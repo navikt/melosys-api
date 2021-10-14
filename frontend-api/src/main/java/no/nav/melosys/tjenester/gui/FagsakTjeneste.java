@@ -12,10 +12,10 @@ import no.nav.melosys.domain.arkiv.DokumentReferanse;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.sak.HenleggFagsakService;
 import no.nav.melosys.service.sak.OpprettSakDto;
@@ -49,26 +49,29 @@ public class FagsakTjeneste {
     private static final String UKJENT_SAMMENSATT_NAVN = "UKJENT";
 
     private final FagsakService fagsakService;
-    private final HenleggFagsakService henleggFagsakService;
-    private final SaksopplysningerService saksopplysningerService;
+    private final Aksesskontroll aksesskontroll;
     private final BehandlingsgrunnlagService behandlingsgrunnlagService;
+    private final HenleggFagsakService henleggFagsakService;
+    private final PersondataFasade persondataFasade;
+    private final SaksopplysningerService saksopplysningerService;
     private final UtpekingService utpekingService;
     private final VideresendSoknadService videresendSoknadService;
-    private final Aksesskontroll aksesskontroll;
 
     @Autowired
     public FagsakTjeneste(FagsakService fagsakService,
-                          HenleggFagsakService henleggFagsakService,
-                          SaksopplysningerService saksopplysningerService,
+                          Aksesskontroll aksesskontroll,
                           BehandlingsgrunnlagService behandlingsgrunnlagService,
+                          HenleggFagsakService henleggFagsakService,
+                          PersondataFasade persondataFasade,
+                          SaksopplysningerService saksopplysningerService,
                           UtpekingService utpekingService,
-                          VideresendSoknadService videresendSoknadService,
-                          Aksesskontroll aksesskontroll) {
+                          VideresendSoknadService videresendSoknadService) {
         this.fagsakService = fagsakService;
-        this.henleggFagsakService = henleggFagsakService;
-        this.saksopplysningerService = saksopplysningerService;
-        this.behandlingsgrunnlagService = behandlingsgrunnlagService;
         this.aksesskontroll = aksesskontroll;
+        this.behandlingsgrunnlagService = behandlingsgrunnlagService;
+        this.henleggFagsakService = henleggFagsakService;
+        this.persondataFasade = persondataFasade;
+        this.saksopplysningerService = saksopplysningerService;
         this.utpekingService = utpekingService;
         this.videresendSoknadService = videresendSoknadService;
     }
@@ -219,7 +222,7 @@ public class FagsakTjeneste {
             List<BehandlingOversiktDto> behandlingOversiktDtoer = behandlinger.stream()
                 .sorted(Comparator.comparing(RegistreringsInfo::getRegistrertDato).reversed())
                 .map(this::tilBehandlingOversiktDto)
-                .collect(Collectors.toList());
+                .toList();
 
             fagsakOppsummeringDto.setSammensattNavn(hentSammensattNavn(behandlinger));
             fagsakOppsummeringDto.setBehandlingOversikter(behandlingOversiktDtoer);
@@ -268,12 +271,7 @@ public class FagsakTjeneste {
         if (behandlinger.isEmpty()) {
             return UKJENT_SAMMENSATT_NAVN;
         }
-
-        Optional<Persondata> saksopplysningPerson = saksopplysningerService.finnPersonOpplysninger(behandlinger.get(0).getId());
-        if (saksopplysningPerson.isPresent()) {
-            return saksopplysningPerson.get().getSammensattNavn();
-        } else {
-            return UKJENT_SAMMENSATT_NAVN;
-        }
+        final String fnr = persondataFasade.hentFolkeregisterident(behandlinger.get(0).getFagsak().hentAktørID());
+        return persondataFasade.hentSammensattNavn(fnr);
     }
 }
