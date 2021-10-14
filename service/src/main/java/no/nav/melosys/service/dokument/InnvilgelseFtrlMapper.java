@@ -32,6 +32,7 @@ import org.springframework.stereotype.Component;
 
 import static java.util.Optional.ofNullable;
 import static no.nav.melosys.domain.kodeverk.Vilkaar.FTRL_2_8_NÆR_TILKNYTNING_NORGE;
+import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 import static org.springframework.util.StringUtils.hasText;
 
 @Component
@@ -140,7 +141,22 @@ public class InnvilgelseFtrlMapper {
         MedfolgendeFamilie medfolgendeFamilie = Optional.of(avklartMedfolgende.get(uuid))
             .orElseThrow(() -> new FunksjonellException("Avklart medfølgende familie " + uuid + " finnes ikke i behandlingsgrunnlaget"));
         String sammensattNavn = medfolgendeFamilie.fnr != null ? dokgenMapperDatahenter.hentSammensattNavn(medfolgendeFamilie.fnr) : medfolgendeFamilie.navn;
-        return new FamiliemedlemInfo(sammensattNavn, medfolgendeFamilie.fnr, IdentType.FNR);
+        return new FamiliemedlemInfo(sammensattNavn, medfolgendeFamilie.fnr, utledIdentType(medfolgendeFamilie.fnr));
+    }
+
+    private IdentType utledIdentType(String ident) {
+        IdentType identType = IdentType.FNR;
+
+        if (isEmpty(ident)) {
+            return identType;
+        }
+
+        if (ident.contains(".")) {
+            identType = IdentType.DATO;
+        } else if(ident.length() == 11 && Integer.parseInt(ident.substring(0,1)) > 3) {
+            identType = IdentType.DNR;
+        }
+        return identType;
     }
 
     private VurderingTrygdeavgift mapVurderingTrygdeavgift(Trygdeavgiftsgrunnlag trygdeavgiftsgrunnlag, FastsattTrygdeavgift fastsattTrygdeavgift) {

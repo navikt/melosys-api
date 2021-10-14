@@ -42,7 +42,7 @@ import static no.nav.melosys.domain.kodeverk.Loenn_forhold.LØNN_FRA_UTLANDET;
 import static no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_8_naer_tilknytning_norge_begrunnelser.ANSATT_I_NORSK_VIRKSOMHET_IKKE_UTSENDT;
 import static no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_barn_begrunnelser_ftrl.IKKE_SOEKERS_BARN;
 import static no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_ektefelle_samboer_begrunnelser_ftrl.IKKE_TRE_AV_FEM_SISTE_ÅR;
-import static no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.IdentType.FNR;
+import static no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.IdentType.*;
 import static no.nav.melosys.service.dokument.DokgenTestData.*;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.*;
@@ -53,14 +53,17 @@ class InnvilgelseFtrlMapperTest {
 
     public static final String UUID_EKTEFELLE = "uuidEktefelle";
     public static final String UUID_BARN_1 = "uuidBarn1";
-    public static final String EKTEFELLE_FNR = "09080723451";
+    public static final String UUID_BARN_2 = "uuidBarn2";
+    public static final String EKTEFELLE_FNR = "49080723451";
     private static final String BARN1_FNR = "12131456789";
+    private static final String BARN2_FNR = "02.05.11";
     public static final String BEGRUNNELSE_FRITEKST = "Begrunnelse fritekst";
     public static final String SAKSBEHANDLER_NAVN = "Fetter Anton";
     public static final String ARBEIDSGIVER_NAVN = "Bang Hansen";
     public static final String SAKSNUMMER = "MEL-123";
     public static final String EKTEFELLE_NAVN = "Dolly Duck";
     public static final String BARN1_NAVN = "Doffen Duck";
+    public static final String BARN2_NAVN = "Ole Duck";
     public static final String REPRESENTANT_NAVN = "Representant AS";
 
     @Mock
@@ -105,9 +108,9 @@ class InnvilgelseFtrlMapperTest {
         assertThat(innvilgelseFtrl.isVurderingLovvalgBarn()).isTrue();
         assertThat(innvilgelseFtrl.getOmfattetFamilie().size()).isEqualTo(2);
         for (FamiliemedlemInfo familiemedlemInfo : innvilgelseFtrl.getOmfattetFamilie()) {
-            assertThat(familiemedlemInfo.ident()).is(new Condition<>(s -> List.of(EKTEFELLE_FNR, BARN1_FNR).contains(s), "fnr"));
-            assertThat(familiemedlemInfo.navn()).is(new Condition<>(s -> List.of(EKTEFELLE_NAVN, BARN1_NAVN).contains(s), "navn"));
-            assertThat(familiemedlemInfo.identType()).isEqualTo(FNR);
+            assertThat(familiemedlemInfo.ident()).is(new Condition<>(s -> List.of(EKTEFELLE_FNR, BARN1_FNR, BARN2_FNR).contains(s), "fnr"));
+            assertThat(familiemedlemInfo.navn()).is(new Condition<>(s -> List.of(EKTEFELLE_NAVN, BARN1_NAVN, BARN2_NAVN).contains(s), "navn"));
+            assertThat(familiemedlemInfo.identType()).is(new Condition<>(s -> List.of(FNR, DNR, DATO).contains(s), "identType"));
         }
         assertThat(innvilgelseFtrl.getIkkeOmfattetBarn().size()).isZero();
         assertThat(innvilgelseFtrl.getIkkeOmfattetEktefelle()).isNull();
@@ -158,15 +161,19 @@ class InnvilgelseFtrlMapperTest {
 
         assertThat(innvilgelseFtrl.getOmfattetFamilie().size()).isZero();
 
-        assertThat(innvilgelseFtrl.getIkkeOmfattetBarn().size()).isEqualTo(1);
-        assertThat(innvilgelseFtrl.getIkkeOmfattetBarn().get(0))
-            .extracting("info.ident", "info.navn", "begrunnelse.kode")
-            .containsExactly(BARN1_FNR, BARN1_NAVN, IKKE_SOEKERS_BARN.getKode());
+        assertThat(innvilgelseFtrl.getIkkeOmfattetBarn().size()).isEqualTo(2);
+
+        for (no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.IkkeOmfattetBarn familiemedlemInfo : innvilgelseFtrl.getIkkeOmfattetBarn()) {
+            assertThat(familiemedlemInfo.info().ident()).is(new Condition<>(s -> List.of(BARN1_FNR, BARN2_FNR).contains(s), "fnr"));
+            assertThat(familiemedlemInfo.info().navn()).is(new Condition<>(s -> List.of(BARN1_NAVN, BARN2_NAVN).contains(s), "navn"));
+            assertThat(familiemedlemInfo.info().identType()).is(new Condition<>(s -> List.of(FNR, DATO).contains(s), "identType"));
+            assertThat(familiemedlemInfo.begrunnelse().getKode()).isEqualTo(IKKE_SOEKERS_BARN.getKode());
+        }
 
         assertThat(innvilgelseFtrl.getIkkeOmfattetEktefelle()).isNotNull();
         assertThat(innvilgelseFtrl.getIkkeOmfattetEktefelle())
-            .extracting("info.ident", "info.navn", "begrunnelse")
-            .containsExactly(EKTEFELLE_FNR, EKTEFELLE_NAVN, IKKE_TRE_AV_FEM_SISTE_ÅR.getKode());
+            .extracting("info.ident", "info.navn", "info.identType", "begrunnelse")
+            .containsExactly(EKTEFELLE_FNR, EKTEFELLE_NAVN, DNR, IKKE_TRE_AV_FEM_SISTE_ÅR.getKode());
     }
 
     @Test
@@ -271,7 +278,8 @@ class InnvilgelseFtrlMapperTest {
 
     private AvklarteMedfolgendeBarn lagAvklartIkkeMedfølgendeBarn() {
         IkkeOmfattetBarn barn1 = new IkkeOmfattetBarn(UUID_BARN_1, IKKE_SOEKERS_BARN.getKode(), "Ikke omfattet");
-        return new AvklarteMedfolgendeBarn(Set.of(), Set.of(barn1));
+        IkkeOmfattetBarn barn2 = new IkkeOmfattetBarn(UUID_BARN_2, IKKE_SOEKERS_BARN.getKode(), "Ikke omfattet");
+        return new AvklarteMedfolgendeBarn(Set.of(), Set.of(barn1, barn2));
     }
 
     private AvklarteMedfolgendeFamilie lagAvklartIkkeMedfølgendeEktefelle() {
@@ -288,7 +296,9 @@ class InnvilgelseFtrlMapperTest {
     private Map<String, MedfolgendeFamilie> lagMedfølgendeBarn() {
         MedfolgendeFamilie medfolgendeBarn1 = new MedfolgendeFamilie();
         medfolgendeBarn1.fnr = BARN1_FNR;
-        return Map.of(UUID_BARN_1, medfolgendeBarn1);
+        MedfolgendeFamilie medfolgendeBarn2 = new MedfolgendeFamilie();
+        medfolgendeBarn2.fnr = BARN2_FNR;
+        return Map.of(UUID_BARN_1, medfolgendeBarn1, UUID_BARN_2, medfolgendeBarn2);
     }
 
     private MedlemAvFolketrygden lagMedlemAvFolketrygden() {
@@ -338,6 +348,7 @@ class InnvilgelseFtrlMapperTest {
             return switch (fnr) {
                 case EKTEFELLE_FNR -> EKTEFELLE_NAVN;
                 case BARN1_FNR -> BARN1_NAVN;
+                case BARN2_FNR -> BARN2_NAVN;
                 default -> null;
             };
         });
