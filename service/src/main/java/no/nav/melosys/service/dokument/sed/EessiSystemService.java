@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 @Qualifier("system")
 public class EessiSystemService extends EessiService {
     public EessiSystemService(SedDataBygger sedDataBygger,
-                              SedDataGrunnlagFactory dataGrunnlagFactory,
+                              @Qualifier("system") SedDataGrunnlagFactory dataGrunnlagFactory,
                               @Qualifier("system") EessiConsumer eessiConsumer,
                               @Qualifier("system") JoarkFasade joarkFasade,
                               BehandlingService behandlingService,
