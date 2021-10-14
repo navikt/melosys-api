@@ -1,6 +1,7 @@
 package no.nav.melosys.service.persondata;
 
 import java.time.LocalDate;
+import java.util.Optional;
 import java.util.Set;
 
 import no.nav.melosys.domain.Saksopplysning;
@@ -13,6 +14,8 @@ public interface PersondataFasade {
     String hentAktørIdForIdent(String ident);
 
     Set<Familiemedlem> hentFamiliemedlemmerMedHistorikk(long behandlingID);
+
+    Optional<String> finnFolkeregisterident(String ident);
 
     String hentFolkeregisterident(String ident);
 

@@ -66,7 +66,7 @@ class InngangsvilkaarServiceTest {
         final var periode = new no.nav.melosys.domain.behandlingsgrunnlag.data.Periode(LocalDate.now().plusYears(1), LocalDate.MAX);
         PersonDokument personDokument = new PersonDokument();
         personDokument.setStatsborgerskap(Land.av(FINLAND));
-        when(saksopplysningerService.hentPersonOpplysninger(anyLong())).thenReturn(personDokument);
+        when(saksopplysningerService.hentTpsPersonopplysninger(anyLong())).thenReturn(personDokument);
         InngangsvilkarResponse res = new InngangsvilkarResponse();
         res.setFeilmeldinger(Collections.emptyList());
         res.setKvalifisererForEf883_2004(Boolean.TRUE);
@@ -140,7 +140,7 @@ class InngangsvilkaarServiceTest {
         final var periode = new no.nav.melosys.domain.behandlingsgrunnlag.data.Periode(LocalDate.now().plusYears(1), null);
         PersonDokument personDokument = new PersonDokument();
         personDokument.setStatsborgerskap(Land.av(FINLAND));
-        when(saksopplysningerService.hentPersonOpplysninger(anyLong())).thenReturn(personDokument);
+        when(saksopplysningerService.hentTpsPersonopplysninger(anyLong())).thenReturn(personDokument);
         InngangsvilkarResponse res = new InngangsvilkarResponse();
         res.setFeilmeldinger(Collections.emptyList());
         res.setKvalifisererForEf883_2004(Boolean.TRUE);
@@ -157,7 +157,7 @@ class InngangsvilkaarServiceTest {
         final var periode = new no.nav.melosys.domain.behandlingsgrunnlag.data.Periode(LocalDate.now().plusYears(1), LocalDate.MAX);
         PersonDokument personDokument = new PersonDokument();
         personDokument.setStatsborgerskap(Land.av(FINLAND));
-        when(saksopplysningerService.hentPersonOpplysninger(anyLong())).thenReturn(personDokument);
+        when(saksopplysningerService.hentTpsPersonopplysninger(anyLong())).thenReturn(personDokument);
         InngangsvilkarResponse res = new InngangsvilkarResponse();
         res.setFeilmeldinger(Collections.emptyList());
         res.setKvalifisererForEf883_2004(Boolean.TRUE);
@@ -176,7 +176,7 @@ class InngangsvilkaarServiceTest {
         final var periode = new no.nav.melosys.domain.behandlingsgrunnlag.data.Periode(LocalDate.now().plusYears(1), LocalDate.MAX);
         PersonDokument personDokument = new PersonDokument();
         personDokument.setStatsborgerskap(Land.av(FINLAND));
-        when(saksopplysningerService.hentPersonOpplysninger(anyLong())).thenReturn(personDokument);
+        when(saksopplysningerService.hentTpsPersonopplysninger(anyLong())).thenReturn(personDokument);
         InngangsvilkarResponse res = new InngangsvilkarResponse();
         var feilmelding = new Feilmelding();
         feilmelding.setKategori(Kategori.TEKNISK_FEIL);
