@@ -1,0 +1,20 @@
+<b:hentPersonResponse xmlns:b="http://nav.no/tjeneste/virksomhet/person/v3" xmlns:a="http://nav.no/tjeneste/virksomhet/person/v3/informasjon">
+    <response>
+        <person c:type="a:Bruker" xmlns:c="http://www.w3.org/2001/XMLSchema-instance">
+            <aktoer c:type="a:PersonIdent">
+                <ident>
+                    <ident>11111111111</ident>
+                    <type>FNR</type>
+                </ident>
+            </aktoer>
+            <postadresse>
+                <ustrukturertAdresse>
+                    <landkode>GBR</landkode>
+                    <adresselinje1>42 Mock Road</adresselinje1>
+                    <adresselinje2>Mock City</adresselinje2>
+                    <adresselinje3>United Kingdom</adresselinje3>
+                </ustrukturertAdresse>
+            </postadresse>
+        </person>
+    </response>
+</b:hentPersonResponse>

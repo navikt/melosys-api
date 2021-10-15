@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import no.nav.melosys.domain.adresse.SemistrukturertAdresse;
 import no.nav.melosys.domain.brev.Postadresse;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.dokument.felles.Land;
@@ -87,7 +88,13 @@ public class PersonDokument implements Persondata, SaksopplysningDokument {
 
     @Override
     public Optional<Kontaktadresse> finnKontaktadresse() {
-        return Optional.empty();
+        if (postadresse == null || postadresse.erTom()) {
+            return Optional.empty();
+        }
+        return Optional.of(
+            new Kontaktadresse(null, lagSemistrukturertAdresse(postadresse), null,
+                null,null ,Master.TPS.name() ,Master.TPS.name(),null,
+                false));
     }
 
     @Override
@@ -295,5 +302,17 @@ public class PersonDokument implements Persondata, SaksopplysningDokument {
 
     public void setErEgenAnsatt(boolean erEgenAnsatt) {
         this.erEgenAnsatt = erEgenAnsatt;
+    }
+
+    private SemistrukturertAdresse lagSemistrukturertAdresse(UstrukturertAdresse ustrukturertAdresse) {
+        return new SemistrukturertAdresse(
+            ustrukturertAdresse.adresselinje1,
+            ustrukturertAdresse.adresselinje2,
+            ustrukturertAdresse.adresselinje3,
+            ustrukturertAdresse.adresselinje4,
+            ustrukturertAdresse.postnr,
+            ustrukturertAdresse.poststed,
+            ustrukturertAdresse.land != null ? LandkoderUtils.tilIso2(ustrukturertAdresse.land.getKode()) : null
+        );
     }
 }
