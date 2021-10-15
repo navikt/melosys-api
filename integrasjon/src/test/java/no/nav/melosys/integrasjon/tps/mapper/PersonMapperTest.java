@@ -178,7 +178,7 @@ class PersonMapperTest {
         assertThat(semistrukturertAdresse.adresselinje1()).isEqualTo("42 Mock Road");
         assertThat(semistrukturertAdresse.adresselinje2()).isEqualTo("Mock City");
         assertThat(semistrukturertAdresse.adresselinje3()).isEqualTo("United Kingdom");
-        assertThat(semistrukturertAdresse.landkode()).isEqualTo(Land.STORBRITANNIA);
+        assertThat(semistrukturertAdresse.landkode()).isEqualTo("GB");
     }
 
     private HentPersonResponse lagHentPersonResponseFraXml(String ressurs) {

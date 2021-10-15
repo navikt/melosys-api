@@ -88,14 +88,13 @@ public class PersonDokument implements Persondata, SaksopplysningDokument {
 
     @Override
     public Optional<Kontaktadresse> finnKontaktadresse() {
-        if (postadresse == null || postadresse.erTom())
-        {
+        if (postadresse == null || postadresse.erTom()) {
             return Optional.empty();
         }
         return Optional.of(
-            new Kontaktadresse(null, lagSemistrukturertAdresse(postadresse), null
-            ,null,null ,Master.TPS.name() ,Master.TPS.name(),null
-            ,false));
+            new Kontaktadresse(null, lagSemistrukturertAdresse(postadresse), null,
+                null,null ,Master.TPS.name() ,Master.TPS.name(),null,
+                false));
     }
 
     @Override
@@ -305,15 +304,15 @@ public class PersonDokument implements Persondata, SaksopplysningDokument {
         this.erEgenAnsatt = erEgenAnsatt;
     }
 
-    private SemistrukturertAdresse lagSemistrukturertAdresse(UstrukturertAdresse ustrtukturertAdresse) {
+    private SemistrukturertAdresse lagSemistrukturertAdresse(UstrukturertAdresse ustrukturertAdresse) {
         return new SemistrukturertAdresse(
-            ustrtukturertAdresse.adresselinje1,
-            ustrtukturertAdresse.adresselinje2,
-            ustrtukturertAdresse.adresselinje3,
-            ustrtukturertAdresse.adresselinje4,
-            ustrtukturertAdresse.postnr,
-            ustrtukturertAdresse.poststed,
-            ustrtukturertAdresse.land.toString()
+            ustrukturertAdresse.adresselinje1,
+            ustrukturertAdresse.adresselinje2,
+            ustrukturertAdresse.adresselinje3,
+            ustrukturertAdresse.adresselinje4,
+            ustrukturertAdresse.postnr,
+            ustrukturertAdresse.poststed,
+            ustrukturertAdresse.land != null ? LandkoderUtils.tilIso2(ustrukturertAdresse.land.getKode()) : null
         );
     }
 }
