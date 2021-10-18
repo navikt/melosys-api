@@ -134,6 +134,32 @@ class OppgaveServiceTest {
     }
 
     @Test
+    void hentOppgaverMedAnsvarlig_aktøridErNull_forventUkjentFNROgSammenssattNavn() {
+        final String jfrOppgID = "2";
+        final String tilordnetRessurs = "Z2222";
+
+        Oppgave.Builder oppgave = new Oppgave.Builder();
+        oppgave.setOppgaveId(jfrOppgID);
+        oppgave.setOppgavetype(Oppgavetyper.JFR);
+        oppgave.setAktørId(null);
+        Set<Oppgave> oppgaver = Set.of(oppgave.build());
+
+        when(oppgaveFasade.finnOppgaverMedAnsvarlig(tilordnetRessurs)).thenReturn(oppgaver);
+
+        List<OppgaveDto> mineSaker = oppgaveService.hentOppgaverMedAnsvarlig(tilordnetRessurs);
+
+        assertThat(mineSaker.size()).isEqualTo(1);
+
+        Optional<OppgaveDto> jfrOppgDt = mineSaker.stream().findFirst();
+
+        assertThat(jfrOppgDt.isPresent()).isTrue();
+        OppgaveDto oppgaveDto = jfrOppgDt.get();
+
+        assertThat(oppgaveDto.getFnr()).isEqualTo("UKJENT");
+        assertThat(oppgaveDto.getSammensattNavn()).isEqualTo("UKJENT");
+    }
+
+    @Test
     void hentOppgaveForFagsaksnummer_oppgaveEksisterer_forventOppgave() {
         when(oppgaveFasade.finnÅpneOppgaverMedSaksnummer(SAKSNUMMER)).thenReturn(List.of(oppgave));
 

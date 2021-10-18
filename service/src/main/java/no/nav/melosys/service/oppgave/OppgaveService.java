@@ -240,6 +240,7 @@ public class OppgaveService {
         if (aktørID == null) {
             oppgaveDto.setFnr(UKJENT);
             oppgaveDto.setSammensattNavn(UKJENT);
+            return;
         }
         final String fnr = persondataFasade.finnFolkeregisterident(aktørID).orElse(null);
         if (StringUtils.isNotEmpty(fnr)) {
