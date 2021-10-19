@@ -10,7 +10,6 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
 import no.nav.melosys.domain.brev.MangelbrevBrevbestilling;
-import no.nav.melosys.domain.brev.storbritannia.AttestStorbritanniaBrevbestilling;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.GeografiskAdresse;
@@ -20,7 +19,6 @@ import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_8_naer_tilknytning_norge_begrunnelser;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.dokgen.dto.*;
-import no.nav.melosys.integrasjon.dokgen.dto.atteststorbritannia.AttestStorbritannia;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -346,22 +344,6 @@ class DokgenMalMapperTest {
 
         assertThat(dokgenMalMapper.mapBehandling(brevbestilling))
             .isInstanceOf(InnvilgelseFtrl.class);
-    }
-
-    @Test
-    void skalMappeAttestStorbritannia() {
-        when(mockDokgenMapperDatahenter.hentPoststed(any())).thenReturn("Andeby");
-        when(mockDokgenMapperDatahenter.hentPersondata(any())).thenReturn(lagPersonDokument());
-
-        Behandling behandling = lagBehandling(lagFagsak(true));
-
-        DokgenBrevbestilling brevbestilling = new AttestStorbritanniaBrevbestilling.Builder()
-            .medProduserbartdokument(ATTEST_NO_UK_1)
-            .medBehandling(behandling)
-            .build();
-
-        assertThat(dokgenMalMapper.mapBehandling(brevbestilling))
-            .isInstanceOf(AttestStorbritannia.class);
     }
 
     private InnvilgelseFtrl lagInnvilgelseFtrl() {
