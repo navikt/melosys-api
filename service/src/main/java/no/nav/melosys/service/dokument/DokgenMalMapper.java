@@ -3,11 +3,9 @@ package no.nav.melosys.service.dokument;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
 import no.nav.melosys.domain.brev.MangelbrevBrevbestilling;
-import no.nav.melosys.domain.brev.storbritannia.AttestStorbritanniaBrevbestilling;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.dokgen.dto.*;
-import no.nav.melosys.integrasjon.dokgen.dto.atteststorbritannia.AttestStorbritannia;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -60,10 +58,6 @@ public class DokgenMalMapper {
                 ((MangelbrevBrevbestilling) brevbestilling).toBuilder()
                     .medVedtaksdato(dokgenMapperDatahenter.hentVedtaksdato(brevbestilling.getBehandling().getId()))
                     .medFullmektigNavn(dokgenMapperDatahenter.hentFullmektigNavn(brevbestilling.getBehandling().getFagsak(), Representerer.BRUKER))
-                    .build()
-            );
-            case ATTEST_NO_UK_1 -> AttestStorbritannia.av(
-                ((AttestStorbritanniaBrevbestilling) brevbestilling).toBuilder()
                     .build()
             );
             case INNVILGELSE_FOLKETRYGDLOVEN_2_8 -> innvilgelseFtrlMapper.map((InnvilgelseBrevbestilling) brevbestilling);
