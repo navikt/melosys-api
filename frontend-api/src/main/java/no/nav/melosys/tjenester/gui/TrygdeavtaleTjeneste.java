@@ -1,22 +1,23 @@
 package no.nav.melosys.tjenester.gui;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Set;
+import java.util.*;
 
 import io.swagger.annotations.Api;
+import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadFtrl;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
+import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.TrygdeavtaleService;
 import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
-import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
+import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.tjenester.gui.dto.LagreMedfolgendeFamilieDto;
-import no.nav.melosys.tjenester.gui.dto.MedfolgendeFamilieDto;
 import no.nav.melosys.tjenester.gui.dto.trygdeavtale.TrygdeavtaleInfoDto;
 import no.nav.melosys.tjenester.gui.dto.trygdeavtale.TrygdeAvtaleDataForVedtakDto;
 import no.nav.security.token.support.core.api.Protected;
@@ -36,21 +37,24 @@ public class TrygdeavtaleTjeneste {
     private final BehandlingService behandlingService;
     private final Aksesskontroll aksesskontroll;
     private final BehandlingsgrunnlagService behandlingsgrunnlagService;
-    private final AvklartefaktaService avklartefaktaService;
     private final AvklarteMedfolgendeFamilieService avklarteMedfolgendeFamilieService;
+    private final AvklarteVirksomheterService avklarteVirksomheterService;
+    private final LovvalgsperiodeService lovvalgsperiodeService;
 
     public TrygdeavtaleTjeneste(TrygdeavtaleService trygdeavtaleService,
                                 BehandlingService behandlingService,
                                 Aksesskontroll aksesskontroll,
                                 BehandlingsgrunnlagService behandlingsgrunnlagService,
-                                AvklartefaktaService avklartefaktaService,
-                                AvklarteMedfolgendeFamilieService avklarteMedfolgendeFamilieService) {
+                                AvklarteMedfolgendeFamilieService avklarteMedfolgendeFamilieService,
+                                AvklarteVirksomheterService avklarteVirksomheterService,
+                                LovvalgsperiodeService lovvalgsperiodeService) {
         this.trygdeavtaleService = trygdeavtaleService;
         this.behandlingService = behandlingService;
         this.aksesskontroll = aksesskontroll;
         this.behandlingsgrunnlagService = behandlingsgrunnlagService;
-        this.avklartefaktaService = avklartefaktaService;
         this.avklarteMedfolgendeFamilieService = avklarteMedfolgendeFamilieService;
+        this.avklarteVirksomheterService = avklarteVirksomheterService;
+        this.lovvalgsperiodeService = lovvalgsperiodeService;
     }
 
     @GetMapping("{behandlingID}")
@@ -74,22 +78,35 @@ public class TrygdeavtaleTjeneste {
         @RequestBody TrygdeAvtaleDataForVedtakDto trygdeAvtaleDataForVedtakDto) {
 
         // TODO: Flytt dette ut til en egen klasse
-        oppdaterBehandlingsgrunnlag(behandlingsId, trygdeAvtaleDataForVedtakDto);
+        sjekkBehandlingsgrunnlag(behandlingsId, trygdeAvtaleDataForVedtakDto);
 
-        var familie = new ArrayList<>(trygdeAvtaleDataForVedtakDto.barn());
-        familie.add(trygdeAvtaleDataForVedtakDto.ektefelle());
-        LagreMedfolgendeFamilieDto lagreMedfolgendeFamilieDto = new LagreMedfolgendeFamilieDto(Set.copyOf(familie));
+        LagreMedfolgendeFamilieDto lagreMedfolgendeFamilieDto = lagMedfolgendeFamilieDto(trygdeAvtaleDataForVedtakDto);
         avklarteMedfolgendeFamilieService.lagreMedfolgendeFamilieSomAvklartefakta(behandlingsId, lagreMedfolgendeFamilieDto.til());
 
-        // TODO:
-        // behandlinger/1/medlemskapsperioder/bestemmelser - trenger ikke
-        // behandlinger/1/trygdeavgift/grunnlag - trenger ikke
-        // vilkaar/1 - bestemlese vilkår, kanskje lovvalgsperiode
-        // avklartefakta/1/medfolgendeFamilie - begynne med denne - Done
-        // sjekk lagring av virksomheter
+        avklarteVirksomheterService.lagreVirksomheterSomAvklartefakta(trygdeAvtaleDataForVedtakDto.virksomheter(), behandlingsId);
+
+        Lovvalgsperiode lovvalgsperiode = lagLovvalgsperiode(trygdeAvtaleDataForVedtakDto);
+        lovvalgsperiodeService.lagreLovvalgsperioder(behandlingsId, List.of(lovvalgsperiode));
     }
 
-    private void oppdaterBehandlingsgrunnlag(long behandlingsId, TrygdeAvtaleDataForVedtakDto trygdeAvtaleDataForVedtakDto) {
+    private LagreMedfolgendeFamilieDto lagMedfolgendeFamilieDto(TrygdeAvtaleDataForVedtakDto trygdeAvtaleDataForVedtakDto) {
+        var familie = new ArrayList<>(trygdeAvtaleDataForVedtakDto.barn());
+        familie.add(trygdeAvtaleDataForVedtakDto.ektefelle());
+        return new LagreMedfolgendeFamilieDto(Set.copyOf(familie));
+    }
+
+    private Lovvalgsperiode lagLovvalgsperiode(TrygdeAvtaleDataForVedtakDto trygdeAvtaleDataForVedtakDto) {
+        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
+        lovvalgsperiode.setFom(trygdeAvtaleDataForVedtakDto.fom());
+        lovvalgsperiode.setTom(trygdeAvtaleDataForVedtakDto.tom());
+        Landkoder lovvalgsland = Landkoder.valueOf(trygdeAvtaleDataForVedtakDto.land()
+            .stream().findFirst().orElseThrow(() -> new TekniskException("trygdeAvtaleDataForVedtakDto.land inneholder ingen land")));
+        lovvalgsperiode.setLovvalgsland(lovvalgsland);
+        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_trygdeavtale_uk.valueOf(trygdeAvtaleDataForVedtakDto.bestemmelse()));
+        return lovvalgsperiode;
+    }
+
+    private void sjekkBehandlingsgrunnlag(long behandlingsId, TrygdeAvtaleDataForVedtakDto trygdeAvtaleDataForVedtakDto) {
         // Periode og land skal alltid være det sammne - men er en sanity sjekk for nå
         Behandlingsgrunnlag behandlingsgrunnlag = behandlingsgrunnlagService.hentBehandlingsgrunnlag(behandlingsId);
         SoeknadFtrl behandlingsgrunnlagdata = (SoeknadFtrl) behandlingsgrunnlag.getBehandlingsgrunnlagdata();
@@ -102,7 +119,5 @@ public class TrygdeavtaleTjeneste {
             if (!behandlingsgrunnlagdata.soeknadsland.landkoder.contains(land))
                 throw new TekniskException("Forventet " + land + " i behandlingsgrunnlagdata soeknadsland.landkoder");
         }
-        // Ser ikke ut som vi trenger og oppdagtere dette nå
-        behandlingsgrunnlagService.oppdaterBehandlingsgrunnlag(behandlingsgrunnlag);
     }
 }
