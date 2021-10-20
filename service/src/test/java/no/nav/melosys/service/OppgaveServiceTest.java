@@ -113,7 +113,6 @@ class OppgaveServiceTest {
         fagsak.setBehandlinger(List.of(behandling));
         when(behandlingService.hentBehandlingUtenSaksopplysninger(anyLong())).thenReturn(behandling);
         when(fagsakService.hentFagsak(any(String.class))).thenReturn(fagsak);
-        when(saksopplysningerService.finnPersonOpplysninger(anyLong())).thenReturn(Optional.of(lagPersonDokument()));
         when(behandlingsgrunnlagService.hentBehandlingsgrunnlag(behandling.getId())).thenReturn(lagBehandlingsgrunnlag());
 
         List<OppgaveDto> mineSaker = oppgaveService.hentOppgaverMedAnsvarlig(tilordnetRessurs);
@@ -132,6 +131,32 @@ class OppgaveServiceTest {
             .findFirst();
 
         assertThat(jfrOppgOpt).isPresent().get().isInstanceOf(JournalfoeringsoppgaveDto.class);
+    }
+
+    @Test
+    void hentOppgaverMedAnsvarlig_aktøridErNull_forventUkjentFNROgSammenssattNavn() {
+        final String jfrOppgID = "2";
+        final String tilordnetRessurs = "Z2222";
+
+        Oppgave.Builder oppgave = new Oppgave.Builder();
+        oppgave.setOppgaveId(jfrOppgID);
+        oppgave.setOppgavetype(Oppgavetyper.JFR);
+        oppgave.setAktørId(null);
+        Set<Oppgave> oppgaver = Set.of(oppgave.build());
+
+        when(oppgaveFasade.finnOppgaverMedAnsvarlig(tilordnetRessurs)).thenReturn(oppgaver);
+
+        List<OppgaveDto> mineSaker = oppgaveService.hentOppgaverMedAnsvarlig(tilordnetRessurs);
+
+        assertThat(mineSaker.size()).isEqualTo(1);
+
+        Optional<OppgaveDto> jfrOppgDt = mineSaker.stream().findFirst();
+
+        assertThat(jfrOppgDt.isPresent()).isTrue();
+        OppgaveDto oppgaveDto = jfrOppgDt.get();
+
+        assertThat(oppgaveDto.getFnr()).isEqualTo("UKJENT");
+        assertThat(oppgaveDto.getSammensattNavn()).isEqualTo("UKJENT");
     }
 
     @Test

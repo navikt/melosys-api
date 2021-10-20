@@ -1,26 +1,22 @@
 package no.nav.melosys.service.vilkaar;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
-import no.finn.unleash.FakeUnleash;
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.VilkaarBegrunnelse;
+import no.nav.melosys.domain.Vilkaarsresultat;
 import no.nav.melosys.domain.dokument.felles.Land;
-import no.nav.melosys.domain.dokument.felles.Periode;
-import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.dokument.person.PersonhistorikkDokument;
-import no.nav.melosys.domain.dokument.person.StatsborgerskapPeriode;
 import no.nav.melosys.domain.inngangsvilkar.Feilmelding;
 import no.nav.melosys.domain.inngangsvilkar.InngangsvilkarResponse;
 import no.nav.melosys.domain.inngangsvilkar.Kategori;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Inngangsvilkaar;
 import no.nav.melosys.domain.person.Statsborgerskap;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.inngangsvilkar.InngangsvilkaarConsumerImpl;
-import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,8 +26,10 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static no.nav.melosys.domain.dokument.felles.Land.*;
+import static no.nav.melosys.domain.dokument.felles.Land.FINLAND;
+import static no.nav.melosys.domain.dokument.felles.Land.SVERIGE;
 import static no.nav.melosys.domain.util.LandkoderUtils.tilIso3;
+import static no.nav.melosys.service.SaksbehandlingDataFactory.lagBehandling;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.*;
@@ -47,45 +45,22 @@ class InngangsvilkaarServiceTest {
     @Mock
     private PersondataFasade persondataFasade;
     @Mock
-    private SaksopplysningerService saksopplysningerService;
-    @Mock
     private VilkaarsresultatService vilkaarsresultatService;
-    private final FakeUnleash unleash = new FakeUnleash();
 
     private InngangsvilkaarService inngangsvilkaarService;
 
     @BeforeEach
     void setUp() {
         inngangsvilkaarService = new InngangsvilkaarService(behandlingService, inngangsvilkaarConsumer,
-            persondataFasade, saksopplysningerService, unleash, vilkaarsresultatService);
+            persondataFasade, vilkaarsresultatService);
     }
 
     @Test
-    void vurderOgLagreInngangsvilkår() {
-        final List<String> landkoder = List.of("FR", "DK", "NO");
-        final var periode = new no.nav.melosys.domain.behandlingsgrunnlag.data.Periode(LocalDate.now().plusYears(1), LocalDate.MAX);
-        PersonDokument personDokument = new PersonDokument();
-        personDokument.setStatsborgerskap(Land.av(FINLAND));
-        when(saksopplysningerService.hentPersonOpplysninger(anyLong())).thenReturn(personDokument);
-        InngangsvilkarResponse res = new InngangsvilkarResponse();
-        res.setFeilmeldinger(Collections.emptyList());
-        res.setKvalifisererForEf883_2004(Boolean.TRUE);
-        when(inngangsvilkaarConsumer.vurderInngangsvilkår(any(), anySet(), anyBoolean(), any())).thenReturn(res);
-
-        inngangsvilkaarService.vurderOgLagreInngangsvilkår(1L, landkoder, false, periode);
-
-        verify(inngangsvilkaarConsumer).vurderInngangsvilkår(personDokument.hentAlleStatsborgerskap(),
-            Set.copyOf(tilIso3(landkoder)), false, periode);
-        verify(vilkaarsresultatService).oppdaterVilkaarsresultat(1L, Vilkaar.FO_883_2004_INNGANGSVILKAAR, true, Collections.emptySet());
-    }
-
-    @Test
-    void vurderOgLagreInngangsvilkår_statsborgerskapFraPDL() {
-        unleash.enable("melosys.pdl.statsborgerskap");
+    void vurderOgLagreInngangsvilkår_medFlereGyldigeStatsborgerskap_oppdaterVilkårsresultat() {
         final List<String> søknadsland = List.of("FR", "DK", "NO");
         final var periode = new no.nav.melosys.domain.behandlingsgrunnlag.data.Periode(LocalDate.now().plusYears(1), LocalDate.MAX);
         final String ident = "aktørID";
-        when(behandlingService.hentBehandlingUtenSaksopplysninger(anyLong())).thenReturn(lagBehandling(ident));
+        when(behandlingService.hentBehandlingUtenSaksopplysninger(anyLong())).thenReturn(lagBehandling());
         final Set<Statsborgerskap> statsborgerskap = Set.of(
             new no.nav.melosys.domain.person.Statsborgerskap("FIN", null, LocalDate.parse("1989-11-18"), null, "FREG",
                 "Dolly", false),
@@ -107,24 +82,12 @@ class InngangsvilkaarServiceTest {
             Collections.emptySet());
     }
 
-    private Behandling lagBehandling(String aktørID) {
-        Fagsak fagsak = new Fagsak();
-        Aktoer aktoer = new Aktoer();
-        aktoer.setRolle(Aktoersroller.BRUKER);
-        aktoer.setAktørId(aktørID);
-        fagsak.setAktører(Set.of(aktoer));
-        Behandling behandling = new Behandling();
-        behandling.setFagsak(fagsak);
-        return behandling;
-    }
-
     @Test
     void vurderOgLagreInngangsvilkår_manglerStatsborgerskap_girBegrunnelse() {
         final List<String> landkoder = List.of("FR", "DK", "NO");
         final var periode = new no.nav.melosys.domain.behandlingsgrunnlag.data.Periode(LocalDate.now().minusYears(2), LocalDate.now().minusYears(1));
-        final var personhistorikkDokument = new PersonhistorikkDokument();
-        personhistorikkDokument.statsborgerskapListe = Collections.emptyList();
-        when(saksopplysningerService.hentPersonhistorikk(anyLong())).thenReturn(personhistorikkDokument);
+        when(behandlingService.hentBehandlingUtenSaksopplysninger(anyLong())).thenReturn(lagBehandling());
+        when(persondataFasade.hentStatsborgerskap(any())).thenReturn(Collections.emptySet());
 
         inngangsvilkaarService.vurderOgLagreInngangsvilkår(1L, landkoder, false, periode);
 
@@ -138,9 +101,12 @@ class InngangsvilkaarServiceTest {
 
         final List<String> landkoder = List.of("FR", "DK", "NO");
         final var periode = new no.nav.melosys.domain.behandlingsgrunnlag.data.Periode(LocalDate.now().plusYears(1), null);
-        PersonDokument personDokument = new PersonDokument();
-        personDokument.setStatsborgerskap(Land.av(FINLAND));
-        when(saksopplysningerService.hentPersonOpplysninger(anyLong())).thenReturn(personDokument);
+        when(behandlingService.hentBehandlingUtenSaksopplysninger(anyLong())).thenReturn(lagBehandling());
+        final Set<Statsborgerskap> statsborgerskap = Set.of(
+            new no.nav.melosys.domain.person.Statsborgerskap("FIN", null, LocalDate.parse("1989-11-18"), null, "FREG",
+                "Dolly", false)
+        );
+        when(persondataFasade.hentStatsborgerskap(any())).thenReturn(statsborgerskap);
         InngangsvilkarResponse res = new InngangsvilkarResponse();
         res.setFeilmeldinger(Collections.emptyList());
         res.setKvalifisererForEf883_2004(Boolean.TRUE);
@@ -155,9 +121,12 @@ class InngangsvilkaarServiceTest {
     @Test
     void vurderOgLagreInngangsvilkår_ukjenteEllerAlleEosLand() {
         final var periode = new no.nav.melosys.domain.behandlingsgrunnlag.data.Periode(LocalDate.now().plusYears(1), LocalDate.MAX);
-        PersonDokument personDokument = new PersonDokument();
-        personDokument.setStatsborgerskap(Land.av(FINLAND));
-        when(saksopplysningerService.hentPersonOpplysninger(anyLong())).thenReturn(personDokument);
+        when(behandlingService.hentBehandlingUtenSaksopplysninger(anyLong())).thenReturn(lagBehandling());
+        final Set<Statsborgerskap> statsborgerskap = Set.of(
+            new no.nav.melosys.domain.person.Statsborgerskap("FIN", null, LocalDate.parse("1989-11-18"), null, "FREG",
+                "Dolly", false)
+        );
+        when(persondataFasade.hentStatsborgerskap(any())).thenReturn(statsborgerskap);
         InngangsvilkarResponse res = new InngangsvilkarResponse();
         res.setFeilmeldinger(Collections.emptyList());
         res.setKvalifisererForEf883_2004(Boolean.TRUE);
@@ -165,7 +134,7 @@ class InngangsvilkaarServiceTest {
 
         inngangsvilkaarService.vurderOgLagreInngangsvilkår(1L, Collections.emptyList(), true, periode);
 
-        verify(inngangsvilkaarConsumer).vurderInngangsvilkår(personDokument.hentAlleStatsborgerskap(),
+        verify(inngangsvilkaarConsumer).vurderInngangsvilkår(Collections.singleton(Land.av(FINLAND)),
             Collections.emptySet(), true, periode);
         verify(vilkaarsresultatService).oppdaterVilkaarsresultat(1L, Vilkaar.FO_883_2004_INNGANGSVILKAAR, true, Collections.emptySet());
     }
@@ -174,9 +143,12 @@ class InngangsvilkaarServiceTest {
     void vurderOgLagreInngangsvilkår_feil_girBegrunnelse() {
         final List<String> landkoder = List.of("FR", "DK", "NO");
         final var periode = new no.nav.melosys.domain.behandlingsgrunnlag.data.Periode(LocalDate.now().plusYears(1), LocalDate.MAX);
-        PersonDokument personDokument = new PersonDokument();
-        personDokument.setStatsborgerskap(Land.av(FINLAND));
-        when(saksopplysningerService.hentPersonOpplysninger(anyLong())).thenReturn(personDokument);
+        when(behandlingService.hentBehandlingUtenSaksopplysninger(anyLong())).thenReturn(lagBehandling());
+        final Set<Statsborgerskap> statsborgerskap = Set.of(
+            new no.nav.melosys.domain.person.Statsborgerskap("FIN", null, LocalDate.parse("1989-11-18"), null, "FREG",
+                "Dolly", false)
+        );
+        when(persondataFasade.hentStatsborgerskap(any())).thenReturn(statsborgerskap);
         InngangsvilkarResponse res = new InngangsvilkarResponse();
         var feilmelding = new Feilmelding();
         feilmelding.setKategori(Kategori.TEKNISK_FEIL);
@@ -187,105 +159,12 @@ class InngangsvilkaarServiceTest {
 
         inngangsvilkaarService.vurderOgLagreInngangsvilkår(1L, landkoder, false, periode);
 
-        verify(inngangsvilkaarConsumer).vurderInngangsvilkår(personDokument.hentAlleStatsborgerskap(),
-            Set.copyOf(tilIso3(landkoder)), false, periode);
         verify(vilkaarsresultatService).oppdaterVilkaarsresultat(1L, Vilkaar.FO_883_2004_INNGANGSVILKAAR,
             false, Set.of(Inngangsvilkaar.TEKNISK_FEIL));
     }
 
     @Test
-    void avgjørStatsborgerskapPåStartDato_tomListe_girNull() {
-        Land stastborgerskap = inngangsvilkaarService.avgjørStatsborgerskapPåStartDato(new ArrayList<>(), null);
-        assertThat(stastborgerskap).isNull();
-    }
-
-    @Test
-    void avgjørStatsborgerskapPåStartDato_ingenGyldige_girNull() {
-        List<StatsborgerskapPeriode> statsborgerskapPerioder = new ArrayList<>();
-        StatsborgerskapPeriode p1 = new StatsborgerskapPeriode();
-        p1.statsborgerskap = av(BELGIA);
-        p1.periode = new Periode(LocalDate.of(2007, 3, 27), LocalDate.of(2018, 3, 27));
-        statsborgerskapPerioder.add(p1);
-        StatsborgerskapPeriode p2 = new StatsborgerskapPeriode();
-        p2.statsborgerskap = av(UKJENT);
-        p2.periode = new Periode(LocalDate.of(2018, 4, 1), LocalDate.of(2018, 5, 2));
-        statsborgerskapPerioder.add(p2);
-        Land stastborgerskap = inngangsvilkaarService.avgjørStatsborgerskapPåStartDato(statsborgerskapPerioder, LocalDate.of(2019, 2, 1));
-        assertThat(stastborgerskap).isNull();
-    }
-
-    @Test
-    void avgjørStatsborgerskapPåStartDato_flerePerioder_girPeriodenSomInkludererStartdato() {
-        List<StatsborgerskapPeriode> statsborgerskapPerioder = new ArrayList<>();
-        StatsborgerskapPeriode p1 = new StatsborgerskapPeriode();
-        p1.statsborgerskap = av(BELGIA);
-        p1.periode = new Periode(LocalDate.of(2007, 3, 27), LocalDate.of(2018, 3, 27));
-        statsborgerskapPerioder.add(p1);
-        StatsborgerskapPeriode p2 = new StatsborgerskapPeriode();
-        p2.statsborgerskap = av(UKJENT);
-        p2.periode = new Periode(LocalDate.of(2018, 4, 1), null);
-        statsborgerskapPerioder.add(p2);
-        Land stastborgerskap = inngangsvilkaarService.avgjørStatsborgerskapPåStartDato(statsborgerskapPerioder, LocalDate.of(2018, 2, 1));
-        assertThat(stastborgerskap).isEqualTo(av(BELGIA));
-    }
-
-    @Test
-    void avgjørStatsborgerskapPåStartDato_flerePerioder_filtererSkd() {
-        List<StatsborgerskapPeriode> statsborgerskapPerioder = new ArrayList<>();
-        StatsborgerskapPeriode p1 = new StatsborgerskapPeriode();
-        p1.statsborgerskap = av(BELGIA);
-        p1.periode = new Periode(LocalDate.of(2007, 3, 27), LocalDate.of(2018, 3, 27));
-        p1.endretAv = "NAV";
-        statsborgerskapPerioder.add(p1);
-        StatsborgerskapPeriode p2 = new StatsborgerskapPeriode();
-        p2.statsborgerskap = av(UKJENT);
-        p2.periode = new Periode(LocalDate.of(2017, 4, 1), null);
-        p2.endretAv = "SKD";
-        statsborgerskapPerioder.add(p2);
-        Land stastborgerskap = inngangsvilkaarService.avgjørStatsborgerskapPåStartDato(statsborgerskapPerioder, LocalDate.of(2018, 2, 1));
-        assertThat(stastborgerskap).isEqualTo(av(BELGIA));
-    }
-
-    @Test
-    void avgjørStatsborgerskapPåStartDato_flereGyldige_filtrererUkjent() {
-        List<StatsborgerskapPeriode> statsborgerskapPerioder = new ArrayList<>();
-        StatsborgerskapPeriode p1 = new StatsborgerskapPeriode();
-        p1.statsborgerskap = av(BELGIA);
-        p1.periode = new Periode(LocalDate.of(2007, 3, 27), LocalDate.of(2018, 3, 27));
-        p1.endretAv = "NAV";
-        p1.endringstidspunkt = LocalDateTime.now().minusYears(3);
-        statsborgerskapPerioder.add(p1);
-        StatsborgerskapPeriode p2 = new StatsborgerskapPeriode();
-        p2.statsborgerskap = av(UKJENT);
-        p2.periode = new Periode(LocalDate.of(2017, 4, 1), null);
-        p2.endretAv = "NAV";
-        p2.endringstidspunkt = LocalDateTime.now().minusYears(2);
-        statsborgerskapPerioder.add(p2);
-        Land stastborgerskap = inngangsvilkaarService.avgjørStatsborgerskapPåStartDato(statsborgerskapPerioder, LocalDate.of(2018, 2, 1));
-        assertThat(stastborgerskap).isEqualTo(av(BELGIA));
-    }
-
-    @Test
-    void avgjørStatsborgerskapPåStartDato_flereGyldige_girSistEndret() {
-        List<StatsborgerskapPeriode> statsborgerskapPerioder = new ArrayList<>();
-        StatsborgerskapPeriode p1 = new StatsborgerskapPeriode();
-        p1.statsborgerskap = av(BELGIA);
-        p1.periode = new Periode(LocalDate.of(2007, 3, 27), LocalDate.of(2018, 3, 27));
-        p1.endretAv = "NAV";
-        p1.endringstidspunkt = LocalDateTime.now().minusYears(3);
-        statsborgerskapPerioder.add(p1);
-        StatsborgerskapPeriode p2 = new StatsborgerskapPeriode();
-        p2.statsborgerskap = av(SVERIGE);
-        p2.periode = new Periode(LocalDate.of(2017, 4, 1), null);
-        p2.endretAv = "NAV";
-        p2.endringstidspunkt = LocalDateTime.now().minusYears(2);
-        statsborgerskapPerioder.add(p2);
-        Land stastborgerskap = inngangsvilkaarService.avgjørStatsborgerskapPåStartDato(statsborgerskapPerioder, LocalDate.of(2018, 2, 1));
-        assertThat(stastborgerskap).isEqualTo(av(SVERIGE));
-    }
-
-    @Test
-    void avgjørGyldigeStatsborgerskapFraPdl() {
+    void avgjørGyldigeStatsborgerskapForPerioden() {
         var statsborgerskapFraPdl = Set.of(
             new no.nav.melosys.domain.person.Statsborgerskap(
                 "AAA", null, LocalDate.parse("1979-11-18"), LocalDate.parse("1980-11-18"),
@@ -305,7 +184,7 @@ class InngangsvilkaarServiceTest {
         );
         var periode = new no.nav.melosys.domain.behandlingsgrunnlag.data.Periode(LocalDate.now().plusMonths(1), null);
 
-        final Set<Land> statsborgerskap = inngangsvilkaarService.avgjørGyldigeStatsborgerskapFraPdlForPerioden(statsborgerskapFraPdl,
+        final Set<Land> statsborgerskap = inngangsvilkaarService.avgjørGyldigeStatsborgerskapForPerioden(statsborgerskapFraPdl,
             periode);
 
         assertThat(statsborgerskap).containsExactlyInAnyOrder(Land.av("CCC"), Land.av("DDD"), Land.av("EEE"));

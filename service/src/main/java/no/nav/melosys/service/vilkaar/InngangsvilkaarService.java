@@ -1,16 +1,17 @@
 package no.nav.melosys.service.vilkaar;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.ErPeriode;
 import no.nav.melosys.domain.VilkaarBegrunnelse;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
 import no.nav.melosys.domain.dokument.felles.Land;
-import no.nav.melosys.domain.dokument.person.StatsborgerskapPeriode;
 import no.nav.melosys.domain.inngangsvilkar.Feilmelding;
 import no.nav.melosys.domain.inngangsvilkar.InngangsvilkarResponse;
 import no.nav.melosys.domain.kodeverk.Kodeverk;
@@ -18,7 +19,6 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Inngangsvilkaar;
 import no.nav.melosys.domain.person.Statsborgerskap;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.inngangsvilkar.InngangsvilkaarConsumer;
-import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import org.slf4j.Logger;
@@ -39,22 +39,16 @@ public class InngangsvilkaarService {
     private final BehandlingService behandlingService;
     private final InngangsvilkaarConsumer inngangsvilkaarConsumer;
     private final PersondataFasade persondataFasade;
-    private final SaksopplysningerService saksopplysningerService;
-    private final Unleash unleash;
     private final VilkaarsresultatService vilkaarsresultatService;
 
     @Autowired
     public InngangsvilkaarService(BehandlingService behandlingService,
                                   InngangsvilkaarConsumer inngangsvilkaarConsumer,
                                   @Qualifier("system") PersondataFasade persondataFasade,
-                                  SaksopplysningerService saksopplysningerService,
-                                  Unleash unleash,
                                   VilkaarsresultatService vilkaarsresultatService) {
         this.behandlingService = behandlingService;
         this.inngangsvilkaarConsumer = inngangsvilkaarConsumer;
         this.persondataFasade = persondataFasade;
-        this.saksopplysningerService = saksopplysningerService;
-        this.unleash = unleash;
         this.vilkaarsresultatService = vilkaarsresultatService;
     }
 
@@ -90,7 +84,7 @@ public class InngangsvilkaarService {
         var landkoderISO3 = Set.copyOf(tilIso3(søknadsland));
         InngangsvilkarResponse res = inngangsvilkaarConsumer.vurderInngangsvilkår(statsborgerskap, landkoderISO3, erUkjenteEllerAlleEosLand, søknadsperiode);
 
-        List<String> feilmeldinger = res.getFeilmeldinger().stream().map(Feilmelding::getMelding).collect(Collectors.toList());
+        List<String> feilmeldinger = res.getFeilmeldinger().stream().map(Feilmelding::getMelding).toList();
 
         if (!feilmeldinger.isEmpty()) {
             if (log.isErrorEnabled()) {
@@ -104,16 +98,12 @@ public class InngangsvilkaarService {
     }
 
     private Set<Land> hentStatsborgerskapForPerioden(long behandlingID, ErPeriode periode) {
-        if (unleash.isEnabled("melosys.pdl.statsborgerskap")) {
-            final var behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
-            final String aktørID = behandling.getFagsak().hentAktørID();
-            return avgjørGyldigeStatsborgerskapFraPdlForPerioden(persondataFasade.hentStatsborgerskap(aktørID), periode);
-        }
-        return Optional.ofNullable(avgjørStatsborgerskapFraTPS(behandlingID, periode))
-            .stream().collect(Collectors.toUnmodifiableSet());
+        final var behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
+        final String aktørID = behandling.getFagsak().hentAktørID();
+        return avgjørGyldigeStatsborgerskapForPerioden(persondataFasade.hentStatsborgerskap(aktørID), periode);
     }
 
-    Set<Land> avgjørGyldigeStatsborgerskapFraPdlForPerioden(Set<Statsborgerskap> statsborgerskap, ErPeriode periode) {
+    Set<Land> avgjørGyldigeStatsborgerskapForPerioden(Set<Statsborgerskap> statsborgerskap, ErPeriode periode) {
         return statsborgerskap.stream().filter(s -> erGyldigStatsborgerskapForPeriode(s, periode))
             .map(s -> Land.av(s.landkode())).collect(Collectors.toUnmodifiableSet());
     }
@@ -124,39 +114,6 @@ public class InngangsvilkaarService {
             return s.erGyldigPåDato(søknadPeriodeFom) || s.erBekreftetPåDato(LocalDate.now());
         }
         return s.erGyldigPåDato(søknadPeriodeFom);
-    }
-
-    private Land avgjørStatsborgerskapFraTPS(long behandlingID, ErPeriode periode) {
-        // Hent statsborgerskap fra saksopplysningene...
-        // Ved søknad tilbake i tid brukes historisk statsborgerskap
-        if (periode.getFom() != null && periode.getFom().isBefore(LocalDate.now())) {
-            return avgjørStatsborgerskapPåStartDato(
-                saksopplysningerService.hentPersonhistorikk(behandlingID).statsborgerskapListe, periode.getFom());
-        } else {
-            return saksopplysningerService.hentPersonOpplysninger(behandlingID).hentAlleStatsborgerskap().stream()
-                .findFirst().orElse(null);
-        }
-    }
-
-    Land avgjørStatsborgerskapPåStartDato(List<StatsborgerskapPeriode> statsborgerskapListe, LocalDate startDato) {
-        if (statsborgerskapListe.isEmpty()) {
-            return null;
-        }
-        List<StatsborgerskapPeriode> gyldigeStasborgerskap = statsborgerskapListe.stream()
-            .filter(p -> p.getPeriode().inkluderer(startDato))
-            .collect(Collectors.toList());
-        if (gyldigeStasborgerskap.isEmpty()) {
-            return null;
-        } else if (gyldigeStasborgerskap.size() == 1) {
-            return gyldigeStasborgerskap.get(0).statsborgerskap;
-        } else {
-            // Hvis det finnes flere kilder for samme dato så ønsker vi å se bort fra det som kommer fra Skattedirektoratet
-            // pga. dårlig datakvalitet. Vi filterer også ukjent statsborgerskap siden det ikke hjelper å vurdere inngangsvilkår.
-            return gyldigeStasborgerskap.stream().filter(p -> !p.erFraSkattedirektoratet())
-                .filter(p -> !p.statsborgerskap.erUkjent())
-                .max(Comparator.comparing(p -> p.endringstidspunkt))
-                .map(p -> p.statsborgerskap).orElse(null);
-        }
     }
 
     @Transactional
@@ -171,7 +128,7 @@ public class InngangsvilkaarService {
             .collect(Collectors.toSet());
 
         final Set<Kodeverk> begrunnelseKoder = Stream.concat(
-            Set.of(Inngangsvilkaar.OVERSTYRT_AV_SAKSBEHANDLER).stream(),
+            Stream.of(Inngangsvilkaar.OVERSTYRT_AV_SAKSBEHANDLER),
             inngangsvilkaarBegrunnelseKoder.stream()
         ).collect(Collectors.toSet());
 

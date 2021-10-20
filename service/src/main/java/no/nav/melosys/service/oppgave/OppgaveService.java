@@ -209,66 +209,79 @@ public class OppgaveService {
     }
 
     private OppgaveDto tilOppgaveDto(Oppgave oppgave) {
-        OppgaveDto dest;
+        OppgaveDto resultat;
 
         if (oppgave.erJournalFøring()) {
-            JournalfoeringsoppgaveDto jfrOppgaveDto = new JournalfoeringsoppgaveDto();
-            jfrOppgaveDto.setJournalpostID(oppgave.getJournalpostId());
-            dest = jfrOppgaveDto;
-            String aktørId = oppgave.getAktørId();
-            String fnr = aktørId != null ? persondataFasade.hentFolkeregisterident(aktørId) : null;
-            if (StringUtils.isNotEmpty(fnr)) {
-                dest.setFnr(fnr);
-                dest.setSammensattNavn(persondataFasade.hentSammensattNavn(fnr));
-            } else {
-                dest.setFnr(UKJENT);
-                dest.setSammensattNavn(UKJENT);
-            }
+            resultat = lagJournalføringsoppgaveDto(oppgave);
         } else if (oppgave.erBehandling() || oppgave.erVurderDokument() || oppgave.erSedBehandling()) {
-            BehandlingsoppgaveDto behOppgaveDto = new BehandlingsoppgaveDto();
-            Fagsak fagsak = fagsakService.hentFagsak(oppgave.getSaksnummer());
-            behOppgaveDto.setSaksnummer(fagsak.getSaksnummer());
-            behOppgaveDto.setSakstype(fagsak.getType());
-
-            Behandling behandling = fagsak.hentSistAktiveBehandling();
-            behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandling.getId());
-            behOppgaveDto.setBehandling(mapBehandling(behandling));
-
-            if (behandling.erBehandlingAvSøknad()) {
-                Soeknad søknadDokument = (Soeknad) behandlingsgrunnlagService
-                    .hentBehandlingsgrunnlag(behandling.getId()).getBehandlingsgrunnlagdata();
-                Soeknadsland søknadsland = hentSøknadsland(søknadDokument);
-                behOppgaveDto.setLand(SoeknadslandDto.av(søknadsland));
-                behOppgaveDto.setPeriode(mapPeriode(søknadDokument));
-            } else {
-                saksopplysningerService.finnSedOpplysninger(behandling.getId()).ifPresent(
-                    sedDokument -> {
-                        Landkoder lovvalgslandKode = sedDokument.getLovvalgslandKode();
-                        behOppgaveDto.setLand(SoeknadslandDto.av(lovvalgslandKode));
-                        behOppgaveDto.setPeriode(new PeriodeDto(
-                            sedDokument.getLovvalgsperiode().getFom(), sedDokument.getLovvalgsperiode().getTom())
-                        );
-                    });
-            }
-            saksopplysningerService.finnPersonOpplysninger(behandling.getId()).ifPresent(
-                personDokument -> {
-                    behOppgaveDto.setSammensattNavn(personDokument.getSammensattNavn());
-                    behOppgaveDto.setFnr(personDokument.hentFolkeregisterident());
-                }
-            );
-
-            dest = behOppgaveDto;
+            resultat = lagBehandlingsoppgaveDto(oppgave);
         } else {
             throw new TekniskException("Oppgavetype " + oppgave.getOppgavetype() + " støttes ikke");
         }
 
-        dest.setAktivTil(oppgave.getFristFerdigstillelse());
-        dest.setAnsvarligID(oppgave.getTilordnetRessurs());
-        dest.setOppgaveID(oppgave.getOppgaveId());
-        dest.setPrioritet(oppgave.getPrioritet());
-        dest.setVersjon(oppgave.getVersjon());
+        resultat.setAktivTil(oppgave.getFristFerdigstillelse());
+        resultat.setAnsvarligID(oppgave.getTilordnetRessurs());
+        resultat.setOppgaveID(oppgave.getOppgaveId());
+        resultat.setPrioritet(oppgave.getPrioritet());
+        resultat.setVersjon(oppgave.getVersjon());
 
-        return dest;
+        return resultat;
+    }
+
+    private OppgaveDto lagJournalføringsoppgaveDto(Oppgave oppgave) {
+        JournalfoeringsoppgaveDto journalfoeringsoppgaveDto = new JournalfoeringsoppgaveDto();
+        journalfoeringsoppgaveDto.setJournalpostID(oppgave.getJournalpostId());
+        String aktørId = oppgave.getAktørId();
+        oppdaterFnrOgNavn(aktørId, journalfoeringsoppgaveDto);
+        return journalfoeringsoppgaveDto;
+    }
+
+    private void oppdaterFnrOgNavn(String aktørID, OppgaveDto oppgaveDto) {
+        if (aktørID == null) {
+            oppgaveDto.setFnr(UKJENT);
+            oppgaveDto.setSammensattNavn(UKJENT);
+            return;
+        }
+        final String fnr = persondataFasade.finnFolkeregisterident(aktørID).orElse(null);
+        if (StringUtils.isNotEmpty(fnr)) {
+            oppgaveDto.setFnr(fnr);
+            oppgaveDto.setSammensattNavn(persondataFasade.hentSammensattNavn(fnr));
+        } else {
+            oppgaveDto.setFnr(UKJENT);
+            oppgaveDto.setSammensattNavn(UKJENT);
+        }
+    }
+
+    private OppgaveDto lagBehandlingsoppgaveDto(Oppgave oppgave) {
+        BehandlingsoppgaveDto behOppgaveDto = new BehandlingsoppgaveDto();
+        Fagsak fagsak = fagsakService.hentFagsak(oppgave.getSaksnummer());
+        behOppgaveDto.setSaksnummer(fagsak.getSaksnummer());
+        behOppgaveDto.setSakstype(fagsak.getType());
+
+        Behandling behandling = fagsak.hentSistAktiveBehandling();
+        behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandling.getId());
+        behOppgaveDto.setBehandling(mapBehandling(behandling));
+
+        if (behandling.erBehandlingAvSøknad()) {
+            Soeknad søknadDokument = (Soeknad) behandlingsgrunnlagService
+                .hentBehandlingsgrunnlag(behandling.getId()).getBehandlingsgrunnlagdata();
+            Soeknadsland søknadsland = hentSøknadsland(søknadDokument);
+            behOppgaveDto.setLand(SoeknadslandDto.av(søknadsland));
+            behOppgaveDto.setPeriode(mapPeriode(søknadDokument));
+        } else {
+            saksopplysningerService.finnSedOpplysninger(behandling.getId()).ifPresent(
+                sedDokument -> {
+                    Landkoder lovvalgslandKode = sedDokument.getLovvalgslandKode();
+                    behOppgaveDto.setLand(SoeknadslandDto.av(lovvalgslandKode));
+                    behOppgaveDto.setPeriode(new PeriodeDto(
+                        sedDokument.getLovvalgsperiode().getFom(), sedDokument.getLovvalgsperiode().getTom())
+                    );
+                });
+        }
+
+        final var aktørID = behandling.getFagsak().hentAktørID();
+        oppdaterFnrOgNavn(aktørID, behOppgaveDto);
+        return behOppgaveDto;
     }
 
     private BehandlingDto mapBehandling(Behandling behandling) {

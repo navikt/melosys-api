@@ -4,16 +4,20 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
+import no.nav.melosys.domain.adresse.SemistrukturertAdresse;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.person.adresse.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresseNorge;
 import no.nav.melosys.domain.dokument.person.adresse.UstrukturertAdresse;
+import no.nav.melosys.domain.person.Master;
+import no.nav.melosys.domain.person.adresse.Kontaktadresse;
 import no.nav.melosys.integrasjon.kodeverk.KodeOppslag;
 import no.nav.tjeneste.virksomhet.person.v3.meldinger.HentPersonResponse;
 import org.assertj.core.api.Assertions;
@@ -58,7 +62,7 @@ class PersonMapperTest {
     }
 
     @Test
-    void testFamilierelasjoner() {
+    void mapTilPerson_testFamilierelasjoner_verifiserAtdokumentIkkeErTomt() {
         final String kilde = "mock/person/familierelasjoner.xml";
         HentPersonResponse response = lagHentPersonResponseFraXml(kilde);
 
@@ -69,7 +73,7 @@ class PersonMapperTest {
     }
 
     @Test
-    void testMidlertidigPostadresseUtland() {
+    void mapTilPerson_testMidlertidigPostadresseUtland_mapGjeldendePostadresse() {
         final String kilde = "mock/person/midlertidig_postadresse_utland.xml";
         HentPersonResponse response = lagHentPersonResponseFraXml(kilde);
 
@@ -82,7 +86,7 @@ class PersonMapperTest {
     }
 
     @Test
-    void testMidlertidigPostadresseNorge() {
+    void mapTilPerson_testMidlertidigPostadresseNorge_mapGjeldendePostadresse() {
         final String kilde = "mock/person/midlertidig_postadresse_norge.xml";
         HentPersonResponse response = lagHentPersonResponseFraXml(kilde);
 
@@ -97,7 +101,7 @@ class PersonMapperTest {
     }
 
     @Test
-    void testMidlertidigPostadresseNorgeMedMatrikkeladresse() {
+    void mapTilPerson_testMidlertidigPostadresseNorgeMedMatrikkeladresse_mapGjeldendePostadresse() {
         final String kilde = "mock/person/midlertidig_postadresse_norge_matrikkel.xml";
         HentPersonResponse response = lagHentPersonResponseFraXml(kilde);
 
@@ -108,7 +112,7 @@ class PersonMapperTest {
     }
 
     @Test
-    void gittBostedsadresseGjeldendeMapGjeldendePostadresse() {
+    void mapTilPerson_gittBostedsadresseGjeldende_mapGjeldendePostadresse() {
         final String kilde = "mock/person/bostedsadresse.xml";
         HentPersonResponse response = lagHentPersonResponseFraXml(kilde);
 
@@ -128,7 +132,7 @@ class PersonMapperTest {
     }
 
     @Test
-    void gittMidlertidigadresseGjeldendeMapGjeldendePostadresse() {
+    void mapTilPerson_gittMidlertidigadresseGjeldende_mapGjeldendePostadresse() {
         final String kilde = "mock/person/midlertidig_co_adresse.xml";
         HentPersonResponse response = lagHentPersonResponseFraXml(kilde);
 
@@ -147,6 +151,34 @@ class PersonMapperTest {
         assertEquals(midlertidigPostadresseNorge.land, gjeldendePostadresse.land);
         assertEquals(midlertidigPostadresseNorge.poststed, gjeldendePostadresse.postnr);
         assertTrue(gjeldendePostadresse.adresselinje1.startsWith("C/O"));
+    }
+
+    @Test
+    void mapTilPerson_medDokumentUtenBostedsadresseFraXml_forventKontaktadresseUtfylt(){
+        final String kilde = "mock/person/postadresse_utland.xml";
+        HentPersonResponse response = lagHentPersonResponseFraXml(kilde);
+
+
+        PersonDokument dokument = PersonMapper.mapTilPerson(response.getPerson(), kodeOppslag);
+
+        assertNotNull(dokument);
+
+        Optional<Kontaktadresse> kontaktadresse = dokument.finnKontaktadresse();
+        assertThat(kontaktadresse.isPresent()).isTrue();
+
+        assertThat(kontaktadresse.get().master()).isEqualTo(Master.TPS.name());
+        assertThat(kontaktadresse.get().gyldigFraOgMed()).isNull();
+        assertThat(kontaktadresse.get().gyldigTilOgMed()).isNull();
+        assertThat(kontaktadresse.get().kilde()).isEqualTo(Master.TPS.name());
+        assertThat(kontaktadresse.get().coAdressenavn()).isNull();
+        assertThat(kontaktadresse.get().registrertDato()).isNull();
+        assertThat(kontaktadresse.get().erHistorisk()).isFalse();
+
+        SemistrukturertAdresse semistrukturertAdresse = kontaktadresse.get().semistrukturertAdresse();
+        assertThat(semistrukturertAdresse.adresselinje1()).isEqualTo("42 Mock Road");
+        assertThat(semistrukturertAdresse.adresselinje2()).isEqualTo("Mock City");
+        assertThat(semistrukturertAdresse.adresselinje3()).isEqualTo("United Kingdom");
+        assertThat(semistrukturertAdresse.landkode()).isEqualTo("GB");
     }
 
     private HentPersonResponse lagHentPersonResponseFraXml(String ressurs) {

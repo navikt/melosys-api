@@ -1,10 +1,12 @@
 package no.nav.melosys.tjenester.gui;
 
+import java.io.IOException;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -23,10 +25,10 @@ import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
-import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.sak.HenleggFagsakService;
 import no.nav.melosys.service.sak.OpprettSakDto;
@@ -35,8 +37,8 @@ import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.utpeking.UtpekingService;
 import no.nav.melosys.tjenester.gui.dto.*;
 import no.nav.melosys.tjenester.gui.dto.dokumentarkiv.VedleggDto;
-import no.nav.melosys.tjenester.gui.util.FagsakBehandlingFactory;
 import no.nav.melosys.tjenester.gui.util.NumericStringRandomizer;
+import no.nav.melosys.tjenester.gui.util.SaksbehandlingDataFactory;
 import org.jeasy.random.EasyRandom;
 import org.jeasy.random.EasyRandomParameters;
 import org.junit.jupiter.api.BeforeEach;
@@ -46,7 +48,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import static no.nav.melosys.tjenester.gui.util.FagsakBehandlingFactory.fagsakMedBehandlinger;
+import static no.nav.melosys.tjenester.gui.util.SaksbehandlingDataFactory.fagsakMedBehandlinger;
 import static org.assertj.core.api.Assertions.*;
 import static org.jeasy.random.FieldPredicates.*;
 import static org.mockito.Mockito.*;
@@ -62,9 +64,10 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
     private static final String FAGSAKSER_HENLEGG_POST_SCHEMA = "fagsaker-henlegg-post-schema.json";
 
     private static final String FNR = "12345678901";
+
     private static FagsakService fagsakService;
-    private static HenleggFagsakService henleggFagsakService;
     private static Aksesskontroll aksesskontroll;
+    private static HenleggFagsakService henleggFagsakService;
     private static UtpekingService utpekingService;
 
     private EasyRandom random;
@@ -84,42 +87,42 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    void videresendSchemaValidering() throws Exception {
+    void videresendSchemaValidering() throws JsonProcessingException {
         VideresendDto videresendDto = new VideresendDto();
         videresendDto.setMottakerinstitusjon("SE:123");
         videresendDto.setFritekst("fri som fuglen");
         videresendDto.setVedlegg(Set.of(new VedleggDto("1", "1")));
 
         String jsonString = objectMapperMedKodeverkServiceStub().writeValueAsString(videresendDto);
-        valider(jsonString, FAGSAKER_VIDERESEND_POST_SCHEMA, log);
+        assertThatCode(() -> valider(jsonString, FAGSAKER_VIDERESEND_POST_SCHEMA, log)).doesNotThrowAnyException();
     }
 
     @Test
-    void fagsakSchemaValidering() throws Exception {
+    void fagsakSchemaValidering() throws JsonProcessingException {
         FagsakDto fagsakDto = random.nextObject(FagsakDto.class);
 
         String jsonString = objectMapperMedKodeverkServiceStub().writeValueAsString(fagsakDto);
-        valider(jsonString, FAGSAKER_SCHEMA, log);
+        assertThatCode(() -> valider(jsonString, FAGSAKER_SCHEMA, log)).doesNotThrowAnyException();
     }
 
     @Test
-    void fagsakOpprettSchemaValidering() throws Exception {
+    void fagsakOpprettSchemaValidering() throws JsonProcessingException {
         OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
 
         String jsonString = new ObjectMapper().registerModule(new JavaTimeModule()).configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false).writeValueAsString(opprettSakDto);
-        valider(jsonString, FAGSAKER_OPPRETT_SCHEMA, log);
+        assertThatCode(() -> valider(jsonString, FAGSAKER_OPPRETT_SCHEMA, log)).doesNotThrowAnyException();
     }
 
     @Test
-    void fagsakUtpekSchemaValidering() throws Exception {
+    void fagsakUtpekSchemaValidering() throws JsonProcessingException {
         UtpekDto utpekDto = new UtpekDto(Set.of("SE:123"), "fri SED", "fri brev");
 
         String jsonString = objectMapperMedKodeverkServiceStub().writeValueAsString(utpekDto);
-        valider(jsonString, FAGSAKER_UTPEK_POST_SCHEMA, log);
+        assertThatCode(() -> valider(jsonString, FAGSAKER_UTPEK_POST_SCHEMA, log)).doesNotThrowAnyException();
     }
 
     @Test
-    void fagsakSøkSchemaValidering() throws Exception {
+    void fagsakSøkSchemaValidering() throws IOException {
         valider(new FagsakSokDto("123", "MEL-123"), SOK_FAGSAKER_POST_SCHEMA);
 
         List<FagsakOppsummeringDto> fagsakOppsummeringDtoList = random.objects(FagsakOppsummeringDto.class, 1).collect(Collectors.toList());
@@ -127,19 +130,19 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
         behandlingOversiktDtoer.get(0).setLand(new SoeknadslandDto(Collections.singletonList(Landkoder.NO.getKode()), false));
         fagsakOppsummeringDtoList.get(0).setBehandlingOversikter(behandlingOversiktDtoer);
 
-        validerArray(fagsakOppsummeringDtoList, SOK_FAGSAKER_SCHEMA, log);
+        assertThatCode(() -> validerArray(fagsakOppsummeringDtoList, SOK_FAGSAKER_SCHEMA, log)).doesNotThrowAnyException();
     }
 
     @Test
     void hentFagsakGir200OkOgDto() {
         Fagsak fagsak = lagFagsak();
-        testHentFagsak("123", ResponseEntity.status(HttpStatus.OK).body(lagFagsakDto(fagsak)));
+        testHentFagsak(ResponseEntity.status(HttpStatus.OK).body(lagFagsakDto(fagsak)));
     }
 
-    private void testHentFagsak(String saksnr, ResponseEntity<FagsakDto> forventning) {
+    private void testHentFagsak(ResponseEntity<FagsakDto> forventning) {
         Fagsak fagsak = lagFagsak();
         FagsakTjeneste instans = lagFagsakTjeneste(fagsak);
-        ResponseEntity<FagsakDto> resultat = instans.hentFagsak(saksnr);
+        ResponseEntity<FagsakDto> resultat = instans.hentFagsak("123");
         assertThat(resultat.getStatusCode()).isEqualTo(forventning.getStatusCode());
         if (forventning.getBody() == null) {
             assertThat(resultat.getBody()).isNull();
@@ -150,8 +153,9 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
 
     @Test
     void hentFagsaker_medFnr_verifiserErMappetKorrekt() {
-        Fagsak fagsak = lagFagsak();
+        Fagsak fagsak = SaksbehandlingDataFactory.lagFagsak("MEL-1");
         Behandling behandling = new Behandling();
+        behandling.setFagsak(fagsak);
         behandling.setId(123L);
         fagsak.setBehandlinger(Collections.singletonList(behandling));
         FagsakTjeneste instans = lagFagsakTjeneste(fagsak);
@@ -214,7 +218,7 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
         assertThat(behandlingFørst.getBehandlingstype().getKode()).isEqualTo("SOEKNAD");
         assertThat(behandlingFørst.getOpprettetDato()).isEqualTo(Instant.parse("2019-01-10T10:37:30.00Z"));
         assertThat(behandlingFørst.getLand().landkoder.get(0)).isEqualTo("DK");
-        assertThat(behandlingFørst.getLand().erUkjenteEllerAlleEosLand).isEqualTo(false);
+        assertThat(behandlingFørst.getLand().erUkjenteEllerAlleEosLand).isFalse();
 
         assertThat(behandlingFørst.getPeriode().getFom()).isEqualTo(LocalDate.of(2019,1,1));
         assertThat(behandlingFørst.getPeriode().getTom()).isEqualTo(LocalDate.of(2019,2,1));
@@ -239,7 +243,7 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    void henleggFagsakSenderSaksnummerFritekstOgBegrunnelseTilService() throws Exception {
+    void henleggFagsakSenderSaksnummerFritekstOgBegrunnelseTilService() throws IOException {
         String begrunnelseKode = Henleggelsesgrunner.OPPHOLD_UTL_AVLYST.getKode();
         String fritekst = "Dette er fritekst";
         HenleggelseDto henleggelseDto = new HenleggelseDto(fritekst, begrunnelseKode);
@@ -257,7 +261,7 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    void avsluttSakSomBortfalt_sakEksisterer_kallerFagservice() throws Exception {
+    void avsluttSakSomBortfalt_sakEksisterer_kallerFagservice() {
         Fagsak fagsak = lagFagsak();
         FagsakTjeneste instans = lagFagsakTjeneste(fagsak);
         String saksnummer = "123";
@@ -268,7 +272,7 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    void avsluttSakManuelt_sakEksisterer_avsluttes() throws Exception {
+    void avsluttSakManuelt_sakEksisterer_avsluttes() {
         Fagsak fagsak = lagFagsak();
         FagsakTjeneste instans = lagFagsakTjeneste(fagsak);
         instans.avsluttSakManuelt("123");
@@ -276,11 +280,12 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    void videresendSøknad_utenVedlegg_feiler() throws Exception {
+    void videresendSøknad_utenVedlegg_feiler() {
         Fagsak fagsak = lagFagsak();
         FagsakTjeneste instans = lagFagsakTjeneste(fagsak);
+        var videresendDto = new VideresendDto();
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> instans.videresend("123", new VideresendDto()))
+            .isThrownBy(() -> instans.videresend("123", videresendDto))
             .withMessageContaining("uten vedlegg");
     }
 
@@ -288,28 +293,29 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
         aksesskontroll = mock(Aksesskontroll.class);
         fagsakService = mock(FagsakService.class);
         henleggFagsakService = mock(HenleggFagsakService.class);
+        PersondataFasade persondataFasade = mock(PersondataFasade.class);
         utpekingService = mock(UtpekingService.class);
         VideresendSoknadService videresendSoknadService = mock(VideresendSoknadService.class);
         SaksopplysningerService saksopplysningerService = mock(SaksopplysningerService.class);
         BehandlingsgrunnlagService behandlingsgrunnlagService = mock(BehandlingsgrunnlagService.class);
-        Persondata persondata = (Persondata)FagsakBehandlingFactory.lagPersonSaksopplysning().getDokument();
-        when(saksopplysningerService.finnPersonOpplysninger(1L)).thenReturn(Optional.ofNullable(persondata));
-        Soeknad søknadDokument = FagsakBehandlingFactory.lagSøknadDokument();
+        Soeknad søknadDokument = SaksbehandlingDataFactory.lagSøknadDokument();
         Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
         behandlingsgrunnlag.setBehandlingsgrunnlagdata(søknadDokument);
         when(behandlingsgrunnlagService.finnBehandlingsgrunnlag(1L)).thenReturn(Optional.of(behandlingsgrunnlag));
         when(fagsakService.hentFagsak("123")).thenReturn(fagsak);
-        ArrayList<Fagsak> fagsaker = new ArrayList<>();
-        fagsaker.add(fagsak);
-        doReturn(fagsaker).when(fagsakService).hentFagsakerMedAktør(Aktoersroller.BRUKER, FNR);
-        return new FagsakTjeneste(fagsakService, henleggFagsakService, saksopplysningerService, behandlingsgrunnlagService, utpekingService,
-            videresendSoknadService, aksesskontroll);
+        when(persondataFasade.hentSammensattNavn(any())).thenReturn("Joe Moe");
+        doReturn(Arrays.asList(fagsak)).when(fagsakService).hentFagsakerMedAktør(Aktoersroller.BRUKER, FNR);
+        return new FagsakTjeneste(fagsakService, aksesskontroll, behandlingsgrunnlagService, henleggFagsakService, persondataFasade, saksopplysningerService, utpekingService,
+            videresendSoknadService);
     }
 
     private static FagsakOppsummeringDto lagFagsakOppsummeringDto(Behandling behandling) {
         FagsakOppsummeringDto result = new FagsakOppsummeringDto();
+        result.setSakstype(Sakstyper.EU_EOS);
+        result.setSaksstatus(Saksstatuser.OPPRETTET);
         result.setSaksnummer("MEL-1");
-        result.setSammensattNavn("UKJENT");
+        result.setSammensattNavn("Joe Moe");
+
         BehandlingOversiktDto behandlingOversiktDto = new BehandlingOversiktDto();
         behandlingOversiktDto.setBehandlingID(behandling.getId());
         result.setBehandlingOversikter(Collections.singletonList(behandlingOversiktDto));

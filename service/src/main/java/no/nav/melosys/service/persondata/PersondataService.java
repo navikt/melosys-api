@@ -75,10 +75,16 @@ public class PersondataService implements PersondataFasade {
 
     @Override
     @Cacheable("folkeregisterIdent")
-    public String hentFolkeregisterident(String ident) {
+    public Optional<String> finnFolkeregisterident(String ident) {
         return pdlConsumer.hentIdenter(ident).identer()
             .stream().filter(Ident::erFolkeregisterIdent)
-            .findFirst().map(Ident::ident)
+            .findFirst().map(Ident::ident);
+    }
+
+    @Override
+    @Cacheable("folkeregisterIdent")
+    public String hentFolkeregisterident(String ident) {
+        return finnFolkeregisterident(ident)
             .orElseThrow(() -> new IkkeFunnetException("Finner ikke folkeregisterident!"));
     }
 

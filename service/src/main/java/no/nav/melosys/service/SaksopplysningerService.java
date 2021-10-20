@@ -22,13 +22,9 @@ public class SaksopplysningerService {
         this.saksopplysningRepo = saksopplysningRepo;
     }
 
-    public Optional<Persondata> finnPersonOpplysninger(long behandlingID) {
+    public Persondata hentTpsPersonopplysninger(long behandlingID) {
         return saksopplysningRepo.findByBehandling_IdAndType(behandlingID, SaksopplysningType.PERSOPL)
-            .map(s -> (Persondata) s.getDokument());
-    }
-
-    public Persondata hentPersonOpplysninger(long behandlingID) {
-        return finnPersonOpplysninger(behandlingID)
+            .map(s -> (Persondata) s.getDokument())
             .orElseThrow(() -> new IkkeFunnetException("Finner ikke persondokument for behandling " + behandlingID));
     }
 
