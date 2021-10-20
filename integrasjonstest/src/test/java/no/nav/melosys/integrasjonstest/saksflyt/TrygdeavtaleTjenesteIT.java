@@ -7,11 +7,14 @@ import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadFtrl;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
+import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_barn_begrunnelser_ftrl;
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_ektefelle_samboer_begrunnelser_ftrl;
+import no.nav.melosys.exception.ValideringException;
+import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.TrygdeavtaleService;
 import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
-import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
+import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.felles.dto.SoeknadslandDto;
@@ -21,8 +24,11 @@ import no.nav.melosys.service.journalforing.dto.FagsakDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringOpprettDto;
 import no.nav.melosys.service.journalforing.dto.PeriodeDto;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
+import no.nav.melosys.service.vedtak.FattTrygdeavtaleVedtakRequest;
+import no.nav.melosys.service.vedtak.FattVedtakRequest;
+import no.nav.melosys.service.vedtak.VedtakServiceFasade;
+import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.tjenester.gui.TrygdeavtaleTjeneste;
-import no.nav.melosys.tjenester.gui.dto.FagsakSokDto;
 import no.nav.melosys.tjenester.gui.dto.trygdeavtale.TrygdeAvtaleDataForVedtakDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -48,11 +54,15 @@ class TrygdeavtaleTjenesteIT {
     @Autowired
     private BehandlingsgrunnlagService behandlingsgrunnlagService;
     @Autowired
-    private AvklartefaktaService avklartefaktaService;
-    @Autowired
     private AvklarteMedfolgendeFamilieService avklarteMedfolgendeFamilieService;
     @Autowired
     private JournalfoeringService journalfoeringService;
+    @Autowired
+    VedtakServiceFasade vedtakServiceFasade;
+    @Autowired
+    private AvklarteVirksomheterService avklarteVirksomheterService;
+    @Autowired
+    private LovvalgsperiodeService lovvalgsperiodeService;
 
     private TrygdeavtaleTjeneste trygdeavtaleTjeneste;
 
@@ -63,8 +73,9 @@ class TrygdeavtaleTjenesteIT {
             behandlingService,
             aksesskontroll,
             behandlingsgrunnlagService,
-            avklartefaktaService,
-            avklarteMedfolgendeFamilieService);
+            avklarteMedfolgendeFamilieService,
+            avklarteVirksomheterService,
+            lovvalgsperiodeService);
 
         // TODO: bruk http://localhost:8083/testdata/jfr-oppgave til å lage oppgave og kjør så opprettOgJournalfør
         Journalpost journalpost = journalfoeringService.hentJournalpost("526345");
@@ -98,8 +109,8 @@ class TrygdeavtaleTjenesteIT {
 
         behandlingsgrunnlagService.oppdaterBehandlingsgrunnlag(behandlingsgrunnlag);
 
-        String jsonData = behandlingsgrunnlag.getJsonData();
-        System.out.println(jsonData);
+//        String jsonData = behandlingsgrunnlag.getJsonData();
+//        System.out.println(jsonData);
     }
 
     private JournalfoeringOpprettDto lagJournalfoeringOpprettDto() {
@@ -124,7 +135,7 @@ class TrygdeavtaleTjenesteIT {
     }
 
     @Test
-    void test() {
+    void test() throws ValideringException, InterruptedException {
         TrygdeAvtaleDataForVedtakDto trygdeAvtaleDataForVedtakDto = new TrygdeAvtaleDataForVedtakDto.Builder()
             .fom(LocalDate.of(2021, 1, 1))
             .tom(LocalDate.of(2021, 2, 1))
@@ -142,5 +153,15 @@ class TrygdeavtaleTjenesteIT {
             .build();
 
         trygdeavtaleTjeneste.overforDataForVedtak(2L, trygdeAvtaleDataForVedtakDto);
+
+        FattVedtakRequest fattVedtakRequest = new FattTrygdeavtaleVedtakRequest
+            .Builder()
+            .medBestillersId(SubjectHandler.getInstance().getUserID())
+            .medVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK)
+            .medFritekstBegrunnelse("trygdeavtale begrunnelse")
+            .build();
+
+        vedtakServiceFasade.fattVedtak(2L, fattVedtakRequest);
+        Thread.sleep(3000);
     }
 }
