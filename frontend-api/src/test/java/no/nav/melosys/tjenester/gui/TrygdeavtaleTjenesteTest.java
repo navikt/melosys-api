@@ -3,17 +3,33 @@ package no.nav.melosys.tjenester.gui;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
+import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
+import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadFtrl;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_barn_begrunnelser_ftrl;
+import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_ektefelle_samboer_begrunnelser_ftrl;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
+import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.TrygdeavtaleService;
+import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
+import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
+import no.nav.melosys.tjenester.gui.dto.trygdeavtale.TrygdeAvtaleDataForVedtakDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.lang.reflect.Field;
+import java.time.LocalDate;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -49,11 +65,12 @@ class TrygdeavtaleTjenesteTest {
             avklarteMedfolgendeFamilieService,
             avklarteVirksomheterService,
             lovvalgsperiodeService);
-        when(behandlingService.hentBehandling(1L)).thenReturn(behandling);
     }
 
     @Test
     void hentTrygdeavtaleInfo_utenVirksomhetOgBarnEktefelle_returnererKorrekt() {
+        when(behandlingService.hentBehandling(1L)).thenReturn(behandling);
+
         var response = trygdeavtaleTjeneste.hentTrygdeavtaleInfo(1L, false, false).getBody();
 
         verify(trygdeavtaleService, never()).hentVirksomheter(any());
@@ -70,6 +87,8 @@ class TrygdeavtaleTjenesteTest {
 
     @Test
     void hentTrygdeavtaleInfo_medVirksomhetOgBarnEktefelle_returnererKorrekt() {
+        when(behandlingService.hentBehandling(1L)).thenReturn(behandling);
+
         var response = trygdeavtaleTjeneste.hentTrygdeavtaleInfo(1L, true, true).getBody();
 
         verify(trygdeavtaleService).hentVirksomheter(any());
