@@ -7,9 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public record TrygdeAvtaleDataForVedtakDto(
-    LocalDate fom,
-    LocalDate tom,
-    List<String> land,
     List<String> virksomheter,
     String vedtak,
     String innvilgelse,
@@ -19,30 +16,12 @@ public record TrygdeAvtaleDataForVedtakDto(
 ) {
     // Mulig å bytte ut med https://github.com/Randgalt/record-builder
     static public class Builder {
-        private LocalDate fom;
-        private LocalDate tom;
-        private List<String> land;
         private List<String> virksomheter;
         private String vedtak;
         private String innvilgelse;
         private String bestemmelse;
         private final List<MedfolgendeFamilieDto> barn = new ArrayList<>();
         private MedfolgendeFamilieDto ektefelle;
-
-        public Builder fom(LocalDate fom) {
-            this.fom = fom;
-            return this;
-        }
-
-        public Builder tom(LocalDate tom) {
-            this.tom = tom;
-            return this;
-        }
-
-        public Builder land(List<String> land) {
-            this.land = land;
-            return this;
-        }
 
         public Builder virksomheter(List<String> virksomheter) {
             this.virksomheter = virksomheter;
@@ -76,9 +55,6 @@ public record TrygdeAvtaleDataForVedtakDto(
 
         public TrygdeAvtaleDataForVedtakDto build() {
             return new TrygdeAvtaleDataForVedtakDto(
-                fom,
-                tom,
-                land,
                 virksomheter,
                 vedtak,
                 innvilgelse,

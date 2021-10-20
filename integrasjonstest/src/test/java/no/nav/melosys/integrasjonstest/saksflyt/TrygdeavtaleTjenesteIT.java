@@ -137,9 +137,6 @@ class TrygdeavtaleTjenesteIT {
     @Test
     void test() throws ValideringException, InterruptedException {
         TrygdeAvtaleDataForVedtakDto trygdeAvtaleDataForVedtakDto = new TrygdeAvtaleDataForVedtakDto.Builder()
-            .fom(LocalDate.of(2021, 1, 1))
-            .tom(LocalDate.of(2021, 2, 1))
-            .land(List.of("GB"))
             .virksomheter(List.of("11111111111"))
             .vedtak("JA_FATTE_VEDTAK")
             .innvilgelse("JA")
