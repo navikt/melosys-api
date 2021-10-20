@@ -39,9 +39,12 @@ public class TrygdeavtaleTjeneste {
 
         aksesskontroll.autoriserSkriv(behandlingId);
         var behandling = behandlingService.hentBehandling(behandlingId);
+        var behandlingsgrunnlagdata = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
         return ResponseEntity.ok(new TrygdeavtaleInfoDto(
             behandling.getFagsak().hentAktørID(),
             behandling.getTema().getKode(),
+            behandlingsgrunnlagdata.periode,
+            behandlingsgrunnlagdata.soeknadsland.landkoder,
             hentVirksomheter ? trygdeavtaleService.hentVirksomheter(behandling) : Collections.emptyMap(),
             hentBarnEktefeller ? trygdeavtaleService.hentFamiliemedlemmer(behandling) : Collections.emptyList()
         ));
