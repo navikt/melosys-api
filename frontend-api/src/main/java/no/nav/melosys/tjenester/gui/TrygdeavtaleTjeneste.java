@@ -81,14 +81,14 @@ public class TrygdeavtaleTjeneste {
         @RequestBody TrygdeAvtaleDataForVedtakDto trygdeAvtaleDataForVedtakDto) {
 
         // TODO: Flytt dette ut til en egen klasse
-        sjekkBehandlingsgrunnlag(behandlingsId, trygdeAvtaleDataForVedtakDto);
-
         LagreMedfolgendeFamilieDto lagreMedfolgendeFamilieDto = lagMedfolgendeFamilieDto(trygdeAvtaleDataForVedtakDto);
         avklarteMedfolgendeFamilieService.lagreMedfolgendeFamilieSomAvklartefakta(behandlingsId, lagreMedfolgendeFamilieDto.til());
 
         avklarteVirksomheterService.lagreVirksomheterSomAvklartefakta(trygdeAvtaleDataForVedtakDto.virksomheter(), behandlingsId);
 
-        Lovvalgsperiode lovvalgsperiode = lagLovvalgsperiode(trygdeAvtaleDataForVedtakDto);
+        SoeknadFtrl behandlingsgrunnlagdata = hentBehandlingsgrunnlagdata(behandlingsId);
+
+        Lovvalgsperiode lovvalgsperiode = lagLovvalgsperiode(trygdeAvtaleDataForVedtakDto, behandlingsgrunnlagdata);
         lovvalgsperiodeService.lagreLovvalgsperioder(behandlingsId, List.of(lovvalgsperiode));
     }
 
@@ -98,29 +98,19 @@ public class TrygdeavtaleTjeneste {
         return new LagreMedfolgendeFamilieDto(Set.copyOf(familie));
     }
 
-    private Lovvalgsperiode lagLovvalgsperiode(TrygdeAvtaleDataForVedtakDto trygdeAvtaleDataForVedtakDto) {
+    private Lovvalgsperiode lagLovvalgsperiode(TrygdeAvtaleDataForVedtakDto trygdeAvtaleDataForVedtakDto, SoeknadFtrl behandlingsgrunnlagdata) {
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setFom(trygdeAvtaleDataForVedtakDto.fom());
-        lovvalgsperiode.setTom(trygdeAvtaleDataForVedtakDto.tom());
-        Landkoder lovvalgsland = Landkoder.valueOf(trygdeAvtaleDataForVedtakDto.land()
-            .stream().findFirst().orElseThrow(() -> new TekniskException("trygdeAvtaleDataForVedtakDto.land inneholder ingen land")));
+        lovvalgsperiode.setFom(behandlingsgrunnlagdata.periode.getFom());
+        lovvalgsperiode.setTom(behandlingsgrunnlagdata.periode.getTom());
+        Landkoder lovvalgsland = Landkoder.valueOf(behandlingsgrunnlagdata.soeknadsland.landkoder.stream().findFirst()
+            .orElseThrow(() -> new TekniskException("Forventet ett land i behandlingsgrunnlagdata soeknadsland.landkoder")));
         lovvalgsperiode.setLovvalgsland(lovvalgsland);
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_trygdeavtale_uk.valueOf(trygdeAvtaleDataForVedtakDto.bestemmelse()));
         return lovvalgsperiode;
     }
 
-    private void sjekkBehandlingsgrunnlag(long behandlingsId, TrygdeAvtaleDataForVedtakDto trygdeAvtaleDataForVedtakDto) {
-        // Periode og land skal alltid være det sammne - men er en sanity sjekk for nå
+    private SoeknadFtrl hentBehandlingsgrunnlagdata(long behandlingsId) {
         Behandlingsgrunnlag behandlingsgrunnlag = behandlingsgrunnlagService.hentBehandlingsgrunnlag(behandlingsId);
-        SoeknadFtrl behandlingsgrunnlagdata = (SoeknadFtrl) behandlingsgrunnlag.getBehandlingsgrunnlagdata();
-
-        Periode periode = behandlingsgrunnlagdata.periode;
-        assert periode.getFom().equals(trygdeAvtaleDataForVedtakDto.fom());
-        assert periode.getTom().equals(trygdeAvtaleDataForVedtakDto.tom());
-
-        for (var land : trygdeAvtaleDataForVedtakDto.land()) {
-            if (!behandlingsgrunnlagdata.soeknadsland.landkoder.contains(land))
-                throw new TekniskException("Forventet " + land + " i behandlingsgrunnlagdata soeknadsland.landkoder");
-        }
+        return (SoeknadFtrl) behandlingsgrunnlag.getBehandlingsgrunnlagdata();
     }
 }
