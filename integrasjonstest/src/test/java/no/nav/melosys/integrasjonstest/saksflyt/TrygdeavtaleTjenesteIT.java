@@ -78,39 +78,39 @@ class TrygdeavtaleTjenesteIT {
             lovvalgsperiodeService);
 
         // TODO: bruk http://localhost:8083/testdata/jfr-oppgave til å lage oppgave og kjør så opprettOgJournalfør
-        Journalpost journalpost = journalfoeringService.hentJournalpost("526345");
-        if (!journalpost.isErFerdigstilt()) {
-            System.out.println("opprettOgJournalfør");
-            JournalfoeringOpprettDto journalfoeringDto = lagJournalfoeringOpprettDto();
-            journalfoeringService.opprettOgJournalfør(journalfoeringDto);
-        }
+//        Journalpost journalpost = journalfoeringService.hentJournalpost("526345");
+//        if (!journalpost.isErFerdigstilt()) {
+//            System.out.println("opprettOgJournalfør");
+//            JournalfoeringOpprettDto journalfoeringDto = lagJournalfoeringOpprettDto();
+//            journalfoeringService.opprettOgJournalfør(journalfoeringDto);
+//        }
 
         // kan slå opp i behandling for å finne behandling id fra INITIERENDE_JOURNALPOST_ID
-        Behandling behandling = behandlingService.hentBehandling(2L);
+        Behandling behandling = behandlingService.hentBehandling(1L);
         behandlingService.endreBehandlingsstatusFraOpprettetTilUnderBehandling(behandling);
         Behandlingsgrunnlag behandlingsgrunnlag = behandling.getBehandlingsgrunnlag();
 
-        SoeknadFtrl behandlingsgrunnlagdata = (SoeknadFtrl) behandlingsgrunnlag.getBehandlingsgrunnlagdata();
-        behandlingsgrunnlagdata.periode = new Periode(
-            LocalDate.of(2021, 1, 1),
-            LocalDate.of(2021, 2, 1)
-        );
-        behandlingsgrunnlagdata.soeknadsland.landkoder = List.of("GB");
-        List<MedfolgendeFamilie> medfolgendeFamilie = new ArrayList<>();
-        medfolgendeFamilie.add(MedfolgendeFamilie.tilMedfolgendeFamilie(
-            "0bad5c70-8a3f-4fc7-9031-d3aebd6b68de", "fnr", "role",
-            MedfolgendeFamilie.Relasjonsrolle.BARN
-        ));
-        medfolgendeFamilie.add(MedfolgendeFamilie.tilMedfolgendeFamilie(
-            "1212121212121-4fc7-9031-ab34332121ff", "fnr", "role",
-            MedfolgendeFamilie.Relasjonsrolle.EKTEFELLE_SAMBOER
-        ));
-        behandlingsgrunnlagdata.personOpplysninger.medfolgendeFamilie = medfolgendeFamilie;
+//        SoeknadFtrl behandlingsgrunnlagdata = (SoeknadFtrl) behandlingsgrunnlag.getBehandlingsgrunnlagdata();
+//        behandlingsgrunnlagdata.periode = new Periode(
+//            LocalDate.of(2021, 1, 1),
+//            LocalDate.of(2021, 2, 1)
+//        );
+//        behandlingsgrunnlagdata.soeknadsland.landkoder = List.of("GB");
+//        List<MedfolgendeFamilie> medfolgendeFamilie = new ArrayList<>();
+//        medfolgendeFamilie.add(MedfolgendeFamilie.tilMedfolgendeFamilie(
+//            "0bad5c70-8a3f-4fc7-9031-d3aebd6b68de", "fnr", "role",
+//            MedfolgendeFamilie.Relasjonsrolle.BARN
+//        ));
+//        medfolgendeFamilie.add(MedfolgendeFamilie.tilMedfolgendeFamilie(
+//            "1212121212121-4fc7-9031-ab34332121ff", "fnr", "role",
+//            MedfolgendeFamilie.Relasjonsrolle.EKTEFELLE_SAMBOER
+//        ));
+//        behandlingsgrunnlagdata.personOpplysninger.medfolgendeFamilie = medfolgendeFamilie;
+//
+//        behandlingsgrunnlagService.oppdaterBehandlingsgrunnlag(behandlingsgrunnlag);
 
-        behandlingsgrunnlagService.oppdaterBehandlingsgrunnlag(behandlingsgrunnlag);
-
-//        String jsonData = behandlingsgrunnlag.getJsonData();
-//        System.out.println(jsonData);
+        String jsonData = behandlingsgrunnlag.getJsonData();
+        System.out.println(jsonData);
     }
 
     private JournalfoeringOpprettDto lagJournalfoeringOpprettDto() {
@@ -137,19 +137,19 @@ class TrygdeavtaleTjenesteIT {
     @Test
     void test() throws ValideringException, InterruptedException {
         TrygdeAvtaleDataForVedtakDto trygdeAvtaleDataForVedtakDto = new TrygdeAvtaleDataForVedtakDto.Builder()
-            .virksomheter(List.of("11111111111"))
+            .virksomheter(List.of("999999999"))
             .vedtak("JA_FATTE_VEDTAK")
             .innvilgelse("JA")
             .bestemmelse("UK_ART6_1")
-            .addBarn("0bad5c70-8a3f-4fc7-9031-d3aebd6b68de",
-                false, Medfolgende_barn_begrunnelser_ftrl.OVER_18_AR.getKode(),
+            .addBarn("122c9b40-1030-414d-9d18-98d8d3f6ec57",
+                true, Medfolgende_barn_begrunnelser_ftrl.OVER_18_AR.getKode(),
                 "begrunnelse barn")
-            .ektefelle("1212121212121-4fc7-9031-ab34332121ff",
-                false,  Medfolgende_ektefelle_samboer_begrunnelser_ftrl.EGEN_INNTEKT.getKode(),
+            .ektefelle("e6ba36ee-9476-40fc-b074-87bb143a1468",
+                true,  Medfolgende_ektefelle_samboer_begrunnelser_ftrl.EGEN_INNTEKT.getKode(),
                 "begrunnelse samboer")
             .build();
 
-        trygdeavtaleTjeneste.overforDataForVedtak(2L, trygdeAvtaleDataForVedtakDto);
+        trygdeavtaleTjeneste.overforDataForVedtak(1L, trygdeAvtaleDataForVedtakDto);
 
         FattVedtakRequest fattVedtakRequest = new FattTrygdeavtaleVedtakRequest
             .Builder()
@@ -158,7 +158,7 @@ class TrygdeavtaleTjenesteIT {
             .medFritekstBegrunnelse("trygdeavtale begrunnelse")
             .build();
 
-        vedtakServiceFasade.fattVedtak(2L, fattVedtakRequest);
-        Thread.sleep(3000);
+//        vedtakServiceFasade.fattVedtak(2L, fattVedtakRequest);
+//        Thread.sleep(3000);
     }
 }
