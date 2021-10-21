@@ -117,7 +117,7 @@ public class AttestMapperTest {
         a1Data.yrkesgruppe = Yrkesgrupper.ORDINAER;
         a1Data.bostedsadresse = boAdresse;
         a1Data.arbeidssteder = Arrays.asList(fysiskArbeidssted, ikkeFysiskArbeidssted);
-        a1Data.arbeidsland = new ArrayList<>();
+        a1Data.arbeidsland = Arrays.asList(Landkoder.NO, Landkoder.BG, Landkoder.AT, Landkoder.AX);
         a1Data.person = lagPersonopplysninger();
         a1Data.hovedvirksomhet = virksomhet;
         a1Data.bivirksomheter = new ArrayList<>(Collections.singletonList(utenlandskVirksomhet));
