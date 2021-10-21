@@ -14,9 +14,12 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataVedlegg;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 
 public class AttestMapper implements BrevDataMapper {
+    private static final Logger log = LoggerFactory.getLogger(AttestMapper.class);
 
     private static final String XSD_LOCATION = "melosysbrev/melosys_000116.xsd";
 
@@ -30,7 +33,11 @@ public class AttestMapper implements BrevDataMapper {
 
         Fag fag = mapFag(brevDataVedlegg);
         JAXBElement<BrevdataType> brevdataTypeJAXBElement = mapintoBrevdataType(fellesType, navFelles, fag, vedleggMapper.hent());
-        return JaxbHelper.marshalAndValidate(brevdataTypeJAXBElement, XSD_LOCATION);
+        String xml = JaxbHelper.marshalAndValidate(brevdataTypeJAXBElement, XSD_LOCATION);
+        if (log.isDebugEnabled()) {
+            log.debug(xml);
+        }
+        return xml;
     }
 
     public Fag mapFag(BrevDataVedlegg vedlegg) {
