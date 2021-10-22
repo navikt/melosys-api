@@ -89,15 +89,6 @@ class LagreAnmodningsperiodeIMedlTest {
     }
 
     private Set<Anmodningsperiode> lagAnmodningsperioderMedDato(LocalDate fom, LocalDate tom) {
-        return Set.of(new Anmodningsperiode(
-            fom,
-            tom,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null
-        ));
+        return Set.of(new Anmodningsperiode(fom, tom, null, null, null, null, null, null));
     }
 }
