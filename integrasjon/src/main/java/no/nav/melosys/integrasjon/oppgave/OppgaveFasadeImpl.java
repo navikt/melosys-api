@@ -263,14 +263,14 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
             .map(OppgaveFasadeImpl::oppgaveMappingDtoTilDomain)
             .collect(Collectors.toList());
 
-        log.info("Fant {} avsluttede oppgaver for saksnummer {}", oppgaveDtoer.size(), saksnummer);
-        oppgaveDtoer.forEach(oppgave -> log.info(
+        log.debug("Fant {} avsluttede oppgaver for saksnummer {}", oppgaveDtoer.size(), saksnummer);
+        oppgaveDtoer.forEach(oppgave -> log.debug(
             "Fant avsluttet oppgave for saksnummer {}, med id {} og opprettetTidspunkt {}",
             saksnummer,
             oppgave.getId(),
             oppgave.getOpprettetTidspunkt()
         ));
-        oppgaveDomeneobjekter.forEach(oppgave -> log.info(
+        oppgaveDomeneobjekter.forEach(oppgave -> log.debug(
             "Avsluttet oppgave for saksnummer {} konvertert til DomeneObjekt, med id {} og opprettetTidspunkt {}",
             saksnummer,
             oppgave.getOppgaveId(),
