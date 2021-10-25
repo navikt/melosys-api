@@ -1,8 +1,10 @@
 package no.nav.melosys.saksflyt.steg.medl;
 
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.NoSuchElementException;
+import java.util.Set;
 
 import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.Behandling;
@@ -37,6 +39,7 @@ class LagreAnmodningsperiodeIMedlTest {
 
     private Prosessinstans prosessinstans;
     private Behandlingsresultat behandlingsresultat;
+    private LocalDate NOW = LocalDate.now();
 
     @BeforeEach
     public void setUp() {
@@ -62,6 +65,7 @@ class LagreAnmodningsperiodeIMedlTest {
     @Test
     void utførNårBehandlingsresultatTypeErAnmodning_om_unntak() {
         behandlingsresultat.setType(Behandlingsresultattyper.ANMODNING_OM_UNNTAK);
+        behandlingsresultat.setAnmodningsperioder(lagAnmodningsperioderMedDato(NOW, NOW.plusMonths(1)));
 
         lagreAnmodningsperiodeIMedl.utfør(prosessinstans);
         verify(medlPeriodeService).opprettPeriodeUnderAvklaring(any(Anmodningsperiode.class), anyLong(), eq(false));
@@ -74,5 +78,17 @@ class LagreAnmodningsperiodeIMedlTest {
         assertThatExceptionOfType(NoSuchElementException.class)
             .isThrownBy(() -> lagreAnmodningsperiodeIMedl.utfør(prosessinstans))
             .withMessageContaining("Ingen anmodningsperioder finnes");
+    }
+
+    @Test
+    void utfør_ulogiskDato_lagrerIkke() {
+        behandlingsresultat.setAnmodningsperioder(lagAnmodningsperioderMedDato(NOW, NOW.minusMonths(1)));
+
+        lagreAnmodningsperiodeIMedl.utfør(prosessinstans);
+        verify(medlPeriodeService, never()).opprettPeriodeUnderAvklaring(any(Anmodningsperiode.class), anyLong(), anyBoolean());
+    }
+
+    private Set<Anmodningsperiode> lagAnmodningsperioderMedDato(LocalDate fom, LocalDate tom) {
+        return Set.of(new Anmodningsperiode(fom, tom, null, null, null, null, null, null));
     }
 }
