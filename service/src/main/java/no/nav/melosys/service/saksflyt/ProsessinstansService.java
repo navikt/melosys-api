@@ -125,7 +125,10 @@ public class ProsessinstansService {
     }
 
     public boolean harVedtakInstans(Long behandlingID) {
-        return prosessinstansRepo.findByBehandling_IdAndTypeIn(behandlingID, ProsessType.IVERKSETT_VEDTAK, ProsessType.IVERKSETT_VEDTAK_EOS).isPresent();
+        return prosessinstansRepo.findByBehandling_IdAndTypeIn(behandlingID,
+            ProsessType.IVERKSETT_VEDTAK_FTRL,
+            ProsessType.IVERKSETT_VEDTAK_TRYGDEAVTALE,
+            ProsessType.IVERKSETT_VEDTAK_EOS).isPresent();
     }
 
     public void lagre(Prosessinstans prosessinstans) {
@@ -202,7 +205,7 @@ public class ProsessinstansService {
 
     public void opprettProsessinstansIverksettVedtak(Behandling behandling, FattFtrlVedtakRequest request) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
-            .medType(ProsessType.IVERKSETT_VEDTAK)
+            .medType(ProsessType.IVERKSETT_VEDTAK_FTRL)
             .medBehandling(behandling)
             .medBegrunnelseFritekst(request.getFritekstBegrunnelse())
             .build();
@@ -212,7 +215,7 @@ public class ProsessinstansService {
 
     public void opprettProsessinstansIverksettVedtak(Behandling behandling, FattTrygdeavtaleVedtakRequest request) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
-            .medType(ProsessType.IVERKSETT_VEDTAK)
+            .medType(ProsessType.IVERKSETT_VEDTAK_TRYGDEAVTALE)
             .medBehandling(behandling)
             .medBegrunnelseFritekst(request.getFritekstBegrunnelse())
             .build();
