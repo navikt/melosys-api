@@ -19,7 +19,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -29,7 +29,7 @@ class PersonMedHistorikkOversetterTest {
 
     @Test
     void lagHistorikkFraTpsData() {
-        no.nav.melosys.domain.dokument.person.Sivilstand sivilstand = mock(no.nav.melosys.domain.dokument.person.Sivilstand.class);
+        no.nav.melosys.domain.dokument.person.Sivilstand sivilstand = spy(no.nav.melosys.domain.dokument.person.Sivilstand.class);
         when(sivilstand.getKode()).thenReturn("GLAD");
         when(kodeverkService.dekod(FellesKodeverk.PERSONSTATUSER, "ABNR")).thenReturn("Aktivt BOSTNR");
         when(kodeverkService.dekod(FellesKodeverk.SIVILSTANDER, "GLAD")).thenReturn("Gift, lever adskilt");

@@ -17,7 +17,6 @@ import no.nav.melosys.service.persondata.PersonMedHistorikk;
 import no.nav.melosys.service.persondata.mapping.adresse.BostedsadresseOversetter;
 import no.nav.melosys.service.persondata.mapping.adresse.KontaktadresseOversetter;
 import no.nav.melosys.service.persondata.mapping.adresse.OppholdsadresseOversetter;
-import org.apache.commons.lang3.StringUtils;
 
 public final class PersonMedHistorikkOversetter {
     private PersonMedHistorikkOversetter() {
@@ -66,31 +65,12 @@ public final class PersonMedHistorikkOversetter {
             return Collections.emptySet();
         }
 
-        Sivilstandstype sivilstandstype = mapSivilstandstypeFraTps(sivilstand.getKode());
+        Sivilstandstype sivilstandstype = sivilstand.tilSivilstandstypeFraDomene();
         String tekstHvisTypeErUdefinert = "";
         if (sivilstandstype.erUdefinert() && sivilstand.getKode() != null) {
             tekstHvisTypeErUdefinert = kodeverkService.dekod(FellesKodeverk.SIVILSTANDER, sivilstand.getKode());
         }
         return Collections.singleton(lagSivilstand(sivilstandstype, tekstHvisTypeErUdefinert, gyldighetsperiodeFom));
-    }
-
-    private static Sivilstandstype mapSivilstandstypeFraTps(String kode) {
-        if (StringUtils.isEmpty(kode)) {
-            return Sivilstandstype.UDEFINERT;
-        }
-        return switch (kode) {
-            case "ENKE" -> Sivilstandstype.ENKE_ELLER_ENKEMANN;
-            case "GIFT" -> Sivilstandstype.GIFT;
-            case "GJPA" -> Sivilstandstype.GJENLEVENDE_PARTNER;
-            case "NULL" -> Sivilstandstype.UOPPGITT;
-            case "REPA" -> Sivilstandstype.REGISTRERT_PARTNER;
-            case "SEPA" -> Sivilstandstype.SEPARERT_PARTNER;
-            case "SEPR" -> Sivilstandstype.SEPARERT;
-            case "SKIL" -> Sivilstandstype.SKILT;
-            case "SKPA" -> Sivilstandstype.SKILT_PARTNER;
-            case "UGI" -> Sivilstandstype.UGIFT;
-            default -> Sivilstandstype.UDEFINERT;
-        };
     }
 
     private static Sivilstand lagSivilstand(Sivilstandstype sivilstandstype,

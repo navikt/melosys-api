@@ -16,7 +16,6 @@ import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.domain.person.Statsborgerskap;
 import no.nav.melosys.domain.person.familie.Familiemedlem;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.pdl.PDLConsumer;
 import no.nav.melosys.integrasjon.pdl.dto.HarMetadata;
 import no.nav.melosys.integrasjon.pdl.dto.identer.Ident;
@@ -49,7 +48,7 @@ public class PersondataService implements PersondataFasade {
     private final TpsService tpsService;
     private final Unleash unleash;
 
-    private static final LocalDate PDL_STARTDATO = LocalDate.parse("2020-07-01");
+    static final LocalDate PDL_STARTDATO = LocalDate.parse("2020-07-01");
 
     @Autowired
     public PersondataService(BehandlingService behandlingService,
@@ -259,7 +258,7 @@ public class PersondataService implements PersondataFasade {
         }
 
         if (LocalDate.ofInstant(behandling.getRegistrertDato(), ZoneId.systemDefault()).isBefore(PDL_STARTDATO)) {
-            throw new TekniskException("Henting av TPS data for behandlinger opprettet før PDL mangler.");
+            return saksopplysningerService.hentTpsPersonopplysninger(behandlingID).hentFamiliemedlemmer();
         }
 
         final Instant skjæringstidspunkt = avgjørSkjæringstidspunktTilInnsyn(behandling);

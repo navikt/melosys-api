@@ -1,12 +1,12 @@
 package no.nav.melosys.service.persondata;
 
 import java.time.LocalDate;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.time.ZoneOffset;
+import java.util.*;
 
 import no.finn.unleash.FakeUnleash;
+import no.nav.melosys.domain.dokument.person.PersonDokument;
+import no.nav.melosys.domain.dokument.person.Sivilstand;
 import no.nav.melosys.domain.kodeverk.Personstatuser;
 import no.nav.melosys.domain.person.*;
 import no.nav.melosys.domain.person.familie.Familiemedlem;
@@ -18,6 +18,7 @@ import no.nav.melosys.integrasjon.pdl.dto.identer.Identliste;
 import no.nav.melosys.integrasjon.pdl.dto.person.Adressebeskyttelse;
 import no.nav.melosys.integrasjon.pdl.dto.person.AdressebeskyttelseGradering;
 import no.nav.melosys.integrasjon.tps.TpsService;
+import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.kodeverk.KodeverkService;
@@ -34,6 +35,7 @@ import static no.nav.melosys.service.persondata.PdlObjectFactory.metadata;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -47,6 +49,8 @@ class PersondataServiceTest {
     @Mock
     private PDLConsumer pdlConsumer;
     @Mock
+    private SaksopplysningerService saksopplysningerService;
+    @Mock
     private TpsService tpsService;
     private final FakeUnleash fakeUnleash = new FakeUnleash();
 
@@ -54,7 +58,8 @@ class PersondataServiceTest {
 
     @BeforeEach
     public void setup() {
-        persondataService = new PersondataService(behandlingService, behandlingsresultatService, kodeverkService, pdlConsumer, null, tpsService, fakeUnleash);
+        persondataService = new PersondataService(behandlingService, behandlingsresultatService, kodeverkService, pdlConsumer,
+                                                  saksopplysningerService, tpsService, fakeUnleash);
     }
 
     @Test
@@ -167,6 +172,46 @@ class PersondataServiceTest {
         final Set<Familiemedlem> familiemedlemmer = persondataService.hentFamiliemedlemmerMedHistorikk(1L);
         assertThat(familiemedlemmer).extracting(Familiemedlem::familierelasjon).contains(Familierelasjon.BARN,
             Familierelasjon.RELATERT_VED_SIVILSTAND);
+    }
+
+    @Test
+    void hentFamiliemedlemmerMedHistorikk_inaktivBehandlingFraFørTps() {
+        var inaktivBehandling = lagBehandlingSomIkkeResulterIVedtak();
+        inaktivBehandling.setRegistrertDato(PersondataService.PDL_STARTDATO.minusMonths(2).atStartOfDay().toInstant(ZoneOffset.UTC));
+        when(behandlingService.hentBehandlingUtenSaksopplysninger(1L)).thenReturn(inaktivBehandling);
+        no.nav.melosys.domain.dokument.person.Sivilstand sivilstand = mock(no.nav.melosys.domain.dokument.person.Sivilstand.class);
+        when(sivilstand.getKode()).thenReturn("BLA");
+        when(saksopplysningerService.hentTpsPersonopplysninger(inaktivBehandling.getId())).thenReturn(lagPersonDokumentMedFamiliemedlemmer(sivilstand));
+
+        final Set<Familiemedlem> familiemedlemmer = persondataService.hentFamiliemedlemmerMedHistorikk(1L);
+        assertThat(familiemedlemmer).extracting(Familiemedlem::navn).extracting(Navn::fornavn).contains("BARN", "NAVN");
+        assertThat(familiemedlemmer).extracting(Familiemedlem::familierelasjon).contains(Familierelasjon.BARN,
+                                                                                         Familierelasjon.RELATERT_VED_SIVILSTAND);
+    }
+
+    private PersonDokument lagPersonDokumentMedFamiliemedlemmer(Sivilstand sivilstand) {
+        PersonDokument person = new PersonDokument();
+        List<no.nav.melosys.domain.dokument.person.Familiemedlem> familiemedlemmer = new ArrayList<>();
+
+        familiemedlemmer.add(lagFamilemedlem("NAVN NAVNSEN", "354652678134", no.nav.melosys.domain.dokument.person.Familierelasjon.EKTE,
+                                             sivilstand));
+        familiemedlemmer.add(lagFamilemedlem("BARN NAVNSEN", "134354652678", no.nav.melosys.domain.dokument.person.Familierelasjon.BARN,
+                                             null));
+        person.setFamiliemedlemmer(familiemedlemmer);
+        return person;
+    }
+
+    private no.nav.melosys.domain.dokument.person.Familiemedlem lagFamilemedlem(String navn, String fnr,
+                                                                                no.nav.melosys.domain.dokument.person.Familierelasjon familierelasjon,
+                                                                                Sivilstand sivilstand) {
+        no.nav.melosys.domain.dokument.person.Familiemedlem familiemedlem = new no.nav.melosys.domain.dokument.person.Familiemedlem();
+        familiemedlem.fnr = fnr;
+        familiemedlem.navn = navn;
+        familiemedlem.familierelasjon = familierelasjon;
+        familiemedlem.fødselsdato = LocalDate.EPOCH;
+        familiemedlem.fnrAnnenForelder = familierelasjon == no.nav.melosys.domain.dokument.person.Familierelasjon.BARN ? "fnrAnnen" : null;
+        familiemedlem.sivilstand = sivilstand;
+        return familiemedlem;
     }
 
     @Test
