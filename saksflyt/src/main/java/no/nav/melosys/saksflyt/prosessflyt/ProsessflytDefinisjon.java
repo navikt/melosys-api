@@ -127,9 +127,19 @@ public final class ProsessflytDefinisjon {
             )
         );
 
-        PROSESS_FLYT_MAP.put(ProsessType.IVERKSETT_VEDTAK,
-            new ProsessFlyt(ProsessType.IVERKSETT_VEDTAK,
+        PROSESS_FLYT_MAP.put(ProsessType.IVERKSETT_VEDTAK_FTRL,
+            new ProsessFlyt(ProsessType.IVERKSETT_VEDTAK_FTRL,
                 LAGRE_MEDLEMSKAPSPERIODE_MEDL,
+                PUBLISER_VEDTAK,
+                OPPRETT_AVGIFTSOPPGAVE,
+                AVSLUTT_SAK_OG_BEHANDLING,
+                SOB_BEHANDLING_AVSLUTTET
+            )
+        );
+
+        PROSESS_FLYT_MAP.put(ProsessType.IVERKSETT_VEDTAK_TRYGDEAVTALE,
+            new ProsessFlyt(ProsessType.IVERKSETT_VEDTAK_TRYGDEAVTALE,
+                LAGRE_LOVVALGSPERIODE_MEDL,
                 PUBLISER_VEDTAK,
                 OPPRETT_AVGIFTSOPPGAVE,
                 AVSLUTT_SAK_OG_BEHANDLING,
