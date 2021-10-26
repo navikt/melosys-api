@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
@@ -53,20 +55,42 @@ class OppgaveConsumerImplTest {
 
         assertThat(oppgaveConsumer.hentOppgave("1")).extracting(
             OppgaveDto::getId,
-            OppgaveDto::getStatus,
-            OppgaveDto::getOppgavetype,
+            OppgaveDto::getTildeltEnhetsnr,
+            OppgaveDto::getJournalpostId,
+            OppgaveDto::getBehandlesAvApplikasjon,
             OppgaveDto::getSaksreferanse,
+            OppgaveDto::getAktørId,
+            OppgaveDto::getTilordnetRessurs,
+            OppgaveDto::getBeskrivelse,
             OppgaveDto::getTema,
-            OppgaveDto::getBehandlingstype,
-            OppgaveDto::getBehandlingstema
+            OppgaveDto::getBehandlingstema,
+            OppgaveDto::getOppgavetype,
+            OppgaveDto::getVersjon,
+            OppgaveDto::getPrioritet,
+            OppgaveDto::getStatus,
+            OppgaveDto::getFristFerdigstillelse,
+            OppgaveDto::getAktivDato,
+            OppgaveDto::getOpprettetTidspunkt,
+            OppgaveDto::getBehandlingstype
         ).containsExactly(
             "11519",
-            "AAPNET",
-            "BEH_SED",
+            "4530",
+            "439654251",
+            "FS38",
             "MEL-301",
+            "1332607802528",
+            "Z990757",
+            " ",
             "MED",
-            null,
-            "ab0390"
+            "ab0390",
+            "BEH_SED",
+            3,
+            "NORM",
+            "AAPNET",
+            LocalDate.parse("2019-12-26"),
+            LocalDate.parse("2019-10-03"),
+            ZonedDateTime.parse("2019-10-03T10:27:26.566Z[UTC]"),
+            null
         );
     }
 
@@ -102,7 +126,7 @@ class OppgaveConsumerImplTest {
                 .medTema(new String[]{"MED", "UFM"})
                 .medStatusKategori("AAPEN")
                 .build()
-            )).hasSize(2)
+        )).hasSize(2)
             .flatExtracting(OppgaveDto::getSaksreferanse)
             .containsExactlyInAnyOrder("MEL-301", "MEL-513");
     }
@@ -137,8 +161,8 @@ class OppgaveConsumerImplTest {
             Files.readAllBytes(
                 Paths.get(
                     Optional.ofNullable(getClass().getClassLoader().getResource(path))
-                    .orElseThrow(() -> new NoSuchElementException("Ingen fil " + path))
-                    .toURI()
+                        .orElseThrow(() -> new NoSuchElementException("Ingen fil " + path))
+                        .toURI()
                 )
             )
         );
