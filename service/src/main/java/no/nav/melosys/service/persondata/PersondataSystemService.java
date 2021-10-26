@@ -3,6 +3,7 @@ package no.nav.melosys.service.persondata;
 import no.finn.unleash.Unleash;
 import no.nav.melosys.integrasjon.pdl.PDLConsumer;
 import no.nav.melosys.integrasjon.tps.TpsSystemService;
+import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.kodeverk.KodeverkService;
@@ -18,8 +19,9 @@ public class PersondataSystemService extends PersondataService {
                                    BehandlingsresultatService behandlingsresultatService,
                                    KodeverkService kodeverkService,
                                    @Qualifier("system") PDLConsumer pdlConsumer,
+                                   SaksopplysningerService saksopplysningerService,
                                    TpsSystemService tpsSystemService,
                                    Unleash unleash) {
-        super(behandlingService, behandlingsresultatService, kodeverkService, pdlConsumer, tpsSystemService, unleash);
+        super(behandlingService, behandlingsresultatService, kodeverkService, pdlConsumer, saksopplysningerService, tpsSystemService, unleash);
     }
 }

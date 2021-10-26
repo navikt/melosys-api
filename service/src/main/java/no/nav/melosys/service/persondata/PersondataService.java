@@ -16,7 +16,6 @@ import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.domain.person.Statsborgerskap;
 import no.nav.melosys.domain.person.familie.Familiemedlem;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.pdl.PDLConsumer;
 import no.nav.melosys.integrasjon.pdl.dto.HarMetadata;
 import no.nav.melosys.integrasjon.pdl.dto.identer.Ident;
@@ -25,6 +24,7 @@ import no.nav.melosys.integrasjon.pdl.dto.person.ForelderBarnRelasjon;
 import no.nav.melosys.integrasjon.pdl.dto.person.Person;
 import no.nav.melosys.integrasjon.pdl.dto.person.Sivilstand;
 import no.nav.melosys.integrasjon.tps.TpsService;
+import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.kodeverk.KodeverkService;
@@ -44,22 +44,25 @@ public class PersondataService implements PersondataFasade {
     private final BehandlingsresultatService behandlingsresultatService;
     private final KodeverkService kodeverkService;
     private final PDLConsumer pdlConsumer;
+    private final SaksopplysningerService saksopplysningerService;
     private final TpsService tpsService;
     private final Unleash unleash;
 
-    private static final LocalDate PDL_STARTDATO = LocalDate.parse("2020-07-01");
+    static final LocalDate PDL_STARTDATO = LocalDate.parse("2020-07-01");
 
     @Autowired
     public PersondataService(BehandlingService behandlingService,
                              BehandlingsresultatService behandlingsresultatService,
                              KodeverkService kodeverkService,
                              @Qualifier("saksbehandler") PDLConsumer pdlConsumer,
+                             SaksopplysningerService saksopplysningerService,
                              TpsService tpsService,
                              Unleash unleash) {
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.kodeverkService = kodeverkService;
         this.pdlConsumer = pdlConsumer;
+        this.saksopplysningerService = saksopplysningerService;
         this.tpsService = tpsService;
         this.unleash = unleash;
     }
@@ -199,7 +202,7 @@ public class PersondataService implements PersondataFasade {
         }
 
         if (LocalDate.ofInstant(behandling.getRegistrertDato(), ZoneId.systemDefault()).isBefore(PDL_STARTDATO)) {
-            throw new TekniskException("Henting av TPS data for behandlinger opprettet før PDL mangler.");
+            return PersonMedHistorikkOversetter.lagHistorikkFraTpsData(saksopplysningerService.hentTpsPersonopplysninger(behandlingID), kodeverkService);
         }
 
         final Instant skjæringstidspunkt = avgjørSkjæringstidspunktTilInnsyn(behandling);
@@ -255,7 +258,7 @@ public class PersondataService implements PersondataFasade {
         }
 
         if (LocalDate.ofInstant(behandling.getRegistrertDato(), ZoneId.systemDefault()).isBefore(PDL_STARTDATO)) {
-            throw new TekniskException("Henting av TPS data for behandlinger opprettet før PDL mangler.");
+            return saksopplysningerService.hentTpsPersonopplysninger(behandlingID).hentFamiliemedlemmer();
         }
 
         final Instant skjæringstidspunkt = avgjørSkjæringstidspunktTilInnsyn(behandling);

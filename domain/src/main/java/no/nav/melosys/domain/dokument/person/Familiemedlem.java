@@ -4,6 +4,7 @@ import java.time.LocalDate;
 
 import no.nav.melosys.domain.person.Foedsel;
 import no.nav.melosys.domain.person.Folkeregisteridentifikator;
+import no.nav.melosys.domain.person.Master;
 import no.nav.melosys.domain.person.Navn;
 
 public class Familiemedlem {
@@ -46,10 +47,15 @@ public class Familiemedlem {
             lagNavn(splittetNavn),
             mapFamilierelasjon(familierelasjon),
             new Foedsel(fødselsdato, null, null, null),
+            fnrAnnenForelder == null ? null : new Folkeregisteridentifikator(fnrAnnenForelder),
             null,
-            null,
-            null
+            sivilstand == null ? null : lagSivilstand(sivilstand, sivilstandGyldighetsperiodeFom)
         );
+    }
+
+    private no.nav.melosys.domain.person.Sivilstand lagSivilstand(Sivilstand sivilstand, LocalDate gyldighetsperiodeFom) {
+        return new no.nav.melosys.domain.person.Sivilstand(sivilstand.tilSivilstandstypeFraDomene(), sivilstand.getKode(), "",
+                                                           gyldighetsperiodeFom, null, Master.TPS.name(), Master.TPS.name(), false);
     }
 
     private no.nav.melosys.domain.person.familie.Familierelasjon mapFamilierelasjon(Familierelasjon familierelasjon) {
