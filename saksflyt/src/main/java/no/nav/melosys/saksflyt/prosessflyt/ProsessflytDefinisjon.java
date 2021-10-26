@@ -141,7 +141,6 @@ public final class ProsessflytDefinisjon {
             new ProsessFlyt(ProsessType.IVERKSETT_VEDTAK_TRYGDEAVTALE,
                 LAGRE_LOVVALGSPERIODE_MEDL,
                 PUBLISER_VEDTAK,
-                OPPRETT_AVGIFTSOPPGAVE,
                 AVSLUTT_SAK_OG_BEHANDLING,
                 SOB_BEHANDLING_AVSLUTTET
             )
