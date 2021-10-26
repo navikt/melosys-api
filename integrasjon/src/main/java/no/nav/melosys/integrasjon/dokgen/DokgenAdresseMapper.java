@@ -7,12 +7,14 @@ import no.nav.melosys.domain.Kontaktopplysning;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.person.Persondata;
+import no.nav.melosys.integrasjon.dokgen.dto.felles.Mottaker;
 
 import static org.springframework.util.StringUtils.hasText;
 
 public final class DokgenAdresseMapper {
 
-    private DokgenAdresseMapper(){}
+    private DokgenAdresseMapper() {
+    }
 
     public static String mapMottakerNavn(OrganisasjonDokument org, Persondata persondata) {
         return org == null ? persondata.getSammensattNavn() : org.getNavn();
@@ -73,5 +75,16 @@ public final class DokgenAdresseMapper {
             landkode = orgAdresse.getLandkode() != null ? orgAdresse.getLandkode() : null;
         }
         return landkode;
+    }
+
+    public static Mottaker mapMottaker(OrganisasjonDokument org, String kontaktperson,
+                                       Kontaktopplysning kontaktopplysning, Persondata persondata) {
+        return new Mottaker(
+            mapMottakerNavn(org, persondata),
+            mapAdresselinjer(org, kontaktperson, kontaktopplysning, persondata),
+            mapPostnr(org, persondata),
+            mapPoststed(org, persondata),
+            mapLandForAdresse(org, persondata)
+        );
     }
 }
