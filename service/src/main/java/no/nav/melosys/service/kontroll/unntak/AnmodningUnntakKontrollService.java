@@ -19,7 +19,7 @@ import no.nav.melosys.service.validering.Kontrollfeil;
 import org.springframework.stereotype.Component;
 
 @Component
-public class AnmodningUnntakKontrollService extends AdresseUtlandKontroller {
+public class AnmodningUnntakKontrollService implements AdresseUtlandKontroller {
 
     private final AnmodningsperiodeService anmodningsperiodeService;
     private final BehandlingService behandlingService;

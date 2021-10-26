@@ -9,7 +9,7 @@ import no.nav.melosys.service.kontroll.PeriodeKontroller;
 import no.nav.melosys.service.kontroll.PersonKontroller;
 import no.nav.melosys.service.validering.Kontrollfeil;
 
-final class VedtakKontroller extends AdresseUtlandKontroller {
+final class VedtakKontroller implements AdresseUtlandKontroller {
 
     private VedtakKontroller() {
     }
