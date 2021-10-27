@@ -16,7 +16,7 @@ public final class DokgenAdresseMapper {
     private DokgenAdresseMapper() {
     }
 
-    public static String mapMottakerNavn(OrganisasjonDokument org, Persondata persondata) {
+    public static String mapNavn(OrganisasjonDokument org, Persondata persondata) {
         return org == null ? persondata.getSammensattNavn() : org.getNavn();
     }
 
@@ -80,7 +80,7 @@ public final class DokgenAdresseMapper {
     public static Mottaker mapMottaker(OrganisasjonDokument org, String kontaktperson,
                                        Kontaktopplysning kontaktopplysning, Persondata persondata) {
         return new Mottaker(
-            mapMottakerNavn(org, persondata),
+            mapNavn(org, persondata),
             mapAdresselinjer(org, kontaktperson, kontaktopplysning, persondata),
             mapPostnr(org, persondata),
             mapPoststed(org, persondata),

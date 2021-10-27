@@ -142,10 +142,10 @@ class InnvilgelseFtrlMapperTest {
         assertThat(innvilgelseFtrl.getSaksnummer()).isEqualTo(SAKSNUMMER);
         assertThat(innvilgelseFtrl.getDagensDato().truncatedTo(ChronoUnit.DAYS)).isEqualTo(Instant.now().truncatedTo(ChronoUnit.DAYS));
         assertThat(innvilgelseFtrl.getNavnBruker()).isEqualTo(SAMMENSATT_NAVN_BRUKER);
-        assertThat(innvilgelseFtrl.getAdresselinjer().isEmpty()).isFalse();
-        assertThat(innvilgelseFtrl.getPostnr()).isEqualTo(POSTNR_BRUKER);
-        assertThat(innvilgelseFtrl.getPoststed()).isEqualTo(POSTSTED_BRUKER);
-        assertThat(innvilgelseFtrl.getLand()).isNull();
+        assertThat(innvilgelseFtrl.getMottaker().adresselinjer().isEmpty()).isFalse();
+        assertThat(innvilgelseFtrl.getMottaker().postnr()).isEqualTo(POSTNR_BRUKER);
+        assertThat(innvilgelseFtrl.getMottaker().poststed()).isEqualTo(POSTSTED_BRUKER);
+        assertThat(innvilgelseFtrl.getMottaker().land()).isNull();
     }
 
     @Test

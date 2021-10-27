@@ -216,7 +216,7 @@ public class BrevbestillingService {
         }
 
         return new BrevAdresse.Builder()
-            .medMottakerNavn(mapMottakerNavn(orgDokument, persondata))
+            .medMottakerNavn(mapNavn(orgDokument, persondata))
             .medOrgnr(orgDokument != null ? orgDokument.getOrgnummer() : null)
             .medAdresselinjer(mapAdresselinjer(orgDokument, null, kontaktopplysning, persondata))
             .medPostnr(mapPostnr(orgDokument, persondata))
