@@ -7,7 +7,6 @@ import no.nav.melosys.domain.InnvilgelsesResultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadFtrl;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
@@ -86,10 +85,8 @@ public class TrygdeavtaleTjeneste {
         // TODO: Flytt dette ut til en egen klasse
         LagreMedfolgendeFamilieDto lagreMedfolgendeFamilieDto = lagMedfolgendeFamilieDto(trygdeAvtaleDataForVedtakDto);
 
-        // BEGRUNNELSE_FRITEKST kommer ikke med?
         avklarteMedfolgendeFamilieService.lagreMedfolgendeFamilieSomAvklartefakta(behandlingsId, lagreMedfolgendeFamilieDto.til());
 
-        // BEGRUNNELSE_FRITEKST kommer ikke med?
         avklarteVirksomheterService.lagreVirksomheterSomAvklartefakta(trygdeAvtaleDataForVedtakDto.virksomheter(), behandlingsId);
 
         SoeknadFtrl behandlingsgrunnlagdata = hentBehandlingsgrunnlagdata(behandlingsId);
@@ -109,20 +106,15 @@ public class TrygdeavtaleTjeneste {
         lovvalgsperiode.setFom(behandlingsgrunnlagdata.periode.getFom());
         lovvalgsperiode.setTom(behandlingsgrunnlagdata.periode.getTom());
 
-        lovvalgsperiode.setInnvilgelsesresultat(finnInnvilgelsesResultat(trygdeAvtaleDataForVedtakDto.innvilgelse()));
+        lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.INNVILGET);
         Landkoder lovvalgsland = Landkoder.valueOf(behandlingsgrunnlagdata.soeknadsland.landkoder.stream().findFirst()
             .orElseThrow(() -> new TekniskException("Forventet ett land i behandlingsgrunnlagdata soeknadsland.landkoder")));
         lovvalgsperiode.setLovvalgsland(lovvalgsland);
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_trygdeavtale_uk.valueOf(trygdeAvtaleDataForVedtakDto.bestemmelse()));
-        lovvalgsperiode.setMedlemskapstype(Medlemskapstyper.FRIVILLIG); // tror dette må være frivillig?
-        //lovvalgsperiode.setDekning(Trygdedekninger.UTEN_DEKNING); // Hva gjør vi med trygde dekkning?
+        lovvalgsperiode.setMedlemskapstype(Medlemskapstyper.PLIKTIG);
+        lovvalgsperiode.setDekning(Trygdedekninger.FULL_DEKNING_FTRL); // Blir renamet til FULL_DEKNING av fag
+        // Dekning i behandlingsgrunnlag også soknad.dekning
         return lovvalgsperiode;
-    }
-
-    private InnvilgelsesResultat finnInnvilgelsesResultat(String innvilgelse) {
-        if (innvilgelse.equals("JA")) return InnvilgelsesResultat.INNVILGET;
-        if (innvilgelse.equals("NEI")) return InnvilgelsesResultat.AVSLAATT;
-        throw new TekniskException(innvilgelse + " som InnvilgelseValg er ikke støttet");
     }
 
     private SoeknadFtrl hentBehandlingsgrunnlagdata(long behandlingsId) {
