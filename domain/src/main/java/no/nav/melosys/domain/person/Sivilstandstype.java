@@ -9,8 +9,13 @@ public enum Sivilstandstype {
     SEPARERT_PARTNER,
     SKILT,
     SKILT_PARTNER,
+    UDEFINERT,
     UGIFT,
     UOPPGITT;
+
+    public boolean erUdefinert() {
+        return this == UDEFINERT;
+    }
 
     @Override
     public String toString() {
@@ -23,6 +28,7 @@ public enum Sivilstandstype {
             case SEPARERT_PARTNER -> "Separert partner";
             case SKILT -> "Skilt";
             case SKILT_PARTNER -> "Skilt partner";
+            case UDEFINERT -> "Udefinert";
             case UGIFT -> "Ugift";
             case UOPPGITT -> "Uoppgitt";
         };

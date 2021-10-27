@@ -91,10 +91,10 @@ class DokgenMalMapperTest {
                 DokgenDto::getNavnMottaker,
                 DokgenDto::getPostnr
             ).containsExactly(
-                SAMMENSATT_NAVN_BRUKER,
-                SAMMENSATT_NAVN_BRUKER,
-                POSTNR_BRUKER
-            );
+            SAMMENSATT_NAVN_BRUKER,
+            SAMMENSATT_NAVN_BRUKER,
+            POSTNR_BRUKER
+        );
         assertThat(dokgenDto.getAdresselinjer()).contains(ADRESSELINJE_1_BRUKER);
     }
 
@@ -121,10 +121,10 @@ class DokgenMalMapperTest {
                 DokgenDto::getNavnMottaker,
                 DokgenDto::getPostnr
             ).containsExactly(
-                SAMMENSATT_NAVN_BRUKER,
-                SAMMENSATT_NAVN_BRUKER,
-                POSTNR_BRUKER
-            );
+            SAMMENSATT_NAVN_BRUKER,
+            SAMMENSATT_NAVN_BRUKER,
+            POSTNR_BRUKER
+        );
         assertThat(dokgenDto.getAdresselinjer()).contains(ADRESSELINJE_1_BRUKER);
         fakeUnleash.disableAll();
     }
@@ -154,9 +154,9 @@ class DokgenMalMapperTest {
                 SaksbehandlingstidSoknad::getAvsenderTypeSoknad,
                 SaksbehandlingstidSoknad::getAvsenderLand
             ).containsExactly(
-                MYNDIGHET,
-                "Finland"
-            );
+            MYNDIGHET,
+            "Finland"
+        );
     }
 
     @Test
@@ -182,10 +182,10 @@ class DokgenMalMapperTest {
                 DokgenDto::getNavnMottaker,
                 DokgenDto::getPostnr
             ).containsExactly(
-                SAMMENSATT_NAVN_BRUKER,
-                NAVN_ORG,
-                POSTNR_ORG
-            );
+            SAMMENSATT_NAVN_BRUKER,
+            NAVN_ORG,
+            POSTNR_ORG
+        );
         assertThat(dokgenDto.getAdresselinjer()).contains(POSTBOKS_ORG);
     }
 
@@ -216,10 +216,10 @@ class DokgenMalMapperTest {
                 DokgenDto::getNavnMottaker,
                 DokgenDto::getPostnr
             ).containsExactly(
-                SAMMENSATT_NAVN_BRUKER,
-                NAVN_ORG,
-                POSTNR_ORG
-            );
+            SAMMENSATT_NAVN_BRUKER,
+            NAVN_ORG,
+            POSTNR_ORG
+        );
         assertThat(dokgenDto.getAdresselinjer()).contains(FORRETNINGSADRESSE_ORG);
     }
 
@@ -247,10 +247,10 @@ class DokgenMalMapperTest {
                 DokgenDto::getNavnMottaker,
                 DokgenDto::getPostnr
             ).containsExactly(
-                SAMMENSATT_NAVN_BRUKER,
-                NAVN_ORG,
-                POSTNR_ORG
-            );
+            SAMMENSATT_NAVN_BRUKER,
+            NAVN_ORG,
+            POSTNR_ORG
+        );
         assertThat(dokgenDto.getAdresselinjer()).containsExactly("Att: " + KONTAKT_NAVN, POSTBOKS_ORG);
     }
 
@@ -281,9 +281,9 @@ class DokgenMalMapperTest {
                 MangelbrevBruker::getInnledningFritekst,
                 MangelbrevBruker::getManglerInfoFritekst
             ).containsExactly(
-                "Dummy",
-                "Dummy"
-            );
+            "Dummy",
+            "Dummy"
+        );
         assertThat(((MangelbrevBruker) dokgenDto).getDatoInnsendingsfrist().truncatedTo(ChronoUnit.DAYS))
             .isEqualTo(Instant.now().plus(Period.ofWeeks(4)).truncatedTo(ChronoUnit.DAYS));
     }
@@ -317,10 +317,10 @@ class DokgenMalMapperTest {
                 MangelbrevArbeidsgiver::getManglerInfoFritekst,
                 MangelbrevArbeidsgiver::getNavnFullmektig
             ).containsExactly(
-                "Dummy",
-                "Dummy",
-                "Fullmektig AS"
-            );
+            "Dummy",
+            "Dummy",
+            "Fullmektig AS"
+        );
         assertThat(((MangelbrevArbeidsgiver) dokgenDto).getDatoInnsendingsfrist().truncatedTo(ChronoUnit.DAYS))
             .isEqualTo(Instant.now().plus(Period.ofWeeks(4)).truncatedTo(ChronoUnit.DAYS));
     }

@@ -258,9 +258,26 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
             .medStatusKategori(OPPGAVE_STATUSKATEGORI_AVSLUTTET)
             .build();
 
-        return oppgaveConsumer.hentOppgaveListe(oppgaveSearchRequest).stream()
+        var oppgaveDtoer = oppgaveConsumer.hentOppgaveListe(oppgaveSearchRequest);
+        var oppgaveDomeneobjekter = oppgaveDtoer.stream()
             .map(OppgaveFasadeImpl::oppgaveMappingDtoTilDomain)
             .collect(Collectors.toList());
+
+        log.debug("Fant {} avsluttede oppgaver for saksnummer {}", oppgaveDtoer.size(), saksnummer);
+        oppgaveDtoer.forEach(oppgave -> log.debug(
+            "Fant avsluttet oppgave for saksnummer {}, med id {} og opprettetTidspunkt {}",
+            saksnummer,
+            oppgave.getId(),
+            oppgave.getOpprettetTidspunkt()
+        ));
+        oppgaveDomeneobjekter.forEach(oppgave -> log.debug(
+            "Avsluttet oppgave for saksnummer {} konvertert til DomeneObjekt, med id {} og opprettetTidspunkt {}",
+            saksnummer,
+            oppgave.getOppgaveId(),
+            oppgave.getOpprettetTidspunkt()
+        ));
+
+        return oppgaveDomeneobjekter;
     }
 
     static Oppgave oppgaveMappingDtoTilDomain(OppgaveDto oppgaveDto) {

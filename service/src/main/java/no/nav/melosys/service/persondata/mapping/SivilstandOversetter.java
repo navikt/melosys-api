@@ -22,6 +22,7 @@ public final class SivilstandOversetter {
     static Sivilstand oversett(no.nav.melosys.integrasjon.pdl.dto.person.Sivilstand sivilstand) {
         return new Sivilstand(
             Sivilstandstype.valueOf(sivilstand.type().name()),
+            null,
             sivilstand.relatertVedSivilstand(),
             sivilstand.gyldigFraOgMed(),
             sivilstand.bekreftelsesdato(),

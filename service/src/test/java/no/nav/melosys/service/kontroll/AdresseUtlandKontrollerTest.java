@@ -12,19 +12,21 @@ import org.junit.jupiter.api.Test;
 import static no.nav.melosys.service.kontroll.AdresseUtlandKontroller.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class AdresseUtlandKontrollerTest {
+class AdresseUtlandKontrollerTest {
 
     private BehandlingsgrunnlagData behandlingsgrunnlagData;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         behandlingsgrunnlagData = new BehandlingsgrunnlagData();
-        behandlingsgrunnlagData.arbeidPaaLand.fysiskeArbeidssteder = List.of(new FysiskArbeidssted());
+        final var fysiskArbeidssted = new FysiskArbeidssted();
+        fysiskArbeidssted.virksomhetNavn = " ";
+        behandlingsgrunnlagData.arbeidPaaLand.fysiskeArbeidssteder = List.of(fysiskArbeidssted);
         behandlingsgrunnlagData.foretakUtland = List.of(new ForetakUtland());
     }
 
     @Test
-    public void utførKontroller_arbeidsstedManglerFelter_returnererKode() {
+    void utførKontroller_arbeidsstedManglerFelter_returnererKode() {
         Kontrollfeil kontrollfeil = AdresseUtlandKontroller.arbeidsstedManglerFelter(behandlingsgrunnlagData);
         assertThat(kontrollfeil)
             .extracting(Kontrollfeil::getKode, Kontrollfeil::getFelter)
@@ -32,7 +34,7 @@ public class AdresseUtlandKontrollerTest {
     }
 
     @Test
-    public void utførKontroller_foretakUtlandManglerFelter_returnererKode() {
+    void utførKontroller_foretakUtlandManglerFelter_returnererKode() {
         Kontrollfeil kontrollfeil = AdresseUtlandKontroller.foretakUtlandManglerFelter(behandlingsgrunnlagData);
         assertThat(kontrollfeil)
             .extracting(Kontrollfeil::getKode, Kontrollfeil::getFelter)
