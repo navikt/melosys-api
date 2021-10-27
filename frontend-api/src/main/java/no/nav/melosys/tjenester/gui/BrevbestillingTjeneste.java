@@ -38,6 +38,7 @@ import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
 @RequestScope
 public class BrevbestillingTjeneste {
     private static final String BRUKER_ELLER_BRUKERS_FULLMEKTIG = "Bruker eller brukers fullmektig";
+    private static final String ARBEIDSGIVER_ELLER_ARBEIDSGIVERS_FULLMEKTIG = "Arbeidsgiver eller arbeidsgivers fullmektig";
 
     private final BrevbestillingService brevbestillingService;
     private final BehandlingService behandlingService;
@@ -101,13 +102,14 @@ public class BrevbestillingTjeneste {
         for(Produserbaredokumenter p : produserbareDokumenter) {
             Aktoersroller hovedMottaker = brevmottakerService.hentMottakerliste(p, behandling).getHovedMottaker();
             switch (p) {
-                case MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD:
-                case MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE:
+                case MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE:
                     maler.add(lagBrevMalDtoForForventetSaksbehandlingstid(p, hovedMottaker, behandling));
                     break;
-                case MANGELBREV_BRUKER:
-                case MANGELBREV_ARBEIDSGIVER:
+                case MANGELBREV_BRUKER, MANGELBREV_ARBEIDSGIVER:
                     maler.add(lagBrevMalDtoForMangelbrev(p, hovedMottaker, behandling));
+                    break;
+                case GENERELT_FRITEKSTBREV_BRUKER, GENERELT_FRITEKSTBREV_ARBEIDSGIVER:
+                    maler.add(lagBrevMalDtoForFritekstbrev(p, hovedMottaker, behandling));
                     break;
                 default:
                     break;
@@ -134,7 +136,7 @@ public class BrevbestillingTjeneste {
         List<FeltvalgDto> feltvalgDtos = new ArrayList<>();
 
         var builder = new MottakerDto.Builder()
-            .medType(hovedMottaker == Aktoersroller.BRUKER ? BRUKER_ELLER_BRUKERS_FULLMEKTIG : "Arbeidsgiver eller arbeidsgivers fullmektig")
+            .medType(hovedMottaker == Aktoersroller.BRUKER ? BRUKER_ELLER_BRUKERS_FULLMEKTIG : ARBEIDSGIVER_ELLER_ARBEIDSGIVERS_FULLMEKTIG)
             .medRolle(hovedMottaker);
 
         leggTilAdresseOgFeilmelding(builder, produserbartdokument, hovedMottaker, behandling);
@@ -168,6 +170,41 @@ public class BrevbestillingTjeneste {
                 new BrevmalFeltDto.Builder()
                     .medKode("MANGLER_FRITEKST")
                     .medBeskrivelse("Hva skal mottakeren sende inn?")
+                    .medFeltType(FeltType.FRITEKST)
+                    .erPåkrevd()
+                    .build()
+            ))
+            .medMuligeMottakere(mottakere)
+            .medMottakereHjelpetekst("Hvis bruker eller arbeidsgiver har fullmektig som er lagt inn i sidemenyen, vil brevet automatisk bli sendt til denne.")
+            .build();
+    }
+
+    private BrevmalDto lagBrevMalDtoForFritekstbrev(Produserbaredokumenter produserbartdokument, Aktoersroller hovedMottaker, Behandling behandling) {
+        List<MottakerDto> mottakere = new ArrayList<>();
+        List<FeltvalgDto> feltvalgDtos = new ArrayList<>();
+
+        var builder = new MottakerDto.Builder()
+            .medType(hovedMottaker == Aktoersroller.BRUKER ? BRUKER_ELLER_BRUKERS_FULLMEKTIG : ARBEIDSGIVER_ELLER_ARBEIDSGIVERS_FULLMEKTIG)
+            .medRolle(hovedMottaker);
+
+        leggTilAdresseOgFeilmelding(builder, produserbartdokument, hovedMottaker, behandling);
+
+        mottakere.add(builder.build());
+
+        feltvalgDtos.add(new FeltvalgDto.Builder().medKode("FRITEKST").medBeskrivelse("Fritekst").build());
+
+        return new BrevmalDto.Builder()
+            .medType(produserbartdokument)
+            .medFelter(asList(
+                new BrevmalFeltDto.Builder()
+                    .medKode("FRITEKST_TITTEL")
+                    .medBeskrivelse("Brevtittel")
+                    .medFeltType(FeltType.FRITEKST_STRING)
+                    .erPåkrevd()
+                    .build(),
+                new BrevmalFeltDto.Builder()
+                    .medKode("FRITEKST")
+                    .medBeskrivelse("Brevtekst")
                     .medFeltType(FeltType.FRITEKST)
                     .erPåkrevd()
                     .build()

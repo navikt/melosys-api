@@ -186,6 +186,30 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
         valider(brevbestillingDto, "dokumenter-v2-opprett-post-schema.json", new ObjectMapper());
     }
 
+    @Test
+    void skalBestilleProduseringAvFritekstbrev() throws Exception {
+        settInnloggetSaksbehandler();
+
+        BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder()
+            .medProduserbardokument(GENERELT_FRITEKSTBREV_BRUKER)
+            .medMottaker(Aktoersroller.BRUKER)
+            .medFritekstTittel("Tittel")
+            .medFritekst("Innhold")
+            .build();
+        brevbestillingTjeneste.produserBrev(123L, brevbestillingDto);
+
+        verify(mockDokServiceFasade).produserDokument(anyLong(), brevbestillingDtoCaptor.capture());
+
+        assertThat(brevbestillingDtoCaptor.getValue()).extracting(
+            BrevbestillingRequest::getProduserbardokument,
+            BrevbestillingRequest::getMottaker,
+            BrevbestillingRequest::getFritekstTittel,
+            BrevbestillingRequest::getFritekst
+        ).containsExactly(GENERELT_FRITEKSTBREV_BRUKER, Aktoersroller.BRUKER, "Tittel", "Innhold");
+
+        valider(brevbestillingDto, "dokumenter-v2-opprett-post-schema.json", new ObjectMapper());
+    }
+
     private Behandling lagBehandling(Behandlingstyper type) {
         var behandling = new Behandling();
         behandling.setId(1L);

@@ -42,8 +42,11 @@ import static no.nav.melosys.integrasjon.dokgen.DokgenAdresseMapper.*;
 @Service
 public class BrevbestillingService {
 
-    private static final List<Produserbaredokumenter> BREV_TILGJENGELIG_FOR_MANUELL_BESTILLING =
-        List.of(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE, MANGELBREV_BRUKER, MANGELBREV_ARBEIDSGIVER);
+    private static final List<Produserbaredokumenter> BREV_TILGJENGELIG_FOR_MANUELL_BESTILLING = List.of(
+        MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE,
+        MANGELBREV_BRUKER, MANGELBREV_ARBEIDSGIVER,
+        GENERELT_FRITEKSTBREV_BRUKER, GENERELT_FRITEKSTBREV_ARBEIDSGIVER
+    );
 
     private final DokumentServiceFasade dokumentServiceFasade;
     private final BrevmottakerService brevmottakerService;

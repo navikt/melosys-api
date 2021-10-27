@@ -11,6 +11,7 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.integrasjon.dokgen.dto.felles.Mottaker;
 
@@ -35,16 +36,25 @@ public abstract class DokgenDto {
     protected static final int DOKUMENTASJON_SVARFRIST_UKER_MANGELBREV = 4;
 
     protected DokgenDto(DokgenBrevbestilling brevbestilling) {
-        Behandling behandling = brevbestilling.getBehandling();
-        OrganisasjonDokument org = brevbestilling.getOrg();
-        Fagsak fagsak = behandling.getFagsak();
         Persondata persondata = brevbestilling.getPersondokument();
 
         this.fnr = persondata.hentFolkeregisterident();
-        this.saksnummer = fagsak.getSaksnummer();
+        this.saksnummer = brevbestilling.getBehandling().getFagsak().getSaksnummer();
         this.dagensDato = Instant.now();
         this.navnBruker = persondata.getSammensattNavn();
-        this.mottaker = mapMottaker(org, brevbestilling.getKontaktpersonNavn(), brevbestilling.getKontaktopplysning(), persondata);
+        this.mottaker = mapMottaker(brevbestilling.getOrg(), brevbestilling.getKontaktpersonNavn(),
+            brevbestilling.getKontaktopplysning(), persondata, Aktoersroller.BRUKER);
+    }
+
+    protected DokgenDto(DokgenBrevbestilling brevbestilling, Aktoersroller mottakerType) {
+        Persondata persondata = brevbestilling.getPersondokument();
+
+        this.fnr = persondata.hentFolkeregisterident();
+        this.saksnummer = brevbestilling.getBehandling().getFagsak().getSaksnummer();
+        this.dagensDato = Instant.now();
+        this.navnBruker = persondata.getSammensattNavn();
+        this.mottaker = mapMottaker(brevbestilling.getOrg(), brevbestilling.getKontaktpersonNavn(),
+            brevbestilling.getKontaktopplysning(), persondata, mottakerType);
     }
 
     public String getFnr() {

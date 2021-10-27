@@ -39,8 +39,8 @@
         <java.version>16</java.version>
 
         <!-- Melosys -->
-        <melosys.jsonschema.version>1.35.145</melosys.jsonschema.version>
-        <melosys.internt.kodeverk.version>5.15.90</melosys.internt.kodeverk.version>
+        <melosys.jsonschema.version>1.35.146-44953cc32682f3f310b2ba012b0a9e7f1c44f7e6</melosys.jsonschema.version>
+        <melosys.internt.kodeverk.version>5.15.92</melosys.internt.kodeverk.version>
         <melosys.brev.version>1.2.99</melosys.brev.version>
 
         <!-- NAV -->
