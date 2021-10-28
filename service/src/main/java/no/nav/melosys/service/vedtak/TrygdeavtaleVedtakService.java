@@ -67,14 +67,14 @@ public class TrygdeavtaleVedtakService {
         behandling.setStatus(Behandlingsstatus.IVERKSETTER_VEDTAK);
         behandlingService.lagre(behandling);
 
-        prosessinstansService.opprettProsessinstansIverksettVedtak(behandling, request);
+//        prosessinstansService.opprettProsessinstansIverksettVedtak(behandling, request);
         dokgenService.produserOgDistribuerBrev(behandlingID, lagBrevbestilling(request));
-        oppgaveService.ferdigstillOppgaveMedSaksnummer(saksnummer);
+//        oppgaveService.ferdigstillOppgaveMedSaksnummer(saksnummer);
     }
 
     private BrevbestillingRequest lagBrevbestilling(FattTrygdeavtaleVedtakRequest request) {
         return new BrevbestillingRequest.Builder()
-            .medProduserbardokument(Produserbaredokumenter.INNVILGELSE_FOLKETRYGDLOVEN_2_8)
+            .medProduserbardokument(Produserbaredokumenter.ATTEST_NO_UK_1) // TODO: Kommer en ny kode fra fag, tester med atest så først
             .medMottaker(Aktoersroller.BRUKER)
             .medKopiMottakere(request.getKopiMottakere())
             .medInnledningFritekst(request.getFritekstInnledning())
@@ -87,6 +87,7 @@ public class TrygdeavtaleVedtakService {
 
     private void oppdaterBehandlingsresultat(long behandlingID, FattTrygdeavtaleVedtakRequest request) throws IkkeFunnetException {
         var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
+        log.info("getBehandlingsresultatTypeKode: " + request.getBehandlingsresultatTypeKode());
         behandlingsresultat.setType(request.getBehandlingsresultatTypeKode());
         behandlingsresultat.settVedtakMetadata(request.getVedtakstype(), LocalDate.now().plusWeeks(FRIST_KLAGE_UKER));
         behandlingsresultat.setBegrunnelseFritekst(request.getFritekstBegrunnelse());

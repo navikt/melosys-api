@@ -3,9 +3,11 @@ package no.nav.melosys.service.dokument;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
 import no.nav.melosys.domain.brev.MangelbrevBrevbestilling;
+import no.nav.melosys.domain.brev.storbritannia.AttestStorbritanniaBrevbestilling;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.dokgen.dto.*;
+import no.nav.melosys.integrasjon.dokgen.dto.atteststorbritannia.AttestStorbritannia;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -17,12 +19,15 @@ public class DokgenMalMapper {
 
     private final DokgenMapperDatahenter dokgenMapperDatahenter;
     private final InnvilgelseFtrlMapper innvilgelseFtrlMapper;
+    private TryggdeavteleAtestMapper tryggdeavteleAtestMapper;
 
     @Autowired
     public DokgenMalMapper(DokgenMapperDatahenter dokgenMapperDatahenter,
-                           InnvilgelseFtrlMapper innvilgelseFtrlMapper) {
+                           InnvilgelseFtrlMapper innvilgelseFtrlMapper,
+                           TryggdeavteleAtestMapper tryggdeavteleAtestMapper) {
         this.dokgenMapperDatahenter = dokgenMapperDatahenter;
         this.innvilgelseFtrlMapper = innvilgelseFtrlMapper;
+        this.tryggdeavteleAtestMapper = tryggdeavteleAtestMapper;
     }
 
     public DokgenDto mapBehandling(DokgenBrevbestilling mottattBrevbestilling) {
@@ -61,6 +66,12 @@ public class DokgenMalMapper {
                     .build()
             );
             case INNVILGELSE_FOLKETRYGDLOVEN_2_8 -> innvilgelseFtrlMapper.map((InnvilgelseBrevbestilling) brevbestilling);
+            case ATTEST_NO_UK_1 -> tryggdeavteleAtestMapper.map((AttestStorbritanniaBrevbestilling) brevbestilling);
+//                AttestStorbritannia.av(
+//                ((AttestStorbritanniaBrevbestilling) brevbestilling).toBuilder()
+//                    .medVedtaksdato(dokgenMapperDatahenter.hentVedtaksdato(brevbestilling.getBehandling().getId()))
+//                    .build()
+//            );
             default -> throw new FunksjonellException(
                 format("ProduserbartDokument %s er ikke støttet av melosys-dokgen",
                     brevbestilling.getProduserbartdokument()));

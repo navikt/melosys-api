@@ -70,6 +70,8 @@ class DokgenServiceTest {
     private SaksbehandlerService mockSaksbehandlerService;
     @Mock
     private InnvilgelseFtrlMapper mockInnvilgelseFtrlMapper;
+    @Mock
+    private TryggdeavteleAtestMapper tryggdeavteleAtestMapper;
     @Captor
     private ArgumentCaptor<DokgenBrevbestilling> brevbestillingCaptor;
 
@@ -86,7 +88,7 @@ class DokgenServiceTest {
 
         dokgenService = new DokgenService(mockDokgenConsumer, new DokumentproduksjonsInfoMapper(unleash),
             mockJoarkFasade,
-            new DokgenMalMapper(dokgenMapperDatahenter, mockInnvilgelseFtrlMapper),
+            new DokgenMalMapper(dokgenMapperDatahenter, mockInnvilgelseFtrlMapper, tryggdeavteleAtestMapper),
             mockBehandlingsService, mockEregFasade, mockKontaktOpplysningService,
             mockBrevMottakerService, mockProsessinstansService, mockSaksbehandlerService);
 

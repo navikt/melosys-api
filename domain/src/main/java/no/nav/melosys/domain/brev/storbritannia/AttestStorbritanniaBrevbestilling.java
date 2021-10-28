@@ -98,6 +98,7 @@ public class AttestStorbritanniaBrevbestilling extends DokgenBrevbestilling {
             return this;
         }
 
+        // Vi trenger vel ikke denne siden dette også ligger i base klasse
         public Builder medVedtaksdato(Instant vedtaksdato) {
             this.vedtaksdato = vedtaksdato;
             return this;

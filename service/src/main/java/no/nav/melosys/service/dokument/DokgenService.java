@@ -6,10 +6,8 @@ import java.util.Set;
 
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.brev.DokgenBrevbestilling;
-import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
-import no.nav.melosys.domain.brev.MangelbrevBrevbestilling;
-import no.nav.melosys.domain.brev.Mottaker;
+import no.nav.melosys.domain.brev.*;
+import no.nav.melosys.domain.brev.storbritannia.AttestStorbritanniaBrevbestilling;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.integrasjon.dokgen.DokgenConsumer;
@@ -18,7 +16,6 @@ import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
-import no.nav.melosys.service.dokument.brev.KopiMottaker;
 import no.nav.melosys.service.ldap.SaksbehandlerService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -131,14 +128,14 @@ public class DokgenService {
             produserOgDistribuerBrev(behandling, aktoer, brevbestilling.build());
         }
 
-        for (KopiMottaker kopiMottaker : brevbestillingRequest.getKopiMottakere()) {
-            var aktoer = new Aktoer();
-            aktoer.setRolle(kopiMottaker.getRolle());
-            aktoer.setOrgnr(kopiMottaker.getOrgnr());
-            aktoer.setAktørId(kopiMottaker.getAktørId());
-            brevbestilling.medBestillKopi(true);
-            produserOgDistribuerBrev(behandling, aktoer, brevbestilling.build());
-        }
+//        for (KopiMottaker kopiMottaker : brevbestillingRequest.getKopiMottakere()) {
+//            var aktoer = new Aktoer();
+//            aktoer.setRolle(kopiMottaker.getRolle());
+//            aktoer.setOrgnr(kopiMottaker.getOrgnr());
+//            aktoer.setAktørId(kopiMottaker.getAktørId());
+//            brevbestilling.medBestillKopi(true);
+//            produserOgDistribuerBrev(behandling, aktoer, brevbestilling.build());
+//        }
     }
 
     private void produserOgDistribuerBrev(Behandling behandling, Aktoer mottaker, DokgenBrevbestilling brevbestilling) {
@@ -187,7 +184,18 @@ public class DokgenService {
                 .medBegrunnelseFritekst(brevbestillingRequest.getBegrunnelseFritekst())
                 .medEktefelleFritekst(brevbestillingRequest.getEktefelleFritekst())
                 .medBarnFritekst(brevbestillingRequest.getBarnFritekst());
+            case ATTEST_NO_UK_1 -> getAttestStorbritanniaBrevbestillingBuilder();
             default -> new DokgenBrevbestilling.Builder<>();
         };
     }
+
+    private AttestStorbritanniaBrevbestilling.Builder getAttestStorbritanniaBrevbestillingBuilder() {
+        return new AttestStorbritanniaBrevbestilling.Builder();
+//         Disse tingen må vi legge på i noe tilsvarende en InnvilgelseFtrlMapper
+//            .medVedtaksdato(Instant.now()) // TODO: legg til BrevbestillingRequest?
+//            .medMedfolgendeFamiliemedlemmer(new MedfolgendeFamiliemedlemmer(
+//                new Person("kone", Instant.now(), "", ""),
+//                Set.of(new Person("barn", Instant.now(), "", ""))));
+    }
+
 }

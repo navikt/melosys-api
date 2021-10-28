@@ -1,11 +1,8 @@
 package no.nav.melosys.integrasjonstest.saksflyt;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
-import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadFtrl;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_barn_begrunnelser_ftrl;
@@ -17,6 +14,7 @@ import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
+import no.nav.melosys.service.dokument.brev.KopiMottaker;
 import no.nav.melosys.service.felles.dto.SoeknadslandDto;
 import no.nav.melosys.service.journalforing.JournalfoeringService;
 import no.nav.melosys.service.journalforing.dto.DokumentDto;
@@ -27,7 +25,6 @@ import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.vedtak.FattTrygdeavtaleVedtakRequest;
 import no.nav.melosys.service.vedtak.FattVedtakRequest;
 import no.nav.melosys.service.vedtak.VedtakServiceFasade;
-import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.tjenester.gui.TrygdeavtaleTjeneste;
 import no.nav.melosys.tjenester.gui.dto.trygdeavtale.TrygdeAvtaleDataForVedtakDto;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,8 +35,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
+
+import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper.FASTSATT_LOVVALGSLAND;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(properties = "spring.profiles.active:local-mock")
@@ -141,24 +139,31 @@ class TrygdeavtaleTjenesteIT {
             .vedtak("JA_FATTE_VEDTAK")
             .innvilgelse("JA")
             .bestemmelse("UK_ART6_1")
-            .addBarn("122c9b40-1030-414d-9d18-98d8d3f6ec57",
-                true, Medfolgende_barn_begrunnelser_ftrl.OVER_18_AR.getKode(),
+            .addBarn("5aa85fd8-4172-47d0-812e-da8acb26780c",
+                false, Medfolgende_barn_begrunnelser_ftrl.OVER_18_AR.getKode(),
                 "begrunnelse barn")
-            .ektefelle("e6ba36ee-9476-40fc-b074-87bb143a1468",
+            .ektefelle("329dfcb9-600d-4a89-8811-73fe7601ca91",
                 true,  Medfolgende_ektefelle_samboer_begrunnelser_ftrl.EGEN_INNTEKT.getKode(),
                 "begrunnelse samboer")
             .build();
 
-        trygdeavtaleTjeneste.overforDataForVedtak(1L, trygdeAvtaleDataForVedtakDto);
-
+//        trygdeavtaleTjeneste.overforDataForVedtak(1L, trygdeAvtaleDataForVedtakDto);
+//
         FattVedtakRequest fattVedtakRequest = new FattTrygdeavtaleVedtakRequest
             .Builder()
-            .medBestillersId(SubjectHandler.getInstance().getUserID())
+            .medBehandlingsresultat(FASTSATT_LOVVALGSLAND)
             .medVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK)
-            .medFritekstBegrunnelse("trygdeavtale begrunnelse")
+            .medFritekstInnledning("Innledning")
+            .medFritekstBegrunnelse("Begrunnelse")
+            .medFritekstEktefelle("Ektefelle omfattet")
+            .medFritekstBarn("Barn ikke omfattet")
+            .medKopiMottakere(List.of(new KopiMottaker(Aktoersroller.ARBEIDSGIVER, "999999999", null)))
+            .medBestillersId("Z123456") //
             .build();
 
-//        vedtakServiceFasade.fattVedtak(2L, fattVedtakRequest);
-//        Thread.sleep(3000);
+        vedtakServiceFasade.fattVedtak(1L, fattVedtakRequest);
+        Thread.sleep(100000000);
+
+        System.out.println("done!");
     }
 }
