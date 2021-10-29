@@ -1,6 +1,7 @@
 package no.nav.melosys.tjenester.gui;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -180,18 +181,14 @@ public class BrevbestillingTjeneste {
     }
 
     private BrevmalDto lagBrevMalDtoForFritekstbrev(Produserbaredokumenter produserbartdokument, Aktoersroller hovedMottaker, Behandling behandling) {
-        List<MottakerDto> mottakere = new ArrayList<>();
-        List<FeltvalgDto> feltvalgDtos = new ArrayList<>();
-
         var builder = new MottakerDto.Builder()
             .medType(hovedMottaker == Aktoersroller.BRUKER ? BRUKER_ELLER_BRUKERS_FULLMEKTIG : ARBEIDSGIVER_ELLER_ARBEIDSGIVERS_FULLMEKTIG)
             .medRolle(hovedMottaker);
 
         leggTilAdresseOgFeilmelding(builder, produserbartdokument, hovedMottaker, behandling);
 
-        mottakere.add(builder.build());
-
-        feltvalgDtos.add(new FeltvalgDto.Builder().medKode("FRITEKST").medBeskrivelse("Fritekst").build());
+        var mottaker = builder.build();
+        var feltvalgDto = new FeltvalgDto.Builder().medKode("FRITEKST").medBeskrivelse("Fritekst").build();
 
         return new BrevmalDto.Builder()
             .medType(produserbartdokument)
@@ -207,9 +204,10 @@ public class BrevbestillingTjeneste {
                     .medBeskrivelse("Brevtekst")
                     .medFeltType(FeltType.FRITEKST)
                     .erPåkrevd()
+                    .medValg(feltvalgDto)
                     .build()
             ))
-            .medMuligeMottakere(mottakere)
+            .medMuligeMottakere(singletonList(mottaker))
             .medMottakereHjelpetekst("Hvis bruker eller arbeidsgiver har fullmektig som er lagt inn i sidemenyen, vil brevet automatisk bli sendt til denne.")
             .build();
     }

@@ -5,6 +5,7 @@ import java.util.List;
 
 import no.nav.melosys.domain.Kontaktopplysning;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
+import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.person.Persondata;
@@ -78,11 +79,12 @@ public final class DokgenAdresseMapper {
         return landkode;
     }
 
-    public static Mottaker mapMottaker(OrganisasjonDokument org, String kontaktperson,
-                                       Kontaktopplysning kontaktopplysning, Persondata persondata, Aktoersroller mottakerType) {
+    public static Mottaker mapMottaker(DokgenBrevbestilling brevbestilling, Aktoersroller mottakerType) {
+        OrganisasjonDokument org = brevbestilling.getOrg();
+        Persondata persondata = brevbestilling.getPersondokument();
         return new Mottaker(
             mapNavn(org, persondata),
-            mapAdresselinjer(org, kontaktperson, kontaktopplysning, persondata),
+            mapAdresselinjer(org, brevbestilling.getKontaktpersonNavn(), brevbestilling.getKontaktopplysning(), persondata),
             mapPostnr(org, persondata),
             mapPoststed(org, persondata),
             mapLandForAdresse(org, persondata),

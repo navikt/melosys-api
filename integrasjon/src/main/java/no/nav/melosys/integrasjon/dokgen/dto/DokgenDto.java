@@ -7,10 +7,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.ser.InstantSerializer;
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
-import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.integrasjon.dokgen.dto.felles.Mottaker;
@@ -42,8 +39,7 @@ public abstract class DokgenDto {
         this.saksnummer = brevbestilling.getBehandling().getFagsak().getSaksnummer();
         this.dagensDato = Instant.now();
         this.navnBruker = persondata.getSammensattNavn();
-        this.mottaker = mapMottaker(brevbestilling.getOrg(), brevbestilling.getKontaktpersonNavn(),
-            brevbestilling.getKontaktopplysning(), persondata, Aktoersroller.BRUKER);
+        this.mottaker = mapMottaker(brevbestilling, Aktoersroller.BRUKER);
     }
 
     protected DokgenDto(DokgenBrevbestilling brevbestilling, Aktoersroller mottakerType) {
@@ -53,8 +49,7 @@ public abstract class DokgenDto {
         this.saksnummer = brevbestilling.getBehandling().getFagsak().getSaksnummer();
         this.dagensDato = Instant.now();
         this.navnBruker = persondata.getSammensattNavn();
-        this.mottaker = mapMottaker(brevbestilling.getOrg(), brevbestilling.getKontaktpersonNavn(),
-            brevbestilling.getKontaktopplysning(), persondata, mottakerType);
+        this.mottaker = mapMottaker(brevbestilling, mottakerType);
     }
 
     public String getFnr() {
