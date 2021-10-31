@@ -25,6 +25,7 @@ public abstract class DokgenDto {
     private final Instant dagensDato;
 
     private final String navnBruker;
+    private final String saksbehandlerNavn;
     private Mottaker mottaker;
 
     // Saksbehandlingstid er 12 uker fra dato for utsendelse av brev, uavhengig av helg, helligdager, osv.
@@ -39,6 +40,7 @@ public abstract class DokgenDto {
         this.saksnummer = brevbestilling.getBehandling().getFagsak().getSaksnummer();
         this.dagensDato = Instant.now();
         this.navnBruker = persondata.getSammensattNavn();
+        this.saksbehandlerNavn = brevbestilling.getSaksbehandlerNavn();
         this.mottaker = mapMottaker(brevbestilling, Aktoersroller.BRUKER);
     }
 
@@ -49,6 +51,7 @@ public abstract class DokgenDto {
         this.saksnummer = brevbestilling.getBehandling().getFagsak().getSaksnummer();
         this.dagensDato = Instant.now();
         this.navnBruker = persondata.getSammensattNavn();
+        this.saksbehandlerNavn = brevbestilling.getSaksbehandlerNavn();
         this.mottaker = mapMottaker(brevbestilling, mottakerType);
     }
 
@@ -66,6 +69,10 @@ public abstract class DokgenDto {
 
     public String getNavnBruker() {
         return navnBruker;
+    }
+
+    public String getSaksbehandlerNavn() {
+        return saksbehandlerNavn;
     }
 
     public Mottaker getMottaker() {

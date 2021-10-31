@@ -188,7 +188,6 @@ public class BrevbestillingTjeneste {
         leggTilAdresseOgFeilmelding(builder, produserbartdokument, hovedMottaker, behandling);
 
         var mottaker = builder.build();
-        var feltvalgDto = new FeltvalgDto.Builder().medKode("FRITEKST").medBeskrivelse("Fritekst").build();
 
         return new BrevmalDto.Builder()
             .medType(produserbartdokument)
@@ -204,7 +203,6 @@ public class BrevbestillingTjeneste {
                     .medBeskrivelse("Brevtekst")
                     .medFeltType(FeltType.FRITEKST)
                     .erPåkrevd()
-                    .medValg(feltvalgDto)
                     .build()
             ))
             .medMuligeMottakere(singletonList(mottaker))

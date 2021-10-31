@@ -362,6 +362,7 @@ class DokgenMalMapperTest {
             .medFritekstTittel("Min tittel")
             .medFritekst("Innhold")
             .medKontaktopplysninger(true)
+            .medSaksbehandlerNavn("Fetter Anton")
             .build();
 
         DokgenDto dokgenDto = dokgenMalMapper.mapBehandling(brevbestilling);
@@ -372,12 +373,14 @@ class DokgenMalMapperTest {
                 Fritekstbrev::getFritekstTittel,
                 Fritekstbrev::getFritekst,
                 Fritekstbrev::medKontaktopplysninger,
-                Fritekstbrev::getNavnFullmektig
+                Fritekstbrev::getNavnFullmektig,
+                Fritekstbrev::getSaksbehandlerNavn
             ).containsExactly(
                 "Min tittel",
                 "Innhold",
                 true,
-                "Fullmektig AS"
+                "Fullmektig AS",
+                "Fetter Anton"
             );
 
         assertThat(dokgenDto.getMottaker().type()).isEqualTo(Aktoersroller.BRUKER.getKode());
