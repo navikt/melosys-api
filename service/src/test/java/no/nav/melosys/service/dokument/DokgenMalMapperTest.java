@@ -91,14 +91,14 @@ class DokgenMalMapperTest {
             .isInstanceOf(SaksbehandlingstidSoknad.class)
             .extracting(
                 DokgenDto::getNavnBruker,
-                DokgenDto::getNavnMottaker,
-                DokgenDto::getPostnr
+                dto -> dto.getMottaker().navn(),
+                dto -> dto.getMottaker().postnr()
             ).containsExactly(
             SAMMENSATT_NAVN_BRUKER,
             SAMMENSATT_NAVN_BRUKER,
             POSTNR_BRUKER
         );
-        assertThat(dokgenDto.getAdresselinjer()).contains(ADRESSELINJE_1_BRUKER);
+        assertThat(dokgenDto.getMottaker().adresselinjer()).contains(ADRESSELINJE_1_BRUKER);
     }
 
     @Test
@@ -121,14 +121,14 @@ class DokgenMalMapperTest {
             .isInstanceOf(SaksbehandlingstidSoknad.class)
             .extracting(
                 DokgenDto::getNavnBruker,
-                DokgenDto::getNavnMottaker,
-                DokgenDto::getPostnr
+                dto -> dto.getMottaker().navn(),
+                dto -> dto.getMottaker().postnr()
             ).containsExactly(
             SAMMENSATT_NAVN_BRUKER,
             SAMMENSATT_NAVN_BRUKER,
             POSTNR_BRUKER
         );
-        assertThat(dokgenDto.getAdresselinjer()).contains(ADRESSELINJE_1_BRUKER);
+        assertThat(dokgenDto.getMottaker().adresselinjer()).contains(ADRESSELINJE_1_BRUKER);
         fakeUnleash.disableAll();
     }
 
@@ -182,14 +182,14 @@ class DokgenMalMapperTest {
             .isInstanceOf(SaksbehandlingstidSoknad.class)
             .extracting(
                 DokgenDto::getNavnBruker,
-                DokgenDto::getNavnMottaker,
-                DokgenDto::getPostnr
+                dto -> dto.getMottaker().navn(),
+                dto -> dto.getMottaker().postnr()
             ).containsExactly(
             SAMMENSATT_NAVN_BRUKER,
             NAVN_ORG,
             POSTNR_ORG
         );
-        assertThat(dokgenDto.getAdresselinjer()).contains(POSTBOKS_ORG);
+        assertThat(dokgenDto.getMottaker().adresselinjer()).contains(POSTBOKS_ORG);
     }
 
     @Test
@@ -216,14 +216,14 @@ class DokgenMalMapperTest {
             .isInstanceOf(SaksbehandlingstidSoknad.class)
             .extracting(
                 DokgenDto::getNavnBruker,
-                DokgenDto::getNavnMottaker,
-                DokgenDto::getPostnr
+                dto -> dto.getMottaker().navn(),
+                dto -> dto.getMottaker().postnr()
             ).containsExactly(
             SAMMENSATT_NAVN_BRUKER,
             NAVN_ORG,
             POSTNR_ORG
         );
-        assertThat(dokgenDto.getAdresselinjer()).contains(FORRETNINGSADRESSE_ORG);
+        assertThat(dokgenDto.getMottaker().adresselinjer()).contains(FORRETNINGSADRESSE_ORG);
     }
 
     @Test
@@ -247,14 +247,14 @@ class DokgenMalMapperTest {
             .isInstanceOf(SaksbehandlingstidSoknad.class)
             .extracting(
                 DokgenDto::getNavnBruker,
-                DokgenDto::getNavnMottaker,
-                DokgenDto::getPostnr
+                dto -> dto.getMottaker().navn(),
+                dto -> dto.getMottaker().postnr()
             ).containsExactly(
             SAMMENSATT_NAVN_BRUKER,
             NAVN_ORG,
             POSTNR_ORG
         );
-        assertThat(dokgenDto.getAdresselinjer()).containsExactly("Att: " + KONTAKT_NAVN, POSTBOKS_ORG);
+        assertThat(dokgenDto.getMottaker().adresselinjer()).containsExactly("Att: " + KONTAKT_NAVN, POSTBOKS_ORG);
     }
 
     @Test

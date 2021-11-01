@@ -7,6 +7,7 @@ import no.nav.melosys.domain.brev.storbritannia.AttestStorbritanniaBrevbestillin
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.dokgen.dto.*;
+import no.nav.melosys.integrasjon.dokgen.dto.felles.Mottaker;
 import no.nav.melosys.integrasjon.dokgen.dto.atteststorbritannia.AttestStorbritannia;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -34,11 +35,15 @@ public class DokgenMalMapper {
         //NOTE Henter opplysninger på nytt for å sikre at korrekt adresse benyttes
         DokgenBrevbestilling brevbestilling = berikBestillingMedPersondata(mottattBrevbestilling);
         DokgenDto dto = lagDokgenDtoFraBestilling(brevbestilling);
+        Mottaker mottaker = dto.getMottaker();
 
-        if (hasText(dto.getPostnr())) {
-            dto.setPoststed(dokgenMapperDatahenter.hentPoststed(dto.getPostnr()));
+        String poststed = mottaker.poststed();
+        if (hasText(mottaker.postnr())) {
+            poststed = dokgenMapperDatahenter.hentPoststed(mottaker.postnr());
         }
-        dto.setLand(dokgenMapperDatahenter.hentLandnavn(dto.getLand()));
+        String land = (dokgenMapperDatahenter.hentLandnavn(mottaker.land()));
+
+        dto.setMottaker(new Mottaker(mottaker.navn(), mottaker.adresselinjer(), mottaker.postnr(), poststed, land));
         return dto;
     }
 
