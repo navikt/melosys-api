@@ -6,12 +6,12 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.ser.InstantSerializer;
-import no.nav.melosys.domain.brev.storbritannia.UKArtikkel;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
 
 import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
 
 public record Utsendelse(
-    UKArtikkel artikkel,
+    Lovvalgbestemmelser_trygdeavtale_uk artikkel,
     List<String> oppholdsadresseUK,
 
     @JsonSerialize(using = InstantSerializer.class)
