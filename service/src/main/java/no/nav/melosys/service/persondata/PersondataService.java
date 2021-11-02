@@ -283,13 +283,10 @@ public class PersondataService implements PersondataFasade {
 
     @Override
     public String hentSammensattNavn(String ident) {
-        if (unleash.isEnabled("melosys.pdl.sammensatt-navn")) {
-            return pdlConsumer.hentNavn(ident).stream()
-                .max(Comparator.comparing(n -> n.metadata().datoSistRegistrert()))
-                .map(NavnOversetter::tilSammensattNavn)
-                .orElse(NavnOversetter.UKJENT);
-        }
-        return tpsService.hentSammensattNavn(ident);
+        return pdlConsumer.hentNavn(ident).stream()
+            .max(Comparator.comparing(n -> n.metadata().datoSistRegistrert()))
+            .map(NavnOversetter::tilSammensattNavn)
+            .orElse(NavnOversetter.UKJENT);
     }
 
     @Override

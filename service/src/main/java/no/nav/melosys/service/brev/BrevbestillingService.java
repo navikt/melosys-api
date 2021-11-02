@@ -101,10 +101,7 @@ public class BrevbestillingService {
     }
 
     private String hentSammensattNavn(Behandling behandling) {
-        if (unleash.isEnabled("melosys.pdl.sammensatt-navn")) {
-            persondataFasade.hentSammensattNavn(behandling.getFagsak().hentAktørID());
-        }
-        return behandling.hentPersonDokument().getSammensattNavn();
+        return persondataFasade.hentSammensattNavn(behandling.getFagsak().hentAktørID());
     }
 
     private List<MuligMottakerDto> lagKopiMottakereMuligMottakerDtos(Produserbaredokumenter produserbaredokumenter, Behandling behandling, Collection<Aktoersroller> kopiMottakere, Aktoersroller hovedmottaker) {
@@ -213,6 +210,8 @@ public class BrevbestillingService {
                 mottaker.getOrgnr()).orElse(null);
             String mottakerOrgnr = kontaktopplysning != null && kontaktopplysning.getKontaktOrgnr() != null ? kontaktopplysning.getKontaktOrgnr() : mottaker.getOrgnr();
             orgDokument = (OrganisasjonDokument) eregFasade.hentOrganisasjon(mottakerOrgnr).getDokument();
+        } else {
+            throw new FunksjonellException("Mottakersrolle støttes ikke: " + mottaker.getRolle());
         }
 
         return new BrevAdresse.Builder()
