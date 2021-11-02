@@ -216,7 +216,6 @@ class PersondataServiceTest {
 
     @Test
     void hentSammensatNavn() {
-        fakeUnleash.enable("melosys.pdl.sammensatt-navn");
         when(pdlConsumer.hentNavn(anyString())).thenReturn(Set.of(
             new no.nav.melosys.integrasjon.pdl.dto.person.Navn("Fornavn", "Mellom", "Etternavnsen", metadata())
         ));

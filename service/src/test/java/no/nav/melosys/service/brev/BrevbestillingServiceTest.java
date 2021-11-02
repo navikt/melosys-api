@@ -79,6 +79,7 @@ class BrevbestillingServiceTest {
             .thenReturn(new Mottakerliste.Builder().medHovedMottaker(BRUKER).build());
         when(mockBrevmottakerService.avklarMottaker(eq(MANGELBREV_BRUKER), any(), eq(behandling)))
             .thenReturn(lagAktoer(BRUKER, null));
+        when(mockPersondataFasade.hentSammensattNavn(anyString())).thenReturn("Ola Nordmann");
 
         var muligeMottakere = brevbestillingService.hentMuligeMottakere(MANGELBREV_BRUKER, behandling, null);
 
@@ -143,6 +144,7 @@ class BrevbestillingServiceTest {
     void hentMuligeMottakere_kopiTilBruker_returnererBrukerSomKopi() {
         when(mockBrevmottakerService.hentMottakerliste(MANGELBREV_BRUKER, behandling))
             .thenReturn(new Mottakerliste.Builder().medHovedMottaker(ARBEIDSGIVER).medKopiMottaker(BRUKER).build());
+        when(mockPersondataFasade.hentSammensattNavn(anyString())).thenReturn("Ola Nordmann");
         mockHentOrganisasjon("orgnr", "Ola Nordmann Rørleggerfirma");
 
         when(mockBrevmottakerService.avklarMottaker(any(Produserbaredokumenter.class), any(), eq(behandling)))
@@ -188,6 +190,7 @@ class BrevbestillingServiceTest {
             .thenReturn(new Mottakerliste.Builder().medHovedMottaker(BRUKER).medKopiMottaker(BRUKER).build());
         when(mockBrevmottakerService.avklarMottaker(eq(MANGELBREV_BRUKER), any(), eq(behandling)))
             .thenReturn(lagAktoer(REPRESENTANT, "orgnrTilFullmektig"));
+        when(mockPersondataFasade.hentSammensattNavn(anyString())).thenReturn("Ola Nordmann");
         mockHentOrganisasjon("orgnrTilFullmektig", "Fullmektig Virksomhet");
 
         var muligeMottakere = brevbestillingService.hentMuligeMottakere(MANGELBREV_BRUKER, behandling, null);
