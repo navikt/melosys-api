@@ -119,8 +119,12 @@ public class OpprettJournalforBrev implements StegBehandler {
     }
 
     private String utledJournalføringsTittel(DokumentproduksjonsInfo dokumentproduksjonsInfo, DokgenBrevbestilling brevbestilling) {
-        if (brevbestilling instanceof FritekstbrevBrevbestilling) {
-            return ((FritekstbrevBrevbestilling) brevbestilling).getFritekstTittel();
+        if (brevbestilling instanceof FritekstbrevBrevbestilling fritekstbrevBrevbestilling) {
+            String fritekstTittel = fritekstbrevBrevbestilling.getFritekstTittel();
+            if (isEmpty(fritekstTittel)) {
+                throw new FunksjonellException("Tittel til fritekstbrev mangler, behandlingId:" + brevbestilling.getBehandlingId());
+            }
+            return fritekstTittel;
         }
         return dokumentproduksjonsInfo.journalføringsTittel();
     }

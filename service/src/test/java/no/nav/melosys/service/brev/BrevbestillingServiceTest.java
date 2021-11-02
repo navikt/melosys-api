@@ -290,8 +290,13 @@ class BrevbestillingServiceTest {
         List<Produserbaredokumenter> brevMaler = brevbestillingService.hentMuligeProduserbaredokumenter(new Behandling());
 
         assertThat(brevMaler)
-            .hasSize(2)
-            .containsExactlyInAnyOrder(MANGELBREV_BRUKER, MANGELBREV_ARBEIDSGIVER);
+            .hasSize(4)
+            .containsExactlyInAnyOrder(
+                MANGELBREV_BRUKER,
+                MANGELBREV_ARBEIDSGIVER,
+                GENERELT_FRITEKSTBREV_BRUKER,
+                GENERELT_FRITEKSTBREV_ARBEIDSGIVER
+            );
     }
 
     @Test
@@ -310,8 +315,14 @@ class BrevbestillingServiceTest {
         List<Produserbaredokumenter> brevMaler = brevbestillingService.hentMuligeProduserbaredokumenter(behandling);
 
         assertThat(brevMaler)
-            .hasSize(3)
-            .containsExactlyInAnyOrder(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, MANGELBREV_BRUKER, MANGELBREV_ARBEIDSGIVER);
+            .hasSize(5)
+            .containsExactlyInAnyOrder(
+                MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD,
+                MANGELBREV_BRUKER,
+                MANGELBREV_ARBEIDSGIVER,
+                GENERELT_FRITEKSTBREV_BRUKER,
+                GENERELT_FRITEKSTBREV_ARBEIDSGIVER
+            );
     }
 
     @Test
@@ -321,8 +332,14 @@ class BrevbestillingServiceTest {
         List<Produserbaredokumenter> brevMaler = brevbestillingService.hentMuligeProduserbaredokumenter(behandling);
 
         assertThat(brevMaler)
-            .hasSize(3)
-            .containsExactlyInAnyOrder(MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE, MANGELBREV_BRUKER, MANGELBREV_ARBEIDSGIVER);
+            .hasSize(5)
+            .containsExactlyInAnyOrder(
+                MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE,
+                MANGELBREV_BRUKER,
+                MANGELBREV_ARBEIDSGIVER,
+                GENERELT_FRITEKSTBREV_BRUKER,
+                GENERELT_FRITEKSTBREV_ARBEIDSGIVER
+            );
     }
 
     @Test

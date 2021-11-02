@@ -1,8 +1,8 @@
 package no.nav.melosys.tjenester.gui;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import io.swagger.annotations.Api;
@@ -99,24 +99,17 @@ public class BrevbestillingTjeneste {
         Behandling behandling = behandlingService.hentBehandling(behandlingId);
         List<Produserbaredokumenter> produserbareDokumenter = brevbestillingService.hentMuligeProduserbaredokumenter(behandling);
 
-        List<BrevmalDto> maler = new ArrayList<>();
-        for(Produserbaredokumenter p : produserbareDokumenter) {
-            Aktoersroller hovedMottaker = brevmottakerService.hentMottakerliste(p, behandling).getHovedMottaker();
-            switch (p) {
-                case MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE:
-                    maler.add(lagBrevMalDtoForForventetSaksbehandlingstid(p, hovedMottaker, behandling));
-                    break;
-                case MANGELBREV_BRUKER, MANGELBREV_ARBEIDSGIVER:
-                    maler.add(lagBrevMalDtoForMangelbrev(p, hovedMottaker, behandling));
-                    break;
-                case GENERELT_FRITEKSTBREV_BRUKER, GENERELT_FRITEKSTBREV_ARBEIDSGIVER:
-                    maler.add(lagBrevMalDtoForFritekstbrev(p, hovedMottaker, behandling));
-                    break;
-                default:
-                    break;
-            }
-        }
-        return maler;
+        return produserbareDokumenter.stream().map(p -> {
+                Aktoersroller hovedMottaker = brevmottakerService.hentMottakerliste(p, behandling).getHovedMottaker();
+                return switch (p) {
+                    case MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE -> lagBrevMalDtoForForventetSaksbehandlingstid(p, hovedMottaker, behandling);
+                    case MANGELBREV_BRUKER, MANGELBREV_ARBEIDSGIVER -> lagBrevMalDtoForMangelbrev(p, hovedMottaker, behandling);
+                    case GENERELT_FRITEKSTBREV_BRUKER, GENERELT_FRITEKSTBREV_ARBEIDSGIVER -> lagBrevMalDtoForFritekstbrev(p, hovedMottaker, behandling);
+                    default -> null;
+                };
+            })
+            .filter(Objects::nonNull)
+            .toList();
     }
 
     private BrevmalDto lagBrevMalDtoForForventetSaksbehandlingstid(Produserbaredokumenter produserbartdokument, Aktoersroller hovedMottaker, Behandling behandling) {
