@@ -5,7 +5,10 @@ import java.time.ZoneOffset;
 import java.util.*;
 
 import no.finn.unleash.FakeUnleash;
+import no.nav.melosys.domain.dokument.felles.Land;
+import no.nav.melosys.domain.dokument.person.KjoennsType;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
+import no.nav.melosys.domain.dokument.person.Personstatus;
 import no.nav.melosys.domain.dokument.person.Sivilstand;
 import no.nav.melosys.domain.kodeverk.Personstatuser;
 import no.nav.melosys.domain.person.*;
@@ -21,6 +24,8 @@ import no.nav.melosys.integrasjon.tps.TpsService;
 import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
+import no.nav.melosys.service.dokument.DokgenTestData;
+import no.nav.melosys.service.dokument.brev.BrevDataTestUtils;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,8 +40,7 @@ import static no.nav.melosys.service.persondata.PdlObjectFactory.metadata;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class PersondataServiceTest {
@@ -137,6 +141,41 @@ class PersondataServiceTest {
     }
 
     @Test
+    void hentPersonMedHistorikk_inaktivBehandling_inaktivBehandlingFraFørPdl() {
+        var inaktivBehandling = lagBehandlingSomIkkeResulterIVedtak();
+        inaktivBehandling.setRegistrertDato(PersondataService.PDL_STARTDATO.minusMonths(2).atStartOfDay().toInstant(ZoneOffset.UTC));
+        when(behandlingService.hentBehandlingUtenSaksopplysninger(1L)).thenReturn(inaktivBehandling);
+        no.nav.melosys.domain.dokument.person.Sivilstand sivilstand = spy(no.nav.melosys.domain.dokument.person.Sivilstand.class);
+        when(sivilstand.getKode()).thenReturn("GLAD");
+        when(saksopplysningerService.hentTpsPersonopplysninger(inaktivBehandling.getId())).thenReturn(lagPersonDokument(sivilstand));
+
+        final var personMedHistorikk = persondataService.hentPersonMedHistorikk(1L);
+        assertThat(personMedHistorikk.statsborgerskap()).containsExactly(
+            new Statsborgerskap("NOR", null, LocalDate.parse("1989-08-07"),
+                                null, "TPS", "TPS", false)
+        );
+    }
+
+    private static PersonDokument lagPersonDokument(no.nav.melosys.domain.dokument.person.Sivilstand sivilstand) {
+        PersonDokument person = new PersonDokument();
+        person.setKjønn(new KjoennsType("K"));
+        person.setFornavn("Kari");
+        person.setMellomnavn("Mellom");
+        person.setEtternavn("Nordmann");
+        person.setFødselsdato(LocalDate.parse("1989-08-07"));
+        person.setFnr("123456789");
+        person.setBostedsadresse(BrevDataTestUtils.lagBostedsadresse());
+        person.setPostadresse(DokgenTestData.lagAdresse());
+        person.setPersonstatus(Personstatus.ABNR);
+        person.setSivilstand(sivilstand);
+        person.setSivilstandGyldighetsperiodeFom(LocalDate.parse("2019-08-07"));
+        person.setStatsborgerskap(new Land(Land.NORGE));
+        person.setStatsborgerskapDato(LocalDate.parse("1989-08-07"));
+        person.setDødsdato(LocalDate.parse("2089-08-07"));
+        return person;
+    }
+
+    @Test
     void hentPersonMedHistorikk_inaktivBehandling_filtrererNyeOpplysninger() {
         when(behandlingService.hentBehandlingUtenSaksopplysninger(1L)).thenReturn(lagInaktivBehandling());
         when(behandlingsresultatService.hentBehandlingsresultat(1L)).thenReturn(lagBehandlingsresultat());
@@ -175,7 +214,7 @@ class PersondataServiceTest {
     }
 
     @Test
-    void hentFamiliemedlemmerMedHistorikk_inaktivBehandlingFraFørTps() {
+    void hentFamiliemedlemmerMedHistorikk_inaktivBehandlingFraFørPdl() {
         var inaktivBehandling = lagBehandlingSomIkkeResulterIVedtak();
         inaktivBehandling.setRegistrertDato(PersondataService.PDL_STARTDATO.minusMonths(2).atStartOfDay().toInstant(ZoneOffset.UTC));
         when(behandlingService.hentBehandlingUtenSaksopplysninger(1L)).thenReturn(inaktivBehandling);
@@ -216,7 +255,6 @@ class PersondataServiceTest {
 
     @Test
     void hentSammensatNavn() {
-        fakeUnleash.enable("melosys.pdl.sammensatt-navn");
         when(pdlConsumer.hentNavn(anyString())).thenReturn(Set.of(
             new no.nav.melosys.integrasjon.pdl.dto.person.Navn("Fornavn", "Mellom", "Etternavnsen", metadata())
         ));

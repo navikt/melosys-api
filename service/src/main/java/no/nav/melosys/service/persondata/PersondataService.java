@@ -197,17 +197,21 @@ public class PersondataService implements PersondataFasade {
     public PersonMedHistorikk hentPersonMedHistorikk(long behandlingID) {
         final var behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
         final String ident = behandling.getFagsak().hentAktørID();
-        if (behandling.erAktiv()) {
+        if (behandling.erAktiv() && erRegistrertEtterPdlStart(behandling)) {
             return PersonMedHistorikkOversetter.oversett(pdlConsumer.hentPersonMedHistorikk(ident), kodeverkService);
         }
 
-        if (LocalDate.ofInstant(behandling.getRegistrertDato(), ZoneId.systemDefault()).isBefore(PDL_STARTDATO)) {
+        if (!erRegistrertEtterPdlStart(behandling)) {
             return PersonMedHistorikkOversetter.lagHistorikkFraTpsData(saksopplysningerService.hentTpsPersonopplysninger(behandlingID), kodeverkService);
         }
 
         final Instant skjæringstidspunkt = avgjørSkjæringstidspunktTilInnsyn(behandling);
         final var persondataTilInnsyn = filtrerPersondataFørDato(pdlConsumer.hentPersonMedHistorikk(ident), skjæringstidspunkt);
         return PersonMedHistorikkOversetter.oversett(persondataTilInnsyn, kodeverkService);
+    }
+
+    private boolean erRegistrertEtterPdlStart(Behandling behandling) {
+        return LocalDate.ofInstant(behandling.getRegistrertDato(), ZoneId.systemDefault()).isAfter(PDL_STARTDATO);
     }
 
     private Instant avgjørSkjæringstidspunktTilInnsyn(Behandling behandling) {
@@ -253,11 +257,11 @@ public class PersondataService implements PersondataFasade {
     public Set<Familiemedlem> hentFamiliemedlemmerMedHistorikk(long behandlingID) {
         final var behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
         final String ident = behandling.getFagsak().hentAktørID();
-        if (behandling.erAktiv()) {
+        if (behandling.erAktiv() && erRegistrertEtterPdlStart(behandling)) {
             return hentFamiliemedlemmer(pdlConsumer.hentFamilierelasjoner(ident));
         }
 
-        if (LocalDate.ofInstant(behandling.getRegistrertDato(), ZoneId.systemDefault()).isBefore(PDL_STARTDATO)) {
+        if (!erRegistrertEtterPdlStart(behandling)) {
             return saksopplysningerService.hentTpsPersonopplysninger(behandlingID).hentFamiliemedlemmer();
         }
 
@@ -283,13 +287,10 @@ public class PersondataService implements PersondataFasade {
 
     @Override
     public String hentSammensattNavn(String ident) {
-        if (unleash.isEnabled("melosys.pdl.sammensatt-navn")) {
-            return pdlConsumer.hentNavn(ident).stream()
-                .max(Comparator.comparing(n -> n.metadata().datoSistRegistrert()))
-                .map(NavnOversetter::tilSammensattNavn)
-                .orElse(NavnOversetter.UKJENT);
-        }
-        return tpsService.hentSammensattNavn(ident);
+        return pdlConsumer.hentNavn(ident).stream()
+            .max(Comparator.comparing(n -> n.metadata().datoSistRegistrert()))
+            .map(NavnOversetter::tilSammensattNavn)
+            .orElse(NavnOversetter.UKJENT);
     }
 
     @Override
