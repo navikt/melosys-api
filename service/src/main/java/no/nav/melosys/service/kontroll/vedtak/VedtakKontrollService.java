@@ -16,9 +16,11 @@ import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.validering.Kontrollfeil;
-import org.springframework.stereotype.Component;
+import org.springframework.context.annotation.Primary;
+import org.springframework.stereotype.Service;
 
-@Component
+@Service
+@Primary
 public class VedtakKontrollService {
 
     private final BehandlingService behandlingService;

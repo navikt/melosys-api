@@ -47,7 +47,7 @@ public class SendVedtakUtland extends AbstraktSendUtland {
                             BehandlingsresultatService behandlingsresultatService,
                             BrevBestiller brevBestiller,
                             SedSomBrevService sedSomBrevService,
-                            UtpekingService utpekingService) {
+                            @Qualifier("system") UtpekingService utpekingService) {
         super(eessiService, behandlingsresultatService);
         this.behandlingService = behandlingService;
         this.brevBestiller = brevBestiller;

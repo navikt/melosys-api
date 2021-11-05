@@ -14,12 +14,14 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.service.kontroll.PeriodeKontroller;
 import no.nav.melosys.service.persondata.PersondataFasade;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
 import static no.nav.melosys.metrics.MetrikkerNavn.TAG_BEGRUNNELSE;
 import static no.nav.melosys.metrics.MetrikkerNavn.UNNTAKSPERIODE_KONTROLL_TREFF;
 
 @Service
+@Primary
 public class UfmKontrollService {
 
     private final KontrollFactory kontrollFactory;
