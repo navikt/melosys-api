@@ -10,6 +10,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.adresse.Adresse;
+import no.nav.melosys.domain.adresse.StrukturertAdresse;
+import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.brev.storbritannia.AttestStorbritanniaBrevbestilling;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
@@ -21,6 +25,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.dokgen.dto.atteststorbritannia.*;
 import no.nav.melosys.integrasjon.dokgen.dto.felles.Person;
 import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
+import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import org.springframework.stereotype.Component;
 
@@ -28,13 +33,16 @@ import org.springframework.stereotype.Component;
 public class TryggdeavteleAtestMapper {
 
     private final AvklarteMedfolgendeFamilieService avklarteMedfolgendeFamilieService;
+    private final AvklarteVirksomheterService avklarteVirksomheterService;
     private final DokgenMapperDatahenter dokgenMapperDatahenter;
     private final PersondataFasade persondataFasade;
 
     public TryggdeavteleAtestMapper(AvklarteMedfolgendeFamilieService avklarteMedfolgendeFamilieService,
+                                    AvklarteVirksomheterService avklarteVirksomheterService,
                                     DokgenMapperDatahenter dokgenMapperDatahenter,
                                     PersondataFasade registerOppslagService) {
         this.avklarteMedfolgendeFamilieService = avklarteMedfolgendeFamilieService;
+        this.avklarteVirksomheterService = avklarteVirksomheterService;
         this.dokgenMapperDatahenter = dokgenMapperDatahenter;
         this.persondataFasade = registerOppslagService;
     }
@@ -42,6 +50,8 @@ public class TryggdeavteleAtestMapper {
     @Transactional
     public AttestStorbritannia map(AttestStorbritanniaBrevbestilling brevbestilling) {
         long behandlingId = brevbestilling.getBehandlingId();
+        Behandling behandling = brevbestilling.getBehandling();
+
         var behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(behandlingId);
 
         return new AttestStorbritannia.Builder(brevbestilling)
@@ -49,8 +59,7 @@ public class TryggdeavteleAtestMapper {
                 mapEktefelle(behandlingId),
                 mapBarn(behandlingId)
             ))
-            .arbeidsgiverNorge(new ArbeidsgiverNorge(
-                "Virksomhetsnavn", List.of("Nordmannsveg 200", "Norge")))
+            .arbeidsgiverNorge(getArbeidsgiverNorge(behandling))
             .arbeidstaker(
                 new Arbeidstaker(
                     "Nordmann, Ola",
@@ -70,6 +79,20 @@ public class TryggdeavteleAtestMapper {
             .build();
     }
 
+    private ArbeidsgiverNorge getArbeidsgiverNorge(Behandling behandling) {
+        List<AvklartVirksomhet> avklartVirksomhets = avklarteVirksomheterService.hentNorskeArbeidsgivere(behandling);
+        if (avklartVirksomhets.size() != 1) {
+            throw new FunksjonellException("avklartVirksomhets funnet er:" + avklartVirksomhets.size() + " må være 1 for trygdeatest");
+        }
+        AvklartVirksomhet norskeArbeidsgiver = avklartVirksomhets.get(0);
+        return new ArbeidsgiverNorge(norskeArbeidsgiver.navn, getAddresse(norskeArbeidsgiver.adresse));
+    }
+
+    private List<String> getAddresse(Adresse adresse) {
+        StrukturertAdresse strukturertAdresse = (StrukturertAdresse) adresse; // TODO: skekk all typer addresser
+        return List.of(strukturertAdresse.getGatenavn(), strukturertAdresse.getHusnummerEtasjeLeilighet(), strukturertAdresse.getPoststed(), strukturertAdresse.getPostnummer());
+    }
+
     private Instant createDate(String date) {
         return LocalDate.parse(date).atStartOfDay(ZoneId.systemDefault()).toInstant();
     }
@@ -77,7 +100,7 @@ public class TryggdeavteleAtestMapper {
     private List<Person> mapBarn(long behandlingID) {
         AvklarteMedfolgendeBarn avklarteMedfolgendeBarn = avklarteMedfolgendeFamilieService.hentAvklarteMedfølgendeBarn(behandlingID);
         Set<OmfattetFamilie> barnOmfattetAvNorskTrygd = avklarteMedfolgendeBarn.barnOmfattetAvNorskTrygd;
-        if(barnOmfattetAvNorskTrygd.isEmpty()) {
+        if (barnOmfattetAvNorskTrygd.isEmpty()) {
             return List.of();
         }
         Map<String, MedfolgendeFamilie> medfølgendeBarn = avklarteMedfolgendeFamilieService.hentMedfølgendeBarn(behandlingID);
@@ -87,7 +110,7 @@ public class TryggdeavteleAtestMapper {
     private Person mapEktefelle(long behandlingID) {
         AvklarteMedfolgendeFamilie avklarteMedfolgendeFamilie = avklarteMedfolgendeFamilieService.hentAvklartMedfølgendeEktefelle(behandlingID);
         Set<OmfattetFamilie> familieOmfattetAvNorskTrygd = avklarteMedfolgendeFamilie.getFamilieOmfattetAvNorskTrygd();
-        if(familieOmfattetAvNorskTrygd.isEmpty()) {
+        if (familieOmfattetAvNorskTrygd.isEmpty()) {
             return null;
         }
         OmfattetFamilie omfattetFamilie = familieOmfattetAvNorskTrygd.iterator().next();
