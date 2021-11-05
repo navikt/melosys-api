@@ -1,7 +1,5 @@
 package no.nav.melosys.domain.brev.storbritannia;
 
-import java.time.Instant;
-
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 
 public class AttestStorbritanniaBrevbestilling extends DokgenBrevbestilling {
