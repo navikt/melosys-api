@@ -6,10 +6,7 @@ import java.util.Set;
 
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.brev.DokgenBrevbestilling;
-import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
-import no.nav.melosys.domain.brev.MangelbrevBrevbestilling;
-import no.nav.melosys.domain.brev.Mottaker;
+import no.nav.melosys.domain.brev.*;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.integrasjon.dokgen.DokgenConsumer;
@@ -187,6 +184,10 @@ public class DokgenService {
                 .medBegrunnelseFritekst(brevbestillingRequest.getBegrunnelseFritekst())
                 .medEktefelleFritekst(brevbestillingRequest.getEktefelleFritekst())
                 .medBarnFritekst(brevbestillingRequest.getBarnFritekst());
+            case GENERELT_FRITEKSTBREV_BRUKER, GENERELT_FRITEKSTBREV_ARBEIDSGIVER -> new FritekstbrevBrevbestilling.Builder()
+                .medFritekstTittel(brevbestillingRequest.getFritekstTittel())
+                .medFritekst(brevbestillingRequest.getFritekst())
+                .medKontaktopplysninger(brevbestillingRequest.isKontaktopplysninger());
             default -> new DokgenBrevbestilling.Builder<>();
         };
     }

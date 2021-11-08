@@ -19,12 +19,9 @@ public class BrevbestillingRequest {
     private String kontaktpersonNavn;
     private List<KopiMottaker> kopiMottakere;
     private String bestillersId;
-
-    /**
-     * @deprecated Benyttes i doksys, kommer til å bli erstattet av dokgen-variabel
-     */
-    @Deprecated
+    private String fritekstTittel;
     private String fritekst;
+    private boolean kontaktopplysninger;
 
     /**
      * @deprecated Benyttes i doksys, kommer til å bli erstattet av dokgen-variabel
@@ -57,7 +54,9 @@ public class BrevbestillingRequest {
         this.kontaktpersonNavn = builder.kontaktpersonNavn;
         this.kopiMottakere = builder.kopiMottakere;
         this.bestillersId = builder.bestillersId;
+        this.fritekstTittel = builder.fritekstTittel;
         this.fritekst = builder.fritekst;
+        this.kontaktopplysninger = builder.kontaktopplysninger;
         this.begrunnelseKode = builder.begrunnelseKode;
         this.begrunnelseFritekst = builder.begrunnelseFritekst;
         this.ytterligereInformasjon = builder.ytterligereInformasjon;
@@ -110,8 +109,16 @@ public class BrevbestillingRequest {
         return bestillersId;
     }
 
+    public String getFritekstTittel() {
+        return fritekstTittel;
+    }
+
     public String getFritekst() {
         return fritekst;
+    }
+
+    public boolean isKontaktopplysninger() {
+        return kontaktopplysninger;
     }
 
     public String getBegrunnelseKode() {
@@ -134,7 +141,9 @@ public class BrevbestillingRequest {
         private String kontaktpersonNavn;
         private List<KopiMottaker> kopiMottakere;
         private String bestillersId;
+        private String fritekstTittel;
         private String fritekst;
+        private boolean kontaktopplysninger;
         private String begrunnelseKode;
         private String ytterligereInformasjon;
 
@@ -193,8 +202,18 @@ public class BrevbestillingRequest {
             return this;
         }
 
+        public Builder medFritekstTittel(String fritekstTittel) {
+            this.fritekstTittel = fritekstTittel;
+            return this;
+        }
+
         public Builder medFritekst(String fritekst) {
             this.fritekst = fritekst;
+            return this;
+        }
+
+        public Builder medKontaktopplysninger(boolean kontaktopplysninger) {
+            this.kontaktopplysninger = kontaktopplysninger;
             return this;
         }
 

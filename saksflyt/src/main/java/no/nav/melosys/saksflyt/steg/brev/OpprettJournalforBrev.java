@@ -6,6 +6,7 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.arkiv.JournalpostBestilling;
 import no.nav.melosys.domain.arkiv.OpprettJournalpost;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
+import no.nav.melosys.domain.brev.FritekstbrevBrevbestilling;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
@@ -93,7 +94,7 @@ public class OpprettJournalforBrev implements StegBehandler {
         DokumentproduksjonsInfo dokumentproduksjonsInfo = dokgenService.hentDokumentInfo(produserbartDokument);
 
         JournalpostBestilling bestilling = new JournalpostBestilling.Builder()
-            .medTittel(dokumentproduksjonsInfo.journalføringsTittel())
+            .medTittel(utledJournalføringsTittel(dokumentproduksjonsInfo, brevbestilling))
             .medBrevkode(dokumentproduksjonsInfo.dokgenMalnavn())
             .medDokumentKategori(dokumentproduksjonsInfo.dokumentKategoriKode())
             .medBrukerFnr(brukerFnr)
@@ -115,5 +116,16 @@ public class OpprettJournalforBrev implements StegBehandler {
             return persondataFasade.hentFolkeregisterident(behandling.getFagsak().hentAktørID());
         }
         return behandling.hentPersonDokument().hentFolkeregisterident();
+    }
+
+    private String utledJournalføringsTittel(DokumentproduksjonsInfo dokumentproduksjonsInfo, DokgenBrevbestilling brevbestilling) {
+        if (brevbestilling instanceof FritekstbrevBrevbestilling fritekstbrevBrevbestilling) {
+            String fritekstTittel = fritekstbrevBrevbestilling.getFritekstTittel();
+            if (isEmpty(fritekstTittel)) {
+                throw new FunksjonellException("Tittel til fritekstbrev mangler, behandlingId:" + brevbestilling.getBehandlingId());
+            }
+            return fritekstTittel;
+        }
+        return dokumentproduksjonsInfo.journalføringsTittel();
     }
 }

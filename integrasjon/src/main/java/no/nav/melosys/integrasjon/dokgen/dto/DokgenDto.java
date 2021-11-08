@@ -7,10 +7,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.ser.InstantSerializer;
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
-import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.integrasjon.dokgen.dto.felles.Mottaker;
 
@@ -27,6 +25,7 @@ public abstract class DokgenDto {
     private final Instant dagensDato;
 
     private final String navnBruker;
+    private final String saksbehandlerNavn;
     private Mottaker mottaker;
 
     // Saksbehandlingstid er 12 uker fra dato for utsendelse av brev, uavhengig av helg, helligdager, osv.
@@ -35,16 +34,25 @@ public abstract class DokgenDto {
     protected static final int DOKUMENTASJON_SVARFRIST_UKER_MANGELBREV = 4;
 
     protected DokgenDto(DokgenBrevbestilling brevbestilling) {
-        Behandling behandling = brevbestilling.getBehandling();
-        OrganisasjonDokument org = brevbestilling.getOrg();
-        Fagsak fagsak = behandling.getFagsak();
         Persondata persondata = brevbestilling.getPersondokument();
 
         this.fnr = persondata.hentFolkeregisterident();
-        this.saksnummer = fagsak.getSaksnummer();
+        this.saksnummer = brevbestilling.getBehandling().getFagsak().getSaksnummer();
         this.dagensDato = Instant.now();
         this.navnBruker = persondata.getSammensattNavn();
-        this.mottaker = mapMottaker(org, brevbestilling.getKontaktpersonNavn(), brevbestilling.getKontaktopplysning(), persondata);
+        this.saksbehandlerNavn = brevbestilling.getSaksbehandlerNavn();
+        this.mottaker = mapMottaker(brevbestilling, Aktoersroller.BRUKER);
+    }
+
+    protected DokgenDto(DokgenBrevbestilling brevbestilling, Aktoersroller mottakerType) {
+        Persondata persondata = brevbestilling.getPersondokument();
+
+        this.fnr = persondata.hentFolkeregisterident();
+        this.saksnummer = brevbestilling.getBehandling().getFagsak().getSaksnummer();
+        this.dagensDato = Instant.now();
+        this.navnBruker = persondata.getSammensattNavn();
+        this.saksbehandlerNavn = brevbestilling.getSaksbehandlerNavn();
+        this.mottaker = mapMottaker(brevbestilling, mottakerType);
     }
 
     public String getFnr() {
@@ -61,6 +69,10 @@ public abstract class DokgenDto {
 
     public String getNavnBruker() {
         return navnBruker;
+    }
+
+    public String getSaksbehandlerNavn() {
+        return saksbehandlerNavn;
     }
 
     public Mottaker getMottaker() {

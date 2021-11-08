@@ -72,8 +72,8 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
     void init() {
         BrevmottakerService brevmottakerService = new BrevmottakerService(mockKontaktopplysningService, mock(AvklarteVirksomheterService.class), mock(UtenlandskMyndighetService.class), mock(BehandlingsresultatService.class), mock(TrygdeavgiftsberegningService.class));
         BrevbestillingService brevbestillingService = new BrevbestillingService(mockBrevmottakerService,
-                mockDokServiceFasade, mockEregFasade, mock(KodeverkService.class), mockKontaktopplysningService,
-                mockPersondataFasade, new FakeUnleash());
+            mockDokServiceFasade, mockEregFasade, mock(KodeverkService.class), mockKontaktopplysningService,
+            mockPersondataFasade, new FakeUnleash());
         brevbestillingTjeneste = new BrevbestillingTjeneste(brevbestillingService, mockBehandlingService, brevmottakerService, aksesskontroll);
     }
 
@@ -93,10 +93,16 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
         assertThat(brevmaler.get(1).getType()).isEqualTo(MANGELBREV_ARBEIDSGIVER);
         assertThat(brevmaler.get(1).getFelter().get(0).getValg()).hasSize(1);
         assertThat(brevmaler.get(1).getMuligeMottakere()).hasSize(2);
+
+//        assertThat(brevmaler.get(2).getType()).isEqualTo(GENERELT_FRITEKSTBREV_BRUKER);
+//        assertThat(brevmaler.get(2).getMuligeMottakere()).hasSize(1);
+//
+//        assertThat(brevmaler.get(3).getType()).isEqualTo(GENERELT_FRITEKSTBREV_ARBEIDSGIVER);
+//        assertThat(brevmaler.get(3).getMuligeMottakere()).hasSize(1);
     }
 
     @Test
-    void hentTilgjengeligeMaler_soeknad_returnererSoeknadMalOgEndredeValg() throws Exception {
+    void hentTilgjengeligeMaler_soeknad_returnererSoeknadMalOgEndredeValg() {
         when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling(Behandlingstyper.SOEKNAD));
         when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
 
@@ -117,11 +123,10 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
             .extracting(FeltvalgDto::getKode)
             .containsExactlyInAnyOrder("FRITEKST", "STANDARD");
 
-
     }
 
     @Test
-    void hentTilgjengeligeMaler_brukerAdresseNull_returnererMalMedFeilmelding() throws Exception {
+    void hentTilgjengeligeMaler_brukerAdresseNull_returnererMalMedFeilmelding() {
         when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling(null));
         when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
 
@@ -182,6 +187,30 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
             BrevbestillingRequest::getInnledningFritekst,
             BrevbestillingRequest::getBestillersId
         ).containsExactly(MANGELBREV_BRUKER, Aktoersroller.BRUKER, "Innledning", SAKSBEHANDLER);
+
+        valider(brevbestillingDto, "dokumenter-v2-opprett-post-schema.json", new ObjectMapper());
+    }
+
+    @Test
+    void skalBestilleProduseringAvFritekstbrev() throws Exception {
+        settInnloggetSaksbehandler();
+
+        BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder()
+            .medProduserbardokument(GENERELT_FRITEKSTBREV_BRUKER)
+            .medMottaker(Aktoersroller.BRUKER)
+            .medFritekstTittel("Tittel")
+            .medFritekst("Innhold")
+            .build();
+        brevbestillingTjeneste.produserBrev(123L, brevbestillingDto);
+
+        verify(mockDokServiceFasade).produserDokument(anyLong(), brevbestillingDtoCaptor.capture());
+
+        assertThat(brevbestillingDtoCaptor.getValue()).extracting(
+            BrevbestillingRequest::getProduserbardokument,
+            BrevbestillingRequest::getMottaker,
+            BrevbestillingRequest::getFritekstTittel,
+            BrevbestillingRequest::getFritekst
+        ).containsExactly(GENERELT_FRITEKSTBREV_BRUKER, Aktoersroller.BRUKER, "Tittel", "Innhold");
 
         valider(brevbestillingDto, "dokumenter-v2-opprett-post-schema.json", new ObjectMapper());
     }

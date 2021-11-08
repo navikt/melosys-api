@@ -41,6 +41,15 @@ public class BrevmottakerMapper {
                     BRUKER_FÅR_KOPI_HVIS_FULLMEKTIG_FINNES,
                     ARBEIDSGIVER_FÅR_KOPI_HVIS_IKKE_SELVBETALENDE_BRUKER,
                     SKATT_FÅR_KOPI_HVIS_AVGIFTSPLIKTIG_INNTEKT
+                ).build(),
+
+            GENERELT_FRITEKSTBREV_BRUKER, new Mottakerliste.Builder()
+                .medHovedMottaker(BRUKER).build(),
+
+            GENERELT_FRITEKSTBREV_ARBEIDSGIVER, new Mottakerliste.Builder()
+                .medHovedMottaker(ARBEIDSGIVER)
+                .medBrevkopiRegler(
+                    BRUKER_FÅR_KOPI
                 ).build()
         );
     }
