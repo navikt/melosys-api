@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import no.nav.commons.foedselsnummer.Kjoenn;
+import no.nav.commons.foedselsnummer.testutils.FoedselsnummerGenerator;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avgift.AvgiftsgrunnlagInfoNorge;
 import no.nav.melosys.domain.avgift.AvgiftsgrunnlagInfoUtland;
@@ -37,12 +39,13 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
 
+import static no.nav.melosys.domain.behandlingsgrunnlag.data.IdentType.*;
+import static no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie.tilMedfolgendeFamilie;
 import static no.nav.melosys.domain.kodeverk.Loenn_forhold.LØNN_FRA_NORGE;
 import static no.nav.melosys.domain.kodeverk.Loenn_forhold.LØNN_FRA_UTLANDET;
 import static no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_8_naer_tilknytning_norge_begrunnelser.ANSATT_I_NORSK_VIRKSOMHET_IKKE_UTSENDT;
 import static no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_barn_begrunnelser_ftrl.IKKE_SOEKERS_BARN;
 import static no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_ektefelle_samboer_begrunnelser_ftrl.IKKE_TRE_AV_FEM_SISTE_ÅR;
-import static no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.IdentType.*;
 import static no.nav.melosys.service.dokument.DokgenTestData.*;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.*;
@@ -51,11 +54,9 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class InnvilgelseFtrlMapperTest {
 
-    public static final String UUID_EKTEFELLE = "uuidEktefelle";
-    public static final String UUID_BARN_1 = "uuidBarn1";
-    public static final String UUID_BARN_2 = "uuidBarn2";
-    public static final String EKTEFELLE_FNR = "49080723451";
-    private static final String BARN1_FNR = "12131456789";
+    private static final String UUID_EKTEFELLE = "uuidEktefelle";
+    private static final String UUID_BARN_1 = "uuidBarn1";
+    private static final String UUID_BARN_2 = "uuidBarn2";
     private static final String BARN2_FNR = "02.05.11";
     public static final String BEGRUNNELSE_FRITEKST = "Begrunnelse fritekst";
     public static final String SAKSBEHANDLER_NAVN = "Fetter Anton";
@@ -80,6 +81,10 @@ class InnvilgelseFtrlMapperTest {
 
     @Mock
     private DokgenMapperDatahenter mockDokgenMapperDatahenter;
+
+    private final FoedselsnummerGenerator foedselsnummerGenerator = new FoedselsnummerGenerator();
+    private final String EKTEFELLE_FNR = foedselsnummerGenerator.foedselsnummer(null, Kjoenn.KVINNE, true).getAsString();
+    private final String BARN1_FNR = foedselsnummerGenerator.foedselsnummer(null, Kjoenn.MANN, false).getAsString();
 
     private InnvilgelseFtrlMapper innvilgelseFtrlMapper;
 
@@ -288,16 +293,13 @@ class InnvilgelseFtrlMapperTest {
     }
 
     private Map<String, MedfolgendeFamilie> lagMedfølgendeEktefelle() {
-        MedfolgendeFamilie ektefelle = new MedfolgendeFamilie();
-        ektefelle.fnr = EKTEFELLE_FNR;
+        MedfolgendeFamilie ektefelle = tilMedfolgendeFamilie(UUID_EKTEFELLE, EKTEFELLE_FNR, EKTEFELLE_NAVN, MedfolgendeFamilie.Relasjonsrolle.EKTEFELLE_SAMBOER);
         return Map.of(UUID_EKTEFELLE, ektefelle);
     }
 
     private Map<String, MedfolgendeFamilie> lagMedfølgendeBarn() {
-        MedfolgendeFamilie medfolgendeBarn1 = new MedfolgendeFamilie();
-        medfolgendeBarn1.fnr = BARN1_FNR;
-        MedfolgendeFamilie medfolgendeBarn2 = new MedfolgendeFamilie();
-        medfolgendeBarn2.fnr = BARN2_FNR;
+        MedfolgendeFamilie medfolgendeBarn1 = tilMedfolgendeFamilie(UUID_BARN_1, BARN1_FNR, BARN1_NAVN, MedfolgendeFamilie.Relasjonsrolle.BARN);
+        MedfolgendeFamilie medfolgendeBarn2 = tilMedfolgendeFamilie(UUID_BARN_2, BARN2_FNR, BARN2_NAVN, MedfolgendeFamilie.Relasjonsrolle.BARN);
         return Map.of(UUID_BARN_1, medfolgendeBarn1, UUID_BARN_2, medfolgendeBarn2);
     }
 
@@ -345,12 +347,15 @@ class InnvilgelseFtrlMapperTest {
         when(mockDokgenMapperDatahenter.hentLandnavn(anyString())).thenAnswer((Answer<String>) invocationOnMock -> Landkoder.valueOf(invocationOnMock.getArgument(0)).getBeskrivelse());
         when(mockDokgenMapperDatahenter.hentSammensattNavn(anyString())).thenAnswer((Answer<String>) invocationOnMock -> {
             String fnr = invocationOnMock.getArgument(0);
-            return switch (fnr) {
-                case EKTEFELLE_FNR -> EKTEFELLE_NAVN;
-                case BARN1_FNR -> BARN1_NAVN;
-                case BARN2_FNR -> BARN2_NAVN;
-                default -> null;
-            };
+            String navn = null;
+            if (fnr.equals(EKTEFELLE_FNR)) {
+                navn = EKTEFELLE_NAVN;
+            } else if (fnr.equals(BARN1_FNR)) {
+                navn = BARN1_NAVN;
+            } else if (fnr.equals(BARN2_FNR)) {
+                navn = BARN2_NAVN;
+            }
+            return navn;
         });
     }
 }

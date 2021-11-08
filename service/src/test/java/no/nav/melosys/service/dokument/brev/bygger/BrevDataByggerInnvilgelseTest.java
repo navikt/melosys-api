@@ -218,11 +218,11 @@ class BrevDataByggerInnvilgelseTest {
         behandlingsgrunnlag.setBehandlingsgrunnlagdata(behandlingsgrunnlagData);
 
         when(avklartefaktaService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(new AvklarteMedfolgendeBarn(
-            Set.of(new OmfattetFamilie(barn1.uuid)),
-            Set.of(new IkkeOmfattetBarn(barn2.uuid, null, null))));
+            Set.of(new OmfattetFamilie(barn1.getUuid())),
+            Set.of(new IkkeOmfattetBarn(barn2.getUuid(), null, null))));
         when(behandlingsgrunnlagService.hentBehandlingsgrunnlag(anyLong())).thenReturn(behandlingsgrunnlag);
-        when(persondataFasade.hentSammensattNavn(barn1.fnr)).thenReturn("Navn1");
-        when(persondataFasade.hentSammensattNavn(barn2.fnr)).thenReturn("Navn2");
+        when(persondataFasade.hentSammensattNavn(barn1.getFnr())).thenReturn("Navn1");
+        when(persondataFasade.hentSammensattNavn(barn2.getFnr())).thenReturn("Navn2");
 
         BrevDataInnvilgelse brevData = (BrevDataInnvilgelse) brevDataByggerInnvilgelse.lag(lagBrevdataGrunnlag(), saksbehandler);
         assertThat(brevData.avklarteMedfolgendeBarn.barnOmfattetAvNorskTrygd)
@@ -245,15 +245,15 @@ class BrevDataByggerInnvilgelseTest {
         behandlingsgrunnlag.setBehandlingsgrunnlagdata(behandlingsgrunnlagData);
 
         when(avklartefaktaService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(new AvklarteMedfolgendeBarn(
-            Set.of(new OmfattetFamilie(barn1.uuid)),
-            Set.of(new IkkeOmfattetBarn(barn2.uuid, null, null))));
+            Set.of(new OmfattetFamilie(barn1.getUuid())),
+            Set.of(new IkkeOmfattetBarn(barn2.getUuid(), null, null))));
         when(behandlingsgrunnlagService.hentBehandlingsgrunnlag(anyLong())).thenReturn(behandlingsgrunnlag);
 
         BrevDataInnvilgelse brevData = (BrevDataInnvilgelse) brevDataByggerInnvilgelse.lag(lagBrevdataGrunnlag(), saksbehandler);
         assertThat(brevData.avklarteMedfolgendeBarn.barnOmfattetAvNorskTrygd)
-            .extracting("sammensattNavn").containsExactly(barn1.navn);
+            .extracting("sammensattNavn").containsExactly(barn1.getNavn());
         assertThat(brevData.avklarteMedfolgendeBarn.barnIkkeOmfattetAvNorskTrygd)
-            .extracting("sammensattNavn").containsExactly(barn2.navn);
+            .extracting("sammensattNavn").containsExactly(barn2.getNavn());
 
         verify(persondataFasade, never()).hentSammensattNavn(anyString());
     }
@@ -264,7 +264,7 @@ class BrevDataByggerInnvilgelseTest {
         final BrevDataGrunnlag brevDataGrunnlag = lagBrevdataGrunnlag();
 
         when(avklartefaktaService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(new AvklarteMedfolgendeBarn(
-            Set.of(new OmfattetFamilie(barn.uuid)), Collections.emptySet()));
+            Set.of(new OmfattetFamilie(barn.getUuid())), Collections.emptySet()));
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> brevDataByggerInnvilgelse.lag(brevDataGrunnlag, saksbehandler))
@@ -277,7 +277,7 @@ class BrevDataByggerInnvilgelseTest {
         final BrevDataGrunnlag brevDataGrunnlag = lagBrevdataGrunnlag();
 
         when(avklartefaktaService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(new AvklarteMedfolgendeBarn(
-            Collections.emptySet(), Set.of(new IkkeOmfattetBarn(barn.uuid, null, null))));
+            Collections.emptySet(), Set.of(new IkkeOmfattetBarn(barn.getUuid(), null, null))));
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> brevDataByggerInnvilgelse.lag(brevDataGrunnlag, saksbehandler))

@@ -13,6 +13,7 @@ import no.nav.melosys.domain.avgift.AvgiftsgrunnlagInfoUtland;
 import no.nav.melosys.domain.avgift.Trygdeavgiftsgrunnlag;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.IdentType;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Soeknadsland;
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
@@ -140,23 +141,8 @@ public class InnvilgelseFtrlMapper {
     private FamiliemedlemInfo tilFamiliemedlemInfo(Map<String, MedfolgendeFamilie> avklartMedfolgende, String uuid) {
         MedfolgendeFamilie medfolgendeFamilie = Optional.of(avklartMedfolgende.get(uuid))
             .orElseThrow(() -> new FunksjonellException("Avklart medfølgende familie " + uuid + " finnes ikke i behandlingsgrunnlaget"));
-        String sammensattNavn = medfolgendeFamilie.fnr != null ? dokgenMapperDatahenter.hentSammensattNavn(medfolgendeFamilie.fnr) : medfolgendeFamilie.navn;
-        return new FamiliemedlemInfo(sammensattNavn, medfolgendeFamilie.fnr, utledIdentType(medfolgendeFamilie.fnr));
-    }
-
-    private IdentType utledIdentType(String ident) {
-        IdentType identType = IdentType.FNR;
-
-        if (isEmpty(ident)) {
-            return identType;
-        }
-
-        if (ident.contains(".")) {
-            identType = IdentType.DATO;
-        } else if(ident.length() == 11 && Integer.parseInt(ident.substring(0,1)) > 3) {
-            identType = IdentType.DNR;
-        }
-        return identType;
+        String sammensattNavn = medfolgendeFamilie.getFnr() != null ? dokgenMapperDatahenter.hentSammensattNavn(medfolgendeFamilie.getFnr()) : medfolgendeFamilie.getNavn();
+        return new FamiliemedlemInfo(sammensattNavn, medfolgendeFamilie.getFnr(), medfolgendeFamilie.utledIdentType());
     }
 
     private VurderingTrygdeavgift mapVurderingTrygdeavgift(Trygdeavgiftsgrunnlag trygdeavgiftsgrunnlag, FastsattTrygdeavgift fastsattTrygdeavgift) {

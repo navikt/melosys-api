@@ -23,6 +23,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySet;
+import static no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie.tilMedfolgendeFamilie;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
@@ -122,9 +123,9 @@ public class TrygdeavtaleServiceTest {
     @Test
     void hentFamiliemedlemmer_barnOgEktefelle_fyltListe() {
         var behandling = lagBehandlingMedFamilie(List.of(
-            lagMedfolgendeFamilie("uuid1", "navn1", MedfolgendeFamilie.Relasjonsrolle.BARN),
-            lagMedfolgendeFamilie("uuid2", "navn2", MedfolgendeFamilie.Relasjonsrolle.BARN),
-            lagMedfolgendeFamilie("uuid3", "navn3", MedfolgendeFamilie.Relasjonsrolle.EKTEFELLE_SAMBOER)
+            tilMedfolgendeFamilie("uuid1", "01.01.01", "navn1", MedfolgendeFamilie.Relasjonsrolle.BARN),
+            tilMedfolgendeFamilie("uuid2", "01.01.01","navn2", MedfolgendeFamilie.Relasjonsrolle.BARN),
+            tilMedfolgendeFamilie("uuid3", "01.01.01","navn3", MedfolgendeFamilie.Relasjonsrolle.EKTEFELLE_SAMBOER)
         ));
 
         var response = trygdeavtaleService.hentFamiliemedlemmer(behandling);
@@ -181,14 +182,6 @@ public class TrygdeavtaleServiceTest {
         behandling.setSaksopplysninger(saksopplysninger);
         behandling.setBehandlingsgrunnlag(behandlingsgrunnlag);
         return behandling;
-    }
-
-    private MedfolgendeFamilie lagMedfolgendeFamilie(String uuid, String navn, MedfolgendeFamilie.Relasjonsrolle rolle) {
-        var medfolgendeFamilie = new MedfolgendeFamilie();
-        medfolgendeFamilie.uuid = uuid;
-        medfolgendeFamilie.navn = navn;
-        medfolgendeFamilie.relasjonsrolle = rolle;
-        return medfolgendeFamilie;
     }
 
     private List<ForetakUtland> lagForetakUtland(Map<String, String> uuidNavn) {

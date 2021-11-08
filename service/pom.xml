@@ -121,6 +121,10 @@
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>nav-foedselsnummer</groupId>
+            <artifactId>testutils</artifactId>
+        </dependency>
     </dependencies>
 
 
