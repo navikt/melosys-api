@@ -130,16 +130,16 @@ public class BrevDataByggerInnvilgelse implements BrevDataBygger {
                 throw new FunksjonellException("Avklart medfølgende barn " + omfattetBarn.getUuid() + " finnes ikke i behandlingsgrunnlaget");
             }
             MedfolgendeFamilie barn = medfølgendeBarn.get(omfattetBarn.getUuid());
-            omfattetBarn.setIdent(barn.fnr);
-            omfattetBarn.setSammensattNavn(barn.fnr != null ? persondataFasade.hentSammensattNavn(barn.fnr) : barn.navn);
+            omfattetBarn.setIdent(barn.getFnr());
+            omfattetBarn.setSammensattNavn(barn.getFnr() != null ? persondataFasade.hentSammensattNavn(barn.getFnr()) : barn.getNavn());
         }
         for (IkkeOmfattetBarn ikkeOmfattetBarn : avklarteMedfolgendeBarn.barnIkkeOmfattetAvNorskTrygd) {
             if (!medfølgendeBarn.containsKey(ikkeOmfattetBarn.uuid)) {
                 throw new FunksjonellException("Avklart medfølgende barn " + ikkeOmfattetBarn.uuid + " finnes ikke i behandlingsgrunnlaget");
             }
             MedfolgendeFamilie barn = medfølgendeBarn.get(ikkeOmfattetBarn.uuid);
-            ikkeOmfattetBarn.sammensattNavn = barn.fnr != null ? persondataFasade.hentSammensattNavn(barn.fnr) : barn.navn;
-            ikkeOmfattetBarn.ident = barn.fnr;
+            ikkeOmfattetBarn.sammensattNavn = barn.getFnr() != null ? persondataFasade.hentSammensattNavn(barn.getFnr()) : barn.getNavn();
+            ikkeOmfattetBarn.ident = barn.getFnr();
         }
         return avklarteMedfolgendeBarn;
     }
