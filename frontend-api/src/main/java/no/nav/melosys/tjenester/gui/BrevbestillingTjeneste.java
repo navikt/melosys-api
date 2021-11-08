@@ -104,7 +104,7 @@ public class BrevbestillingTjeneste {
                 return switch (p) {
                     case MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE -> lagBrevMalDtoForForventetSaksbehandlingstid(p, hovedMottaker, behandling);
                     case MANGELBREV_BRUKER, MANGELBREV_ARBEIDSGIVER -> lagBrevMalDtoForMangelbrev(p, hovedMottaker, behandling);
-                    case GENERELT_FRITEKSTBREV_BRUKER, GENERELT_FRITEKSTBREV_ARBEIDSGIVER -> lagBrevMalDtoForFritekstbrev(p, hovedMottaker, behandling);
+//                    case GENERELT_FRITEKSTBREV_BRUKER, GENERELT_FRITEKSTBREV_ARBEIDSGIVER -> lagBrevMalDtoForFritekstbrev(p, hovedMottaker, behandling);
                     default -> null;
                 };
             })
