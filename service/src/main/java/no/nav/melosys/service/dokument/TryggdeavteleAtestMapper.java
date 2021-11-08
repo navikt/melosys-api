@@ -3,10 +3,7 @@ package no.nav.melosys.service.dokument;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 
@@ -51,6 +48,7 @@ public class TryggdeavteleAtestMapper {
     public AttestStorbritannia map(AttestStorbritanniaBrevbestilling brevbestilling) {
         long behandlingId = brevbestilling.getBehandlingId();
         Behandling behandling = brevbestilling.getBehandling();
+        Persondata persondokument = brevbestilling.getPersondokument();
 
         var behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(behandlingId);
 
@@ -60,12 +58,7 @@ public class TryggdeavteleAtestMapper {
                 mapBarn(behandlingId)
             ))
             .arbeidsgiverNorge(getArbeidsgiverNorge(behandling))
-            .arbeidstaker(
-                new Arbeidstaker(
-                    "Nordmann, Ola",
-                    createDate("1994-04-30"),
-                    "01010119901",
-                    List.of("Nordmannsveg 200", "Norge")))
+            .arbeidstaker(getArbeidstaker(persondokument))
             .representantUK(new RepresentantUK(
                 "Mrs. London",
                 List.of("UK Street 1337"))
@@ -79,6 +72,14 @@ public class TryggdeavteleAtestMapper {
             .build();
     }
 
+    private Arbeidstaker getArbeidstaker(Persondata persondokument) {
+        return new Arbeidstaker(
+            persondokument.getSammensattNavn(),
+            toInstant(persondokument.getFødselsdato()),
+            persondokument.hentFolkeregisterident(),
+            List.of("Nordmannsveg 200", "Norge"));
+    }
+
     private ArbeidsgiverNorge getArbeidsgiverNorge(Behandling behandling) {
         List<AvklartVirksomhet> avklartVirksomhets = avklarteVirksomheterService.hentNorskeArbeidsgivere(behandling);
         if (avklartVirksomhets.size() != 1) {
@@ -89,12 +90,25 @@ public class TryggdeavteleAtestMapper {
     }
 
     private List<String> getAddresse(Adresse adresse) {
-        StrukturertAdresse strukturertAdresse = (StrukturertAdresse) adresse; // TODO: skekk all typer addresser
-        return List.of(strukturertAdresse.getGatenavn(), strukturertAdresse.getHusnummerEtasjeLeilighet(), strukturertAdresse.getPoststed(), strukturertAdresse.getPostnummer());
+        StrukturertAdresse strukturertAdresse = (StrukturertAdresse) adresse; // TODO: sjekk all typer addresser. Finnes det allerede en utility for dette?
+//        ArrayList list = new ArrayList();
+//        list.add(strukturertAdresse.getGatenavn()  + " " + strukturertAdresse.getHusnummerEtasjeLeilighet());
+        return List.of( // TODO: sjekk om null
+            strukturertAdresse.getGatenavn() + " " + strukturertAdresse.getHusnummerEtasjeLeilighet(),
+            strukturertAdresse.getPoststed() + " " + strukturertAdresse.getPostnummer(),
+            strukturertAdresse.getLandkode()
+        );
     }
 
     private Instant createDate(String date) {
-        return LocalDate.parse(date).atStartOfDay(ZoneId.systemDefault()).toInstant();
+        return toInstant(LocalDate.parse(date));
+    }
+
+    private Instant toInstant(LocalDate localDate) {
+        if(localDate == null) {
+            return null;
+        }
+        return localDate.atStartOfDay(ZoneId.systemDefault()).toInstant();
     }
 
     private List<Person> mapBarn(long behandlingID) {

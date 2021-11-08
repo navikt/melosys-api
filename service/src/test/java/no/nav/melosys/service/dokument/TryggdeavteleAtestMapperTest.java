@@ -22,6 +22,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import static no.nav.melosys.service.dokument.DokgenTestData.*;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -79,6 +80,7 @@ class TryggdeavteleAtestMapperTest {
         AttestStorbritannia attestStorbritannia = tryggdeavteleAtestMapper.map(new AttestStorbritanniaBrevbestilling.Builder()
             .medBehandling(lagBehandling())
             .medPersonDokument(lagPersonDokument())
+            .medVedtaksdato(Instant.parse("1970-10-10T00:00:00Z"))
             .build()
         );
 
