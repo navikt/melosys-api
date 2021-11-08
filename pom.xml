@@ -477,12 +477,6 @@
                 <artifactId>core</artifactId>
                 <version>${nav-foedselsnummer.core.version}</version>
             </dependency>
-
-            <dependency>
-                <groupId>nav-foedselsnummer</groupId>
-                <artifactId>testutils</artifactId>
-                <version>${nav-foedselsnummer.core.version}</version>
-            </dependency>
             <!-- SOB -->
             <dependency>
                 <groupId>no.nav.tjenestespesifikasjoner</groupId>
@@ -587,6 +581,11 @@
                 <artifactId>awaitility</artifactId>
                 <version>${awaitility.version}</version>
                 <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>nav-foedselsnummer</groupId>
+                <artifactId>testutils</artifactId>
+                <version>${nav-foedselsnummer.core.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

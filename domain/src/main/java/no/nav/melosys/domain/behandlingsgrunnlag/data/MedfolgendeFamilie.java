@@ -11,7 +11,8 @@ public class MedfolgendeFamilie {
     private String navn;
     private Relasjonsrolle relasjonsrolle;
 
-    private MedfolgendeFamilie() {
+    public MedfolgendeFamilie() {
+        // Tom constructor på grunn av de/serialisering i `BehandlingsgrunnlagListener`
     }
 
     private MedfolgendeFamilie(String uuid, String fnr, String navn, Relasjonsrolle relasjonsrolle) {

@@ -124,6 +124,7 @@
         <dependency>
             <groupId>nav-foedselsnummer</groupId>
             <artifactId>testutils</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
