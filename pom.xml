@@ -586,6 +586,7 @@
                 <groupId>nav-foedselsnummer</groupId>
                 <artifactId>testutils</artifactId>
                 <version>${nav-foedselsnummer.core.version}</version>
+                <scope>test</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>

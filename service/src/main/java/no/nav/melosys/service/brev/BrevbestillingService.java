@@ -186,7 +186,8 @@ public class BrevbestillingService {
         } else if (behandling.erKlage()) {
             brevmaler.add(MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE);
         }
-        brevmaler.addAll(asList(MANGELBREV_BRUKER, MANGELBREV_ARBEIDSGIVER, GENERELT_FRITEKSTBREV_BRUKER, GENERELT_FRITEKSTBREV_ARBEIDSGIVER));
+//        brevmaler.addAll(asList(MANGELBREV_BRUKER, MANGELBREV_ARBEIDSGIVER, GENERELT_FRITEKSTBREV_BRUKER, GENERELT_FRITEKSTBREV_ARBEIDSGIVER)); //TODO Tas inn når frontend er klar for fritekstbrev
+        brevmaler.addAll(asList(MANGELBREV_BRUKER, MANGELBREV_ARBEIDSGIVER));
 
         return behandling.erAktiv() ? brevmaler : emptyList();
     }
