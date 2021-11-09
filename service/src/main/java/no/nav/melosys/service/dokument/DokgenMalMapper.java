@@ -18,12 +18,15 @@ public class DokgenMalMapper {
 
     private final DokgenMapperDatahenter dokgenMapperDatahenter;
     private final InnvilgelseFtrlMapper innvilgelseFtrlMapper;
+    private final InnvilgelseUKMapper innvilgelseUKMapper;
 
     @Autowired
     public DokgenMalMapper(DokgenMapperDatahenter dokgenMapperDatahenter,
-                           InnvilgelseFtrlMapper innvilgelseFtrlMapper) {
+                           InnvilgelseFtrlMapper innvilgelseFtrlMapper,
+                           InnvilgelseUKMapper innvilgelseUKMapper) {
         this.dokgenMapperDatahenter = dokgenMapperDatahenter;
         this.innvilgelseFtrlMapper = innvilgelseFtrlMapper;
+        this.innvilgelseUKMapper = innvilgelseUKMapper;
     }
 
     public DokgenDto mapBehandling(DokgenBrevbestilling mottattBrevbestilling) {
@@ -66,6 +69,7 @@ public class DokgenMalMapper {
                     .build()
             );
             case INNVILGELSE_FOLKETRYGDLOVEN_2_8 -> innvilgelseFtrlMapper.map((InnvilgelseBrevbestilling) brevbestilling);
+            case INNVILGELSE_UK -> innvilgelseUKMapper.map((InnvilgelseBrevbestilling) brevbestilling);
             default -> throw new FunksjonellException(
                 format("ProduserbartDokument %s er ikke støttet av melosys-dokgen",
                     brevbestilling.getProduserbartdokument()));

@@ -5,7 +5,7 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_t
 import no.nav.melosys.integrasjon.dokgen.dto.DokgenDto;
 import no.nav.melosys.integrasjon.dokgen.dto.felles.Mottaker;
 
-public class InnvilgelseStorbritannia extends DokgenDto {
+public class InnvilgelseUK extends DokgenDto {
 
     private final Mottaker mottaker;
     private final Lovvalgbestemmelser_trygdeavtale_uk artikkel;
@@ -14,12 +14,12 @@ public class InnvilgelseStorbritannia extends DokgenDto {
     private final Kopi kopi;
 
 
-    public InnvilgelseStorbritannia(InnvilgelseBrevbestilling brevbestilling,
-                                    Mottaker mottaker,
-                                    Lovvalgbestemmelser_trygdeavtale_uk artikkel,
-                                    Soknad soknad,
-                                    Familie familie,
-                                    Kopi kopi) {
+    public InnvilgelseUK(InnvilgelseBrevbestilling brevbestilling,
+                         Mottaker mottaker,
+                         Lovvalgbestemmelser_trygdeavtale_uk artikkel,
+                         Soknad soknad,
+                         Familie familie,
+                         Kopi kopi) {
         super(brevbestilling);
         this.mottaker = mottaker;
         this.artikkel = artikkel;

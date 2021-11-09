@@ -5,7 +5,6 @@ import java.time.Instant;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.ser.InstantSerializer;
-import no.nav.melosys.domain.brev.storbritannia.SoknadUKInnvilgelse;
 
 import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
 
@@ -22,15 +21,6 @@ public record Soknad(
     @JsonFormat(shape = STRING)
     Instant periodeTom,
 
-    String virksomhetsnavn,
-
-    String fritekstInnvilgelse,
-
-    String fritekstBegrunnelse
+    String virksomhetsnavn
 ) {
-    public Soknad av (SoknadUKInnvilgelse soknad) {
-        return new Soknad(
-          soknad.
-        );
-    }
 }

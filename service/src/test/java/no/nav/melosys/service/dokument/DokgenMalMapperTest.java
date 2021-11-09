@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 
 import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Behandling;
@@ -17,8 +18,11 @@ import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdress
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_8_naer_tilknytning_norge_begrunnelser;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.dokgen.dto.*;
+import no.nav.melosys.integrasjon.dokgen.dto.felles.Mottaker;
+import no.nav.melosys.integrasjon.dokgen.dto.innvilgelsestorbritannia.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -44,6 +48,9 @@ class DokgenMalMapperTest {
     private InnvilgelseFtrlMapper mockInnvilgelseFtrlMapper;
 
     @Mock
+    private InnvilgelseUKMapper mockInnvilgelseUKMapper;
+
+    @Mock
     private DokgenMapperDatahenter mockDokgenMapperDatahenter;
 
     private final FakeUnleash fakeUnleash = new FakeUnleash();
@@ -52,7 +59,7 @@ class DokgenMalMapperTest {
 
     @BeforeEach
     void init() {
-        dokgenMalMapper = new DokgenMalMapper(mockDokgenMapperDatahenter, mockInnvilgelseFtrlMapper);
+        dokgenMalMapper = new DokgenMalMapper(mockDokgenMapperDatahenter, mockInnvilgelseFtrlMapper, mockInnvilgelseUKMapper);
     }
 
     @Test
@@ -346,13 +353,38 @@ class DokgenMalMapperTest {
             .isInstanceOf(InnvilgelseFtrl.class);
     }
 
+    @Test
+    void skalMappeStorbritanniaInnvilgesbrev() {
+        when(mockDokgenMapperDatahenter.hentPoststed(any())).thenReturn("Andeby");
+        when(mockDokgenMapperDatahenter.hentPersondata(any())).thenReturn(lagPersonDokument());
+        when(mockInnvilgelseUKMapper.map(any())).thenReturn(lagInnvilgelseUK());
+
+        Behandling behandling = lagBehandling(lagFagsak(true));
+
+        DokgenBrevbestilling brevbestilling = new InnvilgelseBrevbestilling.Builder()
+            .medProduserbartdokument(INNVILGELSE_UK)
+            .medBehandling(behandling)
+            .medOrg(lagOrg())
+            .medKontaktopplysning(lagKontaktOpplysning())
+            .medForsendelseMottatt(Instant.now())
+            .medInnledningFritekst("Dummy")
+            .build();
+
+        assertThat(dokgenMalMapper.mapBehandling(brevbestilling))
+            .isInstanceOf(InnvilgelseUK.class);
+    }
+
+    private InnvilgelseBrevbestilling lagInnvilgelseBrevbestilling() {
+        return new InnvilgelseBrevbestilling.Builder()
+            .medInnledningFritekst("Innledning")
+            .medBehandling(lagBehandling())
+            .medPersonDokument(lagPersonDokument())
+            .build();
+    }
+
     private InnvilgelseFtrl lagInnvilgelseFtrl() {
         return new InnvilgelseFtrl(
-            new InnvilgelseBrevbestilling.Builder()
-                .medInnledningFritekst("Innledning")
-                .medBehandling(lagBehandling())
-                .medPersonDokument(lagPersonDokument())
-                .build(),
+            lagInnvilgelseBrevbestilling(),
             null,
             true,
             Ftrl_2_8_naer_tilknytning_norge_begrunnelser.ANSATT_I_MULTINASJONALT_SELSKAP.getBeskrivelse(),
@@ -371,6 +403,27 @@ class DokgenMalMapperTest {
             String.valueOf(LocalDate.now().getYear()),
             false,
             false
+        );
+    }
+
+    private InnvilgelseUK lagInnvilgelseUK() {
+        return new InnvilgelseUK(
+            lagInnvilgelseBrevbestilling(),
+            new Mottaker("Ola Nordmann",
+                List.of("Gatenavn 12", "Linje 2"),
+                "1010",
+                "POSTSTED",
+                "Norge"),
+            Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1,
+            new Soknad(Instant.now(),
+                Instant.now().plus(2, ChronoUnit.DAYS),
+                Instant.now().plus(20, ChronoUnit.DAYS),
+                "Virksomhetsnavn",
+                "FritekstInnvilgelse",
+                "FritekstBegrunnelse"
+            ),
+            null,
+            new Kopi(true, true)
         );
     }
 
