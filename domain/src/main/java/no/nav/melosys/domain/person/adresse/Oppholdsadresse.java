@@ -13,5 +13,5 @@ public record Oppholdsadresse(
     String kilde,
     LocalDateTime registrertDato,
     boolean erHistorisk
-) {
+) implements PersonAdresse {
 }
