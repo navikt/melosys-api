@@ -78,6 +78,11 @@
             <artifactId>spring-oxm</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>nav-foedselsnummer</groupId>
+            <artifactId>core</artifactId>
+        </dependency>
+
         <!-- Test -->
         <dependency>
             <groupId>org.jeasy</groupId>

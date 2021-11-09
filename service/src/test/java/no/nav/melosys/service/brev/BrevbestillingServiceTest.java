@@ -291,7 +291,10 @@ class BrevbestillingServiceTest {
 
         assertThat(brevMaler)
             .hasSize(2)
-            .containsExactlyInAnyOrder(MANGELBREV_BRUKER, MANGELBREV_ARBEIDSGIVER);
+            .containsExactlyInAnyOrder(
+                MANGELBREV_BRUKER,
+                MANGELBREV_ARBEIDSGIVER
+            );
     }
 
     @Test
@@ -311,7 +314,11 @@ class BrevbestillingServiceTest {
 
         assertThat(brevMaler)
             .hasSize(3)
-            .containsExactlyInAnyOrder(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, MANGELBREV_BRUKER, MANGELBREV_ARBEIDSGIVER);
+            .containsExactlyInAnyOrder(
+                MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD,
+                MANGELBREV_BRUKER,
+                MANGELBREV_ARBEIDSGIVER
+            );
     }
 
     @Test
@@ -322,7 +329,11 @@ class BrevbestillingServiceTest {
 
         assertThat(brevMaler)
             .hasSize(3)
-            .containsExactlyInAnyOrder(MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE, MANGELBREV_BRUKER, MANGELBREV_ARBEIDSGIVER);
+            .containsExactlyInAnyOrder(
+                MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE,
+                MANGELBREV_BRUKER,
+                MANGELBREV_ARBEIDSGIVER
+            );
     }
 
     @Test

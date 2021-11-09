@@ -55,11 +55,6 @@ public class Mottakerliste {
             return this;
         }
 
-        public Builder medBrevkopiRegler(Collection<BrevkopiRegel> brevkopiRegler) {
-            this.brevkopiRegler = brevkopiRegler;
-            return this;
-        }
-
         public Builder medKopiMottaker(Aktoersroller kopiMottaker) {
             this.kopiMottakere.add(kopiMottaker);
             return this;

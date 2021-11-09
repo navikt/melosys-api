@@ -21,12 +21,9 @@ public class BrevbestillingDto {
     private String barnFritekst;
     private String kontaktpersonNavn;
     private List<KopiMottaker> kopiMottakere;
-
-    /**
-     * @deprecated Benyttes i doksys, kommer til å bli erstattet av dokgen-variabel
-     */
-    @Deprecated
+    private String fritekstTittel;
     private String fritekst;
+    private boolean kontaktopplysninger;
 
     /**
      * @deprecated Benyttes i doksys, kommer til å bli erstattet av dokgen-variabel
@@ -55,7 +52,9 @@ public class BrevbestillingDto {
             .medKopiMottakere(this.getKopiMottakere())
             .medEktefelleFritekst(this.getEktefelleFritekst())
             .medBarnFritekst(this.getBarnFritekst())
+            .medFritekstTittel(this.getFritekstTittel())
             .medFritekst(this.getFritekst())
+            .medKontaktopplysninger(this.isKontaktopplysninger())
             .medBegrunnelseKode(this.getBegrunnelseKode())
             .medYtterligereInformasjon(this.getYtterligereInformasjon());
     }
@@ -71,7 +70,9 @@ public class BrevbestillingDto {
         this.barnFritekst = builder.barnFritekst;
         this.kontaktpersonNavn = builder.kontaktpersonNavn;
         this.kopiMottakere = builder.kopiMottakere;
+        this.fritekstTittel = builder.fritekstTittel;
         this.fritekst = builder.fritekst;
+        this.kontaktopplysninger = builder.kontaktopplysninger;
         this.begrunnelseKode = builder.begrunnelseKode;
         this.ytterligereInformasjon = builder.ytterligereInformasjon;
     }
@@ -119,8 +120,16 @@ public class BrevbestillingDto {
         return kopiMottakere;
     }
 
+    public String getFritekstTittel() {
+        return fritekstTittel;
+    }
+
     public String getFritekst() {
         return fritekst;
+    }
+
+    public boolean isKontaktopplysninger() {
+        return kontaktopplysninger;
     }
 
     public String getBegrunnelseKode() {
@@ -142,7 +151,9 @@ public class BrevbestillingDto {
         private String barnFritekst;
         private String kontaktpersonNavn;
         private List<KopiMottaker> kopiMottakere;
+        private String fritekstTittel;
         private String fritekst;
+        public boolean kontaktopplysninger;
         private String begrunnelseKode;
         private String ytterligereInformasjon;
 
@@ -196,8 +207,18 @@ public class BrevbestillingDto {
             return this;
         }
 
+        public Builder medFritekstTittel(String fritekstTittel) {
+            this.fritekstTittel = fritekstTittel;
+            return this;
+        }
+
         public Builder medFritekst(String fritekst) {
             this.fritekst = fritekst;
+            return this;
+        }
+
+        public Builder medKontaktopplysninger(boolean kontaktopplysninger) {
+            this.kontaktopplysninger = kontaktopplysninger;
             return this;
         }
 
@@ -218,26 +239,24 @@ public class BrevbestillingDto {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o)
-            return true;
-        if (o == null || getClass() != o.getClass())
-            return false;
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
         BrevbestillingDto that = (BrevbestillingDto) o;
-        return produserbardokument == that.produserbardokument && mottaker == that.mottaker && Objects.equals(orgNr,
-            that.orgNr) && Objects.equals(innledningFritekst, that.innledningFritekst) && Objects.equals(
-            manglerFritekst, that.manglerFritekst) && Objects.equals(begrunnelseFritekst,
-            that.begrunnelseFritekst) && Objects.equals(ektefelleFritekst, that.ektefelleFritekst) && Objects.equals(
-            barnFritekst, that.barnFritekst) && Objects.equals(kontaktpersonNavn,
-            that.kontaktpersonNavn) && Objects.equals(kopiMottakere, that.kopiMottakere) && Objects.equals(fritekst,
-            that.fritekst) && Objects.equals(begrunnelseKode, that.begrunnelseKode) && Objects.equals(
-            ytterligereInformasjon, that.ytterligereInformasjon);
+        return kontaktopplysninger == that.kontaktopplysninger && produserbardokument == that.produserbardokument
+            && mottaker == that.mottaker && Objects.equals(orgNr, that.orgNr)
+            && Objects.equals(innledningFritekst, that.innledningFritekst) && Objects.equals(manglerFritekst, that.manglerFritekst)
+            && Objects.equals(begrunnelseFritekst, that.begrunnelseFritekst) && Objects.equals(ektefelleFritekst, that.ektefelleFritekst)
+            && Objects.equals(barnFritekst, that.barnFritekst) && Objects.equals(kontaktpersonNavn, that.kontaktpersonNavn)
+            && Objects.equals(kopiMottakere, that.kopiMottakere) && Objects.equals(fritekstTittel, that.fritekstTittel)
+            && Objects.equals(fritekst, that.fritekst) && Objects.equals(begrunnelseKode, that.begrunnelseKode)
+            && Objects.equals(ytterligereInformasjon, that.ytterligereInformasjon);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(produserbardokument, mottaker, orgNr, innledningFritekst, manglerFritekst,
-            begrunnelseFritekst, ektefelleFritekst, barnFritekst, kontaktpersonNavn, kopiMottakere, fritekst,
-            begrunnelseKode, ytterligereInformasjon);
+            begrunnelseFritekst, ektefelleFritekst, barnFritekst, kontaktpersonNavn, kopiMottakere, fritekstTittel,
+            fritekst, kontaktopplysninger, begrunnelseKode, ytterligereInformasjon);
     }
 
     @Override
@@ -253,7 +272,9 @@ public class BrevbestillingDto {
             ", barnFritekst='" + barnFritekst + '\'' +
             ", kontaktpersonNavn='" + kontaktpersonNavn + '\'' +
             ", kopiMottakere=" + kopiMottakere +
+            ", fritekstTittel='" + fritekstTittel + '\'' +
             ", fritekst='" + fritekst + '\'' +
+            ", kontaktopplysninger=" + kontaktopplysninger +
             ", begrunnelseKode='" + begrunnelseKode + '\'' +
             ", ytterligereInformasjon='" + ytterligereInformasjon + '\'' +
             '}';

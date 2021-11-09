@@ -7,6 +7,7 @@ public record Mottaker(
     List<String> adresselinjer,
     String postnr,
     String poststed,
-    String land
+    String land,
+    String type
 ) {
 }

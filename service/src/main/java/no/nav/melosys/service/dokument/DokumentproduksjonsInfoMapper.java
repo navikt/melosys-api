@@ -52,6 +52,14 @@ public class DokumentproduksjonsInfoMapper {
                 new DokumentproduksjonsInfo("innvilgelse_ftrl_2_8",
                     DokumentKategoriKode.VB.getKode(),
                     JournalforingsTittel.INNVILGELSE_FTRL_2_8.getTittel()))
+            .put(GENERELT_FRITEKSTBREV_BRUKER,
+                new DokumentproduksjonsInfo("fritekstbrev",
+                DokumentKategoriKode.IB.getKode(),
+                null))
+            .put(GENERELT_FRITEKSTBREV_ARBEIDSGIVER,
+                new DokumentproduksjonsInfo("fritekstbrev",
+                    DokumentKategoriKode.IB.getKode(),
+                    null))
             .build());
     }
 
