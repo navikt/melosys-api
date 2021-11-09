@@ -96,10 +96,15 @@ public class UstrukturertAdresse implements Adresse {
     }
 
     @Override
-    public String toString() {
+    public List<String> toList() {
         return Stream.of(getAdresselinje(1), getAdresselinje(2),
-            getAdresselinje(3), getAdresselinje(4), landkode)
+                getAdresselinje(3), getAdresselinje(4), landkode)
             .filter(Objects::nonNull)
-            .collect(Collectors.joining(" "));
+            .collect(Collectors.toList());
+    }
+
+    @Override
+    public String toString() {
+        return String.join(", ", toList());
     }
 }
