@@ -61,20 +61,6 @@ class InnvilgelsesbrevFlereLandMapperTest {
         assertThat(resultat).matches("(?s)<\\?xml version=\"\\d\\.\\d+\" .*>\n.*");
     }
 
-    @Test
-    void mapTilBrevXml_ingenArbeidsland_girUkjenteAlleEosLand() throws Exception {
-        var behandling = lagBehandling(lagFagsak());
-        var behandlingsresultat = lagBehandlingsresultat(Collections.singleton(lagLovvalgsperiode()));
-        var fellesType = lagFellesType();
-        var navFelles = lagNAVFelles();
-        var brevdataInnvilgelse = lagBrevdataInnvilgelse();
-        brevdataInnvilgelse.erUkjenteEllerAlleEosLand = true;
-
-        String resultat = instans.mapTilBrevXML(fellesType, navFelles, behandling, behandlingsresultat, brevdataInnvilgelse);
-        assertThat(resultat).contains("<ns20:arbeidsland>forskjellige EØS-land/Sveits</ns20:arbeidsland>");
-
-    }
-
     private BrevDataInnvilgelseFlereLand lagBrevdataInnvilgelse() {
         List<AvklartVirksomhet> norskeVirksomheter = Collections.singletonList(new AvklartVirksomhet("Telenor", "1234", lagStrukturertAdresse(), Yrkesaktivitetstyper.LOENNET_ARBEID));
 

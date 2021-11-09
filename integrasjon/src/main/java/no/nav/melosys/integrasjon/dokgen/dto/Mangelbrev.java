@@ -26,7 +26,6 @@ public class Mangelbrev extends DokgenDto {
 
     private final String sakstype;
     private final String behandlingstype;
-    private final String saksbehandlerNavn;
     private final String manglerInfoFritekst;
     private final String innledningFritekst;
 
@@ -39,7 +38,6 @@ public class Mangelbrev extends DokgenDto {
         this.datoInnsendingsfrist = Instant.now().plus(Period.ofWeeks(DOKUMENTASJON_SVARFRIST_UKER_MANGELBREV));
         this.sakstype = fagsak.getType().getKode();
         this.behandlingstype = fagsak.getSistOppdaterteBehandling().getType().getKode();
-        this.saksbehandlerNavn = brevbestilling.getSaksbehandlerNavn();
         this.manglerInfoFritekst = brevbestilling.getManglerInfoFritekst();
         this.innledningFritekst = brevbestilling.getInnledningFritekst();
     }
@@ -62,10 +60,6 @@ public class Mangelbrev extends DokgenDto {
 
     public String getBehandlingstype() {
         return behandlingstype;
-    }
-
-    public String getSaksbehandlerNavn() {
-        return saksbehandlerNavn;
     }
 
     public String getManglerInfoFritekst() {

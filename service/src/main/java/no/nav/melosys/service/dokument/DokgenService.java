@@ -11,6 +11,7 @@ import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.brev.*;
 import no.nav.melosys.domain.brev.storbritannia.AttestStorbritanniaBrevbestilling;
+import no.nav.melosys.domain.brev.*;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.TekniskException;
@@ -195,6 +196,10 @@ public class DokgenService {
                 .medBegrunnelseFritekst(brevbestillingRequest.getBegrunnelseFritekst())
                 .medEktefelleFritekst(brevbestillingRequest.getEktefelleFritekst())
                 .medBarnFritekst(brevbestillingRequest.getBarnFritekst());
+            case GENERELT_FRITEKSTBREV_BRUKER, GENERELT_FRITEKSTBREV_ARBEIDSGIVER -> new FritekstbrevBrevbestilling.Builder()
+                .medFritekstTittel(brevbestillingRequest.getFritekstTittel())
+                .medFritekst(brevbestillingRequest.getFritekst())
+                .medKontaktopplysninger(brevbestillingRequest.isKontaktopplysninger());
             case ATTEST_NO_UK_1 -> getAttestStorbritanniaBrevbestillingBuilder();
             default -> new DokgenBrevbestilling.Builder<>();
         };

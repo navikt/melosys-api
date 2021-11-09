@@ -27,7 +27,6 @@ import static no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils
 public final class InnvilgelsesbrevFlereLandMapper implements BrevDataMapper {
 
     private static final String JA = "true";
-    private static final String UKJENTE_ALLE_LAND = "forskjellige EØS-land/Sveits";
 
     private static final String XSD_LOCATION = "melosysbrev/melosys_000083.xsd";
 
@@ -60,14 +59,13 @@ public final class InnvilgelsesbrevFlereLandMapper implements BrevDataMapper {
 
         // AntallArbeidsland avgjør om brevet bruker arbeidsland eller arbeidslandListe
         int antallArbeidsland = brevdata.alleArbeidsland.size();
-        fag.setAntallArbeidsland(brevdata.erUkjenteEllerAlleEosLand ? BigInteger.ONE : BigInteger.valueOf(antallArbeidsland));
-        if (brevdata.erUkjenteEllerAlleEosLand) {
-            fag.setArbeidsland(UKJENTE_ALLE_LAND);
-        } else if (antallArbeidsland == 1) {
+        fag.setAntallArbeidsland(BigInteger.valueOf(antallArbeidsland));
+        if (antallArbeidsland == 1) {
             String arbeidsland = brevdata.alleArbeidsland.iterator().next();
             fag.setArbeidsland(arbeidsland);
         }
         fag.setArbeidslandListe(mapArbeidslandListe(brevdata.alleArbeidsland));
+        fag.setErUkjenteEllerAlleEosLand(Boolean.toString(brevdata.erUkjenteEllerAlleEosLand));
 
         fag.setBostedsland(brevdata.bostedsland);
         if (brevdata.trydemyndighetsland != null) {

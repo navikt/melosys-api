@@ -248,7 +248,7 @@ class BrevmottakerServiceTest {
     }
 
     @Test
-    void gittForvaltningsmelding_skalHovedmottakerVæreBruker() throws Exception {
+    void gittForvaltningsmelding_skalHovedmottakerVæreBruker() {
         assertThat(brevmottakerService.hentMottakerliste(MELDING_FORVENTET_SAKSBEHANDLINGSTID, behandling))
             .extracting(
                 Mottakerliste::getHovedMottaker,
@@ -265,7 +265,7 @@ class BrevmottakerServiceTest {
     }
 
     @Test
-    void gittMangelbrevBruker_skalHovedmottakerVæreBruker() throws Exception {
+    void gittMangelbrevBruker_skalHovedmottakerVæreBruker() {
         assertThat(brevmottakerService.hentMottakerliste(MANGELBREV_BRUKER, behandling))
             .extracting(
                 Mottakerliste::getHovedMottaker,
@@ -282,7 +282,7 @@ class BrevmottakerServiceTest {
     }
 
     @Test
-    void gittMangelbrevArbeidsgiver_skalHovedmottakerVæreArbeidsgiverMedKopi() throws Exception {
+    void gittMangelbrevArbeidsgiver_skalHovedmottakerVæreArbeidsgiverMedKopi() {
         when(behandling.getFagsak()).thenReturn(lagFagsakMedRepresentant(null));
 
         assertThat(brevmottakerService.hentMottakerliste(MANGELBREV_ARBEIDSGIVER, behandling))
@@ -301,7 +301,7 @@ class BrevmottakerServiceTest {
     }
 
     @Test
-    void gittVedtakFtrl2_8UtenFullmektigIkkeSelvbetalende_skalHovedmottakerVæreBrukerMedKopier() throws Exception {
+    void gittVedtakFtrl2_8UtenFullmektigIkkeSelvbetalende_skalHovedmottakerVæreBrukerMedKopier() {
         initMocksForFtrlVedtaksbrev(null, 10000, false);
 
         assertThat(brevmottakerService.hentMottakerliste(INNVILGELSE_FOLKETRYGDLOVEN_2_8, behandling))
@@ -320,7 +320,7 @@ class BrevmottakerServiceTest {
     }
 
     @Test
-    void gittVedtakFtrl2_8UtenFullmektigSelvbetalende_skalHovedmottakerVæreBrukerMedKopier() throws Exception {
+    void gittVedtakFtrl2_8UtenFullmektigSelvbetalende_skalHovedmottakerVæreBrukerMedKopier() {
         initMocksForFtrlVedtaksbrev(null, 10000, true);
 
         assertThat(brevmottakerService.hentMottakerliste(INNVILGELSE_FOLKETRYGDLOVEN_2_8, behandling))
@@ -340,7 +340,7 @@ class BrevmottakerServiceTest {
     }
 
     @Test
-    void gittVedtakFtrl2_8FullmektigIkkeSelvbetalende_skalHovedmottakerVæreBrukerMedKopier() throws Exception {
+    void gittVedtakFtrl2_8FullmektigIkkeSelvbetalende_skalHovedmottakerVæreBrukerMedKopier() {
         initMocksForFtrlVedtaksbrev(Representerer.BRUKER, 10000, false);
 
         assertThat(brevmottakerService.hentMottakerliste(INNVILGELSE_FOLKETRYGDLOVEN_2_8, behandling))
@@ -360,7 +360,7 @@ class BrevmottakerServiceTest {
     }
 
     @Test
-    void gittVedtakFtrl2_8FullmektigSelvbetalende_skalHovedmottakerVæreBrukerMedKopier() throws Exception {
+    void gittVedtakFtrl2_8FullmektigSelvbetalende_skalHovedmottakerVæreBrukerMedKopier() {
         initMocksForFtrlVedtaksbrev(Representerer.BRUKER, 10000, true);
 
         Mottakerliste actual = brevmottakerService.hentMottakerliste(INNVILGELSE_FOLKETRYGDLOVEN_2_8, behandling);
@@ -381,7 +381,7 @@ class BrevmottakerServiceTest {
     }
 
     @Test
-    void gittVedtakFtrl2_8FullmektigIkkeSelvbetalendeIkkeInntekt_skalHovedmottakerVæreBrukerMedKopier() throws Exception {
+    void gittVedtakFtrl2_8FullmektigIkkeSelvbetalendeIkkeInntekt_skalHovedmottakerVæreBrukerMedKopier() {
         initMocksForFtrlVedtaksbrev(Representerer.BRUKER, 0, false);
 
         assertThat(brevmottakerService.hentMottakerliste(INNVILGELSE_FOLKETRYGDLOVEN_2_8, behandling))
@@ -398,6 +398,23 @@ class BrevmottakerServiceTest {
             );
 
         verify(trygdeavgiftsberegningService).finnBeregningsresultat(anyLong());
+    }
+
+    @Test
+    void gittInnvilgelsesbrevUK_skalHovedmottakerVæreBrukerMedKopier() {
+        when(behandling.getFagsak()).thenReturn(lagFagsakMedRepresentant(null));
+
+        assertThat(brevmottakerService.hentMottakerliste(INNVILGELSE_UK, behandling))
+            .extracting(
+                Mottakerliste::getHovedMottaker,
+                Mottakerliste::getKopiMottakere,
+                Mottakerliste::getFasteMottakere
+            )
+            .containsExactly(
+                BRUKER,
+                List.of(ARBEIDSGIVER),
+                List.of(SKATT)
+            );
     }
 
     @Test

@@ -247,6 +247,12 @@ public class BrevmottakerService {
             (brevkopiRegler.contains(BRUKER_FÅR_KOPI_HVIS_FULLMEKTIG_FINNES) && brukerHarFullmektig)) {
             mottakerliste.getKopiMottakere().add(BRUKER);
         }
+        if (brevkopiRegler.contains(ARBEIDSGIVER_FÅR_KOPI)) {
+            mottakerliste.getKopiMottakere().add(ARBEIDSGIVER);
+        }
+        if (brevkopiRegler.contains(SKATT_FÅR_KOPI)) {
+            mottakerliste.getFasteMottakere().add(SKATT);
+        }
 
         Optional<Trygdeavgiftsberegningsresultat> trygdeavgiftsberegningsresultat = trygdeavgiftsberegningService.finnBeregningsresultat(behandling.getId());
 

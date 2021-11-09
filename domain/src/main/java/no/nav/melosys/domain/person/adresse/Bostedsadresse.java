@@ -12,5 +12,5 @@ public record Bostedsadresse(
     String master,
     String kilde,
     boolean erHistorisk
-) {
+) implements PersonAdresse {
 }

@@ -2,6 +2,7 @@ package no.nav.melosys.tjenester.gui;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import io.swagger.annotations.Api;
@@ -38,6 +39,7 @@ import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
 @RequestScope
 public class BrevbestillingTjeneste {
     private static final String BRUKER_ELLER_BRUKERS_FULLMEKTIG = "Bruker eller brukers fullmektig";
+    private static final String ARBEIDSGIVER_ELLER_ARBEIDSGIVERS_FULLMEKTIG = "Arbeidsgiver eller arbeidsgivers fullmektig";
 
     private final BrevbestillingService brevbestillingService;
     private final BehandlingService behandlingService;
@@ -97,23 +99,17 @@ public class BrevbestillingTjeneste {
         Behandling behandling = behandlingService.hentBehandling(behandlingId);
         List<Produserbaredokumenter> produserbareDokumenter = brevbestillingService.hentMuligeProduserbaredokumenter(behandling);
 
-        List<BrevmalDto> maler = new ArrayList<>();
-        for(Produserbaredokumenter p : produserbareDokumenter) {
-            Aktoersroller hovedMottaker = brevmottakerService.hentMottakerliste(p, behandling).getHovedMottaker();
-            switch (p) {
-                case MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD:
-                case MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE:
-                    maler.add(lagBrevMalDtoForForventetSaksbehandlingstid(p, hovedMottaker, behandling));
-                    break;
-                case MANGELBREV_BRUKER:
-                case MANGELBREV_ARBEIDSGIVER:
-                    maler.add(lagBrevMalDtoForMangelbrev(p, hovedMottaker, behandling));
-                    break;
-                default:
-                    break;
-            }
-        }
-        return maler;
+        return produserbareDokumenter.stream().map(p -> {
+                Aktoersroller hovedMottaker = brevmottakerService.hentMottakerliste(p, behandling).getHovedMottaker();
+                return switch (p) {
+                    case MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE -> lagBrevMalDtoForForventetSaksbehandlingstid(p, hovedMottaker, behandling);
+                    case MANGELBREV_BRUKER, MANGELBREV_ARBEIDSGIVER -> lagBrevMalDtoForMangelbrev(p, hovedMottaker, behandling);
+//                    case GENERELT_FRITEKSTBREV_BRUKER, GENERELT_FRITEKSTBREV_ARBEIDSGIVER -> lagBrevMalDtoForFritekstbrev(p, hovedMottaker, behandling); //TODO Tas inn når frontend er klar for fritekstbrev
+                    default -> null;
+                };
+            })
+            .filter(Objects::nonNull)
+            .toList();
     }
 
     private BrevmalDto lagBrevMalDtoForForventetSaksbehandlingstid(Produserbaredokumenter produserbartdokument, Aktoersroller hovedMottaker, Behandling behandling) {
@@ -134,7 +130,7 @@ public class BrevbestillingTjeneste {
         List<FeltvalgDto> feltvalgDtos = new ArrayList<>();
 
         var builder = new MottakerDto.Builder()
-            .medType(hovedMottaker == Aktoersroller.BRUKER ? BRUKER_ELLER_BRUKERS_FULLMEKTIG : "Arbeidsgiver eller arbeidsgivers fullmektig")
+            .medType(hovedMottaker == Aktoersroller.BRUKER ? BRUKER_ELLER_BRUKERS_FULLMEKTIG : ARBEIDSGIVER_ELLER_ARBEIDSGIVERS_FULLMEKTIG)
             .medRolle(hovedMottaker);
 
         leggTilAdresseOgFeilmelding(builder, produserbartdokument, hovedMottaker, behandling);
@@ -173,6 +169,36 @@ public class BrevbestillingTjeneste {
                     .build()
             ))
             .medMuligeMottakere(mottakere)
+            .medMottakereHjelpetekst("Hvis bruker eller arbeidsgiver har fullmektig som er lagt inn i sidemenyen, vil brevet automatisk bli sendt til denne.")
+            .build();
+    }
+
+    private BrevmalDto lagBrevMalDtoForFritekstbrev(Produserbaredokumenter produserbartdokument, Aktoersroller hovedMottaker, Behandling behandling) {
+        var builder = new MottakerDto.Builder()
+            .medType(hovedMottaker == Aktoersroller.BRUKER ? BRUKER_ELLER_BRUKERS_FULLMEKTIG : ARBEIDSGIVER_ELLER_ARBEIDSGIVERS_FULLMEKTIG)
+            .medRolle(hovedMottaker);
+
+        leggTilAdresseOgFeilmelding(builder, produserbartdokument, hovedMottaker, behandling);
+
+        var mottaker = builder.build();
+
+        return new BrevmalDto.Builder()
+            .medType(produserbartdokument)
+            .medFelter(asList(
+                new BrevmalFeltDto.Builder()
+                    .medKode("FRITEKST_TITTEL")
+                    .medBeskrivelse("Brevtittel")
+                    .medFeltType(FeltType.FRITEKST_STRING)
+                    .erPåkrevd()
+                    .build(),
+                new BrevmalFeltDto.Builder()
+                    .medKode("FRITEKST")
+                    .medBeskrivelse("Brevtekst")
+                    .medFeltType(FeltType.FRITEKST)
+                    .erPåkrevd()
+                    .build()
+            ))
+            .medMuligeMottakere(singletonList(mottaker))
             .medMottakereHjelpetekst("Hvis bruker eller arbeidsgiver har fullmektig som er lagt inn i sidemenyen, vil brevet automatisk bli sendt til denne.")
             .build();
     }

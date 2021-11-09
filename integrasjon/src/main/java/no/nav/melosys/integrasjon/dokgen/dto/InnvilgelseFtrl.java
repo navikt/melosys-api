@@ -29,7 +29,6 @@ public class InnvilgelseFtrl extends DokgenDto {
     private final String fritekstBegrunnelse;
     private final String fritekstEktefelle;
     private final String fritekstBarn;
-    private final String saksbehandlerNavn;
     private final String arbeidsgiverNavn;
     private final String arbeidsland;
     private final boolean trygdeavtaleMedArbeidsland;
@@ -66,7 +65,6 @@ public class InnvilgelseFtrl extends DokgenDto {
         this.fritekstBegrunnelse = brevbestilling.getBegrunnelseFritekst();
         this.fritekstEktefelle = brevbestilling.getEktefelleFritekst();
         this.fritekstBarn = brevbestilling.getBarnFritekst();
-        this.saksbehandlerNavn = brevbestilling.getSaksbehandlerNavn();
         this.perioder = perioder;
         this.erFullstendigInnvilget = erFullstendigInnvilget;
         this.ftrl_2_8_begrunnelse = ftrl_2_8_begrunnelse;
@@ -137,10 +135,6 @@ public class InnvilgelseFtrl extends DokgenDto {
 
     public String getFritekstBarn() {
         return fritekstBarn;
-    }
-
-    public String getSaksbehandlerNavn() {
-        return saksbehandlerNavn;
     }
 
     public String getArbeidsgiverNavn() {

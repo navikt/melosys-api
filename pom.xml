@@ -39,9 +39,9 @@
         <java.version>16</java.version>
 
         <!-- Melosys -->
-        <melosys.jsonschema.version>1.35.145</melosys.jsonschema.version>
-        <melosys.internt.kodeverk.version>5.15.90</melosys.internt.kodeverk.version>
-        <melosys.brev.version>1.2.82</melosys.brev.version>
+        <melosys.jsonschema.version>1.35.147</melosys.jsonschema.version>
+        <melosys.internt.kodeverk.version>5.15.93</melosys.internt.kodeverk.version>
+        <melosys.brev.version>1.2.99</melosys.brev.version>
 
         <!-- NAV -->
         <nav.tjenestespesifikasjoner.version>1.2021.02.22-10.45-4201aaea72fb</nav.tjenestespesifikasjoner.version>
@@ -99,6 +99,7 @@
         <xmlsec.version>2.2.3</xmlsec.version>
         <medlemskapsunntak-api-v1.version>1.1</medlemskapsunntak-api-v1.version>
         <wiremock-standalone.version>2.27.2</wiremock-standalone.version>
+        <nav-foedselsnummer.core.version>1.0-SNAPSHOT.6</nav-foedselsnummer.core.version>
     </properties>
 
     <!-- Unngå å put scope i dependency management. Sett det heller der det
@@ -356,7 +357,6 @@
                 <version>${shedlock.version}</version>
             </dependency>
 
-
             <!-- Transitive avhengiheter med konflikter -->
             <dependency>
                 <groupId>com.fasterxml.woodstox</groupId>
@@ -471,6 +471,12 @@
                 <artifactId>person-v3-tjenestespesifikasjon</artifactId>
                 <version>${nav.tjenestespesifikasjoner.version}</version>
             </dependency>
+
+            <dependency>
+                <groupId>nav-foedselsnummer</groupId>
+                <artifactId>core</artifactId>
+                <version>${nav-foedselsnummer.core.version}</version>
+            </dependency>
             <!-- SOB -->
             <dependency>
                 <groupId>no.nav.tjenestespesifikasjoner</groupId>
@@ -574,6 +580,12 @@
                 <groupId>org.awaitility</groupId>
                 <artifactId>awaitility</artifactId>
                 <version>${awaitility.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>nav-foedselsnummer</groupId>
+                <artifactId>testutils</artifactId>
+                <version>${nav-foedselsnummer.core.version}</version>
                 <scope>test</scope>
             </dependency>
         </dependencies>

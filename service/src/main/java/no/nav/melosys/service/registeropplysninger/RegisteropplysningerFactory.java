@@ -19,7 +19,7 @@ public final class RegisteropplysningerFactory {
             case ARBEID_ETT_LAND_ØVRIG:
             case ARBEID_NORGE_BOSATT_ANNET_LAND:
             case ARBEID_I_UTLANDET:
-            case TRYGDEAVTALE_UK: // tenker dette blir det samme?
+            case TRYGDEAVTALE_UK:
                 return hentSaksopplysningTyperForBehandlingAvSøknad();
             case REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING:
             case REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE:

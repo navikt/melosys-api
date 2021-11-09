@@ -2,11 +2,25 @@ package no.nav.melosys.domain.behandlingsgrunnlag.data;
 
 import java.util.UUID;
 
+import no.nav.commons.foedselsnummer.FoedselsNr;
+import no.nav.melosys.exception.FunksjonellException;
+
 public class MedfolgendeFamilie {
-    public String uuid;
-    public String fnr;
-    public String navn;
-    public Relasjonsrolle relasjonsrolle;
+    private String uuid;
+    private String fnr;
+    private String navn;
+    private Relasjonsrolle relasjonsrolle;
+
+    public MedfolgendeFamilie() {
+        // Tom constructor på grunn av de/serialisering i `BehandlingsgrunnlagListener`
+    }
+
+    private MedfolgendeFamilie(String uuid, String fnr, String navn, Relasjonsrolle relasjonsrolle) {
+        this.uuid = uuid;
+        this.fnr = fnr;
+        this.navn = navn;
+        this.relasjonsrolle = relasjonsrolle;
+    }
 
     public enum Relasjonsrolle {
         BARN, EKTEFELLE_SAMBOER
@@ -21,12 +35,7 @@ public class MedfolgendeFamilie {
     }
 
     public static MedfolgendeFamilie tilMedfolgendeFamilie(String uuid, String fnr, String navn, Relasjonsrolle rolle) {
-        MedfolgendeFamilie medfolgendeFamilie = new MedfolgendeFamilie();
-        medfolgendeFamilie.uuid = uuid;
-        medfolgendeFamilie.fnr = fnr;
-        medfolgendeFamilie.navn = navn;
-        medfolgendeFamilie.relasjonsrolle = rolle;
-        return medfolgendeFamilie;
+        return new MedfolgendeFamilie(uuid, fnr, navn, rolle);
     }
 
     public String getUuid() {
@@ -51,5 +60,18 @@ public class MedfolgendeFamilie {
 
     public boolean erEktefelleSamboer() {
         return relasjonsrolle == Relasjonsrolle.EKTEFELLE_SAMBOER;
+    }
+
+    public IdentType utledIdentType() {
+        if (fnr.length() < 11 && fnr.contains(".")) {
+            return IdentType.DATO;
+        }
+
+        FoedselsNr foedselsNr = new FoedselsNr(fnr);
+        if (!foedselsNr.getGyldigeKontrollsiffer()) {
+            throw new FunksjonellException("Ikke et gyldig fødselsnummer, kontrollsiffer er ikke riktig");
+        }
+
+        return foedselsNr.getDNummer() ? IdentType.DNR : IdentType.FNR;
     }
 }
