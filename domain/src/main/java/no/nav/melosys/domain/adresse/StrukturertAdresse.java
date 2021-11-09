@@ -1,5 +1,6 @@
 package no.nav.melosys.domain.adresse;
 
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -54,17 +55,22 @@ public class StrukturertAdresse implements Adresse {
     }
 
     @Override
+    public List<String> toList() {
+        return Stream.of(tilleggsnavn, sammenslå(gatenavn, husnummerEtasjeLeilighet),
+                postboks, postnummer, poststed, region,
+                Landkoder.valueOf(landkode).getBeskrivelse())
+            .filter(StringUtils::isNotEmpty)
+            .toList();
+    }
+
+    @Override
     public String getLandkode() {
         return landkode;
     }
 
     @Override
     public String toString() {
-        return Stream.of(tilleggsnavn, sammenslå(gatenavn, husnummerEtasjeLeilighet),
-            postboks, postnummer, poststed, region,
-            Landkoder.valueOf(landkode).getBeskrivelse())
-            .filter(StringUtils::isNotEmpty)
-            .collect(Collectors.joining(", "));
+        return String.join(", ", toList());
     }
 
     public String getTilleggsnavn() {
