@@ -60,7 +60,7 @@ public class StrukturertAdresse implements Adresse {
                 postboks, postnummer, poststed, region,
                 Landkoder.valueOf(landkode).getBeskrivelse())
             .filter(StringUtils::isNotEmpty)
-            .collect(Collectors.toList());
+            .toList();
     }
 
     @Override

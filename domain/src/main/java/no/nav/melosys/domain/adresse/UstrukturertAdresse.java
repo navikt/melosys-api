@@ -100,7 +100,7 @@ public class UstrukturertAdresse implements Adresse {
         return Stream.of(getAdresselinje(1), getAdresselinje(2),
                 getAdresselinje(3), getAdresselinje(4), landkode)
             .filter(Objects::nonNull)
-            .collect(Collectors.toList());
+            .toList();
     }
 
     @Override
