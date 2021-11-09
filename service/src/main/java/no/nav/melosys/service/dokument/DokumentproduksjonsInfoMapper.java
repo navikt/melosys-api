@@ -57,7 +57,6 @@ public class DokumentproduksjonsInfoMapper {
                 new DokumentproduksjonsInfo("attest_no_uk_1",
                     DokumentKategoriKode.VB.getKode(),
                     JournalforingsTittel.ATTEST_NO_UK_1.getTittel()))
-                    JournalforingsTittel.INNVILGELSE_FTRL_2_8.getTittel()))
             .put(GENERELT_FRITEKSTBREV_BRUKER,
                 new DokumentproduksjonsInfo("fritekstbrev",
                 DokumentKategoriKode.IB.getKode(),

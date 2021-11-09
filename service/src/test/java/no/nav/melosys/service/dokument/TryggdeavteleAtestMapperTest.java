@@ -3,16 +3,13 @@ package no.nav.melosys.service.dokument;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.Lovvalgsperiode;
-import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.brev.storbritannia.AttestStorbritanniaBrevbestilling;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
-import no.nav.melosys.domain.person.Master;
 import no.nav.melosys.domain.person.Persondata;
-import no.nav.melosys.domain.person.adresse.Kontaktadresse;
 import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeBarn;
 import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie;
 import no.nav.melosys.domain.person.familie.OmfattetFamilie;
@@ -27,6 +24,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.stubbing.Answer;
+
 import static no.nav.melosys.service.dokument.DokgenTestData.*;
 
 import java.time.Instant;
@@ -101,8 +100,7 @@ class TryggdeavteleAtestMapperTest {
     }
 
     private void mockHappyCase() {
-        when(mockPersondata.getFødselsdato()).thenReturn(LocalDate.of(1970,1,1));
-
+        when(mockPersondata.getFødselsdato()).thenReturn(LocalDate.of(1970, 1, 1));
         when(mockAvklarteMedfolgendeFamilieService.hentAvklartMedfølgendeEktefelle(anyLong())).thenReturn(lagAvklartMedfølgendeEktefelle());
         when(mockAvklarteMedfolgendeFamilieService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(lagAvklartMedfølgendeBarn());
         when(mockAvklarteMedfolgendeFamilieService.hentMedfølgendEktefelle(anyLong())).thenReturn(lagMedfølgendeEktefelle());
@@ -110,6 +108,16 @@ class TryggdeavteleAtestMapperTest {
         when(mockPersondataFasade.hentPerson(anyString())).thenReturn(mockPersondata);
         when(mockAvklarteVirksomheterService.hentNorskeArbeidsgivere(any())).thenReturn(lagAvklarteVirksomheter());
         when(mockLovvalgsperiodeService.hentLovvalgsperioder(anyLong())).thenReturn(lagreLovvalgsperioder());
+        when(mockDokgenMapperDatahenter.hentSammensattNavn(anyString())).thenAnswer((Answer<String>) invocationOnMock -> {
+            String fnr = invocationOnMock.getArgument(0);
+            String navn = null;
+            if (fnr.equals(EKTEFELLE_FNR)) {
+                navn = EKTEFELLE_NAVN;
+            } else if (fnr.equals(BARN1_FNR)) {
+                navn = BARN1_NAVN;
+            }
+            return navn;
+        });
     }
 
     private Collection<Lovvalgsperiode> lagreLovvalgsperioder() {
@@ -135,14 +143,14 @@ class TryggdeavteleAtestMapperTest {
     }
 
     private Map<String, MedfolgendeFamilie> lagMedfølgendeEktefelle() {
-        MedfolgendeFamilie ektefelle = new MedfolgendeFamilie();
-        ektefelle.fnr = EKTEFELLE_FNR;
+        MedfolgendeFamilie ektefelle = MedfolgendeFamilie.tilMedfolgendeFamilie(
+            UUID_EKTEFELLE, EKTEFELLE_FNR, "kone 1", MedfolgendeFamilie.Relasjonsrolle.EKTEFELLE_SAMBOER);
         return Map.of(UUID_EKTEFELLE, ektefelle);
     }
 
     private Map<String, MedfolgendeFamilie> lagMedfølgendeBarn() {
-        MedfolgendeFamilie medfolgendeBarn1 = new MedfolgendeFamilie();
-        medfolgendeBarn1.fnr = BARN1_FNR;
+        MedfolgendeFamilie medfolgendeBarn1 = MedfolgendeFamilie.tilMedfolgendeFamilie(
+            UUID_BARN_1, BARN1_FNR, "barn 1", MedfolgendeFamilie.Relasjonsrolle.BARN);
         return Map.of(UUID_BARN_1, medfolgendeBarn1);
     }
 

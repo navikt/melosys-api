@@ -151,9 +151,9 @@ public class TryggdeavteleAtestMapper {
     private Person tilPerson(Map<String, MedfolgendeFamilie> medfolgendeFamilieMap, String uuid) {
         MedfolgendeFamilie medfolgendeFamilie = Optional.of(medfolgendeFamilieMap.get(uuid))
             .orElseThrow(() -> new FunksjonellException("Avklart medfølgende familie " + uuid + " finnes ikke i behandlingsgrunnlaget"));
-        String sammensattNavn = medfolgendeFamilie.fnr != null ? dokgenMapperDatahenter.hentSammensattNavn(medfolgendeFamilie.fnr) : medfolgendeFamilie.navn;
-        Instant instant = getFødselDato(medfolgendeFamilie.fnr);
-        return new Person(sammensattNavn, instant, medfolgendeFamilie.fnr, null);
+        String sammensattNavn = medfolgendeFamilie.getFnr() != null ? dokgenMapperDatahenter.hentSammensattNavn(medfolgendeFamilie.getFnr()) : medfolgendeFamilie.getNavn();
+        Instant instant = getFødselDato(medfolgendeFamilie.getFnr());
+        return new Person(sammensattNavn, instant, medfolgendeFamilie.getFnr(), null);
     }
 
     private Instant getFødselDato(String fnr) {
