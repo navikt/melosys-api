@@ -11,7 +11,7 @@ public class InnvilgelseUK extends DokgenDto {
     private final Lovvalgbestemmelser_trygdeavtale_uk artikkel;
     private final Soknad soknad;
     private final Familie familie;
-    private final Kopi kopi;
+    private final boolean virksomhetArbeidsgiverSkalHaKopi;
 
 
     public InnvilgelseUK(InnvilgelseBrevbestilling brevbestilling,
@@ -19,13 +19,13 @@ public class InnvilgelseUK extends DokgenDto {
                          Lovvalgbestemmelser_trygdeavtale_uk artikkel,
                          Soknad soknad,
                          Familie familie,
-                         Kopi kopi) {
+                         boolean virksomhetArbeidsgiverSkalHaKopi) {
         super(brevbestilling);
         this.mottaker = mottaker;
         this.artikkel = artikkel;
         this.soknad = soknad;
         this.familie = familie;
-        this.kopi = kopi;
+        this.virksomhetArbeidsgiverSkalHaKopi = virksomhetArbeidsgiverSkalHaKopi;
     }
 
     @Override
@@ -45,7 +45,7 @@ public class InnvilgelseUK extends DokgenDto {
         return familie;
     }
 
-    public Kopi getKopi() {
-        return kopi;
+    public boolean isVirksomhetArbeidsgiverSkalHaKopi() {
+        return virksomhetArbeidsgiverSkalHaKopi;
     }
 }

@@ -497,7 +497,7 @@ class DokgenMalMapperTest {
                 "Virksomhetsnavn"
             ),
             null,
-            new Kopi(true, true)
+            true
         );
     }
 

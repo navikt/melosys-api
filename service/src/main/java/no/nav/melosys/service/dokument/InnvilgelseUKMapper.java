@@ -7,7 +7,6 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_t
 import no.nav.melosys.integrasjon.dokgen.dto.felles.Mottaker;
 import no.nav.melosys.integrasjon.dokgen.dto.innvilgelsestorbritannia.Familie;
 import no.nav.melosys.integrasjon.dokgen.dto.innvilgelsestorbritannia.InnvilgelseUK;
-import no.nav.melosys.integrasjon.dokgen.dto.innvilgelsestorbritannia.Kopi;
 import no.nav.melosys.integrasjon.dokgen.dto.innvilgelsestorbritannia.Soknad;
 import org.springframework.stereotype.Component;
 
@@ -25,14 +24,14 @@ public class InnvilgelseUKMapper {
         Lovvalgbestemmelser_trygdeavtale_uk artikkel = null;
         Soknad soknad = null;
         Familie familie = null;
-        Kopi kopi = null;
+        boolean virksomhetArbeidsgiverSkalHaKopi = false;
         return new InnvilgelseUK(
             brevbestilling,
             mottaker,
             artikkel,
             soknad,
             familie,
-            kopi
+            virksomhetArbeidsgiverSkalHaKopi
         );
     }
 }
