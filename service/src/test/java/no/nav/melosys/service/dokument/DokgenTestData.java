@@ -8,12 +8,15 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Soeknadsland;
+import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.GeografiskAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
+import no.nav.melosys.domain.dokument.person.adresse.Bostedsadresse;
+import no.nav.melosys.domain.dokument.person.adresse.Gateadresse;
 import no.nav.melosys.domain.dokument.person.adresse.UstrukturertAdresse;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Representerer;
@@ -85,6 +88,12 @@ public final class DokgenTestData {
         personDokument.setFnr(FNR_BRUKER);
         personDokument.setSammensattNavn(SAMMENSATT_NAVN_BRUKER);
         personDokument.setGjeldendePostadresse(lagAdresse());
+        Bostedsadresse bostedsadresse = new Bostedsadresse();
+        bostedsadresse.setLand(new Land(Land.STORBRITANNIA));
+        Gateadresse gateadresse = new Gateadresse();
+        gateadresse.setGatenavn("UK Street 48");
+        bostedsadresse.setGateadresse(gateadresse);
+        personDokument.setBostedsadresse(bostedsadresse);
         return personDokument;
     }
 

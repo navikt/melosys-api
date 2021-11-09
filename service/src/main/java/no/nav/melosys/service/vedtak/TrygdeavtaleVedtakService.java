@@ -67,9 +67,9 @@ public class TrygdeavtaleVedtakService {
         behandling.setStatus(Behandlingsstatus.IVERKSETTER_VEDTAK);
         behandlingService.lagre(behandling);
 
-//        prosessinstansService.opprettProsessinstansIverksettVedtak(behandling, request);
+        prosessinstansService.opprettProsessinstansIverksettVedtak(behandling, request);
         dokgenService.produserOgDistribuerBrev(behandlingID, lagBrevbestilling(request));
-//        oppgaveService.ferdigstillOppgaveMedSaksnummer(saksnummer);
+        oppgaveService.ferdigstillOppgaveMedSaksnummer(saksnummer);
     }
 
     private BrevbestillingRequest lagBrevbestilling(FattTrygdeavtaleVedtakRequest request) {

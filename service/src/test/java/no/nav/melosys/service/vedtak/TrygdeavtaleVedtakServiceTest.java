@@ -31,6 +31,7 @@ import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
 import static no.nav.melosys.domain.kodeverk.Saksstatuser.MEDLEMSKAP_AVKLART;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.IVERKSETTER_VEDTAK;
+import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.ATTEST_NO_UK_1;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.INNVILGELSE_FOLKETRYGDLOVEN_2_8;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.*;
@@ -101,7 +102,7 @@ class TrygdeavtaleVedtakServiceTest {
         assertThat(brevbestillingRequest)
             .extracting("produserbardokument", "bestillersId", "mottaker", "innledningFritekst",
                 "begrunnelseFritekst", "ektefelleFritekst", "barnFritekst")
-            .containsExactly(INNVILGELSE_FOLKETRYGDLOVEN_2_8, "Z990007", BRUKER, "Innledning",
+            .containsExactly(ATTEST_NO_UK_1, "Z990007", BRUKER, "Innledning",
                 "Begrunnelse", "Ektefelle omfattet", "Barn omfattet");
         assertThat(brevbestillingRequest.getKopiMottakere().size()).isEqualTo(1);
         assertThat(brevbestillingRequest.getKopiMottakere().get(0).getRolle()).isEqualTo(ARBEIDSGIVER);

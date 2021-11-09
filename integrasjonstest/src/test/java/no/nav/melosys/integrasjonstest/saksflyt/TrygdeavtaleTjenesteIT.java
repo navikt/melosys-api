@@ -1,6 +1,8 @@
 package no.nav.melosys.integrasjonstest.saksflyt;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
@@ -8,6 +10,7 @@ import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_barn_begrunnelser_ftrl;
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_ektefelle_samboer_begrunnelser_ftrl;
 import no.nav.melosys.exception.ValideringException;
+import no.nav.melosys.repository.VedtakMetadataRepository;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.TrygdeavtaleService;
 import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
@@ -27,6 +30,7 @@ import no.nav.melosys.service.vedtak.FattVedtakRequest;
 import no.nav.melosys.service.vedtak.VedtakServiceFasade;
 import no.nav.melosys.tjenester.gui.TrygdeavtaleTjeneste;
 import no.nav.melosys.tjenester.gui.dto.trygdeavtale.TrygdeAvtaleDataForVedtakDto;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -61,11 +65,18 @@ class TrygdeavtaleTjenesteIT {
     private AvklarteVirksomheterService avklarteVirksomheterService;
     @Autowired
     private LovvalgsperiodeService lovvalgsperiodeService;
+    @Autowired
+    private VedtakMetadataRepository vedtakMetadataRepository;
 
     private TrygdeavtaleTjeneste trygdeavtaleTjeneste;
 
+    @AfterEach
+    void after() {
+        vedtakMetadataRepository.deleteAll();
+    }
+
     @BeforeEach
-    void setup() {
+    void setup() throws InterruptedException {
         trygdeavtaleTjeneste = new TrygdeavtaleTjeneste(
             trygdeavtaleService,
             behandlingService,
@@ -75,18 +86,14 @@ class TrygdeavtaleTjenesteIT {
             avklarteVirksomheterService,
             lovvalgsperiodeService);
 
-        // TODO: bruk http://localhost:8083/testdata/jfr-oppgave til å lage oppgave og kjør så opprettOgJournalfør
-//        Journalpost journalpost = journalfoeringService.hentJournalpost("526345");
-//        if (!journalpost.isErFerdigstilt()) {
-//            System.out.println("opprettOgJournalfør");
-//            JournalfoeringOpprettDto journalfoeringDto = lagJournalfoeringOpprettDto();
-//            journalfoeringService.opprettOgJournalfør(journalfoeringDto);
-//        }
+//        vedtakMetadataRepository.deleteAllById(List.of(1L));
+        vedtakMetadataRepository.deleteAll();
 
-        // kan slå opp i behandling for å finne behandling id fra INITIERENDE_JOURNALPOST_ID
-        Behandling behandling = behandlingService.hentBehandling(1L);
-        behandlingService.endreBehandlingsstatusFraOpprettetTilUnderBehandling(behandling);
-        Behandlingsgrunnlag behandlingsgrunnlag = behandling.getBehandlingsgrunnlag();
+//        lagData();
+
+
+        // Gutt - 02112199996
+        // Jente - 02112199805
 
 //        SoeknadFtrl behandlingsgrunnlagdata = (SoeknadFtrl) behandlingsgrunnlag.getBehandlingsgrunnlagdata();
 //        behandlingsgrunnlagdata.periode = new Periode(
@@ -107,20 +114,63 @@ class TrygdeavtaleTjenesteIT {
 //
 //        behandlingsgrunnlagService.oppdaterBehandlingsgrunnlag(behandlingsgrunnlag);
 
-        String jsonData = behandlingsgrunnlag.getJsonData();
-        System.out.println(jsonData);
+//        String jsonData = behandlingsgrunnlag.getJsonData();
+//        System.out.println(jsonData);
     }
 
-    private JournalfoeringOpprettDto lagJournalfoeringOpprettDto() {
+    private void lagData() throws InterruptedException {
+        TestDataForTrygdeavtale testDataForTrygdeavtale = new TestDataForTrygdeavtale();
+        testDataForTrygdeavtale.lagOppgave();
+        JsonNode journalpostNode = testDataForTrygdeavtale.hentFørsteOppgave();
+        String journalpostID = journalpostNode.get("journalpostId").asText();
+        String oppgaveId = journalpostNode.get("id").asText();
+        JsonNode saksreferanseNode = journalpostNode.get("saksreferanse");
+        System.out.println(saksreferanseNode);
+        assert saksreferanseNode.isNull();
+
+        Journalpost journalpost = journalfoeringService.hentJournalpost(journalpostID);
+        if (!journalpost.isErFerdigstilt()) {
+            System.out.println("opprettOgJournalfør");
+            JournalfoeringOpprettDto journalfoeringDto = lagJournalfoeringOpprettDto(journalpost, oppgaveId);
+
+            int lastId = testDataForTrygdeavtale.hentNyesteOppgave().get("id").asInt();
+            journalfoeringService.opprettOgJournalfør(journalfoeringDto); // Det lages en ny Journalpost
+
+            // Må vente på at prosses har kjørt igennom alle steg
+            while (saksreferanseNode.isNull()) {
+                System.out.println("Sleeping 1s");
+                Thread.sleep(1000);
+
+                JsonNode jsonNode = testDataForTrygdeavtale.hentNyesteOppgave();
+                if (jsonNode.get("id").asInt() == lastId) continue;
+
+                saksreferanseNode = jsonNode.get("saksreferanse");
+                System.out.println(saksreferanseNode.asText());
+            }
+        }
+        if (saksreferanseNode.isNull()) {
+            System.out.println("saksreferanseNode.isNull()");
+            return;
+        }
+
+        long behandlingId = Long.parseLong(saksreferanseNode.asText().split("-")[1]);
+        Behandling behandling = behandlingService.hentBehandling(behandlingId);
+        behandlingService.endreBehandlingsstatusFraOpprettetTilUnderBehandling(behandling);
+//        Behandlingsgrunnlag behandlingsgrunnlag = behandling.getBehandlingsgrunnlag();
+//        String jsonData = behandlingsgrunnlag.getJsonData();
+//        System.out.println(jsonData);
+    }
+
+    private JournalfoeringOpprettDto lagJournalfoeringOpprettDto(Journalpost journalpost, String oppgaveId) {
         JournalfoeringOpprettDto journalfoeringDto = new JournalfoeringOpprettDto();
         journalfoeringDto.setAvsenderID("30056928150");
         journalfoeringDto.setAvsenderNavn("KARAFFEL TRIVIELL");
         journalfoeringDto.setBrukerID("30056928150");
         journalfoeringDto.setAvsenderType(Avsendertyper.PERSON);
-        DokumentDto dokumentDto = new DokumentDto("85937", "Søknad om A1 for utsendte arbeidstakere i EØS/Sveits");
+        DokumentDto dokumentDto = new DokumentDto(journalpost.getHoveddokument().getDokumentId(), "Søknad om A1 for utsendte arbeidstakere i EØS/Sveits");
         journalfoeringDto.setHoveddokument(dokumentDto);
-        journalfoeringDto.setJournalpostID("526345");
-        journalfoeringDto.setOppgaveID("1");
+        journalfoeringDto.setJournalpostID(journalpost.getJournalpostId());
+        journalfoeringDto.setOppgaveID(oppgaveId);
         journalfoeringDto.setSkalTilordnes(true);
         journalfoeringDto.setMottattDato(LocalDate.of(2021, 10, 13));
         journalfoeringDto.setBehandlingstemaKode("TRYGDEAVTALE_UK");
@@ -139,11 +189,11 @@ class TrygdeavtaleTjenesteIT {
             .vedtak("JA_FATTE_VEDTAK")
             .innvilgelse("JA")
             .bestemmelse("UK_ART6_1")
-            .addBarn("5aa85fd8-4172-47d0-812e-da8acb26780c",
+            .addBarn("f922d0c8-269e-4c83-a12d-7b29e33ccf75",
                 false, Medfolgende_barn_begrunnelser_ftrl.OVER_18_AR.getKode(),
                 "begrunnelse barn")
-            .ektefelle("329dfcb9-600d-4a89-8811-73fe7601ca91",
-                true,  Medfolgende_ektefelle_samboer_begrunnelser_ftrl.EGEN_INNTEKT.getKode(),
+            .ektefelle("4ffa867c-e645-4389-8f08-24a6e564889c",
+                true, Medfolgende_ektefelle_samboer_begrunnelser_ftrl.EGEN_INNTEKT.getKode(),
                 "begrunnelse samboer")
             .build();
 
@@ -164,6 +214,6 @@ class TrygdeavtaleTjenesteIT {
         vedtakServiceFasade.fattVedtak(1L, fattVedtakRequest);
         Thread.sleep(100000000);
 
-        System.out.println("done!");
+//        System.out.println("done!");
     }
 }

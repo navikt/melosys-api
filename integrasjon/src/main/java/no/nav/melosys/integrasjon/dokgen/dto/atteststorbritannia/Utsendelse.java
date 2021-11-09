@@ -32,4 +32,43 @@ public record Utsendelse(
             utsendelse.sluttdato()
         );
     }
+
+    static public class Builder {
+        private Lovvalgbestemmelser_trygdeavtale_uk artikkel;
+        private List<String> oppholdsadresseUK;
+        private Instant startdato;
+        private Instant sluttdato;
+
+        public static Builder builder() {
+            return new Builder();
+        }
+
+        public Builder artikkel(Lovvalgbestemmelser_trygdeavtale_uk artikkel) {
+            this.artikkel = artikkel;
+            return this;
+        }
+
+        public Builder oppholdsadresseUK(List<String> oppholdsadresseUK) {
+            this.oppholdsadresseUK = oppholdsadresseUK;
+            return this;
+        }
+
+        public List<String> oppholdsadresseUK() {
+            return oppholdsadresseUK;
+        }
+
+        public Builder startdato(Instant startdato) {
+            this.startdato = startdato;
+            return this;
+        }
+
+        public Builder sluttdato(Instant sluttdato) {
+            this.sluttdato = sluttdato;
+            return this;
+        }
+
+        public Utsendelse build() {
+            return new Utsendelse(artikkel, oppholdsadresseUK, startdato, sluttdato);
+        }
+    }
 }
