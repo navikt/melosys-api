@@ -42,8 +42,11 @@ public final class BostedsadresseOversetter {
             return Optional.empty();
         }
 
+        var gyldigFraOgMed = bostedsadressePDL.gyldigFraOgMed() == null ? null : bostedsadressePDL.gyldigFraOgMed().toLocalDate();
+        var gyldigTilOgMed = bostedsadressePDL.gyldigTilOgMed() == null ? null : bostedsadressePDL.gyldigTilOgMed().toLocalDate();
+
         return Optional.of(new Bostedsadresse(strukturertAdresse, bostedsadressePDL.coAdressenavn(),
-            bostedsadressePDL.gyldigFraOgMed(), bostedsadressePDL.gyldigTilOgMed(),
+            gyldigFraOgMed, gyldigTilOgMed,
             bostedsadressePDL.metadata().master(), bostedsadressePDL.hentKilde(),
             bostedsadressePDL.metadata().historisk()));
     }

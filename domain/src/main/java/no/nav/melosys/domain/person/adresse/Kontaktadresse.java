@@ -1,6 +1,7 @@
 package no.nav.melosys.domain.person.adresse;
 
 import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 import no.nav.melosys.domain.adresse.SemistrukturertAdresse;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
@@ -10,8 +11,8 @@ public record Kontaktadresse(
     StrukturertAdresse strukturertAdresse,
     SemistrukturertAdresse semistrukturertAdresse,
     String coAdressenavn,
-    LocalDateTime gyldigFraOgMed,
-    LocalDateTime gyldigTilOgMed,
+    LocalDate gyldigFraOgMed,
+    LocalDate gyldigTilOgMed,
     String master,
     String kilde,
     LocalDateTime registrertDato,
