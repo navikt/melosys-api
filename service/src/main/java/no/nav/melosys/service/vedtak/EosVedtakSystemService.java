@@ -25,7 +25,7 @@ public class EosVedtakSystemService extends EosVedtakService {
                                   LandvelgerService landvelgerService,
                                   @Qualifier("system") PersondataFasade persondataFasade,
                                   RegisteropplysningerService registeropplysningerService,
-                                  VedtakKontrollService vedtakKontrollService,
+                                  @Qualifier("system") VedtakKontrollService vedtakKontrollService,
                                   AvklartefaktaService avklartefaktaService,
                                   ApplicationEventMulticaster melosysEventMulticaster) {
         super(behandlingService, behandlingsresultatService, oppgaveService, prosessinstansService,

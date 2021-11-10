@@ -1,7 +1,6 @@
 package no.nav.melosys.service.kontroll;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
@@ -14,10 +13,12 @@ import no.nav.melosys.service.kontroll.ufm.UfmKontrollService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Primary
 public class KontrollresultatService {
     private static final Logger log = LoggerFactory.getLogger(KontrollresultatService.class);
 
@@ -54,7 +55,7 @@ public class KontrollresultatService {
 
         List<Kontrollresultat> kontrollresultater = kontrollBegrunnelser.stream()
             .map(kontrollBegrunnelse -> lagKontrollresultat(behandlingsresultat, kontrollBegrunnelse))
-            .collect(Collectors.toList());
+            .toList();
 
         kontrollresultatRepository.saveAll(kontrollresultater);
     }
