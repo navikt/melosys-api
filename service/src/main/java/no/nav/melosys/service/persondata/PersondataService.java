@@ -198,7 +198,7 @@ public class PersondataService implements PersondataFasade {
         final var behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
         final String ident = behandling.getFagsak().hentAktørID();
         if (behandling.erAktiv() && erRegistrertEtterPdlStart(behandling)) {
-            return PersonMedHistorikkOversetter.oversett(pdlConsumer.hentPersonMedHistorikk(ident), kodeverkService);
+            return hentPersonMedHistorikk(ident);
         }
 
         if (!erRegistrertEtterPdlStart(behandling)) {
@@ -208,6 +208,11 @@ public class PersondataService implements PersondataFasade {
         final Instant skjæringstidspunkt = avgjørSkjæringstidspunktTilInnsyn(behandling);
         final var persondataTilInnsyn = filtrerPersondataFørDato(pdlConsumer.hentPersonMedHistorikk(ident), skjæringstidspunkt);
         return PersonMedHistorikkOversetter.oversett(persondataTilInnsyn, kodeverkService);
+    }
+
+    @Override
+    public PersonMedHistorikk hentPersonMedHistorikk(String ident) {
+        return PersonMedHistorikkOversetter.oversett(pdlConsumer.hentPersonMedHistorikk(ident), kodeverkService);
     }
 
     private boolean erRegistrertEtterPdlStart(Behandling behandling) {

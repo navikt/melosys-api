@@ -31,6 +31,8 @@ public interface PersondataFasade {
 
     PersonMedHistorikk hentPersonMedHistorikk(long behandlingID);
 
+    PersonMedHistorikk hentPersonMedHistorikk(String ident);
+
     String hentSammensattNavn(String ident);
 
     Set<Statsborgerskap> hentStatsborgerskap(String ident);
