@@ -4,7 +4,6 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.transaction.Transactional;
 
@@ -18,6 +17,7 @@ import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
 import no.nav.melosys.domain.person.Persondata;
+import no.nav.melosys.domain.person.adresse.PersonAdresse;
 import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeBarn;
 import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie;
 import no.nav.melosys.domain.person.familie.OmfattetFamilie;
@@ -58,7 +58,11 @@ public class TryggdeavteleAtestMapper {
         Persondata persondokument = brevbestilling.getPersondokument();
         Collection<Lovvalgsperiode> lovvalgsperioder = lovvalgsperiodeService.hentLovvalgsperioder(behandlingId);
 
-        var behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(behandlingId);
+        // Bør kanskje henter Persondata fra persondataFasade siden brevbestilling.getPersondokument() gir oss ett
+        // PersonDokument som setter gyldig fra til som null
+        // må finne ut hvor vi kan få fnr fra. Kanskje: brevbestilling.getArbeidstaker().fnr());
+        //Persondata persondataForUtesendelse = persondataFasade.hentPerson(fnr);
+        Persondata persondataForUtesendelse = persondokument;
 
         return new AttestStorbritannia.Builder(brevbestilling)
             .medfolgendeFamiliemedlemmer(new MedfolgendeFamiliemedlemmer(
@@ -71,11 +75,11 @@ public class TryggdeavteleAtestMapper {
                 toInstant(persondokument.getFødselsdato()),
                 persondokument.hentFolkeregisterident(),
                 persondokument.hentGjeldendePostadresse().adresselinjer()))
-            .representantUK(new RepresentantUK( // Må avklare med fag hvor vi skal hente dette
-                "Mrs. London",
-                List.of("UK Street 1337"))
+            .representantUK(new RepresentantUK(
+                "Mrs. London", // Det blir fylt inn via sidemeny. Usikker på hvor det hanver...
+                List.of())
             )
-            .utsendelse(getUtsendelse(lovvalgsperioder, persondokument))
+            .utsendelse(getUtsendelse(lovvalgsperioder, persondataForUtesendelse))
             .build();
     }
 
@@ -91,23 +95,36 @@ public class TryggdeavteleAtestMapper {
 
         return new Utsendelse.Builder()
             .artikkel((Lovvalgbestemmelser_trygdeavtale_uk) bestemmelse)
-            .oppholdsadresseUK(findGyldigAddresse(persondata))
+            .oppholdsadresseUK(findGyldigAddresse(persondata, lovvalgsperiode))
             .startdato(toInstant(lovvalgsperiode.getFom()))
             .sluttdato(toInstant(lovvalgsperiode.getTom()))
             .build();
     }
 
-    private List<String> findGyldigAddresse(Persondata persondata) {
-        var optionalPersonAdresse = Stream.of(persondata.finnBostedsadresse(), persondata.finnOppholdsadresse(), persondata.finnKontaktadresse())
+    static List<String> findGyldigAddresse(Persondata persondata, Lovvalgsperiode lovvalgsperiode) {
+        var optionalPersonAdresse = Stream.of(
+                persondata.finnBostedsadresse(),
+                persondata.finnOppholdsadresse(),
+                persondata.finnKontaktadresse())
             .filter(Optional::isPresent)
             .map(Optional::get)
-            .filter(record -> sjekkAdresseMotLand(record.strukturertAdresse()))
+            .filter(personAdresse -> sjekkAdresseMotLand(personAdresse.strukturertAdresse()))
+            .filter(personAdresse -> sjekkOmAdresseGyldighetErInnenforLovalgsperiode(personAdresse, lovvalgsperiode))
             .findFirst();
         return optionalPersonAdresse.isPresent() ? optionalPersonAdresse.get().strukturertAdresse().toList() : List.of();
     }
 
-    private boolean sjekkAdresseMotLand(StrukturertAdresse adresse) {
+    private static boolean sjekkAdresseMotLand(StrukturertAdresse adresse) {
         return adresse.getLandkode().equals(Landkoder.GB.getKode());
+    }
+
+    static boolean sjekkOmAdresseGyldighetErInnenforLovalgsperiode(PersonAdresse personAdresse, Lovvalgsperiode lovvalgsperiode) {
+        if(personAdresse.gyldigFraOgMed() == null) return false; // Høre med fag om vi skal bruke adressen i dette tilfelle
+        if(personAdresse.gyldigTilOgMed() == null) return false;
+        if(lovvalgsperiode.getTom().isBefore(personAdresse.gyldigFraOgMed().toLocalDate())) return false;
+        if(lovvalgsperiode.getFom().isAfter(personAdresse.gyldigTilOgMed().toLocalDate())) return false;
+
+        return true;
     }
 
     private ArbeidsgiverNorge getArbeidsgiverNorge(Behandling behandling) {
@@ -119,7 +136,7 @@ public class TryggdeavteleAtestMapper {
         return new ArbeidsgiverNorge(norskeArbeidsgiver.navn, norskeArbeidsgiver.adresse.toList());
     }
 
-    private Instant toInstant(LocalDate localDate) {
+    private static Instant toInstant(LocalDate localDate) {
         if (localDate == null) {
             return null;
         }
@@ -133,7 +150,7 @@ public class TryggdeavteleAtestMapper {
             return List.of();
         }
         Map<String, MedfolgendeFamilie> medfølgendeBarn = avklarteMedfolgendeFamilieService.hentMedfølgendeBarn(behandlingID);
-        return barnOmfattetAvNorskTrygd.stream().map(omfattetFamilie -> tilPerson(medfølgendeBarn, omfattetFamilie.getUuid())).collect(Collectors.toList());
+        return barnOmfattetAvNorskTrygd.stream().map(omfattetFamilie -> tilPerson(medfølgendeBarn, omfattetFamilie.getUuid())).toList();
     }
 
     private Person mapEktefelle(long behandlingID) {
