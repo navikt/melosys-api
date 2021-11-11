@@ -203,7 +203,7 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
-    public void opprettProsessinstansIverksettVedtak(Behandling behandling, FattFtrlVedtakRequest request) {
+    public void opprettProsessinstansIverksettVedtakFTRL(Behandling behandling, FattFtrlVedtakRequest request) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.IVERKSETT_VEDTAK_FTRL)
             .medBehandling(behandling)
@@ -213,7 +213,7 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
-    public void opprettProsessinstansIverksettVedtak(Behandling behandling, FattTrygdeavtaleVedtakRequest request) {
+    public void opprettProsessinstansIverksettVedtakTrygdeavtale(Behandling behandling, FattTrygdeavtaleVedtakRequest request) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.IVERKSETT_VEDTAK_TRYGDEAVTALE)
             .medBehandling(behandling)
