@@ -121,8 +121,8 @@ public class TryggdeavteleAtestMapper {
     static boolean sjekkOmAdresseGyldighetErInnenforLovalgsperiode(PersonAdresse personAdresse, Lovvalgsperiode lovvalgsperiode) {
         if(personAdresse.gyldigFraOgMed() == null) return false; // Høre med fag om vi skal bruke adressen i dette tilfelle
         if(personAdresse.gyldigTilOgMed() == null) return false;
-        if(lovvalgsperiode.getTom().isBefore(personAdresse.gyldigFraOgMed().toLocalDate())) return false;
-        if(lovvalgsperiode.getFom().isAfter(personAdresse.gyldigTilOgMed().toLocalDate())) return false;
+        if(lovvalgsperiode.getTom().isBefore(personAdresse.gyldigFraOgMed())) return false;
+        if(lovvalgsperiode.getFom().isAfter(personAdresse.gyldigTilOgMed())) return false;
 
         return true;
     }

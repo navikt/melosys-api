@@ -97,40 +97,40 @@ class TryggdeavteleAtestMapperTest {
                 LocalDate.of(2020, 1, 1),
                 LocalDate.of(2021, 1, 1),
 
-                LocalDateTime.of(2020, 1, 1, 0, 0),
-                LocalDateTime.of(2021, 1, 1, 0, 0),
+                LocalDate.of(2020, 1, 1),
+                LocalDate.of(2021, 1, 1),
                 "lovalgsperiode er lik adresseperiode"
             ),
             Arguments.of(
                 LocalDate.of(2020, 1, 1),
                 LocalDate.of(2021, 1, 1),
 
-                LocalDateTime.of(2020, 2, 1, 0, 0),
-                LocalDateTime.of(2020, 3, 1, 0, 0),
+                LocalDate.of(2020, 2, 1),
+                LocalDate.of(2020, 3, 1),
                 "lovalgsperiode har start før og slutt etter adresseperiode"
             ),
             Arguments.of(
                 LocalDate.of(2020, 2, 1),
                 LocalDate.of(2020, 3, 1),
 
-                LocalDateTime.of(2020, 1, 1, 0, 0),
-                LocalDateTime.of(2021, 1, 1, 0, 0),
+                LocalDate.of(2020, 1, 1),
+                LocalDate.of(2021, 1, 1),
                 "adresseperiode har start før og slutt etter lovalgsperiode"
             ),
             Arguments.of(
                 LocalDate.of(2021, 1, 1),
                 LocalDate.of(2022, 1, 1),
 
-                LocalDateTime.of(2020, 1, 1, 0, 0),
-                LocalDateTime.of(2021, 1, 1, 0, 0),
+                LocalDate.of(2020, 1, 1),
+                LocalDate.of(2021, 1, 1),
                 "lovalgsperiode start er lik adresseperiode slutt"
             ),
             Arguments.of(
                 LocalDate.of(2020, 1, 1),
                 LocalDate.of(2021, 1, 1),
 
-                LocalDateTime.of(2021, 1, 1, 0, 0),
-                LocalDateTime.of(2022, 1, 1, 0, 0),
+                LocalDate.of(2021, 1, 1),
+                LocalDate.of(2022, 1, 1),
                 "lovalgsperiode slutt er lik adresseperiode start"
             )
         );
@@ -138,7 +138,7 @@ class TryggdeavteleAtestMapperTest {
 
     @ParameterizedTest(name = "{4}")
     @MethodSource("gyldigePerioder")
-    void sjekkOmAdresseGyldighetErInnenforLovalgsperiode_for_gyldigePerioder(LocalDate lovFom, LocalDate lovTom, LocalDateTime gyldigFom, LocalDateTime gyldigTom, String grunn) {
+    void sjekkOmAdresseGyldighetErInnenforLovalgsperiode_for_gyldigePerioder(LocalDate lovFom, LocalDate lovTom, LocalDate gyldigFom, LocalDate gyldigTom, String grunn) {
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setFom(lovFom);
         lovvalgsperiode.setTom(lovTom);
@@ -162,16 +162,16 @@ class TryggdeavteleAtestMapperTest {
                 LocalDate.of(2019, 1, 1),
                 LocalDate.of(2020, 1, 1),
 
-                LocalDateTime.of(2020, 2, 1, 0, 0),
-                LocalDateTime.of(2021, 1, 1, 0, 0),
+                LocalDate.of(2020, 2, 1),
+                LocalDate.of(2021, 1, 1),
                 "lovalgsperiode er før adresseperiode"
             ),
             Arguments.of(
                 LocalDate.of(2021, 1, 2),
                 LocalDate.of(2022, 1, 1),
 
-                LocalDateTime.of(2020, 1, 1, 0, 0),
-                LocalDateTime.of(2021, 1, 1, 0, 0),
+                LocalDate.of(2020, 1, 1),
+                LocalDate.of(2021, 1, 1),
                 "lovalgsperiode er etter adresseperiode"
             ),
             Arguments.of(
@@ -187,7 +187,7 @@ class TryggdeavteleAtestMapperTest {
 
     @ParameterizedTest(name = "{4}")
     @MethodSource("ugyldigePerioder")
-    void sjekkOmAdresseGyldighetErInnenforLovalgsperiode_for_ugyldigePerioder(LocalDate lovFom, LocalDate lovTom, LocalDateTime gyldigFom, LocalDateTime gyldigTom, String grunn) {
+    void sjekkOmAdresseGyldighetErInnenforLovalgsperiode_for_ugyldigePerioder(LocalDate lovFom, LocalDate lovTom, LocalDate gyldigFom, LocalDate gyldigTom, String grunn) {
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setFom(lovFom);
         lovvalgsperiode.setTom(lovTom);
@@ -217,54 +217,56 @@ class TryggdeavteleAtestMapperTest {
         );
 
         String forvented = """
-            {
-              "fnr" : "05058892382",
-              "saksnummer" : "MEL-123",
-              "navnBruker" : "Donald Duck",
-              "mottaker" : {
-                "navn" : "Donald Duck",
-                "adresselinjer" : [ "Andebygata 1", null, null, null ],
-                "postnr" : "9999",
-                "poststed" : "Andeby",
-                "land" : null,
-                "type" : "BRUKER"
-              },
-              "arbeidstaker" : {
-                "navn" : "Donald Duck",
-                "foedselsdato" : null,
-                "fnr" : "05058892382",
-                "bostedadresse" : [ "Andebygata 1", null, null, null ]
-              },
-              "medfolgendeFamiliemedlemmer" : {
-                "ektefelle" : {
-                  "navn" : "Dolly Duck",
-                  "foedselsdato" : "1969-12-31T23:00:00Z",
-                  "fnr" : "09080723451",
-                  "dnr" : null
-                },
-                "barn" : [ {
-                  "navn" : "Doffen Duck",
-                  "foedselsdato" : "1969-12-31T23:00:00Z",
-                  "fnr" : "12131456789",
-                  "dnr" : null
-                } ]
-              },
-              "arbeidsgiverNorge" : {
-                "virksomhetsnavn" : "Bang Hansen",
-                "fullstendigAdresse" : [ "Strukturert Gate 12B", "4321", "Poststed", "Bulgaria" ]
-              },
-              "utsendelse" : {
-                "artikkel" : "UK_ART6_1",
-                "oppholdsadresseUK" : [ ],
-                "startdato" : "2019-12-31T23:00:00Z",
-                "sluttdato" : "2020-12-31T23:00:00Z"
-              },
-              "representantUK" : {
-                "navn" : "Mrs. London",
-                "adresse" : [ ]
-              },
-              "vedtaksdato" : "1970-10-10T00:00:00Z"
-            }""";
+        {
+          "saksopplysninger" : {
+            "saksnummer" : "MEL-123",
+            "navnBruker" : "Donald Duck",
+            "fnr" : "05058892382"
+          },
+          "mottaker" : {
+            "navn" : "Donald Duck",
+            "adresselinjer" : [ "Andebygata 1", null, null, null ],
+            "postnr" : "9999",
+            "poststed" : "Andeby",
+            "land" : null,
+            "type" : "BRUKER"
+          },
+          "arbeidstaker" : {
+            "navn" : "Donald Duck",
+            "foedselsdato" : null,
+            "fnr" : "05058892382",
+            "bostedadresse" : [ "Andebygata 1", null, null, null ]
+          },
+          "medfolgendeFamiliemedlemmer" : {
+            "ektefelle" : {
+              "navn" : "Dolly Duck",
+              "foedselsdato" : "1969-12-31T23:00:00Z",
+              "fnr" : "09080723451",
+              "dnr" : null
+            },
+            "barn" : [ {
+              "navn" : "Doffen Duck",
+              "foedselsdato" : "1969-12-31T23:00:00Z",
+              "fnr" : "12131456789",
+              "dnr" : null
+            } ]
+          },
+          "arbeidsgiverNorge" : {
+            "virksomhetsnavn" : "Bang Hansen",
+            "fullstendigAdresse" : [ "Strukturert Gate 12B", "4321", "Poststed", "Bulgaria" ]
+          },
+          "utsendelse" : {
+            "artikkel" : "UK_ART6_1",
+            "oppholdsadresseUK" : [ ],
+            "startdato" : "2019-12-31T23:00:00Z",
+            "sluttdato" : "2020-12-31T23:00:00Z"
+          },
+          "representantUK" : {
+            "navn" : "Mrs. London",
+            "adresse" : [ ]
+          },
+          "vedtaksdato" : "1970-10-10T00:00:00Z"
+        }""";
 
         String s = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(attestStorbritannia);
         String resultat = s.replaceAll("\"dagensDato\" :.*\n", "");
