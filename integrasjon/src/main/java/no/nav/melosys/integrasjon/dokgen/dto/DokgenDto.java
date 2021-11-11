@@ -9,22 +9,20 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.ser.InstantSerializer;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.integrasjon.dokgen.dto.felles.Mottaker;
+import no.nav.melosys.integrasjon.dokgen.dto.felles.Saksopplysninger;
 
 import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
 import static no.nav.melosys.integrasjon.dokgen.DokgenAdresseMapper.mapMottaker;
 
 @JsonInclude(Include.NON_EMPTY)
 public abstract class DokgenDto {
-    private final String fnr;
-    private final String saksnummer;
+    private final Saksopplysninger saksopplysninger;
 
     @JsonSerialize(using = InstantSerializer.class)
     @JsonFormat(shape = STRING)
     private final Instant dagensDato;
 
-    private final String navnBruker;
     private final String saksbehandlerNavn;
     private Mottaker mottaker;
 
@@ -34,41 +32,25 @@ public abstract class DokgenDto {
     protected static final int DOKUMENTASJON_SVARFRIST_UKER_MANGELBREV = 4;
 
     protected DokgenDto(DokgenBrevbestilling brevbestilling) {
-        Persondata persondata = brevbestilling.getPersondokument();
-
-        this.fnr = persondata.hentFolkeregisterident();
-        this.saksnummer = brevbestilling.getBehandling().getFagsak().getSaksnummer();
+        this.saksopplysninger = Saksopplysninger.av(brevbestilling);
         this.dagensDato = Instant.now();
-        this.navnBruker = persondata.getSammensattNavn();
         this.saksbehandlerNavn = brevbestilling.getSaksbehandlerNavn();
         this.mottaker = mapMottaker(brevbestilling, Aktoersroller.BRUKER);
     }
 
     protected DokgenDto(DokgenBrevbestilling brevbestilling, Aktoersroller mottakerType) {
-        Persondata persondata = brevbestilling.getPersondokument();
-
-        this.fnr = persondata.hentFolkeregisterident();
-        this.saksnummer = brevbestilling.getBehandling().getFagsak().getSaksnummer();
+        this.saksopplysninger = Saksopplysninger.av(brevbestilling);
         this.dagensDato = Instant.now();
-        this.navnBruker = persondata.getSammensattNavn();
         this.saksbehandlerNavn = brevbestilling.getSaksbehandlerNavn();
         this.mottaker = mapMottaker(brevbestilling, mottakerType);
     }
 
-    public String getFnr() {
-        return fnr;
-    }
-
-    public String getSaksnummer() {
-        return saksnummer;
+    public Saksopplysninger getSaksopplysninger() {
+        return saksopplysninger;
     }
 
     public Instant getDagensDato() {
         return dagensDato;
-    }
-
-    public String getNavnBruker() {
-        return navnBruker;
     }
 
     public String getSaksbehandlerNavn() {

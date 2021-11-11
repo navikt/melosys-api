@@ -146,10 +146,10 @@ class InnvilgelseFtrlMapperTest {
         assertThat(innvilgelseFtrl.getAvgiftssatsAar()).isEqualTo(String.valueOf(DateTime.now().getYear()));
         assertThat(innvilgelseFtrl.isLoennNorgeSkattepliktig()).isTrue();
         assertThat(innvilgelseFtrl.isLoennUtlandSkattepliktig()).isFalse();
-        assertThat(innvilgelseFtrl.getFnr()).isEqualTo(FNR_BRUKER);
-        assertThat(innvilgelseFtrl.getSaksnummer()).isEqualTo(SAKSNUMMER);
+        assertThat(innvilgelseFtrl.getSaksopplysninger().fnr()).isEqualTo(FNR_BRUKER);
+        assertThat(innvilgelseFtrl.getSaksopplysninger().saksnummer()).isEqualTo(SAKSNUMMER);
         assertThat(innvilgelseFtrl.getDagensDato().truncatedTo(ChronoUnit.DAYS)).isEqualTo(Instant.now().truncatedTo(ChronoUnit.DAYS));
-        assertThat(innvilgelseFtrl.getNavnBruker()).isEqualTo(SAMMENSATT_NAVN_BRUKER);
+        assertThat(innvilgelseFtrl.getSaksopplysninger().navnBruker()).isEqualTo(SAMMENSATT_NAVN_BRUKER);
         assertThat(innvilgelseFtrl.getMottaker().adresselinjer().isEmpty()).isFalse();
         assertThat(innvilgelseFtrl.getMottaker().postnr()).isEqualTo(POSTNR_BRUKER);
         assertThat(innvilgelseFtrl.getMottaker().poststed()).isEqualTo(POSTSTED_BRUKER);
