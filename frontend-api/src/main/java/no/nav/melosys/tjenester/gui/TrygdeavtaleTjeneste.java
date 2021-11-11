@@ -82,7 +82,7 @@ public class TrygdeavtaleTjeneste {
         @PathVariable("behandlingID") long behandlingsId,
         @RequestBody TrygdeAvtaleDataForVedtakDto trygdeAvtaleDataForVedtakDto) {
 
-        // TODO: Flytt dette ut til en egen klasse
+        // TODO: Flytt dette ut til en egen klasse - Gjør dette i en egen PR
         LagreMedfolgendeFamilieDto lagreMedfolgendeFamilieDto = lagMedfolgendeFamilieDto(trygdeAvtaleDataForVedtakDto);
 
         avklarteMedfolgendeFamilieService.lagreMedfolgendeFamilieSomAvklartefakta(behandlingsId, lagreMedfolgendeFamilieDto.til());
@@ -112,8 +112,7 @@ public class TrygdeavtaleTjeneste {
         lovvalgsperiode.setLovvalgsland(lovvalgsland);
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_trygdeavtale_uk.valueOf(trygdeAvtaleDataForVedtakDto.bestemmelse()));
         lovvalgsperiode.setMedlemskapstype(Medlemskapstyper.PLIKTIG);
-        lovvalgsperiode.setDekning(Trygdedekninger.FULL_DEKNING_FTRL); // Blir renamet til FULL_DEKNING av fag
-        // Dekning i behandlingsgrunnlag også soknad.dekning
+        lovvalgsperiode.setDekning(Trygdedekninger.FULL_DEKNING_FTRL); // Skal bli renamet til FULL_DEKNING av fag
         return lovvalgsperiode;
     }
 
