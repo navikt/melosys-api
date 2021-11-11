@@ -1,11 +1,7 @@
 package no.nav.melosys.integrasjonstest.saksflyt;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
-import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadFtrl;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_barn_begrunnelser_ftrl;
@@ -27,9 +23,8 @@ import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.vedtak.FattTrygdeavtaleVedtakRequest;
 import no.nav.melosys.service.vedtak.FattVedtakRequest;
 import no.nav.melosys.service.vedtak.VedtakServiceFasade;
-import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.tjenester.gui.TrygdeavtaleTjeneste;
-import no.nav.melosys.tjenester.gui.dto.trygdeavtale.TrygdeAvtaleDataForVedtakDto;
+import no.nav.melosys.tjenester.gui.dto.trygdeavtale.TrygdeavtaleResultatDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -39,7 +34,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 
 @ExtendWith(SpringExtension.class)
@@ -138,7 +132,7 @@ class TrygdeavtaleTjenesteIT {
 
     @Test
     void test() throws ValideringException, InterruptedException {
-        TrygdeAvtaleDataForVedtakDto trygdeAvtaleDataForVedtakDto = new TrygdeAvtaleDataForVedtakDto.Builder()
+        TrygdeavtaleResultatDto trygdeavtaleResultatDto = new TrygdeavtaleResultatDto.Builder()
             .virksomheter(List.of("999999999"))
             .vedtak("JA_FATTE_VEDTAK")
             .innvilgelse("JA")
@@ -151,7 +145,7 @@ class TrygdeavtaleTjenesteIT {
                 "begrunnelse samboer")
             .build();
 
-        trygdeavtaleTjeneste.overforDataForVedtak(1L, trygdeAvtaleDataForVedtakDto);
+        trygdeavtaleTjeneste.overforResultat(1L, trygdeavtaleResultatDto);
 
         FattVedtakRequest fattVedtakRequest = new FattTrygdeavtaleVedtakRequest
             .Builder()

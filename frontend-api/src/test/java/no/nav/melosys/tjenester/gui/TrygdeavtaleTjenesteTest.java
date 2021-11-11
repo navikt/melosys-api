@@ -18,7 +18,7 @@ import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
-import no.nav.melosys.tjenester.gui.dto.trygdeavtale.TrygdeAvtaleDataForVedtakDto;
+import no.nav.melosys.tjenester.gui.dto.trygdeavtale.TrygdeavtaleResultatDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -107,7 +107,7 @@ class TrygdeavtaleTjenesteTest {
     void leggInnTrygdeAvtaleDataForOgKunneFatteVetak() throws NoSuchFieldException, IllegalAccessException {
         when(behandlingsgrunnlagService.hentBehandlingsgrunnlag(1L)).thenReturn(lagBehandlingsgrunnlag());
 
-        TrygdeAvtaleDataForVedtakDto trygdeAvtaleDataForVedtakDto = new TrygdeAvtaleDataForVedtakDto.Builder()
+        TrygdeavtaleResultatDto trygdeavtaleResultatDto = new TrygdeavtaleResultatDto.Builder()
             .virksomheter(List.of("11111111111"))
             .vedtak("JA_FATTE_VEDTAK")
             .innvilgelse("JA")
@@ -120,7 +120,7 @@ class TrygdeavtaleTjenesteTest {
                 "begrunnelse samboer")
             .build();
 
-        trygdeavtaleTjeneste.overforDataForVedtak(1L, trygdeAvtaleDataForVedtakDto);
+        trygdeavtaleTjeneste.overforResultat(1L, trygdeavtaleResultatDto);
 
         verify(behandlingsgrunnlagService, never()).oppdaterBehandlingsgrunnlag(any());
         verify(avklarteMedfolgendeFamilieService).lagreMedfolgendeFamilieSomAvklartefakta(anyLong(), any());

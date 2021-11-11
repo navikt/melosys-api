@@ -21,7 +21,7 @@ import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.tjenester.gui.dto.LagreMedfolgendeFamilieDto;
 import no.nav.melosys.tjenester.gui.dto.trygdeavtale.TrygdeavtaleInfoDto;
-import no.nav.melosys.tjenester.gui.dto.trygdeavtale.TrygdeAvtaleDataForVedtakDto;
+import no.nav.melosys.tjenester.gui.dto.trygdeavtale.TrygdeavtaleResultatDto;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.ResponseEntity;
@@ -78,31 +78,31 @@ public class TrygdeavtaleTjeneste {
     }
 
     @PostMapping("{behandlingID}")
-    public void overforDataForVedtak(
+    public void overforResultat(
         @PathVariable("behandlingID") long behandlingsId,
-        @RequestBody TrygdeAvtaleDataForVedtakDto trygdeAvtaleDataForVedtakDto) {
+        @RequestBody TrygdeavtaleResultatDto trygdeavtaleResultatDto) {
 
         // TODO: Flytt dette ut til en egen klasse - Gjør dette i en egen PR
-        LagreMedfolgendeFamilieDto lagreMedfolgendeFamilieDto = lagMedfolgendeFamilieDto(trygdeAvtaleDataForVedtakDto);
+        var lagreMedfolgendeFamilieDto = lagMedfolgendeFamilieDto(trygdeavtaleResultatDto);
 
         avklarteMedfolgendeFamilieService.lagreMedfolgendeFamilieSomAvklartefakta(behandlingsId, lagreMedfolgendeFamilieDto.til());
 
-        avklarteVirksomheterService.lagreVirksomheterSomAvklartefakta(trygdeAvtaleDataForVedtakDto.virksomheter(), behandlingsId);
+        avklarteVirksomheterService.lagreVirksomheterSomAvklartefakta(trygdeavtaleResultatDto.virksomheter(), behandlingsId);
 
         SoeknadFtrl behandlingsgrunnlagdata = hentBehandlingsgrunnlagdata(behandlingsId);
 
-        Lovvalgsperiode lovvalgsperiode = lagLovvalgsperiode(trygdeAvtaleDataForVedtakDto, behandlingsgrunnlagdata);
+        var lovvalgsperiode = lagLovvalgsperiode(trygdeavtaleResultatDto, behandlingsgrunnlagdata);
         lovvalgsperiodeService.lagreLovvalgsperioder(behandlingsId, List.of(lovvalgsperiode));
     }
 
-    private LagreMedfolgendeFamilieDto lagMedfolgendeFamilieDto(TrygdeAvtaleDataForVedtakDto trygdeAvtaleDataForVedtakDto) {
-        var familie = new ArrayList<>(trygdeAvtaleDataForVedtakDto.barn());
-        familie.add(trygdeAvtaleDataForVedtakDto.ektefelle());
+    private LagreMedfolgendeFamilieDto lagMedfolgendeFamilieDto(TrygdeavtaleResultatDto trygdeavtaleResultatDto) {
+        var familie = new ArrayList<>(trygdeavtaleResultatDto.barn());
+        familie.add(trygdeavtaleResultatDto.ektefelle());
         return new LagreMedfolgendeFamilieDto(Set.copyOf(familie));
     }
 
-    private Lovvalgsperiode lagLovvalgsperiode(TrygdeAvtaleDataForVedtakDto trygdeAvtaleDataForVedtakDto, SoeknadFtrl behandlingsgrunnlagdata) {
-        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
+    private Lovvalgsperiode lagLovvalgsperiode(TrygdeavtaleResultatDto trygdeavtaleResultatDto, SoeknadFtrl behandlingsgrunnlagdata) {
+        var lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setFom(behandlingsgrunnlagdata.periode.getFom());
         lovvalgsperiode.setTom(behandlingsgrunnlagdata.periode.getTom());
 
@@ -110,14 +110,14 @@ public class TrygdeavtaleTjeneste {
         Landkoder lovvalgsland = Landkoder.valueOf(behandlingsgrunnlagdata.soeknadsland.landkoder.stream().findFirst()
             .orElseThrow(() -> new TekniskException("Forventet ett land i behandlingsgrunnlagdata soeknadsland.landkoder")));
         lovvalgsperiode.setLovvalgsland(lovvalgsland);
-        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_trygdeavtale_uk.valueOf(trygdeAvtaleDataForVedtakDto.bestemmelse()));
+        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_trygdeavtale_uk.valueOf(trygdeavtaleResultatDto.bestemmelse()));
         lovvalgsperiode.setMedlemskapstype(Medlemskapstyper.PLIKTIG);
         lovvalgsperiode.setDekning(Trygdedekninger.FULL_DEKNING_FTRL); // Skal bli renamet til FULL_DEKNING av fag
         return lovvalgsperiode;
     }
 
     private SoeknadFtrl hentBehandlingsgrunnlagdata(long behandlingsId) {
-        Behandlingsgrunnlag behandlingsgrunnlag = behandlingsgrunnlagService.hentBehandlingsgrunnlag(behandlingsId);
+        var behandlingsgrunnlag = behandlingsgrunnlagService.hentBehandlingsgrunnlag(behandlingsId);
         return (SoeknadFtrl) behandlingsgrunnlag.getBehandlingsgrunnlagdata();
     }
 }

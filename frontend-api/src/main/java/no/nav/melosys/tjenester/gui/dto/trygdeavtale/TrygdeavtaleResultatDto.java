@@ -2,11 +2,10 @@ package no.nav.melosys.tjenester.gui.dto.trygdeavtale;
 
 import no.nav.melosys.tjenester.gui.dto.MedfolgendeFamilieDto;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-public record TrygdeAvtaleDataForVedtakDto(
+public record TrygdeavtaleResultatDto(
     List<String> virksomheter,
     String vedtak,
     String innvilgelse,
@@ -53,8 +52,8 @@ public record TrygdeAvtaleDataForVedtakDto(
             return this;
         }
 
-        public TrygdeAvtaleDataForVedtakDto build() {
-            return new TrygdeAvtaleDataForVedtakDto(
+        public TrygdeavtaleResultatDto build() {
+            return new TrygdeavtaleResultatDto(
                 virksomheter,
                 vedtak,
                 innvilgelse,
