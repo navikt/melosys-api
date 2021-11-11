@@ -1,15 +1,11 @@
 package no.nav.melosys.service.vedtak;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Tema;
 import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.Oppgavetyper;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
-import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.oppgave.OppgaveService;
@@ -20,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.Optional;
 
 import static no.nav.melosys.service.vedtak.VedtakServiceFasade.FRIST_KLAGE_UKER;
 
@@ -60,7 +55,7 @@ public class TrygdeavtaleVedtakService {
         behandling.setStatus(Behandlingsstatus.IVERKSETTER_VEDTAK);
         behandlingService.lagre(behandling);
 
-        prosessinstansService.opprettProsessinstansIverksettVedtak(behandling, request);
+        prosessinstansService.opprettProsessinstansIverksettVedtakTrygdeavtale(behandling, request);
         oppgaveService.ferdigstillOppgaveMedSaksnummer(saksnummer);
     }
 
