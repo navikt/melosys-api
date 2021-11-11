@@ -5,7 +5,6 @@ import java.util.*;
 import io.swagger.annotations.Api;
 import no.nav.melosys.domain.InnvilgelsesResultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
-import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadFtrl;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
@@ -89,7 +88,8 @@ public class TrygdeavtaleTjeneste {
 
         avklarteVirksomheterService.lagreVirksomheterSomAvklartefakta(trygdeavtaleResultatDto.virksomheter(), behandlingsId);
 
-        SoeknadFtrl behandlingsgrunnlagdata = hentBehandlingsgrunnlagdata(behandlingsId);
+        var behandlingsgrunnlag = behandlingsgrunnlagService.hentBehandlingsgrunnlag(behandlingsId);
+        SoeknadFtrl behandlingsgrunnlagdata = (SoeknadFtrl) behandlingsgrunnlag.getBehandlingsgrunnlagdata();
 
         var lovvalgsperiode = lagLovvalgsperiode(trygdeavtaleResultatDto, behandlingsgrunnlagdata);
         lovvalgsperiodeService.lagreLovvalgsperioder(behandlingsId, List.of(lovvalgsperiode));
@@ -116,8 +116,4 @@ public class TrygdeavtaleTjeneste {
         return lovvalgsperiode;
     }
 
-    private SoeknadFtrl hentBehandlingsgrunnlagdata(long behandlingsId) {
-        var behandlingsgrunnlag = behandlingsgrunnlagService.hentBehandlingsgrunnlag(behandlingsId);
-        return (SoeknadFtrl) behandlingsgrunnlag.getBehandlingsgrunnlagdata();
-    }
 }
