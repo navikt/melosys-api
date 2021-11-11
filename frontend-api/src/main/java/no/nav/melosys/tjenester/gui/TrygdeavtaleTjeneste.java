@@ -77,7 +77,7 @@ public class TrygdeavtaleTjeneste {
     }
 
     @PostMapping("{behandlingID}")
-    public ResponseEntity overførResultat(
+    public ResponseEntity<Void> overførResultat(
         @PathVariable("behandlingID") long behandlingId,
         @RequestBody TrygdeavtaleResultatDto trygdeavtaleResultatDto) {
 
