@@ -1,12 +1,12 @@
 package no.nav.melosys.tjenester.gui.graphql.dto;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 public record OppholdsadresseDto(
     String coAdressenavn,
     StrukturertAdresseformatDto adresse,
-    LocalDateTime gyldigFraOgMed,
-    LocalDateTime gyldigTilOgMed,
+    LocalDate gyldigFraOgMed,
+    LocalDate gyldigTilOgMed,
     String master,
     String kilde,
     boolean erHistorisk

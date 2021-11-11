@@ -1,6 +1,6 @@
 package no.nav.melosys.service.persondata.mapping.adresse;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.integrasjon.pdl.dto.person.adresse.Bostedsadresse;
@@ -31,7 +31,8 @@ class BostedsadresseOversetterTest {
         assertThat(bostedsadresseOptional).isPresent();
         final var bostedsadresse = bostedsadresseOptional.get();
         assertThat(bostedsadresse.coAdressenavn()).isEqualTo("Kari Hansen");
-        assertThat(bostedsadresse.gyldigFraOgMed()).isEqualTo(LocalDateTime.parse("2020-01-01T00:00:00"));
+        assertThat(bostedsadresse.gyldigFraOgMed()).isEqualTo(LocalDate.parse("2020-01-01"));
+        assertThat(bostedsadresse.gyldigTilOgMed()).isEqualTo(LocalDate.parse("2020-05-05"));
         assertThat(bostedsadresse.strukturertAdresse().getGatenavn()).isEqualTo("Kirkegata");
         assertThat(bostedsadresse.strukturertAdresse().getHusnummerEtasjeLeilighet()).isEqualTo("12 B");
         assertThat(bostedsadresse.strukturertAdresse().getTilleggsnavn()).isEqualTo("Storgården");
