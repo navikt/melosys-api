@@ -1,6 +1,7 @@
 package no.nav.melosys.service.persondata.mapping.adresse;
 
 import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.integrasjon.pdl.dto.person.adresse.Oppholdsadresse;
@@ -14,7 +15,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static no.nav.melosys.service.persondata.PdlObjectFactory.metadata;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -45,7 +45,8 @@ class OppholdsadresseOversetterTest {
         final var oppholdsadresse = OppholdsadresseOversetter.oversett(oppholdsadressePDL, kodeverkService);
 
         assertThat(oppholdsadresse.coAdressenavn()).isEqualTo("Kari Hansen");
-        assertThat(oppholdsadresse.gyldigFraOgMed()).isEqualTo(LocalDateTime.parse("2020-01-01T00:00:00"));
+        assertThat(oppholdsadresse.gyldigFraOgMed()).isEqualTo(LocalDate.parse("2020-01-01"));
+        assertThat(oppholdsadresse.gyldigTilOgMed()).isEqualTo(LocalDate.parse("2020-05-05"));
         assertThat(oppholdsadresse.strukturertAdresse().getGatenavn()).isEqualTo("Kirkegata");
         assertThat(oppholdsadresse.strukturertAdresse().getHusnummerEtasjeLeilighet()).isEqualTo("12 B");
         assertThat(oppholdsadresse.strukturertAdresse().getTilleggsnavn()).isEqualTo("Storgården");

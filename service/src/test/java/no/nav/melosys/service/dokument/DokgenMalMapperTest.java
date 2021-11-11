@@ -92,7 +92,7 @@ class DokgenMalMapperTest {
         assertThat(dokgenDto)
             .isInstanceOf(SaksbehandlingstidSoknad.class)
             .extracting(
-                DokgenDto::getNavnBruker,
+                dto -> dto.getSaksopplysninger().navnBruker(),
                 dto -> dto.getMottaker().navn(),
                 dto -> dto.getMottaker().postnr()
             ).containsExactly(
@@ -122,7 +122,7 @@ class DokgenMalMapperTest {
         assertThat(dokgenDto)
             .isInstanceOf(SaksbehandlingstidSoknad.class)
             .extracting(
-                DokgenDto::getNavnBruker,
+                dto -> dto.getSaksopplysninger().navnBruker(),
                 dto -> dto.getMottaker().navn(),
                 dto -> dto.getMottaker().postnr()
             ).containsExactly(
@@ -183,7 +183,7 @@ class DokgenMalMapperTest {
         assertThat(dokgenDto)
             .isInstanceOf(SaksbehandlingstidSoknad.class)
             .extracting(
-                DokgenDto::getNavnBruker,
+                dto -> dto.getSaksopplysninger().navnBruker(),
                 dto -> dto.getMottaker().navn(),
                 dto -> dto.getMottaker().postnr()
             ).containsExactly(
@@ -217,7 +217,7 @@ class DokgenMalMapperTest {
         assertThat(dokgenDto)
             .isInstanceOf(SaksbehandlingstidSoknad.class)
             .extracting(
-                DokgenDto::getNavnBruker,
+                dto -> dto.getSaksopplysninger().navnBruker(),
                 dto -> dto.getMottaker().navn(),
                 dto -> dto.getMottaker().postnr()
             ).containsExactly(
@@ -248,7 +248,7 @@ class DokgenMalMapperTest {
         assertThat(dokgenDto)
             .isInstanceOf(SaksbehandlingstidSoknad.class)
             .extracting(
-                DokgenDto::getNavnBruker,
+                dto -> dto.getSaksopplysninger().navnBruker(),
                 dto -> dto.getMottaker().navn(),
                 dto -> dto.getMottaker().postnr()
             ).containsExactly(

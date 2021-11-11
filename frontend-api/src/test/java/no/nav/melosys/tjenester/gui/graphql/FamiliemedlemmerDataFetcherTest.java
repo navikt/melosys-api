@@ -1,6 +1,7 @@
 package no.nav.melosys.tjenester.gui.graphql;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Set;
 
 import graphql.execution.ExecutionStepInfo;
@@ -16,7 +17,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -29,15 +29,33 @@ class FamiliemedlemmerDataFetcherTest {
     private ExecutionStepInfo executionStepInfo;
 
     @Test
-    void get() throws Exception {
+    void get_medBehandlingID_returnerData() throws Exception {
         FamiliemedlemmerDataFetcher familiemedlemmerDataFetcher = new FamiliemedlemmerDataFetcher(persondataFasade);
         Set<Familiemedlem> medlemmer = Set.of(lagBarn(), lagRelatertVedsivilstand());
-        when(persondataFasade.hentFamiliemedlemmerMedHistorikk(anyLong())).thenReturn(medlemmer);
         when(dataFetchingEnvironment.getExecutionStepInfo()).thenReturn(executionStepInfo);
         when(executionStepInfo.getParent()).thenReturn(executionStepInfo);
         when(executionStepInfo.getArgument("behandlingID")).thenReturn(1L);
+        when(executionStepInfo.getArgument("ident")).thenReturn(null);
+        when(persondataFasade.hentFamiliemedlemmerMedHistorikk(1L)).thenReturn(medlemmer);
 
         final var familieDtoListe = familiemedlemmerDataFetcher.get(dataFetchingEnvironment);
+        assertFetched(familieDtoListe);
+    }
+
+    @Test
+    void get_medIdent_returnerData() throws Exception {
+        FamiliemedlemmerDataFetcher familiemedlemmerDataFetcher = new FamiliemedlemmerDataFetcher(persondataFasade);
+        Set<Familiemedlem> medlemmer = Set.of(lagBarn(), lagRelatertVedsivilstand());
+        when(dataFetchingEnvironment.getExecutionStepInfo()).thenReturn(executionStepInfo);
+        when(executionStepInfo.getParent()).thenReturn(executionStepInfo);
+        when(executionStepInfo.getArgument("ident")).thenReturn("Z990077");
+        when(persondataFasade.hentFamiliemedlemmerMedHistorikk("Z990077")).thenReturn(medlemmer);
+
+        final var familieDtoListe = familiemedlemmerDataFetcher.get(dataFetchingEnvironment);
+        assertFetched(familieDtoListe);
+    }
+
+    private void assertFetched(List<FamiliemedlemDto> familieDtoListe) {
         assertThat(familieDtoListe).containsExactlyInAnyOrder(
             new FamiliemedlemDto("etternavn barn", "fnrBarn", Familierelasjon.BARN, 42, "felles", "fnrAnnenForelder",
                 null, null),

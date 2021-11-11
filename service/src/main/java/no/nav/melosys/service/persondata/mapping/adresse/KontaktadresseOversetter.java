@@ -35,11 +35,14 @@ public final class KontaktadresseOversetter {
             strukturertAdresse = lagStrukturertAdresse(kontaktadressePDL.postboksadresse(), kodeverkService);
         }
 
+        var gyldigFraOgMed = kontaktadressePDL.gyldigFraOgMed() == null ? null : kontaktadressePDL.gyldigFraOgMed().toLocalDate();
+        var gyldigTilOgMed = kontaktadressePDL.gyldigTilOgMed() == null ? null : kontaktadressePDL.gyldigTilOgMed().toLocalDate();
+
         return new Kontaktadresse(strukturertAdresse,
             semistrukturertAdresse,
             kontaktadressePDL.coAdressenavn(),
-            kontaktadressePDL.gyldigFraOgMed(),
-            kontaktadressePDL.gyldigTilOgMed(),
+            gyldigFraOgMed,
+            gyldigTilOgMed,
             kontaktadressePDL.metadata().master(),
             kontaktadressePDL.hentKilde(),
             kontaktadressePDL.hentDatoSistRegistrert(),

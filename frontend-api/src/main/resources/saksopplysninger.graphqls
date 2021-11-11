@@ -1,14 +1,11 @@
 # ISO-8601 representasjon for en kalenderdato. YYYY-MM-DD. Eksempel: 2018-01-01.
 scalar Date
 
-# ISO-8601 representasjon for en kalenderdato med tid, trunkert til nærmeste sekund. YYYY-MM-DD'T'hh:mm:ss.
-# Eksempel: 2018-01-01T12:00:00.
-scalar DateTime
-
 scalar Long
 
 type Query {
     hentSaksopplysninger(behandlingID: Long!): Saksopplysninger!
+    hentPersonopplysninger(ident: String!): Personopplysninger!
 }
 
 type Saksopplysninger {
@@ -32,8 +29,8 @@ type Personopplysninger {
 type Bostedsadresse {
     coAdressenavn: String
     adresse: StrukturertAdresseformat!
-    gyldigFraOgMed: DateTime
-    gyldigTilOgMed: DateTime
+    gyldigFraOgMed: Date
+    gyldigTilOgMed: Date
     master: String!
     kilde: String
     erHistorisk: Boolean!
@@ -70,8 +67,8 @@ type Kontaktadresse {
     coAdressenavn: String
     semistrukturertAdresse: SemistrukturertAdresseformat
     strukturertAdresse: StrukturertAdresseformat
-    gyldigFraOgMed: DateTime
-    gyldigTilOgMed: DateTime
+    gyldigFraOgMed: Date
+    gyldigTilOgMed: Date
     master: String!
     kilde: String
     erHistorisk: Boolean!
@@ -86,8 +83,8 @@ type Navn {
 type Oppholdsadresse {
     coAdressenavn: String
     adresse: StrukturertAdresseformat!
-    gyldigFraOgMed: DateTime
-    gyldigTilOgMed: DateTime
+    gyldigFraOgMed: Date
+    gyldigTilOgMed: Date
     master: String!
     kilde: String
     erHistorisk: Boolean!

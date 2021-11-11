@@ -84,7 +84,7 @@ class FtrlVedtakServiceTest {
 
         verify(behandlingsresultatService).lagre(behandlingsresultatCaptor.capture());
         verify(behandlingService).lagre(behandlingCaptor.capture());
-        verify(prosessinstansService).opprettProsessinstansIverksettVedtak(any(Behandling.class), eq(request));
+        verify(prosessinstansService).opprettProsessinstansIverksettVedtakFTRL(any(Behandling.class), eq(request));
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(SAKSNUMMER);
         verify(dokgenService).produserOgDistribuerBrev(anyLong(), brevbestillingRequestCaptor.capture());
 

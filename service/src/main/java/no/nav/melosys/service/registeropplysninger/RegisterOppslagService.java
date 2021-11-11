@@ -51,7 +51,7 @@ public class RegisterOppslagService {
     /**
      * @deprecated /personer forsvinner ifm. overgang til PDL.
      */
-    @Deprecated
+    @Deprecated(forRemoval = true)
     public PersonDokument hentPerson(String personnummer) {
         Saksopplysning saksopplysning = persondataFasade.hentPersonFraTps(personnummer, Informasjonsbehov.STANDARD);
         return (PersonDokument) saksopplysning.getDokument();

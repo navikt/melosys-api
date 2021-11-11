@@ -23,10 +23,13 @@ public final class OppholdsadresseOversetter {
                 kodeverkService);
         }
 
+        var gyldigFraOgMed = oppholdsadressePDL.gyldigFraOgMed() == null ? null : oppholdsadressePDL.gyldigFraOgMed().toLocalDate();
+        var gyldigTilOgMed = oppholdsadressePDL.gyldigTilOgMed() == null ? null : oppholdsadressePDL.gyldigTilOgMed().toLocalDate();
+
         return new Oppholdsadresse(strukturertAdresse,
             oppholdsadressePDL.coAdressenavn(),
-            oppholdsadressePDL.gyldigFraOgMed(),
-            oppholdsadressePDL.gyldigTilOgMed(),
+            gyldigFraOgMed,
+            gyldigTilOgMed,
             oppholdsadressePDL.metadata().master(),
             oppholdsadressePDL.hentKilde(),
             oppholdsadressePDL.hentDatoSistRegistrert(),
