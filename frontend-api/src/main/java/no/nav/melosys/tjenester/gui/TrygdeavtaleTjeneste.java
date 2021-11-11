@@ -77,7 +77,7 @@ public class TrygdeavtaleTjeneste {
     }
 
     @PostMapping("{behandlingID}")
-    public void overforResultat(
+    public void overførResultat(
         @PathVariable("behandlingID") long behandlingsId,
         @RequestBody TrygdeavtaleResultatDto trygdeavtaleResultatDto) {
 

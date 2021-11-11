@@ -4,7 +4,6 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadFtrl;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
-import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
@@ -113,7 +112,7 @@ class TrygdeavtaleTjenesteTest {
 
         TrygdeavtaleResultatDto trygdeavtaleResultatDto = lagTrygdeavtaleResultatDto();
 
-        trygdeavtaleTjeneste.overforResultat(1L, trygdeavtaleResultatDto);
+        trygdeavtaleTjeneste.overførResultat(1L, trygdeavtaleResultatDto);
 
         verify(behandlingsgrunnlagService, never()).oppdaterBehandlingsgrunnlag(any());
         verify(avklarteMedfolgendeFamilieService).lagreMedfolgendeFamilieSomAvklartefakta(anyLong(), any());
@@ -130,7 +129,7 @@ class TrygdeavtaleTjenesteTest {
         TrygdeavtaleResultatDto trygdeavtaleResultatDto = lagTrygdeavtaleResultatDto();
 
         assertThatExceptionOfType(TekniskException.class)
-            .isThrownBy(() ->trygdeavtaleTjeneste.overforResultat(1L, trygdeavtaleResultatDto))
+            .isThrownBy(() ->trygdeavtaleTjeneste.overførResultat(1L, trygdeavtaleResultatDto))
             .withMessageContaining("Forventet ett land i behandlingsgrunnlagdata soeknadsland.landkoder, men fant: [GB, NO]");
     }
 
@@ -143,7 +142,7 @@ class TrygdeavtaleTjenesteTest {
         TrygdeavtaleResultatDto trygdeavtaleResultatDto = lagTrygdeavtaleResultatDto();
 
         assertThatExceptionOfType(TekniskException.class)
-            .isThrownBy(() ->trygdeavtaleTjeneste.overforResultat(1L, trygdeavtaleResultatDto))
+            .isThrownBy(() ->trygdeavtaleTjeneste.overførResultat(1L, trygdeavtaleResultatDto))
             .withMessageContaining("Forventet ett land i behandlingsgrunnlagdata soeknadsland.landkoder, men fant: []");
     }
 

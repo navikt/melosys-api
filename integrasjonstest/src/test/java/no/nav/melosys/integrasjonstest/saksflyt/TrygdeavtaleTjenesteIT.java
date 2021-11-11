@@ -145,7 +145,7 @@ class TrygdeavtaleTjenesteIT {
                 "begrunnelse samboer")
             .build();
 
-        trygdeavtaleTjeneste.overforResultat(1L, trygdeavtaleResultatDto);
+        trygdeavtaleTjeneste.overførResultat(1L, trygdeavtaleResultatDto);
 
         FattVedtakRequest fattVedtakRequest = new FattTrygdeavtaleVedtakRequest
             .Builder()
