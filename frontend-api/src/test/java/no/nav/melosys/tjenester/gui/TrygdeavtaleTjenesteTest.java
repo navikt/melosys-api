@@ -149,9 +149,7 @@ class TrygdeavtaleTjenesteTest {
     private TrygdeavtaleResultatDto lagTrygdeavtaleResultatDto() {
         return new TrygdeavtaleResultatDto.Builder()
             .virksomheter(List.of("11111111111"))
-            .vedtak("JA_FATTE_VEDTAK")
-            .innvilgelse("JA")
-            .bestemmelse("UK_ART6_1")
+            .bestemmelse(Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1.getKode())
             .addBarn("0bad5c70-8a3f-4fc7-9031-d3aebd6b68de",
                 false, Medfolgende_barn_begrunnelser_ftrl.OVER_18_AR.getKode(),
                 "begrunnelse barn")
