@@ -31,6 +31,7 @@ import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.tjenester.gui.TrygdeavtaleTjeneste;
 import no.nav.melosys.tjenester.gui.dto.trygdeavtale.TrygdeAvtaleDataForVedtakDto;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +44,7 @@ import java.util.List;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(properties = "spring.profiles.active:local-mock")
+@Disabled
 class TrygdeavtaleTjenesteIT {
 
     @Autowired
@@ -153,7 +155,6 @@ class TrygdeavtaleTjenesteIT {
 
         FattVedtakRequest fattVedtakRequest = new FattTrygdeavtaleVedtakRequest
             .Builder()
-            .medBestillersId(SubjectHandler.getInstance().getUserID())
             .medVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK)
             .medFritekstBegrunnelse("trygdeavtale begrunnelse")
             .build();
