@@ -77,7 +77,7 @@ public class TrygdeavtaleTjeneste {
     }
 
     @PostMapping("{behandlingID}")
-    public void overførResultat(
+    public ResponseEntity overførResultat(
         @PathVariable("behandlingID") long behandlingId,
         @RequestBody TrygdeavtaleResultatDto trygdeavtaleResultatDto) {
 
@@ -93,6 +93,8 @@ public class TrygdeavtaleTjeneste {
 
         var lovvalgsperiode = lagLovvalgsperiode(trygdeavtaleResultatDto, behandlingsgrunnlagdata);
         lovvalgsperiodeService.lagreLovvalgsperioder(behandlingId, List.of(lovvalgsperiode));
+
+        return ResponseEntity.ok().build();
     }
 
     private LagreMedfolgendeFamilieDto lagMedfolgendeFamilieDto(TrygdeavtaleResultatDto trygdeavtaleResultatDto) {
