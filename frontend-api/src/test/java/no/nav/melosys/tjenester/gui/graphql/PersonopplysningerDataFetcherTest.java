@@ -43,7 +43,7 @@ class PersonopplysningerDataFetcherTest {
         PersonopplysningerDataFetcher personopplysningerDataFetcher = new PersonopplysningerDataFetcher(kodeverkService,
             persondataFasade);
         final var bostedsadresse_1 = new Bostedsadresse(
-            new StrukturertAdresse("gate1", null, null, null, null, null),
+            new StrukturertAdresse("gate1", "42 C", null, null, null, null),
             null, null, null, "PDL", null, false);
         final var bostedsadresse_2 = new Bostedsadresse(
             new StrukturertAdresse("gate2", null, null, null, null, null),
@@ -94,6 +94,8 @@ class PersonopplysningerDataFetcherTest {
         final var personopplysninger = personopplysningerDataFetcher.get(dataFetchingEnvironment);
         assertThat(personopplysninger.bostedsadresser()).extracting(BostedsadresseDto::adresse)
             .extracting(StrukturertAdresseformatDto::gatenavn).containsExactlyInAnyOrder("gate1", "gate2");
+        assertThat(personopplysninger.bostedsadresser()).extracting(BostedsadresseDto::adresse).extracting(
+            StrukturertAdresseformatDto::husnummerEtasjeLeilighet).containsExactlyInAnyOrder("42 C", null);
         assertThat(personopplysninger.bostedsadresser()).extracting(BostedsadresseDto::master)
             .containsExactlyInAnyOrder("NAV (PDL)", "");
         assertThat(personopplysninger.folkeregisteridentifikator()).isEqualTo("identNr");
