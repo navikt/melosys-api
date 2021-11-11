@@ -78,21 +78,21 @@ public class TrygdeavtaleTjeneste {
 
     @PostMapping("{behandlingID}")
     public void overførResultat(
-        @PathVariable("behandlingID") long behandlingsId,
+        @PathVariable("behandlingID") long behandlingId,
         @RequestBody TrygdeavtaleResultatDto trygdeavtaleResultatDto) {
 
         // TODO: Flytt dette ut til en egen klasse - Gjør dette i en egen PR
         var lagreMedfolgendeFamilieDto = lagMedfolgendeFamilieDto(trygdeavtaleResultatDto);
 
-        avklarteMedfolgendeFamilieService.lagreMedfolgendeFamilieSomAvklartefakta(behandlingsId, lagreMedfolgendeFamilieDto.til());
+        avklarteMedfolgendeFamilieService.lagreMedfolgendeFamilieSomAvklartefakta(behandlingId, lagreMedfolgendeFamilieDto.til());
 
-        avklarteVirksomheterService.lagreVirksomheterSomAvklartefakta(trygdeavtaleResultatDto.virksomheter(), behandlingsId);
+        avklarteVirksomheterService.lagreVirksomheterSomAvklartefakta(trygdeavtaleResultatDto.virksomheter(), behandlingId);
 
-        var behandlingsgrunnlag = behandlingsgrunnlagService.hentBehandlingsgrunnlag(behandlingsId);
+        var behandlingsgrunnlag = behandlingsgrunnlagService.hentBehandlingsgrunnlag(behandlingId);
         SoeknadFtrl behandlingsgrunnlagdata = (SoeknadFtrl) behandlingsgrunnlag.getBehandlingsgrunnlagdata();
 
         var lovvalgsperiode = lagLovvalgsperiode(trygdeavtaleResultatDto, behandlingsgrunnlagdata);
-        lovvalgsperiodeService.lagreLovvalgsperioder(behandlingsId, List.of(lovvalgsperiode));
+        lovvalgsperiodeService.lagreLovvalgsperioder(behandlingId, List.of(lovvalgsperiode));
     }
 
     private LagreMedfolgendeFamilieDto lagMedfolgendeFamilieDto(TrygdeavtaleResultatDto trygdeavtaleResultatDto) {
