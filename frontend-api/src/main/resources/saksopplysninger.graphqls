@@ -9,6 +9,7 @@ scalar Long
 
 type Query {
     hentSaksopplysninger(behandlingID: Long!): Saksopplysninger!
+    hentPersonopplysninger(ident: String!): Personopplysninger!
 }
 
 type Saksopplysninger {

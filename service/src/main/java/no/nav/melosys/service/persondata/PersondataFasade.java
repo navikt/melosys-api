@@ -15,6 +15,8 @@ public interface PersondataFasade {
 
     Set<Familiemedlem> hentFamiliemedlemmerMedHistorikk(long behandlingID);
 
+    Set<Familiemedlem> hentFamiliemedlemmerMedHistorikk(String ident);
+
     Optional<String> finnFolkeregisterident(String ident);
 
     String hentFolkeregisterident(String ident);
@@ -30,6 +32,8 @@ public interface PersondataFasade {
     Saksopplysning hentPersonhistorikk(String fnr, LocalDate dato);
 
     PersonMedHistorikk hentPersonMedHistorikk(long behandlingID);
+
+    PersonMedHistorikk hentPersonMedHistorikk(String ident);
 
     String hentSammensattNavn(String ident);
 

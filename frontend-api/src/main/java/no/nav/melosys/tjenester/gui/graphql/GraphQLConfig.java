@@ -32,9 +32,11 @@ class GraphQLConfig {
     }
 
     @Bean
-    static TypeRuntimeWiring saksopplysningerWiring(SaksopplysningerDataFetcher saksopplysningerDataFetcher) {
+    static TypeRuntimeWiring queryWiring(SaksopplysningerDataFetcher saksopplysningerDataFetcher,
+                                         PersonopplysningerDataFetcher personopplysningerDataFetcher) {
         return TypeRuntimeWiring.newTypeWiring("Query")
             .dataFetcher("hentSaksopplysninger", saksopplysningerDataFetcher)
+            .dataFetcher("hentPersonopplysninger", personopplysningerDataFetcher)
             .build();
     }
 
