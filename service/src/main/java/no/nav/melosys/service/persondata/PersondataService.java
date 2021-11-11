@@ -263,7 +263,7 @@ public class PersondataService implements PersondataFasade {
         final var behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
         final String ident = behandling.getFagsak().hentAktørID();
         if (behandling.erAktiv() && erRegistrertEtterPdlStart(behandling)) {
-            return hentFamiliemedlemmer(pdlConsumer.hentFamilierelasjoner(ident));
+            return hentFamiliemedlemmerMedHistorikk(ident);
         }
 
         if (!erRegistrertEtterPdlStart(behandling)) {
@@ -272,6 +272,11 @@ public class PersondataService implements PersondataFasade {
 
         final Instant skjæringstidspunkt = avgjørSkjæringstidspunktTilInnsyn(behandling);
         return hentFamiliemedlemmerTilInnsyn(ident, skjæringstidspunkt);
+    }
+
+    @Override
+    public Set<Familiemedlem> hentFamiliemedlemmerMedHistorikk(String ident) {
+        return hentFamiliemedlemmer(pdlConsumer.hentFamilierelasjoner(ident));
     }
 
     private Set<Familiemedlem> hentFamiliemedlemmerTilInnsyn(String ident, Instant skjæringstidspunkt) {
