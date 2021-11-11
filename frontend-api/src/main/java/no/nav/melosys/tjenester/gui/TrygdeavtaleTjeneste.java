@@ -107,8 +107,11 @@ public class TrygdeavtaleTjeneste {
         lovvalgsperiode.setTom(behandlingsgrunnlagdata.periode.getTom());
 
         lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.INNVILGET);
-        Landkoder lovvalgsland = Landkoder.valueOf(behandlingsgrunnlagdata.soeknadsland.landkoder.stream().findFirst()
-            .orElseThrow(() -> new TekniskException("Forventet ett land i behandlingsgrunnlagdata soeknadsland.landkoder")));
+        if (behandlingsgrunnlagdata.soeknadsland.landkoder.size() != 1) {
+            throw new TekniskException("Forventet ett land i behandlingsgrunnlagdata soeknadsland.landkoder, men fant: "
+                + behandlingsgrunnlagdata.soeknadsland.landkoder);
+        }
+        Landkoder lovvalgsland = Landkoder.valueOf(behandlingsgrunnlagdata.soeknadsland.landkoder.get(0));
         lovvalgsperiode.setLovvalgsland(lovvalgsland);
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_trygdeavtale_uk.valueOf(trygdeavtaleResultatDto.bestemmelse()));
         lovvalgsperiode.setMedlemskapstype(Medlemskapstyper.PLIKTIG);

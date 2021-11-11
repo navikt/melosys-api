@@ -2,9 +2,9 @@ package no.nav.melosys.tjenester.gui;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
-import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadFtrl;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
+import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
@@ -13,6 +13,7 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_b
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_ektefelle_samboer_begrunnelser_ftrl;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.TrygdeavtaleService;
 import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
@@ -32,6 +33,7 @@ import java.util.Collection;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -106,10 +108,47 @@ class TrygdeavtaleTjenesteTest {
     }
 
     @Test
-    void leggInnTrygdeAvtaleDataForOgKunneFatteVetak() throws NoSuchFieldException, IllegalAccessException {
+    void leggInnTrygdeAvtaleDataForOgKunneFatteVetak() {
         when(behandlingsgrunnlagService.hentBehandlingsgrunnlag(1L)).thenReturn(lagBehandlingsgrunnlag());
 
-        TrygdeavtaleResultatDto trygdeavtaleResultatDto = new TrygdeavtaleResultatDto.Builder()
+        TrygdeavtaleResultatDto trygdeavtaleResultatDto = lagTrygdeavtaleResultatDto();
+
+        trygdeavtaleTjeneste.overforResultat(1L, trygdeavtaleResultatDto);
+
+        verify(behandlingsgrunnlagService, never()).oppdaterBehandlingsgrunnlag(any());
+        verify(avklarteMedfolgendeFamilieService).lagreMedfolgendeFamilieSomAvklartefakta(anyLong(), any());
+        verify(avklarteVirksomheterService).lagreVirksomheterSomAvklartefakta(any(), anyLong());
+        verify(lovvalgsperiodeService).lagreLovvalgsperioder(1L, expectedLovvalgsperioder());
+    }
+
+    @Test
+    void overforResultat_medToLandkoder_kasterTekniskException() {
+        Behandlingsgrunnlag behandlingsgrunnlag = lagBehandlingsgrunnlag();
+        behandlingsgrunnlag.getBehandlingsgrunnlagdata().soeknadsland.landkoder = List.of("GB", "NO");
+
+        when(behandlingsgrunnlagService.hentBehandlingsgrunnlag(1L)).thenReturn(behandlingsgrunnlag);
+        TrygdeavtaleResultatDto trygdeavtaleResultatDto = lagTrygdeavtaleResultatDto();
+
+        assertThatExceptionOfType(TekniskException.class)
+            .isThrownBy(() ->trygdeavtaleTjeneste.overforResultat(1L, trygdeavtaleResultatDto))
+            .withMessageContaining("Forventet ett land i behandlingsgrunnlagdata soeknadsland.landkoder, men fant: [GB, NO]");
+    }
+
+    @Test
+    void overforResultat_manglerLandkoder_kasterTekniskException() {
+        Behandlingsgrunnlag behandlingsgrunnlag = lagBehandlingsgrunnlag();
+        behandlingsgrunnlag.getBehandlingsgrunnlagdata().soeknadsland.landkoder = List.of();
+
+        when(behandlingsgrunnlagService.hentBehandlingsgrunnlag(1L)).thenReturn(behandlingsgrunnlag);
+        TrygdeavtaleResultatDto trygdeavtaleResultatDto = lagTrygdeavtaleResultatDto();
+
+        assertThatExceptionOfType(TekniskException.class)
+            .isThrownBy(() ->trygdeavtaleTjeneste.overforResultat(1L, trygdeavtaleResultatDto))
+            .withMessageContaining("Forventet ett land i behandlingsgrunnlagdata soeknadsland.landkoder, men fant: []");
+    }
+
+    private TrygdeavtaleResultatDto lagTrygdeavtaleResultatDto() {
+        return new TrygdeavtaleResultatDto.Builder()
             .virksomheter(List.of("11111111111"))
             .vedtak("JA_FATTE_VEDTAK")
             .innvilgelse("JA")
@@ -121,13 +160,6 @@ class TrygdeavtaleTjenesteTest {
                 false, Medfolgende_ektefelle_samboer_begrunnelser_ftrl.EGEN_INNTEKT.getKode(),
                 "begrunnelse samboer")
             .build();
-
-        trygdeavtaleTjeneste.overforResultat(1L, trygdeavtaleResultatDto);
-
-        verify(behandlingsgrunnlagService, never()).oppdaterBehandlingsgrunnlag(any());
-        verify(avklarteMedfolgendeFamilieService).lagreMedfolgendeFamilieSomAvklartefakta(anyLong(), any());
-        verify(avklarteVirksomheterService).lagreVirksomheterSomAvklartefakta(any(), anyLong());
-        verify(lovvalgsperiodeService).lagreLovvalgsperioder(1L, expectedLovvalgsperioder());
     }
 
     private Collection<Lovvalgsperiode> expectedLovvalgsperioder() {
@@ -142,7 +174,7 @@ class TrygdeavtaleTjenesteTest {
         return List.of(lovvalgsperiode);
     }
 
-    private Behandlingsgrunnlag lagBehandlingsgrunnlag() throws NoSuchFieldException, IllegalAccessException {
+    private static Behandlingsgrunnlag lagBehandlingsgrunnlag() {
         Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
         SoeknadFtrl behandlingsgrunnlagdata = new SoeknadFtrl();
         behandlingsgrunnlagdata.soeknadsland.landkoder.add("GB");
@@ -157,15 +189,10 @@ class TrygdeavtaleTjenesteTest {
         bruker.setAktørId("AktørId");
         var fagsak = new Fagsak();
         fagsak.getAktører().add(bruker);
-        var behandlingsgrunnlagdata = new BehandlingsgrunnlagData();
-        behandlingsgrunnlagdata.periode = new Periode(LocalDate.now(), LocalDate.now().plusDays(1));
-        behandlingsgrunnlagdata.soeknadsland.landkoder.addAll(List.of("land1", "land2"));
-        var behandlingsgrunnlag = new Behandlingsgrunnlag();
-        behandlingsgrunnlag.setBehandlingsgrunnlagdata(behandlingsgrunnlagdata);
         var behandling = new Behandling();
         behandling.setFagsak(fagsak);
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
-        behandling.setBehandlingsgrunnlag(behandlingsgrunnlag);
+        behandling.setBehandlingsgrunnlag(lagBehandlingsgrunnlag());
         return behandling;
     }
 }
