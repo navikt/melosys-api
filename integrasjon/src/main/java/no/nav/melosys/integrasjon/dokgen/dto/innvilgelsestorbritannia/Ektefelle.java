@@ -18,10 +18,8 @@ public record Ektefelle(
 
     String fnr,
 
-    // Brukes som backup om fnr mangler
     String dnr,
 
-    // Brukes som backup om fnr og dnr mangler
     @JsonSerialize(using = InstantSerializer.class)
     @JsonFormat(shape = STRING)
     LocalDate foedselsdato
