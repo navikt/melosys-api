@@ -14,7 +14,7 @@ public record TrygdeavtaleResultatDto(
     MedfolgendeFamilieDto ektefelle
 ) {
     // Mulig å bytte ut med https://github.com/Randgalt/record-builder
-    static public class Builder {
+    public static class Builder {
         private List<String> virksomheter;
         private String vedtak;
         private String innvilgelse;
