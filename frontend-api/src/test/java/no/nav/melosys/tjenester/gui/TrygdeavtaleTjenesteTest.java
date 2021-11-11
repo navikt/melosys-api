@@ -121,7 +121,7 @@ class TrygdeavtaleTjenesteTest {
     }
 
     @Test
-    void overforResultat_medToLandkoder_kasterTekniskException() {
+    void overførResultat_medToLandkoder_kasterTekniskException() {
         Behandlingsgrunnlag behandlingsgrunnlag = lagBehandlingsgrunnlag();
         behandlingsgrunnlag.getBehandlingsgrunnlagdata().soeknadsland.landkoder = List.of("GB", "NO");
 
@@ -134,7 +134,7 @@ class TrygdeavtaleTjenesteTest {
     }
 
     @Test
-    void overforResultat_manglerLandkoder_kasterTekniskException() {
+    void overførResultat_manglerLandkoder_kasterTekniskException() {
         Behandlingsgrunnlag behandlingsgrunnlag = lagBehandlingsgrunnlag();
         behandlingsgrunnlag.getBehandlingsgrunnlagdata().soeknadsland.landkoder = List.of();
 
