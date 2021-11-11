@@ -1,16 +1,18 @@
 package no.nav.melosys.tjenester.gui;
 
-import no.nav.melosys.domain.Aktoer;
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadFtrl;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
+import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_barn_begrunnelser_ftrl;
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_ektefelle_samboer_begrunnelser_ftrl;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.TrygdeavtaleService;
 import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
@@ -25,8 +27,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.lang.reflect.Field;
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -125,17 +127,26 @@ class TrygdeavtaleTjenesteTest {
         verify(behandlingsgrunnlagService, never()).oppdaterBehandlingsgrunnlag(any());
         verify(avklarteMedfolgendeFamilieService).lagreMedfolgendeFamilieSomAvklartefakta(anyLong(), any());
         verify(avklarteVirksomheterService).lagreVirksomheterSomAvklartefakta(any(), anyLong());
-        verify(lovvalgsperiodeService).lagreLovvalgsperioder(anyLong(), any());
+        verify(lovvalgsperiodeService).lagreLovvalgsperioder(1L, expectedLovvalgsperioder());
+    }
+
+    private Collection<Lovvalgsperiode> expectedLovvalgsperioder() {
+        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
+        lovvalgsperiode.setFom(LocalDate.of(2020, 1, 1));
+        lovvalgsperiode.setTom(LocalDate.of(2021, 1, 1));
+        lovvalgsperiode.setDekning(Trygdedekninger.FULL_DEKNING_FTRL);
+        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1);
+        lovvalgsperiode.setLovvalgsland(Landkoder.GB);
+        lovvalgsperiode.setMedlemskapstype(Medlemskapstyper.PLIKTIG);
+        lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.INNVILGET);
+        return List.of(lovvalgsperiode);
     }
 
     private Behandlingsgrunnlag lagBehandlingsgrunnlag() throws NoSuchFieldException, IllegalAccessException {
         Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
-        Field field = behandlingsgrunnlag.getClass().getDeclaredField("id");
-        field.setAccessible(true);
-        field.set(behandlingsgrunnlag, 1L);
         SoeknadFtrl behandlingsgrunnlagdata = new SoeknadFtrl();
         behandlingsgrunnlagdata.soeknadsland.landkoder.add("GB");
-        behandlingsgrunnlagdata.periode = new Periode(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 2, 1));
+        behandlingsgrunnlagdata.periode = new Periode(LocalDate.of(2020, 1, 1), LocalDate.of(2021, 1, 1));
         behandlingsgrunnlag.setBehandlingsgrunnlagdata(behandlingsgrunnlagdata);
         return behandlingsgrunnlag;
     }
