@@ -14,7 +14,6 @@ import no.nav.melosys.domain.person.adresse.Bostedsadresse;
 import no.nav.melosys.domain.person.adresse.Kontaktadresse;
 import no.nav.melosys.domain.person.adresse.Oppholdsadresse;
 import no.nav.melosys.domain.person.familie.Familiemedlem;
-import no.nav.melosys.exception.IkkeFunnetException;
 
 import static no.nav.melosys.domain.person.Master.FREG;
 import static no.nav.melosys.domain.person.Master.PDL;
@@ -129,7 +128,8 @@ public record Personopplysninger(
     public Postadresse hentGjeldendePostadresse() {
         return lagPostadresseFraKontaktadresser()
             .or(this::lagPostadresseFraOppholdsadresser)
-            .orElse(lagPostadresseFraBostedsadresse());
+            .or(this::lagPostadresseFraBostedsadresse)
+            .orElse(null);
     }
 
     private Optional<Postadresse> lagPostadresseFraKontaktadresser() {
@@ -157,10 +157,9 @@ public record Personopplysninger(
             .max(Comparator.comparing(Oppholdsadresse::registrertDato));
     }
 
-    private Postadresse lagPostadresseFraBostedsadresse() {
+    private Optional<Postadresse> lagPostadresseFraBostedsadresse() {
         return finnBostedsadresse()
             .map(Bostedsadresse::strukturertAdresse)
-            .map(Postadresse::lagPostadresse)
-            .orElseThrow(() -> new IkkeFunnetException("Forventer bostedsadresse"));
+            .map(Postadresse::lagPostadresse);
     }
 }
