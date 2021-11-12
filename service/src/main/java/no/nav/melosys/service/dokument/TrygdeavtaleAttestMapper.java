@@ -78,12 +78,12 @@ public class TrygdeavtaleAttestMapper {
     }
 
     private Utsendelse getUtsendelse(Collection<Lovvalgsperiode> lovvalgsperioder, Persondata persondata) {
-        if (lovvalgsperioder.size() > 1) {
-            throw new FunksjonellException("Det kan bare være en lovvalgsperioder for trygdeavtale");
+        if (lovvalgsperioder.size() != 1) {
+            throw new FunksjonellException("Det kan bare være en lovvalgsperiode for trygdeavtale. Fant "
+                + lovvalgsperioder.size()
+            );
         }
-        Lovvalgsperiode lovvalgsperiode = lovvalgsperioder.stream()
-            .findFirst()
-            .orElseThrow(() -> new FunksjonellException("ingen lovvalgsperioder funnet for trygdeavtale"));
+        Lovvalgsperiode lovvalgsperiode = lovvalgsperioder.iterator().next();
 
         LovvalgBestemmelse bestemmelse = lovvalgsperiode.getBestemmelse();
 
@@ -113,10 +113,10 @@ public class TrygdeavtaleAttestMapper {
     }
 
     static boolean sjekkOmAdresseGyldighetErInnenforLovalgsperiode(PersonAdresse personAdresse, Lovvalgsperiode lovvalgsperiode) {
-        if(personAdresse.gyldigFraOgMed() == null) return false;
-        if(personAdresse.gyldigTilOgMed() == null) return false;
+        if (personAdresse.gyldigFraOgMed() == null) return false;
+        if (personAdresse.gyldigTilOgMed() == null) return false;
 
-        if(lovvalgsperiode.getTom().isBefore(personAdresse.gyldigFraOgMed())) return false;
+        if (lovvalgsperiode.getTom().isBefore(personAdresse.gyldigFraOgMed())) return false;
         return !lovvalgsperiode.getFom().isAfter(personAdresse.gyldigTilOgMed());
     }
 

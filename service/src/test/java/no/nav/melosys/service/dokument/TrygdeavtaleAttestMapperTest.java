@@ -2,7 +2,6 @@ package no.nav.melosys.service.dokument;
 
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -22,6 +21,7 @@ import no.nav.melosys.domain.person.adresse.PersonAdresse;
 import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeBarn;
 import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie;
 import no.nav.melosys.domain.person.familie.OmfattetFamilie;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.dokgen.dto.atteststorbritannia.AttestStorbritannia;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
@@ -41,6 +41,7 @@ import org.mockito.stubbing.Answer;
 import static no.nav.melosys.service.dokument.DokgenTestData.lagBehandling;
 import static no.nav.melosys.service.dokument.DokgenTestData.lagPersonDokument;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
@@ -269,6 +270,40 @@ class TrygdeavtaleAttestMapperTest {
         assertThat(resultat).isEqualToIgnoringWhitespace(forvented);
     }
 
+    @Test
+    void map_medToLovvalgperioder_kastFunksjonellException() {
+        mockHappyCase();
+        when(mockLovvalgsperiodeService.hentLovvalgsperioder(anyLong()))
+            .thenReturn(List.of(lagLovvalgsperiode(), lagLovvalgsperiode()));
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() ->
+                trygdeavtaleAttestMapper.map(new AttestStorbritanniaBrevbestilling.Builder()
+                    .medBehandling(lagBehandling())
+                    .medPersonDokument(lagPersonDokument())
+                    .medVedtaksdato(Instant.parse("1970-10-10T00:00:00Z"))
+                    .build()
+            )
+        ).withMessageContaining("Det kan bare være en lovvalgsperiode for trygdeavtale. Fant 2");
+    }
+
+    @Test
+    void map_medIngenLovvalgperioder_kastFunksjonellException() {
+        mockHappyCase();
+        when(mockLovvalgsperiodeService.hentLovvalgsperioder(anyLong()))
+            .thenReturn(List.of());
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() ->
+                trygdeavtaleAttestMapper.map(new AttestStorbritanniaBrevbestilling.Builder()
+                    .medBehandling(lagBehandling())
+                    .medPersonDokument(lagPersonDokument())
+                    .medVedtaksdato(Instant.parse("1970-10-10T00:00:00Z"))
+                    .build()
+            )
+        ).withMessageContaining("Det kan bare være en lovvalgsperiode for trygdeavtale. Fant 0");
+    }
+
     private void mockHappyCase() {
         when(mockPersondata.getFødselsdato()).thenReturn(LocalDate.of(1970, 1, 1));
         when(mockAvklarteMedfolgendeFamilieService.hentAvklartMedfølgendeEktefelle(anyLong())).thenReturn(lagAvklartMedfølgendeEktefelle());
@@ -277,7 +312,7 @@ class TrygdeavtaleAttestMapperTest {
         when(mockAvklarteMedfolgendeFamilieService.hentMedfølgendeBarn(anyLong())).thenReturn(lagMedfølgendeBarn());
         when(mockPersondataFasade.hentPerson(anyString())).thenReturn(mockPersondata);
         when(mockAvklarteVirksomheterService.hentNorskeArbeidsgivere(any())).thenReturn(lagAvklarteVirksomheter());
-        when(mockLovvalgsperiodeService.hentLovvalgsperioder(anyLong())).thenReturn(lagreLovvalgsperioder());
+        when(mockLovvalgsperiodeService.hentLovvalgsperioder(anyLong())).thenReturn(List.of(lagLovvalgsperiode()));
         when(mockDokgenMapperDatahenter.hentSammensattNavn(anyString())).thenAnswer((Answer<String>) invocationOnMock -> {
             String fnr = invocationOnMock.getArgument(0);
             String navn = null;
@@ -290,13 +325,13 @@ class TrygdeavtaleAttestMapperTest {
         });
     }
 
-    private Collection<Lovvalgsperiode> lagreLovvalgsperioder() {
+    private Lovvalgsperiode lagLovvalgsperiode() {
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setFom(LocalDate.of(2020, 1, 1));
         lovvalgsperiode.setTom(LocalDate.of(2021, 1, 1));
         lovvalgsperiode.setDekning(Trygdedekninger.FULL_DEKNING_FTRL);
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1);
-        return List.of(lovvalgsperiode);
+        return lovvalgsperiode;
     }
 
     private List<AvklartVirksomhet> lagAvklarteVirksomheter() {
