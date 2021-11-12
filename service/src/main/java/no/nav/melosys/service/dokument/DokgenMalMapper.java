@@ -5,7 +5,6 @@ import no.nav.melosys.domain.brev.FritekstbrevBrevbestilling;
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
 import no.nav.melosys.domain.brev.MangelbrevBrevbestilling;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.brev.storbritannia.AttestStorbritanniaBrevbestilling;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.dokgen.dto.*;
@@ -22,14 +21,18 @@ public class DokgenMalMapper {
     private final DokgenMapperDatahenter dokgenMapperDatahenter;
     private final InnvilgelseFtrlMapper innvilgelseFtrlMapper;
     private final TrygdeavtaleAttestMapper trygdeavtaleAttestMapper;
+    private final InnvilgelseUKMapper innvilgelseUKMapper;
 
     @Autowired
     public DokgenMalMapper(DokgenMapperDatahenter dokgenMapperDatahenter,
                            InnvilgelseFtrlMapper innvilgelseFtrlMapper,
-                           TrygdeavtaleAttestMapper trygdeavtaleAttestMapper) {
+                           TrygdeavtaleAttestMapper trygdeavtaleAttestMapper,
+                           InnvilgelseFtrlMapper innvilgelseFtrlMapper,
+                           InnvilgelseUKMapper innvilgelseUKMapper) {
         this.dokgenMapperDatahenter = dokgenMapperDatahenter;
         this.innvilgelseFtrlMapper = innvilgelseFtrlMapper;
         this.trygdeavtaleAttestMapper = trygdeavtaleAttestMapper;
+        this.innvilgelseUKMapper = innvilgelseUKMapper;
     }
 
     public DokgenDto mapBehandling(DokgenBrevbestilling mottattBrevbestilling) {
@@ -75,12 +78,13 @@ public class DokgenMalMapper {
             case ATTEST_NO_UK_1 -> trygdeavtaleAttestMapper.map(((AttestStorbritanniaBrevbestilling) brevbestilling)
                 .toBuilder()
                 .medVedtaksdato(dokgenMapperDatahenter.hentVedtaksdato(brevbestilling.getBehandling().getId())).build());
+            case INNVILGELSE_UK -> innvilgelseUKMapper.map((InnvilgelseBrevbestilling) brevbestilling);
             case GENERELT_FRITEKSTBREV_BRUKER -> Fritekstbrev.av(((FritekstbrevBrevbestilling) brevbestilling).toBuilder()
-                .medNavnFullmektig(dokgenMapperDatahenter.hentFullmektigNavn(brevbestilling.getBehandling().getFagsak(), Representerer.BRUKER)).build(),
+                    .medNavnFullmektig(dokgenMapperDatahenter.hentFullmektigNavn(brevbestilling.getBehandling().getFagsak(), Representerer.BRUKER)).build(),
                 Aktoersroller.BRUKER
             );
             case GENERELT_FRITEKSTBREV_ARBEIDSGIVER -> Fritekstbrev.av(((FritekstbrevBrevbestilling) brevbestilling).toBuilder()
-                .medNavnFullmektig(dokgenMapperDatahenter.hentFullmektigNavn(brevbestilling.getBehandling().getFagsak(), Representerer.ARBEIDSGIVER)).build(),
+                    .medNavnFullmektig(dokgenMapperDatahenter.hentFullmektigNavn(brevbestilling.getBehandling().getFagsak(), Representerer.ARBEIDSGIVER)).build(),
                 Aktoersroller.ARBEIDSGIVER
             );
             default -> throw new FunksjonellException(
