@@ -4,6 +4,7 @@ import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.brev.FritekstbrevBrevbestilling;
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
 import no.nav.melosys.domain.brev.MangelbrevBrevbestilling;
+import no.nav.melosys.domain.brev.storbritannia.AttestStorbritanniaBrevbestilling;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.exception.FunksjonellException;
@@ -27,7 +28,6 @@ public class DokgenMalMapper {
     public DokgenMalMapper(DokgenMapperDatahenter dokgenMapperDatahenter,
                            InnvilgelseFtrlMapper innvilgelseFtrlMapper,
                            TrygdeavtaleAttestMapper trygdeavtaleAttestMapper,
-                           InnvilgelseFtrlMapper innvilgelseFtrlMapper,
                            InnvilgelseUKMapper innvilgelseUKMapper) {
         this.dokgenMapperDatahenter = dokgenMapperDatahenter;
         this.innvilgelseFtrlMapper = innvilgelseFtrlMapper;
