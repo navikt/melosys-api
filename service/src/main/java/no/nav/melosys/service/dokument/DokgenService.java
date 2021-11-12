@@ -1,20 +1,15 @@
 package no.nav.melosys.service.dokument;
 
-import java.lang.runtime.ObjectMethods;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.brev.*;
 import no.nav.melosys.domain.brev.storbritannia.AttestStorbritanniaBrevbestilling;
-import no.nav.melosys.domain.brev.*;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.dokgen.DokgenConsumer;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
@@ -104,12 +99,6 @@ public class DokgenService {
         settJournalpostOpplysninger(behandling, builder);
 
         var dokgenDto = dokgenMalMapper.mapBehandling(builder.build());
-        try {
-            String s = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(dokgenDto);
-            System.out.println(s);
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
 
         return dokgenConsumer.lagPdf(malnavn, dokgenDto, brevbestilling.isBestillKopi(), brevbestilling.isBestillUtkast());
     }
@@ -200,18 +189,8 @@ public class DokgenService {
                 .medFritekstTittel(brevbestillingRequest.getFritekstTittel())
                 .medFritekst(brevbestillingRequest.getFritekst())
                 .medKontaktopplysninger(brevbestillingRequest.isKontaktopplysninger());
-            case ATTEST_NO_UK_1 -> getAttestStorbritanniaBrevbestillingBuilder();
+            case ATTEST_NO_UK_1 -> new AttestStorbritanniaBrevbestilling.Builder();
             default -> new DokgenBrevbestilling.Builder<>();
         };
     }
-
-    private AttestStorbritanniaBrevbestilling.Builder getAttestStorbritanniaBrevbestillingBuilder() {
-        return new AttestStorbritanniaBrevbestilling.Builder();
-//         Disse tingen må vi legge på i noe tilsvarende en InnvilgelseFtrlMapper
-//            .medVedtaksdato(Instant.now()) // TODO: legg til BrevbestillingRequest?
-//            .medMedfolgendeFamiliemedlemmer(new MedfolgendeFamiliemedlemmer(
-//                new Person("kone", Instant.now(), "", ""),
-//                Set.of(new Person("barn", Instant.now(), "", ""))));
-    }
-
 }
