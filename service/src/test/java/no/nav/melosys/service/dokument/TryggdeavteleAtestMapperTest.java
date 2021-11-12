@@ -1,14 +1,17 @@
 package no.nav.melosys.service.dokument;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.introspect.AnnotatedMember;
-import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
-import no.nav.melosys.domain.brev.storbritannia.Arbeidstaker;
 import no.nav.melosys.domain.brev.storbritannia.AttestStorbritanniaBrevbestilling;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
@@ -35,15 +38,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
 
-import static no.nav.melosys.service.dokument.DokgenTestData.*;
-
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.*;
-
+import static no.nav.melosys.service.dokument.DokgenTestData.lagBehandling;
+import static no.nav.melosys.service.dokument.DokgenTestData.lagPersonDokument;
 import static org.assertj.core.api.Assertions.assertThat;
-
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
@@ -53,12 +50,10 @@ class TryggdeavteleAtestMapperTest {
     public static final String UUID_BARN_1 = "uuidBarn1";
     public static final String EKTEFELLE_FNR = "09080723451";
     private static final String BARN1_FNR = "12131456789";
-    public static final String SAKSBEHANDLER_NAVN = "Fetter Anton";
     public static final String ARBEIDSGIVER_NAVN = "Bang Hansen";
     public static final String SAKSNUMMER = "MEL-123";
     public static final String EKTEFELLE_NAVN = "Dolly Duck";
     public static final String BARN1_NAVN = "Doffen Duck";
-    public static final String REPRESENTANT_NAVN = "Representant AS";
     public static final String ORG_NR = "987654321";
 
     @Mock
@@ -319,13 +314,13 @@ class TryggdeavteleAtestMapperTest {
 
     private Map<String, MedfolgendeFamilie> lagMedfølgendeEktefelle() {
         MedfolgendeFamilie ektefelle = MedfolgendeFamilie.tilMedfolgendeFamilie(
-            UUID_EKTEFELLE, EKTEFELLE_FNR, "kone 1", MedfolgendeFamilie.Relasjonsrolle.EKTEFELLE_SAMBOER);
+            UUID_EKTEFELLE, EKTEFELLE_FNR, EKTEFELLE_NAVN, MedfolgendeFamilie.Relasjonsrolle.EKTEFELLE_SAMBOER);
         return Map.of(UUID_EKTEFELLE, ektefelle);
     }
 
     private Map<String, MedfolgendeFamilie> lagMedfølgendeBarn() {
         MedfolgendeFamilie medfolgendeBarn1 = MedfolgendeFamilie.tilMedfolgendeFamilie(
-            UUID_BARN_1, BARN1_FNR, "barn 1", MedfolgendeFamilie.Relasjonsrolle.BARN);
+            UUID_BARN_1, BARN1_FNR, BARN1_NAVN, MedfolgendeFamilie.Relasjonsrolle.BARN);
         return Map.of(UUID_BARN_1, medfolgendeBarn1);
     }
 
