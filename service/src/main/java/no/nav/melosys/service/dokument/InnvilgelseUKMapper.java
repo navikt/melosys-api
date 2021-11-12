@@ -25,13 +25,12 @@ public class InnvilgelseUKMapper {
         Soknad soknad = null;
         Familie familie = null;
         boolean virksomhetArbeidsgiverSkalHaKopi = false;
-        return new InnvilgelseUK(
-            brevbestilling,
-            mottaker,
-            artikkel,
-            soknad,
-            familie,
-            virksomhetArbeidsgiverSkalHaKopi
-        );
+        return new InnvilgelseUK.Builder(brevbestilling)
+            .mottaker(mottaker)
+            .artikkel(artikkel)
+            .soknad(soknad)
+            .familie(familie)
+            .virksomhetArbeidsgiverSkalHaKopi(virksomhetArbeidsgiverSkalHaKopi)
+            .build();
     }
 }

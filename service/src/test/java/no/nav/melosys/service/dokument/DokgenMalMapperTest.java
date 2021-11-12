@@ -24,7 +24,8 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_t
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.dokgen.dto.*;
 import no.nav.melosys.integrasjon.dokgen.dto.felles.Mottaker;
-import no.nav.melosys.integrasjon.dokgen.dto.innvilgelsestorbritannia.*;
+import no.nav.melosys.integrasjon.dokgen.dto.innvilgelsestorbritannia.InnvilgelseUK;
+import no.nav.melosys.integrasjon.dokgen.dto.innvilgelsestorbritannia.Soknad;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -100,10 +101,10 @@ class DokgenMalMapperTest {
                 dto -> dto.getMottaker().navn(),
                 dto -> dto.getMottaker().postnr()
             ).containsExactly(
-                SAMMENSATT_NAVN_BRUKER,
-                SAMMENSATT_NAVN_BRUKER,
-                POSTNR_BRUKER
-            );
+            SAMMENSATT_NAVN_BRUKER,
+            SAMMENSATT_NAVN_BRUKER,
+            POSTNR_BRUKER
+        );
         assertThat(dokgenDto.getMottaker().adresselinjer()).contains(ADRESSELINJE_1_BRUKER);
     }
 
@@ -130,10 +131,10 @@ class DokgenMalMapperTest {
                 dto -> dto.getMottaker().navn(),
                 dto -> dto.getMottaker().postnr()
             ).containsExactly(
-                SAMMENSATT_NAVN_BRUKER,
-                SAMMENSATT_NAVN_BRUKER,
-                POSTNR_BRUKER
-            );
+            SAMMENSATT_NAVN_BRUKER,
+            SAMMENSATT_NAVN_BRUKER,
+            POSTNR_BRUKER
+        );
         assertThat(dokgenDto.getMottaker().adresselinjer()).contains(ADRESSELINJE_1_BRUKER);
         fakeUnleash.disableAll();
     }
@@ -163,9 +164,9 @@ class DokgenMalMapperTest {
                 SaksbehandlingstidSoknad::getAvsenderTypeSoknad,
                 SaksbehandlingstidSoknad::getAvsenderLand
             ).containsExactly(
-                MYNDIGHET,
-                "Finland"
-            );
+            MYNDIGHET,
+            "Finland"
+        );
     }
 
     @Test
@@ -191,10 +192,10 @@ class DokgenMalMapperTest {
                 dto -> dto.getMottaker().navn(),
                 dto -> dto.getMottaker().postnr()
             ).containsExactly(
-                SAMMENSATT_NAVN_BRUKER,
-                NAVN_ORG,
-                POSTNR_ORG
-            );
+            SAMMENSATT_NAVN_BRUKER,
+            NAVN_ORG,
+            POSTNR_ORG
+        );
         assertThat(dokgenDto.getMottaker().adresselinjer()).contains(POSTBOKS_ORG);
     }
 
@@ -225,10 +226,10 @@ class DokgenMalMapperTest {
                 dto -> dto.getMottaker().navn(),
                 dto -> dto.getMottaker().postnr()
             ).containsExactly(
-                SAMMENSATT_NAVN_BRUKER,
-                NAVN_ORG,
-                POSTNR_ORG
-            );
+            SAMMENSATT_NAVN_BRUKER,
+            NAVN_ORG,
+            POSTNR_ORG
+        );
         assertThat(dokgenDto.getMottaker().adresselinjer()).contains(FORRETNINGSADRESSE_ORG);
     }
 
@@ -256,10 +257,10 @@ class DokgenMalMapperTest {
                 dto -> dto.getMottaker().navn(),
                 dto -> dto.getMottaker().postnr()
             ).containsExactly(
-                SAMMENSATT_NAVN_BRUKER,
-                NAVN_ORG,
-                POSTNR_ORG
-            );
+            SAMMENSATT_NAVN_BRUKER,
+            NAVN_ORG,
+            POSTNR_ORG
+        );
         assertThat(dokgenDto.getMottaker().adresselinjer()).containsExactly("Att: " + KONTAKT_NAVN, POSTBOKS_ORG);
     }
 
@@ -290,9 +291,9 @@ class DokgenMalMapperTest {
                 MangelbrevBruker::getInnledningFritekst,
                 MangelbrevBruker::getManglerInfoFritekst
             ).containsExactly(
-                "Dummy",
-                "Dummy"
-            );
+            "Dummy",
+            "Dummy"
+        );
         assertThat(((MangelbrevBruker) dokgenDto).getDatoInnsendingsfrist().truncatedTo(ChronoUnit.DAYS))
             .isEqualTo(Instant.now().plus(Period.ofWeeks(4)).truncatedTo(ChronoUnit.DAYS));
     }
@@ -326,10 +327,10 @@ class DokgenMalMapperTest {
                 MangelbrevArbeidsgiver::getManglerInfoFritekst,
                 MangelbrevArbeidsgiver::getNavnFullmektig
             ).containsExactly(
-                "Dummy",
-                "Dummy",
-                "Fullmektig AS"
-            );
+            "Dummy",
+            "Dummy",
+            "Fullmektig AS"
+        );
         assertThat(((MangelbrevArbeidsgiver) dokgenDto).getDatoInnsendingsfrist().truncatedTo(ChronoUnit.DAYS))
             .isEqualTo(Instant.now().plus(Period.ofWeeks(4)).truncatedTo(ChronoUnit.DAYS));
     }
@@ -404,12 +405,12 @@ class DokgenMalMapperTest {
                 Fritekstbrev::getNavnFullmektig,
                 Fritekstbrev::getSaksbehandlerNavn
             ).containsExactly(
-                "Min tittel",
-                "Innhold",
-                true,
-                "Fullmektig AS",
-                "Fetter Anton"
-            );
+            "Min tittel",
+            "Innhold",
+            true,
+            "Fullmektig AS",
+            "Fetter Anton"
+        );
 
         assertThat(dokgenDto.getMottaker().type()).isEqualTo(Aktoersroller.BRUKER.getKode());
     }
@@ -440,11 +441,11 @@ class DokgenMalMapperTest {
                 Fritekstbrev::medKontaktopplysninger,
                 Fritekstbrev::getNavnFullmektig
             ).containsExactly(
-                "Min tittel",
-                "Innhold",
-                true,
-                null
-            );
+            "Min tittel",
+            "Innhold",
+            true,
+            null
+        );
 
         assertThat(dokgenDto.getMottaker().type()).isEqualTo(Aktoersroller.ARBEIDSGIVER.getKode());
     }
@@ -482,23 +483,22 @@ class DokgenMalMapperTest {
     }
 
     private InnvilgelseUK lagInnvilgelseUK() {
-        return new InnvilgelseUK(
-            lagInnvilgelseBrevbestilling(),
-            new Mottaker("Ola Nordmann",
+        return new InnvilgelseUK.Builder(lagInnvilgelseBrevbestilling())
+            .mottaker(new Mottaker("Ola Nordmann",
                 List.of("Gatenavn 12", "Linje 2"),
                 "1010",
                 "POSTSTED",
                 "Norge",
-                "Bruker eller brukers fullmektig"),
-            Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1,
-            new Soknad(Instant.now(),
+                "Bruker eller brukers fullmektig"))
+            .artikkel(Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1)
+            .soknad(new Soknad(Instant.now(),
                 Instant.now().plus(2, ChronoUnit.DAYS),
                 Instant.now().plus(20, ChronoUnit.DAYS),
                 "Virksomhetsnavn"
-            ),
-            null,
-            true
-        );
+            ))
+            .familie(null)
+            .virksomhetArbeidsgiverSkalHaKopi(true)
+            .build();
     }
 
     private GeografiskAdresse lagOrgForretningsadresse() {

@@ -15,22 +15,6 @@ public class InnvilgelseUK extends DokgenDto {
     private final Familie familie;
     private final boolean virksomhetArbeidsgiverSkalHaKopi;
 
-
-    public InnvilgelseUK(InnvilgelseBrevbestilling brevbestilling,
-                         Mottaker mottaker,
-                         Lovvalgbestemmelser_trygdeavtale_uk artikkel,
-                         Soknad soknad,
-                         Familie familie,
-                         boolean virksomhetArbeidsgiverSkalHaKopi) {
-        super(brevbestilling);
-        this.mottaker = mottaker;
-        this.innvilgelse = Innvilgelse.av(brevbestilling);
-        this.artikkel = artikkel;
-        this.soknad = soknad;
-        this.familie = familie;
-        this.virksomhetArbeidsgiverSkalHaKopi = virksomhetArbeidsgiverSkalHaKopi;
-    }
-
     @Override
     public Mottaker getMottaker() {
         return mottaker;
@@ -54,5 +38,64 @@ public class InnvilgelseUK extends DokgenDto {
 
     public boolean isVirksomhetArbeidsgiverSkalHaKopi() {
         return virksomhetArbeidsgiverSkalHaKopi;
+    }
+
+    public InnvilgelseUK(Builder builder) {
+        super(builder.brevbestilling);
+        this.mottaker = builder.mottaker;
+        this.innvilgelse = Innvilgelse.av(builder.brevbestilling);
+        this.artikkel = builder.artikkel;
+        this.soknad = builder.soknad;
+        this.familie = builder.familie;
+        this.virksomhetArbeidsgiverSkalHaKopi = builder.virksomhetArbeidsgiverSkalHaKopi;
+
+    }
+
+    static public class Builder {
+        private Mottaker mottaker;
+        private Innvilgelse innvilgelse;
+        private Lovvalgbestemmelser_trygdeavtale_uk artikkel;
+        private Soknad soknad;
+        private Familie familie;
+        private boolean virksomhetArbeidsgiverSkalHaKopi;
+        private final InnvilgelseBrevbestilling brevbestilling;
+
+        public Builder(InnvilgelseBrevbestilling brevbestilling) {
+            this.brevbestilling = brevbestilling;
+        }
+
+        public Builder mottaker(Mottaker mottaker) {
+            this.mottaker = mottaker;
+            return this;
+        }
+
+        public Builder innvilgelse(Innvilgelse innvilgelse) {
+            this.innvilgelse = innvilgelse;
+            return this;
+        }
+
+        public Builder artikkel(Lovvalgbestemmelser_trygdeavtale_uk artikkel) {
+            this.artikkel = artikkel;
+            return this;
+        }
+
+        public Builder soknad(Soknad soknad) {
+            this.soknad = soknad;
+            return this;
+        }
+
+        public Builder familie(Familie familie) {
+            this.familie = familie;
+            return this;
+        }
+
+        public Builder virksomhetArbeidsgiverSkalHaKopi(boolean virksomhetArbeidsgiverSkalHaKopi) {
+            this.virksomhetArbeidsgiverSkalHaKopi = virksomhetArbeidsgiverSkalHaKopi;
+            return this;
+        }
+
+        public InnvilgelseUK build() {
+            return new InnvilgelseUK(this);
+        }
     }
 }
