@@ -1,13 +1,11 @@
 package no.nav.melosys.service.vedtak;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Tema;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
-import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -65,13 +63,14 @@ public class TrygdeavtaleVedtakService {
         behandlingService.lagre(behandling);
 
         prosessinstansService.opprettProsessinstansIverksettVedtakTrygdeavtale(behandling, request);
-        dokgenService.produserOgDistribuerBrev(behandlingID, lagBrevbestilling(request));
+        // Kommer innvigelse nå etterpå - og vi må finne ut hvordan vi slår dette sammen
+        dokgenService.produserOgDistribuerBrev(behandlingID, lagAttestBrevbestilling(request));
         oppgaveService.ferdigstillOppgaveMedSaksnummer(saksnummer);
     }
 
-    private BrevbestillingRequest lagBrevbestilling(FattTrygdeavtaleVedtakRequest request) {
+    private BrevbestillingRequest lagAttestBrevbestilling(FattTrygdeavtaleVedtakRequest request) {
         return new BrevbestillingRequest.Builder()
-            .medProduserbardokument(Produserbaredokumenter.ATTEST_NO_UK_1) // TODO: Kommer en ny kode fra fag, tester med atest så først
+            .medProduserbardokument(Produserbaredokumenter.ATTEST_NO_UK_1)
             .medMottaker(Aktoersroller.BRUKER)
             .medKopiMottakere(request.getKopiMottakere())
             .medInnledningFritekst(request.getFritekstInnledning())
