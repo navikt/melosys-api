@@ -14,13 +14,9 @@ import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.brev.storbritannia.AttestStorbritanniaBrevbestilling;
 import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.domain.person.adresse.PersonAdresse;
-import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeBarn;
-import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie;
-import no.nav.melosys.domain.person.familie.OmfattetFamilie;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.dokgen.dto.atteststorbritannia.*;
 import no.nav.melosys.integrasjon.dokgen.dto.felles.Person;
@@ -89,13 +85,13 @@ public class TrygdeavtaleAttestMapper {
 
         return new Utsendelse.Builder()
             .artikkel((Lovvalgbestemmelser_trygdeavtale_uk) bestemmelse)
-            .oppholdsadresseUK(findGyldigAddresse(persondata, lovvalgsperiode))
+            .oppholdsadresseUK(findGyldigAdresse(persondata, lovvalgsperiode))
             .startdato(toInstant(lovvalgsperiode.getFom()))
             .sluttdato(toInstant(lovvalgsperiode.getTom()))
             .build();
     }
 
-    static List<String> findGyldigAddresse(Persondata persondata, Lovvalgsperiode lovvalgsperiode) {
+    static List<String> findGyldigAdresse(Persondata persondata, Lovvalgsperiode lovvalgsperiode) {
         var optionalPersonAdresse = Stream.of(
                 persondata.finnBostedsadresse(),
                 persondata.finnOppholdsadresse(),
