@@ -45,7 +45,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class TryggdeavteleAtestMapperTest {
+class TrygdeavtaleAttestMapperTest {
     public static final String UUID_EKTEFELLE = "uuidEktefelle";
     public static final String UUID_BARN_1 = "uuidBarn1";
     public static final String EKTEFELLE_FNR = "09080723451";
@@ -74,11 +74,11 @@ class TryggdeavteleAtestMapperTest {
     @Mock
     Persondata mockPersondata;
 
-    TryggdeavteleAtestMapper tryggdeavteleAtestMapper;
+    TrygdeavtaleAttestMapper trygdeavtaleAttestMapper;
 
     @BeforeEach
     void setup() {
-        tryggdeavteleAtestMapper = new TryggdeavteleAtestMapper(
+        trygdeavtaleAttestMapper = new TrygdeavtaleAttestMapper(
             mockAvklarteMedfolgendeFamilieService,
             mockAvklarteVirksomheterService,
             mockDokgenMapperDatahenter,
@@ -146,7 +146,7 @@ class TryggdeavteleAtestMapperTest {
             null,
             false
         );
-        assertThat(TryggdeavteleAtestMapper.sjekkOmAdresseGyldighetErInnenforLovalgsperiode(personAdresse, lovvalgsperiode))
+        assertThat(TrygdeavtaleAttestMapper.sjekkOmAdresseGyldighetErInnenforLovalgsperiode(personAdresse, lovvalgsperiode))
             .withFailMessage(grunn)
             .isTrue();
     }
@@ -195,7 +195,7 @@ class TryggdeavteleAtestMapperTest {
             null,
             false
         );
-        assertThat(TryggdeavteleAtestMapper.sjekkOmAdresseGyldighetErInnenforLovalgsperiode(personAdresse, lovvalgsperiode))
+        assertThat(TrygdeavtaleAttestMapper.sjekkOmAdresseGyldighetErInnenforLovalgsperiode(personAdresse, lovvalgsperiode))
             .withFailMessage(grunn)
             .isFalse();
     }
@@ -204,7 +204,7 @@ class TryggdeavteleAtestMapperTest {
     void map_InnvilgetMedOmfattetFamilie_populererFelter() throws JsonProcessingException {
         mockHappyCase();
 
-        AttestStorbritannia attestStorbritannia = tryggdeavteleAtestMapper.map(new AttestStorbritanniaBrevbestilling.Builder()
+        AttestStorbritannia attestStorbritannia = trygdeavtaleAttestMapper.map(new AttestStorbritanniaBrevbestilling.Builder()
             .medBehandling(lagBehandling())
             .medPersonDokument(lagPersonDokument())
             .medVedtaksdato(Instant.parse("1970-10-10T00:00:00Z"))

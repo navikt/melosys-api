@@ -31,7 +31,7 @@ import no.nav.melosys.service.persondata.PersondataFasade;
 import org.springframework.stereotype.Component;
 
 @Component
-public class TryggdeavteleAtestMapper {
+public class TrygdeavtaleAttestMapper {
 
     private final AvklarteMedfolgendeFamilieService avklarteMedfolgendeFamilieService;
     private final AvklarteVirksomheterService avklarteVirksomheterService;
@@ -39,7 +39,7 @@ public class TryggdeavteleAtestMapper {
     private final PersondataFasade persondataFasade;
     private final LovvalgsperiodeService lovvalgsperiodeService;
 
-    public TryggdeavteleAtestMapper(AvklarteMedfolgendeFamilieService avklarteMedfolgendeFamilieService,
+    public TrygdeavtaleAttestMapper(AvklarteMedfolgendeFamilieService avklarteMedfolgendeFamilieService,
                                     AvklarteVirksomheterService avklarteVirksomheterService,
                                     DokgenMapperDatahenter dokgenMapperDatahenter,
                                     PersondataFasade registerOppslagService,

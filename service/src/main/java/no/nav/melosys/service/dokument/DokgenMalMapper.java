@@ -10,7 +10,6 @@ import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.dokgen.dto.*;
 import no.nav.melosys.integrasjon.dokgen.dto.felles.Mottaker;
-import no.nav.melosys.integrasjon.dokgen.dto.atteststorbritannia.AttestStorbritannia;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -22,15 +21,15 @@ public class DokgenMalMapper {
 
     private final DokgenMapperDatahenter dokgenMapperDatahenter;
     private final InnvilgelseFtrlMapper innvilgelseFtrlMapper;
-    private final TryggdeavteleAtestMapper tryggdeavteleAtestMapper;
+    private final TrygdeavtaleAttestMapper trygdeavtaleAttestMapper;
 
     @Autowired
     public DokgenMalMapper(DokgenMapperDatahenter dokgenMapperDatahenter,
                            InnvilgelseFtrlMapper innvilgelseFtrlMapper,
-                           TryggdeavteleAtestMapper tryggdeavteleAtestMapper) {
+                           TrygdeavtaleAttestMapper trygdeavtaleAttestMapper) {
         this.dokgenMapperDatahenter = dokgenMapperDatahenter;
         this.innvilgelseFtrlMapper = innvilgelseFtrlMapper;
-        this.tryggdeavteleAtestMapper = tryggdeavteleAtestMapper;
+        this.trygdeavtaleAttestMapper = trygdeavtaleAttestMapper;
     }
 
     public DokgenDto mapBehandling(DokgenBrevbestilling mottattBrevbestilling) {
@@ -73,7 +72,7 @@ public class DokgenMalMapper {
                     .build()
             );
             case INNVILGELSE_FOLKETRYGDLOVEN_2_8 -> innvilgelseFtrlMapper.map((InnvilgelseBrevbestilling) brevbestilling);
-            case ATTEST_NO_UK_1 -> tryggdeavteleAtestMapper.map(((AttestStorbritanniaBrevbestilling) brevbestilling)
+            case ATTEST_NO_UK_1 -> trygdeavtaleAttestMapper.map(((AttestStorbritanniaBrevbestilling) brevbestilling)
                 .toBuilder()
                 .medVedtaksdato(dokgenMapperDatahenter.hentVedtaksdato(brevbestilling.getBehandling().getId())).build());
             case GENERELT_FRITEKSTBREV_BRUKER -> Fritekstbrev.av(((FritekstbrevBrevbestilling) brevbestilling).toBuilder()

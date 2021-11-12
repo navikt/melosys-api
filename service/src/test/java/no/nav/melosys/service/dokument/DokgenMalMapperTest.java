@@ -49,7 +49,7 @@ class DokgenMalMapperTest {
     private DokgenMapperDatahenter mockDokgenMapperDatahenter;
 
     @Mock
-    private TryggdeavteleAtestMapper tryggdeavteleAtestMapper;
+    private TrygdeavtaleAttestMapper trygdeavtaleAttestMapper;
 
     private final FakeUnleash fakeUnleash = new FakeUnleash();
 
@@ -57,7 +57,7 @@ class DokgenMalMapperTest {
 
     @BeforeEach
     void init() {
-        dokgenMalMapper = new DokgenMalMapper(mockDokgenMapperDatahenter, mockInnvilgelseFtrlMapper, tryggdeavteleAtestMapper);
+        dokgenMalMapper = new DokgenMalMapper(mockDokgenMapperDatahenter, mockInnvilgelseFtrlMapper, trygdeavtaleAttestMapper);
     }
 
     @Test
