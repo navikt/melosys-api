@@ -20,7 +20,7 @@ public class TestDataForTrygdeavtale {
           "tilordnetRessurs": "Z123456"
         }""";
 
-    public JsonNode lagOppgave() {
+    public JsonNode lagJfrOppgave() {
         WebClient webClient = WebClient.builder()
             .baseUrl("http://localhost:8083/testdata/jfr-oppgave")
             .defaultHeaders(this::defaultHeaders)
@@ -74,5 +74,12 @@ public class TestDataForTrygdeavtale {
     private void defaultHeaders(HttpHeaders httpHeaders) {
         httpHeaders.add(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE);
         httpHeaders.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
+    }
+
+    @Test
+    void test() {
+//        lagJfrOppgave();
+//        JsonNode jsonNode = hentFørsteOppgave();
+//        System.out.println(jsonNode.toPrettyString());
     }
 }

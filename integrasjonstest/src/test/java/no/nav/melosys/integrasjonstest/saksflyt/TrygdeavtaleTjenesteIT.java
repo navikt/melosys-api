@@ -29,7 +29,7 @@ import no.nav.melosys.service.vedtak.FattTrygdeavtaleVedtakRequest;
 import no.nav.melosys.service.vedtak.FattVedtakRequest;
 import no.nav.melosys.service.vedtak.VedtakServiceFasade;
 import no.nav.melosys.tjenester.gui.TrygdeavtaleTjeneste;
-import no.nav.melosys.tjenester.gui.dto.trygdeavtale.TrygdeAvtaleDataForVedtakDto;
+import no.nav.melosys.tjenester.gui.dto.trygdeavtale.TrygdeavtaleResultatDto;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -88,14 +88,15 @@ class TrygdeavtaleTjenesteIT {
             avklarteVirksomheterService,
             lovvalgsperiodeService);
 
-//        vedtakMetadataRepository.deleteAllById(List.of(1L));
+        // Vi må slette dette for å kunne kjøre vedtak på nytt
         vedtakMetadataRepository.deleteAll();
 
+        // Trenger bare kjøre denne første gangen så kan data gjenbrukes
 //        lagData();
 
-
-        // Gutt - 02112199996
-        // Jente - 02112199805
+        //
+        // Barn - 02112199996
+        // Kone - 02112199805
 
 //        SoeknadFtrl behandlingsgrunnlagdata = (SoeknadFtrl) behandlingsgrunnlag.getBehandlingsgrunnlagdata();
 //        behandlingsgrunnlagdata.periode = new Periode(
@@ -122,7 +123,7 @@ class TrygdeavtaleTjenesteIT {
 
     private void lagData() throws InterruptedException {
         TestDataForTrygdeavtale testDataForTrygdeavtale = new TestDataForTrygdeavtale();
-        testDataForTrygdeavtale.lagOppgave();
+//        testDataForTrygdeavtale.lagJfrOppgave();
         JsonNode journalpostNode = testDataForTrygdeavtale.hentFørsteOppgave();
         String journalpostID = journalpostNode.get("journalpostId").asText();
         String oppgaveId = journalpostNode.get("id").asText();
@@ -144,6 +145,8 @@ class TrygdeavtaleTjenesteIT {
                 Thread.sleep(1000);
 
                 JsonNode jsonNode = testDataForTrygdeavtale.hentNyesteOppgave();
+                System.out.println(jsonNode.get("id").asInt());
+                System.out.println(jsonNode.get("saksreferanse"));
                 if (jsonNode.get("id").asInt() == lastId) continue;
 
                 saksreferanseNode = jsonNode.get("saksreferanse");
@@ -186,20 +189,18 @@ class TrygdeavtaleTjenesteIT {
 
     @Test
     void test() throws ValideringException, InterruptedException {
-        TrygdeAvtaleDataForVedtakDto trygdeAvtaleDataForVedtakDto = new TrygdeAvtaleDataForVedtakDto.Builder()
+        TrygdeavtaleResultatDto trygdeavtaleResultatDto = new TrygdeavtaleResultatDto.Builder()
             .virksomheter(List.of("999999999"))
-            .vedtak("JA_FATTE_VEDTAK")
-            .innvilgelse("JA")
             .bestemmelse("UK_ART6_1")
             .addBarn("f922d0c8-269e-4c83-a12d-7b29e33ccf75",
                 false, Medfolgende_barn_begrunnelser_ftrl.OVER_18_AR.getKode(),
                 "begrunnelse barn")
             .ektefelle("4ffa867c-e645-4389-8f08-24a6e564889c",
-                true, Medfolgende_ektefelle_samboer_begrunnelser_ftrl.EGEN_INNTEKT.getKode(),
-                "begrunnelse samboer")
+                true, "",
+                "")
             .build();
 
-//        trygdeavtaleTjeneste.overforDataForVedtak(1L, trygdeAvtaleDataForVedtakDto);
+//        trygdeavtaleTjeneste.overforDataForVedtak(1L, trygdeavtaleResultatDto);
 //
         FattVedtakRequest fattVedtakRequest = new FattTrygdeavtaleVedtakRequest
             .Builder()
