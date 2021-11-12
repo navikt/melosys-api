@@ -13,7 +13,6 @@ import no.nav.melosys.domain.avgift.AvgiftsgrunnlagInfoUtland;
 import no.nav.melosys.domain.avgift.Trygdeavgiftsgrunnlag;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.IdentType;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Soeknadsland;
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
@@ -33,7 +32,6 @@ import org.springframework.stereotype.Component;
 
 import static java.util.Optional.ofNullable;
 import static no.nav.melosys.domain.kodeverk.Vilkaar.FTRL_2_8_NÆR_TILKNYTNING_NORGE;
-import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 import static org.springframework.util.StringUtils.hasText;
 
 @Component
@@ -74,27 +72,25 @@ public class InnvilgelseFtrlMapper {
 
         Collection<Medlemskapsperiode> medlemskapsperioder = medlemAvFolketrygden.getMedlemskapsperioder();
         FastsattTrygdeavgift fastsattTrygdeavgift = medlemAvFolketrygden.getFastsattTrygdeavgift();
-        return new InnvilgelseFtrl(
-            brevbestilling,
-            medlemskapsperioder.stream().map(Periode::new).toList(),
-            erFullstendigInnvilget(medlemskapsperioder),
-            hentSaerligBegrunnelse(behandlingsresultat),
-            avklarteMedfolgendeEktefelle.finnes(),
-            avklarteMedfolgendeBarn.finnes(),
-            mapOmfattetFamilie(behandlingId, avklarteMedfolgendeEktefelle.getFamilieOmfattetAvNorskTrygd(), avklarteMedfolgendeBarn.barnOmfattetAvNorskTrygd),
-            mapIkkeOmfattetBarn(behandlingId, avklarteMedfolgendeBarn.barnIkkeOmfattetAvNorskTrygd),
-            mapIkkeOmfattetEktefelle(behandlingId, avklarteMedfolgendeEktefelle.getFamilieIkkeOmfattetAvNorskTrygd()),
-            norskeArbeidsgivere.navn,
-            dokgenMapperDatahenter.hentLandnavn(arbeidsland),
-            harTrygdeavtaleMedArbeidsland(arbeidsland),
-            mapVurderingTrygdeavgift(trygdeavgiftsgrunnlag, fastsattTrygdeavgift),
-            trygdeavgiftsgrunnlag.getLønnsforhold().getKode(),
-            dokgenMapperDatahenter.hentFullmektigNavn(brevbestilling.getBehandling().getFagsak(), Representerer.ARBEIDSGIVER),
-            brevbestilling.getBehandling().getFagsak().finnRepresentant(Representerer.BRUKER).isPresent(),
-            String.valueOf(LocalDate.now().getYear()),
-            harLønnNorgeSkattepliktigNorge(trygdeavgiftsgrunnlag.getAvgiftsGrunnlagNorge()),
-            harLønnUtlandSkattepliktigNorge(trygdeavgiftsgrunnlag.getAvgiftsGrunnlagUtland())
-        );
+        return new InnvilgelseFtrl.Builder(brevbestilling)
+            .perioder(medlemskapsperioder.stream().map(Periode::new).toList())
+            .erFullstendigInnvilget(erFullstendigInnvilget(medlemskapsperioder))
+            .ftrl_2_8_begrunnelse(hentSaerligBegrunnelse(behandlingsresultat))
+            .vurderingMedlemskapEktefelle(avklarteMedfolgendeEktefelle.finnes())
+            .vurderingLovvalgBarn(avklarteMedfolgendeBarn.finnes())
+            .omfattetFamilie(mapOmfattetFamilie(behandlingId, avklarteMedfolgendeEktefelle.getFamilieOmfattetAvNorskTrygd(), avklarteMedfolgendeBarn.barnOmfattetAvNorskTrygd))
+            .ikkeOmfattetEktefelle(mapIkkeOmfattetEktefelle(behandlingId, avklarteMedfolgendeEktefelle.getFamilieIkkeOmfattetAvNorskTrygd()))
+            .ikkeOmfattetBarn(mapIkkeOmfattetBarn(behandlingId, avklarteMedfolgendeBarn.barnIkkeOmfattetAvNorskTrygd))
+            .arbeidsgiverNavn(norskeArbeidsgivere.navn)
+            .arbeidsland(dokgenMapperDatahenter.hentLandnavn(arbeidsland))
+            .trygdeavtaleMedArbeidsland(harTrygdeavtaleMedArbeidsland(arbeidsland))
+            .vurderingTrygdeavgift(mapVurderingTrygdeavgift(trygdeavgiftsgrunnlag, fastsattTrygdeavgift))
+            .loennsforhold(trygdeavgiftsgrunnlag.getLønnsforhold().getKode())
+            .arbeidsgiverFullmektigNavn(dokgenMapperDatahenter.hentFullmektigNavn(brevbestilling.getBehandling().getFagsak(), Representerer.ARBEIDSGIVER))
+            .avgiftssatsAar(String.valueOf(LocalDate.now().getYear()))
+            .loennNorgeSkattepliktig(harLønnNorgeSkattepliktigNorge(trygdeavgiftsgrunnlag.getAvgiftsGrunnlagNorge()))
+            .loennUtlandSkattepliktig(harLønnUtlandSkattepliktigNorge(trygdeavgiftsgrunnlag.getAvgiftsGrunnlagUtland()))
+            .build();
     }
 
     private boolean erFullstendigInnvilget(Collection<Medlemskapsperiode> medlemskapsperioder) {
