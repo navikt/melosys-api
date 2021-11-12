@@ -53,10 +53,10 @@ public class TrygdeavtaleAttestMapper {
 
     @Transactional
     public AttestStorbritannia map(AttestStorbritanniaBrevbestilling brevbestilling) {
-        long behandlingId = brevbestilling.getBehandlingId();
-        Behandling behandling = brevbestilling.getBehandling();
-        Persondata persondokument = brevbestilling.getPersondokument();
-        Collection<Lovvalgsperiode> lovvalgsperioder = lovvalgsperiodeService.hentLovvalgsperioder(behandlingId);
+        var behandlingId = brevbestilling.getBehandlingId();
+        var behandling = brevbestilling.getBehandling();
+        var persondokument = brevbestilling.getPersondokument();
+        var lovvalgsperioder = lovvalgsperiodeService.hentLovvalgsperioder(behandlingId);
 
         return new AttestStorbritannia.Builder(brevbestilling)
             .medfolgendeFamiliemedlemmer(new MedfolgendeFamiliemedlemmer(
@@ -83,9 +83,9 @@ public class TrygdeavtaleAttestMapper {
                 + lovvalgsperioder.size()
             );
         }
-        Lovvalgsperiode lovvalgsperiode = lovvalgsperioder.iterator().next();
+        var lovvalgsperiode = lovvalgsperioder.iterator().next();
 
-        LovvalgBestemmelse bestemmelse = lovvalgsperiode.getBestemmelse();
+        var bestemmelse = lovvalgsperiode.getBestemmelse();
 
         return new Utsendelse.Builder()
             .artikkel((Lovvalgbestemmelser_trygdeavtale_uk) bestemmelse)
@@ -121,7 +121,7 @@ public class TrygdeavtaleAttestMapper {
     }
 
     private ArbeidsgiverNorge getArbeidsgiverNorge(Behandling behandling) {
-        List<AvklartVirksomhet> avklartVirksomhets = avklarteVirksomheterService.hentNorskeArbeidsgivere(behandling);
+        var avklartVirksomhets = avklarteVirksomheterService.hentNorskeArbeidsgivere(behandling);
         if (avklartVirksomhets.size() != 1) {
             throw new FunksjonellException("avklartVirksomhets funnet er:" + avklartVirksomhets.size() + " må være 1 for trygdeatest");
         }
@@ -137,37 +137,37 @@ public class TrygdeavtaleAttestMapper {
     }
 
     private List<Person> mapBarn(long behandlingID) {
-        AvklarteMedfolgendeBarn avklarteMedfolgendeBarn = avklarteMedfolgendeFamilieService.hentAvklarteMedfølgendeBarn(behandlingID);
-        Set<OmfattetFamilie> barnOmfattetAvNorskTrygd = avklarteMedfolgendeBarn.barnOmfattetAvNorskTrygd;
+        var avklarteMedfolgendeBarn = avklarteMedfolgendeFamilieService.hentAvklarteMedfølgendeBarn(behandlingID);
+        var barnOmfattetAvNorskTrygd = avklarteMedfolgendeBarn.barnOmfattetAvNorskTrygd;
         if (barnOmfattetAvNorskTrygd.isEmpty()) {
             return List.of();
         }
-        Map<String, MedfolgendeFamilie> medfølgendeBarn = avklarteMedfolgendeFamilieService.hentMedfølgendeBarn(behandlingID);
+        var medfølgendeBarn = avklarteMedfolgendeFamilieService.hentMedfølgendeBarn(behandlingID);
         return barnOmfattetAvNorskTrygd.stream().map(omfattetFamilie -> tilPerson(medfølgendeBarn, omfattetFamilie.getUuid())).toList();
     }
 
     private Person mapEktefelle(long behandlingID) {
-        AvklarteMedfolgendeFamilie avklarteMedfolgendeFamilie = avklarteMedfolgendeFamilieService.hentAvklartMedfølgendeEktefelle(behandlingID);
-        Set<OmfattetFamilie> familieOmfattetAvNorskTrygd = avklarteMedfolgendeFamilie.getFamilieOmfattetAvNorskTrygd();
+        var avklarteMedfolgendeFamilie = avklarteMedfolgendeFamilieService.hentAvklartMedfølgendeEktefelle(behandlingID);
+        var familieOmfattetAvNorskTrygd = avklarteMedfolgendeFamilie.getFamilieOmfattetAvNorskTrygd();
         if (familieOmfattetAvNorskTrygd.isEmpty()) {
             return null;
         }
-        OmfattetFamilie omfattetFamilie = familieOmfattetAvNorskTrygd.iterator().next();
-        Map<String, MedfolgendeFamilie> medfolgendeEktefelle = avklarteMedfolgendeFamilieService.hentMedfølgendEktefelle(behandlingID);
+        var omfattetFamilie = familieOmfattetAvNorskTrygd.iterator().next();
+        var medfolgendeEktefelle = avklarteMedfolgendeFamilieService.hentMedfølgendEktefelle(behandlingID);
         String uuid = omfattetFamilie.getUuid();
         return tilPerson(medfolgendeEktefelle, uuid);
     }
 
     private Person tilPerson(Map<String, MedfolgendeFamilie> medfolgendeFamilieMap, String uuid) {
-        MedfolgendeFamilie medfolgendeFamilie = Optional.of(medfolgendeFamilieMap.get(uuid))
+        var medfolgendeFamilie = Optional.of(medfolgendeFamilieMap.get(uuid))
             .orElseThrow(() -> new FunksjonellException("Avklart medfølgende familie " + uuid + " finnes ikke i behandlingsgrunnlaget"));
-        String sammensattNavn = medfolgendeFamilie.getFnr() != null ? dokgenMapperDatahenter.hentSammensattNavn(medfolgendeFamilie.getFnr()) : medfolgendeFamilie.getNavn();
-        Instant instant = getFødselDato(medfolgendeFamilie.getFnr());
+        var sammensattNavn = medfolgendeFamilie.getFnr() != null ? dokgenMapperDatahenter.hentSammensattNavn(medfolgendeFamilie.getFnr()) : medfolgendeFamilie.getNavn();
+        var instant = getFødselDato(medfolgendeFamilie.getFnr());
         return new Person(sammensattNavn, instant, medfolgendeFamilie.getFnr(), null);
     }
 
     private Instant getFødselDato(String fnr) {
-        Persondata persondata = persondataFasade.hentPerson(fnr);
+        var persondata = persondataFasade.hentPerson(fnr);
         return persondata.getFødselsdato().atStartOfDay(ZoneId.systemDefault()).toInstant();
     }
 }
