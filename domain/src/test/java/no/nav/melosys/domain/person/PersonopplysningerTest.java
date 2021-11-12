@@ -19,7 +19,7 @@ class PersonopplysningerTest {
     @Test
     void hentGjeldendePostadresse_bareBostedsadresse_lagPostadresseFraBostedsadresse() {
         Postadresse gjeldendePostadresse =
-            lagPersonopplysninger(Collections.emptyList(), Collections.emptyList()).hentGjeldendePostadresse();
+            lagPersonopplysninger(Collections.emptyList(), Collections.emptyList(), lagBostedsadresse()).hentGjeldendePostadresse();
 
         assertThat(gjeldendePostadresse.adresselinje1()).isEqualTo("gatenavnFraBostedsadresse");
     }
@@ -27,7 +27,7 @@ class PersonopplysningerTest {
     @Test
     void hentGjeldendePostadresse_medKontaktadresser_lagPostadresseFraKontaktadressePDL() {
         Postadresse gjeldendePostadresse =
-            lagPersonopplysninger(lagKontaktadresser(), lagOppholdsadresser()).hentGjeldendePostadresse();
+            lagPersonopplysninger(lagKontaktadresser(), lagOppholdsadresser(), lagBostedsadresse()).hentGjeldendePostadresse();
 
         assertThat(gjeldendePostadresse.adresselinje1()).isEqualTo("gatenavnKontaktadressePDL");
     }
@@ -35,14 +35,22 @@ class PersonopplysningerTest {
     @Test
     void hentGjeldendePostadresse_medOppholdsadresserOgUtenKontaktadresser_lagPostadresseFraOppholdsadresseFreg() {
         Postadresse gjeldendePostadresse =
-            lagPersonopplysninger(Collections.emptyList(), lagOppholdsadresser()).hentGjeldendePostadresse();
+            lagPersonopplysninger(Collections.emptyList(), lagOppholdsadresser(), lagBostedsadresse()).hentGjeldendePostadresse();
 
         assertThat(gjeldendePostadresse.adresselinje1()).isEqualTo("gatenavnOppholdsadresseFreg");
     }
 
+    @Test
+    void hentGjeldendePostadresse_medOppholdsadresserOgUtenBostedsadresse_lagPostadresseFraKontaktadressePDL() {
+        Postadresse gjeldendePostadresse =
+            lagPersonopplysninger(lagKontaktadresser(), lagOppholdsadresser(), null).hentGjeldendePostadresse();
+
+        assertThat(gjeldendePostadresse.adresselinje1()).isEqualTo("gatenavnKontaktadressePDL");
+    }
+
     private Personopplysninger lagPersonopplysninger(Collection<Kontaktadresse> kontaktadresser,
-                                                     Collection<Oppholdsadresse> oppholdsadresser) {
-        return new Personopplysninger(Collections.emptyList(), lagBostedsadresse(), null, null, null, null, null,
+                                                     Collection<Oppholdsadresse> oppholdsadresser, Bostedsadresse bostedsadresse) {
+        return new Personopplysninger(Collections.emptyList(), bostedsadresse, null, null, null, null, null,
             kontaktadresser, null, oppholdsadresser, Collections.emptyList());
     }
 
