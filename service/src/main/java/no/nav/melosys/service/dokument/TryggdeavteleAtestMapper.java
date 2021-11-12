@@ -58,12 +58,6 @@ public class TryggdeavteleAtestMapper {
         Persondata persondokument = brevbestilling.getPersondokument();
         Collection<Lovvalgsperiode> lovvalgsperioder = lovvalgsperiodeService.hentLovvalgsperioder(behandlingId);
 
-        // Bør kanskje henter Persondata fra persondataFasade siden brevbestilling.getPersondokument() gir oss ett
-        // PersonDokument som setter gyldig fra til som null
-        // må finne ut hvor vi kan få fnr fra. Kanskje: brevbestilling.getArbeidstaker().fnr());
-        //Persondata persondataForUtesendelse = persondataFasade.hentPerson(fnr);
-        Persondata persondataForUtesendelse = persondokument;
-
         return new AttestStorbritannia.Builder(brevbestilling)
             .medfolgendeFamiliemedlemmer(new MedfolgendeFamiliemedlemmer(
                 mapEktefelle(behandlingId),
@@ -76,10 +70,10 @@ public class TryggdeavteleAtestMapper {
                 persondokument.hentFolkeregisterident(),
                 persondokument.hentGjeldendePostadresse().adresselinjer()))
             .representantUK(new RepresentantUK(
-                "Mrs. London", // Det blir fylt inn via sidemeny. Usikker på hvor det hanver...
+                "Mrs. London", // TODO: Det blir fylt inn via sidemeny. Hent data når det er tilgjenglig.
                 List.of())
             )
-            .utsendelse(getUtsendelse(lovvalgsperioder, persondataForUtesendelse))
+            .utsendelse(getUtsendelse(lovvalgsperioder, persondokument))
             .build();
     }
 
@@ -119,12 +113,11 @@ public class TryggdeavteleAtestMapper {
     }
 
     static boolean sjekkOmAdresseGyldighetErInnenforLovalgsperiode(PersonAdresse personAdresse, Lovvalgsperiode lovvalgsperiode) {
-        if(personAdresse.gyldigFraOgMed() == null) return false; // Høre med fag om vi skal bruke adressen i dette tilfelle
+        if(personAdresse.gyldigFraOgMed() == null) return false;
         if(personAdresse.gyldigTilOgMed() == null) return false;
-        if(lovvalgsperiode.getTom().isBefore(personAdresse.gyldigFraOgMed())) return false;
-        if(lovvalgsperiode.getFom().isAfter(personAdresse.gyldigTilOgMed())) return false;
 
-        return true;
+        if(lovvalgsperiode.getTom().isBefore(personAdresse.gyldigFraOgMed())) return false;
+        return !lovvalgsperiode.getFom().isAfter(personAdresse.gyldigTilOgMed());
     }
 
     private ArbeidsgiverNorge getArbeidsgiverNorge(Behandling behandling) {
