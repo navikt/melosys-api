@@ -164,6 +164,6 @@ public class TrygdeavtaleAttestMapper {
 
     private Instant getFødselDato(String fnr) {
         var persondata = persondataFasade.hentPerson(fnr);
-        return persondata.getFødselsdato().atStartOfDay(ZoneId.systemDefault()).toInstant();
+        return toInstant(persondata.getFødselsdato());
     }
 }
