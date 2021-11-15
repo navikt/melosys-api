@@ -11,7 +11,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
-import no.nav.melosys.domain.brev.storbritannia.AttestStorbritanniaBrevbestilling;
+import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
@@ -205,7 +205,7 @@ class TrygdeavtaleAttestMapperTest {
     void map_InnvilgetMedOmfattetFamilie_populererFelter() throws JsonProcessingException {
         mockHappyCase();
 
-        AttestStorbritannia attestStorbritannia = trygdeavtaleAttestMapper.map(new AttestStorbritanniaBrevbestilling.Builder()
+        AttestStorbritannia attestStorbritannia = trygdeavtaleAttestMapper.map(new DokgenBrevbestilling.Builder()
             .medBehandling(lagBehandling())
             .medPersonDokument(lagPersonDokument())
             .medVedtaksdato(Instant.parse("1970-10-10T00:00:00Z"))
@@ -278,7 +278,7 @@ class TrygdeavtaleAttestMapperTest {
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() ->
-                trygdeavtaleAttestMapper.map(new AttestStorbritanniaBrevbestilling.Builder()
+                trygdeavtaleAttestMapper.map(new DokgenBrevbestilling.Builder()
                     .medBehandling(lagBehandling())
                     .medPersonDokument(lagPersonDokument())
                     .medVedtaksdato(Instant.parse("1970-10-10T00:00:00Z"))
@@ -295,7 +295,7 @@ class TrygdeavtaleAttestMapperTest {
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() ->
-                trygdeavtaleAttestMapper.map(new AttestStorbritanniaBrevbestilling.Builder()
+                trygdeavtaleAttestMapper.map(new DokgenBrevbestilling.Builder()
                     .medBehandling(lagBehandling())
                     .medPersonDokument(lagPersonDokument())
                     .medVedtaksdato(Instant.parse("1970-10-10T00:00:00Z"))

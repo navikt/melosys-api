@@ -7,7 +7,6 @@ import java.util.Set;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.brev.*;
-import no.nav.melosys.domain.brev.storbritannia.AttestStorbritanniaBrevbestilling;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.integrasjon.dokgen.DokgenConsumer;
@@ -189,7 +188,6 @@ public class DokgenService {
                 .medFritekstTittel(brevbestillingRequest.getFritekstTittel())
                 .medFritekst(brevbestillingRequest.getFritekst())
                 .medKontaktopplysninger(brevbestillingRequest.isKontaktopplysninger());
-            case ATTEST_NO_UK_1 -> new AttestStorbritanniaBrevbestilling.Builder();
             default -> new DokgenBrevbestilling.Builder<>();
         };
     }

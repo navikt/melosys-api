@@ -12,7 +12,7 @@ import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
-import no.nav.melosys.domain.brev.storbritannia.AttestStorbritanniaBrevbestilling;
+import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
 import no.nav.melosys.domain.person.Persondata;
@@ -48,7 +48,7 @@ public class TrygdeavtaleAttestMapper {
     }
 
     @Transactional
-    public AttestStorbritannia map(AttestStorbritanniaBrevbestilling brevbestilling) {
+    public AttestStorbritannia map(DokgenBrevbestilling brevbestilling) {
         var behandlingId = brevbestilling.getBehandlingId();
         var behandling = brevbestilling.getBehandling();
         var persondokument = brevbestilling.getPersondokument();

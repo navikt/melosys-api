@@ -5,7 +5,7 @@ import java.time.Instant;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.ser.InstantSerializer;
-import no.nav.melosys.domain.brev.storbritannia.*;
+import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.integrasjon.dokgen.dto.DokgenDto;
 
 import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
@@ -62,9 +62,9 @@ public class AttestStorbritannia extends DokgenDto {
         private ArbeidsgiverNorge arbeidsgiverNorge;
         private Utsendelse utsendelse;
         private RepresentantUK representantUK;
-        private final AttestStorbritanniaBrevbestilling brevbestilling;
+        private final DokgenBrevbestilling brevbestilling;
 
-        public Builder(AttestStorbritanniaBrevbestilling brevbestilling) {
+        public Builder(DokgenBrevbestilling brevbestilling) {
             this.brevbestilling = brevbestilling;
         }
 
