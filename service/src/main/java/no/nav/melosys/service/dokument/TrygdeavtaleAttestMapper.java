@@ -85,13 +85,13 @@ public class TrygdeavtaleAttestMapper {
 
         return new Utsendelse.Builder()
             .artikkel((Lovvalgbestemmelser_trygdeavtale_uk) bestemmelse)
-            .oppholdsadresseUK(findGyldigAdresse(persondata, lovvalgsperiode))
+            .oppholdsadresseUK(finnGyldigAdresse(persondata, lovvalgsperiode))
             .startdato(toInstant(lovvalgsperiode.getFom()))
             .sluttdato(toInstant(lovvalgsperiode.getTom()))
             .build();
     }
 
-    static List<String> findGyldigAdresse(Persondata persondata, Lovvalgsperiode lovvalgsperiode) {
+    static List<String> finnGyldigAdresse(Persondata persondata, Lovvalgsperiode lovvalgsperiode) {
         var optionalPersonAdresse = Stream.of(
                 persondata.finnBostedsadresse(),
                 persondata.finnOppholdsadresse(),
