@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
@@ -219,6 +220,7 @@ class TrygdeavtaleAttestMapperTest {
             "navnBruker" : "Donald Duck",
             "fnr" : "05058892382"
           },
+          "dagensDato" : "Fjernet for test",
           "mottaker" : {
             "navn" : "Donald Duck",
             "adresselinjer" : [ "Andebygata 1", null, null, null ],
@@ -264,10 +266,10 @@ class TrygdeavtaleAttestMapperTest {
           "vedtaksdato" : "1970-10-10T00:00:00Z"
         }""";
 
-        String s = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(attestStorbritannia);
-        String resultat = s.replaceAll("\"dagensDato\" :.*\n", "");
+        String json = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(attestStorbritannia);
+        String resultat = json.replaceAll("(\"dagensDato\" :)(.*)", "$1 \"Fjernet for test\",");
 
-        assertThat(resultat).isEqualToIgnoringWhitespace(forvented);
+        assertThat(resultat).isEqualTo(forvented);
     }
 
     @Test
