@@ -9,6 +9,7 @@ import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadFtrl;
+import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadTrygdeavtale;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
@@ -97,6 +98,26 @@ class HentRegisteropplysningerTest {
 
         Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
         behandlingsgrunnlag.setBehandlingsgrunnlagdata(new SoeknadFtrl());
+        behandling.setBehandlingsgrunnlag(behandlingsgrunnlag);
+
+        Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setBehandling(behandling);
+
+        hentRegisteropplysninger.utfør(prosessinstans);
+
+        verify(registeropplysningerService).hentOgLagreOpplysninger(requestCaptor.capture());
+
+        assertThat(requestCaptor.getValue().getOpplysningstyper())
+            .containsOnly(SaksopplysningType.PERSOPL);
+    }
+
+    @Test
+    void utfør_sakstypeTrygdeavtale_henterKunPersonopplysninger() {
+        behandling.setTema(Behandlingstema.TRYGDEAVTALE_UK);
+        behandling.getFagsak().setType(Sakstyper.TRYGDEAVTALE);
+
+        Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
+        behandlingsgrunnlag.setBehandlingsgrunnlagdata(new SoeknadTrygdeavtale());
         behandling.setBehandlingsgrunnlag(behandlingsgrunnlag);
 
         Prosessinstans prosessinstans = new Prosessinstans();
