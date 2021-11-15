@@ -398,9 +398,30 @@ class DokgenMalMapperTest {
             .medForsendelseMottatt(Instant.now())
             .build();
 
-        DokgenDto actual = dokgenMalMapper.mapBehandling(brevbestilling);
-        assertThat(actual)
+        DokgenDto dokgenDto = dokgenMalMapper.mapBehandling(brevbestilling);
+        assertThat(dokgenDto)
             .isInstanceOf(AttestStorbritannia.class);
+
+        assertThat((AttestStorbritannia) dokgenDto)
+            .extracting(
+                dto -> dto.getArbeidstaker().navn(),
+                dto -> dto.getArbeidstaker().fnr(),
+                dto -> dto.getArbeidsgiverNorge().fullstendigAdresse(),
+                dto -> dto.getArbeidsgiverNorge().virksomhetsnavn(),
+                dto -> dto.getUtsendelse().artikkel(),
+                dto -> dto.getMedfolgendeFamiliemedlemmer().ektefelle().navn(),
+                dto -> dto.getMedfolgendeFamiliemedlemmer().barn(),
+                dto -> dto.getRepresentantUK().navn()
+            ).containsExactly(
+                "Nordmann, Ola",
+                "01010119901",
+                List.of("Nordmannsveg 200", "Norge"),
+                "Virksomhetsnavn",
+                Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1,
+                "Kone",
+                List.of(),
+                "Mrs. London"
+            );
     }
 
     @Test
