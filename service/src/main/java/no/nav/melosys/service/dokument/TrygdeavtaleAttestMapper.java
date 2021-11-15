@@ -119,7 +119,7 @@ public class TrygdeavtaleAttestMapper {
     private ArbeidsgiverNorge getArbeidsgiverNorge(Behandling behandling) {
         var avklartVirksomhets = avklarteVirksomheterService.hentNorskeArbeidsgivere(behandling);
         if (avklartVirksomhets.size() != 1) {
-            throw new FunksjonellException("avklartVirksomhets funnet er:" + avklartVirksomhets.size() + " må være 1 for trygdeatest");
+            throw new FunksjonellException("Fant " + avklartVirksomhets.size() + " avklarte virksomheter for behandling: " + behandling + ". Må være 1 for trygdeavtale");
         }
         AvklartVirksomhet norskeArbeidsgiver = avklartVirksomhets.get(0);
         return new ArbeidsgiverNorge(norskeArbeidsgiver.navn, norskeArbeidsgiver.adresse.toList());
