@@ -27,6 +27,7 @@ import no.nav.melosys.service.dokument.brev.SedPdfData;
 import no.nav.melosys.service.dokument.sed.bygger.SedDataBygger;
 import no.nav.melosys.service.dokument.sed.datagrunnlag.SedDataGrunnlag;
 import no.nav.melosys.service.dokument.sed.datagrunnlag.SedDataGrunnlagMedSoknad;
+import no.nav.melosys.service.dokument.sed.datagrunnlag.SedDataGrunnlagUtenSoknad;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -349,7 +350,7 @@ class EessiServiceTest {
         saksopplysning.setDokument(new SedDokument());
         behandling.setSaksopplysninger(Collections.singleton(saksopplysning));
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
-        when(dokumentdataGrunnlagFactory.av(any())).thenReturn(Mockito.mock(SedDataGrunnlagMedSoknad.class));
+        when(dokumentdataGrunnlagFactory.av(any(), any())).thenReturn(Mockito.mock(SedDataGrunnlagUtenSoknad.class));
         when(sedDataBygger.lagUtkast(any(SedDataGrunnlag.class), any(Behandlingsresultat.class), any(PeriodeType.class))).thenReturn(new SedDataDto());
         mockBehandlingsresultat();
 
@@ -357,7 +358,7 @@ class EessiServiceTest {
 
         verify(behandlingService).hentBehandling(BEHANDLING_ID);
         verify(sedDataBygger).lagUtkast(any(SedDataGrunnlag.class), any(), eq(PeriodeType.ANMODNINGSPERIODE));
-        verify(dokumentdataGrunnlagFactory).av(any());
+        verify(dokumentdataGrunnlagFactory).av(any(), any());
         verify(eessiConsumer).sendSedPåEksisterendeBuc(any(SedDataDto.class), any(), eq(SedType.A002));
     }
 
@@ -370,7 +371,7 @@ class EessiServiceTest {
         saksopplysning.setDokument(new SedDokument());
         behandling.setSaksopplysninger(Collections.singleton(saksopplysning));
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
-        when(dokumentdataGrunnlagFactory.av(any())).thenReturn(Mockito.mock(SedDataGrunnlagMedSoknad.class));
+        when(dokumentdataGrunnlagFactory.av(any(), any())).thenReturn(Mockito.mock(SedDataGrunnlagMedSoknad.class));
         when(sedDataBygger.lagUtkast(any(SedDataGrunnlag.class), any(Behandlingsresultat.class), any(PeriodeType.class))).thenReturn(new SedDataDto());
         mockBehandlingsresultat();
 
@@ -378,7 +379,7 @@ class EessiServiceTest {
 
         verify(behandlingService).hentBehandling(BEHANDLING_ID);
         verify(sedDataBygger).lagUtkast(any(SedDataGrunnlag.class), any(), eq(PeriodeType.LOVVALGSPERIODE));
-        verify(dokumentdataGrunnlagFactory).av(any());
+        verify(dokumentdataGrunnlagFactory).av(any(), any());
         verify(eessiConsumer).sendSedPåEksisterendeBuc(any(SedDataDto.class), any(), eq(SedType.A012));
     }
 
