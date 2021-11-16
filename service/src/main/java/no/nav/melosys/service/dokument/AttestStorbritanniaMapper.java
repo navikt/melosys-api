@@ -29,18 +29,18 @@ import org.springframework.stereotype.Component;
 @Component
 public class AttestStorbritanniaMapper {
 
-    private final AvklarteMedfolgendeFamilieService avklarteMedfolgendeFamilieService;
+    private final AvklarteMedfolgendeFamilieService avklarteMedfølgendeFamilieService;
     private final AvklarteVirksomheterService avklarteVirksomheterService;
     private final DokgenMapperDatahenter dokgenMapperDatahenter;
     private final PersondataFasade persondataFasade;
     private final LovvalgsperiodeService lovvalgsperiodeService;
 
-    public AttestStorbritanniaMapper(AvklarteMedfolgendeFamilieService avklarteMedfolgendeFamilieService,
+    public AttestStorbritanniaMapper(AvklarteMedfolgendeFamilieService avklarteMedfølgendeFamilieService,
                                      AvklarteVirksomheterService avklarteVirksomheterService,
                                      DokgenMapperDatahenter dokgenMapperDatahenter,
                                      PersondataFasade registerOppslagService,
                                      LovvalgsperiodeService lovvalgsperiodeService) {
-        this.avklarteMedfolgendeFamilieService = avklarteMedfolgendeFamilieService;
+        this.avklarteMedfølgendeFamilieService = avklarteMedfølgendeFamilieService;
         this.avklarteVirksomheterService = avklarteVirksomheterService;
         this.dokgenMapperDatahenter = dokgenMapperDatahenter;
         this.persondataFasade = registerOppslagService;
@@ -133,33 +133,32 @@ public class AttestStorbritanniaMapper {
     }
 
     private List<Person> mapBarn(long behandlingID) {
-        var avklarteMedfolgendeBarn = avklarteMedfolgendeFamilieService.hentAvklarteMedfølgendeBarn(behandlingID);
-        var barnOmfattetAvNorskTrygd = avklarteMedfolgendeBarn.barnOmfattetAvNorskTrygd;
+        var avklarteMedfølgendeBarn = avklarteMedfølgendeFamilieService.hentAvklarteMedfølgendeBarn(behandlingID);
+        var barnOmfattetAvNorskTrygd = avklarteMedfølgendeBarn.barnOmfattetAvNorskTrygd;
         if (barnOmfattetAvNorskTrygd.isEmpty()) {
             return List.of();
         }
-        var medfølgendeBarn = avklarteMedfolgendeFamilieService.hentMedfølgendeBarn(behandlingID);
+        var medfølgendeBarn = avklarteMedfølgendeFamilieService.hentMedfølgendeBarn(behandlingID);
         return barnOmfattetAvNorskTrygd.stream().map(omfattetFamilie -> tilPerson(medfølgendeBarn, omfattetFamilie.getUuid())).toList();
     }
 
     private Person mapEktefelle(long behandlingID) {
-        var avklarteMedfolgendeFamilie = avklarteMedfolgendeFamilieService.hentAvklartMedfølgendeEktefelle(behandlingID);
-        var familieOmfattetAvNorskTrygd = avklarteMedfolgendeFamilie.getFamilieOmfattetAvNorskTrygd();
-        if (familieOmfattetAvNorskTrygd.isEmpty()) {
+        var avklartMedfølgendeEktefelle = avklarteMedfølgendeFamilieService.hentAvklartMedfølgendeEktefelle(behandlingID);
+        var ektefelleOmfattetAvNorskTrygd = avklartMedfølgendeEktefelle.getFamilieOmfattetAvNorskTrygd();
+        if (ektefelleOmfattetAvNorskTrygd.isEmpty()) {
             return null;
         }
-        var omfattetFamilie = familieOmfattetAvNorskTrygd.iterator().next();
-        var medfolgendeEktefelle = avklarteMedfolgendeFamilieService.hentMedfølgendEktefelle(behandlingID);
-        String uuid = omfattetFamilie.getUuid();
-        return tilPerson(medfolgendeEktefelle, uuid);
+        var omfattetFamilie = ektefelleOmfattetAvNorskTrygd.iterator().next();
+        var medfølgendeEktefelle = avklarteMedfølgendeFamilieService.hentMedfølgendEktefelle(behandlingID);
+        return tilPerson(medfølgendeEktefelle, omfattetFamilie.getUuid());
     }
 
-    private Person tilPerson(Map<String, MedfolgendeFamilie> medfolgendeFamilieMap, String uuid) {
-        var medfolgendeFamilie = Optional.of(medfolgendeFamilieMap.get(uuid))
+    private Person tilPerson(Map<String, MedfolgendeFamilie> medfølgendeFamilieMap, String uuid) {
+        var medfølgendeFamilie = Optional.of(medfølgendeFamilieMap.get(uuid))
             .orElseThrow(() -> new FunksjonellException("Avklart medfølgende familie " + uuid + " finnes ikke i behandlingsgrunnlaget"));
-        var sammensattNavn = medfolgendeFamilie.getFnr() != null ? dokgenMapperDatahenter.hentSammensattNavn(medfolgendeFamilie.getFnr()) : medfolgendeFamilie.getNavn();
-        var instant = getFødselDato(medfolgendeFamilie.getFnr());
-        return new Person(sammensattNavn, instant, medfolgendeFamilie.getFnr(), null);
+        var sammensattNavn = medfølgendeFamilie.getFnr() != null ? dokgenMapperDatahenter.hentSammensattNavn(medfølgendeFamilie.getFnr()) : medfølgendeFamilie.getNavn();
+        var instant = getFødselDato(medfølgendeFamilie.getFnr());
+        return new Person(sammensattNavn, instant, medfølgendeFamilie.getFnr(), null);
     }
 
     private Instant getFødselDato(String fnr) {
