@@ -3,7 +3,7 @@ package no.nav.melosys.domain.behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.RepresentantIUtlandet;
 
 public class SoeknadTrygdeavtale extends Soeknad {
-    private RepresentantIUtlandet representantIUtlandet = new RepresentantIUtlandet();
+    private RepresentantIUtlandet representantIUtlandet;
 
     public RepresentantIUtlandet getRepresentantIUtlandet() {
         return representantIUtlandet;
