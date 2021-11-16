@@ -48,14 +48,15 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class AttestStorbritanniaMapperTest {
     public static final String UUID_EKTEFELLE = "uuidEktefelle";
-    public static final String UUID_BARN_1 = "uuidBarn1";
+    public static final String UUID_BARN = "uuidBarn1";
     public static final String EKTEFELLE_FNR = "09080723451";
     private static final String BARN1_FNR = "12131456789";
     public static final String ARBEIDSGIVER_NAVN = "Bang Hansen";
     public static final String SAKSNUMMER = "MEL-123";
     public static final String EKTEFELLE_NAVN = "Dolly Duck";
-    public static final String BARN1_NAVN = "Doffen Duck";
+    public static final String BARN_NAVN = "Doffen Duck";
     public static final String ORG_NR = "987654321";
+    public static final Instant VEDTAKS_DATO = Instant.parse("1970-10-10T00:00:00Z");
 
     @Mock
     private AvklarteVirksomheterService mockAvklarteVirksomheterService;
@@ -208,7 +209,7 @@ class AttestStorbritanniaMapperTest {
         AttestStorbritannia attestStorbritannia = attestStorbritanniaMapper.map(new DokgenBrevbestilling.Builder()
             .medBehandling(lagBehandling())
             .medPersonDokument(lagPersonDokument())
-            .medVedtaksdato(Instant.parse("1970-10-10T00:00:00Z"))
+            .medVedtaksdato(VEDTAKS_DATO)
             .build()
         );
 
@@ -229,7 +230,7 @@ class AttestStorbritanniaMapperTest {
                 attestStorbritanniaMapper.map(new DokgenBrevbestilling.Builder()
                     .medBehandling(lagBehandling())
                     .medPersonDokument(lagPersonDokument())
-                    .medVedtaksdato(Instant.parse("1970-10-10T00:00:00Z"))
+                    .medVedtaksdato(VEDTAKS_DATO)
                     .build()
             )
         ).withMessageContaining("Det kan bare være en lovvalgsperiode for trygdeavtale. Fant 2");
@@ -246,7 +247,7 @@ class AttestStorbritanniaMapperTest {
                 attestStorbritanniaMapper.map(new DokgenBrevbestilling.Builder()
                     .medBehandling(lagBehandling())
                     .medPersonDokument(lagPersonDokument())
-                    .medVedtaksdato(Instant.parse("1970-10-10T00:00:00Z"))
+                    .medVedtaksdato(VEDTAKS_DATO)
                     .build()
             )
         ).withMessageContaining("Det kan bare være en lovvalgsperiode for trygdeavtale. Fant 0");
@@ -267,7 +268,7 @@ class AttestStorbritanniaMapperTest {
             if (fnr.equals(EKTEFELLE_FNR)) {
                 navn = EKTEFELLE_NAVN;
             } else if (fnr.equals(BARN1_FNR)) {
-                navn = BARN1_NAVN;
+                navn = BARN_NAVN;
             }
             return navn;
         });
@@ -292,7 +293,7 @@ class AttestStorbritanniaMapperTest {
     }
 
     private AvklarteMedfolgendeBarn lagAvklartMedfølgendeBarn() {
-        return new AvklarteMedfolgendeBarn(Set.of(new OmfattetFamilie(UUID_BARN_1)), Set.of());
+        return new AvklarteMedfolgendeBarn(Set.of(new OmfattetFamilie(UUID_BARN)), Set.of());
     }
 
     private Map<String, MedfolgendeFamilie> lagMedfølgendeEktefelle() {
@@ -303,8 +304,8 @@ class AttestStorbritanniaMapperTest {
 
     private Map<String, MedfolgendeFamilie> lagMedfølgendeBarn() {
         MedfolgendeFamilie medfolgendeBarn1 = MedfolgendeFamilie.tilMedfolgendeFamilie(
-            UUID_BARN_1, BARN1_FNR, BARN1_NAVN, MedfolgendeFamilie.Relasjonsrolle.BARN);
-        return Map.of(UUID_BARN_1, medfolgendeBarn1);
+            UUID_BARN, BARN1_FNR, BARN_NAVN, MedfolgendeFamilie.Relasjonsrolle.BARN);
+        return Map.of(UUID_BARN, medfolgendeBarn1);
     }
 
     private static final String FORVENTEDE_FELTER_FOR_ATTEST_STORBRITANNIA_MAPPING = """
