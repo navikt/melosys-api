@@ -1,8 +1,11 @@
 package no.nav.melosys.service.dokument.sed;
 
+import java.util.Arrays;
+
 import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
+import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterSystemService;
@@ -46,6 +49,13 @@ public class SedDataGrunnlagFactory {
         } else {
             return new SedDataGrunnlagUtenSoknad(behandling, kodeverkService, hentPersondata(behandling));
         }
+    }
+
+    public SedDataGrunnlag av(Behandling behandling, SedType sedType) {
+        if(Arrays.asList(SedType.A002, SedType.A011).contains(sedType)){
+            return new SedDataGrunnlagUtenSoknad(behandling, kodeverkService, hentPersondata(behandling));
+        }
+        return av(behandling);
     }
 
     private Persondata hentPersondata(Behandling behandling) {

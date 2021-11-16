@@ -1,0 +1,75 @@
+{
+  "sedType": "A001",
+  "utenlandskIdent": [
+    {
+      "ident": "15225345345",
+      "landkode": "BG"
+    }
+  ],
+  "bostedsadresse": {
+    "poststed": "Testby",
+    "postnr": "Testpostkode",
+    "land": "BE",
+    "gateadresse": "Testgate Testbyggnavn",
+    "region": "Testregion",
+    "adressetype": "BOSTEDSADRESSE"
+  },
+  "arbeidsgivendeVirksomheter": [
+    {
+      "navn": "Testarbeidsgiver",
+      "adresse": {
+        "poststed": "Testarbeidsgiverby",
+        "postnr": "Testarbeidsgiverpostkode",
+        "land": "CY",
+        "gateadresse": "Testarbeidsgivergate Testarbeidsgiverbygning",
+        "region": "Testarbeidsgiverregion",
+        "adressetype": "ANNET"
+      },
+      "orgnr": "TestOrgnummer"
+    }
+  ],
+  "selvstendigeVirksomheter": [
+    {
+      "navn": "Testselvstendignavn",
+      "adresse": {
+        "poststed": "Testselvstendigby",
+        "postnr": "Testselvstendigpostkode",
+        "land": "BG",
+        "gateadresse": "Testselvstendiggate Testselvstendigbygning",
+        "region": "Testselvstendigregion",
+        "adressetype": "ANNET"
+      },
+      "orgnr": "Testselvstendignummer"
+    }
+  ],
+  "arbeidssteder": [
+    {
+      "navn": "Testarbeidsstednavn",
+      "adresse": {
+        "poststed": "Testarbeidsstedby",
+        "postnr": "Testarbeidsstedpostkode",
+        "land": "EE",
+        "gateadresse": "Testarbeidsstedgate Testarbeidsstedbygning",
+        "region": "Testarbeidsstedregion",
+        "adressetype": "ANNET"
+      },
+      "fysisk": false,
+      "hjemmebase": "Testarbeidsstedbase"
+    },
+    {
+      "navn": "Testarbeidsstednavn2",
+      "adresse": {
+        "poststed": "Testarbeidsstedby2",
+        "postnr": null,
+        "land": "CY",
+        "gateadresse": "Testarbeidsstedgate2 Testarbeidsstedbygning2",
+        "region": null,
+        "adressetype": "ANNET"
+      },
+      "fysisk": true,
+      "hjemmebase": "Testarbeidsstedbase2"
+    }
+  ],
+  "lovvalgsperioder": null,
+  "ytterligereInformasjon": "ytterligereinformasjon\nOver\nFlere\nlinjer"
+}
