@@ -20,6 +20,7 @@ public class SedGrunnlagTypeResolver extends TypeIdResolverBase {
     private static final Map<SedType, Class<? extends SedGrunnlagDto>> SED_GRUNNLAG_TYPER =
         Maps.immutableEnumMap(ImmutableMap.<SedType, Class<? extends SedGrunnlagDto>>builder()
             .put(SedType.A003, SedGrunnlagA003Dto.class)
+            .put(SedType.A001, SedGrunnlagDto.class)
             .build());
 
     private JavaType sedType;

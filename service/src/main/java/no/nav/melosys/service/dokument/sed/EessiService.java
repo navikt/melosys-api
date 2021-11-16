@@ -213,13 +213,14 @@ public class EessiService {
                                                  Function<Behandlingsresultat, SedType> sedTypeAvklarer, String ytterligereInformasjon) {
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
-        SedDataGrunnlag dataGrunnlag = dataGrunnlagFactory.av(behandling);
+
+        final var sedType = sedTypeAvklarer.apply(behandlingsresultat);
+        SedDataGrunnlag dataGrunnlag = dataGrunnlagFactory.av(behandling, sedType);
 
         SedDataDto sedDataDto = sedDataBygger.lagUtkast(dataGrunnlag, behandlingsresultat, periodeType);
         sedDataDto.setYtterligereInformasjon(ytterligereInformasjon);
         String rinaSaksnummer = behandling.hentSedDokument().getRinaSaksnummer();
 
-        final var sedType = sedTypeAvklarer.apply(behandlingsresultat);
         log.info("Forsøker å sende sed {} for behandling {}", sedType, behandlingID);
         eessiConsumer.sendSedPåEksisterendeBuc(sedDataDto, rinaSaksnummer, sedTypeAvklarer.apply(behandlingsresultat));
     }

@@ -27,7 +27,9 @@ public class SedGrunnlagMapper {
         sedGrunnlag.foretakUtland = tilForetakUtland(sedGrunnlagDto.getArbeidsgivendeVirksomheter(), sedGrunnlagDto.getSelvstendigeVirksomheter());
         sedGrunnlag.periode = tilPeriode(sedGrunnlagDto.getLovvalgsperioder());
         sedGrunnlag.ytterligereInformasjon = sedGrunnlagDto.getYtterligereInformasjon();
-        sedGrunnlag.soeknadsland.landkoder = sedGrunnlagDto.getLovvalgsperioder().stream().map(Lovvalgsperiode::getLovvalgsland).collect(Collectors.toList());
+        if(!sedGrunnlagDto.erA001()) {
+            sedGrunnlag.soeknadsland.landkoder = sedGrunnlagDto.getLovvalgsperioder().stream().map(Lovvalgsperiode::getLovvalgsland).collect(Collectors.toList());
+        }
 
         if (sedGrunnlagDto.erA003()) {
             SedGrunnlagA003Dto sedGrunnlagA003Dto = (SedGrunnlagA003Dto) sedGrunnlagDto;

@@ -23,6 +23,10 @@ public class SedGrunnlagDto {
         return SedType.A003.name().equalsIgnoreCase(getSedType()) && this instanceof SedGrunnlagA003Dto;
     }
 
+    public boolean erA001(){
+        return SedType.A001.name().equalsIgnoreCase(getSedType());
+    }
+
     public List<Ident> getUtenlandskIdent() {
         return utenlandskIdent;
     }
