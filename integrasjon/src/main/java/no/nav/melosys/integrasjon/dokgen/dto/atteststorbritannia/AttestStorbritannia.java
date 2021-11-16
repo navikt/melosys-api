@@ -5,7 +5,7 @@ import java.time.Instant;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.ser.InstantSerializer;
-import no.nav.melosys.domain.brev.storbritannia.*;
+import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.integrasjon.dokgen.dto.DokgenDto;
 
 import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
@@ -22,18 +22,79 @@ public class AttestStorbritannia extends DokgenDto {
     @JsonFormat(shape = STRING)
     private final Instant vedtaksdato;
 
-
-    public AttestStorbritannia(AttestStorbritanniaBrevbestilling brevbestilling) {
-        super(brevbestilling);
-        this.arbeidstaker = Arbeidstaker.av(brevbestilling.getArbeidstaker());
-        this.medfolgendeFamiliemedlemmer = MedfolgendeFamiliemedlemmer.av(brevbestilling.getMedfolgendeFamiliemedlemmer());
-        this.arbeidsgiverNorge = ArbeidsgiverNorge.av(brevbestilling.getArbeidsgiverNorge());
-        this.utsendelse = Utsendelse.av(brevbestilling.getUtsendelse());
-        this.representantUK = RepresentantUK.av(brevbestilling.getRepresentantUK());
-        this.vedtaksdato = brevbestilling.getVedtaksdato();
+    public Arbeidstaker getArbeidstaker() {
+        return arbeidstaker;
     }
 
-    public static AttestStorbritannia av(AttestStorbritanniaBrevbestilling brevbestilling) {
-        return new AttestStorbritannia(brevbestilling);
+    public MedfolgendeFamiliemedlemmer getMedfolgendeFamiliemedlemmer() {
+        return medfolgendeFamiliemedlemmer;
+    }
+
+    public ArbeidsgiverNorge getArbeidsgiverNorge() {
+        return arbeidsgiverNorge;
+    }
+
+    public Utsendelse getUtsendelse() {
+        return utsendelse;
+    }
+
+    public RepresentantUK getRepresentantUK() {
+        return representantUK;
+    }
+
+    public Instant getVedtaksdato() {
+        return vedtaksdato;
+    }
+
+    public AttestStorbritannia(Builder builder) {
+        super(builder.brevbestilling);
+        this.vedtaksdato = builder.brevbestilling.getVedtaksdato();
+        this.utsendelse = builder.utsendelse;
+        this.arbeidstaker = builder.arbeidstaker;
+        this.arbeidsgiverNorge = builder.arbeidsgiverNorge;
+        this.medfolgendeFamiliemedlemmer = builder.medfolgendeFamiliemedlemmer;
+        this.representantUK = builder.representantUK;
+    }
+
+    static public class Builder {
+        private Arbeidstaker arbeidstaker;
+        private MedfolgendeFamiliemedlemmer medfolgendeFamiliemedlemmer;
+        private ArbeidsgiverNorge arbeidsgiverNorge;
+        private Utsendelse utsendelse;
+        private RepresentantUK representantUK;
+        private final DokgenBrevbestilling brevbestilling;
+
+        public Builder(DokgenBrevbestilling brevbestilling) {
+            this.brevbestilling = brevbestilling;
+        }
+
+        public Builder arbeidstaker(Arbeidstaker arbeidstaker) {
+            this.arbeidstaker = arbeidstaker;
+            return this;
+        }
+
+        public Builder medfolgendeFamiliemedlemmer(MedfolgendeFamiliemedlemmer medfolgendeFamiliemedlemmer) {
+            this.medfolgendeFamiliemedlemmer = medfolgendeFamiliemedlemmer;
+            return this;
+        }
+
+        public Builder arbeidsgiverNorge(ArbeidsgiverNorge arbeidsgiverNorge) {
+            this.arbeidsgiverNorge = arbeidsgiverNorge;
+            return this;
+        }
+
+        public Builder utsendelse(Utsendelse utsendelse) {
+            this.utsendelse = utsendelse;
+            return this;
+        }
+
+        public Builder representantUK(RepresentantUK representantUK) {
+            this.representantUK = representantUK;
+            return this;
+        }
+
+        public AttestStorbritannia build() {
+            return new AttestStorbritannia(this);
+        }
     }
 }

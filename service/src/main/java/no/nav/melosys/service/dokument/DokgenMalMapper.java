@@ -20,14 +20,17 @@ public class DokgenMalMapper {
 
     private final DokgenMapperDatahenter dokgenMapperDatahenter;
     private final InnvilgelseFtrlMapper innvilgelseFtrlMapper;
+    private final AttestStorbritanniaMapper attestStorbritanniaMapper;
     private final InnvilgelseUKMapper innvilgelseUKMapper;
 
     @Autowired
     public DokgenMalMapper(DokgenMapperDatahenter dokgenMapperDatahenter,
                            InnvilgelseFtrlMapper innvilgelseFtrlMapper,
+                           AttestStorbritanniaMapper attestStorbritanniaMapper,
                            InnvilgelseUKMapper innvilgelseUKMapper) {
         this.dokgenMapperDatahenter = dokgenMapperDatahenter;
         this.innvilgelseFtrlMapper = innvilgelseFtrlMapper;
+        this.attestStorbritanniaMapper = attestStorbritanniaMapper;
         this.innvilgelseUKMapper = innvilgelseUKMapper;
     }
 
@@ -71,6 +74,8 @@ public class DokgenMalMapper {
                     .build()
             );
             case INNVILGELSE_FOLKETRYGDLOVEN_2_8 -> innvilgelseFtrlMapper.map((InnvilgelseBrevbestilling) brevbestilling);
+            case ATTEST_NO_UK_1 -> attestStorbritanniaMapper.map(brevbestilling.toBuilder()
+                .medVedtaksdato(dokgenMapperDatahenter.hentVedtaksdato(brevbestilling.getBehandling().getId())).build());
             case INNVILGELSE_UK -> innvilgelseUKMapper.map((InnvilgelseBrevbestilling) brevbestilling);
             case GENERELT_FRITEKSTBREV_BRUKER -> Fritekstbrev.av(((FritekstbrevBrevbestilling) brevbestilling).toBuilder()
                     .medNavnFullmektig(dokgenMapperDatahenter.hentFullmektigNavn(brevbestilling.getBehandling().getFagsak(), Representerer.BRUKER)).build(),
