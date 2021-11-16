@@ -212,63 +212,10 @@ class AttestStorbritanniaMapperTest {
             .build()
         );
 
-        String forvented = """
-        {
-          "saksopplysninger" : {
-            "saksnummer" : "MEL-123",
-            "navnBruker" : "Donald Duck",
-            "fnr" : "05058892382"
-          },
-          "dagensDato" : "Fjernet for test",
-          "mottaker" : {
-            "navn" : "Donald Duck",
-            "adresselinjer" : [ "Andebygata 1", null, null, null ],
-            "postnr" : "9999",
-            "poststed" : "Andeby",
-            "land" : null,
-            "type" : "BRUKER"
-          },
-          "arbeidstaker" : {
-            "navn" : "Donald Duck",
-            "foedselsdato" : null,
-            "fnr" : "05058892382",
-            "bostedadresse" : [ "Andebygata 1", null, null, null ]
-          },
-          "medfolgendeFamiliemedlemmer" : {
-            "ektefelle" : {
-              "navn" : "Dolly Duck",
-              "foedselsdato" : "1969-12-31T23:00:00Z",
-              "fnr" : "09080723451",
-              "dnr" : null
-            },
-            "barn" : [ {
-              "navn" : "Doffen Duck",
-              "foedselsdato" : "1969-12-31T23:00:00Z",
-              "fnr" : "12131456789",
-              "dnr" : null
-            } ]
-          },
-          "arbeidsgiverNorge" : {
-            "virksomhetsnavn" : "Bang Hansen",
-            "fullstendigAdresse" : [ "Strukturert Gate 12B", "4321", "Poststed", "Bulgaria" ]
-          },
-          "utsendelse" : {
-            "artikkel" : "UK_ART6_1",
-            "oppholdsadresseUK" : [ ],
-            "startdato" : "2019-12-31T23:00:00Z",
-            "sluttdato" : "2020-12-31T23:00:00Z"
-          },
-          "representantUK" : {
-            "navn" : "Mrs. London",
-            "adresse" : [ ]
-          },
-          "vedtaksdato" : "1970-10-10T00:00:00Z"
-        }""";
-
         String json = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(attestStorbritannia);
         String resultat = json.replaceAll("(\"dagensDato\" :)(.*)", "$1 \"Fjernet for test\",");
 
-        assertThat(resultat).isEqualTo(forvented);
+        assertThat(resultat).isEqualTo(FORVENTEDE_FELTER_FOR_ATTEST_STORBRITANNIA_MAPPING);
     }
 
     @Test
@@ -360,5 +307,56 @@ class AttestStorbritanniaMapperTest {
         return Map.of(UUID_BARN_1, medfolgendeBarn1);
     }
 
-
+    private static final String FORVENTEDE_FELTER_FOR_ATTEST_STORBRITANNIA_MAPPING = """
+        {
+          "saksopplysninger" : {
+            "saksnummer" : "MEL-123",
+            "navnBruker" : "Donald Duck",
+            "fnr" : "05058892382"
+          },
+          "dagensDato" : "Fjernet for test",
+          "mottaker" : {
+            "navn" : "Donald Duck",
+            "adresselinjer" : [ "Andebygata 1", null, null, null ],
+            "postnr" : "9999",
+            "poststed" : "Andeby",
+            "land" : null,
+            "type" : "BRUKER"
+          },
+          "arbeidstaker" : {
+            "navn" : "Donald Duck",
+            "foedselsdato" : null,
+            "fnr" : "05058892382",
+            "bostedadresse" : [ "Andebygata 1", null, null, null ]
+          },
+          "medfolgendeFamiliemedlemmer" : {
+            "ektefelle" : {
+              "navn" : "Dolly Duck",
+              "foedselsdato" : "1969-12-31T23:00:00Z",
+              "fnr" : "09080723451",
+              "dnr" : null
+            },
+            "barn" : [ {
+              "navn" : "Doffen Duck",
+              "foedselsdato" : "1969-12-31T23:00:00Z",
+              "fnr" : "12131456789",
+              "dnr" : null
+            } ]
+          },
+          "arbeidsgiverNorge" : {
+            "virksomhetsnavn" : "Bang Hansen",
+            "fullstendigAdresse" : [ "Strukturert Gate 12B", "4321", "Poststed", "Bulgaria" ]
+          },
+          "utsendelse" : {
+            "artikkel" : "UK_ART6_1",
+            "oppholdsadresseUK" : [ ],
+            "startdato" : "2019-12-31T23:00:00Z",
+            "sluttdato" : "2020-12-31T23:00:00Z"
+          },
+          "representantUK" : {
+            "navn" : "Mrs. London",
+            "adresse" : [ ]
+          },
+          "vedtaksdato" : "1970-10-10T00:00:00Z"
+        }""";
 }
