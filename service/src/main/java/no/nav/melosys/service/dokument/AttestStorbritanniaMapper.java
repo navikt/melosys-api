@@ -59,7 +59,7 @@ public class AttestStorbritanniaMapper {
                 mapEktefelle(behandlingId),
                 mapBarn(behandlingId)
             ))
-            .arbeidsgiverNorge(getArbeidsgiverNorge(behandling))
+            .arbeidsgiverNorge(lagArbeidsgiverNorge(behandling))
             .arbeidstaker(new Arbeidstaker(
                 persondokument.getSammensattNavn(),
                 toInstant(persondokument.getFødselsdato()),
@@ -69,11 +69,11 @@ public class AttestStorbritanniaMapper {
                 "Mrs. London", // TODO: Det blir fylt inn via sidemeny. Hent data når det er tilgjenglig.
                 List.of())
             )
-            .utsendelse(getUtsendelse(lovvalgsperioder, persondokument))
+            .utsendelse(lagUtsendelse(lovvalgsperioder, persondokument))
             .build();
     }
 
-    private Utsendelse getUtsendelse(Collection<Lovvalgsperiode> lovvalgsperioder, Persondata persondata) {
+    private Utsendelse lagUtsendelse(Collection<Lovvalgsperiode> lovvalgsperioder, Persondata persondata) {
         if (lovvalgsperioder.size() != 1) {
             throw new FunksjonellException("Det kan bare være en lovvalgsperiode for trygdeavtale. Fant "
                 + lovvalgsperioder.size()
@@ -116,13 +116,13 @@ public class AttestStorbritanniaMapper {
         return !lovvalgsperiode.getFom().isAfter(personAdresse.gyldigTilOgMed());
     }
 
-    private ArbeidsgiverNorge getArbeidsgiverNorge(Behandling behandling) {
-        var avklartVirksomhets = avklarteVirksomheterService.hentNorskeArbeidsgivere(behandling);
-        if (avklartVirksomhets.size() != 1) {
-            throw new FunksjonellException("Fant " + avklartVirksomhets.size() + " avklarte virksomheter for behandling: " + behandling + ". Må være 1 for trygdeavtale");
+    private ArbeidsgiverNorge lagArbeidsgiverNorge(Behandling behandling) {
+        var avklarteVirksomheter = avklarteVirksomheterService.hentNorskeArbeidsgivere(behandling);
+        if (avklarteVirksomheter.size() != 1) {
+            throw new FunksjonellException("Fant " + avklarteVirksomheter.size() + " avklarte virksomheter for behandling: " + behandling + ". Må være 1 for trygdeavtale");
         }
-        AvklartVirksomhet norskeArbeidsgiver = avklartVirksomhets.get(0);
-        return new ArbeidsgiverNorge(norskeArbeidsgiver.navn, norskeArbeidsgiver.adresse.toList());
+        AvklartVirksomhet norskArbeidsgiver = avklarteVirksomheter.get(0);
+        return new ArbeidsgiverNorge(norskArbeidsgiver.navn, norskArbeidsgiver.adresse.toList());
     }
 
     private static Instant toInstant(LocalDate localDate) {
