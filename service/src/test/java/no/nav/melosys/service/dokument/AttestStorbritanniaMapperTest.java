@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.Set;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
@@ -47,7 +46,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class TrygdeavtaleAttestMapperTest {
+class AttestStorbritanniaMapperTest {
     public static final String UUID_EKTEFELLE = "uuidEktefelle";
     public static final String UUID_BARN_1 = "uuidBarn1";
     public static final String EKTEFELLE_FNR = "09080723451";
@@ -76,11 +75,11 @@ class TrygdeavtaleAttestMapperTest {
     @Mock
     Persondata mockPersondata;
 
-    TrygdeavtaleAttestMapper trygdeavtaleAttestMapper;
+    AttestStorbritanniaMapper attestStorbritanniaMapper;
 
     @BeforeEach
     void setup() {
-        trygdeavtaleAttestMapper = new TrygdeavtaleAttestMapper(
+        attestStorbritanniaMapper = new AttestStorbritanniaMapper(
             mockAvklarteMedfolgendeFamilieService,
             mockAvklarteVirksomheterService,
             mockDokgenMapperDatahenter,
@@ -148,7 +147,7 @@ class TrygdeavtaleAttestMapperTest {
             null,
             false
         );
-        assertThat(TrygdeavtaleAttestMapper.sjekkOmAdresseGyldighetErInnenforLovalgsperiode(personAdresse, lovvalgsperiode))
+        assertThat(AttestStorbritanniaMapper.sjekkOmAdresseGyldighetErInnenforLovalgsperiode(personAdresse, lovvalgsperiode))
             .withFailMessage(grunn)
             .isTrue();
     }
@@ -197,7 +196,7 @@ class TrygdeavtaleAttestMapperTest {
             null,
             false
         );
-        assertThat(TrygdeavtaleAttestMapper.sjekkOmAdresseGyldighetErInnenforLovalgsperiode(personAdresse, lovvalgsperiode))
+        assertThat(AttestStorbritanniaMapper.sjekkOmAdresseGyldighetErInnenforLovalgsperiode(personAdresse, lovvalgsperiode))
             .withFailMessage(grunn)
             .isFalse();
     }
@@ -206,7 +205,7 @@ class TrygdeavtaleAttestMapperTest {
     void map_InnvilgetMedOmfattetFamilie_populererFelter() throws JsonProcessingException {
         mockHappyCase();
 
-        AttestStorbritannia attestStorbritannia = trygdeavtaleAttestMapper.map(new DokgenBrevbestilling.Builder()
+        AttestStorbritannia attestStorbritannia = attestStorbritanniaMapper.map(new DokgenBrevbestilling.Builder()
             .medBehandling(lagBehandling())
             .medPersonDokument(lagPersonDokument())
             .medVedtaksdato(Instant.parse("1970-10-10T00:00:00Z"))
@@ -280,7 +279,7 @@ class TrygdeavtaleAttestMapperTest {
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() ->
-                trygdeavtaleAttestMapper.map(new DokgenBrevbestilling.Builder()
+                attestStorbritanniaMapper.map(new DokgenBrevbestilling.Builder()
                     .medBehandling(lagBehandling())
                     .medPersonDokument(lagPersonDokument())
                     .medVedtaksdato(Instant.parse("1970-10-10T00:00:00Z"))
@@ -297,7 +296,7 @@ class TrygdeavtaleAttestMapperTest {
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() ->
-                trygdeavtaleAttestMapper.map(new DokgenBrevbestilling.Builder()
+                attestStorbritanniaMapper.map(new DokgenBrevbestilling.Builder()
                     .medBehandling(lagBehandling())
                     .medPersonDokument(lagPersonDokument())
                     .medVedtaksdato(Instant.parse("1970-10-10T00:00:00Z"))

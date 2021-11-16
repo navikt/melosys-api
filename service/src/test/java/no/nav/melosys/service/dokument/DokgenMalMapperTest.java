@@ -59,7 +59,7 @@ class DokgenMalMapperTest {
     private DokgenMapperDatahenter mockDokgenMapperDatahenter;
 
     @Mock
-    private TrygdeavtaleAttestMapper mockTrygdeavtaleAttestMapper;
+    private AttestStorbritanniaMapper mockAttestStorbritanniaMapper;
 
     private final FakeUnleash fakeUnleash = new FakeUnleash();
 
@@ -67,7 +67,7 @@ class DokgenMalMapperTest {
 
     @BeforeEach
     void init() {
-        dokgenMalMapper = new DokgenMalMapper(mockDokgenMapperDatahenter, mockInnvilgelseFtrlMapper, mockTrygdeavtaleAttestMapper, mockInnvilgelseUKMapper);
+        dokgenMalMapper = new DokgenMalMapper(mockDokgenMapperDatahenter, mockInnvilgelseFtrlMapper, mockAttestStorbritanniaMapper, mockInnvilgelseUKMapper);
     }
 
     @Test
@@ -388,7 +388,7 @@ class DokgenMalMapperTest {
 
         when(mockDokgenMapperDatahenter.hentPoststed(any())).thenReturn("Andeby");
         when(mockDokgenMapperDatahenter.hentPersondata(any())).thenReturn(lagPersonDokument());
-        when(mockTrygdeavtaleAttestMapper.map(any())).thenReturn(lagAttestStorbritannia());
+        when(mockAttestStorbritanniaMapper.map(any())).thenReturn(lagAttestStorbritannia());
 
         DokgenBrevbestilling brevbestilling = new DokgenBrevbestilling.Builder()
             .medProduserbartdokument(ATTEST_NO_UK_1)
