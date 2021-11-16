@@ -13,15 +13,20 @@ import no.nav.melosys.service.dokument.sed.datagrunnlag.SedDataGrunnlagMedSoknad
 import no.nav.melosys.service.dokument.sed.datagrunnlag.SedDataGrunnlagUtenSoknad;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.persondata.PersondataFasade;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
+
+import java.util.Arrays;
 
 import static no.nav.melosys.domain.person.Informasjonsbehov.MED_FAMILIERELASJONER;
 
 @Component
 @Primary
 public class SedDataGrunnlagFactory {
+    private static final Logger log = LoggerFactory.getLogger(SedDataGrunnlagFactory.class);
     private final AvklartefaktaService avklartefaktaService;
     private final AvklarteVirksomheterService avklarteVirksomheterService;
     private final KodeverkService kodeverkService;
@@ -50,7 +55,8 @@ public class SedDataGrunnlagFactory {
     }
 
     public SedDataGrunnlag av(Behandling behandling, SedType sedType) {
-        if(SedType.A002.equals(sedType)){
+        if(Arrays.asList(SedType.A002, SedType.A011).contains(sedType)){
+            log.info("Oppretter SedDataGrunnlagUtenSoknad for BehID={} og SedType={}", behandling.getId(), sedType);
             return new SedDataGrunnlagUtenSoknad(behandling, kodeverkService, hentPersondata(behandling));
         }
         return av(behandling);
