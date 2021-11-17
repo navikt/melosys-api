@@ -46,7 +46,7 @@ class BehandlingsgrunnlagListenerTest {
     }
 
     @Test
-    void lastBehandlingsgrunnlag_erSøknadFtrl_forventTypeSoeknadTrygdeavtale() throws URISyntaxException, IOException {
+    void lastBehandlingsgrunnlag_erSøknadTrygdeavtale_forventTypeSoeknadTrygdeavtale() throws URISyntaxException, IOException {
         URI søknadURI = (getClass().getClassLoader().getResource("soeknad/soeknad.json")).toURI();
         String json = new String(Files.readAllBytes(Paths.get(søknadURI)));
 
