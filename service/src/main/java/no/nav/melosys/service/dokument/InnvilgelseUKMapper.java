@@ -2,35 +2,135 @@ package no.nav.melosys.service.dokument;
 
 import javax.transaction.Transactional;
 
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
+import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_barn_begrunnelser_ftrl;
+import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_ektefelle_samboer_begrunnelser_ftrl;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
-import no.nav.melosys.integrasjon.dokgen.dto.felles.Mottaker;
-import no.nav.melosys.integrasjon.dokgen.dto.innvilgelsestorbritannia.Familie;
-import no.nav.melosys.integrasjon.dokgen.dto.innvilgelsestorbritannia.InnvilgelseUK;
-import no.nav.melosys.integrasjon.dokgen.dto.innvilgelsestorbritannia.Soknad;
+import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.integrasjon.dokgen.dto.innvilgelsestorbritannia.*;
+import no.nav.melosys.service.LovvalgsperiodeService;
+import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import org.springframework.stereotype.Component;
+
+import java.time.LocalDate;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @Component
 public class InnvilgelseUKMapper {
 
-    // Nok lurt å se på InnvilgelseFtrlMapper. Burde være lignende
-    public InnvilgelseUKMapper() {
+    private final AvklarteMedfolgendeFamilieService avklarteMedfølgendeFamilieService;
+    private final DokgenMapperDatahenter dokgenMapperDatahenter;
+    private final LovvalgsperiodeService lovvalgsperiodeService;
+    private final PersondataFasade persondataFasade;
+
+    public InnvilgelseUKMapper(AvklarteMedfolgendeFamilieService avklarteMedfølgendeFamilieService,
+                               DokgenMapperDatahenter dokgenMapperDatahenter,
+                               LovvalgsperiodeService lovvalgsperiodeService, PersondataFasade persondataFasade) {
+        this.avklarteMedfølgendeFamilieService = avklarteMedfølgendeFamilieService;
+        this.dokgenMapperDatahenter = dokgenMapperDatahenter;
+        this.lovvalgsperiodeService = lovvalgsperiodeService;
+        this.persondataFasade = persondataFasade;
     }
 
     @Transactional
     public InnvilgelseUK map(InnvilgelseBrevbestilling brevbestilling) {
-        // TODO: map brevbestilling
-        Mottaker mottaker = null;
-        Lovvalgbestemmelser_trygdeavtale_uk artikkel = null;
-        Soknad soknad = null;
-        Familie familie = null;
+        Behandling behandling = brevbestilling.getBehandling();
+        BehandlingsgrunnlagData behandlingsgrunnlagdata = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
+        var lovvalgsperioder = lovvalgsperiodeService.hentLovvalgsperioder(behandling.getId());
+
         boolean virksomhetArbeidsgiverSkalHaKopi = false;
         return new InnvilgelseUK.Builder(brevbestilling)
-            .mottaker(mottaker)
-            .artikkel(artikkel)
-            .soknad(soknad)
-            .familie(familie)
+            .artikkel(getLovvalgbestemmelse(lovvalgsperioder))
+            .soknad(lagSøknad(behandlingsgrunnlagdata.periode))
+            .familie(lagFamile(behandling.getId()))
             .virksomhetArbeidsgiverSkalHaKopi(virksomhetArbeidsgiverSkalHaKopi)
             .build();
+    }
+
+    private Familie lagFamile(long behandlingID) {
+        Barn barn = new Barn(
+            "navn",
+            false,
+            Medfolgende_barn_begrunnelser_ftrl.MANGLER_OPPLYSNINGER,
+            "fnr",
+            "dnr",
+            LocalDate.of(1970, 1, 1)
+        );
+
+        return new Familie(
+            false, // TODO
+            finnEktefelle(behandlingID),
+            finnBarn(behandlingID));
+    }
+
+    private Ektefelle finnEktefelle(long behandlingID) {
+        var avklartMedfølgendeEktefelle = avklarteMedfølgendeFamilieService.hentAvklartMedfølgendeEktefelle(behandlingID);
+        var ektefelleOmfattetAvNorskTrygd = avklartMedfølgendeEktefelle.getFamilieOmfattetAvNorskTrygd();
+        if (ektefelleOmfattetAvNorskTrygd.isEmpty()) {
+            return null;
+        }
+        var omfattetFamilie = ektefelleOmfattetAvNorskTrygd.iterator().next();
+        var medfølgendeEktefelle = avklarteMedfølgendeFamilieService.hentMedfølgendEktefelle(behandlingID);
+        return tilEktefelle(medfølgendeEktefelle, omfattetFamilie.getUuid());
+    }
+
+    private Ektefelle tilEktefelle(Map<String, MedfolgendeFamilie> medfølgendeFamilieMap, String uuid) {
+        var medfølgendeFamilie = Optional.of(medfølgendeFamilieMap.get(uuid))
+            .orElseThrow(() -> new FunksjonellException("Avklart medfølgende familie " + uuid + " finnes ikke i behandlingsgrunnlaget"));
+        var sammensattNavn = medfølgendeFamilie.getFnr() != null ? dokgenMapperDatahenter.hentSammensattNavn(medfølgendeFamilie.getFnr()) : medfølgendeFamilie.getNavn();
+        return new Ektefelle(
+            sammensattNavn,
+            false, // TODO
+            Medfolgende_ektefelle_samboer_begrunnelser_ftrl.SAMBOER_UTEN_FELLES_BARN, // TODO
+            medfølgendeFamilie.getFnr(),
+            null,
+            getFødselDato(medfølgendeFamilie.getFnr()));
+    }
+
+    private List<Barn> finnBarn(long behandlingID) {
+        var avklarteMedfølgendeBarn = avklarteMedfølgendeFamilieService.hentAvklarteMedfølgendeBarn(behandlingID);
+        var barnOmfattetAvNorskTrygd = avklarteMedfølgendeBarn.barnOmfattetAvNorskTrygd;
+        if (barnOmfattetAvNorskTrygd.isEmpty()) {
+            return List.of();
+        }
+        var medfølgendeBarn = avklarteMedfølgendeFamilieService.hentMedfølgendeBarn(behandlingID);
+        return barnOmfattetAvNorskTrygd.stream().map(omfattetFamilie -> tilBarn(medfølgendeBarn, omfattetFamilie.getUuid())).toList();
+    }
+
+    private Barn tilBarn(Map<String, MedfolgendeFamilie> medfølgendeBarn, String uuid) {
+        return null;
+    }
+
+    private LocalDate getFødselDato(String fnr) {
+        var persondata = persondataFasade.hentPerson(fnr);
+        return persondata.getFødselsdato();
+    }
+
+    private Lovvalgbestemmelser_trygdeavtale_uk getLovvalgbestemmelse(Collection<Lovvalgsperiode> lovvalgsperioder) {
+        if (lovvalgsperioder.size() != 1) {
+            throw new FunksjonellException("Det kan bare være en lovvalgsperiode for trygdeavtale. Fant "
+                + lovvalgsperioder.size()
+            );
+        }
+        var lovvalgsperiode = lovvalgsperioder.iterator().next();
+        return (Lovvalgbestemmelser_trygdeavtale_uk) lovvalgsperiode.getBestemmelse();
+    }
+
+    private Soknad lagSøknad(Periode periode) {
+        return new Soknad(
+            LocalDate.now(),
+            periode.getFom(),
+            periode.getTom(),
+            "virksomhets navn" // TODO
+        );
     }
 }

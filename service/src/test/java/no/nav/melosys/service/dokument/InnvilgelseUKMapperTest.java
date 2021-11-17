@@ -1,0 +1,130 @@
+package no.nav.melosys.service.dokument;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
+import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
+import no.nav.melosys.domain.kodeverk.Trygdedekninger;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
+import no.nav.melosys.domain.person.Persondata;
+import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeBarn;
+import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie;
+import no.nav.melosys.domain.person.familie.OmfattetFamilie;
+import no.nav.melosys.integrasjon.dokgen.dto.innvilgelsestorbritannia.InnvilgelseUK;
+import no.nav.melosys.service.LovvalgsperiodeService;
+import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
+import no.nav.melosys.service.persondata.PersondataFasade;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.time.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.INNVILGELSE_UK;
+import static no.nav.melosys.service.dokument.DokgenTestData.*;
+import static no.nav.melosys.service.dokument.DokgenTestData.lagKontaktOpplysning;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
+
+@ExtendWith(MockitoExtension.class)
+class InnvilgelseUKMapperTest {
+    public static final String UUID_EKTEFELLE = "uuidEktefelle";
+    public static final String UUID_BARN = "uuidBarn1";
+    public static final String EKTEFELLE_FNR = "09080723451";
+    private static final String BARN1_FNR = "12131456789";
+    public static final String ARBEIDSGIVER_NAVN = "Bang Hansen";
+    public static final String SAKSNUMMER = "MEL-123";
+    public static final String EKTEFELLE_NAVN = "Dolly Duck";
+    public static final String BARN_NAVN = "Doffen Duck";
+    public static final String ORG_NR = "987654321";
+    public static final Instant VEDTAKS_DATO = Instant.parse("1970-10-10T00:00:00Z");
+
+    @Mock
+    private AvklarteMedfolgendeFamilieService mockAvklarteMedfolgendeFamilieService;
+
+    @Mock
+    private DokgenMapperDatahenter mockDokgenMapperDatahenter;
+
+    @Mock
+    private LovvalgsperiodeService mockLovvalgsperiodeService;
+
+    @Mock
+    PersondataFasade mockPersondataFasade;
+
+    @Mock
+    Persondata mockPersondata;
+
+    private InnvilgelseUKMapper innvilgelseUKMapper;
+
+    @BeforeEach
+    void setup() {
+        innvilgelseUKMapper = new InnvilgelseUKMapper(mockAvklarteMedfolgendeFamilieService,
+            mockDokgenMapperDatahenter,
+            mockLovvalgsperiodeService,
+            mockPersondataFasade);
+    }
+
+    @Test
+    void test() throws JsonProcessingException {
+        when(mockLovvalgsperiodeService.hentLovvalgsperioder(anyLong())).thenReturn(List.of(lagLovvalgsperiode()));
+
+        when(mockAvklarteMedfolgendeFamilieService.hentAvklartMedfølgendeEktefelle(anyLong())).thenReturn(lagAvklartMedfølgendeEktefelle());
+        when(mockAvklarteMedfolgendeFamilieService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(lagAvklartMedfølgendeBarn());
+        when(mockAvklarteMedfolgendeFamilieService.hentMedfølgendEktefelle(anyLong())).thenReturn(lagMedfølgendeEktefelle());
+        when(mockAvklarteMedfolgendeFamilieService.hentMedfølgendeBarn(anyLong())).thenReturn(lagMedfølgendeBarn());
+        when(mockPersondataFasade.hentPerson(anyString())).thenReturn(mockPersondata);
+
+        InnvilgelseBrevbestilling brevbestilling = new InnvilgelseBrevbestilling.Builder()
+            .medProduserbartdokument(INNVILGELSE_UK)
+            .medPersonDokument(lagPersonDokument())
+            .medBehandling(lagBehandling(lagFagsak(true)))
+            .medOrg(lagOrg())
+            .medKontaktopplysning(lagKontaktOpplysning())
+            .medForsendelseMottatt(Instant.now())
+            .medInnledningFritekst("innledningFritekst")
+            .medBegrunnelseFritekst("begrunnelse")
+            .build();
+
+        InnvilgelseUK innvilgelseUK = innvilgelseUKMapper.map(brevbestilling);
+        String json = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(innvilgelseUK);
+        System.out.println(json);
+    }
+
+    private static Lovvalgsperiode lagLovvalgsperiode() {
+        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
+        lovvalgsperiode.setFom(LocalDate.of(2020, 1, 1));
+        lovvalgsperiode.setTom(LocalDate.of(2021, 1, 1));
+        lovvalgsperiode.setDekning(Trygdedekninger.FULL_DEKNING_FTRL);
+        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1);
+        return lovvalgsperiode;
+    }
+
+    private AvklarteMedfolgendeFamilie lagAvklartMedfølgendeEktefelle() {
+        OmfattetFamilie ektefelle = new OmfattetFamilie(UUID_EKTEFELLE);
+        return new AvklarteMedfolgendeFamilie(Set.of(ektefelle), Set.of());
+    }
+
+    private AvklarteMedfolgendeBarn lagAvklartMedfølgendeBarn() {
+        return new AvklarteMedfolgendeBarn(Set.of(new OmfattetFamilie(UUID_BARN)), Set.of());
+    }
+
+    private Map<String, MedfolgendeFamilie> lagMedfølgendeEktefelle() {
+        MedfolgendeFamilie ektefelle = MedfolgendeFamilie.tilMedfolgendeFamilie(
+            UUID_EKTEFELLE, EKTEFELLE_FNR, EKTEFELLE_NAVN, MedfolgendeFamilie.Relasjonsrolle.EKTEFELLE_SAMBOER);
+        return Map.of(UUID_EKTEFELLE, ektefelle);
+    }
+
+    private Map<String, MedfolgendeFamilie> lagMedfølgendeBarn() {
+        MedfolgendeFamilie medfolgendeBarn1 = MedfolgendeFamilie.tilMedfolgendeFamilie(
+            UUID_BARN, BARN1_FNR, BARN_NAVN, MedfolgendeFamilie.Relasjonsrolle.BARN);
+        return Map.of(UUID_BARN, medfolgendeBarn1);
+    }
+
+}
