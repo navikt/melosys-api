@@ -19,7 +19,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static no.nav.melosys.domain.kodeverk.Behandlingsgrunnlagtyper.SØKNAD_FOLKETRYGDEN;
+import static no.nav.melosys.domain.kodeverk.Behandlingsgrunnlagtyper.*;
 
 @Service
 public class BehandlingsgrunnlagService {
@@ -65,9 +65,15 @@ public class BehandlingsgrunnlagService {
             eksternReferanseID);
     }
 
-    public void opprettSøknadOmMedlemskapIFolketrygden(long behandlingID,
-                                                       SoeknadFtrl soeknad) {
+    public void opprettSøknadFolketrygden(long behandlingID,
+                                          SoeknadFtrl soeknad) {
         opprettBehandlingsgrunnlag(behandlingID, soeknad, SØKNAD_FOLKETRYGDEN,
+            VERSJON_SOEKNAD_GRUNNLAG);
+    }
+
+    public void opprettSøknadTrygdeavtale(long behandlingID,
+                                          SoeknadTrygdeavtale soeknad) {
+        opprettBehandlingsgrunnlag(behandlingID, soeknad, SØKNAD_TRYGDEAVTALE,
             VERSJON_SOEKNAD_GRUNNLAG);
     }
 

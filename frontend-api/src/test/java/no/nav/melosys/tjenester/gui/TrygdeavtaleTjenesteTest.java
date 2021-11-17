@@ -2,7 +2,7 @@ package no.nav.melosys.tjenester.gui;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
-import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadFtrl;
+import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadTrygdeavtale;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
@@ -173,7 +173,7 @@ class TrygdeavtaleTjenesteTest {
 
     private static Behandlingsgrunnlag lagBehandlingsgrunnlag() {
         Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
-        SoeknadFtrl behandlingsgrunnlagdata = new SoeknadFtrl();
+        SoeknadTrygdeavtale behandlingsgrunnlagdata = new SoeknadTrygdeavtale();
         behandlingsgrunnlagdata.soeknadsland.landkoder.add("GB");
         behandlingsgrunnlagdata.periode = new Periode(LocalDate.of(2020, 1, 1), LocalDate.of(2021, 1, 1));
         behandlingsgrunnlag.setBehandlingsgrunnlagdata(behandlingsgrunnlagdata);

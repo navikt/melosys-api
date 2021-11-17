@@ -33,6 +33,11 @@
     "erHjemmekontor": true,
     "erFastArbeidssted": false
   },
+  "representantIUtlandet": {
+    "representantNavn": "Sauefabrikken",
+    "adresselinjer": ["Adresseveien 123", "1243 Brandenburger"],
+    "representantLand": "GB"
+},
   "foretakUtland": [
     {
       "uuid": "2c5ea4c0-4067-11e9-8bad-9b1deb4d3b7d",
