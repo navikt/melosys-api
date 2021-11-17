@@ -1,11 +1,14 @@
 package no.nav.melosys.service.sak;
 
 import no.finn.unleash.Unleash;
+import no.nav.melosys.domain.arkiv.Journalpost;
+import no.nav.melosys.domain.arkiv.Journalposttype;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.service.journalforing.dto.PeriodeDto;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
@@ -20,11 +23,14 @@ import static no.nav.melosys.service.sak.SakstypeBehandlingstemaKobling.erGyldig
 
 @Service
 public class OpprettNySakFraOppgave {
+    private final JoarkFasade joarkFasade;
     private final OppgaveService oppgaveService;
     private final ProsessinstansService prosessinstansService;
     private final Unleash unleash;
 
-    public OpprettNySakFraOppgave(OppgaveService oppgaveService, @Lazy ProsessinstansService prosessinstansService, Unleash unleash) {
+    public OpprettNySakFraOppgave(JoarkFasade joarkFasade, OppgaveService oppgaveService, @Lazy ProsessinstansService prosessinstansService,
+                                  Unleash unleash) {
+        this.joarkFasade = joarkFasade;
         this.oppgaveService = oppgaveService;
         this.prosessinstansService = prosessinstansService;
         this.unleash = unleash;
@@ -34,6 +40,7 @@ public class OpprettNySakFraOppgave {
     public void bestillNySakOgBehandling(OpprettSakDto opprettSakDto) {
         validerOpprettSakDto(opprettSakDto);
         final Oppgave oppgave = validerOppgave(opprettSakDto.getOppgaveID());
+        validerJournalpost(joarkFasade.hentJournalpost(oppgave.getJournalpostId()));
         prosessinstansService.opprettProsessinstansNySak(
             oppgave.getJournalpostId(),
             opprettSakDto,
@@ -102,5 +109,11 @@ public class OpprettNySakFraOppgave {
         return oppgavetype == Oppgavetyper.BEH_SAK_MK
             || oppgavetype == Oppgavetyper.BEH_SAK
             || oppgavetype == Oppgavetyper.BEH_SED;
+    }
+
+    private void validerJournalpost(Journalpost journalpost) {
+        if (journalpost.getJournalposttype() == Journalposttype.UT) {
+            throw new FunksjonellException("Ny sak kan ikke opprettes fra utgående journalposter siden brev refererer til mottaksdato.");
+        }
     }
 }

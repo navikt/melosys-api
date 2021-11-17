@@ -5,12 +5,15 @@ import java.util.Collections;
 import java.util.List;
 
 import no.finn.unleash.FakeUnleash;
+import no.nav.melosys.domain.arkiv.Journalpost;
+import no.nav.melosys.domain.arkiv.Journalposttype;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.service.felles.dto.SoeknadslandDto;
 import no.nav.melosys.service.journalforing.dto.PeriodeDto;
 import no.nav.melosys.service.oppgave.OppgaveService;
@@ -30,6 +33,8 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class OpprettNySakFraOppgaveTest {
     @Mock
+    private JoarkFasade joarkFasade;
+    @Mock
     private OppgaveService oppgaveService;
     @Mock
     private ProsessinstansService prosessinstansService;
@@ -48,7 +53,7 @@ class OpprettNySakFraOppgaveTest {
 
     @BeforeEach
     public void setUp() {
-        opprettNySakFraOppgave = new OpprettNySakFraOppgave(oppgaveService, prosessinstansService, unleash);
+        opprettNySakFraOppgave = new OpprettNySakFraOppgave(joarkFasade, oppgaveService, prosessinstansService, unleash);
         unleash.enableAll();
     }
 
@@ -59,6 +64,7 @@ class OpprettNySakFraOppgaveTest {
         opprettSakDto.setBehandlingstema(Behandlingstema.ØVRIGE_SED_MED);
         Oppgave oppgave = new Oppgave.Builder().setOppgavetype(Oppgavetyper.BEH_SAK_MK).setJournalpostId("1234").build();
         when(oppgaveService.hentOppgaveMedOppgaveID(opprettSakDto.getOppgaveID())).thenReturn(oppgave);
+        when(joarkFasade.hentJournalpost("1234")).thenReturn(lagJournalpost(Journalposttype.INN));
         opprettNySakFraOppgave.bestillNySakOgBehandling(opprettSakDto);
         verify(prosessinstansService).opprettProsessinstansNySak(oppgave.getJournalpostId(), opprettSakDto, Behandlingstyper.SED);
     }
@@ -96,6 +102,25 @@ class OpprettNySakFraOppgaveTest {
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> opprettNySakFraOppgave.bestillNySakOgBehandling(opprettSakDto))
             .withMessageContaining("mangler journalpost");
+    }
+
+    @Test
+    void bestillNySakOgBehandling_journalpostUtgående_feiler() {
+        OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
+        opprettSakDto.setSakstype(Sakstyper.EU_EOS);
+        opprettSakDto.setBehandlingstema(Behandlingstema.ØVRIGE_SED_MED);
+        Oppgave oppgave = new Oppgave.Builder().setOppgavetype(Oppgavetyper.BEH_SAK_MK).setJournalpostId("jpID").build();
+        when(oppgaveService.hentOppgaveMedOppgaveID(opprettSakDto.getOppgaveID())).thenReturn(oppgave);
+        when(joarkFasade.hentJournalpost("jpID")).thenReturn(lagJournalpost(Journalposttype.UT));
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> opprettNySakFraOppgave.bestillNySakOgBehandling(opprettSakDto))
+            .withMessageContaining("utgående journalposter");
+    }
+
+    private Journalpost lagJournalpost(Journalposttype journalposttype) {
+        final Journalpost journalpost = new Journalpost("jpID");
+        journalpost.setJournalposttype(journalposttype);
+        return journalpost;
     }
 
     @Test
