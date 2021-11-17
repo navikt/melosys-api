@@ -2,8 +2,14 @@ package no.nav.melosys.service.dokument;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
+import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.Soeknadsland;
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
@@ -81,10 +87,16 @@ class InnvilgelseUKMapperTest {
         when(mockAvklarteMedfolgendeFamilieService.hentMedfølgendeBarn(anyLong())).thenReturn(lagMedfølgendeBarn());
         when(mockPersondataFasade.hentPerson(anyString())).thenReturn(mockPersondata);
 
+        Behandling behandling = lagBehandling(lagFagsak(true));
+        behandling.getBehandlingsgrunnlag().setMottaksdato(LocalDate.of(2019,10,1));
+        behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().periode = new Periode(
+            LocalDate.of(2020,1,1),
+            LocalDate.of(2021,1,1)
+        );
         InnvilgelseBrevbestilling brevbestilling = new InnvilgelseBrevbestilling.Builder()
             .medProduserbartdokument(INNVILGELSE_UK)
             .medPersonDokument(lagPersonDokument())
-            .medBehandling(lagBehandling(lagFagsak(true)))
+            .medBehandling(behandling)
             .medOrg(lagOrg())
             .medKontaktopplysning(lagKontaktOpplysning())
             .medForsendelseMottatt(Instant.now())

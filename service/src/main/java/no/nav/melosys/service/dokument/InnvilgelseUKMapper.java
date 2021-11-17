@@ -4,11 +4,11 @@ import javax.transaction.Transactional;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
-import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_barn_begrunnelser_ftrl;
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_ektefelle_samboer_begrunnelser_ftrl;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
 import no.nav.melosys.exception.FunksjonellException;
@@ -44,28 +44,20 @@ public class InnvilgelseUKMapper {
     @Transactional
     public InnvilgelseUK map(InnvilgelseBrevbestilling brevbestilling) {
         Behandling behandling = brevbestilling.getBehandling();
-        BehandlingsgrunnlagData behandlingsgrunnlagdata = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
+        Behandlingsgrunnlag behandlingsgrunnlag = behandling.getBehandlingsgrunnlag();
+        BehandlingsgrunnlagData behandlingsgrunnlagdata = behandlingsgrunnlag.getBehandlingsgrunnlagdata();
         var lovvalgsperioder = lovvalgsperiodeService.hentLovvalgsperioder(behandling.getId());
 
         boolean virksomhetArbeidsgiverSkalHaKopi = false;
         return new InnvilgelseUK.Builder(brevbestilling)
             .artikkel(getLovvalgbestemmelse(lovvalgsperioder))
-            .soknad(lagSøknad(behandlingsgrunnlagdata.periode))
+            .soknad(lagSøknad(behandlingsgrunnlagdata.periode, behandlingsgrunnlag.getMottaksdato()))
             .familie(lagFamile(behandling.getId()))
             .virksomhetArbeidsgiverSkalHaKopi(virksomhetArbeidsgiverSkalHaKopi)
             .build();
     }
 
     private Familie lagFamile(long behandlingID) {
-        Barn barn = new Barn(
-            "navn",
-            false,
-            Medfolgende_barn_begrunnelser_ftrl.MANGLER_OPPLYSNINGER,
-            "fnr",
-            "dnr",
-            LocalDate.of(1970, 1, 1)
-        );
-
         return new Familie(
             false, // TODO
             finnEktefelle(behandlingID),
@@ -125,9 +117,11 @@ public class InnvilgelseUKMapper {
         return (Lovvalgbestemmelser_trygdeavtale_uk) lovvalgsperiode.getBestemmelse();
     }
 
-    private Soknad lagSøknad(Periode periode) {
+    private Soknad lagSøknad(Periode periode, LocalDate mottaksdato) {
         return new Soknad(
-            LocalDate.now(),
+            // Er det riktig å bruke mottaksdato?
+            // Brukes slik Vi viser til søknaden din om medlemskap i folketrygden som vi fikk [soknadsdato].
+            mottaksdato,
             periode.getFom(),
             periode.getTom(),
             "virksomhets navn" // TODO
