@@ -16,10 +16,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.persondata.PersondataFasade;
-import no.nav.melosys.service.sak.FagsakService;
-import no.nav.melosys.service.sak.HenleggFagsakService;
-import no.nav.melosys.service.sak.OpprettSakDto;
-import no.nav.melosys.service.sak.VideresendSoknadService;
+import no.nav.melosys.service.sak.*;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.utpeking.UtpekingService;
 import no.nav.melosys.tjenester.gui.dto.*;
@@ -49,6 +46,7 @@ public class FagsakTjeneste {
     private static final String UKJENT_SAMMENSATT_NAVN = "UKJENT";
 
     private final FagsakService fagsakService;
+    private final OpprettNySakFraOppgave opprettNySakFraOppgave;
     private final Aksesskontroll aksesskontroll;
     private final BehandlingsgrunnlagService behandlingsgrunnlagService;
     private final HenleggFagsakService henleggFagsakService;
@@ -58,18 +56,16 @@ public class FagsakTjeneste {
     private final VideresendSoknadService videresendSoknadService;
 
     @Autowired
-    public FagsakTjeneste(FagsakService fagsakService,
-                          Aksesskontroll aksesskontroll,
-                          BehandlingsgrunnlagService behandlingsgrunnlagService,
+    public FagsakTjeneste(FagsakService fagsakService, Aksesskontroll aksesskontroll, BehandlingsgrunnlagService behandlingsgrunnlagService,
                           HenleggFagsakService henleggFagsakService,
-                          PersondataFasade persondataFasade,
-                          SaksopplysningerService saksopplysningerService,
-                          UtpekingService utpekingService,
+                          OpprettNySakFraOppgave opprettNySakFraOppgave, PersondataFasade persondataFasade,
+                          SaksopplysningerService saksopplysningerService, UtpekingService utpekingService,
                           VideresendSoknadService videresendSoknadService) {
         this.fagsakService = fagsakService;
         this.aksesskontroll = aksesskontroll;
         this.behandlingsgrunnlagService = behandlingsgrunnlagService;
         this.henleggFagsakService = henleggFagsakService;
+        this.opprettNySakFraOppgave = opprettNySakFraOppgave;
         this.persondataFasade = persondataFasade;
         this.saksopplysningerService = saksopplysningerService;
         this.utpekingService = utpekingService;
@@ -93,7 +89,7 @@ public class FagsakTjeneste {
             throw new FunksjonellException("BrukerID trengs for å opprette en sak.");
         }
         aksesskontroll.autoriserFolkeregisterIdent(opprettSakDto.getBrukerID());
-        fagsakService.bestillNySakOgBehandling(opprettSakDto);
+        opprettNySakFraOppgave.bestillNySakOgBehandling(opprettSakDto);
         return ResponseEntity.ok().build();
     }
 

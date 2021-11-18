@@ -42,7 +42,6 @@ public class FagsakService {
     private final BehandlingService behandlingService;
     private final KontaktopplysningService kontaktopplysningService;
     private final OppgaveService oppgaveService;
-    private final OpprettNySakFraOppgave opprettNySakFraOppgave;
     private final PersondataFasade persondataFasade;
     private final BehandlingsresultatService behandlingsresultatService;
     private final MedlPeriodeService medlPeriodeService;
@@ -51,14 +50,12 @@ public class FagsakService {
 
     @Autowired
     public FagsakService(FagsakRepository fagsakRepository, BehandlingService behandlingService,
-                         KontaktopplysningService kontaktopplysningService, @Lazy OppgaveService oppgaveService,
-                         OpprettNySakFraOppgave opprettNySakFraOppgave, PersondataFasade persondataFasade, BehandlingsresultatService behandlingsresultatService,
-                         MedlPeriodeService medlPeriodeService) {
+                         KontaktopplysningService kontaktopplysningService, @Lazy OppgaveService oppgaveService, PersondataFasade persondataFasade,
+                         BehandlingsresultatService behandlingsresultatService, MedlPeriodeService medlPeriodeService) {
         this.fagsakRepository = fagsakRepository;
         this.behandlingService = behandlingService;
         this.kontaktopplysningService = kontaktopplysningService;
         this.oppgaveService = oppgaveService;
-        this.opprettNySakFraOppgave = opprettNySakFraOppgave;
         this.persondataFasade = persondataFasade;
         this.behandlingsresultatService = behandlingsresultatService;
         this.medlPeriodeService = medlPeriodeService;
@@ -93,11 +90,6 @@ public class FagsakService {
             sak.setSaksnummer(hentNesteSaksnummer());
         }
         fagsakRepository.save(sak);
-    }
-
-    @Transactional
-    public void bestillNySakOgBehandling(OpprettSakDto opprettSakDto) {
-        opprettNySakFraOppgave.bestillNySakOgBehandling(opprettSakDto);
     }
 
     // Sletter myndigheter som ikke ligger i oppgitt liste og legger til de som mangler.

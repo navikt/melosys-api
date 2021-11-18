@@ -60,8 +60,8 @@ class FagsakServiceTest {
 
     @BeforeEach
     public void setUp() {
-        fagsakService = new FagsakService(fagsakRepo, behandlingService, kontaktopplysningService, oppgaveService, opprettNySakFraOppgave,
-                                          persondataFasade, behandlingsresultatService, medlPeriodeService);
+        fagsakService = new FagsakService(fagsakRepo, behandlingService, kontaktopplysningService, oppgaveService, persondataFasade,
+                                          behandlingsresultatService, medlPeriodeService);
         unleash.enableAll();
     }
 
