@@ -2,35 +2,28 @@ package no.nav.melosys.service.sak;
 
 import java.time.Instant;
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;
-import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Oppgavetyper;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
-import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.journalforing.dto.PeriodeDto;
 import no.nav.melosys.service.medl.MedlPeriodeService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.persondata.PersondataFasade;
-import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,10 +31,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static no.nav.melosys.domain.Behandling.erBehandlingAvSedForespørsler;
-import static no.nav.melosys.domain.Behandling.erBehandlingAvSøknad;
 import static no.nav.melosys.metrics.MetrikkerNavn.SAKER_OPPRETTET;
-import static no.nav.melosys.service.sak.SakstypeBehandlingstemaKobling.erGyldigBehandlingstemaForSakstype;
 
 @Service
 public class FagsakService {
@@ -53,31 +43,22 @@ public class FagsakService {
     private final KontaktopplysningService kontaktopplysningService;
     private final OppgaveService oppgaveService;
     private final PersondataFasade persondataFasade;
-    private final ProsessinstansService prosessinstansService;
     private final BehandlingsresultatService behandlingsresultatService;
     private final MedlPeriodeService medlPeriodeService;
-    private final Unleash unleash;
 
     private final Counter sakerOpprettet = Metrics.counter(SAKER_OPPRETTET);
 
     @Autowired
-    public FagsakService(FagsakRepository fagsakRepository,
-                         BehandlingService behandlingService,
-                         KontaktopplysningService kontaktopplysningService,
-                         @Lazy OppgaveService oppgaveService,
-                         PersondataFasade persondataFasade,
-                         @Lazy ProsessinstansService prosessinstansService,
-                         BehandlingsresultatService behandlingsresultatService,
-                         MedlPeriodeService medlPeriodeService, Unleash unleash) {
+    public FagsakService(FagsakRepository fagsakRepository, BehandlingService behandlingService,
+                         KontaktopplysningService kontaktopplysningService, @Lazy OppgaveService oppgaveService, PersondataFasade persondataFasade,
+                         BehandlingsresultatService behandlingsresultatService, MedlPeriodeService medlPeriodeService) {
         this.fagsakRepository = fagsakRepository;
         this.behandlingService = behandlingService;
         this.kontaktopplysningService = kontaktopplysningService;
         this.oppgaveService = oppgaveService;
         this.persondataFasade = persondataFasade;
-        this.prosessinstansService = prosessinstansService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.medlPeriodeService = medlPeriodeService;
-        this.unleash = unleash;
     }
 
     public Fagsak hentFagsak(String saksnummer) {
@@ -111,77 +92,6 @@ public class FagsakService {
         fagsakRepository.save(sak);
     }
 
-    @Transactional
-    public void bestillNySakOgBehandling(OpprettSakDto opprettSakDto) {
-        validerOpprettSakDto(opprettSakDto);
-        final Oppgave oppgave = validerOppgave(opprettSakDto.getOppgaveID());
-        prosessinstansService.opprettProsessinstansNySak(
-            oppgave.getJournalpostId(),
-            opprettSakDto,
-            erBehandlingAvSøknad(opprettSakDto.getBehandlingstema()) ? Behandlingstyper.SOEKNAD : Behandlingstyper.SED
-        );
-    }
-
-    void validerOpprettSakDto(OpprettSakDto opprettSakDto) {
-        final var sakstype = opprettSakDto.getSakstype();
-        final var behandlingstema = opprettSakDto.getBehandlingstema();
-        if (behandlingstema == null) {
-            throw new FunksjonellException("Behandlingstema mangler for å opprette ny sak");
-        } else if (!erBehandlingAvSøknad(behandlingstema)
-            && !erBehandlingAvSedForespørsler(opprettSakDto.getBehandlingstema())) {
-            throw new FunksjonellException("Kan ikke opprette ny sak med behandlingstema " + opprettSakDto.getBehandlingstema());
-        } else if (!erGyldigBehandlingstemaForSakstype(sakstype, behandlingstema)) {
-            throw new FunksjonellException("Behandlingstema " + behandlingstema + " er ikke gyldig for sakstype " + sakstype);
-        } else if (behandlingstema == Behandlingstema.ARBEID_I_UTLANDET && !unleash.isEnabled("melosys.folketrygden.mvp")) {
-            throw new FunksjonellException("Kan ikke opprette ny sak med behandlingstema " + behandlingstema);
-        }
-
-        boolean feilet = false;
-        StringBuilder feilmeldingBuilder = new StringBuilder();
-
-        if (erBehandlingAvSøknad(opprettSakDto.getBehandlingstema())) {
-            final SøknadDto soknadDto = opprettSakDto.getSoknadDto();
-            if (soknadDto == null) {
-                throw new FunksjonellException("SoknadDto må ikke være null for å opprette en søknadbehandling.");
-            }
-            PeriodeDto periodeDto = soknadDto.getPeriode();
-            if (periodeDto.getFom() == null) {
-                feilet = true;
-                feilmeldingBuilder.append("søknadsperiodes fra og med dato, ");
-            }
-            if (!soknadDto.getLand().erGyldig()) {
-                feilet = true;
-                feilmeldingBuilder.append("land, ");
-            }
-            if (feilet) {
-                throw new FunksjonellException(feilmeldingBuilder.append("mangler for å opprette en søknadbehandling.").toString());
-            }
-            if (periodeDto.getTom() != null && periodeDto.getFom().isAfter(periodeDto.getTom())) {
-                throw new FunksjonellException("Fra og med dato kan ikke være etter til og med dato.");
-            }
-        }
-    }
-
-    private Oppgave validerOppgave(String oppgaveID) {
-        if (StringUtils.isEmpty(oppgaveID)) {
-            throw new FunksjonellException("OppgaveID mangler.");
-        }
-        final Oppgave oppgave = oppgaveService.hentOppgaveMedOppgaveID(oppgaveID);
-        if (!nySakKanOpprettesFraOppgavetype(oppgave.getOppgavetype())) {
-            throw new FunksjonellException("Ny sak kan ikke opprettes på bakgrunn av oppgave med type: " + oppgave.getOppgavetype().getBeskrivelse());
-        }
-        if (StringUtils.isEmpty(oppgave.getJournalpostId())) {
-            throw new FunksjonellException("Ny sak kan ikke opprettes fordi oppgave " + oppgaveID + " mangler journalpost med søknad.");
-        }
-        return oppgave;
-    }
-
-    private static boolean nySakKanOpprettesFraOppgavetype(Oppgavetyper oppgavetype) {
-        return oppgavetype == Oppgavetyper.BEH_SAK_MK
-            || oppgavetype == Oppgavetyper.BEH_SAK
-            || oppgavetype == Oppgavetyper.BEH_SED;
-    }
-
     // Sletter myndigheter som ikke ligger i oppgitt liste og legger til de som mangler.
     // Oppdaterer IKKE de som allerede finnes i database
     @Transactional
@@ -191,40 +101,18 @@ public class FagsakService {
             && aktoer.getRolle() == Aktoersroller.MYNDIGHET);
 
         Collection<Aktoer> nyeMyndigheter = ider.stream()
-            .map(id -> lagAktør(fagsak, Aktoersroller.MYNDIGHET, id))
-            .collect(Collectors.toList());
+            .map(id -> lagMyndighetAktør(fagsak, id))
+            .toList();
 
         fagsak.getAktører().addAll(nyeMyndigheter);
         fagsakRepository.save(fagsak);
     }
 
-    @Transactional
-    public void leggTilAktør(String saksnummer, Aktoersroller aktørsrolle, String ID) {
-        Fagsak fagsak = hentFagsak(saksnummer);
-
-        Aktoer aktør = lagAktør(fagsak, aktørsrolle, ID);
-        fagsak.getAktører().add(aktør);
-        fagsakRepository.save(fagsak);
-    }
-
-    private static Aktoer lagAktør(Fagsak fagsak, Aktoersroller aktørsrolle, String ID) {
+    private static Aktoer lagMyndighetAktør(Fagsak fagsak, String ID) {
         Aktoer aktør = new Aktoer();
         aktør.setFagsak(fagsak);
-        aktør.setRolle(aktørsrolle);
-        switch (aktørsrolle) {
-            case BRUKER:
-                aktør.setAktørId(ID);
-                break;
-            case ARBEIDSGIVER:
-            case REPRESENTANT:
-                aktør.setOrgnr(ID);
-                break;
-            case MYNDIGHET:
-                aktør.setInstitusjonId(ID);
-                break;
-            default:
-                throw new IllegalStateException(aktørsrolle + " støttes ikke.");
-        }
+        aktør.setRolle(Aktoersroller.MYNDIGHET);
+        aktør.setInstitusjonId(ID);
         return aktør;
     }
 
@@ -400,9 +288,7 @@ public class FagsakService {
             .filter(Objects::nonNull)
             .findFirst();
 
-        if (medlPeriodeID.isPresent()) {
-            medlPeriodeService.avvisPeriode(medlPeriodeID.get());
-        }
+        medlPeriodeID.ifPresent(medlPeriodeService::avvisPeriode);
     }
 
 }
