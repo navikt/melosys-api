@@ -40,7 +40,7 @@
 
         <!-- Melosys -->
         <melosys.jsonschema.version>1.35.148</melosys.jsonschema.version>
-        <melosys.internt.kodeverk.version>5.15.96-a48895a</melosys.internt.kodeverk.version>
+        <melosys.internt.kodeverk.version>5.15.97</melosys.internt.kodeverk.version>
         <melosys.brev.version>1.2.99</melosys.brev.version>
 
         <!-- NAV -->
