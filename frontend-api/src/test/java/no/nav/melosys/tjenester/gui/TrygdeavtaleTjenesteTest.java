@@ -7,10 +7,14 @@ import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadTrygdeavtale;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_barn_begrunnelser_ftrl;
+import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_ektefelle_samboer_begrunnelser_ftrl;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
 import no.nav.melosys.service.TrygdeavtaleService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
+import no.nav.melosys.tjenester.gui.dto.trygdeavtale.TrygdeavtaleResultatDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,6 +22,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -39,10 +44,14 @@ class TrygdeavtaleTjenesteTest {
 
     @BeforeEach
     void init() {
-        trygdeavtaleTjeneste = new TrygdeavtaleTjeneste(
-            trygdeavtaleService,
-            behandlingService,
-            aksesskontroll);
+        trygdeavtaleTjeneste = new TrygdeavtaleTjeneste(trygdeavtaleService, behandlingService, aksesskontroll);
+    }
+
+    @Test
+    void overførResultat_medTrygdeavtaleResultatDto_overførerKorrekt() {
+        trygdeavtaleTjeneste.overførResultat(1L, lagTrygdeavtaleResultat());
+
+        verify(trygdeavtaleService).overførResultat(1L, lagTrygdeavtaleResultat().til());
     }
 
     @Test
@@ -101,5 +110,18 @@ class TrygdeavtaleTjenesteTest {
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         behandling.setBehandlingsgrunnlag(lagBehandlingsgrunnlag());
         return behandling;
+    }
+
+    private TrygdeavtaleResultatDto lagTrygdeavtaleResultat() {
+        return new TrygdeavtaleResultatDto.Builder()
+            .virksomheter(List.of("11111111111"))
+            .bestemmelse(Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1.getKode())
+            .addBarn("0bad5c70-8a3f-4fc7-9031-d3aebd6b68de",
+                false, Medfolgende_barn_begrunnelser_ftrl.OVER_18_AR.getKode(),
+                "begrunnelse barn")
+            .ektefelle("1212121212121-4fc7-9031-ab34332121ff",
+                false, Medfolgende_ektefelle_samboer_begrunnelser_ftrl.EGEN_INNTEKT.getKode(),
+                "begrunnelse samboer")
+            .build();
     }
 }
