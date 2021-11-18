@@ -3,7 +3,7 @@ package no.nav.melosys.tjenester.gui;
 import java.util.*;
 
 import io.swagger.annotations.Api;
-import no.nav.melosys.domain.InnvilgelsesResultat;
+import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadTrygdeavtale;
 import no.nav.melosys.domain.kodeverk.Landkoder;
