@@ -131,7 +131,7 @@ public class PersonopplysningerObjectFactory {
     }
 
     private static StrukturertAdresse lagStrukturertAdresse(String gatenavn) {
-        return new StrukturertAdresse(gatenavn, null, "0123", null, null, "NO");
+        return new StrukturertAdresse(gatenavn, null, "0123", "Poststed", null, "NO");
     }
 
     private static Navn lagNavn() {
