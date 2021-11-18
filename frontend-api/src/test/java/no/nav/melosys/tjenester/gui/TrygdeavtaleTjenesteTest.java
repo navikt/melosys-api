@@ -18,6 +18,8 @@ import no.nav.melosys.tjenester.gui.dto.trygdeavtale.TrygdeavtaleResultatDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -38,6 +40,9 @@ class TrygdeavtaleTjenesteTest {
     @Mock
     private Aksesskontroll aksesskontroll;
 
+    @Captor
+    private ArgumentCaptor<TrygdeavtaleService.TrygdeavtaleResultat> trygdeavtaleResultatArgumentCaptor;
+
     private TrygdeavtaleTjeneste trygdeavtaleTjeneste;
 
     private static final Behandling behandling = lagBehandling();
@@ -49,9 +54,22 @@ class TrygdeavtaleTjenesteTest {
 
     @Test
     void overførResultat_medTrygdeavtaleResultatDto_overførerKorrekt() {
-        trygdeavtaleTjeneste.overførResultat(1L, lagTrygdeavtaleResultat());
+        var trygdeavtaleResultatDto = lagTrygdeavtaleResultat();
+        trygdeavtaleTjeneste.overførResultat(1L, trygdeavtaleResultatDto);
 
-        verify(trygdeavtaleService).overførResultat(1L, lagTrygdeavtaleResultat().til());
+        verify(trygdeavtaleService).overførResultat(eq(1L), trygdeavtaleResultatArgumentCaptor.capture());
+        var trygdeavtaleResultat = trygdeavtaleResultatArgumentCaptor.getValue();
+
+        assertThat(trygdeavtaleResultat).isNotNull();
+        assertThat(trygdeavtaleResultat)
+            .extracting(
+                TrygdeavtaleService.TrygdeavtaleResultat::virksomheter,
+                TrygdeavtaleService.TrygdeavtaleResultat::bestemmelse)
+            .containsExactlyInAnyOrder(
+                trygdeavtaleResultatDto.virksomheter(),
+                trygdeavtaleResultatDto.bestemmelse()
+            );
+        // TODO: Sjekk familieobjektet
     }
 
     @Test

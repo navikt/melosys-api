@@ -1,6 +1,8 @@
 package no.nav.melosys.service;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
@@ -16,8 +18,6 @@ import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
 import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie;
-import no.nav.melosys.domain.person.familie.IkkeOmfattetFamilie;
-import no.nav.melosys.domain.person.familie.OmfattetFamilie;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
@@ -74,27 +74,13 @@ public class TrygdeavtaleService {
     }
 
     public void overførResultat(long behandlingId, TrygdeavtaleResultat trygdeavtaleResultat) {
-        AvklarteMedfolgendeFamilie lagreMedfolgendeFamilie = lagMedfolgendeFamilie(trygdeavtaleResultat);
-
-        avklarteMedfolgendeFamilieService.lagreMedfolgendeFamilieSomAvklartefakta(behandlingId, lagreMedfolgendeFamilie);
-
+        avklarteMedfolgendeFamilieService.lagreMedfolgendeFamilieSomAvklartefakta(behandlingId, trygdeavtaleResultat.familie);
         avklarteVirksomheterService.lagreVirksomheterSomAvklartefakta(trygdeavtaleResultat.virksomheter(), behandlingId);
 
-        var behandlingsgrunnlag = behandlingsgrunnlagService.hentBehandlingsgrunnlag(behandlingId);
-        SoeknadTrygdeavtale behandlingsgrunnlagdata = (SoeknadTrygdeavtale) behandlingsgrunnlag.getBehandlingsgrunnlagdata();
+        SoeknadTrygdeavtale behandlingsgrunnlagdata =
+            (SoeknadTrygdeavtale) behandlingsgrunnlagService.hentBehandlingsgrunnlag(behandlingId).getBehandlingsgrunnlagdata();
 
-        var lovvalgsperiode = lagLovvalgsperiode(trygdeavtaleResultat, behandlingsgrunnlagdata);
-        lovvalgsperiodeService.lagreLovvalgsperioder(behandlingId, List.of(lovvalgsperiode));
-    }
-
-    public AvklarteMedfolgendeFamilie lagMedfolgendeFamilie(TrygdeavtaleResultat trygdeavtaleResultat){
-        return new AvklarteMedfolgendeFamilie(
-            trygdeavtaleResultat.barn.stream()
-                .filter(Familie::omfattet)
-                .map(familieDto -> new OmfattetFamilie(familieDto.uuid())).collect(Collectors.toSet()),
-            trygdeavtaleResultat.barn.stream()
-                .filter(familie -> !familie.omfattet)
-                .map(familieDto -> new IkkeOmfattetFamilie(familieDto.uuid(), familieDto.begrunnelseKode(), familieDto.begrunnelseFritekst())).collect(Collectors.toSet()));
+        lovvalgsperiodeService.lagreLovvalgsperioder(behandlingId, List.of(lagLovvalgsperiode(trygdeavtaleResultat, behandlingsgrunnlagdata)));
     }
 
     private Lovvalgsperiode lagLovvalgsperiode(TrygdeavtaleResultat trygdeavtaleResultat, SoeknadTrygdeavtale behandlingsgrunnlagdata) {
@@ -118,14 +104,12 @@ public class TrygdeavtaleService {
     public record TrygdeavtaleResultat(
         List<String> virksomheter,
         String bestemmelse,
-        List<Familie> barn,
-        Familie ektefelle) {
+        AvklarteMedfolgendeFamilie familie) {
 
         public static class Builder {
             private List<String> virksomheter;
             private String bestemmelse;
-            private List<Familie> barn = new ArrayList<>();
-            private Familie ektefelle;
+            private AvklarteMedfolgendeFamilie familie;
 
             public Builder virksomheter(List<String> virksomheter) {
                 this.virksomheter = virksomheter;
@@ -137,18 +121,8 @@ public class TrygdeavtaleService {
                 return this;
             }
 
-            public Builder barn(List<Familie> barn) {
-                this.barn = barn;
-                return this;
-            }
-
-            public Builder addBarn(String uuid, boolean omfattet, String begrunnelseKode, String begrunnelseFritekst) {
-                this.barn.add(new Familie(uuid, omfattet, begrunnelseKode, begrunnelseFritekst));
-                return this;
-            }
-
-            public Builder ektefelle(String uuid, boolean omfattet, String begrunnelseKode, String begrunnelseFritekst) {
-                this.ektefelle = new Familie(uuid, omfattet, begrunnelseKode, begrunnelseFritekst);
+            public Builder familie(AvklarteMedfolgendeFamilie familie) {
+                this.familie = familie;
                 return this;
             }
 
@@ -156,19 +130,9 @@ public class TrygdeavtaleService {
                 return new TrygdeavtaleResultat(
                     virksomheter,
                     bestemmelse,
-                    barn,
-                    ektefelle
+                    familie
                 );
             }
-
         }
     }
-
-    public record Familie(
-        String uuid,
-        boolean omfattet,
-        String begrunnelseKode,
-        String begrunnelseFritekst) {
-    }
-
 }

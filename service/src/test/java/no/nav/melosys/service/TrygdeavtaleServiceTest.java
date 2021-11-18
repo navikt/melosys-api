@@ -21,6 +21,8 @@ import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_barn_begrunnelser_ftrl;
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_ektefelle_samboer_begrunnelser_ftrl;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
+import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie;
+import no.nav.melosys.domain.person.familie.IkkeOmfattetFamilie;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
@@ -40,7 +42,6 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class TrygdeavtaleServiceTest {
@@ -90,7 +91,7 @@ class TrygdeavtaleServiceTest {
         TrygdeavtaleService.TrygdeavtaleResultat trygdeavtaleResultatDto = lagTrygdeavtaleResultat();
 
         assertThatExceptionOfType(TekniskException.class)
-            .isThrownBy(() ->trygdeavtaleService.overførResultat(1L, trygdeavtaleResultatDto))
+            .isThrownBy(() -> trygdeavtaleService.overførResultat(1L, trygdeavtaleResultatDto))
             .withMessageContaining("Forventet ett land i behandlingsgrunnlagdata soeknadsland.landkoder, men fant: [GB, NO]");
     }
 
@@ -103,7 +104,7 @@ class TrygdeavtaleServiceTest {
         TrygdeavtaleService.TrygdeavtaleResultat trygdeavtaleResultatDto = lagTrygdeavtaleResultat();
 
         assertThatExceptionOfType(TekniskException.class)
-            .isThrownBy(() ->trygdeavtaleService.overførResultat(1L, trygdeavtaleResultatDto))
+            .isThrownBy(() -> trygdeavtaleService.overførResultat(1L, trygdeavtaleResultatDto))
             .withMessageContaining("Forventet ett land i behandlingsgrunnlagdata soeknadsland.landkoder, men fant: []");
     }
 
@@ -111,12 +112,16 @@ class TrygdeavtaleServiceTest {
         return new TrygdeavtaleService.TrygdeavtaleResultat.Builder()
             .virksomheter(List.of("11111111111"))
             .bestemmelse(Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1.getKode())
-            .addBarn("0bad5c70-8a3f-4fc7-9031-d3aebd6b68de",
-                false, Medfolgende_barn_begrunnelser_ftrl.OVER_18_AR.getKode(),
-                "begrunnelse barn")
-            .ektefelle("1212121212121-4fc7-9031-ab34332121ff",
-                false, Medfolgende_ektefelle_samboer_begrunnelser_ftrl.EGEN_INNTEKT.getKode(),
-                "begrunnelse samboer")
+            .familie(new AvklarteMedfolgendeFamilie(Set.of(), Set.of(
+                new IkkeOmfattetFamilie(
+                    "0bad5c70-8a3f-4fc7-9031-d3aebd6b68de",
+                    Medfolgende_barn_begrunnelser_ftrl.OVER_18_AR.getKode(),
+                    "begrunnelse barn"),
+                new IkkeOmfattetFamilie(
+                    "1212121212121-4fc7-9031-ab34332121ff",
+                    Medfolgende_ektefelle_samboer_begrunnelser_ftrl.EGEN_INNTEKT.getKode(),
+                    "begrunnelse samboer")
+            )))
             .build();
     }
 
@@ -221,8 +226,8 @@ class TrygdeavtaleServiceTest {
     void hentFamiliemedlemmer_barnOgEktefelle_fyltListe() {
         var behandling = lagBehandlingMedFamilie(List.of(
             tilMedfolgendeFamilie("uuid1", "01.01.01", "navn1", MedfolgendeFamilie.Relasjonsrolle.BARN),
-            tilMedfolgendeFamilie("uuid2", "01.01.01","navn2", MedfolgendeFamilie.Relasjonsrolle.BARN),
-            tilMedfolgendeFamilie("uuid3", "01.01.01","navn3", MedfolgendeFamilie.Relasjonsrolle.EKTEFELLE_SAMBOER)
+            tilMedfolgendeFamilie("uuid2", "01.01.01", "navn2", MedfolgendeFamilie.Relasjonsrolle.BARN),
+            tilMedfolgendeFamilie("uuid3", "01.01.01", "navn3", MedfolgendeFamilie.Relasjonsrolle.EKTEFELLE_SAMBOER)
         ));
 
         var response = trygdeavtaleService.hentFamiliemedlemmer(behandling);

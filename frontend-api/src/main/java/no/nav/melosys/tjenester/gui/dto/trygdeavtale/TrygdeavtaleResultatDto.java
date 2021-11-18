@@ -1,10 +1,15 @@
 package no.nav.melosys.tjenester.gui.dto.trygdeavtale;
 
+import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie;
+import no.nav.melosys.domain.person.familie.IkkeOmfattetFamilie;
+import no.nav.melosys.domain.person.familie.OmfattetFamilie;
 import no.nav.melosys.service.TrygdeavtaleService;
 import no.nav.melosys.tjenester.gui.dto.MedfolgendeFamilieDto;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public record TrygdeavtaleResultatDto(
     List<String> virksomheter,
@@ -14,13 +19,23 @@ public record TrygdeavtaleResultatDto(
 ) {
     public TrygdeavtaleService.TrygdeavtaleResultat til() {
         return new TrygdeavtaleService.TrygdeavtaleResultat.Builder()
-            .barn(this.barn.stream()
-                .map(b -> new TrygdeavtaleService.Familie(b.uuid(), b.omfattet(), b.begrunnelseKode(), b.begrunnelseFritekst()))
-                .toList())
-            .ektefelle(ektefelle.uuid(), ektefelle.omfattet(), ektefelle.begrunnelseKode(), ektefelle.begrunnelseFritekst())
+            .familie(lagAvklarteMedfolgendeFamilie())
             .bestemmelse(bestemmelse)
             .virksomheter(virksomheter)
             .build();
+    }
+
+    private AvklarteMedfolgendeFamilie lagAvklarteMedfolgendeFamilie() {
+        var omfattetFamilie = Stream.concat(barn.stream(), Stream.of(ektefelle))
+            .filter(MedfolgendeFamilieDto::omfattet)
+            .map(f -> new OmfattetFamilie(f.uuid()))
+            .collect(Collectors.toSet());
+        var ikkeOmfattetFamilie = Stream.concat(barn.stream(), Stream.of(ektefelle))
+            .filter(MedfolgendeFamilieDto::erIkkeOmfattet)
+            .map(f -> new IkkeOmfattetFamilie(f.uuid(), f.begrunnelseKode(), f.begrunnelseFritekst()))
+            .collect(Collectors.toSet());
+
+        return new AvklarteMedfolgendeFamilie(omfattetFamilie, ikkeOmfattetFamilie);
     }
 
     public static class Builder {
