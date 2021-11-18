@@ -10,7 +10,7 @@ import java.util.stream.Stream;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import no.nav.melosys.domain.InnvilgelsesResultat;
+import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
 import no.nav.melosys.domain.kodeverk.Kodeverk;
 import no.nav.melosys.domain.kodeverk.Saerligeavgiftsgrupper;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;

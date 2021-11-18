@@ -6,14 +6,14 @@ import java.util.Collections;
 import java.util.Set;
 
 import no.nav.melosys.domain.ErPeriode;
-import no.nav.melosys.domain.InnvilgelsesResultat;
+import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
 import no.nav.melosys.domain.Medlemskapsperiode;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import org.springframework.data.util.Pair;
 
-import static no.nav.melosys.domain.InnvilgelsesResultat.*;
+import static no.nav.melosys.domain.kodeverk.InnvilgelsesResultat.*;
 import static no.nav.melosys.domain.kodeverk.Medlemskapstyper.PLIKTIG;
 import static no.nav.melosys.domain.kodeverk.Trygdedekninger.*;
 
