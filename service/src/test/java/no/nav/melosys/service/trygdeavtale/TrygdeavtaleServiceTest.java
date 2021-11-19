@@ -24,6 +24,7 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_e
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
 import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie;
 import no.nav.melosys.domain.person.familie.IkkeOmfattetFamilie;
+import no.nav.melosys.domain.person.familie.OmfattetFamilie;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
@@ -33,6 +34,8 @@ import no.nav.melosys.service.registeropplysninger.RegisterOppslagService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -42,7 +45,6 @@ import static no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie.
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -67,6 +69,9 @@ class TrygdeavtaleServiceTest {
     @Mock
     private LovvalgsperiodeService lovvalgsperiodeService;
 
+    @Captor
+    private ArgumentCaptor<AvklarteMedfolgendeFamilie> avklarteMedfolgendeFamilieArgumentCaptor;
+
     private TrygdeavtaleService trygdeavtaleService;
 
     @BeforeEach
@@ -83,9 +88,22 @@ class TrygdeavtaleServiceTest {
         trygdeavtaleService.overførResultat(1L, trygdeavtaleResultat);
 
         verify(behandlingsgrunnlagService, never()).oppdaterBehandlingsgrunnlag(any());
-        verify(avklarteMedfolgendeFamilieService).lagreMedfolgendeFamilieSomAvklartefakta(eq(1L), any());
+        verify(avklarteMedfolgendeFamilieService).lagreMedfolgendeFamilieSomAvklartefakta(eq(1L), avklarteMedfolgendeFamilieArgumentCaptor.capture());
         verify(avklarteVirksomheterService).lagreVirksomheterSomAvklartefakta(1L, List.of(ORGNR_1));
         verify(lovvalgsperiodeService).lagreLovvalgsperioder(1L, expectedLovvalgsperioder());
+
+        assertThat(avklarteMedfolgendeFamilieArgumentCaptor.getValue().getFamilieIkkeOmfattetAvNorskTrygd())
+            .flatExtracting(
+                IkkeOmfattetFamilie::getUuid,
+                IkkeOmfattetFamilie::getBegrunnelse,
+                IkkeOmfattetFamilie::getBegrunnelseFritekst)
+            .containsExactlyInAnyOrder(
+                UUID_BARN, Medfolgende_barn_begrunnelser_ftrl.OVER_18_AR.getKode(), BEGRUNNELSE_BARN,
+                UUID_EKTEFELLE, Medfolgende_ektefelle_samboer_begrunnelser_ftrl.EGEN_INNTEKT.getKode(), BEGRUNNELSE_SAMBOER
+            );
+        assertThat(avklarteMedfolgendeFamilieArgumentCaptor.getValue().getFamilieOmfattetAvNorskTrygd())
+            .isNotNull()
+            .isEmpty();
     }
 
     @Test
