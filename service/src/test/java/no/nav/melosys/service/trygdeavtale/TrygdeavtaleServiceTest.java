@@ -52,7 +52,7 @@ class TrygdeavtaleServiceTest {
     private final static String NAVN_1 = "Navn 1";
     private final static String NAVN_2 = "Navn 2";
     private final static String UUID_BARN = "0bad5c70-8a3f-4fc7-9031-d3aebd6b68de";
-    private final static String UUID_KONE = "1212121212121-4fc7-9031-ab34332121ff";
+    private final static String UUID_EKTEFELLE = "1212121212121-4fc7-9031-ab34332121ff";
     private final static String BEGRUNNELSE_BARN = "begrunnelse barn";
     private final static String BEGRUNNELSE_SAMBOER = "begrunnelse samboer";
 
@@ -124,7 +124,7 @@ class TrygdeavtaleServiceTest {
                     Medfolgende_barn_begrunnelser_ftrl.OVER_18_AR.getKode(),
                     BEGRUNNELSE_BARN),
                 new IkkeOmfattetFamilie(
-                    UUID_KONE,
+                    UUID_EKTEFELLE,
                     Medfolgende_ektefelle_samboer_begrunnelser_ftrl.EGEN_INNTEKT.getKode(),
                     BEGRUNNELSE_SAMBOER)
             )))
