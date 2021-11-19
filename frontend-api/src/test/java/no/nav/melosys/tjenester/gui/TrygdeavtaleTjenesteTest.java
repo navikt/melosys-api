@@ -27,6 +27,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.as;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -81,7 +82,9 @@ class TrygdeavtaleTjenesteTest {
 
         assertThat(trygdeavtaleResultat.familie().getFamilieOmfattetAvNorskTrygd()).isEmpty();
 
-        List<IkkeOmfattetFamilie> ikkeOmfattetFamilies = trygdeavtaleResultat.familie().getFamilieIkkeOmfattetAvNorskTrygd().stream().toList();
+        List<IkkeOmfattetFamilie> ikkeOmfattetFamilies = trygdeavtaleResultat.familie().getFamilieIkkeOmfattetAvNorskTrygd()
+            .stream().sorted((o1, o2) -> o1.getUuid().compareTo(o2.getBegrunnelse())).toList();
+
         assertThat(ikkeOmfattetFamilies).hasSize(2);
 
         assertThat(ikkeOmfattetFamilies.get(0))
@@ -90,7 +93,7 @@ class TrygdeavtaleTjenesteTest {
                 IkkeOmfattetFamilie::getBegrunnelse,
                 IkkeOmfattetFamilie::getBegrunnelseFritekst)
             .containsExactlyInAnyOrder(
-                UUID_EKTEFELLE, Medfolgende_ektefelle_samboer_begrunnelser_ftrl.EGEN_INNTEKT.getKode(), BEGRUNNELSE_SAMBOER);
+                UUID_BARN, Medfolgende_barn_begrunnelser_ftrl.OVER_18_AR.getKode(), BEGRUNNELSE_BARN);
 
         assertThat(ikkeOmfattetFamilies.get(1))
             .extracting(
@@ -98,7 +101,8 @@ class TrygdeavtaleTjenesteTest {
                 IkkeOmfattetFamilie::getBegrunnelse,
                 IkkeOmfattetFamilie::getBegrunnelseFritekst)
             .containsExactlyInAnyOrder(
-                UUID_BARN, Medfolgende_barn_begrunnelser_ftrl.OVER_18_AR.getKode(), BEGRUNNELSE_BARN);
+                UUID_EKTEFELLE, Medfolgende_ektefelle_samboer_begrunnelser_ftrl.EGEN_INNTEKT.getKode(), BEGRUNNELSE_SAMBOER);
+
     }
 
     @Test
