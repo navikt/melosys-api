@@ -6,13 +6,13 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.InnvilgelsesResultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadTrygdeavtale;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
+import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;

@@ -7,7 +7,7 @@ import java.util.Set;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
-import no.nav.melosys.domain.InnvilgelsesResultat;
+import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
 import no.nav.melosys.domain.Tema;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Fartsomrader;

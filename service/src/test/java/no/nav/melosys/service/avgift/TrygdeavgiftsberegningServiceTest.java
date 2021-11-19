@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Optional;
 
-import no.nav.melosys.domain.InnvilgelsesResultat;
+import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
 import no.nav.melosys.domain.Medlemskapsperiode;
 import no.nav.melosys.domain.avgift.*;
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift;

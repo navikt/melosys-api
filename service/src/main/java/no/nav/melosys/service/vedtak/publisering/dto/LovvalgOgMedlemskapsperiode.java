@@ -1,7 +1,7 @@
 package no.nav.melosys.service.vedtak.publisering.dto;
 
 
-import no.nav.melosys.domain.InnvilgelsesResultat;
+import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
 import no.nav.melosys.domain.kodeverk.Bestemmelse;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;

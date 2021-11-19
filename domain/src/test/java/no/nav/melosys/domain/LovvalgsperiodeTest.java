@@ -2,10 +2,7 @@ package no.nav.melosys.domain;
 
 import java.time.LocalDate;
 
-import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
-import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
-import no.nav.melosys.domain.kodeverk.Trygdedekninger;
+import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import org.junit.jupiter.api.Test;
 
