@@ -3,7 +3,7 @@ package no.nav.melosys.tjenester.gui.dto.trygdeavtale;
 import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie;
 import no.nav.melosys.domain.person.familie.IkkeOmfattetFamilie;
 import no.nav.melosys.domain.person.familie.OmfattetFamilie;
-import no.nav.melosys.service.trygdeavtale.TrygdeavtaleService;
+import no.nav.melosys.service.trygdeavtale.TrygdeavtaleResultat;
 import no.nav.melosys.tjenester.gui.dto.MedfolgendeFamilieDto;
 
 import java.util.ArrayList;
@@ -17,8 +17,8 @@ public record TrygdeavtaleResultatDto(
     List<MedfolgendeFamilieDto> barn,
     MedfolgendeFamilieDto ektefelle
 ) {
-    public TrygdeavtaleService.TrygdeavtaleResultat til() {
-        return new TrygdeavtaleService.TrygdeavtaleResultat.Builder()
+    public TrygdeavtaleResultat til() {
+        return new TrygdeavtaleResultat.Builder()
             .familie(lagAvklarteMedfolgendeFamilie())
             .bestemmelse(bestemmelse)
             .virksomheter(virksomheter)

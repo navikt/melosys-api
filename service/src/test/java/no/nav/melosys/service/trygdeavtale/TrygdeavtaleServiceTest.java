@@ -74,7 +74,7 @@ class TrygdeavtaleServiceTest {
     void leggInnTrygdeAvtaleDataForOgKunneFatteVetak() {
         when(behandlingsgrunnlagService.hentBehandlingsgrunnlag(1L)).thenReturn(lagBehandlingsgrunnlag());
 
-        TrygdeavtaleService.TrygdeavtaleResultat trygdeavtaleResultat = lagTrygdeavtaleResultat();
+        TrygdeavtaleResultat trygdeavtaleResultat = lagTrygdeavtaleResultat();
 
         trygdeavtaleService.overførResultat(1L, trygdeavtaleResultat);
 
@@ -90,7 +90,7 @@ class TrygdeavtaleServiceTest {
         behandlingsgrunnlag.getBehandlingsgrunnlagdata().soeknadsland.landkoder = List.of("GB", "NO");
 
         when(behandlingsgrunnlagService.hentBehandlingsgrunnlag(1L)).thenReturn(behandlingsgrunnlag);
-        TrygdeavtaleService.TrygdeavtaleResultat trygdeavtaleResultatDto = lagTrygdeavtaleResultat();
+        TrygdeavtaleResultat trygdeavtaleResultatDto = lagTrygdeavtaleResultat();
 
         assertThatExceptionOfType(TekniskException.class)
             .isThrownBy(() -> trygdeavtaleService.overførResultat(1L, trygdeavtaleResultatDto))
@@ -103,15 +103,15 @@ class TrygdeavtaleServiceTest {
         behandlingsgrunnlag.getBehandlingsgrunnlagdata().soeknadsland.landkoder = List.of();
 
         when(behandlingsgrunnlagService.hentBehandlingsgrunnlag(1L)).thenReturn(behandlingsgrunnlag);
-        TrygdeavtaleService.TrygdeavtaleResultat trygdeavtaleResultatDto = lagTrygdeavtaleResultat();
+        TrygdeavtaleResultat trygdeavtaleResultatDto = lagTrygdeavtaleResultat();
 
         assertThatExceptionOfType(TekniskException.class)
             .isThrownBy(() -> trygdeavtaleService.overførResultat(1L, trygdeavtaleResultatDto))
             .withMessageContaining("Forventet ett land i behandlingsgrunnlagdata soeknadsland.landkoder, men fant: []");
     }
 
-    private TrygdeavtaleService.TrygdeavtaleResultat lagTrygdeavtaleResultat() {
-        return new TrygdeavtaleService.TrygdeavtaleResultat.Builder()
+    private TrygdeavtaleResultat lagTrygdeavtaleResultat() {
+        return new TrygdeavtaleResultat.Builder()
             .virksomheter(List.of("11111111111"))
             .bestemmelse(Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1.getKode())
             .familie(new AvklarteMedfolgendeFamilie(Set.of(), Set.of(

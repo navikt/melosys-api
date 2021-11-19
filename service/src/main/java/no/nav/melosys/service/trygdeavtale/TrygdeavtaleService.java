@@ -17,7 +17,6 @@ import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
-import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
@@ -75,7 +74,7 @@ public class TrygdeavtaleService {
     }
 
     public void overførResultat(long behandlingId, TrygdeavtaleResultat trygdeavtaleResultat) {
-        avklarteMedfolgendeFamilieService.lagreMedfolgendeFamilieSomAvklartefakta(behandlingId, trygdeavtaleResultat.familie);
+        avklarteMedfolgendeFamilieService.lagreMedfolgendeFamilieSomAvklartefakta(behandlingId, trygdeavtaleResultat.familie());
         avklarteVirksomheterService.lagreVirksomheterSomAvklartefakta(trygdeavtaleResultat.virksomheter(), behandlingId);
 
         SoeknadTrygdeavtale behandlingsgrunnlagdata =
@@ -100,40 +99,5 @@ public class TrygdeavtaleService {
         lovvalgsperiode.setMedlemskapstype(Medlemskapstyper.PLIKTIG);
         lovvalgsperiode.setDekning(Trygdedekninger.FULL_DEKNING_FTRL); // Skal bli renamet til FULL_DEKNING av fag
         return lovvalgsperiode;
-    }
-
-    public record TrygdeavtaleResultat(
-        List<String> virksomheter,
-        String bestemmelse,
-        AvklarteMedfolgendeFamilie familie) {
-
-        public static class Builder {
-            private List<String> virksomheter;
-            private String bestemmelse;
-            private AvklarteMedfolgendeFamilie familie;
-
-            public Builder virksomheter(List<String> virksomheter) {
-                this.virksomheter = virksomheter;
-                return this;
-            }
-
-            public Builder bestemmelse(String bestemmelse) {
-                this.bestemmelse = bestemmelse;
-                return this;
-            }
-
-            public Builder familie(AvklarteMedfolgendeFamilie familie) {
-                this.familie = familie;
-                return this;
-            }
-
-            public TrygdeavtaleResultat build() {
-                return new TrygdeavtaleResultat(
-                    virksomheter,
-                    bestemmelse,
-                    familie
-                );
-            }
-        }
     }
 }

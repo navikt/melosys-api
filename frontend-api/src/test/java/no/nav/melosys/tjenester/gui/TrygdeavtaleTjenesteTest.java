@@ -11,6 +11,7 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_b
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_ektefelle_samboer_begrunnelser_ftrl;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
+import no.nav.melosys.service.trygdeavtale.TrygdeavtaleResultat;
 import no.nav.melosys.service.trygdeavtale.TrygdeavtaleService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
@@ -41,7 +42,7 @@ class TrygdeavtaleTjenesteTest {
     private Aksesskontroll aksesskontroll;
 
     @Captor
-    private ArgumentCaptor<TrygdeavtaleService.TrygdeavtaleResultat> trygdeavtaleResultatArgumentCaptor;
+    private ArgumentCaptor<TrygdeavtaleResultat> trygdeavtaleResultatArgumentCaptor;
 
     private TrygdeavtaleTjeneste trygdeavtaleTjeneste;
 
@@ -63,8 +64,8 @@ class TrygdeavtaleTjenesteTest {
         assertThat(trygdeavtaleResultat).isNotNull();
         assertThat(trygdeavtaleResultat)
             .extracting(
-                TrygdeavtaleService.TrygdeavtaleResultat::virksomheter,
-                TrygdeavtaleService.TrygdeavtaleResultat::bestemmelse)
+                TrygdeavtaleResultat::virksomheter,
+                TrygdeavtaleResultat::bestemmelse)
             .containsExactlyInAnyOrder(
                 trygdeavtaleResultatDto.virksomheter(),
                 trygdeavtaleResultatDto.bestemmelse()
