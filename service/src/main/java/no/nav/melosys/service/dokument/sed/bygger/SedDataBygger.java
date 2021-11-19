@@ -68,7 +68,6 @@ public class SedDataBygger {
                                      Behandlingsresultat behandlingsresultat,
                                      PeriodeType periodeType,
                                      boolean erUtkast) {
-        validerAdresser(dataGrunnlag);
         SedDataDto sedDataDto = lagDataDtoMedPersonopplysninger(dataGrunnlag);
         validerArbeidsstederOgVirksomheter(sedDataDto);
         if (erUtkast) {
@@ -83,14 +82,6 @@ public class SedDataBygger {
         sedDataDto.setTidligereLovvalgsperioder(lagTidligereLovvalgsperioder(dataGrunnlag.getBehandling()));
         sedDataDto.setVedtakDto(lagVedtakDto(behandlingsresultat));
         return sedDataDto;
-    }
-
-    private static void validerAdresser(SedDataGrunnlag dataGrunnlag) {
-        if (dataGrunnlag.getBostedGrunnlag().finnBostedsadresse().isEmpty()
-            && dataGrunnlag.getPersondata().finnKontaktadresse().isEmpty()
-            && dataGrunnlag.getPersondata().finnOppholdsadresse().isEmpty()) {
-            throw new FunksjonellException(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE.getBeskrivelse());
-        }
     }
 
     private SedDataDto lagDataDtoMedPersonopplysninger(SedDataGrunnlag dataGrunnlag) {
