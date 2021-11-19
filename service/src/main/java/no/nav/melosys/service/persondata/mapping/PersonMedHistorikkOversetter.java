@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
+import no.nav.melosys.domain.dokument.person.Personstatus;
 import no.nav.melosys.domain.kodeverk.Personstatuser;
 import no.nav.melosys.domain.person.*;
 import no.nav.melosys.integrasjon.pdl.dto.person.Person;
@@ -30,7 +31,9 @@ public final class PersonMedHistorikkOversetter {
             DoedsfallOversetter.oversett(person.doedsfall()),
             FoedselOversetter.oversett(person.foedsel()),
             FolkeregisteridentOversetter.oversett(person.folkeregisteridentifikator()),
-            FolkeregisterpersonstatusOversetter.oversett(person.folkeregisterpersonstatus()),
+            person.folkeregisterpersonstatus().stream()
+                .map(status -> FolkeregisterpersonstatusOversetter.oversett(status, kodeverkService))
+                .collect(Collectors.toUnmodifiableSet()),
             KjoennOversetter.oversett(person.kjoenn()),
             person.kontaktadresse().stream().map(k -> KontaktadresseOversetter.oversett(k, kodeverkService))
                 .collect(Collectors.toUnmodifiableSet()),
@@ -49,7 +52,7 @@ public final class PersonMedHistorikkOversetter {
             new Doedsfall(personDokument.getDødsdato()),
             new Foedsel(personDokument.getFødselsdato(), personDokument.getFødselsdato().getYear(), null, null),
             new Folkeregisteridentifikator(personDokument.getFnr()),
-            new Folkeregisterpersonstatus(Personstatuser.UDEFINERT, kodeverkService.dekod(FellesKodeverk.PERSONSTATUSER, personDokument.getPersonstatus().getKode())),
+            Collections.singleton(lagFolkeregisterpersonstatus(personDokument.getPersonstatus(), kodeverkService)),
             personDokument.hentKjønnType(),
             personDokument.finnKontaktadresse().map(Collections::singleton).orElseGet(Collections::emptySet),
             new Navn(personDokument.getFornavn(), personDokument.getMellomnavn(), personDokument.getEtternavn()),
@@ -76,11 +79,43 @@ public final class PersonMedHistorikkOversetter {
     private static Sivilstand lagSivilstand(Sivilstandstype sivilstandstype,
                                             String tekstHvisTypeErUdefinert,
                                             LocalDate gyldighetsperiodeFom) {
-        return new Sivilstand(sivilstandstype, tekstHvisTypeErUdefinert, "", gyldighetsperiodeFom, null, Master.TPS.name(),
-                              Master.TPS.name(), false);
+        return new Sivilstand(sivilstandstype,
+            tekstHvisTypeErUdefinert,
+            "",
+            gyldighetsperiodeFom,
+            null,
+            Master.TPS.name(),
+            Master.TPS.name(),
+            false);
+    }
+
+    private static Folkeregisterpersonstatus lagFolkeregisterpersonstatus(Personstatus personstatus, KodeverkService kodeverkservice) {
+        return new Folkeregisterpersonstatus(
+            kodeToPersonstatuser(personstatus.getKode()),
+            kodeverkservice.dekod(FellesKodeverk.PERSONSTATUSER, personstatus.getKode()),
+            null,
+            null,
+            Master.TPS.name(),
+            Master.TPS.name(),
+            false);
     }
 
     private static Statsborgerskap lagStatsborgerskap(Land statsborgerskap, LocalDate statsborgerskapDato) {
         return new Statsborgerskap(statsborgerskap.getKode(), null, statsborgerskapDato, null, Master.TPS.name(), Master.TPS.name(), false);
+    }
+
+    private static Personstatuser kodeToPersonstatuser(String kode) {
+        return switch (kode) {
+            case "bosatt" -> Personstatuser.BOSATT;
+            case "utflyttet" -> Personstatuser.UTFLYTTET;
+            case "forsvunnet" -> Personstatuser.FORSVUNNET;
+            case "doed" -> Personstatuser.DOED;
+            case "opphoert" -> Personstatuser.OPPHOERT;
+            case "foedselsregistrert" -> Personstatuser.FOEDSELSREGISTRERT;
+            case "ikkeBosatt" -> Personstatuser.IKKE_BOSATT;
+            case "midlertidig" -> Personstatuser.MIDLERTIDIG;
+            case "inaktiv" -> Personstatuser.INAKTIV;
+            default -> Personstatuser.UDEFINERT;
+        };
     }
 }

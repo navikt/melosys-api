@@ -32,7 +32,7 @@ public class PdlObjectFactory {
             Set.of(new no.nav.melosys.integrasjon.pdl.dto.person.Foedsel(LocalDate.EPOCH, 1970, "NOR", "fødested",
                 metadata())),
             Set.of(new no.nav.melosys.integrasjon.pdl.dto.person.Folkeregisteridentifikator("IdNr", metadata())),
-            Set.of(new Folkeregisterpersonstatus("ikkeBosatt", metadata())),
+            Set.of(new Folkeregisterpersonstatus(LocalDateTime.parse("2020-01-01T00:00:00"), LocalDateTime.parse("2020-05-05T00:00:00"), "ikkeBosatt", metadata())),
             Set.of(new ForelderBarnRelasjon("barnIdent", Familierelasjonsrolle.BARN, Familierelasjonsrolle.MOR, metadata()),
                 new ForelderBarnRelasjon("forelderIdent", Familierelasjonsrolle.MOR, Familierelasjonsrolle.BARN, metadata())),
             Set.of(new Foreldreansvar("felles", metadata())),
