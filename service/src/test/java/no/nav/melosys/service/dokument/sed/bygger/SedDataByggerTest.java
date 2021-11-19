@@ -274,17 +274,6 @@ class SedDataByggerTest {
     }
 
     @Test
-    void lag_ingenAdressekasterException() {
-        behandling.hentPersonDokument().setBostedsadresse(new Bostedsadresse());
-        SedDataGrunnlagMedSoknad sedDataGrunnlagMedSoknad = lagGrunnlagMedSøknad();
-        sedDataGrunnlagMedSoknad.getBehandlingsgrunnlagData().bosted = new Bosted();
-
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> dataBygger.lag(sedDataGrunnlagMedSoknad, behandlingsresultat, PeriodeType.LOVVALGSPERIODE))
-            .withMessageContaining(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE.getBeskrivelse());
-    }
-
-    @Test
     void lag_medKontaktadresse_kontadresseMappes() {
         Persondata persondataMedKontakadresse = PersonopplysningerObjectFactory.lagPersonopplysninger();
         SedDataGrunnlagMedSoknad sedDataGrunnlagMedSoknad = lagGrunnlagMedSøknad(persondataMedKontakadresse);
