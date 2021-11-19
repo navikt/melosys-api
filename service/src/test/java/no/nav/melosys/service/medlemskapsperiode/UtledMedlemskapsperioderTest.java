@@ -3,7 +3,7 @@ package no.nav.melosys.service.medlemskapsperiode;
 
 import java.time.LocalDate;
 
-import no.nav.melosys.domain.InnvilgelsesResultat;
+import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
 import no.nav.melosys.domain.Medlemskapsperiode;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser;

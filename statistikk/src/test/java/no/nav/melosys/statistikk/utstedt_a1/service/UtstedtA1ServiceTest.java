@@ -6,10 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
-import no.nav.melosys.domain.kodeverk.Vedtakstyper;
+import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;

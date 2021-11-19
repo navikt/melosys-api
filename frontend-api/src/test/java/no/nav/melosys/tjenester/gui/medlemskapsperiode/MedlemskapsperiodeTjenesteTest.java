@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Collections;
 
-import no.nav.melosys.domain.InnvilgelsesResultat;
+import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
 import no.nav.melosys.domain.Medlemskapsperiode;
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser;
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper;

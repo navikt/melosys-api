@@ -1,9 +1,16 @@
 package no.nav.melosys.tjenester.gui.dto.trygdeavtale;
 
+import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie;
+import no.nav.melosys.domain.person.familie.IkkeOmfattetFamilie;
+import no.nav.melosys.domain.person.familie.OmfattetFamilie;
+import no.nav.melosys.service.trygdeavtale.TrygdeavtaleResultat;
 import no.nav.melosys.tjenester.gui.dto.MedfolgendeFamilieDto;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public record TrygdeavtaleResultatDto(
     List<String> virksomheter,
@@ -11,7 +18,29 @@ public record TrygdeavtaleResultatDto(
     List<MedfolgendeFamilieDto> barn,
     MedfolgendeFamilieDto ektefelle
 ) {
-    // Mulig å bytte ut med https://github.com/Randgalt/record-builder
+    public TrygdeavtaleResultat til() {
+        return new TrygdeavtaleResultat.Builder()
+            .familie(lagAvklarteMedfolgendeFamilie())
+            .bestemmelse(bestemmelse)
+            .virksomheter(virksomheter)
+            .build();
+    }
+
+    private AvklarteMedfolgendeFamilie lagAvklarteMedfolgendeFamilie() {
+        var omfattetFamilie = Stream.concat(barn.stream(), Stream.of(ektefelle))
+            .filter(Objects::nonNull)
+            .filter(MedfolgendeFamilieDto::omfattet)
+            .map(f -> new OmfattetFamilie(f.uuid()))
+            .collect(Collectors.toSet());
+        var ikkeOmfattetFamilie = Stream.concat(barn.stream(), Stream.of(ektefelle))
+            .filter(Objects::nonNull)
+            .filter(MedfolgendeFamilieDto::erIkkeOmfattet)
+            .map(f -> new IkkeOmfattetFamilie(f.uuid(), f.begrunnelseKode(), f.begrunnelseFritekst()))
+            .collect(Collectors.toSet());
+
+        return new AvklarteMedfolgendeFamilie(omfattetFamilie, ikkeOmfattetFamilie);
+    }
+
     public static class Builder {
         private List<String> virksomheter;
         private String bestemmelse;
@@ -46,7 +75,5 @@ public record TrygdeavtaleResultatDto(
                 ektefelle
             );
         }
-
     }
-
 }
