@@ -54,6 +54,7 @@ public class TrygdeavtaleTjeneste {
     @PostMapping("{behandlingID}")
     public ResponseEntity<Void> overførResultat(@PathVariable("behandlingID") long behandlingId,
                                                 @RequestBody TrygdeavtaleResultatDto trygdeavtaleResultatDto) {
+        aksesskontroll.autoriserSkriv(behandlingId);
         trygdeavtaleService.overførResultat(behandlingId, trygdeavtaleResultatDto.til());
 
         return ResponseEntity.ok().build();
