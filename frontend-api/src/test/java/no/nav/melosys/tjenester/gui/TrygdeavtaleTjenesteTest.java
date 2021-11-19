@@ -11,6 +11,7 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_b
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_ektefelle_samboer_begrunnelser_ftrl;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
+import no.nav.melosys.domain.person.familie.IkkeOmfattetFamilie;
 import no.nav.melosys.service.trygdeavtale.TrygdeavtaleResultat;
 import no.nav.melosys.service.trygdeavtale.TrygdeavtaleService;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -27,6 +28,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.LocalDate;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.as;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -67,8 +69,8 @@ class TrygdeavtaleTjenesteTest {
         verify(trygdeavtaleService).overførResultat(eq(1L), trygdeavtaleResultatArgumentCaptor.capture());
         var trygdeavtaleResultat = trygdeavtaleResultatArgumentCaptor.getValue();
 
-        assertThat(trygdeavtaleResultat).isNotNull();
         assertThat(trygdeavtaleResultat)
+            .isNotNull()
             .extracting(
                 TrygdeavtaleResultat::virksomheter,
                 TrygdeavtaleResultat::bestemmelse)
@@ -76,7 +78,27 @@ class TrygdeavtaleTjenesteTest {
                 trygdeavtaleResultatDto.virksomheter(),
                 trygdeavtaleResultatDto.bestemmelse()
             );
-        // TODO: Sjekk familieobjektet
+
+        assertThat(trygdeavtaleResultat.familie().getFamilieOmfattetAvNorskTrygd()).isEmpty();
+
+        List<IkkeOmfattetFamilie> ikkeOmfattetFamilies = trygdeavtaleResultat.familie().getFamilieIkkeOmfattetAvNorskTrygd().stream().toList();
+        assertThat(ikkeOmfattetFamilies).hasSize(2);
+
+        assertThat(ikkeOmfattetFamilies.get(0))
+            .extracting(
+                IkkeOmfattetFamilie::getUuid,
+                IkkeOmfattetFamilie::getBegrunnelse,
+                IkkeOmfattetFamilie::getBegrunnelseFritekst)
+            .containsExactlyInAnyOrder(
+                UUID_EKTEFELLE, Medfolgende_ektefelle_samboer_begrunnelser_ftrl.EGEN_INNTEKT.getKode(), BEGRUNNELSE_SAMBOER);
+
+        assertThat(ikkeOmfattetFamilies.get(1))
+            .extracting(
+                IkkeOmfattetFamilie::getUuid,
+                IkkeOmfattetFamilie::getBegrunnelse,
+                IkkeOmfattetFamilie::getBegrunnelseFritekst)
+            .containsExactlyInAnyOrder(
+                UUID_BARN, Medfolgende_barn_begrunnelser_ftrl.OVER_18_AR.getKode(), BEGRUNNELSE_BARN);
     }
 
     @Test
