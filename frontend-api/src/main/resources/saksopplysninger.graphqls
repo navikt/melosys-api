@@ -17,7 +17,7 @@ type Personopplysninger {
     bostedsadresser: [Bostedsadresse!]!
     familiemedlemmer: [Familiemedlem!]!
     folkeregisteridentifikator: String
-    folkeregisterpersonstatus: Folkeregisterpersonstatus
+    folkeregisterpersonstatus: [Folkeregisterpersonstatus]!
     kjoenn: KjoennType!
     kontaktadresser: [Kontaktadresse!]!
     navn: Navn!
