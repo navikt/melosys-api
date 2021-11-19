@@ -33,6 +33,12 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class TrygdeavtaleTjenesteTest {
+    private final static String ORGNR_1 = "11111111111";
+    private final static String NAVN_1 = "Navn 1";
+    private final static String UUID_BARN = "0bad5c70-8a3f-4fc7-9031-d3aebd6b68de";
+    private final static String UUID_KONE = "1212121212121-4fc7-9031-ab34332121ff";
+    private final static String BEGRUNNELSE_BARN = "begrunnelse barn";
+    private final static String BEGRUNNELSE_SAMBOER = "begrunnelse samboer";
 
     @Mock
     private TrygdeavtaleService trygdeavtaleService;
@@ -133,14 +139,14 @@ class TrygdeavtaleTjenesteTest {
 
     private TrygdeavtaleResultatDto lagTrygdeavtaleResultat() {
         return new TrygdeavtaleResultatDto.Builder()
-            .virksomheter(List.of("11111111111"))
+            .virksomheter(List.of(ORGNR_1))
             .bestemmelse(Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1.getKode())
-            .addBarn("0bad5c70-8a3f-4fc7-9031-d3aebd6b68de",
+            .addBarn(UUID_BARN,
                 false, Medfolgende_barn_begrunnelser_ftrl.OVER_18_AR.getKode(),
-                "begrunnelse barn")
-            .ektefelle("1212121212121-4fc7-9031-ab34332121ff",
+                BEGRUNNELSE_BARN)
+            .ektefelle(UUID_KONE,
                 false, Medfolgende_ektefelle_samboer_begrunnelser_ftrl.EGEN_INNTEKT.getKode(),
-                "begrunnelse samboer")
+                BEGRUNNELSE_SAMBOER)
             .build();
     }
 }
