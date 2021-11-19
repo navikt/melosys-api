@@ -8,6 +8,7 @@ import no.nav.melosys.tjenester.gui.dto.MedfolgendeFamilieDto;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -27,10 +28,12 @@ public record TrygdeavtaleResultatDto(
 
     private AvklarteMedfolgendeFamilie lagAvklarteMedfolgendeFamilie() {
         var omfattetFamilie = Stream.concat(barn.stream(), Stream.of(ektefelle))
+            .filter(Objects::nonNull)
             .filter(MedfolgendeFamilieDto::omfattet)
             .map(f -> new OmfattetFamilie(f.uuid()))
             .collect(Collectors.toSet());
         var ikkeOmfattetFamilie = Stream.concat(barn.stream(), Stream.of(ektefelle))
+            .filter(Objects::nonNull)
             .filter(MedfolgendeFamilieDto::erIkkeOmfattet)
             .map(f -> new IkkeOmfattetFamilie(f.uuid(), f.begrunnelseKode(), f.begrunnelseFritekst()))
             .collect(Collectors.toSet());
