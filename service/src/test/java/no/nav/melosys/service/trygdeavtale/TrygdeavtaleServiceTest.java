@@ -80,7 +80,7 @@ class TrygdeavtaleServiceTest {
     }
 
     @Test
-    void leggInnTrygdeAvtaleDataForÅKunneFatteVetak() {
+    void leggInnTrygdeavtaleDataForÅKunneFatteVedtak() {
         when(behandlingsgrunnlagService.hentBehandlingsgrunnlag(1L)).thenReturn(lagBehandlingsgrunnlag());
 
         TrygdeavtaleResultat trygdeavtaleResultat = lagTrygdeavtaleResultat();
