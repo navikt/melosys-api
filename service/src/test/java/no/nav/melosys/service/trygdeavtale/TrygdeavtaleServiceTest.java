@@ -84,7 +84,7 @@ class TrygdeavtaleServiceTest {
 
         verify(behandlingsgrunnlagService, never()).oppdaterBehandlingsgrunnlag(any());
         verify(avklarteMedfolgendeFamilieService).lagreMedfolgendeFamilieSomAvklartefakta(anyLong(), any());
-        verify(avklarteVirksomheterService).lagreVirksomheterSomAvklartefakta(any(), anyLong());
+        verify(avklarteVirksomheterService).lagreVirksomheterSomAvklartefakta(anyLong(), any());
         verify(lovvalgsperiodeService).lagreLovvalgsperioder(1L, expectedLovvalgsperioder());
     }
 

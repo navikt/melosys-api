@@ -197,7 +197,7 @@ class AvklarteVirksomheterServiceTest {
         List<String> virksomhetIDer = List.of(uuid1);
         forberedValidering();
 
-        avklarteVirksomheterService.lagreVirksomheterSomAvklartefakta(virksomhetIDer, 1L);
+        avklarteVirksomheterService.lagreVirksomheterSomAvklartefakta(1L, virksomhetIDer);
         verify(avklartefaktaService, times(1)).leggTilAvklarteFakta(1L, VIRKSOMHET, VIRKSOMHET.getKode(), uuid1, Avklartefakta.VALGT_FAKTA);
     }
 
@@ -206,7 +206,7 @@ class AvklarteVirksomheterServiceTest {
         List<String> virksomhetIDer = List.of(orgnr1);
         forberedValidering();
 
-        avklarteVirksomheterService.lagreVirksomheterSomAvklartefakta(virksomhetIDer, 1L);
+        avklarteVirksomheterService.lagreVirksomheterSomAvklartefakta(1L, virksomhetIDer);
         verify(avklartefaktaService, times(1)).leggTilAvklarteFakta(1L, VIRKSOMHET, VIRKSOMHET.getKode(), orgnr1, Avklartefakta.VALGT_FAKTA);
     }
 
@@ -215,7 +215,7 @@ class AvklarteVirksomheterServiceTest {
         List<String> virksomhetIDer = List.of(orgnr2);
         forberedValidering();
 
-        avklarteVirksomheterService.lagreVirksomheterSomAvklartefakta(virksomhetIDer, 1L);
+        avklarteVirksomheterService.lagreVirksomheterSomAvklartefakta(1L, virksomhetIDer);
         verify(avklartefaktaService, times(1)).leggTilAvklarteFakta(1L, VIRKSOMHET, VIRKSOMHET.getKode(), orgnr2, Avklartefakta.VALGT_FAKTA);
     }
 
@@ -224,7 +224,7 @@ class AvklarteVirksomheterServiceTest {
         List<String> virksomhetIDer = List.of(orgnr3);
         forberedValidering();
 
-        avklarteVirksomheterService.lagreVirksomheterSomAvklartefakta(virksomhetIDer, 1L);
+        avklarteVirksomheterService.lagreVirksomheterSomAvklartefakta(1L, virksomhetIDer);
         verify(avklartefaktaService, times(1)).leggTilAvklarteFakta(1L, VIRKSOMHET, VIRKSOMHET.getKode(), orgnr3, Avklartefakta.VALGT_FAKTA);
     }
 
@@ -234,7 +234,7 @@ class AvklarteVirksomheterServiceTest {
         forberedValidering();
 
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> avklarteVirksomheterService.lagreVirksomheterSomAvklartefakta(virksomhetIDer, 1L))
+            .isThrownBy(() -> avklarteVirksomheterService.lagreVirksomheterSomAvklartefakta(1L, virksomhetIDer))
             .withMessage(String.format("VirksomhetID %s hører ikke til noen av arbeidsforholdene", orgnr4));
         verify(avklartefaktaService, never()).leggTilAvklarteFakta(anyLong(), any(Avklartefaktatyper.class), anyString(), anyString(), eq(Avklartefakta.VALGT_FAKTA));
     }
