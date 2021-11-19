@@ -80,7 +80,7 @@ class TrygdeavtaleServiceTest {
     }
 
     @Test
-    void leggInnTrygdeAvtaleDataForOgKunneFatteVetak() {
+    void leggInnTrygdeAvtaleDataForÅKunneFatteVetak() {
         when(behandlingsgrunnlagService.hentBehandlingsgrunnlag(1L)).thenReturn(lagBehandlingsgrunnlag());
 
         TrygdeavtaleResultat trygdeavtaleResultat = lagTrygdeavtaleResultat();
@@ -93,6 +93,7 @@ class TrygdeavtaleServiceTest {
         verify(lovvalgsperiodeService).lagreLovvalgsperioder(1L, expectedLovvalgsperioder());
 
         assertThat(avklarteMedfolgendeFamilieArgumentCaptor.getValue().getFamilieIkkeOmfattetAvNorskTrygd())
+            .isNotNull()
             .flatExtracting(
                 IkkeOmfattetFamilie::getUuid,
                 IkkeOmfattetFamilie::getBegrunnelse,
