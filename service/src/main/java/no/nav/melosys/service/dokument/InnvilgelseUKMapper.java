@@ -9,9 +9,12 @@ import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
+import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_barn_begrunnelser_ftrl;
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_ektefelle_samboer_begrunnelser_ftrl;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
+import no.nav.melosys.domain.person.familie.OmfattetFamilie;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.IkkeOmfattetBarn;
 import no.nav.melosys.integrasjon.dokgen.dto.innvilgelsestorbritannia.*;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
@@ -19,10 +22,8 @@ import no.nav.melosys.service.persondata.PersondataFasade;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Stream;
 
 @Component
 public class InnvilgelseUKMapper {
@@ -91,15 +92,46 @@ public class InnvilgelseUKMapper {
     private List<Barn> finnBarn(long behandlingID) {
         var avklarteMedfølgendeBarn = avklarteMedfølgendeFamilieService.hentAvklarteMedfølgendeBarn(behandlingID);
         var barnOmfattetAvNorskTrygd = avklarteMedfølgendeBarn.barnOmfattetAvNorskTrygd;
-        if (barnOmfattetAvNorskTrygd.isEmpty()) {
-            return List.of();
-        }
-        var medfølgendeBarn = avklarteMedfølgendeFamilieService.hentMedfølgendeBarn(behandlingID);
-        return barnOmfattetAvNorskTrygd.stream().map(omfattetFamilie -> tilBarn(medfølgendeBarn, omfattetFamilie.getUuid())).toList();
+        Set<no.nav.melosys.domain.person.familie.IkkeOmfattetBarn> barnIkkeOmfattetAvNorskTrygd = avklarteMedfølgendeBarn.barnIkkeOmfattetAvNorskTrygd;
+        return Stream.concat(barnOmfattetAvNorskTrygd.stream()
+                .map(this::tilBarn),
+            barnIkkeOmfattetAvNorskTrygd.stream()
+                .map(this::tilBarn)
+        ).toList();
+    }
+
+    private Barn tilBarn(OmfattetFamilie omfattetFamilie) {
+        return new Barn(
+            omfattetFamilie.getSammensattNavn(),
+            true,
+            null,
+            omfattetFamilie.getIdent(),
+            null,
+            LocalDate.now() // TODO: hent fødseldato
+        );
+    }
+
+    private Barn tilBarn(no.nav.melosys.domain.person.familie.IkkeOmfattetBarn ikkeOmfattetBarn) {
+        return new Barn(
+            ikkeOmfattetBarn.sammensattNavn,
+            true,
+            null, // TODO: finn ut av vi kan bruke ikkeOmfattetBarn.begrunnelse() (Medfolgende_barn_begrunnelser)
+            ikkeOmfattetBarn.ident,
+            null,
+            LocalDate.now() // TODO: hent fødseldato
+        );
     }
 
     private Barn tilBarn(Map<String, MedfolgendeFamilie> medfølgendeBarn, String uuid) {
-        return null;
+        MedfolgendeFamilie medfolgendeFamilie = medfølgendeBarn.get(uuid);
+        return new Barn(
+            medfolgendeFamilie.getNavn(),
+            false,
+            Medfolgende_barn_begrunnelser_ftrl.OVER_18_AR, // TODO
+            medfolgendeFamilie.getFnr(),
+            null,
+            LocalDate.now() // TODO: hent fødseldato
+        );
     }
 
     private LocalDate getFødselDato(String fnr) {
