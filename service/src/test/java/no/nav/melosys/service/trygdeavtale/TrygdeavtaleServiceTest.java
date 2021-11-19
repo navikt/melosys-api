@@ -170,9 +170,10 @@ class TrygdeavtaleServiceTest {
 
         var response = trygdeavtaleService.hentVirksomheter(behandling);
 
-        assertThat(response).size().isEqualTo(2);
-        assertThat(response).containsEntry(ORGNR_1, NAVN_1);
-        assertThat(response).containsEntry(ORGNR_2, NAVN_2);
+        assertThat(response)
+            .hasSize(2)
+            .containsEntry(ORGNR_1, NAVN_1)
+            .containsEntry(ORGNR_2, NAVN_2);
     }
 
     @Test
@@ -189,9 +190,10 @@ class TrygdeavtaleServiceTest {
 
         var response = trygdeavtaleService.hentVirksomheter(behandling);
 
-        assertThat(response).size().isEqualTo(2);
-        assertThat(response).containsEntry(ORGNR_1, NAVN_1);
-        assertThat(response).containsEntry(ORGNR_2, NAVN_2);
+        assertThat(response)
+            .hasSize(2)
+            .containsEntry(ORGNR_1, NAVN_1)
+            .containsEntry(ORGNR_2, NAVN_2);
     }
 
     @Test
@@ -205,9 +207,10 @@ class TrygdeavtaleServiceTest {
 
         var response = trygdeavtaleService.hentVirksomheter(behandling);
 
-        assertThat(response).size().isEqualTo(2);
-        assertThat(response).containsEntry(ORGNR_1, NAVN_1);
-        assertThat(response).containsEntry(ORGNR_2, NAVN_2);
+        assertThat(response)
+            .hasSize(2)
+            .containsEntry(ORGNR_1, NAVN_1)
+            .containsEntry(ORGNR_2, NAVN_2);
     }
 
     @Test
@@ -234,8 +237,8 @@ class TrygdeavtaleServiceTest {
 
         var response = trygdeavtaleService.hentFamiliemedlemmer(behandling);
 
-        assertThat(response).size().isEqualTo(3);
         assertThat(response)
+            .hasSize(3)
             .flatExtracting(
                 MedfolgendeFamilie::getUuid,
                 MedfolgendeFamilie::getNavn,
@@ -251,7 +254,7 @@ class TrygdeavtaleServiceTest {
     void hentFamiliemedlemmer_ingenFamilie_tomListe() {
         var behandling = lagBehandlingMedFamilie(emptyList());
         var response = trygdeavtaleService.hentFamiliemedlemmer(behandling);
-        assertThat(response).size().isEqualTo(0);
+        assertThat(response).isEmpty();
     }
 
 
