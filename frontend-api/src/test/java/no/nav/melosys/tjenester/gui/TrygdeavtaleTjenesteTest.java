@@ -1,5 +1,8 @@
 package no.nav.melosys.tjenester.gui;
 
+import java.time.LocalDate;
+import java.util.List;
+
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
@@ -12,10 +15,11 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_e
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
 import no.nav.melosys.domain.person.familie.IkkeOmfattetFamilie;
-import no.nav.melosys.service.trygdeavtale.TrygdeavtaleResultat;
-import no.nav.melosys.service.trygdeavtale.TrygdeavtaleService;
+import no.nav.melosys.domain.person.familie.OmfattetFamilie;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
+import no.nav.melosys.service.trygdeavtale.TrygdeavtaleResultat;
+import no.nav.melosys.service.trygdeavtale.TrygdeavtaleService;
 import no.nav.melosys.tjenester.gui.dto.trygdeavtale.TrygdeavtaleResultatDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,11 +29,6 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDate;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import static org.assertj.core.api.Assertions.as;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -37,8 +36,8 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class TrygdeavtaleTjenesteTest {
     private final static String ORGNR_1 = "11111111111";
-    private final static String NAVN_1 = "Navn 1";
-    private final static String UUID_BARN = "0bad5c70-8a3f-4fc7-9031-d3aebd6b68de";
+    private final static String UUID_BARN_1 = "0bad5c70-8a3f-4fc7-9031-d3aebd6b68de";
+    private final static String UUID_BARN_2 = "1f598113-03a6-431b-99f2-0c42f61348cd";
     private final static String UUID_EKTEFELLE = "1212121212121-4fc7-9031-ab34332121ff";
     private final static String BEGRUNNELSE_BARN = "begrunnelse barn";
     private final static String BEGRUNNELSE_SAMBOER = "begrunnelse samboer";
@@ -79,30 +78,20 @@ class TrygdeavtaleTjenesteTest {
                 trygdeavtaleResultatDto.virksomheter(),
                 trygdeavtaleResultatDto.bestemmelse()
             );
-
-        assertThat(trygdeavtaleResultat.familie().getFamilieOmfattetAvNorskTrygd()).isEmpty();
-
-        List<IkkeOmfattetFamilie> ikkeOmfattetFamilies = trygdeavtaleResultat.familie().getFamilieIkkeOmfattetAvNorskTrygd()
-            .stream().sorted((o1, o2) -> o1.getUuid().compareTo(o2.getBegrunnelse())).toList();
-
-        assertThat(ikkeOmfattetFamilies).hasSize(2);
-
-        assertThat(ikkeOmfattetFamilies.get(0))
-            .extracting(
+        assertThat(trygdeavtaleResultat.familie().getFamilieIkkeOmfattetAvNorskTrygd())
+            .isNotNull()
+            .flatExtracting(
                 IkkeOmfattetFamilie::getUuid,
                 IkkeOmfattetFamilie::getBegrunnelse,
                 IkkeOmfattetFamilie::getBegrunnelseFritekst)
             .containsExactlyInAnyOrder(
-                UUID_BARN, Medfolgende_barn_begrunnelser_ftrl.OVER_18_AR.getKode(), BEGRUNNELSE_BARN);
-
-        assertThat(ikkeOmfattetFamilies.get(1))
-            .extracting(
-                IkkeOmfattetFamilie::getUuid,
-                IkkeOmfattetFamilie::getBegrunnelse,
-                IkkeOmfattetFamilie::getBegrunnelseFritekst)
-            .containsExactlyInAnyOrder(
-                UUID_EKTEFELLE, Medfolgende_ektefelle_samboer_begrunnelser_ftrl.EGEN_INNTEKT.getKode(), BEGRUNNELSE_SAMBOER);
-
+                UUID_BARN_1, Medfolgende_barn_begrunnelser_ftrl.OVER_18_AR.getKode(), BEGRUNNELSE_BARN,
+                UUID_EKTEFELLE, Medfolgende_ektefelle_samboer_begrunnelser_ftrl.EGEN_INNTEKT.getKode(), BEGRUNNELSE_SAMBOER
+            );
+        assertThat(trygdeavtaleResultat.familie().getFamilieOmfattetAvNorskTrygd())
+            .isNotNull()
+            .flatExtracting(OmfattetFamilie::getUuid)
+            .containsExactly(UUID_BARN_2);
     }
 
     @Test
@@ -167,11 +156,16 @@ class TrygdeavtaleTjenesteTest {
         return new TrygdeavtaleResultatDto.Builder()
             .virksomheter(List.of(ORGNR_1))
             .bestemmelse(Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1.getKode())
-            .addBarn(UUID_BARN,
-                false, Medfolgende_barn_begrunnelser_ftrl.OVER_18_AR.getKode(),
+            .addBarn(
+                UUID_BARN_1,
+                false,
+                Medfolgende_barn_begrunnelser_ftrl.OVER_18_AR.getKode(),
                 BEGRUNNELSE_BARN)
-            .ektefelle(UUID_EKTEFELLE,
-                false, Medfolgende_ektefelle_samboer_begrunnelser_ftrl.EGEN_INNTEKT.getKode(),
+            .addBarn(UUID_BARN_2, true, null, null)
+            .ektefelle(
+                UUID_EKTEFELLE,
+                false,
+                Medfolgende_ektefelle_samboer_begrunnelser_ftrl.EGEN_INNTEKT.getKode(),
                 BEGRUNNELSE_SAMBOER)
             .build();
     }
