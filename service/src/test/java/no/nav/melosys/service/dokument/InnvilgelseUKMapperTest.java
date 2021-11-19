@@ -15,7 +15,6 @@ import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_barn_begrunnelser_ftrl;
-import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_ektefelle_samboer_begrunnelser_ftrl;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeBarn;
@@ -86,6 +85,7 @@ class InnvilgelseUKMapperTest {
         when(mockAvklarteMedfolgendeFamilieService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(lagAvklartMedfølgendeBarn());
         when(mockAvklarteMedfolgendeFamilieService.hentMedfølgendEktefelle(anyLong())).thenReturn(lagMedfølgendeEktefelle());
 //        when(mockAvklarteMedfolgendeFamilieService.hentMedfølgendeBarn(anyLong())).thenReturn(lagMedfølgendeBarn());
+        when(mockPersondata.getFødselsdato()).thenReturn(LocalDate.of(1970, 1, 1));
         when(mockPersondataFasade.hentPerson(anyString())).thenReturn(mockPersondata);
 
         Behandling behandling = lagBehandling(lagFagsak(true));
@@ -103,6 +103,8 @@ class InnvilgelseUKMapperTest {
             .medForsendelseMottatt(Instant.now())
             .medInnledningFritekst("innledningFritekst")
             .medBegrunnelseFritekst("begrunnelse")
+            .medBarnFritekst("barnFritekst")
+            .medEktefelleFritekst("ektefelleFritekst")
             .build();
 
         InnvilgelseUK innvilgelseUK = innvilgelseUKMapper.map(brevbestilling);

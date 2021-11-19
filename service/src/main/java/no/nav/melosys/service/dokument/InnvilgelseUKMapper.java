@@ -9,12 +9,10 @@ import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
-import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_barn_begrunnelser_ftrl;
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_ektefelle_samboer_begrunnelser_ftrl;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
 import no.nav.melosys.domain.person.familie.OmfattetFamilie;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.IkkeOmfattetBarn;
 import no.nav.melosys.integrasjon.dokgen.dto.innvilgelsestorbritannia.*;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
@@ -101,37 +99,20 @@ public class InnvilgelseUKMapper {
     }
 
     private Barn tilBarn(OmfattetFamilie omfattetFamilie) {
-        return new Barn(
-            omfattetFamilie.getSammensattNavn(),
-            true,
-            null,
-            omfattetFamilie.getIdent(),
-            null,
-            LocalDate.now() // TODO: hent fødseldato
-        );
+        return new Barn.Builder()
+            .navn(omfattetFamilie.getSammensattNavn())
+            .fnr(omfattetFamilie.getIdent())
+            .foedselsdato(getFødselDato(omfattetFamilie.getIdent()))
+            .build();
     }
 
     private Barn tilBarn(no.nav.melosys.domain.person.familie.IkkeOmfattetBarn ikkeOmfattetBarn) {
-        return new Barn(
-            ikkeOmfattetBarn.sammensattNavn,
-            true,
-            null, // TODO: finn ut av vi kan bruke ikkeOmfattetBarn.begrunnelse() (Medfolgende_barn_begrunnelser)
-            ikkeOmfattetBarn.ident,
-            null,
-            LocalDate.now() // TODO: hent fødseldato
-        );
-    }
-
-    private Barn tilBarn(Map<String, MedfolgendeFamilie> medfølgendeBarn, String uuid) {
-        MedfolgendeFamilie medfolgendeFamilie = medfølgendeBarn.get(uuid);
-        return new Barn(
-            medfolgendeFamilie.getNavn(),
-            false,
-            Medfolgende_barn_begrunnelser_ftrl.OVER_18_AR, // TODO
-            medfolgendeFamilie.getFnr(),
-            null,
-            LocalDate.now() // TODO: hent fødseldato
-        );
+        return new Barn.Builder()
+            .navn(ikkeOmfattetBarn.sammensattNavn)
+            .fnr(ikkeOmfattetBarn.ident)
+            .begrunnelse(ikkeOmfattetBarn.begrunnelse)
+            .foedselsdato(getFødselDato(ikkeOmfattetBarn.ident))
+            .build();
     }
 
     private LocalDate getFødselDato(String fnr) {
