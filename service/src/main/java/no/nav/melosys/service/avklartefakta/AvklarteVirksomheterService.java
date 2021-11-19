@@ -110,7 +110,7 @@ public class AvklarteVirksomheterService {
 
     @Transactional
     public void lagreVirksomheterSomAvklartefakta(Long behandlingID, List<String> virksomhetIDer) {
-        validerVirksomhetIDerGyldige(virksomhetIDer, behandlingID);
+        validerVirksomhetIDerGyldige(behandlingID, virksomhetIDer);
 
         avklartefaktaService.slettAvklarteFakta(behandlingID, VIRKSOMHET);
 
@@ -123,8 +123,7 @@ public class AvklarteVirksomheterService {
         avklartefaktaService.leggTilAvklarteFakta(behandlingID, VIRKSOMHET, VIRKSOMHET.getKode(), virksomhetID, Avklartefakta.VALGT_FAKTA);
     }
 
-    private void validerVirksomhetIDerGyldige(List<String> virksomhetIDer,
-                                              Long behandlingID) {
+    private void validerVirksomhetIDerGyldige(Long behandlingID, List<String> virksomhetIDer) {
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
         for (String virksomhetID : virksomhetIDer) {
             if (!erVirksomhetIDGyldig(virksomhetID, behandling)) {
