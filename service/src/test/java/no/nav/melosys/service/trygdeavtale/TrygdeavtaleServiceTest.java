@@ -114,44 +114,6 @@ class TrygdeavtaleServiceTest {
             .withMessageContaining("Forventet ett land i behandlingsgrunnlagdata soeknadsland.landkoder, men fant: []");
     }
 
-    private TrygdeavtaleResultat lagTrygdeavtaleResultat() {
-        return new TrygdeavtaleResultat.Builder()
-            .virksomheter(List.of(ORGNR_1))
-            .bestemmelse(Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1.getKode())
-            .familie(new AvklarteMedfolgendeFamilie(Set.of(), Set.of(
-                new IkkeOmfattetFamilie(
-                    UUID_BARN,
-                    Medfolgende_barn_begrunnelser_ftrl.OVER_18_AR.getKode(),
-                    BEGRUNNELSE_BARN),
-                new IkkeOmfattetFamilie(
-                    UUID_EKTEFELLE,
-                    Medfolgende_ektefelle_samboer_begrunnelser_ftrl.EGEN_INNTEKT.getKode(),
-                    BEGRUNNELSE_SAMBOER)
-            )))
-            .build();
-    }
-
-    private static Behandlingsgrunnlag lagBehandlingsgrunnlag() {
-        Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
-        SoeknadTrygdeavtale behandlingsgrunnlagdata = new SoeknadTrygdeavtale();
-        behandlingsgrunnlagdata.soeknadsland.landkoder.add("GB");
-        behandlingsgrunnlagdata.periode = new Periode(LocalDate.of(2020, 1, 1), LocalDate.of(2021, 1, 1));
-        behandlingsgrunnlag.setBehandlingsgrunnlagdata(behandlingsgrunnlagdata);
-        return behandlingsgrunnlag;
-    }
-
-    private Collection<Lovvalgsperiode> expectedLovvalgsperioder() {
-        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setFom(LocalDate.of(2020, 1, 1));
-        lovvalgsperiode.setTom(LocalDate.of(2021, 1, 1));
-        lovvalgsperiode.setDekning(Trygdedekninger.FULL_DEKNING_FTRL);
-        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1);
-        lovvalgsperiode.setLovvalgsland(Landkoder.GB);
-        lovvalgsperiode.setMedlemskapstype(Medlemskapstyper.PLIKTIG);
-        lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.INNVILGET);
-        return List.of(lovvalgsperiode);
-    }
-
     @Test
     void hentVirksomheter_fraRegisterOppslag_mappesKorrekt() {
         var selvstendigForetak = new SelvstendigForetak();
@@ -259,6 +221,44 @@ class TrygdeavtaleServiceTest {
         var behandling = lagBehandlingMedFamilie(emptyList());
         var response = trygdeavtaleService.hentFamiliemedlemmer(behandling);
         assertThat(response).isEmpty();
+    }
+
+    private TrygdeavtaleResultat lagTrygdeavtaleResultat() {
+        return new TrygdeavtaleResultat.Builder()
+            .virksomheter(List.of(ORGNR_1))
+            .bestemmelse(Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1.getKode())
+            .familie(new AvklarteMedfolgendeFamilie(Set.of(), Set.of(
+                new IkkeOmfattetFamilie(
+                    UUID_BARN,
+                    Medfolgende_barn_begrunnelser_ftrl.OVER_18_AR.getKode(),
+                    BEGRUNNELSE_BARN),
+                new IkkeOmfattetFamilie(
+                    UUID_EKTEFELLE,
+                    Medfolgende_ektefelle_samboer_begrunnelser_ftrl.EGEN_INNTEKT.getKode(),
+                    BEGRUNNELSE_SAMBOER)
+            )))
+            .build();
+    }
+
+    private static Behandlingsgrunnlag lagBehandlingsgrunnlag() {
+        Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
+        SoeknadTrygdeavtale behandlingsgrunnlagdata = new SoeknadTrygdeavtale();
+        behandlingsgrunnlagdata.soeknadsland.landkoder.add("GB");
+        behandlingsgrunnlagdata.periode = new Periode(LocalDate.of(2020, 1, 1), LocalDate.of(2021, 1, 1));
+        behandlingsgrunnlag.setBehandlingsgrunnlagdata(behandlingsgrunnlagdata);
+        return behandlingsgrunnlag;
+    }
+
+    private Collection<Lovvalgsperiode> expectedLovvalgsperioder() {
+        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
+        lovvalgsperiode.setFom(LocalDate.of(2020, 1, 1));
+        lovvalgsperiode.setTom(LocalDate.of(2021, 1, 1));
+        lovvalgsperiode.setDekning(Trygdedekninger.FULL_DEKNING_FTRL);
+        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1);
+        lovvalgsperiode.setLovvalgsland(Landkoder.GB);
+        lovvalgsperiode.setMedlemskapstype(Medlemskapstyper.PLIKTIG);
+        lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.INNVILGET);
+        return List.of(lovvalgsperiode);
     }
 
 
