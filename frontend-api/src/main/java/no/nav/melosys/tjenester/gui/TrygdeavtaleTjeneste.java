@@ -3,7 +3,7 @@ package no.nav.melosys.tjenester.gui;
 import java.util.Collections;
 
 import io.swagger.annotations.Api;
-import no.nav.melosys.service.TrygdeavtaleService;
+import no.nav.melosys.service.trygdeavtale.TrygdeavtaleService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.tjenester.gui.dto.trygdeavtale.TrygdeavtaleInfoDto;

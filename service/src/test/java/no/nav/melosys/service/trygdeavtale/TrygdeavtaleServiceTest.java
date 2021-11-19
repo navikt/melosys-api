@@ -1,4 +1,4 @@
-package no.nav.melosys.service;
+package no.nav.melosys.service.trygdeavtale;
 
 import java.time.LocalDate;
 import java.util.Collection;
@@ -25,6 +25,7 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_t
 import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie;
 import no.nav.melosys.domain.person.familie.IkkeOmfattetFamilie;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;

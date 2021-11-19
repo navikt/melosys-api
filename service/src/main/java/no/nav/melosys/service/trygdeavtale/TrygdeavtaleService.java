@@ -1,4 +1,4 @@
-package no.nav.melosys.service;
+package no.nav.melosys.service.trygdeavtale;
 
 import java.util.HashMap;
 import java.util.List;
@@ -19,6 +19,7 @@ import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
 import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;

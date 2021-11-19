@@ -3,7 +3,7 @@ package no.nav.melosys.tjenester.gui.dto.trygdeavtale;
 import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie;
 import no.nav.melosys.domain.person.familie.IkkeOmfattetFamilie;
 import no.nav.melosys.domain.person.familie.OmfattetFamilie;
-import no.nav.melosys.service.TrygdeavtaleService;
+import no.nav.melosys.service.trygdeavtale.TrygdeavtaleService;
 import no.nav.melosys.tjenester.gui.dto.MedfolgendeFamilieDto;
 
 import java.util.ArrayList;
