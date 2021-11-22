@@ -13,6 +13,7 @@ import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Representerer;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.pdl.dto.person.Navn;
@@ -55,7 +56,9 @@ public class FattetVedtakService {
     @Transactional
     public void publiserFattetVedtak(long behandlingId) throws IkkeFunnetException {
         var behandling = behandlingService.hentBehandling(behandlingId);
-        fattetVedtakProducer.produserMelding(lagMelding(behandling));
+        if (behandling.getFagsak().getType() == Sakstyper.FTRL) {
+            fattetVedtakProducer.produserMelding(lagMelding(behandling));
+        }
     }
 
     private FattetVedtak lagMelding(Behandling behandling) throws IkkeFunnetException {

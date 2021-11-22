@@ -9,7 +9,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 @JsonSubTypes(
     {
         @JsonSubTypes.Type(value = FattEosVedtakDto.class),
-        @JsonSubTypes.Type(value = FattFtrlVedtakDto.class)
+        @JsonSubTypes.Type(value = FattMedlemIFolketrygdenVedtakDto.class)
     }
 )
 public abstract class FattVedtakDto {

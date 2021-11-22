@@ -30,8 +30,7 @@ import no.nav.melosys.service.journalforing.dto.DokumentDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringDto;
 import no.nav.melosys.service.sak.OpprettSakDto;
 import no.nav.melosys.service.soknad.SoknadMottatt;
-import no.nav.melosys.service.vedtak.FattFtrlVedtakRequest;
-import no.nav.melosys.service.vedtak.FattTrygdeavtaleVedtakRequest;
+import no.nav.melosys.service.vedtak.FattMedlemIFolketrygdenVedtakRequest;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -203,7 +202,7 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
-    public void opprettProsessinstansIverksettVedtakFTRL(Behandling behandling, FattFtrlVedtakRequest request) {
+    public void opprettProsessinstansIverksettVedtakFTRL(Behandling behandling, FattMedlemIFolketrygdenVedtakRequest request) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.IVERKSETT_VEDTAK_FTRL)
             .medBehandling(behandling)
@@ -213,7 +212,7 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
-    public void opprettProsessinstansIverksettVedtakTrygdeavtale(Behandling behandling, FattTrygdeavtaleVedtakRequest request) {
+    public void opprettProsessinstansIverksettVedtakTrygdeavtale(Behandling behandling, FattMedlemIFolketrygdenVedtakRequest request) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.IVERKSETT_VEDTAK_TRYGDEAVTALE)
             .medBehandling(behandling)

@@ -76,18 +76,18 @@ class TrygdeavtaleVedtakServiceTest {
     }
 
     @Test
-    void fattVedtak_Førstegangsvedtak_fatterVedtak() {
+    void fattVedtak_førstegangsvedtak_fatterVedtak() {
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
-        FattTrygdeavtaleVedtakRequest request = lagFattVedtakRequest();
+        FattMedlemIFolketrygdenVedtakRequest request = lagFattVedtakRequest();
         trygdeavtaleVedtakService.fattVedtak(lagBehandling(), request);
 
         verify(behandlingsresultatService).lagre(behandlingsresultatCaptor.capture());
         verify(behandlingService).lagre(behandlingCaptor.capture());
         verify(prosessinstansService).opprettProsessinstansIverksettVedtakTrygdeavtale(any(Behandling.class), eq(request));
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(SAKSNUMMER);
-        verify(dokgenService).produserOgDistribuerBrev(anyLong(), brevbestillingRequestCaptor.capture());
+//        verify(dokgenService).produserOgDistribuerBrev(anyLong(), brevbestillingRequestCaptor.capture());
 
         Behandlingsresultat lagretBehandlingsresultat = behandlingsresultatCaptor.getValue();
         assertThat(lagretBehandlingsresultat)
@@ -98,18 +98,18 @@ class TrygdeavtaleVedtakServiceTest {
         assertThat(lagretBehandling.getStatus()).isEqualTo(IVERKSETTER_VEDTAK);
         assertThat(lagretBehandling.getFagsak().getStatus()).isEqualTo(MEDLEMSKAP_AVKLART);
 
-        BrevbestillingRequest brevbestillingRequest = brevbestillingRequestCaptor.getValue();
-        assertThat(brevbestillingRequest)
-            .extracting("produserbardokument", "bestillersId", "mottaker", "innledningFritekst",
-                "begrunnelseFritekst", "ektefelleFritekst", "barnFritekst")
-            .containsExactly(ATTEST_NO_UK_1, "Z990007", BRUKER, "Innledning",
-                "Begrunnelse", "Ektefelle omfattet", "Barn omfattet");
-        assertThat(brevbestillingRequest.getKopiMottakere().size()).isEqualTo(1);
-        assertThat(brevbestillingRequest.getKopiMottakere().get(0).getRolle()).isEqualTo(ARBEIDSGIVER);
+//        BrevbestillingRequest brevbestillingRequest = brevbestillingRequestCaptor.getValue();
+//        assertThat(brevbestillingRequest)
+//            .extracting("produserbardokument", "bestillersId", "mottaker", "innledningFritekst",
+//                "begrunnelseFritekst", "ektefelleFritekst", "barnFritekst")
+//            .containsExactly(ATTEST_NO_UK_1, "Z990007", BRUKER, "Innledning",
+//                "Begrunnelse", "Ektefelle omfattet", "Barn omfattet");
+//        assertThat(brevbestillingRequest.getKopiMottakere().size()).isEqualTo(1);
+//        assertThat(brevbestillingRequest.getKopiMottakere().get(0).getRolle()).isEqualTo(ARBEIDSGIVER);
     }
 
-    private FattTrygdeavtaleVedtakRequest lagFattVedtakRequest() {
-        return new FattTrygdeavtaleVedtakRequest.Builder()
+    private FattMedlemIFolketrygdenVedtakRequest lagFattVedtakRequest() {
+        return new FattMedlemIFolketrygdenVedtakRequest.Builder()
             .medBehandlingsresultat(MEDLEM_I_FOLKETRYGDEN)
             .medVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK)
             .medFritekstInnledning("Innledning")

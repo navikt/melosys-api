@@ -11,14 +11,14 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.vedtak.FattEosVedtakRequest;
-import no.nav.melosys.service.vedtak.FattFtrlVedtakRequest;
+import no.nav.melosys.service.vedtak.FattMedlemIFolketrygdenVedtakRequest;
 import no.nav.melosys.service.vedtak.VedtakServiceFasade;
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
 import no.nav.melosys.sikkerhet.context.TestSubjectHandler;
 import no.nav.melosys.tjenester.gui.JsonSchemaTestParent;
 import no.nav.melosys.tjenester.gui.dto.EndreVedtakDto;
 import no.nav.melosys.tjenester.gui.dto.FattEosVedtakDto;
-import no.nav.melosys.tjenester.gui.dto.FattFtrlVedtakDto;
+import no.nav.melosys.tjenester.gui.dto.FattMedlemIFolketrygdenVedtakDto;
 import no.nav.melosys.tjenester.gui.dto.FattVedtakDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -72,7 +72,7 @@ class VedtakTjenesteTest extends JsonSchemaTestParent {
 
     @Test
     void fattVedtakFtrl_henleggelse_fungerer() throws Exception {
-        FattFtrlVedtakDto fattVedtakDto = new FattFtrlVedtakDto();
+        FattMedlemIFolketrygdenVedtakDto fattVedtakDto = new FattMedlemIFolketrygdenVedtakDto();
         fattVedtakDto.setBehandlingsresultatTypeKode(Behandlingsresultattyper.HENLEGGELSE);
         fattVedtakDto.setVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK);
         fattVedtakDto.setFritekstBegrunnelse("Begrunnelse");
@@ -80,7 +80,7 @@ class VedtakTjenesteTest extends JsonSchemaTestParent {
         vedtakTjeneste.fattVedtak(behandlingID, fattVedtakDto);
 
         verify(aksesskontroll).autoriserSkriv(behandlingID);
-        verify(vedtakServiceFasade).fattVedtak(eq(behandlingID), any(FattFtrlVedtakRequest.class));
+        verify(vedtakServiceFasade).fattVedtak(eq(behandlingID), any(FattMedlemIFolketrygdenVedtakRequest.class));
 
         valider(fattVedtakDto, FATT_VEDTAK_SCHEMA);
     }
@@ -97,7 +97,7 @@ class VedtakTjenesteTest extends JsonSchemaTestParent {
 
     @Test
     void fattVedtak_dtoManglerVedtakstype_girException() {
-        FattVedtakDto fattVedtakDto = new FattFtrlVedtakDto();
+        FattVedtakDto fattVedtakDto = new FattMedlemIFolketrygdenVedtakDto();
         fattVedtakDto.setBehandlingsresultatTypeKode(Behandlingsresultattyper.HENLEGGELSE);
 
         assertThatThrownBy(() -> vedtakTjeneste.fattVedtak(behandlingID, fattVedtakDto))
@@ -141,7 +141,7 @@ class VedtakTjenesteTest extends JsonSchemaTestParent {
         FattVedtakDto ftrlVedtakDto = objectMapper.readValue(hentJsonRequest("fattftrlvedtak.json"), FattVedtakDto.class);
 
         //TODO Utvide assert
-        assertThat(ftrlVedtakDto).isNotNull().isInstanceOf(FattFtrlVedtakDto.class);
+        assertThat(ftrlVedtakDto).isNotNull().isInstanceOf(FattMedlemIFolketrygdenVedtakDto.class);
     }
 
     private InputStream hentJsonRequest(String filnavn) {

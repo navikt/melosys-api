@@ -4,7 +4,7 @@ import java.util.List;
 
 import no.nav.melosys.service.dokument.brev.KopiMottaker;
 
-public class FattFtrlVedtakDto extends FattVedtakDto {
+public class FattMedlemIFolketrygdenVedtakDto extends FattVedtakDto {
     private String fritekstInnledning;
     private String fritekstBegrunnelse;
     private String fritekstEktefelle;

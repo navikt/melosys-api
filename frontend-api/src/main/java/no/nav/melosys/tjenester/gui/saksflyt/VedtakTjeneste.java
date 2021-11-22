@@ -64,17 +64,14 @@ public class VedtakTjeneste {
                 .medFritekstSed(eosVedtakDto.getFritekstSed())
                 .medMottakerInstitusjoner(eosVedtakDto.getMottakerinstitusjoner())
                 .medRevurderBegrunnelse(eosVedtakDto.getRevurderBegrunnelse());
-        } else if (fattVedtakDto instanceof FattFtrlVedtakDto ftrlVedtakDto) {
-            fattVedtakRequest = new FattFtrlVedtakRequest.Builder()
-                .medFritekstInnledning(ftrlVedtakDto.getFritekstInnledning())
-                .medFritekstBegrunnelse(ftrlVedtakDto.getFritekstBegrunnelse())
-                .medFritekstEktefelle(ftrlVedtakDto.getFritekstEktefelle())
-                .medFritekstBarn(ftrlVedtakDto.getFritekstBarn())
-                .medKopiMottakere(ftrlVedtakDto.getKopiMottakere())
+        } else if (fattVedtakDto instanceof FattMedlemIFolketrygdenVedtakDto medlemIFolketrygdenVedtakDto) {
+            fattVedtakRequest = new FattMedlemIFolketrygdenVedtakRequest.Builder()
+                .medFritekstInnledning(medlemIFolketrygdenVedtakDto.getFritekstInnledning())
+                .medFritekstBegrunnelse(medlemIFolketrygdenVedtakDto.getFritekstBegrunnelse())
+                .medFritekstEktefelle(medlemIFolketrygdenVedtakDto.getFritekstEktefelle())
+                .medFritekstBarn(medlemIFolketrygdenVedtakDto.getFritekstBarn())
+                .medKopiMottakere(medlemIFolketrygdenVedtakDto.getKopiMottakere())
                 .medBestillersId(bestillersId);
-        } else if (fattVedtakDto instanceof FattTrygdeavtaleVedtakDto ftrlVedtakDto) {
-            fattVedtakRequest = new FattTrygdeavtaleVedtakRequest.Builder()
-                .medFritekstBegrunnelse(ftrlVedtakDto.getFritekstBegrunnelse());
         } else {
             throw new FunksjonellException("Vedtakstype er ikke støttet");
         }

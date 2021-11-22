@@ -4,7 +4,7 @@ import java.util.List;
 
 import no.nav.melosys.service.dokument.brev.KopiMottaker;
 
-public class FattFtrlVedtakRequest extends FattVedtakRequest {
+public class FattMedlemIFolketrygdenVedtakRequest extends FattVedtakRequest {
     private final String fritekstInnledning;
     private final String fritekstBegrunnelse;
     private final String fritekstEktefelle;
@@ -12,7 +12,7 @@ public class FattFtrlVedtakRequest extends FattVedtakRequest {
     private final List<KopiMottaker> kopiMottakere;
     private final String bestillersId;
 
-    private FattFtrlVedtakRequest(Builder builder) {
+    private FattMedlemIFolketrygdenVedtakRequest(Builder builder) {
         super(builder);
         this.fritekstInnledning = builder.fritekstInnledning;
         this.fritekstBegrunnelse = builder.fritekstBegrunnelse;
@@ -89,8 +89,8 @@ public class FattFtrlVedtakRequest extends FattVedtakRequest {
             return this;
         }
 
-        public FattFtrlVedtakRequest build() {
-            return new FattFtrlVedtakRequest(this);
+        public FattMedlemIFolketrygdenVedtakRequest build() {
+            return new FattMedlemIFolketrygdenVedtakRequest(this);
         }
     }
 }

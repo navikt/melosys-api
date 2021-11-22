@@ -46,7 +46,7 @@ public class TrygdeavtaleVedtakService {
         this.dokgenService = dokgenService;
     }
 
-    public void fattVedtak(Behandling behandling, FattTrygdeavtaleVedtakRequest request) {
+    public void fattVedtak(Behandling behandling, FattMedlemIFolketrygdenVedtakRequest request) {
         long behandlingID = behandling.getId();
 
         String saksnummer = behandling.getFagsak().getSaksnummer();
@@ -63,12 +63,12 @@ public class TrygdeavtaleVedtakService {
         behandlingService.lagre(behandling);
 
         prosessinstansService.opprettProsessinstansIverksettVedtakTrygdeavtale(behandling, request);
-        // Kommer innvigelse nå etterpå - og vi må finne ut hvordan vi slår dette sammen
-        dokgenService.produserOgDistribuerBrev(behandlingID, lagAttestBrevbestilling(request));
+        // TODO: Produser og distribuer både attest og innvilgelse-brevene
+        // dokgenService.produserOgDistribuerBrev(behandlingID, lagAttestBrevbestilling(request));
         oppgaveService.ferdigstillOppgaveMedSaksnummer(saksnummer);
     }
 
-    private BrevbestillingRequest lagAttestBrevbestilling(FattTrygdeavtaleVedtakRequest request) {
+    private BrevbestillingRequest lagAttestBrevbestilling(FattMedlemIFolketrygdenVedtakRequest request) {
         return new BrevbestillingRequest.Builder()
             .medProduserbardokument(Produserbaredokumenter.ATTEST_NO_UK_1)
             .medMottaker(Aktoersroller.BRUKER)
@@ -81,7 +81,7 @@ public class TrygdeavtaleVedtakService {
             .build();
     }
 
-    private void oppdaterBehandlingsresultat(long behandlingID, FattTrygdeavtaleVedtakRequest request) throws IkkeFunnetException {
+    private void oppdaterBehandlingsresultat(long behandlingID, FattMedlemIFolketrygdenVedtakRequest request) throws IkkeFunnetException {
         var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
         behandlingsresultat.setType(request.getBehandlingsresultatTypeKode());
         behandlingsresultat.settVedtakMetadata(request.getVedtakstype(), LocalDate.now().plusWeeks(FRIST_KLAGE_UKER));

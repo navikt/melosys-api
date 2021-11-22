@@ -79,7 +79,7 @@ class FtrlVedtakServiceTest {
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
-        FattFtrlVedtakRequest request = lagFattVedtakRequest();
+        FattMedlemIFolketrygdenVedtakRequest request = lagFattVedtakRequest();
         ftrlVedtakService.fattVedtak(lagBehandling(), request);
 
         verify(behandlingsresultatService).lagre(behandlingsresultatCaptor.capture());
@@ -107,8 +107,8 @@ class FtrlVedtakServiceTest {
         assertThat(brevbestillingRequest.getKopiMottakere().get(0).getRolle()).isEqualTo(ARBEIDSGIVER);
     }
 
-    private FattFtrlVedtakRequest lagFattVedtakRequest() {
-        return new FattFtrlVedtakRequest.Builder()
+    private FattMedlemIFolketrygdenVedtakRequest lagFattVedtakRequest() {
+        return new FattMedlemIFolketrygdenVedtakRequest.Builder()
             .medBehandlingsresultat(MEDLEM_I_FOLKETRYGDEN)
             .medVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK)
             .medFritekstInnledning("Innledning")
