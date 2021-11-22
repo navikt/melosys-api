@@ -26,13 +26,9 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static no.nav.melosys.domain.kodeverk.Aktoersroller.ARBEIDSGIVER;
-import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
 import static no.nav.melosys.domain.kodeverk.Saksstatuser.MEDLEMSKAP_AVKLART;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.IVERKSETTER_VEDTAK;
-import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.ATTEST_NO_UK_1;
-import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.INNVILGELSE_FOLKETRYGDLOVEN_2_8;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
@@ -80,7 +76,7 @@ class TrygdeavtaleVedtakServiceTest {
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
-        FattMedlemIFolketrygdenVedtakRequest request = lagFattVedtakRequest();
+        FattTrygdeavtaleVedtakRequest request = lagFattVedtakRequest();
         trygdeavtaleVedtakService.fattVedtak(lagBehandling(), request);
 
         verify(behandlingsresultatService).lagre(behandlingsresultatCaptor.capture());
@@ -108,8 +104,8 @@ class TrygdeavtaleVedtakServiceTest {
 //        assertThat(brevbestillingRequest.getKopiMottakere().get(0).getRolle()).isEqualTo(ARBEIDSGIVER);
     }
 
-    private FattMedlemIFolketrygdenVedtakRequest lagFattVedtakRequest() {
-        return new FattMedlemIFolketrygdenVedtakRequest.Builder()
+    private FattTrygdeavtaleVedtakRequest lagFattVedtakRequest() {
+        return new FattTrygdeavtaleVedtakRequest.Builder()
             .medBehandlingsresultat(MEDLEM_I_FOLKETRYGDEN)
             .medVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK)
             .medFritekstInnledning("Innledning")

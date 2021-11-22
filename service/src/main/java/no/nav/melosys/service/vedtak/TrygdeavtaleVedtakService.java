@@ -46,7 +46,7 @@ public class TrygdeavtaleVedtakService {
         this.dokgenService = dokgenService;
     }
 
-    public void fattVedtak(Behandling behandling, FattMedlemIFolketrygdenVedtakRequest request) {
+    public void fattVedtak(Behandling behandling, FattTrygdeavtaleVedtakRequest request) {
         long behandlingID = behandling.getId();
 
         String saksnummer = behandling.getFagsak().getSaksnummer();
@@ -68,7 +68,7 @@ public class TrygdeavtaleVedtakService {
         oppgaveService.ferdigstillOppgaveMedSaksnummer(saksnummer);
     }
 
-    private BrevbestillingRequest lagAttestBrevbestilling(FattMedlemIFolketrygdenVedtakRequest request) {
+    private BrevbestillingRequest lagAttestBrevbestilling(FattTrygdeavtaleVedtakRequest request) {
         return new BrevbestillingRequest.Builder()
             .medProduserbardokument(Produserbaredokumenter.ATTEST_NO_UK_1)
             .medMottaker(Aktoersroller.BRUKER)
@@ -81,7 +81,7 @@ public class TrygdeavtaleVedtakService {
             .build();
     }
 
-    private void oppdaterBehandlingsresultat(long behandlingID, FattMedlemIFolketrygdenVedtakRequest request) throws IkkeFunnetException {
+    private void oppdaterBehandlingsresultat(long behandlingID, FattTrygdeavtaleVedtakRequest request) throws IkkeFunnetException {
         var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
         behandlingsresultat.setType(request.getBehandlingsresultatTypeKode());
         behandlingsresultat.settVedtakMetadata(request.getVedtakstype(), LocalDate.now().plusWeeks(FRIST_KLAGE_UKER));

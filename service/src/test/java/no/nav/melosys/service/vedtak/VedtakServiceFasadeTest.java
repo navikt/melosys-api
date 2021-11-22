@@ -99,7 +99,7 @@ class VedtakServiceFasadeTest {
 
         vedtakServiceFasade.fattVedtak(behandlingID, lagFattFtrlVedtakRequest());
 
-        verify(mockFtrlVedtakService).fattVedtak(eq(behandling), any(FattMedlemIFolketrygdenVedtakRequest.class));
+        verify(mockFtrlVedtakService).fattVedtak(eq(behandling), any(FattFtrlRequest.class));
         verifyNoInteractions(mockEosVedtakService);
         verifyNoInteractions(mockEosVedtakSystemService);
     }
@@ -109,9 +109,9 @@ class VedtakServiceFasadeTest {
         setFagsakPåBehandling(Sakstyper.TRYGDEAVTALE);
         when(mockBehandlingService.hentBehandlingUtenSaksopplysninger(behandlingID)).thenReturn(behandling);
 
-        vedtakServiceFasade.fattVedtak(behandlingID, lagFattMedlemIFolketrygdenVedtakRequest());
+        vedtakServiceFasade.fattVedtak(behandlingID, lagFattTrygdeavtaleVedtakRequest());
 
-        verify(trygdeavtaleVedtakService).fattVedtak(eq(behandling), any(FattMedlemIFolketrygdenVedtakRequest.class));
+        verify(trygdeavtaleVedtakService).fattVedtak(eq(behandling), any(FattTrygdeavtaleVedtakRequest.class));
         verifyNoInteractions(mockEosVedtakService);
         verifyNoInteractions(mockEosVedtakSystemService);
     }
@@ -188,8 +188,8 @@ class VedtakServiceFasadeTest {
             .build();
     }
 
-    private FattMedlemIFolketrygdenVedtakRequest lagFattFtrlVedtakRequest() {
-        return new FattMedlemIFolketrygdenVedtakRequest.Builder()
+    private FattFtrlRequest lagFattFtrlVedtakRequest() {
+        return new FattFtrlRequest.Builder()
             .medBehandlingsresultat(FASTSATT_LOVVALGSLAND)
             .medVedtakstype(FØRSTEGANGSVEDTAK)
             .medFritekstBegrunnelse("Begrunnelse")
@@ -197,8 +197,8 @@ class VedtakServiceFasadeTest {
             .build();
     }
 
-    private FattMedlemIFolketrygdenVedtakRequest lagFattMedlemIFolketrygdenVedtakRequest() {
-        return new FattMedlemIFolketrygdenVedtakRequest.Builder()
+    private FattTrygdeavtaleVedtakRequest lagFattTrygdeavtaleVedtakRequest() {
+        return new FattTrygdeavtaleVedtakRequest.Builder()
             .medBehandlingsresultat(FASTSATT_LOVVALGSLAND)
             .medVedtakstype(FØRSTEGANGSVEDTAK)
             .medFritekstBegrunnelse("Begrunnelse")
