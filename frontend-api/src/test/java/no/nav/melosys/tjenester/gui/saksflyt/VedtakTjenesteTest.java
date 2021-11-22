@@ -15,7 +15,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.vedtak.FattEosVedtakRequest;
-import no.nav.melosys.service.vedtak.FattFtrlRequest;
+import no.nav.melosys.service.vedtak.FattFtrlVedtakRequest;
 import no.nav.melosys.service.vedtak.VedtakServiceFasade;
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
 import no.nav.melosys.sikkerhet.context.TestSubjectHandler;
@@ -88,7 +88,7 @@ class VedtakTjenesteTest extends JsonSchemaTestParent {
         vedtakTjeneste.fattVedtak(behandlingID, fattVedtakDto);
 
         verify(aksesskontroll).autoriserSkriv(behandlingID);
-        verify(vedtakServiceFasade).fattVedtak(eq(behandlingID), any(FattFtrlRequest.class));
+        verify(vedtakServiceFasade).fattVedtak(eq(behandlingID), any(FattFtrlVedtakRequest.class));
 
         valider(fattVedtakDto, FATT_VEDTAK_SCHEMA);
     }

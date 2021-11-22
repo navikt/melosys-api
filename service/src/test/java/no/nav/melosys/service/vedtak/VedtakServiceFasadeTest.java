@@ -99,7 +99,7 @@ class VedtakServiceFasadeTest {
 
         vedtakServiceFasade.fattVedtak(behandlingID, lagFattFtrlVedtakRequest());
 
-        verify(mockFtrlVedtakService).fattVedtak(eq(behandling), any(FattFtrlRequest.class));
+        verify(mockFtrlVedtakService).fattVedtak(eq(behandling), any(FattFtrlVedtakRequest.class));
         verifyNoInteractions(mockEosVedtakService);
         verifyNoInteractions(mockEosVedtakSystemService);
     }
@@ -188,8 +188,8 @@ class VedtakServiceFasadeTest {
             .build();
     }
 
-    private FattFtrlRequest lagFattFtrlVedtakRequest() {
-        return new FattFtrlRequest.Builder()
+    private FattFtrlVedtakRequest lagFattFtrlVedtakRequest() {
+        return new FattFtrlVedtakRequest.Builder()
             .medBehandlingsresultat(FASTSATT_LOVVALGSLAND)
             .medVedtakstype(FØRSTEGANGSVEDTAK)
             .medFritekstBegrunnelse("Begrunnelse")

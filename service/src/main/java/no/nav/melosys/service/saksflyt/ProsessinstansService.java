@@ -30,7 +30,7 @@ import no.nav.melosys.service.journalforing.dto.DokumentDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringDto;
 import no.nav.melosys.service.sak.OpprettSakDto;
 import no.nav.melosys.service.soknad.SoknadMottatt;
-import no.nav.melosys.service.vedtak.FattFtrlRequest;
+import no.nav.melosys.service.vedtak.FattFtrlVedtakRequest;
 import no.nav.melosys.service.vedtak.FattTrygdeavtaleVedtakRequest;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import org.apache.commons.lang3.StringUtils;
@@ -203,7 +203,7 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
-    public void opprettProsessinstansIverksettVedtakFTRL(Behandling behandling, FattFtrlRequest request) {
+    public void opprettProsessinstansIverksettVedtakFTRL(Behandling behandling, FattFtrlVedtakRequest request) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.IVERKSETT_VEDTAK_FTRL)
             .medBehandling(behandling)

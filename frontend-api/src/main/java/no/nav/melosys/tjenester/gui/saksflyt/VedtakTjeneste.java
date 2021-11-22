@@ -71,7 +71,7 @@ public class VedtakTjeneste {
         } else if (fattVedtakDto instanceof FattMedlemIFolketrygdenVedtakDto medlemIFolketrygdenVedtakDto) {
             var sakstype = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID).getFagsak().getType();
             if (sakstype == Sakstyper.FTRL) {
-                fattVedtakRequest = new FattFtrlRequest.Builder()
+                fattVedtakRequest = new FattFtrlVedtakRequest.Builder()
                     .medFritekstInnledning(medlemIFolketrygdenVedtakDto.getFritekstInnledning())
                     .medFritekstBegrunnelse(medlemIFolketrygdenVedtakDto.getFritekstBegrunnelse())
                     .medFritekstEktefelle(medlemIFolketrygdenVedtakDto.getFritekstEktefelle())

@@ -46,7 +46,7 @@ public class FtrlVedtakService {
         this.dokgenService = dokgenService;
     }
 
-    public void fattVedtak(Behandling behandling, FattFtrlRequest request) {
+    public void fattVedtak(Behandling behandling, FattFtrlVedtakRequest request) {
         long behandlingID = behandling.getId();
 
         log.info("Fatter vedtak for (FTRL) sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandlingID);
@@ -66,7 +66,7 @@ public class FtrlVedtakService {
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 
-    private BrevbestillingRequest lagBrevbestilling(FattFtrlRequest request) {
+    private BrevbestillingRequest lagBrevbestilling(FattFtrlVedtakRequest request) {
         return new BrevbestillingRequest.Builder()
             .medProduserbardokument(Produserbaredokumenter.INNVILGELSE_FOLKETRYGDLOVEN_2_8)
             .medMottaker(Aktoersroller.BRUKER)
@@ -79,7 +79,7 @@ public class FtrlVedtakService {
             .build();
     }
 
-    private void oppdaterBehandlingsresultat(long behandlingID, FattFtrlRequest request) throws IkkeFunnetException {
+    private void oppdaterBehandlingsresultat(long behandlingID, FattFtrlVedtakRequest request) throws IkkeFunnetException {
         var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
         behandlingsresultat.setType(request.getBehandlingsresultatTypeKode());
         behandlingsresultat.settVedtakMetadata(request.getVedtakstype(), LocalDate.now().plusWeeks(FRIST_KLAGE_UKER));
