@@ -18,28 +18,28 @@ import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
-import no.nav.melosys.service.registeropplysninger.RegisterOppslagService;
 import org.springframework.stereotype.Service;
 
 @Service
 public class TrygdeavtaleService {
 
-    private final RegisterOppslagService registerOppslagService;
+    private final EregFasade eregFasade;
     private final BehandlingsgrunnlagService behandlingsgrunnlagService;
     private final AvklarteMedfolgendeFamilieService avklarteMedfolgendeFamilieService;
     private final AvklarteVirksomheterService avklarteVirksomheterService;
     private final LovvalgsperiodeService lovvalgsperiodeService;
 
-    public TrygdeavtaleService(RegisterOppslagService registerOppslagService,
+    public TrygdeavtaleService(EregFasade eregFasade,
                                BehandlingsgrunnlagService behandlingsgrunnlagService,
                                AvklarteMedfolgendeFamilieService avklarteMedfolgendeFamilieService,
                                AvklarteVirksomheterService avklarteVirksomheterService,
                                LovvalgsperiodeService lovvalgsperiodeService) {
-        this.registerOppslagService = registerOppslagService;
+        this.eregFasade = eregFasade;
         this.behandlingsgrunnlagService = behandlingsgrunnlagService;
         this.avklarteMedfolgendeFamilieService = avklarteMedfolgendeFamilieService;
         this.avklarteVirksomheterService = avklarteVirksomheterService;
@@ -66,7 +66,8 @@ public class TrygdeavtaleService {
     private String finnNavnFraOrganisasjonsdokument(String orgnr, List<OrganisasjonDokument> organisasjonDokumenter) {
         return organisasjonDokumenter.stream()
             .filter(organisasjonDokument -> orgnr.equals(organisasjonDokument.getOrgnummer()))
-            .findFirst().orElse(registerOppslagService.hentOrganisasjon(orgnr)).getNavn();
+            .map(OrganisasjonDokument::getNavn)
+            .findFirst().orElse(eregFasade.hentOrganisasjonNavn(orgnr));
     }
 
     public List<MedfolgendeFamilie> hentFamiliemedlemmer(Behandling behandling) {
