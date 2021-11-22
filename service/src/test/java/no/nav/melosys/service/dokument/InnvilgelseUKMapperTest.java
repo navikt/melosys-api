@@ -44,6 +44,7 @@ class InnvilgelseUKMapperTest {
     public static final String UUID_BARN_2 = "uuidBarn2";
     public static final String EKTEFELLE_FNR = "09080723451";
     private static final String BARN1_FNR = "12131456789";
+    private static final String BARN2_FNR = "12151456789";
     public static final String ARBEIDSGIVER_NAVN = "Bang Hansen";
     public static final String SAKSNUMMER = "MEL-123";
     public static final String EKTEFELLE_NAVN = "Dolly Duck";
@@ -84,7 +85,6 @@ class InnvilgelseUKMapperTest {
         when(mockAvklarteMedfolgendeFamilieService.hentAvklartMedfølgendeEktefelle(anyLong())).thenReturn(lagAvklartMedfølgendeEktefelle());
         when(mockAvklarteMedfolgendeFamilieService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(lagAvklartMedfølgendeBarn());
         when(mockAvklarteMedfolgendeFamilieService.hentMedfølgendEktefelle(anyLong())).thenReturn(lagMedfølgendeEktefelle());
-//        when(mockAvklarteMedfolgendeFamilieService.hentMedfølgendeBarn(anyLong())).thenReturn(lagMedfølgendeBarn());
         when(mockPersondata.getFødselsdato()).thenReturn(LocalDate.of(1970, 1, 1));
         when(mockPersondataFasade.hentPerson(anyString())).thenReturn(mockPersondata);
 
@@ -128,11 +128,14 @@ class InnvilgelseUKMapperTest {
 
     private AvklarteMedfolgendeBarn lagAvklartMedfølgendeBarn() {
         OmfattetFamilie b1 = new OmfattetFamilie(UUID_BARN_1);
-        b1.setSammensattNavn("Barn 1");
-        b1.setIdent("fnr1");
-        IkkeOmfattetBarn b2 = new IkkeOmfattetBarn(UUID_BARN_2, Medfolgende_barn_begrunnelser_ftrl.OVER_18_AR.getKode(), "begrunnelseFritekst");
-        b2.sammensattNavn = "Barn 2";
-        b2.ident = "fnr2";
+        b1.setSammensattNavn(BARN_NAVN_1);
+        b1.setIdent(BARN1_FNR);
+        IkkeOmfattetBarn b2 = new IkkeOmfattetBarn(
+            UUID_BARN_2,
+            Medfolgende_barn_begrunnelser_ftrl.OVER_18_AR.getKode(),
+            null);
+        b2.sammensattNavn = BARN_NAVN_2;
+        b2.ident = BARN2_FNR;
         return new AvklarteMedfolgendeBarn(
             Set.of(b1),
             Set.of(b2));
@@ -143,11 +146,4 @@ class InnvilgelseUKMapperTest {
             UUID_EKTEFELLE, EKTEFELLE_FNR, EKTEFELLE_NAVN, MedfolgendeFamilie.Relasjonsrolle.EKTEFELLE_SAMBOER);
         return Map.of(UUID_EKTEFELLE, ektefelle);
     }
-
-    private Map<String, MedfolgendeFamilie> lagMedfølgendeBarn() {
-        MedfolgendeFamilie medfolgendeBarn1 = MedfolgendeFamilie.tilMedfolgendeFamilie(
-            UUID_BARN_1, BARN1_FNR, BARN_NAVN_1, MedfolgendeFamilie.Relasjonsrolle.BARN);
-        return Map.of(UUID_BARN_1, medfolgendeBarn1);
-    }
-
 }

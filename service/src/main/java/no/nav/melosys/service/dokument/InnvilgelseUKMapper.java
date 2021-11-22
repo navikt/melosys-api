@@ -9,8 +9,8 @@ import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
-import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_ektefelle_samboer_begrunnelser_ftrl;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
+import no.nav.melosys.domain.person.familie.IkkeOmfattetFamilie;
 import no.nav.melosys.domain.person.familie.OmfattetFamilie;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.dokgen.dto.innvilgelsestorbritannia.*;
@@ -57,34 +57,40 @@ public class InnvilgelseUKMapper {
     }
 
     private Familie lagFamile(long behandlingID) {
-        return new Familie(
-            false, // TODO
-            finnEktefelle(behandlingID),
-            finnBarn(behandlingID));
+        return new Familie.Builder()
+            .barn(finnBarn(behandlingID))
+            .ektefelle(finnEktefelle(behandlingID))
+            .build();
     }
 
     private Ektefelle finnEktefelle(long behandlingID) {
         var avklartMedfølgendeEktefelle = avklarteMedfølgendeFamilieService.hentAvklartMedfølgendeEktefelle(behandlingID);
-        var ektefelleOmfattetAvNorskTrygd = avklartMedfølgendeEktefelle.getFamilieOmfattetAvNorskTrygd();
-        if (ektefelleOmfattetAvNorskTrygd.isEmpty()) {
+        Map<String, MedfolgendeFamilie> medfolgendeEktefelleMap = avklarteMedfølgendeFamilieService.hentMedfølgendEktefelle(behandlingID);
+        Set<OmfattetFamilie> ektefelleOmfattetAvNorskTrygd = avklartMedfølgendeEktefelle.getFamilieOmfattetAvNorskTrygd();
+        if (!ektefelleOmfattetAvNorskTrygd.isEmpty()) {
+            var ektefelleOmfattet = ektefelleOmfattetAvNorskTrygd.iterator().next();
+            return tilEktefelle(medfolgendeEktefelleMap, ektefelleOmfattet.getUuid(), null);
+        }
+        Set<IkkeOmfattetFamilie> ektefelleIkkeOmfattetAvNorskTrygd = avklartMedfølgendeEktefelle.getFamilieIkkeOmfattetAvNorskTrygd();
+        if (ektefelleIkkeOmfattetAvNorskTrygd.isEmpty()) {
             return null;
         }
-        var omfattetFamilie = ektefelleOmfattetAvNorskTrygd.iterator().next();
-        var medfølgendeEktefelle = avklarteMedfølgendeFamilieService.hentMedfølgendEktefelle(behandlingID);
-        return tilEktefelle(medfølgendeEktefelle, omfattetFamilie.getUuid());
+
+        IkkeOmfattetFamilie ikkeOmfattetEktefelle = ektefelleIkkeOmfattetAvNorskTrygd.iterator().next();
+        return tilEktefelle(medfolgendeEktefelleMap, ikkeOmfattetEktefelle.getUuid(), ikkeOmfattetEktefelle.getBegrunnelse());
     }
 
-    private Ektefelle tilEktefelle(Map<String, MedfolgendeFamilie> medfølgendeFamilieMap, String uuid) {
+    private Ektefelle tilEktefelle(Map<String, MedfolgendeFamilie> medfølgendeFamilieMap, String uuid, String begrunnelse) {
         var medfølgendeFamilie = Optional.of(medfølgendeFamilieMap.get(uuid))
             .orElseThrow(() -> new FunksjonellException("Avklart medfølgende familie " + uuid + " finnes ikke i behandlingsgrunnlaget"));
         var sammensattNavn = medfølgendeFamilie.getFnr() != null ? dokgenMapperDatahenter.hentSammensattNavn(medfølgendeFamilie.getFnr()) : medfølgendeFamilie.getNavn();
-        return new Ektefelle(
-            sammensattNavn,
-            false, // TODO
-            Medfolgende_ektefelle_samboer_begrunnelser_ftrl.SAMBOER_UTEN_FELLES_BARN, // TODO
-            medfølgendeFamilie.getFnr(),
-            null,
-            getFødselDato(medfølgendeFamilie.getFnr()));
+
+        return new Ektefelle.Builder()
+            .fnr(medfølgendeFamilie.getFnr())
+            .navn(sammensattNavn)
+            .begrunnelse(begrunnelse)
+            .foedselsdato(getFødselDato(medfølgendeFamilie.getFnr()))
+            .build();
     }
 
     private List<Barn> finnBarn(long behandlingID) {

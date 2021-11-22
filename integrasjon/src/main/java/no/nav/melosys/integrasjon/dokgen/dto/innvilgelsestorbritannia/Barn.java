@@ -43,11 +43,6 @@ public record Barn(
             return this;
         }
 
-        public Builder omfattet(boolean omfattet) {
-            this.omfattet = omfattet;
-            return this;
-        }
-
         public Builder begrunnelse(Medfolgende_barn_begrunnelser begrunnelse) {
             this.begrunnelse = begrunnelse;
             return this;
@@ -63,14 +58,13 @@ public record Barn(
             return this;
         }
 
-
         public Builder foedselsdato(LocalDate foedselsdato) {
             this.foedselsdato = foedselsdato;
             return this;
         }
 
         public Barn build() {
-            return new Barn(navn, omfattet, begrunnelse, fnr, dnr, foedselsdato);
+            return new Barn(navn, begrunnelse == null, begrunnelse, fnr, dnr, foedselsdato);
         }
     }
 
