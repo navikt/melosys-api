@@ -11,6 +11,7 @@ import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadTrygdeavtale;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.*;
+import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.dokument.arbeidsforhold.Aktoertype;
 import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
@@ -24,13 +25,12 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_e
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
 import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie;
 import no.nav.melosys.domain.person.familie.IkkeOmfattetFamilie;
-import no.nav.melosys.domain.person.familie.OmfattetFamilie;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
-import no.nav.melosys.service.registeropplysninger.RegisterOppslagService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -59,7 +59,7 @@ class TrygdeavtaleServiceTest {
     private final static String BEGRUNNELSE_SAMBOER = "begrunnelse samboer";
 
     @Mock
-    private RegisterOppslagService registerOppslagService;
+    private EregFasade eregFasade;
     @Mock
     private BehandlingsgrunnlagService behandlingsgrunnlagService;
     @Mock
@@ -76,7 +76,7 @@ class TrygdeavtaleServiceTest {
 
     @BeforeEach
     void init() {
-        trygdeavtaleService = new TrygdeavtaleService(registerOppslagService, behandlingsgrunnlagService, avklarteMedfolgendeFamilieService, avklarteVirksomheterService, lovvalgsperiodeService);
+        trygdeavtaleService = new TrygdeavtaleService(eregFasade, behandlingsgrunnlagService, avklarteMedfolgendeFamilieService, avklarteVirksomheterService, lovvalgsperiodeService);
     }
 
     @Test
@@ -150,8 +150,8 @@ class TrygdeavtaleServiceTest {
             emptySet()
         );
 
-        when(registerOppslagService.hentOrganisasjon(ORGNR_1)).thenReturn(lagOrganisasjonsDokument(ORGNR_1, NAVN_1));
-        when(registerOppslagService.hentOrganisasjon(ORGNR_2)).thenReturn(lagOrganisasjonsDokument(ORGNR_2, NAVN_2));
+        when(eregFasade.hentOrganisasjonNavn(ORGNR_1)).thenReturn(NAVN_1);
+        when(eregFasade.hentOrganisasjonNavn(ORGNR_2)).thenReturn(NAVN_2);
 
         var response = trygdeavtaleService.hentVirksomheter(behandling);
 
