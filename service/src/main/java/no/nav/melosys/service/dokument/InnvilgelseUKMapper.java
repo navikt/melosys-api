@@ -83,14 +83,20 @@ public class InnvilgelseUKMapper {
     private Ektefelle tilEktefelle(Map<String, MedfolgendeFamilie> medfølgendeFamilieMap, String uuid, String begrunnelse) {
         var medfølgendeFamilie = Optional.of(medfølgendeFamilieMap.get(uuid))
             .orElseThrow(() -> new FunksjonellException("Avklart medfølgende familie " + uuid + " finnes ikke i behandlingsgrunnlaget"));
-        var sammensattNavn = medfølgendeFamilie.getFnr() != null ? dokgenMapperDatahenter.hentSammensattNavn(medfølgendeFamilie.getFnr()) : medfølgendeFamilie.getNavn();
 
         return new Ektefelle.Builder()
             .fnr(medfølgendeFamilie.getFnr())
-            .navn(sammensattNavn)
+            .navn(getSammensattNavn(medfølgendeFamilie))
             .begrunnelse(begrunnelse)
             .foedselsdato(getFødselDato(medfølgendeFamilie.getFnr()))
             .build();
+    }
+
+    private String getSammensattNavn(MedfolgendeFamilie medfølgendeFamilie) {
+        if (medfølgendeFamilie.getFnr() == null) {
+            return medfølgendeFamilie.getNavn();
+        }
+        return dokgenMapperDatahenter.hentSammensattNavn(medfølgendeFamilie.getFnr());
     }
 
     private List<Barn> finnBarn(long behandlingID) {
