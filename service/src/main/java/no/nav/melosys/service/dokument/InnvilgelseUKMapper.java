@@ -88,7 +88,7 @@ public class InnvilgelseUKMapper {
             .fnr(medfølgendeFamilie.getFnr())
             .navn(getSammensattNavn(medfølgendeFamilie))
             .begrunnelse(begrunnelse)
-            .foedselsdato(getFødselDato(medfølgendeFamilie.getFnr()))
+            .fødselsdato(getFødselDato(medfølgendeFamilie.getFnr()))
             .build();
     }
 

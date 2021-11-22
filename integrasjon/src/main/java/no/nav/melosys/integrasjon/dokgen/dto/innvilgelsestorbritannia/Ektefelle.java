@@ -62,8 +62,8 @@ public record Ektefelle(
             return this;
         }
 
-        public Builder foedselsdato(LocalDate foedselsdato) {
-            this.foedselsdato = foedselsdato;
+        public Builder fødselsdato(LocalDate fødselsdato) {
+            this.foedselsdato = fødselsdato;
             return this;
         }
 
