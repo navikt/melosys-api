@@ -28,7 +28,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class TrygdeavtaleService {
 
-    private final EregFasade registerOppslagService;
+    private final EregFasade eregFasade;
     private final BehandlingsgrunnlagService behandlingsgrunnlagService;
     private final AvklarteMedfolgendeFamilieService avklarteMedfolgendeFamilieService;
     private final AvklarteVirksomheterService avklarteVirksomheterService;
@@ -39,7 +39,7 @@ public class TrygdeavtaleService {
                                AvklarteMedfolgendeFamilieService avklarteMedfolgendeFamilieService,
                                AvklarteVirksomheterService avklarteVirksomheterService,
                                LovvalgsperiodeService lovvalgsperiodeService) {
-        this.registerOppslagService = eregFasade;
+        this.eregFasade = eregFasade;
         this.behandlingsgrunnlagService = behandlingsgrunnlagService;
         this.avklarteMedfolgendeFamilieService = avklarteMedfolgendeFamilieService;
         this.avklarteVirksomheterService = avklarteVirksomheterService;
@@ -67,7 +67,7 @@ public class TrygdeavtaleService {
         return organisasjonDokumenter.stream()
             .filter(organisasjonDokument -> orgnr.equals(organisasjonDokument.getOrgnummer()))
             .map(OrganisasjonDokument::getNavn)
-            .findFirst().orElse(registerOppslagService.hentOrganisasjonNavn(orgnr));
+            .findFirst().orElse(eregFasade.hentOrganisasjonNavn(orgnr));
     }
 
     public List<MedfolgendeFamilie> hentFamiliemedlemmer(Behandling behandling) {
