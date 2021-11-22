@@ -15,7 +15,7 @@ public record Barn(
 
     boolean omfattet,
 
-    Medfolgende_barn_begrunnelser_ftrl begrunnelse,
+    Medfolgende_barn_begrunnelser begrunnelse,
 
     String fnr,
 
@@ -30,7 +30,7 @@ public record Barn(
 
         private boolean omfattet;
 
-        private Medfolgende_barn_begrunnelser_ftrl begrunnelse;
+        private Medfolgende_barn_begrunnelser begrunnelse;
 
         private String fnr;
 
@@ -48,15 +48,8 @@ public record Barn(
             return this;
         }
 
-        public Builder begrunnelse(Medfolgende_barn_begrunnelser_ftrl begrunnelse) {
-            this.begrunnelse = begrunnelse;
-            return this;
-        }
-
-        // Finn ut om dette er nødvedning eller om vi kan bruke
-        // Medfolgende_barn_begrunnelser istenden
         public Builder begrunnelse(Medfolgende_barn_begrunnelser begrunnelse) {
-            this.begrunnelse = Medfolgende_barn_begrunnelser_ftrl.valueOf(begrunnelse.getKode());
+            this.begrunnelse = begrunnelse;
             return this;
         }
 
