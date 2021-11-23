@@ -6,6 +6,7 @@ import no.nav.melosys.domain.person.familie.OmfattetFamilie;
 import no.nav.melosys.service.trygdeavtale.TrygdeavtaleResultat;
 import no.nav.melosys.tjenester.gui.dto.MedfolgendeFamilieDto;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -15,6 +16,8 @@ import java.util.stream.Stream;
 public record TrygdeavtaleResultatDto(
     List<String> virksomheter,
     String bestemmelse,
+    LocalDate lovvalgsperiodeFom,
+    LocalDate lovvalgsperiodeTom,
     List<MedfolgendeFamilieDto> barn,
     MedfolgendeFamilieDto ektefelle
 ) {
@@ -22,6 +25,8 @@ public record TrygdeavtaleResultatDto(
         return new TrygdeavtaleResultat.Builder()
             .familie(lagAvklarteMedfolgendeFamilie())
             .bestemmelse(bestemmelse)
+            .lovvalgsperiodeFom(lovvalgsperiodeFom)
+            .lovvalgsperiodeTom(lovvalgsperiodeTom)
             .virksomheter(virksomheter)
             .build();
     }
@@ -44,6 +49,8 @@ public record TrygdeavtaleResultatDto(
     public static class Builder {
         private List<String> virksomheter;
         private String bestemmelse;
+        private LocalDate lovvalgsperiodeFom;
+        private LocalDate lovvalgsperiodeTom;
         private final List<MedfolgendeFamilieDto> barn = new ArrayList<>();
         private MedfolgendeFamilieDto ektefelle;
 
@@ -54,6 +61,16 @@ public record TrygdeavtaleResultatDto(
 
         public Builder bestemmelse(String bestemmelse) {
             this.bestemmelse = bestemmelse;
+            return this;
+        }
+
+        public Builder lovvalgsperiodeFom(LocalDate lovvalgsperiodeFom) {
+            this.lovvalgsperiodeFom = lovvalgsperiodeFom;
+            return this;
+        }
+
+        public Builder lovvalgsperiodeTom(LocalDate lovvalgsperiodeTom) {
+            this.lovvalgsperiodeTom = lovvalgsperiodeTom;
             return this;
         }
 
@@ -71,6 +88,8 @@ public record TrygdeavtaleResultatDto(
             return new TrygdeavtaleResultatDto(
                 virksomheter,
                 bestemmelse,
+                lovvalgsperiodeFom,
+                lovvalgsperiodeTom,
                 barn,
                 ektefelle
             );

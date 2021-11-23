@@ -2,14 +2,16 @@ package no.nav.melosys.tjenester.gui;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
-import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadTrygdeavtale;
+import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_barn_begrunnelser_ftrl;
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_ektefelle_samboer_begrunnelser_ftrl;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
@@ -36,9 +38,9 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class TrygdeavtaleTjenesteTest {
     private final static String ORGNR_1 = "11111111111";
-    private final static String UUID_BARN_1 = "0bad5c70-8a3f-4fc7-9031-d3aebd6b68de";
-    private final static String UUID_BARN_2 = "1f598113-03a6-431b-99f2-0c42f61348cd";
-    private final static String UUID_EKTEFELLE = "1212121212121-4fc7-9031-ab34332121ff";
+    private final static String UUID_BARN_1 = UUID.randomUUID().toString();
+    private final static String UUID_BARN_2 = UUID.randomUUID().toString();
+    private final static String UUID_EKTEFELLE = UUID.randomUUID().toString();
     private final static String BEGRUNNELSE_BARN = "begrunnelse barn";
     private final static String BEGRUNNELSE_SAMBOER = "begrunnelse samboer";
 
@@ -62,8 +64,8 @@ class TrygdeavtaleTjenesteTest {
     }
 
     @Test
-    void overførResultat_medTrygdeavtaleResultatDto_overførerKorrekt() {
-        var trygdeavtaleResultatDto = lagTrygdeavtaleResultat();
+    void overførResultat_medTrygdeavtaleResultatDto_mappesKorrekt() {
+        var trygdeavtaleResultatDto = lagTrygdeavtaleResultatDto();
         trygdeavtaleTjeneste.overførResultat(1L, trygdeavtaleResultatDto);
 
         verify(trygdeavtaleService).overførResultat(eq(1L), trygdeavtaleResultatArgumentCaptor.capture());
@@ -73,13 +75,18 @@ class TrygdeavtaleTjenesteTest {
             .isNotNull()
             .extracting(
                 TrygdeavtaleResultat::virksomheter,
-                TrygdeavtaleResultat::bestemmelse)
+                TrygdeavtaleResultat::bestemmelse,
+                TrygdeavtaleResultat::lovvalgsperiodeFom,
+                TrygdeavtaleResultat::lovvalgsperiodeTom
+            )
             .containsExactlyInAnyOrder(
                 trygdeavtaleResultatDto.virksomheter(),
-                trygdeavtaleResultatDto.bestemmelse()
+                trygdeavtaleResultatDto.bestemmelse(),
+                trygdeavtaleResultatDto.lovvalgsperiodeFom(),
+                trygdeavtaleResultatDto.lovvalgsperiodeTom()
             );
         assertThat(trygdeavtaleResultat.familie().getFamilieIkkeOmfattetAvNorskTrygd())
-            .isNotNull()
+            .hasSize(2)
             .flatExtracting(
                 IkkeOmfattetFamilie::getUuid,
                 IkkeOmfattetFamilie::getBegrunnelse,
@@ -89,7 +96,7 @@ class TrygdeavtaleTjenesteTest {
                 UUID_EKTEFELLE, Medfolgende_ektefelle_samboer_begrunnelser_ftrl.EGEN_INNTEKT.getKode(), BEGRUNNELSE_SAMBOER
             );
         assertThat(trygdeavtaleResultat.familie().getFamilieOmfattetAvNorskTrygd())
-            .isNotNull()
+            .hasSize(1)
             .flatExtracting(OmfattetFamilie::getUuid)
             .containsExactly(UUID_BARN_2);
     }
@@ -131,10 +138,10 @@ class TrygdeavtaleTjenesteTest {
     }
 
     private static Behandlingsgrunnlag lagBehandlingsgrunnlag() {
-        Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
-        SoeknadTrygdeavtale behandlingsgrunnlagdata = new SoeknadTrygdeavtale();
-        behandlingsgrunnlagdata.soeknadsland.landkoder.add("GB");
+        var behandlingsgrunnlagdata = new BehandlingsgrunnlagData();
+        behandlingsgrunnlagdata.soeknadsland.landkoder.add(Landkoder.GB.getKode());
         behandlingsgrunnlagdata.periode = new Periode(LocalDate.of(2020, 1, 1), LocalDate.of(2021, 1, 1));
+        var behandlingsgrunnlag = new Behandlingsgrunnlag();
         behandlingsgrunnlag.setBehandlingsgrunnlagdata(behandlingsgrunnlagdata);
         return behandlingsgrunnlag;
     }
@@ -152,10 +159,12 @@ class TrygdeavtaleTjenesteTest {
         return behandling;
     }
 
-    private TrygdeavtaleResultatDto lagTrygdeavtaleResultat() {
+    private TrygdeavtaleResultatDto lagTrygdeavtaleResultatDto() {
         return new TrygdeavtaleResultatDto.Builder()
             .virksomheter(List.of(ORGNR_1))
             .bestemmelse(Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1.getKode())
+            .lovvalgsperiodeFom(LocalDate.now())
+            .lovvalgsperiodeTom(LocalDate.now().plusYears(1))
             .addBarn(
                 UUID_BARN_1,
                 false,
