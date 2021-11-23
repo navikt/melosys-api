@@ -9,6 +9,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.TekniskException;
@@ -195,8 +196,14 @@ public class BrevbestillingTjeneste {
                     .erPåkrevd()
                     .build(),
                 new BrevmalFeltDto.Builder()
+                    .medKode(("STANDARDTEKST_KONTAKTINFORMASJON"))
+                    .medBeskrivelse("Legg til standardtekst med kontaktinformasjon nederst i brevet")
+                    .medFeltType(FeltType.SJEKKBOKS)
+                    .build(),
+                new BrevmalFeltDto.Builder()
                     .medKode("FRITEKST")
-                    .medBeskrivelse("Brevtekst")
+                    .medBeskrivelse("Tekst til brev")
+                    .medHjelpetekst("Her kommer en hjelpetekst til \"Tekst til brev\". Ikke avklart enda.")
                     .medFeltType(FeltType.FRITEKST)
                     .erPåkrevd()
                     .build()
