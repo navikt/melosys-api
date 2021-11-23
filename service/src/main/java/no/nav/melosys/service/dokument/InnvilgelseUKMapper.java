@@ -4,11 +4,13 @@ import javax.transaction.Transactional;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
 import no.nav.melosys.domain.person.familie.IkkeOmfattetFamilie;
 import no.nav.melosys.domain.person.familie.OmfattetFamilie;
@@ -16,6 +18,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.dokgen.dto.innvilgelsestorbritannia.*;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
+import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import org.springframework.stereotype.Component;
 
@@ -27,14 +30,16 @@ import java.util.stream.Stream;
 public class InnvilgelseUKMapper {
 
     private final AvklarteMedfolgendeFamilieService avklarteMedfølgendeFamilieService;
+    private final AvklarteVirksomheterService avklarteVirksomheterService;
     private final DokgenMapperDatahenter dokgenMapperDatahenter;
     private final LovvalgsperiodeService lovvalgsperiodeService;
     private final PersondataFasade persondataFasade;
 
     public InnvilgelseUKMapper(AvklarteMedfolgendeFamilieService avklarteMedfølgendeFamilieService,
-                               DokgenMapperDatahenter dokgenMapperDatahenter,
+                               AvklarteVirksomheterService avklarteVirksomheterService, DokgenMapperDatahenter dokgenMapperDatahenter,
                                LovvalgsperiodeService lovvalgsperiodeService, PersondataFasade persondataFasade) {
         this.avklarteMedfølgendeFamilieService = avklarteMedfølgendeFamilieService;
+        this.avklarteVirksomheterService = avklarteVirksomheterService;
         this.dokgenMapperDatahenter = dokgenMapperDatahenter;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
         this.persondataFasade = persondataFasade;
@@ -47,10 +52,15 @@ public class InnvilgelseUKMapper {
         BehandlingsgrunnlagData behandlingsgrunnlagdata = behandlingsgrunnlag.getBehandlingsgrunnlagdata();
         var lovvalgsperioder = lovvalgsperiodeService.hentLovvalgsperioder(behandling.getId());
 
+        List<AvklartVirksomhet> avklartVirksomheter = avklarteVirksomheterService.hentUtenlandskeVirksomheter(behandling);
+        AvklartVirksomhet virksomhet = avklartVirksomheter.stream()
+            .filter(avklartVirksomhet -> Landkoder.GB.getKode().equals(avklartVirksomhet.adresse.getLandkode()))
+            .findFirst().orElseThrow(() -> new FunksjonellException("Ingen utenlandske virksomheter funnet"));
+
         boolean virksomhetArbeidsgiverSkalHaKopi = false;
         return new InnvilgelseUK.Builder(brevbestilling)
             .artikkel(getLovvalgbestemmelse(lovvalgsperioder))
-            .soknad(lagSøknad(behandlingsgrunnlagdata.periode, behandlingsgrunnlag.getMottaksdato()))
+            .soknad(lagSøknad(behandlingsgrunnlagdata.periode, behandlingsgrunnlag.getMottaksdato(), virksomhet.navn))
             .familie(lagFamile(behandling.getId()))
             .virksomhetArbeidsgiverSkalHaKopi(virksomhetArbeidsgiverSkalHaKopi)
             .build();
@@ -142,14 +152,12 @@ public class InnvilgelseUKMapper {
         return (Lovvalgbestemmelser_trygdeavtale_uk) lovvalgsperiode.getBestemmelse();
     }
 
-    private Soknad lagSøknad(Periode periode, LocalDate mottaksdato) {
+    private Soknad lagSøknad(Periode periode, LocalDate mottaksdato, String virksomhetsNavn) {
         return new Soknad(
-            // Er det riktig å bruke mottaksdato?
-            // Brukes slik Vi viser til søknaden din om medlemskap i folketrygden som vi fikk [soknadsdato].
             mottaksdato,
             periode.getFom(),
             periode.getTom(),
-            "virksomhets navn" // TODO
+            virksomhetsNavn
         );
     }
 }

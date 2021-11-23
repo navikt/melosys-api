@@ -10,20 +10,23 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.adresse.Adresse;
+import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_barn_begrunnelser_ftrl;
+import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_ektefelle_samboer_begrunnelser_ftrl;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
+import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
 import no.nav.melosys.domain.person.Persondata;
-import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeBarn;
-import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie;
-import no.nav.melosys.domain.person.familie.IkkeOmfattetBarn;
-import no.nav.melosys.domain.person.familie.OmfattetFamilie;
+import no.nav.melosys.domain.person.familie.*;
 import no.nav.melosys.integrasjon.dokgen.dto.innvilgelsestorbritannia.InnvilgelseUK;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
+import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,8 +36,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.INNVILGELSE_UK;
 import static no.nav.melosys.service.dokument.DokgenTestData.*;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -57,6 +59,9 @@ class InnvilgelseUKMapperTest {
     private AvklarteMedfolgendeFamilieService mockAvklarteMedfolgendeFamilieService;
 
     @Mock
+    private AvklarteVirksomheterService mockAvklarteVirksomheterService;
+
+    @Mock
     private DokgenMapperDatahenter mockDokgenMapperDatahenter;
 
     @Mock
@@ -72,28 +77,81 @@ class InnvilgelseUKMapperTest {
 
     @BeforeEach
     void setup() {
-        innvilgelseUKMapper = new InnvilgelseUKMapper(mockAvklarteMedfolgendeFamilieService,
+        innvilgelseUKMapper = new InnvilgelseUKMapper(
+            mockAvklarteMedfolgendeFamilieService,
+            mockAvklarteVirksomheterService,
             mockDokgenMapperDatahenter,
             mockLovvalgsperiodeService,
             mockPersondataFasade);
+
+        mockData();
     }
 
     @Test
-    void test() throws JsonProcessingException {
-        when(mockLovvalgsperiodeService.hentLovvalgsperioder(anyLong())).thenReturn(List.of(lagLovvalgsperiode()));
+    void map_Innvilget_populererFelter() throws JsonProcessingException {
+        InnvilgelseBrevbestilling brevbestilling = lagInnvilgelseBrevbestilling();
 
+        InnvilgelseUK innvilgelseUK = innvilgelseUKMapper.map(brevbestilling);
+        String json = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(innvilgelseUK);
+        System.out.println(json);
+    }
+
+    @Test
+    void map_InnvilgetIkkeOmfattetEktefelle_populererFelter() throws JsonProcessingException {
+        when(mockAvklarteMedfolgendeFamilieService
+            .hentAvklartMedfølgendeEktefelle(anyLong()))
+            .thenReturn(lagIkkeAvklartMedfølgendeEktefelle());
+        InnvilgelseBrevbestilling brevbestilling = lagInnvilgelseBrevbestilling();
+
+        InnvilgelseUK innvilgelseUK = innvilgelseUKMapper.map(brevbestilling);
+        String json = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(innvilgelseUK);
+        System.out.println(json);
+    }
+
+    private void mockData() {
+        when(mockLovvalgsperiodeService.hentLovvalgsperioder(anyLong())).thenReturn(List.of(lagLovvalgsperiode()));
         when(mockAvklarteMedfolgendeFamilieService.hentAvklartMedfølgendeEktefelle(anyLong())).thenReturn(lagAvklartMedfølgendeEktefelle());
         when(mockAvklarteMedfolgendeFamilieService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(lagAvklartMedfølgendeBarn());
         when(mockAvklarteMedfolgendeFamilieService.hentMedfølgendEktefelle(anyLong())).thenReturn(lagMedfølgendeEktefelle());
         when(mockPersondata.getFødselsdato()).thenReturn(LocalDate.of(1970, 1, 1));
         when(mockPersondataFasade.hentPerson(anyString())).thenReturn(mockPersondata);
+        when(mockAvklarteVirksomheterService.hentUtenlandskeVirksomheter(any())).thenReturn(lagAvklarteVirksomheter());
+    }
 
+    private List<AvklartVirksomhet> lagAvklarteVirksomheter() {
+        Adresse adresse = new Adresse() {
+            @Override
+            public String getLandkode() {
+                return Landkoder.GB.getKode();
+            }
+
+            @Override
+            public boolean erTom() {
+                return false;
+            }
+
+            @Override
+            public List<String> toList() {
+                return List.of(getLandkode());
+            }
+        };
+
+        return List.of(new AvklartVirksomhet("Foretaksnavn", "orgnr", adresse, Yrkesaktivitetstyper.LOENNET_ARBEID));
+    }
+
+    private Behandling lagBehandlingMedPeriode() {
         Behandling behandling = lagBehandling(lagFagsak(true));
         behandling.getBehandlingsgrunnlag().setMottaksdato(LocalDate.of(2019, 10, 1));
         behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().periode = new Periode(
             LocalDate.of(2020, 1, 1),
             LocalDate.of(2021, 1, 1)
         );
+        return behandling;
+    }
+
+    private InnvilgelseBrevbestilling lagInnvilgelseBrevbestilling() {
+        Behandling behandling = lagBehandlingMedPeriode();
+
         InnvilgelseBrevbestilling brevbestilling = new InnvilgelseBrevbestilling.Builder()
             .medProduserbartdokument(INNVILGELSE_UK)
             .medPersonDokument(lagPersonDokument())
@@ -106,10 +164,7 @@ class InnvilgelseUKMapperTest {
             .medBarnFritekst("barnFritekst")
             .medEktefelleFritekst("ektefelleFritekst")
             .build();
-
-        InnvilgelseUK innvilgelseUK = innvilgelseUKMapper.map(brevbestilling);
-        String json = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(innvilgelseUK);
-        System.out.println(json);
+        return brevbestilling;
     }
 
     private static Lovvalgsperiode lagLovvalgsperiode() {
@@ -124,6 +179,12 @@ class InnvilgelseUKMapperTest {
     private AvklarteMedfolgendeFamilie lagAvklartMedfølgendeEktefelle() {
         OmfattetFamilie ektefelle = new OmfattetFamilie(UUID_EKTEFELLE);
         return new AvklarteMedfolgendeFamilie(Set.of(ektefelle), Set.of());
+    }
+
+    private AvklarteMedfolgendeFamilie lagIkkeAvklartMedfølgendeEktefelle() {
+        IkkeOmfattetFamilie ektefelle = new IkkeOmfattetFamilie(UUID_EKTEFELLE,
+            Medfolgende_ektefelle_samboer_begrunnelser_ftrl.MANGLER_OPPLYSNINGER.getKode(), "");
+        return new AvklarteMedfolgendeFamilie(Set.of(), Set.of(ektefelle));
     }
 
     private AvklarteMedfolgendeBarn lagAvklartMedfølgendeBarn() {
