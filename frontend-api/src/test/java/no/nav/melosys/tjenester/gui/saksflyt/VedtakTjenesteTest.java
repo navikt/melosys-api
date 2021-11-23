@@ -16,13 +16,14 @@ import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.vedtak.FattEosVedtakRequest;
 import no.nav.melosys.service.vedtak.FattFtrlVedtakRequest;
+import no.nav.melosys.service.vedtak.FattTrygdeavtaleVedtakRequest;
 import no.nav.melosys.service.vedtak.VedtakServiceFasade;
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
 import no.nav.melosys.sikkerhet.context.TestSubjectHandler;
 import no.nav.melosys.tjenester.gui.JsonSchemaTestParent;
 import no.nav.melosys.tjenester.gui.dto.EndreVedtakDto;
 import no.nav.melosys.tjenester.gui.dto.FattEosVedtakDto;
-import no.nav.melosys.tjenester.gui.dto.FattMedlemIFolketrygdenVedtakDto;
+import no.nav.melosys.tjenester.gui.dto.FattTrygdeavtaleEllerFtrlVedtakDto;
 import no.nav.melosys.tjenester.gui.dto.FattVedtakDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -78,9 +79,9 @@ class VedtakTjenesteTest extends JsonSchemaTestParent {
 
     @Test
     void fattVedtakFtrl_henleggelse_fungerer() throws Exception {
-        when(behandlingService.hentBehandlingUtenSaksopplysninger(anyLong())).thenReturn(lagBehandling());
+        when(behandlingService.hentBehandlingUtenSaksopplysninger(anyLong())).thenReturn(lagBehandling(Sakstyper.FTRL));
 
-        FattMedlemIFolketrygdenVedtakDto fattVedtakDto = new FattMedlemIFolketrygdenVedtakDto();
+        FattTrygdeavtaleEllerFtrlVedtakDto fattVedtakDto = new FattTrygdeavtaleEllerFtrlVedtakDto();
         fattVedtakDto.setBehandlingsresultatTypeKode(Behandlingsresultattyper.HENLEGGELSE);
         fattVedtakDto.setVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK);
         fattVedtakDto.setFritekstBegrunnelse("Begrunnelse");
@@ -89,6 +90,23 @@ class VedtakTjenesteTest extends JsonSchemaTestParent {
 
         verify(aksesskontroll).autoriserSkriv(behandlingID);
         verify(vedtakServiceFasade).fattVedtak(eq(behandlingID), any(FattFtrlVedtakRequest.class));
+
+        valider(fattVedtakDto, FATT_VEDTAK_SCHEMA);
+    }
+
+    @Test
+    void fattVedtakTrygdeavtale_henleggelse_fungerer() throws Exception {
+        when(behandlingService.hentBehandlingUtenSaksopplysninger(anyLong())).thenReturn(lagBehandling(Sakstyper.TRYGDEAVTALE));
+
+        FattTrygdeavtaleEllerFtrlVedtakDto fattVedtakDto = new FattTrygdeavtaleEllerFtrlVedtakDto();
+        fattVedtakDto.setBehandlingsresultatTypeKode(Behandlingsresultattyper.HENLEGGELSE);
+        fattVedtakDto.setVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK);
+        fattVedtakDto.setFritekstBegrunnelse("Begrunnelse");
+
+        vedtakTjeneste.fattVedtak(behandlingID, fattVedtakDto);
+
+        verify(aksesskontroll).autoriserSkriv(behandlingID);
+        verify(vedtakServiceFasade).fattVedtak(eq(behandlingID), any(FattTrygdeavtaleVedtakRequest.class));
 
         valider(fattVedtakDto, FATT_VEDTAK_SCHEMA);
     }
@@ -105,7 +123,7 @@ class VedtakTjenesteTest extends JsonSchemaTestParent {
 
     @Test
     void fattVedtak_dtoManglerVedtakstype_girException() {
-        FattVedtakDto fattVedtakDto = new FattMedlemIFolketrygdenVedtakDto();
+        FattVedtakDto fattVedtakDto = new FattTrygdeavtaleEllerFtrlVedtakDto();
         fattVedtakDto.setBehandlingsresultatTypeKode(Behandlingsresultattyper.HENLEGGELSE);
 
         assertThatThrownBy(() -> vedtakTjeneste.fattVedtak(behandlingID, fattVedtakDto))
@@ -149,16 +167,16 @@ class VedtakTjenesteTest extends JsonSchemaTestParent {
         FattVedtakDto ftrlVedtakDto = objectMapper.readValue(hentJsonRequest("fattftrlvedtak.json"), FattVedtakDto.class);
 
         //TODO Utvide assert
-        assertThat(ftrlVedtakDto).isNotNull().isInstanceOf(FattMedlemIFolketrygdenVedtakDto.class);
+        assertThat(ftrlVedtakDto).isNotNull().isInstanceOf(FattTrygdeavtaleEllerFtrlVedtakDto.class);
     }
 
     private InputStream hentJsonRequest(String filnavn) {
         return getClass().getClassLoader().getResourceAsStream(filnavn);
     }
 
-    private Behandling lagBehandling() {
+    private Behandling lagBehandling(Sakstyper sakstyper) {
         var fagsak = new Fagsak();
-        fagsak.setType(Sakstyper.FTRL);
+        fagsak.setType(sakstyper);
         var behandling = new Behandling();
         behandling.setFagsak(fagsak);
         return behandling;
