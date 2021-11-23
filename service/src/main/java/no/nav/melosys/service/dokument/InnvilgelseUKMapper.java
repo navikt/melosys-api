@@ -138,6 +138,7 @@ public class InnvilgelseUKMapper {
     }
 
     private LocalDate getFødselDato(String fnr) {
+        if (fnr == null) return null;
         var persondata = persondataFasade.hentPerson(fnr);
         return persondata.getFødselsdato();
     }

@@ -17,12 +17,14 @@ import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Medfolgende_barn_begrunnelser;
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_barn_begrunnelser_ftrl;
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_ektefelle_samboer_begrunnelser_ftrl;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.domain.person.familie.*;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.dokgen.dto.innvilgelsestorbritannia.InnvilgelseUK;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
@@ -37,6 +39,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.INNVILGELSE_UK;
 import static no.nav.melosys.service.dokument.DokgenTestData.*;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
@@ -85,11 +88,11 @@ class InnvilgelseUKMapperTest {
             mockLovvalgsperiodeService,
             mockPersondataFasade);
 
-        mockData();
     }
 
     @Test
     void map_Innvilget_populererFelter() throws JsonProcessingException {
+        mockData();
         InnvilgelseBrevbestilling brevbestilling = lagInnvilgelseBrevbestilling();
 
         InnvilgelseUK innvilgelseUK = innvilgelseUKMapper.map(brevbestilling);
@@ -100,9 +103,42 @@ class InnvilgelseUKMapperTest {
         assertThat(resultat).isEqualTo(FORVENTEDE_FELTER_FOR_INNVIGLESE_STORBRITANNIA_MAPPING);
     }
 
+    @Test
+    void map_ingenUtenlandskeVirksomheter_kastFunksjonellException() {
+        when(mockAvklarteVirksomheterService.hentUtenlandskeVirksomheter(any())).thenReturn(List.of());
+
+        InnvilgelseBrevbestilling brevbestilling = lagInnvilgelseBrevbestilling();
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> innvilgelseUKMapper.map(brevbestilling))
+            .withMessageContaining("Ingen utenlandske virksomheter funnet");
+    }
+
+    @Test
+    void map_ettOmfattetBarn_minstEttOmfattetFamiliemedlemErtrue() {
+        mockData();
+        when(mockAvklarteMedfolgendeFamilieService.hentAvklartMedfølgendeEktefelle(anyLong())).thenReturn(lagIkkeOmfattetMedfølgendeEktefelle());
+        when(mockAvklarteMedfolgendeFamilieService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(lagOmfatetMedfølgendeBarn());
+
+        InnvilgelseBrevbestilling brevbestilling = lagInnvilgelseBrevbestilling();
+        InnvilgelseUK map = innvilgelseUKMapper.map(brevbestilling);
+        assertThat(map.getFamilie().minstEttOmfattetFamiliemedlem()).isTrue();
+    }
+
+    @Test
+    void map_ingenOmfattet_minstEttOmfattetFamiliemedlemErfalse() {
+        mockData();
+        when(mockAvklarteMedfolgendeFamilieService.hentAvklartMedfølgendeEktefelle(anyLong())).thenReturn(lagIkkeOmfattetMedfølgendeEktefelle());
+        when(mockAvklarteMedfolgendeFamilieService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(lagIkkeOmfatetMedfølgendeBarn());
+
+        InnvilgelseBrevbestilling brevbestilling = lagInnvilgelseBrevbestilling();
+        InnvilgelseUK map = innvilgelseUKMapper.map(brevbestilling);
+        assertThat(map.getFamilie().minstEttOmfattetFamiliemedlem()).isFalse();
+    }
+
     private void mockData() {
         when(mockLovvalgsperiodeService.hentLovvalgsperioder(anyLong())).thenReturn(List.of(lagLovvalgsperiode()));
-        when(mockAvklarteMedfolgendeFamilieService.hentAvklartMedfølgendeEktefelle(anyLong())).thenReturn(lagAvklartMedfølgendeEktefelle());
+        when(mockAvklarteMedfolgendeFamilieService.hentAvklartMedfølgendeEktefelle(anyLong())).thenReturn(lagOmfattetMedfølgendeEktefelle());
         when(mockAvklarteMedfolgendeFamilieService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(lagAvklartMedfølgendeBarn());
         when(mockAvklarteMedfolgendeFamilieService.hentMedfølgendEktefelle(anyLong())).thenReturn(lagMedfølgendeEktefelle());
         when(mockPersondata.getFødselsdato()).thenReturn(LocalDate.of(1970, 1, 1));
@@ -169,16 +205,35 @@ class InnvilgelseUKMapperTest {
         return lovvalgsperiode;
     }
 
-    private AvklarteMedfolgendeFamilie lagAvklartMedfølgendeEktefelle() {
+    private AvklarteMedfolgendeFamilie lagOmfattetMedfølgendeEktefelle() {
         OmfattetFamilie ektefelle = new OmfattetFamilie(UUID_EKTEFELLE);
         return new AvklarteMedfolgendeFamilie(Set.of(ektefelle), Set.of());
     }
 
-    private AvklarteMedfolgendeFamilie lagIkkeAvklartMedfølgendeEktefelle() {
+    private AvklarteMedfolgendeFamilie lagIkkeOmfattetMedfølgendeEktefelle() {
         IkkeOmfattetFamilie ektefelle = new IkkeOmfattetFamilie(UUID_EKTEFELLE,
             Medfolgende_ektefelle_samboer_begrunnelser_ftrl.MANGLER_OPPLYSNINGER.getKode(), "");
         return new AvklarteMedfolgendeFamilie(Set.of(), Set.of(ektefelle));
     }
+
+    private AvklarteMedfolgendeBarn lagOmfatetMedfølgendeBarn() {
+        OmfattetFamilie barn = new OmfattetFamilie(UUID_BARN_1);
+        barn.setSammensattNavn(BARN_NAVN_1);
+        barn.setIdent(BARN1_FNR);
+        return new AvklarteMedfolgendeBarn(
+            Set.of(barn),
+            Set.of());
+    }
+
+    private AvklarteMedfolgendeBarn lagIkkeOmfatetMedfølgendeBarn() {
+        IkkeOmfattetBarn barn = new IkkeOmfattetBarn(
+            UUID_BARN_1,
+            Medfolgende_barn_begrunnelser.MANGLER_OPPLYSNINGER.getKode(),  "");
+        return new AvklarteMedfolgendeBarn(
+            Set.of(),
+            Set.of(barn));
+    }
+
 
     private AvklarteMedfolgendeBarn lagAvklartMedfølgendeBarn() {
         OmfattetFamilie b1 = new OmfattetFamilie(UUID_BARN_1);
