@@ -34,7 +34,7 @@ import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
 
 @Protected
 @RestController
-@RequestMapping("/dokumenter/v2") //TODO Endre url når gjennomtestet
+@RequestMapping("/dokumenter/v2") //TODO: Endre url når gjennomtestet
 @Api(tags = {"dokumenterv2"})
 @RequestScope
 public class BrevbestillingTjeneste {
@@ -104,7 +104,7 @@ public class BrevbestillingTjeneste {
                 return switch (p) {
                     case MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE -> lagBrevMalDtoForForventetSaksbehandlingstid(p, hovedMottaker, behandling);
                     case MANGELBREV_BRUKER, MANGELBREV_ARBEIDSGIVER -> lagBrevMalDtoForMangelbrev(p, hovedMottaker, behandling);
-//                    case GENERELT_FRITEKSTBREV_BRUKER, GENERELT_FRITEKSTBREV_ARBEIDSGIVER -> lagBrevMalDtoForFritekstbrev(p, hovedMottaker, behandling); //TODO Tas inn når frontend er klar for fritekstbrev
+                    case GENERELT_FRITEKSTBREV_BRUKER, GENERELT_FRITEKSTBREV_ARBEIDSGIVER -> lagBrevMalDtoForFritekstbrev(p, hovedMottaker, behandling);
                     default -> null;
                 };
             })

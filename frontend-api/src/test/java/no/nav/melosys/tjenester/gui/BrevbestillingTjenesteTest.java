@@ -83,7 +83,7 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
         when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
 
         List<BrevmalDto> brevmaler = brevbestillingTjeneste.hentTilgjengeligeMaler(123L);
-        assertThat(brevmaler).hasSize(2);
+        assertThat(brevmaler).hasSize(4);
 
         assertThat(brevmaler.get(0).getType()).isEqualTo(MANGELBREV_BRUKER);
         assertThat(brevmaler.get(0).getFelter()).hasSize(2);
@@ -94,11 +94,11 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
         assertThat(brevmaler.get(1).getFelter().get(0).getValg()).hasSize(1);
         assertThat(brevmaler.get(1).getMuligeMottakere()).hasSize(2);
 
-//        assertThat(brevmaler.get(2).getType()).isEqualTo(GENERELT_FRITEKSTBREV_BRUKER);
-//        assertThat(brevmaler.get(2).getMuligeMottakere()).hasSize(1);
-//
-//        assertThat(brevmaler.get(3).getType()).isEqualTo(GENERELT_FRITEKSTBREV_ARBEIDSGIVER);
-//        assertThat(brevmaler.get(3).getMuligeMottakere()).hasSize(1);
+        assertThat(brevmaler.get(2).getType()).isEqualTo(GENERELT_FRITEKSTBREV_BRUKER);
+        assertThat(brevmaler.get(2).getMuligeMottakere()).hasSize(1);
+
+        assertThat(brevmaler.get(3).getType()).isEqualTo(GENERELT_FRITEKSTBREV_ARBEIDSGIVER);
+        assertThat(brevmaler.get(3).getMuligeMottakere()).hasSize(1);
     }
 
     @Test
