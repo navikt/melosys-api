@@ -10,6 +10,7 @@ public class BrevmalFeltDto {
     private final String hjelpetekst;
     private final boolean paakrevd;
     private final List<FeltvalgDto> valg;
+    private final Integer tegnBegrensning; // TODO: Verifiser i kontrolleren
 
     private BrevmalFeltDto(Builder builder) {
         this.kode = builder.kode;
@@ -18,6 +19,7 @@ public class BrevmalFeltDto {
         this.hjelpetekst = builder.hjelpetekst;
         this.paakrevd = builder.paakrevd;
         this.valg = builder.valg;
+        this.tegnBegrensning = builder.tegnBegrensning;
     }
 
     public String getKode() {
@@ -44,6 +46,10 @@ public class BrevmalFeltDto {
         return valg;
     }
 
+    public Integer getTegnBegrensning() {
+        return tegnBegrensning;
+    }
+
     public static final class Builder {
         private String kode;
         private String beskrivelse;
@@ -51,6 +57,7 @@ public class BrevmalFeltDto {
         private String hjelpetekst;
         private boolean paakrevd = false;
         private List<FeltvalgDto> valg;
+        private Integer tegnBegrensning;
 
         public Builder medKode(String kode) {
             this.kode = kode;
@@ -79,6 +86,11 @@ public class BrevmalFeltDto {
 
         public Builder medValg(List<FeltvalgDto> valg) {
             this.valg = valg;
+            return this;
+        }
+
+        public Builder medTegnBegrensning(Integer antallTegn) {
+            this.tegnBegrensning = antallTegn;
             return this;
         }
 

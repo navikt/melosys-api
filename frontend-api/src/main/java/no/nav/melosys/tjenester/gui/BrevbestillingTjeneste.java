@@ -189,6 +189,9 @@ public class BrevbestillingTjeneste {
                     .medKode("FRITEKST_TITTEL")
                     .medBeskrivelse("Brevtittel")
                     .medFeltType(FeltType.FRITEKST_STRING)
+                    .medHjelpetekst("Tittelen du skriver inn her, vil bli tittelen på brevet når du sender det ut.")
+                    .medValg(hentFritekstTittelValg(behandling))
+                    .medTegnBegrensning(60)
                     .erPåkrevd()
                     .build(),
                 new BrevmalFeltDto.Builder()
@@ -201,6 +204,28 @@ public class BrevbestillingTjeneste {
             .medMuligeMottakere(singletonList(mottaker))
             .medMottakereHjelpetekst("Hvis bruker eller arbeidsgiver har fullmektig som er lagt inn i sidemenyen, vil brevet automatisk bli sendt til denne.")
             .build();
+    }
+
+    private List<FeltvalgDto> hentFritekstTittelValg(Behandling behandling) {
+        Sakstyper fagsakType = behandling.getFagsak().getType();
+
+        List<FeltvalgDto> tittelValgForSakstype = new ArrayList<>();
+        if (fagsakType.equals(Sakstyper.EU_EOS)) {
+            tittelValgForSakstype.add(lagTittelValg("HENVENDELSE_OM_TRYGDETILHØRLIGHET", "Svar på henvendelse om trygdetilhørlighet"));
+        } else if (fagsakType.equals(Sakstyper.FTRL) || fagsakType.equals(Sakstyper.TRYGDEAVTALE)) {
+            tittelValgForSakstype.add(lagTittelValg("HENVENDELSE_OM_MEDLEMSKAP", "Svar på henvendelse om medlemskap i folketrygden"));
+        }
+        if (fagsakType.equals(Sakstyper.FTRL)) {
+            tittelValgForSakstype.add(lagTittelValg("CONFIRMATION_OF_MEMBERSHIP", "Confirmation of membership in the National Insurance Scheme"));
+            tittelValgForSakstype.add(lagTittelValg("BEKREFTELSE_PÅ_MEDLEMSKAP", "Bekreftelse på medlemskap i folketrygden"));
+        }
+        tittelValgForSakstype.add(lagTittelValg("FRITEKST", "Fritekst"));
+
+        return tittelValgForSakstype;
+    }
+
+    private FeltvalgDto lagTittelValg(String kode, String beskrivelse) {
+        return new FeltvalgDto.Builder().medKode(kode).medBeskrivelse(beskrivelse).build();
     }
 
     private void leggTilAdresseOgFeilmelding(MottakerDto.Builder builder, Produserbaredokumenter produserbaredokumenter, Aktoersroller aktoersroller, Behandling behandling) {
