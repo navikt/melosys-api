@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.ser.InstantSerializer;
+import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_ektefelle_samboer_begrunnelser_ftrl;
 
 import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
 
@@ -13,7 +14,7 @@ public record Ektefelle(
 
     boolean omfattet,
 
-    String begrunnelse,
+    Medfolgende_ektefelle_samboer_begrunnelser_ftrl begrunnelse,
 
     String fnr,
 
@@ -28,7 +29,7 @@ public record Ektefelle(
 
         private boolean omfattet;
 
-        private String begrunnelse;
+        private Medfolgende_ektefelle_samboer_begrunnelser_ftrl begrunnelse;
 
         private String fnr;
 
@@ -47,8 +48,11 @@ public record Ektefelle(
         }
 
         public Builder begrunnelse(String begrunnelse) {
-            this.begrunnelse = begrunnelse;
-            this.omfattet = begrunnelse == null;
+            if (begrunnelse != null) {
+                this.begrunnelse = Medfolgende_ektefelle_samboer_begrunnelser_ftrl.valueOf(begrunnelse);
+            } else {
+                this.omfattet = true;
+            }
             return this;
         }
 
