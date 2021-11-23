@@ -36,6 +36,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.INNVILGELSE_UK;
 import static no.nav.melosys.service.dokument.DokgenTestData.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
@@ -92,20 +93,11 @@ class InnvilgelseUKMapperTest {
         InnvilgelseBrevbestilling brevbestilling = lagInnvilgelseBrevbestilling();
 
         InnvilgelseUK innvilgelseUK = innvilgelseUKMapper.map(brevbestilling);
-        String json = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(innvilgelseUK);
-        System.out.println(json);
-    }
 
-    @Test
-    void map_InnvilgetIkkeOmfattetEktefelle_populererFelter() throws JsonProcessingException {
-        when(mockAvklarteMedfolgendeFamilieService
-            .hentAvklartMedfølgendeEktefelle(anyLong()))
-            .thenReturn(lagIkkeAvklartMedfølgendeEktefelle());
-        InnvilgelseBrevbestilling brevbestilling = lagInnvilgelseBrevbestilling();
-
-        InnvilgelseUK innvilgelseUK = innvilgelseUKMapper.map(brevbestilling);
         String json = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(innvilgelseUK);
-        System.out.println(json);
+        String resultat = json.replaceAll("(\"dagensDato\" :)(.*)", "$1 \"Fjernet for test\",");
+
+        assertThat(resultat).isEqualTo(FORVENTEDE_FELTER_FOR_INNVIGLESE_STORBRITANNIA_MAPPING);
     }
 
     private void mockData() {
@@ -116,6 +108,7 @@ class InnvilgelseUKMapperTest {
         when(mockPersondata.getFødselsdato()).thenReturn(LocalDate.of(1970, 1, 1));
         when(mockPersondataFasade.hentPerson(anyString())).thenReturn(mockPersondata);
         when(mockAvklarteVirksomheterService.hentUtenlandskeVirksomheter(any())).thenReturn(lagAvklarteVirksomheter());
+        when(mockDokgenMapperDatahenter.hentSammensattNavn(EKTEFELLE_FNR)).thenReturn(EKTEFELLE_NAVN);
     }
 
     private List<AvklartVirksomhet> lagAvklarteVirksomheter() {
@@ -207,4 +200,62 @@ class InnvilgelseUKMapperTest {
             UUID_EKTEFELLE, EKTEFELLE_FNR, EKTEFELLE_NAVN, MedfolgendeFamilie.Relasjonsrolle.EKTEFELLE_SAMBOER);
         return Map.of(UUID_EKTEFELLE, ektefelle);
     }
+
+    private static final String FORVENTEDE_FELTER_FOR_INNVIGLESE_STORBRITANNIA_MAPPING = """
+        {
+          "saksopplysninger" : {
+            "saksnummer" : "MEL-123",
+            "navnBruker" : "Donald Duck",
+            "fnr" : "05058892382"
+          },
+          "dagensDato" : "Fjernet for test",
+          "mottaker" : {
+            "navn" : "Advokatene AS",
+            "adresselinjer" : [ "Att: Fetter Anton", "POSTBOKS 200" ],
+            "postnr" : "9990",
+            "poststed" : null,
+            "land" : null,
+            "type" : "BRUKER"
+          },
+          "innvilgelse" : {
+            "innledningFritekst" : "innledningFritekst",
+            "begrunnelseFritekst" : "begrunnelse",
+            "ektefelleFritekst" : "ektefelleFritekst",
+            "barnFritekst" : "barnFritekst"
+          },
+          "artikkel" : "UK_ART6_1",
+          "soknad" : {
+            "soknadsdato" : "2019-10-01",
+            "periodeFom" : "2020-01-01",
+            "periodeTom" : "2021-01-01",
+            "virksomhetsnavn" : "Foretaksnavn"
+          },
+          "familie" : {
+            "minstEttOmfattetFamiliemedlem" : true,
+            "ektefelle" : {
+              "navn" : "Dolly Duck",
+              "omfattet" : true,
+              "begrunnelse" : null,
+              "fnr" : "09080723451",
+              "dnr" : null,
+              "foedselsdato" : "1970-01-01"
+            },
+            "barn" : [ {
+              "navn" : "Doffen Duck",
+              "omfattet" : true,
+              "begrunnelse" : null,
+              "fnr" : "12131456789",
+              "dnr" : null,
+              "foedselsdato" : "1970-01-01"
+            }, {
+              "navn" : "Dole Duck",
+              "omfattet" : false,
+              "begrunnelse" : "OVER_18_AR",
+              "fnr" : "12151456789",
+              "dnr" : null,
+              "foedselsdato" : "1970-01-01"
+            } ]
+          },
+          "virksomhetArbeidsgiverSkalHaKopi" : false
+        }""";
 }

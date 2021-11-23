@@ -112,7 +112,7 @@ public class InnvilgelseUKMapper {
     private List<Barn> finnBarn(long behandlingID) {
         var avklarteMedfølgendeBarn = avklarteMedfølgendeFamilieService.hentAvklarteMedfølgendeBarn(behandlingID);
         var barnOmfattetAvNorskTrygd = avklarteMedfølgendeBarn.barnOmfattetAvNorskTrygd;
-        Set<no.nav.melosys.domain.person.familie.IkkeOmfattetBarn> barnIkkeOmfattetAvNorskTrygd = avklarteMedfølgendeBarn.barnIkkeOmfattetAvNorskTrygd;
+        var barnIkkeOmfattetAvNorskTrygd = avklarteMedfølgendeBarn.barnIkkeOmfattetAvNorskTrygd;
         return Stream.concat(barnOmfattetAvNorskTrygd.stream()
                 .map(this::tilBarn),
             barnIkkeOmfattetAvNorskTrygd.stream()
