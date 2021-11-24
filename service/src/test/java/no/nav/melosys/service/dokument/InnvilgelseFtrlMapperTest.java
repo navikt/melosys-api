@@ -119,10 +119,10 @@ class InnvilgelseFtrlMapperTest {
         }
         assertThat(innvilgelseFtrl.getIkkeOmfattetBarn().size()).isZero();
         assertThat(innvilgelseFtrl.getIkkeOmfattetEktefelle()).isNull();
-        assertThat(innvilgelseFtrl.getFritekstInnledning()).isNull();
-        assertThat(innvilgelseFtrl.getFritekstBegrunnelse()).isEqualTo(BEGRUNNELSE_FRITEKST);
-        assertThat(innvilgelseFtrl.getFritekstEktefelle()).isNull();
-        assertThat(innvilgelseFtrl.getFritekstBarn()).isNull();
+        assertThat(innvilgelseFtrl.getInnvilgelse().innledningFritekst()).isNull();
+        assertThat(innvilgelseFtrl.getInnvilgelse().begrunnelseFritekst()).isEqualTo(BEGRUNNELSE_FRITEKST);
+        assertThat(innvilgelseFtrl.getInnvilgelse().ektefelleFritekst()).isNull();
+        assertThat(innvilgelseFtrl.getInnvilgelse().barnFritekst()).isNull();
         assertThat(innvilgelseFtrl.getSaksbehandlerNavn()).isEqualTo(SAKSBEHANDLER_NAVN);
         assertThat(innvilgelseFtrl.getArbeidsgiverNavn()).isEqualTo(ARBEIDSGIVER_NAVN);
         assertThat(innvilgelseFtrl.getArbeidsland()).isEqualTo(Landkoder.AT.getBeskrivelse());
