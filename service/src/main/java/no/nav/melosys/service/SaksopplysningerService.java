@@ -1,8 +1,10 @@
 package no.nav.melosys.service;
 
+import java.time.Instant;
 import java.util.Optional;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
@@ -15,6 +17,9 @@ import no.nav.melosys.repository.SaksopplysningRepository;
 import no.nav.melosys.service.persondata.PersonMedHistorikk;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import static no.nav.melosys.service.persondata.PersondataService.PDL_PERSOPL_VERSJON;
+import static no.nav.melosys.service.persondata.PersondataService.PDL_PERS_SAKS_VERSJON;
 
 @Service
 public class SaksopplysningerService {
@@ -58,10 +63,26 @@ public class SaksopplysningerService {
     }
 
     public void lagrePersonopplysninger(Behandling behandling, Persondata persondata) {
-
+        Instant nå = Instant.now();
+        Saksopplysning saksopplysning = new Saksopplysning();
+        saksopplysning.setDokument(persondata);
+        saksopplysning.setType(SaksopplysningType.PDL_PERSOPL);
+        saksopplysning.setBehandling(behandling);
+        saksopplysning.setVersjon(PDL_PERSOPL_VERSJON);
+        saksopplysning.setEndretDato(nå);
+        saksopplysning.setRegistrertDato(nå);
+        saksopplysningRepo.save(saksopplysning);
     }
 
-    public void lagrePersonMedHistorikk(PersonMedHistorikk personMedHistorikk) {
-
+    public void lagrePersonMedHistorikk(Behandling behandling, PersonMedHistorikk personMedHistorikk) {
+        Instant nå = Instant.now();
+        Saksopplysning saksopplysning = new Saksopplysning();
+        saksopplysning.setDokument(personMedHistorikk);
+        saksopplysning.setType(SaksopplysningType.PDL_PERS_SAKS);
+        saksopplysning.setBehandling(behandling);
+        saksopplysning.setVersjon(PDL_PERS_SAKS_VERSJON);
+        saksopplysning.setEndretDato(nå);
+        saksopplysning.setRegistrertDato(nå);
+        saksopplysningRepo.save(saksopplysning);
     }
 }

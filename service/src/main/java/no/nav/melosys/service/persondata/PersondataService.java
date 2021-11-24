@@ -48,6 +48,8 @@ public class PersondataService implements PersondataFasade {
     private final TpsService tpsService;
     private final Unleash unleash;
 
+    public static final String PDL_PERSOPL_VERSJON = "1.0";
+    public static final String PDL_PERS_SAKS_VERSJON = "1.0";
     static final LocalDate PDL_STARTDATO = LocalDate.parse("2020-07-01");
 
     @Autowired

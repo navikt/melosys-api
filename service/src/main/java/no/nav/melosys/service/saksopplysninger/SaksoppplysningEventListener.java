@@ -37,7 +37,7 @@ public class SaksoppplysningEventListener {
             Persondata persondata = persondataFasade.hentPerson(behandling.getFagsak().hentAktørID(), Informasjonsbehov.MED_FAMILIERELASJONER);
             PersonMedHistorikk personMedHistorikk = persondataFasade.hentPersonMedHistorikk(behandling.getFagsak().hentAktørID());
             saksopplysningerService.lagrePersonopplysninger(behandling, persondata);
-            saksopplysningerService.lagrePersonMedHistorikk(personMedHistorikk);
+            saksopplysningerService.lagrePersonMedHistorikk(behandling, personMedHistorikk);
         }
     }
 }

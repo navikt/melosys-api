@@ -51,7 +51,7 @@ class SaksoppplysningEventListenerTest {
         saksoppplysningEventListener.lagrePersonopplysninger(event);
 
         verify(saksopplysningerService).lagrePersonopplysninger(behandling, personopplysninger);
-        verify(saksopplysningerService).lagrePersonMedHistorikk(eq(personMedHistorikk));
+        verify(saksopplysningerService).lagrePersonMedHistorikk(behandling, personMedHistorikk);
     }
 
     @Test
