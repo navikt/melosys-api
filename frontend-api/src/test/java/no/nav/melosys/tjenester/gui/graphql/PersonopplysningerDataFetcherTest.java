@@ -83,7 +83,7 @@ class PersonopplysningerDataFetcherTest {
             .containsExactlyInAnyOrder("NAV (PDL)", "");
         assertThat(personopplysninger.folkeregisteridentifikator()).isEqualTo("identNr");
         assertThat(personopplysninger.folkeregisterpersonstatuser()).containsExactly(
-            new FolkeregisterpersonstatusDto(Personstatuser.UDEFINERT.getKode(), "ny status fra PDL", LocalDate.parse("2019-11-18"), "NAV (PDL)", Master.PDL.name(), false));
+            new FolkeregisterpersonstatusDto(Personstatuser.UDEFINERT.getKode(), "ny status fra PDL", "NAV (PDL)", Master.PDL.name(), LocalDate.parse("2019-11-18"), false));
         assertThat(personopplysninger.kjoenn()).isEqualTo(KjoennType.UKJENT);
         assertThat(personopplysninger.kontaktadresser()).hasSize(2);
         assertThat(personopplysninger.kontaktadresser()).extracting(KontaktadresseDto::master)
