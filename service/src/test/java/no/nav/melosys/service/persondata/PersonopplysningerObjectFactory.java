@@ -6,8 +6,10 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
+import no.nav.melosys.domain.adresse.SemistrukturertAdresse;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.felles.Land;
+import no.nav.melosys.domain.kodeverk.Personstatuser;
 import no.nav.melosys.domain.person.*;
 import no.nav.melosys.domain.person.adresse.Bostedsadresse;
 import no.nav.melosys.domain.person.adresse.Kontaktadresse;
@@ -157,5 +159,46 @@ public class PersonopplysningerObjectFactory {
                 LocalDate.parse("1980-11-18"), "PDL",
                 "Dolly", false)
         );
+    }
+
+    public static PersonMedHistorikk lagPersonMedHistorikk() {
+        final var bostedsadresse_1 = new Bostedsadresse(
+            new StrukturertAdresse("gate1", "42 C", null, null, null, null),
+            null, null, null, "PDL", null, false);
+        final var bostedsadresse_2 = new Bostedsadresse(
+            new StrukturertAdresse("gate2", null, null, null, null, null),
+            null, null, null, null, null, true);
+
+        final var kontaktadresse_1 = new Kontaktadresse(
+            new StrukturertAdresse("kontakt 1", null, null, null, null, null), null, null, null, null, "PDL", null, null,
+            false);
+        final var kontaktadresse_2 = new Kontaktadresse(null,
+            new SemistrukturertAdresse("kontakt 2", "linje 2", null, null, "1234", "By", "IT"), null, null, null, null,
+            null, null, false);
+
+        final var oppholdsadresse_1 = new Oppholdsadresse(
+            new StrukturertAdresse("opphold 1", null, null, null, null, null), null, null, null, "PDL", null, null,
+            false);
+        final var oppholdsadresse_2 = new Oppholdsadresse(
+            new StrukturertAdresse("opphold 2", null, null, null, null, null), null, null, null, null, null, null,
+            true);
+
+        final var statsborgerskap_1 = new Statsborgerskap("AAA", null, LocalDate.parse("2009-11-18"),
+            LocalDate.parse("1980-11-18"), "PDL", "Dolly", false);
+        final var statsborgerskap_2 = new Statsborgerskap("BBB", null, LocalDate.parse("1979-11-18"),
+            LocalDate.parse("1980-11-18"), "PDL", "Dolly", false);
+        final var statsborgerskap_3 = new Statsborgerskap("CCC", null, null, LocalDate.parse("1980-11-18"), "PDL",
+            "Dolly", false);
+
+        return new PersonMedHistorikk(Set.of(bostedsadresse_1, bostedsadresse_2),
+            null, null, new Folkeregisteridentifikator("identNr"),
+            new Folkeregisterpersonstatus(Personstatuser.UDEFINERT, "ny status fra PDL"), KjoennType.UKJENT,
+            Set.of(kontaktadresse_1, kontaktadresse_2), new Navn("Ola", "Oops", "King"),
+            Set.of(oppholdsadresse_1, oppholdsadresse_2), Set.of(
+            new Sivilstand(Sivilstandstype.REGISTRERT_PARTNER, null, "relatertVedSivilstandID", LocalDate.MIN,
+                LocalDate.EPOCH, "PDL", "kilde", false),
+            new Sivilstand(Sivilstandstype.UDEFINERT, "Udefinert type", "relatertVedSivilstandID", LocalDate.MIN,
+                LocalDate.EPOCH, "PDL", "kilde", false)),
+            Set.of(statsborgerskap_1, statsborgerskap_2, statsborgerskap_3));
     }
 }

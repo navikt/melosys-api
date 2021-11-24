@@ -32,7 +32,6 @@ import static no.nav.melosys.domain.kodeverk.Saksstatuser.MEDLEMSKAP_AVKLART;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.IVERKSETTER_VEDTAK;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.ATTEST_NO_UK_1;
-import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.INNVILGELSE_FOLKETRYGDLOVEN_2_8;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
@@ -84,7 +83,7 @@ class TrygdeavtaleVedtakServiceTest {
         trygdeavtaleVedtakService.fattVedtak(lagBehandling(), request);
 
         verify(behandlingsresultatService).lagre(behandlingsresultatCaptor.capture());
-        verify(behandlingService).lagre(behandlingCaptor.capture());
+        verify(behandlingService).oppdaterStatus(behandlingCaptor.capture(), eq(IVERKSETTER_VEDTAK));
         verify(prosessinstansService).opprettProsessinstansIverksettVedtakTrygdeavtale(any(Behandling.class), eq(request));
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(SAKSNUMMER);
         verify(dokgenService).produserOgDistribuerBrev(anyLong(), brevbestillingRequestCaptor.capture());
@@ -95,7 +94,6 @@ class TrygdeavtaleVedtakServiceTest {
             .containsExactly(MEDLEM_I_FOLKETRYGDEN, "Begrunnelse", Landkoder.NO);
 
         Behandling lagretBehandling = behandlingCaptor.getValue();
-        assertThat(lagretBehandling.getStatus()).isEqualTo(IVERKSETTER_VEDTAK);
         assertThat(lagretBehandling.getFagsak().getStatus()).isEqualTo(MEDLEMSKAP_AVKLART);
 
         BrevbestillingRequest brevbestillingRequest = brevbestillingRequestCaptor.getValue();

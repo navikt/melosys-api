@@ -2,14 +2,17 @@ package no.nav.melosys.service;
 
 import java.util.Optional;
 
+import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.person.PersonhistorikkDokument;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
+import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.SaksopplysningRepository;
+import no.nav.melosys.service.persondata.PersonMedHistorikk;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -52,5 +55,13 @@ public class SaksopplysningerService {
         return saksopplysningRepo.findByBehandling_IdAndType(behandlingID, SaksopplysningType.PERSHIST)
             .map(s -> (PersonhistorikkDokument) s.getDokument())
             .orElseThrow(() -> new IkkeFunnetException("Finner ikke personhistorikkDokument for behandling " + behandlingID));
+    }
+
+    public void lagrePersonopplysninger(Behandling behandling, Persondata persondata) {
+
+    }
+
+    public void lagrePersonMedHistorikk(PersonMedHistorikk personMedHistorikk) {
+
     }
 }
