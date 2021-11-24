@@ -5,8 +5,7 @@ import java.time.LocalDate;
 public record FolkeregisterpersonstatusDto(
     String kode,
     String tekst,
-    LocalDate gyldigFraOgMed,
-    LocalDate gyldigTilOgMed,
+    LocalDate registreringsdato,
     String master,
     String kilde,
     boolean erHistorisk

@@ -94,10 +94,9 @@ public final class PersonMedHistorikkOversetter {
         return new Folkeregisterpersonstatus(
             kodeToPersonstatuser(personstatus.getKode()),
             kodeverkservice.dekod(FellesKodeverk.PERSONSTATUSER, personstatus.getKode()),
-            null,
-            null,
             Master.TPS.name(),
             Master.TPS.name(),
+            null,
             false);
     }
 

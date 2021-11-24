@@ -32,10 +32,9 @@ public final class FolkeregisterpersonstatusOversetter {
         return new Folkeregisterpersonstatus(
             oversettStatusTilKodeverk(folkeregisterpersonstatus),
             kodeverkService.dekod(FellesKodeverk.PERSONSTATUSER, folkeregisterpersonstatus.status()),
-            KonverteringsUtils.localDateTimeToLocalDate(folkeregisterpersonstatus.gyldigFraOgMed()),
-            KonverteringsUtils.localDateTimeToLocalDate(folkeregisterpersonstatus.gyldigTilOgMed()),
             folkeregisterpersonstatus.metadata().master(),
             folkeregisterpersonstatus.hentKilde(),
+            folkeregisterpersonstatus.folkeregistermetadata().gyldighetstidspunkt().toLocalDate(),
             folkeregisterpersonstatus.metadata().historisk()
         );
     }

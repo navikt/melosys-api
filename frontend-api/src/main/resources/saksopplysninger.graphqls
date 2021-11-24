@@ -57,10 +57,9 @@ enum Familierelasjonsrolle {
 type Folkeregisterpersonstatus {
     kode: String!
     tekst: String!
-    gyldigFraOgMed: Date
-    gyldigTilOgMed: Date
     master: String!
     kilde: String
+    registreringsdato: Date
     erHistorisk: Boolean!
 }
 

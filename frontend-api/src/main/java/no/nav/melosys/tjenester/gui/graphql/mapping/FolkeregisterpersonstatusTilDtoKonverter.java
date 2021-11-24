@@ -14,8 +14,7 @@ public final class FolkeregisterpersonstatusTilDtoKonverter {
         return new FolkeregisterpersonstatusDto(
             folkeregisterpersonstatus.personstatus().getKode(),
             folkeregisterpersonstatus.hentGjeldendeTekst(),
-            folkeregisterpersonstatus.gyldigFraOgMed(),
-            folkeregisterpersonstatus.gyldigTilOgMed(),
+            folkeregisterpersonstatus.registreringsdato(),
             MasterTilDtoKonverter.tilDto(folkeregisterpersonstatus.master()),
             folkeregisterpersonstatus.kilde(),
             folkeregisterpersonstatus.erHistorisk()

@@ -83,7 +83,7 @@ class PersonopplysningerDataFetcherTest {
             .containsExactlyInAnyOrder("NAV (PDL)", "");
         assertThat(personopplysninger.folkeregisteridentifikator()).isEqualTo("identNr");
         assertThat(personopplysninger.folkeregisterpersonstatuser()).containsExactly(
-            new FolkeregisterpersonstatusDto(Personstatuser.UDEFINERT.getKode(), "ny status fra PDL", LocalDate.parse("2019-11-18"), LocalDate.parse("2029-11-18"), "NAV (PDL)", Master.PDL.name(), false));
+            new FolkeregisterpersonstatusDto(Personstatuser.UDEFINERT.getKode(), "ny status fra PDL", LocalDate.parse("2019-11-18"), "NAV (PDL)", Master.PDL.name(), false));
         assertThat(personopplysninger.kjoenn()).isEqualTo(KjoennType.UKJENT);
         assertThat(personopplysninger.kontaktadresser()).hasSize(2);
         assertThat(personopplysninger.kontaktadresser()).extracting(KontaktadresseDto::master)
@@ -139,7 +139,7 @@ class PersonopplysningerDataFetcherTest {
 
         return new PersonMedHistorikk(Set.of(bostedsadresse_1, bostedsadresse_2),
             null, null, new Folkeregisteridentifikator("identNr"),
-            Set.of(new Folkeregisterpersonstatus(Personstatuser.UDEFINERT, "ny status fra PDL", LocalDate.parse("2019-11-18"), LocalDate.parse("2029-11-18"), Master.PDL.name(), Master.PDL.name(), false)),
+            Set.of(new Folkeregisterpersonstatus(Personstatuser.UDEFINERT, "ny status fra PDL", Master.PDL.name(), Master.PDL.name(), LocalDate.parse("2019-11-18"), false)),
             KjoennType.UKJENT,
             Set.of(kontaktadresse_1, kontaktadresse_2), new Navn("Ola", "Oops", "King"),
             Set.of(oppholdsadresse_1, oppholdsadresse_2), Set.of(
