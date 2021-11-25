@@ -97,11 +97,6 @@ public record Personopplysninger(
     }
 
     @Override
-    public no.nav.melosys.domain.dokument.person.adresse.Bostedsadresse getBostedsadresse() {
-        throw new UnsupportedOperationException("Eksisterer bare ifm. TPS");
-    }
-
-    @Override
     public Optional<Bostedsadresse> finnBostedsadresse() {
         return Optional.ofNullable(bostedsadresse);
     }
