@@ -16,7 +16,7 @@ public final class FolkeregisterpersonstatusTilDtoKonverter {
             folkeregisterpersonstatus.hentGjeldendeTekst(),
             MasterTilDtoKonverter.tilDto(folkeregisterpersonstatus.master()),
             folkeregisterpersonstatus.kilde(),
-            folkeregisterpersonstatus.gyldighetstidspunkt(),
+            folkeregisterpersonstatus.fregGyldighetstidspunkt(),
             folkeregisterpersonstatus.erHistorisk()
         );
     }

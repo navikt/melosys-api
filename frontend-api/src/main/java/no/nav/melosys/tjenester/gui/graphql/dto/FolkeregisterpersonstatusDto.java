@@ -7,7 +7,7 @@ public record FolkeregisterpersonstatusDto(
     String tekst,
     String master,
     String kilde,
-    LocalDate gyldighetstidspunkt,
+    LocalDate fregGyldighetstidspunkt,
     boolean erHistorisk
 ) {
 }
