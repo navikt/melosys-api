@@ -9,7 +9,7 @@ public record Folkeregisterpersonstatus(
     String tekstHvisStatusErUdefinert,
     String master,
     String kilde,
-    LocalDate registreringsdato,
+    LocalDate gyldighetstidspunkt,
     boolean erHistorisk
 ) {
     public String hentGjeldendeTekst() {

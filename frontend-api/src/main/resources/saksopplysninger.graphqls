@@ -59,7 +59,7 @@ type Folkeregisterpersonstatus {
     tekst: String!
     master: String!
     kilde: String
-    registreringsdato: Date
+    gyldighetstidspunkt: Date
     erHistorisk: Boolean!
 }
 
