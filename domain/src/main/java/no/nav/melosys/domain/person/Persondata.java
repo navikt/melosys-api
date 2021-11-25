@@ -38,9 +38,6 @@ public interface Persondata {
 
     LocalDate getFødselsdato();
 
-    @Deprecated // knyttet til TPS
-    no.nav.melosys.domain.dokument.person.adresse.Bostedsadresse getBostedsadresse();
-
     Optional<Bostedsadresse> finnBostedsadresse();
 
     Optional<Kontaktadresse> finnKontaktadresse();
