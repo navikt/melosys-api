@@ -5,17 +5,17 @@ import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie;
 import java.util.List;
 
 public record TrygdeavtaleResultat(
-    List<String> virksomheter,
+    String virksomhet,
     String bestemmelse,
     AvklarteMedfolgendeFamilie familie) {
 
     public static class Builder {
-        private List<String> virksomheter;
+        private String virksomhet;
         private String bestemmelse;
         private AvklarteMedfolgendeFamilie familie;
 
-        public Builder virksomheter(List<String> virksomheter) {
-            this.virksomheter = virksomheter;
+        public Builder virksomhet(String virksomhet) {
+            this.virksomhet = virksomhet;
             return this;
         }
 
@@ -31,7 +31,7 @@ public record TrygdeavtaleResultat(
 
         public TrygdeavtaleResultat build() {
             return new TrygdeavtaleResultat(
-                virksomheter,
+                virksomhet,
                 bestemmelse,
                 familie
             );
