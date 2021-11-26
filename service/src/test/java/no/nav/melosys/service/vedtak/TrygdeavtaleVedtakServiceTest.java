@@ -82,7 +82,7 @@ class TrygdeavtaleVedtakServiceTest {
         trygdeavtaleVedtakService.fattVedtak(lagBehandling(), request);
 
         verify(behandlingsresultatService).lagre(behandlingsresultatCaptor.capture());
-        verify(behandlingService).lagre(behandlingCaptor.capture());
+        verify(behandlingService).oppdaterStatus(behandlingCaptor.capture(), eq(IVERKSETTER_VEDTAK));
         verify(prosessinstansService).opprettProsessinstansIverksettVedtakTrygdeavtale(any(Behandling.class), eq(request));
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(SAKSNUMMER);
 
@@ -92,7 +92,6 @@ class TrygdeavtaleVedtakServiceTest {
             .containsExactly(MEDLEM_I_FOLKETRYGDEN, "Begrunnelse", Landkoder.NO);
 
         Behandling lagretBehandling = behandlingCaptor.getValue();
-        assertThat(lagretBehandling.getStatus()).isEqualTo(IVERKSETTER_VEDTAK);
         assertThat(lagretBehandling.getFagsak().getStatus()).isEqualTo(MEDLEMSKAP_AVKLART);
     }
 
