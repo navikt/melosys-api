@@ -1,4 +1,4 @@
-package no.nav.melosys.service.persondata;
+package no.nav.melosys.domain.person;
 
 import java.util.Collection;
 

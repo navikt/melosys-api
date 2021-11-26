@@ -126,8 +126,7 @@ public class BehandlingService {
         } else if (status == Behandlingsstatus.AVSLUTTET) {
             oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
         }
-
-            //send event
+        applicationEventPublisher.publishEvent(new BehandlingEndretStatusEvent(behandling.getId(), status, behandling));
     }
 
     public void brukerOppdaterStatus(long behandlingID, Behandlingsstatus status) {
@@ -273,7 +272,7 @@ public class BehandlingService {
         behandling.setStatus(Behandlingsstatus.AVSLUTTET);
         behandlingRepository.save(behandling);
         behandlingerAvsluttet.increment();
-        // send event
+        applicationEventPublisher.publishEvent(new BehandlingEndretStatusEvent(behandlingId, AVSLUTTET, behandling));
     }
 
     public Behandling hentBehandling(long behandlingId) {

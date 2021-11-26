@@ -11,10 +11,10 @@ import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.person.PersonhistorikkDokument;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
+import no.nav.melosys.domain.person.PersonMedHistorikk;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.SaksopplysningRepository;
-import no.nav.melosys.service.persondata.PersonMedHistorikk;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -63,26 +63,30 @@ public class SaksopplysningerService {
     }
 
     public void lagrePersonopplysninger(Behandling behandling, Persondata persondata) {
-        Instant nå = Instant.now();
-        Saksopplysning saksopplysning = new Saksopplysning();
-        saksopplysning.setDokument(persondata);
-        saksopplysning.setType(SaksopplysningType.PDL_PERSOPL);
-        saksopplysning.setBehandling(behandling);
-        saksopplysning.setVersjon(PDL_PERSOPL_VERSJON);
-        saksopplysning.setEndretDato(nå);
-        saksopplysning.setRegistrertDato(nå);
-        saksopplysningRepo.save(saksopplysning);
+        if (!behandling.saksopplysningEksisterer(SaksopplysningType.PDL_PERSOPL)) {
+            Instant nå = Instant.now();
+            Saksopplysning saksopplysning = new Saksopplysning();
+            saksopplysning.setDokument(persondata);
+            saksopplysning.setType(SaksopplysningType.PDL_PERSOPL);
+            saksopplysning.setBehandling(behandling);
+            saksopplysning.setVersjon(PDL_PERSOPL_VERSJON);
+            saksopplysning.setEndretDato(nå);
+            saksopplysning.setRegistrertDato(nå);
+            saksopplysningRepo.save(saksopplysning);
+        }
     }
 
     public void lagrePersonMedHistorikk(Behandling behandling, PersonMedHistorikk personMedHistorikk) {
-        Instant nå = Instant.now();
-        Saksopplysning saksopplysning = new Saksopplysning();
-        saksopplysning.setDokument(personMedHistorikk);
-        saksopplysning.setType(SaksopplysningType.PDL_PERS_SAKS);
-        saksopplysning.setBehandling(behandling);
-        saksopplysning.setVersjon(PDL_PERS_SAKS_VERSJON);
-        saksopplysning.setEndretDato(nå);
-        saksopplysning.setRegistrertDato(nå);
-        saksopplysningRepo.save(saksopplysning);
+        if (!behandling.saksopplysningEksisterer(SaksopplysningType.PDL_PERS_SAKS)) {
+            Instant nå = Instant.now();
+            Saksopplysning saksopplysning = new Saksopplysning();
+            saksopplysning.setDokument(personMedHistorikk);
+            saksopplysning.setType(SaksopplysningType.PDL_PERS_SAKS);
+            saksopplysning.setBehandling(behandling);
+            saksopplysning.setVersjon(PDL_PERS_SAKS_VERSJON);
+            saksopplysning.setEndretDato(nå);
+            saksopplysning.setRegistrertDato(nå);
+            saksopplysningRepo.save(saksopplysning);
+        }
     }
 }

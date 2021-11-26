@@ -5,7 +5,7 @@ import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.person.Personopplysninger;
 import no.nav.melosys.repository.SaksopplysningRepository;
-import no.nav.melosys.service.persondata.PersonMedHistorikk;
+import no.nav.melosys.domain.person.PersonMedHistorikk;
 import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
