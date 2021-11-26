@@ -5,7 +5,6 @@ import java.util.List;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -19,6 +18,7 @@ import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.sikkerhet.context.TestSubjectHandler;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -26,8 +26,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static no.nav.melosys.domain.kodeverk.Aktoersroller.ARBEIDSGIVER;
-import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
+import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
 import static no.nav.melosys.domain.kodeverk.Saksstatuser.MEDLEMSKAP_AVKLART;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.IVERKSETTER_VEDTAK;
@@ -75,7 +74,31 @@ class TrygdeavtaleVedtakServiceTest {
     }
 
     @Test
-    void fattVedtak_Førstegangsvedtak_fatterVedtak() {
+    void fattVedtak_førstegangsvedtakUtenBrev_fatterVedtak() {
+        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
+
+        FattTrygdeavtaleVedtakRequest request = lagFattVedtakRequest();
+        trygdeavtaleVedtakService.fattVedtak(lagBehandling(), request);
+
+        verify(behandlingsresultatService).lagre(behandlingsresultatCaptor.capture());
+        verify(behandlingService).lagre(behandlingCaptor.capture());
+        verify(prosessinstansService).opprettProsessinstansIverksettVedtakTrygdeavtale(any(Behandling.class), eq(request));
+        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(SAKSNUMMER);
+
+        Behandlingsresultat lagretBehandlingsresultat = behandlingsresultatCaptor.getValue();
+        assertThat(lagretBehandlingsresultat)
+            .extracting("type", "begrunnelseFritekst", "fastsattAvLand")
+            .containsExactly(MEDLEM_I_FOLKETRYGDEN, "Begrunnelse", Landkoder.NO);
+
+        Behandling lagretBehandling = behandlingCaptor.getValue();
+        assertThat(lagretBehandling.getStatus()).isEqualTo(IVERKSETTER_VEDTAK);
+        assertThat(lagretBehandling.getFagsak().getStatus()).isEqualTo(MEDLEMSKAP_AVKLART);
+    }
+
+    @Test
+    @Disabled("Denne er disabled frem til dokgen attest-bestilling er ok")
+    void fattVedtak_kallerDokgen_fatterVedtak() {
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
@@ -114,7 +137,7 @@ class TrygdeavtaleVedtakServiceTest {
             .medFritekstBegrunnelse("Begrunnelse")
             .medFritekstEktefelle("Ektefelle omfattet")
             .medFritekstBarn("Barn omfattet")
-            .medKopiMottakere(List.of(new KopiMottaker(Aktoersroller.ARBEIDSGIVER, "987654321", null)))
+            .medKopiMottakere(List.of(new KopiMottaker(ARBEIDSGIVER, "987654321", null)))
             .medBestillersId(SubjectHandler.getInstance().getUserID())
             .build();
     }

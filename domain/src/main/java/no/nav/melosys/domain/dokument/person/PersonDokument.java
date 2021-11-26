@@ -253,7 +253,6 @@ public class PersonDokument implements Persondata {
         this.statsborgerskapDato = statsborgerskapDato;
     }
 
-    @Override
     public Bostedsadresse getBostedsadresse() {
         return bostedsadresse;
     }

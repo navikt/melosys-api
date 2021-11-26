@@ -62,8 +62,8 @@ public class TrygdeavtaleVedtakService {
         behandlingService.oppdaterStatus(behandling, Behandlingsstatus.IVERKSETTER_VEDTAK);
 
         prosessinstansService.opprettProsessinstansIverksettVedtakTrygdeavtale(behandling, request);
-        // Kommer innvigelse nå etterpå - og vi må finne ut hvordan vi slår dette sammen
-        dokgenService.produserOgDistribuerBrev(behandlingID, lagAttestBrevbestilling(request));
+        // TODO: Produser og distribuer både attest og innvilgelse-brevene
+        // dokgenService.produserOgDistribuerBrev(behandlingID, lagAttestBrevbestilling(request));
         oppgaveService.ferdigstillOppgaveMedSaksnummer(saksnummer);
     }
 

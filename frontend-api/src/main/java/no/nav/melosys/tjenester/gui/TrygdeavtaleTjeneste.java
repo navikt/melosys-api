@@ -38,7 +38,7 @@ public class TrygdeavtaleTjeneste {
                                                                     @RequestParam(value = "virksomheter", required = false) boolean hentVirksomheter,
                                                                     @RequestParam(value = "barnEktefeller", required = false) boolean hentBarnEktefeller) {
 
-        aksesskontroll.autoriserSkriv(behandlingId);
+        aksesskontroll.autoriser(behandlingId);
         var behandling = behandlingService.hentBehandling(behandlingId);
         var behandlingsgrunnlagdata = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
         return ResponseEntity.ok(new TrygdeavtaleInfoDto(
