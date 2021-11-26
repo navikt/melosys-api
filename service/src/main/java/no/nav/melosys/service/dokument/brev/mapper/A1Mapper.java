@@ -20,7 +20,6 @@ import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.domain.person.adresse.Kontaktadresse;
 import no.nav.melosys.domain.person.adresse.Oppholdsadresse;
 import no.nav.melosys.domain.util.LandkoderUtils;
-import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted;
@@ -90,17 +89,25 @@ class A1Mapper {
     }
 
     private BostedsadresseType mapBostedAdresse(StrukturertAdresse bostedsadresse) {
-        if (bostedsadresse == null) {
-            throw new FunksjonellException("Brevmalen fra A1 trenger bostedsadresse"); //FIXME Mal må endres
-        }
-        return lagBostedsadresse(bostedsadresse);
+        return (bostedsadresse == null) ? null : lagBostedsadresse(bostedsadresse);
     }
 
     private MidlertidigOppholdsadresseType mapMidlertidigOppholdsadresse(Persondata persondata) {
-        Optional<StrukturertAdresse> strukturertAdresse = hentNyesteRegistrerteStrukturAdresse(persondata);
+        Optional<StrukturertAdresse> strukturertAdresse = hentNyesteOppholdEllerKontaktadresse(persondata);
         return lagMidlertidigOppholdsadresse(strukturertAdresse.orElseGet(() -> persondata.finnKontaktadresse()
             .map(Kontaktadresse::strukturertAdresse)
             .orElse(hentOppholdsadresseEllerNy(persondata))));
+    }
+
+    private Optional<StrukturertAdresse> hentNyesteOppholdEllerKontaktadresse(Persondata persondata) {
+        return persondata.finnOppholdsadresse()
+            .map(oppholdsadresse -> persondata.finnKontaktadresse().map(kontaktadresse -> returnerSistRegistrertAdresse(kontaktadresse, oppholdsadresse)))
+            .flatMap(strukturertAdresse -> strukturertAdresse.orElse(Optional.empty()));
+    }
+
+    private Optional<StrukturertAdresse> returnerSistRegistrertAdresse(Kontaktadresse kontaktadresse, Oppholdsadresse oppholdsadresse) {
+        return kontaktadresse.registrertDato().isAfter((oppholdsadresse.registrertDato())) ?
+            Optional.of(kontaktadresse.strukturertAdresse()) : Optional.of(oppholdsadresse.strukturertAdresse());
     }
 
     private StrukturertAdresse hentOppholdsadresseEllerNy(Persondata persondata) {
@@ -250,18 +257,6 @@ class A1Mapper {
         return arbeidsland.stream()
             .filter(a -> !arbeidslandMedArbeidsted.contains(a.getKode()))
             .collect(Collectors.toSet());
-    }
-
-    private Optional<StrukturertAdresse> sammenlignRegistrerteDatoer(Kontaktadresse kontaktadresse, Oppholdsadresse oppholdsadresse) {
-        return kontaktadresse.registrertDato().isAfter((oppholdsadresse.registrertDato())) ?
-            Optional.of(kontaktadresse.strukturertAdresse()) : Optional.of(oppholdsadresse.strukturertAdresse());
-    }
-
-    private Optional<StrukturertAdresse> hentNyesteRegistrerteStrukturAdresse(Persondata persondata) {
-        return persondata.finnOppholdsadresse()
-            .map(oppholdsadresse -> persondata.finnKontaktadresse()
-                .map(kontaktadresse -> sammenlignRegistrerteDatoer(kontaktadresse, oppholdsadresse)))
-            .flatMap(strukturertAdresse -> strukturertAdresse.orElse(Optional.empty()));
     }
 
     private MidlertidigOppholdsadresseType lagMidlertidigOppholdsadresse(StrukturertAdresse strukturertAdresse) {
