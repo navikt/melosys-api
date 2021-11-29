@@ -17,6 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 @ExtendWith(MockitoExtension.class)
 class SaksopplysningerServiceTest {
@@ -35,7 +36,7 @@ class SaksopplysningerServiceTest {
     }
 
     @Test
-    void lagrePersonopplysninger_ok() {
+    void lagrePersonopplysninger_ingenSaksopplysninger_ok() {
         Personopplysninger personopplysninger = PersonopplysningerObjectFactory.lagPersonopplysninger();
         Behandling behandling = SaksbehandlingDataFactory.lagBehandling();
         saksopplysningerService.lagrePersonopplysninger(behandling, personopplysninger);
@@ -46,7 +47,7 @@ class SaksopplysningerServiceTest {
     }
 
     @Test
-    void lagrePersonMedHistorikk_ok() {
+    void lagrePersonMedHistorikk_ingenSaksopplysninger_ok() {
         PersonMedHistorikk personMedHistorikk = PersonopplysningerObjectFactory.lagPersonMedHistorikk();
         Behandling behandling = SaksbehandlingDataFactory.lagBehandling();
         saksopplysningerService.lagrePersonMedHistorikk(behandling, personMedHistorikk);
@@ -54,5 +55,31 @@ class SaksopplysningerServiceTest {
         verify(saksopplysningRepository).save(captor.capture());
 
         assertThat(captor.getValue().getType()).isEqualTo(SaksopplysningType.PDL_PERS_SAKS);
+    }
+
+    @Test
+    void lagrePersonopplysninger_PERSOPLeksisterer_lagresIkke() {
+        Personopplysninger personopplysninger = PersonopplysningerObjectFactory.lagPersonopplysninger();
+        Behandling behandling = SaksbehandlingDataFactory.lagBehandling();
+        Saksopplysning saksopplysning = new Saksopplysning();
+        saksopplysning.setType(SaksopplysningType.PERSOPL);
+        behandling.getSaksopplysninger().add(saksopplysning);
+
+        saksopplysningerService.lagrePersonopplysninger(behandling, personopplysninger);
+
+        verifyNoInteractions(saksopplysningRepository);
+    }
+
+    @Test
+    void lagrePersonMedHistorikk_PERSHISTeksisterer_lagesIkke() {
+        PersonMedHistorikk personMedHistorikk = PersonopplysningerObjectFactory.lagPersonMedHistorikk();
+        Behandling behandling = SaksbehandlingDataFactory.lagBehandling();
+        Saksopplysning saksopplysning = new Saksopplysning();
+        saksopplysning.setType(SaksopplysningType.PERSHIST);
+        behandling.getSaksopplysninger().add(saksopplysning);
+
+        saksopplysningerService.lagrePersonMedHistorikk(behandling, personMedHistorikk);
+
+        verifyNoInteractions(saksopplysningRepository);
     }
 }

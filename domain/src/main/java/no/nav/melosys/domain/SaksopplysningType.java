@@ -12,8 +12,8 @@ public enum SaksopplysningType implements Kodeverk {
     ORG("ORG", "Arbeidsgiver"),
     PDL_PERSOPL("PDL_PERSOPL", "Personopplysning fra PDL"),
     PDL_PERS_SAKS("PDL_PERS_SAKS", "Personopplysning fra PDL til saksbehandler"),
-    PERSHIST("PERSHIST", "Personhistorikk"),
-    PERSOPL("PERSOPL", "Personopplysning"),
+    PERSHIST("PERSHIST", "Personhistorikk fra TPS"),
+    PERSOPL("PERSOPL", "Personopplysning fra TPS"),
     SEDOPPL("SEDOPPL", "SED-opplysninger"),
     SOB_SAK("SOB_SAK", "Sak og behandling-sak"),
     UTBETAL("UTBETAL", "Utbetaldata");
@@ -44,6 +44,6 @@ public enum SaksopplysningType implements Kodeverk {
         ARBFORH, INNTK, MEDL, PERSHIST, UTBETAL
     );
 
-    public static final Set<SaksopplysningType> TYPER_TIL_REGISTRERING= Set.of(ARBFORH, INNTK, MEDL, ORG, PERSHIST, PERSOPL, SOB_SAK, UTBETAL);
+    public static final Set<SaksopplysningType> TYPER_SOM_LAGRES_INITIELT = Set.of(ARBFORH, INNTK, MEDL, ORG, PERSHIST, PERSOPL, SOB_SAK, UTBETAL);
 }
 

@@ -63,7 +63,7 @@ public class SaksopplysningerService {
     }
 
     public void lagrePersonopplysninger(Behandling behandling, Persondata persondata) {
-        if (!behandling.saksopplysningEksisterer(SaksopplysningType.PDL_PERSOPL)) {
+        if (!behandling.saksopplysningEksisterer(SaksopplysningType.PDL_PERSOPL) && !behandling.saksopplysningEksisterer(SaksopplysningType.PERSOPL)) {
             Instant nå = Instant.now();
             Saksopplysning saksopplysning = new Saksopplysning();
             saksopplysning.setDokument(persondata);
@@ -77,7 +77,7 @@ public class SaksopplysningerService {
     }
 
     public void lagrePersonMedHistorikk(Behandling behandling, PersonMedHistorikk personMedHistorikk) {
-        if (!behandling.saksopplysningEksisterer(SaksopplysningType.PDL_PERS_SAKS)) {
+        if (!behandling.saksopplysningEksisterer(SaksopplysningType.PDL_PERS_SAKS) && !behandling.saksopplysningEksisterer(SaksopplysningType.PERSHIST)) {
             Instant nå = Instant.now();
             Saksopplysning saksopplysning = new Saksopplysning();
             saksopplysning.setDokument(personMedHistorikk);

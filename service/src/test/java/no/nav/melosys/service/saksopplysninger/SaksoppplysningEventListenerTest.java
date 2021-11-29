@@ -8,7 +8,6 @@ import no.nav.melosys.domain.person.PersonMedHistorikk;
 import no.nav.melosys.domain.person.Personopplysninger;
 import no.nav.melosys.service.SaksbehandlingDataFactory;
 import no.nav.melosys.service.SaksopplysningerService;
-import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory;
 import org.junit.jupiter.api.BeforeEach;
@@ -44,7 +43,7 @@ class SaksoppplysningEventListenerTest {
         PersonMedHistorikk personMedHistorikk = PersonopplysningerObjectFactory.lagPersonMedHistorikk();
         when(persondataFasade.hentPersonMedHistorikk(eq("aktørID"))).thenReturn(personMedHistorikk);
 
-        BehandlingEndretStatusEvent event = new BehandlingEndretStatusEvent(56L, Behandlingsstatus.IVERKSETTER_VEDTAK, behandling);
+        BehandlingEndretStatusEvent event = new BehandlingEndretStatusEvent(Behandlingsstatus.IVERKSETTER_VEDTAK, behandling);
         saksoppplysningEventListener.lagrePersonopplysninger(event);
 
         verify(saksopplysningerService).lagrePersonopplysninger(behandling, personopplysninger);

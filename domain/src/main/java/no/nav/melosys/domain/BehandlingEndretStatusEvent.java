@@ -7,8 +7,8 @@ public class BehandlingEndretStatusEvent extends BehandlingEvent {
     private final Behandlingsstatus behandlingsstatus;
     private final Behandling behandling;
 
-    public BehandlingEndretStatusEvent(long behandlingID, Behandlingsstatus behandlingsstatus, Behandling behandling) {
-        super(behandlingID);
+    public BehandlingEndretStatusEvent(Behandlingsstatus behandlingsstatus, Behandling behandling) {
+        super(behandling.getId());
         this.behandlingsstatus = behandlingsstatus;
         this.behandling = behandling;
     }

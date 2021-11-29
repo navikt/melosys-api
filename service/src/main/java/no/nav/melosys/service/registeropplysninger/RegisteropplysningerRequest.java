@@ -12,7 +12,7 @@ import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.exception.TekniskException;
 import org.apache.commons.lang3.StringUtils;
 
-import static no.nav.melosys.domain.SaksopplysningType.TYPER_TIL_REGISTRERING;
+import static no.nav.melosys.domain.SaksopplysningType.TYPER_SOM_LAGRES_INITIELT;
 
 public class RegisteropplysningerRequest {
     private final Long behandlingID;
@@ -66,9 +66,8 @@ public class RegisteropplysningerRequest {
         return new RegisteropplysningerRequest(getBehandlingID(), opplysningstyperSet, getFnr(), null, null, getInformasjonsbehov());
     }
 
-    // Støtter ikke type SEDOPPL
-    public static SaksopplysningTyper hentAlleSaksopplysningTyper() {
-        return new SaksopplysningTyper(TYPER_TIL_REGISTRERING);
+    public static SaksopplysningTyper hentSaksopplysningTyperSomLagres() {
+        return new SaksopplysningTyper(TYPER_SOM_LAGRES_INITIELT);
     }
 
     public static class RegisteropplysningerRequestBuilder {

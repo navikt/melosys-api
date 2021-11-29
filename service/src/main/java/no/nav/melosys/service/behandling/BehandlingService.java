@@ -92,6 +92,7 @@ public class BehandlingService {
         tidligereMedlemsperiodeRepository.saveAll(tidligereMedlemsperioder);
     }
 
+    @Deprecated
     public void lagre(Behandling behandling) {
         behandlingRepository.save(behandling);
     }
@@ -126,7 +127,7 @@ public class BehandlingService {
         } else if (status == Behandlingsstatus.AVSLUTTET) {
             oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
         }
-        applicationEventPublisher.publishEvent(new BehandlingEndretStatusEvent(behandling.getId(), status, behandling));
+        applicationEventPublisher.publishEvent(new BehandlingEndretStatusEvent(status, behandling));
     }
 
     public void brukerOppdaterStatus(long behandlingID, Behandlingsstatus status) {
@@ -272,7 +273,7 @@ public class BehandlingService {
         behandling.setStatus(Behandlingsstatus.AVSLUTTET);
         behandlingRepository.save(behandling);
         behandlingerAvsluttet.increment();
-        applicationEventPublisher.publishEvent(new BehandlingEndretStatusEvent(behandlingId, AVSLUTTET, behandling));
+        applicationEventPublisher.publishEvent(new BehandlingEndretStatusEvent(AVSLUTTET, behandling));
     }
 
     public Behandling hentBehandling(long behandlingId) {
@@ -300,14 +301,14 @@ public class BehandlingService {
     public void oppdaterStatusOgSvarfrist(Behandling behandling, Behandlingsstatus behandlingsstatus, Instant svarfristDato) {
         behandling.setStatus(behandlingsstatus);
         behandling.setDokumentasjonSvarfristDato(svarfristDato);
-        lagre(behandling);
+        behandlingRepository.save(behandling);
     }
 
     @Transactional
     public void endreBehandlingsfrist(long behandlingId, LocalDate behandlingsfrist) {
         Behandling behandling = hentBehandlingUtenSaksopplysninger(behandlingId);
         behandling.setBehandlingsfrist(behandlingsfrist);
-        lagre(behandling);
+        behandlingRepository.save(behandling);
 
         applicationEventPublisher.publishEvent(new BehandlingsfristEndretEvent(behandlingId, behandlingsfrist));
     }

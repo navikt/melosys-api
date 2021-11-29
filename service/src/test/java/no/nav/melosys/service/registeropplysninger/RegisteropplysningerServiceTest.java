@@ -135,7 +135,7 @@ class RegisteropplysningerServiceTest {
         registeropplysningerService.hentOgLagreOpplysninger(
             RegisteropplysningerRequest.builder()
                 .behandlingID(2L)
-                .saksopplysningTyper(RegisteropplysningerRequest.hentAlleSaksopplysningTyper())
+                .saksopplysningTyper(RegisteropplysningerRequest.hentSaksopplysningTyperSomLagres())
                 .fom(LocalDate.now().minusYears(1))
                 .tom(LocalDate.now().plusYears(1))
                 .fnr(FNR)
@@ -256,7 +256,7 @@ class RegisteropplysningerServiceTest {
 
         registeropplysningerService.hentOgLagreOpplysninger(RegisteropplysningerRequest.builder()
             .behandlingID(2L)
-            .saksopplysningTyper(RegisteropplysningerRequest.hentAlleSaksopplysningTyper())
+            .saksopplysningTyper(RegisteropplysningerRequest.hentSaksopplysningTyperSomLagres())
             .fnr(FNR)
             .fom(fom)
             .tom(tom)

@@ -282,6 +282,7 @@ class BehandlingServiceTest {
     @Test
     void avsluttBehandling() {
         Behandling behandling = new Behandling();
+        behandling.setId(BEHANDLING_ID);
         when(behandlingRepo.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
 
         behandlingService.avsluttBehandling(BEHANDLING_ID);
