@@ -93,10 +93,10 @@ class A1Mapper {
     }
 
     private MidlertidigOppholdsadresseType mapMidlertidigOppholdsadresse(Persondata persondata) {
-        Optional<StrukturertAdresse> strukturertAdresse = hentNyesteOppholdEllerKontaktadresse(persondata);
-        return lagMidlertidigOppholdsadresse(strukturertAdresse.orElseGet(() -> persondata.finnKontaktadresse()
-            .map(Kontaktadresse::strukturertAdresse)
-            .orElse(hentOppholdsadresseEllerNy(persondata))));
+        Optional<StrukturertAdresse> strukturertAdresse = hentNyesteOppholdEllerKontaktadresse(persondata)
+            .or(() -> persondata.finnKontaktadresse().map(Kontaktadresse::strukturertAdresse))
+            .or(() -> persondata.finnOppholdsadresse().map(Oppholdsadresse::strukturertAdresse));
+        return strukturertAdresse.map(this::lagMidlertidigOppholdsadresse).orElse(null);
     }
 
     private Optional<StrukturertAdresse> hentNyesteOppholdEllerKontaktadresse(Persondata persondata) {
@@ -108,12 +108,6 @@ class A1Mapper {
     private Optional<StrukturertAdresse> returnerSistRegistrertAdresse(Kontaktadresse kontaktadresse, Oppholdsadresse oppholdsadresse) {
         return kontaktadresse.registrertDato().isAfter((oppholdsadresse.registrertDato())) ?
             Optional.of(kontaktadresse.strukturertAdresse()) : Optional.of(oppholdsadresse.strukturertAdresse());
-    }
-
-    private StrukturertAdresse hentOppholdsadresseEllerNy(Persondata persondata) {
-        return persondata.finnOppholdsadresse()
-            .map(Oppholdsadresse::strukturertAdresse)
-            .orElse(new StrukturertAdresse());
     }
 
     private static String mapStatsborgerskap(Set<Land> statsborgerskap) {
