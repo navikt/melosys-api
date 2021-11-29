@@ -72,10 +72,10 @@ class TrygdeavtaleTjenesteTest {
         assertThat(trygdeavtaleResultat)
             .isNotNull()
             .extracting(
-                TrygdeavtaleResultat::virksomheter,
+                TrygdeavtaleResultat::virksomhet,
                 TrygdeavtaleResultat::bestemmelse)
             .containsExactlyInAnyOrder(
-                trygdeavtaleResultatDto.virksomheter(),
+                trygdeavtaleResultatDto.virksomhet(),
                 trygdeavtaleResultatDto.bestemmelse()
             );
         assertThat(trygdeavtaleResultat.familie().getFamilieIkkeOmfattetAvNorskTrygd())
@@ -154,7 +154,7 @@ class TrygdeavtaleTjenesteTest {
 
     private TrygdeavtaleResultatDto lagTrygdeavtaleResultat() {
         return new TrygdeavtaleResultatDto.Builder()
-            .virksomheter(List.of(ORGNR_1))
+            .virksomhet(ORGNR_1)
             .bestemmelse(Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1.getKode())
             .addBarn(
                 UUID_BARN_1,
