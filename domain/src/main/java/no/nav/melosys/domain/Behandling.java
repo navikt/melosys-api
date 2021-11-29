@@ -412,7 +412,7 @@ public class Behandling extends RegistreringsInfo {
             || Behandlingstema.IKKE_YRKESAKTIV.getKode().equalsIgnoreCase(behandlingstemaKode)
             || Behandlingstema.ARBEID_NORGE_BOSATT_ANNET_LAND.getKode().equalsIgnoreCase(behandlingstemaKode)
             || Behandlingstema.ARBEID_I_UTLANDET.getKode().equalsIgnoreCase(behandlingstemaKode)
-            || Behandlingstema.TRYGDEAVTALE_UK.getKode().equalsIgnoreCase(behandlingstemaKode);
+            || Behandlingstema.YRKESAKTIV.getKode().equalsIgnoreCase(behandlingstemaKode);
     }
 
     public static boolean erBehandlingAvSøknadUtsendtArbeidstaker(String behandlingstemaKode) {

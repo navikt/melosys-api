@@ -113,7 +113,7 @@ class HentRegisteropplysningerTest {
 
     @Test
     void utfør_sakstypeTrygdeavtale_henterKunPersonopplysninger() {
-        behandling.setTema(Behandlingstema.TRYGDEAVTALE_UK);
+        behandling.setTema(Behandlingstema.YRKESAKTIV);
         behandling.getFagsak().setType(Sakstyper.TRYGDEAVTALE);
 
         Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
