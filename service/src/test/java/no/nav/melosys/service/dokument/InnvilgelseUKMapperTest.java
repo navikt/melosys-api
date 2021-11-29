@@ -51,13 +51,10 @@ class InnvilgelseUKMapperTest {
     public static final String EKTEFELLE_FNR = "09080723451";
     private static final String BARN1_FNR = "12131456789";
     private static final String BARN2_FNR = "12151456789";
-    public static final String ARBEIDSGIVER_NAVN = "Bang Hansen";
     public static final String SAKSNUMMER = "MEL-123";
     public static final String EKTEFELLE_NAVN = "Dolly Duck";
     public static final String BARN_NAVN_1 = "Doffen Duck";
     public static final String BARN_NAVN_2 = "Dole Duck";
-    public static final String ORG_NR = "987654321";
-    public static final Instant VEDTAKS_DATO = Instant.parse("1970-10-10T00:00:00Z");
 
     @Mock
     private AvklarteMedfolgendeFamilieService mockAvklarteMedfolgendeFamilieService;
