@@ -76,7 +76,7 @@ public class TrygdeavtaleService {
 
     public void overførResultat(long behandlingId, TrygdeavtaleResultat trygdeavtaleResultat) {
         avklarteMedfolgendeFamilieService.lagreMedfolgendeFamilieSomAvklartefakta(behandlingId, trygdeavtaleResultat.familie());
-        avklarteVirksomheterService.lagreVirksomheterSomAvklartefakta(behandlingId, trygdeavtaleResultat.virksomheter());
+        avklarteVirksomheterService.lagreVirksomheterSomAvklartefakta(behandlingId, List.of(trygdeavtaleResultat.virksomhet()));
 
         SoeknadTrygdeavtale behandlingsgrunnlagdata =
             (SoeknadTrygdeavtale) behandlingsgrunnlagService.hentBehandlingsgrunnlag(behandlingId).getBehandlingsgrunnlagdata();
