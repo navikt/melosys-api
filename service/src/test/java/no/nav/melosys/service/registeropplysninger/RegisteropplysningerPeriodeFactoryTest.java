@@ -63,24 +63,26 @@ class RegisteropplysningerPeriodeFactoryTest {
 
     @Test
     void hentPeriodeForArbeidsforhold_åpenPeriodeBehandlingSøknad() {
-        LocalDate fom = LocalDate.now().minusYears(2);
+        LocalDate idag = LocalDate.now();
+        LocalDate fom = idag.minusYears(2);
         LocalDate tom = null;
 
         RegisteropplysningerPeriodeFactory.DatoPeriode periode = factory.hentPeriodeForArbeidsforhold(fom, tom, behandlingAvSøknad);
 
         assertThat(periode.fom).isEqualTo(fom.minusMonths(arbeidsforholdhistorikkAntallMåneder));
-        assertThat(periode.tom).isEqualTo(fom.plusYears(1));
+        assertThat(periode.tom).isEqualTo(idag);
     }
 
     @Test
     void hentPeriodeForMedlemskap_åpenPeriodeBehandlingSøknad() {
-        LocalDate fom = LocalDate.now().minusYears(1);
+        LocalDate idag = LocalDate.now();
+        LocalDate fom = idag.minusYears(3);
         LocalDate tom = null;
 
         RegisteropplysningerPeriodeFactory.DatoPeriode periode = factory.hentPeriodeForMedlemskap(fom, tom, behandlingAvSøknad);
 
         assertThat(periode.fom).isEqualTo(fom.minusYears(medlemskaphistorikkAntallÅr));
-        assertThat(periode.tom).isEqualTo(fom.plusYears(1));
+        assertThat(periode.tom).isEqualTo(idag);
     }
 
     @Test
@@ -164,13 +166,14 @@ class RegisteropplysningerPeriodeFactoryTest {
 
     @Test
     void hentPeriodeForYtelser_åpenPeriodeBehandlingSøknad_forespørTomTilDato() {
-        LocalDate fom = LocalDate.now().minusYears(2);
+        LocalDate idag = LocalDate.now();
+        LocalDate fom = idag.minusYears(2);
         LocalDate tom = null;
 
         RegisteropplysningerPeriodeFactory.Periode periode = factory.hentPeriodeForInntekt(fom, tom, behandlingAvSøknad);
 
         assertThat(periode.fom).isEqualTo(YearMonth.from(fom.minusMonths(inntektshistorikkAntallMåneder)));
-        assertThat(periode.tom).isEqualTo(YearMonth.from(fom.plusYears(1)));
+        assertThat(periode.tom).isEqualTo(YearMonth.from(idag));
     }
 
     private Behandling lagBehandling(boolean erBehandlingAvSøknad) {
