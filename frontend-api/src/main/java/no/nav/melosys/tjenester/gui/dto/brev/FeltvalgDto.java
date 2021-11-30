@@ -1,38 +1,40 @@
 package no.nav.melosys.tjenester.gui.dto.brev;
 
-public class FeltvalgDto {
-    private final String kode;
-    private final String beskrivelse;
+import java.util.List;
 
-    private FeltvalgDto(String kode, String beskrivelse) {
-        this.kode = kode;
-        this.beskrivelse = beskrivelse;
+public class FeltValgDto {
+
+    private List<FeltvalgAlternativDto> valgAltnerativer;
+    private FeltValgType valgType;
+    private FeltvalgAlternativDto valgAlternativTrigger;
+
+    public FeltValgDto(List<FeltvalgAlternativDto> valgAltnerativer, FeltValgType valgType, FeltvalgAlternativDto valgAlternativTrigger){
+        this.valgAltnerativer = valgAltnerativer;
+        this.valgType = valgType;
+        this.valgAlternativTrigger = valgAlternativTrigger;
     }
 
-    public String getKode() {
-        return kode;
+    public List<FeltvalgAlternativDto> getValgAltnerativer() {
+        return valgAltnerativer;
     }
 
-    public String getBeskrivelse() {
-        return beskrivelse;
+    public void setValgAltnerativer(List<FeltvalgAlternativDto> valgAltnerativer) {
+        this.valgAltnerativer = valgAltnerativer;
     }
 
-    public static final class Builder {
-        private String kode;
-        private String beskrivelse;
+    public FeltValgType getValgType() {
+        return valgType;
+    }
 
-        public Builder medKode(String kode) {
-            this.kode = kode;
-            return this;
-        }
+    public void setValgType(FeltValgType valgType) {
+        this.valgType = valgType;
+    }
 
-        public Builder medBeskrivelse(String beskrivelse) {
-            this.beskrivelse = beskrivelse;
-            return this;
-        }
+    public FeltvalgAlternativDto getValgAlternativTrigger() {
+        return valgAlternativTrigger;
+    }
 
-        public FeltvalgDto build() {
-            return new FeltvalgDto(kode, beskrivelse);
-        }
+    public void setValgAlternativTrigger(FeltvalgAlternativDto valgAlternativTrigger) {
+        this.valgAlternativTrigger = valgAlternativTrigger;
     }
 }

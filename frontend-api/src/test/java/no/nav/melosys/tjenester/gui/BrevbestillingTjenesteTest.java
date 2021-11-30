@@ -90,11 +90,11 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
 
         assertThat(brevmaler.get(0).getType()).isEqualTo(MANGELBREV_BRUKER);
         assertThat(brevmaler.get(0).getFelter()).hasSize(2);
-        assertThat(brevmaler.get(0).getFelter().get(0).getValg()).hasSize(1);
+        assertThat(brevmaler.get(0).getFelter().get(0).getValg().getValgAltnerativer()).hasSize(1);
         assertThat(brevmaler.get(0).getMuligeMottakere()).hasSize(1);
 
         assertThat(brevmaler.get(1).getType()).isEqualTo(MANGELBREV_ARBEIDSGIVER);
-        assertThat(brevmaler.get(1).getFelter().get(0).getValg()).hasSize(1);
+        assertThat(brevmaler.get(1).getFelter().get(0).getValg().getValgAltnerativer()).hasSize(1);
         assertThat(brevmaler.get(1).getMuligeMottakere()).hasSize(2);
 
         assertThat(brevmaler.get(2).getType()).isEqualTo(GENERELT_FRITEKSTBREV_BRUKER);
@@ -117,14 +117,20 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
         assertThat(brevmaler.get(0).getMuligeMottakere()).hasSize(1);
 
         assertThat(brevmaler.get(1).getFelter()).hasSize(2);
-        assertThat(brevmaler.get(1).getFelter().get(0).getValg()).hasSize(2)
-            .extracting(FeltvalgDto::getKode)
+        assertThat(brevmaler.get(1).getFelter().get(0).getValg().getValgAltnerativer()).hasSize(2)
+            .extracting(FeltvalgAlternativDto::getKode)
             .containsExactlyInAnyOrder("FRITEKST", "STANDARD");
+        FeltValgDto returnedFeltValgIndex1 = brevmaler.get(1).getFelter().get(0).getValg();
+        assertEquals("FRITEKST", returnedFeltValgIndex1.getValgAlternativTrigger().getKode());
+        assertEquals(FeltValgType.RADIO, returnedFeltValgIndex1.getValgType());
 
         assertThat(brevmaler.get(2).getFelter()).hasSize(2);
-        assertThat(brevmaler.get(2).getFelter().get(0).getValg()).hasSize(2)
-            .extracting(FeltvalgDto::getKode)
+        assertThat(brevmaler.get(2).getFelter().get(0).getValg().getValgAltnerativer()).hasSize(2)
+            .extracting(FeltvalgAlternativDto::getKode)
             .containsExactlyInAnyOrder("FRITEKST", "STANDARD");
+        FeltValgDto returnedFeltValgIndex2 = brevmaler.get(2).getFelter().get(0).getValg();
+        assertEquals("FRITEKST", returnedFeltValgIndex2.getValgAlternativTrigger().getKode());
+        assertEquals(FeltValgType.RADIO, returnedFeltValgIndex2.getValgType());
 
         assertThat(brevmaler.get(3).getFelter()).hasSize(3);
         assertThat(brevmaler.get(3).getType()).isEqualTo(GENERELT_FRITEKSTBREV_BRUKER);
@@ -159,34 +165,50 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
 
     @Test
     void hentTilgjengeligeMaler_lagerRiktigeTittelValgForFritekstbrevForEuEOS() {
-        Behandling behandling_EU_EOS = lagBehandling(Behandlingstyper.SOEKNAD);
-        behandling_EU_EOS.getFagsak().setType(Sakstyper.EU_EOS);
-        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandling_EU_EOS);
+        Behandling behandlingEUEOS = lagBehandling(Behandlingstyper.SOEKNAD);
+        behandlingEUEOS.getFagsak().setType(Sakstyper.EU_EOS);
+        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandlingEUEOS);
         when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
 
         List<BrevmalDto> brevmaler = brevbestillingTjeneste.hentTilgjengeligeMaler(123L);
 
         assertThat(brevmaler).hasSize(5);
-        assertThat(brevmaler.get(3).getFelter().get(0).getValg()).hasSize(2)
-            .extracting(FeltvalgDto::getKode)
+        assertThat(brevmaler.get(3).getFelter().get(0).getValg().getValgAltnerativer()).hasSize(2)
+            .extracting(FeltvalgAlternativDto::getKode)
             .containsExactlyInAnyOrder("HENVENDELSE_OM_TRYGDETILHØRLIGHET", "FRITEKST");
     }
 
     @Test
     void hentTilgjengeligeMaler_lagerRiktigeTittelValgForFritekstbrevForFTRL() {
-        Behandling behandling_FTRL = lagBehandling(Behandlingstyper.SOEKNAD);
-        behandling_FTRL.getFagsak().setType(Sakstyper.FTRL);
-        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandling_FTRL);
+        Behandling behandlingFTRL = lagBehandling(Behandlingstyper.SOEKNAD);
+        behandlingFTRL.getFagsak().setType(Sakstyper.FTRL);
+        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandlingFTRL);
         when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
 
         List<BrevmalDto> brevmaler = brevbestillingTjeneste.hentTilgjengeligeMaler(123L);
 
         assertThat(brevmaler).hasSize(5);
-        assertThat(brevmaler.get(4).getFelter().get(0).getValg()).hasSize(4)
-            .extracting(FeltvalgDto::getKode)
+        assertThat(brevmaler.get(4).getFelter().get(0).getValg().getValgAltnerativer()).hasSize(4)
+            .extracting(FeltvalgAlternativDto::getKode)
             .containsExactlyInAnyOrder("HENVENDELSE_OM_MEDLEMSKAP",
                 "BEKREFTELSE_PÅ_MEDLEMSKAP",
                 "CONFIRMATION_OF_MEMBERSHIP",
+                "FRITEKST");
+    }
+
+    @Test
+    void hentTilgjengeligeMaler_lagerRiktigeTittelValgForFritekstbrevForTrygdeavtale() {
+        Behandling behandlingTrygdeavtale = lagBehandling(Behandlingstyper.SOEKNAD);
+        behandlingTrygdeavtale.getFagsak().setType(Sakstyper.TRYGDEAVTALE);
+        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandlingTrygdeavtale);
+        when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
+
+        List<BrevmalDto> brevmaler = brevbestillingTjeneste.hentTilgjengeligeMaler(123L);
+
+        assertThat(brevmaler).hasSize(5);
+        assertThat(brevmaler.get(4).getFelter().get(0).getValg().getValgAltnerativer()).hasSize(2)
+            .extracting(FeltvalgAlternativDto::getKode)
+            .containsExactlyInAnyOrder("HENVENDELSE_OM_MEDLEMSKAP",
                 "FRITEKST");
     }
 

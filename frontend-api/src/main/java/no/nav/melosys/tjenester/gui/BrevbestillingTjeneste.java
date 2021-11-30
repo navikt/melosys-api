@@ -128,7 +128,7 @@ public class BrevbestillingTjeneste {
 
     private BrevmalDto lagBrevMalDtoForMangelbrev(Produserbaredokumenter produserbartdokument, Aktoersroller hovedMottaker, Behandling behandling) {
         List<MottakerDto> mottakere = new ArrayList<>();
-        List<FeltvalgDto> feltvalgDtos = new ArrayList<>();
+        List<FeltvalgAlternativDto> feltvalgAlternativDtos = new ArrayList<>();
 
         var builder = new MottakerDto.Builder()
             .medType(hovedMottaker == Aktoersroller.BRUKER ? BRUKER_ELLER_BRUKERS_FULLMEKTIG : ARBEIDSGIVER_ELLER_ARBEIDSGIVERS_FULLMEKTIG)
@@ -146,11 +146,13 @@ public class BrevbestillingTjeneste {
                     .build()
             );
         }
-
         if (behandling.getType() == Behandlingstyper.SOEKNAD || behandling.erKlage()) {
-            feltvalgDtos.add(new FeltvalgDto.Builder().medKode("STANDARD").medBeskrivelse("Standardtekst søknad/klage").build());
+            feltvalgAlternativDtos.add(new FeltvalgAlternativDto("STANDARD", "Standardtekst søknad/klage"));
         }
-        feltvalgDtos.add(new FeltvalgDto.Builder().medKode("FRITEKST").medBeskrivelse("Fritekst (erstatter standardtekst)").build());
+        FeltvalgAlternativDto valgAlternativTrigger = new FeltvalgAlternativDto("FRITEKST", "Fritekst (erstatter standardtekst)");
+        feltvalgAlternativDtos.add(valgAlternativTrigger);
+
+        FeltValgDto feltValgDto = new FeltValgDto(feltvalgAlternativDtos, FeltValgType.RADIO, valgAlternativTrigger);
 
         return new BrevmalDto.Builder()
             .medType(produserbartdokument)
@@ -160,7 +162,7 @@ public class BrevbestillingTjeneste {
                     .medBeskrivelse("Innledningstekst")
                     .medFeltType(FeltType.FRITEKST)
                     .erPåkrevd()
-                    .medValg(feltvalgDtos)
+                    .medValg(feltValgDto)
                     .build(),
                 new BrevmalFeltDto.Builder()
                     .medKode("MANGLER_FRITEKST")
@@ -203,7 +205,6 @@ public class BrevbestillingTjeneste {
                 new BrevmalFeltDto.Builder()
                     .medKode("FRITEKST")
                     .medBeskrivelse("Tekst til brev")
-                    .medHjelpetekst("Her kommer en hjelpetekst til \"Tekst til brev\". Ikke avklart enda.")
                     .medFeltType(FeltType.FRITEKST)
                     .erPåkrevd()
                     .build()
@@ -213,26 +214,23 @@ public class BrevbestillingTjeneste {
             .build();
     }
 
-    private List<FeltvalgDto> hentFritekstTittelValg(Behandling behandling) {
+    private FeltValgDto hentFritekstTittelValg(Behandling behandling) {
         Sakstyper fagsakType = behandling.getFagsak().getType();
 
-        List<FeltvalgDto> tittelValgForSakstype = new ArrayList<>();
+        final List<FeltvalgAlternativDto> valgAlternativer = new ArrayList<>();
         if (fagsakType.equals(Sakstyper.EU_EOS)) {
-            tittelValgForSakstype.add(lagTittelValg("HENVENDELSE_OM_TRYGDETILHØRLIGHET", "Svar på henvendelse om trygdetilhørlighet"));
+            valgAlternativer.add(new FeltvalgAlternativDto("HENVENDELSE_OM_TRYGDETILHØRLIGHET", "Svar på henvendelse om trygdetilhørlighet"));
         } else if (fagsakType.equals(Sakstyper.FTRL) || fagsakType.equals(Sakstyper.TRYGDEAVTALE)) {
-            tittelValgForSakstype.add(lagTittelValg("HENVENDELSE_OM_MEDLEMSKAP", "Svar på henvendelse om medlemskap i folketrygden"));
+            valgAlternativer.add(new FeltvalgAlternativDto("HENVENDELSE_OM_MEDLEMSKAP", "Svar på henvendelse om medlemskap i folketrygden"));
         }
         if (fagsakType.equals(Sakstyper.FTRL)) {
-            tittelValgForSakstype.add(lagTittelValg("CONFIRMATION_OF_MEMBERSHIP", "Confirmation of membership in the National Insurance Scheme"));
-            tittelValgForSakstype.add(lagTittelValg("BEKREFTELSE_PÅ_MEDLEMSKAP", "Bekreftelse på medlemskap i folketrygden"));
+            valgAlternativer.add(new FeltvalgAlternativDto("CONFIRMATION_OF_MEMBERSHIP", "Confirmation of membership in the National Insurance Scheme"));
+            valgAlternativer.add(new FeltvalgAlternativDto("BEKREFTELSE_PÅ_MEDLEMSKAP", "Bekreftelse på medlemskap i folketrygden"));
         }
-        tittelValgForSakstype.add(lagTittelValg("FRITEKST", "Fritekst"));
+        FeltvalgAlternativDto valgAlternativTrigger = new FeltvalgAlternativDto("FRITEKST", "Fritekst");
+        valgAlternativer.add(valgAlternativTrigger);
 
-        return tittelValgForSakstype;
-    }
-
-    private FeltvalgDto lagTittelValg(String kode, String beskrivelse) {
-        return new FeltvalgDto.Builder().medKode(kode).medBeskrivelse(beskrivelse).build();
+        return new FeltValgDto(valgAlternativer, FeltValgType.SELECT, valgAlternativTrigger);
     }
 
     private void leggTilAdresseOgFeilmelding(MottakerDto.Builder builder, Produserbaredokumenter produserbaredokumenter, Aktoersroller aktoersroller, Behandling behandling) {

@@ -1,15 +1,18 @@
 package no.nav.melosys.tjenester.gui.dto.brev;
 
-import java.util.ArrayList;
-import java.util.List;
-
+/**
+ * Informasjon om et felt som skal være med i malen.
+ *
+ * Merk: FeltValgDto inneholder en liste over valg brukeren må foreta, der ett av valgene gjør at dette feltet
+ * blir synlig. Dersom {@param valg} ikke er null, vil altså ikke dette feltet være synlig med mindre brukeren velger riktig valg.
+ */
 public class BrevmalFeltDto {
     private final String kode;
     private final String beskrivelse;
     private final FeltType feltType;
     private final String hjelpetekst;
     private final boolean paakrevd;
-    private final List<FeltvalgDto> valg;
+    private final FeltValgDto valg;
     private final Integer tegnBegrensning; // TODO: Verifiser i kontrolleren
 
     private BrevmalFeltDto(Builder builder) {
@@ -42,7 +45,7 @@ public class BrevmalFeltDto {
         return paakrevd;
     }
 
-    public List<FeltvalgDto> getValg() {
+    public FeltValgDto getValg() {
         return valg;
     }
 
@@ -56,7 +59,7 @@ public class BrevmalFeltDto {
         private FeltType feltType;
         private String hjelpetekst;
         private boolean paakrevd = false;
-        private List<FeltvalgDto> valg;
+        private FeltValgDto valg;
         private Integer tegnBegrensning;
 
         public Builder medKode(String kode) {
@@ -84,21 +87,13 @@ public class BrevmalFeltDto {
             return this;
         }
 
-        public Builder medValg(List<FeltvalgDto> valg) {
+        public Builder medValg(FeltValgDto valg) {
             this.valg = valg;
             return this;
         }
 
         public Builder medTegnBegrensning(Integer antallTegn) {
             this.tegnBegrensning = antallTegn;
-            return this;
-        }
-
-        public Builder medValg(FeltvalgDto valg) {
-            if (this.valg == null) {
-                this.valg = new ArrayList<>();
-            }
-            this.valg.add(valg);
             return this;
         }
 
