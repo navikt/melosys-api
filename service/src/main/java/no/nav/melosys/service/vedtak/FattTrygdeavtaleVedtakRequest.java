@@ -12,7 +12,7 @@ public class FattTrygdeavtaleVedtakRequest extends FattVedtakRequest {
     private final List<KopiMottaker> kopiMottakere;
     private final String bestillersId;
 
-    private FattTrygdeavtaleVedtakRequest(FattTrygdeavtaleVedtakRequest.Builder builder) {
+    private FattTrygdeavtaleVedtakRequest(Builder builder) {
         super(builder);
         this.fritekstInnledning = builder.fritekstInnledning;
         this.fritekstBegrunnelse = builder.fritekstBegrunnelse;
@@ -55,36 +55,36 @@ public class FattTrygdeavtaleVedtakRequest extends FattVedtakRequest {
         private String bestillersId;
 
         @Override
-        public FattTrygdeavtaleVedtakRequest.Builder getThis() {
+        public Builder getThis() {
             return this;
         }
 
-        public FattTrygdeavtaleVedtakRequest.Builder medFritekstInnledning(String fritekstInnledning) {
+        public Builder medFritekstInnledning(String fritekstInnledning) {
             this.fritekstInnledning = fritekstInnledning;
             return this;
         }
 
-        public FattTrygdeavtaleVedtakRequest.Builder medFritekstBegrunnelse(String fritekstBegrunnelse) {
+        public Builder medFritekstBegrunnelse(String fritekstBegrunnelse) {
             this.fritekstBegrunnelse = fritekstBegrunnelse;
             return this;
         }
 
-        public FattTrygdeavtaleVedtakRequest.Builder medFritekstEktefelle(String fritekstEktefelle) {
+        public Builder medFritekstEktefelle(String fritekstEktefelle) {
             this.fritekstEktefelle = fritekstEktefelle;
             return this;
         }
 
-        public FattTrygdeavtaleVedtakRequest.Builder medFritekstBarn(String fritekstBarn) {
+        public Builder medFritekstBarn(String fritekstBarn) {
             this.fritekstBarn = fritekstBarn;
             return this;
         }
 
-        public FattTrygdeavtaleVedtakRequest.Builder medKopiMottakere(List<KopiMottaker> kopiMottakere) {
+        public Builder medKopiMottakere(List<KopiMottaker> kopiMottakere) {
             this.kopiMottakere = kopiMottakere;
             return this;
         }
 
-        public FattTrygdeavtaleVedtakRequest.Builder medBestillersId(String bestillersId) {
+        public Builder medBestillersId(String bestillersId) {
             this.bestillersId = bestillersId;
             return this;
         }

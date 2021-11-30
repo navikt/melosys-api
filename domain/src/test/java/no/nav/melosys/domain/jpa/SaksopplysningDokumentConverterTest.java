@@ -20,6 +20,8 @@ import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.dokument.utbetaling.UtbetalingDokument;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
+import no.nav.melosys.domain.person.PersonMedHistorikk;
+import no.nav.melosys.domain.person.Personopplysninger;
 import org.jeasy.random.EasyRandom;
 import org.jeasy.random.EasyRandomParameters;
 import org.jeasy.random.randomizers.misc.EnumRandomizer;
@@ -99,10 +101,26 @@ class SaksopplysningDokumentConverterTest {
         testKonvertering(UtbetalingDokument.class);
     }
 
+    @Test
+    void konverterTilOgFraDatabase_medPersonopplysninger_erUendret() {
+        Personopplysninger personopplysninger = PersonopplysningerObjectFactory.lagPersonopplysninger();
+        testKonverteringObject(personopplysninger);
+    }
+
+    @Test
+    void konverterTilOgFraDatabase_medPersonMedHistorikk_erUendret() {
+        PersonMedHistorikk personMedHistorikk = PersonopplysningerObjectFactory.lagPersonMedHistorikk();
+        testKonverteringObject(personMedHistorikk);
+    }
+
+    private <T extends SaksopplysningDokument> void testKonverteringObject(T saksopplysningDokument) {
+        String json = converter.convertToDatabaseColumn(saksopplysningDokument);
+        SaksopplysningDokument deserialisertDokument = converter.convertToEntityAttribute(json);
+        assertThat(deserialisertDokument).usingRecursiveComparison().isEqualTo(saksopplysningDokument);
+    }
+
     private <T extends SaksopplysningDokument> void testKonvertering(Class<T> clazz) {
         T opprinneligTestDokument = random.nextObject(clazz);
-        String json = converter.convertToDatabaseColumn(opprinneligTestDokument);
-        SaksopplysningDokument deserialisertDokument = converter.convertToEntityAttribute(json);
-        assertThat(deserialisertDokument).usingRecursiveComparison().isEqualTo(opprinneligTestDokument);
+        testKonverteringObject(opprinneligTestDokument);
     }
 }

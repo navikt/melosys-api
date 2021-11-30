@@ -64,7 +64,7 @@ class VedtakKontrollServiceTest {
         when(lovvalgsperiodeService.hentValidertLovvalgsperiode(behandlingID)).thenReturn(lovvalgsperiode);
 
         final FakeUnleash unleash = new FakeUnleash();
-        unleash.enable("melosys.kontroller.pdl");
+        unleash.enable("melosys.pdl.aktiv");
         vedtakKontrollService = new VedtakKontrollService(behandlingService, lovvalgsperiodeService, persondataFasade,
             unleash);
     }

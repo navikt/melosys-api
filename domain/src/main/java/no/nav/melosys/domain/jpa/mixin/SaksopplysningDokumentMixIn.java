@@ -11,6 +11,8 @@ import no.nav.melosys.domain.dokument.person.PersonhistorikkDokument;
 import no.nav.melosys.domain.dokument.sakogbehandling.SobSakDokument;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.dokument.utbetaling.UtbetalingDokument;
+import no.nav.melosys.domain.person.PersonMedHistorikk;
+import no.nav.melosys.domain.person.Personopplysninger;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
 @JsonSubTypes( {
@@ -22,6 +24,8 @@ import no.nav.melosys.domain.dokument.utbetaling.UtbetalingDokument;
     @JsonSubTypes.Type(value = PersonhistorikkDokument.class),
     @JsonSubTypes.Type(value = SedDokument.class),
     @JsonSubTypes.Type(value = SobSakDokument.class),
-    @JsonSubTypes.Type(value = UtbetalingDokument.class)
+    @JsonSubTypes.Type(value = UtbetalingDokument.class),
+    @JsonSubTypes.Type(value = Personopplysninger.class),
+    @JsonSubTypes.Type(value = PersonMedHistorikk.class)
 })
 public interface SaksopplysningDokumentMixIn {}

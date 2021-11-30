@@ -74,13 +74,13 @@ class TrygdeavtaleTjenesteTest {
         assertThat(trygdeavtaleResultat)
             .isNotNull()
             .extracting(
-                TrygdeavtaleResultat::virksomheter,
+                TrygdeavtaleResultat::virksomhet,
                 TrygdeavtaleResultat::bestemmelse,
                 TrygdeavtaleResultat::lovvalgsperiodeFom,
                 TrygdeavtaleResultat::lovvalgsperiodeTom
             )
             .containsExactlyInAnyOrder(
-                trygdeavtaleResultatDto.virksomheter(),
+                trygdeavtaleResultatDto.virksomhet(),
                 trygdeavtaleResultatDto.bestemmelse(),
                 trygdeavtaleResultatDto.lovvalgsperiodeFom(),
                 trygdeavtaleResultatDto.lovvalgsperiodeTom()
@@ -161,7 +161,7 @@ class TrygdeavtaleTjenesteTest {
 
     private TrygdeavtaleResultatDto lagTrygdeavtaleResultatDto() {
         return new TrygdeavtaleResultatDto.Builder()
-            .virksomheter(List.of(ORGNR_1))
+            .virksomhet(ORGNR_1)
             .bestemmelse(Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1.getKode())
             .lovvalgsperiodeFom(LocalDate.now())
             .lovvalgsperiodeTom(LocalDate.now().plusYears(1))

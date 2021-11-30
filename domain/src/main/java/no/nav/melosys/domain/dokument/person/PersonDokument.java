@@ -10,7 +10,6 @@ import java.util.stream.Collectors;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import no.nav.melosys.domain.adresse.SemistrukturertAdresse;
 import no.nav.melosys.domain.brev.Postadresse;
-import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.adresse.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresse;
@@ -27,7 +26,7 @@ import no.nav.melosys.domain.util.LandkoderUtils;
  * Representerer svar fra personregisteret (TPS)
  *
  */
-public class PersonDokument implements Persondata, SaksopplysningDokument {
+public class PersonDokument implements Persondata {
     private String fnr;
     private Sivilstand sivilstand;
     private LocalDate sivilstandGyldighetsperiodeFom;
@@ -254,7 +253,6 @@ public class PersonDokument implements Persondata, SaksopplysningDokument {
         this.statsborgerskapDato = statsborgerskapDato;
     }
 
-    @Override
     public Bostedsadresse getBostedsadresse() {
         return bostedsadresse;
     }

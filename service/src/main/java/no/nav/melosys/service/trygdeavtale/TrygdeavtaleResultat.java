@@ -6,21 +6,21 @@ import java.time.LocalDate;
 import java.util.List;
 
 public record TrygdeavtaleResultat(
-    List<String> virksomheter,
+    String virksomhet,
     String bestemmelse,
     LocalDate lovvalgsperiodeFom,
     LocalDate lovvalgsperiodeTom,
     AvklarteMedfolgendeFamilie familie) {
 
     public static class Builder {
-        private List<String> virksomheter;
+        private String virksomhet;
         private String bestemmelse;
         private LocalDate lovvalgsperiodeFom;
         private LocalDate lovvalgsperiodeTom;
         private AvklarteMedfolgendeFamilie familie;
 
-        public Builder virksomheter(List<String> virksomheter) {
-            this.virksomheter = virksomheter;
+        public Builder virksomhet(String virksomhet) {
+            this.virksomhet = virksomhet;
             return this;
         }
 
@@ -46,7 +46,7 @@ public record TrygdeavtaleResultat(
 
         public TrygdeavtaleResultat build() {
             return new TrygdeavtaleResultat(
-                virksomheter,
+                virksomhet,
                 bestemmelse,
                 lovvalgsperiodeFom,
                 lovvalgsperiodeTom,

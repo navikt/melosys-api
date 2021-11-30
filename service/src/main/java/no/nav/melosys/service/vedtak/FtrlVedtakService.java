@@ -58,8 +58,7 @@ public class FtrlVedtakService {
         }
 
         behandling.getFagsak().setStatus(Saksstatuser.MEDLEMSKAP_AVKLART);
-        behandling.setStatus(Behandlingsstatus.IVERKSETTER_VEDTAK);
-        behandlingService.lagre(behandling);
+        behandlingService.oppdaterStatus(behandling, Behandlingsstatus.IVERKSETTER_VEDTAK);
 
         prosessinstansService.opprettProsessinstansIverksettVedtakFTRL(behandling, request);
         dokgenService.produserOgDistribuerBrev(behandlingID, lagBrevbestilling(request));

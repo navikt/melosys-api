@@ -273,7 +273,7 @@ class TrygdeavtaleServiceTest {
 
     private TrygdeavtaleResultat lagTrygdeavtaleResultat() {
         return new TrygdeavtaleResultat.Builder()
-            .virksomheter(List.of(ORGNR_1))
+            .virksomhet(ORGNR_1)
             .bestemmelse(UK_ART6_1.getKode())
             .familie(new AvklarteMedfolgendeFamilie(
                 Set.of(new OmfattetFamilie(UUID_BARN_2)),

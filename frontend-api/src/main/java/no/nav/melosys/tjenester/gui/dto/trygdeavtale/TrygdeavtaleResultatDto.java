@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public record TrygdeavtaleResultatDto(
-    List<String> virksomheter,
+    String virksomhet,
     String bestemmelse,
     LocalDate lovvalgsperiodeFom,
     LocalDate lovvalgsperiodeTom,
@@ -25,9 +25,9 @@ public record TrygdeavtaleResultatDto(
         return new TrygdeavtaleResultat.Builder()
             .familie(lagAvklarteMedfolgendeFamilie())
             .bestemmelse(bestemmelse)
+            .virksomhet(virksomhet)
             .lovvalgsperiodeFom(lovvalgsperiodeFom)
             .lovvalgsperiodeTom(lovvalgsperiodeTom)
-            .virksomheter(virksomheter)
             .build();
     }
 
@@ -47,15 +47,15 @@ public record TrygdeavtaleResultatDto(
     }
 
     public static class Builder {
-        private List<String> virksomheter;
+        private String virksomhet;
         private String bestemmelse;
         private LocalDate lovvalgsperiodeFom;
         private LocalDate lovvalgsperiodeTom;
         private final List<MedfolgendeFamilieDto> barn = new ArrayList<>();
         private MedfolgendeFamilieDto ektefelle;
 
-        public Builder virksomheter(List<String> virksomheter) {
-            this.virksomheter = virksomheter;
+        public Builder virksomhet(String virksomhet) {
+            this.virksomhet = virksomhet;
             return this;
         }
 
@@ -86,7 +86,7 @@ public record TrygdeavtaleResultatDto(
 
         public TrygdeavtaleResultatDto build() {
             return new TrygdeavtaleResultatDto(
-                virksomheter,
+                virksomhet,
                 bestemmelse,
                 lovvalgsperiodeFom,
                 lovvalgsperiodeTom,
