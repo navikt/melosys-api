@@ -355,7 +355,7 @@ class BrevbestillingServiceTest {
 
     @Test
     void hentBrevAdresseTilMottakereFraPdl_brukerSomMottaker_returnererBrukeradresse() {
-        fakeUnleash.enable("melosys.brev.adresser.pdl");
+        fakeUnleash.enable("melosys.pdl.aktiv");
         when(mockBrevmottakerService.avklarMottakere(any(), eq(Mottaker.av(Aktoersroller.BRUKER)), any(), eq(false), eq(false)))
             .thenReturn(List.of(lagAktoer(Aktoersroller.BRUKER, null)));
         when(mockPersondataFasade.hentPerson(anyString())).thenReturn(lagPersondata());

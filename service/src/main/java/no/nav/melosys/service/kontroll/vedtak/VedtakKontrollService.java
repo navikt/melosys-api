@@ -60,7 +60,7 @@ public class VedtakKontrollService {
     }
 
     private Persondata hentPersondata(Behandling behandling) {
-        if (unleash.isEnabled("melosys.kontroller.pdl")) {
+        if (unleash.isEnabled("melosys.pdl.aktiv")) {
             return persondataFasade.hentPerson(behandling.getFagsak().hentAktørID());
         }
         return behandling.hentPersonDokument();

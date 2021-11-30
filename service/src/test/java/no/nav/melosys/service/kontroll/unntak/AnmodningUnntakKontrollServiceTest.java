@@ -49,7 +49,7 @@ class AnmodningUnntakKontrollServiceTest {
         when(persondataFasade.hentPerson(anyString())).thenReturn(PersonopplysningerObjectFactory.lagPersonopplysninger());
 
         final FakeUnleash unleash = new FakeUnleash();
-        unleash.enable("melosys.kontroller.pdl");
+        unleash.enable("melosys.pdl.aktiv");
         anmodningUnntakKontrollService = new AnmodningUnntakKontrollService(anmodningsperiodeService, behandlingService,
                 persondataFasade, unleash);
     }
