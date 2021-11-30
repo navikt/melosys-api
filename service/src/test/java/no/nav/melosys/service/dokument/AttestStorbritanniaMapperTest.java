@@ -216,7 +216,7 @@ class AttestStorbritanniaMapperTest {
         String json = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(attestStorbritannia);
         String resultat = json.replaceAll("(\"dagensDato\" :)(.*)", "$1 \"Fjernet for test\",");
 
-        assertThat(resultat).isEqualTo(FORVENTEDE_FELTER_FOR_ATTEST_STORBRITANNIA_MAPPING);
+        assertThat(resultat).isEqualToIgnoringNewLines(FORVENTEDE_FELTER_FOR_ATTEST_STORBRITANNIA_MAPPING);
     }
 
     @Test

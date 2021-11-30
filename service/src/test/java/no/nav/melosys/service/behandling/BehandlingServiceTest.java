@@ -56,6 +56,9 @@ class BehandlingServiceTest {
     @Captor
     private ArgumentCaptor<Behandling> behandlingCaptor;
 
+    @Captor
+    private ArgumentCaptor<BehandlingEndretStatusEvent> behandlingEndretStatusEventCaptor;
+
     @BeforeEach
     public void setUp() {
         behandlingService = new BehandlingService(behandlingRepo, behandlingsresultatRepository, tidligereMedlemsperiodeRepo, behandlingsresultatService, oppgaveService, applicationEventPublisher);
@@ -77,21 +80,36 @@ class BehandlingServiceTest {
         var behandling = new Behandling();
         behandling.setStatus(Behandlingsstatus.VURDER_DOKUMENT);
         behandling.setFagsak(fagsak);
+        behandling.setId(BEHANDLING_ID);
         when(behandlingRepo.findById(anyLong())).thenReturn(Optional.of(behandling));
 
         behandlingService.oppdaterStatus(BEHANDLING_ID, Behandlingsstatus.AVVENT_DOK_PART);
 
+        verify(applicationEventPublisher).publishEvent(behandlingEndretStatusEventCaptor.capture());
         assertThat(behandling.getDokumentasjonSvarfristDato()).isNotNull();
         verify(oppgaveService).oppdaterOppgaveMedSaksnummer(eq(SAKSNUMMER), any());
+        BehandlingEndretStatusEvent behandlingEndretStatusEvent = behandlingEndretStatusEventCaptor.getValue();
+        assertThat(behandlingEndretStatusEvent.getBehandlingID()).isEqualTo(BEHANDLING_ID);
+        assertThat(behandlingEndretStatusEvent.getBehandlingsstatus()).isEqualTo(AVVENT_DOK_PART);
+
     }
 
     @Test
     void oppdaterStatus_statusAnmodningUnntakSendt_behandlingLagret() {
+        Fagsak fagsak = new Fagsak();
+        fagsak.setSaksnummer("23132");
         Behandling behandling = new Behandling();
+        behandling.setId(BEHANDLING_ID);
+        behandling.setFagsak(fagsak);
         behandling.setStatus(Behandlingsstatus.VURDER_DOKUMENT);
         when(behandlingRepo.findById(anyLong())).thenReturn(Optional.of(behandling));
         behandlingService.oppdaterStatus(BEHANDLING_ID, Behandlingsstatus.ANMODNING_UNNTAK_SENDT);
         verify(behandlingRepo).save(behandling);
+        verify(applicationEventPublisher).publishEvent(behandlingEndretStatusEventCaptor.capture());
+
+        BehandlingEndretStatusEvent behandlingEndretStatusEvent = behandlingEndretStatusEventCaptor.getValue();
+        assertThat(behandlingEndretStatusEvent.getBehandlingID()).isEqualTo(BEHANDLING_ID);
+        assertThat(behandlingEndretStatusEvent.getBehandlingsstatus()).isEqualTo(ANMODNING_UNNTAK_SENDT);
     }
 
     @Test
@@ -121,6 +139,7 @@ class BehandlingServiceTest {
         Behandling behandling = new Behandling();
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
         behandling.setFagsak(fagsak);
+        behandling.setId(BEHANDLING_ID);
         when(behandlingRepo.findById(anyLong())).thenReturn(Optional.of(behandling));
         behandlingService.oppdaterStatus(BEHANDLING_ID, Behandlingsstatus.AVSLUTTET);
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(fagsak.getSaksnummer());
@@ -263,13 +282,18 @@ class BehandlingServiceTest {
     @Test
     void avsluttBehandling() {
         Behandling behandling = new Behandling();
+        behandling.setId(BEHANDLING_ID);
         when(behandlingRepo.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
 
         behandlingService.avsluttBehandling(BEHANDLING_ID);
 
         verify(behandlingRepo).save(behandlingCaptor.capture());
+        verify(applicationEventPublisher).publishEvent(behandlingEndretStatusEventCaptor.capture());
         Behandling lagretBehandling = behandlingCaptor.getValue();
         assertThat(lagretBehandling.getStatus()).isEqualTo(Behandlingsstatus.AVSLUTTET);
+        BehandlingEndretStatusEvent behandlingEndretStatusEvent = behandlingEndretStatusEventCaptor.getValue();
+        assertThat(behandlingEndretStatusEvent.getBehandlingID()).isEqualTo(BEHANDLING_ID);
+        assertThat(behandlingEndretStatusEvent.getBehandlingsstatus()).isEqualTo(AVSLUTTET);
     }
 
     @Test

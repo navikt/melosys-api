@@ -6,6 +6,7 @@ import java.util.Set;
 
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.person.Informasjonsbehov;
+import no.nav.melosys.domain.person.PersonMedHistorikk;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.domain.person.Statsborgerskap;
 import no.nav.melosys.domain.person.familie.Familiemedlem;

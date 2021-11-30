@@ -12,7 +12,6 @@ import no.nav.dok.melosysbrev._000067.AdresseType;
 import no.nav.dok.melosysbrev._000116.BrevdataType;
 import no.nav.dok.melosysbrev._000116.Fag;
 import no.nav.dok.melosysbrev._000116.ObjectFactory;
-import no.nav.dok.melosysbrev.felles.melosys_felles.BostedsadresseType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
 import no.nav.dok.melosysbrev.felles.melosys_vedlegg.VedleggType;
@@ -38,7 +37,10 @@ import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FysiskArbeidssted
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.MaritimtArbeidssted;
 import org.apache.commons.lang3.StringUtils;
 import org.jeasy.random.EasyRandom;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.xml.sax.SAXException;
 
 import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.*;
@@ -65,7 +67,7 @@ class A1MapperTest {
     private MelosysNAVFelles navFelles;
 
     @BeforeAll
-    void felleSetup() {
+    void commonSetup() {
         mapper = new A1Mapper();
         easyRandom = EasyRandomConfigurer.randomForDokProd();
 
@@ -266,17 +268,14 @@ class A1MapperTest {
         assertThat(a1.getPerson().getStatsborgerskap()).isEqualTo(STATSLØS_TEKST);
     }
 
-
-    @Disabled("Trenger rydding")
     @Test
     void mapTilBrevXML_bostedsadresserFraRegister_forventBostedsadresse() {
-        brevData.person = lagPersonopplysninger();
         A1 a1 = mapper.mapA1(behandling, behandlingsresultat, brevData);
         assertThat(a1.getPerson().getBostedsadresse().getGatenavn()).isEqualTo("Bogata");
         assertThat(a1.getPerson().getBostedsadresse().getHusnummer()).isEqualTo("12B");
-        assertThat(a1.getPerson().getBostedsadresse().getPostnr()).isEqualTo("1234");
-        assertThat(a1.getPerson().getBostedsadresse().getPoststed()).isEqualTo("Oslo");
-        assertThat(a1.getPerson().getBostedsadresse().getRegion()).isEqualTo("Norge");
+        assertThat(a1.getPerson().getBostedsadresse().getPostnr()).isEqualTo("0165");
+        assertThat(a1.getPerson().getBostedsadresse().getPoststed()).isEqualTo("Poststed");
+        assertThat(a1.getPerson().getBostedsadresse().getRegion()).isEqualTo("Region");
         assertThat(a1.getPerson().getBostedsadresse().getLandkode()).isEqualTo("NO");
     }
 
@@ -301,21 +300,20 @@ class A1MapperTest {
         assertThat(a1.getPerson().getMidlertidigOppholdsadresse().getGatenavn()).isEqualTo("gatenavnOppholdsadresseFreg");
     }
 
-    @Disabled("Brevmal krever bostedsadresse")
     @Test
     void mapTilBrevXML_harIngenAdresserRegistrert() {
+        brevData.bostedsadresse = null;
         brevData.person = lagPersonopplysningerUtenAdresser();
         A1 a1 = mapper.mapA1(behandling, behandlingsresultat, brevData);
-        assertThat(a1.getPerson().getBostedsadresse().getGatenavn()).isNull();
-        assertThat(a1.getPerson().getMidlertidigOppholdsadresse().getGatenavn()).isNull();
+        assertThat(a1.getPerson().getBostedsadresse()).isNull();
+        assertThat(a1.getPerson().getMidlertidigOppholdsadresse()).isNull();
     }
 
-    @Disabled("Brevmal krever bostedsadresse")
     @Test
-    void mapTilBrevXML_harIkkeBostedsAdresseFraPDL_bostedsAdresseErTom() {
-        brevData.person = lagPersonopplysningerUtenBostedsadresse();
+    void mapTilBrevXML_brevdataManglerBostedsadresse_bostedsadresseErTom() {
+        brevData.bostedsadresse = null;
         A1 a1 = mapper.mapA1(behandling, behandlingsresultat, brevData);
-        assertThat(a1.getPerson().getBostedsadresse()).isEqualTo(new BostedsadresseType());
+        assertThat(a1.getPerson().getBostedsadresse()).isNull();
     }
 
     public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat, BrevData brevData) throws JAXBException, SAXException {
