@@ -115,7 +115,7 @@ class DokgenMalMapperTest {
 
     @Test
     void mapping_persondataFraPdl_ok() {
-        fakeUnleash.enable("melosys.brev.adresser.pdl");
+        fakeUnleash.enable("melosys.pdl.aktiv");
         when(mockDokgenMapperDatahenter.hentPoststed(any())).thenReturn("Andeby");
         when(mockDokgenMapperDatahenter.hentPersondata(any())).thenReturn(lagPersonDokument());
 

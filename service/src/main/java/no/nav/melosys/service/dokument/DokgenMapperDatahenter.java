@@ -73,7 +73,7 @@ public class DokgenMapperDatahenter {
 
     Persondata hentPersondata(DokgenBrevbestilling brevbestilling) {
         final var behandling = brevbestilling.getBehandling();
-        if (unleash.isEnabled("melosys.brev.adresser.pdl")) {
+        if (unleash.isEnabled("melosys.pdl.aktiv")) {
             return persondataFasade.hentPerson(behandling.getFagsak().hentAktørID());
         }
         String fnr = behandling.hentPersonDokument().hentFolkeregisterident();

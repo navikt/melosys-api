@@ -234,7 +234,7 @@ public class BrevbestillingService {
 
     private String mapPoststed(Persondata persondata) {
         final String poststed = persondata.hentGjeldendePostadresse().poststed();
-        if (unleash.isEnabled("melosys.brev.adresser.pdl")) {
+        if (unleash.isEnabled("melosys.pdl.aktiv")) {
             return poststed;
         }
         return StringUtils.isEmpty(poststed) ? kodeverkService.dekod(FellesKodeverk.POSTNUMMER,
@@ -242,7 +242,7 @@ public class BrevbestillingService {
     }
 
     private Persondata hentPersondata(Behandling behandling) {
-        if (unleash.isEnabled("melosys.brev.adresser.pdl")) {
+        if (unleash.isEnabled("melosys.pdl.aktiv")) {
             return persondataFasade.hentPerson(behandling.getFagsak().hentAktørID());
         }
         return (Persondata) persondataFasade.hentPersonFraTps(behandling.hentPersonDokument().hentFolkeregisterident(),
