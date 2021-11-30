@@ -189,7 +189,7 @@ public class BrevbestillingTjeneste {
             .medType(produserbartdokument)
             .medFelter(asList(
                 new BrevmalFeltDto.Builder()
-                    .medKode("FRITEKST_TITTEL")
+                    .medKode("BREV_TITTEL")
                     .medBeskrivelse("Brevtittel")
                     .medFeltType(FeltType.TEKST)
                     .medHjelpetekst("Tittelen du skriver inn her, vil bli tittelen på brevet når du sender det ut.")
