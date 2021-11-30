@@ -218,15 +218,18 @@ public class BrevbestillingTjeneste {
         Sakstyper fagsakType = behandling.getFagsak().getType();
 
         final List<FeltvalgAlternativDto> valgAlternativer = new ArrayList<>();
-        if (fagsakType.equals(Sakstyper.EU_EOS)) {
-            valgAlternativer.add(new FeltvalgAlternativDto("HENVENDELSE_OM_TRYGDETILHØRLIGHET", "Svar på henvendelse om trygdetilhørlighet"));
-        } else if (fagsakType.equals(Sakstyper.FTRL) || fagsakType.equals(Sakstyper.TRYGDEAVTALE)) {
-            valgAlternativer.add(new FeltvalgAlternativDto("HENVENDELSE_OM_MEDLEMSKAP", "Svar på henvendelse om medlemskap i folketrygden"));
+
+        switch (fagsakType) {
+            case EU_EOS:
+                valgAlternativer.add(new FeltvalgAlternativDto("HENVENDELSE_OM_TRYGDETILHØRLIGHET", "Svar på henvendelse om trygdetilhørlighet"));
+                break;
+            case FTRL:
+                valgAlternativer.add(new FeltvalgAlternativDto("CONFIRMATION_OF_MEMBERSHIP", "Confirmation of membership in the National Insurance Scheme"));
+                valgAlternativer.add(new FeltvalgAlternativDto("BEKREFTELSE_PÅ_MEDLEMSKAP", "Bekreftelse på medlemskap i folketrygden"));
+            case TRYGDEAVTALE:
+                valgAlternativer.add(new FeltvalgAlternativDto("HENVENDELSE_OM_MEDLEMSKAP", "Svar på henvendelse om medlemskap i folketrygden"));
         }
-        if (fagsakType.equals(Sakstyper.FTRL)) {
-            valgAlternativer.add(new FeltvalgAlternativDto("CONFIRMATION_OF_MEMBERSHIP", "Confirmation of membership in the National Insurance Scheme"));
-            valgAlternativer.add(new FeltvalgAlternativDto("BEKREFTELSE_PÅ_MEDLEMSKAP", "Bekreftelse på medlemskap i folketrygden"));
-        }
+
         FeltvalgAlternativDto valgAlternativTrigger = new FeltvalgAlternativDto("FRITEKST", "Fritekst");
         valgAlternativer.add(valgAlternativTrigger);
 
