@@ -2,6 +2,11 @@ package no.nav.melosys.tjenester.gui.dto.brev;
 
 import java.util.List;
 
+/**
+ * FeltValgDto inneholder en liste over valg brukeren må foreta, der ett av valgene (@param valgAlternativTrigger)
+ * synliggjør feltet som bruker disse valgene. Hvis brukeren ikke velger valgAlternativTrigger, vil feltet ellers være
+ * usynlig.
+ */
 public class FeltValgDto {
 
     private List<FeltvalgAlternativDto> valgAlternativer;

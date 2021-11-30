@@ -3,8 +3,8 @@ package no.nav.melosys.tjenester.gui.dto.brev;
 /**
  * Informasjon om et felt som skal være med i malen.
  *
- * Merk: FeltValgDto inneholder en liste over valg brukeren må foreta, der ett av valgene gjør at dette feltet
- * blir synlig. Dersom {@param valg} ikke er null, vil altså ikke dette feltet være synlig med mindre brukeren velger riktig valg.
+ * Dersom {@param valg} ikke er null, vil instans av dette feltet være usynlig med mindre brukeren velger
+ * {@link FeltValgDto#getValgAlternativTrigger()}.
  */
 public class BrevmalFeltDto {
     private final String kode;
