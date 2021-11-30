@@ -68,6 +68,10 @@ public class SendVedtakUtland extends AbstraktSendUtland {
         if (behandling.erNorgeUtpekt()) {
             var bucer = eessiService.hentTilknyttedeBucer(behandling.getFagsak().getGsakSaksnummer(), Collections.emptyList());
             if (bucer.stream().anyMatch(buc -> buc.getBucType().equals(BucType.LA_BUC_02.name()) && buc.erÅpen())) {
+                if (behandling.erNyVurdering()) {
+                    //TODO: Sjekk om det er sendt en A004/A012 og ugyldiggjør denne med en X008. Send deretter A012
+                    annullerSedForNyVurdering(behandling,SedType.A012);
+                }
                 eessiService.sendGodkjenningArbeidFlereLand(behandling.getId(), prosessinstans.getData(ProsessDataKey.YTTERLIGERE_INFO_SED));
             } else {
                 log.info("Sender ikke godkjenning av utpeking da behandling {} ikke er tilknyttet en åpen LA_BUC_02", behandling.getId());
@@ -117,6 +121,21 @@ public class SendVedtakUtland extends AbstraktSendUtland {
     @Override
     protected boolean skalSendesUtland(Behandlingsresultat behandlingsresultat) {
         return behandlingsresultat.utlandSkalVarslesOmVedtak();
+    }
+
+    public void annullerSedForNyVurdering(Behandling behandling, SedType sedType) {
+        if (erVedtakSendt(behandling.getFagsak().getGsakSaksnummer(), sedType)) {
+            eessiService.sendInvalideringSed(behandling.getId(),"");
+        }
+    }
+
+    private boolean erVedtakSendt(long rinasaksnummer, SedType sedType) {
+        return eessiService.hentTilknyttedeBucer(rinasaksnummer, Collections.emptyList())
+            .stream()
+            .filter(BucInformasjon::erÅpen)
+            .filter(buc -> BucType.LA_BUC_02.name().equalsIgnoreCase(buc.getBucType()))
+            .flatMap(b -> b.getSeder().stream())
+            .anyMatch(s -> s.getSedType().equals(sedType.name()));
     }
 
     private BucType avklarBucType(Behandling behandling) {
