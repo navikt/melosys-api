@@ -42,6 +42,7 @@ import org.springframework.context.event.ApplicationEventMulticaster;
 
 import static no.nav.melosys.domain.kodeverk.Vedtakstyper.FØRSTEGANGSVEDTAK;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper.FASTSATT_LOVVALGSLAND;
+import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.IVERKSETTER_VEDTAK;
 import static no.nav.melosys.service.vedtak.VedtakServiceFasade.FRIST_KLAGE_UKER;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -116,7 +117,7 @@ class EosVedtakServiceTest {
             .extracting(VedtakMetadata::getVedtakstype, VedtakMetadata::getRevurderBegrunnelse, VedtakMetadata::getVedtakKlagefrist)
             .containsExactly(FØRSTEGANGSVEDTAK, null, LocalDate.now().plusWeeks(FRIST_KLAGE_UKER));
 
-        verify(behandlingService).lagre(behandling);
+        verify(behandlingService).oppdaterStatus(behandling, IVERKSETTER_VEDTAK);
         verify(prosessinstansService).opprettProsessinstansIverksettVedtakEos(
             any(),
             eq(FASTSATT_LOVVALGSLAND),
@@ -144,7 +145,7 @@ class EosVedtakServiceTest {
             .extracting(VedtakMetadata::getVedtakstype, VedtakMetadata::getRevurderBegrunnelse, VedtakMetadata::getVedtakKlagefrist)
             .containsExactly(FØRSTEGANGSVEDTAK, null, LocalDate.now().plusWeeks(FRIST_KLAGE_UKER));
 
-        verify(behandlingService).lagre(behandling);
+        verify(behandlingService).oppdaterStatus(behandling, IVERKSETTER_VEDTAK);
         verify(prosessinstansService).opprettProsessinstansIverksettVedtakEos(
             any(Behandling.class),
             eq(FASTSATT_LOVVALGSLAND),

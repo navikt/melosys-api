@@ -1,14 +1,18 @@
 package no.nav.melosys.service.registeropplysninger;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.service.kontroll.PeriodeKontroller;
 import org.apache.commons.lang3.StringUtils;
+
+import static no.nav.melosys.domain.SaksopplysningType.TYPER_SOM_LAGRES_INITIELT;
 
 public class RegisteropplysningerRequest {
     private final Long behandlingID;
@@ -62,11 +66,8 @@ public class RegisteropplysningerRequest {
         return new RegisteropplysningerRequest(getBehandlingID(), opplysningstyperSet, getFnr(), null, null, getInformasjonsbehov());
     }
 
-    // Støtter ikke type SEDOPPL
-    public static SaksopplysningTyper hentAlleSaksopplysningTyper() {
-        return new SaksopplysningTyper(
-            Arrays.stream(SaksopplysningType.values()).filter(s -> !SaksopplysningType.SEDOPPL.equals(s)).collect(Collectors.toSet())
-        );
+    public static SaksopplysningTyper hentSaksopplysningTyperSomLagres() {
+        return new SaksopplysningTyper(TYPER_SOM_LAGRES_INITIELT);
     }
 
     public static class RegisteropplysningerRequestBuilder {
