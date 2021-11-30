@@ -186,8 +186,13 @@ public class BrevbestillingService {
         } else if (behandling.erKlage()) {
             brevmaler.add(MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE);
         }
-        brevmaler.addAll(asList(MANGELBREV_BRUKER, MANGELBREV_ARBEIDSGIVER, GENERELT_FRITEKSTBREV_BRUKER, GENERELT_FRITEKSTBREV_ARBEIDSGIVER));
-
+        brevmaler.addAll(asList(MANGELBREV_BRUKER, MANGELBREV_ARBEIDSGIVER));
+        if (unleash.isEnabled("melosys.brev.GENERELT_FRITEKSTBREV_BRUKER")) {
+            brevmaler.add(GENERELT_FRITEKSTBREV_BRUKER);
+        }
+        if (unleash.isEnabled("melosys.brev.GENERELT_FRITEKSTBREV_ARBEIDSGIVER")) {
+            brevmaler.add(GENERELT_FRITEKSTBREV_ARBEIDSGIVER);
+        }
         return behandling.erAktiv() ? brevmaler : emptyList();
     }
 

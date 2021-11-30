@@ -28,9 +28,7 @@ import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
-import no.nav.melosys.tjenester.gui.dto.brev.BrevbestillingDto;
-import no.nav.melosys.tjenester.gui.dto.brev.BrevmalDto;
-import no.nav.melosys.tjenester.gui.dto.brev.FeltvalgDto;
+import no.nav.melosys.tjenester.gui.dto.brev.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -43,6 +41,7 @@ import org.springframework.http.ResponseEntity;
 
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
@@ -66,6 +65,7 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
     private Aksesskontroll aksesskontroll;
     @Captor
     private ArgumentCaptor<BrevbestillingRequest> brevbestillingDtoCaptor;
+    private final FakeUnleash fakeUnleash = new FakeUnleash();
 
     private BrevbestillingTjeneste brevbestillingTjeneste;
 
@@ -74,8 +74,10 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
         BrevmottakerService brevmottakerService = new BrevmottakerService(mockKontaktopplysningService, mock(AvklarteVirksomheterService.class), mock(UtenlandskMyndighetService.class), mock(BehandlingsresultatService.class), mock(TrygdeavgiftsberegningService.class));
         BrevbestillingService brevbestillingService = new BrevbestillingService(mockBrevmottakerService,
             mockDokServiceFasade, mockEregFasade, mock(KodeverkService.class), mockKontaktopplysningService,
-            mockPersondataFasade, new FakeUnleash());
+            mockPersondataFasade, fakeUnleash);
         brevbestillingTjeneste = new BrevbestillingTjeneste(brevbestillingService, mockBehandlingService, brevmottakerService, aksesskontroll);
+        fakeUnleash.enable("melosys.brev.GENERELT_FRITEKSTBREV_ARBEIDSGIVER");
+        fakeUnleash.enable("melosys.brev.GENERELT_FRITEKSTBREV_BRUKER");
     }
 
     @Test

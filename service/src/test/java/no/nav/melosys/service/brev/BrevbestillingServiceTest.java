@@ -71,6 +71,8 @@ class BrevbestillingServiceTest {
     void init() {
         brevbestillingService = new BrevbestillingService(mockBrevmottakerService, mockDokServiceFasade, mockEregFasade,
                 mockKodeverkService, mockKontaktopplysningService, mockPersondataFasade, fakeUnleash);
+        fakeUnleash.enable("melosys.brev.GENERELT_FRITEKSTBREV_ARBEIDSGIVER");
+        fakeUnleash.enable("melosys.brev.GENERELT_FRITEKSTBREV_BRUKER");
     }
 
     @Test
