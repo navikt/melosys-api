@@ -102,8 +102,7 @@ public class EosVedtakService {
         if (prosessinstansService.harVedtakInstans(behandlingID)) {
             throw new FunksjonellException("Det finnes allerede en vedtak-prosess for behandling " + behandling);
         }
-        behandling.setStatus(Behandlingsstatus.IVERKSETTER_VEDTAK);
-        behandlingService.lagre(behandling);
+        behandlingService.oppdaterStatus(behandling, Behandlingsstatus.IVERKSETTER_VEDTAK);
         prosessinstansService.opprettProsessinstansIverksettVedtakEos(behandling, request.getBehandlingsresultatTypeKode(),
             request.getFritekst(), request.getFritekstSed(), mottakerinstitusjoner, request.getRevurderBegrunnelse());
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());

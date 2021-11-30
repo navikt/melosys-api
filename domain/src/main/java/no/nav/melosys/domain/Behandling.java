@@ -452,6 +452,11 @@ public class Behandling extends RegistreringsInfo {
         return this.status == status;
     }
 
+    public boolean saksopplysningEksisterer(SaksopplysningType saksopplysningType){
+        return getSaksopplysninger().stream()
+            .anyMatch(p -> p.getType().equals(saksopplysningType));
+    }
+
     @Override
     public String toString() {
         return "Behandling{" +
