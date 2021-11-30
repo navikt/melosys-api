@@ -4,22 +4,22 @@ import java.util.List;
 
 public class FeltValgDto {
 
-    private List<FeltvalgAlternativDto> valgAltnerativer;
+    private List<FeltvalgAlternativDto> valgAlternativer;
     private FeltValgType valgType;
     private FeltvalgAlternativDto valgAlternativTrigger;
 
-    public FeltValgDto(List<FeltvalgAlternativDto> valgAltnerativer, FeltValgType valgType, FeltvalgAlternativDto valgAlternativTrigger){
-        this.valgAltnerativer = valgAltnerativer;
+    public FeltValgDto(List<FeltvalgAlternativDto> valgAlternativer, FeltValgType valgType, FeltvalgAlternativDto valgAlternativTrigger){
+        this.valgAlternativer = valgAlternativer;
         this.valgType = valgType;
         this.valgAlternativTrigger = valgAlternativTrigger;
     }
 
-    public List<FeltvalgAlternativDto> getValgAltnerativer() {
-        return valgAltnerativer;
+    public List<FeltvalgAlternativDto> getValgAlternativer() {
+        return valgAlternativer;
     }
 
-    public void setValgAltnerativer(List<FeltvalgAlternativDto> valgAltnerativer) {
-        this.valgAltnerativer = valgAltnerativer;
+    public void setValgAlternativer(List<FeltvalgAlternativDto> valgAlternativer) {
+        this.valgAlternativer = valgAlternativer;
     }
 
     public FeltValgType getValgType() {

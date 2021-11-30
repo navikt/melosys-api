@@ -90,11 +90,11 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
 
         assertThat(brevmaler.get(0).getType()).isEqualTo(MANGELBREV_BRUKER);
         assertThat(brevmaler.get(0).getFelter()).hasSize(2);
-        assertThat(brevmaler.get(0).getFelter().get(0).getValg().getValgAltnerativer()).hasSize(1);
+        assertThat(brevmaler.get(0).getFelter().get(0).getValg().getValgAlternativer()).hasSize(1);
         assertThat(brevmaler.get(0).getMuligeMottakere()).hasSize(1);
 
         assertThat(brevmaler.get(1).getType()).isEqualTo(MANGELBREV_ARBEIDSGIVER);
-        assertThat(brevmaler.get(1).getFelter().get(0).getValg().getValgAltnerativer()).hasSize(1);
+        assertThat(brevmaler.get(1).getFelter().get(0).getValg().getValgAlternativer()).hasSize(1);
         assertThat(brevmaler.get(1).getMuligeMottakere()).hasSize(2);
 
         assertThat(brevmaler.get(2).getType()).isEqualTo(GENERELT_FRITEKSTBREV_BRUKER);
@@ -117,7 +117,7 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
         assertThat(brevmaler.get(0).getMuligeMottakere()).hasSize(1);
 
         assertThat(brevmaler.get(1).getFelter()).hasSize(2);
-        assertThat(brevmaler.get(1).getFelter().get(0).getValg().getValgAltnerativer()).hasSize(2)
+        assertThat(brevmaler.get(1).getFelter().get(0).getValg().getValgAlternativer()).hasSize(2)
             .extracting(FeltvalgAlternativDto::getKode)
             .containsExactlyInAnyOrder("FRITEKST", "STANDARD");
         FeltValgDto returnedFeltValgIndex1 = brevmaler.get(1).getFelter().get(0).getValg();
@@ -125,7 +125,7 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
         assertEquals(FeltValgType.RADIO, returnedFeltValgIndex1.getValgType());
 
         assertThat(brevmaler.get(2).getFelter()).hasSize(2);
-        assertThat(brevmaler.get(2).getFelter().get(0).getValg().getValgAltnerativer()).hasSize(2)
+        assertThat(brevmaler.get(2).getFelter().get(0).getValg().getValgAlternativer()).hasSize(2)
             .extracting(FeltvalgAlternativDto::getKode)
             .containsExactlyInAnyOrder("FRITEKST", "STANDARD");
         FeltValgDto returnedFeltValgIndex2 = brevmaler.get(2).getFelter().get(0).getValg();
@@ -173,7 +173,7 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
         List<BrevmalDto> brevmaler = brevbestillingTjeneste.hentTilgjengeligeMaler(123L);
 
         assertThat(brevmaler).hasSize(5);
-        assertThat(brevmaler.get(3).getFelter().get(0).getValg().getValgAltnerativer()).hasSize(2)
+        assertThat(brevmaler.get(3).getFelter().get(0).getValg().getValgAlternativer()).hasSize(2)
             .extracting(FeltvalgAlternativDto::getKode)
             .containsExactlyInAnyOrder("HENVENDELSE_OM_TRYGDETILHØRLIGHET", "FRITEKST");
     }
@@ -188,7 +188,7 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
         List<BrevmalDto> brevmaler = brevbestillingTjeneste.hentTilgjengeligeMaler(123L);
 
         assertThat(brevmaler).hasSize(5);
-        assertThat(brevmaler.get(4).getFelter().get(0).getValg().getValgAltnerativer()).hasSize(4)
+        assertThat(brevmaler.get(4).getFelter().get(0).getValg().getValgAlternativer()).hasSize(4)
             .extracting(FeltvalgAlternativDto::getKode)
             .containsExactlyInAnyOrder("HENVENDELSE_OM_MEDLEMSKAP",
                 "BEKREFTELSE_PÅ_MEDLEMSKAP",
@@ -206,7 +206,7 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
         List<BrevmalDto> brevmaler = brevbestillingTjeneste.hentTilgjengeligeMaler(123L);
 
         assertThat(brevmaler).hasSize(5);
-        assertThat(brevmaler.get(4).getFelter().get(0).getValg().getValgAltnerativer()).hasSize(2)
+        assertThat(brevmaler.get(4).getFelter().get(0).getValg().getValgAlternativer()).hasSize(2)
             .extracting(FeltvalgAlternativDto::getKode)
             .containsExactlyInAnyOrder("HENVENDELSE_OM_MEDLEMSKAP",
                 "FRITEKST");
