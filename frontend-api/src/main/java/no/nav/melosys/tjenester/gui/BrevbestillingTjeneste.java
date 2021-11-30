@@ -191,7 +191,7 @@ public class BrevbestillingTjeneste {
                 new BrevmalFeltDto.Builder()
                     .medKode("FRITEKST_TITTEL")
                     .medBeskrivelse("Brevtittel")
-                    .medFeltType(FeltType.FRITEKST_STRING)
+                    .medFeltType(FeltType.TEKST)
                     .medHjelpetekst("Tittelen du skriver inn her, vil bli tittelen på brevet når du sender det ut.")
                     .medValg(hentFritekstTittelValg(behandling))
                     .medTegnBegrensning(60)
