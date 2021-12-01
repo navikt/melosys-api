@@ -30,11 +30,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import static no.nav.melosys.domain.kodeverk.Vilkaar.FO_883_2004_INNGANGSVILKAAR;
 import static no.nav.melosys.domain.util.LandkoderUtils.tilIso3;
-import static no.nav.melosys.service.registeropplysninger.RegisteropplysningerPeriodeFactory.REGISTEROPPLYSNINGER_DEFAULT_SLUTTDATO_ANTALL_ÅR;
 
 @Service
 public class InngangsvilkaarService {
     private static final Logger log = LoggerFactory.getLogger(InngangsvilkaarService.class);
+    private static final long DEFAULT_SLUTTDATO_ANTALL_ÅR = 1;
 
     private final BehandlingService behandlingService;
     private final InngangsvilkaarConsumer inngangsvilkaarConsumer;
@@ -78,7 +78,7 @@ public class InngangsvilkaarService {
             return new InngangsvilkaarVurdering(false, Inngangsvilkaar.MANGLER_STATSBORGERSKAP);
         }
         if (søknadsperiode.getTom() == null) {
-            søknadsperiode = new Periode(søknadsperiode.getFom(), søknadsperiode.getFom().plusYears(REGISTEROPPLYSNINGER_DEFAULT_SLUTTDATO_ANTALL_ÅR));
+            søknadsperiode = new Periode(søknadsperiode.getFom(), søknadsperiode.getFom().plusYears(DEFAULT_SLUTTDATO_ANTALL_ÅR));
         }
 
         var landkoderISO3 = Set.copyOf(tilIso3(søknadsland));

@@ -316,7 +316,7 @@ public class PersondataService implements PersondataFasade {
 
     @Override
     public boolean harStrengtFortroligAdresse(String ident) {
-        if (unleash.isEnabled("melosys.pdl.adressebeskyttelse")) {
+        if (unleash.isEnabled("melosys.pdl.aktiv")) {
             return pdlConsumer.hentAdressebeskyttelser(ident).stream().anyMatch(Adressebeskyttelse::erStrengtFortrolig);
         }
         return tpsService.harStrengtFortroligAdresse(ident);
