@@ -4,7 +4,7 @@ package no.nav.melosys.tjenester.gui.dto.brev;
  * Informasjon om et felt som skal være med i malen.
  *
  * Dersom {@param valg} ikke er null, vil instans av dette feltet være usynlig med mindre brukeren velger
- * {@link FeltValgDto#getValgAlternativTrigger()}.
+ * et valgalternativ fra {@param valg} som har {@link FeltvalgAlternativDto#isVisFelt()} = true.
  */
 public class BrevmalFeltDto {
     private final String kode;

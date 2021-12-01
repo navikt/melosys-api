@@ -149,10 +149,9 @@ public class BrevbestillingTjeneste {
         if (behandling.getType() == Behandlingstyper.SOEKNAD || behandling.erKlage()) {
             feltvalgAlternativDtos.add(new FeltvalgAlternativDto("STANDARD", "Standardtekst søknad/klage"));
         }
-        FeltvalgAlternativDto valgAlternativTrigger = new FeltvalgAlternativDto("FRITEKST", "Fritekst (erstatter standardtekst)");
-        feltvalgAlternativDtos.add(valgAlternativTrigger);
+        feltvalgAlternativDtos.add(new FeltvalgAlternativDto("FRITEKST", "Fritekst (erstatter standardtekst)", true));
 
-        FeltValgDto feltValgDto = new FeltValgDto(feltvalgAlternativDtos, FeltValgType.RADIO, valgAlternativTrigger);
+        FeltValgDto feltValgDto = new FeltValgDto(feltvalgAlternativDtos, FeltValgType.RADIO);
 
         return new BrevmalDto.Builder()
             .medType(produserbartdokument)
@@ -230,10 +229,9 @@ public class BrevbestillingTjeneste {
                 valgAlternativer.add(new FeltvalgAlternativDto("HENVENDELSE_OM_MEDLEMSKAP", "Svar på henvendelse om medlemskap i folketrygden"));
         }
 
-        FeltvalgAlternativDto valgAlternativTrigger = new FeltvalgAlternativDto("FRITEKST", "Fritekst");
-        valgAlternativer.add(valgAlternativTrigger);
+        valgAlternativer.add(new FeltvalgAlternativDto("FRITEKST", "Fritekst", true));
 
-        return new FeltValgDto(valgAlternativer, FeltValgType.SELECT, valgAlternativTrigger);
+        return new FeltValgDto(valgAlternativer, FeltValgType.SELECT);
     }
 
     private void leggTilAdresseOgFeilmelding(MottakerDto.Builder builder, Produserbaredokumenter produserbaredokumenter, Aktoersroller aktoersroller, Behandling behandling) {

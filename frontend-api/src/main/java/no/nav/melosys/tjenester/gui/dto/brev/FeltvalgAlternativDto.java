@@ -1,12 +1,21 @@
 package no.nav.melosys.tjenester.gui.dto.brev;
 
 public class FeltvalgAlternativDto {
+
     private final String kode;
     private final String beskrivelse;
+    private final boolean visFelt;
 
     public FeltvalgAlternativDto(String kode, String beskrivelse) {
         this.kode = kode;
         this.beskrivelse = beskrivelse;
+        this.visFelt = false;
+    }
+
+    public FeltvalgAlternativDto(String kode, String beskrivelse, boolean visFelt) {
+        this.kode = kode;
+        this.beskrivelse = beskrivelse;
+        this.visFelt = visFelt;
     }
 
     public String getKode() {
@@ -17,9 +26,14 @@ public class FeltvalgAlternativDto {
         return beskrivelse;
     }
 
+    public boolean isVisFelt() {
+        return visFelt;
+    }
+
     public static final class Builder {
         private String kode;
         private String beskrivelse;
+        private boolean visFelt;
 
         public Builder medKode(String kode) {
             this.kode = kode;
@@ -31,8 +45,13 @@ public class FeltvalgAlternativDto {
             return this;
         }
 
+        public Builder medVisFelt(boolean visFelt) {
+            this.visFelt = visFelt;
+            return this;
+        }
+
         public FeltvalgAlternativDto build() {
-            return new FeltvalgAlternativDto(kode, beskrivelse);
+            return new FeltvalgAlternativDto(kode, beskrivelse, visFelt);
         }
     }
 }

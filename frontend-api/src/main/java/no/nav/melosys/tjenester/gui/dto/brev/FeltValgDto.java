@@ -3,20 +3,17 @@ package no.nav.melosys.tjenester.gui.dto.brev;
 import java.util.List;
 
 /**
- * FeltValgDto inneholder en liste over valg brukeren må foreta, der ett av valgene (@param valgAlternativTrigger)
- * synliggjør feltet som bruker disse valgene. Hvis brukeren ikke velger valgAlternativTrigger, vil feltet ellers være
- * usynlig.
+ * FeltValgDto inneholder en liste over {@param valgAlternativer} brukeren må foreta. Feltet som bruker disse valgene
+ * vil være usynlig med mindre brukeren velger et alternativ som har {@link FeltvalgAlternativDto#isVisFelt()} = true.
  */
 public class FeltValgDto {
 
     private List<FeltvalgAlternativDto> valgAlternativer;
     private FeltValgType valgType;
-    private FeltvalgAlternativDto valgAlternativTrigger;
 
-    public FeltValgDto(List<FeltvalgAlternativDto> valgAlternativer, FeltValgType valgType, FeltvalgAlternativDto valgAlternativTrigger){
+    public FeltValgDto(List<FeltvalgAlternativDto> valgAlternativer, FeltValgType valgType) {
         this.valgAlternativer = valgAlternativer;
         this.valgType = valgType;
-        this.valgAlternativTrigger = valgAlternativTrigger;
     }
 
     public List<FeltvalgAlternativDto> getValgAlternativer() {
@@ -33,13 +30,5 @@ public class FeltValgDto {
 
     public void setValgType(FeltValgType valgType) {
         this.valgType = valgType;
-    }
-
-    public FeltvalgAlternativDto getValgAlternativTrigger() {
-        return valgAlternativTrigger;
-    }
-
-    public void setValgAlternativTrigger(FeltvalgAlternativDto valgAlternativTrigger) {
-        this.valgAlternativTrigger = valgAlternativTrigger;
     }
 }

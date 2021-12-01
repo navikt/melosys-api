@@ -42,6 +42,7 @@ import org.springframework.http.ResponseEntity;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
@@ -121,7 +122,8 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
             .extracting(FeltvalgAlternativDto::getKode)
             .containsExactlyInAnyOrder("FRITEKST", "STANDARD");
         FeltValgDto returnedFeltValgIndex1 = brevmaler.get(1).getFelter().get(0).getValg();
-        assertEquals("FRITEKST", returnedFeltValgIndex1.getValgAlternativTrigger().getKode());
+        assertTrue(returnedFeltValgIndex1.getValgAlternativer().get(1).isVisFelt());
+        assertEquals("FRITEKST", returnedFeltValgIndex1.getValgAlternativer().get(1).getKode());
         assertEquals(FeltValgType.RADIO, returnedFeltValgIndex1.getValgType());
 
         assertThat(brevmaler.get(2).getFelter()).hasSize(2);
@@ -129,7 +131,8 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
             .extracting(FeltvalgAlternativDto::getKode)
             .containsExactlyInAnyOrder("FRITEKST", "STANDARD");
         FeltValgDto returnedFeltValgIndex2 = brevmaler.get(2).getFelter().get(0).getValg();
-        assertEquals("FRITEKST", returnedFeltValgIndex2.getValgAlternativTrigger().getKode());
+        assertTrue(returnedFeltValgIndex2.getValgAlternativer().get(1).isVisFelt());
+        assertEquals("FRITEKST", returnedFeltValgIndex2.getValgAlternativer().get(1).getKode());
         assertEquals(FeltValgType.RADIO, returnedFeltValgIndex2.getValgType());
 
         assertThat(brevmaler.get(3).getFelter()).hasSize(3);
