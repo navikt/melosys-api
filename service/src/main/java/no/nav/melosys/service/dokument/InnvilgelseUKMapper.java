@@ -11,6 +11,7 @@ import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
 import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Medfolgende_barn_begrunnelser;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
 import no.nav.melosys.domain.person.familie.IkkeOmfattetFamilie;
 import no.nav.melosys.domain.person.familie.OmfattetFamilie;
@@ -109,28 +110,25 @@ public class InnvilgelseUKMapper {
         var avklarteMedfølgendeBarn = avklarteMedfølgendeFamilieService.hentAvklarteMedfølgendeBarn(behandlingID);
         var barnOmfattetAvNorskTrygd = avklarteMedfølgendeBarn.barnOmfattetAvNorskTrygd;
         var barnIkkeOmfattetAvNorskTrygd = avklarteMedfølgendeBarn.barnIkkeOmfattetAvNorskTrygd;
+
+        var medfølgendeBarn = avklarteMedfølgendeFamilieService.hentMedfølgendeBarn(behandlingID);
+
         return Stream.concat(barnOmfattetAvNorskTrygd.stream()
-                .map(this::tilBarn),
+                .map(omfattetFamilie -> tilBarn(medfølgendeBarn,omfattetFamilie.getUuid(), null)),
             barnIkkeOmfattetAvNorskTrygd.stream()
-                .map(this::tilBarn)
+                .map(ikkeOmfattetBarn -> tilBarn(medfølgendeBarn,ikkeOmfattetBarn.uuid, ikkeOmfattetBarn.begrunnelse))
         ).toList();
     }
 
-    private Barn tilBarn(OmfattetFamilie omfattetFamilie) {
-        String ident = omfattetFamilie.getIdent();
+    private Barn tilBarn(Map<String, MedfolgendeFamilie> medfølgendeBarnMap, String uuid, Medfolgende_barn_begrunnelser begrunnelse) {
+        var medfølgendeBarn = Optional.of(medfølgendeBarnMap.get(uuid))
+            .orElseThrow(() -> new FunksjonellException("Avklart medfølgende familie " + uuid + " finnes ikke i behandlingsgrunnlaget"));
+        String fnr = medfølgendeBarn.getFnr();
         return new Barn.Builder()
-            .navn(getSammensattNavn(ident, omfattetFamilie.getSammensattNavn()))
-            .fnr(ident)
-            .foedselsdato(getFødselDato(ident))
-            .build();
-    }
-
-    private Barn tilBarn(no.nav.melosys.domain.person.familie.IkkeOmfattetBarn ikkeOmfattetBarn) {
-        return new Barn.Builder()
-            .navn(ikkeOmfattetBarn.sammensattNavn)
-            .fnr(ikkeOmfattetBarn.ident)
-            .begrunnelse(ikkeOmfattetBarn.begrunnelse)
-            .foedselsdato(getFødselDato(ikkeOmfattetBarn.ident))
+            .navn(getSammensattNavn(fnr, medfølgendeBarn.getNavn()))
+            .fnr(fnr)
+            .foedselsdato(getFødselDato(fnr))
+            .begrunnelse(begrunnelse)
             .build();
     }
 

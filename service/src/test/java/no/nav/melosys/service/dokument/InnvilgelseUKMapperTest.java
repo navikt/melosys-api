@@ -87,6 +87,7 @@ class InnvilgelseUKMapperTest {
     void map_Innvilget_populererFelter() throws JsonProcessingException {
         mockData();
         when(mockDokgenMapperDatahenter.hentSammensattNavn(BARN1_FNR)).thenReturn(BARN_NAVN_1);
+        when(mockDokgenMapperDatahenter.hentSammensattNavn(BARN2_FNR)).thenReturn(BARN_NAVN_2);
 
         InnvilgelseBrevbestilling brevbestilling = lagInnvilgelseBrevbestilling();
 
@@ -124,6 +125,7 @@ class InnvilgelseUKMapperTest {
         mockData();
         when(mockAvklarteMedfolgendeFamilieService.hentAvklartMedfølgendeEktefelle(anyLong())).thenReturn(lagIkkeOmfattetMedfølgendeEktefelle());
         when(mockAvklarteMedfolgendeFamilieService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(lagIkkeOmfatetMedfølgendeBarn());
+        when(mockDokgenMapperDatahenter.hentSammensattNavn(BARN1_FNR)).thenReturn(BARN_NAVN_1);
 
         InnvilgelseBrevbestilling brevbestilling = lagInnvilgelseBrevbestilling();
         InnvilgelseUK map = innvilgelseUKMapper.map(brevbestilling);
@@ -135,6 +137,7 @@ class InnvilgelseUKMapperTest {
         when(mockAvklarteMedfolgendeFamilieService.hentAvklartMedfølgendeEktefelle(anyLong())).thenReturn(lagOmfattetMedfølgendeEktefelle());
         when(mockAvklarteMedfolgendeFamilieService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(lagAvklartMedfølgendeBarn());
         when(mockAvklarteMedfolgendeFamilieService.hentMedfølgendEktefelle(anyLong())).thenReturn(lagMedfølgendeEktefelle());
+        when(mockAvklarteMedfolgendeFamilieService.hentMedfølgendeBarn(anyLong())).thenReturn(lagMedfølgendeBarn());
         when(mockPersondata.getFødselsdato()).thenReturn(LocalDate.of(1970, 1, 1));
         when(mockPersondataFasade.hentPerson(anyString())).thenReturn(mockPersondata);
         when(mockDokgenMapperDatahenter.hentSammensattNavn(EKTEFELLE_FNR)).thenReturn(EKTEFELLE_NAVN);
@@ -203,6 +206,15 @@ class InnvilgelseUKMapperTest {
         return new AvklarteMedfolgendeFamilie(Set.of(), Set.of(ektefelle));
     }
 
+    private Map<String, MedfolgendeFamilie> lagMedfølgendeBarn() {
+        return Map.of(
+            UUID_BARN_1,
+            MedfolgendeFamilie.tilMedfolgendeFamilie(UUID_BARN_1, BARN1_FNR, BARN_NAVN_1, MedfolgendeFamilie.Relasjonsrolle.BARN),
+            UUID_BARN_2,
+            MedfolgendeFamilie.tilMedfolgendeFamilie(UUID_BARN_2, BARN2_FNR, BARN_NAVN_2, MedfolgendeFamilie.Relasjonsrolle.BARN)
+        );
+    }
+
     private AvklarteMedfolgendeBarn lagOmfatetMedfølgendeBarn() {
         OmfattetFamilie barn = new OmfattetFamilie(UUID_BARN_1);
         barn.setSammensattNavn(BARN_NAVN_1);
@@ -215,7 +227,7 @@ class InnvilgelseUKMapperTest {
     private AvklarteMedfolgendeBarn lagIkkeOmfatetMedfølgendeBarn() {
         IkkeOmfattetBarn barn = new IkkeOmfattetBarn(
             UUID_BARN_1,
-            Medfolgende_barn_begrunnelser.MANGLER_OPPLYSNINGER.getKode(),  "");
+            Medfolgende_barn_begrunnelser.MANGLER_OPPLYSNINGER.getKode(), "");
         return new AvklarteMedfolgendeBarn(
             Set.of(),
             Set.of(barn));
