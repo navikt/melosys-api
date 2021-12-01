@@ -53,6 +53,11 @@ public class DokumentproduksjonsInfoMapper {
                     DokumentKategoriKode.VB.getKode(),
                     JournalforingsTittel.INNVILGELSE_FTRL_2_8.getTittel())
             )
+            .put(INNVILGELSE_UK,
+                new DokumentproduksjonsInfo("innvilgelse_uk",
+                    DokumentKategoriKode.VB.getKode(),
+                    JournalforingsTittel.INNVILGELSE_UK.getTittel())
+            )
             .put(ATTEST_NO_UK_1,
                 new DokumentproduksjonsInfo("attest_no_uk_1",
                     DokumentKategoriKode.VB.getKode(),
@@ -102,8 +107,8 @@ public class DokumentproduksjonsInfoMapper {
         FORVALTNINGSMELDING("Melding om forventet saksbehandlingstid"),
         MANGELBREV("Melding om manglende opplysninger"),
         INNVILGELSE_FTRL_2_8("Vedtak om frivillig medlemskap"),
-        ATTEST_NO_UK_1("Attest medlemskap folketrygden uk");
-
+        ATTEST_NO_UK_1("Attest medlemskap folketrygden uk"),
+        INNVILGELSE_UK("Vedtak innvilgelse Storbritannia");
         private String tittel;
 
         public String getTittel() {
