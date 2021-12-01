@@ -7,6 +7,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.exception.TekniskException;
@@ -40,7 +41,13 @@ public class RegisteropplysningerRequest {
         return behandlingID;
     }
 
-    public Set<SaksopplysningType> getOpplysningstyper() {
+    public Set<SaksopplysningType> getOpplysningstyper(Unleash unleash) {
+        // Hvis PDL er aktiv skal vi ikke lagre ned person data fra TPS
+        if(unleash.isEnabled("melosys.pdl.aktiv")){
+            return opplysningstyper.stream()
+                .filter(p -> !SaksopplysningType.PERSOPL.name().equals(p.getKode()) && !SaksopplysningType.PERSHIST.name().equals(p.getKode()))
+                .collect(Collectors.toSet());
+        }
         return opplysningstyper;
     }
 
@@ -60,8 +67,8 @@ public class RegisteropplysningerRequest {
         return Objects.requireNonNullElse(informasjonsbehov, Informasjonsbehov.STANDARD);
     }
 
-    RegisteropplysningerRequest lagKopiUtenPeriodeOgOpplysningstyperSomKreverPeriode() {
-        Set<SaksopplysningType> opplysningstyperSet = getOpplysningstyper().stream().collect(Collectors.toSet());
+    RegisteropplysningerRequest lagKopiUtenPeriodeOgOpplysningstyperSomKreverPeriode(Unleash unleash) {
+        Set<SaksopplysningType> opplysningstyperSet = getOpplysningstyper(unleash).stream().collect(Collectors.toSet());
         opplysningstyperSet.removeAll(SaksopplysningType.KREVER_PERIODE);
         return new RegisteropplysningerRequest(getBehandlingID(), opplysningstyperSet, getFnr(), null, null, getInformasjonsbehov());
     }

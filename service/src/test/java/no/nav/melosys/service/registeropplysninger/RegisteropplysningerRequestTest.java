@@ -1,8 +1,11 @@
 package no.nav.melosys.service.registeropplysninger;
 
+import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.exception.TekniskException;
 import org.junit.jupiter.api.Test;
+
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -49,5 +52,26 @@ class RegisteropplysningerRequestTest {
             .build();
 
         assertThat(registeropplysningerRequest.getFnr()).isNull();
+    }
+
+    @Test
+    void getOpplysningstyper_aktivPDL_dataFraTPSHentesIkke() {
+        RegisteropplysningerRequest registeropplysningerRequest = RegisteropplysningerRequest.builder()
+            .behandlingID(1L)
+            .fnr("12345678911")
+            .saksopplysningTyper(RegisteropplysningerRequest.SaksopplysningTyper.builder()
+                .personopplysninger()
+                .personhistorikkopplysninger()
+                .organisasjonsopplysninger()
+                .build())
+            .build();
+
+        FakeUnleash unleash = new FakeUnleash();
+        unleash.enable("melosys.pdl.aktiv");
+
+        Set<SaksopplysningType> opplysningstyper = registeropplysningerRequest.getOpplysningstyper(unleash);
+        assertThat(opplysningstyper)
+            .singleElement()
+            .isEqualTo(SaksopplysningType.ORG);
     }
 }
