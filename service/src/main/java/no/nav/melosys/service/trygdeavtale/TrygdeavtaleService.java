@@ -8,22 +8,22 @@ import java.util.stream.Collectors;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.SaksopplysningType;
-import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadTrygdeavtale;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
-import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
 import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
-import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
-import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import org.springframework.stereotype.Service;
+
+import static no.nav.melosys.domain.kodeverk.InnvilgelsesResultat.INNVILGET;
+import static no.nav.melosys.domain.kodeverk.Medlemskapstyper.PLIKTIG;
+import static no.nav.melosys.domain.kodeverk.Trygdedekninger.FULL_DEKNING_FTRL;
 
 @Service
 public class TrygdeavtaleService {
@@ -77,28 +77,27 @@ public class TrygdeavtaleService {
     public void overførResultat(long behandlingId, TrygdeavtaleResultat trygdeavtaleResultat) {
         avklarteMedfolgendeFamilieService.lagreMedfolgendeFamilieSomAvklartefakta(behandlingId, trygdeavtaleResultat.familie());
         avklarteVirksomheterService.lagreVirksomheterSomAvklartefakta(behandlingId, List.of(trygdeavtaleResultat.virksomhet()));
-
-        SoeknadTrygdeavtale behandlingsgrunnlagdata =
-            (SoeknadTrygdeavtale) behandlingsgrunnlagService.hentBehandlingsgrunnlag(behandlingId).getBehandlingsgrunnlagdata();
-
-        lovvalgsperiodeService.lagreLovvalgsperioder(behandlingId, List.of(lagLovvalgsperiode(trygdeavtaleResultat, behandlingsgrunnlagdata)));
+        lovvalgsperiodeService.lagreLovvalgsperioder(behandlingId, List.of(lagLovvalgsperiode(behandlingId, trygdeavtaleResultat)));
     }
 
-    private Lovvalgsperiode lagLovvalgsperiode(TrygdeavtaleResultat trygdeavtaleResultat, SoeknadTrygdeavtale behandlingsgrunnlagdata) {
+    private Lovvalgsperiode lagLovvalgsperiode(long behandlingId, TrygdeavtaleResultat trygdeavtaleResultat) {
+        var behandlingsgrunnlagdata = behandlingsgrunnlagService.hentBehandlingsgrunnlag(behandlingId).getBehandlingsgrunnlagdata();
         var lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setFom(behandlingsgrunnlagdata.periode.getFom());
-        lovvalgsperiode.setTom(behandlingsgrunnlagdata.periode.getTom());
 
-        lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.INNVILGET);
+        lovvalgsperiode.setFom(trygdeavtaleResultat.lovvalgsperiodeFom());
+        lovvalgsperiode.setTom(trygdeavtaleResultat.lovvalgsperiodeTom());
+        lovvalgsperiode.setMedlemskapstype(PLIKTIG);
+        lovvalgsperiode.setDekning(FULL_DEKNING_FTRL);
+        lovvalgsperiode.setInnvilgelsesresultat(INNVILGET);
+        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_trygdeavtale_uk.valueOf(trygdeavtaleResultat.bestemmelse()));
+
         if (behandlingsgrunnlagdata.soeknadsland.landkoder.size() != 1) {
-            throw new TekniskException("Forventet ett land i behandlingsgrunnlagdata soeknadsland.landkoder, men fant: "
+            throw new FunksjonellException("Forventet ett soeknadsland, men fant: "
                 + behandlingsgrunnlagdata.soeknadsland.landkoder);
         }
-        Landkoder lovvalgsland = Landkoder.valueOf(behandlingsgrunnlagdata.soeknadsland.landkoder.get(0));
-        lovvalgsperiode.setLovvalgsland(lovvalgsland);
-        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_trygdeavtale_uk.valueOf(trygdeavtaleResultat.bestemmelse()));
-        lovvalgsperiode.setMedlemskapstype(Medlemskapstyper.PLIKTIG);
-        lovvalgsperiode.setDekning(Trygdedekninger.FULL_DEKNING_FTRL); // Skal bli renamet til FULL_DEKNING av fag
+
+        lovvalgsperiode.setLovvalgsland(Landkoder.valueOf(behandlingsgrunnlagdata.soeknadsland.landkoder.get(0)));
+
         return lovvalgsperiode;
     }
 }
