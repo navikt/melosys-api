@@ -4,9 +4,9 @@ import javax.transaction.Transactional;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
-import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.ForetakUtland;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
@@ -18,7 +18,6 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.dokgen.dto.innvilgelsestorbritannia.*;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
-import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import org.springframework.stereotype.Component;
 
@@ -30,16 +29,14 @@ import java.util.stream.Stream;
 public class InnvilgelseUKMapper {
 
     private final AvklarteMedfolgendeFamilieService avklarteMedfølgendeFamilieService;
-    private final AvklarteVirksomheterService avklarteVirksomheterService;
     private final DokgenMapperDatahenter dokgenMapperDatahenter;
     private final LovvalgsperiodeService lovvalgsperiodeService;
     private final PersondataFasade persondataFasade;
 
     public InnvilgelseUKMapper(AvklarteMedfolgendeFamilieService avklarteMedfølgendeFamilieService,
-                               AvklarteVirksomheterService avklarteVirksomheterService, DokgenMapperDatahenter dokgenMapperDatahenter,
+                               DokgenMapperDatahenter dokgenMapperDatahenter,
                                LovvalgsperiodeService lovvalgsperiodeService, PersondataFasade persondataFasade) {
         this.avklarteMedfølgendeFamilieService = avklarteMedfølgendeFamilieService;
-        this.avklarteVirksomheterService = avklarteVirksomheterService;
         this.dokgenMapperDatahenter = dokgenMapperDatahenter;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
         this.persondataFasade = persondataFasade;
@@ -52,15 +49,14 @@ public class InnvilgelseUKMapper {
         BehandlingsgrunnlagData behandlingsgrunnlagdata = behandlingsgrunnlag.getBehandlingsgrunnlagdata();
         var lovvalgsperioder = lovvalgsperiodeService.hentLovvalgsperioder(behandling.getId());
 
-        List<AvklartVirksomhet> avklartVirksomheter = avklarteVirksomheterService.hentUtenlandskeVirksomheter(behandling);
-        AvklartVirksomhet virksomhet = avklartVirksomheter.stream()
-            .filter(avklartVirksomhet -> Landkoder.GB.getKode().equals(avklartVirksomhet.adresse.getLandkode()))
+        ForetakUtland foretakUtland = behandlingsgrunnlagdata.foretakUtland.stream()
+            .filter(foretak -> foretak.adresse.getLandkode().equals(Landkoder.GB.getKode()))
             .findFirst().orElseThrow(() -> new FunksjonellException("Ingen utenlandske virksomheter funnet"));
 
         boolean virksomhetArbeidsgiverSkalHaKopi = false;
         return new InnvilgelseUK.Builder(brevbestilling)
             .artikkel(getLovvalgbestemmelse(lovvalgsperioder))
-            .soknad(lagSøknad(behandlingsgrunnlagdata.periode, behandlingsgrunnlag.getMottaksdato(), virksomhet.navn))
+            .soknad(lagSøknad(behandlingsgrunnlagdata.periode, behandlingsgrunnlag.getMottaksdato(), foretakUtland.navn))
             .familie(lagFamile(behandling.getId()))
             .virksomhetArbeidsgiverSkalHaKopi(virksomhetArbeidsgiverSkalHaKopi)
             .build();
@@ -96,17 +92,17 @@ public class InnvilgelseUKMapper {
 
         return new Ektefelle.Builder()
             .fnr(medfølgendeFamilie.getFnr())
-            .navn(getSammensattNavn(medfølgendeFamilie))
+            .navn(getSammensattNavn(medfølgendeFamilie.getFnr(), medfølgendeFamilie.getNavn()))
             .begrunnelse(begrunnelse)
             .fødselsdato(getFødselDato(medfølgendeFamilie.getFnr()))
             .build();
     }
 
-    private String getSammensattNavn(MedfolgendeFamilie medfølgendeFamilie) {
-        if (medfølgendeFamilie.getFnr() == null) {
-            return medfølgendeFamilie.getNavn();
+    private String getSammensattNavn(String ident, String navn) {
+        if (ident == null) {
+            return navn;
         }
-        return dokgenMapperDatahenter.hentSammensattNavn(medfølgendeFamilie.getFnr());
+        return dokgenMapperDatahenter.hentSammensattNavn(ident);
     }
 
     private List<Barn> finnBarn(long behandlingID) {
@@ -121,10 +117,11 @@ public class InnvilgelseUKMapper {
     }
 
     private Barn tilBarn(OmfattetFamilie omfattetFamilie) {
+        String ident = omfattetFamilie.getIdent();
         return new Barn.Builder()
-            .navn(omfattetFamilie.getSammensattNavn())
-            .fnr(omfattetFamilie.getIdent())
-            .foedselsdato(getFødselDato(omfattetFamilie.getIdent()))
+            .navn(getSammensattNavn(ident, omfattetFamilie.getSammensattNavn()))
+            .fnr(ident)
+            .foedselsdato(getFødselDato(ident))
             .build();
     }
 
