@@ -96,7 +96,7 @@ class InnvilgelseUKMapperTest {
         String json = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(innvilgelseUK);
         String resultat = json.replaceAll("(\"dagensDato\" :)(.*)", "$1 \"Fjernet for test\",");
 
-        assertThat(resultat).isEqualTo(FORVENTEDE_FELTER_FOR_INNVIGLESE_STORBRITANNIA_MAPPING);
+        assertThat(resultat).isEqualToIgnoringNewLines(FORVENTEDE_FELTER_FOR_INNVIGLESE_STORBRITANNIA_MAPPING);
     }
 
     @Test
