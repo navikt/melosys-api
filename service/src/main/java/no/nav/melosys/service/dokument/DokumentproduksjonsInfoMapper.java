@@ -119,7 +119,7 @@ public class DokumentproduksjonsInfoMapper {
         MANGELBREV("Melding om manglende opplysninger"),
         INNVILGELSE_FTRL_2_8("Vedtak om frivillig medlemskap"),
         ATTEST_NO_UK_1("Attest medlemskap folketrygden uk"),
-        INNVILGELSE_UK("Vedtak innvilgelse Storbritannia");
+        INNVILGELSE_UK("Vedtak om medlemskap");
 
         private final String tittel;
 
