@@ -3,6 +3,7 @@ package no.nav.melosys.domain;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
 import javax.persistence.*;
 
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
@@ -447,9 +448,8 @@ public class Behandling extends RegistreringsInfo {
         return this.status == status;
     }
 
-    public boolean saksopplysningEksisterer(SaksopplysningType saksopplysningType){
-        return getSaksopplysninger().stream()
-            .anyMatch(p -> p.getType().equals(saksopplysningType));
+    public boolean saksopplysningerEksistererIkke(List<SaksopplysningType> saksopplysningTyper){
+        return Collections.disjoint(saksopplysningTyper, getSaksopplysninger().stream().map(Saksopplysning::getType).collect(Collectors.toList()));
     }
 
     @Override

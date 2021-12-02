@@ -1,6 +1,7 @@
 package no.nav.melosys.service;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 
 import no.nav.melosys.domain.Behandling;
@@ -63,7 +64,7 @@ public class SaksopplysningerService {
     }
 
     public void lagrePersonopplysninger(Behandling behandling, Persondata persondata) {
-        if (!behandling.saksopplysningEksisterer(SaksopplysningType.PDL_PERSOPL) && !behandling.saksopplysningEksisterer(SaksopplysningType.PERSOPL)) {
+        if (behandling.saksopplysningerEksistererIkke(List.of(SaksopplysningType.PERSOPL, SaksopplysningType.PDL_PERSOPL))) {
             Instant nå = Instant.now();
             Saksopplysning saksopplysning = new Saksopplysning();
             saksopplysning.setDokument(persondata);
@@ -77,7 +78,7 @@ public class SaksopplysningerService {
     }
 
     public void lagrePersonMedHistorikk(Behandling behandling, PersonMedHistorikk personMedHistorikk) {
-        if (!behandling.saksopplysningEksisterer(SaksopplysningType.PDL_PERS_SAKS) && !behandling.saksopplysningEksisterer(SaksopplysningType.PERSHIST)) {
+        if (behandling.saksopplysningerEksistererIkke(List.of(SaksopplysningType.PERSHIST, SaksopplysningType.PDL_PERS_SAKS))) {
             Instant nå = Instant.now();
             Saksopplysning saksopplysning = new Saksopplysning();
             saksopplysning.setDokument(personMedHistorikk);
