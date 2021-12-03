@@ -140,7 +140,7 @@ public class JournalfoeringService {
                 "siden 'melosys.folketrygden.mvp' ikke er aktivert i unleash");
         }
 
-        if (behandlingstema == Behandlingstema.TRYGDEAVTALE_UK && !unleash.isEnabled("melosys.trygdeavtale")) {
+        if (behandlingstema == Behandlingstema.YRKESAKTIV && !unleash.isEnabled("melosys.trygdeavtale")) {
             throw new FunksjonellException("Kan ikke opprette ny sak med behandlingstema " + behandlingstema +
                 "siden 'melosys.trygdeavtale' ikke er aktivert i unleash");
         }
