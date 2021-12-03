@@ -11,7 +11,6 @@ import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
 import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.begrunnelser.Medfolgende_barn_begrunnelser;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
 import no.nav.melosys.domain.person.familie.IkkeOmfattetFamilie;
 import no.nav.melosys.domain.person.familie.OmfattetFamilie;
@@ -116,13 +115,14 @@ public class InnvilgelseUKMapper {
         return Stream.concat(barnOmfattetAvNorskTrygd.stream()
                 .map(omfattetFamilie -> tilBarn(medfølgendeBarn,omfattetFamilie.getUuid(), null)),
             barnIkkeOmfattetAvNorskTrygd.stream()
-                .map(ikkeOmfattetBarn -> tilBarn(medfølgendeBarn,ikkeOmfattetBarn.uuid, ikkeOmfattetBarn.begrunnelse))
+                .map(ikkeOmfattetBarn -> tilBarn(medfølgendeBarn,ikkeOmfattetBarn.uuid, ikkeOmfattetBarn.begrunnelse.getKode()))
         ).toList();
     }
 
-    private Barn tilBarn(Map<String, MedfolgendeFamilie> medfølgendeBarnMap, String uuid, Medfolgende_barn_begrunnelser begrunnelse) {
+    private Barn tilBarn(Map<String, MedfolgendeFamilie> medfølgendeBarnMap, String uuid, String begrunnelse) {
         var medfølgendeBarn = Optional.of(medfølgendeBarnMap.get(uuid))
-            .orElseThrow(() -> new FunksjonellException("Avklart medfølgende familie " + uuid + " finnes ikke i behandlingsgrunnlaget"));
+            .orElseThrow(() -> new FunksjonellException("Avklart medfølgende familie " + uuid +
+                " finnes ikke i behandlingsgrunnlaget"));
         String fnr = medfølgendeBarn.getFnr();
         return new Barn.Builder()
             .navn(getSammensattNavn(fnr, medfølgendeBarn.getNavn()))

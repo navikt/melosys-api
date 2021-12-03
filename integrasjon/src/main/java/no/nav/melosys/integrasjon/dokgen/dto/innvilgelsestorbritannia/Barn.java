@@ -5,7 +5,6 @@ import java.time.LocalDate;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.ser.InstantSerializer;
-import no.nav.melosys.domain.kodeverk.begrunnelser.Medfolgende_barn_begrunnelser;
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_barn_begrunnelser_ftrl;
 
 import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
@@ -15,7 +14,7 @@ public record Barn(
 
     boolean omfattet,
 
-    Medfolgende_barn_begrunnelser begrunnelse,
+    Medfolgende_barn_begrunnelser_ftrl begrunnelse,
 
     String fnr,
 
@@ -30,7 +29,7 @@ public record Barn(
 
         private boolean omfattet;
 
-        private Medfolgende_barn_begrunnelser begrunnelse;
+        private Medfolgende_barn_begrunnelser_ftrl begrunnelse;
 
         private String fnr;
 
@@ -43,8 +42,10 @@ public record Barn(
             return this;
         }
 
-        public Builder begrunnelse(Medfolgende_barn_begrunnelser begrunnelse) {
-            this.begrunnelse = begrunnelse;
+        public Builder begrunnelse(String begrunnelse) {
+            if(begrunnelse!=null) {
+                this.begrunnelse = Medfolgende_barn_begrunnelser_ftrl.valueOf(begrunnelse);
+            }
             return this;
         }
 
