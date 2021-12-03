@@ -5,7 +5,6 @@ import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.person.adresse.Kontaktadresse;
 import no.nav.melosys.domain.util.LandkoderUtils;
-import no.nav.melosys.integrasjon.KonverteringsUtils;
 import no.nav.melosys.integrasjon.pdl.dto.person.adresse.PostadresseIFrittFormat;
 import no.nav.melosys.integrasjon.pdl.dto.person.adresse.Postboksadresse;
 import no.nav.melosys.integrasjon.pdl.dto.person.adresse.UtenlandskAdresseIFrittFormat;
@@ -36,11 +35,14 @@ public final class KontaktadresseOversetter {
             strukturertAdresse = lagStrukturertAdresse(kontaktadressePDL.postboksadresse(), kodeverkService);
         }
 
+        var gyldigFraOgMed = kontaktadressePDL.gyldigFraOgMed() == null ? null : kontaktadressePDL.gyldigFraOgMed().toLocalDate();
+        var gyldigTilOgMed = kontaktadressePDL.gyldigTilOgMed() == null ? null : kontaktadressePDL.gyldigTilOgMed().toLocalDate();
+
         return new Kontaktadresse(strukturertAdresse,
             semistrukturertAdresse,
             kontaktadressePDL.coAdressenavn(),
-            KonverteringsUtils.localDateTimeToLocalDate(kontaktadressePDL.gyldigFraOgMed()),
-            KonverteringsUtils.localDateTimeToLocalDate(kontaktadressePDL.gyldigTilOgMed()),
+            gyldigFraOgMed,
+            gyldigTilOgMed,
             kontaktadressePDL.metadata().master(),
             kontaktadressePDL.hentKilde(),
             kontaktadressePDL.hentDatoSistRegistrert(),

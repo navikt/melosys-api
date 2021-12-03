@@ -2,7 +2,6 @@ package no.nav.melosys.service.persondata.mapping.adresse;
 
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.person.adresse.Oppholdsadresse;
-import no.nav.melosys.integrasjon.KonverteringsUtils;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 
 public final class OppholdsadresseOversetter {
@@ -24,10 +23,13 @@ public final class OppholdsadresseOversetter {
                 kodeverkService);
         }
 
+        var gyldigFraOgMed = oppholdsadressePDL.gyldigFraOgMed() == null ? null : oppholdsadressePDL.gyldigFraOgMed().toLocalDate();
+        var gyldigTilOgMed = oppholdsadressePDL.gyldigTilOgMed() == null ? null : oppholdsadressePDL.gyldigTilOgMed().toLocalDate();
+
         return new Oppholdsadresse(strukturertAdresse,
             oppholdsadressePDL.coAdressenavn(),
-            KonverteringsUtils.localDateTimeToLocalDate(oppholdsadressePDL.gyldigFraOgMed()),
-            KonverteringsUtils.localDateTimeToLocalDate(oppholdsadressePDL.gyldigTilOgMed()),
+            gyldigFraOgMed,
+            gyldigTilOgMed,
             oppholdsadressePDL.metadata().master(),
             oppholdsadressePDL.hentKilde(),
             oppholdsadressePDL.hentDatoSistRegistrert(),

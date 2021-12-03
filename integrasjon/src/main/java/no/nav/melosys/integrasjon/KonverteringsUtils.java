@@ -83,11 +83,4 @@ public final class KonverteringsUtils {
 
         return LocalDate.parse(date.toLocalDate().toString());
     }
-
-    public static LocalDate localDateTimeToLocalDate(LocalDateTime date) {
-        if (date == null) {
-            return null;
-        }
-        return date.toLocalDate();
-    }
 }

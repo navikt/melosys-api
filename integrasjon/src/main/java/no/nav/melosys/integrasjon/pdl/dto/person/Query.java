@@ -310,9 +310,6 @@ query($ident: ID!, $historikk: Boolean!) {
           type
         }
       }
-      folkeregistermetadata {
-        gyldighetstidspunkt
-      }
     }
     forelderBarnRelasjon {
       relatertPersonsIdent

@@ -11,13 +11,7 @@ public final class FolkeregisterpersonstatusTilDtoKonverter {
         if (folkeregisterpersonstatus == null) {
             return null;
         }
-        return new FolkeregisterpersonstatusDto(
-            folkeregisterpersonstatus.personstatus().getKode(),
-            folkeregisterpersonstatus.hentGjeldendeTekst(),
-            MasterTilDtoKonverter.tilDto(folkeregisterpersonstatus.master()),
-            folkeregisterpersonstatus.kilde(),
-            folkeregisterpersonstatus.fregGyldighetstidspunkt(),
-            folkeregisterpersonstatus.erHistorisk()
-        );
+        return new FolkeregisterpersonstatusDto(folkeregisterpersonstatus.personstatus().getKode(),
+            folkeregisterpersonstatus.hentGjeldendeTekst());
     }
 }

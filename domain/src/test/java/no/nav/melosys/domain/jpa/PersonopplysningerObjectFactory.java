@@ -1,11 +1,5 @@
 package no.nav.melosys.domain.jpa;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-
 import no.nav.melosys.domain.adresse.SemistrukturertAdresse;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.felles.Land;
@@ -14,6 +8,12 @@ import no.nav.melosys.domain.person.*;
 import no.nav.melosys.domain.person.adresse.Bostedsadresse;
 import no.nav.melosys.domain.person.adresse.Kontaktadresse;
 import no.nav.melosys.domain.person.adresse.Oppholdsadresse;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySet;
@@ -192,8 +192,7 @@ public class PersonopplysningerObjectFactory {
 
         return new PersonMedHistorikk(Set.of(bostedsadresse_1, bostedsadresse_2),
             null, null, new Folkeregisteridentifikator("identNr"),
-            Set.of(new Folkeregisterpersonstatus(Personstatuser.UDEFINERT, "ny status fra PDL", Master.PDL.name(), Master.PDL.name(), null, false)),
-            KjoennType.UKJENT,
+            new Folkeregisterpersonstatus(Personstatuser.UDEFINERT, "ny status fra PDL"), KjoennType.UKJENT,
             Set.of(kontaktadresse_1, kontaktadresse_2), new Navn("Ola", "Oops", "King"),
             Set.of(oppholdsadresse_1, oppholdsadresse_2), Set.of(
             new Sivilstand(Sivilstandstype.REGISTRERT_PARTNER, null, "relatertVedSivilstandID", LocalDate.MIN,
