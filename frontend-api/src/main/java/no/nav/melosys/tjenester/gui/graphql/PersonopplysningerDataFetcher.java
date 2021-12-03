@@ -52,7 +52,7 @@ public class PersonopplysningerDataFetcher implements DataFetcher<Personopplysni
             .sorted(Comparator.comparing(StatsborgerskapDto::gyldigFraOgMed,
                 Comparator.nullsFirst(Comparator.reverseOrder())))
             .toList();
-        var x = new PersonopplysningerDto(bostedsadresseDtoList,
+        return new PersonopplysningerDto(bostedsadresseDtoList,
             FolkeregisteridentifikatorTilDtoKonverter.tilDto(personMedHistorikk.folkeregisteridentifikator()),
             folkeregisterpersonstatusDtoList,
             personMedHistorikk.kjønn(),
@@ -61,6 +61,5 @@ public class PersonopplysningerDataFetcher implements DataFetcher<Personopplysni
             oppholdsadresseDtoList,
             sivilstandDtoList,
             statsborgerskapDtoList);
-        return x;
     }
 }
