@@ -55,6 +55,12 @@ class InnvilgelseUKMapperTest {
     public static final String BARN_NAVN_1 = "Doffen Duck";
     public static final String BARN_NAVN_2 = "Dole Duck";
 
+    private static final Map<String,String> FNR_TIL_NAVN = Map.of(
+        EKTEFELLE_FNR, EKTEFELLE_NAVN,
+        BARN1_FNR, BARN_NAVN_1,
+        BARN2_FNR, BARN_NAVN_2
+    );
+
     @Mock
     private AvklarteMedfolgendeFamilieService mockAvklarteMedfolgendeFamilieService;
 
@@ -87,9 +93,7 @@ class InnvilgelseUKMapperTest {
         mockLovvalgsperiode();
         mockMedfølgendeFamilieDefaultCase();
         mockAvklartFamilieDefaultCase();
-        mockPerson();
-        when(mockDokgenMapperDatahenter.hentSammensattNavn(BARN1_FNR)).thenReturn(BARN_NAVN_1);
-        when(mockDokgenMapperDatahenter.hentSammensattNavn(BARN2_FNR)).thenReturn(BARN_NAVN_2);
+        mockPerson(EKTEFELLE_FNR, BARN1_FNR, BARN2_FNR);
 
         InnvilgelseBrevbestilling brevbestilling = lagInnvilgelseBrevbestilling();
 
@@ -115,10 +119,9 @@ class InnvilgelseUKMapperTest {
     void map_ettOmfattetBarn_minstEttOmfattetFamiliemedlemErtrue() {
         mockLovvalgsperiode();
         mockMedfølgendeFamilieDefaultCase();
-        mockPerson();
+        mockPerson(BARN1_FNR);
         when(mockAvklarteMedfolgendeFamilieService.hentAvklartMedfølgendeEktefelle(anyLong())).thenReturn(lagIkkeOmfattetMedfølgendeEktefelle());
         when(mockAvklarteMedfolgendeFamilieService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(lagOmfatetMedfølgendeBarn());
-        when(mockDokgenMapperDatahenter.hentSammensattNavn(BARN1_FNR)).thenReturn(BARN_NAVN_1);
 
         InnvilgelseBrevbestilling brevbestilling = lagInnvilgelseBrevbestilling();
         InnvilgelseUK map = innvilgelseUKMapper.map(brevbestilling);
@@ -129,20 +132,21 @@ class InnvilgelseUKMapperTest {
     void map_ingenOmfattet_minstEttOmfattetFamiliemedlemErfalse() {
         mockLovvalgsperiode();
         mockMedfølgendeFamilieDefaultCase();
-        mockPerson();
+        mockPerson(BARN1_FNR);
         when(mockAvklarteMedfolgendeFamilieService.hentAvklartMedfølgendeEktefelle(anyLong())).thenReturn(lagIkkeOmfattetMedfølgendeEktefelle());
         when(mockAvklarteMedfolgendeFamilieService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(lagIkkeOmfatetMedfølgendeBarn());
-        when(mockDokgenMapperDatahenter.hentSammensattNavn(BARN1_FNR)).thenReturn(BARN_NAVN_1);
 
         InnvilgelseBrevbestilling brevbestilling = lagInnvilgelseBrevbestilling();
         InnvilgelseUK map = innvilgelseUKMapper.map(brevbestilling);
         assertThat(map.getFamilie().minstEttOmfattetFamiliemedlem()).isFalse();
     }
 
-    private void mockPerson() {
+    private void mockPerson(String... personer) {
         when(mockPersondata.getFødselsdato()).thenReturn(LocalDate.of(1970, 1, 1));
         when(mockPersondataFasade.hentPerson(anyString())).thenReturn(mockPersondata);
-        when(mockDokgenMapperDatahenter.hentSammensattNavn(EKTEFELLE_FNR)).thenReturn(EKTEFELLE_NAVN);
+        for (String fnr : personer) {
+            when(mockDokgenMapperDatahenter.hentSammensattNavn(fnr)).thenReturn(FNR_TIL_NAVN.get(fnr));
+        }
     }
 
     private void mockMedfølgendeFamilieDefaultCase() {
