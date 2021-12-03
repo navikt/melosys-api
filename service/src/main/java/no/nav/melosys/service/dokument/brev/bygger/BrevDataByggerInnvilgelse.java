@@ -138,8 +138,8 @@ public class BrevDataByggerInnvilgelse implements BrevDataBygger {
                 throw new FunksjonellException("Avklart medfølgende barn " + ikkeOmfattetBarn.getUuid() + " finnes ikke i behandlingsgrunnlaget");
             }
             MedfolgendeFamilie barn = medfølgendeBarn.get(ikkeOmfattetBarn.getUuid());
-            ikkeOmfattetBarn.sammensattNavn = barn.getFnr() != null ? persondataFasade.hentSammensattNavn(barn.getFnr()) : barn.getNavn();
-            ikkeOmfattetBarn.ident = barn.getFnr();
+            ikkeOmfattetBarn.setSammensattNavn(barn.getFnr() != null ? persondataFasade.hentSammensattNavn(barn.getFnr()) : barn.getNavn());
+            ikkeOmfattetBarn.setIdent(barn.getFnr());
         }
         return avklarteMedfolgendeBarn;
     }

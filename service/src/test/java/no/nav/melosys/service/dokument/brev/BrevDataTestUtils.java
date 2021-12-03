@@ -139,8 +139,8 @@ public class BrevDataTestUtils {
         omfattetBarn.setSammensattNavn("Omfattet Barn");
         omfattetBarn.setIdent("123321123");
         IkkeOmfattetFamilie ikkeOmfattetBarn = new IkkeOmfattetFamilie("fnrIkkeOmfattet", OVER_18_AR.getKode(), null);
-        ikkeOmfattetBarn.sammensattNavn = "Ikke Omfattet Barn";
-        ikkeOmfattetBarn.ident = "1111111111";
+        ikkeOmfattetBarn.setSammensattNavn("Ikke Omfattet Barn");
+        ikkeOmfattetBarn.setIdent("1111111111");
 
         return new AvklarteMedfolgendeFamilie(Set.of(omfattetBarn), Set.of(ikkeOmfattetBarn));
     }

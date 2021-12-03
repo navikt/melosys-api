@@ -193,8 +193,8 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
     private BarnAvslagType lagBarnAvslagType(IkkeOmfattetFamilie ikkeOmfattetBarn) {
         return BarnAvslagType.builder()
             .withBarnAvslagBegrunnelse(tilBarnAvslagBegrunnelseKode(ikkeOmfattetBarn.getBegrunnelse()))
-            .withBarnFodselsnummer(ikkeOmfattetBarn.ident)
-            .withBarnIkkeOmfattetAvNorskTrygd(ikkeOmfattetBarn.sammensattNavn).build();
+            .withBarnFodselsnummer(ikkeOmfattetBarn.getIdent())
+            .withBarnIkkeOmfattetAvNorskTrygd(ikkeOmfattetBarn.getSammensattNavn()).build();
     }
 
     private BarnAvslagBegrunnelseKode tilBarnAvslagBegrunnelseKode(String begrunnelse) {
