@@ -30,13 +30,13 @@ public class InnvilgelseArbeidsgiverMapper implements BrevDataMapper {
                                 BrevData brevdata) throws JAXBException, SAXException {
 
         BrevDataInnvilgelse brevDataInnvilgelse = (BrevDataInnvilgelse) brevdata;
-        Fag fag = mapFag(behandling, brevDataInnvilgelse);
+        Fag fag = mapFag(brevDataInnvilgelse);
 
         JAXBElement<BrevdataType> brevdataTypeJAXBElement = lagBrevdataType(fellesType, navFelles, fag);
         return JaxbHelper.marshalAndValidate(brevdataTypeJAXBElement, XSD_LOCATION);
     }
 
-    private Fag mapFag(Behandling behandling, BrevDataInnvilgelse brevDataInnvilgelse) {
+    private Fag mapFag(BrevDataInnvilgelse brevDataInnvilgelse) {
         Fag fag = new Fag();
 
         fag.setArbeidsland(brevDataInnvilgelse.arbeidsland);
@@ -49,10 +49,6 @@ public class InnvilgelseArbeidsgiverMapper implements BrevDataMapper {
             .withTomDato(lagXmlDato(periode.getTom()))
             .build());
 
-        final String sammensattNavn = behandling.finnPersonDokument().map(p -> p.getSammensattNavn())
-            .orElseThrow(() -> new IllegalStateException("Persondokument finnes ikke for behandling " + behandling.getId()));
-
-        fag.setNavn(sammensattNavn);
         return fag;
     }
 

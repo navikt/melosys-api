@@ -2,8 +2,10 @@ package no.nav.melosys.tjenester.gui.saksflyt;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.ValideringException;
+import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.vedtak.*;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
@@ -23,11 +25,13 @@ import org.springframework.web.context.WebApplicationContext;
 public class VedtakTjeneste {
     private final VedtakServiceFasade vedtakServiceFasade;
     private final Aksesskontroll aksesskontroll;
+    private final BehandlingService behandlingService;
 
     @Autowired
-    public VedtakTjeneste(VedtakServiceFasade vedtakServiceFasade, Aksesskontroll aksesskontroll) {
+    public VedtakTjeneste(VedtakServiceFasade vedtakServiceFasade, Aksesskontroll aksesskontroll, BehandlingService behandlingService) {
         this.vedtakServiceFasade = vedtakServiceFasade;
         this.aksesskontroll = aksesskontroll;
+        this.behandlingService = behandlingService;
     }
 
     @PostMapping("{behandlingID}/fatt")
@@ -39,7 +43,7 @@ public class VedtakTjeneste {
         }
         aksesskontroll.autoriserSkriv(behandlingID);
 
-        vedtakServiceFasade.fattVedtak(behandlingID, lagFattVedtakRequest(fattVedtakDto, SubjectHandler.getInstance().getUserID()));
+        vedtakServiceFasade.fattVedtak(behandlingID, lagFattVedtakRequest(behandlingID, fattVedtakDto, SubjectHandler.getInstance().getUserID()));
         return ResponseEntity.ok().build();
     }
 
@@ -55,7 +59,7 @@ public class VedtakTjeneste {
         return ResponseEntity.ok().build();
     }
 
-    private FattVedtakRequest lagFattVedtakRequest(FattVedtakDto fattVedtakDto, String bestillersId) {
+    private FattVedtakRequest lagFattVedtakRequest(long behandlingID, FattVedtakDto fattVedtakDto, String bestillersId) {
         FattVedtakRequest.Builder<?> fattVedtakRequest;
 
         if (fattVedtakDto instanceof FattEosVedtakDto eosVedtakDto) {
@@ -64,19 +68,29 @@ public class VedtakTjeneste {
                 .medFritekstSed(eosVedtakDto.getFritekstSed())
                 .medMottakerInstitusjoner(eosVedtakDto.getMottakerinstitusjoner())
                 .medRevurderBegrunnelse(eosVedtakDto.getRevurderBegrunnelse());
-        } else if (fattVedtakDto instanceof FattFtrlVedtakDto ftrlVedtakDto) {
-            fattVedtakRequest = new FattFtrlVedtakRequest.Builder()
-                .medFritekstInnledning(ftrlVedtakDto.getFritekstInnledning())
-                .medFritekstBegrunnelse(ftrlVedtakDto.getFritekstBegrunnelse())
-                .medFritekstEktefelle(ftrlVedtakDto.getFritekstEktefelle())
-                .medFritekstBarn(ftrlVedtakDto.getFritekstBarn())
-                .medKopiMottakere(ftrlVedtakDto.getKopiMottakere())
-                .medBestillersId(bestillersId);
-        } else if (fattVedtakDto instanceof FattTrygdeavtaleVedtakDto ftrlVedtakDto) {
-            fattVedtakRequest = new FattTrygdeavtaleVedtakRequest.Builder()
-                .medFritekstBegrunnelse(ftrlVedtakDto.getFritekstBegrunnelse());
+        } else if (fattVedtakDto instanceof FattTrygdeavtaleEllerFtrlVedtakDto trygdeavtaleEllerFtrlVedtakDto) {
+            var sakstype = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID).getFagsak().getType();
+            if (sakstype == Sakstyper.FTRL) {
+                fattVedtakRequest = new FattFtrlVedtakRequest.Builder()
+                    .medFritekstInnledning(trygdeavtaleEllerFtrlVedtakDto.getFritekstInnledning())
+                    .medFritekstBegrunnelse(trygdeavtaleEllerFtrlVedtakDto.getFritekstBegrunnelse())
+                    .medFritekstEktefelle(trygdeavtaleEllerFtrlVedtakDto.getFritekstEktefelle())
+                    .medFritekstBarn(trygdeavtaleEllerFtrlVedtakDto.getFritekstBarn())
+                    .medKopiMottakere(trygdeavtaleEllerFtrlVedtakDto.getKopiMottakere())
+                    .medBestillersId(bestillersId);
+            } else if (sakstype == Sakstyper.TRYGDEAVTALE) {
+                fattVedtakRequest = new FattTrygdeavtaleVedtakRequest.Builder()
+                    .medFritekstInnledning(trygdeavtaleEllerFtrlVedtakDto.getFritekstInnledning())
+                    .medFritekstBegrunnelse(trygdeavtaleEllerFtrlVedtakDto.getFritekstBegrunnelse())
+                    .medFritekstEktefelle(trygdeavtaleEllerFtrlVedtakDto.getFritekstEktefelle())
+                    .medFritekstBarn(trygdeavtaleEllerFtrlVedtakDto.getFritekstBarn())
+                    .medKopiMottakere(trygdeavtaleEllerFtrlVedtakDto.getKopiMottakere())
+                    .medBestillersId(bestillersId);
+            } else {
+                throw new FunksjonellException("Vedtakstype " + fattVedtakDto.getVedtakstype() + " med sakstype " + sakstype + " er ikke støttet");
+            }
         } else {
-            throw new FunksjonellException("Vedtakstype er ikke støttet");
+            throw new FunksjonellException("Vedtakstype " + fattVedtakDto.getVedtakstype() + " er ikke støttet");
         }
 
         fattVedtakRequest

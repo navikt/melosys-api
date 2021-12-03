@@ -46,7 +46,7 @@ public class BrevdataGrunnlagFactory {
     }
 
     private Persondata hentPersondata(Behandling behandling) {
-        if (unleash.isEnabled("melosys.brev.person.pdl")) {
+        if (unleash.isEnabled("melosys.pdl.aktiv")) {
             return persondataFasade.hentPerson(behandling.getFagsak().hentAktørID(), Informasjonsbehov.MED_FAMILIERELASJONER);
         }
         return behandling.hentPersonDokument();

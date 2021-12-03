@@ -279,7 +279,7 @@ class PersondataServiceTest {
 
     @Test
     void harStrengtFortroligAdresse() {
-        fakeUnleash.enable("melosys.pdl.adressebeskyttelse");
+        fakeUnleash.enable("melosys.pdl.aktiv");
         when(pdlConsumer.hentAdressebeskyttelser(anyString())).thenReturn(
             List.of(new Adressebeskyttelse(AdressebeskyttelseGradering.UGRADERT, metadata()),
                 new Adressebeskyttelse(AdressebeskyttelseGradering.STRENGT_FORTROLIG, metadata())));

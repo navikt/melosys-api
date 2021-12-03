@@ -115,7 +115,7 @@ class DokgenMalMapperTest {
 
     @Test
     void mapping_persondataFraPdl_ok() {
-        fakeUnleash.enable("melosys.brev.adresser.pdl");
+        fakeUnleash.enable("melosys.pdl.aktiv");
         when(mockDokgenMapperDatahenter.hentPoststed(any())).thenReturn("Andeby");
         when(mockDokgenMapperDatahenter.hentPersondata(any())).thenReturn(lagPersonDokument());
 
@@ -506,27 +506,25 @@ class DokgenMalMapperTest {
     }
 
     private InnvilgelseFtrl lagInnvilgelseFtrl() {
-        return new InnvilgelseFtrl(
-            lagInnvilgelseBrevbestilling(),
-            null,
-            true,
-            Ftrl_2_8_naer_tilknytning_norge_begrunnelser.ANSATT_I_MULTINASJONALT_SELSKAP.getBeskrivelse(),
-            false,
-            false,
-            null,
-            null,
-            null,
-            "Egon Olsen AS",
-            "USA",
-            false,
-            null,
-            null,
-            null,
-            false,
-            String.valueOf(LocalDate.now().getYear()),
-            false,
-            false
-        );
+        return new InnvilgelseFtrl.Builder(lagInnvilgelseBrevbestilling())
+            .perioder(null)
+            .erFullstendigInnvilget(true)
+            .ftrl_2_8_begrunnelse(Ftrl_2_8_naer_tilknytning_norge_begrunnelser.ANSATT_I_MULTINASJONALT_SELSKAP.getBeskrivelse())
+            .vurderingMedlemskapEktefelle(false)
+            .vurderingLovvalgBarn(false)
+            .omfattetFamilie(null)
+            .ikkeOmfattetEktefelle(null)
+            .ikkeOmfattetBarn(null)
+            .arbeidsgiverNavn("Egon Olsen AS")
+            .arbeidsland("USA")
+            .trygdeavtaleMedArbeidsland(false)
+            .vurderingTrygdeavgift(null)
+            .loennsforhold(null)
+            .arbeidsgiverFullmektigNavn(null)
+            .avgiftssatsAar(String.valueOf(LocalDate.now().getYear()))
+            .loennNorgeSkattepliktig(false)
+            .loennUtlandSkattepliktig(false)
+            .build();
     }
 
     private InnvilgelseUK lagInnvilgelseUK() {

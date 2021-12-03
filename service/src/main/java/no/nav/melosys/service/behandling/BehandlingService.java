@@ -92,6 +92,7 @@ public class BehandlingService {
         tidligereMedlemsperiodeRepository.saveAll(tidligereMedlemsperioder);
     }
 
+    @Deprecated
     public void lagre(Behandling behandling) {
         behandlingRepository.save(behandling);
     }
@@ -101,7 +102,7 @@ public class BehandlingService {
         oppdaterStatus(behandling, status);
     }
 
-    private void oppdaterStatus(Behandling behandling, Behandlingsstatus status) {
+    public void oppdaterStatus(Behandling behandling, Behandlingsstatus status) {
         if (behandling.getStatus() == status) {
             return;
         }
@@ -126,6 +127,7 @@ public class BehandlingService {
         } else if (status == Behandlingsstatus.AVSLUTTET) {
             oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
         }
+        applicationEventPublisher.publishEvent(new BehandlingEndretStatusEvent(status, behandling));
     }
 
     public void brukerOppdaterStatus(long behandlingID, Behandlingsstatus status) {
@@ -271,6 +273,7 @@ public class BehandlingService {
         behandling.setStatus(Behandlingsstatus.AVSLUTTET);
         behandlingRepository.save(behandling);
         behandlingerAvsluttet.increment();
+        applicationEventPublisher.publishEvent(new BehandlingEndretStatusEvent(AVSLUTTET, behandling));
     }
 
     public Behandling hentBehandling(long behandlingId) {
@@ -298,21 +301,21 @@ public class BehandlingService {
     public void oppdaterStatusOgSvarfrist(Behandling behandling, Behandlingsstatus behandlingsstatus, Instant svarfristDato) {
         behandling.setStatus(behandlingsstatus);
         behandling.setDokumentasjonSvarfristDato(svarfristDato);
-        lagre(behandling);
+        behandlingRepository.save(behandling);
     }
 
     @Transactional
     public void endreBehandlingsfrist(long behandlingId, LocalDate behandlingsfrist) {
         Behandling behandling = hentBehandlingUtenSaksopplysninger(behandlingId);
         behandling.setBehandlingsfrist(behandlingsfrist);
-        lagre(behandling);
+        behandlingRepository.save(behandling);
 
         applicationEventPublisher.publishEvent(new BehandlingsfristEndretEvent(behandlingId, behandlingsfrist));
     }
 
     private LocalDate hentBehandlingsfristForBehandlingstema(Behandlingstema behandlingstema) {
         return switch (behandlingstema) {
-            case UTSENDT_ARBEIDSTAKER, UTSENDT_SELVSTENDIG, ARBEID_FLERE_LAND, ARBEID_ETT_LAND_ØVRIG, IKKE_YRKESAKTIV, ARBEID_I_UTLANDET, ARBEID_NORGE_BOSATT_ANNET_LAND, TRYGDEAVTALE_UK -> LocalDate.now().plusDays(30);
+            case UTSENDT_ARBEIDSTAKER, UTSENDT_SELVSTENDIG, ARBEID_FLERE_LAND, ARBEID_ETT_LAND_ØVRIG, IKKE_YRKESAKTIV, ARBEID_I_UTLANDET, ARBEID_NORGE_BOSATT_ANNET_LAND, YRKESAKTIV -> LocalDate.now().plusDays(30);
             case REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING, REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE -> LocalDate.now().plusWeeks(2);
             case BESLUTNING_LOVVALG_NORGE, BESLUTNING_LOVVALG_ANNET_LAND -> LocalDate.now().plusWeeks(4);
             case ANMODNING_OM_UNNTAK_HOVEDREGEL, ØVRIGE_SED_UFM, ØVRIGE_SED_MED, TRYGDETID -> LocalDate.now().plusWeeks(8);

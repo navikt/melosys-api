@@ -5,8 +5,8 @@ import java.util.Objects;
 
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
+import no.nav.melosys.domain.person.PersonMedHistorikk;
 import no.nav.melosys.service.kodeverk.KodeverkService;
-import no.nav.melosys.service.persondata.PersonMedHistorikk;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.tjenester.gui.graphql.dto.PersonopplysningerDto;
 import no.nav.melosys.tjenester.gui.graphql.dto.StatsborgerskapDto;

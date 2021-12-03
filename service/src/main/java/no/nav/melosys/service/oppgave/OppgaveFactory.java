@@ -92,8 +92,7 @@ public final class OppgaveFactory {
             case ARBEID_I_UTLANDET:
                 oppgaveParametere = new OppgaveParametere("ab0388", null, Tema.MED, Oppgavetyper.BEH_SAK_MK, fristDager(30));
                 break;
-            case TRYGDEAVTALE_UK:
-                // https://confluence.adeo.no/display/TEESSI/Storbritannia#Storbritannia-Journalf%C3%B8ring
+            case YRKESAKTIV:
                 oppgaveParametere = new OppgaveParametere("ab0387", null, Tema.MED, Oppgavetyper.BEH_SAK_MK, fristDager(30));
                 break;
             default:

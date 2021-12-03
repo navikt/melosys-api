@@ -5,6 +5,7 @@ import java.time.YearMonth;
 import java.util.List;
 import java.util.Optional;
 
+import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
@@ -60,12 +61,14 @@ class RegisteropplysningerServiceTest {
     @Mock
     private RegisteropplysningerPeriodeFactory registeropplysningerPeriodeFactory;
 
+    private FakeUnleash unleash = new FakeUnleash();
+
     private RegisteropplysningerService registeropplysningerService;
 
     @BeforeEach
     public void setUp() throws Exception {
         registeropplysningerService = new RegisteropplysningerService(persondataFasade, medlPeriodeService, eregFasade, aaregFasade, behandlingService,
-            sobService, inntektService, utbetaldataService, saksopplysningerService, registeropplysningerPeriodeFactory);
+            sobService, inntektService, utbetaldataService, saksopplysningerService, registeropplysningerPeriodeFactory, unleash);
         when(persondataFasade.hentAktørIdForIdent(anyString())).thenReturn(AKTØR_ID);
 
         when(aaregFasade.finnArbeidsforholdPrArbeidstaker(anyString(), anyLocalDate(), anyLocalDate())).thenReturn(lagSaksopplysning(SaksopplysningType.ARBFORH));
@@ -135,7 +138,7 @@ class RegisteropplysningerServiceTest {
         registeropplysningerService.hentOgLagreOpplysninger(
             RegisteropplysningerRequest.builder()
                 .behandlingID(2L)
-                .saksopplysningTyper(RegisteropplysningerRequest.hentAlleSaksopplysningTyper())
+                .saksopplysningTyper(RegisteropplysningerRequest.hentSaksopplysningTyperSomLagres())
                 .fom(LocalDate.now().minusYears(1))
                 .tom(LocalDate.now().plusYears(1))
                 .fnr(FNR)
@@ -256,7 +259,7 @@ class RegisteropplysningerServiceTest {
 
         registeropplysningerService.hentOgLagreOpplysninger(RegisteropplysningerRequest.builder()
             .behandlingID(2L)
-            .saksopplysningTyper(RegisteropplysningerRequest.hentAlleSaksopplysningTyper())
+            .saksopplysningTyper(RegisteropplysningerRequest.hentSaksopplysningTyperSomLagres())
             .fnr(FNR)
             .fom(fom)
             .tom(tom)

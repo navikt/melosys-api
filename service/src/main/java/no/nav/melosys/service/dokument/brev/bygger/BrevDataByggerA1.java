@@ -1,7 +1,6 @@
 package no.nav.melosys.service.dokument.brev.bygger;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.exception.FunksjonellException;
@@ -31,7 +30,7 @@ public class BrevDataByggerA1 implements BrevDataBygger {
         BrevDataA1 brevData = new BrevDataA1();
         brevData.person = dataGrunnlag.getPerson();
         brevData.yrkesgruppe = avklartefaktaService.finnYrkesGruppe(dataGrunnlag.getBehandling().getId()).orElse(null);
-        brevData.bostedsadresse = dataGrunnlag.getBostedGrunnlag().hentBostedsadresse();
+        brevData.bostedsadresse = dataGrunnlag.getBostedGrunnlag().finnBostedsadresse().orElse(null);
 
         List<Arbeidssted> arbeidssteder = dataGrunnlag.getArbeidsstedGrunnlag().hentArbeidssteder();
         brevData.arbeidssteder = arbeidssteder;
@@ -53,7 +52,7 @@ public class BrevDataByggerA1 implements BrevDataBygger {
         return arbeidssteder.stream()
             .filter(this::arbeidsstedHarForetak)
             .map(this::utledVirksomhetFraArbeidssted)
-            .collect(Collectors.toList());
+            .toList();
     }
 
     private boolean arbeidsstedHarForetak(Arbeidssted arbeidssted) {

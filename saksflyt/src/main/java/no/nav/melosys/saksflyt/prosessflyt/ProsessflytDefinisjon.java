@@ -140,7 +140,6 @@ public final class ProsessflytDefinisjon {
         PROSESS_FLYT_MAP.put(ProsessType.IVERKSETT_VEDTAK_TRYGDEAVTALE,
             new ProsessFlyt(ProsessType.IVERKSETT_VEDTAK_TRYGDEAVTALE,
                 LAGRE_LOVVALGSPERIODE_MEDL,
-                PUBLISER_VEDTAK,
                 AVSLUTT_SAK_OG_BEHANDLING,
                 SOB_BEHANDLING_AVSLUTTET
             )

@@ -14,7 +14,6 @@ import no.nav.melosys.domain.kodeverk.Personstatuser;
 import no.nav.melosys.domain.person.*;
 import no.nav.melosys.integrasjon.pdl.dto.person.Person;
 import no.nav.melosys.service.kodeverk.KodeverkService;
-import no.nav.melosys.service.persondata.PersonMedHistorikk;
 import no.nav.melosys.service.persondata.mapping.adresse.BostedsadresseOversetter;
 import no.nav.melosys.service.persondata.mapping.adresse.KontaktadresseOversetter;
 import no.nav.melosys.service.persondata.mapping.adresse.OppholdsadresseOversetter;

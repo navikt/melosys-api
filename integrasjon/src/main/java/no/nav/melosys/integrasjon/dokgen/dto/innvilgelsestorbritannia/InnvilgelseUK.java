@@ -53,7 +53,6 @@ public class InnvilgelseUK extends DokgenDto {
 
     static public class Builder {
         private Mottaker mottaker;
-        private Innvilgelse innvilgelse;
         private Lovvalgbestemmelser_trygdeavtale_uk artikkel;
         private Soknad soknad;
         private Familie familie;
@@ -66,11 +65,6 @@ public class InnvilgelseUK extends DokgenDto {
 
         public Builder mottaker(Mottaker mottaker) {
             this.mottaker = mottaker;
-            return this;
-        }
-
-        public Builder innvilgelse(Innvilgelse innvilgelse) {
-            this.innvilgelse = innvilgelse;
             return this;
         }
 

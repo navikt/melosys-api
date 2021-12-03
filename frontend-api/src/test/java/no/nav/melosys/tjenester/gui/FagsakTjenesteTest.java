@@ -29,10 +29,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.persondata.PersondataFasade;
-import no.nav.melosys.service.sak.FagsakService;
-import no.nav.melosys.service.sak.HenleggFagsakService;
-import no.nav.melosys.service.sak.OpprettSakDto;
-import no.nav.melosys.service.sak.VideresendSoknadService;
+import no.nav.melosys.service.sak.*;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.utpeking.UtpekingService;
 import no.nav.melosys.tjenester.gui.dto.*;
@@ -66,6 +63,7 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
     private static final String FNR = "12345678901";
 
     private static FagsakService fagsakService;
+    private static OpprettNySakFraOppgave opprettNySakFraOppgave;
     private static Aksesskontroll aksesskontroll;
     private static HenleggFagsakService henleggFagsakService;
     private static UtpekingService utpekingService;
@@ -239,7 +237,7 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
         dto.setBrukerID("brukerID");
         instans.opprettFagsak(dto);
         verify(aksesskontroll).autoriserFolkeregisterIdent(dto.getBrukerID());
-        verify(fagsakService).bestillNySakOgBehandling(dto);
+        verify(opprettNySakFraOppgave).bestillNySakOgBehandling(dto);
     }
 
     @Test
@@ -292,6 +290,7 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
     private static FagsakTjeneste lagFagsakTjeneste(Fagsak fagsak) {
         aksesskontroll = mock(Aksesskontroll.class);
         fagsakService = mock(FagsakService.class);
+        opprettNySakFraOppgave = mock(OpprettNySakFraOppgave.class);
         henleggFagsakService = mock(HenleggFagsakService.class);
         PersondataFasade persondataFasade = mock(PersondataFasade.class);
         utpekingService = mock(UtpekingService.class);
@@ -305,8 +304,8 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
         when(fagsakService.hentFagsak("123")).thenReturn(fagsak);
         when(persondataFasade.hentSammensattNavn(any())).thenReturn("Joe Moe");
         doReturn(Arrays.asList(fagsak)).when(fagsakService).hentFagsakerMedAktør(Aktoersroller.BRUKER, FNR);
-        return new FagsakTjeneste(fagsakService, aksesskontroll, behandlingsgrunnlagService, henleggFagsakService, persondataFasade, saksopplysningerService, utpekingService,
-            videresendSoknadService);
+        return new FagsakTjeneste(fagsakService, aksesskontroll, behandlingsgrunnlagService, henleggFagsakService, opprettNySakFraOppgave,
+                                  persondataFasade, saksopplysningerService, utpekingService, videresendSoknadService);
     }
 
     private static FagsakOppsummeringDto lagFagsakOppsummeringDto(Behandling behandling) {

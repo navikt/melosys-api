@@ -1,6 +1,7 @@
 package no.nav.melosys.service.dokument;
 
 import java.util.Set;
+import java.util.function.Predicate;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
@@ -20,6 +21,12 @@ public class DokumentproduksjonsInfoMapper {
     private final Unleash unleash;
 
     private static final ImmutableMap<Produserbaredokumenter, DokumentproduksjonsInfo> DOKUMENTPRODUKSJONS_INFO_MAP;
+    static final Set<Produserbaredokumenter> DOKUMENTMALER_PRODSATT = Set.of(
+        MANGELBREV_ARBEIDSGIVER,
+        MANGELBREV_BRUKER,
+        MELDING_FORVENTET_SAKSBEHANDLINGSTID,
+        MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD
+    );
 
     static {
         DOKUMENTPRODUKSJONS_INFO_MAP = Maps.immutableEnumMap(ImmutableMap.<Produserbaredokumenter, DokumentproduksjonsInfo>builder()
@@ -75,8 +82,12 @@ public class DokumentproduksjonsInfoMapper {
 
     public Set<Produserbaredokumenter> utledTilgjengeligeMaler() {
         return DOKUMENTPRODUKSJONS_INFO_MAP.keySet().stream()
-            .filter(key -> unleash.isEnabled("melosys.brev." + key.name()))
+            .filter(isEnabled())
             .collect(toSet());
+    }
+
+    private Predicate<Produserbaredokumenter> isEnabled() {
+        return key -> DOKUMENTMALER_PRODSATT.contains(key) || unleash.isEnabled("melosys.brev." + key.name());
     }
 
     public String hentMalnavn(Produserbaredokumenter produserbartDokument) {
@@ -104,7 +115,7 @@ public class DokumentproduksjonsInfoMapper {
         INNVILGELSE_FTRL_2_8("Vedtak om frivillig medlemskap"),
         ATTEST_NO_UK_1("Attest medlemskap folketrygden uk");
 
-        private String tittel;
+        private final String tittel;
 
         public String getTittel() {
             return tittel;

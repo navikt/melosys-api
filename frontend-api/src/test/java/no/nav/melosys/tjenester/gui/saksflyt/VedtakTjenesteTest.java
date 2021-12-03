@@ -5,20 +5,25 @@ import java.io.InputStream;
 import java.util.Set;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.vedtak.FattEosVedtakRequest;
 import no.nav.melosys.service.vedtak.FattFtrlVedtakRequest;
+import no.nav.melosys.service.vedtak.FattTrygdeavtaleVedtakRequest;
 import no.nav.melosys.service.vedtak.VedtakServiceFasade;
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
 import no.nav.melosys.sikkerhet.context.TestSubjectHandler;
 import no.nav.melosys.tjenester.gui.JsonSchemaTestParent;
 import no.nav.melosys.tjenester.gui.dto.EndreVedtakDto;
 import no.nav.melosys.tjenester.gui.dto.FattEosVedtakDto;
-import no.nav.melosys.tjenester.gui.dto.FattFtrlVedtakDto;
+import no.nav.melosys.tjenester.gui.dto.FattTrygdeavtaleEllerFtrlVedtakDto;
 import no.nav.melosys.tjenester.gui.dto.FattVedtakDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,9 +33,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class VedtakTjenesteTest extends JsonSchemaTestParent {
@@ -42,6 +47,8 @@ class VedtakTjenesteTest extends JsonSchemaTestParent {
     private VedtakServiceFasade vedtakServiceFasade;
     @Mock
     private Aksesskontroll aksesskontroll;
+    @Mock
+    private BehandlingService behandlingService;
 
     private VedtakTjeneste vedtakTjeneste;
 
@@ -52,7 +59,7 @@ class VedtakTjenesteTest extends JsonSchemaTestParent {
 
     @BeforeEach
     public void setUp() {
-        vedtakTjeneste = new VedtakTjeneste(vedtakServiceFasade, aksesskontroll);
+        vedtakTjeneste = new VedtakTjeneste(vedtakServiceFasade, aksesskontroll, behandlingService);
         SpringSubjectHandler.set(new TestSubjectHandler());
     }
 
@@ -72,7 +79,9 @@ class VedtakTjenesteTest extends JsonSchemaTestParent {
 
     @Test
     void fattVedtakFtrl_henleggelse_fungerer() throws Exception {
-        FattFtrlVedtakDto fattVedtakDto = new FattFtrlVedtakDto();
+        when(behandlingService.hentBehandlingUtenSaksopplysninger(anyLong())).thenReturn(lagBehandling(Sakstyper.FTRL));
+
+        FattTrygdeavtaleEllerFtrlVedtakDto fattVedtakDto = new FattTrygdeavtaleEllerFtrlVedtakDto();
         fattVedtakDto.setBehandlingsresultatTypeKode(Behandlingsresultattyper.HENLEGGELSE);
         fattVedtakDto.setVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK);
         fattVedtakDto.setFritekstBegrunnelse("Begrunnelse");
@@ -81,6 +90,23 @@ class VedtakTjenesteTest extends JsonSchemaTestParent {
 
         verify(aksesskontroll).autoriserSkriv(behandlingID);
         verify(vedtakServiceFasade).fattVedtak(eq(behandlingID), any(FattFtrlVedtakRequest.class));
+
+        valider(fattVedtakDto, FATT_VEDTAK_SCHEMA);
+    }
+
+    @Test
+    void fattVedtakTrygdeavtale_henleggelse_fungerer() throws Exception {
+        when(behandlingService.hentBehandlingUtenSaksopplysninger(anyLong())).thenReturn(lagBehandling(Sakstyper.TRYGDEAVTALE));
+
+        FattTrygdeavtaleEllerFtrlVedtakDto fattVedtakDto = new FattTrygdeavtaleEllerFtrlVedtakDto();
+        fattVedtakDto.setBehandlingsresultatTypeKode(Behandlingsresultattyper.HENLEGGELSE);
+        fattVedtakDto.setVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK);
+        fattVedtakDto.setFritekstBegrunnelse("Begrunnelse");
+
+        vedtakTjeneste.fattVedtak(behandlingID, fattVedtakDto);
+
+        verify(aksesskontroll).autoriserSkriv(behandlingID);
+        verify(vedtakServiceFasade).fattVedtak(eq(behandlingID), any(FattTrygdeavtaleVedtakRequest.class));
 
         valider(fattVedtakDto, FATT_VEDTAK_SCHEMA);
     }
@@ -97,7 +123,7 @@ class VedtakTjenesteTest extends JsonSchemaTestParent {
 
     @Test
     void fattVedtak_dtoManglerVedtakstype_girException() {
-        FattVedtakDto fattVedtakDto = new FattFtrlVedtakDto();
+        FattVedtakDto fattVedtakDto = new FattTrygdeavtaleEllerFtrlVedtakDto();
         fattVedtakDto.setBehandlingsresultatTypeKode(Behandlingsresultattyper.HENLEGGELSE);
 
         assertThatThrownBy(() -> vedtakTjeneste.fattVedtak(behandlingID, fattVedtakDto))
@@ -141,10 +167,18 @@ class VedtakTjenesteTest extends JsonSchemaTestParent {
         FattVedtakDto ftrlVedtakDto = objectMapper.readValue(hentJsonRequest("fattftrlvedtak.json"), FattVedtakDto.class);
 
         //TODO Utvide assert
-        assertThat(ftrlVedtakDto).isNotNull().isInstanceOf(FattFtrlVedtakDto.class);
+        assertThat(ftrlVedtakDto).isNotNull().isInstanceOf(FattTrygdeavtaleEllerFtrlVedtakDto.class);
     }
 
     private InputStream hentJsonRequest(String filnavn) {
         return getClass().getClassLoader().getResourceAsStream(filnavn);
+    }
+
+    private Behandling lagBehandling(Sakstyper sakstyper) {
+        var fagsak = new Fagsak();
+        fagsak.setType(sakstyper);
+        var behandling = new Behandling();
+        behandling.setFagsak(fagsak);
+        return behandling;
     }
 }

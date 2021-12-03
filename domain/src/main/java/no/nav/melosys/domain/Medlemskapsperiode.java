@@ -9,11 +9,12 @@ import javax.persistence.*;
 import no.nav.melosys.domain.avgift.Trygdeavgift;
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser;
+import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 
-import static no.nav.melosys.domain.InnvilgelsesResultat.DELVIS_INNVILGET;
-import static no.nav.melosys.domain.InnvilgelsesResultat.INNVILGET;
+import static no.nav.melosys.domain.kodeverk.InnvilgelsesResultat.DELVIS_INNVILGET;
+import static no.nav.melosys.domain.kodeverk.InnvilgelsesResultat.INNVILGET;
 
 @Entity
 @Table(name = "medlemskapsperiode")

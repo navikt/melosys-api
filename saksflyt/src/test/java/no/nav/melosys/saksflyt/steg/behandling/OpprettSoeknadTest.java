@@ -51,7 +51,7 @@ class OpprettSoeknadTest {
 
     @Test
     void utfør_behandlingstemaTrygdeavtaleUK_oppretterSøknadTrygdeavtale() {
-        opprettSoeknad.utfør(lagProsessinstans(Sakstyper.TRYGDEAVTALE, Behandlingstema.TRYGDEAVTALE_UK));
+        opprettSoeknad.utfør(lagProsessinstans(Sakstyper.TRYGDEAVTALE, Behandlingstema.YRKESAKTIV));
         verify(behandlingsgrunnlagService).opprettSøknadTrygdeavtale(eq(behandlingID), any(SoeknadTrygdeavtale.class));
     }
 

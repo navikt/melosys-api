@@ -2,6 +2,7 @@ package no.nav.melosys.saksflyt.steg.register;
 
 import java.time.LocalDate;
 
+import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
@@ -41,6 +42,8 @@ class HentRegisteropplysningerTest {
     private BehandlingService behandlingService;
     @Mock
     private PersondataFasade persondataFasade;
+
+    private FakeUnleash unleash = new FakeUnleash();
 
     private HentRegisteropplysninger hentRegisteropplysninger;
 
@@ -107,13 +110,13 @@ class HentRegisteropplysningerTest {
 
         verify(registeropplysningerService).hentOgLagreOpplysninger(requestCaptor.capture());
 
-        assertThat(requestCaptor.getValue().getOpplysningstyper())
+        assertThat(requestCaptor.getValue().getOpplysningstyper(unleash))
             .containsOnly(SaksopplysningType.PERSOPL);
     }
 
     @Test
     void utfør_sakstypeTrygdeavtale_henterKunPersonopplysninger() {
-        behandling.setTema(Behandlingstema.TRYGDEAVTALE_UK);
+        behandling.setTema(Behandlingstema.YRKESAKTIV);
         behandling.getFagsak().setType(Sakstyper.TRYGDEAVTALE);
 
         Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
@@ -127,7 +130,7 @@ class HentRegisteropplysningerTest {
 
         verify(registeropplysningerService).hentOgLagreOpplysninger(requestCaptor.capture());
 
-        assertThat(requestCaptor.getValue().getOpplysningstyper())
+        assertThat(requestCaptor.getValue().getOpplysningstyper(unleash))
             .containsOnly(SaksopplysningType.PERSOPL);
     }
 }

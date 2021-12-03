@@ -19,6 +19,7 @@ import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.integrasjon.dokgen.DokgenAdresseMapper;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.dokument.BrevmottakerService;
@@ -28,9 +29,11 @@ import no.nav.melosys.service.dokument.MuligeMottakereDto;
 import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.persondata.PersondataFasade;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
@@ -217,20 +220,29 @@ public class BrevbestillingService {
         } else {
             throw new FunksjonellException("Mottakersrolle støttes ikke: " + mottaker.getRolle());
         }
+        Assert.isTrue((orgDokument != null) || (persondata != null), "Orgdata eller persondata forventes for å sende brev.");
 
         return new BrevAdresse.Builder()
             .medMottakerNavn(mapNavn(orgDokument, persondata))
             .medOrgnr(orgDokument != null ? orgDokument.getOrgnummer() : null)
             .medAdresselinjer(mapAdresselinjer(orgDokument, null, kontaktopplysning, persondata))
             .medPostnr(mapPostnr(orgDokument, persondata))
-            .medPoststed(orgDokument != null ? mapPoststed(orgDokument) :
-                kodeverkService.dekod(FellesKodeverk.POSTNUMMER, persondata.hentGjeldendePostadresse().postnr()))
+            .medPoststed(orgDokument != null ? DokgenAdresseMapper.mapPoststed(orgDokument) : mapPoststed(persondata))
             .medLand(mapLandForAdresse(orgDokument, persondata))
             .build();
     }
 
+    private String mapPoststed(Persondata persondata) {
+        final String poststed = persondata.hentGjeldendePostadresse().poststed();
+        if (unleash.isEnabled("melosys.pdl.aktiv")) {
+            return poststed;
+        }
+        return StringUtils.isEmpty(poststed) ? kodeverkService.dekod(FellesKodeverk.POSTNUMMER,
+                                                                     persondata.hentGjeldendePostadresse().postnr()) : poststed;
+    }
+
     private Persondata hentPersondata(Behandling behandling) {
-        if (unleash.isEnabled("melosys.brev.adresser.pdl")) {
+        if (unleash.isEnabled("melosys.pdl.aktiv")) {
             return persondataFasade.hentPerson(behandling.getFagsak().hentAktørID());
         }
         return (Persondata) persondataFasade.hentPersonFraTps(behandling.hentPersonDokument().hentFolkeregisterident(),

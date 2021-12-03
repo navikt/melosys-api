@@ -38,7 +38,7 @@ public final class SakstypeBehandlingstemaKobling {
                 Behandlingstema.ARBEID_I_UTLANDET
             ),
             Sakstyper.TRYGDEAVTALE, Set.of(
-                Behandlingstema.TRYGDEAVTALE_UK
+                Behandlingstema.YRKESAKTIV
             )
         );
     }
