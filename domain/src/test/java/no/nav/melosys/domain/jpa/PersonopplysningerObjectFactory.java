@@ -192,7 +192,7 @@ public class PersonopplysningerObjectFactory {
 
         return new PersonMedHistorikk(Set.of(bostedsadresse_1, bostedsadresse_2),
             null, null, new Folkeregisteridentifikator("identNr"),
-            Set.of(new Folkeregisterpersonstatus(Personstatuser.UDEFINERT, "ny status fra PDL", "PDL", "folkeregisteret", null, false)),
+            Set.of(new Folkeregisterpersonstatus(Personstatuser.UDEFINERT, "ny status fra PDL", Master.PDL.name(), Master.PDL.name(), null, false)),
             KjoennType.UKJENT,
             Set.of(kontaktadresse_1, kontaktadresse_2), new Navn("Ola", "Oops", "King"),
             Set.of(oppholdsadresse_1, oppholdsadresse_2), Set.of(
