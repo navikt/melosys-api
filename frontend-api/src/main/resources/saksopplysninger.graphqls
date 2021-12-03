@@ -17,7 +17,7 @@ type Personopplysninger {
     bostedsadresser: [Bostedsadresse!]!
     familiemedlemmer: [Familiemedlem!]!
     folkeregisteridentifikator: String
-    folkeregisterpersonstatus: Folkeregisterpersonstatus
+    folkeregisterpersonstatuser: [Folkeregisterpersonstatus!]!
     kjoenn: KjoennType!
     kontaktadresser: [Kontaktadresse!]!
     navn: Navn!
@@ -57,6 +57,10 @@ enum Familierelasjonsrolle {
 type Folkeregisterpersonstatus {
     kode: String!
     tekst: String!
+    master: String!
+    kilde: String
+    fregGyldighetstidspunkt: Date
+    erHistorisk: Boolean!
 }
 
 enum KjoennType {

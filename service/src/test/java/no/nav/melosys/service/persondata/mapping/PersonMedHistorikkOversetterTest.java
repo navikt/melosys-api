@@ -45,8 +45,8 @@ class PersonMedHistorikkOversetterTest {
                                Master.TPS.name(), false));
         assertThat(personMedHistorikk.kontaktadresser()).isNotEmpty();
         assertThat(personMedHistorikk.oppholdsadresser()).isEmpty();
-        assertThat(personMedHistorikk.folkeregisterpersonstatus()).isEqualTo(
-            new Folkeregisterpersonstatus(Personstatuser.UDEFINERT, "Aktivt BOSTNR"));
+        assertThat(personMedHistorikk.folkeregisterpersonstatuser()).containsExactly(
+            new Folkeregisterpersonstatus(Personstatuser.UDEFINERT, "Aktivt BOSTNR", Master.TPS.name(), Master.TPS.name(), null, false));
         assertThat(personMedHistorikk.sivilstand()).containsExactly(
             new Sivilstand(Sivilstandstype.UDEFINERT, "Gift, lever adskilt", "", LocalDate.parse("2019-08-07"), null, Master.TPS.name(),
                            Master.TPS.name(), false));

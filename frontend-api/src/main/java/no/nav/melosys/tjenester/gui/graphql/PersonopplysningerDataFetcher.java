@@ -38,6 +38,9 @@ public class PersonopplysningerDataFetcher implements DataFetcher<Personopplysni
 
         final var bostedsadresseDtoList = personMedHistorikk.bostedsadresser().stream()
             .map(bostedsadresse -> BostedsadresseTilDtoKonverter.tilDto(bostedsadresse, kodeverkService)).toList();
+        final var folkeregisterpersonstatusDtoList = personMedHistorikk.folkeregisterpersonstatuser().stream()
+            .map(folkeregisterpersonstatus -> FolkeregisterpersonstatusTilDtoKonverter.tilDto(folkeregisterpersonstatus))
+            .filter(status -> status != null).toList();
         final var kontaktadresseDtoList = personMedHistorikk.kontaktadresser().stream()
             .map(kontaktadresse -> KontaktadresseTilDtoKonverter.tilDto(kontaktadresse, kodeverkService)).toList();
         final var oppholdsadresseDtoList = personMedHistorikk.oppholdsadresser().stream()
@@ -51,7 +54,7 @@ public class PersonopplysningerDataFetcher implements DataFetcher<Personopplysni
             .toList();
         return new PersonopplysningerDto(bostedsadresseDtoList,
             FolkeregisteridentifikatorTilDtoKonverter.tilDto(personMedHistorikk.folkeregisteridentifikator()),
-            FolkeregisterpersonstatusTilDtoKonverter.tilDto(personMedHistorikk.folkeregisterpersonstatus()),
+            folkeregisterpersonstatusDtoList,
             personMedHistorikk.kjønn(),
             kontaktadresseDtoList,
             NavnTilDtoKonverter.tilDto(personMedHistorikk.navn()),
