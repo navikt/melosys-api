@@ -56,6 +56,8 @@ class InnvilgelseUKMapperTest {
     public static final String BARN_NAVN_2 = "Dole Duck";
     private static final LocalDate FRA_DATO = LocalDate.of(2020, 1, 1);
     private static final LocalDate TIL_DATO = LocalDate.of(2021, 1, 1);
+    private static final LocalDate FOEDSELSDATO = LocalDate.of(1970, 1, 1);
+    private static final LocalDate SOKNADSDATO = LocalDate.of(2019, 10, 1);
 
     private static final Map<String,String> FNR_TIL_NAVN = Map.of(
         EKTEFELLE_FNR, EKTEFELLE_NAVN,
@@ -277,7 +279,7 @@ class InnvilgelseUKMapperTest {
         return Map.of(UUID_EKTEFELLE, ektefelle);
     }
 
-    private static final String FORVENTEDE_FELTER_FOR_INNVILGELSE_STORBRITANNIA_MAPPING = """
+    private static final String FORVENTEDE_FELTER_FOR_INNVILGELSE_STORBRITANNIA_MAPPING = String.format("""
         {
           "saksopplysninger" : {
             "saksnummer" : "MEL-123",
@@ -301,9 +303,9 @@ class InnvilgelseUKMapperTest {
           },
           "artikkel" : "UK_ART6_1",
           "soknad" : {
-            "soknadsdato" : "2019-10-01",
-            "periodeFom" : "2020-01-01",
-            "periodeTom" : "2021-01-01",
+            "soknadsdato" : "%s",
+            "periodeFom" : "%s",
+            "periodeTom" : "%s",
             "virksomhetsnavn" : "Foretaksnavn"
           },
           "familie" : {
@@ -314,7 +316,7 @@ class InnvilgelseUKMapperTest {
               "begrunnelse" : null,
               "fnr" : "09080723451",
               "dnr" : null,
-              "foedselsdato" : "1970-01-01"
+              "foedselsdato" : "%s"
             },
             "barn" : [ {
               "navn" : "Doffen Duck",
@@ -322,16 +324,23 @@ class InnvilgelseUKMapperTest {
               "begrunnelse" : null,
               "fnr" : "12131456789",
               "dnr" : null,
-              "foedselsdato" : "1970-01-01"
+              "foedselsdato" : "%s"
             }, {
               "navn" : "Dole Duck",
               "omfattet" : false,
               "begrunnelse" : "OVER_18_AR",
               "fnr" : "12151456789",
               "dnr" : null,
-              "foedselsdato" : "1970-01-01"
+              "foedselsdato" : "%s"
             } ]
           },
           "virksomhetArbeidsgiverSkalHaKopi" : false
-        }""";
+        }""",
+        SOKNADSDATO,
+        FRA_DATO,
+        TIL_DATO,
+        FOEDSELSDATO,
+        FOEDSELSDATO,
+        FOEDSELSDATO
+    );
 }
