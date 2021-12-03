@@ -84,7 +84,10 @@ class InnvilgelseUKMapperTest {
 
     @Test
     void map_Innvilget_populererFelter() throws JsonProcessingException {
-        mockData();
+        mockLovvalgsperiode();
+        mockMedfølgendeFamilieDefaultCase();
+        mockAvklartFamilieDefaultCase();
+        mockPerson();
         when(mockDokgenMapperDatahenter.hentSammensattNavn(BARN1_FNR)).thenReturn(BARN_NAVN_1);
         when(mockDokgenMapperDatahenter.hentSammensattNavn(BARN2_FNR)).thenReturn(BARN_NAVN_2);
 
@@ -100,7 +103,7 @@ class InnvilgelseUKMapperTest {
 
     @Test
     void map_ingenUtenlandskeVirksomheter_kastFunksjonellException() {
-        when(mockLovvalgsperiodeService.hentValidertLovvalgsperiode(anyLong())).thenReturn(lagLovvalgsperiode());
+        mockLovvalgsperiode();
         InnvilgelseBrevbestilling brevbestilling = lagInnvilgelseBrevbestilling(lagBehandlingMedPeriode());
 
         assertThatExceptionOfType(FunksjonellException.class)
@@ -110,7 +113,9 @@ class InnvilgelseUKMapperTest {
 
     @Test
     void map_ettOmfattetBarn_minstEttOmfattetFamiliemedlemErtrue() {
-        mockData();
+        mockLovvalgsperiode();
+        mockMedfølgendeFamilieDefaultCase();
+        mockPerson();
         when(mockAvklarteMedfolgendeFamilieService.hentAvklartMedfølgendeEktefelle(anyLong())).thenReturn(lagIkkeOmfattetMedfølgendeEktefelle());
         when(mockAvklarteMedfolgendeFamilieService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(lagOmfatetMedfølgendeBarn());
         when(mockDokgenMapperDatahenter.hentSammensattNavn(BARN1_FNR)).thenReturn(BARN_NAVN_1);
@@ -122,7 +127,9 @@ class InnvilgelseUKMapperTest {
 
     @Test
     void map_ingenOmfattet_minstEttOmfattetFamiliemedlemErfalse() {
-        mockData();
+        mockLovvalgsperiode();
+        mockMedfølgendeFamilieDefaultCase();
+        mockPerson();
         when(mockAvklarteMedfolgendeFamilieService.hentAvklartMedfølgendeEktefelle(anyLong())).thenReturn(lagIkkeOmfattetMedfølgendeEktefelle());
         when(mockAvklarteMedfolgendeFamilieService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(lagIkkeOmfatetMedfølgendeBarn());
         when(mockDokgenMapperDatahenter.hentSammensattNavn(BARN1_FNR)).thenReturn(BARN_NAVN_1);
@@ -132,15 +139,24 @@ class InnvilgelseUKMapperTest {
         assertThat(map.getFamilie().minstEttOmfattetFamiliemedlem()).isFalse();
     }
 
-    private void mockData() {
-        when(mockLovvalgsperiodeService.hentValidertLovvalgsperiode(anyLong())).thenReturn(lagLovvalgsperiode());
-        when(mockAvklarteMedfolgendeFamilieService.hentAvklartMedfølgendeEktefelle(anyLong())).thenReturn(lagOmfattetMedfølgendeEktefelle());
-        when(mockAvklarteMedfolgendeFamilieService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(lagAvklartMedfølgendeBarn());
-        when(mockAvklarteMedfolgendeFamilieService.hentMedfølgendEktefelle(anyLong())).thenReturn(lagMedfølgendeEktefelle());
-        when(mockAvklarteMedfolgendeFamilieService.hentMedfølgendeBarn(anyLong())).thenReturn(lagMedfølgendeBarn());
+    private void mockPerson() {
         when(mockPersondata.getFødselsdato()).thenReturn(LocalDate.of(1970, 1, 1));
         when(mockPersondataFasade.hentPerson(anyString())).thenReturn(mockPersondata);
         when(mockDokgenMapperDatahenter.hentSammensattNavn(EKTEFELLE_FNR)).thenReturn(EKTEFELLE_NAVN);
+    }
+
+    private void mockMedfølgendeFamilieDefaultCase() {
+        when(mockAvklarteMedfolgendeFamilieService.hentMedfølgendEktefelle(anyLong())).thenReturn(lagMedfølgendeEktefelle());
+        when(mockAvklarteMedfolgendeFamilieService.hentMedfølgendeBarn(anyLong())).thenReturn(lagMedfølgendeBarn());
+    }
+
+    private void mockAvklartFamilieDefaultCase() {
+        when(mockAvklarteMedfolgendeFamilieService.hentAvklartMedfølgendeEktefelle(anyLong())).thenReturn(lagOmfattetMedfølgendeEktefelle());
+        when(mockAvklarteMedfolgendeFamilieService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(lagAvklartMedfølgendeBarn());
+    }
+
+    private void mockLovvalgsperiode() {
+        when(mockLovvalgsperiodeService.hentValidertLovvalgsperiode(anyLong())).thenReturn(lagLovvalgsperiode());
     }
 
     private Behandling lagBehandlingMedPeriode() {
