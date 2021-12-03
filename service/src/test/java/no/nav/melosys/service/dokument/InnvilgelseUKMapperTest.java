@@ -104,7 +104,7 @@ class InnvilgelseUKMapperTest {
         String json = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(innvilgelseUK);
         String resultat = json.replaceAll("(\"dagensDato\" :)(.*)", "$1 \"Fjernet for test\",");
 
-        assertThat(resultat).isEqualToIgnoringNewLines(FORVENTEDE_FELTER_FOR_INNVIGLESE_STORBRITANNIA_MAPPING);
+        assertThat(resultat).isEqualToIgnoringNewLines(FORVENTEDE_FELTER_FOR_INNVILGELSE_STORBRITANNIA_MAPPING);
     }
 
     @Test
@@ -277,7 +277,7 @@ class InnvilgelseUKMapperTest {
         return Map.of(UUID_EKTEFELLE, ektefelle);
     }
 
-    private static final String FORVENTEDE_FELTER_FOR_INNVIGLESE_STORBRITANNIA_MAPPING = """
+    private static final String FORVENTEDE_FELTER_FOR_INNVILGELSE_STORBRITANNIA_MAPPING = """
         {
           "saksopplysninger" : {
             "saksnummer" : "MEL-123",
