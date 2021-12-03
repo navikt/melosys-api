@@ -144,8 +144,8 @@ class InnvilgelseUKMapperTest {
     }
 
     private Behandling lagBehandlingMedPeriode() {
-        Behandling behandling = lagBehandling(lagFagsak(true));
-        Behandlingsgrunnlag behandlingsgrunnlag = behandling.getBehandlingsgrunnlag();
+        var behandling = lagBehandling(lagFagsak(true));
+        var behandlingsgrunnlag = behandling.getBehandlingsgrunnlag();
         behandlingsgrunnlag.setMottaksdato(LocalDate.of(2019, 10, 1));
         behandlingsgrunnlag.getBehandlingsgrunnlagdata().periode = new Periode(
             LocalDate.of(2020, 1, 1),
@@ -155,10 +155,10 @@ class InnvilgelseUKMapperTest {
     }
 
     private Behandling leggPåForetakUtland(Behandling behandling) {
-        Behandlingsgrunnlag behandlingsgrunnlag = behandling.getBehandlingsgrunnlag();
-        ForetakUtland foretakUtland = new ForetakUtland();
+        var behandlingsgrunnlag = behandling.getBehandlingsgrunnlag();
+        var foretakUtland = new ForetakUtland();
         foretakUtland.navn = "Foretaksnavn";
-        StrukturertAdresse adresse = new StrukturertAdresse();
+        var adresse = new StrukturertAdresse();
         adresse.setLandkode(Landkoder.GB.getKode());
         foretakUtland.adresse = adresse;
         behandlingsgrunnlag.getBehandlingsgrunnlagdata().foretakUtland = List.of(foretakUtland);
@@ -166,7 +166,7 @@ class InnvilgelseUKMapperTest {
     }
 
     private InnvilgelseBrevbestilling lagInnvilgelseBrevbestilling() {
-        Behandling behandling = lagBehandlingMedPeriode();
+        var behandling = lagBehandlingMedPeriode();
         return lagInnvilgelseBrevbestilling(leggPåForetakUtland(behandling));
     }
 
@@ -187,7 +187,7 @@ class InnvilgelseUKMapperTest {
     }
 
     private static Lovvalgsperiode lagLovvalgsperiode() {
-        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
+        var lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setFom(LocalDate.of(2020, 1, 1));
         lovvalgsperiode.setTom(LocalDate.of(2021, 1, 1));
         lovvalgsperiode.setDekning(Trygdedekninger.FULL_DEKNING_FTRL);
@@ -196,12 +196,12 @@ class InnvilgelseUKMapperTest {
     }
 
     private AvklarteMedfolgendeFamilie lagOmfattetMedfølgendeEktefelle() {
-        OmfattetFamilie ektefelle = new OmfattetFamilie(UUID_EKTEFELLE);
+        var ektefelle = new OmfattetFamilie(UUID_EKTEFELLE);
         return new AvklarteMedfolgendeFamilie(Set.of(ektefelle), Set.of());
     }
 
     private AvklarteMedfolgendeFamilie lagIkkeOmfattetMedfølgendeEktefelle() {
-        IkkeOmfattetFamilie ektefelle = new IkkeOmfattetFamilie(UUID_EKTEFELLE,
+        var ektefelle = new IkkeOmfattetFamilie(UUID_EKTEFELLE,
             Medfolgende_ektefelle_samboer_begrunnelser_ftrl.MANGLER_OPPLYSNINGER.getKode(), "");
         return new AvklarteMedfolgendeFamilie(Set.of(), Set.of(ektefelle));
     }
@@ -216,7 +216,7 @@ class InnvilgelseUKMapperTest {
     }
 
     private AvklarteMedfolgendeBarn lagOmfatetMedfølgendeBarn() {
-        OmfattetFamilie barn = new OmfattetFamilie(UUID_BARN_1);
+        var barn = new OmfattetFamilie(UUID_BARN_1);
         barn.setSammensattNavn(BARN_NAVN_1);
         barn.setIdent(BARN1_FNR);
         return new AvklarteMedfolgendeBarn(
@@ -225,7 +225,7 @@ class InnvilgelseUKMapperTest {
     }
 
     private AvklarteMedfolgendeBarn lagIkkeOmfatetMedfølgendeBarn() {
-        IkkeOmfattetBarn barn = new IkkeOmfattetBarn(
+        var barn = new IkkeOmfattetBarn(
             UUID_BARN_1,
             Medfolgende_barn_begrunnelser.MANGLER_OPPLYSNINGER.getKode(), "");
         return new AvklarteMedfolgendeBarn(
@@ -235,10 +235,10 @@ class InnvilgelseUKMapperTest {
 
 
     private AvklarteMedfolgendeBarn lagAvklartMedfølgendeBarn() {
-        OmfattetFamilie b1 = new OmfattetFamilie(UUID_BARN_1);
+        var b1 = new OmfattetFamilie(UUID_BARN_1);
         b1.setSammensattNavn(BARN_NAVN_1);
         b1.setIdent(BARN1_FNR);
-        IkkeOmfattetBarn b2 = new IkkeOmfattetBarn(
+        var b2 = new IkkeOmfattetBarn(
             UUID_BARN_2,
             Medfolgende_barn_begrunnelser_ftrl.OVER_18_AR.getKode(),
             null);
@@ -250,7 +250,7 @@ class InnvilgelseUKMapperTest {
     }
 
     private Map<String, MedfolgendeFamilie> lagMedfølgendeEktefelle() {
-        MedfolgendeFamilie ektefelle = MedfolgendeFamilie.tilMedfolgendeFamilie(
+        var ektefelle = MedfolgendeFamilie.tilMedfolgendeFamilie(
             UUID_EKTEFELLE, EKTEFELLE_FNR, EKTEFELLE_NAVN, MedfolgendeFamilie.Relasjonsrolle.EKTEFELLE_SAMBOER);
         return Map.of(UUID_EKTEFELLE, ektefelle);
     }

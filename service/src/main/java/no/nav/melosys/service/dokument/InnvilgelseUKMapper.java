@@ -2,18 +2,13 @@ package no.nav.melosys.service.dokument;
 
 import javax.transaction.Transactional;
 
-import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
-import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
-import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.ForetakUtland;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
 import no.nav.melosys.domain.person.familie.IkkeOmfattetFamilie;
-import no.nav.melosys.domain.person.familie.OmfattetFamilie;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.dokgen.dto.innvilgelsestorbritannia.*;
 import no.nav.melosys.service.LovvalgsperiodeService;
@@ -44,16 +39,16 @@ public class InnvilgelseUKMapper {
 
     @Transactional
     public InnvilgelseUK map(InnvilgelseBrevbestilling brevbestilling) {
-        Behandling behandling = brevbestilling.getBehandling();
-        Behandlingsgrunnlag behandlingsgrunnlag = behandling.getBehandlingsgrunnlag();
-        BehandlingsgrunnlagData behandlingsgrunnlagdata = behandlingsgrunnlag.getBehandlingsgrunnlagdata();
+        var behandling = brevbestilling.getBehandling();
+        var behandlingsgrunnlag = behandling.getBehandlingsgrunnlag();
+        var behandlingsgrunnlagdata = behandlingsgrunnlag.getBehandlingsgrunnlagdata();
         var lovvalgsperioder = lovvalgsperiodeService.hentLovvalgsperioder(behandling.getId());
 
-        ForetakUtland foretakUtland = behandlingsgrunnlagdata.foretakUtland.stream()
+        var foretakUtland = behandlingsgrunnlagdata.foretakUtland.stream()
             .filter(foretak -> foretak.adresse.getLandkode().equals(Landkoder.GB.getKode()))
             .findFirst().orElseThrow(() -> new FunksjonellException("Ingen utenlandske virksomheter funnet"));
 
-        boolean virksomhetArbeidsgiverSkalHaKopi = false;
+        var virksomhetArbeidsgiverSkalHaKopi = false;
         return new InnvilgelseUK.Builder(brevbestilling)
             .artikkel(getLovvalgbestemmelse(lovvalgsperioder))
             .soknad(lagSøknad(behandlingsgrunnlagdata.periode, behandlingsgrunnlag.getMottaksdato(), foretakUtland.navn))
@@ -71,8 +66,8 @@ public class InnvilgelseUKMapper {
 
     private Ektefelle finnEktefelle(long behandlingID) {
         var avklartMedfølgendeEktefelle = avklarteMedfølgendeFamilieService.hentAvklartMedfølgendeEktefelle(behandlingID);
-        Map<String, MedfolgendeFamilie> medfolgendeEktefelleMap = avklarteMedfølgendeFamilieService.hentMedfølgendEktefelle(behandlingID);
-        Set<OmfattetFamilie> ektefelleOmfattetAvNorskTrygd = avklartMedfølgendeEktefelle.getFamilieOmfattetAvNorskTrygd();
+        var medfolgendeEktefelleMap = avklarteMedfølgendeFamilieService.hentMedfølgendEktefelle(behandlingID);
+        var ektefelleOmfattetAvNorskTrygd = avklartMedfølgendeEktefelle.getFamilieOmfattetAvNorskTrygd();
         if (!ektefelleOmfattetAvNorskTrygd.isEmpty()) {
             var ektefelleOmfattet = ektefelleOmfattetAvNorskTrygd.iterator().next();
             return tilEktefelle(medfolgendeEktefelleMap, ektefelleOmfattet.getUuid(), null);
@@ -123,7 +118,7 @@ public class InnvilgelseUKMapper {
         var medfølgendeBarn = Optional.of(medfølgendeBarnMap.get(uuid))
             .orElseThrow(() -> new FunksjonellException("Avklart medfølgende familie " + uuid +
                 " finnes ikke i behandlingsgrunnlaget"));
-        String fnr = medfølgendeBarn.getFnr();
+        var fnr = medfølgendeBarn.getFnr();
         return new Barn.Builder()
             .navn(getSammensattNavn(fnr, medfølgendeBarn.getNavn()))
             .fnr(fnr)
