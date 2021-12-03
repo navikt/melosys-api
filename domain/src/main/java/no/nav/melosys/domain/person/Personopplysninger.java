@@ -122,7 +122,7 @@ public record Personopplysninger(
     /*
      * Vi følger anbefaling fra PDL om følgende prioritering:
      * Kontaktadresse med master PDL
-     * Kontaktadresse fra Freg med nyeste fregGyldighetstidspunkt
+     * Kontaktadresse fra Freg med nyeste registreringsdato
      * Oppholdsadresse med master PDL
      * Oppholdsadresse med master Freg
      * Bostedsadresse

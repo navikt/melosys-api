@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Set;
 
 import no.nav.melosys.integrasjon.pdl.dto.Endring;
-import no.nav.melosys.integrasjon.pdl.dto.Folkeregistermetadata;
 import no.nav.melosys.integrasjon.pdl.dto.Metadata;
 import no.nav.melosys.integrasjon.pdl.dto.person.*;
 import no.nav.melosys.integrasjon.pdl.dto.person.adresse.Bostedsadresse;
@@ -19,14 +18,9 @@ import static no.nav.melosys.integrasjon.pdl.dto.Endringstype.OPPRETT;
 
 public class PdlObjectFactory {
     private static final Metadata METADATA = lagMetadata();
-    private static final Folkeregistermetadata FOLKEREGISTERMETADATA = lagFolkeregistermetadata();
 
     public static Metadata metadata() {
         return METADATA;
-    }
-
-    public static Folkeregistermetadata folkeregistermetadata() {
-        return FOLKEREGISTERMETADATA;
     }
 
     public static Person lagPerson() {
@@ -38,7 +32,7 @@ public class PdlObjectFactory {
             Set.of(new no.nav.melosys.integrasjon.pdl.dto.person.Foedsel(LocalDate.EPOCH, 1970, "NOR", "fødested",
                 metadata())),
             Set.of(new no.nav.melosys.integrasjon.pdl.dto.person.Folkeregisteridentifikator("IdNr", metadata())),
-            Set.of(new Folkeregisterpersonstatus("ikkeBosatt", metadata(), folkeregistermetadata())),
+            Set.of(new Folkeregisterpersonstatus("ikkeBosatt", metadata())),
             Set.of(new ForelderBarnRelasjon("barnIdent", Familierelasjonsrolle.BARN, Familierelasjonsrolle.MOR, metadata()),
                 new ForelderBarnRelasjon("forelderIdent", Familierelasjonsrolle.MOR, Familierelasjonsrolle.BARN, metadata())),
             Set.of(new Foreldreansvar("felles", metadata())),
@@ -155,15 +149,5 @@ public class PdlObjectFactory {
     static Metadata lagMetadata() {
         return new Metadata("PDL", false,
             List.of(new Endring(OPPRETT, LocalDateTime.parse("2021-05-07T10:04:52"), "Dolly")));
-    }
-
-    static Folkeregistermetadata lagFolkeregistermetadata() {
-        return new Folkeregistermetadata(
-            LocalDateTime.parse("2021-04-07T10:04:52"),
-            LocalDateTime.parse("2021-05-07T10:04:52"),
-            LocalDateTime.parse("2021-06-07T10:04:52"),
-            null,
-            null
-            );
     }
 }
