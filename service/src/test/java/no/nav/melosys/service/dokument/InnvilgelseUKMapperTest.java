@@ -54,6 +54,8 @@ class InnvilgelseUKMapperTest {
     public static final String EKTEFELLE_NAVN = "Dolly Duck";
     public static final String BARN_NAVN_1 = "Doffen Duck";
     public static final String BARN_NAVN_2 = "Dole Duck";
+    private static final LocalDate FRA_DATO = LocalDate.of(2020, 1, 1);
+    private static final LocalDate TIL_DATO = LocalDate.of(2021, 1, 1);
 
     private static final Map<String,String> FNR_TIL_NAVN = Map.of(
         EKTEFELLE_FNR, EKTEFELLE_NAVN,
@@ -168,8 +170,8 @@ class InnvilgelseUKMapperTest {
         var behandlingsgrunnlag = behandling.getBehandlingsgrunnlag();
         behandlingsgrunnlag.setMottaksdato(LocalDate.of(2019, 10, 1));
         behandlingsgrunnlag.getBehandlingsgrunnlagdata().periode = new Periode(
-            LocalDate.of(2020, 1, 1),
-            LocalDate.of(2021, 1, 1)
+            FRA_DATO,
+            TIL_DATO
         );
         return behandling;
     }
@@ -208,8 +210,8 @@ class InnvilgelseUKMapperTest {
 
     private static Lovvalgsperiode lagLovvalgsperiode() {
         var lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setFom(LocalDate.of(2020, 1, 1));
-        lovvalgsperiode.setTom(LocalDate.of(2021, 1, 1));
+        lovvalgsperiode.setFom(FRA_DATO);
+        lovvalgsperiode.setTom(TIL_DATO);
         lovvalgsperiode.setDekning(Trygdedekninger.FULL_DEKNING_FTRL);
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1);
         return lovvalgsperiode;
