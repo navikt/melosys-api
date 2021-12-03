@@ -23,9 +23,7 @@ import no.nav.melosys.domain.kodeverk.Maritimtyper;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Fartsomrader;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Medfolgende_barn_begrunnelser;
-import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeBarn;
-import no.nav.melosys.domain.person.familie.IkkeOmfattetBarn;
-import no.nav.melosys.domain.person.familie.OmfattetFamilie;
+import no.nav.melosys.domain.person.familie.*;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelse;
@@ -143,7 +141,7 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
         if (brevdata.avklarteMedfolgendeBarn.finnes()) {
             fag.setErVurderingLovvalgBarn(JA);
             fag.setAntallBarnOmfattetAvNorskTrygd(
-                BigInteger.valueOf(brevdata.avklarteMedfolgendeBarn.barnOmfattetAvNorskTrygd.size())
+                BigInteger.valueOf(brevdata.avklarteMedfolgendeBarn.getFamilieOmfattetAvNorskTrygd().size())
             );
             fag.setBarnIkkeOmfattetAvNorskTrygdListe(hentBarnIkkeOmfattetAvNorskTrygd(brevdata.avklarteMedfolgendeBarn));
             fag.setBarnOmfattetAvNorskTrygdListe(hentBarnOmfattetAvNorskTrygd(brevdata.avklarteMedfolgendeBarn));
@@ -168,17 +166,17 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
         };
     }
 
-    private BarnOmfattetAvNorskTrygdListeType hentBarnOmfattetAvNorskTrygd(AvklarteMedfolgendeBarn avklarteMedfolgendeBarn) {
-        List<BarnInnvilgelseType> barnInnvilgelse = avklarteMedfolgendeBarn.barnOmfattetAvNorskTrygd.stream()
+    private BarnOmfattetAvNorskTrygdListeType hentBarnOmfattetAvNorskTrygd(AvklarteMedfolgendeFamilie avklarteMedfolgendeBarn) {
+        List<BarnInnvilgelseType> barnInnvilgelse = avklarteMedfolgendeBarn.getFamilieOmfattetAvNorskTrygd().stream()
             .map(this::lagBarnInnvilgelseType)
             .collect(Collectors.toList());
         return BarnOmfattetAvNorskTrygdListeType.builder()
             .withBarnInnvilgelse(barnInnvilgelse).build();
     }
 
-    private BarnIkkeOmfattetAvNorskTrygdListeType hentBarnIkkeOmfattetAvNorskTrygd(AvklarteMedfolgendeBarn avklarteMedfolgendeBarn) {
+    private BarnIkkeOmfattetAvNorskTrygdListeType hentBarnIkkeOmfattetAvNorskTrygd(AvklarteMedfolgendeFamilie avklarteMedfolgendeBarn) {
         List<BarnAvslagType> barnAvslag = new ArrayList<>();
-        for (IkkeOmfattetBarn medfolgendeBarn : avklarteMedfolgendeBarn.barnIkkeOmfattetAvNorskTrygd) {
+        for (IkkeOmfattetFamilie medfolgendeBarn : avklarteMedfolgendeBarn.getFamilieIkkeOmfattetAvNorskTrygd()) {
             barnAvslag.add(lagBarnAvslagType(medfolgendeBarn));
         }
         return BarnIkkeOmfattetAvNorskTrygdListeType.builder()
@@ -192,18 +190,18 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
             .build();
     }
 
-    private BarnAvslagType lagBarnAvslagType(IkkeOmfattetBarn ikkeOmfattetBarn) {
+    private BarnAvslagType lagBarnAvslagType(IkkeOmfattetFamilie ikkeOmfattetBarn) {
         return BarnAvslagType.builder()
-            .withBarnAvslagBegrunnelse(tilBarnAvslagBegrunnelseKode(ikkeOmfattetBarn.begrunnelse))
+            .withBarnAvslagBegrunnelse(tilBarnAvslagBegrunnelseKode(ikkeOmfattetBarn.getBegrunnelse()))
             .withBarnFodselsnummer(ikkeOmfattetBarn.ident)
             .withBarnIkkeOmfattetAvNorskTrygd(ikkeOmfattetBarn.sammensattNavn).build();
     }
 
-    private BarnAvslagBegrunnelseKode tilBarnAvslagBegrunnelseKode(Medfolgende_barn_begrunnelser begrunnelse) {
+    private BarnAvslagBegrunnelseKode tilBarnAvslagBegrunnelseKode(String begrunnelse) {
         if (begrunnelse == null) {
             return null;
-        } else if (BARN_AVSLAG_BEGRUNNELSE_KODE_MAP.containsKey(begrunnelse)) {
-            return BARN_AVSLAG_BEGRUNNELSE_KODE_MAP.get(begrunnelse);
+        } else if (BARN_AVSLAG_BEGRUNNELSE_KODE_MAP.containsKey(Medfolgende_barn_begrunnelser.valueOf(begrunnelse))) {
+            return BARN_AVSLAG_BEGRUNNELSE_KODE_MAP.get(Medfolgende_barn_begrunnelser.valueOf(begrunnelse));
         }
         throw new TekniskException("Ukjent begrunnelse " + begrunnelse + " kan ikke mappes til BarnAvslagBegrunnelseKode");
     }

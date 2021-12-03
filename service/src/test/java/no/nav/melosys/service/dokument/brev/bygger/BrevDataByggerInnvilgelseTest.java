@@ -19,8 +19,8 @@ import no.nav.melosys.domain.kodeverk.Maritimtyper;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
 import no.nav.melosys.domain.person.Persondata;
-import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeBarn;
-import no.nav.melosys.domain.person.familie.IkkeOmfattetBarn;
+import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie;
+import no.nav.melosys.domain.person.familie.IkkeOmfattetFamilie;
 import no.nav.melosys.domain.person.familie.OmfattetFamilie;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.LandvelgerService;
@@ -117,7 +117,7 @@ class BrevDataByggerInnvilgelseTest {
         when(landvelgerService.hentArbeidsland(anyLong())).thenReturn(Landkoder.AT);
         when(landvelgerService.hentBostedsland(anyLong(), any(BehandlingsgrunnlagData.class))).thenReturn(new Bostedsland(Landkoder.NO));
         when(landvelgerService.hentUtenlandskTrygdemyndighetsland(anyLong())).thenReturn(Collections.singletonList(Landkoder.DE));
-        when(avklartefaktaService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(new AvklarteMedfolgendeBarn(Collections.emptySet(), Collections.emptySet()));
+        when(avklartefaktaService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(new AvklarteMedfolgendeFamilie(Collections.emptySet(), Collections.emptySet()));
 
         brevDataByggerInnvilgelse = new BrevDataByggerInnvilgelse(avklartefaktaService,
             landvelgerService,
@@ -217,18 +217,18 @@ class BrevDataByggerInnvilgelseTest {
         Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
         behandlingsgrunnlag.setBehandlingsgrunnlagdata(behandlingsgrunnlagData);
 
-        when(avklartefaktaService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(new AvklarteMedfolgendeBarn(
+        when(avklartefaktaService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(new AvklarteMedfolgendeFamilie(
             Set.of(new OmfattetFamilie(barn1.getUuid())),
-            Set.of(new IkkeOmfattetBarn(barn2.getUuid(), null, null))));
+            Set.of(new IkkeOmfattetFamilie(barn2.getUuid(), null, null))));
         when(behandlingsgrunnlagService.hentBehandlingsgrunnlag(anyLong())).thenReturn(behandlingsgrunnlag);
         when(persondataFasade.hentSammensattNavn(barn1.getFnr())).thenReturn("Navn1");
         when(persondataFasade.hentSammensattNavn(barn2.getFnr())).thenReturn("Navn2");
 
         BrevDataInnvilgelse brevData = (BrevDataInnvilgelse) brevDataByggerInnvilgelse.lag(lagBrevdataGrunnlag(), saksbehandler);
-        assertThat(brevData.avklarteMedfolgendeBarn.barnOmfattetAvNorskTrygd)
+        assertThat(brevData.avklarteMedfolgendeBarn.getFamilieOmfattetAvNorskTrygd())
             .extracting("sammensattNavn", "ident")
             .containsExactly(tuple("Navn1", barn1.getFnr()));
-        assertThat(brevData.avklarteMedfolgendeBarn.barnIkkeOmfattetAvNorskTrygd)
+        assertThat(brevData.avklarteMedfolgendeBarn.getFamilieIkkeOmfattetAvNorskTrygd())
             .extracting("sammensattNavn")
             .containsExactly("Navn2");
 
@@ -244,15 +244,15 @@ class BrevDataByggerInnvilgelseTest {
         Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
         behandlingsgrunnlag.setBehandlingsgrunnlagdata(behandlingsgrunnlagData);
 
-        when(avklartefaktaService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(new AvklarteMedfolgendeBarn(
+        when(avklartefaktaService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(new AvklarteMedfolgendeFamilie(
             Set.of(new OmfattetFamilie(barn1.getUuid())),
-            Set.of(new IkkeOmfattetBarn(barn2.getUuid(), null, null))));
+            Set.of(new IkkeOmfattetFamilie(barn2.getUuid(), null, null))));
         when(behandlingsgrunnlagService.hentBehandlingsgrunnlag(anyLong())).thenReturn(behandlingsgrunnlag);
 
         BrevDataInnvilgelse brevData = (BrevDataInnvilgelse) brevDataByggerInnvilgelse.lag(lagBrevdataGrunnlag(), saksbehandler);
-        assertThat(brevData.avklarteMedfolgendeBarn.barnOmfattetAvNorskTrygd)
+        assertThat(brevData.avklarteMedfolgendeBarn.getFamilieOmfattetAvNorskTrygd())
             .extracting("sammensattNavn").containsExactly(barn1.getNavn());
-        assertThat(brevData.avklarteMedfolgendeBarn.barnIkkeOmfattetAvNorskTrygd)
+        assertThat(brevData.avklarteMedfolgendeBarn.getFamilieIkkeOmfattetAvNorskTrygd())
             .extracting("sammensattNavn").containsExactly(barn2.getNavn());
 
         verify(persondataFasade, never()).hentSammensattNavn(anyString());
@@ -263,7 +263,7 @@ class BrevDataByggerInnvilgelseTest {
         MedfolgendeFamilie barn = MedfolgendeFamilie.tilMedfolgendeFamilie(UUID.randomUUID().toString(), null, "Navn", MedfolgendeFamilie.Relasjonsrolle.BARN);
         final BrevDataGrunnlag brevDataGrunnlag = lagBrevdataGrunnlag();
 
-        when(avklartefaktaService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(new AvklarteMedfolgendeBarn(
+        when(avklartefaktaService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(new AvklarteMedfolgendeFamilie(
             Set.of(new OmfattetFamilie(barn.getUuid())), Collections.emptySet()));
 
         assertThatExceptionOfType(FunksjonellException.class)
@@ -276,8 +276,8 @@ class BrevDataByggerInnvilgelseTest {
         MedfolgendeFamilie barn = MedfolgendeFamilie.tilMedfolgendeFamilie(UUID.randomUUID().toString(), null, "Navn", MedfolgendeFamilie.Relasjonsrolle.BARN);
         final BrevDataGrunnlag brevDataGrunnlag = lagBrevdataGrunnlag();
 
-        when(avklartefaktaService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(new AvklarteMedfolgendeBarn(
-            Collections.emptySet(), Set.of(new IkkeOmfattetBarn(barn.getUuid(), null, null))));
+        when(avklartefaktaService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(new AvklarteMedfolgendeFamilie(
+            Collections.emptySet(), Set.of(new IkkeOmfattetFamilie(barn.getUuid(), null, null))));
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> brevDataByggerInnvilgelse.lag(brevDataGrunnlag, saksbehandler))

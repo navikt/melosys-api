@@ -18,7 +18,6 @@ import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.domain.person.adresse.Oppholdsadresse;
 import no.nav.melosys.domain.person.adresse.PersonAdresse;
-import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeBarn;
 import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie;
 import no.nav.melosys.domain.person.familie.OmfattetFamilie;
 import no.nav.melosys.exception.FunksjonellException;
@@ -292,8 +291,8 @@ class AttestStorbritanniaMapperTest {
         return new AvklarteMedfolgendeFamilie(Set.of(ektefelle), Set.of());
     }
 
-    private AvklarteMedfolgendeBarn lagAvklartMedfølgendeBarn() {
-        return new AvklarteMedfolgendeBarn(Set.of(new OmfattetFamilie(UUID_BARN)), Set.of());
+    private AvklarteMedfolgendeFamilie lagAvklartMedfølgendeBarn() {
+        return new AvklarteMedfolgendeFamilie(Set.of(new OmfattetFamilie(UUID_BARN)), Set.of());
     }
 
     private Map<String, MedfolgendeFamilie> lagMedfølgendeEktefelle() {

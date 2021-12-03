@@ -6,7 +6,6 @@ import java.util.stream.Stream;
 import javax.transaction.Transactional;
 
 import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
 import no.nav.melosys.domain.Medlemskapsperiode;
 import no.nav.melosys.domain.avgift.AvgiftsgrunnlagInfoNorge;
 import no.nav.melosys.domain.avgift.AvgiftsgrunnlagInfoUtland;
@@ -19,7 +18,9 @@ import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Avtaleland;
+import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
 import no.nav.melosys.domain.kodeverk.Representerer;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Medfolgende_barn_begrunnelser;
 import no.nav.melosys.domain.person.familie.OmfattetFamilie;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.dokgen.dto.InnvilgelseFtrl;
@@ -78,9 +79,9 @@ public class InnvilgelseFtrlMapper {
             .ftrl_2_8_begrunnelse(hentSaerligBegrunnelse(behandlingsresultat))
             .vurderingMedlemskapEktefelle(avklarteMedfolgendeEktefelle.finnes())
             .vurderingLovvalgBarn(avklarteMedfolgendeBarn.finnes())
-            .omfattetFamilie(mapOmfattetFamilie(behandlingId, avklarteMedfolgendeEktefelle.getFamilieOmfattetAvNorskTrygd(), avklarteMedfolgendeBarn.barnOmfattetAvNorskTrygd))
+            .omfattetFamilie(mapOmfattetFamilie(behandlingId, avklarteMedfolgendeEktefelle.getFamilieOmfattetAvNorskTrygd(), avklarteMedfolgendeBarn.getFamilieOmfattetAvNorskTrygd()))
             .ikkeOmfattetEktefelle(mapIkkeOmfattetEktefelle(behandlingId, avklarteMedfolgendeEktefelle.getFamilieIkkeOmfattetAvNorskTrygd()))
-            .ikkeOmfattetBarn(mapIkkeOmfattetBarn(behandlingId, avklarteMedfolgendeBarn.barnIkkeOmfattetAvNorskTrygd))
+            .ikkeOmfattetBarn(mapIkkeOmfattetBarn(behandlingId, avklarteMedfolgendeBarn.getFamilieIkkeOmfattetAvNorskTrygd()))
             .arbeidsgiverNavn(norskeArbeidsgivere.navn)
             .arbeidsland(dokgenMapperDatahenter.hentLandnavn(arbeidsland))
             .trygdeavtaleMedArbeidsland(harTrygdeavtaleMedArbeidsland(arbeidsland))
@@ -118,10 +119,12 @@ public class InnvilgelseFtrlMapper {
         ).toList();
     }
 
-    private List<IkkeOmfattetBarn> mapIkkeOmfattetBarn(long behandlingID, Set<no.nav.melosys.domain.person.familie.IkkeOmfattetBarn> barnIkkeOmfattetAvNorskTrygd) {
+    private List<IkkeOmfattetBarn> mapIkkeOmfattetBarn(long behandlingID, Set<no.nav.melosys.domain.person.familie.IkkeOmfattetFamilie> barnIkkeOmfattetAvNorskTrygd) {
         Map<String, MedfolgendeFamilie> medfoelgendeBarn = avklarteMedfolgendeFamilieService.hentMedfølgendeBarn(behandlingID);
         return barnIkkeOmfattetAvNorskTrygd.stream()
-            .map(ikkeOmfattetBarn -> new IkkeOmfattetBarn(tilFamiliemedlemInfo(medfoelgendeBarn, ikkeOmfattetBarn.uuid), ikkeOmfattetBarn.begrunnelse))
+            .map(ikkeOmfattetBarn -> new IkkeOmfattetBarn(
+                tilFamiliemedlemInfo(medfoelgendeBarn, ikkeOmfattetBarn.getUuid()),
+                Medfolgende_barn_begrunnelser.valueOf(ikkeOmfattetBarn.getBegrunnelse())))
             .toList();
     }
 

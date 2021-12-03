@@ -17,8 +17,8 @@ import no.nav.melosys.domain.dokument.person.adresse.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.adresse.Gateadresse;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
-import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeBarn;
-import no.nav.melosys.domain.person.familie.IkkeOmfattetBarn;
+import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie;
+import no.nav.melosys.domain.person.familie.IkkeOmfattetFamilie;
 import no.nav.melosys.domain.person.familie.OmfattetFamilie;
 import no.nav.melosys.service.avklartefakta.AvklartMaritimtArbeid;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted;
@@ -134,14 +134,14 @@ public class BrevDataTestUtils {
         return vilkaarsresultat;
     }
 
-    public static AvklarteMedfolgendeBarn lagAvklarteMedfølgendeBarn() {
+    public static AvklarteMedfolgendeFamilie lagAvklarteMedfølgendeBarn() {
         OmfattetFamilie omfattetBarn = new OmfattetFamilie("fnrOmfattet");
         omfattetBarn.setSammensattNavn("Omfattet Barn");
         omfattetBarn.setIdent("123321123");
-        IkkeOmfattetBarn ikkeOmfattetBarn = new IkkeOmfattetBarn("fnrIkkeOmfattet", OVER_18_AR.getKode(), null);
+        IkkeOmfattetFamilie ikkeOmfattetBarn = new IkkeOmfattetFamilie("fnrIkkeOmfattet", OVER_18_AR.getKode(), null);
         ikkeOmfattetBarn.sammensattNavn = "Ikke Omfattet Barn";
         ikkeOmfattetBarn.ident = "1111111111";
 
-        return new AvklarteMedfolgendeBarn(Set.of(omfattetBarn), Set.of(ikkeOmfattetBarn));
+        return new AvklarteMedfolgendeFamilie(Set.of(omfattetBarn), Set.of(ikkeOmfattetBarn));
     }
 }
