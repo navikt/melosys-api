@@ -18,6 +18,7 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.SaksopplysningRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import static no.nav.melosys.service.persondata.PersondataService.PDL_PERSOPL_VERSJON;
 import static no.nav.melosys.service.persondata.PersondataService.PDL_PERS_SAKS_VERSJON;
@@ -63,6 +64,7 @@ public class SaksopplysningerService {
             .orElseThrow(() -> new IkkeFunnetException("Finner ikke personhistorikkDokument for behandling " + behandlingID));
     }
 
+    @Transactional
     public void lagrePersonopplysninger(Behandling behandling, Persondata persondata) {
         if (behandling.saksopplysningerEksistererIkke(List.of(SaksopplysningType.PERSOPL, SaksopplysningType.PDL_PERSOPL))) {
             Instant nå = Instant.now();
@@ -77,6 +79,7 @@ public class SaksopplysningerService {
         }
     }
 
+    @Transactional
     public void lagrePersonMedHistorikk(Behandling behandling, PersonMedHistorikk personMedHistorikk) {
         if (behandling.saksopplysningerEksistererIkke(List.of(SaksopplysningType.PERSHIST, SaksopplysningType.PDL_PERS_SAKS))) {
             Instant nå = Instant.now();

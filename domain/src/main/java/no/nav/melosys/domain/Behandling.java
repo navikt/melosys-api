@@ -449,7 +449,7 @@ public class Behandling extends RegistreringsInfo {
     }
 
     public boolean saksopplysningerEksistererIkke(List<SaksopplysningType> saksopplysningTyper){
-        return Collections.disjoint(saksopplysningTyper, getSaksopplysninger().stream().map(Saksopplysning::getType).collect(Collectors.toList()));
+        return Collections.disjoint(saksopplysningTyper, getSaksopplysninger().stream().map(Saksopplysning::getType).toList());
     }
 
     @Override
