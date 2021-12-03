@@ -3,6 +3,7 @@ package no.nav.melosys.service.dokument;
 import javax.transaction.Transactional;
 
 import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
@@ -41,19 +42,13 @@ public class InnvilgelseUKMapper {
     public InnvilgelseUK map(InnvilgelseBrevbestilling brevbestilling) {
         var behandling = brevbestilling.getBehandling();
         var behandlingsgrunnlag = behandling.getBehandlingsgrunnlag();
-        var behandlingsgrunnlagdata = behandlingsgrunnlag.getBehandlingsgrunnlagdata();
         var lovvalgsperioder = lovvalgsperiodeService.hentLovvalgsperioder(behandling.getId());
 
-        var foretakUtland = behandlingsgrunnlagdata.foretakUtland.stream()
-            .filter(foretak -> foretak.adresse.getLandkode().equals(Landkoder.GB.getKode()))
-            .findFirst().orElseThrow(() -> new FunksjonellException("Ingen utenlandske virksomheter funnet"));
-
-        var virksomhetArbeidsgiverSkalHaKopi = false;
         return new InnvilgelseUK.Builder(brevbestilling)
             .artikkel(getLovvalgbestemmelse(lovvalgsperioder))
-            .soknad(lagSøknad(behandlingsgrunnlagdata.periode, behandlingsgrunnlag.getMottaksdato(), foretakUtland.navn))
+            .soknad(lagSøknad(behandlingsgrunnlag))
             .familie(lagFamile(behandling.getId()))
-            .virksomhetArbeidsgiverSkalHaKopi(virksomhetArbeidsgiverSkalHaKopi)
+            .virksomhetArbeidsgiverSkalHaKopi(false)
             .build();
     }
 
@@ -108,9 +103,9 @@ public class InnvilgelseUKMapper {
         var medfølgendeBarn = avklarteMedfølgendeFamilieService.hentMedfølgendeBarn(behandlingID);
 
         return Stream.concat(barnOmfattetAvNorskTrygd.stream()
-                .map(omfattetFamilie -> tilBarn(medfølgendeBarn,omfattetFamilie.getUuid(), null)),
+                .map(omfattetFamilie -> tilBarn(medfølgendeBarn, omfattetFamilie.getUuid(), null)),
             barnIkkeOmfattetAvNorskTrygd.stream()
-                .map(ikkeOmfattetBarn -> tilBarn(medfølgendeBarn,ikkeOmfattetBarn.uuid, ikkeOmfattetBarn.begrunnelse.getKode()))
+                .map(ikkeOmfattetBarn -> tilBarn(medfølgendeBarn, ikkeOmfattetBarn.uuid, ikkeOmfattetBarn.begrunnelse.getKode()))
         ).toList();
     }
 
@@ -143,12 +138,17 @@ public class InnvilgelseUKMapper {
         return (Lovvalgbestemmelser_trygdeavtale_uk) lovvalgsperiode.getBestemmelse();
     }
 
-    private Soknad lagSøknad(Periode periode, LocalDate mottaksdato, String virksomhetsNavn) {
+    private Soknad lagSøknad(Behandlingsgrunnlag behandlingsgrunnlag) {
+        var foretakUtland = behandlingsgrunnlag.getBehandlingsgrunnlagdata().foretakUtland.stream()
+            .filter(foretak -> foretak.adresse.getLandkode().equals(Landkoder.GB.getKode()))
+            .findFirst().orElseThrow(() -> new FunksjonellException("Ingen utenlandske virksomheter funnet"));
+
+        Periode periode = behandlingsgrunnlag.getBehandlingsgrunnlagdata().periode;
         return new Soknad(
-            mottaksdato,
+            behandlingsgrunnlag.getMottaksdato(),
             periode.getFom(),
             periode.getTom(),
-            virksomhetsNavn
+            foretakUtland.navn
         );
     }
 }

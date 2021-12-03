@@ -101,6 +101,7 @@ class InnvilgelseUKMapperTest {
 
     @Test
     void map_ingenUtenlandskeVirksomheter_kastFunksjonellException() {
+        when(mockLovvalgsperiodeService.hentLovvalgsperioder(anyLong())).thenReturn(List.of(lagLovvalgsperiode()));
         InnvilgelseBrevbestilling brevbestilling = lagInnvilgelseBrevbestilling(lagBehandlingMedPeriode());
 
         assertThatExceptionOfType(FunksjonellException.class)
