@@ -129,7 +129,7 @@ class PersondataServiceTest {
         assertThat(personMedHistorikk.dødsfall()).isEqualTo(new Doedsfall(LocalDate.MAX));
         assertThat(personMedHistorikk.fødsel()).isEqualTo(new Foedsel(LocalDate.parse("1970-01-01"), 1970, "NOR", "fødested"));
         assertThat(personMedHistorikk.folkeregisteridentifikator()).isEqualTo(new Folkeregisteridentifikator("IdNr"));
-        assertThat(personMedHistorikk.folkeregisterpersonstatus().personstatus()).isEqualTo(Personstatuser.IKKE_BOSATT);
+        assertThat(personMedHistorikk.folkeregisterpersonstatuser()).map(Folkeregisterpersonstatus::personstatus).containsExactly(Personstatuser.IKKE_BOSATT);
         assertThat(personMedHistorikk.kjønn()).isEqualTo(KjoennType.UKJENT);
         assertThat(personMedHistorikk.navn()).isEqualTo(new Navn("fornavn", "mellomnavn", "etternavn"));
         assertThat(personMedHistorikk.statsborgerskap()).containsExactlyInAnyOrder(
