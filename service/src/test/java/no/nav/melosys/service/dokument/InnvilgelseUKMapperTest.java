@@ -11,7 +11,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
-import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.ForetakUtland;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
@@ -66,10 +65,10 @@ class InnvilgelseUKMapperTest {
     private LovvalgsperiodeService mockLovvalgsperiodeService;
 
     @Mock
-    PersondataFasade mockPersondataFasade;
+    private PersondataFasade mockPersondataFasade;
 
     @Mock
-    Persondata mockPersondata;
+    private Persondata mockPersondata;
 
     private InnvilgelseUKMapper innvilgelseUKMapper;
 

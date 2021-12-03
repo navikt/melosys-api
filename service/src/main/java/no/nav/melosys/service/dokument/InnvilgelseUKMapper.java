@@ -2,7 +2,6 @@ package no.nav.melosys.service.dokument;
 
 import javax.transaction.Transactional;
 
-import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
