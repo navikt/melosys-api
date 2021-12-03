@@ -42,10 +42,10 @@ public class InnvilgelseUKMapper {
     public InnvilgelseUK map(InnvilgelseBrevbestilling brevbestilling) {
         var behandling = brevbestilling.getBehandling();
         var behandlingsgrunnlag = behandling.getBehandlingsgrunnlag();
-        var lovvalgsperioder = lovvalgsperiodeService.hentLovvalgsperioder(behandling.getId());
+        var lovvalgsperiode = lovvalgsperiodeService.hentValidertLovvalgsperiode(behandling.getId());
 
         return new InnvilgelseUK.Builder(brevbestilling)
-            .artikkel(getLovvalgbestemmelse(lovvalgsperioder))
+            .artikkel((Lovvalgbestemmelser_trygdeavtale_uk) lovvalgsperiode.getBestemmelse())
             .soknad(lagSøknad(behandlingsgrunnlag))
             .familie(lagFamile(behandling.getId()))
             .virksomhetArbeidsgiverSkalHaKopi(false)
@@ -128,15 +128,6 @@ public class InnvilgelseUKMapper {
         return persondata.getFødselsdato();
     }
 
-    private Lovvalgbestemmelser_trygdeavtale_uk getLovvalgbestemmelse(Collection<Lovvalgsperiode> lovvalgsperioder) {
-        if (lovvalgsperioder.size() != 1) {
-            throw new FunksjonellException("Det kan bare være en lovvalgsperiode for trygdeavtale. Fant "
-                + lovvalgsperioder.size()
-            );
-        }
-        var lovvalgsperiode = lovvalgsperioder.iterator().next();
-        return (Lovvalgbestemmelser_trygdeavtale_uk) lovvalgsperiode.getBestemmelse();
-    }
 
     private Soknad lagSøknad(Behandlingsgrunnlag behandlingsgrunnlag) {
         var foretakUtland = behandlingsgrunnlag.getBehandlingsgrunnlagdata().foretakUtland.stream()
