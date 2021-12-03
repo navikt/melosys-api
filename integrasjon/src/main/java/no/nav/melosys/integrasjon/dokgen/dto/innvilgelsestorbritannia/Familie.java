@@ -1,12 +1,21 @@
 package no.nav.melosys.integrasjon.dokgen.dto.innvilgelsestorbritannia;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
 import java.util.List;
 
+@JsonPropertyOrder({"minstEttOmfattetFamiliemedlem", "ektefelle", "barn"})
 public record Familie(
-    boolean minstEttOmfattetFamiliemedlem,
     Ektefelle ektefelle,
     List<Barn> barn
 ) {
+    @JsonProperty
+    public boolean minstEttOmfattetFamiliemedlem() {
+        if (ektefelle.omfattet()) return true;
+        return barn.stream().anyMatch(Barn::omfattet);
+    }
+
     public static class Builder {
         private Ektefelle ektefelle;
         private List<Barn> barn;
@@ -21,13 +30,8 @@ public record Familie(
             return this;
         }
 
-        private boolean harMinstEttOmfattetFamiliemedlem() {
-            if (ektefelle.omfattet()) return true;
-            return barn.stream().anyMatch(Barn::omfattet);
-        }
-
         public Familie build() {
-            return new Familie(harMinstEttOmfattetFamiliemedlem(), ektefelle, barn);
+            return new Familie(ektefelle, barn);
         }
     }
 }
