@@ -178,7 +178,7 @@ class InnvilgelseUKMapperTest {
         return behandling;
     }
 
-    private Behandling leggPåForetakUtland(Behandling behandling) {
+    private Behandling medForetakUtland(Behandling behandling) {
         var behandlingsgrunnlag = behandling.getBehandlingsgrunnlag();
         var foretakUtland = new ForetakUtland();
         foretakUtland.navn = "Foretaksnavn";
@@ -191,7 +191,7 @@ class InnvilgelseUKMapperTest {
 
     private InnvilgelseBrevbestilling lagInnvilgelseBrevbestilling() {
         var behandling = lagBehandlingMedPeriode();
-        return lagInnvilgelseBrevbestilling(leggPåForetakUtland(behandling));
+        return lagInnvilgelseBrevbestilling(medForetakUtland(behandling));
     }
 
     private InnvilgelseBrevbestilling lagInnvilgelseBrevbestilling(Behandling behandling) {
