@@ -3,6 +3,7 @@ package no.nav.melosys.service.dokument;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.Period;
+import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
@@ -48,6 +49,11 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class DokgenMalMapperTest {
     public static final String FORRETNINGSADRESSE_ORG = "Storgata 1";
+    public static final LocalDate SOKNADSDATO = LocalDate.of(2000, 1, 1);
+    public static final LocalDate LOVVALGSPERIODE_FOM = LocalDate.of(2020, 1, 1);
+    public static final LocalDate LOVVALGSPERIODE_TOM = LocalDate.of(2021, 1, 1);
+    public static final LocalDate FØDSELSDATO = LocalDate.of(2000, 1, 1);
+    public static final Instant FØDSELSDATO_INSTANT = FØDSELSDATO.atStartOfDay(ZoneId.systemDefault()).toInstant();
 
     @Mock
     private InnvilgelseFtrlMapper mockInnvilgelseFtrlMapper;
@@ -536,9 +542,9 @@ class DokgenMalMapperTest {
                 "Norge",
                 "Bruker eller brukers fullmektig"))
             .artikkel(Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1)
-            .soknad(new Soknad(Instant.now(),
-                Instant.now().plus(2, ChronoUnit.DAYS),
-                Instant.now().plus(20, ChronoUnit.DAYS),
+            .soknad(new Soknad(SOKNADSDATO,
+                LOVVALGSPERIODE_FOM,
+                LOVVALGSPERIODE_TOM,
                 "Virksomhetsnavn"
             ))
             .familie(null)
@@ -555,7 +561,7 @@ class DokgenMalMapperTest {
         return new AttestStorbritannia.Builder(dokgenBrevbestillingBuilder)
             .medfolgendeFamiliemedlemmer(new MedfolgendeFamiliemedlemmer(
                 new Person("Kone",
-                    Instant.now().minus(20, ChronoUnit.DAYS),
+                    FØDSELSDATO_INSTANT,
                     "01010119901",
                     null),
                 List.of()
@@ -565,7 +571,7 @@ class DokgenMalMapperTest {
             .arbeidstaker(
                 new Arbeidstaker(
                     "Nordmann, Ola",
-                    Instant.now().minus(20, ChronoUnit.DAYS),
+                    LocalDate.now().minusDays(20),
                     "01010119901",
                     List.of("Nordmannsveg 200", "Norge")))
             .representantUK(new RepresentantUK(
@@ -575,8 +581,8 @@ class DokgenMalMapperTest {
             .utsendelse(new Utsendelse(
                 Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1,
                 List.of("UK Street 1337"),
-                Instant.now().plus(2, ChronoUnit.DAYS),
-                Instant.now().plus(20, ChronoUnit.DAYS)
+                LOVVALGSPERIODE_FOM,
+                LOVVALGSPERIODE_TOM
             ))
             .build();
     }

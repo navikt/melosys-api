@@ -1,11 +1,10 @@
 package no.nav.melosys.integrasjon.dokgen.dto;
 
-import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.datatype.jsr310.ser.InstantSerializer;
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.integrasjon.dokgen.dto.felles.Innvilgelse;
@@ -15,9 +14,8 @@ import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
 
 public class InnvilgelseFtrl extends DokgenDto {
 
-    @JsonSerialize(using = InstantSerializer.class)
     @JsonFormat(shape = STRING)
-    private final Instant datoMottatt;
+    private final LocalDate datoMottatt;
 
     private final Innvilgelse innvilgelse;
     private final List<Periode> perioder;
@@ -39,7 +37,7 @@ public class InnvilgelseFtrl extends DokgenDto {
     private final boolean loennNorgeSkattepliktig;
     private final boolean loennUtlandSkattepliktig;
 
-    public Instant getDatoMottatt() {
+    public LocalDate getDatoMottatt() {
         return datoMottatt;
     }
 
@@ -122,7 +120,7 @@ public class InnvilgelseFtrl extends DokgenDto {
     public InnvilgelseFtrl(Builder builder) {
         super(builder.brevbestilling);
         this.innvilgelse = Innvilgelse.av(builder.brevbestilling);
-        this.datoMottatt = builder.brevbestilling.getForsendelseMottatt();
+        this.datoMottatt = builder.brevbestilling.getForsendelseMottatt() != null ? LocalDate.ofInstant(builder.brevbestilling.getForsendelseMottatt(), ZoneId.systemDefault()): null;
         this.perioder = builder.perioder;
         this.erFullstendigInnvilget = builder.erFullstendigInnvilget;
         this.ftrl_2_8_begrunnelse = builder.ftrl_2_8_begrunnelse;
