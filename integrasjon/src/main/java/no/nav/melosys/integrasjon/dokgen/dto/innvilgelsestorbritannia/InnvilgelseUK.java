@@ -43,7 +43,6 @@ public class InnvilgelseUK extends DokgenDto {
     }
 
     public static class Builder {
-        private Innvilgelse innvilgelse;
         private Lovvalgbestemmelser_trygdeavtale_uk artikkel;
         private Soknad soknad;
         private Familie familie;
@@ -52,11 +51,6 @@ public class InnvilgelseUK extends DokgenDto {
 
         public Builder(InnvilgelseBrevbestilling brevbestilling) {
             this.brevbestilling = brevbestilling;
-        }
-
-        public Builder innvilgelse(Innvilgelse innvilgelse) {
-            this.innvilgelse = innvilgelse;
-            return this;
         }
 
         public Builder artikkel(Lovvalgbestemmelser_trygdeavtale_uk artikkel) {
