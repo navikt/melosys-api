@@ -146,7 +146,7 @@ class InnvilgelseUKMapperTest {
     }
 
     private void mockPerson(String... personer) {
-        when(mockPersondata.getFødselsdato()).thenReturn(LocalDate.of(1970, 1, 1));
+        when(mockPersondata.getFødselsdato()).thenReturn(FOEDSELSDATO);
         when(mockPersondataFasade.hentPerson(anyString())).thenReturn(mockPersondata);
         for (String fnr : personer) {
             when(mockDokgenMapperDatahenter.hentSammensattNavn(fnr)).thenReturn(FNR_TIL_NAVN.get(fnr));
@@ -170,7 +170,7 @@ class InnvilgelseUKMapperTest {
     private Behandling lagBehandlingMedPeriode() {
         var behandling = lagBehandling(lagFagsak(true));
         var behandlingsgrunnlag = behandling.getBehandlingsgrunnlag();
-        behandlingsgrunnlag.setMottaksdato(LocalDate.of(2019, 10, 1));
+        behandlingsgrunnlag.setMottaksdato(SOKNADSDATO);
         behandlingsgrunnlag.getBehandlingsgrunnlagdata().periode = new Periode(
             FRA_DATO,
             TIL_DATO
