@@ -96,15 +96,15 @@ public class InnvilgelseUKMapper {
 
     private List<Barn> finnBarn(long behandlingID) {
         var avklarteMedfølgendeBarn = avklarteMedfølgendeFamilieService.hentAvklarteMedfølgendeBarn(behandlingID);
-        var barnOmfattetAvNorskTrygd = avklarteMedfølgendeBarn.barnOmfattetAvNorskTrygd;
-        var barnIkkeOmfattetAvNorskTrygd = avklarteMedfølgendeBarn.barnIkkeOmfattetAvNorskTrygd;
+        var barnOmfattetAvNorskTrygd = avklarteMedfølgendeBarn.getFamilieOmfattetAvNorskTrygd();
+        var barnIkkeOmfattetAvNorskTrygd = avklarteMedfølgendeBarn.getFamilieIkkeOmfattetAvNorskTrygd();
 
         var medfølgendeBarn = avklarteMedfølgendeFamilieService.hentMedfølgendeBarn(behandlingID);
 
         return Stream.concat(barnOmfattetAvNorskTrygd.stream()
                 .map(omfattetFamilie -> tilBarn(medfølgendeBarn, omfattetFamilie.getUuid(), null)),
             barnIkkeOmfattetAvNorskTrygd.stream()
-                .map(ikkeOmfattetBarn -> tilBarn(medfølgendeBarn, ikkeOmfattetBarn.uuid, ikkeOmfattetBarn.begrunnelse.getKode()))
+                .map(ikkeOmfattetBarn -> tilBarn(medfølgendeBarn, ikkeOmfattetBarn.getUuid(), ikkeOmfattetBarn.getBegrunnelse()))
         ).toList();
     }
 

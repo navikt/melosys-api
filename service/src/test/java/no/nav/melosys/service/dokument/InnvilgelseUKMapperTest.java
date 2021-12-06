@@ -239,36 +239,34 @@ class InnvilgelseUKMapperTest {
         );
     }
 
-    private AvklarteMedfolgendeBarn lagOmfatetMedfølgendeBarn() {
+    private AvklarteMedfolgendeFamilie lagOmfatetMedfølgendeBarn() {
         var barn = new OmfattetFamilie(UUID_BARN_1);
         barn.setSammensattNavn(BARN_NAVN_1);
         barn.setIdent(BARN1_FNR);
-        return new AvklarteMedfolgendeBarn(
+        return new AvklarteMedfolgendeFamilie(
             Set.of(barn),
             Set.of());
     }
 
-    private AvklarteMedfolgendeBarn lagIkkeOmfatetMedfølgendeBarn() {
-        var barn = new IkkeOmfattetBarn(
+    private AvklarteMedfolgendeFamilie lagIkkeOmfatetMedfølgendeBarn() {
+        var barn = new IkkeOmfattetFamilie(
             UUID_BARN_1,
             Medfolgende_barn_begrunnelser.MANGLER_OPPLYSNINGER.getKode(), "");
-        return new AvklarteMedfolgendeBarn(
+        return new AvklarteMedfolgendeFamilie(
             Set.of(),
             Set.of(barn));
     }
 
 
-    private AvklarteMedfolgendeBarn lagAvklartMedfølgendeBarn() {
+    private AvklarteMedfolgendeFamilie lagAvklartMedfølgendeBarn() {
         var b1 = new OmfattetFamilie(UUID_BARN_1);
-        b1.setSammensattNavn(BARN_NAVN_1);
         b1.setIdent(BARN1_FNR);
-        var b2 = new IkkeOmfattetBarn(
+        var b2 = new IkkeOmfattetFamilie(
             UUID_BARN_2,
             Medfolgende_barn_begrunnelser_ftrl.OVER_18_AR.getKode(),
             null);
-        b2.sammensattNavn = BARN_NAVN_2;
-        b2.ident = BARN2_FNR;
-        return new AvklarteMedfolgendeBarn(
+        b2.setIdent(BARN2_FNR);
+        return new AvklarteMedfolgendeFamilie(
             Set.of(b1),
             Set.of(b2));
     }
