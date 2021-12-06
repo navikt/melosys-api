@@ -126,34 +126,34 @@ public class AvklartefaktaService {
             .collect(Collectors.toMap(Map.Entry::getKey, AvklartMaritimtArbeid::av));
     }
 
-    public AvklarteMedfolgendeBarn hentAvklarteMedfølgendeBarn(long behandlingID) {
+    public AvklarteMedfolgendeFamilie hentAvklarteMedfølgendeBarn(long behandlingID) {
         Set<OmfattetFamilie> barnOmfattetAvNorskTrygd = new HashSet<>();
-        Set<IkkeOmfattetBarn> barnIkkeOmfattetAvNorskTrygd = new HashSet<>();
+        Set<IkkeOmfattetFamilie> barnIkkeOmfattetAvNorskTrygd = new HashSet<>();
         for (Avklartefakta avklartefakta : avklarteFaktaRepository.findAllByBehandlingsresultatIdAndType(behandlingID, VURDERING_LOVVALG_BARN)) {
             if (avklartefakta.getFakta().equals(VALGT_FAKTA)) {
                 barnOmfattetAvNorskTrygd.add(new OmfattetFamilie(avklartefakta.getSubjekt()));
             } else {
                 String begrunnelse = avklartefakta.getRegistreringer().iterator().next().getBegrunnelseKode();
                 barnIkkeOmfattetAvNorskTrygd.add(
-                    new IkkeOmfattetBarn(avklartefakta.getSubjekt(), begrunnelse, avklartefakta.getBegrunnelseFritekst()));
-            }
-        }
-        return new AvklarteMedfolgendeBarn(barnOmfattetAvNorskTrygd, barnIkkeOmfattetAvNorskTrygd);
-    }
-
-    public AvklarteMedfolgendeFamilie hentAvklarteMedfølgendeEktefelle(long behandlingId) {
-        Set<OmfattetFamilie> omfattetFamilie = new HashSet<>();
-        Set<IkkeOmfattetFamilie> ikkeOmfattetFamilie = new HashSet<>();
-        for (Avklartefakta avklartefakta : avklarteFaktaRepository.findAllByBehandlingsresultatIdAndType(behandlingId, VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER)) {
-            if (avklartefakta.getFakta().equals(VALGT_FAKTA)) {
-                omfattetFamilie.add(new OmfattetFamilie(avklartefakta.getSubjekt()));
-            } else {
-                String begrunnelse = avklartefakta.getRegistreringer().iterator().next().getBegrunnelseKode();
-                ikkeOmfattetFamilie.add(
                     new IkkeOmfattetFamilie(avklartefakta.getSubjekt(), begrunnelse, avklartefakta.getBegrunnelseFritekst()));
             }
         }
-        return new AvklarteMedfolgendeFamilie(omfattetFamilie, ikkeOmfattetFamilie);
+        return new AvklarteMedfolgendeFamilie(barnOmfattetAvNorskTrygd, barnIkkeOmfattetAvNorskTrygd);
+    }
+
+    public AvklarteMedfolgendeFamilie hentAvklarteMedfølgendeEktefelle(long behandlingId) {
+        Set<OmfattetFamilie> ektefelleOmfattetAvNorskTrygd = new HashSet<>();
+        Set<IkkeOmfattetFamilie> ektefelleIkkeOmfattetAvNorskTrygd = new HashSet<>();
+        for (Avklartefakta avklartefakta : avklarteFaktaRepository.findAllByBehandlingsresultatIdAndType(behandlingId, VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER)) {
+            if (avklartefakta.getFakta().equals(VALGT_FAKTA)) {
+                ektefelleOmfattetAvNorskTrygd.add(new OmfattetFamilie(avklartefakta.getSubjekt()));
+            } else {
+                String begrunnelse = avklartefakta.getRegistreringer().iterator().next().getBegrunnelseKode();
+                ektefelleIkkeOmfattetAvNorskTrygd.add(
+                    new IkkeOmfattetFamilie(avklartefakta.getSubjekt(), begrunnelse, avklartefakta.getBegrunnelseFritekst()));
+            }
+        }
+        return new AvklarteMedfolgendeFamilie(ektefelleOmfattetAvNorskTrygd, ektefelleIkkeOmfattetAvNorskTrygd);
     }
 
     private Map<String, List<Avklartefakta>> grupperForSubjekt(Collection<Avklartefakta> avklartefakta) {

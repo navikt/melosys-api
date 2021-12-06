@@ -3,6 +3,7 @@ package no.nav.melosys.domain;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
 import javax.persistence.*;
 
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
@@ -407,7 +408,7 @@ public class Behandling extends RegistreringsInfo {
             || Behandlingstema.IKKE_YRKESAKTIV.getKode().equalsIgnoreCase(behandlingstemaKode)
             || Behandlingstema.ARBEID_NORGE_BOSATT_ANNET_LAND.getKode().equalsIgnoreCase(behandlingstemaKode)
             || Behandlingstema.ARBEID_I_UTLANDET.getKode().equalsIgnoreCase(behandlingstemaKode)
-            || Behandlingstema.TRYGDEAVTALE_UK.getKode().equalsIgnoreCase(behandlingstemaKode);
+            || Behandlingstema.YRKESAKTIV.getKode().equalsIgnoreCase(behandlingstemaKode);
     }
 
     public static boolean erBehandlingAvSøknadUtsendtArbeidstaker(String behandlingstemaKode) {
@@ -447,9 +448,8 @@ public class Behandling extends RegistreringsInfo {
         return this.status == status;
     }
 
-    public boolean saksopplysningEksisterer(SaksopplysningType saksopplysningType){
-        return getSaksopplysninger().stream()
-            .anyMatch(p -> p.getType().equals(saksopplysningType));
+    public boolean saksopplysningerEksistererIkke(List<SaksopplysningType> saksopplysningTyper){
+        return Collections.disjoint(saksopplysningTyper, getSaksopplysninger().stream().map(Saksopplysning::getType).toList());
     }
 
     @Override

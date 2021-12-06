@@ -18,8 +18,8 @@ class LovvalgBestemmelseUtilsTest {
 
     @Test
     void dbDataTilLovvalgBestemmelse() {
-        LovvalgBestemmelse lovvalgBestemmelse = LovvalgBestemmelseUtils.dbDataTilLovvalgBestemmelse("UK_ART7");
-        assertThat(lovvalgBestemmelse.getKode()).isEqualTo("UK_ART7");
+        LovvalgBestemmelse lovvalgBestemmelse = LovvalgBestemmelseUtils.dbDataTilLovvalgBestemmelse("UK_ART7_3");
+        assertThat(lovvalgBestemmelse.getKode()).isEqualTo("UK_ART7_3");
         assertThat(lovvalgBestemmelse).isInstanceOf(Lovvalgbestemmelser_trygdeavtale_uk.class);
     }
 }

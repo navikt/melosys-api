@@ -134,7 +134,7 @@ public class AttestStorbritanniaMapper {
 
     private List<Person> mapBarn(long behandlingID) {
         var avklarteMedfølgendeBarn = avklarteMedfølgendeFamilieService.hentAvklarteMedfølgendeBarn(behandlingID);
-        var barnOmfattetAvNorskTrygd = avklarteMedfølgendeBarn.barnOmfattetAvNorskTrygd;
+        var barnOmfattetAvNorskTrygd = avklarteMedfølgendeBarn.getFamilieOmfattetAvNorskTrygd();
         if (barnOmfattetAvNorskTrygd.isEmpty()) {
             return List.of();
         }

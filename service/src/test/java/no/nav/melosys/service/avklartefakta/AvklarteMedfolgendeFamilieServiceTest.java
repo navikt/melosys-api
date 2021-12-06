@@ -259,14 +259,14 @@ class AvklarteMedfolgendeFamilieServiceTest {
 
         when(behandlingsgrunnlagService.hentBehandlingsgrunnlag(1L)).thenReturn(lagBehandlingsGrunnlag());
 
-        AvklarteMedfolgendeBarn avklarteMedfolgendeBarn = avklarteMedfolgendeFamilieService.hentAvklarteMedfølgendeBarn(1L);
+        AvklarteMedfolgendeFamilie avklarteMedfolgendeBarn = avklarteMedfolgendeFamilieService.hentAvklarteMedfølgendeBarn(1L);
 
-        assertThat(avklarteMedfolgendeBarn.barnIkkeOmfattetAvNorskTrygd)
+        assertThat(avklarteMedfolgendeBarn.getFamilieIkkeOmfattetAvNorskTrygd())
             .hasSize(1)
-            .flatExtracting((Function<? super IkkeOmfattetBarn, ?>) ikkeOmfattetBarn -> ikkeOmfattetBarn.uuid)
+            .flatExtracting((Function<? super IkkeOmfattetFamilie, ?>) ikkeOmfattetBarn -> ikkeOmfattetBarn.getUuid())
             .containsExactly(uuidBarn2);
 
-        assertThat(avklarteMedfolgendeBarn.barnOmfattetAvNorskTrygd)
+        assertThat(avklarteMedfolgendeBarn.getFamilieOmfattetAvNorskTrygd())
             .hasSize(1)
             .flatExtracting(OmfattetFamilie::getUuid)
             .containsExactly(uuidBarn);
