@@ -272,8 +272,8 @@ class InnvilgelseFtrlMapperTest {
         return List.of(new AvklartVirksomhet(ARBEIDSGIVER_NAVN, "987654321", BrevDataTestUtils.lagStrukturertAdresse(), Yrkesaktivitetstyper.LOENNET_ARBEID));
     }
 
-    private AvklarteMedfolgendeBarn lagAvklartMedfølgendeBarn() {
-        return new AvklarteMedfolgendeBarn(Set.of(new OmfattetFamilie(UUID_BARN_1)), Set.of());
+    private AvklarteMedfolgendeFamilie lagAvklartMedfølgendeBarn() {
+        return new AvklarteMedfolgendeFamilie(Set.of(new OmfattetFamilie(UUID_BARN_1)), Set.of());
     }
 
     private AvklarteMedfolgendeFamilie lagAvklartMedfølgendeEktefelle() {
@@ -281,10 +281,10 @@ class InnvilgelseFtrlMapperTest {
         return new AvklarteMedfolgendeFamilie(Set.of(ektefelle), Set.of());
     }
 
-    private AvklarteMedfolgendeBarn lagAvklartIkkeMedfølgendeBarn() {
-        IkkeOmfattetBarn barn1 = new IkkeOmfattetBarn(UUID_BARN_1, IKKE_SOEKERS_BARN.getKode(), "Ikke omfattet");
-        IkkeOmfattetBarn barn2 = new IkkeOmfattetBarn(UUID_BARN_2, IKKE_SOEKERS_BARN.getKode(), "Ikke omfattet");
-        return new AvklarteMedfolgendeBarn(Set.of(), Set.of(barn1, barn2));
+    private AvklarteMedfolgendeFamilie lagAvklartIkkeMedfølgendeBarn() {
+        IkkeOmfattetFamilie barn1 = new IkkeOmfattetFamilie(UUID_BARN_1, IKKE_SOEKERS_BARN.getKode(), "Ikke omfattet");
+        IkkeOmfattetFamilie barn2 = new IkkeOmfattetFamilie(UUID_BARN_2, IKKE_SOEKERS_BARN.getKode(), "Ikke omfattet");
+        return new AvklarteMedfolgendeFamilie(Set.of(), Set.of(barn1, barn2));
     }
 
     private AvklarteMedfolgendeFamilie lagAvklartIkkeMedfølgendeEktefelle() {

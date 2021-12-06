@@ -13,8 +13,8 @@ import no.nav.melosys.domain.kodeverk.Maritimtyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Medfolgende_barn_begrunnelser;
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_ektefelle_samboer_begrunnelser_ftrl;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesgrupper;
-import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeBarn;
 import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie;
+import no.nav.melosys.domain.person.familie.IkkeOmfattetFamilie;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.AvklarteFaktaRepository;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
@@ -281,22 +281,22 @@ class AvklartefaktaServiceTest {
          when(avklarteFaktaRepository.findAllByBehandlingsresultatIdAndType(anyLong(), any(Avklartefaktatyper.class)))
             .thenReturn(Set.of(barnOmfattet, barnIkkeOmfattet1, barnIkkeOmfattet2));
 
-        AvklarteMedfolgendeBarn avklarteMedfølgendeBarn
+        AvklarteMedfolgendeFamilie avklarteMedfølgendeBarn
             = avklartefaktaService.hentAvklarteMedfølgendeBarn(1L);
 
-        assertThat(avklarteMedfølgendeBarn.barnOmfattetAvNorskTrygd)
+        assertThat(avklarteMedfølgendeBarn.getFamilieOmfattetAvNorskTrygd())
             .extracting("uuid").containsExactly("omfattet");
-        assertThat(avklarteMedfølgendeBarn.barnIkkeOmfattetAvNorskTrygd)
+        assertThat(avklarteMedfølgendeBarn.getFamilieIkkeOmfattetAvNorskTrygd())
             .extracting("uuid")
             .containsExactlyInAnyOrder("ikkeOmfattet1", "ikkeOmfattet2");
-        assertThat(avklarteMedfølgendeBarn.barnIkkeOmfattetAvNorskTrygd)
-            .filteredOn(barnIkkeOmfattet -> barnIkkeOmfattet.uuid.equals("ikkeOmfattet1"))
-            .extracting("begrunnelse")
-            .isEqualTo(List.of(Medfolgende_barn_begrunnelser.OVER_18_AR));
-        assertThat(avklarteMedfølgendeBarn.barnIkkeOmfattetAvNorskTrygd)
-            .filteredOn(barnIkkeOmfattet -> barnIkkeOmfattet.uuid.equals("ikkeOmfattet2"))
-            .extracting("begrunnelse")
-            .isEqualTo(List.of(Medfolgende_barn_begrunnelser.MANGLER_OPPLYSNINGER));
+        assertThat(avklarteMedfølgendeBarn.getFamilieIkkeOmfattetAvNorskTrygd())
+            .filteredOn(barnIkkeOmfattet -> barnIkkeOmfattet.getUuid().equals("ikkeOmfattet1"))
+            .extracting(IkkeOmfattetFamilie::getBegrunnelse)
+            .isEqualTo(List.of(Medfolgende_barn_begrunnelser.OVER_18_AR.getKode()));
+        assertThat(avklarteMedfølgendeBarn.getFamilieIkkeOmfattetAvNorskTrygd())
+            .filteredOn(barnIkkeOmfattet -> barnIkkeOmfattet.getUuid().equals("ikkeOmfattet2"))
+            .extracting(IkkeOmfattetFamilie::getBegrunnelse)
+            .isEqualTo(List.of(Medfolgende_barn_begrunnelser.MANGLER_OPPLYSNINGER.getKode()));
         assertThat(avklarteMedfølgendeBarn.hentBegrunnelseFritekst().orElse("")).isEqualTo("begrunnelseFritekst");
     }
 

@@ -27,6 +27,13 @@ public class AvklarteMedfolgendeFamilie {
         return familieIkkeOmfattetAvNorskTrygd;
     }
 
+    public Optional<String> hentBegrunnelseFritekst() {
+        return familieIkkeOmfattetAvNorskTrygd.stream()
+            .map(IkkeOmfattetFamilie::getBegrunnelseFritekst)
+            .filter(Objects::nonNull)
+            .findFirst();
+    }
+
     public Collection<Avklartefakta> tilAvklartefakta(Map<String, MedfolgendeFamilie.Relasjonsrolle> uuidOgRolle) {
         Set<Avklartefakta> avklartefakta = new HashSet<>();
         getFamilieOmfattetAvNorskTrygd().forEach(omfattet ->
