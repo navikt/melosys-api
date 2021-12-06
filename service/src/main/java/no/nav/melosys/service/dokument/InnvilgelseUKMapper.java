@@ -66,7 +66,7 @@ public class InnvilgelseUKMapper {
             var ektefelleOmfattet = ektefelleOmfattetAvNorskTrygd.iterator().next();
             return tilEktefelle(medfolgendeEktefelleMap, ektefelleOmfattet.getUuid(), null);
         }
-        Set<IkkeOmfattetFamilie> ektefelleIkkeOmfattetAvNorskTrygd = avklartMedfølgendeEktefelle.getFamilieIkkeOmfattetAvNorskTrygd();
+        var ektefelleIkkeOmfattetAvNorskTrygd = avklartMedfølgendeEktefelle.getFamilieIkkeOmfattetAvNorskTrygd();
         if (ektefelleIkkeOmfattetAvNorskTrygd.isEmpty()) {
             return null;
         }
@@ -133,7 +133,7 @@ public class InnvilgelseUKMapper {
             .filter(foretak -> foretak.adresse.getLandkode().equals(Landkoder.GB.getKode()))
             .findFirst().orElseThrow(() -> new FunksjonellException("Ingen utenlandske virksomheter funnet"));
 
-        Periode periode = behandlingsgrunnlag.getBehandlingsgrunnlagdata().periode;
+        var periode = behandlingsgrunnlag.getBehandlingsgrunnlagdata().periode;
         return new Soknad(
             behandlingsgrunnlag.getMottaksdato(),
             periode.getFom(),
