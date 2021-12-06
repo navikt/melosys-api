@@ -58,10 +58,9 @@ public class SaksopplysningerService {
             .map(s -> (InntektDokument) s.getDokument());
     }
 
-    public PersonhistorikkDokument hentPersonhistorikk(long behandlingID) {
-        return saksopplysningRepo.findByBehandling_IdAndType(behandlingID, SaksopplysningType.PERSHIST)
-            .map(s -> (PersonhistorikkDokument) s.getDokument())
-            .orElseThrow(() -> new IkkeFunnetException("Finner ikke personhistorikkDokument for behandling " + behandlingID));
+    public Optional<PersonMedHistorikk> hentPersonhistorikkPDL(long behandlingID) {
+        return saksopplysningRepo.findByBehandling_IdAndType(behandlingID, SaksopplysningType.PDL_PERS_SAKS)
+            .map(s -> (PersonMedHistorikk) s.getDokument());
     }
 
     @Transactional

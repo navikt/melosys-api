@@ -15,9 +15,10 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Optional;
+
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class SaksopplysningerServiceTest {
@@ -71,7 +72,7 @@ class SaksopplysningerServiceTest {
     }
 
     @Test
-    void lagrePersonMedHistorikk_PERSHISTeksisterer_lagesIkke() {
+    void lagrePersonMedHistorikk_PERSHISTeksisterer_lagresIkke() {
         PersonMedHistorikk personMedHistorikk = PersonopplysningerObjectFactory.lagPersonMedHistorikk();
         Behandling behandling = SaksbehandlingDataFactory.lagBehandling();
         Saksopplysning saksopplysning = new Saksopplysning();
@@ -81,5 +82,14 @@ class SaksopplysningerServiceTest {
         saksopplysningerService.lagrePersonMedHistorikk(behandling, personMedHistorikk);
 
         verifyNoInteractions(saksopplysningRepository);
+    }
+
+    @Test
+    void hentPersonhistorikkPDL_PDL_PERS_SAKSeksistererIkke_optionalNull() {
+        when(saksopplysningRepository.findByBehandling_IdAndType(1L, SaksopplysningType.PDL_PERS_SAKS)).thenReturn(Optional.empty());
+
+        Optional<PersonMedHistorikk> personMedHistorikk = saksopplysningerService.hentPersonhistorikkPDL(1L);
+
+        assertThat(personMedHistorikk.isPresent()).isFalse();
     }
 }

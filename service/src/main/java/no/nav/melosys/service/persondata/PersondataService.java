@@ -204,13 +204,8 @@ public class PersondataService implements PersondataFasade {
             return hentPersonMedHistorikk(ident);
         }
 
-        if (!erRegistrertEtterPdlStart(behandling)) {
-            return PersonMedHistorikkOversetter.lagHistorikkFraTpsData(saksopplysningerService.hentTpsPersonopplysninger(behandlingID), kodeverkService);
-        }
-
-        final Instant skjæringstidspunkt = avgjørSkjæringstidspunktTilInnsyn(behandling);
-        final var persondataTilInnsyn = filtrerPersondataFørDato(pdlConsumer.hentPersonMedHistorikk(ident), skjæringstidspunkt);
-        return PersonMedHistorikkOversetter.oversett(persondataTilInnsyn, kodeverkService);
+        return saksopplysningerService.hentPersonhistorikkPDL(behandlingID)
+            .orElseGet(() -> PersonMedHistorikkOversetter.lagHistorikkFraTpsData(saksopplysningerService.hentTpsPersonopplysninger(behandlingID), kodeverkService));
     }
 
     @Override

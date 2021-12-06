@@ -178,13 +178,29 @@ class PersondataServiceTest {
     @Test
     void hentPersonMedHistorikk_inaktivBehandling_filtrererNyeOpplysninger() {
         when(behandlingService.hentBehandlingUtenSaksopplysninger(1L)).thenReturn(lagInaktivBehandling());
-        when(behandlingsresultatService.hentBehandlingsresultat(1L)).thenReturn(lagBehandlingsresultat());
-        when(pdlConsumer.hentPersonMedHistorikk(anyString())).thenReturn(lagPerson());
+        when(saksopplysningerService.hentPersonhistorikkPDL(1L)).thenReturn(Optional.of(PersonopplysningerObjectFactory.lagPersonMedHistorikk()));
+
+        final var personMedHistorikk = persondataService.hentPersonMedHistorikk(1L);
+        assertThat(personMedHistorikk.statsborgerskap()).containsExactlyInAnyOrder(
+            new Statsborgerskap("AAA", null, LocalDate.parse("2009-11-18"),
+                LocalDate.parse("1980-11-18"), "PDL", "Dolly", false),
+            new Statsborgerskap("BBB", null, LocalDate.parse("1979-11-18"),
+                LocalDate.parse("1980-11-18"), "PDL", "Dolly", false),
+            new Statsborgerskap("CCC", null, null,
+                LocalDate.parse("1980-11-18"), "PDL", "Dolly", false)
+        );
+    }
+
+    @Test
+    void hentPersonMedHistorikk_inaktivBehandlingTPSDataLagret_returnererDataFraTps() {
+        when(behandlingService.hentBehandlingUtenSaksopplysninger(1L)).thenReturn(lagInaktivBehandling());
+        when(saksopplysningerService.hentPersonhistorikkPDL(1L)).thenReturn(Optional.empty());
+        when(saksopplysningerService.hentTpsPersonopplysninger(1L)).thenReturn(lagPersonDokument(null));
 
         final var personMedHistorikk = persondataService.hentPersonMedHistorikk(1L);
         assertThat(personMedHistorikk.statsborgerskap()).containsExactly(
-            new Statsborgerskap("AIA", null, LocalDate.parse("1979-11-18"),
-                LocalDate.parse("1980-11-18"), "PDL", "Dolly", false)
+            new Statsborgerskap("NOR", null, LocalDate.parse("1989-08-07"),
+                null, "TPS", "TPS", false)
         );
     }
 
