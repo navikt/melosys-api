@@ -96,8 +96,8 @@ class PersonopplysningerDataFetcherTest {
         assertThat(personopplysninger.sivilstand()).flatExtracting(SivilstandDto::type,
             SivilstandDto::relatertVedSivilstand, SivilstandDto::gyldigFraOgMed, SivilstandDto::bekreftelsesdato,
             SivilstandDto::master, SivilstandDto::kilde, SivilstandDto::erHistorisk)
-            .containsExactlyInAnyOrder("Registrert partner", "relatertVedSivilstandID", LocalDate.MIN, LocalDate.EPOCH, "NAV (PDL)",
-                "kilde", false, "Udefinert type", "relatertVedSivilstandID", LocalDate.MIN, LocalDate.EPOCH, "NAV (PDL)", "kilde", false);
+            .containsExactly("Udefinert type", "relatertVedSivilstandID", LocalDate.MIN.plusDays(1), LocalDate.EPOCH, "NAV (PDL)", "kilde", false,
+                "Registrert partner", "relatertVedSivilstandID", LocalDate.MIN, LocalDate.EPOCH, "NAV (PDL)", "kilde", false);
 
         Consumer<PersonopplysningerDto> statsborgerskapErSortert = personopplysningerDto -> {
             assertThat(personopplysningerDto.statsborgerskap().get(0).land()).isEqualTo("Testland C");
@@ -144,7 +144,7 @@ class PersonopplysningerDataFetcherTest {
             Set.of(oppholdsadresse_1, oppholdsadresse_2), Set.of(
             new Sivilstand(Sivilstandstype.REGISTRERT_PARTNER, null, "relatertVedSivilstandID", LocalDate.MIN,
                 LocalDate.EPOCH, "PDL", "kilde", false),
-            new Sivilstand(Sivilstandstype.UDEFINERT, "Udefinert type", "relatertVedSivilstandID", LocalDate.MIN,
+            new Sivilstand(Sivilstandstype.UDEFINERT, "Udefinert type", "relatertVedSivilstandID", LocalDate.MIN.plusDays(1),
                 LocalDate.EPOCH, "PDL", "kilde", false)),
             Set.of(statsborgerskap_1, statsborgerskap_2, statsborgerskap_3));
     }
