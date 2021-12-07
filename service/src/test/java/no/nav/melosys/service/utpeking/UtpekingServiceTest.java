@@ -85,6 +85,7 @@ class UtpekingServiceTest {
             lovvalgsperiodeService, oppgaveService, prosessinstansService, utpekingsperiodeRepository, vedtakKontrollService, melosysEventMulticaster);
 
         fagsak.setBehandlinger(List.of(behandling));
+        fagsak.setType(Sakstyper.EU_EOS);
         behandling.setId(behandlingID);
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
         behandling.setFagsak(fagsak);
@@ -116,6 +117,7 @@ class UtpekingServiceTest {
         verify(lovvalgsperiodeService).lagreLovvalgsperioder(eq(behandlingID), lovvalgsperiodeCaptor.capture());
         verify(prosessinstansService).opprettProsessinstansUtpekAnnetLand(eq(behandling), eq(Landkoder.SE), eq(mottakerInstitusjoner), isNull(), isNull());
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(eq(fagsak.getSaksnummer()));
+        verify(vedtakKontrollService).utførKontroller(eq(behandlingID), eq(Vedtakstyper.FØRSTEGANGSVEDTAK), eq(Sakstyper.EU_EOS));
 
         assertThat(behandlingsresultat)
             .extracting(Behandlingsresultat::getType, Behandlingsresultat::getBegrunnelseFritekst, Behandlingsresultat::getFastsattAvLand)

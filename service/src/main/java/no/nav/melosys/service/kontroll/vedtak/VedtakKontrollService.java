@@ -10,6 +10,7 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.service.LovvalgsperiodeService;
@@ -36,11 +37,11 @@ public class VedtakKontrollService {
         this.unleash = unleash;
     }
 
-    public Collection<Kontrollfeil> utførKontroller(long behandlingID, Vedtakstyper vedtakstype) {
+    public Collection<Kontrollfeil> utførKontroller(long behandlingID, Vedtakstyper vedtakstype, Sakstyper sakstype) {
         return utførKontroller(
             behandlingService.hentBehandling(behandlingID),
             lovvalgsperiodeService.hentValidertLovvalgsperiode(behandlingID),
-            VedtakKontrollFactory.hentKontrollerForVedtakstype(vedtakstype)
+            VedtakKontrollFactory.hentKontrollerForVedtakstype(vedtakstype, sakstype)
         );
     }
 

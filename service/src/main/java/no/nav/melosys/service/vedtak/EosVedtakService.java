@@ -4,15 +4,14 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.VedtakMetadataLagretEvent;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
@@ -24,13 +23,8 @@ import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
-import no.nav.melosys.service.kontroll.vedtak.VedtakKontrollService;
 import no.nav.melosys.service.oppgave.OppgaveService;
-import no.nav.melosys.service.persondata.PersondataFasade;
-import no.nav.melosys.service.registeropplysninger.RegisteropplysningerRequest;
-import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
-import no.nav.melosys.service.validering.Kontrollfeil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,30 +44,25 @@ public class EosVedtakService {
     private final ProsessinstansService prosessinstansService;
     private final EessiService eessiService;
     private final LandvelgerService landvelgerService;
-    private final PersondataFasade persondataFasade;
-    private final RegisteropplysningerService registeropplysningerService;
-    private final VedtakKontrollService vedtakKontrollService;
     private final AvklartefaktaService avklartefaktaService;
     private final ApplicationEventMulticaster melosysEventMulticaster;
+    private final ValiderVedtakService validerVedtakService;
 
     @Autowired
     public EosVedtakService(BehandlingService behandlingService, BehandlingsresultatService behandlingsresultatService,
                             OppgaveService oppgaveService, ProsessinstansService prosessinstansService,
                             EessiService eessiService, LandvelgerService landvelgerService,
-                            PersondataFasade persondataFasade, RegisteropplysningerService registeropplysningerService,
-                            VedtakKontrollService vedtakKontrollService, AvklartefaktaService avklartefaktaService,
-                            ApplicationEventMulticaster melosysEventMulticaster) {
+                            AvklartefaktaService avklartefaktaService, ApplicationEventMulticaster melosysEventMulticaster,
+                            ValiderVedtakService validerVedtakService) {
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.oppgaveService = oppgaveService;
         this.prosessinstansService = prosessinstansService;
         this.eessiService = eessiService;
         this.landvelgerService = landvelgerService;
-        this.persondataFasade = persondataFasade;
-        this.registeropplysningerService = registeropplysningerService;
-        this.vedtakKontrollService = vedtakKontrollService;
         this.avklartefaktaService = avklartefaktaService;
         this.melosysEventMulticaster = melosysEventMulticaster;
+        this.validerVedtakService = validerVedtakService;
     }
 
     public void fattVedtak(Behandling behandling, Behandlingsresultattyper behandlingsresultattype, Vedtakstyper vedtakstype) throws ValideringException {
@@ -93,7 +82,7 @@ public class EosVedtakService {
         behandlingsresultat.setType(request.getBehandlingsresultatTypeKode());
 
         if (behandlingsresultat.erInnvilgelse()) {
-            validerInnvilgelse(request.getVedtakstype(), behandling, behandlingsresultat);
+            validerVedtakService.validerInnvilgelse(behandling, behandlingsresultat, request.getVedtakstype(), Sakstyper.EU_EOS);
         }
 
         oppdaterBehandlingsresultat(behandlingsresultat, request.getVedtakstype(), request.getFritekst(), request.getRevurderBegrunnelse());
@@ -146,25 +135,6 @@ public class EosVedtakService {
         melosysEventMulticaster.multicastEvent(new VedtakMetadataLagretEvent(behandling.getId()));
     }
 
-    private void validerInnvilgelse(Vedtakstyper vedtakstype,
-                                    Behandling behandling,
-                                    Behandlingsresultat behandlingsresultat) throws ValideringException {
-        Lovvalgsperiode lovvalgsperiode = behandlingsresultat.hentValidertLovvalgsperiode();
-        String fnr = persondataFasade.hentFolkeregisterident(behandling.getFagsak().hentAktørID());
-
-        registeropplysningerService.hentOgLagreOpplysninger(
-            RegisteropplysningerRequest.builder()
-                .behandlingID(behandling.getId())
-                .fnr(fnr)
-                .fom(lovvalgsperiode.getFom())
-                .tom(lovvalgsperiode.getTom())
-                .saksopplysningTyper(RegisteropplysningerRequest.SaksopplysningTyper.builder()
-                    .medlemskapsopplysninger().build())
-                .build());
-
-        kontrollerFattVedtak(behandling.getId(), vedtakstype);
-    }
-
     private Set<String> validerOgAvklarMottakerInstitusjoner(Behandling behandling,
                                                              Set<String> mottakerinstitusjoner,
                                                              Behandlingsresultat behandlingsresultat) {
@@ -193,14 +163,6 @@ public class EosVedtakService {
             return false;
         }
         return !behandlingsresultat.erArt16EtterUtlandMedRegistrertSvar();
-    }
-
-    private void kontrollerFattVedtak(long behandlingID, Vedtakstyper vedtakstype) throws ValideringException {
-        Collection<Kontrollfeil> feilValideringer = vedtakKontrollService.utførKontroller(behandlingID, vedtakstype);
-        if (!feilValideringer.isEmpty()) {
-            throw new ValideringException("Feil i validering. Kan ikke fatte vedtak.",
-                feilValideringer.stream().map(Kontrollfeil::tilDto).collect(Collectors.toList()));
-        }
     }
 
     private static BucType avklarBucType(Behandlingsresultat behandlingsresultat) {

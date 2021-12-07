@@ -3,13 +3,13 @@ package no.nav.melosys.service.vedtak;
 import java.time.LocalDate;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.Saksstatuser;
+import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.DokgenService;
@@ -32,27 +32,38 @@ public class TrygdeavtaleVedtakService {
     private final ProsessinstansService prosessinstansService;
     private final OppgaveService oppgaveService;
     private final DokgenService dokgenService;
+    private final ValiderVedtakService validerVedtakService;
+
 
     @Autowired
     public TrygdeavtaleVedtakService(BehandlingsresultatService behandlingsresultatService,
                                      BehandlingService behandlingService,
                                      ProsessinstansService prosessinstansService,
                                      OppgaveService oppgaveService,
-                                     DokgenService dokgenService) {
+                                     DokgenService dokgenService,
+                                     ValiderVedtakService validerVedtakService) {
         this.behandlingsresultatService = behandlingsresultatService;
         this.behandlingService = behandlingService;
         this.prosessinstansService = prosessinstansService;
         this.oppgaveService = oppgaveService;
         this.dokgenService = dokgenService;
+        this.validerVedtakService = validerVedtakService;
     }
 
-    public void fattVedtak(Behandling behandling, FattTrygdeavtaleVedtakRequest request) {
+    public void fattVedtak(Behandling behandling, FattTrygdeavtaleVedtakRequest request) throws ValideringException {
         long behandlingID = behandling.getId();
 
         String saksnummer = behandling.getFagsak().getSaksnummer();
         log.info("Fatter vedtak for (Trygdeavtale) sak: {} behandling: {}", saksnummer, behandlingID);
 
-        oppdaterBehandlingsresultat(behandlingID, request);
+        var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
+        behandlingsresultat.setType(request.getBehandlingsresultatTypeKode());
+
+        if (behandlingsresultat.erInnvilgelse()) {
+            validerVedtakService.validerInnvilgelse(behandling, behandlingsresultat, request.getVedtakstype(), Sakstyper.TRYGDEAVTALE);
+        }
+
+        oppdaterBehandlingsresultat(behandlingsresultat, request);
 
         if (prosessinstansService.harVedtakInstans(behandlingID)) {
             throw new FunksjonellException("Det finnes allerede en vedtak-prosess for behandling " + behandling);
@@ -80,9 +91,7 @@ public class TrygdeavtaleVedtakService {
             .build();
     }
 
-    private void oppdaterBehandlingsresultat(long behandlingID, FattTrygdeavtaleVedtakRequest request) throws IkkeFunnetException {
-        var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
-        behandlingsresultat.setType(request.getBehandlingsresultatTypeKode());
+    private void oppdaterBehandlingsresultat(Behandlingsresultat behandlingsresultat, FattTrygdeavtaleVedtakRequest request) throws IkkeFunnetException {
         behandlingsresultat.settVedtakMetadata(request.getVedtakstype(), LocalDate.now().plusWeeks(FRIST_KLAGE_UKER));
         behandlingsresultat.setBegrunnelseFritekst(request.getFritekstBegrunnelse());
         behandlingsresultat.setFastsattAvLand(Landkoder.NO);

@@ -252,7 +252,7 @@ public class Behandlingsresultat extends RegistreringsInfo {
 
     public boolean erInnvilgelse() {
         if (type == Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
-            || type == Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND) {
+            || type == Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND || type == Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN) {
             return finnValidertLovvalgsperiode().filter(Lovvalgsperiode::erInnvilget).isPresent();
         }
         return false;

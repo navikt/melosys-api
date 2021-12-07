@@ -1,12 +1,14 @@
 package no.nav.melosys.service.vedtak;
 
 import java.util.List;
+import java.util.Set;
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
 import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
+import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.DokgenService;
@@ -39,28 +41,26 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class TrygdeavtaleVedtakServiceTest {
 
+    public static final long BEHANDLING_ID = 123L;
     public static final String SAKSNUMMER = "MEL-123";
+
     @Mock
     private BehandlingsresultatService behandlingsresultatService;
-
     @Mock
     private BehandlingService behandlingService;
-
     @Mock
     private ProsessinstansService prosessinstansService;
-
     @Mock
     private OppgaveService oppgaveService;
-
     @Mock
     private DokgenService dokgenService;
+    @Mock
+    private ValiderVedtakService validerVedtakService;
 
     @Captor
     private ArgumentCaptor<Behandlingsresultat> behandlingsresultatCaptor;
-
     @Captor
     private ArgumentCaptor<Behandling> behandlingCaptor;
-
     @Captor
     private ArgumentCaptor<BrevbestillingRequest> brevbestillingRequestCaptor;
 
@@ -68,15 +68,15 @@ class TrygdeavtaleVedtakServiceTest {
 
     @BeforeEach
     void setup() {
-        trygdeavtaleVedtakService = new TrygdeavtaleVedtakService(behandlingsresultatService, behandlingService, prosessinstansService, oppgaveService, dokgenService);
+        trygdeavtaleVedtakService = new TrygdeavtaleVedtakService(behandlingsresultatService, behandlingService, prosessinstansService, oppgaveService, dokgenService, validerVedtakService);
 
         SpringSubjectHandler.set(new TestSubjectHandler());
     }
 
     @Test
-    void fattVedtak_førstegangsvedtakUtenBrev_fatterVedtak() {
-        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
+    void fattVedtak_førstegangsvedtakUtenBrev_fatterVedtak() throws ValideringException {
+        var behandlingsresultat = lagBehandlingsresultat();
+        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
 
         FattTrygdeavtaleVedtakRequest request = lagFattVedtakRequest();
         trygdeavtaleVedtakService.fattVedtak(lagBehandling(), request);
@@ -85,6 +85,7 @@ class TrygdeavtaleVedtakServiceTest {
         verify(behandlingService).oppdaterStatus(behandlingCaptor.capture(), eq(IVERKSETTER_VEDTAK));
         verify(prosessinstansService).opprettProsessinstansIverksettVedtakTrygdeavtale(any(Behandling.class), eq(request));
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(SAKSNUMMER);
+        verify(validerVedtakService).validerInnvilgelse(any(Behandling.class), any(Behandlingsresultat.class), eq(Vedtakstyper.FØRSTEGANGSVEDTAK), eq(Sakstyper.TRYGDEAVTALE));
 
         Behandlingsresultat lagretBehandlingsresultat = behandlingsresultatCaptor.getValue();
         assertThat(lagretBehandlingsresultat)
@@ -97,9 +98,9 @@ class TrygdeavtaleVedtakServiceTest {
 
     @Test
     @Disabled("Denne er disabled frem til dokgen attest-bestilling er ok")
-    void fattVedtak_kallerDokgen_fatterVedtak() {
-        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
+    void fattVedtak_kallerDokgen_fatterVedtak() throws ValideringException {
+        var behandlingsresultat = lagBehandlingsresultat();
+        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
 
         FattTrygdeavtaleVedtakRequest request = lagFattVedtakRequest();
         trygdeavtaleVedtakService.fattVedtak(lagBehandling(), request);
@@ -109,6 +110,7 @@ class TrygdeavtaleVedtakServiceTest {
         verify(prosessinstansService).opprettProsessinstansIverksettVedtakTrygdeavtale(any(Behandling.class), eq(request));
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(SAKSNUMMER);
         verify(dokgenService).produserOgDistribuerBrev(anyLong(), brevbestillingRequestCaptor.capture());
+        verify(validerVedtakService).validerInnvilgelse(any(Behandling.class), any(Behandlingsresultat.class), eq(Vedtakstyper.FØRSTEGANGSVEDTAK), eq(Sakstyper.TRYGDEAVTALE));
 
         Behandlingsresultat lagretBehandlingsresultat = behandlingsresultatCaptor.getValue();
         assertThat(lagretBehandlingsresultat)
@@ -142,15 +144,24 @@ class TrygdeavtaleVedtakServiceTest {
     }
 
     private Behandling lagBehandling() {
-        Behandling behandling = new Behandling();
-        behandling.setId(123L);
+        var behandling = new Behandling();
+        behandling.setId(BEHANDLING_ID);
         behandling.setFagsak(lagFagsak());
         return behandling;
     }
 
     private Fagsak lagFagsak() {
-        Fagsak fagsak = new Fagsak();
+        var fagsak = new Fagsak();
         fagsak.setSaksnummer(SAKSNUMMER);
         return fagsak;
+    }
+
+    private Behandlingsresultat lagBehandlingsresultat() {
+        var lovvalgsperiode = new Lovvalgsperiode();
+        lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.INNVILGET);
+        lovvalgsperiode.setLovvalgsland(Landkoder.GB);
+        var behandlingsresultat = new Behandlingsresultat();
+        behandlingsresultat.setLovvalgsperioder(Set.of(lovvalgsperiode));
+        return behandlingsresultat;
     }
 }
