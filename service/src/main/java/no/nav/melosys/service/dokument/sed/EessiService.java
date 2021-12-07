@@ -209,12 +209,6 @@ public class EessiService {
 
     private void sendSedPåEksisterendeBehandling(long behandlingID,
                                                  PeriodeType periodeType,
-                                                 Function<Behandlingsresultat, SedType> sedTypeAvklarer) {
-        sendSedPåEksisterendeBehandling(behandlingID, periodeType, sedTypeAvklarer, null);
-    }
-
-    private void sendSedPåEksisterendeBehandling(long behandlingID,
-                                                 PeriodeType periodeType,
                                                  Function<Behandlingsresultat, SedType> sedTypeAvklarer, String ytterligereInformasjon) {
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());

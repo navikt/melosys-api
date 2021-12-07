@@ -1,5 +1,6 @@
 package no.nav.melosys.service.dokument.sed;
 
+import java.time.LocalDate;
 import java.util.*;
 
 import com.google.common.collect.Sets;
@@ -232,9 +233,9 @@ class EessiServiceTest {
     @Test
     void hentTilknyttedeBucer_forventListeMedRettType() {
         when(eessiConsumer.hentTilknyttedeBucer(anyLong(), anyList())).thenReturn(Arrays.asList(
-            easyRandom.nextObject(BucInformasjon.class),
-            easyRandom.nextObject(BucInformasjon.class),
-            easyRandom.nextObject(BucInformasjon.class)
+            lagBucInformasjon("1"),
+            lagBucInformasjon("2"),
+            lagBucInformasjon("3")
         ));
 
         List<BucInformasjon> tilknyttedeBucer = eessiService.hentTilknyttedeBucer(123L, Arrays.asList("utkast", "sendt"));
@@ -614,5 +615,16 @@ class EessiServiceTest {
         arkivDokument.setDokumentId(dokumentID);
         arkivDokument.setTittel("Tittel " + dokumentID);
         return arkivDokument;
+    }
+
+    private static BucInformasjon lagBucInformasjon(String bucID) {
+        return new BucInformasjon(
+            bucID,
+            true,
+            BucType.LA_BUC_02.name(),
+            LocalDate.now(),
+            Collections.emptySet(),
+            Collections.emptyList()
+            );
     }
 }

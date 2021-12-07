@@ -10,15 +10,20 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
+import no.nav.melosys.domain.dokument.medlemskap.Periode;
+import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.eessi.BucInformasjon;
 import no.nav.melosys.domain.eessi.BucType;
+import no.nav.melosys.domain.eessi.SedInformasjon;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
@@ -192,6 +197,19 @@ class SendVedtakUtlandTest {
     }
 
     @Test
+    void utfør_norgeErUtpektElektroniskBucÅpenNyBehandling_senderA012() {
+        when(eessiService.hentTilknyttedeBucer(eq(fagsak.getGsakSaksnummer()), any()))
+            .thenReturn(List.of(new BucInformasjon("5453", true, BucType.LA_BUC_02.name(), LocalDate.now(), Set.of(), List.of(lagSedinformasjon()))));
+        behandling.setType(Behandlingstyper.NY_VURDERING);
+        prosessinstans.setData(ProsessDataKey.YTTERLIGERE_INFO_SED, "Test");
+        behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
+        sendVedtakUtland.utfør(prosessinstans);
+
+        verify(eessiService).sendInvalideringSed(behandling.getId(), "");
+        verify(eessiService).sendGodkjenningArbeidFlereLand(behandling.getId(), "Test");
+    }
+
+    @Test
     void utfør_norgeErUtpektElektroniskBukLukket_senderIkkeA012() {
         when(eessiService.hentTilknyttedeBucer(eq(fagsak.getGsakSaksnummer()), any()))
             .thenReturn(List.of(new BucInformasjon("5453", false, BucType.LA_BUC_02.name(), LocalDate.now(), Set.of(), Collections.emptyList())));
@@ -200,5 +218,16 @@ class SendVedtakUtlandTest {
         sendVedtakUtland.utfør(prosessinstans);
 
         verify(eessiService, never()).sendGodkjenningArbeidFlereLand(anyLong(), anyString());
+    }
+
+    private static SedInformasjon lagSedinformasjon() {
+        return new SedInformasjon(
+            "5453",
+            "12345",
+            LocalDate.now(),
+            LocalDate.now(),
+            SedType.A012.name(),
+            "status",
+            "rinaUrl");
     }
 }

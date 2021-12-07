@@ -124,16 +124,15 @@ public class SendVedtakUtland extends AbstraktSendUtland {
     }
 
     public void annullerSedForNyVurdering(Behandling behandling, SedType sedType) {
-        if (erVedtakSendt(behandling.getFagsak().getGsakSaksnummer(), sedType)) {
+        if (harSendtVedtak(behandling.getFagsak().getGsakSaksnummer(), sedType)) {
             eessiService.sendInvalideringSed(behandling.getId(),"");
         }
     }
 
-    private boolean erVedtakSendt(long rinasaksnummer, SedType sedType) {
+    private boolean harSendtVedtak(long rinasaksnummer, SedType sedType) {
         return eessiService.hentTilknyttedeBucer(rinasaksnummer, Collections.emptyList())
             .stream()
             .filter(BucInformasjon::erÅpen)
-            .filter(buc -> BucType.LA_BUC_02.name().equalsIgnoreCase(buc.getBucType()))
             .flatMap(b -> b.getSeder().stream())
             .anyMatch(s -> s.getSedType().equals(sedType.name()));
     }
