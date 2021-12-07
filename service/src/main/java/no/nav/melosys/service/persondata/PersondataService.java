@@ -200,7 +200,7 @@ public class PersondataService implements PersondataFasade {
     public PersonMedHistorikk hentPersonMedHistorikk(long behandlingID) {
         final var behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
         final String ident = behandling.getFagsak().hentAktørID();
-        if (behandling.erAktiv() && erRegistrertEtterPdlStart(behandling)) {
+        if (behandling.erAktiv()) {
             return hentPersonMedHistorikk(ident);
         }
 

@@ -176,7 +176,7 @@ class PersondataServiceTest {
     }
 
     @Test
-    void hentPersonMedHistorikk_inaktivBehandling_filtrererNyeOpplysninger() {
+    void hentPersonMedHistorikk_inaktivBehandling_returnerDataFraPDL() {
         when(behandlingService.hentBehandlingUtenSaksopplysninger(1L)).thenReturn(lagInaktivBehandling());
         when(saksopplysningerService.hentPersonhistorikkPDL(1L)).thenReturn(Optional.of(PersonopplysningerObjectFactory.lagPersonMedHistorikk()));
 

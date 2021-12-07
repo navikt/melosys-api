@@ -85,7 +85,7 @@ class SaksopplysningerServiceTest {
     }
 
     @Test
-    void hentPersonhistorikkPDL_PDL_PERS_SAKSeksistererIkke_optionalNull() {
+    void hentPersonhistorikkPDL_PDL_PERS_SAKSeksistererIkke_optionalEmpty() {
         when(saksopplysningRepository.findByBehandling_IdAndType(1L, SaksopplysningType.PDL_PERS_SAKS)).thenReturn(Optional.empty());
 
         Optional<PersonMedHistorikk> personMedHistorikk = saksopplysningerService.hentPersonhistorikkPDL(1L);
