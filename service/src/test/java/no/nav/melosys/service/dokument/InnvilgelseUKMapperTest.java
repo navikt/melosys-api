@@ -15,13 +15,13 @@ import no.nav.melosys.domain.behandlingsgrunnlag.data.ForetakUtland;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
+import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Medfolgende_barn_begrunnelser;
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_barn_begrunnelser_ftrl;
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_ektefelle_samboer_begrunnelser_ftrl;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
-import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.domain.person.familie.*;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.dokgen.dto.innvilgelsestorbritannia.InnvilgelseUK;
@@ -39,7 +39,6 @@ import static no.nav.melosys.service.dokument.DokgenTestData.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -47,29 +46,28 @@ class InnvilgelseUKMapperTest {
     public static final String UUID_EKTEFELLE = "uuidEktefelle";
     public static final String UUID_BARN_1 = "uuidBarn1";
     public static final String UUID_BARN_2 = "uuidBarn2";
-    public static final String EKTEFELLE_FNR = "09080723451";
-    private static final String BARN1_FNR = "12131456789";
-    private static final String BARN2_FNR = "12151456789";
+    public static final String EKTEFELLE_FNR = "01108049800";
+    private static final LocalDate EKTEFELLE_FOEDSELSDATO = LocalDate.of(1980, 10, 2);
+    private static final String BARN1_FNR = "01100099728";
+    private static final LocalDate BARN1_FOEDSELSDATO = LocalDate.of(2000, 10, 1);
+    private static final String BARN2_FNR = "02109049878";
+    private static final LocalDate BARN2_FOEDSELSDATO = LocalDate.of(1990, 10, 2);
     public static final String SAKSNUMMER = "MEL-123";
     public static final String EKTEFELLE_NAVN = "Dolly Duck";
     public static final String BARN_NAVN_1 = "Doffen Duck";
     public static final String BARN_NAVN_2 = "Dole Duck";
     private static final LocalDate FRA_DATO = LocalDate.of(2020, 1, 1);
     private static final LocalDate TIL_DATO = LocalDate.of(2021, 1, 1);
-    private static final LocalDate FOEDSELSDATO = LocalDate.of(1970, 1, 1);
     private static final LocalDate SOKNADSDATO = LocalDate.of(2019, 10, 1);
 
-    private static final Map<String,String> FNR_TIL_NAVN = Map.of(
-        EKTEFELLE_FNR, EKTEFELLE_NAVN,
-        BARN1_FNR, BARN_NAVN_1,
-        BARN2_FNR, BARN_NAVN_2
+    private static final Map<String, LocalDate> FNR_TIL_DATO = Map.of(
+        EKTEFELLE_FNR, EKTEFELLE_FOEDSELSDATO,
+        BARN1_FNR, BARN1_FOEDSELSDATO,
+        BARN2_FNR, BARN2_FOEDSELSDATO
     );
 
     @Mock
     private AvklarteMedfolgendeFamilieService mockAvklarteMedfolgendeFamilieService;
-
-    @Mock
-    private DokgenMapperDatahenter mockDokgenMapperDatahenter;
 
     @Mock
     private LovvalgsperiodeService mockLovvalgsperiodeService;
@@ -77,16 +75,12 @@ class InnvilgelseUKMapperTest {
     @Mock
     private PersondataFasade mockPersondataFasade;
 
-    @Mock
-    private Persondata mockPersondata;
-
     private InnvilgelseUKMapper innvilgelseUKMapper;
 
     @BeforeEach
     void setup() {
         innvilgelseUKMapper = new InnvilgelseUKMapper(
             mockAvklarteMedfolgendeFamilieService,
-            mockDokgenMapperDatahenter,
             mockLovvalgsperiodeService,
             mockPersondataFasade);
 
@@ -123,7 +117,7 @@ class InnvilgelseUKMapperTest {
     void map_ettOmfattetBarn_minstEttOmfattetFamiliemedlemErtrue() {
         mockLovvalgsperiode();
         mockMedfølgendeFamilieDefaultCase();
-        mockPerson(BARN1_FNR);
+        mockPerson(EKTEFELLE_FNR, BARN1_FNR);
         when(mockAvklarteMedfolgendeFamilieService.hentAvklartMedfølgendeEktefelle(anyLong())).thenReturn(lagIkkeOmfattetMedfølgendeEktefelle());
         when(mockAvklarteMedfolgendeFamilieService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(lagOmfatetMedfølgendeBarn());
 
@@ -136,7 +130,7 @@ class InnvilgelseUKMapperTest {
     void map_ingenOmfattet_minstEttOmfattetFamiliemedlemErfalse() {
         mockLovvalgsperiode();
         mockMedfølgendeFamilieDefaultCase();
-        mockPerson(BARN1_FNR);
+        mockPerson(EKTEFELLE_FNR, BARN1_FNR);
         when(mockAvklarteMedfolgendeFamilieService.hentAvklartMedfølgendeEktefelle(anyLong())).thenReturn(lagIkkeOmfattetMedfølgendeEktefelle());
         when(mockAvklarteMedfolgendeFamilieService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(lagIkkeOmfatetMedfølgendeBarn());
 
@@ -146,10 +140,10 @@ class InnvilgelseUKMapperTest {
     }
 
     private void mockPerson(String... personer) {
-        when(mockPersondata.getFødselsdato()).thenReturn(FOEDSELSDATO);
-        when(mockPersondataFasade.hentPerson(anyString())).thenReturn(mockPersondata);
-        for (String fnr : personer) {
-            when(mockDokgenMapperDatahenter.hentSammensattNavn(fnr)).thenReturn(FNR_TIL_NAVN.get(fnr));
+        for (var fnr : personer) {
+            PersonDokument personDokument = new PersonDokument();
+            personDokument.setFødselsdato(FNR_TIL_DATO.get(fnr));
+            when(mockPersondataFasade.hentPerson(fnr)).thenReturn(personDokument);
         }
     }
 
@@ -312,7 +306,7 @@ class InnvilgelseUKMapperTest {
               "navn" : "Dolly Duck",
               "omfattet" : true,
               "begrunnelse" : null,
-              "fnr" : "09080723451",
+              "fnr" : "%s",
               "dnr" : null,
               "foedselsdato" : "%s"
             },
@@ -320,14 +314,14 @@ class InnvilgelseUKMapperTest {
               "navn" : "Doffen Duck",
               "omfattet" : true,
               "begrunnelse" : null,
-              "fnr" : "12131456789",
+              "fnr" : "%s",
               "dnr" : null,
               "foedselsdato" : "%s"
             }, {
               "navn" : "Dole Duck",
               "omfattet" : false,
               "begrunnelse" : "OVER_18_AR",
-              "fnr" : "12151456789",
+              "fnr" : "%s",
               "dnr" : null,
               "foedselsdato" : "%s"
             } ]
@@ -337,8 +331,11 @@ class InnvilgelseUKMapperTest {
         SOKNADSDATO,
         FRA_DATO,
         TIL_DATO,
-        FOEDSELSDATO,
-        FOEDSELSDATO,
-        FOEDSELSDATO
+        EKTEFELLE_FNR,
+        EKTEFELLE_FOEDSELSDATO,
+        BARN1_FNR,
+        BARN1_FOEDSELSDATO,
+        BARN2_FNR,
+        BARN2_FOEDSELSDATO
     );
 }

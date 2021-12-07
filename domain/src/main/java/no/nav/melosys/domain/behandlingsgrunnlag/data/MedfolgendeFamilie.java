@@ -1,5 +1,6 @@
 package no.nav.melosys.domain.behandlingsgrunnlag.data;
 
+import java.time.LocalDate;
 import java.util.UUID;
 
 import no.nav.commons.foedselsnummer.FoedselsNr;
@@ -69,9 +70,13 @@ public class MedfolgendeFamilie {
 
         FoedselsNr foedselsNr = new FoedselsNr(fnr);
         if (!foedselsNr.getGyldigeKontrollsiffer()) {
-            throw new FunksjonellException("Ikke et gyldig fødselsnummer, kontrollsiffer er ikke riktig");
+            throw new FunksjonellException(fnr + " er ikke et gyldig fødselsnummer, kontrollsiffer er ikke riktig");
         }
 
         return foedselsNr.getDNummer() ? IdentType.DNR : IdentType.FNR;
+    }
+
+    public LocalDate datoFraFnr() {
+        return LocalDate.parse(fnr); // TODO: støtt lovlige formater https://jira.adeo.no/browse/MELOSYS-4730#
     }
 }

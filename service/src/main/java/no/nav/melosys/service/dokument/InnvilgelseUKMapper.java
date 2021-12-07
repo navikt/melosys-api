@@ -3,6 +3,7 @@ package no.nav.melosys.service.dokument;
 import javax.transaction.Transactional;
 
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.IdentType;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
 import no.nav.melosys.domain.kodeverk.Landkoder;
@@ -23,15 +24,12 @@ import java.util.stream.Stream;
 public class InnvilgelseUKMapper {
 
     private final AvklarteMedfolgendeFamilieService avklarteMedfølgendeFamilieService;
-    private final DokgenMapperDatahenter dokgenMapperDatahenter;
     private final LovvalgsperiodeService lovvalgsperiodeService;
     private final PersondataFasade persondataFasade;
 
     public InnvilgelseUKMapper(AvklarteMedfolgendeFamilieService avklarteMedfølgendeFamilieService,
-                               DokgenMapperDatahenter dokgenMapperDatahenter,
                                LovvalgsperiodeService lovvalgsperiodeService, PersondataFasade persondataFasade) {
         this.avklarteMedfølgendeFamilieService = avklarteMedfølgendeFamilieService;
-        this.dokgenMapperDatahenter = dokgenMapperDatahenter;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
         this.persondataFasade = persondataFasade;
     }
@@ -78,19 +76,14 @@ public class InnvilgelseUKMapper {
         var medfølgendeFamilie = Optional.of(medfølgendeFamilieMap.get(uuid))
             .orElseThrow(() -> new FunksjonellException("Avklart medfølgende familie " + uuid + " finnes ikke i behandlingsgrunnlaget"));
 
+        IdentType identType = medfølgendeFamilie.utledIdentType();
         return new Ektefelle.Builder()
-            .fnr(medfølgendeFamilie.getFnr())
-            .navn(getSammensattNavn(medfølgendeFamilie.getFnr(), medfølgendeFamilie.getNavn()))
+            .fnr(identType == IdentType.FNR ? medfølgendeFamilie.getFnr() : null)
+            .dnr(identType == IdentType.DNR ? medfølgendeFamilie.getFnr() : null)
+            .navn(medfølgendeFamilie.getNavn())
             .begrunnelse(begrunnelse)
-            .fødselsdato(getFødselDato(medfølgendeFamilie.getFnr()))
+            .fødselsdato(getFødselDato(medfølgendeFamilie))
             .build();
-    }
-
-    private String getSammensattNavn(String ident, String navn) {
-        if (ident == null) {
-            return navn;
-        }
-        return dokgenMapperDatahenter.hentSammensattNavn(ident);
     }
 
     private List<Barn> finnBarn(long behandlingID) {
@@ -111,21 +104,23 @@ public class InnvilgelseUKMapper {
         var medfølgendeBarn = Optional.of(medfølgendeBarnMap.get(uuid))
             .orElseThrow(() -> new FunksjonellException("Avklart medfølgende familie " + uuid +
                 " finnes ikke i behandlingsgrunnlaget"));
-        var fnr = medfølgendeBarn.getFnr();
+        IdentType identType = medfølgendeBarn.utledIdentType();
         return new Barn.Builder()
-            .navn(getSammensattNavn(fnr, medfølgendeBarn.getNavn()))
-            .fnr(fnr)
-            .foedselsdato(getFødselDato(fnr))
+            .navn(medfølgendeBarn.getNavn())
+            .fnr(identType == IdentType.FNR ? medfølgendeBarn.getFnr() : null)
+            .dnr(identType == IdentType.DNR ? medfølgendeBarn.getFnr() : null)
+            .foedselsdato(getFødselDato(medfølgendeBarn))
             .begrunnelse(begrunnelse)
             .build();
     }
 
-    private LocalDate getFødselDato(String fnr) {
-        if (fnr == null) return null;
-        var persondata = persondataFasade.hentPerson(fnr);
-        return persondata.getFødselsdato();
+    private LocalDate getFødselDato(MedfolgendeFamilie medfolgendeFamilie) {
+        IdentType identType = medfolgendeFamilie.utledIdentType();
+        if (identType == IdentType.DATO) {
+            return medfolgendeFamilie.datoFraFnr();
+        }
+        return persondataFasade.hentPerson(medfolgendeFamilie.getFnr()).getFødselsdato();
     }
-
 
     private Soknad lagSøknad(Behandlingsgrunnlag behandlingsgrunnlag) {
         var foretakUtland = behandlingsgrunnlag.getBehandlingsgrunnlagdata().foretakUtland.stream()
