@@ -10,7 +10,6 @@ import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.dokument.person.PersonhistorikkDokument;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.person.PersonMedHistorikk;
 import no.nav.melosys.domain.person.Persondata;
@@ -65,7 +64,7 @@ public class SaksopplysningerService {
 
     @Transactional
     public void lagrePersonopplysninger(Behandling behandling, Persondata persondata) {
-        if (behandling.saksopplysningerEksistererIkke(List.of(SaksopplysningType.PERSOPL, SaksopplysningType.PDL_PERSOPL))) {
+        if (behandling.saksopplysningerEksistererIkke(List.of(SaksopplysningType.PDL_PERSOPL))) {
             Instant nå = Instant.now();
             Saksopplysning saksopplysning = new Saksopplysning();
             saksopplysning.setDokument(persondata);
@@ -74,13 +73,15 @@ public class SaksopplysningerService {
             saksopplysning.setVersjon(PDL_PERSOPL_VERSJON);
             saksopplysning.setEndretDato(nå);
             saksopplysning.setRegistrertDato(nå);
+
+            behandling.getSaksopplysninger().removeIf(s -> s.getType().equals(SaksopplysningType.PERSOPL));
             saksopplysningRepo.save(saksopplysning);
         }
     }
 
     @Transactional
     public void lagrePersonMedHistorikk(Behandling behandling, PersonMedHistorikk personMedHistorikk) {
-        if (behandling.saksopplysningerEksistererIkke(List.of(SaksopplysningType.PERSHIST, SaksopplysningType.PDL_PERS_SAKS))) {
+        if (behandling.saksopplysningerEksistererIkke(List.of(SaksopplysningType.PDL_PERS_SAKS))) {
             Instant nå = Instant.now();
             Saksopplysning saksopplysning = new Saksopplysning();
             saksopplysning.setDokument(personMedHistorikk);
@@ -89,6 +90,8 @@ public class SaksopplysningerService {
             saksopplysning.setVersjon(PDL_PERS_SAKS_VERSJON);
             saksopplysning.setEndretDato(nå);
             saksopplysning.setRegistrertDato(nå);
+
+            behandling.getSaksopplysninger().removeIf(s -> s.getType().equals(SaksopplysningType.PERSHIST));
             saksopplysningRepo.save(saksopplysning);
         }
     }

@@ -1,5 +1,6 @@
 package no.nav.melosys.service.saksopplysninger;
 
+import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.BehandlingEndretStatusEvent;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
@@ -26,11 +27,14 @@ class SaksoppplysningEventListenerTest {
     @Mock
     private SaksopplysningerService saksopplysningerService;
 
+    private final FakeUnleash unleash = new FakeUnleash();
+
     private SaksoppplysningEventListener saksoppplysningEventListener;
 
     @BeforeEach
     void setUp() {
-        saksoppplysningEventListener = new SaksoppplysningEventListener(saksopplysningerService, persondataFasade);
+        unleash.enableAll();
+        saksoppplysningEventListener = new SaksoppplysningEventListener(saksopplysningerService, persondataFasade, unleash);
     }
 
     @Test
