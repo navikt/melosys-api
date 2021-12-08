@@ -14,6 +14,7 @@ import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.DokgenService;
 import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
+import no.nav.melosys.service.kontroll.vedtak.VedtakKontrollService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.slf4j.Logger;
@@ -32,7 +33,7 @@ public class TrygdeavtaleVedtakService {
     private final ProsessinstansService prosessinstansService;
     private final OppgaveService oppgaveService;
     private final DokgenService dokgenService;
-    private final ValiderVedtakService validerVedtakService;
+    private final VedtakKontrollService vedtakKontrollService;
 
 
     @Autowired
@@ -41,13 +42,13 @@ public class TrygdeavtaleVedtakService {
                                      ProsessinstansService prosessinstansService,
                                      OppgaveService oppgaveService,
                                      DokgenService dokgenService,
-                                     ValiderVedtakService validerVedtakService) {
+                                     VedtakKontrollService vedtakKontrollService) {
         this.behandlingsresultatService = behandlingsresultatService;
         this.behandlingService = behandlingService;
         this.prosessinstansService = prosessinstansService;
         this.oppgaveService = oppgaveService;
         this.dokgenService = dokgenService;
-        this.validerVedtakService = validerVedtakService;
+        this.vedtakKontrollService = vedtakKontrollService;
     }
 
     public void fattVedtak(Behandling behandling, FattTrygdeavtaleVedtakRequest request) throws ValideringException {
@@ -60,7 +61,7 @@ public class TrygdeavtaleVedtakService {
         behandlingsresultat.setType(request.getBehandlingsresultatTypeKode());
 
         if (behandlingsresultat.erInnvilgelse()) {
-            validerVedtakService.validerInnvilgelse(behandling, behandlingsresultat, request.getVedtakstype(), Sakstyper.TRYGDEAVTALE);
+            vedtakKontrollService.validerInnvilgelse(behandling, behandlingsresultat, request.getVedtakstype(), Sakstyper.TRYGDEAVTALE);
         }
 
         oppdaterBehandlingsresultat(behandlingsresultat, request);

@@ -25,8 +25,8 @@ public class EosVedtakSystemService extends EosVedtakService {
                                   LandvelgerService landvelgerService,
                                   AvklartefaktaService avklartefaktaService,
                                   ApplicationEventMulticaster melosysEventMulticaster,
-                                  ValiderVedtakService validerVedtakService) {
+                                  VedtakKontrollService vedtakKontrollService) {
         super(behandlingService, behandlingsresultatService, oppgaveService, prosessinstansService,
-            eessiService, landvelgerService, avklartefaktaService, melosysEventMulticaster, validerVedtakService);
+            eessiService, landvelgerService, avklartefaktaService, melosysEventMulticaster, vedtakKontrollService);
     }
 }

@@ -14,6 +14,7 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.DokgenService;
 import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
 import no.nav.melosys.service.dokument.brev.KopiMottaker;
+import no.nav.melosys.service.kontroll.vedtak.VedtakKontrollService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
@@ -55,7 +56,7 @@ class TrygdeavtaleVedtakServiceTest {
     @Mock
     private DokgenService dokgenService;
     @Mock
-    private ValiderVedtakService validerVedtakService;
+    private VedtakKontrollService vedtakKontrollService;
 
     @Captor
     private ArgumentCaptor<Behandlingsresultat> behandlingsresultatCaptor;
@@ -68,7 +69,7 @@ class TrygdeavtaleVedtakServiceTest {
 
     @BeforeEach
     void setup() {
-        trygdeavtaleVedtakService = new TrygdeavtaleVedtakService(behandlingsresultatService, behandlingService, prosessinstansService, oppgaveService, dokgenService, validerVedtakService);
+        trygdeavtaleVedtakService = new TrygdeavtaleVedtakService(behandlingsresultatService, behandlingService, prosessinstansService, oppgaveService, dokgenService, vedtakKontrollService);
 
         SpringSubjectHandler.set(new TestSubjectHandler());
     }
@@ -85,7 +86,7 @@ class TrygdeavtaleVedtakServiceTest {
         verify(behandlingService).oppdaterStatus(behandlingCaptor.capture(), eq(IVERKSETTER_VEDTAK));
         verify(prosessinstansService).opprettProsessinstansIverksettVedtakTrygdeavtale(any(Behandling.class), eq(request));
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(SAKSNUMMER);
-        verify(validerVedtakService).validerInnvilgelse(any(Behandling.class), any(Behandlingsresultat.class), eq(Vedtakstyper.FØRSTEGANGSVEDTAK), eq(Sakstyper.TRYGDEAVTALE));
+        verify(vedtakKontrollService).validerInnvilgelse(any(Behandling.class), any(Behandlingsresultat.class), eq(Vedtakstyper.FØRSTEGANGSVEDTAK), eq(Sakstyper.TRYGDEAVTALE));
 
         Behandlingsresultat lagretBehandlingsresultat = behandlingsresultatCaptor.getValue();
         assertThat(lagretBehandlingsresultat)
@@ -110,7 +111,7 @@ class TrygdeavtaleVedtakServiceTest {
         verify(prosessinstansService).opprettProsessinstansIverksettVedtakTrygdeavtale(any(Behandling.class), eq(request));
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(SAKSNUMMER);
         verify(dokgenService).produserOgDistribuerBrev(anyLong(), brevbestillingRequestCaptor.capture());
-        verify(validerVedtakService).validerInnvilgelse(any(Behandling.class), any(Behandlingsresultat.class), eq(Vedtakstyper.FØRSTEGANGSVEDTAK), eq(Sakstyper.TRYGDEAVTALE));
+        verify(vedtakKontrollService).validerInnvilgelse(any(Behandling.class), any(Behandlingsresultat.class), eq(Vedtakstyper.FØRSTEGANGSVEDTAK), eq(Sakstyper.TRYGDEAVTALE));
 
         Behandlingsresultat lagretBehandlingsresultat = behandlingsresultatCaptor.getValue();
         assertThat(lagretBehandlingsresultat)

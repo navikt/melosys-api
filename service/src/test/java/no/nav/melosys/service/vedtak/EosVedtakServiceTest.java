@@ -21,6 +21,7 @@ import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
+import no.nav.melosys.service.kontroll.vedtak.VedtakKontrollService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
@@ -60,7 +61,7 @@ class EosVedtakServiceTest {
     @Mock
     private ApplicationEventMulticaster melosysEventMulticaster;
     @Mock
-    private ValiderVedtakService validerVedtakService;
+    private VedtakKontrollService vedtakKontrollService;
 
     private EosVedtakService vedtakService;
 
@@ -72,7 +73,7 @@ class EosVedtakServiceTest {
     @BeforeEach
     void setUp() {
         vedtakService = new EosVedtakService(behandlingService, behandlingsresultatService, oppgaveService, prosessinstansService,
-            eessiService, landvelgerService, avklartefaktaService, melosysEventMulticaster, validerVedtakService);
+            eessiService, landvelgerService, avklartefaktaService, melosysEventMulticaster, vedtakKontrollService);
 
         SpringSubjectHandler.set(new TestSubjectHandler());
 
@@ -85,6 +86,37 @@ class EosVedtakServiceTest {
         behandlingsresultat.setBehandling(behandling);
 
         behandling.setFagsak(lagFagsak());
+    }
+
+    @Test
+    void fattVedtak_erInnvilgelse_fatterVedtakOgKontrollererVedtak() throws Exception {
+        var mottakerinstitusjoner = Set.of("AB:CDEF123");
+        mockBehandlingsresultat();
+        mockEesiReady();
+        leggTilLovvalgsperiode(InnvilgelsesResultat.INNVILGET);
+
+        vedtakService.fattVedtak(behandling, lagRequest(FASTSATT_LOVVALGSLAND, FØRSTEGANGSVEDTAK,
+            behandlingsresultatFritekst, null, mottakerinstitusjoner));
+
+        assertThat(behandlingsresultat)
+            .extracting(Behandlingsresultat::getType, Behandlingsresultat::getBegrunnelseFritekst)
+            .containsExactly(FASTSATT_LOVVALGSLAND, behandlingsresultatFritekst);
+
+        assertThat(behandlingsresultat.getVedtakMetadata()).isNotNull()
+            .extracting(VedtakMetadata::getVedtakstype, VedtakMetadata::getRevurderBegrunnelse, VedtakMetadata::getVedtakKlagefrist)
+            .containsExactly(FØRSTEGANGSVEDTAK, null, LocalDate.now().plusWeeks(FRIST_KLAGE_UKER));
+
+        verify(behandlingService).oppdaterStatus(behandling, IVERKSETTER_VEDTAK);
+        verify(prosessinstansService).opprettProsessinstansIverksettVedtakEos(
+            any(),
+            eq(FASTSATT_LOVVALGSLAND),
+            eq(behandlingsresultatFritekst),
+            isNull(),
+            eq(mottakerinstitusjoner),
+            isNull()
+        );
+        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(any());
+        verify(vedtakKontrollService).validerInnvilgelse(any(Behandling.class), any(Behandlingsresultat.class), eq(FØRSTEGANGSVEDTAK), eq(Sakstyper.EU_EOS));
     }
 
     @Test

@@ -2,6 +2,7 @@ package no.nav.melosys.tjenester.gui.saksflyt;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collections;
 import java.util.Set;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -12,7 +13,9 @@ import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.kontroll.vedtak.VedtakKontrollService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.vedtak.FattEosVedtakRequest;
 import no.nav.melosys.service.vedtak.FattFtrlVedtakRequest;
@@ -34,8 +37,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class VedtakTjenesteTest extends JsonSchemaTestParent {
@@ -49,6 +51,8 @@ class VedtakTjenesteTest extends JsonSchemaTestParent {
     private Aksesskontroll aksesskontroll;
     @Mock
     private BehandlingService behandlingService;
+    @Mock
+    private VedtakKontrollService vedtakKontrollService;
 
     private VedtakTjeneste vedtakTjeneste;
 
@@ -59,7 +63,7 @@ class VedtakTjenesteTest extends JsonSchemaTestParent {
 
     @BeforeEach
     public void setUp() {
-        vedtakTjeneste = new VedtakTjeneste(vedtakServiceFasade, aksesskontroll, behandlingService);
+        vedtakTjeneste = new VedtakTjeneste(vedtakServiceFasade, aksesskontroll, behandlingService, vedtakKontrollService);
         SpringSubjectHandler.set(new TestSubjectHandler());
     }
 
@@ -151,6 +155,21 @@ class VedtakTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
+    void kontrollerVedtak_ingenFeilmeldinger_ingentingSkjer() throws ValideringException {
+        vedtakTjeneste.kontrollerVedtak(behandlingID, true, lagFattVedtakDto());
+    }
+
+    @Test
+    void kontrollerVedtak_feilmeldinger_kasterExceptions() throws ValideringException {
+        doThrow(new ValideringException("melding", Collections.emptyList()))
+            .when(vedtakKontrollService).validerInnvilgelse(behandlingID, Vedtakstyper.FØRSTEGANGSVEDTAK, true);
+
+        assertThatThrownBy(() -> vedtakTjeneste.kontrollerVedtak(behandlingID, true, lagFattVedtakDto()))
+            .isInstanceOf(ValideringException.class)
+            .hasMessage("melding");
+    }
+
+    @Test
     void skalMappeTilDto_EOS() throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();
         FattVedtakDto eosVedtakDto = objectMapper.readValue(hentJsonRequest("fatteosvedtak.json"), FattVedtakDto.class);
@@ -180,5 +199,11 @@ class VedtakTjenesteTest extends JsonSchemaTestParent {
         var behandling = new Behandling();
         behandling.setFagsak(fagsak);
         return behandling;
+    }
+
+    private FattVedtakDto lagFattVedtakDto (){
+        var fattVedtak = new FattTrygdeavtaleEllerFtrlVedtakDto();
+        fattVedtak.setVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK);
+        return fattVedtak;
     }
 }
