@@ -1,12 +1,14 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.datatype.DatatypeConfigurationException;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
+import com.google.common.collect.ImmutableMap;
 import no.nav.dok.melosysbrev._000084.*;
 import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.InngangsvilkaarBegrunnelseKode;
@@ -32,22 +34,30 @@ import static no.nav.melosys.service.dokument.brev.mapper.felles.Vilkaarbegrunne
 
 public class AnmodningUnntakMapper implements BrevDataMapper {
 
+
     private static final Logger log = LoggerFactory.getLogger(AnmodningUnntakMapper.class);
 
     private static final String XSD_LOCATION = "melosysbrev/melosys_000084.xsd";
 
-    private static final Map<LovvalgBestemmelse, BestemmelseDetSoekesUnntakFraKode> BESTEMMELSE_DET_SOEKES_UNNTAK_FRA_KODE_MAP =
-        Map.of(
-            Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A, BestemmelseDetSoekesUnntakFraKode.FO_883_2004_ART_13_1_A,
-            Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B1, BestemmelseDetSoekesUnntakFraKode.FO_883_2004_ART_13_1_B_1,
-            Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B2, BestemmelseDetSoekesUnntakFraKode.FO_883_2004_ART_13_1_B_2,
-            Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B3, BestemmelseDetSoekesUnntakFraKode.FO_883_2004_ART_13_1_B_3,
-            Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B4, BestemmelseDetSoekesUnntakFraKode.FO_883_2004_ART_13_1_B_4,
-            Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_2A, BestemmelseDetSoekesUnntakFraKode.FO_883_2004_ART_13_2_A,
-            Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_2B, BestemmelseDetSoekesUnntakFraKode.FO_883_2004_ART_13_2_B,
-            Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_3, BestemmelseDetSoekesUnntakFraKode.FO_883_2004_ART_13_3,
-            Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_4, BestemmelseDetSoekesUnntakFraKode.FO_883_2004_ART_13_4
-        );
+    static final BiMap<LovvalgBestemmelse, BestemmelseDetSoekesUnntakFraKode> BESTEMMELSE_DET_SOEKES_UNNTAK_FRA_KODE_MAP =
+        HashBiMap.create(ImmutableMap.<LovvalgBestemmelse, BestemmelseDetSoekesUnntakFraKode>builder()
+                             .put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A, BestemmelseDetSoekesUnntakFraKode.FO_883_2004_ART_11_3_A)
+                             .put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3B, BestemmelseDetSoekesUnntakFraKode.FO_883_2004_ART_11_3_B)
+                             .put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3C, BestemmelseDetSoekesUnntakFraKode.FO_883_2004_ART_11_3_C)
+                             .put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3D, BestemmelseDetSoekesUnntakFraKode.FO_883_2004_ART_11_3_D)
+                             .put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3E, BestemmelseDetSoekesUnntakFraKode.FO_883_2004_ART_11_3_E)
+                             .put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_4, BestemmelseDetSoekesUnntakFraKode.FO_883_2004_ART_11_4)
+                             .put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_4_2, BestemmelseDetSoekesUnntakFraKode.FO_883_2004_ART_11_4_2)
+                             .put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A, BestemmelseDetSoekesUnntakFraKode.FO_883_2004_ART_13_1_A)
+                             .put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B1, BestemmelseDetSoekesUnntakFraKode.FO_883_2004_ART_13_1_B_1)
+                             .put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B2, BestemmelseDetSoekesUnntakFraKode.FO_883_2004_ART_13_1_B_2)
+                             .put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B3, BestemmelseDetSoekesUnntakFraKode.FO_883_2004_ART_13_1_B_3)
+                             .put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B4, BestemmelseDetSoekesUnntakFraKode.FO_883_2004_ART_13_1_B_4)
+                             .put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_2A, BestemmelseDetSoekesUnntakFraKode.FO_883_2004_ART_13_2_A)
+                             .put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_2B, BestemmelseDetSoekesUnntakFraKode.FO_883_2004_ART_13_2_B)
+                             .put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_3, BestemmelseDetSoekesUnntakFraKode.FO_883_2004_ART_13_3)
+                             .put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_4, BestemmelseDetSoekesUnntakFraKode.FO_883_2004_ART_13_4)
+                             .build());
 
     @Override
     public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat,
