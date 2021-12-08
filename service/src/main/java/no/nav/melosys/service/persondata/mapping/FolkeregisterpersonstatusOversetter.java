@@ -3,9 +3,12 @@ package no.nav.melosys.service.persondata.mapping;
 import java.util.Collection;
 import java.util.Comparator;
 
+import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.domain.kodeverk.Personstatuser;
 import no.nav.melosys.domain.person.Folkeregisterpersonstatus;
+import no.nav.melosys.integrasjon.KonverteringsUtils;
 import no.nav.melosys.integrasjon.pdl.dto.HarMetadata;
+import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,19 +19,27 @@ public final class FolkeregisterpersonstatusOversetter {
     }
 
     public static Folkeregisterpersonstatus oversett(
-        Collection<no.nav.melosys.integrasjon.pdl.dto.person.Folkeregisterpersonstatus> folkeregisterpersonstatus) {
+        Collection<no.nav.melosys.integrasjon.pdl.dto.person.Folkeregisterpersonstatus> folkeregisterpersonstatus,
+        KodeverkService kodeverkService) {
         return folkeregisterpersonstatus.stream().max(Comparator.comparing(HarMetadata::hentDatoSistRegistrert))
-            .map(FolkeregisterpersonstatusOversetter::oversett)
+            .map(status -> oversett(status, kodeverkService))
             .orElse(null);
     }
 
-    private static Folkeregisterpersonstatus oversett(
-        no.nav.melosys.integrasjon.pdl.dto.person.Folkeregisterpersonstatus folkeregisterpersonstatus) {
-        return new Folkeregisterpersonstatus(oversettStatusTilKodeverk(folkeregisterpersonstatus),
-            folkeregisterpersonstatus.status());
+    public static Folkeregisterpersonstatus oversett(
+        no.nav.melosys.integrasjon.pdl.dto.person.Folkeregisterpersonstatus folkeregisterpersonstatus,
+        KodeverkService kodeverkService) {
+        return new Folkeregisterpersonstatus(
+            oversettStatusTilKodeverk(folkeregisterpersonstatus),
+            kodeverkService.dekod(FellesKodeverk.PERSONSTATUSER, folkeregisterpersonstatus.status()),
+            folkeregisterpersonstatus.metadata().master(),
+            folkeregisterpersonstatus.hentKilde(),
+            folkeregisterpersonstatus.folkeregistermetadata().gyldighetstidspunkt().toLocalDate(),
+            folkeregisterpersonstatus.metadata().historisk()
+        );
     }
 
-    private static Personstatuser oversettStatusTilKodeverk(
+    public static Personstatuser oversettStatusTilKodeverk(
         no.nav.melosys.integrasjon.pdl.dto.person.Folkeregisterpersonstatus folkeregisterpersonstatus) {
         return switch (folkeregisterpersonstatus.status()) {
             case "bosatt" -> Personstatuser.BOSATT;

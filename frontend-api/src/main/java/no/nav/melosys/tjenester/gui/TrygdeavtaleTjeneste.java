@@ -11,6 +11,7 @@ import no.nav.melosys.tjenester.gui.dto.trygdeavtale.TrygdeavtaleResultatDto;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -34,6 +35,7 @@ public class TrygdeavtaleTjeneste {
     }
 
     @GetMapping("{behandlingID}")
+    @Transactional
     public ResponseEntity<TrygdeavtaleInfoDto> hentTrygdeavtaleInfo(@PathVariable("behandlingID") long behandlingId,
                                                                     @RequestParam(value = "virksomheter", required = false) boolean hentVirksomheter,
                                                                     @RequestParam(value = "barnEktefeller", required = false) boolean hentBarnEktefeller) {
