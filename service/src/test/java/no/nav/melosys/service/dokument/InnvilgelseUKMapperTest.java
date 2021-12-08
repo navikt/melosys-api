@@ -44,21 +44,20 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class InnvilgelseUKMapperTest {
-    public static final String UUID_EKTEFELLE = "uuidEktefelle";
-    public static final String UUID_BARN_1 = "uuidBarn1";
-    public static final String UUID_BARN_2 = "uuidBarn2";
-    public static final String UUID_BARN_3 = "uuidBarn3";
-    public static final String EKTEFELLE_FNR = "01108049800";
+    private static final String UUID_EKTEFELLE = "uuidEktefelle";
+    private static final String UUID_BARN_1 = "uuidBarn1";
+    private static final String UUID_BARN_2 = "uuidBarn2";
+    private static final String UUID_BARN_3 = "uuidBarn3";
+    private static final String EKTEFELLE_FNR = "01108049800";
     private static final LocalDate EKTEFELLE_FOEDSELSDATO = LocalDate.of(1980, 10, 2);
     private static final String BARN1_FNR = "01100099728";
     private static final LocalDate BARN1_FOEDSELSDATO = LocalDate.of(2000, 10, 1);
     private static final String BARN2_FNR = "02109049878";
     private static final LocalDate BARN2_FOEDSELSDATO = LocalDate.of(1990, 10, 2);
-    public static final String SAKSNUMMER = "MEL-123";
-    public static final String EKTEFELLE_NAVN = "Dolly Duck";
-    public static final String BARN_NAVN_1 = "Doffen Duck";
-    public static final String BARN_NAVN_2 = "Dole Duck";
-    public static final String BARN_NAVN_3 = "Utenid Duck";
+    private static final String EKTEFELLE_NAVN = "Dolly Duck";
+    private static final String BARN_NAVN_1 = "Doffen Duck";
+    private static final String BARN_NAVN_2 = "Dole Duck";
+    private static final String BARN_NAVN_3 = "Utenid Duck";
     private static final String BARN3_UTEN_FNR = "01.02.2021";
     private static final LocalDate BARN3_FOEDSELSDATO = LocalDate.of(2021, 02, 01);
     private static final LocalDate FRA_DATO = LocalDate.of(2020, 1, 1);
