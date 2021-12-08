@@ -104,7 +104,7 @@ public class InnvilgelseUKMapper {
         var medfølgendeBarn = Optional.of(medfølgendeBarnMap.get(uuid))
             .orElseThrow(() -> new FunksjonellException("Avklart medfølgende familie " + uuid +
                 " finnes ikke i behandlingsgrunnlaget"));
-        IdentType identType = medfølgendeBarn.utledIdentType();
+        var identType = medfølgendeBarn.utledIdentType();
         return new Barn.Builder()
             .navn(medfølgendeBarn.getNavn())
             .fnr(identType == IdentType.FNR ? medfølgendeBarn.getFnr() : null)
@@ -115,7 +115,7 @@ public class InnvilgelseUKMapper {
     }
 
     private LocalDate getFødselDato(MedfolgendeFamilie medfolgendeFamilie) {
-        IdentType identType = medfolgendeFamilie.utledIdentType();
+        var identType = medfolgendeFamilie.utledIdentType();
         if (identType == IdentType.DATO) {
             return medfolgendeFamilie.datoFraFnr();
         }
