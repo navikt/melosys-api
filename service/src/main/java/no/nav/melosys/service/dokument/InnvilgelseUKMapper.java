@@ -13,10 +13,8 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.dokgen.dto.innvilgelsestorbritannia.*;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
-import no.nav.melosys.service.persondata.PersondataFasade;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Stream;
 
@@ -25,13 +23,11 @@ public class InnvilgelseUKMapper {
 
     private final AvklarteMedfolgendeFamilieService avklarteMedfølgendeFamilieService;
     private final LovvalgsperiodeService lovvalgsperiodeService;
-    private final PersondataFasade persondataFasade;
 
     public InnvilgelseUKMapper(AvklarteMedfolgendeFamilieService avklarteMedfølgendeFamilieService,
-                               LovvalgsperiodeService lovvalgsperiodeService, PersondataFasade persondataFasade) {
+                               LovvalgsperiodeService lovvalgsperiodeService) {
         this.avklarteMedfølgendeFamilieService = avklarteMedfølgendeFamilieService;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
-        this.persondataFasade = persondataFasade;
     }
 
     @Transactional
@@ -82,7 +78,7 @@ public class InnvilgelseUKMapper {
             .dnr(identType == IdentType.DNR ? medfølgendeFamilie.getFnr() : null)
             .navn(medfølgendeFamilie.getNavn())
             .begrunnelse(begrunnelse)
-            .fødselsdato(getFødselDato(medfølgendeFamilie))
+            .fødselsdato(medfølgendeFamilie.datoFraFnr())
             .build();
     }
 
@@ -109,17 +105,9 @@ public class InnvilgelseUKMapper {
             .navn(medfølgendeBarn.getNavn())
             .fnr(identType == IdentType.FNR ? medfølgendeBarn.getFnr() : null)
             .dnr(identType == IdentType.DNR ? medfølgendeBarn.getFnr() : null)
-            .foedselsdato(getFødselDato(medfølgendeBarn))
+            .foedselsdato(medfølgendeBarn.datoFraFnr())
             .begrunnelse(begrunnelse)
             .build();
-    }
-
-    private LocalDate getFødselDato(MedfolgendeFamilie medfolgendeFamilie) {
-        var identType = medfolgendeFamilie.utledIdentType();
-        if (identType == IdentType.DATO) {
-            return medfolgendeFamilie.datoFraFnr();
-        }
-        return persondataFasade.hentPerson(medfolgendeFamilie.getFnr()).getFødselsdato();
     }
 
     private Soknad lagSøknad(Behandlingsgrunnlag behandlingsgrunnlag) {

@@ -19,15 +19,13 @@ class MedfolgendeFamilieTest {
     private static final String NAVN = "Doffen Duck";
 
     @Test
-    void datoFraFnr_gyldigFnr_kastException() {
+    void datoFraFnr_gyldigFnr_retunerFødselsDato() {
         MedfolgendeFamilie medfolgendeFamilie = MedfolgendeFamilie.tilBarnFraFnrOgNavn("01108049800", NAVN);
-        assertThatExceptionOfType(TekniskException.class)
-            .isThrownBy(medfolgendeFamilie::datoFraFnr)
-            .withMessageContaining("Kan bare parse dato når IdentType er DATO");
+        assertThat(medfolgendeFamilie.datoFraFnr()).isEqualTo(LocalDate.of(1980,10,1));
     }
 
     @Test
-    void datoFraFnr_gyldigFnrDato_kastException() {
+    void datoFraFnr_feilDatoFormat_kastException() {
         MedfolgendeFamilie medfolgendeFamilie = MedfolgendeFamilie.tilBarnFraFnrOgNavn("20.13.21", NAVN);
         assertThatExceptionOfType(TekniskException.class)
             .isThrownBy(medfolgendeFamilie::datoFraFnr)
@@ -46,7 +44,6 @@ class MedfolgendeFamilieTest {
     void datoFraFnr_ÅrhundreOvergangDatoer_returnerDato(String dato, LocalDate expected) {
         MedfolgendeFamilie medfolgendeFamilie = MedfolgendeFamilie.tilBarnFraFnrOgNavn(dato, NAVN);
         assertThat(medfolgendeFamilie.datoFraFnr()).isEqualTo(expected);
-        System.out.println(medfolgendeFamilie.datoFraFnr());
     }
 
     private static List<Arguments> gyldigeDatoer() {

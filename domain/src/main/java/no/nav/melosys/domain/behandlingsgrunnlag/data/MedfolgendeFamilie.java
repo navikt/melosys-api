@@ -83,8 +83,9 @@ public class MedfolgendeFamilie {
 
     public LocalDate datoFraFnr() {
         if (utledIdentType() != IdentType.DATO) {
-            throw new TekniskException("Kan bare parse dato når IdentType er DATO");
+            return new FoedselsNr(fnr).getFoedselsdato();
         }
+
         LocalDate datoMedKlartÅrstall = finnFørsteMatch(Stream.of(
             "ddMMyyyy", "dd.MM.yyyy", "dd/MM/yyyy", "dd-MM-yyyy"
         ));

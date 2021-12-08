@@ -15,7 +15,6 @@ import no.nav.melosys.domain.behandlingsgrunnlag.data.ForetakUtland;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
-import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Medfolgende_barn_begrunnelser;
@@ -49,7 +48,7 @@ class InnvilgelseUKMapperTest {
     private static final String UUID_BARN_2 = "uuidBarn2";
     private static final String UUID_BARN_3 = "uuidBarn3";
     private static final String EKTEFELLE_FNR = "01108049800";
-    private static final LocalDate EKTEFELLE_FOEDSELSDATO = LocalDate.of(1980, 10, 2);
+    private static final LocalDate EKTEFELLE_FOEDSELSDATO = LocalDate.of(1980, 10, 1);
     private static final String BARN1_FNR = "01100099728";
     private static final LocalDate BARN1_FOEDSELSDATO = LocalDate.of(2000, 10, 1);
     private static final String BARN2_FNR = "02109049878";
@@ -76,18 +75,13 @@ class InnvilgelseUKMapperTest {
     @Mock
     private LovvalgsperiodeService mockLovvalgsperiodeService;
 
-    @Mock
-    private PersondataFasade mockPersondataFasade;
-
     private InnvilgelseUKMapper innvilgelseUKMapper;
 
     @BeforeEach
     void setup() {
         innvilgelseUKMapper = new InnvilgelseUKMapper(
             mockAvklarteMedfolgendeFamilieService,
-            mockLovvalgsperiodeService,
-            mockPersondataFasade);
-
+            mockLovvalgsperiodeService);
     }
 
     @Test
@@ -95,7 +89,6 @@ class InnvilgelseUKMapperTest {
         mockLovvalgsperiode();
         mockMedfølgendeFamilieDefaultCase();
         mockAvklartFamilieDefaultCase();
-        mockPerson(EKTEFELLE_FNR, BARN1_FNR, BARN2_FNR);
 
         InnvilgelseBrevbestilling brevbestilling = lagInnvilgelseBrevbestilling();
 
@@ -121,7 +114,6 @@ class InnvilgelseUKMapperTest {
     void map_ettOmfattetBarn_minstEttOmfattetFamiliemedlemErtrue() {
         mockLovvalgsperiode();
         mockMedfølgendeFamilieDefaultCase();
-        mockPerson(EKTEFELLE_FNR, BARN1_FNR);
         when(mockAvklarteMedfolgendeFamilieService.hentAvklartMedfølgendeEktefelle(anyLong())).thenReturn(lagIkkeOmfattetMedfølgendeEktefelle());
         when(mockAvklarteMedfolgendeFamilieService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(lagOmfatetMedfølgendeBarn());
 
@@ -151,21 +143,12 @@ class InnvilgelseUKMapperTest {
     void map_ingenOmfattet_minstEttOmfattetFamiliemedlemErfalse() {
         mockLovvalgsperiode();
         mockMedfølgendeFamilieDefaultCase();
-        mockPerson(EKTEFELLE_FNR, BARN1_FNR);
         when(mockAvklarteMedfolgendeFamilieService.hentAvklartMedfølgendeEktefelle(anyLong())).thenReturn(lagIkkeOmfattetMedfølgendeEktefelle());
         when(mockAvklarteMedfolgendeFamilieService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(lagIkkeOmfatetMedfølgendeBarn());
 
         InnvilgelseBrevbestilling brevbestilling = lagInnvilgelseBrevbestilling();
         InnvilgelseUK map = innvilgelseUKMapper.map(brevbestilling);
         assertThat(map.getFamilie().minstEttOmfattetFamiliemedlem()).isFalse();
-    }
-
-    private void mockPerson(String... personer) {
-        for (var fnr : personer) {
-            PersonDokument personDokument = new PersonDokument();
-            personDokument.setFødselsdato(FNR_TIL_DATO.get(fnr));
-            when(mockPersondataFasade.hentPerson(fnr)).thenReturn(personDokument);
-        }
     }
 
     private void mockMedfølgendeFamilieDefaultCase() {
