@@ -31,7 +31,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
 import static no.nav.melosys.domain.kodeverk.Saksstatuser.MEDLEMSKAP_AVKLART;
-import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN;
+import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper.FASTSATT_LOVVALGSLAND;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.IVERKSETTER_VEDTAK;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.ATTEST_NO_UK_1;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -91,7 +91,7 @@ class TrygdeavtaleVedtakServiceTest {
         Behandlingsresultat lagretBehandlingsresultat = behandlingsresultatCaptor.getValue();
         assertThat(lagretBehandlingsresultat)
             .extracting("type", "begrunnelseFritekst", "fastsattAvLand")
-            .containsExactly(MEDLEM_I_FOLKETRYGDEN, "Begrunnelse", Landkoder.NO);
+            .containsExactly(FASTSATT_LOVVALGSLAND, "Begrunnelse", Landkoder.NO);
 
         Behandling lagretBehandling = behandlingCaptor.getValue();
         assertThat(lagretBehandling.getFagsak().getStatus()).isEqualTo(MEDLEMSKAP_AVKLART);
@@ -116,7 +116,7 @@ class TrygdeavtaleVedtakServiceTest {
         Behandlingsresultat lagretBehandlingsresultat = behandlingsresultatCaptor.getValue();
         assertThat(lagretBehandlingsresultat)
             .extracting("type", "begrunnelseFritekst", "fastsattAvLand")
-            .containsExactly(MEDLEM_I_FOLKETRYGDEN, "Begrunnelse", Landkoder.NO);
+            .containsExactly(FASTSATT_LOVVALGSLAND, "Begrunnelse", Landkoder.NO);
 
         Behandling lagretBehandling = behandlingCaptor.getValue();
         assertThat(lagretBehandling.getFagsak().getStatus()).isEqualTo(MEDLEMSKAP_AVKLART);
@@ -133,7 +133,7 @@ class TrygdeavtaleVedtakServiceTest {
 
     private FattTrygdeavtaleVedtakRequest lagFattVedtakRequest() {
         return new FattTrygdeavtaleVedtakRequest.Builder()
-            .medBehandlingsresultat(MEDLEM_I_FOLKETRYGDEN)
+            .medBehandlingsresultat(FASTSATT_LOVVALGSLAND)
             .medVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK)
             .medFritekstInnledning("Innledning")
             .medFritekstBegrunnelse("Begrunnelse")
