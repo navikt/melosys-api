@@ -16,15 +16,22 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOf
 
 class MedfolgendeFamilieTest {
 
-    public static final String NAVN = "Doffen Duck";
-    public static final String GYLDIG_FNR = "01108049800";
+    private static final String NAVN = "Doffen Duck";
 
     @Test
     void datoFraFnr_gyldigFnr_kastException() {
-        MedfolgendeFamilie medfolgendeFamilie = MedfolgendeFamilie.tilBarnFraFnrOgNavn(GYLDIG_FNR, NAVN);
+        MedfolgendeFamilie medfolgendeFamilie = MedfolgendeFamilie.tilBarnFraFnrOgNavn("01108049800", NAVN);
         assertThatExceptionOfType(TekniskException.class)
             .isThrownBy(medfolgendeFamilie::datoFraFnr)
             .withMessageContaining("Kan bare parse dato når IdentType er DATO");
+    }
+
+    @Test
+    void datoFraFnr_gyldigFnrDato_kastException() {
+        MedfolgendeFamilie medfolgendeFamilie = MedfolgendeFamilie.tilBarnFraFnrOgNavn("20.13.21", NAVN);
+        assertThatExceptionOfType(TekniskException.class)
+            .isThrownBy(medfolgendeFamilie::datoFraFnr)
+            .withMessageContaining("fnr: 20.13.21 kan ikke parsers til fødselsdato");
     }
 
     @ParameterizedTest()

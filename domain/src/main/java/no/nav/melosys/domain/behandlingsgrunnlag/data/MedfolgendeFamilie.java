@@ -93,7 +93,9 @@ public class MedfolgendeFamilie {
         LocalDate datoMedUklartÅrhundre = finnFørsteMatch(Stream.of(
             "ddMMyy", "dd.MM.yy", "dd/MM/yy", "dd-MM-yy"
         ));
-        if (datoMedUklartÅrhundre == null) return null;
+        if (datoMedUklartÅrhundre == null) {
+            throw new TekniskException("fnr: " + fnr + " kan ikke parsers til fødselsdato");
+        }
 
         if (datoMedUklartÅrhundre.isAfter(LocalDate.now())) {
             // om en person har en dato frem i tiden velger vi å plassere han på 1900 tallet
