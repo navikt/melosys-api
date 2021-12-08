@@ -24,6 +24,7 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_e
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
 import no.nav.melosys.domain.person.familie.*;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.integrasjon.dokgen.dto.innvilgelsestorbritannia.Barn;
 import no.nav.melosys.integrasjon.dokgen.dto.innvilgelsestorbritannia.InnvilgelseUK;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
@@ -46,6 +47,7 @@ class InnvilgelseUKMapperTest {
     public static final String UUID_EKTEFELLE = "uuidEktefelle";
     public static final String UUID_BARN_1 = "uuidBarn1";
     public static final String UUID_BARN_2 = "uuidBarn2";
+    public static final String UUID_BARN_3 = "uuidBarn3";
     public static final String EKTEFELLE_FNR = "01108049800";
     private static final LocalDate EKTEFELLE_FOEDSELSDATO = LocalDate.of(1980, 10, 2);
     private static final String BARN1_FNR = "01100099728";
@@ -56,6 +58,9 @@ class InnvilgelseUKMapperTest {
     public static final String EKTEFELLE_NAVN = "Dolly Duck";
     public static final String BARN_NAVN_1 = "Doffen Duck";
     public static final String BARN_NAVN_2 = "Dole Duck";
+    public static final String BARN_NAVN_3 = "Utenid Duck";
+    private static final String BARN3_UTEN_FNR = "01.02.2021";
+    private static final LocalDate BARN3_FOEDSELSDATO = LocalDate.of(2021, 02, 01);
     private static final LocalDate FRA_DATO = LocalDate.of(2020, 1, 1);
     private static final LocalDate TIL_DATO = LocalDate.of(2021, 1, 1);
     private static final LocalDate SOKNADSDATO = LocalDate.of(2019, 10, 1);
@@ -124,6 +129,23 @@ class InnvilgelseUKMapperTest {
         InnvilgelseBrevbestilling brevbestilling = lagInnvilgelseBrevbestilling();
         InnvilgelseUK map = innvilgelseUKMapper.map(brevbestilling);
         assertThat(map.getFamilie().minstEttOmfattetFamiliemedlem()).isTrue();
+    }
+
+    @Test
+    void map_barnUtenFnr_parseOppgittFnrTilDato() {
+        mockLovvalgsperiode();
+        mockMedfølgendeFamilieDefaultCase();
+        when(mockAvklarteMedfolgendeFamilieService.hentAvklartMedfølgendeEktefelle(anyLong())).thenReturn(tomFamilie());
+        when(mockAvklarteMedfolgendeFamilieService.hentMedfølgendeBarn(anyLong())).thenReturn(lagMedølgendeBarnUtenFnr());
+        when(mockAvklarteMedfolgendeFamilieService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(lagBarnUtenFnr());
+
+        InnvilgelseBrevbestilling brevbestilling = lagInnvilgelseBrevbestilling();
+        InnvilgelseUK map = innvilgelseUKMapper.map(brevbestilling);
+        assertThat(map.getFamilie().barn())
+            .hasSize(1)
+            .element(0)
+            .extracting(Barn::fnr, Barn::foedselsdato)
+            .containsExactly(null, BARN3_FOEDSELSDATO);
     }
 
     @Test
@@ -271,63 +293,81 @@ class InnvilgelseUKMapperTest {
         return Map.of(UUID_EKTEFELLE, ektefelle);
     }
 
+    private Map<String, MedfolgendeFamilie> lagMedølgendeBarnUtenFnr() {
+        return Map.of(
+            UUID_BARN_3,
+            MedfolgendeFamilie.tilMedfolgendeFamilie(UUID_BARN_3, BARN3_UTEN_FNR, BARN_NAVN_3, MedfolgendeFamilie.Relasjonsrolle.BARN)
+        );
+    }
+
+    private AvklarteMedfolgendeFamilie lagBarnUtenFnr() {
+        var barn = new OmfattetFamilie(UUID_BARN_3);
+        barn.setSammensattNavn(BARN_NAVN_3);
+        barn.setIdent(BARN3_UTEN_FNR);
+        return new AvklarteMedfolgendeFamilie(Set.of(barn), Set.of());
+    }
+
+    private AvklarteMedfolgendeFamilie tomFamilie() {
+        return new AvklarteMedfolgendeFamilie(Set.of(), Set.of());
+    }
+
     private static final String FORVENTEDE_FELTER_FOR_INNVILGELSE_STORBRITANNIA_MAPPING = String.format("""
-        {
-          "saksopplysninger" : {
-            "saksnummer" : "MEL-123",
-            "navnBruker" : "Donald Duck",
-            "fnr" : "05058892382"
-          },
-          "dagensDato" : "Fjernet for test",
-          "mottaker" : {
-            "navn" : "Advokatene AS",
-            "adresselinjer" : [ "Att: Fetter Anton", "POSTBOKS 200" ],
-            "postnr" : "9990",
-            "poststed" : null,
-            "land" : null,
-            "type" : "BRUKER"
-          },
-          "innvilgelse" : {
-            "innledningFritekst" : "innledningFritekst",
-            "begrunnelseFritekst" : "begrunnelse",
-            "ektefelleFritekst" : "ektefelleFritekst",
-            "barnFritekst" : "barnFritekst"
-          },
-          "artikkel" : "UK_ART6_1",
-          "soknad" : {
-            "soknadsdato" : "%s",
-            "periodeFom" : "%s",
-            "periodeTom" : "%s",
-            "virksomhetsnavn" : "Foretaksnavn"
-          },
-          "familie" : {
-            "minstEttOmfattetFamiliemedlem" : true,
-            "ektefelle" : {
-              "navn" : "Dolly Duck",
-              "omfattet" : true,
-              "begrunnelse" : null,
-              "fnr" : "%s",
-              "dnr" : null,
-              "foedselsdato" : "%s"
-            },
-            "barn" : [ {
-              "navn" : "Doffen Duck",
-              "omfattet" : true,
-              "begrunnelse" : null,
-              "fnr" : "%s",
-              "dnr" : null,
-              "foedselsdato" : "%s"
-            }, {
-              "navn" : "Dole Duck",
-              "omfattet" : false,
-              "begrunnelse" : "OVER_18_AR",
-              "fnr" : "%s",
-              "dnr" : null,
-              "foedselsdato" : "%s"
-            } ]
-          },
-          "virksomhetArbeidsgiverSkalHaKopi" : false
-        }""",
+            {
+              "saksopplysninger" : {
+                "saksnummer" : "MEL-123",
+                "navnBruker" : "Donald Duck",
+                "fnr" : "05058892382"
+              },
+              "dagensDato" : "Fjernet for test",
+              "mottaker" : {
+                "navn" : "Advokatene AS",
+                "adresselinjer" : [ "Att: Fetter Anton", "POSTBOKS 200" ],
+                "postnr" : "9990",
+                "poststed" : null,
+                "land" : null,
+                "type" : "BRUKER"
+              },
+              "innvilgelse" : {
+                "innledningFritekst" : "innledningFritekst",
+                "begrunnelseFritekst" : "begrunnelse",
+                "ektefelleFritekst" : "ektefelleFritekst",
+                "barnFritekst" : "barnFritekst"
+              },
+              "artikkel" : "UK_ART6_1",
+              "soknad" : {
+                "soknadsdato" : "%s",
+                "periodeFom" : "%s",
+                "periodeTom" : "%s",
+                "virksomhetsnavn" : "Foretaksnavn"
+              },
+              "familie" : {
+                "minstEttOmfattetFamiliemedlem" : true,
+                "ektefelle" : {
+                  "navn" : "Dolly Duck",
+                  "omfattet" : true,
+                  "begrunnelse" : null,
+                  "fnr" : "%s",
+                  "dnr" : null,
+                  "foedselsdato" : "%s"
+                },
+                "barn" : [ {
+                  "navn" : "Doffen Duck",
+                  "omfattet" : true,
+                  "begrunnelse" : null,
+                  "fnr" : "%s",
+                  "dnr" : null,
+                  "foedselsdato" : "%s"
+                }, {
+                  "navn" : "Dole Duck",
+                  "omfattet" : false,
+                  "begrunnelse" : "OVER_18_AR",
+                  "fnr" : "%s",
+                  "dnr" : null,
+                  "foedselsdato" : "%s"
+                } ]
+              },
+              "virksomhetArbeidsgiverSkalHaKopi" : false
+            }""",
         SOKNADSDATO,
         FRA_DATO,
         TIL_DATO,
