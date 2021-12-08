@@ -12,7 +12,8 @@ public record Familie(
 ) {
     @JsonProperty
     public boolean minstEttOmfattetFamiliemedlem() {
-        if (ektefelle.omfattet()) return true;
+        if (ektefelle != null && ektefelle.omfattet()) return true;
+        if (barn == null) return false;
         return barn.stream().anyMatch(Barn::omfattet);
     }
 
