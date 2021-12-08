@@ -85,21 +85,21 @@ public class MedfolgendeFamilie {
         if (utledIdentType() != IdentType.DATO) {
             throw new TekniskException("Kan bare parse dato når IdentType er DATO");
         }
-        LocalDate happyCase = finnFørsteMatch(Stream.of(
+        LocalDate datoMedKlartÅrstall = finnFørsteMatch(Stream.of(
             "ddMMyyyy", "dd.MM.yyyy", "dd/MM/yyyy", "dd-MM-yyyy"
         ));
-        if (happyCase != null) return happyCase;
+        if (datoMedKlartÅrstall != null) return datoMedKlartÅrstall;
 
-        LocalDate dateMedUklartÅrhundre = finnFørsteMatch(Stream.of(
+        LocalDate datoMedUklartÅrhundre = finnFørsteMatch(Stream.of(
             "ddMMyy", "dd.MM.yy", "dd/MM/yy", "dd-MM-yy"
         ));
-        if (dateMedUklartÅrhundre == null) return null;
+        if (datoMedUklartÅrhundre == null) return null;
 
-        if (dateMedUklartÅrhundre.isAfter(LocalDate.now())) {
+        if (datoMedUklartÅrhundre.isAfter(LocalDate.now())) {
             // om en person har en dato frem i tiden velger vi å plassere han på 1900 tallet
-            return dateMedUklartÅrhundre.minusYears(100);
+            return datoMedUklartÅrhundre.minusYears(100);
         }
-        return dateMedUklartÅrhundre;
+        return datoMedUklartÅrhundre;
     }
 
     private LocalDate finnFørsteMatch(Stream<String> stream) {
