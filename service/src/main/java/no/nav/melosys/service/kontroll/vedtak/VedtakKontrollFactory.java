@@ -32,7 +32,8 @@ class VedtakKontrollFactory {
             case TRYGDEAVTALE -> Set.of(
                 VedtakKontroller::overlappendeMedlemsperiode,
                 VedtakKontroller::periodeManglerSluttdato,
-                VedtakKontroller::arbeidsstedManglerFelter
+                VedtakKontroller::arbeidsstedManglerFelter,
+                VedtakKontroller::representantIUtlandetManglerFelter
             );
             default -> throw new UnsupportedOperationException("Kan ikke hente kontroller for sakstype " + sakstype);
         };

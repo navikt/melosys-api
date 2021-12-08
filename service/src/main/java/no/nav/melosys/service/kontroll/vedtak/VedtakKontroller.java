@@ -1,12 +1,10 @@
 package no.nav.melosys.service.kontroll.vedtak;
 
 import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadTrygdeavtale;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
-import no.nav.melosys.service.kontroll.AdresseUtlandKontroller;
-import no.nav.melosys.service.kontroll.MedlemskapKontroller;
-import no.nav.melosys.service.kontroll.PeriodeKontroller;
-import no.nav.melosys.service.kontroll.PersonKontroller;
+import no.nav.melosys.service.kontroll.*;
 import no.nav.melosys.service.validering.Kontrollfeil;
 
 final class VedtakKontroller implements AdresseUtlandKontroller {
@@ -25,7 +23,7 @@ final class VedtakKontroller implements AdresseUtlandKontroller {
     static Kontrollfeil periodeOver24Mnd(VedtakKontrollData kontrollData) {
         Lovvalgsperiode lovvalgsperiode = kontrollData.getLovvalgsperiode();
 
-        return lovvalgsperiode.erArtikkel12()
+        return (lovvalgsperiode.erArtikkel12() || lovvalgsperiode.skalFåTrygdeavtaleAttest())
             && PeriodeKontroller.periodeOver24Mnd(lovvalgsperiode.getFom(), lovvalgsperiode.getTom())
             ? new Kontrollfeil(Kontroll_begrunnelser.PERIODEN_OVER_24_MD) : null;
     }
@@ -42,6 +40,15 @@ final class VedtakKontroller implements AdresseUtlandKontroller {
 
     static Kontrollfeil foretakUtlandManglerFelter(VedtakKontrollData kontrollData) {
         return AdresseUtlandKontroller.foretakUtlandManglerFelter(kontrollData.getBehandlingsgrunnlagData());
+    }
+
+    static Kontrollfeil representantIUtlandetManglerFelter(VedtakKontrollData kontrollData) {
+        var lovvalgsperiode = kontrollData.getLovvalgsperiode();
+        var behandlingsgrunnlagData = (SoeknadTrygdeavtale) kontrollData.getBehandlingsgrunnlagData();
+
+        return lovvalgsperiode.skalFåTrygdeavtaleAttest()
+            && ArbeidsstedKontroller.representantIUtlandetManglerFelter(behandlingsgrunnlagData.getRepresentantIUtlandet())
+            ? new Kontrollfeil(Kontroll_begrunnelser.ANNET) : null; // TODO: Endre til nytt kodeverk-objekt når det kommer.
     }
 
     static Kontrollfeil adresseRegistrertForA1(VedtakKontrollData kontrollData) {

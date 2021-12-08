@@ -25,6 +25,7 @@ import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
 import no.nav.melosys.service.validering.Kontrollfeil;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Primary
@@ -47,6 +48,7 @@ public class VedtakKontrollService {
         this.unleash = unleash;
     }
 
+    @Transactional
     public void validerInnvilgelse(long behandlingId, Vedtakstyper vedtakstype, boolean oppdaterRegisteropplysninger) throws ValideringException {
         var behandling = behandlingService.hentBehandling(behandlingId);
         var sakstype = behandling.getFagsak().getType();

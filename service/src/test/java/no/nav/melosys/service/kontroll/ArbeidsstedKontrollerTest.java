@@ -2,6 +2,7 @@ package no.nav.melosys.service.kontroll;
 
 import java.util.List;
 
+import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.RepresentantIUtlandet;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.eessi.melding.Adresse;
 import no.nav.melosys.domain.eessi.melding.Arbeidssted;
@@ -10,6 +11,19 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class ArbeidsstedKontrollerTest {
+
+    @Test
+    void representantIUtlandetManglerFelter_ok_false() {
+        assertThat(ArbeidsstedKontroller.representantIUtlandetManglerFelter(lagRepresentantIUtlandet("RepresentantNavn"))).isFalse();
+    }
+    @Test
+    void representantIUtlandetManglerFelter_finnesIkke_true() {
+        assertThat(ArbeidsstedKontroller.representantIUtlandetManglerFelter(null)).isTrue();
+    }
+    @Test
+    void representantIUtlandetManglerFelter_harIkkeNavn_true() {
+        assertThat(ArbeidsstedKontroller.representantIUtlandetManglerFelter(lagRepresentantIUtlandet(null))).isTrue();
+    }
     @Test
     void arbeidstedSvalbardOgJanMayen_landErSJ_true() {
         assertThat(ArbeidsstedKontroller.arbeidstedSvalbardOgJanMayen(lagSedDokument("SJ", "by"))).isTrue();
@@ -28,6 +42,12 @@ class ArbeidsstedKontrollerTest {
     @Test
     void arbeidstedSvalbardOgJanMayen_byIkkeFraSvalbard_false() {
         assertThat(ArbeidsstedKontroller.arbeidstedSvalbardOgJanMayen(lagSedDokument("JS", "New-Holesound"))).isFalse();
+    }
+
+    private RepresentantIUtlandet lagRepresentantIUtlandet(String navn) {
+        var representantIUtlandet = new RepresentantIUtlandet();
+        representantIUtlandet.representantNavn = navn;
+        return representantIUtlandet;
     }
 
     private SedDokument lagSedDokument(String landKode, String  by) {

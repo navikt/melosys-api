@@ -2,6 +2,7 @@ package no.nav.melosys.service.kontroll;
 
 import java.util.function.Predicate;
 
+import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.RepresentantIUtlandet;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.eessi.melding.Arbeidssted;
 import no.nav.melosys.domain.kodeverk.Landkoder;
@@ -12,6 +13,10 @@ public final class ArbeidsstedKontroller {
     private static final String[] BYER_FRA_SVALBARD = {"Ny-Ålesund", "Svalbard", "Sveagruva", "Hopen", "Bjørnøya", "Spitsbergen", "Longyearbyen"};
 
     private ArbeidsstedKontroller() {
+    }
+
+    public static boolean representantIUtlandetManglerFelter(RepresentantIUtlandet representantIUtlandet) {
+        return representantIUtlandet == null || representantIUtlandet.representantNavn == null;
     }
 
     public static boolean arbeidstedSvalbardOgJanMayen(SedDokument sedDokument) {
