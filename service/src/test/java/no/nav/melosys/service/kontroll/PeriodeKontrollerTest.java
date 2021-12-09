@@ -50,7 +50,22 @@ class PeriodeKontrollerTest {
     }
 
     @Test
-    void periodeOver5År_periode5År_false() {
+    void periodeOver3År_periode2År_false() {
+        assertThat(PeriodeKontroller.periodeOver3År(LocalDate.now(), LocalDate.now().plusYears(2).plusMonths(11))).isFalse();
+    }
+
+    @Test
+    void periodeOver3År_periode3År_true() {
+        assertThat(PeriodeKontroller.periodeOver3År(LocalDate.now(), LocalDate.now().plusYears(3))).isTrue();
+    }
+
+    @Test
+    void periodeOver3År_periode4År_true() {
+        assertThat(PeriodeKontroller.periodeOver3År(LocalDate.now(), LocalDate.now().plusYears(4))).isTrue();
+    }
+
+    @Test
+    void periodeOver5År_periode5År_true() {
         assertThat(PeriodeKontroller.periodeOver5År(LocalDate.now(), LocalDate.now().plusYears(5))).isTrue();
     }
 

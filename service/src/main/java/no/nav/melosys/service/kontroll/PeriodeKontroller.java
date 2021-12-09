@@ -24,6 +24,10 @@ public final class PeriodeKontroller {
         return tom != null && ChronoUnit.MONTHS.between(fom, tom) >= 24;
     }
 
+    public static boolean periodeOver3År(LocalDate fom, LocalDate tom) {
+        return tom != null && ChronoUnit.YEARS.between(fom, tom) >= 3;
+    }
+
     public static boolean periodeOver5År(LocalDate fom, LocalDate tom) {
         return tom != null && ChronoUnit.YEARS.between(fom, tom) >= 5;
     }

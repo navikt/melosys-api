@@ -171,6 +171,17 @@ class VedtakKontrollServiceTest {
     }
 
     @Test
+    void utførKontroller_periodeOver3År_returnererKode() {
+        lovvalgsperiode.setFom(LocalDate.now());
+        lovvalgsperiode.setTom(LocalDate.now().plusYears(3).plusDays(1));
+        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1);
+        behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(new SoeknadTrygdeavtale());
+
+        Collection<Kontrollfeil> resultat = vedtakKontrollService.utførKontroller(behandlingID, Vedtakstyper.FØRSTEGANGSVEDTAK, Sakstyper.TRYGDEAVTALE);
+        assertThat(resultat).extracting(Kontrollfeil::getKode).contains(Kontroll_begrunnelser.MER_ENN_TRE_ÅR);
+    }
+
+    @Test
     void utførKontroller_arbeidsstedManglerFelter_returnererKode() {
         lovvalgsperiode.setFom(LocalDate.now());
         lovvalgsperiode.setTom(LocalDate.now().plusYears(1));
@@ -197,14 +208,12 @@ class VedtakKontrollServiceTest {
     @Test
     void utførKontroller_representantIUtlandetManglerFelter_returnererKode() {
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1);
-        var behandlingsgrunnlag = new Behandlingsgrunnlag();
-        behandlingsgrunnlag.setBehandlingsgrunnlagdata(new SoeknadTrygdeavtale());
-        behandling.setBehandlingsgrunnlag(behandlingsgrunnlag);
+        behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(new SoeknadTrygdeavtale());
 
         Collection<Kontrollfeil> resultat = vedtakKontrollService.utførKontroller(behandlingID, Vedtakstyper.FØRSTEGANGSVEDTAK, Sakstyper.TRYGDEAVTALE);
         assertThat(resultat)
             .extracting(Kontrollfeil::getKode)
-            .contains(Kontroll_begrunnelser.ANNET);
+            .contains(Kontroll_begrunnelser.ATTEST_MANGER_ARBEIDSSTED);
     }
 
     private Behandlingsresultat lagBehandlingsresultat() {

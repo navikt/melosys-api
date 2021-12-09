@@ -22,7 +22,7 @@ class VedtakKontrollFactory {
     private static Set<Function<VedtakKontrollData, Kontrollfeil>> vedtakKontroller(Sakstyper sakstype) {
         return switch (sakstype) {
             case EU_EOS -> Set.of(
-                VedtakKontroller::adresseRegistrertForA1,
+                VedtakKontroller::adresseRegistrert,
                 VedtakKontroller::overlappendeMedlemsperiode,
                 VedtakKontroller::periodeOver24Mnd,
                 VedtakKontroller::periodeManglerSluttdato,
@@ -30,8 +30,10 @@ class VedtakKontrollFactory {
                 VedtakKontroller::foretakUtlandManglerFelter
             );
             case TRYGDEAVTALE -> Set.of(
+                VedtakKontroller::adresseRegistrert,
                 VedtakKontroller::overlappendeMedlemsperiode,
                 VedtakKontroller::periodeManglerSluttdato,
+                VedtakKontroller::periodeOverTreÅr,
                 VedtakKontroller::arbeidsstedManglerFelter,
                 VedtakKontroller::representantIUtlandetManglerFelter
             );

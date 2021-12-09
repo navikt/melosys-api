@@ -4,6 +4,7 @@ import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadTrygdeavtale;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
 import no.nav.melosys.service.kontroll.*;
 import no.nav.melosys.service.validering.Kontrollfeil;
 
@@ -23,7 +24,7 @@ final class VedtakKontroller implements AdresseUtlandKontroller {
     static Kontrollfeil periodeOver24Mnd(VedtakKontrollData kontrollData) {
         Lovvalgsperiode lovvalgsperiode = kontrollData.getLovvalgsperiode();
 
-        return (lovvalgsperiode.erArtikkel12() || lovvalgsperiode.skalFåTrygdeavtaleAttest())
+        return lovvalgsperiode.erArtikkel12()
             && PeriodeKontroller.periodeOver24Mnd(lovvalgsperiode.getFom(), lovvalgsperiode.getTom())
             ? new Kontrollfeil(Kontroll_begrunnelser.PERIODEN_OVER_24_MD) : null;
     }
@@ -32,6 +33,14 @@ final class VedtakKontroller implements AdresseUtlandKontroller {
         Lovvalgsperiode lovvalgsperiode = kontrollData.getLovvalgsperiode();
 
         return lovvalgsperiode.getTom() == null ? new Kontrollfeil(Kontroll_begrunnelser.INGEN_SLUTTDATO) : null;
+    }
+
+    static Kontrollfeil periodeOverTreÅr(VedtakKontrollData kontrollData) {
+        Lovvalgsperiode lovvalgsperiode = kontrollData.getLovvalgsperiode();
+
+        return lovvalgsperiode.getBestemmelse() == Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1
+            && PeriodeKontroller.periodeOver3År(lovvalgsperiode.getFom(), lovvalgsperiode.getTom())
+            ? new Kontrollfeil(Kontroll_begrunnelser.MER_ENN_TRE_ÅR) : null;
     }
 
     static Kontrollfeil arbeidsstedManglerFelter(VedtakKontrollData kontrollData) {
@@ -48,10 +57,10 @@ final class VedtakKontroller implements AdresseUtlandKontroller {
 
         return lovvalgsperiode.skalFåTrygdeavtaleAttest()
             && ArbeidsstedKontroller.representantIUtlandetManglerFelter(behandlingsgrunnlagData.getRepresentantIUtlandet())
-            ? new Kontrollfeil(Kontroll_begrunnelser.ANNET) : null; // TODO: Endre til nytt kodeverk-objekt når det kommer.
+            ? new Kontrollfeil(Kontroll_begrunnelser.ATTEST_MANGER_ARBEIDSSTED) : null;
     }
 
-    static Kontrollfeil adresseRegistrertForA1(VedtakKontrollData kontrollData) {
+    static Kontrollfeil adresseRegistrert(VedtakKontrollData kontrollData) {
         return PersonKontroller.harRegistrertAdresse(kontrollData.getPersonDokument(), kontrollData.getBehandlingsgrunnlagData())
             ? null : new Kontrollfeil(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE);
     }
