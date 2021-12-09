@@ -1,11 +1,13 @@
 package no.nav.melosys.service;
 
+import java.util.Optional;
+
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
+import no.nav.melosys.domain.person.PersonMedHistorikk;
 import no.nav.melosys.domain.person.Personopplysninger;
 import no.nav.melosys.repository.SaksopplysningRepository;
-import no.nav.melosys.domain.person.PersonMedHistorikk;
 import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,7 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class SaksopplysningerServiceTest {
@@ -58,7 +60,7 @@ class SaksopplysningerServiceTest {
     }
 
     @Test
-    void lagrePersonopplysninger_PERSOPLeksisterer_lagresIkke() {
+    void lagrePersonopplysninger_PERSOPLeksisterer_lagresPERSOPLfjernes() {
         Personopplysninger personopplysninger = PersonopplysningerObjectFactory.lagPersonopplysninger();
         Behandling behandling = SaksbehandlingDataFactory.lagBehandling();
         Saksopplysning saksopplysning = new Saksopplysning();
@@ -67,11 +69,15 @@ class SaksopplysningerServiceTest {
 
         saksopplysningerService.lagrePersonopplysninger(behandling, personopplysninger);
 
-        verifyNoInteractions(saksopplysningRepository);
+        verify(saksopplysningRepository).save(captor.capture());
+
+        assertThat(captor.getValue().getType()).isEqualTo(SaksopplysningType.PDL_PERSOPL);
+        assertThat(behandling.getSaksopplysninger())
+            .hasSize(0);
     }
 
     @Test
-    void lagrePersonMedHistorikk_PERSHISTeksisterer_lagesIkke() {
+    void lagrePersonMedHistorikk_PERSHISTeksisterer_lagresPERSHISTfjernes() {
         PersonMedHistorikk personMedHistorikk = PersonopplysningerObjectFactory.lagPersonMedHistorikk();
         Behandling behandling = SaksbehandlingDataFactory.lagBehandling();
         Saksopplysning saksopplysning = new Saksopplysning();
@@ -80,6 +86,19 @@ class SaksopplysningerServiceTest {
 
         saksopplysningerService.lagrePersonMedHistorikk(behandling, personMedHistorikk);
 
-        verifyNoInteractions(saksopplysningRepository);
+        verify(saksopplysningRepository).save(captor.capture());
+
+        assertThat(captor.getValue().getType()).isEqualTo(SaksopplysningType.PDL_PERS_SAKS);
+        assertThat(behandling.getSaksopplysninger())
+            .hasSize(0);
+    }
+
+    @Test
+    void hentPersonhistorikkPDL_PDL_PERS_SAKSeksistererIkke_optionalEmpty() {
+        when(saksopplysningRepository.findByBehandling_IdAndType(1L, SaksopplysningType.PDL_PERS_SAKS)).thenReturn(Optional.empty());
+
+        Optional<PersonMedHistorikk> personMedHistorikk = saksopplysningerService.hentPersonhistorikkPDL(1L);
+
+        assertThat(personMedHistorikk.isPresent()).isFalse();
     }
 }

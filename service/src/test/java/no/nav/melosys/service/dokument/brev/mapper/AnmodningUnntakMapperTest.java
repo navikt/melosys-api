@@ -1,22 +1,21 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
+import com.google.common.collect.BiMap;
 import com.google.common.collect.Sets;
 import no.nav.dok.brevdata.felles.v1.navfelles.Kontaktinformasjon;
+import no.nav.dok.melosysbrev._000084.BestemmelseDetSoekesUnntakFraKode;
 import no.nav.dok.melosysbrev._000084.Fag;
 import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.FysiskArbeidssted;
-import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
@@ -32,21 +31,23 @@ import org.junit.jupiter.api.Test;
 
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagKontaktInformasjon;
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagNorskPostadresse;
+import static no.nav.melosys.service.dokument.brev.mapper.AnmodningUnntakMapper.BESTEMMELSE_DET_SOEKES_UNNTAK_FRA_KODE_MAP;
 import static no.nav.melosys.service.dokument.brev.mapper.BrevMappingTestUtils.lagNAVFelles;
 import static no.nav.melosys.service.dokument.brev.mapper.felles.VilkaarbegrunnelseFactoryTest.lagAlleVilkaarBegrunnelser;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 
-public class AnmodningUnntakMapperTest {
+class AnmodningUnntakMapperTest {
 
     private AnmodningUnntakMapper mapper;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         mapper = new AnmodningUnntakMapper();
     }
 
     @Test
-    public void mapTilBrevXML() throws Exception {
+    void mapTilBrevXML() throws Exception {
         FellesType fellesType = lagFellesType();
 
         MelosysNAVFelles navFelles = lagMelosysNAVFelles();
@@ -65,27 +66,26 @@ public class AnmodningUnntakMapperTest {
 
         String xml = mapper.mapTilBrevXML(fellesType, navFelles, behandling, resultat, brevData);
 
-        assertThat(xml).matches("(?s)\\<\\?xml version=\"\\d\\.\\d+\" .*>\n.*")
+        assertThat(xml).matches("(?s)<\\?xml version=\"\\d\\.\\d+\" .*>\n.*")
             .contains(":yrkesaktivitet>SELVSTENDIG</ns");
         assertThat(Landkoder.AT.getBeskrivelse()).isSubstringOf(xml);
         assertThat(xml).doesNotContain(Landkoder.DK.getKode());
     }
 
     @Test
-    public void mapTilBrevXML_validerKodeverk() throws Exception {
+    void mapTilBrevXML_kodeverkArt16_1_anmodning_valider() throws Exception {
         Behandling behandling = lagBehandling();
         Behandlingsresultat resultat = lagBehandlingsresultat();
         Set<VilkaarBegrunnelse> begrunnelser = lagAlleVilkaarBegrunnelser(Art16_1_anmodning.class);
         for (VilkaarBegrunnelse begrunnelse : begrunnelser) {
-            Vilkaarsresultat vilkaarsresultat = new Vilkaarsresultat();
-            vilkaarsresultat.setBegrunnelser(Collections.singleton(begrunnelse));
             BrevDataAnmodningUnntak brevdata = lagBrevData(resultat);
-            mapper.mapFag(behandling, resultat, brevdata);
+            brevdata.anmodningBegrunnelser = Set.of(begrunnelse);
+            assertThatNoException().isThrownBy(() -> mapper.mapFag(behandling, resultat, brevdata));
         }
     }
 
     @Test
-    public void mapFag_unntakFraBestemmelseArtikkel13_forventIkkeNull() {
+    void mapFag_unntakFraBestemmelseArtikkel13_forventIkkeNull() {
         Behandling behandling = lagBehandling();
         Behandlingsresultat behandlingsresultat = lagBehandlingsresultat();
         BrevDataAnmodningUnntak brevData = lagBrevData(behandlingsresultat, Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B3);
@@ -95,7 +95,7 @@ public class AnmodningUnntakMapperTest {
     }
 
     @Test
-    public void mapFag_unntakFraBestemmelseIkkeArtikkel13_forventNull() {
+    void mapFag_unntakFraBestemmelseIkkeArtikkel13_forventNull() {
         Behandling behandling = lagBehandling();
         Behandlingsresultat behandlingsresultat = lagBehandlingsresultat();
         BrevDataAnmodningUnntak brevData = lagBrevData(behandlingsresultat, Lovvalgbestemmelser_987_2009.FO_987_2009_ART14_11);
@@ -105,13 +105,21 @@ public class AnmodningUnntakMapperTest {
     }
 
     @Test
-    public void mapFag_unntakFraBestemmelseNull_forventNull() {
+    void mapFag_unntakFraBestemmelseNull_forventNull() {
         Behandling behandling = lagBehandling();
         Behandlingsresultat behandlingsresultat = lagBehandlingsresultat();
         BrevDataAnmodningUnntak brevData = lagBrevData(behandlingsresultat);
 
         Fag fag = mapper.mapFag(behandling, behandlingsresultat, brevData);
         assertThat(fag.getBestemmelseDetSoekesUnntakFra()).isNull();
+    }
+
+    @Test
+    void mapFag_alleBestemmelserDetSøkesUnntakFra_brukes() {
+        final BiMap<BestemmelseDetSoekesUnntakFraKode, LovvalgBestemmelse> bestemmelseDetSoekesUnntakFraBrev =
+            BESTEMMELSE_DET_SOEKES_UNNTAK_FRA_KODE_MAP.inverse();
+        Arrays.stream(BestemmelseDetSoekesUnntakFraKode.values()).forEach(b -> assertThat(bestemmelseDetSoekesUnntakFraBrev.get(b))
+            .describedAs("Bestemmelse %s i brev brukes ikke", b).isNotNull());
     }
 
     private BrevDataAnmodningUnntak lagBrevData(Behandlingsresultat resultat) {

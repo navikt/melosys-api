@@ -82,8 +82,8 @@ class PersonopplysningerDataFetcherTest {
         assertThat(personopplysninger.bostedsadresser()).extracting(BostedsadresseDto::master)
             .containsExactlyInAnyOrder("NAV (PDL)", "");
         assertThat(personopplysninger.folkeregisteridentifikator()).isEqualTo("identNr");
-        assertThat(personopplysninger.folkeregisterpersonstatus()).isEqualTo(
-            new FolkeregisterpersonstatusDto(Personstatuser.UDEFINERT.getKode(), "ny status fra PDL"));
+        assertThat(personopplysninger.folkeregisterpersonstatuser()).containsExactly(
+            new FolkeregisterpersonstatusDto(Personstatuser.UDEFINERT.getKode(), "ny status fra PDL", "NAV (PDL)", Master.PDL.name(), LocalDate.parse("2019-11-18"), false));
         assertThat(personopplysninger.kjoenn()).isEqualTo(KjoennType.UKJENT);
         assertThat(personopplysninger.kontaktadresser()).hasSize(2);
         assertThat(personopplysninger.kontaktadresser()).extracting(KontaktadresseDto::master)
@@ -96,8 +96,8 @@ class PersonopplysningerDataFetcherTest {
         assertThat(personopplysninger.sivilstand()).flatExtracting(SivilstandDto::type,
             SivilstandDto::relatertVedSivilstand, SivilstandDto::gyldigFraOgMed, SivilstandDto::bekreftelsesdato,
             SivilstandDto::master, SivilstandDto::kilde, SivilstandDto::erHistorisk)
-            .containsExactlyInAnyOrder("Registrert partner", "relatertVedSivilstandID", LocalDate.MIN, LocalDate.EPOCH, "NAV (PDL)",
-                "kilde", false, "Udefinert type", "relatertVedSivilstandID", LocalDate.MIN, LocalDate.EPOCH, "NAV (PDL)", "kilde", false);
+            .containsExactly("Udefinert type", "relatertVedSivilstandID", LocalDate.MIN.plusDays(1), LocalDate.EPOCH, "NAV (PDL)", "kilde", false,
+                "Registrert partner", "relatertVedSivilstandID", LocalDate.MIN, LocalDate.EPOCH, "NAV (PDL)", "kilde", false);
 
         Consumer<PersonopplysningerDto> statsborgerskapErSortert = personopplysningerDto -> {
             assertThat(personopplysningerDto.statsborgerskap().get(0).land()).isEqualTo("Testland C");
@@ -139,12 +139,13 @@ class PersonopplysningerDataFetcherTest {
 
         return new PersonMedHistorikk(Set.of(bostedsadresse_1, bostedsadresse_2),
             null, null, new Folkeregisteridentifikator("identNr"),
-            new Folkeregisterpersonstatus(Personstatuser.UDEFINERT, "ny status fra PDL"), KjoennType.UKJENT,
+            Set.of(new Folkeregisterpersonstatus(Personstatuser.UDEFINERT, "ny status fra PDL", Master.PDL.name(), Master.PDL.name(), LocalDate.parse("2019-11-18"), false)),
+            KjoennType.UKJENT,
             Set.of(kontaktadresse_1, kontaktadresse_2), new Navn("Ola", "Oops", "King"),
             Set.of(oppholdsadresse_1, oppholdsadresse_2), Set.of(
             new Sivilstand(Sivilstandstype.REGISTRERT_PARTNER, null, "relatertVedSivilstandID", LocalDate.MIN,
                 LocalDate.EPOCH, "PDL", "kilde", false),
-            new Sivilstand(Sivilstandstype.UDEFINERT, "Udefinert type", "relatertVedSivilstandID", LocalDate.MIN,
+            new Sivilstand(Sivilstandstype.UDEFINERT, "Udefinert type", "relatertVedSivilstandID", LocalDate.MIN.plusDays(1),
                 LocalDate.EPOCH, "PDL", "kilde", false)),
             Set.of(statsborgerskap_1, statsborgerskap_2, statsborgerskap_3));
     }
