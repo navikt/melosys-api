@@ -66,12 +66,15 @@ public class DokumentproduksjonsInfoMapper {
                     JournalforingsTittel.ATTEST_NO_UK_1.getTittel()))
             .put(GENERELT_FRITEKSTBREV_BRUKER,
                 new DokumentproduksjonsInfo("fritekstbrev",
-                DokumentKategoriKode.IB.getKode(),
-                null))
+                    DokumentKategoriKode.IB.getKode(),
+                    null))
             .put(GENERELT_FRITEKSTBREV_ARBEIDSGIVER,
                 new DokumentproduksjonsInfo("fritekstbrev",
                     DokumentKategoriKode.IB.getKode(),
                     null))
+            .put(AVSLAG_MANGLENDE_OPPLYSNINGER,
+                new DokumentproduksjonsInfo("avslag_manglende_opplysninger", DokumentKategoriKode.VB.getKode(),
+                    "Avslag pga manglende dokument"))
             .build());
     }
 

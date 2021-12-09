@@ -188,6 +188,8 @@ public class DokgenService {
                 .medFritekstTittel(brevbestillingRequest.getFritekstTittel())
                 .medFritekst(brevbestillingRequest.getFritekst())
                 .medKontaktopplysninger(brevbestillingRequest.isKontaktopplysninger());
+            case AVSLAG_MANGLENDE_OPPLYSNINGER -> new AvslagBrevbestilling.Builder()
+                .medFritekst(brevbestillingRequest.getFritekst());
             default -> new DokgenBrevbestilling.Builder<>();
         };
     }

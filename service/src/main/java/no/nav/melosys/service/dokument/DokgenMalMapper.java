@@ -1,9 +1,13 @@
 package no.nav.melosys.service.dokument;
 
-import no.nav.melosys.domain.brev.DokgenBrevbestilling;
-import no.nav.melosys.domain.brev.FritekstbrevBrevbestilling;
-import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
-import no.nav.melosys.domain.brev.MangelbrevBrevbestilling;
+import java.time.Instant;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
+import no.nav.melosys.domain.arkiv.Journalpost;
+import no.nav.melosys.domain.brev.*;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.exception.FunksjonellException;
@@ -13,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static java.lang.String.format;
+import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING_MANGLENDE_OPPLYSNINGER;
 import static org.springframework.util.StringUtils.hasText;
 
 @Component
@@ -22,16 +27,20 @@ public class DokgenMalMapper {
     private final InnvilgelseFtrlMapper innvilgelseFtrlMapper;
     private final AttestStorbritanniaMapper attestStorbritanniaMapper;
     private final InnvilgelseUKMapper innvilgelseUKMapper;
+    private final DokumentHentingService dokumentHentingService;
 
     @Autowired
     public DokgenMalMapper(DokgenMapperDatahenter dokgenMapperDatahenter,
                            InnvilgelseFtrlMapper innvilgelseFtrlMapper,
                            AttestStorbritanniaMapper attestStorbritanniaMapper,
-                           InnvilgelseUKMapper innvilgelseUKMapper) {
+                           InnvilgelseUKMapper innvilgelseUKMapper,
+                           DokumentHentingService dokumentHentingService
+    ) {
         this.dokgenMapperDatahenter = dokgenMapperDatahenter;
         this.innvilgelseFtrlMapper = innvilgelseFtrlMapper;
         this.attestStorbritanniaMapper = attestStorbritanniaMapper;
         this.innvilgelseUKMapper = innvilgelseUKMapper;
+        this.dokumentHentingService = dokumentHentingService;
     }
 
     public DokgenDto mapBehandling(DokgenBrevbestilling mottattBrevbestilling) {
@@ -52,6 +61,18 @@ public class DokgenMalMapper {
 
     private DokgenBrevbestilling berikBestillingMedPersondata(DokgenBrevbestilling mottattBrevbestilling) {
         return mottattBrevbestilling.toBuilder().medPersonDokument(dokgenMapperDatahenter.hentPersondata(mottattBrevbestilling)).build();
+    }
+
+    private List<Instant> hentMangelbrevDatoer(String saksnummer) {
+        List<Journalpost> dokumenter = dokumentHentingService.hentDokumenter(saksnummer).stream().filter(dokument ->
+                dokument.getHoveddokument().getTittel().equals(MELDING_MANGLENDE_OPPLYSNINGER.getBeskrivelse()))
+            .collect(Collectors.toList());
+
+        return dokumenter.stream()
+            .map(Journalpost::getForsendelseJournalfoert)
+            .filter(Objects::nonNull)
+            .sorted(Comparator.naturalOrder())
+            .collect(Collectors.toList());
     }
 
     private DokgenDto lagDokgenDtoFraBestilling(DokgenBrevbestilling brevbestilling) {
@@ -84,6 +105,9 @@ public class DokgenMalMapper {
             case GENERELT_FRITEKSTBREV_ARBEIDSGIVER -> Fritekstbrev.av(((FritekstbrevBrevbestilling) brevbestilling).toBuilder()
                     .medNavnFullmektig(dokgenMapperDatahenter.hentFullmektigNavn(brevbestilling.getBehandling().getFagsak(), Representerer.ARBEIDSGIVER)).build(),
                 Aktoersroller.ARBEIDSGIVER
+            );
+            case AVSLAG_MANGLENDE_OPPLYSNINGER -> Avslagbrev.av(((AvslagBrevbestilling) brevbestilling).toBuilder().build(),
+                hentMangelbrevDatoer(brevbestilling.getBehandling().getFagsak().getSaksnummer())
             );
             default -> throw new FunksjonellException(
                 format("ProduserbartDokument %s er ikke støttet av melosys-dokgen",
