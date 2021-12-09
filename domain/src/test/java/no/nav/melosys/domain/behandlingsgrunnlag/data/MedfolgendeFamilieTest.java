@@ -19,7 +19,7 @@ class MedfolgendeFamilieTest {
     private static final String NAVN = "Doffen Duck";
 
     @Test
-    void datoFraFnr_gyldigFnr_retunerFødselsDato() {
+    void datoFraFnr_gyldigFnr_returnerFødselsdato() {
         MedfolgendeFamilie medfolgendeFamilie = MedfolgendeFamilie.tilBarnFraFnrOgNavn("01108049800", NAVN);
         assertThat(medfolgendeFamilie.datoFraFnr()).isEqualTo(LocalDate.of(1980,10,1));
     }
