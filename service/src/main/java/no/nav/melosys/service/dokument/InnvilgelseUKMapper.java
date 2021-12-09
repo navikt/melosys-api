@@ -3,10 +3,11 @@ package no.nav.melosys.service.dokument;
 import javax.transaction.Transactional;
 
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
+import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadTrygdeavtale;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.IdentType;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.RepresentantIUtlandet;
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
-import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
 import no.nav.melosys.domain.person.familie.IkkeOmfattetFamilie;
 import no.nav.melosys.exception.FunksjonellException;
@@ -111,16 +112,18 @@ public class InnvilgelseUKMapper {
     }
 
     private Soknad lagSøknad(Behandlingsgrunnlag behandlingsgrunnlag) {
-        var foretakUtland = behandlingsgrunnlag.getBehandlingsgrunnlagdata().foretakUtland.stream()
-            .filter(foretak -> foretak.adresse.getLandkode().equals(Landkoder.GB.getKode()))
-            .findFirst().orElseThrow(() -> new FunksjonellException("Ingen utenlandske virksomheter funnet"));
+        var soeknadTrygdeavtale = (SoeknadTrygdeavtale) behandlingsgrunnlag.getBehandlingsgrunnlagdata();
+        var representantIUtlandet = soeknadTrygdeavtale.getRepresentantIUtlandet();
+        if (representantIUtlandet == null) {
+            throw new FunksjonellException("Behandlingsgrunnlaget inneholder ikke representant I utlandet");
+        }
 
         var periode = behandlingsgrunnlag.getBehandlingsgrunnlagdata().periode;
         return new Soknad(
             behandlingsgrunnlag.getMottaksdato(),
             periode.getFom(),
             periode.getTom(),
-            foretakUtland.navn
+            representantIUtlandet.representantNavn
         );
     }
 }
