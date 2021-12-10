@@ -7,13 +7,14 @@ package no.nav.melosys.tjenester.gui.dto.brev;
  * et valgalternativ fra {@param valg} som har {@link FeltvalgAlternativDto#isVisFelt()} = true.
  */
 public class BrevmalFeltDto {
+
     private final String kode;
     private final String beskrivelse;
     private final FeltType feltType;
     private final String hjelpetekst;
     private final boolean paakrevd;
     private final FeltValgDto valg;
-    private final Integer tegnBegrensning; // TODO: Verifiser i kontrolleren
+    private final Integer tegnBegrensning;
 
     private BrevmalFeltDto(Builder builder) {
         this.kode = builder.kode;
