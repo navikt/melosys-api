@@ -43,6 +43,7 @@ import org.mockito.stubbing.Answer;
 
 import static no.nav.melosys.service.dokument.DokgenMalMapperTest.*;
 import static no.nav.melosys.service.dokument.DokgenTestData.*;
+import static no.nav.melosys.service.dokument.DokgenTrygdeavtaleTestData.lagLovvalgsperiode;
 import static no.nav.melosys.service.dokument.DokgenTrygdeavtaleTestData.lagTrygdeavtaleBehandling;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
@@ -273,15 +274,6 @@ class AttestStorbritanniaMapperTest {
         });
     }
 
-    private Lovvalgsperiode lagLovvalgsperiode() {
-        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setFom(LOVVALGSPERIODE_FOM);
-        lovvalgsperiode.setTom(LOVVALGSPERIODE_TOM);
-        lovvalgsperiode.setDekning(Trygdedekninger.FULL_DEKNING_FTRL);
-        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1);
-        return lovvalgsperiode;
-    }
-
     private List<AvklartVirksomhet> lagAvklarteVirksomheter() {
         return List.of(new AvklartVirksomhet(ARBEIDSGIVER_NAVN, ORG_NR, BrevDataTestUtils.lagStrukturertAdresse(), Yrkesaktivitetstyper.LOENNET_ARBEID));
     }
@@ -305,16 +297,6 @@ class AttestStorbritanniaMapperTest {
         MedfolgendeFamilie medfolgendeBarn1 = MedfolgendeFamilie.tilMedfolgendeFamilie(
             UUID_BARN, BARN1_FNR, BARN_NAVN, MedfolgendeFamilie.Relasjonsrolle.BARN);
         return Map.of(UUID_BARN, medfolgendeBarn1);
-    }
-
-    private static SoeknadTrygdeavtale lagTrygdeavtaleBehandlingsgrunnlagdata() {
-        var behandlingsgrunnlagData = new SoeknadTrygdeavtale();
-        var representantIUtlandet = new RepresentantIUtlandet();
-        representantIUtlandet.representantNavn = "Foretaksnavn";
-        representantIUtlandet.adresselinjer = List.of("Uk address");
-        representantIUtlandet.representantLand = Landkoder.GB.getKode();
-        behandlingsgrunnlagData.setRepresentantIUtlandet(representantIUtlandet);
-        return behandlingsgrunnlagData;
     }
 
     private static final String FORVENTEDE_FELTER_FOR_ATTEST_STORBRITANNIA_MAPPING = String.format("""
