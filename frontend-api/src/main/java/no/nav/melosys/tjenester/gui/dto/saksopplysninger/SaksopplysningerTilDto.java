@@ -1,4 +1,4 @@
-package no.nav.melosys.tjenester.gui.dto.tildto;
+package no.nav.melosys.tjenester.gui.dto.saksopplysninger;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -102,10 +102,8 @@ public class SaksopplysningerTilDto {
                 case SEDOPPL:
                     dto.setSed(SedDokumentDto.fra((SedDokument) dokument));
                     break;
-                case UTBETAL:
-                    break;
                 default:
-                    throw new IllegalArgumentException("Type " + type.getKode() + " ikke støttet.");
+                    break;
             }
         }
 

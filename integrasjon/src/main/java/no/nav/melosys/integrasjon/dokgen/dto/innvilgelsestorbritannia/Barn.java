@@ -21,4 +21,49 @@ public record Barn(
     @JsonFormat(shape = STRING)
     LocalDate foedselsdato
 ) {
+    public static class Builder {
+        private String navn;
+
+        private boolean omfattet;
+
+        private Medfolgende_barn_begrunnelser_ftrl begrunnelse;
+
+        private String fnr;
+
+        private String dnr;
+
+        private LocalDate foedselsdato;
+
+        public Builder navn(String navn) {
+            this.navn = navn;
+            return this;
+        }
+
+        public Builder begrunnelse(String begrunnelse) {
+            if(begrunnelse!=null) {
+                this.begrunnelse = Medfolgende_barn_begrunnelser_ftrl.valueOf(begrunnelse);
+            }
+            return this;
+        }
+
+        public Builder fnr(String fnr) {
+            this.fnr = fnr;
+            return this;
+        }
+
+        public Builder dnr(String dnr) {
+            this.dnr = dnr;
+            return this;
+        }
+
+        public Builder foedselsdato(LocalDate foedselsdato) {
+            this.foedselsdato = foedselsdato;
+            return this;
+        }
+
+        public Barn build() {
+            return new Barn(navn, begrunnelse == null, begrunnelse, fnr, dnr, foedselsdato);
+        }
+    }
+
 }

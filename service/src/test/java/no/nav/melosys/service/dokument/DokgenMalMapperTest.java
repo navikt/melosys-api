@@ -25,7 +25,6 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_t
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.dokgen.dto.*;
 import no.nav.melosys.integrasjon.dokgen.dto.atteststorbritannia.*;
-import no.nav.melosys.integrasjon.dokgen.dto.felles.Mottaker;
 import no.nav.melosys.integrasjon.dokgen.dto.felles.Person;
 import no.nav.melosys.integrasjon.dokgen.dto.innvilgelsestorbritannia.InnvilgelseUK;
 import no.nav.melosys.integrasjon.dokgen.dto.innvilgelsestorbritannia.Soknad;
@@ -535,12 +534,6 @@ class DokgenMalMapperTest {
 
     private InnvilgelseUK lagInnvilgelseUK() {
         return new InnvilgelseUK.Builder(lagInnvilgelseBrevbestilling())
-            .mottaker(new Mottaker("Ola Nordmann",
-                List.of("Gatenavn 12", "Linje 2"),
-                "1010",
-                "POSTSTED",
-                "Norge",
-                "Bruker eller brukers fullmektig"))
             .artikkel(Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1)
             .soknad(new Soknad(SOKNADSDATO,
                 LOVVALGSPERIODE_FOM,

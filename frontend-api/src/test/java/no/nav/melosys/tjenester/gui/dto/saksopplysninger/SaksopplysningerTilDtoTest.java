@@ -1,4 +1,4 @@
-package no.nav.melosys.tjenester.gui.dto.tildto;
+package no.nav.melosys.tjenester.gui.dto.saksopplysninger;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -38,9 +38,10 @@ import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 
 import static no.nav.melosys.domain.SaksopplysningType.PERSHIST;
 import static no.nav.melosys.domain.SaksopplysningType.PERSOPL;
-import static no.nav.melosys.tjenester.gui.dto.tildto.SaksopplysningerTilDto.medlemsperiodeKomparator;
+import static no.nav.melosys.tjenester.gui.dto.saksopplysninger.SaksopplysningerTilDto.medlemsperiodeKomparator;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
