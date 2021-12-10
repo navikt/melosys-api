@@ -150,7 +150,7 @@ public class AttestStorbritanniaMapper {
         var fnr = medfølgendeFamilie.getFnr();
 
         var sammensattNavn = fnr != null ? dokgenMapperDatahenter.hentSammensattNavn(fnr) : medfølgendeFamilie.getNavn();
-        var fødselsdato = persondataFasade.hentPerson(fnr).getFødselsdato().atStartOfDay(ZoneId.systemDefault()).toInstant();
+        var fødselsdato = persondataFasade.hentPerson(fnr).getFødselsdato();
         return new Person(sammensattNavn, fødselsdato, fnr, null);
     }
 }

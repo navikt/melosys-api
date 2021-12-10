@@ -52,7 +52,6 @@ class DokgenMalMapperTest {
     public static final LocalDate LOVVALGSPERIODE_FOM = LocalDate.of(2020, 1, 1);
     public static final LocalDate LOVVALGSPERIODE_TOM = LocalDate.of(2021, 1, 1);
     public static final LocalDate FØDSELSDATO = LocalDate.of(2000, 1, 1);
-    public static final Instant FØDSELSDATO_INSTANT = FØDSELSDATO.atStartOfDay(ZoneId.systemDefault()).toInstant();
 
     @Mock
     private InnvilgelseFtrlMapper mockInnvilgelseFtrlMapper;
@@ -554,7 +553,7 @@ class DokgenMalMapperTest {
         return new AttestStorbritannia.Builder(dokgenBrevbestillingBuilder)
             .medfolgendeFamiliemedlemmer(new MedfolgendeFamiliemedlemmer(
                 new Person("Kone",
-                    FØDSELSDATO_INSTANT,
+                    FØDSELSDATO,
                     "01010119901",
                     null),
                 List.of()

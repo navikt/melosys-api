@@ -49,7 +49,8 @@ public class AttestStorbritannia extends DokgenDto {
 
     public AttestStorbritannia(Builder builder) {
         super(builder.brevbestilling);
-        this.vedtaksdato = builder.brevbestilling.getVedtaksdato() != null ? LocalDate.ofInstant(builder.brevbestilling.getVedtaksdato(), ZoneId.systemDefault()): null;
+        this.vedtaksdato = builder.brevbestilling.getVedtaksdato() != null
+            ? LocalDate.ofInstant(builder.brevbestilling.getVedtaksdato(), ZoneId.systemDefault()) : null;
         this.utsendelse = builder.utsendelse;
         this.arbeidstaker = builder.arbeidstaker;
         this.arbeidsgiverNorge = builder.arbeidsgiverNorge;

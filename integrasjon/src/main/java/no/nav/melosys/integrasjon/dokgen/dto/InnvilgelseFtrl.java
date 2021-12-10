@@ -123,7 +123,8 @@ public class InnvilgelseFtrl extends DokgenDto {
     public InnvilgelseFtrl(Builder builder) {
         super(builder.brevbestilling);
         this.innvilgelse = Innvilgelse.av(builder.brevbestilling);
-        this.datoMottatt = builder.brevbestilling.getForsendelseMottatt() != null ? LocalDate.ofInstant(builder.brevbestilling.getForsendelseMottatt(), ZoneId.systemDefault()): null;
+        this.datoMottatt = builder.brevbestilling.getForsendelseMottatt() != null
+            ? LocalDate.ofInstant(builder.brevbestilling.getForsendelseMottatt(), ZoneId.systemDefault()): null;
         this.perioder = builder.perioder;
         this.erFullstendigInnvilget = builder.erFullstendigInnvilget;
         this.ftrl_2_8_begrunnelse = builder.ftrl_2_8_begrunnelse;

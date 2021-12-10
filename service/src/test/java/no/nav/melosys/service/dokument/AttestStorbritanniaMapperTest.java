@@ -355,5 +355,5 @@ class AttestStorbritanniaMapperTest {
             "adresse" : [ ]
           },
           "vedtaksdato" : "%s"
-        }""", FØDSELSDATO_INSTANT, FØDSELSDATO_INSTANT, LOVVALGSPERIODE_FOM, LOVVALGSPERIODE_TOM, VEDTAKS_DATO);
+        }""", FØDSELSDATO, FØDSELSDATO, LOVVALGSPERIODE_FOM, LOVVALGSPERIODE_TOM, VEDTAKS_DATO);
 }
