@@ -9,7 +9,6 @@ import java.util.Set;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadTrygdeavtale;
@@ -44,6 +43,7 @@ import org.mockito.stubbing.Answer;
 
 import static no.nav.melosys.service.dokument.DokgenMalMapperTest.*;
 import static no.nav.melosys.service.dokument.DokgenTestData.*;
+import static no.nav.melosys.service.dokument.DokgenTrygdeavtaleTestData.lagTrygdeavtaleBehandling;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.*;
@@ -77,8 +77,6 @@ class AttestStorbritanniaMapperTest {
 
     private AttestStorbritanniaMapper attestStorbritanniaMapper;
 
-    private Behandling behandlingMedTrygdeavtaleSøknad;
-
     @BeforeEach
     void setup() {
         attestStorbritanniaMapper = new AttestStorbritanniaMapper(
@@ -87,9 +85,6 @@ class AttestStorbritanniaMapperTest {
             mockDokgenMapperDatahenter,
             mockPersondataFasade,
             mockLovvalgsperiodeService);
-
-        behandlingMedTrygdeavtaleSøknad = lagBehandling();
-        behandlingMedTrygdeavtaleSøknad.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(lagTrygdeavtaleBehandlingsgrunnlagdata());
     }
 
     private static List<Arguments> gyldigePerioder() {
@@ -211,7 +206,7 @@ class AttestStorbritanniaMapperTest {
         mockHappyCase();
 
         AttestStorbritannia attestStorbritannia = attestStorbritanniaMapper.map(new DokgenBrevbestilling.Builder()
-            .medBehandling(behandlingMedTrygdeavtaleSøknad)
+            .medBehandling(lagTrygdeavtaleBehandling())
             .medPersonDokument(lagPersonDokument())
             .medVedtaksdato(VEDTAKS_DATO_INSTANT)
             .build()
@@ -232,7 +227,7 @@ class AttestStorbritanniaMapperTest {
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() ->
                 attestStorbritanniaMapper.map(new DokgenBrevbestilling.Builder()
-                    .medBehandling(behandlingMedTrygdeavtaleSøknad)
+                    .medBehandling(lagTrygdeavtaleBehandling())
                     .medPersonDokument(lagPersonDokument())
                     .medVedtaksdato(VEDTAKS_DATO_INSTANT)
                     .build()
@@ -249,7 +244,7 @@ class AttestStorbritanniaMapperTest {
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() ->
                 attestStorbritanniaMapper.map(new DokgenBrevbestilling.Builder()
-                    .medBehandling(behandlingMedTrygdeavtaleSøknad)
+                    .medBehandling(lagTrygdeavtaleBehandling())
                     .medPersonDokument(lagPersonDokument())
                     .medVedtaksdato(VEDTAKS_DATO_INSTANT)
                     .build()

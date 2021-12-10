@@ -12,7 +12,6 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadTrygdeavtale;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.RepresentantIUtlandet;
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
 import no.nav.melosys.domain.kodeverk.Landkoder;
@@ -36,6 +35,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.INNVILGELSE_UK;
 import static no.nav.melosys.service.dokument.DokgenMalMapperTest.*;
 import static no.nav.melosys.service.dokument.DokgenTestData.*;
+import static no.nav.melosys.service.dokument.DokgenTrygdeavtaleTestData.lagTrygdeavtaleBehandling;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -62,16 +62,11 @@ class InnvilgelseUKMapperTest {
 
     private InnvilgelseUKMapper innvilgelseUKMapper;
 
-    private Behandling behandlingMedTrygdeavtaleSøknad;
-
     @BeforeEach
     void setup() {
         innvilgelseUKMapper = new InnvilgelseUKMapper(
             mockAvklarteMedfolgendeFamilieService,
             mockLovvalgsperiodeService);
-
-        behandlingMedTrygdeavtaleSøknad = lagBehandling();
-        behandlingMedTrygdeavtaleSøknad.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(lagTrygdeavtaleBehandlingsgrunnlagdata());
     }
 
     @Test
@@ -80,7 +75,7 @@ class InnvilgelseUKMapperTest {
         mockMedfølgendeFamilieDefaultCase();
         mockAvklartFamilieDefaultCase();
 
-        InnvilgelseBrevbestilling brevbestilling = lagInnvilgelseBrevbestilling(medPeriode(behandlingMedTrygdeavtaleSøknad));
+        InnvilgelseBrevbestilling brevbestilling = lagInnvilgelseBrevbestilling(medPeriode(lagTrygdeavtaleBehandling()));
 
         InnvilgelseUK innvilgelseUK = innvilgelseUKMapper.map(brevbestilling);
 
@@ -93,8 +88,7 @@ class InnvilgelseUKMapperTest {
     @Test
     void map_ingenUtenlandskeVirksomheter_kastFunksjonellException() {
         mockLovvalgsperiode();
-        hentSoeknadTrygdeavtale().setRepresentantIUtlandet(null);
-        Behandling behandling = medPeriode(behandlingMedTrygdeavtaleSøknad);
+        Behandling behandling = medPeriode(lagTrygdeavtaleBehandling(null));
         InnvilgelseBrevbestilling brevbestilling = lagInnvilgelseBrevbestilling(behandling);
 
         assertThatExceptionOfType(FunksjonellException.class)
@@ -109,7 +103,7 @@ class InnvilgelseUKMapperTest {
         when(mockAvklarteMedfolgendeFamilieService.hentAvklartMedfølgendeEktefelle(anyLong())).thenReturn(lagIkkeOmfattetMedfølgendeEktefelle());
         when(mockAvklarteMedfolgendeFamilieService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(lagOmfattetMedfølgendeBarn());
 
-        InnvilgelseBrevbestilling brevbestilling = lagInnvilgelseBrevbestilling(behandlingMedTrygdeavtaleSøknad);
+        InnvilgelseBrevbestilling brevbestilling = lagInnvilgelseBrevbestilling(lagTrygdeavtaleBehandling());
         InnvilgelseUK map = innvilgelseUKMapper.map(brevbestilling);
         assertThat(map.getFamilie().minstEttOmfattetFamiliemedlem()).isTrue();
     }
@@ -122,7 +116,7 @@ class InnvilgelseUKMapperTest {
         when(mockAvklarteMedfolgendeFamilieService.hentMedfølgendeBarn(anyLong())).thenReturn(lagMedølgendeBarnUtenFnr());
         when(mockAvklarteMedfolgendeFamilieService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(lagBarnUtenFnr());
 
-        InnvilgelseBrevbestilling brevbestilling = lagInnvilgelseBrevbestilling(behandlingMedTrygdeavtaleSøknad);
+        InnvilgelseBrevbestilling brevbestilling = lagInnvilgelseBrevbestilling(lagTrygdeavtaleBehandling());
         InnvilgelseUK map = innvilgelseUKMapper.map(brevbestilling);
         assertThat(map.getFamilie().barn())
             .hasSize(1)
@@ -138,7 +132,7 @@ class InnvilgelseUKMapperTest {
         when(mockAvklarteMedfolgendeFamilieService.hentAvklartMedfølgendeEktefelle(anyLong())).thenReturn(lagIkkeOmfattetMedfølgendeEktefelle());
         when(mockAvklarteMedfolgendeFamilieService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(lagIkkeOmfattetMedfølgendeBarn());
 
-        InnvilgelseBrevbestilling brevbestilling = lagInnvilgelseBrevbestilling(behandlingMedTrygdeavtaleSøknad);
+        InnvilgelseBrevbestilling brevbestilling = lagInnvilgelseBrevbestilling(lagTrygdeavtaleBehandling());
         InnvilgelseUK map = innvilgelseUKMapper.map(brevbestilling);
         assertThat(map.getFamilie().minstEttOmfattetFamiliemedlem()).isFalse();
     }
@@ -261,20 +255,6 @@ class InnvilgelseUKMapperTest {
 
     private AvklarteMedfolgendeFamilie tomFamilie() {
         return new AvklarteMedfolgendeFamilie(Set.of(), Set.of());
-    }
-
-    private static SoeknadTrygdeavtale lagTrygdeavtaleBehandlingsgrunnlagdata() {
-        var behandlingsgrunnlagData = new SoeknadTrygdeavtale();
-        var representantIUtlandet = new RepresentantIUtlandet();
-        representantIUtlandet.representantNavn = "Foretaksnavn";
-        representantIUtlandet.adresselinjer = List.of("Uk address");
-        representantIUtlandet.representantLand = Landkoder.GB.getKode();
-        behandlingsgrunnlagData.setRepresentantIUtlandet(representantIUtlandet);
-        return behandlingsgrunnlagData;
-    }
-
-    private SoeknadTrygdeavtale hentSoeknadTrygdeavtale() {
-        return (SoeknadTrygdeavtale) behandlingMedTrygdeavtaleSøknad.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
     }
 
     private static final String FORVENTEDE_FELTER_FOR_INNVILGELSE_STORBRITANNIA_MAPPING = String.format("""
