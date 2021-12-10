@@ -1,6 +1,5 @@
 package no.nav.melosys.service.dokument;
 
-import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Stream;
 import javax.transaction.Transactional;
@@ -9,6 +8,8 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
+import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
+import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadTrygdeavtale;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.kodeverk.Landkoder;
@@ -63,12 +64,20 @@ public class AttestStorbritanniaMapper {
                 persondokument.getFødselsdato(),
                 persondokument.hentFolkeregisterident(),
                 persondokument.hentGjeldendePostadresse().adresselinjer()))
-            .representantUK(new RepresentantUK(
-                "Mrs. London", // TODO: Det blir fylt inn via sidemeny. Hent data når det er tilgjenglig.
-                List.of())
+            .representantUK(lagRepresentantUK(behandling.getBehandlingsgrunnlag())
             )
             .utsendelse(lagUtsendelse(lovvalgsperioder, persondokument))
             .build();
+    }
+
+    private RepresentantUK lagRepresentantUK(Behandlingsgrunnlag behandlingsgrunnlag) {
+        var soeknadTrygdeavtale = (SoeknadTrygdeavtale) behandlingsgrunnlag.getBehandlingsgrunnlagdata();
+        var representantIUtlandet = soeknadTrygdeavtale.getRepresentantIUtlandet();
+
+        return new RepresentantUK(
+            representantIUtlandet.representantNavn,
+            representantIUtlandet.adresselinjer
+        );
     }
 
     private Utsendelse lagUtsendelse(Collection<Lovvalgsperiode> lovvalgsperioder, Persondata persondata) {

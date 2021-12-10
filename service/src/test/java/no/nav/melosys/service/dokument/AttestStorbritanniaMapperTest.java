@@ -9,11 +9,14 @@ import java.util.Set;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
+import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadTrygdeavtale;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.RepresentantIUtlandet;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
@@ -74,6 +77,8 @@ class AttestStorbritanniaMapperTest {
 
     private AttestStorbritanniaMapper attestStorbritanniaMapper;
 
+    private Behandling behandlingMedTrygdeavtaleSøknad;
+
     @BeforeEach
     void setup() {
         attestStorbritanniaMapper = new AttestStorbritanniaMapper(
@@ -82,6 +87,9 @@ class AttestStorbritanniaMapperTest {
             mockDokgenMapperDatahenter,
             mockPersondataFasade,
             mockLovvalgsperiodeService);
+
+        behandlingMedTrygdeavtaleSøknad = lagBehandling();
+        behandlingMedTrygdeavtaleSøknad.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(lagTrygdeavtaleBehandlingsgrunnlagdata());
     }
 
     private static List<Arguments> gyldigePerioder() {
@@ -203,7 +211,7 @@ class AttestStorbritanniaMapperTest {
         mockHappyCase();
 
         AttestStorbritannia attestStorbritannia = attestStorbritanniaMapper.map(new DokgenBrevbestilling.Builder()
-            .medBehandling(lagBehandling())
+            .medBehandling(behandlingMedTrygdeavtaleSøknad)
             .medPersonDokument(lagPersonDokument())
             .medVedtaksdato(VEDTAKS_DATO_INSTANT)
             .build()
@@ -224,7 +232,7 @@ class AttestStorbritanniaMapperTest {
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() ->
                 attestStorbritanniaMapper.map(new DokgenBrevbestilling.Builder()
-                    .medBehandling(lagBehandling())
+                    .medBehandling(behandlingMedTrygdeavtaleSøknad)
                     .medPersonDokument(lagPersonDokument())
                     .medVedtaksdato(VEDTAKS_DATO_INSTANT)
                     .build()
@@ -241,7 +249,7 @@ class AttestStorbritanniaMapperTest {
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() ->
                 attestStorbritanniaMapper.map(new DokgenBrevbestilling.Builder()
-                    .medBehandling(lagBehandling())
+                    .medBehandling(behandlingMedTrygdeavtaleSøknad)
                     .medPersonDokument(lagPersonDokument())
                     .medVedtaksdato(VEDTAKS_DATO_INSTANT)
                     .build()
@@ -304,6 +312,16 @@ class AttestStorbritanniaMapperTest {
         return Map.of(UUID_BARN, medfolgendeBarn1);
     }
 
+    private static SoeknadTrygdeavtale lagTrygdeavtaleBehandlingsgrunnlagdata() {
+        var behandlingsgrunnlagData = new SoeknadTrygdeavtale();
+        var representantIUtlandet = new RepresentantIUtlandet();
+        representantIUtlandet.representantNavn = "Foretaksnavn";
+        representantIUtlandet.adresselinjer = List.of("Uk address");
+        representantIUtlandet.representantLand = Landkoder.GB.getKode();
+        behandlingsgrunnlagData.setRepresentantIUtlandet(representantIUtlandet);
+        return behandlingsgrunnlagData;
+    }
+
     private static final String FORVENTEDE_FELTER_FOR_ATTEST_STORBRITANNIA_MAPPING = String.format("""
         {
           "saksopplysninger" : {
@@ -351,8 +369,8 @@ class AttestStorbritanniaMapperTest {
             "sluttdato" : "%s"
           },
           "representantUK" : {
-            "navn" : "Mrs. London",
-            "adresse" : [ ]
+            "navn" : "Foretaksnavn",
+            "adresse" : [ "Uk address" ]
           },
           "vedtaksdato" : "%s"
         }""", FØDSELSDATO, FØDSELSDATO, LOVVALGSPERIODE_FOM, LOVVALGSPERIODE_TOM, VEDTAKS_DATO);
