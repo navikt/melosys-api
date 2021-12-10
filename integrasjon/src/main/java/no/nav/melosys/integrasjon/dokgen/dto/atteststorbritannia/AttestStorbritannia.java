@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.integrasjon.dokgen.dto.DokgenDto;
 
@@ -17,6 +19,7 @@ public class AttestStorbritannia extends DokgenDto {
     private final Utsendelse utsendelse;
     private final RepresentantUK representantUK;
 
+    @JsonSerialize(using = LocalDateSerializer.class)
     @JsonFormat(shape = STRING)
     private final LocalDate vedtaksdato;
 

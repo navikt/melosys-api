@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
 
 import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
@@ -12,9 +14,11 @@ public record Utsendelse(
     Lovvalgbestemmelser_trygdeavtale_uk artikkel,
     List<String> oppholdsadresseUK,
 
+    @JsonSerialize(using = LocalDateSerializer.class)
     @JsonFormat(shape = STRING)
     LocalDate startdato,
 
+    @JsonSerialize(using = LocalDateSerializer.class)
     @JsonFormat(shape = STRING)
     LocalDate sluttdato
 ) {

@@ -5,6 +5,8 @@ import java.time.ZoneId;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.integrasjon.dokgen.dto.felles.Innvilgelse;
@@ -14,6 +16,7 @@ import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
 
 public class InnvilgelseFtrl extends DokgenDto {
 
+    @JsonSerialize(using = LocalDateSerializer.class)
     @JsonFormat(shape = STRING)
     private final LocalDate datoMottatt;
 
