@@ -77,11 +77,10 @@ public class TrygdeavtaleService {
     public void overførResultat(long behandlingId, TrygdeavtaleResultat trygdeavtaleResultat) {
         avklarteMedfolgendeFamilieService.lagreMedfolgendeFamilieSomAvklartefakta(behandlingId, trygdeavtaleResultat.familie());
         avklarteVirksomheterService.lagreVirksomheterSomAvklartefakta(behandlingId, List.of(trygdeavtaleResultat.virksomhet()));
-        lovvalgsperiodeService.lagreLovvalgsperioder(behandlingId, List.of(lagLovvalgsperiode(behandlingId, trygdeavtaleResultat)));
+        lovvalgsperiodeService.lagreLovvalgsperioder(behandlingId, List.of(lagLovvalgsperiode(trygdeavtaleResultat)));
     }
 
-    private Lovvalgsperiode lagLovvalgsperiode(long behandlingId, TrygdeavtaleResultat trygdeavtaleResultat) {
-        var behandlingsgrunnlagdata = behandlingsgrunnlagService.hentBehandlingsgrunnlag(behandlingId).getBehandlingsgrunnlagdata();
+    private Lovvalgsperiode lagLovvalgsperiode(TrygdeavtaleResultat trygdeavtaleResultat) {
         var lovvalgsperiode = new Lovvalgsperiode();
 
         lovvalgsperiode.setFom(trygdeavtaleResultat.lovvalgsperiodeFom());
@@ -90,13 +89,7 @@ public class TrygdeavtaleService {
         lovvalgsperiode.setDekning(FULL_DEKNING_FTRL);
         lovvalgsperiode.setInnvilgelsesresultat(INNVILGET);
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_trygdeavtale_uk.valueOf(trygdeavtaleResultat.bestemmelse()));
-
-        if (behandlingsgrunnlagdata.soeknadsland.landkoder.size() != 1) {
-            throw new FunksjonellException("Forventet ett soeknadsland, men fant: "
-                + behandlingsgrunnlagdata.soeknadsland.landkoder);
-        }
-
-        lovvalgsperiode.setLovvalgsland(Landkoder.valueOf(behandlingsgrunnlagdata.soeknadsland.landkoder.get(0)));
+        lovvalgsperiode.setLovvalgsland(Landkoder.NO);
 
         return lovvalgsperiode;
     }
