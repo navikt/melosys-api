@@ -34,6 +34,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.INNVILGELSE_UK;
+import static no.nav.melosys.service.dokument.DokgenMalMapperTest.*;
 import static no.nav.melosys.service.dokument.DokgenTestData.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
@@ -47,26 +48,11 @@ class InnvilgelseUKMapperTest {
     private static final String UUID_BARN_2 = "uuidBarn2";
     private static final String UUID_BARN_3 = "uuidBarn3";
     private static final String EKTEFELLE_FNR = "01108049800";
-    private static final LocalDate EKTEFELLE_FOEDSELSDATO = LocalDate.of(1980, 10, 1);
     private static final String BARN1_FNR = "01100099728";
-    private static final LocalDate BARN1_FOEDSELSDATO = LocalDate.of(2000, 10, 1);
     private static final String BARN2_FNR = "02109049878";
-    private static final LocalDate BARN2_FOEDSELSDATO = LocalDate.of(1990, 10, 2);
-    private static final String EKTEFELLE_NAVN = "Dolly Duck";
     private static final String BARN_NAVN_1 = "Doffen Duck";
-    private static final String BARN_NAVN_2 = "Dole Duck";
     private static final String BARN_NAVN_3 = "Utenid Duck";
     private static final String BARN3_UTEN_FNR = "01.02.2021";
-    private static final LocalDate BARN3_FOEDSELSDATO = LocalDate.of(2021, 02, 01);
-    private static final LocalDate FRA_DATO = LocalDate.of(2020, 1, 1);
-    private static final LocalDate TIL_DATO = LocalDate.of(2021, 1, 1);
-    private static final LocalDate SOKNADSDATO = LocalDate.of(2019, 10, 1);
-
-    private static final Map<String, LocalDate> FNR_TIL_DATO = Map.of(
-        EKTEFELLE_FNR, EKTEFELLE_FOEDSELSDATO,
-        BARN1_FNR, BARN1_FOEDSELSDATO,
-        BARN2_FNR, BARN2_FOEDSELSDATO
-    );
 
     @Mock
     private AvklarteMedfolgendeFamilieService mockAvklarteMedfolgendeFamilieService;
@@ -76,7 +62,7 @@ class InnvilgelseUKMapperTest {
 
     private InnvilgelseUKMapper innvilgelseUKMapper;
 
-    private Behandling behandlingMedTrygdavtaleSøknad;
+    private Behandling behandlingMedTrygdeavtaleSøknad;
 
     @BeforeEach
     void setup() {
@@ -84,8 +70,8 @@ class InnvilgelseUKMapperTest {
             mockAvklarteMedfolgendeFamilieService,
             mockLovvalgsperiodeService);
 
-        behandlingMedTrygdavtaleSøknad = lagBehandling();
-        behandlingMedTrygdavtaleSøknad.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(lagTrygdeavtaleBehandlingsgrunnlagdata());
+        behandlingMedTrygdeavtaleSøknad = lagBehandling();
+        behandlingMedTrygdeavtaleSøknad.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(lagTrygdeavtaleBehandlingsgrunnlagdata());
     }
 
     @Test
@@ -94,7 +80,7 @@ class InnvilgelseUKMapperTest {
         mockMedfølgendeFamilieDefaultCase();
         mockAvklartFamilieDefaultCase();
 
-        InnvilgelseBrevbestilling brevbestilling = lagInnvilgelseBrevbestilling(medPeriode(behandlingMedTrygdavtaleSøknad));
+        InnvilgelseBrevbestilling brevbestilling = lagInnvilgelseBrevbestilling(medPeriode(behandlingMedTrygdeavtaleSøknad));
 
         InnvilgelseUK innvilgelseUK = innvilgelseUKMapper.map(brevbestilling);
 
@@ -108,7 +94,7 @@ class InnvilgelseUKMapperTest {
     void map_ingenUtenlandskeVirksomheter_kastFunksjonellException() {
         mockLovvalgsperiode();
         hentSoeknadTrygdeavtale().setRepresentantIUtlandet(null);
-        Behandling behandling = medPeriode(behandlingMedTrygdavtaleSøknad);
+        Behandling behandling = medPeriode(behandlingMedTrygdeavtaleSøknad);
         InnvilgelseBrevbestilling brevbestilling = lagInnvilgelseBrevbestilling(behandling);
 
         assertThatExceptionOfType(FunksjonellException.class)
@@ -121,9 +107,9 @@ class InnvilgelseUKMapperTest {
         mockLovvalgsperiode();
         mockMedfølgendeFamilieDefaultCase();
         when(mockAvklarteMedfolgendeFamilieService.hentAvklartMedfølgendeEktefelle(anyLong())).thenReturn(lagIkkeOmfattetMedfølgendeEktefelle());
-        when(mockAvklarteMedfolgendeFamilieService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(lagOmfatetMedfølgendeBarn());
+        when(mockAvklarteMedfolgendeFamilieService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(lagOmfattetMedfølgendeBarn());
 
-        InnvilgelseBrevbestilling brevbestilling = lagInnvilgelseBrevbestilling(behandlingMedTrygdavtaleSøknad);
+        InnvilgelseBrevbestilling brevbestilling = lagInnvilgelseBrevbestilling(behandlingMedTrygdeavtaleSøknad);
         InnvilgelseUK map = innvilgelseUKMapper.map(brevbestilling);
         assertThat(map.getFamilie().minstEttOmfattetFamiliemedlem()).isTrue();
     }
@@ -136,13 +122,13 @@ class InnvilgelseUKMapperTest {
         when(mockAvklarteMedfolgendeFamilieService.hentMedfølgendeBarn(anyLong())).thenReturn(lagMedølgendeBarnUtenFnr());
         when(mockAvklarteMedfolgendeFamilieService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(lagBarnUtenFnr());
 
-        InnvilgelseBrevbestilling brevbestilling = lagInnvilgelseBrevbestilling(behandlingMedTrygdavtaleSøknad);
+        InnvilgelseBrevbestilling brevbestilling = lagInnvilgelseBrevbestilling(behandlingMedTrygdeavtaleSøknad);
         InnvilgelseUK map = innvilgelseUKMapper.map(brevbestilling);
         assertThat(map.getFamilie().barn())
             .hasSize(1)
             .element(0)
             .extracting(Barn::fnr, Barn::foedselsdato)
-            .containsExactly(null, BARN3_FOEDSELSDATO);
+            .containsExactly(null, LocalDate.of(2021, 02, 01));
     }
 
     @Test
@@ -150,9 +136,9 @@ class InnvilgelseUKMapperTest {
         mockLovvalgsperiode();
         mockMedfølgendeFamilieDefaultCase();
         when(mockAvklarteMedfolgendeFamilieService.hentAvklartMedfølgendeEktefelle(anyLong())).thenReturn(lagIkkeOmfattetMedfølgendeEktefelle());
-        when(mockAvklarteMedfolgendeFamilieService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(lagIkkeOmfatetMedfølgendeBarn());
+        when(mockAvklarteMedfolgendeFamilieService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(lagIkkeOmfattetMedfølgendeBarn());
 
-        InnvilgelseBrevbestilling brevbestilling = lagInnvilgelseBrevbestilling(behandlingMedTrygdavtaleSøknad);
+        InnvilgelseBrevbestilling brevbestilling = lagInnvilgelseBrevbestilling(behandlingMedTrygdeavtaleSøknad);
         InnvilgelseUK map = innvilgelseUKMapper.map(brevbestilling);
         assertThat(map.getFamilie().minstEttOmfattetFamiliemedlem()).isFalse();
     }
@@ -174,10 +160,6 @@ class InnvilgelseUKMapperTest {
     private Behandling medPeriode(Behandling behandling) {
         var behandlingsgrunnlag = behandling.getBehandlingsgrunnlag();
         behandlingsgrunnlag.setMottaksdato(SOKNADSDATO);
-        behandlingsgrunnlag.getBehandlingsgrunnlagdata().periode = new Periode(
-            FRA_DATO,
-            TIL_DATO
-        );
         return behandling;
     }
 
@@ -198,8 +180,8 @@ class InnvilgelseUKMapperTest {
 
     private static Lovvalgsperiode lagLovvalgsperiode() {
         var lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setFom(FRA_DATO);
-        lovvalgsperiode.setTom(TIL_DATO);
+        lovvalgsperiode.setFom(LOVVALGSPERIODE_FOM);
+        lovvalgsperiode.setTom(LOVVALGSPERIODE_TOM);
         lovvalgsperiode.setDekning(Trygdedekninger.FULL_DEKNING_FTRL);
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1);
         return lovvalgsperiode;
@@ -221,11 +203,11 @@ class InnvilgelseUKMapperTest {
             UUID_BARN_1,
             MedfolgendeFamilie.tilMedfolgendeFamilie(UUID_BARN_1, BARN1_FNR, BARN_NAVN_1, MedfolgendeFamilie.Relasjonsrolle.BARN),
             UUID_BARN_2,
-            MedfolgendeFamilie.tilMedfolgendeFamilie(UUID_BARN_2, BARN2_FNR, BARN_NAVN_2, MedfolgendeFamilie.Relasjonsrolle.BARN)
+            MedfolgendeFamilie.tilMedfolgendeFamilie(UUID_BARN_2, BARN2_FNR, "Dole Duck", MedfolgendeFamilie.Relasjonsrolle.BARN)
         );
     }
 
-    private AvklarteMedfolgendeFamilie lagOmfatetMedfølgendeBarn() {
+    private AvklarteMedfolgendeFamilie lagOmfattetMedfølgendeBarn() {
         var barn = new OmfattetFamilie(UUID_BARN_1);
         barn.setSammensattNavn(BARN_NAVN_1);
         barn.setIdent(BARN1_FNR);
@@ -234,7 +216,7 @@ class InnvilgelseUKMapperTest {
             Set.of());
     }
 
-    private AvklarteMedfolgendeFamilie lagIkkeOmfatetMedfølgendeBarn() {
+    private AvklarteMedfolgendeFamilie lagIkkeOmfattetMedfølgendeBarn() {
         var barn = new IkkeOmfattetFamilie(
             UUID_BARN_1,
             Medfolgende_barn_begrunnelser.MANGLER_OPPLYSNINGER.getKode(), "");
@@ -259,7 +241,7 @@ class InnvilgelseUKMapperTest {
 
     private Map<String, MedfolgendeFamilie> lagMedfølgendeEktefelle() {
         var ektefelle = MedfolgendeFamilie.tilMedfolgendeFamilie(
-            UUID_EKTEFELLE, EKTEFELLE_FNR, EKTEFELLE_NAVN, MedfolgendeFamilie.Relasjonsrolle.EKTEFELLE_SAMBOER);
+            UUID_EKTEFELLE, EKTEFELLE_FNR, "Dolly Duck", MedfolgendeFamilie.Relasjonsrolle.EKTEFELLE_SAMBOER);
         return Map.of(UUID_EKTEFELLE, ektefelle);
     }
 
@@ -292,7 +274,7 @@ class InnvilgelseUKMapperTest {
     }
 
     private SoeknadTrygdeavtale hentSoeknadTrygdeavtale() {
-        return (SoeknadTrygdeavtale) behandlingMedTrygdavtaleSøknad.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
+        return (SoeknadTrygdeavtale) behandlingMedTrygdeavtaleSøknad.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
     }
 
     private static final String FORVENTEDE_FELTER_FOR_INNVILGELSE_STORBRITANNIA_MAPPING = String.format("""
@@ -353,13 +335,13 @@ class InnvilgelseUKMapperTest {
               "virksomhetArbeidsgiverSkalHaKopi" : false
             }""",
         SOKNADSDATO,
-        FRA_DATO,
-        TIL_DATO,
+        LOVVALGSPERIODE_FOM,
+        LOVVALGSPERIODE_TOM,
         EKTEFELLE_FNR,
-        EKTEFELLE_FOEDSELSDATO,
+        LocalDate.of(1980, 10, 1),
         BARN1_FNR,
-        BARN1_FOEDSELSDATO,
+        LocalDate.of(2000, 10, 1),
         BARN2_FNR,
-        BARN2_FOEDSELSDATO
+        LocalDate.of(1990, 10, 2)
     );
 }

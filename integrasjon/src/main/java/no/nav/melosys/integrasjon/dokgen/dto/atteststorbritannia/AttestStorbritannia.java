@@ -1,10 +1,11 @@
 package no.nav.melosys.integrasjon.dokgen.dto.atteststorbritannia;
 
-import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.datatype.jsr310.ser.InstantSerializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.integrasjon.dokgen.dto.DokgenDto;
 
@@ -18,9 +19,9 @@ public class AttestStorbritannia extends DokgenDto {
     private final Utsendelse utsendelse;
     private final RepresentantUK representantUK;
 
-    @JsonSerialize(using = InstantSerializer.class)
+    @JsonSerialize(using = LocalDateSerializer.class)
     @JsonFormat(shape = STRING)
-    private final Instant vedtaksdato;
+    private final LocalDate vedtaksdato;
 
     public Arbeidstaker getArbeidstaker() {
         return arbeidstaker;
@@ -42,13 +43,14 @@ public class AttestStorbritannia extends DokgenDto {
         return representantUK;
     }
 
-    public Instant getVedtaksdato() {
+    public LocalDate getVedtaksdato() {
         return vedtaksdato;
     }
 
     public AttestStorbritannia(Builder builder) {
         super(builder.brevbestilling);
-        this.vedtaksdato = builder.brevbestilling.getVedtaksdato();
+        this.vedtaksdato = builder.brevbestilling.getVedtaksdato() != null
+            ? LocalDate.ofInstant(builder.brevbestilling.getVedtaksdato(), ZoneId.systemDefault()) : null;
         this.utsendelse = builder.utsendelse;
         this.arbeidstaker = builder.arbeidstaker;
         this.arbeidsgiverNorge = builder.arbeidsgiverNorge;
