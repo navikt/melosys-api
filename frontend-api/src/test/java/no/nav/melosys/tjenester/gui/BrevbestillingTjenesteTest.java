@@ -117,6 +117,7 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
         assertThat(brevmaler.get(0).getMuligeMottakere()).hasSize(1);
 
         assertThat(brevmaler.get(1).getFelter()).hasSize(2);
+        assertThat(brevmaler.get(1).getType()).isEqualTo(MANGELBREV_BRUKER);
         assertThat(brevmaler.get(1).getFelter().get(0).getValg().getValgAlternativer()).hasSize(2)
             .extracting(FeltvalgAlternativDto::getKode)
             .containsExactlyInAnyOrder(FRITEKST.getKode(), STANDARD.getKode());
@@ -126,6 +127,7 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
         assertThat(mangelbrevBrukerFeltValg.getValgType()).isEqualTo(FeltValgType.RADIO);
 
         assertThat(brevmaler.get(2).getFelter()).hasSize(2);
+        assertThat(brevmaler.get(2).getType()).isEqualTo(MANGELBREV_ARBEIDSGIVER);
         assertThat(brevmaler.get(2).getFelter().get(0).getValg().getValgAlternativer()).hasSize(2)
             .extracting(FeltvalgAlternativDto::getKode)
             .containsExactlyInAnyOrder(FRITEKST.getKode(), STANDARD.getKode());
