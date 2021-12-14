@@ -206,7 +206,7 @@ class VedtakKontrollServiceTest {
     }
 
     @Test
-    void utførKontroller_representantIUtlandetManglerFelter_returnererKode() {
+    void utførKontroller_representantIUtlandetMangler_returnererKode() {
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1);
         behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(new SoeknadTrygdeavtale());
 

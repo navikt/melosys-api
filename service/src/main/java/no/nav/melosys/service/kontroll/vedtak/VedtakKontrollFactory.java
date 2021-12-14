@@ -1,5 +1,6 @@
 package no.nav.melosys.service.kontroll.vedtak;
 
+import java.util.Collections;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -35,9 +36,9 @@ class VedtakKontrollFactory {
                 VedtakKontroller::periodeManglerSluttdato,
                 VedtakKontroller::periodeOverTreÅr,
                 VedtakKontroller::arbeidsstedManglerFelter,
-                VedtakKontroller::representantIUtlandetManglerFelter
+                VedtakKontroller::representantIUtlandetMangler
             );
-            default -> throw new UnsupportedOperationException("Kan ikke hente kontroller for sakstype " + sakstype);
+            default -> Collections.emptySet();
         };
 
     }

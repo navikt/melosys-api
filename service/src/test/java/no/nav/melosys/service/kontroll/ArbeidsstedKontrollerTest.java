@@ -13,16 +13,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ArbeidsstedKontrollerTest {
 
     @Test
-    void representantIUtlandetManglerFelter_ok_false() {
-        assertThat(ArbeidsstedKontroller.representantIUtlandetManglerFelter(lagRepresentantIUtlandet("RepresentantNavn"))).isFalse();
+    void representantIUtlandetMangler_ok_false() {
+        assertThat(ArbeidsstedKontroller.representantIUtlandetMangler(lagRepresentantIUtlandet("RepresentantNavn"))).isFalse();
     }
     @Test
-    void representantIUtlandetManglerFelter_finnesIkke_true() {
-        assertThat(ArbeidsstedKontroller.representantIUtlandetManglerFelter(null)).isTrue();
+    void representantIUtlandetMangler_finnesIkke_true() {
+        assertThat(ArbeidsstedKontroller.representantIUtlandetMangler(null)).isTrue();
     }
     @Test
-    void representantIUtlandetManglerFelter_harIkkeNavn_true() {
-        assertThat(ArbeidsstedKontroller.representantIUtlandetManglerFelter(lagRepresentantIUtlandet(null))).isTrue();
+    void representantIUtlandetMangler_harIkkeNavn_true() {
+        assertThat(ArbeidsstedKontroller.representantIUtlandetMangler(lagRepresentantIUtlandet(null))).isTrue();
     }
     @Test
     void arbeidstedSvalbardOgJanMayen_landErSJ_true() {

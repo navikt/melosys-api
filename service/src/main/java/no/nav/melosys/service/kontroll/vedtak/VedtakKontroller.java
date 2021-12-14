@@ -51,12 +51,12 @@ final class VedtakKontroller implements AdresseUtlandKontroller {
         return AdresseUtlandKontroller.foretakUtlandManglerFelter(kontrollData.getBehandlingsgrunnlagData());
     }
 
-    static Kontrollfeil representantIUtlandetManglerFelter(VedtakKontrollData kontrollData) {
+    static Kontrollfeil representantIUtlandetMangler(VedtakKontrollData kontrollData) {
         var lovvalgsperiode = kontrollData.getLovvalgsperiode();
         var behandlingsgrunnlagData = (SoeknadTrygdeavtale) kontrollData.getBehandlingsgrunnlagData();
 
         return lovvalgsperiode.skalFåTrygdeavtaleAttest()
-            && ArbeidsstedKontroller.representantIUtlandetManglerFelter(behandlingsgrunnlagData.getRepresentantIUtlandet())
+            && ArbeidsstedKontroller.representantIUtlandetMangler(behandlingsgrunnlagData.getRepresentantIUtlandet())
             ? new Kontrollfeil(Kontroll_begrunnelser.ATTEST_MANGER_ARBEIDSSTED) : null;
     }
 

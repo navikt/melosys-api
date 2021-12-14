@@ -63,7 +63,7 @@ public class VedtakTjeneste {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("{behandlingID}/kontroll")
+    @PostMapping("{behandlingID}/kontroller")
     @ApiOperation(value = "Gjør kontroll på vedtaket, og returnerer eventuelle feilmeldinger")
     public ResponseEntity<Void> kontrollerVedtak(@PathVariable("behandlingID") long behandlingID,
                                  @RequestParam(value = "oppdater", required = false) boolean oppdaterRegisteropplysninger,

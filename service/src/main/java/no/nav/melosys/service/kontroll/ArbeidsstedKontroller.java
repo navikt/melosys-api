@@ -15,7 +15,7 @@ public final class ArbeidsstedKontroller {
     private ArbeidsstedKontroller() {
     }
 
-    public static boolean representantIUtlandetManglerFelter(RepresentantIUtlandet representantIUtlandet) {
+    public static boolean representantIUtlandetMangler(RepresentantIUtlandet representantIUtlandet) {
         return representantIUtlandet == null || representantIUtlandet.representantNavn == null;
     }
 
