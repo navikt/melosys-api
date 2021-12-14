@@ -75,31 +75,7 @@ class TrygdeavtaleVedtakServiceTest {
     }
 
     @Test
-    void fattVedtak_førstegangsvedtakUtenBrev_fatterVedtak() throws ValideringException {
-        var behandlingsresultat = lagBehandlingsresultat();
-        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
-
-        FattTrygdeavtaleVedtakRequest request = lagFattVedtakRequest();
-        trygdeavtaleVedtakService.fattVedtak(lagBehandling(), request);
-
-        verify(behandlingsresultatService).lagre(behandlingsresultatCaptor.capture());
-        verify(behandlingService).oppdaterStatus(behandlingCaptor.capture(), eq(IVERKSETTER_VEDTAK));
-        verify(prosessinstansService).opprettProsessinstansIverksettVedtakTrygdeavtale(any(Behandling.class), eq(request));
-        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(SAKSNUMMER);
-        verify(vedtakKontrollService).validerInnvilgelse(any(Behandling.class), any(Behandlingsresultat.class), eq(Vedtakstyper.FØRSTEGANGSVEDTAK), eq(Sakstyper.TRYGDEAVTALE));
-
-        Behandlingsresultat lagretBehandlingsresultat = behandlingsresultatCaptor.getValue();
-        assertThat(lagretBehandlingsresultat)
-            .extracting("type", "begrunnelseFritekst", "fastsattAvLand")
-            .containsExactly(FASTSATT_LOVVALGSLAND, "Begrunnelse", Landkoder.NO);
-
-        Behandling lagretBehandling = behandlingCaptor.getValue();
-        assertThat(lagretBehandling.getFagsak().getStatus()).isEqualTo(MEDLEMSKAP_AVKLART);
-    }
-
-    @Test
-    @Disabled("Denne er disabled frem til dokgen attest-bestilling er ok")
-    void fattVedtak_kallerDokgen_fatterVedtak() throws ValideringException {
+    void fattVedtak_førstegangsvedtak_fatterVedtak() throws ValideringException {
         var behandlingsresultat = lagBehandlingsresultat();
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
 

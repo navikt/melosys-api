@@ -75,7 +75,7 @@ public class TrygdeavtaleVedtakService {
 
         prosessinstansService.opprettProsessinstansIverksettVedtakTrygdeavtale(behandling, request);
         // TODO: Produser og distribuer både attest og innvilgelse-brevene
-         dokgenService.produserOgDistribuerBrev(behandlingID, lagAttestBrevbestilling(request));
+        dokgenService.produserOgDistribuerBrev(behandlingID, lagAttestBrevbestilling(request));
         oppgaveService.ferdigstillOppgaveMedSaksnummer(saksnummer);
     }
 
