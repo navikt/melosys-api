@@ -1,6 +1,7 @@
 package no.nav.melosys.service.dokument;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
@@ -105,7 +106,7 @@ class InnvilgelseFtrlMapperTest {
         InnvilgelseFtrl innvilgelseFtrl = innvilgelseFtrlMapper.map(lagInnvilgelseBrevbestilling());
 
         assertThat(innvilgelseFtrl).isNotNull();
-        assertThat(innvilgelseFtrl.getDatoMottatt()).isEqualTo(Instant.EPOCH);
+        assertThat(innvilgelseFtrl.getDatoMottatt()).isEqualTo(LocalDate.EPOCH);
         assertThat(innvilgelseFtrl.getPerioder().size()).isEqualTo(1);
         assertThat(innvilgelseFtrl.isErFullstendigInnvilget()).isTrue();
         assertThat(innvilgelseFtrl.getFtrl_2_8_begrunnelse()).isEqualTo(ANSATT_I_NORSK_VIRKSOMHET_IKKE_UTSENDT.getKode());
