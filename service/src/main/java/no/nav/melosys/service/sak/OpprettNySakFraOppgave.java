@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import static no.nav.melosys.domain.Behandling.erBehandlingAvSedForespørsler;
 import static no.nav.melosys.domain.Behandling.erBehandlingAvSøknad;
+import static no.nav.melosys.domain.Fagsak.erSakstypeEøs;
 import static no.nav.melosys.service.sak.SakstypeBehandlingstemaKobling.erGyldigBehandlingstemaForSakstype;
 
 @Service
@@ -60,9 +61,11 @@ public class OpprettNySakFraOppgave {
             throw new FunksjonellException("Behandlingstema " + behandlingstema + " er ikke gyldig for sakstype " + sakstype);
         } else if (behandlingstema == Behandlingstema.ARBEID_I_UTLANDET && !unleash.isEnabled("melosys.folketrygden.mvp")) {
             throw new FunksjonellException("Kan ikke opprette ny sak med behandlingstema " + behandlingstema);
+        } else if (behandlingstema == Behandlingstema.YRKESAKTIV && !unleash.isEnabled("melosys.trygdeavtale")) {
+            throw new FunksjonellException("Kan ikke opprette ny sak med behandlingstema " + behandlingstema);
         }
 
-        if (erBehandlingAvSøknad(opprettSakDto.getBehandlingstema())) {
+        if (erBehandlingAvSøknad(opprettSakDto.getBehandlingstema()) && erSakstypeEøs(sakstype)) {
             final SøknadDto soknadDto = opprettSakDto.getSoknadDto();
             validerSøknadData(soknadDto);
         }
