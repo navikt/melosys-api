@@ -19,7 +19,6 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_t
 import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie;
 import no.nav.melosys.domain.person.familie.IkkeOmfattetFamilie;
 import no.nav.melosys.domain.person.familie.OmfattetFamilie;
-import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
@@ -45,7 +44,6 @@ import static no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfol
 import static no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_ektefelle_samboer_begrunnelser_ftrl.EGEN_INNTEKT;
 import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -87,9 +85,6 @@ class TrygdeavtaleServiceTest {
 
     @Test
     void overførResultat_altOk_lagresKorrekt() {
-        var behandlingsgrunnlag = lagBehandlingsgrunnlag();
-        when(behandlingsgrunnlagService.hentBehandlingsgrunnlag(1L)).thenReturn(behandlingsgrunnlag);
-
         var trygdeavtaleResultat = lagTrygdeavtaleResultat();
 
         trygdeavtaleService.overførResultat(1L, trygdeavtaleResultat);
@@ -131,34 +126,8 @@ class TrygdeavtaleServiceTest {
                 FULL_DEKNING_FTRL,
                 INNVILGET,
                 Lovvalgbestemmelser_trygdeavtale_uk.valueOf(trygdeavtaleResultat.bestemmelse()),
-                Landkoder.valueOf(behandlingsgrunnlag.getBehandlingsgrunnlagdata().soeknadsland.landkoder.get(0))
+                Landkoder.NO
             );
-    }
-
-    @Test
-    void overførResultat_medToSoeknadslandLandkoder_kasterFunksjonellException() {
-        var behandlingsgrunnlag = lagBehandlingsgrunnlag();
-        behandlingsgrunnlag.getBehandlingsgrunnlagdata().soeknadsland.landkoder = List.of("GB", "NO");
-
-        when(behandlingsgrunnlagService.hentBehandlingsgrunnlag(1L)).thenReturn(behandlingsgrunnlag);
-        var trygdeavtaleResultat = lagTrygdeavtaleResultat();
-
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> trygdeavtaleService.overførResultat(1L, trygdeavtaleResultat))
-            .withMessageContaining("Forventet ett soeknadsland, men fant: [GB, NO]");
-    }
-
-    @Test
-    void overførResultat_manglerSoeknadslandLandkoder_kasterFunksjonellException() {
-        var behandlingsgrunnlag = lagBehandlingsgrunnlag();
-        behandlingsgrunnlag.getBehandlingsgrunnlagdata().soeknadsland.landkoder = List.of();
-
-        when(behandlingsgrunnlagService.hentBehandlingsgrunnlag(1L)).thenReturn(behandlingsgrunnlag);
-        var trygdeavtaleResultat = lagTrygdeavtaleResultat();
-
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> trygdeavtaleService.overførResultat(1L, trygdeavtaleResultat))
-            .withMessageContaining("Forventet ett soeknadsland, men fant: []");
     }
 
     @Test
@@ -291,14 +260,6 @@ class TrygdeavtaleServiceTest {
             .lovvalgsperiodeFom(PERIODE_FOM)
             .lovvalgsperiodeTom(PERIODE_TOM)
             .build();
-    }
-
-    private Behandlingsgrunnlag lagBehandlingsgrunnlag() {
-        var behandlingsgrunnlagdata = new BehandlingsgrunnlagData();
-        behandlingsgrunnlagdata.soeknadsland.landkoder.add(Landkoder.GB.getKode());
-        var behandlingsgrunnlag = new Behandlingsgrunnlag();
-        behandlingsgrunnlag.setBehandlingsgrunnlagdata(behandlingsgrunnlagdata);
-        return behandlingsgrunnlag;
     }
 
     private Behandling lagBehandlingMedFamilie(List<MedfolgendeFamilie> familie) {

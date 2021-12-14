@@ -24,7 +24,6 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_t
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.dokgen.dto.*;
 import no.nav.melosys.integrasjon.dokgen.dto.atteststorbritannia.*;
-import no.nav.melosys.integrasjon.dokgen.dto.felles.Mottaker;
 import no.nav.melosys.integrasjon.dokgen.dto.felles.Person;
 import no.nav.melosys.integrasjon.dokgen.dto.innvilgelsestorbritannia.InnvilgelseUK;
 import no.nav.melosys.integrasjon.dokgen.dto.innvilgelsestorbritannia.Soknad;
@@ -48,6 +47,10 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class DokgenMalMapperTest {
     public static final String FORRETNINGSADRESSE_ORG = "Storgata 1";
+    public static final LocalDate SOKNADSDATO = LocalDate.of(2000, 1, 1);
+    public static final LocalDate LOVVALGSPERIODE_FOM = LocalDate.of(2020, 1, 1);
+    public static final LocalDate LOVVALGSPERIODE_TOM = LocalDate.of(2021, 1, 1);
+    public static final LocalDate FØDSELSDATO = LocalDate.of(2000, 1, 1);
 
     @Mock
     private InnvilgelseFtrlMapper mockInnvilgelseFtrlMapper;
@@ -612,16 +615,10 @@ class DokgenMalMapperTest {
 
     private InnvilgelseUK lagInnvilgelseUK() {
         return new InnvilgelseUK.Builder(lagInnvilgelseBrevbestilling())
-            .mottaker(new Mottaker("Ola Nordmann",
-                List.of("Gatenavn 12", "Linje 2"),
-                "1010",
-                "POSTSTED",
-                "Norge",
-                "Bruker eller brukers fullmektig"))
             .artikkel(Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1)
-            .soknad(new Soknad(Instant.now(),
-                Instant.now().plus(2, ChronoUnit.DAYS),
-                Instant.now().plus(20, ChronoUnit.DAYS),
+            .soknad(new Soknad(SOKNADSDATO,
+                LOVVALGSPERIODE_FOM,
+                LOVVALGSPERIODE_TOM,
                 "Virksomhetsnavn"
             ))
             .familie(null)
@@ -638,7 +635,7 @@ class DokgenMalMapperTest {
         return new AttestStorbritannia.Builder(dokgenBrevbestillingBuilder)
             .medfolgendeFamiliemedlemmer(new MedfolgendeFamiliemedlemmer(
                 new Person("Kone",
-                    Instant.now().minus(20, ChronoUnit.DAYS),
+                    FØDSELSDATO,
                     "01010119901",
                     null),
                 List.of()
@@ -648,7 +645,7 @@ class DokgenMalMapperTest {
             .arbeidstaker(
                 new Arbeidstaker(
                     "Nordmann, Ola",
-                    Instant.now().minus(20, ChronoUnit.DAYS),
+                    LocalDate.now().minusDays(20),
                     "01010119901",
                     List.of("Nordmannsveg 200", "Norge")))
             .representantUK(new RepresentantUK(
@@ -658,8 +655,8 @@ class DokgenMalMapperTest {
             .utsendelse(new Utsendelse(
                 Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1,
                 List.of("UK Street 1337"),
-                Instant.now().plus(2, ChronoUnit.DAYS),
-                Instant.now().plus(20, ChronoUnit.DAYS)
+                LOVVALGSPERIODE_FOM,
+                LOVVALGSPERIODE_TOM
             ))
             .build();
     }

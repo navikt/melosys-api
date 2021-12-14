@@ -1,7 +1,5 @@
 package no.nav.melosys.service.dokument;
 
-import java.time.Instant;
-import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Stream;
@@ -62,7 +60,7 @@ public class AttestStorbritanniaMapper {
             .arbeidsgiverNorge(lagArbeidsgiverNorge(behandling))
             .arbeidstaker(new Arbeidstaker(
                 persondokument.getSammensattNavn(),
-                toInstant(persondokument.getFødselsdato()),
+                persondokument.getFødselsdato(),
                 persondokument.hentFolkeregisterident(),
                 persondokument.hentGjeldendePostadresse().adresselinjer()))
             .representantUK(new RepresentantUK(
@@ -86,8 +84,8 @@ public class AttestStorbritanniaMapper {
         return new Utsendelse.Builder()
             .artikkel((Lovvalgbestemmelser_trygdeavtale_uk) bestemmelse)
             .oppholdsadresseUK(finnGyldigAdresse(persondata, lovvalgsperiode))
-            .startdato(toInstant(lovvalgsperiode.getFom()))
-            .sluttdato(toInstant(lovvalgsperiode.getTom()))
+            .startdato(lovvalgsperiode.getFom())
+            .sluttdato(lovvalgsperiode.getTom())
             .build();
     }
 
@@ -125,13 +123,6 @@ public class AttestStorbritanniaMapper {
         return new ArbeidsgiverNorge(norskArbeidsgiver.navn, norskArbeidsgiver.adresse.toList());
     }
 
-    private static Instant toInstant(LocalDate localDate) {
-        if (localDate == null) {
-            return null;
-        }
-        return localDate.atStartOfDay(ZoneId.systemDefault()).toInstant();
-    }
-
     private List<Person> mapBarn(long behandlingID) {
         var avklarteMedfølgendeBarn = avklarteMedfølgendeFamilieService.hentAvklarteMedfølgendeBarn(behandlingID);
         var barnOmfattetAvNorskTrygd = avklarteMedfølgendeBarn.getFamilieOmfattetAvNorskTrygd();
@@ -156,13 +147,10 @@ public class AttestStorbritanniaMapper {
     private Person tilPerson(Map<String, MedfolgendeFamilie> medfølgendeFamilieMap, String uuid) {
         var medfølgendeFamilie = Optional.of(medfølgendeFamilieMap.get(uuid))
             .orElseThrow(() -> new FunksjonellException("Avklart medfølgende familie " + uuid + " finnes ikke i behandlingsgrunnlaget"));
-        var sammensattNavn = medfølgendeFamilie.getFnr() != null ? dokgenMapperDatahenter.hentSammensattNavn(medfølgendeFamilie.getFnr()) : medfølgendeFamilie.getNavn();
-        var instant = getFødselDato(medfølgendeFamilie.getFnr());
-        return new Person(sammensattNavn, instant, medfølgendeFamilie.getFnr(), null);
-    }
+        var fnr = medfølgendeFamilie.getFnr();
 
-    private Instant getFødselDato(String fnr) {
-        var persondata = persondataFasade.hentPerson(fnr);
-        return toInstant(persondata.getFødselsdato());
+        var sammensattNavn = fnr != null ? dokgenMapperDatahenter.hentSammensattNavn(fnr) : medfølgendeFamilie.getNavn();
+        var fødselsdato = persondataFasade.hentPerson(fnr).getFødselsdato();
+        return new Person(sammensattNavn, fødselsdato, fnr, null);
     }
 }
