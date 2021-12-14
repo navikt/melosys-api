@@ -526,8 +526,8 @@ class DokgenMalMapperTest {
 
         assertThat(avslagbrev.getMottaker().type()).isEqualTo(Aktoersroller.BRUKER.getKode());
         assertThat(avslagbrev.getMangelbrevDatoer()).containsExactly(
-            datoOktober.atStartOfDay(ZoneId.of("Europe/Paris")).toInstant(),
-            datoDesember.atStartOfDay(ZoneId.of("Europe/Paris")).toInstant());
+            LocalDate.of(2021, 10, 9),
+            LocalDate.of(2021, 12, 9));
         assertThat(avslagbrev.getMangelbrevDatoer()).isSorted();
         assertThat(avslagbrev.getFritekst()).isEqualTo("Hei");
     }
@@ -553,7 +553,7 @@ class DokgenMalMapperTest {
         Avslagbrev avslagbrev = (Avslagbrev) dokgenMalMapper.mapBehandling(brevbestilling);
 
         Instant forventetInstant = datoDesember.atStartOfDay(ZoneId.of("Europe/Paris")).toInstant().plus(Period.ofWeeks(4));
-        assertThat(avslagbrev.getDatoInnsendingsfrist()).isEqualTo(forventetInstant);
+        assertThat(avslagbrev.getDatoInnsendingsfrist()).isEqualTo(LocalDate.ofInstant(forventetInstant, ZoneId.systemDefault()));
     }
 
     @Test

@@ -1,9 +1,11 @@
 package no.nav.melosys.integrasjon.dokgen.dto;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.Period;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -20,15 +22,15 @@ public class Avslagbrev extends DokgenDto {
 
     @JsonSerialize(using = InstantSerializer.class)
     @JsonFormat(shape = STRING)
-    private final Instant datoInnsendingsfrist;
+    private final LocalDate datoInnsendingsfrist;
 
     @JsonInclude
     @JsonFormat(shape = STRING)
-    private final List<Instant> mangelbrevDatoer;
+    private final List<LocalDate> mangelbrevDatoer;
 
     @JsonSerialize(using = InstantSerializer.class)
     @JsonFormat(shape = STRING)
-    private final Instant datoMottatt;
+    private final LocalDate datoMottatt;
 
     private final String sakstype;
 
@@ -38,11 +40,12 @@ public class Avslagbrev extends DokgenDto {
         var fagsak = brevbestilling.getBehandling().getFagsak();
 
         this.sakstype = fagsak.getType().getKode();
-        this.mangelbrevDatoer = mangelbrevDatoer;
-        this.datoInnsendingsfrist = mangelbrevDatoer.size() > 0
+        this.mangelbrevDatoer = mangelbrevDatoer.stream().map(this::instantTilLocalDate).collect(Collectors.toList());
+        Instant innsendingsfrist = mangelbrevDatoer.size() > 0
             ? Collections.max(mangelbrevDatoer).plus(Period.ofWeeks(DOKUMENTASJON_SVARFRIST_UKER_MANGELBREV))
             : null;
-        this.datoMottatt = brevbestilling.getForsendelseMottatt();
+        this.datoInnsendingsfrist = instantTilLocalDate(innsendingsfrist);
+        this.datoMottatt = instantTilLocalDate(brevbestilling.getForsendelseMottatt());
     }
 
     public String getFritekst() {
@@ -57,15 +60,15 @@ public class Avslagbrev extends DokgenDto {
         return sakstype;
     }
 
-    public Instant getDatoInnsendingsfrist() {
+    public LocalDate getDatoInnsendingsfrist() {
         return datoInnsendingsfrist;
     }
 
-    public List<Instant> getMangelbrevDatoer() {
+    public List<LocalDate> getMangelbrevDatoer() {
         return mangelbrevDatoer;
     }
 
-    public Instant getDatoMottatt() {
+    public LocalDate getDatoMottatt() {
         return datoMottatt;
     }
 }

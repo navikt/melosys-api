@@ -1,6 +1,8 @@
 package no.nav.melosys.integrasjon.dokgen.dto;
 
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -63,5 +65,9 @@ public abstract class DokgenDto {
 
     public void setMottaker(Mottaker mottaker) {
         this.mottaker = mottaker;
+    }
+
+    protected LocalDate instantTilLocalDate(Instant datoOgTid) {
+        return datoOgTid != null ? LocalDate.ofInstant(datoOgTid, ZoneId.systemDefault()) : null;
     }
 }
