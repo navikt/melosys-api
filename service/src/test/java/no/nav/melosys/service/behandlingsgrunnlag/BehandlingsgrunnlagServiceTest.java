@@ -119,7 +119,7 @@ class BehandlingsgrunnlagServiceTest {
         JsonNode jsonNode = new ObjectMapper().readTree(behandlingsgrunnlagArgumentCaptor.getValue().getJsonData());
         String periode = jsonNode.get("periode").toString();
         assertThat(periode)
-            .contains("{" +
+            .isEqualTo("{" +
                 "\"fom\":[2000,1,1]," +
                 "\"tom\":[2010,1,1]" +
                 "}");
