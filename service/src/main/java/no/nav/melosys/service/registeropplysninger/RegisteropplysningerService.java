@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
@@ -63,6 +64,7 @@ public class RegisteropplysningerService {
     private final UtbetaldataService utbetaldataService;
     private final SaksopplysningerService saksopplysningerService;
     private final RegisteropplysningerPeriodeFactory registeropplysningerPeriodeFactory;
+    private final Unleash unleash;
 
     @Autowired
     public RegisteropplysningerService(@Qualifier("system") PersondataFasade persondataFasade,
@@ -73,8 +75,8 @@ public class RegisteropplysningerService {
                                        InntektService inntektService,
                                        UtbetaldataService utbetaldataService,
                                        SaksopplysningerService saksopplysningerService,
-                                       RegisteropplysningerPeriodeFactory registeropplysningerPeriodeFactory
-    ) {
+                                       RegisteropplysningerPeriodeFactory registeropplysningerPeriodeFactory,
+                                       Unleash unleash) {
         this.persondataFasade = persondataFasade;
         this.medlPeriodeService = medlPeriodeService;
         this.eregFasade = eregFasade;
@@ -85,6 +87,7 @@ public class RegisteropplysningerService {
         this.utbetaldataService = utbetaldataService;
         this.saksopplysningerService = saksopplysningerService;
         this.registeropplysningerPeriodeFactory = registeropplysningerPeriodeFactory;
+        this.unleash = unleash;
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -93,14 +96,14 @@ public class RegisteropplysningerService {
 
         if (PeriodeKontroller.feilIPeriode(registeropplysningerRequest.getFom(), registeropplysningerRequest.getTom())) {
             log.warn("Henter ikke registeropplysninger for behandling {} pga feil i periode. fom={}, tom={}", registeropplysningerRequest.getBehandlingID(), registeropplysningerRequest.getFom(), registeropplysningerRequest.getTom());
-            registeropplysningerRequest = registeropplysningerRequest.lagKopiUtenPeriodeOgOpplysningstyperSomKreverPeriode();
+            registeropplysningerRequest = registeropplysningerRequest.lagKopiUtenPeriodeOgOpplysningstyperSomKreverPeriode(unleash);
         }
 
         hentOgLagreOpplysninger(registeropplysningerRequest, behandling);
     }
 
     private void hentOgLagreOpplysninger(RegisteropplysningerRequest registeropplysningerRequest, Behandling behandling) {
-        for (var opplysningstype : sorterteSaksopplysningstyper(registeropplysningerRequest.getOpplysningstyper())) {
+        for (var opplysningstype : sorterteSaksopplysningstyper(registeropplysningerRequest.getOpplysningstyper(unleash))) {
             if (!SAKSOPPLYSNING_TYPE_FUNCTION_MAP.containsKey(opplysningstype)) {
                 throw new TekniskException("Støtter ikke å hente opplysninger for saksopplysningType " + opplysningstype);
             }

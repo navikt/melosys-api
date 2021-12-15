@@ -47,7 +47,7 @@ class UfmKontrollServiceTest {
     @BeforeEach
     public void setup() {
         final FakeUnleash unleash = new FakeUnleash();
-        unleash.enable("melosys.kontroller.pdl");
+        unleash.enable("melosys.pdl.aktiv");
         ufmKontrollService = new UfmKontrollService(kontrollFactory, persondataFasade, unleash);
         SedDokument sedDokument = new SedDokument();
         sedDokument.setSedType(SedType.A009);

@@ -1,19 +1,19 @@
 package no.nav.melosys.integrasjon.dokgen.dto.felles;
 
-import java.time.Instant;
+import java.time.LocalDate;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.datatype.jsr310.ser.InstantSerializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 
 import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
 
 public record Person(
     String navn,
 
-    @JsonSerialize(using = InstantSerializer.class)
+    @JsonSerialize(using = LocalDateSerializer.class)
     @JsonFormat(shape = STRING)
-    Instant foedselsdato,
+    LocalDate foedselsdato,
 
     String fnr,
 

@@ -12,6 +12,7 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.person.Informasjonsbehov;
+import no.nav.melosys.domain.person.PersonMedHistorikk;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.domain.person.Statsborgerskap;
 import no.nav.melosys.domain.person.familie.Familiemedlem;
@@ -48,6 +49,8 @@ public class PersondataService implements PersondataFasade {
     private final TpsService tpsService;
     private final Unleash unleash;
 
+    public static final String PDL_PERSOPL_VERSJON = "1.0";
+    public static final String PDL_PERS_SAKS_VERSJON = "1.0";
     static final LocalDate PDL_STARTDATO = LocalDate.parse("2020-07-01");
 
     @Autowired
@@ -197,17 +200,12 @@ public class PersondataService implements PersondataFasade {
     public PersonMedHistorikk hentPersonMedHistorikk(long behandlingID) {
         final var behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
         final String ident = behandling.getFagsak().hentAktørID();
-        if (behandling.erAktiv() && erRegistrertEtterPdlStart(behandling)) {
+        if (behandling.erAktiv()) {
             return hentPersonMedHistorikk(ident);
         }
 
-        if (!erRegistrertEtterPdlStart(behandling)) {
-            return PersonMedHistorikkOversetter.lagHistorikkFraTpsData(saksopplysningerService.hentTpsPersonopplysninger(behandlingID), kodeverkService);
-        }
-
-        final Instant skjæringstidspunkt = avgjørSkjæringstidspunktTilInnsyn(behandling);
-        final var persondataTilInnsyn = filtrerPersondataFørDato(pdlConsumer.hentPersonMedHistorikk(ident), skjæringstidspunkt);
-        return PersonMedHistorikkOversetter.oversett(persondataTilInnsyn, kodeverkService);
+        return saksopplysningerService.hentPersonhistorikkPDL(behandlingID)
+            .orElseGet(() -> PersonMedHistorikkOversetter.lagHistorikkFraTpsData(saksopplysningerService.hentTpsPersonopplysninger(behandlingID), kodeverkService));
     }
 
     @Override
@@ -313,7 +311,7 @@ public class PersondataService implements PersondataFasade {
 
     @Override
     public boolean harStrengtFortroligAdresse(String ident) {
-        if (unleash.isEnabled("melosys.pdl.adressebeskyttelse")) {
+        if (unleash.isEnabled("melosys.pdl.aktiv")) {
             return pdlConsumer.hentAdressebeskyttelser(ident).stream().anyMatch(Adressebeskyttelse::erStrengtFortrolig);
         }
         return tpsService.harStrengtFortroligAdresse(ident);

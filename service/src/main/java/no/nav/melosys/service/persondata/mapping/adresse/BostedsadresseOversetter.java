@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.person.adresse.Bostedsadresse;
+import no.nav.melosys.integrasjon.KonverteringsUtils;
 import no.nav.melosys.integrasjon.pdl.dto.HarMetadata;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 
@@ -42,12 +43,14 @@ public final class BostedsadresseOversetter {
             return Optional.empty();
         }
 
-        var gyldigFraOgMed = bostedsadressePDL.gyldigFraOgMed() == null ? null : bostedsadressePDL.gyldigFraOgMed().toLocalDate();
-        var gyldigTilOgMed = bostedsadressePDL.gyldigTilOgMed() == null ? null : bostedsadressePDL.gyldigTilOgMed().toLocalDate();
-
-        return Optional.of(new Bostedsadresse(strukturertAdresse, bostedsadressePDL.coAdressenavn(),
-            gyldigFraOgMed, gyldigTilOgMed,
-            bostedsadressePDL.metadata().master(), bostedsadressePDL.hentKilde(),
-            bostedsadressePDL.metadata().historisk()));
+        return Optional.of(new Bostedsadresse(
+            strukturertAdresse,
+            bostedsadressePDL.coAdressenavn(),
+            KonverteringsUtils.localDateTimeToLocalDate(bostedsadressePDL.gyldigFraOgMed()),
+            KonverteringsUtils.localDateTimeToLocalDate(bostedsadressePDL.gyldigTilOgMed()),
+            bostedsadressePDL.metadata().master(),
+            bostedsadressePDL.hentKilde(),
+            bostedsadressePDL.metadata().historisk())
+        );
     }
 }

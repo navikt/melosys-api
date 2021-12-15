@@ -1,21 +1,25 @@
 package no.nav.melosys.service.vedtak;
 
+import java.time.LocalDate;
+
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
+import no.nav.melosys.service.dokument.DokgenService;
+import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.time.LocalDate;
 
 import static no.nav.melosys.service.vedtak.VedtakServiceFasade.FRIST_KLAGE_UKER;
 
@@ -27,16 +31,19 @@ public class TrygdeavtaleVedtakService {
     private final BehandlingService behandlingService;
     private final ProsessinstansService prosessinstansService;
     private final OppgaveService oppgaveService;
+    private final DokgenService dokgenService;
 
     @Autowired
     public TrygdeavtaleVedtakService(BehandlingsresultatService behandlingsresultatService,
                                      BehandlingService behandlingService,
                                      ProsessinstansService prosessinstansService,
-                                     OppgaveService oppgaveService) {
+                                     OppgaveService oppgaveService,
+                                     DokgenService dokgenService) {
         this.behandlingsresultatService = behandlingsresultatService;
         this.behandlingService = behandlingService;
         this.prosessinstansService = prosessinstansService;
         this.oppgaveService = oppgaveService;
+        this.dokgenService = dokgenService;
     }
 
     public void fattVedtak(Behandling behandling, FattTrygdeavtaleVedtakRequest request) {
@@ -52,11 +59,25 @@ public class TrygdeavtaleVedtakService {
         }
 
         behandling.getFagsak().setStatus(Saksstatuser.MEDLEMSKAP_AVKLART);
-        behandling.setStatus(Behandlingsstatus.IVERKSETTER_VEDTAK);
-        behandlingService.lagre(behandling);
+        behandlingService.oppdaterStatus(behandling, Behandlingsstatus.IVERKSETTER_VEDTAK);
 
         prosessinstansService.opprettProsessinstansIverksettVedtakTrygdeavtale(behandling, request);
+        // TODO: Produser og distribuer både attest og innvilgelse-brevene
+         dokgenService.produserOgDistribuerBrev(behandlingID, lagAttestBrevbestilling(request));
         oppgaveService.ferdigstillOppgaveMedSaksnummer(saksnummer);
+    }
+
+    private BrevbestillingRequest lagAttestBrevbestilling(FattTrygdeavtaleVedtakRequest request) {
+        return new BrevbestillingRequest.Builder()
+            .medProduserbardokument(Produserbaredokumenter.ATTEST_NO_UK_1)
+            .medMottaker(Aktoersroller.BRUKER)
+            .medKopiMottakere(request.getKopiMottakere())
+            .medInnledningFritekst(request.getFritekstInnledning())
+            .medBegrunnelseFritekst(request.getFritekstBegrunnelse())
+            .medEktefelleFritekst(request.getFritekstEktefelle())
+            .medBarnFritekst(request.getFritekstBarn())
+            .medBestillersId(request.getBestillersId())
+            .build();
     }
 
     private void oppdaterBehandlingsresultat(long behandlingID, FattTrygdeavtaleVedtakRequest request) throws IkkeFunnetException {

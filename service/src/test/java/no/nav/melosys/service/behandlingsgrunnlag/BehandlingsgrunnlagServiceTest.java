@@ -165,7 +165,7 @@ class BehandlingsgrunnlbagServiceTest {
         when(behandlingService.hentBehandling(behandlingID)).thenReturn(behandling);
         when(joarkFasade.hentMottaksDatoForJournalpost(behandling.getInitierendeJournalpostId())).thenReturn(LocalDate.now());
         SoeknadFtrl soeknadFtrl = new SoeknadFtrl();
-        behandlingsgrunnlagService.opprettSøknadOmMedlemskapIFolketrygden(behandlingID, soeknadFtrl);
+        behandlingsgrunnlagService.opprettSøknadFolketrygden(behandlingID, soeknadFtrl);
 
         verify(behandlingsgrunnlagRepository).save(behandlingsgrunnlagArgumentCaptor.capture());
         Behandlingsgrunnlag opprettet = behandlingsgrunnlagArgumentCaptor.getValue();
@@ -173,6 +173,24 @@ class BehandlingsgrunnlbagServiceTest {
         assertThat(opprettet).isNotNull();
         assertThat(opprettet.getBehandlingsgrunnlagdata()).isInstanceOf(SoeknadFtrl.class);
         assertThat(opprettet.getType()).isEqualTo(Behandlingsgrunnlagtyper.SØKNAD_FOLKETRYGDEN);
+        assertThat(opprettet.getBehandling()).isEqualTo(behandling);
+        assertThat(opprettet.getMottaksdato()).isNotNull();
+    }
+
+    @Test
+    void opprettSøknadTrygdeavtale_harRettType() {
+        Behandling behandling = lagBehandling();
+        when(behandlingService.hentBehandling(behandlingID)).thenReturn(behandling);
+        when(joarkFasade.hentMottaksDatoForJournalpost(behandling.getInitierendeJournalpostId())).thenReturn(LocalDate.now());
+        SoeknadTrygdeavtale soeknadTrygdeavtale = new SoeknadTrygdeavtale();
+        behandlingsgrunnlagService.opprettSøknadTrygdeavtale(behandlingID, soeknadTrygdeavtale);
+
+        verify(behandlingsgrunnlagRepository).save(behandlingsgrunnlagArgumentCaptor.capture());
+        Behandlingsgrunnlag opprettet = behandlingsgrunnlagArgumentCaptor.getValue();
+
+        assertThat(opprettet).isNotNull();
+        assertThat(opprettet.getBehandlingsgrunnlagdata()).isInstanceOf(SoeknadTrygdeavtale.class);
+        assertThat(opprettet.getType()).isEqualTo(Behandlingsgrunnlagtyper.SØKNAD_TRYGDEAVTALE);
         assertThat(opprettet.getBehandling()).isEqualTo(behandling);
         assertThat(opprettet.getMottaksdato()).isNotNull();
     }

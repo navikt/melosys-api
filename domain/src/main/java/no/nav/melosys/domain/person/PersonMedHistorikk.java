@@ -1,7 +1,8 @@
-package no.nav.melosys.service.persondata;
+package no.nav.melosys.domain.person;
 
 import java.util.Collection;
 
+import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.person.*;
 import no.nav.melosys.domain.person.adresse.Bostedsadresse;
 import no.nav.melosys.domain.person.adresse.Kontaktadresse;
@@ -12,11 +13,11 @@ public record PersonMedHistorikk(
     Doedsfall dødsfall,
     Foedsel fødsel,
     Folkeregisteridentifikator folkeregisteridentifikator,
-    Folkeregisterpersonstatus folkeregisterpersonstatus,
+    Collection<Folkeregisterpersonstatus> folkeregisterpersonstatuser,
     KjoennType kjønn,
     Collection<Kontaktadresse> kontaktadresser,
     Navn navn,
     Collection<Oppholdsadresse> oppholdsadresser,
     Collection<Sivilstand> sivilstand,
-    Collection<Statsborgerskap> statsborgerskap) {
+    Collection<Statsborgerskap> statsborgerskap) implements SaksopplysningDokument {
 }

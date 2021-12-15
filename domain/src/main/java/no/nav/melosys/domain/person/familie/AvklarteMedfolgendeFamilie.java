@@ -1,9 +1,6 @@
 package no.nav.melosys.domain.person.familie;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
@@ -28,6 +25,13 @@ public class AvklarteMedfolgendeFamilie {
 
     public Set<IkkeOmfattetFamilie> getFamilieIkkeOmfattetAvNorskTrygd() {
         return familieIkkeOmfattetAvNorskTrygd;
+    }
+
+    public Optional<String> hentBegrunnelseFritekst() {
+        return familieIkkeOmfattetAvNorskTrygd.stream()
+            .map(IkkeOmfattetFamilie::getBegrunnelseFritekst)
+            .filter(Objects::nonNull)
+            .findFirst();
     }
 
     public Collection<Avklartefakta> tilAvklartefakta(Map<String, MedfolgendeFamilie.Relasjonsrolle> uuidOgRolle) {

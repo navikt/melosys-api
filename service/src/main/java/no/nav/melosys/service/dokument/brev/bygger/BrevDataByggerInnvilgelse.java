@@ -9,8 +9,8 @@ import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
-import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeBarn;
-import no.nav.melosys.domain.person.familie.IkkeOmfattetBarn;
+import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie;
+import no.nav.melosys.domain.person.familie.IkkeOmfattetFamilie;
 import no.nav.melosys.domain.person.familie.OmfattetFamilie;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.LandvelgerService;
@@ -122,10 +122,10 @@ public class BrevDataByggerInnvilgelse implements BrevDataBygger {
         return brevDataInnvilgelse;
     }
 
-    private AvklarteMedfolgendeBarn hentAvklarteMedfølgendeBarn(long behandlingID) {
+    private AvklarteMedfolgendeFamilie hentAvklarteMedfølgendeBarn(long behandlingID) {
         var avklarteMedfolgendeBarn = avklartefaktaService.hentAvklarteMedfølgendeBarn(behandlingID);
         Map<String, MedfolgendeFamilie> medfølgendeBarn = hentMedfølgendeBarn(behandlingID);
-        for (OmfattetFamilie omfattetBarn : avklarteMedfolgendeBarn.barnOmfattetAvNorskTrygd) {
+        for (OmfattetFamilie omfattetBarn : avklarteMedfolgendeBarn.getFamilieOmfattetAvNorskTrygd()) {
             if (!medfølgendeBarn.containsKey(omfattetBarn.getUuid())) {
                 throw new FunksjonellException("Avklart medfølgende barn " + omfattetBarn.getUuid() + " finnes ikke i behandlingsgrunnlaget");
             }
@@ -133,13 +133,13 @@ public class BrevDataByggerInnvilgelse implements BrevDataBygger {
             omfattetBarn.setIdent(barn.getFnr());
             omfattetBarn.setSammensattNavn(barn.getFnr() != null ? persondataFasade.hentSammensattNavn(barn.getFnr()) : barn.getNavn());
         }
-        for (IkkeOmfattetBarn ikkeOmfattetBarn : avklarteMedfolgendeBarn.barnIkkeOmfattetAvNorskTrygd) {
-            if (!medfølgendeBarn.containsKey(ikkeOmfattetBarn.uuid)) {
-                throw new FunksjonellException("Avklart medfølgende barn " + ikkeOmfattetBarn.uuid + " finnes ikke i behandlingsgrunnlaget");
+        for (IkkeOmfattetFamilie ikkeOmfattetBarn : avklarteMedfolgendeBarn.getFamilieIkkeOmfattetAvNorskTrygd()) {
+            if (!medfølgendeBarn.containsKey(ikkeOmfattetBarn.getUuid())) {
+                throw new FunksjonellException("Avklart medfølgende barn " + ikkeOmfattetBarn.getUuid() + " finnes ikke i behandlingsgrunnlaget");
             }
-            MedfolgendeFamilie barn = medfølgendeBarn.get(ikkeOmfattetBarn.uuid);
-            ikkeOmfattetBarn.sammensattNavn = barn.getFnr() != null ? persondataFasade.hentSammensattNavn(barn.getFnr()) : barn.getNavn();
-            ikkeOmfattetBarn.ident = barn.getFnr();
+            MedfolgendeFamilie barn = medfølgendeBarn.get(ikkeOmfattetBarn.getUuid());
+            ikkeOmfattetBarn.setSammensattNavn(barn.getFnr() != null ? persondataFasade.hentSammensattNavn(barn.getFnr()) : barn.getNavn());
+            ikkeOmfattetBarn.setIdent(barn.getFnr());
         }
         return avklarteMedfolgendeBarn;
     }

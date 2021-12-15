@@ -1,5 +1,6 @@
 package no.nav.melosys.service.dokument;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import no.finn.unleash.FakeUnleash;
@@ -8,6 +9,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import org.junit.jupiter.api.Test;
 
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
+import static no.nav.melosys.service.dokument.DokumentproduksjonsInfoMapper.DOKUMENTMALER_PRODSATT;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
@@ -25,11 +27,12 @@ class DokumentproduksjonsInfoMapperTest {
 
     @Test
     void skalUtledeTilgjengeligeMaler() {
-        fakeUnleash.enable("melosys.brev.MELDING_FORVENTET_SAKSBEHANDLINGSTID");
+        fakeUnleash.enable("melosys.brev.ATTEST_NO_UK_1");
         Set<Produserbaredokumenter> produserbaredokumenter = dokumentproduksjonsInfoMapper.utledTilgjengeligeMaler();
 
-        assertThat(produserbaredokumenter).hasSize(1);
-        assertThat(produserbaredokumenter.iterator().next()).isEqualTo(MELDING_FORVENTET_SAKSBEHANDLINGSTID);
+        Set<Produserbaredokumenter> forventetProduserbaredokumenter = new HashSet<>(DOKUMENTMALER_PRODSATT);
+        forventetProduserbaredokumenter.add(ATTEST_NO_UK_1);
+        assertThat(produserbaredokumenter).hasSameElementsAs(forventetProduserbaredokumenter);
     }
 
     @Test

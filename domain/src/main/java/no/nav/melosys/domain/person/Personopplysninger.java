@@ -7,6 +7,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import no.nav.melosys.domain.brev.Postadresse;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.person.adresse.Adressebeskyttelse;
@@ -66,22 +67,27 @@ public record Personopplysninger(
         return kjønn;
     }
 
+    @JsonIgnore
     @Override
     public String getFornavn() {
         return navn.fornavn();
     }
 
     @Override
+    @JsonIgnore
     public String getMellomnavn() {
         return navn.mellomnavn();
     }
 
     @Override
+    @JsonIgnore
     public String getEtternavn() {
         return navn.etternavn();
     }
 
     @Override
+
+    @JsonIgnore
     public String getSammensattNavn() {
         return navn.tilSammensattNavn();
     }
@@ -92,13 +98,9 @@ public record Personopplysninger(
     }
 
     @Override
+    @JsonIgnore
     public LocalDate getFødselsdato() {
         return fødsel.fødselsdato();
-    }
-
-    @Override
-    public no.nav.melosys.domain.dokument.person.adresse.Bostedsadresse getBostedsadresse() {
-        throw new UnsupportedOperationException("Eksisterer bare ifm. TPS");
     }
 
     @Override
@@ -120,7 +122,7 @@ public record Personopplysninger(
     /*
      * Vi følger anbefaling fra PDL om følgende prioritering:
      * Kontaktadresse med master PDL
-     * Kontaktadresse fra Freg med nyeste registreringsdato
+     * Kontaktadresse fra Freg med nyeste fregGyldighetstidspunkt
      * Oppholdsadresse med master PDL
      * Oppholdsadresse med master Freg
      * Bostedsadresse

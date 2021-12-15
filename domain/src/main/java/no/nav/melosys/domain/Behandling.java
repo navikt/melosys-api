@@ -3,6 +3,7 @@ package no.nav.melosys.domain;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
 import javax.persistence.*;
 
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
@@ -19,7 +20,6 @@ import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
-import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -206,10 +206,6 @@ public class Behandling extends RegistreringsInfo {
         Optional<SaksopplysningDokument> saksopplysning = finnDokument(SaksopplysningType.PERSOPL);
         return (PersonDokument) saksopplysning
             .orElseThrow(() -> new TekniskException("Finner ikke persondokument"));
-    }
-
-    public Optional<Persondata> finnPersonDokument() {
-        return finnDokument(SaksopplysningType.PERSOPL).map(Persondata.class::cast);
     }
 
     public MedlemskapDokument hentMedlemskapDokument() {
@@ -412,7 +408,7 @@ public class Behandling extends RegistreringsInfo {
             || Behandlingstema.IKKE_YRKESAKTIV.getKode().equalsIgnoreCase(behandlingstemaKode)
             || Behandlingstema.ARBEID_NORGE_BOSATT_ANNET_LAND.getKode().equalsIgnoreCase(behandlingstemaKode)
             || Behandlingstema.ARBEID_I_UTLANDET.getKode().equalsIgnoreCase(behandlingstemaKode)
-            || Behandlingstema.TRYGDEAVTALE_UK.getKode().equalsIgnoreCase(behandlingstemaKode);
+            || Behandlingstema.YRKESAKTIV.getKode().equalsIgnoreCase(behandlingstemaKode);
     }
 
     public static boolean erBehandlingAvSøknadUtsendtArbeidstaker(String behandlingstemaKode) {
@@ -450,6 +446,10 @@ public class Behandling extends RegistreringsInfo {
 
     public boolean harStatus(Behandlingsstatus status) {
         return this.status == status;
+    }
+
+    public boolean saksopplysningerEksistererIkke(List<SaksopplysningType> saksopplysningTyper){
+        return Collections.disjoint(saksopplysningTyper, getSaksopplysninger().stream().map(Saksopplysning::getType).toList());
     }
 
     @Override

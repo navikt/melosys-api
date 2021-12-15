@@ -1,6 +1,7 @@
 package no.nav.melosys.service.dokument;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
@@ -105,7 +106,7 @@ class InnvilgelseFtrlMapperTest {
         InnvilgelseFtrl innvilgelseFtrl = innvilgelseFtrlMapper.map(lagInnvilgelseBrevbestilling());
 
         assertThat(innvilgelseFtrl).isNotNull();
-        assertThat(innvilgelseFtrl.getDatoMottatt()).isEqualTo(Instant.EPOCH);
+        assertThat(innvilgelseFtrl.getDatoMottatt()).isEqualTo(LocalDate.EPOCH);
         assertThat(innvilgelseFtrl.getPerioder().size()).isEqualTo(1);
         assertThat(innvilgelseFtrl.isErFullstendigInnvilget()).isTrue();
         assertThat(innvilgelseFtrl.getFtrl_2_8_begrunnelse()).isEqualTo(ANSATT_I_NORSK_VIRKSOMHET_IKKE_UTSENDT.getKode());
@@ -119,10 +120,10 @@ class InnvilgelseFtrlMapperTest {
         }
         assertThat(innvilgelseFtrl.getIkkeOmfattetBarn().size()).isZero();
         assertThat(innvilgelseFtrl.getIkkeOmfattetEktefelle()).isNull();
-        assertThat(innvilgelseFtrl.getFritekstInnledning()).isNull();
-        assertThat(innvilgelseFtrl.getFritekstBegrunnelse()).isEqualTo(BEGRUNNELSE_FRITEKST);
-        assertThat(innvilgelseFtrl.getFritekstEktefelle()).isNull();
-        assertThat(innvilgelseFtrl.getFritekstBarn()).isNull();
+        assertThat(innvilgelseFtrl.getInnvilgelse().innledningFritekst()).isNull();
+        assertThat(innvilgelseFtrl.getInnvilgelse().begrunnelseFritekst()).isEqualTo(BEGRUNNELSE_FRITEKST);
+        assertThat(innvilgelseFtrl.getInnvilgelse().ektefelleFritekst()).isNull();
+        assertThat(innvilgelseFtrl.getInnvilgelse().barnFritekst()).isNull();
         assertThat(innvilgelseFtrl.getSaksbehandlerNavn()).isEqualTo(SAKSBEHANDLER_NAVN);
         assertThat(innvilgelseFtrl.getArbeidsgiverNavn()).isEqualTo(ARBEIDSGIVER_NAVN);
         assertThat(innvilgelseFtrl.getArbeidsland()).isEqualTo(Landkoder.AT.getBeskrivelse());
@@ -272,8 +273,8 @@ class InnvilgelseFtrlMapperTest {
         return List.of(new AvklartVirksomhet(ARBEIDSGIVER_NAVN, "987654321", BrevDataTestUtils.lagStrukturertAdresse(), Yrkesaktivitetstyper.LOENNET_ARBEID));
     }
 
-    private AvklarteMedfolgendeBarn lagAvklartMedfølgendeBarn() {
-        return new AvklarteMedfolgendeBarn(Set.of(new OmfattetFamilie(UUID_BARN_1)), Set.of());
+    private AvklarteMedfolgendeFamilie lagAvklartMedfølgendeBarn() {
+        return new AvklarteMedfolgendeFamilie(Set.of(new OmfattetFamilie(UUID_BARN_1)), Set.of());
     }
 
     private AvklarteMedfolgendeFamilie lagAvklartMedfølgendeEktefelle() {
@@ -281,10 +282,10 @@ class InnvilgelseFtrlMapperTest {
         return new AvklarteMedfolgendeFamilie(Set.of(ektefelle), Set.of());
     }
 
-    private AvklarteMedfolgendeBarn lagAvklartIkkeMedfølgendeBarn() {
-        IkkeOmfattetBarn barn1 = new IkkeOmfattetBarn(UUID_BARN_1, IKKE_SOEKERS_BARN.getKode(), "Ikke omfattet");
-        IkkeOmfattetBarn barn2 = new IkkeOmfattetBarn(UUID_BARN_2, IKKE_SOEKERS_BARN.getKode(), "Ikke omfattet");
-        return new AvklarteMedfolgendeBarn(Set.of(), Set.of(barn1, barn2));
+    private AvklarteMedfolgendeFamilie lagAvklartIkkeMedfølgendeBarn() {
+        IkkeOmfattetFamilie barn1 = new IkkeOmfattetFamilie(UUID_BARN_1, IKKE_SOEKERS_BARN.getKode(), "Ikke omfattet");
+        IkkeOmfattetFamilie barn2 = new IkkeOmfattetFamilie(UUID_BARN_2, IKKE_SOEKERS_BARN.getKode(), "Ikke omfattet");
+        return new AvklarteMedfolgendeFamilie(Set.of(), Set.of(barn1, barn2));
     }
 
     private AvklarteMedfolgendeFamilie lagAvklartIkkeMedfølgendeEktefelle() {

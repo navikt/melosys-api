@@ -112,7 +112,7 @@ public class OpprettJournalforBrev implements StegBehandler {
     }
 
     private String hentBrukerFolkeregisterIdent(Behandling behandling) {
-        if (unleash.isEnabled("melosys.brev.person.pdl")) {
+        if (unleash.isEnabled("melosys.pdl.aktiv")) {
             return persondataFasade.hentFolkeregisterident(behandling.getFagsak().hentAktørID());
         }
         return behandling.hentPersonDokument().hentFolkeregisterident();

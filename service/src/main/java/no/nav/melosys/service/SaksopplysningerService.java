@@ -1,17 +1,26 @@
 package no.nav.melosys.service;
 
+import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.dokument.person.PersonhistorikkDokument;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
+import no.nav.melosys.domain.person.PersonMedHistorikk;
+import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.SaksopplysningRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import static no.nav.melosys.service.persondata.PersondataService.PDL_PERSOPL_VERSJON;
+import static no.nav.melosys.service.persondata.PersondataService.PDL_PERS_SAKS_VERSJON;
 
 @Service
 public class SaksopplysningerService {
@@ -48,9 +57,42 @@ public class SaksopplysningerService {
             .map(s -> (InntektDokument) s.getDokument());
     }
 
-    public PersonhistorikkDokument hentPersonhistorikk(long behandlingID) {
-        return saksopplysningRepo.findByBehandling_IdAndType(behandlingID, SaksopplysningType.PERSHIST)
-            .map(s -> (PersonhistorikkDokument) s.getDokument())
-            .orElseThrow(() -> new IkkeFunnetException("Finner ikke personhistorikkDokument for behandling " + behandlingID));
+    public Optional<PersonMedHistorikk> hentPersonhistorikkPDL(long behandlingID) {
+        return saksopplysningRepo.findByBehandling_IdAndType(behandlingID, SaksopplysningType.PDL_PERS_SAKS)
+            .map(s -> (PersonMedHistorikk) s.getDokument());
+    }
+
+    @Transactional
+    public void lagrePersonopplysninger(Behandling behandling, Persondata persondata) {
+        if (behandling.saksopplysningerEksistererIkke(List.of(SaksopplysningType.PDL_PERSOPL))) {
+            Instant nå = Instant.now();
+            Saksopplysning saksopplysning = new Saksopplysning();
+            saksopplysning.setDokument(persondata);
+            saksopplysning.setType(SaksopplysningType.PDL_PERSOPL);
+            saksopplysning.setBehandling(behandling);
+            saksopplysning.setVersjon(PDL_PERSOPL_VERSJON);
+            saksopplysning.setEndretDato(nå);
+            saksopplysning.setRegistrertDato(nå);
+
+            behandling.getSaksopplysninger().removeIf(s -> s.getType().equals(SaksopplysningType.PERSOPL));
+            saksopplysningRepo.save(saksopplysning);
+        }
+    }
+
+    @Transactional
+    public void lagrePersonMedHistorikk(Behandling behandling, PersonMedHistorikk personMedHistorikk) {
+        if (behandling.saksopplysningerEksistererIkke(List.of(SaksopplysningType.PDL_PERS_SAKS))) {
+            Instant nå = Instant.now();
+            Saksopplysning saksopplysning = new Saksopplysning();
+            saksopplysning.setDokument(personMedHistorikk);
+            saksopplysning.setType(SaksopplysningType.PDL_PERS_SAKS);
+            saksopplysning.setBehandling(behandling);
+            saksopplysning.setVersjon(PDL_PERS_SAKS_VERSJON);
+            saksopplysning.setEndretDato(nå);
+            saksopplysning.setRegistrertDato(nå);
+
+            behandling.getSaksopplysninger().removeIf(s -> s.getType().equals(SaksopplysningType.PERSHIST));
+            saksopplysningRepo.save(saksopplysning);
+        }
     }
 }

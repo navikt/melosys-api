@@ -1,7 +1,7 @@
 package no.nav.melosys.domain.brev.storbritannia;
 
-import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 
-public record Arbeidstaker(String navn, Instant foedselsdato, String fnr, List<String> bostedsadresse) {
+public record Arbeidstaker(String navn, LocalDate foedselsdato, String fnr, List<String> bostedsadresse) {
 }

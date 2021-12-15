@@ -2,6 +2,7 @@ package no.nav.melosys.saksflyt.steg.register;
 
 import java.time.LocalDate;
 
+import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
@@ -9,6 +10,7 @@ import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadFtrl;
+import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadTrygdeavtale;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
@@ -40,6 +42,8 @@ class HentRegisteropplysningerTest {
     private BehandlingService behandlingService;
     @Mock
     private PersondataFasade persondataFasade;
+
+    private FakeUnleash unleash = new FakeUnleash();
 
     private HentRegisteropplysninger hentRegisteropplysninger;
 
@@ -106,7 +110,27 @@ class HentRegisteropplysningerTest {
 
         verify(registeropplysningerService).hentOgLagreOpplysninger(requestCaptor.capture());
 
-        assertThat(requestCaptor.getValue().getOpplysningstyper())
+        assertThat(requestCaptor.getValue().getOpplysningstyper(unleash))
+            .containsOnly(SaksopplysningType.PERSOPL);
+    }
+
+    @Test
+    void utfør_sakstypeTrygdeavtale_henterKunPersonopplysninger() {
+        behandling.setTema(Behandlingstema.YRKESAKTIV);
+        behandling.getFagsak().setType(Sakstyper.TRYGDEAVTALE);
+
+        Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
+        behandlingsgrunnlag.setBehandlingsgrunnlagdata(new SoeknadTrygdeavtale());
+        behandling.setBehandlingsgrunnlag(behandlingsgrunnlag);
+
+        Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setBehandling(behandling);
+
+        hentRegisteropplysninger.utfør(prosessinstans);
+
+        verify(registeropplysningerService).hentOgLagreOpplysninger(requestCaptor.capture());
+
+        assertThat(requestCaptor.getValue().getOpplysningstyper(unleash))
             .containsOnly(SaksopplysningType.PERSOPL);
     }
 }

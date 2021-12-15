@@ -1,24 +1,24 @@
 package no.nav.melosys.integrasjon.dokgen.dto.atteststorbritannia;
 
-import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.datatype.jsr310.ser.InstantSerializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 
 import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
 
 public record Arbeidstaker(
     String navn,
 
-    @JsonSerialize(using = InstantSerializer.class)
+    @JsonSerialize(using = LocalDateSerializer.class)
     @JsonFormat(shape = STRING)
-    Instant foedselsdato,
+    LocalDate foedselsdato,
 
     String fnr,
 
-    List<String> bostedadresse
+    List<String> bostedsadresse
 ) {
     public static Arbeidstaker av(no.nav.melosys.domain.brev.storbritannia.Arbeidstaker arbeidstaker) {
         if (arbeidstaker == null) return null;

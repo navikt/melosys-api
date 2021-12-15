@@ -69,7 +69,7 @@ class VideresendSoknadServiceTest {
     @BeforeEach
     public void setup() {
         final FakeUnleash unleash = new FakeUnleash();
-        unleash.enable("melosys.kontroller.pdl");
+        unleash.enable("melosys.pdl.aktiv");
         videresendSoknadService = new VideresendSoknadService(behandlingsresultatService, eessiService, fagsakService,
             joarkFasade, landvelgerService, oppgaveService, persondataFasade, prosessinstansService, unleash);
 

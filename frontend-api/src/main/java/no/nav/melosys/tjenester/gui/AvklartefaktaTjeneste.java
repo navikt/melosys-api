@@ -76,7 +76,7 @@ public class AvklartefaktaTjeneste {
                                                                    @RequestBody VirksomheterDto virksomheter) {
         aksesskontroll.autoriserSkrivTilRessurs(behandlingID, Ressurs.AVKLARTE_FAKTA);
 
-        avklarteVirksomheterService.lagreVirksomheterSomAvklartefakta(virksomheter.getVirksomhetIDer(), behandlingID);
+        avklarteVirksomheterService.lagreVirksomheterSomAvklartefakta(behandlingID, virksomheter.getVirksomhetIDer());
 
         return AvklartefaktaOppsummeringDto.av(avklartefaktaService.hentAlleAvklarteFakta(behandlingID));
     }

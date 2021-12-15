@@ -363,19 +363,17 @@ class BrevbestillingServiceTest {
 
     @Test
     void hentBrevAdresseTilMottakereFraPdl_brukerSomMottaker_returnererBrukeradresse() {
-        fakeUnleash.enable("melosys.brev.adresser.pdl");
+        fakeUnleash.enable("melosys.pdl.aktiv");
         when(mockBrevmottakerService.avklarMottakere(any(), eq(Mottaker.av(Aktoersroller.BRUKER)), any(), eq(false), eq(false)))
             .thenReturn(List.of(lagAktoer(Aktoersroller.BRUKER, null)));
         when(mockPersondataFasade.hentPerson(anyString())).thenReturn(lagPersondata());
-        when(mockKodeverkService.dekod(eq(FellesKodeverk.POSTNUMMER), anyString())).thenReturn("Oslo");
 
         var brevAdresser = brevbestillingService.hentBrevAdresseTilMottakere(MANGELBREV_BRUKER, Aktoersroller.BRUKER, behandling);
 
         assertThat(brevAdresser).hasSize(1);
         assertThat(brevAdresser.get(0))
             .extracting(BrevAdresse::getMottakerNavn, BrevAdresse::getOrgnr, BrevAdresse::getAdresselinjer, BrevAdresse::getPostnr, BrevAdresse::getPoststed, BrevAdresse::getLand)
-            .containsExactly("Nordmann Ola", null, List.of("gatenavnKontaktadressePDL"), "0123", "Oslo", "NO");
-        //fakeUnleash.disableAll();
+            .containsExactly("Nordmann Ola", null, List.of("gatenavnKontaktadressePDL"), "0123", "Poststed", "NO");
     }
 
     @Test

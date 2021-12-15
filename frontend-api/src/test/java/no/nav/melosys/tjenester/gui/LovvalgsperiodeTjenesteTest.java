@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Optional;
 
 import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.InnvilgelsesResultat;
+import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper;

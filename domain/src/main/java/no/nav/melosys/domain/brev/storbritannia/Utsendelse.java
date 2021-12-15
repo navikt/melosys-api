@@ -1,6 +1,6 @@
 package no.nav.melosys.domain.brev.storbritannia;
 
-import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
@@ -8,7 +8,7 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_t
 public record Utsendelse(
     Lovvalgbestemmelser_trygdeavtale_uk artikkel,
     List<String> oppholdsadresseUK,
-    Instant startdato,
-    Instant sluttdato
+    LocalDate startdato,
+    LocalDate sluttdato
 ) {
 }

@@ -15,7 +15,6 @@ import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.dokgen.DokgenConsumer;
-import no.nav.melosys.integrasjon.dokgen.dto.innvilgelsestorbritannia.InnvilgelseUK;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
@@ -73,6 +72,8 @@ class DokgenServiceTest {
     private InnvilgelseFtrlMapper mockInnvilgelseFtrlMapper;
     @Mock
     private InnvilgelseUKMapper mockInnvilgelseUKMapper;
+    @Mock
+    private AttestStorbritanniaMapper mockAttestStorbritanniaMapper;
     @Captor
     private ArgumentCaptor<DokgenBrevbestilling> brevbestillingCaptor;
 
@@ -89,7 +90,7 @@ class DokgenServiceTest {
 
         dokgenService = new DokgenService(mockDokgenConsumer, new DokumentproduksjonsInfoMapper(unleash),
             mockJoarkFasade,
-            new DokgenMalMapper(dokgenMapperDatahenter, mockInnvilgelseFtrlMapper, mockInnvilgelseUKMapper),
+            new DokgenMalMapper(dokgenMapperDatahenter, mockInnvilgelseFtrlMapper, mockAttestStorbritanniaMapper, mockInnvilgelseUKMapper),
             mockBehandlingsService, mockEregFasade, mockKontaktOpplysningService,
             mockBrevMottakerService, mockProsessinstansService, mockSaksbehandlerService);
 

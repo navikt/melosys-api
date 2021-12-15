@@ -9,10 +9,7 @@ import java.nio.file.Paths;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
-import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
-import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
-import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadFtrl;
+import no.nav.melosys.domain.behandlingsgrunnlag.*;
 import no.nav.melosys.domain.kodeverk.Behandlingsgrunnlagtyper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -43,6 +40,22 @@ class BehandlingsgrunnlagListenerTest {
 
         assertThat(behandlingsgrunnlag.getBehandlingsgrunnlagdata()).isNotNull();
         assertThat(behandlingsgrunnlag.getBehandlingsgrunnlagdata()).isInstanceOf(SoeknadFtrl.class);
+
+        JsonNode jsonNode = objectMapper.readTree(json);
+        assertKonvertering(jsonNode, behandlingsgrunnlag.getBehandlingsgrunnlagdata());
+    }
+
+    @Test
+    void lastBehandlingsgrunnlag_erSøknadTrygdeavtale_forventTypeSoeknadTrygdeavtale() throws URISyntaxException, IOException {
+        URI søknadURI = (getClass().getClassLoader().getResource("soeknad/soeknad.json")).toURI();
+        String json = new String(Files.readAllBytes(Paths.get(søknadURI)));
+
+        behandlingsgrunnlag.setJsonData(json);
+        behandlingsgrunnlag.setType(Behandlingsgrunnlagtyper.SØKNAD_TRYGDEAVTALE);
+        behandlingsgrunnlagListener.lastBehandlingsgrunnlag(behandlingsgrunnlag);
+
+        assertThat(behandlingsgrunnlag.getBehandlingsgrunnlagdata()).isNotNull();
+        assertThat(behandlingsgrunnlag.getBehandlingsgrunnlagdata()).isInstanceOf(SoeknadTrygdeavtale.class);
 
         JsonNode jsonNode = objectMapper.readTree(json);
         assertKonvertering(jsonNode, behandlingsgrunnlag.getBehandlingsgrunnlagdata());

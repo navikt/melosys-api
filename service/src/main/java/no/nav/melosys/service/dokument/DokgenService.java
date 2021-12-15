@@ -98,7 +98,6 @@ public class DokgenService {
         settJournalpostOpplysninger(behandling, builder);
 
         var dokgenDto = dokgenMalMapper.mapBehandling(builder.build());
-
         return dokgenConsumer.lagPdf(malnavn, dokgenDto, brevbestilling.isBestillKopi(), brevbestilling.isBestillUtkast());
     }
 
@@ -179,7 +178,7 @@ public class DokgenService {
                 .medInnledningFritekst(brevbestillingRequest.getInnledningFritekst())
                 .medManglerInfoFritekst(brevbestillingRequest.getManglerFritekst())
                 .medKontaktpersonNavn(brevbestillingRequest.getKontaktpersonNavn());
-            case INNVILGELSE_FOLKETRYGDLOVEN_2_8 -> new InnvilgelseBrevbestilling.Builder()
+            case INNVILGELSE_FOLKETRYGDLOVEN_2_8, INNVILGELSE_UK -> new InnvilgelseBrevbestilling.Builder()
                 .medInnledningFritekst(brevbestillingRequest.getInnledningFritekst())
                 .medBegrunnelseFritekst(brevbestillingRequest.getBegrunnelseFritekst())
                 .medEktefelleFritekst(brevbestillingRequest.getEktefelleFritekst())
