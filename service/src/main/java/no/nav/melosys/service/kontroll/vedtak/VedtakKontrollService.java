@@ -49,18 +49,18 @@ public class VedtakKontrollService {
     }
 
     @Transactional
-    public void validerInnvilgelse(long behandlingId, Vedtakstyper vedtakstype, boolean oppdaterRegisteropplysninger) throws ValideringException {
+    public void kontrollerInnvilgelse(long behandlingId, Vedtakstyper vedtakstype, boolean oppdaterRegisteropplysninger) throws ValideringException {
         var behandling = behandlingService.hentBehandling(behandlingId);
         var sakstype = behandling.getFagsak().getType();
         if (oppdaterRegisteropplysninger) {
             var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingId);
-            validerInnvilgelse(behandling, behandlingsresultat, vedtakstype, sakstype);
+            kontrollerInnvilgelse(behandling, behandlingsresultat, vedtakstype, sakstype);
         } else {
             kontrollerFattVedtak(behandlingId, vedtakstype, sakstype);
         }
     }
 
-    public void validerInnvilgelse(Behandling behandling, Behandlingsresultat behandlingsresultat, Vedtakstyper vedtakstype, Sakstyper sakstype) throws ValideringException {
+    public void kontrollerInnvilgelse(Behandling behandling, Behandlingsresultat behandlingsresultat, Vedtakstyper vedtakstype, Sakstyper sakstype) throws ValideringException {
         Lovvalgsperiode lovvalgsperiode = behandlingsresultat.hentValidertLovvalgsperiode();
         String fnr = persondataFasade.hentFolkeregisterident(behandling.getFagsak().hentAktørID());
 

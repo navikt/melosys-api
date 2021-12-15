@@ -8,7 +8,6 @@ import java.util.function.Consumer;
 
 import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadTrygdeavtale;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.ForetakUtland;
@@ -85,34 +84,34 @@ class VedtakKontrollServiceTest {
     }
 
     @Test
-    void validerInnvilgelse_feilFraKontroller_kasterExceptionMedFeilkode() {
+    void kontrollerInnvilgelse_feilFraKontroller_kasterExceptionMedFeilkode() {
         var behandlingsresultat = lagBehandlingsresultat();
         when(persondataFasade.hentFolkeregisterident(behandling.getFagsak().hentAktørID())).thenReturn("fnr");
 
         Consumer<ValideringException> medFeilkode = v -> assertThat(v.getFeilkoder())
             .extracting(KontrollfeilDto::getKode).containsExactly(Kontroll_begrunnelser.INGEN_SLUTTDATO.getKode());
 
-        assertThatThrownBy(() -> vedtakKontrollService.validerInnvilgelse(behandling, behandlingsresultat, FØRSTEGANGSVEDTAK, Sakstyper.EU_EOS))
+        assertThatThrownBy(() -> vedtakKontrollService.kontrollerInnvilgelse(behandling, behandlingsresultat, FØRSTEGANGSVEDTAK, Sakstyper.EU_EOS))
             .isInstanceOfSatisfying(ValideringException.class, medFeilkode)
             .hasMessage("Feil i validering. Kan ikke fatte vedtak.");
     }
 
     @Test
-    void validerInnvilgelse_oppdaterRegisteropplysninger_oppdatererRegisteropplysninger() throws ValideringException {
+    void kontrollerInnvilgelse_oppdaterRegisteropplysninger_oppdatererRegisteropplysninger() throws ValideringException {
         lovvalgsperiode.setTom(LocalDate.now());
         var behandlingsresultat = lagBehandlingsresultat();
         when(behandlingsresultatService.hentBehandlingsresultat(behandlingID)).thenReturn(behandlingsresultat);
         when(persondataFasade.hentFolkeregisterident(behandling.getFagsak().hentAktørID())).thenReturn("fnr");
 
-        vedtakKontrollService.validerInnvilgelse(behandling.getId(), FØRSTEGANGSVEDTAK, true);
+        vedtakKontrollService.kontrollerInnvilgelse(behandling.getId(), FØRSTEGANGSVEDTAK, true);
         verify(registeropplysningerService).hentOgLagreOpplysninger(any());
     }
 
     @Test
-    void validerInnvilgelse_ikkeOppdaterRegisteropplysninger_oppdatererkke() throws ValideringException {
+    void kontrollerInnvilgelse_ikkeOppdaterRegisteropplysninger_oppdatererkke() throws ValideringException {
         lovvalgsperiode.setTom(LocalDate.now());
 
-        vedtakKontrollService.validerInnvilgelse(behandling.getId(), FØRSTEGANGSVEDTAK, false);
+        vedtakKontrollService.kontrollerInnvilgelse(behandling.getId(), FØRSTEGANGSVEDTAK, false);
         verify(registeropplysningerService, never()).hentOgLagreOpplysninger(any());
     }
 
