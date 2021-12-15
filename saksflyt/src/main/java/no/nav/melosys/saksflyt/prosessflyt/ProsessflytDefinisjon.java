@@ -100,6 +100,18 @@ public final class ProsessflytDefinisjon {
             )
         );
 
+        PROSESS_FLYT_MAP.put(ProsessType.OPPRETT_NY_SAK_FTRL_TRYGDEAVTALE,
+            new ProsessFlyt(ProsessType.OPPRETT_NY_SAK_FTRL_TRYGDEAVTALE,
+                JFR_OPPRETT_SAK_OG_BEH,
+                JFR_OPPRETT_SØKNAD,
+                OPPRETT_ARKIVSAK,
+                OPPDATER_SAKSRELASJON,
+                SOB_BEHANDLING_OPPRETTET,
+                HENT_REGISTEROPPLYSNINGER,
+                GJENBRUK_OPPGAVE
+            )
+        );
+
         PROSESS_FLYT_MAP.put(ProsessType.IVERKSETT_VEDTAK_EOS,
             new ProsessFlyt(ProsessType.IVERKSETT_VEDTAK_EOS,
                 AVKLAR_MYNDIGHET,

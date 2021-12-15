@@ -42,11 +42,17 @@ public class OpprettNySakFraOppgave {
         validerOpprettSakDto(opprettSakDto);
         final Oppgave oppgave = validerOppgave(opprettSakDto.getOppgaveID());
         validerJournalpost(joarkFasade.hentJournalpost(oppgave.getJournalpostId()));
-        prosessinstansService.opprettProsessinstansNySak(
-            oppgave.getJournalpostId(),
-            opprettSakDto,
-            erBehandlingAvSøknad(opprettSakDto.getBehandlingstema()) ? Behandlingstyper.SOEKNAD : Behandlingstyper.SED
-        );
+        switch (opprettSakDto.getSakstype()) {
+            case EU_EOS -> prosessinstansService.opprettProsessinstansNySak(
+                oppgave.getJournalpostId(),
+                opprettSakDto,
+                erBehandlingAvSøknad(opprettSakDto.getBehandlingstema()) ? Behandlingstyper.SOEKNAD : Behandlingstyper.SED
+            );
+            case FTRL, TRYGDEAVTALE -> prosessinstansService.opprettProsessinstansNySakFTRLTrygdeavtale(
+                oppgave.getJournalpostId(),
+                opprettSakDto
+            );
+        }
     }
 
     void validerOpprettSakDto(OpprettSakDto opprettSakDto) {

@@ -70,6 +70,32 @@ class OpprettNySakFraOppgaveTest {
     }
 
     @Test
+    void bestillNySakOgBehandling_sakstypeFtrlFeatureToggleEnabled_oppretterProsess() {
+        OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
+        opprettSakDto.setSakstype(Sakstyper.FTRL);
+        opprettSakDto.setBehandlingstema(Behandlingstema.ARBEID_I_UTLANDET);
+        unleash.enableAll();
+        Oppgave oppgave = new Oppgave.Builder().setOppgavetype(Oppgavetyper.BEH_SAK_MK).setJournalpostId("1234").build();
+        when(oppgaveService.hentOppgaveMedOppgaveID(opprettSakDto.getOppgaveID())).thenReturn(oppgave);
+        when(joarkFasade.hentJournalpost("1234")).thenReturn(lagJournalpost(Journalposttype.INN));
+        opprettNySakFraOppgave.bestillNySakOgBehandling(opprettSakDto);
+        verify(prosessinstansService).opprettProsessinstansNySakFTRLTrygdeavtale(oppgave.getJournalpostId(), opprettSakDto);
+    }
+
+    @Test
+    void bestillNySakOgBehandling_sakstypeTrygdeavtaleFeatureToggleEnabled_oppretterProsess() {
+        OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
+        opprettSakDto.setSakstype(Sakstyper.TRYGDEAVTALE);
+        opprettSakDto.setBehandlingstema(Behandlingstema.YRKESAKTIV);
+        unleash.enableAll();
+        Oppgave oppgave = new Oppgave.Builder().setOppgavetype(Oppgavetyper.BEH_SAK_MK).setJournalpostId("1234").build();
+        when(oppgaveService.hentOppgaveMedOppgaveID(opprettSakDto.getOppgaveID())).thenReturn(oppgave);
+        when(joarkFasade.hentJournalpost("1234")).thenReturn(lagJournalpost(Journalposttype.INN));
+        opprettNySakFraOppgave.bestillNySakOgBehandling(opprettSakDto);
+        verify(prosessinstansService).opprettProsessinstansNySakFTRLTrygdeavtale(oppgave.getJournalpostId(), opprettSakDto);
+    }
+
+    @Test
     void bestillNySakOgBehandling_sakstypeFtrlFeatureToggleDisabled_kasterException() {
         OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
         opprettSakDto.setSakstype(Sakstyper.FTRL);
@@ -183,7 +209,7 @@ class OpprettNySakFraOppgaveTest {
         when(oppgaveService.hentOppgaveMedOppgaveID(opprettSakDto.getOppgaveID())).thenReturn(oppgave);
         when(joarkFasade.hentJournalpost("1234")).thenReturn(lagJournalpost(Journalposttype.INN));
         opprettNySakFraOppgave.bestillNySakOgBehandling(opprettSakDto);
-        verify(prosessinstansService).opprettProsessinstansNySak(oppgave.getJournalpostId(), opprettSakDto, Behandlingstyper.SOEKNAD);
+        verify(prosessinstansService).opprettProsessinstansNySakFTRLTrygdeavtale(oppgave.getJournalpostId(), opprettSakDto);
     }
 
     @Test
@@ -196,7 +222,7 @@ class OpprettNySakFraOppgaveTest {
         when(oppgaveService.hentOppgaveMedOppgaveID(opprettSakDto.getOppgaveID())).thenReturn(oppgave);
         when(joarkFasade.hentJournalpost("1234")).thenReturn(lagJournalpost(Journalposttype.INN));
         opprettNySakFraOppgave.bestillNySakOgBehandling(opprettSakDto);
-        verify(prosessinstansService).opprettProsessinstansNySak(oppgave.getJournalpostId(), opprettSakDto, Behandlingstyper.SOEKNAD);
+        verify(prosessinstansService).opprettProsessinstansNySakFTRLTrygdeavtale(oppgave.getJournalpostId(), opprettSakDto);
     }
 
     @Test
