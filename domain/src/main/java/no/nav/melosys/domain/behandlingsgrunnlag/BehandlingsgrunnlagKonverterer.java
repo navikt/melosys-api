@@ -53,6 +53,8 @@ public final class BehandlingsgrunnlagKonverterer {
     }
 
     private static String lagJsonFraType(BehandlingsgrunnlagData behandlingsgrunnlagdata) throws JsonProcessingException {
-        return objectMapper.writeValueAsString(behandlingsgrunnlagdata);
+        return objectMapper
+            .writerWithDefaultPrettyPrinter()
+            .writeValueAsString(behandlingsgrunnlagdata);
     }
 }
