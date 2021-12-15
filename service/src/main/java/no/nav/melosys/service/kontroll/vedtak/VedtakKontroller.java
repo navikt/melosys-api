@@ -56,7 +56,7 @@ final class VedtakKontroller implements AdresseUtlandKontroller {
         var lovvalgsperiode = kontrollData.getLovvalgsperiode();
         var behandlingsgrunnlagData = (SoeknadTrygdeavtale) kontrollData.getBehandlingsgrunnlagData();
 
-        return skalFåTrygdeavtaleAttest(lovvalgsperiode.getBestemmelse())
+        return erBestemmelseDerTrygdeavtaleAttestSendes(lovvalgsperiode.getBestemmelse())
             && ArbeidsstedKontroller.representantIUtlandetMangler(behandlingsgrunnlagData.getRepresentantIUtlandet())
             ? new Kontrollfeil(Kontroll_begrunnelser.ATTEST_MANGER_ARBEIDSSTED) : null;
     }
@@ -66,7 +66,7 @@ final class VedtakKontroller implements AdresseUtlandKontroller {
             ? null : new Kontrollfeil(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE);
     }
 
-    private static boolean skalFåTrygdeavtaleAttest(LovvalgBestemmelse bestemmelse) {
+    private static boolean erBestemmelseDerTrygdeavtaleAttestSendes(LovvalgBestemmelse bestemmelse) {
         return bestemmelse == Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1
             || bestemmelse == Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_5
             || bestemmelse == Lovvalgbestemmelser_trygdeavtale_uk.UK_ART7_3;
