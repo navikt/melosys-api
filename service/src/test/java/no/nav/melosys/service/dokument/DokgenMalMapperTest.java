@@ -452,7 +452,7 @@ class DokgenMalMapperTest {
             .extracting(
                 Fritekstbrev::getFritekstTittel,
                 Fritekstbrev::getFritekst,
-                Fritekstbrev::medKontaktopplysninger,
+                Fritekstbrev::isMedKontaktopplysninger,
                 Fritekstbrev::getNavnFullmektig,
                 Fritekstbrev::getSaksbehandlerNavn
             ).containsExactly(
@@ -489,7 +489,7 @@ class DokgenMalMapperTest {
             .extracting(
                 Fritekstbrev::getFritekstTittel,
                 Fritekstbrev::getFritekst,
-                Fritekstbrev::medKontaktopplysninger,
+                Fritekstbrev::isMedKontaktopplysninger,
                 Fritekstbrev::getNavnFullmektig
             ).containsExactly(
             "Min tittel",

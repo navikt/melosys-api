@@ -25,7 +25,7 @@ public class Fritekstbrev extends DokgenDto {
         return fritekst;
     }
 
-    public boolean medKontaktopplysninger() {
+    public boolean isMedKontaktopplysninger() {
         return medKontaktopplysninger;
     }
 
