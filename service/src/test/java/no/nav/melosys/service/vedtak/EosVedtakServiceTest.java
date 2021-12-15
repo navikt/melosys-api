@@ -4,22 +4,18 @@ import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Consumer;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.Institusjon;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
-import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.ValideringException;
-import no.nav.melosys.exception.validering.KontrollfeilDto;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -27,10 +23,7 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.kontroll.vedtak.VedtakKontrollService;
 import no.nav.melosys.service.oppgave.OppgaveService;
-import no.nav.melosys.service.persondata.PersondataFasade;
-import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
-import no.nav.melosys.service.validering.Kontrollfeil;
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
 import no.nav.melosys.sikkerhet.context.TestSubjectHandler;
 import org.junit.jupiter.api.BeforeEach;
@@ -64,15 +57,11 @@ class EosVedtakServiceTest {
     @Mock
     private LandvelgerService landvelgerService;
     @Mock
-    private PersondataFasade persondataFasade;
-    @Mock
-    private RegisteropplysningerService registeropplysningerService;
-    @Mock
-    private VedtakKontrollService vedtakKontrollService;
-    @Mock
     private AvklartefaktaService avklartefaktaService;
     @Mock
     private ApplicationEventMulticaster melosysEventMulticaster;
+    @Mock
+    private VedtakKontrollService vedtakKontrollService;
 
     private EosVedtakService vedtakService;
 
@@ -84,7 +73,7 @@ class EosVedtakServiceTest {
     @BeforeEach
     void setUp() {
         vedtakService = new EosVedtakService(behandlingService, behandlingsresultatService, oppgaveService, prosessinstansService,
-            eessiService, landvelgerService, persondataFasade, registeropplysningerService, vedtakKontrollService, avklartefaktaService, melosysEventMulticaster);
+            eessiService, landvelgerService, avklartefaktaService, melosysEventMulticaster, vedtakKontrollService);
 
         SpringSubjectHandler.set(new TestSubjectHandler());
 
@@ -97,6 +86,37 @@ class EosVedtakServiceTest {
         behandlingsresultat.setBehandling(behandling);
 
         behandling.setFagsak(lagFagsak());
+    }
+
+    @Test
+    void fattVedtak_erInnvilgelse_fatterVedtakOgKontrollererVedtak() throws Exception {
+        var mottakerinstitusjoner = Set.of("AB:CDEF123");
+        mockBehandlingsresultat();
+        mockEesiReady();
+        leggTilLovvalgsperiode(InnvilgelsesResultat.INNVILGET);
+
+        vedtakService.fattVedtak(behandling, lagRequest(FASTSATT_LOVVALGSLAND, FØRSTEGANGSVEDTAK,
+            behandlingsresultatFritekst, null, mottakerinstitusjoner));
+
+        assertThat(behandlingsresultat)
+            .extracting(Behandlingsresultat::getType, Behandlingsresultat::getBegrunnelseFritekst)
+            .containsExactly(FASTSATT_LOVVALGSLAND, behandlingsresultatFritekst);
+
+        assertThat(behandlingsresultat.getVedtakMetadata()).isNotNull()
+            .extracting(VedtakMetadata::getVedtakstype, VedtakMetadata::getRevurderBegrunnelse, VedtakMetadata::getVedtakKlagefrist)
+            .containsExactly(FØRSTEGANGSVEDTAK, null, LocalDate.now().plusWeeks(FRIST_KLAGE_UKER));
+
+        verify(behandlingService).oppdaterStatus(behandling, IVERKSETTER_VEDTAK);
+        verify(prosessinstansService).opprettProsessinstansIverksettVedtakEos(
+            any(),
+            eq(FASTSATT_LOVVALGSLAND),
+            eq(behandlingsresultatFritekst),
+            isNull(),
+            eq(mottakerinstitusjoner),
+            isNull()
+        );
+        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(any());
+        verify(vedtakKontrollService).kontrollerInnvilgelse(any(Behandling.class), any(Behandlingsresultat.class), eq(FØRSTEGANGSVEDTAK), eq(Sakstyper.EU_EOS));
     }
 
     @Test
@@ -250,21 +270,6 @@ class EosVedtakServiceTest {
     }
 
     @Test
-    void fattVedtak_feilFraKontroller_kasterExceptionMedFeilkode() {
-        mockBehandlingsresultat();
-        mockFeilendeValidering();
-        leggTilLovvalgsperiode(InnvilgelsesResultat.INNVILGET);
-
-        Consumer<ValideringException> medFeilkode = v -> assertThat(v.getFeilkoder())
-            .extracting(KontrollfeilDto::getKode).containsExactly(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER.getKode());
-
-        assertThatThrownBy(() -> vedtakService.fattVedtak(behandling, lagRequest(FASTSATT_LOVVALGSLAND,
-            FØRSTEGANGSVEDTAK, null, null, null)))
-            .isInstanceOfSatisfying(ValideringException.class, medFeilkode)
-            .hasMessage("Feil i validering. Kan ikke fatte vedtak.");
-    }
-
-    @Test
     void endreVedtak_fungerer() {
         final Endretperiode endretperiodeBegrunnelse = Endretperiode.ENDRINGER_ARBEIDSSITUASJON;
         leggTilMyndighetAktoer();
@@ -315,12 +320,6 @@ class EosVedtakServiceTest {
         when(eessiService.validerOgAvklarMottakerInstitusjonerForBuc(anySet(), anyCollection(), any(BucType.class))).thenCallRealMethod();
         when(eessiService.hentEessiMottakerinstitusjoner(BucType.LA_BUC_04.name(), Set.of(Landkoder.SE.getKode())))
             .thenReturn(List.of(new Institusjon("AB:CDEF123", "inst", Landkoder.SE.getKode())));
-    }
-
-    private void mockFeilendeValidering() {
-        when(persondataFasade.hentFolkeregisterident(anyString())).thenReturn("123");
-        when(vedtakKontrollService.utførKontroller(anyLong(), any(Vedtakstyper.class)))
-            .thenReturn(Collections.singletonList(new Kontrollfeil(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER)));
     }
 
     private void leggTilLovvalgsperiode() {
