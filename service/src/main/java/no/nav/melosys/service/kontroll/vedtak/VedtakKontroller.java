@@ -3,6 +3,7 @@ package no.nav.melosys.service.kontroll.vedtak;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadTrygdeavtale;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
+import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
 import no.nav.melosys.service.kontroll.*;
@@ -55,7 +56,7 @@ final class VedtakKontroller implements AdresseUtlandKontroller {
         var lovvalgsperiode = kontrollData.getLovvalgsperiode();
         var behandlingsgrunnlagData = (SoeknadTrygdeavtale) kontrollData.getBehandlingsgrunnlagData();
 
-        return lovvalgsperiode.skalFåTrygdeavtaleAttest()
+        return skalFåTrygdeavtaleAttest(lovvalgsperiode.getBestemmelse())
             && ArbeidsstedKontroller.representantIUtlandetMangler(behandlingsgrunnlagData.getRepresentantIUtlandet())
             ? new Kontrollfeil(Kontroll_begrunnelser.ATTEST_MANGER_ARBEIDSSTED) : null;
     }
@@ -63,5 +64,11 @@ final class VedtakKontroller implements AdresseUtlandKontroller {
     static Kontrollfeil adresseRegistrert(VedtakKontrollData kontrollData) {
         return PersonKontroller.harRegistrertAdresse(kontrollData.getPersonDokument(), kontrollData.getBehandlingsgrunnlagData())
             ? null : new Kontrollfeil(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE);
+    }
+
+    private static boolean skalFåTrygdeavtaleAttest(LovvalgBestemmelse bestemmelse) {
+        return bestemmelse == Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1
+            || bestemmelse == Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_5
+            || bestemmelse == Lovvalgbestemmelser_trygdeavtale_uk.UK_ART7_3;
     }
 }

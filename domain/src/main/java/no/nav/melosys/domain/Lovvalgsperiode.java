@@ -6,7 +6,6 @@ import javax.persistence.*;
 
 import no.nav.melosys.domain.jpa.LovvalgBestemmelsekonverterer;
 import no.nav.melosys.domain.kodeverk.*;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
 import no.nav.melosys.exception.FunksjonellException;
 
 @Entity
@@ -205,12 +204,6 @@ public class Lovvalgsperiode implements PeriodeOmLovvalg {
 
     public boolean harUgyldigTilstand() {
         return !erInnvilget() && !erAvslått();
-    }
-
-    public boolean skalFåTrygdeavtaleAttest() {
-        return bestemmelse == Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1
-            || bestemmelse == Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_5
-            || bestemmelse == Lovvalgbestemmelser_trygdeavtale_uk.UK_ART7_3;
     }
 
     public static Lovvalgsperiode av(AnmodningsperiodeSvar anmodningsperiodeSvar,
