@@ -5,6 +5,7 @@ import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.medl.DekningMedl;
@@ -25,6 +26,8 @@ class MedlPeriodeKonverterTest {
             .isEqualTo(GrunnlagMedl.FO_16);
         assertThat(MedlPeriodeKonverter.tilGrunnlagMedltype(Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_2))
             .isEqualTo(GrunnlagMedl.FO_16);
+        assertThat(MedlPeriodeKonverter.tilGrunnlagMedltype(Lovvalgbestemmelser_trygdeavtale_uk.UK_ART7_3))
+            .isEqualTo(GrunnlagMedl.Storbrit_NIrland_7_3);
 
         assertThatExceptionOfType(TekniskException.class)
             .isThrownBy(() -> MedlPeriodeKonverter.tilGrunnlagMedltype(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_1))
