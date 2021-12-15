@@ -64,9 +64,9 @@ public class VedtakTjeneste {
     }
 
     @PostMapping("{behandlingID}/kontroller")
-    @ApiOperation(value = "Gjør kontroll på vedtaket, og returnerer eventuelle feilmeldinger")
+    @ApiOperation(value = "Gjør kontroll på vedtaket, og returnerer eventuelle feilmeldinger som liste med KontrollfeilDto")
     public ResponseEntity<Void> kontrollerVedtak(@PathVariable("behandlingID") long behandlingID,
-                                 @RequestParam(value = "oppdater", required = false) boolean oppdaterRegisteropplysninger,
+                                 @RequestParam(value = "oppdaterRegisteropplysninger", required = false) boolean oppdaterRegisteropplysninger,
                                  @RequestBody FattVedtakDto fattVedtakDto) throws ValideringException {
         if (fattVedtakDto.getVedtakstype() == null) {
             throw new FunksjonellException("Vedtakstype mangler.");
