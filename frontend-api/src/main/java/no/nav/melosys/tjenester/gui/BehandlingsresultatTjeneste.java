@@ -6,14 +6,12 @@ import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.tjenester.gui.dto.BehandlingsresultatDto;
+import no.nav.melosys.tjenester.gui.dto.LagreFritekstDto;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.WebApplicationContext;
 
 @Protected
@@ -40,5 +38,20 @@ public class BehandlingsresultatTjeneste {
 
         Behandlingsresultat resultat = behandlingsresultatService.hentBehandlingsresultatMedKontrollresultat(behandlingID);
         return ResponseEntity.ok(BehandlingsresultatDto.av(resultat));
+    }
+
+    @PostMapping("{behandlingID}/resultat/fritekst")
+    @ApiOperation(value = "Oppdater fritekstene begrunnelseFritekst og innledningFritekst i behandlingsresultatet",
+        response = BehandlingsresultatDto.class)
+    public ResponseEntity<BehandlingsresultatDto> oppdaterFritekster(@PathVariable("behandlingID") long behandlingID,
+                                                                     @RequestBody LagreFritekstDto lagreFritekstDto) {
+        aksesskontroll.autoriserSkriv(behandlingID);
+
+        return ResponseEntity.ok(BehandlingsresultatDto.av(
+            behandlingsresultatService.oppdaterFritekster(
+                behandlingID,
+                lagreFritekstDto.begrunnelseFritekst(),
+                lagreFritekstDto.innledningFritekst())
+        ));
     }
 }
