@@ -40,14 +40,14 @@ public class OpprettSoeknad implements StegBehandler {
         long behandlingID = prosessinstans.getBehandling().getId();
 
         if (prosessinstans.getBehandling().erBehandlingAvSøknad()) {
-
-            Periode periode = prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, Periode.class);
-            Soeknad soeknad = new Soeknad();
-            soeknad.periode = periode;
-            soeknad.soeknadsland = prosessinstans.getData(ProsessDataKey.SØKNADSLAND, new TypeReference<>() {});
             Sakstyper sakstype = prosessinstans.getBehandling().getFagsak().getType();
             switch (sakstype) {
-                case EU_EOS -> behandlingsgrunnlagService.opprettSøknadYrkesaktiveEøs(behandlingID, soeknad);
+                case EU_EOS -> {
+                    Soeknad soeknad = new Soeknad();
+                    soeknad.periode = prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, Periode.class);
+                    soeknad.soeknadsland = prosessinstans.getData(ProsessDataKey.SØKNADSLAND, new TypeReference<>() {});
+                    behandlingsgrunnlagService.opprettSøknadYrkesaktiveEøs(behandlingID, soeknad);
+                }
                 case FTRL -> behandlingsgrunnlagService.opprettSøknadFolketrygden(behandlingID, new SoeknadFtrl());
                 case TRYGDEAVTALE -> behandlingsgrunnlagService.opprettSøknadTrygdeavtale(behandlingID, new SoeknadTrygdeavtale());
             }
