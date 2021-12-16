@@ -6,7 +6,9 @@ import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.kontroll.vedtak.VedtakKontrollService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
+import no.nav.melosys.service.tilgang.Aksesstype;
 import no.nav.melosys.service.vedtak.*;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.tjenester.gui.dto.*;
@@ -26,12 +28,14 @@ public class VedtakTjeneste {
     private final VedtakServiceFasade vedtakServiceFasade;
     private final Aksesskontroll aksesskontroll;
     private final BehandlingService behandlingService;
+    private final VedtakKontrollService vedtakKontrollService;
 
     @Autowired
-    public VedtakTjeneste(VedtakServiceFasade vedtakServiceFasade, Aksesskontroll aksesskontroll, BehandlingService behandlingService) {
+    public VedtakTjeneste(VedtakServiceFasade vedtakServiceFasade, Aksesskontroll aksesskontroll, BehandlingService behandlingService, VedtakKontrollService vedtakKontrollService) {
         this.vedtakServiceFasade = vedtakServiceFasade;
         this.aksesskontroll = aksesskontroll;
         this.behandlingService = behandlingService;
+        this.vedtakKontrollService = vedtakKontrollService;
     }
 
     @PostMapping("{behandlingID}/fatt")
@@ -56,6 +60,19 @@ public class VedtakTjeneste {
         }
         aksesskontroll.autoriserSkriv(behandlingID);
         vedtakServiceFasade.endreVedtak(behandlingID, endreVedtakDto.getBegrunnelseKode(), endreVedtakDto.getFritekst(), endreVedtakDto.getFritekstSed());
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("{behandlingID}/kontroller")
+    @ApiOperation(value = "Gjør kontroll på vedtaket, og returnerer eventuelle feilmeldinger som liste med KontrollfeilDto")
+    public ResponseEntity<Void> kontrollerVedtak(@PathVariable("behandlingID") long behandlingID,
+                                 @RequestParam(value = "oppdaterRegisteropplysninger", required = false) boolean oppdaterRegisteropplysninger,
+                                 @RequestBody FattVedtakDto fattVedtakDto) throws ValideringException {
+        if (fattVedtakDto.getVedtakstype() == null) {
+            throw new FunksjonellException("Vedtakstype mangler.");
+        }
+        aksesskontroll.autoriser(behandlingID, oppdaterRegisteropplysninger ? Aksesstype.SKRIV : Aksesstype.LES);
+        vedtakKontrollService.kontrollerInnvilgelse(behandlingID, fattVedtakDto.getVedtakstype(), oppdaterRegisteropplysninger);
         return ResponseEntity.ok().build();
     }
 

@@ -31,7 +31,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class BehandlingsgrunnlbagServiceTest {
+class BehandlingsgrunnlagServiceTest {
     @Mock
     private BehandlingsgrunnlagRepository behandlingsgrunnlagRepository;
     @Mock
@@ -104,7 +104,7 @@ class BehandlingsgrunnlbagServiceTest {
     }
 
     @Test
-    void oppdaterBehandlingsgrunnlag_behandlingsgrunnlagJsonDataIkkeSatt_setterJsonDataOgLagrerBehandlingsgrunnlag() {
+    void oppdaterBehandlingsgrunnlag_behandlingsgrunnlagJsonDataIkkeSatt_setterJsonDataOgLagrerBehandlingsgrunnlag() throws JsonProcessingException {
         BehandlingsgrunnlagData behandlingsgrunnlagData = new BehandlingsgrunnlagData();
         behandlingsgrunnlagData.periode = new Periode(
             LocalDate.of(2000, 1, 1),
@@ -116,8 +116,10 @@ class BehandlingsgrunnlbagServiceTest {
         behandlingsgrunnlagService.oppdaterBehandlingsgrunnlag(behandlingsgrunnlag);
 
         verify(behandlingsgrunnlagRepository).saveAndFlush(behandlingsgrunnlagArgumentCaptor.capture());
-        assertThat(behandlingsgrunnlagArgumentCaptor.getValue().getJsonData())
-            .contains("\"periode\":{" +
+        JsonNode jsonNode = new ObjectMapper().readTree(behandlingsgrunnlagArgumentCaptor.getValue().getJsonData());
+        String periode = jsonNode.get("periode").toString();
+        assertThat(periode)
+            .isEqualTo("{" +
                 "\"fom\":[2000,1,1]," +
                 "\"tom\":[2010,1,1]" +
                 "}");

@@ -2,6 +2,7 @@ package no.nav.melosys.service.dokument;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -12,8 +13,6 @@ import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
-import no.nav.melosys.domain.kodeverk.Trygdedekninger;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.domain.person.adresse.Oppholdsadresse;
@@ -37,8 +36,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
 
-import static no.nav.melosys.service.dokument.DokgenTestData.lagBehandling;
+import static no.nav.melosys.service.dokument.DokgenMalMapperTest.*;
 import static no.nav.melosys.service.dokument.DokgenTestData.lagPersonDokument;
+import static no.nav.melosys.service.dokument.DokgenTestData.lagLovvalgsperiode;
+import static no.nav.melosys.service.dokument.DokgenTestData.lagTrygdeavtaleBehandling;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.*;
@@ -46,36 +47,31 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class AttestStorbritanniaMapperTest {
-    public static final String UUID_EKTEFELLE = "uuidEktefelle";
-    public static final String UUID_BARN = "uuidBarn1";
-    public static final String EKTEFELLE_FNR = "09080723451";
+    private static final String UUID_EKTEFELLE = "uuidEktefelle";
+    private static final String UUID_BARN = "uuidBarn1";
+    private static final String EKTEFELLE_FNR = "09080723451";
     private static final String BARN1_FNR = "12131456789";
-    public static final String ARBEIDSGIVER_NAVN = "Bang Hansen";
-    public static final String SAKSNUMMER = "MEL-123";
-    public static final String EKTEFELLE_NAVN = "Dolly Duck";
-    public static final String BARN_NAVN = "Doffen Duck";
-    public static final String ORG_NR = "987654321";
-    public static final Instant VEDTAKS_DATO = Instant.parse("1970-10-10T00:00:00Z");
+    private static final String ARBEIDSGIVER_NAVN = "Bang Hansen";
+    private static final String EKTEFELLE_NAVN = "Dolly Duck";
+    private static final String BARN_NAVN = "Doffen Duck";
+    private static final String ORG_NR = "987654321";
+    private static final LocalDate VEDTAKS_DATO = LocalDate.of(2022, 1, 1);
+    private static final Instant VEDTAKS_DATO_INSTANT = VEDTAKS_DATO.atStartOfDay(ZoneId.systemDefault()).toInstant();
 
     @Mock
     private AvklarteVirksomheterService mockAvklarteVirksomheterService;
-
     @Mock
     private AvklarteMedfolgendeFamilieService mockAvklarteMedfolgendeFamilieService;
-
     @Mock
     private DokgenMapperDatahenter mockDokgenMapperDatahenter;
-
     @Mock
-    PersondataFasade mockPersondataFasade;
-
+    private PersondataFasade mockPersondataFasade;
     @Mock
     private LovvalgsperiodeService mockLovvalgsperiodeService;
-
     @Mock
-    Persondata mockPersondata;
+    private Persondata mockPersondata;
 
-    AttestStorbritanniaMapper attestStorbritanniaMapper;
+    private AttestStorbritanniaMapper attestStorbritanniaMapper;
 
     @BeforeEach
     void setup() {
@@ -206,9 +202,9 @@ class AttestStorbritanniaMapperTest {
         mockHappyCase();
 
         AttestStorbritannia attestStorbritannia = attestStorbritanniaMapper.map(new DokgenBrevbestilling.Builder()
-            .medBehandling(lagBehandling())
+            .medBehandling(lagTrygdeavtaleBehandling())
             .medPersonDokument(lagPersonDokument())
-            .medVedtaksdato(VEDTAKS_DATO)
+            .medVedtaksdato(VEDTAKS_DATO_INSTANT)
             .build()
         );
 
@@ -227,9 +223,9 @@ class AttestStorbritanniaMapperTest {
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() ->
                 attestStorbritanniaMapper.map(new DokgenBrevbestilling.Builder()
-                    .medBehandling(lagBehandling())
+                    .medBehandling(lagTrygdeavtaleBehandling())
                     .medPersonDokument(lagPersonDokument())
-                    .medVedtaksdato(VEDTAKS_DATO)
+                    .medVedtaksdato(VEDTAKS_DATO_INSTANT)
                     .build()
             )
         ).withMessageContaining("Det kan bare være en lovvalgsperiode for trygdeavtale. Fant 2");
@@ -244,16 +240,16 @@ class AttestStorbritanniaMapperTest {
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() ->
                 attestStorbritanniaMapper.map(new DokgenBrevbestilling.Builder()
-                    .medBehandling(lagBehandling())
+                    .medBehandling(lagTrygdeavtaleBehandling())
                     .medPersonDokument(lagPersonDokument())
-                    .medVedtaksdato(VEDTAKS_DATO)
+                    .medVedtaksdato(VEDTAKS_DATO_INSTANT)
                     .build()
             )
         ).withMessageContaining("Det kan bare være en lovvalgsperiode for trygdeavtale. Fant 0");
     }
 
     private void mockHappyCase() {
-        when(mockPersondata.getFødselsdato()).thenReturn(LocalDate.of(1970, 1, 1));
+        when(mockPersondata.getFødselsdato()).thenReturn(FØDSELSDATO);
         when(mockAvklarteMedfolgendeFamilieService.hentAvklartMedfølgendeEktefelle(anyLong())).thenReturn(lagAvklartMedfølgendeEktefelle());
         when(mockAvklarteMedfolgendeFamilieService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(lagAvklartMedfølgendeBarn());
         when(mockAvklarteMedfolgendeFamilieService.hentMedfølgendEktefelle(anyLong())).thenReturn(lagMedfølgendeEktefelle());
@@ -271,15 +267,6 @@ class AttestStorbritanniaMapperTest {
             }
             return navn;
         });
-    }
-
-    private Lovvalgsperiode lagLovvalgsperiode() {
-        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setFom(LocalDate.of(2020, 1, 1));
-        lovvalgsperiode.setTom(LocalDate.of(2021, 1, 1));
-        lovvalgsperiode.setDekning(Trygdedekninger.FULL_DEKNING_FTRL);
-        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1);
-        return lovvalgsperiode;
     }
 
     private List<AvklartVirksomhet> lagAvklarteVirksomheter() {
@@ -307,7 +294,7 @@ class AttestStorbritanniaMapperTest {
         return Map.of(UUID_BARN, medfolgendeBarn1);
     }
 
-    private static final String FORVENTEDE_FELTER_FOR_ATTEST_STORBRITANNIA_MAPPING = """
+    private static final String FORVENTEDE_FELTER_FOR_ATTEST_STORBRITANNIA_MAPPING = String.format("""
         {
           "saksopplysninger" : {
             "saksnummer" : "MEL-123",
@@ -327,18 +314,18 @@ class AttestStorbritanniaMapperTest {
             "navn" : "Donald Duck",
             "foedselsdato" : null,
             "fnr" : "05058892382",
-            "bostedadresse" : [ "Andebygata 1", null, null, null ]
+            "bostedsadresse" : [ "Andebygata 1", null, null, null ]
           },
           "medfolgendeFamiliemedlemmer" : {
             "ektefelle" : {
               "navn" : "Dolly Duck",
-              "foedselsdato" : "1969-12-31T23:00:00Z",
+              "foedselsdato" : "%s",
               "fnr" : "09080723451",
               "dnr" : null
             },
             "barn" : [ {
               "navn" : "Doffen Duck",
-              "foedselsdato" : "1969-12-31T23:00:00Z",
+              "foedselsdato" : "%s",
               "fnr" : "12131456789",
               "dnr" : null
             } ]
@@ -350,13 +337,13 @@ class AttestStorbritanniaMapperTest {
           "utsendelse" : {
             "artikkel" : "UK_ART6_1",
             "oppholdsadresseUK" : [ ],
-            "startdato" : "2019-12-31T23:00:00Z",
-            "sluttdato" : "2020-12-31T23:00:00Z"
+            "startdato" : "%s",
+            "sluttdato" : "%s"
           },
           "representantUK" : {
-            "navn" : "Mrs. London",
-            "adresse" : [ ]
+            "navn" : "Foretaksnavn",
+            "adresse" : [ "Uk address" ]
           },
-          "vedtaksdato" : "1970-10-10T00:00:00Z"
-        }""";
+          "vedtaksdato" : "%s"
+        }""", FØDSELSDATO, FØDSELSDATO, LOVVALGSPERIODE_FOM, LOVVALGSPERIODE_TOM, VEDTAKS_DATO);
 }

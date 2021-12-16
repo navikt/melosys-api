@@ -9,4 +9,12 @@ public class RepresentantIUtlandet {
     public String representantNavn;
     public List<String> adresselinjer = new ArrayList<>();
     public String representantLand;
+
+    public static RepresentantIUtlandet av(String representantNavn, List<String> adresselinjer, Landkoder representantLand) {
+        RepresentantIUtlandet representantIUtlandet = new RepresentantIUtlandet();
+        representantIUtlandet.representantNavn = representantNavn;
+        representantIUtlandet.adresselinjer = adresselinjer;
+        representantIUtlandet.representantLand = representantLand.getKode();
+        return representantIUtlandet;
+    }
 }

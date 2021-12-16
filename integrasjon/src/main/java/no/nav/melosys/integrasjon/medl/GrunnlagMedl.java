@@ -30,6 +30,7 @@ public enum GrunnlagMedl {
     Storbrit_NIrland_6_1("Storbrit_NIrland_6_1"),
     Storbrit_NIrland_6_5("Storbrit_NIrland_6_5"),
     Storbrit_NIrland_7_1("Storbrit_NIrland_7_1"),
+    Storbrit_NIrland_7_3("Storbrit_NIrland_7_3"),
     Storbrit_NIrland_8_2("Storbrit_NIrland_8_2"),
     Storbrit_NIrland_9("Storbrit_NIrland_9");
 

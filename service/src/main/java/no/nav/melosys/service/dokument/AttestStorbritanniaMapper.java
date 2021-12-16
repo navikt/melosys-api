@@ -1,8 +1,5 @@
 package no.nav.melosys.service.dokument;
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Stream;
 import javax.transaction.Transactional;
@@ -11,6 +8,8 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
+import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
+import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadTrygdeavtale;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.kodeverk.Landkoder;
@@ -62,15 +61,23 @@ public class AttestStorbritanniaMapper {
             .arbeidsgiverNorge(lagArbeidsgiverNorge(behandling))
             .arbeidstaker(new Arbeidstaker(
                 persondokument.getSammensattNavn(),
-                toInstant(persondokument.getFødselsdato()),
+                persondokument.getFødselsdato(),
                 persondokument.hentFolkeregisterident(),
                 persondokument.hentGjeldendePostadresse().adresselinjer()))
-            .representantUK(new RepresentantUK(
-                "Mrs. London", // TODO: Det blir fylt inn via sidemeny. Hent data når det er tilgjenglig.
-                List.of())
+            .representantUK(lagRepresentantUK(behandling.getBehandlingsgrunnlag())
             )
             .utsendelse(lagUtsendelse(lovvalgsperioder, persondokument))
             .build();
+    }
+
+    private RepresentantUK lagRepresentantUK(Behandlingsgrunnlag behandlingsgrunnlag) {
+        var soeknadTrygdeavtale = (SoeknadTrygdeavtale) behandlingsgrunnlag.getBehandlingsgrunnlagdata();
+        var representantIUtlandet = soeknadTrygdeavtale.getRepresentantIUtlandet();
+
+        return new RepresentantUK(
+            representantIUtlandet.representantNavn,
+            representantIUtlandet.adresselinjer
+        );
     }
 
     private Utsendelse lagUtsendelse(Collection<Lovvalgsperiode> lovvalgsperioder, Persondata persondata) {
@@ -86,8 +93,8 @@ public class AttestStorbritanniaMapper {
         return new Utsendelse.Builder()
             .artikkel((Lovvalgbestemmelser_trygdeavtale_uk) bestemmelse)
             .oppholdsadresseUK(finnGyldigAdresse(persondata, lovvalgsperiode))
-            .startdato(toInstant(lovvalgsperiode.getFom()))
-            .sluttdato(toInstant(lovvalgsperiode.getTom()))
+            .startdato(lovvalgsperiode.getFom())
+            .sluttdato(lovvalgsperiode.getTom())
             .build();
     }
 
@@ -125,13 +132,6 @@ public class AttestStorbritanniaMapper {
         return new ArbeidsgiverNorge(norskArbeidsgiver.navn, norskArbeidsgiver.adresse.toList());
     }
 
-    private static Instant toInstant(LocalDate localDate) {
-        if (localDate == null) {
-            return null;
-        }
-        return localDate.atStartOfDay(ZoneId.systemDefault()).toInstant();
-    }
-
     private List<Person> mapBarn(long behandlingID) {
         var avklarteMedfølgendeBarn = avklarteMedfølgendeFamilieService.hentAvklarteMedfølgendeBarn(behandlingID);
         var barnOmfattetAvNorskTrygd = avklarteMedfølgendeBarn.getFamilieOmfattetAvNorskTrygd();
@@ -156,13 +156,10 @@ public class AttestStorbritanniaMapper {
     private Person tilPerson(Map<String, MedfolgendeFamilie> medfølgendeFamilieMap, String uuid) {
         var medfølgendeFamilie = Optional.of(medfølgendeFamilieMap.get(uuid))
             .orElseThrow(() -> new FunksjonellException("Avklart medfølgende familie " + uuid + " finnes ikke i behandlingsgrunnlaget"));
-        var sammensattNavn = medfølgendeFamilie.getFnr() != null ? dokgenMapperDatahenter.hentSammensattNavn(medfølgendeFamilie.getFnr()) : medfølgendeFamilie.getNavn();
-        var instant = getFødselDato(medfølgendeFamilie.getFnr());
-        return new Person(sammensattNavn, instant, medfølgendeFamilie.getFnr(), null);
-    }
+        var fnr = medfølgendeFamilie.getFnr();
 
-    private Instant getFødselDato(String fnr) {
-        var persondata = persondataFasade.hentPerson(fnr);
-        return toInstant(persondata.getFødselsdato());
+        var sammensattNavn = fnr != null ? dokgenMapperDatahenter.hentSammensattNavn(fnr) : medfølgendeFamilie.getNavn();
+        var fødselsdato = persondataFasade.hentPerson(fnr).getFødselsdato();
+        return new Person(sammensattNavn, fødselsdato, fnr, null);
     }
 }

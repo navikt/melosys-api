@@ -2,6 +2,7 @@ package no.nav.melosys.service.dokument;
 
 import javax.transaction.Transactional;
 
+import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadTrygdeavtale;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.IdentType;
@@ -39,7 +40,7 @@ public class InnvilgelseUKMapper {
 
         return new InnvilgelseUK.Builder(brevbestilling)
             .artikkel((Lovvalgbestemmelser_trygdeavtale_uk) lovvalgsperiode.getBestemmelse())
-            .soknad(lagSøknad(behandlingsgrunnlag))
+            .soknad(lagSøknad(behandlingsgrunnlag, lovvalgsperiode))
             .familie(lagFamile(behandling.getId()))
             .virksomhetArbeidsgiverSkalHaKopi(false)
             .build();
@@ -111,18 +112,17 @@ public class InnvilgelseUKMapper {
             .build();
     }
 
-    private Soknad lagSøknad(Behandlingsgrunnlag behandlingsgrunnlag) {
+    private Soknad lagSøknad(Behandlingsgrunnlag behandlingsgrunnlag, Lovvalgsperiode lovvalgsperiode) {
         var soeknadTrygdeavtale = (SoeknadTrygdeavtale) behandlingsgrunnlag.getBehandlingsgrunnlagdata();
         var representantIUtlandet = soeknadTrygdeavtale.getRepresentantIUtlandet();
         if (representantIUtlandet == null) {
             throw new FunksjonellException("Behandlingsgrunnlaget inneholder ikke representant I utlandet");
         }
 
-        var periode = behandlingsgrunnlag.getBehandlingsgrunnlagdata().periode;
         return new Soknad(
             behandlingsgrunnlag.getMottaksdato(),
-            periode.getFom(),
-            periode.getTom(),
+            lovvalgsperiode.getFom(),
+            lovvalgsperiode.getTom(),
             representantIUtlandet.representantNavn
         );
     }
