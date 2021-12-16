@@ -3,7 +3,6 @@ package no.nav.melosys.service.dokument;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.Period;
-import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
@@ -24,10 +23,11 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_8_naer
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.dokgen.dto.*;
-import no.nav.melosys.integrasjon.dokgen.dto.atteststorbritannia.*;
+import no.nav.melosys.integrasjon.dokgen.dto.felles.Innvilgelse;
 import no.nav.melosys.integrasjon.dokgen.dto.felles.Person;
-import no.nav.melosys.integrasjon.dokgen.dto.innvilgelsestorbritannia.InnvilgelseUK;
-import no.nav.melosys.integrasjon.dokgen.dto.innvilgelsestorbritannia.Soknad;
+import no.nav.melosys.integrasjon.dokgen.dto.storbritannia.attest.*;
+import no.nav.melosys.integrasjon.dokgen.dto.storbritannia.innvilgelse.InnvilgelseStorbritannia;
+import no.nav.melosys.integrasjon.dokgen.dto.storbritannia.innvilgelse.Soknad;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -55,15 +55,10 @@ class DokgenMalMapperTest {
 
     @Mock
     private InnvilgelseFtrlMapper mockInnvilgelseFtrlMapper;
-
-    @Mock
-    private InnvilgelseUKMapper mockInnvilgelseUKMapper;
-
     @Mock
     private DokgenMapperDatahenter mockDokgenMapperDatahenter;
-
     @Mock
-    private AttestStorbritanniaMapper mockAttestStorbritanniaMapper;
+    private StorbritanniaMapper mockStorbritanniaMapper;
 
     private final FakeUnleash fakeUnleash = new FakeUnleash();
 
@@ -71,7 +66,7 @@ class DokgenMalMapperTest {
 
     @BeforeEach
     void init() {
-        dokgenMalMapper = new DokgenMalMapper(mockDokgenMapperDatahenter, mockInnvilgelseFtrlMapper, mockAttestStorbritanniaMapper, mockInnvilgelseUKMapper);
+        dokgenMalMapper = new DokgenMalMapper(mockDokgenMapperDatahenter, mockInnvilgelseFtrlMapper, mockStorbritanniaMapper);
     }
 
     @Test
@@ -366,15 +361,15 @@ class DokgenMalMapperTest {
     }
 
     @Test
-    void skalMappeStorbritanniaInnvilgesbrev() {
+    void skalMappeStorbritanniabrev() {
         when(mockDokgenMapperDatahenter.hentPoststed(any())).thenReturn("Andeby");
         when(mockDokgenMapperDatahenter.hentPersondata(any())).thenReturn(lagPersonDokument());
-        when(mockInnvilgelseUKMapper.map(any())).thenReturn(lagInnvilgelseUK());
+        when(mockStorbritanniaMapper.map(any())).thenReturn(lagInnvilgelseOgAttestStorbritannia());
 
         Behandling behandling = lagBehandling(lagFagsak(true));
 
         DokgenBrevbestilling brevbestilling = new InnvilgelseBrevbestilling.Builder()
-            .medProduserbartdokument(INNVILGELSE_UK)
+            .medProduserbartdokument(STORBRITANNIA)
             .medBehandling(behandling)
             .medOrg(lagOrg())
             .medKontaktopplysning(lagKontaktOpplysning())
@@ -382,50 +377,44 @@ class DokgenMalMapperTest {
             .medInnledningFritekst("Dummy")
             .build();
 
-        assertThat(dokgenMalMapper.mapBehandling(brevbestilling))
-            .isInstanceOf(InnvilgelseUK.class);
-    }
-
-    @Test
-    void skalMappeStorbritanniaAttest() {
-        Behandling behandling = lagBehandling(lagFagsak(true));
-
-        when(mockDokgenMapperDatahenter.hentPoststed(any())).thenReturn("Andeby");
-        when(mockDokgenMapperDatahenter.hentPersondata(any())).thenReturn(lagPersonDokument());
-        when(mockAttestStorbritanniaMapper.map(any())).thenReturn(lagAttestStorbritannia());
-
-        DokgenBrevbestilling brevbestilling = new DokgenBrevbestilling.Builder()
-            .medProduserbartdokument(ATTEST_NO_UK_1)
-            .medBehandling(behandling)
-            .medOrg(lagOrg())
-            .medKontaktopplysning(lagKontaktOpplysning())
-            .medForsendelseMottatt(Instant.now())
-            .build();
-
         DokgenDto dokgenDto = dokgenMalMapper.mapBehandling(brevbestilling);
-        assertThat(dokgenDto)
-            .isInstanceOf(AttestStorbritannia.class);
+        assertThat(dokgenDto).isInstanceOf(InnvilgelseOgAttestStorbritannia.class);
 
-        assertThat((AttestStorbritannia) dokgenDto)
+        InnvilgelseStorbritannia innvilgelse = ((InnvilgelseOgAttestStorbritannia) dokgenDto).getInnvilgelse();
+        AttestStorbritannia attest = ((InnvilgelseOgAttestStorbritannia) dokgenDto).getAttest();
+
+        assertThat(innvilgelse).extracting(
+            i -> i.getInnvilgelse().innledningFritekst(),
+            i -> i.getArtikkel(),
+            i -> i.getSoknad().virksomhetsnavn(),
+            i -> i.isVirksomhetArbeidsgiverSkalHaKopi()
+        ).containsExactly(
+            "Innledning",
+            Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1,
+            "Virksomhetsnavn",
+            true
+        );
+
+        assertThat(attest)
             .extracting(
-                dto -> dto.getArbeidstaker().navn(),
-                dto -> dto.getArbeidstaker().fnr(),
-                dto -> dto.getArbeidsgiverNorge().fullstendigAdresse(),
-                dto -> dto.getArbeidsgiverNorge().virksomhetsnavn(),
-                dto -> dto.getUtsendelse().artikkel(),
-                dto -> dto.getMedfolgendeFamiliemedlemmer().ektefelle().navn(),
-                dto -> dto.getMedfolgendeFamiliemedlemmer().barn(),
-                dto -> dto.getRepresentantUK().navn()
+                a -> a.getArbeidstaker().navn(),
+                a -> a.getArbeidstaker().fnr(),
+                a -> a.getArbeidsgiverNorge().fullstendigAdresse(),
+                a -> a.getArbeidsgiverNorge().virksomhetsnavn(),
+                a -> a.getUtsendelse().artikkel(),
+                a -> a.getMedfolgendeFamiliemedlemmer().ektefelle().navn(),
+                a -> a.getMedfolgendeFamiliemedlemmer().barn(),
+                a -> a.getRepresentant().navn()
             ).containsExactly(
-                "Nordmann, Ola",
-                "01010119901",
-                List.of("Nordmannsveg 200", "Norge"),
-                "Virksomhetsnavn",
-                Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1,
-                "Kone",
-                List.of(),
-                "Mrs. London"
-            );
+            "Nordmann, Ola",
+            "01010119901",
+            List.of("Nordmannsveg 200", "Norge"),
+            "Virksomhetsnavn",
+            Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1,
+            "Kone",
+            List.of(),
+            "Mrs. London"
+        );
     }
 
     @Test
@@ -531,8 +520,16 @@ class DokgenMalMapperTest {
             .build();
     }
 
-    private InnvilgelseUK lagInnvilgelseUK() {
-        return new InnvilgelseUK.Builder(lagInnvilgelseBrevbestilling())
+    private InnvilgelseOgAttestStorbritannia lagInnvilgelseOgAttestStorbritannia() {
+        return new InnvilgelseOgAttestStorbritannia.Builder(lagInnvilgelseBrevbestilling())
+            .innvilgelse(lagInnvilgelseStorbritannia())
+            .attest(lagAttestStorbritannia())
+            .build();
+    }
+
+    private InnvilgelseStorbritannia lagInnvilgelseStorbritannia() {
+        return new InnvilgelseStorbritannia.Builder()
+            .innvilgelse(Innvilgelse.av(lagInnvilgelseBrevbestilling()))
             .artikkel(Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1)
             .soknad(new Soknad(SOKNADSDATO,
                 LOVVALGSPERIODE_FOM,
@@ -566,7 +563,7 @@ class DokgenMalMapperTest {
                     LocalDate.now().minusDays(20),
                     "01010119901",
                     List.of("Nordmannsveg 200", "Norge")))
-            .representantUK(new RepresentantUK(
+            .representant(new RepresentantStorbritannia(
                 "Mrs. London",
                 List.of("UK Street 1337"))
             )

@@ -27,11 +27,9 @@ class DokumentproduksjonsInfoMapperTest {
 
     @Test
     void skalUtledeTilgjengeligeMaler() {
-        fakeUnleash.enable("melosys.brev.ATTEST_NO_UK_1");
         Set<Produserbaredokumenter> produserbaredokumenter = dokumentproduksjonsInfoMapper.utledTilgjengeligeMaler();
 
         Set<Produserbaredokumenter> forventetProduserbaredokumenter = new HashSet<>(DOKUMENTMALER_PRODSATT);
-        forventetProduserbaredokumenter.add(ATTEST_NO_UK_1);
         assertThat(produserbaredokumenter).hasSameElementsAs(forventetProduserbaredokumenter);
     }
 

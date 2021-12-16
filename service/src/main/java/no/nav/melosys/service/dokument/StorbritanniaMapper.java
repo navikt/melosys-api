@@ -1,7 +1,9 @@
 package no.nav.melosys.service.dokument;
 
-import java.time.ZoneId;
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 import javax.transaction.Transactional;
 
@@ -9,15 +11,23 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
+import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
+import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadTrygdeavtale;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.IdentType;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
+import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.domain.person.adresse.PersonAdresse;
+import no.nav.melosys.domain.person.familie.IkkeOmfattetFamilie;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.integrasjon.dokgen.dto.atteststorbritannia.*;
+import no.nav.melosys.integrasjon.dokgen.dto.InnvilgelseOgAttestStorbritannia;
+import no.nav.melosys.integrasjon.dokgen.dto.felles.Innvilgelse;
 import no.nav.melosys.integrasjon.dokgen.dto.felles.Person;
+import no.nav.melosys.integrasjon.dokgen.dto.storbritannia.attest.*;
+import no.nav.melosys.integrasjon.dokgen.dto.storbritannia.innvilgelse.*;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
@@ -25,7 +35,7 @@ import no.nav.melosys.service.persondata.PersondataFasade;
 import org.springframework.stereotype.Component;
 
 @Component
-public class AttestStorbritanniaMapper {
+public class StorbritanniaMapper {
 
     private final AvklarteMedfolgendeFamilieService avklarteMedfølgendeFamilieService;
     private final AvklarteVirksomheterService avklarteVirksomheterService;
@@ -33,11 +43,11 @@ public class AttestStorbritanniaMapper {
     private final PersondataFasade persondataFasade;
     private final LovvalgsperiodeService lovvalgsperiodeService;
 
-    public AttestStorbritanniaMapper(AvklarteMedfolgendeFamilieService avklarteMedfølgendeFamilieService,
-                                     AvklarteVirksomheterService avklarteVirksomheterService,
-                                     DokgenMapperDatahenter dokgenMapperDatahenter,
-                                     PersondataFasade registerOppslagService,
-                                     LovvalgsperiodeService lovvalgsperiodeService) {
+    public StorbritanniaMapper(AvklarteMedfolgendeFamilieService avklarteMedfølgendeFamilieService,
+                               AvklarteVirksomheterService avklarteVirksomheterService,
+                               DokgenMapperDatahenter dokgenMapperDatahenter,
+                               PersondataFasade registerOppslagService,
+                               LovvalgsperiodeService lovvalgsperiodeService) {
         this.avklarteMedfølgendeFamilieService = avklarteMedfølgendeFamilieService;
         this.avklarteVirksomheterService = avklarteVirksomheterService;
         this.dokgenMapperDatahenter = dokgenMapperDatahenter;
@@ -46,7 +56,28 @@ public class AttestStorbritanniaMapper {
     }
 
     @Transactional
-    public AttestStorbritannia map(DokgenBrevbestilling brevbestilling) {
+    public InnvilgelseOgAttestStorbritannia map(InnvilgelseBrevbestilling brevbestilling) {
+        return new InnvilgelseOgAttestStorbritannia.Builder(brevbestilling)
+            .innvilgelse(mapInnvilgelse(brevbestilling))
+            .attest(mapAttest(brevbestilling))
+            .build();
+    }
+
+    private InnvilgelseStorbritannia mapInnvilgelse(InnvilgelseBrevbestilling brevbestilling) {
+        var behandling = brevbestilling.getBehandling();
+        var behandlingsgrunnlag = behandling.getBehandlingsgrunnlag();
+        var lovvalgsperiode = lovvalgsperiodeService.hentValidertLovvalgsperiode(behandling.getId());
+
+        return new InnvilgelseStorbritannia.Builder()
+            .innvilgelse(Innvilgelse.av(brevbestilling))
+            .artikkel((Lovvalgbestemmelser_trygdeavtale_uk) lovvalgsperiode.getBestemmelse())
+            .soknad(lagSøknad(behandlingsgrunnlag, lovvalgsperiode))
+            .familie(lagFamile(behandling.getId()))
+            .virksomhetArbeidsgiverSkalHaKopi(false)
+            .build();
+    }
+
+    private AttestStorbritannia mapAttest(DokgenBrevbestilling brevbestilling) {
         var behandlingId = brevbestilling.getBehandlingId();
         var behandling = brevbestilling.getBehandling();
         var persondokument = brevbestilling.getPersondokument();
@@ -63,12 +94,93 @@ public class AttestStorbritanniaMapper {
                 persondokument.getFødselsdato(),
                 persondokument.hentFolkeregisterident(),
                 persondokument.hentGjeldendePostadresse().adresselinjer()))
-            .representantUK(new RepresentantUK(
+            .representant(new RepresentantStorbritannia(
                 "Mrs. London", // TODO: Det blir fylt inn via sidemeny. Hent data når det er tilgjenglig.
                 List.of())
             )
             .utsendelse(lagUtsendelse(lovvalgsperioder, persondokument))
             .build();
+    }
+
+    private Familie lagFamile(long behandlingID) {
+        return new Familie.Builder()
+            .barn(finnBarn(behandlingID))
+            .ektefelle(finnEktefelle(behandlingID))
+            .build();
+    }
+
+    private Ektefelle finnEktefelle(long behandlingID) {
+        var avklartMedfølgendeEktefelle = avklarteMedfølgendeFamilieService.hentAvklartMedfølgendeEktefelle(behandlingID);
+        var medfolgendeEktefelleMap = avklarteMedfølgendeFamilieService.hentMedfølgendEktefelle(behandlingID);
+        var ektefelleOmfattetAvNorskTrygd = avklartMedfølgendeEktefelle.getFamilieOmfattetAvNorskTrygd();
+        if (!ektefelleOmfattetAvNorskTrygd.isEmpty()) {
+            var ektefelleOmfattet = ektefelleOmfattetAvNorskTrygd.iterator().next();
+            return tilEktefelle(medfolgendeEktefelleMap, ektefelleOmfattet.getUuid(), null);
+        }
+        var ektefelleIkkeOmfattetAvNorskTrygd = avklartMedfølgendeEktefelle.getFamilieIkkeOmfattetAvNorskTrygd();
+        if (ektefelleIkkeOmfattetAvNorskTrygd.isEmpty()) {
+            return null;
+        }
+
+        IkkeOmfattetFamilie ikkeOmfattetEktefelle = ektefelleIkkeOmfattetAvNorskTrygd.iterator().next();
+        return tilEktefelle(medfolgendeEktefelleMap, ikkeOmfattetEktefelle.getUuid(), ikkeOmfattetEktefelle.getBegrunnelse());
+    }
+
+    private Ektefelle tilEktefelle(Map<String, MedfolgendeFamilie> medfølgendeFamilieMap, String uuid, String begrunnelse) {
+        var medfølgendeFamilie = Optional.of(medfølgendeFamilieMap.get(uuid))
+            .orElseThrow(() -> new FunksjonellException("Avklart medfølgende familie " + uuid + " finnes ikke i behandlingsgrunnlaget"));
+
+        IdentType identType = medfølgendeFamilie.utledIdentType();
+        return new Ektefelle.Builder()
+            .fnr(identType == IdentType.FNR ? medfølgendeFamilie.getFnr() : null)
+            .dnr(identType == IdentType.DNR ? medfølgendeFamilie.getFnr() : null)
+            .navn(medfølgendeFamilie.getNavn())
+            .begrunnelse(begrunnelse)
+            .fødselsdato(medfølgendeFamilie.datoFraFnr())
+            .build();
+    }
+
+    private List<Barn> finnBarn(long behandlingID) {
+        var avklarteMedfølgendeBarn = avklarteMedfølgendeFamilieService.hentAvklarteMedfølgendeBarn(behandlingID);
+        var barnOmfattetAvNorskTrygd = avklarteMedfølgendeBarn.getFamilieOmfattetAvNorskTrygd();
+        var barnIkkeOmfattetAvNorskTrygd = avklarteMedfølgendeBarn.getFamilieIkkeOmfattetAvNorskTrygd();
+
+        var medfølgendeBarn = avklarteMedfølgendeFamilieService.hentMedfølgendeBarn(behandlingID);
+
+        return Stream.concat(barnOmfattetAvNorskTrygd.stream()
+                .map(omfattetFamilie -> tilBarn(medfølgendeBarn, omfattetFamilie.getUuid(), null)),
+            barnIkkeOmfattetAvNorskTrygd.stream()
+                .map(ikkeOmfattetBarn -> tilBarn(medfølgendeBarn, ikkeOmfattetBarn.getUuid(), ikkeOmfattetBarn.getBegrunnelse()))
+        ).toList();
+    }
+
+    private Barn tilBarn(Map<String, MedfolgendeFamilie> medfølgendeBarnMap, String uuid, String begrunnelse) {
+        var medfølgendeBarn = Optional.of(medfølgendeBarnMap.get(uuid))
+            .orElseThrow(() -> new FunksjonellException("Avklart medfølgende familie " + uuid +
+                " finnes ikke i behandlingsgrunnlaget"));
+        var identType = medfølgendeBarn.utledIdentType();
+        return new Barn.Builder()
+            .navn(medfølgendeBarn.getNavn())
+            .fnr(identType == IdentType.FNR ? medfølgendeBarn.getFnr() : null)
+            .dnr(identType == IdentType.DNR ? medfølgendeBarn.getFnr() : null)
+            .foedselsdato(medfølgendeBarn.datoFraFnr())
+            .begrunnelse(begrunnelse)
+            .build();
+    }
+
+    private Soknad lagSøknad(Behandlingsgrunnlag behandlingsgrunnlag, Lovvalgsperiode lovvalgsperiode) {
+        var soeknadTrygdeavtale = (SoeknadTrygdeavtale) behandlingsgrunnlag.getBehandlingsgrunnlagdata();
+        var representantIUtlandet = soeknadTrygdeavtale.getRepresentantIUtlandet();
+        if (representantIUtlandet == null) {
+            throw new FunksjonellException("Behandlingsgrunnlaget inneholder ikke representant I utlandet");
+        }
+
+        return new Soknad(
+            behandlingsgrunnlag.getMottaksdato(),
+            lovvalgsperiode.getFom(),
+            lovvalgsperiode.getTom(),
+            representantIUtlandet.representantNavn
+        );
     }
 
     private Utsendelse lagUtsendelse(Collection<Lovvalgsperiode> lovvalgsperioder, Persondata persondata) {
@@ -91,9 +203,9 @@ public class AttestStorbritanniaMapper {
 
     static List<String> finnGyldigAdresse(Persondata persondata, Lovvalgsperiode lovvalgsperiode) {
         var optionalPersonAdresse = Stream.of(
-                persondata.finnBostedsadresse(),
-                persondata.finnOppholdsadresse(),
-                persondata.finnKontaktadresse())
+            persondata.finnBostedsadresse(),
+            persondata.finnOppholdsadresse(),
+            persondata.finnKontaktadresse())
             .filter(Optional::isPresent)
             .map(Optional::get)
             .filter(personAdresse -> sjekkAdresseMotLand(personAdresse.strukturertAdresse()))

@@ -62,14 +62,13 @@ public class TrygdeavtaleVedtakService {
         behandlingService.oppdaterStatus(behandling, Behandlingsstatus.IVERKSETTER_VEDTAK);
 
         prosessinstansService.opprettProsessinstansIverksettVedtakTrygdeavtale(behandling, request);
-        // TODO: Produser og distribuer både attest og innvilgelse-brevene
-         dokgenService.produserOgDistribuerBrev(behandlingID, lagAttestBrevbestilling(request));
+        dokgenService.produserOgDistribuerBrev(behandlingID, lagStorbritanniaBrevbestilling(request));
         oppgaveService.ferdigstillOppgaveMedSaksnummer(saksnummer);
     }
 
-    private BrevbestillingRequest lagAttestBrevbestilling(FattTrygdeavtaleVedtakRequest request) {
+    private BrevbestillingRequest lagStorbritanniaBrevbestilling(FattTrygdeavtaleVedtakRequest request) {
         return new BrevbestillingRequest.Builder()
-            .medProduserbardokument(Produserbaredokumenter.ATTEST_NO_UK_1)
+            .medProduserbardokument(Produserbaredokumenter.STORBRITANNIA)
             .medMottaker(Aktoersroller.BRUKER)
             .medKopiMottakere(request.getKopiMottakere())
             .medInnledningFritekst(request.getFritekstInnledning())
