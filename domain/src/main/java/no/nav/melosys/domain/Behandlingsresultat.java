@@ -44,6 +44,9 @@ public class Behandlingsresultat extends RegistreringsInfo {
     @Column(name = "begrunnelse_fritekst")
     private String begrunnelseFritekst;
 
+    @Column(name = "innledning_fritekst")
+    private String innledningFritekst;
+
     @OneToOne(mappedBy = "behandlingsresultat", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private VedtakMetadata vedtakMetadata;
 
@@ -125,6 +128,14 @@ public class Behandlingsresultat extends RegistreringsInfo {
 
     public void setBegrunnelseFritekst(String begrunnelseFritekst) {
         this.begrunnelseFritekst = begrunnelseFritekst;
+    }
+
+    public String getInnledningFritekst() {
+        return innledningFritekst;
+    }
+
+    public void setInnledningFritekst(String innledningFritekst) {
+        this.innledningFritekst = innledningFritekst;
     }
 
     public VedtakMetadata getVedtakMetadata() {

@@ -95,6 +95,7 @@ public class TrygdeavtaleVedtakService {
     private void oppdaterBehandlingsresultat(Behandlingsresultat behandlingsresultat, FattTrygdeavtaleVedtakRequest request) throws IkkeFunnetException {
         behandlingsresultat.settVedtakMetadata(request.getVedtakstype(), LocalDate.now().plusWeeks(FRIST_KLAGE_UKER));
         behandlingsresultat.setBegrunnelseFritekst(request.getFritekstBegrunnelse());
+        behandlingsresultat.setInnledningFritekst(request.getFritekstInnledning());
         behandlingsresultat.setFastsattAvLand(Landkoder.NO);
 
         behandlingsresultatService.lagre(behandlingsresultat);
