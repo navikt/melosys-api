@@ -9,13 +9,10 @@ import java.util.Set;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
-import no.nav.melosys.domain.kodeverk.Trygdedekninger;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.domain.person.adresse.Oppholdsadresse;
@@ -40,7 +37,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
 
 import static no.nav.melosys.service.dokument.DokgenMalMapperTest.*;
-import static no.nav.melosys.service.dokument.DokgenTestData.*;
+import static no.nav.melosys.service.dokument.DokgenTestData.lagPersonDokument;
+import static no.nav.melosys.service.dokument.DokgenTestData.lagLovvalgsperiode;
+import static no.nav.melosys.service.dokument.DokgenTestData.lagTrygdeavtaleBehandling;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.*;
@@ -203,7 +202,7 @@ class AttestStorbritanniaMapperTest {
         mockHappyCase();
 
         AttestStorbritannia attestStorbritannia = attestStorbritanniaMapper.map(new DokgenBrevbestilling.Builder()
-            .medBehandling(lagBehandling())
+            .medBehandling(lagTrygdeavtaleBehandling())
             .medPersonDokument(lagPersonDokument())
             .medVedtaksdato(VEDTAKS_DATO_INSTANT)
             .build()
@@ -224,7 +223,7 @@ class AttestStorbritanniaMapperTest {
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() ->
                 attestStorbritanniaMapper.map(new DokgenBrevbestilling.Builder()
-                    .medBehandling(lagBehandling())
+                    .medBehandling(lagTrygdeavtaleBehandling())
                     .medPersonDokument(lagPersonDokument())
                     .medVedtaksdato(VEDTAKS_DATO_INSTANT)
                     .build()
@@ -241,7 +240,7 @@ class AttestStorbritanniaMapperTest {
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() ->
                 attestStorbritanniaMapper.map(new DokgenBrevbestilling.Builder()
-                    .medBehandling(lagBehandling())
+                    .medBehandling(lagTrygdeavtaleBehandling())
                     .medPersonDokument(lagPersonDokument())
                     .medVedtaksdato(VEDTAKS_DATO_INSTANT)
                     .build()
@@ -268,15 +267,6 @@ class AttestStorbritanniaMapperTest {
             }
             return navn;
         });
-    }
-
-    private Lovvalgsperiode lagLovvalgsperiode() {
-        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setFom(LOVVALGSPERIODE_FOM);
-        lovvalgsperiode.setTom(LOVVALGSPERIODE_TOM);
-        lovvalgsperiode.setDekning(Trygdedekninger.FULL_DEKNING_FTRL);
-        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1);
-        return lovvalgsperiode;
     }
 
     private List<AvklartVirksomhet> lagAvklarteVirksomheter() {
@@ -351,8 +341,8 @@ class AttestStorbritanniaMapperTest {
             "sluttdato" : "%s"
           },
           "representantUK" : {
-            "navn" : "Mrs. London",
-            "adresse" : [ ]
+            "navn" : "Foretaksnavn",
+            "adresse" : [ "Uk address" ]
           },
           "vedtaksdato" : "%s"
         }""", FØDSELSDATO, FØDSELSDATO, LOVVALGSPERIODE_FOM, LOVVALGSPERIODE_TOM, VEDTAKS_DATO);

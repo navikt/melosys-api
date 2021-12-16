@@ -14,6 +14,7 @@ public class BehandlingsresultatDto {
     private final String behandlingsresultatTypeKode;
     private final List<String> begrunnelseKoder;
     private final String begrunnelseFritekst;
+    private final String innledningFritekst;
     private final String utfallRegistreringUnntak;
     private final String utfallUtpeking;
     private final String vedtakstype;
@@ -21,11 +22,13 @@ public class BehandlingsresultatDto {
 
     private BehandlingsresultatDto(Behandlingsresultattyper behandlingsresultatTypeKode,
                                    String begrunnelseFritekst,
+                                   String innledningFritekst,
                                    String utfallRegistreringUnntak,
                                    String utfallUtpeking,
                                    String vedtakstype,
                                    List<String> kontrollresultatBegrunnelseKoder) {
         this.behandlingsresultatTypeKode = behandlingsresultatTypeKode.getKode();
+        this.innledningFritekst = innledningFritekst;
         this.utfallUtpeking = utfallUtpeking;
         this.begrunnelseKoder = new ArrayList<>();
         this.begrunnelseFritekst = begrunnelseFritekst;
@@ -38,6 +41,7 @@ public class BehandlingsresultatDto {
         BehandlingsresultatDto dto = new BehandlingsresultatDto(
             resultat.getType(),
             resultat.getBegrunnelseFritekst(),
+            resultat.getInnledningFritekst(),
             resultat.getUtfallRegistreringUnntak() != null ? resultat.getUtfallRegistreringUnntak().getKode() : null,
             resultat.getUtfallUtpeking() != null ? resultat.getUtfallUtpeking().getKode() : null,
             resultat.getVedtakMetadata() != null ? resultat.getVedtakMetadata().getVedtakstype().getKode() : null,
@@ -64,6 +68,10 @@ public class BehandlingsresultatDto {
 
     public String getBegrunnelseFritekst() {
         return begrunnelseFritekst;
+    }
+
+    public String getInnledningFritekst() {
+        return innledningFritekst;
     }
 
     public String getUtfallRegistreringUnntak() {
