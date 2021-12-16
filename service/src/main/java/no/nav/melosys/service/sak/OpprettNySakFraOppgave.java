@@ -4,6 +4,7 @@ import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.arkiv.Journalposttype;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
@@ -58,22 +59,25 @@ public class OpprettNySakFraOppgave {
     void validerOpprettSakDto(OpprettSakDto opprettSakDto) {
         final var sakstype = opprettSakDto.getSakstype();
         final var behandlingstema = opprettSakDto.getBehandlingstema();
+
+        validerBehandlingstema(behandlingstema, sakstype);
+
+        if (erBehandlingAvSøknad(behandlingstema) && erSakstypeEøs(sakstype)) {
+            validerSøknadData(opprettSakDto.getSoknadDto());
+        }
+    }
+
+    void validerBehandlingstema(Behandlingstema behandlingstema, Sakstyper sakstype) {
         if (behandlingstema == null) {
             throw new FunksjonellException("Behandlingstema mangler for å opprette ny sak");
-        } else if (!erBehandlingAvSøknad(behandlingstema)
-            && !erBehandlingAvSedForespørsler(opprettSakDto.getBehandlingstema())) {
-            throw new FunksjonellException("Kan ikke opprette ny sak med behandlingstema " + opprettSakDto.getBehandlingstema());
+        } else if (!erBehandlingAvSøknad(behandlingstema) && !erBehandlingAvSedForespørsler(behandlingstema)) {
+            throw new FunksjonellException("Kan ikke opprette ny sak med behandlingstema " + behandlingstema);
         } else if (!erGyldigBehandlingstemaForSakstype(sakstype, behandlingstema)) {
             throw new FunksjonellException("Behandlingstema " + behandlingstema + " er ikke gyldig for sakstype " + sakstype);
         } else if (behandlingstema == Behandlingstema.ARBEID_I_UTLANDET && !unleash.isEnabled("melosys.folketrygden.mvp")) {
             throw new FunksjonellException("Kan ikke opprette ny sak med behandlingstema " + behandlingstema);
         } else if (behandlingstema == Behandlingstema.YRKESAKTIV && !unleash.isEnabled("melosys.trygdeavtale")) {
             throw new FunksjonellException("Kan ikke opprette ny sak med behandlingstema " + behandlingstema);
-        }
-
-        if (erBehandlingAvSøknad(opprettSakDto.getBehandlingstema()) && erSakstypeEøs(sakstype)) {
-            final SøknadDto soknadDto = opprettSakDto.getSoknadDto();
-            validerSøknadData(soknadDto);
         }
     }
 
