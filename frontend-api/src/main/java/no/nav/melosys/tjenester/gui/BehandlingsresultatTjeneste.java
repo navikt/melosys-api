@@ -11,6 +11,7 @@ import no.nav.security.token.support.core.api.Protected;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -40,6 +41,7 @@ public class BehandlingsresultatTjeneste {
         return ResponseEntity.ok(BehandlingsresultatDto.av(resultat));
     }
 
+    @Transactional
     @PostMapping("{behandlingID}/resultat/fritekst")
     @ApiOperation(value = "Oppdater fritekstene begrunnelseFritekst og innledningFritekst i behandlingsresultatet",
         response = BehandlingsresultatDto.class)
