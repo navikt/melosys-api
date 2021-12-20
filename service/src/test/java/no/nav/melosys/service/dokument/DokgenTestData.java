@@ -7,7 +7,9 @@ import java.util.List;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
+import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadTrygdeavtale;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Soeknadsland;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.RepresentantIUtlandet;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
@@ -18,14 +20,15 @@ import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.person.adresse.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.adresse.Gateadresse;
 import no.nav.melosys.domain.dokument.person.adresse.UstrukturertAdresse;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Representerer;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
 
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
+import static no.nav.melosys.service.dokument.DokgenMalMapperTest.LOVVALGSPERIODE_FOM;
+import static no.nav.melosys.service.dokument.DokgenMalMapperTest.LOVVALGSPERIODE_TOM;
 
 public final class DokgenTestData {
     public static final String FNR_BRUKER = "05058892382";
@@ -149,4 +152,27 @@ public final class DokgenTestData {
         semistrukturertAdresse.setGyldighetsperiode(new Periode(LocalDate.now().minusDays(2), LocalDate.now().plusDays(2)));
         return semistrukturertAdresse;
     }
+
+    public static Behandling lagTrygdeavtaleBehandling() {
+        return lagTrygdeavtaleBehandling(
+            RepresentantIUtlandet.av("Foretaksnavn", List.of("Uk address"), Landkoder.GB));
+    }
+
+    public static Behandling lagTrygdeavtaleBehandling(RepresentantIUtlandet representantIUtlandet) {
+        Behandling behandling = lagBehandling(lagFagsak());
+        var behandlingsgrunnlagData = new SoeknadTrygdeavtale();
+        behandlingsgrunnlagData.setRepresentantIUtlandet(representantIUtlandet);
+        behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(behandlingsgrunnlagData);
+        return behandling;
+    }
+
+    public static Lovvalgsperiode lagLovvalgsperiode() {
+        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
+        lovvalgsperiode.setFom(LOVVALGSPERIODE_FOM);
+        lovvalgsperiode.setTom(LOVVALGSPERIODE_TOM);
+        lovvalgsperiode.setDekning(Trygdedekninger.FULL_DEKNING_FTRL);
+        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1);
+        return lovvalgsperiode;
+    }
+
 }

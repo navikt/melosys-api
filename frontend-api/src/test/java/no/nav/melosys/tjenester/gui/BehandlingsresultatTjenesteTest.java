@@ -16,6 +16,7 @@ import org.jeasy.random.EasyRandom;
 import org.jeasy.random.EasyRandomParameters;
 import org.jeasy.random.randomizers.misc.EnumRandomizer;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -60,6 +61,7 @@ class BehandlingsresultatTjenesteTest extends JsonSchemaTestParent {
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setType(Behandlingsresultattyper.IKKE_FASTSATT);
         behandlingsresultat.setBegrunnelseFritekst("Bruker har fått flyskrekk");
+        behandlingsresultat.setInnledningFritekst("<p>Bruker har fått flyskrekk</>");
         BehandlingsresultatBegrunnelse begrunnelse = new BehandlingsresultatBegrunnelse();
         begrunnelse.setKode(Henleggelsesgrunner.ANNET.getKode());
         behandlingsresultat.setBehandlingsresultatBegrunnelser(Sets.newHashSet(begrunnelse));

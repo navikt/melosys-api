@@ -59,7 +59,7 @@ public final class MedlPeriodeKonverter {
 
         tbl.put(Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1, GrunnlagMedl.Storbrit_NIrland_6_1);
         tbl.put(Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_5, GrunnlagMedl.Storbrit_NIrland_6_5);
-        tbl.put(Lovvalgbestemmelser_trygdeavtale_uk.UK_ART7_3, GrunnlagMedl.Storbrit_NIrland_7_1);
+        tbl.put(Lovvalgbestemmelser_trygdeavtale_uk.UK_ART7_3, GrunnlagMedl.Storbrit_NIrland_7_3);
         tbl.put(Lovvalgbestemmelser_trygdeavtale_uk.UK_ART8_2, GrunnlagMedl.Storbrit_NIrland_8_2);
         tbl.put(Lovvalgbestemmelser_trygdeavtale_uk.UK_ART9, GrunnlagMedl.Storbrit_NIrland_9);
         lovvalgsbestemmelseTilGrunnlagMedlTabell = tbl;

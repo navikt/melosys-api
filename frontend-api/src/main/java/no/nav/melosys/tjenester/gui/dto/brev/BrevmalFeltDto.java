@@ -1,15 +1,20 @@
 package no.nav.melosys.tjenester.gui.dto.brev;
 
-import java.util.ArrayList;
-import java.util.List;
-
+/**
+ * Informasjon om et felt som skal være med i malen.
+ *
+ * Dersom {@param valg} ikke er null, vil instans av dette feltet være usynlig med mindre brukeren velger
+ * et valgalternativ fra {@param valg} som har {@link FeltvalgAlternativDto#isVisFelt()} = true.
+ */
 public class BrevmalFeltDto {
+
     private final String kode;
     private final String beskrivelse;
     private final FeltType feltType;
     private final String hjelpetekst;
     private final boolean paakrevd;
-    private final List<FeltvalgDto> valg;
+    private final FeltValgDto valg;
+    private final Integer tegnBegrensning;
 
     private BrevmalFeltDto(Builder builder) {
         this.kode = builder.kode;
@@ -18,6 +23,7 @@ public class BrevmalFeltDto {
         this.hjelpetekst = builder.hjelpetekst;
         this.paakrevd = builder.paakrevd;
         this.valg = builder.valg;
+        this.tegnBegrensning = builder.tegnBegrensning;
     }
 
     public String getKode() {
@@ -40,8 +46,12 @@ public class BrevmalFeltDto {
         return paakrevd;
     }
 
-    public List<FeltvalgDto> getValg() {
+    public FeltValgDto getValg() {
         return valg;
+    }
+
+    public Integer getTegnBegrensning() {
+        return tegnBegrensning;
     }
 
     public static final class Builder {
@@ -50,7 +60,8 @@ public class BrevmalFeltDto {
         private FeltType feltType;
         private String hjelpetekst;
         private boolean paakrevd = false;
-        private List<FeltvalgDto> valg;
+        private FeltValgDto valg;
+        private Integer tegnBegrensning;
 
         public Builder medKode(String kode) {
             this.kode = kode;
@@ -77,16 +88,13 @@ public class BrevmalFeltDto {
             return this;
         }
 
-        public Builder medValg(List<FeltvalgDto> valg) {
+        public Builder medValg(FeltValgDto valg) {
             this.valg = valg;
             return this;
         }
 
-        public Builder medValg(FeltvalgDto valg) {
-            if (this.valg == null) {
-                this.valg = new ArrayList<>();
-            }
-            this.valg.add(valg);
+        public Builder medTegnBegrensning(Integer antallTegn) {
+            this.tegnBegrensning = antallTegn;
             return this;
         }
 

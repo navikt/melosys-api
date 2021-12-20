@@ -147,7 +147,8 @@ public class StorbritanniaMapper {
 
         var medfølgendeBarn = avklarteMedfølgendeFamilieService.hentMedfølgendeBarn(behandlingID);
 
-        return Stream.concat(barnOmfattetAvNorskTrygd.stream()
+        return Stream.concat(
+            barnOmfattetAvNorskTrygd.stream()
                 .map(omfattetFamilie -> tilBarn(medfølgendeBarn, omfattetFamilie.getUuid(), null)),
             barnIkkeOmfattetAvNorskTrygd.stream()
                 .map(ikkeOmfattetBarn -> tilBarn(medfølgendeBarn, ikkeOmfattetBarn.getUuid(), ikkeOmfattetBarn.getBegrunnelse()))

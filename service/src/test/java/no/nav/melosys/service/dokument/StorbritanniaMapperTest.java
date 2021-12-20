@@ -90,8 +90,6 @@ public class StorbritanniaMapperTest {
 
     private StorbritanniaMapper storbritanniaMapper;
 
-    private Behandling behandlingMedTrygdeavtaleSøknad;
-
     @BeforeEach
     void setup() {
         storbritanniaMapper = new StorbritanniaMapper(
@@ -100,9 +98,6 @@ public class StorbritanniaMapperTest {
             mockDokgenMapperDatahenter,
             mockPersondataFasade,
             mockLovvalgsperiodeService);
-
-        behandlingMedTrygdeavtaleSøknad = lagBehandling();
-        behandlingMedTrygdeavtaleSøknad.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(lagTrygdeavtaleBehandlingsgrunnlagdata());
     }
 
     @Test
@@ -111,7 +106,7 @@ public class StorbritanniaMapperTest {
         mockAvklartFamilieDefaultCase();
         mockHappyCase();
 
-        InnvilgelseBrevbestilling brevbestilling = lagStorbritanniaBrevbestilling(medPeriode(behandlingMedTrygdeavtaleSøknad));
+        InnvilgelseBrevbestilling brevbestilling = lagStorbritanniaBrevbestilling(medPeriode(lagTrygdeavtaleBehandling()));
 
         InnvilgelseStorbritannia innvilgelseUK = storbritanniaMapper.map(brevbestilling).getInnvilgelse();
 
@@ -124,8 +119,9 @@ public class StorbritanniaMapperTest {
     @Test
     void map_ingenUtenlandskeVirksomheter_kastFunksjonellException() {
         mockLovvalgsperiode();
-        hentSoeknadTrygdeavtale().setRepresentantIUtlandet(null);
-        Behandling behandling = medPeriode(behandlingMedTrygdeavtaleSøknad);
+
+        Behandling behandling = medPeriode(lagTrygdeavtaleBehandling());
+        ((SoeknadTrygdeavtale) behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata()).setRepresentantIUtlandet(null);
         InnvilgelseBrevbestilling brevbestilling = lagStorbritanniaBrevbestilling(behandling);
 
         assertThatExceptionOfType(FunksjonellException.class)
@@ -142,7 +138,7 @@ public class StorbritanniaMapperTest {
         when(mockAvklarteMedfolgendeFamilieService.hentAvklartMedfølgendeEktefelle(anyLong())).thenReturn(lagIkkeOmfattetMedfølgendeEktefelle());
         when(mockAvklarteMedfolgendeFamilieService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(lagOmfattetMedfølgendeBarn());
 
-        InnvilgelseBrevbestilling brevbestilling = lagStorbritanniaBrevbestilling(behandlingMedTrygdeavtaleSøknad);
+        InnvilgelseBrevbestilling brevbestilling = lagStorbritanniaBrevbestilling(lagTrygdeavtaleBehandling());
         InnvilgelseStorbritannia map = storbritanniaMapper.map(brevbestilling).getInnvilgelse();
         assertThat(map.getFamilie().minstEttOmfattetFamiliemedlem()).isTrue();
     }
@@ -155,7 +151,7 @@ public class StorbritanniaMapperTest {
         when(mockAvklarteMedfolgendeFamilieService.hentMedfølgendeBarn(anyLong())).thenReturn(lagMedølgendeBarnUtenFnr());
         when(mockAvklarteMedfolgendeFamilieService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(lagBarnUtenFnr());
 
-        InnvilgelseBrevbestilling brevbestilling = lagStorbritanniaBrevbestilling(behandlingMedTrygdeavtaleSøknad);
+        InnvilgelseBrevbestilling brevbestilling = lagStorbritanniaBrevbestilling(lagTrygdeavtaleBehandling());
         InnvilgelseStorbritannia map = storbritanniaMapper.map(brevbestilling).getInnvilgelse();
         assertThat(map.getFamilie().barn())
             .hasSize(1)
@@ -173,7 +169,7 @@ public class StorbritanniaMapperTest {
         when(mockAvklarteMedfolgendeFamilieService.hentAvklartMedfølgendeEktefelle(anyLong())).thenReturn(lagIkkeOmfattetMedfølgendeEktefelle());
         when(mockAvklarteMedfolgendeFamilieService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(lagIkkeOmfattetMedfølgendeBarn());
 
-        InnvilgelseBrevbestilling brevbestilling = lagStorbritanniaBrevbestilling(behandlingMedTrygdeavtaleSøknad);
+        InnvilgelseBrevbestilling brevbestilling = lagStorbritanniaBrevbestilling(lagTrygdeavtaleBehandling());
         InnvilgelseStorbritannia map = storbritanniaMapper.map(brevbestilling).getInnvilgelse();
         assertThat(map.getFamilie().minstEttOmfattetFamiliemedlem()).isFalse();
     }
@@ -223,7 +219,7 @@ public class StorbritanniaMapperTest {
     void map_InnvilgetMedOmfattetFamilie_populererFelter() throws JsonProcessingException {
         mockHappyCase();
 
-        AttestStorbritannia attestStorbritannia = storbritanniaMapper.map(lagStorbritanniaBrevbestilling(behandlingMedTrygdeavtaleSøknad))
+        AttestStorbritannia attestStorbritannia = storbritanniaMapper.map(lagStorbritanniaBrevbestilling(lagTrygdeavtaleBehandling()))
             .getAttest();
 
         String json = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(attestStorbritannia);
@@ -240,7 +236,7 @@ public class StorbritanniaMapperTest {
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() ->
-                storbritanniaMapper.map(lagStorbritanniaBrevbestilling(behandlingMedTrygdeavtaleSøknad))
+                storbritanniaMapper.map(lagStorbritanniaBrevbestilling(lagTrygdeavtaleBehandling()))
             ).withMessageContaining("Det kan bare være en lovvalgsperiode for trygdeavtale. Fant 2");
     }
 
@@ -253,7 +249,7 @@ public class StorbritanniaMapperTest {
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() ->
                 storbritanniaMapper.map(new InnvilgelseBrevbestilling.Builder()
-                    .medBehandling(behandlingMedTrygdeavtaleSøknad)
+                    .medBehandling(lagTrygdeavtaleBehandling())
                     .medPersonDokument(lagPersonDokument())
                     .medVedtaksdato(VEDTAKS_DATO_INSTANT)
                     .build()
@@ -359,7 +355,7 @@ public class StorbritanniaMapperTest {
     }
 
     private SoeknadTrygdeavtale hentSoeknadTrygdeavtale() {
-        return (SoeknadTrygdeavtale) behandlingMedTrygdeavtaleSøknad.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
+        return (SoeknadTrygdeavtale) lagTrygdeavtaleBehandling().getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
     }
 
     private void mockHappyCase() {

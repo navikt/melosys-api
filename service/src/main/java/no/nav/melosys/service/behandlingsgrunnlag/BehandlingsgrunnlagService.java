@@ -133,7 +133,7 @@ public class BehandlingsgrunnlagService {
     @Transactional
     public Behandlingsgrunnlag oppdaterBehandlingsgrunnlag(long behandlingID, JsonNode behandlingsgrunnlagDataJson) {
         Behandlingsgrunnlag behandlingsgrunnlag = hentBehandlingsgrunnlag(behandlingID);
-        behandlingsgrunnlag.setJsonData(behandlingsgrunnlagDataJson.toString());
+        behandlingsgrunnlag.setJsonData(behandlingsgrunnlagDataJson.toPrettyString());
         return behandlingsgrunnlagRepository.saveAndFlush(behandlingsgrunnlag);
     }
 
