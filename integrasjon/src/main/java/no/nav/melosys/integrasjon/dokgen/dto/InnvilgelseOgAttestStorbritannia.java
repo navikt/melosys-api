@@ -6,15 +6,11 @@ import no.nav.melosys.integrasjon.dokgen.dto.storbritannia.innvilgelse.Innvilgel
 
 public class InnvilgelseOgAttestStorbritannia extends DokgenDto {
 
-    private final boolean skalHaInnvilgelse;
-    private final boolean skalHaAttest;
     private final InnvilgelseStorbritannia innvilgelse;
     private final AttestStorbritannia attest;
 
     public InnvilgelseOgAttestStorbritannia(Builder builder) {
         super(builder.brevbestilling);
-        skalHaInnvilgelse = builder.innvilgelse != null;
-        skalHaAttest = builder.attest != null;
         innvilgelse = builder.innvilgelse;
         attest = builder.attest;
     }
@@ -44,11 +40,11 @@ public class InnvilgelseOgAttestStorbritannia extends DokgenDto {
     }
 
     public boolean isSkalHaInnvilgelse() {
-        return skalHaInnvilgelse;
+        return innvilgelse != null;
     }
 
     public boolean isSkalHaAttest() {
-        return skalHaAttest;
+        return attest != null;
     }
 
     public InnvilgelseStorbritannia getInnvilgelse() {
