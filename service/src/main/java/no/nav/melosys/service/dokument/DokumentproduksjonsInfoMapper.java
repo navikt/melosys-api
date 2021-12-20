@@ -113,7 +113,7 @@ public class DokumentproduksjonsInfoMapper {
         FORVALTNINGSMELDING("Melding om forventet saksbehandlingstid"),
         MANGELBREV("Melding om manglende opplysninger"),
         INNVILGELSE_FTRL_2_8("Vedtak om frivillig medlemskap"),
-        STORBRITANNIA("Vedtak om medlemskap + Attest for utsendt arbeidstaker fra Norge til Storbritannia");
+        STORBRITANNIA("Vedtak om medlemskap, Attest for utsendt arbeidstaker");
 
         private final String tittel;
 

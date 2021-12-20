@@ -43,7 +43,7 @@ public class BrevmottakerMapper {
                     SKATT_FÅR_KOPI_HVIS_AVGIFTSPLIKTIG_INNTEKT
                 ).build(),
 
-            INNVILGELSE_UK, new Mottakerliste.Builder()
+            STORBRITANNIA, new Mottakerliste.Builder()
                 .medHovedMottaker(BRUKER)
                 .medBrevkopiRegler(ARBEIDSGIVER_FÅR_KOPI, SKATT_FÅR_KOPI)
                 .build(),

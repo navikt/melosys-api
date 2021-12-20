@@ -404,7 +404,7 @@ class BrevmottakerServiceTest {
     void gittInnvilgelsesbrevUK_skalHovedmottakerVæreBrukerMedKopier() {
         when(behandling.getFagsak()).thenReturn(lagFagsakMedRepresentant(null));
 
-        assertThat(brevmottakerService.hentMottakerliste(INNVILGELSE_UK, behandling))
+        assertThat(brevmottakerService.hentMottakerliste(STORBRITANNIA, behandling))
             .extracting(
                 Mottakerliste::getHovedMottaker,
                 Mottakerliste::getKopiMottakere,
