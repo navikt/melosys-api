@@ -31,7 +31,7 @@ public final class PersonMedHistorikkOversetter {
             FoedselOversetter.oversett(person.foedsel()),
             FolkeregisteridentOversetter.oversett(person.folkeregisteridentifikator()),
             person.folkeregisterpersonstatus().stream()
-                .map(status -> FolkeregisterpersonstatusOversetter.oversett(status, kodeverkService))
+                .map(status -> FolkeregisterpersonstatusOversetter.oversett(status))
                 .filter(status -> status != null)
                 .collect(Collectors.toUnmodifiableSet()),
             KjoennOversetter.oversett(person.kjoenn()),
