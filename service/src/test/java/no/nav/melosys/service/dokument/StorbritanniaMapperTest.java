@@ -16,6 +16,7 @@ import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadTrygdeavtale;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.RepresentantIUtlandet;
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Medfolgende_barn_begrunnelser;
@@ -252,6 +253,7 @@ public class StorbritanniaMapperTest {
                     .medBehandling(lagTrygdeavtaleBehandling())
                     .medPersonDokument(lagPersonDokument())
                     .medVedtaksdato(VEDTAKS_DATO_INSTANT)
+                    .medMottakertype(Aktoersroller.BRUKER)
                     .build()
                 )
             ).withMessageContaining("Det kan bare være en lovvalgsperiode for trygdeavtale. Fant 0");
@@ -294,6 +296,7 @@ public class StorbritanniaMapperTest {
             .medBarnFritekst("barnFritekst")
             .medEktefelleFritekst("ektefelleFritekst")
             .medVedtaksdato(VEDTAKS_DATO_INSTANT)
+            .medMottakertype(Aktoersroller.BRUKER)
             .build();
     }
 

@@ -16,6 +16,7 @@ import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadTrygdeavtale;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.IdentType;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
+import no.nav.melosys.domain.brev.FastMottaker;
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
@@ -57,6 +58,7 @@ public class StorbritanniaMapper {
 
     @Transactional
     public InnvilgelseOgAttestStorbritannia map(InnvilgelseBrevbestilling brevbestilling) {
+        // Splitt her ut ifra mottaker
         return new InnvilgelseOgAttestStorbritannia.Builder(brevbestilling)
             .innvilgelse(mapInnvilgelse(brevbestilling))
             .attest(mapAttest(brevbestilling))
@@ -64,6 +66,8 @@ public class StorbritanniaMapper {
     }
 
     private InnvilgelseStorbritannia mapInnvilgelse(InnvilgelseBrevbestilling brevbestilling) {
+        if (!skalHaInnvilgelse(brevbestilling)) return null;
+
         var behandling = brevbestilling.getBehandling();
         var behandlingsgrunnlag = behandling.getBehandlingsgrunnlag();
         var lovvalgsperiode = lovvalgsperiodeService.hentValidertLovvalgsperiode(behandling.getId());
@@ -78,6 +82,8 @@ public class StorbritanniaMapper {
     }
 
     private AttestStorbritannia mapAttest(DokgenBrevbestilling brevbestilling) {
+        if (!skalHaAttest(brevbestilling)) return null;
+
         var behandlingId = brevbestilling.getBehandlingId();
         var behandling = brevbestilling.getBehandling();
         var persondokument = brevbestilling.getPersondokument();
@@ -265,5 +271,21 @@ public class StorbritanniaMapper {
         var sammensattNavn = fnr != null ? dokgenMapperDatahenter.hentSammensattNavn(fnr) : medfølgendeFamilie.getNavn();
         var fødselsdato = persondataFasade.hentPerson(fnr).getFødselsdato();
         return new Person(sammensattNavn, fødselsdato, fnr, null);
+    }
+
+    private boolean skalHaInnvilgelse(InnvilgelseBrevbestilling brevbestilling) {
+        return switch (brevbestilling.getMottakertype()) {
+            case BRUKER, ARBEIDSGIVER -> true;
+            case MYNDIGHET -> FastMottaker.OrgNr.SKATTEETATEN_ORGNR.getOrgnr().equals(brevbestilling.getOrg().getOrgnummer());
+            default -> false;
+        };
+    }
+
+    private boolean skalHaAttest(DokgenBrevbestilling brevbestilling) {
+        return switch (brevbestilling.getMottakertype()) {
+            case BRUKER, ARBEIDSGIVER -> true;
+            case MYNDIGHET -> FastMottaker.OrgNr.BRITISKE_TRYGDEMYNDIGHETER_ORGNR.getOrgnr().equals(brevbestilling.getOrg().getOrgnummer());
+            default -> false;
+        };
     }
 }

@@ -90,6 +90,7 @@ public class DokgenService {
         DokgenBrevbestilling.Builder<?> builder = brevbestilling.toBuilder();
 
         builder.medBehandling(behandling);
+        builder.medMottakertype(mottaker.getRolle());
 
         if (hasText(orgnr)) {
             settOrganisasjonsOpplysninger(behandling, orgnr, builder);

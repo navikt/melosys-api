@@ -165,12 +165,22 @@ public class BrevbestillingService {
         for (FastMottaker fastMottaker : fasteMottakere) {
             Aktoer avklartMottaker = brevmottakerService.avklarMottaker(produserbaredokumenter, FastMottaker.av(fastMottaker), behandling);
             var orgDokument = hentRettOrganisasjonsdokument(behandling, avklartMottaker.getOrgnr());
-            muligMottakerDtos.add(new MuligMottakerDto.Builder()
-                .medDokumentNavn("Kopi til " + orgDokument.getNavn())
-                .medMottakerNavn(orgDokument.getNavn())
-                .medRolle(avklartMottaker.getRolle())
-                .medOrgnr(orgDokument.getOrgnummer())
-                .build());
+
+            muligMottakerDtos.add(switch (fastMottaker) {
+                case BRITISKE_TRYGDEMYNDIGHETER -> new MuligMottakerDto.Builder()
+                    .medDokumentNavn("Attest NO/UK 1")
+                    .medMottakerNavn(orgDokument.getNavn())
+                    .medRolle(avklartMottaker.getRolle())
+                    .medOrgnr(orgDokument.getOrgnummer())
+                    .build();
+                default -> new MuligMottakerDto.Builder()
+                    .medDokumentNavn("Kopi til " + orgDokument.getNavn())
+                    .medMottakerNavn(orgDokument.getNavn())
+                    .medRolle(avklartMottaker.getRolle())
+                    .medOrgnr(orgDokument.getOrgnummer())
+                    .build();
+            });
+
         }
         return muligMottakerDtos;
     }
@@ -242,7 +252,7 @@ public class BrevbestillingService {
             return poststed;
         }
         return StringUtils.isEmpty(poststed) ? kodeverkService.dekod(FellesKodeverk.POSTNUMMER,
-                                                                     persondata.hentGjeldendePostadresse().postnr()) : poststed;
+            persondata.hentGjeldendePostadresse().postnr()) : poststed;
     }
 
     private Persondata hentPersondata(Behandling behandling) {
