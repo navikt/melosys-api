@@ -10,7 +10,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 @Component
-@Profile("local | local-mock")
+@Profile("local | local-mock | test")
 public class LocalOppstart implements Oppstart, EnvironmentAware {
 
     private static final Logger log = LoggerFactory.getLogger(LocalOppstart.class);
