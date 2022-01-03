@@ -10,7 +10,12 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
 public final class ArbeidsstedKontroller {
-    private static final String[] BYER_FRA_SVALBARD = {"Ny-Ålesund", "Svalbard", "Sveagruva", "Hopen", "Bjørnøya", "Spitsbergen", "Longyearbyen"};
+    private static final String[] BYER_FRA_SVALBARD = {"Ny-Ålesund", "Ny-Alesund", "Svalbard", "Sveagruva", "Hopen",
+        "Bjørnøya", "Bjornoya", "Spitsbergen", "Longyearbyen"};
+
+    private static final Predicate<Arbeidssted> ARBEIDSSTED_SVALBARD_JAN_MAIEN =
+        arbeidssted -> StringUtils.equals(arbeidssted.adresse.land, Landkoder.SJ.getKode())
+            || containsAnyIgnoreCase(arbeidssted.adresse.by, BYER_FRA_SVALBARD);
 
     private ArbeidsstedKontroller() {
     }
@@ -20,11 +25,8 @@ public final class ArbeidsstedKontroller {
     }
 
     public static boolean arbeidstedSvalbardOgJanMayen(SedDokument sedDokument) {
-        return sedDokument.getArbeidssteder().stream().anyMatch(ARBEIDSSTED_SJ);
+        return sedDokument.getArbeidssteder().stream().anyMatch(ARBEIDSSTED_SVALBARD_JAN_MAIEN);
     }
-
-    private static Predicate<Arbeidssted> ARBEIDSSTED_SJ = arbeidssted -> StringUtils.equals(arbeidssted.adresse.land, Landkoder.SJ.getKode())
-        || containsAnyIgnoreCase(arbeidssted.adresse.by, BYER_FRA_SVALBARD);
 
     private static boolean containsAnyIgnoreCase(final CharSequence cs, final CharSequence... searchCharSequences) {
         if (StringUtils.isEmpty(cs) || ArrayUtils.isEmpty(searchCharSequences)) {
