@@ -2,7 +2,7 @@ package no.nav.melosys.tjenester.gui;
 
 public enum BrevmalFeltKode {
 
-    BREV_TITTEL("Brevtittel"),
+    BREV_TITTEL("Tittel"),
     STANDARDTEKST_KONTAKTINFORMASJON("Legg til standardtekst med kontaktinformasjon nederst i brevet"),
     FRITEKST("Tekst til brev"),
     INNLEDNING_FRITEKST("Innledningstekst"),
