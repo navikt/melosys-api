@@ -266,7 +266,7 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
         ResponseEntity<Void> resultat = instans.avsluttSakSomBortfalt(saksnummer);
 
         assertThat(resultat.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
-        verify(fagsakService).avsluttSakSomBortfalt(fagsak);
+        verify(fagsakService).henleggSomBortfalt(fagsak);
     }
 
     @Test

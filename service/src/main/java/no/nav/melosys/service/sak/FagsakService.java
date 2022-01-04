@@ -190,7 +190,7 @@ public class FagsakService {
     }
 
     @Transactional
-    public void avsluttSakSomBortfalt(Fagsak fagsak) {
+    public void henleggSomBortfalt(Fagsak fagsak) {
         fagsak.getBehandlinger().forEach(behandling -> behandlingsresultatService.oppdaterBehandlingsresultattype(behandling.getId(), Behandlingsresultattyper.HENLEGGELSE));
 
         fagsak.getBehandlinger().forEach(behandling -> {

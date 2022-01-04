@@ -147,7 +147,7 @@ class FagsakServiceTest {
         andreBehandling.setId(2L);
         andreBehandling.setStatus(Behandlingsstatus.ANMODNING_UNNTAK_SENDT);
         fagsak.setBehandlinger(Arrays.asList(førsteBehandling, andreBehandling));
-        fagsakService.avsluttSakSomBortfalt(fagsak);
+        fagsakService.henleggSomBortfalt(fagsak);
 
         verify(fagsakRepo).save(fagsak);
         verify(behandlingsresultatService).oppdaterBehandlingsresultattype(1L, Behandlingsresultattyper.HENLEGGELSE);

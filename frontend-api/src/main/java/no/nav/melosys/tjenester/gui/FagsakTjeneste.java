@@ -150,7 +150,7 @@ public class FagsakTjeneste {
         Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
         aksesskontroll.autoriserSakstilgang(fagsak);
 
-        fagsakService.avsluttSakSomBortfalt(fagsak);
+        fagsakService.henleggSomBortfalt(fagsak);
         return ResponseEntity.noContent().build();
     }
 
