@@ -16,14 +16,17 @@ class ArbeidsstedKontrollerTest {
     void representantIUtlandetMangler_ok_false() {
         assertThat(ArbeidsstedKontroller.representantIUtlandetMangler(lagRepresentantIUtlandet("RepresentantNavn"))).isFalse();
     }
+
     @Test
     void representantIUtlandetMangler_finnesIkke_true() {
         assertThat(ArbeidsstedKontroller.representantIUtlandetMangler(null)).isTrue();
     }
+
     @Test
     void representantIUtlandetMangler_harIkkeNavn_true() {
         assertThat(ArbeidsstedKontroller.representantIUtlandetMangler(lagRepresentantIUtlandet(null))).isTrue();
     }
+
     @Test
     void arbeidstedSvalbardOgJanMayen_landErSJ_true() {
         assertThat(ArbeidsstedKontroller.arbeidstedSvalbardOgJanMayen(lagSedDokument("SJ", "by"))).isTrue();
@@ -36,7 +39,12 @@ class ArbeidsstedKontrollerTest {
 
     @Test
     void arbeidstedSvalbardOgJanMayen_byFraSvalbard_true() {
-        assertThat(ArbeidsstedKontroller.arbeidstedSvalbardOgJanMayen(lagSedDokument("JS", "Et sted, nær Ny-Ålesund"))).isTrue();
+        assertThat(ArbeidsstedKontroller.arbeidstedSvalbardOgJanMayen(lagSedDokument("NO", "Et sted, nær Ny-Ålesund"))).isTrue();
+    }
+
+    @Test
+    void arbeidstedSvalbardOgJanMayen_ikkeÅlesundMenAlesund_true() {
+        assertThat(ArbeidsstedKontroller.arbeidstedSvalbardOgJanMayen(lagSedDokument("NO", "Ny-Alesund"))).isTrue();
     }
 
     @Test
