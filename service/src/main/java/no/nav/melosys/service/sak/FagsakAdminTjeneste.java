@@ -13,10 +13,13 @@ import org.springframework.web.bind.annotation.*;
 public class FagsakAdminTjeneste implements AdminTjeneste {
     private final String apiKey;
     private final FagsakService fagsakService;
+    private final HenleggFagsakService henleggFagsakService;
 
-    public FagsakAdminTjeneste(@Value("${Melosys-admin.apikey}") String apiKey, FagsakService fagsakService) {
+    public FagsakAdminTjeneste(@Value("${Melosys-admin.apikey}") String apiKey, FagsakService fagsakService,
+                               HenleggFagsakService henleggFagsakService) {
         this.apiKey = apiKey;
         this.fagsakService = fagsakService;
+        this.henleggFagsakService = henleggFagsakService;
     }
 
     @PostMapping("/{saksnummer}/henlegg-bortfalt")
@@ -25,7 +28,7 @@ public class FagsakAdminTjeneste implements AdminTjeneste {
         validerApikey(apiKey);
 
         final Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
-        fagsakService.henleggSomBortfalt(fagsak);
+        henleggFagsakService.henleggSomBortfalt(fagsak);
         return ResponseEntity.ok().build();
     }
 

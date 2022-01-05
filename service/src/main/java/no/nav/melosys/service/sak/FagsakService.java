@@ -9,7 +9,6 @@ import io.micrometer.core.instrument.Metrics;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -187,20 +186,6 @@ public class FagsakService {
 
     private String hentNesteSaksnummer() {
         return FAGSAKID_PREFIX + fagsakRepository.hentNesteSekvensVerdi();
-    }
-
-    @Transactional
-    public void henleggSomBortfalt(Fagsak fagsak) {
-        fagsak.getBehandlinger().forEach(behandling -> behandlingsresultatService.oppdaterBehandlingsresultattype(behandling.getId(), Behandlingsresultattyper.HENLEGGELSE));
-
-        fagsak.getBehandlinger().forEach(behandling -> {
-            log.info("Setter behandling {} til {}", behandling.getId(), Behandlingsstatus.AVSLUTTET);
-            behandling.setStatus(Behandlingsstatus.AVSLUTTET);
-        });
-        log.info("Setter status på fagsak {} til {}", fagsak.getSaksnummer(), Saksstatuser.HENLAGT_BORTFALT);
-        fagsak.setStatus(Saksstatuser.HENLAGT_BORTFALT);
-        fagsakRepository.save(fagsak);
-        oppgaveService.ferdigstillOppgaveMedSaksnummer(fagsak.getSaksnummer());
     }
 
     //Brukes for å avslutte behandling (og dermed fagsak) fra frontend i manuelle sed-behandlinger
