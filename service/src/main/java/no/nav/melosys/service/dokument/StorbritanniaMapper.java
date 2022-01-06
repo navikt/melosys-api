@@ -9,6 +9,7 @@ import javax.transaction.Transactional;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.UtenlandskMyndighet;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
@@ -16,8 +17,8 @@ import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadTrygdeavtale;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.IdentType;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
-import no.nav.melosys.domain.brev.FastMottaker;
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
 import no.nav.melosys.domain.person.Persondata;
@@ -26,10 +27,12 @@ import no.nav.melosys.domain.person.familie.IkkeOmfattetFamilie;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.dokgen.dto.InnvilgelseOgAttestStorbritannia;
 import no.nav.melosys.integrasjon.dokgen.dto.felles.Innvilgelse;
+import no.nav.melosys.integrasjon.dokgen.dto.felles.Mottaker;
 import no.nav.melosys.integrasjon.dokgen.dto.felles.Person;
 import no.nav.melosys.integrasjon.dokgen.dto.storbritannia.attest.*;
 import no.nav.melosys.integrasjon.dokgen.dto.storbritannia.innvilgelse.*;
 import no.nav.melosys.service.LovvalgsperiodeService;
+import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.persondata.PersondataFasade;
@@ -43,26 +46,37 @@ public class StorbritanniaMapper {
     private final DokgenMapperDatahenter dokgenMapperDatahenter;
     private final PersondataFasade persondataFasade;
     private final LovvalgsperiodeService lovvalgsperiodeService;
+    private final UtenlandskMyndighetService utenlandskMyndighetService;
 
     public StorbritanniaMapper(AvklarteMedfolgendeFamilieService avklarteMedfølgendeFamilieService,
                                AvklarteVirksomheterService avklarteVirksomheterService,
                                DokgenMapperDatahenter dokgenMapperDatahenter,
                                PersondataFasade registerOppslagService,
-                               LovvalgsperiodeService lovvalgsperiodeService) {
+                               LovvalgsperiodeService lovvalgsperiodeService,
+                               UtenlandskMyndighetService utenlandskMyndighetService) {
         this.avklarteMedfølgendeFamilieService = avklarteMedfølgendeFamilieService;
         this.avklarteVirksomheterService = avklarteVirksomheterService;
         this.dokgenMapperDatahenter = dokgenMapperDatahenter;
         this.persondataFasade = registerOppslagService;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
+        this.utenlandskMyndighetService = utenlandskMyndighetService;
     }
 
     @Transactional
     public InnvilgelseOgAttestStorbritannia map(InnvilgelseBrevbestilling brevbestilling) {
-        // Splitt her ut ifra mottaker
-        return new InnvilgelseOgAttestStorbritannia.Builder(brevbestilling)
+        var innvilgelseOgAttestStorbritannia = new InnvilgelseOgAttestStorbritannia.Builder(brevbestilling)
             .innvilgelse(mapInnvilgelse(brevbestilling))
             .attest(mapAttest(brevbestilling))
             .build();
+
+        if (brevbestilling.isUtenlandskMyndighet()) {
+            UtenlandskMyndighet myndighet = utenlandskMyndighetService.hentUtenlandskMyndighet(Landkoder.GB);
+            innvilgelseOgAttestStorbritannia.setMottaker(
+                new Mottaker(myndighet.navn, myndighet.getAdresse().toList(), myndighet.postnummer, myndighet.poststed, myndighet.land, Aktoersroller.MYNDIGHET.getKode())
+            );
+        }
+
+        return innvilgelseOgAttestStorbritannia;
     }
 
     private InnvilgelseStorbritannia mapInnvilgelse(InnvilgelseBrevbestilling brevbestilling) {
@@ -276,15 +290,13 @@ public class StorbritanniaMapper {
     private boolean skalHaInnvilgelse(InnvilgelseBrevbestilling brevbestilling) {
         return switch (brevbestilling.getMottakertype()) {
             case BRUKER, ARBEIDSGIVER -> true;
-            case MYNDIGHET -> FastMottaker.OrgNr.SKATTEETATEN_ORGNR.getOrgnr().equals(brevbestilling.getOrg().getOrgnummer());
             default -> false;
         };
     }
 
     private boolean skalHaAttest(DokgenBrevbestilling brevbestilling) {
         return switch (brevbestilling.getMottakertype()) {
-            case BRUKER, ARBEIDSGIVER -> true;
-            case MYNDIGHET -> FastMottaker.OrgNr.BRITISKE_TRYGDEMYNDIGHETER_ORGNR.getOrgnr().equals(brevbestilling.getOrg().getOrgnummer());
+            case BRUKER, ARBEIDSGIVER, MYNDIGHET -> true;
             default -> false;
         };
     }

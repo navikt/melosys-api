@@ -35,6 +35,7 @@ import no.nav.melosys.integrasjon.dokgen.dto.storbritannia.attest.AttestStorbrit
 import no.nav.melosys.integrasjon.dokgen.dto.storbritannia.innvilgelse.Barn;
 import no.nav.melosys.integrasjon.dokgen.dto.storbritannia.innvilgelse.InnvilgelseStorbritannia;
 import no.nav.melosys.service.LovvalgsperiodeService;
+import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.dokument.brev.BrevDataTestUtils;
@@ -83,6 +84,8 @@ public class StorbritanniaMapperTest {
     @Mock
     private AvklarteVirksomheterService mockAvklarteVirksomheterService;
     @Mock
+    UtenlandskMyndighetService mockUtenlandskMyndighetService;
+    @Mock
     private DokgenMapperDatahenter mockDokgenMapperDatahenter;
     @Mock
     private PersondataFasade mockPersondataFasade;
@@ -98,7 +101,8 @@ public class StorbritanniaMapperTest {
             mockAvklarteVirksomheterService,
             mockDokgenMapperDatahenter,
             mockPersondataFasade,
-            mockLovvalgsperiodeService);
+            mockLovvalgsperiodeService,
+            mockUtenlandskMyndighetService);
     }
 
     @Test

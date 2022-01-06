@@ -2,6 +2,7 @@ package no.nav.melosys.domain.brev;
 
 import java.time.Instant;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import no.nav.melosys.domain.Behandling;
@@ -107,6 +108,12 @@ public class DokgenBrevbestilling extends Brevbestilling {
 
     public Aktoersroller getMottakertype() {
         return mottakertype;
+    }
+
+    @JsonIgnore
+    public boolean isUtenlandskMyndighet() {
+        // TODO: Mer detaljert sjekk for faktisk UTENLANDSK myndighet
+        return Aktoersroller.MYNDIGHET.equals(mottakertype);
     }
 
     public Builder toBuilder() {

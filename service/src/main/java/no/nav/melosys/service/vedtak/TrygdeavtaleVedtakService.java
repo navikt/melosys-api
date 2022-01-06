@@ -82,7 +82,7 @@ public class TrygdeavtaleVedtakService {
     }
 
     private BrevbestillingRequest lagStorbritanniaBrevbestilling(FattTrygdeavtaleVedtakRequest request) {
-        request.getKopiMottakere().add(new KopiMottaker(Aktoersroller.MYNDIGHET, FastMottaker.OrgNr.BRITISKE_TRYGDEMYNDIGHETER_ORGNR.getOrgnr(), null));
+        request.getKopiMottakere().add(new KopiMottaker(Aktoersroller.MYNDIGHET, null, null));
         return new BrevbestillingRequest.Builder()
             .medProduserbardokument(Produserbaredokumenter.STORBRITANNIA)
             .medMottaker(Aktoersroller.BRUKER)

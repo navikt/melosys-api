@@ -90,7 +90,6 @@ public class DokgenService {
         DokgenBrevbestilling.Builder<?> builder = brevbestilling.toBuilder();
 
         builder.medBehandling(behandling);
-        builder.medMottakertype(mottaker.getRolle());
 
         if (hasText(orgnr)) {
             settOrganisasjonsOpplysninger(behandling, orgnr, builder);
@@ -125,6 +124,7 @@ public class DokgenService {
         }
 
         for (Aktoer aktoer : mottakere) {
+            brevbestilling.medMottakertype(aktoer.getRolle());
             produserOgDistribuerBrev(behandling, aktoer, brevbestilling.build());
         }
 
@@ -134,6 +134,7 @@ public class DokgenService {
             aktoer.setOrgnr(kopiMottaker.getOrgnr());
             aktoer.setAktørId(kopiMottaker.getAktørId());
             brevbestilling.medBestillKopi(true);
+            brevbestilling.medMottakertype(kopiMottaker.getRolle());
             produserOgDistribuerBrev(behandling, aktoer, brevbestilling.build());
         }
     }
