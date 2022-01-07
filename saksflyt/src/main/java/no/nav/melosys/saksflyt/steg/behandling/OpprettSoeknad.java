@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.JFR_OPPRETT_SØKNAD;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.OPPRETT_SØKNAD;
 
 @Component
 public class OpprettSoeknad implements StegBehandler {
@@ -32,7 +32,7 @@ public class OpprettSoeknad implements StegBehandler {
 
     @Override
     public ProsessSteg inngangsSteg() {
-        return JFR_OPPRETT_SØKNAD;
+        return OPPRETT_SØKNAD;
     }
 
     @Override

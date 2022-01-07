@@ -392,7 +392,7 @@ class ProsessinstansServiceTest {
         prosessinstansService.opprettProsessinstansNySak(journalpostID, opprettSakDto, Behandlingstyper.SOEKNAD);
         verify(prosessinstansRepo).save(piCaptor.capture());
         Prosessinstans prosessinstans = piCaptor.getValue();
-        assertThat(prosessinstans.getType()).isEqualTo(ProsessType.OPPRETT_NY_SAK);
+        assertThat(prosessinstans.getType()).isEqualTo(ProsessType.OPPRETT_NY_SAK_EOS);
         assertThat(prosessinstans.getData(ProsessDataKey.SAKSTYPE, Sakstyper.class)).isNotNull();
         assertThat(prosessinstans.getData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.class)).isEqualTo(Behandlingstyper.SOEKNAD);
         assertThat(prosessinstans.getData(ProsessDataKey.BEHANDLINGSTEMA, Behandlingstema.class)).isEqualTo(Behandlingstema.IKKE_YRKESAKTIV);
@@ -412,7 +412,7 @@ class ProsessinstansServiceTest {
         prosessinstansService.opprettProsessinstansNySak(journalpostID, opprettSakDto, Behandlingstyper.SED);
         verify(prosessinstansRepo).save(piCaptor.capture());
         Prosessinstans prosessinstans = piCaptor.getValue();
-        assertThat(prosessinstans.getType()).isEqualTo(ProsessType.OPPRETT_NY_SAK);
+        assertThat(prosessinstans.getType()).isEqualTo(ProsessType.OPPRETT_NY_SAK_EOS);
         assertThat(prosessinstans.getData(ProsessDataKey.SAKSTYPE, Sakstyper.class)).isNotNull();
         assertThat(prosessinstans.getData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.class)).isEqualTo(Behandlingstyper.SED);
         assertThat(prosessinstans.getData(ProsessDataKey.BEHANDLINGSTEMA, Behandlingstema.class)).isEqualTo(Behandlingstema.TRYGDETID);
