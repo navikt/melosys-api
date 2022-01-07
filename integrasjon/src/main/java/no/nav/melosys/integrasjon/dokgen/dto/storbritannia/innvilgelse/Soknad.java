@@ -1,4 +1,4 @@
-package no.nav.melosys.integrasjon.dokgen.dto.innvilgelsestorbritannia;
+package no.nav.melosys.integrasjon.dokgen.dto.storbritannia.innvilgelse;
 
 import java.time.LocalDate;
 

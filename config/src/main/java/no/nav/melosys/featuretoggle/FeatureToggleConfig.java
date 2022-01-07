@@ -18,7 +18,9 @@ public class FeatureToggleConfig {
     public Unleash unleash(Environment environment) {
 
         if (!Collections.disjoint(List.of(environment.getActiveProfiles()), List.of("local", "local-mock"))) {
-            return new FakeUnleash();
+            var fakeUnleash = new FakeUnleash();
+            // fakeUnleash.enableAll();
+            return fakeUnleash;
         } else {
             var unleashConfig = UnleashConfig.builder()
                 .appName("melosys")

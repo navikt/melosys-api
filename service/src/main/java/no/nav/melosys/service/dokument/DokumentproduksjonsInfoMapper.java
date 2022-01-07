@@ -60,19 +60,14 @@ public class DokumentproduksjonsInfoMapper {
                     DokumentKategoriKode.VB.getKode(),
                     JournalforingsTittel.INNVILGELSE_FTRL_2_8.getTittel())
             )
-            .put(INNVILGELSE_UK,
-                new DokumentproduksjonsInfo("innvilgelse_uk",
+            .put(STORBRITANNIA,
+                new DokumentproduksjonsInfo("uk_innvilgelse_og_attest",
                     DokumentKategoriKode.VB.getKode(),
-                    JournalforingsTittel.INNVILGELSE_UK.getTittel())
-            )
-            .put(ATTEST_NO_UK_1,
-                new DokumentproduksjonsInfo("attest_no_uk_1",
-                    DokumentKategoriKode.VB.getKode(),
-                    JournalforingsTittel.ATTEST_NO_UK_1.getTittel()))
+                    JournalforingsTittel.STORBRITANNIA.getTittel()))
             .put(GENERELT_FRITEKSTBREV_BRUKER,
                 new DokumentproduksjonsInfo("fritekstbrev",
-                DokumentKategoriKode.IB.getKode(),
-                null))
+                    DokumentKategoriKode.IB.getKode(),
+                    null))
             .put(GENERELT_FRITEKSTBREV_ARBEIDSGIVER,
                 new DokumentproduksjonsInfo("fritekstbrev",
                     DokumentKategoriKode.IB.getKode(),
@@ -118,8 +113,7 @@ public class DokumentproduksjonsInfoMapper {
         FORVALTNINGSMELDING("Melding om forventet saksbehandlingstid"),
         MANGELBREV("Melding om manglende opplysninger"),
         INNVILGELSE_FTRL_2_8("Vedtak om frivillig medlemskap"),
-        ATTEST_NO_UK_1("Attest for utsendt arbeidstaker fra Norge til Storbritannia"),
-        INNVILGELSE_UK("Vedtak om medlemskap");
+        STORBRITANNIA("Vedtak om medlemskap, Attest for utsendt arbeidstaker");
 
         private final String tittel;
 

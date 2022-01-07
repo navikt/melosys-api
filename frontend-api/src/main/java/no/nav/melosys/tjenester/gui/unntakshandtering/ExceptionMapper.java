@@ -19,7 +19,7 @@ public class ExceptionMapper {
 
     private static final Logger log = LoggerFactory.getLogger(ExceptionMapper.class);
 
-    private static final String FEIL_OPPSTÅTT = "Feil oppstått: ";
+    private static final String API_KALL_FEILET = "API kall feilet: ";
 
     @ExceptionHandler(value = IkkeFunnetException.class)
     public ResponseEntity<Map<String, Object>> håndter(IkkeFunnetException e) {
@@ -55,9 +55,9 @@ public class ExceptionMapper {
                                                         Level loggnivå,
                                                         Collection begrunnelser) {
         if (loggnivå.equals(Level.ERROR)) {
-            log.error(FEIL_OPPSTÅTT, e);
+            log.error(API_KALL_FEILET + e.getMessage(), e);
         } else if (loggnivå.equals(Level.WARN)) {
-            log.warn(FEIL_OPPSTÅTT, e);
+            log.warn(API_KALL_FEILET + e.getMessage(), e);
         }
 
         Map<String, Object> entity = new HashMap<>();
