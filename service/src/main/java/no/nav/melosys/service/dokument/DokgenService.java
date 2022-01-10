@@ -173,7 +173,6 @@ public class DokgenService {
 
     private void settUtenlandskMyndighetOpplysninger(String institusjonskode,
                                                      DokgenBrevbestilling.Builder<?> brevbestilling) {
-//        var landkode = Landkoder.valueOf(Arrays.stream(institusjonskode.split(":")).findFirst().orElse(null));
         var landkode = Landkoder.valueOf(institusjonskode);
         var utenlandskMyndighet = utenlandskMyndighetService.hentUtenlandskMyndighet(landkode);
         brevbestilling

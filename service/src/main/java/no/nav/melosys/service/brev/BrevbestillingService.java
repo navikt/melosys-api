@@ -163,12 +163,12 @@ public class BrevbestillingService {
 
     private MuligMottakerDto lagKopiMottakerForMyndighet(Produserbaredokumenter produserbaredokumenter, Behandling behandling, Aktoersroller kopiMottaker) {
         Aktoer avklartKopi = brevmottakerService.avklarMottaker(produserbaredokumenter, Mottaker.av(kopiMottaker), behandling);
-        var ikode = Arrays.stream(avklartKopi.getInstitusjonId().split(":")).findFirst().orElse(null);
+        String myndighetLandkode = Arrays.stream(avklartKopi.getInstitusjonId().split(":")).findFirst().orElse(null);
         return new MuligMottakerDto.Builder()
             .medDokumentNavn("Kopi til utenlandsk trygdemyndighet")
             .medMottakerNavn("Utenlandsk trygdemyndighet")
             .medRolle(avklartKopi.getRolle())
-            .medInstitusjonskode(ikode)
+            .medInstitusjonskode(myndighetLandkode)
             .build();
     }
 
