@@ -23,8 +23,8 @@ import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Art12_1_begrunnelser;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Art16_1_anmodning;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_987_2009;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
+import no.nav.melosys.service.SaksbehandlingDataFactory;
 import no.nav.melosys.service.dokument.brev.BrevDataAnmodningUnntak;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -85,9 +85,9 @@ class AnmodningUnntakMapperTest {
     }
 
     @Test
-    void mapFag_unntakFraBestemmelseArtikkel13_forventIkkeNull() {
+    void mapFag_direkteArt16_forventIkkeNull() {
         Behandling behandling = lagBehandling();
-        Behandlingsresultat behandlingsresultat = lagBehandlingsresultat();
+        Behandlingsresultat behandlingsresultat = SaksbehandlingDataFactory.lagBehandlingsresultat();
         BrevDataAnmodningUnntak brevData = lagBrevData(behandlingsresultat, Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B3);
 
         Fag fag = mapper.mapFag(behandling, behandlingsresultat, brevData);
@@ -95,20 +95,10 @@ class AnmodningUnntakMapperTest {
     }
 
     @Test
-    void mapFag_unntakFraBestemmelseIkkeArtikkel13_forventNull() {
+    void mapFag_ikkeDirekteArt16_forventNull() {
         Behandling behandling = lagBehandling();
         Behandlingsresultat behandlingsresultat = lagBehandlingsresultat();
-        BrevDataAnmodningUnntak brevData = lagBrevData(behandlingsresultat, Lovvalgbestemmelser_987_2009.FO_987_2009_ART14_11);
-
-        Fag fag = mapper.mapFag(behandling, behandlingsresultat, brevData);
-        assertThat(fag.getBestemmelseDetSoekesUnntakFra()).isNull();
-    }
-
-    @Test
-    void mapFag_unntakFraBestemmelseNull_forventNull() {
-        Behandling behandling = lagBehandling();
-        Behandlingsresultat behandlingsresultat = lagBehandlingsresultat();
-        BrevDataAnmodningUnntak brevData = lagBrevData(behandlingsresultat);
+        BrevDataAnmodningUnntak brevData = lagBrevData(behandlingsresultat, Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B3);
 
         Fag fag = mapper.mapFag(behandling, behandlingsresultat, brevData);
         assertThat(fag.getBestemmelseDetSoekesUnntakFra()).isNull();
@@ -189,6 +179,7 @@ class AnmodningUnntakMapperTest {
 
         Vilkaarsresultat vilkaarsresultat12_1 = new Vilkaarsresultat();
         vilkaarsresultat12_1.setVilkaar(Vilkaar.FO_883_2004_ART12_1);
+        vilkaarsresultat12_1.setOppfylt(false);
         VilkaarBegrunnelse begrunnelse12_1 = new VilkaarBegrunnelse();
         begrunnelse12_1.setKode(Art12_1_begrunnelser.IKKE_VESENTLIG_VIRKSOMHET.getKode());
         vilkaarsresultat12_1.setBegrunnelser(Collections.singleton(begrunnelse12_1));
@@ -196,6 +187,7 @@ class AnmodningUnntakMapperTest {
 
         Vilkaarsresultat vilkaarsresultat12_2 = new Vilkaarsresultat();
         vilkaarsresultat12_2.setVilkaar(Vilkaar.FO_883_2004_ART12_2);
+        vilkaarsresultat12_2.setOppfylt(true);
         resultat.getVilkaarsresultater().add(vilkaarsresultat12_2);
         return resultat;
     }
