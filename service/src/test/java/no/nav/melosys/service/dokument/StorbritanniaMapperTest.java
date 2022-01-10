@@ -254,7 +254,6 @@ public class StorbritanniaMapperTest {
                     .medBehandling(lagTrygdeavtaleBehandling())
                     .medPersonDokument(lagPersonDokument())
                     .medVedtaksdato(VEDTAKS_DATO_INSTANT)
-                    .medMottakertype(Aktoersroller.BRUKER)
                     .build()
                 )
             ).withMessageContaining("Det kan bare være en lovvalgsperiode for trygdeavtale. Fant 0");
@@ -297,7 +296,6 @@ public class StorbritanniaMapperTest {
             .medBarnFritekst("barnFritekst")
             .medEktefelleFritekst("ektefelleFritekst")
             .medVedtaksdato(VEDTAKS_DATO_INSTANT)
-            .medMottakertype(Aktoersroller.BRUKER)
             .build();
     }
 

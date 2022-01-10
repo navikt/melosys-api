@@ -36,7 +36,6 @@ public class DokgenBrevbestilling extends Brevbestilling {
     private Instant vedtaksdato;
     private String saksbehandlerNavn;
     private Persondata persondokument;
-    private Aktoersroller mottakertype;
 
     public DokgenBrevbestilling() {
         super();
@@ -58,7 +57,6 @@ public class DokgenBrevbestilling extends Brevbestilling {
         this.vedtaksdato = builder.vedtaksdato;
         this.saksbehandlerNavn = builder.saksbehandlerNavn;
         this.persondokument = builder.persondokument;
-        this.mottakertype = builder.mottakertype;
     }
 
     public OrganisasjonDokument getOrg() {
@@ -113,10 +111,6 @@ public class DokgenBrevbestilling extends Brevbestilling {
         return persondokument;
     }
 
-    public Aktoersroller getMottakertype() {
-        return mottakertype;
-    }
-
     public Builder toBuilder() {
         return new Builder(this);
     }
@@ -138,7 +132,6 @@ public class DokgenBrevbestilling extends Brevbestilling {
         private Instant vedtaksdato;
         private String saksbehandlerNavn;
         private Persondata persondokument;
-        private Aktoersroller mottakertype;
 
         public Builder() {
         }
@@ -160,7 +153,6 @@ public class DokgenBrevbestilling extends Brevbestilling {
             this.vedtaksdato = brevbestilling.vedtaksdato;
             this.saksbehandlerNavn = brevbestilling.saksbehandlerNavn;
             this.persondokument = brevbestilling.persondokument;
-            this.mottakertype = brevbestilling.mottakertype;
         }
 
         public T medProduserbartdokument(Produserbaredokumenter produserbartdokument) {
@@ -240,11 +232,6 @@ public class DokgenBrevbestilling extends Brevbestilling {
 
         public T medPersonDokument(Persondata persondata) {
             this.persondokument = persondata;
-            return (T) this;
-        }
-
-        public T medMottakertype(Aktoersroller mottakertype) {
-            this.mottakertype = mottakertype;
             return (T) this;
         }
 

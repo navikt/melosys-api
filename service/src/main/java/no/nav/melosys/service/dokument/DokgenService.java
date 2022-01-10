@@ -85,7 +85,6 @@ public class DokgenService {
             .medProduserbartdokument(produserbartdokument)
             .medBehandlingId(behandlingId)
             .medSaksbehandlerNavn(hentSaksbehandlerNavn(brevbestillingRequest.getBestillersId()))
-            .medMottakertype(brevbestillingRequest.getMottaker())
             .medBestillUtkast(true);
 
         return produserBrev(mottaker, brevbestilling.build());
@@ -136,7 +135,6 @@ public class DokgenService {
         }
 
         for (Aktoer aktoer : mottakere) {
-            brevbestilling.medMottakertype(aktoer.getRolle());
             produserOgDistribuerBrev(behandling, aktoer, brevbestilling.build());
         }
 
@@ -147,7 +145,6 @@ public class DokgenService {
             aktoer.setAktørId(kopiMottaker.getAktørId());
             aktoer.setInstitusjonId(kopiMottaker.getInstitusjonskode());
             brevbestilling.medBestillKopi(true);
-            brevbestilling.medMottakertype(kopiMottaker.getRolle());
             produserOgDistribuerBrev(behandling, aktoer, brevbestilling.build());
         }
     }

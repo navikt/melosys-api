@@ -275,18 +275,12 @@ public class StorbritanniaMapper {
     }
 
     private boolean skalHaInnvilgelse(InnvilgelseBrevbestilling brevbestilling) {
-        return switch (brevbestilling.getMottakertype()) {
-            case BRUKER, ARBEIDSGIVER -> true;
-            case MYNDIGHET -> brevbestilling.getOrg() != null && brevbestilling.getOrg().getOrgnummer().equals(FastMottaker.OrgNr.SKATTEETATEN_ORGNR.getOrgnr());
-            default -> false;
-        };
+        // Utenlandkse trygdemyndigheter skal ikke ha innvilgelse
+        return brevbestilling.getUtenlandskMyndighet() == null;
     }
 
     private boolean skalHaAttest(DokgenBrevbestilling brevbestilling) {
-        return switch (brevbestilling.getMottakertype()) {
-            case BRUKER, ARBEIDSGIVER -> true;
-            case MYNDIGHET -> brevbestilling.getUtenlandskMyndighet() != null && brevbestilling.getUtenlandskMyndighet().landkode.equals(Landkoder.GB);
-            default -> false;
-        };
+        // Skatteetaten skal ikke ha attest
+        return !(brevbestilling.getOrg() != null && brevbestilling.getOrg().getOrgnummer().equals(FastMottaker.OrgNr.SKATTEETATEN_ORGNR.getOrgnr()));
     }
 }
