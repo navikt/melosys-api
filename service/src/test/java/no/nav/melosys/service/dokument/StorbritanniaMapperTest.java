@@ -84,8 +84,6 @@ public class StorbritanniaMapperTest {
     @Mock
     private AvklarteVirksomheterService mockAvklarteVirksomheterService;
     @Mock
-    UtenlandskMyndighetService mockUtenlandskMyndighetService;
-    @Mock
     private DokgenMapperDatahenter mockDokgenMapperDatahenter;
     @Mock
     private PersondataFasade mockPersondataFasade;
@@ -101,8 +99,7 @@ public class StorbritanniaMapperTest {
             mockAvklarteVirksomheterService,
             mockDokgenMapperDatahenter,
             mockPersondataFasade,
-            mockLovvalgsperiodeService,
-            mockUtenlandskMyndighetService);
+            mockLovvalgsperiodeService);
     }
 
     @Test

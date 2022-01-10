@@ -287,6 +287,8 @@ public class ProsessinstansService {
         }
         if (hasText(mottaker.getOrgnr())) {
             prosessinstans.setData(ORGNR, mottaker.getOrgnr());
+        } if (hasText(mottaker.getInstitusjonId())) {
+            prosessinstans.setData(UTENLANDSK_MYNDIGHET, mottaker.getInstitusjonId());
         }
         prosessinstans.setBehandling(behandling);
         lagre(prosessinstans);

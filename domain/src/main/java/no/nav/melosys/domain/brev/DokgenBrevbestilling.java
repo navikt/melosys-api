@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Kontaktopplysning;
+import no.nav.melosys.domain.UtenlandskMyndighet;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
@@ -24,6 +25,7 @@ import no.nav.melosys.domain.person.Persondata;
 public class DokgenBrevbestilling extends Brevbestilling {
     private OrganisasjonDokument org;
     private Kontaktopplysning kontaktopplysning;
+    private UtenlandskMyndighet utenlandskMyndighet;
     private String kontaktpersonNavn;
     private Instant forsendelseMottatt;
     private String avsenderLand;
@@ -45,6 +47,7 @@ public class DokgenBrevbestilling extends Brevbestilling {
         super(builder.produserbartdokument, builder.behandling, builder.avsenderNavn);
         this.org = builder.org;
         this.kontaktopplysning = builder.kontaktopplysning;
+        this.utenlandskMyndighet = builder.utenlandskMyndighet;
         this.kontaktpersonNavn = builder.kontaktpersonNavn;
         this.forsendelseMottatt = builder.forsendelseMottatt;
         this.avsendertype = builder.avsendertype;
@@ -64,6 +67,10 @@ public class DokgenBrevbestilling extends Brevbestilling {
 
     public Kontaktopplysning getKontaktopplysning() {
         return kontaktopplysning;
+    }
+
+    public UtenlandskMyndighet getUtenlandskMyndighet() {
+        return utenlandskMyndighet;
     }
 
     public String getKontaktpersonNavn() {
@@ -110,12 +117,6 @@ public class DokgenBrevbestilling extends Brevbestilling {
         return mottakertype;
     }
 
-    @JsonIgnore
-    public boolean isUtenlandskMyndighet() {
-        // TODO: Mer detaljert sjekk for faktisk UTENLANDSK myndighet
-        return Aktoersroller.MYNDIGHET.equals(mottakertype);
-    }
-
     public Builder toBuilder() {
         return new Builder(this);
     }
@@ -125,6 +126,7 @@ public class DokgenBrevbestilling extends Brevbestilling {
         private Behandling behandling;
         private OrganisasjonDokument org;
         private Kontaktopplysning kontaktopplysning;
+        private UtenlandskMyndighet utenlandskMyndighet;
         private String kontaktpersonNavn;
         private Instant forsendelseMottatt;
         private String avsenderNavn;
@@ -146,6 +148,7 @@ public class DokgenBrevbestilling extends Brevbestilling {
             this.behandling = brevbestilling.behandling;
             this.org = brevbestilling.org;
             this.kontaktopplysning = brevbestilling.kontaktopplysning;
+            this.utenlandskMyndighet = brevbestilling.utenlandskMyndighet;
             this.kontaktpersonNavn = brevbestilling.kontaktpersonNavn;
             this.forsendelseMottatt = brevbestilling.forsendelseMottatt;
             this.avsenderNavn = brevbestilling.avsenderNavn;
@@ -177,6 +180,11 @@ public class DokgenBrevbestilling extends Brevbestilling {
 
         public T medKontaktopplysning(Kontaktopplysning kontaktopplysning) {
             this.kontaktopplysning = kontaktopplysning;
+            return (T) this;
+        }
+
+        public T medUtenlandskMyndighet(UtenlandskMyndighet utenlandskMyndighet) {
+            this.utenlandskMyndighet = utenlandskMyndighet;
             return (T) this;
         }
 

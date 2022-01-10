@@ -10,7 +10,7 @@ public class InnvilgelseOgAttestStorbritannia extends DokgenDto {
     private final AttestStorbritannia attest;
 
     public InnvilgelseOgAttestStorbritannia(Builder builder) {
-        super(builder.brevbestilling);
+        super(builder.brevbestilling, builder.brevbestilling.getMottakertype());
         innvilgelse = builder.innvilgelse;
         attest = builder.attest;
     }

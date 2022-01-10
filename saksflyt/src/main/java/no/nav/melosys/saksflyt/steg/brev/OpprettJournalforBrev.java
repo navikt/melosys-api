@@ -73,18 +73,19 @@ public class OpprettJournalforBrev implements StegBehandler {
         String aktørId = prosessinstans.getData(AKTØR_ID);
         Aktoersroller mottakerrolle = prosessinstans.getData(MOTTAKER, Aktoersroller.class, null);
         String orgnr = prosessinstans.getData(ORGNR, String.class, null);
+        String utenlandskMyndighet = prosessinstans.getData(UTENLANDSK_MYNDIGHET, String.class, null);
         String fnr = null;
         String sammensattNavn = null;
 
-        if (isEmpty(aktørId) && isEmpty(orgnr) && !brevbestilling.isUtenlandskMyndighet()) {
+        if (isEmpty(aktørId) && isEmpty(orgnr) && isEmpty(utenlandskMyndighet)) {
             throw new FunksjonellException("Mangler mottaker");
         }
 
         Aktoer mottaker = new Aktoer();
         mottaker.setRolle(mottakerrolle);
 
-        if (brevbestilling.isUtenlandskMyndighet()) {
-            // Trenger ikke orgnr eller aktørId om Myndighet. Vil utlede nødvendig info senere
+        if (!isEmpty(utenlandskMyndighet)) {
+            mottaker.setInstitusjonId(utenlandskMyndighet);
         }
         else if (isEmpty(orgnr)) {
             mottaker.setAktørId(aktørId);
