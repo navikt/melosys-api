@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.JFR_OPPRETT_SØKNAD;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.OPPRETT_SØKNAD;
 
 @Component
 public class OpprettSoeknad implements StegBehandler {
@@ -32,7 +32,7 @@ public class OpprettSoeknad implements StegBehandler {
 
     @Override
     public ProsessSteg inngangsSteg() {
-        return JFR_OPPRETT_SØKNAD;
+        return OPPRETT_SØKNAD;
     }
 
     @Override
@@ -40,14 +40,14 @@ public class OpprettSoeknad implements StegBehandler {
         long behandlingID = prosessinstans.getBehandling().getId();
 
         if (prosessinstans.getBehandling().erBehandlingAvSøknad()) {
-
-            Periode periode = prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, Periode.class);
-            Soeknad soeknad = new Soeknad();
-            soeknad.periode = periode;
-            soeknad.soeknadsland = prosessinstans.getData(ProsessDataKey.SØKNADSLAND, new TypeReference<>() {});
             Sakstyper sakstype = prosessinstans.getBehandling().getFagsak().getType();
             switch (sakstype) {
-                case EU_EOS -> behandlingsgrunnlagService.opprettSøknadYrkesaktiveEøs(behandlingID, soeknad);
+                case EU_EOS -> {
+                    Soeknad soeknad = new Soeknad();
+                    soeknad.periode = prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, Periode.class);
+                    soeknad.soeknadsland = prosessinstans.getData(ProsessDataKey.SØKNADSLAND, new TypeReference<>() {});
+                    behandlingsgrunnlagService.opprettSøknadYrkesaktiveEøs(behandlingID, soeknad);
+                }
                 case FTRL -> behandlingsgrunnlagService.opprettSøknadFolketrygden(behandlingID, new SoeknadFtrl());
                 case TRYGDEAVTALE -> behandlingsgrunnlagService.opprettSøknadTrygdeavtale(behandlingID, new SoeknadTrygdeavtale());
             }
