@@ -281,6 +281,6 @@ public class StorbritanniaMapper {
 
     private boolean skalHaAttest(DokgenBrevbestilling brevbestilling) {
         // Skatteetaten skal ikke ha attest
-        return !(brevbestilling.getOrg() != null && brevbestilling.getOrg().getOrgnummer().equals(FastMottaker.OrgNr.SKATTEETATEN_ORGNR.getOrgnr()));
+        return !(brevbestilling.getOrg() != null && FastMottaker.OrgNr.SKATTEETATEN_ORGNR.getOrgnr().equals(brevbestilling.getOrg().getOrgnummer()));
     }
 }
