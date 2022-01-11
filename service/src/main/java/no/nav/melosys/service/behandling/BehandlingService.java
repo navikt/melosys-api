@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import java.time.Period;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;
@@ -147,7 +148,7 @@ public class BehandlingService {
     private Collection<Behandlingsstatus> hentMuligeStatuser(Behandling behandling) {
         if (behandling.erInaktiv()) return Collections.emptyList();
 
-        List<Behandlingsstatus> muligeStatuser = List.of(AVVENT_DOK_PART, AVVENT_DOK_UTL, UNDER_BEHANDLING, AVVENT_FAGLIG_AVKLARING).stream()
+        List<Behandlingsstatus> muligeStatuser = Stream.of(AVVENT_DOK_PART, AVVENT_DOK_UTL, UNDER_BEHANDLING, AVVENT_FAGLIG_AVKLARING)
             .filter(status -> status != behandling.getStatus())
             .collect(Collectors.toList());
 
@@ -266,14 +267,33 @@ public class BehandlingService {
 
     public void avsluttBehandling(long behandlingId) {
         Behandling behandling = hentBehandlingUtenSaksopplysninger(behandlingId);
+
+        avsluttBehandling(behandling);
+    }
+
+    private void avsluttBehandling(Behandling behandling) {
         if (behandling.erAvsluttet()) {
-            throw new FunksjonellException("Behandling " + behandlingId + " er allerede avsluttet!");
+            throw new FunksjonellException("Behandling " + behandling.getId() + " er allerede avsluttet!");
         }
 
         behandling.setStatus(Behandlingsstatus.AVSLUTTET);
         behandlingRepository.save(behandling);
         behandlingerAvsluttet.increment();
         applicationEventPublisher.publishEvent(new BehandlingEndretStatusEvent(AVSLUTTET, behandling));
+    }
+
+    public void avsluttNyVurdering(long behandlingId, Behandlingsresultattyper nyBehandlingsResultatType) {
+        Behandling behandling = hentBehandlingUtenSaksopplysninger(behandlingId);
+        if (!behandling.erNyVurdering()) {
+            throw new FunksjonellException("Behandling " + behandling.getId() + " er ikke typen NY_VURDERING!");
+        }
+        avsluttBehandling(behandling);
+
+        behandlingsresultatService.oppdaterBehandlingsresultattype(behandling.getId(),nyBehandlingsResultatType);
+    }
+
+    public void ferdigbehandleNyVurdering(long behandlingId) {
+        avsluttNyVurdering(behandlingId, Behandlingsresultattyper.AVSLUTTET_UTEN_ENDRING);
     }
 
     public Behandling hentBehandling(long behandlingId) {

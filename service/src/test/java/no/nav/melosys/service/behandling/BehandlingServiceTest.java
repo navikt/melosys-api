@@ -7,6 +7,7 @@ import java.util.*;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -65,7 +66,7 @@ class BehandlingServiceTest {
     }
 
     @Test
-    void hentBehandling()  {
+    void hentBehandling() {
         when(behandlingRepo.findWithSaksopplysningerById(BEHANDLING_ID)).thenReturn(null);
 
         assertThatExceptionOfType(IkkeFunnetException.class)
@@ -294,6 +295,92 @@ class BehandlingServiceTest {
         BehandlingEndretStatusEvent behandlingEndretStatusEvent = behandlingEndretStatusEventCaptor.getValue();
         assertThat(behandlingEndretStatusEvent.getBehandlingID()).isEqualTo(BEHANDLING_ID);
         assertThat(behandlingEndretStatusEvent.getBehandlingsstatus()).isEqualTo(AVSLUTTET);
+    }
+
+    @Test
+    void avsluttBehandling_kasterFunksjonellException_dersomBehandlingErAvsluttet() {
+        Behandling behandling = new Behandling();
+        behandling.setId(BEHANDLING_ID);
+        behandling.setStatus(AVSLUTTET);
+        when(behandlingRepo.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> behandlingService.avsluttBehandling(BEHANDLING_ID))
+            .withMessageContaining("Behandling " + BEHANDLING_ID + " er allerede avsluttet!");
+    }
+
+    @Test
+    void avsluttNyVurdering_avslutterBehandlingOgOppdatererBehandlingsresultattype() {
+        Behandling behandling = new Behandling();
+        behandling.setId(BEHANDLING_ID);
+        behandling.setType(Behandlingstyper.NY_VURDERING);
+        when(behandlingRepo.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
+
+        behandlingService.avsluttNyVurdering(BEHANDLING_ID, Behandlingsresultattyper.HENLEGGELSE_BORTFALT);
+
+        verify(behandlingRepo).save(behandlingCaptor.capture());
+        verify(applicationEventPublisher).publishEvent(behandlingEndretStatusEventCaptor.capture());
+        Behandling lagretBehandling = behandlingCaptor.getValue();
+        assertThat(lagretBehandling.getStatus()).isEqualTo(Behandlingsstatus.AVSLUTTET);
+        BehandlingEndretStatusEvent behandlingEndretStatusEvent = behandlingEndretStatusEventCaptor.getValue();
+        assertThat(behandlingEndretStatusEvent.getBehandlingID()).isEqualTo(BEHANDLING_ID);
+        assertThat(behandlingEndretStatusEvent.getBehandlingsstatus()).isEqualTo(AVSLUTTET);
+        verify(behandlingsresultatService).oppdaterBehandlingsresultattype(BEHANDLING_ID, Behandlingsresultattyper.HENLEGGELSE_BORTFALT);
+    }
+
+    @Test
+    void avsluttNyVurdering_oppdatererBehandlingsresultattype() {
+        Behandling behandling = new Behandling();
+        behandling.setId(BEHANDLING_ID);
+        behandling.setType(Behandlingstyper.NY_VURDERING);
+        when(behandlingRepo.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
+
+        behandlingService.avsluttNyVurdering(BEHANDLING_ID, Behandlingsresultattyper.AVSLUTTET_UTEN_ENDRING);
+
+    }
+
+    @Test
+    void ferdigbehandleNyVurdering_avslutterBehandlingOgSetterBehandlingsresultattypeRiktig() {
+        Behandling behandling = new Behandling();
+        behandling.setId(BEHANDLING_ID);
+        behandling.setType(Behandlingstyper.NY_VURDERING);
+        when(behandlingRepo.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
+
+        behandlingService.ferdigbehandleNyVurdering(BEHANDLING_ID);
+
+        verify(behandlingRepo).save(behandlingCaptor.capture());
+        verify(applicationEventPublisher).publishEvent(behandlingEndretStatusEventCaptor.capture());
+        Behandling lagretBehandling = behandlingCaptor.getValue();
+        assertThat(lagretBehandling.getStatus()).isEqualTo(Behandlingsstatus.AVSLUTTET);
+        BehandlingEndretStatusEvent behandlingEndretStatusEvent = behandlingEndretStatusEventCaptor.getValue();
+        assertThat(behandlingEndretStatusEvent.getBehandlingID()).isEqualTo(BEHANDLING_ID);
+        assertThat(behandlingEndretStatusEvent.getBehandlingsstatus()).isEqualTo(AVSLUTTET);
+        verify(behandlingsresultatService).oppdaterBehandlingsresultattype(BEHANDLING_ID, Behandlingsresultattyper.AVSLUTTET_UTEN_ENDRING);
+    }
+
+    @Test
+    void avsluttNyVurdering_kasterFunksjonellException_dersomBehandlingTypeIkkeErNyVurdering() {
+        Behandling behandling = new Behandling();
+        behandling.setId(BEHANDLING_ID);
+        behandling.setStatus(AVSLUTTET);
+        when(behandlingRepo.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> behandlingService.avsluttNyVurdering(BEHANDLING_ID, Behandlingsresultattyper.AVSLUTTET_UTEN_ENDRING))
+            .withMessageContaining("Behandling "+BEHANDLING_ID+" er ikke typen NY_VURDERING!");
+    }
+
+    @Test
+    void avsluttNyVurdering_kasterFunksjonellException_dersomBehandlingErAvsluttet() {
+        Behandling behandling = new Behandling();
+        behandling.setId(BEHANDLING_ID);
+        behandling.setStatus(AVSLUTTET);
+        behandling.setType(Behandlingstyper.NY_VURDERING);
+        when(behandlingRepo.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> behandlingService.avsluttNyVurdering(BEHANDLING_ID, Behandlingsresultattyper.HENLEGGELSE_BORTFALT))
+            .withMessageContaining("Behandling " + BEHANDLING_ID + " er allerede avsluttet!");
     }
 
     @Test
