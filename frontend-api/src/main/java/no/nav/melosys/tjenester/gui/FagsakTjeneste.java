@@ -40,7 +40,7 @@ import static no.nav.melosys.domain.util.BehandlingsgrunnlagUtils.hentSøknadsla
 @RestController
 @RequestMapping("/fagsaker")
 @Api(tags = {"fagsaker"})
-@Scope(value= WebApplicationContext.SCOPE_REQUEST)
+@Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class FagsakTjeneste {
     private static final Logger log = LoggerFactory.getLogger(FagsakTjeneste.class);
     private static final String UKJENT_SAMMENSATT_NAVN = "UKJENT";
@@ -126,7 +126,7 @@ public class FagsakTjeneste {
     @PostMapping("{saksnr}/henlegg-videresend")
     @ApiOperation(value = "Videresender søknad for en gitt behandling")
     public ResponseEntity<Void> videresend(@PathVariable("saksnr") String saksnummer,
-                                     @RequestBody VideresendDto videresendDto) {
+                                           @RequestBody VideresendDto videresendDto) {
         Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
         aksesskontroll.autoriserSakstilgang(fagsak);
 
@@ -168,7 +168,7 @@ public class FagsakTjeneste {
     @PostMapping("/{saksnummer}/utpek")
     @ApiOperation(value = "Utpeker lovvalgsland for gitt fagsak")
     public ResponseEntity<Void> utpekLovvalgsland(@PathVariable("saksnummer") String saksnummer,
-                                            @RequestBody UtpekDto utpekDto) {
+                                                  @RequestBody UtpekDto utpekDto) {
         Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
         aksesskontroll.autoriserSakstilgang(fagsak);
 

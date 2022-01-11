@@ -8,7 +8,9 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
@@ -23,8 +25,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static no.nav.melosys.service.SaksbehandlingDataFactory.lagFagsak;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class HenleggFagsakServiceTest {
@@ -37,6 +38,8 @@ class HenleggFagsakServiceTest {
     private FagsakService fagsakService;
     @Mock
     private BehandlingsresultatService behandlingsresultatService;
+    @Mock
+    private BehandlingService behandlingService;
 
     private HenleggFagsakService henleggFagsakService;
 
@@ -52,7 +55,7 @@ class HenleggFagsakServiceTest {
 
     @BeforeEach
     public void setup() {
-        henleggFagsakService = new HenleggFagsakService(fagsakService, behandlingsresultatService, prosessinstansService, oppgaveService);
+        henleggFagsakService = new HenleggFagsakService(fagsakService, behandlingsresultatService, prosessinstansService, oppgaveService, behandlingService);
 
         behandling.setId(behandlingID);
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
@@ -106,4 +109,23 @@ class HenleggFagsakServiceTest {
         assertThat(fagsak.getStatus()).isEqualTo(Saksstatuser.HENLAGT_BORTFALT);
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(saksnummer);
     }
+
+    @Test
+    void henleggSomBortfalt_avslutterKunBehandling_dersomBehandlingTypeErNyVurdering() {
+        String saksnummer = "saksnummer";
+        Fagsak fagsak = lagFagsak(saksnummer);
+        Behandling førsteBehandling = new Behandling();
+        førsteBehandling.setId(1L);
+        førsteBehandling.setStatus(Behandlingsstatus.AVSLUTTET);
+        Behandling andreBehandling = new Behandling();
+        andreBehandling.setId(2L);
+        andreBehandling.setType(Behandlingstyper.NY_VURDERING);
+        fagsak.setBehandlinger(Arrays.asList(førsteBehandling, andreBehandling));
+
+        henleggFagsakService.henleggSomBortfalt(fagsak);
+
+        verify(behandlingService).avsluttNyVurdering(andreBehandling.getId(), Behandlingsresultattyper.HENLEGGELSE_BORTFALT);
+        verifyNoMoreInteractions(fagsakService, behandlingsresultatService, oppgaveService);
+    }
+
 }

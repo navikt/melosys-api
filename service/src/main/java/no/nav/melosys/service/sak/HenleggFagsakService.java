@@ -9,6 +9,7 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
@@ -26,15 +27,17 @@ public class HenleggFagsakService {
     private final BehandlingsresultatService behandlingsresultatService;
     private final ProsessinstansService prosessinstansService;
     private final OppgaveService oppgaveService;
+    private final BehandlingService behandlingService;
 
     public HenleggFagsakService(FagsakService fagsakService,
                                 BehandlingsresultatService behandlingsresultatService,
                                 ProsessinstansService prosessinstansService,
-                                @Qualifier("system") OppgaveService oppgaveService) {
+                                @Qualifier("system") OppgaveService oppgaveService, BehandlingService behandlingService) {
         this.fagsakService = fagsakService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.prosessinstansService = prosessinstansService;
         this.oppgaveService = oppgaveService;
+        this.behandlingService = behandlingService;
     }
 
     @Transactional
@@ -71,11 +74,17 @@ public class HenleggFagsakService {
 
     @Transactional
     public void henleggSomBortfalt(Fagsak fagsak) {
-        log.info("Fagsak {}: {}", fagsak.getSaksnummer(), Saksstatuser.HENLAGT_BORTFALT.getBeskrivelse());
-        fagsak.getBehandlinger().forEach(behandling -> behandlingsresultatService.oppdaterBehandlingsresultattype(behandling.getId(), Behandlingsresultattyper.HENLEGGELSE));
-        fagsak.getBehandlinger().forEach(behandling -> behandling.setStatus(Behandlingsstatus.AVSLUTTET));
-        fagsak.setStatus(Saksstatuser.HENLAGT_BORTFALT);
-        fagsakService.lagre(fagsak);
-        oppgaveService.ferdigstillOppgaveMedSaksnummer(fagsak.getSaksnummer());
+        Behandling aktivBehandling = fagsak.hentAktivBehandling();
+
+        if (aktivBehandling.erNyVurdering()) {
+            behandlingService.avsluttNyVurdering(aktivBehandling.getId(), Behandlingsresultattyper.HENLEGGELSE_BORTFALT);
+        } else {
+            log.info("Fagsak {}: {}", fagsak.getSaksnummer(), Saksstatuser.HENLAGT_BORTFALT.getBeskrivelse());
+            fagsak.getBehandlinger().forEach(behandling -> behandlingsresultatService.oppdaterBehandlingsresultattype(behandling.getId(), Behandlingsresultattyper.HENLEGGELSE));
+            fagsak.getBehandlinger().forEach(behandling -> behandling.setStatus(Behandlingsstatus.AVSLUTTET));
+            fagsak.setStatus(Saksstatuser.HENLAGT_BORTFALT);
+            fagsakService.lagre(fagsak);
+            oppgaveService.ferdigstillOppgaveMedSaksnummer(fagsak.getSaksnummer());
+        }
     }
 }
