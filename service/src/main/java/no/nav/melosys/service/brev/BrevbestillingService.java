@@ -1,7 +1,6 @@
 package no.nav.melosys.service.brev;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -118,7 +117,7 @@ public class BrevbestillingService {
             switch (kopiMottaker) {
                 case BRUKER -> muligMottakerDtos.add(lagKopiMottakerForBruker(produserbaredokumenter, behandling, kopiMottaker, hovedmottaker));
                 case ARBEIDSGIVER -> muligMottakerDtos.addAll(lagKopiMottakereForArbeidsgiver(produserbaredokumenter, behandling, kopiMottaker));
-                case MYNDIGHET -> muligMottakerDtos.add(lagKopiMottakerForMyndighet(produserbaredokumenter, behandling, kopiMottaker));
+                case MYNDIGHET -> muligMottakerDtos.addAll(lagKopiMottakereForMyndighet(produserbaredokumenter, behandling, kopiMottaker));
                 default -> throw new IllegalStateException(kopiMottaker + " er ikke en gyldig kopiMottakerrolle");
             }
         }
@@ -161,14 +160,19 @@ public class BrevbestillingService {
         return muligMottakerDtos;
     }
 
-    private MuligMottakerDto lagKopiMottakerForMyndighet(Produserbaredokumenter produserbaredokumenter, Behandling behandling, Aktoersroller kopiMottaker) {
-        Aktoer avklartKopi = brevmottakerService.avklarMottaker(produserbaredokumenter, Mottaker.av(kopiMottaker), behandling);
-        return new MuligMottakerDto.Builder()
-            .medDokumentNavn("Kopi til utenlandsk trygdemyndighet")
-            .medMottakerNavn("Utenlandsk trygdemyndighet")
-            .medRolle(avklartKopi.getRolle())
-            .medInstitusjonskode(avklartKopi.getInstitusjonId())
-            .build();
+    private List<MuligMottakerDto> lagKopiMottakereForMyndighet(Produserbaredokumenter produserbaredokumenter, Behandling behandling, Aktoersroller kopiMottaker) {
+        List<MuligMottakerDto> muligMottakerDtos = new ArrayList<>();
+
+        List<Aktoer> avklarteKopier = brevmottakerService.avklarMottakere(produserbaredokumenter, Mottaker.av(kopiMottaker), behandling);
+        for (Aktoer avklartKopi : avklarteKopier) {
+            muligMottakerDtos.add(new MuligMottakerDto.Builder()
+                .medDokumentNavn("Kopi til utenlandsk trygdemyndighet")
+                .medMottakerNavn("Utenlandsk trygdemyndighet")
+                .medRolle(avklartKopi.getRolle())
+                .medInstitusjonskode(avklartKopi.getInstitusjonId())
+                .build());
+        }
+        return muligMottakerDtos;
     }
 
     private List<MuligMottakerDto> lagFasteMottakereMuligMottakerDtos(Produserbaredokumenter produserbaredokumenter, Behandling behandling, Collection<FastMottaker> fasteMottakere) {
