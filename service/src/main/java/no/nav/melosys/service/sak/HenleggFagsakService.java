@@ -32,7 +32,8 @@ public class HenleggFagsakService {
     public HenleggFagsakService(FagsakService fagsakService,
                                 BehandlingsresultatService behandlingsresultatService,
                                 ProsessinstansService prosessinstansService,
-                                @Qualifier("system") OppgaveService oppgaveService, BehandlingService behandlingService) {
+                                @Qualifier("system") OppgaveService oppgaveService,
+                                BehandlingService behandlingService) {
         this.fagsakService = fagsakService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.prosessinstansService = prosessinstansService;
@@ -53,9 +54,13 @@ public class HenleggFagsakService {
 
         Behandling aktivBehandling = fagsak.hentAktivBehandling();
         oppdaterBehandlingsresultat(aktivBehandling.getId(), begrunnelseKode, fritekst);
-        fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.HENLAGT);
-        prosessinstansService.opprettProsessinstansFagsakHenlagt(aktivBehandling);
-        oppgaveService.ferdigstillOppgaveMedSaksnummer(aktivBehandling.getFagsak().getSaksnummer());
+        if (aktivBehandling.erNyVurdering()) {
+            behandlingService.avsluttNyVurdering(aktivBehandling.getId(), Behandlingsresultattyper.HENLEGGELSE);
+        } else {
+            fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.HENLAGT);
+            prosessinstansService.opprettProsessinstansFagsakHenlagt(aktivBehandling);
+            oppgaveService.ferdigstillOppgaveMedSaksnummer(aktivBehandling.getFagsak().getSaksnummer());
+        }
     }
 
     private void oppdaterBehandlingsresultat(long behandlingID, Henleggelsesgrunner begrunnelseKode, String fritekst) {
