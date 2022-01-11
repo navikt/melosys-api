@@ -23,22 +23,22 @@ public class UtstedtA1AivenProducer {
     private static final Logger log = LoggerFactory.getLogger(UtstedtA1AivenProducer.class);
     private static final String A1_UTSTEDT_SCHEMA = "utstedt_a1/a1-utstedt-schema.json";
 
-    private final KafkaTemplate<String, UtstedtA1Melding> kafkaTemplate;
+    private final KafkaTemplate<String, UtstedtA1Melding> aivenKafkaTemplate;
     private final ObjectMapper objectMapper;
     private final String topicName;
 
     @Autowired
-    public UtstedtA1AivenProducer(@Qualifier("aivenUtstedtA1") KafkaTemplate<String, UtstedtA1Melding> kafkaTemplate,
+    public UtstedtA1AivenProducer(@Qualifier("aivenUtstedtA1") KafkaTemplate<String, UtstedtA1Melding> aivenKafkaTemplate,
                                   ObjectMapper objectMapper,
                                   @Value("${kafka.aiven.a1-utstedt.topic}") String topicName) {
-        this.kafkaTemplate = kafkaTemplate;
+        this.aivenKafkaTemplate = aivenKafkaTemplate;
         this.objectMapper = objectMapper;
         this.topicName = topicName;
     }
 
     public UtstedtA1Melding produserMelding(UtstedtA1Melding melding) {
         valider(melding);
-        ListenableFuture<SendResult<String, UtstedtA1Melding>> future = kafkaTemplate.send(topicName, melding);
+        ListenableFuture<SendResult<String, UtstedtA1Melding>> future = aivenKafkaTemplate.send(topicName, melding);
 
         try {
             SendResult<String, UtstedtA1Melding> res = future.get(15L, TimeUnit.SECONDS);

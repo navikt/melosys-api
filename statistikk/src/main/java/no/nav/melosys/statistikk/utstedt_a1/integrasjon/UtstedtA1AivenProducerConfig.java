@@ -40,7 +40,7 @@ public class UtstedtA1AivenProducerConfig {
 
     @Bean
     @Qualifier("aivenUtstedtA1")
-    public KafkaTemplate<String, UtstedtA1Melding> kafkaTemplate(ObjectMapper objectMapper) {
+    public KafkaTemplate<String, UtstedtA1Melding> aivenKafkaTemplate(ObjectMapper objectMapper) {
         Map<String, Object> props = commonProps();
         ProducerFactory<String, UtstedtA1Melding> producerFactory =
             new DefaultKafkaProducerFactory<>(props, new StringSerializer(), new JsonSerializer<>(objectMapper));
