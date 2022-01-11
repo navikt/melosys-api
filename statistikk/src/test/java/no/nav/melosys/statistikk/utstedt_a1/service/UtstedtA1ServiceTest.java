@@ -5,7 +5,6 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 
-import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
@@ -14,7 +13,6 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_8
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.statistikk.utstedt_a1.integrasjon.UtstedtA1AivenProducer;
 import no.nav.melosys.statistikk.utstedt_a1.integrasjon.UtstedtA1Producer;
 import no.nav.melosys.statistikk.utstedt_a1.integrasjon.dto.A1TypeUtstedelse;
 import no.nav.melosys.statistikk.utstedt_a1.integrasjon.dto.Lovvalgsbestemmelse;
@@ -40,9 +38,6 @@ class UtstedtA1ServiceTest {
     private BehandlingsresultatService behandlingsresultatService;
     @Mock
     private LandvelgerService landvelgerService;
-    @Mock
-    private UtstedtA1AivenProducer utstedtA1AivenProducer;
-    private FakeUnleash unleash = new FakeUnleash();
 
     @Captor
     private ArgumentCaptor<UtstedtA1Melding> captor;
@@ -53,7 +48,7 @@ class UtstedtA1ServiceTest {
 
     @BeforeEach
     void setUp() {
-        utstedtA1Service = new UtstedtA1Service(utstedtA1Producer, utstedtA1AivenProducer, behandlingsresultatService, landvelgerService, unleash);
+        utstedtA1Service = new UtstedtA1Service(utstedtA1Producer, behandlingsresultatService, landvelgerService);
     }
 
     @Test
@@ -67,28 +62,6 @@ class UtstedtA1ServiceTest {
         verify(behandlingsresultatService).hentBehandlingsresultat(BEHANDLING_ID);
         verify(landvelgerService).hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID);
         verify(utstedtA1Producer).produserMelding(captor.capture());
-
-        UtstedtA1Melding melding = captor.getValue();
-        assertThat(melding).isNotNull();
-        assertThat(melding.getSerienummer()).isEqualTo("MEL-123123");
-        assertThat(melding.getUtsendtTilLand()).isEqualTo("SE");
-        assertThat(melding.getArtikkel()).isEqualTo(Lovvalgsbestemmelse.ART_12_1);
-        assertThat(melding.getTypeUtstedelse()).isEqualTo(A1TypeUtstedelse.FØRSTEGANG);
-    }
-
-    @Test
-    void sendMeldingOmUtstedtA1PåAiven() {
-        unleash.enable("melosys.api.producer-aiven");
-
-        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(lagBehandlingsresultat());
-        when(landvelgerService.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID)).thenReturn(List.of(Landkoder.SE));
-        when(utstedtA1AivenProducer.produserMelding(any(UtstedtA1Melding.class))).thenAnswer(returnsFirstArg());
-
-        utstedtA1Service.sendMeldingOmUtstedtA1(BEHANDLING_ID);
-
-        verify(behandlingsresultatService).hentBehandlingsresultat(BEHANDLING_ID);
-        verify(landvelgerService).hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID);
-        verify(utstedtA1AivenProducer).produserMelding(captor.capture());
 
         UtstedtA1Melding melding = captor.getValue();
         assertThat(melding).isNotNull();
