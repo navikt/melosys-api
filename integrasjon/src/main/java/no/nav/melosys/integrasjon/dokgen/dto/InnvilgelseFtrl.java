@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.integrasjon.dokgen.dto.felles.Innvilgelse;
 import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.*;
@@ -121,7 +122,7 @@ public class InnvilgelseFtrl extends DokgenDto {
     }
 
     public InnvilgelseFtrl(Builder builder) {
-        super(builder.brevbestilling);
+        super(builder.brevbestilling, Aktoersroller.BRUKER);
         this.innvilgelse = Innvilgelse.av(builder.brevbestilling);
         this.datoMottatt = builder.brevbestilling.getForsendelseMottatt() != null
             ? LocalDate.ofInstant(builder.brevbestilling.getForsendelseMottatt(), ZoneId.systemDefault()): null;

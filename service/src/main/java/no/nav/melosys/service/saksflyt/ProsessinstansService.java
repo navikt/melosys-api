@@ -14,7 +14,6 @@ import no.nav.melosys.domain.arkiv.DokumentReferanse;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.eessi.melding.UtpekingAvvis;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Ikke_godkjent_begrunnelser;
@@ -287,8 +286,10 @@ public class ProsessinstansService {
         }
         if (hasText(mottaker.getOrgnr())) {
             prosessinstans.setData(ORGNR, mottaker.getOrgnr());
-        } if (hasText(mottaker.getInstitusjonId())) {
-            prosessinstans.setData(UTENLANDSK_MYNDIGHET, mottaker.getInstitusjonId());
+        }
+        if (hasText(mottaker.getInstitusjonId())) {
+            // TODO: Parsing av variabelen feiler pga ":". Burde fikses på en skikkelig måte
+            prosessinstans.setData(INSTITUSJON_ID, String.format("\"%s\"", mottaker.getInstitusjonId()));
         }
         prosessinstans.setBehandling(behandling);
         lagre(prosessinstans);

@@ -1,7 +1,6 @@
 package no.nav.melosys.service.dokument;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -94,7 +93,6 @@ public class DokgenService {
         Behandling behandling = behandlingService.hentBehandling(brevbestilling.getBehandlingId());
         String malnavn = dokumentproduksjonsInfoMapper.hentMalnavn(brevbestilling.getProduserbartdokument());
         String orgnr = mottaker != null ? mottaker.getOrgnr() : null;
-        String institusjonskode = mottaker != null ? mottaker.getInstitusjonId() : null;
         DokgenBrevbestilling.Builder<?> builder = brevbestilling.toBuilder();
 
         builder.medBehandling(behandling);
@@ -102,8 +100,8 @@ public class DokgenService {
         if (hasText(orgnr)) {
             settOrganisasjonsOpplysninger(behandling, orgnr, builder);
         }
-        if (hasText(institusjonskode)) {
-            settUtenlandskMyndighetOpplysninger(institusjonskode, builder);
+        if (mottaker != null && mottaker.erUtenlandskMyndighet()) {
+            settUtenlandskMyndighetOpplysninger(mottaker.hentMyndighetLandkode(), builder);
         }
 
         settJournalpostOpplysninger(behandling, builder);
@@ -171,12 +169,10 @@ public class DokgenService {
             .medKontaktopplysning(kontaktopplysning);
     }
 
-    private void settUtenlandskMyndighetOpplysninger(String institusjonskode,
+    private void settUtenlandskMyndighetOpplysninger(Landkoder landkode,
                                                      DokgenBrevbestilling.Builder<?> brevbestilling) {
-        var landkode = Landkoder.valueOf(institusjonskode);
         var utenlandskMyndighet = utenlandskMyndighetService.hentUtenlandskMyndighet(landkode);
-        brevbestilling
-            .medUtenlandskMyndighet(utenlandskMyndighet);
+        brevbestilling.medUtenlandskMyndighet(utenlandskMyndighet);
     }
 
     private void settJournalpostOpplysninger(Behandling behandling, DokgenBrevbestilling.Builder<?> brevbestilling) {

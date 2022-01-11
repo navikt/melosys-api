@@ -10,12 +10,6 @@ public class InnvilgelseOgAttestStorbritannia extends DokgenDto {
     private final InnvilgelseStorbritannia innvilgelse;
     private final AttestStorbritannia attest;
 
-    public InnvilgelseOgAttestStorbritannia(Builder builder) {
-        super(builder.brevbestilling);
-        innvilgelse = builder.innvilgelse;
-        attest = builder.attest;
-    }
-
     public InnvilgelseOgAttestStorbritannia(Builder builder, Aktoersroller mottaker) {
         super(builder.brevbestilling, mottaker);
         innvilgelse = builder.innvilgelse;
@@ -42,11 +36,10 @@ public class InnvilgelseOgAttestStorbritannia extends DokgenDto {
         }
 
         public InnvilgelseOgAttestStorbritannia build() {
-            if (brevbestilling.getUtenlandskMyndighet() == null) {
-                return new InnvilgelseOgAttestStorbritannia(this);
-            } else {
-                return new InnvilgelseOgAttestStorbritannia(this, Aktoersroller.MYNDIGHET);
-            }
+            Aktoersroller mottaker = brevbestilling.getUtenlandskMyndighet() == null
+                ? Aktoersroller.BRUKER
+                : Aktoersroller.MYNDIGHET;
+            return new InnvilgelseOgAttestStorbritannia(this, mottaker);
         }
     }
 

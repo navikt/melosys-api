@@ -58,12 +58,10 @@ public class StorbritanniaMapper {
 
     @Transactional
     public InnvilgelseOgAttestStorbritannia map(InnvilgelseBrevbestilling brevbestilling) {
-        var innvilgelseOgAttestStorbritannia = new InnvilgelseOgAttestStorbritannia.Builder(brevbestilling)
+        return new InnvilgelseOgAttestStorbritannia.Builder(brevbestilling)
             .innvilgelse(mapInnvilgelse(brevbestilling))
             .attest(mapAttest(brevbestilling))
             .build();
-
-        return innvilgelseOgAttestStorbritannia;
     }
 
     private InnvilgelseStorbritannia mapInnvilgelse(InnvilgelseBrevbestilling brevbestilling) {

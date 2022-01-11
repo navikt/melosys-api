@@ -62,30 +62,31 @@ public class OpprettJournalforBrev implements StegBehandler {
 
     @Override
     public void utfør(Prosessinstans prosessinstans) {
+        String aktørId = prosessinstans.getData(AKTØR_ID);
+        Aktoersroller mottakerrolle = prosessinstans.getData(MOTTAKER, Aktoersroller.class, null);
+        String orgnr = prosessinstans.getData(ORGNR);
+        String institusjonsid = prosessinstans.getData(INSTITUSJON_ID);
+
+        if (isEmpty(aktørId) && isEmpty(orgnr) && isEmpty(institusjonsid)) {
+            throw new FunksjonellException("Mangler mottaker");
+        }
         if (prosessinstans.getBehandling() == null) {
             throw new FunksjonellException("Prosessinstans mangler behandling");
         }
+
         Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
         String brukerFnr = hentBrukerFolkeregisterIdent(behandling);
         var brevbestilling = prosessinstans.getData(BREVBESTILLING, DokgenBrevbestilling.class);
         Produserbaredokumenter produserbartDokument = brevbestilling.getProduserbartdokument();
 
-        String aktørId = prosessinstans.getData(AKTØR_ID);
-        Aktoersroller mottakerrolle = prosessinstans.getData(MOTTAKER, Aktoersroller.class, null);
-        String orgnr = prosessinstans.getData(ORGNR, String.class, null);
-        String utenlandskMyndighet = prosessinstans.getData(UTENLANDSK_MYNDIGHET, String.class, null);
         String fnr = null;
         String sammensattNavn = null;
-
-        if (isEmpty(aktørId) && isEmpty(orgnr) && isEmpty(utenlandskMyndighet)) {
-            throw new FunksjonellException("Mangler mottaker");
-        }
 
         Aktoer mottaker = new Aktoer();
         mottaker.setRolle(mottakerrolle);
 
-        if (!isEmpty(utenlandskMyndighet)) {
-            mottaker.setInstitusjonId(utenlandskMyndighet);
+        if (!isEmpty(institusjonsid)) {
+            mottaker.setInstitusjonId(institusjonsid);
         }
         else if (isEmpty(orgnr)) {
             mottaker.setAktørId(aktørId);
