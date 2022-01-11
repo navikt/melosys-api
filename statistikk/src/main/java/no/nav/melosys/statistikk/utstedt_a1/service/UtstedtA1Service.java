@@ -4,11 +4,13 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Collection;
 
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
+import no.nav.melosys.statistikk.utstedt_a1.integrasjon.UtstedtA1AivenProducer;
 import no.nav.melosys.statistikk.utstedt_a1.integrasjon.UtstedtA1Producer;
 import no.nav.melosys.statistikk.utstedt_a1.integrasjon.dto.A1TypeUtstedelse;
 import no.nav.melosys.statistikk.utstedt_a1.integrasjon.dto.Lovvalgsbestemmelse;
@@ -25,16 +27,20 @@ public class UtstedtA1Service {
     private static final Logger log = LoggerFactory.getLogger(UtstedtA1Service.class);
 
     private final UtstedtA1Producer utstedtA1Producer;
+    private final UtstedtA1AivenProducer utstedtA1AivenProducer;
     private final BehandlingsresultatService behandlingsresultatService;
     private final LandvelgerService landvelgerService;
+    private final Unleash unleash;
 
     @Autowired
     public UtstedtA1Service(UtstedtA1Producer utstedtA1Producer,
-                            BehandlingsresultatService behandlingsresultatService,
-                            LandvelgerService landvelgerService) {
+                            UtstedtA1AivenProducer utstedtA1AivenProducer, BehandlingsresultatService behandlingsresultatService,
+                            LandvelgerService landvelgerService, Unleash unleash) {
         this.utstedtA1Producer = utstedtA1Producer;
+        this.utstedtA1AivenProducer = utstedtA1AivenProducer;
         this.behandlingsresultatService = behandlingsresultatService;
         this.landvelgerService = landvelgerService;
+        this.unleash = unleash;
     }
 
     @Transactional(readOnly = true)
@@ -50,7 +56,11 @@ public class UtstedtA1Service {
 
     private void sendMeldingOmUtstedtA1(Behandlingsresultat behandlingsresultat) {
         final UtstedtA1Melding melding = lagMelding(behandlingsresultat);
-        utstedtA1Producer.produserMelding(melding);
+        if (unleash.isEnabled("melosys.api.producer-aiven")) {
+            utstedtA1AivenProducer.produserMelding(melding);
+        } else {
+            utstedtA1Producer.produserMelding(melding);
+        }
     }
 
     private UtstedtA1Melding lagMelding(Behandlingsresultat behandlingsresultat) {
