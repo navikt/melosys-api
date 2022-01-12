@@ -212,7 +212,7 @@ class VedtakKontrollServiceTest {
         Collection<Kontrollfeil> resultat = vedtakKontrollService.utførKontroller(behandlingID, Vedtakstyper.FØRSTEGANGSVEDTAK, Sakstyper.TRYGDEAVTALE);
         assertThat(resultat)
             .extracting(Kontrollfeil::getKode)
-            .contains(Kontroll_begrunnelser.ATTEST_MANGER_ARBEIDSSTED);
+            .contains(Kontroll_begrunnelser.ATTEST_MANGLER_ARBEIDSSTED);
     }
 
     private Behandlingsresultat lagBehandlingsresultat() {

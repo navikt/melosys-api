@@ -19,6 +19,7 @@ import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.brev.FastMottaker;
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
 import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.domain.person.adresse.PersonAdresse;
@@ -178,7 +179,7 @@ public class StorbritanniaMapper {
         var soeknadTrygdeavtale = (SoeknadTrygdeavtale) behandlingsgrunnlag.getBehandlingsgrunnlagdata();
         var representantIUtlandet = soeknadTrygdeavtale.getRepresentantIUtlandet();
         if (representantIUtlandet == null) {
-            throw new FunksjonellException("Behandlingsgrunnlaget inneholder ikke representant I utlandet");
+            throw new FunksjonellException(Kontroll_begrunnelser.ATTEST_MANGLER_ARBEIDSSTED.getBeskrivelse());
         }
 
         return new Soknad(

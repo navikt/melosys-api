@@ -3,12 +3,9 @@ package no.nav.melosys.service.persondata.mapping;
 import java.util.Collection;
 import java.util.Comparator;
 
-import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.domain.kodeverk.Personstatuser;
 import no.nav.melosys.domain.person.Folkeregisterpersonstatus;
-import no.nav.melosys.integrasjon.KonverteringsUtils;
 import no.nav.melosys.integrasjon.pdl.dto.HarMetadata;
-import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,19 +16,18 @@ public final class FolkeregisterpersonstatusOversetter {
     }
 
     public static Folkeregisterpersonstatus oversett(
-        Collection<no.nav.melosys.integrasjon.pdl.dto.person.Folkeregisterpersonstatus> folkeregisterpersonstatus,
-        KodeverkService kodeverkService) {
+        Collection<no.nav.melosys.integrasjon.pdl.dto.person.Folkeregisterpersonstatus> folkeregisterpersonstatus) {
         return folkeregisterpersonstatus.stream().max(Comparator.comparing(HarMetadata::hentDatoSistRegistrert))
-            .map(status -> oversett(status, kodeverkService))
+            .map(status -> oversett(status))
             .orElse(null);
     }
 
     public static Folkeregisterpersonstatus oversett(
-        no.nav.melosys.integrasjon.pdl.dto.person.Folkeregisterpersonstatus folkeregisterpersonstatus,
-        KodeverkService kodeverkService) {
+        no.nav.melosys.integrasjon.pdl.dto.person.Folkeregisterpersonstatus folkeregisterpersonstatus) {
+        var personstatus = oversettStatusTilKodeverk(folkeregisterpersonstatus);
         return new Folkeregisterpersonstatus(
-            oversettStatusTilKodeverk(folkeregisterpersonstatus),
-            kodeverkService.dekod(FellesKodeverk.PERSONSTATUSER, folkeregisterpersonstatus.status()),
+            personstatus,
+            personstatus.getBeskrivelse(),
             folkeregisterpersonstatus.metadata().master(),
             folkeregisterpersonstatus.hentKilde(),
             folkeregisterpersonstatus.folkeregistermetadata().gyldighetstidspunkt().toLocalDate(),
