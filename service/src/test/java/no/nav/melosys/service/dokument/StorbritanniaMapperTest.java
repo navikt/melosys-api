@@ -16,7 +16,6 @@ import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadTrygdeavtale;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.RepresentantIUtlandet;
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
@@ -36,7 +35,6 @@ import no.nav.melosys.integrasjon.dokgen.dto.storbritannia.attest.AttestStorbrit
 import no.nav.melosys.integrasjon.dokgen.dto.storbritannia.innvilgelse.Barn;
 import no.nav.melosys.integrasjon.dokgen.dto.storbritannia.innvilgelse.InnvilgelseStorbritannia;
 import no.nav.melosys.service.LovvalgsperiodeService;
-import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.dokument.brev.BrevDataTestUtils;

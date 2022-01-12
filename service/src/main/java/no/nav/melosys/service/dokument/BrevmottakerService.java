@@ -28,7 +28,7 @@ import org.springframework.stereotype.Service;
 import static java.util.Optional.ofNullable;
 import static no.nav.melosys.domain.Preferanse.PreferanseEnum.RESERVERT_FRA_A1;
 import static no.nav.melosys.domain.brev.BrevkopiRegel.*;
-import static no.nav.melosys.domain.brev.FastMottaker.*;
+import static no.nav.melosys.domain.brev.FastMottaker.SKATT;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 
@@ -249,9 +249,6 @@ public class BrevmottakerService {
         }
         if (brevkopiRegler.contains(ARBEIDSGIVER_FÅR_KOPI)) {
             mottakerliste.getKopiMottakere().add(ARBEIDSGIVER);
-        }
-        if (brevkopiRegler.contains(UTENLANDSK_TRYGDEMYNDIGHET_FÅR_KOPI)) {
-            mottakerliste.getKopiMottakere().add(MYNDIGHET);
         }
         if (brevkopiRegler.contains(SKATT_FÅR_KOPI)) {
             mottakerliste.getFasteMottakere().add(SKATT);

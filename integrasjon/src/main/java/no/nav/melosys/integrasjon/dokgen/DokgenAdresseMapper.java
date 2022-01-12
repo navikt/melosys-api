@@ -80,18 +80,6 @@ public final class DokgenAdresseMapper {
     }
 
     public static Mottaker mapMottaker(DokgenBrevbestilling brevbestilling, Aktoersroller mottakerType) {
-        if (mottakerType == Aktoersroller.MYNDIGHET && brevbestilling.getUtenlandskMyndighet() != null) {
-            var utenlandskMyndighet = brevbestilling.getUtenlandskMyndighet();
-            return new Mottaker(
-                utenlandskMyndighet.navn,
-                utenlandskMyndighet.getAdresse().toList(),
-                utenlandskMyndighet.postnummer,
-                utenlandskMyndighet.poststed,
-                utenlandskMyndighet.land,
-                mottakerType.getKode()
-            );
-        }
-
         OrganisasjonDokument org = brevbestilling.getOrg();
         Persondata persondata = brevbestilling.getPersondokument();
         return new Mottaker(

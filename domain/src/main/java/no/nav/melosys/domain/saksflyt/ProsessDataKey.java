@@ -30,7 +30,6 @@ public enum ProsessDataKey {
     FYSISKE_VEDLEGG("fysiskeVedlegg"),
     GSAK_SAK_ID("gsakSakID"),
     HOVEDDOKUMENT_TITTEL("hoveddokumentTittel"),
-    INSTITUSJON_ID("institusjonsID"),
     JFR_INGEN_VURDERING("ingenVurdering"),
     JOURNALPOST_ID("journalpostID"),
     LOGISKE_VEDLEGG_TITLER("logiskeVedleggTitler"),

@@ -29,7 +29,7 @@ public class SaksbehandlingstidSoknad extends DokgenDto {
     private final String avsenderLand;
 
     public SaksbehandlingstidSoknad(DokgenBrevbestilling brevbestilling) {
-        super(brevbestilling, Aktoersroller.BRUKER);
+        super(brevbestilling);
         this.datoMottatt = brevbestilling.getForsendelseMottatt();
         this.datoBehandlingstid = brevbestilling.getForsendelseMottatt().plus(SAKSBEHANDLINGSTID_DAGER, ChronoUnit.DAYS);
         this.typeSoknad = brevbestilling.getBehandling().getFagsak().getType().getKode();

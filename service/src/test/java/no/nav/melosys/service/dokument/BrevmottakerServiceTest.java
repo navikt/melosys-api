@@ -412,7 +412,7 @@ class BrevmottakerServiceTest {
             )
             .containsExactly(
                 BRUKER,
-                List.of(ARBEIDSGIVER, MYNDIGHET),
+                List.of(ARBEIDSGIVER),
                 List.of(SKATT)
             );
     }

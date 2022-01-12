@@ -4,10 +4,7 @@ import java.time.LocalDate;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.Saksstatuser;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
@@ -77,6 +74,7 @@ public class TrygdeavtaleVedtakService {
         behandlingService.oppdaterStatus(behandling, Behandlingsstatus.IVERKSETTER_VEDTAK);
 
         prosessinstansService.opprettProsessinstansIverksettVedtakTrygdeavtale(behandling, request);
+        // TODO: Egne regler for hvilket brev som skal være med for de forskjellige mottakerne (innvilgelse/attest/begge)
         dokgenService.produserOgDistribuerBrev(behandlingID, lagStorbritanniaBrevbestilling(request));
         oppgaveService.ferdigstillOppgaveMedSaksnummer(saksnummer);
     }
