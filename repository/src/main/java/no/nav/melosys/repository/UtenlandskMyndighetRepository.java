@@ -13,6 +13,6 @@ public interface UtenlandskMyndighetRepository extends CrudRepository<Utenlandsk
     Optional<UtenlandskMyndighet> findByLandkode(Landkoder landkode);
 
     List<UtenlandskMyndighet> findAll();
-
+    
     List<UtenlandskMyndighet> findByLandkodeIsIn(Collection<Landkoder> landkoder);
 }

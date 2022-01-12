@@ -114,7 +114,7 @@ class FtrlVedtakServiceTest {
             .medFritekstBegrunnelse("Begrunnelse")
             .medFritekstEktefelle("Ektefelle omfattet")
             .medFritekstBarn("Barn omfattet")
-            .medKopiMottakere(List.of(new KopiMottaker(Aktoersroller.ARBEIDSGIVER, "987654321", null, null)))
+            .medKopiMottakere(List.of(new KopiMottaker(Aktoersroller.ARBEIDSGIVER, "987654321", null)))
             .medBestillersId(SubjectHandler.getInstance().getUserID())
             .build();
     }

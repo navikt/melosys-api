@@ -8,13 +8,11 @@ import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.brev.*;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
-import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.integrasjon.dokgen.DokgenConsumer;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
-import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
 import no.nav.melosys.service.dokument.brev.KopiMottaker;
@@ -39,7 +37,6 @@ public class DokgenService {
     private final BrevmottakerService brevmottakerService;
     private final ProsessinstansService prosessinstansService;
     private final SaksbehandlerService saksbehandlerService;
-    private final UtenlandskMyndighetService utenlandskMyndighetService;
 
     @Autowired
     public DokgenService(DokgenConsumer dokgenConsumer,
@@ -49,8 +46,7 @@ public class DokgenService {
                          @Qualifier("system") EregFasade eregFasade,
                          KontaktopplysningService kontaktopplysningService,
                          BrevmottakerService brevmottakerService, ProsessinstansService prosessinstansService,
-                         SaksbehandlerService saksbehandlerService,
-                         UtenlandskMyndighetService utenlandskMyndighetService) {
+                         SaksbehandlerService saksbehandlerService) {
         this.dokgenConsumer = dokgenConsumer;
         this.dokumentproduksjonsInfoMapper = dokumentproduksjonsInfoMapper;
         this.joarkFasade = joarkFasade;
@@ -61,18 +57,16 @@ public class DokgenService {
         this.brevmottakerService = brevmottakerService;
         this.prosessinstansService = prosessinstansService;
         this.saksbehandlerService = saksbehandlerService;
-        this.utenlandskMyndighetService = utenlandskMyndighetService;
     }
 
     public byte[] produserUtkast(long behandlingId, BrevbestillingRequest brevbestillingRequest) {
         Produserbaredokumenter produserbartdokument = brevbestillingRequest.getProduserbardokument();
         Behandling behandling = behandlingService.hentBehandling(behandlingId);
         Aktoer mottaker;
-        if (hasText(brevbestillingRequest.getOrgNr()) || hasText(brevbestillingRequest.getInstitusjonskode())) {
+        if (hasText(brevbestillingRequest.getOrgNr())) {
             mottaker = new Aktoer();
             mottaker.setRolle(brevbestillingRequest.getMottaker());
             mottaker.setOrgnr(brevbestillingRequest.getOrgNr());
-            mottaker.setInstitusjonId(brevbestillingRequest.getInstitusjonskode());
         } else {
             mottaker = brevmottakerService.avklarMottakere(produserbartdokument,
                 Mottaker.av(brevbestillingRequest.getMottaker()), behandling, true, false).get(0);
@@ -99,9 +93,6 @@ public class DokgenService {
 
         if (hasText(orgnr)) {
             settOrganisasjonsOpplysninger(behandling, orgnr, builder);
-        }
-        if (mottaker != null && mottaker.erUtenlandskMyndighet()) {
-            settUtenlandskMyndighetOpplysninger(mottaker.hentMyndighetLandkode(), builder);
         }
 
         settJournalpostOpplysninger(behandling, builder);
@@ -141,7 +132,6 @@ public class DokgenService {
             aktoer.setRolle(kopiMottaker.getRolle());
             aktoer.setOrgnr(kopiMottaker.getOrgnr());
             aktoer.setAktørId(kopiMottaker.getAktørId());
-            aktoer.setInstitusjonId(kopiMottaker.getInstitusjonskode());
             brevbestilling.medBestillKopi(true);
             produserOgDistribuerBrev(behandling, aktoer, brevbestilling.build());
         }
@@ -167,12 +157,6 @@ public class DokgenService {
         brevbestilling
             .medOrg((OrganisasjonDokument) eregFasade.hentOrganisasjon(mottakerOrgnr).getDokument())
             .medKontaktopplysning(kontaktopplysning);
-    }
-
-    private void settUtenlandskMyndighetOpplysninger(Landkoder landkode,
-                                                     DokgenBrevbestilling.Builder<?> brevbestilling) {
-        var utenlandskMyndighet = utenlandskMyndighetService.hentUtenlandskMyndighet(landkode);
-        brevbestilling.medUtenlandskMyndighet(utenlandskMyndighet);
     }
 
     private void settJournalpostOpplysninger(Behandling behandling, DokgenBrevbestilling.Builder<?> brevbestilling) {

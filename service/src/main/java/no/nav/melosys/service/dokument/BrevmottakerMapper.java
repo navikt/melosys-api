@@ -32,7 +32,8 @@ public class BrevmottakerMapper {
                 .medHovedMottaker(ARBEIDSGIVER)
                 .medBrevkopiRegler(
                     BRUKER_FÅR_KOPI
-                ).build(),
+                )
+                .build(),
 
             INNVILGELSE_FOLKETRYGDLOVEN_2_8, new Mottakerliste.Builder()
                 .medHovedMottaker(BRUKER)
@@ -44,11 +45,8 @@ public class BrevmottakerMapper {
 
             STORBRITANNIA, new Mottakerliste.Builder()
                 .medHovedMottaker(BRUKER)
-                .medBrevkopiRegler(
-                    ARBEIDSGIVER_FÅR_KOPI,
-                    SKATT_FÅR_KOPI,
-                    UTENLANDSK_TRYGDEMYNDIGHET_FÅR_KOPI
-                ).build(),
+                .medBrevkopiRegler(ARBEIDSGIVER_FÅR_KOPI, SKATT_FÅR_KOPI)
+                .build(),
 
             GENERELT_FRITEKSTBREV_BRUKER, new Mottakerliste.Builder()
                 .medHovedMottaker(BRUKER).build(),

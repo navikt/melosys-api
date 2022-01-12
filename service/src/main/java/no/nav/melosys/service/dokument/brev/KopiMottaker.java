@@ -4,8 +4,7 @@ import no.nav.melosys.domain.kodeverk.Aktoersroller;
 
 public record KopiMottaker(Aktoersroller rolle,
                            String orgnr,
-                           String aktørId,
-                           String institusjonskode) {
+                           String aktørId) {
 
     public Aktoersroller getRolle() {
         return rolle;
@@ -17,9 +16,5 @@ public record KopiMottaker(Aktoersroller rolle,
 
     public String getAktørId() {
         return aktørId;
-    }
-
-    public String getInstitusjonskode() {
-        return institusjonskode;
     }
 }
