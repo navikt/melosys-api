@@ -127,7 +127,7 @@ public class StorbritanniaMapperTest {
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> storbritanniaMapper.map(brevbestilling))
-            .withMessageContaining(Kontroll_begrunnelser.ATTEST_MANGER_ARBEIDSSTED.getBeskrivelse());
+            .withMessageContaining(Kontroll_begrunnelser.ATTEST_MANGLER_ARBEIDSSTED.getBeskrivelse());
     }
 
     @Test

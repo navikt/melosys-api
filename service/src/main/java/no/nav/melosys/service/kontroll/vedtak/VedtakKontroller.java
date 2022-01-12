@@ -58,7 +58,7 @@ final class VedtakKontroller implements AdresseUtlandKontroller {
 
         return erBestemmelseDerTrygdeavtaleAttestSendes(lovvalgsperiode.getBestemmelse())
             && ArbeidsstedKontroller.representantIUtlandetMangler(behandlingsgrunnlagData.getRepresentantIUtlandet())
-            ? new Kontrollfeil(Kontroll_begrunnelser.ATTEST_MANGER_ARBEIDSSTED) : null;
+            ? new Kontrollfeil(Kontroll_begrunnelser.ATTEST_MANGLER_ARBEIDSSTED) : null;
     }
 
     static Kontrollfeil adresseRegistrert(VedtakKontrollData kontrollData) {
