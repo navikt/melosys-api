@@ -46,7 +46,7 @@ public class BrevbestillingDto {
             .medProduserbardokument(this.getProduserbardokument())
             .medMottaker(this.getMottaker())
             .medOrgNr(this.getOrgNr())
-            .medInstitusjonskode(this.getInstitusjonskode())
+            .medInstitusjonId(this.getInstitusjonskode())
             .medInnledningFritekst(this.getInnledningFritekst())
             .medManglerFritekst(this.getManglerFritekst())
             .medBegrunnelseFritekst(this.getBegrunnelseFritekst())

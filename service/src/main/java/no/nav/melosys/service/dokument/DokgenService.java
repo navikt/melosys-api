@@ -68,11 +68,11 @@ public class DokgenService {
         Produserbaredokumenter produserbartdokument = brevbestillingRequest.getProduserbardokument();
         Behandling behandling = behandlingService.hentBehandling(behandlingId);
         Aktoer mottaker;
-        if (hasText(brevbestillingRequest.getOrgNr()) || hasText(brevbestillingRequest.getInstitusjonskode())) {
+        if (hasText(brevbestillingRequest.getOrgNr()) || hasText(brevbestillingRequest.getInstitusjonId())) {
             mottaker = new Aktoer();
             mottaker.setRolle(brevbestillingRequest.getMottaker());
             mottaker.setOrgnr(brevbestillingRequest.getOrgNr());
-            mottaker.setInstitusjonId(brevbestillingRequest.getInstitusjonskode());
+            mottaker.setInstitusjonId(brevbestillingRequest.getInstitusjonId());
         } else {
             mottaker = brevmottakerService.avklarMottakere(produserbartdokument,
                 Mottaker.av(brevbestillingRequest.getMottaker()), behandling, true, false).get(0);

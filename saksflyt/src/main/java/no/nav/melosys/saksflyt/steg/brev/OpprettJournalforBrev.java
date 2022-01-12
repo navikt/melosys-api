@@ -63,7 +63,6 @@ public class OpprettJournalforBrev implements StegBehandler {
     @Override
     public void utfør(Prosessinstans prosessinstans) {
         String aktørId = prosessinstans.getData(AKTØR_ID);
-        Aktoersroller mottakerrolle = prosessinstans.getData(MOTTAKER, Aktoersroller.class, null);
         String orgnr = prosessinstans.getData(ORGNR);
         String institusjonsid = prosessinstans.getData(INSTITUSJON_ID);
 
@@ -76,6 +75,7 @@ public class OpprettJournalforBrev implements StegBehandler {
 
         Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
         String brukerFnr = hentBrukerFolkeregisterIdent(behandling);
+        Aktoersroller mottakerrolle = prosessinstans.getData(MOTTAKER, Aktoersroller.class, null);
         var brevbestilling = prosessinstans.getData(BREVBESTILLING, DokgenBrevbestilling.class);
         Produserbaredokumenter produserbartDokument = brevbestilling.getProduserbartdokument();
 
@@ -88,12 +88,12 @@ public class OpprettJournalforBrev implements StegBehandler {
         if (!isEmpty(institusjonsid)) {
             mottaker.setInstitusjonId(institusjonsid);
         }
-        else if (isEmpty(orgnr)) {
+        else if (!isEmpty(orgnr)) {
+            mottaker.setOrgnr(orgnr);
+        } else {
             mottaker.setAktørId(aktørId);
             fnr = persondataFasade.hentFolkeregisterident(aktørId);
             sammensattNavn = persondataFasade.hentSammensattNavn(fnr);
-        } else {
-            mottaker.setOrgnr(orgnr);
         }
 
         byte[] pdf = dokgenService.produserBrev(mottaker, brevbestilling);

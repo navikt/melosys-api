@@ -66,7 +66,7 @@ public class StorbritanniaMapper {
     }
 
     private InnvilgelseStorbritannia mapInnvilgelse(InnvilgelseBrevbestilling brevbestilling) {
-        if (!skalHaInnvilgelse(brevbestilling)) return null;
+        if (skalIkkeHaInnvilgelse(brevbestilling)) return null;
 
         var behandling = brevbestilling.getBehandling();
         var behandlingsgrunnlag = behandling.getBehandlingsgrunnlag();
@@ -82,7 +82,7 @@ public class StorbritanniaMapper {
     }
 
     private AttestStorbritannia mapAttest(DokgenBrevbestilling brevbestilling) {
-        if (!skalHaAttest(brevbestilling)) return null;
+        if (skalIkkeHaAttest(brevbestilling)) return null;
 
         var behandlingId = brevbestilling.getBehandlingId();
         var behandling = brevbestilling.getBehandling();
@@ -273,13 +273,13 @@ public class StorbritanniaMapper {
         return new Person(sammensattNavn, fødselsdato, fnr, null);
     }
 
-    private boolean skalHaInnvilgelse(InnvilgelseBrevbestilling brevbestilling) {
+    private boolean skalIkkeHaInnvilgelse(InnvilgelseBrevbestilling brevbestilling) {
         // Utenlandkse trygdemyndigheter skal ikke ha innvilgelse
-        return brevbestilling.getUtenlandskMyndighet() == null;
+        return brevbestilling.getUtenlandskMyndighet() != null;
     }
 
-    private boolean skalHaAttest(DokgenBrevbestilling brevbestilling) {
+    private boolean skalIkkeHaAttest(DokgenBrevbestilling brevbestilling) {
         // Skatteetaten skal ikke ha attest
-        return !(brevbestilling.getOrg() != null && FastMottaker.OrgNr.SKATTEETATEN_ORGNR.getOrgnr().equals(brevbestilling.getOrg().getOrgnummer()));
+        return brevbestilling.getOrg() != null && FastMottaker.OrgNr.SKATTEETATEN_ORGNR.getOrgnr().equals(brevbestilling.getOrg().getOrgnummer());
     }
 }
