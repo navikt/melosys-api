@@ -31,13 +31,6 @@ public abstract class DokgenDto {
     // Svarfrist mangelbrev 4 uker fra dato brevet blir generert.
     protected static final int DOKUMENTASJON_SVARFRIST_UKER_MANGELBREV = 4;
 
-    protected DokgenDto(DokgenBrevbestilling brevbestilling) {
-        this.saksopplysninger = Saksopplysninger.av(brevbestilling);
-        this.dagensDato = Instant.now();
-        this.saksbehandlerNavn = brevbestilling.getSaksbehandlerNavn();
-        this.mottaker = mapMottaker(brevbestilling, Aktoersroller.BRUKER);
-    }
-
     protected DokgenDto(DokgenBrevbestilling brevbestilling, Aktoersroller mottakerType) {
         this.saksopplysninger = Saksopplysninger.av(brevbestilling);
         this.dagensDato = Instant.now();

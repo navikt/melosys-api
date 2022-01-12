@@ -16,6 +16,7 @@ import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadTrygdeavtale;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.IdentType;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
+import no.nav.melosys.domain.brev.FastMottaker;
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
@@ -65,6 +66,8 @@ public class StorbritanniaMapper {
     }
 
     private InnvilgelseStorbritannia mapInnvilgelse(InnvilgelseBrevbestilling brevbestilling) {
+        if (skalIkkeHaInnvilgelse(brevbestilling)) return null;
+
         var behandling = brevbestilling.getBehandling();
         var behandlingsgrunnlag = behandling.getBehandlingsgrunnlag();
         var lovvalgsperiode = lovvalgsperiodeService.hentValidertLovvalgsperiode(behandling.getId());
@@ -79,6 +82,8 @@ public class StorbritanniaMapper {
     }
 
     private AttestStorbritannia mapAttest(DokgenBrevbestilling brevbestilling) {
+        if (skalIkkeHaAttest(brevbestilling)) return null;
+
         var behandlingId = brevbestilling.getBehandlingId();
         var behandling = brevbestilling.getBehandling();
         var persondokument = brevbestilling.getPersondokument();
@@ -266,5 +271,15 @@ public class StorbritanniaMapper {
         var sammensattNavn = fnr != null ? dokgenMapperDatahenter.hentSammensattNavn(fnr) : medfølgendeFamilie.getNavn();
         var fødselsdato = persondataFasade.hentPerson(fnr).getFødselsdato();
         return new Person(sammensattNavn, fødselsdato, fnr, null);
+    }
+
+    private boolean skalIkkeHaInnvilgelse(InnvilgelseBrevbestilling brevbestilling) {
+        // Utenlandkse trygdemyndigheter skal ikke ha innvilgelse
+        return brevbestilling.getUtenlandskMyndighet() != null;
+    }
+
+    private boolean skalIkkeHaAttest(DokgenBrevbestilling brevbestilling) {
+        // Skatteetaten skal ikke ha attest
+        return brevbestilling.getOrg() != null && FastMottaker.OrgNr.SKATTEETATEN_ORGNR.getOrgnr().equals(brevbestilling.getOrg().getOrgnummer());
     }
 }

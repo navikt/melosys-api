@@ -1,6 +1,7 @@
 package no.nav.melosys.integrasjon.dokgen.dto;
 
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.integrasjon.dokgen.dto.storbritannia.attest.AttestStorbritannia;
 import no.nav.melosys.integrasjon.dokgen.dto.storbritannia.innvilgelse.InnvilgelseStorbritannia;
 
@@ -9,8 +10,8 @@ public class InnvilgelseOgAttestStorbritannia extends DokgenDto {
     private final InnvilgelseStorbritannia innvilgelse;
     private final AttestStorbritannia attest;
 
-    public InnvilgelseOgAttestStorbritannia(Builder builder) {
-        super(builder.brevbestilling);
+    public InnvilgelseOgAttestStorbritannia(Builder builder, Aktoersroller mottaker) {
+        super(builder.brevbestilling, mottaker);
         innvilgelse = builder.innvilgelse;
         attest = builder.attest;
     }
@@ -35,7 +36,10 @@ public class InnvilgelseOgAttestStorbritannia extends DokgenDto {
         }
 
         public InnvilgelseOgAttestStorbritannia build() {
-            return new InnvilgelseOgAttestStorbritannia(this);
+            Aktoersroller mottaker = brevbestilling.getUtenlandskMyndighet() == null
+                ? Aktoersroller.BRUKER
+                : Aktoersroller.MYNDIGHET;
+            return new InnvilgelseOgAttestStorbritannia(this, mottaker);
         }
     }
 

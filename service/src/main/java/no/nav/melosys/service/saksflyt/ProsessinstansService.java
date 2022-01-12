@@ -302,6 +302,10 @@ public class ProsessinstansService {
         if (hasText(mottaker.getOrgnr())) {
             prosessinstans.setData(ORGNR, mottaker.getOrgnr());
         }
+        if (hasText(mottaker.getInstitusjonId())) {
+            // FIXME: Parsing av variabelen feiler pga ":". Burde fikses på en skikkelig måte
+            prosessinstans.setData(INSTITUSJON_ID, String.format("\"%s\"", mottaker.getInstitusjonId()));
+        }
         prosessinstans.setBehandling(behandling);
         lagre(prosessinstans);
     }
