@@ -8,7 +8,7 @@ public class MuligMottakerDto {
     private final Aktoersroller rolle;
     private final String orgnr;
     private final String aktørId;
-    private final String institusjonskode;
+    private final String institusjonId;
 
     private MuligMottakerDto(Builder builder) {
         this.mottakerNavn = builder.mottakerNavn;
@@ -16,7 +16,7 @@ public class MuligMottakerDto {
         this.rolle = builder.rolle;
         this.orgnr = builder.orgnr;
         this.aktørId = builder.aktørId;
-        this.institusjonskode = builder.institusjonskode;
+        this.institusjonId = builder.institusjonId;
     }
 
     public String getMottakerNavn() {
@@ -39,8 +39,8 @@ public class MuligMottakerDto {
         return aktørId;
     }
 
-    public String getInstitusjonskode() {
-        return institusjonskode;
+    public String getInstitusjonId() {
+        return institusjonId;
     }
 
     public static final class Builder {
@@ -49,7 +49,7 @@ public class MuligMottakerDto {
         private Aktoersroller rolle;
         private String orgnr;
         private String aktørId;
-        private String institusjonskode;
+        private String institusjonId;
 
         public Builder medMottakerNavn(String mottakerNavn) {
             this.mottakerNavn = mottakerNavn;
@@ -76,8 +76,8 @@ public class MuligMottakerDto {
             return this;
         }
 
-        public Builder medInstitusjonskode(String institusjonskode) {
-            this.institusjonskode = institusjonskode;
+        public Builder medInstitusjonId(String institusjonId) {
+            this.institusjonId = institusjonId;
             return this;
         }
 

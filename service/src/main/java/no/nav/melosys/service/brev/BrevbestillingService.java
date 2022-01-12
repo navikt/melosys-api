@@ -169,7 +169,7 @@ public class BrevbestillingService {
                 .medDokumentNavn("Kopi til utenlandsk trygdemyndighet")
                 .medMottakerNavn("Utenlandsk trygdemyndighet")
                 .medRolle(avklartKopi.getRolle())
-                .medInstitusjonskode(avklartKopi.getInstitusjonId())
+                .medInstitusjonId(avklartKopi.getInstitusjonId())
                 .build());
         }
         return muligMottakerDtos;

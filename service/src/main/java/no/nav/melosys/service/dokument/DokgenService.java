@@ -141,7 +141,7 @@ public class DokgenService {
             aktoer.setRolle(kopiMottaker.getRolle());
             aktoer.setOrgnr(kopiMottaker.getOrgnr());
             aktoer.setAktørId(kopiMottaker.getAktørId());
-            aktoer.setInstitusjonId(kopiMottaker.getInstitusjonskode());
+            aktoer.setInstitusjonId(kopiMottaker.getInstitusjonId());
             brevbestilling.medBestillKopi(true);
             produserOgDistribuerBrev(behandling, aktoer, brevbestilling.build());
         }

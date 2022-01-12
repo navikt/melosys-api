@@ -14,7 +14,7 @@ public class BrevbestillingDto {
     private Produserbaredokumenter produserbardokument;
     private Aktoersroller mottaker;
     private String orgNr;
-    private String institusjonskode;
+    private String institusjonId;
     private String innledningFritekst;
     private String manglerFritekst;
     private String begrunnelseFritekst;
@@ -46,7 +46,7 @@ public class BrevbestillingDto {
             .medProduserbardokument(this.getProduserbardokument())
             .medMottaker(this.getMottaker())
             .medOrgNr(this.getOrgNr())
-            .medInstitusjonId(this.getInstitusjonskode())
+            .medInstitusjonId(this.getInstitusjonId())
             .medInnledningFritekst(this.getInnledningFritekst())
             .medManglerFritekst(this.getManglerFritekst())
             .medBegrunnelseFritekst(this.getBegrunnelseFritekst())
@@ -91,8 +91,8 @@ public class BrevbestillingDto {
         return orgNr;
     }
 
-    public String getInstitusjonskode() {
-        return institusjonskode;
+    public String getInstitusjonId() {
+        return institusjonId;
     }
 
     public String getInnledningFritekst() {
