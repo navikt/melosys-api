@@ -73,6 +73,7 @@ public class BrevbestillingService {
         this.unleash = unleash;
     }
 
+    @Transactional
     public MuligeMottakereDto hentMuligeMottakere(Produserbaredokumenter produserbaredokumenter, Behandling behandling, String orgnrTilValgtArbeidsgiver) {
         Mottakerliste mottakerliste = brevmottakerService.hentMottakerliste(produserbaredokumenter, behandling);
         return new MuligeMottakereDto(
@@ -90,16 +91,16 @@ public class BrevbestillingService {
     }
 
     private String hentMottakerNavn(Produserbaredokumenter produserbaredokumenter, Behandling behandling, Aktoersroller hovedmottaker, String orgnrTilValgtArbeidsgiver) {
-        if (hovedmottaker == Aktoersroller.BRUKER) {
+        if (hovedmottaker == BRUKER) {
             Aktoer avklartMottaker = brevmottakerService.avklarMottaker(produserbaredokumenter, Mottaker.av(hovedmottaker), behandling);
-            if (avklartMottaker.getRolle() == Aktoersroller.BRUKER) {
+            if (avklartMottaker.getRolle() == BRUKER) {
                 return hentSammensattNavn(behandling);
             } else {
                 var orgDokument = hentRettOrganisasjonsdokument(behandling, avklartMottaker.getOrgnr());
                 return orgDokument.getNavn();
             }
         }
-        if (hovedmottaker == Aktoersroller.ARBEIDSGIVER) {
+        if (hovedmottaker == ARBEIDSGIVER) {
             var orgDokument = (OrganisasjonDokument) eregFasade.hentOrganisasjon(orgnrTilValgtArbeidsgiver).getDokument();
             return orgDokument.getNavn();
         }
@@ -113,11 +114,11 @@ public class BrevbestillingService {
     private List<MuligMottakerDto> lagKopiMottakereMuligMottakerDtos(Produserbaredokumenter produserbaredokumenter, Behandling behandling, Collection<Aktoersroller> kopiMottakere, Aktoersroller hovedmottaker) {
         List<MuligMottakerDto> muligMottakerDtos = new ArrayList<>();
         for (Aktoersroller kopiMottaker : kopiMottakere) {
-            if (kopiMottaker == Aktoersroller.BRUKER) {
-                muligMottakerDtos.add(lagKopiMottakerForBruker(produserbaredokumenter, behandling, kopiMottaker, hovedmottaker));
-            }
-            if (kopiMottaker == Aktoersroller.ARBEIDSGIVER) {
-                muligMottakerDtos.addAll(lagKopiMottakereForArbeidsgiver(produserbaredokumenter, behandling, kopiMottaker));
+            switch (kopiMottaker) {
+                case BRUKER -> muligMottakerDtos.add(lagKopiMottakerForBruker(produserbaredokumenter, behandling, kopiMottaker, hovedmottaker));
+                case ARBEIDSGIVER -> muligMottakerDtos.addAll(lagKopiMottakereForArbeidsgiver(produserbaredokumenter, behandling, kopiMottaker));
+                case MYNDIGHET -> muligMottakerDtos.addAll(lagKopiMottakereForMyndighet(produserbaredokumenter, behandling, kopiMottaker));
+                default -> throw new IllegalStateException(kopiMottaker + " er ikke en gyldig kopiMottakerrolle");
             }
         }
         return muligMottakerDtos;
@@ -125,7 +126,7 @@ public class BrevbestillingService {
 
     private MuligMottakerDto lagKopiMottakerForBruker(Produserbaredokumenter produserbaredokumenter, Behandling behandling, Aktoersroller kopiMottaker, Aktoersroller hovedmottaker) {
         Aktoer avklartKopi = brevmottakerService.avklarMottaker(produserbaredokumenter, Mottaker.av(kopiMottaker), behandling);
-        if (avklartKopi.getRolle() == Aktoersroller.BRUKER || hovedmottaker == kopiMottaker) {
+        if (avklartKopi.getRolle() == BRUKER || hovedmottaker == kopiMottaker) {
             return new MuligMottakerDto.Builder()
                 .medDokumentNavn("Kopi til bruker")
                 .medMottakerNavn(hentSammensattNavn(behandling))
@@ -159,12 +160,28 @@ public class BrevbestillingService {
         return muligMottakerDtos;
     }
 
+    private List<MuligMottakerDto> lagKopiMottakereForMyndighet(Produserbaredokumenter produserbaredokumenter, Behandling behandling, Aktoersroller kopiMottaker) {
+        List<MuligMottakerDto> muligMottakerDtos = new ArrayList<>();
+
+        List<Aktoer> avklarteKopier = brevmottakerService.avklarMottakere(produserbaredokumenter, Mottaker.av(kopiMottaker), behandling);
+        for (Aktoer avklartKopi : avklarteKopier) {
+            muligMottakerDtos.add(new MuligMottakerDto.Builder()
+                .medDokumentNavn("Kopi til utenlandsk trygdemyndighet")
+                .medMottakerNavn("Utenlandsk trygdemyndighet")
+                .medRolle(avklartKopi.getRolle())
+                .medInstitusjonskode(avklartKopi.getInstitusjonId())
+                .build());
+        }
+        return muligMottakerDtos;
+    }
+
     private List<MuligMottakerDto> lagFasteMottakereMuligMottakerDtos(Produserbaredokumenter produserbaredokumenter, Behandling behandling, Collection<FastMottaker> fasteMottakere) {
         List<MuligMottakerDto> muligMottakerDtos = new ArrayList<>();
 
         for (FastMottaker fastMottaker : fasteMottakere) {
             Aktoer avklartMottaker = brevmottakerService.avklarMottaker(produserbaredokumenter, FastMottaker.av(fastMottaker), behandling);
             var orgDokument = hentRettOrganisasjonsdokument(behandling, avklartMottaker.getOrgnr());
+
             muligMottakerDtos.add(new MuligMottakerDto.Builder()
                 .medDokumentNavn("Kopi til " + orgDokument.getNavn())
                 .medMottakerNavn(orgDokument.getNavn())
@@ -214,9 +231,9 @@ public class BrevbestillingService {
         Kontaktopplysning kontaktopplysning = null;
         OrganisasjonDokument orgDokument = null;
 
-        if (mottaker.getRolle() == Aktoersroller.BRUKER) {
+        if (mottaker.getRolle() == BRUKER) {
             persondata = hentPersondata(behandling);
-        } else if (mottaker.getRolle() == Aktoersroller.ARBEIDSGIVER || mottaker.getRolle() == Aktoersroller.REPRESENTANT) {
+        } else if (mottaker.getRolle() == ARBEIDSGIVER || mottaker.getRolle() == Aktoersroller.REPRESENTANT) {
             kontaktopplysning = kontaktopplysningService.hentKontaktopplysning(behandling.getFagsak().getSaksnummer(),
                 mottaker.getOrgnr()).orElse(null);
             String mottakerOrgnr = kontaktopplysning != null && kontaktopplysning.getKontaktOrgnr() != null ? kontaktopplysning.getKontaktOrgnr() : mottaker.getOrgnr();
@@ -242,7 +259,7 @@ public class BrevbestillingService {
             return poststed;
         }
         return StringUtils.isEmpty(poststed) ? kodeverkService.dekod(FellesKodeverk.POSTNUMMER,
-                                                                     persondata.hentGjeldendePostadresse().postnr()) : poststed;
+            persondata.hentGjeldendePostadresse().postnr()) : poststed;
     }
 
     private Persondata hentPersondata(Behandling behandling) {
