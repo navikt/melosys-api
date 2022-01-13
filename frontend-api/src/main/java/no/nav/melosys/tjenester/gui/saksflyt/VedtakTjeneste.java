@@ -89,18 +89,18 @@ public class VedtakTjeneste {
             var sakstype = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID).getFagsak().getType();
             if (sakstype == Sakstyper.FTRL) {
                 fattVedtakRequest = new FattFtrlVedtakRequest.Builder()
-                    .medFritekstInnledning(trygdeavtaleEllerFtrlVedtakDto.getFritekstInnledning())
-                    .medFritekstBegrunnelse(trygdeavtaleEllerFtrlVedtakDto.getFritekstBegrunnelse())
-                    .medFritekstEktefelle(trygdeavtaleEllerFtrlVedtakDto.getFritekstEktefelle())
-                    .medFritekstBarn(trygdeavtaleEllerFtrlVedtakDto.getFritekstBarn())
+                    .medInnledningFritekst(trygdeavtaleEllerFtrlVedtakDto.getInnledningFritekst())
+                    .medBegrunnelseFritekst(trygdeavtaleEllerFtrlVedtakDto.getBegrunnelseFritekst())
+                    .medEktefelleFritekst(trygdeavtaleEllerFtrlVedtakDto.getEktefelleFritekst())
+                    .medBarnFritekst(trygdeavtaleEllerFtrlVedtakDto.getBarnFritekst())
                     .medKopiMottakere(trygdeavtaleEllerFtrlVedtakDto.getKopiMottakere())
                     .medBestillersId(bestillersId);
             } else if (sakstype == Sakstyper.TRYGDEAVTALE) {
                 fattVedtakRequest = new FattTrygdeavtaleVedtakRequest.Builder()
-                    .medFritekstInnledning(trygdeavtaleEllerFtrlVedtakDto.getFritekstInnledning())
-                    .medFritekstBegrunnelse(trygdeavtaleEllerFtrlVedtakDto.getFritekstBegrunnelse())
-                    .medFritekstEktefelle(trygdeavtaleEllerFtrlVedtakDto.getFritekstEktefelle())
-                    .medFritekstBarn(trygdeavtaleEllerFtrlVedtakDto.getFritekstBarn())
+                    .medInnledningFritekst(trygdeavtaleEllerFtrlVedtakDto.getInnledningFritekst())
+                    .medBegrunnelseFritekst(trygdeavtaleEllerFtrlVedtakDto.getBegrunnelseFritekst())
+                    .medEktefelleFritekst(trygdeavtaleEllerFtrlVedtakDto.getEktefelleFritekst())
+                    .medBarnFritekst(trygdeavtaleEllerFtrlVedtakDto.getBarnFritekst())
                     .medKopiMottakere(trygdeavtaleEllerFtrlVedtakDto.getKopiMottakere())
                     .medBestillersId(bestillersId);
             } else {

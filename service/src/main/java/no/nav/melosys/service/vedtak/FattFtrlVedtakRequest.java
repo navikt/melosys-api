@@ -5,37 +5,37 @@ import java.util.List;
 import no.nav.melosys.service.dokument.brev.KopiMottaker;
 
 public class FattFtrlVedtakRequest extends FattVedtakRequest {
-    private final String fritekstInnledning;
-    private final String fritekstBegrunnelse;
-    private final String fritekstEktefelle;
-    private final String fritekstBarn;
+    private final String innledningFritekst;
+    private final String begrunnelseFritekst;
+    private final String ektefelleFritekst;
+    private final String barnFritekst;
     private final List<KopiMottaker> kopiMottakere;
     private final String bestillersId;
 
     private FattFtrlVedtakRequest(Builder builder) {
         super(builder);
-        this.fritekstInnledning = builder.fritekstInnledning;
-        this.fritekstBegrunnelse = builder.fritekstBegrunnelse;
-        this.fritekstEktefelle = builder.fritekstEktefelle;
-        this.fritekstBarn = builder.fritekstBarn;
+        this.innledningFritekst = builder.innledningFritekst;
+        this.begrunnelseFritekst = builder.begrunnelseFritekst;
+        this.ektefelleFritekst = builder.ektefelleFritekst;
+        this.barnFritekst = builder.barnFritekst;
         this.kopiMottakere = builder.kopiMottakere;
         this.bestillersId = builder.bestillersId;
     }
 
-    public String getFritekstInnledning() {
-        return fritekstInnledning;
+    public String getInnledningFritekst() {
+        return innledningFritekst;
     }
 
-    public String getFritekstBegrunnelse() {
-        return fritekstBegrunnelse;
+    public String getBegrunnelseFritekst() {
+        return begrunnelseFritekst;
     }
 
-    public String getFritekstEktefelle() {
-        return fritekstEktefelle;
+    public String getEktefelleFritekst() {
+        return ektefelleFritekst;
     }
 
-    public String getFritekstBarn() {
-        return fritekstBarn;
+    public String getBarnFritekst() {
+        return barnFritekst;
     }
 
     public List<KopiMottaker> getKopiMottakere() {
@@ -47,10 +47,10 @@ public class FattFtrlVedtakRequest extends FattVedtakRequest {
     }
 
     public static class Builder extends FattVedtakRequest.Builder<Builder> {
-        private String fritekstInnledning;
-        private String fritekstBegrunnelse;
-        private String fritekstEktefelle;
-        private String fritekstBarn;
+        private String innledningFritekst;
+        private String begrunnelseFritekst;
+        private String ektefelleFritekst;
+        private String barnFritekst;
         private List<KopiMottaker> kopiMottakere;
         private String bestillersId;
 
@@ -59,23 +59,23 @@ public class FattFtrlVedtakRequest extends FattVedtakRequest {
             return this;
         }
 
-        public Builder medFritekstInnledning(String fritekstInnledning) {
-            this.fritekstInnledning = fritekstInnledning;
+        public Builder medInnledningFritekst(String innledningFritekst) {
+            this.innledningFritekst = innledningFritekst;
             return this;
         }
 
-        public Builder medFritekstBegrunnelse(String fritekstBegrunnelse) {
-            this.fritekstBegrunnelse = fritekstBegrunnelse;
+        public Builder medBegrunnelseFritekst(String begrunnelseFritekst) {
+            this.begrunnelseFritekst = begrunnelseFritekst;
             return this;
         }
 
-        public Builder medFritekstEktefelle(String fritekstEktefelle) {
-            this.fritekstEktefelle = fritekstEktefelle;
+        public Builder medEktefelleFritekst(String ektefelleFritekst) {
+            this.ektefelleFritekst = ektefelleFritekst;
             return this;
         }
 
-        public Builder medFritekstBarn(String fritekstBarn) {
-            this.fritekstBarn = fritekstBarn;
+        public Builder medBarnFritekst(String barnFritekst) {
+            this.barnFritekst = barnFritekst;
             return this;
         }
 
