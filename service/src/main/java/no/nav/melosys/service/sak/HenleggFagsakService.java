@@ -41,6 +41,10 @@ public class HenleggFagsakService {
         this.behandlingService = behandlingService;
     }
 
+    /**
+     * Henlegger fagsak. Dersom den forespurte behandlingen {@param behandlingID} er ny vurdering,
+     * skal man ikke avslutte saken, men kun avslutte behandlingen. Behandlingsresultattype blir da HENLEGGELSE.
+     */
     @Transactional
     public void henleggFagsak(String saksnummer, String begrunnelseKodeString, String fritekst) {
         Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
