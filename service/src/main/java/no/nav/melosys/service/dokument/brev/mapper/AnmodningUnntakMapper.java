@@ -1,7 +1,6 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
 import java.util.Optional;
-import java.util.Set;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.datatype.DatatypeConfigurationException;
@@ -17,7 +16,6 @@ import no.nav.dok.melosysbrev.felles.melosys_felles.YrkesaktivitetsKode;
 import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.VilkaarBegrunnelse;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
@@ -74,7 +72,7 @@ public class AnmodningUnntakMapper implements BrevDataMapper {
             // Respons fra regelmodulen skiller ikke mellom begrunnelser for 883/2004 (MELOSYS-1863)
             fag.setInngangsvilkårBegrunnelse(InngangsvilkaarBegrunnelseKode.EOS_BORGER);
         } else {
-            throw new TekniskException("Forholdet er ikke dekket av inngangsvilkårene for 883/2004");
+            throw new TekniskException(behandling.getFagsak().getType() + " støttes ikke.");
         }
 
         fag.setForetakNavn(brevData.hovedvirksomhet.navn);
@@ -84,17 +82,20 @@ public class AnmodningUnntakMapper implements BrevDataMapper {
         fag.setArbeidsland(brevData.arbeidsland);
         fag.setLovvalgsperiode(lagLovvalgsperiodeType(anmodningsperiode));
 
-        Set<VilkaarBegrunnelse> art121Begrunnelser = resultat.hentVilkaarbegrunnelser(FO_883_2004_ART12_1);
-        fag.setArt121Begrunnelse(mapArt121BegrunnelseType(art121Begrunnelser));
+        if (resultat.manglerVilkår(FO_883_2004_ART12_1) && resultat.manglerVilkår(FO_883_2004_ART12_2)) {
+            // bestemmelseDetSoekesUnntakFra støttes feilaktig bare i forkortet flyt, direkte anmodning om art.16
+            Optional.ofNullable(anmodningsperiode.getUnntakFraBestemmelse())
+                .map(BESTEMMELSE_DET_SOEKES_UNNTAK_FRA_KODE_MAP::get)
+                .ifPresent(fag::setBestemmelseDetSoekesUnntakFra);
+        }
 
-        Set<VilkaarBegrunnelse> art121ForutgåendeBegrunnelser = resultat.hentVilkaarbegrunnelser(ART12_1_FORUTGAAENDE_MEDLEMSKAP);
-        fag.setArt121ForutgåendeBegrunnelse(mapArt121ForutgaaendeBegrunnelseType(art121ForutgåendeBegrunnelser));
+        fag.setArt121Begrunnelse(mapArt121BegrunnelseType(resultat.hentVilkaarbegrunnelser(FO_883_2004_ART12_1)));
+        fag.setArt121ForutgåendeBegrunnelse(
+            mapArt121ForutgaaendeBegrunnelseType(resultat.hentVilkaarbegrunnelser(ART12_1_FORUTGAAENDE_MEDLEMSKAP)));
 
-        Set<VilkaarBegrunnelse> art122Begrunnelser = resultat.hentVilkaarbegrunnelser(FO_883_2004_ART12_2);
-        fag.setArt122Begrunnelse(mapArt122BegrunnelseType(art122Begrunnelser));
-
-        Set<VilkaarBegrunnelse> art122NormalVirksomhetBegrunnelse = resultat.hentVilkaarbegrunnelser(ART12_2_NORMALT_DRIVER_VIRKSOMHET);
-        fag.setArt122NormalVirksomhetBegrunnelse(mapArt122NormalVirksomhetBegrunnelseType(art122NormalVirksomhetBegrunnelse));
+        fag.setArt122Begrunnelse(mapArt122BegrunnelseType(resultat.hentVilkaarbegrunnelser(FO_883_2004_ART12_2)));
+        fag.setArt122NormalVirksomhetBegrunnelse(mapArt122NormalVirksomhetBegrunnelseType(
+            resultat.hentVilkaarbegrunnelser(ART12_2_NORMALT_DRIVER_VIRKSOMHET)));
 
         mapAnmodningBegrunnelser(brevData.anmodningBegrunnelser).ifPresent(fag::setArt161AnmodningBegrunnelse);
 
@@ -103,10 +104,6 @@ public class AnmodningUnntakMapper implements BrevDataMapper {
         fag.setAnmodningFritekst(brevData.anmodningFritekst);
 
         fag.setBegrunnelseFritekst(brevData.fritekst);
-
-        Optional.ofNullable(anmodningsperiode.getUnntakFraBestemmelse())
-            .map(BESTEMMELSE_DET_SOEKES_UNNTAK_FRA_KODE_MAP::get)
-            .ifPresent(fag::setBestemmelseDetSoekesUnntakFra);
 
         return fag;
     }

@@ -1,4 +1,4 @@
-package no.nav.melosys.integrasjon.dokgen.dto.atteststorbritannia;
+package no.nav.melosys.integrasjon.dokgen.dto.storbritannia.attest;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -7,17 +7,16 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
-import no.nav.melosys.integrasjon.dokgen.dto.DokgenDto;
 
 import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
 
-public class AttestStorbritannia extends DokgenDto {
+public class AttestStorbritannia {
 
     private final Arbeidstaker arbeidstaker;
     private final MedfolgendeFamiliemedlemmer medfolgendeFamiliemedlemmer;
     private final ArbeidsgiverNorge arbeidsgiverNorge;
     private final Utsendelse utsendelse;
-    private final RepresentantUK representantUK;
+    private final RepresentantStorbritannia representant;
 
     @JsonSerialize(using = LocalDateSerializer.class)
     @JsonFormat(shape = STRING)
@@ -39,8 +38,8 @@ public class AttestStorbritannia extends DokgenDto {
         return utsendelse;
     }
 
-    public RepresentantUK getRepresentantUK() {
-        return representantUK;
+    public RepresentantStorbritannia getRepresentant() {
+        return representant;
     }
 
     public LocalDate getVedtaksdato() {
@@ -48,14 +47,13 @@ public class AttestStorbritannia extends DokgenDto {
     }
 
     public AttestStorbritannia(Builder builder) {
-        super(builder.brevbestilling);
         this.vedtaksdato = builder.brevbestilling.getVedtaksdato() != null
             ? LocalDate.ofInstant(builder.brevbestilling.getVedtaksdato(), ZoneId.systemDefault()) : null;
         this.utsendelse = builder.utsendelse;
         this.arbeidstaker = builder.arbeidstaker;
         this.arbeidsgiverNorge = builder.arbeidsgiverNorge;
         this.medfolgendeFamiliemedlemmer = builder.medfolgendeFamiliemedlemmer;
-        this.representantUK = builder.representantUK;
+        this.representant = builder.representant;
     }
 
     static public class Builder {
@@ -63,7 +61,7 @@ public class AttestStorbritannia extends DokgenDto {
         private MedfolgendeFamiliemedlemmer medfolgendeFamiliemedlemmer;
         private ArbeidsgiverNorge arbeidsgiverNorge;
         private Utsendelse utsendelse;
-        private RepresentantUK representantUK;
+        private RepresentantStorbritannia representant;
         private final DokgenBrevbestilling brevbestilling;
 
         public Builder(DokgenBrevbestilling brevbestilling) {
@@ -90,8 +88,8 @@ public class AttestStorbritannia extends DokgenDto {
             return this;
         }
 
-        public Builder representantUK(RepresentantUK representantUK) {
-            this.representantUK = representantUK;
+        public Builder representant(RepresentantStorbritannia representant) {
+            this.representant = representant;
             return this;
         }
 

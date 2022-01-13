@@ -56,20 +56,16 @@ class OpprettJournalforBrevTest {
 
     @Test
     void utførFeilerVedManglendeBehandling() {
-        assertThatThrownBy(() -> opprettJournalforBrev.utfør(new Prosessinstans()))
+        Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setData(ProsessDataKey.AKTØR_ID, "12345678901");
+        assertThatThrownBy(() -> opprettJournalforBrev.utfør(prosessinstans))
             .isInstanceOf(FunksjonellException.class)
             .hasMessage("Prosessinstans mangler behandling");
     }
 
     @Test
     void utførFeilerVedManglendeMottaker() {
-        Prosessinstans prosessinstans = new Prosessinstans();
-        Behandling behandling = TestdataFactory.lagBehandling();
-        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandling);
-        prosessinstans.setBehandling(behandling);
-        prosessinstans.setData(ProsessDataKey.BREVBESTILLING, new DokgenBrevbestilling.Builder<>().build());
-
-        assertThatThrownBy(() -> opprettJournalforBrev.utfør(prosessinstans))
+        assertThatThrownBy(() -> opprettJournalforBrev.utfør(new Prosessinstans()))
             .isInstanceOf(FunksjonellException.class)
             .hasMessage("Mangler mottaker");
     }
@@ -175,7 +171,7 @@ class OpprettJournalforBrevTest {
 
         assertThatThrownBy(() -> opprettJournalforBrev.utfør(prosessinstans))
             .isInstanceOf(FunksjonellException.class)
-                .hasMessageContaining("Tittel til fritekstbrev mangler");
+            .hasMessageContaining("Tittel til fritekstbrev mangler");
     }
 
     @Test

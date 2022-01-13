@@ -23,12 +23,10 @@ public class EosVedtakSystemService extends EosVedtakService {
                                   ProsessinstansService prosessinstansService,
                                   @Qualifier("system") EessiService eessiService,
                                   LandvelgerService landvelgerService,
-                                  @Qualifier("system") PersondataFasade persondataFasade,
-                                  RegisteropplysningerService registeropplysningerService,
-                                  @Qualifier("system") VedtakKontrollService vedtakKontrollService,
                                   AvklartefaktaService avklartefaktaService,
-                                  ApplicationEventMulticaster melosysEventMulticaster) {
+                                  ApplicationEventMulticaster melosysEventMulticaster,
+                                  VedtakKontrollService vedtakKontrollService) {
         super(behandlingService, behandlingsresultatService, oppgaveService, prosessinstansService,
-            eessiService, landvelgerService, persondataFasade, registeropplysningerService, vedtakKontrollService, avklartefaktaService, melosysEventMulticaster);
+            eessiService, landvelgerService, avklartefaktaService, melosysEventMulticaster, vedtakKontrollService);
     }
 }

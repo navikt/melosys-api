@@ -18,6 +18,7 @@ import no.nav.melosys.integrasjon.dokgen.DokgenConsumer;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
+import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
@@ -69,13 +70,13 @@ class DokgenServiceTest {
     @Mock
     private SaksbehandlerService mockSaksbehandlerService;
     @Mock
+    private UtenlandskMyndighetService mockUtenlandskMyndighetService;
+    @Mock
     private InnvilgelseFtrlMapper mockInnvilgelseFtrlMapper;
     @Mock
-    private InnvilgelseUKMapper mockInnvilgelseUKMapper;
+    private StorbritanniaMapper mockStorbritanniaMapper;
     @Mock
     private DokumentHentingService dokumentHentingService;
-    @Mock
-    private AttestStorbritanniaMapper mockAttestStorbritanniaMapper;
     @Captor
     private ArgumentCaptor<DokgenBrevbestilling> brevbestillingCaptor;
 
@@ -92,13 +93,10 @@ class DokgenServiceTest {
 
         dokgenService = new DokgenService(mockDokgenConsumer, new DokumentproduksjonsInfoMapper(unleash),
             mockJoarkFasade,
-            new DokgenMalMapper(dokgenMapperDatahenter,
-                mockInnvilgelseFtrlMapper,
-                mockAttestStorbritanniaMapper,
-                mockInnvilgelseUKMapper,
-                dokumentHentingService),
+            new DokgenMalMapper(dokgenMapperDatahenter, mockInnvilgelseFtrlMapper, mockStorbritanniaMapper, dokumentHentingService),
             mockBehandlingsService, mockEregFasade, mockKontaktOpplysningService,
-            mockBrevMottakerService, mockProsessinstansService, mockSaksbehandlerService);
+            mockBrevMottakerService, mockProsessinstansService, mockSaksbehandlerService,
+            mockUtenlandskMyndighetService);
 
         reset(mockDokgenConsumer);
     }
@@ -324,7 +322,7 @@ class DokgenServiceTest {
             .medManglerFritekst("Mangler")
             .medMottaker(Aktoersroller.ARBEIDSGIVER)
             .medOrgNr("987654321")
-            .medKopiMottakere(List.of(new KopiMottaker(Aktoersroller.BRUKER, null, "1223")))
+            .medKopiMottakere(List.of(new KopiMottaker(Aktoersroller.BRUKER, null, "1223", null)))
             .build();
 
         dokgenService.produserOgDistribuerBrev(123L, brevbestillingRequest);

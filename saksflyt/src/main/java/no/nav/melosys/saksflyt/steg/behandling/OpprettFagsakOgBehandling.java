@@ -25,7 +25,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.*;
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.JFR_OPPRETT_SAK_OG_BEH;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.OPPRETT_SAK_OG_BEH;
 
 @Component
 public class OpprettFagsakOgBehandling implements StegBehandler {
@@ -43,7 +43,7 @@ public class OpprettFagsakOgBehandling implements StegBehandler {
 
     @Override
     public ProsessSteg inngangsSteg() {
-        return JFR_OPPRETT_SAK_OG_BEH;
+        return OPPRETT_SAK_OG_BEH;
     }
 
     @Override

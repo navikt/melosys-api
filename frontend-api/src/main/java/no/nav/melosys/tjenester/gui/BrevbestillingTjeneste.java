@@ -9,6 +9,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.TekniskException;
@@ -34,7 +35,7 @@ import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
 
 @Protected
 @RestController
-@RequestMapping("/dokumenter/v2") //TODO Endre url når gjennomtestet
+@RequestMapping("/dokumenter/v2") //TODO: Endre url når gjennomtestet
 @Api(tags = {"dokumenterv2"})
 @RequestScope
 public class BrevbestillingTjeneste {
@@ -104,7 +105,7 @@ public class BrevbestillingTjeneste {
                 return switch (p) {
                     case MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE -> lagBrevMalDtoForForventetSaksbehandlingstid(p, hovedMottaker, behandling);
                     case MANGELBREV_BRUKER, MANGELBREV_ARBEIDSGIVER -> lagBrevMalDtoForMangelbrev(p, hovedMottaker, behandling);
-//                    case GENERELT_FRITEKSTBREV_BRUKER, GENERELT_FRITEKSTBREV_ARBEIDSGIVER -> lagBrevMalDtoForFritekstbrev(p, hovedMottaker, behandling); //TODO Tas inn når frontend er klar for fritekstbrev
+                    case GENERELT_FRITEKSTBREV_BRUKER, GENERELT_FRITEKSTBREV_ARBEIDSGIVER -> lagBrevMalDtoForFritekstbrev(p, hovedMottaker, behandling);
                     default -> null;
                 };
             })
@@ -127,7 +128,7 @@ public class BrevbestillingTjeneste {
 
     private BrevmalDto lagBrevMalDtoForMangelbrev(Produserbaredokumenter produserbartdokument, Aktoersroller hovedMottaker, Behandling behandling) {
         List<MottakerDto> mottakere = new ArrayList<>();
-        List<FeltvalgDto> feltvalgDtos = new ArrayList<>();
+        List<FeltvalgAlternativDto> feltvalgAlternativDtos = new ArrayList<>();
 
         var builder = new MottakerDto.Builder()
             .medType(hovedMottaker == Aktoersroller.BRUKER ? BRUKER_ELLER_BRUKERS_FULLMEKTIG : ARBEIDSGIVER_ELLER_ARBEIDSGIVERS_FULLMEKTIG)
@@ -145,25 +146,26 @@ public class BrevbestillingTjeneste {
                     .build()
             );
         }
-
         if (behandling.getType() == Behandlingstyper.SOEKNAD || behandling.erKlage()) {
-            feltvalgDtos.add(new FeltvalgDto.Builder().medKode("STANDARD").medBeskrivelse("Standardtekst søknad/klage").build());
+            feltvalgAlternativDtos.add(new FeltvalgAlternativDto(FeltvalgAlternativKode.STANDARD));
         }
-        feltvalgDtos.add(new FeltvalgDto.Builder().medKode("FRITEKST").medBeskrivelse("Fritekst (erstatter standardtekst)").build());
+        feltvalgAlternativDtos.add(new FeltvalgAlternativDto(FeltvalgAlternativKode.FRITEKST.getKode(), "Fritekst (erstatter standardtekst)", true));
+
+        FeltValgDto feltValgDto = new FeltValgDto(feltvalgAlternativDtos, FeltValgType.RADIO);
 
         return new BrevmalDto.Builder()
             .medType(produserbartdokument)
             .medFelter(asList(
                 new BrevmalFeltDto.Builder()
-                    .medKode("INNLEDNING_FRITEKST")
-                    .medBeskrivelse("Innledningstekst")
+                    .medKode(BrevmalFeltKode.INNLEDNING_FRITEKST.getKode())
+                    .medBeskrivelse(BrevmalFeltKode.INNLEDNING_FRITEKST.getBeskrivelse())
                     .medFeltType(FeltType.FRITEKST)
                     .erPåkrevd()
-                    .medValg(feltvalgDtos)
+                    .medValg(feltValgDto)
                     .build(),
                 new BrevmalFeltDto.Builder()
-                    .medKode("MANGLER_FRITEKST")
-                    .medBeskrivelse("Hva skal mottakeren sende inn?")
+                    .medKode(BrevmalFeltKode.MANGLER_FRITEKST.getKode())
+                    .medBeskrivelse(BrevmalFeltKode.MANGLER_FRITEKST.getBeskrivelse())
                     .medFeltType(FeltType.FRITEKST)
                     .erPåkrevd()
                     .build()
@@ -186,14 +188,22 @@ public class BrevbestillingTjeneste {
             .medType(produserbartdokument)
             .medFelter(asList(
                 new BrevmalFeltDto.Builder()
-                    .medKode("FRITEKST_TITTEL")
-                    .medBeskrivelse("Brevtittel")
-                    .medFeltType(FeltType.FRITEKST_STRING)
+                    .medKode(BrevmalFeltKode.BREV_TITTEL.getKode())
+                    .medBeskrivelse(BrevmalFeltKode.BREV_TITTEL.getBeskrivelse())
+                    .medFeltType(FeltType.TEKST)
+                    .medHjelpetekst("Tittelen du skriver inn her, vil bli tittelen på brevet når du sender det ut.")
+                    .medValg(hentFritekstTittelValg(behandling))
+                    .medTegnBegrensning(60)
                     .erPåkrevd()
                     .build(),
                 new BrevmalFeltDto.Builder()
-                    .medKode("FRITEKST")
-                    .medBeskrivelse("Brevtekst")
+                    .medKode(BrevmalFeltKode.STANDARDTEKST_KONTAKTINFORMASJON.getKode())
+                    .medBeskrivelse(BrevmalFeltKode.STANDARDTEKST_KONTAKTINFORMASJON.getBeskrivelse())
+                    .medFeltType(FeltType.SJEKKBOKS)
+                    .build(),
+                new BrevmalFeltDto.Builder()
+                    .medKode(BrevmalFeltKode.FRITEKST.getKode())
+                    .medBeskrivelse(BrevmalFeltKode.FRITEKST.getBeskrivelse())
                     .medFeltType(FeltType.FRITEKST)
                     .erPåkrevd()
                     .build()
@@ -201,6 +211,27 @@ public class BrevbestillingTjeneste {
             .medMuligeMottakere(singletonList(mottaker))
             .medMottakereHjelpetekst("Hvis bruker eller arbeidsgiver har fullmektig som er lagt inn i sidemenyen, vil brevet automatisk bli sendt til denne.")
             .build();
+    }
+
+    private FeltValgDto hentFritekstTittelValg(Behandling behandling) {
+        Sakstyper fagsakType = behandling.getFagsak().getType();
+
+        final List<FeltvalgAlternativDto> valgAlternativer = new ArrayList<>();
+
+        switch (fagsakType) {
+            case EU_EOS:
+                valgAlternativer.add(new FeltvalgAlternativDto(FeltvalgAlternativKode.HENVENDELSE_OM_TRYGDETILHØRLIGHET));
+                break;
+            case FTRL:
+                valgAlternativer.add(new FeltvalgAlternativDto(FeltvalgAlternativKode.CONFIRMATION_OF_MEMBERSHIP));
+                valgAlternativer.add(new FeltvalgAlternativDto(FeltvalgAlternativKode.BEKREFTELSE_PÅ_MEDLEMSKAP));
+            case TRYGDEAVTALE:
+                valgAlternativer.add(new FeltvalgAlternativDto(FeltvalgAlternativKode.HENVENDELSE_OM_MEDLEMSKAP));
+        }
+
+        valgAlternativer.add(new FeltvalgAlternativDto(FeltvalgAlternativKode.FRITEKST.getKode(), FeltvalgAlternativKode.FRITEKST.getBeskrivelse(), true));
+
+        return new FeltValgDto(valgAlternativer, FeltValgType.SELECT);
     }
 
     private void leggTilAdresseOgFeilmelding(MottakerDto.Builder builder, Produserbaredokumenter produserbaredokumenter, Aktoersroller aktoersroller, Behandling behandling) {
