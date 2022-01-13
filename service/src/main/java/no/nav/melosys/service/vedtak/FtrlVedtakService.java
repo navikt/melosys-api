@@ -70,10 +70,10 @@ public class FtrlVedtakService {
             .medProduserbardokument(Produserbaredokumenter.INNVILGELSE_FOLKETRYGDLOVEN_2_8)
             .medMottaker(Aktoersroller.BRUKER)
             .medKopiMottakere(request.getKopiMottakere())
-            .medInnledningFritekst(request.getFritekstInnledning())
-            .medBegrunnelseFritekst(request.getFritekstBegrunnelse())
-            .medEktefelleFritekst(request.getFritekstEktefelle())
-            .medBarnFritekst(request.getFritekstBarn())
+            .medInnledningFritekst(request.getInnledningFritekst())
+            .medBegrunnelseFritekst(request.getBegrunnelseFritekst())
+            .medEktefelleFritekst(request.getEktefelleFritekst())
+            .medBarnFritekst(request.getBarnFritekst())
             .medBestillersId(request.getBestillersId())
             .build();
     }
@@ -82,8 +82,8 @@ public class FtrlVedtakService {
         var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
         behandlingsresultat.setType(request.getBehandlingsresultatTypeKode());
         behandlingsresultat.settVedtakMetadata(request.getVedtakstype(), LocalDate.now().plusWeeks(FRIST_KLAGE_UKER));
-        behandlingsresultat.setBegrunnelseFritekst(request.getFritekstBegrunnelse());
-        behandlingsresultat.setInnledningFritekst(request.getFritekstInnledning());
+        behandlingsresultat.setBegrunnelseFritekst(request.getBegrunnelseFritekst());
+        behandlingsresultat.setInnledningFritekst(request.getInnledningFritekst());
         behandlingsresultat.setFastsattAvLand(Landkoder.NO);
 
         behandlingsresultatService.lagre(behandlingsresultat);

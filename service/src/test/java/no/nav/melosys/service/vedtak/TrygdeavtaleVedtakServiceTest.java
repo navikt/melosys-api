@@ -32,7 +32,6 @@ import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
 import static no.nav.melosys.domain.kodeverk.Saksstatuser.MEDLEMSKAP_AVKLART;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper.FASTSATT_LOVVALGSLAND;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.IVERKSETTER_VEDTAK;
-import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.ATTEST_NO_UK_1;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.STORBRITANNIA;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.*;
@@ -112,10 +111,10 @@ class TrygdeavtaleVedtakServiceTest {
         return new FattTrygdeavtaleVedtakRequest.Builder()
             .medBehandlingsresultat(FASTSATT_LOVVALGSLAND)
             .medVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK)
-            .medFritekstInnledning("Innledning")
-            .medFritekstBegrunnelse("Begrunnelse")
-            .medFritekstEktefelle("Ektefelle omfattet")
-            .medFritekstBarn("Barn omfattet")
+            .medInnledningFritekst("Innledning")
+            .medBegrunnelseFritekst("Begrunnelse")
+            .medEktefelleFritekst("Ektefelle omfattet")
+            .medBarnFritekst("Barn omfattet")
             .medKopiMottakere(List.of(
                 new KopiMottaker(ARBEIDSGIVER, "987654321", null, null),
                 new KopiMottaker(MYNDIGHET, null, null, "GB:UK010")

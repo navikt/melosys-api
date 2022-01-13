@@ -35,6 +35,7 @@ import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ObjectUtils;
 
 @Component
 public class StorbritanniaMapper {
@@ -59,10 +60,11 @@ public class StorbritanniaMapper {
 
     @Transactional
     public InnvilgelseOgAttestStorbritannia map(InnvilgelseBrevbestilling brevbestilling) {
-        return new InnvilgelseOgAttestStorbritannia.Builder(brevbestilling)
+        var temp = new InnvilgelseOgAttestStorbritannia.Builder(brevbestilling)
             .innvilgelse(mapInnvilgelse(brevbestilling))
             .attest(mapAttest(brevbestilling))
             .build();
+        return temp;
     }
 
     private InnvilgelseStorbritannia mapInnvilgelse(InnvilgelseBrevbestilling brevbestilling) {
@@ -109,9 +111,16 @@ public class StorbritanniaMapper {
     }
 
     private Familie lagFamile(long behandlingID) {
+        var ektefelle = finnEktefelle(behandlingID);
+        var barn = finnBarn(behandlingID);
+
+        if (ObjectUtils.isEmpty(ektefelle) && ObjectUtils.isEmpty(barn)) {
+            return null;
+        }
+
         return new Familie.Builder()
-            .barn(finnBarn(behandlingID))
-            .ektefelle(finnEktefelle(behandlingID))
+            .ektefelle(ektefelle)
+            .barn(barn)
             .build();
     }
 

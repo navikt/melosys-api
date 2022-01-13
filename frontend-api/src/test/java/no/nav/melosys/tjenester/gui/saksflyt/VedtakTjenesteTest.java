@@ -21,6 +21,7 @@ import no.nav.melosys.service.vedtak.FattEosVedtakRequest;
 import no.nav.melosys.service.vedtak.FattFtrlVedtakRequest;
 import no.nav.melosys.service.vedtak.FattTrygdeavtaleVedtakRequest;
 import no.nav.melosys.service.vedtak.VedtakServiceFasade;
+import no.nav.melosys.service.vedtak.publisering.dto.Vedtak;
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
 import no.nav.melosys.sikkerhet.context.TestSubjectHandler;
 import no.nav.melosys.tjenester.gui.JsonSchemaTestParent;
@@ -88,7 +89,7 @@ class VedtakTjenesteTest extends JsonSchemaTestParent {
         FattTrygdeavtaleEllerFtrlVedtakDto fattVedtakDto = new FattTrygdeavtaleEllerFtrlVedtakDto();
         fattVedtakDto.setBehandlingsresultatTypeKode(Behandlingsresultattyper.HENLEGGELSE);
         fattVedtakDto.setVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK);
-        fattVedtakDto.setFritekstBegrunnelse("Begrunnelse");
+        fattVedtakDto.setBegrunnelseFritekst("Begrunnelse");
 
         vedtakTjeneste.fattVedtak(behandlingID, fattVedtakDto);
 
@@ -105,7 +106,7 @@ class VedtakTjenesteTest extends JsonSchemaTestParent {
         FattTrygdeavtaleEllerFtrlVedtakDto fattVedtakDto = new FattTrygdeavtaleEllerFtrlVedtakDto();
         fattVedtakDto.setBehandlingsresultatTypeKode(Behandlingsresultattyper.HENLEGGELSE);
         fattVedtakDto.setVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK);
-        fattVedtakDto.setFritekstBegrunnelse("Begrunnelse");
+        fattVedtakDto.setBegrunnelseFritekst("Begrunnelse");
 
         vedtakTjeneste.fattVedtak(behandlingID, fattVedtakDto);
 
