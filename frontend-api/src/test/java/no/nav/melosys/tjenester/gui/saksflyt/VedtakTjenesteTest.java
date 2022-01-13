@@ -21,7 +21,6 @@ import no.nav.melosys.service.vedtak.FattEosVedtakRequest;
 import no.nav.melosys.service.vedtak.FattFtrlVedtakRequest;
 import no.nav.melosys.service.vedtak.FattTrygdeavtaleVedtakRequest;
 import no.nav.melosys.service.vedtak.VedtakServiceFasade;
-import no.nav.melosys.service.vedtak.publisering.dto.Vedtak;
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
 import no.nav.melosys.sikkerhet.context.TestSubjectHandler;
 import no.nav.melosys.tjenester.gui.JsonSchemaTestParent;
@@ -202,7 +201,7 @@ class VedtakTjenesteTest extends JsonSchemaTestParent {
         return behandling;
     }
 
-    private FattVedtakDto lagFattVedtakDto (){
+    private FattVedtakDto lagFattVedtakDto() {
         var fattVedtak = new FattTrygdeavtaleEllerFtrlVedtakDto();
         fattVedtak.setVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK);
         return fattVedtak;
