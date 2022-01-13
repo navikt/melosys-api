@@ -38,8 +38,13 @@ class ArbeidsstedKontrollerTest {
     }
 
     @Test
-    void arbeidstedSvalbardOgJanMayen_byFraSvalbard_true() {
-        assertThat(ArbeidsstedKontroller.arbeidstedSvalbardOgJanMayen(lagSedDokument("NO", "Et sted, nær Ny-Ålesund"))).isTrue();
+    void arbeidstedSvalbardOgJanMayen_inneholderByFraSvalbard_false() {
+        assertThat(ArbeidsstedKontroller.arbeidstedSvalbardOgJanMayen(lagSedDokument("NO", "Senjahopen"))).isFalse();
+    }
+
+    @Test
+    void arbeidstedSvalbardOgJanMayen_likByFraSvalbard_true() {
+        assertThat(ArbeidsstedKontroller.arbeidstedSvalbardOgJanMayen(lagSedDokument("NO", "Hopen"))).isTrue();
     }
 
     @Test
