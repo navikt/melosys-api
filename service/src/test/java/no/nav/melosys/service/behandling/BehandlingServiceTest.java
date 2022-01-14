@@ -340,13 +340,13 @@ class BehandlingServiceTest {
     }
 
     @Test
-    void ferdigbehandleNyVurdering_avslutterBehandlingOgSetterBehandlingsresultattypeRiktig() {
+    void avsluttNyVurderingUtenEndring_avslutterBehandlingOgSetterBehandlingsresultattypeRiktig() {
         Behandling behandling = new Behandling();
         behandling.setId(BEHANDLING_ID);
         behandling.setType(Behandlingstyper.NY_VURDERING);
         when(behandlingRepo.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
 
-        behandlingService.ferdigbehandleNyVurdering(BEHANDLING_ID);
+        behandlingService.avsluttNyVurderingUtenEndring(BEHANDLING_ID);
 
         verify(behandlingRepo).save(behandlingCaptor.capture());
         verify(applicationEventPublisher).publishEvent(behandlingEndretStatusEventCaptor.capture());

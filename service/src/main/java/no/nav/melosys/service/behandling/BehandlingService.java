@@ -5,7 +5,6 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import io.micrometer.core.instrument.Counter;
@@ -150,7 +149,7 @@ public class BehandlingService {
 
         List<Behandlingsstatus> muligeStatuser = Stream.of(AVVENT_DOK_PART, AVVENT_DOK_UTL, UNDER_BEHANDLING, AVVENT_FAGLIG_AVKLARING)
             .filter(status -> status != behandling.getStatus())
-            .collect(Collectors.toList());
+            .collect(toList());
 
         List<Behandlingstema> temaerSomKanAvsluttes = List.of(ØVRIGE_SED_MED, ØVRIGE_SED_UFM, TRYGDETID, IKKE_YRKESAKTIV);
         if (temaerSomKanAvsluttes.contains(behandling.getTema())) {
@@ -292,7 +291,7 @@ public class BehandlingService {
         behandlingsresultatService.oppdaterBehandlingsresultattype(behandling.getId(),nyBehandlingsResultatType);
     }
 
-    public void ferdigbehandleNyVurdering(long behandlingId) {
+    public void avsluttNyVurderingUtenEndring(long behandlingId) {
         avsluttNyVurdering(behandlingId, Behandlingsresultattyper.AVSLUTTET_UTEN_ENDRING);
     }
 
