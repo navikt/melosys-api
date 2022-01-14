@@ -70,10 +70,47 @@ class OpprettNySakFraOppgaveTest {
     }
 
     @Test
+    void bestillNySakOgBehandling_sakstypeFtrlFeatureToggleEnabled_oppretterProsess() {
+        OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
+        opprettSakDto.setSakstype(Sakstyper.FTRL);
+        opprettSakDto.setBehandlingstema(Behandlingstema.ARBEID_I_UTLANDET);
+        unleash.enableAll();
+        Oppgave oppgave = new Oppgave.Builder().setOppgavetype(Oppgavetyper.BEH_SAK_MK).setJournalpostId("1234").build();
+        when(oppgaveService.hentOppgaveMedOppgaveID(opprettSakDto.getOppgaveID())).thenReturn(oppgave);
+        when(joarkFasade.hentJournalpost("1234")).thenReturn(lagJournalpost(Journalposttype.INN));
+        opprettNySakFraOppgave.bestillNySakOgBehandling(opprettSakDto);
+        verify(prosessinstansService).opprettProsessinstansNySakFTRLTrygdeavtale(oppgave.getJournalpostId(), opprettSakDto);
+    }
+
+    @Test
+    void bestillNySakOgBehandling_sakstypeTrygdeavtaleFeatureToggleEnabled_oppretterProsess() {
+        OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
+        opprettSakDto.setSakstype(Sakstyper.TRYGDEAVTALE);
+        opprettSakDto.setBehandlingstema(Behandlingstema.YRKESAKTIV);
+        unleash.enableAll();
+        Oppgave oppgave = new Oppgave.Builder().setOppgavetype(Oppgavetyper.BEH_SAK_MK).setJournalpostId("1234").build();
+        when(oppgaveService.hentOppgaveMedOppgaveID(opprettSakDto.getOppgaveID())).thenReturn(oppgave);
+        when(joarkFasade.hentJournalpost("1234")).thenReturn(lagJournalpost(Journalposttype.INN));
+        opprettNySakFraOppgave.bestillNySakOgBehandling(opprettSakDto);
+        verify(prosessinstansService).opprettProsessinstansNySakFTRLTrygdeavtale(oppgave.getJournalpostId(), opprettSakDto);
+    }
+
+    @Test
     void bestillNySakOgBehandling_sakstypeFtrlFeatureToggleDisabled_kasterException() {
         OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
         opprettSakDto.setSakstype(Sakstyper.FTRL);
         opprettSakDto.setBehandlingstema(Behandlingstema.ARBEID_I_UTLANDET);
+        unleash.disableAll();
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> opprettNySakFraOppgave.bestillNySakOgBehandling(opprettSakDto))
+            .withMessageContaining("Kan ikke opprette ny sak med");
+    }
+
+    @Test
+    void bestillNySakOgBehandling_sakstypeTrygdeavtaleFeatureToggleDisabled_kasterException() {
+        OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
+        opprettSakDto.setSakstype(Sakstyper.TRYGDEAVTALE);
+        opprettSakDto.setBehandlingstema(Behandlingstema.YRKESAKTIV);
         unleash.disableAll();
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> opprettNySakFraOppgave.bestillNySakOgBehandling(opprettSakDto))
@@ -160,6 +197,32 @@ class OpprettNySakFraOppgaveTest {
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> opprettNySakFraOppgave.bestillNySakOgBehandling(opprettSakDto))
             .withMessageContaining("må ikke være null");
+    }
+
+    @Test
+    void validerOpprettSakDto_nullSøknad_okForFTRL() {
+        OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
+        opprettSakDto.setSakstype(Sakstyper.FTRL);
+        opprettSakDto.setBehandlingstema(Behandlingstema.ARBEID_I_UTLANDET);
+        opprettSakDto.setSoknadDto(null);
+        Oppgave oppgave = new Oppgave.Builder().setOppgavetype(Oppgavetyper.BEH_SAK_MK).setJournalpostId("1234").build();
+        when(oppgaveService.hentOppgaveMedOppgaveID(opprettSakDto.getOppgaveID())).thenReturn(oppgave);
+        when(joarkFasade.hentJournalpost("1234")).thenReturn(lagJournalpost(Journalposttype.INN));
+        opprettNySakFraOppgave.bestillNySakOgBehandling(opprettSakDto);
+        verify(prosessinstansService).opprettProsessinstansNySakFTRLTrygdeavtale(oppgave.getJournalpostId(), opprettSakDto);
+    }
+
+    @Test
+    void validerOpprettSakDto_nullSøknad_okForTrygdeavtale() {
+        OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
+        opprettSakDto.setSakstype(Sakstyper.TRYGDEAVTALE);
+        opprettSakDto.setBehandlingstema(Behandlingstema.YRKESAKTIV);
+        opprettSakDto.setSoknadDto(null);
+        Oppgave oppgave = new Oppgave.Builder().setOppgavetype(Oppgavetyper.BEH_SAK_MK).setJournalpostId("1234").build();
+        when(oppgaveService.hentOppgaveMedOppgaveID(opprettSakDto.getOppgaveID())).thenReturn(oppgave);
+        when(joarkFasade.hentJournalpost("1234")).thenReturn(lagJournalpost(Journalposttype.INN));
+        opprettNySakFraOppgave.bestillNySakOgBehandling(opprettSakDto);
+        verify(prosessinstansService).opprettProsessinstansNySakFTRLTrygdeavtale(oppgave.getJournalpostId(), opprettSakDto);
     }
 
     @Test

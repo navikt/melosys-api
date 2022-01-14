@@ -372,6 +372,10 @@ public class Behandlingsresultat extends RegistreringsInfo {
             .collect(Collectors.toSet());
     }
 
+    public boolean manglerVilkår(Vilkaar vilkår) {
+        return vilkaarsresultater.stream().noneMatch(v -> v.getVilkaar() == vilkår);
+    }
+
     public boolean oppfyllerVilkår(Collection<Vilkaar> vilkår) {
         return vilkår.stream().allMatch(this::oppfyllerVilkår);
     }

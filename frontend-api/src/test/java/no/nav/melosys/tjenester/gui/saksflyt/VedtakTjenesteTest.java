@@ -88,7 +88,7 @@ class VedtakTjenesteTest extends JsonSchemaTestParent {
         FattTrygdeavtaleEllerFtrlVedtakDto fattVedtakDto = new FattTrygdeavtaleEllerFtrlVedtakDto();
         fattVedtakDto.setBehandlingsresultatTypeKode(Behandlingsresultattyper.HENLEGGELSE);
         fattVedtakDto.setVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK);
-        fattVedtakDto.setFritekstBegrunnelse("Begrunnelse");
+        fattVedtakDto.setBegrunnelseFritekst("Begrunnelse");
 
         vedtakTjeneste.fattVedtak(behandlingID, fattVedtakDto);
 
@@ -105,7 +105,7 @@ class VedtakTjenesteTest extends JsonSchemaTestParent {
         FattTrygdeavtaleEllerFtrlVedtakDto fattVedtakDto = new FattTrygdeavtaleEllerFtrlVedtakDto();
         fattVedtakDto.setBehandlingsresultatTypeKode(Behandlingsresultattyper.HENLEGGELSE);
         fattVedtakDto.setVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK);
-        fattVedtakDto.setFritekstBegrunnelse("Begrunnelse");
+        fattVedtakDto.setBegrunnelseFritekst("Begrunnelse");
 
         vedtakTjeneste.fattVedtak(behandlingID, fattVedtakDto);
 
@@ -201,7 +201,7 @@ class VedtakTjenesteTest extends JsonSchemaTestParent {
         return behandling;
     }
 
-    private FattVedtakDto lagFattVedtakDto (){
+    private FattVedtakDto lagFattVedtakDto() {
         var fattVedtak = new FattTrygdeavtaleEllerFtrlVedtakDto();
         fattVedtak.setVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK);
         return fattVedtak;

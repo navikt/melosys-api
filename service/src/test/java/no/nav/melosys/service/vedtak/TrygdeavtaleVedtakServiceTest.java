@@ -32,7 +32,7 @@ import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
 import static no.nav.melosys.domain.kodeverk.Saksstatuser.MEDLEMSKAP_AVKLART;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper.FASTSATT_LOVVALGSLAND;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.IVERKSETTER_VEDTAK;
-import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.ATTEST_NO_UK_1;
+import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.STORBRITANNIA;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
@@ -100,21 +100,25 @@ class TrygdeavtaleVedtakServiceTest {
         assertThat(brevbestillingRequest)
             .extracting("produserbardokument", "bestillersId", "mottaker", "innledningFritekst",
                 "begrunnelseFritekst", "ektefelleFritekst", "barnFritekst")
-            .containsExactly(ATTEST_NO_UK_1, "Z990007", BRUKER, "Innledning",
+            .containsExactly(STORBRITANNIA, "Z990007", BRUKER, "Innledning",
                 "Begrunnelse", "Ektefelle omfattet", "Barn omfattet");
-        assertThat(brevbestillingRequest.getKopiMottakere().size()).isEqualTo(1);
+        assertThat(brevbestillingRequest.getKopiMottakere().size()).isEqualTo(2);
         assertThat(brevbestillingRequest.getKopiMottakere().get(0).getRolle()).isEqualTo(ARBEIDSGIVER);
+        assertThat(brevbestillingRequest.getKopiMottakere().get(1).getRolle()).isEqualTo(MYNDIGHET);
     }
 
     private FattTrygdeavtaleVedtakRequest lagFattVedtakRequest() {
         return new FattTrygdeavtaleVedtakRequest.Builder()
             .medBehandlingsresultat(FASTSATT_LOVVALGSLAND)
             .medVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK)
-            .medFritekstInnledning("Innledning")
-            .medFritekstBegrunnelse("Begrunnelse")
-            .medFritekstEktefelle("Ektefelle omfattet")
-            .medFritekstBarn("Barn omfattet")
-            .medKopiMottakere(List.of(new KopiMottaker(ARBEIDSGIVER, "987654321", null)))
+            .medInnledningFritekst("Innledning")
+            .medBegrunnelseFritekst("Begrunnelse")
+            .medEktefelleFritekst("Ektefelle omfattet")
+            .medBarnFritekst("Barn omfattet")
+            .medKopiMottakere(List.of(
+                new KopiMottaker(ARBEIDSGIVER, "987654321", null, null),
+                new KopiMottaker(MYNDIGHET, null, null, "GB:UK010")
+            ))
             .medBestillersId(SubjectHandler.getInstance().getUserID())
             .build();
     }

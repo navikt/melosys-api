@@ -6,7 +6,6 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
-import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
@@ -44,7 +43,8 @@ import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagStruktur
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class BrevDataByggerAvslagArbeidsgiverTest {
@@ -61,8 +61,6 @@ class BrevDataByggerAvslagArbeidsgiverTest {
     @Mock
     LovvalgsperiodeService lovvalgsperiodeService;
 
-    private final FakeUnleash fakeUnleash = new FakeUnleash();
-
     private BrevDataByggerAvslagArbeidsgiver brevDataByggerAvslagArbeidsgiver;
 
     @BeforeEach
@@ -76,8 +74,6 @@ class BrevDataByggerAvslagArbeidsgiverTest {
 
     @Test
     void lag_avslagArbeidsgiverBrev_harVilkaarBegrunnelser() {
-        fakeUnleash.enable("melosys.pdl.sed-mapping");
-
         Aktoer aktoer = new Aktoer();
         aktoer.setRolle(Aktoersroller.BRUKER);
         aktoer.setAktørId("ident");
@@ -97,13 +93,12 @@ class BrevDataByggerAvslagArbeidsgiverTest {
         person.setType(SaksopplysningType.PERSOPL);
 
         Set<Saksopplysning> saksopplysninger = lagArbeidsforholdOpplysninger(Collections.singletonList("123456789"));
-
-        behandling.setBehandlingsgrunnlag(lagBehandlingsgrunnlag(Collections.singletonList("987654321"),
-            Collections.emptyList(),
-            Collections.emptyList()));
-
         saksopplysninger.add(person);
         behandling.setSaksopplysninger(saksopplysninger);
+
+        behandling.setBehandlingsgrunnlag(lagBehandlingsgrunnlag(Collections.emptyList(),
+            Collections.emptyList(),
+            Collections.singletonList("987654321")));
 
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setLovvalgsland(Landkoder.DE);
@@ -120,7 +115,7 @@ class BrevDataByggerAvslagArbeidsgiverTest {
         when(organisasjonsDetaljer.hentStrukturertForretningsadresse()).thenReturn(lagStrukturertAdresse());
         organisasjonDokument.organisasjonDetaljer = organisasjonsDetaljer;
 
-        lenient().when(registerOppslagService.hentOrganisasjoner(orgSet)).thenReturn(new HashSet<>(Collections.singletonList(organisasjonDokument)));
+        when(registerOppslagService.hentOrganisasjoner(orgSet)).thenReturn(new HashSet<>(Collections.singletonList(organisasjonDokument)));
 
         Vilkaarsresultat vilkaarsresultatArt121 = lagVilkårresultat(Vilkaar.FO_883_2004_ART12_1, Art12_1_begrunnelser.IKKE_OMFATTET_LENGE_NOK_I_NORGE_FOER.getKode());
         Vilkaarsresultat vesentligVirksomhet = lagVilkårresultat(Vilkaar.ART12_1_VESENTLIG_VIRKSOMHET, Art12_1_vesentlig_virksomhet.FOR_LITE_KONTRAKTER_NORGE.getKode());
