@@ -43,6 +43,7 @@ import static no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfol
 import static no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_ektefelle_samboer_begrunnelser_ftrl.EGEN_INNTEKT;
 import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.entry;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -149,10 +150,7 @@ class TrygdeavtaleServiceTest {
 
         var response = trygdeavtaleService.hentVirksomheter(behandling);
 
-        assertThat(response)
-            .hasSize(2)
-            .containsEntry(ORGNR_1, NAVN_1)
-            .containsEntry(ORGNR_2, NAVN_2);
+        assertThat(response).containsExactly(entry(ORGNR_1, NAVN_1), entry(ORGNR_2, NAVN_2));
     }
 
     @Test
@@ -170,9 +168,7 @@ class TrygdeavtaleServiceTest {
         var response = trygdeavtaleService.hentVirksomheter(behandling);
 
         assertThat(response)
-            .hasSize(2)
-            .containsEntry(ORGNR_1, NAVN_1)
-            .containsEntry(ORGNR_2, NAVN_2)
+            .containsExactly(entry(ORGNR_1, NAVN_1), entry(ORGNR_2, NAVN_2))
             .doesNotContainKey("OpplysningspliktigID");
     }
 
@@ -187,10 +183,7 @@ class TrygdeavtaleServiceTest {
 
         var response = trygdeavtaleService.hentVirksomheter(behandling);
 
-        assertThat(response)
-            .hasSize(2)
-            .containsEntry(ORGNR_1, NAVN_1)
-            .containsEntry(ORGNR_2, NAVN_2);
+        assertThat(response).containsExactly(entry(ORGNR_1, NAVN_1), entry(ORGNR_2, NAVN_2));
     }
 
     @Test
