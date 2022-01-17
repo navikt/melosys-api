@@ -19,7 +19,6 @@ import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.brev.FastMottaker;
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
 import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.domain.person.adresse.PersonAdresse;
@@ -181,17 +180,13 @@ public class StorbritanniaMapper {
     }
 
     private Soknad lagSøknad(Behandlingsgrunnlag behandlingsgrunnlag, Lovvalgsperiode lovvalgsperiode) {
-        var soeknadTrygdeavtale = (SoeknadTrygdeavtale) behandlingsgrunnlag.getBehandlingsgrunnlagdata();
-        var representantIUtlandet = soeknadTrygdeavtale.getRepresentantIUtlandet();
-        if (representantIUtlandet == null) {
-            throw new FunksjonellException(Kontroll_begrunnelser.ATTEST_MANGLER_ARBEIDSSTED.getBeskrivelse());
-        }
+        var arbeidsgiver = lagArbeidsgiverNorge(behandlingsgrunnlag.getBehandling());
 
         return new Soknad(
             behandlingsgrunnlag.getMottaksdato(),
             lovvalgsperiode.getFom(),
             lovvalgsperiode.getTom(),
-            representantIUtlandet.representantNavn
+            arbeidsgiver.virksomhetsnavn()
         );
     }
 
@@ -295,6 +290,8 @@ public class StorbritanniaMapper {
 
     private boolean skalIkkeHaAttest(DokgenBrevbestilling brevbestilling) {
         // Skatteetaten skal ikke ha attest
-        return brevbestilling.getOrg() != null && FastMottaker.OrgNr.SKATTEETATEN_ORGNR.getOrgnr().equals(brevbestilling.getOrg().getOrgnummer());
+        boolean erSkatteetaten = brevbestilling.getOrg() != null && FastMottaker.OrgNr.SKATTEETATEN_ORGNR.getOrgnr().equals(brevbestilling.getOrg().getOrgnummer());
+        boolean erArtikkel8_2 = lovvalgsperiodeService.hentValidertLovvalgsperiode(brevbestilling.getBehandlingId()).getBestemmelse() == Lovvalgbestemmelser_trygdeavtale_uk.UK_ART8_2;
+        return erSkatteetaten || erArtikkel8_2;
     }
 }
