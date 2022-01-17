@@ -23,7 +23,6 @@ import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
-import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -63,8 +62,6 @@ class TrygdeavtaleServiceTest {
     @Mock
     private EregFasade eregFasade;
     @Mock
-    private BehandlingsgrunnlagService behandlingsgrunnlagService;
-    @Mock
     private AvklarteMedfolgendeFamilieService avklarteMedfolgendeFamilieService;
     @Mock
     private AvklarteVirksomheterService avklarteVirksomheterService;
@@ -80,7 +77,7 @@ class TrygdeavtaleServiceTest {
 
     @BeforeEach
     void init() {
-        trygdeavtaleService = new TrygdeavtaleService(eregFasade, behandlingsgrunnlagService, avklarteMedfolgendeFamilieService, avklarteVirksomheterService, lovvalgsperiodeService);
+        trygdeavtaleService = new TrygdeavtaleService(eregFasade, avklarteMedfolgendeFamilieService, avklarteVirksomheterService, lovvalgsperiodeService);
     }
 
     @Test
@@ -175,7 +172,8 @@ class TrygdeavtaleServiceTest {
         assertThat(response)
             .hasSize(2)
             .containsEntry(ORGNR_1, NAVN_1)
-            .containsEntry(ORGNR_2, NAVN_2);
+            .containsEntry(ORGNR_2, NAVN_2)
+            .doesNotContainKey("OpplysningspliktigID");
     }
 
     @Test
@@ -328,6 +326,8 @@ class TrygdeavtaleServiceTest {
                 var arbeidsforhold = new Arbeidsforhold();
                 arbeidsforhold.arbeidsgivertype = Aktoertype.ORGANISASJON;
                 arbeidsforhold.arbeidsgiverID = orgnr;
+                arbeidsforhold.opplysningspliktigtype = Aktoertype.ORGANISASJON;
+                arbeidsforhold.opplysningspliktigID = "OpplysningspliktigID";
                 return arbeidsforhold;
             })
             .toList();
