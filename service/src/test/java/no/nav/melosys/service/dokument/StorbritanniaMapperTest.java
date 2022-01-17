@@ -129,7 +129,7 @@ public class StorbritanniaMapperTest {
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> storbritanniaMapper.map(brevbestilling))
-            .withMessageContaining(Kontroll_begrunnelser.ATTEST_MANGLER_ARBEIDSSTED.getBeskrivelse());
+            .withMessageContaining("Fant 0 avklarte virksomheter for behandling: null. Må være 1 for trygdeavtale");
     }
 
     @Test
@@ -517,7 +517,7 @@ public class StorbritanniaMapperTest {
                 "soknadsdato" : "%s",
                 "periodeFom" : "%s",
                 "periodeTom" : "%s",
-                "virksomhetsnavn" : "Foretaksnavn"
+                "virksomhetsnavn" : "Bang Hansen"
               },
               "familie" : {
                 "minstEttOmfattetFamiliemedlem" : true,
