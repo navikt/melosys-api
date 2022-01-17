@@ -39,9 +39,7 @@ public class Avslagbrev extends DokgenDto {
 
         this.sakstype = fagsak.getType().getKode();
         this.mangelbrevDatoer = mangelbrevDatoer.stream().map(this::instantTilLocalDate).collect(Collectors.toList());
-        Instant innsendingsfrist = mangelbrevDatoer.size() > 0
-            ? Collections.max(mangelbrevDatoer).plus(Period.ofWeeks(DOKUMENTASJON_SVARFRIST_UKER_MANGELBREV))
-            : null;
+        Instant innsendingsfrist = mangelbrevDatoer.isEmpty() ? null : Collections.max(mangelbrevDatoer).plus(Period.ofWeeks(DOKUMENTASJON_SVARFRIST_UKER_MANGELBREV));
         this.datoInnsendingsfrist = instantTilLocalDate(innsendingsfrist);
         this.datoMottatt = instantTilLocalDate(brevbestilling.getForsendelseMottatt());
     }
