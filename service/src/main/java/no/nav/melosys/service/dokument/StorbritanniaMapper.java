@@ -60,11 +60,10 @@ public class StorbritanniaMapper {
 
     @Transactional
     public InnvilgelseOgAttestStorbritannia map(InnvilgelseBrevbestilling brevbestilling) {
-        var temp = new InnvilgelseOgAttestStorbritannia.Builder(brevbestilling)
+        return new InnvilgelseOgAttestStorbritannia.Builder(brevbestilling)
             .innvilgelse(mapInnvilgelse(brevbestilling))
             .attest(mapAttest(brevbestilling))
             .build();
-        return temp;
     }
 
     private InnvilgelseStorbritannia mapInnvilgelse(InnvilgelseBrevbestilling brevbestilling) {
@@ -79,7 +78,7 @@ public class StorbritanniaMapper {
             .artikkel((Lovvalgbestemmelser_trygdeavtale_uk) lovvalgsperiode.getBestemmelse())
             .soknad(lagSøknad(behandlingsgrunnlag, lovvalgsperiode))
             .familie(lagFamile(behandling.getId()))
-            .virksomhetArbeidsgiverSkalHaKopi(false)
+            .virksomhetArbeidsgiverSkalHaKopi(brevbestilling.isVirksomhetArbeidsgiverSkalHaKopi())
             .build();
     }
 

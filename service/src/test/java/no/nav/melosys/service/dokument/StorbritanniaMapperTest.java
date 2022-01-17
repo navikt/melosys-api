@@ -297,6 +297,7 @@ public class StorbritanniaMapperTest {
             .medBarnFritekst("barnFritekst")
             .medEktefelleFritekst("ektefelleFritekst")
             .medVedtaksdato(VEDTAKS_DATO_INSTANT)
+            .medVirksomhetArbeidsgiverSkalHaKopi(false)
             .build();
     }
 
