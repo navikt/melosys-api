@@ -413,7 +413,7 @@ class DokgenMalMapperTest {
             Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1,
             "Kone",
             List.of(),
-            ""
+            "Mrs. London"
         );
     }
 
