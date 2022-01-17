@@ -20,7 +20,6 @@ public class Avslagbrev extends DokgenDto {
 
     private final String fritekst;
 
-    @JsonSerialize(using = InstantSerializer.class)
     @JsonFormat(shape = STRING)
     private final LocalDate datoInnsendingsfrist;
 
@@ -28,7 +27,6 @@ public class Avslagbrev extends DokgenDto {
     @JsonFormat(shape = STRING)
     private final List<LocalDate> mangelbrevDatoer;
 
-    @JsonSerialize(using = InstantSerializer.class)
     @JsonFormat(shape = STRING)
     private final LocalDate datoMottatt;
 
