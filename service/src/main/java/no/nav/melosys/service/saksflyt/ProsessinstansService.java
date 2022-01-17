@@ -207,7 +207,7 @@ public class ProsessinstansService {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.IVERKSETT_VEDTAK_FTRL)
             .medBehandling(behandling)
-            .medBegrunnelseFritekst(request.getFritekstBegrunnelse())
+            .medBegrunnelseFritekst(request.getBegrunnelseFritekst())
             .build();
 
         lagre(prosessinstans);
@@ -217,7 +217,7 @@ public class ProsessinstansService {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.IVERKSETT_VEDTAK_TRYGDEAVTALE)
             .medBehandling(behandling)
-            .medBegrunnelseFritekst(request.getFritekstBegrunnelse())
+            .medBegrunnelseFritekst(request.getBegrunnelseFritekst())
             .build();
 
         lagre(prosessinstans);

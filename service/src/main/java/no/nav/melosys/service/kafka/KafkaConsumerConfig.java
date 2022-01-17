@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
+import no.nav.melosys.service.soknad.SoknadMottatt;
 import org.apache.kafka.clients.CommonClientConfigs;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.config.SslConfigs;
@@ -47,6 +48,13 @@ public class KafkaConsumerConfig {
         KafkaProperties kafkaProperties, @Value("${kafka.aiven.eessi.groupid}") String groupId
     ) {
         return kafkaListenerContainerFactory(MelosysEessiMelding.class, kafkaProperties, groupId);
+    }
+
+    @Bean
+    public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, SoknadMottatt>> aivenSoknadMottattContainerFactory(
+        KafkaProperties kafkaProperties, @Value("${kafka.aiven.soknad-mottak.groupid}") String groupId
+    ) {
+        return kafkaListenerContainerFactory(SoknadMottatt.class, kafkaProperties, groupId);
     }
 
     public <T> ConcurrentKafkaListenerContainerFactory<String, T> kafkaListenerContainerFactory(

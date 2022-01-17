@@ -5,46 +5,46 @@ import java.util.List;
 import no.nav.melosys.service.dokument.brev.KopiMottaker;
 
 public class FattTrygdeavtaleEllerFtrlVedtakDto extends FattVedtakDto {
-    private String fritekstInnledning;
-    private String fritekstBegrunnelse;
-    private String fritekstEktefelle;
-    private String fritekstBarn;
+    private String innledningFritekst;
+    private String begrunnelseFritekst;
+    private String ektefelleFritekst;
+    private String barnFritekst;
     private List<KopiMottaker> kopiMottakere;
 
-    public String getFritekstInnledning() {
-        return fritekstInnledning;
+    public String getInnledningFritekst() {
+        return innledningFritekst;
     }
 
-    public String getFritekstBegrunnelse() {
-        return fritekstBegrunnelse;
+    public String getBegrunnelseFritekst() {
+        return begrunnelseFritekst;
     }
 
-    public String getFritekstEktefelle() {
-        return fritekstEktefelle;
+    public String getEktefelleFritekst() {
+        return ektefelleFritekst;
     }
 
-    public String getFritekstBarn() {
-        return fritekstBarn;
+    public String getBarnFritekst() {
+        return barnFritekst;
     }
 
     public List<KopiMottaker> getKopiMottakere() {
         return kopiMottakere;
     }
 
-    public void setFritekstInnledning(String fritekstInnledning) {
-        this.fritekstInnledning = fritekstInnledning;
+    public void setInnledningFritekst(String innledningFritekst) {
+        this.innledningFritekst = innledningFritekst;
     }
 
-    public void setFritekstBegrunnelse(String fritekstBegrunnelse) {
-        this.fritekstBegrunnelse = fritekstBegrunnelse;
+    public void setBegrunnelseFritekst(String begrunnelseFritekst) {
+        this.begrunnelseFritekst = begrunnelseFritekst;
     }
 
-    public void setFritekstEktefelle(String fritekstEktefelle) {
-        this.fritekstEktefelle = fritekstEktefelle;
+    public void setEktefelleFritekst(String ektefelleFritekst) {
+        this.ektefelleFritekst = ektefelleFritekst;
     }
 
-    public void setFritekstBarn(String fritekstBarn) {
-        this.fritekstBarn = fritekstBarn;
+    public void setBarnFritekst(String barnFritekst) {
+        this.barnFritekst = barnFritekst;
     }
 
     public void setKopiMottakere(List<KopiMottaker> kopiMottakere) {
