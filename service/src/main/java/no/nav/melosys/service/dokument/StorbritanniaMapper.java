@@ -60,11 +60,10 @@ public class StorbritanniaMapper {
 
     @Transactional
     public InnvilgelseOgAttestStorbritannia map(InnvilgelseBrevbestilling brevbestilling) {
-        var temp = new InnvilgelseOgAttestStorbritannia.Builder(brevbestilling)
+        return new InnvilgelseOgAttestStorbritannia.Builder(brevbestilling)
             .innvilgelse(mapInnvilgelse(brevbestilling))
             .attest(mapAttest(brevbestilling))
             .build();
-        return temp;
     }
 
     private InnvilgelseStorbritannia mapInnvilgelse(InnvilgelseBrevbestilling brevbestilling) {
@@ -79,7 +78,7 @@ public class StorbritanniaMapper {
             .artikkel((Lovvalgbestemmelser_trygdeavtale_uk) lovvalgsperiode.getBestemmelse())
             .soknad(lagSøknad(behandlingsgrunnlag, lovvalgsperiode))
             .familie(lagFamile(behandling.getId()))
-            .virksomhetArbeidsgiverSkalHaKopi(false)
+            .virksomhetArbeidsgiverSkalHaKopi(brevbestilling.isVirksomhetArbeidsgiverSkalHaKopi())
             .build();
     }
 
@@ -102,10 +101,7 @@ public class StorbritanniaMapper {
                 persondokument.getFødselsdato(),
                 persondokument.hentFolkeregisterident(),
                 persondokument.hentGjeldendePostadresse().adresselinjer()))
-            .representant(new RepresentantStorbritannia(
-                "Mrs. London", // TODO: Det blir fylt inn via sidemeny. Hent data når det er tilgjenglig.
-                List.of())
-            )
+            .representant(lagRepresentant(behandling.getBehandlingsgrunnlag()))
             .utsendelse(lagUtsendelse(lovvalgsperioder, persondokument))
             .build();
     }
@@ -249,6 +245,16 @@ public class StorbritanniaMapper {
         }
         AvklartVirksomhet norskArbeidsgiver = avklarteVirksomheter.get(0);
         return new ArbeidsgiverNorge(norskArbeidsgiver.navn, norskArbeidsgiver.adresse.toList());
+    }
+
+    private RepresentantStorbritannia lagRepresentant(Behandlingsgrunnlag behandlingsgrunnlag) {
+        var soeknadTrygdeavtale = (SoeknadTrygdeavtale) behandlingsgrunnlag.getBehandlingsgrunnlagdata();
+        var representantIUtlandet = soeknadTrygdeavtale.getRepresentantIUtlandet();
+
+        return new RepresentantStorbritannia(
+            representantIUtlandet.representantNavn,
+            representantIUtlandet.adresselinjer
+        );
     }
 
     private List<Person> mapBarn(long behandlingID) {

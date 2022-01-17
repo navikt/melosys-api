@@ -297,6 +297,7 @@ public class StorbritanniaMapperTest {
             .medBarnFritekst("barnFritekst")
             .medEktefelleFritekst("ektefelleFritekst")
             .medVedtaksdato(VEDTAKS_DATO_INSTANT)
+            .medVirksomhetArbeidsgiverSkalHaKopi(false)
             .build();
     }
 
@@ -590,8 +591,8 @@ public class StorbritanniaMapperTest {
             "sluttdato" : "%s"
           },
           "representant" : {
-            "navn" : "Mrs. London",
-            "adresse" : [ ]
+            "navn" : "Foretaksnavn",
+            "adresse" : [ "Uk address" ]
           },
           "vedtaksdato" : "%s"
         }""", FØDSELSDATO, EKTEFELLE_FNR, FØDSELSDATO, BARN1_FNR, LOVVALGSPERIODE_FOM, LOVVALGSPERIODE_TOM, VEDTAKS_DATO);

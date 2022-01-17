@@ -2,6 +2,7 @@ package no.nav.melosys.integrasjon.dokgen.dto;
 
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
 import no.nav.melosys.integrasjon.dokgen.dto.storbritannia.attest.AttestStorbritannia;
 import no.nav.melosys.integrasjon.dokgen.dto.storbritannia.innvilgelse.InnvilgelseStorbritannia;
 
@@ -48,7 +49,7 @@ public class InnvilgelseOgAttestStorbritannia extends DokgenDto {
     }
 
     public boolean isSkalHaAttest() {
-        return attest != null;
+        return attest != null && innvilgelse.getArtikkel() != Lovvalgbestemmelser_trygdeavtale_uk.UK_ART8_2;
     }
 
     public InnvilgelseStorbritannia getInnvilgelse() {
