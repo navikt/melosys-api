@@ -21,8 +21,7 @@ public final class ProsessflytDefinisjon {
             ProsessType.OPPRETT_OG_DISTRIBUER_BREV,
             new ProsessFlyt(ProsessType.OPPRETT_OG_DISTRIBUER_BREV,
                 OPPRETT_OG_JOURNALFØR_BREV,
-                DISTRIBUER_JOURNALPOST,
-                DISTRIBUER_JOURNALPOST_UTLAND
+                DISTRIBUER_JOURNALPOST
             )
         );
 
