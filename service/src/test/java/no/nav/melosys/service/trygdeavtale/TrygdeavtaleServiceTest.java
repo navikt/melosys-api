@@ -23,7 +23,6 @@ import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
-import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -44,6 +43,7 @@ import static no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfol
 import static no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_ektefelle_samboer_begrunnelser_ftrl.EGEN_INNTEKT;
 import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.entry;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -63,8 +63,6 @@ class TrygdeavtaleServiceTest {
     @Mock
     private EregFasade eregFasade;
     @Mock
-    private BehandlingsgrunnlagService behandlingsgrunnlagService;
-    @Mock
     private AvklarteMedfolgendeFamilieService avklarteMedfolgendeFamilieService;
     @Mock
     private AvklarteVirksomheterService avklarteVirksomheterService;
@@ -80,7 +78,7 @@ class TrygdeavtaleServiceTest {
 
     @BeforeEach
     void init() {
-        trygdeavtaleService = new TrygdeavtaleService(eregFasade, behandlingsgrunnlagService, avklarteMedfolgendeFamilieService, avklarteVirksomheterService, lovvalgsperiodeService);
+        trygdeavtaleService = new TrygdeavtaleService(eregFasade, avklarteMedfolgendeFamilieService, avklarteVirksomheterService, lovvalgsperiodeService);
     }
 
     @Test
@@ -152,10 +150,7 @@ class TrygdeavtaleServiceTest {
 
         var response = trygdeavtaleService.hentVirksomheter(behandling);
 
-        assertThat(response)
-            .hasSize(2)
-            .containsEntry(ORGNR_1, NAVN_1)
-            .containsEntry(ORGNR_2, NAVN_2);
+        assertThat(response).containsExactly(entry(ORGNR_1, NAVN_1), entry(ORGNR_2, NAVN_2));
     }
 
     @Test
@@ -173,9 +168,8 @@ class TrygdeavtaleServiceTest {
         var response = trygdeavtaleService.hentVirksomheter(behandling);
 
         assertThat(response)
-            .hasSize(2)
-            .containsEntry(ORGNR_1, NAVN_1)
-            .containsEntry(ORGNR_2, NAVN_2);
+            .containsExactly(entry(ORGNR_1, NAVN_1), entry(ORGNR_2, NAVN_2))
+            .doesNotContainKey("OpplysningspliktigID");
     }
 
     @Test
@@ -189,10 +183,7 @@ class TrygdeavtaleServiceTest {
 
         var response = trygdeavtaleService.hentVirksomheter(behandling);
 
-        assertThat(response)
-            .hasSize(2)
-            .containsEntry(ORGNR_1, NAVN_1)
-            .containsEntry(ORGNR_2, NAVN_2);
+        assertThat(response).containsExactly(entry(ORGNR_1, NAVN_1), entry(ORGNR_2, NAVN_2));
     }
 
     @Test
@@ -328,6 +319,8 @@ class TrygdeavtaleServiceTest {
                 var arbeidsforhold = new Arbeidsforhold();
                 arbeidsforhold.arbeidsgivertype = Aktoertype.ORGANISASJON;
                 arbeidsforhold.arbeidsgiverID = orgnr;
+                arbeidsforhold.opplysningspliktigtype = Aktoertype.ORGANISASJON;
+                arbeidsforhold.opplysningspliktigID = "OpplysningspliktigID";
                 return arbeidsforhold;
             })
             .toList();

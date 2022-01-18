@@ -37,6 +37,13 @@ public class ArbeidsforholdDokument implements SaksopplysningDokument {
             .collect(Collectors.toSet());
     }
 
+    public Set<String> hentArbeidsgiverIDer() {
+        return getArbeidsforhold().stream()
+            .map(Arbeidsforhold::getArbeidsgiverID)
+            .filter(StringUtils::isNotEmpty)
+            .collect(Collectors.toSet());
+    }
+
     public Set<Periode> hentAnsettelsesperioder(Collection<String> orgnummere) {
         return getArbeidsforhold().stream()
                 .filter(a -> !Collections.disjoint(orgnummere, a.hentOrgnumre()))

@@ -117,7 +117,7 @@ public class Aktoer extends RegistreringsInfo {
     public Landkoder hentMyndighetLandkode() {
         if (erUtenlandskMyndighet()) {
             String[] split = institusjonId.split(":");
-            return Landkoder.valueOf(split[0]);
+            return Landkoder.valueOf(split[0].replaceAll("[^a-zA-Z]", ""));
         }
         throw new TekniskException("Aktør " + id + " er ikke en utenlandsk myndighet");
     }

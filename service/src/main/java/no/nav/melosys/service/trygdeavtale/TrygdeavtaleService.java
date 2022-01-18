@@ -13,12 +13,10 @@ import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
-import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
-import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import org.springframework.stereotype.Service;
 
 import static no.nav.melosys.domain.kodeverk.InnvilgelsesResultat.INNVILGET;
@@ -29,18 +27,15 @@ import static no.nav.melosys.domain.kodeverk.Trygdedekninger.FULL_DEKNING_FTRL;
 public class TrygdeavtaleService {
 
     private final EregFasade eregFasade;
-    private final BehandlingsgrunnlagService behandlingsgrunnlagService;
     private final AvklarteMedfolgendeFamilieService avklarteMedfolgendeFamilieService;
     private final AvklarteVirksomheterService avklarteVirksomheterService;
     private final LovvalgsperiodeService lovvalgsperiodeService;
 
     public TrygdeavtaleService(EregFasade eregFasade,
-                               BehandlingsgrunnlagService behandlingsgrunnlagService,
                                AvklarteMedfolgendeFamilieService avklarteMedfolgendeFamilieService,
                                AvklarteVirksomheterService avklarteVirksomheterService,
                                LovvalgsperiodeService lovvalgsperiodeService) {
         this.eregFasade = eregFasade;
-        this.behandlingsgrunnlagService = behandlingsgrunnlagService;
         this.avklarteMedfolgendeFamilieService = avklarteMedfolgendeFamilieService;
         this.avklarteVirksomheterService = avklarteVirksomheterService;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
@@ -54,10 +49,12 @@ public class TrygdeavtaleService {
 
         orgIdOgNavn.putAll(
             ((ArbeidsforholdDokument) behandling.finnDokument(SaksopplysningType.ARBFORH).orElse(new ArbeidsforholdDokument()))
-                .hentOrgnumre().stream()
+                .hentArbeidsgiverIDer().stream()
                 .collect(Collectors.toMap(orgnr -> orgnr, orgnr -> finnNavnFraOrganisasjonsdokument(orgnr, organisasjonDokumenter))));
+
         orgIdOgNavn.putAll(behandlingsgrunnlagData.hentAlleOrganisasjonsnumre().stream()
             .collect(Collectors.toMap(orgnr -> orgnr, orgnr -> finnNavnFraOrganisasjonsdokument(orgnr, organisasjonDokumenter))));
+
         orgIdOgNavn.putAll(behandlingsgrunnlagData.hentUtenlandskeArbeidsgivereUuidOgNavn());
 
         return orgIdOgNavn;

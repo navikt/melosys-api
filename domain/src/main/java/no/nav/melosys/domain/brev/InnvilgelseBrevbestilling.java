@@ -5,6 +5,7 @@ public class InnvilgelseBrevbestilling extends DokgenBrevbestilling {
     private String begrunnelseFritekst;
     private String ektefelleFritekst;
     private String barnFritekst;
+    private boolean virksomhetArbeidsgiverSkalHaKopi;
 
     public InnvilgelseBrevbestilling() {
         super();
@@ -17,6 +18,7 @@ public class InnvilgelseBrevbestilling extends DokgenBrevbestilling {
         this.begrunnelseFritekst = builder.begrunnelseFritekst;
         this.ektefelleFritekst = builder.ektefelleFritekst;
         this.barnFritekst = builder.barnFritekst;
+        this.virksomhetArbeidsgiverSkalHaKopi = builder.virksomhetArbeidsgiverSkalHaKopi;
     }
 
     public String getInnledningFritekst() {
@@ -35,6 +37,10 @@ public class InnvilgelseBrevbestilling extends DokgenBrevbestilling {
         return barnFritekst;
     }
 
+    public boolean isVirksomhetArbeidsgiverSkalHaKopi() {
+        return virksomhetArbeidsgiverSkalHaKopi;
+    }
+
     public Builder toBuilder() {
         return new Builder(this);
     }
@@ -44,6 +50,7 @@ public class InnvilgelseBrevbestilling extends DokgenBrevbestilling {
         private String begrunnelseFritekst;
         private String ektefelleFritekst;
         private String barnFritekst;
+        private boolean virksomhetArbeidsgiverSkalHaKopi;
 
         public Builder() {
         }
@@ -54,6 +61,7 @@ public class InnvilgelseBrevbestilling extends DokgenBrevbestilling {
             this.begrunnelseFritekst = innvilgelseBrevbestilling.begrunnelseFritekst;
             this.ektefelleFritekst = innvilgelseBrevbestilling.ektefelleFritekst;
             this.barnFritekst = innvilgelseBrevbestilling.barnFritekst;
+            this.virksomhetArbeidsgiverSkalHaKopi = innvilgelseBrevbestilling.virksomhetArbeidsgiverSkalHaKopi;
         }
 
         public Builder medInnledningFritekst(String innledningFritekst) {
@@ -73,6 +81,11 @@ public class InnvilgelseBrevbestilling extends DokgenBrevbestilling {
 
         public Builder medBarnFritekst(String barnFritekst) {
             this.barnFritekst = barnFritekst;
+            return this;
+        }
+
+        public Builder medVirksomhetArbeidsgiverSkalHaKopi(boolean virksomhetArbeidsgiverSkalHaKopi) {
+            this.virksomhetArbeidsgiverSkalHaKopi = virksomhetArbeidsgiverSkalHaKopi;
             return this;
         }
 
