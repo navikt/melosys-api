@@ -3,7 +3,6 @@ package no.nav.melosys.saksflyt.steg.brev;
 import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.UtenlandskMyndighet;
 import no.nav.melosys.domain.arkiv.JournalpostBestilling;
 import no.nav.melosys.domain.arkiv.OpprettJournalpost;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
@@ -91,7 +90,7 @@ public class OpprettJournalforBrev implements StegBehandler {
 
         if (!isEmpty(institusjonsid)) {
             mottaker.setInstitusjonId(institusjonsid);
-            sammensattNavn = utenlandskMyndighetService.hentUtenlandskMyndighet(UtenlandskMyndighet.konverterInstitusjonIdTilLandkode(institusjonsid)).navn;
+            sammensattNavn = utenlandskMyndighetService.hentUtenlandskMyndighetForInstitusjonID(institusjonsid).navn;
         } else if (!isEmpty(orgnr)) {
             mottaker.setOrgnr(orgnr);
         } else {

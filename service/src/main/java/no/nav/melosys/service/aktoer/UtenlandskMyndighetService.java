@@ -51,6 +51,10 @@ public class UtenlandskMyndighetService {
             .orElseThrow(() -> new IkkeFunnetException("Finner ikke utenlandskMyndighet for " + landkode.getKode() + "."));
     }
 
+    public UtenlandskMyndighet hentUtenlandskMyndighetForInstitusjonID(String institusjonID) {
+        return hentUtenlandskMyndighet(UtenlandskMyndighet.konverterInstitusjonIdTilLandkode(institusjonID));
+    }
+
     public List<UtenlandskMyndighet> hentAlleUtenlandskMyndigheter() {
         return utenlandskMyndighetRepository.findAll();
     }
