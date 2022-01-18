@@ -3,6 +3,7 @@ package no.nav.melosys.saksflyt.steg.brev;
 import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.UtenlandskMyndighet;
 import no.nav.melosys.domain.arkiv.JournalpostBestilling;
 import no.nav.melosys.domain.arkiv.OpprettJournalpost;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
@@ -15,6 +16,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
+import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.DokgenService;
 import no.nav.melosys.service.dokument.DokumentproduksjonsInfo;
@@ -36,19 +38,21 @@ public class OpprettJournalforBrev implements StegBehandler {
 
     private final BehandlingService behandlingService;
     private final DokgenService dokgenService;
+    private final UtenlandskMyndighetService utenlandskMyndighetService;
     private final JoarkFasade joarkFasade;
     private final PersondataFasade persondataFasade;
     private final EregFasade eregFasade;
     private final Unleash unleash;
 
     @Autowired
-    public OpprettJournalforBrev(BehandlingService behandlingService, DokgenService dokgenService,
+    public OpprettJournalforBrev(BehandlingService behandlingService, DokgenService dokgenService, UtenlandskMyndighetService utenlandskMyndighetService,
                                  @Qualifier("system") JoarkFasade joarkFasade,
                                  @Qualifier("system") PersondataFasade persondataFasade,
                                  @Qualifier("system") EregFasade eregFasade,
                                  Unleash unleash) {
         this.behandlingService = behandlingService;
         this.dokgenService = dokgenService;
+        this.utenlandskMyndighetService = utenlandskMyndighetService;
         this.joarkFasade = joarkFasade;
         this.persondataFasade = persondataFasade;
         this.eregFasade = eregFasade;
@@ -87,8 +91,8 @@ public class OpprettJournalforBrev implements StegBehandler {
 
         if (!isEmpty(institusjonsid)) {
             mottaker.setInstitusjonId(institusjonsid);
-        }
-        else if (!isEmpty(orgnr)) {
+            sammensattNavn = utenlandskMyndighetService.hentUtenlandskMyndighet(UtenlandskMyndighet.konverterInstitusjonIdTilLandkode(institusjonsid)).navn;
+        } else if (!isEmpty(orgnr)) {
             mottaker.setOrgnr(orgnr);
         } else {
             mottaker.setAktørId(aktørId);

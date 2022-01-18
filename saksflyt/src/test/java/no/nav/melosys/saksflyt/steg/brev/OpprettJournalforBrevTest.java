@@ -13,6 +13,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.saksflyt.TestdataFactory;
+import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.DokgenService;
 import no.nav.melosys.service.persondata.PersondataFasade;
@@ -38,6 +39,9 @@ class OpprettJournalforBrevTest {
     private DokgenService mockDokgenService;
 
     @Mock
+    private UtenlandskMyndighetService mockUtenlandskMyndighetService;
+
+    @Mock
     private JoarkFasade mockJoarkFasade;
 
     @Mock
@@ -50,7 +54,7 @@ class OpprettJournalforBrevTest {
 
     @BeforeEach
     void init() {
-        opprettJournalforBrev = new OpprettJournalforBrev(mockBehandlingService, mockDokgenService,
+        opprettJournalforBrev = new OpprettJournalforBrev(mockBehandlingService, mockDokgenService, mockUtenlandskMyndighetService,
             mockJoarkFasade, mockPersondataFasade, mockEregFasade, new FakeUnleash());
     }
 
