@@ -32,18 +32,21 @@ public class DokgenMalMapper {
     }
 
     public DokgenDto mapBehandling(DokgenBrevbestilling mottattBrevbestilling) {
-        //NOTE Henter opplysninger på nytt for å sikre at korrekt adresse benyttes
         DokgenBrevbestilling brevbestilling = berikBestillingMedPersondata(mottattBrevbestilling);
         DokgenDto dto = lagDokgenDtoFraBestilling(brevbestilling);
+
+        //NOTE Henter opplysninger på nytt for å sikre at korrekt adresse benyttes med mindre myndighet
         Mottaker mottaker = dto.getMottaker();
+        if (!Aktoersroller.MYNDIGHET.getKode().equals(mottaker.type())) {
+            String poststed = mottaker.poststed();
+            if (hasText(mottaker.postnr())) {
+                poststed = dokgenMapperDatahenter.hentPoststed(mottaker.postnr());
+            }
+            String land = (dokgenMapperDatahenter.hentLandnavn(mottaker.land()));
 
-        String poststed = mottaker.poststed();
-        if (hasText(mottaker.postnr())) {
-            poststed = dokgenMapperDatahenter.hentPoststed(mottaker.postnr());
+            dto.setMottaker(new Mottaker(mottaker.navn(), mottaker.adresselinjer(), mottaker.postnr(), poststed, land, mottaker.type()));
         }
-        String land = (dokgenMapperDatahenter.hentLandnavn(mottaker.land()));
 
-        dto.setMottaker(new Mottaker(mottaker.navn(), mottaker.adresselinjer(), mottaker.postnr(), poststed, land, mottaker.type()));
         return dto;
     }
 
