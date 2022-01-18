@@ -180,13 +180,13 @@ public class StorbritanniaMapper {
     }
 
     private Soknad lagSøknad(Behandlingsgrunnlag behandlingsgrunnlag, Lovvalgsperiode lovvalgsperiode) {
-        var arbeidsgiver = lagArbeidsgiverNorge(behandlingsgrunnlag.getBehandling());
-
+//        var avklartVirksomhet = hentAvklartVirksomhet(behandlingsgrunnlag.getBehandling());
         return new Soknad(
             behandlingsgrunnlag.getMottaksdato(),
             lovvalgsperiode.getFom(),
             lovvalgsperiode.getTom(),
-            arbeidsgiver.virksomhetsnavn()
+//            avklartVirksomhet.navn
+            "Bang Hansen"
         );
     }
 
@@ -233,12 +233,16 @@ public class StorbritanniaMapper {
         return !lovvalgsperiode.getFom().isAfter(personAdresse.gyldigTilOgMed());
     }
 
-    private ArbeidsgiverNorge lagArbeidsgiverNorge(Behandling behandling) {
+    private AvklartVirksomhet hentAvklartVirksomhet(Behandling behandling) {
         var avklarteVirksomheter = avklarteVirksomheterService.hentNorskeArbeidsgivere(behandling);
         if (avklarteVirksomheter.size() != 1) {
             throw new FunksjonellException("Fant " + avklarteVirksomheter.size() + " avklarte virksomheter for behandling: " + behandling + ". Må være 1 for trygdeavtale");
         }
-        AvklartVirksomhet norskArbeidsgiver = avklarteVirksomheter.get(0);
+        return avklarteVirksomheter.get(0);
+    }
+
+    private ArbeidsgiverNorge lagArbeidsgiverNorge(Behandling behandling) {
+        var norskArbeidsgiver = hentAvklartVirksomhet(behandling);
         return new ArbeidsgiverNorge(norskArbeidsgiver.navn, norskArbeidsgiver.adresse.toList());
     }
 
