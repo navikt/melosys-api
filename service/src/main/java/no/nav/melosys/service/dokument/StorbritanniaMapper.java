@@ -31,7 +31,7 @@ import no.nav.melosys.integrasjon.dokgen.dto.storbritannia.attest.*;
 import no.nav.melosys.integrasjon.dokgen.dto.storbritannia.innvilgelse.*;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
-import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
+import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterSystemService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
@@ -40,18 +40,18 @@ import org.springframework.util.ObjectUtils;
 public class StorbritanniaMapper {
 
     private final AvklarteMedfolgendeFamilieService avklarteMedfølgendeFamilieService;
-    private final AvklarteVirksomheterService avklarteVirksomheterService;
+    private final AvklarteVirksomheterSystemService avklarteVirksomheterSystemService;
     private final DokgenMapperDatahenter dokgenMapperDatahenter;
     private final PersondataFasade persondataFasade;
     private final LovvalgsperiodeService lovvalgsperiodeService;
 
     public StorbritanniaMapper(AvklarteMedfolgendeFamilieService avklarteMedfølgendeFamilieService,
-                               AvklarteVirksomheterService avklarteVirksomheterService,
+                               AvklarteVirksomheterSystemService avklarteVirksomheterSystemService,
                                DokgenMapperDatahenter dokgenMapperDatahenter,
                                PersondataFasade registerOppslagService,
                                LovvalgsperiodeService lovvalgsperiodeService) {
         this.avklarteMedfølgendeFamilieService = avklarteMedfølgendeFamilieService;
-        this.avklarteVirksomheterService = avklarteVirksomheterService;
+        this.avklarteVirksomheterSystemService = avklarteVirksomheterSystemService;
         this.dokgenMapperDatahenter = dokgenMapperDatahenter;
         this.persondataFasade = registerOppslagService;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
@@ -180,13 +180,13 @@ public class StorbritanniaMapper {
     }
 
     private Soknad lagSøknad(Behandlingsgrunnlag behandlingsgrunnlag, Lovvalgsperiode lovvalgsperiode) {
-//        var avklartVirksomhet = hentAvklartVirksomhet(behandlingsgrunnlag.getBehandling());
+        var avklartVirksomhet = hentAvklartVirksomhet(behandlingsgrunnlag.getBehandling());
+
         return new Soknad(
             behandlingsgrunnlag.getMottaksdato(),
             lovvalgsperiode.getFom(),
             lovvalgsperiode.getTom(),
-//            avklartVirksomhet.navn
-            "Bang Hansen"
+            avklartVirksomhet.navn
         );
     }
 
@@ -234,7 +234,7 @@ public class StorbritanniaMapper {
     }
 
     private AvklartVirksomhet hentAvklartVirksomhet(Behandling behandling) {
-        var avklarteVirksomheter = avklarteVirksomheterService.hentNorskeArbeidsgivere(behandling);
+        var avklarteVirksomheter = avklarteVirksomheterSystemService.hentNorskeArbeidsgivere(behandling);
         if (avklarteVirksomheter.size() != 1) {
             throw new FunksjonellException("Fant " + avklarteVirksomheter.size() + " avklarte virksomheter for behandling: " + behandling + ". Må være 1 for trygdeavtale");
         }
