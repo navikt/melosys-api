@@ -127,31 +127,14 @@ public class BrevbestillingTjeneste {
     }
 
     private BrevmalDto lagBrevMalDtoForMangelbrev(Produserbaredokumenter produserbartdokument, Aktoersroller hovedMottaker, Behandling behandling) {
-        List<MottakerDto> mottakere = new ArrayList<>();
         List<FeltvalgAlternativDto> feltvalgAlternativDtos = new ArrayList<>();
-
-        var builder = new MottakerDto.Builder()
-            .medType(hovedMottaker == Aktoersroller.BRUKER ? BRUKER_ELLER_BRUKERS_FULLMEKTIG : ARBEIDSGIVER_ELLER_ARBEIDSGIVERS_FULLMEKTIG)
-            .medRolle(hovedMottaker);
-
-        leggTilAdresseOgFeilmelding(builder, produserbartdokument, hovedMottaker, behandling);
-
-        mottakere.add(builder.build());
-        if (hovedMottaker == Aktoersroller.ARBEIDSGIVER) {
-            mottakere.add(
-                new MottakerDto.Builder()
-                    .medType("Annen organisasjon")
-                    .medRolle(hovedMottaker)
-                    .orgnrSettesAvSaksbehandler()
-                    .build()
-            );
-        }
         if (behandling.getType() == Behandlingstyper.SOEKNAD || behandling.erKlage()) {
             feltvalgAlternativDtos.add(new FeltvalgAlternativDto(FeltvalgAlternativKode.STANDARD));
         }
         feltvalgAlternativDtos.add(new FeltvalgAlternativDto(FeltvalgAlternativKode.FRITEKST.getKode(), "Fritekst (erstatter standardtekst)", true));
 
         FeltValgDto feltValgDto = new FeltValgDto(feltvalgAlternativDtos, FeltValgType.RADIO);
+        List<MottakerDto> mottakere = hentMottakereForBrev(produserbartdokument, hovedMottaker, behandling);
 
         return new BrevmalDto.Builder()
             .medType(produserbartdokument)
@@ -176,13 +159,7 @@ public class BrevbestillingTjeneste {
     }
 
     private BrevmalDto lagBrevMalDtoForFritekstbrev(Produserbaredokumenter produserbartdokument, Aktoersroller hovedMottaker, Behandling behandling) {
-        var builder = new MottakerDto.Builder()
-            .medType(hovedMottaker == Aktoersroller.BRUKER ? BRUKER_ELLER_BRUKERS_FULLMEKTIG : ARBEIDSGIVER_ELLER_ARBEIDSGIVERS_FULLMEKTIG)
-            .medRolle(hovedMottaker);
-
-        leggTilAdresseOgFeilmelding(builder, produserbartdokument, hovedMottaker, behandling);
-
-        var mottaker = builder.build();
+        List<MottakerDto> mottakere = hentMottakereForBrev(produserbartdokument, hovedMottaker, behandling);
 
         return new BrevmalDto.Builder()
             .medType(produserbartdokument)
@@ -208,9 +185,30 @@ public class BrevbestillingTjeneste {
                     .erPåkrevd()
                     .build()
             ))
-            .medMuligeMottakere(singletonList(mottaker))
+            .medMuligeMottakere(mottakere)
             .medMottakereHjelpetekst("Hvis bruker eller arbeidsgiver har fullmektig som er lagt inn i sidemenyen, vil brevet automatisk bli sendt til denne.")
             .build();
+    }
+
+    private List<MottakerDto> hentMottakereForBrev(Produserbaredokumenter produserbartdokument, Aktoersroller hovedMottaker, Behandling behandling) {
+        List<MottakerDto> mottakere = new ArrayList<>();
+        var builder = new MottakerDto.Builder()
+            .medType(hovedMottaker == Aktoersroller.BRUKER ? BRUKER_ELLER_BRUKERS_FULLMEKTIG : ARBEIDSGIVER_ELLER_ARBEIDSGIVERS_FULLMEKTIG)
+            .medRolle(hovedMottaker);
+
+        leggTilAdresseOgFeilmelding(builder, produserbartdokument, hovedMottaker, behandling);
+
+        mottakere.add(builder.build());
+        if (hovedMottaker == Aktoersroller.ARBEIDSGIVER) {
+            mottakere.add(
+                new MottakerDto.Builder()
+                    .medType("Annen organisasjon")
+                    .medRolle(hovedMottaker)
+                    .orgnrSettesAvSaksbehandler()
+                    .build()
+            );
+        }
+        return mottakere;
     }
 
     private FeltValgDto hentFritekstTittelValg(Behandling behandling) {
