@@ -31,6 +31,12 @@ public record TrygdeavtaleResultatDto(
             .build();
     }
 
+    public static TrygdeavtaleResultatDto fra(TrygdeavtaleResultat resultat) {
+        return new Builder()
+            .bestemmelse(resultat.bestemmelse())
+            .build();
+    }
+
     private AvklarteMedfolgendeFamilie lagAvklarteMedfolgendeFamilie() {
         var omfattetFamilie = Stream.concat(barn.stream(), Stream.of(ektefelle))
             .filter(Objects::nonNull)

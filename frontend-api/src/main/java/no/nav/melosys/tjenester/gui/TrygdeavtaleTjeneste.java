@@ -3,6 +3,7 @@ package no.nav.melosys.tjenester.gui;
 import java.util.Collections;
 
 import io.swagger.annotations.Api;
+import no.nav.melosys.service.trygdeavtale.TrygdeavtaleResultat;
 import no.nav.melosys.service.trygdeavtale.TrygdeavtaleService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
@@ -51,6 +52,13 @@ public class TrygdeavtaleTjeneste {
             hentVirksomheter ? trygdeavtaleService.hentVirksomheter(behandling) : Collections.emptyMap(),
             hentBarnEktefeller ? trygdeavtaleService.hentFamiliemedlemmer(behandling) : Collections.emptyList()
         ));
+    }
+
+    @GetMapping("resultat/{behandlingID}")
+    @Transactional
+    public ResponseEntity<TrygdeavtaleResultatDto> hentResultat(@PathVariable("behandlingID") long behandlingId) {
+        TrygdeavtaleResultat trygdeavtaleResultat = trygdeavtaleService.hentResultat(behandlingId);
+        return ResponseEntity.ok(TrygdeavtaleResultatDto.fra(trygdeavtaleResultat));
     }
 
     @PostMapping("{behandlingID}")

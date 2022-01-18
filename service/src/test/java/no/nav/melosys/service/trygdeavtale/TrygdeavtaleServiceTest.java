@@ -129,6 +129,12 @@ class TrygdeavtaleServiceTest {
     }
 
     @Test
+    void hentResultat_altOk_hentesKorrekt() {
+        TrygdeavtaleResultat trygdeavtaleResultat = trygdeavtaleService.hentResultat(1L);
+    }
+
+
+    @Test
     void hentVirksomheter_fraEreg_mappesKorrekt() {
         var selvstendigForetak = new SelvstendigForetak();
         selvstendigForetak.orgnr = ORGNR_1;

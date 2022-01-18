@@ -3,6 +3,7 @@ package no.nav.melosys.service.trygdeavtale;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
@@ -13,6 +14,8 @@ import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
+import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie;
+import no.nav.melosys.domain.person.familie.OmfattetFamilie;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
@@ -75,6 +78,12 @@ public class TrygdeavtaleService {
         avklarteMedfolgendeFamilieService.lagreMedfolgendeFamilieSomAvklartefakta(behandlingId, trygdeavtaleResultat.familie());
         avklarteVirksomheterService.lagreVirksomheterSomAvklartefakta(behandlingId, List.of(trygdeavtaleResultat.virksomhet()));
         lovvalgsperiodeService.lagreLovvalgsperioder(behandlingId, List.of(lagLovvalgsperiode(trygdeavtaleResultat)));
+    }
+
+    public TrygdeavtaleResultat hentResultat(long behandlingId) {
+        AvklarteMedfolgendeFamilie avklarteMedfolgendeFamilie = avklarteMedfolgendeFamilieService.hentAvklartMedfølgendeEktefelle(behandlingId);
+        Set<OmfattetFamilie> familieOmfattetAvNorskTrygd = avklarteMedfolgendeFamilie.getFamilieOmfattetAvNorskTrygd();
+        return new TrygdeavtaleResultat.Builder().build();
     }
 
     private Lovvalgsperiode lagLovvalgsperiode(TrygdeavtaleResultat trygdeavtaleResultat) {
