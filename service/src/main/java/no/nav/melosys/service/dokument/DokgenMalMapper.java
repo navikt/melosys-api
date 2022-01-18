@@ -39,7 +39,7 @@ public class DokgenMalMapper {
         Mottaker mottaker = dto.getMottaker();
         if (!Aktoersroller.MYNDIGHET.getKode().equals(mottaker.type())) {
             String poststed = mottaker.poststed();
-            if (hasText(mottaker.postnr()) && !hasText(poststed)) {
+            if (hasText(mottaker.postnr())) {
                 poststed = dokgenMapperDatahenter.hentPoststed(mottaker.postnr());
             }
             String land = (dokgenMapperDatahenter.hentLandnavn(mottaker.land()));
