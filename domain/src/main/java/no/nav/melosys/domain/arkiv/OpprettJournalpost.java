@@ -18,9 +18,22 @@ public class OpprettJournalpost extends Journalpost {
     private static final String MEDLEMSKAP_OG_AVGIFT = "4530";
     private static final String MEDLEMSKAP = "MED";
     private static final String ALTINN = "ALTINN";
-    private static final String UTENLANDSK_ORGANISASJON = "UTL_ORG";
-    private static final String ORGNR = "ORGNR";
-    private static final String FNR = "FNR";
+
+    public enum KorrespondansepartIdType {
+        UTENLANDSK_ORGANISASJON("UTL_ORG"),
+        ORGNR("ORGNR"),
+        FNR("FNR");
+
+        private final String kode;
+
+        public String getKode() {
+            return kode;
+        }
+
+        KorrespondansepartIdType(String tittel) {
+            this.kode = tittel;
+        }
+    }
 
     private String eksternReferanseId;
     private String journalførendeEnhet;
@@ -49,7 +62,7 @@ public class OpprettJournalpost extends Journalpost {
         opprettJournalpost.setKorrespondansepartId(institusjonID);
         opprettJournalpost.setKorrespondansepartNavn(institusjonNavn);
         opprettJournalpost.setKorrespondansepartLand(institusjonLand);
-        opprettJournalpost.setKorrespondansepartIdType(UTENLANDSK_ORGANISASJON);
+        opprettJournalpost.setKorrespondansepartIdType(KorrespondansepartIdType.UTENLANDSK_ORGANISASJON);
         opprettJournalpost.setBrukerId(brukerFnr);
         opprettJournalpost.setBrukerIdType(BrukerIdType.FOLKEREGISTERIDENT);
 
@@ -85,12 +98,12 @@ public class OpprettJournalpost extends Journalpost {
             r -> {
                 opprettJournalpost.setKorrespondansepartId(r.getOrgnr());
                 opprettJournalpost.setKorrespondansepartNavn(avsenderNavn);
-                opprettJournalpost.setKorrespondansepartIdType(ORGNR);
+                opprettJournalpost.setKorrespondansepartIdType(KorrespondansepartIdType.ORGNR);
             },
             () -> {
                 opprettJournalpost.setKorrespondansepartId(brukerFnr);
                 opprettJournalpost.setKorrespondansepartNavn(avsenderNavn);
-                opprettJournalpost.setKorrespondansepartIdType(FNR);
+                opprettJournalpost.setKorrespondansepartIdType(KorrespondansepartIdType.FNR);
             }
         );
 
@@ -108,7 +121,7 @@ public class OpprettJournalpost extends Journalpost {
         opprettJournalpost.setBrukerIdType(BrukerIdType.FOLKEREGISTERIDENT);
         opprettJournalpost.setKorrespondansepartId(bestilling.getMottakerId());
         opprettJournalpost.setKorrespondansepartNavn(bestilling.getMottakerNavn());
-        opprettJournalpost.setKorrespondansepartIdType(bestilling.erMottakerOrg() ? ORGNR : FNR);
+        opprettJournalpost.setKorrespondansepartIdType(bestilling.getMottakerIdType());
         opprettJournalpost.setInnhold(opprettJournalpost.getHoveddokument().getTittel());
 
         return opprettJournalpost;
@@ -134,8 +147,8 @@ public class OpprettJournalpost extends Journalpost {
         return korrespondansepartIdType;
     }
 
-    public void setKorrespondansepartIdType(String korrespondansepartIdType) {
-        this.korrespondansepartIdType = korrespondansepartIdType;
+    public void setKorrespondansepartIdType(KorrespondansepartIdType korrespondansepartIdType) {
+        this.korrespondansepartIdType = korrespondansepartIdType.getKode();
     }
 
     public String getKorrespondansepartLand() {

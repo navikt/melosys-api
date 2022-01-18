@@ -110,8 +110,8 @@ public class OpprettJournalforBrev implements StegBehandler {
             .medDokumentKategori(dokumentproduksjonsInfo.dokumentKategoriKode())
             .medBrukerFnr(brukerFnr)
             .medMottakerNavn(hasText(orgnr) ? eregFasade.hentOrganisasjonNavn(orgnr) : sammensattNavn)
-            .medMottakerId(hasText(orgnr) ? orgnr : fnr)
-            .medErMottakerOrg(hasText(orgnr))
+            .medMottakerId(utledMottakerId(orgnr, fnr, institusjonsid))
+            .medMottakerIdType(utledMottakerIdType(orgnr, fnr, institusjonsid))
             .medSaksnummer(behandling.getFagsak().getSaksnummer())
             .medPdf(pdf)
             .build();
@@ -120,6 +120,26 @@ public class OpprettJournalforBrev implements StegBehandler {
 
         log.info("Brev for behandling {} er journalført, journalpostId {}", behandling.getId(), journalpostId);
         prosessinstans.setData(DISTRIBUERBAR_JOURNALPOST_ID, journalpostId);
+    }
+
+    private String utledMottakerId(String orgnr, String fnr, String institusjonId) {
+        if (hasText(institusjonId)) {
+            return institusjonId;
+        }
+        if (hasText(orgnr)) {
+            return orgnr;
+        }
+        return fnr;
+    }
+
+    private OpprettJournalpost.KorrespondansepartIdType utledMottakerIdType(String orgnr, String fnr, String institusjonId) {
+        if (hasText(institusjonId)) {
+            return OpprettJournalpost.KorrespondansepartIdType.UTENLANDSK_ORGANISASJON;
+        }
+        if (hasText(orgnr)) {
+            return OpprettJournalpost.KorrespondansepartIdType.ORGNR;
+        }
+        return OpprettJournalpost.KorrespondansepartIdType.FNR;
     }
 
     private String hentBrukerFolkeregisterIdent(Behandling behandling) {
