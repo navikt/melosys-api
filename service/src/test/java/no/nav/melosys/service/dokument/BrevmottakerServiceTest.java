@@ -21,9 +21,11 @@ import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService;
@@ -57,6 +59,8 @@ class BrevmottakerServiceTest {
     @Mock
     private TrygdeavgiftsberegningService trygdeavgiftsberegningService;
     @Mock
+    private LovvalgsperiodeService lovvalgsperiodeService;
+    @Mock
     private Behandling behandling;
 
     private Behandlingsresultat behandlingsresultat;
@@ -65,7 +69,7 @@ class BrevmottakerServiceTest {
     @BeforeEach
     void setup() {
         brevmottakerService = new BrevmottakerService(kontaktopplysningService, avklarteVirksomheterService,
-            utenlandskMyndighetService, behandlingsresultatService, trygdeavgiftsberegningService);
+            utenlandskMyndighetService, behandlingsresultatService, trygdeavgiftsberegningService, lovvalgsperiodeService);
 
         behandlingsresultat = new Behandlingsresultat();
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
@@ -402,7 +406,11 @@ class BrevmottakerServiceTest {
 
     @Test
     void gittInnvilgelsesbrevUK_skalHovedmottakerVæreBrukerMedKopier() {
+        var lovvalgsperiode = new Lovvalgsperiode();
+        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1);
+
         when(behandling.getFagsak()).thenReturn(lagFagsakMedRepresentant(null));
+        when(lovvalgsperiodeService.hentValidertLovvalgsperiode(anyLong())).thenReturn(lovvalgsperiode);
 
         assertThat(brevmottakerService.hentMottakerliste(STORBRITANNIA, behandling))
             .extracting(
