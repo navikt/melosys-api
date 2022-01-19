@@ -4,7 +4,7 @@
   "journalpostId": "439646307",
   "dokumentId": "ukjent",
   "gsakSaksnummer": 161,
-  "aktoerId": "1792998400865",
+  "aktoerId": "30056928150",
   "statsborgerskap": [
     {
       "landkode": "NO"
@@ -20,5 +20,6 @@
   "midlertidigBestemmelse": false,
   "ytterligereInformasjon": "tteeesstt",
   "bucType": "LA_BUC_04",
-  "sedType": "A009"
+  "sedType": "A009",
+  "sedVersjon":"1"
 }

@@ -1,0 +1,43 @@
+dn: dc=local
+changetype: add
+objectClass: top
+objectClass: dcObject
+dc: local
+
+dn: DC=test,DC=local
+changetype: add
+dc: test
+o: test
+objectClass: top
+objectclass: dcObject
+objectclass: organization
+
+dn: OU=BusinessUnits,DC=test,DC=local
+changetype: add
+dc: BusinessUnits
+objectClass: organizationalUnit
+objectClass: top
+
+dn: OU=NAV,OU=BusinessUnits,DC=test,DC=local
+changetype: add
+dc: NAV
+objectClass: organizationalUnit
+objectClass: top
+
+dn: OU=Users,OU=NAV,OU=BusinessUnits,DC=test,DC=local
+changetype: add
+dc: Users
+objectClass: organizationalUnit
+objectClass: top
+
+dn: CN=Z123456,OU=Users,OU=NAV,OU=BusinessUnits,DC=test,DC=local
+changetype: add
+objectClass: user
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+cn: Z123456
+objectCategory: CN=Person,CN=Schema,CN=Configuration,DC=test,DC=local
+displayName: Melosys Saksbehandler
+memberOf: CN=0000-GA-MELOSYS,OU=AccountGroups,OU=Groups,OU=NAV,OU=Busines
+ sUnits,DC=test,DC=local

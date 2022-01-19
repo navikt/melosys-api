@@ -1,0 +1,177 @@
+{"nav": {
+    "bruker": {
+      "mor": {
+        "person": {
+          "etternavnvedfoedsel": "Testmorsetternavnvedfoedsel",
+          "fornavn": "Testmorsforrnavn"
+        }
+      },
+      "person": {
+        "fornavn": "Testfornavn",
+        "pin": [
+          {
+            "sektor": "alle",
+            "identifikator": "01058312345",
+            "land": "NO"
+          },
+          {
+            "sektor": "familieytelser",
+            "land": "BE",
+            "identifikator": "478323742"
+          }
+        ],
+        "kjoenn": "K",
+        "etternavn": "Testetternavn",
+        "foedselsdato": "1983-05-01",
+        "statsborgerskap": [
+          {
+            "land": "DK"
+          },
+          {
+            "land": "GR"
+          },
+          {
+            "land": "GB"
+          },
+          {
+            "land": "AU"
+          }
+        ],
+        "foedested": {
+          "region": "Testregion",
+          "land": "FR",
+          "by": "Testby"
+        },
+        "fornavnvedfoedsel": "Testfornavnvedfoedsel",
+        "etternavnvedfoedsel": "Testetternavnvedfoedsel"
+      },
+      "adresse": [
+        {
+          "by": "Testby1",
+          "postnummer": "Testpostkode1",
+          "bygning": "Testbygning1",
+          "type": "opphold",
+          "land": "BG",
+          "gate": "Testgate1",
+          "region": "Testregion1"
+        },
+        {
+          "postnummer": "Testpostkode2",
+          "region": "Testregion2",
+          "land": "SE",
+          "type": "bosted",
+          "by": "Testby2",
+          "bygning": "Testbygning2",
+          "gate": "Testgate2"
+        }
+      ],
+      "far": {
+        "person": {
+          "fornavn": "Testfarsforrnavn",
+          "etternavnvedfoedsel": "Testfarsetternavnvedfoedsel"
+        }
+      }
+    },
+    "arbeidssted": [
+      {
+        "adresse": {
+          "land": "BE",
+          "gate": "Testarbeidsstedgate1",
+          "bygning": "Testarbeidsstedbygning1",
+          "region": "Testarbeidsstedregoin1",
+          "by": "Testarbeidsstedby1",
+          "postnummer": "Testarbeidsstedpostkode1"
+        },
+        "erikkefastadresse": "nei",
+        "navn": "Testarbeidssted1",
+        "hjemmebase": "Testarbeidsstedhjemme1"
+      },
+      {
+        "navn": "Testarbeidssted2",
+        "adresse": {
+          "gate": "Testarbeidsstedgate2",
+          "land": "CZ",
+          "by": "Testarbeidsstedby2"
+        },
+        "erikkefastadresse": "ja",
+        "hjemmebase": "Testarbeidsstedbase2"
+      }
+    ],
+    "selvstendig": {
+      "arbeidsgiver": [
+        {
+          "identifikator": [
+            {
+              "id": "24234234",
+              "type": "ukjent"
+            }
+          ],
+          "navn": "Testarbeidsgiver4",
+          "adresse": {
+            "by": "Testarbeidsgiverby4",
+            "gate": "Testarbeidsgivergate4",
+            "land": "BG"
+          }
+        }
+      ]
+    },
+    "ytterligereinformasjon": "Testkommentar\nOver\nflere\nlinjer"
+  },
+  "medlemskap": {
+    "utsendingsland": {
+      "arbeidsgiver": [
+        {
+          "adresse": {
+            "region": "Testarbeidsgiverregion1",
+            "postnummer": "Testarbeidsgiverpostkode1",
+            "gate": "Testarbeidsgivergate1",
+            "bygning": "Testarbeidsgiverbygning1",
+            "by": "Testarbeidsgiverby1",
+            "land": "CY"
+          },
+          "identifikator": [
+            {
+              "type": "registrering",
+              "id": "234234234"
+            },
+            {
+              "id": "435435",
+              "type": "trygd"
+            }
+          ],
+          "navn": "Testarbeidsgiver1"
+        },
+        {
+          "adresse": {
+            "by": "Testarbeidsgiverby2",
+            "land": "HR",
+            "gate": "Testarbeidsgivergate2"
+          },
+          "navn": "Testarbeidsgiver2",
+          "identifikator": [
+            {
+              "type": "skatt",
+              "id": "234234234"
+            }
+          ]
+        }
+      ]
+    },
+    "vedtak": {
+      "gjelderperiode": {
+        "fastperiode": {
+          "startdato": "2018-10-01",
+          "sluttdato": "2019-05-01"
+        }
+      },
+      "artikkelforordning": "12_1",
+      "land": "IE",
+      "gjeldervarighetyrkesaktivitet": "ja",
+      "erendringsvedtak": "nei",
+      "datoforrigevedtak": "2018-05-01"
+    }
+  },
+  "sedVer": "1",
+  "sedGVer": "4",
+  "sed": "A009"
+}

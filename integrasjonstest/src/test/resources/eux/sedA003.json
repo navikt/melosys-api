@@ -1,0 +1,154 @@
+{
+  "nav" : {
+    "bruker" : {
+      "mor" : {
+        "person" : {
+          "etternavnvedfoedsel" : "sadffsasf",
+          "fornavn" : "acvxzvsfsf"
+        }
+      },
+      "person" : {
+        "fornavn" : "Gul",
+        "kjoenn" : "M",
+        "etternavn" : "Rot",
+        "etternavnvedfoedsel" : "saffsd",
+        "foedselsdato" : "1978-04-04",
+        "statsborgerskap" : [ {
+          "land" : "FR"
+        } ],
+        "pin" : [ {
+          "institusjonsnavn" : "asfasfasfa",
+          "identifikator" : "34235435gdg",
+          "sektor" : "familieytelser",
+          "land" : "DK",
+          "institusjonsid" : "2423442"
+        } ],
+        "foedested" : {
+          "region" : "asdfasdf",
+          "by" : "qwfesafds",
+          "land" : "SE"
+        },
+        "fornavnvedfoedsel" : "sdffsdf"
+      },
+      "adresse" : [ {
+        "land" : "FI",
+        "by" : "sdfsfaadv",
+        "postnummer" : "234",
+        "bygning" : "rrwrwfs",
+        "type" : "bosted",
+        "gate" : "sfaffsaf",
+        "region" : "fsdfafasf"
+      } ],
+      "far" : {
+        "person" : {
+          "fornavn" : "werwrqwr",
+          "etternavnvedfoedsel" : "sdfsfaaa"
+        }
+      }
+    },
+    "arbeidsgiver" : [ {
+      "identifikator" : [ {
+        "id" : "qwer2343",
+        "type" : "registrering"
+      } ],
+      "navn" : "asdffsdf",
+      "adresse" : {
+        "gate" : "qweqwe",
+        "land" : "DK",
+        "bygning" : "fwfwqf",
+        "by" : "sdafffsca",
+        "postnummer" : "123123",
+        "region" : "werqfefew"
+      }
+    }, {
+      "identifikator" : [ {
+        "type" : "trygd",
+        "id" : "2323"
+      } ],
+      "adresse" : {
+        "gate" : "asdasd",
+        "region" : "ccww",
+        "postnummer" : "2332",
+        "by" : "dasdsd323",
+        "bygning" : "asdsasd",
+        "land" : "SE"
+      },
+      "navn" : "dasdsds"
+    } ],
+    "arbeidssted" : [ {
+      "adresse" : {
+        "land" : "GR",
+        "gate" : "asdda",
+        "region" : "asddasd",
+        "bygning" : "asdvasadsa",
+        "by" : "asdcas",
+        "postnummer" : "asdcascsa"
+      },
+      "erikkefastadresse" : "ja",
+      "navn" : "asdsadsa",
+      "hjemmebase" : "asasfsaf"
+    } ],
+    "selvstendig" : {
+      "arbeidsgiver" : [ {
+        "identifikator" : [ {
+          "id" : "ads3324234",
+          "type" : "ukjent"
+        } ],
+        "navn" : "asdasdvsf",
+        "adresse" : {
+          "region" : "asdsad",
+          "gate" : "asdasdasd",
+          "bygning" : "asdasdfas",
+          "land" : "SK",
+          "by" : "asdasdasd",
+          "postnummer" : "234324234"
+        }
+      } ]
+    },
+    "eessisak" : {
+      "institusjonsnummer" : "rewwsfsfsa",
+      "institusjonsid" : "asfsaf"
+    },
+    "ytterligereinformasjon" : "hkjhsdjkakjhhjkkh",
+    "arbeidsgiveraktivitet" : {
+      "eraktivitetmarginal" : "nei"
+    }
+  },
+  "medlemskap" : {
+    "gjeldendereglerEC883" : "14_2_b",
+    "relevantartikkelfor8832004eller9872009" : "13_1_b_iii",
+    "andreland" : {
+      "arbeidsgiver" : [ {
+        "adresse" : {
+          "by" : "dqwdqwd",
+          "postnummer" : "qdwqccq",
+          "gate" : "qwdqwdqdw",
+          "region" : "ioqhwdiuhdhi",
+          "land" : "DE"
+        },
+        "identifikator" : [ {
+          "type" : "skatt",
+          "id" : "234234234ff"
+        } ],
+        "navn" : "sadddd2d"
+      } ],
+      "arbeidsgiveraktivitet" : {
+        "eraktivitetmarginal" : "ja"
+      }
+    },
+    "vedtak" : {
+      "gjelderperiode" : {
+        "startdato" : "2018-09-09",
+        "sluttdato" : "2017-12-01"
+      },
+      "land" : "SE",
+      "gjeldervarighetyrkesaktivitet" : "ja",
+      "erendringsvedtak" : "nei",
+      "datoforrigevedtak" : "2018-05-05"
+    },
+    "isDeterminationProvisional" : "ja"
+  },
+  "sedVer" : "1",
+  "sedGVer" : "4",
+  "sed" : "A003"
+}
