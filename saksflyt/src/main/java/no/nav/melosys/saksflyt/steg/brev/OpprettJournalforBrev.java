@@ -15,6 +15,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
+import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.DokgenService;
 import no.nav.melosys.service.dokument.DokumentproduksjonsInfo;
@@ -36,19 +37,21 @@ public class OpprettJournalforBrev implements StegBehandler {
 
     private final BehandlingService behandlingService;
     private final DokgenService dokgenService;
+    private final UtenlandskMyndighetService utenlandskMyndighetService;
     private final JoarkFasade joarkFasade;
     private final PersondataFasade persondataFasade;
     private final EregFasade eregFasade;
     private final Unleash unleash;
 
     @Autowired
-    public OpprettJournalforBrev(BehandlingService behandlingService, DokgenService dokgenService,
+    public OpprettJournalforBrev(BehandlingService behandlingService, DokgenService dokgenService, UtenlandskMyndighetService utenlandskMyndighetService,
                                  @Qualifier("system") JoarkFasade joarkFasade,
                                  @Qualifier("system") PersondataFasade persondataFasade,
                                  @Qualifier("system") EregFasade eregFasade,
                                  Unleash unleash) {
         this.behandlingService = behandlingService;
         this.dokgenService = dokgenService;
+        this.utenlandskMyndighetService = utenlandskMyndighetService;
         this.joarkFasade = joarkFasade;
         this.persondataFasade = persondataFasade;
         this.eregFasade = eregFasade;
@@ -87,8 +90,8 @@ public class OpprettJournalforBrev implements StegBehandler {
 
         if (!isEmpty(institusjonsid)) {
             mottaker.setInstitusjonId(institusjonsid);
-        }
-        else if (!isEmpty(orgnr)) {
+            sammensattNavn = utenlandskMyndighetService.hentUtenlandskMyndighetForInstitusjonID(institusjonsid).navn;
+        } else if (!isEmpty(orgnr)) {
             mottaker.setOrgnr(orgnr);
         } else {
             mottaker.setAktørId(aktørId);
@@ -107,8 +110,8 @@ public class OpprettJournalforBrev implements StegBehandler {
             .medDokumentKategori(dokumentproduksjonsInfo.dokumentKategoriKode())
             .medBrukerFnr(brukerFnr)
             .medMottakerNavn(hasText(orgnr) ? eregFasade.hentOrganisasjonNavn(orgnr) : sammensattNavn)
-            .medMottakerId(hasText(orgnr) ? orgnr : fnr)
-            .medErMottakerOrg(hasText(orgnr))
+            .medMottakerId(utledMottakerId(orgnr, fnr, institusjonsid))
+            .medMottakerIdType(utledMottakerIdType(orgnr, fnr, institusjonsid))
             .medSaksnummer(behandling.getFagsak().getSaksnummer())
             .medPdf(pdf)
             .build();
@@ -117,6 +120,26 @@ public class OpprettJournalforBrev implements StegBehandler {
 
         log.info("Brev for behandling {} er journalført, journalpostId {}", behandling.getId(), journalpostId);
         prosessinstans.setData(DISTRIBUERBAR_JOURNALPOST_ID, journalpostId);
+    }
+
+    private String utledMottakerId(String orgnr, String fnr, String institusjonId) {
+        if (hasText(institusjonId)) {
+            return institusjonId;
+        }
+        if (hasText(orgnr)) {
+            return orgnr;
+        }
+        return fnr;
+    }
+
+    private OpprettJournalpost.KorrespondansepartIdType utledMottakerIdType(String orgnr, String fnr, String institusjonId) {
+        if (hasText(institusjonId)) {
+            return OpprettJournalpost.KorrespondansepartIdType.UTENLANDSK_ORGANISASJON;
+        }
+        if (hasText(orgnr)) {
+            return OpprettJournalpost.KorrespondansepartIdType.ORGNR;
+        }
+        return OpprettJournalpost.KorrespondansepartIdType.FNR;
     }
 
     private String hentBrukerFolkeregisterIdent(Behandling behandling) {
