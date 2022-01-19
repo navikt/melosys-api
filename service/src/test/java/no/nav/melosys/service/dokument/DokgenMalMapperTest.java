@@ -38,6 +38,7 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.MYNDIGHET;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
+import static no.nav.melosys.service.dokument.DokgenMalMapper.SAKSBEHANDLINGSTID_DAGER;
 import static no.nav.melosys.service.dokument.DokgenTestData.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
@@ -153,11 +154,11 @@ class DokgenMalMapperTest {
         when(mockDokgenMapperDatahenter.hentPersondata(any())).thenReturn(lagPersonDokument());
 
         Behandling behandling = lagBehandling();
-
+        LocalDate forsendelseMottattDato = LocalDate.of(2022, 1, 19);
         DokgenBrevbestilling brevbestilling = new DokgenBrevbestilling.Builder<>()
             .medProduserbartdokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID)
             .medBehandling(behandling)
-            .medForsendelseMottatt(Instant.now())
+            .medForsendelseMottatt(forsendelseMottattDato.atStartOfDay(ZoneId.of("Europe/Paris")).toInstant())
             .medAvsendertype(Avsendertyper.UTENLANDSK_TRYGDEMYNDIGHET)
             .medAvsenderLand("FI")
             .build();
@@ -170,10 +171,12 @@ class DokgenMalMapperTest {
         assertThat((SaksbehandlingstidSoknad) dokgenDto)
             .extracting(
                 SaksbehandlingstidSoknad::getAvsenderTypeSoknad,
-                SaksbehandlingstidSoknad::getAvsenderLand
+                SaksbehandlingstidSoknad::getAvsenderLand,
+                SaksbehandlingstidSoknad::getDatoBehandlingstid
             ).containsExactly(
                 MYNDIGHET,
-                "Finland"
+                "Finland",
+                forsendelseMottattDato.atStartOfDay(ZoneId.of("Europe/Paris")).toInstant().plus(SAKSBEHANDLINGSTID_DAGER, ChronoUnit.DAYS)
             );
     }
 
@@ -389,9 +392,9 @@ class DokgenMalMapperTest {
 
         assertThat(innvilgelse).extracting(
             i -> i.getInnvilgelse().innledningFritekst(),
-            i -> i.getArtikkel(),
+            InnvilgelseStorbritannia::getArtikkel,
             i -> i.getSoknad().virksomhetsnavn(),
-            i -> i.isVirksomhetArbeidsgiverSkalHaKopi()
+            InnvilgelseStorbritannia::isVirksomhetArbeidsgiverSkalHaKopi
         ).containsExactly(
             "Innledning",
             Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1,
@@ -517,28 +520,6 @@ class DokgenMalMapperTest {
             LocalDate.of(2021, 12, 9));
         assertThat(avslagbrev.getMangelbrevDatoer()).isSorted();
         assertThat(avslagbrev.getFritekst()).isEqualTo("Hei");
-    }
-
-    @Test
-    void skalMappeFristFraMangelbrevDatoerIAvlagsbrev() {
-        //NB! Denne tester ikke mapperen direkte, men tester konstruktøren i avslagbrev
-        //Grunnen til at den er her, er fordi DokgenTestData ikke er tilgjengelig fra et annet sted.
-        //Tester her som en ekstra sikkerhet for at den blir testet et sted.
-        LocalDate datoDesember = LocalDate.of(2021, 12, 9);
-        LocalDate datoOktober = LocalDate.of(2021, 10, 9);
-        when(dokumentHentingService.hentDokumenter("MEL-123")).thenReturn(List.of(
-            lagJournalpost(datoDesember),
-            lagJournalpost(datoOktober)));
-        when(mockDokgenMapperDatahenter.hentPoststed(any())).thenReturn("Andeby");
-        when(mockDokgenMapperDatahenter.hentPersondata(any())).thenReturn(lagPersonDokument());
-        DokgenBrevbestilling brevbestilling = new AvslagBrevbestilling.Builder()
-            .medProduserbartdokument(AVSLAG_MANGLENDE_OPPLYSNINGER)
-            .medBehandling(lagBehandling(lagFagsak(true)))
-            .medFritekst("Hei")
-            .build();
-
-        Avslagbrev avslagbrev = (Avslagbrev) dokgenMalMapper.mapBehandling(brevbestilling);
-
         Instant forventetInstant = datoDesember.atStartOfDay(ZoneId.of("Europe/Paris")).toInstant().plus(Period.ofWeeks(4));
         assertThat(avslagbrev.getDatoInnsendingsfrist()).isEqualTo(LocalDate.ofInstant(forventetInstant, ZoneId.systemDefault()));
     }
