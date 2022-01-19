@@ -14,12 +14,8 @@ import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadTrygdeavtale;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.RepresentantIUtlandet;
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
-import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Medfolgende_barn_begrunnelser;
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_barn_begrunnelser_ftrl;
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_ektefelle_samboer_begrunnelser_ftrl;
@@ -36,9 +32,8 @@ import no.nav.melosys.integrasjon.dokgen.dto.storbritannia.attest.AttestStorbrit
 import no.nav.melosys.integrasjon.dokgen.dto.storbritannia.innvilgelse.Barn;
 import no.nav.melosys.integrasjon.dokgen.dto.storbritannia.innvilgelse.InnvilgelseStorbritannia;
 import no.nav.melosys.service.LovvalgsperiodeService;
-import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
-import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
+import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterSystemService;
 import no.nav.melosys.service.dokument.brev.BrevDataTestUtils;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import org.junit.jupiter.api.BeforeEach;
@@ -83,7 +78,7 @@ public class StorbritanniaMapperTest {
     @Mock
     private LovvalgsperiodeService mockLovvalgsperiodeService;
     @Mock
-    private AvklarteVirksomheterService mockAvklarteVirksomheterService;
+    private AvklarteVirksomheterSystemService mockAvklarteVirksomheterSystemService;
     @Mock
     private DokgenMapperDatahenter mockDokgenMapperDatahenter;
     @Mock
@@ -97,7 +92,7 @@ public class StorbritanniaMapperTest {
     void setup() {
         storbritanniaMapper = new StorbritanniaMapper(
             mockAvklarteMedfolgendeFamilieService,
-            mockAvklarteVirksomheterService,
+            mockAvklarteVirksomheterSystemService,
             mockDokgenMapperDatahenter,
             mockPersondataFasade,
             mockLovvalgsperiodeService);
@@ -129,7 +124,7 @@ public class StorbritanniaMapperTest {
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> storbritanniaMapper.map(brevbestilling))
-            .withMessageContaining(Kontroll_begrunnelser.ATTEST_MANGLER_ARBEIDSSTED.getBeskrivelse());
+            .withMessageContaining("Fant 0 avklarte virksomheter for behandling: null. Må være 1 for trygdeavtale");
     }
 
     @Test
@@ -168,7 +163,7 @@ public class StorbritanniaMapperTest {
         mockMedfølgendeFamilieDefaultCase();
         mockLovvalgsperiode();
         when(mockLovvalgsperiodeService.hentLovvalgsperioder(anyLong())).thenReturn(List.of(lagLovvalgsperiode()));
-        when(mockAvklarteVirksomheterService.hentNorskeArbeidsgivere(any())).thenReturn(lagAvklarteVirksomheter());
+        when(mockAvklarteVirksomheterSystemService.hentNorskeArbeidsgivere(any())).thenReturn(lagAvklarteVirksomheter());
         when(mockAvklarteMedfolgendeFamilieService.hentAvklartMedfølgendeEktefelle(anyLong())).thenReturn(lagIkkeOmfattetMedfølgendeEktefelle());
         when(mockAvklarteMedfolgendeFamilieService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(lagIkkeOmfattetMedfølgendeBarn());
 
@@ -297,6 +292,7 @@ public class StorbritanniaMapperTest {
             .medBarnFritekst("barnFritekst")
             .medEktefelleFritekst("ektefelleFritekst")
             .medVedtaksdato(VEDTAKS_DATO_INSTANT)
+            .medVirksomhetArbeidsgiverSkalHaKopi(false)
             .build();
     }
 
@@ -347,20 +343,6 @@ public class StorbritanniaMapperTest {
         return new AvklarteMedfolgendeFamilie(Set.of(), Set.of());
     }
 
-    private static SoeknadTrygdeavtale lagTrygdeavtaleBehandlingsgrunnlagdata() {
-        var behandlingsgrunnlagData = new SoeknadTrygdeavtale();
-        var representantIUtlandet = new RepresentantIUtlandet();
-        representantIUtlandet.representantNavn = "Foretaksnavn";
-        representantIUtlandet.adresselinjer = List.of("Uk address");
-        representantIUtlandet.representantLand = Landkoder.GB.getKode();
-        behandlingsgrunnlagData.setRepresentantIUtlandet(representantIUtlandet);
-        return behandlingsgrunnlagData;
-    }
-
-    private SoeknadTrygdeavtale hentSoeknadTrygdeavtale() {
-        return (SoeknadTrygdeavtale) lagTrygdeavtaleBehandling().getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
-    }
-
     private void mockHappyCase() {
         when(mockPersondata.getFødselsdato()).thenReturn(FØDSELSDATO);
         when(mockAvklarteMedfolgendeFamilieService.hentAvklartMedfølgendeEktefelle(anyLong())).thenReturn(lagAvklartMedfølgendeEktefelle());
@@ -368,7 +350,7 @@ public class StorbritanniaMapperTest {
         when(mockAvklarteMedfolgendeFamilieService.hentMedfølgendEktefelle(anyLong())).thenReturn(lagMedfølgendeEktefelle());
         when(mockAvklarteMedfolgendeFamilieService.hentMedfølgendeBarn(anyLong())).thenReturn(lagMedfølgendeBarn());
         when(mockPersondataFasade.hentPerson(anyString())).thenReturn(mockPersondata);
-        when(mockAvklarteVirksomheterService.hentNorskeArbeidsgivere(any())).thenReturn(lagAvklarteVirksomheter());
+        when(mockAvklarteVirksomheterSystemService.hentNorskeArbeidsgivere(any())).thenReturn(lagAvklarteVirksomheter());
         when(mockLovvalgsperiodeService.hentLovvalgsperioder(anyLong())).thenReturn(List.of(lagLovvalgsperiode()));
         when(mockLovvalgsperiodeService.hentValidertLovvalgsperiode(anyLong())).thenReturn(lagLovvalgsperiode());
         when(mockDokgenMapperDatahenter.hentSammensattNavn(anyString())).thenAnswer((Answer<String>) invocationOnMock -> {
@@ -516,7 +498,7 @@ public class StorbritanniaMapperTest {
                 "soknadsdato" : "%s",
                 "periodeFom" : "%s",
                 "periodeTom" : "%s",
-                "virksomhetsnavn" : "Foretaksnavn"
+                "virksomhetsnavn" : "Bang Hansen"
               },
               "familie" : {
                 "minstEttOmfattetFamiliemedlem" : true,
@@ -590,8 +572,8 @@ public class StorbritanniaMapperTest {
             "sluttdato" : "%s"
           },
           "representant" : {
-            "navn" : "Mrs. London",
-            "adresse" : [ ]
+            "navn" : "Foretaksnavn",
+            "adresse" : [ "Uk address" ]
           },
           "vedtaksdato" : "%s"
         }""", FØDSELSDATO, EKTEFELLE_FNR, FØDSELSDATO, BARN1_FNR, LOVVALGSPERIODE_FOM, LOVVALGSPERIODE_TOM, VEDTAKS_DATO);

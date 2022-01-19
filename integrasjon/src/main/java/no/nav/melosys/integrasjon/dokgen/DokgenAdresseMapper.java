@@ -1,6 +1,7 @@
 package no.nav.melosys.integrasjon.dokgen;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import no.nav.melosys.domain.Kontaktopplysning;
@@ -84,7 +85,7 @@ public final class DokgenAdresseMapper {
             var utenlandskMyndighet = brevbestilling.getUtenlandskMyndighet();
             return new Mottaker(
                 utenlandskMyndighet.navn,
-                utenlandskMyndighet.getAdresse().toList(),
+                Collections.singletonList(utenlandskMyndighet.gateadresse),
                 utenlandskMyndighet.postnummer,
                 utenlandskMyndighet.poststed,
                 utenlandskMyndighet.land,
