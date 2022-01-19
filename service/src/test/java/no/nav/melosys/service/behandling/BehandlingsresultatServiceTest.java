@@ -242,6 +242,22 @@ class BehandlingsresultatServiceTest {
         assertThat(behandlingsresultatBegrunnelse.getBehandlingsresultat()).isEqualTo(behandlingsresultat);
     }
 
+    @Test
+    void oppdaterFritekster_altOk_blirLagret() {
+        ArgumentCaptor<Behandlingsresultat> captor = ArgumentCaptor.forClass(Behandlingsresultat.class);
+        var behandlingsresultat = new Behandlingsresultat();
+        when(behandlingsresultatRepo.findById(1L)).thenReturn(Optional.of(behandlingsresultat));
+
+        behandlingsresultatService.oppdaterFritekster(
+            1L,"fritekst for begrunnelse", "fritekst for innledning");
+
+
+        verify(behandlingsresultatRepo).save(captor.capture());
+        Behandlingsresultat capturedBehandlingsresultat = captor.getValue();
+        assertThat(capturedBehandlingsresultat.getBegrunnelseFritekst()).isEqualTo("fritekst for begrunnelse");
+        assertThat(capturedBehandlingsresultat.getInnledningFritekst()).isEqualTo("fritekst for innledning");
+    }
+
     private Lovvalgsperiode opprettLovvalgsperiode() {
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setId(32L);

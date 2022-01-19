@@ -233,4 +233,11 @@ public class BehandlingsresultatService {
         behandlingsresultat.setBegrunnelseFritekst(begrunnelseFritekst);
         behandlingsresultatRepository.save(behandlingsresultat);
     }
+
+    public Behandlingsresultat oppdaterFritekster(long behandlingID, String begrunnelseFritekst, String innledningFritekst) {
+        final Behandlingsresultat behandlingsresultat = hentBehandlingsresultat(behandlingID);
+        behandlingsresultat.setBegrunnelseFritekst(begrunnelseFritekst);
+        behandlingsresultat.setInnledningFritekst(innledningFritekst);
+        return behandlingsresultatRepository.save(behandlingsresultat);
+    }
 }
