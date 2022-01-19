@@ -1,11 +1,11 @@
 package no.nav.melosys.tjenester.gui;
 
 import java.time.LocalDate;
-import java.util.List;
 import java.util.UUID;
 
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
@@ -19,6 +19,7 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_t
 import no.nav.melosys.domain.person.familie.IkkeOmfattetFamilie;
 import no.nav.melosys.domain.person.familie.OmfattetFamilie;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.trygdeavtale.TrygdeavtaleResultat;
 import no.nav.melosys.service.trygdeavtale.TrygdeavtaleService;
@@ -49,6 +50,8 @@ class TrygdeavtaleTjenesteTest {
     @Mock
     private BehandlingService behandlingService;
     @Mock
+    private BehandlingsresultatService behandlingsresultatService;
+    @Mock
     private Aksesskontroll aksesskontroll;
 
     @Captor
@@ -57,10 +60,11 @@ class TrygdeavtaleTjenesteTest {
     private TrygdeavtaleTjeneste trygdeavtaleTjeneste;
 
     private static final Behandling behandling = lagBehandling();
+    private static final Behandlingsresultat behandlingsresultat = lagBehandlingsresultat();
 
     @BeforeEach
     void init() {
-        trygdeavtaleTjeneste = new TrygdeavtaleTjeneste(trygdeavtaleService, behandlingService, aksesskontroll);
+        trygdeavtaleTjeneste = new TrygdeavtaleTjeneste(trygdeavtaleService, behandlingService, behandlingsresultatService, aksesskontroll);
     }
 
     @Test
@@ -104,6 +108,7 @@ class TrygdeavtaleTjenesteTest {
     @Test
     void hentTrygdeavtaleInfo_utenVirksomhetOgBarnEktefelle_returnererKorrekt() {
         when(behandlingService.hentBehandling(1L)).thenReturn(behandling);
+        when(behandlingsresultatService.hentBehandlingsresultat(1L)).thenReturn(behandlingsresultat);
 
         var response = trygdeavtaleTjeneste.hentTrygdeavtaleInfo(1L, false, false).getBody();
 
@@ -113,15 +118,19 @@ class TrygdeavtaleTjenesteTest {
         assertThat(response).isNotNull();
         assertThat(response.aktoerId()).isEqualTo(behandling.getFagsak().hentAktørID());
         assertThat(response.behandlingstema()).isEqualTo(behandling.getTema().getKode());
+        assertThat(response.redigerbart()).isFalse();
         var behandlingsgrunnlagdata = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
         assertThat(response.periodeFom()).isEqualTo(behandlingsgrunnlagdata.periode.getFom());
         assertThat(response.periodeTom()).isEqualTo(behandlingsgrunnlagdata.periode.getTom());
         assertThat(response.soeknadsland()).isEqualTo(behandlingsgrunnlagdata.soeknadsland.landkoder);
+        assertThat(response.innledningFritekst()).isEqualTo(behandlingsresultat.getInnledningFritekst());
+        assertThat(response.begrunnelseFritekst()).isEqualTo(behandlingsresultat.getBegrunnelseFritekst());
     }
 
     @Test
     void hentTrygdeavtaleInfo_medVirksomhetOgBarnEktefelle_returnererKorrekt() {
         when(behandlingService.hentBehandling(1L)).thenReturn(behandling);
+        when(behandlingsresultatService.hentBehandlingsresultat(1L)).thenReturn(behandlingsresultat);
 
         var response = trygdeavtaleTjeneste.hentTrygdeavtaleInfo(1L, true, true).getBody();
 
@@ -131,10 +140,25 @@ class TrygdeavtaleTjenesteTest {
         assertThat(response).isNotNull();
         assertThat(response.aktoerId()).isEqualTo(behandling.getFagsak().hentAktørID());
         assertThat(response.behandlingstema()).isEqualTo(behandling.getTema().getKode());
+        assertThat(response.redigerbart()).isFalse();
         var behandlingsgrunnlagdata = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
         assertThat(response.periodeFom()).isEqualTo(behandlingsgrunnlagdata.periode.getFom());
         assertThat(response.periodeTom()).isEqualTo(behandlingsgrunnlagdata.periode.getTom());
         assertThat(response.soeknadsland()).isEqualTo(behandlingsgrunnlagdata.soeknadsland.landkoder);
+        assertThat(response.innledningFritekst()).isEqualTo(behandlingsresultat.getInnledningFritekst());
+        assertThat(response.begrunnelseFritekst()).isEqualTo(behandlingsresultat.getBegrunnelseFritekst());
+    }
+
+    @Test
+    void hentTrygdeavtaleInfo_saksbehandlerHarTillatelseTilÅRedigere_returnererKorrekt() {
+        when(behandlingService.hentBehandling(1L)).thenReturn(behandling);
+        when(behandlingsresultatService.hentBehandlingsresultat(1L)).thenReturn(behandlingsresultat);
+        when(aksesskontroll.behandlingKanRedigeresAvSaksbehandler(eq(behandling), any())).thenReturn(true);
+
+        var response = trygdeavtaleTjeneste.hentTrygdeavtaleInfo(1L, true, true).getBody();
+
+        assertThat(response).isNotNull();
+        assertThat(response.redigerbart()).isTrue();
     }
 
     private static Behandlingsgrunnlag lagBehandlingsgrunnlag() {
@@ -157,6 +181,13 @@ class TrygdeavtaleTjenesteTest {
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         behandling.setBehandlingsgrunnlag(lagBehandlingsgrunnlag());
         return behandling;
+    }
+
+    private static Behandlingsresultat lagBehandlingsresultat() {
+        var behandlingsresultat = new Behandlingsresultat();
+        behandlingsresultat.setInnledningFritekst("innledningFritekst");
+        behandlingsresultat.setBegrunnelseFritekst("begrunnelseFritekst");
+        return behandlingsresultat;
     }
 
     private TrygdeavtaleResultatDto lagTrygdeavtaleResultatDto() {
