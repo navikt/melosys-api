@@ -58,7 +58,9 @@ public class TrygdeavtaleTjeneste {
     @Transactional
     public ResponseEntity<TrygdeavtaleResultatDto> hentResultat(@PathVariable("behandlingID") long behandlingId) {
         TrygdeavtaleResultat trygdeavtaleResultat = trygdeavtaleService.hentResultat(behandlingId);
-        return ResponseEntity.ok(TrygdeavtaleResultatDto.fra(trygdeavtaleResultat));
+        var behandling = behandlingService.hentBehandling(behandlingId);
+        var behandlingsgrunnlagdata = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
+        return ResponseEntity.ok(TrygdeavtaleResultatDto.fra(trygdeavtaleResultat, behandlingsgrunnlagdata.personOpplysninger.medfolgendeFamilie));
     }
 
     @PostMapping("{behandlingID}")

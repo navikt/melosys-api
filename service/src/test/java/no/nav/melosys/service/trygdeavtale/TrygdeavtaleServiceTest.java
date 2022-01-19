@@ -23,6 +23,7 @@ import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
+import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -68,6 +69,8 @@ class TrygdeavtaleServiceTest {
     private AvklarteVirksomheterService avklarteVirksomheterService;
     @Mock
     private LovvalgsperiodeService lovvalgsperiodeService;
+    @Mock
+    private AvklartefaktaService avklartefaktaService;
 
     @Captor
     private ArgumentCaptor<AvklarteMedfolgendeFamilie> avklarteMedfolgendeFamilieArgumentCaptor;
@@ -78,7 +81,7 @@ class TrygdeavtaleServiceTest {
 
     @BeforeEach
     void init() {
-        trygdeavtaleService = new TrygdeavtaleService(eregFasade, avklarteMedfolgendeFamilieService, avklarteVirksomheterService, lovvalgsperiodeService);
+        trygdeavtaleService = new TrygdeavtaleService(eregFasade, avklarteMedfolgendeFamilieService, avklarteVirksomheterService, lovvalgsperiodeService, avklartefaktaService);
     }
 
     @Test

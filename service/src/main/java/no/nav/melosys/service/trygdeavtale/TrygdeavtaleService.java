@@ -1,10 +1,8 @@
 package no.nav.melosys.service.trygdeavtale;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
@@ -15,11 +13,14 @@ import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
 import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie;
+import no.nav.melosys.domain.person.familie.IkkeOmfattetFamilie;
 import no.nav.melosys.domain.person.familie.OmfattetFamilie;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
+import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import org.springframework.stereotype.Service;
 
 import static no.nav.melosys.domain.kodeverk.InnvilgelsesResultat.INNVILGET;
@@ -33,15 +34,17 @@ public class TrygdeavtaleService {
     private final AvklarteMedfolgendeFamilieService avklarteMedfolgendeFamilieService;
     private final AvklarteVirksomheterService avklarteVirksomheterService;
     private final LovvalgsperiodeService lovvalgsperiodeService;
+    private final AvklartefaktaService avklartefaktaService;
 
     public TrygdeavtaleService(EregFasade eregFasade,
                                AvklarteMedfolgendeFamilieService avklarteMedfolgendeFamilieService,
                                AvklarteVirksomheterService avklarteVirksomheterService,
-                               LovvalgsperiodeService lovvalgsperiodeService) {
+                               LovvalgsperiodeService lovvalgsperiodeService, AvklartefaktaService avklartefaktaService) {
         this.eregFasade = eregFasade;
         this.avklarteMedfolgendeFamilieService = avklarteMedfolgendeFamilieService;
         this.avklarteVirksomheterService = avklarteVirksomheterService;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
+        this.avklartefaktaService = avklartefaktaService;
     }
 
     public Map<String, String> hentVirksomheter(Behandling behandling) {
@@ -81,9 +84,18 @@ public class TrygdeavtaleService {
     }
 
     public TrygdeavtaleResultat hentResultat(long behandlingId) {
-        AvklarteMedfolgendeFamilie avklarteMedfolgendeFamilie = avklarteMedfolgendeFamilieService.hentAvklartMedfølgendeEktefelle(behandlingId);
-        Set<OmfattetFamilie> familieOmfattetAvNorskTrygd = avklarteMedfolgendeFamilie.getFamilieOmfattetAvNorskTrygd();
-        return new TrygdeavtaleResultat.Builder().build();
+        AvklarteMedfolgendeFamilie avklarteMedfølgendeBarn = avklarteMedfolgendeFamilieService.hentAvklarteMedfølgendeBarn(behandlingId);
+        AvklarteMedfolgendeFamilie avklartMedfølgendeEktefelle = avklarteMedfolgendeFamilieService.hentAvklartMedfølgendeEktefelle(behandlingId);
+
+        Set<OmfattetFamilie> omfattetFamilie = Stream.concat(avklarteMedfølgendeBarn.getFamilieOmfattetAvNorskTrygd().stream(),
+            avklartMedfølgendeEktefelle.getFamilieOmfattetAvNorskTrygd().stream()).collect(Collectors.toSet());
+        Set<IkkeOmfattetFamilie> ikkeOmfattetFamilie = Stream.concat(avklarteMedfølgendeBarn.getFamilieIkkeOmfattetAvNorskTrygd().stream(),
+            avklartMedfølgendeEktefelle.getFamilieIkkeOmfattetAvNorskTrygd().stream()).collect(Collectors.toSet());
+
+        return new TrygdeavtaleResultat.Builder()
+            .familie(new AvklarteMedfolgendeFamilie(omfattetFamilie, ikkeOmfattetFamilie))
+            .virksomhet("123")
+            .build();
     }
 
     private Lovvalgsperiode lagLovvalgsperiode(TrygdeavtaleResultat trygdeavtaleResultat) {
