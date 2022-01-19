@@ -423,7 +423,7 @@ class JoarkServiceTest {
         opprettJournalpost.setBrukerIdType(BrukerIdType.FOLKEREGISTERIDENT);
         opprettJournalpost.setKorrespondansepartNavn("navn");
         opprettJournalpost.setKorrespondansepartId("id");
-        opprettJournalpost.setKorrespondansepartIdType("UTL_ORG");
+        opprettJournalpost.setKorrespondansepartIdType(OpprettJournalpost.KorrespondansepartIdType.UTENLANDSK_ORGANISASJON);
 
         FysiskDokument hoveddokument = new FysiskDokument();
         hoveddokument.setTittel("tittel");

@@ -4,10 +4,12 @@ import java.util.Optional;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Saksopplysning;
+import no.nav.melosys.domain.UtenlandskMyndighet;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.brev.MangelbrevBrevbestilling;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
@@ -15,6 +17,7 @@ import no.nav.melosys.integrasjon.doksys.DoksysFasade;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.saksflyt.TestdataFactory;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
+import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.junit.jupiter.api.BeforeEach;
@@ -40,6 +43,8 @@ class DistribuerJournalpostTest {
     @Mock
     private BehandlingService mockBehandlingService;
     @Mock
+    private UtenlandskMyndighetService mockUtenlandskMyndighetService;
+    @Mock
     private KodeverkService mockKodeverkService;
 
     private DistribuerJournalpost distribuerJournalpost;
@@ -47,7 +52,7 @@ class DistribuerJournalpostTest {
     @BeforeEach
     void init() {
         distribuerJournalpost = new DistribuerJournalpost(mockDoksysFasade, mockEregFasade,
-            mockKontaktopplysningService, mockBehandlingService, mockKodeverkService);
+            mockKontaktopplysningService, mockBehandlingService, mockUtenlandskMyndighetService, mockKodeverkService);
     }
 
     @Test
@@ -88,7 +93,7 @@ class DistribuerJournalpostTest {
     }
 
     @Test
-    void utførDistribuerJournalpostMedPostadresse() throws Exception {
+    void utførDistribuerJournalpostMedPostadresse() {
         String journalpostId = "12345";
 
         Prosessinstans prosessinstans = setupHappypath(journalpostId, Aktoersroller.REPRESENTANT);
@@ -105,7 +110,7 @@ class DistribuerJournalpostTest {
     }
 
     @Test
-    void utførDistribuerJournalpostMedForretningsadresse() throws Exception {
+    void utførDistribuerJournalpostMedForretningsadresse() {
         String journalpostId = "12345";
         Prosessinstans prosessinstans = setupHappypath(journalpostId, Aktoersroller.REPRESENTANT);
 
@@ -119,6 +124,23 @@ class DistribuerJournalpostTest {
         distribuerJournalpost.utfør(prosessinstans);
 
         verify(mockDoksysFasade).distribuerJournalpost(eq(journalpostId), any(StrukturertAdresse.class), any(), any());
+    }
+
+    @Test
+    void utførDistribuerJournalpostMedUtenlandskMyndighet() {
+        final String journalpostId = "12345";
+        final String institusjonId = "GB:A100";
+        Prosessinstans prosessinstans = setupHappypath(journalpostId, Aktoersroller.MYNDIGHET);
+        prosessinstans.setData(ProsessDataKey.INSTITUSJON_ID, institusjonId);
+
+        var utenlandskMyndighet = new UtenlandskMyndighet();
+        utenlandskMyndighet.landkode = Landkoder.GB;
+
+        when(mockUtenlandskMyndighetService.hentUtenlandskMyndighetForInstitusjonID(eq(institusjonId))).thenReturn(utenlandskMyndighet);
+
+        distribuerJournalpost.utfør(prosessinstans);
+
+        verify(mockDoksysFasade).distribuerJournalpost(eq(journalpostId), any(StrukturertAdresse.class));
     }
 
     private Prosessinstans setupHappypath(String journalpostId, Aktoersroller rolle) {

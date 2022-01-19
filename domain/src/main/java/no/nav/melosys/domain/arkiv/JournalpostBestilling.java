@@ -7,7 +7,7 @@ public final class JournalpostBestilling {
     private final String brukerFnr;
     private final String mottakerNavn;
     private final String mottakerId;
-    private final boolean erMottakerOrg;
+    private final OpprettJournalpost.KorrespondansepartIdType mottakerIdType;
     private final String saksnummer;
     private final byte[] pdf;
 
@@ -18,7 +18,7 @@ public final class JournalpostBestilling {
         this.brukerFnr = builder.brukerFnr;
         this.mottakerNavn = builder.mottakerNavn;
         this.mottakerId = builder.mottakerId;
-        this.erMottakerOrg = builder.erMottakerOrg;
+        this.mottakerIdType = builder.mottakerIdType;
         this.saksnummer = builder.saksnummer;
         this.pdf = builder.pdf;
     }
@@ -47,8 +47,8 @@ public final class JournalpostBestilling {
         return mottakerId;
     }
 
-    public boolean erMottakerOrg() {
-        return erMottakerOrg;
+    public OpprettJournalpost.KorrespondansepartIdType getMottakerIdType() {
+        return mottakerIdType;
     }
 
     public String getSaksnummer() {
@@ -66,7 +66,7 @@ public final class JournalpostBestilling {
         private String brukerFnr;
         private String mottakerNavn;
         private String mottakerId;
-        private boolean erMottakerOrg;
+        private OpprettJournalpost.KorrespondansepartIdType mottakerIdType;
         private String saksnummer;
         private byte[] pdf;
 
@@ -100,8 +100,8 @@ public final class JournalpostBestilling {
             return this;
         }
 
-        public Builder medErMottakerOrg(boolean erMottakerOrg) {
-            this.erMottakerOrg = erMottakerOrg;
+        public Builder medMottakerIdType(OpprettJournalpost.KorrespondansepartIdType mottakerIdType) {
+            this.mottakerIdType = mottakerIdType;
             return this;
         }
 

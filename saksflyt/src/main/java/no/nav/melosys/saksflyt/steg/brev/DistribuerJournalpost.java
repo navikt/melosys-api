@@ -14,6 +14,7 @@ import no.nav.melosys.integrasjon.doksys.DoksysFasade;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
+import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.slf4j.Logger;
@@ -23,6 +24,7 @@ import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.*;
 import static org.apache.commons.lang3.ObjectUtils.isEmpty;
+import static org.springframework.util.StringUtils.hasText;
 
 @Component
 public class DistribuerJournalpost implements StegBehandler {
@@ -32,17 +34,20 @@ public class DistribuerJournalpost implements StegBehandler {
     private final EregFasade eregFasade;
     private final KontaktopplysningService kontaktopplysningService;
     private final BehandlingService behandlingService;
+    private final UtenlandskMyndighetService utenlandskMyndighetService;
     private final KodeverkService kodeverkService;
 
     public DistribuerJournalpost(@Qualifier("system") DoksysFasade doksysFasade,
                                  @Qualifier("system") EregFasade eregFasade,
                                  KontaktopplysningService kontaktopplysningService,
                                  BehandlingService behandlingService,
+                                 UtenlandskMyndighetService utenlandskMyndighetService,
                                  KodeverkService kodeverkService) {
         this.doksysFasade = doksysFasade;
         this.eregFasade = eregFasade;
         this.kontaktopplysningService = kontaktopplysningService;
         this.behandlingService = behandlingService;
+        this.utenlandskMyndighetService = utenlandskMyndighetService;
         this.kodeverkService = kodeverkService;
     }
 
@@ -60,7 +65,8 @@ public class DistribuerJournalpost implements StegBehandler {
         String journalpostId = prosessinstans.getData(DISTRIBUERBAR_JOURNALPOST_ID);
         var brevbestilling = prosessinstans.getData(BREVBESTILLING, DokgenBrevbestilling.class);
         Aktoersroller mottaker = prosessinstans.getData(MOTTAKER, Aktoersroller.class);
-        String orgnr = prosessinstans.getData(ORGNR, String.class, null);
+        String orgnr = prosessinstans.getData(ORGNR);
+        String institusjonId = prosessinstans.getData(INSTITUSJON_ID);
 
         if (isEmpty(journalpostId)) {
             throw new FunksjonellException("JournalpostId mangler, kan ikke distribuere");
@@ -73,7 +79,7 @@ public class DistribuerJournalpost implements StegBehandler {
         OrganisasjonDokument org = null;
         Kontaktopplysning kontaktopplysning = null;
 
-        if (mottaker != Aktoersroller.BRUKER) {
+        if (mottaker != Aktoersroller.BRUKER && !hasText(institusjonId)) {
             kontaktopplysning = kontaktopplysningService.hentKontaktopplysning(behandling.getFagsak().getSaksnummer(), orgnr).orElse(null);
             String mottakerOrgnr = kontaktopplysning != null && kontaktopplysning.getKontaktOrgnr() != null ? kontaktopplysning.getKontaktOrgnr() : orgnr;
             org = (OrganisasjonDokument) eregFasade.hentOrganisasjon(mottakerOrgnr).getDokument();
@@ -87,6 +93,9 @@ public class DistribuerJournalpost implements StegBehandler {
                     kodeverkService.dekod(FellesKodeverk.POSTNUMMER, orgAdresse.getPostnummer()));
             }
             bestillingsId = doksysFasade.distribuerJournalpost(journalpostId, orgAdresse, kontaktopplysning, brevbestilling.getKontaktpersonNavn());
+        } else if (hasText(institusjonId)) {
+            var utenlandskMyndighet = utenlandskMyndighetService.hentUtenlandskMyndighetForInstitusjonID(institusjonId);
+            bestillingsId = doksysFasade.distribuerJournalpost(journalpostId, utenlandskMyndighet.getAdresse());
         } else {
             bestillingsId = doksysFasade.distribuerJournalpost(journalpostId);
         }
