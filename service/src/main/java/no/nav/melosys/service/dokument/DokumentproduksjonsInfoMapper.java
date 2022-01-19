@@ -73,7 +73,8 @@ public class DokumentproduksjonsInfoMapper {
                     DokumentKategoriKode.IB.getKode(),
                     null))
             .put(AVSLAG_MANGLENDE_OPPLYSNINGER,
-                new DokumentproduksjonsInfo("avslag_manglende_opplysninger", DokumentKategoriKode.VB.getKode(),
+                new DokumentproduksjonsInfo("avslag_manglende_opplysninger",
+                    DokumentKategoriKode.VB.getKode(),
                     "Avslag pga manglende dokument"))
             .build());
     }
