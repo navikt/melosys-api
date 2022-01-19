@@ -1,10 +1,12 @@
 package no.nav.melosys.service.dokument;
 
 import java.time.Instant;
+import java.time.Period;
+import java.time.temporal.ChronoUnit;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.brev.*;
@@ -17,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static java.lang.String.format;
+import static java.util.stream.Collectors.toList;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING_MANGLENDE_OPPLYSNINGER;
 import static org.springframework.util.StringUtils.hasText;
 
@@ -27,6 +30,11 @@ public class DokgenMalMapper {
     private final InnvilgelseFtrlMapper innvilgelseFtrlMapper;
     private final StorbritanniaMapper storbritanniaMapper;
     private final DokumentHentingService dokumentHentingService;
+
+    // Svarfrist mangelbrev 4 uker fra dato brevet blir generert.
+    protected static final int DOKUMENTASJON_SVARFRIST_UKER_MANGELBREV = 4;
+    // Saksbehandlingstid er 12 uker fra dato for utsendelse av brev, uavhengig av helg, helligdager, osv.
+    protected static final int SAKSBEHANDLINGSTID_DAGER = 12 * 7;
 
     @Autowired
     public DokgenMalMapper(DokgenMapperDatahenter dokgenMapperDatahenter,
@@ -65,13 +73,30 @@ public class DokgenMalMapper {
     private List<Instant> hentMangelbrevDatoer(String saksnummer) {
         List<Journalpost> dokumenter = dokumentHentingService.hentDokumenter(saksnummer).stream().filter(dokument ->
                 dokument.getHoveddokument().getTittel().equals(MELDING_MANGLENDE_OPPLYSNINGER.getBeskrivelse()))
-            .collect(Collectors.toList());
+            .collect(toList());
 
         return dokumenter.stream()
             .map(Journalpost::getForsendelseJournalfoert)
             .filter(Objects::nonNull)
             .sorted(Comparator.naturalOrder())
-            .collect(Collectors.toList());
+            .collect(toList());
+    }
+
+    private Instant hentSvarfristForMangelbrev(Instant brevdato) {
+        return brevdato.plus(Period.ofWeeks(DOKUMENTASJON_SVARFRIST_UKER_MANGELBREV));
+    }
+
+    private Avslagbrev hentAvslagsbrev(DokgenBrevbestilling brevbestilling) {
+        List<Instant> mangelbrevDatoer = hentMangelbrevDatoer(brevbestilling.getBehandling().getFagsak().getSaksnummer());
+
+        return Avslagbrev.av(((AvslagBrevbestilling) brevbestilling).toBuilder().build(),
+            mangelbrevDatoer,
+            mangelbrevDatoer.isEmpty() ? null : hentSvarfristForMangelbrev(Collections.max(mangelbrevDatoer))
+        );
+    }
+
+    private Instant hentDatoBehandlingstid(Instant forsendelseMottatt) {
+        return forsendelseMottatt.plus(SAKSBEHANDLINGSTID_DAGER, ChronoUnit.DAYS);
     }
 
     private DokgenDto lagDokgenDtoFraBestilling(DokgenBrevbestilling brevbestilling) {
@@ -79,19 +104,23 @@ public class DokgenMalMapper {
             case MELDING_FORVENTET_SAKSBEHANDLINGSTID, MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD -> SaksbehandlingstidSoknad.av(
                 brevbestilling.toBuilder()
                     .medAvsenderLand(dokgenMapperDatahenter.hentLandnavn(brevbestilling.getAvsenderLand()))
-                    .build()
+                    .build(),
+                hentDatoBehandlingstid(brevbestilling.getForsendelseMottatt())
             );
-            case MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE -> SaksbehandlingstidKlage.av(brevbestilling);
+            case MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE -> SaksbehandlingstidKlage.av(brevbestilling,
+                hentDatoBehandlingstid(brevbestilling.getForsendelseMottatt()));
             case MANGELBREV_BRUKER -> MangelbrevBruker.av(
                 ((MangelbrevBrevbestilling) brevbestilling).toBuilder()
                     .medVedtaksdato(dokgenMapperDatahenter.hentVedtaksdato(brevbestilling.getBehandling().getId()))
-                    .build()
+                    .build(),
+                hentSvarfristForMangelbrev(Instant.now())
             );
             case MANGELBREV_ARBEIDSGIVER -> MangelbrevArbeidsgiver.av(
                 ((MangelbrevBrevbestilling) brevbestilling).toBuilder()
                     .medVedtaksdato(dokgenMapperDatahenter.hentVedtaksdato(brevbestilling.getBehandling().getId()))
                     .medFullmektigNavn(dokgenMapperDatahenter.hentFullmektigNavn(brevbestilling.getBehandling().getFagsak(), Representerer.BRUKER))
-                    .build()
+                    .build(),
+                hentSvarfristForMangelbrev(Instant.now())
             );
             case INNVILGELSE_FOLKETRYGDLOVEN_2_8 -> innvilgelseFtrlMapper.map((InnvilgelseBrevbestilling) brevbestilling);
             case STORBRITANNIA -> storbritanniaMapper.map((InnvilgelseBrevbestilling) brevbestilling.toBuilder()
@@ -104,9 +133,7 @@ public class DokgenMalMapper {
                     .medNavnFullmektig(dokgenMapperDatahenter.hentFullmektigNavn(brevbestilling.getBehandling().getFagsak(), Representerer.ARBEIDSGIVER)).build(),
                 Aktoersroller.ARBEIDSGIVER
             );
-            case AVSLAG_MANGLENDE_OPPLYSNINGER -> Avslagbrev.av(((AvslagBrevbestilling) brevbestilling).toBuilder().build(),
-                hentMangelbrevDatoer(brevbestilling.getBehandling().getFagsak().getSaksnummer())
-            );
+            case AVSLAG_MANGLENDE_OPPLYSNINGER -> hentAvslagsbrev(brevbestilling);
             default -> throw new FunksjonellException(
                 format("ProduserbartDokument %s er ikke støttet av melosys-dokgen",
                     brevbestilling.getProduserbartdokument()));

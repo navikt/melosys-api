@@ -32,15 +32,17 @@ public class Avslagbrev extends DokgenDto {
 
     private final String sakstype;
 
-    private Avslagbrev(AvslagBrevbestilling brevbestilling, Aktoersroller mottakerType, List<Instant> mangelbrevDatoer) {
+    private Avslagbrev(AvslagBrevbestilling brevbestilling,
+                       Aktoersroller mottakerType,
+                       List<Instant> mangelbrevDatoer,
+                       Instant datoInnsendingsfrist) {
         super(brevbestilling, mottakerType);
         this.fritekst = brevbestilling.getFritekst();
         var fagsak = brevbestilling.getBehandling().getFagsak();
 
         this.sakstype = fagsak.getType().getKode();
         this.mangelbrevDatoer = mangelbrevDatoer.stream().map(this::instantTilLocalDate).collect(Collectors.toList());
-        Instant innsendingsfrist = mangelbrevDatoer.isEmpty() ? null : Collections.max(mangelbrevDatoer).plus(Period.ofWeeks(DOKUMENTASJON_SVARFRIST_UKER_MANGELBREV));
-        this.datoInnsendingsfrist = instantTilLocalDate(innsendingsfrist);
+        this.datoInnsendingsfrist = instantTilLocalDate(datoInnsendingsfrist);
         this.datoMottatt = instantTilLocalDate(brevbestilling.getForsendelseMottatt());
     }
 
@@ -48,8 +50,8 @@ public class Avslagbrev extends DokgenDto {
         return fritekst;
     }
 
-    public static Avslagbrev av(AvslagBrevbestilling brevbestilling, List<Instant> mangelbrevDatoer) {
-        return new Avslagbrev(brevbestilling, Aktoersroller.BRUKER, mangelbrevDatoer);
+    public static Avslagbrev av(AvslagBrevbestilling brevbestilling, List<Instant> mangelbrevDatoer, Instant datoInnsendingsfrist) {
+        return new Avslagbrev(brevbestilling, Aktoersroller.BRUKER, mangelbrevDatoer, datoInnsendingsfrist);
     }
 
     public String getSakstype() {

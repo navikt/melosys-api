@@ -30,13 +30,13 @@ public class Mangelbrev extends DokgenDto {
     private final String manglerInfoFritekst;
     private final String innledningFritekst;
 
-    protected Mangelbrev(MangelbrevBrevbestilling brevbestilling) {
+    protected Mangelbrev(MangelbrevBrevbestilling brevbestilling, Instant datoInnsendingsfrist) {
         super(brevbestilling, Aktoersroller.BRUKER);
         var fagsak = brevbestilling.getBehandling().getFagsak();
 
         this.datoMottatt = brevbestilling.getForsendelseMottatt();
         this.datoVedtatt = brevbestilling.getVedtaksdato();
-        this.datoInnsendingsfrist = Instant.now().plus(Period.ofWeeks(DOKUMENTASJON_SVARFRIST_UKER_MANGELBREV));
+        this.datoInnsendingsfrist = datoInnsendingsfrist;
         this.sakstype = fagsak.getType().getKode();
         this.behandlingstype = fagsak.getSistOppdaterteBehandling().getType().getKode();
         this.manglerInfoFritekst = brevbestilling.getManglerInfoFritekst();
