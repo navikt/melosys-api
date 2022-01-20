@@ -1,6 +1,6 @@
 // @no-cookie-jar
 // @no-log
-PUT https://{{melosys-api-url}}/admin/fagsaker/{{saksnummer}}}}/henlegg-bortfalt
+PUT https://{{melosys-api-url}}/admin/fagsaker/{{saksnummer}}/henlegg-bortfalt
 Cache-Control: no-cache
 Content-Type: application/json
 Accept: application/json
