@@ -4,6 +4,7 @@ import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie;
 import no.nav.melosys.domain.person.familie.IkkeOmfattetFamilie;
 import no.nav.melosys.domain.person.familie.OmfattetFamilie;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.trygdeavtale.TrygdeavtaleResultat;
 import no.nav.melosys.tjenester.gui.dto.MedfolgendeFamilieDto;
 
@@ -33,8 +34,12 @@ public record TrygdeavtaleResultatDto(
     }
 
     public static TrygdeavtaleResultatDto fra(TrygdeavtaleResultat resultat, List<MedfolgendeFamilie> familie) {
-        MedfolgendeFamilie eketefelle = familie.stream().filter(mf -> mf.getRelasjonsrolle() == MedfolgendeFamilie.Relasjonsrolle.EKTEFELLE_SAMBOER).findFirst().orElse(null);
-        OmfattetFamilie omfattetFamilieEktefelle = resultat.familie().getFamilieOmfattetAvNorskTrygd().stream().filter(omfattetFamilie -> omfattetFamilie.getUuid().equals(eketefelle.getUuid())).findFirst()
+        MedfolgendeFamilie eketefelle = familie.stream()
+            .filter(mf -> mf.getRelasjonsrolle() == MedfolgendeFamilie.Relasjonsrolle.EKTEFELLE_SAMBOER)
+            .findFirst().orElseThrow(() -> new TekniskException("WIP"));
+        OmfattetFamilie omfattetFamilieEktefelle = resultat.familie().getFamilieOmfattetAvNorskTrygd()
+            .stream().filter(omfattetFamilie -> omfattetFamilie.getUuid().equals(eketefelle.getUuid()))
+            .findFirst().orElseThrow(() -> new TekniskException("WIP"));
 
         return new Builder()
             .ektefelle(omfattetFamilieEktefelle.getUuid(), true, null, null)
