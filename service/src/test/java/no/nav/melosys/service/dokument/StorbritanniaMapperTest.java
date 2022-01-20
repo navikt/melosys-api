@@ -138,7 +138,6 @@ public class StorbritanniaMapperTest {
     @Test
     void map_ettOmfattetBarn_minstEttOmfattetFamiliemedlemErtrue() {
         mockLovvalgsperiode();
-        mockPersondata();
         mockMedfølgendeFamilieDefaultCase();
         mockHappyCase();
         when(mockAvklarteMedfolgendeFamilieService.hentAvklartMedfølgendeEktefelle(anyLong())).thenReturn(lagIkkeOmfattetMedfølgendeEktefelle());
@@ -352,25 +351,13 @@ public class StorbritanniaMapperTest {
     }
 
     private void mockHappyCase() {
-        when(mockPersondata.getFødselsdato()).thenReturn(FØDSELSDATO);
         when(mockAvklarteMedfolgendeFamilieService.hentAvklartMedfølgendeEktefelle(anyLong())).thenReturn(lagAvklartMedfølgendeEktefelle());
         when(mockAvklarteMedfolgendeFamilieService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(lagAvklartMedfølgendeBarn());
         when(mockAvklarteMedfolgendeFamilieService.hentMedfølgendEktefelle(anyLong())).thenReturn(lagMedfølgendeEktefelle());
         when(mockAvklarteMedfolgendeFamilieService.hentMedfølgendeBarn(anyLong())).thenReturn(lagMedfølgendeBarn());
-        when(mockPersondataFasade.hentPerson(anyString())).thenReturn(mockPersondata);
         when(mockAvklarteVirksomheterSystemService.hentNorskeArbeidsgivere(any())).thenReturn(lagAvklarteVirksomheter());
         when(mockLovvalgsperiodeService.hentLovvalgsperioder(anyLong())).thenReturn(List.of(lagLovvalgsperiode()));
         when(mockLovvalgsperiodeService.hentValidertLovvalgsperiode(anyLong())).thenReturn(lagLovvalgsperiode());
-        when(mockDokgenMapperDatahenter.hentSammensattNavn(anyString())).thenAnswer((Answer<String>) invocationOnMock -> {
-            String fnr = invocationOnMock.getArgument(0);
-            String navn = null;
-            if (fnr.equals(EKTEFELLE_FNR)) {
-                navn = EKTEFELLE_NAVN;
-            } else if (fnr.equals(BARN1_FNR)) {
-                navn = BARN_NAVN_1;
-            }
-            return navn;
-        });
     }
 
     private Lovvalgsperiode lagLovvalgsperiode() {
@@ -584,5 +571,13 @@ public class StorbritanniaMapperTest {
             "adresse" : [ "Uk address" ]
           },
           "vedtaksdato" : "%s"
-        }""", FØDSELSDATO, EKTEFELLE_FNR, FØDSELSDATO, BARN1_FNR, LOVVALGSPERIODE_FOM, LOVVALGSPERIODE_TOM, VEDTAKS_DATO);
+        }""",
+        LocalDate.of(1980, 10, 1),
+        EKTEFELLE_FNR,
+        LocalDate.of(2000, 10, 1),
+        BARN1_FNR,
+        LOVVALGSPERIODE_FOM,
+        LOVVALGSPERIODE_TOM,
+        VEDTAKS_DATO
+    );
 }

@@ -265,34 +265,30 @@ public class StorbritanniaMapper {
     }
 
     private List<Person> mapBarn(long behandlingID) {
-        var avklarteMedfølgendeBarn = avklarteMedfølgendeFamilieService.hentAvklarteMedfølgendeBarn(behandlingID);
-        var barnOmfattetAvNorskTrygd = avklarteMedfølgendeBarn.getFamilieOmfattetAvNorskTrygd();
-        if (barnOmfattetAvNorskTrygd.isEmpty()) {
-            return List.of();
-        }
-        var medfølgendeBarn = avklarteMedfølgendeFamilieService.hentMedfølgendeBarn(behandlingID);
-        return barnOmfattetAvNorskTrygd.stream().map(omfattetFamilie -> tilPerson(medfølgendeBarn, omfattetFamilie.getUuid())).toList();
+        var barnOmfattetAvNorskTrygd =
+            avklarteMedfølgendeFamilieService.hentAvklarteMedfølgendeBarn(behandlingID).getFamilieOmfattetAvNorskTrygd();
+
+        return barnOmfattetAvNorskTrygd.stream().map(omfattetFamilie ->
+            mapFamilieTilPerson(avklarteMedfølgendeFamilieService.hentMedfølgendeBarn(behandlingID), omfattetFamilie.getUuid())).toList();
     }
 
     private Person mapEktefelle(long behandlingID) {
-        var avklartMedfølgendeEktefelle = avklarteMedfølgendeFamilieService.hentAvklartMedfølgendeEktefelle(behandlingID);
-        var ektefelleOmfattetAvNorskTrygd = avklartMedfølgendeEktefelle.getFamilieOmfattetAvNorskTrygd();
+        var ektefelleOmfattetAvNorskTrygd =
+            avklarteMedfølgendeFamilieService.hentAvklartMedfølgendeEktefelle(behandlingID).getFamilieOmfattetAvNorskTrygd();
         if (ektefelleOmfattetAvNorskTrygd.isEmpty()) {
             return null;
         }
+
         var omfattetFamilie = ektefelleOmfattetAvNorskTrygd.iterator().next();
-        var medfølgendeEktefelle = avklarteMedfølgendeFamilieService.hentMedfølgendEktefelle(behandlingID);
-        return tilPerson(medfølgendeEktefelle, omfattetFamilie.getUuid());
+        return mapFamilieTilPerson(avklarteMedfølgendeFamilieService.hentMedfølgendEktefelle(behandlingID), omfattetFamilie.getUuid());
     }
 
-    private Person tilPerson(Map<String, MedfolgendeFamilie> medfølgendeFamilieMap, String uuid) {
+    private Person mapFamilieTilPerson(Map<String, MedfolgendeFamilie> medfølgendeFamilieMap, String uuid) {
         var medfølgendeFamilie = Optional.of(medfølgendeFamilieMap.get(uuid))
             .orElseThrow(() -> new FunksjonellException("Avklart medfølgende familie " + uuid + " finnes ikke i behandlingsgrunnlaget"));
-        var fnr = medfølgendeFamilie.getFnr();
+        var fnr = medfølgendeFamilie.utledIdentType() == IdentType.DATO ? null : medfølgendeFamilie.getFnr();
 
-        var sammensattNavn = fnr != null ? dokgenMapperDatahenter.hentSammensattNavn(fnr) : medfølgendeFamilie.getNavn();
-        var fødselsdato = persondataFasade.hentPerson(fnr).getFødselsdato();
-        return new Person(sammensattNavn, fødselsdato, fnr, null);
+        return new Person(medfølgendeFamilie.getNavn(), medfølgendeFamilie.datoFraFnr(), fnr, null);
     }
 
     private boolean erSkatteetaten(OrganisasjonDokument org) {
