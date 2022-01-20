@@ -426,6 +426,27 @@ class BrevmottakerServiceTest {
     }
 
     @Test
+    void gittInnvilgelsesbrevUKOgArt82_skalIkkeMyndighetFåKopi() {
+        var lovvalgsperiode = new Lovvalgsperiode();
+        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_trygdeavtale_uk.UK_ART8_2);
+
+        when(behandling.getFagsak()).thenReturn(lagFagsakMedRepresentant(null));
+        when(lovvalgsperiodeService.hentValidertLovvalgsperiode(anyLong())).thenReturn(lovvalgsperiode);
+
+        assertThat(brevmottakerService.hentMottakerliste(STORBRITANNIA, behandling))
+            .extracting(
+                Mottakerliste::getHovedMottaker,
+                Mottakerliste::getKopiMottakere,
+                Mottakerliste::getFasteMottakere
+            )
+            .containsExactly(
+                BRUKER,
+                List.of(ARBEIDSGIVER),
+                List.of(SKATT)
+            );
+    }
+
+    @Test
     void hentKontaktopplysning_utenMottaker_girTomtResultat() {
         Kontaktopplysning kontaktopplysning = brevmottakerService.hentKontaktopplysning("MEL-123", null);
         assertThat(kontaktopplysning).isNull();

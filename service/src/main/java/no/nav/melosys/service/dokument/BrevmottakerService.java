@@ -255,9 +255,6 @@ public class BrevmottakerService {
         if (brevkopiRegler.contains(ARBEIDSGIVER_FÅR_KOPI)) {
             mottakerliste.getKopiMottakere().add(ARBEIDSGIVER);
         }
-        if (brevkopiRegler.contains(UTENLANDSK_TRYGDEMYNDIGHET_FÅR_KOPI)) {
-            mottakerliste.getKopiMottakere().add(MYNDIGHET);
-        }
         if (brevkopiRegler.contains(SKATT_FÅR_KOPI)) {
             mottakerliste.getFasteMottakere().add(SKATT);
         }
