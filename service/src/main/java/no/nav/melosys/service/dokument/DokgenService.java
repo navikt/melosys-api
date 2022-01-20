@@ -140,10 +140,10 @@ public class DokgenService {
 
         for (KopiMottaker kopiMottaker : brevbestillingRequest.getKopiMottakere()) {
             var aktoer = new Aktoer();
-            aktoer.setRolle(kopiMottaker.getRolle());
-            aktoer.setOrgnr(kopiMottaker.getOrgnr());
-            aktoer.setAktørId(kopiMottaker.getAktørId());
-            aktoer.setInstitusjonId(kopiMottaker.getInstitusjonId());
+            aktoer.setRolle(kopiMottaker.rolle());
+            aktoer.setOrgnr(kopiMottaker.orgnr());
+            aktoer.setAktørId(kopiMottaker.aktørId());
+            aktoer.setInstitusjonId(kopiMottaker.institusjonId());
             brevbestilling.medBestillKopi(true);
             produserOgDistribuerBrev(behandling, aktoer, brevbestilling.build());
         }
@@ -191,7 +191,7 @@ public class DokgenService {
     }
 
     private boolean inneholderArbeidsgiverSomKopimottaker(Collection<KopiMottaker> kopimottakere) {
-        return kopimottakere.stream().map(KopiMottaker::getRolle).anyMatch(kopimottaker -> kopimottaker == Aktoersroller.ARBEIDSGIVER);
+        return kopimottakere.stream().map(KopiMottaker::rolle).anyMatch(kopimottaker -> kopimottaker == Aktoersroller.ARBEIDSGIVER);
     }
 
     private DokgenBrevbestilling.Builder<?> lagDokgenBrevbestilling(BrevbestillingRequest brevbestillingRequest) {

@@ -103,7 +103,7 @@ class FtrlVedtakServiceTest {
             .containsExactly(INNVILGELSE_FOLKETRYGDLOVEN_2_8, "Z990007", BRUKER, "Innledning",
                 "Begrunnelse", "Ektefelle omfattet", "Barn omfattet");
         assertThat(brevbestillingRequest.getKopiMottakere().size()).isEqualTo(1);
-        assertThat(brevbestillingRequest.getKopiMottakere().get(0).getRolle()).isEqualTo(ARBEIDSGIVER);
+        assertThat(brevbestillingRequest.getKopiMottakere().get(0).rolle()).isEqualTo(ARBEIDSGIVER);
     }
 
     private FattFtrlVedtakRequest lagFattVedtakRequest() {
