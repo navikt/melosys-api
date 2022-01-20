@@ -227,7 +227,7 @@ public class StorbritanniaMapper {
     }
 
     private static boolean sjekkAdresseMotLand(StrukturertAdresse adresse) {
-        return adresse.getLandkode().equals(Landkoder.GB.getKode());
+        return adresse != null && adresse.getLandkode().equals(Landkoder.GB.getKode());
     }
 
     static boolean sjekkOmAdresseGyldighetErInnenforLovalgsperiode(PersonAdresse personAdresse, Lovvalgsperiode lovvalgsperiode) {
