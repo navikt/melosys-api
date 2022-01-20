@@ -22,7 +22,7 @@ public class FagsakAdminTjeneste implements AdminTjeneste {
         this.henleggFagsakService = henleggFagsakService;
     }
 
-    @PostMapping("/{saksnummer}/henlegg-bortfalt")
+    @PutMapping("/{saksnummer}/henlegg-bortfalt")
     public ResponseEntity<Void> henleggFagsakSomBortfalt(@PathVariable String saksnummer,
                                               @RequestHeader(API_KEY_HEADER) String apiKey) {
         validerApikey(apiKey);
