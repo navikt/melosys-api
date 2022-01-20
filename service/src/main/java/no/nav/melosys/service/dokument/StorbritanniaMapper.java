@@ -267,9 +267,9 @@ public class StorbritanniaMapper {
     private List<Person> mapBarn(long behandlingID) {
         var barnOmfattetAvNorskTrygd =
             avklarteMedfølgendeFamilieService.hentAvklarteMedfølgendeBarn(behandlingID).getFamilieOmfattetAvNorskTrygd();
+        var medfølgendeBarn = avklarteMedfølgendeFamilieService.hentMedfølgendeBarn(behandlingID);
 
-        return barnOmfattetAvNorskTrygd.stream().map(omfattetFamilie ->
-            mapFamilieTilPerson(avklarteMedfølgendeFamilieService.hentMedfølgendeBarn(behandlingID), omfattetFamilie.getUuid())).toList();
+        return barnOmfattetAvNorskTrygd.stream().map(omfattetFamilie -> mapFamilieTilPerson(medfølgendeBarn, omfattetFamilie.getUuid())).toList();
     }
 
     private Person mapEktefelle(long behandlingID) {
