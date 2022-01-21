@@ -38,7 +38,6 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.MYNDIGHET;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
-import static no.nav.melosys.service.dokument.DokgenMalMapper.SAKSBEHANDLINGSTID_DAGER;
 import static no.nav.melosys.service.dokument.DokgenTestData.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
@@ -176,7 +175,7 @@ class DokgenMalMapperTest {
             ).containsExactly(
                 MYNDIGHET,
                 "Finland",
-                forsendelseMottattDato.atStartOfDay(ZoneId.of("Europe/Paris")).toInstant().plus(SAKSBEHANDLINGSTID_DAGER, ChronoUnit.DAYS)
+                forsendelseMottattDato.atStartOfDay(ZoneId.of("Europe/Paris")).toInstant().plus(Saksbehandlingstid.SAKSBEHANDLINGSTID_DAGER, ChronoUnit.DAYS)
             );
     }
 
@@ -413,15 +412,15 @@ class DokgenMalMapperTest {
                 a -> a.getMedfolgendeFamiliemedlemmer().barn(),
                 a -> a.getRepresentant().navn()
             ).containsExactly(
-            "Nordmann, Ola",
-            "01010119901",
-            List.of("Nordmannsveg 200", "Norge"),
-            "Virksomhetsnavn",
-            Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1,
-            "Kone",
-            List.of(),
-            "Mrs. London"
-        );
+                "Nordmann, Ola",
+                "01010119901",
+                List.of("Nordmannsveg 200", "Norge"),
+                "Virksomhetsnavn",
+                Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1,
+                "Kone",
+                List.of(),
+                "Mrs. London"
+            );
     }
 
     @Test

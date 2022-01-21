@@ -1,7 +1,6 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 
@@ -14,6 +13,7 @@ import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
 import no.nav.dok.melosysbrev.felles.melosys_felles.RolleKode;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.brev.Saksbehandlingstid;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataMottattDato;
 import org.xml.sax.SAXException;
@@ -23,9 +23,6 @@ import static no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils
 public class ForvaltningsmeldingMapper implements BrevDataMapper {
 
     private static final String XSD_LOCATION = "melosysbrev/melosys_000082.xsd";
-
-    // Saksbehandlingstid er 12 uker fra dato for utsendelse av brev, uavhengig av helg, helligdager, osv.
-    private static final int SAKSBEHANDLINGSTID_DAGER = 12 * 7;
 
     @Override
     public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat, BrevData brevData) throws JAXBException, SAXException {
@@ -40,7 +37,7 @@ public class ForvaltningsmeldingMapper implements BrevDataMapper {
         final Instant forsendelseMottattTidspunkt = brevDataMottattDato.initierendeJournalpostForsendelseMottattTidspunkt;
         fag.setBehandlingstype(BehandlingstypeKodeMapper.hentBehandlingstypeKode(behandling));
         fag.setDatoMottatt(convertToXMLGregorianCalendarRemoveTimezone(forsendelseMottattTidspunkt));
-        fag.setSaksbehandlingstidDato(convertToXMLGregorianCalendarRemoveTimezone(forsendelseMottattTidspunkt.plus(SAKSBEHANDLINGSTID_DAGER, ChronoUnit.DAYS)));
+        fag.setSaksbehandlingstidDato(convertToXMLGregorianCalendarRemoveTimezone(Saksbehandlingstid.hentDatoBehandlingstid(forsendelseMottattTidspunkt)));
 
         AvsenderType avsenderType = new AvsenderType();
         avsenderType.setRolle(RolleKode.BRUKER);

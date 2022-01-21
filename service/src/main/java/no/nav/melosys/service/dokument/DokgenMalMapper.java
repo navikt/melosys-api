@@ -1,9 +1,6 @@
 package no.nav.melosys.service.dokument;
 
 import java.time.Instant;
-import java.time.Period;
-import java.time.temporal.ChronoUnit;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -30,9 +27,6 @@ public class DokgenMalMapper {
     private final InnvilgelseFtrlMapper innvilgelseFtrlMapper;
     private final StorbritanniaMapper storbritanniaMapper;
     private final DokumentHentingService dokumentHentingService;
-
-    // Saksbehandlingstid er 12 uker fra dato for utsendelse av brev, uavhengig av helg, helligdager, osv.
-    protected static final int SAKSBEHANDLINGSTID_DAGER = 12 * 7;
 
     @Autowired
     public DokgenMalMapper(DokgenMapperDatahenter dokgenMapperDatahenter,
@@ -89,20 +83,16 @@ public class DokgenMalMapper {
         );
     }
 
-    private Instant hentDatoBehandlingstid(Instant forsendelseMottatt) {
-        return forsendelseMottatt.plus(SAKSBEHANDLINGSTID_DAGER, ChronoUnit.DAYS);
-    }
-
     private DokgenDto lagDokgenDtoFraBestilling(DokgenBrevbestilling brevbestilling) {
         return switch (brevbestilling.getProduserbartdokument()) {
             case MELDING_FORVENTET_SAKSBEHANDLINGSTID, MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD -> SaksbehandlingstidSoknad.av(
                 brevbestilling.toBuilder()
                     .medAvsenderLand(dokgenMapperDatahenter.hentLandnavn(brevbestilling.getAvsenderLand()))
                     .build(),
-                hentDatoBehandlingstid(brevbestilling.getForsendelseMottatt())
+                Saksbehandlingstid.hentDatoBehandlingstid(brevbestilling.getForsendelseMottatt())
             );
             case MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE -> SaksbehandlingstidKlage.av(brevbestilling,
-                hentDatoBehandlingstid(brevbestilling.getForsendelseMottatt()));
+                Saksbehandlingstid.hentDatoBehandlingstid(brevbestilling.getForsendelseMottatt()));
             case MANGELBREV_BRUKER -> MangelbrevBruker.av(
                 ((MangelbrevBrevbestilling) brevbestilling).toBuilder()
                     .medVedtaksdato(dokgenMapperDatahenter.hentVedtaksdato(brevbestilling.getBehandling().getId()))
