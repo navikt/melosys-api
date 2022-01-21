@@ -9,7 +9,7 @@ import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.ForetakUtland;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
-import no.nav.melosys.domain.brev.FastMottaker;
+import no.nav.melosys.domain.brev.FastMottakerMedOrgnr;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
@@ -39,7 +39,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.context.ApplicationEventPublisher;
 
-import static no.nav.melosys.domain.brev.FastMottaker.*;
+import static no.nav.melosys.domain.brev.FastMottakerMedOrgnr.*;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -241,7 +241,7 @@ class SendVedtaksbrevInnlandTest {
 
         Aktoer myndighet = new Aktoer();
         myndighet.setAktørId("2");
-        myndighet.setRolle(MYNDIGHET);
+        myndighet.setRolle(TRYGDEMYNDIGHET);
         myndighet.setInstitusjonId("SE:sesese123");
 
         Aktoer arbeidsgiver = new Aktoer();
@@ -341,8 +341,8 @@ class SendVedtaksbrevInnlandTest {
         Prosessinstans prosessinstans = lagProsessinstans(BEHANDLINGSID_MANGLENDE_OPPL);
         StegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
         instans.utfør(prosessinstans);
-        verify(dokService, never()).produserDokument(eq(AVSLAG_MANGLENDE_OPPLYSNINGER), eq(FastMottaker.av(SKATT)), anyLong(), any());
-        verify(dokService, never()).produserDokument(eq(AVSLAG_MANGLENDE_OPPLYSNINGER), eq(FastMottaker.av(HELFO)), anyLong(), any());
+        verify(dokService, never()).produserDokument(eq(AVSLAG_MANGLENDE_OPPLYSNINGER), eq(FastMottakerMedOrgnr.av(SKATT)), anyLong(), any());
+        verify(dokService, never()).produserDokument(eq(AVSLAG_MANGLENDE_OPPLYSNINGER), eq(FastMottakerMedOrgnr.av(HELFO)), anyLong(), any());
     }
 
     @Test
@@ -369,7 +369,7 @@ class SendVedtaksbrevInnlandTest {
         instans.utfør(prosessinstans);
 
         verify(dokService).produserDokument(eq(INNVILGELSE_YRKESAKTIV), eq(Mottaker.av(BRUKER)), anyLong(), any());
-        verify(dokService).produserDokument(eq(INNVILGELSE_YRKESAKTIV), eq(FastMottaker.av(SKATT)), anyLong(), any());
+        verify(dokService).produserDokument(eq(INNVILGELSE_YRKESAKTIV), eq(FastMottakerMedOrgnr.av(SKATT)), anyLong(), any());
     }
 
     @Test
@@ -391,7 +391,7 @@ class SendVedtaksbrevInnlandTest {
         instans.utfør(prosessinstans);
 
         verify(dokService).produserDokument(eq(INNVILGELSE_YRKESAKTIV_FLERE_LAND), eq(Mottaker.av(BRUKER)), anyLong(), any());
-        verify(dokService).produserDokument(eq(INNVILGELSE_YRKESAKTIV_FLERE_LAND), eq(FastMottaker.av(SKATT)), anyLong(), any());
+        verify(dokService).produserDokument(eq(INNVILGELSE_YRKESAKTIV_FLERE_LAND), eq(FastMottakerMedOrgnr.av(SKATT)), anyLong(), any());
     }
 
     @Test
@@ -423,7 +423,7 @@ class SendVedtaksbrevInnlandTest {
             .foretakUtland.add(arbeidsgiverUtland);
         instans.utfør(prosessinstans);
 
-        verify(dokService).produserDokument(eq(INNVILGELSE_YRKESAKTIV_FLERE_LAND), eq(FastMottaker.av(STATLIG_SKATTEOPPKREVING)), anyLong(), any());
+        verify(dokService).produserDokument(eq(INNVILGELSE_YRKESAKTIV_FLERE_LAND), eq(FastMottakerMedOrgnr.av(STATLIG_SKATTEOPPKREVING)), anyLong(), any());
     }
 
     @Test
@@ -437,7 +437,7 @@ class SendVedtaksbrevInnlandTest {
 
         instans.utfør(prosessinstans);
 
-        verify(dokService, never()).produserDokument(any(), eq(FastMottaker.av(STATLIG_SKATTEOPPKREVING)), anyLong(), any());
+        verify(dokService, never()).produserDokument(any(), eq(FastMottakerMedOrgnr.av(STATLIG_SKATTEOPPKREVING)), anyLong(), any());
     }
 
     @Test
@@ -462,7 +462,7 @@ class SendVedtaksbrevInnlandTest {
         StegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
         instans.utfør(prosessinstans);
 
-        verify(dokService, never()).produserDokument(any(), eq(FastMottaker.av(STATLIG_SKATTEOPPKREVING)), anyLong(), any());
+        verify(dokService, never()).produserDokument(any(), eq(FastMottakerMedOrgnr.av(STATLIG_SKATTEOPPKREVING)), anyLong(), any());
     }
 
     @Test
@@ -500,8 +500,8 @@ class SendVedtaksbrevInnlandTest {
         Prosessinstans prosessinstans = lagProsessinstans(ART12_1_AVSLÅTT_BEHANDLINGSID);
         StegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
         instans.utfør(prosessinstans);
-        verify(dokService).produserDokument(eq(AVSLAG_YRKESAKTIV), eq(FastMottaker.av(HELFO)), anyLong(), any());
-        verify(dokService).produserDokument(eq(AVSLAG_YRKESAKTIV), eq(FastMottaker.av(SKATT)), anyLong(), any());
+        verify(dokService).produserDokument(eq(AVSLAG_YRKESAKTIV), eq(FastMottakerMedOrgnr.av(HELFO)), anyLong(), any());
+        verify(dokService).produserDokument(eq(AVSLAG_YRKESAKTIV), eq(FastMottakerMedOrgnr.av(SKATT)), anyLong(), any());
     }
 
     @Test

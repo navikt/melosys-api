@@ -9,7 +9,7 @@ import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.domain.Kontaktopplysning;
-import no.nav.melosys.domain.brev.FastMottaker;
+import no.nav.melosys.domain.brev.FastMottakerMedOrgnr;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.brev.Mottakerliste;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
@@ -121,7 +121,7 @@ public class BrevbestillingService {
             switch (kopiMottaker) {
                 case BRUKER -> muligMottakerDtos.add(lagKopiMottakerForBruker(produserbaredokumenter, behandling, kopiMottaker, hovedmottaker));
                 case ARBEIDSGIVER -> muligMottakerDtos.addAll(lagKopiMottakereForArbeidsgiver(produserbaredokumenter, behandling, kopiMottaker));
-                case MYNDIGHET -> muligMottakerDtos.addAll(lagKopiMottakereForMyndighet(produserbaredokumenter, behandling, kopiMottaker));
+                case TRYGDEMYNDIGHET -> muligMottakerDtos.addAll(lagKopiMottakereForMyndighet(produserbaredokumenter, behandling, kopiMottaker));
                 default -> throw new IllegalStateException(kopiMottaker + " er ikke en gyldig kopiMottakerrolle");
             }
         }
@@ -179,11 +179,11 @@ public class BrevbestillingService {
         return muligMottakerDtos;
     }
 
-    private List<MuligMottakerDto> lagFasteMottakereMuligMottakerDtos(Produserbaredokumenter produserbaredokumenter, Behandling behandling, Collection<FastMottaker> fasteMottakere) {
+    private List<MuligMottakerDto> lagFasteMottakereMuligMottakerDtos(Produserbaredokumenter produserbaredokumenter, Behandling behandling, Collection<FastMottakerMedOrgnr> fasteMottakere) {
         List<MuligMottakerDto> muligMottakerDtos = new ArrayList<>();
 
-        for (FastMottaker fastMottaker : fasteMottakere) {
-            Aktoer avklartMottaker = brevmottakerService.avklarMottaker(produserbaredokumenter, FastMottaker.av(fastMottaker), behandling);
+        for (FastMottakerMedOrgnr fastMottakerMedOrgnr : fasteMottakere) {
+            Aktoer avklartMottaker = brevmottakerService.avklarMottaker(produserbaredokumenter, FastMottakerMedOrgnr.av(fastMottakerMedOrgnr), behandling);
             var orgDokument = hentRettOrganisasjonsdokument(behandling, avklartMottaker.getOrgnr());
 
             muligMottakerDtos.add(new MuligMottakerDto.Builder()

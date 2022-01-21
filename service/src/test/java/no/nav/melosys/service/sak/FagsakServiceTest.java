@@ -219,7 +219,7 @@ class FagsakServiceTest {
             .extracting(Aktoer::getRolle, Aktoer::getAktørId, Aktoer::getInstitusjonId)
             .containsExactlyInAnyOrder(
                 tuple(Aktoersroller.BRUKER, "1234", null),
-                tuple(Aktoersroller.MYNDIGHET, null, "Ny institusjonsid")
+                tuple(Aktoersroller.TRYGDEMYNDIGHET, null, "Ny institusjonsid")
             );
     }
 
@@ -388,7 +388,7 @@ class FagsakServiceTest {
         Aktoer aktoer = new Aktoer();
         aktoer.setInstitusjonId("Gammel institusjonsid");
         aktoer.setFagsak(fagsak);
-        aktoer.setRolle(Aktoersroller.MYNDIGHET);
+        aktoer.setRolle(Aktoersroller.TRYGDEMYNDIGHET);
         fagsak.setAktører(new HashSet<>(Collections.singleton(aktoer)));
         return fagsak;
     }

@@ -80,7 +80,7 @@ class DokumentTjenesteTest extends JsonSchemaTestParent {
             .medProduserbardokument(Produserbaredokumenter.ATTEST_A1)
             .medBegrunnelseKode("KODE")
             .medFritekst("Fritekst.")
-            .medMottaker(Aktoersroller.MYNDIGHET)
+            .medMottaker(Aktoersroller.TRYGDEMYNDIGHET)
             .medYtterligereInformasjon("Ytterligere informasjon")
             .build();
 

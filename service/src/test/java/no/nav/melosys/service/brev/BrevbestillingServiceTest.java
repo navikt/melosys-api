@@ -6,7 +6,7 @@ import java.util.List;
 
 import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.brev.FastMottaker;
+import no.nav.melosys.domain.brev.FastMottakerMedOrgnr;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.brev.Mottakerliste;
 import no.nav.melosys.domain.dokument.felles.Land;
@@ -70,7 +70,7 @@ class BrevbestillingServiceTest {
     @BeforeEach
     void init() {
         brevbestillingService = new BrevbestillingService(mockBrevmottakerService, mockDokServiceFasade, mockEregFasade,
-                mockKodeverkService, mockKontaktopplysningService, mockPersondataFasade, fakeUnleash);
+            mockKodeverkService, mockKontaktopplysningService, mockPersondataFasade, fakeUnleash);
         fakeUnleash.enable("melosys.brev.GENERELT_FRITEKSTBREV_ARBEIDSGIVER");
         fakeUnleash.enable("melosys.brev.GENERELT_FRITEKSTBREV_BRUKER");
     }
@@ -268,11 +268,11 @@ class BrevbestillingServiceTest {
     @Test
     void hentMuligeMottakere_fastTilSkatt_returnererSkattSomFast() {
         when(mockBrevmottakerService.hentMottakerliste(MANGELBREV_BRUKER, behandling))
-            .thenReturn(new Mottakerliste.Builder().medHovedMottaker(BRUKER).medFastMottaker(FastMottaker.SKATT).build());
+            .thenReturn(new Mottakerliste.Builder().medHovedMottaker(BRUKER).medFastMottaker(FastMottakerMedOrgnr.SKATT).build());
         when(mockBrevmottakerService.avklarMottaker(MANGELBREV_BRUKER, Mottaker.av(BRUKER), behandling))
             .thenReturn(lagAktoer(BRUKER, null));
-        when(mockBrevmottakerService.avklarMottaker(MANGELBREV_BRUKER, FastMottaker.av(FastMottaker.SKATT), behandling))
-            .thenReturn(FastMottaker.av(FastMottaker.SKATT).getAktør());
+        when(mockBrevmottakerService.avklarMottaker(MANGELBREV_BRUKER, FastMottakerMedOrgnr.av(FastMottakerMedOrgnr.SKATT), behandling))
+            .thenReturn(FastMottakerMedOrgnr.av(FastMottakerMedOrgnr.SKATT).getAktør());
         mockHentOrganisasjon("974761076", "Skatteetaten");
 
         var muligeMottakere = brevbestillingService.hentMuligeMottakere(MANGELBREV_BRUKER, behandling, null);
@@ -284,7 +284,7 @@ class BrevbestillingServiceTest {
                 MuligMottakerDto::getRolle,
                 MuligMottakerDto::getAktørId,
                 MuligMottakerDto::getOrgnr)
-            .containsExactly("Kopi til Skatteetaten", "Skatteetaten", MYNDIGHET, null, "974761076");
+            .containsExactly("Kopi til Skatteetaten", "Skatteetaten", TRYGDEMYNDIGHET, null, "974761076");
     }
 
     @Test

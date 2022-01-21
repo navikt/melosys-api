@@ -46,7 +46,7 @@ public class InnvilgelseOgAttestStorbritannia extends DokgenDto {
         public InnvilgelseOgAttestStorbritannia build() {
             Aktoersroller mottaker = brevbestilling.getUtenlandskMyndighet() == null
                 ? Aktoersroller.BRUKER
-                : Aktoersroller.MYNDIGHET;
+                : Aktoersroller.TRYGDEMYNDIGHET;
             return new InnvilgelseOgAttestStorbritannia(this, mottaker);
         }
     }

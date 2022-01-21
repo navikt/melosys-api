@@ -130,7 +130,7 @@ class DistribuerJournalpostTest {
     void utførDistribuerJournalpostMedUtenlandskMyndighet() {
         final String journalpostId = "12345";
         final String institusjonId = "GB:A100";
-        Prosessinstans prosessinstans = setupHappypath(journalpostId, Aktoersroller.MYNDIGHET);
+        Prosessinstans prosessinstans = setupHappypath(journalpostId, Aktoersroller.TRYGDEMYNDIGHET);
         prosessinstans.setData(ProsessDataKey.INSTITUSJON_ID, institusjonId);
 
         var utenlandskMyndighet = new UtenlandskMyndighet();

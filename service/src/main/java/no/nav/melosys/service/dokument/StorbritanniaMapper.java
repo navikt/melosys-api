@@ -16,7 +16,7 @@ import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadTrygdeavtale;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.IdentType;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
-import no.nav.melosys.domain.brev.FastMottaker;
+import no.nav.melosys.domain.brev.FastMottakerMedOrgnr;
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
@@ -297,7 +297,7 @@ public class StorbritanniaMapper {
 
     private boolean erSkatteetaten(OrganisasjonDokument org) {
         // Skatteetaten skal ikke ha attest
-        return org != null && FastMottaker.OrgNr.SKATTEETATEN_ORGNR.getOrgnr().equals(org.getOrgnummer());
+        return org != null && FastMottakerMedOrgnr.OrgNr.SKATTEETATEN_ORGNR.getOrgnr().equals(org.getOrgnummer());
     }
 
     private boolean skalIkkeHaInnvilgelse(InnvilgelseBrevbestilling brevbestilling) {

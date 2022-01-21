@@ -103,7 +103,7 @@ class BrevDataServiceTest {
 
     private static Aktoer lagAktoerMyndighet(String institusjonID) {
         Aktoer myndighet = new Aktoer();
-        myndighet.setRolle(Aktoersroller.MYNDIGHET);
+        myndighet.setRolle(Aktoersroller.TRYGDEMYNDIGHET);
         myndighet.setInstitusjonId(institusjonID);
         return myndighet;
     }
@@ -111,7 +111,7 @@ class BrevDataServiceTest {
     @Test
     void lagMyndighetFraAktoer() {
         Aktoer aktoer = new Aktoer();
-        aktoer.setRolle(Aktoersroller.MYNDIGHET);
+        aktoer.setRolle(Aktoersroller.TRYGDEMYNDIGHET);
         aktoer.setInstitusjonId("DE:TEST");
         UtenlandskMyndighet tyskMyndighet = new UtenlandskMyndighet();
         tyskMyndighet.institusjonskode = "TEST";
@@ -333,7 +333,7 @@ class BrevDataServiceTest {
         Behandling behandling = lagBehandling(lagSaksopplysninger(), lagSøknadDokument());
         BrevData brevData = new BrevData("Z123456");
 
-        Aktoer mottaker = lagAktør(Aktoersroller.MYNDIGHET);
+        Aktoer mottaker = lagAktør(Aktoersroller.TRYGDEMYNDIGHET);
         DokumentbestillingMetadata metadata = service.lagBestillingMetadata(MELDING_MANGLENDE_OPPLYSNINGER, mottaker, null, behandling, brevData);
         assertThat(metadata.postadresse).isNull();
         assertThat(metadata.brukerNavn).isEqualTo(sammensattNavn);

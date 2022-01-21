@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import static no.nav.melosys.domain.kodeverk.Aktoersroller.MYNDIGHET;
+import static no.nav.melosys.domain.kodeverk.Aktoersroller.TRYGDEMYNDIGHET;
 
 @Service
 public class UtenlandskMyndighetService {
@@ -82,7 +82,7 @@ public class UtenlandskMyndighetService {
 
     private Aktoer lagAktoer(UtenlandskMyndighet utenlandskMyndighet) {
         Aktoer aktoer = new Aktoer();
-        aktoer.setRolle(MYNDIGHET);
+        aktoer.setRolle(TRYGDEMYNDIGHET);
         aktoer.setInstitusjonId(lagInstitusjonsId(utenlandskMyndighet));
         return aktoer;
     }

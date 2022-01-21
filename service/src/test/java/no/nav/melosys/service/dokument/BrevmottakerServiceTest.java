@@ -38,7 +38,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static java.util.Collections.emptyList;
-import static no.nav.melosys.domain.brev.FastMottaker.SKATT;
+import static no.nav.melosys.domain.brev.FastMottakerMedOrgnr.SKATT;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 import static org.assertj.core.api.Assertions.*;
@@ -220,7 +220,7 @@ class BrevmottakerServiceTest {
         when(utenlandskMyndighetService.lagUtenlandskeMyndigheterFraBehandling(eq(behandling))).thenReturn(Collections.singletonMap(lagUtenlandskMyndighet(), lagAktoerUtenlandskMyndighet()));
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
-        List<Aktoer> myndigheter = brevmottakerService.avklarMottakere(Produserbaredokumenter.ATTEST_A1, Mottaker.av(MYNDIGHET), behandling);
+        List<Aktoer> myndigheter = brevmottakerService.avklarMottakere(Produserbaredokumenter.ATTEST_A1, Mottaker.av(TRYGDEMYNDIGHET), behandling);
         assertThat(myndigheter).isEmpty();
     }
 
@@ -230,7 +230,7 @@ class BrevmottakerServiceTest {
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
         behandlingsresultat.hentValidertLovvalgsperiode().setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_4_2);
-        List<Aktoer> myndigheter = brevmottakerService.avklarMottakere(Produserbaredokumenter.ATTEST_A1, Mottaker.av(MYNDIGHET), behandling);
+        List<Aktoer> myndigheter = brevmottakerService.avklarMottakere(Produserbaredokumenter.ATTEST_A1, Mottaker.av(TRYGDEMYNDIGHET), behandling);
         assertThat(myndigheter).isEmpty();
     }
 
@@ -238,7 +238,7 @@ class BrevmottakerServiceTest {
     void avklarMottakere_A001_CZerReservertFraA1_forventerMyndighetAktør() {
         when(utenlandskMyndighetService.lagUtenlandskeMyndigheterFraBehandling(eq(behandling))).thenReturn(Collections.singletonMap(lagUtenlandskMyndighet(), lagAktoerUtenlandskMyndighet()));
 
-        List<Aktoer> myndigheter = brevmottakerService.avklarMottakere(Produserbaredokumenter.ANMODNING_UNNTAK, Mottaker.av(MYNDIGHET), behandling);
+        List<Aktoer> myndigheter = brevmottakerService.avklarMottakere(Produserbaredokumenter.ANMODNING_UNNTAK, Mottaker.av(TRYGDEMYNDIGHET), behandling);
         assertThat(myndigheter)
             .flatExtracting(Aktoer::getInstitusjonId)
             .containsExactly("CZ:SZUC10416");
@@ -420,7 +420,7 @@ class BrevmottakerServiceTest {
             )
             .containsExactly(
                 BRUKER,
-                List.of(ARBEIDSGIVER, MYNDIGHET),
+                List.of(ARBEIDSGIVER, TRYGDEMYNDIGHET),
                 List.of(SKATT)
             );
     }
@@ -513,7 +513,7 @@ class BrevmottakerServiceTest {
     void avklarMottakerRolleFraDokument_tilMyndighet_girRolleMyndighet() {
         Aktoersroller mottakerRolle = brevmottakerService.avklarMottakerRolleFraDokument(ATTEST_A1);
 
-        assertThat(mottakerRolle).isEqualTo(MYNDIGHET);
+        assertThat(mottakerRolle).isEqualTo(TRYGDEMYNDIGHET);
     }
 
     @Test
@@ -582,7 +582,7 @@ class BrevmottakerServiceTest {
 
     private Aktoer lagAktoerUtenlandskMyndighet() {
         Aktoer aktoer = new Aktoer();
-        aktoer.setRolle(MYNDIGHET);
+        aktoer.setRolle(TRYGDEMYNDIGHET);
         aktoer.setInstitusjonId("CZ:SZUC10416");
         return aktoer;
     }

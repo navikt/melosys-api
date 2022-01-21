@@ -97,7 +97,7 @@ public class FagsakService {
     public void oppdaterMyndigheter(String saksnummer, Collection<String> ider) {
         Fagsak fagsak = hentFagsak(saksnummer);
         fagsak.getAktører().removeIf(aktoer -> !ider.contains(aktoer.getInstitusjonId())
-            && aktoer.getRolle() == Aktoersroller.MYNDIGHET);
+            && aktoer.getRolle() == Aktoersroller.TRYGDEMYNDIGHET);
 
         Collection<Aktoer> nyeMyndigheter = ider.stream()
             .map(id -> lagMyndighetAktør(fagsak, id))
@@ -110,7 +110,7 @@ public class FagsakService {
     private static Aktoer lagMyndighetAktør(Fagsak fagsak, String ID) {
         Aktoer aktør = new Aktoer();
         aktør.setFagsak(fagsak);
-        aktør.setRolle(Aktoersroller.MYNDIGHET);
+        aktør.setRolle(Aktoersroller.TRYGDEMYNDIGHET);
         aktør.setInstitusjonId(ID);
         return aktør;
     }
