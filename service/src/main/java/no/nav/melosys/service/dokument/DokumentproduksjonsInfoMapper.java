@@ -72,6 +72,10 @@ public class DokumentproduksjonsInfoMapper {
                 new DokumentproduksjonsInfo("fritekstbrev",
                     DokumentKategoriKode.IB.getKode(),
                     null))
+            .put(AVSLAG_MANGLENDE_OPPLYSNINGER,
+                new DokumentproduksjonsInfo("avslag_manglende_opplysninger",
+                    DokumentKategoriKode.VB.getKode(),
+                    JournalforingsTittel.AVSLAG_MANGLENDE_OPPLYSNINGER.getTittel()))
             .build());
     }
 
@@ -113,7 +117,8 @@ public class DokumentproduksjonsInfoMapper {
         FORVALTNINGSMELDING("Melding om forventet saksbehandlingstid"),
         MANGELBREV("Melding om manglende opplysninger"),
         INNVILGELSE_FTRL_2_8("Vedtak om frivillig medlemskap"),
-        STORBRITANNIA("Vedtak om medlemskap, Attest for utsendt arbeidstaker");
+        STORBRITANNIA("Vedtak om medlemskap, Attest for utsendt arbeidstaker"),
+        AVSLAG_MANGLENDE_OPPLYSNINGER("Avslag pga manglende dokument");
 
         private final String tittel;
 

@@ -1,11 +1,11 @@
 package no.nav.melosys.service.behandling;
 
 import java.time.Instant;
-import java.time.Period;
 import java.util.List;
 import java.util.Optional;
 
 import no.nav.melosys.domain.BehandlingsfristEndretEvent;
+import no.nav.melosys.domain.brev.MangelbrevSvarfrist;
 import no.nav.melosys.domain.dokument.DokumentBestiltEvent;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.oppgave.Oppgave;
@@ -20,8 +20,6 @@ import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 
 @Component
 public class BehandlingEventListener {
-
-    private static final int DOKUMENTASJON_SVARFRIST_UKER_MANGELBREV = 4;
 
     private final BehandlingService behandlingService;
     private final OppgaveService oppgaveService;
@@ -39,7 +37,7 @@ public class BehandlingEventListener {
                 behandlingService.oppdaterStatusOgSvarfrist(
                     behandling,
                     Behandlingsstatus.AVVENT_DOK_PART,
-                    Instant.now().plus(Period.ofWeeks(DOKUMENTASJON_SVARFRIST_UKER_MANGELBREV))
+                    MangelbrevSvarfrist.beregnFristFraDato(Instant.now())
                 );
             }
         }
