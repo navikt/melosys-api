@@ -1,6 +1,10 @@
 {
   "sedId": "d57743a8549d40298ed7b6a8c18cab1c",
   "rinaSaksnummer": "68604",
+  "avsender": {
+    "avsenderID": "101",
+    "landkode":"DK"
+  },
   "journalpostId": "439646307",
   "dokumentId": "ukjent",
   "gsakSaksnummer": 161,

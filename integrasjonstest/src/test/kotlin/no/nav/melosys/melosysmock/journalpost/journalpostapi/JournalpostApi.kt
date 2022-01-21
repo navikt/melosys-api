@@ -3,11 +3,13 @@ package no.nav.melosys.melosysmock.journalpost.journalpostapi
 import no.nav.melosys.melosysmock.journalpost.JournalpostMapper
 import no.nav.melosys.melosysmock.journalpost.JournalpostRepo.repo
 import no.nav.melosys.melosysmock.journalpost.intern_modell.JournalStatus
+import no.nav.security.token.support.core.api.Unprotected
 import org.springframework.web.bind.annotation.*
 import java.time.LocalDateTime
 
 @RestController
 @RequestMapping("/rest/journalpostapi/v1")
+@Unprotected
 class JournalpostApi {
 
     @PostMapping("journalpost")
