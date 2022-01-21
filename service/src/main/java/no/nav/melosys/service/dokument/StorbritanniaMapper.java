@@ -37,6 +37,8 @@ import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterSystemService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import org.springframework.stereotype.Component;
 
+import static no.nav.melosys.domain.behandlingsgrunnlag.data.IdentType.DNR;
+import static no.nav.melosys.domain.behandlingsgrunnlag.data.IdentType.FNR;
 import static org.springframework.util.ObjectUtils.isEmpty;
 
 @Component
@@ -147,8 +149,8 @@ public class StorbritanniaMapper {
 
         IdentType identType = medfølgendeFamilie.utledIdentType();
         return new Ektefelle.Builder()
-            .fnr(identType == IdentType.FNR ? medfølgendeFamilie.getFnr() : null)
-            .dnr(identType == IdentType.DNR ? medfølgendeFamilie.getFnr() : null)
+            .fnr(identType == FNR ? medfølgendeFamilie.getFnr() : null)
+            .dnr(identType == DNR ? medfølgendeFamilie.getFnr() : null)
             .navn(medfølgendeFamilie.getNavn())
             .begrunnelse(begrunnelse)
             .fødselsdato(medfølgendeFamilie.datoFraFnr())
@@ -177,8 +179,8 @@ public class StorbritanniaMapper {
         var identType = medfølgendeBarn.utledIdentType();
         return new Barn.Builder()
             .navn(medfølgendeBarn.getNavn())
-            .fnr(identType == IdentType.FNR ? medfølgendeBarn.getFnr() : null)
-            .dnr(identType == IdentType.DNR ? medfølgendeBarn.getFnr() : null)
+            .fnr(identType == FNR ? medfølgendeBarn.getFnr() : null)
+            .dnr(identType == DNR ? medfølgendeBarn.getFnr() : null)
             .foedselsdato(medfølgendeBarn.datoFraFnr())
             .begrunnelse(begrunnelse)
             .build();
@@ -286,9 +288,13 @@ public class StorbritanniaMapper {
     private Person mapFamilieTilPerson(Map<String, MedfolgendeFamilie> medfølgendeFamilieMap, String uuid) {
         var medfølgendeFamilie = Optional.of(medfølgendeFamilieMap.get(uuid))
             .orElseThrow(() -> new FunksjonellException("Avklart medfølgende familie " + uuid + " finnes ikke i behandlingsgrunnlaget"));
-        var fnr = medfølgendeFamilie.utledIdentType() == IdentType.DATO ? null : medfølgendeFamilie.getFnr();
+        var identType = medfølgendeFamilie.utledIdentType();
 
-        return new Person(medfølgendeFamilie.getNavn(), medfølgendeFamilie.datoFraFnr(), fnr, null);
+        return new Person(
+            medfølgendeFamilie.getNavn(),
+            medfølgendeFamilie.datoFraFnr(),
+            identType == FNR ? medfølgendeFamilie.getFnr() : null,
+            identType == DNR ? medfølgendeFamilie.getFnr() : null);
     }
 
     private boolean erSkatteetaten(OrganisasjonDokument org) {
