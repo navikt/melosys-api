@@ -7,16 +7,20 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class HenleggFagsakService {
+    private static final Logger log = LoggerFactory.getLogger(HenleggFagsakService.class);
 
     private final FagsakService fagsakService;
     private final BehandlingsresultatService behandlingsresultatService;
@@ -63,5 +67,15 @@ public class HenleggFagsakService {
         behandlingsresultat.getBehandlingsresultatBegrunnelser().add(begrunnelse);
 
         behandlingsresultatService.lagre(behandlingsresultat);
+    }
+
+    @Transactional
+    public void henleggSomBortfalt(Fagsak fagsak) {
+        log.info("Fagsak {}: {}", fagsak.getSaksnummer(), Saksstatuser.HENLAGT_BORTFALT.getBeskrivelse());
+        fagsak.getBehandlinger().forEach(behandling -> behandlingsresultatService.oppdaterBehandlingsresultattype(behandling.getId(), Behandlingsresultattyper.HENLEGGELSE));
+        fagsak.getBehandlinger().forEach(behandling -> behandling.setStatus(Behandlingsstatus.AVSLUTTET));
+        fagsak.setStatus(Saksstatuser.HENLAGT_BORTFALT);
+        fagsakService.lagre(fagsak);
+        oppgaveService.ferdigstillOppgaveMedSaksnummer(fagsak.getSaksnummer());
     }
 }

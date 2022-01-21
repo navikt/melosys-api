@@ -1,6 +1,7 @@
 package no.nav.melosys.integrasjon.dokgen;
 
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 
@@ -93,7 +94,7 @@ class DokgenConsumerTest {
             .medBehandling(lagBehandling())
             .medPersonDokument((Persondata) lagPersondokument().getDokument())
             .build();
-        return MangelbrevBruker.av(mangelbrevBrevbestilling);
+        return MangelbrevBruker.av(mangelbrevBrevbestilling, Instant.now());
     }
 
     private Behandling lagBehandling() {
