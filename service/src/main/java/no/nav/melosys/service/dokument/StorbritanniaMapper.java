@@ -34,7 +34,6 @@ import no.nav.melosys.integrasjon.dokgen.dto.storbritannia.innvilgelse.*;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterSystemService;
-import no.nav.melosys.service.persondata.PersondataFasade;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.behandlingsgrunnlag.data.IdentType.DNR;
@@ -46,19 +45,13 @@ public class StorbritanniaMapper {
 
     private final AvklarteMedfolgendeFamilieService avklarteMedfølgendeFamilieService;
     private final AvklarteVirksomheterSystemService avklarteVirksomheterSystemService;
-    private final DokgenMapperDatahenter dokgenMapperDatahenter;
-    private final PersondataFasade persondataFasade;
     private final LovvalgsperiodeService lovvalgsperiodeService;
 
     public StorbritanniaMapper(AvklarteMedfolgendeFamilieService avklarteMedfølgendeFamilieService,
                                AvklarteVirksomheterSystemService avklarteVirksomheterSystemService,
-                               DokgenMapperDatahenter dokgenMapperDatahenter,
-                               PersondataFasade registerOppslagService,
                                LovvalgsperiodeService lovvalgsperiodeService) {
         this.avklarteMedfølgendeFamilieService = avklarteMedfølgendeFamilieService;
         this.avklarteVirksomheterSystemService = avklarteVirksomheterSystemService;
-        this.dokgenMapperDatahenter = dokgenMapperDatahenter;
-        this.persondataFasade = registerOppslagService;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
     }
 

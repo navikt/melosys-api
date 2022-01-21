@@ -22,7 +22,6 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_b
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_ektefelle_samboer_begrunnelser_ftrl;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
-import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.domain.person.adresse.Oppholdsadresse;
 import no.nav.melosys.domain.person.adresse.PersonAdresse;
 import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie;
@@ -36,7 +35,6 @@ import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterSystemService;
 import no.nav.melosys.service.dokument.brev.BrevDataTestUtils;
-import no.nav.melosys.service.persondata.PersondataFasade;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -45,7 +43,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.stubbing.Answer;
 
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.STORBRITANNIA;
 import static no.nav.melosys.service.dokument.DokgenMalMapperTest.*;
@@ -80,12 +77,6 @@ public class StorbritanniaMapperTest {
     private LovvalgsperiodeService mockLovvalgsperiodeService;
     @Mock
     private AvklarteVirksomheterSystemService mockAvklarteVirksomheterSystemService;
-    @Mock
-    private DokgenMapperDatahenter mockDokgenMapperDatahenter;
-    @Mock
-    private PersondataFasade mockPersondataFasade;
-    @Mock
-    private Persondata mockPersondata;
 
     private StorbritanniaMapper storbritanniaMapper;
 
@@ -94,8 +85,6 @@ public class StorbritanniaMapperTest {
         storbritanniaMapper = new StorbritanniaMapper(
             mockAvklarteMedfolgendeFamilieService,
             mockAvklarteVirksomheterSystemService,
-            mockDokgenMapperDatahenter,
-            mockPersondataFasade,
             mockLovvalgsperiodeService);
     }
 
@@ -162,7 +151,7 @@ public class StorbritanniaMapperTest {
             .hasSize(1)
             .element(0)
             .extracting(Barn::fnr, Barn::foedselsdato)
-            .containsExactly(null, LocalDate.of(2021, 02, 01));
+            .containsExactly(null, LocalDate.of(2021, 2, 1));
     }
 
     @Test
@@ -274,10 +263,6 @@ public class StorbritanniaMapperTest {
 
     private void mockLovvalgsperiode() {
         when(mockLovvalgsperiodeService.hentValidertLovvalgsperiode(anyLong())).thenReturn(lagLovvalgsperiode());
-    }
-
-    private void mockPersondata() {
-        when(mockPersondataFasade.hentPerson(anyString())).thenReturn(mockPersondata);
     }
 
     private Behandling medPeriode(Behandling behandling) {
