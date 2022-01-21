@@ -37,7 +37,7 @@ public class BehandlingEventListener {
                 behandlingService.oppdaterStatusOgSvarfrist(
                     behandling,
                     Behandlingsstatus.AVVENT_DOK_PART,
-                    MangelbrevSvarfrist.hentSvarfristForMangelbrev(Instant.now())
+                    MangelbrevSvarfrist.beregnFristFraDato(Instant.now())
                 );
             }
         }

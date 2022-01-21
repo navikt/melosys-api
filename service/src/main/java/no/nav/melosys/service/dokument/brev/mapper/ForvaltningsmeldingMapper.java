@@ -37,7 +37,7 @@ public class ForvaltningsmeldingMapper implements BrevDataMapper {
         final Instant forsendelseMottattTidspunkt = brevDataMottattDato.initierendeJournalpostForsendelseMottattTidspunkt;
         fag.setBehandlingstype(BehandlingstypeKodeMapper.hentBehandlingstypeKode(behandling));
         fag.setDatoMottatt(convertToXMLGregorianCalendarRemoveTimezone(forsendelseMottattTidspunkt));
-        fag.setSaksbehandlingstidDato(convertToXMLGregorianCalendarRemoveTimezone(Saksbehandlingstid.hentDatoBehandlingstid(forsendelseMottattTidspunkt)));
+        fag.setSaksbehandlingstidDato(convertToXMLGregorianCalendarRemoveTimezone(Saksbehandlingstid.beregnSaksbehandlingsfrist(forsendelseMottattTidspunkt)));
 
         AvsenderType avsenderType = new AvsenderType();
         avsenderType.setRolle(RolleKode.BRUKER);
