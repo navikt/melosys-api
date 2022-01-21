@@ -25,15 +25,15 @@ public class SaksbehandlingstidKlage extends DokgenDto {
     @JsonFormat(shape = STRING)
     private final Instant datoVedtak;
 
-    public SaksbehandlingstidKlage(DokgenBrevbestilling brevbestilling) {
+    public SaksbehandlingstidKlage(DokgenBrevbestilling brevbestilling, Instant datoBehandlingstid) {
         super(brevbestilling, Aktoersroller.BRUKER);
         this.datoMottatt = brevbestilling.getForsendelseMottatt();
-        this.datoBehandlingstid = brevbestilling.getForsendelseMottatt().plus(SAKSBEHANDLINGSTID_DAGER, ChronoUnit.DAYS);
+        this.datoBehandlingstid = datoBehandlingstid;
         this.datoVedtak = brevbestilling.getVedtaksdato();
     }
 
-    public static SaksbehandlingstidKlage av(DokgenBrevbestilling brevbestilling) {
-        return new SaksbehandlingstidKlage(brevbestilling);
+    public static SaksbehandlingstidKlage av(DokgenBrevbestilling brevbestilling, Instant datoBehandlingstid) {
+        return new SaksbehandlingstidKlage(brevbestilling, datoBehandlingstid);
     }
 
     public Instant getDatoMottatt() {
