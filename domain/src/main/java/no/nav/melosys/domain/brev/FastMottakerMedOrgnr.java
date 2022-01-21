@@ -37,7 +37,7 @@ public enum FastMottakerMedOrgnr {
 
     private static Aktoer lagAktør(OrgNr orgn) {
         Aktoer aktør = new Aktoer();
-        aktør.setRolle(Aktoersroller.MYNDIGHET);
+        aktør.setRolle(Aktoersroller.TRYGDEMYNDIGHET);
         aktør.setOrgnr(orgn.getOrgnr());
         return aktør;
     }

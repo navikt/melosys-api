@@ -348,7 +348,7 @@ class EosVedtakServiceTest {
 
     private void leggTilMyndighetAktoer() {
         Aktoer myndighet = new Aktoer();
-        myndighet.setRolle(Aktoersroller.MYNDIGHET);
+        myndighet.setRolle(Aktoersroller.TRYGDEMYNDIGHET);
         myndighet.setInstitusjonId("SE:SE001");
         behandling.getFagsak().setAktører(Set.of(myndighet));
     }

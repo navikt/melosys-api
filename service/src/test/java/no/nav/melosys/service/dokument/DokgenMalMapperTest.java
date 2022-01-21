@@ -36,7 +36,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
-import static no.nav.melosys.domain.kodeverk.Aktoersroller.MYNDIGHET;
+import static no.nav.melosys.domain.kodeverk.Aktoersroller.TRYGDEMYNDIGHET;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 import static no.nav.melosys.service.dokument.DokgenTestData.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -168,7 +168,7 @@ class DokgenMalMapperTest {
                 SaksbehandlingstidSoknad::getAvsenderTypeSoknad,
                 SaksbehandlingstidSoknad::getAvsenderLand
             ).containsExactly(
-            MYNDIGHET,
+            TRYGDEMYNDIGHET,
             "Finland"
         );
     }

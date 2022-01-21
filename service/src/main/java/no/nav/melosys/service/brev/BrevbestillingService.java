@@ -117,7 +117,7 @@ public class BrevbestillingService {
             switch (kopiMottaker) {
                 case BRUKER -> muligMottakerDtos.add(lagKopiMottakerForBruker(produserbaredokumenter, behandling, kopiMottaker, hovedmottaker));
                 case ARBEIDSGIVER -> muligMottakerDtos.addAll(lagKopiMottakereForArbeidsgiver(produserbaredokumenter, behandling, kopiMottaker));
-                case MYNDIGHET -> muligMottakerDtos.addAll(lagKopiMottakereForMyndighet(produserbaredokumenter, behandling, kopiMottaker));
+                case TRYGDEMYNDIGHET -> muligMottakerDtos.addAll(lagKopiMottakereForMyndighet(produserbaredokumenter, behandling, kopiMottaker));
                 default -> throw new IllegalStateException(kopiMottaker + " er ikke en gyldig kopiMottakerrolle");
             }
         }

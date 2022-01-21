@@ -37,7 +37,7 @@ public class DokgenMalMapper {
 
         //NOTE Henter opplysninger på nytt for å sikre at korrekt adresse benyttes med mindre myndighet
         Mottaker mottaker = dto.getMottaker();
-        if (!Aktoersroller.MYNDIGHET.getKode().equals(mottaker.type())) {
+        if (!Aktoersroller.TRYGDEMYNDIGHET.getKode().equals(mottaker.type())) {
             String poststed = mottaker.poststed();
             if (hasText(mottaker.postnr())) {
                 poststed = dokgenMapperDatahenter.hentPoststed(mottaker.postnr());

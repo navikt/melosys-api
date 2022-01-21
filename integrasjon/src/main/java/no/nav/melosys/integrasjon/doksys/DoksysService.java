@@ -113,7 +113,7 @@ public class DoksysService implements DoksysFasade {
         info.setDokumenttilhoerendeFagomraade(fagområde);
 
         info.setJournalfoerendeEnhet(Integer.toString(MELOSYS_ENHET_ID));
-        info.setSaksbehandlernavn(metadata.saksbehandler !=null ? metadata.saksbehandler : SYS_AVSENDER);
+        info.setSaksbehandlernavn(metadata.saksbehandler != null ? metadata.saksbehandler : SYS_AVSENDER);
 
         if (metadata.mottaker.erUtenlandskMyndighet()) {
             info.setAdresse(lagUtenlandskAdresse(metadata.utenlandskMyndighet.getAdresse()));
@@ -207,7 +207,7 @@ public class DoksysService implements DoksysFasade {
         Adresse.AdresseBuilder adresseBuilder = Adresse.builder()
             .land(strukturertAdresse.getLandkode());
 
-        if(hasText(kontaktpersonNavn)) {
+        if (hasText(kontaktpersonNavn)) {
             adresseBuilder
                 .adresselinje1("Att: " + kontaktpersonNavn)
                 .adresselinje2(
@@ -225,8 +225,8 @@ public class DoksysService implements DoksysFasade {
 
         if (strukturertAdresse.erNorsk()) {
             adresseBuilder.adressetype("norskPostadresse")
-            .postnummer(strukturertAdresse.getPostnummer())
-            .poststed(strukturertAdresse.getPoststed());
+                .postnummer(strukturertAdresse.getPostnummer())
+                .poststed(strukturertAdresse.getPoststed());
         } else {
             adresseBuilder.adressetype("utenlandskPostadresse");
         }
@@ -262,7 +262,7 @@ public class DoksysService implements DoksysFasade {
                 Organisasjon organisasjon = objectFactory.createOrganisasjon();
                 organisasjon.setOrgnummer(mottakerID);
                 return organisasjon;
-            case MYNDIGHET:
+            case TRYGDEMYNDIGHET:
                 if (metadata.mottaker.erUtenlandskMyndighet()) {
                     // Dokprod støtter ikke utenlandske myndigheter så vi lager en falsk person
                     // med mottakerId="11111111111" og dermed blir AvsendMottakId i Joark tom.

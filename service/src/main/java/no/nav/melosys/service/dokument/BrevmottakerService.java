@@ -70,7 +70,7 @@ public class BrevmottakerService {
         } else if (List.of(INNVILGELSE_ARBEIDSGIVER, AVSLAG_ARBEIDSGIVER).contains(produserbartDokument)) {
             mottakerRolle = ARBEIDSGIVER;
         } else if (List.of(ANMODNING_UNNTAK, ATTEST_A1).contains(produserbartDokument)) {
-            mottakerRolle = MYNDIGHET;
+            mottakerRolle = TRYGDEMYNDIGHET;
         } else {
             throw new TekniskException("Valg av mottakerRolle støttes ikke for " + produserbartDokument);
         }
@@ -103,7 +103,7 @@ public class BrevmottakerService {
             mottakere = avklarMottakereForBruker(produserbartDokument, behandling, forhåndsvisning);
         } else if (mottakerRolle == ARBEIDSGIVER) {
             mottakere = avklarMottakereForArbeidsgiver(behandling, kunAvklarteVirksomheter);
-        } else if (mottakerRolle == MYNDIGHET) {
+        } else if (mottakerRolle == TRYGDEMYNDIGHET) {
             mottakere = avklarMottakereForMyndigheter(mottaker, behandling, produserbartDokument);
         } else {
             throw new FunksjonellException(mottakerRolle + " støttes ikke.");
@@ -262,7 +262,7 @@ public class BrevmottakerService {
         if (brevkopiRegler.contains(UTENLANDSK_TRYGDEMYNDIGHET_FÅR_KOPI_HVIS_IKKE_ART_8_2)) {
             Optional.ofNullable(lovvalgsperiodeService.hentValidertLovvalgsperiode(behandling.getId())).ifPresent(lovvalgsperiode -> {
                     if (lovvalgsperiode.getBestemmelse() != Lovvalgbestemmelser_trygdeavtale_uk.UK_ART8_2) {
-                        mottakerliste.getKopiMottakere().add(MYNDIGHET);
+                        mottakerliste.getKopiMottakere().add(TRYGDEMYNDIGHET);
                     }
                 }
             );

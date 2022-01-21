@@ -70,7 +70,7 @@ class BrevbestillingServiceTest {
     @BeforeEach
     void init() {
         brevbestillingService = new BrevbestillingService(mockBrevmottakerService, mockDokServiceFasade, mockEregFasade,
-                mockKodeverkService, mockKontaktopplysningService, mockPersondataFasade, fakeUnleash);
+            mockKodeverkService, mockKontaktopplysningService, mockPersondataFasade, fakeUnleash);
         fakeUnleash.enable("melosys.brev.GENERELT_FRITEKSTBREV_ARBEIDSGIVER");
         fakeUnleash.enable("melosys.brev.GENERELT_FRITEKSTBREV_BRUKER");
     }
@@ -284,7 +284,7 @@ class BrevbestillingServiceTest {
                 MuligMottakerDto::getRolle,
                 MuligMottakerDto::getAktørId,
                 MuligMottakerDto::getOrgnr)
-            .containsExactly("Kopi til Skatteetaten", "Skatteetaten", MYNDIGHET, null, "974761076");
+            .containsExactly("Kopi til Skatteetaten", "Skatteetaten", TRYGDEMYNDIGHET, null, "974761076");
     }
 
     @Test
