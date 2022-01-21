@@ -31,8 +31,6 @@ public class DokgenMalMapper {
     private final StorbritanniaMapper storbritanniaMapper;
     private final DokumentHentingService dokumentHentingService;
 
-    // Svarfrist mangelbrev 4 uker fra dato brevet blir generert.
-    protected static final int DOKUMENTASJON_SVARFRIST_UKER_MANGELBREV = 4;
     // Saksbehandlingstid er 12 uker fra dato for utsendelse av brev, uavhengig av helg, helligdager, osv.
     protected static final int SAKSBEHANDLINGSTID_DAGER = 12 * 7;
 
@@ -82,16 +80,12 @@ public class DokgenMalMapper {
             .collect(toList());
     }
 
-    private Instant hentSvarfristForMangelbrev(Instant brevdato) {
-        return brevdato.plus(Period.ofWeeks(DOKUMENTASJON_SVARFRIST_UKER_MANGELBREV));
-    }
-
     private Avslagbrev hentAvslagsbrev(DokgenBrevbestilling brevbestilling) {
         List<Instant> mangelbrevDatoer = hentMangelbrevDatoer(brevbestilling.getBehandling().getFagsak().getSaksnummer());
 
         return Avslagbrev.av(((AvslagBrevbestilling) brevbestilling).toBuilder().build(),
             mangelbrevDatoer,
-            mangelbrevDatoer.isEmpty() ? null : hentSvarfristForMangelbrev(Collections.max(mangelbrevDatoer))
+            MangelbrevSvarfrist.hentSvarfristForSisteDato(mangelbrevDatoer)
         );
     }
 
@@ -113,14 +107,14 @@ public class DokgenMalMapper {
                 ((MangelbrevBrevbestilling) brevbestilling).toBuilder()
                     .medVedtaksdato(dokgenMapperDatahenter.hentVedtaksdato(brevbestilling.getBehandling().getId()))
                     .build(),
-                hentSvarfristForMangelbrev(Instant.now())
+                MangelbrevSvarfrist.hentSvarfristForMangelbrev(Instant.now())
             );
             case MANGELBREV_ARBEIDSGIVER -> MangelbrevArbeidsgiver.av(
                 ((MangelbrevBrevbestilling) brevbestilling).toBuilder()
                     .medVedtaksdato(dokgenMapperDatahenter.hentVedtaksdato(brevbestilling.getBehandling().getId()))
                     .medFullmektigNavn(dokgenMapperDatahenter.hentFullmektigNavn(brevbestilling.getBehandling().getFagsak(), Representerer.BRUKER))
                     .build(),
-                hentSvarfristForMangelbrev(Instant.now())
+                MangelbrevSvarfrist.hentSvarfristForMangelbrev(Instant.now())
             );
             case INNVILGELSE_FOLKETRYGDLOVEN_2_8 -> innvilgelseFtrlMapper.map((InnvilgelseBrevbestilling) brevbestilling);
             case STORBRITANNIA -> storbritanniaMapper.map((InnvilgelseBrevbestilling) brevbestilling.toBuilder()
