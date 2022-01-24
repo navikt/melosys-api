@@ -9,6 +9,7 @@ import no.nav.melosys.tjenester.gui.dto.MedfolgendeFamilieDto;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -33,23 +34,15 @@ public record TrygdeavtaleResultatDto(
     }
 
     public static TrygdeavtaleResultatDto fra(TrygdeavtaleResultat resultat, List<MedfolgendeFamilie> familie) {
-        Builder builder = new Builder();
+        var ektefelle = familie.stream().filter(mf -> mf.getRelasjonsrolle() == MedfolgendeFamilie.Relasjonsrolle.EKTEFELLE_SAMBOER)
+            .map(mf -> tilMedfolgendeFamilieDto(resultat, mf.getUuid())).flatMap(Collection::stream).findFirst().orElse(null);
 
-        familie.stream()
-            .filter(mf -> mf.getRelasjonsrolle() == MedfolgendeFamilie.Relasjonsrolle.EKTEFELLE_SAMBOER)
-            .findFirst().ifPresent(mf -> {
-                String uuid = mf.getUuid();
-                leggTil(resultat, uuid).forEach(f ->
-                    builder.ektefelle(f.uuid(), f.omfattet(), f.begrunnelseKode(), f.begrunnelseFritekst()));
-            });
+        var barn = familie.stream().filter(mf1 -> mf1.getRelasjonsrolle() == MedfolgendeFamilie.Relasjonsrolle.BARN)
+            .map(mf1 -> tilMedfolgendeFamilieDto(resultat, mf1.getUuid())).flatMap(Collection::stream).toList();
 
-        familie.stream().filter(mf -> mf.getRelasjonsrolle() == MedfolgendeFamilie.Relasjonsrolle.BARN).forEach(barn -> {
-            String uuid = barn.getUuid();
-            leggTil(resultat, uuid).forEach(f ->
-                builder.addBarn(f.uuid(), f.omfattet(), f.begrunnelseKode(), f.begrunnelseFritekst()));
-        });
-
-        return builder
+        return new Builder()
+            .ektefelle(ektefelle)
+            .barn(barn)
             .bestemmelse(resultat.bestemmelse())
             .virksomhet(resultat.virksomhet())
             .lovvalgsperiodeFom(resultat.lovvalgsperiodeFom())
@@ -57,18 +50,15 @@ public record TrygdeavtaleResultatDto(
             .build();
     }
 
-    private static List<MedfolgendeFamilieDto> leggTil(TrygdeavtaleResultat resultat, String uuid) {
-        List<MedfolgendeFamilieDto> list = new ArrayList<>();
-        resultat.familie().getFamilieOmfattetAvNorskTrygd()
-            .stream().filter(omfattet -> omfattet.getUuid().equals(uuid))
-            .findFirst().ifPresent(omfattet ->
-                list.add(new MedfolgendeFamilieDto(uuid, true, null, null)));
-
-        resultat.familie().getFamilieIkkeOmfattetAvNorskTrygd()
-            .stream().filter(ikkeOmfattet -> ikkeOmfattet.getUuid().equals(uuid))
-            .findFirst().ifPresent(ikkeOmfattet ->
-                list.add(new MedfolgendeFamilieDto(uuid, false, ikkeOmfattet.getBegrunnelse(), ikkeOmfattet.getBegrunnelseFritekst())));
-        return list;
+    private static List<MedfolgendeFamilieDto> tilMedfolgendeFamilieDto(TrygdeavtaleResultat resultat, String uuid) {
+        return Stream.concat(
+            resultat.familie().getFamilieOmfattetAvNorskTrygd()
+                .stream().filter(omfattet -> omfattet.getUuid().equals(uuid))
+                .map(omfattet -> new MedfolgendeFamilieDto(uuid, true, null, null)),
+            resultat.familie().getFamilieIkkeOmfattetAvNorskTrygd()
+                .stream().filter(ikkeOmfattet -> ikkeOmfattet.getUuid().equals(uuid))
+                .map(ikkeOmfattet -> new MedfolgendeFamilieDto(uuid, false, ikkeOmfattet.getBegrunnelse(), ikkeOmfattet.getBegrunnelseFritekst()))
+        ).toList();
     }
 
     private AvklarteMedfolgendeFamilie lagAvklarteMedfolgendeFamilie() {
@@ -119,8 +109,18 @@ public record TrygdeavtaleResultatDto(
             return this;
         }
 
+        public Builder barn(List<MedfolgendeFamilieDto> barn) {
+            this.barn.addAll(barn);
+            return this;
+        }
+
         public Builder ektefelle(String uuid, boolean omfattet, String begrunnelseKode, String begrunnelseFritekst) {
             this.ektefelle = new MedfolgendeFamilieDto(uuid, omfattet, begrunnelseKode, begrunnelseFritekst);
+            return this;
+        }
+
+        public Builder ektefelle(MedfolgendeFamilieDto ektefelle) {
+            this.ektefelle = ektefelle;
             return this;
         }
 
