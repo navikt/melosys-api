@@ -15,7 +15,6 @@ import no.nav.melosys.domain.person.adresse.Bostedsadresse;
 import no.nav.melosys.domain.person.adresse.Kontaktadresse;
 import no.nav.melosys.domain.person.adresse.Oppholdsadresse;
 import no.nav.melosys.service.kodeverk.KodeverkService;
-import no.nav.melosys.domain.person.PersonMedHistorikk;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.tjenester.gui.graphql.dto.*;
 import org.junit.jupiter.api.Test;
@@ -85,12 +84,13 @@ class PersonopplysningerDataFetcherTest {
         assertThat(personopplysninger.folkeregisterpersonstatuser()).containsExactly(
             new FolkeregisterpersonstatusDto(Personstatuser.UDEFINERT.getKode(), "ny status fra PDL", "NAV (PDL)", Master.PDL.name(), LocalDate.parse("2019-11-18"), false));
         assertThat(personopplysninger.kjoenn()).isEqualTo(KjoennType.UKJENT);
-        assertThat(personopplysninger.kontaktadresser()).hasSize(2);
         assertThat(personopplysninger.kontaktadresser()).extracting(KontaktadresseDto::master)
             .containsExactlyInAnyOrder("NAV (PDL)", "");
         assertThat(personopplysninger.navn()).isEqualTo(new NavnDto("Ola", "Oops", "King"));
         assertThat(personopplysninger.oppholdsadresser()).extracting(OppholdsadresseDto::adresse)
             .extracting(StrukturertAdresseformatDto::gatenavn).containsExactlyInAnyOrder("opphold 1", "opphold 2");
+        assertThat(personopplysninger.oppholdsadresser()).extracting(OppholdsadresseDto::adresse)
+            .extracting(StrukturertAdresseformatDto::tilleggsnavn).containsExactlyInAnyOrder("tilleggOpphold", null);
         assertThat(personopplysninger.oppholdsadresser()).extracting(OppholdsadresseDto::master)
             .containsExactlyInAnyOrder("NAV (PDL)", "");
         assertThat(personopplysninger.sivilstand()).flatExtracting(SivilstandDto::type,
@@ -124,8 +124,8 @@ class PersonopplysningerDataFetcherTest {
             null, null, false);
 
         final var oppholdsadresse_1 = new Oppholdsadresse(
-            new StrukturertAdresse("opphold 1", null, null, null, null, null), null, null, null, "PDL", null, null,
-            false);
+            new StrukturertAdresse("tilleggOpphold", "opphold 1", null, null, null, null, null, null), null, null, null,
+            "PDL", null, null, false);
         final var oppholdsadresse_2 = new Oppholdsadresse(
             new StrukturertAdresse("opphold 2", null, null, null, null, null), null, null, null, null, null, null,
             true);
