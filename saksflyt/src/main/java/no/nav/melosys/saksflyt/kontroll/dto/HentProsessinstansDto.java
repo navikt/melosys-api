@@ -5,6 +5,7 @@ import java.util.UUID;
 
 public record HentProsessinstansDto(UUID id,
                                     Long behandlingId,
+                                    String saksnummer,
                                     String prosessType,
                                     LocalDateTime endretDato,
                                     String sistFullførtSteg,

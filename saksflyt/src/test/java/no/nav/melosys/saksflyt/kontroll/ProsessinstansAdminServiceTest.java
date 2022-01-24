@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.saksflyt.*;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.repository.ProsessinstansRepository;
@@ -53,12 +54,14 @@ class ProsessinstansAdminServiceTest {
         var prosessinstanser = prosessinstansAdminService.hentFeiledeProsessinstanser();
 
         assertThat(prosessinstanser)
-            .flatExtracting(HentProsessinstansDto::id, HentProsessinstansDto::behandlingId, HentProsessinstansDto::endretDato,
-                HentProsessinstansDto::prosessType, HentProsessinstansDto::sistFullførtSteg,
-                HentProsessinstansDto::sisteFeilmelding)
-            .containsExactly(prosessinstans.getId(), prosessinstans.getBehandling().getId(), prosessinstans.getEndretDato(),
-                prosessinstans.getType().getKode(), prosessinstans.getSistFullførtSteg().getKode(),
-                sisteFeilmelding);
+            .flatExtracting(HentProsessinstansDto::id,
+                HentProsessinstansDto::behandlingId, HentProsessinstansDto::saksnummer,
+                HentProsessinstansDto::endretDato, HentProsessinstansDto::prosessType,
+                HentProsessinstansDto::sistFullførtSteg, HentProsessinstansDto::sisteFeilmelding)
+            .containsExactly(prosessinstans.getId(),
+                prosessinstans.getBehandling().getId(), prosessinstans.getBehandling().getFagsak().getSaksnummer(),
+                prosessinstans.getEndretDato(), prosessinstans.getType().getKode(),
+                prosessinstans.getSistFullførtSteg().getKode(), sisteFeilmelding);
     }
 
     @Test
@@ -129,6 +132,13 @@ class ProsessinstansAdminServiceTest {
     private Behandling lagBehandling() {
         var behandling = new Behandling();
         behandling.setId(1L);
+        behandling.setFagsak(lagFagsak());
         return behandling;
+    }
+
+    private Fagsak lagFagsak() {
+        var fagsak = new Fagsak();
+        fagsak.setSaksnummer("MEL-2");
+        return fagsak;
     }
 }

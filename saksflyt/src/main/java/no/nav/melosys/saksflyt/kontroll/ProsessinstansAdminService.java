@@ -3,6 +3,8 @@ package no.nav.melosys.saksflyt.kontroll;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.saksflyt.ProsessStatus;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
@@ -51,9 +53,17 @@ public class ProsessinstansAdminService {
     }
 
     private HentProsessinstansDto mapTilHentProsessinstansDto(Prosessinstans prosessinstans) {
+        Long behandlingID = Optional.ofNullable(prosessinstans.getBehandling())
+            .map(Behandling::getId)
+            .orElse(null);
+        String saksnummer = Optional.ofNullable(prosessinstans.getBehandling())
+            .map(behandling -> behandling.getFagsak().getSaksnummer())
+            .orElse(null);
+
         return new HentProsessinstansDto(
             prosessinstans.getId(),
-            prosessinstans.getBehandling() == null ? null : prosessinstans.getBehandling().getId(),
+            behandlingID,
+            saksnummer,
             prosessinstans.getType().getKode(),
             prosessinstans.getEndretDato(),
             Optional.ofNullable(prosessinstans.getSistFullførtSteg())
