@@ -3,6 +3,8 @@ package no.nav.melosys.service.trygdeavtale;
 import java.time.LocalDate;
 import java.util.*;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.Saksopplysning;
@@ -15,6 +17,7 @@ import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_barn_begrunnelser_ftrl;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
 import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie;
 import no.nav.melosys.domain.person.familie.IkkeOmfattetFamilie;
@@ -32,8 +35,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static java.util.Collections.emptyList;
-import static java.util.Collections.emptySet;
+import static java.util.Collections.*;
 import static no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie.Relasjonsrolle.BARN;
 import static no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie.Relasjonsrolle.EKTEFELLE_SAMBOER;
 import static no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie.tilMedfolgendeFamilie;
@@ -132,8 +134,16 @@ class TrygdeavtaleServiceTest {
     }
 
     @Test
-    void hentResultat_altOk_hentesKorrekt() {
+    void hentResultat_altOk_hentesKorrekt() throws JsonProcessingException {
+        when(avklarteMedfolgendeFamilieService.hentAvklartMedfølgendeEktefelle(anyLong())).thenReturn(lagAvklartMedfølgendeEktefelle());
+        when(avklarteMedfolgendeFamilieService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(lagAvklartMedfølgendeBarn());
+//        when(avklarteMedfolgendeFamilieService.hentMedfølgendEktefelle(anyLong())).thenReturn(lagMedfølgendeEktefelle());
+//        when(avklarteMedfolgendeFamilieService.hentMedfølgendeBarn(anyLong())).thenReturn(lagMedfølgendeBarn());
+
         TrygdeavtaleResultat trygdeavtaleResultat = trygdeavtaleService.hentResultat(1L);
+        String result = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(trygdeavtaleResultat.familie());
+
+        System.out.println(result);
     }
 
 
@@ -339,4 +349,45 @@ class TrygdeavtaleServiceTest {
         saksopplysning.setDokument(arbeidsforholdDokument);
         return saksopplysning;
     }
+
+    private static final String EKTEFELLE_FNR = "01108049800";
+    private static final String BARN1_FNR = "01100099728";
+    private static final String BARN2_FNR = "02109049878";
+    private static final String BARN_NAVN_1 = "Doffen Duck";
+    private static final String BARN_NAVN_2 = "Dole Duck";
+    private static final String EKTEFELLE_NAVN = "Dolly Duck";
+
+    private AvklarteMedfolgendeFamilie lagAvklartMedfølgendeEktefelle() {
+        OmfattetFamilie ektefelle = new OmfattetFamilie(UUID_EKTEFELLE);
+        return new AvklarteMedfolgendeFamilie(Set.of(ektefelle), Set.of());
+    }
+
+    private AvklarteMedfolgendeFamilie lagAvklartMedfølgendeBarn() {
+        var b1 = new OmfattetFamilie(UUID_BARN_1);
+        b1.setIdent(BARN1_FNR);
+        var b2 = new IkkeOmfattetFamilie(
+            UUID_BARN_2,
+            Medfolgende_barn_begrunnelser_ftrl.OVER_18_AR.getKode(),
+            null);
+        b2.setIdent(BARN2_FNR);
+        return new AvklarteMedfolgendeFamilie(
+            Set.of(b1),
+            Set.of(b2));
+    }
+
+    private Map<String, MedfolgendeFamilie> lagMedfølgendeEktefelle() {
+        MedfolgendeFamilie ektefelle = MedfolgendeFamilie.tilMedfolgendeFamilie(
+            UUID_EKTEFELLE, EKTEFELLE_FNR, EKTEFELLE_NAVN, MedfolgendeFamilie.Relasjonsrolle.EKTEFELLE_SAMBOER);
+        return Map.of(UUID_EKTEFELLE, ektefelle);
+    }
+
+    private Map<String, MedfolgendeFamilie> lagMedfølgendeBarn() {
+        return Map.of(
+            UUID_BARN_1,
+            MedfolgendeFamilie.tilMedfolgendeFamilie(UUID_BARN_1, BARN1_FNR, BARN_NAVN_1, MedfolgendeFamilie.Relasjonsrolle.BARN),
+            UUID_BARN_2,
+            MedfolgendeFamilie.tilMedfolgendeFamilie(UUID_BARN_2, BARN2_FNR, BARN_NAVN_2, MedfolgendeFamilie.Relasjonsrolle.BARN)
+        );
+    }
+
 }

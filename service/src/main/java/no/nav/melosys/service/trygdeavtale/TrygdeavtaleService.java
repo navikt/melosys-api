@@ -85,12 +85,12 @@ public class TrygdeavtaleService {
 
     public TrygdeavtaleResultat hentResultat(long behandlingId) {
         AvklarteMedfolgendeFamilie avklarteMedfølgendeBarn = avklarteMedfolgendeFamilieService.hentAvklarteMedfølgendeBarn(behandlingId);
-        AvklarteMedfolgendeFamilie avklartMedfølgendeEktefelle = avklarteMedfolgendeFamilieService.hentAvklartMedfølgendeEktefelle(behandlingId);
+        AvklarteMedfolgendeFamilie avklarteMedfølgendeEktefelle = avklarteMedfolgendeFamilieService.hentAvklartMedfølgendeEktefelle(behandlingId);
 
         Set<OmfattetFamilie> omfattetFamilie = Stream.concat(avklarteMedfølgendeBarn.getFamilieOmfattetAvNorskTrygd().stream(),
-            avklartMedfølgendeEktefelle.getFamilieOmfattetAvNorskTrygd().stream()).collect(Collectors.toSet());
+            avklarteMedfølgendeEktefelle.getFamilieOmfattetAvNorskTrygd().stream()).collect(Collectors.toSet());
         Set<IkkeOmfattetFamilie> ikkeOmfattetFamilie = Stream.concat(avklarteMedfølgendeBarn.getFamilieIkkeOmfattetAvNorskTrygd().stream(),
-            avklartMedfølgendeEktefelle.getFamilieIkkeOmfattetAvNorskTrygd().stream()).collect(Collectors.toSet());
+            avklarteMedfølgendeEktefelle.getFamilieIkkeOmfattetAvNorskTrygd().stream()).collect(Collectors.toSet());
 
         return new TrygdeavtaleResultat.Builder()
             .familie(new AvklarteMedfolgendeFamilie(omfattetFamilie, ikkeOmfattetFamilie))

@@ -4,7 +4,6 @@ import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie;
 import no.nav.melosys.domain.person.familie.IkkeOmfattetFamilie;
 import no.nav.melosys.domain.person.familie.OmfattetFamilie;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.trygdeavtale.TrygdeavtaleResultat;
 import no.nav.melosys.tjenester.gui.dto.MedfolgendeFamilieDto;
 
@@ -34,17 +33,42 @@ public record TrygdeavtaleResultatDto(
     }
 
     public static TrygdeavtaleResultatDto fra(TrygdeavtaleResultat resultat, List<MedfolgendeFamilie> familie) {
-        MedfolgendeFamilie eketefelle = familie.stream()
-            .filter(mf -> mf.getRelasjonsrolle() == MedfolgendeFamilie.Relasjonsrolle.EKTEFELLE_SAMBOER)
-            .findFirst().orElseThrow(() -> new TekniskException("WIP"));
-        OmfattetFamilie omfattetFamilieEktefelle = resultat.familie().getFamilieOmfattetAvNorskTrygd()
-            .stream().filter(omfattetFamilie -> omfattetFamilie.getUuid().equals(eketefelle.getUuid()))
-            .findFirst().orElseThrow(() -> new TekniskException("WIP"));
+        Builder builder = new Builder();
 
-        return new Builder()
-            .ektefelle(omfattetFamilieEktefelle.getUuid(), true, null, null)
+        familie.stream()
+            .filter(mf -> mf.getRelasjonsrolle() == MedfolgendeFamilie.Relasjonsrolle.EKTEFELLE_SAMBOER)
+            .findFirst().ifPresent(mf -> {
+                String uuid = mf.getUuid();
+                leggTil(resultat, uuid).forEach(f ->
+                    builder.ektefelle(f.uuid(), f.omfattet(), f.begrunnelseKode(), f.begrunnelseFritekst()));
+            });
+
+        familie.stream().filter(mf -> mf.getRelasjonsrolle() == MedfolgendeFamilie.Relasjonsrolle.BARN).forEach(barn -> {
+            String uuid = barn.getUuid();
+            leggTil(resultat, uuid).forEach(f ->
+                builder.addBarn(f.uuid(), f.omfattet(), f.begrunnelseKode(), f.begrunnelseFritekst()));
+        });
+
+        return builder
             .bestemmelse(resultat.bestemmelse())
+            .virksomhet(resultat.virksomhet())
+            .lovvalgsperiodeFom(resultat.lovvalgsperiodeFom())
+            .lovvalgsperiodeTom(resultat.lovvalgsperiodeTom())
             .build();
+    }
+
+    private static List<MedfolgendeFamilieDto> leggTil(TrygdeavtaleResultat resultat, String uuid) {
+        List<MedfolgendeFamilieDto> list = new ArrayList<>();
+        resultat.familie().getFamilieOmfattetAvNorskTrygd()
+            .stream().filter(omfattet -> omfattet.getUuid().equals(uuid))
+            .findFirst().ifPresent(omfattet ->
+                list.add(new MedfolgendeFamilieDto(uuid, true, null, null)));
+
+        resultat.familie().getFamilieIkkeOmfattetAvNorskTrygd()
+            .stream().filter(ikkeOmfattet -> ikkeOmfattet.getUuid().equals(uuid))
+            .findFirst().ifPresent(ikkeOmfattet ->
+                list.add(new MedfolgendeFamilieDto(uuid, false, ikkeOmfattet.getBegrunnelse(), ikkeOmfattet.getBegrunnelseFritekst())));
+        return list;
     }
 
     private AvklarteMedfolgendeFamilie lagAvklarteMedfolgendeFamilie() {
