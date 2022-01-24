@@ -27,8 +27,6 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_t
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
-import static no.nav.melosys.service.dokument.DokgenMalMapperTest.LOVVALGSPERIODE_FOM;
-import static no.nav.melosys.service.dokument.DokgenMalMapperTest.LOVVALGSPERIODE_TOM;
 
 public final class DokgenTestData {
     public static final String FNR_BRUKER = "05058892382";
@@ -41,6 +39,8 @@ public final class DokgenTestData {
     public static final String NAVN_ORG = "Advokatene AS";
     public static final String POSTBOKS_ORG = "POSTBOKS 200";
     public static final String POSTNR_ORG = "9990";
+    public static final LocalDate LOVVALGSPERIODE_FOM = LocalDate.of(2020, 1, 1);
+    public static final LocalDate LOVVALGSPERIODE_TOM = LocalDate.of(2021, 1, 1);
 
     public static Behandling lagBehandling() {
         return lagBehandling(lagFagsak());

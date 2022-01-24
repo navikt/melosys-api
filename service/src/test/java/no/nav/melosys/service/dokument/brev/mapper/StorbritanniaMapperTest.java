@@ -1,4 +1,4 @@
-package no.nav.melosys.service.dokument;
+package no.nav.melosys.service.dokument.brev.mapper;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -48,7 +48,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
 
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.STORBRITANNIA;
-import static no.nav.melosys.service.dokument.DokgenMalMapperTest.*;
+import static no.nav.melosys.service.dokument.brev.mapper.DokgenMalMapperTest.*;
 import static no.nav.melosys.service.dokument.DokgenTestData.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;

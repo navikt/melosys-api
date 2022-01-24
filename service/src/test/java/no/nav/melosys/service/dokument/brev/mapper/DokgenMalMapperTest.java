@@ -1,4 +1,4 @@
-package no.nav.melosys.service.dokument;
+package no.nav.melosys.service.dokument.brev.mapper;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -28,6 +28,11 @@ import no.nav.melosys.integrasjon.dokgen.dto.felles.Person;
 import no.nav.melosys.integrasjon.dokgen.dto.storbritannia.attest.*;
 import no.nav.melosys.integrasjon.dokgen.dto.storbritannia.innvilgelse.InnvilgelseStorbritannia;
 import no.nav.melosys.integrasjon.dokgen.dto.storbritannia.innvilgelse.Soknad;
+import no.nav.melosys.service.dokument.DokumentHentingService;
+import no.nav.melosys.service.dokument.brev.mapper.DokgenMalMapper;
+import no.nav.melosys.service.dokument.brev.mapper.DokgenMapperDatahenter;
+import no.nav.melosys.service.dokument.brev.mapper.InnvilgelseFtrlMapper;
+import no.nav.melosys.service.dokument.brev.mapper.StorbritanniaMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -49,8 +54,6 @@ import static org.mockito.Mockito.when;
 class DokgenMalMapperTest {
     public static final String FORRETNINGSADRESSE_ORG = "Storgata 1";
     public static final LocalDate SOKNADSDATO = LocalDate.of(2000, 1, 1);
-    public static final LocalDate LOVVALGSPERIODE_FOM = LocalDate.of(2020, 1, 1);
-    public static final LocalDate LOVVALGSPERIODE_TOM = LocalDate.of(2021, 1, 1);
     public static final LocalDate FØDSELSDATO = LocalDate.of(2000, 1, 1);
 
     @Mock
