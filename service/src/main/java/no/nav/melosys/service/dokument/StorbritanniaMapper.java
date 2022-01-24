@@ -16,9 +16,11 @@ import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadTrygdeavtale;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.IdentType;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
-import no.nav.melosys.domain.brev.FastMottaker;
+import no.nav.melosys.domain.brev.FastMottakerMedOrgnr;
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
+import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.domain.person.adresse.PersonAdresse;
@@ -34,7 +36,8 @@ import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterSystemService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import org.springframework.stereotype.Component;
-import org.springframework.util.ObjectUtils;
+
+import static org.springframework.util.ObjectUtils.isEmpty;
 
 @Component
 public class StorbritanniaMapper {
@@ -59,9 +62,11 @@ public class StorbritanniaMapper {
 
     @Transactional
     public InnvilgelseOgAttestStorbritannia map(InnvilgelseBrevbestilling brevbestilling) {
+        var innvilgelse = mapInnvilgelse(brevbestilling);
         return new InnvilgelseOgAttestStorbritannia.Builder(brevbestilling)
-            .innvilgelse(mapInnvilgelse(brevbestilling))
+            .innvilgelse(innvilgelse)
             .attest(mapAttest(brevbestilling))
+            .skalHaInfoOmRettigheter(skalHaInfoOmRettigheter(innvilgelse, brevbestilling))
             .build();
     }
 
@@ -109,7 +114,7 @@ public class StorbritanniaMapper {
         var ektefelle = finnEktefelle(behandlingID);
         var barn = finnBarn(behandlingID);
 
-        if (ObjectUtils.isEmpty(ektefelle) && ObjectUtils.isEmpty(barn)) {
+        if (isEmpty(ektefelle) && isEmpty(barn)) {
             return null;
         }
 
@@ -222,7 +227,7 @@ public class StorbritanniaMapper {
     }
 
     private static boolean sjekkAdresseMotLand(StrukturertAdresse adresse) {
-        return adresse.getLandkode().equals(Landkoder.GB.getKode());
+        return adresse != null && adresse.getLandkode().equals(Landkoder.GB.getKode());
     }
 
     static boolean sjekkOmAdresseGyldighetErInnenforLovalgsperiode(PersonAdresse personAdresse, Lovvalgsperiode lovvalgsperiode) {
@@ -249,6 +254,9 @@ public class StorbritanniaMapper {
     private RepresentantStorbritannia lagRepresentant(Behandlingsgrunnlag behandlingsgrunnlag) {
         var soeknadTrygdeavtale = (SoeknadTrygdeavtale) behandlingsgrunnlag.getBehandlingsgrunnlagdata();
         var representantIUtlandet = soeknadTrygdeavtale.getRepresentantIUtlandet();
+        if (representantIUtlandet == null) {
+            throw new FunksjonellException(Kontroll_begrunnelser.ATTEST_MANGLER_ARBEIDSSTED.getBeskrivelse());
+        }
 
         return new RepresentantStorbritannia(
             representantIUtlandet.representantNavn,
@@ -287,6 +295,11 @@ public class StorbritanniaMapper {
         return new Person(sammensattNavn, fødselsdato, fnr, null);
     }
 
+    private boolean erSkatteetaten(OrganisasjonDokument org) {
+        // Skatteetaten skal ikke ha attest
+        return org != null && FastMottakerMedOrgnr.OrgNr.SKATTEETATEN_ORGNR.getOrgnr().equals(org.getOrgnummer());
+    }
+
     private boolean skalIkkeHaInnvilgelse(InnvilgelseBrevbestilling brevbestilling) {
         // Utenlandkse trygdemyndigheter skal ikke ha innvilgelse
         return brevbestilling.getUtenlandskMyndighet() != null;
@@ -294,8 +307,12 @@ public class StorbritanniaMapper {
 
     private boolean skalIkkeHaAttest(DokgenBrevbestilling brevbestilling) {
         // Skatteetaten skal ikke ha attest
-        boolean erSkatteetaten = brevbestilling.getOrg() != null && FastMottaker.OrgNr.SKATTEETATEN_ORGNR.getOrgnr().equals(brevbestilling.getOrg().getOrgnummer());
         boolean erArtikkel8_2 = lovvalgsperiodeService.hentValidertLovvalgsperiode(brevbestilling.getBehandlingId()).getBestemmelse() == Lovvalgbestemmelser_trygdeavtale_uk.UK_ART8_2;
-        return erSkatteetaten || erArtikkel8_2;
+        return erSkatteetaten(brevbestilling.getOrg()) || erArtikkel8_2;
+    }
+
+    private boolean skalHaInfoOmRettigheter(InnvilgelseStorbritannia innvilgelse, DokgenBrevbestilling brevbestilling) {
+        // Skal bare ha med vedlegget om innvilgelse er med og mottaker ikke er skatteetaten
+        return !(isEmpty(innvilgelse) || erSkatteetaten(brevbestilling.getOrg()));
     }
 }

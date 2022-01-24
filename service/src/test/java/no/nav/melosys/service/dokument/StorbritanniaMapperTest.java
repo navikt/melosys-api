@@ -3,6 +3,7 @@ package no.nav.melosys.service.dokument;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -12,10 +13,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
-import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadTrygdeavtale;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Medfolgende_barn_begrunnelser;
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_barn_begrunnelser_ftrl;
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_ektefelle_samboer_begrunnelser_ftrl;
@@ -115,15 +116,22 @@ public class StorbritanniaMapperTest {
     }
 
     @Test
+    void map_ingenRepresentantIUtlandet_kastFunksjonellException() {
+        mockHappyCase();
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> storbritanniaMapper.map(lagStorbritanniaBrevbestilling(lagTrygdeavtaleBehandling(null))))
+            .withMessageContaining(Kontroll_begrunnelser.ATTEST_MANGLER_ARBEIDSSTED.getBeskrivelse());
+    }
+
+    @Test
     void map_ingenUtenlandskeVirksomheter_kastFunksjonellException() {
         mockLovvalgsperiode();
 
-        Behandling behandling = medPeriode(lagTrygdeavtaleBehandling());
-        ((SoeknadTrygdeavtale) behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata()).setRepresentantIUtlandet(null);
-        InnvilgelseBrevbestilling brevbestilling = lagStorbritanniaBrevbestilling(behandling);
+        when(mockAvklarteVirksomheterSystemService.hentNorskeArbeidsgivere(any())).thenReturn(Collections.emptyList());
 
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> storbritanniaMapper.map(brevbestilling))
+            .isThrownBy(() -> storbritanniaMapper.map(lagStorbritanniaBrevbestilling(lagTrygdeavtaleBehandling())))
             .withMessageContaining("Fant 0 avklarte virksomheter for behandling: null. Må være 1 for trygdeavtale");
     }
 

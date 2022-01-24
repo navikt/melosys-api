@@ -9,16 +9,19 @@ public class InnvilgelseOgAttestStorbritannia extends DokgenDto {
 
     private final InnvilgelseStorbritannia innvilgelse;
     private final AttestStorbritannia attest;
+    private final boolean skalHaInfoOmRettigheter;
 
     public InnvilgelseOgAttestStorbritannia(Builder builder, Aktoersroller mottaker) {
         super(builder.brevbestilling, mottaker);
-        innvilgelse = builder.innvilgelse;
-        attest = builder.attest;
+        this.innvilgelse = builder.innvilgelse;
+        this.attest = builder.attest;
+        this.skalHaInfoOmRettigheter = builder.skalHaInfoOmRettigheter;
     }
 
     public static class Builder {
         private InnvilgelseStorbritannia innvilgelse;
         private AttestStorbritannia attest;
+        private boolean skalHaInfoOmRettigheter;
         private final DokgenBrevbestilling brevbestilling;
 
         public Builder(DokgenBrevbestilling brevbestilling) {
@@ -35,10 +38,15 @@ public class InnvilgelseOgAttestStorbritannia extends DokgenDto {
             return this;
         }
 
+        public Builder skalHaInfoOmRettigheter(boolean skalHaInfoOmRettigheter) {
+            this.skalHaInfoOmRettigheter = skalHaInfoOmRettigheter;
+            return this;
+        }
+
         public InnvilgelseOgAttestStorbritannia build() {
             Aktoersroller mottaker = brevbestilling.getUtenlandskMyndighet() == null
                 ? Aktoersroller.BRUKER
-                : Aktoersroller.MYNDIGHET;
+                : Aktoersroller.TRYGDEMYNDIGHET;
             return new InnvilgelseOgAttestStorbritannia(this, mottaker);
         }
     }
@@ -49,6 +57,10 @@ public class InnvilgelseOgAttestStorbritannia extends DokgenDto {
 
     public boolean isSkalHaAttest() {
         return attest != null;
+    }
+
+    public boolean isSkalHaInfoOmRettigheter() {
+        return skalHaInfoOmRettigheter;
     }
 
     public InnvilgelseStorbritannia getInnvilgelse() {

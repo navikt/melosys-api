@@ -81,7 +81,7 @@ public final class DokgenAdresseMapper {
     }
 
     public static Mottaker mapMottaker(DokgenBrevbestilling brevbestilling, Aktoersroller mottakerType) {
-        if (mottakerType == Aktoersroller.MYNDIGHET && brevbestilling.getUtenlandskMyndighet() != null) {
+        if (mottakerType == Aktoersroller.TRYGDEMYNDIGHET && brevbestilling.getUtenlandskMyndighet() != null) {
             var utenlandskMyndighet = brevbestilling.getUtenlandskMyndighet();
             return new Mottaker(
                 utenlandskMyndighet.navn,

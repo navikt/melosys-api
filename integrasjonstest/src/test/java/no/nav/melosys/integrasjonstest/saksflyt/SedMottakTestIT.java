@@ -148,7 +148,7 @@ class SedMottakTestIT {
         request.setKorrespondansepartId("SE:123");
         request.setKorrespondansepartNavn("Sverige");
         request.setKorrespondansepartLand("SE");
-        request.setKorrespondansepartIdType("UTL_ORG");
+        request.setKorrespondansepartIdType(OpprettJournalpost.KorrespondansepartIdType.UTENLANDSK_ORGANISASJON);
         request.setMottaksKanal("EESSI");
         request.setJournalposttype(Journalposttype.INN);
         request.setInnhold(sedType + "-tittel");

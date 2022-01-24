@@ -145,7 +145,7 @@ class VideresendSoknadTest {
 
     private static Fagsak lagFagsak() {
         Aktoer myndighet = new Aktoer();
-        myndighet.setRolle(Aktoersroller.MYNDIGHET);
+        myndighet.setRolle(Aktoersroller.TRYGDEMYNDIGHET);
         myndighet.setAktørId("123");
         myndighet.setInstitusjonId("SE:id");
 

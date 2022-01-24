@@ -19,7 +19,7 @@ public class Aktoer extends RegistreringsInfo {
     private Long id;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name="saksnummer", updatable = false)
+    @JoinColumn(name = "saksnummer", updatable = false)
     private Fagsak fagsak;
 
     @Column(name = "aktoer_id", updatable = false)
@@ -107,7 +107,7 @@ public class Aktoer extends RegistreringsInfo {
     }
 
     public boolean erUtenlandskMyndighet() {
-        return Aktoersroller.MYNDIGHET == rolle && institusjonId != null;
+        return Aktoersroller.TRYGDEMYNDIGHET == rolle && institusjonId != null;
     }
 
     public boolean erOrganisasjon() {
@@ -116,8 +116,7 @@ public class Aktoer extends RegistreringsInfo {
 
     public Landkoder hentMyndighetLandkode() {
         if (erUtenlandskMyndighet()) {
-            String[] split = institusjonId.split(":");
-            return Landkoder.valueOf(split[0].replaceAll("[^a-zA-Z]", ""));
+            return UtenlandskMyndighet.konverterInstitusjonIdTilLandkode(institusjonId);
         }
         throw new TekniskException("Aktør " + id + " er ikke en utenlandsk myndighet");
     }

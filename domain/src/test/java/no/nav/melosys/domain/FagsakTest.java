@@ -235,7 +235,7 @@ class FagsakTest {
     @Test
     void hentMyndighetLandkode_forventGyldigLandkode() {
         Aktoer aktoer = new Aktoer();
-        aktoer.setRolle(Aktoersroller.MYNDIGHET);
+        aktoer.setRolle(Aktoersroller.TRYGDEMYNDIGHET);
         aktoer.setInstitusjonId("SE:gfr");
 
         Fagsak fagsak = new Fagsak();

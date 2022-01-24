@@ -47,7 +47,7 @@ public class BrevmottakerMapper {
                 .medBrevkopiRegler(
                     ARBEIDSGIVER_FÅR_KOPI,
                     SKATT_FÅR_KOPI,
-                    UTENLANDSK_TRYGDEMYNDIGHET_FÅR_KOPI
+                    UTENLANDSK_TRYGDEMYNDIGHET_FÅR_KOPI_HVIS_IKKE_ART_8_2
                 ).build(),
 
             GENERELT_FRITEKSTBREV_BRUKER, new Mottakerliste.Builder()
