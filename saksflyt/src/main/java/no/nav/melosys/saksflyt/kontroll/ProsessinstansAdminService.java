@@ -13,6 +13,8 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.saksflyt.impl.BehandleProsessinstansDelegate;
 import no.nav.melosys.saksflyt.kontroll.dto.HentProsessinstansDto;
+import no.nav.melosys.saksflyt.prosessflyt.ProsessFlyt;
+import no.nav.melosys.saksflyt.prosessflyt.ProsessflytDefinisjon;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -66,14 +68,24 @@ public class ProsessinstansAdminService {
             saksnummer,
             prosessinstans.getType().getKode(),
             prosessinstans.getEndretDato(),
-            Optional.ofNullable(prosessinstans.getSistFullførtSteg())
-                .map(ProsessSteg::getKode)
-                .orElse(null),
+            hentFeiletSteg(prosessinstans),
             prosessinstans.getHendelser()
                 .stream()
                 .max(Comparator.comparing(ProsessinstansHendelse::getDato))
                 .map(ProsessinstansHendelse::getMelding)
                 .orElse(null));
+    }
+
+    private String hentFeiletSteg(Prosessinstans prosessinstans) {
+        var sisteFullførtSteg = Optional.ofNullable(prosessinstans.getSistFullførtSteg())
+            .orElse(null);
+
+        if (sisteFullførtSteg == null) return null;
+
+        return ProsessflytDefinisjon.finnFlytForProsessType(prosessinstans.getType())
+            .map(it -> it.nesteSteg(sisteFullførtSteg))
+            .map(ProsessSteg::getKode)
+            .orElse(null);
     }
 
     private void setStatusRestartet(Collection<Prosessinstans> prosessinstanser) {

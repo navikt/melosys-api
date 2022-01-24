@@ -29,6 +29,11 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class ProsessinstansAdminServiceTest {
 
+    // Viktig at forrige og current er steg som kommer rett etter hverandre i samme prosess(type)
+    private static final ProsessType PROSESS_TYPE = ProsessType.JFR_NY_SAK;
+    private static final ProsessSteg FORRIGE_PROSSESS_STEG = ProsessSteg.OPPRETT_SØKNAD;
+    private static final ProsessSteg CURRENT_PROSESS_STEG = ProsessSteg.OPPRETT_ARKIVSAK;
+
     @Mock
     private ProsessinstansRepository prosessinstansRepository;
     @Mock
@@ -57,11 +62,11 @@ class ProsessinstansAdminServiceTest {
             .flatExtracting(HentProsessinstansDto::id,
                 HentProsessinstansDto::behandlingId, HentProsessinstansDto::saksnummer,
                 HentProsessinstansDto::endretDato, HentProsessinstansDto::prosessType,
-                HentProsessinstansDto::sistFullførtSteg, HentProsessinstansDto::sisteFeilmelding)
+                HentProsessinstansDto::feiletSteg, HentProsessinstansDto::sisteFeilmelding)
             .containsExactly(prosessinstans.getId(),
                 prosessinstans.getBehandling().getId(), prosessinstans.getBehandling().getFagsak().getSaksnummer(),
                 prosessinstans.getEndretDato(), prosessinstans.getType().getKode(),
-                prosessinstans.getSistFullførtSteg().getKode(), sisteFeilmelding);
+                CURRENT_PROSESS_STEG.getKode(), sisteFeilmelding);
     }
 
     @Test
@@ -122,8 +127,8 @@ class ProsessinstansAdminServiceTest {
         prosessinstans.setId(UUID.randomUUID());
         prosessinstans.setBehandling(lagBehandling());
         prosessinstans.setStatus(ProsessStatus.FEILET);
-        prosessinstans.setType(ProsessType.ANMODNING_OM_UNNTAK);
-        prosessinstans.setSistFullførtSteg(ProsessSteg.AVKLAR_ARBEIDSGIVER);
+        prosessinstans.setType(PROSESS_TYPE);
+        prosessinstans.setSistFullførtSteg(FORRIGE_PROSSESS_STEG);
         prosessinstans.setRegistrertDato(registrertDato);
         prosessinstans.setEndretDato(registrertDato);
         return prosessinstans;
