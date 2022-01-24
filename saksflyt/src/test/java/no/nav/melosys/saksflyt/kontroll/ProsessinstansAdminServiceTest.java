@@ -53,9 +53,9 @@ class ProsessinstansAdminServiceTest {
         var prosessinstanser = prosessinstansAdminService.hentFeiledeProsessinstanser();
 
         assertThat(prosessinstanser)
-            .flatExtracting(HentProsessinstansDto::getId, HentProsessinstansDto::getBehandlingId, HentProsessinstansDto::getEndretDato,
-                HentProsessinstansDto::getProsessType, HentProsessinstansDto::getSistFullførtSteg,
-                HentProsessinstansDto::getSisteFeilmelding)
+            .flatExtracting(HentProsessinstansDto::id, HentProsessinstansDto::behandlingId, HentProsessinstansDto::endretDato,
+                HentProsessinstansDto::prosessType, HentProsessinstansDto::sistFullførtSteg,
+                HentProsessinstansDto::sisteFeilmelding)
             .containsExactly(prosessinstans.getId(), prosessinstans.getBehandling().getId(), prosessinstans.getEndretDato(),
                 prosessinstans.getType().getKode(), prosessinstans.getSistFullførtSteg().getKode(),
                 sisteFeilmelding);

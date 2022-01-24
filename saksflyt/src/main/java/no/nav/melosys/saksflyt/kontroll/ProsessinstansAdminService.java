@@ -1,13 +1,12 @@
 package no.nav.melosys.saksflyt.kontroll;
 
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.saksflyt.ProsessStatus;
+import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
+import no.nav.melosys.domain.saksflyt.ProsessinstansHendelse;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.saksflyt.impl.BehandleProsessinstansDelegate;
@@ -52,7 +51,19 @@ public class ProsessinstansAdminService {
     }
 
     private HentProsessinstansDto mapTilHentProsessinstansDto(Prosessinstans prosessinstans) {
-        return new HentProsessinstansDto(prosessinstans);
+        return new HentProsessinstansDto(
+            prosessinstans.getId(),
+            prosessinstans.getBehandling() == null ? null : prosessinstans.getBehandling().getId(),
+            prosessinstans.getType().getKode(),
+            prosessinstans.getEndretDato(),
+            Optional.ofNullable(prosessinstans.getSistFullførtSteg())
+                .map(ProsessSteg::getKode)
+                .orElse(null),
+            prosessinstans.getHendelser()
+                .stream()
+                .max(Comparator.comparing(ProsessinstansHendelse::getDato))
+                .map(ProsessinstansHendelse::getMelding)
+                .orElse(null));
     }
 
     private void setStatusRestartet(Collection<Prosessinstans> prosessinstanser) {
