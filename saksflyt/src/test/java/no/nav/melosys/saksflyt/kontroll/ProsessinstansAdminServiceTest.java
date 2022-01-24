@@ -6,11 +6,9 @@ import java.util.*;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.saksflyt.*;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.saksflyt.impl.BehandleProsessinstansDelegate;
 import no.nav.melosys.saksflyt.kontroll.dto.HentProsessinstansDto;
-import no.nav.melosys.saksflyt.kontroll.dto.RestartProsessinstanserRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,7 +16,6 @@ import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatus;
 
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -29,19 +26,18 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class ProsessinstansAdminTjenesteTest {
+class ProsessinstansAdminServiceTest {
 
     @Mock
     private ProsessinstansRepository prosessinstansRepository;
     @Mock
     private BehandleProsessinstansDelegate behandleProsessinstansDelegate;
-    private final String apiKey = "dummy";
 
-    private ProsessinstansAdminTjeneste prosessinstansAdminTjeneste;
+    private ProsessinstansAdminService prosessinstansAdminService;
 
     @BeforeEach
     public void setup() {
-        prosessinstansAdminTjeneste = new ProsessinstansAdminTjeneste(behandleProsessinstansDelegate, prosessinstansRepository, apiKey);
+        prosessinstansAdminService = new ProsessinstansAdminService(behandleProsessinstansDelegate, prosessinstansRepository);
     }
 
     @Test
@@ -54,11 +50,9 @@ class ProsessinstansAdminTjenesteTest {
         when(prosessinstansRepository.findAllByStatus(ProsessStatus.FEILET))
             .thenReturn(singletonList(prosessinstans));
 
-        var response = prosessinstansAdminTjeneste.hentFeiledeProsessinstanser(apiKey);
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        var prosessinstanser = prosessinstansAdminService.hentFeiledeProsessinstanser();
 
-        var body = response.getBody();
-        assertThat(body)
+        assertThat(prosessinstanser)
             .flatExtracting(HentProsessinstansDto::getId, HentProsessinstansDto::getBehandlingId, HentProsessinstansDto::getEndretDato,
                 HentProsessinstansDto::getProsessType, HentProsessinstansDto::getSistFullførtSteg,
                 HentProsessinstansDto::getSisteFeilmelding)
@@ -77,7 +71,7 @@ class ProsessinstansAdminTjenesteTest {
             .thenReturn(Set.of(tidligstFeilet, nestTidligstFeilet, senestFeilet));
         when(prosessinstansRepository.saveAll(any())).thenAnswer(a -> new ArrayList<>((Collection<?>) a.getArgument(0)));
 
-        prosessinstansAdminTjeneste.restartAlleFeiledeProsessinstanser(apiKey);
+        prosessinstansAdminService.restartAlleFeiledeProsessinstanser();
 
         InOrder inOrder = Mockito.inOrder(behandleProsessinstansDelegate);
         inOrder.verify(behandleProsessinstansDelegate).behandleProsessinstans(tidligstFeilet);
@@ -94,9 +88,8 @@ class ProsessinstansAdminTjenesteTest {
         when(prosessinstansRepository.findAllById(anyList()))
             .thenReturn(singletonList(prosessinstans));
 
-        final var request = new RestartProsessinstanserRequest(singletonList(uuid));
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> prosessinstansAdminTjeneste.restartProsessinstans(apiKey, request))
+            .isThrownBy(() -> prosessinstansAdminService.restartProsessinstanser(singletonList(uuid)))
             .withMessageContaining("har status");
     }
 
@@ -109,26 +102,11 @@ class ProsessinstansAdminTjenesteTest {
             .thenReturn(singletonList(prosessinstans));
         when(prosessinstansRepository.saveAll(any())).then(a -> a.getArgument(0, List.class));
 
-        prosessinstansAdminTjeneste.restartProsessinstans(apiKey, new RestartProsessinstanserRequest(singletonList(uuid)));
+        prosessinstansAdminService.restartProsessinstanser(singletonList(uuid));
 
         assertThat(prosessinstans.getStatus()).isEqualTo(ProsessStatus.RESTARTET);
         verify(prosessinstansRepository).saveAll(singletonList(prosessinstans));
         verify(behandleProsessinstansDelegate).behandleProsessinstans(prosessinstans);
-    }
-
-    @Test
-    void hentFeiledeProsessinstanser_feilApiKeyOppgitt_forventForbidden() {
-        assertThatExceptionOfType(SikkerhetsbegrensningException.class)
-            .isThrownBy(() -> prosessinstansAdminTjeneste.hentFeiledeProsessinstanser("Dum dummy"))
-            .withMessageContaining("apikey");
-    }
-
-    @Test
-    void restartProsessinstans_feilApiKeyOppgitt_forventForbidden() {
-        final var request = new RestartProsessinstanserRequest(List.of());
-        assertThatExceptionOfType(SikkerhetsbegrensningException.class)
-            .isThrownBy(() -> prosessinstansAdminTjeneste.restartProsessinstans("Dumdum", request))
-            .withMessageContaining("apikey");
     }
 
 
