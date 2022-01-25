@@ -25,6 +25,10 @@ public enum FastMottakerMedOrgnr {
         }
     }
 
+    public static boolean orgNrErSkatt(String orgnr) {
+        return OrgNr.SKATTEETATEN_ORGNR.orgnr.equals(orgnr);
+    }
+
     public static Mottaker av(FastMottakerMedOrgnr mottaker) {
         Assert.notNull(mottaker, "FastMottakerMedOrgnr trengs.");
         return switch (mottaker) {
