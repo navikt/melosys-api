@@ -5,6 +5,8 @@ import java.util.*;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.Saksopplysning;
@@ -18,6 +20,7 @@ import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_barn_begrunnelser_ftrl;
+import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_ektefelle_samboer_begrunnelser_ftrl;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
 import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie;
 import no.nav.melosys.domain.person.familie.IkkeOmfattetFamilie;
@@ -45,8 +48,8 @@ import static no.nav.melosys.domain.kodeverk.Trygdedekninger.FULL_DEKNING_FTRL;
 import static no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_barn_begrunnelser_ftrl.OVER_18_AR;
 import static no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_ektefelle_samboer_begrunnelser_ftrl.EGEN_INNTEKT;
 import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1;
+import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.entry;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -62,6 +65,13 @@ class TrygdeavtaleServiceTest {
     private final static String BEGRUNNELSE_SAMBOER = "begrunnelse samboer";
     private final static LocalDate PERIODE_FOM = LocalDate.now();
     private final static LocalDate PERIODE_TOM = PERIODE_FOM.plusYears(1);
+
+    private static final String EKTEFELLE_FNR = "01108049800";
+    private static final String BARN1_FNR = "01100099728";
+    private static final String BARN2_FNR = "02109049878";
+    private static final String BARN_NAVN_1 = "Doffen Duck";
+    private static final String BARN_NAVN_2 = "Dole Duck";
+    private static final String EKTEFELLE_NAVN = "Dolly Duck";
 
     @Mock
     private EregFasade eregFasade;
@@ -137,15 +147,40 @@ class TrygdeavtaleServiceTest {
     void hentResultat_altOk_hentesKorrekt() throws JsonProcessingException {
         when(avklarteMedfolgendeFamilieService.hentAvklartMedfølgendeEktefelle(anyLong())).thenReturn(lagAvklartMedfølgendeEktefelle());
         when(avklarteMedfolgendeFamilieService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(lagAvklartMedfølgendeBarn());
-//        when(avklarteMedfolgendeFamilieService.hentMedfølgendEktefelle(anyLong())).thenReturn(lagMedfølgendeEktefelle());
-//        when(avklarteMedfolgendeFamilieService.hentMedfølgendeBarn(anyLong())).thenReturn(lagMedfølgendeBarn());
+        when(avklartefaktaService.hentAvklarteOrgnrOgUuid(anyLong())).thenReturn(Set.of(ORGNR_1));
 
         TrygdeavtaleResultat trygdeavtaleResultat = trygdeavtaleService.hentResultat(1L);
-        String result = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(trygdeavtaleResultat.familie());
+        assertThat(trygdeavtaleResultat).extracting(
+            TrygdeavtaleResultat::virksomhet,
+            TrygdeavtaleResultat::bestemmelse,
+            TrygdeavtaleResultat::lovvalgsperiodeFom,
+            TrygdeavtaleResultat::lovvalgsperiodeTom
+        ).containsExactly(
+            ORGNR_1,
+            "",
+            null,
+            null
+        );
 
-        System.out.println(result);
+//
+//        assertThat(trygdeavtaleResultat).usingRecursiveComparison().isEqualTo(trygdeavtaleResultat);
+
+//        assertThat(trygdeavtaleResultat.familie()).usingRecursiveComparison().isEqualTo(lagTrygdeavtaleResultat().familie());
+//        assertThat(trygdeavtaleResultat.familie().getFamilieOmfattetAvNorskTrygd())
+//            .usingRecursiveComparison()
+//            .isEqualTo(lagTrygdeavtaleResultat().familie().getFamilieOmfattetAvNorskTrygd());
+
+//        assertThat(trygdeavtaleResultat.familie().getFamilieOmfattetAvNorskTrygd())
+//            .isEqualTo(lagTrygdeavtaleResultat().familie().getFamilieOmfattetAvNorskTrygd());
+
+        ObjectWriter objectWriter = new ObjectMapper()
+            .registerModule(new JavaTimeModule())
+            .writerWithDefaultPrettyPrinter();
+
+        String result = objectWriter.writeValueAsString(trygdeavtaleResultat.familie());
+        String expected = objectWriter.writeValueAsString(lagTrygdeavtaleResultat().familie());
+        assertThat(result).isEqualTo(expected);
     }
-
 
     @Test
     void hentVirksomheter_fraEreg_mappesKorrekt() {
@@ -272,6 +307,20 @@ class TrygdeavtaleServiceTest {
             .build();
     }
 
+    private AvklarteMedfolgendeFamilie lagAvklartMedfølgendeEktefelle() {
+        return new AvklarteMedfolgendeFamilie(
+            Set.of(),
+            Set.of(new IkkeOmfattetFamilie(UUID_EKTEFELLE, EGEN_INNTEKT.getKode(), BEGRUNNELSE_SAMBOER))
+        );
+    }
+
+    private AvklarteMedfolgendeFamilie lagAvklartMedfølgendeBarn() {
+        return new AvklarteMedfolgendeFamilie(
+            Set.of(new OmfattetFamilie(UUID_BARN_2)),
+            Set.of(new IkkeOmfattetFamilie(UUID_BARN_1, OVER_18_AR.getKode(), BEGRUNNELSE_BARN)));
+    }
+
+
     private Behandling lagBehandlingMedFamilie(List<MedfolgendeFamilie> familie) {
         var personOpplysninger = new OpplysningerOmBrukeren();
         personOpplysninger.medfolgendeFamilie.addAll(familie);
@@ -349,45 +398,4 @@ class TrygdeavtaleServiceTest {
         saksopplysning.setDokument(arbeidsforholdDokument);
         return saksopplysning;
     }
-
-    private static final String EKTEFELLE_FNR = "01108049800";
-    private static final String BARN1_FNR = "01100099728";
-    private static final String BARN2_FNR = "02109049878";
-    private static final String BARN_NAVN_1 = "Doffen Duck";
-    private static final String BARN_NAVN_2 = "Dole Duck";
-    private static final String EKTEFELLE_NAVN = "Dolly Duck";
-
-    private AvklarteMedfolgendeFamilie lagAvklartMedfølgendeEktefelle() {
-        OmfattetFamilie ektefelle = new OmfattetFamilie(UUID_EKTEFELLE);
-        return new AvklarteMedfolgendeFamilie(Set.of(ektefelle), Set.of());
-    }
-
-    private AvklarteMedfolgendeFamilie lagAvklartMedfølgendeBarn() {
-        var b1 = new OmfattetFamilie(UUID_BARN_1);
-        b1.setIdent(BARN1_FNR);
-        var b2 = new IkkeOmfattetFamilie(
-            UUID_BARN_2,
-            Medfolgende_barn_begrunnelser_ftrl.OVER_18_AR.getKode(),
-            null);
-        b2.setIdent(BARN2_FNR);
-        return new AvklarteMedfolgendeFamilie(
-            Set.of(b1),
-            Set.of(b2));
-    }
-
-    private Map<String, MedfolgendeFamilie> lagMedfølgendeEktefelle() {
-        MedfolgendeFamilie ektefelle = MedfolgendeFamilie.tilMedfolgendeFamilie(
-            UUID_EKTEFELLE, EKTEFELLE_FNR, EKTEFELLE_NAVN, MedfolgendeFamilie.Relasjonsrolle.EKTEFELLE_SAMBOER);
-        return Map.of(UUID_EKTEFELLE, ektefelle);
-    }
-
-    private Map<String, MedfolgendeFamilie> lagMedfølgendeBarn() {
-        return Map.of(
-            UUID_BARN_1,
-            MedfolgendeFamilie.tilMedfolgendeFamilie(UUID_BARN_1, BARN1_FNR, BARN_NAVN_1, MedfolgendeFamilie.Relasjonsrolle.BARN),
-            UUID_BARN_2,
-            MedfolgendeFamilie.tilMedfolgendeFamilie(UUID_BARN_2, BARN2_FNR, BARN_NAVN_2, MedfolgendeFamilie.Relasjonsrolle.BARN)
-        );
-    }
-
 }

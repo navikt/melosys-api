@@ -13,9 +13,6 @@ import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
 import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie;
-import no.nav.melosys.domain.person.familie.IkkeOmfattetFamilie;
-import no.nav.melosys.domain.person.familie.OmfattetFamilie;
-import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
@@ -84,18 +81,30 @@ public class TrygdeavtaleService {
     }
 
     public TrygdeavtaleResultat hentResultat(long behandlingId) {
+        AvklarteMedfolgendeFamilie familie = hentAvklarteMedfolgendeFamilie(behandlingId);
+
+        String virksomhet = avklartefaktaService.hentAvklarteOrgnrOgUuid(behandlingId)
+            .stream().findFirst().orElse(null);
+
+        return new TrygdeavtaleResultat.Builder()
+            .familie(familie)
+            .virksomhet(virksomhet)
+            .bestemmelse("") // TODO
+            .lovvalgsperiodeFom(null) // TODO
+            .lovvalgsperiodeFom(null) // TODO
+            .build();
+    }
+
+    private AvklarteMedfolgendeFamilie hentAvklarteMedfolgendeFamilie(long behandlingId) {
         AvklarteMedfolgendeFamilie avklarteMedfølgendeBarn = avklarteMedfolgendeFamilieService.hentAvklarteMedfølgendeBarn(behandlingId);
         AvklarteMedfolgendeFamilie avklarteMedfølgendeEktefelle = avklarteMedfolgendeFamilieService.hentAvklartMedfølgendeEktefelle(behandlingId);
 
-        Set<OmfattetFamilie> omfattetFamilie = Stream.concat(avklarteMedfølgendeBarn.getFamilieOmfattetAvNorskTrygd().stream(),
+        var omfattetFamilie = Stream.concat(avklarteMedfølgendeBarn.getFamilieOmfattetAvNorskTrygd().stream(),
             avklarteMedfølgendeEktefelle.getFamilieOmfattetAvNorskTrygd().stream()).collect(Collectors.toSet());
-        Set<IkkeOmfattetFamilie> ikkeOmfattetFamilie = Stream.concat(avklarteMedfølgendeBarn.getFamilieIkkeOmfattetAvNorskTrygd().stream(),
+        var ikkeOmfattetFamilie = Stream.concat(avklarteMedfølgendeBarn.getFamilieIkkeOmfattetAvNorskTrygd().stream(),
             avklarteMedfølgendeEktefelle.getFamilieIkkeOmfattetAvNorskTrygd().stream()).collect(Collectors.toSet());
-
-        return new TrygdeavtaleResultat.Builder()
-            .familie(new AvklarteMedfolgendeFamilie(omfattetFamilie, ikkeOmfattetFamilie))
-            .virksomhet("123")
-            .build();
+        
+        return new AvklarteMedfolgendeFamilie(omfattetFamilie, ikkeOmfattetFamilie);
     }
 
     private Lovvalgsperiode lagLovvalgsperiode(TrygdeavtaleResultat trygdeavtaleResultat) {
