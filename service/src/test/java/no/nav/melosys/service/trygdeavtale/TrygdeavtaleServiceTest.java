@@ -4,9 +4,6 @@ import java.time.LocalDate;
 import java.util.*;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.Saksopplysning;
@@ -19,8 +16,6 @@ import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_barn_begrunnelser_ftrl;
-import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_ektefelle_samboer_begrunnelser_ftrl;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
 import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie;
 import no.nav.melosys.domain.person.familie.IkkeOmfattetFamilie;
@@ -144,42 +139,38 @@ class TrygdeavtaleServiceTest {
     }
 
     @Test
-    void hentResultat_altOk_hentesKorrekt() throws JsonProcessingException {
+    void hentResultat_altOk_hentesKorrekt() {
         when(avklarteMedfolgendeFamilieService.hentAvklartMedfølgendeEktefelle(anyLong())).thenReturn(lagAvklartMedfølgendeEktefelle());
         when(avklarteMedfolgendeFamilieService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(lagAvklartMedfølgendeBarn());
         when(avklartefaktaService.hentAvklarteOrgnrOgUuid(anyLong())).thenReturn(Set.of(ORGNR_1));
+        when(lovvalgsperiodeService.hentLovvalgsperioder(anyLong())).thenReturn(List.of(
+            lagLovvalgsperiode()
+        ));
 
         TrygdeavtaleResultat trygdeavtaleResultat = trygdeavtaleService.hentResultat(1L);
-        assertThat(trygdeavtaleResultat).extracting(
-            TrygdeavtaleResultat::virksomhet,
-            TrygdeavtaleResultat::bestemmelse,
-            TrygdeavtaleResultat::lovvalgsperiodeFom,
-            TrygdeavtaleResultat::lovvalgsperiodeTom
-        ).containsExactly(
-            ORGNR_1,
-            "",
-            null,
-            null
-        );
 
+//        assertThat(trygdeavtaleResultat).extracting(
+//            TrygdeavtaleResultat::virksomhet,
+//            TrygdeavtaleResultat::bestemmelse,
+//            TrygdeavtaleResultat::lovvalgsperiodeFom,
+//            TrygdeavtaleResultat::lovvalgsperiodeTom
+//        ).containsExactly(
+//            ORGNR_1,
+//            UK_ART6_1.getKode(),
+//            PERIODE_FOM,
+//            PERIODE_TOM
+//        );
+
+        assertThat(trygdeavtaleResultat).usingRecursiveComparison().isEqualTo(lagTrygdeavtaleResultat());
+
+//        ObjectWriter objectWriter = new ObjectMapper()
+//            .registerModule(new JavaTimeModule())
+//            .writerWithDefaultPrettyPrinter();
+//        System.out.println(objectWriter.writeValueAsString(trygdeavtaleResultat));
 //
-//        assertThat(trygdeavtaleResultat).usingRecursiveComparison().isEqualTo(trygdeavtaleResultat);
-
-//        assertThat(trygdeavtaleResultat.familie()).usingRecursiveComparison().isEqualTo(lagTrygdeavtaleResultat().familie());
-//        assertThat(trygdeavtaleResultat.familie().getFamilieOmfattetAvNorskTrygd())
-//            .usingRecursiveComparison()
-//            .isEqualTo(lagTrygdeavtaleResultat().familie().getFamilieOmfattetAvNorskTrygd());
-
-//        assertThat(trygdeavtaleResultat.familie().getFamilieOmfattetAvNorskTrygd())
-//            .isEqualTo(lagTrygdeavtaleResultat().familie().getFamilieOmfattetAvNorskTrygd());
-
-        ObjectWriter objectWriter = new ObjectMapper()
-            .registerModule(new JavaTimeModule())
-            .writerWithDefaultPrettyPrinter();
-
-        String result = objectWriter.writeValueAsString(trygdeavtaleResultat.familie());
-        String expected = objectWriter.writeValueAsString(lagTrygdeavtaleResultat().familie());
-        assertThat(result).isEqualTo(expected);
+//        String result = objectWriter.writeValueAsString(trygdeavtaleResultat.familie());
+//        String expected = objectWriter.writeValueAsString(lagTrygdeavtaleResultat().familie());
+//        assertThat(result).isEqualTo(expected);
     }
 
     @Test
@@ -320,6 +311,13 @@ class TrygdeavtaleServiceTest {
             Set.of(new IkkeOmfattetFamilie(UUID_BARN_1, OVER_18_AR.getKode(), BEGRUNNELSE_BARN)));
     }
 
+    private Lovvalgsperiode lagLovvalgsperiode() {
+        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
+        lovvalgsperiode.setBestemmelse(UK_ART6_1);
+        lovvalgsperiode.setFom(PERIODE_FOM);
+        lovvalgsperiode.setTom(PERIODE_TOM);
+        return lovvalgsperiode;
+    }
 
     private Behandling lagBehandlingMedFamilie(List<MedfolgendeFamilie> familie) {
         var personOpplysninger = new OpplysningerOmBrukeren();

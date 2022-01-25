@@ -13,6 +13,7 @@ import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
 import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
@@ -81,29 +82,35 @@ public class TrygdeavtaleService {
     }
 
     public TrygdeavtaleResultat hentResultat(long behandlingId) {
-        AvklarteMedfolgendeFamilie familie = hentAvklarteMedfolgendeFamilie(behandlingId);
-
-        String virksomhet = avklartefaktaService.hentAvklarteOrgnrOgUuid(behandlingId)
+        var familie = hentAvklarteMedfolgendeFamilie(behandlingId);
+        var virksomhet = avklartefaktaService.hentAvklarteOrgnrOgUuid(behandlingId)
             .stream().findFirst().orElse(null);
+        Lovvalgsperiode lovvalgsperiode = hentLovvalgsperiode(behandlingId);
 
         return new TrygdeavtaleResultat.Builder()
             .familie(familie)
             .virksomhet(virksomhet)
-            .bestemmelse("") // TODO
-            .lovvalgsperiodeFom(null) // TODO
-            .lovvalgsperiodeFom(null) // TODO
+            .lovvalgsperiode(lovvalgsperiode)
             .build();
     }
 
+    private Lovvalgsperiode hentLovvalgsperiode(long behandlingId) {
+        var lovvalgsperioder = lovvalgsperiodeService.hentLovvalgsperioder(behandlingId);
+        if (lovvalgsperioder.size() > 2) {
+            throw new TekniskException("Forventer kun 1 lovvalgsperiode for " + behandlingId);
+        }
+        return lovvalgsperioder.stream().findFirst().orElse(null);
+    }
+
     private AvklarteMedfolgendeFamilie hentAvklarteMedfolgendeFamilie(long behandlingId) {
-        AvklarteMedfolgendeFamilie avklarteMedfølgendeBarn = avklarteMedfolgendeFamilieService.hentAvklarteMedfølgendeBarn(behandlingId);
-        AvklarteMedfolgendeFamilie avklarteMedfølgendeEktefelle = avklarteMedfolgendeFamilieService.hentAvklartMedfølgendeEktefelle(behandlingId);
+        var avklarteMedfølgendeBarn = avklarteMedfolgendeFamilieService.hentAvklarteMedfølgendeBarn(behandlingId);
+        var avklarteMedfølgendeEktefelle = avklarteMedfolgendeFamilieService.hentAvklartMedfølgendeEktefelle(behandlingId);
 
         var omfattetFamilie = Stream.concat(avklarteMedfølgendeBarn.getFamilieOmfattetAvNorskTrygd().stream(),
             avklarteMedfølgendeEktefelle.getFamilieOmfattetAvNorskTrygd().stream()).collect(Collectors.toSet());
         var ikkeOmfattetFamilie = Stream.concat(avklarteMedfølgendeBarn.getFamilieIkkeOmfattetAvNorskTrygd().stream(),
             avklarteMedfølgendeEktefelle.getFamilieIkkeOmfattetAvNorskTrygd().stream()).collect(Collectors.toSet());
-        
+
         return new AvklarteMedfolgendeFamilie(omfattetFamilie, ikkeOmfattetFamilie);
     }
 
