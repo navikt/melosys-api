@@ -40,4 +40,15 @@ public class IkkeOmfattetFamilie {
     public void setIdent(String ident) {
         this.ident = ident;
     }
+
+    @Override
+    public String toString() {
+        return "IkkeOmfattetFamilie{" +
+            "uuid='" + uuid + '\'' +
+            ", begrunnelse='" + begrunnelse + '\'' +
+            ", begrunnelseFritekst='" + begrunnelseFritekst + '\'' +
+            ", sammensattNavn='" + sammensattNavn + '\'' +
+            ", ident='" + ident + '\'' +
+            '}';
+    }
 }
