@@ -163,7 +163,7 @@ class TrygdeavtaleTjenesteTest {
 
         var response = trygdeavtaleTjeneste.hentResultat(1L).getBody();
 
-        assertThat(response).isEqualTo(lagTrygdeavtaleResultatDto());
+        assertThat(response).usingRecursiveComparison().isEqualTo(lagTrygdeavtaleResultatDto());
     }
 
     private static Behandlingsgrunnlag lagBehandlingsgrunnlag() {
