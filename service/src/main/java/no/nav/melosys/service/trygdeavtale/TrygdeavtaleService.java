@@ -83,8 +83,7 @@ public class TrygdeavtaleService {
 
     public TrygdeavtaleResultat hentResultat(long behandlingId) {
         var familie = hentAvklarteMedfolgendeFamilie(behandlingId);
-        var virksomhet = avklartefaktaService.hentAvklarteOrgnrOgUuid(behandlingId)
-            .stream().findFirst().orElse(null);
+        var virksomhet = hentVirksomheter(behandlingId);
         var lovvalgsperiode = hentLovvalgsperiode(behandlingId);
 
         return new TrygdeavtaleResultat.Builder()
@@ -92,6 +91,14 @@ public class TrygdeavtaleService {
             .virksomhet(virksomhet)
             .lovvalgsperiode(lovvalgsperiode)
             .build();
+    }
+
+    private String hentVirksomheter(long behandlingId) {
+        var virksomheter = avklartefaktaService.hentAvklarteOrgnrOgUuid(behandlingId);
+        if (virksomheter.size() > 1) {
+            throw new TekniskException("Forventer kun 1 virksomhet for " + behandlingId);
+        }
+        return virksomheter.stream().findFirst().orElse(null);
     }
 
     private Lovvalgsperiode hentLovvalgsperiode(long behandlingId) {
