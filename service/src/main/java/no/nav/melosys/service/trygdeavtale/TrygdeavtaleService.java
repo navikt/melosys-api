@@ -96,7 +96,7 @@ public class TrygdeavtaleService {
 
     private Lovvalgsperiode hentLovvalgsperiode(long behandlingId) {
         var lovvalgsperioder = lovvalgsperiodeService.hentLovvalgsperioder(behandlingId);
-        if (lovvalgsperioder.size() > 2) {
+        if (lovvalgsperioder.size() > 1) {
             throw new TekniskException("Forventer kun 1 lovvalgsperiode for " + behandlingId);
         }
         return lovvalgsperioder.stream().findFirst().orElse(null);
