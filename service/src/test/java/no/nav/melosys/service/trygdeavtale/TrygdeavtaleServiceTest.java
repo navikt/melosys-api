@@ -3,7 +3,6 @@ package no.nav.melosys.service.trygdeavtale;
 import java.time.LocalDate;
 import java.util.*;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.Saksopplysning;
@@ -143,34 +142,11 @@ class TrygdeavtaleServiceTest {
         when(avklarteMedfolgendeFamilieService.hentAvklartMedfølgendeEktefelle(anyLong())).thenReturn(lagAvklartMedfølgendeEktefelle());
         when(avklarteMedfolgendeFamilieService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(lagAvklartMedfølgendeBarn());
         when(avklartefaktaService.hentAvklarteOrgnrOgUuid(anyLong())).thenReturn(Set.of(ORGNR_1));
-        when(lovvalgsperiodeService.hentLovvalgsperioder(anyLong())).thenReturn(List.of(
-            lagLovvalgsperiode()
-        ));
+        when(lovvalgsperiodeService.hentLovvalgsperioder(anyLong())).thenReturn(List.of(lagLovvalgsperiode()));
 
         TrygdeavtaleResultat trygdeavtaleResultat = trygdeavtaleService.hentResultat(1L);
 
-//        assertThat(trygdeavtaleResultat).extracting(
-//            TrygdeavtaleResultat::virksomhet,
-//            TrygdeavtaleResultat::bestemmelse,
-//            TrygdeavtaleResultat::lovvalgsperiodeFom,
-//            TrygdeavtaleResultat::lovvalgsperiodeTom
-//        ).containsExactly(
-//            ORGNR_1,
-//            UK_ART6_1.getKode(),
-//            PERIODE_FOM,
-//            PERIODE_TOM
-//        );
-
         assertThat(trygdeavtaleResultat).usingRecursiveComparison().isEqualTo(lagTrygdeavtaleResultat());
-
-//        ObjectWriter objectWriter = new ObjectMapper()
-//            .registerModule(new JavaTimeModule())
-//            .writerWithDefaultPrettyPrinter();
-//        System.out.println(objectWriter.writeValueAsString(trygdeavtaleResultat));
-//
-//        String result = objectWriter.writeValueAsString(trygdeavtaleResultat.familie());
-//        String expected = objectWriter.writeValueAsString(lagTrygdeavtaleResultat().familie());
-//        assertThat(result).isEqualTo(expected);
     }
 
     @Test
