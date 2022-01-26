@@ -35,12 +35,25 @@ public class TrygdeavtaleTjeneste {
         this.aksesskontroll = aksesskontroll;
     }
 
+    /***
+     *
+     * @deprecated
+     * Dette endepunket blir fjernet når trygdeavtale har tatt i bruk grunnlag/{behandlingID}
+     */
     @GetMapping("{behandlingID}")
     @Transactional
+    @Deprecated()
     public ResponseEntity<TrygdeavtaleInfoDto> hentTrygdeavtaleInfo(@PathVariable("behandlingID") long behandlingId,
                                                                     @RequestParam(value = "virksomheter", required = false) boolean hentVirksomheter,
                                                                     @RequestParam(value = "barnEktefeller", required = false) boolean hentBarnEktefeller) {
+        return hentGrunnlagTrygdeavtaleInfo(behandlingId, hentVirksomheter, hentBarnEktefeller);
+    }
 
+    @GetMapping("grunnlag/{behandlingID}")
+    @Transactional
+    public ResponseEntity<TrygdeavtaleInfoDto> hentGrunnlagTrygdeavtaleInfo(@PathVariable("behandlingID") long behandlingId,
+                                                                            @RequestParam(value = "virksomheter", required = false) boolean hentVirksomheter,
+                                                                            @RequestParam(value = "barnEktefeller", required = false) boolean hentBarnEktefeller) {
         aksesskontroll.autoriser(behandlingId);
         var behandling = behandlingService.hentBehandling(behandlingId);
         var behandlingsgrunnlagdata = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
