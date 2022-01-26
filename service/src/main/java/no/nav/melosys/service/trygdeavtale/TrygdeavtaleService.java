@@ -85,7 +85,7 @@ public class TrygdeavtaleService {
         var familie = hentAvklarteMedfolgendeFamilie(behandlingId);
         var virksomhet = avklartefaktaService.hentAvklarteOrgnrOgUuid(behandlingId)
             .stream().findFirst().orElse(null);
-        Lovvalgsperiode lovvalgsperiode = hentLovvalgsperiode(behandlingId);
+        var lovvalgsperiode = hentLovvalgsperiode(behandlingId);
 
         return new TrygdeavtaleResultat.Builder()
             .familie(familie)
