@@ -573,6 +573,11 @@
             </dependency>
             <dependency>
                 <groupId>no.nav.security</groupId>
+                <artifactId>token-validation-spring-test</artifactId>
+                <version>${token-support.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.nav.security</groupId>
                 <artifactId>token-validation-test-support</artifactId>
                 <version>${token-support.version}</version>
             </dependency>
