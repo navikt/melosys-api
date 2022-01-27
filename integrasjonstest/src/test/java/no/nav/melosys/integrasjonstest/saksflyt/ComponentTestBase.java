@@ -15,23 +15,23 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 
-//@Testcontainers
+@Testcontainers
 @ExtendWith(SpringExtension.class)
 @ActiveProfiles(profiles = "test")
-//@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @SpringBootTest(classes = {Application.class}, properties = "spring.profiles.active:test", webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @Import({ComponentTestConfig.class})
 @EnableMockOAuth2Server
 public abstract class ComponentTestBase {
 
-//    @Container
-//    static OracleContainer DB = new OracleContainer();
+    @Container
+    static OracleContainer DB = new OracleContainer();
 
-//    @DynamicPropertySource
-//    static void oracleProperties(DynamicPropertyRegistry registry) {
-//        registry.add("spring.datasource.url", DB::getJdbcUrl);
-//        registry.add("spring.datasource.password", DB::getPassword);
-//        registry.add("spring.datasource.username", DB::getUsername);
-//    }
+    @DynamicPropertySource
+    static void oracleProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.datasource.url", DB::getJdbcUrl);
+        registry.add("spring.datasource.password", DB::getPassword);
+        registry.add("spring.datasource.username", DB::getUsername);
+    }
 
 }

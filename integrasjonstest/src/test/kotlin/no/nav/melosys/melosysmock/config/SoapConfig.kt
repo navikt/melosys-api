@@ -1,5 +1,6 @@
 package no.nav.melosys.melosysmock.config
 
+import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.boot.web.servlet.ServletRegistrationBean
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Bean
@@ -8,7 +9,7 @@ import org.springframework.ws.config.annotation.EnableWs
 import org.springframework.ws.transport.http.MessageDispatcherServlet
 
 @EnableWs
-@Configuration
+@TestConfiguration
 class SoapConfig {
     @Bean
     fun messageDispatcherServlet(applicationContext: ApplicationContext): ServletRegistrationBean<MessageDispatcherServlet> {

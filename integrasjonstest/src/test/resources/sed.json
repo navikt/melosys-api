@@ -1,6 +1,6 @@
 {
   "sedId": "d57743a8549d40298ed7b6a8c18cab1c",
-  "rinaSaksnummer": "68604",
+  "rinaSaksnummer": "68611",
   "avsender": {
     "avsenderID": "101",
     "landkode":"DK"
@@ -18,6 +18,19 @@
     "fom": "2019-08-20",
     "tom": "2022-12-20"
   },
+  "arbeidssteder": [
+    {
+      "navn" : "Yara",
+      "adresse": {
+        "gate": "Testarbeidsstedgate2",
+        "land": "CY",
+        "bygning": "Testarbeidsstedbygning2",
+        "by": "Testarbeidsstedby2"
+      },
+      "hjemmebase": "Norge",
+      "erIkkeFastAdresse": "false"
+    }
+  ],
   "lovvalgsland": "DK",
   "artikkel": "12_1",
   "erEndring": true,

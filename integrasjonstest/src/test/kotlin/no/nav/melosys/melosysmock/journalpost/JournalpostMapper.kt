@@ -12,9 +12,9 @@ import java.time.LocalDate
 
 class JournalpostMapper {
 
-    fun tilModell(request: OpprettJournalpostRequest, forsoekFerdigstill: Boolean?, journalpostID:String?): JournalpostModell {
+    fun tilModell(request: OpprettJournalpostRequest, forsoekFerdigstill: Boolean?): JournalpostModell {
         return JournalpostModell(
-            journalpostId = journalpostID ?: lagRandomId(),
+            journalpostId = lagRandomId(),
             avsenderMottaker = AvsenderMottaker(
                 id = request.avsenderMottaker?.id,
                 type = IdType.valueOf(request.avsenderMottaker?.idType?.name!!),
@@ -51,7 +51,7 @@ class JournalpostMapper {
                     brevkode = dok.brevkode,
                     dokumentTilknyttetJournalpost = dokumentTilknyttetJournalpost,
                     dokumentVarianter = lagDokumentvarianter(dok.dokumentvarianter)
-            )
+                )
             )
         }
         return dokumentListe

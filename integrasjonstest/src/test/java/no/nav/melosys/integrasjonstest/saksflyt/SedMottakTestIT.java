@@ -33,16 +33,12 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
-@ExtendWith(SpringExtension.class)
-@SpringBootTest(properties = "spring.profiles.active:local-mock")
-class SedMottakTestIT {
+
+class SedMottakTestIT extends ComponentTestBase{
 
     @Autowired
     @Qualifier("system")
     private JoarkFasade joarkFasade;
-
-    @Autowired
-    private EessiMeldingConsumer eessiMeldingConsumer;
 
     @Autowired
     @Qualifier("melosysEessiMelding")
@@ -53,8 +49,7 @@ class SedMottakTestIT {
 
     private String rinaSaksnummer;
 
-    @Value("${kafka.eessi.topic}")
-    String kafkaTopic;
+    private String kafkaTopic = "privat-melosys-eessi-v1-local";
 
     @BeforeEach
     void setup() {

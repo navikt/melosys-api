@@ -15,10 +15,9 @@ class JournalpostApi {
     @PostMapping("journalpost")
     fun opprettJournalpost(
         @RequestBody request: OpprettJournalpostRequest,
-        @RequestParam("forsoekFerdigstill", required = false) forsoekFerdigstill: Boolean = false,
-        @RequestParam("journalpostID", required = false) journalpostID: String
+        @RequestParam("forsoekFerdigstill", required = false) forsoekFerdigstill: Boolean = false
     ): Map<String, Any> {
-        return JournalpostMapper().tilModell(request, forsoekFerdigstill, journalpostID)
+        return JournalpostMapper().tilModell(request, forsoekFerdigstill)
             .also { repo[it.journalpostId] = it }
             .let {
                 mapOf(

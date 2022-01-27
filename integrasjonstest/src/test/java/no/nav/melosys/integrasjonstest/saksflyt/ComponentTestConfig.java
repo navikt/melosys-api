@@ -3,6 +3,7 @@ package no.nav.melosys.integrasjonstest.saksflyt;
 import no.finn.unleash.FakeUnleash;
 import no.finn.unleash.Unleash;
 import no.nav.melosys.melosysmock.config.GraphqlConfig;
+import no.nav.melosys.melosysmock.config.SoapConfig;
 import no.nav.melosys.melosysmock.journalpost.journalpostapi.JournalpostApi;
 import no.nav.melosys.melosysmock.journalpost.saf.SafRestApi;
 import no.nav.melosys.melosysmock.sak.SakApi;
@@ -21,7 +22,9 @@ import org.springframework.util.SocketUtils;
         GraphqlConfig.class,
         JournalpostApi.class,
         SafRestApi.class,
-        SakApi.class
+        SakApi.class,
+        SoapConfig.class,
+        EndpointsListener.class
     }
 )
 public class ComponentTestConfig {

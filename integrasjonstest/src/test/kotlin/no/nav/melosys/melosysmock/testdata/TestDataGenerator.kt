@@ -17,9 +17,11 @@ class TestDataGenerator {
 
     @PostMapping("/jfr-oppgave")
     fun lagJournalføringsoppgave(@RequestBody request: OpprettJfrOppgaveRequest) {
+        for (i in 0 until request.antall) {
             lagJournalpost()
-                .let { JournalpostApi().opprettJournalpost(it, false, request.journalPostId) }
-                .also { opprettJfrOppgave(request.journalPostId, request.tilordnetRessurs) }
+                .let { JournalpostApi().opprettJournalpost(it, false) }
+                .also { opprettJfrOppgave(it["journalpostId"] as String, request.tilordnetRessurs) }
+        }
     }
 
     private fun opprettJfrOppgave(journalpostID: String, tilordnetRessurs: String) {
@@ -67,6 +69,6 @@ class TestDataGenerator {
 
 
 data class OpprettJfrOppgaveRequest(
-    val tilordnetRessurs: String,
-    val journalPostId: String
+    val antall: Int,
+    val tilordnetRessurs: String
 )

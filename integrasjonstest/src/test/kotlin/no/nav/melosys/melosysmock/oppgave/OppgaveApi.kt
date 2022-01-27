@@ -1,5 +1,6 @@
 package no.nav.melosys.melosysmock.oppgave
 
+import no.nav.security.token.support.core.api.Unprotected
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.time.LocalDate
@@ -10,6 +11,7 @@ import no.nav.melosys.melosysmock.oppgave.OppgaveRepo.repo as oppgaveRepo
 
 @RestController
 @RequestMapping("/api/v1/oppgaver")
+@Unprotected
 class OppgaveApi {
 
     companion object OppgaveIdTeller {
