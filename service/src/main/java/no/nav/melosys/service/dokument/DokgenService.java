@@ -20,6 +20,8 @@ import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
 import no.nav.melosys.service.dokument.brev.KopiMottaker;
+import no.nav.melosys.service.dokument.brev.mapper.DokgenMalMapper;
+import no.nav.melosys.service.dokument.brev.mapper.DokumentproduksjonsInfoMapper;
 import no.nav.melosys.service.ldap.SaksbehandlerService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.springframework.beans.factory.annotation.Autowired;

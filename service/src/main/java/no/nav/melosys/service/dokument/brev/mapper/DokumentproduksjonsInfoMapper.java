@@ -1,4 +1,4 @@
-package no.nav.melosys.service.dokument;
+package no.nav.melosys.service.dokument.brev.mapper;
 
 import java.util.Set;
 import java.util.function.Predicate;
@@ -9,6 +9,7 @@ import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.joark.DokumentKategoriKode;
+import no.nav.melosys.service.dokument.DokumentproduksjonsInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

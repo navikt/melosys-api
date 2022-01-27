@@ -1,4 +1,4 @@
-package no.nav.melosys.service.dokument;
+package no.nav.melosys.service.dokument.brev.mapper;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -29,6 +29,8 @@ import no.nav.melosys.service.avgift.TrygdeavgiftsgrunnlagService;
 import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.dokument.brev.BrevDataTestUtils;
+import no.nav.melosys.service.dokument.brev.mapper.DokgenMapperDatahenter;
+import no.nav.melosys.service.dokument.brev.mapper.InnvilgelseFtrlMapper;
 import no.nav.melosys.service.representant.RepresentantService;
 import no.nav.melosys.service.representant.dto.RepresentantDataDto;
 import org.assertj.core.api.Condition;

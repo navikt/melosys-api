@@ -1,4 +1,4 @@
-package no.nav.melosys.service.dokument;
+package no.nav.melosys.service.dokument.brev.mapper;
 
 import java.util.Map;
 
