@@ -65,8 +65,8 @@ public class DokumentproduksjonsInfoMapper {
                 new DokumentproduksjonsInfo("uk_innvilgelse_og_attest",
                     DokumentKategoriKode.VB.getKode(),
                     JournalforingsTittel.STORBRITANNIA.getTittel(),
-                    Map.of(VedtaksTyper.VEDTAKSBREV, JournalforingsTittel.STORBRITANNIA_VEDTAKSBREV.getTittel(),
-                        VedtaksTyper.ATTEST, JournalforingsTittel.STORBRITANNIA_ATTEST.getTittel())))
+                    Map.of(VedleggsTyper.VEDTAKSBREV, JournalforingsTittel.STORBRITANNIA_VEDTAKSBREV.getTittel(),
+                        VedleggsTyper.ATTEST, JournalforingsTittel.STORBRITANNIA_ATTEST.getTittel())))
             .put(GENERELT_FRITEKSTBREV_BRUKER,
                 new DokumentproduksjonsInfo("fritekstbrev",
                     DokumentKategoriKode.IB.getKode(),
@@ -136,7 +136,7 @@ public class DokumentproduksjonsInfoMapper {
         }
     }
 
-    public enum VedtaksTyper {
+    public enum VedleggsTyper {
         VEDTAKSBREV,
         ATTEST
     }

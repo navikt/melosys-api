@@ -175,10 +175,10 @@ public class OpprettJournalforBrev implements StegBehandler {
 
     private String utledJournalføringsTittelForAvtaleMedStorbritannia(long behandlingID, DokumentproduksjonsInfo dokumentproduksjonsInfo, Aktoer mottaker) {
         if (mottaker.erUtenlandskMyndighet()) {
-            return dokumentproduksjonsInfo.vedleggstitler().get(DokumentproduksjonsInfoMapper.VedtaksTyper.ATTEST);
+            return dokumentproduksjonsInfo.vedleggsTitler().get(DokumentproduksjonsInfoMapper.VedleggsTyper.ATTEST);
         }
 
-        var vedtaksbrevTittel = dokumentproduksjonsInfo.vedleggstitler().get(DokumentproduksjonsInfoMapper.VedtaksTyper.VEDTAKSBREV);
+        var vedtaksbrevTittel = dokumentproduksjonsInfo.vedleggsTitler().get(DokumentproduksjonsInfoMapper.VedleggsTyper.VEDTAKSBREV);
 
         if (FastMottakerMedOrgnr.SKATT.getOrgnr().equals((mottaker.getOrgnr()))) {
             return lagKopiTittel(vedtaksbrevTittel);
