@@ -91,7 +91,17 @@
       ],
       "folkeregisterpersonstatus": [
         {
-          "status": "doed"
+          "status": "doed",
+          "metadata": {
+            "master": "FREG",
+            "endringer": [
+              {
+                "registrert": "2021-07-06T11:28:37",
+                "type": "OPPRETT",
+                "kilde": "Dolly"
+              }
+            ]
+          }
         }
       ],
       "forelderBarnRelasjon": [
