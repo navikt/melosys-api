@@ -116,7 +116,7 @@ class TrygdeavtaleTjenesteTest {
     void hentTrygdeavtaleInfo_utenVirksomhetOgBarnEktefelle_returnererKorrekt() {
         when(behandlingService.hentBehandling(1L)).thenReturn(behandling);
 
-        var response = trygdeavtaleTjeneste.hentGrunnlagTrygdeavtaleInfo(1L, false, false).getBody();
+        var response = trygdeavtaleTjeneste.hentTrygdeavtaleBehandlingsgrunnlag(1L, false, false).getBody();
 
         verify(trygdeavtaleService, never()).hentVirksomheter(any());
         verify(trygdeavtaleService, never()).hentFamiliemedlemmer(any());
@@ -134,7 +134,7 @@ class TrygdeavtaleTjenesteTest {
     void hentTrygdeavtaleInfo_medVirksomhetOgBarnEktefelle_returnererKorrekt() {
         when(behandlingService.hentBehandling(1L)).thenReturn(behandling);
 
-        var response = trygdeavtaleTjeneste.hentGrunnlagTrygdeavtaleInfo(1L, true, true).getBody();
+        var response = trygdeavtaleTjeneste.hentTrygdeavtaleBehandlingsgrunnlag(1L, true, true).getBody();
 
         verify(trygdeavtaleService).hentVirksomheter(any());
         verify(trygdeavtaleService).hentFamiliemedlemmer(any());
