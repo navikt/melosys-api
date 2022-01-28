@@ -77,7 +77,7 @@
         <oxmlparserv2.version>11.2.0.1.nojaxpservice</oxmlparserv2.version>
         <easy-random.version>5.0.0</easy-random.version>
         <restFixture.version>4.4</restFixture.version>
-        <shedlock.version>4.23.0</shedlock.version>
+        <shedlock.version>4.32.0</shedlock.version>
         <slf4j.version>1.7.32</slf4j.version>
         <springfox.version>3.0.0</springfox.version>
         <swagger.version>1.5.21</swagger.version>
@@ -96,7 +96,7 @@
         <objenesis.version>3.2</objenesis.version>
         <osgi.version>6.0.0</osgi.version>
         <woodstox.version>6.2.6</woodstox.version>
-        <xmlsec.version>2.2.3</xmlsec.version>
+        <xmlsec.version>2.3.0</xmlsec.version>
         <medlemskapsunntak-api-v1.version>1.1</medlemskapsunntak-api-v1.version>
         <wiremock-standalone.version>2.27.2</wiremock-standalone.version>
         <nav-foedselsnummer.core.version>1.0-SNAPSHOT.6</nav-foedselsnummer.core.version>
