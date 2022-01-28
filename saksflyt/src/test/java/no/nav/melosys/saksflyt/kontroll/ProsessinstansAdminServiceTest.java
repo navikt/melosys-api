@@ -31,6 +31,7 @@ class ProsessinstansAdminServiceTest {
 
     // Viktig at forrige og current er steg som kommer rett etter hverandre i samme prosess(type)
     private static final ProsessType PROSESS_TYPE = ProsessType.JFR_NY_SAK;
+    private static final ProsessSteg FORSTE_PROSSESS_STEG = ProsessSteg.OPPRETT_SAK_OG_BEH;
     private static final ProsessSteg FORRIGE_PROSSESS_STEG = ProsessSteg.OPPRETT_SØKNAD;
     private static final ProsessSteg CURRENT_PROSESS_STEG = ProsessSteg.OPPRETT_ARKIVSAK;
 
@@ -67,6 +68,19 @@ class ProsessinstansAdminServiceTest {
                 prosessinstans.getBehandling().getId(), prosessinstans.getBehandling().getFagsak().getSaksnummer(),
                 prosessinstans.getEndretDato(), prosessinstans.getType().getKode(),
                 CURRENT_PROSESS_STEG.getKode(), sisteFeilmelding);
+    }
+
+    @Test
+    void hentFeiletSteg_forrigeErNull_girForsteSteg() {
+        Prosessinstans prosessinstans = lagProsessinstans();
+        prosessinstans.setSistFullførtSteg(null);
+
+        when(prosessinstansRepository.findAllByStatus(ProsessStatus.FEILET))
+            .thenReturn(singletonList(prosessinstans));
+
+        var prosessinstanser = prosessinstansAdminService.hentFeiledeProsessinstanser();
+
+        assertThat(prosessinstanser.get(0).feiletSteg()).isEqualTo(FORSTE_PROSSESS_STEG.getKode());
     }
 
     @Test
@@ -116,7 +130,6 @@ class ProsessinstansAdminServiceTest {
         verify(prosessinstansRepository).saveAll(singletonList(prosessinstans));
         verify(behandleProsessinstansDelegate).behandleProsessinstans(prosessinstans);
     }
-
 
     private Prosessinstans lagProsessinstans() {
         return lagProsessinstans(LocalDateTime.now());

@@ -79,8 +79,6 @@ public class ProsessinstansAdminService {
         var sisteFullførtSteg = Optional.ofNullable(prosessinstans.getSistFullførtSteg())
             .orElse(null);
 
-        if (sisteFullførtSteg == null) return null;
-
         return ProsessflytDefinisjon.finnFlytForProsessType(prosessinstans.getType())
             .map(it -> it.nesteSteg(sisteFullførtSteg))
             .map(ProsessSteg::getKode)
