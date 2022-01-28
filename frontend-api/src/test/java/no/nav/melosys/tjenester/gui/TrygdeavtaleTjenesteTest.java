@@ -77,7 +77,7 @@ class TrygdeavtaleTjenesteTest {
     @Test
     void overførResultat_medTrygdeavtaleResultatDto_mappesKorrekt() {
         var trygdeavtaleResultatDto = lagTrygdeavtaleResultatDto();
-        trygdeavtaleTjeneste.overførResultat(1L, trygdeavtaleResultatDto);
+        trygdeavtaleTjeneste.overførTrygdeavtaleResultat(1L, trygdeavtaleResultatDto);
 
         verify(trygdeavtaleService).overførResultat(eq(1L), trygdeavtaleResultatArgumentCaptor.capture());
         var trygdeavtaleResultat = trygdeavtaleResultatArgumentCaptor.getValue();

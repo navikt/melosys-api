@@ -77,11 +77,22 @@ public class TrygdeavtaleTjeneste {
     }
 
     @PostMapping("resultat/{behandlingID}")
-    public ResponseEntity<Void> overførResultat(@PathVariable("behandlingID") long behandlingId,
+    public ResponseEntity<Void> overførTrygdeavtaleResultat(@PathVariable("behandlingID") long behandlingId,
                                                 @RequestBody TrygdeavtaleResultatDto trygdeavtaleResultatDto) {
         aksesskontroll.autoriserSkriv(behandlingId);
         trygdeavtaleService.overførResultat(behandlingId, trygdeavtaleResultatDto.til());
 
         return ResponseEntity.ok().build();
+    }
+
+    /***
+     *
+     * @deprecated
+     * Dette endepunket blir fjernet når trygdeavtale har tatt i bruk resultat/{behandlingID}
+     */
+    @PostMapping("{behandlingID}")
+    public ResponseEntity<Void> overførResultat(@PathVariable("behandlingID") long behandlingId,
+                                                @RequestBody TrygdeavtaleResultatDto trygdeavtaleResultatDto) {
+        return overførTrygdeavtaleResultat(behandlingId, trygdeavtaleResultatDto);
     }
 }
