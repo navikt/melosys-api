@@ -292,7 +292,7 @@ public class StorbritanniaMapper {
 
     private boolean erSkatteetaten(OrganisasjonDokument org) {
         // Skatteetaten skal ikke ha attest
-        return org != null && FastMottakerMedOrgnr.orgNrErSkatt(org.getOrgnummer());
+        return org != null && FastMottakerMedOrgnr.SKATT.getOrgnr().equals(org.getOrgnummer());
     }
 
     private boolean skalIkkeHaInnvilgelse(InnvilgelseBrevbestilling brevbestilling) {

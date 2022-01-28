@@ -9,6 +9,14 @@ public enum FastMottakerMedOrgnr {
     SKATT,
     STATLIG_SKATTEOPPKREVING;
 
+    public String getOrgnr() {
+        return switch (this) {
+            case HELFO -> OrgNr.HELFO_ORGNR.orgnr;
+            case SKATT -> OrgNr.SKATTEETATEN_ORGNR.orgnr;
+            case STATLIG_SKATTEOPPKREVING -> OrgNr.STATLIG_SKATTEOPPKREVING_ORGNR.orgnr;
+        };
+    }
+
     public enum OrgNr {
         HELFO_ORGNR("986965610"),
         SKATTEETATEN_ORGNR("974761076"),
@@ -23,10 +31,6 @@ public enum FastMottakerMedOrgnr {
         public String getOrgnr() {
             return orgnr;
         }
-    }
-
-    public static boolean orgNrErSkatt(String orgnr) {
-        return OrgNr.SKATTEETATEN_ORGNR.orgnr.equals(orgnr);
     }
 
     public static Mottaker av(FastMottakerMedOrgnr mottaker) {
