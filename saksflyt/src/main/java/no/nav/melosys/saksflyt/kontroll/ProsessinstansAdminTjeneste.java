@@ -1,15 +1,7 @@
 package no.nav.melosys.saksflyt.kontroll;
 
-import java.util.Collection;
-import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
-import no.nav.melosys.domain.saksflyt.ProsessStatus;
-import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.repository.ProsessinstansRepository;
-import no.nav.melosys.saksflyt.impl.BehandleProsessinstansDelegate;
 import no.nav.melosys.saksflyt.kontroll.dto.HentProsessinstansDto;
 import no.nav.melosys.saksflyt.kontroll.dto.RestartProsessinstanserRequest;
 import no.nav.melosys.service.AdminTjeneste;
@@ -27,15 +19,12 @@ public class ProsessinstansAdminTjeneste implements AdminTjeneste {
 
     private final Logger log = LoggerFactory.getLogger(ProsessinstansAdminTjeneste.class);
 
-    private final BehandleProsessinstansDelegate behandleProsessinstansDelegate;
-    private final ProsessinstansRepository prosessinstansRepository;
+    private final ProsessinstansAdminService prosessinstansAdminService;
     private final String apiKey;
 
-    public ProsessinstansAdminTjeneste(BehandleProsessinstansDelegate behandleProsessinstansDelegate,
-                                       ProsessinstansRepository prosessinstansRepository,
+    public ProsessinstansAdminTjeneste(ProsessinstansAdminService prosessinstansAdminService,
                                        @Value("${Melosys-admin.apikey}") String apiKey) {
-        this.behandleProsessinstansDelegate = behandleProsessinstansDelegate;
-        this.prosessinstansRepository = prosessinstansRepository;
+        this.prosessinstansAdminService = prosessinstansAdminService;
         this.apiKey = apiKey;
     }
 
@@ -44,19 +33,15 @@ public class ProsessinstansAdminTjeneste implements AdminTjeneste {
         @RequestHeader(API_KEY_HEADER) String apiKey) {
 
         validerApikey(apiKey);
-        return ResponseEntity.ok(prosessinstansRepository.findAllByStatus(ProsessStatus.FEILET).stream()
-            .map(HentProsessinstansDto::new)
-            .collect(Collectors.toList()));
+        return ResponseEntity.ok(prosessinstansAdminService.hentFeiledeProsessinstanser());
     }
 
     @PostMapping("/feilede/restart")
     public ResponseEntity<List<HentProsessinstansDto>> restartAlleFeiledeProsessinstanser(
         @RequestHeader(API_KEY_HEADER) String apiKey) {
+
         validerApikey(apiKey);
-        Collection<Prosessinstans> prosessinstanser = prosessinstansRepository.findAllByStatus(ProsessStatus.FEILET);
-        restartProsessinstanser(prosessinstanser);
-        return ResponseEntity.ok(
-            prosessinstanser.stream().map(HentProsessinstansDto::new).collect(Collectors.toList()));
+        return ResponseEntity.ok(prosessinstansAdminService.restartAlleFeiledeProsessinstanser());
     }
 
     @PostMapping("/restart")
@@ -65,27 +50,9 @@ public class ProsessinstansAdminTjeneste implements AdminTjeneste {
         validerApikey(apiKey);
 
         log.info("Forsøker å restarte prosessinstanser {}", request.getUuids());
-        Collection<Prosessinstans> prosessinstanser = prosessinstansRepository.findAllById(request.getUuids());
-
-        for (var prosessinstans : prosessinstanser) {
-            if (prosessinstans.getStatus() != ProsessStatus.FEILET) {
-                throw new FunksjonellException("Prosessinstans " + prosessinstans.getId() + " har status " + prosessinstans.getStatus());
-            }
-        }
-
-        restartProsessinstanser(prosessinstanser);
+        prosessinstansAdminService.restartProsessinstanser(request.getUuids());
 
         return ResponseEntity.ok().build();
-    }
-
-    private void restartProsessinstanser(Collection<Prosessinstans> prosessinstanser) {
-        prosessinstanser.forEach(p -> p.setStatus(ProsessStatus.RESTARTET));
-
-        prosessinstansRepository
-            .saveAll(prosessinstanser)
-            .stream()
-            .sorted(Comparator.comparing(Prosessinstans::getRegistrertDato))
-            .forEach(behandleProsessinstansDelegate::behandleProsessinstans);
     }
 
     @Override
