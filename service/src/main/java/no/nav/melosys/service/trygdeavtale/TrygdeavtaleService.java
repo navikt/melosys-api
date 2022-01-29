@@ -89,7 +89,7 @@ public class TrygdeavtaleService {
         return new TrygdeavtaleResultat.Builder()
             .familie(familie)
             .virksomhet(virksomhet)
-            .lovvalgsperiode(lovvalgsperiode)
+            .lovvalgsperiodeOgBestemmelse(lovvalgsperiode)
             .build();
     }
 

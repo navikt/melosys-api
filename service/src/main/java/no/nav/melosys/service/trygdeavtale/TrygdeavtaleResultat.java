@@ -39,7 +39,7 @@ public record TrygdeavtaleResultat(
             return this;
         }
 
-        public Builder lovvalgsperiode(Lovvalgsperiode lovvalgsperiode) {
+        public Builder lovvalgsperiodeOgBestemmelse(Lovvalgsperiode lovvalgsperiode) {
             if (lovvalgsperiode == null) return this;
             this.bestemmelse = lovvalgsperiode.getBestemmelse().getKode();
             this.lovvalgsperiodeFom = lovvalgsperiode.getFom();

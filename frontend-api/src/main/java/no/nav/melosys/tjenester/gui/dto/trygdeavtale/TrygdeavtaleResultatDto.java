@@ -15,6 +15,8 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie.*;
+
 public record TrygdeavtaleResultatDto(
     String virksomhet,
     String bestemmelse,
@@ -34,11 +36,11 @@ public record TrygdeavtaleResultatDto(
     }
 
     public static TrygdeavtaleResultatDto fra(TrygdeavtaleResultat resultat, List<MedfolgendeFamilie> familie) {
-        var ektefelle = familie.stream().filter(mf -> mf.getRelasjonsrolle() == MedfolgendeFamilie.Relasjonsrolle.EKTEFELLE_SAMBOER)
+        var ektefelle = familie.stream().filter(mf -> mf.getRelasjonsrolle() == Relasjonsrolle.EKTEFELLE_SAMBOER)
             .map(mf -> tilMedfolgendeFamilieDto(resultat, mf.getUuid())).flatMap(Collection::stream).findFirst().orElse(null);
 
-        var barn = familie.stream().filter(mf1 -> mf1.getRelasjonsrolle() == MedfolgendeFamilie.Relasjonsrolle.BARN)
-            .map(mf1 -> tilMedfolgendeFamilieDto(resultat, mf1.getUuid())).flatMap(Collection::stream).toList();
+        var barn = familie.stream().filter(mf1 -> mf1.getRelasjonsrolle() == Relasjonsrolle.BARN)
+            .map(mf -> tilMedfolgendeFamilieDto(resultat, mf.getUuid())).flatMap(Collection::stream).toList();
 
         return new Builder()
             .ektefelle(ektefelle)
