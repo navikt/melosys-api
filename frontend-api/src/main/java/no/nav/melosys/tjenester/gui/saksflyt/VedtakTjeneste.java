@@ -102,6 +102,7 @@ public class VedtakTjeneste {
                     .medEktefelleFritekst(trygdeavtaleEllerFtrlVedtakDto.getEktefelleFritekst())
                     .medBarnFritekst(trygdeavtaleEllerFtrlVedtakDto.getBarnFritekst())
                     .medKopiMottakere(trygdeavtaleEllerFtrlVedtakDto.getKopiMottakere())
+                    .medRevurderBegrunnelse(trygdeavtaleEllerFtrlVedtakDto.getRevurderBegrunnelse())
                     .medBestillersId(bestillersId);
             } else {
                 throw new FunksjonellException("Vedtakstype " + fattVedtakDto.getVedtakstype() + " med sakstype " + sakstype + " er ikke støttet");
