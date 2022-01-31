@@ -92,7 +92,7 @@ class TrygdeavtaleServiceTest {
 
     @Test
     void overførResultat_altOk_lagresKorrekt() {
-        var trygdeavtaleResultat = lagTrygdeavtaleResultat();
+        var trygdeavtaleResultat = lagTrygdeavtaleAltFyltUtResultat();
 
         trygdeavtaleService.overførResultat(1L, trygdeavtaleResultat);
 
@@ -138,7 +138,7 @@ class TrygdeavtaleServiceTest {
     }
 
     @Test
-    void hentResultat_altOk_hentesKorrekt() {
+    void hentResultat_allData_hentesKorrekt() {
         when(avklarteMedfolgendeFamilieService.hentAvklartMedfølgendeEktefelle(anyLong())).thenReturn(lagAvklartMedfølgendeEktefelle());
         when(avklarteMedfolgendeFamilieService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(lagAvklartMedfølgendeBarn());
         when(avklartefaktaService.hentAvklarteOrgnrOgUuid(anyLong())).thenReturn(Set.of(ORGNR_1));
@@ -146,7 +146,21 @@ class TrygdeavtaleServiceTest {
 
         TrygdeavtaleResultat trygdeavtaleResultat = trygdeavtaleService.hentResultat(1L);
 
-        assertThat(trygdeavtaleResultat).usingRecursiveComparison().isEqualTo(lagTrygdeavtaleResultat());
+        assertThat(trygdeavtaleResultat).usingRecursiveComparison().isEqualTo(lagTrygdeavtaleAltFyltUtResultat());
+    }
+
+    @Test
+    void hentResultat_ingenData_hentesKorrekt() {
+        when(avklarteMedfolgendeFamilieService.hentAvklartMedfølgendeEktefelle(anyLong())).thenReturn(new AvklarteMedfolgendeFamilie(Set.of(), Set.of()));
+        when(avklarteMedfolgendeFamilieService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(new AvklarteMedfolgendeFamilie(Set.of(), Set.of()));
+        when(avklartefaktaService.hentAvklarteOrgnrOgUuid(anyLong())).thenReturn(Set.of());
+        when(lovvalgsperiodeService.hentLovvalgsperioder(anyLong())).thenReturn(List.of());
+
+        TrygdeavtaleResultat trygdeavtaleResultat = trygdeavtaleService.hentResultat(1L);
+
+        TrygdeavtaleResultat tomtTrygdeavtaleResultat = new TrygdeavtaleResultat
+            .Builder().familie(new AvklarteMedfolgendeFamilie(Set.of(), Set.of())).build();
+        assertThat(trygdeavtaleResultat).usingRecursiveComparison().isEqualTo(tomtTrygdeavtaleResultat);
     }
 
     @Test
@@ -252,7 +266,7 @@ class TrygdeavtaleServiceTest {
         assertThat(response).isEmpty();
     }
 
-    private TrygdeavtaleResultat lagTrygdeavtaleResultat() {
+    private TrygdeavtaleResultat lagTrygdeavtaleAltFyltUtResultat() {
         return new TrygdeavtaleResultat.Builder()
             .virksomhet(ORGNR_1)
             .bestemmelse(UK_ART6_1.getKode())
