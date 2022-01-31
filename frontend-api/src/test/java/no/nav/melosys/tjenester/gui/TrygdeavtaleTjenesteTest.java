@@ -166,6 +166,24 @@ class TrygdeavtaleTjenesteTest {
         assertThat(response).usingRecursiveComparison().isEqualTo(lagTrygdeavtaleResultatDto());
     }
 
+    @Test
+    void hentResultat_tomtResultat_returnererKorrekt() {
+        Behandling behandling = lagBehandling();
+        behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().personOpplysninger.medfolgendeFamilie =
+            List.of();
+
+        TrygdeavtaleResultat tomtTrygdeavtaleResultat = new TrygdeavtaleResultat
+            .Builder().familie(new AvklarteMedfolgendeFamilie(Set.of(), Set.of())).build();
+
+        when(behandlingService.hentBehandling(1L)).thenReturn(behandling);
+        when(trygdeavtaleService.hentResultat(1L)).thenReturn(tomtTrygdeavtaleResultat);
+
+        var response = trygdeavtaleTjeneste.hentResultat(1L).getBody();
+
+        TrygdeavtaleResultatDto tomTrygdeavtaleResultatDto = new TrygdeavtaleResultatDto.Builder().build();
+        assertThat(response).usingRecursiveComparison().isEqualTo(tomTrygdeavtaleResultatDto);
+    }
+
     private static Behandlingsgrunnlag lagBehandlingsgrunnlag() {
         var behandlingsgrunnlagdata = new BehandlingsgrunnlagData();
         behandlingsgrunnlagdata.soeknadsland.landkoder.add(Landkoder.GB.getKode());
