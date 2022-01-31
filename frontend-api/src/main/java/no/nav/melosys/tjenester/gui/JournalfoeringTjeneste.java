@@ -8,6 +8,7 @@ import no.nav.melosys.service.journalforing.JournalfoeringService;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringOpprettDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringSedDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringTilordneDto;
+import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.tjenester.gui.dto.journalforing.BehandlingsInformasjon;
 import no.nav.melosys.tjenester.gui.dto.journalforing.JournalpostDto;
 import no.nav.security.token.support.core.api.Protected;
@@ -28,10 +29,12 @@ public class JournalfoeringTjeneste {
     private static final Logger log = LoggerFactory.getLogger(JournalfoeringTjeneste.class);
 
     private final JournalfoeringService journalføringService;
+    private final OppgaveService oppgaveService;
 
     @Autowired
-    public JournalfoeringTjeneste(JournalfoeringService journalføringService) {
+    public JournalfoeringTjeneste(JournalfoeringService journalføringService, OppgaveService oppgaveService) {
         this.journalføringService = journalføringService;
+        this.oppgaveService = oppgaveService;
     }
 
     @GetMapping("{journalpostID}")
@@ -50,8 +53,9 @@ public class JournalfoeringTjeneste {
 
     @PostMapping("opprett")
     @ApiOperation(value = "Opprett sak og journalfør.")
-    public ResponseEntity<Void> opprettSakOgJournalfør(@RequestBody JournalfoeringOpprettDto journalfoeringDto) {
-        journalføringService.opprettOgJournalfør(journalfoeringDto);
+    public ResponseEntity<Void> opprettSakOgJournalfør(@RequestBody JournalfoeringOpprettDto journalføringDto) {
+        journalføringService.opprettOgJournalfør(journalføringDto);
+        oppgaveService.ferdigstillOppgave(journalføringDto.getOppgaveID());
         return ResponseEntity.noContent().build();
     }
 
@@ -59,13 +63,15 @@ public class JournalfoeringTjeneste {
     @ApiOperation(value = "Opprett sak og journalfør.")
     public ResponseEntity<Void> journalførSed(@RequestBody JournalfoeringSedDto journalfoeringSedDto) {
         journalføringService.journalførSed(journalfoeringSedDto);
+        oppgaveService.ferdigstillOppgave(journalfoeringSedDto.getOppgaveID());
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("tilordne")
     @ApiOperation(value = "Tilordne sak og journalfør.")
-    public ResponseEntity<Void> tilordneSakOgJournalfør(@RequestBody JournalfoeringTilordneDto journalfoeringDto) {
-        journalføringService.tilordneSakOgJournalfør(journalfoeringDto);
+    public ResponseEntity<Void> tilordneSakOgJournalfør(@RequestBody JournalfoeringTilordneDto journalføringDto) {
+        journalføringService.tilordneSakOgJournalfør(journalføringDto);
+        oppgaveService.ferdigstillOppgave(journalføringDto.getOppgaveID());
         return ResponseEntity.noContent().build();
     }
 }

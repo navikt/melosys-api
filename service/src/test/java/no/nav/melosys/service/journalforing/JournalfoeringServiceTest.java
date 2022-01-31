@@ -23,7 +23,6 @@ import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.felles.dto.SoeknadslandDto;
 import no.nav.melosys.service.journalforing.dto.*;
-import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
@@ -45,8 +44,6 @@ class JournalfoeringServiceTest {
     private JoarkFasade joarkFasade;
     @Mock
     private ProsessinstansService prosessinstansService;
-    @Mock
-    private OppgaveService oppgaveService;
     @Mock
     private EessiService eessiService;
     @Mock
@@ -70,7 +67,7 @@ class JournalfoeringServiceTest {
         journalpost = new Journalpost("123");
         journalpost.setHoveddokument(new ArkivDokument());
 
-        this.journalfoeringService = new JournalfoeringService(joarkFasade, oppgaveService, prosessinstansService, eessiService, fagsakService, persondataFasade, unleash);
+        this.journalfoeringService = new JournalfoeringService(joarkFasade, prosessinstansService, eessiService, fagsakService, persondataFasade, unleash);
         opprettDto = new JournalfoeringOpprettDto();
         opprettDto.setJournalpostID("setJournalpostID");
         opprettDto.setOppgaveID("setOppgaveID");
@@ -139,7 +136,6 @@ class JournalfoeringServiceTest {
         journalfoeringService.opprettOgJournalfør(opprettDto);
 
         verify(prosessinstansService).lagre(any(Prosessinstans.class));
-        verify(oppgaveService).ferdigstillOppgave(anyString());
     }
 
     @Test
@@ -154,7 +150,6 @@ class JournalfoeringServiceTest {
         journalfoeringService.opprettOgJournalfør(opprettDto);
 
         verify(prosessinstansService).lagre(any(Prosessinstans.class));
-        verify(oppgaveService).ferdigstillOppgave(anyString());
     }
 
     @Test
@@ -192,7 +187,6 @@ class JournalfoeringServiceTest {
         journalfoeringService.opprettOgJournalfør(opprettDto);
 
         verify(prosessinstansService).lagre(any(Prosessinstans.class));
-        verify(oppgaveService).ferdigstillOppgave(anyString());
     }
 
     @Test
@@ -327,7 +321,6 @@ class JournalfoeringServiceTest {
         journalfoeringService.tilordneSakOgJournalfør(tilordneDto);
 
         verify(prosessinstansService).lagre(any(Prosessinstans.class));
-        verify(oppgaveService).ferdigstillOppgave(anyString());
     }
 
     @Test

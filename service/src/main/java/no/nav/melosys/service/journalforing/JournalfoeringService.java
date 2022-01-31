@@ -18,7 +18,6 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.journalforing.dto.*;
-import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
@@ -40,7 +39,6 @@ public class JournalfoeringService {
     private static final Logger log = LoggerFactory.getLogger(JournalfoeringService.class);
 
     private final JoarkFasade joarkFasade;
-    private final OppgaveService oppgaveService;
     private final ProsessinstansService prosessinstansService;
     private final EessiService eessiService;
     private final FagsakService fagsakService;
@@ -49,13 +47,12 @@ public class JournalfoeringService {
 
     @Autowired
     public JournalfoeringService(JoarkFasade joarkFasade,
-                                 OppgaveService oppgaveService,
                                  ProsessinstansService prosessinstansService,
                                  EessiService eessiService,
                                  FagsakService fagsakService,
-                                 PersondataFasade persondataFasade, Unleash unleash) {
+                                 PersondataFasade persondataFasade,
+                                 Unleash unleash) {
         this.joarkFasade = joarkFasade;
-        this.oppgaveService = oppgaveService;
         this.prosessinstansService = prosessinstansService;
         this.eessiService = eessiService;
         this.fagsakService = fagsakService;
@@ -97,8 +94,6 @@ public class JournalfoeringService {
                 String.format("Manuell journalføring av behandlingstema %s støttes ikke", journalfoeringDto.getBehandlingstemaKode())
             );
         }
-
-        oppgaveService.ferdigstillOppgave(journalfoeringDto.getOppgaveID());
     }
 
     private void validerKanOppretteSakFraSed(Journalpost journalpost) {
@@ -220,7 +215,6 @@ public class JournalfoeringService {
         prosessinstans.setData(ProsessDataKey.JFR_INGEN_VURDERING, journalfoeringDto.isIngenVurdering());
 
         prosessinstansService.lagre(prosessinstans);
-        oppgaveService.ferdigstillOppgave(journalfoeringDto.getOppgaveID());
     }
 
     private void validerKanTilknytteJournalpostForSedTilSak(Journalpost journalpost, String tilknyttTilSaksnummer) {
@@ -311,7 +305,6 @@ public class JournalfoeringService {
         validerJournalfoerSed(journalfoeringSedDto);
         MelosysEessiMelding eessiMelding = eessiService.hentSedTilknyttetJournalpost(journalfoeringSedDto.getJournalpostID());
         prosessinstansService.opprettProsessinstansSedMottak(eessiMelding, persondataFasade.hentAktørIdForIdent(journalfoeringSedDto.getBrukerID()));
-        oppgaveService.ferdigstillOppgave(journalfoeringSedDto.getOppgaveID());
     }
 
     private void validerJournalfoerSed(JournalfoeringSedDto journalfoeringSedDto) {
