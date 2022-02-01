@@ -11,6 +11,7 @@ public class FattFtrlVedtakRequest extends FattVedtakRequest {
     private final String barnFritekst;
     private final List<KopiMottaker> kopiMottakere;
     private final String bestillersId;
+    private final String revurderBegrunnelse;
 
     private FattFtrlVedtakRequest(Builder builder) {
         super(builder);
@@ -20,6 +21,7 @@ public class FattFtrlVedtakRequest extends FattVedtakRequest {
         this.barnFritekst = builder.barnFritekst;
         this.kopiMottakere = builder.kopiMottakere;
         this.bestillersId = builder.bestillersId;
+        this.revurderBegrunnelse = builder.revurderBegrunnelse;
     }
 
     public String getInnledningFritekst() {
@@ -46,6 +48,10 @@ public class FattFtrlVedtakRequest extends FattVedtakRequest {
         return bestillersId;
     }
 
+    public String getRevurderBegrunnelse() {
+        return revurderBegrunnelse;
+    }
+
     public static class Builder extends FattVedtakRequest.Builder<Builder> {
         private String innledningFritekst;
         private String begrunnelseFritekst;
@@ -53,6 +59,8 @@ public class FattFtrlVedtakRequest extends FattVedtakRequest {
         private String barnFritekst;
         private List<KopiMottaker> kopiMottakere;
         private String bestillersId;
+        private String revurderBegrunnelse;
+
 
         @Override
         public Builder getThis() {
@@ -86,6 +94,11 @@ public class FattFtrlVedtakRequest extends FattVedtakRequest {
 
         public Builder medBestillersId(String bestillersId) {
             this.bestillersId = bestillersId;
+            return this;
+        }
+
+        public Builder medRevurderBegrunnelse(String revurderBegrunnelse) {
+            this.revurderBegrunnelse = revurderBegrunnelse;
             return this;
         }
 

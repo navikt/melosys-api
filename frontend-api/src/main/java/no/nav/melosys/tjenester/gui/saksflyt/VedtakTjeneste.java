@@ -94,6 +94,7 @@ public class VedtakTjeneste {
                     .medEktefelleFritekst(trygdeavtaleEllerFtrlVedtakDto.getEktefelleFritekst())
                     .medBarnFritekst(trygdeavtaleEllerFtrlVedtakDto.getBarnFritekst())
                     .medKopiMottakere(trygdeavtaleEllerFtrlVedtakDto.getKopiMottakere())
+                    .medRevurderBegrunnelse(trygdeavtaleEllerFtrlVedtakDto.getRevurderBegrunnelse())
                     .medBestillersId(bestillersId);
             } else if (sakstype == Sakstyper.TRYGDEAVTALE) {
                 fattVedtakRequest = new FattTrygdeavtaleVedtakRequest.Builder()
