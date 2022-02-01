@@ -139,7 +139,7 @@ class OpprettJournalforBrevTest {
     }
 
     @Test
-    void utfør_StorbritanniaInnvilgelseTilBrukerSkalHaHaAttest_korrektTittel() {
+    void utfør_StorbritanniaInnvilgelseTilBrukerSkalHaAttest_korrektTittel() {
         when(mockLovvalgsperiodeService.hentValidertLovvalgsperiode(anyLong())).thenReturn(lagLovvalsperiode(UK_ART6_1));
         Prosessinstans prosessinstans = mockStorbritannia(lagMottaker(BRUKER, "1234", null, null));
 
@@ -152,7 +152,7 @@ class OpprettJournalforBrevTest {
     }
 
     @Test
-    void utfør_StorbritanniaInnvilgelseTilBrukerSkalIkkeHaHaAttest_korrektTittel() {
+    void utfør_StorbritanniaInnvilgelseTilBrukerSkalIkkeHaAttest_korrektTittel() {
         when(mockLovvalgsperiodeService.hentValidertLovvalgsperiode(anyLong())).thenReturn(lagLovvalsperiode(UK_ART8_2));
         Prosessinstans prosessinstans = mockStorbritannia(lagMottaker(BRUKER, "1234", null, null));
 
@@ -165,7 +165,7 @@ class OpprettJournalforBrevTest {
     }
 
     @Test
-    void utfør_StorbritanniaInnvilgelseTilArbeidsgiverSkalHaHaAttest_korrektTittel() {
+    void utfør_StorbritanniaInnvilgelseTilArbeidsgiverSkalHaAttest_korrektTittel() {
         when(mockLovvalgsperiodeService.hentValidertLovvalgsperiode(anyLong())).thenReturn(lagLovvalsperiode(UK_ART6_1));
         Prosessinstans prosessinstans = mockStorbritannia(lagMottaker(ARBEIDSGIVER, null, "1234", null));
 
@@ -178,7 +178,7 @@ class OpprettJournalforBrevTest {
     }
 
     @Test
-    void utfør_StorbritanniaInnvilgelseTilArbeidsgiverBrukerSkalIkkeHaHaAttest_korrektTittel() {
+    void utfør_StorbritanniaInnvilgelseTilArbeidsgiverBrukerSkalIkkeHaAttest_korrektTittel() {
         when(mockLovvalgsperiodeService.hentValidertLovvalgsperiode(anyLong())).thenReturn(lagLovvalsperiode(UK_ART8_2));
         Prosessinstans prosessinstans = mockStorbritannia(lagMottaker(ARBEIDSGIVER, null, "1234", null));
 
@@ -191,7 +191,7 @@ class OpprettJournalforBrevTest {
     }
 
     @Test
-    void utfør_StorbritanniaInnvilgelseTilSkattSkalHaHaAttest_korrektTittel() {
+    void utfør_StorbritanniaInnvilgelseTilSkattSkalAldriHaAttest_korrektTittel() {
         Prosessinstans prosessinstans = mockStorbritannia(lagMottaker(TRYGDEMYNDIGHET, null, FastMottakerMedOrgnr.OrgNr.SKATTEETATEN_ORGNR.getOrgnr(), null));
 
         opprettJournalforBrev.utfør(prosessinstans);
@@ -203,19 +203,7 @@ class OpprettJournalforBrevTest {
     }
 
     @Test
-    void utfør_StorbritanniaInnvilgelseTilSkattSkalIkkeHaHaAttest_korrektTittel() {
-        Prosessinstans prosessinstans = mockStorbritannia(lagMottaker(TRYGDEMYNDIGHET, null, FastMottakerMedOrgnr.OrgNr.SKATTEETATEN_ORGNR.getOrgnr(), null));
-
-        opprettJournalforBrev.utfør(prosessinstans);
-
-        verify(mockJoarkFasade).opprettJournalpost(opprettJournalpostCaptor.capture(), anyBoolean());
-
-        OpprettJournalpost captured = opprettJournalpostCaptor.getValue();
-        assertThat(captured.getHoveddokument().getTittel()).isEqualTo("Kopi av vedtak om medlemskap");
-    }
-
-    @Test
-    void utfør_StorbritanniaInnvilgelseTilStorbritanniaSkalIkkeHaHaAttest_korrektTittel() {
+    void utfør_StorbritanniaInnvilgelseTilStorbritanniaSkalKunHaAttest_korrektTittel() {
         when(mockUtenlandskMyndighetService.hentUtenlandskMyndighetForInstitusjonID("1234")).thenReturn(new UtenlandskMyndighet());
         Prosessinstans prosessinstans = mockStorbritannia(lagMottaker(TRYGDEMYNDIGHET, null, null, "1234"));
 
