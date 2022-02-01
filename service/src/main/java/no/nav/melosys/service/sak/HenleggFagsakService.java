@@ -1,5 +1,6 @@
 package no.nav.melosys.service.sak;
 
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.BehandlingsresultatBegrunnelse;
@@ -28,17 +29,19 @@ public class HenleggFagsakService {
     private final ProsessinstansService prosessinstansService;
     private final OppgaveService oppgaveService;
     private final BehandlingService behandlingService;
+    private final Unleash unleash;
 
     public HenleggFagsakService(FagsakService fagsakService,
                                 BehandlingsresultatService behandlingsresultatService,
                                 ProsessinstansService prosessinstansService,
                                 @Qualifier("system") OppgaveService oppgaveService,
-                                BehandlingService behandlingService) {
+                                BehandlingService behandlingService, Unleash unleash) {
         this.fagsakService = fagsakService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.prosessinstansService = prosessinstansService;
         this.oppgaveService = oppgaveService;
         this.behandlingService = behandlingService;
+        this.unleash = unleash;
     }
 
     /**
@@ -58,7 +61,7 @@ public class HenleggFagsakService {
 
         Behandling aktivBehandling = fagsak.hentAktivBehandling();
         oppdaterBehandlingsresultat(aktivBehandling.getId(), begrunnelseKode, fritekst);
-        if (aktivBehandling.erNyVurdering()) {
+        if (aktivBehandling.erNyVurdering() && unleash.isEnabled("melosys.behandling.AVSLUTTE_UTEN_ENDRING")) {
             behandlingService.avsluttNyVurdering(aktivBehandling.getId(), Behandlingsresultattyper.HENLEGGELSE);
         } else {
             fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.HENLAGT);
@@ -85,7 +88,7 @@ public class HenleggFagsakService {
     public void henleggSomBortfalt(Fagsak fagsak) {
         Behandling aktivBehandling = fagsak.hentAktivBehandling();
 
-        if (aktivBehandling.erNyVurdering()) {
+        if (aktivBehandling.erNyVurdering() && unleash.isEnabled("melosys.behandling.AVSLUTTE_UTEN_ENDRING") ) {
             behandlingService.avsluttNyVurdering(aktivBehandling.getId(), Behandlingsresultattyper.HENLEGGELSE_BORTFALT);
         } else {
             log.info("Fagsak {}: {}", fagsak.getSaksnummer(), Saksstatuser.HENLAGT_BORTFALT.getBeskrivelse());

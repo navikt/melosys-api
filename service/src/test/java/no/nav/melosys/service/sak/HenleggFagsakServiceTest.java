@@ -2,6 +2,7 @@ package no.nav.melosys.service.sak;
 
 import java.util.Arrays;
 
+import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
@@ -44,6 +45,8 @@ class HenleggFagsakServiceTest {
 
     private HenleggFagsakService henleggFagsakService;
 
+    private final FakeUnleash unleash = new FakeUnleash();
+
     @Captor
     private ArgumentCaptor<Behandlingsresultat> behandlingsresultatCaptor;
 
@@ -56,13 +59,15 @@ class HenleggFagsakServiceTest {
 
     @BeforeEach
     public void setup() {
-        henleggFagsakService = new HenleggFagsakService(fagsakService, behandlingsresultatService, prosessinstansService, oppgaveService, behandlingService);
+        henleggFagsakService = new HenleggFagsakService(fagsakService, behandlingsresultatService, prosessinstansService, oppgaveService, behandlingService, unleash);
 
         behandling.setId(behandlingID);
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
         behandling.setFagsak(fagsak);
         fagsak.setSaksnummer(saksnummer);
         fagsak.getBehandlinger().add(behandling);
+
+        unleash.enableAll();
     }
 
     @Test
