@@ -21,7 +21,7 @@ import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.DokgenService;
 import no.nav.melosys.service.dokument.DokumentproduksjonsInfo;
-import no.nav.melosys.service.dokument.brev.mapper.DokumentproduksjonsInfoMapper;
+import no.nav.melosys.service.dokument.VedleggTyper;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -175,10 +175,10 @@ public class OpprettJournalforBrev implements StegBehandler {
 
     private String utledJournalføringsTittelForAvtaleMedStorbritannia(long behandlingID, DokumentproduksjonsInfo dokumentproduksjonsInfo, Aktoer mottaker) {
         if (mottaker.erUtenlandskMyndighet()) {
-            return dokumentproduksjonsInfo.vedleggsTitler().get(DokumentproduksjonsInfoMapper.VedleggsTyper.ATTEST);
+            return dokumentproduksjonsInfo.vedleggsTitler().get(VedleggTyper.ATTEST);
         }
 
-        var vedtaksbrevTittel = dokumentproduksjonsInfo.vedleggsTitler().get(DokumentproduksjonsInfoMapper.VedleggsTyper.VEDTAKSBREV);
+        var vedtaksbrevTittel = dokumentproduksjonsInfo.vedleggsTitler().get(VedleggTyper.VEDTAKSBREV);
 
         if (FastMottakerMedOrgnr.SKATT.getOrgnr().equals((mottaker.getOrgnr()))) {
             return lagKopiTittel(vedtaksbrevTittel);

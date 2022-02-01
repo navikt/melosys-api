@@ -11,6 +11,7 @@ import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.joark.DokumentKategoriKode;
 import no.nav.melosys.service.dokument.DokumentproduksjonsInfo;
+import no.nav.melosys.service.dokument.VedleggTyper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -66,8 +67,8 @@ public class DokumentproduksjonsInfoMapper {
                 new DokumentproduksjonsInfo("uk_innvilgelse_og_attest",
                     DokumentKategoriKode.VB.getKode(),
                     JournalforingsTittel.STORBRITANNIA.getTittel(),
-                    Map.of(VedleggsTyper.VEDTAKSBREV, JournalforingsTittel.STORBRITANNIA_VEDTAKSBREV.getTittel(),
-                        VedleggsTyper.ATTEST, JournalforingsTittel.STORBRITANNIA_ATTEST.getTittel())))
+                    Map.of(VedleggTyper.VEDTAKSBREV, JournalforingsTittel.STORBRITANNIA_VEDTAKSBREV.getTittel(),
+                        VedleggTyper.ATTEST, JournalforingsTittel.STORBRITANNIA_ATTEST.getTittel())))
             .put(GENERELT_FRITEKSTBREV_BRUKER,
                 new DokumentproduksjonsInfo("fritekstbrev",
                     DokumentKategoriKode.IB.getKode(),
@@ -135,10 +136,5 @@ public class DokumentproduksjonsInfoMapper {
         JournalforingsTittel(String tittel) {
             this.tittel = tittel;
         }
-    }
-
-    public enum VedleggsTyper {
-        VEDTAKSBREV,
-        ATTEST
     }
 }
