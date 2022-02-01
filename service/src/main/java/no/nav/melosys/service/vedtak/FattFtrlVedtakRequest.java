@@ -11,7 +11,7 @@ public class FattFtrlVedtakRequest extends FattVedtakRequest {
     private final String barnFritekst;
     private final List<KopiMottaker> kopiMottakere;
     private final String bestillersId;
-    private final String revurderBegrunnelse;
+    private final String nyVurderingBakgrunn;
 
     private FattFtrlVedtakRequest(Builder builder) {
         super(builder);
@@ -21,7 +21,7 @@ public class FattFtrlVedtakRequest extends FattVedtakRequest {
         this.barnFritekst = builder.barnFritekst;
         this.kopiMottakere = builder.kopiMottakere;
         this.bestillersId = builder.bestillersId;
-        this.revurderBegrunnelse = builder.revurderBegrunnelse;
+        this.nyVurderingBakgrunn = builder.nyVurderingBakgrunn;
     }
 
     public String getInnledningFritekst() {
@@ -48,8 +48,8 @@ public class FattFtrlVedtakRequest extends FattVedtakRequest {
         return bestillersId;
     }
 
-    public String getRevurderBegrunnelse() {
-        return revurderBegrunnelse;
+    public String getNyVurderingBakgrunn() {
+        return nyVurderingBakgrunn;
     }
 
     public static class Builder extends FattVedtakRequest.Builder<Builder> {
@@ -59,7 +59,7 @@ public class FattFtrlVedtakRequest extends FattVedtakRequest {
         private String barnFritekst;
         private List<KopiMottaker> kopiMottakere;
         private String bestillersId;
-        private String revurderBegrunnelse;
+        private String nyVurderingBakgrunn;
 
 
         @Override
@@ -97,8 +97,8 @@ public class FattFtrlVedtakRequest extends FattVedtakRequest {
             return this;
         }
 
-        public Builder medRevurderBegrunnelse(String revurderBegrunnelse) {
-            this.revurderBegrunnelse = revurderBegrunnelse;
+        public Builder medNyVurderingBakgrunn(String nyVurderingBakgrunn) {
+            this.nyVurderingBakgrunn = nyVurderingBakgrunn;
             return this;
         }
 

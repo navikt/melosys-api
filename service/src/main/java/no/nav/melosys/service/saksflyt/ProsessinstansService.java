@@ -186,7 +186,7 @@ public class ProsessinstansService {
 
     public void opprettProsessinstansIverksettVedtakEos(Behandling behandling, Behandlingsresultattyper behandlingsresultatType,
                                                         String fritekst, String fritekstSed, Set<String> mottakerinstitusjoner,
-                                                        String revurderBegrunnelse) {
+                                                        String nyVurderingBakgrunn) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.IVERKSETT_VEDTAK_EOS)
             .medBehandling(behandling)
@@ -196,8 +196,8 @@ public class ProsessinstansService {
             .build();
 
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSRESULTATTYPE, behandlingsresultatType.getKode());
-        if (StringUtils.isNotEmpty(revurderBegrunnelse)) {
-            prosessinstans.setData(ProsessDataKey.REVURDER_BEGRUNNELSE, revurderBegrunnelse);
+        if (StringUtils.isNotEmpty(nyVurderingBakgrunn)) {
+            prosessinstans.setData(ProsessDataKey.NY_VURDERING_BAKGRUNN, nyVurderingBakgrunn);
         }
 
         lagre(prosessinstans);

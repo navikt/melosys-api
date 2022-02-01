@@ -52,8 +52,8 @@ public class BehandlingsresultatDto {
             .map(BehandlingsresultatBegrunnelse::getKode)
             .forEach(dto.getBegrunnelseKoder()::add);
 
-        if (resultat.getVedtakMetadata() != null && resultat.getVedtakMetadata().getRevurderBegrunnelse() != null) {
-            dto.getBegrunnelseKoder().add(resultat.getVedtakMetadata().getRevurderBegrunnelse());
+        if (resultat.getVedtakMetadata() != null && resultat.getVedtakMetadata().getNyVurderingBakgrunn() != null) {
+            dto.getBegrunnelseKoder().add(resultat.getVedtakMetadata().getNyVurderingBakgrunn());
         }
         return dto;
     }
