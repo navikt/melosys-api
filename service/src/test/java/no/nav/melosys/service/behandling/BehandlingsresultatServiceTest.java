@@ -4,10 +4,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.*;
-import java.util.stream.Stream;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
+import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
@@ -164,7 +164,10 @@ class BehandlingsresultatServiceTest {
             .allMatch(a -> a.getId() == null)
             .allMatch(a -> a.getBehandlingsresultat() == behandlingsresultatreplika)
             .allMatch(a -> a.getFakta().equals("fakta"))
-            .allMatch(a -> a.getType().equals(Avklartefaktatyper.ARBEIDSLAND));
+            .allMatch(a -> a.getType().equals(Avklartefaktatyper.ARBEIDSLAND))
+            .flatExtracting(Avklartefakta::getRegistreringer)
+            .extracting(AvklartefaktaRegistrering::getAvklartefakta)
+            .containsExactly(behandlingsresultatreplika.getAvklartefakta().stream().findFirst().get());
 
         assertThat(behandlingsresultatreplika.getVilkaarsresultater())
             .allMatch(v -> v.getId() == null)
@@ -311,6 +314,9 @@ class BehandlingsresultatServiceTest {
         avklartefakta.setBehandlingsresultat(opprettTomtBehandlingsresultatMedId());
         avklartefakta.setFakta("fakta");
         avklartefakta.setType(Avklartefaktatyper.ARBEIDSLAND);
+        AvklartefaktaRegistrering avklartefaktaRegistrering = new AvklartefaktaRegistrering();
+        avklartefaktaRegistrering.setBegrunnelseKode("begrunnelsekode");
+        avklartefakta.getRegistreringer().add(avklartefaktaRegistrering);
         return avklartefakta;
     }
 
