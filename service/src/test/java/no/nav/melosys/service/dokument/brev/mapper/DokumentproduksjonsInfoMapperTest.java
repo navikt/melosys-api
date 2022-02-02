@@ -1,4 +1,4 @@
-package no.nav.melosys.service.dokument;
+package no.nav.melosys.service.dokument.brev.mapper;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -6,10 +6,12 @@ import java.util.Set;
 import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.service.dokument.DokumentproduksjonsInfo;
+import no.nav.melosys.service.dokument.brev.mapper.DokumentproduksjonsInfoMapper;
 import org.junit.jupiter.api.Test;
 
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
-import static no.nav.melosys.service.dokument.DokumentproduksjonsInfoMapper.DOKUMENTMALER_PRODSATT;
+import static no.nav.melosys.service.dokument.brev.mapper.DokumentproduksjonsInfoMapper.DOKUMENTMALER_PRODSATT;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 

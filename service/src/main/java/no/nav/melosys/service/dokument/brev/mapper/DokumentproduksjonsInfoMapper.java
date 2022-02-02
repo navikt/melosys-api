@@ -1,5 +1,6 @@
-package no.nav.melosys.service.dokument;
+package no.nav.melosys.service.dokument.brev.mapper;
 
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
 
@@ -9,6 +10,8 @@ import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.joark.DokumentKategoriKode;
+import no.nav.melosys.service.dokument.DokumentproduksjonsInfo;
+import no.nav.melosys.service.dokument.VedleggTyper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -33,49 +36,51 @@ public class DokumentproduksjonsInfoMapper {
             .put(MELDING_FORVENTET_SAKSBEHANDLINGSTID,
                 new DokumentproduksjonsInfo("saksbehandlingstid_soknad",
                     DokumentKategoriKode.IB.getKode(),
-                    JournalforingsTittel.FORVALTNINGSMELDING.getTittel())
+                    JournalforingsTittel.FORVALTNINGSMELDING.getTittel(), null)
             )
             .put(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD,
                 new DokumentproduksjonsInfo("saksbehandlingstid_soknad",
                     DokumentKategoriKode.IB.getKode(),
-                    JournalforingsTittel.FORVALTNINGSMELDING.getTittel())
+                    JournalforingsTittel.FORVALTNINGSMELDING.getTittel(), null)
             )
             .put(MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE,
                 new DokumentproduksjonsInfo("saksbehandlingstid_klage",
                     DokumentKategoriKode.IB.getKode(),
-                    JournalforingsTittel.FORVALTNINGSMELDING.getTittel())
+                    JournalforingsTittel.FORVALTNINGSMELDING.getTittel(), null)
             )
             .put(MANGELBREV_BRUKER,
                 new DokumentproduksjonsInfo("mangelbrev_bruker",
                     DokumentKategoriKode.IB.getKode(),
-                    JournalforingsTittel.MANGELBREV.getTittel())
+                    JournalforingsTittel.MANGELBREV.getTittel(), null)
             )
             .put(MANGELBREV_ARBEIDSGIVER,
                 new DokumentproduksjonsInfo("mangelbrev_arbeidsgiver",
                     DokumentKategoriKode.IB.getKode(),
-                    JournalforingsTittel.MANGELBREV.getTittel())
+                    JournalforingsTittel.MANGELBREV.getTittel(), null)
             )
             .put(INNVILGELSE_FOLKETRYGDLOVEN_2_8,
                 new DokumentproduksjonsInfo("innvilgelse_ftrl_2_8",
                     DokumentKategoriKode.VB.getKode(),
-                    JournalforingsTittel.INNVILGELSE_FTRL_2_8.getTittel())
+                    JournalforingsTittel.INNVILGELSE_FTRL_2_8.getTittel(), null)
             )
             .put(STORBRITANNIA,
                 new DokumentproduksjonsInfo("uk_innvilgelse_og_attest",
                     DokumentKategoriKode.VB.getKode(),
-                    JournalforingsTittel.STORBRITANNIA.getTittel()))
+                    JournalforingsTittel.STORBRITANNIA.getTittel(),
+                    Map.of(VedleggTyper.VEDTAKSBREV, JournalforingsTittel.STORBRITANNIA_VEDTAKSBREV.getTittel(),
+                        VedleggTyper.ATTEST, JournalforingsTittel.STORBRITANNIA_ATTEST.getTittel())))
             .put(GENERELT_FRITEKSTBREV_BRUKER,
                 new DokumentproduksjonsInfo("fritekstbrev",
                     DokumentKategoriKode.IB.getKode(),
-                    null))
+                    null, null))
             .put(GENERELT_FRITEKSTBREV_ARBEIDSGIVER,
                 new DokumentproduksjonsInfo("fritekstbrev",
                     DokumentKategoriKode.IB.getKode(),
-                    null))
+                    null, null))
             .put(AVSLAG_MANGLENDE_OPPLYSNINGER,
                 new DokumentproduksjonsInfo("avslag_manglende_opplysninger",
                     DokumentKategoriKode.VB.getKode(),
-                    JournalforingsTittel.AVSLAG_MANGLENDE_OPPLYSNINGER.getTittel()))
+                    JournalforingsTittel.AVSLAG_MANGLENDE_OPPLYSNINGER.getTittel(), null))
             .build());
     }
 
@@ -118,6 +123,8 @@ public class DokumentproduksjonsInfoMapper {
         MANGELBREV("Melding om manglende opplysninger"),
         INNVILGELSE_FTRL_2_8("Vedtak om frivillig medlemskap"),
         STORBRITANNIA("Vedtak om medlemskap, Attest for utsendt arbeidstaker"),
+        STORBRITANNIA_VEDTAKSBREV("Vedtak om medlemskap"),
+        STORBRITANNIA_ATTEST("Attest for utsendt arbeidstaker"),
         AVSLAG_MANGLENDE_OPPLYSNINGER("Avslag pga manglende dokument");
 
         private final String tittel;

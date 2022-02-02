@@ -1,7 +1,7 @@
 package no.nav.melosys.tjenester.gui.graphql.dto;
 
 public record StrukturertAdresseformatDto(
-    String tilleggsavn,
+    String tilleggsnavn,
     String gatenavn,
     String husnummerEtasjeLeilighet,
     String postboks,
