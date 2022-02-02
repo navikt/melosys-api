@@ -59,6 +59,6 @@ public class VilkaarTjeneste {
         aksesskontroll.autoriserSkrivTilRessurs(behandlingID, Ressurs.VILKÅR);
         inngangsvilkaarService.overstyrInngangsvilkårTilOppfylt(behandlingID);
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 }

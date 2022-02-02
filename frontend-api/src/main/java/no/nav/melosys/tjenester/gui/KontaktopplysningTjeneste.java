@@ -61,6 +61,6 @@ public class KontaktopplysningTjeneste {
     public ResponseEntity slettKontaktopplysning(@PathVariable("saksnummer") String saksnummer, @PathVariable("orgnr") String orgnr) {
         aksesskontroll.autoriserSakstilgang(saksnummer);
         kontaktopplysningService.slettKontaktopplysning(saksnummer, orgnr);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 }
