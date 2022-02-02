@@ -39,7 +39,7 @@ public record TrygdeavtaleResultatDto(
         var ektefelle = familie.stream().filter(mf -> mf.getRelasjonsrolle() == Relasjonsrolle.EKTEFELLE_SAMBOER)
             .map(mf -> tilMedfolgendeFamilieDto(resultat, mf.getUuid())).flatMap(Collection::stream).findFirst().orElse(null);
 
-        var barn = familie.stream().filter(mf1 -> mf1.getRelasjonsrolle() == Relasjonsrolle.BARN)
+        var barn = familie.stream().filter(mf -> mf.getRelasjonsrolle() == Relasjonsrolle.BARN)
             .map(mf -> tilMedfolgendeFamilieDto(resultat, mf.getUuid())).flatMap(Collection::stream).toList();
 
         return new Builder()
