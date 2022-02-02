@@ -182,7 +182,7 @@ class InngangsvilkaarServiceTest {
                 "EEE", null, null, null,
                 "FREG", "Nully", false)
         );
-        var periode = new no.nav.melosys.domain.behandlingsgrunnlag.data.Periode(LocalDate.now().plusMonths(1), null);
+        var periode = new no.nav.melosys.domain.behandlingsgrunnlag.data.Periode(LocalDate.parse("2020-11-18"), null);
 
         final Set<Land> statsborgerskap = inngangsvilkaarService.avgjørGyldigeStatsborgerskapForPerioden(statsborgerskapFraPdl,
             periode);
