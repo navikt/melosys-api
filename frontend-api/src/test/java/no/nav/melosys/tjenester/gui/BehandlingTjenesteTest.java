@@ -17,6 +17,7 @@ import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresseUtlan
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.EndreBehandlingstemaService;
 import no.nav.melosys.service.ldap.SaksbehandlerService;
@@ -27,6 +28,7 @@ import no.nav.melosys.tjenester.gui.util.NumericStringRandomizer;
 import org.jeasy.random.EasyRandom;
 import org.jeasy.random.EasyRandomParameters;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -48,6 +50,7 @@ class BehandlingTjenesteTest extends JsonSchemaTestParent {
     private static final String ENDRE_BEHANDLINGSTEMA_SCHEMA = "behandlinger-endrebehandlingstema-schema.json";
     private static final String ENDRE_BEHANDLINGSTEMA_POST_SCHEMA = "behandlinger-endrebehandlingstema-post-schema.json";
     private static final String ENDRE_BEHANDLINGSSTATUS_SCHEMA = "behandlinger-status-schema.json";
+    private static final String ENDRE_BEHANDLINGSTYPE_SCHEMA = "behandlinger-type-schema.json";
     private static final String ENDRE_BEHANDLINGSSTATUS_POST_SCHEMA = "behandlinger-status-post-schema.json";
     private static final long BEHANDLING_ID = 11L;
     private static final List<Long> PERIODE_IDER = Arrays.asList(2L, 3L, 5L);
@@ -103,16 +106,22 @@ class BehandlingTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
+    void endreBehandlingstemaValidering() throws Exception {
+        EndreBehandlingstemaDto endreBehandlingstemaDto = new EndreBehandlingstemaDto(Behandlingstema.ARBEID_NORGE_BOSATT_ANNET_LAND.getKode());
+        valider(endreBehandlingstemaDto, ENDRE_BEHANDLINGSTEMA_POST_SCHEMA, log);
+    }
+
+    @Test
+    void endreBehandlinsstatusValidering() throws Exception {
+        EndreBehandlingsstatusDto behandlingsstatusDto = new EndreBehandlingsstatusDto(Behandlingsstatus.AVVENT_FAGLIG_AVKLARING.getKode());
+        valider(behandlingsstatusDto, ENDRE_BEHANDLINGSSTATUS_POST_SCHEMA, log);
+    }
+
+    @Test
     void hentMuligeBehandlingstemaValidering() throws IOException {
         when(endreBehandlingstemaService.hentMuligeBehandlingstema(BEHANDLING_ID)).thenReturn(BEHANDLINGSTEMA_SØKNAD);
         List<Behandlingstema> muligeBehandlingstema = behandlingTjeneste.hentEndreBehandlingstema(BEHANDLING_ID).getBody();
         validerArray(muligeBehandlingstema, ENDRE_BEHANDLINGSTEMA_SCHEMA, log);
-    }
-
-    @Test
-    void endreBehandlingstemaValidering() throws Exception {
-        EndreBehandlingstemaDto endreBehandlingstemaDto = new EndreBehandlingstemaDto(Behandlingstema.ARBEID_NORGE_BOSATT_ANNET_LAND.getKode());
-        valider(endreBehandlingstemaDto, ENDRE_BEHANDLINGSTEMA_POST_SCHEMA, log);
     }
 
     @Test
@@ -122,9 +131,10 @@ class BehandlingTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    void endreBehandlinsstatusValidering() throws Exception {
-        EndreBehandlingsstatusDto behandlingsstatusDto = new EndreBehandlingsstatusDto(Behandlingsstatus.AVVENT_FAGLIG_AVKLARING.getKode());
-        valider(behandlingsstatusDto, ENDRE_BEHANDLINGSSTATUS_POST_SCHEMA, log);
+    @Disabled("Inntil melosys-schema er oppdatert")
+    void hentMuligeBehandlingstyperValidering() throws IOException {
+        Collection<Behandlingstyper> muligeTyper = behandlingTjeneste.hentMuligeTyper(BEHANDLING_ID).getBody();
+        validerArray(muligeTyper, ENDRE_BEHANDLINGSTYPE_SCHEMA, log);
     }
 
     @Test

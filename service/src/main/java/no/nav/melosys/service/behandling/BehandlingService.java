@@ -35,6 +35,8 @@ import org.springframework.transaction.annotation.Transactional;
 import static java.util.stream.Collectors.toList;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.*;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*;
+import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.ENDRET_PERIODE;
+import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.NY_VURDERING;
 import static no.nav.melosys.metrics.MetrikkerNavn.*;
 
 @Service
@@ -147,9 +149,7 @@ public class BehandlingService {
     private Collection<Behandlingsstatus> hentMuligeStatuser(Behandling behandling) {
         if (behandling.erInaktiv()) return Collections.emptyList();
 
-        List<Behandlingsstatus> muligeStatuser = List.of(AVVENT_DOK_PART, AVVENT_DOK_UTL, UNDER_BEHANDLING, AVVENT_FAGLIG_AVKLARING).stream()
-            .filter(status -> status != behandling.getStatus())
-            .collect(Collectors.toList());
+        List<Behandlingsstatus> muligeStatuser = List.of(AVVENT_DOK_PART, AVVENT_DOK_UTL, UNDER_BEHANDLING, AVVENT_FAGLIG_AVKLARING);
 
         List<Behandlingstema> temaerSomKanAvsluttes = List.of(ØVRIGE_SED_MED, ØVRIGE_SED_UFM, TRYGDETID, IKKE_YRKESAKTIV);
         if (temaerSomKanAvsluttes.contains(behandling.getTema())) {
@@ -157,6 +157,15 @@ public class BehandlingService {
         }
 
         return muligeStatuser;
+    }
+
+    @Transactional(readOnly = true)
+    public Collection<Behandlingstyper> hentMuligeTyper(long behandlingID) {
+        var behandling = hentBehandlingUtenSaksopplysninger(behandlingID);
+
+        if (behandling.erInaktiv()) return Collections.emptyList();
+
+        return List.of(ENDRET_PERIODE, NY_VURDERING);
     }
 
     @Transactional

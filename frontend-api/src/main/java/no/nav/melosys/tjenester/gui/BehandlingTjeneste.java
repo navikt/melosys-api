@@ -11,6 +11,7 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.dokument.DokumentView;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.EndreBehandlingstemaService;
@@ -68,16 +69,6 @@ public class BehandlingTjeneste {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("{behandlingID}/muligeStatuser")
-    @ApiOperation("Hent mulige nye behandlingsstatuser for en behandling")
-    public ResponseEntity<Collection<Behandlingsstatus>> hentMuligeStatuser(@PathVariable("behandlingID") long behandlingID)
-        {
-        log.info("Saksbehandler {} ber om å hente mulige nye behandlingsstatuser for behandling {}.", SubjectHandler.getInstance().getUserID(), behandlingID);
-        aksesskontroll.autoriser(behandlingID);
-
-        return ResponseEntity.ok(behandlingService.hentMuligeStatuser(behandlingID));
-    }
-
     @PostMapping("{behandlingID}/tidligeremedlemsperioder")
     @ApiOperation(value = "Knytt medlemsperioder fra MEDL til oppholdsland fra søknaden",
         response = TidligereMedlemsperioderDto.class)
@@ -119,21 +110,6 @@ public class BehandlingTjeneste {
         return ResponseEntity.ok(behandlingDto);
     }
 
-    @GetMapping("{behandlingID}/muligeBehandlingstema")
-    @ApiOperation(value = "Hent mulige nye behandlingstema for en behandling")
-    public ResponseEntity<List<Behandlingstema>> hentEndreBehandlingstema(@PathVariable("behandlingID") long behandlingsID)
-        {
-        log.debug("Saksbehandler {} ber om å hente mulige nye behandlingstema for behandling {}.", SubjectHandler.getInstance().getUserID(), behandlingsID);
-        try {
-            aksesskontroll.autoriser(behandlingsID);
-        } catch (FunksjonellException e) {
-            return ResponseEntity.ok(Collections.emptyList());
-        }
-
-        List<Behandlingstema> muligeBehandlingstema = endreBehandlingstemaService.hentMuligeBehandlingstema(behandlingsID);
-        return ResponseEntity.ok(muligeBehandlingstema);
-    }
-
     @PostMapping("{behandlingID}/endreBehandlingstema")
     @ApiOperation(value = "Endre behandlingstema for en gitt behandling")
     public ResponseEntity<Void> endreBehandlingstema(@PathVariable("behandlingID") long behandlingsID, @RequestBody EndreBehandlingstemaDto endreBehandlingstemaDto)
@@ -153,6 +129,41 @@ public class BehandlingTjeneste {
 
         behandlingService.endreBehandlingsfrist(behandlingID, endreBehandlingsfristDto.behandlingsfrist());
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("{behandlingID}/muligeStatuser")
+    @ApiOperation("Hent mulige nye behandlingsstatuser for en behandling")
+    public ResponseEntity<Collection<Behandlingsstatus>> hentMuligeStatuser(@PathVariable("behandlingID") long behandlingID)
+    {
+        log.info("Saksbehandler {} ber om å hente mulige nye behandlingsstatuser for behandling {}.", SubjectHandler.getInstance().getUserID(), behandlingID);
+        aksesskontroll.autoriser(behandlingID);
+
+        return ResponseEntity.ok(behandlingService.hentMuligeStatuser(behandlingID));
+    }
+
+    @GetMapping("{behandlingID}/muligeBehandlingstema")
+    @ApiOperation(value = "Hent mulige nye behandlingstema for en behandling")
+    public ResponseEntity<List<Behandlingstema>> hentEndreBehandlingstema(@PathVariable("behandlingID") long behandlingsID)
+    {
+        log.debug("Saksbehandler {} ber om å hente mulige nye behandlingstema for behandling {}.", SubjectHandler.getInstance().getUserID(), behandlingsID);
+        try {
+            aksesskontroll.autoriser(behandlingsID);
+        } catch (FunksjonellException e) {
+            return ResponseEntity.ok(Collections.emptyList());
+        }
+
+        List<Behandlingstema> muligeBehandlingstema = endreBehandlingstemaService.hentMuligeBehandlingstema(behandlingsID);
+        return ResponseEntity.ok(muligeBehandlingstema);
+    }
+
+    @GetMapping("{behandlingID}/muligeTyper")
+    @ApiOperation("Hent mulige nye behandlingstyper for en behandling")
+    public ResponseEntity<Collection<Behandlingstyper>> hentMuligeTyper(@PathVariable("behandlingID") long behandlingID)
+    {
+        log.info("Saksbehandler {} ber om å hente mulige nye behandlingstyper for behandling {}.", SubjectHandler.getInstance().getUserID(), behandlingID);
+        aksesskontroll.autoriser(behandlingID);
+
+        return ResponseEntity.ok(behandlingService.hentMuligeTyper(behandlingID));
     }
 
 
