@@ -72,9 +72,9 @@ class JournalfoeringTjenesteTest extends JsonSchemaTestParent {
         journalføringDto.setBrukerID(SAMPLE_FNR);
         journalføringDto.setBehandlingstypeKode(Behandlingstyper.ENDRET_PERIODE.getKode());
 
-        tjeneste.tilordneSakOgJournalfør(journalføringDto);
+        tjeneste.journalførOgTilordneSak(journalføringDto);
 
-        verify(journalføringService).tilordneSakOgJournalfør(journalføringDto);
+        verify(journalføringService).journalførOgTilordneSak(journalføringDto);
         verify(oppgaveService).ferdigstillOppgave(journalføringDto.getOppgaveID());
         valider(journalføringDto, JOURNALFOERING_TILORDNE_SCHEMA, log);
     }
@@ -87,9 +87,9 @@ class JournalfoeringTjenesteTest extends JsonSchemaTestParent {
         journalføringDto.setArbeidsgiverID(SAMPLE_ORGNR);
         journalføringDto.setRepresentantID(SAMPLE_ORGNR);
 
-        tjeneste.opprettSakOgJournalfør(journalføringDto);
+        tjeneste.journalførOgOpprettSak(journalføringDto);
 
-        verify(journalføringService).opprettOgJournalfør(journalføringDto);
+        verify(journalføringService).journalførOgOpprettSak(journalføringDto);
         verify(oppgaveService).ferdigstillOppgave(journalføringDto.getOppgaveID());
         valider(journalføringDto, JOURNALFOERING_OPPRETT_SCHEMA, log);
     }

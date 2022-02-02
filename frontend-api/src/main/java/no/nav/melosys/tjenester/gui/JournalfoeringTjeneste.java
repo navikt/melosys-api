@@ -38,7 +38,7 @@ public class JournalfoeringTjeneste {
     }
 
     @GetMapping("{journalpostID}")
-    @ApiOperation(value = "Hent journalpost opplysninger.", response = JournalpostDto.class)
+    @ApiOperation(value = "Hent journalpost opplysninger", response = JournalpostDto.class)
     public ResponseEntity<JournalpostDto> hentJournalpostOpplysninger(@PathVariable("journalpostID") String journalpostID) {
         log.debug("Journalpost med ID {} hentes.", journalpostID);
         Journalpost journalpost = journalføringService.hentJournalpost(journalpostID);
@@ -52,15 +52,15 @@ public class JournalfoeringTjeneste {
     }
 
     @PostMapping("opprett")
-    @ApiOperation(value = "Opprett sak og journalfør.")
-    public ResponseEntity<Void> opprettSakOgJournalfør(@RequestBody JournalfoeringOpprettDto journalføringDto) {
-        journalføringService.opprettOgJournalfør(journalføringDto);
+    @ApiOperation(value = "Journalfør og opprett ny fagsak asynkront")
+    public ResponseEntity<Void> journalførOgOpprettSak(@RequestBody JournalfoeringOpprettDto journalføringDto) {
+        journalføringService.journalførOgOpprettSak(journalføringDto);
         oppgaveService.ferdigstillOppgave(journalføringDto.getOppgaveID());
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("sed")
-    @ApiOperation(value = "Opprett sak og journalfør.")
+    @ApiOperation(value = "Journalfør SED")
     public ResponseEntity<Void> journalførSed(@RequestBody JournalfoeringSedDto journalfoeringSedDto) {
         journalføringService.journalførSed(journalfoeringSedDto);
         oppgaveService.ferdigstillOppgave(journalfoeringSedDto.getOppgaveID());
@@ -68,9 +68,9 @@ public class JournalfoeringTjeneste {
     }
 
     @PostMapping("tilordne")
-    @ApiOperation(value = "Tilordne sak og journalfør.")
-    public ResponseEntity<Void> tilordneSakOgJournalfør(@RequestBody JournalfoeringTilordneDto journalføringDto) {
-        journalføringService.tilordneSakOgJournalfør(journalføringDto);
+    @ApiOperation(value = "Journalfør og tilordne fagsak asynkront")
+    public ResponseEntity<Void> journalførOgTilordneSak(@RequestBody JournalfoeringTilordneDto journalføringDto) {
+        journalføringService.journalførOgTilordneSak(journalføringDto);
         oppgaveService.ferdigstillOppgave(journalføringDto.getOppgaveID());
         return ResponseEntity.noContent().build();
     }

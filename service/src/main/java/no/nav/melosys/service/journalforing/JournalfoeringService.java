@@ -76,7 +76,7 @@ public class JournalfoeringService {
     }
 
     @Transactional
-    public void opprettOgJournalfør(JournalfoeringOpprettDto journalfoeringDto) {
+    public void journalførOgOpprettSak(JournalfoeringOpprettDto journalfoeringDto) {
         Journalpost journalpost = hentJournalpost(journalfoeringDto.getJournalpostID());
 
         if (journalpost.isErFerdigstilt()) {
@@ -172,7 +172,7 @@ public class JournalfoeringService {
     }
 
     @Transactional
-    public void tilordneSakOgJournalfør(JournalfoeringTilordneDto journalfoeringDto) {
+    public void journalførOgTilordneSak(JournalfoeringTilordneDto journalfoeringDto) {
 
         final Journalpost journalpost = joarkFasade.hentJournalpost(journalfoeringDto.getJournalpostID());
         final String saksnummer = journalfoeringDto.getSaksnummer();
