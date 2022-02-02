@@ -14,6 +14,7 @@ import no.nav.melosys.domain.kodeverk.Maritimtyper;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesgrupper;
 import no.nav.melosys.domain.person.familie.*;
 import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.AvklarteFaktaRepository;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -127,33 +128,29 @@ public class AvklartefaktaService {
     }
 
     public AvklarteMedfolgendeFamilie hentAvklarteMedfølgendeBarn(long behandlingID) {
+        return hentAvklarteMedfolgendeFamilie(behandlingID, VURDERING_LOVVALG_BARN);
+    }
+
+    public AvklarteMedfolgendeFamilie hentAvklarteMedfølgendeEktefelle(long behandlingID) {
+        return hentAvklarteMedfolgendeFamilie(behandlingID, VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER);
+    }
+
+    private AvklarteMedfolgendeFamilie hentAvklarteMedfolgendeFamilie(long behandlingID, Avklartefaktatyper avklartefaktatyper) {
         Set<OmfattetFamilie> barnOmfattetAvNorskTrygd = new HashSet<>();
         Set<IkkeOmfattetFamilie> barnIkkeOmfattetAvNorskTrygd = new HashSet<>();
-        for (Avklartefakta avklartefakta : avklarteFaktaRepository.findAllByBehandlingsresultatIdAndType(behandlingID, VURDERING_LOVVALG_BARN)) {
+        for (Avklartefakta avklartefakta : avklarteFaktaRepository.findAllByBehandlingsresultatIdAndType(behandlingID, avklartefaktatyper)) {
             if (avklartefakta.getFakta().equals(VALGT_FAKTA)) {
                 barnOmfattetAvNorskTrygd.add(new OmfattetFamilie(avklartefakta.getSubjekt()));
             } else {
+                if (avklartefakta.getRegistreringer().size() == 0) {
+                    throw new TekniskException("Det mangler registreringer for avklartefakta med ID: " + avklartefakta.getId());
+                }
                 String begrunnelse = avklartefakta.getRegistreringer().iterator().next().getBegrunnelseKode();
                 barnIkkeOmfattetAvNorskTrygd.add(
                     new IkkeOmfattetFamilie(avklartefakta.getSubjekt(), begrunnelse, avklartefakta.getBegrunnelseFritekst()));
             }
         }
         return new AvklarteMedfolgendeFamilie(barnOmfattetAvNorskTrygd, barnIkkeOmfattetAvNorskTrygd);
-    }
-
-    public AvklarteMedfolgendeFamilie hentAvklarteMedfølgendeEktefelle(long behandlingId) {
-        Set<OmfattetFamilie> ektefelleOmfattetAvNorskTrygd = new HashSet<>();
-        Set<IkkeOmfattetFamilie> ektefelleIkkeOmfattetAvNorskTrygd = new HashSet<>();
-        for (Avklartefakta avklartefakta : avklarteFaktaRepository.findAllByBehandlingsresultatIdAndType(behandlingId, VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER)) {
-            if (avklartefakta.getFakta().equals(VALGT_FAKTA)) {
-                ektefelleOmfattetAvNorskTrygd.add(new OmfattetFamilie(avklartefakta.getSubjekt()));
-            } else {
-                String begrunnelse = avklartefakta.getRegistreringer().iterator().next().getBegrunnelseKode();
-                ektefelleIkkeOmfattetAvNorskTrygd.add(
-                    new IkkeOmfattetFamilie(avklartefakta.getSubjekt(), begrunnelse, avklartefakta.getBegrunnelseFritekst()));
-            }
-        }
-        return new AvklarteMedfolgendeFamilie(ektefelleOmfattetAvNorskTrygd, ektefelleIkkeOmfattetAvNorskTrygd);
     }
 
     private Map<String, List<Avklartefakta>> grupperForSubjekt(Collection<Avklartefakta> avklartefakta) {
