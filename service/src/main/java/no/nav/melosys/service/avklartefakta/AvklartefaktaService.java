@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import static no.nav.melosys.domain.avklartefakta.Avklartefakta.IKKE_VALGT_FAKTA;
 import static no.nav.melosys.domain.avklartefakta.Avklartefakta.VALGT_FAKTA;
 import static no.nav.melosys.domain.kodeverk.Avklartefaktatyper.VURDERING_LOVVALG_BARN;
 import static no.nav.melosys.domain.kodeverk.Avklartefaktatyper.VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER;
@@ -136,21 +137,26 @@ public class AvklartefaktaService {
     }
 
     private AvklarteMedfolgendeFamilie hentAvklarteMedfolgendeFamilie(long behandlingID, Avklartefaktatyper avklartefaktatyper) {
-        Set<OmfattetFamilie> barnOmfattetAvNorskTrygd = new HashSet<>();
-        Set<IkkeOmfattetFamilie> barnIkkeOmfattetAvNorskTrygd = new HashSet<>();
-        for (Avklartefakta avklartefakta : avklarteFaktaRepository.findAllByBehandlingsresultatIdAndType(behandlingID, avklartefaktatyper)) {
-            if (avklartefakta.getFakta().equals(VALGT_FAKTA)) {
-                barnOmfattetAvNorskTrygd.add(new OmfattetFamilie(avklartefakta.getSubjekt()));
-            } else {
-                if (avklartefakta.getRegistreringer().size() == 0) {
-                    throw new TekniskException("Det mangler registreringer for avklartefakta med ID: " + avklartefakta.getId());
-                }
-                String begrunnelse = avklartefakta.getRegistreringer().iterator().next().getBegrunnelseKode();
-                barnIkkeOmfattetAvNorskTrygd.add(
-                    new IkkeOmfattetFamilie(avklartefakta.getSubjekt(), begrunnelse, avklartefakta.getBegrunnelseFritekst()));
-            }
-        }
-        return new AvklarteMedfolgendeFamilie(barnOmfattetAvNorskTrygd, barnIkkeOmfattetAvNorskTrygd);
+        var avklartefakta = avklarteFaktaRepository.findAllByBehandlingsresultatIdAndType(behandlingID, avklartefaktatyper);
+
+        var omfattetAvNorskTrygd = avklartefakta
+            .stream()
+            .filter(af -> af.getFakta().equals(VALGT_FAKTA))
+            .map(af -> new OmfattetFamilie(af.getSubjekt()))
+            .collect(Collectors.toSet());
+
+        var ikkeOmfattetAvNorskTrygd = avklartefakta
+            .stream()
+            .filter(af -> af.getFakta().equals(IKKE_VALGT_FAKTA))
+            .map(af -> new IkkeOmfattetFamilie(
+                af.getSubjekt(),
+                af.getRegistreringer().stream().findFirst().orElseThrow(() ->
+                    new TekniskException("Det mangler registreringer for avklartefakta med ID: " + af.getId()))
+                    .getBegrunnelseKode(),
+                af.getBegrunnelseFritekst()))
+            .collect(Collectors.toSet());
+
+        return new AvklarteMedfolgendeFamilie(omfattetAvNorskTrygd, ikkeOmfattetAvNorskTrygd);
     }
 
     private Map<String, List<Avklartefakta>> grupperForSubjekt(Collection<Avklartefakta> avklartefakta) {
