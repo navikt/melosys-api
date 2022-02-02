@@ -29,4 +29,13 @@ public class OmfattetFamilie {
     public void setIdent(String ident) {
         this.ident = ident;
     }
+
+    @Override
+    public String toString() {
+        return "OmfattetFamilie{" +
+            "uuid='" + uuid + '\'' +
+            ", sammensattNavn='" + sammensattNavn + '\'' +
+            ", ident='" + ident + '\'' +
+            '}';
+    }
 }

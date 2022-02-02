@@ -1,5 +1,6 @@
 package no.nav.melosys.tjenester.gui.dto.trygdeavtale;
 
+import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie;
 import no.nav.melosys.domain.person.familie.IkkeOmfattetFamilie;
 import no.nav.melosys.domain.person.familie.OmfattetFamilie;
@@ -8,10 +9,13 @@ import no.nav.melosys.tjenester.gui.dto.MedfolgendeFamilieDto;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie.*;
 
 public record TrygdeavtaleResultatDto(
     String virksomhet,
@@ -29,6 +33,34 @@ public record TrygdeavtaleResultatDto(
             .lovvalgsperiodeFom(lovvalgsperiodeFom)
             .lovvalgsperiodeTom(lovvalgsperiodeTom)
             .build();
+    }
+
+    public static TrygdeavtaleResultatDto fra(TrygdeavtaleResultat resultat, List<MedfolgendeFamilie> familie) {
+        var ektefelle = familie.stream().filter(mf -> mf.getRelasjonsrolle() == Relasjonsrolle.EKTEFELLE_SAMBOER)
+            .map(mf -> tilMedfolgendeFamilieDto(resultat, mf.getUuid())).flatMap(Collection::stream).findFirst().orElse(null);
+
+        var barn = familie.stream().filter(mf -> mf.getRelasjonsrolle() == Relasjonsrolle.BARN)
+            .map(mf -> tilMedfolgendeFamilieDto(resultat, mf.getUuid())).flatMap(Collection::stream).toList();
+
+        return new Builder()
+            .ektefelle(ektefelle)
+            .barn(barn)
+            .bestemmelse(resultat.bestemmelse())
+            .virksomhet(resultat.virksomhet())
+            .lovvalgsperiodeFom(resultat.lovvalgsperiodeFom())
+            .lovvalgsperiodeTom(resultat.lovvalgsperiodeTom())
+            .build();
+    }
+
+    private static List<MedfolgendeFamilieDto> tilMedfolgendeFamilieDto(TrygdeavtaleResultat resultat, String uuid) {
+        return Stream.concat(
+            resultat.familie().getFamilieOmfattetAvNorskTrygd()
+                .stream().filter(omfattet -> omfattet.getUuid().equals(uuid))
+                .map(omfattet -> new MedfolgendeFamilieDto(uuid, true, null, null)),
+            resultat.familie().getFamilieIkkeOmfattetAvNorskTrygd()
+                .stream().filter(ikkeOmfattet -> ikkeOmfattet.getUuid().equals(uuid))
+                .map(ikkeOmfattet -> new MedfolgendeFamilieDto(uuid, false, ikkeOmfattet.getBegrunnelse(), ikkeOmfattet.getBegrunnelseFritekst()))
+        ).toList();
     }
 
     private AvklarteMedfolgendeFamilie lagAvklarteMedfolgendeFamilie() {
@@ -79,8 +111,18 @@ public record TrygdeavtaleResultatDto(
             return this;
         }
 
+        public Builder barn(List<MedfolgendeFamilieDto> barn) {
+            this.barn.addAll(barn);
+            return this;
+        }
+
         public Builder ektefelle(String uuid, boolean omfattet, String begrunnelseKode, String begrunnelseFritekst) {
             this.ektefelle = new MedfolgendeFamilieDto(uuid, omfattet, begrunnelseKode, begrunnelseFritekst);
+            return this;
+        }
+
+        public Builder ektefelle(MedfolgendeFamilieDto ektefelle) {
+            this.ektefelle = ektefelle;
             return this;
         }
 
