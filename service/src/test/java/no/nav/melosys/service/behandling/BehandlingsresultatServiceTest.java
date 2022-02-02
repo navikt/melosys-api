@@ -33,6 +33,9 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class BehandlingsresultatServiceTest {
+    private static final String AVKLARTEFAKTA_REGISTRERING_BEGRUNNELSE_KODE = "AvklartefaktaRegistrering-begrunnelsekode";
+
+
     @Mock
     private BehandlingsresultatRepository behandlingsresultatRepo;
     @Mock
@@ -168,6 +171,11 @@ class BehandlingsresultatServiceTest {
             .flatExtracting(Avklartefakta::getRegistreringer)
             .extracting(AvklartefaktaRegistrering::getAvklartefakta)
             .containsExactly(behandlingsresultatreplika.getAvklartefakta().stream().findFirst().get());
+
+        assertThat(behandlingsresultatreplika.getAvklartefakta())
+            .flatExtracting(Avklartefakta::getRegistreringer)
+            .extracting(AvklartefaktaRegistrering::getBegrunnelseKode)
+            .containsExactly(AVKLARTEFAKTA_REGISTRERING_BEGRUNNELSE_KODE);
 
         assertThat(behandlingsresultatreplika.getVilkaarsresultater())
             .allMatch(v -> v.getId() == null)
@@ -315,7 +323,7 @@ class BehandlingsresultatServiceTest {
         avklartefakta.setFakta("fakta");
         avklartefakta.setType(Avklartefaktatyper.ARBEIDSLAND);
         AvklartefaktaRegistrering avklartefaktaRegistrering = new AvklartefaktaRegistrering();
-        avklartefaktaRegistrering.setBegrunnelseKode("begrunnelsekode");
+        avklartefaktaRegistrering.setBegrunnelseKode(AVKLARTEFAKTA_REGISTRERING_BEGRUNNELSE_KODE);
         avklartefakta.getRegistreringer().add(avklartefaktaRegistrering);
         return avklartefakta;
     }
