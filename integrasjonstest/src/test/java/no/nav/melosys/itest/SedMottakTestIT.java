@@ -1,4 +1,4 @@
-package no.nav.melosys.integrasjonstest.saksflyt;
+package no.nav.melosys.itest;
 
 import java.time.Duration;
 import java.time.LocalDate;
@@ -18,23 +18,16 @@ import no.nav.melosys.domain.saksflyt.ProsessStatus;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.repository.ProsessinstansRepository;
-import no.nav.melosys.service.eessi.kafka.EessiMeldingConsumer;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
-
-class SedMottakTestIT extends ComponentTestBase{
+class SedMottakTestIT extends ComponentTestBase {
 
     @Autowired
     @Qualifier("system")
@@ -42,7 +35,7 @@ class SedMottakTestIT extends ComponentTestBase{
 
     @Autowired
     @Qualifier("melosysEessiMelding")
-    private KafkaTemplate<String,MelosysEessiMelding> melosysEessiMeldingKafkaTemplate;
+    private KafkaTemplate<String, MelosysEessiMelding> melosysEessiMeldingKafkaTemplate;
 
     @Autowired
     private ProsessinstansRepository prosessinstansRepository;
@@ -71,9 +64,9 @@ class SedMottakTestIT extends ComponentTestBase{
             BucType.LA_BUC_04, SedType.X007, null, null, opprettEessiJournalpost(SedType.X007)
         );
 
-        melosysEessiMeldingKafkaTemplate.send(kafkaTopic,eessiMeldingA009);
-        melosysEessiMeldingKafkaTemplate.send(kafkaTopic,eessiMeldingX001);
-        melosysEessiMeldingKafkaTemplate.send(kafkaTopic,eessiMeldingX007);
+        melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingA009);
+        melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingX001);
+        melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingX007);
 
 
         await().timeout(Duration.ofSeconds(20)).pollInterval(Duration.ofSeconds(3))

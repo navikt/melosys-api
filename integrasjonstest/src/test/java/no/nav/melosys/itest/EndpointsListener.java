@@ -1,4 +1,4 @@
-package no.nav.melosys.integrasjonstest.saksflyt;
+package no.nav.melosys.itest;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationListener;

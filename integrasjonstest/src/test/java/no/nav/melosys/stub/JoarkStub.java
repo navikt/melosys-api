@@ -1,4 +1,4 @@
-package stub;
+package no.nav.melosys.stub;
 
 import no.nav.melosys.domain.arkiv.DokumentReferanse;
 import no.nav.melosys.domain.arkiv.Journalpost;

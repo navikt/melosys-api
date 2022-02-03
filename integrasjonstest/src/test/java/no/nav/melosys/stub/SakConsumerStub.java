@@ -1,4 +1,4 @@
-package stub;
+package no.nav.melosys.stub;
 
 import no.nav.melosys.integrasjon.felles.RestConsumer;
 import no.nav.melosys.integrasjon.sak.SakConsumer;

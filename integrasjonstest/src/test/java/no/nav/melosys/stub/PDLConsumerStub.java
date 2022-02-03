@@ -1,4 +1,4 @@
-package stub;
+package no.nav.melosys.stub;
 
 import no.nav.melosys.integrasjon.pdl.PDLConsumer;
 import no.nav.melosys.integrasjon.pdl.dto.identer.Identliste;

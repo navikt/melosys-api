@@ -158,18 +158,11 @@
             <artifactId>graphql-spring-boot-starter</artifactId>
             <version>${graphql-spring-boot-starter.version}</version>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>com.graphql-java</groupId>-->
-<!--            <artifactId>graphql-java-extended-scalars</artifactId>-->
-<!--            <version>16.0.0</version>-->
-<!--            <scope>test</scope>-->
-<!--        </dependency>-->
     </dependencies>
 
     <build>
 
         <finalName>${project.artifactId}</finalName>
-        <sourceDirectory>${project.basedir}/src/main/kotlin</sourceDirectory>
         <testSourceDirectory>${project.basedir}/src/test/kotlin</testSourceDirectory>
         <pluginManagement>
 
@@ -203,6 +196,7 @@
                             <sourceDirs>
                                 <source>src/test/kotlin</source>
                                 <source>src/test/java</source>
+                                <source>src/test/resources</source>
                             </sourceDirs>
                         </configuration>
                     </execution>
@@ -262,6 +256,10 @@
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
             </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>

@@ -1,4 +1,4 @@
-package stub;
+package no.nav.melosys.stub;
 
 import no.nav.melosys.domain.eessi.*;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
