@@ -133,11 +133,12 @@ class BehandlingsresultatServiceTest {
         verify(behandlingsresultatRepo).save(captor.capture());
         Behandlingsresultat behandlingsresultatreplika = captor.getValue();
 
-        assertThat(behandlingsresultatreplika.getId()).isNull();
-        assertThat(behandlingsresultatreplika.getBehandling()).isEqualTo(behandlingsreplika);
-        assertThat(behandlingsresultatreplika.getBehandlingsmåte()).isEqualTo(behandlingsresultat.getBehandlingsmåte());
-        assertThat(behandlingsresultatreplika.getType()).isEqualTo(behandlingsresultat.getType());
-        assertThat(behandlingsresultatreplika.getVedtakMetadata()).isNull();
+        assertThat(behandlingsresultatreplika)
+            .matches(b -> b.getId() == null)
+            .matches(b -> b.getBehandling().equals(behandlingsreplika))
+            .matches(b -> b.getBehandlingsmåte().equals(behandlingsresultat.getBehandlingsmåte()))
+            .matches(b -> b.getType().equals(behandlingsresultat.getType()))
+            .matches(b -> b.getVedtakMetadata() == null);
 
         assertThat(behandlingsresultatreplika.getLovvalgsperioder())
             .singleElement()
