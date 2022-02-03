@@ -57,6 +57,6 @@ public class BehandlingsgrunnlagTjeneste {
         behandlingsgrunnlagService.oppdaterBehandlingsgrunnlagPeriodeOgLand(behandlingID,
             new Periode(periodeOgLandPostDto.fom(), periodeOgLandPostDto.tom()),
             new Soeknadsland(periodeOgLandPostDto.land(), false));
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 }

@@ -29,7 +29,7 @@ public class FagsakAdminTjeneste implements AdminTjeneste {
 
         final Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
         henleggFagsakService.henleggSomBortfalt(fagsak);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @Override

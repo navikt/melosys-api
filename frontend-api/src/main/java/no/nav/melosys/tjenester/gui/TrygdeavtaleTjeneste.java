@@ -82,7 +82,7 @@ public class TrygdeavtaleTjeneste {
         aksesskontroll.autoriserSkriv(behandlingId);
         trygdeavtaleService.overførResultat(behandlingId, trygdeavtaleResultatDto.til());
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     /***

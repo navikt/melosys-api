@@ -67,7 +67,7 @@ public class OppgaveTjeneste {
 
             return ResponseEntity.ok(dto);
         } else {
-            return ResponseEntity.ok().build();
+            return ResponseEntity.noContent().build();
         }
     }
 
@@ -76,7 +76,7 @@ public class OppgaveTjeneste {
     public ResponseEntity leggTilbakeOppgave(@RequestBody TilbakeleggingDto tilbakelegging) {
         String ident = SubjectHandler.getInstance().getUserID();
         oppgaveplukker.leggTilbakeOppgave(ident, tilbakelegging);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/oversikt")

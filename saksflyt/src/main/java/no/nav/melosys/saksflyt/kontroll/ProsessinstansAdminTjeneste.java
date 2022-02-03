@@ -52,7 +52,7 @@ public class ProsessinstansAdminTjeneste implements AdminTjeneste {
         log.info("Forsøker å restarte prosessinstanser {}", request.getUuids());
         prosessinstansAdminService.restartProsessinstanser(request.getUuids());
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @Override
