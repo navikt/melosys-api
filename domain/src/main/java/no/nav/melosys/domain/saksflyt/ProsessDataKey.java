@@ -39,7 +39,6 @@ public enum ProsessDataKey {
     MOTTAKER("mottaker"),
     MOTTATT_DATO("mottattDato"),
     MOTTATT_SOKNAD_ID("mottattSoknadID"),
-    NY_VURDERING_BAKGRUNN("nyVurderingBakgrunn"),
     OPPGAVE_ID("oppgaveID"),
     OPPHOLDSLAND("oppholdsland"),
     ORGNR("orgnr"),
@@ -65,7 +64,7 @@ public enum ProsessDataKey {
     VEDLEGG_SED("vedleggTilSed"),
     YTTERLIGERE_INFO_SED("ytterligereInformasjonSed");
 
-    private String kode;
+    private final String kode;
 
     ProsessDataKey(String kode) {
         this.kode = kode;

@@ -94,7 +94,7 @@ public class EosVedtakService {
         }
         behandlingService.oppdaterStatus(behandling, Behandlingsstatus.IVERKSETTER_VEDTAK);
         prosessinstansService.opprettProsessinstansIverksettVedtakEos(behandling, request.getBehandlingsresultatTypeKode(),
-            request.getFritekst(), request.getFritekstSed(), mottakerinstitusjoner, request.getNyVurderingBakgrunn());
+            request.getFritekst(), request.getFritekstSed(), mottakerinstitusjoner);
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 
