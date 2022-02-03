@@ -58,19 +58,19 @@ public class BehandlingTjeneste {
         this.aksesskontroll = aksesskontroll;
     }
 
-    @PostMapping("{behandlingID}/oppdater")
+    @PostMapping("{behandlingID}/endre")
     @ApiOperation("Oppdater behandling")
-    public ResponseEntity<Void> oppdaterBehandling(@PathVariable long behandlingID,
-                                                   @RequestBody OppdaterBehandlingDto oppdaterBehandling) {
-        log.info("Saksbehandler {} ber om å oppdatere behandling {} med {}", SubjectHandler.getInstance().getUserID(), oppdaterBehandling);
+    public ResponseEntity<Void> endreBehandling(@PathVariable long behandlingID,
+                                                @RequestBody EndreBehandlingDto endreBehandling) {
+        log.info("Saksbehandler {} ber om å endre behandling {} med {}", SubjectHandler.getInstance().getUserID(), endreBehandling);
         aksesskontroll.autoriser(behandlingID);
 
-        var sakstype = oppdaterBehandling.sakstype() == null ? null : Sakstyper.valueOf(oppdaterBehandling.sakstype());
-        var behandlingstype = oppdaterBehandling.behandlingstype() == null ? null : Behandlingstyper.valueOf(oppdaterBehandling.behandlingstype());
-        var behandlingstema = oppdaterBehandling.behandlingstema() == null ? null : Behandlingstema.valueOf(oppdaterBehandling.behandlingstema());
-        var behandlingsstatus = oppdaterBehandling.behandlingsstatus() == null ? null : Behandlingsstatus.valueOf(oppdaterBehandling.behandlingsstatus());
+        var sakstype = endreBehandling.sakstype() == null ? null : Sakstyper.valueOf(endreBehandling.sakstype());
+        var behandlingstype = endreBehandling.behandlingstype() == null ? null : Behandlingstyper.valueOf(endreBehandling.behandlingstype());
+        var behandlingstema = endreBehandling.behandlingstema() == null ? null : Behandlingstema.valueOf(endreBehandling.behandlingstema());
+        var behandlingsstatus = endreBehandling.behandlingsstatus() == null ? null : Behandlingsstatus.valueOf(endreBehandling.behandlingsstatus());
 
-        behandlingService.oppdaterBehandling(behandlingID, sakstype, behandlingstype, behandlingstema, behandlingsstatus, oppdaterBehandling.behandlingsfrist());
+        behandlingService.endreBehandling(behandlingID, sakstype, behandlingstype, behandlingstema, behandlingsstatus, endreBehandling.behandlingsfrist());
         return ResponseEntity.noContent().build();
     }
 

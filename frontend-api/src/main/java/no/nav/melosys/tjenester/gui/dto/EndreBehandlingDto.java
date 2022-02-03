@@ -2,7 +2,7 @@ package no.nav.melosys.tjenester.gui.dto;
 
 import java.time.LocalDate;
 
-public record OppdaterBehandlingDto(
+public record EndreBehandlingDto(
     String sakstype,
     String behandlingstype,
     String behandlingstema,

@@ -235,13 +235,14 @@ class BehandlingServiceTest {
     }
 
     @Test
-    void oppdaterBehandling() {
+    void endreBehandling() {
         var behandling = new Behandling();
         behandling.setId(BEHANDLING_ID);
         behandling.setTema(Behandlingstema.IKKE_YRKESAKTIV);
         behandling.setFagsak(new Fagsak());
         when(behandlingRepo.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
-        behandlingService.oppdaterBehandling(BEHANDLING_ID, Sakstyper.EU_EOS, BEHANDLING_TYPE, BEHANDLING_TEMA, BEHANDLING_STATUS, BEHANDLING_FRIST);
+
+        behandlingService.endreBehandling(BEHANDLING_ID, Sakstyper.EU_EOS, BEHANDLING_TYPE, BEHANDLING_TEMA, BEHANDLING_STATUS, BEHANDLING_FRIST);
 
         verify(behandlingRepo, times(2)).save(behandlingCaptor.capture());
         var lagretBehandlinger = behandlingCaptor.getAllValues();

@@ -79,7 +79,8 @@ public class BehandlingService {
     }
 
     @Transactional
-    public void oppdaterBehandling(long behandlingID, Sakstyper sakstype, Behandlingstyper type, Behandlingstema tema, Behandlingsstatus status, LocalDate behandlingsfrist) {
+    public void endreBehandling(long behandlingID, Sakstyper sakstype, Behandlingstyper type, Behandlingstema tema, Behandlingsstatus status, LocalDate behandlingsfrist) {
+        // TODO: Endre sakstype (MELOSYS-4899 for EØS <-> trygdeavtale)
         var behandling = hentBehandlingUtenSaksopplysninger(behandlingID);
         if (!behandling.erAktiv()) {
             throw new FunksjonellException("Behandlingen må være aktiv for å kunne endres");
@@ -106,8 +107,6 @@ public class BehandlingService {
             behandlingRepository.save(behandling);
             applicationEventPublisher.publishEvent(new BehandlingEndretEvent(behandlingID, behandling));
         }
-
-        // TODO: Endre sakstype (MELOSYS-4899 for EØS <-> trygdeavtale)
     }
 
     /**
