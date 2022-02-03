@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.ser.InstantSerializer;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
 
 import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
 
@@ -24,15 +25,15 @@ public class SaksbehandlingstidKlage extends DokgenDto {
     @JsonFormat(shape = STRING)
     private final Instant datoVedtak;
 
-    public SaksbehandlingstidKlage(DokgenBrevbestilling brevbestilling) {
-        super(brevbestilling);
+    public SaksbehandlingstidKlage(DokgenBrevbestilling brevbestilling, Instant datoBehandlingstid) {
+        super(brevbestilling, Aktoersroller.BRUKER);
         this.datoMottatt = brevbestilling.getForsendelseMottatt();
-        this.datoBehandlingstid = brevbestilling.getForsendelseMottatt().plus(SAKSBEHANDLINGSTID_DAGER, ChronoUnit.DAYS);
+        this.datoBehandlingstid = datoBehandlingstid;
         this.datoVedtak = brevbestilling.getVedtaksdato();
     }
 
-    public static SaksbehandlingstidKlage av(DokgenBrevbestilling brevbestilling) {
-        return new SaksbehandlingstidKlage(brevbestilling);
+    public static SaksbehandlingstidKlage av(DokgenBrevbestilling brevbestilling, Instant datoBehandlingstid) {
+        return new SaksbehandlingstidKlage(brevbestilling, datoBehandlingstid);
     }
 
     public Instant getDatoMottatt() {

@@ -1,17 +1,17 @@
-package no.nav.melosys.service.dokument;
+package no.nav.melosys.service.dokument.brev.mapper;
 
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.Period;
+import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.brev.DokgenBrevbestilling;
-import no.nav.melosys.domain.brev.FritekstbrevBrevbestilling;
-import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
-import no.nav.melosys.domain.brev.MangelbrevBrevbestilling;
+import no.nav.melosys.domain.arkiv.ArkivDokument;
+import no.nav.melosys.domain.arkiv.Journalpost;
+import no.nav.melosys.domain.brev.*;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.GeografiskAdresse;
@@ -28,6 +28,11 @@ import no.nav.melosys.integrasjon.dokgen.dto.felles.Person;
 import no.nav.melosys.integrasjon.dokgen.dto.storbritannia.attest.*;
 import no.nav.melosys.integrasjon.dokgen.dto.storbritannia.innvilgelse.InnvilgelseStorbritannia;
 import no.nav.melosys.integrasjon.dokgen.dto.storbritannia.innvilgelse.Soknad;
+import no.nav.melosys.service.dokument.DokumentHentingService;
+import no.nav.melosys.service.dokument.brev.mapper.DokgenMalMapper;
+import no.nav.melosys.service.dokument.brev.mapper.DokgenMapperDatahenter;
+import no.nav.melosys.service.dokument.brev.mapper.InnvilgelseFtrlMapper;
+import no.nav.melosys.service.dokument.brev.mapper.StorbritanniaMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,7 +41,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
-import static no.nav.melosys.domain.kodeverk.Aktoersroller.MYNDIGHET;
+import static no.nav.melosys.domain.kodeverk.Aktoersroller.TRYGDEMYNDIGHET;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 import static no.nav.melosys.service.dokument.DokgenTestData.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -49,14 +54,16 @@ import static org.mockito.Mockito.when;
 class DokgenMalMapperTest {
     public static final String FORRETNINGSADRESSE_ORG = "Storgata 1";
     public static final LocalDate SOKNADSDATO = LocalDate.of(2000, 1, 1);
-    public static final LocalDate LOVVALGSPERIODE_FOM = LocalDate.of(2020, 1, 1);
-    public static final LocalDate LOVVALGSPERIODE_TOM = LocalDate.of(2021, 1, 1);
     public static final LocalDate FØDSELSDATO = LocalDate.of(2000, 1, 1);
 
     @Mock
     private InnvilgelseFtrlMapper mockInnvilgelseFtrlMapper;
     @Mock
     private DokgenMapperDatahenter mockDokgenMapperDatahenter;
+
+    @Mock
+    private DokumentHentingService dokumentHentingService;
+
     @Mock
     private StorbritanniaMapper mockStorbritanniaMapper;
 
@@ -66,7 +73,7 @@ class DokgenMalMapperTest {
 
     @BeforeEach
     void init() {
-        dokgenMalMapper = new DokgenMalMapper(mockDokgenMapperDatahenter, mockInnvilgelseFtrlMapper, mockStorbritanniaMapper);
+        dokgenMalMapper = new DokgenMalMapper(mockDokgenMapperDatahenter, mockInnvilgelseFtrlMapper, mockStorbritanniaMapper, dokumentHentingService);
     }
 
     @Test
@@ -149,11 +156,11 @@ class DokgenMalMapperTest {
         when(mockDokgenMapperDatahenter.hentPersondata(any())).thenReturn(lagPersonDokument());
 
         Behandling behandling = lagBehandling();
-
+        LocalDate forsendelseMottattDato = LocalDate.of(2022, 1, 19);
         DokgenBrevbestilling brevbestilling = new DokgenBrevbestilling.Builder<>()
             .medProduserbartdokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID)
             .medBehandling(behandling)
-            .medForsendelseMottatt(Instant.now())
+            .medForsendelseMottatt(forsendelseMottattDato.atStartOfDay(ZoneId.of("Europe/Paris")).toInstant())
             .medAvsendertype(Avsendertyper.UTENLANDSK_TRYGDEMYNDIGHET)
             .medAvsenderLand("FI")
             .build();
@@ -166,10 +173,12 @@ class DokgenMalMapperTest {
         assertThat((SaksbehandlingstidSoknad) dokgenDto)
             .extracting(
                 SaksbehandlingstidSoknad::getAvsenderTypeSoknad,
-                SaksbehandlingstidSoknad::getAvsenderLand
+                SaksbehandlingstidSoknad::getAvsenderLand,
+                SaksbehandlingstidSoknad::getDatoBehandlingstid
             ).containsExactly(
-            MYNDIGHET,
-            "Finland"
+            TRYGDEMYNDIGHET,
+            "Finland",
+            forsendelseMottattDato.atStartOfDay(ZoneId.of("Europe/Paris")).toInstant().plus(Saksbehandlingstid.SAKSBEHANDLINGSTID_DAGER, ChronoUnit.DAYS)
         );
     }
 
@@ -385,9 +394,9 @@ class DokgenMalMapperTest {
 
         assertThat(innvilgelse).extracting(
             i -> i.getInnvilgelse().innledningFritekst(),
-            i -> i.getArtikkel(),
+            InnvilgelseStorbritannia::getArtikkel,
             i -> i.getSoknad().virksomhetsnavn(),
-            i -> i.isVirksomhetArbeidsgiverSkalHaKopi()
+            InnvilgelseStorbritannia::isVirksomhetArbeidsgiverSkalHaKopi
         ).containsExactly(
             "Innledning",
             Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1,
@@ -488,6 +497,60 @@ class DokgenMalMapperTest {
         );
 
         assertThat(dokgenDto.getMottaker().type()).isEqualTo(Aktoersroller.ARBEIDSGIVER.getKode());
+    }
+
+    @Test
+    void skalMappeTilAvslagbrev() {
+        LocalDate datoDesember = LocalDate.of(2021, 12, 9);
+        LocalDate datoOktober = LocalDate.of(2021, 10, 9);
+        when(dokumentHentingService.hentDokumenter("MEL-123")).thenReturn(List.of(
+            lagJournalpost(datoDesember),
+            lagJournalpost(datoOktober)));
+        when(mockDokgenMapperDatahenter.hentPoststed(any())).thenReturn("Andeby");
+        when(mockDokgenMapperDatahenter.hentPersondata(any())).thenReturn(lagPersonDokument());
+        DokgenBrevbestilling brevbestilling = new AvslagBrevbestilling.Builder()
+            .medProduserbartdokument(AVSLAG_MANGLENDE_OPPLYSNINGER)
+            .medBehandling(lagBehandling(lagFagsak(true)))
+            .medFritekst("Hei")
+            .build();
+
+        Avslagbrev avslagbrev = (Avslagbrev) dokgenMalMapper.mapBehandling(brevbestilling);
+
+        assertThat(avslagbrev.getMottaker().type()).isEqualTo(Aktoersroller.BRUKER.getKode());
+        assertThat(avslagbrev.getMangelbrevDatoer()).containsExactly(
+            LocalDate.of(2021, 10, 9),
+            LocalDate.of(2021, 12, 9));
+        assertThat(avslagbrev.getMangelbrevDatoer()).isSorted();
+        assertThat(avslagbrev.getFritekst()).isEqualTo("Hei");
+        Instant forventetInstant = datoDesember.atStartOfDay(ZoneId.of("Europe/Paris")).toInstant().plus(Period.ofWeeks(4));
+        assertThat(avslagbrev.getDatoInnsendingsfrist()).isEqualTo(LocalDate.ofInstant(forventetInstant, ZoneId.systemDefault()));
+    }
+
+    @Test
+    void skalMappeAvslagsbrevPgaManglendeOpplysningerTilBruker() {
+        when(dokumentHentingService.hentDokumenter("MEL-123")).thenReturn(emptyList());
+        when(mockDokgenMapperDatahenter.hentPoststed(any())).thenReturn("Andeby");
+        when(mockDokgenMapperDatahenter.hentPersondata(any())).thenReturn(lagPersonDokument());
+        DokgenBrevbestilling brevbestilling = new AvslagBrevbestilling.Builder()
+            .medProduserbartdokument(AVSLAG_MANGLENDE_OPPLYSNINGER)
+            .medBehandling(lagBehandling(lagFagsak(true)))
+            .medFritekst("Hei")
+            .build();
+
+        DokgenDto dokgenDto = dokgenMalMapper.mapBehandling(brevbestilling);
+
+        assertThat(dokgenDto.getMottaker().type()).isEqualTo(Aktoersroller.BRUKER.getKode());
+    }
+
+    private Journalpost lagJournalpost(LocalDate forsendelseJournalfoertDato) {
+        Instant forsteDato = forsendelseJournalfoertDato.atStartOfDay(ZoneId.of("Europe/Paris")).toInstant();
+        ArkivDokument arkivDokument = new ArkivDokument();
+        arkivDokument.setTittel(MELDING_MANGLENDE_OPPLYSNINGER.getBeskrivelse());
+        Journalpost journalpost = new Journalpost("1");
+        journalpost.setHoveddokument(arkivDokument);
+        journalpost.setForsendelseJournalfoert(forsteDato);
+
+        return journalpost;
     }
 
     private InnvilgelseBrevbestilling lagInnvilgelseBrevbestilling() {

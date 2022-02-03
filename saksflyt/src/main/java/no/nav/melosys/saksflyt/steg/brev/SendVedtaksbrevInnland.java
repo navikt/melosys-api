@@ -10,7 +10,7 @@ import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
-import no.nav.melosys.domain.brev.FastMottaker;
+import no.nav.melosys.domain.brev.FastMottakerMedOrgnr;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.brev.FastMottaker.*;
+import static no.nav.melosys.domain.brev.FastMottakerMedOrgnr.*;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.ARBEIDSGIVER;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
@@ -132,12 +132,12 @@ public class SendVedtaksbrevInnland implements StegBehandler {
         Produserbaredokumenter innvilgelseType = (resultat.erInnvilgelseFlereLand())
             ? INNVILGELSE_YRKESAKTIV_FLERE_LAND : INNVILGELSE_YRKESAKTIV;
 
-        List<Mottaker> mottakerListe = new ArrayList<>(List.of(Mottaker.av(BRUKER), FastMottaker.av(SKATT)));
+        List<Mottaker> mottakerListe = new ArrayList<>(List.of(Mottaker.av(BRUKER), FastMottakerMedOrgnr.av(SKATT)));
         if (brevSendesTilStatligSkatteoppkreving(
             resultat.hentValidertLovvalgsperiode(),
             behandling.getBehandlingsgrunnlag()
         )) {
-            mottakerListe.add(FastMottaker.av(STATLIG_SKATTEOPPKREVING));
+            mottakerListe.add(FastMottakerMedOrgnr.av(STATLIG_SKATTEOPPKREVING));
         }
 
         DoksysBrevbestilling innvilgelseBrukerOgSkatt = new DoksysBrevbestilling.Builder().medProduserbartDokument(innvilgelseType)

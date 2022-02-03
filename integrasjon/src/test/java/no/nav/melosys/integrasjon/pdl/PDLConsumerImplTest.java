@@ -203,6 +203,11 @@ class PDLConsumerImplTest {
         assertThat(person.folkeregisterpersonstatus())
             .flatExtracting(Folkeregisterpersonstatus::status)
             .containsExactly("doed");
+        assertThat(person.folkeregisterpersonstatus())
+            .extracting(Folkeregisterpersonstatus::metadata)
+            .flatExtracting(Metadata::endringer)
+            .extracting(Endring::kilde)
+            .containsExactly("Dolly");
        assertThat(person.forelderBarnRelasjon())
             .flatExtracting(ForelderBarnRelasjon::relatertPersonsIdent, ForelderBarnRelasjon::relatertPersonsRolle,
                 ForelderBarnRelasjon::minRolleForPerson)

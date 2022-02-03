@@ -30,7 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.kodeverk.Aktoersroller.MYNDIGHET;
+import static no.nav.melosys.domain.kodeverk.Aktoersroller.TRYGDEMYNDIGHET;
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.YTTERLIGERE_INFO_SED;
 
 @Component
@@ -74,7 +74,8 @@ public class SendAnmodningOmUnntak extends AbstraktSendUtland {
 
     private Collection<Vedlegg> hentVedlegg(Prosessinstans prosessinstans) {
         final Set<DokumentReferanse> vedleggReferanser = prosessinstans.getData(ProsessDataKey.VEDLEGG_SED,
-            new TypeReference<Set<DokumentReferanse>>() {}, Collections.emptySet());
+            new TypeReference<Set<DokumentReferanse>>() {
+            }, Collections.emptySet());
         return eessiService.lagEessiVedlegg(prosessinstans.getBehandling().getFagsak(),
             vedleggReferanser);
     }
@@ -88,7 +89,7 @@ public class SendAnmodningOmUnntak extends AbstraktSendUtland {
         Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
         return new DoksysBrevbestilling.Builder().medProduserbartDokument(Produserbaredokumenter.ANMODNING_UNNTAK)
             .medAvsenderNavn(hentSaksbehandler(prosessinstans))
-            .medMottakere(Mottaker.av(MYNDIGHET))
+            .medMottakere(Mottaker.av(TRYGDEMYNDIGHET))
             .medBehandling(behandling)
             .medYtterligereInformasjon(prosessinstans.getData(YTTERLIGERE_INFO_SED))
             .build();

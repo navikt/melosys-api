@@ -1,6 +1,7 @@
 package no.nav.melosys.integrasjon.dokgen;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import no.nav.melosys.domain.Kontaktopplysning;
@@ -80,6 +81,18 @@ public final class DokgenAdresseMapper {
     }
 
     public static Mottaker mapMottaker(DokgenBrevbestilling brevbestilling, Aktoersroller mottakerType) {
+        if (mottakerType == Aktoersroller.TRYGDEMYNDIGHET && brevbestilling.getUtenlandskMyndighet() != null) {
+            var utenlandskMyndighet = brevbestilling.getUtenlandskMyndighet();
+            return new Mottaker(
+                utenlandskMyndighet.navn,
+                Collections.singletonList(utenlandskMyndighet.gateadresse),
+                utenlandskMyndighet.postnummer,
+                utenlandskMyndighet.poststed,
+                utenlandskMyndighet.land,
+                mottakerType.getKode()
+            );
+        }
+
         OrganisasjonDokument org = brevbestilling.getOrg();
         Persondata persondata = brevbestilling.getPersondokument();
         return new Mottaker(

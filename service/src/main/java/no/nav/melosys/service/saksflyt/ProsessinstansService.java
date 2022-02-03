@@ -207,7 +207,7 @@ public class ProsessinstansService {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.IVERKSETT_VEDTAK_FTRL)
             .medBehandling(behandling)
-            .medBegrunnelseFritekst(request.getFritekstBegrunnelse())
+            .medBegrunnelseFritekst(request.getBegrunnelseFritekst())
             .build();
 
         lagre(prosessinstans);
@@ -217,7 +217,7 @@ public class ProsessinstansService {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.IVERKSETT_VEDTAK_TRYGDEAVTALE)
             .medBehandling(behandling)
-            .medBegrunnelseFritekst(request.getFritekstBegrunnelse())
+            .medBegrunnelseFritekst(request.getBegrunnelseFritekst())
             .build();
 
         lagre(prosessinstans);
@@ -227,7 +227,7 @@ public class ProsessinstansService {
     public void opprettProsessinstansNySak(String journalpostID, OpprettSakDto opprettSakDto, Behandlingstyper behandlingstype) {
         Prosessinstans prosessinstans = new Prosessinstans();
 
-        prosessinstans.setType(ProsessType.OPPRETT_NY_SAK);
+        prosessinstans.setType(ProsessType.OPPRETT_NY_SAK_EOS);
         prosessinstans.setData(ProsessDataKey.SAKSTYPE, opprettSakDto.getSakstype());
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, behandlingstype);
         prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, journalpostID);
@@ -236,6 +236,21 @@ public class ProsessinstansService {
         prosessinstans.setData(ProsessDataKey.OPPGAVE_ID, opprettSakDto.getOppgaveID());
         prosessinstans.setData(ProsessDataKey.SØKNADSPERIODE, opprettSakDto.getSoknadDto().getPeriode());
         prosessinstans.setData(ProsessDataKey.SØKNADSLAND, opprettSakDto.getSoknadDto().getLand());
+        prosessinstans.setData(ProsessDataKey.SKAL_TILORDNES, opprettSakDto.isSkalTilordnes());
+
+        lagre(prosessinstans);
+    }
+
+    public void opprettProsessinstansNySakFTRLTrygdeavtale(String journalpostID, OpprettSakDto opprettSakDto) {
+        Prosessinstans prosessinstans = new Prosessinstans();
+
+        prosessinstans.setType(ProsessType.OPPRETT_NY_SAK_FTRL_TRYGDEAVTALE);
+        prosessinstans.setData(ProsessDataKey.SAKSTYPE, opprettSakDto.getSakstype());
+        prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.SOEKNAD);
+        prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, journalpostID);
+        prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, opprettSakDto.getBehandlingstema());
+        prosessinstans.setData(ProsessDataKey.BRUKER_ID, opprettSakDto.getBrukerID());
+        prosessinstans.setData(ProsessDataKey.OPPGAVE_ID, opprettSakDto.getOppgaveID());
         prosessinstans.setData(ProsessDataKey.SKAL_TILORDNES, opprettSakDto.isSkalTilordnes());
 
         lagre(prosessinstans);
@@ -286,6 +301,10 @@ public class ProsessinstansService {
         }
         if (hasText(mottaker.getOrgnr())) {
             prosessinstans.setData(ORGNR, mottaker.getOrgnr());
+        }
+        if (hasText(mottaker.getInstitusjonId())) {
+            // FIXME: Parsing av variabelen feiler pga ":". Burde fikses på en skikkelig måte
+            prosessinstans.setData(INSTITUSJON_ID, String.format("\"%s\"", mottaker.getInstitusjonId()));
         }
         prosessinstans.setBehandling(behandling);
         lagre(prosessinstans);

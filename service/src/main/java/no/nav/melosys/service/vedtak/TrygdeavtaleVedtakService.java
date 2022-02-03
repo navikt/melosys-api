@@ -4,7 +4,10 @@ import java.time.LocalDate;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.kodeverk.*;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Saksstatuser;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
@@ -74,7 +77,6 @@ public class TrygdeavtaleVedtakService {
         behandlingService.oppdaterStatus(behandling, Behandlingsstatus.IVERKSETTER_VEDTAK);
 
         prosessinstansService.opprettProsessinstansIverksettVedtakTrygdeavtale(behandling, request);
-        // TODO: Egne regler for hvilket brev som skal være med for de forskjellige mottakerne (innvilgelse/attest/begge)
         dokgenService.produserOgDistribuerBrev(behandlingID, lagStorbritanniaBrevbestilling(request));
         oppgaveService.ferdigstillOppgaveMedSaksnummer(saksnummer);
     }
@@ -84,18 +86,18 @@ public class TrygdeavtaleVedtakService {
             .medProduserbardokument(Produserbaredokumenter.STORBRITANNIA)
             .medMottaker(Aktoersroller.BRUKER)
             .medKopiMottakere(request.getKopiMottakere())
-            .medInnledningFritekst(request.getFritekstInnledning())
-            .medBegrunnelseFritekst(request.getFritekstBegrunnelse())
-            .medEktefelleFritekst(request.getFritekstEktefelle())
-            .medBarnFritekst(request.getFritekstBarn())
+            .medInnledningFritekst(request.getInnledningFritekst())
+            .medBegrunnelseFritekst(request.getBegrunnelseFritekst())
+            .medEktefelleFritekst(request.getEktefelleFritekst())
+            .medBarnFritekst(request.getBarnFritekst())
             .medBestillersId(request.getBestillersId())
             .build();
     }
 
     private void oppdaterBehandlingsresultat(Behandlingsresultat behandlingsresultat, FattTrygdeavtaleVedtakRequest request) throws IkkeFunnetException {
         behandlingsresultat.settVedtakMetadata(request.getVedtakstype(), LocalDate.now().plusWeeks(FRIST_KLAGE_UKER));
-        behandlingsresultat.setBegrunnelseFritekst(request.getFritekstBegrunnelse());
-        behandlingsresultat.setInnledningFritekst(request.getFritekstInnledning());
+        behandlingsresultat.setBegrunnelseFritekst(request.getBegrunnelseFritekst());
+        behandlingsresultat.setInnledningFritekst(request.getInnledningFritekst());
         behandlingsresultat.setFastsattAvLand(Landkoder.NO);
 
         behandlingsresultatService.lagre(behandlingsresultat);

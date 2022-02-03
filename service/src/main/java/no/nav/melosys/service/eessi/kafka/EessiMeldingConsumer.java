@@ -31,4 +31,17 @@ public class EessiMeldingConsumer {
             log.error("Feil ved mottak av SED! ConsumerRecord.key: {}", consumerRecord.key(), e);
         }
     }
+
+    @KafkaListener(clientIdPrefix = "aiven-melosys-eessi-consumer", topics = "${kafka.aiven.eessi.topic}",
+        containerFactory = "aivenEessiMeldingListenerContainerFactory")
+    public void mottaMeldingAiven(ConsumerRecord<String, MelosysEessiMelding> consumerRecord) {
+        MelosysEessiMelding melding = consumerRecord.value();
+        log.info("Mottatt ny melding fra eessi(aiven): {}", melding);
+
+        try {
+            prosessinstansService.opprettProsessinstansSedMottak(melding);
+        } catch (Exception e) {
+            log.error("Feil ved mottak av SED(aiven)! ConsumerRecord.key: {}", consumerRecord.key(), e);
+        }
+    }
 }

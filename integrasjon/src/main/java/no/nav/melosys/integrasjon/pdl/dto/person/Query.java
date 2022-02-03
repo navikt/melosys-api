@@ -306,8 +306,9 @@ query($ident: ID!, $historikk: Boolean!) {
       metadata {
         master
         endringer {
-          registrert
           type
+          registrert
+          kilde
         }
       }
       folkeregistermetadata {

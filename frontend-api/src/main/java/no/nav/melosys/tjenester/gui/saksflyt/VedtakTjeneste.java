@@ -48,7 +48,7 @@ public class VedtakTjeneste {
         aksesskontroll.autoriserSkriv(behandlingID);
 
         vedtakServiceFasade.fattVedtak(behandlingID, lagFattVedtakRequest(behandlingID, fattVedtakDto, SubjectHandler.getInstance().getUserID()));
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("{behandlingID}/endre")
@@ -60,7 +60,7 @@ public class VedtakTjeneste {
         }
         aksesskontroll.autoriserSkriv(behandlingID);
         vedtakServiceFasade.endreVedtak(behandlingID, endreVedtakDto.getBegrunnelseKode(), endreVedtakDto.getFritekst(), endreVedtakDto.getFritekstSed());
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("{behandlingID}/kontroller")
@@ -73,7 +73,7 @@ public class VedtakTjeneste {
         }
         aksesskontroll.autoriser(behandlingID, oppdaterRegisteropplysninger ? Aksesstype.SKRIV : Aksesstype.LES);
         vedtakKontrollService.kontrollerInnvilgelse(behandlingID, fattVedtakDto.getVedtakstype(), oppdaterRegisteropplysninger);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     private FattVedtakRequest lagFattVedtakRequest(long behandlingID, FattVedtakDto fattVedtakDto, String bestillersId) {
@@ -89,18 +89,18 @@ public class VedtakTjeneste {
             var sakstype = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID).getFagsak().getType();
             if (sakstype == Sakstyper.FTRL) {
                 fattVedtakRequest = new FattFtrlVedtakRequest.Builder()
-                    .medFritekstInnledning(trygdeavtaleEllerFtrlVedtakDto.getFritekstInnledning())
-                    .medFritekstBegrunnelse(trygdeavtaleEllerFtrlVedtakDto.getFritekstBegrunnelse())
-                    .medFritekstEktefelle(trygdeavtaleEllerFtrlVedtakDto.getFritekstEktefelle())
-                    .medFritekstBarn(trygdeavtaleEllerFtrlVedtakDto.getFritekstBarn())
+                    .medInnledningFritekst(trygdeavtaleEllerFtrlVedtakDto.getInnledningFritekst())
+                    .medBegrunnelseFritekst(trygdeavtaleEllerFtrlVedtakDto.getBegrunnelseFritekst())
+                    .medEktefelleFritekst(trygdeavtaleEllerFtrlVedtakDto.getEktefelleFritekst())
+                    .medBarnFritekst(trygdeavtaleEllerFtrlVedtakDto.getBarnFritekst())
                     .medKopiMottakere(trygdeavtaleEllerFtrlVedtakDto.getKopiMottakere())
                     .medBestillersId(bestillersId);
             } else if (sakstype == Sakstyper.TRYGDEAVTALE) {
                 fattVedtakRequest = new FattTrygdeavtaleVedtakRequest.Builder()
-                    .medFritekstInnledning(trygdeavtaleEllerFtrlVedtakDto.getFritekstInnledning())
-                    .medFritekstBegrunnelse(trygdeavtaleEllerFtrlVedtakDto.getFritekstBegrunnelse())
-                    .medFritekstEktefelle(trygdeavtaleEllerFtrlVedtakDto.getFritekstEktefelle())
-                    .medFritekstBarn(trygdeavtaleEllerFtrlVedtakDto.getFritekstBarn())
+                    .medInnledningFritekst(trygdeavtaleEllerFtrlVedtakDto.getInnledningFritekst())
+                    .medBegrunnelseFritekst(trygdeavtaleEllerFtrlVedtakDto.getBegrunnelseFritekst())
+                    .medEktefelleFritekst(trygdeavtaleEllerFtrlVedtakDto.getEktefelleFritekst())
+                    .medBarnFritekst(trygdeavtaleEllerFtrlVedtakDto.getBarnFritekst())
                     .medKopiMottakere(trygdeavtaleEllerFtrlVedtakDto.getKopiMottakere())
                     .medBestillersId(bestillersId);
             } else {

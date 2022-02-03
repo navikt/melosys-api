@@ -192,7 +192,7 @@ class VedtakServiceFasadeTest {
         return new FattFtrlVedtakRequest.Builder()
             .medBehandlingsresultat(FASTSATT_LOVVALGSLAND)
             .medVedtakstype(FØRSTEGANGSVEDTAK)
-            .medFritekstBegrunnelse("Begrunnelse")
+            .medBegrunnelseFritekst("Begrunnelse")
             .medBestillersId(SubjectHandler.getInstance().getUserID())
             .build();
     }
@@ -201,7 +201,7 @@ class VedtakServiceFasadeTest {
         return new FattTrygdeavtaleVedtakRequest.Builder()
             .medBehandlingsresultat(FASTSATT_LOVVALGSLAND)
             .medVedtakstype(FØRSTEGANGSVEDTAK)
-            .medFritekstBegrunnelse("Begrunnelse")
+            .medBegrunnelseFritekst("Begrunnelse")
             .build();
     }
 }

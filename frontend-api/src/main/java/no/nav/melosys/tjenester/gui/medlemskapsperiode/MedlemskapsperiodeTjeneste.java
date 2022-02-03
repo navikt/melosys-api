@@ -87,7 +87,7 @@ public class MedlemskapsperiodeTjeneste {
                                                         @PathVariable("medlemskapsperiodeID") long medlemskapsperiodeID) {
         aksesskontroll.autoriserSkriv(behandlingID);
         medlemskapsperiodeService.slettMedlemskapsperiode(behandlingID, medlemskapsperiodeID);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/behandlinger/medlemskapsperioder/bestemmelser")

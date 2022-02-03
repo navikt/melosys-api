@@ -103,18 +103,18 @@ class FtrlVedtakServiceTest {
             .containsExactly(INNVILGELSE_FOLKETRYGDLOVEN_2_8, "Z990007", BRUKER, "Innledning",
                 "Begrunnelse", "Ektefelle omfattet", "Barn omfattet");
         assertThat(brevbestillingRequest.getKopiMottakere().size()).isEqualTo(1);
-        assertThat(brevbestillingRequest.getKopiMottakere().get(0).getRolle()).isEqualTo(ARBEIDSGIVER);
+        assertThat(brevbestillingRequest.getKopiMottakere().get(0).rolle()).isEqualTo(ARBEIDSGIVER);
     }
 
     private FattFtrlVedtakRequest lagFattVedtakRequest() {
         return new FattFtrlVedtakRequest.Builder()
             .medBehandlingsresultat(MEDLEM_I_FOLKETRYGDEN)
             .medVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK)
-            .medFritekstInnledning("Innledning")
-            .medFritekstBegrunnelse("Begrunnelse")
-            .medFritekstEktefelle("Ektefelle omfattet")
-            .medFritekstBarn("Barn omfattet")
-            .medKopiMottakere(List.of(new KopiMottaker(Aktoersroller.ARBEIDSGIVER, "987654321", null)))
+            .medInnledningFritekst("Innledning")
+            .medBegrunnelseFritekst("Begrunnelse")
+            .medEktefelleFritekst("Ektefelle omfattet")
+            .medBarnFritekst("Barn omfattet")
+            .medKopiMottakere(List.of(new KopiMottaker(Aktoersroller.ARBEIDSGIVER, "987654321", null, null)))
             .medBestillersId(SubjectHandler.getInstance().getUserID())
             .build();
     }

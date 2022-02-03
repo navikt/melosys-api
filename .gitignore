@@ -23,3 +23,4 @@ app/src/main/resources/public/
 *.secrets.properties
 .DS_Store
 http-client.private.env.json
+.sdkmanrc

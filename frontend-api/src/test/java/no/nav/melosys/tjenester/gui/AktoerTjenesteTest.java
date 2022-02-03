@@ -92,19 +92,19 @@ class AktoerTjenesteTest extends JsonSchemaTestParent {
         aktoerMyndighet.setId(39L);
         aktoerMyndighet.setAktørId("1235");
         aktoerMyndighet.setInstitusjonId("INST2");
-        aktoerMyndighet.setRolle(Aktoersroller.MYNDIGHET);
+        aktoerMyndighet.setRolle(Aktoersroller.TRYGDEMYNDIGHET);
         aktoerMyndighet.setOrgnr("100");
         aktoerMyndighet.setFagsak(lagFagsak());
         aktoerMyndighet.setUtenlandskPersonId("UTL");
 
         when(aktoerService.hentfagsakAktører(any(), any(), any())).thenReturn(Collections.singletonList(aktoerMyndighet));
 
-        List<AktoerDto> aktører = aktoerTjeneste.hentAktoerer("MELTEST-1", "MYNDIGHET", null);
+        List<AktoerDto> aktører = aktoerTjeneste.hentAktoerer("MELTEST-1", "TRYGDEMYNDIGHET", null);
         AktoerDto aktoerDto = aktører.get(0);
 
         assertThat(aktoerDto.getAktoerID()).isEqualTo("1235");
         assertThat(aktoerDto.getInstitusjonsID()).isEqualTo("INST2");
-        assertThat(aktoerDto.getRolleKode()).isEqualTo("MYNDIGHET");
+        assertThat(aktoerDto.getRolleKode()).isEqualTo("TRYGDEMYNDIGHET");
         assertThat(aktoerDto.getOrgnr()).isEqualTo("100");
         assertThat(aktoerDto.getRepresentererKode()).isNull();
     }
