@@ -188,12 +188,12 @@ class BehandlingsresultatServiceTest {
             .matches(v -> v.getId() == null)
             .matches(v -> v.getBehandlingsresultat() == behandlingsresultatreplika)
             .matches(v -> v.getBegrunnelseFritekst().equals("fritekst"))
-            .matches(v -> v.getBegrunnelseFritekstEessi().equals("free text"));
-
-        VilkaarBegrunnelse vilkaarBegrunnelse = behandlingsresultatreplika.getVilkaarsresultater().stream()
-            .findFirst().get().getBegrunnelser().stream().findFirst().get();
-        assertThat(vilkaarBegrunnelse.getId()).isNull();
-        assertThat(vilkaarBegrunnelse.getKode()).isEqualTo("kode");
+            .matches(v -> v.getBegrunnelseFritekstEessi().equals("free text"))
+            .extracting(Vilkaarsresultat::getBegrunnelser)
+            .matches(vb -> vb.size() == 1)
+            .extracting(vb -> vb.iterator().next())
+            .matches(vb -> vb.getId() == null)
+            .matches(vb -> vb.getKode().equals("kode"));
 
         assertThat(behandlingsresultatreplika.getBehandlingsresultatBegrunnelser())
             .singleElement()
