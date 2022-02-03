@@ -4,6 +4,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
@@ -21,6 +23,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
+import org.assertj.core.groups.Tuple;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -137,51 +140,54 @@ class BehandlingsresultatServiceTest {
         assertThat(behandlingsresultatreplika.getVedtakMetadata()).isNull();
 
         assertThat(behandlingsresultatreplika.getLovvalgsperioder())
-            .allMatch(l -> l.getId() == null)
-            .allMatch(a -> a.getFom() != null)
-            .allMatch(a -> a.getTom() != null)
-            .allMatch(l -> l.getBehandlingsresultat() == behandlingsresultatreplika)
-            .allMatch(l -> l.getDekning().equals(Trygdedekninger.FULL_DEKNING_EOSFO));
+            .singleElement()
+            .matches(l -> l.getId() == null)
+            .matches(l -> l.getId() == null)
+            .matches(a -> a.getFom() != null)
+            .matches(a -> a.getTom() != null)
+            .matches(l -> l.getBehandlingsresultat() == behandlingsresultatreplika)
+            .matches(l -> l.getDekning().equals(Trygdedekninger.FULL_DEKNING_EOSFO));
 
         assertThat(behandlingsresultatreplika.getAnmodningsperioder())
-            .allMatch(l -> l.getId() == null)
-            .allMatch(a -> a.getFom() != null)
-            .allMatch(a -> a.getTom() != null)
-            .allMatch(a -> a.getLovvalgsland() == Landkoder.SE)
-            .allMatch(a -> a.getBestemmelse() == Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1)
-            .allMatch(a -> a.getAnmodningsperiodeSvar() == null)
-            .allMatch(a -> !a.erSendtUtland())
-            .allMatch(a -> a.getBehandlingsresultat() == behandlingsresultatreplika)
-            .allMatch(a -> a.getDekning().equals(Trygdedekninger.FULL_DEKNING_EOSFO));
+            .singleElement()
+            .matches(l -> l.getId() == null)
+            .matches(a -> a.getFom() != null)
+            .matches(a -> a.getTom() != null)
+            .matches(a -> a.getLovvalgsland() == Landkoder.SE)
+            .matches(a -> a.getBestemmelse() == Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1)
+            .matches(a -> a.getAnmodningsperiodeSvar() == null)
+            .matches(a -> !a.erSendtUtland())
+            .matches(a -> a.getBehandlingsresultat() == behandlingsresultatreplika)
+            .matches(a -> a.getDekning().equals(Trygdedekninger.FULL_DEKNING_EOSFO));
 
         assertThat(behandlingsresultatreplika.getUtpekingsperioder())
-            .allMatch(l -> l.getId() == null)
-            .allMatch(a -> a.getFom() != null)
-            .allMatch(a -> a.getTom() != null)
-            .allMatch(a -> a.getLovvalgsland() == Landkoder.SE)
-            .allMatch(a -> a.getBestemmelse() == Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_2A)
-            .allMatch(a -> a.getSendtUtland() == null)
-            .allMatch(a -> a.getBehandlingsresultat() == behandlingsresultatreplika);
+            .singleElement()
+            .matches(l -> l.getId() == null)
+            .matches(a -> a.getFom() != null)
+            .matches(a -> a.getTom() != null)
+            .matches(a -> a.getLovvalgsland() == Landkoder.SE)
+            .matches(a -> a.getBestemmelse() == Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_2A)
+            .matches(a -> a.getSendtUtland() == null)
+            .matches(a -> a.getBehandlingsresultat() == behandlingsresultatreplika);
 
         assertThat(behandlingsresultatreplika.getAvklartefakta())
-            .allMatch(a -> a.getId() == null)
-            .allMatch(a -> a.getBehandlingsresultat() == behandlingsresultatreplika)
-            .allMatch(a -> a.getFakta().equals("fakta"))
-            .allMatch(a -> a.getType().equals(Avklartefaktatyper.ARBEIDSLAND))
-            .flatExtracting(Avklartefakta::getRegistreringer)
-            .extracting(AvklartefaktaRegistrering::getAvklartefakta)
-            .containsExactly(behandlingsresultatreplika.getAvklartefakta().stream().findFirst().get());
-
-        assertThat(behandlingsresultatreplika.getAvklartefakta())
-            .flatExtracting(Avklartefakta::getRegistreringer)
-            .extracting(AvklartefaktaRegistrering::getBegrunnelseKode)
-            .containsExactly(AVKLARTEFAKTA_REGISTRERING_BEGRUNNELSE_KODE);
+            .singleElement()
+            .matches(a -> a.getId() == null)
+            .matches(a -> a.getBehandlingsresultat() == behandlingsresultatreplika)
+            .matches(a -> a.getFakta().equals("fakta"))
+            .matches(a -> a.getType().equals(Avklartefaktatyper.ARBEIDSLAND))
+            .extracting(Avklartefakta::getRegistreringer)
+            .matches(r -> r.size() == 1)
+            .extracting(r -> r.iterator().next())
+            .matches(ar -> ar.getAvklartefakta().equals(behandlingsresultatreplika.getAvklartefakta().iterator().next()))
+            .matches(ar -> ar.getBegrunnelseKode().equals(AVKLARTEFAKTA_REGISTRERING_BEGRUNNELSE_KODE));
 
         assertThat(behandlingsresultatreplika.getVilkaarsresultater())
-            .allMatch(v -> v.getId() == null)
-            .allMatch(v -> v.getBehandlingsresultat() == behandlingsresultatreplika)
-            .allMatch(v -> v.getBegrunnelseFritekst().equals("fritekst"))
-            .allMatch(v -> v.getBegrunnelseFritekstEessi().equals("free text"));
+            .singleElement()
+            .matches(v -> v.getId() == null)
+            .matches(v -> v.getBehandlingsresultat() == behandlingsresultatreplika)
+            .matches(v -> v.getBegrunnelseFritekst().equals("fritekst"))
+            .matches(v -> v.getBegrunnelseFritekstEessi().equals("free text"));
 
         VilkaarBegrunnelse vilkaarBegrunnelse = behandlingsresultatreplika.getVilkaarsresultater().stream()
             .findFirst().get().getBegrunnelser().stream().findFirst().get();
@@ -189,14 +195,16 @@ class BehandlingsresultatServiceTest {
         assertThat(vilkaarBegrunnelse.getKode()).isEqualTo("kode");
 
         assertThat(behandlingsresultatreplika.getBehandlingsresultatBegrunnelser())
-            .allMatch(a -> a.getId() == null)
-            .allMatch(a -> a.getBehandlingsresultat() == behandlingsresultatreplika)
-            .allMatch(a -> a.getKode().equals("begrunnelsekode"));
+            .singleElement()
+            .matches(a -> a.getId() == null)
+            .matches(a -> a.getBehandlingsresultat() == behandlingsresultatreplika)
+            .matches(a -> a.getKode().equals("begrunnelsekode"));
 
         assertThat(behandlingsresultatreplika.getKontrollresultater())
-            .allMatch(a -> a.getId() == null)
-            .allMatch(a -> a.getBehandlingsresultat() == behandlingsresultatreplika)
-            .allMatch(a -> a.getBegrunnelse() == Kontroll_begrunnelser.FEIL_I_PERIODEN);
+            .singleElement()
+            .matches(a -> a.getId() == null)
+            .matches(a -> a.getBehandlingsresultat() == behandlingsresultatreplika)
+            .matches(a -> a.getBegrunnelse() == Kontroll_begrunnelser.FEIL_I_PERIODEN);
 
         assertThat(behandlingsresultatreplika.getUtfallRegistreringUnntak()).isNull();
         assertThat(behandlingsresultatreplika.getUtfallUtpeking()).isNull();
