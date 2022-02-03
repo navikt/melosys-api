@@ -5,12 +5,12 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
@@ -76,6 +76,38 @@ public class BehandlingService {
         this.behandlingsresultatService = behandlingsresultatService;
         this.oppgaveService = oppgaveService;
         this.applicationEventPublisher = applicationEventPublisher;
+    }
+
+    @Transactional
+    public void oppdaterBehandling(long behandlingID, Sakstyper sakstype, Behandlingstyper type, Behandlingstema tema, Behandlingsstatus status, LocalDate behandlingsfrist) {
+        var behandling = hentBehandlingUtenSaksopplysninger(behandlingID);
+        if (!behandling.erAktiv()) {
+            throw new FunksjonellException("Behandlingen må være aktiv for å kunne endres");
+        }
+
+        if (behandling.getStatus() != status) {
+            brukerOppdaterStatus(behandlingID, status);
+        }
+
+        boolean behandlingErEndret = false;
+        if (behandling.getType() != type) {
+            behandling.setType(type);
+            behandlingErEndret = true;
+        }
+        if (behandling.getTema() != tema) {
+            behandling.setTema(tema);
+            behandlingErEndret = true;
+        }
+        if (!behandlingsfrist.equals(behandling.getBehandlingsfrist())) {
+            behandling.setBehandlingsfrist(behandlingsfrist);
+            behandlingErEndret = true;
+        }
+        if (behandlingErEndret) {
+            behandlingRepository.save(behandling);
+            applicationEventPublisher.publishEvent(new BehandlingEndretEvent(behandlingID, behandling));
+        }
+
+        // TODO: Endre sakstype (MELOSYS-4899 for EØS <-> trygdeavtale)
     }
 
     /**
@@ -149,9 +181,9 @@ public class BehandlingService {
     private Collection<Behandlingsstatus> hentMuligeStatuser(Behandling behandling) {
         if (behandling.erInaktiv()) return Collections.emptyList();
 
-        List<Behandlingsstatus> muligeStatuser = List.of(AVVENT_DOK_PART, AVVENT_DOK_UTL, UNDER_BEHANDLING, AVVENT_FAGLIG_AVKLARING);
+        Set<Behandlingsstatus> muligeStatuser = new HashSet<>(Set.of(AVVENT_DOK_PART, AVVENT_DOK_UTL, UNDER_BEHANDLING, AVVENT_FAGLIG_AVKLARING));
 
-        List<Behandlingstema> temaerSomKanAvsluttes = List.of(ØVRIGE_SED_MED, ØVRIGE_SED_UFM, TRYGDETID, IKKE_YRKESAKTIV);
+        Set<Behandlingstema> temaerSomKanAvsluttes = Set.of(ØVRIGE_SED_MED, ØVRIGE_SED_UFM, TRYGDETID, IKKE_YRKESAKTIV);
         if (temaerSomKanAvsluttes.contains(behandling.getTema())) {
             muligeStatuser.add(Behandlingsstatus.AVSLUTTET);
         }

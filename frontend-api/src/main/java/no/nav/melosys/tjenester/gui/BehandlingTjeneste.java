@@ -9,6 +9,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.dokument.DokumentView;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -57,11 +58,26 @@ public class BehandlingTjeneste {
         this.aksesskontroll = aksesskontroll;
     }
 
+    @PostMapping("{behandlingID}/oppdater")
+    @ApiOperation("Oppdater behandling")
+    public ResponseEntity<Void> oppdaterBehandling(@PathVariable long behandlingID,
+                                                   @RequestBody OppdaterBehandlingDto oppdaterBehandling) {
+        log.info("Saksbehandler {} ber om å oppdatere behandling {} med {}", SubjectHandler.getInstance().getUserID(), oppdaterBehandling);
+        aksesskontroll.autoriser(behandlingID);
+
+        var sakstype = oppdaterBehandling.sakstype() == null ? null : Sakstyper.valueOf(oppdaterBehandling.sakstype());
+        var behandlingstype = oppdaterBehandling.behandlingstype() == null ? null : Behandlingstyper.valueOf(oppdaterBehandling.behandlingstype());
+        var behandlingstema = oppdaterBehandling.behandlingstema() == null ? null : Behandlingstema.valueOf(oppdaterBehandling.behandlingstema());
+        var behandlingsstatus = oppdaterBehandling.behandlingsstatus() == null ? null : Behandlingsstatus.valueOf(oppdaterBehandling.behandlingsstatus());
+
+        behandlingService.oppdaterBehandling(behandlingID, sakstype, behandlingstype, behandlingstema, behandlingsstatus, oppdaterBehandling.behandlingsfrist());
+        return ResponseEntity.noContent().build();
+    }
+
     @PostMapping("{behandlingID}/status")
     @ApiOperation("Endre status for en gitt behandling.")
     public ResponseEntity<Void> endreStatus(@PathVariable("behandlingID") long behandlingID,
-                                            @RequestBody EndreBehandlingsstatusDto status)
-        {
+                                            @RequestBody EndreBehandlingsstatusDto status) {
         log.info("Saksbehandler {} ber om å endre status for behandling {} til {}.", SubjectHandler.getInstance().getUserID(),
             behandlingID, status.behandlingsstatus());
         aksesskontroll.autoriserSkriv(behandlingID);
@@ -73,8 +89,7 @@ public class BehandlingTjeneste {
     @ApiOperation(value = "Knytt medlemsperioder fra MEDL til oppholdsland fra søknaden",
         response = TidligereMedlemsperioderDto.class)
     public ResponseEntity<TidligereMedlemsperioderDto> knyttMedlemsperioder(@PathVariable("behandlingID") long behandlingID,
-                                                                            @RequestBody TidligereMedlemsperioderDto tidligereMedlemsperioder)
-        {
+                                                                            @RequestBody TidligereMedlemsperioderDto tidligereMedlemsperioder) {
         log.info("Saksbehandler {} ber om å knytte medlemsperioder for behandling {}.", SubjectHandler.getInstance().getUserID(), behandlingID);
         aksesskontroll.autoriserSkriv(behandlingID);
 
@@ -85,8 +100,7 @@ public class BehandlingTjeneste {
     @GetMapping("{behandlingID}/tidligeremedlemsperioder")
     @ApiOperation(value = "Hent medlemsperioder knyttet til oppholdsland fra søknaden",
         response = TidligereMedlemsperioderDto.class)
-    public ResponseEntity<TidligereMedlemsperioderDto> hentMedlemsperioder(@PathVariable("behandlingID") long behandlingID)
-        {
+    public ResponseEntity<TidligereMedlemsperioderDto> hentMedlemsperioder(@PathVariable("behandlingID") long behandlingID) {
         log.debug("Saksbehandler {} ber om å hente medlemsperioder for behandling {}.", SubjectHandler.getInstance().getUserID(), behandlingID);
         aksesskontroll.autoriser(behandlingID);
 
@@ -98,8 +112,7 @@ public class BehandlingTjeneste {
     @GetMapping("{behandlingID}")
     @JsonView(DokumentView.FrontendApi.class)
     @ApiOperation(value = "Hent en spesifikk behandling", response = BehandlingDto.class)
-    public ResponseEntity<BehandlingDto> hentBehandling(@PathVariable("behandlingID") long behandlingID)
-        {
+    public ResponseEntity<BehandlingDto> hentBehandling(@PathVariable("behandlingID") long behandlingID) {
         String saksbehandler = SubjectHandler.getInstance().getUserID();
         log.debug("Saksbehandler {} ber om å hente behandling {}.", saksbehandler, behandlingID);
         aksesskontroll.autoriser(behandlingID);
@@ -112,8 +125,7 @@ public class BehandlingTjeneste {
 
     @PostMapping("{behandlingID}/endreBehandlingstema")
     @ApiOperation(value = "Endre behandlingstema for en gitt behandling")
-    public ResponseEntity<Void> endreBehandlingstema(@PathVariable("behandlingID") long behandlingsID, @RequestBody EndreBehandlingstemaDto endreBehandlingstemaDto)
-        {
+    public ResponseEntity<Void> endreBehandlingstema(@PathVariable("behandlingID") long behandlingsID, @RequestBody EndreBehandlingstemaDto endreBehandlingstemaDto) {
         log.debug("Saksbehandler {} ber om å sette behandlingstema for behandling {} til {}.", SubjectHandler.getInstance().getUserID(), behandlingsID, endreBehandlingstemaDto);
         aksesskontroll.autoriserSkrivOgTilordnet(behandlingsID);
 
@@ -133,8 +145,7 @@ public class BehandlingTjeneste {
 
     @GetMapping("{behandlingID}/muligeStatuser")
     @ApiOperation("Hent mulige nye behandlingsstatuser for en behandling")
-    public ResponseEntity<Collection<Behandlingsstatus>> hentMuligeStatuser(@PathVariable("behandlingID") long behandlingID)
-    {
+    public ResponseEntity<Collection<Behandlingsstatus>> hentMuligeStatuser(@PathVariable("behandlingID") long behandlingID) {
         log.info("Saksbehandler {} ber om å hente mulige nye behandlingsstatuser for behandling {}.", SubjectHandler.getInstance().getUserID(), behandlingID);
         aksesskontroll.autoriser(behandlingID);
 
@@ -143,8 +154,7 @@ public class BehandlingTjeneste {
 
     @GetMapping("{behandlingID}/muligeBehandlingstema")
     @ApiOperation(value = "Hent mulige nye behandlingstema for en behandling")
-    public ResponseEntity<List<Behandlingstema>> hentEndreBehandlingstema(@PathVariable("behandlingID") long behandlingsID)
-    {
+    public ResponseEntity<List<Behandlingstema>> hentEndreBehandlingstema(@PathVariable("behandlingID") long behandlingsID) {
         log.debug("Saksbehandler {} ber om å hente mulige nye behandlingstema for behandling {}.", SubjectHandler.getInstance().getUserID(), behandlingsID);
         try {
             aksesskontroll.autoriser(behandlingsID);
@@ -158,8 +168,7 @@ public class BehandlingTjeneste {
 
     @GetMapping("{behandlingID}/muligeTyper")
     @ApiOperation("Hent mulige nye behandlingstyper for en behandling")
-    public ResponseEntity<Collection<Behandlingstyper>> hentMuligeTyper(@PathVariable("behandlingID") long behandlingID)
-    {
+    public ResponseEntity<Collection<Behandlingstyper>> hentMuligeTyper(@PathVariable("behandlingID") long behandlingID) {
         log.info("Saksbehandler {} ber om å hente mulige nye behandlingstyper for behandling {}.", SubjectHandler.getInstance().getUserID(), behandlingID);
         aksesskontroll.autoriser(behandlingID);
 

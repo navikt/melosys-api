@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
+import no.nav.melosys.domain.BehandlingEndretEvent;
 import no.nav.melosys.domain.BehandlingsfristEndretEvent;
 import no.nav.melosys.domain.brev.MangelbrevSvarfrist;
 import no.nav.melosys.domain.dokument.DokumentBestiltEvent;
@@ -52,6 +53,21 @@ public class BehandlingEventListener {
             value.getOppgaveId(),
             OppgaveOppdatering.builder()
                 .fristFerdigstillelse(behandlingsfristEndretEvent.getFristFerdigstillelse())
+                .build())
+        );
+    }
+
+    @EventListener
+    @Async
+    public void behandlingEndret(BehandlingEndretEvent behandlingEndretEvent) {
+        var behandling = behandlingService.hentBehandling(behandlingEndretEvent.getBehandlingID());
+        Optional<Oppgave> oppgave = oppgaveService.finnÅpenOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer());
+        oppgave.ifPresent(value -> oppgaveService.oppdaterOppgave(
+            value.getOppgaveId(),
+            OppgaveOppdatering.builder()
+                .behandlingstype(behandlingEndretEvent.getBehandlingstype().getKode())
+                .behandlingstema(behandlingEndretEvent.getBehandlingstema().getKode())
+                .fristFerdigstillelse(behandlingEndretEvent.getBehandlingsfrist())
                 .build())
         );
     }
