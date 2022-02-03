@@ -144,14 +144,14 @@ class BehandlingsresultatServiceTest {
             .singleElement()
             .matches(l -> l.getId() == null)
             .matches(l -> l.getId() == null)
-            .matches(a -> a.getFom() != null)
-            .matches(a -> a.getTom() != null)
+            .matches(l -> l.getFom() != null)
+            .matches(l -> l.getTom() != null)
             .matches(l -> l.getBehandlingsresultat() == behandlingsresultatreplika)
             .matches(l -> l.getDekning().equals(Trygdedekninger.FULL_DEKNING_EOSFO));
 
         assertThat(behandlingsresultatreplika.getAnmodningsperioder())
             .singleElement()
-            .matches(l -> l.getId() == null)
+            .matches(a -> a.getId() == null)
             .matches(a -> a.getFom() != null)
             .matches(a -> a.getTom() != null)
             .matches(a -> a.getLovvalgsland() == Landkoder.SE)
@@ -163,13 +163,13 @@ class BehandlingsresultatServiceTest {
 
         assertThat(behandlingsresultatreplika.getUtpekingsperioder())
             .singleElement()
-            .matches(l -> l.getId() == null)
-            .matches(a -> a.getFom() != null)
-            .matches(a -> a.getTom() != null)
-            .matches(a -> a.getLovvalgsland() == Landkoder.SE)
-            .matches(a -> a.getBestemmelse() == Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_2A)
-            .matches(a -> a.getSendtUtland() == null)
-            .matches(a -> a.getBehandlingsresultat() == behandlingsresultatreplika);
+            .matches(u -> u.getId() == null)
+            .matches(u -> u.getFom() != null)
+            .matches(u -> u.getTom() != null)
+            .matches(u -> u.getLovvalgsland() == Landkoder.SE)
+            .matches(u -> u.getBestemmelse() == Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_2A)
+            .matches(u -> u.getSendtUtland() == null)
+            .matches(u -> u.getBehandlingsresultat() == behandlingsresultatreplika);
 
         assertThat(behandlingsresultatreplika.getAvklartefakta())
             .singleElement()
@@ -197,15 +197,15 @@ class BehandlingsresultatServiceTest {
 
         assertThat(behandlingsresultatreplika.getBehandlingsresultatBegrunnelser())
             .singleElement()
-            .matches(a -> a.getId() == null)
-            .matches(a -> a.getBehandlingsresultat() == behandlingsresultatreplika)
-            .matches(a -> a.getKode().equals("begrunnelsekode"));
+            .matches(b -> b.getId() == null)
+            .matches(b -> b.getBehandlingsresultat() == behandlingsresultatreplika)
+            .matches(b -> b.getKode().equals("begrunnelsekode"));
 
         assertThat(behandlingsresultatreplika.getKontrollresultater())
             .singleElement()
-            .matches(a -> a.getId() == null)
-            .matches(a -> a.getBehandlingsresultat() == behandlingsresultatreplika)
-            .matches(a -> a.getBegrunnelse() == Kontroll_begrunnelser.FEIL_I_PERIODEN);
+            .matches(k -> k.getId() == null)
+            .matches(k -> k.getBehandlingsresultat() == behandlingsresultatreplika)
+            .matches(k -> k.getBegrunnelse() == Kontroll_begrunnelser.FEIL_I_PERIODEN);
 
         assertThat(behandlingsresultatreplika.getUtfallRegistreringUnntak()).isNull();
         assertThat(behandlingsresultatreplika.getUtfallUtpeking()).isNull();
