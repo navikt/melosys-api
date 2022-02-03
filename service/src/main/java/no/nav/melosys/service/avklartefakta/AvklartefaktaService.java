@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import static no.nav.melosys.domain.avklartefakta.Avklartefakta.IKKE_VALGT_FAKTA;
 import static no.nav.melosys.domain.avklartefakta.Avklartefakta.VALGT_FAKTA;
 import static no.nav.melosys.domain.kodeverk.Avklartefaktatyper.VURDERING_LOVVALG_BARN;
 import static no.nav.melosys.domain.kodeverk.Avklartefaktatyper.VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER;
@@ -146,7 +147,7 @@ public class AvklartefaktaService {
 
         var ikkeOmfattetAvNorskTrygd = avklartefakta
             .stream()
-            .filter(af -> !af.getFakta().equals(VALGT_FAKTA)) // Usikker på om vi kan bruke equals("FALSE")
+            .filter(af -> af.getFakta().equals(IKKE_VALGT_FAKTA))
             .map(af -> new IkkeOmfattetFamilie(
                 af.getSubjekt(),
                 af.getRegistreringer().stream().findFirst().orElseThrow(() ->
