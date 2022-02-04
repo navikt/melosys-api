@@ -28,13 +28,6 @@ public class LegacyKafkaConfig {
     // Denne gjelder for topics liggende på on-prem kafka
 
     @Bean
-    public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, MelosysEessiMelding>> eessiMeldingListenerContainerFactory(
-        KafkaProperties kafkaProperties, @Value("${kafka.eessi.groupid}") String groupId
-    ) {
-        return kafkaListenerContainerFactory(MelosysEessiMelding.class, kafkaProperties, groupId);
-    }
-
-    @Bean
     public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, SoknadMottatt>> soknadMottattContainerFactory(
         KafkaProperties kafkaProperties, @Value("${kafka.soknad-mottak.groupid}") String groupId
     ) {
