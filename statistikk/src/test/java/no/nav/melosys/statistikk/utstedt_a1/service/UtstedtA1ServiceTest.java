@@ -5,7 +5,6 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 
-import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
@@ -15,7 +14,6 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.statistikk.utstedt_a1.integrasjon.UtstedtA1AivenProducer;
-import no.nav.melosys.statistikk.utstedt_a1.integrasjon.UtstedtA1Producer;
 import no.nav.melosys.statistikk.utstedt_a1.integrasjon.dto.A1TypeUtstedelse;
 import no.nav.melosys.statistikk.utstedt_a1.integrasjon.dto.Lovvalgsbestemmelse;
 import no.nav.melosys.statistikk.utstedt_a1.integrasjon.dto.UtstedtA1Melding;
@@ -35,14 +33,11 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class UtstedtA1ServiceTest {
     @Mock
-    private UtstedtA1Producer utstedtA1Producer;
-    @Mock
     private BehandlingsresultatService behandlingsresultatService;
     @Mock
     private LandvelgerService landvelgerService;
     @Mock
     private UtstedtA1AivenProducer utstedtA1AivenProducer;
-    private FakeUnleash unleash = new FakeUnleash();
 
     @Captor
     private ArgumentCaptor<UtstedtA1Melding> captor;
@@ -53,20 +48,20 @@ class UtstedtA1ServiceTest {
 
     @BeforeEach
     void setUp() {
-        utstedtA1Service = new UtstedtA1Service(utstedtA1Producer, utstedtA1AivenProducer, behandlingsresultatService, landvelgerService, unleash);
+        utstedtA1Service = new UtstedtA1Service(utstedtA1AivenProducer, behandlingsresultatService, landvelgerService);
     }
 
     @Test
     void sendMeldingOmUtstedtA1() {
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(lagBehandlingsresultat());
         when(landvelgerService.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID)).thenReturn(List.of(Landkoder.SE));
-        when(utstedtA1Producer.produserMelding(any(UtstedtA1Melding.class))).thenAnswer(returnsFirstArg());
+        when(utstedtA1AivenProducer.produserMelding(any(UtstedtA1Melding.class))).thenAnswer(returnsFirstArg());
 
         utstedtA1Service.sendMeldingOmUtstedtA1(BEHANDLING_ID);
 
         verify(behandlingsresultatService).hentBehandlingsresultat(BEHANDLING_ID);
         verify(landvelgerService).hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID);
-        verify(utstedtA1Producer).produserMelding(captor.capture());
+        verify(utstedtA1AivenProducer).produserMelding(captor.capture());
 
         UtstedtA1Melding melding = captor.getValue();
         assertThat(melding).isNotNull();
@@ -78,8 +73,6 @@ class UtstedtA1ServiceTest {
 
     @Test
     void sendMeldingOmUtstedtA1PåAiven() {
-        unleash.enable("melosys.api.producer-aiven");
-
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(lagBehandlingsresultat());
         when(landvelgerService.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID)).thenReturn(List.of(Landkoder.SE));
         when(utstedtA1AivenProducer.produserMelding(any(UtstedtA1Melding.class))).thenAnswer(returnsFirstArg());
@@ -106,19 +99,19 @@ class UtstedtA1ServiceTest {
 
         verify(behandlingsresultatService).hentBehandlingsresultat(BEHANDLING_ID);
         verify(landvelgerService, never()).hentUtenlandskTrygdemyndighetsland(anyLong());
-        verify(utstedtA1Producer, never()).produserMelding(any(UtstedtA1Melding.class));
+        verify(utstedtA1AivenProducer, never()).produserMelding(any(UtstedtA1Melding.class));
     }
 
     @Test
     void sendMeldingOmUtstedtA1_art13_forventTomLandkode() {
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(lagBehandlingsresultat(false, lagBehandling(), Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A));
-        when(utstedtA1Producer.produserMelding(any(UtstedtA1Melding.class))).thenAnswer(returnsFirstArg());
+        when(utstedtA1AivenProducer.produserMelding(any(UtstedtA1Melding.class))).thenAnswer(returnsFirstArg());
 
         utstedtA1Service.sendMeldingOmUtstedtA1(BEHANDLING_ID);
 
         verify(behandlingsresultatService).hentBehandlingsresultat(BEHANDLING_ID);
         verify(landvelgerService, never()).hentUtenlandskTrygdemyndighetsland(anyLong());
-        verify(utstedtA1Producer).produserMelding(captor.capture());
+        verify(utstedtA1AivenProducer).produserMelding(captor.capture());
 
         UtstedtA1Melding melding = captor.getValue();
         assertThat(melding).isNotNull();
@@ -131,13 +124,13 @@ class UtstedtA1ServiceTest {
     @Test
     void sendMeldingOmUtstedtA1_art11_forventTomLandkode() {
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(lagBehandlingsresultat(false, lagBehandling(), Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A));
-        when(utstedtA1Producer.produserMelding(any(UtstedtA1Melding.class))).thenAnswer(returnsFirstArg());
+        when(utstedtA1AivenProducer.produserMelding(any(UtstedtA1Melding.class))).thenAnswer(returnsFirstArg());
 
         utstedtA1Service.sendMeldingOmUtstedtA1(BEHANDLING_ID);
 
         verify(behandlingsresultatService).hentBehandlingsresultat(BEHANDLING_ID);
         verify(landvelgerService, never()).hentUtenlandskTrygdemyndighetsland(anyLong());
-        verify(utstedtA1Producer).produserMelding(captor.capture());
+        verify(utstedtA1AivenProducer).produserMelding(captor.capture());
 
         UtstedtA1Melding melding = captor.getValue();
         assertThat(melding).isNotNull();
@@ -154,13 +147,13 @@ class UtstedtA1ServiceTest {
 
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
         when(landvelgerService.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID)).thenReturn(List.of(Landkoder.SE));
-        when(utstedtA1Producer.produserMelding(any(UtstedtA1Melding.class))).thenAnswer(returnsFirstArg());
+        when(utstedtA1AivenProducer.produserMelding(any(UtstedtA1Melding.class))).thenAnswer(returnsFirstArg());
 
         utstedtA1Service.sendMeldingOmUtstedtA1(BEHANDLING_ID);
 
         verify(behandlingsresultatService).hentBehandlingsresultat(BEHANDLING_ID);
         verify(landvelgerService).hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID);
-        verify(utstedtA1Producer).produserMelding(captor.capture());
+        verify(utstedtA1AivenProducer).produserMelding(captor.capture());
 
         UtstedtA1Melding melding = captor.getValue();
         assertThat(melding).isNotNull();
