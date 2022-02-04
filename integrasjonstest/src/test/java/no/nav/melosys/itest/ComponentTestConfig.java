@@ -1,14 +1,13 @@
 package no.nav.melosys.itest;
 
+import java.util.Map;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.finn.unleash.FakeUnleash;
 import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.melosysmock.config.GraphqlConfig;
 import no.nav.melosys.melosysmock.config.SoapConfig;
-import no.nav.melosys.melosysmock.journalpost.journalpostapi.JournalpostApi;
-import no.nav.melosys.melosysmock.journalpost.saf.SafRestApi;
-import no.nav.melosys.melosysmock.sak.SakApi;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
@@ -25,17 +24,11 @@ import org.springframework.kafka.support.serializer.JsonSerializer;
 import org.springframework.kafka.test.EmbeddedKafkaBroker;
 import org.springframework.util.SocketUtils;
 
-import java.util.Map;
-
 @TestConfiguration
 @Import(
     {
         GraphqlConfig.class,
-//        JournalpostApi.class,
-//        SafRestApi.class,
-//        SakApi.class,
         SoapConfig.class,
-//        EndpointsListener.class
     }
 )
 public class ComponentTestConfig {
