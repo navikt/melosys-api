@@ -6,6 +6,7 @@ public class InnvilgelseBrevbestilling extends DokgenBrevbestilling {
     private String ektefelleFritekst;
     private String barnFritekst;
     private boolean virksomhetArbeidsgiverSkalHaKopi;
+    private String nyVurderingBakgrunn;
 
     public InnvilgelseBrevbestilling() {
         super();
@@ -19,6 +20,7 @@ public class InnvilgelseBrevbestilling extends DokgenBrevbestilling {
         this.ektefelleFritekst = builder.ektefelleFritekst;
         this.barnFritekst = builder.barnFritekst;
         this.virksomhetArbeidsgiverSkalHaKopi = builder.virksomhetArbeidsgiverSkalHaKopi;
+        this.nyVurderingBakgrunn = builder.nyVurderingBakgrunn;
     }
 
     public String getInnledningFritekst() {
@@ -41,6 +43,10 @@ public class InnvilgelseBrevbestilling extends DokgenBrevbestilling {
         return virksomhetArbeidsgiverSkalHaKopi;
     }
 
+    public String getNyVurderingBakgrunn() {
+        return nyVurderingBakgrunn;
+    }
+
     public Builder toBuilder() {
         return new Builder(this);
     }
@@ -51,6 +57,7 @@ public class InnvilgelseBrevbestilling extends DokgenBrevbestilling {
         private String ektefelleFritekst;
         private String barnFritekst;
         private boolean virksomhetArbeidsgiverSkalHaKopi;
+        private String nyVurderingBakgrunn;
 
         public Builder() {
         }
@@ -62,6 +69,7 @@ public class InnvilgelseBrevbestilling extends DokgenBrevbestilling {
             this.ektefelleFritekst = innvilgelseBrevbestilling.ektefelleFritekst;
             this.barnFritekst = innvilgelseBrevbestilling.barnFritekst;
             this.virksomhetArbeidsgiverSkalHaKopi = innvilgelseBrevbestilling.virksomhetArbeidsgiverSkalHaKopi;
+            this.nyVurderingBakgrunn = innvilgelseBrevbestilling.nyVurderingBakgrunn;
         }
 
         public Builder medInnledningFritekst(String innledningFritekst) {
@@ -86,6 +94,11 @@ public class InnvilgelseBrevbestilling extends DokgenBrevbestilling {
 
         public Builder medVirksomhetArbeidsgiverSkalHaKopi(boolean virksomhetArbeidsgiverSkalHaKopi) {
             this.virksomhetArbeidsgiverSkalHaKopi = virksomhetArbeidsgiverSkalHaKopi;
+            return this;
+        }
+
+        public Builder medNyVurderingBakgrunn(String nyVurderingBakgrunn) {
+            this.nyVurderingBakgrunn = nyVurderingBakgrunn;
             return this;
         }
 

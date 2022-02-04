@@ -62,6 +62,7 @@ public class StorbritanniaMapper {
             .innvilgelse(innvilgelse)
             .attest(mapAttest(brevbestilling))
             .skalHaInfoOmRettigheter(skalHaInfoOmRettigheter(innvilgelse, brevbestilling))
+            .nyVurderingBakgrunn(brevbestilling.getNyVurderingBakgrunn())
             .build();
     }
 
