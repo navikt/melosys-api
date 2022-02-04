@@ -10,6 +10,7 @@ public class FattTrygdeavtaleEllerFtrlVedtakDto extends FattVedtakDto {
     private String ektefelleFritekst;
     private String barnFritekst;
     private List<KopiMottaker> kopiMottakere;
+    private String nyVurderingBakgrunn;
 
     public String getInnledningFritekst() {
         return innledningFritekst;
@@ -31,6 +32,10 @@ public class FattTrygdeavtaleEllerFtrlVedtakDto extends FattVedtakDto {
         return kopiMottakere;
     }
 
+    public String getNyVurderingBakgrunn() {
+        return nyVurderingBakgrunn;
+    }
+
     public void setInnledningFritekst(String innledningFritekst) {
         this.innledningFritekst = innledningFritekst;
     }
@@ -49,5 +54,9 @@ public class FattTrygdeavtaleEllerFtrlVedtakDto extends FattVedtakDto {
 
     public void setKopiMottakere(List<KopiMottaker> kopiMottakere) {
         this.kopiMottakere = kopiMottakere;
+    }
+
+    public void setNyVurderingBakgrunn(String nyVurderingBakgrunn) {
+        this.nyVurderingBakgrunn = nyVurderingBakgrunn;
     }
 }

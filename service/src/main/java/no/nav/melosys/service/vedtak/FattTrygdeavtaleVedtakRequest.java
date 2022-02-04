@@ -11,6 +11,7 @@ public class FattTrygdeavtaleVedtakRequest extends FattVedtakRequest {
     private final String barnFritekst;
     private final List<KopiMottaker> kopiMottakere;
     private final String bestillersId;
+    private final String nyVurderingBakgrunn;
 
     private FattTrygdeavtaleVedtakRequest(Builder builder) {
         super(builder);
@@ -20,6 +21,7 @@ public class FattTrygdeavtaleVedtakRequest extends FattVedtakRequest {
         this.barnFritekst = builder.barnFritekst;
         this.kopiMottakere = builder.kopiMottakere;
         this.bestillersId = builder.bestillersId;
+        this.nyVurderingBakgrunn = builder.nyVurderingBakgrunn;
     }
 
     public String getInnledningFritekst() {
@@ -46,6 +48,10 @@ public class FattTrygdeavtaleVedtakRequest extends FattVedtakRequest {
         return bestillersId;
     }
 
+    public String getNyVurderingBakgrunn() {
+        return nyVurderingBakgrunn;
+    }
+
     public static class Builder extends FattVedtakRequest.Builder<Builder> {
         private String innledningFritekst;
         private String begrunnelseFritekst;
@@ -53,6 +59,7 @@ public class FattTrygdeavtaleVedtakRequest extends FattVedtakRequest {
         private String barnFritekst;
         private List<KopiMottaker> kopiMottakere;
         private String bestillersId;
+        private String nyVurderingBakgrunn;
 
         @Override
         public Builder getThis() {
@@ -86,6 +93,11 @@ public class FattTrygdeavtaleVedtakRequest extends FattVedtakRequest {
 
         public Builder medBestillersId(String bestillersId) {
             this.bestillersId = bestillersId;
+            return this;
+        }
+
+        public Builder medNyVurderingBakgrunn(String nyVurderingBakgrunn) {
+            this.nyVurderingBakgrunn = nyVurderingBakgrunn;
             return this;
         }
 
