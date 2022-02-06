@@ -6,7 +6,6 @@ import java.util.List;
 
 import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.arkiv.ArkivDokument;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.brev.*;
@@ -28,7 +27,6 @@ import no.nav.melosys.integrasjon.dokgen.dto.storbritannia.attest.*;
 import no.nav.melosys.integrasjon.dokgen.dto.storbritannia.innvilgelse.InnvilgelseStorbritannia;
 import no.nav.melosys.integrasjon.dokgen.dto.storbritannia.innvilgelse.Soknad;
 import no.nav.melosys.service.dokument.DokumentHentingService;
-import no.nav.melosys.service.sak.FagsakService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -40,6 +38,7 @@ import static java.util.Collections.singletonList;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.TRYGDEMYNDIGHET;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 import static no.nav.melosys.service.dokument.DokgenTestData.*;
+import static no.nav.melosys.service.dokument.DokgenTestData.lagBehandling;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -60,8 +59,6 @@ class DokgenMalMapperTest {
     private DokumentHentingService dokumentHentingService;
     @Mock
     private StorbritanniaMapper mockStorbritanniaMapper;
-    @Mock
-    private FagsakService fagsakService;
 
     private final FakeUnleash fakeUnleash = new FakeUnleash();
 
@@ -73,8 +70,7 @@ class DokgenMalMapperTest {
             mockDokgenMapperDatahenter,
             mockInnvilgelseFtrlMapper,
             mockStorbritanniaMapper,
-            dokumentHentingService,
-            fagsakService
+            dokumentHentingService
         );
     }
 
@@ -507,25 +503,20 @@ class DokgenMalMapperTest {
     }
 
     @Test
-    void skalMappeTilAvslagbrev() {
+    void skalMappeTilAvslagbrevMedRiktigeMangelbrevdatoer() {
         LocalDate datoSeptember = LocalDate.of(2021, 9, 9);
         LocalDate datoOktober = LocalDate.of(2021, 10, 9);
         LocalDate datoDesember = LocalDate.of(2021, 12, 9);
-        Fagsak fagsak = lagFagsak(true);
-        fagsak.hentAktivBehandling().setRegistrertDato(LocalDateTime.of(2021, 10, 1, 0, 0).toInstant(ZoneOffset.UTC));
-        when(fagsakService.hentFagsak("MEL-123")).thenReturn(fagsak);
-       Journalpost journalPostVirksomhet = lagJournalpost(datoOktober);
-       journalPostVirksomhet.setAvsenderType(Avsendertyper.ORGANISASJON);
+        Behandling behandling = lagBehandling(lagFagsak(true));
+        behandling.setRegistrertDato(LocalDateTime.of(2021, 10, 1, 0, 0).toInstant(ZoneOffset.UTC));
         when(dokumentHentingService.hentDokumenter("MEL-123")).thenReturn(List.of(
             lagJournalpost(datoSeptember),
             lagJournalpost(datoDesember),
-            lagJournalpost(datoOktober),
-            journalPostVirksomhet));
-        when(mockDokgenMapperDatahenter.hentPoststed(any())).thenReturn("Andeby");
+            lagJournalpost(datoOktober)));
         when(mockDokgenMapperDatahenter.hentPersondata(any())).thenReturn(lagPersonDokument());
         DokgenBrevbestilling brevbestilling = new AvslagBrevbestilling.Builder()
             .medProduserbartdokument(AVSLAG_MANGLENDE_OPPLYSNINGER)
-            .medBehandling(lagBehandling(fagsak))
+            .medBehandling(behandling)
             .medFritekst("Hei")
             .build();
 
@@ -542,14 +533,36 @@ class DokgenMalMapperTest {
     }
 
     @Test
-    void skalMappeAvslagsbrevPgaManglendeOpplysningerTilBruker() {
-        when(dokumentHentingService.hentDokumenter("MEL-123")).thenReturn(emptyList());
-        when(mockDokgenMapperDatahenter.hentPoststed(any())).thenReturn("Andeby");
+    void skalMappeAvslagsbrevMedRiktigAvsenderType() {
+        LocalDate datoOktober = LocalDate.of(2021, 10, 9);
+        LocalDate datoNovember = LocalDate.of(2021, 11, 10);
+        Journalpost journalPostVirksomhet = lagJournalpost(datoNovember);
+        journalPostVirksomhet.setAvsenderType(Avsendertyper.ORGANISASJON);
+        Behandling behandling = lagBehandling(lagFagsak(true));
+        behandling.setRegistrertDato(LocalDateTime.of(2021, 10, 1, 0, 0).toInstant(ZoneOffset.UTC));
         when(mockDokgenMapperDatahenter.hentPersondata(any())).thenReturn(lagPersonDokument());
+        when(dokumentHentingService.hentDokumenter("MEL-123")).thenReturn(List.of(
+            lagJournalpost(datoOktober),
+            journalPostVirksomhet));
         DokgenBrevbestilling brevbestilling = new AvslagBrevbestilling.Builder()
             .medProduserbartdokument(AVSLAG_MANGLENDE_OPPLYSNINGER)
-            .medBehandling(lagBehandling(lagFagsak(true)))
-            .medFritekst("Hei")
+            .medBehandling(behandling)
+            .build();
+
+        Avslagbrev avslagbrev = (Avslagbrev) dokgenMalMapper.mapBehandling(brevbestilling);
+
+        assertThat(avslagbrev.getMangelbrevDatoer()).containsExactly(
+            LocalDate.of(2021, 10, 9));
+    }
+
+    @Test
+    void skalMappeAvslagsbrevPgaManglendeOpplysningerTilBruker() {
+        when(dokumentHentingService.hentDokumenter("MEL-123")).thenReturn(emptyList());
+        when(mockDokgenMapperDatahenter.hentPersondata(any())).thenReturn(lagPersonDokument());
+        Behandling behandling = lagBehandling(lagFagsak(true));
+        DokgenBrevbestilling brevbestilling = new AvslagBrevbestilling.Builder()
+            .medProduserbartdokument(AVSLAG_MANGLENDE_OPPLYSNINGER)
+            .medBehandling(behandling)
             .build();
 
         DokgenDto dokgenDto = dokgenMalMapper.mapBehandling(brevbestilling);
