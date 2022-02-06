@@ -124,6 +124,8 @@ public final class DokgenTestData {
     private static List<Behandling> lagBehandlinger() {
         Behandling behandling = new Behandling();
         behandling.setType(Behandlingstyper.SOEKNAD);
+        behandling.setRegistrertDato(Instant.now());
+
         return singletonList(behandling);
     }
 

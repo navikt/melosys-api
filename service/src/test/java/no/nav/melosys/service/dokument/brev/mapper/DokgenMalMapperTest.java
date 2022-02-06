@@ -1,14 +1,12 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.Period;
-import java.time.ZoneId;
+import java.time.*;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.arkiv.ArkivDokument;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.brev.*;
@@ -30,10 +28,7 @@ import no.nav.melosys.integrasjon.dokgen.dto.storbritannia.attest.*;
 import no.nav.melosys.integrasjon.dokgen.dto.storbritannia.innvilgelse.InnvilgelseStorbritannia;
 import no.nav.melosys.integrasjon.dokgen.dto.storbritannia.innvilgelse.Soknad;
 import no.nav.melosys.service.dokument.DokumentHentingService;
-import no.nav.melosys.service.dokument.brev.mapper.DokgenMalMapper;
-import no.nav.melosys.service.dokument.brev.mapper.DokgenMapperDatahenter;
-import no.nav.melosys.service.dokument.brev.mapper.InnvilgelseFtrlMapper;
-import no.nav.melosys.service.dokument.brev.mapper.StorbritanniaMapper;
+import no.nav.melosys.service.sak.FagsakService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -61,12 +56,12 @@ class DokgenMalMapperTest {
     private InnvilgelseFtrlMapper mockInnvilgelseFtrlMapper;
     @Mock
     private DokgenMapperDatahenter mockDokgenMapperDatahenter;
-
     @Mock
     private DokumentHentingService dokumentHentingService;
-
     @Mock
     private StorbritanniaMapper mockStorbritanniaMapper;
+    @Mock
+    private FagsakService fagsakService;
 
     private final FakeUnleash fakeUnleash = new FakeUnleash();
 
@@ -74,7 +69,13 @@ class DokgenMalMapperTest {
 
     @BeforeEach
     void init() {
-        dokgenMalMapper = new DokgenMalMapper(mockDokgenMapperDatahenter, mockInnvilgelseFtrlMapper, mockStorbritanniaMapper, dokumentHentingService);
+        dokgenMalMapper = new DokgenMalMapper(
+            mockDokgenMapperDatahenter,
+            mockInnvilgelseFtrlMapper,
+            mockStorbritanniaMapper,
+            dokumentHentingService,
+            fagsakService
+        );
     }
 
     @Test
@@ -507,16 +508,24 @@ class DokgenMalMapperTest {
 
     @Test
     void skalMappeTilAvslagbrev() {
-        LocalDate datoDesember = LocalDate.of(2021, 12, 9);
+        LocalDate datoSeptember = LocalDate.of(2021, 9, 9);
         LocalDate datoOktober = LocalDate.of(2021, 10, 9);
+        LocalDate datoDesember = LocalDate.of(2021, 12, 9);
+        Fagsak fagsak = lagFagsak(true);
+        fagsak.hentAktivBehandling().setRegistrertDato(LocalDateTime.of(2021, 10, 1, 0, 0).toInstant(ZoneOffset.UTC));
+        when(fagsakService.hentFagsak("MEL-123")).thenReturn(fagsak);
+       Journalpost journalPostVirksomhet = lagJournalpost(datoOktober);
+       journalPostVirksomhet.setAvsenderType(Avsendertyper.ORGANISASJON);
         when(dokumentHentingService.hentDokumenter("MEL-123")).thenReturn(List.of(
+            lagJournalpost(datoSeptember),
             lagJournalpost(datoDesember),
-            lagJournalpost(datoOktober)));
+            lagJournalpost(datoOktober),
+            journalPostVirksomhet));
         when(mockDokgenMapperDatahenter.hentPoststed(any())).thenReturn("Andeby");
         when(mockDokgenMapperDatahenter.hentPersondata(any())).thenReturn(lagPersonDokument());
         DokgenBrevbestilling brevbestilling = new AvslagBrevbestilling.Builder()
             .medProduserbartdokument(AVSLAG_MANGLENDE_OPPLYSNINGER)
-            .medBehandling(lagBehandling(lagFagsak(true)))
+            .medBehandling(lagBehandling(fagsak))
             .medFritekst("Hei")
             .build();
 
@@ -555,6 +564,7 @@ class DokgenMalMapperTest {
         Journalpost journalpost = new Journalpost("1");
         journalpost.setHoveddokument(arkivDokument);
         journalpost.setForsendelseJournalfoert(forsteDato);
+        journalpost.setAvsenderType(Avsendertyper.PERSON);
 
         return journalpost;
     }
