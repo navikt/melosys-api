@@ -6,14 +6,17 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.brev.*;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Avsendertyper;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.dokgen.dto.*;
 import no.nav.melosys.integrasjon.dokgen.dto.felles.Mottaker;
 import no.nav.melosys.service.dokument.DokumentHentingService;
+import no.nav.melosys.service.sak.FagsakService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -29,16 +32,19 @@ public class DokgenMalMapper {
     private final InnvilgelseFtrlMapper innvilgelseFtrlMapper;
     private final StorbritanniaMapper storbritanniaMapper;
     private final DokumentHentingService dokumentHentingService;
+    private final FagsakService fagsakService;
 
     @Autowired
     public DokgenMalMapper(DokgenMapperDatahenter dokgenMapperDatahenter,
                            InnvilgelseFtrlMapper innvilgelseFtrlMapper,
                            StorbritanniaMapper storbritanniaMapper,
-                           DokumentHentingService dokumentHentingService) {
+                           DokumentHentingService dokumentHentingService,
+                           FagsakService fagsakService) {
         this.dokgenMapperDatahenter = dokgenMapperDatahenter;
         this.innvilgelseFtrlMapper = innvilgelseFtrlMapper;
         this.storbritanniaMapper = storbritanniaMapper;
         this.dokumentHentingService = dokumentHentingService;
+        this.fagsakService = fagsakService;
     }
 
     public DokgenDto mapBehandling(DokgenBrevbestilling mottattBrevbestilling) {
@@ -65,8 +71,14 @@ public class DokgenMalMapper {
     }
 
     private List<Instant> hentMangelbrevDatoer(String saksnummer) {
+        Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
+        Instant behandlingRegistrertTid = fagsak.hentAktivBehandling().getRegistrertDato();
         List<Journalpost> dokumenter = dokumentHentingService.hentDokumenter(saksnummer).stream().filter(dokument ->
-                dokument.getHoveddokument().getTittel().equals(MELDING_MANGLENDE_OPPLYSNINGER.getBeskrivelse()))
+                dokument.getHoveddokument().getTittel().equals(MELDING_MANGLENDE_OPPLYSNINGER.getBeskrivelse())
+                    && dokument.getForsendelseJournalfoert() != null
+                    && dokument.getForsendelseJournalfoert().isAfter(behandlingRegistrertTid)
+                    && dokument.getAvsenderType().equals(Avsendertyper.PERSON)
+            )
             .collect(toList());
 
         return dokumenter.stream()
