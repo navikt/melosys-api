@@ -70,11 +70,10 @@ class OpprettNySakFraOppgaveTest {
     }
 
     @Test
-    void bestillNySakOgBehandling_sakstypeFtrlFeatureToggleEnabled_oppretterProsess() {
+    void bestillNySakOgBehandling_sakstypeFtrl_oppretterProsess() {
         OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
         opprettSakDto.setSakstype(Sakstyper.FTRL);
         opprettSakDto.setBehandlingstema(Behandlingstema.ARBEID_I_UTLANDET);
-        unleash.enableAll();
         Oppgave oppgave = new Oppgave.Builder().setOppgavetype(Oppgavetyper.BEH_SAK_MK).setJournalpostId("1234").build();
         when(oppgaveService.hentOppgaveMedOppgaveID(opprettSakDto.getOppgaveID())).thenReturn(oppgave);
         when(joarkFasade.hentJournalpost("1234")).thenReturn(lagJournalpost(Journalposttype.INN));
@@ -100,17 +99,6 @@ class OpprettNySakFraOppgaveTest {
         OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
         opprettSakDto.setSakstype(Sakstyper.FTRL);
         opprettSakDto.setBehandlingstema(Behandlingstema.ARBEID_I_UTLANDET);
-        unleash.disableAll();
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> opprettNySakFraOppgave.bestillNySakOgBehandling(opprettSakDto))
-            .withMessageContaining("Kan ikke opprette ny sak med");
-    }
-
-    @Test
-    void bestillNySakOgBehandling_sakstypeTrygdeavtaleFeatureToggleDisabled_kasterException() {
-        OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
-        opprettSakDto.setSakstype(Sakstyper.TRYGDEAVTALE);
-        opprettSakDto.setBehandlingstema(Behandlingstema.YRKESAKTIV);
         unleash.disableAll();
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> opprettNySakFraOppgave.bestillNySakOgBehandling(opprettSakDto))

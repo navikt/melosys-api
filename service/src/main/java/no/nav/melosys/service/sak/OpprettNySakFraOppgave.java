@@ -76,8 +76,6 @@ public class OpprettNySakFraOppgave {
             throw new FunksjonellException("Behandlingstema " + behandlingstema + " er ikke gyldig for sakstype " + sakstype);
         } else if (behandlingstema == Behandlingstema.ARBEID_I_UTLANDET && !unleash.isEnabled("melosys.folketrygden.mvp")) {
             throw new FunksjonellException("Kan ikke opprette ny sak med behandlingstema " + behandlingstema);
-        } else if (behandlingstema == Behandlingstema.YRKESAKTIV && !unleash.isEnabled("melosys.trygdeavtale")) {
-            throw new FunksjonellException("Kan ikke opprette ny sak med behandlingstema " + behandlingstema);
         }
     }
 
