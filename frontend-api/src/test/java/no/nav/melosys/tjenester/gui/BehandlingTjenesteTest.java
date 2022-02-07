@@ -15,6 +15,7 @@ import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresse;
 import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresseNorge;
 import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresseUtland;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -135,6 +136,20 @@ class BehandlingTjenesteTest extends JsonSchemaTestParent {
     void hentMuligeBehandlingstyperValidering() throws IOException {
         Collection<Behandlingstyper> muligeTyper = behandlingTjeneste.hentMuligeTyper(BEHANDLING_ID).getBody();
         validerArray(muligeTyper, ENDRE_BEHANDLINGSTYPE_SCHEMA, log);
+    }
+
+    @Test
+    void endreBehandling() {
+        final var sakstype = Sakstyper.EU_EOS;
+        final var behandlingstype = Behandlingstyper.SOEKNAD;
+        final var behandlingstema = Behandlingstema.ARBEID_I_UTLANDET;
+        final var behandlingsstatus = Behandlingsstatus.UNDER_BEHANDLING;
+        final var behandlingsfrist = LocalDate.now();
+
+        var endreBehandlingDto = new EndreBehandlingDto(sakstype.getKode(), behandlingstype.getKode(), behandlingstema.getKode(), behandlingsstatus.getKode(), behandlingsfrist);
+        behandlingTjeneste.endreBehandling(BEHANDLING_ID, endreBehandlingDto);
+
+        verify(behandlingService).endreBehandling(BEHANDLING_ID, sakstype, behandlingstype, behandlingstema, behandlingsstatus, behandlingsfrist);
     }
 
     @Test

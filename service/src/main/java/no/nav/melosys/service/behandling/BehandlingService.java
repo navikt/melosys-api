@@ -86,20 +86,20 @@ public class BehandlingService {
             throw new FunksjonellException("Behandlingen må være aktiv for å kunne endres");
         }
 
-        if (behandling.getStatus() != status) {
+        if (status != null) {
             brukerOppdaterStatus(behandlingID, status);
         }
 
         boolean behandlingErEndret = false;
-        if (behandling.getType() != type) {
+        if (type != null && type != behandling.getType()) {
             behandling.setType(type);
             behandlingErEndret = true;
         }
-        if (behandling.getTema() != tema) {
+        if (tema != null && tema != behandling.getTema()) {
             behandling.setTema(tema);
             behandlingErEndret = true;
         }
-        if (!behandlingsfrist.equals(behandling.getBehandlingsfrist())) {
+        if (behandlingsfrist != null && !behandlingsfrist.equals(behandling.getBehandlingsfrist())) {
             behandling.setBehandlingsfrist(behandlingsfrist);
             behandlingErEndret = true;
         }
@@ -196,7 +196,7 @@ public class BehandlingService {
 
         if (behandling.erInaktiv()) return Collections.emptyList();
 
-        return List.of(ENDRET_PERIODE, NY_VURDERING);
+        return Set.of(behandling.getType(), ENDRET_PERIODE, NY_VURDERING);
     }
 
     @Transactional

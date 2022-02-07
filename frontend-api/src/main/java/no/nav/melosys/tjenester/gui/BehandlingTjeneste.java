@@ -59,7 +59,7 @@ public class BehandlingTjeneste {
     }
 
     @PostMapping("{behandlingID}/endre")
-    @ApiOperation("Oppdater behandling")
+    @ApiOperation("Endre behandling")
     public ResponseEntity<Void> endreBehandling(@PathVariable long behandlingID,
                                                 @RequestBody EndreBehandlingDto endreBehandling) {
         log.info("Saksbehandler {} ber om å endre behandling {} med {}", SubjectHandler.getInstance().getUserID(), endreBehandling);
