@@ -7,7 +7,7 @@ import com.tngtech.archunit.lang.ArchRule;
 import static com.tngtech.archunit.library.Architectures.layeredArchitecture;
 
 @AnalyzeClasses(packages = "no.nav.melosys")
-class ArkitekturTest {
+class ArkitekturTestIT {
 
     @ArchTest
     static final ArchRule melosys_has_layered_architecture = layeredArchitecture()
