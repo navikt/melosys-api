@@ -239,7 +239,7 @@ final class DokumentServiceTest {
             mock(UtenlandskMyndighetService.class),
             behandlingsresultatService,
             mock(TrygdeavgiftsberegningService.class),
-            mock(LovvalgsperiodeService.class));
+            mock(LovvalgsperiodeService.class), behandlingService);
         return new DokumentService(behandlingService, brevDataService, dokSysFasade, brevmottakerService, brevdatabyggervelger, lagBrevinput(persondataFasade, avklartefaktaService));
     }
 

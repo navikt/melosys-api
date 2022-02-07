@@ -76,9 +76,9 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
     void init() {
         BrevmottakerService brevmottakerService = new BrevmottakerService(mockKontaktopplysningService,
             mock(AvklarteVirksomheterService.class), mock(UtenlandskMyndighetService.class), mock(BehandlingsresultatService.class),
-            mock(TrygdeavgiftsberegningService.class), mock(LovvalgsperiodeService.class));
+            mock(TrygdeavgiftsberegningService.class), mock(LovvalgsperiodeService.class), mockBehandlingService);
         BrevbestillingService brevbestillingService = new BrevbestillingService(mockBrevmottakerService,
-            mockDokServiceFasade, mockEregFasade, mock(KodeverkService.class), mockKontaktopplysningService,
+            mockDokServiceFasade, mockBehandlingService, mockEregFasade, mock(KodeverkService.class), mockKontaktopplysningService,
             mockPersondataFasade, fakeUnleash);
         brevbestillingTjeneste = new BrevbestillingTjeneste(brevbestillingService, mockBehandlingService, brevmottakerService, aksesskontroll);
         fakeUnleash.enable("melosys.brev.GENERELT_FRITEKSTBREV_ARBEIDSGIVER");
