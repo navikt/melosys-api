@@ -17,8 +17,8 @@
 
         <commons-cli.version>1.4</commons-cli.version>
         <graphql-spring-boot-starter.version>12.0.0</graphql-spring-boot-starter.version>
-        <oracle-xe.version>1.16.2</oracle-xe.version>
         <scala.version>2.13.4</scala.version>
+        <testcontainers.version>1.16.3</testcontainers.version>
     </properties>
 
     <dependencyManagement>
@@ -115,13 +115,13 @@
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>oracle-xe</artifactId>
-            <version>${oracle-xe.version}</version>
+            <version>${testcontainers.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>junit-jupiter</artifactId>
-            <version>1.16.2</version>
+            <version>${testcontainers.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -161,12 +161,8 @@
     </dependencies>
 
     <build>
-
         <finalName>${project.artifactId}</finalName>
         <testSourceDirectory>${project.basedir}/src/test/kotlin</testSourceDirectory>
-        <pluginManagement>
-
-        </pluginManagement>
         <plugins>
             <plugin>
                 <groupId>org.jetbrains.kotlin</groupId>
