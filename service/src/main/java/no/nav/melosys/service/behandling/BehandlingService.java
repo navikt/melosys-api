@@ -10,7 +10,6 @@ import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
@@ -34,9 +33,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import static java.util.stream.Collectors.toList;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.*;
-import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*;
-import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.ENDRET_PERIODE;
-import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.NY_VURDERING;
 import static no.nav.melosys.metrics.MetrikkerNavn.*;
 
 @Service
@@ -76,37 +72,6 @@ public class BehandlingService {
         this.behandlingsresultatService = behandlingsresultatService;
         this.oppgaveService = oppgaveService;
         this.applicationEventPublisher = applicationEventPublisher;
-    }
-
-    @Transactional
-    public void endreBehandling(long behandlingID, Sakstyper sakstype, Behandlingstyper type, Behandlingstema tema, Behandlingsstatus status, LocalDate behandlingsfrist) {
-        // TODO: Endre sakstype (MELOSYS-4899 for EØS <-> trygdeavtale)
-        var behandling = hentBehandlingUtenSaksopplysninger(behandlingID);
-        if (!behandling.erAktiv()) {
-            throw new FunksjonellException("Behandlingen må være aktiv for å kunne endres");
-        }
-
-        if (status != null) {
-            brukerOppdaterStatus(behandlingID, status);
-        }
-
-        boolean behandlingErEndret = false;
-        if (type != null && type != behandling.getType()) {
-            behandling.setType(type);
-            behandlingErEndret = true;
-        }
-        if (tema != null && tema != behandling.getTema()) {
-            behandling.setTema(tema);
-            behandlingErEndret = true;
-        }
-        if (behandlingsfrist != null && !behandlingsfrist.equals(behandling.getBehandlingsfrist())) {
-            behandling.setBehandlingsfrist(behandlingsfrist);
-            behandlingErEndret = true;
-        }
-        if (behandlingErEndret) {
-            behandlingRepository.save(behandling);
-            applicationEventPublisher.publishEvent(new BehandlingEndretEvent(behandlingID, behandling));
-        }
     }
 
     /**
@@ -161,42 +126,6 @@ public class BehandlingService {
             oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
         }
         applicationEventPublisher.publishEvent(new BehandlingEndretStatusEvent(status, behandling));
-    }
-
-    public void brukerOppdaterStatus(long behandlingID, Behandlingsstatus status) {
-        Behandling behandling = hentBehandlingUtenSaksopplysninger(behandlingID);
-        if (!hentMuligeStatuser(behandling).contains(status)) {
-            throw new FunksjonellException(String.format("Behandlingen kan ikke endres til status %s. Gyldige statuser for behandling %s er %s", status, behandlingID, hentMuligeStatuser(behandling)));
-        }
-        oppdaterStatus(behandling, status);
-    }
-
-    @Transactional(readOnly = true)
-    public Collection<Behandlingsstatus> hentMuligeStatuser(long behandlingId) {
-        Behandling behandling = hentBehandlingUtenSaksopplysninger(behandlingId);
-        return hentMuligeStatuser(behandling);
-    }
-
-    private Collection<Behandlingsstatus> hentMuligeStatuser(Behandling behandling) {
-        if (behandling.erInaktiv()) return Collections.emptyList();
-
-        Set<Behandlingsstatus> muligeStatuser = new HashSet<>(Set.of(AVVENT_DOK_PART, AVVENT_DOK_UTL, UNDER_BEHANDLING, AVVENT_FAGLIG_AVKLARING));
-
-        Set<Behandlingstema> temaerSomKanAvsluttes = Set.of(ØVRIGE_SED_MED, ØVRIGE_SED_UFM, TRYGDETID, IKKE_YRKESAKTIV);
-        if (temaerSomKanAvsluttes.contains(behandling.getTema())) {
-            muligeStatuser.add(Behandlingsstatus.AVSLUTTET);
-        }
-
-        return muligeStatuser;
-    }
-
-    @Transactional(readOnly = true)
-    public Collection<Behandlingstyper> hentMuligeTyper(long behandlingID) {
-        var behandling = hentBehandlingUtenSaksopplysninger(behandlingID);
-
-        if (behandling.erInaktiv()) return Collections.emptyList();
-
-        return Set.of(behandling.getType(), ENDRET_PERIODE, NY_VURDERING);
     }
 
     @Transactional

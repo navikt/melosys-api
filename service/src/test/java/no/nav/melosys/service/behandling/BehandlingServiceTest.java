@@ -7,7 +7,6 @@ import java.util.*;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -34,14 +33,9 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class BehandlingServiceTest {
 
-    private static final String SAKSBEHANDLER = "Z990007";
     private static final long BEHANDLING_ID = 11L;
     private static final String SAKSNUMMER = "12";
     private static final List<Long> PERIODE_IDS = Arrays.asList(2L, 3L);
-    private static final Behandlingstyper BEHANDLING_TYPE = Behandlingstyper.SOEKNAD;
-    private static final Behandlingstema BEHANDLING_TEMA = Behandlingstema.ARBEID_I_UTLANDET;
-    private static final Behandlingsstatus BEHANDLING_STATUS = UNDER_BEHANDLING;
-    private static final LocalDate BEHANDLING_FRIST = LocalDate.now().plusMonths(1);
 
     @Mock
     private BehandlingRepository behandlingRepo;
@@ -61,10 +55,6 @@ class BehandlingServiceTest {
     @Captor
     private ArgumentCaptor<Behandling> behandlingCaptor;
     @Captor
-    private ArgumentCaptor<BehandlingEvent> behandlingEventCaptor;
-    @Captor
-    private ArgumentCaptor<BehandlingEndretEvent> behandlingEndretEventCaptor;
-    @Captor
     private ArgumentCaptor<BehandlingEndretStatusEvent> behandlingEndretStatusEventCaptor;
 
     @BeforeEach
@@ -73,7 +63,7 @@ class BehandlingServiceTest {
     }
 
     @Test
-    void hentBehandling()  {
+    void hentBehandling() {
         when(behandlingRepo.findWithSaksopplysningerById(BEHANDLING_ID)).thenReturn(null);
 
         assertThatExceptionOfType(IkkeFunnetException.class)
@@ -164,37 +154,6 @@ class BehandlingServiceTest {
     }
 
     @Test
-    void brukerOppdaterStatus_nyStatusErIkkeGyldig() {
-        Behandling behandling = new Behandling();
-        behandling.setTema(Behandlingstema.ARBEID_I_UTLANDET);
-        when(behandlingRepo.findById(anyLong())).thenReturn(Optional.of(behandling));
-
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> behandlingService.brukerOppdaterStatus(BEHANDLING_ID, AVSLUTTET))
-            .withMessageContaining("Behandlingen kan ikke endres til status AVSLUTTET. Gyldige statuser for ");
-    }
-
-    @Test
-    void hentMuligeStatuser_temaOvrigeSedMed_avsluttetErMulig() {
-        Behandling behandling = new Behandling();
-        behandling.setTema(Behandlingstema.ØVRIGE_SED_MED);
-        when(behandlingRepo.findById(anyLong())).thenReturn(Optional.of(behandling));
-
-        Collection<Behandlingsstatus> muligeStatuser = behandlingService.hentMuligeStatuser(BEHANDLING_ID);
-        assertThat(muligeStatuser).containsExactlyInAnyOrder(AVVENT_DOK_PART, AVVENT_DOK_UTL, UNDER_BEHANDLING, AVVENT_FAGLIG_AVKLARING, AVSLUTTET);
-    }
-
-    @Test
-    void hentMuligeStatuser_temaArbeidUtland_avsluttetErIkkeMulig() {
-        Behandling behandling = new Behandling();
-        behandling.setTema(Behandlingstema.ARBEID_I_UTLANDET);
-        when(behandlingRepo.findById(anyLong())).thenReturn(Optional.of(behandling));
-
-        Collection<Behandlingsstatus> muligeStatuser = behandlingService.hentMuligeStatuser(BEHANDLING_ID);
-        assertThat(muligeStatuser).containsExactlyInAnyOrder(AVVENT_DOK_PART, AVVENT_DOK_UTL, UNDER_BEHANDLING, AVVENT_FAGLIG_AVKLARING);
-    }
-
-    @Test
     void knyttMedlemsperioder_ingenBehandling() {
         when(behandlingRepo.findById(anyLong())).thenReturn(Optional.empty());
 
@@ -232,45 +191,6 @@ class BehandlingServiceTest {
 
         List<Long> periodeIder = behandlingService.hentMedlemsperioder(BEHANDLING_ID);
         assertThat(periodeIder).isEmpty();
-    }
-
-    @Test
-    void endreBehandling() {
-        var behandling = new Behandling();
-        behandling.setId(BEHANDLING_ID);
-        behandling.setTema(Behandlingstema.IKKE_YRKESAKTIV);
-        behandling.setFagsak(new Fagsak());
-        when(behandlingRepo.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
-
-        behandlingService.endreBehandling(BEHANDLING_ID, Sakstyper.EU_EOS, BEHANDLING_TYPE, BEHANDLING_TEMA, BEHANDLING_STATUS, BEHANDLING_FRIST);
-
-        verify(behandlingRepo, times(2)).save(behandlingCaptor.capture());
-        var lagretBehandlinger = behandlingCaptor.getAllValues();
-        assertThat(lagretBehandlinger.size()).isEqualTo(2);
-
-        Behandling behandlingOppdatertStatus = lagretBehandlinger.get(0);
-        assertThat(behandlingOppdatertStatus.getId()).isEqualTo(BEHANDLING_ID);
-        assertThat(behandlingOppdatertStatus.getStatus()).isEqualTo(BEHANDLING_STATUS);
-
-        Behandling behandlingOppdatertResten = lagretBehandlinger.get(1);
-        assertThat(behandlingOppdatertResten.getId()).isEqualTo(BEHANDLING_ID);
-        assertThat(behandlingOppdatertResten.getType()).isEqualTo(BEHANDLING_TYPE);
-        assertThat(behandlingOppdatertResten.getTema()).isEqualTo(BEHANDLING_TEMA);
-        assertThat(behandlingOppdatertResten.getBehandlingsfrist()).isEqualTo(BEHANDLING_FRIST);
-
-        verify(applicationEventPublisher, times(2)).publishEvent(behandlingEventCaptor.capture());
-        var behandlingEvents = behandlingEventCaptor.getAllValues();
-        assertThat(behandlingEvents.size()).isEqualTo(2);
-
-        var behandlingEndretStatusEvent = (BehandlingEndretStatusEvent) (behandlingEvents.get(0));
-        assertThat(behandlingEndretStatusEvent.getBehandlingID()).isEqualTo(BEHANDLING_ID);
-        assertThat(behandlingEndretStatusEvent.getBehandlingsstatus()).isEqualTo(BEHANDLING_STATUS);
-
-        var behandlingEndretEvent = (BehandlingEndretEvent) (behandlingEvents.get(1));
-        assertThat(behandlingEndretEvent.getBehandlingID()).isEqualTo(BEHANDLING_ID);
-        assertThat(behandlingEndretEvent.getBehandlingstype()).isEqualTo(BEHANDLING_TYPE);
-        assertThat(behandlingEndretEvent.getBehandlingstema()).isEqualTo(BEHANDLING_TEMA);
-        assertThat(behandlingEndretEvent.getBehandlingsfrist()).isEqualTo(BEHANDLING_FRIST);
     }
 
     @Test
