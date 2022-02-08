@@ -6,7 +6,7 @@ public class FattEosVedtakDto extends FattVedtakDto {
     private String fritekst;
     private String fritekstSed;
     private Set<String> mottakerinstitusjoner;
-    private String revurderBegrunnelse;
+    private String nyVurderingBakgrunn;
 
     public String getFritekst() {
         return fritekst;
@@ -32,11 +32,11 @@ public class FattEosVedtakDto extends FattVedtakDto {
         this.mottakerinstitusjoner = mottakerinstitusjoner;
     }
 
-    public String getRevurderBegrunnelse() {
-        return revurderBegrunnelse;
+    public String getNyVurderingBakgrunn() {
+        return nyVurderingBakgrunn;
     }
 
-    public void setRevurderBegrunnelse(String revurderBegrunnelse) {
-        this.revurderBegrunnelse = revurderBegrunnelse;
+    public void setNyVurderingBakgrunn(String nyVurderingBakgrunn) {
+        this.nyVurderingBakgrunn = nyVurderingBakgrunn;
     }
 }

@@ -4,6 +4,7 @@ import java.util.Collections;
 
 import io.swagger.annotations.Api;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
+import no.nav.melosys.service.trygdeavtale.TrygdeavtaleResultat;
 import no.nav.melosys.service.trygdeavtale.TrygdeavtaleService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
@@ -43,14 +44,28 @@ public class TrygdeavtaleTjeneste {
         this.aksesskontroll = aksesskontroll;
     }
 
+    /***
+     *
+     * @deprecated
+     * Dette endepunket blir fjernet når trygdeavtale har tatt i bruk behandlingsgrunnlag/{behandlingID}
+     */
     @GetMapping("{behandlingID}")
     @Transactional
+    @Deprecated()
     public ResponseEntity<TrygdeavtaleInfoDto> hentTrygdeavtaleInfo(@PathVariable("behandlingID") long behandlingId,
                                                                     @RequestParam(value = "virksomheter", required = false) boolean hentVirksomheter,
                                                                     @RequestParam(value = "barnEktefeller", required = false) boolean hentBarnEktefeller) {
 
         String saksbehandler = SubjectHandler.getInstance().getUserID();
         log.debug("Melosys-trygdeavtale henter TrygdeavtaleInfo for behandling {} på vegne av saksbehandler {}.", behandlingId, saksbehandler);
+        return hentTrygdeavtaleBehandlingsgrunnlag(behandlingId, hentVirksomheter, hentBarnEktefeller);
+    }
+
+    @GetMapping("behandlingsgrunnlag/{behandlingID}")
+    @Transactional
+    public ResponseEntity<TrygdeavtaleInfoDto> hentTrygdeavtaleBehandlingsgrunnlag(@PathVariable("behandlingID") long behandlingId,
+                                                                                   @RequestParam(value = "virksomheter", required = false) boolean hentVirksomheter,
+                                                                                   @RequestParam(value = "barnEktefeller", required = false) boolean hentBarnEktefeller) {
         aksesskontroll.autoriser(behandlingId);
 
         var behandling = behandlingService.hentBehandling(behandlingId);
@@ -70,12 +85,32 @@ public class TrygdeavtaleTjeneste {
         ));
     }
 
-    @PostMapping("{behandlingID}")
-    public ResponseEntity<Void> overførResultat(@PathVariable("behandlingID") long behandlingId,
+    @GetMapping("resultat/{behandlingID}")
+    @Transactional
+    public ResponseEntity<TrygdeavtaleResultatDto> hentResultat(@PathVariable("behandlingID") long behandlingId) {
+        TrygdeavtaleResultat trygdeavtaleResultat = trygdeavtaleService.hentResultat(behandlingId);
+        var behandling = behandlingService.hentBehandling(behandlingId);
+        var behandlingsgrunnlagdata = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
+        return ResponseEntity.ok(TrygdeavtaleResultatDto.fra(trygdeavtaleResultat, behandlingsgrunnlagdata.personOpplysninger.medfolgendeFamilie));
+    }
+
+    @PostMapping("resultat/{behandlingID}")
+    public ResponseEntity<Void> overførTrygdeavtaleResultat(@PathVariable("behandlingID") long behandlingId,
                                                 @RequestBody TrygdeavtaleResultatDto trygdeavtaleResultatDto) {
         aksesskontroll.autoriserSkriv(behandlingId);
         trygdeavtaleService.overførResultat(behandlingId, trygdeavtaleResultatDto.til());
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
+    }
+
+    /***
+     *
+     * @deprecated
+     * Dette endepunket blir fjernet når trygdeavtale har tatt i bruk resultat/{behandlingID}
+     */
+    @PostMapping("{behandlingID}")
+    public ResponseEntity<Void> overførResultat(@PathVariable("behandlingID") long behandlingId,
+                                                @RequestBody TrygdeavtaleResultatDto trygdeavtaleResultatDto) {
+        return overførTrygdeavtaleResultat(behandlingId, trygdeavtaleResultatDto);
     }
 }

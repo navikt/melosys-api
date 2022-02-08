@@ -26,35 +26,35 @@ public class FrontendLoggingTjeneste {
     @ApiOperation(value = "Logger trace-melding.", notes = ("Logger trace-melding."))
     public ResponseEntity frontendTraceLogging(@RequestBody String loggMelding) {
         log.trace(loggMelding);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/debug")
     @ApiOperation(value = "Logger debug-melding.", notes = ("Logger debug-melding."))
     public ResponseEntity frontendDebugLogging(@RequestBody String loggMelding) {
         log.debug(loggMelding);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/info")
     @ApiOperation(value = "Logger info-melding.", notes = ("Logger info-melding."))
     public ResponseEntity frontendInfoLogging(@RequestBody String loggMelding) {
         log.info(loggMelding);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/warn")
     @ApiOperation(value = "Logger warn-melding.", notes = ("Logger warn-melding."))
     public ResponseEntity frontendWarnLogging(@RequestBody String loggMelding) {
         log.warn(loggMelding);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/error")
     @ApiOperation(value = "Logger error-melding.", notes = ("Logger error-melding."))
     public ResponseEntity frontendErrorLogging(@RequestBody String loggMelding) {
         log.error(loggMelding);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
 }

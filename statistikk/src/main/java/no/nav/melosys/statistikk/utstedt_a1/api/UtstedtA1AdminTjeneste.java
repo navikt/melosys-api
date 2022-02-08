@@ -50,7 +50,7 @@ public class UtstedtA1AdminTjeneste implements AdminTjeneste {
     ) {
         validerApikey(apiKey);
         utstedtA1Service.sendMeldingOmUtstedtA1(behandlingID);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/publiserMelding/eksisterendeBehandlinger")

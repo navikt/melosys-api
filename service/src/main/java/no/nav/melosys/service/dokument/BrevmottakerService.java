@@ -12,14 +12,17 @@ import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
+import no.nav.melosys.service.dokument.brev.mapper.BrevmottakerMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +31,7 @@ import org.springframework.stereotype.Service;
 import static java.util.Optional.ofNullable;
 import static no.nav.melosys.domain.Preferanse.PreferanseEnum.RESERVERT_FRA_A1;
 import static no.nav.melosys.domain.brev.BrevkopiRegel.*;
-import static no.nav.melosys.domain.brev.FastMottaker.*;
+import static no.nav.melosys.domain.brev.FastMottakerMedOrgnr.SKATT;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 
@@ -44,18 +47,21 @@ public class BrevmottakerService {
     private final UtenlandskMyndighetService utenlandskMyndighetService;
     private final BehandlingsresultatService behandlingsresultatService;
     private final TrygdeavgiftsberegningService trygdeavgiftsberegningService;
+    private final LovvalgsperiodeService lovvalgsperiodeService;
 
     @Autowired
     public BrevmottakerService(KontaktopplysningService kontaktopplysningService,
                                AvklarteVirksomheterService avklarteVirksomheterService,
                                UtenlandskMyndighetService utenlandskMyndighetService,
                                BehandlingsresultatService behandlingsresultatService,
-                               TrygdeavgiftsberegningService trygdeavgiftsberegningService) {
+                               TrygdeavgiftsberegningService trygdeavgiftsberegningService,
+                               LovvalgsperiodeService lovvalgsperiodeService) {
         this.kontaktopplysningService = kontaktopplysningService;
         this.avklarteVirksomheterService = avklarteVirksomheterService;
         this.utenlandskMyndighetService = utenlandskMyndighetService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.trygdeavgiftsberegningService = trygdeavgiftsberegningService;
+        this.lovvalgsperiodeService = lovvalgsperiodeService;
     }
 
     Aktoersroller avklarMottakerRolleFraDokument(Produserbaredokumenter produserbartDokument) {
@@ -65,7 +71,7 @@ public class BrevmottakerService {
         } else if (List.of(INNVILGELSE_ARBEIDSGIVER, AVSLAG_ARBEIDSGIVER).contains(produserbartDokument)) {
             mottakerRolle = ARBEIDSGIVER;
         } else if (List.of(ANMODNING_UNNTAK, ATTEST_A1).contains(produserbartDokument)) {
-            mottakerRolle = MYNDIGHET;
+            mottakerRolle = TRYGDEMYNDIGHET;
         } else {
             throw new TekniskException("Valg av mottakerRolle støttes ikke for " + produserbartDokument);
         }
@@ -98,7 +104,7 @@ public class BrevmottakerService {
             mottakere = avklarMottakereForBruker(produserbartDokument, behandling, forhåndsvisning);
         } else if (mottakerRolle == ARBEIDSGIVER) {
             mottakere = avklarMottakereForArbeidsgiver(behandling, kunAvklarteVirksomheter);
-        } else if (mottakerRolle == MYNDIGHET) {
+        } else if (mottakerRolle == TRYGDEMYNDIGHET) {
             mottakere = avklarMottakereForMyndigheter(mottaker, behandling, produserbartDokument);
         } else {
             throw new FunksjonellException(mottakerRolle + " støttes ikke.");
@@ -250,11 +256,17 @@ public class BrevmottakerService {
         if (brevkopiRegler.contains(ARBEIDSGIVER_FÅR_KOPI)) {
             mottakerliste.getKopiMottakere().add(ARBEIDSGIVER);
         }
-        if (brevkopiRegler.contains(UTENLANDSK_TRYGDEMYNDIGHET_FÅR_KOPI)) {
-            mottakerliste.getKopiMottakere().add(MYNDIGHET);
-        }
         if (brevkopiRegler.contains(SKATT_FÅR_KOPI)) {
             mottakerliste.getFasteMottakere().add(SKATT);
+        }
+
+        if (brevkopiRegler.contains(UTENLANDSK_TRYGDEMYNDIGHET_FÅR_KOPI_HVIS_IKKE_ART_8_2)) {
+            Optional.ofNullable(lovvalgsperiodeService.hentValidertLovvalgsperiode(behandling.getId())).ifPresent(lovvalgsperiode -> {
+                    if (lovvalgsperiode.getBestemmelse() != Lovvalgbestemmelser_trygdeavtale_uk.UK_ART8_2) {
+                        mottakerliste.getKopiMottakere().add(TRYGDEMYNDIGHET);
+                    }
+                }
+            );
         }
 
         Optional<Trygdeavgiftsberegningsresultat> trygdeavgiftsberegningsresultat = trygdeavgiftsberegningService.finnBeregningsresultat(behandling.getId());

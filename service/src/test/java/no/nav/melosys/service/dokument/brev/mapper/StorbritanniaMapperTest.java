@@ -1,8 +1,9 @@
-package no.nav.melosys.service.dokument;
+package no.nav.melosys.service.dokument.brev.mapper;
 
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -12,16 +13,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
-import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadTrygdeavtale;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Medfolgende_barn_begrunnelser;
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_barn_begrunnelser_ftrl;
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_ektefelle_samboer_begrunnelser_ftrl;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
-import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.domain.person.adresse.Oppholdsadresse;
 import no.nav.melosys.domain.person.adresse.PersonAdresse;
 import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie;
@@ -35,7 +35,6 @@ import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterSystemService;
 import no.nav.melosys.service.dokument.brev.BrevDataTestUtils;
-import no.nav.melosys.service.persondata.PersondataFasade;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -44,10 +43,9 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.stubbing.Answer;
 
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.STORBRITANNIA;
-import static no.nav.melosys.service.dokument.DokgenMalMapperTest.*;
+import static no.nav.melosys.service.dokument.brev.mapper.DokgenMalMapperTest.*;
 import static no.nav.melosys.service.dokument.DokgenTestData.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
@@ -79,12 +77,6 @@ public class StorbritanniaMapperTest {
     private LovvalgsperiodeService mockLovvalgsperiodeService;
     @Mock
     private AvklarteVirksomheterSystemService mockAvklarteVirksomheterSystemService;
-    @Mock
-    private DokgenMapperDatahenter mockDokgenMapperDatahenter;
-    @Mock
-    private PersondataFasade mockPersondataFasade;
-    @Mock
-    private Persondata mockPersondata;
 
     private StorbritanniaMapper storbritanniaMapper;
 
@@ -93,8 +85,6 @@ public class StorbritanniaMapperTest {
         storbritanniaMapper = new StorbritanniaMapper(
             mockAvklarteMedfolgendeFamilieService,
             mockAvklarteVirksomheterSystemService,
-            mockDokgenMapperDatahenter,
-            mockPersondataFasade,
             mockLovvalgsperiodeService);
     }
 
@@ -115,22 +105,28 @@ public class StorbritanniaMapperTest {
     }
 
     @Test
+    void map_ingenRepresentantIUtlandet_kastFunksjonellException() {
+        mockHappyCase();
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> storbritanniaMapper.map(lagStorbritanniaBrevbestilling(lagTrygdeavtaleBehandling(null))))
+            .withMessageContaining(Kontroll_begrunnelser.ATTEST_MANGLER_ARBEIDSSTED.getBeskrivelse());
+    }
+
+    @Test
     void map_ingenUtenlandskeVirksomheter_kastFunksjonellException() {
         mockLovvalgsperiode();
 
-        Behandling behandling = medPeriode(lagTrygdeavtaleBehandling());
-        ((SoeknadTrygdeavtale) behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata()).setRepresentantIUtlandet(null);
-        InnvilgelseBrevbestilling brevbestilling = lagStorbritanniaBrevbestilling(behandling);
+        when(mockAvklarteVirksomheterSystemService.hentNorskeArbeidsgivere(any())).thenReturn(Collections.emptyList());
 
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> storbritanniaMapper.map(brevbestilling))
+            .isThrownBy(() -> storbritanniaMapper.map(lagStorbritanniaBrevbestilling(lagTrygdeavtaleBehandling())))
             .withMessageContaining("Fant 0 avklarte virksomheter for behandling: null. Må være 1 for trygdeavtale");
     }
 
     @Test
     void map_ettOmfattetBarn_minstEttOmfattetFamiliemedlemErtrue() {
         mockLovvalgsperiode();
-        mockPersondata();
         mockMedfølgendeFamilieDefaultCase();
         mockHappyCase();
         when(mockAvklarteMedfolgendeFamilieService.hentAvklartMedfølgendeEktefelle(anyLong())).thenReturn(lagIkkeOmfattetMedfølgendeEktefelle());
@@ -155,7 +151,7 @@ public class StorbritanniaMapperTest {
             .hasSize(1)
             .element(0)
             .extracting(Barn::fnr, Barn::foedselsdato)
-            .containsExactly(null, LocalDate.of(2021, 02, 01));
+            .containsExactly(null, LocalDate.of(2021, 2, 1));
     }
 
     @Test
@@ -269,10 +265,6 @@ public class StorbritanniaMapperTest {
         when(mockLovvalgsperiodeService.hentValidertLovvalgsperiode(anyLong())).thenReturn(lagLovvalgsperiode());
     }
 
-    private void mockPersondata() {
-        when(mockPersondataFasade.hentPerson(anyString())).thenReturn(mockPersondata);
-    }
-
     private Behandling medPeriode(Behandling behandling) {
         var behandlingsgrunnlag = behandling.getBehandlingsgrunnlag();
         behandlingsgrunnlag.setMottaksdato(SOKNADSDATO);
@@ -344,25 +336,13 @@ public class StorbritanniaMapperTest {
     }
 
     private void mockHappyCase() {
-        when(mockPersondata.getFødselsdato()).thenReturn(FØDSELSDATO);
         when(mockAvklarteMedfolgendeFamilieService.hentAvklartMedfølgendeEktefelle(anyLong())).thenReturn(lagAvklartMedfølgendeEktefelle());
         when(mockAvklarteMedfolgendeFamilieService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(lagAvklartMedfølgendeBarn());
         when(mockAvklarteMedfolgendeFamilieService.hentMedfølgendEktefelle(anyLong())).thenReturn(lagMedfølgendeEktefelle());
         when(mockAvklarteMedfolgendeFamilieService.hentMedfølgendeBarn(anyLong())).thenReturn(lagMedfølgendeBarn());
-        when(mockPersondataFasade.hentPerson(anyString())).thenReturn(mockPersondata);
         when(mockAvklarteVirksomheterSystemService.hentNorskeArbeidsgivere(any())).thenReturn(lagAvklarteVirksomheter());
         when(mockLovvalgsperiodeService.hentLovvalgsperioder(anyLong())).thenReturn(List.of(lagLovvalgsperiode()));
         when(mockLovvalgsperiodeService.hentValidertLovvalgsperiode(anyLong())).thenReturn(lagLovvalgsperiode());
-        when(mockDokgenMapperDatahenter.hentSammensattNavn(anyString())).thenAnswer((Answer<String>) invocationOnMock -> {
-            String fnr = invocationOnMock.getArgument(0);
-            String navn = null;
-            if (fnr.equals(EKTEFELLE_FNR)) {
-                navn = EKTEFELLE_NAVN;
-            } else if (fnr.equals(BARN1_FNR)) {
-                navn = BARN_NAVN_1;
-            }
-            return navn;
-        });
     }
 
     private Lovvalgsperiode lagLovvalgsperiode() {
@@ -576,5 +556,13 @@ public class StorbritanniaMapperTest {
             "adresse" : [ "Uk address" ]
           },
           "vedtaksdato" : "%s"
-        }""", FØDSELSDATO, EKTEFELLE_FNR, FØDSELSDATO, BARN1_FNR, LOVVALGSPERIODE_FOM, LOVVALGSPERIODE_TOM, VEDTAKS_DATO);
+        }""",
+        LocalDate.of(1980, 10, 1),
+        EKTEFELLE_FNR,
+        LocalDate.of(2000, 10, 1),
+        BARN1_FNR,
+        LOVVALGSPERIODE_FOM,
+        LOVVALGSPERIODE_TOM,
+        VEDTAKS_DATO
+    );
 }

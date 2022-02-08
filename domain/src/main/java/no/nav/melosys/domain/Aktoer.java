@@ -107,7 +107,7 @@ public class Aktoer extends RegistreringsInfo {
     }
 
     public boolean erUtenlandskMyndighet() {
-        return Aktoersroller.MYNDIGHET == rolle && institusjonId != null;
+        return Aktoersroller.TRYGDEMYNDIGHET == rolle && institusjonId != null;
     }
 
     public boolean erOrganisasjon() {

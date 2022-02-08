@@ -103,8 +103,8 @@ class TrygdeavtaleVedtakServiceTest {
             .containsExactly(STORBRITANNIA, "Z990007", BRUKER, "Innledning",
                 "Begrunnelse", "Ektefelle omfattet", "Barn omfattet");
         assertThat(brevbestillingRequest.getKopiMottakere().size()).isEqualTo(2);
-        assertThat(brevbestillingRequest.getKopiMottakere().get(0).getRolle()).isEqualTo(ARBEIDSGIVER);
-        assertThat(brevbestillingRequest.getKopiMottakere().get(1).getRolle()).isEqualTo(MYNDIGHET);
+        assertThat(brevbestillingRequest.getKopiMottakere().get(0).rolle()).isEqualTo(ARBEIDSGIVER);
+        assertThat(brevbestillingRequest.getKopiMottakere().get(1).rolle()).isEqualTo(TRYGDEMYNDIGHET);
     }
 
     private FattTrygdeavtaleVedtakRequest lagFattVedtakRequest() {
@@ -117,7 +117,7 @@ class TrygdeavtaleVedtakServiceTest {
             .medBarnFritekst("Barn omfattet")
             .medKopiMottakere(List.of(
                 new KopiMottaker(ARBEIDSGIVER, "987654321", null, null),
-                new KopiMottaker(MYNDIGHET, null, null, "GB:UK010")
+                new KopiMottaker(TRYGDEMYNDIGHET, null, null, "GB:UK010")
             ))
             .medBestillersId(SubjectHandler.getInstance().getUserID())
             .build();

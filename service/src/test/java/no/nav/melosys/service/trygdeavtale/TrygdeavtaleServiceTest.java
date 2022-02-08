@@ -23,6 +23,7 @@ import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
+import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,8 +32,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static java.util.Collections.emptyList;
-import static java.util.Collections.emptySet;
+import static java.util.Collections.*;
 import static no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie.Relasjonsrolle.BARN;
 import static no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie.Relasjonsrolle.EKTEFELLE_SAMBOER;
 import static no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie.tilMedfolgendeFamilie;
@@ -42,8 +42,8 @@ import static no.nav.melosys.domain.kodeverk.Trygdedekninger.FULL_DEKNING_FTRL;
 import static no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_barn_begrunnelser_ftrl.OVER_18_AR;
 import static no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_ektefelle_samboer_begrunnelser_ftrl.EGEN_INNTEKT;
 import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1;
+import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.entry;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -60,6 +60,13 @@ class TrygdeavtaleServiceTest {
     private final static LocalDate PERIODE_FOM = LocalDate.now();
     private final static LocalDate PERIODE_TOM = PERIODE_FOM.plusYears(1);
 
+    private static final String EKTEFELLE_FNR = "01108049800";
+    private static final String BARN1_FNR = "01100099728";
+    private static final String BARN2_FNR = "02109049878";
+    private static final String BARN_NAVN_1 = "Doffen Duck";
+    private static final String BARN_NAVN_2 = "Dole Duck";
+    private static final String EKTEFELLE_NAVN = "Dolly Duck";
+
     @Mock
     private EregFasade eregFasade;
     @Mock
@@ -68,6 +75,8 @@ class TrygdeavtaleServiceTest {
     private AvklarteVirksomheterService avklarteVirksomheterService;
     @Mock
     private LovvalgsperiodeService lovvalgsperiodeService;
+    @Mock
+    private AvklartefaktaService avklartefaktaService;
 
     @Captor
     private ArgumentCaptor<AvklarteMedfolgendeFamilie> avklarteMedfolgendeFamilieArgumentCaptor;
@@ -78,12 +87,12 @@ class TrygdeavtaleServiceTest {
 
     @BeforeEach
     void init() {
-        trygdeavtaleService = new TrygdeavtaleService(eregFasade, avklarteMedfolgendeFamilieService, avklarteVirksomheterService, lovvalgsperiodeService);
+        trygdeavtaleService = new TrygdeavtaleService(eregFasade, avklarteMedfolgendeFamilieService, avklarteVirksomheterService, lovvalgsperiodeService, avklartefaktaService);
     }
 
     @Test
     void overførResultat_altOk_lagresKorrekt() {
-        var trygdeavtaleResultat = lagTrygdeavtaleResultat();
+        var trygdeavtaleResultat = lagTrygdeavtaleAltFyltUtResultat();
 
         trygdeavtaleService.overførResultat(1L, trygdeavtaleResultat);
 
@@ -126,6 +135,32 @@ class TrygdeavtaleServiceTest {
                 Lovvalgbestemmelser_trygdeavtale_uk.valueOf(trygdeavtaleResultat.bestemmelse()),
                 Landkoder.NO
             );
+    }
+
+    @Test
+    void hentResultat_allData_hentesKorrekt() {
+        when(avklarteMedfolgendeFamilieService.hentAvklartMedfølgendeEktefelle(anyLong())).thenReturn(lagAvklartMedfølgendeEktefelle());
+        when(avklarteMedfolgendeFamilieService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(lagAvklartMedfølgendeBarn());
+        when(avklartefaktaService.hentAvklarteOrgnrOgUuid(anyLong())).thenReturn(Set.of(ORGNR_1));
+        when(lovvalgsperiodeService.hentLovvalgsperioder(anyLong())).thenReturn(List.of(lagLovvalgsperiode()));
+
+        TrygdeavtaleResultat trygdeavtaleResultat = trygdeavtaleService.hentResultat(1L);
+
+        assertThat(trygdeavtaleResultat).usingRecursiveComparison().isEqualTo(lagTrygdeavtaleAltFyltUtResultat());
+    }
+
+    @Test
+    void hentResultat_ingenData_hentesKorrekt() {
+        when(avklarteMedfolgendeFamilieService.hentAvklartMedfølgendeEktefelle(anyLong())).thenReturn(new AvklarteMedfolgendeFamilie(Set.of(), Set.of()));
+        when(avklarteMedfolgendeFamilieService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(new AvklarteMedfolgendeFamilie(Set.of(), Set.of()));
+        when(avklartefaktaService.hentAvklarteOrgnrOgUuid(anyLong())).thenReturn(Set.of());
+        when(lovvalgsperiodeService.hentLovvalgsperioder(anyLong())).thenReturn(List.of());
+
+        TrygdeavtaleResultat trygdeavtaleResultat = trygdeavtaleService.hentResultat(1L);
+
+        TrygdeavtaleResultat tomtTrygdeavtaleResultat = new TrygdeavtaleResultat
+            .Builder().familie(new AvklarteMedfolgendeFamilie(Set.of(), Set.of())).build();
+        assertThat(trygdeavtaleResultat).usingRecursiveComparison().isEqualTo(tomtTrygdeavtaleResultat);
     }
 
     @Test
@@ -231,7 +266,7 @@ class TrygdeavtaleServiceTest {
         assertThat(response).isEmpty();
     }
 
-    private TrygdeavtaleResultat lagTrygdeavtaleResultat() {
+    private TrygdeavtaleResultat lagTrygdeavtaleAltFyltUtResultat() {
         return new TrygdeavtaleResultat.Builder()
             .virksomhet(ORGNR_1)
             .bestemmelse(UK_ART6_1.getKode())
@@ -251,6 +286,27 @@ class TrygdeavtaleServiceTest {
             .lovvalgsperiodeFom(PERIODE_FOM)
             .lovvalgsperiodeTom(PERIODE_TOM)
             .build();
+    }
+
+    private AvklarteMedfolgendeFamilie lagAvklartMedfølgendeEktefelle() {
+        return new AvklarteMedfolgendeFamilie(
+            Set.of(),
+            Set.of(new IkkeOmfattetFamilie(UUID_EKTEFELLE, EGEN_INNTEKT.getKode(), BEGRUNNELSE_SAMBOER))
+        );
+    }
+
+    private AvklarteMedfolgendeFamilie lagAvklartMedfølgendeBarn() {
+        return new AvklarteMedfolgendeFamilie(
+            Set.of(new OmfattetFamilie(UUID_BARN_2)),
+            Set.of(new IkkeOmfattetFamilie(UUID_BARN_1, OVER_18_AR.getKode(), BEGRUNNELSE_BARN)));
+    }
+
+    private Lovvalgsperiode lagLovvalgsperiode() {
+        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
+        lovvalgsperiode.setBestemmelse(UK_ART6_1);
+        lovvalgsperiode.setFom(PERIODE_FOM);
+        lovvalgsperiode.setTom(PERIODE_TOM);
+        return lovvalgsperiode;
     }
 
     private Behandling lagBehandlingMedFamilie(List<MedfolgendeFamilie> familie) {

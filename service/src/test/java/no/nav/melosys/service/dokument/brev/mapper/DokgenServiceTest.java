@@ -1,4 +1,4 @@
-package no.nav.melosys.service.dokument;
+package no.nav.melosys.service.dokument.brev.mapper;
 
 import java.time.Instant;
 import java.util.List;
@@ -21,8 +21,13 @@ import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
+import no.nav.melosys.service.dokument.BrevmottakerService;
+import no.nav.melosys.service.dokument.DokgenService;
+import no.nav.melosys.service.dokument.DokumentHentingService;
+import no.nav.melosys.service.dokument.DokumentproduksjonsInfo;
 import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
 import no.nav.melosys.service.dokument.brev.KopiMottaker;
+import no.nav.melosys.service.dokument.brev.mapper.*;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.ldap.SaksbehandlerService;
 import no.nav.melosys.service.persondata.PersondataFasade;
@@ -75,6 +80,8 @@ class DokgenServiceTest {
     private InnvilgelseFtrlMapper mockInnvilgelseFtrlMapper;
     @Mock
     private StorbritanniaMapper mockStorbritanniaMapper;
+    @Mock
+    private DokumentHentingService dokumentHentingService;
     @Captor
     private ArgumentCaptor<DokgenBrevbestilling> brevbestillingCaptor;
 
@@ -91,7 +98,7 @@ class DokgenServiceTest {
 
         dokgenService = new DokgenService(mockDokgenConsumer, new DokumentproduksjonsInfoMapper(unleash),
             mockJoarkFasade,
-            new DokgenMalMapper(dokgenMapperDatahenter, mockInnvilgelseFtrlMapper, mockStorbritanniaMapper),
+            new DokgenMalMapper(dokgenMapperDatahenter, mockInnvilgelseFtrlMapper, mockStorbritanniaMapper, dokumentHentingService),
             mockBehandlingsService, mockEregFasade, mockKontaktOpplysningService,
             mockBrevMottakerService, mockProsessinstansService, mockSaksbehandlerService,
             mockUtenlandskMyndighetService);

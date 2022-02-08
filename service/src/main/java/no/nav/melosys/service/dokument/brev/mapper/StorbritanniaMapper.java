@@ -1,4 +1,4 @@
-package no.nav.melosys.service.dokument;
+package no.nav.melosys.service.dokument.brev.mapper;
 
 import java.util.Collection;
 import java.util.List;
@@ -16,10 +16,11 @@ import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadTrygdeavtale;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.IdentType;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
-import no.nav.melosys.domain.brev.FastMottaker;
+import no.nav.melosys.domain.brev.FastMottakerMedOrgnr;
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.domain.person.adresse.PersonAdresse;
@@ -33,9 +34,10 @@ import no.nav.melosys.integrasjon.dokgen.dto.storbritannia.innvilgelse.*;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterSystemService;
-import no.nav.melosys.service.persondata.PersondataFasade;
 import org.springframework.stereotype.Component;
 
+import static no.nav.melosys.domain.behandlingsgrunnlag.data.IdentType.DNR;
+import static no.nav.melosys.domain.behandlingsgrunnlag.data.IdentType.FNR;
 import static org.springframework.util.ObjectUtils.isEmpty;
 
 @Component
@@ -43,19 +45,13 @@ public class StorbritanniaMapper {
 
     private final AvklarteMedfolgendeFamilieService avklarteMedfølgendeFamilieService;
     private final AvklarteVirksomheterSystemService avklarteVirksomheterSystemService;
-    private final DokgenMapperDatahenter dokgenMapperDatahenter;
-    private final PersondataFasade persondataFasade;
     private final LovvalgsperiodeService lovvalgsperiodeService;
 
     public StorbritanniaMapper(AvklarteMedfolgendeFamilieService avklarteMedfølgendeFamilieService,
                                AvklarteVirksomheterSystemService avklarteVirksomheterSystemService,
-                               DokgenMapperDatahenter dokgenMapperDatahenter,
-                               PersondataFasade registerOppslagService,
                                LovvalgsperiodeService lovvalgsperiodeService) {
         this.avklarteMedfølgendeFamilieService = avklarteMedfølgendeFamilieService;
         this.avklarteVirksomheterSystemService = avklarteVirksomheterSystemService;
-        this.dokgenMapperDatahenter = dokgenMapperDatahenter;
-        this.persondataFasade = registerOppslagService;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
     }
 
@@ -146,8 +142,8 @@ public class StorbritanniaMapper {
 
         IdentType identType = medfølgendeFamilie.utledIdentType();
         return new Ektefelle.Builder()
-            .fnr(identType == IdentType.FNR ? medfølgendeFamilie.getFnr() : null)
-            .dnr(identType == IdentType.DNR ? medfølgendeFamilie.getFnr() : null)
+            .fnr(identType == FNR ? medfølgendeFamilie.getFnr() : null)
+            .dnr(identType == DNR ? medfølgendeFamilie.getFnr() : null)
             .navn(medfølgendeFamilie.getNavn())
             .begrunnelse(begrunnelse)
             .fødselsdato(medfølgendeFamilie.datoFraFnr())
@@ -176,8 +172,8 @@ public class StorbritanniaMapper {
         var identType = medfølgendeBarn.utledIdentType();
         return new Barn.Builder()
             .navn(medfølgendeBarn.getNavn())
-            .fnr(identType == IdentType.FNR ? medfølgendeBarn.getFnr() : null)
-            .dnr(identType == IdentType.DNR ? medfølgendeBarn.getFnr() : null)
+            .fnr(identType == FNR ? medfølgendeBarn.getFnr() : null)
+            .dnr(identType == DNR ? medfølgendeBarn.getFnr() : null)
             .foedselsdato(medfølgendeBarn.datoFraFnr())
             .begrunnelse(begrunnelse)
             .build();
@@ -226,7 +222,7 @@ public class StorbritanniaMapper {
     }
 
     private static boolean sjekkAdresseMotLand(StrukturertAdresse adresse) {
-        return adresse.getLandkode().equals(Landkoder.GB.getKode());
+        return adresse != null && adresse.getLandkode().equals(Landkoder.GB.getKode());
     }
 
     static boolean sjekkOmAdresseGyldighetErInnenforLovalgsperiode(PersonAdresse personAdresse, Lovvalgsperiode lovvalgsperiode) {
@@ -253,6 +249,9 @@ public class StorbritanniaMapper {
     private RepresentantStorbritannia lagRepresentant(Behandlingsgrunnlag behandlingsgrunnlag) {
         var soeknadTrygdeavtale = (SoeknadTrygdeavtale) behandlingsgrunnlag.getBehandlingsgrunnlagdata();
         var representantIUtlandet = soeknadTrygdeavtale.getRepresentantIUtlandet();
+        if (representantIUtlandet == null) {
+            throw new FunksjonellException(Kontroll_begrunnelser.ATTEST_MANGLER_ARBEIDSSTED.getBeskrivelse());
+        }
 
         return new RepresentantStorbritannia(
             representantIUtlandet.representantNavn,
@@ -261,39 +260,39 @@ public class StorbritanniaMapper {
     }
 
     private List<Person> mapBarn(long behandlingID) {
-        var avklarteMedfølgendeBarn = avklarteMedfølgendeFamilieService.hentAvklarteMedfølgendeBarn(behandlingID);
-        var barnOmfattetAvNorskTrygd = avklarteMedfølgendeBarn.getFamilieOmfattetAvNorskTrygd();
-        if (barnOmfattetAvNorskTrygd.isEmpty()) {
-            return List.of();
-        }
+        var barnOmfattetAvNorskTrygd =
+            avklarteMedfølgendeFamilieService.hentAvklarteMedfølgendeBarn(behandlingID).getFamilieOmfattetAvNorskTrygd();
         var medfølgendeBarn = avklarteMedfølgendeFamilieService.hentMedfølgendeBarn(behandlingID);
-        return barnOmfattetAvNorskTrygd.stream().map(omfattetFamilie -> tilPerson(medfølgendeBarn, omfattetFamilie.getUuid())).toList();
+
+        return barnOmfattetAvNorskTrygd.stream().map(omfattetFamilie -> mapFamilieTilPerson(medfølgendeBarn, omfattetFamilie.getUuid())).toList();
     }
 
     private Person mapEktefelle(long behandlingID) {
-        var avklartMedfølgendeEktefelle = avklarteMedfølgendeFamilieService.hentAvklartMedfølgendeEktefelle(behandlingID);
-        var ektefelleOmfattetAvNorskTrygd = avklartMedfølgendeEktefelle.getFamilieOmfattetAvNorskTrygd();
+        var ektefelleOmfattetAvNorskTrygd =
+            avklarteMedfølgendeFamilieService.hentAvklartMedfølgendeEktefelle(behandlingID).getFamilieOmfattetAvNorskTrygd();
         if (ektefelleOmfattetAvNorskTrygd.isEmpty()) {
             return null;
         }
+
         var omfattetFamilie = ektefelleOmfattetAvNorskTrygd.iterator().next();
-        var medfølgendeEktefelle = avklarteMedfølgendeFamilieService.hentMedfølgendEktefelle(behandlingID);
-        return tilPerson(medfølgendeEktefelle, omfattetFamilie.getUuid());
+        return mapFamilieTilPerson(avklarteMedfølgendeFamilieService.hentMedfølgendEktefelle(behandlingID), omfattetFamilie.getUuid());
     }
 
-    private Person tilPerson(Map<String, MedfolgendeFamilie> medfølgendeFamilieMap, String uuid) {
+    private Person mapFamilieTilPerson(Map<String, MedfolgendeFamilie> medfølgendeFamilieMap, String uuid) {
         var medfølgendeFamilie = Optional.of(medfølgendeFamilieMap.get(uuid))
             .orElseThrow(() -> new FunksjonellException("Avklart medfølgende familie " + uuid + " finnes ikke i behandlingsgrunnlaget"));
-        var fnr = medfølgendeFamilie.getFnr();
+        var identType = medfølgendeFamilie.utledIdentType();
 
-        var sammensattNavn = fnr != null ? dokgenMapperDatahenter.hentSammensattNavn(fnr) : medfølgendeFamilie.getNavn();
-        var fødselsdato = persondataFasade.hentPerson(fnr).getFødselsdato();
-        return new Person(sammensattNavn, fødselsdato, fnr, null);
+        return new Person(
+            medfølgendeFamilie.getNavn(),
+            medfølgendeFamilie.datoFraFnr(),
+            identType == FNR ? medfølgendeFamilie.getFnr() : null,
+            identType == DNR ? medfølgendeFamilie.getFnr() : null);
     }
 
     private boolean erSkatteetaten(OrganisasjonDokument org) {
         // Skatteetaten skal ikke ha attest
-        return org != null && FastMottaker.OrgNr.SKATTEETATEN_ORGNR.getOrgnr().equals(org.getOrgnummer());
+        return org != null && FastMottakerMedOrgnr.SKATT.getOrgnr().equals(org.getOrgnummer());
     }
 
     private boolean skalIkkeHaInnvilgelse(InnvilgelseBrevbestilling brevbestilling) {

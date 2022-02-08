@@ -6,14 +6,14 @@ public class FattEosVedtakRequest extends FattVedtakRequest {
     private final String fritekst;
     private final String fritekstSed;
     private final Set<String> mottakerinstitusjoner;
-    private final String revurderBegrunnelse;
+    private final String nyVurderingBakgrunn;
 
     private FattEosVedtakRequest(Builder builder) {
         super(builder);
         this.fritekst = builder.fritekst;
         this.fritekstSed = builder.fritekstSed;
         this.mottakerinstitusjoner = builder.mottakerinstitusjoner;
-        this.revurderBegrunnelse = builder.revurderBegrunnelse;
+        this.nyVurderingBakgrunn = builder.nyVurderingBakgrunn;
     }
 
     public String getFritekst() {
@@ -28,15 +28,15 @@ public class FattEosVedtakRequest extends FattVedtakRequest {
         return mottakerinstitusjoner;
     }
 
-    public String getRevurderBegrunnelse() {
-        return revurderBegrunnelse;
+    public String getNyVurderingBakgrunn() {
+        return nyVurderingBakgrunn;
     }
 
     public static class Builder extends FattVedtakRequest.Builder<Builder> {
         private String fritekst;
         private String fritekstSed;
         private Set<String> mottakerinstitusjoner;
-        private String revurderBegrunnelse;
+        private String nyVurderingBakgrunn;
 
         @Override
         public Builder getThis() {
@@ -58,8 +58,8 @@ public class FattEosVedtakRequest extends FattVedtakRequest {
             return this;
         }
 
-        public Builder medRevurderBegrunnelse(String revurderBegrunnelse) {
-            this.revurderBegrunnelse = revurderBegrunnelse;
+        public Builder medNyVurderingBakgrunn(String nyVurderingBakgrunn) {
+            this.nyVurderingBakgrunn = nyVurderingBakgrunn;
             return this;
         }
 

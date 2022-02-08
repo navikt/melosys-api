@@ -27,7 +27,7 @@ public class OppgaveAdminTjeneste implements AdminTjeneste {
         validerApikey(apiKey);
 
         oppgaveService.opprettOppgaveForSak(saksnummer);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @Override

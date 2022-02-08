@@ -10,7 +10,6 @@ import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -45,8 +44,6 @@ class FagsakServiceTest {
     private KontaktopplysningService kontaktopplysningService;
     @Mock
     private OppgaveService oppgaveService;
-    @Mock
-    private OpprettNySakFraOppgave opprettNySakFraOppgave;
     @Mock
     private PersondataFasade persondataFasade;
     @Mock
@@ -137,27 +134,6 @@ class FagsakServiceTest {
     }
 
     @Test
-    void avsluttSakSomBortfalt_harFagsakMedFlereBehandlinger_AvslutterAlleBehandlingerOgSetterFagsakstatusTilHENLAGT_BORTFALT() {
-        String saksnummer = "saksnummer";
-        Fagsak fagsak = lagFagsak(saksnummer);
-        Behandling førsteBehandling = new Behandling();
-        førsteBehandling.setId(1L);
-        førsteBehandling.setStatus(Behandlingsstatus.OPPRETTET);
-        Behandling andreBehandling = new Behandling();
-        andreBehandling.setId(2L);
-        andreBehandling.setStatus(Behandlingsstatus.ANMODNING_UNNTAK_SENDT);
-        fagsak.setBehandlinger(Arrays.asList(førsteBehandling, andreBehandling));
-        fagsakService.avsluttSakSomBortfalt(fagsak);
-
-        verify(fagsakRepo).save(fagsak);
-        verify(behandlingsresultatService).oppdaterBehandlingsresultattype(1L, Behandlingsresultattyper.HENLEGGELSE);
-        verify(behandlingsresultatService).oppdaterBehandlingsresultattype(2L, Behandlingsresultattyper.HENLEGGELSE);
-        assertThat(fagsak.getStatus()).isEqualTo(Saksstatuser.HENLAGT_BORTFALT);
-        assertThat(fagsak.getBehandlinger()).allSatisfy(behandling -> assertThat(behandling.getStatus()).isEqualTo(Behandlingsstatus.AVSLUTTET));
-        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(saksnummer);
-    }
-
-    @Test
     void avsluttFagsakOgBehandlingValiderBehandlingstema_behtemaIkkeYrkesaktiv_blirAvsluttet() {
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer("MEL-123");
@@ -243,7 +219,7 @@ class FagsakServiceTest {
             .extracting(Aktoer::getRolle, Aktoer::getAktørId, Aktoer::getInstitusjonId)
             .containsExactlyInAnyOrder(
                 tuple(Aktoersroller.BRUKER, "1234", null),
-                tuple(Aktoersroller.MYNDIGHET, null, "Ny institusjonsid")
+                tuple(Aktoersroller.TRYGDEMYNDIGHET, null, "Ny institusjonsid")
             );
     }
 
@@ -412,7 +388,7 @@ class FagsakServiceTest {
         Aktoer aktoer = new Aktoer();
         aktoer.setInstitusjonId("Gammel institusjonsid");
         aktoer.setFagsak(fagsak);
-        aktoer.setRolle(Aktoersroller.MYNDIGHET);
+        aktoer.setRolle(Aktoersroller.TRYGDEMYNDIGHET);
         fagsak.setAktører(new HashSet<>(Collections.singleton(aktoer)));
         return fagsak;
     }

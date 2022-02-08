@@ -10,7 +10,7 @@ public class Mottakerliste {
     private final Aktoersroller hovedMottaker;
     private final Collection<BrevkopiRegel> brevkopiRegler;
     private final Collection<Aktoersroller> kopiMottakere;
-    private final Collection<FastMottaker> fasteMottakere;
+    private final Collection<FastMottakerMedOrgnr> fasteMottakere;
 
     private Mottakerliste(Builder builder) {
         this.hovedMottaker = builder.hovedMottaker;
@@ -27,7 +27,7 @@ public class Mottakerliste {
         return kopiMottakere;
     }
 
-    public Collection<FastMottaker> getFasteMottakere() {
+    public Collection<FastMottakerMedOrgnr> getFasteMottakere() {
         return fasteMottakere;
     }
 
@@ -43,7 +43,7 @@ public class Mottakerliste {
         private Aktoersroller hovedMottaker;
         private Collection<BrevkopiRegel> brevkopiRegler = new ArrayList<>();
         private Collection<Aktoersroller> kopiMottakere = new ArrayList<>();
-        private Collection<FastMottaker> fasteMottakere = new ArrayList<>();
+        private Collection<FastMottakerMedOrgnr> fasteMottakere = new ArrayList<>();
 
         public Builder medHovedMottaker(Aktoersroller hovedMottaker) {
             this.hovedMottaker = hovedMottaker;
@@ -60,8 +60,8 @@ public class Mottakerliste {
             return this;
         }
 
-        public Builder medFastMottaker(FastMottaker fastMottaker) {
-            this.fasteMottakere.add(fastMottaker);
+        public Builder medFastMottaker(FastMottakerMedOrgnr fastMottakerMedOrgnr) {
+            this.fasteMottakere.add(fastMottakerMedOrgnr);
             return this;
         }
 

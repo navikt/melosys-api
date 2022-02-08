@@ -168,6 +168,7 @@ public class BehandlingsresultatService {
             for (AvklartefaktaRegistrering avklartefaktaRegistreringOrig : avklartefaktaOrig.getRegistreringer()) {
                 AvklartefaktaRegistrering avklartefaktaRegistreringreplika = (AvklartefaktaRegistrering) BeanUtils.cloneBean(avklartefaktaRegistreringOrig);
                 avklartefaktaRegistreringreplika.setId(null);
+                avklartefaktaRegistreringreplika.setAvklartefakta(avklartefaktareplika);
                 avklartefaktareplika.getRegistreringer().add(avklartefaktaRegistreringreplika);
             }
             behandlingsresultatsreplika.getAvklartefakta().add(avklartefaktareplika);

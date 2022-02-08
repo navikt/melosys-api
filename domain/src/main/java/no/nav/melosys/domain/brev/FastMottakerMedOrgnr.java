@@ -4,10 +4,18 @@ import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import org.springframework.util.Assert;
 
-public enum FastMottaker {
+public enum FastMottakerMedOrgnr {
     HELFO,
     SKATT,
     STATLIG_SKATTEOPPKREVING;
+
+    public String getOrgnr() {
+        return switch (this) {
+            case HELFO -> OrgNr.HELFO_ORGNR.orgnr;
+            case SKATT -> OrgNr.SKATTEETATEN_ORGNR.orgnr;
+            case STATLIG_SKATTEOPPKREVING -> OrgNr.STATLIG_SKATTEOPPKREVING_ORGNR.orgnr;
+        };
+    }
 
     public enum OrgNr {
         HELFO_ORGNR("986965610"),
@@ -25,8 +33,8 @@ public enum FastMottaker {
         }
     }
 
-    public static Mottaker av(FastMottaker mottaker) {
-        Assert.notNull(mottaker, "FastMottaker trengs.");
+    public static Mottaker av(FastMottakerMedOrgnr mottaker) {
+        Assert.notNull(mottaker, "FastMottakerMedOrgnr trengs.");
         return switch (mottaker) {
             case HELFO -> Mottaker.av(lagAktør(OrgNr.HELFO_ORGNR));
             case SKATT -> Mottaker.av(lagAktør(OrgNr.SKATTEETATEN_ORGNR));
@@ -37,7 +45,7 @@ public enum FastMottaker {
 
     private static Aktoer lagAktør(OrgNr orgn) {
         Aktoer aktør = new Aktoer();
-        aktør.setRolle(Aktoersroller.MYNDIGHET);
+        aktør.setRolle(Aktoersroller.TRYGDEMYNDIGHET);
         aktør.setOrgnr(orgn.getOrgnr());
         return aktør;
     }

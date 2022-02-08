@@ -21,9 +21,9 @@ import org.springframework.kafka.support.serializer.JsonSerializer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class UtstedtA1ProducerTest {
+class UtstedtA1AivenProducerTest {
 
-    private UtstedtA1Producer utstedtA1Producer;
+    private UtstedtA1AivenProducer utstedtA1AivenProducer;
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
         .registerModule(new JavaTimeModule())
@@ -32,12 +32,12 @@ class UtstedtA1ProducerTest {
     @BeforeEach
     void setUp() {
         KafkaTemplate<String, UtstedtA1Melding> kafkaTemplate = new KafkaTemplate<>(new MockA1UtstedtMeldingProducerFactory());
-        utstedtA1Producer = new UtstedtA1Producer(kafkaTemplate, OBJECT_MAPPER, "topic");
+        utstedtA1AivenProducer = new UtstedtA1AivenProducer(kafkaTemplate, OBJECT_MAPPER, "topic");
     }
 
     @Test
     void produserMelding_forventMelding() {
-        UtstedtA1Melding sendtMelding = utstedtA1Producer.produserMelding(lagMelding());
+        UtstedtA1Melding sendtMelding = utstedtA1AivenProducer.produserMelding(lagMelding());
         assertThat(sendtMelding).isNotNull();
     }
 

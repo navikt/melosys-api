@@ -2,7 +2,7 @@ on: pull_request
 
 jobs:
   build:
-    runs-on: [self-hosted, java-16]
+    runs-on: [self-hosted, java-17]
     steps:
       - uses: actions/checkout@v2
       - uses: actions/cache@v2
@@ -13,5 +13,5 @@ jobs:
             ${{ runner.os }}-maven-
       - name: Build
         run: |
-          JAVA_HOME=/usr/local/openjdk-16
+          JAVA_HOME=/usr/local/openjdk-17
           mvn clean package -B -e -U
