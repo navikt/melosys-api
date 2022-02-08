@@ -68,16 +68,21 @@ public class EndreBehandlingService {
             behandling.setType(type);
             behandlingErEndret = true;
         }
-        if (tema != null && tema != behandling.getTema()) {
+        if (kanEndreTema(behandling, tema)) {
             behandling.setTema(tema);
+            if (tema != ARBEID_FLERE_LAND) {
+                oppdaterBehandlingsgrunnlag(behandling.getBehandlingsgrunnlag());
+            }
             behandlingErEndret = true;
         }
-        if (behandlingsfrist != null && !behandlingsfrist.equals(behandling.getBehandlingsfrist())) {
+        if (kanEndreFrist(behandling, behandlingsfrist)) {
             behandling.setBehandlingsfrist(behandlingsfrist);
             behandlingErEndret = true;
         }
         if (behandlingErEndret) {
             behandlingRepository.save(behandling);
+            behandlingsresultatService.tømBehandlingsresultat(behandlingID);
+
             applicationEventPublisher.publishEvent(new BehandlingEndretEvent(behandlingID, behandling));
         }
     }
@@ -174,6 +179,10 @@ public class EndreBehandlingService {
             && tema != behandling.getTema()
             && behandlingsresultatService.hentBehandlingsresultat(behandling.getId()).erIkkeArtikkel16MedSendtAnmodningOmUnntak()
             && hentMuligeBehandlingstema(behandling).contains(tema);
+    }
+
+    private boolean kanEndreFrist(Behandling behandling, LocalDate behandlingsfrist) {
+        return behandlingsfrist != null && !behandlingsfrist.equals(behandling.getBehandlingsfrist());
     }
 
     private boolean kanOppdatereBehandlingstema(Behandling behandling) {
