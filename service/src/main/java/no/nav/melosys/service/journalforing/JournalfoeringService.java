@@ -191,9 +191,8 @@ public class JournalfoeringService {
         if (StringUtils.isEmpty(journalfoeringDto.getSaksnummer())) {
             throw new FunksjonellException("Saksnummer mangler");
         } else if (behandlingstype != null) {
-            if (behandlingstype != Behandlingstyper.ENDRET_PERIODE) {
-                throw new FunksjonellException(behandlingstype + " er ikke en lovlig behandlingstype ved knytting av dokument til sak");
-            } else if (fagsak.hentAktivBehandling() != null) {
+            validerBehandlingstype(fagsak.getType(), behandlingstype);
+            if (fagsak.hentAktivBehandling() != null) {
                 throw new FunksjonellException("Det finnes allerede en aktiv behandling på fagsak " + saksnummer);
             }
         }
@@ -224,6 +223,15 @@ public class JournalfoeringService {
         Optional<Fagsak> tilknyttetFagsak = finnSakTilknyttetSed(melosysEessiMelding);
         if (tilknyttetFagsak.isPresent() && !tilknyttetFagsak.get().getSaksnummer().equals(tilknyttTilSaksnummer)) {
             throw new FunksjonellException(String.format("RINA-sak %s er allerede tilknyttet %s", melosysEessiMelding.getRinaSaksnummer(), tilknyttetFagsak.get().getSaksnummer()));
+        }
+    }
+
+    private void validerBehandlingstype(Sakstyper sakstype, Behandlingstyper behandlingstype) {
+        if (sakstype == Sakstyper.EU_EOS && behandlingstype != Behandlingstyper.ENDRET_PERIODE) {
+            throw new FunksjonellException(behandlingstype + " er ikke en lovlig behandlingstype ved knytting av dokument til sak");
+        }
+        if (sakstype == Sakstyper.TRYGDEAVTALE && behandlingstype != Behandlingstyper.NY_VURDERING) {
+            throw new FunksjonellException(behandlingstype + " er ikke en lovlig behandlingstype ved knytting av dokument til sak");
         }
     }
 

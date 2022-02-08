@@ -375,6 +375,32 @@ class JournalfoeringServiceTest {
     }
 
     @Test
+    void tilordneSakOgJournalfør_behandlingstypeIkkeTillattForSakstype_kasterException() {
+        final String saksnummer = "MEL-0123";
+        tilordneDto.setSaksnummer(saksnummer);
+
+        Fagsak fagsak = new Fagsak();
+        fagsak.setSaksnummer(saksnummer);
+
+        when(fagsakService.hentFagsak(saksnummer)).thenReturn(fagsak);
+        when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
+
+        tilordneDto.setBehandlingstypeKode(Behandlingstyper.ENDRET_PERIODE.getKode());
+        fagsak.setType(Sakstyper.TRYGDEAVTALE);
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> journalfoeringService.journalførOgTilordneSak(tilordneDto))
+            .withMessageContaining(" er ikke en lovlig behandlingstype ved knytting av dokument til sak");
+
+        tilordneDto.setBehandlingstypeKode(Behandlingstyper.NY_VURDERING.getKode());
+        fagsak.setType(Sakstyper.EU_EOS);
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> journalfoeringService.journalførOgTilordneSak(tilordneDto))
+            .withMessageContaining(" er ikke en lovlig behandlingstype ved knytting av dokument til sak");
+    }
+
+    @Test
     void journalførSed_støtterIkkeAutomatiskBehandling_forventException() {
         when(eessiService.støtterAutomatiskBehandling(journalfoeringSedDto.getJournalpostID())).thenReturn(false);
 
