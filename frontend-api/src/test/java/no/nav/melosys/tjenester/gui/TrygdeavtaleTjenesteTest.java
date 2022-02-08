@@ -167,7 +167,7 @@ class TrygdeavtaleTjenesteTest {
         when(behandlingsresultatService.hentBehandlingsresultat(1L)).thenReturn(behandlingsresultat);
         when(aksesskontroll.behandlingKanRedigeresAvSaksbehandler(eq(behandling), any())).thenReturn(true);
 
-        var response = trygdeavtaleTjeneste.hentTrygdeavtaleInfo(1L, true, true).getBody();
+        var response = trygdeavtaleTjeneste.hentTrygdeavtaleBehandlingsgrunnlag(1L, true, true).getBody();
 
         assertThat(response).isNotNull();
         assertThat(response.redigerbart()).isTrue();

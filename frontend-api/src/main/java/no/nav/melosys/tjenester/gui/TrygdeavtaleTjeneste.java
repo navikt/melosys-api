@@ -55,9 +55,6 @@ public class TrygdeavtaleTjeneste {
     public ResponseEntity<TrygdeavtaleInfoDto> hentTrygdeavtaleInfo(@PathVariable("behandlingID") long behandlingId,
                                                                     @RequestParam(value = "virksomheter", required = false) boolean hentVirksomheter,
                                                                     @RequestParam(value = "barnEktefeller", required = false) boolean hentBarnEktefeller) {
-
-        String saksbehandler = SubjectHandler.getInstance().getUserID();
-        log.debug("Melosys-trygdeavtale henter TrygdeavtaleInfo for behandling {} på vegne av saksbehandler {}.", behandlingId, saksbehandler);
         return hentTrygdeavtaleBehandlingsgrunnlag(behandlingId, hentVirksomheter, hentBarnEktefeller);
     }
 
@@ -66,6 +63,8 @@ public class TrygdeavtaleTjeneste {
     public ResponseEntity<TrygdeavtaleInfoDto> hentTrygdeavtaleBehandlingsgrunnlag(@PathVariable("behandlingID") long behandlingId,
                                                                                    @RequestParam(value = "virksomheter", required = false) boolean hentVirksomheter,
                                                                                    @RequestParam(value = "barnEktefeller", required = false) boolean hentBarnEktefeller) {
+        String saksbehandler = SubjectHandler.getInstance().getUserID();
+        log.debug("Melosys-trygdeavtale henter TrygdeavtaleInfo for behandling {} på vegne av saksbehandler {}.", behandlingId, saksbehandler);
         aksesskontroll.autoriser(behandlingId);
 
         var behandling = behandlingService.hentBehandling(behandlingId);
