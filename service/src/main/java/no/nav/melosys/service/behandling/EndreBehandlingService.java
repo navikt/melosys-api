@@ -68,15 +68,15 @@ public class EndreBehandlingService {
             behandling.setType(type);
             behandlingErEndret = true;
         }
+        if (kanEndreFrist(behandling, behandlingsfrist)) {
+            behandling.setBehandlingsfrist(behandlingsfrist);
+            behandlingErEndret = true;
+        }
         if (kanEndreTema(behandling, tema)) {
             behandling.setTema(tema);
             if (tema != ARBEID_FLERE_LAND) {
                 oppdaterBehandlingsgrunnlag(behandling.getBehandlingsgrunnlag());
             }
-            behandlingErEndret = true;
-        }
-        if (kanEndreFrist(behandling, behandlingsfrist)) {
-            behandling.setBehandlingsfrist(behandlingsfrist);
             behandlingErEndret = true;
         }
         if (behandlingErEndret) {

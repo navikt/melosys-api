@@ -43,7 +43,7 @@ class EndreBehandlingServiceTest {
 
     private static final long BEHANDLING_ID = 11L;
     private static final Behandlingstyper BEHANDLING_TYPE = Behandlingstyper.SOEKNAD;
-    private static final Behandlingstema BEHANDLING_TEMA = Behandlingstema.ARBEID_I_UTLANDET;
+    private static final Behandlingstema BEHANDLING_TEMA = Behandlingstema.ARBEID_FLERE_LAND;
     private static final Behandlingsstatus BEHANDLING_STATUS = UNDER_BEHANDLING;
     private static final LocalDate BEHANDLING_FRIST = LocalDate.now().plusMonths(1);
     private Behandlingsresultat BEHANDLINGSRESULTAT = new Behandlingsresultat();
@@ -94,6 +94,7 @@ class EndreBehandlingServiceTest {
         behandling.setTema(Behandlingstema.IKKE_YRKESAKTIV);
         behandling.setFagsak(new Fagsak());
         when(behandlingService.hentBehandlingUtenSaksopplysninger(anyLong())).thenReturn(behandling);
+        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(BEHANDLINGSRESULTAT);
 
         endreBehandlingService.endreBehandling(BEHANDLING_ID, Sakstyper.EU_EOS, BEHANDLING_TYPE, BEHANDLING_TEMA, BEHANDLING_STATUS, BEHANDLING_FRIST);
 
