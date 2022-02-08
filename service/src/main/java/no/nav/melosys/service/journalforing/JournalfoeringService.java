@@ -227,10 +227,10 @@ public class JournalfoeringService {
     }
 
     private void validerBehandlingstype(Sakstyper sakstype, Behandlingstyper behandlingstype) {
-        if (behandlingstype != Behandlingstyper.ENDRET_PERIODE && sakstype == Sakstyper.EU_EOS) {
+        if (sakstype == Sakstyper.EU_EOS && behandlingstype != Behandlingstyper.ENDRET_PERIODE) {
             throw new FunksjonellException(behandlingstype + " er ikke en lovlig behandlingstype ved knytting av dokument til sak");
         }
-        if (behandlingstype != Behandlingstyper.NY_VURDERING && sakstype == Sakstyper.TRYGDEAVTALE) {
+        if (sakstype == Sakstyper.TRYGDEAVTALE && behandlingstype != Behandlingstyper.NY_VURDERING) {
             throw new FunksjonellException(behandlingstype + " er ikke en lovlig behandlingstype ved knytting av dokument til sak");
         }
     }
