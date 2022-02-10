@@ -3,7 +3,6 @@ package no.nav.melosys.domain;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.*;
-import java.util.stream.Collectors;
 import javax.persistence.*;
 
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
@@ -291,10 +290,9 @@ public class Behandling extends RegistreringsInfo {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof Behandling)) { // Implisitt nullsjekk
+        if (!(o instanceof Behandling that)) { // Implisitt nullsjekk
             return false;
         }
-        Behandling that = (Behandling) o;
         if (this.id != 0 && that.id != 0) { // Begge entiteter er persistert. True hvis samme rad i db.
             return this.id.equals(that.getId());
         }
@@ -448,7 +446,7 @@ public class Behandling extends RegistreringsInfo {
         return this.status == status;
     }
 
-    public boolean saksopplysningerEksistererIkke(List<SaksopplysningType> saksopplysningTyper){
+    public boolean manglerSaksopplysningerAvType(List<SaksopplysningType> saksopplysningTyper){
         return Collections.disjoint(saksopplysningTyper, getSaksopplysninger().stream().map(Saksopplysning::getType).toList());
     }
 
