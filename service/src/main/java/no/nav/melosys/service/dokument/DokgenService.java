@@ -12,6 +12,7 @@ import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
+import no.nav.melosys.domain.util.StrengUtils;
 import no.nav.melosys.integrasjon.dokgen.DokgenConsumer;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
@@ -189,7 +190,13 @@ public class DokgenService {
     }
 
     private String hentSaksbehandlerNavn(String ident) {
-        return ident != null ? saksbehandlerService.hentNavnForIdent(ident) : "N/A";
+        if (ident == null) return "N/A";
+
+        String displayNavn = saksbehandlerService.hentNavnForIdent(ident);
+        if (displayNavn != null && displayNavn.contains(",")) {
+            return StrengUtils.navnEtternavnSist(displayNavn);
+        }
+        return displayNavn;
     }
 
     private boolean inneholderArbeidsgiverSomKopimottaker(Collection<KopiMottaker> kopimottakere) {
