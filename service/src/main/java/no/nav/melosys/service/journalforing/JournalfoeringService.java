@@ -135,11 +135,6 @@ public class JournalfoeringService {
                 "siden 'melosys.folketrygden.mvp' ikke er aktivert i unleash");
         }
 
-        if (behandlingstema == Behandlingstema.YRKESAKTIV && !unleash.isEnabled("melosys.trygdeavtale")) {
-            throw new FunksjonellException("Kan ikke opprette ny sak med behandlingstema " + behandlingstema +
-                "siden 'melosys.trygdeavtale' ikke er aktivert i unleash");
-        }
-
         Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_NY_SAK, journalfoeringDto);
         prosessinstans.setData(ProsessDataKey.SAKSTYPE, sakstype);
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, behandlingstema);
