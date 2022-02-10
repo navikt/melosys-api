@@ -89,7 +89,7 @@ public class BehandlingTjeneste {
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("{behandlingID}/tidligeremedlemsperioder")
+    @PostMapping("{behandlingID}/tidligere-medlemsperioder")
     @ApiOperation(value = "Knytt medlemsperioder fra MEDL til oppholdsland fra søknaden",
         response = TidligereMedlemsperioderDto.class)
     public ResponseEntity<TidligereMedlemsperioderDto> knyttMedlemsperioder(@PathVariable("behandlingID") long behandlingID,
@@ -101,7 +101,7 @@ public class BehandlingTjeneste {
         return ResponseEntity.ok(tidligereMedlemsperioder);
     }
 
-    @GetMapping("{behandlingID}/tidligeremedlemsperioder")
+    @GetMapping("{behandlingID}/tidligere-medlemsperioder")
     @ApiOperation(value = "Hent medlemsperioder knyttet til oppholdsland fra søknaden",
         response = TidligereMedlemsperioderDto.class)
     public ResponseEntity<TidligereMedlemsperioderDto> hentMedlemsperioder(@PathVariable("behandlingID") long behandlingID) {
