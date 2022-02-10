@@ -155,7 +155,7 @@ public class BehandlingTjeneste {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("{behandlingID}/muligestatuser")
+    @GetMapping("{behandlingID}/mulige-statuser")
     @ApiOperation("Hent mulige nye behandlingsstatuser for en behandling")
     public ResponseEntity<Collection<Behandlingsstatus>> hentMuligeStatuser(@PathVariable("behandlingID") long behandlingID) {
         log.info("Saksbehandler {} ber om å hente mulige nye behandlingsstatuser for behandling {}.", SubjectHandler.getInstance().getUserID(), behandlingID);
@@ -164,7 +164,7 @@ public class BehandlingTjeneste {
         return ResponseEntity.ok(endreBehandlingService.hentMuligeStatuser(behandlingID));
     }
 
-    @GetMapping("{behandlingID}/muligebehandlingstema")
+    @GetMapping("{behandlingID}/mulige-behandlingstema")
     @ApiOperation(value = "Hent mulige nye behandlingstema for en behandling")
     public ResponseEntity<List<Behandlingstema>> hentMuligeBehandlingstema(@PathVariable("behandlingID") long behandlingsID) {
         log.debug("Saksbehandler {} ber om å hente mulige nye behandlingstema for behandling {}.", SubjectHandler.getInstance().getUserID(), behandlingsID);
@@ -178,7 +178,7 @@ public class BehandlingTjeneste {
         return ResponseEntity.ok(muligeBehandlingstema);
     }
 
-    @GetMapping("{behandlingID}/muligetyper")
+    @GetMapping("{behandlingID}/mulige-typer")
     @ApiOperation("Hent mulige nye behandlingstyper for en behandling")
     public ResponseEntity<Collection<Behandlingstyper>> hentMuligeTyper(@PathVariable("behandlingID") long behandlingID) {
         log.info("Saksbehandler {} ber om å hente mulige nye behandlingstyper for behandling {}.", SubjectHandler.getInstance().getUserID(), behandlingID);
