@@ -16,7 +16,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
-import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.oppgave.OppgaveFactory;
 import no.nav.melosys.service.oppgave.OppgaveService;
@@ -59,8 +58,6 @@ class EndreBehandlingServiceTest {
     @Mock
     private BehandlingsgrunnlagService behandlingsgrunnlagService;
     @Mock
-    private BehandlingRepository behandlingRepository;
-    @Mock
     private ApplicationEventPublisher applicationEventPublisher;
 
     @Captor
@@ -70,7 +67,7 @@ class EndreBehandlingServiceTest {
     @Captor
     private ArgumentCaptor<Behandlingsgrunnlag> behandlingsgrunnlagCaptor;
     @Captor
-    private ArgumentCaptor<BehandlingEndretEvent> behandlingEndretEventCaptor;
+    private ArgumentCaptor<BehandlingEndretAvSaksbehandlerEvent> behandlingEndretEventCaptor;
 
     private EndreBehandlingService endreBehandlingService;
 
@@ -81,7 +78,6 @@ class EndreBehandlingServiceTest {
             behandlingsresultatService,
             oppgaveService,
             behandlingsgrunnlagService,
-            behandlingRepository,
             applicationEventPublisher
         );
 
@@ -99,7 +95,7 @@ class EndreBehandlingServiceTest {
         endreBehandlingService.endreBehandling(BEHANDLING_ID, Sakstyper.EU_EOS, BEHANDLING_TYPE, BEHANDLING_TEMA, BEHANDLING_STATUS, BEHANDLING_FRIST);
 
         verify(behandlingService).oppdaterStatus(behandling, BEHANDLING_STATUS);
-        verify(behandlingRepository).save(behandlingCaptor.capture());
+        verify(behandlingService).lagre(behandlingCaptor.capture());
 
         var lagretBehandling = behandlingCaptor.getValue();
         assertThat(lagretBehandling.getId()).isEqualTo(BEHANDLING_ID);
@@ -147,21 +143,21 @@ class EndreBehandlingServiceTest {
     @Test
     void hentMuligeBehandlingstema_gyldigSøknadBehandlingstema_returnererSøknadBehandlingstema() {
         behandling.setTema(ARBEID_FLERE_LAND);
-        when(behandlingService.hentBehandlingUtenSaksopplysninger(eq(BEHANDLING_ID))).thenReturn(behandling);
+        when(behandlingService.hentBehandlingUtenSaksopplysninger(BEHANDLING_ID)).thenReturn(behandling);
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(BEHANDLINGSRESULTAT);
 
         List<Behandlingstema> muligeBehandlingstema = endreBehandlingService.hentMuligeBehandlingstema(BEHANDLING_ID);
-        assertThat(BEHANDLINGSTEMA_SØKNAD).isEqualTo(muligeBehandlingstema);
+        assertThat(muligeBehandlingstema).isEqualTo(BEHANDLINGSTEMA_SØKNAD);
     }
 
     @Test
     void hentMuligeBehandlingstema_gyldigSEDForespørselBehandlingstema_returnererSEDForespørselBehandlingstema() {
         behandling.setTema(ØVRIGE_SED_MED);
-        when(behandlingService.hentBehandlingUtenSaksopplysninger(eq(BEHANDLING_ID))).thenReturn(behandling);
+        when(behandlingService.hentBehandlingUtenSaksopplysninger(BEHANDLING_ID)).thenReturn(behandling);
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(BEHANDLINGSRESULTAT);
 
         List<Behandlingstema> muligeBehandlingstema = endreBehandlingService.hentMuligeBehandlingstema(BEHANDLING_ID);
-        assertThat(BEHANDLINGSTEMA_SED_FORESPØRSEL).isEqualTo(muligeBehandlingstema);
+        assertThat(muligeBehandlingstema).isEqualTo(BEHANDLINGSTEMA_SED_FORESPØRSEL);
     }
 
     @Test
@@ -190,7 +186,7 @@ class EndreBehandlingServiceTest {
         anmodningsperiode.setSendtUtland(true);
         BEHANDLINGSRESULTAT.setAnmodningsperioder(Set.of(anmodningsperiode));
         behandling.setTema(ARBEID_FLERE_LAND);
-        when(behandlingService.hentBehandlingUtenSaksopplysninger(eq(BEHANDLING_ID))).thenReturn(behandling);
+        when(behandlingService.hentBehandlingUtenSaksopplysninger(BEHANDLING_ID)).thenReturn(behandling);
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(BEHANDLINGSRESULTAT);
 
         List<Behandlingstema> muligeBehandlingstema = endreBehandlingService.hentMuligeBehandlingstema(BEHANDLING_ID);
@@ -223,7 +219,7 @@ class EndreBehandlingServiceTest {
         Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
         behandlingsgrunnlag.setBehandlingsgrunnlagdata(new BehandlingsgrunnlagData());
         behandling.setBehandlingsgrunnlag(behandlingsgrunnlag);
-        when(behandlingService.hentBehandlingUtenSaksopplysninger(eq(BEHANDLING_ID))).thenReturn(behandling);
+        when(behandlingService.hentBehandlingUtenSaksopplysninger(BEHANDLING_ID)).thenReturn(behandling);
         setup_endreBehandlingstemaTester();
         Oppgave behandlingsOppgaveForType = OppgaveFactory.lagBehandlingsOppgaveForType(ØVRIGE_SED_MED, behandling.getType()).build();
 
@@ -239,7 +235,7 @@ class EndreBehandlingServiceTest {
     @Test
     void endreBehandlingstema_ugyldigNyttTemaForSøknad_exceptionKastes() {
         behandling.setTema(ARBEID_FLERE_LAND);
-        when(behandlingService.hentBehandlingUtenSaksopplysninger(eq(BEHANDLING_ID))).thenReturn(behandling);
+        when(behandlingService.hentBehandlingUtenSaksopplysninger(BEHANDLING_ID)).thenReturn(behandling);
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(BEHANDLINGSRESULTAT);
 
         assertThatExceptionOfType(FunksjonellException.class)
@@ -256,7 +252,7 @@ class EndreBehandlingServiceTest {
         Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
         behandlingsgrunnlag.setBehandlingsgrunnlagdata(new BehandlingsgrunnlagData());
         behandling.setBehandlingsgrunnlag(behandlingsgrunnlag);
-        when(behandlingService.hentBehandlingUtenSaksopplysninger(eq(BEHANDLING_ID))).thenReturn(behandling);
+        when(behandlingService.hentBehandlingUtenSaksopplysninger(BEHANDLING_ID)).thenReturn(behandling);
         setup_endreBehandlingstemaTester();
 
         endreBehandlingService.endreBehandlingstemaTilBehandling(BEHANDLING_ID, UTSENDT_ARBEIDSTAKER);

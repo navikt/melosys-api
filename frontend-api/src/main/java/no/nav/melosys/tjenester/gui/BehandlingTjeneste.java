@@ -1,7 +1,6 @@
 package no.nav.melosys.tjenester.gui;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonView;
@@ -13,7 +12,6 @@ import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
-import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.EndreBehandlingService;
 import no.nav.melosys.service.ldap.SaksbehandlerService;
@@ -62,7 +60,7 @@ public class BehandlingTjeneste {
     @ApiOperation("Endre behandling")
     public ResponseEntity<Void> endreBehandling(@PathVariable long behandlingID,
                                                 @RequestBody EndreBehandlingDto endreBehandling) {
-        log.info("Saksbehandler {} ber om å endre behandling {} med {}", SubjectHandler.getInstance().getUserID(), endreBehandling);
+        log.debug("Saksbehandler {} ber om å endre behandling {} med {}", SubjectHandler.getInstance().getUserID(), behandlingID, endreBehandling);
         aksesskontroll.autoriser(behandlingID);
 
         var sakstype = endreBehandling.sakstype() == null ? null : Sakstyper.valueOf(endreBehandling.sakstype());
@@ -94,7 +92,7 @@ public class BehandlingTjeneste {
         response = TidligereMedlemsperioderDto.class)
     public ResponseEntity<TidligereMedlemsperioderDto> knyttMedlemsperioder(@PathVariable("behandlingID") long behandlingID,
                                                                             @RequestBody TidligereMedlemsperioderDto tidligereMedlemsperioder) {
-        log.info("Saksbehandler {} ber om å knytte medlemsperioder for behandling {}.", SubjectHandler.getInstance().getUserID(), behandlingID);
+        log.debug("Saksbehandler {} ber om å knytte medlemsperioder for behandling {}.", SubjectHandler.getInstance().getUserID(), behandlingID);
         aksesskontroll.autoriserSkriv(behandlingID);
 
         behandlingService.knyttMedlemsperioder(behandlingID, tidligereMedlemsperioder.periodeIder);
@@ -158,7 +156,7 @@ public class BehandlingTjeneste {
     @GetMapping("{behandlingID}/mulige-statuser")
     @ApiOperation("Hent mulige nye behandlingsstatuser for en behandling")
     public ResponseEntity<Collection<Behandlingsstatus>> hentMuligeStatuser(@PathVariable("behandlingID") long behandlingID) {
-        log.info("Saksbehandler {} ber om å hente mulige nye behandlingsstatuser for behandling {}.", SubjectHandler.getInstance().getUserID(), behandlingID);
+        log.debug("Saksbehandler {} ber om å hente mulige nye behandlingsstatuser for behandling {}.", SubjectHandler.getInstance().getUserID(), behandlingID);
         aksesskontroll.autoriser(behandlingID);
 
         return ResponseEntity.ok(endreBehandlingService.hentMuligeStatuser(behandlingID));
@@ -168,11 +166,7 @@ public class BehandlingTjeneste {
     @ApiOperation(value = "Hent mulige nye behandlingstema for en behandling")
     public ResponseEntity<List<Behandlingstema>> hentMuligeBehandlingstema(@PathVariable("behandlingID") long behandlingsID) {
         log.debug("Saksbehandler {} ber om å hente mulige nye behandlingstema for behandling {}.", SubjectHandler.getInstance().getUserID(), behandlingsID);
-        try {
-            aksesskontroll.autoriser(behandlingsID);
-        } catch (FunksjonellException e) {
-            return ResponseEntity.ok(Collections.emptyList());
-        }
+        aksesskontroll.autoriser(behandlingsID);
 
         List<Behandlingstema> muligeBehandlingstema = endreBehandlingService.hentMuligeBehandlingstema(behandlingsID);
         return ResponseEntity.ok(muligeBehandlingstema);
@@ -181,7 +175,7 @@ public class BehandlingTjeneste {
     @GetMapping("{behandlingID}/mulige-typer")
     @ApiOperation("Hent mulige nye behandlingstyper for en behandling")
     public ResponseEntity<Collection<Behandlingstyper>> hentMuligeTyper(@PathVariable("behandlingID") long behandlingID) {
-        log.info("Saksbehandler {} ber om å hente mulige nye behandlingstyper for behandling {}.", SubjectHandler.getInstance().getUserID(), behandlingID);
+        log.debug("Saksbehandler {} ber om å hente mulige nye behandlingstyper for behandling {}.", SubjectHandler.getInstance().getUserID(), behandlingID);
         aksesskontroll.autoriser(behandlingID);
 
         return ResponseEntity.ok(endreBehandlingService.hentMuligeTyper(behandlingID));

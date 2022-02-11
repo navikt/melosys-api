@@ -273,6 +273,10 @@ public class BehandlingService {
         behandlingRepository.save(behandling);
     }
 
+    /**
+     * @deprecated Erstattes av endreBestilling
+     */
+    @Deprecated
     @Transactional
     public void endreBehandlingsfrist(long behandlingId, LocalDate behandlingsfrist) {
         Behandling behandling = hentBehandlingUtenSaksopplysninger(behandlingId);

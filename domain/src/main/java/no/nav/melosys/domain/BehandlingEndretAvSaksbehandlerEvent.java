@@ -5,12 +5,12 @@ import java.time.LocalDate;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 
-public class BehandlingEndretEvent extends BehandlingEvent {
+public class BehandlingEndretAvSaksbehandlerEvent extends BehandlingEvent {
     private final Behandlingstyper behandlingstype;
     private final Behandlingstema behandlingstema;
     private final LocalDate behandlingsfrist;
 
-    public BehandlingEndretEvent(long behandlingID, Behandling behandling) {
+    public BehandlingEndretAvSaksbehandlerEvent(long behandlingID, Behandling behandling) {
         super(behandlingID);
         this.behandlingstype = behandling.getType();
         this.behandlingstema = behandling.getTema();

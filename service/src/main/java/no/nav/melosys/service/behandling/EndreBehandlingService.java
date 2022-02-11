@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.util.*;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.BehandlingEndretEvent;
+import no.nav.melosys.domain.BehandlingEndretAvSaksbehandlerEvent;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
@@ -13,7 +13,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
-import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.oppgave.OppgaveFactory;
 import no.nav.melosys.service.oppgave.OppgaveService;
@@ -30,29 +29,29 @@ import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.NY_VU
 @Service
 public class EndreBehandlingService {
 
+    private final Set<Behandlingsstatus> MULIGE_STATUSER = Set.of(AVVENT_DOK_PART, AVVENT_DOK_UTL, UNDER_BEHANDLING, AVVENT_FAGLIG_AVKLARING);
+    private final Set<Behandlingstema> TEMAER_SOM_KAN_AVSLUTTES = Set.of(ØVRIGE_SED_MED, ØVRIGE_SED_UFM, TRYGDETID, IKKE_YRKESAKTIV);
+
     private final BehandlingService behandlingService;
     private final BehandlingsresultatService behandlingsresultatService;
     private final OppgaveService oppgaveService;
     private final BehandlingsgrunnlagService behandlingsgrunnlagService;
-    private final BehandlingRepository behandlingRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
 
     public EndreBehandlingService(BehandlingService behandlingService,
                                   BehandlingsresultatService behandlingsresultatService,
                                   OppgaveService oppgaveService,
                                   BehandlingsgrunnlagService behandlingsgrunnlagService,
-                                  BehandlingRepository behandlingRepository,
                                   ApplicationEventPublisher applicationEventPublisher) {
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.oppgaveService = oppgaveService;
         this.behandlingsgrunnlagService = behandlingsgrunnlagService;
-        this.behandlingRepository = behandlingRepository;
         this.applicationEventPublisher = applicationEventPublisher;
     }
 
     @Transactional
-    public void endreBehandling(long behandlingID, Sakstyper sakstype, Behandlingstyper type, Behandlingstema tema, Behandlingsstatus status, LocalDate behandlingsfrist) {
+    public void endreBehandling(long behandlingID, Sakstyper ignoredSakstype, Behandlingstyper type, Behandlingstema tema, Behandlingsstatus status, LocalDate behandlingsfrist) {
         // TODO: Endre sakstype (MELOSYS-4899 for EØS <-> trygdeavtale)
         var behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
         if (!behandling.erAktiv()) {
@@ -74,16 +73,13 @@ public class EndreBehandlingService {
         }
         if (kanEndreTema(behandling, tema)) {
             behandling.setTema(tema);
-            if (tema != ARBEID_FLERE_LAND) {
-                oppdaterBehandlingsgrunnlag(behandling.getBehandlingsgrunnlag());
-            }
             behandlingErEndret = true;
         }
         if (behandlingErEndret) {
-            behandlingRepository.save(behandling);
-            behandlingsresultatService.tømBehandlingsresultat(behandlingID);
+            behandlingService.lagre(behandling);
+            tilbakestillBehandlingsgrunnlag(behandling);
 
-            applicationEventPublisher.publishEvent(new BehandlingEndretEvent(behandlingID, behandling));
+            applicationEventPublisher.publishEvent(new BehandlingEndretAvSaksbehandlerEvent(behandlingID, behandling));
         }
     }
 
@@ -95,26 +91,23 @@ public class EndreBehandlingService {
         behandlingService.oppdaterStatus(behandling, status);
     }
 
-    @Transactional(readOnly = true)
-    public Collection<Behandlingsstatus> hentMuligeStatuser(long behandlingId) {
-        Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingId);
+    public Collection<Behandlingsstatus> hentMuligeStatuser(long behandlingID) {
+        Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
         return hentMuligeStatuser(behandling);
     }
 
     private Collection<Behandlingsstatus> hentMuligeStatuser(Behandling behandling) {
         if (behandling.erInaktiv()) return Collections.emptyList();
 
-        Set<Behandlingsstatus> muligeStatuser = new HashSet<>(Set.of(AVVENT_DOK_PART, AVVENT_DOK_UTL, UNDER_BEHANDLING, AVVENT_FAGLIG_AVKLARING));
+        Set<Behandlingsstatus> muligeStatuser = new HashSet<>(MULIGE_STATUSER);
 
-        Set<Behandlingstema> temaerSomKanAvsluttes = Set.of(ØVRIGE_SED_MED, ØVRIGE_SED_UFM, TRYGDETID, IKKE_YRKESAKTIV);
-        if (temaerSomKanAvsluttes.contains(behandling.getTema())) {
+        if (TEMAER_SOM_KAN_AVSLUTTES.contains(behandling.getTema())) {
             muligeStatuser.add(Behandlingsstatus.AVSLUTTET);
         }
 
         return muligeStatuser;
     }
 
-    @Transactional(readOnly = true)
     public Collection<Behandlingstyper> hentMuligeTyper(long behandlingID) {
         var behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
 
@@ -123,9 +116,8 @@ public class EndreBehandlingService {
         return Set.of(behandling.getType(), ENDRET_PERIODE, NY_VURDERING);
     }
 
-    @Transactional(readOnly = true)
-    public List<Behandlingstema> hentMuligeBehandlingstema(long behandlingsID) {
-        Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingsID);
+    public List<Behandlingstema> hentMuligeBehandlingstema(long behandlingID) {
+        Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
         return hentMuligeBehandlingstema(behandling);
     }
 
@@ -140,13 +132,17 @@ public class EndreBehandlingService {
         }
     }
 
+    /**
+     * @deprecated Erstattes av endreBestilling
+     */
+    @Deprecated
     @Transactional
-    public void endreBehandlingstemaTilBehandling(long behandlingsID, Behandlingstema nyttTema) {
-        Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingsID);
+    public void endreBehandlingstemaTilBehandling(long behandlingID, Behandlingstema nyttTema) {
+        Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
         if (hentMuligeBehandlingstema(behandling).contains(nyttTema)) {
             behandling.setTema(nyttTema);
             behandlingService.lagre(behandling);
-            behandlingsresultatService.tømBehandlingsresultat(behandlingsID);
+            behandlingsresultatService.tømBehandlingsresultat(behandlingID);
             oppdaterOppgave(behandling);
             if (nyttTema != ARBEID_FLERE_LAND) {
                 oppdaterBehandlingsgrunnlag(behandling.getBehandlingsgrunnlag());
@@ -188,6 +184,14 @@ public class EndreBehandlingService {
     private boolean kanOppdatereBehandlingstema(Behandling behandling) {
         return behandling.erAktiv() && behandlingsresultatService.hentBehandlingsresultat(
             behandling.getId()).erIkkeArtikkel16MedSendtAnmodningOmUnntak();
+    }
+
+    private void tilbakestillBehandlingsgrunnlag(Behandling behandling) {
+        behandlingsresultatService.tømBehandlingsresultat(behandling.getId());
+        if (behandling.getTema() != ARBEID_FLERE_LAND) {
+            behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().soeknadsland.erUkjenteEllerAlleEosLand = false;
+            behandlingsgrunnlagService.oppdaterBehandlingsgrunnlag(behandling.getBehandlingsgrunnlag());
+        }
     }
 
     private void oppdaterBehandlingsgrunnlag(Behandlingsgrunnlag behandlingsgrunnlag) {
