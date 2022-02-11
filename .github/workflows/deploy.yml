@@ -53,7 +53,7 @@ jobs:
           path: |
             Dockerfile
             nais.yml
-            app/target/melosys.jar
+            app/target/melosys-sb-execution.jar
             docker-init-scripts/vault-systembruker-env.sh
           retention-days: 1
 
