@@ -37,7 +37,7 @@ internal class SedMottakTestIT : ComponentTestBase() {
     private val prosessinstansRepository: ProsessinstansRepository? = null
 
     lateinit var rinaSaksnummer: String
-    private val kafkaTopic = "privat-melosys-eessi-v1-local"
+    private val kafkaTopic = "teammelosys.eessi.v1-local"
 
     @BeforeEach
     fun setup() {

@@ -36,9 +36,9 @@ class ComponentTestConfig {
     fun kafkaEmbedded(env: Environment): EmbeddedKafkaBroker {
         val kafka = EmbeddedKafkaBroker(
             1, true, 1,
-            "privat-melosys-eessi-v1-local",
-            "privat-melosys-soknad-mottak-local",
-            "aapen-melosys-utstedtA1-v1-local",
+            "teammelosys.eessi.v1-local",
+            "teammelosys.soknad-mottak.v1-local",
+            "teammelosys.melosys-utstedt-a1.v1-local",
             "teammelosys.fattetvedtak.v1-local"
 
         )
