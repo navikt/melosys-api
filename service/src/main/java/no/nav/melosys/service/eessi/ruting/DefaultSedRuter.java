@@ -60,7 +60,7 @@ public class DefaultSedRuter implements SedRuter {
             Behandling behandling = fagsak.get().hentSistAktiveBehandling();
 
             if (behandling.erAktiv()) {
-                behandlingService.oppdaterStatus(behandling.getId(), Behandlingsstatus.VURDER_DOKUMENT);
+                behandlingService.endreStatus(behandling.getId(), Behandlingsstatus.VURDER_DOKUMENT);
             }
 
             if (skalOppdatereOppgaveForSedType(sedType)) {

@@ -41,7 +41,7 @@ public class SettVurderDokument implements StegBehandler {
         Behandling behandling = fagsak.hentAktivBehandling();
         boolean ingenVurdering = prosessinstans.getData(ProsessDataKey.JFR_INGEN_VURDERING, Boolean.class);
         if (behandling != null && !ingenVurdering) {
-            behandlingService.oppdaterStatus(behandling.getId(), Behandlingsstatus.VURDER_DOKUMENT);
+            behandlingService.endreStatus(behandling.getId(), Behandlingsstatus.VURDER_DOKUMENT);
             log.info("Endret status på behandling {} til {}", behandling.getId(), Behandlingsstatus.VURDER_DOKUMENT);
         } else {
             log.info("Nytt dokument krever ingen vurdering ({}) eller ingen aktiv behandling for sak {}.", ingenVurdering, saksnummer);

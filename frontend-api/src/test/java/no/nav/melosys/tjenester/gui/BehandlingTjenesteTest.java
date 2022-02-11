@@ -20,7 +20,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.behandling.EndreBehandlingService;
 import no.nav.melosys.service.ldap.SaksbehandlerService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.tjenester.gui.dto.*;
@@ -38,7 +37,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 
-import static no.nav.melosys.domain.Behandling.BEHANDLINGSTEMA_SØKNAD;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.jeasy.random.FieldPredicates.*;
 import static org.mockito.Mockito.*;
@@ -64,14 +62,12 @@ class BehandlingTjenesteTest extends JsonSchemaTestParent {
     private SaksopplysningerTilDto saksopplysningerTilDto;
     @Mock
     private SaksbehandlerService saksbehandlerService;
-    @Mock
-    private EndreBehandlingService endreBehandlingService;
 
     private EasyRandom random;
 
     @BeforeEach
     void setUp() {
-        behandlingTjeneste = new BehandlingTjeneste(behandlingService, saksopplysningerTilDto, saksbehandlerService, endreBehandlingService, mock(Aksesskontroll.class));
+        behandlingTjeneste = new BehandlingTjeneste(behandlingService, saksopplysningerTilDto, saksbehandlerService, mock(Aksesskontroll.class));
 
         random = new EasyRandom(new EasyRandomParameters()
             .overrideDefaultInitialization(true)
@@ -120,8 +116,8 @@ class BehandlingTjenesteTest extends JsonSchemaTestParent {
 
     @Test
     void hentMuligeBehandlingstemaValidering() throws IOException {
-        when(endreBehandlingService.hentMuligeBehandlingstema(BEHANDLING_ID)).thenReturn(BEHANDLINGSTEMA_SØKNAD);
-        List<Behandlingstema> muligeBehandlingstema = behandlingTjeneste.hentMuligeBehandlingstema(BEHANDLING_ID).getBody();
+        // when(behandlingService.hentMuligeBehandlingstema(BEHANDLING_ID)).thenReturn(BEHANDLINGSTEMA_SØKNAD);
+        Collection<Behandlingstema> muligeBehandlingstema = behandlingTjeneste.hentMuligeBehandlingstema(BEHANDLING_ID).getBody();
         validerArray(muligeBehandlingstema, ENDRE_BEHANDLINGSTEMA_SCHEMA, log);
     }
 
@@ -149,7 +145,7 @@ class BehandlingTjenesteTest extends JsonSchemaTestParent {
         var endreBehandlingDto = new EndreBehandlingDto(sakstype.getKode(), behandlingstype.getKode(), behandlingstema.getKode(), behandlingsstatus.getKode(), behandlingsfrist);
         behandlingTjeneste.endreBehandling(BEHANDLING_ID, endreBehandlingDto);
 
-        verify(endreBehandlingService).endreBehandling(BEHANDLING_ID, sakstype, behandlingstype, behandlingstema, behandlingsstatus, behandlingsfrist);
+        verify(behandlingService).endreBehandling(BEHANDLING_ID, sakstype, behandlingstype, behandlingstema, behandlingsstatus, behandlingsfrist);
     }
 
     @Test

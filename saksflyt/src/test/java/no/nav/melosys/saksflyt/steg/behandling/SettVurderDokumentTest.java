@@ -42,7 +42,7 @@ class SettVurderDokumentTest {
         when(fagsakService.hentFagsak(eq(saksnummer))).thenReturn(fagsakMedBehandling());
         prosessinstans.setData(ProsessDataKey.JFR_INGEN_VURDERING, false);
         settVurderDokument.utfør(prosessinstans);
-        verify(behandlingService).oppdaterStatus(behandlingID, Behandlingsstatus.VURDER_DOKUMENT);
+        verify(behandlingService).endreStatus(behandlingID, Behandlingsstatus.VURDER_DOKUMENT);
     }
 
     @Test
@@ -50,7 +50,7 @@ class SettVurderDokumentTest {
         when(fagsakService.hentFagsak(eq(saksnummer))).thenReturn(new Fagsak());
         prosessinstans.setData(ProsessDataKey.JFR_INGEN_VURDERING, false);
         settVurderDokument.utfør(prosessinstans);
-        verify(behandlingService, never()).oppdaterStatus(anyLong(), any());
+        verify(behandlingService, never()).endreStatus(anyLong(), any());
     }
 
     @Test
@@ -58,7 +58,7 @@ class SettVurderDokumentTest {
         when(fagsakService.hentFagsak(eq(saksnummer))).thenReturn(fagsakMedBehandling());
         prosessinstans.setData(ProsessDataKey.JFR_INGEN_VURDERING, true);
         settVurderDokument.utfør(prosessinstans);
-        verify(behandlingService, never()).oppdaterStatus(anyLong(), any());
+        verify(behandlingService, never()).endreStatus(anyLong(), any());
     }
 
     private Fagsak fagsakMedBehandling() {

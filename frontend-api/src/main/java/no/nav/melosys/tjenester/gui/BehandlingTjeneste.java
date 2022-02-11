@@ -1,7 +1,6 @@
 package no.nav.melosys.tjenester.gui;
 
 import java.util.Collection;
-import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import io.swagger.annotations.Api;
@@ -13,7 +12,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.behandling.EndreBehandlingService;
 import no.nav.melosys.service.ldap.SaksbehandlerService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
@@ -40,19 +38,16 @@ public class BehandlingTjeneste {
     private final BehandlingService behandlingService;
     private final SaksopplysningerTilDto saksopplysningerTilDto;
     private final SaksbehandlerService saksbehandlerService;
-    private final EndreBehandlingService endreBehandlingService;
     private final Aksesskontroll aksesskontroll;
 
     @Autowired
     public BehandlingTjeneste(BehandlingService behandlingService,
                               SaksopplysningerTilDto saksopplysningerTilDto,
                               SaksbehandlerService saksbehandlerService,
-                              EndreBehandlingService endreBehandlingService,
                               Aksesskontroll aksesskontroll) {
         this.behandlingService = behandlingService;
         this.saksopplysningerTilDto = saksopplysningerTilDto;
         this.saksbehandlerService = saksbehandlerService;
-        this.endreBehandlingService = endreBehandlingService;
         this.aksesskontroll = aksesskontroll;
     }
 
@@ -68,7 +63,7 @@ public class BehandlingTjeneste {
         var behandlingstema = endreBehandling.behandlingstema() == null ? null : Behandlingstema.valueOf(endreBehandling.behandlingstema());
         var behandlingsstatus = endreBehandling.behandlingsstatus() == null ? null : Behandlingsstatus.valueOf(endreBehandling.behandlingsstatus());
 
-        endreBehandlingService.endreBehandling(behandlingID, sakstype, behandlingstype, behandlingstema, behandlingsstatus, endreBehandling.behandlingsfrist());
+        behandlingService.endreBehandling(behandlingID, sakstype, behandlingstype, behandlingstema, behandlingsstatus, endreBehandling.behandlingsfrist());
         return ResponseEntity.noContent().build();
     }
 
@@ -83,7 +78,7 @@ public class BehandlingTjeneste {
         log.info("Saksbehandler {} ber om å endre status for behandling {} til {}.", SubjectHandler.getInstance().getUserID(),
             behandlingID, status.behandlingsstatus());
         aksesskontroll.autoriserSkriv(behandlingID);
-        endreBehandlingService.endreStatus(behandlingID, Behandlingsstatus.valueOf(status.behandlingsstatus()));
+        behandlingService.endreStatus(behandlingID, Behandlingsstatus.valueOf(status.behandlingsstatus()));
         return ResponseEntity.noContent().build();
     }
 
@@ -135,7 +130,7 @@ public class BehandlingTjeneste {
         log.debug("Saksbehandler {} ber om å sette behandlingstema for behandling {} til {}.", SubjectHandler.getInstance().getUserID(), behandlingsID, endreBehandlingstemaDto);
         aksesskontroll.autoriserSkrivOgTilordnet(behandlingsID);
 
-        endreBehandlingService.endreBehandlingstemaTilBehandling(behandlingsID, Behandlingstema.valueOf(endreBehandlingstemaDto.behandlingstema()));
+        behandlingService.endreBehandlingstemaTilBehandling(behandlingsID, Behandlingstema.valueOf(endreBehandlingstemaDto.behandlingstema()));
         return ResponseEntity.noContent().build();
     }
 
@@ -159,17 +154,16 @@ public class BehandlingTjeneste {
         log.debug("Saksbehandler {} ber om å hente mulige nye behandlingsstatuser for behandling {}.", SubjectHandler.getInstance().getUserID(), behandlingID);
         aksesskontroll.autoriser(behandlingID);
 
-        return ResponseEntity.ok(endreBehandlingService.hentMuligeStatuser(behandlingID));
+        return ResponseEntity.ok(behandlingService.hentMuligeStatuser(behandlingID));
     }
 
     @GetMapping("{behandlingID}/mulige-behandlingstema")
     @ApiOperation(value = "Hent mulige nye behandlingstema for en behandling")
-    public ResponseEntity<List<Behandlingstema>> hentMuligeBehandlingstema(@PathVariable("behandlingID") long behandlingsID) {
+    public ResponseEntity<Collection<Behandlingstema>> hentMuligeBehandlingstema(@PathVariable("behandlingID") long behandlingsID) {
         log.debug("Saksbehandler {} ber om å hente mulige nye behandlingstema for behandling {}.", SubjectHandler.getInstance().getUserID(), behandlingsID);
         aksesskontroll.autoriser(behandlingsID);
 
-        List<Behandlingstema> muligeBehandlingstema = endreBehandlingService.hentMuligeBehandlingstema(behandlingsID);
-        return ResponseEntity.ok(muligeBehandlingstema);
+        return ResponseEntity.ok(behandlingService.hentMuligeBehandlingstema(behandlingsID));
     }
 
     @GetMapping("{behandlingID}/mulige-typer")
@@ -178,7 +172,7 @@ public class BehandlingTjeneste {
         log.debug("Saksbehandler {} ber om å hente mulige nye behandlingstyper for behandling {}.", SubjectHandler.getInstance().getUserID(), behandlingID);
         aksesskontroll.autoriser(behandlingID);
 
-        return ResponseEntity.ok(endreBehandlingService.hentMuligeTyper(behandlingID));
+        return ResponseEntity.ok(behandlingService.hentMuligeTyper(behandlingID));
     }
 
 
