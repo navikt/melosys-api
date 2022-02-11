@@ -254,7 +254,7 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
         String saksnummer = "123";
         ResponseEntity<Void> resultat = instans.henleggFagsak(saksnummer, henleggelseDto);
 
-        assertThat(resultat.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(resultat.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
         verify(henleggFagsakService).henleggFagsak(saksnummer, begrunnelseKode, fritekst);
     }
 

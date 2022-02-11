@@ -48,7 +48,7 @@ public class VedtakTjeneste {
         aksesskontroll.autoriserSkriv(behandlingID);
 
         vedtakServiceFasade.fattVedtak(behandlingID, lagFattVedtakRequest(behandlingID, fattVedtakDto, SubjectHandler.getInstance().getUserID()));
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("{behandlingID}/endre")
@@ -60,7 +60,7 @@ public class VedtakTjeneste {
         }
         aksesskontroll.autoriserSkriv(behandlingID);
         vedtakServiceFasade.endreVedtak(behandlingID, endreVedtakDto.getBegrunnelseKode(), endreVedtakDto.getFritekst(), endreVedtakDto.getFritekstSed());
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("{behandlingID}/kontroller")
@@ -73,7 +73,7 @@ public class VedtakTjeneste {
         }
         aksesskontroll.autoriser(behandlingID, oppdaterRegisteropplysninger ? Aksesstype.SKRIV : Aksesstype.LES);
         vedtakKontrollService.kontrollerInnvilgelse(behandlingID, fattVedtakDto.getVedtakstype(), oppdaterRegisteropplysninger);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     private FattVedtakRequest lagFattVedtakRequest(long behandlingID, FattVedtakDto fattVedtakDto, String bestillersId) {
@@ -84,7 +84,7 @@ public class VedtakTjeneste {
                 .medFritekst(eosVedtakDto.getFritekst())
                 .medFritekstSed(eosVedtakDto.getFritekstSed())
                 .medMottakerInstitusjoner(eosVedtakDto.getMottakerinstitusjoner())
-                .medRevurderBegrunnelse(eosVedtakDto.getRevurderBegrunnelse());
+                .medNyVurderingBakgrunn(eosVedtakDto.getNyVurderingBakgrunn());
         } else if (fattVedtakDto instanceof FattTrygdeavtaleEllerFtrlVedtakDto trygdeavtaleEllerFtrlVedtakDto) {
             var sakstype = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID).getFagsak().getType();
             if (sakstype == Sakstyper.FTRL) {
@@ -94,6 +94,7 @@ public class VedtakTjeneste {
                     .medEktefelleFritekst(trygdeavtaleEllerFtrlVedtakDto.getEktefelleFritekst())
                     .medBarnFritekst(trygdeavtaleEllerFtrlVedtakDto.getBarnFritekst())
                     .medKopiMottakere(trygdeavtaleEllerFtrlVedtakDto.getKopiMottakere())
+                    .medNyVurderingBakgrunn(trygdeavtaleEllerFtrlVedtakDto.getNyVurderingBakgrunn())
                     .medBestillersId(bestillersId);
             } else if (sakstype == Sakstyper.TRYGDEAVTALE) {
                 fattVedtakRequest = new FattTrygdeavtaleVedtakRequest.Builder()
@@ -102,6 +103,7 @@ public class VedtakTjeneste {
                     .medEktefelleFritekst(trygdeavtaleEllerFtrlVedtakDto.getEktefelleFritekst())
                     .medBarnFritekst(trygdeavtaleEllerFtrlVedtakDto.getBarnFritekst())
                     .medKopiMottakere(trygdeavtaleEllerFtrlVedtakDto.getKopiMottakere())
+                    .medNyVurderingBakgrunn(trygdeavtaleEllerFtrlVedtakDto.getNyVurderingBakgrunn())
                     .medBestillersId(bestillersId);
             } else {
                 throw new FunksjonellException("Vedtakstype " + fattVedtakDto.getVedtakstype() + " med sakstype " + sakstype + " er ikke støttet");

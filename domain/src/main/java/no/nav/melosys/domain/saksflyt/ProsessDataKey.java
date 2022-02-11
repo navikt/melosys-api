@@ -46,7 +46,6 @@ public enum ProsessDataKey {
     REPRESENTANT("representant"),
     REPRESENTANT_KONTAKTPERSON("representantKontakperson"),
     REPRESENTANT_REPRESENTERER("representantRepresenterer"),
-    REVURDER_BEGRUNNELSE("revurderBegrunnelse"),
     SAKSBEHANDLER("saksbehandler"),
     SAKSNUMMER("saksnummer"),
     SAKSTYPE("sakstype"),
@@ -65,7 +64,7 @@ public enum ProsessDataKey {
     VEDLEGG_SED("vedleggTilSed"),
     YTTERLIGERE_INFO_SED("ytterligereInformasjonSed");
 
-    private String kode;
+    private final String kode;
 
     ProsessDataKey(String kode) {
         this.kode = kode;

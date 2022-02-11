@@ -11,6 +11,7 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Nyvurderingbakgrunner;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.ValideringException;
@@ -172,21 +173,36 @@ class VedtakTjenesteTest extends JsonSchemaTestParent {
     @Test
     void skalMappeTilDto_EOS() throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();
-        FattVedtakDto eosVedtakDto = objectMapper.readValue(hentJsonRequest("fatteosvedtak.json"), FattVedtakDto.class);
+        FattVedtakDto eosVedtakDto = objectMapper.readValue(hentJsonRequest("fattEosVedtak.json"), FattVedtakDto.class);
 
         assertThat(eosVedtakDto)
             .isInstanceOf(FattEosVedtakDto.class)
-            .extracting("mottakerinstitusjoner", "fritekstSed")
-            .containsExactly(Set.of("NO:NAVT003"), "Fritekst til SED");
+            .extracting("mottakerinstitusjoner", "fritekstSed", "nyVurderingBakgrunn")
+            .containsExactly(Set.of("NO:NAVT003"), "Fritekst til SED", Nyvurderingbakgrunner.FEIL_I_BEHANDLING.getKode());
     }
 
     @Test
     void skalMappeTilDto_FTRL() throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();
-        FattVedtakDto ftrlVedtakDto = objectMapper.readValue(hentJsonRequest("fattftrlvedtak.json"), FattVedtakDto.class);
+        FattVedtakDto ftrlVedtakDto = objectMapper.readValue(hentJsonRequest("fattFtrlVedtak.json"), FattVedtakDto.class);
 
-        //TODO Utvide assert
-        assertThat(ftrlVedtakDto).isNotNull().isInstanceOf(FattTrygdeavtaleEllerFtrlVedtakDto.class);
+        assertThat(ftrlVedtakDto)
+            .isNotNull()
+            .isInstanceOf(FattTrygdeavtaleEllerFtrlVedtakDto.class)
+            .extracting("innledningFritekst", "kopiMottakere", "nyVurderingBakgrunn")
+            .containsExactly("Fritekst innledning", null, null);
+    }
+
+    @Test
+    void skalMappeTilDto_Trygdeavtale() throws Exception {
+        ObjectMapper objectMapper = new ObjectMapper();
+        FattVedtakDto ftrlVedtakDto = objectMapper.readValue(hentJsonRequest("fattTrygdeavtaleVedtak.json"), FattVedtakDto.class);
+
+        assertThat(ftrlVedtakDto)
+            .isNotNull()
+            .isInstanceOf(FattTrygdeavtaleEllerFtrlVedtakDto.class)
+            .extracting("innledningFritekst", "kopiMottakere", "nyVurderingBakgrunn")
+            .containsExactly("Fritekst innledning", null, Nyvurderingbakgrunner.NYE_OPPLYSNINGER.getKode());
     }
 
     private InputStream hentJsonRequest(String filnavn) {
