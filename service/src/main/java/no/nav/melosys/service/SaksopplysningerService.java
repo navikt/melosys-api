@@ -64,7 +64,7 @@ public class SaksopplysningerService {
 
     @Transactional
     public void lagrePersonopplysninger(Behandling behandling, Persondata persondata) {
-        if (behandling.saksopplysningerEksistererIkke(List.of(SaksopplysningType.PDL_PERSOPL))) {
+        if (behandling.manglerSaksopplysningerAvType(List.of(SaksopplysningType.PDL_PERSOPL))) {
             Instant nå = Instant.now();
             Saksopplysning saksopplysning = new Saksopplysning();
             saksopplysning.setDokument(persondata);
@@ -81,7 +81,7 @@ public class SaksopplysningerService {
 
     @Transactional
     public void lagrePersonMedHistorikk(Behandling behandling, PersonMedHistorikk personMedHistorikk) {
-        if (behandling.saksopplysningerEksistererIkke(List.of(SaksopplysningType.PDL_PERS_SAKS))) {
+        if (behandling.manglerSaksopplysningerAvType(List.of(SaksopplysningType.PDL_PERS_SAKS))) {
             Instant nå = Instant.now();
             Saksopplysning saksopplysning = new Saksopplysning();
             saksopplysning.setDokument(personMedHistorikk);
