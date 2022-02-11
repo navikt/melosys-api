@@ -1,0 +1,112 @@
+{
+  "nav": {
+    "arbeidsgiver": [
+      {
+        "identifikator": [
+          {
+            "id": "90090",
+            "type": "registrering"
+          }
+        ],
+        "adresse": {
+          "land": "DK",
+          "by": "kk"
+        },
+        "navn": "kl"
+      }
+    ],
+    "bruker": {
+      "person": {
+        "statsborgerskap": [
+          {"land":"GR"},
+          {"land":"DE"}
+        ],
+        "pin": [
+          {
+            "sektor": "alle",
+            "land": "CZ",
+            "institusjonsid": "NO:NAVT003",
+            "institusjonsnavn": "12348, NAVT003, NO",
+            "identifikator": "45325325324"
+          }
+        ],
+        "fornavn": "TALENTFULL",
+        "kjoenn": "M",
+        "etternavn": "KNOTT",
+        "etternavnvedfoedsel": "ll",
+        "fornavnvedfoedsel": "ll",
+        "foedselsdato": "1986-05-02"
+      },
+      "adresse": [
+        {
+          "type": "bosted",
+          "land": "HR",
+          "by": "kl"
+        }
+      ]
+    },
+    "selvstendig": {
+      "arbeidsgiver": [
+        {
+          "identifikator": [
+            {
+              "type": "registrering",
+              "id": "9090"
+            }
+          ],
+          "navn": "kløklø",
+          "adresse": {
+            "by": "kløølk",
+            "land": "CZ"
+          }
+        }
+      ]
+    },
+    "arbeidssted": [
+      {
+        "adresse": {
+          "land": "DK",
+          "by": "mlmmmmmmmmmmmmmmmmmmmml"
+        },
+        "erikkefastadresse": "ja",
+        "navn": "lølkøl",
+        "hjemmebase": "kløioi"
+      }
+    ],
+    "ytterligereinformasjon": "ytterligere informasjon"
+  },
+  "sedGVer": "4",
+  "sedVer": "1",
+  "medlemskap": {
+    "vedtak": {
+      "land": "BG",
+      "gjeldervarighetyrkesaktivitet": "ja",
+      "eropprinneligvedtak": "ja",
+      "gjelderperiode": {
+        "sluttdato": "2019-12-20",
+        "startdato": "2019-08-20"
+      }
+    },
+    "andreland": {
+      "arbeidsgiver": [
+        {
+          "adresse": {
+            "by": "klø",
+            "land": "BE"
+          },
+          "identifikator": [
+            {
+              "type": "registrering",
+              "id": "999999"
+            }
+          ],
+          "navn": "kløklø"
+        }
+      ]
+    },
+    "meldingomlovvalg": {
+      "artikkel": "11_3_d"
+    }
+  },
+  "sed": "A010"
+}
