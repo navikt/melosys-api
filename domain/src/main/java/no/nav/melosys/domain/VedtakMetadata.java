@@ -25,15 +25,15 @@ public class VedtakMetadata extends RegistreringsInfo {
     @Enumerated(EnumType.STRING)
     @Column(name = "vedtak_type", nullable = false)
     private Vedtakstyper vedtakstype;
-    
-    @Column(name = "revurder_begrunnelse")
-    private String revurderBegrunnelse;
+
+    @Column(name = "ny_vurdering_bakgrunn")
+    private String nyVurderingBakgrunn;
 
     @MapsId
     @OneToOne(optional = false)
     @JoinColumn(name = "behandlingsresultat_id")
     private Behandlingsresultat behandlingsresultat;
-    
+
     public Long getId() {
         return id;
     }
@@ -74,12 +74,12 @@ public class VedtakMetadata extends RegistreringsInfo {
         this.behandlingsresultat = behandlingsresultat;
     }
 
-    public String getRevurderBegrunnelse() {
-        return revurderBegrunnelse;
+    public String getNyVurderingBakgrunn() {
+        return nyVurderingBakgrunn;
     }
 
-    public void setRevurderBegrunnelse(String revurderBegrunnelse) {
-        this.revurderBegrunnelse = revurderBegrunnelse;
+    public void setNyVurderingBakgrunn(String nyVurderingBakgrunn) {
+        this.nyVurderingBakgrunn = nyVurderingBakgrunn;
     }
 
     @Override

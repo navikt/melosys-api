@@ -8,6 +8,7 @@ import no.nav.melosys.domain.BehandlingsresultatBegrunnelse;
 import no.nav.melosys.domain.VedtakMetadata;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Nyvurderingbakgrunner;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
@@ -16,7 +17,6 @@ import org.jeasy.random.EasyRandom;
 import org.jeasy.random.EasyRandomParameters;
 import org.jeasy.random.randomizers.misc.EnumRandomizer;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -67,7 +67,7 @@ class BehandlingsresultatTjenesteTest extends JsonSchemaTestParent {
         behandlingsresultat.setBehandlingsresultatBegrunnelser(Sets.newHashSet(begrunnelse));
         VedtakMetadata vedtakMetadata = new VedtakMetadata();
         vedtakMetadata.setVedtakstype(Vedtakstyper.KORRIGERT_VEDTAK);
-        vedtakMetadata.setRevurderBegrunnelse("BEGRUNNELSE");
+        vedtakMetadata.setNyVurderingBakgrunn(Nyvurderingbakgrunner.FEIL_I_BEHANDLING.getKode());
         behandlingsresultat.setVedtakMetadata(vedtakMetadata);
         when(behandlingsresultatService.hentBehandlingsresultatMedKontrollresultat(anyLong())).thenReturn(behandlingsresultat);
 
