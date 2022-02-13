@@ -126,7 +126,7 @@ public class BrevbestillingTjeneste {
 
     private BrevmalDto lagBrevMalDtoForMangelbrev(Produserbaredokumenter produserbartdokument, Aktoersroller hovedMottaker, long behandlingId) {
         List<FeltvalgAlternativDto> feltvalgAlternativDtos = new ArrayList<>();
-        Behandling behandling = behandlingService.hentBehandling(behandlingId);
+        Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingId);
 
         if (behandling.getType() == Behandlingstyper.SOEKNAD || behandling.erKlage()) {
             feltvalgAlternativDtos.add(new FeltvalgAlternativDto(FeltvalgAlternativKode.STANDARD));
@@ -212,7 +212,7 @@ public class BrevbestillingTjeneste {
     }
 
     private FeltValgDto hentFritekstTittelValg(long behandlingId) {
-        Behandling behandling = behandlingService.hentBehandling(behandlingId);
+        Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingId);
         Sakstyper fagsakType = behandling.getFagsak().getType();
 
         final List<FeltvalgAlternativDto> valgAlternativer = new ArrayList<>();
