@@ -74,18 +74,26 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
         fag.setYrkesaktivitet(YrkesaktivitetsKode.fromValue(hovedvirksomhet.yrkesaktivitet.getKode()));
 
         fag.setInngangsvilkårbegrunnelse(InngangsvilkaarBegrunnelseKode.EOS_BORGER);
-
-        fag.setArbeidsland(brevdata.arbeidsland);
         fag.setBostedsland(brevdata.bostedsland);
         fag.setTrygdemyndighetsland(brevdata.trygdemyndighetsland);
 
         BehandlingsgrunnlagData grunnlagData = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
-        fag.setFlaggland(brevdata.arbeidsland);
+
         if (!grunnlagData.maritimtArbeid.isEmpty()) {
             MaritimtArbeid maritimtArbeid = grunnlagData.maritimtArbeid.iterator().next();
             if (Fartsomrader.INNENRIKS == maritimtArbeid.fartsomradeKode) {
                 fag.setArbeidPåTerritorialfarvann(JA);
+                fag.setArbeidsland(maritimtArbeid.territorialfarvann);
+                fag.setFlaggland(maritimtArbeid.territorialfarvann);
             }
+        }
+
+        if(fag.getArbeidsland() == null){
+            fag.setArbeidsland(brevdata.arbeidsland);
+        }
+
+        if(fag.getFlaggland() == null) {
+            fag.setFlaggland(brevdata.arbeidsland);
         }
 
         if (brevdata.avklartMaritimType == Maritimtyper.SKIP) {
