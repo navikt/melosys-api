@@ -168,16 +168,6 @@ class BehandlingServiceTest {
     }
 
     @Test
-    void hentMuligeStatuser_temaOvrigeSedMed_avsluttetErMulig() {
-        Behandling behandling = new Behandling();
-        behandling.setTema(Behandlingstema.ØVRIGE_SED_MED);
-        when(behandlingRepo.findById(anyLong())).thenReturn(Optional.of(behandling));
-
-        Collection<Behandlingsstatus> muligeStatuser = behandlingService.hentMuligeStatuser(BEHANDLING_ID);
-        assertThat(muligeStatuser).containsExactlyInAnyOrder(AVVENT_DOK_PART, AVVENT_DOK_UTL, UNDER_BEHANDLING, AVVENT_FAGLIG_AVKLARING, AVSLUTTET);
-    }
-
-    @Test
     void hentMuligeStatuser_temaArbeidUtland_avsluttetErIkkeMulig() {
         Behandling behandling = new Behandling();
         behandling.setTema(Behandlingstema.ARBEID_I_UTLANDET);

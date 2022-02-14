@@ -34,7 +34,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import static java.util.stream.Collectors.toList;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.*;
-import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*;
 import static no.nav.melosys.metrics.MetrikkerNavn.*;
 
 @Service
@@ -147,16 +146,9 @@ public class BehandlingService {
     private Collection<Behandlingsstatus> hentMuligeStatuser(Behandling behandling) {
         if (behandling.erInaktiv()) return Collections.emptyList();
 
-        List<Behandlingsstatus> muligeStatuser = Stream.of(AVVENT_DOK_PART, AVVENT_DOK_UTL, UNDER_BEHANDLING, AVVENT_FAGLIG_AVKLARING)
+        return Stream.of(AVVENT_DOK_PART, AVVENT_DOK_UTL, UNDER_BEHANDLING, AVVENT_FAGLIG_AVKLARING)
             .filter(status -> status != behandling.getStatus())
             .collect(toList());
-
-        List<Behandlingstema> temaerSomKanAvsluttes = List.of(ØVRIGE_SED_MED, ØVRIGE_SED_UFM, TRYGDETID, IKKE_YRKESAKTIV);
-        if (temaerSomKanAvsluttes.contains(behandling.getTema())) {
-            muligeStatuser.add(Behandlingsstatus.AVSLUTTET);
-        }
-
-        return muligeStatuser;
     }
 
     @Transactional
@@ -288,7 +280,7 @@ public class BehandlingService {
         }
         avsluttBehandling(behandling);
 
-        behandlingsresultatService.oppdaterBehandlingsresultattype(behandling.getId(),nyBehandlingsResultatType);
+        behandlingsresultatService.oppdaterBehandlingsresultattype(behandling.getId(), nyBehandlingsResultatType);
     }
 
     public void avsluttNyVurderingUtenEndring(long behandlingId) {
