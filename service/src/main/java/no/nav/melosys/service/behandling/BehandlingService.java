@@ -132,16 +132,16 @@ public class BehandlingService {
             throw new FunksjonellException("Behandlingen må være aktiv for å kunne endres");
         }
 
-        if (saksbehandlerKanEndreStatus(behandling, status)) {
+        if (status != null && status != behandling.getStatus() && saksbehandlerKanEndreStatus(behandling, status)) {
             endreStatus(behandling, status);
         }
-        if (saksbehandlerKanEndreType(behandling, type)) {
+        if (type != null && type != behandling.getType() && saksbehandlerKanEndreType(behandling, type)) {
             endreType(behandling, type);
         }
-        if (saksbehandlerKanEndreTema(behandling, tema)) {
+        if (tema != null && tema != behandling.getTema() && saksbehandlerKanEndreTema(behandling, tema)) {
             endreTema(behandling, tema);
         }
-        if (saksbehandlerKanEndreFrist(behandling, behandlingsfrist)) {
+        if (behandlingsfrist != null && !behandlingsfrist.equals(behandling.getBehandlingsfrist())) {
             endreBehandlingsfrist(behandling, behandlingsfrist);
         }
     }
@@ -388,26 +388,19 @@ public class BehandlingService {
     }
 
     private boolean saksbehandlerKanEndreStatus(Behandling behandling, Behandlingsstatus status) {
-        if (status == null || status == behandling.getStatus()) return false;
         MuligeManuelleBehandlingsendringer.validerNyStatusMulig(behandling, status);
         return true;
     }
 
     private boolean saksbehandlerKanEndreType(Behandling behandling, Behandlingstyper type) {
-        if (type == null || type == behandling.getType()) return false;
         MuligeManuelleBehandlingsendringer.validerNyTypeMulig(behandling, type);
         return true;
     }
 
     private boolean saksbehandlerKanEndreTema(Behandling behandling, Behandlingstema tema) {
-        if (tema == null || tema == behandling.getTema()) return false;
         var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
         MuligeManuelleBehandlingsendringer.validerNyttTemaMulig(behandling, behandlingsresultat, tema);
         return behandlingsresultat.erIkkeArtikkel16MedSendtAnmodningOmUnntak();
-    }
-
-    private boolean saksbehandlerKanEndreFrist(Behandling behandling, LocalDate behandlingsfrist) {
-        return behandlingsfrist != null && !behandlingsfrist.equals(behandling.getBehandlingsfrist());
     }
 
     private LocalDate hentBehandlingsfristForBehandlingstema(Behandlingstema behandlingstema) {
