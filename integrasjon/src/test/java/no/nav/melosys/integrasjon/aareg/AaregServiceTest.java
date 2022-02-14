@@ -10,34 +10,27 @@ import com.fasterxml.jackson.databind.introspect.AnnotatedMember;
 import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.github.tomakehurst.wiremock.WireMockServer;
-import no.finn.unleash.FakeUnleash;
-import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.dokument.DokumentFactory;
 import no.nav.melosys.domain.dokument.XsltTemplatesFactory;
 import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.jaxb.JaxbConfig;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdConsumer;
 import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdMock;
 import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdRestConsumer;
 import no.nav.melosys.integrasjon.kodeverk.KodeOppslag;
-import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.binding.HentArbeidsforholdHistorikkSikkerhetsbegrensning;
-import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.meldinger.HentArbeidsforholdHistorikkRequest;
 import org.assertj.core.api.Assertions;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
-import static org.assertj.core.api.Assertions.catchThrowable;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class AaregServiceTest {
@@ -49,7 +42,6 @@ class AaregServiceTest {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private WireMockServer wireMockServer;
-    private final FakeUnleash fakeUnleash = new FakeUnleash();
 
     @BeforeAll
     void setupBeforeAll() {
@@ -62,17 +54,12 @@ class AaregServiceTest {
             .baseUrl("http://localhost:" + wireMockServer.port())
             .build();
         ArbeidsforholdRestConsumer restConsumer = new ArbeidsforholdRestConsumer(webClient);
-        aaregService = lagAaregService(new ArbeidsforholdMock(), fakeUnleash, restConsumer);
+        aaregService = lagAaregService(new ArbeidsforholdMock(), restConsumer);
     }
 
     @AfterAll
     void tearDown() {
         wireMockServer.stop();
-    }
-
-    @BeforeEach
-    void setUp() {
-        fakeUnleash.disable("melosys.aareg.rest");
     }
 
     @Test
@@ -88,7 +75,6 @@ class AaregServiceTest {
                 .withBody(responsAaregRestBody)
             )
         );
-        fakeUnleash.enable("melosys.aareg.rest");
         Saksopplysning saksopplysning = aaregService.finnArbeidsforholdPrArbeidstaker(
             NAV_PERSONIDENT,
             LocalDate.of(2014, 7, 1),
@@ -111,55 +97,10 @@ class AaregServiceTest {
         Assertions.assertThat(result).isEqualToIgnoringNewLines(expectedRestResult);
     }
 
-    @Test
-    void getArbeidsforholdDokument() {
-        Saksopplysning saksopplysning = aaregService.finnArbeidsforholdPrArbeidstaker("99999999991", null, null);
-        ArbeidsforholdDokument arbeidsforholdDokument = (ArbeidsforholdDokument) saksopplysning.getDokument();
-        assertThat(arbeidsforholdDokument.getArbeidsforhold().size()).isPositive();
-    }
-
-    @Test
-    void getArbeidsforholdDokument_CheckJsonResult() throws Exception {
-        Saksopplysning saksopplysning = aaregService.finnArbeidsforholdPrArbeidstaker("88888888885", null, null);
-        ArbeidsforholdDokument arbeidsforholdDokument = (ArbeidsforholdDokument) saksopplysning.getDokument();
-
-        String result = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(arbeidsforholdDokument);
-        assertThat(result).isEqualToIgnoringNewLines(expectedSoapApiResult);
-    }
-
-
-    @Test
-    void getHistoriskArbeidsforholdDokument() {
-        Saksopplysning saksopplysning = aaregService.hentArbeidsforholdHistorikk(12608035L);
-        ArbeidsforholdDokument arbeidsforholdDokument = (ArbeidsforholdDokument) saksopplysning.getDokument();
-        assertThat(arbeidsforholdDokument.getArbeidsforhold().size()).isPositive();
-        assertThat(arbeidsforholdDokument.getArbeidsforhold().get(0).getArbeidsavtaler().size()).isGreaterThan(1);
-    }
-
-    @Test
-    void hentSikkerhetsbegrensetArbeidsforholdHistorikkKasterUnntak() throws Exception {
-        ArbeidsforholdConsumer arbeidsforholdConsumer = mockArbeidsforholdConsumer();
-        AaregService instans = lagAaregService(arbeidsforholdConsumer, new FakeUnleash(), null);
-        Throwable unntak = catchThrowable(() -> instans.hentArbeidsforholdHistorikk(SIKKERHETSBEGRENSET_ID));
-        assertThat(unntak).isInstanceOf(SikkerhetsbegrensningException.class)
-            .hasMessageContaining("oppslag av arbeidsforhold");
-    }
-
-    private static ArbeidsforholdConsumer mockArbeidsforholdConsumer() throws Exception {
-        ArbeidsforholdConsumer arbeidsforholdConsumer = mock(ArbeidsforholdConsumer.class);
-        HentArbeidsforholdHistorikkRequest request = new HentArbeidsforholdHistorikkRequest();
-        request.setArbeidsforholdId(SIKKERHETSBEGRENSET_ID);
-        when(arbeidsforholdConsumer
-            .hentArbeidsforholdHistorikk(argThat(r -> r.getArbeidsforholdId() == SIKKERHETSBEGRENSET_ID)))
-            .thenThrow(new HentArbeidsforholdHistorikkSikkerhetsbegrensning(null, null));
-        return arbeidsforholdConsumer;
-    }
-
     private AaregService lagAaregService(ArbeidsforholdConsumer arbeidsforholdConsumer,
-                                         Unleash unleash,
                                          ArbeidsforholdRestConsumer arbeidsforholdRestConsumer) {
         DokumentFactory dokumentFactory = new DokumentFactory(marshaller, new XsltTemplatesFactory());
-        return new AaregService(arbeidsforholdConsumer, dokumentFactory, arbeidsforholdRestConsumer, unleash, getKodeOppslag());
+        return new AaregService(arbeidsforholdRestConsumer, getKodeOppslag());
     }
 
     @NotNull
@@ -177,57 +118,6 @@ class AaregServiceTest {
             }
         };
     }
-
-    private static final String expectedSoapApiResult = """
-        [ {
-          "arbeidsforholdID" : "V974600951R131438S1001L0001",
-          "arbeidsforholdIDnav" : 39525427,
-          "ansettelsesPeriode" : {
-            "fom" : [ 2016, 4, 1 ],
-            "tom" : null
-          },
-          "arbeidsforholdstype" : "Ordinært arbeidsforhold",
-          "arbeidsavtaler" : [ {
-            "arbeidstidsordning" : {
-              "kode" : "ikkeSkift"
-            },
-            "avloenningstype" : "Fastlønn",
-            "yrke" : {
-              "kode" : "3119136",
-              "term" : "INGENIØR (ØVRIG TEKNISK VIRKSOMHET)"
-            },
-            "gyldighetsperiode" : {
-              "fom" : [ 2016, 4, 1 ],
-              "tom" : null
-            },
-            "avtaltArbeidstimerPerUke" : 37.5,
-            "stillingsprosent" : 100.0,
-            "sisteLoennsendringsdato" : [ 2016, 4, 1 ],
-            "beregnetAntallTimerPrUke" : 37.5,
-            "endringsdatoStillingsprosent" : [ 2016, 4, 1 ],
-            "skipsregister" : {
-              "kode" : null
-            },
-            "skipstype" : {
-              "kode" : null
-            },
-            "maritimArbeidsavtale" : false,
-            "beregnetStillingsprosent" : null,
-            "antallTimerGammeltAa" : null,
-            "fartsomraade" : null
-          } ],
-          "permisjonOgPermittering" : [ ],
-          "utenlandsopphold" : [ ],
-          "arbeidsgivertype" : "ORGANISASJON",
-          "arbeidsgiverID" : "974600951",
-          "arbeidstakerID" : "88888888885",
-          "opplysningspliktigtype" : "ORGANISASJON",
-          "opplysningspliktigID" : "964338531",
-          "opprettelsestidspunkt" : 1460536367.299000000,
-          "sistBekreftet" : 1498651290.000000000,
-          "Aordning" : true,
-          "timerTimelonnet" : [ ]
-        } ]""";
 
     private static final String expectedRestResult = """
         [ {
