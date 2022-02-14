@@ -51,15 +51,13 @@ class FagsakServiceTest {
     @Mock
     private MedlPeriodeService medlPeriodeService;
 
-    private final FakeUnleash unleash = new FakeUnleash();
 
     private FagsakService fagsakService;
 
     @BeforeEach
     public void setUp() {
         fagsakService = new FagsakService(fagsakRepo, behandlingService, kontaktopplysningService, oppgaveService, persondataFasade,
-                                          behandlingsresultatService, medlPeriodeService, unleash);
-        unleash.enableAll();
+                                          behandlingsresultatService, medlPeriodeService);
     }
 
     @Test

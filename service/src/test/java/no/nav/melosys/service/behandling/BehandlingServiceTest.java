@@ -335,8 +335,7 @@ class BehandlingServiceTest {
         behandling.setType(Behandlingstyper.NY_VURDERING);
         when(behandlingRepo.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
 
-        behandlingService.avsluttNyVurdering(BEHANDLING_ID, Behandlingsresultattyper.AVSLUTTET_UTEN_ENDRING);
-
+        behandlingService.avsluttNyVurdering(BEHANDLING_ID, Behandlingsresultattyper.FERDIGBEHANDLET);
     }
 
     @Test
@@ -355,7 +354,7 @@ class BehandlingServiceTest {
         BehandlingEndretStatusEvent behandlingEndretStatusEvent = behandlingEndretStatusEventCaptor.getValue();
         assertThat(behandlingEndretStatusEvent.getBehandlingID()).isEqualTo(BEHANDLING_ID);
         assertThat(behandlingEndretStatusEvent.getBehandlingsstatus()).isEqualTo(AVSLUTTET);
-        verify(behandlingsresultatService).oppdaterBehandlingsresultattype(BEHANDLING_ID, Behandlingsresultattyper.AVSLUTTET_UTEN_ENDRING);
+        verify(behandlingsresultatService).oppdaterBehandlingsresultattype(BEHANDLING_ID, Behandlingsresultattyper.FERDIGBEHANDLET);
     }
 
     @Test
@@ -366,7 +365,7 @@ class BehandlingServiceTest {
         when(behandlingRepo.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
 
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> behandlingService.avsluttNyVurdering(BEHANDLING_ID, Behandlingsresultattyper.AVSLUTTET_UTEN_ENDRING))
+            .isThrownBy(() -> behandlingService.avsluttNyVurdering(BEHANDLING_ID, Behandlingsresultattyper.FERDIGBEHANDLET))
             .withMessageContaining("Behandling "+BEHANDLING_ID+" er ikke typen NY_VURDERING!");
     }
 

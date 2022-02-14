@@ -292,7 +292,7 @@ public class BehandlingService {
     }
 
     public void avsluttNyVurderingUtenEndring(long behandlingId) {
-        avsluttNyVurdering(behandlingId, Behandlingsresultattyper.AVSLUTTET_UTEN_ENDRING);
+        avsluttNyVurdering(behandlingId, Behandlingsresultattyper.FERDIGBEHANDLET);
     }
 
     public Behandling hentBehandling(long behandlingId) {

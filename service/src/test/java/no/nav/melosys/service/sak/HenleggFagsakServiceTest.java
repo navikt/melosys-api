@@ -26,7 +26,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static no.nav.melosys.service.SaksbehandlingDataFactory.lagFagsak;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -100,7 +99,7 @@ class HenleggFagsakServiceTest {
         Fagsak fagsak = lagFagsak(saksnummer);
         Behandling førsteBehandling = new Behandling();
         førsteBehandling.setId(1L);
-        førsteBehandling.setStatus(Behandlingsstatus.OPPRETTET);
+        førsteBehandling.setStatus(Behandlingsstatus.AVSLUTTET);
         Behandling andreBehandling = new Behandling();
         andreBehandling.setId(2L);
         andreBehandling.setStatus(Behandlingsstatus.ANMODNING_UNNTAK_SENDT);
@@ -132,21 +131,5 @@ class HenleggFagsakServiceTest {
 
         verify(behandlingService).avsluttNyVurdering(andreBehandling.getId(), Behandlingsresultattyper.HENLEGGELSE_BORTFALT);
         verifyNoMoreInteractions(fagsakService, behandlingsresultatService, oppgaveService);
-    }
-
-    @Test
-    void henleggFagsak_henleggerKunBehandling_dersomAktivBehandlingErNyVurdering(){
-        String fritekst = "Fri tale";
-        when(behandlingsresultatService.hentBehandlingsresultat(eq(behandlingID))).thenReturn(behandlingsresultat);
-        behandling.setType(Behandlingstyper.NY_VURDERING);
-
-        henleggFagsakService.henleggFagsak(saksnummer, "ANNET", fritekst);
-
-        verify(behandlingsresultatService).lagre(behandlingsresultatCaptor.capture());
-        verify(behandlingService).avsluttNyVurdering(behandling.getId(), Behandlingsresultattyper.HENLEGGELSE);
-        verifyNoMoreInteractions(prosessinstansService, fagsakService, oppgaveService);
-        assertThat(behandlingsresultat)
-            .extracting(Behandlingsresultat::getType, Behandlingsresultat::getBegrunnelseFritekst)
-            .containsExactly(Behandlingsresultattyper.HENLEGGELSE, fritekst);
     }
 }
