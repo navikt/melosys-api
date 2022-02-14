@@ -17,8 +17,9 @@ import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.ENDRET_PERIODE;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.NY_VURDERING;
 
-public class MuligeBehandlingsverdier {
+public class MuligeManuelleBehandlingsendringer {
 
+    private static final Set<Behandlingstyper> MULIGE_TYPER = Set.of(ENDRET_PERIODE, NY_VURDERING);
     private static final Set<Behandlingsstatus> MULIGE_STATUSER = Set.of(AVVENT_DOK_PART, AVVENT_DOK_UTL, UNDER_BEHANDLING, AVVENT_FAGLIG_AVKLARING);
     private static final Set<Behandlingstema> TEMAER_SOM_KAN_AVSLUTTES = Set.of(ØVRIGE_SED_MED, ØVRIGE_SED_UFM, TRYGDETID, IKKE_YRKESAKTIV);
 
@@ -37,7 +38,9 @@ public class MuligeBehandlingsverdier {
     public static Set<Behandlingstyper> hentMuligeTyper(Behandling behandling) {
         if (behandling.erInaktiv()) return Collections.emptySet();
 
-        return Set.of(behandling.getType(), ENDRET_PERIODE, NY_VURDERING);
+        if (MULIGE_TYPER.contains(behandling.getType())) return MULIGE_TYPER;
+
+        return Collections.singleton(behandling.getType());
     }
 
     public static Set<Behandlingstema> hentMuligeBehandlingstema(Behandling behandling, Behandlingsresultat behandlingsresultat) {

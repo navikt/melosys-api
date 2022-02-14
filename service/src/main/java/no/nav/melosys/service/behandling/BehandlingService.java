@@ -10,6 +10,7 @@ import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
+import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagKonverterer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
@@ -20,9 +21,9 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
 import no.nav.melosys.repository.BehandlingRepository;
+import no.nav.melosys.repository.BehandlingsgrunnlagRepository;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.TidligereMedlemsperiodeRepository;
-import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import org.apache.commons.beanutils.BeanUtils;
 import org.slf4j.Logger;
@@ -47,7 +48,7 @@ public class BehandlingService {
     private final BehandlingsresultatRepository behandlingsresultatRepository;
     private final TidligereMedlemsperiodeRepository tidligereMedlemsperiodeRepository;
     private final BehandlingsresultatService behandlingsresultatService;
-    private final BehandlingsgrunnlagService behandlingsgrunnlagService;
+    private final BehandlingsgrunnlagRepository behandlingsgrunnlagRepository;
     private final OppgaveService oppgaveService;
     private final ApplicationEventPublisher applicationEventPublisher;
 
@@ -67,15 +68,15 @@ public class BehandlingService {
     public BehandlingService(BehandlingRepository behandlingRepository,
                              BehandlingsresultatRepository behandlingsresultatRepository,
                              TidligereMedlemsperiodeRepository tidligereMedlemsperiodeRepository,
+                             BehandlingsgrunnlagRepository behandlingsgrunnlagRepository,
                              BehandlingsresultatService behandlingsresultatService,
-                             BehandlingsgrunnlagService behandlingsgrunnlagService,
                              @Lazy OppgaveService oppgaveService,
                              ApplicationEventPublisher applicationEventPublisher) {
         this.behandlingRepository = behandlingRepository;
         this.behandlingsresultatRepository = behandlingsresultatRepository;
         this.tidligereMedlemsperiodeRepository = tidligereMedlemsperiodeRepository;
+        this.behandlingsgrunnlagRepository = behandlingsgrunnlagRepository;
         this.behandlingsresultatService = behandlingsresultatService;
-        this.behandlingsgrunnlagService = behandlingsgrunnlagService;
         this.oppgaveService = oppgaveService;
         this.applicationEventPublisher = applicationEventPublisher;
     }
@@ -153,14 +154,15 @@ public class BehandlingService {
     public void endreBehandlingstemaTilBehandling(long behandlingID, Behandlingstema nyttTema) {
         Behandling behandling = hentBehandlingUtenSaksopplysninger(behandlingID);
         var behandlingsgrunnlag = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
-        if (MuligeBehandlingsverdier.hentMuligeBehandlingstema(behandling, behandlingsgrunnlag).contains(nyttTema)) {
+        if (MuligeManuelleBehandlingsendringer.hentMuligeBehandlingstema(behandling, behandlingsgrunnlag).contains(nyttTema)) {
             behandling.setTema(nyttTema);
 
             tilbakestillBehandlingsgrunnlag(behandling);
             applicationEventPublisher.publishEvent(new BehandlingEndretAvSaksbehandlerEvent(behandling.getId(), behandling));
             if (nyttTema != ARBEID_FLERE_LAND) {
                 behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().soeknadsland.erUkjenteEllerAlleEosLand = false;
-                behandlingsgrunnlagService.oppdaterBehandlingsgrunnlag(behandling.getBehandlingsgrunnlag());
+                BehandlingsgrunnlagKonverterer.oppdaterBehandlingsgrunnlag(behandling.getBehandlingsgrunnlag());
+                behandlingsgrunnlagRepository.saveAndFlush(behandling.getBehandlingsgrunnlag());
             }
         } else {
             throw new FunksjonellException("Ikke mulig å endre behandlingstema");
@@ -363,43 +365,44 @@ public class BehandlingService {
         behandlingsresultatService.tømBehandlingsresultat(behandling.getId());
         if (behandling.getTema() != ARBEID_FLERE_LAND) {
             behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().soeknadsland.erUkjenteEllerAlleEosLand = false;
-            behandlingsgrunnlagService.oppdaterBehandlingsgrunnlag(behandling.getBehandlingsgrunnlag());
+            BehandlingsgrunnlagKonverterer.oppdaterBehandlingsgrunnlag(behandling.getBehandlingsgrunnlag());
+            behandlingsgrunnlagRepository.saveAndFlush(behandling.getBehandlingsgrunnlag());
         }
     }
 
     public Set<Behandlingsstatus> hentMuligeStatuser(long behandlingID) {
         var behandling = hentBehandlingUtenSaksopplysninger(behandlingID);
-        return MuligeBehandlingsverdier.hentMuligeStatuser(behandling);
+        return MuligeManuelleBehandlingsendringer.hentMuligeStatuser(behandling);
     }
 
+    @Transactional
     public Set<Behandlingstema> hentMuligeBehandlingstema(long behandlingID) {
         var behandling = hentBehandlingUtenSaksopplysninger(behandlingID);
         var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
-        return MuligeBehandlingsverdier.hentMuligeBehandlingstema(behandling, behandlingsresultat);
+        return MuligeManuelleBehandlingsendringer.hentMuligeBehandlingstema(behandling, behandlingsresultat);
     }
 
     public Set<Behandlingstyper> hentMuligeTyper(long behandlingID) {
         var behandling = hentBehandlingUtenSaksopplysninger(behandlingID);
-        return MuligeBehandlingsverdier.hentMuligeTyper(behandling);
+        return MuligeManuelleBehandlingsendringer.hentMuligeTyper(behandling);
     }
-
 
     private boolean saksbehandlerKanEndreStatus(Behandling behandling, Behandlingsstatus status) {
         if (status == null || status == behandling.getStatus()) return false;
-        MuligeBehandlingsverdier.validerNyStatusMulig(behandling, status);
+        MuligeManuelleBehandlingsendringer.validerNyStatusMulig(behandling, status);
         return true;
     }
 
     private boolean saksbehandlerKanEndreType(Behandling behandling, Behandlingstyper type) {
         if (type == null || type == behandling.getType()) return false;
-        MuligeBehandlingsverdier.validerNyTypeMulig(behandling, type);
+        MuligeManuelleBehandlingsendringer.validerNyTypeMulig(behandling, type);
         return true;
     }
 
     private boolean saksbehandlerKanEndreTema(Behandling behandling, Behandlingstema tema) {
         if (tema == null || tema == behandling.getTema()) return false;
         var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
-        MuligeBehandlingsverdier.validerNyttTemaMulig(behandling, behandlingsresultat, tema);
+        MuligeManuelleBehandlingsendringer.validerNyttTemaMulig(behandling, behandlingsresultat, tema);
         return behandlingsresultat.erIkkeArtikkel16MedSendtAnmodningOmUnntak();
     }
 

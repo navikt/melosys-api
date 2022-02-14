@@ -47,7 +47,7 @@ public class Behandling extends RegistreringsInfo {
     private Behandlingsstatus status;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "beh_type", nullable = false, updatable = false)
+    @Column(name = "beh_type", nullable = false)
     private Behandlingstyper type;
 
     @Enumerated(EnumType.STRING)

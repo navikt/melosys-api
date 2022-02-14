@@ -17,9 +17,9 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.BehandlingRepository;
+import no.nav.melosys.repository.BehandlingsgrunnlagRepository;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.TidligereMedlemsperiodeRepository;
-import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -55,9 +55,9 @@ class BehandlingServiceTest {
     @Mock
     private TidligereMedlemsperiodeRepository tidligereMedlemsperiodeRepo;
     @Mock
-    private BehandlingsresultatService behandlingsresultatService;
+    private BehandlingsgrunnlagRepository behandlingsgrunnlagRepo;
     @Mock
-    private BehandlingsgrunnlagService behandlingsgrunnlagService;
+    private BehandlingsresultatService behandlingsresultatService;
     @Mock
     private OppgaveService oppgaveService;
     @Mock
@@ -67,8 +67,6 @@ class BehandlingServiceTest {
 
     @Captor
     private ArgumentCaptor<Behandling> behandlingCaptor;
-    @Captor
-    private ArgumentCaptor<Behandlingsgrunnlag> behandlingsgrunnlagCaptor;
     @Captor
     private ArgumentCaptor<BehandlingEvent> behandlingEventCaptor;
     @Captor
@@ -80,7 +78,7 @@ class BehandlingServiceTest {
 
     @BeforeEach
     public void setUp() {
-        behandlingService = new BehandlingService(behandlingRepo, behandlingsresultatRepository, tidligereMedlemsperiodeRepo, behandlingsresultatService, behandlingsgrunnlagService, oppgaveService, applicationEventPublisher);
+        behandlingService = new BehandlingService(behandlingRepo, behandlingsresultatRepository, tidligereMedlemsperiodeRepo, behandlingsgrunnlagRepo, behandlingsresultatService, oppgaveService, applicationEventPublisher);
 
         behandling = new Behandling();
         behandling.setId(BEHANDLING_ID);
@@ -98,7 +96,7 @@ class BehandlingServiceTest {
     @Test
     void endreBehandling() {
         behandling.setTema(Behandlingstema.IKKE_YRKESAKTIV);
-        behandling.setType(Behandlingstyper.SOEKNAD);
+        behandling.setType(Behandlingstyper.ENDRET_PERIODE);
         behandling.setFagsak(new Fagsak());
         behandling.setBehandlingsgrunnlag(opprettBehandlingsgrunnlag());
         when(behandlingRepo.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));

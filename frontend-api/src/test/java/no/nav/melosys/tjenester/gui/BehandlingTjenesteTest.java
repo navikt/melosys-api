@@ -116,7 +116,6 @@ class BehandlingTjenesteTest extends JsonSchemaTestParent {
 
     @Test
     void hentMuligeBehandlingstemaValidering() throws IOException {
-        // when(behandlingService.hentMuligeBehandlingstema(BEHANDLING_ID)).thenReturn(BEHANDLINGSTEMA_SØKNAD);
         Collection<Behandlingstema> muligeBehandlingstema = behandlingTjeneste.hentMuligeBehandlingstema(BEHANDLING_ID).getBody();
         validerArray(muligeBehandlingstema, ENDRE_BEHANDLINGSTEMA_SCHEMA, log);
     }
@@ -128,7 +127,6 @@ class BehandlingTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    @Disabled("Inntil melosys-schema er oppdatert")
     void hentMuligeBehandlingstyperValidering() throws IOException {
         Collection<Behandlingstyper> muligeTyper = behandlingTjeneste.hentMuligeTyper(BEHANDLING_ID).getBody();
         validerArray(muligeTyper, ENDRE_BEHANDLINGSTYPE_SCHEMA, log);
