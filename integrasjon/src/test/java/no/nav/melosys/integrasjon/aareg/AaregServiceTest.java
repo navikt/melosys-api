@@ -11,13 +11,8 @@ import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import no.nav.melosys.domain.Saksopplysning;
-import no.nav.melosys.domain.dokument.DokumentFactory;
-import no.nav.melosys.domain.dokument.XsltTemplatesFactory;
 import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
-import no.nav.melosys.domain.dokument.jaxb.JaxbConfig;
-import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdConsumer;
-import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdMock;
 import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdRestConsumer;
 import no.nav.melosys.integrasjon.kodeverk.KodeOppslag;
 import org.assertj.core.api.Assertions;
@@ -26,7 +21,6 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
-import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
@@ -34,18 +28,15 @@ import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMoc
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class AaregServiceTest {
-    private static final Long SIKKERHETSBEGRENSET_ID = 1L;
     private static final String NAV_PERSONIDENT = "12345678990";
 
     private AaregService aaregService;
-    private Jaxb2Marshaller marshaller;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private WireMockServer wireMockServer;
 
     @BeforeAll
     void setupBeforeAll() {
-        marshaller = JaxbConfig.jaxb2Marshaller();
         objectMapper.registerModule(new JavaTimeModule());
         wireMockServer = new WireMockServer(wireMockConfig().dynamicPort());
         wireMockServer.start();
@@ -54,7 +45,7 @@ class AaregServiceTest {
             .baseUrl("http://localhost:" + wireMockServer.port())
             .build();
         ArbeidsforholdRestConsumer restConsumer = new ArbeidsforholdRestConsumer(webClient);
-        aaregService = lagAaregService(new ArbeidsforholdMock(), restConsumer);
+        aaregService = lagAaregService(restConsumer);
     }
 
     @AfterAll
@@ -97,9 +88,7 @@ class AaregServiceTest {
         Assertions.assertThat(result).isEqualToIgnoringNewLines(expectedRestResult);
     }
 
-    private AaregService lagAaregService(ArbeidsforholdConsumer arbeidsforholdConsumer,
-                                         ArbeidsforholdRestConsumer arbeidsforholdRestConsumer) {
-        DokumentFactory dokumentFactory = new DokumentFactory(marshaller, new XsltTemplatesFactory());
+    private AaregService lagAaregService(ArbeidsforholdRestConsumer arbeidsforholdRestConsumer) {
         return new AaregService(arbeidsforholdRestConsumer, getKodeOppslag());
     }
 
