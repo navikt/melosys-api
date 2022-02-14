@@ -8,11 +8,13 @@ import com.fasterxml.jackson.annotation.JsonView;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.dokument.DokumentView;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.behandling.EndreBehandlingstemaService;
 import no.nav.melosys.service.ldap.SaksbehandlerService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
@@ -42,18 +44,20 @@ public class BehandlingTjeneste {
     private final SaksbehandlerService saksbehandlerService;
     private final EndreBehandlingstemaService endreBehandlingstemaService;
     private final Aksesskontroll aksesskontroll;
+    private final BehandlingsresultatService behandlingsresultatService;
 
     @Autowired
     public BehandlingTjeneste(BehandlingService behandlingService,
                               SaksopplysningerTilDto saksopplysningerTilDto,
                               SaksbehandlerService saksbehandlerService,
                               EndreBehandlingstemaService endreBehandlingstemaService,
-                              Aksesskontroll aksesskontroll) {
+                              Aksesskontroll aksesskontroll, BehandlingsresultatService behandlingsresultatService) {
         this.behandlingService = behandlingService;
         this.saksopplysningerTilDto = saksopplysningerTilDto;
         this.saksbehandlerService = saksbehandlerService;
         this.endreBehandlingstemaService = endreBehandlingstemaService;
         this.aksesskontroll = aksesskontroll;
+        this.behandlingsresultatService = behandlingsresultatService;
     }
 
     @PostMapping("{behandlingID}/status")
@@ -171,6 +175,8 @@ public class BehandlingTjeneste {
     }
 
     private BehandlingOppsummeringDto tilOppsummeringDto(Behandling behandling) {
+        Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
+
         var behandlingOppsummeringDto = new BehandlingOppsummeringDto();
         behandlingOppsummeringDto.setBehandlingsstatus(behandling.getStatus());
         behandlingOppsummeringDto.setBehandlingstype(behandling.getType());
@@ -181,6 +187,7 @@ public class BehandlingTjeneste {
         behandlingOppsummeringDto.setSisteOpplysningerHentetDato(behandling.getSistOpplysningerHentetDato());
         behandlingOppsummeringDto.setSvarFrist(behandling.getDokumentasjonSvarfristDato());
         behandlingOppsummeringDto.setBehandlingsfrist(behandling.getBehandlingsfrist());
+        behandlingOppsummeringDto.setBehandlingsresultattype(behandlingsresultat.getType());
         return behandlingOppsummeringDto;
     }
 }

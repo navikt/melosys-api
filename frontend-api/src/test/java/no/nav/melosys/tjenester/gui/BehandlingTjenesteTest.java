@@ -18,6 +18,7 @@ import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.behandling.EndreBehandlingstemaService;
 import no.nav.melosys.service.ldap.SaksbehandlerService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
@@ -62,12 +63,14 @@ class BehandlingTjenesteTest extends JsonSchemaTestParent {
     private SaksbehandlerService saksbehandlerService;
     @Mock
     private EndreBehandlingstemaService endreBehandlingstemaService;
+    @Mock
+    private BehandlingsresultatService behandlingsresultatService;
 
     private EasyRandom random;
 
     @BeforeEach
     void setUp() {
-        behandlingTjeneste = new BehandlingTjeneste(behandlingService, saksopplysningerTilDto, saksbehandlerService, endreBehandlingstemaService, mock(Aksesskontroll.class));
+        behandlingTjeneste = new BehandlingTjeneste(behandlingService, saksopplysningerTilDto, saksbehandlerService, endreBehandlingstemaService, mock(Aksesskontroll.class), behandlingsresultatService);
 
         random = new EasyRandom(new EasyRandomParameters()
             .overrideDefaultInitialization(true)
