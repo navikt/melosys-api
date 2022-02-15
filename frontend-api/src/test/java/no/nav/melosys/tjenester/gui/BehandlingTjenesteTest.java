@@ -27,6 +27,7 @@ import no.nav.melosys.tjenester.gui.util.NumericStringRandomizer;
 import org.jeasy.random.EasyRandom;
 import org.jeasy.random.EasyRandomParameters;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -93,6 +94,7 @@ class BehandlingTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
+    @Disabled("Enables når MELOSYS-4815 merges inn")
     void hentBehandling_erSchemaValidert() throws Exception {
         BehandlingDto behandlingDto = random.nextObject(BehandlingDto.class);
         behandlingDto.getSaksopplysninger().setSed(null);
