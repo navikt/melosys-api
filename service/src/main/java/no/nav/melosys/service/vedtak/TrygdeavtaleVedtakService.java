@@ -91,6 +91,7 @@ public class TrygdeavtaleVedtakService {
             .medEktefelleFritekst(request.getEktefelleFritekst())
             .medBarnFritekst(request.getBarnFritekst())
             .medBestillersId(request.getBestillersId())
+            .medNyVurderingBakgrunn(request.getNyVurderingBakgrunn())
             .build();
     }
 

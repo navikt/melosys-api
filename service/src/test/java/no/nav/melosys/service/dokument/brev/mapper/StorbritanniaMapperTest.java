@@ -28,7 +28,7 @@ import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie;
 import no.nav.melosys.domain.person.familie.IkkeOmfattetFamilie;
 import no.nav.melosys.domain.person.familie.OmfattetFamilie;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.integrasjon.dokgen.dto.storbritannia.attest.AttestStorbritannia;
+import no.nav.melosys.integrasjon.dokgen.dto.InnvilgelseOgAttestStorbritannia;
 import no.nav.melosys.integrasjon.dokgen.dto.storbritannia.innvilgelse.Barn;
 import no.nav.melosys.integrasjon.dokgen.dto.storbritannia.innvilgelse.InnvilgelseStorbritannia;
 import no.nav.melosys.service.LovvalgsperiodeService;
@@ -89,19 +89,29 @@ public class StorbritanniaMapperTest {
     }
 
     @Test
-    void map_Innvilget_populererFelter() throws JsonProcessingException {
+    void map_altOkInnvilgelseOgAttestSendes_populererFelter() throws JsonProcessingException {
         mockMedfølgendeFamilieDefaultCase();
         mockAvklartFamilieDefaultCase();
         mockHappyCase();
 
         InnvilgelseBrevbestilling brevbestilling = lagStorbritanniaBrevbestilling(medPeriode(lagTrygdeavtaleBehandling()));
 
-        InnvilgelseStorbritannia innvilgelseUK = storbritanniaMapper.map(brevbestilling).getInnvilgelse();
+        InnvilgelseOgAttestStorbritannia innvilgelseOgAttestStorbritannia = storbritanniaMapper.map(brevbestilling);
 
-        String json = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(innvilgelseUK);
-        String resultat = json.replaceAll("(\"dagensDato\" :)(.*)", "$1 \"Fjernet for test\",");
+        String jsonInnvilgelse = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(innvilgelseOgAttestStorbritannia.getInnvilgelse());
+        String resultatInnvilgelse = jsonInnvilgelse.replaceAll("(\"dagensDato\" :)(.*)", "$1 \"Fjernet for test\",");
 
-        assertThat(resultat).isEqualToIgnoringNewLines(FORVENTEDE_FELTER_FOR_INNVILGELSE_STORBRITANNIA_MAPPING);
+        assertThat(innvilgelseOgAttestStorbritannia.isSkalHaAttest()).isTrue();
+        assertThat(resultatInnvilgelse).isEqualToIgnoringNewLines(FORVENTEDE_FELTER_FOR_INNVILGELSE_STORBRITANNIA_MAPPING);
+
+        String jsonAttest = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(innvilgelseOgAttestStorbritannia.getAttest());
+        String resultatAttest = jsonAttest.replaceAll("(\"dagensDato\" :)(.*)", "$1 \"Fjernet for test\",");
+
+        assertThat(innvilgelseOgAttestStorbritannia.isSkalHaInnvilgelse()).isTrue();
+        assertThat(resultatAttest).isEqualToIgnoringNewLines(FORVENTEDE_FELTER_FOR_ATTEST_STORBRITANNIA_MAPPING);
+
+        assertThat(innvilgelseOgAttestStorbritannia.isSkalHaInfoOmRettigheter()).isTrue();
+        assertThat(innvilgelseOgAttestStorbritannia.getNyVurderingBakgrunn()).isEqualTo(brevbestilling.getNyVurderingBakgrunn());
     }
 
     @Test
@@ -114,7 +124,7 @@ public class StorbritanniaMapperTest {
     }
 
     @Test
-    void map_ingenUtenlandskeVirksomheter_kastFunksjonellException() {
+    void map_ingenNorskeVirksomheter_kastFunksjonellException() {
         mockLovvalgsperiode();
 
         when(mockAvklarteVirksomheterSystemService.hentNorskeArbeidsgivere(any())).thenReturn(Collections.emptyList());
@@ -125,7 +135,7 @@ public class StorbritanniaMapperTest {
     }
 
     @Test
-    void map_ettOmfattetBarn_minstEttOmfattetFamiliemedlemErtrue() {
+    void map_ettOmfattetBarn_minstEttOmfattetFamiliemedlemErTrue() {
         mockLovvalgsperiode();
         mockMedfølgendeFamilieDefaultCase();
         mockHappyCase();
@@ -155,7 +165,7 @@ public class StorbritanniaMapperTest {
     }
 
     @Test
-    void map_ingenOmfattet_minstEttOmfattetFamiliemedlemErfalse() {
+    void map_ingenOmfattet_minstEttOmfattetFamiliemedlemErFalse() {
         mockMedfølgendeFamilieDefaultCase();
         mockLovvalgsperiode();
         when(mockLovvalgsperiodeService.hentLovvalgsperioder(anyLong())).thenReturn(List.of(lagLovvalgsperiode()));
@@ -207,19 +217,6 @@ public class StorbritanniaMapperTest {
         assertThat(StorbritanniaMapper.sjekkOmAdresseGyldighetErInnenforLovalgsperiode(personAdresse, lovvalgsperiode))
             .withFailMessage(grunn)
             .isFalse();
-    }
-
-    @Test
-    void map_InnvilgetMedOmfattetFamilie_populererFelter() throws JsonProcessingException {
-        mockHappyCase();
-
-        AttestStorbritannia attestStorbritannia = storbritanniaMapper.map(lagStorbritanniaBrevbestilling(lagTrygdeavtaleBehandling()))
-            .getAttest();
-
-        String json = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(attestStorbritannia);
-        String resultat = json.replaceAll("(\"dagensDato\" :)(.*)", "$1 \"Fjernet for test\",");
-
-        assertThat(resultat).isEqualToIgnoringNewLines(FORVENTEDE_FELTER_FOR_ATTEST_STORBRITANNIA_MAPPING);
     }
 
     @Test
