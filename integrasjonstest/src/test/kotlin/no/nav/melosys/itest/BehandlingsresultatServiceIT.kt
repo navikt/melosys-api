@@ -91,14 +91,14 @@ internal class BehandlingsresultatServiceIT(
 
         val behandlingsresultat: Behandlingsresultat = lagBehandlingsresultat(tidligsteInaktiveBehandling)
 
-//        behandlingsresultatService!!.replikerBehandlingsresultat(tidligsteInaktiveBehandling, behandlingsreplika)
+//        behandlingsresultatService.replikerBehandlingsresultat(tidligsteInaktiveBehandling, behandlingsreplika)
 //
 //        println(behandlingsresultat.avklartefakta.map { it.behandlingsresultat.id })
 
     }
 
     fun lagBehandlingsresultat(tidligsteInaktiveBehandling: Behandling): Behandlingsresultat {
-        val behandlingsresultat: Behandlingsresultat = Behandlingsresultat().apply {
+        return Behandlingsresultat().apply {
             behandling = tidligsteInaktiveBehandling
             behandlingsmåte = Behandlingsmaate.MANUELT
             type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
@@ -151,118 +151,53 @@ internal class BehandlingsresultatServiceIT(
                     fom = LocalDate.now()
                     tom = LocalDate.now().plusMonths(2)
                 })
+
+            br.behandlingsresultatBegrunnelser.add(
+                BehandlingsresultatBegrunnelse().apply {
+                    behandlingsresultat = br
+                    kode = "begrunnelsekode"
+                }
+            )
+
+            br.kontrollresultater.add(
+                Kontrollresultat().apply {
+                    behandlingsresultat = br
+                    begrunnelse = Kontroll_begrunnelser.FEIL_I_PERIODEN
+                })
+
+            br.anmodningsperioder.add(
+                Anmodningsperiode().apply {
+                    behandlingsresultat = br
+                    fom = LocalDate.now()
+                    tom = LocalDate.now().plusYears(1L)
+                    lovvalgsland = Landkoder.SE
+                    unntakFraLovvalgsland = Landkoder.NO
+                    bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1
+                    unntakFraBestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1
+                    tilleggsbestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_1
+                    setSendtUtland(true)
+                    dekning = Trygdedekninger.FULL_DEKNING_EOSFO
+                }.also {
+                    it.anmodningsperiodeSvar = AnmodningsperiodeSvar().apply {
+                        anmodningsperiodeSvarType = Anmodningsperiodesvartyper.INNVILGELSE
+                        anmodningsperiode = it
+                        registrertDato = LocalDate.now()
+                    }
+                }
+            )
+
+            br.utpekingsperioder.add(
+                Utpekingsperiode(
+                    LocalDate.now(), LocalDate.now().plusYears(1), Landkoder.SE,
+                    Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_2A, Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1
+                ).apply {
+                    behandlingsresultat = br
+                    medlPeriodeID = 1242L
+                    sendtUtland = LocalDate.now()
+                }
+            )
+
             behandlingsresultatRepository.save(br)
-        }
-
-        val behandlingsresultatBegrunnelse = opprettBehandlingsresultatBegrunnelse()
-        behandlingsresultat.behandlingsresultatBegrunnelser.add(behandlingsresultatBegrunnelse)
-        val kontrollresultat = opprettKontrollresultat()
-        behandlingsresultat.kontrollresultater.add(kontrollresultat)
-        val anmodningsperiode = opprettAnmodningsperiode()
-        behandlingsresultat.anmodningsperioder.add(anmodningsperiode)
-        val utpekingsperiode = opprettUtpekingsperiode()
-        behandlingsresultat.utpekingsperioder.add(utpekingsperiode)
-        return behandlingsresultat
-    }
-
-    private fun setRegistreringsInfo(registreringsInfo: RegistreringsInfo) =
-        registreringsInfo.apply {
-            leggTilRegisteringInfo()
-        }
-
-    private fun opprettVilkaarsresultat(): Vilkaarsresultat? {
-        val vilkaarsresultat = Vilkaarsresultat()
-        vilkaarsresultat.behandlingsresultat = opprettTomtBehandlingsresultatMedId()
-        vilkaarsresultat.id = 32L
-        vilkaarsresultat.begrunnelseFritekst = "fritekst"
-        vilkaarsresultat.begrunnelseFritekstEessi = "free text"
-        val begrunnelser = HashSet<VilkaarBegrunnelse>()
-        val vilkaarBegrunnelse = VilkaarBegrunnelse()
-        vilkaarBegrunnelse.id = 2222L
-        vilkaarBegrunnelse.kode = "kode"
-        begrunnelser.add(vilkaarBegrunnelse)
-        vilkaarsresultat.begrunnelser = begrunnelser
-        return vilkaarsresultat
-    }
-
-    private fun opprettTomtBehandlingsresultatMedId(): Behandlingsresultat {
-        val behandlingsresultat = Behandlingsresultat()
-        return behandlingsresultat
-    }
-
-    private fun opprettLovvalgsperiode(): Lovvalgsperiode? {
-        val lovvalgsperiode = Lovvalgsperiode()
-        lovvalgsperiode.id = 32L
-        lovvalgsperiode.behandlingsresultat = opprettTomtBehandlingsresultatMedId()
-        lovvalgsperiode.dekning = Trygdedekninger.FULL_DEKNING_EOSFO
-        lovvalgsperiode.fom = LocalDate.now()
-        lovvalgsperiode.tom = LocalDate.now().plusMonths(2)
-        return lovvalgsperiode
-    }
-
-    private fun opprettAnmodningsperiode(): Anmodningsperiode? {
-        val anmodningsperiode = Anmodningsperiode()
-        anmodningsperiode.id = 32L
-        anmodningsperiode.fom = LocalDate.now()
-        anmodningsperiode.tom = LocalDate.now().plusYears(1L)
-        anmodningsperiode.lovvalgsland = Landkoder.SE
-        anmodningsperiode.unntakFraLovvalgsland = Landkoder.NO
-        anmodningsperiode.bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1
-        anmodningsperiode.unntakFraBestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1
-        anmodningsperiode.tilleggsbestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_1
-        anmodningsperiode.behandlingsresultat = opprettTomtBehandlingsresultatMedId()
-        anmodningsperiode.setSendtUtland(true)
-        anmodningsperiode.anmodningsperiodeSvar = AnmodningsperiodeSvar()
-        anmodningsperiode.dekning = Trygdedekninger.FULL_DEKNING_EOSFO
-        return anmodningsperiode
-    }
-
-    private fun opprettUtpekingsperiode(): Utpekingsperiode? {
-        val utpekingsperiode = Utpekingsperiode(
-            LocalDate.now(), LocalDate.now().plusYears(1), Landkoder.SE,
-            Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_2A, Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1
-        )
-        utpekingsperiode.id = 11111L
-        utpekingsperiode.medlPeriodeID = 1242L
-        utpekingsperiode.sendtUtland = LocalDate.now()
-        return utpekingsperiode
-    }
-
-    private fun opprettBehandlingsresultatBegrunnelse(): BehandlingsresultatBegrunnelse? {
-        val behandlingsresultatBegrunnelse = BehandlingsresultatBegrunnelse()
-        behandlingsresultatBegrunnelse.id = 32L
-        behandlingsresultatBegrunnelse.behandlingsresultat =
-            opprettTomtBehandlingsresultatMedId()
-        behandlingsresultatBegrunnelse.kode = "begrunnelsekode"
-        return behandlingsresultatBegrunnelse
-    }
-
-    private fun opprettKontrollresultat(): Kontrollresultat? {
-        val kontrollresultat = Kontrollresultat()
-        kontrollresultat.id = 123L
-        kontrollresultat.behandlingsresultat = opprettTomtBehandlingsresultatMedId()
-        kontrollresultat.begrunnelse = Kontroll_begrunnelser.FEIL_I_PERIODEN
-        return kontrollresultat
-    }
-
-    fun opprettBehandlingsresultatMedData(tidligsteInaktiveBehandling: Behandling): Behandlingsresultat {
-        return Behandlingsresultat().apply {
-            behandling = tidligsteInaktiveBehandling
-            behandlingsmåte = Behandlingsmaate.MANUELT
-            type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
-            avklartefakta = LinkedHashSet()
-            lovvalgsperioder = LinkedHashSet()
-            vilkaarsresultater = LinkedHashSet()
-            utfallUtpeking = Utfallregistreringunntak.IKKE_GODKJENT
-            utfallRegistreringUnntak = Utfallregistreringunntak.IKKE_GODKJENT
-            leggTilRegisteringInfo()
-        }.also {
-            it.vedtakMetadata = VedtakMetadata().apply {
-                behandlingsresultat = it
-                vedtaksdato = Instant.parse("2002-02-11T09:37:30Z")
-                vedtakstype = Vedtakstyper.ENDRINGSVEDTAK
-            }
-            behandlingsresultatRepository.save(it)
         }
     }
 
