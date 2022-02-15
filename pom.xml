@@ -39,7 +39,7 @@
         <java.version>17</java.version>
 
         <!-- Melosys -->
-        <melosys.jsonschema.version>1.35.157</melosys.jsonschema.version>
+        <melosys.jsonschema.version>1.35.159</melosys.jsonschema.version>
         <melosys.internt.kodeverk.version>5.15.107</melosys.internt.kodeverk.version>
         <melosys.brev.version>1.2.124</melosys.brev.version>
 
@@ -573,6 +573,11 @@
             </dependency>
             <dependency>
                 <groupId>no.nav.security</groupId>
+                <artifactId>token-validation-spring-test</artifactId>
+                <version>${token-support.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.nav.security</groupId>
                 <artifactId>token-validation-test-support</artifactId>
                 <version>${token-support.version}</version>
             </dependency>
@@ -658,10 +663,18 @@
                     <version>${maven-dependency-plugin.version}</version>
                 </plugin>
                 <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-failsafe-plugin</artifactId>
-                    <version>${maven-failsafe-plugin.version}</version>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>integration-test</goal>
+                                <goal>verify</goal>
+                            </goals>
+                        </execution>
+                    </executions>
                     <configuration>
-                        <skipITs>true</skipITs>
+                        <failIfNoTests>true</failIfNoTests>
                     </configuration>
                 </plugin>
             </plugins>

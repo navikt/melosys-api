@@ -19,6 +19,7 @@ import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdress
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
 import no.nav.melosys.domain.kodeverk.Representerer;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Nyvurderingbakgrunner;
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_8_naer_tilknytning_norge_begrunnelser;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
 import no.nav.melosys.exception.FunksjonellException;
@@ -424,6 +425,11 @@ class DokgenMalMapperTest {
             List.of(),
             "Mrs. London"
         );
+
+        assertThat(((InnvilgelseOgAttestStorbritannia) dokgenDto).getNyVurderingBakgrunn())
+            .isEqualTo(Nyvurderingbakgrunner.NYE_OPPLYSNINGER.getKode());
+        assertThat(((InnvilgelseOgAttestStorbritannia) dokgenDto).isSkalHaInfoOmRettigheter())
+            .isFalse();
     }
 
     @Test
@@ -587,6 +593,7 @@ class DokgenMalMapperTest {
         return new InnvilgelseOgAttestStorbritannia.Builder(lagInnvilgelseBrevbestilling())
             .innvilgelse(lagInnvilgelseStorbritannia())
             .attest(lagAttestStorbritannia())
+            .nyVurderingBakgrunn(Nyvurderingbakgrunner.NYE_OPPLYSNINGER.getKode())
             .build();
     }
 

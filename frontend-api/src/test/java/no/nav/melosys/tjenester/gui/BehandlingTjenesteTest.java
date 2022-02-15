@@ -93,6 +93,7 @@ class BehandlingTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
+    @Disabled("Enables når MELOSYS-4815 merges inn")
     void hentBehandling_erSchemaValidert() throws Exception {
         BehandlingDto behandlingDto = random.nextObject(BehandlingDto.class);
         behandlingDto.getSaksopplysninger().setSed(null);

@@ -1,6 +1,7 @@
 package no.nav.melosys.sikkerhet.sts;
 
 import java.util.HashMap;
+import java.util.List;
 import javax.xml.namespace.QName;
 
 import no.nav.melosys.sikkerhet.sts.NAVSTSClient.StsClientType;
@@ -42,7 +43,7 @@ public class StsConfigurationUtil {
 
         //Ignorer sts-kall ved mock-kjøring
         final String aktivProfil = System.getProperty(SPRING_ACTIVE_PROFILES);
-        if (aktivProfil != null && aktivProfil.equals("local-mock")) {
+        if (aktivProfil != null && List.of("local-mock", "test").contains(aktivProfil)) {
             return port;
         }
 
