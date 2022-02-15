@@ -92,7 +92,7 @@ public class BestemBehandlingsmåteSvarAnmodningUnntak implements StegBehandler 
                 anmodningsperiode.getAnmodningsperiodeSvar().getAnmodningsperiodeSvarType(),
                 behandlingID,
                 Behandlingsstatus.SVAR_ANMODNING_MOTTATT);
-            behandlingService.oppdaterStatus(behandlingID, Behandlingsstatus.SVAR_ANMODNING_MOTTATT);
+            behandlingService.endreStatus(behandlingID, Behandlingsstatus.SVAR_ANMODNING_MOTTATT);
         }
         registrerMetrikk(melosysEessiMelding, vedtakFattesAutomatisk);
     }
@@ -113,7 +113,7 @@ public class BestemBehandlingsmåteSvarAnmodningUnntak implements StegBehandler 
             log.info("Kan ikke fatte vedtak automatisk pga. treff i vedtakkontroller: {}. Endrer behandlingsstatus til {}",
                 e.getFeilkoder().stream().map(KontrollfeilDto::getKode).collect(Collectors.joining(", ")),
                 Behandlingsstatus.SVAR_ANMODNING_MOTTATT);
-            behandlingService.oppdaterStatus(behandlingID, Behandlingsstatus.SVAR_ANMODNING_MOTTATT);
+            behandlingService.endreStatus(behandlingID, Behandlingsstatus.SVAR_ANMODNING_MOTTATT);
         }
     }
 

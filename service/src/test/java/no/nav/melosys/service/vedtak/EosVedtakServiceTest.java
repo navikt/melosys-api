@@ -106,7 +106,7 @@ class EosVedtakServiceTest {
             .extracting(VedtakMetadata::getVedtakstype, VedtakMetadata::getNyVurderingBakgrunn, VedtakMetadata::getVedtakKlagefrist)
             .containsExactly(FØRSTEGANGSVEDTAK, null, LocalDate.now().plusWeeks(FRIST_KLAGE_UKER));
 
-        verify(behandlingService).oppdaterStatus(behandling, IVERKSETTER_VEDTAK);
+        verify(behandlingService).endreStatus(behandling, IVERKSETTER_VEDTAK);
         verify(prosessinstansService).opprettProsessinstansIverksettVedtakEos(
             any(),
             eq(FASTSATT_LOVVALGSLAND),
@@ -136,7 +136,7 @@ class EosVedtakServiceTest {
             .extracting(VedtakMetadata::getVedtakstype, VedtakMetadata::getNyVurderingBakgrunn, VedtakMetadata::getVedtakKlagefrist)
             .containsExactly(FØRSTEGANGSVEDTAK, null, LocalDate.now().plusWeeks(FRIST_KLAGE_UKER));
 
-        verify(behandlingService).oppdaterStatus(behandling, IVERKSETTER_VEDTAK);
+        verify(behandlingService).endreStatus(behandling, IVERKSETTER_VEDTAK);
         verify(prosessinstansService).opprettProsessinstansIverksettVedtakEos(
             any(),
             eq(FASTSATT_LOVVALGSLAND),
@@ -163,7 +163,7 @@ class EosVedtakServiceTest {
             .extracting(VedtakMetadata::getVedtakstype, VedtakMetadata::getNyVurderingBakgrunn, VedtakMetadata::getVedtakKlagefrist)
             .containsExactly(FØRSTEGANGSVEDTAK, null, LocalDate.now().plusWeeks(FRIST_KLAGE_UKER));
 
-        verify(behandlingService).oppdaterStatus(behandling, IVERKSETTER_VEDTAK);
+        verify(behandlingService).endreStatus(behandling, IVERKSETTER_VEDTAK);
         verify(prosessinstansService).opprettProsessinstansIverksettVedtakEos(
             any(Behandling.class),
             eq(FASTSATT_LOVVALGSLAND),

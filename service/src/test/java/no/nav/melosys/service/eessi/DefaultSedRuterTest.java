@@ -80,7 +80,7 @@ class DefaultSedRuterTest {
 
         assertThat(prosessinstans.getBehandling()).isNotNull();
         verify(prosessinstansService).opprettProsessinstansSedJournalføring(fagsak.hentAktivBehandling(), melosysEessiMelding);
-        verify(behandlingService).oppdaterStatus(anyLong(), eq(Behandlingsstatus.VURDER_DOKUMENT));
+        verify(behandlingService).endreStatus(anyLong(), eq(Behandlingsstatus.VURDER_DOKUMENT));
         verify(oppgaveService).finnÅpenOppgaveMedFagsaksnummer(SAKSNUMMER);
         verify(oppgaveService).oppdaterOppgave(eq(oppgaveId), any(OppgaveOppdatering.class));
     }
@@ -100,7 +100,7 @@ class DefaultSedRuterTest {
         defaultSedRuter.rutSedTilBehandling(prosessinstans, GSAK_SAKSNUMMER);
         assertThat(prosessinstans.getBehandling()).isNotNull();
         verify(prosessinstansService).opprettProsessinstansSedJournalføring(fagsak.hentSistAktiveBehandling(), melosysEessiMelding);
-        verify(behandlingService, never()).oppdaterStatus(anyLong(), any());
+        verify(behandlingService, never()).endreStatus(anyLong(), any());
         verify(oppgaveService, never()).finnÅpenOppgaveMedFagsaksnummer(any());
         verify(oppgaveService, never()).oppdaterOppgave(any(), any());
     }
@@ -120,7 +120,7 @@ class DefaultSedRuterTest {
 
         var oppgaveCaptor = ArgumentCaptor.forClass(Oppgave.class);
         var oppgaveOppdateringArgumentCaptor = ArgumentCaptor.forClass(OppgaveOppdatering.class);
-        verify(behandlingService, never()).oppdaterStatus(anyLong(), any());
+        verify(behandlingService, never()).endreStatus(anyLong(), any());
         verify(oppgaveService).opprettOppgave(oppgaveCaptor.capture());
         verify(oppgaveService).oppdaterOppgave(any(), oppgaveOppdateringArgumentCaptor.capture());
         verify(prosessinstansService).opprettProsessinstansSedJournalføring(fagsak.hentSistAktiveBehandling(), melosysEessiMelding);

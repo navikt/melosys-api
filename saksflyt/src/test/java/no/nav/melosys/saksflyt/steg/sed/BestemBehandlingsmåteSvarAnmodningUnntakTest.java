@@ -76,7 +76,7 @@ class BestemBehandlingsmåteSvarAnmodningUnntakTest {
 
         bestemBehandlingsmåteSvarAnmodningUnntak.utfør(prosessinstans);
 
-        verify(behandlingService).oppdaterStatus(anyLong(), eq(Behandlingsstatus.SVAR_ANMODNING_MOTTATT));
+        verify(behandlingService).endreStatus(anyLong(), eq(Behandlingsstatus.SVAR_ANMODNING_MOTTATT));
         verify(lovvalgsperiodeService).lagreLovvalgsperioder(anyLong(), captor.capture());
 
         Collection<Lovvalgsperiode> lagredeLovvalgsperioder = captor.getValue();
@@ -130,7 +130,7 @@ class BestemBehandlingsmåteSvarAnmodningUnntakTest {
         bestemBehandlingsmåteSvarAnmodningUnntak.utfør(prosessinstans);
 
         verify(vedtakService, never()).fattVedtak(anyLong(), eq(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND));
-        verify(behandlingService).oppdaterStatus(anyLong(), eq(Behandlingsstatus.SVAR_ANMODNING_MOTTATT));
+        verify(behandlingService).endreStatus(anyLong(), eq(Behandlingsstatus.SVAR_ANMODNING_MOTTATT));
     }
 
     @Test
@@ -147,7 +147,7 @@ class BestemBehandlingsmåteSvarAnmodningUnntakTest {
 
         bestemBehandlingsmåteSvarAnmodningUnntak.utfør(prosessinstans);
 
-        verify(behandlingService).oppdaterStatus(anyLong(), eq(Behandlingsstatus.SVAR_ANMODNING_MOTTATT));
+        verify(behandlingService).endreStatus(anyLong(), eq(Behandlingsstatus.SVAR_ANMODNING_MOTTATT));
         verify(lovvalgsperiodeService).lagreLovvalgsperioder(anyLong(), captor.capture());
 
         Collection<Lovvalgsperiode> lagredeLovvalgsperioder = captor.getValue();
@@ -183,7 +183,7 @@ class BestemBehandlingsmåteSvarAnmodningUnntakTest {
 
         verify(vedtakService).fattVedtak(123L, Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
         verify(behandlingsresultatService, never()).oppdaterBehandlingsMaate(123L, Behandlingsmaate.DELVIS_AUTOMATISERT);
-        verify(behandlingService).oppdaterStatus(anyLong(), eq(Behandlingsstatus.SVAR_ANMODNING_MOTTATT));
+        verify(behandlingService).endreStatus(anyLong(), eq(Behandlingsstatus.SVAR_ANMODNING_MOTTATT));
         verify(lovvalgsperiodeService).lagreLovvalgsperioder(anyLong(), captor.capture());
 
         Collection<Lovvalgsperiode> lagredeLovvalgsperioder = captor.getValue();
