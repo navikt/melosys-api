@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import no.nav.melosys.domain.Saksbehandler;
+import no.nav.melosys.domain.person.Navn;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.ldap.LdapService;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
@@ -42,7 +43,7 @@ public class SaksbehandlerService {
 
     private Optional<Saksbehandler> finnBrukerinformasjon(String ident) {
         return ldapService.finnBrukerinformasjon(ident)
-            .map(l -> new Saksbehandler(ident, l.getDisplayName(), l.getGroups()));
+            .map(l -> new Saksbehandler(ident, formatterSaksbehandlerNavn(l.getDisplayName()), l.getGroups()));
     }
 
     public Optional<String> finnNavnForIdent(String ident) {
@@ -59,5 +60,12 @@ public class SaksbehandlerService {
     public String hentNavnForIdent(String ident) {
         return finnNavnForIdent(ident)
             .orElseThrow(() -> new IkkeFunnetException("Finner ikke navn for ident " + ident));
+    }
+
+    private String formatterSaksbehandlerNavn(String navn) {
+        if (navn != null && navn.contains(",")) {
+            return Navn.navnEtternavnSist(navn);
+        }
+        return navn;
     }
 }

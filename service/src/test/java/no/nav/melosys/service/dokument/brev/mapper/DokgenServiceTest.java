@@ -290,7 +290,7 @@ class DokgenServiceTest {
             DokgenBrevbestilling::getProduserbartdokument,
             DokgenBrevbestilling::getBehandlingId,
             DokgenBrevbestilling::getSaksbehandlerNavn
-        ).containsExactly(MANGELBREV_BRUKER, 123L, "Ole Saksbehandler");
+        ).containsExactly(MANGELBREV_BRUKER, 123L, "Saksbehandler, Ole");
     }
 
     @Test

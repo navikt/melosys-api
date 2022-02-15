@@ -190,13 +190,7 @@ public class DokgenService {
     }
 
     private String hentSaksbehandlerNavn(String ident) {
-        if (ident == null) return "N/A";
-
-        String displayNavn = saksbehandlerService.hentNavnForIdent(ident);
-        if (displayNavn != null && displayNavn.contains(",")) {
-            return Navn.navnEtternavnSist(displayNavn);
-        }
-        return displayNavn;
+        return ident != null ? saksbehandlerService.hentNavnForIdent(ident) : "N/A";
     }
 
     private boolean inneholderArbeidsgiverSomKopimottaker(Collection<KopiMottaker> kopimottakere) {
