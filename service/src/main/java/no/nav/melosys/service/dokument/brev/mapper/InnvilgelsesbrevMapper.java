@@ -43,10 +43,10 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
 
     private static final Map<Medfolgende_barn_begrunnelser, BarnAvslagBegrunnelseKode> BARN_AVSLAG_BEGRUNNELSE_KODE_MAP
         = Map.ofEntries(
-            entry(Medfolgende_barn_begrunnelser.OVER_18_AR, BarnAvslagBegrunnelseKode.OVER_18_AAR),
-            entry(Medfolgende_barn_begrunnelser.IKKE_SOEKERS_BARN, BarnAvslagBegrunnelseKode.IKKE_SOEKERS_BARN),
-            entry(Medfolgende_barn_begrunnelser.IKKE_BOSATT_I_NORGE, BarnAvslagBegrunnelseKode.IKKE_BOSATT_I_NORGE),
-            entry(Medfolgende_barn_begrunnelser.MANGLER_OPPLYSNINGER, BarnAvslagBegrunnelseKode.MANGLER_OPPLYSNINGER));
+        entry(Medfolgende_barn_begrunnelser.OVER_18_AR, BarnAvslagBegrunnelseKode.OVER_18_AAR),
+        entry(Medfolgende_barn_begrunnelser.IKKE_SOEKERS_BARN, BarnAvslagBegrunnelseKode.IKKE_SOEKERS_BARN),
+        entry(Medfolgende_barn_begrunnelser.IKKE_BOSATT_I_NORGE, BarnAvslagBegrunnelseKode.IKKE_BOSATT_I_NORGE),
+        entry(Medfolgende_barn_begrunnelser.MANGLER_OPPLYSNINGER, BarnAvslagBegrunnelseKode.MANGLER_OPPLYSNINGER));
 
     @Override
     public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat, BrevData brevdata) throws JAXBException, SAXException {
@@ -79,21 +79,16 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
 
         BehandlingsgrunnlagData grunnlagData = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
 
+        fag.setArbeidsland(brevdata.arbeidsland);
+        fag.setFlaggland(brevdata.arbeidsland);
+
         if (!grunnlagData.maritimtArbeid.isEmpty()) {
             MaritimtArbeid maritimtArbeid = grunnlagData.maritimtArbeid.iterator().next();
+            fag.setFlaggland(maritimtArbeid.flaggLandkode);
             if (Fartsomrader.INNENRIKS == maritimtArbeid.fartsomradeKode) {
                 fag.setArbeidPåTerritorialfarvann(JA);
                 fag.setArbeidsland(maritimtArbeid.territorialfarvann);
-                fag.setFlaggland(maritimtArbeid.territorialfarvann);
             }
-        }
-
-        if(fag.getArbeidsland() == null){
-            fag.setArbeidsland(brevdata.arbeidsland);
-        }
-
-        if(fag.getFlaggland() == null) {
-            fag.setFlaggland(brevdata.arbeidsland);
         }
 
         if (brevdata.avklartMaritimType == Maritimtyper.SKIP) {

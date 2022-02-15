@@ -87,7 +87,6 @@
         <ns6:arbeidsland>Sverige</ns6:arbeidsland>
         <ns6:trygdemyndighetsland>Sverige</ns6:trygdemyndighetsland>
         <ns6:arbeidsgiver>Virker ikke</ns6:arbeidsgiver>
-        <ns6:flaggland>Sverige</ns6:flaggland>
         <ns6:behandlingstype>KLAGE</ns6:behandlingstype>
         <ns6:sakstype>EU_EOS</ns6:sakstype>
         <ns6:lovvalgsbestemmelse>FO_883_2004_ART12_1</ns6:lovvalgsbestemmelse>
@@ -135,7 +134,7 @@
     <ns6:vedlegg>
         <ns8:A1>
             <ns7:serienummer>nullnull</ns7:serienummer>
-            <ns7:opprettelsesDato>2022-02-13</ns7:opprettelsesDato>
+            <ns7:opprettelsesDato>2022-02-15</ns7:opprettelsesDato>
             <ns7:person>
                 <ns7:personnavn>
                     <ns4:fornavn>Ola</ns4:fornavn>

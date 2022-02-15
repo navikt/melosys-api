@@ -44,6 +44,7 @@ import static org.springframework.test.util.AssertionErrors.assertFalse;
 class InnvilgelsesbrevMapperTest {
 
     private final InnvilgelsesbrevMapper instans;
+    private static final LocalDate NOW = LocalDate.parse("2022-02-13");
 
     public InnvilgelsesbrevMapperTest() {
         instans = new InnvilgelsesbrevMapper();
@@ -56,7 +57,7 @@ class InnvilgelsesbrevMapperTest {
             Collections.singleton(lagAvklarteFakta(Avklartefaktatyper.VIRKSOMHET, "123456789"))), false);
 
         Diff diff = DiffBuilder.compare(xmlFraFil).withTest(testMapTilBrevXml)
-            .withNodeFilter(node -> !Arrays.asList("ns6:fomDato", "ns6:tomDato", "ns7:opprettelsesDato", "ns7:fomDato", "ns7:tomDato").contains(node.getNodeName()))
+            .withNodeFilter(node -> !"ns7:opprettelsesDato".equals(node.getNodeName()))
             .build();
         assertFalse(diff.toString(), diff.hasDifferences());
     }
@@ -68,7 +69,7 @@ class InnvilgelsesbrevMapperTest {
             Collections.singleton(lagAvklarteFakta(Avklartefaktatyper.VIRKSOMHET, "123456789"))), true);
 
         Diff diff = DiffBuilder.compare(xmlFraFil).withTest(testMapTilBrevXml)
-            .withNodeFilter(node -> !Arrays.asList("ns6:fomDato", "ns6:tomDato", "ns7:opprettelsesDato", "ns7:fomDato", "ns7:tomDato").contains(node.getNodeName()))
+            .withNodeFilter(node -> !"ns7:opprettelsesDato".equals(node.getNodeName()))
             .build();
         assertFalse(diff.toString(), diff.hasDifferences());
     }
@@ -106,16 +107,6 @@ class InnvilgelsesbrevMapperTest {
 
         String resultat = instans.mapTilBrevXML(fellesType, navFelles, behandling, behandlingsresultat, brevdataInnvilgelse);
         return resultat;
-        // TODO: Vurder å bruke XMLUnit e.l. til å sammenlikne XML-strengen
-        // grundig mot forventninger.
-//        assertThat(resultat).matches("(?s)<\\?xml version=\"\\d\\.\\d+\" .*>\n.*");
-    }
-
-    private static Behandlingsresultat lagBehandlingsresultat() {
-        Set<Avklartefakta> fakta = new HashSet<>(Arrays.asList(
-            lagAvklarteFakta(Avklartefaktatyper.VIRKSOMHET, "123456789"),
-            lagAvklarteFakta(Avklartefaktatyper.ARBEIDSLAND, "SE")));
-        return lagBehandlingsresultat(Collections.singleton(lagLovvalgsperiode()), fakta);
     }
 
     private static Behandlingsresultat lagBehandlingsresultat(Set<Lovvalgsperiode> perioder, Set<Avklartefakta> fakta) {
@@ -126,14 +117,14 @@ class InnvilgelsesbrevMapperTest {
     }
 
     private static Lovvalgsperiode lagLovvalgsperiode() {
-        return lagLovvalgsperiode(LocalDate.now());
+        return lagLovvalgsperiode(NOW);
     }
 
     private static Lovvalgsperiode lagLovvalgsperiode(LocalDate fom) {
         Lovvalgsperiode periode = new Lovvalgsperiode();
         periode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
         periode.setFom(fom);
-        periode.setTom(LocalDate.now());
+        periode.setTom(NOW);
         periode.setLovvalgsland(Landkoder.AT);
         periode.setTilleggsbestemmelse(Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1);
         return periode;
