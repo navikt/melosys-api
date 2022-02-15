@@ -27,6 +27,8 @@ public class ArbeidsforholdRestConsumer implements RestConsumer {
                 .queryParamIfPresent("ansettelsesperiodeFom", arbeidsforholdQuery.getAnsettelsesperiodeFom())
                 .queryParamIfPresent("ansettelsesperiodeTom", arbeidsforholdQuery.getAnsettelsesperiodeTom())
                 .build())
+                // Om vi ønsker å se request med mer detaljer i grafana må vi gjøre det samme som er gjort i MedlemskapRestConsumer
+                // Nå ser vi bare request på host
             .header("Nav-Personident", fnr)
             .accept(MediaType.APPLICATION_JSON)
             .retrieve()
