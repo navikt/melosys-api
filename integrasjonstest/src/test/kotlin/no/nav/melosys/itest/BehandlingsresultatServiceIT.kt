@@ -67,16 +67,12 @@ internal class BehandlingsresultatServiceIT(
             saksnummer = "MEL-1001"
             type = Sakstyper.TRYGDEAVTALE
             status = Saksstatuser.LOVVALG_AVKLART
-            registrertDato = Instant.now()
-            endretDato = Instant.now()
-            endretAv = "bla"
+            leggTilRegisteringInfo()
         }.also { fagsakRepository.save(it) }
 
         val tidligsteInaktiveBehandling = Behandling().apply {
             fagsak = fsak
-            registrertDato = Instant.now()
-            endretDato = Instant.now()
-            endretAv = "bla"
+            leggTilRegisteringInfo()
             behandlingsfrist = LocalDate.now().plusYears(1)
             status = Behandlingsstatus.AVSLUTTET
             type = Behandlingstyper.SOEKNAD
@@ -85,9 +81,7 @@ internal class BehandlingsresultatServiceIT(
 
         val behandlingsreplika = Behandling().apply {
             fagsak = fsak
-            registrertDato = Instant.now()
-            endretDato = Instant.now()
-            endretAv = "bla"
+            leggTilRegisteringInfo()
             behandlingsfrist = LocalDate.now().plusYears(1)
             status = Behandlingsstatus.AVSLUTTET
             type = Behandlingstyper.SOEKNAD
@@ -110,9 +104,7 @@ internal class BehandlingsresultatServiceIT(
             type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
             utfallUtpeking = Utfallregistreringunntak.IKKE_GODKJENT
             utfallRegistreringUnntak = Utfallregistreringunntak.IKKE_GODKJENT
-            registrertDato = Instant.now()
-            endretDato = Instant.now()
-            endretAv = "bla"
+            leggTilRegisteringInfo()
         }.also { br ->
             br.vedtakMetadata = VedtakMetadata().apply {
                 behandlingsresultat = br
@@ -131,35 +123,37 @@ internal class BehandlingsresultatServiceIT(
                         AvklartefaktaRegistrering().apply {
                             avklartefakta = it
                             begrunnelseKode = AVKLARTEFAKTA_REGISTRERING_BEGRUNNELSE_KODE
-                            registrertDato = Instant.now()
-                            endretDato = Instant.now()
-                            endretAv = "bla"
+                            leggTilRegisteringInfo()
                         })
                 })
 
-            br.vilkaarsresultater.add(Vilkaarsresultat().apply {
-                behandlingsresultat = br
-                begrunnelseFritekst = "fritekst"
-                begrunnelseFritekstEessi = "free text"
-                vilkaar = Vilkaar.BOSATT_I_NORGE
-                registrertDato = Instant.now()
-                endretDato = Instant.now()
-                endretAv = "bla"
-            }.also {
-                it.begrunnelser = setOf(VilkaarBegrunnelse().apply {
-                    vilkaarsresultat = it
-                    kode = "kode"
-                    registrertDato = Instant.now()
-                    endretDato = Instant.now()
-                    endretAv = "bla"
+            br.vilkaarsresultater.add(
+                Vilkaarsresultat().apply {
+                    behandlingsresultat = br
+                    begrunnelseFritekst = "fritekst"
+                    begrunnelseFritekstEessi = "free text"
+                    vilkaar = Vilkaar.BOSATT_I_NORGE
+                    leggTilRegisteringInfo()
+                }.also {
+                    it.begrunnelser = setOf(VilkaarBegrunnelse().apply {
+                        vilkaarsresultat = it
+                        kode = "kode"
+                        leggTilRegisteringInfo()
+                    })
                 })
-            })
-            behandlingsresultatRepository.save(br)
 
+            br.lovvalgsperioder.add(
+                Lovvalgsperiode().apply {
+                    behandlingsresultat = br
+                    dekning = Trygdedekninger.FULL_DEKNING_EOSFO
+                    innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                    medlemskapstype = Medlemskapstyper.PLIKTIG
+                    fom = LocalDate.now()
+                    tom = LocalDate.now().plusMonths(2)
+                })
+            behandlingsresultatRepository.save(br)
         }
 
-        val lovvalgsperiode = opprettLovvalgsperiode()
-        behandlingsresultat.lovvalgsperioder.add(lovvalgsperiode)
         val behandlingsresultatBegrunnelse = opprettBehandlingsresultatBegrunnelse()
         behandlingsresultat.behandlingsresultatBegrunnelser.add(behandlingsresultatBegrunnelse)
         val kontrollresultat = opprettKontrollresultat()
@@ -173,9 +167,7 @@ internal class BehandlingsresultatServiceIT(
 
     private fun setRegistreringsInfo(registreringsInfo: RegistreringsInfo) =
         registreringsInfo.apply {
-            registrertDato = Instant.now()
-            endretDato = Instant.now()
-            endretAv = "bla"
+            leggTilRegisteringInfo()
         }
 
     private fun opprettVilkaarsresultat(): Vilkaarsresultat? {
@@ -263,9 +255,7 @@ internal class BehandlingsresultatServiceIT(
             vilkaarsresultater = LinkedHashSet()
             utfallUtpeking = Utfallregistreringunntak.IKKE_GODKJENT
             utfallRegistreringUnntak = Utfallregistreringunntak.IKKE_GODKJENT
-            registrertDato = Instant.now()
-            endretDato = Instant.now()
-            endretAv = "bla"
+            leggTilRegisteringInfo()
         }.also {
             it.vedtakMetadata = VedtakMetadata().apply {
                 behandlingsresultat = it
@@ -274,5 +264,11 @@ internal class BehandlingsresultatServiceIT(
             }
             behandlingsresultatRepository.save(it)
         }
+    }
+
+    private fun RegistreringsInfo.leggTilRegisteringInfo() {
+        registrertDato = Instant.now()
+        endretDato = Instant.now()
+        endretAv = "bla"
     }
 }
