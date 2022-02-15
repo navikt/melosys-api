@@ -100,6 +100,7 @@
         <medlemskapsunntak-api-v1.version>1.1</medlemskapsunntak-api-v1.version>
         <wiremock-standalone.version>2.27.2</wiremock-standalone.version>
         <nav-foedselsnummer.core.version>1.0-SNAPSHOT.6</nav-foedselsnummer.core.version>
+        <xmlunit.version>2.9.0</xmlunit.version>
     </properties>
 
     <!-- Unngå å put scope i dependency management. Sett det heller der det
@@ -592,6 +593,16 @@
                 <artifactId>testutils</artifactId>
                 <version>${nav-foedselsnummer.core.version}</version>
                 <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.xmlunit</groupId>
+                <artifactId>xmlunit-core</artifactId>
+                <version>${xmlunit.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.xmlunit</groupId>
+                <artifactId>xmlunit-matchers</artifactId>
+                <version>${xmlunit.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
