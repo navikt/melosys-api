@@ -28,7 +28,6 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.time.Instant
 import java.time.LocalDate
-import java.util.*
 
 @ActiveProfiles(profiles = ["test"])
 @ExtendWith(SpringExtension::class)
@@ -47,20 +46,17 @@ import java.util.*
     ]
 )
 
-internal class BehandlingsresultatServiceIT {
+internal class BehandlingsresultatServiceIT(
+    @Autowired
+    private val behandlingRepository: BehandlingRepository,
+    @Autowired
+    private val behandlingsresultatService: BehandlingsresultatService,
+    @Autowired
+    private val behandlingsresultatRepository: BehandlingsresultatRepository,
+    @Autowired
+    private val fagsakRepository: FagsakRepository
+) {
     private val AVKLARTEFAKTA_REGISTRERING_BEGRUNNELSE_KODE = "AvklartefaktaRegistrering-begrunnelsekode"
-
-    @Autowired
-    private val behandlingsresultatService: BehandlingsresultatService? = null
-
-    @Autowired
-    private val behandlingRepository: BehandlingRepository? = null
-
-    @Autowired
-    private val behandlingsresultatRepository: BehandlingsresultatRepository? = null
-
-    @Autowired
-    private val fagsakRepository: FagsakRepository? = null
 
     @Test
     fun replikerBehandlingOgBehandlingsresultat_dataBlirRiktigIDB() {
@@ -74,10 +70,9 @@ internal class BehandlingsresultatServiceIT {
             registrertDato = Instant.now()
             endretDato = Instant.now()
             endretAv = "bla"
-        }.also { fagsakRepository!!.save(it) }
+        }.also { fagsakRepository.save(it) }
 
         val tidligsteInaktiveBehandling = Behandling().apply {
-            id = 1001L
             fagsak = fsak
             registrertDato = Instant.now()
             endretDato = Instant.now()
@@ -86,10 +81,9 @@ internal class BehandlingsresultatServiceIT {
             status = Behandlingsstatus.AVSLUTTET
             type = Behandlingstyper.SOEKNAD
             tema = Behandlingstema.YRKESAKTIV
-        }.also { behandlingRepository!!.save(it) }
+        }.also { behandlingRepository.save(it) }
 
         val behandlingsreplika = Behandling().apply {
-            id = 1002L
             fagsak = fsak
             registrertDato = Instant.now()
             endretDato = Instant.now()
@@ -98,22 +92,72 @@ internal class BehandlingsresultatServiceIT {
             status = Behandlingsstatus.AVSLUTTET
             type = Behandlingstyper.SOEKNAD
             tema = Behandlingstema.YRKESAKTIV
-        }.also { behandlingRepository!!.save(it) }
+        }.also { behandlingRepository.save(it) }
+
 
         val behandlingsresultat: Behandlingsresultat = lagBehandlingsresultat(tidligsteInaktiveBehandling)
 
-        behandlingsresultatService!!.replikerBehandlingsresultat(tidligsteInaktiveBehandling, behandlingsreplika)
-
-        println(behandlingsresultat.avklartefakta.map { it.behandlingsresultat.id })
+//        behandlingsresultatService!!.replikerBehandlingsresultat(tidligsteInaktiveBehandling, behandlingsreplika)
+//
+//        println(behandlingsresultat.avklartefakta.map { it.behandlingsresultat.id })
 
     }
 
     fun lagBehandlingsresultat(tidligsteInaktiveBehandling: Behandling): Behandlingsresultat {
-        val behandlingsresultat: Behandlingsresultat = opprettBehandlingsresultatMedData(tidligsteInaktiveBehandling)
-        val avklartefakta = opprettAvklartefakta()
-        behandlingsresultat!!.avklartefakta.add(avklartefakta)
-        val vilkaarsresultat = opprettVilkaarsresultat()
-        behandlingsresultat.vilkaarsresultater.add(vilkaarsresultat)
+        val behandlingsresultat: Behandlingsresultat = Behandlingsresultat().apply {
+            behandling = tidligsteInaktiveBehandling
+            behandlingsmåte = Behandlingsmaate.MANUELT
+            type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
+            utfallUtpeking = Utfallregistreringunntak.IKKE_GODKJENT
+            utfallRegistreringUnntak = Utfallregistreringunntak.IKKE_GODKJENT
+            registrertDato = Instant.now()
+            endretDato = Instant.now()
+            endretAv = "bla"
+        }.also { br ->
+            br.vedtakMetadata = VedtakMetadata().apply {
+                behandlingsresultat = br
+                vedtaksdato = Instant.parse("2002-02-11T09:37:30Z")
+                vedtakstype = Vedtakstyper.ENDRINGSVEDTAK
+            }
+
+            br.avklartefakta.add(
+                Avklartefakta().apply {
+                    behandlingsresultat = br
+                    fakta = "fakta"
+                    type = Avklartefaktatyper.ARBEIDSLAND
+                    referanse = "referanse"
+                }.also {
+                    it.registreringer.add(
+                        AvklartefaktaRegistrering().apply {
+                            avklartefakta = it
+                            begrunnelseKode = AVKLARTEFAKTA_REGISTRERING_BEGRUNNELSE_KODE
+                            registrertDato = Instant.now()
+                            endretDato = Instant.now()
+                            endretAv = "bla"
+                        })
+                })
+
+            br.vilkaarsresultater.add(Vilkaarsresultat().apply {
+                behandlingsresultat = br
+                begrunnelseFritekst = "fritekst"
+                begrunnelseFritekstEessi = "free text"
+                vilkaar = Vilkaar.BOSATT_I_NORGE
+                registrertDato = Instant.now()
+                endretDato = Instant.now()
+                endretAv = "bla"
+            }.also {
+                it.begrunnelser = setOf(VilkaarBegrunnelse().apply {
+                    vilkaarsresultat = it
+                    kode = "kode"
+                    registrertDato = Instant.now()
+                    endretDato = Instant.now()
+                    endretAv = "bla"
+                })
+            })
+            behandlingsresultatRepository.save(br)
+
+        }
+
         val lovvalgsperiode = opprettLovvalgsperiode()
         behandlingsresultat.lovvalgsperioder.add(lovvalgsperiode)
         val behandlingsresultatBegrunnelse = opprettBehandlingsresultatBegrunnelse()
@@ -127,9 +171,30 @@ internal class BehandlingsresultatServiceIT {
         return behandlingsresultat
     }
 
+    private fun setRegistreringsInfo(registreringsInfo: RegistreringsInfo) =
+        registreringsInfo.apply {
+            registrertDato = Instant.now()
+            endretDato = Instant.now()
+            endretAv = "bla"
+        }
+
+    private fun opprettVilkaarsresultat(): Vilkaarsresultat? {
+        val vilkaarsresultat = Vilkaarsresultat()
+        vilkaarsresultat.behandlingsresultat = opprettTomtBehandlingsresultatMedId()
+        vilkaarsresultat.id = 32L
+        vilkaarsresultat.begrunnelseFritekst = "fritekst"
+        vilkaarsresultat.begrunnelseFritekstEessi = "free text"
+        val begrunnelser = HashSet<VilkaarBegrunnelse>()
+        val vilkaarBegrunnelse = VilkaarBegrunnelse()
+        vilkaarBegrunnelse.id = 2222L
+        vilkaarBegrunnelse.kode = "kode"
+        begrunnelser.add(vilkaarBegrunnelse)
+        vilkaarsresultat.begrunnelser = begrunnelser
+        return vilkaarsresultat
+    }
+
     private fun opprettTomtBehandlingsresultatMedId(): Behandlingsresultat {
         val behandlingsresultat = Behandlingsresultat()
-        behandlingsresultat.id = 667L
         return behandlingsresultat
     }
 
@@ -171,19 +236,6 @@ internal class BehandlingsresultatServiceIT {
         return utpekingsperiode
     }
 
-    private fun opprettAvklartefakta(): Avklartefakta {
-        val avklartefakta = Avklartefakta()
-        avklartefakta.id = 32L
-        avklartefakta.behandlingsresultat = opprettTomtBehandlingsresultatMedId()
-        avklartefakta.fakta = "fakta"
-        avklartefakta.type = Avklartefaktatyper.ARBEIDSLAND
-        val avklartefaktaRegistrering = AvklartefaktaRegistrering()
-        avklartefaktaRegistrering.begrunnelseKode =
-            AVKLARTEFAKTA_REGISTRERING_BEGRUNNELSE_KODE
-        avklartefakta.registreringer.add(avklartefaktaRegistrering)
-        return avklartefakta
-    }
-
     private fun opprettBehandlingsresultatBegrunnelse(): BehandlingsresultatBegrunnelse? {
         val behandlingsresultatBegrunnelse = BehandlingsresultatBegrunnelse()
         behandlingsresultatBegrunnelse.id = 32L
@@ -191,21 +243,6 @@ internal class BehandlingsresultatServiceIT {
             opprettTomtBehandlingsresultatMedId()
         behandlingsresultatBegrunnelse.kode = "begrunnelsekode"
         return behandlingsresultatBegrunnelse
-    }
-
-    private fun opprettVilkaarsresultat(): Vilkaarsresultat? {
-        val vilkaarsresultat = Vilkaarsresultat()
-        vilkaarsresultat.behandlingsresultat = opprettTomtBehandlingsresultatMedId()
-        vilkaarsresultat.id = 32L
-        vilkaarsresultat.begrunnelseFritekst = "fritekst"
-        vilkaarsresultat.begrunnelseFritekstEessi = "free text"
-        val begrunnelser = HashSet<VilkaarBegrunnelse>()
-        val vilkaarBegrunnelse = VilkaarBegrunnelse()
-        vilkaarBegrunnelse.id = 2222L
-        vilkaarBegrunnelse.kode = "kode"
-        begrunnelser.add(vilkaarBegrunnelse)
-        vilkaarsresultat.begrunnelser = begrunnelser
-        return vilkaarsresultat
     }
 
     private fun opprettKontrollresultat(): Kontrollresultat? {
@@ -218,15 +255,9 @@ internal class BehandlingsresultatServiceIT {
 
     fun opprettBehandlingsresultatMedData(tidligsteInaktiveBehandling: Behandling): Behandlingsresultat {
         return Behandlingsresultat().apply {
-            id = tidligsteInaktiveBehandling.id
             behandling = tidligsteInaktiveBehandling
             behandlingsmåte = Behandlingsmaate.MANUELT
             type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
-//            vedtakMetadata = VedtakMetadata().apply {
-//                id = 1001L
-//                vedtaksdato = Instant.parse("2002-02-11T09:37:30Z")
-//                vedtakstype = Vedtakstyper.ENDRINGSVEDTAK
-//            }.also {  }
             avklartefakta = LinkedHashSet()
             lovvalgsperioder = LinkedHashSet()
             vilkaarsresultater = LinkedHashSet()
@@ -236,7 +267,12 @@ internal class BehandlingsresultatServiceIT {
             endretDato = Instant.now()
             endretAv = "bla"
         }.also {
-            behandlingsresultatRepository!!.save(it)
+            it.vedtakMetadata = VedtakMetadata().apply {
+                behandlingsresultat = it
+                vedtaksdato = Instant.parse("2002-02-11T09:37:30Z")
+                vedtakstype = Vedtakstyper.ENDRINGSVEDTAK
+            }
+            behandlingsresultatRepository.save(it)
         }
     }
 }
