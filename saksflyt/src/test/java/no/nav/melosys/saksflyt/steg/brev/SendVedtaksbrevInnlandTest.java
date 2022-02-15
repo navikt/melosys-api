@@ -143,7 +143,7 @@ class SendVedtaksbrevInnlandTest {
         KontaktopplysningService kontaktopplysningService = mock(KontaktopplysningService.class);
         BrevmottakerService brevmottakerService = new BrevmottakerService(kontaktopplysningService,
             avklarteVirksomheterService, utenlandskMyndighetService, behandlingsresultatService,
-            mock(TrygdeavgiftsberegningService.class), mock(LovvalgsperiodeService.class));
+            mock(TrygdeavgiftsberegningService.class), mock(LovvalgsperiodeService.class), behandlingService);
         return spy(new DokumentSystemService(behandlingService, brevDataService, dokSysFasade,
             brevmottakerService, brevDataByggerVelger, mock(BrevdataGrunnlagSystemFactory.class)));
     }
