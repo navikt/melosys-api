@@ -56,13 +56,9 @@ internal class BehandlingsresultatServiceIT(
     @Autowired
     private val fagsakRepository: FagsakRepository
 ) {
-    private val AVKLARTEFAKTA_REGISTRERING_BEGRUNNELSE_KODE = "AvklartefaktaRegistrering-begrunnelsekode"
 
     @Test
     fun replikerBehandlingOgBehandlingsresultat_dataBlirRiktigIDB() {
-//        val hentBehandlingsresultat = behandlingsresultatService!!.hentBehandlingsresultat(1L)
-//        println(hentBehandlingsresultat)
-
         val fsak = Fagsak().apply {
             saksnummer = "MEL-1001"
             type = Sakstyper.TRYGDEAVTALE
@@ -83,7 +79,7 @@ internal class BehandlingsresultatServiceIT(
             fagsak = fsak
             leggTilRegisteringInfo()
             behandlingsfrist = LocalDate.now().plusYears(1)
-            status = Behandlingsstatus.AVSLUTTET
+            status = Behandlingsstatus.OPPRETTET
             type = Behandlingstyper.SOEKNAD
             tema = Behandlingstema.YRKESAKTIV
         }.also { behandlingRepository.save(it) }
@@ -91,14 +87,14 @@ internal class BehandlingsresultatServiceIT(
 
         val behandlingsresultat: Behandlingsresultat = lagBehandlingsresultat(tidligsteInaktiveBehandling)
 
-//        behandlingsresultatService.replikerBehandlingsresultat(tidligsteInaktiveBehandling, behandlingsreplika)
+        behandlingsresultatService.replikerBehandlingsresultat(tidligsteInaktiveBehandling, behandlingsreplika)
 //
-//        println(behandlingsresultat.avklartefakta.map { it.behandlingsresultat.id })
+        println(behandlingsresultat.avklartefakta.map { it.behandlingsresultat.id })
 
     }
 
-    fun lagBehandlingsresultat(tidligsteInaktiveBehandling: Behandling): Behandlingsresultat {
-        return Behandlingsresultat().apply {
+    fun lagBehandlingsresultat(tidligsteInaktiveBehandling: Behandling): Behandlingsresultat =
+        Behandlingsresultat().apply {
             behandling = tidligsteInaktiveBehandling
             behandlingsmåte = Behandlingsmaate.MANUELT
             type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
@@ -110,6 +106,7 @@ internal class BehandlingsresultatServiceIT(
                 behandlingsresultat = br
                 vedtaksdato = Instant.parse("2002-02-11T09:37:30Z")
                 vedtakstype = Vedtakstyper.ENDRINGSVEDTAK
+                leggTilRegisteringInfo()
             }
 
             br.avklartefakta.add(
@@ -122,7 +119,7 @@ internal class BehandlingsresultatServiceIT(
                     it.registreringer.add(
                         AvklartefaktaRegistrering().apply {
                             avklartefakta = it
-                            begrunnelseKode = AVKLARTEFAKTA_REGISTRERING_BEGRUNNELSE_KODE
+                            begrunnelseKode = "AvklartefaktaRegistrering-begrunnelsekode"
                             leggTilRegisteringInfo()
                         })
                 })
@@ -199,7 +196,6 @@ internal class BehandlingsresultatServiceIT(
 
             behandlingsresultatRepository.save(br)
         }
-    }
 
     private fun RegistreringsInfo.leggTilRegisteringInfo() {
         registrertDato = Instant.now()
