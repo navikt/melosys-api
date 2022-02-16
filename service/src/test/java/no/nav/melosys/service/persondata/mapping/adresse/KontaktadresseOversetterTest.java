@@ -148,4 +148,30 @@ class KontaktadresseOversetterTest {
         assertThat(kontaktadresse.semistrukturertAdresse().poststed()).isEqualTo("by");
         assertThat(kontaktadresse.semistrukturertAdresse().landkode()).isEqualTo("FR");
     }
+
+    @Test
+    void oversettPostboksAdresse() {
+        var kontaktadressePDL = new Kontaktadresse(
+            null,
+            null,
+            null,
+            new Postboksadresse(
+                "Byggfirma A/S",
+                "Postboks 1234",
+                "1234"
+            ),
+            null,
+            null,
+            null,
+            null,
+            metadata()
+        );
+
+        final var kontaktadresse = KontaktadresseOversetter.oversett(kontaktadressePDL, kodeverkService);
+
+        assertThat(kontaktadresse.coAdressenavn()).isEqualTo("Byggfirma A/S");
+        assertThat(kontaktadresse.strukturertAdresse().getPostnummer()).isEqualTo("1234");
+        assertThat(kontaktadresse.strukturertAdresse().getPostboks()).isEqualTo("Postboks 1234");
+
+    }
 }
