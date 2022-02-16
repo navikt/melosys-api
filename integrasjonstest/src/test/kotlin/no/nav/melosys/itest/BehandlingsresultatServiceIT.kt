@@ -15,6 +15,7 @@ import no.nav.melosys.repository.BehandlingRepository
 import no.nav.melosys.repository.BehandlingsresultatRepository
 import no.nav.melosys.repository.FagsakRepository
 import no.nav.melosys.service.behandling.BehandlingsresultatService
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
@@ -88,9 +89,29 @@ internal class BehandlingsresultatServiceIT(
         val behandlingsresultat: Behandlingsresultat = lagBehandlingsresultat(tidligsteInaktiveBehandling)
 
         behandlingsresultatService.replikerBehandlingsresultat(tidligsteInaktiveBehandling, behandlingsreplika)
-//
-        println(behandlingsresultat.avklartefakta.map { it.behandlingsresultat.id })
 
+        val replikaResultat = behandlingsresultatRepository.findById(behandlingsreplika.id).get()
+
+        assertThat(replikaResultat.avklartefakta)
+            .singleElement()
+            .matches { af -> af.behandlingsresultat.id == behandlingsreplika.id }
+
+
+        println(replikaResultat.lovvalgsperioder.map { it.behandlingsresultat.id })
+        println(replikaResultat.avklartefakta.map { it.behandlingsresultat.id })
+        println(replikaResultat.vilkaarsresultater.map { it.behandlingsresultat.id })
+        println(replikaResultat.behandlingsresultatBegrunnelser.map { it.behandlingsresultat.id })
+        println(replikaResultat.kontrollresultater.map { it.behandlingsresultat.id })
+        println(replikaResultat.anmodningsperioder.map { it.behandlingsresultat.id })
+        println(replikaResultat.utpekingsperioder.map { it.behandlingsresultat.id })
+
+        println(behandlingsresultat.lovvalgsperioder.map { it.behandlingsresultat.id })
+        println(behandlingsresultat.avklartefakta.map { it.behandlingsresultat.id })
+        println(behandlingsresultat.vilkaarsresultater.map { it.behandlingsresultat.id })
+        println(behandlingsresultat.behandlingsresultatBegrunnelser.map { it.behandlingsresultat.id })
+        println(behandlingsresultat.kontrollresultater.map { it.behandlingsresultat.id })
+        println(behandlingsresultat.anmodningsperioder.map { it.behandlingsresultat.id })
+        println(behandlingsresultat.utpekingsperioder.map { it.behandlingsresultat.id })
     }
 
     fun lagBehandlingsresultat(tidligsteInaktiveBehandling: Behandling): Behandlingsresultat =
@@ -185,8 +206,11 @@ internal class BehandlingsresultatServiceIT(
 
             br.utpekingsperioder.add(
                 Utpekingsperiode(
-                    LocalDate.now(), LocalDate.now().plusYears(1), Landkoder.SE,
-                    Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_2A, Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1
+                    LocalDate.now(),
+                    LocalDate.now().plusYears(1),
+                    Landkoder.SE,
+                    Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_2A,
+                    Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1
                 ).apply {
                     behandlingsresultat = br
                     medlPeriodeID = 1242L
