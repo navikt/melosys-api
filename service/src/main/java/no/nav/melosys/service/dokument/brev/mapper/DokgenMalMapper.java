@@ -49,7 +49,8 @@ public class DokgenMalMapper {
         Mottaker mottaker = dto.getMottaker();
         if (!Aktoersroller.TRYGDEMYNDIGHET.getKode().equals(mottaker.type())) {
             String poststed = mottaker.poststed();
-            if (hasText(mottaker.postnr())) {
+            // Henter bare nytt poststed hvis land er Norge, ellers finnes ikke poststed og vi får ukjent
+            if (hasText(mottaker.postnr()) && "NO".equals(mottaker.land())) {
                 poststed = dokgenMapperDatahenter.hentPoststed(mottaker.postnr());
             }
             String land = (dokgenMapperDatahenter.hentLandnavn(mottaker.land()));

@@ -121,6 +121,18 @@ public final class DokgenTestData {
         return organisasjonDokument;
     }
 
+    public static OrganisasjonDokument lagOrg(Landkoder landkoder){
+        OrganisasjonDokument organisasjonDokument = lagOrg();
+        OrganisasjonsDetaljer organisasjonsDetaljer = new OrganisasjonsDetaljer();
+        SemistrukturertAdresse semistrukturertAdresse = new SemistrukturertAdresse();
+        semistrukturertAdresse.setLandkode(landkoder.getKode());
+        semistrukturertAdresse.setGyldighetsperiode(new Periode(LocalDate.now(), LocalDate.now()));
+        semistrukturertAdresse.setPostnr("2040");
+        organisasjonsDetaljer.forretningsadresse.add(semistrukturertAdresse);
+        organisasjonDokument.setOrganisasjonDetaljer(organisasjonsDetaljer);
+        return organisasjonDokument;
+    }
+
     private static List<Behandling> lagBehandlinger() {
         Behandling behandling = new Behandling();
         behandling.setType(Behandlingstyper.SOEKNAD);
