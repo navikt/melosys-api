@@ -6,10 +6,12 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
+import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.brev.*;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Avsendertyper;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.dokgen.dto.*;
@@ -66,9 +68,16 @@ public class DokgenMalMapper {
         return mottattBrevbestilling.toBuilder().medPersonDokument(dokgenMapperDatahenter.hentPersondata(mottattBrevbestilling)).build();
     }
 
-    private List<Instant> hentMangelbrevDatoer(String saksnummer) {
+    private List<Instant> hentMangelbrevDatoer(DokgenBrevbestilling brevbestilling) {
+        String saksnummer = brevbestilling.getBehandling().getFagsak().getSaksnummer();
+        Behandling behandling = brevbestilling.getBehandling();
+
         List<Journalpost> dokumenter = dokumentHentingService.hentDokumenter(saksnummer).stream().filter(dokument ->
-                dokument.getHoveddokument().getTittel().equals(MELDING_MANGLENDE_OPPLYSNINGER.getBeskrivelse()))
+                dokument.getHoveddokument().getTittel().equals(MELDING_MANGLENDE_OPPLYSNINGER.getBeskrivelse())
+                    && dokument.getForsendelseJournalfoert() != null
+                    && dokument.getForsendelseJournalfoert().isAfter(behandling.getRegistrertDato())
+                    && dokument.getAvsenderType().equals(Avsendertyper.PERSON)
+            )
             .collect(toList());
 
         return dokumenter.stream()
@@ -79,7 +88,7 @@ public class DokgenMalMapper {
     }
 
     private Avslagbrev hentAvslagsbrev(DokgenBrevbestilling brevbestilling) {
-        List<Instant> mangelbrevDatoer = hentMangelbrevDatoer(brevbestilling.getBehandling().getFagsak().getSaksnummer());
+        List<Instant> mangelbrevDatoer = hentMangelbrevDatoer(brevbestilling);
 
         return Avslagbrev.av(((AvslagBrevbestilling) brevbestilling).toBuilder().build(),
             mangelbrevDatoer,

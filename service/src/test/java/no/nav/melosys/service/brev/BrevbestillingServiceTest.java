@@ -21,6 +21,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.domain.person.Persondata;
+import no.nav.melosys.domain.person.Personopplysninger;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
@@ -32,6 +33,7 @@ import no.nav.melosys.service.dokument.MuligeMottakereDto;
 import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.persondata.PersondataFasade;
+import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -459,6 +461,23 @@ class BrevbestillingServiceTest {
         assertThat(brevAdresser.get(0))
             .extracting(BrevAdresse::getMottakerNavn, BrevAdresse::getOrgnr, BrevAdresse::getAdresselinjer, BrevAdresse::getPostnr, BrevAdresse::getPoststed, BrevAdresse::getLand)
             .containsExactly("Ola Nordmann Fullmektig", "orgNr", List.of("Gateadresse 43A"), "0123", "Oslo", Land.NORGE);
+    }
+
+    @Test
+    void hentBrevAdresseTilMottakere_returnererAdresseFelterSomNull_nårGjeldendePostadresseErNull() {
+        fakeUnleash.enable("melosys.pdl.aktiv");
+        when(mockBehandlingService.hentBehandling(123L)).thenReturn(behandling);
+        when(mockBrevmottakerService.avklarMottakere(any(), eq(Mottaker.av(Aktoersroller.BRUKER)), any(), eq(false), eq(false)))
+            .thenReturn(List.of(lagAktoer(Aktoersroller.BRUKER, null)));
+        Personopplysninger persondata = PersonopplysningerObjectFactory.lagPersonopplysningerUtenAdresser();
+        when(mockPersondataFasade.hentPerson(anyString())).thenReturn(persondata);
+
+        var brevAdresser = brevbestillingService.hentBrevAdresseTilMottakere(MANGELBREV_BRUKER, Aktoersroller.BRUKER, 123L);
+
+        assertThat(brevAdresser).hasSize(1);
+        assertThat(brevAdresser.get(0))
+            .extracting(BrevAdresse::getMottakerNavn, BrevAdresse::getOrgnr, BrevAdresse::getAdresselinjer, BrevAdresse::getPostnr, BrevAdresse::getPoststed, BrevAdresse::getLand)
+            .containsExactly("Nordmann Ola", null, null, null, null, null);
     }
 
     @Test

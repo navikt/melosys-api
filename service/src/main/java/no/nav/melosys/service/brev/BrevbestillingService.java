@@ -12,6 +12,7 @@ import no.nav.melosys.domain.Kontaktopplysning;
 import no.nav.melosys.domain.brev.FastMottakerMedOrgnr;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.brev.Mottakerliste;
+import no.nav.melosys.domain.brev.Postadresse;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -266,12 +267,18 @@ public class BrevbestillingService {
     }
 
     private String mapPoststed(Persondata persondata) {
-        final String poststed = persondata.hentGjeldendePostadresse().poststed();
+        final String poststed;
+        Postadresse postadresse = persondata.hentGjeldendePostadresse();
+        if (postadresse == null) {
+            return null;
+        }
+        poststed = postadresse.poststed();
         if (unleash.isEnabled("melosys.pdl.aktiv")) {
             return poststed;
         }
-        return StringUtils.isEmpty(poststed) ? kodeverkService.dekod(FellesKodeverk.POSTNUMMER,
-            persondata.hentGjeldendePostadresse().postnr()) : poststed;
+        return StringUtils.isEmpty(poststed)
+            ? kodeverkService.dekod(FellesKodeverk.POSTNUMMER, postadresse.postnr())
+            : poststed;
     }
 
     private Persondata hentPersondata(Behandling behandling) {
