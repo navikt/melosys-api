@@ -21,8 +21,9 @@ public record Kontaktadresse(
     public Postadresse tilPostadresse() {
         if (strukturertAdresse != null) {
             return Postadresse.lagPostadresse(strukturertAdresse);
-        } else {
+        } else if (semistrukturertAdresse != null) {
             return Postadresse.lagPostadresse(semistrukturertAdresse);
         }
+        return null;
     }
 }
