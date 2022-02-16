@@ -127,7 +127,7 @@ public final class DokgenTestData {
         SemistrukturertAdresse semistrukturertAdresse = new SemistrukturertAdresse();
         semistrukturertAdresse.setLandkode(landkoder.getKode());
         semistrukturertAdresse.setGyldighetsperiode(new Periode(LocalDate.now(), LocalDate.now()));
-        semistrukturertAdresse.setPostnr("2040");
+        semistrukturertAdresse.setPostnr(POSTNR_ORG);
         organisasjonsDetaljer.forretningsadresse.add(semistrukturertAdresse);
         organisasjonDokument.setOrganisasjonDetaljer(organisasjonsDetaljer);
         return organisasjonDokument;

@@ -9,6 +9,7 @@ import java.util.Objects;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.brev.*;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.dokgen.dto.*;
@@ -50,7 +51,7 @@ public class DokgenMalMapper {
         if (!Aktoersroller.TRYGDEMYNDIGHET.getKode().equals(mottaker.type())) {
             String poststed = mottaker.poststed();
             // Henter bare nytt poststed hvis land er Norge, ellers finnes ikke poststed og vi får ukjent
-            if (hasText(mottaker.postnr()) && "NO".equals(mottaker.land())) {
+            if (hasText(mottaker.postnr()) && Landkoder.NO.getKode().equals(mottaker.land())) {
                 poststed = dokgenMapperDatahenter.hentPoststed(mottaker.postnr());
             }
             String land = (dokgenMapperDatahenter.hentLandnavn(mottaker.land()));
