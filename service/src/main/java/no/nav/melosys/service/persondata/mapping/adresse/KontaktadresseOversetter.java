@@ -23,7 +23,7 @@ public final class KontaktadresseOversetter {
         KodeverkService kodeverkService) {
         StrukturertAdresse strukturertAdresse = null;
         SemistrukturertAdresse semistrukturertAdresse = null;
-        String coAdressenavn = null;
+        String coAdressenavnFraPostboks = null;
 
         if (kontaktadressePDL.vegadresse() != null) {
             strukturertAdresse = PdlAdresseformatOversetter.lagStrukturertAdresse(kontaktadressePDL.vegadresse(), kodeverkService);
@@ -35,12 +35,12 @@ public final class KontaktadresseOversetter {
             semistrukturertAdresse = lagPostadresse(kontaktadressePDL.utenlandskAdresseIFrittFormat());
         } else if (kontaktadressePDL.postboksadresse() != null) {
             strukturertAdresse = lagStrukturertAdresse(kontaktadressePDL.postboksadresse(), kodeverkService);
-            coAdressenavn = kontaktadressePDL.postboksadresse().postbokseier();
+            coAdressenavnFraPostboks = kontaktadressePDL.postboksadresse().postbokseier();
         }
 
         return new Kontaktadresse(strukturertAdresse,
             semistrukturertAdresse,
-            coAdressenavn != null ? coAdressenavn : kontaktadressePDL.coAdressenavn(),
+            coAdressenavnFraPostboks != null ? coAdressenavnFraPostboks : kontaktadressePDL.coAdressenavn(),
             KonverteringsUtils.localDateTimeToLocalDate(kontaktadressePDL.gyldigFraOgMed()),
             KonverteringsUtils.localDateTimeToLocalDate(kontaktadressePDL.gyldigTilOgMed()),
             kontaktadressePDL.metadata().master(),
