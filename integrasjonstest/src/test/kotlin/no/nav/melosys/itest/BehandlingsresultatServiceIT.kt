@@ -35,17 +35,12 @@ import java.time.LocalDate
 @DataJpaTest(
     showSql = false,
     excludeAutoConfiguration = [FlywayAutoConfiguration::class],
-    properties = ["spring.profiles.active:test"],
-
-    )
+    properties = ["spring.profiles.active:test"]
+)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @EnableJpaRepositories("no.nav.melosys.repository")
 @EntityScan("no.nav.melosys.domain")
-@Import(
-    value = [
-        BehandlingsresultatService::class,
-    ]
-)
+@Import(value = [BehandlingsresultatService::class])
 
 internal class BehandlingsresultatServiceIT(
     @Autowired
@@ -57,7 +52,6 @@ internal class BehandlingsresultatServiceIT(
     @Autowired
     private val fagsakRepository: FagsakRepository
 ) {
-
     @Test
     fun replikerBehandlingOgBehandlingsresultat_dataBlirRiktigIDB() {
         val fsak = Fagsak().apply {
@@ -85,33 +79,33 @@ internal class BehandlingsresultatServiceIT(
             tema = Behandlingstema.YRKESAKTIV
         }.also { behandlingRepository.save(it) }
 
-
-        val behandlingsresultat: Behandlingsresultat = lagBehandlingsresultat(tidligsteInaktiveBehandling)
+        val behandlingsresultat = lagBehandlingsresultat(tidligsteInaktiveBehandling)
+        behandlingsresultatRepository.save(behandlingsresultat)
 
         behandlingsresultatService.replikerBehandlingsresultat(tidligsteInaktiveBehandling, behandlingsreplika)
 
         val replikaResultat = behandlingsresultatRepository.findById(behandlingsreplika.id).get()
 
-        assertThat(replikaResultat.avklartefakta)
+        listOf(
+            replikaResultat.lovvalgsperioder,
+            replikaResultat.avklartefakta,
+            replikaResultat.vilkaarsresultater,
+            replikaResultat.behandlingsresultatBegrunnelser,
+            replikaResultat.kontrollresultater,
+            replikaResultat.anmodningsperioder,
+            replikaResultat.utpekingsperioder
+        ).forEach {
+            assertThat(it)
+                .singleElement()
+                .hasFieldOrPropertyWithValue("behandlingsresultat.id", behandlingsreplika.id)
+        }
+        assertThat(replikaResultat.avklartefakta.flatMap { it.registreringer })
             .singleElement()
-            .matches { af -> af.behandlingsresultat.id == behandlingsreplika.id }
+            .matches { it.avklartefakta.id == replikaResultat.avklartefakta.first().id }
 
-
-        println(replikaResultat.lovvalgsperioder.map { it.behandlingsresultat.id })
-        println(replikaResultat.avklartefakta.map { it.behandlingsresultat.id })
-        println(replikaResultat.vilkaarsresultater.map { it.behandlingsresultat.id })
-        println(replikaResultat.behandlingsresultatBegrunnelser.map { it.behandlingsresultat.id })
-        println(replikaResultat.kontrollresultater.map { it.behandlingsresultat.id })
-        println(replikaResultat.anmodningsperioder.map { it.behandlingsresultat.id })
-        println(replikaResultat.utpekingsperioder.map { it.behandlingsresultat.id })
-
-        println(behandlingsresultat.lovvalgsperioder.map { it.behandlingsresultat.id })
-        println(behandlingsresultat.avklartefakta.map { it.behandlingsresultat.id })
-        println(behandlingsresultat.vilkaarsresultater.map { it.behandlingsresultat.id })
-        println(behandlingsresultat.behandlingsresultatBegrunnelser.map { it.behandlingsresultat.id })
-        println(behandlingsresultat.kontrollresultater.map { it.behandlingsresultat.id })
-        println(behandlingsresultat.anmodningsperioder.map { it.behandlingsresultat.id })
-        println(behandlingsresultat.utpekingsperioder.map { it.behandlingsresultat.id })
+        assertThat(replikaResultat.vilkaarsresultater.flatMap { it.begrunnelser })
+            .singleElement()
+            .matches { it.vilkaarsresultat.id == replikaResultat.vilkaarsresultater.first().id }
     }
 
     fun lagBehandlingsresultat(tidligsteInaktiveBehandling: Behandling): Behandlingsresultat =
@@ -217,8 +211,6 @@ internal class BehandlingsresultatServiceIT(
                     sendtUtland = LocalDate.now()
                 }
             )
-
-            behandlingsresultatRepository.save(br)
         }
 
     private fun RegistreringsInfo.leggTilRegisteringInfo() {
