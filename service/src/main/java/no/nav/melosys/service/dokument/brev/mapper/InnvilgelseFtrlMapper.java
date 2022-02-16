@@ -83,7 +83,7 @@ public class InnvilgelseFtrlMapper {
             .ikkeOmfattetEktefelle(mapIkkeOmfattetEktefelle(behandlingId, avklarteMedfolgendeEktefelle.getFamilieIkkeOmfattetAvNorskTrygd()))
             .ikkeOmfattetBarn(mapIkkeOmfattetBarn(behandlingId, avklarteMedfolgendeBarn.getFamilieIkkeOmfattetAvNorskTrygd()))
             .arbeidsgiverNavn(norskeArbeidsgivere.navn)
-            .arbeidsland(dokgenMapperDatahenter.hentLandnavn(arbeidsland))
+            .arbeidsland(dokgenMapperDatahenter.hentLandnavnFraLandkode(arbeidsland))
             .trygdeavtaleMedArbeidsland(harTrygdeavtaleMedArbeidsland(arbeidsland))
             .vurderingTrygdeavgift(mapVurderingTrygdeavgift(trygdeavgiftsgrunnlag, fastsattTrygdeavgift))
             .loennsforhold(trygdeavgiftsgrunnlag.getLønnsforhold().getKode())
