@@ -30,6 +30,7 @@ import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
+import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -61,6 +62,8 @@ class BrevmottakerServiceTest {
     @Mock
     private LovvalgsperiodeService lovvalgsperiodeService;
     @Mock
+    private BehandlingService behandlingService;
+    @Mock
     private Behandling behandling;
 
     private Behandlingsresultat behandlingsresultat;
@@ -69,7 +72,7 @@ class BrevmottakerServiceTest {
     @BeforeEach
     void setup() {
         brevmottakerService = new BrevmottakerService(kontaktopplysningService, avklarteVirksomheterService,
-            utenlandskMyndighetService, behandlingsresultatService, trygdeavgiftsberegningService, lovvalgsperiodeService);
+            utenlandskMyndighetService, behandlingsresultatService, trygdeavgiftsberegningService, lovvalgsperiodeService, behandlingService);
 
         behandlingsresultat = new Behandlingsresultat();
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
@@ -247,13 +250,13 @@ class BrevmottakerServiceTest {
     @Test
     void gittMalIkkeRegistret_skalKasteFeil() {
         assertThatExceptionOfType(IkkeFunnetException.class)
-            .isThrownBy(() -> brevmottakerService.hentMottakerliste(ATTEST_A1, behandling))
+            .isThrownBy(() -> brevmottakerService.hentMottakerliste(ATTEST_A1, 123))
             .withMessage("Mangler mapping av mottakere for ATTEST_A1");
     }
 
     @Test
     void gittForvaltningsmelding_skalHovedmottakerVæreBruker() {
-        assertThat(brevmottakerService.hentMottakerliste(MELDING_FORVENTET_SAKSBEHANDLINGSTID, behandling))
+        assertThat(brevmottakerService.hentMottakerliste(MELDING_FORVENTET_SAKSBEHANDLINGSTID, 123))
             .extracting(
                 Mottakerliste::getHovedMottaker,
                 Mottakerliste::getKopiMottakere,
@@ -270,7 +273,7 @@ class BrevmottakerServiceTest {
 
     @Test
     void gittMangelbrevBruker_skalHovedmottakerVæreBruker() {
-        assertThat(brevmottakerService.hentMottakerliste(MANGELBREV_BRUKER, behandling))
+        assertThat(brevmottakerService.hentMottakerliste(MANGELBREV_BRUKER, 123))
             .extracting(
                 Mottakerliste::getHovedMottaker,
                 Mottakerliste::getKopiMottakere,
@@ -287,9 +290,10 @@ class BrevmottakerServiceTest {
 
     @Test
     void gittMangelbrevArbeidsgiver_skalHovedmottakerVæreArbeidsgiverMedKopi() {
+        when(behandlingService.hentBehandling(123L)).thenReturn(behandling);
         when(behandling.getFagsak()).thenReturn(lagFagsakMedRepresentant(null));
 
-        assertThat(brevmottakerService.hentMottakerliste(MANGELBREV_ARBEIDSGIVER, behandling))
+        assertThat(brevmottakerService.hentMottakerliste(MANGELBREV_ARBEIDSGIVER, 123))
             .extracting(
                 Mottakerliste::getHovedMottaker,
                 Mottakerliste::getKopiMottakere,
@@ -308,7 +312,7 @@ class BrevmottakerServiceTest {
     void gittVedtakFtrl2_8UtenFullmektigIkkeSelvbetalende_skalHovedmottakerVæreBrukerMedKopier() {
         initMocksForFtrlVedtaksbrev(null, 10000, false);
 
-        assertThat(brevmottakerService.hentMottakerliste(INNVILGELSE_FOLKETRYGDLOVEN_2_8, behandling))
+        assertThat(brevmottakerService.hentMottakerliste(INNVILGELSE_FOLKETRYGDLOVEN_2_8, 123))
             .extracting(
                 Mottakerliste::getHovedMottaker,
                 Mottakerliste::getKopiMottakere,
@@ -327,7 +331,7 @@ class BrevmottakerServiceTest {
     void gittVedtakFtrl2_8UtenFullmektigSelvbetalende_skalHovedmottakerVæreBrukerMedKopier() {
         initMocksForFtrlVedtaksbrev(null, 10000, true);
 
-        assertThat(brevmottakerService.hentMottakerliste(INNVILGELSE_FOLKETRYGDLOVEN_2_8, behandling))
+        assertThat(brevmottakerService.hentMottakerliste(INNVILGELSE_FOLKETRYGDLOVEN_2_8, 123))
             .isNotNull()
             .extracting(
                 Mottakerliste::getHovedMottaker,
@@ -347,7 +351,7 @@ class BrevmottakerServiceTest {
     void gittVedtakFtrl2_8FullmektigIkkeSelvbetalende_skalHovedmottakerVæreBrukerMedKopier() {
         initMocksForFtrlVedtaksbrev(Representerer.BRUKER, 10000, false);
 
-        assertThat(brevmottakerService.hentMottakerliste(INNVILGELSE_FOLKETRYGDLOVEN_2_8, behandling))
+        assertThat(brevmottakerService.hentMottakerliste(INNVILGELSE_FOLKETRYGDLOVEN_2_8, 123))
             .isNotNull()
             .extracting(
                 Mottakerliste::getHovedMottaker,
@@ -367,7 +371,7 @@ class BrevmottakerServiceTest {
     void gittVedtakFtrl2_8FullmektigSelvbetalende_skalHovedmottakerVæreBrukerMedKopier() {
         initMocksForFtrlVedtaksbrev(Representerer.BRUKER, 10000, true);
 
-        Mottakerliste actual = brevmottakerService.hentMottakerliste(INNVILGELSE_FOLKETRYGDLOVEN_2_8, behandling);
+        Mottakerliste actual = brevmottakerService.hentMottakerliste(INNVILGELSE_FOLKETRYGDLOVEN_2_8, 123);
         assertThat(actual)
             .isNotNull()
             .extracting(
@@ -388,7 +392,7 @@ class BrevmottakerServiceTest {
     void gittVedtakFtrl2_8FullmektigIkkeSelvbetalendeIkkeInntekt_skalHovedmottakerVæreBrukerMedKopier() {
         initMocksForFtrlVedtaksbrev(Representerer.BRUKER, 0, false);
 
-        assertThat(brevmottakerService.hentMottakerliste(INNVILGELSE_FOLKETRYGDLOVEN_2_8, behandling))
+        assertThat(brevmottakerService.hentMottakerliste(INNVILGELSE_FOLKETRYGDLOVEN_2_8, 123))
             .isNotNull()
             .extracting(
                 Mottakerliste::getHovedMottaker,
@@ -408,11 +412,11 @@ class BrevmottakerServiceTest {
     void gittInnvilgelsesbrevUK_skalHovedmottakerVæreBrukerMedKopier() {
         var lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1);
-
+        when(behandlingService.hentBehandling(123L)).thenReturn(behandling);
         when(behandling.getFagsak()).thenReturn(lagFagsakMedRepresentant(null));
         when(lovvalgsperiodeService.hentValidertLovvalgsperiode(anyLong())).thenReturn(lovvalgsperiode);
 
-        assertThat(brevmottakerService.hentMottakerliste(STORBRITANNIA, behandling))
+        assertThat(brevmottakerService.hentMottakerliste(STORBRITANNIA, 123))
             .extracting(
                 Mottakerliste::getHovedMottaker,
                 Mottakerliste::getKopiMottakere,
@@ -429,11 +433,11 @@ class BrevmottakerServiceTest {
     void gittInnvilgelsesbrevUKOgArt82_skalIkkeMyndighetFåKopi() {
         var lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_trygdeavtale_uk.UK_ART8_2);
-
+        when(behandlingService.hentBehandling(123L)).thenReturn(behandling);
         when(behandling.getFagsak()).thenReturn(lagFagsakMedRepresentant(null));
         when(lovvalgsperiodeService.hentValidertLovvalgsperiode(anyLong())).thenReturn(lovvalgsperiode);
 
-        assertThat(brevmottakerService.hentMottakerliste(STORBRITANNIA, behandling))
+        assertThat(brevmottakerService.hentMottakerliste(STORBRITANNIA, 123))
             .extracting(
                 Mottakerliste::getHovedMottaker,
                 Mottakerliste::getKopiMottakere,
@@ -531,6 +535,7 @@ class BrevmottakerServiceTest {
 
         when(trygdeavgiftsberegningService.finnBeregningsresultat(anyLong())).thenReturn(trygdeavgiftsberegningsresultat);
 
+        when(behandlingService.hentBehandling(123L)).thenReturn(behandling);
         Fagsak fagsak = lagFagsakMedRepresentant(representerer);
         fagsak.setType(Sakstyper.FTRL);
         when(behandling.getFagsak()).thenReturn(fagsak);

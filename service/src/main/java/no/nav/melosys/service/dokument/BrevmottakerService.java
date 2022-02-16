@@ -21,12 +21,14 @@ import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
+import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.brev.mapper.BrevmottakerMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import static java.util.Optional.ofNullable;
 import static no.nav.melosys.domain.Preferanse.PreferanseEnum.RESERVERT_FRA_A1;
@@ -48,6 +50,7 @@ public class BrevmottakerService {
     private final BehandlingsresultatService behandlingsresultatService;
     private final TrygdeavgiftsberegningService trygdeavgiftsberegningService;
     private final LovvalgsperiodeService lovvalgsperiodeService;
+    private final BehandlingService behandlingService;
 
     @Autowired
     public BrevmottakerService(KontaktopplysningService kontaktopplysningService,
@@ -55,13 +58,14 @@ public class BrevmottakerService {
                                UtenlandskMyndighetService utenlandskMyndighetService,
                                BehandlingsresultatService behandlingsresultatService,
                                TrygdeavgiftsberegningService trygdeavgiftsberegningService,
-                               LovvalgsperiodeService lovvalgsperiodeService) {
+                               LovvalgsperiodeService lovvalgsperiodeService, BehandlingService behandlingService) {
         this.kontaktopplysningService = kontaktopplysningService;
         this.avklarteVirksomheterService = avklarteVirksomheterService;
         this.utenlandskMyndighetService = utenlandskMyndighetService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.trygdeavgiftsberegningService = trygdeavgiftsberegningService;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
+        this.behandlingService = behandlingService;
     }
 
     Aktoersroller avklarMottakerRolleFraDokument(Produserbaredokumenter produserbartDokument) {
@@ -112,8 +116,8 @@ public class BrevmottakerService {
         return mottakere;
     }
 
-    public Mottakerliste hentMottakerliste(Produserbaredokumenter produserbartdokument, Behandling behandling) {
-
+    @Transactional
+    public Mottakerliste hentMottakerliste(Produserbaredokumenter produserbartdokument, long behandlingId) {
         Mottakerliste mottakerliste = ofNullable(BrevmottakerMapper.BREV_MOTTAKER_MAP.get(produserbartdokument))
             .orElseThrow(() -> new IkkeFunnetException("Mangler mapping av mottakere for " + produserbartdokument));
 
@@ -122,7 +126,7 @@ public class BrevmottakerService {
             .build();
 
         if (mottakerliste.kanHaKopier()) {
-            leggTilKopier(behandling, mottakerListeKopi, mottakerliste.getBrevkopiRegler());
+            leggTilKopier(behandlingId, mottakerListeKopi, mottakerliste.getBrevkopiRegler());
         }
 
         return mottakerListeKopi;
@@ -246,7 +250,8 @@ public class BrevmottakerService {
         return null;
     }
 
-    private void leggTilKopier(Behandling behandling, Mottakerliste mottakerliste, Collection<BrevkopiRegel> brevkopiRegler) {
+    private void leggTilKopier(long behandlingId, Mottakerliste mottakerliste, Collection<BrevkopiRegel> brevkopiRegler) {
+        Behandling behandling = behandlingService.hentBehandling(behandlingId);
         boolean brukerHarFullmektig = behandling.getFagsak().finnRepresentant(Representerer.BRUKER).isPresent();
 
         if (brevkopiRegler.contains(BRUKER_FÅR_KOPI) ||

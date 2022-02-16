@@ -169,7 +169,7 @@ class ArbeidFlereLandSedRuterTest {
 
         arbeidFlereLandSedRuter.rutSedTilBehandling(prosessinstans, gsakSaksnummer);
 
-        verify(behandlingService).oppdaterStatus(behandlingID, Behandlingsstatus.VURDER_DOKUMENT);
+        verify(behandlingService).endreStatus(behandlingID, Behandlingsstatus.VURDER_DOKUMENT);
         verify(oppgaveService).oppdaterOppgave(eq(oppgaveID), oppgaveOppdateringCaptor.capture());
         verify(prosessinstansService).opprettProsessinstansSedJournalføring(behandling, melosysEessiMelding);
 

@@ -16,10 +16,4 @@ public interface AaregFasade {
      */
     Saksopplysning finnArbeidsforholdPrArbeidstaker(String ident, LocalDate fom, LocalDate tom);
 
-    /**
-     * Etterspør et arbeidsforhold fra AA-registeret med gjeldende og historiske arbeidsavtaler.
-     *
-     * @param arbeidsforholdsID Unik ID til et arbeidsforhold i NAV
-     */
-    Saksopplysning hentArbeidsforholdHistorikk(Long arbeidsforholdsID);
 }
