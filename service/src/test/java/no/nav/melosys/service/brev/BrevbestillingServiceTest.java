@@ -466,12 +466,13 @@ class BrevbestillingServiceTest {
     @Test
     void hentBrevAdresseTilMottakere_returnererAdresseFelterSomNull_nårGjeldendePostadresseErNull() {
         fakeUnleash.enable("melosys.pdl.aktiv");
+        when(mockBehandlingService.hentBehandling(123L)).thenReturn(behandling);
         when(mockBrevmottakerService.avklarMottakere(any(), eq(Mottaker.av(Aktoersroller.BRUKER)), any(), eq(false), eq(false)))
             .thenReturn(List.of(lagAktoer(Aktoersroller.BRUKER, null)));
         Personopplysninger persondata = PersonopplysningerObjectFactory.lagPersonopplysningerUtenAdresser();
         when(mockPersondataFasade.hentPerson(anyString())).thenReturn(persondata);
 
-        var brevAdresser = brevbestillingService.hentBrevAdresseTilMottakere(MANGELBREV_BRUKER, Aktoersroller.BRUKER, 123);
+        var brevAdresser = brevbestillingService.hentBrevAdresseTilMottakere(MANGELBREV_BRUKER, Aktoersroller.BRUKER, 123L);
 
         assertThat(brevAdresser).hasSize(1);
         assertThat(brevAdresser.get(0))
