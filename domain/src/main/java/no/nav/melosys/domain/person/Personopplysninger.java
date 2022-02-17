@@ -137,7 +137,7 @@ public record Personopplysninger(
     private Optional<Postadresse> lagPostadresseFraKontaktadresser() {
         return hentGjeldendeKontaktadresseFraMaster(PDL)
             .or(() -> hentGjeldendeKontaktadresseFraMaster(FREG))
-            .map(Kontaktadresse::tilPostadresse);
+            .map(this::kontaktadresseTilPostadresse);
     }
 
     private Optional<Kontaktadresse> hentGjeldendeKontaktadresseFraMaster(Master master) {
@@ -149,7 +149,7 @@ public record Personopplysninger(
     private Optional<Postadresse> lagPostadresseFraOppholdsadresser() {
         return hentGjeldendeOppholdsadresseFraMaster(PDL)
             .or(() -> hentGjeldendeOppholdsadresseFraMaster(FREG))
-            .map(Oppholdsadresse::tilPostadresse);
+            .map(this::oppholdsadresseTilPostadresse);
     }
 
     private Optional<Oppholdsadresse> hentGjeldendeOppholdsadresseFraMaster(Master master) {
@@ -162,5 +162,21 @@ public record Personopplysninger(
         return finnBostedsadresse()
             .map(bostedsadresse ->
                 Postadresse.lagPostadresse(bostedsadresse.coAdressenavn(), bostedsadresse.strukturertAdresse()));
+    }
+
+    private Postadresse kontaktadresseTilPostadresse(Kontaktadresse kontaktadresse) {
+        if (kontaktadresse.strukturertAdresse() != null) {
+            return Postadresse.lagPostadresse(kontaktadresse.coAdressenavn(), kontaktadresse.strukturertAdresse());
+        } else if (kontaktadresse.semistrukturertAdresse() != null) {
+            return Postadresse.lagPostadresse(kontaktadresse.coAdressenavn(), kontaktadresse.semistrukturertAdresse());
+        }
+        return null;
+    }
+
+    private Postadresse oppholdsadresseTilPostadresse(Oppholdsadresse oppholdsadresse) {
+        if (oppholdsadresse.strukturertAdresse() != null) {
+            return Postadresse.lagPostadresse(oppholdsadresse.coAdressenavn(), oppholdsadresse.strukturertAdresse());
+        }
+        return null;
     }
 }
