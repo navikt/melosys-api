@@ -6,6 +6,7 @@ import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import org.junit.jupiter.api.Test;
 
 import static no.nav.melosys.domain.Behandling.BEHANDLINGSTEMA_SED_FORESPØRSEL;
@@ -58,6 +59,36 @@ public class MuligeManuelleBehandlingsendringerTest {
         assertThat(muligeBehandlingstema).isEmpty();
     }
 
+    @Test
+    void hentMuligeTyper_temaEndretPeriode_returnererNyVurdering() {
+        var muligeTyper = MuligeManuelleBehandlingsendringer.hentMuligeTyper(behandlingMedTemaOgType(Behandlingstema.UTSENDT_ARBEIDSTAKER, Behandlingstyper.ENDRET_PERIODE));
+        assertThat(muligeTyper).containsExactly(Behandlingstyper.NY_VURDERING);
+    }
+
+    @Test
+    void hentMuligeTyper_temaNyVurdering_returnererEndretPeriode() {
+        var muligeTyper = MuligeManuelleBehandlingsendringer.hentMuligeTyper(behandlingMedTemaOgType(Behandlingstema.UTSENDT_SELVSTENDIG, Behandlingstyper.NY_VURDERING));
+        assertThat(muligeTyper).containsExactly(Behandlingstyper.ENDRET_PERIODE);
+    }
+
+    @Test
+    void hentMuligeTyper_feilType_returnererTomListe() {
+        var muligeTyper = MuligeManuelleBehandlingsendringer.hentMuligeTyper(behandlingMedTemaOgType(Behandlingstema.UTSENDT_ARBEIDSTAKER, Behandlingstyper.SOEKNAD));
+        assertThat(muligeTyper).isEmpty();
+    }
+
+    @Test
+    void hentMuligeTyper_feilTema_returnererTomListe() {
+        var muligeTyper = MuligeManuelleBehandlingsendringer.hentMuligeTyper(behandlingMedTema(Behandlingstema.ARBEID_FLERE_LAND));
+        assertThat(muligeTyper).isEmpty();
+    }
+
+    @Test
+    void hentMuligeTyper_inaktivBehandling_returnererTomListe() {
+        var muligeTyper = MuligeManuelleBehandlingsendringer.hentMuligeTyper(avsluttetBehandlingMedTema(Behandlingstema.UTSENDT_ARBEIDSTAKER));
+        assertThat(muligeTyper).isEmpty();
+    }
+
     private Behandling behandlingMedTema(Behandlingstema tema) {
         var behandling = new Behandling();
         behandling.setTema(tema);
@@ -67,6 +98,12 @@ public class MuligeManuelleBehandlingsendringerTest {
     private Behandling avsluttetBehandlingMedTema(Behandlingstema tema) {
         var behandling = behandlingMedTema(tema);
         behandling.setStatus(AVSLUTTET);
+        return behandling;
+    }
+
+    private Behandling behandlingMedTemaOgType(Behandlingstema tema, Behandlingstyper type) {
+        var behandling = behandlingMedTema(tema);
+        behandling.setType(type);
         return behandling;
     }
 
