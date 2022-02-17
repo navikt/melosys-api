@@ -50,7 +50,7 @@ public class MuligeManuelleBehandlingsendringer {
 
     public static Set<Behandlingstema> hentMuligeBehandlingstema(Behandling behandling, Behandlingsresultat behandlingsresultat) {
         boolean kanOppdatereBehandlingstema = kanOppdatereBehandlingstema(behandling, behandlingsresultat);
-        if (behandling.getType() == ENDRET_PERIODE) {
+        if (behandling.erEndretPeriode()) {
             return switch (behandling.getTema()) {
                 case UTSENDT_ARBEIDSTAKER -> Collections.singleton(UTSENDT_SELVSTENDIG);
                 case UTSENDT_SELVSTENDIG -> Collections.singleton(UTSENDT_ARBEIDSTAKER);
