@@ -14,11 +14,4 @@ public record Bostedsadresse(
     String kilde,
     boolean erHistorisk
 ) implements PersonAdresse {
-
-    public Postadresse tilPostadresse() {
-        if (strukturertAdresse != null) {
-            return Postadresse.lagPostadresse(strukturertAdresse, coAdressenavn());
-        }
-        return null;
-    }
 }
