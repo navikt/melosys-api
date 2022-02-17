@@ -283,7 +283,7 @@ public class BehandlingService {
         behandlingsresultatService.oppdaterBehandlingsresultattype(behandling.getId(), nyBehandlingsResultatType);
     }
 
-    public void avsluttNyVurderingUtenEndring(long behandlingId) {
+    public void settNyVurderingTilFerdigbehandlet(long behandlingId) {
         avsluttNyVurdering(behandlingId, Behandlingsresultattyper.FERDIGBEHANDLET);
     }
 

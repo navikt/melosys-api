@@ -27,8 +27,7 @@ public class FagsakAdminTjeneste implements AdminTjeneste {
                                               @RequestHeader(API_KEY_HEADER) String apiKey) {
         validerApikey(apiKey);
 
-        final Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
-        henleggFagsakService.henleggSomBortfalt(fagsak);
+        henleggFagsakService.henleggSakEllerBehandlingSomBortfalt(saksnummer);
         return ResponseEntity.noContent().build();
     }
 

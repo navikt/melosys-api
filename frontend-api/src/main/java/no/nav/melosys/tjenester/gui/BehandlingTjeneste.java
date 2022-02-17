@@ -153,13 +153,13 @@ public class BehandlingTjeneste {
         return ResponseEntity.noContent().build();
     }
 
-    @PutMapping("{behandlingID}/avslutt-uten-endring")
-    @ApiOperation("Avslutt en gitt behandling uten endring av saksstatus")
-    public ResponseEntity<Void> avsluttNyVurderingUtenEndring(@PathVariable("behandlingID") long behandlingID) {
+    @PutMapping("{behandlingID}/sett-til-ferdigbehandlet")
+    @ApiOperation("Avslutt en gitt behandling med Ferdigbehandlet som resultat uten endring av saksstatus")
+    public ResponseEntity<Void> avsluttNyVurderingMedFerdigbehandlet(@PathVariable("behandlingID") long behandlingID) {
         log.debug("Saksbehandler {} ber om å avslutte behandling {} uten endring av saksstatus", SubjectHandler.getInstance().getUserID(), behandlingID);
         aksesskontroll.autoriserSkrivOgTilordnet(behandlingID);
 
-        behandlingService.avsluttNyVurderingUtenEndring(behandlingID);
+        behandlingService.settNyVurderingTilFerdigbehandlet(behandlingID);
 
         return ResponseEntity.noContent().build();
     }

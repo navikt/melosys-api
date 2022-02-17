@@ -119,7 +119,7 @@ public class FagsakTjeneste {
     @ApiOperation(value = "Henlegger en fagsak. Avslutter kun behandling uten endring av saksstatus dersom behandlingtype er NY_VURDERING.")
     public ResponseEntity<Void> henleggFagsak(@PathVariable("saksnr") String saksnummer, @RequestBody HenleggelseDto henleggelseDto) {
         aksesskontroll.autoriserSakstilgang(saksnummer);
-        henleggFagsakService.henleggFagsak(saksnummer, henleggelseDto.begrunnelseKode(), henleggelseDto.fritekst());
+        henleggFagsakService.henleggFagsakEllerBehandling(saksnummer, henleggelseDto.begrunnelseKode(), henleggelseDto.fritekst());
         return ResponseEntity.noContent().build();
     }
 
@@ -144,14 +144,13 @@ public class FagsakTjeneste {
         return ResponseEntity.noContent().build();
     }
 
-    @PutMapping(value = "{saksnr}/avsluttsaksombortfalt", consumes = MediaType.TEXT_PLAIN_VALUE, produces = MediaType.TEXT_PLAIN_VALUE)
+    @PutMapping(value = "{saksnr}/henlegg-som-bortfalt", consumes = MediaType.TEXT_PLAIN_VALUE, produces = MediaType.TEXT_PLAIN_VALUE)
     @ApiOperation(value = "Henlegger en fagsak i Melosys som bortfalt, fordi den ikke skal behandles i Melosys. " +
         "Henlegger kun den aktive behandlingen uten endring av saksstatus dersom behandlingtype er NY_VURDERING.")
     public ResponseEntity<Void> avsluttSakSomBortfalt(@PathVariable("saksnr") String saksnummer) {
-        Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
-        aksesskontroll.autoriserSakstilgang(fagsak);
+        aksesskontroll.autoriserSakstilgang(saksnummer);
 
-        henleggFagsakService.henleggSomBortfalt(fagsak);
+        henleggFagsakService.henleggSakEllerBehandlingSomBortfalt(saksnummer);
         return ResponseEntity.noContent().build();
     }
 

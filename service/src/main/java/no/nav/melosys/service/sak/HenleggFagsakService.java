@@ -49,7 +49,7 @@ public class HenleggFagsakService {
      * skal man ikke avslutte saken, men kun avslutte behandlingen. Behandlingsresultattype blir da HENLEGGELSE.
      */
     @Transactional
-    public void henleggFagsak(String saksnummer, String begrunnelseKodeString, String fritekst) {
+    public void henleggFagsakEllerBehandling(String saksnummer, String begrunnelseKodeString, String fritekst) {
         Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
 
         Henleggelsesgrunner begrunnelseKode;
@@ -64,10 +64,16 @@ public class HenleggFagsakService {
         if (aktivBehandling.erNyVurdering() && unleash.isEnabled("melosys.behandling.AVSLUTTE_UTEN_ENDRING")) {
             behandlingService.avsluttNyVurdering(aktivBehandling.getId(), Behandlingsresultattyper.HENLEGGELSE);
         } else {
-            fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.HENLAGT);
-            prosessinstansService.opprettProsessinstansFagsakHenlagt(aktivBehandling);
-            oppgaveService.ferdigstillOppgaveMedSaksnummer(aktivBehandling.getFagsak().getSaksnummer());
+            henleggFagsakEllerBehandling(fagsak);
         }
+    }
+
+    private void henleggFagsakEllerBehandling(Fagsak fagsak) {
+        Behandling aktivBehandling = fagsak.hentAktivBehandling();
+
+        fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.HENLAGT);
+        prosessinstansService.opprettProsessinstansFagsakHenlagt(aktivBehandling);
+        oppgaveService.ferdigstillOppgaveMedSaksnummer(aktivBehandling.getFagsak().getSaksnummer());
     }
 
     private void oppdaterBehandlingsresultat(long behandlingID, Henleggelsesgrunner begrunnelseKode, String fritekst) {
@@ -85,18 +91,23 @@ public class HenleggFagsakService {
     }
 
     @Transactional
-    public void henleggSomBortfalt(Fagsak fagsak) {
+    public void henleggSakEllerBehandlingSomBortfalt(String saksnummer) {
+        Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
         Behandling aktivBehandling = fagsak.hentAktivBehandling();
 
         if (aktivBehandling.erNyVurdering() && unleash.isEnabled("melosys.behandling.AVSLUTTE_UTEN_ENDRING") ) {
             behandlingService.avsluttNyVurdering(aktivBehandling.getId(), Behandlingsresultattyper.HENLEGGELSE_BORTFALT);
         } else {
-            log.info("Fagsak {}: {}", fagsak.getSaksnummer(), Saksstatuser.HENLAGT_BORTFALT.getBeskrivelse());
-            fagsak.getBehandlinger().forEach(behandling -> behandlingsresultatService.oppdaterBehandlingsresultattype(behandling.getId(), Behandlingsresultattyper.HENLEGGELSE));
-            fagsak.getBehandlinger().forEach(behandling -> behandling.setStatus(Behandlingsstatus.AVSLUTTET));
-            fagsak.setStatus(Saksstatuser.HENLAGT_BORTFALT);
-            fagsakService.lagre(fagsak);
-            oppgaveService.ferdigstillOppgaveMedSaksnummer(fagsak.getSaksnummer());
+            henleggSakSomBortfalt(fagsak);
         }
+    }
+
+    private void henleggSakSomBortfalt(Fagsak fagsak) {
+        log.info("Fagsak {}: {}", fagsak.getSaksnummer(), Saksstatuser.HENLAGT_BORTFALT.getBeskrivelse());
+        fagsak.getBehandlinger().forEach(behandling -> behandlingsresultatService.oppdaterBehandlingsresultattype(behandling.getId(), Behandlingsresultattyper.HENLEGGELSE));
+        fagsak.getBehandlinger().forEach(behandling -> behandling.setStatus(Behandlingsstatus.AVSLUTTET));
+        fagsak.setStatus(Saksstatuser.HENLAGT_BORTFALT);
+        fagsakService.lagre(fagsak);
+        oppgaveService.ferdigstillOppgaveMedSaksnummer(fagsak.getSaksnummer());
     }
 }

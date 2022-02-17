@@ -75,7 +75,7 @@ class HenleggFagsakServiceTest {
         when(behandlingsresultatService.hentBehandlingsresultat(behandlingID)).thenReturn(behandlingsresultat);
         when(fagsakService.hentFagsak(saksnummer)).thenReturn(fagsak);
 
-        henleggFagsakService.henleggFagsak(saksnummer, "ANNET", fritekst);
+        henleggFagsakService.henleggFagsakEllerBehandling(saksnummer, "ANNET", fritekst);
 
         verify(behandlingsresultatService).lagre(behandlingsresultatCaptor.capture());
         verify(prosessinstansService).opprettProsessinstansFagsakHenlagt(behandling);
@@ -89,7 +89,7 @@ class HenleggFagsakServiceTest {
     @Test
     void henleggFagsak_ikkeGyldigHenleggelsesgrunn_kasterException() {
         assertThatExceptionOfType(TekniskException.class)
-            .isThrownBy(() -> henleggFagsakService.henleggFagsak(saksnummer, "UGYLDIGKODE", "Fri tale"))
+            .isThrownBy(() -> henleggFagsakService.henleggFagsakEllerBehandling(saksnummer, "UGYLDIGKODE", "Fri tale"))
             .withMessageContaining("ingen gyldig henleggelsesgrunn");
     }
 
@@ -104,8 +104,9 @@ class HenleggFagsakServiceTest {
         andreBehandling.setId(2L);
         andreBehandling.setStatus(Behandlingsstatus.ANMODNING_UNNTAK_SENDT);
         fagsak.setBehandlinger(Arrays.asList(førsteBehandling, andreBehandling));
+        when(fagsakService.hentFagsak(saksnummer)).thenReturn(fagsak);
 
-        henleggFagsakService.henleggSomBortfalt(fagsak);
+        henleggFagsakService.henleggSakEllerBehandlingSomBortfalt(saksnummer);
 
         verify(fagsakService).lagre(fagsak);
         verify(behandlingsresultatService).oppdaterBehandlingsresultattype(1L, Behandlingsresultattyper.HENLEGGELSE);
@@ -126,8 +127,9 @@ class HenleggFagsakServiceTest {
         andreBehandling.setId(2L);
         andreBehandling.setType(Behandlingstyper.NY_VURDERING);
         fagsak.setBehandlinger(Arrays.asList(førsteBehandling, andreBehandling));
+        when(fagsakService.hentFagsak(saksnummer)).thenReturn(fagsak);
 
-        henleggFagsakService.henleggSomBortfalt(fagsak);
+        henleggFagsakService.henleggSakEllerBehandlingSomBortfalt(saksnummer);
 
         verify(behandlingService).avsluttNyVurdering(andreBehandling.getId(), Behandlingsresultattyper.HENLEGGELSE_BORTFALT);
         verifyNoMoreInteractions(fagsakService, behandlingsresultatService, oppgaveService);
