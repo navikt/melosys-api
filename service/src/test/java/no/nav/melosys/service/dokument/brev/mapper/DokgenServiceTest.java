@@ -120,7 +120,7 @@ class DokgenServiceTest {
     void produserBrevTilBrukerOk() {
         when(mockDokgenConsumer.lagPdf(anyString(), any(), eq(false), eq(false))).thenReturn(expectedPdf);
         when(mockJoarkFasade.hentJournalpost(any())).thenReturn(lagJournalpost());
-        when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(lagBehandling());
+        when(mockBehandlingsService.hentBehandling(anyLong())).thenReturn(lagBehandling());
         when(mockPersondataFasade.hentPersonFraTps(anyString(), any())).thenReturn(lagPersonopplysning());
 
         Aktoer mottaker = new Aktoer();
@@ -145,7 +145,7 @@ class DokgenServiceTest {
     void produserBrevTilRepresentantOk() {
         when(mockDokgenConsumer.lagPdf(anyString(), any(), eq(false), eq(false))).thenReturn(expectedPdf);
         when(mockJoarkFasade.hentJournalpost(any())).thenReturn(lagJournalpost());
-        when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(lagBehandling());
+        when(mockBehandlingsService.hentBehandling(anyLong())).thenReturn(lagBehandling());
         when(mockPersondataFasade.hentPersonFraTps(anyString(), any())).thenReturn(lagPersonopplysning());
         when(mockEregFasade.hentOrganisasjon(any())).thenReturn(lagSaksopplysning());
         when(mockKontaktOpplysningService.hentKontaktopplysning(any(), any())).thenReturn(of(lagKontaktOpplysning()));
@@ -173,7 +173,7 @@ class DokgenServiceTest {
     void produserUtkastUtenRepresentantForBrukerOk() {
         when(mockDokgenConsumer.lagPdf(anyString(), any(), eq(false), eq(true))).thenReturn(expectedPdf);
         when(mockJoarkFasade.hentJournalpost(any())).thenReturn(lagJournalpost());
-        when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(lagBehandling());
+        when(mockBehandlingsService.hentBehandling(anyLong())).thenReturn(lagBehandling());
         when(mockPersondataFasade.hentPersonFraTps(any(), any())).thenReturn(lagPersonopplysning());
         Aktoer mottaker = new Aktoer();
         mottaker.setRolle(Aktoersroller.BRUKER);
@@ -203,7 +203,7 @@ class DokgenServiceTest {
     void produserUtkastTilRepresentantForBrukerOk() {
         when(mockDokgenConsumer.lagPdf(anyString(), any(), eq(false), eq(true))).thenReturn(expectedPdf);
         when(mockJoarkFasade.hentJournalpost(any())).thenReturn(lagJournalpost());
-        when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(lagBehandling());
+        when(mockBehandlingsService.hentBehandling(anyLong())).thenReturn(lagBehandling());
         when(mockPersondataFasade.hentPersonFraTps(anyString(), any())).thenReturn(lagPersonopplysning());
         when(mockEregFasade.hentOrganisasjon(any())).thenReturn(lagSaksopplysning());
         when(mockKontaktOpplysningService.hentKontaktopplysning(any(), any())).thenReturn(of(lagKontaktOpplysning()));
@@ -235,7 +235,7 @@ class DokgenServiceTest {
     void produserUtkastTilRepresentantForArbeidsgiverOk() {
         when(mockDokgenConsumer.lagPdf(anyString(), any(), eq(false), eq(true))).thenReturn(expectedPdf);
         when(mockJoarkFasade.hentJournalpost(any())).thenReturn(lagJournalpost());
-        when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(lagBehandling());
+        when(mockBehandlingsService.hentBehandling(anyLong())).thenReturn(lagBehandling());
         when(mockPersondataFasade.hentPersonFraTps(anyString(), any())).thenReturn(lagPersonopplysning());
         when(mockEregFasade.hentOrganisasjon(any())).thenReturn(lagSaksopplysning());
         when(mockKontaktOpplysningService.hentKontaktopplysning(any(), any())).thenReturn(of(lagKontaktOpplysning()));
@@ -269,7 +269,7 @@ class DokgenServiceTest {
         bruker.setRolle(Aktoersroller.BRUKER);
 
         when(mockSaksbehandlerService.hentNavnForIdent(anyString())).thenReturn("Saksbehandler, Ole");
-        when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(new Behandling());
+        when(mockBehandlingsService.hentBehandling(anyLong())).thenReturn(new Behandling());
         when(mockBrevMottakerService.avklarMottakere(any(), any(), any(), eq(false), eq(false))).thenReturn(List.of(bruker));
         BrevbestillingRequest brevbestillingRequest = new BrevbestillingRequest.Builder()
             .medProduserbardokument(MANGELBREV_BRUKER)
@@ -294,7 +294,7 @@ class DokgenServiceTest {
 
     @Test
     void skalProdusereOgDistribuereBrevTilOrgnrUtenKopi() {
-        when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(new Behandling());
+        when(mockBehandlingsService.hentBehandling(anyLong())).thenReturn(new Behandling());
 
         BrevbestillingRequest brevbestillingRequest = new BrevbestillingRequest.Builder()
             .medProduserbardokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD)
@@ -318,7 +318,7 @@ class DokgenServiceTest {
 
     @Test
     void skalProdusereOgDistribuereBrevTilOrgnrMedKopi() {
-        when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(new Behandling());
+        when(mockBehandlingsService.hentBehandling(anyLong())).thenReturn(new Behandling());
 
         BrevbestillingRequest brevbestillingRequest = new BrevbestillingRequest.Builder()
             .medProduserbardokument(MANGELBREV_BRUKER)
