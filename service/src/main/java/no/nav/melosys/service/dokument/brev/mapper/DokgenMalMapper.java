@@ -10,8 +10,8 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.brev.*;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.dokgen.dto.*;
@@ -21,7 +21,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static java.lang.String.format;
-import static java.util.stream.Collectors.toList;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING_MANGLENDE_OPPLYSNINGER;
 import static org.springframework.util.StringUtils.hasText;
 
@@ -45,23 +44,26 @@ public class DokgenMalMapper {
     }
 
     public DokgenDto mapBehandling(DokgenBrevbestilling mottattBrevbestilling) {
+        // Henter opplysninger på nytt for å sikre at korrekt adresse benyttes (med mindre myndighet)
         DokgenBrevbestilling brevbestilling = berikBestillingMedPersondata(mottattBrevbestilling);
         DokgenDto dto = lagDokgenDtoFraBestilling(brevbestilling);
 
-        //NOTE Henter opplysninger på nytt for å sikre at korrekt adresse benyttes med mindre myndighet
         Mottaker mottaker = dto.getMottaker();
-        if (!Aktoersroller.TRYGDEMYNDIGHET.getKode().equals(mottaker.type())) {
-            String poststed = mottaker.poststed();
-            // Henter bare nytt poststed hvis land er Norge, ellers finnes ikke poststed og vi får ukjent
-            if (hasText(mottaker.postnr()) && Landkoder.NO.getKode().equals(mottaker.land())) {
-                poststed = dokgenMapperDatahenter.hentPoststed(mottaker.postnr());
-            }
-            String land = (dokgenMapperDatahenter.hentLandnavn(mottaker.land()));
-
-            dto.setMottaker(new Mottaker(mottaker.navn(), mottaker.adresselinjer(), mottaker.postnr(), poststed, land, mottaker.type()));
+        if (Aktoersroller.TRYGDEMYNDIGHET.getKode().equals(mottaker.type())) {
+            return dto;
         }
 
+        dto.setMottaker(lagMottakerUtenKoder(mottaker));
         return dto;
+    }
+
+    private Mottaker lagMottakerUtenKoder(Mottaker mottakerMedKoder) {
+        String poststed = mottakerMedKoder.poststed();
+        if (Landkoder.NO.getKode().equals(mottakerMedKoder.land()) && hasText(mottakerMedKoder.postnr())) {
+            poststed = dokgenMapperDatahenter.hentNorskPoststed(mottakerMedKoder.postnr());
+        }
+        String land = (dokgenMapperDatahenter.hentLandnavnFraLandkode(mottakerMedKoder.land()));
+        return new Mottaker(mottakerMedKoder.navn(), mottakerMedKoder.adresselinjer(), mottakerMedKoder.postnr(), poststed, land, mottakerMedKoder.type());
     }
 
     private DokgenBrevbestilling berikBestillingMedPersondata(DokgenBrevbestilling mottattBrevbestilling) {
@@ -77,14 +79,13 @@ public class DokgenMalMapper {
                     && dokument.getForsendelseJournalfoert() != null
                     && dokument.getForsendelseJournalfoert().isAfter(behandling.getRegistrertDato())
                     && dokument.getAvsenderType().equals(Avsendertyper.PERSON)
-            )
-            .collect(toList());
+            ).toList();
 
         return dokumenter.stream()
             .map(Journalpost::getForsendelseJournalfoert)
             .filter(Objects::nonNull)
             .sorted(Comparator.naturalOrder())
-            .collect(toList());
+            .toList();
     }
 
     private Avslagbrev hentAvslagsbrev(DokgenBrevbestilling brevbestilling) {
@@ -100,7 +101,7 @@ public class DokgenMalMapper {
         return switch (brevbestilling.getProduserbartdokument()) {
             case MELDING_FORVENTET_SAKSBEHANDLINGSTID, MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD -> SaksbehandlingstidSoknad.av(
                 brevbestilling.toBuilder()
-                    .medAvsenderLand(dokgenMapperDatahenter.hentLandnavn(brevbestilling.getAvsenderLand()))
+                    .medAvsenderLand(dokgenMapperDatahenter.hentLandnavnFraLandkode(brevbestilling.getAvsenderLand()))
                     .build(),
                 Saksbehandlingstid.beregnSaksbehandlingsfrist(brevbestilling.getForsendelseMottatt())
             );
