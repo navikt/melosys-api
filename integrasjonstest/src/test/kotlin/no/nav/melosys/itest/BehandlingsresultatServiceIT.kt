@@ -20,7 +20,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.domain.EntityScan
-import org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.context.annotation.Import
@@ -34,7 +33,6 @@ import java.time.LocalDate
 @ExtendWith(SpringExtension::class)
 @DataJpaTest(
     showSql = false,
-    excludeAutoConfiguration = [FlywayAutoConfiguration::class],
     properties = ["spring.profiles.active:test"]
 )
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
@@ -51,7 +49,7 @@ internal class BehandlingsresultatServiceIT(
     private val behandlingsresultatRepository: BehandlingsresultatRepository,
     @Autowired
     private val fagsakRepository: FagsakRepository
-) {
+    ) : OracleTestConteinerBase() {
     data class Behandlinger(val orginal: Behandling, val replika: Behandling)
 
     @Test
