@@ -3,6 +3,7 @@ package no.nav.melosys.service.behandling;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
@@ -19,9 +20,9 @@ import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.NY_VU
 
 public class MuligeManuelleBehandlingsendringer {
 
-    private static final Set<Behandlingstyper> MULIGE_TYPER = Set.of(ENDRET_PERIODE, NY_VURDERING);
     private static final Set<Behandlingsstatus> MULIGE_STATUSER = Set.of(AVVENT_DOK_PART, AVVENT_DOK_UTL, UNDER_BEHANDLING, AVVENT_FAGLIG_AVKLARING);
     private static final Set<Behandlingstema> TEMAER_SOM_KAN_AVSLUTTES = Set.of(ØVRIGE_SED_MED, ØVRIGE_SED_UFM, TRYGDETID, IKKE_YRKESAKTIV);
+    private static final Set<Behandlingstema> TEMAER_SOM_KAN_ENDRE_TYPE = Set.of(UTSENDT_ARBEIDSTAKER, UTSENDT_SELVSTENDIG);
 
     public static Set<Behandlingsstatus> hentMuligeStatuser(Behandling behandling) {
         if (behandling.erInaktiv()) return Collections.emptySet();
@@ -32,23 +33,27 @@ public class MuligeManuelleBehandlingsendringer {
             muligeStatuser.add(Behandlingsstatus.AVSLUTTET);
         }
 
-        return muligeStatuser;
+        return muligeStatuser.stream().filter(status -> status != behandling.getStatus()).collect(Collectors.toSet());
     }
 
     public static Set<Behandlingstyper> hentMuligeTyper(Behandling behandling) {
-        if (behandling.erInaktiv()) return Collections.emptySet();
+        if (behandling.erInaktiv() || !TEMAER_SOM_KAN_ENDRE_TYPE.contains(behandling.getTema())) {
+            return Collections.emptySet();
+        }
 
-        if (MULIGE_TYPER.contains(behandling.getType())) return MULIGE_TYPER;
-
-        return Collections.singleton(behandling.getType());
+        return switch (behandling.getType()) {
+            case ENDRET_PERIODE -> Collections.singleton(NY_VURDERING);
+            case NY_VURDERING -> Collections.singleton(ENDRET_PERIODE);
+            default -> Collections.emptySet();
+        };
     }
 
     public static Set<Behandlingstema> hentMuligeBehandlingstema(Behandling behandling, Behandlingsresultat behandlingsresultat) {
         boolean kanOppdatereBehandlingstema = kanOppdatereBehandlingstema(behandling, behandlingsresultat);
         if (kanOppdatereBehandlingstema && erGyldigBehandlingAvSøknad(behandling.getTema())) {
-            return BEHANDLINGSTEMA_SØKNAD;
+            return BEHANDLINGSTEMA_SØKNAD.stream().filter(tema -> tema != behandling.getTema()).collect(Collectors.toSet());
         } else if (kanOppdatereBehandlingstema && erBehandlingAvSedForespørsler(behandling.getTema())) {
-            return BEHANDLINGSTEMA_SED_FORESPØRSEL;
+            return BEHANDLINGSTEMA_SED_FORESPØRSEL.stream().filter(tema -> tema != behandling.getTema()).collect(Collectors.toSet());
         } else {
             return Collections.emptySet();
         }

@@ -95,7 +95,7 @@ class BehandlingServiceTest {
 
     @Test
     void endreBehandling() {
-        behandling.setTema(Behandlingstema.IKKE_YRKESAKTIV);
+        behandling.setTema(UTSENDT_ARBEIDSTAKER);
         behandling.setType(Behandlingstyper.ENDRET_PERIODE);
         behandling.setFagsak(new Fagsak());
         behandling.setBehandlingsgrunnlag(opprettBehandlingsgrunnlag());
