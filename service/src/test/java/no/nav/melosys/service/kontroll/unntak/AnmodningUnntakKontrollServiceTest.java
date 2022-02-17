@@ -56,7 +56,7 @@ class AnmodningUnntakKontrollServiceTest {
 
     @Test
     void utførKontroller_manglerBostedsadresse_returnererKode() {
-        when(behandlingService.hentBehandling(behandlingID)).thenReturn(lagBehandling());
+        when(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(lagBehandling());
         when(persondataFasade.hentPerson(anyString())).thenReturn(PersonopplysningerObjectFactory.lagPersonopplysningerUtenBostedsadresse());
 
         Collection<Kontrollfeil> resultat = anmodningUnntakKontrollService.utførKontroller(behandlingID);
@@ -67,7 +67,7 @@ class AnmodningUnntakKontrollServiceTest {
 
     @Test
     void utførKontroller_anmodningsperiodeManglerSluttdato_returnererKode() {
-        when(behandlingService.hentBehandling(behandlingID)).thenReturn(lagBehandling());
+        when(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(lagBehandling());
         anmodningsperiode.setTom(null);
 
         Collection<Kontrollfeil> resultat = anmodningUnntakKontrollService.utførKontroller(behandlingID);
@@ -80,7 +80,7 @@ class AnmodningUnntakKontrollServiceTest {
     void utførKontroller_arbeidsstedManglerFelter_returnererKode() {
         BehandlingsgrunnlagData behandlingsgrunnlagData = new BehandlingsgrunnlagData();
         behandlingsgrunnlagData.arbeidPaaLand.fysiskeArbeidssteder = List.of(new FysiskArbeidssted());
-        when(behandlingService.hentBehandling(behandlingID)).thenReturn(lagBehandling(behandlingsgrunnlagData));
+        when(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(lagBehandling(behandlingsgrunnlagData));
 
         Collection<Kontrollfeil> resultat = anmodningUnntakKontrollService.utførKontroller(behandlingID);
         assertThat(resultat)
@@ -92,7 +92,7 @@ class AnmodningUnntakKontrollServiceTest {
     void utførKontroller_foretakUtlandManglerFelter_returnererKode() {
         BehandlingsgrunnlagData behandlingsgrunnlagData = new BehandlingsgrunnlagData();
         behandlingsgrunnlagData.foretakUtland = List.of(new ForetakUtland());
-        when(behandlingService.hentBehandling(behandlingID)).thenReturn(lagBehandling(behandlingsgrunnlagData));
+        when(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(lagBehandling(behandlingsgrunnlagData));
 
         Collection<Kontrollfeil> resultat = anmodningUnntakKontrollService.utførKontroller(behandlingID);
         assertThat(resultat)

@@ -83,7 +83,7 @@ class BrevbestillingServiceTest {
 
     @Test
     void hentMuligeMottakere_hovedMottakerBruker_returnererBrukerSomHovedMottaker() {
-        when(mockBehandlingService.hentBehandling(123L)).thenReturn(behandling);
+        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
         when(mockBrevmottakerService.hentMottakerliste(MANGELBREV_BRUKER, 123L))
             .thenReturn(new Mottakerliste.Builder().medHovedMottaker(BRUKER).build());
         when(mockBrevmottakerService.avklarMottaker(eq(MANGELBREV_BRUKER), any(), eq(behandling)))
@@ -107,7 +107,7 @@ class BrevbestillingServiceTest {
 
     @Test
     void hentMuligeMottakere_hovedMottakerBrukerMedFullmektig_returnererFullmektigSomHovedMottaker() {
-        when(mockBehandlingService.hentBehandling(123L)).thenReturn(behandling);
+        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
         when(mockBrevmottakerService.hentMottakerliste(MANGELBREV_BRUKER, 123))
             .thenReturn(new Mottakerliste.Builder().medHovedMottaker(BRUKER).build());
         when(mockBrevmottakerService.avklarMottaker(any(Produserbaredokumenter.class), any(), eq(behandling)))
@@ -152,7 +152,7 @@ class BrevbestillingServiceTest {
 
     @Test
     void hentMuligeMottakere_kopiTilBruker_returnererBrukerSomKopi() {
-        when(mockBehandlingService.hentBehandling(123L)).thenReturn(behandling);
+        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
         when(mockBrevmottakerService.hentMottakerliste(MANGELBREV_BRUKER, 123))
             .thenReturn(new Mottakerliste.Builder().medHovedMottaker(ARBEIDSGIVER).medKopiMottaker(BRUKER).build());
         when(mockPersondataFasade.hentSammensattNavn(anyString())).thenReturn("Ola Nordmann");
@@ -175,7 +175,7 @@ class BrevbestillingServiceTest {
 
     @Test
     void hentMuligeMottakere_kopiTilBrukerMedFullmektig_returnererFullmektigSomKopi() {
-        when(mockBehandlingService.hentBehandling(123L)).thenReturn(behandling);
+        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
         when(mockBrevmottakerService.hentMottakerliste(MANGELBREV_BRUKER, 123))
             .thenReturn(new Mottakerliste.Builder().medHovedMottaker(ARBEIDSGIVER).medKopiMottaker(BRUKER).build());
         when(mockBrevmottakerService.avklarMottaker(eq(MANGELBREV_BRUKER), any(), eq(behandling)))
@@ -198,7 +198,7 @@ class BrevbestillingServiceTest {
 
     @Test
     void hentMuligeMottakere_kopiTilBrukerMedFullmektigNårHovedMottakerErBruker_returnererBrukerSomKopi() {
-        when(mockBehandlingService.hentBehandling(123L)).thenReturn(behandling);
+        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
         when(mockBrevmottakerService.hentMottakerliste(MANGELBREV_BRUKER, 123))
             .thenReturn(new Mottakerliste.Builder().medHovedMottaker(BRUKER).medKopiMottaker(BRUKER).build());
         when(mockBrevmottakerService.avklarMottaker(eq(MANGELBREV_BRUKER), any(), eq(behandling)))
@@ -228,7 +228,7 @@ class BrevbestillingServiceTest {
 
     @Test
     void hentMuligeMottakere_kopiTilArbeidsgiver_returnererArbeidsgiverSomKopi() {
-        when(mockBehandlingService.hentBehandling(123L)).thenReturn(behandling);
+        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
         when(mockBrevmottakerService.hentMottakerliste(MANGELBREV_BRUKER, 123))
             .thenReturn(new Mottakerliste.Builder().medHovedMottaker(BRUKER).medKopiMottaker(ARBEIDSGIVER).build());
         when(mockBrevmottakerService.avklarMottaker(eq(MANGELBREV_BRUKER), any(), eq(behandling)))
@@ -255,7 +255,7 @@ class BrevbestillingServiceTest {
 
     @Test
     void hentMuligeMottakere_kopiTilArbeidsgiverMedFullmektig_returnererFullmektigSomKopi() {
-        when(mockBehandlingService.hentBehandling(123L)).thenReturn(behandling);
+        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
         when(mockBrevmottakerService.hentMottakerliste(MANGELBREV_BRUKER, 123))
             .thenReturn(new Mottakerliste.Builder().medHovedMottaker(BRUKER).medKopiMottaker(ARBEIDSGIVER).build());
         when(mockBrevmottakerService.avklarMottaker(eq(MANGELBREV_BRUKER), any(), eq(behandling)))
@@ -280,7 +280,7 @@ class BrevbestillingServiceTest {
 
     @Test
     void hentMuligeMottakere_fastTilSkatt_returnererSkattSomFast() {
-        when(mockBehandlingService.hentBehandling(123L)).thenReturn(behandling);
+        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
         when(mockBrevmottakerService.hentMottakerliste(MANGELBREV_BRUKER, 123))
             .thenReturn(new Mottakerliste.Builder().medHovedMottaker(BRUKER).medFastMottaker(FastMottakerMedOrgnr.SKATT).build());
         when(mockBrevmottakerService.avklarMottaker(MANGELBREV_BRUKER, Mottaker.av(BRUKER), behandling))
@@ -303,7 +303,7 @@ class BrevbestillingServiceTest {
 
     @Test
     void hentBrevMaler_behandlingIkkeAvsluttet_returnererMaler() {
-        when(mockBehandlingService.hentBehandling(123L)).thenReturn(behandling);
+        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
 
         List<Produserbaredokumenter> brevMaler = brevbestillingService.hentMuligeProduserbaredokumenter(123L);
 
@@ -321,7 +321,7 @@ class BrevbestillingServiceTest {
     void hentBrevMaler_behandlingAvsluttet_returnererTomListe() {
         var behandling = new Behandling();
         behandling.setStatus(Behandlingsstatus.AVSLUTTET);
-        when(mockBehandlingService.hentBehandling(321L)).thenReturn(behandling);
+        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(321L)).thenReturn(behandling);
         List<Produserbaredokumenter> brevMaler = brevbestillingService.hentMuligeProduserbaredokumenter(321L);
 
         assertThat(brevMaler).isEmpty();
@@ -331,7 +331,7 @@ class BrevbestillingServiceTest {
     void hentBrevMaler_behandlingErSoeknad_returnererSoeknadMalITillegg() {
         var behandling = new Behandling();
         behandling.setType(Behandlingstyper.SOEKNAD);
-        when(mockBehandlingService.hentBehandling(321L)).thenReturn(behandling);
+        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(321L)).thenReturn(behandling);
         List<Produserbaredokumenter> brevMaler = brevbestillingService.hentMuligeProduserbaredokumenter(321L);
 
         assertThat(brevMaler)
@@ -349,7 +349,7 @@ class BrevbestillingServiceTest {
     void hentBrevMaler_behandlingErKlage_returnererKlageMalITillegg() {
         var behandling = new Behandling();
         behandling.setType(Behandlingstyper.KLAGE);
-        when(mockBehandlingService.hentBehandling(123L)).thenReturn(behandling);
+        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
         List<Produserbaredokumenter> brevMaler = brevbestillingService.hentMuligeProduserbaredokumenter(123L);
 
         assertThat(brevMaler)
@@ -366,7 +366,7 @@ class BrevbestillingServiceTest {
     @Test
     @Deprecated
     void hentBrevAdresseTilMottakere_brukerSomMottaker_returnererBrukeradresse() {
-        when(mockBehandlingService.hentBehandling(123L)).thenReturn(behandling);
+        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
         when(mockBrevmottakerService.avklarMottakere(any(), eq(Mottaker.av(Aktoersroller.BRUKER)), any(), eq(false), eq(false)))
             .thenReturn(List.of(lagAktoer(Aktoersroller.BRUKER, null)));
         when(mockPersondataFasade.hentPersonFraTps(any(), eq(Informasjonsbehov.STANDARD)))
@@ -384,7 +384,7 @@ class BrevbestillingServiceTest {
     @Test
     void hentBrevAdresseTilMottakereFraPdl_brukerSomMottaker_returnererBrukeradresse() {
         fakeUnleash.enable("melosys.pdl.aktiv");
-        when(mockBehandlingService.hentBehandling(123L)).thenReturn(behandling);
+        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
         when(mockBrevmottakerService.avklarMottakere(any(), eq(Mottaker.av(Aktoersroller.BRUKER)), any(), eq(false), eq(false)))
             .thenReturn(List.of(lagAktoer(Aktoersroller.BRUKER, null)));
         when(mockPersondataFasade.hentPerson(anyString())).thenReturn(lagPersondata());
@@ -401,7 +401,7 @@ class BrevbestillingServiceTest {
     void hentBrevAdresseTilMottakere_brukersFullmaktSomMottaker_returnererFullmektigsAdresse() {
         var behandling = new Behandling();
         behandling.setFagsak(new Fagsak());
-        when(mockBehandlingService.hentBehandling(123L)).thenReturn(behandling);
+        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
         when(mockBrevmottakerService.avklarMottakere(any(), eq(Mottaker.av(Aktoersroller.BRUKER)), any(), eq(false), eq(false)))
             .thenReturn(List.of(lagAktoer(Aktoersroller.REPRESENTANT, "orgNr")));
         when(mockEregFasade.hentOrganisasjon("orgNr")).thenReturn(lagORGSaksopplysning("orgNr", "Ola Nordmann Fullmektig"));
@@ -419,7 +419,7 @@ class BrevbestillingServiceTest {
         var behandling = new Behandling();
         behandling.setFagsak(new Fagsak());
 
-        when(mockBehandlingService.hentBehandling(123L)).thenReturn(behandling);
+        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
         when(mockBrevmottakerService.avklarMottakere(any(), eq(Mottaker.av(Aktoersroller.ARBEIDSGIVER)), any(), eq(false), eq(false)))
             .thenReturn(List.of(lagAktoer(Aktoersroller.ARBEIDSGIVER, "orgNr1"), lagAktoer(Aktoersroller.ARBEIDSGIVER, "orgNr2")));
         when(mockEregFasade.hentOrganisasjon("orgNr1")).thenReturn(lagORGSaksopplysning("orgNr1", "Ola Nordmann Rørleggerfirma"));
@@ -450,7 +450,7 @@ class BrevbestillingServiceTest {
     void hentBrevAdresseTilMottakere_arbeidsgiversFullmaktSomMottaker_returnererFullmektigsAdresse() {
         var behandling = new Behandling();
         behandling.setFagsak(new Fagsak());
-        when(mockBehandlingService.hentBehandling(123L)).thenReturn(behandling);
+        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
         when(mockBrevmottakerService.avklarMottakere(any(), eq(Mottaker.av(Aktoersroller.ARBEIDSGIVER)), any(), eq(false), eq(false)))
             .thenReturn(List.of(lagAktoer(Aktoersroller.REPRESENTANT, "orgNr")));
         when(mockEregFasade.hentOrganisasjon("orgNr")).thenReturn(lagORGSaksopplysning("orgNr", "Ola Nordmann Fullmektig"));
@@ -466,7 +466,7 @@ class BrevbestillingServiceTest {
     @Test
     void hentBrevAdresseTilMottakere_returnererAdresseFelterSomNull_nårGjeldendePostadresseErNull() {
         fakeUnleash.enable("melosys.pdl.aktiv");
-        when(mockBehandlingService.hentBehandling(123L)).thenReturn(behandling);
+        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
         when(mockBrevmottakerService.avklarMottakere(any(), eq(Mottaker.av(Aktoersroller.BRUKER)), any(), eq(false), eq(false)))
             .thenReturn(List.of(lagAktoer(Aktoersroller.BRUKER, null)));
         Personopplysninger persondata = PersonopplysningerObjectFactory.lagPersonopplysningerUtenAdresser();

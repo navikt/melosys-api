@@ -14,7 +14,9 @@ import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
-import no.nav.melosys.domain.person.familie.*;
+import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie;
+import no.nav.melosys.domain.person.familie.IkkeOmfattetFamilie;
+import no.nav.melosys.domain.person.familie.OmfattetFamilie;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.repository.AvklarteFaktaRepository;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
@@ -80,7 +82,7 @@ class AvklarteMedfolgendeFamilieServiceTest {
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setId(1L);
 
-        when(behandlingService.hentBehandlingUtenSaksopplysninger(1L)).thenReturn(mockBehandling());
+        when(behandlingService.hentBehandling(1L)).thenReturn(mockBehandling());
         when(behandlingsresultatService.hentBehandlingsresultat(1L)).thenReturn(behandlingsresultat);
 
         avklarteMedfolgendeFamilieService.lagreMedfolgendeFamilieSomAvklartefakta(1L, avklarteMedfolgendeFamilie);
@@ -126,7 +128,7 @@ class AvklarteMedfolgendeFamilieServiceTest {
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setId(1L);
 
-        when(behandlingService.hentBehandlingUtenSaksopplysninger(1L)).thenReturn(mockBehandling());
+        when(behandlingService.hentBehandling(1L)).thenReturn(mockBehandling());
         when(behandlingsresultatService.hentBehandlingsresultat(1L)).thenReturn(behandlingsresultat);
 
         avklarteMedfolgendeFamilieService.lagreMedfolgendeFamilieSomAvklartefakta(1L, avklarteMedfolgendeFamilie);
@@ -161,7 +163,7 @@ class AvklarteMedfolgendeFamilieServiceTest {
         AvklarteMedfolgendeFamilie avklarteMedfolgendeFamilie =
             new AvklarteMedfolgendeFamilie(Set.of(new OmfattetFamilie("uuid3")), Set.of());
 
-        when(behandlingService.hentBehandlingUtenSaksopplysninger(1L)).thenReturn(mockBehandling());
+        when(behandlingService.hentBehandling(1L)).thenReturn(mockBehandling());
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> avklarteMedfolgendeFamilieService.lagreMedfolgendeFamilieSomAvklartefakta(1L, avklarteMedfolgendeFamilie))
@@ -176,7 +178,7 @@ class AvklarteMedfolgendeFamilieServiceTest {
             new AvklarteMedfolgendeFamilie(Set.of(), Set.of(
                 new IkkeOmfattetFamilie("uuid3", OVER_18_AR.getKode(), fritekstBarn)));
 
-        when(behandlingService.hentBehandlingUtenSaksopplysninger(1L)).thenReturn(mockBehandling());
+        when(behandlingService.hentBehandling(1L)).thenReturn(mockBehandling());
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> avklarteMedfolgendeFamilieService.lagreMedfolgendeFamilieSomAvklartefakta(1L, avklarteMedfolgendeFamilie))
@@ -191,7 +193,7 @@ class AvklarteMedfolgendeFamilieServiceTest {
             new AvklarteMedfolgendeFamilie(Set.of(), Set.of(
                 new IkkeOmfattetFamilie(uuidBarn, SAMBOER_UTEN_FELLES_BARN.getKode(), fritekstBarn)));
 
-        when(behandlingService.hentBehandlingUtenSaksopplysninger(1L)).thenReturn(mockBehandling());
+        when(behandlingService.hentBehandling(1L)).thenReturn(mockBehandling());
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> avklarteMedfolgendeFamilieService.lagreMedfolgendeFamilieSomAvklartefakta(1L, avklarteMedfolgendeFamilie))
@@ -206,7 +208,7 @@ class AvklarteMedfolgendeFamilieServiceTest {
             new AvklarteMedfolgendeFamilie(Set.of(), Set.of(
                 new IkkeOmfattetFamilie(uuidEktefelleSamboer, OVER_18_AR.getKode(), fritekstEktefelleSamboer)));
 
-        when(behandlingService.hentBehandlingUtenSaksopplysninger(1L)).thenReturn(mockBehandling());
+        when(behandlingService.hentBehandling(1L)).thenReturn(mockBehandling());
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> avklarteMedfolgendeFamilieService.lagreMedfolgendeFamilieSomAvklartefakta(1L, avklarteMedfolgendeFamilie))
@@ -221,7 +223,7 @@ class AvklarteMedfolgendeFamilieServiceTest {
             new AvklarteMedfolgendeFamilie(Set.of(), Set.of(
                 new IkkeOmfattetFamilie(uuidBarn, null, fritekstBarn)));
 
-        when(behandlingService.hentBehandlingUtenSaksopplysninger(1L)).thenReturn(mockBehandling());
+        when(behandlingService.hentBehandling(1L)).thenReturn(mockBehandling());
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> avklarteMedfolgendeFamilieService.lagreMedfolgendeFamilieSomAvklartefakta(1L, avklarteMedfolgendeFamilie))

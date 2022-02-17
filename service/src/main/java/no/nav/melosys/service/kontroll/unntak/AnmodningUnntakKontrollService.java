@@ -38,7 +38,7 @@ public class AnmodningUnntakKontrollService implements AdresseUtlandKontroller {
 
     public Collection<Kontrollfeil> utførKontroller(long behandlingID) {
         return utførKontroller(
-            behandlingService.hentBehandling(behandlingID),
+            behandlingService.hentBehandlingMedSaksopplysninger(behandlingID),
             anmodningsperiodeService.hentFørsteAnmodningsperiode(behandlingID),
             anmodningUnntakKontroller()
         );

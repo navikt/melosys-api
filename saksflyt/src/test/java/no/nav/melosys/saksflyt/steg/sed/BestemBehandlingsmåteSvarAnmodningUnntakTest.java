@@ -98,7 +98,7 @@ class BestemBehandlingsmåteSvarAnmodningUnntakTest {
         Behandling behandling = lagBehandling(Behandlingsstatus.ANMODNING_UNNTAK_SENDT);
         prosessinstans.setBehandling(behandling);
 
-        when(behandlingService.hentBehandling(behandling.getId())).thenReturn(behandling);
+        when(behandlingService.hentBehandlingMedSaksopplysninger(behandling.getId())).thenReturn(behandling);
 
         bestemBehandlingsmåteSvarAnmodningUnntak.utfør(prosessinstans);
 
@@ -125,7 +125,7 @@ class BestemBehandlingsmåteSvarAnmodningUnntakTest {
         Behandling behandling = lagBehandling(Behandlingsstatus.VURDER_DOKUMENT);
         prosessinstans.setBehandling(behandling);
 
-        when(behandlingService.hentBehandling(behandling.getId())).thenReturn(behandling);
+        when(behandlingService.hentBehandlingMedSaksopplysninger(behandling.getId())).thenReturn(behandling);
 
         bestemBehandlingsmåteSvarAnmodningUnntak.utfør(prosessinstans);
 
@@ -177,7 +177,7 @@ class BestemBehandlingsmåteSvarAnmodningUnntakTest {
         Behandling behandling = lagBehandling();
         prosessinstans.setBehandling(behandling);
 
-        when(behandlingService.hentBehandling(behandling.getId())).thenReturn(behandling);
+        when(behandlingService.hentBehandlingMedSaksopplysninger(behandling.getId())).thenReturn(behandling);
 
         bestemBehandlingsmåteSvarAnmodningUnntak.utfør(prosessinstans);
 

@@ -114,7 +114,7 @@ public class BehandlingTjeneste {
         log.debug("Saksbehandler {} ber om å hente behandling {}.", saksbehandler, behandlingID);
         aksesskontroll.autoriser(behandlingID);
 
-        Behandling behandling = behandlingService.hentBehandling(behandlingID);
+        Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
         behandlingService.endreBehandlingsstatusFraOpprettetTilUnderBehandling(behandling);
         BehandlingDto behandlingDto = tilBehandlingDto(behandling, saksbehandler);
         return ResponseEntity.ok(behandlingDto);

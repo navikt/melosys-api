@@ -58,16 +58,16 @@ class BehandlingEventListenerTest {
     @Test
     void dokumentBestilt_dokumentErMangelbrevBehandlingIkkeAktiv_ingenAksjon() {
         behandling.setStatus(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
-        when(behandlingService.hentBehandlingUtenSaksopplysninger(BEHANDLING_ID)).thenReturn(behandling);
+        when(behandlingService.hentBehandling(BEHANDLING_ID)).thenReturn(behandling);
         behandlingEventListener.dokumentBestilt(new DokumentBestiltEvent(BEHANDLING_ID, Produserbaredokumenter.MELDING_MANGLENDE_OPPLYSNINGER));
-        verify(behandlingService).hentBehandlingUtenSaksopplysninger(BEHANDLING_ID);
+        verify(behandlingService).hentBehandling(BEHANDLING_ID);
         verifyNoMoreInteractions(behandlingService);
     }
 
     @Test
     void dokumentBestilt_dokumentErMangelbrevBehandlingErAktiv_oppdatererStatusOgFrist() {
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
-        when(behandlingService.hentBehandlingUtenSaksopplysninger(BEHANDLING_ID)).thenReturn(behandling);
+        when(behandlingService.hentBehandling(BEHANDLING_ID)).thenReturn(behandling);
         behandlingEventListener.dokumentBestilt(new DokumentBestiltEvent(BEHANDLING_ID, Produserbaredokumenter.MELDING_MANGLENDE_OPPLYSNINGER));
         verify(behandlingService).oppdaterStatusOgSvarfrist(eq(behandling), eq(Behandlingsstatus.AVVENT_DOK_PART), any(Instant.class));
     }
@@ -75,7 +75,7 @@ class BehandlingEventListenerTest {
     @Test
     void dokumentBestilt_dokumentErNyttMangelbrevTilBrukerBehandlingErAktiv_oppdatererStatusOgFrist() {
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
-        when(behandlingService.hentBehandlingUtenSaksopplysninger(BEHANDLING_ID)).thenReturn(behandling);
+        when(behandlingService.hentBehandling(BEHANDLING_ID)).thenReturn(behandling);
         behandlingEventListener.dokumentBestilt(new DokumentBestiltEvent(BEHANDLING_ID, Produserbaredokumenter.MANGELBREV_BRUKER));
         verify(behandlingService).oppdaterStatusOgSvarfrist(eq(behandling), eq(Behandlingsstatus.AVVENT_DOK_PART), any(Instant.class));
     }
@@ -83,7 +83,7 @@ class BehandlingEventListenerTest {
     @Test
     void dokumentBestilt_dokumentErNyttMangelbrevTilArbeidsgiverBehandlingErAktiv_oppdatererStatusOgFrist() {
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
-        when(behandlingService.hentBehandlingUtenSaksopplysninger(BEHANDLING_ID)).thenReturn(behandling);
+        when(behandlingService.hentBehandling(BEHANDLING_ID)).thenReturn(behandling);
         behandlingEventListener.dokumentBestilt(new DokumentBestiltEvent(BEHANDLING_ID, Produserbaredokumenter.MANGELBREV_ARBEIDSGIVER));
         verify(behandlingService).oppdaterStatusOgSvarfrist(eq(behandling), eq(Behandlingsstatus.AVVENT_DOK_PART), any(Instant.class));
     }
@@ -97,12 +97,12 @@ class BehandlingEventListenerTest {
         behandling.setFagsak(fagsak);
         Oppgave oppgave = new Oppgave.Builder().setOppgaveId(OPPGAVE_ID).build();
 
-        when(behandlingService.hentBehandling(BEHANDLING_ID)).thenReturn(behandling);
+        when(behandlingService.hentBehandlingMedSaksopplysninger(BEHANDLING_ID)).thenReturn(behandling);
         when(oppgaveService.finnÅpenOppgaveMedFagsaksnummer(FAGSAKSNUMMER)).thenReturn(Optional.of(oppgave));
 
         behandlingEventListener.behandlingsfristEndret(new BehandlingsfristEndretEvent(BEHANDLING_ID, nå.plusWeeks(1)));
 
-        verify(behandlingService, only()).hentBehandling(BEHANDLING_ID);
+        verify(behandlingService, only()).hentBehandlingMedSaksopplysninger(BEHANDLING_ID);
         verify(oppgaveService).oppdaterOppgave(eq(OPPGAVE_ID), oppgaveOppdateringCaptor.capture());
         assertThat(oppgaveOppdateringCaptor.getValue().getFristFerdigstillelse()).isEqualTo(nå.plusWeeks(1));
     }

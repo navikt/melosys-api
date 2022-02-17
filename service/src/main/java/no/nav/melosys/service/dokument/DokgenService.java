@@ -70,7 +70,7 @@ public class DokgenService {
 
     public byte[] produserUtkast(long behandlingId, BrevbestillingRequest brevbestillingRequest) {
         Produserbaredokumenter produserbartdokument = brevbestillingRequest.getProduserbardokument();
-        Behandling behandling = behandlingService.hentBehandling(behandlingId);
+        Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingId);
         Aktoer mottaker;
         if (hasText(brevbestillingRequest.getOrgNr()) || hasText(brevbestillingRequest.getInstitusjonId())) {
             mottaker = new Aktoer();
@@ -94,7 +94,7 @@ public class DokgenService {
     }
 
     public byte[] produserBrev(Aktoer mottaker, DokgenBrevbestilling brevbestilling) {
-        Behandling behandling = behandlingService.hentBehandling(brevbestilling.getBehandlingId());
+        Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(brevbestilling.getBehandlingId());
         String malnavn = dokumentproduksjonsInfoMapper.hentMalnavn(brevbestilling.getProduserbartdokument());
         String orgnr = mottaker != null ? mottaker.getOrgnr() : null;
         DokgenBrevbestilling.Builder<?> builder = brevbestilling.toBuilder();
@@ -116,7 +116,7 @@ public class DokgenService {
 
     public void produserOgDistribuerBrev(long behandlingId, BrevbestillingRequest brevbestillingRequest) {
         Produserbaredokumenter produserbartDokument = brevbestillingRequest.getProduserbardokument();
-        var behandling = behandlingService.hentBehandling(behandlingId);
+        var behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingId);
 
         DokgenBrevbestilling.Builder<?> brevbestilling = lagDokgenBrevbestilling(brevbestillingRequest);
 

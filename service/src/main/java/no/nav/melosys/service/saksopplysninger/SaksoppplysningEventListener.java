@@ -42,7 +42,7 @@ public class SaksoppplysningEventListener {
     public void lagrePersonopplysninger(BehandlingEndretStatusEvent event) {
         if (unleash.isEnabled("melosys.pdl.aktiv")) {
             if (List.of(Behandlingsstatus.AVSLUTTET, Behandlingsstatus.IVERKSETTER_VEDTAK, Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING).contains(event.getBehandlingsstatus())) {
-                Behandling behandling = behandlingService.hentBehandling(event.getBehandling().getId());
+                Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(event.getBehandling().getId());
 
                 if (behandling.manglerSaksopplysningerAvType(List.of(SaksopplysningType.PDL_PERSOPL))) {
                     Persondata persondata = persondataFasade.hentPerson(behandling.getFagsak().hentAktørID(), Informasjonsbehov.MED_FAMILIERELASJONER);

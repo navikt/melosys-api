@@ -198,7 +198,7 @@ public class PersondataService implements PersondataFasade {
 
     @Override
     public PersonMedHistorikk hentPersonMedHistorikk(long behandlingID) {
-        final var behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
+        final var behandling = behandlingService.hentBehandling(behandlingID);
         final String ident = behandling.getFagsak().hentAktørID();
         if (behandling.erAktiv()) {
             return hentPersonMedHistorikk(ident);
@@ -258,7 +258,7 @@ public class PersondataService implements PersondataFasade {
 
     @Override
     public Set<Familiemedlem> hentFamiliemedlemmerMedHistorikk(long behandlingID) {
-        final var behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
+        final var behandling = behandlingService.hentBehandling(behandlingID);
         final String ident = behandling.getFagsak().hentAktørID();
         if (behandling.erAktiv() && erRegistrertEtterPdlStart(behandling)) {
             return hentFamiliemedlemmerMedHistorikk(ident);

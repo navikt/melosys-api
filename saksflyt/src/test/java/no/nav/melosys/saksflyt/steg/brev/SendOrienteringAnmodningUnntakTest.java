@@ -42,7 +42,7 @@ class SendOrienteringAnmodningUnntakTest {
         behandling.setType(Behandlingstyper.SOEKNAD);
         behandling.setId(1L);
 
-        when(behandlingService.hentBehandling(eq(behandling.getId()))).thenReturn(behandling);
+        when(behandlingService.hentBehandlingMedSaksopplysninger(eq(behandling.getId()))).thenReturn(behandling);
 
         prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);

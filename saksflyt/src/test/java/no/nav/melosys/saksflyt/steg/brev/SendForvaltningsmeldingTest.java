@@ -41,14 +41,14 @@ class SendForvaltningsmeldingTest {
         Behandling behandling = new Behandling();
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         behandling.setId(behandlingID);
-        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
 
         prosessinstans.setBehandling(behandling);
         prosessinstans.setData(ProsessDataKey.SAKSBEHANDLER, "TEST");
 
         sendForvaltningsmelding.utfør(prosessinstans);
 
-        verify(behandlingService).hentBehandling(behandlingID);
+        verify(behandlingService).hentBehandlingMedSaksopplysninger(behandlingID);
         verify(brevBestiller).bestill(eq(Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID), anyString(), eq(Mottaker.av(Aktoersroller.BRUKER)), any(Behandling.class));
     }
 

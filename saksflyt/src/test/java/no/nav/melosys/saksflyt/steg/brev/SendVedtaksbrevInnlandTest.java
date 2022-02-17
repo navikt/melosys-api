@@ -107,7 +107,7 @@ class SendVedtaksbrevInnlandTest {
         BrevBestiller brevBestiller = new BrevBestiller(dokumentServiceFasade);
 
         BehandlingService behandlingService = mock(BehandlingService.class);
-        when(behandlingService.hentBehandling(behandling.getId())).thenReturn(behandling);
+        when(behandlingService.hentBehandlingMedSaksopplysninger(behandling.getId())).thenReturn(behandling);
 
         return new SendVedtaksbrevInnland(brevBestiller, behandlingService, mockBehandlingsresultatService());
     }
@@ -126,7 +126,7 @@ class SendVedtaksbrevInnlandTest {
             ART13_1B1_UTPEKING_BEHANDLINGSID,
             ART11_4_INNVILGET_BEHANDLINGSID,
             ART12_1_FORKORTET_PERIODE_BEHANDLINGSID);
-        when(behandlingService.hentBehandling(longThat(behandlingReferanser::contains))).thenReturn(behandling);
+        when(behandlingService.hentBehandlingMedSaksopplysninger(longThat(behandlingReferanser::contains))).thenReturn(behandling);
         return behandlingService;
     }
 

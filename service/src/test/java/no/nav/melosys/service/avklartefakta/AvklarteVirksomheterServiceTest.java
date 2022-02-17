@@ -9,14 +9,14 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
+import no.nav.melosys.domain.adresse.Adresse;
+import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.ForetakUtland;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.SelvstendigForetak;
-import no.nav.melosys.domain.adresse.Adresse;
-import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.felles.Periode;
@@ -69,12 +69,12 @@ class AvklarteVirksomheterServiceTest {
 
     private AvklarteVirksomheterService avklarteVirksomheterService;
 
-    private String orgnr1 = "111111111";
-    private String orgnr2 = "222222222";
-    private String orgnr3 = "333333333";
-    private String orgnr4 = "444444444";
-    private String uuid1 = "a2k2jf-a3khs";
-    private String uuid2 = "0dkf93-kj701";
+    private final String orgnr1 = "111111111";
+    private final String orgnr2 = "222222222";
+    private final String orgnr3 = "333333333";
+    private final String orgnr4 = "444444444";
+    private final String uuid1 = "a2k2jf-a3khs";
+    private final String uuid2 = "0dkf93-kj701";
 
     Function<OrganisasjonDokument, Adresse> INGEN_ADRESSE = org -> null;
 
@@ -312,7 +312,7 @@ class AvklarteVirksomheterServiceTest {
         behandling.setSaksopplysninger(Set.of(saksopplysning));
         behandling.setBehandlingsgrunnlag(behandlingsgrunnlag);
 
-        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
     }
 
     private void leggTilIRegisterOppslag(Collection<String> orgnumre) {

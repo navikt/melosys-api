@@ -102,7 +102,7 @@ public class BestemBehandlingsmåteSvarAnmodningUnntak implements StegBehandler 
                                            MelosysEessiMelding melosysEessiMelding) {
         return anmodningsperiode.getAnmodningsperiodeSvar().erInnvilgelse()
             && !melosysEessiMelding.inneholderYtterligereInformasjon()
-            && behandlingService.hentBehandling(behandlingID).harStatus(Behandlingsstatus.ANMODNING_UNNTAK_SENDT);
+            && behandlingService.hentBehandlingMedSaksopplysninger(behandlingID).harStatus(Behandlingsstatus.ANMODNING_UNNTAK_SENDT);
     }
 
     private void fattVedtak(long behandlingID) {

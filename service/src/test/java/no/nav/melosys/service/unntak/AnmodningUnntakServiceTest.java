@@ -83,7 +83,7 @@ class AnmodningUnntakServiceTest {
         behandling.setFagsak(fagsak);
         behandling.getSaksopplysninger().add(lagPersonSaksopplysning());
         behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
-        when(behandlingService.hentBehandling(BEHANDLING_ID)).thenReturn(behandling);
+        when(behandlingService.hentBehandlingMedSaksopplysninger(BEHANDLING_ID)).thenReturn(behandling);
         when(landvelgerService.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID)).thenReturn(Collections.singletonList(Landkoder.SE));
 
         anmodningUnntakService.anmodningOmUnntak(BEHANDLING_ID, MOTTAKER_INSTITUSJON, Set.of(dokumentReferanse), FRITEKST_SED);
@@ -104,7 +104,7 @@ class AnmodningUnntakServiceTest {
         fagsak.setSaksnummer(SAKSNUMMER);
         behandling.setFagsak(fagsak);
         behandling.getSaksopplysninger().add(lagPersonSaksopplysning());
-        when(behandlingService.hentBehandling(BEHANDLING_ID)).thenReturn(behandling);
+        when(behandlingService.hentBehandlingMedSaksopplysninger(BEHANDLING_ID)).thenReturn(behandling);
         when(landvelgerService.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID)).thenReturn(Collections.singletonList(Landkoder.SE));
 
         anmodningUnntakService.anmodningOmUnntak(BEHANDLING_ID, null, Collections.emptySet(), FRITEKST_SED);
@@ -122,13 +122,13 @@ class AnmodningUnntakServiceTest {
         Behandling behandling = lagBehandling();
         behandling.setTema(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL);
 
-        when(behandlingService.hentBehandlingUtenSaksopplysninger(anyLong())).thenReturn(behandling);
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
         when(anmodningsperiodeService.hentAnmodningsperiodeSvarForBehandling(anyLong())).thenReturn(Collections.singletonList(new AnmodningsperiodeSvar()));
         when(lovvalgsperiodeService.hentLovvalgsperioder(anyLong())).thenReturn(Collections.singletonList(new Lovvalgsperiode()));
 
         anmodningUnntakService.anmodningOmUnntakSvar(BEHANDLING_ID, FRITEKST_SED);
 
-        verify(behandlingService).hentBehandlingUtenSaksopplysninger(BEHANDLING_ID);
+        verify(behandlingService).hentBehandling(BEHANDLING_ID);
         verify(anmodningsperiodeService).hentAnmodningsperiodeSvarForBehandling(BEHANDLING_ID);
         verify(lovvalgsperiodeService).hentLovvalgsperioder(BEHANDLING_ID);
         verify(prosessinstansService).opprettProsessinstansAnmodningOmUnntakMottakSvar(behandling, FRITEKST_SED);
@@ -138,7 +138,7 @@ class AnmodningUnntakServiceTest {
     @Test
     void anmodningOmUnntakSvar_feilBehandlingstype_forventException() {
         Behandling behandling = lagBehandling();
-        when(behandlingService.hentBehandlingUtenSaksopplysninger(anyLong())).thenReturn(behandling);
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> anmodningUnntakService.anmodningOmUnntakSvar(BEHANDLING_ID, null))
@@ -150,7 +150,7 @@ class AnmodningUnntakServiceTest {
         Behandling behandling = lagBehandling();
         behandling.setTema(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL);
         behandling.setStatus(Behandlingsstatus.AVSLUTTET);
-        when(behandlingService.hentBehandlingUtenSaksopplysninger(anyLong())).thenReturn(behandling);
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> anmodningUnntakService.anmodningOmUnntakSvar(BEHANDLING_ID, null))
@@ -162,7 +162,7 @@ class AnmodningUnntakServiceTest {
         Behandling behandling = lagBehandling();
         behandling.setTema(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL);
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
-        when(behandlingService.hentBehandlingUtenSaksopplysninger(anyLong())).thenReturn(behandling);
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> anmodningUnntakService.anmodningOmUnntakSvar(BEHANDLING_ID, null))
@@ -175,7 +175,7 @@ class AnmodningUnntakServiceTest {
         behandling.setTema(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL);
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
 
-        when(behandlingService.hentBehandlingUtenSaksopplysninger(anyLong())).thenReturn(behandling);
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
         when(anmodningsperiodeService.hentAnmodningsperiodeSvarForBehandling(anyLong())).thenReturn(Collections.singletonList(new AnmodningsperiodeSvar()));
 
         assertThatExceptionOfType(FunksjonellException.class)
@@ -193,7 +193,7 @@ class AnmodningUnntakServiceTest {
         anmodningsperiodeSvar.setBegrunnelseFritekst(RandomStringUtils.random(256));
         anmodningsperiodeSvar.setAnmodningsperiodeSvarType(Anmodningsperiodesvartyper.AVSLAG);
 
-        when(behandlingService.hentBehandlingUtenSaksopplysninger(anyLong())).thenReturn(behandling);
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
         when(anmodningsperiodeService.hentAnmodningsperiodeSvarForBehandling(anyLong())).thenReturn(Collections.singletonList(anmodningsperiodeSvar));
         when(lovvalgsperiodeService.hentLovvalgsperioder(anyLong())).thenReturn(Collections.singletonList(new Lovvalgsperiode()));
 

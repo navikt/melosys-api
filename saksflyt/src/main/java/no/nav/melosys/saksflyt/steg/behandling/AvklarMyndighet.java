@@ -39,7 +39,7 @@ public class AvklarMyndighet implements StegBehandler {
     public void utfør(Prosessinstans prosessinstans) {
 
         Long behandlingID = prosessinstans.getBehandling().getId();
-        Behandling behandling = behandlingService.hentBehandling(behandlingID);
+        Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
 
         boolean innvilgelseEllerAnmodningUnntakSkalSendes = prosessinstans.getType() == ProsessType.ANMODNING_OM_UNNTAK

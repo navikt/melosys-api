@@ -39,7 +39,7 @@ public class SendOrienteringsbrevVideresendSøknad implements StegBehandler {
 
     @Override
     public void utfør(Prosessinstans prosessinstans) {
-        Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
+        Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(prosessinstans.getBehandling().getId());
         String saksbehandler = prosessinstans.getData(SAKSBEHANDLER);
         String fritekst = prosessinstans.getData(BEHANDLINGSRESULTAT_BEGRUNNELSE_FRITEKST);
 

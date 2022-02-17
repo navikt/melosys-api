@@ -60,7 +60,7 @@ class InngangsvilkaarServiceTest {
         final List<String> søknadsland = List.of("FR", "DK", "NO");
         final var periode = new no.nav.melosys.domain.behandlingsgrunnlag.data.Periode(LocalDate.now().plusYears(1), LocalDate.MAX);
         final String ident = "aktørID";
-        when(behandlingService.hentBehandlingUtenSaksopplysninger(anyLong())).thenReturn(lagBehandling());
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling());
         final Set<Statsborgerskap> statsborgerskap = Set.of(
             new no.nav.melosys.domain.person.Statsborgerskap("FIN", null, LocalDate.parse("1989-11-18"), null, "FREG",
                 "Dolly", false),
@@ -86,7 +86,7 @@ class InngangsvilkaarServiceTest {
     void vurderOgLagreInngangsvilkår_manglerStatsborgerskap_girBegrunnelse() {
         final List<String> landkoder = List.of("FR", "DK", "NO");
         final var periode = new no.nav.melosys.domain.behandlingsgrunnlag.data.Periode(LocalDate.now().minusYears(2), LocalDate.now().minusYears(1));
-        when(behandlingService.hentBehandlingUtenSaksopplysninger(anyLong())).thenReturn(lagBehandling());
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling());
         when(persondataFasade.hentStatsborgerskap(any())).thenReturn(Collections.emptySet());
 
         inngangsvilkaarService.vurderOgLagreInngangsvilkår(1L, landkoder, false, periode);
@@ -101,7 +101,7 @@ class InngangsvilkaarServiceTest {
 
         final List<String> landkoder = List.of("FR", "DK", "NO");
         final var periode = new no.nav.melosys.domain.behandlingsgrunnlag.data.Periode(LocalDate.now().plusYears(1), null);
-        when(behandlingService.hentBehandlingUtenSaksopplysninger(anyLong())).thenReturn(lagBehandling());
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling());
         final Set<Statsborgerskap> statsborgerskap = Set.of(
             new no.nav.melosys.domain.person.Statsborgerskap("FIN", null, LocalDate.parse("1989-11-18"), null, "FREG",
                 "Dolly", false)
@@ -121,7 +121,7 @@ class InngangsvilkaarServiceTest {
     @Test
     void vurderOgLagreInngangsvilkår_ukjenteEllerAlleEosLand() {
         final var periode = new no.nav.melosys.domain.behandlingsgrunnlag.data.Periode(LocalDate.now().plusYears(1), LocalDate.MAX);
-        when(behandlingService.hentBehandlingUtenSaksopplysninger(anyLong())).thenReturn(lagBehandling());
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling());
         final Set<Statsborgerskap> statsborgerskap = Set.of(
             new no.nav.melosys.domain.person.Statsborgerskap("FIN", null, LocalDate.parse("1989-11-18"), null, "FREG",
                 "Dolly", false)
@@ -143,7 +143,7 @@ class InngangsvilkaarServiceTest {
     void vurderOgLagreInngangsvilkår_feil_girBegrunnelse() {
         final List<String> landkoder = List.of("FR", "DK", "NO");
         final var periode = new no.nav.melosys.domain.behandlingsgrunnlag.data.Periode(LocalDate.now().plusYears(1), LocalDate.MAX);
-        when(behandlingService.hentBehandlingUtenSaksopplysninger(anyLong())).thenReturn(lagBehandling());
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling());
         final Set<Statsborgerskap> statsborgerskap = Set.of(
             new no.nav.melosys.domain.person.Statsborgerskap("FIN", null, LocalDate.parse("1989-11-18"), null, "FREG",
                 "Dolly", false)

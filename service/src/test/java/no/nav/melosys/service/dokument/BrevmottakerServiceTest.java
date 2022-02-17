@@ -290,7 +290,7 @@ class BrevmottakerServiceTest {
 
     @Test
     void gittMangelbrevArbeidsgiver_skalHovedmottakerVæreArbeidsgiverMedKopi() {
-        when(behandlingService.hentBehandling(123L)).thenReturn(behandling);
+        when(behandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
         when(behandling.getFagsak()).thenReturn(lagFagsakMedRepresentant(null));
 
         assertThat(brevmottakerService.hentMottakerliste(MANGELBREV_ARBEIDSGIVER, 123))
@@ -412,7 +412,7 @@ class BrevmottakerServiceTest {
     void gittInnvilgelsesbrevUK_skalHovedmottakerVæreBrukerMedKopier() {
         var lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1);
-        when(behandlingService.hentBehandling(123L)).thenReturn(behandling);
+        when(behandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
         when(behandling.getFagsak()).thenReturn(lagFagsakMedRepresentant(null));
         when(lovvalgsperiodeService.hentValidertLovvalgsperiode(anyLong())).thenReturn(lovvalgsperiode);
 
@@ -433,7 +433,7 @@ class BrevmottakerServiceTest {
     void gittInnvilgelsesbrevUKOgArt82_skalIkkeMyndighetFåKopi() {
         var lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_trygdeavtale_uk.UK_ART8_2);
-        when(behandlingService.hentBehandling(123L)).thenReturn(behandling);
+        when(behandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
         when(behandling.getFagsak()).thenReturn(lagFagsakMedRepresentant(null));
         when(lovvalgsperiodeService.hentValidertLovvalgsperiode(anyLong())).thenReturn(lovvalgsperiode);
 
@@ -535,7 +535,7 @@ class BrevmottakerServiceTest {
 
         when(trygdeavgiftsberegningService.finnBeregningsresultat(anyLong())).thenReturn(trygdeavgiftsberegningsresultat);
 
-        when(behandlingService.hentBehandling(123L)).thenReturn(behandling);
+        when(behandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
         Fagsak fagsak = lagFagsakMedRepresentant(representerer);
         fagsak.setType(Sakstyper.FTRL);
         when(behandling.getFagsak()).thenReturn(fagsak);

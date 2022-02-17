@@ -87,7 +87,7 @@ public class OpprettJournalforBrev implements StegBehandler {
             throw new FunksjonellException("Prosessinstans mangler behandling");
         }
 
-        Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
+        Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(prosessinstans.getBehandling().getId());
         String brukerFnr = hentBrukerFolkeregisterIdent(behandling);
         Aktoersroller mottakerrolle = prosessinstans.getData(MOTTAKER, Aktoersroller.class, null);
         var brevbestilling = prosessinstans.getData(BREVBESTILLING, DokgenBrevbestilling.class);

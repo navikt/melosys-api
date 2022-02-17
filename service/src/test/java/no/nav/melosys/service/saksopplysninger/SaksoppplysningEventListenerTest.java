@@ -46,7 +46,7 @@ class SaksoppplysningEventListenerTest {
         Behandling behandling = SaksbehandlingDataFactory.lagBehandling();
         behandling.setStatus(Behandlingsstatus.IVERKSETTER_VEDTAK);
 
-        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
         Personopplysninger personopplysninger = PersonopplysningerObjectFactory.lagPersonopplysninger();
         when(persondataFasade.hentPerson("aktørID", Informasjonsbehov.MED_FAMILIERELASJONER)).thenReturn(personopplysninger);
         PersonMedHistorikk personMedHistorikk = PersonopplysningerObjectFactory.lagPersonMedHistorikk();

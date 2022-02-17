@@ -61,7 +61,7 @@ class RegisteropplysningerServiceTest {
     @Mock
     private RegisteropplysningerPeriodeFactory registeropplysningerPeriodeFactory;
 
-    private FakeUnleash unleash = new FakeUnleash();
+    private final FakeUnleash unleash = new FakeUnleash();
 
     private RegisteropplysningerService registeropplysningerService;
 
@@ -80,7 +80,7 @@ class RegisteropplysningerServiceTest {
         when(persondataFasade.hentPersonhistorikk(anyString(), anyLocalDate())).thenReturn(lagSaksopplysning(SaksopplysningType.PERSHIST));
         when(sobService.finnSakOgBehandlingskjedeListe(anyString())).thenReturn(lagSaksopplysning(SaksopplysningType.SOB_SAK));
 
-        when(behandlingService.hentBehandlingUtenSaksopplysninger(anyLong())).thenReturn(hentBehandling());
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(hentBehandling());
         when(saksopplysningerService.finnArbeidsforholdsopplysninger(anyLong())).thenReturn(Optional.of(lagArbeidsforholdDokument()));
         when(saksopplysningerService.finnInntektsopplysninger(anyLong())).thenReturn(Optional.empty());
 
@@ -110,7 +110,7 @@ class RegisteropplysningerServiceTest {
                 .build());
 
         verify(behandlingService).lagre(any(Behandling.class));
-        verify(behandlingService, never()).hentBehandling(anyLong());
+        verify(behandlingService, never()).hentBehandlingMedSaksopplysninger(anyLong());
 
         verify(aaregFasade).finnArbeidsforholdPrArbeidstaker(anyString(), anyLocalDate(), anyLocalDate());
         verify(inntektService).hentInntektListe(anyString(), anyYearMonth(), anyYearMonth());
@@ -133,7 +133,7 @@ class RegisteropplysningerServiceTest {
         saksopplysning.setType(SaksopplysningType.ARBFORH);
         saksopplysning.leggTilKildesystemOgMottattDokument(
             SaksopplysningKildesystem.AAREG, null);
-        when(behandlingService.hentBehandlingUtenSaksopplysninger(anyLong())).thenReturn(hentBehandling(saksopplysning));
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(hentBehandling(saksopplysning));
 
         registeropplysningerService.hentOgLagreOpplysninger(
             RegisteropplysningerRequest.builder()
@@ -145,7 +145,7 @@ class RegisteropplysningerServiceTest {
                 .build());
 
         verify(behandlingService).lagre(any(Behandling.class));
-        verify(behandlingService, never()).hentBehandling(anyLong());
+        verify(behandlingService, never()).hentBehandlingMedSaksopplysninger(anyLong());
 
         // Noen av stegene er avhengige av hverandre. Det er viktig at vi ivaretar rekkefølgen.
         InOrder inntektFørOrg = inOrder(inntektService, eregFasade);
@@ -285,7 +285,7 @@ class RegisteropplysningerServiceTest {
             .saksopplysningTyper(saksopplysningstyper().personopplysninger().build())
             .build());
 
-        verify(behandlingService).hentBehandlingUtenSaksopplysninger(eq(1L));
+        verify(behandlingService).hentBehandling(eq(1L));
     }
 
     private Behandling hentBehandling() {

@@ -91,7 +91,7 @@ class UtpekingServiceTest {
         behandling.setFagsak(fagsak);
         behandlingsresultat.setId(behandlingID);
 
-        when(behandlingService.hentBehandlingUtenSaksopplysninger(eq(behandlingID))).thenReturn(behandling);
+        when(behandlingService.hentBehandling(eq(behandlingID))).thenReturn(behandling);
         when(behandlingsresultatService.hentBehandlingsresultat(eq(behandlingID))).thenReturn(behandlingsresultat);
     }
 

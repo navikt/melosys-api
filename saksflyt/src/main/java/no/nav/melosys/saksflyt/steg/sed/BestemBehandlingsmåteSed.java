@@ -46,7 +46,7 @@ public class BestemBehandlingsmåteSed implements StegBehandler {
     @Override
     public void utfør(Prosessinstans prosessinstans) {
 
-        Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
+        Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(prosessinstans.getBehandling().getId());
         final long behandlingID = behandling.getId();
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
 

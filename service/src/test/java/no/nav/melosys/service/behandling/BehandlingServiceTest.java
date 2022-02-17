@@ -44,7 +44,7 @@ class BehandlingServiceTest {
     private static final Behandlingstema BEHANDLING_TEMA = Behandlingstema.ARBEID_FLERE_LAND;
     private static final Behandlingsstatus BEHANDLING_STATUS = UNDER_BEHANDLING;
     private static final LocalDate BEHANDLING_FRIST = LocalDate.now().plusMonths(1);
-    private Behandlingsresultat BEHANDLINGSRESULTAT = new Behandlingsresultat();
+    private final Behandlingsresultat BEHANDLINGSRESULTAT = new Behandlingsresultat();
     private static final String SAKSNUMMER = "12";
     private static final List<Long> PERIODE_IDS = Arrays.asList(2L, 3L);
 
@@ -89,7 +89,7 @@ class BehandlingServiceTest {
         when(behandlingRepo.findWithSaksopplysningerById(BEHANDLING_ID)).thenReturn(null);
 
         assertThatExceptionOfType(IkkeFunnetException.class)
-            .isThrownBy(() -> behandlingService.hentBehandling(BEHANDLING_ID))
+            .isThrownBy(() -> behandlingService.hentBehandlingMedSaksopplysninger(BEHANDLING_ID))
             .withMessage("Finner ikke behandling med id " + BEHANDLING_ID);
     }
 

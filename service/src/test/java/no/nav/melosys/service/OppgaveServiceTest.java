@@ -111,7 +111,7 @@ class OppgaveServiceTest {
         fagsak.setStatus(Saksstatuser.OPPRETTET);
         Behandling behandling = lagBehandling();
         fagsak.setBehandlinger(List.of(behandling));
-        when(behandlingService.hentBehandlingUtenSaksopplysninger(anyLong())).thenReturn(behandling);
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
         when(fagsakService.hentFagsak(any(String.class))).thenReturn(fagsak);
         when(behandlingsgrunnlagService.hentBehandlingsgrunnlag(behandling.getId())).thenReturn(lagBehandlingsgrunnlag());
 
@@ -172,7 +172,7 @@ class OppgaveServiceTest {
         Behandling behandling = lagBehandling();
         behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
         behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(new BehandlingsgrunnlagData());
-        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
 
         oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", "Z99999");
         verify(oppgaveFasade).opprettOppgave(any(Oppgave.class));
@@ -187,7 +187,7 @@ class OppgaveServiceTest {
         behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
         behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(new BehandlingsgrunnlagData());
         behandling.getBehandlingsgrunnlag().setType(Behandlingsgrunnlagtyper.SØKNAD_A1_UTSENDTE_ARBEIDSTAKERE_EØS);
-        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
 
         oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", "Z99999");
 
@@ -230,7 +230,7 @@ class OppgaveServiceTest {
         Behandling behandling = lagBehandling();
         behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
         behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(new BehandlingsgrunnlagData());
-        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
         when(persondataFasade.hentFolkeregisterident("aktørID")).thenReturn("fnrBruker");
         when(persondataFasade.harStrengtFortroligAdresse("fnrBruker")).thenReturn(true);
 
@@ -249,7 +249,7 @@ class OppgaveServiceTest {
         when(persondataFasade.hentFolkeregisterident("aktørID")).thenReturn("fnrBruker");
         when(persondataFasade.harStrengtFortroligAdresse("fnrBruker")).thenReturn(false);
         when(persondataFasade.harStrengtFortroligAdresse("fnrBarn")).thenReturn(true);
-        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
 
         oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", "Z99999");
         verify(oppgaveFasade, never()).opprettOppgave(any(Oppgave.class));
@@ -268,7 +268,7 @@ class OppgaveServiceTest {
 
         when(persondataFasade.hentFolkeregisterident("aktørID")).thenReturn("fnrBruker");
         when(persondataFasade.harStrengtFortroligAdresse("fnrBruker")).thenReturn(false);
-        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
         when(oppgaveFasade.finnAvsluttetOppgaverMedSaksnummer(SAKSNUMMER)).thenReturn(List.of(oppgave1, oppgave2));
         when(fagsakService.hentFagsak(SAKSNUMMER)).thenReturn(fagsak);
 

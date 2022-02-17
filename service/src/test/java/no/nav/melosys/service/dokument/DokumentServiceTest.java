@@ -420,10 +420,10 @@ final class DokumentServiceTest {
 
     private static BehandlingService mockBehandlingService(Behandling behandling) {
         BehandlingService behandlingService = mock(BehandlingService.class);
+        when(behandlingService.hentBehandlingMedSaksopplysninger(BEHANDLINGSID)).thenReturn(behandling);
         when(behandlingService.hentBehandling(BEHANDLINGSID)).thenReturn(behandling);
-        when(behandlingService.hentBehandlingUtenSaksopplysninger(BEHANDLINGSID)).thenReturn(behandling);
+        when(behandlingService.hentBehandlingMedSaksopplysninger(not(eq(BEHANDLINGSID)))).thenThrow(new IkkeFunnetException("Behandling finnes ikke."));
         when(behandlingService.hentBehandling(not(eq(BEHANDLINGSID)))).thenThrow(new IkkeFunnetException("Behandling finnes ikke."));
-        when(behandlingService.hentBehandlingUtenSaksopplysninger(not(eq(BEHANDLINGSID)))).thenThrow(new IkkeFunnetException("Behandling finnes ikke."));
         return behandlingService;
     }
 

@@ -49,10 +49,10 @@ class OpprettAnmodningsperiodeFraSedTest {
         behandling.setSaksopplysninger(Collections.singleton(saksopplysning));
         prosessinstans.setBehandling(behandling);
 
-        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
         opprettAnmodningsperiodeFraSed.utfør(prosessinstans);
 
-        verify(behandlingService).hentBehandling(anyLong());
+        verify(behandlingService).hentBehandlingMedSaksopplysninger(anyLong());
         verify(anmodningsperiodeService).lagreAnmodningsperioder(eq(1L), any());
     }
 

@@ -11,7 +11,10 @@ import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.tilgang.Aksesstype;
 import no.nav.melosys.service.vedtak.*;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
-import no.nav.melosys.tjenester.gui.dto.*;
+import no.nav.melosys.tjenester.gui.dto.EndreVedtakDto;
+import no.nav.melosys.tjenester.gui.dto.FattEosVedtakDto;
+import no.nav.melosys.tjenester.gui.dto.FattTrygdeavtaleEllerFtrlVedtakDto;
+import no.nav.melosys.tjenester.gui.dto.FattVedtakDto;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -86,7 +89,7 @@ public class VedtakTjeneste {
                 .medMottakerInstitusjoner(eosVedtakDto.getMottakerinstitusjoner())
                 .medNyVurderingBakgrunn(eosVedtakDto.getNyVurderingBakgrunn());
         } else if (fattVedtakDto instanceof FattTrygdeavtaleEllerFtrlVedtakDto trygdeavtaleEllerFtrlVedtakDto) {
-            var sakstype = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID).getFagsak().getType();
+            var sakstype = behandlingService.hentBehandling(behandlingID).getFagsak().getType();
             if (sakstype == Sakstyper.FTRL) {
                 fattVedtakRequest = new FattFtrlVedtakRequest.Builder()
                     .medInnledningFritekst(trygdeavtaleEllerFtrlVedtakDto.getInnledningFritekst())
