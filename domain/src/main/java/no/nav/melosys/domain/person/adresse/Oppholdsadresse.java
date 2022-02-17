@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.time.LocalDate;
 
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
+import no.nav.melosys.domain.brev.Postadresse;
 
 public record Oppholdsadresse(
     StrukturertAdresse strukturertAdresse,
@@ -15,4 +16,11 @@ public record Oppholdsadresse(
     LocalDateTime registrertDato,
     boolean erHistorisk
 ) implements PersonAdresse {
+
+    public Postadresse tilPostadresse() {
+        if (strukturertAdresse != null) {
+            return Postadresse.lagPostadresse(strukturertAdresse, coAdressenavn());
+        }
+        return null;
+    }
 }

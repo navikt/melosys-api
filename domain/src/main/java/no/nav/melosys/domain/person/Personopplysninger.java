@@ -149,8 +149,7 @@ public record Personopplysninger(
     private Optional<Postadresse> lagPostadresseFraOppholdsadresser() {
         return hentGjeldendeOppholdsadresseFraMaster(PDL)
             .or(() -> hentGjeldendeOppholdsadresseFraMaster(FREG))
-            .map(Oppholdsadresse::strukturertAdresse)
-            .map(Postadresse::lagPostadresse);
+            .map(Oppholdsadresse::tilPostadresse);
     }
 
     private Optional<Oppholdsadresse> hentGjeldendeOppholdsadresseFraMaster(Master master) {
@@ -161,7 +160,6 @@ public record Personopplysninger(
 
     private Optional<Postadresse> lagPostadresseFraBostedsadresse() {
         return finnBostedsadresse()
-            .map(Bostedsadresse::strukturertAdresse)
-            .map(Postadresse::lagPostadresse);
+            .map(Bostedsadresse::tilPostadresse);
     }
 }

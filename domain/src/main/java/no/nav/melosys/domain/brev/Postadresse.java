@@ -15,10 +15,12 @@ public record Postadresse(
     String adresselinje4,
     String postnr,
     String poststed,
-    String landkode
+    String landkode,
+    String coAdressenavn
 ) {
     public List<String> adresselinjer() {
         return asList(
+            coAdressenavn,
             adresselinje1,
             adresselinje2,
             adresselinje3,
@@ -26,7 +28,7 @@ public record Postadresse(
         );
     }
 
-    public static Postadresse lagPostadresse(StrukturertAdresse strukturertAdresse) {
+    public static Postadresse lagPostadresse(StrukturertAdresse strukturertAdresse, String coAdressenavn) {
         return new Postadresse(
             sammenslå(strukturertAdresse.getGatenavn(), strukturertAdresse.getHusnummerEtasjeLeilighet()),
             strukturertAdresse.getPostboks(),
@@ -34,16 +36,18 @@ public record Postadresse(
             null,
             strukturertAdresse.getPostnummer(),
             strukturertAdresse.getPoststed(),
-            strukturertAdresse.getLandkode());
+            strukturertAdresse.getLandkode(),
+            coAdressenavn);
     }
 
-    public static Postadresse lagPostadresse(SemistrukturertAdresse semistrukturertAdresse) {
+    public static Postadresse lagPostadresse(SemistrukturertAdresse semistrukturertAdresse, String coAdressenavn) {
         return new Postadresse(semistrukturertAdresse.adresselinje1(),
             semistrukturertAdresse.adresselinje2(),
             semistrukturertAdresse.adresselinje3(),
             null,
             semistrukturertAdresse.postnr(),
             semistrukturertAdresse.poststed(),
-            semistrukturertAdresse.landkode());
+            semistrukturertAdresse.landkode(),
+            coAdressenavn);
     }
 }
