@@ -1,6 +1,7 @@
 package no.nav.melosys.service.behandling;
 
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.Behandling;
@@ -32,13 +33,15 @@ public class MuligeManuelleBehandlingsendringerTest {
     @Test
     void hentMuligeBehandlingstema_gyldigSøknadBehandlingstema_returnererSøknadBehandlingstema() {
         var muligeBehandlingstema = MuligeManuelleBehandlingsendringer.hentMuligeBehandlingstema(behandlingMedTema(Behandlingstema.ARBEID_FLERE_LAND), behandlingsresultatSendtUtland(false));
-        assertThat(muligeBehandlingstema).isEqualTo(BEHANDLINGSTEMA_SØKNAD);
+        var behandlingstemaSøknadUtenValgtTema = BEHANDLINGSTEMA_SØKNAD.stream().filter(tema -> tema != Behandlingstema.ARBEID_FLERE_LAND).collect(Collectors.toSet());
+        assertThat(muligeBehandlingstema).isEqualTo(behandlingstemaSøknadUtenValgtTema);
     }
 
     @Test
     void hentMuligeBehandlingstema_gyldigSEDForespørselBehandlingstema_returnererSEDForespørselBehandlingstema() {
         var muligeBehandlingstema = MuligeManuelleBehandlingsendringer.hentMuligeBehandlingstema(behandlingMedTema(Behandlingstema.ØVRIGE_SED_MED), behandlingsresultatSendtUtland(false));
-        assertThat(muligeBehandlingstema).isEqualTo(BEHANDLINGSTEMA_SED_FORESPØRSEL);
+        var behandlingstemaSedForespørselUtenValgtTema = BEHANDLINGSTEMA_SED_FORESPØRSEL.stream().filter(tema -> tema != Behandlingstema.ØVRIGE_SED_MED).collect(Collectors.toSet());
+        assertThat(muligeBehandlingstema).isEqualTo(behandlingstemaSedForespørselUtenValgtTema);
     }
 
     @Test

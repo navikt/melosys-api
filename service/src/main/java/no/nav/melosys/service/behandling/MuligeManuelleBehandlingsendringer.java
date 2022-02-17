@@ -33,7 +33,7 @@ public class MuligeManuelleBehandlingsendringer {
             muligeStatuser.add(Behandlingsstatus.AVSLUTTET);
         }
 
-        return muligeStatuser.stream().filter(status -> status != behandling.getStatus()).collect(Collectors.toCollection(HashSet::new));
+        return muligeStatuser.stream().filter(status -> status != behandling.getStatus()).collect(Collectors.toSet());
     }
 
     public static Set<Behandlingstyper> hentMuligeTyper(Behandling behandling) {
@@ -51,9 +51,9 @@ public class MuligeManuelleBehandlingsendringer {
     public static Set<Behandlingstema> hentMuligeBehandlingstema(Behandling behandling, Behandlingsresultat behandlingsresultat) {
         boolean kanOppdatereBehandlingstema = kanOppdatereBehandlingstema(behandling, behandlingsresultat);
         if (kanOppdatereBehandlingstema && erGyldigBehandlingAvSøknad(behandling.getTema())) {
-            return BEHANDLINGSTEMA_SØKNAD.stream().filter(tema -> tema != behandling.getTema()).collect(Collectors.toCollection(HashSet::new));
+            return BEHANDLINGSTEMA_SØKNAD.stream().filter(tema -> tema != behandling.getTema()).collect(Collectors.toSet());
         } else if (kanOppdatereBehandlingstema && erBehandlingAvSedForespørsler(behandling.getTema())) {
-            return BEHANDLINGSTEMA_SED_FORESPØRSEL.stream().filter(tema -> tema != behandling.getTema()).collect(Collectors.toCollection(HashSet::new));
+            return BEHANDLINGSTEMA_SED_FORESPØRSEL.stream().filter(tema -> tema != behandling.getTema()).collect(Collectors.toSet());
         } else {
             return Collections.emptySet();
         }
