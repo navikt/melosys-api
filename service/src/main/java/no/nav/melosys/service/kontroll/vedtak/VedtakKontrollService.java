@@ -50,7 +50,7 @@ public class VedtakKontrollService {
 
     @Transactional
     public void kontrollerInnvilgelse(long behandlingId, Vedtakstyper vedtakstype, boolean oppdaterRegisteropplysninger) throws ValideringException {
-        var behandling = behandlingService.hentBehandling(behandlingId);
+        var behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingId);
         var sakstype = behandling.getFagsak().getType();
         if (oppdaterRegisteropplysninger) {
             var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingId);
@@ -87,7 +87,7 @@ public class VedtakKontrollService {
 
     public Collection<Kontrollfeil> utførKontroller(long behandlingID, Vedtakstyper vedtakstype, Sakstyper sakstype) {
         return utførKontroller(
-            behandlingService.hentBehandling(behandlingID),
+            behandlingService.hentBehandlingMedSaksopplysninger(behandlingID),
             lovvalgsperiodeService.hentValidertLovvalgsperiode(behandlingID),
             VedtakKontrollFactory.hentKontrollerForVedtakstype(vedtakstype, sakstype)
         );

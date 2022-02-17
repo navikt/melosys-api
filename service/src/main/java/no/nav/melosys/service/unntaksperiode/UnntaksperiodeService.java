@@ -125,7 +125,7 @@ public class UnntaksperiodeService {
     }
 
     private Behandling hentOgValiderBehandling(long behandlingID) {
-        Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
+        Behandling behandling = behandlingService.hentBehandling(behandlingID);
         validerBehandling(behandling);
         return behandling;
     }

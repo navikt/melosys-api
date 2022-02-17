@@ -1,5 +1,7 @@
 package no.nav.melosys.saksflyt.steg.brev;
 
+import java.util.stream.Stream;
+
 import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
@@ -32,8 +34,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.stream.Stream;
 
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
@@ -99,7 +99,7 @@ class OpprettJournalforBrevTest {
     @Test
     void utførOpprettJournalforBrevTilBruker() {
         Behandling behandling = TestdataFactory.lagBehandling();
-        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
         when(mockJoarkFasade.opprettJournalpost(any(), anyBoolean())).thenReturn("12234");
         when(mockDokgenService.hentDokumentInfo(any())).thenReturn(TestdataFactory.lagDokumentInfo());
 
@@ -111,7 +111,7 @@ class OpprettJournalforBrevTest {
 
         opprettJournalforBrev.utfør(prosessinstans);
 
-        verify(mockBehandlingService).hentBehandling(anyLong());
+        verify(mockBehandlingService).hentBehandlingMedSaksopplysninger(anyLong());
         verify(mockDokgenService).produserBrev(any(Aktoer.class), any(DokgenBrevbestilling.class));
         verify(mockJoarkFasade).opprettJournalpost(any(), anyBoolean());
     }
@@ -119,7 +119,7 @@ class OpprettJournalforBrevTest {
     @Test
     void utførOpprettJournalforBrevTilRepresentant() {
         Behandling behandling = TestdataFactory.lagBehandling();
-        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
         when(mockDokgenService.hentDokumentInfo(any())).thenReturn(TestdataFactory.lagDokumentInfo());
         when(mockJoarkFasade.opprettJournalpost(any(), anyBoolean())).thenReturn("12234");
         when(mockEregFasade.hentOrganisasjonNavn(any())).thenReturn("Advokatene AS");
@@ -136,7 +136,7 @@ class OpprettJournalforBrevTest {
 
         opprettJournalforBrev.utfør(prosessinstans);
 
-        verify(mockBehandlingService).hentBehandling(anyLong());
+        verify(mockBehandlingService).hentBehandlingMedSaksopplysninger(anyLong());
         verify(mockDokgenService).produserBrev(any(Aktoer.class), any(DokgenBrevbestilling.class));
         verify(mockJoarkFasade).opprettJournalpost(any(), anyBoolean());
     }
@@ -180,7 +180,7 @@ class OpprettJournalforBrevTest {
 
     private Prosessinstans mockStorbritannia(Aktoer mottaker, boolean erNyVurdering) {
         Behandling behandling = TestdataFactory.lagBehandling();
-        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
         when(mockJoarkFasade.opprettJournalpost(any(), anyBoolean())).thenReturn("12234");
         DokumentproduksjonsInfoMapper dokumentproduksjonsInfoMapper = new DokumentproduksjonsInfoMapper(new FakeUnleash());
         when(mockDokgenService.hentDokumentInfo(any())).thenReturn(dokumentproduksjonsInfoMapper.hentDokumentproduksjonsInfo(STORBRITANNIA));
@@ -197,7 +197,7 @@ class OpprettJournalforBrevTest {
     @Test
     void utførOpprettJournalforMangelbrevTilBruker() {
         Behandling behandling = TestdataFactory.lagBehandling();
-        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
         when(mockJoarkFasade.opprettJournalpost(any(), anyBoolean())).thenReturn("12234");
         when(mockDokgenService.hentDokumentInfo(any())).thenReturn(TestdataFactory.lagDokumentInfo());
 
@@ -210,7 +210,7 @@ class OpprettJournalforBrevTest {
 
         opprettJournalforBrev.utfør(prosessinstans);
 
-        verify(mockBehandlingService).hentBehandling(anyLong());
+        verify(mockBehandlingService).hentBehandlingMedSaksopplysninger(anyLong());
         verify(mockDokgenService).produserBrev(any(Aktoer.class), any(MangelbrevBrevbestilling.class));
         verify(mockJoarkFasade).opprettJournalpost(any(), anyBoolean());
     }
@@ -218,7 +218,7 @@ class OpprettJournalforBrevTest {
     @Test
     void utførOpprettJournalforMangelbrevKopiTilBruker() {
         Behandling behandling = TestdataFactory.lagBehandling();
-        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
         when(mockJoarkFasade.opprettJournalpost(any(), anyBoolean())).thenReturn("12234");
         when(mockDokgenService.hentDokumentInfo(any())).thenReturn(TestdataFactory.lagDokumentInfo());
 
@@ -232,7 +232,7 @@ class OpprettJournalforBrevTest {
 
         opprettJournalforBrev.utfør(prosessinstans);
 
-        verify(mockBehandlingService).hentBehandling(anyLong());
+        verify(mockBehandlingService).hentBehandlingMedSaksopplysninger(anyLong());
         verify(mockDokgenService).produserBrev(any(Aktoer.class), refEq(brevbestilling));
         verify(mockJoarkFasade).opprettJournalpost(any(), anyBoolean());
     }
@@ -240,7 +240,7 @@ class OpprettJournalforBrevTest {
     @Test
     void utførOpprettJournalforFritekstbrev_feilerUtentittel() {
         Behandling behandling = TestdataFactory.lagBehandling();
-        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
 
         FritekstbrevBrevbestilling brevbestilling = new FritekstbrevBrevbestilling.Builder()
             .medProduserbartdokument(GENERELT_FRITEKSTBREV_BRUKER)
@@ -256,7 +256,7 @@ class OpprettJournalforBrevTest {
     @Test
     void utførOpprettJournalforFritekstbrev() {
         Behandling behandling = TestdataFactory.lagBehandling();
-        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
         when(mockJoarkFasade.opprettJournalpost(any(), anyBoolean())).thenReturn("12234");
         when(mockDokgenService.hentDokumentInfo(any())).thenReturn(TestdataFactory.lagDokumentInfo());
 
@@ -270,7 +270,7 @@ class OpprettJournalforBrevTest {
 
         opprettJournalforBrev.utfør(prosessinstans);
 
-        verify(mockBehandlingService).hentBehandling(anyLong());
+        verify(mockBehandlingService).hentBehandlingMedSaksopplysninger(anyLong());
         verify(mockDokgenService).produserBrev(any(Aktoer.class), refEq(brevbestilling));
         verify(mockJoarkFasade).opprettJournalpost(any(), anyBoolean());
     }

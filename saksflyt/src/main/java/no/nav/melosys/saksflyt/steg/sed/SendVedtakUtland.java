@@ -91,7 +91,7 @@ public class SendVedtakUtland extends AbstraktSendUtland {
 
     private DoksysBrevbestilling lagBrevBestilling(Prosessinstans prosessinstans) {
         Long behandlingID = prosessinstans.getBehandling().getId();
-        var behandling = behandlingService.hentBehandling(behandlingID);
+        var behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
         return new DoksysBrevbestilling.Builder().medProduserbartDokument(ATTEST_A1)
             .medAvsenderNavn(hentSaksbehandler(prosessinstans))
             .medMottakere(Mottaker.av(TRYGDEMYNDIGHET))

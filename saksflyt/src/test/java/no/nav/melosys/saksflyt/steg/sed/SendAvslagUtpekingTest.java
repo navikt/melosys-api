@@ -67,7 +67,7 @@ class SendAvslagUtpekingTest {
         behandling.setSaksopplysninger(Set.of(saksopplysning));
 
         when(sedDataBygger.lagUtkast(any(), any(), any())).thenReturn(new SedDataDto());
-        when(behandlingService.hentBehandling(1L)).thenReturn(behandling);
+        when(behandlingService.hentBehandlingMedSaksopplysninger(1L)).thenReturn(behandling);
     }
 
     @Test

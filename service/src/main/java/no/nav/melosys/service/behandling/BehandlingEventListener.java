@@ -38,7 +38,7 @@ public class BehandlingEventListener {
     @EventListener
     public void dokumentBestilt(DokumentBestiltEvent dokumentBestiltEvent) {
         if (List.of(MELDING_MANGLENDE_OPPLYSNINGER, MANGELBREV_BRUKER, MANGELBREV_ARBEIDSGIVER).contains(dokumentBestiltEvent.getProduserbaredokumenter())) {
-            var behandling = behandlingService.hentBehandlingUtenSaksopplysninger(dokumentBestiltEvent.getBehandlingID());
+            var behandling = behandlingService.hentBehandling(dokumentBestiltEvent.getBehandlingID());
             if (behandling.erAktiv()) {
                 behandlingService.oppdaterStatusOgSvarfrist(
                     behandling,
@@ -52,7 +52,7 @@ public class BehandlingEventListener {
     @EventListener
     @Async
     public void behandlingsfristEndret(BehandlingsfristEndretEvent behandlingsfristEndretEvent) {
-        var behandling = behandlingService.hentBehandling(behandlingsfristEndretEvent.getBehandlingId());
+        var behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingsfristEndretEvent.getBehandlingId());
         Optional<Oppgave> oppgave = oppgaveService.finnÅpenOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer());
         oppgave.ifPresent(value -> oppgaveService.oppdaterOppgave(
             value.getOppgaveId(),
@@ -65,7 +65,7 @@ public class BehandlingEventListener {
     @EventListener
     @Async
     public void behandlingEndret(BehandlingEndretAvSaksbehandlerEvent behandlingEndretAvSaksbehandlerEvent) {
-        var behandling = behandlingService.hentBehandling(behandlingEndretAvSaksbehandlerEvent.getBehandlingID());
+        var behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingEndretAvSaksbehandlerEvent.getBehandlingID());
         Optional<Oppgave> oppgave = oppgaveService.finnÅpenOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer());
         oppgave.ifPresent(value -> {
                 String type = behandlingEndretAvSaksbehandlerEvent.getBehandlingstype().getKode();

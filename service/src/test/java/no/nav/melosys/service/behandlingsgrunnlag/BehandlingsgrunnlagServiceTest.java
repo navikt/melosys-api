@@ -68,7 +68,7 @@ class BehandlingsgrunnlagServiceTest {
     @Test
     void opprettSøknadGrunnlag_finnesIkkeFraFør_blirOpprettet() {
         Behandling behandling = lagBehandling();
-        when(behandlingService.hentBehandling(behandlingID)).thenReturn(behandling);
+        when(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling);
         when(joarkFasade.hentMottaksDatoForJournalpost(behandling.getInitierendeJournalpostId())).thenReturn(LocalDate.now());
         Soeknad soeknad = new Soeknad();
         behandlingsgrunnlagService.opprettSøknadYrkesaktiveEøs(behandlingID, soeknad);
@@ -146,7 +146,7 @@ class BehandlingsgrunnlagServiceTest {
     @Test
     void opprettSedGrunnlag_harRettType() {
         Behandling behandling = lagBehandling();
-        when(behandlingService.hentBehandling(behandlingID)).thenReturn(behandling);
+        when(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling);
         when(joarkFasade.hentMottaksDatoForJournalpost(behandling.getInitierendeJournalpostId())).thenReturn(LocalDate.now());
         SedGrunnlag sedGrunnlag = new SedGrunnlag();
         behandlingsgrunnlagService.opprettSedGrunnlag(behandlingID, sedGrunnlag);
@@ -164,7 +164,7 @@ class BehandlingsgrunnlagServiceTest {
     @Test
     void opprettSøknadFolketrygden_harRettType() {
         Behandling behandling = lagBehandling();
-        when(behandlingService.hentBehandling(behandlingID)).thenReturn(behandling);
+        when(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling);
         when(joarkFasade.hentMottaksDatoForJournalpost(behandling.getInitierendeJournalpostId())).thenReturn(LocalDate.now());
         SoeknadFtrl soeknadFtrl = new SoeknadFtrl();
         behandlingsgrunnlagService.opprettSøknadFolketrygden(behandlingID, soeknadFtrl);
@@ -182,7 +182,7 @@ class BehandlingsgrunnlagServiceTest {
     @Test
     void opprettSøknadTrygdeavtale_harRettType() {
         Behandling behandling = lagBehandling();
-        when(behandlingService.hentBehandling(behandlingID)).thenReturn(behandling);
+        when(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling);
         when(joarkFasade.hentMottaksDatoForJournalpost(behandling.getInitierendeJournalpostId())).thenReturn(LocalDate.now());
         SoeknadTrygdeavtale soeknadTrygdeavtale = new SoeknadTrygdeavtale();
         behandlingsgrunnlagService.opprettSøknadTrygdeavtale(behandlingID, soeknadTrygdeavtale);

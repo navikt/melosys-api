@@ -5,9 +5,9 @@ import java.util.Optional;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.UtenlandskMyndighet;
+import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.brev.MangelbrevBrevbestilling;
-import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
@@ -64,7 +64,7 @@ class DistribuerJournalpostTest {
     void utførFeilerVedManglendeJournalpostId() {
         Prosessinstans prosessinstans = new Prosessinstans();
         Behandling behandling = TestdataFactory.lagBehandling();
-        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
         prosessinstans.setBehandling(behandling);
         prosessinstans.setData(ProsessDataKey.BREVBESTILLING, new DokgenBrevbestilling.Builder<>().build());
 
@@ -75,7 +75,7 @@ class DistribuerJournalpostTest {
     void utførFeilerVedManglendeMottaker() {
         Prosessinstans prosessinstans = new Prosessinstans();
         Behandling behandling = TestdataFactory.lagBehandling();
-        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
         prosessinstans.setBehandling(behandling);
         prosessinstans.setData(ProsessDataKey.DISTRIBUERBAR_JOURNALPOST_ID, "123");
         prosessinstans.setData(ProsessDataKey.BREVBESTILLING, new DokgenBrevbestilling.Builder<>().build());
@@ -154,7 +154,7 @@ class DistribuerJournalpostTest {
         prosessinstans.setData(ProsessDataKey.BREVBESTILLING, brevbestilling);
         prosessinstans.setData(ProsessDataKey.MOTTAKER, rolle);
 
-        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
 
         return prosessinstans;
     }

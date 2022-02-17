@@ -259,7 +259,7 @@ public class OppgaveService {
         behOppgaveDto.setSakstype(fagsak.getType());
 
         Behandling behandling = fagsak.hentSistAktiveBehandling();
-        behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandling.getId());
+        behandling = behandlingService.hentBehandling(behandling.getId());
         behOppgaveDto.setBehandling(mapBehandling(behandling));
 
         if (behandling.erBehandlingAvSøknad()) {
@@ -304,7 +304,7 @@ public class OppgaveService {
     }
 
     private boolean harBeskyttelsesbehov(long behandlingID) {
-        Behandling behandling = behandlingService.hentBehandling(behandlingID);
+        Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
         // TODO TPS krever fnr. Kall til hentFolkeregisterident fjernes etter overgang til PDL.
         final String brukersFnr = persondataFasade.hentFolkeregisterident(behandling.getFagsak().hentAktørID());
         if (persondataFasade.harStrengtFortroligAdresse(brukersFnr)) {

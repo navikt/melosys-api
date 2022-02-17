@@ -3,11 +3,11 @@ package no.nav.melosys.tjenester.gui;
 import java.util.Collections;
 
 import io.swagger.annotations.Api;
+import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
+import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.trygdeavtale.TrygdeavtaleResultat;
 import no.nav.melosys.service.trygdeavtale.TrygdeavtaleService;
-import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.tjenester.gui.dto.trygdeavtale.TrygdeavtaleInfoDto;
 import no.nav.melosys.tjenester.gui.dto.trygdeavtale.TrygdeavtaleResultatDto;
@@ -67,7 +67,7 @@ public class TrygdeavtaleTjeneste {
         log.debug("Melosys-trygdeavtale henter TrygdeavtaleInfo for behandling {} på vegne av saksbehandler {}.", behandlingId, saksbehandler);
         aksesskontroll.autoriser(behandlingId);
 
-        var behandling = behandlingService.hentBehandling(behandlingId);
+        var behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingId);
         var behandlingsgrunnlagdata = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
         var behandlingsResultat = behandlingsresultatService.hentBehandlingsresultat(behandlingId);
 
@@ -88,7 +88,7 @@ public class TrygdeavtaleTjeneste {
     @Transactional
     public ResponseEntity<TrygdeavtaleResultatDto> hentResultat(@PathVariable("behandlingID") long behandlingId) {
         TrygdeavtaleResultat trygdeavtaleResultat = trygdeavtaleService.hentResultat(behandlingId);
-        var behandling = behandlingService.hentBehandling(behandlingId);
+        var behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingId);
         var behandlingsgrunnlagdata = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
         return ResponseEntity.ok(TrygdeavtaleResultatDto.fra(trygdeavtaleResultat, behandlingsgrunnlagdata.personOpplysninger.medfolgendeFamilie));
     }

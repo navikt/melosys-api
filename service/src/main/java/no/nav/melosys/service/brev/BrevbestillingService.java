@@ -83,7 +83,7 @@ public class BrevbestillingService {
 
     @Transactional
     public MuligeMottakereDto hentMuligeMottakere(Produserbaredokumenter produserbaredokumenter, long behandlingId, String orgnrTilValgtArbeidsgiver) {
-        Behandling behandling = behandlingService.hentBehandling(behandlingId);
+        Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingId);
         Mottakerliste mottakerliste = brevmottakerService.hentMottakerliste(produserbaredokumenter, behandlingId);
         return new MuligeMottakereDto(
             lagHovedMottakerMuligMottakerDto(produserbaredokumenter, behandling, mottakerliste.getHovedMottaker(), orgnrTilValgtArbeidsgiver),
@@ -210,7 +210,7 @@ public class BrevbestillingService {
     @Transactional
     public List<Produserbaredokumenter> hentMuligeProduserbaredokumenter(long behandlingId) {
         List<Produserbaredokumenter> brevmaler = new ArrayList<>();
-        Behandling behandling = behandlingService.hentBehandling(behandlingId);
+        Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingId);
 
         if (behandling.getType() == Behandlingstyper.SOEKNAD) {
             brevmaler.add(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD);
@@ -229,7 +229,7 @@ public class BrevbestillingService {
 
     @Transactional
     public List<BrevAdresse> hentBrevAdresseTilMottakere(Produserbaredokumenter produserbaredokumenter, Aktoersroller aktoersroller, long behandlingId) {
-        Behandling behandling = behandlingService.hentBehandling(behandlingId);
+        Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingId);
         var mottakere = brevmottakerService.avklarMottakere(produserbaredokumenter, Mottaker.av(aktoersroller), behandling, false, false);
         List<BrevAdresse> brevAdresser = new ArrayList<>();
 

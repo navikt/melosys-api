@@ -3,8 +3,8 @@ package no.nav.melosys.saksflyt.steg.brev;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.domain.Kontaktopplysning;
-import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
+import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
@@ -61,7 +61,7 @@ public class DistribuerJournalpost implements StegBehandler {
         if (prosessinstans.getBehandling() == null) {
             throw new FunksjonellException("Prosessinstans mangler behandling");
         }
-        Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
+        Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(prosessinstans.getBehandling().getId());
         String journalpostId = prosessinstans.getData(DISTRIBUERBAR_JOURNALPOST_ID);
         var brevbestilling = prosessinstans.getData(BREVBESTILLING, DokgenBrevbestilling.class);
         Aktoersroller mottaker = prosessinstans.getData(MOTTAKER, Aktoersroller.class);

@@ -1,6 +1,9 @@
 package no.nav.melosys.service.vedtak;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
@@ -62,7 +65,7 @@ class VedtakServiceFasadeTest {
     @Test
     void fattVedtak_feilBehandlingstype_kasterException() {
         behandling.setTema(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING);
-        when(mockBehandlingService.hentBehandlingUtenSaksopplysninger(behandlingID)).thenReturn(behandling);
+        when(mockBehandlingService.hentBehandling(behandlingID)).thenReturn(behandling);
 
         assertThatThrownBy(() -> vedtakServiceFasade.fattVedtak(behandlingID, lagFattFtrlVedtakRequest()))
             .isInstanceOf(FunksjonellException.class)
@@ -72,7 +75,7 @@ class VedtakServiceFasadeTest {
     @Test
     void fattVedtak_EU_EOS_skalKalleEosVedtakService() throws Exception {
         setFagsakPåBehandling(Sakstyper.EU_EOS);
-        when(mockBehandlingService.hentBehandlingUtenSaksopplysninger(behandlingID)).thenReturn(behandling);
+        when(mockBehandlingService.hentBehandling(behandlingID)).thenReturn(behandling);
 
         vedtakServiceFasade.fattVedtak(behandlingID, lagFattEosVedtakRequest());
 
@@ -83,7 +86,7 @@ class VedtakServiceFasadeTest {
 
     @Test
     void fattVedtak_delvisAutomatisert_skalKalleEosVedtakSystemService() throws Exception {
-        when(mockBehandlingService.hentBehandlingUtenSaksopplysninger(behandlingID)).thenReturn(behandling);
+        when(mockBehandlingService.hentBehandling(behandlingID)).thenReturn(behandling);
 
         vedtakServiceFasade.fattVedtak(behandlingID, FASTSATT_LOVVALGSLAND);
 
@@ -95,7 +98,7 @@ class VedtakServiceFasadeTest {
     @Test
     void fattVedtak_FTRL_skalKalleFtrlVedtakService() throws Exception {
         setFagsakPåBehandling(Sakstyper.FTRL);
-        when(mockBehandlingService.hentBehandlingUtenSaksopplysninger(behandlingID)).thenReturn(behandling);
+        when(mockBehandlingService.hentBehandling(behandlingID)).thenReturn(behandling);
 
         vedtakServiceFasade.fattVedtak(behandlingID, lagFattFtrlVedtakRequest());
 
@@ -107,7 +110,7 @@ class VedtakServiceFasadeTest {
     @Test
     void fattVedtak_TRYGDEAVTALER_kasterException() throws Exception {
         setFagsakPåBehandling(Sakstyper.TRYGDEAVTALE);
-        when(mockBehandlingService.hentBehandlingUtenSaksopplysninger(behandlingID)).thenReturn(behandling);
+        when(mockBehandlingService.hentBehandling(behandlingID)).thenReturn(behandling);
 
         vedtakServiceFasade.fattVedtak(behandlingID, lagFattTrygdeavtaleVedtakRequest());
 
@@ -119,7 +122,7 @@ class VedtakServiceFasadeTest {
     @Test
     void endreVedtak_EU_EOS_skalKalleEosVedtakService() {
         setFagsakPåBehandling(Sakstyper.EU_EOS);
-        when(mockBehandlingService.hentBehandlingUtenSaksopplysninger(behandlingID)).thenReturn(behandling);
+        when(mockBehandlingService.hentBehandling(behandlingID)).thenReturn(behandling);
 
         vedtakServiceFasade.endreVedtak(behandlingID, ENDRINGER_ARBEIDSSITUASJON, null, null);
 
@@ -130,7 +133,7 @@ class VedtakServiceFasadeTest {
     @Test
     void endreVedtak_FTRL_kasterException() {
         setFagsakPåBehandling(Sakstyper.FTRL);
-        when(mockBehandlingService.hentBehandlingUtenSaksopplysninger(behandlingID)).thenReturn(behandling);
+        when(mockBehandlingService.hentBehandling(behandlingID)).thenReturn(behandling);
 
         assertThatThrownBy(() -> vedtakServiceFasade.endreVedtak(behandlingID, ENDRINGER_ARBEIDSSITUASJON, null, null))
             .isInstanceOf(FunksjonellException.class)
@@ -143,7 +146,7 @@ class VedtakServiceFasadeTest {
     @Test
     void endreVedtak_TRYGDEAVTALER_kasterException() throws Exception {
         setFagsakPåBehandling(Sakstyper.TRYGDEAVTALE);
-        when(mockBehandlingService.hentBehandlingUtenSaksopplysninger(behandlingID)).thenReturn(behandling);
+        when(mockBehandlingService.hentBehandling(behandlingID)).thenReturn(behandling);
 
         assertThatThrownBy(() -> vedtakServiceFasade.endreVedtak(behandlingID, ENDRINGER_ARBEIDSSITUASJON, null, null))
             .isInstanceOf(FunksjonellException.class)

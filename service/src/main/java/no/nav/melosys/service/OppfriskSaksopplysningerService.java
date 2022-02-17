@@ -50,7 +50,7 @@ public class OppfriskSaksopplysningerService {
     public void oppfriskSaksopplysning(long behandlingID, boolean medFamilierelasjoner) {
         log.info("Starter oppfrisking av behandlingID: {} ", behandlingID);
 
-        Behandling behandling = behandlingService.hentBehandling(behandlingID);
+        Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
         String aktørID = behandling.getFagsak().hentAktørID();
         String brukerID = persondataFasade.hentFolkeregisterident(aktørID);
 

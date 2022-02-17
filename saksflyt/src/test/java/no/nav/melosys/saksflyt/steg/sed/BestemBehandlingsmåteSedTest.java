@@ -52,7 +52,7 @@ class BestemBehandlingsmåteSedTest {
         behandling.setFagsak(new Fagsak());
         behandling.getFagsak().getAktører().add(bruker);
 
-        when(behandlingService.hentBehandling(eq(behandling.getId()))).thenReturn(behandling);
+        when(behandlingService.hentBehandlingMedSaksopplysninger(eq(behandling.getId()))).thenReturn(behandling);
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
     }
 

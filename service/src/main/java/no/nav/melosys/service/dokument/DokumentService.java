@@ -68,7 +68,7 @@ public class DokumentService {
     @Transactional(readOnly = true)
     public byte[] produserUtkast(long behandlingID, BrevbestillingRequest brevbestillingRequest) {
         Produserbaredokumenter produserbartDokument = brevbestillingRequest.getProduserbardokument();
-        Behandling behandling = behandlingService.hentBehandling(behandlingID);
+        Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
         Aktoersroller mottakerRolle = brevbestillingRequest.getMottaker() == null ?
             brevmottakerService.avklarMottakerRolleFraDokument(produserbartDokument) : brevbestillingRequest.getMottaker();
         DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medProduserbartDokument(produserbartDokument)
@@ -104,7 +104,7 @@ public class DokumentService {
                                  Mottaker mottaker,
                                  long behandlingID,
                                  DoksysBrevbestilling brevbestilling) {
-        Behandling behandling = behandlingService.hentBehandling(behandlingID);
+        Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
         // FIXME: Behandling i brevbestilling byttes ut med behandlingId for å samle ansvar for henting av saksopplysninger
         DoksysBrevbestilling nyBrevbestilling = new DoksysBrevbestilling.Builder()
             .medProduserbartDokument(brevbestilling.getProduserbartdokument())

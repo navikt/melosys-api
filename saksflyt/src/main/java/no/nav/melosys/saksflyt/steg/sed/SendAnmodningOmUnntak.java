@@ -86,7 +86,7 @@ public class SendAnmodningOmUnntak extends AbstraktSendUtland {
     }
 
     private DoksysBrevbestilling lagBrevBestilling(Prosessinstans prosessinstans) {
-        Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
+        Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(prosessinstans.getBehandling().getId());
         return new DoksysBrevbestilling.Builder().medProduserbartDokument(Produserbaredokumenter.ANMODNING_UNNTAK)
             .medAvsenderNavn(hentSaksbehandler(prosessinstans))
             .medMottakere(Mottaker.av(TRYGDEMYNDIGHET))

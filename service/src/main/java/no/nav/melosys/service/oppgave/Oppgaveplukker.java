@@ -105,7 +105,7 @@ public class Oppgaveplukker {
 
     @Transactional
     public synchronized void leggTilbakeOppgave(String saksbehandlerID, TilbakeleggingDto tilbakelegging) {
-        Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(tilbakelegging.getBehandlingID());
+        Behandling behandling = behandlingService.hentBehandling(tilbakelegging.getBehandlingID());
 
         Fagsak fagsak = behandling.getFagsak();
         Oppgave oppgave = oppgaveService.hentÅpenOppgaveMedFagsaksnummer(fagsak.getSaksnummer());

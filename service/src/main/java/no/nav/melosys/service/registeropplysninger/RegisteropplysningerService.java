@@ -92,7 +92,7 @@ public class RegisteropplysningerService {
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void hentOgLagreOpplysninger(RegisteropplysningerRequest registeropplysningerRequest) {
-        Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(registeropplysningerRequest.getBehandlingID());
+        Behandling behandling = behandlingService.hentBehandling(registeropplysningerRequest.getBehandlingID());
 
         if (PeriodeKontroller.feilIPeriode(registeropplysningerRequest.getFom(), registeropplysningerRequest.getTom())) {
             log.warn("Henter ikke registeropplysninger for behandling {} pga feil i periode. fom={}, tom={}", registeropplysningerRequest.getBehandlingID(), registeropplysningerRequest.getFom(), registeropplysningerRequest.getTom());

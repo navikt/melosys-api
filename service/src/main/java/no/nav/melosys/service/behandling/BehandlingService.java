@@ -82,12 +82,12 @@ public class BehandlingService {
     }
 
     public Behandling hentBehandling(long behandlingId) {
-        return Optional.ofNullable(behandlingRepository.findWithSaksopplysningerById(behandlingId))
+        return behandlingRepository.findById(behandlingId)
             .orElseThrow(() -> new IkkeFunnetException(FINNER_IKKE_BEHANDLING + behandlingId));
     }
 
-    public Behandling hentBehandlingUtenSaksopplysninger(long behandlingId) {
-        return behandlingRepository.findById(behandlingId)
+    public Behandling hentBehandlingMedSaksopplysninger(long behandlingId) {
+        return Optional.ofNullable(behandlingRepository.findWithSaksopplysningerById(behandlingId))
             .orElseThrow(() -> new IkkeFunnetException(FINNER_IKKE_BEHANDLING + behandlingId));
     }
 
@@ -127,7 +127,7 @@ public class BehandlingService {
     @Transactional
     public void endreBehandling(long behandlingID, Sakstyper ignoredSakstype, Behandlingstyper type, Behandlingstema tema, Behandlingsstatus status, LocalDate behandlingsfrist) {
         // TODO: Endre sakstype (MELOSYS-4899 for EØS <-> trygdeavtale)
-        var behandling = hentBehandlingUtenSaksopplysninger(behandlingID);
+        var behandling = hentBehandling(behandlingID);
         if (!behandling.erAktiv()) {
             throw new FunksjonellException("Behandlingen må være aktiv for å kunne endres");
         }
@@ -152,7 +152,7 @@ public class BehandlingService {
     @Deprecated
     @Transactional
     public void endreBehandlingstemaTilBehandling(long behandlingID, Behandlingstema nyttTema) {
-        Behandling behandling = hentBehandlingUtenSaksopplysninger(behandlingID);
+        Behandling behandling = hentBehandling(behandlingID);
         var behandlingsgrunnlag = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
         if (MuligeManuelleBehandlingsendringer.hentMuligeBehandlingstema(behandling, behandlingsgrunnlag).contains(nyttTema)) {
             behandling.setTema(nyttTema);
@@ -170,7 +170,7 @@ public class BehandlingService {
     }
 
     public void avsluttBehandling(long behandlingId) {
-        Behandling behandling = hentBehandlingUtenSaksopplysninger(behandlingId);
+        Behandling behandling = hentBehandling(behandlingId);
         if (behandling.erAvsluttet()) {
             throw new FunksjonellException("Behandling " + behandlingId + " er allerede avsluttet!");
         }
@@ -186,7 +186,7 @@ public class BehandlingService {
      */
     @Transactional
     public void knyttMedlemsperioder(long behandlingID, List<Long> periodeIder) {
-        Behandling behandling = hentBehandlingUtenSaksopplysninger(behandlingID);
+        Behandling behandling = hentBehandling(behandlingID);
 
         if (!behandling.erAktiv()) {
             throw new FunksjonellException("Medlemsperioder kan ikke lagres på behandling med status " + behandling.getStatus());
@@ -203,7 +203,7 @@ public class BehandlingService {
     }
 
     public void endreStatus(long behandlingID, Behandlingsstatus status) {
-        Behandling behandling = hentBehandlingUtenSaksopplysninger(behandlingID);
+        Behandling behandling = hentBehandling(behandlingID);
         endreStatus(behandling, status);
     }
 
@@ -354,7 +354,7 @@ public class BehandlingService {
     @Deprecated
     @Transactional
     public void endreBehandlingsfrist(long behandlingId, LocalDate behandlingsfrist) {
-        Behandling behandling = hentBehandlingUtenSaksopplysninger(behandlingId);
+        Behandling behandling = hentBehandling(behandlingId);
         behandling.setBehandlingsfrist(behandlingsfrist);
         behandlingRepository.save(behandling);
 
@@ -371,19 +371,19 @@ public class BehandlingService {
     }
 
     public Set<Behandlingsstatus> hentMuligeStatuser(long behandlingID) {
-        var behandling = hentBehandlingUtenSaksopplysninger(behandlingID);
+        var behandling = hentBehandling(behandlingID);
         return MuligeManuelleBehandlingsendringer.hentMuligeStatuser(behandling);
     }
 
     @Transactional
     public Set<Behandlingstema> hentMuligeBehandlingstema(long behandlingID) {
-        var behandling = hentBehandlingUtenSaksopplysninger(behandlingID);
+        var behandling = hentBehandling(behandlingID);
         var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
         return MuligeManuelleBehandlingsendringer.hentMuligeBehandlingstema(behandling, behandlingsresultat);
     }
 
     public Set<Behandlingstyper> hentMuligeTyper(long behandlingID) {
-        var behandling = hentBehandlingUtenSaksopplysninger(behandlingID);
+        var behandling = hentBehandling(behandlingID);
         return MuligeManuelleBehandlingsendringer.hentMuligeTyper(behandling);
     }
 

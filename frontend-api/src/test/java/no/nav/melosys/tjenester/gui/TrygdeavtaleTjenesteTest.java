@@ -36,7 +36,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie.*;
+import static no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie.Relasjonsrolle;
 import static no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie.tilMedfolgendeFamilie;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -119,7 +119,7 @@ class TrygdeavtaleTjenesteTest {
 
     @Test
     void hentTrygdeavtaleInfo_utenVirksomhetOgBarnEktefelle_returnererKorrekt() {
-        when(behandlingService.hentBehandling(1L)).thenReturn(behandling);
+        when(behandlingService.hentBehandlingMedSaksopplysninger(1L)).thenReturn(behandling);
         when(behandlingsresultatService.hentBehandlingsresultat(1L)).thenReturn(behandlingsresultat);
 
         var response = trygdeavtaleTjeneste.hentTrygdeavtaleBehandlingsgrunnlag(1L, false, false).getBody();
@@ -141,7 +141,7 @@ class TrygdeavtaleTjenesteTest {
 
     @Test
     void hentTrygdeavtaleInfo_medVirksomhetOgBarnEktefelle_returnererKorrekt() {
-        when(behandlingService.hentBehandling(1L)).thenReturn(behandling);
+        when(behandlingService.hentBehandlingMedSaksopplysninger(1L)).thenReturn(behandling);
         when(behandlingsresultatService.hentBehandlingsresultat(1L)).thenReturn(behandlingsresultat);
 
         var response = trygdeavtaleTjeneste.hentTrygdeavtaleBehandlingsgrunnlag(1L, true, true).getBody();
@@ -163,7 +163,7 @@ class TrygdeavtaleTjenesteTest {
 
     @Test
     void hentTrygdeavtaleInfo_saksbehandlerHarTillatelseTilÅRedigere_returnererKorrekt() {
-        when(behandlingService.hentBehandling(1L)).thenReturn(behandling);
+        when(behandlingService.hentBehandlingMedSaksopplysninger(1L)).thenReturn(behandling);
         when(behandlingsresultatService.hentBehandlingsresultat(1L)).thenReturn(behandlingsresultat);
         when(aksesskontroll.behandlingKanRedigeresAvSaksbehandler(eq(behandling), any())).thenReturn(true);
 
@@ -183,7 +183,7 @@ class TrygdeavtaleTjenesteTest {
                 tilMedfolgendeFamilie(UUID_BARN_2, BARN2_FNR, BARN_NAVN_2, MedfolgendeFamilie.Relasjonsrolle.BARN)
             );
 
-        when(behandlingService.hentBehandling(1L)).thenReturn(behandling);
+        when(behandlingService.hentBehandlingMedSaksopplysninger(1L)).thenReturn(behandling);
         when(trygdeavtaleService.hentResultat(1L)).thenReturn(lagTrygdeavtaleResultat());
 
         var response = trygdeavtaleTjeneste.hentResultat(1L).getBody();
@@ -200,7 +200,7 @@ class TrygdeavtaleTjenesteTest {
         TrygdeavtaleResultat tomtTrygdeavtaleResultat = new TrygdeavtaleResultat
             .Builder().familie(new AvklarteMedfolgendeFamilie(Set.of(), Set.of())).build();
 
-        when(behandlingService.hentBehandling(1L)).thenReturn(behandling);
+        when(behandlingService.hentBehandlingMedSaksopplysninger(1L)).thenReturn(behandling);
         when(trygdeavtaleService.hentResultat(1L)).thenReturn(tomtTrygdeavtaleResultat);
 
         var response = trygdeavtaleTjeneste.hentResultat(1L).getBody();
