@@ -50,7 +50,13 @@ public class MuligeManuelleBehandlingsendringer {
 
     public static Set<Behandlingstema> hentMuligeBehandlingstema(Behandling behandling, Behandlingsresultat behandlingsresultat) {
         boolean kanOppdatereBehandlingstema = kanOppdatereBehandlingstema(behandling, behandlingsresultat);
-        if (kanOppdatereBehandlingstema && erGyldigBehandlingAvSøknad(behandling.getTema())) {
+        if (behandling.erEndretPeriode()) {
+            return switch (behandling.getTema()) {
+                case UTSENDT_ARBEIDSTAKER -> Collections.singleton(UTSENDT_SELVSTENDIG);
+                case UTSENDT_SELVSTENDIG -> Collections.singleton(UTSENDT_ARBEIDSTAKER);
+                default -> Collections.emptySet();
+            };
+        } else if (kanOppdatereBehandlingstema && erGyldigBehandlingAvSøknad(behandling.getTema())) {
             return BEHANDLINGSTEMA_SØKNAD.stream().filter(tema -> tema != behandling.getTema()).collect(Collectors.toSet());
         } else if (kanOppdatereBehandlingstema && erBehandlingAvSedForespørsler(behandling.getTema())) {
             return BEHANDLINGSTEMA_SED_FORESPØRSEL.stream().filter(tema -> tema != behandling.getTema()).collect(Collectors.toSet());
