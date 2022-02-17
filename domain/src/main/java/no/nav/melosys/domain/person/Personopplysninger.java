@@ -160,6 +160,7 @@ public record Personopplysninger(
 
     private Optional<Postadresse> lagPostadresseFraBostedsadresse() {
         return finnBostedsadresse()
-            .map(Bostedsadresse::tilPostadresse);
+            .map(bostedsadresse ->
+                Postadresse.lagPostadresse(bostedsadresse.coAdressenavn(), bostedsadresse.strukturertAdresse()));
     }
 }

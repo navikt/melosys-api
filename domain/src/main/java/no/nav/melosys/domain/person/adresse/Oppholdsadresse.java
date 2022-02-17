@@ -19,7 +19,7 @@ public record Oppholdsadresse(
 
     public Postadresse tilPostadresse() {
         if (strukturertAdresse != null) {
-            return Postadresse.lagPostadresse(strukturertAdresse, coAdressenavn());
+            return Postadresse.lagPostadresse(coAdressenavn(), strukturertAdresse);
         }
         return null;
     }

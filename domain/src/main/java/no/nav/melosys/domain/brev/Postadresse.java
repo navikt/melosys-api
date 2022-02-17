@@ -33,7 +33,7 @@ public record Postadresse(
         return adresselinjer;
     }
 
-    public static Postadresse lagPostadresse(StrukturertAdresse strukturertAdresse, String coAdressenavn) {
+    public static Postadresse lagPostadresse(String coAdressenavn, StrukturertAdresse strukturertAdresse) {
         return new Postadresse(
             coAdressenavn,
             sammenslå(strukturertAdresse.getGatenavn(), strukturertAdresse.getHusnummerEtasjeLeilighet()),
@@ -45,7 +45,7 @@ public record Postadresse(
             strukturertAdresse.getLandkode());
     }
 
-    public static Postadresse lagPostadresse(SemistrukturertAdresse semistrukturertAdresse, String coAdressenavn) {
+    public static Postadresse lagPostadresse(String coAdressenavn, SemistrukturertAdresse semistrukturertAdresse) {
         return new Postadresse(
             coAdressenavn,
             semistrukturertAdresse.adresselinje1(),
@@ -55,6 +55,6 @@ public record Postadresse(
             semistrukturertAdresse.postnr(),
             semistrukturertAdresse.poststed(),
             semistrukturertAdresse.landkode()
-            );
+        );
     }
 }
