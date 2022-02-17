@@ -52,39 +52,17 @@ internal class BehandlingsresultatServiceIT(
     @Autowired
     private val fagsakRepository: FagsakRepository
 ) {
+    data class Behandlinger(val orginal: Behandling, val replika: Behandling)
+
     @Test
     fun replikerBehandlingOgBehandlingsresultat_dataBlirRiktigIDB() {
-        val fsak = Fagsak().apply {
-            saksnummer = "MEL-1001"
-            type = Sakstyper.TRYGDEAVTALE
-            status = Saksstatuser.LOVVALG_AVKLART
-            leggTilRegisteringInfo()
-        }.also { fagsakRepository.save(it) }
+        val behandlinger = lagFagsakMedBehandlinger()
 
-        val tidligsteInaktiveBehandling = Behandling().apply {
-            fagsak = fsak
-            leggTilRegisteringInfo()
-            behandlingsfrist = LocalDate.now().plusYears(1)
-            status = Behandlingsstatus.AVSLUTTET
-            type = Behandlingstyper.SOEKNAD
-            tema = Behandlingstema.YRKESAKTIV
-        }.also { behandlingRepository.save(it) }
-
-        val behandlingsreplika = Behandling().apply {
-            fagsak = fsak
-            leggTilRegisteringInfo()
-            behandlingsfrist = LocalDate.now().plusYears(1)
-            status = Behandlingsstatus.OPPRETTET
-            type = Behandlingstyper.SOEKNAD
-            tema = Behandlingstema.YRKESAKTIV
-        }.also { behandlingRepository.save(it) }
-
-        val behandlingsresultat = lagBehandlingsresultat(tidligsteInaktiveBehandling)
+        val behandlingsresultat = lagBehandlingsresultat(behandlinger.orginal)
         behandlingsresultatRepository.save(behandlingsresultat)
+        behandlingsresultatService.replikerBehandlingsresultat(behandlinger.orginal, behandlinger.replika)
 
-        behandlingsresultatService.replikerBehandlingsresultat(tidligsteInaktiveBehandling, behandlingsreplika)
-
-        val replikaResultat = behandlingsresultatRepository.findById(behandlingsreplika.id).get()
+        val replikaResultat = behandlingsresultatRepository.findById(behandlinger.replika.id).get()
 
         listOf(
             replikaResultat.lovvalgsperioder,
@@ -97,7 +75,7 @@ internal class BehandlingsresultatServiceIT(
         ).forEach {
             assertThat(it)
                 .singleElement()
-                .hasFieldOrPropertyWithValue("behandlingsresultat.id", behandlingsreplika.id)
+                .hasFieldOrPropertyWithValue("behandlingsresultat.id", behandlinger.replika.id)
         }
         assertThat(replikaResultat.avklartefakta.flatMap { it.registreringer })
             .singleElement()
@@ -106,6 +84,38 @@ internal class BehandlingsresultatServiceIT(
         assertThat(replikaResultat.vilkaarsresultater.flatMap { it.begrunnelser })
             .singleElement()
             .matches { it.vilkaarsresultat.id == replikaResultat.vilkaarsresultater.first().id }
+    }
+
+    private fun lagFagsakMedBehandlinger(): Behandlinger {
+        Fagsak().apply {
+            saksnummer = "MEL-1001"
+            type = Sakstyper.TRYGDEAVTALE
+            status = Saksstatuser.LOVVALG_AVKLART
+            leggTilRegisteringInfo()
+        }.also { fsak ->
+            fagsakRepository.save(fsak)
+
+            val tidligsteInaktiveBehandling = Behandling().apply {
+                fagsak = fsak
+                leggTilRegisteringInfo()
+                behandlingsfrist = LocalDate.now().plusYears(1)
+                status = Behandlingsstatus.AVSLUTTET
+                type = Behandlingstyper.SOEKNAD
+                tema = Behandlingstema.YRKESAKTIV
+            }.also { behandlingRepository.save(it) }
+
+            val behandlingsreplika = Behandling().apply {
+                fagsak = fsak
+                leggTilRegisteringInfo()
+                behandlingsfrist = LocalDate.now().plusYears(1)
+                status = Behandlingsstatus.OPPRETTET
+                type = Behandlingstyper.SOEKNAD
+                tema = Behandlingstema.YRKESAKTIV
+            }.also {
+                behandlingRepository.save(it)
+            }
+            return Behandlinger(tidligsteInaktiveBehandling, behandlingsreplika)
+        }
     }
 
     fun lagBehandlingsresultat(tidligsteInaktiveBehandling: Behandling): Behandlingsresultat =
