@@ -49,7 +49,7 @@ internal class BehandlingsresultatServiceIT(
     private val behandlingsresultatRepository: BehandlingsresultatRepository,
     @Autowired
     private val fagsakRepository: FagsakRepository
-    ) : OracleTestConteinerBase() {
+    ) : OracleTestContainerBase() {
     data class Behandlinger(val orginal: Behandling, val replika: Behandling)
 
     @Test

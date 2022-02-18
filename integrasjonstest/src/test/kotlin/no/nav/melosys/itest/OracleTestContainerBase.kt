@@ -7,7 +7,7 @@ import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
 
 @Testcontainers
-open class OracleTestConteinerBase {
+open class OracleTestContainerBase {
     companion object {
         @Container
         var DB = OracleContainer()
