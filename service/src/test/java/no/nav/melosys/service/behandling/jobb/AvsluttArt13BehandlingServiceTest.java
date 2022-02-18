@@ -68,7 +68,7 @@ class AvsluttArt13BehandlingServiceTest {
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_2A);
         lovvalgsperiode.setMedlPeriodeID(123L);
 
-        when(behandlingService.hentBehandling(behandlingID)).thenReturn(behandling);
+        when(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling);
         when(behandlingsresultatService.hentBehandlingsresultat(behandlingID))
             .thenReturn(behandlingsresultat);
     }

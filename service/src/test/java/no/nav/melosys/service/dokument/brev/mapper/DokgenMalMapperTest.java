@@ -1,9 +1,6 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.Period;
-import java.time.ZoneId;
+import java.time.*;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
@@ -18,7 +15,9 @@ import no.nav.melosys.domain.dokument.organisasjon.adresse.GeografiskAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Representerer;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Nyvurderingbakgrunner;
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_8_naer_tilknytning_norge_begrunnelser;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
 import no.nav.melosys.exception.FunksjonellException;
@@ -29,10 +28,6 @@ import no.nav.melosys.integrasjon.dokgen.dto.storbritannia.attest.*;
 import no.nav.melosys.integrasjon.dokgen.dto.storbritannia.innvilgelse.InnvilgelseStorbritannia;
 import no.nav.melosys.integrasjon.dokgen.dto.storbritannia.innvilgelse.Soknad;
 import no.nav.melosys.service.dokument.DokumentHentingService;
-import no.nav.melosys.service.dokument.brev.mapper.DokgenMalMapper;
-import no.nav.melosys.service.dokument.brev.mapper.DokgenMapperDatahenter;
-import no.nav.melosys.service.dokument.brev.mapper.InnvilgelseFtrlMapper;
-import no.nav.melosys.service.dokument.brev.mapper.StorbritanniaMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -60,10 +55,8 @@ class DokgenMalMapperTest {
     private InnvilgelseFtrlMapper mockInnvilgelseFtrlMapper;
     @Mock
     private DokgenMapperDatahenter mockDokgenMapperDatahenter;
-
     @Mock
     private DokumentHentingService dokumentHentingService;
-
     @Mock
     private StorbritanniaMapper mockStorbritanniaMapper;
 
@@ -73,7 +66,12 @@ class DokgenMalMapperTest {
 
     @BeforeEach
     void init() {
-        dokgenMalMapper = new DokgenMalMapper(mockDokgenMapperDatahenter, mockInnvilgelseFtrlMapper, mockStorbritanniaMapper, dokumentHentingService);
+        dokgenMalMapper = new DokgenMalMapper(
+            mockDokgenMapperDatahenter,
+            mockInnvilgelseFtrlMapper,
+            mockStorbritanniaMapper,
+            dokumentHentingService
+        );
     }
 
     @Test
@@ -92,7 +90,6 @@ class DokgenMalMapperTest {
 
     @Test
     void skalMappeMedBrukerAdresse() {
-        when(mockDokgenMapperDatahenter.hentPoststed(any())).thenReturn("Andeby");
         when(mockDokgenMapperDatahenter.hentPersondata(any())).thenReturn(lagPersonDokument());
 
         Behandling behandling = lagBehandling();
@@ -112,17 +109,16 @@ class DokgenMalMapperTest {
                 dto -> dto.getMottaker().navn(),
                 dto -> dto.getMottaker().postnr()
             ).containsExactly(
-            SAMMENSATT_NAVN_BRUKER,
-            SAMMENSATT_NAVN_BRUKER,
-            POSTNR_BRUKER
-        );
+                SAMMENSATT_NAVN_BRUKER,
+                SAMMENSATT_NAVN_BRUKER,
+                POSTNR_BRUKER
+            );
         assertThat(dokgenDto.getMottaker().adresselinjer()).contains(ADRESSELINJE_1_BRUKER);
     }
 
     @Test
     void mapping_persondataFraPdl_ok() {
         fakeUnleash.enable("melosys.pdl.aktiv");
-        when(mockDokgenMapperDatahenter.hentPoststed(any())).thenReturn("Andeby");
         when(mockDokgenMapperDatahenter.hentPersondata(any())).thenReturn(lagPersonDokument());
 
         Behandling behandling = lagBehandling();
@@ -142,17 +138,17 @@ class DokgenMalMapperTest {
                 dto -> dto.getMottaker().navn(),
                 dto -> dto.getMottaker().postnr()
             ).containsExactly(
-            SAMMENSATT_NAVN_BRUKER,
-            SAMMENSATT_NAVN_BRUKER,
-            POSTNR_BRUKER
-        );
+                SAMMENSATT_NAVN_BRUKER,
+                SAMMENSATT_NAVN_BRUKER,
+                POSTNR_BRUKER
+            );
         assertThat(dokgenDto.getMottaker().adresselinjer()).contains(ADRESSELINJE_1_BRUKER);
         fakeUnleash.disableAll();
     }
 
     @Test
     void mapping_avsenderMyndighet_ok() {
-        when(mockDokgenMapperDatahenter.hentLandnavn("FI")).thenReturn("Finland");
+        when(mockDokgenMapperDatahenter.hentLandnavnFraLandkode("FI")).thenReturn("Finland");
         when(mockDokgenMapperDatahenter.hentPersondata(any())).thenReturn(lagPersonDokument());
 
         Behandling behandling = lagBehandling();
@@ -176,15 +172,14 @@ class DokgenMalMapperTest {
                 SaksbehandlingstidSoknad::getAvsenderLand,
                 SaksbehandlingstidSoknad::getDatoBehandlingstid
             ).containsExactly(
-            TRYGDEMYNDIGHET,
-            "Finland",
-            forsendelseMottattDato.atStartOfDay(ZoneId.of("Europe/Paris")).toInstant().plus(Saksbehandlingstid.SAKSBEHANDLINGSTID_DAGER, ChronoUnit.DAYS)
-        );
+                TRYGDEMYNDIGHET,
+                "Finland",
+                forsendelseMottattDato.atStartOfDay(ZoneId.of("Europe/Paris")).toInstant().plus(Saksbehandlingstid.SAKSBEHANDLINGSTID_DAGER, ChronoUnit.DAYS)
+            );
     }
 
     @Test
     void skalMappeMedFullmektigAdresse() {
-        when(mockDokgenMapperDatahenter.hentPoststed(any())).thenReturn("Andeby");
         when(mockDokgenMapperDatahenter.hentPersondata(any())).thenReturn(lagPersonDokument());
 
         Behandling behandling = lagBehandling();
@@ -205,16 +200,15 @@ class DokgenMalMapperTest {
                 dto -> dto.getMottaker().navn(),
                 dto -> dto.getMottaker().postnr()
             ).containsExactly(
-            SAMMENSATT_NAVN_BRUKER,
-            NAVN_ORG,
-            POSTNR_ORG
-        );
+                SAMMENSATT_NAVN_BRUKER,
+                NAVN_ORG,
+                POSTNR_ORG
+            );
         assertThat(dokgenDto.getMottaker().adresselinjer()).contains(POSTBOKS_ORG);
     }
 
     @Test
     void skalMappeMedFullmektigForretningsAdresse() {
-        when(mockDokgenMapperDatahenter.hentPoststed(any())).thenReturn("Andeby");
         when(mockDokgenMapperDatahenter.hentPersondata(any())).thenReturn(lagPersonDokument());
 
         Behandling behandling = lagBehandling();
@@ -239,16 +233,15 @@ class DokgenMalMapperTest {
                 dto -> dto.getMottaker().navn(),
                 dto -> dto.getMottaker().postnr()
             ).containsExactly(
-            SAMMENSATT_NAVN_BRUKER,
-            NAVN_ORG,
-            POSTNR_ORG
-        );
+                SAMMENSATT_NAVN_BRUKER,
+                NAVN_ORG,
+                POSTNR_ORG
+            );
         assertThat(dokgenDto.getMottaker().adresselinjer()).contains(FORRETNINGSADRESSE_ORG);
     }
 
     @Test
     void skalMappeMedFullmektigMedKontaktpersonAdresse() {
-        when(mockDokgenMapperDatahenter.hentPoststed(any())).thenReturn("Andeby");
         when(mockDokgenMapperDatahenter.hentPersondata(any())).thenReturn(lagPersonDokument());
 
         Behandling behandling = lagBehandling();
@@ -270,16 +263,16 @@ class DokgenMalMapperTest {
                 dto -> dto.getMottaker().navn(),
                 dto -> dto.getMottaker().postnr()
             ).containsExactly(
-            SAMMENSATT_NAVN_BRUKER,
-            NAVN_ORG,
-            POSTNR_ORG
-        );
+                SAMMENSATT_NAVN_BRUKER,
+                NAVN_ORG,
+                POSTNR_ORG
+            );
         assertThat(dokgenDto.getMottaker().adresselinjer()).containsExactly("Att: " + KONTAKT_NAVN, POSTBOKS_ORG);
     }
 
     @Test
     void skalMappeMangelbrevTilBruker() {
-        when(mockDokgenMapperDatahenter.hentPoststed(any())).thenReturn("Andeby");
+        when(mockDokgenMapperDatahenter.hentNorskPoststed(any())).thenReturn("Andeby");
         when(mockDokgenMapperDatahenter.hentPersondata(any())).thenReturn(lagPersonDokument());
 
         Behandling behandling = lagBehandling(lagFagsak(true));
@@ -287,7 +280,7 @@ class DokgenMalMapperTest {
         DokgenBrevbestilling brevbestilling = new MangelbrevBrevbestilling.Builder()
             .medProduserbartdokument(MANGELBREV_BRUKER)
             .medBehandling(behandling)
-            .medOrg(lagOrg())
+            .medOrg(lagOrg(Landkoder.NO))
             .medKontaktopplysning(lagKontaktOpplysning())
             .medForsendelseMottatt(Instant.now())
             .medInnledningFritekst("Dummy")
@@ -304,16 +297,16 @@ class DokgenMalMapperTest {
                 MangelbrevBruker::getInnledningFritekst,
                 MangelbrevBruker::getManglerInfoFritekst
             ).containsExactly(
-            "Dummy",
-            "Dummy"
-        );
+                "Dummy",
+                "Dummy"
+            );
         assertThat(((MangelbrevBruker) dokgenDto).getDatoInnsendingsfrist().truncatedTo(ChronoUnit.DAYS))
             .isEqualTo(Instant.now().plus(Period.ofWeeks(4)).truncatedTo(ChronoUnit.DAYS));
     }
 
     @Test
     void skalMappeMangelbrevTilArbeidsgiver() {
-        when(mockDokgenMapperDatahenter.hentPoststed(any())).thenReturn("Andeby");
+        when(mockDokgenMapperDatahenter.hentNorskPoststed(any())).thenReturn("Andeby");
         when(mockDokgenMapperDatahenter.hentPersondata(any())).thenReturn(lagPersonDokument());
         when(mockDokgenMapperDatahenter.hentFullmektigNavn(any(), eq(Representerer.BRUKER))).thenReturn("Fullmektig AS");
 
@@ -322,7 +315,7 @@ class DokgenMalMapperTest {
         DokgenBrevbestilling brevbestilling = new MangelbrevBrevbestilling.Builder()
             .medProduserbartdokument(MANGELBREV_ARBEIDSGIVER)
             .medBehandling(behandling)
-            .medOrg(lagOrg())
+            .medOrg(lagOrg(Landkoder.NO))
             .medKontaktopplysning(lagKontaktOpplysning())
             .medForsendelseMottatt(Instant.now())
             .medInnledningFritekst("Dummy")
@@ -340,17 +333,16 @@ class DokgenMalMapperTest {
                 MangelbrevArbeidsgiver::getManglerInfoFritekst,
                 MangelbrevArbeidsgiver::getNavnFullmektig
             ).containsExactly(
-            "Dummy",
-            "Dummy",
-            "Fullmektig AS"
-        );
+                "Dummy",
+                "Dummy",
+                "Fullmektig AS"
+            );
         assertThat(((MangelbrevArbeidsgiver) dokgenDto).getDatoInnsendingsfrist().truncatedTo(ChronoUnit.DAYS))
             .isEqualTo(Instant.now().plus(Period.ofWeeks(4)).truncatedTo(ChronoUnit.DAYS));
     }
 
     @Test
     void skalMappeInnvilgelsesbrevTilBruker() {
-        when(mockDokgenMapperDatahenter.hentPoststed(any())).thenReturn("Andeby");
         when(mockDokgenMapperDatahenter.hentPersondata(any())).thenReturn(lagPersonDokument());
         when(mockInnvilgelseFtrlMapper.map(any())).thenReturn(lagInnvilgelseFtrl());
 
@@ -371,7 +363,6 @@ class DokgenMalMapperTest {
 
     @Test
     void skalMappeStorbritanniabrev() {
-        when(mockDokgenMapperDatahenter.hentPoststed(any())).thenReturn("Andeby");
         when(mockDokgenMapperDatahenter.hentPersondata(any())).thenReturn(lagPersonDokument());
         when(mockStorbritanniaMapper.map(any())).thenReturn(lagInnvilgelseOgAttestStorbritannia());
 
@@ -380,7 +371,7 @@ class DokgenMalMapperTest {
         DokgenBrevbestilling brevbestilling = new InnvilgelseBrevbestilling.Builder()
             .medProduserbartdokument(STORBRITANNIA)
             .medBehandling(behandling)
-            .medOrg(lagOrg())
+            .medOrg(lagOrg(Landkoder.GB))
             .medKontaktopplysning(lagKontaktOpplysning())
             .medForsendelseMottatt(Instant.now())
             .medInnledningFritekst("Dummy")
@@ -415,20 +406,24 @@ class DokgenMalMapperTest {
                 a -> a.getMedfolgendeFamiliemedlemmer().barn(),
                 a -> a.getRepresentant().navn()
             ).containsExactly(
-            "Nordmann, Ola",
-            "01010119901",
-            List.of("Nordmannsveg 200", "Norge"),
-            "Virksomhetsnavn",
-            Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1,
-            "Kone",
-            List.of(),
-            "Mrs. London"
-        );
+                "Nordmann, Ola",
+                "01010119901",
+                List.of("Nordmannsveg 200", "Norge"),
+                "Virksomhetsnavn",
+                Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1,
+                "Kone",
+                List.of(),
+                "Mrs. London"
+            );
+
+        assertThat(((InnvilgelseOgAttestStorbritannia) dokgenDto).getNyVurderingBakgrunn())
+            .isEqualTo(Nyvurderingbakgrunner.NYE_OPPLYSNINGER.getKode());
+        assertThat(((InnvilgelseOgAttestStorbritannia) dokgenDto).isSkalHaInfoOmRettigheter())
+            .isFalse();
     }
 
     @Test
     void skalMappeFritekstbrevTilBruker() {
-        when(mockDokgenMapperDatahenter.hentPoststed(any())).thenReturn("Andeby");
         when(mockDokgenMapperDatahenter.hentPersondata(any())).thenReturn(lagPersonDokument());
         when(mockDokgenMapperDatahenter.hentFullmektigNavn(any(), eq(Representerer.BRUKER))).thenReturn("Fullmektig AS");
 
@@ -454,19 +449,18 @@ class DokgenMalMapperTest {
                 Fritekstbrev::getNavnFullmektig,
                 Fritekstbrev::getSaksbehandlerNavn
             ).containsExactly(
-            "Min tittel",
-            "Innhold",
-            true,
-            "Fullmektig AS",
-            "Fetter Anton"
-        );
+                "Min tittel",
+                "Innhold",
+                true,
+                "Fullmektig AS",
+                "Fetter Anton"
+            );
 
         assertThat(dokgenDto.getMottaker().type()).isEqualTo(Aktoersroller.BRUKER.getKode());
     }
 
     @Test
     void skalMappeFritekstbrevTilArbeidsgiver() {
-        when(mockDokgenMapperDatahenter.hentPoststed(any())).thenReturn("Andeby");
         when(mockDokgenMapperDatahenter.hentPersondata(any())).thenReturn(lagPersonDokument());
         when(mockDokgenMapperDatahenter.hentFullmektigNavn(any(), eq(Representerer.ARBEIDSGIVER))).thenReturn(null);
 
@@ -490,27 +484,30 @@ class DokgenMalMapperTest {
                 Fritekstbrev::isMedKontaktopplysninger,
                 Fritekstbrev::getNavnFullmektig
             ).containsExactly(
-            "Min tittel",
-            "Innhold",
-            true,
-            null
-        );
+                "Min tittel",
+                "Innhold",
+                true,
+                null
+            );
 
         assertThat(dokgenDto.getMottaker().type()).isEqualTo(Aktoersroller.ARBEIDSGIVER.getKode());
     }
 
     @Test
-    void skalMappeTilAvslagbrev() {
-        LocalDate datoDesember = LocalDate.of(2021, 12, 9);
+    void skalMappeTilAvslagbrevMedRiktigeMangelbrevdatoer() {
+        LocalDate datoSeptember = LocalDate.of(2021, 9, 9);
         LocalDate datoOktober = LocalDate.of(2021, 10, 9);
+        LocalDate datoDesember = LocalDate.of(2021, 12, 9);
+        Behandling behandling = lagBehandling(lagFagsak(true));
+        behandling.setRegistrertDato(LocalDateTime.of(2021, 10, 1, 0, 0).toInstant(ZoneOffset.UTC));
         when(dokumentHentingService.hentDokumenter("MEL-123")).thenReturn(List.of(
+            lagJournalpost(datoSeptember),
             lagJournalpost(datoDesember),
             lagJournalpost(datoOktober)));
-        when(mockDokgenMapperDatahenter.hentPoststed(any())).thenReturn("Andeby");
         when(mockDokgenMapperDatahenter.hentPersondata(any())).thenReturn(lagPersonDokument());
         DokgenBrevbestilling brevbestilling = new AvslagBrevbestilling.Builder()
             .medProduserbartdokument(AVSLAG_MANGLENDE_OPPLYSNINGER)
-            .medBehandling(lagBehandling(lagFagsak(true)))
+            .medBehandling(behandling)
             .medFritekst("Hei")
             .build();
 
@@ -527,14 +524,36 @@ class DokgenMalMapperTest {
     }
 
     @Test
-    void skalMappeAvslagsbrevPgaManglendeOpplysningerTilBruker() {
-        when(dokumentHentingService.hentDokumenter("MEL-123")).thenReturn(emptyList());
-        when(mockDokgenMapperDatahenter.hentPoststed(any())).thenReturn("Andeby");
+    void skalMappeAvslagsbrevMedRiktigAvsenderType() {
+        LocalDate datoOktober = LocalDate.of(2021, 10, 9);
+        LocalDate datoNovember = LocalDate.of(2021, 11, 10);
+        Journalpost journalPostVirksomhet = lagJournalpost(datoNovember);
+        journalPostVirksomhet.setAvsenderType(Avsendertyper.ORGANISASJON);
+        Behandling behandling = lagBehandling(lagFagsak(true));
+        behandling.setRegistrertDato(LocalDateTime.of(2021, 10, 1, 0, 0).toInstant(ZoneOffset.UTC));
         when(mockDokgenMapperDatahenter.hentPersondata(any())).thenReturn(lagPersonDokument());
+        when(dokumentHentingService.hentDokumenter("MEL-123")).thenReturn(List.of(
+            lagJournalpost(datoOktober),
+            journalPostVirksomhet));
         DokgenBrevbestilling brevbestilling = new AvslagBrevbestilling.Builder()
             .medProduserbartdokument(AVSLAG_MANGLENDE_OPPLYSNINGER)
-            .medBehandling(lagBehandling(lagFagsak(true)))
-            .medFritekst("Hei")
+            .medBehandling(behandling)
+            .build();
+
+        Avslagbrev avslagbrev = (Avslagbrev) dokgenMalMapper.mapBehandling(brevbestilling);
+
+        assertThat(avslagbrev.getMangelbrevDatoer()).containsExactly(
+            LocalDate.of(2021, 10, 9));
+    }
+
+    @Test
+    void skalMappeAvslagsbrevPgaManglendeOpplysningerTilBruker() {
+        when(dokumentHentingService.hentDokumenter("MEL-123")).thenReturn(emptyList());
+        when(mockDokgenMapperDatahenter.hentPersondata(any())).thenReturn(lagPersonDokument());
+        Behandling behandling = lagBehandling(lagFagsak(true));
+        DokgenBrevbestilling brevbestilling = new AvslagBrevbestilling.Builder()
+            .medProduserbartdokument(AVSLAG_MANGLENDE_OPPLYSNINGER)
+            .medBehandling(behandling)
             .build();
 
         DokgenDto dokgenDto = dokgenMalMapper.mapBehandling(brevbestilling);
@@ -549,6 +568,7 @@ class DokgenMalMapperTest {
         Journalpost journalpost = new Journalpost("1");
         journalpost.setHoveddokument(arkivDokument);
         journalpost.setForsendelseJournalfoert(forsteDato);
+        journalpost.setAvsenderType(Avsendertyper.PERSON);
 
         return journalpost;
     }
@@ -587,6 +607,7 @@ class DokgenMalMapperTest {
         return new InnvilgelseOgAttestStorbritannia.Builder(lagInnvilgelseBrevbestilling())
             .innvilgelse(lagInnvilgelseStorbritannia())
             .attest(lagAttestStorbritannia())
+            .nyVurderingBakgrunn(Nyvurderingbakgrunner.NYE_OPPLYSNINGER.getKode())
             .build();
     }
 

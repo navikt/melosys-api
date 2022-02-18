@@ -39,7 +39,7 @@
         <java.version>17</java.version>
 
         <!-- Melosys -->
-        <melosys.jsonschema.version>1.35.158</melosys.jsonschema.version>
+        <melosys.jsonschema.version>1.35.159</melosys.jsonschema.version>
         <melosys.internt.kodeverk.version>5.15.107-5c249f4</melosys.internt.kodeverk.version>
         <melosys.brev.version>1.2.124</melosys.brev.version>
 
@@ -100,6 +100,7 @@
         <medlemskapsunntak-api-v1.version>1.1</medlemskapsunntak-api-v1.version>
         <wiremock-standalone.version>2.27.2</wiremock-standalone.version>
         <nav-foedselsnummer.core.version>1.0-SNAPSHOT.6</nav-foedselsnummer.core.version>
+        <xmlunit.version>2.9.0</xmlunit.version>
     </properties>
 
     <!-- Unngå å put scope i dependency management. Sett det heller der det
@@ -446,11 +447,6 @@
                 <version>${token-support.version}</version>
             </dependency>
             <dependency>
-                <groupId>no.nav.tjenestespesifikasjoner</groupId>
-                <artifactId>nav-arbeidsforhold-v3-tjenestespesifikasjon</artifactId>
-                <version>${nav.tjenestespesifikasjoner.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>no.nav.tjenester</groupId>
                 <artifactId>nav-dokumentproduksjon-v3-tjenestespesifikasjon</artifactId>
                 <version>${doksys.dokumentproduksjon.version}</version>
@@ -592,6 +588,16 @@
                 <artifactId>testutils</artifactId>
                 <version>${nav-foedselsnummer.core.version}</version>
                 <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.xmlunit</groupId>
+                <artifactId>xmlunit-core</artifactId>
+                <version>${xmlunit.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.xmlunit</groupId>
+                <artifactId>xmlunit-matchers</artifactId>
+                <version>${xmlunit.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

@@ -74,7 +74,7 @@ public class TrygdeavtaleVedtakService {
         }
 
         behandling.getFagsak().setStatus(Saksstatuser.MEDLEMSKAP_AVKLART);
-        behandlingService.oppdaterStatus(behandling, Behandlingsstatus.IVERKSETTER_VEDTAK);
+        behandlingService.endreStatus(behandling, Behandlingsstatus.IVERKSETTER_VEDTAK);
 
         prosessinstansService.opprettProsessinstansIverksettVedtakTrygdeavtale(behandling, request);
         dokgenService.produserOgDistribuerBrev(behandlingID, lagStorbritanniaBrevbestilling(request));
@@ -91,6 +91,7 @@ public class TrygdeavtaleVedtakService {
             .medEktefelleFritekst(request.getEktefelleFritekst())
             .medBarnFritekst(request.getBarnFritekst())
             .medBestillersId(request.getBestillersId())
+            .medNyVurderingBakgrunn(request.getNyVurderingBakgrunn())
             .build();
     }
 

@@ -54,10 +54,10 @@ public class KontrollresultatServiceTest {
 
     @Test
     public void utførKontrollerOgRegistrerFeil() throws Exception {
-        when(behandlingService.hentBehandling(anyLong())).thenReturn(new Behandling());
+        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(new Behandling());
         kontrollresultatService.utførKontrollerOgRegistrerFeil(1L);
 
-        verify(behandlingService).hentBehandling(anyLong());
+        verify(behandlingService).hentBehandlingMedSaksopplysninger(anyLong());
         verify(ufmKontrollService).utførKontroller(any(Behandling.class));
         verify(kontrollresultatRepository).deleteByBehandlingsresultat(any(Behandlingsresultat.class));
         verify(kontrollresultatRepository).saveAll(kontrollresultaterCaptor.capture());

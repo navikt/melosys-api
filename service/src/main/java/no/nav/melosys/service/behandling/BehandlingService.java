@@ -5,12 +5,13 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.*;
-import java.util.stream.Stream;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
+import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagKonverterer;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
@@ -20,6 +21,7 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
 import no.nav.melosys.repository.BehandlingRepository;
+import no.nav.melosys.repository.BehandlingsgrunnlagRepository;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.TidligereMedlemsperiodeRepository;
 import no.nav.melosys.service.oppgave.OppgaveService;
@@ -34,6 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import static java.util.stream.Collectors.toList;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.*;
+import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.ARBEID_FLERE_LAND;
 import static no.nav.melosys.metrics.MetrikkerNavn.*;
 
 @Service
@@ -45,6 +48,7 @@ public class BehandlingService {
     private final BehandlingsresultatRepository behandlingsresultatRepository;
     private final TidligereMedlemsperiodeRepository tidligereMedlemsperiodeRepository;
     private final BehandlingsresultatService behandlingsresultatService;
+    private final BehandlingsgrunnlagRepository behandlingsgrunnlagRepository;
     private final OppgaveService oppgaveService;
     private final ApplicationEventPublisher applicationEventPublisher;
 
@@ -64,91 +68,27 @@ public class BehandlingService {
     public BehandlingService(BehandlingRepository behandlingRepository,
                              BehandlingsresultatRepository behandlingsresultatRepository,
                              TidligereMedlemsperiodeRepository tidligereMedlemsperiodeRepository,
+                             BehandlingsgrunnlagRepository behandlingsgrunnlagRepository,
                              BehandlingsresultatService behandlingsresultatService,
                              @Lazy OppgaveService oppgaveService,
                              ApplicationEventPublisher applicationEventPublisher) {
         this.behandlingRepository = behandlingRepository;
         this.behandlingsresultatRepository = behandlingsresultatRepository;
         this.tidligereMedlemsperiodeRepository = tidligereMedlemsperiodeRepository;
+        this.behandlingsgrunnlagRepository = behandlingsgrunnlagRepository;
         this.behandlingsresultatService = behandlingsresultatService;
         this.oppgaveService = oppgaveService;
         this.applicationEventPublisher = applicationEventPublisher;
     }
 
-    /**
-     * Knytt medlemsperioder fra MEDL til behandlingen.
-     */
-    @Transactional
-    public void knyttMedlemsperioder(long behandlingID, List<Long> periodeIder) {
-        Behandling behandling = hentBehandlingUtenSaksopplysninger(behandlingID);
-
-        if (!behandling.erAktiv()) {
-            throw new FunksjonellException("Medlemsperioder kan ikke lagres på behandling med status " + behandling.getStatus());
-        }
-        List<TidligereMedlemsperiode> tidligereMedlemsperioder = periodeIder.stream()
-            .map(pid -> new TidligereMedlemsperiode(behandlingID, pid)).collect(toList());
-        tidligereMedlemsperiodeRepository.deleteById_BehandlingId(behandlingID);
-        tidligereMedlemsperiodeRepository.saveAll(tidligereMedlemsperioder);
+    public Behandling hentBehandling(long behandlingId) {
+        return behandlingRepository.findById(behandlingId)
+            .orElseThrow(() -> new IkkeFunnetException(FINNER_IKKE_BEHANDLING + behandlingId));
     }
 
-    @Deprecated
-    public void lagre(Behandling behandling) {
-        behandlingRepository.save(behandling);
-    }
-
-    public void oppdaterStatus(long behandlingID, Behandlingsstatus status) {
-        Behandling behandling = hentBehandlingUtenSaksopplysninger(behandlingID);
-        oppdaterStatus(behandling, status);
-    }
-
-    public void oppdaterStatus(Behandling behandling, Behandlingsstatus status) {
-        if (behandling.getStatus() == status) {
-            return;
-        }
-
-        if (!behandling.erAktiv()) {
-            throw new FunksjonellException("Behandlingen må være aktiv for å kunne endres. Status var: " + behandling.getStatus());
-        }
-
-        log.info("Oppdaterer status for behandling {} fra {} til {}", behandling, behandling.getStatus(), status);
-        behandling.setStatus(status);
-        if (behandling.erVenterForDokumentasjon()) {
-            behandling.setDokumentasjonSvarfristDato(Instant.now().plus(Period.ofWeeks(2)));
-        }
-
-        behandlingRepository.save(behandling);
-
-        if (List.of(AVVENT_FAGLIG_AVKLARING, AVVENT_DOK_PART, AVVENT_DOK_UTL).contains(status)) {
-            oppgaveService.oppdaterOppgaveMedSaksnummer(
-                behandling.getFagsak().getSaksnummer(),
-                OppgaveOppdatering.builder().beskrivelse(status.getBeskrivelse()).build()
-            );
-        } else if (status == Behandlingsstatus.AVSLUTTET) {
-            oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
-        }
-        applicationEventPublisher.publishEvent(new BehandlingEndretStatusEvent(status, behandling));
-    }
-
-    public void brukerOppdaterStatus(long behandlingID, Behandlingsstatus status) {
-        Behandling behandling = hentBehandlingUtenSaksopplysninger(behandlingID);
-        if (!hentMuligeStatuser(behandling).contains(status)) {
-            throw new FunksjonellException(String.format("Behandlingen kan ikke endres til status %s. Gyldige statuser for behandling %s er %s", status, behandlingID, hentMuligeStatuser(behandling)));
-        }
-        oppdaterStatus(behandling, status);
-    }
-
-    @Transactional(readOnly = true)
-    public Collection<Behandlingsstatus> hentMuligeStatuser(long behandlingId) {
-        Behandling behandling = hentBehandlingUtenSaksopplysninger(behandlingId);
-        return hentMuligeStatuser(behandling);
-    }
-
-    private Collection<Behandlingsstatus> hentMuligeStatuser(Behandling behandling) {
-        if (behandling.erInaktiv()) return Collections.emptyList();
-
-        return Stream.of(AVVENT_DOK_PART, AVVENT_DOK_UTL, UNDER_BEHANDLING, AVVENT_FAGLIG_AVKLARING)
-            .filter(status -> status != behandling.getStatus())
-            .collect(toList());
+    public Behandling hentBehandlingMedSaksopplysninger(long behandlingId) {
+        return Optional.ofNullable(behandlingRepository.findWithSaksopplysningerById(behandlingId))
+            .orElseThrow(() -> new IkkeFunnetException(FINNER_IKKE_BEHANDLING + behandlingId));
     }
 
     @Transactional
@@ -182,6 +122,128 @@ public class BehandlingService {
         Metrics.counter(BEHANDLINGSTEMAER_OPPRETTET, TAG_TEMA, behandlingstema.getKode()).increment();
         Metrics.counter(BEHANDLINGSTYPER_OPPRETTET, TAG_TYPE, behandlingstype.getKode()).increment();
         return behandling;
+    }
+
+    @Transactional
+    public void endreBehandling(long behandlingID, Sakstyper ignoredSakstype, Behandlingstyper type, Behandlingstema tema, Behandlingsstatus status, LocalDate behandlingsfrist) {
+        // TODO: Endre sakstype (MELOSYS-4899 for EØS <-> trygdeavtale)
+        var behandling = hentBehandling(behandlingID);
+        if (!behandling.erAktiv()) {
+            throw new FunksjonellException("Behandlingen må være aktiv for å kunne endres");
+        }
+
+        if (status != null && status != behandling.getStatus() && saksbehandlerKanEndreStatus(behandling, status)) {
+            endreStatus(behandling, status);
+        }
+        if (type != null && type != behandling.getType() && saksbehandlerKanEndreType(behandling, type)) {
+            endreType(behandling, type);
+        }
+        if (tema != null && tema != behandling.getTema() && saksbehandlerKanEndreTema(behandling, tema)) {
+            endreTema(behandling, tema);
+        }
+        if (behandlingsfrist != null && !behandlingsfrist.equals(behandling.getBehandlingsfrist())) {
+            endreBehandlingsfrist(behandling, behandlingsfrist);
+        }
+    }
+
+    /**
+     * @deprecated Erstattes av endreBestilling
+     */
+    @Deprecated
+    @Transactional
+    public void endreBehandlingstemaTilBehandling(long behandlingID, Behandlingstema nyttTema) {
+        Behandling behandling = hentBehandling(behandlingID);
+        var behandlingsgrunnlag = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
+        if (MuligeManuelleBehandlingsendringer.hentMuligeBehandlingstema(behandling, behandlingsgrunnlag).contains(nyttTema)) {
+            behandling.setTema(nyttTema);
+
+            tilbakestillBehandlingsgrunnlag(behandling);
+            applicationEventPublisher.publishEvent(new BehandlingEndretAvSaksbehandlerEvent(behandling.getId(), behandling));
+            if (nyttTema != ARBEID_FLERE_LAND) {
+                behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().soeknadsland.erUkjenteEllerAlleEosLand = false;
+                BehandlingsgrunnlagKonverterer.oppdaterBehandlingsgrunnlag(behandling.getBehandlingsgrunnlag());
+                behandlingsgrunnlagRepository.saveAndFlush(behandling.getBehandlingsgrunnlag());
+            }
+        } else {
+            throw new FunksjonellException("Ikke mulig å endre behandlingstema");
+        }
+    }
+
+    /**
+     * Knytt medlemsperioder fra MEDL til behandlingen.
+     */
+    @Transactional
+    public void knyttMedlemsperioder(long behandlingID, List<Long> periodeIder) {
+        Behandling behandling = hentBehandling(behandlingID);
+
+        if (!behandling.erAktiv()) {
+            throw new FunksjonellException("Medlemsperioder kan ikke lagres på behandling med status " + behandling.getStatus());
+        }
+        List<TidligereMedlemsperiode> tidligereMedlemsperioder = periodeIder.stream()
+            .map(pid -> new TidligereMedlemsperiode(behandlingID, pid)).collect(toList());
+        tidligereMedlemsperiodeRepository.deleteById_BehandlingId(behandlingID);
+        tidligereMedlemsperiodeRepository.saveAll(tidligereMedlemsperioder);
+    }
+
+    @Deprecated
+    public void lagre(Behandling behandling) {
+        behandlingRepository.save(behandling);
+    }
+
+    public void endreStatus(long behandlingID, Behandlingsstatus status) {
+        Behandling behandling = hentBehandling(behandlingID);
+        endreStatus(behandling, status);
+    }
+
+    public void endreStatus(Behandling behandling, Behandlingsstatus status) {
+        if (behandling.getStatus() == status) {
+            return;
+        }
+
+        if (!behandling.erAktiv()) {
+            throw new FunksjonellException("Behandlingen må være aktiv for å kunne endres. Status var: " + behandling.getStatus());
+        }
+
+        log.info("Oppdaterer status for behandling {} fra {} til {}", behandling.getId(), behandling.getStatus(), status);
+        behandling.setStatus(status);
+        if (behandling.erVenterForDokumentasjon()) {
+            behandling.setDokumentasjonSvarfristDato(Instant.now().plus(Period.ofWeeks(2)));
+        }
+
+        behandlingRepository.save(behandling);
+
+        if (List.of(AVVENT_FAGLIG_AVKLARING, AVVENT_DOK_PART, AVVENT_DOK_UTL).contains(status)) {
+            oppgaveService.oppdaterOppgaveMedSaksnummer(
+                behandling.getFagsak().getSaksnummer(),
+                OppgaveOppdatering.builder().beskrivelse(status.getBeskrivelse()).build()
+            );
+        } else if (status == Behandlingsstatus.AVSLUTTET) {
+            oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
+        }
+        applicationEventPublisher.publishEvent(new BehandlingEndretStatusEvent(status, behandling));
+    }
+
+    public void endreType(Behandling behandling, Behandlingstyper type) {
+        log.info("Endrer behandlingstypen for behandling {} fra {} til {}", behandling.getId(), behandling.getType(), type);
+        behandling.setType(type);
+        behandlingRepository.save(behandling);
+        tilbakestillBehandlingsgrunnlag(behandling);
+        applicationEventPublisher.publishEvent(new BehandlingEndretAvSaksbehandlerEvent(behandling.getId(), behandling));
+    }
+
+    public void endreTema(Behandling behandling, Behandlingstema tema) {
+        log.info("Endrer behandlingstema for behandling {} fra {} til {}", behandling.getId(), behandling.getTema(), tema);
+        behandling.setTema(tema);
+        behandlingRepository.save(behandling);
+        tilbakestillBehandlingsgrunnlag(behandling);
+        applicationEventPublisher.publishEvent(new BehandlingEndretAvSaksbehandlerEvent(behandling.getId(), behandling));
+    }
+
+    public void endreBehandlingsfrist(Behandling behandling, LocalDate behandlingsfrist) {
+        log.info("Endrer behandlingsfrist for behandling {} fra {} til {}", behandling.getId(), behandling.getBehandlingsfrist(), behandlingsfrist);
+        behandling.setBehandlingsfrist(behandlingsfrist);
+        behandlingRepository.save(behandling);
+        applicationEventPublisher.publishEvent(new BehandlingEndretAvSaksbehandlerEvent(behandling.getId(), behandling));
     }
 
     public List<Long> hentMedlemsperioder(long behandlingID) {
@@ -257,7 +319,7 @@ public class BehandlingService {
     }
 
     public void avsluttBehandling(long behandlingId) {
-        Behandling behandling = hentBehandlingUtenSaksopplysninger(behandlingId);
+        Behandling behandling = hentBehandling(behandlingId);
 
         avsluttBehandling(behandling);
     }
@@ -274,7 +336,7 @@ public class BehandlingService {
     }
 
     public void avsluttNyVurdering(long behandlingId, Behandlingsresultattyper nyBehandlingsResultatType) {
-        Behandling behandling = hentBehandlingUtenSaksopplysninger(behandlingId);
+        Behandling behandling = hentBehandling(behandlingId);
         if (!behandling.erNyVurdering()) {
             throw new FunksjonellException("Behandling " + behandling.getId() + " er ikke typen NY_VURDERING!");
         }
@@ -285,16 +347,6 @@ public class BehandlingService {
 
     public void settNyVurderingTilFerdigbehandlet(long behandlingId) {
         avsluttNyVurdering(behandlingId, Behandlingsresultattyper.FERDIGBEHANDLET);
-    }
-
-    public Behandling hentBehandling(long behandlingId) {
-        return Optional.ofNullable(behandlingRepository.findWithSaksopplysningerById(behandlingId))
-            .orElseThrow(() -> new IkkeFunnetException(FINNER_IKKE_BEHANDLING + behandlingId));
-    }
-
-    public Behandling hentBehandlingUtenSaksopplysninger(long behandlingId) {
-        return behandlingRepository.findById(behandlingId)
-            .orElseThrow(() -> new IkkeFunnetException(FINNER_IKKE_BEHANDLING + behandlingId));
     }
 
     @Transactional(readOnly = true)
@@ -315,13 +367,59 @@ public class BehandlingService {
         behandlingRepository.save(behandling);
     }
 
+    /**
+     * @deprecated Erstattes av endreBestilling
+     */
+    @Deprecated
     @Transactional
     public void endreBehandlingsfrist(long behandlingId, LocalDate behandlingsfrist) {
-        Behandling behandling = hentBehandlingUtenSaksopplysninger(behandlingId);
+        Behandling behandling = hentBehandling(behandlingId);
         behandling.setBehandlingsfrist(behandlingsfrist);
         behandlingRepository.save(behandling);
 
         applicationEventPublisher.publishEvent(new BehandlingsfristEndretEvent(behandlingId, behandlingsfrist));
+    }
+
+    private void tilbakestillBehandlingsgrunnlag(Behandling behandling) {
+        behandlingsresultatService.tømBehandlingsresultat(behandling.getId());
+        if (behandling.getTema() != ARBEID_FLERE_LAND) {
+            behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().soeknadsland.erUkjenteEllerAlleEosLand = false;
+            BehandlingsgrunnlagKonverterer.oppdaterBehandlingsgrunnlag(behandling.getBehandlingsgrunnlag());
+            behandlingsgrunnlagRepository.saveAndFlush(behandling.getBehandlingsgrunnlag());
+        }
+    }
+
+    public Set<Behandlingsstatus> hentMuligeStatuser(long behandlingID) {
+        var behandling = hentBehandling(behandlingID);
+        return MuligeManuelleBehandlingsendringer.hentMuligeStatuser(behandling);
+    }
+
+    @Transactional
+    public Set<Behandlingstema> hentMuligeBehandlingstema(long behandlingID) {
+        var behandling = hentBehandling(behandlingID);
+        var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
+        return MuligeManuelleBehandlingsendringer.hentMuligeBehandlingstema(behandling, behandlingsresultat);
+    }
+
+    public Set<Behandlingstyper> hentMuligeTyper(long behandlingID) {
+        var behandling = hentBehandling(behandlingID);
+        return MuligeManuelleBehandlingsendringer.hentMuligeTyper(behandling);
+    }
+
+    private boolean saksbehandlerKanEndreStatus(Behandling behandling, Behandlingsstatus status) {
+        MuligeManuelleBehandlingsendringer.validerNyStatusMulig(behandling, status);
+        return true;
+    }
+
+    private boolean saksbehandlerKanEndreType(Behandling behandling, Behandlingstyper type) {
+        MuligeManuelleBehandlingsendringer.validerNyTypeMulig(behandling, type);
+        return true;
+    }
+
+    private boolean saksbehandlerKanEndreTema(Behandling behandling, Behandlingstema tema) {
+        var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
+        MuligeManuelleBehandlingsendringer.validerNyttTemaMulig(behandling, behandlingsresultat, tema);
+        return behandlingsresultat.erIkkeArtikkel16MedSendtAnmodningOmUnntak();
     }
 
     private LocalDate hentBehandlingsfristForBehandlingstema(Behandlingstema behandlingstema) {

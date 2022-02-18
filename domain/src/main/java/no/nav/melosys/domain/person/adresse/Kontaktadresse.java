@@ -20,9 +20,10 @@ public record Kontaktadresse(
 ) implements PersonAdresse {
     public Postadresse tilPostadresse() {
         if (strukturertAdresse != null) {
-            return Postadresse.lagPostadresse(strukturertAdresse);
-        } else {
-            return Postadresse.lagPostadresse(semistrukturertAdresse);
+            return Postadresse.lagPostadresse(coAdressenavn(), strukturertAdresse);
+        } else if (semistrukturertAdresse != null) {
+            return Postadresse.lagPostadresse(coAdressenavn(), semistrukturertAdresse);
         }
+        return null;
     }
 }

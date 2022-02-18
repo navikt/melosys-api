@@ -40,11 +40,11 @@ public class DokgenMapperDatahenter {
         this.unleash = unleash;
     }
 
-    String hentPoststed(String postnr) {
+    String hentNorskPoststed(String postnr) {
         return kodeverkService.dekod(FellesKodeverk.POSTNUMMER, postnr);
     }
 
-    String hentLandnavn(String landkode) {
+    String hentLandnavnFraLandkode(String landkode) {
         var landnavn = "";
         if (hasText(landkode)) {
             landnavn = kodeverkService.dekod(FellesKodeverk.LANDKODER, landkode);

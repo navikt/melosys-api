@@ -42,7 +42,7 @@ class VurderInngangsvilkaarTest {
         behandling.setId(behandlingID);
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
-        when(behandlingService.hentBehandling(eq(behandlingID))).thenReturn(behandling);
+        when(behandlingService.hentBehandlingMedSaksopplysninger(eq(behandlingID))).thenReturn(behandling);
     }
 
     @Test

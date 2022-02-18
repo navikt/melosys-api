@@ -67,7 +67,7 @@ class OppfriskSaksopplysningerServiceTest {
 
     @Test
     void oppfriskSaksopplysning() {
-        when(behandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling());
+        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(lagBehandling());
 
         oppfriskSaksopplysningerService.oppfriskSaksopplysning(BEHANDLING_ID, false);
 
@@ -81,7 +81,7 @@ class OppfriskSaksopplysningerServiceTest {
         behandling.setTema(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE);
 
         behandling.getSaksopplysninger().add(lagSED());
-        when(behandlingService.hentBehandling(eq(BEHANDLING_ID))).thenReturn(behandling);
+        when(behandlingService.hentBehandlingMedSaksopplysninger(eq(BEHANDLING_ID))).thenReturn(behandling);
 
         oppfriskSaksopplysningerService.oppfriskSaksopplysning(BEHANDLING_ID, false);
 
@@ -100,7 +100,7 @@ class OppfriskSaksopplysningerServiceTest {
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.getVilkaarsresultater().add(vilkaarsresultat);
 
-        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
         when(inngangsvilkaarService.vurderOgLagreInngangsvilkår(anyLong(), anyList(), anyBoolean(), any(Periode.class))).thenReturn(true);
 
         oppfriskSaksopplysningerService.oppfriskSaksopplysning(BEHANDLING_ID, false);
@@ -111,7 +111,7 @@ class OppfriskSaksopplysningerServiceTest {
     @Test
     void oppfriskSaksopplysning_utenFamilierelasjoner_girForventetInformasjonsbehov() {
         Behandling behandling = lagBehandling();
-        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
         ArgumentCaptor<RegisteropplysningerRequest> requestCaptor = ArgumentCaptor.forClass(RegisteropplysningerRequest.class);
         oppfriskSaksopplysningerService.oppfriskSaksopplysning(BEHANDLING_ID, false);
         verify(registeropplysningerService).hentOgLagreOpplysninger(requestCaptor.capture());
@@ -121,7 +121,7 @@ class OppfriskSaksopplysningerServiceTest {
     @Test
     void oppfriskSaksopplysning_medFamilierelasjoner_girForventetInformasjonsbehov() {
         Behandling behandling = lagBehandling();
-        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
         ArgumentCaptor<RegisteropplysningerRequest> requestCaptor = ArgumentCaptor.forClass(RegisteropplysningerRequest.class);
         oppfriskSaksopplysningerService.oppfriskSaksopplysning(BEHANDLING_ID, true);
         verify(registeropplysningerService).hentOgLagreOpplysninger(requestCaptor.capture());

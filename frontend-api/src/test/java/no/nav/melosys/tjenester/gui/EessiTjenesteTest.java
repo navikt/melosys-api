@@ -81,7 +81,7 @@ class EessiTjenesteTest extends JsonSchemaTestParent {
 
     @Test
     void opprettBuc() throws IOException {
-        when(behandlingService.hentBehandling(123L)).thenReturn(lagBehandling());
+        when(behandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(lagBehandling());
         when(eessiService.opprettBucOgSed(any(), any(BucType.class), anyList(), anyCollection())).thenReturn(MOCK_RINA_URL);
 
         BucBestillingDto nyBucDto = new BucBestillingDto(
@@ -100,7 +100,7 @@ class EessiTjenesteTest extends JsonSchemaTestParent {
 
     @Test
     void hentBucer() throws IOException {
-        when(behandlingService.hentBehandlingUtenSaksopplysninger(123L)).thenReturn(lagBehandling());
+        when(behandlingService.hentBehandling(123L)).thenReturn(lagBehandling());
         when(eessiService.hentTilknyttedeBucer(anyLong(), anyList()))
             .thenReturn(Arrays.asList(
                 bucInformasjon(),

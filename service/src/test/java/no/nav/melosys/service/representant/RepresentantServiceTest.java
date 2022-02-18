@@ -97,7 +97,7 @@ class RepresentantServiceTest {
         var fagsak = lagFagsak(lagAktoer(Aktoersroller.BRUKER, 1L));
         var behandling = new Behandling();
         behandling.setFagsak(fagsak);
-        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
 
         representantService.oppdaterValgtRepresentant(1L, new ValgtRepresentant("repnr", true, null, null));
 
@@ -126,7 +126,7 @@ class RepresentantServiceTest {
         var fagsak = lagFagsak(aktoer);
         var behandling = new Behandling();
         behandling.setFagsak(fagsak);
-        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
 
         representantService.oppdaterValgtRepresentant(1L, new ValgtRepresentant("repnr", true, null, null));
 
@@ -155,7 +155,7 @@ class RepresentantServiceTest {
         var fagsak = lagFagsak(aktoer, lagAktoer(Aktoersroller.BRUKER, 2L));
         var behandling = new Behandling();
         behandling.setFagsak(fagsak);
-        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
 
         representantService.oppdaterValgtRepresentant(1L, new ValgtRepresentant("repnr", true, null, null));
 
@@ -185,7 +185,7 @@ class RepresentantServiceTest {
         var fagsak = lagFagsak();
         var behandling = new Behandling();
         behandling.setFagsak(fagsak);
-        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
 
         representantService.oppdaterValgtRepresentant(1L, new ValgtRepresentant("repnr", false, "orgnr", "kontaktperson"));
 
@@ -222,7 +222,7 @@ class RepresentantServiceTest {
         var fagsak = lagFagsak(aktoer);
         var behandling = new Behandling();
         behandling.setFagsak(fagsak);
-        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
 
         representantService.oppdaterValgtRepresentant(1L, new ValgtRepresentant("repnr", false, "orgnr", "kontaktperson"));
 
@@ -259,7 +259,7 @@ class RepresentantServiceTest {
         var fagsak = lagFagsak(aktoer);
         var behandling = new Behandling();
         behandling.setFagsak(fagsak);
-        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
 
         representantService.oppdaterValgtRepresentant(1L, new ValgtRepresentant("repnr", false, "orgnr", "kontaktperson"));
 

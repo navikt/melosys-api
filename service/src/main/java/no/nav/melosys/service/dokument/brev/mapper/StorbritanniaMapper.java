@@ -62,6 +62,7 @@ public class StorbritanniaMapper {
             .innvilgelse(innvilgelse)
             .attest(mapAttest(brevbestilling))
             .skalHaInfoOmRettigheter(skalHaInfoOmRettigheter(innvilgelse, brevbestilling))
+            .nyVurderingBakgrunn(brevbestilling.getNyVurderingBakgrunn())
             .build();
     }
 
@@ -84,16 +85,13 @@ public class StorbritanniaMapper {
     private AttestStorbritannia mapAttest(DokgenBrevbestilling brevbestilling) {
         if (skalIkkeHaAttest(brevbestilling)) return null;
 
-        var behandlingId = brevbestilling.getBehandlingId();
+        var behandlingID = brevbestilling.getBehandlingId();
         var behandling = brevbestilling.getBehandling();
         var persondokument = brevbestilling.getPersondokument();
-        var lovvalgsperioder = lovvalgsperiodeService.hentLovvalgsperioder(behandlingId);
+        var lovvalgsperioder = lovvalgsperiodeService.hentLovvalgsperioder(behandlingID);
 
         return new AttestStorbritannia.Builder(brevbestilling)
-            .medfolgendeFamiliemedlemmer(new MedfolgendeFamiliemedlemmer(
-                mapEktefelle(behandlingId),
-                mapBarn(behandlingId)
-            ))
+            .medfolgendeFamiliemedlemmer(mapMedfolgendeFamiliemedlemmer(behandlingID))
             .arbeidsgiverNorge(lagArbeidsgiverNorge(behandling))
             .arbeidstaker(new Arbeidstaker(
                 persondokument.getSammensattNavn(),
@@ -257,6 +255,15 @@ public class StorbritanniaMapper {
             representantIUtlandet.representantNavn,
             representantIUtlandet.adresselinjer
         );
+    }
+
+    private MedfolgendeFamiliemedlemmer mapMedfolgendeFamiliemedlemmer(long behandlingID) {
+        var ektefelle = mapEktefelle(behandlingID);
+        var barn = mapBarn(behandlingID);
+
+        if (ektefelle == null && barn.isEmpty()) return null;
+
+        return new MedfolgendeFamiliemedlemmer(ektefelle, barn);
     }
 
     private List<Person> mapBarn(long behandlingID) {

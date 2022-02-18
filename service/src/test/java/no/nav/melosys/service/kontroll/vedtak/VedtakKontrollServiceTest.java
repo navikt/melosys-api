@@ -61,7 +61,7 @@ class VedtakKontrollServiceTest {
     private final Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
     private final MedlemskapDokument medlemskapDokument = new MedlemskapDokument();
     private final BehandlingsgrunnlagData behandlingsgrunnlagData = new BehandlingsgrunnlagData();
-    private Behandling behandling = lagBehandling(behandlingsgrunnlagData);
+    private final Behandling behandling = lagBehandling(behandlingsgrunnlagData);
 
     private VedtakKontrollService vedtakKontrollService;
 
@@ -74,7 +74,7 @@ class VedtakKontrollServiceTest {
         medlSaksopplysning.setDokument(medlemskapDokument);
 
         behandling.getSaksopplysninger().add(medlSaksopplysning);
-        when(behandlingService.hentBehandling(behandlingID)).thenReturn(behandling);
+        when(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling);
         when(lovvalgsperiodeService.hentValidertLovvalgsperiode(behandlingID)).thenReturn(lovvalgsperiode);
 
         final FakeUnleash unleash = new FakeUnleash();

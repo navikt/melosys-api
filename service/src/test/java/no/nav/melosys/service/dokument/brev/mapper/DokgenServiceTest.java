@@ -27,7 +27,6 @@ import no.nav.melosys.service.dokument.DokumentHentingService;
 import no.nav.melosys.service.dokument.DokumentproduksjonsInfo;
 import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
 import no.nav.melosys.service.dokument.brev.KopiMottaker;
-import no.nav.melosys.service.dokument.brev.mapper.*;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.ldap.SaksbehandlerService;
 import no.nav.melosys.service.persondata.PersondataFasade;
@@ -269,7 +268,7 @@ class DokgenServiceTest {
         Aktoer bruker = new Aktoer();
         bruker.setRolle(Aktoersroller.BRUKER);
 
-        when(mockSaksbehandlerService.hentNavnForIdent(anyString())).thenReturn("Ole Saksbehandler");
+        when(mockSaksbehandlerService.hentNavnForIdent(anyString())).thenReturn("Saksbehandler, Ole");
         when(mockBehandlingsService.hentBehandling(anyLong())).thenReturn(new Behandling());
         when(mockBrevMottakerService.avklarMottakere(any(), any(), any(), eq(false), eq(false))).thenReturn(List.of(bruker));
         BrevbestillingRequest brevbestillingRequest = new BrevbestillingRequest.Builder()
@@ -290,7 +289,7 @@ class DokgenServiceTest {
             DokgenBrevbestilling::getProduserbartdokument,
             DokgenBrevbestilling::getBehandlingId,
             DokgenBrevbestilling::getSaksbehandlerNavn
-        ).containsExactly(MANGELBREV_BRUKER, 123L, "Ole Saksbehandler");
+        ).containsExactly(MANGELBREV_BRUKER, 123L, "Saksbehandler, Ole");
     }
 
     @Test

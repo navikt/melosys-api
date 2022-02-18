@@ -52,21 +52,21 @@ public class AksesskontrollImpl implements Aksesskontroll {
 
     @Override
     public void autoriser(long behandlingID, Aksesstype aksesstype) {
-        autoriser(behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID), aksesstype, Ressurs.UKJENT, false);
+        autoriser(behandlingService.hentBehandling(behandlingID), aksesstype, Ressurs.UKJENT, false);
     }
 
     @Override
     public void autoriserSkriv(long behandlingID) {
-        autoriser(behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID), SKRIV, Ressurs.UKJENT, false);
+        autoriser(behandlingService.hentBehandling(behandlingID), SKRIV, Ressurs.UKJENT, false);
     }
 
     public void autoriserSkrivOgTilordnet(long behandlingID) {
-        autoriser(behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID), SKRIV, Ressurs.UKJENT, true);
+        autoriser(behandlingService.hentBehandling(behandlingID), SKRIV, Ressurs.UKJENT, true);
     }
 
     @Override
     public void autoriserSkrivTilRessurs(long behandlingID, Ressurs ressurs) {
-        autoriser(behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID), SKRIV, ressurs, false);
+        autoriser(behandlingService.hentBehandling(behandlingID), SKRIV, ressurs, false);
     }
 
     @Override

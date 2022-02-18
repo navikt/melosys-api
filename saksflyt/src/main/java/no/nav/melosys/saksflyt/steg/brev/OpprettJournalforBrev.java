@@ -8,6 +8,7 @@ import no.nav.melosys.domain.arkiv.OpprettJournalpost;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.brev.FastMottakerMedOrgnr;
 import no.nav.melosys.domain.brev.FritekstbrevBrevbestilling;
+import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
@@ -86,7 +87,7 @@ public class OpprettJournalforBrev implements StegBehandler {
             throw new FunksjonellException("Prosessinstans mangler behandling");
         }
 
-        Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
+        Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(prosessinstans.getBehandling().getId());
         String brukerFnr = hentBrukerFolkeregisterIdent(behandling);
         Aktoersroller mottakerrolle = prosessinstans.getData(MOTTAKER, Aktoersroller.class, null);
         var brevbestilling = prosessinstans.getData(BREVBESTILLING, DokgenBrevbestilling.class);
@@ -121,7 +122,7 @@ public class OpprettJournalforBrev implements StegBehandler {
             .medBrukerFnr(brukerFnr)
             .medMottakerNavn(hasText(orgnr) ? eregFasade.hentOrganisasjonNavn(orgnr) : sammensattNavn)
             .medMottakerId(utledMottakerId(orgnr, fnr, institusjonsid))
-            .medMottakerIdType(utledMottakerIdType(orgnr, fnr, institusjonsid))
+            .medMottakerIdType(utledMottakerIdType(orgnr, institusjonsid))
             .medSaksnummer(behandling.getFagsak().getSaksnummer())
             .medPdf(pdf)
             .build();
@@ -142,7 +143,7 @@ public class OpprettJournalforBrev implements StegBehandler {
         return fnr;
     }
 
-    private OpprettJournalpost.KorrespondansepartIdType utledMottakerIdType(String orgnr, String fnr, String institusjonId) {
+    private OpprettJournalpost.KorrespondansepartIdType utledMottakerIdType(String orgnr, String institusjonId) {
         if (hasText(institusjonId)) {
             return OpprettJournalpost.KorrespondansepartIdType.UTENLANDSK_ORGANISASJON;
         }
@@ -168,7 +169,9 @@ public class OpprettJournalforBrev implements StegBehandler {
             return fritekstTittel;
         }
         if (brevbestilling.getProduserbartdokument() == Produserbaredokumenter.STORBRITANNIA) {
-            return utledJournalføringsTittelForAvtaleMedStorbritannia(brevbestilling.getBehandlingId(), dokumentproduksjonsInfo, mottaker);
+            boolean erNyVurdering = ((InnvilgelseBrevbestilling) brevbestilling).getNyVurderingBakgrunn() != null;
+            String tittel = utledJournalføringsTittelForAvtaleMedStorbritannia(brevbestilling.getBehandlingId(), dokumentproduksjonsInfo, mottaker);
+            return erNyVurdering ? lagEndringTittel(tittel) : tittel;
         }
         return dokumentproduksjonsInfo.journalføringsTittel();
     }
@@ -196,5 +199,9 @@ public class OpprettJournalforBrev implements StegBehandler {
 
     private String lagKopiTittel(String tittel) {
         return "Kopi av " + StringUtils.uncapitalize(tittel);
+    }
+
+    private String lagEndringTittel(String tittel) {
+        return tittel + " - endring";
     }
 }

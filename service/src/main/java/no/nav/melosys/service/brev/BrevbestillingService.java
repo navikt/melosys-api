@@ -12,6 +12,7 @@ import no.nav.melosys.domain.Kontaktopplysning;
 import no.nav.melosys.domain.brev.FastMottakerMedOrgnr;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.brev.Mottakerliste;
+import no.nav.melosys.domain.brev.Postadresse;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -22,6 +23,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.dokgen.DokgenAdresseMapper;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
+import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.BrevmottakerService;
 import no.nav.melosys.service.dokument.DokumentServiceFasade;
 import no.nav.melosys.service.dokument.MuligMottakerDto;
@@ -57,6 +59,7 @@ public class BrevbestillingService {
 
     private final DokumentServiceFasade dokumentServiceFasade;
     private final BrevmottakerService brevmottakerService;
+    private final BehandlingService behandlingService;
     private final EregFasade eregFasade;
     private final KodeverkService kodeverkService;
     private final KontaktopplysningService kontaktopplysningService;
@@ -65,11 +68,12 @@ public class BrevbestillingService {
 
     @Autowired
     public BrevbestillingService(BrevmottakerService brevmottakerService, DokumentServiceFasade dokumentServiceFasade,
-                                 EregFasade eregFasade, KodeverkService kodeverkService,
+                                 BehandlingService behandlingService, EregFasade eregFasade, KodeverkService kodeverkService,
                                  KontaktopplysningService kontaktopplysningService, PersondataFasade persondataFasade,
                                  Unleash unleash) {
         this.brevmottakerService = brevmottakerService;
         this.dokumentServiceFasade = dokumentServiceFasade;
+        this.behandlingService = behandlingService;
         this.eregFasade = eregFasade;
         this.kodeverkService = kodeverkService;
         this.kontaktopplysningService = kontaktopplysningService;
@@ -78,8 +82,9 @@ public class BrevbestillingService {
     }
 
     @Transactional
-    public MuligeMottakereDto hentMuligeMottakere(Produserbaredokumenter produserbaredokumenter, Behandling behandling, String orgnrTilValgtArbeidsgiver) {
-        Mottakerliste mottakerliste = brevmottakerService.hentMottakerliste(produserbaredokumenter, behandling);
+    public MuligeMottakereDto hentMuligeMottakere(Produserbaredokumenter produserbaredokumenter, long behandlingId, String orgnrTilValgtArbeidsgiver) {
+        Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingId);
+        Mottakerliste mottakerliste = brevmottakerService.hentMottakerliste(produserbaredokumenter, behandlingId);
         return new MuligeMottakereDto(
             lagHovedMottakerMuligMottakerDto(produserbaredokumenter, behandling, mottakerliste.getHovedMottaker(), orgnrTilValgtArbeidsgiver),
             lagKopiMottakereMuligMottakerDtos(produserbaredokumenter, behandling, mottakerliste.getKopiMottakere(), mottakerliste.getHovedMottaker()),
@@ -202,8 +207,10 @@ public class BrevbestillingService {
         return (OrganisasjonDokument) eregFasade.hentOrganisasjon(mottakerOrgnr).getDokument();
     }
 
-    public List<Produserbaredokumenter> hentMuligeProduserbaredokumenter(Behandling behandling) {
+    @Transactional
+    public List<Produserbaredokumenter> hentMuligeProduserbaredokumenter(long behandlingId) {
         List<Produserbaredokumenter> brevmaler = new ArrayList<>();
+        Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingId);
 
         if (behandling.getType() == Behandlingstyper.SOEKNAD) {
             brevmaler.add(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD);
@@ -220,7 +227,9 @@ public class BrevbestillingService {
         return behandling.erAktiv() ? brevmaler : emptyList();
     }
 
-    public List<BrevAdresse> hentBrevAdresseTilMottakere(Produserbaredokumenter produserbaredokumenter, Aktoersroller aktoersroller, Behandling behandling) {
+    @Transactional
+    public List<BrevAdresse> hentBrevAdresseTilMottakere(Produserbaredokumenter produserbaredokumenter, Aktoersroller aktoersroller, long behandlingId) {
+        Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingId);
         var mottakere = brevmottakerService.avklarMottakere(produserbaredokumenter, Mottaker.av(aktoersroller), behandling, false, false);
         List<BrevAdresse> brevAdresser = new ArrayList<>();
 
@@ -258,12 +267,18 @@ public class BrevbestillingService {
     }
 
     private String mapPoststed(Persondata persondata) {
-        final String poststed = persondata.hentGjeldendePostadresse().poststed();
+        final String poststed;
+        Postadresse postadresse = persondata.hentGjeldendePostadresse();
+        if (postadresse == null) {
+            return null;
+        }
+        poststed = postadresse.poststed();
         if (unleash.isEnabled("melosys.pdl.aktiv")) {
             return poststed;
         }
-        return StringUtils.isEmpty(poststed) ? kodeverkService.dekod(FellesKodeverk.POSTNUMMER,
-            persondata.hentGjeldendePostadresse().postnr()) : poststed;
+        return StringUtils.isEmpty(poststed)
+            ? kodeverkService.dekod(FellesKodeverk.POSTNUMMER, postadresse.postnr())
+            : poststed;
     }
 
     private Persondata hentPersondata(Behandling behandling) {

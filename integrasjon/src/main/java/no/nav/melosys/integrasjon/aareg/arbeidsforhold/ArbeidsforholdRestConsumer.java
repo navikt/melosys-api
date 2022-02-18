@@ -3,9 +3,9 @@ package no.nav.melosys.integrasjon.aareg.arbeidsforhold;
 import java.util.List;
 
 import no.nav.melosys.integrasjon.felles.RestConsumer;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.core.ParameterizedTypeReference;
 
 public class ArbeidsforholdRestConsumer implements RestConsumer {
 
@@ -26,8 +26,9 @@ public class ArbeidsforholdRestConsumer implements RestConsumer {
                 .queryParamIfPresent("arbeidsforholdType", arbeidsforholdQuery.getArbeidsforholdType())
                 .queryParamIfPresent("ansettelsesperiodeFom", arbeidsforholdQuery.getAnsettelsesperiodeFom())
                 .queryParamIfPresent("ansettelsesperiodeTom", arbeidsforholdQuery.getAnsettelsesperiodeTom())
-                // TODO: sjekk om metriks får url uten detaljer så det funker i grafana
                 .build())
+                // Om vi ønsker å se request med mer detaljer i grafana må vi gjøre det samme som er gjort i MedlemskapRestConsumer
+                // Nå ser vi bare request på host
             .header("Nav-Personident", fnr)
             .accept(MediaType.APPLICATION_JSON)
             .retrieve()

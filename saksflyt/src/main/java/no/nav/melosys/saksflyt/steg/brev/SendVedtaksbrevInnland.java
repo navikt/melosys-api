@@ -64,7 +64,7 @@ public class SendVedtaksbrevInnland implements StegBehandler {
 
     @Override
     public void utfør(Prosessinstans prosessinstans) {
-        Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
+        Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(prosessinstans.getBehandling().getId());
         Behandlingsresultat resultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
         Behandlingsresultattyper behandlingsresultatType = resultat.getType();
         String saksbehandler = hentSaksbehandler(prosessinstans, resultat);

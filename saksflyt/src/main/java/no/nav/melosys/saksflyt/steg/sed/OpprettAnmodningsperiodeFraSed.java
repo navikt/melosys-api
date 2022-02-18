@@ -37,7 +37,7 @@ public class OpprettAnmodningsperiodeFraSed implements StegBehandler {
 
     @Override
     public void utfør(Prosessinstans prosessinstans) {
-        Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
+        Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(prosessinstans.getBehandling().getId());
         SedDokument sedDokument = behandling.hentSedDokument();
         Anmodningsperiode anmodningsperiode = lagAnmodningsperiode(sedDokument);
         anmodningsperiodeService.lagreAnmodningsperioder(prosessinstans.getBehandling().getId(), Collections.singletonList(anmodningsperiode));

@@ -10,12 +10,14 @@ public class InnvilgelseOgAttestStorbritannia extends DokgenDto {
     private final InnvilgelseStorbritannia innvilgelse;
     private final AttestStorbritannia attest;
     private final boolean skalHaInfoOmRettigheter;
+    private final String nyVurderingBakgrunn;
 
     public InnvilgelseOgAttestStorbritannia(Builder builder, Aktoersroller mottaker) {
         super(builder.brevbestilling, mottaker);
         this.innvilgelse = builder.innvilgelse;
         this.attest = builder.attest;
         this.skalHaInfoOmRettigheter = builder.skalHaInfoOmRettigheter;
+        this.nyVurderingBakgrunn = builder.nyVurderingBakgrunn;
     }
 
     public static class Builder {
@@ -23,6 +25,7 @@ public class InnvilgelseOgAttestStorbritannia extends DokgenDto {
         private AttestStorbritannia attest;
         private boolean skalHaInfoOmRettigheter;
         private final DokgenBrevbestilling brevbestilling;
+        private String nyVurderingBakgrunn;
 
         public Builder(DokgenBrevbestilling brevbestilling) {
             this.brevbestilling = brevbestilling;
@@ -40,6 +43,11 @@ public class InnvilgelseOgAttestStorbritannia extends DokgenDto {
 
         public Builder skalHaInfoOmRettigheter(boolean skalHaInfoOmRettigheter) {
             this.skalHaInfoOmRettigheter = skalHaInfoOmRettigheter;
+            return this;
+        }
+
+        public Builder nyVurderingBakgrunn(String nyVurderingBakgrunn) {
+            this.nyVurderingBakgrunn = nyVurderingBakgrunn;
             return this;
         }
 
@@ -69,5 +77,9 @@ public class InnvilgelseOgAttestStorbritannia extends DokgenDto {
 
     public AttestStorbritannia getAttest() {
         return attest;
+    }
+
+    public String getNyVurderingBakgrunn() {
+        return nyVurderingBakgrunn;
     }
 }

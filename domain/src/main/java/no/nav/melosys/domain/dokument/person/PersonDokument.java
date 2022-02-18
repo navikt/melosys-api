@@ -284,6 +284,7 @@ public class PersonDokument implements Persondata {
     @Override
     public Postadresse hentGjeldendePostadresse() {
         return new Postadresse(
+            null,
             gjeldendePostadresse.adresselinje1,
             gjeldendePostadresse.adresselinje2,
             gjeldendePostadresse.adresselinje3,

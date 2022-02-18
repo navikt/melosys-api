@@ -145,7 +145,7 @@ public class UtpekingService {
     public void avvisUtpeking(long behandlingID, UtpekingAvvis utpekingAvvis) {
         validerAvslagUtpeking(utpekingAvvis);
 
-        Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
+        Behandling behandling = behandlingService.hentBehandling(behandlingID);
 
         if (!behandling.erAktiv()) {
             throw new FunksjonellException("Behandling " + behandlingID + " er ikke aktiv!");

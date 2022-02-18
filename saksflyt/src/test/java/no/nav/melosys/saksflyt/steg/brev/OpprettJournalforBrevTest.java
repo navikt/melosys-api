@@ -1,17 +1,17 @@
 package no.nav.melosys.saksflyt.steg.brev;
 
+import java.util.stream.Stream;
+
 import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.UtenlandskMyndighet;
 import no.nav.melosys.domain.arkiv.OpprettJournalpost;
-import no.nav.melosys.domain.brev.DokgenBrevbestilling;
-import no.nav.melosys.domain.brev.FastMottakerMedOrgnr;
-import no.nav.melosys.domain.brev.FritekstbrevBrevbestilling;
-import no.nav.melosys.domain.brev.MangelbrevBrevbestilling;
+import no.nav.melosys.domain.brev.*;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Nyvurderingbakgrunner;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
@@ -27,6 +27,9 @@ import no.nav.melosys.service.persondata.PersondataFasade;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -96,7 +99,7 @@ class OpprettJournalforBrevTest {
     @Test
     void utførOpprettJournalforBrevTilBruker() {
         Behandling behandling = TestdataFactory.lagBehandling();
-        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
         when(mockJoarkFasade.opprettJournalpost(any(), anyBoolean())).thenReturn("12234");
         when(mockDokgenService.hentDokumentInfo(any())).thenReturn(TestdataFactory.lagDokumentInfo());
 
@@ -108,7 +111,7 @@ class OpprettJournalforBrevTest {
 
         opprettJournalforBrev.utfør(prosessinstans);
 
-        verify(mockBehandlingService).hentBehandling(anyLong());
+        verify(mockBehandlingService).hentBehandlingMedSaksopplysninger(anyLong());
         verify(mockDokgenService).produserBrev(any(Aktoer.class), any(DokgenBrevbestilling.class));
         verify(mockJoarkFasade).opprettJournalpost(any(), anyBoolean());
     }
@@ -116,7 +119,7 @@ class OpprettJournalforBrevTest {
     @Test
     void utførOpprettJournalforBrevTilRepresentant() {
         Behandling behandling = TestdataFactory.lagBehandling();
-        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
         when(mockDokgenService.hentDokumentInfo(any())).thenReturn(TestdataFactory.lagDokumentInfo());
         when(mockJoarkFasade.opprettJournalpost(any(), anyBoolean())).thenReturn("12234");
         when(mockEregFasade.hentOrganisasjonNavn(any())).thenReturn("Advokatene AS");
@@ -133,96 +136,59 @@ class OpprettJournalforBrevTest {
 
         opprettJournalforBrev.utfør(prosessinstans);
 
-        verify(mockBehandlingService).hentBehandling(anyLong());
+        verify(mockBehandlingService).hentBehandlingMedSaksopplysninger(anyLong());
         verify(mockDokgenService).produserBrev(any(Aktoer.class), any(DokgenBrevbestilling.class));
         verify(mockJoarkFasade).opprettJournalpost(any(), anyBoolean());
     }
 
-    @Test
-    void utfør_StorbritanniaInnvilgelseTilBrukerSkalHaAttest_korrektTittel() {
-        when(mockLovvalgsperiodeService.hentValidertLovvalgsperiode(anyLong())).thenReturn(lagLovvalsperiode(UK_ART6_1));
-        Prosessinstans prosessinstans = mockStorbritannia(lagMottaker(BRUKER, "1234", null, null));
+    @ParameterizedTest
+    @MethodSource("testparametre")
+    void utfør_StorbritanniaInnvilgelseOgAttestMedUlikeParametre_korrektTittel(boolean skalHaAttest, boolean erNyVurdering, Aktoer mottaker, String forventetTittel){
+        if (mottaker.erUtenlandskMyndighet()) {
+            when(mockUtenlandskMyndighetService.hentUtenlandskMyndighetForInstitusjonID("1234")).thenReturn(new UtenlandskMyndighet());
+        }
+        else if (!FastMottakerMedOrgnr.SKATT.getOrgnr().equals(mottaker.getOrgnr())) {
+            when(mockLovvalgsperiodeService.hentValidertLovvalgsperiode(anyLong())).thenReturn(lagLovvalsperiode(skalHaAttest ? UK_ART6_1 : UK_ART8_2));
+        }
+        Prosessinstans prosessinstans = mockStorbritannia(mottaker, erNyVurdering);
 
         opprettJournalforBrev.utfør(prosessinstans);
 
         verify(mockJoarkFasade).opprettJournalpost(opprettJournalpostCaptor.capture(), anyBoolean());
 
         OpprettJournalpost captured = opprettJournalpostCaptor.getValue();
-        assertThat(captured.getHoveddokument().getTittel()).isEqualTo("Vedtak om medlemskap, Attest for utsendt arbeidstaker");
+        assertThat(captured.getHoveddokument().getTittel()).isEqualTo(forventetTittel);
     }
 
-    @Test
-    void utfør_StorbritanniaInnvilgelseTilBrukerSkalIkkeHaAttest_korrektTittel() {
-        when(mockLovvalgsperiodeService.hentValidertLovvalgsperiode(anyLong())).thenReturn(lagLovvalsperiode(UK_ART8_2));
-        Prosessinstans prosessinstans = mockStorbritannia(lagMottaker(BRUKER, "1234", null, null));
+    private static Stream<Arguments> testparametre() {
+        return Stream.of(
+            Arguments.of(true, false, lagMottaker(BRUKER, "1234", null, null), "Vedtak om medlemskap, Attest for utsendt arbeidstaker"),
+            Arguments.of(false, false, lagMottaker(BRUKER, "1234", null, null), "Vedtak om medlemskap"),
+            Arguments.of(true, false, lagMottaker(ARBEIDSGIVER, null, "1234", null), "Kopi av vedtak om medlemskap, Attest for utsendt arbeidstaker"),
+            Arguments.of(false, false, lagMottaker(ARBEIDSGIVER, null, "1234", null), "Kopi av vedtak om medlemskap"),
+            Arguments.of(false, false, lagMottaker(TRYGDEMYNDIGHET, null, FastMottakerMedOrgnr.OrgNr.SKATTEETATEN_ORGNR.getOrgnr(), null), "Kopi av vedtak om medlemskap"),
+            Arguments.of(true, false, lagMottaker(TRYGDEMYNDIGHET, null, null, "1234"), "Attest for utsendt arbeidstaker"),
 
-        opprettJournalforBrev.utfør(prosessinstans);
-
-        verify(mockJoarkFasade).opprettJournalpost(opprettJournalpostCaptor.capture(), anyBoolean());
-
-        OpprettJournalpost captured = opprettJournalpostCaptor.getValue();
-        assertThat(captured.getHoveddokument().getTittel()).isEqualTo("Vedtak om medlemskap");
+            Arguments.of(true, true, lagMottaker(BRUKER, "1234", null, null), "Vedtak om medlemskap, Attest for utsendt arbeidstaker - endring"),
+            Arguments.of(false, true, lagMottaker(BRUKER, "1234", null, null), "Vedtak om medlemskap - endring"),
+            Arguments.of(true, true, lagMottaker(ARBEIDSGIVER, null, "1234", null), "Kopi av vedtak om medlemskap, Attest for utsendt arbeidstaker - endring"),
+            Arguments.of(false, true, lagMottaker(ARBEIDSGIVER, null, "1234", null), "Kopi av vedtak om medlemskap - endring"),
+            Arguments.of(false, true, lagMottaker(TRYGDEMYNDIGHET, null, FastMottakerMedOrgnr.OrgNr.SKATTEETATEN_ORGNR.getOrgnr(), null), "Kopi av vedtak om medlemskap - endring"),
+            Arguments.of(true, true, lagMottaker(TRYGDEMYNDIGHET, null, null, "1234"), "Attest for utsendt arbeidstaker - endring")
+        );
     }
 
-    @Test
-    void utfør_StorbritanniaInnvilgelseTilArbeidsgiverSkalHaAttest_korrektTittel() {
-        when(mockLovvalgsperiodeService.hentValidertLovvalgsperiode(anyLong())).thenReturn(lagLovvalsperiode(UK_ART6_1));
-        Prosessinstans prosessinstans = mockStorbritannia(lagMottaker(ARBEIDSGIVER, null, "1234", null));
-
-        opprettJournalforBrev.utfør(prosessinstans);
-
-        verify(mockJoarkFasade).opprettJournalpost(opprettJournalpostCaptor.capture(), anyBoolean());
-
-        OpprettJournalpost captured = opprettJournalpostCaptor.getValue();
-        assertThat(captured.getHoveddokument().getTittel()).isEqualTo("Kopi av vedtak om medlemskap, Attest for utsendt arbeidstaker");
-    }
-
-    @Test
-    void utfør_StorbritanniaInnvilgelseTilArbeidsgiverBrukerSkalIkkeHaAttest_korrektTittel() {
-        when(mockLovvalgsperiodeService.hentValidertLovvalgsperiode(anyLong())).thenReturn(lagLovvalsperiode(UK_ART8_2));
-        Prosessinstans prosessinstans = mockStorbritannia(lagMottaker(ARBEIDSGIVER, null, "1234", null));
-
-        opprettJournalforBrev.utfør(prosessinstans);
-
-        verify(mockJoarkFasade).opprettJournalpost(opprettJournalpostCaptor.capture(), anyBoolean());
-
-        OpprettJournalpost captured = opprettJournalpostCaptor.getValue();
-        assertThat(captured.getHoveddokument().getTittel()).isEqualTo("Kopi av vedtak om medlemskap");
-    }
-
-    @Test
-    void utfør_StorbritanniaInnvilgelseTilSkattSkalAldriHaAttest_korrektTittel() {
-        Prosessinstans prosessinstans = mockStorbritannia(lagMottaker(TRYGDEMYNDIGHET, null, FastMottakerMedOrgnr.OrgNr.SKATTEETATEN_ORGNR.getOrgnr(), null));
-
-        opprettJournalforBrev.utfør(prosessinstans);
-
-        verify(mockJoarkFasade).opprettJournalpost(opprettJournalpostCaptor.capture(), anyBoolean());
-
-        OpprettJournalpost captured = opprettJournalpostCaptor.getValue();
-        assertThat(captured.getHoveddokument().getTittel()).isEqualTo("Kopi av vedtak om medlemskap");
-    }
-
-    @Test
-    void utfør_StorbritanniaInnvilgelseTilStorbritanniaSkalKunHaAttest_korrektTittel() {
-        when(mockUtenlandskMyndighetService.hentUtenlandskMyndighetForInstitusjonID("1234")).thenReturn(new UtenlandskMyndighet());
-        Prosessinstans prosessinstans = mockStorbritannia(lagMottaker(TRYGDEMYNDIGHET, null, null, "1234"));
-
-        opprettJournalforBrev.utfør(prosessinstans);
-
-        verify(mockJoarkFasade).opprettJournalpost(opprettJournalpostCaptor.capture(), anyBoolean());
-
-        OpprettJournalpost captured = opprettJournalpostCaptor.getValue();
-        assertThat(captured.getHoveddokument().getTittel()).isEqualTo("Attest for utsendt arbeidstaker");
-    }
-
-    private Prosessinstans mockStorbritannia(Aktoer mottaker) {
+    private Prosessinstans mockStorbritannia(Aktoer mottaker, boolean erNyVurdering) {
         Behandling behandling = TestdataFactory.lagBehandling();
-        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
         when(mockJoarkFasade.opprettJournalpost(any(), anyBoolean())).thenReturn("12234");
         DokumentproduksjonsInfoMapper dokumentproduksjonsInfoMapper = new DokumentproduksjonsInfoMapper(new FakeUnleash());
         when(mockDokgenService.hentDokumentInfo(any())).thenReturn(dokumentproduksjonsInfoMapper.hentDokumentproduksjonsInfo(STORBRITANNIA));
 
-        DokgenBrevbestilling brevbestilling = new DokgenBrevbestilling.Builder<>().medProduserbartdokument(STORBRITANNIA).build();
+        InnvilgelseBrevbestilling brevbestilling = new InnvilgelseBrevbestilling.Builder()
+            .medProduserbartdokument(STORBRITANNIA)
+            .medNyVurderingBakgrunn(erNyVurdering ? Nyvurderingbakgrunner.NYE_OPPLYSNINGER.getKode() : null)
+            .build();
 
         return lagProsessinstansMedMottaker(behandling, mottaker, brevbestilling);
     }
@@ -231,7 +197,7 @@ class OpprettJournalforBrevTest {
     @Test
     void utførOpprettJournalforMangelbrevTilBruker() {
         Behandling behandling = TestdataFactory.lagBehandling();
-        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
         when(mockJoarkFasade.opprettJournalpost(any(), anyBoolean())).thenReturn("12234");
         when(mockDokgenService.hentDokumentInfo(any())).thenReturn(TestdataFactory.lagDokumentInfo());
 
@@ -244,7 +210,7 @@ class OpprettJournalforBrevTest {
 
         opprettJournalforBrev.utfør(prosessinstans);
 
-        verify(mockBehandlingService).hentBehandling(anyLong());
+        verify(mockBehandlingService).hentBehandlingMedSaksopplysninger(anyLong());
         verify(mockDokgenService).produserBrev(any(Aktoer.class), any(MangelbrevBrevbestilling.class));
         verify(mockJoarkFasade).opprettJournalpost(any(), anyBoolean());
     }
@@ -252,7 +218,7 @@ class OpprettJournalforBrevTest {
     @Test
     void utførOpprettJournalforMangelbrevKopiTilBruker() {
         Behandling behandling = TestdataFactory.lagBehandling();
-        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
         when(mockJoarkFasade.opprettJournalpost(any(), anyBoolean())).thenReturn("12234");
         when(mockDokgenService.hentDokumentInfo(any())).thenReturn(TestdataFactory.lagDokumentInfo());
 
@@ -266,7 +232,7 @@ class OpprettJournalforBrevTest {
 
         opprettJournalforBrev.utfør(prosessinstans);
 
-        verify(mockBehandlingService).hentBehandling(anyLong());
+        verify(mockBehandlingService).hentBehandlingMedSaksopplysninger(anyLong());
         verify(mockDokgenService).produserBrev(any(Aktoer.class), refEq(brevbestilling));
         verify(mockJoarkFasade).opprettJournalpost(any(), anyBoolean());
     }
@@ -274,7 +240,7 @@ class OpprettJournalforBrevTest {
     @Test
     void utførOpprettJournalforFritekstbrev_feilerUtentittel() {
         Behandling behandling = TestdataFactory.lagBehandling();
-        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
 
         FritekstbrevBrevbestilling brevbestilling = new FritekstbrevBrevbestilling.Builder()
             .medProduserbartdokument(GENERELT_FRITEKSTBREV_BRUKER)
@@ -290,7 +256,7 @@ class OpprettJournalforBrevTest {
     @Test
     void utførOpprettJournalforFritekstbrev() {
         Behandling behandling = TestdataFactory.lagBehandling();
-        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
         when(mockJoarkFasade.opprettJournalpost(any(), anyBoolean())).thenReturn("12234");
         when(mockDokgenService.hentDokumentInfo(any())).thenReturn(TestdataFactory.lagDokumentInfo());
 
@@ -304,7 +270,7 @@ class OpprettJournalforBrevTest {
 
         opprettJournalforBrev.utfør(prosessinstans);
 
-        verify(mockBehandlingService).hentBehandling(anyLong());
+        verify(mockBehandlingService).hentBehandlingMedSaksopplysninger(anyLong());
         verify(mockDokgenService).produserBrev(any(Aktoer.class), refEq(brevbestilling));
         verify(mockJoarkFasade).opprettJournalpost(any(), anyBoolean());
     }
@@ -346,7 +312,7 @@ class OpprettJournalforBrevTest {
         return lovvalgsperiode;
     }
 
-    private Aktoer lagMottaker(Aktoersroller rolle, String aktørID, String orgnr, String institusjonsID) {
+    private static Aktoer lagMottaker(Aktoersroller rolle, String aktørID, String orgnr, String institusjonsID) {
         Aktoer mottaker = new Aktoer();
         mottaker.setRolle(rolle);
         mottaker.setAktørId(aktørID);

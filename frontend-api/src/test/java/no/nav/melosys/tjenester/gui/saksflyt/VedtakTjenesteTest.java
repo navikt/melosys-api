@@ -84,7 +84,7 @@ class VedtakTjenesteTest extends JsonSchemaTestParent {
 
     @Test
     void fattVedtakFtrl_henleggelse_fungerer() throws Exception {
-        when(behandlingService.hentBehandlingUtenSaksopplysninger(anyLong())).thenReturn(lagBehandling(Sakstyper.FTRL));
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling(Sakstyper.FTRL));
 
         FattTrygdeavtaleEllerFtrlVedtakDto fattVedtakDto = new FattTrygdeavtaleEllerFtrlVedtakDto();
         fattVedtakDto.setBehandlingsresultatTypeKode(Behandlingsresultattyper.HENLEGGELSE);
@@ -101,7 +101,7 @@ class VedtakTjenesteTest extends JsonSchemaTestParent {
 
     @Test
     void fattVedtakTrygdeavtale_henleggelse_fungerer() throws Exception {
-        when(behandlingService.hentBehandlingUtenSaksopplysninger(anyLong())).thenReturn(lagBehandling(Sakstyper.TRYGDEAVTALE));
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling(Sakstyper.TRYGDEAVTALE));
 
         FattTrygdeavtaleEllerFtrlVedtakDto fattVedtakDto = new FattTrygdeavtaleEllerFtrlVedtakDto();
         fattVedtakDto.setBehandlingsresultatTypeKode(Behandlingsresultattyper.HENLEGGELSE);

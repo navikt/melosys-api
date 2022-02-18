@@ -72,7 +72,7 @@ public class AnmodningUnntakService {
                                   Set<DokumentReferanse> vedleggReferanser, String ytterligereInformasjonSed) throws ValideringException {
         Set<String> mottakerinstitusjoner = validerMottakerInstitusjon(behandlingID, mottakerinstitusjon);
 
-        Behandling behandling = behandlingService.hentBehandling(behandlingID);
+        Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
         Fagsak fagsak = behandling.getFagsak();
         log.info("Anmodning om unntak for sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandlingID);
 
@@ -97,7 +97,7 @@ public class AnmodningUnntakService {
 
     @Transactional
     public void anmodningOmUnntakSvar(long behandlingID, String ytterligereInfo) {
-        Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
+        Behandling behandling = behandlingService.hentBehandling(behandlingID);
         validerBehandlingstemaUnntak(behandling);
         validerSvar(behandling);
         prosessinstansService.opprettProsessinstansAnmodningOmUnntakMottakSvar(behandling, ytterligereInfo);

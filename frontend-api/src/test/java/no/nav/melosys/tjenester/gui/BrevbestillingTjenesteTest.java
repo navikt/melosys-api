@@ -76,9 +76,9 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
     void init() {
         BrevmottakerService brevmottakerService = new BrevmottakerService(mockKontaktopplysningService,
             mock(AvklarteVirksomheterService.class), mock(UtenlandskMyndighetService.class), mock(BehandlingsresultatService.class),
-            mock(TrygdeavgiftsberegningService.class), mock(LovvalgsperiodeService.class));
+            mock(TrygdeavgiftsberegningService.class), mock(LovvalgsperiodeService.class), mockBehandlingService);
         BrevbestillingService brevbestillingService = new BrevbestillingService(mockBrevmottakerService,
-            mockDokServiceFasade, mockEregFasade, mock(KodeverkService.class), mockKontaktopplysningService,
+            mockDokServiceFasade, mockBehandlingService, mockEregFasade, mock(KodeverkService.class), mockKontaktopplysningService,
             mockPersondataFasade, fakeUnleash);
         brevbestillingTjeneste = new BrevbestillingTjeneste(brevbestillingService, mockBehandlingService, brevmottakerService, aksesskontroll);
         fakeUnleash.enable("melosys.brev.GENERELT_FRITEKSTBREV_ARBEIDSGIVER");
@@ -87,6 +87,7 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
 
     @Test
     void skalReturnereTilgjengeligeBrevmaler() {
+        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(lagBehandling(null));
         when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling(null));
         when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
 
@@ -107,6 +108,7 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
 
     @Test
     void hentTilgjengeligeMaler_soeknad_returnererSoeknadMalMedFelter() {
+        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(lagBehandling(Behandlingstyper.SOEKNAD));
         when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling(Behandlingstyper.SOEKNAD));
         when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
 
@@ -133,6 +135,7 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
 
     @Test
     void hentTilgjengeligeMaler_brukerAdresseNull_returnererMalMedFeilmelding() {
+        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(lagBehandling(null));
         when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling(null));
         when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
 
@@ -144,6 +147,7 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
 
     @Test
     void hentTilgjengeligeMaler_registerOpplysningerIkkeHentet_returnererMalMedFeilmelding() {
+        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(lagBehandling(null));
         when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling(null));
         when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean()))
             .thenThrow(new TekniskException("Finner ikke arbeidsforholddokument"));
@@ -156,6 +160,7 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
 
     @Test
     void hentTilgjengeligeMaler_lagerRiktigeValgForMangelbrevForBruker() {
+        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(lagBehandling(Behandlingstyper.SOEKNAD));
         when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling(Behandlingstyper.SOEKNAD));
         when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
 
@@ -174,6 +179,7 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
 
     @Test
     void hentTilgjengeligeMaler_lagerRiktigeValgForMangelbrevForArbeidsgiver() {
+        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(lagBehandling(Behandlingstyper.SOEKNAD));
         when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling(Behandlingstyper.SOEKNAD));
         when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
 
@@ -194,6 +200,7 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
     void hentTilgjengeligeMaler_lagerRiktigeTittelValgForFritekstbrevForEuEOS() {
         Behandling behandlingEUEOS = lagBehandling(Behandlingstyper.SOEKNAD);
         behandlingEUEOS.getFagsak().setType(Sakstyper.EU_EOS);
+        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandlingEUEOS);
         when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandlingEUEOS);
         when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
 
@@ -212,6 +219,7 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
     void hentTilgjengeligeMaler_lagerRiktigeTittelValgForFritekstbrevForFTRL() {
         Behandling behandlingFTRL = lagBehandling(Behandlingstyper.SOEKNAD);
         behandlingFTRL.getFagsak().setType(Sakstyper.FTRL);
+        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandlingFTRL);
         when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandlingFTRL);
         when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
 
@@ -233,6 +241,7 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
     void hentTilgjengeligeMaler_lagerRiktigeTittelValgForFritekstbrevForTrygdeavtale() {
         Behandling behandlingTrygdeavtale = lagBehandling(Behandlingstyper.SOEKNAD);
         behandlingTrygdeavtale.getFagsak().setType(Sakstyper.TRYGDEAVTALE);
+        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandlingTrygdeavtale);
         when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandlingTrygdeavtale);
         when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
 
@@ -250,6 +259,7 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
 
     @Test
     void hentTilgjengeligeMaler_lagerRiktigeMottakereForArbeidsgiver() {
+        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(lagBehandling(Behandlingstyper.SOEKNAD));
         when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling(Behandlingstyper.SOEKNAD));
         when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
 
@@ -266,6 +276,7 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
 
     @Test
     void hentTilgjengeligeMaler_lagerRiktigeMottakerTilBehandlingstypeSoknadForBruker() {
+        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(lagBehandling(Behandlingstyper.SOEKNAD));
         when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling(Behandlingstyper.SOEKNAD));
         when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
 
@@ -286,6 +297,7 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
 
     @Test
     void hentTilgjengeligeMaler_lagerRiktigeMottakerTilBehandlingstypeKlage() {
+        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(lagBehandling(Behandlingstyper.KLAGE));
         when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling(Behandlingstyper.KLAGE));
         when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
 

@@ -41,14 +41,14 @@ public class VedtakServiceFasade {
 
     @Transactional(noRollbackFor = {ValideringException.class})
     public void fattVedtak(long behandlingID, Behandlingsresultattyper behandlingsresultattype) throws ValideringException {
-        var behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
+        var behandling = behandlingService.hentBehandling(behandlingID);
 
         eosVedtakSystemService.fattVedtak(behandling, behandlingsresultattype, Vedtakstyper.FØRSTEGANGSVEDTAK);
     }
 
     @Transactional(noRollbackFor = {ValideringException.class})
     public void fattVedtak(long behandlingID, FattVedtakRequest fattVedtakRequest) throws ValideringException {
-        var behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
+        var behandling = behandlingService.hentBehandling(behandlingID);
 
         validerKanFattesVedtakAvTema(behandling);
 
@@ -64,7 +64,7 @@ public class VedtakServiceFasade {
 
     @Transactional(noRollbackFor = {ValideringException.class})
     public void endreVedtak(long behandlingID, Endretperiode endretperiode, String fritekst, String fritekstSed) {
-        var behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
+        var behandling = behandlingService.hentBehandling(behandlingID);
         Sakstyper sakstype = behandling.getFagsak().getType();
 
         if (sakstype == EU_EOS) {

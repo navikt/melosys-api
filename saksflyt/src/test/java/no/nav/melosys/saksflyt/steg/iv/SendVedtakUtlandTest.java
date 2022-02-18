@@ -111,7 +111,7 @@ class SendVedtakUtlandTest {
 
     @Test
     void utfør_ingenInstitusjonEessiKlar_senderBrev() {
-        when(behandlingService.hentBehandling(anyLong())).thenReturn(prosessinstans.getBehandling());
+        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(prosessinstans.getBehandling());
         when(behandlingsresultatService.hentBehandlingsresultatMedAvklartefakta(anyLong()))
             .thenReturn(lagBehandlingsresultat());
 

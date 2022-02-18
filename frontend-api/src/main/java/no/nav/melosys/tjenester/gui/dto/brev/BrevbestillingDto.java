@@ -25,6 +25,7 @@ public class BrevbestillingDto {
     private String fritekstTittel;
     private String fritekst;
     private boolean kontaktopplysninger;
+    private String nyVurderingBakgrunn;
 
     /**
      * @deprecated Benyttes i doksys, kommer til å bli erstattet av dokgen-variabel
@@ -58,7 +59,8 @@ public class BrevbestillingDto {
             .medFritekst(this.getFritekst())
             .medKontaktopplysninger(this.isKontaktopplysninger())
             .medBegrunnelseKode(this.getBegrunnelseKode())
-            .medYtterligereInformasjon(this.getYtterligereInformasjon());
+            .medYtterligereInformasjon(this.getYtterligereInformasjon())
+            .medNyVurderingBakgrunn(this.getNyVurderingBakgrunn());
     }
 
     public BrevbestillingDto(Builder builder) {
@@ -77,6 +79,7 @@ public class BrevbestillingDto {
         this.kontaktopplysninger = builder.kontaktopplysninger;
         this.begrunnelseKode = builder.begrunnelseKode;
         this.ytterligereInformasjon = builder.ytterligereInformasjon;
+        this.nyVurderingBakgrunn = builder.nyVurderingBakgrunn;
     }
 
     public Produserbaredokumenter getProduserbardokument() {
@@ -146,6 +149,10 @@ public class BrevbestillingDto {
         return ytterligereInformasjon;
     }
 
+    public String getNyVurderingBakgrunn() {
+        return nyVurderingBakgrunn;
+    }
+
     public static class Builder {
         private Produserbaredokumenter produserbardokument;
         private Aktoersroller mottaker;
@@ -162,6 +169,7 @@ public class BrevbestillingDto {
         public boolean kontaktopplysninger;
         private String begrunnelseKode;
         private String ytterligereInformasjon;
+        private String nyVurderingBakgrunn;
 
         public Builder medProduserbardokument(Produserbaredokumenter produserbardokument) {
             this.produserbardokument = produserbardokument;
@@ -238,6 +246,11 @@ public class BrevbestillingDto {
             return this;
         }
 
+        public Builder medNyVurderingBakgrunn(String nyVurderingBakgrunn) {
+            this.nyVurderingBakgrunn = nyVurderingBakgrunn;
+            return this;
+        }
+
         public BrevbestillingDto build() {
             return new BrevbestillingDto(this);
         }
@@ -255,14 +268,15 @@ public class BrevbestillingDto {
             && Objects.equals(barnFritekst, that.barnFritekst) && Objects.equals(kontaktpersonNavn, that.kontaktpersonNavn)
             && Objects.equals(kopiMottakere, that.kopiMottakere) && Objects.equals(fritekstTittel, that.fritekstTittel)
             && Objects.equals(fritekst, that.fritekst) && Objects.equals(begrunnelseKode, that.begrunnelseKode)
-            && Objects.equals(ytterligereInformasjon, that.ytterligereInformasjon);
+            && Objects.equals(ytterligereInformasjon, that.ytterligereInformasjon)
+            && Objects.equals(nyVurderingBakgrunn, that.nyVurderingBakgrunn);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(produserbardokument, mottaker, orgNr, innledningFritekst, manglerFritekst,
             begrunnelseFritekst, ektefelleFritekst, barnFritekst, kontaktpersonNavn, kopiMottakere, fritekstTittel,
-            fritekst, kontaktopplysninger, begrunnelseKode, ytterligereInformasjon);
+            fritekst, kontaktopplysninger, begrunnelseKode, ytterligereInformasjon, nyVurderingBakgrunn);
     }
 
     @Override
@@ -283,6 +297,7 @@ public class BrevbestillingDto {
             ", kontaktopplysninger=" + kontaktopplysninger +
             ", begrunnelseKode='" + begrunnelseKode + '\'' +
             ", ytterligereInformasjon='" + ytterligereInformasjon + '\'' +
+            ", nyVurderingBakgrunn='" + nyVurderingBakgrunn + '\'' +
             '}';
     }
 }

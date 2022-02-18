@@ -23,6 +23,7 @@ public class BrevbestillingRequest {
     private String fritekstTittel;
     private String fritekst;
     private boolean kontaktopplysninger;
+    private String nyVurderingBakgrunn;
 
     /**
      * @deprecated Benyttes i doksys, kommer til å bli erstattet av dokgen-variabel
@@ -62,6 +63,7 @@ public class BrevbestillingRequest {
         this.begrunnelseKode = builder.begrunnelseKode;
         this.begrunnelseFritekst = builder.begrunnelseFritekst;
         this.ytterligereInformasjon = builder.ytterligereInformasjon;
+        this.nyVurderingBakgrunn = builder.nyVurderingBakgrunn;
     }
 
     public Produserbaredokumenter getProduserbardokument() {
@@ -135,6 +137,10 @@ public class BrevbestillingRequest {
         return ytterligereInformasjon;
     }
 
+    public String getNyVurderingBakgrunn() {
+        return nyVurderingBakgrunn;
+    }
+
     public static class Builder {
         private Produserbaredokumenter produserbardokument;
         private Aktoersroller mottaker;
@@ -153,6 +159,7 @@ public class BrevbestillingRequest {
         private boolean kontaktopplysninger;
         private String begrunnelseKode;
         private String ytterligereInformasjon;
+        private String nyVurderingBakgrunn;
 
         public Builder medProduserbardokument(Produserbaredokumenter produserbardokument) {
             this.produserbardokument = produserbardokument;
@@ -236,6 +243,11 @@ public class BrevbestillingRequest {
 
         public Builder medYtterligereInformasjon(String ytterligereInformasjon) {
             this.ytterligereInformasjon = ytterligereInformasjon;
+            return this;
+        }
+
+        public Builder medNyVurderingBakgrunn(String nyVurderingBakgrunn) {
+            this.nyVurderingBakgrunn = nyVurderingBakgrunn;
             return this;
         }
 

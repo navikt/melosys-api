@@ -2,7 +2,6 @@ package no.nav.melosys.integrasjon.aareg.arbeidsforhold;
 
 
 import no.nav.melosys.integrasjon.felles.RestConsumer;
-import no.nav.melosys.integrasjon.felles.SystemContextExchangeFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +16,6 @@ import reactor.core.publisher.Mono;
 public class ArbeidsforholdRestConsumerConfig implements RestConsumer {
     private static final Logger log = LoggerFactory.getLogger(ArbeidsforholdRestConsumerConfig.class);
 
-    private static final String CONSUMER_ID = "srvmelosys";
     private final String url;
 
     @Autowired
