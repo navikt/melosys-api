@@ -53,7 +53,7 @@ internal class BehandlingsresultatServiceIT(
     data class Behandlinger(val orginal: Behandling, val replika: Behandling)
 
     @Test
-    fun replikerBehandlingOgBehandlingsresultat_dataBlirRiktigIDB() {
+    fun replikerBehandlingOgBehandlingsresultat_relasjonerBlirRiktigIDb() {
         val behandlinger = lagFagsakMedBehandlinger()
 
         val behandlingsresultat = lagBehandlingsresultat(behandlinger.orginal)
