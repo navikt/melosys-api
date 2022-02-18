@@ -9,6 +9,7 @@ import java.util.Set;
 import no.nav.melosys.domain.adresse.SemistrukturertAdresse;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.felles.Land;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Personstatuser;
 import no.nav.melosys.domain.person.*;
 import no.nav.melosys.domain.person.adresse.Bostedsadresse;
@@ -40,13 +41,19 @@ public class PersonopplysningerObjectFactory {
         return lagPersonopplysninger(false, false, false, true);
     }
 
+    public static Personopplysninger lagPersonopplysningerKontaktadresseSemistrukturert(boolean erUtenOppholdsadresse){
+        return new Personopplysninger(emptyList(), lagBostedsadresse(), null, emptySet(),
+            lagFødesel(), null, lagKjønn(), lagKontaktadresser(true), lagNavn(), erUtenOppholdsadresse ? emptySet() : lagOppholdsadresser(),
+            lagStatsborgerskap(false));
+    }
+
     private static Personopplysninger lagPersonopplysninger(
         boolean erStatløs,
         boolean erUtenBostedsadresse,
         boolean erUtenOppholdsadresse,
         boolean erUtenKontaktadresse) {
         return new Personopplysninger(emptyList(), erUtenBostedsadresse ? null : lagBostedsadresse(), null, emptySet(),
-            lagFødesel(), null, lagKjønn(), erUtenKontaktadresse ? emptySet() : lagKontaktadresser(), lagNavn(), erUtenOppholdsadresse ? emptySet() : lagOppholdsadresser(),
+            lagFødesel(), null, lagKjønn(), erUtenKontaktadresse ? emptySet() : lagKontaktadresser(false), lagNavn(), erUtenOppholdsadresse ? emptySet() : lagOppholdsadresser(),
             lagStatsborgerskap(erStatløs));
 
     }
@@ -69,7 +76,22 @@ public class PersonopplysningerObjectFactory {
             null, null, null, null, null, false);
     }
 
-    public static Collection<Kontaktadresse> lagKontaktadresser() {
+    public static Collection<Kontaktadresse> lagKontaktadresser(boolean semistruktuert) {
+        if(semistruktuert){
+            return Set.of(
+                new Kontaktadresse(
+                    null,
+                    lagSemistrukturertAdresse(),
+                    null,
+                    null,
+                    null,
+                    Master.PDL.name(),
+                    null,
+                    LocalDateTime.MAX.minusYears(43),
+                    false
+                )
+            );
+        }
         return Set.of(
             new Kontaktadresse(
                 lagStrukturertAdresse("gatenavnKontaktadressePDL"),
@@ -134,6 +156,10 @@ public class PersonopplysningerObjectFactory {
 
     private static StrukturertAdresse lagStrukturertAdresse(String gatenavn) {
         return new StrukturertAdresse(gatenavn, null, "0123", "Poststed", null, "NO");
+    }
+
+    private static SemistrukturertAdresse lagSemistrukturertAdresse(){
+        return new SemistrukturertAdresse("Kranstien 3", "0338 Oslo", null,null, "0338", null, Landkoder.NO.name());
     }
 
     private static Navn lagNavn() {

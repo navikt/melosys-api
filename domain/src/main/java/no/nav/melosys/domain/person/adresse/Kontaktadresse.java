@@ -17,4 +17,13 @@ public record Kontaktadresse(
     LocalDateTime registrertDato,
     boolean erHistorisk
 ) implements PersonAdresse {
+
+    public StrukturertAdresse hentEllerLagStrukturertAdresse() {
+        if (strukturertAdresse != null) {
+            return strukturertAdresse;
+        } else if (semistrukturertAdresse != null) {
+            return semistrukturertAdresse.tilStrukturertAdresse();
+        }
+        return null;
+    }
 }
