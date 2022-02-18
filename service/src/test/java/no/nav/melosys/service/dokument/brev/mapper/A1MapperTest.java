@@ -294,6 +294,13 @@ class A1MapperTest {
     }
 
     @Test
+    void mapTilBrevXML_harIngenOppholdsadresse_forventUtfylltMidlertidigAdresseMedKontaktAdresseSemistrukturert() {
+        brevData.person = lagPersonopplysningerKontaktadresseSemistrukturert(true);
+        A1 a1 = mapper.mapA1(behandling, behandlingsresultat, brevData);
+        assertThat(a1.getPerson().getMidlertidigOppholdsadresse().getGatenavn()).isEqualTo("Kranstien 3 0338 Oslo");
+    }
+
+    @Test
     void mapTilBrevXML_harIngenKontaktadresse_forventUtfylltMidlertidigAdresseMedOppholdsadresse() {
         brevData.person = lagPersoopplysningerUtenKontaktadresse();
         A1 a1 = mapper.mapA1(behandling, behandlingsresultat, brevData);
