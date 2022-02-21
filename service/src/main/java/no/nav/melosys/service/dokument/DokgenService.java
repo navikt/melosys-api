@@ -27,6 +27,7 @@ import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import static org.springframework.util.StringUtils.hasText;
 
@@ -68,6 +69,7 @@ public class DokgenService {
         this.utenlandskMyndighetService = utenlandskMyndighetService;
     }
 
+    @Transactional
     public byte[] produserUtkast(long behandlingId, BrevbestillingRequest brevbestillingRequest) {
         Produserbaredokumenter produserbartdokument = brevbestillingRequest.getProduserbardokument();
         Behandling behandling = behandlingService.hentBehandling(behandlingId);
@@ -93,6 +95,7 @@ public class DokgenService {
         return produserBrev(mottaker, brevbestilling.build());
     }
 
+    @Transactional
     public byte[] produserBrev(Aktoer mottaker, DokgenBrevbestilling brevbestilling) {
         Behandling behandling = behandlingService.hentBehandling(brevbestilling.getBehandlingId());
         String malnavn = dokumentproduksjonsInfoMapper.hentMalnavn(brevbestilling.getProduserbartdokument());
@@ -114,6 +117,7 @@ public class DokgenService {
         return dokgenConsumer.lagPdf(malnavn, dokgenDto, brevbestilling.isBestillKopi(), brevbestilling.isBestillUtkast());
     }
 
+    @Transactional
     public void produserOgDistribuerBrev(long behandlingId, BrevbestillingRequest brevbestillingRequest) {
         Produserbaredokumenter produserbartDokument = brevbestillingRequest.getProduserbardokument();
         var behandling = behandlingService.hentBehandling(behandlingId);
