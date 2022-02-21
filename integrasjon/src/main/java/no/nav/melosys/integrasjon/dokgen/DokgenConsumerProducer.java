@@ -38,7 +38,7 @@ public class DokgenConsumerProducer {
                 return response.bodyToMono(String.class)
                     .flatMap(errorBody -> {
                         log.error("Kall mot melosys-dokgen feilet. {} - {}", response.statusCode(), errorBody);
-                        return Mono.error(new TekniskException("Kall mot melosys dokument genererings tjeneste feilet"));
+                        return Mono.error(new TekniskException("Kall mot dokumentgenereringstjeneste feilet."));
                     });
             }
             return Mono.just(response);
