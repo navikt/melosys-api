@@ -37,7 +37,7 @@ public class MuligeManuelleBehandlingsendringer {
     }
 
     public static Set<Behandlingstyper> hentMuligeTyper(Behandling behandling) {
-//        Ref:MELOSYS - 4998. Støtter foreløpig ikke endring mellom forkortet periode og ny vurdering på sletting av periode i MEDL
+//        Ref:MELOSYS - 4998. Støtter foreløpig ikke endring mellom forkortet periode og ny vurdering på grunn av sletting av periode i MEDL
         return Collections.emptySet();
 //        if (behandling.erInaktiv() || !TEMAER_SOM_KAN_ENDRE_TYPE.contains(behandling.getTema())) {
 //            return Collections.emptySet();
