@@ -37,15 +37,17 @@ public class MuligeManuelleBehandlingsendringer {
     }
 
     public static Set<Behandlingstyper> hentMuligeTyper(Behandling behandling) {
-        if (behandling.erInaktiv() || !TEMAER_SOM_KAN_ENDRE_TYPE.contains(behandling.getTema())) {
-            return Collections.emptySet();
-        }
-
-        return switch (behandling.getType()) {
-            case ENDRET_PERIODE -> Collections.singleton(NY_VURDERING);
-            case NY_VURDERING -> Collections.singleton(ENDRET_PERIODE);
-            default -> Collections.emptySet();
-        };
+//        Ref:MELOSYS - 4998. Støtter foreløpig ikke endring mellom forkortet periode og ny vurdering på sletting av periode i MEDL
+        return Collections.emptySet();
+//        if (behandling.erInaktiv() || !TEMAER_SOM_KAN_ENDRE_TYPE.contains(behandling.getTema())) {
+//            return Collections.emptySet();
+//        }
+//
+//        return switch (behandling.getType()) {
+//            case ENDRET_PERIODE -> Collections.singleton(NY_VURDERING);
+//            case NY_VURDERING -> Collections.singleton(ENDRET_PERIODE);
+//            default -> Collections.emptySet();
+//        };
     }
 
     public static Set<Behandlingstema> hentMuligeBehandlingstema(Behandling behandling, Behandlingsresultat behandlingsresultat) {
