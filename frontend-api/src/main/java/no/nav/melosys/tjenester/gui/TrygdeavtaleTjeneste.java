@@ -74,13 +74,15 @@ public class TrygdeavtaleTjeneste {
         return ResponseEntity.ok(new TrygdeavtaleInfoDto(
             behandling.getFagsak().hentAktørID(),
             behandling.getTema().getKode(),
+            behandling.getType().getKode(),
             aksesskontroll.behandlingKanRedigeresAvSaksbehandler(behandling, saksbehandler),
             behandlingsgrunnlagdata.periode,
             behandlingsgrunnlagdata.soeknadsland.landkoder,
             hentVirksomheter ? trygdeavtaleService.hentVirksomheter(behandling) : Collections.emptyMap(),
             hentBarnEktefeller ? trygdeavtaleService.hentFamiliemedlemmer(behandling) : Collections.emptyList(),
             behandlingsResultat.getInnledningFritekst(),
-            behandlingsResultat.getBegrunnelseFritekst()
+            behandlingsResultat.getBegrunnelseFritekst(),
+            behandlingsResultat.getVedtakMetadata() != null ? behandlingsResultat.getVedtakMetadata().getNyVurderingBakgrunn(): null
         ));
     }
 
