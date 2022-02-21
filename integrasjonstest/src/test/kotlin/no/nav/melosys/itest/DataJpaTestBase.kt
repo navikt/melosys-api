@@ -17,5 +17,5 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @EnableJpaRepositories("no.nav.melosys.repository")
 @EntityScan("no.nav.melosys.domain")
-class DataJpaTestBase() : OracleTestContainerBase() {
-}
+class DataJpaTestBase : OracleTestContainerBase()
+

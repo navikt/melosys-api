@@ -23,7 +23,6 @@ import java.time.Instant
 import java.time.LocalDate
 
 @Import(value = [BehandlingsresultatService::class])
-
 internal class BehandlingsresultatServiceIT(
     @Autowired
     private val behandlingRepository: BehandlingRepository,
