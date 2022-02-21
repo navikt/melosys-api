@@ -1,6 +1,7 @@
 package no.nav.melosys.integrasjon.aareg.arbeidsforhold;
 
 
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.felles.RestConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,13 +33,13 @@ public class ArbeidsforholdRestConsumerConfig implements RestConsumer {
             .build());
     }
 
-    private ExchangeFilterFunction errorFilter() {
+    public static ExchangeFilterFunction errorFilter() {
         return ExchangeFilterFunction.ofResponseProcessor(response -> {
             if (response.statusCode().isError()) {
-                return response.bodyToMono(String.class)
+                return response.createException()
                     .flatMap(errorBody -> {
                         log.error("Kall mot arreg-rest feilet. {} - {}", response.statusCode(), errorBody);
-                        return Mono.error(new RuntimeException(errorBody));
+                        return Mono.error(new TekniskException("Henting av arbeidsforhold fra Aareg feilet."));
                     });
             }
             return Mono.just(response);
