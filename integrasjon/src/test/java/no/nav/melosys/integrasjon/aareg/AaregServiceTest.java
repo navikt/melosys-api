@@ -13,7 +13,9 @@ import com.github.tomakehurst.wiremock.WireMockServer;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdRestConsumer;
+import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdRestConsumerConfig;
 import no.nav.melosys.integrasjon.kodeverk.KodeOppslag;
 import org.assertj.core.api.Assertions;
 import org.jetbrains.annotations.NotNull;
@@ -25,6 +27,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class AaregServiceTest {
@@ -43,6 +46,7 @@ class AaregServiceTest {
 
         WebClient webClient = WebClient.builder()
             .baseUrl("http://localhost:" + wireMockServer.port())
+            .filter(ArbeidsforholdRestConsumerConfig.errorFilter())
             .build();
         ArbeidsforholdRestConsumer restConsumer = new ArbeidsforholdRestConsumer(webClient);
         aaregService = lagAaregService(restConsumer);
@@ -86,6 +90,24 @@ class AaregServiceTest {
         });
         String result = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(arbeidsforhold);
         Assertions.assertThat(result).isEqualToIgnoringNewLines(expectedRestResult);
+    }
+
+    @Test
+    void getArbeidsforholdDokumentFromRestService_error_returnererBeskrivendeTekst() {
+        wireMockServer.stubFor(get(urlPathEqualTo("/"))
+            .willReturn(aResponse()
+                .withStatus(500)
+                .withHeader("Content-Type", "application/json")
+                .withBody("{\"melding\": \"Internal Server Error\"}")
+            )
+        );
+
+        assertThatExceptionOfType(TekniskException.class)
+            .isThrownBy(() -> aaregService.finnArbeidsforholdPrArbeidstaker(
+                NAV_PERSONIDENT,
+                LocalDate.of(2014, 7, 1),
+                LocalDate.of(2015, 12, 31))
+            ).withMessage("Henting av arbeidsforhold fra Aareg feilet.");
     }
 
     private AaregService lagAaregService(ArbeidsforholdRestConsumer arbeidsforholdRestConsumer) {
