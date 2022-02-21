@@ -8,6 +8,7 @@ import java.util.*;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagKonverterer;
@@ -51,6 +52,7 @@ public class BehandlingService {
     private final BehandlingsgrunnlagRepository behandlingsgrunnlagRepository;
     private final OppgaveService oppgaveService;
     private final ApplicationEventPublisher applicationEventPublisher;
+    private final Unleash unleash;
 
     private final Counter behandlingerAvsluttet = Metrics.counter(BEHANDLINGER_AVSLUTTET);
     private static final String FINNER_IKKE_BEHANDLING = "Finner ikke behandling med id ";
@@ -71,7 +73,8 @@ public class BehandlingService {
                              BehandlingsgrunnlagRepository behandlingsgrunnlagRepository,
                              BehandlingsresultatService behandlingsresultatService,
                              @Lazy OppgaveService oppgaveService,
-                             ApplicationEventPublisher applicationEventPublisher) {
+                             ApplicationEventPublisher applicationEventPublisher,
+                             Unleash unleash) {
         this.behandlingRepository = behandlingRepository;
         this.behandlingsresultatRepository = behandlingsresultatRepository;
         this.tidligereMedlemsperiodeRepository = tidligereMedlemsperiodeRepository;
@@ -79,6 +82,7 @@ public class BehandlingService {
         this.behandlingsresultatService = behandlingsresultatService;
         this.oppgaveService = oppgaveService;
         this.applicationEventPublisher = applicationEventPublisher;
+        this.unleash = unleash;
     }
 
     public Behandling hentBehandling(long behandlingId) {
@@ -383,8 +387,11 @@ public class BehandlingService {
     }
 
     public Set<Behandlingstyper> hentMuligeTyper(long behandlingID) {
-        var behandling = hentBehandling(behandlingID);
-        return MuligeManuelleBehandlingsendringer.hentMuligeTyper(behandling);
+        if (unleash.isEnabled("melosys.api.endretype")) {
+            var behandling = hentBehandling(behandlingID);
+            return MuligeManuelleBehandlingsendringer.hentMuligeTyper(behandling);
+        }
+        return Collections.emptySet();
     }
 
     private boolean saksbehandlerKanEndreStatus(Behandling behandling, Behandlingsstatus status) {

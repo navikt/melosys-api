@@ -71,15 +71,15 @@ public class MuligeManuelleBehandlingsendringerTest {
     }
 
     @Test
-    void hentMuligeTyper_temaEndretPeriode_returnererTomListe() {
+    void hentMuligeTyper_temaEndretPeriode_returnererNyVurdering() {
         var muligeTyper = MuligeManuelleBehandlingsendringer.hentMuligeTyper(behandlingMedTemaOgType(UTSENDT_ARBEIDSTAKER, ENDRET_PERIODE));
-        assertThat(muligeTyper).isEmpty();
+        assertThat(muligeTyper).containsExactly(NY_VURDERING);
     }
 
     @Test
-    void hentMuligeTyper_temaNyVurdering_returnererTomListe() {
+    void hentMuligeTyper_temaNyVurdering_returnererEndretPeriode() {
         var muligeTyper = MuligeManuelleBehandlingsendringer.hentMuligeTyper(behandlingMedTemaOgType(UTSENDT_SELVSTENDIG, NY_VURDERING));
-        assertThat(muligeTyper).isEmpty();
+        assertThat(muligeTyper).containsExactly(ENDRET_PERIODE);
     }
 
     @Test
