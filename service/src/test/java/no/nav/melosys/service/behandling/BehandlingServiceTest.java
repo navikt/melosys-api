@@ -99,13 +99,13 @@ class BehandlingServiceTest {
     @Test
     void endreBehandling() {
         behandling.setTema(UTSENDT_ARBEIDSTAKER);
-        behandling.setType(BEHANDLING_TYPE);
+        behandling.setType(ENDRET_PERIODE);
         behandling.setFagsak(new Fagsak());
         behandling.setBehandlingsgrunnlag(opprettBehandlingsgrunnlag());
         when(behandlingRepo.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(BEHANDLINGSRESULTAT);
 
-        behandlingService.endreBehandling(BEHANDLING_ID, Sakstyper.EU_EOS, null, BEHANDLING_TEMA, BEHANDLING_STATUS, BEHANDLING_FRIST);
+        behandlingService.endreBehandling(BEHANDLING_ID, Sakstyper.EU_EOS, BEHANDLING_TYPE, BEHANDLING_TEMA, BEHANDLING_STATUS, BEHANDLING_FRIST);
 
         verify(behandlingRepo, times(4)).save(behandlingCaptor.capture());
         verify(applicationEventPublisher, times(4)).publishEvent(behandlingEventCaptor.capture());
@@ -129,7 +129,22 @@ class BehandlingServiceTest {
         assertThat(((BehandlingEndretAvSaksbehandlerEvent) behandlingEndretEvents.get(2)).getBehandlingstema()).isEqualTo(BEHANDLING_TEMA);
         assertThat(behandlingEndretEvents.get(3).getBehandlingID()).isEqualTo(BEHANDLING_ID);
         assertThat(((BehandlingEndretAvSaksbehandlerEvent) behandlingEndretEvents.get(3)).getBehandlingsfrist()).isEqualTo(BEHANDLING_FRIST);
+    }
 
+    @Test
+    void endreBehandling_nullEllerSammeVerdi_ingenEndring() {
+        behandling.setTema(BEHANDLING_TEMA);
+        behandling.setType(BEHANDLING_TYPE);
+        behandling.setStatus(BEHANDLING_STATUS);
+        behandling.setBehandlingsfrist(BEHANDLING_FRIST);
+        behandling.setFagsak(new Fagsak());
+        behandling.setBehandlingsgrunnlag(opprettBehandlingsgrunnlag());
+        when(behandlingRepo.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
+
+        behandlingService.endreBehandling(BEHANDLING_ID, Sakstyper.EU_EOS, BEHANDLING_TYPE, null, null, BEHANDLING_FRIST);
+
+        verify(behandlingRepo, never()).save(any());
+        verify(applicationEventPublisher, never()).publishEvent(any());
     }
 
     @Test
