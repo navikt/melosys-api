@@ -173,7 +173,7 @@ class TrygdeavtaleTjenesteTest {
         behandlingsresultat.setVedtakMetadata(vedtakMetadata);
         behandling.setType(Behandlingstyper.NY_VURDERING);
 
-        when(behandlingService.hentBehandling(1L)).thenReturn(behandling);
+        when(behandlingService.hentBehandlingMedSaksopplysninger(1L)).thenReturn(behandling);
         when(behandlingsresultatService.hentBehandlingsresultat(1L)).thenReturn(behandlingsresultat);
 
         var response = trygdeavtaleTjeneste.hentTrygdeavtaleBehandlingsgrunnlag(1L, true, true).getBody();

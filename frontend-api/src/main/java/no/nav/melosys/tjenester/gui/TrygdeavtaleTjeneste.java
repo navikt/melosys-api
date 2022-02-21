@@ -82,7 +82,7 @@ public class TrygdeavtaleTjeneste {
             hentBarnEktefeller ? trygdeavtaleService.hentFamiliemedlemmer(behandling) : Collections.emptyList(),
             behandlingsResultat.getInnledningFritekst(),
             behandlingsResultat.getBegrunnelseFritekst(),
-            behandlingsResultat.getVedtakMetadata() != null ? behandlingsResultat.getVedtakMetadata().getNyVurderingBakgrunn(): null
+            behandlingsResultat.getVedtakMetadata() != null ? behandlingsResultat.getVedtakMetadata().getNyVurderingBakgrunn() : null
         ));
     }
 
