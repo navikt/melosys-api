@@ -36,7 +36,7 @@ public class ArbeidsforholdRestConsumerConfig implements RestConsumer {
     public static ExchangeFilterFunction errorFilter() {
         return ExchangeFilterFunction.ofResponseProcessor(response -> {
             if (response.statusCode().isError()) {
-                return response.createException()
+                return response.bodyToMono(String.class)
                     .flatMap(errorBody -> {
                         log.error("Kall mot arreg-rest feilet. {} - {}", response.statusCode(), errorBody);
                         return Mono.error(new TekniskException("Henting av arbeidsforhold fra Aareg feilet."));
