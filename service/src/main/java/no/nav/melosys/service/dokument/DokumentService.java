@@ -105,7 +105,6 @@ public class DokumentService {
                                  long behandlingID,
                                  DoksysBrevbestilling brevbestilling) {
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
-        // TODO: Behandling i brevbestilling byttes ut med behandlingId for å samle ansvar for henting av saksopplysninger (MELOSYS-5020)
         DoksysBrevbestilling nyBrevbestilling = new DoksysBrevbestilling.Builder()
             .medProduserbartDokument(brevbestilling.getProduserbartdokument())
             .medAvsenderNavn(brevbestilling.getAvsenderNavn())
