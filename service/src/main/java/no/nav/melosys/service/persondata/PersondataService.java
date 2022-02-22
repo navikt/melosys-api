@@ -46,8 +46,12 @@ public class PersondataService implements PersondataFasade {
     public static final String PDL_PERS_SAKS_VERSJON = "1.0";
 
     @Autowired
-    public PersondataService(BehandlingService behandlingService, KodeverkService kodeverkService, @Qualifier("saksbehandler") PDLConsumer pdlConsumer,
-                             SaksopplysningerService saksopplysningerService, TpsService tpsService, Unleash unleash) {
+    public PersondataService(BehandlingService behandlingService,
+                             KodeverkService kodeverkService,
+                             @Qualifier("saksbehandler") PDLConsumer pdlConsumer,
+                             SaksopplysningerService saksopplysningerService,
+                             TpsService tpsService,
+                             Unleash unleash) {
         this.behandlingService = behandlingService;
         this.kodeverkService = kodeverkService;
         this.pdlConsumer = pdlConsumer;
@@ -119,21 +123,13 @@ public class PersondataService implements PersondataFasade {
     }
 
     private Set<Familiemedlem> hentForeldre(Collection<ForelderBarnRelasjon> forelderBarnRelasjoner) {
-        return hentForeldreInntil(forelderBarnRelasjoner);
-    }
-
-    private Set<Familiemedlem> hentForeldreInntil(Collection<ForelderBarnRelasjon> forelderBarnRelasjoner) {
         return forelderBarnRelasjoner.stream()
             .filter(ForelderBarnRelasjon::erForelder)
             .map(forelderBarnRelasjon -> {
-                final var person = hentForelderInntil(forelderBarnRelasjon);
+                final var person = pdlConsumer.hentForelder(forelderBarnRelasjon.relatertPersonsIdent());
                 return lagFamilieMedlemForelder(forelderBarnRelasjon, person);
             })
             .collect(Collectors.toUnmodifiableSet());
-    }
-
-    private Person hentForelderInntil(ForelderBarnRelasjon forelderBarnRelasjon) {
-        return pdlConsumer.hentForelder(forelderBarnRelasjon.relatertPersonsIdent());
     }
 
     private Familiemedlem lagFamilieMedlemForelder(ForelderBarnRelasjon forelderBarnRelasjon, Person person) {
@@ -142,10 +138,6 @@ public class PersondataService implements PersondataFasade {
     }
 
     private Set<Familiemedlem> hentRelatertVedSivilstand(Collection<Sivilstand> sivilstandRelasjoner) {
-        return hentRelatertVedSivilstandInntil(sivilstandRelasjoner);
-    }
-
-    private Set<Familiemedlem> hentRelatertVedSivilstandInntil(Collection<Sivilstand> sivilstandRelasjoner) {
         return sivilstandRelasjoner.stream()
             .map(Sivilstand::relatertVedSivilstand)
             .filter(Objects::nonNull)
@@ -155,10 +147,6 @@ public class PersondataService implements PersondataFasade {
     }
 
     private Set<Familiemedlem> hentBarn(Person person) {
-        return hentBarnInntil(person);
-    }
-
-    private Set<Familiemedlem> hentBarnInntil(Person person) {
         final var folkeregisteridentifikator = FolkeregisteridentOversetter.oversett(
             person.folkeregisteridentifikator());
         return person.forelderBarnRelasjon().stream()
