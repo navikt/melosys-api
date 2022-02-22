@@ -42,7 +42,7 @@ public final class SaksbehandlingDataFactory {
         return behandling;
     }
 
-    public static Behandling lagBehandlingSomIkkeResulterIVedtak() {
+    public static Behandling lagInaktivBehandlingSomIkkeResulterIVedtak() {
         Behandling behandling = new Behandling();
         behandling.setId(1L);
         behandling.setStatus(Behandlingsstatus.AVSLUTTET);
