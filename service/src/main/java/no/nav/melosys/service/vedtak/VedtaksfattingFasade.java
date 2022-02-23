@@ -15,7 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import static no.nav.melosys.domain.kodeverk.Sakstyper.EU_EOS;
 
 @Service
-public class VedtakServiceFasade {
+public class VedtaksfattingFasade {
 
     private final BehandlingService behandlingService;
     private final EosVedtakService eosVedtakService;
@@ -26,11 +26,11 @@ public class VedtakServiceFasade {
     public static final int FRIST_KLAGE_UKER = 6;
 
     @Autowired
-    public VedtakServiceFasade(BehandlingService behandlingService,
-                               EosVedtakService eosVedtakService,
-                               EosVedtakSystemService eosVedtakSystemService,
-                               FtrlVedtakService ftrlVedtakService,
-                               TrygdeavtaleVedtakService trygdeavtaleVedtakService
+    public VedtaksfattingFasade(BehandlingService behandlingService,
+                                EosVedtakService eosVedtakService,
+                                EosVedtakSystemService eosVedtakSystemService,
+                                FtrlVedtakService ftrlVedtakService,
+                                TrygdeavtaleVedtakService trygdeavtaleVedtakService
     ) {
         this.behandlingService = behandlingService;
         this.eosVedtakService = eosVedtakService;

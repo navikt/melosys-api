@@ -2,16 +2,16 @@ package no.nav.melosys.tjenester.gui.saksflyt;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.ValideringException;
-import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.kontroll.vedtak.VedtakKontrollService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.tilgang.Aksesstype;
-import no.nav.melosys.service.vedtak.*;
+import no.nav.melosys.service.vedtak.FattVedtakRequest;
+import no.nav.melosys.service.vedtak.VedtaksfattingFasade;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
-import no.nav.melosys.tjenester.gui.dto.*;
+import no.nav.melosys.tjenester.gui.dto.EndreVedtakDto;
+import no.nav.melosys.tjenester.gui.dto.FattVedtakDto;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -25,13 +25,13 @@ import org.springframework.web.context.WebApplicationContext;
 @Api(tags = {"saksflyt", "vedtak"})
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class VedtakTjeneste {
-    private final VedtakServiceFasade vedtakServiceFasade;
+    private final VedtaksfattingFasade vedtaksfattingFasade;
     private final Aksesskontroll aksesskontroll;
     private final VedtakKontrollService vedtakKontrollService;
 
     @Autowired
-    public VedtakTjeneste(VedtakServiceFasade vedtakServiceFasade, Aksesskontroll aksesskontroll, VedtakKontrollService vedtakKontrollService) {
-        this.vedtakServiceFasade = vedtakServiceFasade;
+    public VedtakTjeneste(VedtaksfattingFasade vedtaksfattingFasade, Aksesskontroll aksesskontroll, VedtakKontrollService vedtakKontrollService) {
+        this.vedtaksfattingFasade = vedtaksfattingFasade;
         this.aksesskontroll = aksesskontroll;
         this.vedtakKontrollService = vedtakKontrollService;
     }
@@ -45,7 +45,7 @@ public class VedtakTjeneste {
         }
         aksesskontroll.autoriserSkriv(behandlingID);
 
-        vedtakServiceFasade.fattVedtak(behandlingID, lagFattVedtakRequest(fattVedtakDto, SubjectHandler.getInstance().getUserID()));
+        vedtaksfattingFasade.fattVedtak(behandlingID, lagFattVedtakRequest(fattVedtakDto, SubjectHandler.getInstance().getUserID()));
         return ResponseEntity.noContent().build();
     }
 
@@ -57,7 +57,7 @@ public class VedtakTjeneste {
             throw new FunksjonellException("BegrunnelseKode mangler.");
         }
         aksesskontroll.autoriserSkriv(behandlingID);
-        vedtakServiceFasade.endreVedtak(behandlingID, endreVedtakDto.getBegrunnelseKode(), endreVedtakDto.getFritekst(), endreVedtakDto.getFritekstSed());
+        vedtaksfattingFasade.endreVedtak(behandlingID, endreVedtakDto.getBegrunnelseKode(), endreVedtakDto.getFritekst(), endreVedtakDto.getFritekstSed());
         return ResponseEntity.noContent().build();
     }
 
