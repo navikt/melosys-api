@@ -76,7 +76,12 @@ public class EosVedtakService {
     }
 
     public void fattAvslagPgaManglendePåOpplysninger(Behandling behandling, FattAvslagRequest request) throws ValideringException {
-        throw new TekniskException("Ikke implementert");
+        // Dette vil virke som før, men er det riktig for avslag
+        fattVedtak(behandling,
+            new FattEosVedtakRequest.Builder()
+                .medFritekst(request.getFritekst())
+                .build()
+        );
     }
 
 
