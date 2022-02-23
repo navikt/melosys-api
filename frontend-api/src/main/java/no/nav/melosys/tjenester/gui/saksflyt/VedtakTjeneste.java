@@ -11,10 +11,7 @@ import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.tilgang.Aksesstype;
 import no.nav.melosys.service.vedtak.*;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
-import no.nav.melosys.tjenester.gui.dto.EndreVedtakDto;
-import no.nav.melosys.tjenester.gui.dto.FattEosVedtakDto;
-import no.nav.melosys.tjenester.gui.dto.FattTrygdeavtaleEllerFtrlVedtakDto;
-import no.nav.melosys.tjenester.gui.dto.FattVedtakDto;
+import no.nav.melosys.tjenester.gui.dto.*;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -51,6 +48,16 @@ public class VedtakTjeneste {
         aksesskontroll.autoriserSkriv(behandlingID);
 
         vedtakServiceFasade.fattVedtak(behandlingID, lagFattVedtakRequest(behandlingID, fattVedtakDto, SubjectHandler.getInstance().getUserID()));
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("{behandlingID}/fatt/avslag-pga-manglende-opplysninger")
+    @ApiOperation(value = "Fatter et vedtak for en gitt behandling")
+    public ResponseEntity<Void> fattVedtakAvslagPgaManglendePpplysninger(@PathVariable("behandlingID") long behandlingID,
+                                           @RequestBody FattAvslagDto fattAvslagDto) throws ValideringException {
+        aksesskontroll.autoriserSkriv(behandlingID);
+
+        vedtakServiceFasade.fattAvslagPgaManglendePåOpplysninger(behandlingID, fattAvslagDto.til());
         return ResponseEntity.noContent().build();
     }
 

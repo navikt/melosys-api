@@ -63,6 +63,22 @@ public class VedtakServiceFasade {
     }
 
     @Transactional(noRollbackFor = {ValideringException.class})
+    public void fattAvslagPgaManglendePåOpplysninger(long behandlingID, FattAvslagRequest fattAvslagRequest) throws ValideringException {
+        var behandling = behandlingService.hentBehandling(behandlingID);
+
+        validerKanFattesVedtakAvTema(behandling);
+
+        Sakstyper sakstype = behandling.getFagsak().getType();
+
+        switch (sakstype) {
+            case EU_EOS -> eosVedtakService.fattAvslagPgaManglendePåOpplysninger(behandling, fattAvslagRequest);
+            case FTRL -> ftrlVedtakService.fattAvslagPgaManglendePåOpplysninger(behandling, fattAvslagRequest);
+            case TRYGDEAVTALE -> trygdeavtaleVedtakService.fattAvslagPgaManglendePåOpplysninger(behandling, fattAvslagRequest);
+            default -> throw new FunksjonellException("Vedtaksfatting for sakstype " + sakstype + " er ikke støttet.");
+        }
+    }
+
+    @Transactional(noRollbackFor = {ValideringException.class})
     public void endreVedtak(long behandlingID, Endretperiode endretperiode, String fritekst, String fritekstSed) {
         var behandling = behandlingService.hentBehandling(behandlingID);
         Sakstyper sakstype = behandling.getFagsak().getType();

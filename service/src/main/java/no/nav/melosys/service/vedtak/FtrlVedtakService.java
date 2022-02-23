@@ -10,6 +10,8 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.DokgenService;
@@ -63,6 +65,10 @@ public class FtrlVedtakService {
         prosessinstansService.opprettProsessinstansIverksettVedtakFTRL(behandling, request);
         dokgenService.produserOgDistribuerBrev(behandlingID, lagBrevbestilling(request));
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
+    }
+
+    public void fattAvslagPgaManglendePåOpplysninger(Behandling behandling, FattAvslagRequest request) throws ValideringException {
+        throw new TekniskException("Ikke implementert");
     }
 
     private BrevbestillingRequest lagBrevbestilling(FattFtrlVedtakRequest request) {

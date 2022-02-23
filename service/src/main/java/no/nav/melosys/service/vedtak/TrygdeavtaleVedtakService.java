@@ -12,6 +12,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
@@ -52,6 +53,10 @@ public class TrygdeavtaleVedtakService {
         this.oppgaveService = oppgaveService;
         this.dokgenService = dokgenService;
         this.vedtakKontrollService = vedtakKontrollService;
+    }
+
+    public void fattAvslagPgaManglendePåOpplysninger(Behandling behandling, FattAvslagRequest request) throws ValideringException {
+        throw new TekniskException("Ikke implementert");
     }
 
     public void fattVedtak(Behandling behandling, FattTrygdeavtaleVedtakRequest request) throws ValideringException {

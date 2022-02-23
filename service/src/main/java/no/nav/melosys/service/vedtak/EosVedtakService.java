@@ -17,6 +17,7 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
@@ -73,6 +74,11 @@ public class EosVedtakService {
             .build();
         fattVedtak(behandling, request);
     }
+
+    public void fattAvslagPgaManglendePåOpplysninger(Behandling behandling, FattAvslagRequest request) throws ValideringException {
+        throw new TekniskException("Ikke implementert");
+    }
+
 
     public void fattVedtak(Behandling behandling, FattEosVedtakRequest request) throws ValideringException {
         long behandlingID = behandling.getId();
