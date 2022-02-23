@@ -30,6 +30,7 @@ import no.nav.melosys.service.journalforing.dto.DokumentDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringDto;
 import no.nav.melosys.service.sak.OpprettSakDto;
 import no.nav.melosys.service.soknad.SoknadMottatt;
+import no.nav.melosys.service.vedtak.FattAvslagRequest;
 import no.nav.melosys.service.vedtak.FattFtrlVedtakRequest;
 import no.nav.melosys.service.vedtak.FattTrygdeavtaleVedtakRequest;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
@@ -214,6 +215,17 @@ public class ProsessinstansService {
             .medType(ProsessType.IVERKSETT_VEDTAK_TRYGDEAVTALE)
             .medBehandling(behandling)
             .medBegrunnelseFritekst(request.getBegrunnelseFritekst())
+            .build();
+
+        lagre(prosessinstans);
+    }
+
+
+    public void opprettProsessinstansIverksettAvslagTrygdeavtale(Behandling behandling, FattAvslagRequest request) {
+        Prosessinstans prosessinstans = new ProsessinstansBuilder()
+            .medType(ProsessType.IVERKSETT_VEDTAK_TRYGDEAVTALE)
+            .medBehandling(behandling)
+            .medBegrunnelseFritekst(request.getFritekst())
             .build();
 
         lagre(prosessinstans);

@@ -12,7 +12,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
@@ -55,9 +54,27 @@ public class TrygdeavtaleVedtakService {
         this.vedtakKontrollService = vedtakKontrollService;
     }
 
-    public void fattAvslagPgaManglendePåOpplysninger(Behandling behandling, FattAvslagRequest request) throws ValideringException {
-        throw new TekniskException("Ikke implementert");
-    }
+    public void fattAvslagPgaManglendePåOpplysninger(Behandling behandling, FattAvslagRequest request) {
+        long behandlingID = behandling.getId();
+
+        String saksnummer = behandling.getFagsak().getSaksnummer();
+        log.info("Fatter avslag vedtak for (Trygdeavtale) sak: {} behandling: {}", saksnummer, behandlingID);
+
+        var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
+        behandlingsresultat.setType(request.getBehandlingsresultatTypeKode());
+
+        if (prosessinstansService.harVedtakInstans(behandlingID)) {
+            throw new FunksjonellException("Det finnes allerede en vedtak-prosess for behandling " + behandling);
+        }
+
+        behandling.getFagsak().setStatus(Saksstatuser.AVSLUTTET);
+        behandlingService.endreStatus(behandling, Behandlingsstatus.AVSLUTTET);
+
+        prosessinstansService.opprettProsessinstansIverksettAvslagTrygdeavtale(behandling, request);
+        // TODO: send avslag brev
+//        dokgenService.produserOgDistribuerBrev(behandlingID, lagStorbritanniaBrevbestilling(request));
+        oppgaveService.ferdigstillOppgaveMedSaksnummer(saksnummer);
+        }
 
     public void fattVedtak(Behandling behandling, FattTrygdeavtaleVedtakRequest request) throws ValideringException {
         long behandlingID = behandling.getId();
