@@ -8,7 +8,7 @@ public record FattAvslagDto(String fritekst) {
      public FattAvslagRequest til() {
         return new FattAvslagRequest.Builder()
             .medFritekst(fritekst)
-            .medBehandlingsresultattype(Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL)
+            .medBehandlingsresultat(Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL)
             .medVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK)
             .build();
     }
