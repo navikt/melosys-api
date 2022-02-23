@@ -64,13 +64,13 @@ public class VedtakTjeneste {
     @PostMapping("{behandlingID}/kontroller")
     @ApiOperation(value = "Gjør kontroll på vedtaket, og returnerer eventuelle feilmeldinger som liste med KontrollfeilDto")
     public ResponseEntity<Void> kontrollerVedtak(@PathVariable("behandlingID") long behandlingID,
-                                 @RequestParam(value = "oppdaterRegisteropplysninger", required = false) boolean oppdaterRegisteropplysninger,
+                                 @RequestParam(value = "skalRegisteropplysningerOppdateres", required = false) boolean skalRegisteropplysningerOppdateres,
                                  @RequestBody FattVedtakDto fattVedtakDto) throws ValideringException {
         if (fattVedtakDto.getVedtakstype() == null) {
             throw new FunksjonellException("Vedtakstype mangler.");
         }
-        aksesskontroll.autoriser(behandlingID, oppdaterRegisteropplysninger ? Aksesstype.SKRIV : Aksesstype.LES);
-        vedtakKontrollService.kontrollerInnvilgelse(behandlingID, fattVedtakDto.getVedtakstype(), oppdaterRegisteropplysninger);
+        aksesskontroll.autoriser(behandlingID, skalRegisteropplysningerOppdateres ? Aksesstype.SKRIV : Aksesstype.LES);
+        vedtakKontrollService.kontrollerVedtak(behandlingID, fattVedtakDto.getVedtakstype(), skalRegisteropplysningerOppdateres);
         return ResponseEntity.noContent().build();
     }
 

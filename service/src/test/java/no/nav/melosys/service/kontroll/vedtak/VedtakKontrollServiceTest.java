@@ -103,7 +103,7 @@ class VedtakKontrollServiceTest {
         when(behandlingsresultatService.hentBehandlingsresultat(behandlingID)).thenReturn(behandlingsresultat);
         when(persondataFasade.hentFolkeregisterident(behandling.getFagsak().hentAktørID())).thenReturn("fnr");
 
-        vedtakKontrollService.kontrollerInnvilgelse(behandling.getId(), FØRSTEGANGSVEDTAK, true);
+        vedtakKontrollService.kontrollerVedtak(behandling.getId(), FØRSTEGANGSVEDTAK, true);
         verify(registeropplysningerService).hentOgLagreOpplysninger(any());
     }
 
@@ -111,7 +111,7 @@ class VedtakKontrollServiceTest {
     void kontrollerInnvilgelse_ikkeOppdaterRegisteropplysninger_oppdatererkke() throws ValideringException {
         lovvalgsperiode.setTom(LocalDate.now());
 
-        vedtakKontrollService.kontrollerInnvilgelse(behandling.getId(), FØRSTEGANGSVEDTAK, false);
+        vedtakKontrollService.kontrollerVedtak(behandling.getId(), FØRSTEGANGSVEDTAK, false);
         verify(registeropplysningerService, never()).hentOgLagreOpplysninger(any());
     }
 

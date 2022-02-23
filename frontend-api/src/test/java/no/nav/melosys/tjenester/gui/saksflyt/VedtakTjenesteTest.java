@@ -151,7 +151,7 @@ class VedtakTjenesteTest extends JsonSchemaTestParent {
     @Test
     void kontrollerVedtak_feilmeldinger_kasterExceptions() throws ValideringException {
         doThrow(new ValideringException("melding", Collections.emptyList()))
-            .when(vedtakKontrollService).kontrollerInnvilgelse(behandlingID, Vedtakstyper.FØRSTEGANGSVEDTAK, true);
+            .when(vedtakKontrollService).kontrollerVedtak(behandlingID, Vedtakstyper.FØRSTEGANGSVEDTAK, true);
 
         assertThatThrownBy(() -> vedtakTjeneste.kontrollerVedtak(behandlingID, true, lagFattVedtakDto()))
             .isInstanceOf(ValideringException.class)

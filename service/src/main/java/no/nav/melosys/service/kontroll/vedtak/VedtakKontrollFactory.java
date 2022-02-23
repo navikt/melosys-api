@@ -13,33 +13,63 @@ class VedtakKontrollFactory {
     private VedtakKontrollFactory() {
     }
 
-    static Set<Function<VedtakKontrollData, Kontrollfeil>> hentKontrollerForVedtakstype(Vedtakstyper vedtakstype, Sakstyper sakstype) {
-        return switch (vedtakstype) {
-            case FØRSTEGANGSVEDTAK, OMGJØRINGSVEDTAK, KORRIGERT_VEDTAK -> vedtakKontroller(sakstype);
-            default -> throw new UnsupportedOperationException("Kan ikke hente kontroller for vedtakstype " + vedtakstype);
+    private static final Set<Function<VedtakKontrollData, Kontrollfeil>> KONTROLLER_EU_EOS_FØRSTE_GANG = Set.of(
+        VedtakKontroller::adresseRegistrert,
+        VedtakKontroller::overlappendeMedlemsperiode,
+        VedtakKontroller::periodeOver24Mnd,
+        VedtakKontroller::periodeManglerSluttdato,
+        VedtakKontroller::arbeidsstedManglerFelter,
+        VedtakKontroller::foretakUtlandManglerFelter
+    );
+
+    private static final Set<Function<VedtakKontrollData, Kontrollfeil>> KONTROLLER_EU_EOS_ANDRE_GANG = Set.of(
+        VedtakKontroller::adresseRegistrert,
+        VedtakKontroller::overlappendeMedlemsperiode,
+        VedtakKontroller::periodeOver24Mnd,
+        VedtakKontroller::periodeManglerSluttdato,
+        VedtakKontroller::arbeidsstedManglerFelter,
+        VedtakKontroller::foretakUtlandManglerFelter
+    );
+
+    private static final Set<Function<VedtakKontrollData, Kontrollfeil>> KONTROLLER_TRYGDEAVTALER_FØRSTE_GANG = Set.of(
+        VedtakKontroller::adresseRegistrert,
+        VedtakKontroller::overlappendeMedlemsperiode,
+        VedtakKontroller::periodeOverTreÅr,
+        VedtakKontroller::periodeManglerSluttdato,
+        VedtakKontroller::arbeidsstedManglerFelter,
+        VedtakKontroller::representantIUtlandetMangler
+    );
+
+    private static final Set<Function<VedtakKontrollData, Kontrollfeil>> KONTROLLER_TRYGDEAVTALER_ANDRE_GANG = Set.of(
+        VedtakKontroller::adresseRegistrert,
+        VedtakKontroller::overlappendeMedlemsperiode,
+        VedtakKontroller::periodeOverTreÅr,
+        VedtakKontroller::periodeManglerSluttdato,
+        VedtakKontroller::arbeidsstedManglerFelter,
+        VedtakKontroller::representantIUtlandetMangler
+    );
+
+    static Set<Function<VedtakKontrollData, Kontrollfeil>> hentKontrollerForVedtak(Sakstyper sakstype,
+                                                                                   Vedtakstyper vedtakstype) {
+        return switch (sakstype) {
+            case EU_EOS -> hentKontrollerForEøs(vedtakstype);
+            case FTRL -> Collections.emptySet();
+            case TRYGDEAVTALE -> hentKontrollerForTrygdeavtaler(vedtakstype);
         };
     }
 
-    private static Set<Function<VedtakKontrollData, Kontrollfeil>> vedtakKontroller(Sakstyper sakstype) {
-        return switch (sakstype) {
-            case EU_EOS -> Set.of(
-                VedtakKontroller::adresseRegistrert,
-                VedtakKontroller::overlappendeMedlemsperiode,
-                VedtakKontroller::periodeOver24Mnd,
-                VedtakKontroller::periodeManglerSluttdato,
-                VedtakKontroller::arbeidsstedManglerFelter,
-                VedtakKontroller::foretakUtlandManglerFelter
-            );
-            case TRYGDEAVTALE -> Set.of(
-                VedtakKontroller::adresseRegistrert,
-                VedtakKontroller::overlappendeMedlemsperiode,
-                VedtakKontroller::periodeManglerSluttdato,
-                VedtakKontroller::periodeOverTreÅr,
-                VedtakKontroller::arbeidsstedManglerFelter,
-                VedtakKontroller::representantIUtlandetMangler
-            );
-            default -> Collections.emptySet();
+    private static Set<Function<VedtakKontrollData, Kontrollfeil>> hentKontrollerForEøs(Vedtakstyper vedtakstype) {
+        return switch (vedtakstype) {
+            case FØRSTEGANGSVEDTAK -> KONTROLLER_EU_EOS_FØRSTE_GANG;
+            case ENDRINGSVEDTAK, KORRIGERT_VEDTAK, OMGJØRINGSVEDTAK -> KONTROLLER_EU_EOS_ANDRE_GANG;
         };
+    }
 
+    private static Set<Function<VedtakKontrollData, Kontrollfeil>> hentKontrollerForTrygdeavtaler(
+        Vedtakstyper vedtakstype) {
+        return switch (vedtakstype) {
+            case FØRSTEGANGSVEDTAK -> KONTROLLER_TRYGDEAVTALER_FØRSTE_GANG;
+            case ENDRINGSVEDTAK, KORRIGERT_VEDTAK, OMGJØRINGSVEDTAK -> KONTROLLER_TRYGDEAVTALER_ANDRE_GANG;
+        };
     }
 }
