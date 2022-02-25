@@ -68,24 +68,14 @@ public class EosVedtakService {
     }
 
     public void fattVedtak(Behandling behandling, Behandlingsresultattyper behandlingsresultattype, Vedtakstyper vedtakstype) throws ValideringException {
-        FattEosVedtakRequest request = new FattEosVedtakRequest.Builder()
+        FattVedtakRequest request = new FattVedtakRequest.Builder()
             .medBehandlingsresultat(behandlingsresultattype)
             .medVedtakstype(vedtakstype)
             .build();
         fattVedtak(behandling, request);
     }
 
-    public void fattAvslagPgaManglendePåOpplysninger(Behandling behandling, FattAvslagRequest request) throws ValideringException {
-        // Dette vil virke som før, men er det riktig for avslag
-        fattVedtak(behandling,
-            new FattEosVedtakRequest.Builder()
-                .medFritekst(request.getFritekst())
-                .build()
-        );
-    }
-
-
-    public void fattVedtak(Behandling behandling, FattEosVedtakRequest request) throws ValideringException {
+    public void fattVedtak(Behandling behandling, FattVedtakRequest request) throws ValideringException {
         long behandlingID = behandling.getId();
 
         log.info("Fatter vedtak for (EU_EØS) sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandlingID);

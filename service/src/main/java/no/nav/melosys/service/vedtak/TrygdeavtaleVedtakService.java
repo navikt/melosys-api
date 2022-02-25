@@ -54,29 +54,7 @@ public class TrygdeavtaleVedtakService {
         this.vedtakKontrollService = vedtakKontrollService;
     }
 
-    public void fattAvslagPgaManglendePåOpplysninger(Behandling behandling, FattAvslagRequest request) {
-        long behandlingID = behandling.getId();
-
-        String saksnummer = behandling.getFagsak().getSaksnummer();
-        log.info("Fatter avslag vedtak for (Trygdeavtale) sak: {} behandling: {}", saksnummer, behandlingID);
-
-        var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
-        behandlingsresultat.setType(request.getBehandlingsresultatTypeKode());
-
-        if (prosessinstansService.harVedtakInstans(behandlingID)) {
-            throw new FunksjonellException("Det finnes allerede en vedtak-prosess for behandling " + behandling);
-        }
-
-        behandling.getFagsak().setStatus(Saksstatuser.AVSLUTTET);
-        behandlingService.endreStatus(behandling, Behandlingsstatus.AVSLUTTET);
-
-        prosessinstansService.opprettProsessinstansIverksettAvslagTrygdeavtale(behandling, request);
-        // TODO: send avslag brev
-//        dokgenService.produserOgDistribuerBrev(behandlingID, lagStorbritanniaBrevbestilling(request));
-        oppgaveService.ferdigstillOppgaveMedSaksnummer(saksnummer);
-        }
-
-    public void fattVedtak(Behandling behandling, FattTrygdeavtaleVedtakRequest request) throws ValideringException {
+    public void fattVedtak(Behandling behandling, FattVedtakRequest request) throws ValideringException {
         long behandlingID = behandling.getId();
 
         String saksnummer = behandling.getFagsak().getSaksnummer();
@@ -103,7 +81,12 @@ public class TrygdeavtaleVedtakService {
         oppgaveService.ferdigstillOppgaveMedSaksnummer(saksnummer);
     }
 
-    private BrevbestillingRequest lagStorbritanniaBrevbestilling(FattTrygdeavtaleVedtakRequest request) {
+    private BrevbestillingRequest lagAvsalgBrevbestilling(FattVedtakRequest request) {
+        return new BrevbestillingRequest.Builder()
+            .medBegrunnelseFritekst(request.getBegrunnelseFritekst())
+            .build();
+    }
+    private BrevbestillingRequest lagStorbritanniaBrevbestilling(FattVedtakRequest request) {
         return new BrevbestillingRequest.Builder()
             .medProduserbardokument(Produserbaredokumenter.STORBRITANNIA)
             .medMottaker(Aktoersroller.BRUKER)
@@ -117,7 +100,7 @@ public class TrygdeavtaleVedtakService {
             .build();
     }
 
-    private void oppdaterBehandlingsresultat(Behandlingsresultat behandlingsresultat, FattTrygdeavtaleVedtakRequest request) throws IkkeFunnetException {
+    private void oppdaterBehandlingsresultat(Behandlingsresultat behandlingsresultat, FattVedtakRequest request) throws IkkeFunnetException {
         behandlingsresultat.settVedtakMetadata(request.getVedtakstype(), request.getNyVurderingBakgrunn(), LocalDate.now().plusWeeks(FRIST_KLAGE_UKER));
         behandlingsresultat.setBegrunnelseFritekst(request.getBegrunnelseFritekst());
         behandlingsresultat.setInnledningFritekst(request.getInnledningFritekst());
