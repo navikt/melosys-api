@@ -89,6 +89,37 @@ class DokgenMalMapperTest {
     }
 
     @Test
+    void skalMappeMedBrukerAdressePDL() {
+        when(mockDokgenMapperDatahenter.hentPersondata(any())).thenReturn(lagPersondata());
+
+        Behandling behandling = lagBehandling();
+
+        DokgenBrevbestilling brevbestilling = new DokgenBrevbestilling.Builder<>()
+            .medProduserbartdokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID)
+            .medBehandling(behandling)
+            .medForsendelseMottatt(Instant.now())
+            .build();
+
+        DokgenDto dokgenDto = dokgenMalMapper.mapBehandling(brevbestilling);
+
+        assertThat(dokgenDto)
+            .isInstanceOf(SaksbehandlingstidSoknad.class)
+            .extracting(
+                dto -> dto.getSaksopplysninger().navnBruker(),
+                dto -> dto.getMottaker().navn(),
+                dto -> dto.getMottaker().postnr(),
+                dto -> dto.getMottaker().poststed(),
+                dto -> dto.getMottaker().region()
+            ).containsExactly(
+                "Duck Donald",
+                "Duck Donald",
+                POSTNR_BRUKER,
+                POSTSTED_BRUKER,
+                REGION
+            );
+    }
+
+    @Test
     void skalMappeMedBrukerAdresse() {
         when(mockDokgenMapperDatahenter.hentPersondata(any())).thenReturn(lagPersonDokument());
 

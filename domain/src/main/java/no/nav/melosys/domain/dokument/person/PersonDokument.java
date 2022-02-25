@@ -291,7 +291,8 @@ public class PersonDokument implements Persondata {
             gjeldendePostadresse.adresselinje4,
             gjeldendePostadresse.postnr,
             gjeldendePostadresse.poststed,
-            gjeldendePostadresse.land != null ? LandkoderUtils.tilIso2(gjeldendePostadresse.land.getKode()) : null
+            gjeldendePostadresse.land != null ? LandkoderUtils.tilIso2(gjeldendePostadresse.land.getKode()) : null,
+            null
         );
     }
 
