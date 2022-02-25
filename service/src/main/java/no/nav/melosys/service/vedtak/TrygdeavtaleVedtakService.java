@@ -81,11 +81,6 @@ public class TrygdeavtaleVedtakService {
         oppgaveService.ferdigstillOppgaveMedSaksnummer(saksnummer);
     }
 
-    private BrevbestillingRequest lagAvsalgBrevbestilling(FattVedtakRequest request) {
-        return new BrevbestillingRequest.Builder()
-            .medBegrunnelseFritekst(request.getBegrunnelseFritekst())
-            .build();
-    }
     private BrevbestillingRequest lagStorbritanniaBrevbestilling(FattVedtakRequest request) {
         return new BrevbestillingRequest.Builder()
             .medProduserbardokument(Produserbaredokumenter.STORBRITANNIA)
