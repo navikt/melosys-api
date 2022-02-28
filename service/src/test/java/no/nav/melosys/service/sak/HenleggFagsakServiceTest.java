@@ -109,8 +109,8 @@ class HenleggFagsakServiceTest {
         henleggFagsakService.henleggSakEllerBehandlingSomBortfalt(saksnummer);
 
         verify(fagsakService).lagre(fagsak);
-        verify(behandlingsresultatService).oppdaterBehandlingsresultattype(1L, Behandlingsresultattyper.HENLEGGELSE);
-        verify(behandlingsresultatService).oppdaterBehandlingsresultattype(2L, Behandlingsresultattyper.HENLEGGELSE);
+        verify(behandlingsresultatService).oppdaterBehandlingsresultattype(1L, Behandlingsresultattyper.HENLEGGELSE_BORTFALT);
+        verify(behandlingsresultatService).oppdaterBehandlingsresultattype(2L, Behandlingsresultattyper.HENLEGGELSE_BORTFALT);
         assertThat(fagsak.getBehandlinger()).allSatisfy(behandling -> assertThat(behandling.getStatus()).isEqualTo(Behandlingsstatus.AVSLUTTET));
         assertThat(fagsak.getStatus()).isEqualTo(Saksstatuser.HENLAGT_BORTFALT);
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(saksnummer);
