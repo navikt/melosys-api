@@ -3,6 +3,7 @@ package no.nav.melosys.service.kontroll;
 import java.time.LocalDate;
 import java.util.Collections;
 
+import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode;
 import no.nav.melosys.domain.dokument.medlemskap.Periode;
@@ -15,70 +16,72 @@ class OverlappendeMedlemskapsperioderKontrollerTest {
 
     @Test
     void overlappendeGyldigMedlemsperiode_tidligerePeriodeIkkeOverlappendePerioder_ingenTreff() {
-        assertThat(OverlappendeMedlemskapsperioderKontroller.overlappendeMedlemsperiodeGyldigPeriode(
-            LocalDate.now().minusYears(2), LocalDate.now().minusYears(1), hentMedlemskapsDokument())
+        assertThat(OverlappendeMedlemskapsperioderKontroller.harOverlappendeMedlemsperiodeGyldigIPeriode(
+            hentMedlemskapsDokument(), lagLovvalgsPeriode(LocalDate.EPOCH.minusYears(2),
+                LocalDate.EPOCH.minusYears(1)))
         ).isFalse();
     }
 
     @Test
     void overlappendeGyldigMedlemsperiode_senerePeriodeIkkeOverlappendePerioder_ingenTreff() {
-        assertThat(OverlappendeMedlemskapsperioderKontroller.overlappendeMedlemsperiodeGyldigPeriode(
-            LocalDate.now().plusYears(3), LocalDate.now().plusYears(5L), hentMedlemskapsDokument()
-        )).isFalse();
+        assertThat(OverlappendeMedlemskapsperioderKontroller.harOverlappendeMedlemsperiodeGyldigIPeriode(
+            hentMedlemskapsDokument(), lagLovvalgsPeriode(LocalDate.EPOCH.plusYears(3),
+                LocalDate.EPOCH.plusYears(5L)))).isFalse();
     }
 
     @Test
     void overlappendeGyldigMedlemsperiode_overlappendePeriode_registrerTreff_1() {
-        assertThat(OverlappendeMedlemskapsperioderKontroller.overlappendeMedlemsperiodeGyldigPeriode(
-            LocalDate.now(), LocalDate.now().plusYears(1), hentMedlemskapsDokument())
+        assertThat(OverlappendeMedlemskapsperioderKontroller.harOverlappendeMedlemsperiodeGyldigIPeriode(
+            hentMedlemskapsDokument(), lagLovvalgsPeriode(LocalDate.EPOCH, LocalDate.EPOCH.plusYears(1)))
         ).isTrue();
     }
 
     @Test
     void overlappendeGyldigMedlemsperiode_overlappendePeriode_registrerTreff_2() {
-        assertThat(OverlappendeMedlemskapsperioderKontroller.overlappendeMedlemsperiodeGyldigPeriode(
-            LocalDate.now().plusYears(1), LocalDate.now().plusYears(5), hentMedlemskapsDokument())
+        assertThat(OverlappendeMedlemskapsperioderKontroller.harOverlappendeMedlemsperiodeGyldigIPeriode(
+            hentMedlemskapsDokument(), lagLovvalgsPeriode(LocalDate.EPOCH.plusYears(1), LocalDate.EPOCH.plusYears(5)))
         ).isTrue();
     }
 
     @Test
     void overlappendeGyldigMedlemsperiode_overlappendePeriode_registrerTreff_3() {
-        assertThat(OverlappendeMedlemskapsperioderKontroller.overlappendeMedlemsperiodeGyldigPeriode(
-            LocalDate.now().minusYears(1), LocalDate.now().plusYears(5), hentMedlemskapsDokument())
+        assertThat(OverlappendeMedlemskapsperioderKontroller.harOverlappendeMedlemsperiodeGyldigIPeriode(
+            hentMedlemskapsDokument(), lagLovvalgsPeriode(LocalDate.EPOCH.minusYears(1), LocalDate.EPOCH.plusYears(5)))
         ).isTrue();
     }
 
     @Test
     void overlappendeGyldigMedlemsperiode_overlappendePeriode_registrerTreff_4() {
-        assertThat(OverlappendeMedlemskapsperioderKontroller.overlappendeMedlemsperiodeGyldigPeriode(
-            LocalDate.now().minusYears(1), LocalDate.now().plusYears(1), hentMedlemskapsDokument())).isTrue();
+        assertThat(OverlappendeMedlemskapsperioderKontroller.harOverlappendeMedlemsperiodeGyldigIPeriode(
+            hentMedlemskapsDokument(), lagLovvalgsPeriode(LocalDate.EPOCH.minusYears(1),
+                LocalDate.EPOCH.plusYears(1)))).isTrue();
     }
 
     @Test
     void overlappendeGyldigMedlemsperiode_overlappendePeriode_registrerTreff_5() {
-        assertThat(OverlappendeMedlemskapsperioderKontroller.overlappendeMedlemsperiodeGyldigPeriode(
-            LocalDate.now(), LocalDate.now().plusYears(2), hentMedlemskapsDokument())
+        assertThat(OverlappendeMedlemskapsperioderKontroller.harOverlappendeMedlemsperiodeGyldigIPeriode(
+            hentMedlemskapsDokument(), lagLovvalgsPeriode(LocalDate.EPOCH, LocalDate.EPOCH.plusYears(2)))
         ).isTrue();
     }
 
     @Test
     void overlappendeGyldigMedlemsperiode_overlappendePeriode_registrerTreff_6() {
-        assertThat(OverlappendeMedlemskapsperioderKontroller.overlappendeMedlemsperiodeGyldigPeriode(
-            LocalDate.now().plusYears(2), LocalDate.now().plusYears(3), hentMedlemskapsDokument())
+        assertThat(OverlappendeMedlemskapsperioderKontroller.harOverlappendeMedlemsperiodeGyldigIPeriode(
+            hentMedlemskapsDokument(), lagLovvalgsPeriode(LocalDate.EPOCH.plusYears(2), LocalDate.EPOCH.plusYears(3)))
         ).isTrue();
     }
 
     @Test
     void overlappendeGyldigMedlemsperiode_overlappendePeriode_registrerTreff_7() {
-        assertThat(OverlappendeMedlemskapsperioderKontroller.overlappendeMedlemsperiodeGyldigPeriode(
-            LocalDate.now().plusYears(2), LocalDate.now().plusYears(2), hentMedlemskapsDokument())
+        assertThat(OverlappendeMedlemskapsperioderKontroller.harOverlappendeMedlemsperiodeGyldigIPeriode(
+            hentMedlemskapsDokument(), lagLovvalgsPeriode(LocalDate.EPOCH.plusYears(2), LocalDate.EPOCH.plusYears(2)))
         ).isTrue();
     }
 
     @Test
     void overlappendeGyldigMedlemsperiode_overlappendePeriodeOgTomErNull_registrerTreff() {
-        assertThat(OverlappendeMedlemskapsperioderKontroller.overlappendeMedlemsperiodeGyldigPeriode(
-            LocalDate.now().minusYears(1), null, hentMedlemskapsDokument())
+        assertThat(OverlappendeMedlemskapsperioderKontroller.harOverlappendeMedlemsperiodeGyldigIPeriode(
+            hentMedlemskapsDokument(), lagLovvalgsPeriode(LocalDate.EPOCH.minusYears(1), null))
         ).isTrue();
     }
 
@@ -87,8 +90,8 @@ class OverlappendeMedlemskapsperioderKontrollerTest {
         MedlemskapDokument medlemskapDokument = hentMedlemskapsDokument();
         Medlemsperiode medlemsperiode = medlemskapDokument.getMedlemsperiode().get(0);
         medlemsperiode.status = PeriodestatusMedl.UAVK.getKode();
-        assertThat(OverlappendeMedlemskapsperioderKontroller.overlappendeMedlemsperiodeGyldigPeriode(
-            LocalDate.now(), LocalDate.now().plusYears(2), medlemskapDokument)
+        assertThat(OverlappendeMedlemskapsperioderKontroller.harOverlappendeMedlemsperiodeGyldigIPeriode(
+            medlemskapDokument, lagLovvalgsPeriode(LocalDate.EPOCH, LocalDate.EPOCH.plusYears(2)))
         ).isFalse();
     }
 
@@ -97,8 +100,8 @@ class OverlappendeMedlemskapsperioderKontrollerTest {
         MedlemskapDokument medlemskapDokument = hentMedlemskapsDokument();
         Medlemsperiode medlemsperiode = medlemskapDokument.getMedlemsperiode().get(0);
         medlemsperiode.status = PeriodestatusMedl.UAVK.getKode();
-        assertThat(OverlappendeMedlemskapsperioderKontroller.overlappendeMedlemsperiodeIkkeAvvistPeriode(
-            LocalDate.now(), LocalDate.now().plusYears(2), medlemskapDokument)
+        assertThat(OverlappendeMedlemskapsperioderKontroller.harOverlappendeMedlemsperiodeIkkeAvvistIPeriode(
+            medlemskapDokument, new Periode(LocalDate.EPOCH, LocalDate.EPOCH.plusYears(2)))
         ).isTrue();
     }
 
@@ -107,8 +110,8 @@ class OverlappendeMedlemskapsperioderKontrollerTest {
         MedlemskapDokument medlemskapDokument = hentMedlemskapsDokument();
         Medlemsperiode medlemsperiode = medlemskapDokument.getMedlemsperiode().get(0);
         medlemsperiode.kilde = "LAANEKASSEN";
-        assertThat(OverlappendeMedlemskapsperioderKontroller.overlappendeMedlemsperiodeGyldigPeriode(
-            LocalDate.now(), LocalDate.now().plusYears(2), medlemskapDokument)
+        assertThat(OverlappendeMedlemskapsperioderKontroller.harOverlappendeMedlemsperiodeGyldigIPeriode(
+            medlemskapDokument, lagLovvalgsPeriode(LocalDate.EPOCH, LocalDate.EPOCH.plusYears(2)))
         ).isFalse();
     }
 
@@ -117,9 +120,16 @@ class OverlappendeMedlemskapsperioderKontrollerTest {
 
         Medlemsperiode medlemsperiode = new Medlemsperiode();
         medlemsperiode.status = PeriodestatusMedl.GYLD.getKode();
-        medlemsperiode.periode = new Periode(LocalDate.now(), LocalDate.now().plusYears(2));
+        medlemsperiode.periode = new Periode(LocalDate.EPOCH, LocalDate.EPOCH.plusYears(2));
 
         medlemskapDokument.medlemsperiode = Collections.singletonList(medlemsperiode);
         return medlemskapDokument;
+    }
+
+    private Lovvalgsperiode lagLovvalgsPeriode(LocalDate fom, LocalDate tom) {
+        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
+        lovvalgsperiode.setFom(fom);
+        lovvalgsperiode.setTom(tom);
+        return lovvalgsperiode;
     }
 }
