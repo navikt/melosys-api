@@ -51,7 +51,6 @@ class FagsakServiceTest {
     @Mock
     private MedlPeriodeService medlPeriodeService;
 
-    private final FakeUnleash unleash = new FakeUnleash();
 
     private FagsakService fagsakService;
 
@@ -59,7 +58,6 @@ class FagsakServiceTest {
     public void setUp() {
         fagsakService = new FagsakService(fagsakRepo, behandlingService, kontaktopplysningService, oppgaveService, persondataFasade,
                                           behandlingsresultatService, medlPeriodeService);
-        unleash.enableAll();
     }
 
     @Test

@@ -20,6 +20,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.ldap.SaksbehandlerService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.tjenester.gui.dto.*;
@@ -28,7 +29,6 @@ import no.nav.melosys.tjenester.gui.util.NumericStringRandomizer;
 import org.jeasy.random.EasyRandom;
 import org.jeasy.random.EasyRandomParameters;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -62,12 +62,13 @@ class BehandlingTjenesteTest extends JsonSchemaTestParent {
     private SaksopplysningerTilDto saksopplysningerTilDto;
     @Mock
     private SaksbehandlerService saksbehandlerService;
-
+    @Mock
+    private BehandlingsresultatService behandlingsresultatService;
     private EasyRandom random;
 
     @BeforeEach
     void setUp() {
-        behandlingTjeneste = new BehandlingTjeneste(behandlingService, saksopplysningerTilDto, saksbehandlerService, mock(Aksesskontroll.class));
+        behandlingTjeneste = new BehandlingTjeneste(behandlingService, saksopplysningerTilDto, saksbehandlerService, mock(Aksesskontroll.class), behandlingsresultatService);
 
         random = new EasyRandom(new EasyRandomParameters()
             .overrideDefaultInitialization(true)
@@ -93,7 +94,6 @@ class BehandlingTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    @Disabled("Enables når MELOSYS-4815 merges inn")
     void hentBehandling_erSchemaValidert() throws Exception {
         BehandlingDto behandlingDto = random.nextObject(BehandlingDto.class);
         behandlingDto.getSaksopplysninger().setSed(null);

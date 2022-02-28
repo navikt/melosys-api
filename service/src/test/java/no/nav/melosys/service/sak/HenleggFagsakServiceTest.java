@@ -2,13 +2,16 @@ package no.nav.melosys.service.sak;
 
 import java.util.Arrays;
 
+import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
@@ -23,8 +26,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static no.nav.melosys.service.SaksbehandlingDataFactory.lagFagsak;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class HenleggFagsakServiceTest {
@@ -37,8 +39,12 @@ class HenleggFagsakServiceTest {
     private FagsakService fagsakService;
     @Mock
     private BehandlingsresultatService behandlingsresultatService;
+    @Mock
+    private BehandlingService behandlingService;
 
     private HenleggFagsakService henleggFagsakService;
+
+    private final FakeUnleash unleash = new FakeUnleash();
 
     @Captor
     private ArgumentCaptor<Behandlingsresultat> behandlingsresultatCaptor;
@@ -52,13 +58,15 @@ class HenleggFagsakServiceTest {
 
     @BeforeEach
     public void setup() {
-        henleggFagsakService = new HenleggFagsakService(fagsakService, behandlingsresultatService, prosessinstansService, oppgaveService);
+        henleggFagsakService = new HenleggFagsakService(fagsakService, behandlingsresultatService, prosessinstansService, oppgaveService, behandlingService, unleash);
 
         behandling.setId(behandlingID);
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
         behandling.setFagsak(fagsak);
         fagsak.setSaksnummer(saksnummer);
         fagsak.getBehandlinger().add(behandling);
+
+        unleash.enableAll();
     }
 
     @Test
@@ -67,7 +75,7 @@ class HenleggFagsakServiceTest {
         when(behandlingsresultatService.hentBehandlingsresultat(behandlingID)).thenReturn(behandlingsresultat);
         when(fagsakService.hentFagsak(saksnummer)).thenReturn(fagsak);
 
-        henleggFagsakService.henleggFagsak(saksnummer, "ANNET", fritekst);
+        henleggFagsakService.henleggFagsakEllerBehandling(saksnummer, "ANNET", fritekst);
 
         verify(behandlingsresultatService).lagre(behandlingsresultatCaptor.capture());
         verify(prosessinstansService).opprettProsessinstansFagsakHenlagt(behandling);
@@ -81,7 +89,7 @@ class HenleggFagsakServiceTest {
     @Test
     void henleggFagsak_ikkeGyldigHenleggelsesgrunn_kasterException() {
         assertThatExceptionOfType(TekniskException.class)
-            .isThrownBy(() -> henleggFagsakService.henleggFagsak(saksnummer, "UGYLDIGKODE", "Fri tale"))
+            .isThrownBy(() -> henleggFagsakService.henleggFagsakEllerBehandling(saksnummer, "UGYLDIGKODE", "Fri tale"))
             .withMessageContaining("ingen gyldig henleggelsesgrunn");
     }
 
@@ -91,19 +99,39 @@ class HenleggFagsakServiceTest {
         Fagsak fagsak = lagFagsak(saksnummer);
         Behandling førsteBehandling = new Behandling();
         førsteBehandling.setId(1L);
-        førsteBehandling.setStatus(Behandlingsstatus.OPPRETTET);
+        førsteBehandling.setStatus(Behandlingsstatus.AVSLUTTET);
         Behandling andreBehandling = new Behandling();
         andreBehandling.setId(2L);
         andreBehandling.setStatus(Behandlingsstatus.ANMODNING_UNNTAK_SENDT);
         fagsak.setBehandlinger(Arrays.asList(førsteBehandling, andreBehandling));
+        when(fagsakService.hentFagsak(saksnummer)).thenReturn(fagsak);
 
-        henleggFagsakService.henleggSomBortfalt(fagsak);
+        henleggFagsakService.henleggSakEllerBehandlingSomBortfalt(saksnummer);
 
         verify(fagsakService).lagre(fagsak);
-        verify(behandlingsresultatService).oppdaterBehandlingsresultattype(1L, Behandlingsresultattyper.HENLEGGELSE);
-        verify(behandlingsresultatService).oppdaterBehandlingsresultattype(2L, Behandlingsresultattyper.HENLEGGELSE);
+        verify(behandlingsresultatService).oppdaterBehandlingsresultattype(1L, Behandlingsresultattyper.HENLEGGELSE_BORTFALT);
+        verify(behandlingsresultatService).oppdaterBehandlingsresultattype(2L, Behandlingsresultattyper.HENLEGGELSE_BORTFALT);
         assertThat(fagsak.getBehandlinger()).allSatisfy(behandling -> assertThat(behandling.getStatus()).isEqualTo(Behandlingsstatus.AVSLUTTET));
         assertThat(fagsak.getStatus()).isEqualTo(Saksstatuser.HENLAGT_BORTFALT);
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(saksnummer);
+    }
+
+    @Test
+    void henleggSomBortfalt_avslutterKunBehandling_dersomBehandlingTypeErNyVurdering() {
+        String saksnummer = "saksnummer";
+        Fagsak fagsak = lagFagsak(saksnummer);
+        Behandling førsteBehandling = new Behandling();
+        førsteBehandling.setId(1L);
+        førsteBehandling.setStatus(Behandlingsstatus.AVSLUTTET);
+        Behandling andreBehandling = new Behandling();
+        andreBehandling.setId(2L);
+        andreBehandling.setType(Behandlingstyper.NY_VURDERING);
+        fagsak.setBehandlinger(Arrays.asList(førsteBehandling, andreBehandling));
+        when(fagsakService.hentFagsak(saksnummer)).thenReturn(fagsak);
+
+        henleggFagsakService.henleggSakEllerBehandlingSomBortfalt(saksnummer);
+
+        verify(behandlingService).avsluttNyVurdering(andreBehandling.getId(), Behandlingsresultattyper.HENLEGGELSE_BORTFALT);
+        verifyNoMoreInteractions(fagsakService, behandlingsresultatService, oppgaveService);
     }
 }
