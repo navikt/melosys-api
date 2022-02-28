@@ -10,19 +10,19 @@ public final class OverlappendeMedlemskapsperioderKontroller {
     private OverlappendeMedlemskapsperioderKontroller() {
     }
 
-    public static boolean harOverlappendeMedlemsperiodeIkkeAvvistIPeriode(MedlemskapDokument medlemskapDokument,
-                                                                          ErPeriode periode) {
+    public static boolean harOverlappendeIkkeAvvistMedlemsperiode(MedlemskapDokument medlemskapDokument,
+                                                                  ErPeriode kontrollperiode) {
         return medlemskapDokument.hentMedlemsperioderHvorKildeIkkeLånekassen().stream().anyMatch(
             medlemsperiode -> !PeriodestatusMedl.AVST.getKode().equals(medlemsperiode.status)
-                && PeriodeKontroller.periodeOverlapper(periode, medlemsperiode.getPeriode()));
+                && PeriodeKontroller.periodeOverlapper(kontrollperiode, medlemsperiode.getPeriode()));
     }
 
-    public static boolean harOverlappendeMedlemsperiodeGyldigIPeriode(MedlemskapDokument medlemskapDokument,
-                                                                      Lovvalgsperiode lovvalgsperiode) {
+    public static boolean harOverlappendeGyldigMedlemsperiode(MedlemskapDokument medlemskapDokument,
+                                                              Lovvalgsperiode kontrollperiode) {
         return medlemskapDokument.hentMedlemsperioderHvorKildeIkkeLånekassen().stream().anyMatch(
             medlemsperiode -> PeriodestatusMedl.GYLD.getKode().equals(medlemsperiode.status)
-                && PeriodeKontroller.periodeOverlapper(lovvalgsperiode, medlemsperiode.getPeriode())
-                && (lovvalgsperiode.getMedlPeriodeID() == null || !lovvalgsperiode.getMedlPeriodeID().equals(
+                && PeriodeKontroller.periodeOverlapper(kontrollperiode, medlemsperiode.getPeriode())
+                && (kontrollperiode.getMedlPeriodeID() == null || !kontrollperiode.getMedlPeriodeID().equals(
                     medlemsperiode.id)));
     }
 }

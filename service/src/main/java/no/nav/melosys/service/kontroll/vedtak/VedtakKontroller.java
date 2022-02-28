@@ -18,7 +18,7 @@ final class VedtakKontroller implements AdresseUtlandKontroller {
         MedlemskapDokument medlemskapDokument = kontrollData.getMedlemskapDokument();
         Lovvalgsperiode lovvalgsperiode = kontrollData.getLovvalgsperiode();
 
-        return OverlappendeMedlemskapsperioderKontroller.harOverlappendeMedlemsperiodeGyldigIPeriode(medlemskapDokument,
+        return OverlappendeMedlemskapsperioderKontroller.harOverlappendeGyldigMedlemsperiode(medlemskapDokument,
             lovvalgsperiode) ? new Kontrollfeil(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER) : null;
     }
 
