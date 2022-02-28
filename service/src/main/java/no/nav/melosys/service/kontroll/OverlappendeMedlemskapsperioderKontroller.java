@@ -1,11 +1,8 @@
 package no.nav.melosys.service.kontroll;
 
-import java.util.function.Predicate;
-
 import no.nav.melosys.domain.ErPeriode;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
-import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode;
 import no.nav.melosys.integrasjon.medl.PeriodestatusMedl;
 
 public final class OverlappendeMedlemskapsperioderKontroller {
@@ -15,30 +12,17 @@ public final class OverlappendeMedlemskapsperioderKontroller {
 
     public static boolean harOverlappendeMedlemsperiodeIkkeAvvistIPeriode(MedlemskapDokument medlemskapDokument,
                                                                           ErPeriode periode) {
-        return overlappendeMedlemsperiodeMedPredikatFinnesIPeriode(medlemskapDokument,
-            OverlappendeMedlemskapsperioderKontroller::erPeriodeIkkeAvvist, periode);
+        return medlemskapDokument.hentMedlemsperioderHvorKildeIkkeLånekassen().stream().anyMatch(
+            medlemsperiode -> !PeriodestatusMedl.AVST.getKode().equals(medlemsperiode.status)
+                && PeriodeKontroller.periodeOverlapper(periode, medlemsperiode.getPeriode()));
     }
 
     public static boolean harOverlappendeMedlemsperiodeGyldigIPeriode(MedlemskapDokument medlemskapDokument,
                                                                       Lovvalgsperiode lovvalgsperiode) {
-        return overlappendeMedlemsperiodeMedPredikatFinnesIPeriode(medlemskapDokument,
-            OverlappendeMedlemskapsperioderKontroller::erPeriodeGyldig, lovvalgsperiode);
-    }
-
-    private static boolean overlappendeMedlemsperiodeMedPredikatFinnesIPeriode(MedlemskapDokument medlemskapDokument,
-                                                                               Predicate<Medlemsperiode> medlemsperiodeFilter,
-                                                                               ErPeriode periode) {
         return medlemskapDokument.hentMedlemsperioderHvorKildeIkkeLånekassen().stream().anyMatch(
-            medlemsperiode -> medlemsperiodeFilter.test(medlemsperiode) && PeriodeKontroller.periodeOverlapper(
-                periode.getFom(), periode.getTom(), medlemsperiode.getPeriode().getFom(),
-                medlemsperiode.getPeriode().getTom()));
-    }
-
-    private static boolean erPeriodeGyldig(Medlemsperiode medlemsperiode) {
-        return PeriodestatusMedl.GYLD.getKode().equals(medlemsperiode.status);
-    }
-
-    private static boolean erPeriodeIkkeAvvist(Medlemsperiode medlemsperiode) {
-        return !PeriodestatusMedl.AVST.getKode().equals(medlemsperiode.status);
+            medlemsperiode -> PeriodestatusMedl.GYLD.getKode().equals(medlemsperiode.status)
+                && PeriodeKontroller.periodeOverlapper(lovvalgsperiode, medlemsperiode.getPeriode())
+                && (lovvalgsperiode.getMedlPeriodeID() == null || !lovvalgsperiode.getMedlPeriodeID().equals(
+                    medlemsperiode.id)));
     }
 }
