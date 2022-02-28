@@ -85,6 +85,18 @@ public final class DokgenAdresseMapper {
         return landkode;
     }
 
+    public static String mapRegionForAdresse(OrganisasjonDokument org, Persondata persondata) {
+        String region;
+        if(org == null) {
+            Postadresse postadresse = persondata.hentGjeldendePostadresse();
+            region = postadresse != null ? postadresse.region() : null;
+        } else {
+            StrukturertAdresse orgAdresse = org.hentTilgjengeligAdresse();
+            region = orgAdresse.getRegion() != null ? orgAdresse.getRegion() : null;
+        }
+        return region;
+    }
+
     public static Mottaker mapMottaker(DokgenBrevbestilling brevbestilling, Aktoersroller mottakerType) {
         if (mottakerType == Aktoersroller.TRYGDEMYNDIGHET && brevbestilling.getUtenlandskMyndighet() != null) {
             var utenlandskMyndighet = brevbestilling.getUtenlandskMyndighet();
@@ -94,7 +106,8 @@ public final class DokgenAdresseMapper {
                 utenlandskMyndighet.postnummer,
                 utenlandskMyndighet.poststed,
                 utenlandskMyndighet.land,
-                mottakerType.getKode()
+                mottakerType.getKode(),
+                null
             );
         }
 
@@ -106,7 +119,8 @@ public final class DokgenAdresseMapper {
             mapPostnr(org, persondata),
             mapPoststed(org, persondata),
             mapLandForAdresse(org, persondata),
-            mottakerType.getKode()
+            mottakerType.getKode(),
+            mapRegionForAdresse(org, persondata)
         );
     }
 }

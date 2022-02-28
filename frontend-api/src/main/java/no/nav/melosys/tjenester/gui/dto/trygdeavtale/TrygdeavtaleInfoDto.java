@@ -8,7 +8,7 @@ import java.util.function.Predicate;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
 
-public record TrygdeavtaleInfoDto(String aktoerId, String behandlingstema,
+public record TrygdeavtaleInfoDto(String aktoerId, String behandlingstema, String behandlingstype,
                                   boolean redigerbart,
                                   LocalDate periodeFom,
                                   LocalDate periodeTom,
@@ -16,12 +16,14 @@ public record TrygdeavtaleInfoDto(String aktoerId, String behandlingstema,
                                   List<VirksomhetDto> virksomheter, List<FamilieDto> barn,
                                   FamilieDto ektefelleSamboer,
                                   String innledningFritekst,
-                                  String begrunnelseFritekst) {
+                                  String begrunnelseFritekst,
+                                  String nyVurderingBakgrunn) {
 
-    public TrygdeavtaleInfoDto(String aktoerId, String behandlingstema, boolean redigerbart, Periode periode, List<String> land, Map<String, String> virksomheter, List<MedfolgendeFamilie> familie, String innledingFritekst, String begrunnelseFritekst) {
+    public TrygdeavtaleInfoDto(String aktoerId, String behandlingstema, String behandlingstype, boolean redigerbart, Periode periode, List<String> land, Map<String, String> virksomheter, List<MedfolgendeFamilie> familie, String innledingFritekst, String begrunnelseFritekst, String nyVurderingBakgrunn) {
         this(
             aktoerId,
             behandlingstema,
+            behandlingstype,
             redigerbart,
             periode.getFom(),
             periode.getTom(),
@@ -31,7 +33,8 @@ public record TrygdeavtaleInfoDto(String aktoerId, String behandlingstema,
             filtrerOgMapFamilie(familie, MedfolgendeFamilie::erEktefelleSamboer)
                 .stream().findFirst().orElse(null),
             innledingFritekst,
-            begrunnelseFritekst
+            begrunnelseFritekst,
+            nyVurderingBakgrunn
         );
     }
 

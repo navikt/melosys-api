@@ -6,6 +6,7 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.person.PersonMedHistorikk;
+import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.domain.person.Personopplysninger;
 import no.nav.melosys.repository.SaksopplysningRepository;
 import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory;
@@ -72,8 +73,7 @@ class SaksopplysningerServiceTest {
         verify(saksopplysningRepository).save(captor.capture());
 
         assertThat(captor.getValue().getType()).isEqualTo(SaksopplysningType.PDL_PERSOPL);
-        assertThat(behandling.getSaksopplysninger())
-            .hasSize(0);
+        assertThat(behandling.getSaksopplysninger()).isEmpty();
     }
 
     @Test
@@ -89,16 +89,28 @@ class SaksopplysningerServiceTest {
         verify(saksopplysningRepository).save(captor.capture());
 
         assertThat(captor.getValue().getType()).isEqualTo(SaksopplysningType.PDL_PERS_SAKS);
-        assertThat(behandling.getSaksopplysninger())
-            .hasSize(0);
+        assertThat(behandling.getSaksopplysninger()).isEmpty();
     }
 
     @Test
-    void hentPersonhistorikkPDL_PDL_PERS_SAKSeksistererIkke_optionalEmpty() {
+    void hentPersonhistorikk_PDL_PERS_SAKSeksistererIkke_optionalEmpty() {
         when(saksopplysningRepository.findByBehandling_IdAndType(1L, SaksopplysningType.PDL_PERS_SAKS)).thenReturn(Optional.empty());
 
-        Optional<PersonMedHistorikk> personMedHistorikk = saksopplysningerService.hentPersonhistorikkPDL(1L);
+        Optional<PersonMedHistorikk> personMedHistorikk = saksopplysningerService.finnPdlPersonhistorikkTilSaksbehandler(1L);
 
-        assertThat(personMedHistorikk.isPresent()).isFalse();
+        assertThat(personMedHistorikk).isNotPresent();
+    }
+
+    @Test
+    void hentPDLpersonopplysninger_eksistererFraDb_returneres() {
+        Saksopplysning saksopplysning = new Saksopplysning();
+        saksopplysning.setType(SaksopplysningType.PERSOPL);
+        saksopplysning.setDokument(PersonopplysningerObjectFactory.lagPersonopplysninger());
+        when(saksopplysningRepository.findByBehandling_IdAndType(1L, SaksopplysningType.PDL_PERSOPL))
+            .thenReturn(Optional.of(saksopplysning));
+
+        Persondata persondata = saksopplysningerService.hentPdlPersonopplysninger(1L);
+
+        assertThat(persondata).isNotNull();
     }
 }

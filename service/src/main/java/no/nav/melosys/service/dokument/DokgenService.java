@@ -27,6 +27,7 @@ import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import static org.springframework.util.StringUtils.hasText;
 
@@ -68,9 +69,10 @@ public class DokgenService {
         this.utenlandskMyndighetService = utenlandskMyndighetService;
     }
 
+    @Transactional
     public byte[] produserUtkast(long behandlingId, BrevbestillingRequest brevbestillingRequest) {
         Produserbaredokumenter produserbartdokument = brevbestillingRequest.getProduserbardokument();
-        Behandling behandling = behandlingService.hentBehandling(behandlingId);
+        Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingId);
         Aktoer mottaker;
         if (hasText(brevbestillingRequest.getOrgNr()) || hasText(brevbestillingRequest.getInstitusjonId())) {
             mottaker = new Aktoer();
@@ -93,8 +95,9 @@ public class DokgenService {
         return produserBrev(mottaker, brevbestilling.build());
     }
 
+    @Transactional
     public byte[] produserBrev(Aktoer mottaker, DokgenBrevbestilling brevbestilling) {
-        Behandling behandling = behandlingService.hentBehandling(brevbestilling.getBehandlingId());
+        Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(brevbestilling.getBehandlingId());
         String malnavn = dokumentproduksjonsInfoMapper.hentMalnavn(brevbestilling.getProduserbartdokument());
         String orgnr = mottaker != null ? mottaker.getOrgnr() : null;
         DokgenBrevbestilling.Builder<?> builder = brevbestilling.toBuilder();
@@ -114,9 +117,10 @@ public class DokgenService {
         return dokgenConsumer.lagPdf(malnavn, dokgenDto, brevbestilling.isBestillKopi(), brevbestilling.isBestillUtkast());
     }
 
+    @Transactional
     public void produserOgDistribuerBrev(long behandlingId, BrevbestillingRequest brevbestillingRequest) {
         Produserbaredokumenter produserbartDokument = brevbestillingRequest.getProduserbardokument();
-        var behandling = behandlingService.hentBehandling(behandlingId);
+        var behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingId);
 
         DokgenBrevbestilling.Builder<?> brevbestilling = lagDokgenBrevbestilling(brevbestillingRequest);
 
@@ -212,6 +216,7 @@ public class DokgenService {
             case GENERELT_FRITEKSTBREV_BRUKER, GENERELT_FRITEKSTBREV_ARBEIDSGIVER -> new FritekstbrevBrevbestilling.Builder()
                 .medFritekstTittel(brevbestillingRequest.getFritekstTittel())
                 .medFritekst(brevbestillingRequest.getFritekst())
+                .medKontaktpersonNavn(brevbestillingRequest.getKontaktpersonNavn())
                 .medKontaktopplysninger(brevbestillingRequest.isKontaktopplysninger());
             case AVSLAG_MANGLENDE_OPPLYSNINGER -> new AvslagBrevbestilling.Builder()
                 .medFritekst(brevbestillingRequest.getFritekst());

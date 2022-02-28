@@ -20,7 +20,7 @@ public class MedlemskapRestConsumerProducer implements RestConsumer {
     private static final Logger log = LoggerFactory.getLogger(MedlemskapRestConsumerProducer.class);
     private static final String CONSUMER_ID = "srvmelosys";
 
-    private String url;
+    private final String url;
 
     @Autowired
     public MedlemskapRestConsumerProducer(@Value("${medlemskap.rest.url}") String url) {
@@ -56,7 +56,7 @@ public class MedlemskapRestConsumerProducer implements RestConsumer {
                 return response.bodyToMono(String.class)
                     .flatMap(errorBody -> {
                         log.error("Kall mot MEDL feilet. {} - {}", response.statusCode(), errorBody);
-                        return Mono.error(new TekniskException(errorBody));
+                        return Mono.error(new TekniskException("Henting av registeropplysninger fra MEDL feilet."));
                     });
             }
             return Mono.just(response);

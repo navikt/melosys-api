@@ -97,7 +97,7 @@ public class StorbritanniaMapper {
                 persondokument.getSammensattNavn(),
                 persondokument.getFødselsdato(),
                 persondokument.hentFolkeregisterident(),
-                persondokument.hentGjeldendePostadresse().adresselinjer()))
+                persondokument.hentGjeldendePostadresse().lagPostadresseListe()))
             .representant(lagRepresentant(behandling.getBehandlingsgrunnlag()))
             .utsendelse(lagUtsendelse(lovvalgsperioder, persondokument))
             .build();
