@@ -169,7 +169,7 @@ class InnvilgelsesbrevMapperTest {
         MaritimtArbeid maritimtArbeid = new MaritimtArbeid();
         maritimtArbeid.enhetNavn = "Dunfjæder";
         maritimtArbeid.innretningLandkode = "NO";
-        maritimtArbeid.territorialfarvann = "GB";
+        maritimtArbeid.territorialfarvannLandkode = "GB";
         maritimtArbeid.fartsomradeKode = Fartsomrader.INNENRIKS;
         return maritimtArbeid;
     }
