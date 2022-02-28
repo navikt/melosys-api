@@ -8,17 +8,17 @@ import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode;
 import no.nav.melosys.domain.dokument.medlemskap.Periode;
 import no.nav.melosys.integrasjon.medl.PeriodestatusMedl;
 
-public final class MedlemskapKontroller {
+public final class OverlappendeMedlemskapsperioderKontroller {
 
-    private MedlemskapKontroller() {
+    private OverlappendeMedlemskapsperioderKontroller() {
     }
 
     public static boolean overlappendeMedlemsperiodeIkkeAvvistPeriode(LocalDate fom, LocalDate tom, MedlemskapDokument medlemskapDokument) {
-        return overlappendeMedlemsperiodeMedPredikatFinnes(fom, tom, medlemskapDokument, MedlemskapKontroller::periodeIkkeAvvist);
+        return overlappendeMedlemsperiodeMedPredikatFinnes(fom, tom, medlemskapDokument, OverlappendeMedlemskapsperioderKontroller::periodeIkkeAvvist);
     }
 
     public static boolean overlappendeMedlemsperiodeGyldigPeriode(LocalDate fom, LocalDate tom, MedlemskapDokument medlemskapDokument) {
-        return overlappendeMedlemsperiodeMedPredikatFinnes(fom, tom, medlemskapDokument, MedlemskapKontroller::periodeGyldig);
+        return overlappendeMedlemsperiodeMedPredikatFinnes(fom, tom, medlemskapDokument, OverlappendeMedlemskapsperioderKontroller::periodeGyldig);
     }
 
     private static boolean overlappendeMedlemsperiodeMedPredikatFinnes(LocalDate fom, LocalDate tom,
@@ -42,5 +42,4 @@ public final class MedlemskapKontroller {
     private static boolean periodeIkkeAvvist(Medlemsperiode medlemsperiode) {
         return !PeriodestatusMedl.AVST.getKode().equals(medlemsperiode.status);
     }
-
 }
