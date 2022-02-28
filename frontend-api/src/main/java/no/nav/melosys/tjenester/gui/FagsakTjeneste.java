@@ -147,7 +147,7 @@ public class FagsakTjeneste {
     @PutMapping(value = "{saksnr}/henlegg-som-bortfalt", consumes = MediaType.TEXT_PLAIN_VALUE, produces = MediaType.TEXT_PLAIN_VALUE)
     @ApiOperation(value = "Henlegger en fagsak i Melosys som bortfalt, fordi den ikke skal behandles i Melosys. " +
         "Henlegger kun den aktive behandlingen uten endring av saksstatus dersom behandlingtype er NY_VURDERING.")
-    public ResponseEntity<Void> avsluttSakSomBortfalt(@PathVariable("saksnr") String saksnummer) {
+    public ResponseEntity<Void> henleggSakSomBortfalt(@PathVariable("saksnr") String saksnummer) {
         aksesskontroll.autoriserSakstilgang(saksnummer);
 
         henleggFagsakService.henleggSakEllerBehandlingSomBortfalt(saksnummer);
