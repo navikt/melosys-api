@@ -20,7 +20,6 @@ import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
 import no.nav.melosys.sikkerhet.context.TestSubjectHandler;
 import no.nav.melosys.tjenester.gui.JsonSchemaTestParent;
 import no.nav.melosys.tjenester.gui.dto.EndreVedtakDto;
-import no.nav.melosys.tjenester.gui.dto.FattEosVedtakDto;
 import no.nav.melosys.tjenester.gui.dto.FattVedtakDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -63,7 +62,7 @@ class VedtakTjenesteTest extends JsonSchemaTestParent {
 
     @Test
     void fattVedtak_henleggelse_fungerer() throws Exception {
-        FattEosVedtakDto fattVedtakDto = new FattEosVedtakDto();
+        var fattVedtakDto = new FattVedtakDto();
         fattVedtakDto.setBehandlingsresultatTypeKode(Behandlingsresultattyper.HENLEGGELSE);
         fattVedtakDto.setVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK);
         fattVedtakDto.setMottakerinstitusjoner(Set.of("SE:4343"));
@@ -107,7 +106,7 @@ class VedtakTjenesteTest extends JsonSchemaTestParent {
 
     @Test
     void fattVedtak_dtoManglerBehandlingresultat_girException() {
-        FattVedtakDto fattVedtakDto = new FattEosVedtakDto();
+        var fattVedtakDto = new FattVedtakDto();
         fattVedtakDto.setVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK);
 
         assertThatThrownBy(() -> vedtakTjeneste.fattVedtak(behandlingID, fattVedtakDto))
