@@ -1,35 +1,16 @@
 package no.nav.melosys.service.kontroll;
 
 import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Set;
 import java.util.function.Predicate;
 
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode;
 import no.nav.melosys.domain.dokument.medlemskap.Periode;
-import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.integrasjon.medl.PeriodestatusMedl;
 
 public final class MedlemskapKontroller {
 
-    private static final String STATSLØS = "XS";
-    private static final Set<Landkoder> NORDISK_ELLER_AVTALELAND = Set.of(
-        Landkoder.SE,
-        Landkoder.DK,
-        Landkoder.FI,
-        Landkoder.IS,
-        Landkoder.AT,
-        Landkoder.NL,
-        Landkoder.LU
-    );
-
     private MedlemskapKontroller() {
-    }
-
-    public static boolean lovvalgslandErNorge(Landkoder landkode) {
-        return landkode.equals(Landkoder.NO);
     }
 
     public static boolean overlappendeMedlemsperiodeIkkeAvvistPeriode(LocalDate fom, LocalDate tom, MedlemskapDokument medlemskapDokument) {
@@ -40,10 +21,13 @@ public final class MedlemskapKontroller {
         return overlappendeMedlemsperiodeMedPredikatFinnes(fom, tom, medlemskapDokument, MedlemskapKontroller::periodeGyldig);
     }
 
-    private static boolean overlappendeMedlemsperiodeMedPredikatFinnes(LocalDate fom, LocalDate tom, MedlemskapDokument medlemskapDokument, Predicate<Medlemsperiode> medlemsperiodeFilter) {
+    private static boolean overlappendeMedlemsperiodeMedPredikatFinnes(LocalDate fom, LocalDate tom,
+                                                                       MedlemskapDokument medlemskapDokument,
+                                                                       Predicate<Medlemsperiode> medlemsperiodeFilter) {
         for (Medlemsperiode medlemsperiode : medlemskapDokument.hentMedlemsperioderKildeIkkeLånekassen()) {
             Periode periode = medlemsperiode.getPeriode();
-            if (medlemsperiodeFilter.test(medlemsperiode) && PeriodeKontroller.periodeOverlapper(fom, tom, periode.getFom(), periode.getTom())) {
+            if (medlemsperiodeFilter.test(medlemsperiode) && PeriodeKontroller.periodeOverlapper(fom, tom,
+                periode.getFom(), periode.getTom())) {
                 return true;
             }
         }
@@ -59,16 +43,4 @@ public final class MedlemskapKontroller {
         return !PeriodestatusMedl.AVST.getKode().equals(medlemsperiode.status);
     }
 
-    public static boolean statsborgerskapErMedlemsland(Collection<String> statsborgerskapLandkoder) {
-        return !statsborgerskapLandkoder.isEmpty() && Arrays.stream(Landkoder.values())
-            .anyMatch(landkode -> statsborgerskapLandkoder.contains(landkode.getKode()));
-    }
-
-    public static boolean avsenderErNordiskEllerAvtaleland(Landkoder avsenderLandkode) {
-        return avsenderLandkode != null && NORDISK_ELLER_AVTALELAND.contains(avsenderLandkode);
-    }
-
-    public static boolean erStatsløs(Collection<String> statsborgerskapLandkoder) {
-        return !statsborgerskapLandkoder.isEmpty() && statsborgerskapLandkoder.contains(STATSLØS);
-    }
 }
