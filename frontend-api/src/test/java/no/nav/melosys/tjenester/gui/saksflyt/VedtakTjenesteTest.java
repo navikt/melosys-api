@@ -71,7 +71,7 @@ class VedtakTjenesteTest extends JsonSchemaTestParent {
         verify(aksesskontroll).autoriserSkriv(behandlingID);
         verify(vedtakServiceFasade).fattVedtak(eq(behandlingID), any(FattVedtakRequest.class));
 
-//        valider(fattVedtakDto, FATT_VEDTAK_SCHEMA); // TODO avklar om vi kan fjerne slik validering
+        valider(fattVedtakDto, FATT_VEDTAK_SCHEMA);
     }
 
     @Test
@@ -86,7 +86,7 @@ class VedtakTjenesteTest extends JsonSchemaTestParent {
         verify(aksesskontroll).autoriserSkriv(behandlingID);
         verify(vedtakServiceFasade).fattVedtak(eq(behandlingID), any(FattVedtakRequest.class));
 
-//        valider(fattVedtakDto, FATT_VEDTAK_SCHEMA); // TODO avklar om vi kan fjerne slik validering
+        valider(fattVedtakDto, FATT_VEDTAK_SCHEMA);
     }
 
     @Test
@@ -101,7 +101,7 @@ class VedtakTjenesteTest extends JsonSchemaTestParent {
         verify(aksesskontroll).autoriserSkriv(behandlingID);
         verify(vedtakServiceFasade).fattVedtak(eq(behandlingID), any(FattVedtakRequest.class));
 
-//        valider(fattVedtakDto, FATT_VEDTAK_SCHEMA); // TODO avklar om vi kan fjerne slik validering
+        valider(fattVedtakDto, FATT_VEDTAK_SCHEMA);
     }
 
     @Test
