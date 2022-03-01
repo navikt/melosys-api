@@ -55,7 +55,7 @@ public class VedtakKontrollService {
             var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
             kontrollerInnvilgelse(behandling, behandlingsresultat, vedtakstype, sakstype);
         } else {
-            kontrollerInnvilgelse(behandlingID, vedtakstype, sakstype);
+            kontrollerInnvilgelse(behandlingID, sakstype);
         }
     }
 
@@ -64,7 +64,7 @@ public class VedtakKontrollService {
                                       Vedtakstyper vedtakstype,
                                       Sakstyper sakstype) throws ValideringException {
         hentNyeRegisteropplysninger(behandlingsresultat, behandling);
-        kontrollerInnvilgelse(behandling.getId(), vedtakstype, sakstype);
+        kontrollerInnvilgelse(behandling.getId(), sakstype);
     }
 
     private void hentNyeRegisteropplysninger(Behandlingsresultat behandlingsresultat, Behandling behandling) {
@@ -82,29 +82,25 @@ public class VedtakKontrollService {
                 .build());
     }
 
-    private void kontrollerInnvilgelse(long behandlingID, Vedtakstyper vedtakstype, Sakstyper sakstype) throws ValideringException {
-        Collection<Kontrollfeil> kontrollfeil = utførKontroller(behandlingID, vedtakstype, sakstype);
+    private void kontrollerInnvilgelse(long behandlingID, Sakstyper sakstype) throws ValideringException {
+        Collection<Kontrollfeil> kontrollfeil = utførKontroller(behandlingID, sakstype);
         if (!kontrollfeil.isEmpty()) {
             throw new ValideringException("Feil i validering. Kan ikke fatte vedtak.",
                 kontrollfeil.stream().map(Kontrollfeil::tilDto).toList());
         }
     }
 
-    public Collection<Kontrollfeil> utførKontroller(long behandlingID, Vedtakstyper vedtakstype, Sakstyper sakstype) {
+    public Collection<Kontrollfeil> utførKontroller(long behandlingID, Sakstyper sakstype) {
         return utførKontroller(
             behandlingService.hentBehandlingMedSaksopplysninger(behandlingID),
             lovvalgsperiodeService.hentValidertLovvalgsperiode(behandlingID),
-            sakstype,
-            vedtakstype
-        );
+            sakstype);
     }
 
-    private Collection<Kontrollfeil> utførKontroller(Behandling behandling,
-                                                     Lovvalgsperiode lovvalgsperiode,
-                                                     Sakstyper sakstype,
-                                                     Vedtakstyper vedtakstype) {
+    private Collection<Kontrollfeil> utførKontroller(Behandling behandling, Lovvalgsperiode lovvalgsperiode,
+                                                     Sakstyper sakstype) {
         Set<Function<VedtakKontrollData, Kontrollfeil>> vedtakKontroller =
-            VedtakKontrollFactory.hentKontrollerForVedtak(sakstype, vedtakstype);
+            VedtakKontrollFactory.hentKontrollerForVedtak(sakstype);
         var vedtakKontrollData = hentVedtakKontrollData(behandling, lovvalgsperiode);
         return vedtakKontroller.stream()
             .map(f -> f.apply(vedtakKontrollData))

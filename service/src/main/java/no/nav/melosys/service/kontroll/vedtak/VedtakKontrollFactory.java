@@ -5,7 +5,6 @@ import java.util.Set;
 import java.util.function.Function;
 
 import no.nav.melosys.domain.kodeverk.Sakstyper;
-import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.service.validering.Kontrollfeil;
 
 class VedtakKontrollFactory {
@@ -13,7 +12,7 @@ class VedtakKontrollFactory {
     private VedtakKontrollFactory() {
     }
 
-    private static final Set<Function<VedtakKontrollData, Kontrollfeil>> KONTROLLER_EU_EOS_FØRSTE_GANG = Set.of(
+    private static final Set<Function<VedtakKontrollData, Kontrollfeil>> KONTROLLER_EU_EOS = Set.of(
         VedtakKontroller::adresseRegistrert,
         VedtakKontroller::overlappendeMedlemsperiode,
         VedtakKontroller::periodeOver24Mnd,
@@ -22,16 +21,7 @@ class VedtakKontrollFactory {
         VedtakKontroller::foretakUtlandManglerFelter
     );
 
-    private static final Set<Function<VedtakKontrollData, Kontrollfeil>> KONTROLLER_EU_EOS_ANDRE_GANG = Set.of(
-        VedtakKontroller::adresseRegistrert,
-        VedtakKontroller::overlappendeMedlemsperiode,
-        VedtakKontroller::periodeOver24Mnd,
-        VedtakKontroller::periodeManglerSluttdato,
-        VedtakKontroller::arbeidsstedManglerFelter,
-        VedtakKontroller::foretakUtlandManglerFelter
-    );
-
-    private static final Set<Function<VedtakKontrollData, Kontrollfeil>> KONTROLLER_TRYGDEAVTALER_FØRSTE_GANG = Set.of(
+    private static final Set<Function<VedtakKontrollData, Kontrollfeil>> KONTROLLER_TRYGDEAVTALER = Set.of(
         VedtakKontroller::adresseRegistrert,
         VedtakKontroller::overlappendeMedlemsperiode,
         VedtakKontroller::periodeOverTreÅr,
@@ -40,36 +30,19 @@ class VedtakKontrollFactory {
         VedtakKontroller::representantIUtlandetMangler
     );
 
-    private static final Set<Function<VedtakKontrollData, Kontrollfeil>> KONTROLLER_TRYGDEAVTALER_ANDRE_GANG = Set.of(
-        VedtakKontroller::adresseRegistrert,
-        VedtakKontroller::overlappendeMedlemsperiode,
-        VedtakKontroller::periodeOverTreÅr,
-        VedtakKontroller::periodeManglerSluttdato,
-        VedtakKontroller::arbeidsstedManglerFelter,
-        VedtakKontroller::representantIUtlandetMangler
-    );
-
-    static Set<Function<VedtakKontrollData, Kontrollfeil>> hentKontrollerForVedtak(Sakstyper sakstype,
-                                                                                   Vedtakstyper vedtakstype) {
+    static Set<Function<VedtakKontrollData, Kontrollfeil>> hentKontrollerForVedtak(Sakstyper sakstype) {
         return switch (sakstype) {
-            case EU_EOS -> hentKontrollerForEøs(vedtakstype);
+            case EU_EOS -> hentKontrollerForEøs();
             case FTRL -> Collections.emptySet();
-            case TRYGDEAVTALE -> hentKontrollerForTrygdeavtaler(vedtakstype);
+            case TRYGDEAVTALE -> hentKontrollerForTrygdeavtaler();
         };
     }
 
-    private static Set<Function<VedtakKontrollData, Kontrollfeil>> hentKontrollerForEøs(Vedtakstyper vedtakstype) {
-        return switch (vedtakstype) {
-            case FØRSTEGANGSVEDTAK -> KONTROLLER_EU_EOS_FØRSTE_GANG;
-            case ENDRINGSVEDTAK, KORRIGERT_VEDTAK, OMGJØRINGSVEDTAK -> KONTROLLER_EU_EOS_ANDRE_GANG;
-        };
+    private static Set<Function<VedtakKontrollData, Kontrollfeil>> hentKontrollerForEøs() {
+        return KONTROLLER_EU_EOS;
     }
 
-    private static Set<Function<VedtakKontrollData, Kontrollfeil>> hentKontrollerForTrygdeavtaler(
-        Vedtakstyper vedtakstype) {
-        return switch (vedtakstype) {
-            case FØRSTEGANGSVEDTAK -> KONTROLLER_TRYGDEAVTALER_FØRSTE_GANG;
-            case ENDRINGSVEDTAK, KORRIGERT_VEDTAK, OMGJØRINGSVEDTAK -> KONTROLLER_TRYGDEAVTALER_ANDRE_GANG;
-        };
+    private static Set<Function<VedtakKontrollData, Kontrollfeil>> hentKontrollerForTrygdeavtaler() {
+        return KONTROLLER_TRYGDEAVTALER;
     }
 }
