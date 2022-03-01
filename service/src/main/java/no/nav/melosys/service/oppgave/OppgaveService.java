@@ -146,7 +146,17 @@ public class OppgaveService {
     }
 
     public void opprettEllerGjenbrukBehandlingsoppgave(Behandling behandling, String journalpostID, String aktørID, @Nullable String tilordnetRessurs) {
-        opprettEllerGjenbrukBehandlingsoppgave(behandling, journalpostID, aktørID, tilordnetRessurs, behandling.erElektroniskSøknad() ? "Mottatt elektronisk søknad" : null);
+        opprettEllerGjenbrukBehandlingsoppgave(behandling, journalpostID, aktørID, tilordnetRessurs, lagOppgaveBeskrivelse(behandling));
+    }
+
+    private String lagOppgaveBeskrivelse(Behandling behandling) {
+        if (behandling.erElektroniskSøknad()) {
+            return "Mottatt elektronisk søknad";
+        }
+        if (behandling.erNyVurdering()) {
+            return "Ny vurdering";
+        }
+        return null;
     }
 
     public void opprettJournalføringsoppgave(String journalpostID, String aktørID) {
