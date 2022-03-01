@@ -84,7 +84,7 @@
         <ns4:fagsaksnummer>MELTEST-1</ns4:fagsaksnummer>
     </ns6:felles>
     <ns6:fag>
-        <ns6:arbeidsland>GB</ns6:arbeidsland>
+        <ns6:arbeidsland>Storbritannia</ns6:arbeidsland>
         <ns6:trygdemyndighetsland>Sverige</ns6:trygdemyndighetsland>
         <ns6:arbeidsgiver>Virker ikke</ns6:arbeidsgiver>
         <ns6:behandlingstype>KLAGE</ns6:behandlingstype>

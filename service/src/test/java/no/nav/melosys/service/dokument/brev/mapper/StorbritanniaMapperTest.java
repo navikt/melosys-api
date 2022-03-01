@@ -522,7 +522,7 @@ public class StorbritanniaMapperTest {
             "navn" : "Donald Duck",
             "foedselsdato" : null,
             "fnr" : "05058892382",
-            "bostedsadresse" : [ "Andebygata 1", null, null, null ]
+            "bostedsadresse" : [ "Andebygata 1", "9999", "Andeby" ]
           },
           "medfolgendeFamiliemedlemmer" : {
             "ektefelle" : {

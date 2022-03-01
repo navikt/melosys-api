@@ -40,7 +40,7 @@ import static no.nav.melosys.domain.util.BehandlingsgrunnlagUtils.hentSøknadsla
 @RestController
 @RequestMapping("/fagsaker")
 @Api(tags = {"fagsaker"})
-@Scope(value= WebApplicationContext.SCOPE_REQUEST)
+@Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class FagsakTjeneste {
     private static final Logger log = LoggerFactory.getLogger(FagsakTjeneste.class);
     private static final String UKJENT_SAMMENSATT_NAVN = "UKJENT";
@@ -116,17 +116,17 @@ public class FagsakTjeneste {
     }
 
     @PostMapping("{saksnr}/henlegg")
-    @ApiOperation(value = "Henlegger en fagsak")
+    @ApiOperation(value = "Henlegger en fagsak. Avslutter kun behandling uten endring av saksstatus dersom behandlingtype er NY_VURDERING.")
     public ResponseEntity<Void> henleggFagsak(@PathVariable("saksnr") String saksnummer, @RequestBody HenleggelseDto henleggelseDto) {
         aksesskontroll.autoriserSakstilgang(saksnummer);
-        henleggFagsakService.henleggFagsak(saksnummer, henleggelseDto.begrunnelseKode(), henleggelseDto.fritekst());
+        henleggFagsakService.henleggFagsakEllerBehandling(saksnummer, henleggelseDto.begrunnelseKode(), henleggelseDto.fritekst());
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("{saksnr}/henlegg-videresend")
     @ApiOperation(value = "Videresender søknad for en gitt behandling")
     public ResponseEntity<Void> videresend(@PathVariable("saksnr") String saksnummer,
-                                     @RequestBody VideresendDto videresendDto) {
+                                           @RequestBody VideresendDto videresendDto) {
         Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
         aksesskontroll.autoriserSakstilgang(fagsak);
 
@@ -144,13 +144,13 @@ public class FagsakTjeneste {
         return ResponseEntity.noContent().build();
     }
 
-    @PutMapping(value = "{saksnr}/avsluttsaksombortfalt", consumes = MediaType.TEXT_PLAIN_VALUE, produces = MediaType.TEXT_PLAIN_VALUE)
-    @ApiOperation(value = "Henlegger en fagsak i Melosys som bortfalt, fordi den ikke skal behandles i Melosys")
-    public ResponseEntity<Void> avsluttSakSomBortfalt(@PathVariable("saksnr") String saksnummer) {
-        Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
-        aksesskontroll.autoriserSakstilgang(fagsak);
+    @PutMapping(value = "{saksnr}/henlegg-som-bortfalt", consumes = MediaType.TEXT_PLAIN_VALUE, produces = MediaType.TEXT_PLAIN_VALUE)
+    @ApiOperation(value = "Henlegger en fagsak i Melosys som bortfalt, fordi den ikke skal behandles i Melosys. " +
+        "Henlegger kun den aktive behandlingen uten endring av saksstatus dersom behandlingtype er NY_VURDERING.")
+    public ResponseEntity<Void> henleggSakSomBortfalt(@PathVariable("saksnr") String saksnummer) {
+        aksesskontroll.autoriserSakstilgang(saksnummer);
 
-        henleggFagsakService.henleggSomBortfalt(fagsak);
+        henleggFagsakService.henleggSakEllerBehandlingSomBortfalt(saksnummer);
         return ResponseEntity.noContent().build();
     }
 
@@ -168,7 +168,7 @@ public class FagsakTjeneste {
     @PostMapping("/{saksnummer}/utpek")
     @ApiOperation(value = "Utpeker lovvalgsland for gitt fagsak")
     public ResponseEntity<Void> utpekLovvalgsland(@PathVariable("saksnummer") String saksnummer,
-                                            @RequestBody UtpekDto utpekDto) {
+                                                  @RequestBody UtpekDto utpekDto) {
         Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
         aksesskontroll.autoriserSakstilgang(fagsak);
 

@@ -173,18 +173,6 @@ public class BehandlingService {
         }
     }
 
-    public void avsluttBehandling(long behandlingId) {
-        Behandling behandling = hentBehandling(behandlingId);
-        if (behandling.erAvsluttet()) {
-            throw new FunksjonellException("Behandling " + behandlingId + " er allerede avsluttet!");
-        }
-
-        behandling.setStatus(Behandlingsstatus.AVSLUTTET);
-        behandlingRepository.save(behandling);
-        behandlingerAvsluttet.increment();
-        applicationEventPublisher.publishEvent(new BehandlingEndretStatusEvent(AVSLUTTET, behandling));
-    }
-
     /**
      * Knytt medlemsperioder fra MEDL til behandlingen.
      */
@@ -332,6 +320,37 @@ public class BehandlingService {
         replikertBehandlingsgrunnlag.setId(null);
         replikertBehandlingsgrunnlag.setBehandling(behandlingsreplika);
         return replikertBehandlingsgrunnlag;
+    }
+
+    public void avsluttBehandling(long behandlingId) {
+        Behandling behandling = hentBehandling(behandlingId);
+
+        avsluttBehandling(behandling);
+    }
+
+    private void avsluttBehandling(Behandling behandling) {
+        if (behandling.erAvsluttet()) {
+            throw new FunksjonellException("Behandling " + behandling.getId() + " er allerede avsluttet!");
+        }
+
+        behandling.setStatus(Behandlingsstatus.AVSLUTTET);
+        behandlingRepository.save(behandling);
+        behandlingerAvsluttet.increment();
+        applicationEventPublisher.publishEvent(new BehandlingEndretStatusEvent(AVSLUTTET, behandling));
+    }
+
+    public void avsluttNyVurdering(long behandlingId, Behandlingsresultattyper nyBehandlingsResultatType) {
+        Behandling behandling = hentBehandling(behandlingId);
+        if (!behandling.erNyVurdering()) {
+            throw new FunksjonellException("Behandling " + behandling.getId() + " er ikke typen NY_VURDERING!");
+        }
+        avsluttBehandling(behandling);
+
+        behandlingsresultatService.oppdaterBehandlingsresultattype(behandling.getId(), nyBehandlingsResultatType);
+    }
+
+    public void settNyVurderingTilFerdigbehandlet(long behandlingId) {
+        avsluttNyVurdering(behandlingId, Behandlingsresultattyper.FERDIGBEHANDLET);
     }
 
     @Transactional(readOnly = true)

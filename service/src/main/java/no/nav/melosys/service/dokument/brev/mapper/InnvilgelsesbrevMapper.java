@@ -19,6 +19,7 @@ import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.MaritimtArbeid;
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Fartsomrader;
@@ -87,7 +88,7 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
             fag.setFlaggland(maritimtArbeid.flaggLandkode);
             if (Fartsomrader.INNENRIKS == maritimtArbeid.fartsomradeKode) {
                 fag.setArbeidPåTerritorialfarvann(JA);
-                fag.setArbeidsland(maritimtArbeid.territorialfarvann);
+                fag.setArbeidsland(Landkoder.valueOf(maritimtArbeid.territorialfarvannLandkode).getBeskrivelse());
             }
         }
 

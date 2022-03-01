@@ -63,7 +63,7 @@ public class DokgenMalMapper {
             poststed = dokgenMapperDatahenter.hentNorskPoststed(mottakerMedKoder.postnr());
         }
         String land = (dokgenMapperDatahenter.hentLandnavnFraLandkode(mottakerMedKoder.land()));
-        return new Mottaker(mottakerMedKoder.navn(), mottakerMedKoder.adresselinjer(), mottakerMedKoder.postnr(), poststed, land, mottakerMedKoder.type());
+        return new Mottaker(mottakerMedKoder.navn(), mottakerMedKoder.adresselinjer(), mottakerMedKoder.postnr(), poststed, land, mottakerMedKoder.type(), mottakerMedKoder.region());
     }
 
     private DokgenBrevbestilling berikBestillingMedPersondata(DokgenBrevbestilling mottattBrevbestilling) {

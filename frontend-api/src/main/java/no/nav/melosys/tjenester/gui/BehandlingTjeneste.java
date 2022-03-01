@@ -6,12 +6,14 @@ import com.fasterxml.jackson.annotation.JsonView;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.dokument.DokumentView;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.ldap.SaksbehandlerService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
@@ -39,16 +41,19 @@ public class BehandlingTjeneste {
     private final SaksopplysningerTilDto saksopplysningerTilDto;
     private final SaksbehandlerService saksbehandlerService;
     private final Aksesskontroll aksesskontroll;
+    private final BehandlingsresultatService behandlingsresultatService;
 
     @Autowired
     public BehandlingTjeneste(BehandlingService behandlingService,
                               SaksopplysningerTilDto saksopplysningerTilDto,
                               SaksbehandlerService saksbehandlerService,
-                              Aksesskontroll aksesskontroll) {
+                              Aksesskontroll aksesskontroll,
+                              BehandlingsresultatService behandlingsresultatService) {
         this.behandlingService = behandlingService;
         this.saksopplysningerTilDto = saksopplysningerTilDto;
         this.saksbehandlerService = saksbehandlerService;
         this.aksesskontroll = aksesskontroll;
+        this.behandlingsresultatService = behandlingsresultatService;
     }
 
     @PostMapping("{behandlingID}/endre")
@@ -148,6 +153,16 @@ public class BehandlingTjeneste {
         return ResponseEntity.noContent().build();
     }
 
+    @PutMapping("{behandlingID}/sett-til-ferdigbehandlet")
+    @ApiOperation("Avslutt en gitt behandling med Ferdigbehandlet som resultat uten endring av saksstatus")
+    public ResponseEntity<Void> avsluttNyVurderingMedFerdigbehandlet(@PathVariable("behandlingID") long behandlingID) {
+        log.debug("Saksbehandler {} ber om å avslutte behandling {} uten endring av saksstatus", SubjectHandler.getInstance().getUserID(), behandlingID);
+        aksesskontroll.autoriserSkrivOgTilordnet(behandlingID);
+
+        behandlingService.settNyVurderingTilFerdigbehandlet(behandlingID);
+
+        return ResponseEntity.noContent().build();
+    }
     @GetMapping("{behandlingID}/mulige-statuser")
     @ApiOperation("Hent mulige nye behandlingsstatuser for en behandling")
     public ResponseEntity<Collection<Behandlingsstatus>> hentMuligeStatuser(@PathVariable("behandlingID") long behandlingID) {
@@ -187,6 +202,8 @@ public class BehandlingTjeneste {
     }
 
     private BehandlingOppsummeringDto tilOppsummeringDto(Behandling behandling) {
+        Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
+
         var behandlingOppsummeringDto = new BehandlingOppsummeringDto();
         behandlingOppsummeringDto.setBehandlingsstatus(behandling.getStatus());
         behandlingOppsummeringDto.setBehandlingstype(behandling.getType());
@@ -197,6 +214,7 @@ public class BehandlingTjeneste {
         behandlingOppsummeringDto.setSisteOpplysningerHentetDato(behandling.getSistOpplysningerHentetDato());
         behandlingOppsummeringDto.setSvarFrist(behandling.getDokumentasjonSvarfristDato());
         behandlingOppsummeringDto.setBehandlingsfrist(behandling.getBehandlingsfrist());
+        behandlingOppsummeringDto.setBehandlingsresultattype(behandlingsresultat.getType());
         return behandlingOppsummeringDto;
     }
 }
