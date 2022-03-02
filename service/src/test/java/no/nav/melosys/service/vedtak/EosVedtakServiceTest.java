@@ -254,8 +254,8 @@ class EosVedtakServiceTest {
 
         leggTilLovvalgsperiode(InnvilgelsesResultat.AVSLAATT);
 
-        final var fattEosVedtakRequest = lagRequest(FASTSATT_LOVVALGSLAND, FØRSTEGANGSVEDTAK, null, null, null);
-        assertThatThrownBy(() -> vedtakService.fattVedtak(behandling, fattEosVedtakRequest))
+        final var FattVedtakRequest = lagRequest(FASTSATT_LOVVALGSLAND, FØRSTEGANGSVEDTAK, null, null, null);
+        assertThatThrownBy(() -> vedtakService.fattVedtak(behandling, FattVedtakRequest))
             .isInstanceOf(FunksjonellException.class)
             .hasMessageContaining("vedtak-prosess");
 
@@ -347,9 +347,9 @@ class EosVedtakServiceTest {
         behandling.getFagsak().setAktører(Set.of(myndighet));
     }
 
-    private FattEosVedtakRequest lagRequest(Behandlingsresultattyper behandlingsresultattype, Vedtakstyper vedtakstype,
+    private FattVedtakRequest lagRequest(Behandlingsresultattyper behandlingsresultattype, Vedtakstyper vedtakstype,
                                             String behandlingsresultatFritekst, String fritekstSed, Set<String> mottakerinstitusjoner) {
-        return new FattEosVedtakRequest.Builder()
+        return new FattVedtakRequest.Builder()
             .medBehandlingsresultat(behandlingsresultattype)
             .medVedtakstype(vedtakstype)
             .medFritekst(behandlingsresultatFritekst)

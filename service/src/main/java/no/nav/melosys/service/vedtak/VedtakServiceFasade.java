@@ -55,9 +55,9 @@ public class VedtakServiceFasade {
         Sakstyper sakstype = behandling.getFagsak().getType();
 
         switch (sakstype) {
-            case EU_EOS -> eosVedtakService.fattVedtak(behandling, (FattEosVedtakRequest) fattVedtakRequest);
-            case FTRL -> ftrlVedtakService.fattVedtak(behandling, (FattFtrlVedtakRequest) fattVedtakRequest);
-            case TRYGDEAVTALE -> trygdeavtaleVedtakService.fattVedtak(behandling, (FattTrygdeavtaleVedtakRequest) fattVedtakRequest);
+            case EU_EOS -> eosVedtakService.fattVedtak(behandling, fattVedtakRequest);
+            case FTRL -> ftrlVedtakService.fattVedtak(behandling, fattVedtakRequest);
+            case TRYGDEAVTALE -> trygdeavtaleVedtakService.fattVedtak(behandling, fattVedtakRequest);
             default -> throw new FunksjonellException("Vedtaksfatting for sakstype " + sakstype + " er ikke støttet.");
         }
     }

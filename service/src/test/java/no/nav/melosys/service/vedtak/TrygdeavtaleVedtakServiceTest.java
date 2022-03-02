@@ -80,7 +80,7 @@ class TrygdeavtaleVedtakServiceTest {
         var behandlingsresultat = lagBehandlingsresultat();
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
 
-        FattTrygdeavtaleVedtakRequest request = lagFattVedtakRequest(FØRSTEGANGSVEDTAK, null);
+        FattVedtakRequest request = lagFattVedtakRequest(FØRSTEGANGSVEDTAK, null);
         trygdeavtaleVedtakService.fattVedtak(lagBehandling(), request);
 
         verify(behandlingsresultatService).lagre(behandlingsresultatCaptor.capture());
@@ -114,7 +114,7 @@ class TrygdeavtaleVedtakServiceTest {
         var behandlingsresultat = lagBehandlingsresultat();
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
 
-        FattTrygdeavtaleVedtakRequest request = lagFattVedtakRequest(KORRIGERT_VEDTAK, Nyvurderingbakgrunner.FEIL_I_BEHANDLING.getKode());
+        FattVedtakRequest request = lagFattVedtakRequest(KORRIGERT_VEDTAK, Nyvurderingbakgrunner.FEIL_I_BEHANDLING.getKode());
         trygdeavtaleVedtakService.fattVedtak(lagBehandling(), request);
 
         verify(behandlingsresultatService).lagre(behandlingsresultatCaptor.capture());
@@ -148,7 +148,7 @@ class TrygdeavtaleVedtakServiceTest {
         var behandlingsresultat = lagBehandlingsresultat();
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
 
-        FattTrygdeavtaleVedtakRequest request = lagFattVedtakRequest(ENDRINGSVEDTAK, Nyvurderingbakgrunner.NYE_OPPLYSNINGER.getKode());
+        FattVedtakRequest request = lagFattVedtakRequest(ENDRINGSVEDTAK, Nyvurderingbakgrunner.NYE_OPPLYSNINGER.getKode());
         trygdeavtaleVedtakService.fattVedtak(lagBehandling(), request);
 
         verify(behandlingsresultatService).lagre(behandlingsresultatCaptor.capture());
@@ -177,8 +177,8 @@ class TrygdeavtaleVedtakServiceTest {
         assertThat(brevbestillingRequest.getKopiMottakere().get(1).rolle()).isEqualTo(TRYGDEMYNDIGHET);
     }
 
-    private FattTrygdeavtaleVedtakRequest lagFattVedtakRequest(Vedtakstyper vedtakstype, String nyVurderingBakgrunn) {
-        return new FattTrygdeavtaleVedtakRequest.Builder()
+    private FattVedtakRequest lagFattVedtakRequest(Vedtakstyper vedtakstype, String nyVurderingBakgrunn) {
+        return new FattVedtakRequest.Builder()
             .medBehandlingsresultat(FASTSATT_LOVVALGSLAND)
             .medVedtakstype(vedtakstype)
             .medInnledningFritekst("Innledning")

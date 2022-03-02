@@ -10,6 +10,8 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.DokgenService;
@@ -46,7 +48,7 @@ public class FtrlVedtakService {
         this.dokgenService = dokgenService;
     }
 
-    public void fattVedtak(Behandling behandling, FattFtrlVedtakRequest request) {
+    public void fattVedtak(Behandling behandling, FattVedtakRequest request) {
         long behandlingID = behandling.getId();
 
         log.info("Fatter vedtak for (FTRL) sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandlingID);
@@ -65,7 +67,7 @@ public class FtrlVedtakService {
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 
-    private BrevbestillingRequest lagBrevbestilling(FattFtrlVedtakRequest request) {
+    private BrevbestillingRequest lagBrevbestilling(FattVedtakRequest request) {
         return new BrevbestillingRequest.Builder()
             .medProduserbardokument(Produserbaredokumenter.INNVILGELSE_FOLKETRYGDLOVEN_2_8)
             .medMottaker(Aktoersroller.BRUKER)
@@ -78,7 +80,7 @@ public class FtrlVedtakService {
             .build();
     }
 
-    private void oppdaterBehandlingsresultat(long behandlingID, FattFtrlVedtakRequest request) throws IkkeFunnetException {
+    private void oppdaterBehandlingsresultat(long behandlingID, FattVedtakRequest request) throws IkkeFunnetException {
         var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
         behandlingsresultat.setType(request.getBehandlingsresultatTypeKode());
         behandlingsresultat.settVedtakMetadata(request.getVedtakstype(), request.getNyVurderingBakgrunn(), LocalDate.now().plusWeeks(FRIST_KLAGE_UKER));

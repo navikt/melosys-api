@@ -17,6 +17,7 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
@@ -67,14 +68,14 @@ public class EosVedtakService {
     }
 
     public void fattVedtak(Behandling behandling, Behandlingsresultattyper behandlingsresultattype, Vedtakstyper vedtakstype) throws ValideringException {
-        FattEosVedtakRequest request = new FattEosVedtakRequest.Builder()
+        FattVedtakRequest request = new FattVedtakRequest.Builder()
             .medBehandlingsresultat(behandlingsresultattype)
             .medVedtakstype(vedtakstype)
             .build();
         fattVedtak(behandling, request);
     }
 
-    public void fattVedtak(Behandling behandling, FattEosVedtakRequest request) throws ValideringException {
+    public void fattVedtak(Behandling behandling, FattVedtakRequest request) throws ValideringException {
         long behandlingID = behandling.getId();
 
         log.info("Fatter vedtak for (EU_EØS) sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandlingID);
