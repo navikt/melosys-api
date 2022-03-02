@@ -304,6 +304,7 @@ query($ident: ID!, $historikk: Boolean!) {
     folkeregisterpersonstatus {
       status
       metadata {
+      historisk
         master
         endringer {
           type
