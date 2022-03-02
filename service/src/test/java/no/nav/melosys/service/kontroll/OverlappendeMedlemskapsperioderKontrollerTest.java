@@ -116,7 +116,7 @@ class OverlappendeMedlemskapsperioderKontrollerTest {
     }
 
     @Test
-    void overlappendeGyldigMedlemsperiode_lovvalgsperiodeHarSammeMedlPeriodeID_ingenTreff() {
+    void overlappendeGyldigMedlemsperiode_lovvalgsperiodeNyVurderingSammeMedlPeriodeID_ingenTreff() {
         MedlemskapDokument medlemskapDokument = lagMedlemskapsDokument();
         Medlemsperiode medlemsperiode = medlemskapDokument.getMedlemsperiode().get(0);
         medlemsperiode.id = 123L;

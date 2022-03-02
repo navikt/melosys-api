@@ -32,17 +32,9 @@ class VedtakKontrollFactory {
 
     static Set<Function<VedtakKontrollData, Kontrollfeil>> hentKontrollerForVedtak(Sakstyper sakstype) {
         return switch (sakstype) {
-            case EU_EOS -> hentKontrollerForEøs();
+            case EU_EOS -> KONTROLLER_EU_EOS;
             case FTRL -> Collections.emptySet();
-            case TRYGDEAVTALE -> hentKontrollerForTrygdeavtaler();
+            case TRYGDEAVTALE -> KONTROLLER_TRYGDEAVTALER;
         };
-    }
-
-    private static Set<Function<VedtakKontrollData, Kontrollfeil>> hentKontrollerForEøs() {
-        return KONTROLLER_EU_EOS;
-    }
-
-    private static Set<Function<VedtakKontrollData, Kontrollfeil>> hentKontrollerForTrygdeavtaler() {
-        return KONTROLLER_TRYGDEAVTALER;
     }
 }

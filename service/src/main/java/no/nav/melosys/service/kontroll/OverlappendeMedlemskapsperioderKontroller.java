@@ -22,7 +22,6 @@ public final class OverlappendeMedlemskapsperioderKontroller {
         return medlemskapDokument.hentMedlemsperioderHvorKildeIkkeLånekassen().stream().anyMatch(
             medlemsperiode -> PeriodestatusMedl.GYLD.getKode().equals(medlemsperiode.status)
                 && PeriodeKontroller.periodeOverlapper(kontrollperiode, medlemsperiode.getPeriode())
-                && (kontrollperiode.getMedlPeriodeID() == null || !kontrollperiode.getMedlPeriodeID().equals(
-                    medlemsperiode.id)));
+                && (kontrollperiode.erNyPeriodeForMedl() || !kontrollperiode.harSammeMedlID(medlemsperiode.id)));
     }
 }
