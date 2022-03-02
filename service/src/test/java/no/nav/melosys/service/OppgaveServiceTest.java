@@ -196,6 +196,19 @@ class OppgaveServiceTest {
     }
 
     @Test
+    void opprettEllerGjenbrukBehandlingsoppgave_oppgaveNyVurdering_oppgaveBlirOpprettetMedBeskrvielse() {
+        final String mottattString = "Ny vurdering";
+        Behandling behandling = lagBehandling();
+        behandling.setType(Behandlingstyper.NY_VURDERING);
+        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
+
+        oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", "Z99999");
+
+        verify(oppgaveFasade).opprettOppgave(oppgaveCaptor.capture());
+        assertThat(oppgaveCaptor.getValue().getBeskrivelse()).isEqualTo(mottattString);
+    }
+
+    @Test
     void opprettEllerGjenbrukBehandlingsoppgave_oppgaveEksistererSaksbehandlerErTilordnet_oppgaveBlirIkkeOpprettetEllerOppdatert() {
         Behandling behandling = new Behandling();
         behandling.setType(Behandlingstyper.SOEKNAD);
