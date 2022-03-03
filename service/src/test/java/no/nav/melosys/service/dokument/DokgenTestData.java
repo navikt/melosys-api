@@ -62,6 +62,7 @@ public final class DokgenTestData {
         behandling.setId(1L);
         behandling.setSaksopplysninger(singleton(lagPersonopplysning()));
         behandling.setFagsak(fagsak);
+        behandling.setType(Behandlingstyper.SOEKNAD);
         behandling.setBehandlingsgrunnlag(lagBehandlingsgrunnlag());
         return behandling;
     }
