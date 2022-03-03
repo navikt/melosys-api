@@ -150,12 +150,12 @@ public class MedlPeriodeService {
             throw new FunksjonellException(FEIL_VED_OPPDATERING_MEDL + behandlingID);
         }
 
-        if (periodeOmLovvalg instanceof Lovvalgsperiode) {
-            lagreMedlPeriodeId(medlPeriodeID, (Lovvalgsperiode) periodeOmLovvalg);
-        } else if (periodeOmLovvalg instanceof Anmodningsperiode) {
-            lagreMedlPeriodeId(medlPeriodeID, (Anmodningsperiode) periodeOmLovvalg);
-        } else if (periodeOmLovvalg instanceof Utpekingsperiode) {
-            lagreMedlPeriodeId(medlPeriodeID, (Utpekingsperiode) periodeOmLovvalg);
+        if (periodeOmLovvalg instanceof Lovvalgsperiode lovvalgsperiode) {
+            lagreMedlPeriodeId(medlPeriodeID, lovvalgsperiode);
+        } else if (periodeOmLovvalg instanceof Anmodningsperiode anmodningsperiode) {
+            lagreMedlPeriodeId(medlPeriodeID, anmodningsperiode);
+        } else if (periodeOmLovvalg instanceof Utpekingsperiode utpekingsperiode) {
+            lagreMedlPeriodeId(medlPeriodeID, utpekingsperiode);
         } else {
             throw new UnsupportedOperationException("Uventet periode med bestemmelse kan ikke lagres");
         }

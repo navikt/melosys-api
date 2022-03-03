@@ -15,7 +15,7 @@ import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.service.kontroll.vedtak.VedtakKontrollService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.vedtak.FattVedtakRequest;
-import no.nav.melosys.service.vedtak.VedtakServiceFasade;
+import no.nav.melosys.service.vedtak.VedtaksfattingFasade;
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
 import no.nav.melosys.sikkerhet.context.TestSubjectHandler;
 import no.nav.melosys.tjenester.gui.JsonSchemaTestParent;
@@ -41,7 +41,7 @@ class VedtakTjenesteTest extends JsonSchemaTestParent {
     private static final long behandlingID = 3;
 
     @Mock
-    private VedtakServiceFasade vedtakServiceFasade;
+    private VedtaksfattingFasade vedtaksfattingFasade;
     @Mock
     private Aksesskontroll aksesskontroll;
     @Mock
@@ -56,7 +56,7 @@ class VedtakTjenesteTest extends JsonSchemaTestParent {
 
     @BeforeEach
     public void setUp() {
-        vedtakTjeneste = new VedtakTjeneste(vedtakServiceFasade, aksesskontroll, vedtakKontrollService);
+        vedtakTjeneste = new VedtakTjeneste(vedtaksfattingFasade, aksesskontroll, vedtakKontrollService);
         SpringSubjectHandler.set(new TestSubjectHandler());
     }
 
@@ -69,7 +69,7 @@ class VedtakTjenesteTest extends JsonSchemaTestParent {
         vedtakTjeneste.fattVedtak(behandlingID, fattVedtakDto);
 
         verify(aksesskontroll).autoriserSkriv(behandlingID);
-        verify(vedtakServiceFasade).fattVedtak(eq(behandlingID), any(FattVedtakRequest.class));
+        verify(vedtaksfattingFasade).fattVedtak(eq(behandlingID), any(FattVedtakRequest.class));
 
         valider(fattVedtakDto, FATT_VEDTAK_SCHEMA);
     }
@@ -84,7 +84,7 @@ class VedtakTjenesteTest extends JsonSchemaTestParent {
         vedtakTjeneste.fattVedtak(behandlingID, fattVedtakDto);
 
         verify(aksesskontroll).autoriserSkriv(behandlingID);
-        verify(vedtakServiceFasade).fattVedtak(eq(behandlingID), any(FattVedtakRequest.class));
+        verify(vedtaksfattingFasade).fattVedtak(eq(behandlingID), any(FattVedtakRequest.class));
 
         valider(fattVedtakDto, FATT_VEDTAK_SCHEMA);
     }
@@ -99,7 +99,7 @@ class VedtakTjenesteTest extends JsonSchemaTestParent {
         vedtakTjeneste.fattVedtak(behandlingID, fattVedtakDto);
 
         verify(aksesskontroll).autoriserSkriv(behandlingID);
-        verify(vedtakServiceFasade).fattVedtak(eq(behandlingID), any(FattVedtakRequest.class));
+        verify(vedtaksfattingFasade).fattVedtak(eq(behandlingID), any(FattVedtakRequest.class));
 
         valider(fattVedtakDto, FATT_VEDTAK_SCHEMA);
     }
@@ -131,7 +131,7 @@ class VedtakTjenesteTest extends JsonSchemaTestParent {
         vedtakTjeneste.endreVedtak(behandlingID, endreVedtakDto);
 
         verify(aksesskontroll).autoriserSkriv(behandlingID);
-        verify(vedtakServiceFasade).endreVedtak(behandlingID, Endretperiode.ENDRINGER_ARBEIDSSITUASJON, null, endreVedtakDto.getFritekstSed());
+        verify(vedtaksfattingFasade).endreVedtak(behandlingID, Endretperiode.ENDRINGER_ARBEIDSSITUASJON, null, endreVedtakDto.getFritekstSed());
 
         valider(endreVedtakDto, ENDRE_PERIODE_SCHEMA);
     }
@@ -151,7 +151,7 @@ class VedtakTjenesteTest extends JsonSchemaTestParent {
     @Test
     void kontrollerVedtak_feilmeldinger_kasterExceptions() throws ValideringException {
         doThrow(new ValideringException("melding", Collections.emptyList()))
-            .when(vedtakKontrollService).kontrollerInnvilgelse(behandlingID, Vedtakstyper.FØRSTEGANGSVEDTAK, true);
+            .when(vedtakKontrollService).kontrollerVedtak(behandlingID, Vedtakstyper.FØRSTEGANGSVEDTAK, true);
 
         assertThatThrownBy(() -> vedtakTjeneste.kontrollerVedtak(behandlingID, true, lagFattVedtakDto()))
             .isInstanceOf(ValideringException.class)

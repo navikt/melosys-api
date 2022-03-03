@@ -202,6 +202,14 @@ public class Lovvalgsperiode implements PeriodeOmLovvalg {
         return getInnvilgelsesresultat() == InnvilgelsesResultat.AVSLAATT;
     }
 
+    public boolean erNyPeriodeForMedl() {
+        return medlPeriodeID == null;
+    }
+
+    public boolean harSammeMedlID(Long medlPeriodeIdSomSjekkes) {
+        return medlPeriodeID != null && medlPeriodeID.equals(medlPeriodeIdSomSjekkes);
+    }
+
     public boolean harUgyldigTilstand() {
         return !erInnvilget() && !erAvslått();
     }

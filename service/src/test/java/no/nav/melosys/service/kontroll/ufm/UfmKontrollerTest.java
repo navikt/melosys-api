@@ -5,6 +5,7 @@ import java.time.YearMonth;
 import java.util.Collections;
 import java.util.List;
 
+import com.google.common.collect.Lists;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.inntekt.ArbeidsInntektInformasjon;
 import no.nav.melosys.domain.dokument.inntekt.ArbeidsInntektMaaned;
@@ -28,89 +29,118 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class UfmKontrollerTest {
+class UfmKontrollerTest {
     @Test
-    public void feilIPeriode_erFeil_verifiserBegrunnelse() {
+    void feilIPeriode_erFeil_verifiserBegrunnelse() {
         assertThat(UfmKontroller.feilIPeriode(kontrollData(null, null))).isEqualTo(Kontroll_begrunnelser.FEIL_I_PERIODEN);
     }
 
     @Test
-    public void periodeErÅpen_erFeil_verifiserBegrunnelse() {
+    void periodeErÅpen_erFeil_verifiserBegrunnelse() {
         assertThat(UfmKontroller.periodeErÅpen(kontrollData(LocalDate.now(), null))).isEqualTo(Kontroll_begrunnelser.INGEN_SLUTTDATO);
     }
 
     @Test
-    public void periodeOver24Mnd_erFeil_verifiserBegrunnelse() {
+    void periodeOver24Mnd_erFeil_verifiserBegrunnelse() {
         assertThat(UfmKontroller.periodeOver24Mnd(kontrollData())).isEqualTo(Kontroll_begrunnelser.PERIODEN_OVER_24_MD);
     }
 
     @Test
-    public void periodeOver5År_erFeil_verifiserBegrunnelse() {
+    void periodeOver5År_erFeil_verifiserBegrunnelse() {
         assertThat(UfmKontroller.periodeOver5År(kontrollData())).isEqualTo(Kontroll_begrunnelser.PERIODEN_OVER_5_AR);
     }
 
     @Test
-    public void periodeEldreEnn5År_erFeil_verifiserBegrunnelse() {
+    void periodeEldreEnn5År_erFeil_verifiserBegrunnelse() {
         assertThat(UfmKontroller.periodeStarterFørFørsteJuni2012(kontrollData(LocalDate.now().minusYears(10), null))).isEqualTo(Kontroll_begrunnelser.PERIODE_FOR_GAMMEL);
     }
 
     @Test
-    public void periodeOver1ÅrFremITid_erFeil_verifiserBegrunnelse() {
+    void periodeOver1ÅrFremITid_erFeil_verifiserBegrunnelse() {
         assertThat(UfmKontroller.periodeOver1ÅrFremITid(kontrollData())).isEqualTo(Kontroll_begrunnelser.PERIODE_LANGT_FREM_I_TID);
     }
 
     @Test
-    public void utbetaltYtelserFraOffentligIPeriode_erFeil_verifiserBegrunnelse() {
+    void utbetaltYtelserFraOffentligIPeriode_erFeil_verifiserBegrunnelse() {
         assertThat(UfmKontroller.utbetaltYtelserFraOffentligIPeriode(kontrollData())).isEqualTo(Kontroll_begrunnelser.MOTTAR_YTELSER);
     }
 
     @Test
-    public void utbetaltBarnetrygdytelser_erFeil_verifiserBegrunnelse() {
+    void utbetaltBarnetrygdytelser_erFeil_verifiserBegrunnelse() {
         assertThat(UfmKontroller.utbetaltBarnetrygdytelser(kontrollData())).isEqualTo(Kontroll_begrunnelser.MOTTAR_YTELSER);
     }
 
     @Test
-    public void lovvalgslandErNorge_erFeil_verifiserBegrunnelse() {
+    void lovvalgslandErNorge_erFeil_verifiserBegrunnelse() {
         assertThat(UfmKontroller.lovvalgslandErNorge(kontrollData())).isEqualTo(Kontroll_begrunnelser.LOVVALGSLAND_NORGE);
     }
 
     @Test
-    public void overlappendeMedlemsperiode_erFeil_verifiserBegrunnelse() {
+    void overlappendeMedlemsperiode_erFeil_verifiserBegrunnelse() {
         assertThat(UfmKontroller.overlappendeMedlemsperiode(kontrollData())).isEqualTo(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER);
     }
 
     @Test
-    public void statsborgerskapIkkeMedlemsland_erFeil_verifiserBegrunnelse() {
+    void statsborgerskapIkkeMedlemsland_erFeil_verifiserBegrunnelse() {
         assertThat(UfmKontroller.statsborgerskapIkkeMedlemsland(kontrollData())).isEqualTo(Kontroll_begrunnelser.TREDJELANDSBORGER_IKKE_AVTALELAND);
     }
 
     @Test
-    public void statsborgerskapStatsløs_erOK_ikkeSjekkMedlemsland() {
+    void statsborgerskapStatsløs_erOK_ikkeSjekkMedlemsland() {
         UfmKontrollData kontrollData = kontrollData();
         kontrollData.getSedDokument().setStatsborgerskapKoder(List.of("XS"));
         assertThat(UfmKontroller.statsborgerskapIkkeMedlemsland(kontrollData)).isNull();
     }
 
     @Test
-    public void avtalelandErSverige_erOK_ikkeSjekkMedlemsland() {
+    void avtalelandErSverige_erOK_ikkeSjekkMedlemsland() {
         UfmKontrollData kontrollData = kontrollData();
         kontrollData.getSedDokument().setAvsenderLandkode(Landkoder.SE);
         assertThat(UfmKontroller.statsborgerskapIkkeMedlemsland(kontrollData)).isNull();
     }
 
     @Test
-    public void personDød_erFeil_verifiserBegrunnelse() {
+    void personDød_erFeil_verifiserBegrunnelse() {
         assertThat(UfmKontroller.personDød(kontrollData())).isEqualTo(Kontroll_begrunnelser.PERSON_DOD);
     }
 
     @Test
-    public void personBosattINorge_erFeil_verifiserBegrunnelse() {
+    void personBosattINorge_erFeil_verifiserBegrunnelse() {
         assertThat(UfmKontroller.personBosattINorge(kontrollData())).isEqualTo(Kontroll_begrunnelser.BOSATT_I_NORGE);
     }
 
     @Test
-    public void arbeidssted_erSvalbard_verifiserBegrunnelse() {
+    void arbeidssted_erSvalbard_verifiserBegrunnelse() {
         assertThat(UfmKontroller.arbeidssted(kontrollData())).isEqualTo(Kontroll_begrunnelser.ARBEIDSSTED_UTENFOR_EOS);
+    }
+
+    @Test
+    void lovvalgslandErNorge_erNorge_registrerTreff() {
+        assertThat(UfmKontroller.lovvalgslandErNorge(Landkoder.NO)).isTrue();
+    }
+
+    @Test
+    void lovvalgslandErNorge_erSverige_ingenTreff() {
+        assertThat(UfmKontroller.lovvalgslandErNorge(Landkoder.SE)).isFalse();
+    }
+
+
+    @Test
+    void statsborgerskapErMedlemsland_statsborgerSE_registrerTreff() {
+        assertThat(UfmKontroller.statsborgerskapErMedlemsland(Lists.newArrayList(Landkoder.SE.getKode())))
+            .isTrue();
+    }
+
+    @Test
+    void statsborgerskapErMedlemsland_statsborgerSEOgUS_registrerTreff() {
+        assertThat(UfmKontroller.statsborgerskapErMedlemsland(Lists.newArrayList(Landkoder.SE.getKode(), "US")))
+            .isTrue();
+    }
+
+    @Test
+    void statsborgerskapErMedlemsland_statsborgerUS_ingenTreff() {
+        assertThat(UfmKontroller.statsborgerskapErMedlemsland(Lists.newArrayList("US")))
+            .isFalse();
     }
 
     private UfmKontrollData kontrollData() {
