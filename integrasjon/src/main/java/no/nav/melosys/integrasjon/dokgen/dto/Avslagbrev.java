@@ -21,9 +21,6 @@ public class Avslagbrev extends DokgenDto {
 
     private final String fritekst;
 
-    @JsonFormat(shape = STRING)
-    private final LocalDate datoInnsendingsfrist;
-
     @JsonInclude
     @JsonFormat(shape = STRING)
     private final List<LocalDate> mangelbrevDatoer;
@@ -37,12 +34,10 @@ public class Avslagbrev extends DokgenDto {
 
     private Avslagbrev(AvslagBrevbestilling brevbestilling,
                        Aktoersroller mottakerType,
-                       List<Instant> mangelbrevDatoer,
-                       Instant datoInnsendingsfrist) {
+                       List<Instant> mangelbrevDatoer) {
         super(brevbestilling, mottakerType);
 
         this.fritekst = brevbestilling.getFritekst();
-        this.datoInnsendingsfrist = instantTilLocalDate(datoInnsendingsfrist);
         this.mangelbrevDatoer = mangelbrevDatoer.stream().map(this::instantTilLocalDate).collect(Collectors.toList());
         this.datoMottatt = instantTilLocalDate(brevbestilling.getForsendelseMottatt());
         this.sakstype = brevbestilling.getBehandling().getFagsak().getType().getKode();
@@ -53,8 +48,8 @@ public class Avslagbrev extends DokgenDto {
         return fritekst;
     }
 
-    public static Avslagbrev av(AvslagBrevbestilling brevbestilling, List<Instant> mangelbrevDatoer, Instant datoInnsendingsfrist) {
-        return new Avslagbrev(brevbestilling, Aktoersroller.BRUKER, mangelbrevDatoer, datoInnsendingsfrist);
+    public static Avslagbrev av(AvslagBrevbestilling brevbestilling, List<Instant> mangelbrevDatoer) {
+        return new Avslagbrev(brevbestilling, Aktoersroller.BRUKER, mangelbrevDatoer);
     }
 
     public String getSakstype() {
@@ -63,10 +58,6 @@ public class Avslagbrev extends DokgenDto {
 
     public String getBehandlingstype() {
         return behandlingstype;
-    }
-
-    public LocalDate getDatoInnsendingsfrist() {
-        return datoInnsendingsfrist;
     }
 
     public List<LocalDate> getMangelbrevDatoer() {
