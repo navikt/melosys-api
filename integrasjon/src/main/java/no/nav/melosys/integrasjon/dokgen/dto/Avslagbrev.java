@@ -13,15 +13,13 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.ser.InstantSerializer;
 import no.nav.melosys.domain.brev.AvslagBrevbestilling;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 
 import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
 
 public class Avslagbrev extends DokgenDto {
 
     private final String fritekst;
-
-    @JsonFormat(shape = STRING)
-    private final LocalDate datoInnsendingsfrist;
 
     @JsonInclude
     @JsonFormat(shape = STRING)
@@ -32,34 +30,34 @@ public class Avslagbrev extends DokgenDto {
 
     private final String sakstype;
 
+    private final String behandlingstype;
+
     private Avslagbrev(AvslagBrevbestilling brevbestilling,
                        Aktoersroller mottakerType,
-                       List<Instant> mangelbrevDatoer,
-                       Instant datoInnsendingsfrist) {
+                       List<Instant> mangelbrevDatoer) {
         super(brevbestilling, mottakerType);
-        this.fritekst = brevbestilling.getFritekst();
-        var fagsak = brevbestilling.getBehandling().getFagsak();
 
-        this.sakstype = fagsak.getType().getKode();
+        this.fritekst = brevbestilling.getFritekst();
         this.mangelbrevDatoer = mangelbrevDatoer.stream().map(this::instantTilLocalDate).collect(Collectors.toList());
-        this.datoInnsendingsfrist = instantTilLocalDate(datoInnsendingsfrist);
         this.datoMottatt = instantTilLocalDate(brevbestilling.getForsendelseMottatt());
+        this.sakstype = brevbestilling.getBehandling().getFagsak().getType().getKode();
+        this.behandlingstype = brevbestilling.getBehandling().getType().getKode();
     }
 
     public String getFritekst() {
         return fritekst;
     }
 
-    public static Avslagbrev av(AvslagBrevbestilling brevbestilling, List<Instant> mangelbrevDatoer, Instant datoInnsendingsfrist) {
-        return new Avslagbrev(brevbestilling, Aktoersroller.BRUKER, mangelbrevDatoer, datoInnsendingsfrist);
+    public static Avslagbrev av(AvslagBrevbestilling brevbestilling, List<Instant> mangelbrevDatoer) {
+        return new Avslagbrev(brevbestilling, Aktoersroller.BRUKER, mangelbrevDatoer);
     }
 
     public String getSakstype() {
         return sakstype;
     }
 
-    public LocalDate getDatoInnsendingsfrist() {
-        return datoInnsendingsfrist;
+    public String getBehandlingstype() {
+        return behandlingstype;
     }
 
     public List<LocalDate> getMangelbrevDatoer() {

@@ -91,10 +91,7 @@ public class DokgenMalMapper {
     private Avslagbrev hentAvslagsbrev(DokgenBrevbestilling brevbestilling) {
         List<Instant> mangelbrevDatoer = hentMangelbrevDatoer(brevbestilling);
 
-        return Avslagbrev.av(((AvslagBrevbestilling) brevbestilling).toBuilder().build(),
-            mangelbrevDatoer,
-            mangelbrevDatoer.isEmpty() ? null : MangelbrevSvarfrist.beregnFristFraDato(Collections.max(mangelbrevDatoer))
-        );
+        return Avslagbrev.av(((AvslagBrevbestilling) brevbestilling).toBuilder().build(), mangelbrevDatoer);
     }
 
     private DokgenDto lagDokgenDtoFraBestilling(DokgenBrevbestilling brevbestilling) {
