@@ -18,7 +18,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -54,7 +53,7 @@ class FattetVedtakServiceTest {
     @Test
     void fattetVedtakFtrl_skalPubliseres() {
         final long behandlingId = 123L;
-        when(mockBehandlingService.hentBehandling(behandlingId)).thenReturn(FattetVedtakTestData.lagBehandling());
+        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(behandlingId)).thenReturn(FattetVedtakTestData.lagBehandling());
         when(mockBehandlingsresultatService.hentBehandlingsresultat(behandlingId)).thenReturn(FattetVedtakTestData.lagBehandlingsresultat());
         when(mockPersondataFasade.hentPerson(anyString())).thenReturn(PersonopplysningerObjectFactory.lagPersonopplysninger());
         fattetVedtakService.publiserFattetVedtak(behandlingId);

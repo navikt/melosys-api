@@ -44,7 +44,7 @@ public class AnmodningUnntakTjeneste {
                 .map(v -> new DokumentReferanse(v.journalpostID(), v.dokumentID()))
                 .collect(Collectors.toUnmodifiableSet()),
             anmodningUnntakDto.getFritekstSed());
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("{behandlingID}/svar")
@@ -52,6 +52,6 @@ public class AnmodningUnntakTjeneste {
     public ResponseEntity<Void> svar(@PathVariable("behandlingID") long behandlingID, @RequestBody AnmodningUnntakSvarDto anmodningUnntakSvarDto) {
         aksesskontroll.autoriserSkriv(behandlingID);
         anmodningUnntakService.anmodningOmUnntakSvar(behandlingID, anmodningUnntakSvarDto.ytterligereInfo());
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 }

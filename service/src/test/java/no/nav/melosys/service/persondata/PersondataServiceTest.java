@@ -1,7 +1,6 @@
 package no.nav.melosys.service.persondata;
 
 import java.time.LocalDate;
-import java.time.ZoneOffset;
 import java.util.*;
 
 import no.finn.unleash.FakeUnleash;
@@ -23,7 +22,6 @@ import no.nav.melosys.integrasjon.pdl.dto.person.AdressebeskyttelseGradering;
 import no.nav.melosys.integrasjon.tps.TpsService;
 import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.DokgenTestData;
 import no.nav.melosys.service.dokument.brev.BrevDataTestUtils;
 import no.nav.melosys.service.kodeverk.KodeverkService;
@@ -47,8 +45,6 @@ class PersondataServiceTest {
     @Mock
     private BehandlingService behandlingService;
     @Mock
-    private BehandlingsresultatService behandlingsresultatService;
-    @Mock
     private KodeverkService kodeverkService;
     @Mock
     private PDLConsumer pdlConsumer;
@@ -62,7 +58,7 @@ class PersondataServiceTest {
 
     @BeforeEach
     public void setup() {
-        persondataService = new PersondataService(behandlingService, behandlingsresultatService, kodeverkService, pdlConsumer,
+        persondataService = new PersondataService(behandlingService, kodeverkService, pdlConsumer,
                                                   saksopplysningerService, tpsService, fakeUnleash);
     }
 
@@ -121,7 +117,7 @@ class PersondataServiceTest {
 
     @Test
     void hentPersonMedHistorikk_aktivBehandling_konverteringOk() {
-        when(behandlingService.hentBehandlingUtenSaksopplysninger(1L)).thenReturn(lagBehandling());
+        when(behandlingService.hentBehandling(1L)).thenReturn(lagBehandling());
         when(pdlConsumer.hentPersonMedHistorikk(anyString())).thenReturn(lagPerson());
 
         final var personMedHistorikk = persondataService.hentPersonMedHistorikk(1L);
@@ -142,9 +138,8 @@ class PersondataServiceTest {
 
     @Test
     void hentPersonMedHistorikk_inaktivBehandling_inaktivBehandlingFraFørPdl() {
-        var inaktivBehandling = lagBehandlingSomIkkeResulterIVedtak();
-        inaktivBehandling.setRegistrertDato(PersondataService.PDL_STARTDATO.minusMonths(2).atStartOfDay().toInstant(ZoneOffset.UTC));
-        when(behandlingService.hentBehandlingUtenSaksopplysninger(1L)).thenReturn(inaktivBehandling);
+        var inaktivBehandling = lagInaktivBehandlingSomIkkeResulterIVedtak();
+        when(behandlingService.hentBehandling(1L)).thenReturn(inaktivBehandling);
         no.nav.melosys.domain.dokument.person.Sivilstand sivilstand = spy(no.nav.melosys.domain.dokument.person.Sivilstand.class);
         when(sivilstand.getKode()).thenReturn("GLAD");
         when(saksopplysningerService.hentTpsPersonopplysninger(inaktivBehandling.getId())).thenReturn(lagPersonDokument(sivilstand));
@@ -177,8 +172,8 @@ class PersondataServiceTest {
 
     @Test
     void hentPersonMedHistorikk_inaktivBehandling_returnerDataFraPDL() {
-        when(behandlingService.hentBehandlingUtenSaksopplysninger(1L)).thenReturn(lagInaktivBehandling());
-        when(saksopplysningerService.hentPersonhistorikkPDL(1L)).thenReturn(Optional.of(PersonopplysningerObjectFactory.lagPersonMedHistorikk()));
+        when(behandlingService.hentBehandling(1L)).thenReturn(lagInaktivBehandling());
+        when(saksopplysningerService.finnPdlPersonhistorikkTilSaksbehandler(1L)).thenReturn(Optional.of(PersonopplysningerObjectFactory.lagPersonMedHistorikk()));
 
         final var personMedHistorikk = persondataService.hentPersonMedHistorikk(1L);
         assertThat(personMedHistorikk.statsborgerskap()).containsExactlyInAnyOrder(
@@ -193,8 +188,8 @@ class PersondataServiceTest {
 
     @Test
     void hentPersonMedHistorikk_inaktivBehandlingTPSDataLagret_returnererDataFraTps() {
-        when(behandlingService.hentBehandlingUtenSaksopplysninger(1L)).thenReturn(lagInaktivBehandling());
-        when(saksopplysningerService.hentPersonhistorikkPDL(1L)).thenReturn(Optional.empty());
+        when(behandlingService.hentBehandling(1L)).thenReturn(lagInaktivBehandling());
+        when(saksopplysningerService.finnPdlPersonhistorikkTilSaksbehandler(1L)).thenReturn(Optional.empty());
         when(saksopplysningerService.hentTpsPersonopplysninger(1L)).thenReturn(lagPersonDokument(null));
 
         final var personMedHistorikk = persondataService.hentPersonMedHistorikk(1L);
@@ -206,7 +201,7 @@ class PersondataServiceTest {
 
     @Test
     void hentFamiliemedlemmerMedHistorikk_aktivBehandling() {
-        when(behandlingService.hentBehandlingUtenSaksopplysninger(1L)).thenReturn(lagBehandling());
+        when(behandlingService.hentBehandling(1L)).thenReturn(lagBehandling());
         when(pdlConsumer.hentFamilierelasjoner(anyString())).thenReturn(lagPerson());
         when(pdlConsumer.hentBarn("barnIdent")).thenReturn(lagPerson());
         when(pdlConsumer.hentRelatertVedSivilstand("relatertVedSivilstandID")).thenReturn(lagPerson());
@@ -218,11 +213,10 @@ class PersondataServiceTest {
 
     @Test
     void hentFamiliemedlemmerMedHistorikk_inaktivBehandling() {
-        final var inaktivBehandling = lagBehandlingSomIkkeResulterIVedtak();
-        when(behandlingService.hentBehandlingUtenSaksopplysninger(1L)).thenReturn(inaktivBehandling);
-        when(pdlConsumer.hentFamilierelasjoner(anyString())).thenReturn(lagPerson());
-        when(pdlConsumer.hentBarnMedHistorikk("barnIdent")).thenReturn(lagPerson());
-        when(pdlConsumer.hentRelatertVedSivilstandMedHistorikk("relatertVedSivilstandID")).thenReturn(lagPerson());
+        final var inaktivBehandling = lagInaktivBehandlingSomIkkeResulterIVedtak();
+        when(behandlingService.hentBehandling(1L)).thenReturn(inaktivBehandling);
+        when(saksopplysningerService.harTpsPersonopplysninger(1L)).thenReturn(false);
+        when(saksopplysningerService.hentPdlPersonopplysninger(1L)).thenReturn(PersonopplysningerObjectFactory.lagPersonopplysningerMedFamilie());
 
         final Set<Familiemedlem> familiemedlemmer = persondataService.hentFamiliemedlemmerMedHistorikk(1L);
         assertThat(familiemedlemmer).extracting(Familiemedlem::familierelasjon).contains(Familierelasjon.BARN,
@@ -230,12 +224,12 @@ class PersondataServiceTest {
     }
 
     @Test
-    void hentFamiliemedlemmerMedHistorikk_inaktivBehandlingFraFørPdl() {
-        var inaktivBehandling = lagBehandlingSomIkkeResulterIVedtak();
-        inaktivBehandling.setRegistrertDato(PersondataService.PDL_STARTDATO.minusMonths(2).atStartOfDay().toInstant(ZoneOffset.UTC));
-        when(behandlingService.hentBehandlingUtenSaksopplysninger(1L)).thenReturn(inaktivBehandling);
+    void hentFamiliemedlemmerMedHistorikk_inaktivBehandlingMedTpsData() {
+        var inaktivBehandling = lagInaktivBehandlingSomIkkeResulterIVedtak();
+        when(behandlingService.hentBehandling(1L)).thenReturn(inaktivBehandling);
         no.nav.melosys.domain.dokument.person.Sivilstand sivilstand = mock(no.nav.melosys.domain.dokument.person.Sivilstand.class);
         when(sivilstand.getKode()).thenReturn("BLA");
+        when(saksopplysningerService.harTpsPersonopplysninger(1L)).thenReturn(true);
         when(saksopplysningerService.hentTpsPersonopplysninger(inaktivBehandling.getId())).thenReturn(lagPersonDokumentMedFamiliemedlemmer(sivilstand));
 
         final Set<Familiemedlem> familiemedlemmer = persondataService.hentFamiliemedlemmerMedHistorikk(1L);

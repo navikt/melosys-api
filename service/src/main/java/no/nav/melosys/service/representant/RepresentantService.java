@@ -55,7 +55,7 @@ public class RepresentantService {
             .orElseThrow(() -> new IkkeFunnetException("Finner ikke medlemAvFolketrygden for behandlingsresultatID " + behandlingID));
 
         var fastsattTrygdeavgift = medlemAvFolketrygden.getFastsattTrygdeavgift();
-        var fagsak = behandlingService.hentBehandling(behandlingID).getFagsak();
+        var fagsak = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID).getFagsak();
 
         fastsattTrygdeavgift.setRepresentantNr(valgtRepresentant.getRepresentantnummer());
         fastsattTrygdeavgift.setBetalesAv(oppdaterEllerOpprettAktoer(fastsattTrygdeavgift.getBetalesAv(), valgtRepresentant.isSelvbetalende(), fagsak, valgtRepresentant.getOrgnr()));

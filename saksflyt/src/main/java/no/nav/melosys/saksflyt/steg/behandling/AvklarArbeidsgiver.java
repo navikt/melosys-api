@@ -7,8 +7,8 @@ import java.util.stream.Collectors;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.adresse.Adresse;
+import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
@@ -57,7 +57,7 @@ public class AvklarArbeidsgiver implements StegBehandler {
         Behandlingsresultat resultat = behandlingsresultatService.hentBehandlingsresultat(prosessinstans.getBehandling().getId());
         if (arbeidsgiverAvklares(resultat)) {
             long behandlingID = prosessinstans.getBehandling().getId();
-            Behandling behandling = behandlingService.hentBehandling(behandlingID);
+            Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
             Fagsak fagsak = behandling.getFagsak();
             String saksnummer = fagsak.getSaksnummer();
 

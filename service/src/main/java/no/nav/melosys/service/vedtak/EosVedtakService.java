@@ -17,6 +17,7 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
@@ -33,7 +34,7 @@ import org.springframework.context.event.ApplicationEventMulticaster;
 import org.springframework.stereotype.Service;
 
 import static no.nav.melosys.domain.kodeverk.Utfallregistreringunntak.GODKJENT;
-import static no.nav.melosys.service.vedtak.VedtakServiceFasade.FRIST_KLAGE_UKER;
+import static no.nav.melosys.service.vedtak.VedtaksfattingFasade.FRIST_KLAGE_UKER;
 
 @Service
 public class EosVedtakService {
@@ -67,14 +68,14 @@ public class EosVedtakService {
     }
 
     public void fattVedtak(Behandling behandling, Behandlingsresultattyper behandlingsresultattype, Vedtakstyper vedtakstype) throws ValideringException {
-        FattEosVedtakRequest request = new FattEosVedtakRequest.Builder()
+        FattVedtakRequest request = new FattVedtakRequest.Builder()
             .medBehandlingsresultat(behandlingsresultattype)
             .medVedtakstype(vedtakstype)
             .build();
         fattVedtak(behandling, request);
     }
 
-    public void fattVedtak(Behandling behandling, FattEosVedtakRequest request) throws ValideringException {
+    public void fattVedtak(Behandling behandling, FattVedtakRequest request) throws ValideringException {
         long behandlingID = behandling.getId();
 
         log.info("Fatter vedtak for (EU_EØS) sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandlingID);
@@ -86,15 +87,15 @@ public class EosVedtakService {
             vedtakKontrollService.kontrollerInnvilgelse(behandling, behandlingsresultat, request.getVedtakstype(), Sakstyper.EU_EOS);
         }
 
-        oppdaterBehandlingsresultat(behandlingsresultat, request.getVedtakstype(), request.getFritekst(), request.getRevurderBegrunnelse());
+        oppdaterBehandlingsresultat(behandlingsresultat, request.getVedtakstype(), request.getFritekst(), request.getNyVurderingBakgrunn());
         Set<String> mottakerinstitusjoner = validerOgAvklarMottakerInstitusjoner(behandling, request.getMottakerinstitusjoner(), behandlingsresultat);
 
         if (prosessinstansService.harVedtakInstans(behandlingID)) {
             throw new FunksjonellException("Det finnes allerede en vedtak-prosess for behandling " + behandling);
         }
-        behandlingService.oppdaterStatus(behandling, Behandlingsstatus.IVERKSETTER_VEDTAK);
+        behandlingService.endreStatus(behandling, Behandlingsstatus.IVERKSETTER_VEDTAK);
         prosessinstansService.opprettProsessinstansIverksettVedtakEos(behandling, request.getBehandlingsresultatTypeKode(),
-            request.getFritekst(), request.getFritekstSed(), mottakerinstitusjoner, request.getRevurderBegrunnelse());
+            request.getFritekst(), request.getFritekstSed(), mottakerinstitusjoner);
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 
@@ -122,13 +123,13 @@ public class EosVedtakService {
     private void oppdaterBehandlingsresultat(Behandlingsresultat behandlingsresultat,
                                              Vedtakstyper vedtakstype,
                                              String behandlingresultatBegrunnelseFritekst,
-                                             String revurderBegrunnelse) {
+                                             String nyVurderingBakgrunn) {
         final Behandling behandling = behandlingsresultat.getBehandling();
         if (behandling.erNorgeUtpekt()) {
             behandlingsresultatService.oppdaterUtfallUtpeking(behandling.getId(), GODKJENT);
         }
 
-        behandlingsresultat.settVedtakMetadata(vedtakstype, revurderBegrunnelse, LocalDate.now().plusWeeks(FRIST_KLAGE_UKER));
+        behandlingsresultat.settVedtakMetadata(vedtakstype, nyVurderingBakgrunn, LocalDate.now().plusWeeks(FRIST_KLAGE_UKER));
         behandlingsresultat.setBegrunnelseFritekst(behandlingresultatBegrunnelseFritekst);
         behandlingsresultat.setFastsattAvLand(Landkoder.NO);
         behandlingsresultatService.lagre(behandlingsresultat);

@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import static no.nav.melosys.service.vedtak.VedtakServiceFasade.FRIST_KLAGE_UKER;
+import static no.nav.melosys.service.vedtak.VedtaksfattingFasade.FRIST_KLAGE_UKER;
 
 @Service
 public class TrygdeavtaleVedtakService {
@@ -54,7 +54,7 @@ public class TrygdeavtaleVedtakService {
         this.vedtakKontrollService = vedtakKontrollService;
     }
 
-    public void fattVedtak(Behandling behandling, FattTrygdeavtaleVedtakRequest request) throws ValideringException {
+    public void fattVedtak(Behandling behandling, FattVedtakRequest request) throws ValideringException {
         long behandlingID = behandling.getId();
 
         String saksnummer = behandling.getFagsak().getSaksnummer();
@@ -74,14 +74,14 @@ public class TrygdeavtaleVedtakService {
         }
 
         behandling.getFagsak().setStatus(Saksstatuser.MEDLEMSKAP_AVKLART);
-        behandlingService.oppdaterStatus(behandling, Behandlingsstatus.IVERKSETTER_VEDTAK);
+        behandlingService.endreStatus(behandling, Behandlingsstatus.IVERKSETTER_VEDTAK);
 
         prosessinstansService.opprettProsessinstansIverksettVedtakTrygdeavtale(behandling, request);
         dokgenService.produserOgDistribuerBrev(behandlingID, lagStorbritanniaBrevbestilling(request));
         oppgaveService.ferdigstillOppgaveMedSaksnummer(saksnummer);
     }
 
-    private BrevbestillingRequest lagStorbritanniaBrevbestilling(FattTrygdeavtaleVedtakRequest request) {
+    private BrevbestillingRequest lagStorbritanniaBrevbestilling(FattVedtakRequest request) {
         return new BrevbestillingRequest.Builder()
             .medProduserbardokument(Produserbaredokumenter.STORBRITANNIA)
             .medMottaker(Aktoersroller.BRUKER)
@@ -91,11 +91,12 @@ public class TrygdeavtaleVedtakService {
             .medEktefelleFritekst(request.getEktefelleFritekst())
             .medBarnFritekst(request.getBarnFritekst())
             .medBestillersId(request.getBestillersId())
+            .medNyVurderingBakgrunn(request.getNyVurderingBakgrunn())
             .build();
     }
 
-    private void oppdaterBehandlingsresultat(Behandlingsresultat behandlingsresultat, FattTrygdeavtaleVedtakRequest request) throws IkkeFunnetException {
-        behandlingsresultat.settVedtakMetadata(request.getVedtakstype(), LocalDate.now().plusWeeks(FRIST_KLAGE_UKER));
+    private void oppdaterBehandlingsresultat(Behandlingsresultat behandlingsresultat, FattVedtakRequest request) throws IkkeFunnetException {
+        behandlingsresultat.settVedtakMetadata(request.getVedtakstype(), request.getNyVurderingBakgrunn(), LocalDate.now().plusWeeks(FRIST_KLAGE_UKER));
         behandlingsresultat.setBegrunnelseFritekst(request.getBegrunnelseFritekst());
         behandlingsresultat.setInnledningFritekst(request.getInnledningFritekst());
         behandlingsresultat.setFastsattAvLand(Landkoder.NO);

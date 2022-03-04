@@ -43,7 +43,7 @@ public class AvsluttArt13BehandlingService {
 
     @Transactional
     public void avsluttBehandlingHvisToMndPassert(long behandlingID) {
-        Behandling behandling = behandlingService.hentBehandling(behandlingID);
+        Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
 
         if (toMndHarPassertSidenSaksbehandling(behandling, behandlingsresultat)) {

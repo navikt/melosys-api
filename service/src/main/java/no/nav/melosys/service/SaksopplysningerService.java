@@ -31,6 +31,10 @@ public class SaksopplysningerService {
         this.saksopplysningRepo = saksopplysningRepo;
     }
 
+    public boolean harTpsPersonopplysninger(long behandlingID) {
+        return saksopplysningRepo.existsByBehandling_IdAndType(behandlingID, SaksopplysningType.PERSOPL);
+    }
+
     public PersonDokument hentTpsPersonopplysninger(long behandlingID) {
         return saksopplysningRepo.findByBehandling_IdAndType(behandlingID, SaksopplysningType.PERSOPL)
             .map(s -> (PersonDokument) s.getDokument())
@@ -57,14 +61,24 @@ public class SaksopplysningerService {
             .map(s -> (InntektDokument) s.getDokument());
     }
 
-    public Optional<PersonMedHistorikk> hentPersonhistorikkPDL(long behandlingID) {
+    public Persondata hentPdlPersonopplysninger(long behandlingID) {
+        return finnPdlPersonopplysninger(behandlingID)
+            .orElseThrow(() -> new IkkeFunnetException("Fant ikke persondata for behandling " + behandlingID));
+    }
+
+    private Optional<Persondata> finnPdlPersonopplysninger(long behandlingID) {
+        return saksopplysningRepo.findByBehandling_IdAndType(behandlingID, SaksopplysningType.PDL_PERSOPL)
+            .map(s -> (Persondata) s.getDokument());
+    }
+
+    public Optional<PersonMedHistorikk> finnPdlPersonhistorikkTilSaksbehandler(long behandlingID) {
         return saksopplysningRepo.findByBehandling_IdAndType(behandlingID, SaksopplysningType.PDL_PERS_SAKS)
             .map(s -> (PersonMedHistorikk) s.getDokument());
     }
 
     @Transactional
     public void lagrePersonopplysninger(Behandling behandling, Persondata persondata) {
-        if (behandling.saksopplysningerEksistererIkke(List.of(SaksopplysningType.PDL_PERSOPL))) {
+        if (behandling.manglerSaksopplysningerAvType(List.of(SaksopplysningType.PDL_PERSOPL))) {
             Instant nå = Instant.now();
             Saksopplysning saksopplysning = new Saksopplysning();
             saksopplysning.setDokument(persondata);
@@ -81,7 +95,7 @@ public class SaksopplysningerService {
 
     @Transactional
     public void lagrePersonMedHistorikk(Behandling behandling, PersonMedHistorikk personMedHistorikk) {
-        if (behandling.saksopplysningerEksistererIkke(List.of(SaksopplysningType.PDL_PERS_SAKS))) {
+        if (behandling.manglerSaksopplysningerAvType(List.of(SaksopplysningType.PDL_PERS_SAKS))) {
             Instant nå = Instant.now();
             Saksopplysning saksopplysning = new Saksopplysning();
             saksopplysning.setDokument(personMedHistorikk);

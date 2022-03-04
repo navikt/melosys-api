@@ -3,11 +3,15 @@ package no.nav.melosys.service.vedtak;
 import java.util.List;
 import java.util.Set;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Nyvurderingbakgrunner;
 import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
@@ -30,6 +34,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
 import static no.nav.melosys.domain.kodeverk.Saksstatuser.MEDLEMSKAP_AVKLART;
+import static no.nav.melosys.domain.kodeverk.Vedtakstyper.*;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper.FASTSATT_LOVVALGSLAND;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.IVERKSETTER_VEDTAK;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.STORBRITANNIA;
@@ -78,15 +83,15 @@ class TrygdeavtaleVedtakServiceTest {
         var behandlingsresultat = lagBehandlingsresultat();
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
 
-        FattTrygdeavtaleVedtakRequest request = lagFattVedtakRequest();
+        FattVedtakRequest request = lagFattVedtakRequest(FØRSTEGANGSVEDTAK, null);
         trygdeavtaleVedtakService.fattVedtak(lagBehandling(), request);
 
         verify(behandlingsresultatService).lagre(behandlingsresultatCaptor.capture());
-        verify(behandlingService).oppdaterStatus(behandlingCaptor.capture(), eq(IVERKSETTER_VEDTAK));
+        verify(behandlingService).endreStatus(behandlingCaptor.capture(), eq(IVERKSETTER_VEDTAK));
         verify(prosessinstansService).opprettProsessinstansIverksettVedtakTrygdeavtale(any(Behandling.class), eq(request));
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(SAKSNUMMER);
         verify(dokgenService).produserOgDistribuerBrev(anyLong(), brevbestillingRequestCaptor.capture());
-        verify(vedtakKontrollService).kontrollerInnvilgelse(any(Behandling.class), any(Behandlingsresultat.class), eq(Vedtakstyper.FØRSTEGANGSVEDTAK), eq(Sakstyper.TRYGDEAVTALE));
+        verify(vedtakKontrollService).kontrollerInnvilgelse(any(Behandling.class), any(Behandlingsresultat.class), eq(FØRSTEGANGSVEDTAK), eq(Sakstyper.TRYGDEAVTALE));
 
         Behandlingsresultat lagretBehandlingsresultat = behandlingsresultatCaptor.getValue();
         assertThat(lagretBehandlingsresultat)
@@ -99,27 +104,96 @@ class TrygdeavtaleVedtakServiceTest {
         BrevbestillingRequest brevbestillingRequest = brevbestillingRequestCaptor.getValue();
         assertThat(brevbestillingRequest)
             .extracting("produserbardokument", "bestillersId", "mottaker", "innledningFritekst",
-                "begrunnelseFritekst", "ektefelleFritekst", "barnFritekst")
+                "begrunnelseFritekst", "ektefelleFritekst", "barnFritekst", "nyVurderingBakgrunn")
             .containsExactly(STORBRITANNIA, "Z990007", BRUKER, "Innledning",
-                "Begrunnelse", "Ektefelle omfattet", "Barn omfattet");
+                "Begrunnelse", "Ektefelle omfattet", "Barn omfattet", null);
         assertThat(brevbestillingRequest.getKopiMottakere().size()).isEqualTo(2);
-        assertThat(brevbestillingRequest.getKopiMottakere().get(0).getRolle()).isEqualTo(ARBEIDSGIVER);
-        assertThat(brevbestillingRequest.getKopiMottakere().get(1).getRolle()).isEqualTo(MYNDIGHET);
+        assertThat(brevbestillingRequest.getKopiMottakere().get(0).rolle()).isEqualTo(ARBEIDSGIVER);
+        assertThat(brevbestillingRequest.getKopiMottakere().get(1).rolle()).isEqualTo(TRYGDEMYNDIGHET);
     }
 
-    private FattTrygdeavtaleVedtakRequest lagFattVedtakRequest() {
-        return new FattTrygdeavtaleVedtakRequest.Builder()
+    @Test
+    void fattVedtak_korrigert_vedtak_fatterVedtak() throws ValideringException {
+        var behandlingsresultat = lagBehandlingsresultat();
+        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
+
+        FattVedtakRequest request = lagFattVedtakRequest(KORRIGERT_VEDTAK, Nyvurderingbakgrunner.FEIL_I_BEHANDLING.getKode());
+        trygdeavtaleVedtakService.fattVedtak(lagBehandling(), request);
+
+        verify(behandlingsresultatService).lagre(behandlingsresultatCaptor.capture());
+        verify(behandlingService).endreStatus(behandlingCaptor.capture(), eq(IVERKSETTER_VEDTAK));
+        verify(prosessinstansService).opprettProsessinstansIverksettVedtakTrygdeavtale(any(Behandling.class), eq(request));
+        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(SAKSNUMMER);
+        verify(dokgenService).produserOgDistribuerBrev(anyLong(), brevbestillingRequestCaptor.capture());
+        verify(vedtakKontrollService).kontrollerInnvilgelse(any(Behandling.class), any(Behandlingsresultat.class), eq(KORRIGERT_VEDTAK), eq(Sakstyper.TRYGDEAVTALE));
+
+        Behandlingsresultat lagretBehandlingsresultat = behandlingsresultatCaptor.getValue();
+        assertThat(lagretBehandlingsresultat)
+            .extracting("type", "begrunnelseFritekst", "fastsattAvLand")
+            .containsExactly(FASTSATT_LOVVALGSLAND, "Begrunnelse", Landkoder.NO);
+
+        Behandling lagretBehandling = behandlingCaptor.getValue();
+        assertThat(lagretBehandling.getFagsak().getStatus()).isEqualTo(MEDLEMSKAP_AVKLART);
+
+        BrevbestillingRequest brevbestillingRequest = brevbestillingRequestCaptor.getValue();
+        assertThat(brevbestillingRequest)
+            .extracting("produserbardokument", "bestillersId", "mottaker", "innledningFritekst",
+                "begrunnelseFritekst", "ektefelleFritekst", "barnFritekst", "nyVurderingBakgrunn")
+            .containsExactly(STORBRITANNIA, "Z990007", BRUKER, "Innledning",
+                "Begrunnelse", "Ektefelle omfattet", "Barn omfattet", Nyvurderingbakgrunner.FEIL_I_BEHANDLING.getKode());
+        assertThat(brevbestillingRequest.getKopiMottakere().size()).isEqualTo(2);
+        assertThat(brevbestillingRequest.getKopiMottakere().get(0).rolle()).isEqualTo(ARBEIDSGIVER);
+        assertThat(brevbestillingRequest.getKopiMottakere().get(1).rolle()).isEqualTo(TRYGDEMYNDIGHET);
+    }
+
+    @Test
+    void fattVedtak_endringsvedtak_fatterVedtak() throws ValideringException {
+        var behandlingsresultat = lagBehandlingsresultat();
+        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
+
+        FattVedtakRequest request = lagFattVedtakRequest(ENDRINGSVEDTAK, Nyvurderingbakgrunner.NYE_OPPLYSNINGER.getKode());
+        trygdeavtaleVedtakService.fattVedtak(lagBehandling(), request);
+
+        verify(behandlingsresultatService).lagre(behandlingsresultatCaptor.capture());
+        verify(behandlingService).endreStatus(behandlingCaptor.capture(), eq(IVERKSETTER_VEDTAK));
+        verify(prosessinstansService).opprettProsessinstansIverksettVedtakTrygdeavtale(any(Behandling.class), eq(request));
+        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(SAKSNUMMER);
+        verify(dokgenService).produserOgDistribuerBrev(anyLong(), brevbestillingRequestCaptor.capture());
+        verify(vedtakKontrollService).kontrollerInnvilgelse(any(Behandling.class), any(Behandlingsresultat.class), eq(ENDRINGSVEDTAK), eq(Sakstyper.TRYGDEAVTALE));
+
+        Behandlingsresultat lagretBehandlingsresultat = behandlingsresultatCaptor.getValue();
+        assertThat(lagretBehandlingsresultat)
+            .extracting("type", "begrunnelseFritekst", "fastsattAvLand")
+            .containsExactly(FASTSATT_LOVVALGSLAND, "Begrunnelse", Landkoder.NO);
+
+        Behandling lagretBehandling = behandlingCaptor.getValue();
+        assertThat(lagretBehandling.getFagsak().getStatus()).isEqualTo(MEDLEMSKAP_AVKLART);
+
+        BrevbestillingRequest brevbestillingRequest = brevbestillingRequestCaptor.getValue();
+        assertThat(brevbestillingRequest)
+            .extracting("produserbardokument", "bestillersId", "mottaker", "innledningFritekst",
+                "begrunnelseFritekst", "ektefelleFritekst", "barnFritekst", "nyVurderingBakgrunn")
+            .containsExactly(STORBRITANNIA, "Z990007", BRUKER, "Innledning",
+                "Begrunnelse", "Ektefelle omfattet", "Barn omfattet", Nyvurderingbakgrunner.NYE_OPPLYSNINGER.getKode());
+        assertThat(brevbestillingRequest.getKopiMottakere().size()).isEqualTo(2);
+        assertThat(brevbestillingRequest.getKopiMottakere().get(0).rolle()).isEqualTo(ARBEIDSGIVER);
+        assertThat(brevbestillingRequest.getKopiMottakere().get(1).rolle()).isEqualTo(TRYGDEMYNDIGHET);
+    }
+
+    private FattVedtakRequest lagFattVedtakRequest(Vedtakstyper vedtakstype, String nyVurderingBakgrunn) {
+        return new FattVedtakRequest.Builder()
             .medBehandlingsresultat(FASTSATT_LOVVALGSLAND)
-            .medVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK)
+            .medVedtakstype(vedtakstype)
             .medInnledningFritekst("Innledning")
             .medBegrunnelseFritekst("Begrunnelse")
             .medEktefelleFritekst("Ektefelle omfattet")
             .medBarnFritekst("Barn omfattet")
             .medKopiMottakere(List.of(
                 new KopiMottaker(ARBEIDSGIVER, "987654321", null, null),
-                new KopiMottaker(MYNDIGHET, null, null, "GB:UK010")
+                new KopiMottaker(TRYGDEMYNDIGHET, null, null, "GB:UK010")
             ))
             .medBestillersId(SubjectHandler.getInstance().getUserID())
+            .medNyVurderingBakgrunn(nyVurderingBakgrunn)
             .build();
     }
 

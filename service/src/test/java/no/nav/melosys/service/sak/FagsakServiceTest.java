@@ -4,13 +4,11 @@ import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -19,7 +17,6 @@ import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.medl.MedlPeriodeService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import org.junit.jupiter.api.BeforeEach;
@@ -46,23 +43,16 @@ class FagsakServiceTest {
     @Mock
     private OppgaveService oppgaveService;
     @Mock
-    private OpprettNySakFraOppgave opprettNySakFraOppgave;
-    @Mock
     private PersondataFasade persondataFasade;
     @Mock
     private BehandlingsresultatService behandlingsresultatService;
-    @Mock
-    private MedlPeriodeService medlPeriodeService;
-
-    private final FakeUnleash unleash = new FakeUnleash();
 
     private FagsakService fagsakService;
 
     @BeforeEach
     public void setUp() {
         fagsakService = new FagsakService(fagsakRepo, behandlingService, kontaktopplysningService, oppgaveService, persondataFasade,
-                                          behandlingsresultatService, medlPeriodeService);
-        unleash.enableAll();
+                                          behandlingsresultatService);
     }
 
     @Test
@@ -134,27 +124,6 @@ class FagsakServiceTest {
         verify(kontaktopplysningService).lagEllerOppdaterKontaktopplysning(
             any(), eq("RepresentantOrgnr"), eq(null), eq("Kontaktperson"), eq("Telefon")
         );
-    }
-
-    @Test
-    void avsluttSakSomBortfalt_harFagsakMedFlereBehandlinger_AvslutterAlleBehandlingerOgSetterFagsakstatusTilHENLAGT_BORTFALT() {
-        String saksnummer = "saksnummer";
-        Fagsak fagsak = lagFagsak(saksnummer);
-        Behandling førsteBehandling = new Behandling();
-        førsteBehandling.setId(1L);
-        førsteBehandling.setStatus(Behandlingsstatus.OPPRETTET);
-        Behandling andreBehandling = new Behandling();
-        andreBehandling.setId(2L);
-        andreBehandling.setStatus(Behandlingsstatus.ANMODNING_UNNTAK_SENDT);
-        fagsak.setBehandlinger(Arrays.asList(førsteBehandling, andreBehandling));
-        fagsakService.avsluttSakSomBortfalt(fagsak);
-
-        verify(fagsakRepo).save(fagsak);
-        verify(behandlingsresultatService).oppdaterBehandlingsresultattype(1L, Behandlingsresultattyper.HENLEGGELSE);
-        verify(behandlingsresultatService).oppdaterBehandlingsresultattype(2L, Behandlingsresultattyper.HENLEGGELSE);
-        assertThat(fagsak.getStatus()).isEqualTo(Saksstatuser.HENLAGT_BORTFALT);
-        assertThat(fagsak.getBehandlinger()).allSatisfy(behandling -> assertThat(behandling.getStatus()).isEqualTo(Behandlingsstatus.AVSLUTTET));
-        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(saksnummer);
     }
 
     @Test
@@ -243,7 +212,7 @@ class FagsakServiceTest {
             .extracting(Aktoer::getRolle, Aktoer::getAktørId, Aktoer::getInstitusjonId)
             .containsExactlyInAnyOrder(
                 tuple(Aktoersroller.BRUKER, "1234", null),
-                tuple(Aktoersroller.MYNDIGHET, null, "Ny institusjonsid")
+                tuple(Aktoersroller.TRYGDEMYNDIGHET, null, "Ny institusjonsid")
             );
     }
 
@@ -402,7 +371,6 @@ class FagsakServiceTest {
 
         long behandlingID = fagsakService.opprettNyVurderingBehandling(saksnummer);
         verify(behandlingService).replikerBehandlingOgBehandlingsresultat(sistOppdaterteBehandling, Behandlingsstatus.OPPRETTET, Behandlingstyper.NY_VURDERING);
-        verify(medlPeriodeService).avvisPeriode(anmodningsperiode.getMedlPeriodeID());
         assertThat(behandlingID).isEqualTo(replikertBehandling.getId());
     }
 
@@ -412,7 +380,7 @@ class FagsakServiceTest {
         Aktoer aktoer = new Aktoer();
         aktoer.setInstitusjonId("Gammel institusjonsid");
         aktoer.setFagsak(fagsak);
-        aktoer.setRolle(Aktoersroller.MYNDIGHET);
+        aktoer.setRolle(Aktoersroller.TRYGDEMYNDIGHET);
         fagsak.setAktører(new HashSet<>(Collections.singleton(aktoer)));
         return fagsak;
     }

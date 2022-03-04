@@ -57,7 +57,7 @@ class LandvelgerServiceTest {
         søknad.oppholdUtland.oppholdslandkoder.add("NO");
         søknad.bosted.oppgittAdresse.setLandkode(oppgittbostedsland.getKode());
         MaritimtArbeid maritimtArbeid = new MaritimtArbeid();
-        maritimtArbeid.territorialfarvann = territorialfarvannLand.getKode();
+        maritimtArbeid.territorialfarvannLandkode = territorialfarvannLand.getKode();
         søknad.maritimtArbeid.add(maritimtArbeid);
 
         lovvalgsperiode = new Lovvalgsperiode();

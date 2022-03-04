@@ -61,4 +61,8 @@ public class UtenlandskMyndighet {
         adresse.setLandkode(landkode.getKode());
         return adresse;
     }
+
+    public static Landkoder konverterInstitusjonIdTilLandkode(String institusjonID) {
+        return Landkoder.valueOf(institusjonID.split(":")[0].replaceAll("[^a-zA-Z]", ""));
+    }
 }

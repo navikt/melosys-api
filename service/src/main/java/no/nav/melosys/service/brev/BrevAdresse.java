@@ -46,7 +46,7 @@ public class BrevAdresse {
     }
 
     public boolean isAdresselinjerEmpty() {
-        return adresselinjer.stream().allMatch(String::isBlank);
+        return adresselinjer == null || adresselinjer.stream().allMatch(String::isBlank);
     }
 
     public static class Builder {
@@ -68,7 +68,9 @@ public class BrevAdresse {
         }
 
         public Builder medAdresselinjer(List<String> adresselinjer) {
-            this.adresselinjer = adresselinjer.stream().filter(Objects::nonNull).collect(Collectors.toList());
+            this.adresselinjer = adresselinjer != null
+                ? adresselinjer.stream().filter(Objects::nonNull).collect(Collectors.toList())
+                : null;
             return this;
         }
 

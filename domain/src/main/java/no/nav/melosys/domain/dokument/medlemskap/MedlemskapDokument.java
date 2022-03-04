@@ -2,7 +2,6 @@ package no.nav.melosys.domain.dokument.medlemskap;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 import javax.xml.bind.annotation.*;
 
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
@@ -21,9 +20,9 @@ public class MedlemskapDokument implements SaksopplysningDokument {
         return medlemsperiode;
     }
 
-    public List<Medlemsperiode> hentMedlemsperioderKildeIkkeLånekassen() {
+    public List<Medlemsperiode> hentMedlemsperioderHvorKildeIkkeLånekassen() {
         return medlemsperiode.stream()
             .filter(not(Medlemsperiode::erKildeLånekassen))
-            .collect(Collectors.toList());
+            .toList();
     }
 }

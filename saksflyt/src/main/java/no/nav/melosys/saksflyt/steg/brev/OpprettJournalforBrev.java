@@ -6,7 +6,9 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.arkiv.JournalpostBestilling;
 import no.nav.melosys.domain.arkiv.OpprettJournalpost;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
+import no.nav.melosys.domain.brev.FastMottakerMedOrgnr;
 import no.nav.melosys.domain.brev.FritekstbrevBrevbestilling;
+import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
@@ -15,16 +17,21 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
+import no.nav.melosys.service.LovvalgsperiodeService;
+import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.DokgenService;
 import no.nav.melosys.service.dokument.DokumentproduksjonsInfo;
+import no.nav.melosys.service.dokument.VedleggTyper;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
+import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk.UK_ART8_2;
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.*;
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.OPPRETT_OG_JOURNALFØR_BREV;
 import static org.springframework.util.ObjectUtils.isEmpty;
@@ -35,20 +42,27 @@ public class OpprettJournalforBrev implements StegBehandler {
     private static final Logger log = LoggerFactory.getLogger(OpprettJournalforBrev.class);
 
     private final BehandlingService behandlingService;
+    private final LovvalgsperiodeService lovvalgsperiodeService;
     private final DokgenService dokgenService;
+    private final UtenlandskMyndighetService utenlandskMyndighetService;
     private final JoarkFasade joarkFasade;
     private final PersondataFasade persondataFasade;
     private final EregFasade eregFasade;
     private final Unleash unleash;
 
     @Autowired
-    public OpprettJournalforBrev(BehandlingService behandlingService, DokgenService dokgenService,
+    public OpprettJournalforBrev(BehandlingService behandlingService,
+                                 LovvalgsperiodeService lovvalgsperiodeService,
+                                 DokgenService dokgenService,
+                                 UtenlandskMyndighetService utenlandskMyndighetService,
                                  @Qualifier("system") JoarkFasade joarkFasade,
                                  @Qualifier("system") PersondataFasade persondataFasade,
                                  @Qualifier("system") EregFasade eregFasade,
                                  Unleash unleash) {
         this.behandlingService = behandlingService;
+        this.lovvalgsperiodeService = lovvalgsperiodeService;
         this.dokgenService = dokgenService;
+        this.utenlandskMyndighetService = utenlandskMyndighetService;
         this.joarkFasade = joarkFasade;
         this.persondataFasade = persondataFasade;
         this.eregFasade = eregFasade;
@@ -73,7 +87,7 @@ public class OpprettJournalforBrev implements StegBehandler {
             throw new FunksjonellException("Prosessinstans mangler behandling");
         }
 
-        Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
+        Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(prosessinstans.getBehandling().getId());
         String brukerFnr = hentBrukerFolkeregisterIdent(behandling);
         Aktoersroller mottakerrolle = prosessinstans.getData(MOTTAKER, Aktoersroller.class, null);
         var brevbestilling = prosessinstans.getData(BREVBESTILLING, DokgenBrevbestilling.class);
@@ -87,8 +101,8 @@ public class OpprettJournalforBrev implements StegBehandler {
 
         if (!isEmpty(institusjonsid)) {
             mottaker.setInstitusjonId(institusjonsid);
-        }
-        else if (!isEmpty(orgnr)) {
+            sammensattNavn = utenlandskMyndighetService.hentUtenlandskMyndighetForInstitusjonID(institusjonsid).navn;
+        } else if (!isEmpty(orgnr)) {
             mottaker.setOrgnr(orgnr);
         } else {
             mottaker.setAktørId(aktørId);
@@ -102,13 +116,13 @@ public class OpprettJournalforBrev implements StegBehandler {
         DokumentproduksjonsInfo dokumentproduksjonsInfo = dokgenService.hentDokumentInfo(produserbartDokument);
 
         JournalpostBestilling bestilling = new JournalpostBestilling.Builder()
-            .medTittel(utledJournalføringsTittel(dokumentproduksjonsInfo, brevbestilling))
+            .medTittel(utledJournalføringsTittel(dokumentproduksjonsInfo, brevbestilling, mottaker))
             .medBrevkode(dokumentproduksjonsInfo.dokgenMalnavn())
             .medDokumentKategori(dokumentproduksjonsInfo.dokumentKategoriKode())
             .medBrukerFnr(brukerFnr)
             .medMottakerNavn(hasText(orgnr) ? eregFasade.hentOrganisasjonNavn(orgnr) : sammensattNavn)
-            .medMottakerId(hasText(orgnr) ? orgnr : fnr)
-            .medErMottakerOrg(hasText(orgnr))
+            .medMottakerId(utledMottakerId(orgnr, fnr, institusjonsid))
+            .medMottakerIdType(utledMottakerIdType(orgnr, institusjonsid))
             .medSaksnummer(behandling.getFagsak().getSaksnummer())
             .medPdf(pdf)
             .build();
@@ -119,6 +133,26 @@ public class OpprettJournalforBrev implements StegBehandler {
         prosessinstans.setData(DISTRIBUERBAR_JOURNALPOST_ID, journalpostId);
     }
 
+    private String utledMottakerId(String orgnr, String fnr, String institusjonId) {
+        if (hasText(institusjonId)) {
+            return institusjonId;
+        }
+        if (hasText(orgnr)) {
+            return orgnr;
+        }
+        return fnr;
+    }
+
+    private OpprettJournalpost.KorrespondansepartIdType utledMottakerIdType(String orgnr, String institusjonId) {
+        if (hasText(institusjonId)) {
+            return OpprettJournalpost.KorrespondansepartIdType.UTENLANDSK_ORGANISASJON;
+        }
+        if (hasText(orgnr)) {
+            return OpprettJournalpost.KorrespondansepartIdType.ORGNR;
+        }
+        return OpprettJournalpost.KorrespondansepartIdType.FNR;
+    }
+
     private String hentBrukerFolkeregisterIdent(Behandling behandling) {
         if (unleash.isEnabled("melosys.pdl.aktiv")) {
             return persondataFasade.hentFolkeregisterident(behandling.getFagsak().hentAktørID());
@@ -126,7 +160,7 @@ public class OpprettJournalforBrev implements StegBehandler {
         return behandling.hentPersonDokument().hentFolkeregisterident();
     }
 
-    private String utledJournalføringsTittel(DokumentproduksjonsInfo dokumentproduksjonsInfo, DokgenBrevbestilling brevbestilling) {
+    private String utledJournalføringsTittel(DokumentproduksjonsInfo dokumentproduksjonsInfo, DokgenBrevbestilling brevbestilling, Aktoer mottaker) {
         if (brevbestilling instanceof FritekstbrevBrevbestilling fritekstbrevBrevbestilling) {
             String fritekstTittel = fritekstbrevBrevbestilling.getFritekstTittel();
             if (isEmpty(fritekstTittel)) {
@@ -134,6 +168,40 @@ public class OpprettJournalforBrev implements StegBehandler {
             }
             return fritekstTittel;
         }
+        if (brevbestilling.getProduserbartdokument() == Produserbaredokumenter.STORBRITANNIA) {
+            boolean erNyVurdering = ((InnvilgelseBrevbestilling) brevbestilling).getNyVurderingBakgrunn() != null;
+            String tittel = utledJournalføringsTittelForAvtaleMedStorbritannia(brevbestilling.getBehandlingId(), dokumentproduksjonsInfo, mottaker);
+            return erNyVurdering ? lagEndringTittel(tittel) : tittel;
+        }
         return dokumentproduksjonsInfo.journalføringsTittel();
+    }
+
+    private String utledJournalføringsTittelForAvtaleMedStorbritannia(long behandlingID, DokumentproduksjonsInfo dokumentproduksjonsInfo, Aktoer mottaker) {
+        if (mottaker.erUtenlandskMyndighet()) {
+            return dokumentproduksjonsInfo.vedleggsTitler().get(VedleggTyper.ATTEST);
+        }
+
+        var vedtaksbrevTittel = dokumentproduksjonsInfo.vedleggsTitler().get(VedleggTyper.VEDTAKSBREV);
+
+        if (FastMottakerMedOrgnr.SKATT.getOrgnr().equals((mottaker.getOrgnr()))) {
+            return lagKopiTittel(vedtaksbrevTittel);
+        }
+
+        boolean erArtikkel8_2 = lovvalgsperiodeService.hentValidertLovvalgsperiode(behandlingID).getBestemmelse() == UK_ART8_2;
+
+        if (mottaker.erOrganisasjon()) {
+            return lagKopiTittel(erArtikkel8_2 ? vedtaksbrevTittel : dokumentproduksjonsInfo.journalføringsTittel());
+        }
+        else {
+            return erArtikkel8_2 ? vedtaksbrevTittel : dokumentproduksjonsInfo.journalføringsTittel();
+        }
+    }
+
+    private String lagKopiTittel(String tittel) {
+        return "Kopi av " + StringUtils.uncapitalize(tittel);
+    }
+
+    private String lagEndringTittel(String tittel) {
+        return tittel + " - endring";
     }
 }

@@ -1,24 +1,24 @@
 package no.nav.melosys.domain;
 
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
-import org.junit.jupiter.api.Test;
-
 import java.util.List;
 import java.util.Set;
+
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class BehandlingTest {
 
     @Test
-    public void erAktiv_underBehandling_ja() {
+    void erAktiv_underBehandling_ja() {
         Behandling behandling = new Behandling();
         behandling.setStatus(Behandlingsstatus.VURDER_DOKUMENT);
         assertThat(behandling.erAktiv()).isTrue();
     }
 
     @Test
-    public void erAktiv_avsluttet_nei() {
+    void erAktiv_avsluttet_nei() {
         Behandling behandling = new Behandling();
         behandling.setStatus(Behandlingsstatus.AVSLUTTET);
         assertThat(behandling.erAktiv()).isFalse();
@@ -34,7 +34,7 @@ class BehandlingTest {
         Behandling behandling = new Behandling();
         behandling.setSaksopplysninger(Set.of(saksopplysning1, saksopplysning2));
 
-        assertThat(behandling.saksopplysningerEksistererIkke(List.of(SaksopplysningType.PDL_PERSOPL, SaksopplysningType.PERSOPL))).isFalse();
+        assertThat(behandling.manglerSaksopplysningerAvType(List.of(SaksopplysningType.PDL_PERSOPL, SaksopplysningType.PERSOPL))).isFalse();
     }
 
     @Test
@@ -45,6 +45,6 @@ class BehandlingTest {
         Behandling behandling = new Behandling();
         behandling.setSaksopplysninger(Set.of(saksopplysning));
 
-        assertThat(behandling.saksopplysningerEksistererIkke(List.of(SaksopplysningType.PDL_PERS_SAKS, SaksopplysningType.PERSHIST))).isTrue();
+        assertThat(behandling.manglerSaksopplysningerAvType(List.of(SaksopplysningType.PDL_PERS_SAKS, SaksopplysningType.PERSHIST))).isTrue();
     }
 }

@@ -87,6 +87,6 @@ class AvsluttFagsakOgBehandlingTest {
     void utfør_erArtikkel13_behandlingsstatusMidlertidigLovvalgsbeslutning() {
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A);
         avsluttFagsakOgBehandling.utfør(prosessinstans);
-        verify(behandlingService).oppdaterStatus(eq(behandling.getId()), eq(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING));
+        verify(behandlingService).endreStatus(eq(behandling.getId()), eq(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING));
     }
 }

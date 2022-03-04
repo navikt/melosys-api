@@ -11,8 +11,8 @@ import no.nav.melosys.exception.TekniskException;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.util.Assert;
 
-import static no.nav.melosys.domain.kodeverk.Aktoersroller.MYNDIGHET;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.REPRESENTANT;
+import static no.nav.melosys.domain.kodeverk.Aktoersroller.TRYGDEMYNDIGHET;
 
 @Entity
 @Table(name = "fagsak")
@@ -118,7 +118,7 @@ public class Fagsak extends RegistreringsInfo {
     }
 
     public List<Aktoer> hentMyndigheter() {
-        return hentAktørerMedRolleType(MYNDIGHET);
+        return hentAktørerMedRolleType(TRYGDEMYNDIGHET);
     }
 
     /**
@@ -168,7 +168,7 @@ public class Fagsak extends RegistreringsInfo {
     public Aktoer hentMyndighet() {
         List<Aktoer> myndigheter = hentMyndigheter();
         if (myndigheter.isEmpty()) {
-            throw new TekniskException("Finner ingen aktør med rolle " + MYNDIGHET + " for fagsak " + saksnummer);
+            throw new TekniskException("Finner ingen aktør med rolle " + TRYGDEMYNDIGHET + " for fagsak " + saksnummer);
         }
         if (myndigheter.size() > 1) {
             throw new TekniskException("Kan ikke hente landkode for en bestemt myndighet fordi finnes flere myndigheter");

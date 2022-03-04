@@ -54,7 +54,7 @@ public class FattetVedtakService {
 
     @Transactional
     public void publiserFattetVedtak(long behandlingId) throws IkkeFunnetException {
-        var behandling = behandlingService.hentBehandling(behandlingId);
+        var behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingId);
         fattetVedtakProducer.produserMelding(lagMelding(behandling));
     }
 

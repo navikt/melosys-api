@@ -1,9 +1,9 @@
 package no.nav.melosys.service.trygdeavtale;
 
+import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie;
 
 import java.time.LocalDate;
-import java.util.List;
 
 public record TrygdeavtaleResultat(
     String virksomhet,
@@ -36,6 +36,14 @@ public record TrygdeavtaleResultat(
 
         public Builder lovvalgsperiodeTom(LocalDate lovvalgsperiodeTom) {
             this.lovvalgsperiodeTom = lovvalgsperiodeTom;
+            return this;
+        }
+
+        public Builder lovvalgsperiodeOgBestemmelse(Lovvalgsperiode lovvalgsperiode) {
+            if (lovvalgsperiode == null) return this;
+            this.bestemmelse = lovvalgsperiode.getBestemmelse().getKode();
+            this.lovvalgsperiodeFom = lovvalgsperiode.getFom();
+            this.lovvalgsperiodeTom = lovvalgsperiode.getTom();
             return this;
         }
 

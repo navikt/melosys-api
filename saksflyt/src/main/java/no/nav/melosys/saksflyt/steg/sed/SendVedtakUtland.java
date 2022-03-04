@@ -28,7 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.kodeverk.Aktoersroller.MYNDIGHET;
+import static no.nav.melosys.domain.kodeverk.Aktoersroller.TRYGDEMYNDIGHET;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.ATTEST_A1;
 
 
@@ -91,10 +91,10 @@ public class SendVedtakUtland extends AbstraktSendUtland {
 
     private DoksysBrevbestilling lagBrevBestilling(Prosessinstans prosessinstans) {
         Long behandlingID = prosessinstans.getBehandling().getId();
-        var behandling = behandlingService.hentBehandling(behandlingID);
+        var behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
         return new DoksysBrevbestilling.Builder().medProduserbartDokument(ATTEST_A1)
             .medAvsenderNavn(hentSaksbehandler(prosessinstans))
-            .medMottakere(Mottaker.av(MYNDIGHET))
+            .medMottakere(Mottaker.av(TRYGDEMYNDIGHET))
             .medBehandling(behandling)
             .medBegrunnelseKode(hentBegrunnelsekodeTilForkortetPeriode(prosessinstans))
             .build();

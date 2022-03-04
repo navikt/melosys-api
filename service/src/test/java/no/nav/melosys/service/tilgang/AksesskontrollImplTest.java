@@ -61,7 +61,7 @@ class AksesskontrollImplTest {
 
     @Test
     void autoriser_verifiserSjekkLesetilgang() {
-        when(behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID)).thenReturn(behandling);
+        when(behandlingService.hentBehandling(behandlingID)).thenReturn(behandling);
         aksesskontroll.autoriser(behandlingID);
         verify(brukertilgangKontroll).validerTilgangTilAktørID(aktørID);
         verify(redigerbarKontroll, never()).sjekkRessursRedigerbar(behandling, Ressurs.UKJENT);
@@ -69,7 +69,7 @@ class AksesskontrollImplTest {
 
     @Test
     void autoriser_skalSkrive_verifiserRedigerbarBehandling() {
-        when(behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID)).thenReturn(behandling);
+        when(behandlingService.hentBehandling(behandlingID)).thenReturn(behandling);
         aksesskontroll.autoriser(behandlingID, Aksesstype.SKRIV);
         verify(brukertilgangKontroll).validerTilgangTilAktørID(aktørID);
         verify(redigerbarKontroll).sjekkRessursRedigerbar(behandling, Ressurs.UKJENT);
@@ -78,7 +78,7 @@ class AksesskontrollImplTest {
     @Test
     void autoriserSkrivTilRessurs_verifiserRedigerbarBehandlingSjekkes() {
         final var skrivTilRessurs = Ressurs.AVKLARTE_FAKTA;
-        when(behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID)).thenReturn(behandling);
+        when(behandlingService.hentBehandling(behandlingID)).thenReturn(behandling);
         aksesskontroll.autoriserSkrivTilRessurs(behandlingID, skrivTilRessurs);
         verify(brukertilgangKontroll).validerTilgangTilAktørID(aktørID);
         verify(redigerbarKontroll).sjekkRessursRedigerbar(behandling, skrivTilRessurs);

@@ -8,7 +8,6 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.FoedestedOgLand;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.UtenlandskIdent;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.ArbeidsstedType;
@@ -140,7 +139,7 @@ class SoeknadMapperTest {
         final MaritimtArbeid maritimtArbeidInnenriks = soeknad.maritimtArbeid.get(0);
         assertThat(maritimtArbeidInnenriks.enhetNavn).isEqualTo("abcd");
         assertThat(maritimtArbeidInnenriks.fartsomradeKode).isEqualTo(INNENRIKS);
-        assertThat(maritimtArbeidInnenriks.territorialfarvann).isEqualTo("BG");
+        assertThat(maritimtArbeidInnenriks.territorialfarvannLandkode).isEqualTo("BG");
         final MaritimtArbeid maritimtArbeidUtenriks = soeknad.maritimtArbeid.get(1);
         assertThat(maritimtArbeidUtenriks.fartsomradeKode).isEqualTo(UTENRIKS);
         assertThat(maritimtArbeidUtenriks.flaggLandkode).isEqualTo("FO");

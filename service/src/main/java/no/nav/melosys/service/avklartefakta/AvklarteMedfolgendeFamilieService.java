@@ -51,7 +51,7 @@ public class AvklarteMedfolgendeFamilieService {
     @Transactional
     public void lagreMedfolgendeFamilieSomAvklartefakta(long behandlingID, AvklarteMedfolgendeFamilie medfolgendeFamilie) {
         Map<String, MedfolgendeFamilie.Relasjonsrolle> uuidOgRolleFraBehandlingsgrunnlag =
-            behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID).getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().hentUuidOgRolleMedfølgendeFamilie();
+            behandlingService.hentBehandling(behandlingID).getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().hentUuidOgRolleMedfølgendeFamilie();
 
         validerMedfolgendeFamilie(medfolgendeFamilie, uuidOgRolleFraBehandlingsgrunnlag);
 

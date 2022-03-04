@@ -2,14 +2,12 @@ package no.nav.melosys.service.sak;
 
 import java.time.Instant;
 import java.util.*;
-import java.util.stream.Stream;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -19,7 +17,6 @@ import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.medl.MedlPeriodeService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
@@ -44,21 +41,19 @@ public class FagsakService {
     private final OppgaveService oppgaveService;
     private final PersondataFasade persondataFasade;
     private final BehandlingsresultatService behandlingsresultatService;
-    private final MedlPeriodeService medlPeriodeService;
 
     private final Counter sakerOpprettet = Metrics.counter(SAKER_OPPRETTET);
 
     @Autowired
     public FagsakService(FagsakRepository fagsakRepository, BehandlingService behandlingService,
-                         KontaktopplysningService kontaktopplysningService, @Lazy OppgaveService oppgaveService, PersondataFasade persondataFasade,
-                         BehandlingsresultatService behandlingsresultatService, MedlPeriodeService medlPeriodeService) {
+                         KontaktopplysningService kontaktopplysningService, @Lazy OppgaveService oppgaveService,
+                         PersondataFasade persondataFasade, BehandlingsresultatService behandlingsresultatService) {
         this.fagsakRepository = fagsakRepository;
         this.behandlingService = behandlingService;
         this.kontaktopplysningService = kontaktopplysningService;
         this.oppgaveService = oppgaveService;
         this.persondataFasade = persondataFasade;
         this.behandlingsresultatService = behandlingsresultatService;
-        this.medlPeriodeService = medlPeriodeService;
     }
 
     public Fagsak hentFagsak(String saksnummer) {
@@ -98,7 +93,7 @@ public class FagsakService {
     public void oppdaterMyndigheter(String saksnummer, Collection<String> ider) {
         Fagsak fagsak = hentFagsak(saksnummer);
         fagsak.getAktører().removeIf(aktoer -> !ider.contains(aktoer.getInstitusjonId())
-            && aktoer.getRolle() == Aktoersroller.MYNDIGHET);
+            && aktoer.getRolle() == Aktoersroller.TRYGDEMYNDIGHET);
 
         Collection<Aktoer> nyeMyndigheter = ider.stream()
             .map(id -> lagMyndighetAktør(fagsak, id))
@@ -111,7 +106,7 @@ public class FagsakService {
     private static Aktoer lagMyndighetAktør(Fagsak fagsak, String ID) {
         Aktoer aktør = new Aktoer();
         aktør.setFagsak(fagsak);
-        aktør.setRolle(Aktoersroller.MYNDIGHET);
+        aktør.setRolle(Aktoersroller.TRYGDEMYNDIGHET);
         aktør.setInstitusjonId(ID);
         return aktør;
     }
@@ -189,20 +184,6 @@ public class FagsakService {
         return FAGSAKID_PREFIX + fagsakRepository.hentNesteSekvensVerdi();
     }
 
-    @Transactional
-    public void avsluttSakSomBortfalt(Fagsak fagsak) {
-        fagsak.getBehandlinger().forEach(behandling -> behandlingsresultatService.oppdaterBehandlingsresultattype(behandling.getId(), Behandlingsresultattyper.HENLEGGELSE));
-
-        fagsak.getBehandlinger().forEach(behandling -> {
-            log.info("Setter behandling {} til {}", behandling.getId(), Behandlingsstatus.AVSLUTTET);
-            behandling.setStatus(Behandlingsstatus.AVSLUTTET);
-        });
-        log.info("Setter status på fagsak {} til {}", fagsak.getSaksnummer(), Saksstatuser.HENLAGT_BORTFALT);
-        fagsak.setStatus(Saksstatuser.HENLAGT_BORTFALT);
-        fagsakRepository.save(fagsak);
-        oppgaveService.ferdigstillOppgaveMedSaksnummer(fagsak.getSaksnummer());
-    }
-
     //Brukes for å avslutte behandling (og dermed fagsak) fra frontend i manuelle sed-behandlinger
     @Transactional
     public void avsluttFagsakOgBehandlingValiderBehandlingstype(Fagsak fagsak, Behandling behandling) {
@@ -267,7 +248,6 @@ public class FagsakService {
         oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(
             replikertBehandling, replikertBehandling.getInitierendeJournalpostId(), fagsak.hentAktørID(), SubjectHandler.getInstance().getUserID()
         );
-        avsluttTidligereMedlPeriode(behandlingsresultat);
         return replikertBehandling.getId();
     }
 
@@ -278,17 +258,4 @@ public class FagsakService {
             throw new FunksjonellException("Kan ikke revurdere en behandling av type " + Behandlingstyper.ENDRET_PERIODE.getBeskrivelse());
         }
     }
-
-    private void avsluttTidligereMedlPeriode(Behandlingsresultat behandlingsresultat) {
-        Collection<? extends PeriodeOmLovvalg> anmodningsperioder = behandlingsresultat.getAnmodningsperioder();
-        Collection<? extends PeriodeOmLovvalg> lovvalgsperioder = behandlingsresultat.getLovvalgsperioder();
-
-        Optional<Long> medlPeriodeID = Stream.concat(anmodningsperioder.stream(), lovvalgsperioder.stream())
-            .map(PeriodeOmLovvalg::getMedlPeriodeID)
-            .filter(Objects::nonNull)
-            .findFirst();
-
-        medlPeriodeID.ifPresent(medlPeriodeService::avvisPeriode);
-    }
-
 }

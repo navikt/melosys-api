@@ -38,8 +38,8 @@ public class AvgiftOverforingConsumerProducer {
             if (response.statusCode().isError()) {
                 return response.bodyToMono(String.class)
                     .flatMap(errorBody -> {
-                        log.error("Kall mot melosys-avgift-overforing feilet. {} - {}", response.statusCode(), errorBody);
-                        return Mono.error(new TekniskException(errorBody));
+                        log.error("Kall mot melosys-avgift-overføring feilet. {} - {}", response.statusCode(), errorBody);
+                        return Mono.error(new TekniskException("Kall mot melosys-avgift-overføring feilet."));
                     });
             }
             return Mono.just(response);

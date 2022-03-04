@@ -5,6 +5,8 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 
+import no.nav.melosys.domain.ErPeriode;
+
 public final class PeriodeKontroller {
 
     private static final LocalDate FØRSTE_JUNI_2012 = LocalDate.of(2012, 6, 1);
@@ -61,7 +63,11 @@ public final class PeriodeKontroller {
         return date1.equals(date2);
     }
 
-    public static boolean periodeOverlapper(LocalDate fom1, LocalDate tom1, LocalDate fom2, LocalDate tom2) {
+    public static boolean periodeOverlapper(ErPeriode periode1, ErPeriode periode2) {
+        return periodeOverlapper(periode1.getFom(), periode1.getTom(), periode2.getFom(), periode2.getTom());
+    }
+
+    private static boolean periodeOverlapper(LocalDate fom1, LocalDate tom1, LocalDate fom2, LocalDate tom2) {
 
         if (fom1 == null || fom2 == null) {
             throw new IllegalArgumentException("Fom-dato kan ikke være null!");

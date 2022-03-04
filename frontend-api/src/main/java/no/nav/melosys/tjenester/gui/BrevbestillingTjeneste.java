@@ -69,8 +69,7 @@ public class BrevbestillingTjeneste {
     public MuligeMottakereDto hentTilgjengeligeMottakere(@PathVariable long behandlingID,
                                                          @RequestBody HentMuligeMottakereRequestDto hentMuligeMottakereRequestDto) {
         aksesskontroll.autoriser(behandlingID);
-        Behandling behandling = behandlingService.hentBehandling(behandlingID);
-        return brevbestillingService.hentMuligeMottakere(hentMuligeMottakereRequestDto.produserbartdokument(), behandling, hentMuligeMottakereRequestDto.orgnr());
+        return brevbestillingService.hentMuligeMottakere(hentMuligeMottakereRequestDto.produserbartdokument(), behandlingID, hentMuligeMottakereRequestDto.orgnr());
     }
 
     @PostMapping(value = "pdf/brev/utkast/{behandlingID}", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_PDF_VALUE)
@@ -97,15 +96,14 @@ public class BrevbestillingTjeneste {
     }
 
     private List<BrevmalDto> byggBrevmalListe(long behandlingId) {
-        Behandling behandling = behandlingService.hentBehandling(behandlingId);
-        List<Produserbaredokumenter> produserbareDokumenter = brevbestillingService.hentMuligeProduserbaredokumenter(behandling);
+        List<Produserbaredokumenter> produserbareDokumenter = brevbestillingService.hentMuligeProduserbaredokumenter(behandlingId);
 
         return produserbareDokumenter.stream().map(p -> {
-                Aktoersroller hovedMottaker = brevmottakerService.hentMottakerliste(p, behandling).getHovedMottaker();
+                Aktoersroller hovedMottaker = brevmottakerService.hentMottakerliste(p, behandlingId).getHovedMottaker();
                 return switch (p) {
-                    case MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE -> lagBrevMalDtoForForventetSaksbehandlingstid(p, hovedMottaker, behandling);
-                    case MANGELBREV_BRUKER, MANGELBREV_ARBEIDSGIVER -> lagBrevMalDtoForMangelbrev(p, hovedMottaker, behandling);
-                    case GENERELT_FRITEKSTBREV_BRUKER, GENERELT_FRITEKSTBREV_ARBEIDSGIVER -> lagBrevMalDtoForFritekstbrev(p, hovedMottaker, behandling);
+                    case MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE -> lagBrevMalDtoForForventetSaksbehandlingstid(p, hovedMottaker, behandlingId);
+                    case MANGELBREV_BRUKER, MANGELBREV_ARBEIDSGIVER -> lagBrevMalDtoForMangelbrev(p, hovedMottaker, behandlingId);
+                    case GENERELT_FRITEKSTBREV_BRUKER, GENERELT_FRITEKSTBREV_ARBEIDSGIVER -> lagBrevMalDtoForFritekstbrev(p, hovedMottaker, behandlingId);
                     default -> null;
                 };
             })
@@ -113,12 +111,12 @@ public class BrevbestillingTjeneste {
             .toList();
     }
 
-    private BrevmalDto lagBrevMalDtoForForventetSaksbehandlingstid(Produserbaredokumenter produserbartdokument, Aktoersroller hovedMottaker, Behandling behandling) {
+    private BrevmalDto lagBrevMalDtoForForventetSaksbehandlingstid(Produserbaredokumenter produserbartdokument, Aktoersroller hovedMottaker, long behandlingId) {
         var builder = new MottakerDto.Builder()
             .medType(BRUKER_ELLER_BRUKERS_FULLMEKTIG)
             .medRolle(hovedMottaker);
 
-        leggTilAdresseOgFeilmelding(builder, produserbartdokument, hovedMottaker, behandling);
+        leggTilAdresseOgFeilmelding(builder, produserbartdokument, hovedMottaker, behandlingId);
 
         return new BrevmalDto.Builder()
             .medType(produserbartdokument)
@@ -126,32 +124,17 @@ public class BrevbestillingTjeneste {
             .build();
     }
 
-    private BrevmalDto lagBrevMalDtoForMangelbrev(Produserbaredokumenter produserbartdokument, Aktoersroller hovedMottaker, Behandling behandling) {
-        List<MottakerDto> mottakere = new ArrayList<>();
+    private BrevmalDto lagBrevMalDtoForMangelbrev(Produserbaredokumenter produserbartdokument, Aktoersroller hovedMottaker, long behandlingId) {
         List<FeltvalgAlternativDto> feltvalgAlternativDtos = new ArrayList<>();
+        Behandling behandling = behandlingService.hentBehandling(behandlingId);
 
-        var builder = new MottakerDto.Builder()
-            .medType(hovedMottaker == Aktoersroller.BRUKER ? BRUKER_ELLER_BRUKERS_FULLMEKTIG : ARBEIDSGIVER_ELLER_ARBEIDSGIVERS_FULLMEKTIG)
-            .medRolle(hovedMottaker);
-
-        leggTilAdresseOgFeilmelding(builder, produserbartdokument, hovedMottaker, behandling);
-
-        mottakere.add(builder.build());
-        if (hovedMottaker == Aktoersroller.ARBEIDSGIVER) {
-            mottakere.add(
-                new MottakerDto.Builder()
-                    .medType("Annen organisasjon")
-                    .medRolle(hovedMottaker)
-                    .orgnrSettesAvSaksbehandler()
-                    .build()
-            );
-        }
         if (behandling.getType() == Behandlingstyper.SOEKNAD || behandling.erKlage()) {
             feltvalgAlternativDtos.add(new FeltvalgAlternativDto(FeltvalgAlternativKode.STANDARD));
         }
         feltvalgAlternativDtos.add(new FeltvalgAlternativDto(FeltvalgAlternativKode.FRITEKST.getKode(), "Fritekst (erstatter standardtekst)", true));
 
         FeltValgDto feltValgDto = new FeltValgDto(feltvalgAlternativDtos, FeltValgType.RADIO);
+        List<MottakerDto> mottakere = hentMottakereForBrev(produserbartdokument, hovedMottaker, behandlingId);
 
         return new BrevmalDto.Builder()
             .medType(produserbartdokument)
@@ -175,14 +158,8 @@ public class BrevbestillingTjeneste {
             .build();
     }
 
-    private BrevmalDto lagBrevMalDtoForFritekstbrev(Produserbaredokumenter produserbartdokument, Aktoersroller hovedMottaker, Behandling behandling) {
-        var builder = new MottakerDto.Builder()
-            .medType(hovedMottaker == Aktoersroller.BRUKER ? BRUKER_ELLER_BRUKERS_FULLMEKTIG : ARBEIDSGIVER_ELLER_ARBEIDSGIVERS_FULLMEKTIG)
-            .medRolle(hovedMottaker);
-
-        leggTilAdresseOgFeilmelding(builder, produserbartdokument, hovedMottaker, behandling);
-
-        var mottaker = builder.build();
+    private BrevmalDto lagBrevMalDtoForFritekstbrev(Produserbaredokumenter produserbartdokument, Aktoersroller hovedMottaker, long behandlingId) {
+        List<MottakerDto> mottakere = hentMottakereForBrev(produserbartdokument, hovedMottaker, behandlingId);
 
         return new BrevmalDto.Builder()
             .medType(produserbartdokument)
@@ -192,7 +169,7 @@ public class BrevbestillingTjeneste {
                     .medBeskrivelse(BrevmalFeltKode.BREV_TITTEL.getBeskrivelse())
                     .medFeltType(FeltType.TEKST)
                     .medHjelpetekst("Tittelen du skriver inn her, vil bli tittelen på brevet når du sender det ut.")
-                    .medValg(hentFritekstTittelValg(behandling))
+                    .medValg(hentFritekstTittelValg(behandlingId))
                     .medTegnBegrensning(60)
                     .erPåkrevd()
                     .build(),
@@ -208,12 +185,34 @@ public class BrevbestillingTjeneste {
                     .erPåkrevd()
                     .build()
             ))
-            .medMuligeMottakere(singletonList(mottaker))
+            .medMuligeMottakere(mottakere)
             .medMottakereHjelpetekst("Hvis bruker eller arbeidsgiver har fullmektig som er lagt inn i sidemenyen, vil brevet automatisk bli sendt til denne.")
             .build();
     }
 
-    private FeltValgDto hentFritekstTittelValg(Behandling behandling) {
+    private List<MottakerDto> hentMottakereForBrev(Produserbaredokumenter produserbartdokument, Aktoersroller hovedMottaker, long behandlingId) {
+        List<MottakerDto> mottakere = new ArrayList<>();
+        var builder = new MottakerDto.Builder()
+            .medType(hovedMottaker == Aktoersroller.BRUKER ? BRUKER_ELLER_BRUKERS_FULLMEKTIG : ARBEIDSGIVER_ELLER_ARBEIDSGIVERS_FULLMEKTIG)
+            .medRolle(hovedMottaker);
+
+        leggTilAdresseOgFeilmelding(builder, produserbartdokument, hovedMottaker, behandlingId);
+
+        mottakere.add(builder.build());
+        if (hovedMottaker == Aktoersroller.ARBEIDSGIVER) {
+            mottakere.add(
+                new MottakerDto.Builder()
+                    .medType("Annen organisasjon")
+                    .medRolle(hovedMottaker)
+                    .orgnrSettesAvSaksbehandler()
+                    .build()
+            );
+        }
+        return mottakere;
+    }
+
+    private FeltValgDto hentFritekstTittelValg(long behandlingId) {
+        Behandling behandling = behandlingService.hentBehandling(behandlingId);
         Sakstyper fagsakType = behandling.getFagsak().getType();
 
         final List<FeltvalgAlternativDto> valgAlternativer = new ArrayList<>();
@@ -234,9 +233,9 @@ public class BrevbestillingTjeneste {
         return new FeltValgDto(valgAlternativer, FeltValgType.SELECT);
     }
 
-    private void leggTilAdresseOgFeilmelding(MottakerDto.Builder builder, Produserbaredokumenter produserbaredokumenter, Aktoersroller aktoersroller, Behandling behandling) {
+    private void leggTilAdresseOgFeilmelding(MottakerDto.Builder builder, Produserbaredokumenter produserbaredokumenter, Aktoersroller aktoersroller, long behandlingId) {
         try {
-            var brevAdresser = brevbestillingService.hentBrevAdresseTilMottakere(produserbaredokumenter, aktoersroller, behandling);
+            var brevAdresser = brevbestillingService.hentBrevAdresseTilMottakere(produserbaredokumenter, aktoersroller, behandlingId);
             if (aktoersroller == Aktoersroller.BRUKER && brevAdresser.stream().allMatch(BrevAdresse::isAdresselinjerEmpty)) {
                 builder.medFeilmelding("Bruker har ingen registrert adresse.");
             } else {

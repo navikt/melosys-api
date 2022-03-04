@@ -64,7 +64,7 @@ public class EessiTjeneste {
     public ResponseEntity<OpprettBucSvarDto> opprettBuc(@RequestBody BucBestillingDto nyBucDto,
                                                         @PathVariable("behandlingID") long behandlingID) {
         aksesskontroll.autoriser(behandlingID);
-        Behandling behandling = behandlingService.hentBehandling(behandlingID);
+        Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
 
         OpprettBucSvarDto opprettBucSvarDto = new OpprettBucSvarDto(
             eessiService.opprettBucOgSed(
@@ -88,7 +88,7 @@ public class EessiTjeneste {
     public ResponseEntity<BucerTilknyttetBehandlingDto> hentBucer(@PathVariable("behandlingID") long behandlingID,
                                                                   @RequestParam(value = "statuser", required = false) List<String> statuser) {
         aksesskontroll.autoriser(behandlingID);
-        Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
+        Behandling behandling = behandlingService.hentBehandling(behandlingID);
         long gsakSaksnummer = behandling.getFagsak().getGsakSaksnummer();
 
         log.info("Henter tilknyttede bucer for sakID {}", gsakSaksnummer);

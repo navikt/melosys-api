@@ -1,0 +1,224 @@
+{
+  "nav": {
+    "bruker": {
+      "mor": {
+        "person": {
+          "etternavnvedfoedsel": "Testmorsetternavnvedfødsel",
+          "fornavn": "Testmorsfornavn"
+        }
+      },
+      "person": {
+        "fornavn": "Testfornavn1",
+        "kjoenn": "M",
+        "etternavn": "Testetternavn1",
+        "foedselsdato": "1977-10-01",
+        "statsborgerskap": [
+          {
+            "land": "AT"
+          },
+          {
+            "land": "BG"
+          },
+          {
+            "land": "GR"
+          }
+        ],
+        "pin": [
+          {
+            "sektor": "sykdom",
+            "identifikator": "15225345345",
+            "land": "BG"
+          }
+        ],
+        "foedested": {
+          "region": "Testfødselsregion",
+          "land": "DK",
+          "by": "Testfødselssted"
+        },
+        "fornavnvedfoedsel": "Testfornavnvedfoedsel",
+        "etternavnvedfoedsel": "Testetternavnvedfoedsel"
+      },
+      "adresse": [
+        {
+          "by": "Testby",
+          "postnummer": "Testpostkode",
+          "bygning": "Testbyggnavn",
+          "type": "bosted",
+          "land": "BE",
+          "gate": "Testgate",
+          "region": "Testregion"
+        },
+        {
+          "postnummer": "Testpostkode2",
+          "region": "Testregion2",
+          "land": "BG",
+          "type": "kontakt",
+          "by": "Testby2",
+          "bygning": "Testbygg2",
+          "gate": "Testgate2"
+        }
+      ],
+      "far": {
+        "person": {
+          "fornavn": "Testfarsfornavn",
+          "etternavnvedfoedsel": "Testfarsetternavnvedfødsel"
+        }
+      }
+    },
+    "arbeidssted": [
+      {
+        "adresse": {
+          "land": "EE",
+          "gate": "Testarbeidsstedgate",
+          "bygning": "Testarbeidsstedbygning",
+          "region": "Testarbeidsstedregion",
+          "by": "Testarbeidsstedby",
+          "postnummer": "Testarbeidsstedpostkode"
+        },
+        "erikkefastadresse": "ja",
+        "navn": "Testarbeidsstednavn",
+        "hjemmebase": "Testarbeidsstedbase"
+      },
+      {
+        "navn": "Testarbeidsstednavn2",
+        "adresse": {
+          "gate": "Testarbeidsstedgate2",
+          "land": "CY",
+          "bygning": "Testarbeidsstedbygning2",
+          "by": "Testarbeidsstedby2"
+        },
+        "erikkefastadresse": "nei",
+        "hjemmebase": "Testarbeidsstedbase2"
+      }
+    ],
+    "selvstendig": {
+      "arbeidsgiver": [
+        {
+          "identifikator": [
+            {
+              "id": "Testselvstendignummer",
+              "type": "ukjent"
+            }
+          ],
+          "navn": "Testselvstendignavn",
+          "adresse": {
+            "region": "Testselvstendigregion",
+            "by": "Testselvstendigby",
+            "gate": "Testselvstendiggate",
+            "bygning": "Testselvstendigbygning",
+            "land": "BG",
+            "postnummer": "Testselvstendigpostkode"
+          }
+        }
+      ]
+    },
+    "arbeidsgiver": [
+      {
+        "navn": "Testarbeidsgiver",
+        "adresse": {
+          "land": "CY",
+          "bygning": "Testarbeidsgiverbygning",
+          "gate": "Testarbeidsgivergate",
+          "by": "Testarbeidsgiverby",
+          "postnummer": "Testarbeidsgiverpostkode",
+          "region": "Testarbeidsgiverregion"
+        },
+        "identifikator": [
+          {
+            "id": "TestOrgnummer",
+            "type": "trygd"
+          }
+        ]
+      }
+    ],
+    "ytterligereinformasjon": "ytterligereinformasjon\nOver\nFlere\nlinjer"
+  },
+  "medlemskap": {
+    "unntak": {
+      "startdatoansattforsikret": "2020-01-01",
+      "grunnlag": {
+        "annet": "Testandre\nFlere\nLinjer",
+        "artikkel": "11_3_d"
+      },
+      "spesielleomstendigheter": {
+        "type": "arbeidskontrakt_vertslandet_står_ved_lag",
+        "beskrivelseannensituasjon": "Testbeskrivelse\nFlere \nLinjer"
+      },
+      "startdatokontraktansettelse": "2019-01-01",
+      "begrunnelse": "Begrunnelse\nOver\nFlere\nlinjer",
+      "a1grunnlag": "16_R"
+    },
+    "vertsland": {
+      "arbeidsgiver": [
+        {
+          "identifikator": [
+            {
+              "id": "Testarbeidsgiverhosnummer",
+              "type": "trygd"
+            }
+          ],
+          "adresse": {
+            "bygning": "Testarbeidsgiverhosbygning",
+            "by": "Testarbeidsgiverhosby",
+            "land": "HR",
+            "gate": "Testarbeidsgiverhosgate",
+            "region": "Testarbeidsgiverhosregion",
+            "postnummer": "Testagpostkode"
+          },
+          "navn": "Testarbeidsgiverhostnavn"
+        }
+      ]
+    },
+    "naavaerendemedlemskap": [
+      {
+        "land": "BE"
+      },
+      {
+        "land": "BG"
+      },
+      {
+        "land": "HR"
+      },
+      {
+        "land": "GR"
+      },
+      {
+        "land": "GB"
+      }
+    ],
+    "forespurtmedlemskap": [
+      {
+        "land": "CZ"
+      },
+      {
+        "land": "GR"
+      },
+      {
+        "land": "GB"
+      }
+    ],
+    "soeknadsperiode": {
+      "startdato": "2018-01-10",
+      "sluttdato": "2019-12-01"
+    },
+    "tidligereperiode": [
+      {
+        "fastperiode": {
+          "sluttdato": "2020-12-01",
+          "startdato": "2018-10-01"
+        }
+      }
+    ],
+    "anmodning": {
+      "erendring": "ja"
+    },
+    "forrigesoeknad": [
+      {
+        "dato": "2017-12-01"
+      }
+    ]
+  },
+  "sedVer": "1",
+  "sedGVer": "4",
+  "sed": "A001"
+}

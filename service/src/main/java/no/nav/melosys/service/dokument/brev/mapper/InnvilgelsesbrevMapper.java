@@ -19,6 +19,7 @@ import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.MaritimtArbeid;
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Fartsomrader;
@@ -43,10 +44,10 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
 
     private static final Map<Medfolgende_barn_begrunnelser, BarnAvslagBegrunnelseKode> BARN_AVSLAG_BEGRUNNELSE_KODE_MAP
         = Map.ofEntries(
-            entry(Medfolgende_barn_begrunnelser.OVER_18_AR, BarnAvslagBegrunnelseKode.OVER_18_AAR),
-            entry(Medfolgende_barn_begrunnelser.IKKE_SOEKERS_BARN, BarnAvslagBegrunnelseKode.IKKE_SOEKERS_BARN),
-            entry(Medfolgende_barn_begrunnelser.IKKE_BOSATT_I_NORGE, BarnAvslagBegrunnelseKode.IKKE_BOSATT_I_NORGE),
-            entry(Medfolgende_barn_begrunnelser.MANGLER_OPPLYSNINGER, BarnAvslagBegrunnelseKode.MANGLER_OPPLYSNINGER));
+        entry(Medfolgende_barn_begrunnelser.OVER_18_AR, BarnAvslagBegrunnelseKode.OVER_18_AAR),
+        entry(Medfolgende_barn_begrunnelser.IKKE_SOEKERS_BARN, BarnAvslagBegrunnelseKode.IKKE_SOEKERS_BARN),
+        entry(Medfolgende_barn_begrunnelser.IKKE_BOSATT_I_NORGE, BarnAvslagBegrunnelseKode.IKKE_BOSATT_I_NORGE),
+        entry(Medfolgende_barn_begrunnelser.MANGLER_OPPLYSNINGER, BarnAvslagBegrunnelseKode.MANGLER_OPPLYSNINGER));
 
     @Override
     public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat, BrevData brevdata) throws JAXBException, SAXException {
@@ -74,17 +75,20 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
         fag.setYrkesaktivitet(YrkesaktivitetsKode.fromValue(hovedvirksomhet.yrkesaktivitet.getKode()));
 
         fag.setInngangsvilkårbegrunnelse(InngangsvilkaarBegrunnelseKode.EOS_BORGER);
-
-        fag.setArbeidsland(brevdata.arbeidsland);
         fag.setBostedsland(brevdata.bostedsland);
         fag.setTrygdemyndighetsland(brevdata.trygdemyndighetsland);
 
         BehandlingsgrunnlagData grunnlagData = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
+
+        fag.setArbeidsland(brevdata.arbeidsland);
         fag.setFlaggland(brevdata.arbeidsland);
+
         if (!grunnlagData.maritimtArbeid.isEmpty()) {
             MaritimtArbeid maritimtArbeid = grunnlagData.maritimtArbeid.iterator().next();
+            fag.setFlaggland(maritimtArbeid.flaggLandkode);
             if (Fartsomrader.INNENRIKS == maritimtArbeid.fartsomradeKode) {
                 fag.setArbeidPåTerritorialfarvann(JA);
+                fag.setArbeidsland(Landkoder.valueOf(maritimtArbeid.territorialfarvannLandkode).getBeskrivelse());
             }
         }
 

@@ -8,6 +8,7 @@ public record Mottaker(
     String postnr,
     String poststed,
     String land,
-    String type
+    String type,
+    String region
 ) {
 }

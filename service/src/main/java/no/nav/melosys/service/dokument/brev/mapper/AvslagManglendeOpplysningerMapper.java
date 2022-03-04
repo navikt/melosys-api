@@ -13,6 +13,7 @@ import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import org.xml.sax.SAXException;
 
+//TODO: Fjern når ny løsning er ferdigtestet (toggle "melosys.brev.AVSLAG_MANGLENDE_OPPLYSNINGER").
 public class AvslagManglendeOpplysningerMapper implements BrevDataMapper {
 
     private static final String XSD_LOCATION = "melosysbrev/melosys_000125.xsd";

@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.service.soknad.SoknadMottatt;
 import org.apache.kafka.clients.CommonClientConfigs;
@@ -42,6 +43,11 @@ public class KafkaConsumerConfig {
 
     @Value("${kafka.aiven.credstorePassword}")
     private String credstorePassword;
+
+    @Bean
+    public JsonDeserializer<MelosysEessiMelding> jsonDeserializer(ObjectMapper objectMapper) {
+        return new JsonDeserializer<>(MelosysEessiMelding.class, objectMapper, false);
+    }
 
     @Bean
     public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, MelosysEessiMelding>> aivenEessiMeldingListenerContainerFactory(
