@@ -1,14 +1,11 @@
 package no.nav.melosys.tjenester.gui;
 
-import java.util.Collection;
-
 import com.fasterxml.jackson.annotation.JsonView;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.dokument.DokumentView;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -27,6 +24,8 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.WebApplicationContext;
+
+import java.util.Collection;
 
 @Protected
 @RestController
@@ -63,12 +62,8 @@ public class BehandlingTjeneste {
         log.debug("Saksbehandler {} ber om å endre behandling {} med {}", SubjectHandler.getInstance().getUserID(), behandlingID, endreBehandling);
         aksesskontroll.autoriser(behandlingID);
 
-        var sakstype = endreBehandling.sakstype() == null ? null : Sakstyper.valueOf(endreBehandling.sakstype());
-        var behandlingstype = endreBehandling.behandlingstype() == null ? null : Behandlingstyper.valueOf(endreBehandling.behandlingstype());
-        var behandlingstema = endreBehandling.behandlingstema() == null ? null : Behandlingstema.valueOf(endreBehandling.behandlingstema());
-        var behandlingsstatus = endreBehandling.behandlingsstatus() == null ? null : Behandlingsstatus.valueOf(endreBehandling.behandlingsstatus());
-
-        behandlingService.endreBehandling(behandlingID, sakstype, behandlingstype, behandlingstema, behandlingsstatus, endreBehandling.behandlingsfrist());
+        behandlingService.endreBehandling(behandlingID, endreBehandling.sakstype(), endreBehandling.behandlingstype(),
+            endreBehandling.behandlingstema(), endreBehandling.behandlingsstatus(), endreBehandling.behandlingsfrist());
         return ResponseEntity.noContent().build();
     }
 
@@ -163,6 +158,7 @@ public class BehandlingTjeneste {
 
         return ResponseEntity.noContent().build();
     }
+
     @GetMapping("{behandlingID}/mulige-statuser")
     @ApiOperation("Hent mulige nye behandlingsstatuser for en behandling")
     public ResponseEntity<Collection<Behandlingsstatus>> hentMuligeStatuser(@PathVariable("behandlingID") long behandlingID) {

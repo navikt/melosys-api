@@ -1,11 +1,5 @@
 package no.nav.melosys.service.behandling;
 
-import java.lang.reflect.InvocationTargetException;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.Period;
-import java.util.*;
-
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;
 import no.finn.unleash.Unleash;
@@ -34,6 +28,12 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.lang.reflect.InvocationTargetException;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.Period;
+import java.util.*;
 
 import static java.util.stream.Collectors.toList;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.*;
@@ -210,9 +210,9 @@ public class BehandlingService {
 
         log.info("Oppdaterer status for behandling {} fra {} til {}", behandling.getId(), behandling.getStatus(), status);
         behandling.setStatus(status);
-        if (behandling.erVenterForDokumentasjon()) {
-            behandling.setDokumentasjonSvarfristDato(Instant.now().plus(Period.ofWeeks(2)));
-        }
+
+        Instant svarfrist = Instant.now().plus(Period.ofWeeks(2));
+        behandling.setDokumentasjonSvarfristDato(behandling.erVenterForDokumentasjon() ? svarfrist : null);
 
         behandlingRepository.save(behandling);
 

@@ -141,7 +141,7 @@ class BehandlingTjenesteTest extends JsonSchemaTestParent {
         final var behandlingsstatus = Behandlingsstatus.UNDER_BEHANDLING;
         final var behandlingsfrist = LocalDate.now();
 
-        var endreBehandlingDto = new EndreBehandlingDto(sakstype.getKode(), behandlingstype.getKode(), behandlingstema.getKode(), behandlingsstatus.getKode(), behandlingsfrist);
+        var endreBehandlingDto = new EndreBehandlingDto(sakstype, behandlingstype, behandlingstema, behandlingsstatus, behandlingsfrist);
         behandlingTjeneste.endreBehandling(BEHANDLING_ID, endreBehandlingDto);
 
         verify(behandlingService).endreBehandling(BEHANDLING_ID, sakstype, behandlingstype, behandlingstema, behandlingsstatus, behandlingsfrist);
