@@ -4,8 +4,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
@@ -23,7 +21,6 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
-import org.assertj.core.groups.Tuple;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,7 +28,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -146,6 +144,7 @@ class BehandlingsresultatServiceTest {
             .matches(l -> l.getId() == null)
             .matches(l -> l.getFom() != null)
             .matches(l -> l.getTom() != null)
+            .matches(l -> l.getMedlPeriodeID() != null)
             .matches(l -> l.getBehandlingsresultat() == behandlingsresultatreplika)
             .matches(l -> l.getDekning().equals(Trygdedekninger.FULL_DEKNING_EOSFO));
 
@@ -295,6 +294,7 @@ class BehandlingsresultatServiceTest {
         lovvalgsperiode.setDekning(Trygdedekninger.FULL_DEKNING_EOSFO);
         lovvalgsperiode.setFom(LocalDate.now());
         lovvalgsperiode.setTom(LocalDate.now().plusMonths(2));
+        lovvalgsperiode.setMedlPeriodeID(777L);
         return lovvalgsperiode;
     }
 

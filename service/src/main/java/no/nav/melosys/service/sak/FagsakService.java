@@ -2,9 +2,11 @@ package no.nav.melosys.service.sak;
 
 import java.time.Instant;
 import java.util.*;
+import java.util.stream.Stream;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
@@ -17,6 +19,7 @@ import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
+import no.nav.melosys.service.medl.MedlPeriodeService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
@@ -41,19 +44,24 @@ public class FagsakService {
     private final OppgaveService oppgaveService;
     private final PersondataFasade persondataFasade;
     private final BehandlingsresultatService behandlingsresultatService;
+    private final MedlPeriodeService medlPeriodeService;
+    private final Unleash unleash;
 
     private final Counter sakerOpprettet = Metrics.counter(SAKER_OPPRETTET);
 
     @Autowired
     public FagsakService(FagsakRepository fagsakRepository, BehandlingService behandlingService,
                          KontaktopplysningService kontaktopplysningService, @Lazy OppgaveService oppgaveService,
-                         PersondataFasade persondataFasade, BehandlingsresultatService behandlingsresultatService) {
+                         PersondataFasade persondataFasade, BehandlingsresultatService behandlingsresultatService,
+                         MedlPeriodeService medlPeriodeService, Unleash unleash) {
         this.fagsakRepository = fagsakRepository;
         this.behandlingService = behandlingService;
         this.kontaktopplysningService = kontaktopplysningService;
         this.oppgaveService = oppgaveService;
         this.persondataFasade = persondataFasade;
         this.behandlingsresultatService = behandlingsresultatService;
+        this.medlPeriodeService = medlPeriodeService;
+        this.unleash = unleash;
     }
 
     public Fagsak hentFagsak(String saksnummer) {
@@ -248,6 +256,9 @@ public class FagsakService {
         oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(
             replikertBehandling, replikertBehandling.getInitierendeJournalpostId(), fagsak.hentAktørID(), SubjectHandler.getInstance().getUserID()
         );
+        if (unleash.isEnabled("melosys.api.ny.vurdering.medlperiode.slettes")) {
+            avsluttTidligereMedlPeriode(behandlingsresultat);
+        }
         return replikertBehandling.getId();
     }
 
@@ -257,5 +268,17 @@ public class FagsakService {
         } else if (behandling.erEndretPeriode()) {
             throw new FunksjonellException("Kan ikke revurdere en behandling av type " + Behandlingstyper.ENDRET_PERIODE.getBeskrivelse());
         }
+    }
+
+    private void avsluttTidligereMedlPeriode(Behandlingsresultat behandlingsresultat) {
+        Collection<? extends PeriodeOmLovvalg> anmodningsperioder = behandlingsresultat.getAnmodningsperioder();
+        Collection<? extends PeriodeOmLovvalg> lovvalgsperioder = behandlingsresultat.getLovvalgsperioder();
+
+        Optional<Long> medlPeriodeID = Stream.concat(anmodningsperioder.stream(), lovvalgsperioder.stream())
+            .map(PeriodeOmLovvalg::getMedlPeriodeID)
+            .filter(Objects::nonNull)
+            .findFirst();
+
+        medlPeriodeID.ifPresent(medlPeriodeService::avvisPeriode);
     }
 }
