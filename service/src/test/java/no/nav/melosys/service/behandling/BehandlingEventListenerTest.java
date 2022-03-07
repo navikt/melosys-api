@@ -5,13 +5,17 @@ import java.time.LocalDate;
 import java.util.Optional;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.BehandlingEndretAvSaksbehandlerEvent;
 import no.nav.melosys.domain.BehandlingsfristEndretEvent;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.dokument.DokumentBestiltEvent;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
+import no.nav.melosys.service.oppgave.OppgaveFactory;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -105,5 +109,32 @@ class BehandlingEventListenerTest {
         verify(behandlingService, only()).hentBehandlingMedSaksopplysninger(BEHANDLING_ID);
         verify(oppgaveService).oppdaterOppgave(eq(OPPGAVE_ID), oppgaveOppdateringCaptor.capture());
         assertThat(oppgaveOppdateringCaptor.getValue().getFristFerdigstillelse()).isEqualTo(nå.plusWeeks(1));
+    }
+
+    @Test
+    void behandlingEndret_oppdatererOppgave_medRiktigData() {
+        Fagsak fagsak = new Fagsak();
+        fagsak.setSaksnummer(FAGSAKSNUMMER);
+        behandling.setType(Behandlingstyper.NY_VURDERING);
+        behandling.setTema(Behandlingstema.IKKE_YRKESAKTIV);
+        behandling.setBehandlingsfrist(LocalDate.of(2022, 3, 7));
+        behandling.setFagsak(fagsak);
+        when(behandlingService.hentBehandlingMedSaksopplysninger(BEHANDLING_ID)).thenReturn(behandling);
+        BehandlingEndretAvSaksbehandlerEvent behandlingEndretAvSaksbehandlerEvent = new BehandlingEndretAvSaksbehandlerEvent(
+            BEHANDLING_ID,
+            behandling
+        );
+        Oppgave oppgave = new Oppgave.Builder().setOppgaveId(OPPGAVE_ID).build();
+        when(oppgaveService.finnÅpenOppgaveMedFagsaksnummer(FAGSAKSNUMMER)).thenReturn(Optional.of(oppgave));
+
+        behandlingEventListener.behandlingEndret(behandlingEndretAvSaksbehandlerEvent);
+
+        Oppgave behandlingsOppgaveForType = OppgaveFactory.lagBehandlingsOppgaveForType(behandling.getTema(), behandling.getType()).build();
+        verify(oppgaveService).oppdaterOppgave(eq(OPPGAVE_ID), oppgaveOppdateringCaptor.capture());
+        OppgaveOppdatering capturedOppgaveOppdatering = oppgaveOppdateringCaptor.getValue();
+        assertThat(capturedOppgaveOppdatering.getBehandlingstema()).isEqualTo(behandlingsOppgaveForType.getBehandlingstema());
+        assertThat(capturedOppgaveOppdatering.getBehandlingstype()).isEqualTo(behandlingsOppgaveForType.getBehandlingstype());
+        assertThat(capturedOppgaveOppdatering.getTema()).isEqualTo(behandlingsOppgaveForType.getTema());
+        assertThat(capturedOppgaveOppdatering.getFristFerdigstillelse()).isEqualTo(LocalDate.of(2022, 3, 7));
     }
 }
