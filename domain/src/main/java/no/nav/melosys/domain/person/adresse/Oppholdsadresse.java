@@ -1,7 +1,7 @@
 package no.nav.melosys.domain.person.adresse;
 
-import java.time.LocalDateTime;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 

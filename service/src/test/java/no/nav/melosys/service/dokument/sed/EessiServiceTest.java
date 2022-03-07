@@ -96,7 +96,7 @@ class EessiServiceTest {
     }
 
     private void mockBehandling() {
-        when(behandlingService.hentBehandling(BEHANDLING_ID)).thenReturn(lagBehandling());
+        when(behandlingService.hentBehandlingMedSaksopplysninger(BEHANDLING_ID)).thenReturn(lagBehandling());
     }
 
     private Behandlingsresultat lagBehandlingsresultat() {
@@ -349,14 +349,14 @@ class EessiServiceTest {
         saksopplysning.setType(SaksopplysningType.SEDOPPL);
         saksopplysning.setDokument(new SedDokument());
         behandling.setSaksopplysninger(Collections.singleton(saksopplysning));
-        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
         when(dokumentdataGrunnlagFactory.av(any(), any())).thenReturn(Mockito.mock(SedDataGrunnlagUtenSoknad.class));
         when(sedDataBygger.lagUtkast(any(SedDataGrunnlag.class), any(Behandlingsresultat.class), any(PeriodeType.class))).thenReturn(new SedDataDto());
         mockBehandlingsresultat();
 
         eessiService.sendAnmodningUnntakSvar(BEHANDLING_ID, null);
 
-        verify(behandlingService).hentBehandling(BEHANDLING_ID);
+        verify(behandlingService).hentBehandlingMedSaksopplysninger(BEHANDLING_ID);
         verify(sedDataBygger).lagUtkast(any(SedDataGrunnlag.class), any(), eq(PeriodeType.ANMODNINGSPERIODE));
         verify(dokumentdataGrunnlagFactory).av(any(), any());
         verify(eessiConsumer).sendSedPåEksisterendeBuc(any(SedDataDto.class), any(), eq(SedType.A002));
@@ -370,14 +370,14 @@ class EessiServiceTest {
         saksopplysning.setType(SaksopplysningType.SEDOPPL);
         saksopplysning.setDokument(new SedDokument());
         behandling.setSaksopplysninger(Collections.singleton(saksopplysning));
-        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
         when(dokumentdataGrunnlagFactory.av(any(), any())).thenReturn(Mockito.mock(SedDataGrunnlagMedSoknad.class));
         when(sedDataBygger.lagUtkast(any(SedDataGrunnlag.class), any(Behandlingsresultat.class), any(PeriodeType.class))).thenReturn(new SedDataDto());
         mockBehandlingsresultat();
 
         eessiService.sendGodkjenningArbeidFlereLand(BEHANDLING_ID, null);
 
-        verify(behandlingService).hentBehandling(BEHANDLING_ID);
+        verify(behandlingService).hentBehandlingMedSaksopplysninger(BEHANDLING_ID);
         verify(sedDataBygger).lagUtkast(any(SedDataGrunnlag.class), any(), eq(PeriodeType.LOVVALGSPERIODE));
         verify(dokumentdataGrunnlagFactory).av(any(), any());
         verify(eessiConsumer).sendSedPåEksisterendeBuc(any(SedDataDto.class), any(), eq(SedType.A012));
@@ -448,7 +448,7 @@ class EessiServiceTest {
         sedPdfData.setNyttLovvalgsland("SE");
         byte[] pdf = eessiService.genererSedPdf(BEHANDLING_ID, SedType.A001, sedPdfData);
 
-        verify(behandlingService).hentBehandling(BEHANDLING_ID);
+        verify(behandlingService).hentBehandlingMedSaksopplysninger(BEHANDLING_ID);
         verify(dokumentdataGrunnlagFactory).av(any());
         verify(sedDataBygger).lagUtkast(any(SedDataGrunnlag.class), any(), eq(PeriodeType.ANMODNINGSPERIODE));
         verify(eessiConsumer).genererSedPdf(sedDataDtoCaptor.capture(), any());

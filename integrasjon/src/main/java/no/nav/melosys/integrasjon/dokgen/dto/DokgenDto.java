@@ -1,6 +1,8 @@
 package no.nav.melosys.integrasjon.dokgen.dto;
 
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -25,11 +27,6 @@ public abstract class DokgenDto {
 
     private final String saksbehandlerNavn;
     private Mottaker mottaker;
-
-    // Saksbehandlingstid er 12 uker fra dato for utsendelse av brev, uavhengig av helg, helligdager, osv.
-    protected static final int SAKSBEHANDLINGSTID_DAGER = 12 * 7;
-    // Svarfrist mangelbrev 4 uker fra dato brevet blir generert.
-    protected static final int DOKUMENTASJON_SVARFRIST_UKER_MANGELBREV = 4;
 
     protected DokgenDto(DokgenBrevbestilling brevbestilling, Aktoersroller mottakerType) {
         this.saksopplysninger = Saksopplysninger.av(brevbestilling);
@@ -56,5 +53,9 @@ public abstract class DokgenDto {
 
     public void setMottaker(Mottaker mottaker) {
         this.mottaker = mottaker;
+    }
+
+    protected LocalDate instantTilLocalDate(Instant datoOgTid) {
+        return datoOgTid != null ? LocalDate.ofInstant(datoOgTid, ZoneId.systemDefault()) : null;
     }
 }

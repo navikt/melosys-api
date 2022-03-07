@@ -1,0 +1,174 @@
+[
+  {
+    "id": "SE:6",
+    "navn": "The Swedish Social Insurance Agency",
+    "akronym": "FK Sverige-TS90",
+    "landkode": "SE",
+    "tilegnetBucs": [
+      {
+        "bucType": "LA_BUC_04",
+        "institusjonsrolle": "CaseOwner",
+        "gyldigStartDato": "2018-02-28T23:00:00.000+0000",
+        "eessiklar": true
+      },
+      {
+        "bucType": "S_BUC_18a",
+        "institusjonsrolle": "CaseOwner",
+        "gyldigStartDato": "2018-02-28T23:00:00.000+0000",
+        "eessiklar": true
+      },
+      {
+        "bucType": "S_BUC_04",
+        "institusjonsrolle": "CounterParty",
+        "gyldigStartDato": "2018-02-28T23:00:00.000+0000",
+        "eessiklar": true
+      },
+      {
+        "bucType": "AW_BUC_08",
+        "institusjonsrolle": "CaseOwner",
+        "gyldigStartDato": "2018-02-28T23:00:00.000+0000",
+        "eessiklar": true
+      }
+    ]
+  },
+  {
+    "id": "SE:5",
+    "navn": "The Swedish Social Insurance Agency",
+    "akronym": "FK Sverige-TS31",
+    "landkode": "SE",
+    "tilegnetBucs": [
+      {
+        "bucType": "AW_BUC_23",
+        "institusjonsrolle": "CaseOwner",
+        "gyldigStartDato": "2018-02-28T23:00:00.000+0000",
+        "eessiklar": true
+      },
+      {
+        "bucType": "H_BUC_03a",
+        "institusjonsrolle": "CaseOwner",
+        "gyldigStartDato": "2018-02-28T23:00:00.000+0000",
+        "eessiklar": true
+      }
+    ]
+  },
+  {
+    "id": "SE:4",
+    "navn": "The Swedish Social Insurance Agency",
+    "akronym": "FK Sverige-TS39",
+    "landkode": "SE",
+    "tilegnetBucs": [
+      {
+        "bucType": "LA_BUC_01",
+        "institusjonsrolle": "CounterParty",
+        "gyldigStartDato": "2018-02-28T23:00:00.000+0000",
+        "eessiklar": true
+      },
+      {
+        "bucType": "AW_BUC_11",
+        "institusjonsrolle": "CounterParty",
+        "gyldigStartDato": "2018-02-28T23:00:00.000+0000",
+        "eessiklar": true
+      }
+    ]
+  },
+  {
+    "id": "SE:3",
+    "navn": "The Swedish Social Insurance Agency",
+    "akronym": "FK Sverige-TS22",
+    "landkode": "SE",
+    "tilegnetBucs": [
+      {
+        "bucType": "AW_BUC_02",
+        "institusjonsrolle": "CaseOwner",
+        "gyldigStartDato": "2018-02-28T23:00:00.000+0000",
+        "eessiklar": true
+      },
+      {
+        "bucType": "AW_BUC_05",
+        "institusjonsrolle": "CounterParty",
+        "gyldigStartDato": "2018-02-28T23:00:00.000+0000",
+        "eessiklar": true
+      }
+    ]
+  },
+  {
+    "id": "SE:2",
+    "navn": "The Swedish Social Insurance Agency",
+    "akronym": "FK Sverige-TS25",
+    "landkode": "SE",
+    "tilegnetBucs": [
+      {
+        "bucType": "LA_BUC_09",
+        "institusjonsrolle": "CounterParty",
+        "gyldigStartDato": "2018-02-28T23:00:00.000+0000",
+        "eessiklar": false
+      },
+      {
+        "bucType": "S_BUC_01a",
+        "institusjonsrolle": "CounterParty",
+        "gyldigStartDato": "2018-02-28T23:00:00.000+0000",
+        "eessiklar": true
+      },
+      {
+        "bucType": "S_BUC_18",
+        "institusjonsrolle": "CounterParty",
+        "gyldigStartDato": "2018-02-28T23:00:00.000+0000",
+        "eessiklar": false
+      },
+      {
+        "bucType": "S_BUC_03",
+        "institusjonsrolle": "CounterParty",
+        "gyldigStartDato": "2018-02-28T23:00:00.000+0000",
+        "eessiklar": true
+      },
+      {
+        "bucType": "AW_BUC_01b",
+        "institusjonsrolle": "CaseOwner",
+        "gyldigStartDato": "2018-02-28T23:00:00.000+0000",
+        "eessiklar": true
+      }
+    ]
+  },
+  {
+    "id": "SE:1",
+    "navn": "The Swedish Social Insurance Agency",
+    "akronym": "FK Sverige-TS70",
+    "landkode": "SE",
+    "tilegnetBucs": [
+      {
+        "bucType": "LA_BUC_04",
+        "institusjonsrolle": "CounterParty",
+        "gyldigStartDato": "2018-02-28T23:00:00.000+0000",
+        "eessiklar": true
+      }
+    ]
+  },
+  {
+    "id": "UK:1",
+    "navn": "The UK Social Insurance Agency",
+    "akronym": "FK UK-TITTEI",
+    "landkode": "UK",
+    "tilegnetBucs": [
+      {
+        "bucType": "LA_BUC_04",
+        "institusjonsrolle": "CounterParty",
+        "gyldigStartDato": "2018-02-28T23:00:00.000+0000",
+        "eessiklar": true
+      }
+    ]
+  },
+  {
+    "id": "EL:1",
+    "navn": "The Hellas Social Insurance Agency",
+    "akronym": "FK EL-TITTEI",
+    "landkode": "EL",
+    "tilegnetBucs": [
+      {
+        "bucType": "LA_BUC_04",
+        "institusjonsrolle": "CounterParty",
+        "gyldigStartDato": "2018-02-28T23:00:00.000+0000",
+        "eessiklar": true
+      }
+    ]
+  }
+]

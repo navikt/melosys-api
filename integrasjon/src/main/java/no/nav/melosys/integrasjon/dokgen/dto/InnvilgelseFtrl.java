@@ -1,7 +1,6 @@
 package no.nav.melosys.integrasjon.dokgen.dto;
 
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -125,7 +124,7 @@ public class InnvilgelseFtrl extends DokgenDto {
         super(builder.brevbestilling, Aktoersroller.BRUKER);
         this.innvilgelse = Innvilgelse.av(builder.brevbestilling);
         this.datoMottatt = builder.brevbestilling.getForsendelseMottatt() != null
-            ? LocalDate.ofInstant(builder.brevbestilling.getForsendelseMottatt(), ZoneId.systemDefault()): null;
+            ? instantTilLocalDate(builder.brevbestilling.getForsendelseMottatt()): null;
         this.perioder = builder.perioder;
         this.erFullstendigInnvilget = builder.erFullstendigInnvilget;
         this.ftrl_2_8_begrunnelse = builder.ftrl_2_8_begrunnelse;

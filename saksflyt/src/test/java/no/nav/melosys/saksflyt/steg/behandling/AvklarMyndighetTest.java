@@ -1,6 +1,9 @@
 package no.nav.melosys.saksflyt.steg.behandling;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.FysiskArbeidssted;
@@ -44,7 +47,7 @@ class AvklarMyndighetTest {
         fagsak.setSaksnummer("saksnr");
 
         Behandling behandling = lagBehandling(fagsak);
-        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
         prosessinstans.setBehandling(behandling);
         prosessinstans.setType(ProsessType.IVERKSETT_VEDTAK_EOS);
     }

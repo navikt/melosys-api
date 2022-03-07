@@ -94,7 +94,7 @@ class A1Mapper {
 
     private MidlertidigOppholdsadresseType mapMidlertidigOppholdsadresse(Persondata persondata) {
         Optional<StrukturertAdresse> strukturertAdresse = hentNyesteOppholdEllerKontaktadresse(persondata)
-            .or(() -> persondata.finnKontaktadresse().map(Kontaktadresse::strukturertAdresse))
+            .or(() -> persondata.finnKontaktadresse().map(Kontaktadresse::hentEllerLagStrukturertAdresse))
             .or(() -> persondata.finnOppholdsadresse().map(Oppholdsadresse::strukturertAdresse));
         return strukturertAdresse.map(this::lagMidlertidigOppholdsadresse).orElse(null);
     }
@@ -107,7 +107,7 @@ class A1Mapper {
 
     private Optional<StrukturertAdresse> returnerSistRegistrertAdresse(Kontaktadresse kontaktadresse, Oppholdsadresse oppholdsadresse) {
         return kontaktadresse.registrertDato().isAfter((oppholdsadresse.registrertDato())) ?
-            Optional.of(kontaktadresse.strukturertAdresse()) : Optional.of(oppholdsadresse.strukturertAdresse());
+            Optional.ofNullable(kontaktadresse.hentEllerLagStrukturertAdresse()) : Optional.of(oppholdsadresse.strukturertAdresse());
     }
 
     private static String mapStatsborgerskap(Set<Land> statsborgerskap) {
@@ -163,8 +163,8 @@ class A1Mapper {
 
         BivirksomhetListeType bivirksomheterBrev = new BivirksomhetListeType();
         Stream.concat(
-            hentAvklarteVirksomheterOgIkkeFysiskeArbeidssteder(avklarteVirksomheter, arbeidssteder),
-            Stream.generate(A1Mapper::lagTomBivirksomhetType))
+                hentAvklarteVirksomheterOgIkkeFysiskeArbeidssteder(avklarteVirksomheter, arbeidssteder),
+                Stream.generate(A1Mapper::lagTomBivirksomhetType))
             .limit(ANTALL_PÅKREVDE_FELTER_I_LISTE_5_1)
             .forEach(bivirksomhetType -> bivirksomheterBrev.getBivirksomhet().add(bivirksomhetType));
         return bivirksomheterBrev;
@@ -178,9 +178,9 @@ class A1Mapper {
                                                                  Collection<Landkoder> arbeidsland) {
         FysiskArbeidsstedAdresseListeType fysiskeAdresserBrev = new FysiskArbeidsstedAdresseListeType();
         Stream.concat(
-            lagAdresserForArbeidsstederOgLandUtenArbeidssted(arbeidssteder, arbeidsland),
-            Stream.generate(A1Mapper::lagTomAdresseType)
-        )
+                lagAdresserForArbeidsstederOgLandUtenArbeidssted(arbeidssteder, arbeidsland),
+                Stream.generate(A1Mapper::lagTomAdresseType)
+            )
             .limit(ANTALL_PÅKREVDE_FELTER_I_LISTE_5_2)
             .forEach(adresseType -> fysiskeAdresserBrev.getAdresse().add(adresseType));
         return fysiskeAdresserBrev;

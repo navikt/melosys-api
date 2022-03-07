@@ -1,0 +1,100 @@
+{
+  "nav" : {
+    "bruker" : {
+      "mor" : {
+        "person" : {
+          "etternavnvedfoedsel" : "sadfsdafsdf",
+          "fornavn" : "sndfiajkn uijoj"
+        }
+      },
+      "person" : {
+        "fornavn" : "sadfsdf",
+        "statsborgerskap" : [ {
+          "land" : "GR"
+        }, {
+          "land" : "DE"
+        } ],
+        "kjoenn" : "K",
+        "etternavn" : "sdfsdfa adfs",
+        "etternavnvedfoedsel" : "sfdasf sdfasf",
+        "foedselsdato" : "1955-09-12",
+        "pin" : [ {
+          "institusjonsnavn" : "asdfsdf werwerwer",
+          "identifikator" : "i3244234",
+          "sektor" : "tIlbakekreving",
+          "land" : "SE",
+          "institusjonsid" : "asfdf asdff"
+        } ],
+        "foedested" : {
+          "region" : "fwqf wefqwfwe",
+          "by" : "fnnoqfwef",
+          "land" : "GR"
+        },
+        "fornavnvedfoedsel" : "kjsndfkjnkjn"
+      },
+      "far" : {
+        "person" : {
+          "fornavn" : "dfa dsaffds",
+          "etternavnvedfoedsel" : "fssadf feqwfwq"
+        }
+      }
+    },
+    "arbeidssted" : [ {
+      "adresse" : {
+        "land" : "CY",
+        "gate" : "aSD ASDAda",
+        "region" : "asds sfasd",
+        "bygning" : "jknkjn kjnjkn",
+        "by" : "asd adsdy",
+        "postnummer" : "1233"
+      },
+      "erikkefastadresse" : "ja",
+      "navn" : "nsjfsa asds",
+      "hjemmebase" : "kjnjk jknkn"
+    } ],
+    "eessisak" : {
+      "institusjonsnummer" : "ijnfiasdn ijij",
+      "institusjonsid" : "asdf ojo"
+    }
+  },
+  "medlemskap" : {
+    "endring" : {
+      "periode" : "14_11",
+      "arbeidssted" : {
+        "navn" : "jndsfisa iji AS",
+        "by" : "sdjnin iinininj",
+        "gate" : "fsjanfin iniin",
+        "region" : "safdsv adfsd",
+        "postnummer" : "3244",
+        "land" : "FR"
+      },
+      "trerikraftfra" : "2018-12-10",
+      "sluttdato" : "2019-04-10",
+      "adresse" : {
+        "postnummer" : "wfqinfi innunn",
+        "by" : "fwfqw fweq",
+        "gate" : "jhsiab inin",
+        "land" : "IS",
+        "region" : "fqwfwefwqefeqwf"
+      },
+      "bruker" : {
+        "fornavn" : "isafnisa nuin",
+        "etternavn" : "asdifni ini"
+      },
+      "startdato" : "2019-04-05"
+    },
+    "bruker" : {
+      "arbeidiflereland" : {
+        "bosted" : {
+          "land" : "SE"
+        },
+        "yrkesaktivitet" : {
+          "startdato" : "2019-10-09"
+        }
+      }
+    }
+  },
+  "sedVer" : "1",
+  "sedGVer" : "4",
+  "sed" : "A008"
+}

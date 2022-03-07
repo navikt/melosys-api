@@ -1,5 +1,6 @@
 package no.nav.melosys.tjenester.gui;
 
+import java.io.IOException;
 import java.util.Optional;
 
 import no.nav.melosys.domain.arkiv.Journalpost;
@@ -9,6 +10,7 @@ import no.nav.melosys.service.journalforing.JournalfoeringService;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringOpprettDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringSedDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringTilordneDto;
+import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.tjenester.gui.dto.journalforing.JournalpostDto;
 import org.jeasy.random.EasyRandom;
 import org.jeasy.random.EasyRandomParameters;
@@ -22,10 +24,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-@SuppressWarnings("resource")
 class JournalfoeringTjenesteTest extends JsonSchemaTestParent {
     private static final Logger log = LoggerFactory.getLogger(JournalfoeringTjenesteTest.class);
     private static final String JOURNALFOERING_SCHEMA = "journalforing-schema.json";
@@ -39,18 +41,20 @@ class JournalfoeringTjenesteTest extends JsonSchemaTestParent {
 
     @Mock
     private JournalfoeringService journalføringService;
+    @Mock
+    private OppgaveService oppgaveService;
 
     private JournalfoeringTjeneste tjeneste;
 
     @BeforeEach
     public void setUp() {
-        tjeneste = new JournalfoeringTjeneste(journalføringService);
+        tjeneste = new JournalfoeringTjeneste(journalføringService, oppgaveService);
 
         random = new EasyRandom(new EasyRandomParameters().collectionSizeRange(1, 4));
     }
 
     @Test
-    void hentJournalpostValidering() throws Exception {
+    void hentJournalpost_validerSchema() throws IOException {
         Journalpost journalpost = random.nextObject(Journalpost.class);
         journalpost.setAvsenderId(SAMPLE_ORGNR);
         when(journalføringService.hentJournalpost(anyString())).thenReturn(journalpost);
@@ -63,41 +67,55 @@ class JournalfoeringTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    void journalføringTilordneSchemaValidering() throws Exception {
-        JournalfoeringTilordneDto journalfoeringDto = random.nextObject(JournalfoeringTilordneDto.class);
-        journalfoeringDto.setBrukerID(SAMPLE_FNR);
-        journalfoeringDto.setBehandlingstypeKode(Behandlingstyper.ENDRET_PERIODE.getKode());
-        valider(journalfoeringDto, JOURNALFOERING_TILORDNE_SCHEMA, log);
+    void journalføringTilordne_validerKallOgSchema() throws IOException {
+        JournalfoeringTilordneDto journalføringDto = random.nextObject(JournalfoeringTilordneDto.class);
+        journalføringDto.setBrukerID(SAMPLE_FNR);
+        journalføringDto.setBehandlingstypeKode(Behandlingstyper.ENDRET_PERIODE.getKode());
+
+        tjeneste.journalførOgTilordneSak(journalføringDto);
+
+        verify(journalføringService).journalførOgTilordneSak(journalføringDto);
+        verify(oppgaveService).ferdigstillOppgave(journalføringDto.getOppgaveID());
+        valider(journalføringDto, JOURNALFOERING_TILORDNE_SCHEMA, log);
     }
 
     @Test
-    void journalføringOpprettSchemaValidering() throws Exception {
-        JournalfoeringOpprettDto journalfoeringDto = random.nextObject(JournalfoeringOpprettDto.class);
-        journalfoeringDto.setBrukerID(SAMPLE_FNR);
-        journalfoeringDto.setBehandlingstemaKode(Behandlingstema.ARBEID_FLERE_LAND.getKode());
-        journalfoeringDto.setArbeidsgiverID(SAMPLE_ORGNR);
-        journalfoeringDto.setRepresentantID(SAMPLE_ORGNR);
-        valider(journalfoeringDto, JOURNALFOERING_OPPRETT_SCHEMA, log);
+    void journalføringOpprett_validerKallOgSchema() throws IOException {
+        JournalfoeringOpprettDto journalføringDto = random.nextObject(JournalfoeringOpprettDto.class);
+        journalføringDto.setBrukerID(SAMPLE_FNR);
+        journalføringDto.setBehandlingstemaKode(Behandlingstema.ARBEID_FLERE_LAND.getKode());
+        journalføringDto.setArbeidsgiverID(SAMPLE_ORGNR);
+        journalføringDto.setRepresentantID(SAMPLE_ORGNR);
+
+        tjeneste.journalførOgOpprettSak(journalføringDto);
+
+        verify(journalføringService).journalførOgOpprettSak(journalføringDto);
+        verify(oppgaveService).ferdigstillOppgave(journalføringDto.getOppgaveID());
+        valider(journalføringDto, JOURNALFOERING_OPPRETT_SCHEMA, log);
     }
 
     @Test
-    void journalføringOpprettSchemaValideringMedRepresentantIDNull() throws Exception {
-        JournalfoeringOpprettDto journalfoeringDto = random.nextObject(JournalfoeringOpprettDto.class);
-        journalfoeringDto.setBrukerID(SAMPLE_FNR);
-        journalfoeringDto.setBehandlingstemaKode(Behandlingstema.ARBEID_FLERE_LAND.getKode());
-        journalfoeringDto.setArbeidsgiverID(SAMPLE_ORGNR);
-        journalfoeringDto.setRepresentantID(null);
-        valider(journalfoeringDto, JOURNALFOERING_OPPRETT_SCHEMA, log);
+    void journalføringOpprett_validerSchemaMedRepresentantIDNull() throws IOException {
+        JournalfoeringOpprettDto journalføringDto = random.nextObject(JournalfoeringOpprettDto.class);
+        journalføringDto.setBrukerID(SAMPLE_FNR);
+        journalføringDto.setBehandlingstemaKode(Behandlingstema.ARBEID_FLERE_LAND.getKode());
+        journalføringDto.setArbeidsgiverID(SAMPLE_ORGNR);
+        journalføringDto.setRepresentantID(null);
+        valider(journalføringDto, JOURNALFOERING_OPPRETT_SCHEMA, log);
     }
 
     @Test
-    void journalførSedSchemaValidering() throws Exception {
-        JournalfoeringSedDto journalfoeringSedDto = new JournalfoeringSedDto();
-        journalfoeringSedDto.setOppgaveID("123123");
-        journalfoeringSedDto.setBrukerID(SAMPLE_FNR);
-        journalfoeringSedDto.setJournalpostID("1231231232");
-        valider(journalfoeringSedDto, JOURNALFOERING_SED_SCHEMA, log);
-    }
+    void journalførSed_validerSchema() throws IOException {
+        JournalfoeringSedDto journalføringSedDto = new JournalfoeringSedDto();
+        journalføringSedDto.setOppgaveID("123123");
+        journalføringSedDto.setBrukerID(SAMPLE_FNR);
+        journalføringSedDto.setJournalpostID("1231231232");
 
+        tjeneste.journalførSed(journalføringSedDto);
+
+        verify(journalføringService).journalførSed(journalføringSedDto);
+        verify(oppgaveService).ferdigstillOppgave(journalføringSedDto.getOppgaveID());
+        valider(journalføringSedDto, JOURNALFOERING_SED_SCHEMA, log);
+    }
 }
 

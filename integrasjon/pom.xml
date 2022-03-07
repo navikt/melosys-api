@@ -119,12 +119,6 @@
             <artifactId>spring-retry</artifactId>
         </dependency>
 
-        <!--AAREG-->
-        <dependency>
-            <groupId>no.nav.tjenestespesifikasjoner</groupId>
-            <artifactId>nav-arbeidsforhold-v3-tjenestespesifikasjon</artifactId>
-        </dependency>
-
         <!-- Sak og Behandling a.k.a. SOB -->
         <dependency>
             <groupId>no.nav.tjenestespesifikasjoner</groupId>

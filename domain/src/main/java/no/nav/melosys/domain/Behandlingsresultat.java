@@ -413,12 +413,8 @@ public class Behandlingsresultat extends RegistreringsInfo {
                     || erUtpeking());
     }
 
-    public void settVedtakMetadata(Vedtakstyper vedtakstype, LocalDate klagefrist) {
-        settVedtakMetadata(vedtakstype, null, klagefrist);
-    }
-
     public void settVedtakMetadata(Vedtakstyper vedtakstype,
-                                   String revurderBegrunnelse,
+                                   String nyVurderingBakgrunn,
                                    LocalDate klagefrist) {
         if (vedtakMetadata == null) {
             vedtakMetadata = new VedtakMetadata();
@@ -430,7 +426,7 @@ public class Behandlingsresultat extends RegistreringsInfo {
 
         vedtakMetadata.setVedtakstype(vedtakstype);
         vedtakMetadata.setVedtaksdato(Instant.now());
-        vedtakMetadata.setRevurderBegrunnelse(revurderBegrunnelse);
+        vedtakMetadata.setNyVurderingBakgrunn(nyVurderingBakgrunn);
         vedtakMetadata.setVedtakKlagefrist(klagefrist);
     }
 

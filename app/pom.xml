@@ -94,6 +94,7 @@
                 <configuration>
                     <mainClass>no.nav.melosys.Application</mainClass>
                     <finalName>melosys</finalName>
+                    <classifier>sb-execution</classifier>
                 </configuration>
             </plugin>
             <plugin>

@@ -10,6 +10,8 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.DokgenService;
@@ -21,7 +23,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import static no.nav.melosys.service.vedtak.VedtakServiceFasade.FRIST_KLAGE_UKER;
+import static no.nav.melosys.service.vedtak.VedtaksfattingFasade.FRIST_KLAGE_UKER;
 
 @Service
 public class FtrlVedtakService {
@@ -46,7 +48,7 @@ public class FtrlVedtakService {
         this.dokgenService = dokgenService;
     }
 
-    public void fattVedtak(Behandling behandling, FattFtrlVedtakRequest request) {
+    public void fattVedtak(Behandling behandling, FattVedtakRequest request) {
         long behandlingID = behandling.getId();
 
         log.info("Fatter vedtak for (FTRL) sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandlingID);
@@ -58,14 +60,14 @@ public class FtrlVedtakService {
         }
 
         behandling.getFagsak().setStatus(Saksstatuser.MEDLEMSKAP_AVKLART);
-        behandlingService.oppdaterStatus(behandling, Behandlingsstatus.IVERKSETTER_VEDTAK);
+        behandlingService.endreStatus(behandling, Behandlingsstatus.IVERKSETTER_VEDTAK);
 
         prosessinstansService.opprettProsessinstansIverksettVedtakFTRL(behandling, request);
         dokgenService.produserOgDistribuerBrev(behandlingID, lagBrevbestilling(request));
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 
-    private BrevbestillingRequest lagBrevbestilling(FattFtrlVedtakRequest request) {
+    private BrevbestillingRequest lagBrevbestilling(FattVedtakRequest request) {
         return new BrevbestillingRequest.Builder()
             .medProduserbardokument(Produserbaredokumenter.INNVILGELSE_FOLKETRYGDLOVEN_2_8)
             .medMottaker(Aktoersroller.BRUKER)
@@ -78,10 +80,10 @@ public class FtrlVedtakService {
             .build();
     }
 
-    private void oppdaterBehandlingsresultat(long behandlingID, FattFtrlVedtakRequest request) throws IkkeFunnetException {
+    private void oppdaterBehandlingsresultat(long behandlingID, FattVedtakRequest request) throws IkkeFunnetException {
         var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
         behandlingsresultat.setType(request.getBehandlingsresultatTypeKode());
-        behandlingsresultat.settVedtakMetadata(request.getVedtakstype(), LocalDate.now().plusWeeks(FRIST_KLAGE_UKER));
+        behandlingsresultat.settVedtakMetadata(request.getVedtakstype(), request.getNyVurderingBakgrunn(), LocalDate.now().plusWeeks(FRIST_KLAGE_UKER));
         behandlingsresultat.setBegrunnelseFritekst(request.getBegrunnelseFritekst());
         behandlingsresultat.setInnledningFritekst(request.getInnledningFritekst());
         behandlingsresultat.setFastsattAvLand(Landkoder.NO);

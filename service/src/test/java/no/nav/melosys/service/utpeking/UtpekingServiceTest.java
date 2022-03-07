@@ -36,7 +36,7 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.springframework.context.event.ApplicationEventMulticaster;
 
-import static no.nav.melosys.service.vedtak.VedtakServiceFasade.FRIST_KLAGE_UKER;
+import static no.nav.melosys.service.vedtak.VedtaksfattingFasade.FRIST_KLAGE_UKER;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.*;
@@ -91,7 +91,7 @@ class UtpekingServiceTest {
         behandling.setFagsak(fagsak);
         behandlingsresultat.setId(behandlingID);
 
-        when(behandlingService.hentBehandlingUtenSaksopplysninger(eq(behandlingID))).thenReturn(behandling);
+        when(behandlingService.hentBehandling(eq(behandlingID))).thenReturn(behandling);
         when(behandlingsresultatService.hentBehandlingsresultat(eq(behandlingID))).thenReturn(behandlingsresultat);
     }
 
@@ -117,13 +117,13 @@ class UtpekingServiceTest {
         verify(lovvalgsperiodeService).lagreLovvalgsperioder(eq(behandlingID), lovvalgsperiodeCaptor.capture());
         verify(prosessinstansService).opprettProsessinstansUtpekAnnetLand(eq(behandling), eq(Landkoder.SE), eq(mottakerInstitusjoner), isNull(), isNull());
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(eq(fagsak.getSaksnummer()));
-        verify(vedtakKontrollService).utførKontroller(behandlingID, Vedtakstyper.FØRSTEGANGSVEDTAK, Sakstyper.EU_EOS);
+        verify(vedtakKontrollService).utførKontroller(behandlingID, Sakstyper.EU_EOS);
 
         assertThat(behandlingsresultat)
             .extracting(Behandlingsresultat::getType, Behandlingsresultat::getBegrunnelseFritekst, Behandlingsresultat::getFastsattAvLand)
             .containsExactly(Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND, null, Landkoder.NO);
         assertThat(behandlingsresultat.getVedtakMetadata()).isNotNull()
-            .extracting(VedtakMetadata::getVedtakstype, VedtakMetadata::getRevurderBegrunnelse, VedtakMetadata::getVedtakKlagefrist)
+            .extracting(VedtakMetadata::getVedtakstype, VedtakMetadata::getNyVurderingBakgrunn, VedtakMetadata::getVedtakKlagefrist)
             .containsExactly(Vedtakstyper.FØRSTEGANGSVEDTAK, null, LocalDate.now().plusWeeks(FRIST_KLAGE_UKER));
 
 
@@ -175,7 +175,7 @@ class UtpekingServiceTest {
             .extracting(Behandlingsresultat::getType, Behandlingsresultat::getBegrunnelseFritekst, Behandlingsresultat::getFastsattAvLand)
             .containsExactly(Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND, null, Landkoder.NO);
         assertThat(behandlingsresultat.getVedtakMetadata()).isNotNull()
-            .extracting(VedtakMetadata::getVedtakstype, VedtakMetadata::getRevurderBegrunnelse, VedtakMetadata::getVedtakKlagefrist)
+            .extracting(VedtakMetadata::getVedtakstype, VedtakMetadata::getNyVurderingBakgrunn, VedtakMetadata::getVedtakKlagefrist)
             .containsExactly(Vedtakstyper.FØRSTEGANGSVEDTAK, null, LocalDate.now().plusWeeks(FRIST_KLAGE_UKER));
     }
 

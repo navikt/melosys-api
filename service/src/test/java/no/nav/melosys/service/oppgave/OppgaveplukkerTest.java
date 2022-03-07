@@ -69,7 +69,7 @@ class OppgaveplukkerTest {
         fagsak.setGsakSaksnummer(GSAK_SAKSNUMMER);
         behandling.setFagsak(fagsak);
 
-        when(behandlingService.hentBehandlingUtenSaksopplysninger(BEHANDLING_ID)).thenReturn(behandling);
+        when(behandlingService.hentBehandling(BEHANDLING_ID)).thenReturn(behandling);
     }
 
     @Test

@@ -33,7 +33,7 @@ public class VurderInngangsvilkaar implements StegBehandler {
     @Override
     public void utfør(Prosessinstans prosessinstans) {
         final long behandlingID = prosessinstans.getBehandling().getId();
-        Behandling behandling = behandlingService.hentBehandling(behandlingID);
+        Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
 
         if (behandling.getFagsak().getType() == Sakstyper.EU_EOS && behandling.kanResultereIVedtak()) {
             var søknadsland = behandling.finnSøknadsLand();

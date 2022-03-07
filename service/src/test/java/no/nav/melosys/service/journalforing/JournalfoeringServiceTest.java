@@ -23,7 +23,6 @@ import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.felles.dto.SoeknadslandDto;
 import no.nav.melosys.service.journalforing.dto.*;
-import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
@@ -45,8 +44,6 @@ class JournalfoeringServiceTest {
     private JoarkFasade joarkFasade;
     @Mock
     private ProsessinstansService prosessinstansService;
-    @Mock
-    private OppgaveService oppgaveService;
     @Mock
     private EessiService eessiService;
     @Mock
@@ -70,7 +67,7 @@ class JournalfoeringServiceTest {
         journalpost = new Journalpost("123");
         journalpost.setHoveddokument(new ArkivDokument());
 
-        this.journalfoeringService = new JournalfoeringService(joarkFasade, oppgaveService, prosessinstansService, eessiService, fagsakService, persondataFasade, unleash);
+        this.journalfoeringService = new JournalfoeringService(joarkFasade, prosessinstansService, eessiService, fagsakService, persondataFasade, unleash);
         opprettDto = new JournalfoeringOpprettDto();
         opprettDto.setJournalpostID("setJournalpostID");
         opprettDto.setOppgaveID("setOppgaveID");
@@ -136,10 +133,9 @@ class JournalfoeringServiceTest {
             .thenReturn(new Prosessinstans());
         when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
 
-        journalfoeringService.opprettOgJournalfør(opprettDto);
+        journalfoeringService.journalførOgOpprettSak(opprettDto);
 
         verify(prosessinstansService).lagre(any(Prosessinstans.class));
-        verify(oppgaveService).ferdigstillOppgave(anyString());
     }
 
     @Test
@@ -151,10 +147,9 @@ class JournalfoeringServiceTest {
             .thenReturn(new Prosessinstans());
         when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
 
-        journalfoeringService.opprettOgJournalfør(opprettDto);
+        journalfoeringService.journalførOgOpprettSak(opprettDto);
 
         verify(prosessinstansService).lagre(any(Prosessinstans.class));
-        verify(oppgaveService).ferdigstillOppgave(anyString());
     }
 
     @Test
@@ -165,7 +160,7 @@ class JournalfoeringServiceTest {
         when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
 
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> journalfoeringService.opprettOgJournalfør(opprettDto))
+            .isThrownBy(() -> journalfoeringService.journalførOgOpprettSak(opprettDto))
             .withMessageContaining("ikke gyldig for sakstype");
     }
 
@@ -177,7 +172,7 @@ class JournalfoeringServiceTest {
             .thenReturn(new Prosessinstans());
         when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> journalfoeringService.opprettOgJournalfør(opprettDto))
+            .isThrownBy(() -> journalfoeringService.journalførOgOpprettSak(opprettDto))
             .withMessageContaining("Fra og med dato kan ikke være etter til og med dato");
     }
 
@@ -189,10 +184,9 @@ class JournalfoeringServiceTest {
             .thenReturn(new Prosessinstans());
         when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
 
-        journalfoeringService.opprettOgJournalfør(opprettDto);
+        journalfoeringService.journalførOgOpprettSak(opprettDto);
 
         verify(prosessinstansService).lagre(any(Prosessinstans.class));
-        verify(oppgaveService).ferdigstillOppgave(anyString());
     }
 
     @Test
@@ -204,7 +198,7 @@ class JournalfoeringServiceTest {
         when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
 
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> journalfoeringService.opprettOgJournalfør(opprettDto))
+            .isThrownBy(() -> journalfoeringService.journalførOgOpprettSak(opprettDto))
             .withMessageContaining("Kan ikke opprette ny sak med behandlingstema " + Behandlingstema.ARBEID_I_UTLANDET);
     }
 
@@ -218,7 +212,7 @@ class JournalfoeringServiceTest {
             .thenReturn(new Prosessinstans());
         when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
 
-        journalfoeringService.opprettOgJournalfør(opprettDto);
+        journalfoeringService.journalførOgOpprettSak(opprettDto);
         verify(prosessinstansService).lagre(any(Prosessinstans.class));
     }
 
@@ -228,7 +222,7 @@ class JournalfoeringServiceTest {
         when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
 
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> journalfoeringService.opprettOgJournalfør(opprettDto))
+            .isThrownBy(() -> journalfoeringService.journalførOgOpprettSak(opprettDto))
             .withMessageContaining("OppgaveID mangler");
     }
 
@@ -244,7 +238,7 @@ class JournalfoeringServiceTest {
         when(eessiService.støtterAutomatiskBehandling(any(MelosysEessiMelding.class))).thenReturn(Boolean.TRUE);
 
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> journalfoeringService.opprettOgJournalfør(opprettDto))
+            .isThrownBy(() -> journalfoeringService.journalførOgOpprettSak(opprettDto))
             .withMessageContaining("skal ikke journalføres manuelt");
     }
 
@@ -261,7 +255,7 @@ class JournalfoeringServiceTest {
         when(eessiService.støtterAutomatiskBehandling(any(MelosysEessiMelding.class))).thenReturn(Boolean.FALSE);
 
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> journalfoeringService.opprettOgJournalfør(opprettDto))
+            .isThrownBy(() -> journalfoeringService.journalførOgOpprettSak(opprettDto))
             .withMessageContaining("Manuell journalføring");
     }
 
@@ -283,7 +277,7 @@ class JournalfoeringServiceTest {
         when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
 
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> journalfoeringService.opprettOgJournalfør(opprettDto))
+            .isThrownBy(() -> journalfoeringService.journalførOgOpprettSak(opprettDto))
             .withMessageContaining("er allerede tilknyttet");
     }
 
@@ -293,7 +287,7 @@ class JournalfoeringServiceTest {
         when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
 
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> journalfoeringService.opprettOgJournalfør(opprettDto))
+            .isThrownBy(() -> journalfoeringService.journalførOgOpprettSak(opprettDto))
             .withMessageContaining("BrukerID mangler");
     }
 
@@ -303,7 +297,7 @@ class JournalfoeringServiceTest {
         when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
 
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> journalfoeringService.opprettOgJournalfør(opprettDto))
+            .isThrownBy(() -> journalfoeringService.journalførOgOpprettSak(opprettDto))
             .withMessageContaining("allerede ferdigstilt");
     }
 
@@ -324,10 +318,9 @@ class JournalfoeringServiceTest {
             .thenReturn(new Prosessinstans());
         when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
 
-        journalfoeringService.tilordneSakOgJournalfør(tilordneDto);
+        journalfoeringService.journalførOgTilordneSak(tilordneDto);
 
         verify(prosessinstansService).lagre(any(Prosessinstans.class));
-        verify(oppgaveService).ferdigstillOppgave(anyString());
     }
 
     @Test
@@ -345,7 +338,7 @@ class JournalfoeringServiceTest {
         when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
 
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> journalfoeringService.tilordneSakOgJournalfør(tilordneDto))
+            .isThrownBy(() -> journalfoeringService.journalførOgTilordneSak(tilordneDto))
             .withMessageContaining("Det finnes allerede en aktiv behandling på fagsak");
     }
 
@@ -355,7 +348,7 @@ class JournalfoeringServiceTest {
         when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
 
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> journalfoeringService.tilordneSakOgJournalfør(tilordneDto))
+            .isThrownBy(() -> journalfoeringService.journalførOgTilordneSak(tilordneDto))
             .withMessageContaining("Saksnummer mangler");
     }
 
@@ -377,8 +370,34 @@ class JournalfoeringServiceTest {
         when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
 
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> journalfoeringService.tilordneSakOgJournalfør(tilordneDto))
+            .isThrownBy(() -> journalfoeringService.journalførOgTilordneSak(tilordneDto))
             .withMessageContaining("er allerede tilknyttet");
+    }
+
+    @Test
+    void tilordneSakOgJournalfør_behandlingstypeIkkeTillattForSakstype_kasterException() {
+        final String saksnummer = "MEL-0123";
+        tilordneDto.setSaksnummer(saksnummer);
+
+        Fagsak fagsak = new Fagsak();
+        fagsak.setSaksnummer(saksnummer);
+
+        when(fagsakService.hentFagsak(saksnummer)).thenReturn(fagsak);
+        when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
+
+        tilordneDto.setBehandlingstypeKode(Behandlingstyper.ENDRET_PERIODE.getKode());
+        fagsak.setType(Sakstyper.TRYGDEAVTALE);
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> journalfoeringService.journalførOgTilordneSak(tilordneDto))
+            .withMessageContaining(" er ikke en lovlig behandlingstype ved knytting av dokument til sak");
+
+        tilordneDto.setBehandlingstypeKode(Behandlingstyper.NY_VURDERING.getKode());
+        fagsak.setType(Sakstyper.EU_EOS);
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> journalfoeringService.journalførOgTilordneSak(tilordneDto))
+            .withMessageContaining(" er ikke en lovlig behandlingstype ved knytting av dokument til sak");
     }
 
     @Test

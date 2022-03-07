@@ -158,7 +158,7 @@ public final class SoeknadMapper {
         maritimtArbeid.enhetNavn = skip.getSkipNavn();
         maritimtArbeid.fartsomradeKode = Fartsomrader.valueOf(skip.getFartsomraade().toString().toUpperCase());
         maritimtArbeid.flaggLandkode = skip.getFlaggland();
-        maritimtArbeid.territorialfarvann = skip.getTerritorialEllerHavnLand();
+        maritimtArbeid.territorialfarvannLandkode = skip.getTerritorialEllerHavnLand();
         return maritimtArbeid;
     }
 

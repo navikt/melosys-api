@@ -131,7 +131,7 @@ class DokSysServiceTest {
         aktør.setRolle(rolle);
         if (rolle == Aktoersroller.BRUKER) {
             aktør.setAktørId("1234");
-        } else if (rolle == Aktoersroller.MYNDIGHET) {
+        } else if (rolle == Aktoersroller.TRYGDEMYNDIGHET) {
             aktør.setInstitusjonId("DK:234");
         } else {
             aktør.setOrgnr("98765");
@@ -320,7 +320,7 @@ class DokSysServiceTest {
 
     private DokumentbestillingMetadata lagMetadataMedMyndighet() {
         DokumentbestillingMetadata metadata = new DokumentbestillingMetadata();
-        metadata.mottaker = lagAktør(Aktoersroller.MYNDIGHET);
+        metadata.mottaker = lagAktør(Aktoersroller.TRYGDEMYNDIGHET);
         metadata.utenlandskMyndighet = lagUtenlandskMyndighet();
         metadata.dokumenttypeID = "dok_1234";
         return metadata;

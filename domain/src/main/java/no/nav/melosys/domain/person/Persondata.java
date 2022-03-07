@@ -12,6 +12,8 @@ import no.nav.melosys.domain.person.adresse.Kontaktadresse;
 import no.nav.melosys.domain.person.adresse.Oppholdsadresse;
 import no.nav.melosys.domain.person.familie.Familiemedlem;
 
+import javax.annotation.Nullable;
+
 public interface Persondata extends SaksopplysningDokument {
     boolean erPersonDød();
 
@@ -45,5 +47,6 @@ public interface Persondata extends SaksopplysningDokument {
 
     Optional<Oppholdsadresse> finnOppholdsadresse();
 
+    @Nullable
     Postadresse hentGjeldendePostadresse();
 }

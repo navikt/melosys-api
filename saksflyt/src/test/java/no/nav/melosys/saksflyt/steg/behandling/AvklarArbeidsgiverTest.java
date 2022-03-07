@@ -80,7 +80,7 @@ class AvklarArbeidsgiverTest {
 
         List<AvklartVirksomhet> avklarteVirksomheter = Collections.singletonList(avklartVirksomhet);
         when(avklarteVirksomheterService.hentNorskeArbeidsgivere(any(), any())).thenReturn(avklarteVirksomheter);
-        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
 
         steg.utfør(prosessinstans);
 
@@ -98,7 +98,7 @@ class AvklarArbeidsgiverTest {
         AktoerRepository aktoerRepository = mock(AktoerRepository.class);
         AvklarArbeidsgiver steg = new AvklarArbeidsgiver(new AktoerService(aktoerRepository), avklarteVirksomheterService,
             behandlingService, behandlingsresultatService);
-        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
 
         steg.utfør(prosessinstans);
         verify(aktoerRepository).deleteAllByFagsakAndRolle(eq(fagsak), eq(Aktoersroller.ARBEIDSGIVER));
@@ -108,7 +108,7 @@ class AvklarArbeidsgiverTest {
     @Test
     void utfør_iverksettVedtakArt12_arbeidsgiverAktoererSkalOpprettes() {
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
-        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
         avklarArbeidsgiver.utfør(prosessinstans);
         verify(aktoerService).erstattEksisterendeArbeidsgiveraktører(any(), any());
     }
@@ -124,7 +124,7 @@ class AvklarArbeidsgiverTest {
     void utfør_iverksettVedtakAvslagManglendeOppl_arbeidsgiverAktoererSkalIkkeOpprettes() {
         behandlingsresultat.setType(Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL);
         behandlingsresultat.setLovvalgsperioder(new HashSet<>());
-        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
 
         avklarArbeidsgiver.utfør(prosessinstans);
         verify(aktoerService).erstattEksisterendeArbeidsgiveraktører(any(), any());

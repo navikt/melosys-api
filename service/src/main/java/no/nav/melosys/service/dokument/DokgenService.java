@@ -1,6 +1,7 @@
 package no.nav.melosys.service.dokument;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -8,6 +9,7 @@ import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.brev.*;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.integrasjon.dokgen.DokgenConsumer;
@@ -18,11 +20,14 @@ import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
 import no.nav.melosys.service.dokument.brev.KopiMottaker;
+import no.nav.melosys.service.dokument.brev.mapper.DokgenMalMapper;
+import no.nav.melosys.service.dokument.brev.mapper.DokumentproduksjonsInfoMapper;
 import no.nav.melosys.service.ldap.SaksbehandlerService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import static org.springframework.util.StringUtils.hasText;
 
@@ -64,9 +69,10 @@ public class DokgenService {
         this.utenlandskMyndighetService = utenlandskMyndighetService;
     }
 
+    @Transactional
     public byte[] produserUtkast(long behandlingId, BrevbestillingRequest brevbestillingRequest) {
         Produserbaredokumenter produserbartdokument = brevbestillingRequest.getProduserbardokument();
-        Behandling behandling = behandlingService.hentBehandling(behandlingId);
+        Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingId);
         Aktoer mottaker;
         if (hasText(brevbestillingRequest.getOrgNr()) || hasText(brevbestillingRequest.getInstitusjonId())) {
             mottaker = new Aktoer();
@@ -89,8 +95,9 @@ public class DokgenService {
         return produserBrev(mottaker, brevbestilling.build());
     }
 
+    @Transactional
     public byte[] produserBrev(Aktoer mottaker, DokgenBrevbestilling brevbestilling) {
-        Behandling behandling = behandlingService.hentBehandling(brevbestilling.getBehandlingId());
+        Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(brevbestilling.getBehandlingId());
         String malnavn = dokumentproduksjonsInfoMapper.hentMalnavn(brevbestilling.getProduserbartdokument());
         String orgnr = mottaker != null ? mottaker.getOrgnr() : null;
         DokgenBrevbestilling.Builder<?> builder = brevbestilling.toBuilder();
@@ -110,9 +117,10 @@ public class DokgenService {
         return dokgenConsumer.lagPdf(malnavn, dokgenDto, brevbestilling.isBestillKopi(), brevbestilling.isBestillUtkast());
     }
 
+    @Transactional
     public void produserOgDistribuerBrev(long behandlingId, BrevbestillingRequest brevbestillingRequest) {
         Produserbaredokumenter produserbartDokument = brevbestillingRequest.getProduserbardokument();
-        var behandling = behandlingService.hentBehandling(behandlingId);
+        var behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingId);
 
         DokgenBrevbestilling.Builder<?> brevbestilling = lagDokgenBrevbestilling(brevbestillingRequest);
 
@@ -138,10 +146,10 @@ public class DokgenService {
 
         for (KopiMottaker kopiMottaker : brevbestillingRequest.getKopiMottakere()) {
             var aktoer = new Aktoer();
-            aktoer.setRolle(kopiMottaker.getRolle());
-            aktoer.setOrgnr(kopiMottaker.getOrgnr());
-            aktoer.setAktørId(kopiMottaker.getAktørId());
-            aktoer.setInstitusjonId(kopiMottaker.getInstitusjonId());
+            aktoer.setRolle(kopiMottaker.rolle());
+            aktoer.setOrgnr(kopiMottaker.orgnr());
+            aktoer.setAktørId(kopiMottaker.aktørId());
+            aktoer.setInstitusjonId(kopiMottaker.institusjonId());
             brevbestilling.medBestillKopi(true);
             produserOgDistribuerBrev(behandling, aktoer, brevbestilling.build());
         }
@@ -188,6 +196,10 @@ public class DokgenService {
         return ident != null ? saksbehandlerService.hentNavnForIdent(ident) : "N/A";
     }
 
+    private boolean inneholderArbeidsgiverSomKopimottaker(Collection<KopiMottaker> kopimottakere) {
+        return kopimottakere.stream().map(KopiMottaker::rolle).anyMatch(kopimottaker -> kopimottaker == Aktoersroller.ARBEIDSGIVER);
+    }
+
     private DokgenBrevbestilling.Builder<?> lagDokgenBrevbestilling(BrevbestillingRequest brevbestillingRequest) {
         return switch (brevbestillingRequest.getProduserbardokument()) {
             case MANGELBREV_ARBEIDSGIVER, MANGELBREV_BRUKER -> new MangelbrevBrevbestilling.Builder()
@@ -198,11 +210,16 @@ public class DokgenService {
                 .medInnledningFritekst(brevbestillingRequest.getInnledningFritekst())
                 .medBegrunnelseFritekst(brevbestillingRequest.getBegrunnelseFritekst())
                 .medEktefelleFritekst(brevbestillingRequest.getEktefelleFritekst())
-                .medBarnFritekst(brevbestillingRequest.getBarnFritekst());
+                .medBarnFritekst(brevbestillingRequest.getBarnFritekst())
+                .medVirksomhetArbeidsgiverSkalHaKopi(inneholderArbeidsgiverSomKopimottaker(brevbestillingRequest.getKopiMottakere()))
+                .medNyVurderingBakgrunn(brevbestillingRequest.getNyVurderingBakgrunn());
             case GENERELT_FRITEKSTBREV_BRUKER, GENERELT_FRITEKSTBREV_ARBEIDSGIVER -> new FritekstbrevBrevbestilling.Builder()
                 .medFritekstTittel(brevbestillingRequest.getFritekstTittel())
                 .medFritekst(brevbestillingRequest.getFritekst())
+                .medKontaktpersonNavn(brevbestillingRequest.getKontaktpersonNavn())
                 .medKontaktopplysninger(brevbestillingRequest.isKontaktopplysninger());
+            case AVSLAG_MANGLENDE_OPPLYSNINGER -> new AvslagBrevbestilling.Builder()
+                .medFritekst(brevbestillingRequest.getFritekst());
             default -> new DokgenBrevbestilling.Builder<>();
         };
     }

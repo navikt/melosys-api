@@ -1,8 +1,8 @@
 package no.nav.melosys.integrasjon.aareg.arbeidsforhold;
 
 
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.felles.RestConsumer;
-import no.nav.melosys.integrasjon.felles.SystemContextExchangeFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +17,6 @@ import reactor.core.publisher.Mono;
 public class ArbeidsforholdRestConsumerConfig implements RestConsumer {
     private static final Logger log = LoggerFactory.getLogger(ArbeidsforholdRestConsumerConfig.class);
 
-    private static final String CONSUMER_ID = "srvmelosys";
     private final String url;
 
     @Autowired
@@ -34,13 +33,13 @@ public class ArbeidsforholdRestConsumerConfig implements RestConsumer {
             .build());
     }
 
-    private ExchangeFilterFunction errorFilter() {
+    public static ExchangeFilterFunction errorFilter() {
         return ExchangeFilterFunction.ofResponseProcessor(response -> {
             if (response.statusCode().isError()) {
                 return response.bodyToMono(String.class)
                     .flatMap(errorBody -> {
                         log.error("Kall mot arreg-rest feilet. {} - {}", response.statusCode(), errorBody);
-                        return Mono.error(new RuntimeException(errorBody));
+                        return Mono.error(new TekniskException("Henting av arbeidsforhold fra Aareg feilet."));
                     });
             }
             return Mono.just(response);

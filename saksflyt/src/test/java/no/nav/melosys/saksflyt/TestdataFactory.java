@@ -45,7 +45,7 @@ public final class TestdataFactory {
     }
 
     public static DokumentproduksjonsInfo lagDokumentInfo() {
-        return new DokumentproduksjonsInfo("dummy_mal", DokumentKategoriKode.IB.getKode(), "Dummy tittel");
+        return new DokumentproduksjonsInfo("dummy_mal", DokumentKategoriKode.IB.getKode(), "Dummy tittel", null);
     }
 
     static Saksopplysning lagPersonopplysning() {

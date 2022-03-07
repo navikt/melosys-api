@@ -7,11 +7,11 @@ import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.FellesKodeverk;
+import no.nav.melosys.domain.adresse.Adresse;
+import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
-import no.nav.melosys.domain.adresse.Adresse;
-import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
@@ -124,7 +124,7 @@ public class AvklarteVirksomheterService {
     }
 
     private void validerVirksomhetIDerGyldige(Long behandlingID, List<String> virksomhetIDer) {
-        Behandling behandling = behandlingService.hentBehandling(behandlingID);
+        Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
         for (String virksomhetID : virksomhetIDer) {
             if (!erVirksomhetIDGyldig(virksomhetID, behandling)) {
                 throw new FunksjonellException("VirksomhetID " + virksomhetID + " hører ikke til noen av arbeidsforholdene");

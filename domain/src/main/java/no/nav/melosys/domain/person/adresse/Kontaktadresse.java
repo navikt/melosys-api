@@ -1,11 +1,10 @@
 package no.nav.melosys.domain.person.adresse;
 
-import java.time.LocalDateTime;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import no.nav.melosys.domain.adresse.SemistrukturertAdresse;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
-import no.nav.melosys.domain.brev.Postadresse;
 
 public record Kontaktadresse(
     StrukturertAdresse strukturertAdresse,
@@ -18,11 +17,13 @@ public record Kontaktadresse(
     LocalDateTime registrertDato,
     boolean erHistorisk
 ) implements PersonAdresse {
-    public Postadresse tilPostadresse() {
+
+    public StrukturertAdresse hentEllerLagStrukturertAdresse() {
         if (strukturertAdresse != null) {
-            return Postadresse.lagPostadresse(strukturertAdresse);
-        } else {
-            return Postadresse.lagPostadresse(semistrukturertAdresse);
+            return strukturertAdresse;
+        } else if (semistrukturertAdresse != null) {
+            return semistrukturertAdresse.tilStrukturertAdresse();
         }
+        return null;
     }
 }

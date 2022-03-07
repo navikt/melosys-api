@@ -43,7 +43,7 @@ class HentRegisteropplysningerTest {
     @Mock
     private PersondataFasade persondataFasade;
 
-    private FakeUnleash unleash = new FakeUnleash();
+    private final FakeUnleash unleash = new FakeUnleash();
 
     private HentRegisteropplysninger hentRegisteropplysninger;
 
@@ -68,7 +68,7 @@ class HentRegisteropplysningerTest {
         fagsak.getAktører().add(bruker);
         behandling.setFagsak(fagsak);
 
-        when(behandlingService.hentBehandling(eq(behandling.getId()))).thenReturn(behandling);
+        when(behandlingService.hentBehandlingMedSaksopplysninger(eq(behandling.getId()))).thenReturn(behandling);
         when(persondataFasade.hentFolkeregisterident(eq(aktørID))).thenReturn(ident);
     }
 

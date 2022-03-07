@@ -43,7 +43,7 @@ public class SendOrienteringsbrevVideresendSøknadTest {
 
         behandling = new Behandling();
         behandling.setId(1L);
-        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
         prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
     }

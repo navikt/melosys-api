@@ -9,17 +9,23 @@ public class InnvilgelseOgAttestStorbritannia extends DokgenDto {
 
     private final InnvilgelseStorbritannia innvilgelse;
     private final AttestStorbritannia attest;
+    private final boolean skalHaInfoOmRettigheter;
+    private final String nyVurderingBakgrunn;
 
     public InnvilgelseOgAttestStorbritannia(Builder builder, Aktoersroller mottaker) {
         super(builder.brevbestilling, mottaker);
-        innvilgelse = builder.innvilgelse;
-        attest = builder.attest;
+        this.innvilgelse = builder.innvilgelse;
+        this.attest = builder.attest;
+        this.skalHaInfoOmRettigheter = builder.skalHaInfoOmRettigheter;
+        this.nyVurderingBakgrunn = builder.nyVurderingBakgrunn;
     }
 
     public static class Builder {
         private InnvilgelseStorbritannia innvilgelse;
         private AttestStorbritannia attest;
+        private boolean skalHaInfoOmRettigheter;
         private final DokgenBrevbestilling brevbestilling;
+        private String nyVurderingBakgrunn;
 
         public Builder(DokgenBrevbestilling brevbestilling) {
             this.brevbestilling = brevbestilling;
@@ -35,10 +41,20 @@ public class InnvilgelseOgAttestStorbritannia extends DokgenDto {
             return this;
         }
 
+        public Builder skalHaInfoOmRettigheter(boolean skalHaInfoOmRettigheter) {
+            this.skalHaInfoOmRettigheter = skalHaInfoOmRettigheter;
+            return this;
+        }
+
+        public Builder nyVurderingBakgrunn(String nyVurderingBakgrunn) {
+            this.nyVurderingBakgrunn = nyVurderingBakgrunn;
+            return this;
+        }
+
         public InnvilgelseOgAttestStorbritannia build() {
             Aktoersroller mottaker = brevbestilling.getUtenlandskMyndighet() == null
                 ? Aktoersroller.BRUKER
-                : Aktoersroller.MYNDIGHET;
+                : Aktoersroller.TRYGDEMYNDIGHET;
             return new InnvilgelseOgAttestStorbritannia(this, mottaker);
         }
     }
@@ -51,11 +67,19 @@ public class InnvilgelseOgAttestStorbritannia extends DokgenDto {
         return attest != null;
     }
 
+    public boolean isSkalHaInfoOmRettigheter() {
+        return skalHaInfoOmRettigheter;
+    }
+
     public InnvilgelseStorbritannia getInnvilgelse() {
         return innvilgelse;
     }
 
     public AttestStorbritannia getAttest() {
         return attest;
+    }
+
+    public String getNyVurderingBakgrunn() {
+        return nyVurderingBakgrunn;
     }
 }

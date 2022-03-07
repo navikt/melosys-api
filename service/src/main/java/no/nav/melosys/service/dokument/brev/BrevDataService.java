@@ -121,7 +121,7 @@ public class BrevDataService {
             } catch (IkkeFunnetException e) {
                 throw new TekniskException(e);
             }
-        } else if (mottakerRolle == MYNDIGHET) {
+        } else if (mottakerRolle == TRYGDEMYNDIGHET) {
             if (mottaker.erUtenlandskMyndighet()) {
                 return mottaker.getInstitusjonId();
             } else {
@@ -203,7 +203,7 @@ public class BrevDataService {
             mottakerBrev = new Organisasjon();
             mottakerBrev.setTypeKode(AktoerType.ORGANISASJON);
             mottakerBrev.setId(mottakerID);
-        } else if (mottakerRolle == MYNDIGHET) {
+        } else if (mottakerRolle == TRYGDEMYNDIGHET) {
             if (mottaker.erUtenlandskMyndighet()) {
                 mottakerBrev = new Person();
                 mottakerBrev.setBerik(false);

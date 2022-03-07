@@ -137,31 +137,46 @@ public record Personopplysninger(
     private Optional<Postadresse> lagPostadresseFraKontaktadresser() {
         return hentGjeldendeKontaktadresseFraMaster(PDL)
             .or(() -> hentGjeldendeKontaktadresseFraMaster(FREG))
-            .map(Kontaktadresse::tilPostadresse);
+            .map(this::lagPostadresseFraKontaktadresse);
     }
 
     private Optional<Kontaktadresse> hentGjeldendeKontaktadresseFraMaster(Master master) {
         return kontaktadresser.stream()
-            .filter(a -> master.name().equals(a.master()))
+            .filter(a -> master.name().equalsIgnoreCase(a.master()))
             .max(Comparator.comparing(Kontaktadresse::registrertDato));
     }
 
     private Optional<Postadresse> lagPostadresseFraOppholdsadresser() {
         return hentGjeldendeOppholdsadresseFraMaster(PDL)
             .or(() -> hentGjeldendeOppholdsadresseFraMaster(FREG))
-            .map(Oppholdsadresse::strukturertAdresse)
-            .map(Postadresse::lagPostadresse);
+            .map(this::lagPostadresseFraOppholdsadresse);
     }
 
     private Optional<Oppholdsadresse> hentGjeldendeOppholdsadresseFraMaster(Master master) {
         return oppholdsadresser.stream()
-            .filter(a -> master.name().equals(a.master()))
+            .filter(a -> master.name().equalsIgnoreCase(a.master()))
             .max(Comparator.comparing(Oppholdsadresse::registrertDato));
     }
 
     private Optional<Postadresse> lagPostadresseFraBostedsadresse() {
         return finnBostedsadresse()
-            .map(Bostedsadresse::strukturertAdresse)
-            .map(Postadresse::lagPostadresse);
+            .map(bostedsadresse ->
+                Postadresse.lagPostadresse(bostedsadresse.coAdressenavn(), bostedsadresse.strukturertAdresse()));
+    }
+
+    private Postadresse lagPostadresseFraKontaktadresse(Kontaktadresse kontaktadresse) {
+        if (kontaktadresse.strukturertAdresse() != null) {
+            return Postadresse.lagPostadresse(kontaktadresse.coAdressenavn(), kontaktadresse.strukturertAdresse());
+        } else if (kontaktadresse.semistrukturertAdresse() != null) {
+            return Postadresse.lagPostadresse(kontaktadresse.coAdressenavn(), kontaktadresse.semistrukturertAdresse());
+        }
+        return null;
+    }
+
+    private Postadresse lagPostadresseFraOppholdsadresse(Oppholdsadresse oppholdsadresse) {
+        if (oppholdsadresse.strukturertAdresse() != null) {
+            return Postadresse.lagPostadresse(oppholdsadresse.coAdressenavn(), oppholdsadresse.strukturertAdresse());
+        }
+        return null;
     }
 }

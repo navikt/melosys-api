@@ -254,19 +254,20 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
         String saksnummer = "123";
         ResponseEntity<Void> resultat = instans.henleggFagsak(saksnummer, henleggelseDto);
 
-        assertThat(resultat.getStatusCode()).isEqualTo(HttpStatus.OK);
-        verify(henleggFagsakService).henleggFagsak(saksnummer, begrunnelseKode, fritekst);
+        assertThat(resultat.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+        verify(henleggFagsakService).henleggFagsakEllerBehandling(saksnummer, begrunnelseKode, fritekst);
     }
 
     @Test
-    void avsluttSakSomBortfalt_sakEksisterer_kallerFagservice() {
+    void henleggSakSomBortfalt_sakEksisterer_kallerFagservice() {
         Fagsak fagsak = lagFagsak();
         FagsakTjeneste instans = lagFagsakTjeneste(fagsak);
         String saksnummer = "123";
-        ResponseEntity<Void> resultat = instans.avsluttSakSomBortfalt(saksnummer);
+        ResponseEntity<Void> resultat = instans.henleggSakSomBortfalt(saksnummer);
+        when(fagsakService.hentFagsak("123")).thenReturn(fagsak);
 
         assertThat(resultat.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
-        verify(fagsakService).avsluttSakSomBortfalt(fagsak);
+        verify(henleggFagsakService).henleggSakEllerBehandlingSomBortfalt("123");
     }
 
     @Test
@@ -303,6 +304,7 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
         when(behandlingsgrunnlagService.finnBehandlingsgrunnlag(1L)).thenReturn(Optional.of(behandlingsgrunnlag));
         when(fagsakService.hentFagsak("123")).thenReturn(fagsak);
         when(persondataFasade.hentSammensattNavn(any())).thenReturn("Joe Moe");
+        //noinspection ArraysAsListWithZeroOrOneArgument
         doReturn(Arrays.asList(fagsak)).when(fagsakService).hentFagsakerMedAktør(Aktoersroller.BRUKER, FNR);
         return new FagsakTjeneste(fagsakService, aksesskontroll, behandlingsgrunnlagService, henleggFagsakService, opprettNySakFraOppgave,
                                   persondataFasade, saksopplysningerService, utpekingService, videresendSoknadService);

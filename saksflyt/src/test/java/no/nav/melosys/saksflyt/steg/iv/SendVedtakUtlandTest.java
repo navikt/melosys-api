@@ -111,13 +111,13 @@ class SendVedtakUtlandTest {
 
     @Test
     void utfør_ingenInstitusjonEessiKlar_senderBrev() {
-        when(behandlingService.hentBehandling(anyLong())).thenReturn(prosessinstans.getBehandling());
+        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(prosessinstans.getBehandling());
         when(behandlingsresultatService.hentBehandlingsresultatMedAvklartefakta(anyLong()))
             .thenReturn(lagBehandlingsresultat());
 
         sendVedtakUtland.utfør(prosessinstans);
         verify(brevBestiller).bestill(brevbestillingArgumentCaptor.capture());
-        assertThat(brevbestillingArgumentCaptor.getValue().getMottakere()).contains(Mottaker.av(Aktoersroller.MYNDIGHET));
+        assertThat(brevbestillingArgumentCaptor.getValue().getMottakere()).contains(Mottaker.av(Aktoersroller.TRYGDEMYNDIGHET));
         assertThat(brevbestillingArgumentCaptor.getValue().getProduserbartdokument()).isEqualTo(Produserbaredokumenter.ATTEST_A1);
     }
 
@@ -135,7 +135,7 @@ class SendVedtakUtlandTest {
 
         Aktoer myndighet = new Aktoer();
         myndighet.setInstitusjonId(MOTTAKER_INSTITUSJON);
-        myndighet.setRolle(Aktoersroller.MYNDIGHET);
+        myndighet.setRolle(Aktoersroller.TRYGDEMYNDIGHET);
 
         fagsak.setAktører(Set.of(myndighet));
         behandling.setFagsak(fagsak);

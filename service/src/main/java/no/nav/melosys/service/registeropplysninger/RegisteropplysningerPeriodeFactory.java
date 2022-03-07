@@ -3,7 +3,6 @@ package no.nav.melosys.service.registeropplysninger;
 import java.time.LocalDate;
 import java.time.YearMonth;
 
-import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -14,16 +13,12 @@ public class RegisteropplysningerPeriodeFactory {
     private final Integer medlemskaphistorikkAntallÅr;
     private final Integer inntektshistorikkAntallMåneder;
 
-    private final Unleash unleash;
-    private static final long REGISTEROPPLYSNINGER_DEFAULT_SLUTTDATO_ANTALL_ÅR = 1;
-
     public RegisteropplysningerPeriodeFactory(@Value("${melosys.service.fagsak.arbeidsforholdhistorikk.antallMåneder}") Integer arbeidsforholdhistorikkAntallMåneder,
                                               @Value("${melosys.service.fagsak.medlemskaphistorikk.antallÅr}") Integer medlemskaphistorikkAntallÅr,
-                                              @Value("${melosys.service.fagsak.inntektshistorikk.antallMåneder}") Integer inntektshistorikkAntallMåneder, Unleash unleash) {
+                                              @Value("${melosys.service.fagsak.inntektshistorikk.antallMåneder}") Integer inntektshistorikkAntallMåneder) {
         this.arbeidsforholdhistorikkAntallMåneder = arbeidsforholdhistorikkAntallMåneder;
         this.medlemskaphistorikkAntallÅr = medlemskaphistorikkAntallÅr;
         this.inntektshistorikkAntallMåneder = inntektshistorikkAntallMåneder;
-        this.unleash = unleash;
     }
 
     DatoPeriode hentPeriodeForArbeidsforhold(LocalDate fom, LocalDate tom, Behandling behandling) {
@@ -56,7 +51,7 @@ public class RegisteropplysningerPeriodeFactory {
         }
 
         if (tomDato == null) {
-            tomDato = unleash.isEnabled("melosys.ny-default-sluttdato") ? iDag : fom.plusYears(REGISTEROPPLYSNINGER_DEFAULT_SLUTTDATO_ANTALL_ÅR);
+            tomDato = iDag;
         }
         if (tomDato.isAfter(iDag)) {
             tomDato = iDag;
@@ -94,7 +89,7 @@ public class RegisteropplysningerPeriodeFactory {
         }
 
         if (tom == null) {
-            tomMnd = YearMonth.from(unleash.isEnabled("melosys.ny-default-sluttdato") ? nå : fom.plusYears(REGISTEROPPLYSNINGER_DEFAULT_SLUTTDATO_ANTALL_ÅR));
+            tomMnd = YearMonth.from(nå);
         } else if (tom.isAfter(nå)) {
             tomMnd = YearMonth.from(nå);
         } else {
@@ -125,16 +120,7 @@ public class RegisteropplysningerPeriodeFactory {
     }
 
     private DatoPeriode hentPeriodeForMedlemskapBehandlingSøknad(LocalDate fom, LocalDate tom) {
-        LocalDate fomDato = fom.minusYears(medlemskaphistorikkAntallÅr);
-        LocalDate tomDato;
-
-        if (unleash.isEnabled("melosys.ny-default-sluttdato")) {
-            tomDato = tom == null ? LocalDate.now() : tom;
-        } else {
-            tomDato = tom == null ? fom.plusYears(REGISTEROPPLYSNINGER_DEFAULT_SLUTTDATO_ANTALL_ÅR) : tom;
-        }
-
-        return new DatoPeriode(fomDato, tomDato);
+        return new DatoPeriode(fom.minusYears(medlemskaphistorikkAntallÅr), tom == null ? LocalDate.now() : tom);
     }
 
     private DatoPeriode hentPeriodeForMedlemskapMottakSed(LocalDate fom, LocalDate tom) {

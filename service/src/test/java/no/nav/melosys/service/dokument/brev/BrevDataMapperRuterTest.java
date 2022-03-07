@@ -26,6 +26,7 @@ class BrevDataMapperRuterTest {
     }
 
 
+    //TODO: Fjern når ny løsning er ferdigtestet (toggle "melosys.brev.AVSLAG_MANGLENDE_OPPLYSNINGER").
     @Test
     void oppslagAvAvslagManglendeOpplysningerGirAvslagManglendeOpplysningerMapper() {
         BrevDataMapper resultat = BrevDataMapperRuter.brevDataMapper(Produserbaredokumenter.AVSLAG_MANGLENDE_OPPLYSNINGER);

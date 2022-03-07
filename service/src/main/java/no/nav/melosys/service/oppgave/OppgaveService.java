@@ -146,7 +146,17 @@ public class OppgaveService {
     }
 
     public void opprettEllerGjenbrukBehandlingsoppgave(Behandling behandling, String journalpostID, String aktørID, @Nullable String tilordnetRessurs) {
-        opprettEllerGjenbrukBehandlingsoppgave(behandling, journalpostID, aktørID, tilordnetRessurs, behandling.erElektroniskSøknad() ? "Mottatt elektronisk søknad" : null);
+        opprettEllerGjenbrukBehandlingsoppgave(behandling, journalpostID, aktørID, tilordnetRessurs, lagOppgaveBeskrivelse(behandling));
+    }
+
+    private String lagOppgaveBeskrivelse(Behandling behandling) {
+        if (behandling.erElektroniskSøknad()) {
+            return "Mottatt elektronisk søknad";
+        }
+        if (behandling.erNyVurdering()) {
+            return "Ny vurdering";
+        }
+        return null;
     }
 
     public void opprettJournalføringsoppgave(String journalpostID, String aktørID) {
@@ -259,7 +269,7 @@ public class OppgaveService {
         behOppgaveDto.setSakstype(fagsak.getType());
 
         Behandling behandling = fagsak.hentSistAktiveBehandling();
-        behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandling.getId());
+        behandling = behandlingService.hentBehandling(behandling.getId());
         behOppgaveDto.setBehandling(mapBehandling(behandling));
 
         if (behandling.erBehandlingAvSøknad()) {
@@ -304,7 +314,7 @@ public class OppgaveService {
     }
 
     private boolean harBeskyttelsesbehov(long behandlingID) {
-        Behandling behandling = behandlingService.hentBehandling(behandlingID);
+        Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
         // TODO TPS krever fnr. Kall til hentFolkeregisterident fjernes etter overgang til PDL.
         final String brukersFnr = persondataFasade.hentFolkeregisterident(behandling.getFagsak().hentAktørID());
         if (persondataFasade.harStrengtFortroligAdresse(brukersFnr)) {

@@ -22,6 +22,6 @@ public class PersondataSystemService extends PersondataService {
                                    SaksopplysningerService saksopplysningerService,
                                    TpsSystemService tpsSystemService,
                                    Unleash unleash) {
-        super(behandlingService, behandlingsresultatService, kodeverkService, pdlConsumer, saksopplysningerService, tpsSystemService, unleash);
+        super(behandlingService, kodeverkService, pdlConsumer, saksopplysningerService, tpsSystemService, unleash);
     }
 }

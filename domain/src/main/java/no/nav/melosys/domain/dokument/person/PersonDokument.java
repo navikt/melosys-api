@@ -284,13 +284,15 @@ public class PersonDokument implements Persondata {
     @Override
     public Postadresse hentGjeldendePostadresse() {
         return new Postadresse(
+            null,
             gjeldendePostadresse.adresselinje1,
             gjeldendePostadresse.adresselinje2,
             gjeldendePostadresse.adresselinje3,
             gjeldendePostadresse.adresselinje4,
             gjeldendePostadresse.postnr,
             gjeldendePostadresse.poststed,
-            gjeldendePostadresse.land != null ? LandkoderUtils.tilIso2(gjeldendePostadresse.land.getKode()) : null
+            gjeldendePostadresse.land != null ? LandkoderUtils.tilIso2(gjeldendePostadresse.land.getKode()) : null,
+            null
         );
     }
 

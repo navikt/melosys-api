@@ -30,10 +30,8 @@ import no.nav.melosys.service.journalforing.dto.DokumentDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringDto;
 import no.nav.melosys.service.sak.OpprettSakDto;
 import no.nav.melosys.service.soknad.SoknadMottatt;
-import no.nav.melosys.service.vedtak.FattFtrlVedtakRequest;
-import no.nav.melosys.service.vedtak.FattTrygdeavtaleVedtakRequest;
+import no.nav.melosys.service.vedtak.FattVedtakRequest;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -185,8 +183,7 @@ public class ProsessinstansService {
     }
 
     public void opprettProsessinstansIverksettVedtakEos(Behandling behandling, Behandlingsresultattyper behandlingsresultatType,
-                                                        String fritekst, String fritekstSed, Set<String> mottakerinstitusjoner,
-                                                        String revurderBegrunnelse) {
+                                                        String fritekst, String fritekstSed, Set<String> mottakerinstitusjoner) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.IVERKSETT_VEDTAK_EOS)
             .medBehandling(behandling)
@@ -196,14 +193,11 @@ public class ProsessinstansService {
             .build();
 
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSRESULTATTYPE, behandlingsresultatType.getKode());
-        if (StringUtils.isNotEmpty(revurderBegrunnelse)) {
-            prosessinstans.setData(ProsessDataKey.REVURDER_BEGRUNNELSE, revurderBegrunnelse);
-        }
 
         lagre(prosessinstans);
     }
 
-    public void opprettProsessinstansIverksettVedtakFTRL(Behandling behandling, FattFtrlVedtakRequest request) {
+    public void opprettProsessinstansIverksettVedtakFTRL(Behandling behandling, FattVedtakRequest request) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.IVERKSETT_VEDTAK_FTRL)
             .medBehandling(behandling)
@@ -213,7 +207,7 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
-    public void opprettProsessinstansIverksettVedtakTrygdeavtale(Behandling behandling, FattTrygdeavtaleVedtakRequest request) {
+    public void opprettProsessinstansIverksettVedtakTrygdeavtale(Behandling behandling, FattVedtakRequest request) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.IVERKSETT_VEDTAK_TRYGDEAVTALE)
             .medBehandling(behandling)
@@ -222,7 +216,6 @@ public class ProsessinstansService {
 
         lagre(prosessinstans);
     }
-
 
     public void opprettProsessinstansNySak(String journalpostID, OpprettSakDto opprettSakDto, Behandlingstyper behandlingstype) {
         Prosessinstans prosessinstans = new Prosessinstans();

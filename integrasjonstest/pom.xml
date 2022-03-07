@@ -12,39 +12,66 @@
     <artifactId>integrasjonstest</artifactId>
 
     <properties>
-        <maven.compiler.source>15</maven.compiler.source>
-        <maven.compiler.target>15</maven.compiler.target>
+        <kotlin.version>1.6.10</kotlin.version>
+        <kotlin.compiler.jvmTarget>${java.version}</kotlin.compiler.jvmTarget>
+
+        <commons-cli.version>1.4</commons-cli.version>
+        <graphql-spring-boot-starter.version>12.0.0</graphql-spring-boot-starter.version>
+        <scala.version>2.13.4</scala.version>
+        <testcontainers.version>1.16.3</testcontainers.version>
     </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>commons-cli</groupId>
+                <artifactId>commons-cli</artifactId>
+                <version>${commons-cli.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>net.java.dev.jna</groupId>
+                <artifactId>jna</artifactId>
+                <version>5.8.0</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jetbrains</groupId>
+                <artifactId>annotations</artifactId>
+                <version>17.0.0</version>
+            </dependency>
+            <dependency>
+                <groupId>org.reflections</groupId>
+                <artifactId>reflections</artifactId>
+                <version>0.9.11</version>
+            </dependency>
+            <dependency>
+                <groupId>org.scala-lang</groupId>
+                <artifactId>scala-library</artifactId>
+                <version>${scala.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.scala-lang</groupId>
+                <artifactId>scala-reflect</artifactId>
+                <version>${scala.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
 
     <dependencies>
         <dependency>
             <groupId>no.nav.melosys</groupId>
             <artifactId>app</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>no.nav.melosys</groupId>
-            <artifactId>melosys-config</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>no.nav.melosys</groupId>
-            <artifactId>melosys-domain</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>no.nav.melosys</groupId>
-            <artifactId>saksflyt</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>no.nav.melosys</groupId>
-            <artifactId>melosys-repository</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>no.nav.melosys</groupId>
-            <artifactId>melosys-service</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>no.nav.melosys</groupId>
+                    <artifactId>frontend-api</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
+            <artifactId>spring-boot-starter-web-services</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -60,6 +87,205 @@
             <groupId>org.awaitility</groupId>
             <artifactId>awaitility</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.kafka</groupId>
+            <artifactId>spring-kafka-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>oracle-xe</artifactId>
+            <version>${testcontainers.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>${testcontainers.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.security</groupId>
+            <artifactId>token-validation-test-support</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.security</groupId>
+            <artifactId>token-validation-spring-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>no.nav.tjenestespesifikasjoner</groupId>
+            <artifactId>nav-fim-aktoer-v2-tjenestespesifikasjon</artifactId>
+            <version>${nav.tjenestespesifikasjoner.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jetbrains.kotlin</groupId>
+            <artifactId>kotlin-stdlib</artifactId>
+            <version>${kotlin.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains.kotlin</groupId>
+            <artifactId>kotlin-test-junit5</artifactId>
+            <version>${kotlin.version}</version>
+        </dependency>
+        <!-- graphql -->
+        <dependency>
+            <groupId>com.graphql-java-kickstart</groupId>
+            <artifactId>graphql-spring-boot-starter</artifactId>
+            <version>${graphql-spring-boot-starter.version}</version>
+        </dependency>
     </dependencies>
+
+    <build>
+        <finalName>${project.artifactId}</finalName>
+        <testSourceDirectory>${project.basedir}/src/test/kotlin</testSourceDirectory>
+        <plugins>
+            <plugin>
+                <groupId>org.jetbrains.kotlin</groupId>
+                <artifactId>kotlin-maven-plugin</artifactId>
+                <version>${kotlin.version}</version>
+                <executions>
+                    <execution>
+                        <id>compile</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                        <configuration>
+                            <sourceDirs>
+                                <source>target/generated-sources/graphql</source>
+                                <source>src/main/kotlin</source>
+                            </sourceDirs>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>test-compile</id>
+                        <phase>test-compile</phase>
+                        <goals>
+                            <goal>test-compile</goal>
+                        </goals>
+                        <configuration>
+                            <sourceDirs>
+                                <source>src/test/kotlin</source>
+                                <source>src/test/resources</source>
+                            </sourceDirs>
+                        </configuration>
+                    </execution>
+                </executions>
+                <configuration>
+                    <args>
+                        <arg>-Xjsr305=strict</arg>
+                    </args>
+                    <compilerPlugins>
+                        <plugin>spring</plugin>
+                    </compilerPlugins>
+                    <jvmTarget>${java.version}</jvmTarget>
+                </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.jetbrains.kotlin</groupId>
+                        <artifactId>kotlin-maven-allopen</artifactId>
+                        <version>${kotlin.version}</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+
+            <!-- GraphQL Codegen Maven plugin -->
+            <plugin>
+                <groupId>io.github.kobylynskyi</groupId>
+                <artifactId>graphql-codegen-maven-plugin</artifactId>
+                <version>5.1.0</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <graphqlSchemaPaths>
+                                <graphqlSchemaPath>
+                                    ${project.basedir}/src/test/resources/root.graphqls
+                                </graphqlSchemaPath>
+                                <graphqlSchemaPath>
+                                    ${project.basedir}/src/test/resources/saf/schema.graphqls
+                                </graphqlSchemaPath>
+                                <graphqlSchemaPath>
+                                    ${project.basedir}/src/test/resources/pdl/schema.graphqls
+                                </graphqlSchemaPath>
+                            </graphqlSchemaPaths>
+                            <outputDir>${project.build.directory}/generated-sources/graphql</outputDir>
+                            <apiPackageName>no.nav.melosys.generated.graphql.api</apiPackageName>
+                            <modelPackageName>no.nav.melosys.generated.graphql.model</modelPackageName>
+                            <customTypesMapping>
+                                <DateTime>java.time.LocalDateTime</DateTime>
+                            </customTypesMapping>
+                            <modelNameSuffix>Dto</modelNameSuffix>
+                            <generatedLanguage>KOTLIN</generatedLanguage>
+                            <parentInterfaces>
+                                <queryResolver>graphql.kickstart.tools.GraphQLQueryResolver</queryResolver>
+                                <resolver><![CDATA[graphql.kickstart.tools.GraphQLResolver<{{TYPE}}>]]></resolver>
+                            </parentInterfaces>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>3.2.0</version>
+                <executions>
+                    <execution>
+                        <id>add-source</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>${project.build.directory}/target/generated-sources/graphql</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <executions>
+                    <!-- Replacing default-compile as it is treated specially by maven -->
+                    <execution>
+                        <id>default-compile</id>
+                        <phase>none</phase>
+                    </execution>
+                    <!-- Replacing default-testCompile as it is treated specially by maven -->
+                    <execution>
+                        <id>default-testCompile</id>
+                        <phase>none</phase>
+                    </execution>
+                    <execution>
+                        <id>java-compile</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>java-test-compile</id>
+                        <phase>test-compile</phase>
+                        <goals>
+                            <goal>testCompile</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>

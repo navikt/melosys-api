@@ -35,7 +35,7 @@ public class SobService {
     }
 
     public void sakOgBehandlingOpprettet(long behandlingID) {
-        Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
+        Behandling behandling = behandlingService.hentBehandling(behandlingID);
         Fagsak fagsak = behandling.getFagsak();
         sakOgBehandlingFasade.sendBehandlingOpprettet(
             lagBehandlingStatusMapper(fagsak.getSaksnummer(), behandling, fagsak.hentAktørID())
@@ -43,7 +43,7 @@ public class SobService {
     }
 
     public void sakOgBehandlingAvsluttet(long behandlingID) {
-        Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
+        Behandling behandling = behandlingService.hentBehandling(behandlingID);
         Fagsak fagsak = behandling.getFagsak();
         sakOgBehandlingFasade.sendBehandlingAvsluttet(
             lagBehandlingStatusMapper(fagsak.getSaksnummer(), behandling, fagsak.hentAktørID())

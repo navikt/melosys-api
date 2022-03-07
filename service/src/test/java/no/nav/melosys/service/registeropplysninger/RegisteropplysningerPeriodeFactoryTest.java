@@ -3,13 +3,10 @@ package no.nav.melosys.service.registeropplysninger;
 import java.time.LocalDate;
 import java.time.YearMonth;
 
-import no.finn.unleash.FakeUnleash;
-import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -25,13 +22,10 @@ class RegisteropplysningerPeriodeFactoryTest {
 
     @BeforeEach
     void setUp() {
-        final FakeUnleash unleash = new FakeUnleash();
-        unleash.enable("melosys.ny-default-sluttdato");
-
         factory = new RegisteropplysningerPeriodeFactory(
             arbeidsforholdhistorikkAntallMåneder,
             medlemskaphistorikkAntallÅr,
-            inntektshistorikkAntallMåneder, unleash);
+            inntektshistorikkAntallMåneder);
     }
 
     @Test

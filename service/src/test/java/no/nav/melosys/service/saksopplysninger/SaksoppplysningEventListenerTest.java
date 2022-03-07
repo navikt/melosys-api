@@ -9,6 +9,7 @@ import no.nav.melosys.domain.person.PersonMedHistorikk;
 import no.nav.melosys.domain.person.Personopplysninger;
 import no.nav.melosys.service.SaksbehandlingDataFactory;
 import no.nav.melosys.service.SaksopplysningerService;
+import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,6 +24,8 @@ import static org.mockito.Mockito.*;
 class SaksoppplysningEventListenerTest {
 
     @Mock
+    private BehandlingService behandlingService;
+    @Mock
     private PersondataFasade persondataFasade;
     @Mock
     private SaksopplysningerService saksopplysningerService;
@@ -34,7 +37,8 @@ class SaksoppplysningEventListenerTest {
     @BeforeEach
     void setUp() {
         unleash.enableAll();
-        saksoppplysningEventListener = new SaksoppplysningEventListener(saksopplysningerService, persondataFasade, unleash);
+        saksoppplysningEventListener = new SaksoppplysningEventListener(saksopplysningerService, behandlingService, persondataFasade,
+                                                                        unleash);
     }
 
     @Test
@@ -42,10 +46,11 @@ class SaksoppplysningEventListenerTest {
         Behandling behandling = SaksbehandlingDataFactory.lagBehandling();
         behandling.setStatus(Behandlingsstatus.IVERKSETTER_VEDTAK);
 
+        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
         Personopplysninger personopplysninger = PersonopplysningerObjectFactory.lagPersonopplysninger();
-        when(persondataFasade.hentPerson(eq("aktørID"), eq(Informasjonsbehov.MED_FAMILIERELASJONER))).thenReturn(personopplysninger);
+        when(persondataFasade.hentPerson("aktørID", Informasjonsbehov.MED_FAMILIERELASJONER)).thenReturn(personopplysninger);
         PersonMedHistorikk personMedHistorikk = PersonopplysningerObjectFactory.lagPersonMedHistorikk();
-        when(persondataFasade.hentPersonMedHistorikk(eq("aktørID"))).thenReturn(personMedHistorikk);
+        when(persondataFasade.hentPersonMedHistorikk("aktørID")).thenReturn(personMedHistorikk);
 
         BehandlingEndretStatusEvent event = new BehandlingEndretStatusEvent(Behandlingsstatus.IVERKSETTER_VEDTAK, behandling);
         saksoppplysningEventListener.lagrePersonopplysninger(event);
@@ -55,9 +60,12 @@ class SaksoppplysningEventListenerTest {
     }
 
     @Test
-    void lagrePersonopplysning_behandlingEr_opplysningerBlirIkkeLagret() {
+    void lagrePersonopplysning_behandlingHarIkkeRelevantStatus_opplysningerBlirIkkeLagret() {
         Behandling behandling = SaksbehandlingDataFactory.lagBehandling();
         behandling.setStatus(Behandlingsstatus.TIDSFRIST_UTLOEPT);
+        BehandlingEndretStatusEvent event = new BehandlingEndretStatusEvent(Behandlingsstatus.TIDSFRIST_UTLOEPT, behandling);
+
+        saksoppplysningEventListener.lagrePersonopplysninger(event);
 
         verifyNoInteractions(saksopplysningerService, persondataFasade);
     }

@@ -93,7 +93,7 @@ public class EessiService {
     public void opprettOgSendSed(long behandlingID, List<String> mottakerInstitusjoner, BucType bucType,
                                  Collection<Vedlegg> vedlegg, String ytterligereInformasjon) {
         log.info("Starter sending av SED for behandling {}", behandlingID);
-        Behandling behandling = behandlingService.hentBehandling(behandlingID);
+        Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
         Fagsak fagsak = behandling.getFagsak();
 
@@ -211,7 +211,7 @@ public class EessiService {
     private void sendSedPåEksisterendeBehandling(long behandlingID,
                                                  PeriodeType periodeType,
                                                  Function<Behandlingsresultat, SedType> sedTypeAvklarer, String ytterligereInformasjon) {
-        Behandling behandling = behandlingService.hentBehandling(behandlingID);
+        Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
 
         final var sedType = sedTypeAvklarer.apply(behandlingsresultat);
@@ -226,7 +226,7 @@ public class EessiService {
     }
 
     public void sendAvslagUtpekingSvar(long behandlingId, UtpekingAvvis utpekingAvvis) {
-        Behandling behandling = behandlingService.hentBehandling(behandlingId);
+        Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingId);
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingId);
         SedDataGrunnlag dataGrunnlag = dataGrunnlagFactory.av(behandling);
 
@@ -249,7 +249,7 @@ public class EessiService {
 
     @Transactional(readOnly = true)
     public byte[] genererSedPdf(long behandlingID, SedType sedType, @Nullable SedPdfData sedPdfData) {
-        Behandling behandling = behandlingService.hentBehandling(behandlingID);
+        Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
         SedDataGrunnlag dataGrunnlag = dataGrunnlagFactory.av(behandling);
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
 

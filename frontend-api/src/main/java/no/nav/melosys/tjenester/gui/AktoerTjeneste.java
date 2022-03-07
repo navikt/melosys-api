@@ -86,7 +86,7 @@ public class AktoerTjeneste {
         response = AktoerDto.class)
     public ResponseEntity<Void> slettAktoer(@PathVariable("databaseID") long databaseID) {
         aktoerService.slettAktoer(databaseID);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     private AktoerDto tilDto(Aktoer aktoer) {

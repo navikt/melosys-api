@@ -1,0 +1,10 @@
+{
+  "behandlingsresultatTypeKode": "FASTSATT_LOVVALGSLAND",
+  "fritekst": "Fritekst",
+  "fritekstSed": "Fritekst til SED",
+  "mottakerinstitusjoner": [
+    "NO:NAVT003"
+  ],
+  "nyVurderingBakgrunn": "FEIL_I_BEHANDLING",
+  "vedtakstype": "KORRIGERT_VEDTAK"
+}

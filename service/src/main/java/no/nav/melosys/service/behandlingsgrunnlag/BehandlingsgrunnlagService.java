@@ -19,7 +19,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static no.nav.melosys.domain.kodeverk.Behandlingsgrunnlagtyper.*;
+import static no.nav.melosys.domain.kodeverk.Behandlingsgrunnlagtyper.SØKNAD_FOLKETRYGDEN;
+import static no.nav.melosys.domain.kodeverk.Behandlingsgrunnlagtyper.SØKNAD_TRYGDEAVTALE;
 
 @Service
 public class BehandlingsgrunnlagService {
@@ -92,7 +93,7 @@ public class BehandlingsgrunnlagService {
                                             String versjon,
                                             String eksternReferanseID) {
 
-        Behandling behandling = behandlingService.hentBehandling(behandlingID);
+        Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
         if (behandling.getBehandlingsgrunnlag() != null) {
             throw new FunksjonellException("Finnes allerede behandlingsgrunnlag for behandling " + behandling.getId());
         }

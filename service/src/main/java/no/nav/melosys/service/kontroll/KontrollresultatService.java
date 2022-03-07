@@ -40,7 +40,7 @@ public class KontrollresultatService {
 
     @Transactional
     public void utførKontrollerOgRegistrerFeil(long behandlingId) {
-        Behandling behandling = behandlingService.hentBehandling(behandlingId);
+        Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingId);
         List<Kontroll_begrunnelser> registrerteTreff = ufmKontrollService.utførKontroller(behandling);
 
         log.info("Treff ved validering av periode for behandling {}: {}", behandlingId, registrerteTreff);
