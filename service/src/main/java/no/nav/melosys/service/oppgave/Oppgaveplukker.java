@@ -60,7 +60,7 @@ public class Oppgaveplukker {
         Behandlingstema behandlingstema = Behandlingstema.valueOf(plukkDto.getBehandlingstema());
         List<Oppgave> ufordelteOppgaver = oppgaveFasade.finnUtildelteOppgaverEtterFrist(OppgaveFactory.hentOppgaveParametere(behandlingstema).behandlingstype);
 
-        fjernOppgaverSomVenterForDokumentasjon(ufordelteOppgaver);
+        fjernOppgaverSomVenterForDokumentasjonEllerFagligAvklaring(ufordelteOppgaver);
 
         Optional<Oppgave> valg = velgNeste(saksbehandlerID, ufordelteOppgaver);
 
@@ -80,7 +80,7 @@ public class Oppgaveplukker {
         }
     }
 
-    private void fjernOppgaverSomVenterForDokumentasjon(List<Oppgave> oppgaver) {
+    private void fjernOppgaverSomVenterForDokumentasjonEllerFagligAvklaring(List<Oppgave> oppgaver) {
         Iterator<Oppgave> iter = oppgaver.iterator();
         while (iter.hasNext()) {
             Oppgave oppgave = iter.next();
@@ -99,6 +99,8 @@ public class Oppgaveplukker {
                 } else if (behandling.getDokumentasjonSvarfristDato().isAfter(Instant.now())) {
                     iter.remove();
                 }
+            } else if (behandling.getStatus() == Behandlingsstatus.AVVENT_FAGLIG_AVKLARING) {
+                iter.remove();
             }
         }
     }
