@@ -68,21 +68,21 @@ public class BehandlingEventListener {
     @EventListener
     @Async
     public void behandlingEndret(BehandlingEndretAvSaksbehandlerEvent behandlingEndretAvSaksbehandlerEvent) {
-        var behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingEndretAvSaksbehandlerEvent.getBehandlingID());
+        final var behandling = behandlingService.hentBehandling(behandlingEndretAvSaksbehandlerEvent.getBehandlingID());
         Optional<Oppgave> oppgave = oppgaveService.finnÅpenOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer());
         oppgave.ifPresent(value -> {
-                Behandlingstyper type = behandlingEndretAvSaksbehandlerEvent.getBehandlingstype();
-                Behandlingstema tema = behandlingEndretAvSaksbehandlerEvent.getBehandlingstema();
+            final Behandlingstyper type = behandlingEndretAvSaksbehandlerEvent.getBehandlingstype();
+            final Behandlingstema tema = behandlingEndretAvSaksbehandlerEvent.getBehandlingstema();
 
-                Oppgave behandlingsOppgaveForType = OppgaveFactory.lagBehandlingsOppgaveForType(tema, type).build();
+            final Oppgave behandlingsOppgaveForType = OppgaveFactory.lagBehandlingsOppgaveForType(tema, type).build();
 
-                LocalDate frist = behandlingEndretAvSaksbehandlerEvent.getBehandlingsfrist();
+            final LocalDate frist = behandlingEndretAvSaksbehandlerEvent.getBehandlingsfrist();
 
-                log.info("Oppdaterer oppgave {} med behandlingstype {}, behandlingstema {} og fristFerdigstillelse {}",
-                    value.getOppgaveId(), type.getKode(), tema.getKode(), frist);
+            log.info("Oppdaterer oppgave {} med behandlingstype {}, behandlingstema {} og fristFerdigstillelse {}",
+                value.getOppgaveId(), type.getKode(), tema.getKode(), frist);
 
-                oppgaveService.oppdaterOppgave(
-                    value.getOppgaveId(),
+            oppgaveService.oppdaterOppgave(
+                value.getOppgaveId(),
                     OppgaveOppdatering.builder()
                         .behandlingstema(behandlingsOppgaveForType.getBehandlingstema())
                         .behandlingstype(behandlingsOppgaveForType.getBehandlingstype())
