@@ -99,7 +99,7 @@ public class Oppgaveplukker {
                 } else if (behandling.getDokumentasjonSvarfristDato().isAfter(Instant.now())) {
                     iter.remove();
                 }
-            } else if (behandling.getStatus() == Behandlingsstatus.AVVENT_FAGLIG_AVKLARING) {
+            } else if (behandling.erAvventerFagligAvklaring()) {
                 iter.remove();
             }
         }
