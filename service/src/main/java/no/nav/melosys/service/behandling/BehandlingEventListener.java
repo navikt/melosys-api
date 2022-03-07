@@ -71,22 +71,22 @@ public class BehandlingEventListener {
         var behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingEndretAvSaksbehandlerEvent.getBehandlingID());
         Optional<Oppgave> oppgave = oppgaveService.finnÅpenOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer());
         oppgave.ifPresent(value -> {
-            Behandlingstyper type = behandlingEndretAvSaksbehandlerEvent.getBehandlingstype();
-            Behandlingstema tema = behandlingEndretAvSaksbehandlerEvent.getBehandlingstema();
+                Behandlingstyper type = behandlingEndretAvSaksbehandlerEvent.getBehandlingstype();
+                Behandlingstema tema = behandlingEndretAvSaksbehandlerEvent.getBehandlingstema();
 
-            Oppgave behandlingsOppgaveForType = OppgaveFactory.lagBehandlingsOppgaveForType(tema, type).build();
+                Oppgave behandlingsOppgaveForType = OppgaveFactory.lagBehandlingsOppgaveForType(tema, type).build();
 
-            LocalDate frist = behandlingEndretAvSaksbehandlerEvent.getBehandlingsfrist();
+                LocalDate frist = behandlingEndretAvSaksbehandlerEvent.getBehandlingsfrist();
 
-            log.info("Oppdaterer oppgave {} med behandlingstype {}, behandlingstema {} og fristFerdigstillelse {}",
-                value.getOppgaveId(), type.getKode(), tema.getKode(), frist);
+                log.info("Oppdaterer oppgave {} med behandlingstype {}, behandlingstema {} og fristFerdigstillelse {}",
+                    value.getOppgaveId(), type.getKode(), tema.getKode(), frist);
 
-            oppgaveService.oppdaterOppgave(
-                value.getOppgaveId(),
-                OppgaveOppdatering.builder()
-                    .behandlingstema(behandlingsOppgaveForType.getBehandlingstema())
-                    .behandlingstype(behandlingsOppgaveForType.getBehandlingstype())
-                    .tema(behandlingsOppgaveForType.getTema())
+                oppgaveService.oppdaterOppgave(
+                    value.getOppgaveId(),
+                    OppgaveOppdatering.builder()
+                        .behandlingstema(behandlingsOppgaveForType.getBehandlingstema())
+                        .behandlingstype(behandlingsOppgaveForType.getBehandlingstype())
+                        .tema(behandlingsOppgaveForType.getTema())
                         .fristFerdigstillelse(frist)
                         .build());
             }
