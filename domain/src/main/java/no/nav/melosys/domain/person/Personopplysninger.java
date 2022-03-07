@@ -142,7 +142,7 @@ public record Personopplysninger(
 
     private Optional<Kontaktadresse> hentGjeldendeKontaktadresseFraMaster(Master master) {
         return kontaktadresser.stream()
-            .filter(a -> master.name().equals(a.master()))
+            .filter(a -> master.name().equalsIgnoreCase(a.master()))
             .max(Comparator.comparing(Kontaktadresse::registrertDato));
     }
 
@@ -154,7 +154,7 @@ public record Personopplysninger(
 
     private Optional<Oppholdsadresse> hentGjeldendeOppholdsadresseFraMaster(Master master) {
         return oppholdsadresser.stream()
-            .filter(a -> master.name().equals(a.master()))
+            .filter(a -> master.name().equalsIgnoreCase(a.master()))
             .max(Comparator.comparing(Oppholdsadresse::registrertDato));
     }
 
