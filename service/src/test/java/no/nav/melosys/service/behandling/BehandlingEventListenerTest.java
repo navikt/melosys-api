@@ -119,7 +119,7 @@ class BehandlingEventListenerTest {
         behandling.setTema(Behandlingstema.IKKE_YRKESAKTIV);
         behandling.setBehandlingsfrist(LocalDate.of(2022, 3, 7));
         behandling.setFagsak(fagsak);
-        when(behandlingService.hentBehandlingMedSaksopplysninger(BEHANDLING_ID)).thenReturn(behandling);
+        when(behandlingService.hentBehandling(BEHANDLING_ID)).thenReturn(behandling);
         BehandlingEndretAvSaksbehandlerEvent behandlingEndretAvSaksbehandlerEvent = new BehandlingEndretAvSaksbehandlerEvent(
             BEHANDLING_ID,
             behandling
