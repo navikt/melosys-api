@@ -164,7 +164,7 @@ class OppgaveplukkerTest {
     }
 
     @Test
-    void oppgaveplukkerVelgerIkkeSakerSomVenterPaaFagligAvklaring() {
+    void oppgaveplukker_velgerIkkeSak_nårStatusErVenterPaaFagligAvklaring() {
         List<Oppgave> oppgaver = new ArrayList<>();
         oppgaver.add(opprettOppgave("1", Oppgavetyper.VUR, PrioritetType.LAV, LocalDate.of(2019, 8, 7), LocalDate.now(), "MEL-1"));
         when(oppgaveFasade.finnUtildelteOppgaverEtterFrist(any(String.class))).thenReturn(oppgaver);
