@@ -7,7 +7,9 @@ import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
@@ -116,6 +118,32 @@ class LagreLovvalgsperiodeMedlTest {
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> lagreLovvalgsperiodeMedl.utfør(prosessinstans))
             .withMessageContaining("Ukjent eller ikke-eksisterende innvilgelsesresultat");
+    }
+
+    @Test
+    void utfør_erInnvilgelseNyVurdering_erstatterOgLagrerNyLovvalgsperiode() {
+        Lovvalgsperiode lovvalgsperiode = lagLovvalgsperiode(11L, Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1, InnvilgelsesResultat.INNVILGET);
+        behandlingsresultat.getLovvalgsperioder().add(lovvalgsperiode);
+        behandlingsresultat.setType(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
+        behandling.setType(Behandlingstyper.NY_VURDERING);
+
+        lagreLovvalgsperiodeMedl.utfør(prosessinstans);
+        verify(medlPeriodeService).avvisPeriode(eq(lovvalgsperiode.getMedlPeriodeID()));
+        verify(medlPeriodeService).opprettPeriodeEndelig(eq(lovvalgsperiode), eq(behandlingID), eq(false));
+        verifyNoMoreInteractions(medlPeriodeService);
+    }
+
+    @Test
+    void utfør_erAvslagNyVurdering_erstatterOgLagrerNyLovvalgsperiode() {
+        Lovvalgsperiode lovvalgsperiode = lagLovvalgsperiode(11L, Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1, InnvilgelsesResultat.AVSLAATT);
+        behandlingsresultat.getLovvalgsperioder().add(lovvalgsperiode);
+        behandlingsresultat.setType(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
+        behandling.setType(Behandlingstyper.NY_VURDERING);
+
+        lagreLovvalgsperiodeMedl.utfør(prosessinstans);
+        verify(medlPeriodeService).avvisPeriode(eq(lovvalgsperiode.getMedlPeriodeID()));
+        verify(medlPeriodeService).opprettPeriodeEndelig(eq(lovvalgsperiode), eq(behandlingID), eq(false));
+        verifyNoMoreInteractions(medlPeriodeService);
     }
 
     private Lovvalgsperiode lagLovvalgsperiode(Long medlPeriodeID,

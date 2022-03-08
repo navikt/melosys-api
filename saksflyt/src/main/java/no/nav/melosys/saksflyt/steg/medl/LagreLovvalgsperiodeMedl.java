@@ -31,15 +31,29 @@ public class LagreLovvalgsperiodeMedl implements StegBehandler {
 
     @Override
     public void utfør(Prosessinstans prosessinstans) {
-        final long behandlingID = prosessinstans.getBehandling().getId();
+        final Behandling behandling = prosessinstans.getBehandling();
+        final long behandlingID = behandling.getId();
         final Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
         final Optional<Lovvalgsperiode> lovvalgsperiode = behandlingsresultat.finnValidertLovvalgsperiode();
 
         if (lovvalgsperiode.isPresent()) {
-            oppdaterLovvalgsperiode(prosessinstans.getBehandling(), lovvalgsperiode.get());
+            if (behandling.erNyVurdering()) {
+                erstattLovvalgsperiode(behandling, lovvalgsperiode.get());
+            } else {
+                oppdaterLovvalgsperiode(behandling, lovvalgsperiode.get());
+            }
         } else if (!behandlingsresultat.erAvslagManglendeOpplysninger()) {
             throw new FunksjonellException("Finner ingen lovvalgsperiode for behandling " + behandlingID);
         }
+    }
+
+    private void erstattLovvalgsperiode(Behandling behandling, Lovvalgsperiode lovvalgsperiode) {
+        if (lovvalgsperiode.getMedlPeriodeID() != null) {
+            medlPeriodeService.avvisPeriode(lovvalgsperiode.getMedlPeriodeID());
+        } else {
+            throw new FunksjonellException("Finner ikke lovvalgsperiode som skal erstattes for behandling " + behandling.getId());
+        }
+        opprettMedlPeriode(behandling, lovvalgsperiode);
     }
 
     private void oppdaterLovvalgsperiode(Behandling behandling, Lovvalgsperiode lovvalgsperiode) {
