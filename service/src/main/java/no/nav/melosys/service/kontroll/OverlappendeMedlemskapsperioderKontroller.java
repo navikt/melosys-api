@@ -10,15 +10,15 @@ public final class OverlappendeMedlemskapsperioderKontroller {
     private OverlappendeMedlemskapsperioderKontroller() {
     }
 
-    public static boolean harOverlappendeIkkeAvvistMedlemsperiode(MedlemskapDokument medlemskapDokument,
-                                                                  ErPeriode kontrollperiode) {
+    public static boolean harOverlappendeMedlemsperiodeFraSed(MedlemskapDokument medlemskapDokument,
+                                                              ErPeriode kontrollperiode) {
         return medlemskapDokument.hentMedlemsperioderHvorKildeIkkeLånekassen().stream().anyMatch(
             medlemsperiode -> !PeriodestatusMedl.AVST.getKode().equals(medlemsperiode.status)
                 && PeriodeKontroller.periodeOverlapper(kontrollperiode, medlemsperiode.getPeriode()));
     }
 
-    public static boolean harOverlappendeGyldigMedlemsperiode(MedlemskapDokument medlemskapDokument,
-                                                              Lovvalgsperiode kontrollperiode) {
+    public static boolean harOverlappendeMedlemsperiode(MedlemskapDokument medlemskapDokument,
+                                                        Lovvalgsperiode kontrollperiode) {
         return medlemskapDokument.hentMedlemsperioderHvorKildeIkkeLånekassen().stream().anyMatch(
             medlemsperiode -> !PeriodestatusMedl.AVST.getKode().equals(medlemsperiode.status)
                 && PeriodeKontroller.periodeOverlapper(kontrollperiode, medlemsperiode.getPeriode())
