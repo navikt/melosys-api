@@ -86,13 +86,23 @@ class OverlappendeMedlemskapsperioderKontrollerTest {
     }
 
     @Test
-    void overlappendeGyldigMedlemsperiode_overlappendePeriodeIkkeGyldigPeriode_ingenTreff() {
+    void overlappendeGyldigMedlemsperiode_overlappendePeriodeAvvistPeriode_ingenTreff() {
+        MedlemskapDokument medlemskapDokument = lagMedlemskapsDokument();
+        Medlemsperiode medlemsperiode = medlemskapDokument.getMedlemsperiode().get(0);
+        medlemsperiode.status = PeriodestatusMedl.AVST.getKode();
+        assertThat(OverlappendeMedlemskapsperioderKontroller.harOverlappendeGyldigMedlemsperiode(
+            medlemskapDokument, lagLovvalgsPeriode(LocalDate.EPOCH, LocalDate.EPOCH.plusYears(2)))
+        ).isFalse();
+    }
+
+    @Test
+    void overlappendeGyldigMedlemsperiode_overlappendePeriodeUavklartPeriode_registrerTreff() {
         MedlemskapDokument medlemskapDokument = lagMedlemskapsDokument();
         Medlemsperiode medlemsperiode = medlemskapDokument.getMedlemsperiode().get(0);
         medlemsperiode.status = PeriodestatusMedl.UAVK.getKode();
         assertThat(OverlappendeMedlemskapsperioderKontroller.harOverlappendeGyldigMedlemsperiode(
             medlemskapDokument, lagLovvalgsPeriode(LocalDate.EPOCH, LocalDate.EPOCH.plusYears(2)))
-        ).isFalse();
+        ).isTrue();
     }
 
     @Test

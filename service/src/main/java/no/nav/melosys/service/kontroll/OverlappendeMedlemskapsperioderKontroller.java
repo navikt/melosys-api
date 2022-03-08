@@ -20,7 +20,7 @@ public final class OverlappendeMedlemskapsperioderKontroller {
     public static boolean harOverlappendeGyldigMedlemsperiode(MedlemskapDokument medlemskapDokument,
                                                               Lovvalgsperiode kontrollperiode) {
         return medlemskapDokument.hentMedlemsperioderHvorKildeIkkeLånekassen().stream().anyMatch(
-            medlemsperiode -> PeriodestatusMedl.GYLD.getKode().equals(medlemsperiode.status)
+            medlemsperiode -> !PeriodestatusMedl.AVST.getKode().equals(medlemsperiode.status)
                 && PeriodeKontroller.periodeOverlapper(kontrollperiode, medlemsperiode.getPeriode())
                 && (kontrollperiode.erNyPeriodeForMedl() || !kontrollperiode.harSammeMedlID(medlemsperiode.id)));
     }
