@@ -164,7 +164,7 @@ class OppgaveplukkerTest {
     }
 
     @Test
-    void plukkOppgave_avventerFagligAvklaring() {
+    void oppgaveplukkerVelgerIkkeSakerSomVenterPaaFagligAvklaring() {
         List<Oppgave> oppgaver = new ArrayList<>();
         oppgaver.add(opprettOppgave("1", Oppgavetyper.VUR, PrioritetType.LAV, LocalDate.of(2019, 8, 7), LocalDate.now(), "MEL-1"));
         when(oppgaveFasade.finnUtildelteOppgaverEtterFrist(any(String.class))).thenReturn(oppgaver);
@@ -179,8 +179,7 @@ class OppgaveplukkerTest {
 
         Optional<Oppgave> oppgave = oppgaveplukker.plukkOppgave("Z01234", plukkOppgaveInnDto);
 
-        assertThat(oppgave)
-            .isNotPresent();
+        assertThat(oppgave).isNotPresent();
     }
 
     @Test

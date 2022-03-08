@@ -344,10 +344,6 @@ public class Behandling extends RegistreringsInfo {
             || status == Behandlingsstatus.ANMODNING_UNNTAK_SENDT;
     }
 
-    public boolean erAvventerFagligAvklaring() {
-        return status == Behandlingsstatus.AVVENT_FAGLIG_AVKLARING;
-    }
-
     public boolean erBehandlingAvSøknad() {
         return tema != null && erBehandlingAvSøknad(tema.getKode());
     }
