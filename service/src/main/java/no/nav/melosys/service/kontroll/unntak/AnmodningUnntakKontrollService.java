@@ -46,7 +46,7 @@ public class AnmodningUnntakKontrollService implements AdresseUtlandKontroller {
 
     private static Set<Function<AnmodningUnntakKontrollData, Kontrollfeil>> anmodningUnntakKontroller() {
         return Set.of(
-            AnmodningUnntakKontrollService::bostedsadresseForOrienteringAnmodningUnntak,
+            AnmodningUnntakKontrollService::harRegistrertAdresse,
             AnmodningUnntakKontrollService::anmodningsperiodeManglerSluttdato,
             kontrollData -> AdresseUtlandKontroller.arbeidsstedManglerFelter(kontrollData.getBehandlingsgrunnlagData()),
             kontrollData -> AdresseUtlandKontroller.foretakUtlandManglerFelter(kontrollData.getBehandlingsgrunnlagData())
@@ -76,9 +76,9 @@ public class AnmodningUnntakKontrollService implements AdresseUtlandKontroller {
         return behandling.hentPersonDokument();
     }
 
-    static Kontrollfeil bostedsadresseForOrienteringAnmodningUnntak(AnmodningUnntakKontrollData kontrollData) {
-        return PersonKontroller.harRegistrertBostedsadresse(kontrollData.getPersonDokument(), kontrollData.getBehandlingsgrunnlagData())
-            ? null : new Kontrollfeil(Kontroll_begrunnelser.MANGLENDE_BOSTEDSADRESSE);
+    static Kontrollfeil harRegistrertAdresse(AnmodningUnntakKontrollData kontrollData) {
+        return PersonKontroller.harRegistrertAdresse(kontrollData.getPersonDokument(), kontrollData.getBehandlingsgrunnlagData())
+            ? null : new Kontrollfeil(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE);
     }
 
     static Kontrollfeil anmodningsperiodeManglerSluttdato(AnmodningUnntakKontrollData kontrollData) {
