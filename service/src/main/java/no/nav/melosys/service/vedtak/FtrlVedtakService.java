@@ -6,12 +6,11 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.DokgenService;
@@ -68,6 +67,22 @@ public class FtrlVedtakService {
     }
 
     private BrevbestillingRequest lagBrevbestilling(FattVedtakRequest request) {
+        if (request.getBehandlingsresultatTypeKode() == Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL) {
+            return lagAvslagMangledeOpplysningerBrevbestilling(request);
+        }
+        return lagInnvilgelseFolketrygdloven(request);
+    }
+
+    private BrevbestillingRequest lagAvslagMangledeOpplysningerBrevbestilling(FattVedtakRequest request) {
+        return new BrevbestillingRequest.Builder()
+            .medProduserbardokument(Produserbaredokumenter.AVSLAG_MANGLENDE_OPPLYSNINGER)
+            .medMottaker(Aktoersroller.BRUKER)
+            .medKopiMottakere(request.getKopiMottakere())
+            .medFritekst(request.getFritekst())
+            .build();
+    }
+
+    private BrevbestillingRequest lagInnvilgelseFolketrygdloven(FattVedtakRequest request) {
         return new BrevbestillingRequest.Builder()
             .medProduserbardokument(Produserbaredokumenter.INNVILGELSE_FOLKETRYGDLOVEN_2_8)
             .medMottaker(Aktoersroller.BRUKER)
