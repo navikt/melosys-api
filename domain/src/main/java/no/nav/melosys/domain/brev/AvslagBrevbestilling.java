@@ -2,7 +2,7 @@ package no.nav.melosys.domain.brev;
 
 public class AvslagBrevbestilling extends DokgenBrevbestilling {
 
-    private String fritekst;
+    private String avslagFritekst;
 
     public AvslagBrevbestilling() {
         super();
@@ -11,16 +11,16 @@ public class AvslagBrevbestilling extends DokgenBrevbestilling {
 
     public AvslagBrevbestilling(AvslagBrevbestilling.Builder builder) {
         super(builder);
-        this.fritekst = builder.fritekst;
+        this.avslagFritekst = builder.fritekst;
     }
 
     public AvslagBrevbestilling(AvslagBrevbestilling.Builder builder, String fritekst) {
         super(builder);
-        this.fritekst = fritekst;
+        this.avslagFritekst = fritekst;
     }
 
-    public String getFritekst() {
-        return fritekst;
+    public String getAvslagFritekst() {
+        return avslagFritekst;
     }
 
     public AvslagBrevbestilling.Builder toBuilder() {
@@ -35,7 +35,7 @@ public class AvslagBrevbestilling extends DokgenBrevbestilling {
 
         public Builder(AvslagBrevbestilling fritekstbrevBrevbestilling) {
             super(fritekstbrevBrevbestilling);
-            this.fritekst = fritekstbrevBrevbestilling.fritekst;
+            this.fritekst = fritekstbrevBrevbestilling.avslagFritekst;
         }
 
         public AvslagBrevbestilling.Builder medFritekst(String fritekst) {
