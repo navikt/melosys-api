@@ -84,7 +84,7 @@ final class UfmKontroller {
     }
 
     static Kontroll_begrunnelser overlappendeMedlemsperiode(UfmKontrollData kontrollData) {
-        return OverlappendeMedlemskapsperioderKontroller.harOverlappendeIkkeAvvistMedlemsperiode(
+        return OverlappendeMedlemskapsperioderKontroller.harOverlappendeMedlemsperiodeFraSed(
             kontrollData.getMedlemskapDokument(), kontrollData.getSedDokument().getLovvalgsperiode()) ?
             Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER : null;
     }
