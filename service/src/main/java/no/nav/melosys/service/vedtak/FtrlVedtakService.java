@@ -77,7 +77,7 @@ public class FtrlVedtakService {
         return new BrevbestillingRequest.Builder()
             .medProduserbardokument(Produserbaredokumenter.AVSLAG_MANGLENDE_OPPLYSNINGER)
             .medMottaker(Aktoersroller.BRUKER)
-            .medKopiMottakere(request.getKopiMottakere())
+            .medBestillersId(request.getBestillersId())
             .medFritekst(request.getFritekst())
             .build();
     }
