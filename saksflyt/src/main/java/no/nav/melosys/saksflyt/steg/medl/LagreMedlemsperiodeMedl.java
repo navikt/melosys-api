@@ -45,8 +45,6 @@ public class LagreMedlemsperiodeMedl implements StegBehandler {
         Behandlingsresultat resultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
 
         if(resultat.erAvslag()) {
-            // Feiler med oppslag mot hentMedlemAvFolketrygden under oppslag under ved avslag
-            // Mulig hentMedlemAvFolketrygden bør skives om til å ikke kast exception
             return;
         }
 
