@@ -1,8 +1,11 @@
 package no.nav.melosys.domain.brev;
 
+import java.util.List;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.serializer.LovvalgBestemmelseDeserializer;
@@ -16,60 +19,29 @@ class DokgenBrevbestillingTest {
         .registerModule(new SimpleModule().addDeserializer(LovvalgBestemmelse.class, new LovvalgBestemmelseDeserializer()));
 
     @Test
-    void deserialsiering_skalBliRiktigType_AvslagBrevbestilling() throws JsonProcessingException {
-        String dataString = """
-                {
-                    "avslagFritekst": "avslagFritekst"
-            }
-            """;
-
-        DokgenBrevbestilling dokgenBrevbestilling = dataMapper.readValue(dataString, DokgenBrevbestilling.class);
-        assertThat(dokgenBrevbestilling).isInstanceOf(AvslagBrevbestilling.class);
+    void deserialsiering_skalBliRiktigType_forAlleSubtyperAvDokgenBrevbestilling() throws JsonProcessingException {
+        var subTypesOfDokgenBrevbestilling = List.of(
+            MangelbrevBrevbestilling.class,
+            InnvilgelseBrevbestilling.class,
+            FritekstbrevBrevbestilling.class,
+            AvslagBrevbestilling.class);
+        for (var type : subTypesOfDokgenBrevbestilling) {
+            ObjectNode node = getJsonNodes(type);
+            DokgenBrevbestilling dokgenBrevbestilling = dataMapper.readValue(node.toPrettyString(), DokgenBrevbestilling.class);
+            assertThat(dokgenBrevbestilling).isInstanceOf(type);
+        }
     }
 
-    @Test
-    void deserialsiering_skalBliRiktigType_FritekstbrevBrevbestilling() throws JsonProcessingException {
-        String dataString = """
-                {
-                    "fritekstTittel": "",
-                    "fritekst": "",
-                    "kontaktopplysninger": false,
-                    "navnFullmektig": ""
+    private ObjectNode getJsonNodes(Class<? extends DokgenBrevbestilling> type) {
+        var node = dataMapper.createObjectNode();
+        for (var a : type.getDeclaredFields()) {
+            node.put(a.getName(), a.getType().getSimpleName());
+            if (a.getType().getSimpleName().equals("boolean")) {
+                node.put(a.getName(), false);
+            } else {
+                node.put(a.getName(), a.getType().getSimpleName());
             }
-            """;
-
-        DokgenBrevbestilling dokgenBrevbestilling = dataMapper.readValue(dataString, DokgenBrevbestilling.class);
-        assertThat(dokgenBrevbestilling).isInstanceOf(FritekstbrevBrevbestilling.class);
-    }
-
-    @Test
-    void deserialsiering_skalBliRiktigType_InnvilgelseBrevbestilling() throws JsonProcessingException {
-        String dataString = """
-                {
-                    "innledningFritekst": "",
-                    "begrunnelseFritekst": "",
-                    "ektefelleFritekst": "",
-                    "barnFritekst": "",
-                    "virksomhetArbeidsgiverSkalHaKopi": false,
-                    "nyVurderingBakgrunn": "false"
-            }
-            """;
-
-        DokgenBrevbestilling dokgenBrevbestilling = dataMapper.readValue(dataString, DokgenBrevbestilling.class);
-        assertThat(dokgenBrevbestilling).isInstanceOf(InnvilgelseBrevbestilling.class);
-    }
-
-    @Test
-    void deserialsiering_skalBliRiktigType_MangelbrevBrevbestilling() throws JsonProcessingException {
-        String dataString = """
-                {
-                    "manglerInfoFritekst": "",
-                    "innledningFritekst": "",
-                    "fullmektigNavn": ""
-            }
-            """;
-
-        DokgenBrevbestilling dokgenBrevbestilling = dataMapper.readValue(dataString, DokgenBrevbestilling.class);
-        assertThat(dokgenBrevbestilling).isInstanceOf(MangelbrevBrevbestilling.class);
+        }
+        return node;
     }
 }
