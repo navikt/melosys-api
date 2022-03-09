@@ -35,8 +35,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
 import static no.nav.melosys.domain.kodeverk.Saksstatuser.MEDLEMSKAP_AVKLART;
 import static no.nav.melosys.domain.kodeverk.Vedtakstyper.*;
+import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper.FASTSATT_LOVVALGSLAND;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.IVERKSETTER_VEDTAK;
+import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.AVSLAG_MANGLENDE_OPPLYSNINGER;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.STORBRITANNIA;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.*;
@@ -178,6 +180,39 @@ class TrygdeavtaleVedtakServiceTest {
         assertThat(brevbestillingRequest.getKopiMottakere().size()).isEqualTo(2);
         assertThat(brevbestillingRequest.getKopiMottakere().get(0).rolle()).isEqualTo(ARBEIDSGIVER);
         assertThat(brevbestillingRequest.getKopiMottakere().get(1).rolle()).isEqualTo(TRYGDEMYNDIGHET);
+    }
+
+    @Test
+    void fattVedtak_avslag_manglende_opplysninger_fatterVedtak() throws ValideringException {
+        var behandlingsresultat = new Behandlingsresultat();
+        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
+
+        FattVedtakRequest request = new FattVedtakRequest.Builder()
+            .medBehandlingsresultat(AVSLAG_MANGLENDE_OPPL)
+            .medVedtakstype(FØRSTEGANGSVEDTAK)
+            .medFritekst("fritekst for beskrivelse avslag")
+            .medBestillersId(SubjectHandler.getInstance().getUserID())
+            .build();
+
+        trygdeavtaleVedtakService.fattVedtak(lagBehandling(), request);
+
+        verify(behandlingsresultatService).lagre(behandlingsresultatCaptor.capture());
+        verify(behandlingService).endreStatus(behandlingCaptor.capture(), eq(IVERKSETTER_VEDTAK));
+        verify(prosessinstansService).opprettProsessinstansIverksettVedtakTrygdeavtale(any(Behandling.class), eq(request));
+        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(SAKSNUMMER);
+        verify(dokgenService).produserOgDistribuerBrev(anyLong(), brevbestillingRequestCaptor.capture());
+
+        Behandlingsresultat lagretBehandlingsresultat = behandlingsresultatCaptor.getValue();
+        assertThat(lagretBehandlingsresultat.getType()).isEqualTo(AVSLAG_MANGLENDE_OPPL);
+
+        Behandling lagretBehandling = behandlingCaptor.getValue();
+        assertThat(lagretBehandling.getFagsak().getStatus()).isEqualTo(MEDLEMSKAP_AVKLART);
+
+        BrevbestillingRequest brevbestillingRequest = brevbestillingRequestCaptor.getValue();
+        assertThat(brevbestillingRequest)
+            .extracting("produserbardokument", "bestillersId", "mottaker", "fritekst" )
+            .containsExactly(AVSLAG_MANGLENDE_OPPLYSNINGER, "Z990007", BRUKER, "fritekst for beskrivelse avslag");
+        assertThat(brevbestillingRequest.getKopiMottakere().size()).isEqualTo(0);
     }
 
     private FattVedtakRequest lagFattVedtakRequest(Vedtakstyper vedtakstype, String nyVurderingBakgrunn) {
