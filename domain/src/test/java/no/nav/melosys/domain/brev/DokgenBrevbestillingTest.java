@@ -1,7 +1,8 @@
 package no.nav.melosys.domain.brev;
 
-import java.util.List;
+import java.util.Arrays;
 
+import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
@@ -20,19 +21,17 @@ class DokgenBrevbestillingTest {
 
     @Test
     void deserialsiering_skalBliRiktigType_forAlleSubtyperAvDokgenBrevbestilling() throws JsonProcessingException {
-        var subTypesOfDokgenBrevbestilling = List.of(
-            MangelbrevBrevbestilling.class,
-            InnvilgelseBrevbestilling.class,
-            FritekstbrevBrevbestilling.class,
-            AvslagBrevbestilling.class);
-        for (var type : subTypesOfDokgenBrevbestilling) {
+        JsonSubTypes jsonSubTypes = DokgenBrevbestilling.class.getAnnotation(JsonSubTypes.class);
+        var classes = Arrays.stream(jsonSubTypes.value()).map(JsonSubTypes.Type::value).toList();
+
+        for (var type : classes) {
             ObjectNode node = getJsonNodes(type);
             DokgenBrevbestilling dokgenBrevbestilling = dataMapper.readValue(node.toPrettyString(), DokgenBrevbestilling.class);
             assertThat(dokgenBrevbestilling).isInstanceOf(type);
         }
     }
 
-    private ObjectNode getJsonNodes(Class<? extends DokgenBrevbestilling> type) {
+    private ObjectNode getJsonNodes(Class type) {
         var node = dataMapper.createObjectNode();
         for (var a : type.getDeclaredFields()) {
             node.put(a.getName(), a.getType().getSimpleName());
