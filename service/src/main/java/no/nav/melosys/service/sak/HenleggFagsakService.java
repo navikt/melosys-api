@@ -63,6 +63,7 @@ public class HenleggFagsakService {
         oppdaterBehandlingsresultat(aktivBehandling.getId(), begrunnelseKode, fritekst);
         if (aktivBehandling.erNyVurdering() && unleash.isEnabled("melosys.behandling.AVSLUTTE_UTEN_ENDRING")) {
             behandlingService.avsluttNyVurdering(aktivBehandling.getId(), Behandlingsresultattyper.HENLEGGELSE);
+            prosessinstansService.opprettProsessinstansFagsakHenlagt(aktivBehandling);
         } else {
             henleggFagsakEllerBehandling(fagsak);
         }
