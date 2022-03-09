@@ -65,11 +65,11 @@ public class HenleggFagsakService {
             behandlingService.avsluttNyVurdering(aktivBehandling.getId(), Behandlingsresultattyper.HENLEGGELSE);
             prosessinstansService.opprettProsessinstansFagsakHenlagt(aktivBehandling);
         } else {
-            henleggFagsakEllerBehandling(fagsak);
+            henleggFagsakOgBehandling(fagsak);
         }
     }
 
-    private void henleggFagsakEllerBehandling(Fagsak fagsak) {
+    private void henleggFagsakOgBehandling(Fagsak fagsak) {
         Behandling aktivBehandling = fagsak.hentAktivBehandling();
 
         fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.HENLAGT);
