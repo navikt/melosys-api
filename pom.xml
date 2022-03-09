@@ -53,7 +53,7 @@
         <!-- Versjoner av eksterne biblioteker -->
         <archunit.version>0.19.0</archunit.version>
         <apache-httpclients.version>4.5.13</apache-httpclients.version>
-        <caffeine.version>3.0.3</caffeine.version>
+        <caffeine.version>3.0.5</caffeine.version>
         <cxf.version>3.4.4</cxf.version>
         <commons-collections4.version>4.4</commons-collections4.version>
         <commons-lang.version>3.12.0</commons-lang.version>
@@ -78,7 +78,7 @@
         <easy-random.version>5.0.0</easy-random.version>
         <restFixture.version>4.4</restFixture.version>
         <shedlock.version>4.32.0</shedlock.version>
-        <slf4j.version>1.7.32</slf4j.version>
+        <slf4j.version>1.7.36</slf4j.version>
         <springfox.version>3.0.0</springfox.version>
         <swagger.version>1.5.21</swagger.version>
         <unleash.version>4.4.1</unleash.version>
@@ -96,7 +96,7 @@
         <objenesis.version>3.2</objenesis.version>
         <osgi.version>6.0.0</osgi.version>
         <woodstox.version>6.2.6</woodstox.version>
-        <xmlsec.version>2.2.3</xmlsec.version>
+        <xmlsec.version>2.3.0</xmlsec.version>
         <medlemskapsunntak-api-v1.version>1.1</medlemskapsunntak-api-v1.version>
         <wiremock-standalone.version>2.27.2</wiremock-standalone.version>
         <nav-foedselsnummer.core.version>1.0-SNAPSHOT.6</nav-foedselsnummer.core.version>

@@ -55,14 +55,14 @@ class AnmodningUnntakKontrollServiceTest {
     }
 
     @Test
-    void utførKontroller_manglerBostedsadresse_returnererKode() {
+    void utførKontroller_manglerAdresse_returnererKode() {
         when(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(lagBehandling());
-        when(persondataFasade.hentPerson(anyString())).thenReturn(PersonopplysningerObjectFactory.lagPersonopplysningerUtenBostedsadresse());
+        when(persondataFasade.hentPerson(anyString())).thenReturn(PersonopplysningerObjectFactory.lagPersonopplysningerUtenAdresser());
 
         Collection<Kontrollfeil> resultat = anmodningUnntakKontrollService.utførKontroller(behandlingID);
         assertThat(resultat)
             .extracting(Kontrollfeil::getKode)
-            .containsExactly(Kontroll_begrunnelser.MANGLENDE_BOSTEDSADRESSE);
+            .containsExactly(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE);
     }
 
     @Test

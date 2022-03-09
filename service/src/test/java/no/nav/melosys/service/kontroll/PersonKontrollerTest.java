@@ -3,7 +3,6 @@ package no.nav.melosys.service.kontroll;
 import java.time.LocalDate;
 
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.Bosted;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.person.adresse.Bostedsadresse;
@@ -50,27 +49,5 @@ class PersonKontrollerTest {
     @Test
     void personBosattINorge_ingenBostedsadresse_false() {
         assertThat(PersonKontroller.personBosattINorge(new PersonDokument())).isFalse();
-    }
-
-    @Test
-    void harBostedsadresse_oppgittBostedsadresseIBehandlingsgrunnnlag_true() {
-        Bosted bosted = behandlingsgrunnlagData.bosted;
-        bosted.oppgittAdresse.setGatenavn("gate");
-        bosted.oppgittAdresse.setLandkode("SE");
-
-        assertThat(PersonKontroller.harRegistrertBostedsadresse(personDokument, behandlingsgrunnlagData)).isTrue();
-    }
-
-    @Test
-    void harRegistrertBostedsadresse_oppgittBostedsadresseITPS_true() {
-        personDokument.getBostedsadresse().getGateadresse().setGatenavn("gate 123");
-        personDokument.getBostedsadresse().getLand().setKode("SWE");
-
-        assertThat(PersonKontroller.harRegistrertBostedsadresse(personDokument, behandlingsgrunnlagData)).isTrue();
-    }
-
-    @Test
-    void harRegistrertBostedsadresse_ikkeOppgittBostedsadresseITPSEllerSøknad_false() {
-        assertThat(PersonKontroller.harRegistrertBostedsadresse(personDokument, behandlingsgrunnlagData)).isFalse();
     }
 }
