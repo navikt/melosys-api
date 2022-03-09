@@ -141,7 +141,6 @@ public final class ProsessflytDefinisjon {
         PROSESS_FLYT_MAP.put(ProsessType.IVERKSETT_VEDTAK_FTRL,
             new ProsessFlyt(ProsessType.IVERKSETT_VEDTAK_FTRL,
                 LAGRE_MEDLEMSKAPSPERIODE_MEDL,
-                PUBLISER_VEDTAK,
                 OPPRETT_AVGIFTSOPPGAVE,
                 AVSLUTT_SAK_OG_BEHANDLING,
                 SOB_BEHANDLING_AVSLUTTET
