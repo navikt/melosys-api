@@ -96,7 +96,22 @@ class HenleggFagsakServiceTest {
 
         verify(behandlingService).avsluttNyVurdering(behandlingID, Behandlingsresultattyper.HENLEGGELSE);
         verify(prosessinstansService).opprettProsessinstansFagsakHenlagt(behandling);
-        verifyNoMoreInteractions(fagsakService, prosessinstansService, oppgaveService);
+        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(fagsak.getSaksnummer());
+        verifyNoMoreInteractions(fagsakService);
+    }
+
+    @Test
+    void henleggFagsak_avslutterKunBehandling_nårBehandlingTypeIkkeErNyVurdering() {
+        when(fagsakService.hentFagsak(saksnummer)).thenReturn(fagsak);
+        when(behandlingsresultatService.hentBehandlingsresultat(behandlingID)).thenReturn(behandlingsresultat);
+        behandling.setType(Behandlingstyper.SOEKNAD);
+
+        henleggFagsakService.henleggFagsakEllerBehandling(saksnummer, "ANNET", "- Justin Bieber");
+
+        verify(fagsakService).avsluttFagsakOgBehandling(fagsak, Saksstatuser.HENLAGT);
+        verify(prosessinstansService).opprettProsessinstansFagsakHenlagt(behandling);
+        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(fagsak.getSaksnummer());
+        verifyNoMoreInteractions(behandlingService);
     }
 
     @Test
@@ -145,6 +160,7 @@ class HenleggFagsakServiceTest {
         henleggFagsakService.henleggSakEllerBehandlingSomBortfalt(saksnummer);
 
         verify(behandlingService).avsluttNyVurdering(andreBehandling.getId(), Behandlingsresultattyper.HENLEGGELSE_BORTFALT);
+        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(saksnummer);
         verifyNoMoreInteractions(fagsakService, behandlingsresultatService, oppgaveService);
     }
 }
