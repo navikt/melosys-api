@@ -94,7 +94,11 @@ class FtrlVedtakServiceTest {
 
         Behandlingsresultat lagretBehandlingsresultat = behandlingsresultatCaptor.getValue();
         assertThat(lagretBehandlingsresultat)
-            .extracting("type", "begrunnelseFritekst", "fastsattAvLand")
+            .extracting(
+                Behandlingsresultat::getType,
+                Behandlingsresultat::getBegrunnelseFritekst,
+                Behandlingsresultat::getFastsattAvLand
+            )
             .containsExactly(MEDLEM_I_FOLKETRYGDEN, "Begrunnelse", Landkoder.NO);
 
         Behandling lagretBehandling = behandlingCaptor.getValue();
@@ -102,8 +106,15 @@ class FtrlVedtakServiceTest {
 
         BrevbestillingRequest brevbestillingRequest = brevbestillingRequestCaptor.getValue();
         assertThat(brevbestillingRequest)
-            .extracting("produserbardokument", "bestillersId", "mottaker", "innledningFritekst",
-                "begrunnelseFritekst", "ektefelleFritekst", "barnFritekst")
+            .extracting(
+                BrevbestillingRequest::getProduserbardokument,
+                BrevbestillingRequest::getBestillersId,
+                BrevbestillingRequest::getMottaker,
+                BrevbestillingRequest::getInnledningFritekst,
+                BrevbestillingRequest::getBegrunnelseFritekst,
+                BrevbestillingRequest::getEktefelleFritekst,
+                BrevbestillingRequest::getBarnFritekst
+            )
             .containsExactly(INNVILGELSE_FOLKETRYGDLOVEN_2_8, "Z990007", BRUKER, "Innledning",
                 "Begrunnelse", "Ektefelle omfattet", "Barn omfattet");
         assertThat(brevbestillingRequest.getKopiMottakere().size()).isEqualTo(1);
@@ -138,7 +149,12 @@ class FtrlVedtakServiceTest {
 
         BrevbestillingRequest brevbestillingRequest = brevbestillingRequestCaptor.getValue();
         assertThat(brevbestillingRequest)
-            .extracting("produserbardokument", "bestillersId", "mottaker", "fritekst" )
+            .extracting(
+                BrevbestillingRequest::getProduserbardokument,
+                BrevbestillingRequest::getBestillersId,
+                BrevbestillingRequest::getMottaker,
+                BrevbestillingRequest::getFritekst
+            )
             .containsExactly(AVSLAG_MANGLENDE_OPPLYSNINGER, "Z990007", BRUKER, "fritekst for beskrivelse avslag");
         assertThat(brevbestillingRequest.getKopiMottakere().size()).isEqualTo(0);
     }
