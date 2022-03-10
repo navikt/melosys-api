@@ -120,7 +120,7 @@ public class EessiService {
                                   List<String> mottakerInstitusjoner,
                                   Collection<DokumentReferanse> vedleggReferanser) {
 
-        Behandling behandling = behandlingService.hentBehandling(behandlingID);
+        Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
 
         Fagsak fagsak = behandling.getFagsak();
         joarkFasade.validerDokumenterTilhørerSakOgHarTilgang(
