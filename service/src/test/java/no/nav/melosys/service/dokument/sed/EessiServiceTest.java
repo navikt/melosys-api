@@ -204,15 +204,16 @@ class EessiServiceTest {
     }
 
     @Test
-    void opprettBucOgSed_verifiserKorrektSedType() throws Exception {
+    void opprettBucOgSed_verifiserKorrektSedType() {
         OpprettSedDto opprettSedDto = new OpprettSedDto();
         opprettSedDto.setRinaUrl("localhost:3000");
+        when(behandlingService.hentBehandling(BEHANDLING_ID)).thenReturn(lagBehandling());
         when(eessiConsumer.opprettBucOgSed(any(SedDataDto.class), any(), any(BucType.class), anyBoolean(), anyBoolean())).thenReturn(opprettSedDto);
         when(dokumentdataGrunnlagFactory.av(any())).thenReturn(Mockito.mock(SedDataGrunnlagMedSoknad.class));
         when(sedDataBygger.lagUtkast(any(SedDataGrunnlag.class), any(Behandlingsresultat.class), any(PeriodeType.class))).thenReturn(new SedDataDto());
         mockBehandlingsresultat();
 
-        eessiService.opprettBucOgSed(lagBehandling(), BucType.LA_BUC_01, List.of(mottakerBelgia1), Collections.emptyList());
+        eessiService.opprettBucOgSed(BEHANDLING_ID, BucType.LA_BUC_01, List.of(mottakerBelgia1), Collections.emptyList());
         verify(eessiConsumer).opprettBucOgSed(any(SedDataDto.class), anyCollection(), eq(BucType.LA_BUC_01), eq(false), eq(false));
     }
 
