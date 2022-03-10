@@ -59,9 +59,17 @@ public class DokumentServiceFasade {
         var brevbestillingDto = new BrevbestillingRequest.Builder()
             .medProduserbardokument(dokumentType)
             .medMottaker(mottaker.getRolle())
+            .medFritekst(hentFritekst(brevbestilling))
             .build();
 
         produserDokument(behandlingId, brevbestilling, brevbestillingDto, mottaker);
+    }
+
+    private String hentFritekst(DoksysBrevbestilling brevbestilling) {
+        if (brevbestilling.getProduserbartdokument() == Produserbaredokumenter.AVSLAG_MANGLENDE_OPPLYSNINGER) {
+            return brevbestilling.getFritekst();
+        }
+        return null;
     }
 
     private void produserDokument(long behandlingID, DoksysBrevbestilling brevbestilling, BrevbestillingRequest brevbestillingRequest, Mottaker mottaker) {
