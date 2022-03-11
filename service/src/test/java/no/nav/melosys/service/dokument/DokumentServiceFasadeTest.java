@@ -16,6 +16,9 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 
+import java.util.List;
+
+import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -109,21 +112,27 @@ class DokumentServiceFasadeTest {
     }
 
     @Test
-    void sendDokgenBrevForAvslagManglendeOpplysninger() {
+    void skal_lageRiktigDokgenBrevRequest_ved_avslagManglendeOpplysninger_() {
         when(mockDokgenService.erTilgjengeligDokgenmal(eq(Produserbaredokumenter.AVSLAG_MANGLENDE_OPPLYSNINGER))).thenReturn(true);
 
-        BrevbestillingRequest brevbestillingRequest = new BrevbestillingRequest.Builder()
-            .medProduserbardokument(Produserbaredokumenter.AVSLAG_MANGLENDE_OPPLYSNINGER)
-            .medFritekst("fritekst")
-            .medBestillersId("Z123456")
+        DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder()
+            .medProduserbartDokument(Produserbaredokumenter.AVSLAG_MANGLENDE_OPPLYSNINGER)
+            .medAvsenderNavn("Z123456")
+            .medMottakere(List.of(Mottaker.av(BRUKER)))
+            .medFritekst("avlsag fritekst")
             .build();
 
-        dokumentServiceFasade.produserDokument(1L, brevbestillingRequest);
+        dokumentServiceFasade.produserDokument(Produserbaredokumenter.AVSLAG_MANGLENDE_OPPLYSNINGER, Mottaker.av(BRUKER), 1L, brevbestilling);
 
         verify(mockDokgenService).produserOgDistribuerBrev(eq(1L), brevbestillingRequestCaptor.capture());
+        verifyNoInteractions(mockDokumentService);
 
         BrevbestillingRequest value = brevbestillingRequestCaptor.getValue();
-        assertThat(value).isEqualTo(brevbestillingRequest);
-        verifyNoInteractions(mockDokumentService);
+
+        assertThat(value).extracting(
+            BrevbestillingRequest::getBestillersId,
+            BrevbestillingRequest::getMottaker,
+            BrevbestillingRequest::getFritekst
+        ).containsExactly("Z123456", BRUKER, "avlsag fritekst");
     }
 }
