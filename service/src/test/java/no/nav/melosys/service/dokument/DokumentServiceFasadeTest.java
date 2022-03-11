@@ -127,9 +127,9 @@ class DokumentServiceFasadeTest {
         verify(mockDokgenService).produserOgDistribuerBrev(eq(1L), brevbestillingRequestCaptor.capture());
         verifyNoInteractions(mockDokumentService);
 
-        BrevbestillingRequest value = brevbestillingRequestCaptor.getValue();
+        var dokgenBrevbestillingRequest = brevbestillingRequestCaptor.getValue();
 
-        assertThat(value).extracting(
+        assertThat(dokgenBrevbestillingRequest).extracting(
             BrevbestillingRequest::getBestillersId,
             BrevbestillingRequest::getMottaker,
             BrevbestillingRequest::getFritekst
