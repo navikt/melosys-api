@@ -1,49 +1,49 @@
-    package no.nav.melosys.service.dokument.brev;
+package no.nav.melosys.service.dokument.brev;
 
-    import java.time.Instant;
-    import java.util.Collection;
-    import java.util.HashSet;
-    import java.util.Optional;
+import java.time.Instant;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Optional;
 
-    import no.finn.unleash.FakeUnleash;
-    import no.nav.dok.brevdata.felles.v1.navfelles.Mottaker;
-    import no.nav.dok.brevdata.felles.v1.navfelles.Organisasjon;
-    import no.nav.dok.brevdata.felles.v1.navfelles.Person;
-    import no.nav.melosys.domain.*;
-    import no.nav.melosys.domain.adresse.StrukturertAdresse;
-    import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
-    import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
-    import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
-    import no.nav.melosys.domain.dokument.person.PersonDokument;
-    import no.nav.melosys.domain.kodeverk.Aktoersroller;
-    import no.nav.melosys.domain.kodeverk.Landkoder;
-    import no.nav.melosys.domain.kodeverk.Representerer;
-    import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
-    import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
-    import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
-    import no.nav.melosys.domain.person.Persondata;
-    import no.nav.melosys.exception.FunksjonellException;
-    import no.nav.melosys.integrasjon.doksys.DokumentbestillingMetadata;
-    import no.nav.melosys.repository.BehandlingsresultatRepository;
-    import no.nav.melosys.repository.UtenlandskMyndighetRepository;
-    import no.nav.melosys.service.ldap.SaksbehandlerService;
-    import no.nav.melosys.service.persondata.PersondataFasade;
-    import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory;
-    import org.junit.jupiter.api.BeforeEach;
-    import org.junit.jupiter.api.Test;
-    import org.junit.jupiter.api.extension.ExtendWith;
-    import org.mockito.Mock;
-    import org.mockito.junit.jupiter.MockitoExtension;
-    import org.mockito.junit.jupiter.MockitoSettings;
-    import org.mockito.quality.Strictness;
-    import org.w3c.dom.Element;
+import no.finn.unleash.FakeUnleash;
+import no.nav.dok.brevdata.felles.v1.navfelles.Mottaker;
+import no.nav.dok.brevdata.felles.v1.navfelles.Organisasjon;
+import no.nav.dok.brevdata.felles.v1.navfelles.Person;
+import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.adresse.StrukturertAdresse;
+import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
+import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
+import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
+import no.nav.melosys.domain.dokument.person.PersonDokument;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Representerer;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
+import no.nav.melosys.domain.person.Persondata;
+import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.integrasjon.doksys.DokumentbestillingMetadata;
+import no.nav.melosys.repository.BehandlingsresultatRepository;
+import no.nav.melosys.repository.UtenlandskMyndighetRepository;
+import no.nav.melosys.service.ldap.SaksbehandlerService;
+import no.nav.melosys.service.persondata.PersondataFasade;
+import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
+import org.w3c.dom.Element;
 
-    import static java.util.Arrays.asList;
-    import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
-    import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.*;
-    import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-    import static org.junit.jupiter.api.Assertions.assertThrows;
-    import static org.mockito.Mockito.*;
+import static java.util.Arrays.asList;
+import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
+import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.*;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -69,7 +69,7 @@ class BrevDataServiceTest {
     @BeforeEach
     public void setUp() {
         service = spy(new BrevDataService(behandlingsresultatRepository, persondataFasade, saksbehandlerService,
-                utenlandskMyndighetRepository, new FakeUnleash()));
+            utenlandskMyndighetRepository, new FakeUnleash()));
 
         when(behandlingsresultatRepository.findById(anyLong())).thenReturn(Optional.of(new Behandlingsresultat()));
         when(saksbehandlerService.hentNavnForIdent(anyString())).thenReturn("Joe Moe");
