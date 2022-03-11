@@ -143,7 +143,7 @@ public class DokgenBrevbestilling extends Brevbestilling {
             this.utenlandskMyndighet = brevbestilling.utenlandskMyndighet;
             this.kontaktpersonNavn = brevbestilling.kontaktpersonNavn;
             this.forsendelseMottatt = brevbestilling.forsendelseMottatt;
-            this.avsenderNavn = brevbestilling.avsenderNavn;
+            this.avsenderNavn = brevbestilling.avsenderID;
             this.avsendertype = brevbestilling.avsendertype;
             this.avsenderLand = brevbestilling.avsenderLand;
             this.behandlingId = brevbestilling.behandlingId;

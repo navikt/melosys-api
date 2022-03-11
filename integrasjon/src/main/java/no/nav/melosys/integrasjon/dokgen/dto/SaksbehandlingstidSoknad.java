@@ -2,7 +2,6 @@ package no.nav.melosys.integrasjon.dokgen.dto;
 
 
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -34,7 +33,7 @@ public class SaksbehandlingstidSoknad extends DokgenDto {
         this.datoBehandlingstid = datoBehandlingstid;
         this.typeSoknad = brevbestilling.getBehandling().getFagsak().getType().getKode();
         this.avsenderTypeSoknad = utledAvsendertype(brevbestilling.getAvsendertype());
-        this.avsenderSoknad = brevbestilling.getAvsenderNavn();
+        this.avsenderSoknad = brevbestilling.getAvsenderID();
         this.avsenderLand = brevbestilling.getAvsenderLand();
     }
 

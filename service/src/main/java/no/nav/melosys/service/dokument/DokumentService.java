@@ -72,7 +72,7 @@ public class DokumentService {
         Aktoersroller mottakerRolle = brevbestillingRequest.getMottaker() == null ?
             brevmottakerService.avklarMottakerRolleFraDokument(produserbartDokument) : brevbestillingRequest.getMottaker();
         DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medProduserbartDokument(produserbartDokument)
-            .medAvsenderNavn(SubjectHandler.getInstance().getUserID())
+            .medAvsenderID(SubjectHandler.getInstance().getUserID())
             .medMottakerRolle(mottakerRolle)
             .medBehandling(behandling)
             .medBegrunnelseKode(brevbestillingRequest.getBegrunnelseKode())
@@ -107,7 +107,7 @@ public class DokumentService {
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
         DoksysBrevbestilling nyBrevbestilling = new DoksysBrevbestilling.Builder()
             .medProduserbartDokument(brevbestilling.getProduserbartdokument())
-            .medAvsenderNavn(brevbestilling.getAvsenderNavn())
+            .medAvsenderID(brevbestilling.getAvsenderID())
             .medMottakerRolle(brevbestilling.getMottakerRolle())
             .medMottakere(brevbestilling.getMottakere())
             .medBehandling(behandling)
@@ -130,7 +130,7 @@ public class DokumentService {
         BrevDataBygger brevDataBygger = brevDataByggerVelger.hent(dokumentType, lagBrevbestillingDto(brevbestilling));
         BrevDataGrunnlag brevDataGrunnlag = brevdataGrunnlagFactory.av(brevbestilling);
 
-        return brevDataBygger.lag(brevDataGrunnlag, brevbestilling.getAvsenderNavn());
+        return brevDataBygger.lag(brevDataGrunnlag, brevbestilling.getAvsenderID());
     }
 
     private static BrevbestillingRequest lagBrevbestillingDto(DoksysBrevbestilling brevbestilling) {

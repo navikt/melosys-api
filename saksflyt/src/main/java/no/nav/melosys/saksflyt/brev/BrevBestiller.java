@@ -23,7 +23,7 @@ public class BrevBestiller {
 
     public void bestill(Produserbaredokumenter dokumentType, String avsender, Mottaker mottaker, Behandling behandling) {
         DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medProduserbartDokument(dokumentType)
-            .medAvsenderNavn(avsender)
+            .medAvsenderID(avsender)
             .medMottakere(mottaker)
             .medBehandling(behandling).build();
         bestill(brevbestilling);
