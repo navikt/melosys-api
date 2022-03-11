@@ -42,10 +42,10 @@ public class DokumentServiceFasade {
 
     @Transactional
     public void produserDokument(long behandlingId, BrevbestillingRequest brevbestillingRequest) {
-        String saksbehandler = SubjectHandler.getInstance().getUserID();
+        String saksbehandlerID = SubjectHandler.getInstance().getUserID();
         var behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingId);
         DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medProduserbartDokument(brevbestillingRequest.getProduserbardokument())
-            .medAvsenderNavn(saksbehandler)
+            .medAvsenderNavn(saksbehandlerID)
             .medMottakere(Mottaker.av(brevbestillingRequest.getMottaker()))
             .medBegrunnelseKode(brevbestillingRequest.getBegrunnelseKode())
             .medYtterligereInformasjon(brevbestillingRequest.getYtterligereInformasjon())
