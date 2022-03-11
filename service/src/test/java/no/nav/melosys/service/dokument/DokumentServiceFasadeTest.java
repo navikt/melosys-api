@@ -119,7 +119,7 @@ class DokumentServiceFasadeTest {
             .medProduserbartDokument(Produserbaredokumenter.AVSLAG_MANGLENDE_OPPLYSNINGER)
             .medAvsenderNavn("Z123456")
             .medMottakere(List.of(Mottaker.av(BRUKER)))
-            .medFritekst("avlsag fritekst")
+            .medFritekst("avslag fritekst")
             .build();
 
         dokumentServiceFasade.produserDokument(Produserbaredokumenter.AVSLAG_MANGLENDE_OPPLYSNINGER, Mottaker.av(BRUKER), 1L, brevbestilling);
@@ -133,6 +133,6 @@ class DokumentServiceFasadeTest {
             BrevbestillingRequest::getBestillersId,
             BrevbestillingRequest::getMottaker,
             BrevbestillingRequest::getFritekst
-        ).containsExactly("Z123456", BRUKER, "avlsag fritekst");
+        ).containsExactly("Z123456", BRUKER, "avslag fritekst");
     }
 }
