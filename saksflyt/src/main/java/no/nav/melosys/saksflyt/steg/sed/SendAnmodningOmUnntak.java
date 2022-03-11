@@ -74,7 +74,7 @@ public class SendAnmodningOmUnntak extends AbstraktSendUtland {
 
     private Collection<Vedlegg> hentVedlegg(Prosessinstans prosessinstans) {
         final Set<DokumentReferanse> vedleggReferanser = prosessinstans.getData(ProsessDataKey.VEDLEGG_SED,
-            new TypeReference<Set<DokumentReferanse>>() {
+            new TypeReference<>() {
             }, Collections.emptySet());
         return eessiService.lagEessiVedlegg(prosessinstans.getBehandling().getFagsak(),
             vedleggReferanser);

@@ -49,7 +49,7 @@ public class SendHenleggelsesbrev implements StegBehandler {
     public void utfør(Prosessinstans prosessinstans) {
         log.info("Sender henleggelsesbrev for behandling {}", prosessinstans.getBehandling().getId());
         final List<String> henleggelsesGrunnerKoder = Arrays.stream(Henleggelsesgrunner.values())
-            .map(Kodeverk::getKode).collect(Collectors.toList());
+            .map(Kodeverk::getKode).toList();
 
         Behandling behandling = prosessinstans.getBehandling();
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
