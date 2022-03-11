@@ -42,7 +42,7 @@ import static java.util.Arrays.asList;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.*;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -134,11 +134,9 @@ class BrevDataServiceTest {
         Aktoer aktoer = lagAktør(Aktoersroller.BRUKER);
         when(persondataFasade.hentPerson(anyString())).thenReturn(lagPersondata());
 
-        Exception exception = assertThrows(FunksjonellException.class, () -> {
-            service.lagMottaker(aktoer, null, behandling);
-        });
-
-        assertThat(exception.getMessage()).isEqualTo(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE.getBeskrivelse());
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> service.lagMottaker(aktoer, null, behandling))
+            .withMessageContaining(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE.getBeskrivelse());
     }
 
     @Test
