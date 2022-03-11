@@ -9,12 +9,18 @@ import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 
+import java.util.List;
+
+import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
@@ -32,6 +38,8 @@ class DokumentServiceFasadeTest {
     private BehandlingService mockBehandlingService;
     @Mock
     private ApplicationEventPublisher applicationEventPublisher;
+    @Captor
+    private ArgumentCaptor<BrevbestillingRequest> brevbestillingRequestCaptor;
 
     private DokumentServiceFasade dokumentServiceFasade;
 
@@ -101,5 +109,30 @@ class DokumentServiceFasadeTest {
 
         verify(mockDokgenService).produserOgDistribuerBrev(anyLong(), any());
         verifyNoInteractions(mockDokumentService);
+    }
+
+    @Test
+    void skal_lageRiktigDokgenBrevRequest_ved_avslagManglendeOpplysninger_() {
+        when(mockDokgenService.erTilgjengeligDokgenmal(eq(Produserbaredokumenter.AVSLAG_MANGLENDE_OPPLYSNINGER))).thenReturn(true);
+
+        DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder()
+            .medProduserbartDokument(Produserbaredokumenter.AVSLAG_MANGLENDE_OPPLYSNINGER)
+            .medAvsenderNavn("Z123456")
+            .medMottakere(List.of(Mottaker.av(BRUKER)))
+            .medFritekst("avslag fritekst")
+            .build();
+
+        dokumentServiceFasade.produserDokument(Produserbaredokumenter.AVSLAG_MANGLENDE_OPPLYSNINGER, Mottaker.av(BRUKER), 1L, brevbestilling);
+
+        verify(mockDokgenService).produserOgDistribuerBrev(eq(1L), brevbestillingRequestCaptor.capture());
+        verifyNoInteractions(mockDokumentService);
+
+        var dokgenBrevbestillingRequest = brevbestillingRequestCaptor.getValue();
+
+        assertThat(dokgenBrevbestillingRequest).extracting(
+            BrevbestillingRequest::getBestillersId,
+            BrevbestillingRequest::getMottaker,
+            BrevbestillingRequest::getFritekst
+        ).containsExactly("Z123456", BRUKER, "avslag fritekst");
     }
 }
