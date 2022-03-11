@@ -60,6 +60,7 @@ public class DokumentServiceFasade {
             .medProduserbardokument(dokumentType)
             .medMottaker(mottaker.getRolle())
             .medFritekst(hentFritekst(brevbestilling))
+            .medBestillersId(brevbestilling.getAvsenderNavn())
             .build();
 
         produserDokument(behandlingId, brevbestilling, brevbestillingDto, mottaker);
