@@ -63,7 +63,7 @@ public class SendHenleggelsesbrev implements StegBehandler {
 
         DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder()
             .medProduserbartDokument(MELDING_HENLAGT_SAK)
-            .medAvsenderNavn(saksbehandler)
+            .medAvsenderID(saksbehandler)
             .medMottakere(Mottaker.av(Aktoersroller.BRUKER))
             .medBehandling(behandling)
             .medBegrunnelseKode(begrunnelseKode)

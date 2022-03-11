@@ -44,7 +44,7 @@ public class SendOrienteringsbrevVideresendSøknad implements StegBehandler {
         String fritekst = prosessinstans.getData(BEHANDLINGSRESULTAT_BEGRUNNELSE_FRITEKST);
 
         DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder()
-            .medAvsenderNavn(saksbehandler)
+            .medAvsenderID(saksbehandler)
             .medProduserbartDokument(Produserbaredokumenter.ORIENTERING_VIDERESENDT_SOEKNAD)
             .medMottakere(Mottaker.av(Aktoersroller.BRUKER))
             .medBehandling(behandling)

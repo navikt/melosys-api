@@ -102,7 +102,7 @@ public class SendVedtaksbrevInnland implements StegBehandler {
 
         DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder()
             .medProduserbartDokument(avslagTypeBruker)
-            .medAvsenderNavn(saksbehandler)
+            .medAvsenderID(saksbehandler)
             .medBehandling(behandling)
             .medMottakere(mottakerListe)
             .medFritekst(fritekst)
@@ -115,7 +115,7 @@ public class SendVedtaksbrevInnland implements StegBehandler {
 
             DoksysBrevbestilling.Builder brevbestillingArbeidsgiver = new DoksysBrevbestilling.Builder()
                 .medProduserbartDokument(avslagTypeArbeidsgiver)
-                .medAvsenderNavn(saksbehandler)
+                .medAvsenderID(saksbehandler)
                 .medBehandling(behandling)
                 .medMottakere(Mottaker.av(ARBEIDSGIVER))
                 .medFritekst(fritekst);
@@ -141,7 +141,7 @@ public class SendVedtaksbrevInnland implements StegBehandler {
         }
 
         DoksysBrevbestilling innvilgelseBrukerOgSkatt = new DoksysBrevbestilling.Builder().medProduserbartDokument(innvilgelseType)
-            .medAvsenderNavn(saksbehandler)
+            .medAvsenderID(saksbehandler)
             .medBehandling(behandling)
             .medBegrunnelseKode(begrunnelseKode)
             .medMottakere(mottakerListe)
@@ -152,7 +152,7 @@ public class SendVedtaksbrevInnland implements StegBehandler {
 
     private void sendUtpekingsbrev(Behandling behandling, String saksbehandler, String fritekst) {
         DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medProduserbartDokument(ORIENTERING_UTPEKING_UTLAND)
-            .medAvsenderNavn(saksbehandler)
+            .medAvsenderID(saksbehandler)
             .medBehandling(behandling)
             .medMottakere(Mottaker.av(BRUKER))
             .medFritekst(fritekst)

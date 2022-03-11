@@ -117,7 +117,7 @@ class DokumentServiceFasadeTest {
 
         DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder()
             .medProduserbartDokument(Produserbaredokumenter.AVSLAG_MANGLENDE_OPPLYSNINGER)
-            .medAvsenderNavn("Z123456")
+            .medAvsenderID("Z123456")
             .medMottakere(List.of(Mottaker.av(BRUKER)))
             .medFritekst("avslag fritekst")
             .build();

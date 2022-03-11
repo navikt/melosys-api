@@ -15,14 +15,14 @@ public final class DoksysBrevbestilling extends Brevbestilling {
     private final String ytterligereInformasjon;
 
     private DoksysBrevbestilling(Produserbaredokumenter produserbartdokument,
-                                 String avsenderNavn,
+                                 String avsenderID,
                                  Aktoersroller mottakerRolle,
                                  Collection<Mottaker> mottaker,
                                  Behandling behandling,
                                  String begrunnelseKode,
                                  String fritekst,
                                  String ytterligereInformasjon) {
-        super(produserbartdokument, behandling, avsenderNavn);
+        super(produserbartdokument, behandling, avsenderID);
         this.mottakerRolle = mottakerRolle;
         this.mottaker = mottaker;
         this.begrunnelseKode = begrunnelseKode;
@@ -32,7 +32,7 @@ public final class DoksysBrevbestilling extends Brevbestilling {
 
     public static class Builder {
         private Produserbaredokumenter produserbartdokument;
-        private String avsenderNavn;
+        private String avsenderID;
         private Aktoersroller mottakerRolle;
         private Collection<Mottaker> mottakere;
         private Behandling behandling;
@@ -45,8 +45,8 @@ public final class DoksysBrevbestilling extends Brevbestilling {
             return this;
         }
 
-        public Builder medAvsenderNavn(String avsenderNavn) {
-            this.avsenderNavn = avsenderNavn;
+        public Builder medAvsenderID(String avsenderID) {
+            this.avsenderID = avsenderID;
             return this;
         }
 
@@ -89,7 +89,7 @@ public final class DoksysBrevbestilling extends Brevbestilling {
         public DoksysBrevbestilling build() {
             return new DoksysBrevbestilling(
                 produserbartdokument,
-                avsenderNavn,
+                avsenderID,
                 mottakerRolle,
                 mottakere,
                 behandling,
