@@ -9,12 +9,15 @@ import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
@@ -32,6 +35,8 @@ class DokumentServiceFasadeTest {
     private BehandlingService mockBehandlingService;
     @Mock
     private ApplicationEventPublisher applicationEventPublisher;
+    @Captor
+    private ArgumentCaptor<BrevbestillingRequest> brevbestillingRequestCaptor;
 
     private DokumentServiceFasade dokumentServiceFasade;
 
@@ -100,6 +105,25 @@ class DokumentServiceFasadeTest {
         dokumentServiceFasade.produserDokument(1, new BrevbestillingRequest());
 
         verify(mockDokgenService).produserOgDistribuerBrev(anyLong(), any());
+        verifyNoInteractions(mockDokumentService);
+    }
+
+    @Test
+    void sendDokgenBrevForAvslagManglendeOpplysninger() {
+        when(mockDokgenService.erTilgjengeligDokgenmal(eq(Produserbaredokumenter.AVSLAG_MANGLENDE_OPPLYSNINGER))).thenReturn(true);
+
+        BrevbestillingRequest brevbestillingRequest = new BrevbestillingRequest.Builder()
+            .medProduserbardokument(Produserbaredokumenter.AVSLAG_MANGLENDE_OPPLYSNINGER)
+            .medFritekst("fritekst")
+            .medBestillersId("Z123456")
+            .build();
+
+        dokumentServiceFasade.produserDokument(1L, brevbestillingRequest);
+
+        verify(mockDokgenService).produserOgDistribuerBrev(eq(1L), brevbestillingRequestCaptor.capture());
+
+        BrevbestillingRequest value = brevbestillingRequestCaptor.getValue();
+        assertThat(value).isEqualTo(brevbestillingRequest);
         verifyNoInteractions(mockDokumentService);
     }
 }
