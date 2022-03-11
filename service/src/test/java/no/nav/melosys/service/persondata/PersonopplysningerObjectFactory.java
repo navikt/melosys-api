@@ -34,12 +34,12 @@ public class PersonopplysningerObjectFactory {
         return lagPersonopplysninger(false, true, false, false, false);
     }
 
-    public static Personopplysninger lagPersoopplysningerUtenOppholdsadresse() {
+    public static Personopplysninger lagPersonopplysningerUtenOppholdsadresse() {
         return lagPersonopplysninger(false, false, true, false, false);
 
     }
 
-    public static Personopplysninger lagPersoopplysningerUtenKontaktadresse() {
+    public static Personopplysninger lagPersonpplysningerUtenKontaktadresse() {
         return lagPersonopplysninger(false, false, false, true, false);
     }
 

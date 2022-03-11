@@ -288,7 +288,7 @@ class A1MapperTest {
 
     @Test
     void mapTilBrevXML_harIngenOppholdsadresse_forventUtfylltMidlertidigAdresseMedKontaktAdresse() {
-        brevData.person = lagPersoopplysningerUtenOppholdsadresse();
+        brevData.person = lagPersonopplysningerUtenOppholdsadresse();
         A1 a1 = mapper.mapA1(behandling, behandlingsresultat, brevData);
         assertThat(a1.getPerson().getMidlertidigOppholdsadresse().getGatenavn()).isEqualTo("gatenavnKontaktadresseFreg");
     }
@@ -302,7 +302,7 @@ class A1MapperTest {
 
     @Test
     void mapTilBrevXML_harIngenKontaktadresse_forventUtfylltMidlertidigAdresseMedOppholdsadresse() {
-        brevData.person = lagPersoopplysningerUtenKontaktadresse();
+        brevData.person = lagPersonpplysningerUtenKontaktadresse();
         A1 a1 = mapper.mapA1(behandling, behandlingsresultat, brevData);
         assertThat(a1.getPerson().getMidlertidigOppholdsadresse().getGatenavn()).isEqualTo("gatenavnOppholdsadresseFreg");
     }
