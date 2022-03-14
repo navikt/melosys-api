@@ -1,10 +1,7 @@
 package no.nav.melosys.tjenester.gui;
 
-import java.util.List;
-
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import no.nav.melosys.repository.BehandlingStatistikk;
 import no.nav.melosys.service.statistikk.StatistikkService;
 import no.nav.melosys.tjenester.gui.dto.statistikk.StatistikkDto;
 import no.nav.security.token.support.core.api.Protected;
@@ -32,7 +29,6 @@ public class StatistikkTjeneste {
     @GetMapping
     @ApiOperation(value = "Saksbehandlingsstatistikk", response = StatistikkDto.class)
     public ResponseEntity<StatistikkDto> hentStatistikk() {
-        List<BehandlingStatistikk> behandlingStatistikk = statistikkService.hentBehandlingstatistikk();
-        return ResponseEntity.ok(StatistikkDto.av(behandlingStatistikk));
+        return ResponseEntity.ok(new StatistikkDto(statistikkService.hentBehandlingstatistikk()));
     }
 }
