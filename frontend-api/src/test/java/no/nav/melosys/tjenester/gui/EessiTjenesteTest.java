@@ -81,8 +81,7 @@ class EessiTjenesteTest extends JsonSchemaTestParent {
 
     @Test
     void opprettBuc() throws IOException {
-        when(behandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(lagBehandling());
-        when(eessiService.opprettBucOgSed(any(), any(BucType.class), anyList(), anyCollection())).thenReturn(MOCK_RINA_URL);
+        when(eessiService.opprettBucOgSed(anyLong(), any(BucType.class), anyList(), anyCollection())).thenReturn(MOCK_RINA_URL);
 
         BucBestillingDto nyBucDto = new BucBestillingDto(
             BucType.LA_BUC_01,
@@ -95,7 +94,7 @@ class EessiTjenesteTest extends JsonSchemaTestParent {
         valider(nyBucDto, OPPRETT_BUC_SCHEMA, log);
         assertThat(opprettBucSvarDto).isNotNull()
             .extracting(OpprettBucSvarDto::rinaUrl).isEqualTo(MOCK_RINA_URL);
-        verify(eessiService).opprettBucOgSed(any(), eq(BucType.LA_BUC_01), anyList(), anyCollection());
+        verify(eessiService).opprettBucOgSed(anyLong(), eq(BucType.LA_BUC_01), anyList(), anyCollection());
     }
 
     @Test

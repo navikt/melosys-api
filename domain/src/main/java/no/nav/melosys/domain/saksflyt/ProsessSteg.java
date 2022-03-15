@@ -35,7 +35,7 @@ public enum ProsessSteg implements Kodeverk {
     OPPRETT_SEDDOKUMENT("OPPRETT_SEDDOKUMENT", "Oppretter saksopplysning fra SED"),
     OPPRETT_SED_GRUNNLAG("OPPRETT_SED_GRUNNLAG", "Oppretter behandlingsgrunnlag fra SED"),
     OPPRETT_SØKNAD("OPPRETT_SØKNAD", "Oppretter ny søknad i Melosys"),
-    PUBLISER_VEDTAK("PUBLISER_VEDTAK", "Publiserer vedtak på Kafka"),
+    PUBLISER_VEDTAK("PUBLISER_VEDTAK", "Publiserer vedtak på Kafka"), // Er ikke i bruk i dag, men mulig vi vil bruke dette i fremtiden
     REGISTERKONTROLL("REGISTERKONTROLL", "Utfører registerkontroll for en behandling"),
     REPLIKER_BEHANDLING("REPLIKER_BEHANDLING", "Replikerer den første, avsluttede behandlingen i Melosys og setter den til OPPRETTET"),
     SED_MOTTAK_FERDIGSTILL_JOURNALPOST("SED_MOTTAK_FERDIGSTILL_JOURNALPOST", "Journalføring av innkommende SED"),

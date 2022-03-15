@@ -452,7 +452,7 @@ class SendVedtaksbrevInnlandTest {
         verify(dokService).produserDokument(
             eq(INNVILGELSE_YRKESAKTIV), eq(Mottaker.av(BRUKER)), eq(ART16_1_INNVILGET_BEHANDLINGSID), dokumentBestillingCaptor.capture()
         );
-        assertThat(dokumentBestillingCaptor.getValue()).extracting(DoksysBrevbestilling::getAvsenderNavn).isEqualTo("Z111111");
+        assertThat(dokumentBestillingCaptor.getValue()).extracting(DoksysBrevbestilling::getAvsenderID).isEqualTo("Z111111");
     }
 
     @Test

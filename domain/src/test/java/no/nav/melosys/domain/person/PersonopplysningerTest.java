@@ -41,6 +41,14 @@ class PersonopplysningerTest {
     }
 
     @Test
+    void hentGjeldendePostadresse_medBareKontakadresseFreg_lagPostadresseFraKontakadresseFreg() {
+        Postadresse gjeldendePostadresse =
+            lagPersonopplysninger(lagKontaktadresseFraFreg(), Collections.emptyList(), null).hentGjeldendePostadresse();
+
+        assertThat(gjeldendePostadresse.adresselinje1()).isEqualTo("gatenavnKontaktadresseFreg");
+    }
+
+    @Test
     void hentGjeldendePostadresse_medOppholdsadresserOgUtenBostedsadresse_lagPostadresseFraKontaktadressePDL() {
         Postadresse gjeldendePostadresse =
             lagPersonopplysninger(lagKontaktadresser(), lagOppholdsadresser(), null).hentGjeldendePostadresse();
@@ -90,6 +98,22 @@ class PersonopplysningerTest {
                 null,
                 null,
                 Master.FREG.name(),
+                null,
+                LocalDateTime.MAX,
+                false
+            )
+        );
+    }
+
+    private Collection<Kontaktadresse> lagKontaktadresseFraFreg() {
+        return Set.of(
+            new Kontaktadresse(
+                lagStrukturertAdresse("gatenavnKontaktadresseFreg"),
+                null,
+                null,
+                null,
+                null,
+                "Freg",
                 null,
                 LocalDateTime.MAX,
                 false

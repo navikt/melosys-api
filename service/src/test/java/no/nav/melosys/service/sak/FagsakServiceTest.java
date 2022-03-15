@@ -373,12 +373,11 @@ class FagsakServiceTest {
         when(fagsakRepo.findBySaksnummer(saksnummer)).thenReturn(Optional.of(fagsak));
         when(behandlingsresultatService.hentBehandlingsresultat(sistOppdaterteBehandling.getId())).thenReturn(behandlingsresultat);
         when(behandlingService.replikerBehandlingOgBehandlingsresultat(any(), any(), any())).thenReturn(replikertBehandling);
-        unleash.enable("melosys.api.ny.vurdering.medlperiode.slettes");
 
         long behandlingID = fagsakService.opprettNyVurderingBehandling(saksnummer);
         verify(behandlingService).replikerBehandlingOgBehandlingsresultat(sistOppdaterteBehandling, Behandlingsstatus.OPPRETTET, Behandlingstyper.NY_VURDERING);
 
-        if (unleash.isEnabled("melosys.api.ny.vurdering.medlperiode.slettes")) {
+        if (!unleash.isEnabled("melosys.api.ny.vurdering.medlperiode.beholdes")) {
             verify(medlPeriodeService).avvisPeriode(anmodningsperiode.getMedlPeriodeID());
         }
 
