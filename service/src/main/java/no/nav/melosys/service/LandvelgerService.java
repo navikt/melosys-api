@@ -12,11 +12,11 @@ import com.google.common.collect.Streams;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.Soeknadsland;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
+import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,17 +26,21 @@ import static no.nav.melosys.domain.util.BehandlingsgrunnlagUtils.*;
 
 @Service
 public class LandvelgerService {
+
     private final AvklartefaktaService avklartefaktaService;
     private final BehandlingsresultatService behandlingsresultatService;
     private final BehandlingsgrunnlagService behandlingsgrunnlagService;
+    private final BehandlingService behandlingService;
 
     @Autowired
     public LandvelgerService(AvklartefaktaService avklartefaktaService,
                              BehandlingsresultatService behandlingsresultatService,
-                             BehandlingsgrunnlagService behandlingsgrunnlagService) {
+                             BehandlingsgrunnlagService behandlingsgrunnlagService,
+                             BehandlingService behandlingService) {
         this.avklartefaktaService = avklartefaktaService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.behandlingsgrunnlagService = behandlingsgrunnlagService;
+        this.behandlingService = behandlingService;
     }
 
     public Landkoder hentArbeidsland(long behandlingID) {
@@ -48,10 +52,16 @@ public class LandvelgerService {
     }
 
     public Collection<Landkoder> hentAlleArbeidsland(long behandlingID) {
+        Behandling behandling = behandlingService.hentBehandling(behandlingID);
         Collection<Landkoder> alleArbeidsland = avklartefaktaService.hentAlleAvklarteArbeidsland(behandlingID);
         if (alleArbeidsland.isEmpty() || erArtikkel13(behandlingID)) {
             BehandlingsgrunnlagData grunnlagData = behandlingsgrunnlagService.hentBehandlingsgrunnlag(behandlingID).getBehandlingsgrunnlagdata();
-            alleArbeidsland.addAll(hentSøknadslandkoder(grunnlagData));
+            var søknadsland = grunnlagData.soeknadsland;
+            if (behandling.erAnmodningOmUnntak() && søknadsland.landkoder.isEmpty() && !søknadsland.erUkjenteEllerAlleEosLand) {
+                alleArbeidsland.add(behandling.hentSedDokument().getUnntakFraLovvalgslandKode());
+            } else {
+                alleArbeidsland.addAll(hentSøknadslandkoder(grunnlagData));
+            }
         }
 
         return alleArbeidsland;
