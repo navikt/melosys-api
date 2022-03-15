@@ -31,11 +31,11 @@ public final class BehandlingsgrunnlagUtils {
      */
     public static List<Landkoder> hentSøknadslandkoder(BehandlingsgrunnlagData grunnlagdata) {
         Soeknadsland soeknadsland = hentSøknadsland(grunnlagdata);
-        List<String> søknadsland = soeknadsland.landkoder;
-        if (søknadsland.isEmpty() && soeknadsland.erUkjenteEllerAlleEosLand == false) {
+        List<String> søknadslandkoder = soeknadsland.landkoder;
+        if (søknadslandkoder.isEmpty() && !soeknadsland.erUkjenteEllerAlleEosLand) {
             throw new IllegalStateException("Søknad mangler søknadsland og land er ikke markert som ukjente eller alle Eøs-land.");
         }
-        return søknadsland.stream()
+        return søknadslandkoder.stream()
             .map(Landkoder::valueOf)
             .collect(Collectors.toList());
     }
