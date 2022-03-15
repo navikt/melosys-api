@@ -64,13 +64,14 @@ public class BrevbestillingService {
     private final KodeverkService kodeverkService;
     private final KontaktopplysningService kontaktopplysningService;
     private final PersondataFasade persondataFasade;
+    private final TrygdeavtaleTittelService trygdeavtaleTittelService;
     private final Unleash unleash;
 
     @Autowired
     public BrevbestillingService(BrevmottakerService brevmottakerService, DokumentServiceFasade dokumentServiceFasade,
                                  BehandlingService behandlingService, EregFasade eregFasade, KodeverkService kodeverkService,
                                  KontaktopplysningService kontaktopplysningService, PersondataFasade persondataFasade,
-                                 Unleash unleash) {
+                                 TrygdeavtaleTittelService trygdeavtaleTittelService, Unleash unleash) {
         this.brevmottakerService = brevmottakerService;
         this.dokumentServiceFasade = dokumentServiceFasade;
         this.behandlingService = behandlingService;
@@ -78,6 +79,7 @@ public class BrevbestillingService {
         this.kodeverkService = kodeverkService;
         this.kontaktopplysningService = kontaktopplysningService;
         this.persondataFasade = persondataFasade;
+        this.trygdeavtaleTittelService = trygdeavtaleTittelService;
         this.unleash = unleash;
     }
 
@@ -93,7 +95,7 @@ public class BrevbestillingService {
 
     private MuligMottakerDto lagHovedMottakerMuligMottakerDto(Produserbaredokumenter produserbaredokumenter, Behandling behandling, Aktoersroller hovedmottaker, String orgnrTilValgtArbeidsgiver) {
         return new MuligMottakerDto.Builder()
-            .medDokumentNavn(produserbaredokumenter.getBeskrivelse())
+            .medDokumentNavn(trygdeavtaleTittelService.utledDokumentNavnForProduserbaredokumenterOgAktoerRolle(behandling, produserbaredokumenter, hovedmottaker, null))
             .medMottakerNavn(hentMottakerNavn(produserbaredokumenter, behandling, hovedmottaker, orgnrTilValgtArbeidsgiver))
             .medRolle(hovedmottaker)
             .build();
@@ -159,8 +161,9 @@ public class BrevbestillingService {
         List<Aktoer> avklarteKopier = brevmottakerService.avklarMottakere(produserbaredokumenter, Mottaker.av(kopiMottaker), behandling, false, true);
         for (Aktoer avklartKopi : avklarteKopier) {
             var orgDokument = hentRettOrganisasjonsdokument(behandling, avklartKopi.getOrgnr());
+            String fastTekst = avklartKopi.getRolle() == ARBEIDSGIVER ? "Kopi til arbeidsgiver" : "Kopi til arbeidsgivers fullmektig";
             muligMottakerDtos.add(new MuligMottakerDto.Builder()
-                .medDokumentNavn(avklartKopi.getRolle() == ARBEIDSGIVER ? "Kopi til arbeidsgiver" : "Kopi til arbeidsgivers fullmektig")
+                .medDokumentNavn(trygdeavtaleTittelService.utledDokumentNavnForProduserbaredokumenterOgAktoer(behandling, produserbaredokumenter, avklartKopi, fastTekst))
                 .medMottakerNavn(orgDokument.getNavn())
                 .medRolle(avklartKopi.getRolle())
                 .medOrgnr(orgDokument.getOrgnummer())
@@ -174,8 +177,9 @@ public class BrevbestillingService {
 
         List<Aktoer> avklarteKopier = brevmottakerService.avklarMottakere(produserbaredokumenter, Mottaker.av(kopiMottaker), behandling);
         for (Aktoer avklartKopi : avklarteKopier) {
+            String fastTekst = "Kopi til utenlandsk trygdemyndighet";
             muligMottakerDtos.add(new MuligMottakerDto.Builder()
-                .medDokumentNavn("Kopi til utenlandsk trygdemyndighet")
+                .medDokumentNavn(trygdeavtaleTittelService.utledDokumentNavnForProduserbaredokumenterOgAktoer(behandling, produserbaredokumenter, avklartKopi, fastTekst))
                 .medMottakerNavn("Utenlandsk trygdemyndighet")
                 .medRolle(avklartKopi.getRolle())
                 .medInstitusjonId(avklartKopi.getInstitusjonId())
@@ -191,8 +195,9 @@ public class BrevbestillingService {
             Aktoer avklartMottaker = brevmottakerService.avklarMottaker(produserbaredokumenter, FastMottakerMedOrgnr.av(fastMottakerMedOrgnr), behandling);
             var orgDokument = hentRettOrganisasjonsdokument(behandling, avklartMottaker.getOrgnr());
 
+            String fastTekst = "Kopi til " + orgDokument.getNavn();
             muligMottakerDtos.add(new MuligMottakerDto.Builder()
-                .medDokumentNavn("Kopi til " + orgDokument.getNavn())
+                .medDokumentNavn(trygdeavtaleTittelService.utledDokumentNavnForProduserbaredokumenterOgAktoer(behandling, produserbaredokumenter, avklartMottaker, fastTekst))
                 .medMottakerNavn(orgDokument.getNavn())
                 .medRolle(avklartMottaker.getRolle())
                 .medOrgnr(orgDokument.getOrgnummer())
