@@ -1,7 +1,6 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
 import java.time.Instant;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -16,8 +15,9 @@ import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.dokgen.dto.*;
 import no.nav.melosys.integrasjon.dokgen.dto.felles.Mottaker;
-import no.nav.melosys.service.dokument.DokumentHentingService;
+import no.nav.melosys.service.dokument.DokumentHentingFasade;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import static java.lang.String.format;
@@ -30,17 +30,17 @@ public class DokgenMalMapper {
     private final DokgenMapperDatahenter dokgenMapperDatahenter;
     private final InnvilgelseFtrlMapper innvilgelseFtrlMapper;
     private final StorbritanniaMapper storbritanniaMapper;
-    private final DokumentHentingService dokumentHentingService;
+    private final DokumentHentingFasade dokumentHentingFasade;
 
     @Autowired
     public DokgenMalMapper(DokgenMapperDatahenter dokgenMapperDatahenter,
                            InnvilgelseFtrlMapper innvilgelseFtrlMapper,
                            StorbritanniaMapper storbritanniaMapper,
-                           DokumentHentingService dokumentHentingService) {
+                           @Qualifier("system") DokumentHentingFasade dokumentHentingService) {
         this.dokgenMapperDatahenter = dokgenMapperDatahenter;
         this.innvilgelseFtrlMapper = innvilgelseFtrlMapper;
         this.storbritanniaMapper = storbritanniaMapper;
-        this.dokumentHentingService = dokumentHentingService;
+        this.dokumentHentingFasade = dokumentHentingService;
     }
 
     public DokgenDto mapBehandling(DokgenBrevbestilling mottattBrevbestilling) {
@@ -74,12 +74,12 @@ public class DokgenMalMapper {
         String saksnummer = brevbestilling.getBehandling().getFagsak().getSaksnummer();
         Behandling behandling = brevbestilling.getBehandling();
 
-        List<Journalpost> dokumenter = dokumentHentingService.hentDokumenter(saksnummer).stream().filter(dokument ->
-                dokument.getHoveddokument().getTittel().equals(MELDING_MANGLENDE_OPPLYSNINGER.getBeskrivelse())
-                    && dokument.getForsendelseJournalfoert() != null
-                    && dokument.getForsendelseJournalfoert().isAfter(behandling.getRegistrertDato())
-                    && dokument.getAvsenderType().equals(Avsendertyper.PERSON)
-            ).toList();
+        List<Journalpost> dokumenter = dokumentHentingFasade.hentDokumenter(saksnummer).stream().filter(dokument ->
+            dokument.getHoveddokument().getTittel().equals(MELDING_MANGLENDE_OPPLYSNINGER.getBeskrivelse())
+                && dokument.getForsendelseJournalfoert() != null
+                && dokument.getForsendelseJournalfoert().isAfter(behandling.getRegistrertDato())
+                && dokument.getAvsenderType().equals(Avsendertyper.PERSON)
+        ).toList();
 
         return dokumenter.stream()
             .map(Journalpost::getForsendelseJournalfoert)
