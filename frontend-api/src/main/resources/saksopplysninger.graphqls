@@ -4,7 +4,7 @@ scalar Date
 scalar Long
 
 type Query {
-    hentSaksopplysninger(behandlingID: Long!): Saksopplysninger!
+    hentSaksopplysninger(behandlingID: Long!, historikk: Boolean): Saksopplysninger!
     hentPersonopplysninger(ident: String!): Personopplysninger!
 }
 
@@ -20,7 +20,7 @@ type Personopplysninger {
     folkeregisterpersonstatuser: [Folkeregisterpersonstatus!]!
     kjoenn: KjoennType!
     kontaktadresser: [Kontaktadresse!]!
-    navn: Navn!
+    navn(historikk: Boolean): Navn!
     oppholdsadresser: [Oppholdsadresse!]!
     sivilstand: [Sivilstand!]!
     statsborgerskap: [Statsborgerskap!]!
