@@ -2,6 +2,7 @@ package no.nav.melosys.integrasjon.felles;
 
 import javax.annotation.Nonnull;
 
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
@@ -18,9 +19,13 @@ public class UserContextExchangeFilter implements ExchangeFilterFunction {
     @Override
     public Mono<ClientResponse> filter(@Nonnull final ClientRequest clientRequest,
                                        @Nonnull final ExchangeFunction exchangeFunction) {
+        String oidcTokenString = SubjectHandler.getInstance().getOidcTokenString();
+        if (oidcTokenString == null) {
+            throw new TekniskException("Token mangler! Dette kommer mest sansynlig av at en service ment for frontend kalles fra backend");
+        }
         return exchangeFunction.exchange(
             ClientRequest.from(clientRequest)
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + SubjectHandler.getInstance().getOidcTokenString())
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + oidcTokenString)
                 .build()
         );
     }
