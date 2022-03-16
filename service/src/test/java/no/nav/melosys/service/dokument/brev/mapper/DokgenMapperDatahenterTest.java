@@ -12,7 +12,7 @@ import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.dokument.DokumentHentingFasade;
+import no.nav.melosys.service.dokument.DokumentHentingService;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import org.junit.jupiter.api.BeforeEach;
@@ -43,13 +43,13 @@ class DokgenMapperDatahenterTest {
     @Mock
     private Unleash unleash;
     @Mock
-    private DokumentHentingFasade dokumentHentingFasade;
+    private DokumentHentingService dokumentHentingService;
 
     private DokgenMapperDatahenter dokgenMapperDatahenter;
 
     @BeforeEach
     void init() {
-        dokgenMapperDatahenter = new DokgenMapperDatahenter(behandlingsresultatService, eregFasade, persondataFasade, dokumentHentingFasade, kodeverkService, unleash);
+        dokgenMapperDatahenter = new DokgenMapperDatahenter(behandlingsresultatService, eregFasade, persondataFasade, dokumentHentingService, kodeverkService, unleash);
     }
 
     @Test
@@ -66,7 +66,7 @@ class DokgenMapperDatahenterTest {
             .medFritekst("Hei")
             .build();
 
-        when(dokumentHentingFasade.hentDokumenter(any())).thenReturn(List.of(
+        when(dokumentHentingService.hentDokumenter(any())).thenReturn(List.of(
             lagJournalpost(datoSeptember),
             lagJournalpost(datoDesember),
             lagJournalpost(datoOktober)));

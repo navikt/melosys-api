@@ -77,7 +77,7 @@ class DokgenServiceTest {
     @Mock
     private StorbritanniaMapper mockStorbritanniaMapper;
     @Mock
-    private DokumentHentingFasade mockDokumentHentingFasade;
+    private DokumentHentingService mockDokumentHentingFasade;
     @Captor
     private ArgumentCaptor<DokgenBrevbestilling> brevbestillingCaptor;
 

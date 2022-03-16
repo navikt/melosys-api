@@ -18,7 +18,7 @@ import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.dokument.DokumentHentingFasade;
+import no.nav.melosys.service.dokument.DokumentHentingService;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -35,17 +35,17 @@ public class DokgenMapperDatahenter {
     private final KodeverkService kodeverkService;
     private final PersondataFasade persondataFasade;
     private final Unleash unleash;
-    private final DokumentHentingFasade dokumentHentingFasade;
+    private final DokumentHentingService dokumentHentingService;
 
     protected DokgenMapperDatahenter(BehandlingsresultatService behandlingsresultatService,
                                      @Qualifier("system") EregFasade eregFasade,
                                      @Qualifier("system") PersondataFasade persondataFasade,
-                                     @Qualifier("system") DokumentHentingFasade dokumentHentingFasade,
+                                     @Qualifier("system") DokumentHentingService dokumentHentingService,
                                      KodeverkService kodeverkService,
                                      Unleash unleash) {
         this.behandlingsresultatService = behandlingsresultatService;
         this.eregFasade = eregFasade;
-        this.dokumentHentingFasade = dokumentHentingFasade;
+        this.dokumentHentingService = dokumentHentingService;
         this.kodeverkService = kodeverkService;
         this.persondataFasade = persondataFasade;
         this.unleash = unleash;
@@ -99,7 +99,7 @@ public class DokgenMapperDatahenter {
         String saksnummer = brevbestilling.getBehandling().getFagsak().getSaksnummer();
         Behandling behandling = brevbestilling.getBehandling();
 
-        List<Journalpost> dokumenter = dokumentHentingFasade.hentDokumenter(saksnummer).stream().filter(dokument ->
+        List<Journalpost> dokumenter = dokumentHentingService.hentDokumenter(saksnummer).stream().filter(dokument ->
             dokument.getHoveddokument().getTittel().equals(MELDING_MANGLENDE_OPPLYSNINGER.getBeskrivelse())
                 && dokument.getForsendelseJournalfoert() != null
                 && dokument.getForsendelseJournalfoert().isAfter(behandling.getRegistrertDato())

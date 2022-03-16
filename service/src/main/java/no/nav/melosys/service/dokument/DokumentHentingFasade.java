@@ -4,7 +4,7 @@ import no.nav.melosys.domain.arkiv.Journalpost;
 
 import java.util.List;
 
-public interface DokumentHentingFasade {
-    byte[] hentDokument(String journalpostID, String dokumentID);
-    List<Journalpost> hentDokumenter(String saksnummer);
-}
+//public interface DokumentHentingService {
+//    byte[] hentDokument(String journalpostID, String dokumentID);
+//    List<Journalpost> hentDokumenter(String saksnummer);
+//}
