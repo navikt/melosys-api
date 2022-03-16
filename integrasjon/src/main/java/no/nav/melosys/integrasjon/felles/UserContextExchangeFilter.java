@@ -21,7 +21,7 @@ public class UserContextExchangeFilter implements ExchangeFilterFunction {
                                        @Nonnull final ExchangeFunction exchangeFunction) {
         String oidcTokenString = SubjectHandler.getInstance().getOidcTokenString();
         if (oidcTokenString == null) {
-            throw new TekniskException("Token mangler! Dette kommer mest sansynlig av at en service ment for frontend kalles fra backend");
+            throw new TekniskException("Token mangler! Dette kommer mest sannsynlig av at en service ment for frontend kalles fra en backend-prosess");
         }
         return exchangeFunction.exchange(
             ClientRequest.from(clientRequest)
