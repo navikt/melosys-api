@@ -387,7 +387,7 @@ query($ident: ID!, $historikk: Boolean!) {
         }
       }
     }
-    navn(historikk: $historikk) {
+    navn {
       fornavn
       mellomnavn
       etternavn
@@ -560,7 +560,7 @@ query($ident: ID!, $historikk: Boolean!) {
         }
       }
     }
-    navn(historikk: $historikk) {
+    navn {
       fornavn
       mellomnavn
       etternavn
@@ -638,7 +638,7 @@ query($ident: ID!, $historikk: Boolean!) {
         }
       }
     }
-    navn(historikk: $historikk) {
+    navn {
       fornavn
       mellomnavn
       etternavn
@@ -680,7 +680,7 @@ query($ident: ID!, $historikk: Boolean!) {
         }
       }
     }
-    navn(historikk: $historikk) {
+    navn {
       fornavn
       mellomnavn
       etternavn
