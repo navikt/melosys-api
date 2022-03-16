@@ -71,9 +71,9 @@ class DokgenMapperDatahenterTest {
             lagJournalpost(datoDesember),
             lagJournalpost(datoOktober)));
 
-        List<Instant> instants = dokgenMapperDatahenter.hentMangelbrevDatoer(brevbestilling);
+        List<Instant> mangelbrevDatoer = dokgenMapperDatahenter.hentMangelbrevDatoer(brevbestilling);
 
-        assertThat(instants)
+        assertThat(mangelbrevDatoer)
             .hasSize(2)
             .containsExactly(
                 datoOktober.atStartOfDay(ZoneId.systemDefault()).toInstant(),
