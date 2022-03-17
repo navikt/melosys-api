@@ -10,6 +10,7 @@ public class BrevAdresse {
     public final List<String> adresselinjer;
     public final String postnr;
     public final String poststed;
+    public final String region;
     public final String land;
 
     public BrevAdresse(Builder builder) {
@@ -18,6 +19,7 @@ public class BrevAdresse {
         this.adresselinjer = builder.adresselinjer;
         this.postnr = builder.postnr;
         this.poststed = builder.poststed;
+        this.region = builder.region;
         this.land = builder.land;
     }
 
@@ -41,6 +43,10 @@ public class BrevAdresse {
         return poststed;
     }
 
+    public String getRegion() {
+        return region;
+    }
+
     public String getLand() {
         return land;
     }
@@ -55,6 +61,7 @@ public class BrevAdresse {
         public List<String> adresselinjer;
         public String postnr;
         public String poststed;
+        public String region;
         public String land;
 
         public Builder medMottakerNavn(String mottakerNavn) {
@@ -81,6 +88,11 @@ public class BrevAdresse {
 
         public Builder medPoststed(String poststed) {
             this.poststed = poststed;
+            return this;
+        }
+
+        public Builder medRegion(String region) {
+            this.region = region;
             return this;
         }
 
