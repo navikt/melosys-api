@@ -19,6 +19,7 @@ import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.DokumentHentingService;
+import no.nav.melosys.service.dokument.DokumentHentingSystemService;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -40,7 +41,7 @@ public class DokgenMapperDatahenter {
     protected DokgenMapperDatahenter(BehandlingsresultatService behandlingsresultatService,
                                      @Qualifier("system") EregFasade eregFasade,
                                      @Qualifier("system") PersondataFasade persondataFasade,
-                                     @Qualifier("system") DokumentHentingService dokumentHentingService,
+                                     @Qualifier("system") DokumentHentingSystemService dokumentHentingService,
                                      KodeverkService kodeverkService,
                                      Unleash unleash) {
         this.behandlingsresultatService = behandlingsresultatService;
