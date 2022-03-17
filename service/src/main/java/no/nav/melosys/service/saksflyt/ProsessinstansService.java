@@ -34,7 +34,6 @@ import no.nav.melosys.service.vedtak.FattVedtakRequest;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -54,7 +53,6 @@ public class ProsessinstansService {
 
     private final Counter prosessinstanserOpprettet = Metrics.counter(MetrikkerNavn.PROSESSINSTANSER_OPPRETTET);
 
-    @Autowired
     public ProsessinstansService(ApplicationEventPublisher applicationEventPublisher,
                                  ProsessinstansRepository prosessinstansRepo,
                                  UtenlandskMyndighetService utenlandskMyndighetService,

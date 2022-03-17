@@ -28,25 +28,19 @@ import no.nav.melosys.tjenester.gui.dto.PersonhistorikkDto;
 import no.nav.melosys.tjenester.gui.dto.SaksopplysningerDto;
 import no.nav.melosys.tjenester.gui.dto.eessi.SedDokumentDto;
 import no.nav.melosys.tjenester.gui.dto.inntekt.InntektDto;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.FellesKodeverk.POSTNUMMER;
 
-/**
- * Klassen konverterer alle saksopplysninger til SaksopplysningerDto for visning i frontend.
- */
 @Component
 public class SaksopplysningerTilDto {
     private static final ZoneId TIME_ZONE_ID = ZoneId.systemDefault();
 
-    //Medlemsperioder sorteres fra nyest til eldst.
     static final Comparator<Medlemsperiode> medlemsperiodeKomparator =
         (o1, o2) -> o2.getPeriode().getFom().compareTo(o1.getPeriode().getFom());
 
     private final KodeverkService kodeverkService;
 
-    @Autowired
     public SaksopplysningerTilDto(KodeverkService kodeverkService) {
         this.kodeverkService = kodeverkService;
     }
@@ -119,11 +113,6 @@ public class SaksopplysningerTilDto {
         return dto;
     }
 
-    /**
-     * - Ved søknad tilbake i tid, brukes historisk statsborgerskap med fom-dato for søknad som dato
-     * - Ved søknad framover i tid, brukes statsborgerskap fra TPS med gjeldende dato, avgrenset
-     * av dato for henting av opplysninger (hvis tilstede) eller endring av behandling
-     */
     private static LocalDate hentGjeldendeDato(Behandling behandling) {
         if (behandling.getSistOpplysningerHentetDato() != null) {
             return LocalDateTime.ofInstant(behandling.getSistOpplysningerHentetDato(), TIME_ZONE_ID).toLocalDate();
@@ -136,19 +125,18 @@ public class SaksopplysningerTilDto {
      * - Arbeidsforhold må ellers sorteres med nyeste fra-og-med-dato øverst.
      */
     static final class ArbeidsforholdComparator implements Comparator<Arbeidsforhold> {
-
         @Override
-        public int compare(Arbeidsforhold a, Arbeidsforhold b) {
-            if (a.getAnsettelsesPeriode().getTom() == null) {
-                if (b.getAnsettelsesPeriode().getTom() == null) {
-                    return b.getAnsettelsesPeriode().getFom().compareTo(a.getAnsettelsesPeriode().getFom());
+        public int compare(Arbeidsforhold arbeidsforholdA, Arbeidsforhold arbeidsforholdB) {
+            if (arbeidsforholdA.getAnsettelsesPeriode().getTom() == null) {
+                if (arbeidsforholdB.getAnsettelsesPeriode().getTom() == null) {
+                    return arbeidsforholdB.getAnsettelsesPeriode().getFom().compareTo(arbeidsforholdA.getAnsettelsesPeriode().getFom());
                 } else {
                     return -1;
                 }
-            } else if (b.getAnsettelsesPeriode().getTom() == null) {
+            } else if (arbeidsforholdB.getAnsettelsesPeriode().getTom() == null) {
                 return 1;
             } else {
-                return b.getAnsettelsesPeriode().getFom().compareTo(a.getAnsettelsesPeriode().getFom());
+                return arbeidsforholdB.getAnsettelsesPeriode().getFom().compareTo(arbeidsforholdA.getAnsettelsesPeriode().getFom());
             }
         }
     }

@@ -13,7 +13,6 @@ import no.nav.melding.virksomhet.behandlingsstatus.hendelsehandterer.v1.hendelse
 import no.nav.melding.virksomhet.behandlingsstatus.hendelsehandterer.v1.hendelseshandtererbehandlingsstatus.ObjectFactory;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.integrasjon.felles.mdc.MDCOperations;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.jms.core.MessagePostProcessor;
@@ -31,7 +30,6 @@ public class BehandlingstatusClientImpl implements BehandlingstatusClient {
     private final Jaxb2Marshaller jaxb2Marshaller;
     private final ObjectFactory objectFactory;
 
-    @Autowired
     public BehandlingstatusClientImpl(JmsTemplate jmsTemplate,
                                       @Qualifier(HENDELSESKØ) Queue hendelseshåndterer,
                                       Jaxb2Marshaller jaxb2Marshaller) {

@@ -11,7 +11,6 @@ import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.sak.FagsakService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -22,7 +21,6 @@ public class SettVurderDokument implements StegBehandler {
     private final FagsakService fagsakService;
     private final BehandlingService behandlingService;
 
-    @Autowired
     public SettVurderDokument(FagsakService fagsakService, BehandlingService behandlingService) {
         this.fagsakService = fagsakService;
         this.behandlingService = behandlingService;

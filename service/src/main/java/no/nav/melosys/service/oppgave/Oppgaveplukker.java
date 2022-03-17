@@ -23,13 +23,12 @@ import no.nav.melosys.service.sak.FagsakService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class Oppgaveplukker {
-    private static final Logger log =  LoggerFactory.getLogger(Oppgaveplukker.class);
+    private static final Logger log = LoggerFactory.getLogger(Oppgaveplukker.class);
 
     private final OppgaveFasade oppgaveFasade;
     private final OppgaveTilbakeleggingRepository oppgaveTilbakkeleggingRepo;
@@ -37,7 +36,6 @@ public class Oppgaveplukker {
     private final BehandlingService behandlingService;
     private final OppgaveService oppgaveService;
 
-    @Autowired
     public Oppgaveplukker(OppgaveFasade oppgaveFasade, OppgaveTilbakeleggingRepository oppgaveTilbakeleggingRepo,
                           FagsakService fagsakService, BehandlingService behandlingService, OppgaveService oppgaveService) {
         this.oppgaveFasade = oppgaveFasade;
@@ -47,12 +45,6 @@ public class Oppgaveplukker {
         this.oppgaveService = oppgaveService;
     }
 
-    /**
-     * 1) Input valideres og behandlingstema og oppgavetyper beregnes.
-     * 2) Oppgaveplukker henter i Oppgave en liste over alle aktive, ikke tildelte oppgaver med oppgitt parametre.
-     * 3) Neste oppgave velges basert på prioritet (først) og frist.
-     * 4) Oppgaven tildeles til saksbehandleren.
-     */
     @Transactional
     public synchronized Optional<Oppgave> plukkOppgave(String saksbehandlerID, PlukkOppgaveInnDto plukkDto) {
         validerPlukkOppgave(plukkDto);
@@ -129,7 +121,6 @@ public class Oppgaveplukker {
     private Optional<Oppgave> velgNeste(String saksbehandlerID, List<Oppgave> oppgaver) {
 
         Optional<Oppgave> valg = oppgaver.stream().max(Oppgave.lavestTilHøyestPrioritet);
-        // Vi må ikke tildele en oppgave som var tilbakelagt.
         if (valg.isPresent()) {
             String oppgaveId = valg.get().getOppgaveId();
             if (erTilbakeLagt(saksbehandlerID, oppgaveId)) {
@@ -141,7 +132,6 @@ public class Oppgaveplukker {
         return valg;
     }
 
-    // Sjekker tabellen for tilbakelegging.
     private boolean erTilbakeLagt(String saksbehandlerID, String oppgaveId) {
         List<OppgaveTilbakelegging> tilbakelegging = oppgaveTilbakkeleggingRepo.findBySaksbehandlerIdAndOppgaveId(saksbehandlerID, oppgaveId);
         return !tilbakelegging.isEmpty();

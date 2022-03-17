@@ -27,7 +27,6 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.brev.FastMottakerMedOrgnr.*;
@@ -48,7 +47,6 @@ public class SendVedtaksbrevInnland implements StegBehandler {
     private final BehandlingService behandlingService;
     private final BehandlingsresultatService behandlingsresultatService;
 
-    @Autowired
     public SendVedtaksbrevInnland(BrevBestiller brevBestiller,
                                   BehandlingService behandlingService,
                                   BehandlingsresultatService behandlingsresultatService) {

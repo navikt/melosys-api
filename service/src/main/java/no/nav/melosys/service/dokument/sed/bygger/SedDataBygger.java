@@ -30,7 +30,6 @@ import no.nav.melosys.service.dokument.sed.datagrunnlag.SedDataGrunnlagMedSoknad
 import no.nav.melosys.service.dokument.sed.datagrunnlag.SedDataGrunnlagUtenSoknad;
 import no.nav.melosys.service.dokument.sed.mapper.VilkaarsresultatTilBegrunnelseMapper;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import static java.util.function.Predicate.not;
@@ -43,7 +42,6 @@ public class SedDataBygger {
     private final LandvelgerService landvelgerService;
     private final LovvalgsperiodeService lovvalgsperiodeService;
 
-    @Autowired
     public SedDataBygger(BehandlingsresultatService behandlingsresultatService, LandvelgerService landvelgerService,
                          LovvalgsperiodeService lovvalgsperiodeService) {
         this.behandlingsresultatService = behandlingsresultatService;

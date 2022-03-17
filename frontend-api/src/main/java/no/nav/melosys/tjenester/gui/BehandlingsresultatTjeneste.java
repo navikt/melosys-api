@@ -8,7 +8,6 @@ import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.tjenester.gui.dto.BehandlingsresultatDto;
 import no.nav.melosys.tjenester.gui.dto.LagreFritekstDto;
 import no.nav.security.token.support.core.api.Protected;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,14 +17,13 @@ import org.springframework.web.context.WebApplicationContext;
 @Protected
 @RestController
 @RequestMapping("/behandlinger")
-@Api(tags = { "behandlingsresultat" })
+@Api(tags = {"behandlingsresultat"})
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class BehandlingsresultatTjeneste {
 
     private final BehandlingsresultatService behandlingsresultatService;
     private final Aksesskontroll aksesskontroll;
 
-    @Autowired
     public BehandlingsresultatTjeneste(BehandlingsresultatService behandlingsresultatService, Aksesskontroll aksesskontroll) {
         this.behandlingsresultatService = behandlingsresultatService;
         this.aksesskontroll = aksesskontroll;

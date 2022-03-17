@@ -10,7 +10,6 @@ import no.nav.melosys.service.kontroll.PeriodeKontroller;
 import no.nav.melosys.service.medl.MedlPeriodeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.LAGRE_ANMODNINGSPERIODE_MEDL;
@@ -23,7 +22,6 @@ public class LagreAnmodningsperiodeIMedl implements StegBehandler {
     private final BehandlingsresultatService behandlingsresultatService;
     private final MedlPeriodeService medlPeriodeService;
 
-    @Autowired
     public LagreAnmodningsperiodeIMedl(BehandlingsresultatService behandlingsresultatService, MedlPeriodeService medlPeriodeService) {
         this.behandlingsresultatService = behandlingsresultatService;
         this.medlPeriodeService = medlPeriodeService;

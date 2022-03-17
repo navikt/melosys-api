@@ -19,7 +19,6 @@ import no.nav.tjeneste.virksomhet.utbetaling.v1.HentUtbetalingsinformasjonPerson
 import no.nav.tjeneste.virksomhet.utbetaling.v1.informasjon.*;
 import no.nav.tjeneste.virksomhet.utbetaling.v1.meldinger.WSHentUtbetalingsinformasjonRequest;
 import no.nav.tjeneste.virksomhet.utbetaling.v1.meldinger.WSHentUtbetalingsinformasjonResponse;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -31,7 +30,6 @@ public class UtbetaldataService implements UtbetaldataFasade {
     private final UtbetalingConsumer utbetalingConsumer;
     private final DokumentFactory dokumentFactory;
 
-    @Autowired
     public UtbetaldataService(UtbetalingConsumer utbetalingConsumer, DokumentFactory dokumentFactory) {
         this.utbetalingConsumer = utbetalingConsumer;
         this.dokumentFactory = dokumentFactory;
@@ -41,12 +39,11 @@ public class UtbetaldataService implements UtbetaldataFasade {
     public Saksopplysning hentUtbetalingerBarnetrygd(String fnr, LocalDate fom, LocalDate tom) {
         WSHentUtbetalingsinformasjonResponse response;
 
-        // Utbetldata støtter ikke uthenting av data for lenger tilbake enn 3 år
-        if (tom != null && datoErEldreEnnTreÅr(tom)) {
+        if (erUtbetalingsDataStøttet(tom)) {
             response = new WSHentUtbetalingsinformasjonResponse();
         } else {
             response = filtrerYtelserAvTypeBarnetrygd(
-                    hentUtbetalingsinformasjon(lagRequest(fnr, fom, tom))
+                hentUtbetalingsinformasjon(lagRequest(fnr, fom, tom))
             );
         }
 
@@ -81,7 +78,7 @@ public class UtbetaldataService implements UtbetaldataFasade {
         return xmlWriter;
     }
 
-    private static WSHentUtbetalingsinformasjonRequest lagRequest(String fnr, LocalDate fom, LocalDate tom) {
+    private WSHentUtbetalingsinformasjonRequest lagRequest(String fnr, LocalDate fom, LocalDate tom) {
         var request = new WSHentUtbetalingsinformasjonRequest();
         request.setId(lagIdent(fnr));
         request.setPeriode(lagPeriode(fom, tom));
@@ -97,7 +94,7 @@ public class UtbetaldataService implements UtbetaldataFasade {
         return ident;
     }
 
-    private static WSForespurtPeriode lagPeriode(LocalDate fom, LocalDate tom) {
+    private WSForespurtPeriode lagPeriode(LocalDate fom, LocalDate tom) {
         var periode = new WSForespurtPeriode();
         var periodetype = new WSPeriodetyper();
         periodetype.setValue(YTELSESPERIODE);
@@ -113,25 +110,33 @@ public class UtbetaldataService implements UtbetaldataFasade {
         return periode;
     }
 
-    private static WSHentUtbetalingsinformasjonResponse filtrerYtelserAvTypeBarnetrygd(WSHentUtbetalingsinformasjonResponse response) {
-        // Fjerner utbetalinger uten barnetrygd
-        response.getUtbetalingListe().removeIf(utbetaling ->  utbetaling.getYtelseListe().stream()
-            .noneMatch(UtbetaldataService::erBarnetrygdytelse));
-
-        // Fjerner ytelser i utbetalinger som ikke er barnetrygd
-        response.getUtbetalingListe().forEach(utbetaling -> utbetaling.getYtelseListe()
-            .removeIf(ytelse -> !erBarnetrygdytelse(ytelse)));
-
+    private WSHentUtbetalingsinformasjonResponse filtrerYtelserAvTypeBarnetrygd(WSHentUtbetalingsinformasjonResponse response) {
+        taVekkUtbetalingerUtenBarnetrygd(response);
+        taVekkYtelserFraUtbetalingerSomIkkeErBarnetrygd(response);
         return response;
     }
 
-    private static boolean erBarnetrygdytelse(WSYtelse ytelse) {
+    private void taVekkYtelserFraUtbetalingerSomIkkeErBarnetrygd(WSHentUtbetalingsinformasjonResponse response) {
+        response.getUtbetalingListe().forEach(utbetaling -> utbetaling.getYtelseListe()
+            .removeIf(ytelse -> !erBarnetrygdytelse(ytelse)));
+    }
+
+    private void taVekkUtbetalingerUtenBarnetrygd(WSHentUtbetalingsinformasjonResponse response) {
+        response.getUtbetalingListe().removeIf(utbetaling -> utbetaling.getYtelseListe().stream()
+            .noneMatch(this::erBarnetrygdytelse));
+    }
+
+    private boolean erBarnetrygdytelse(WSYtelse ytelse) {
         return ytelse.getYtelsestype() != null
             && ytelse.getYtelsestype().getValue() != null
             && ytelse.getYtelsestype().getValue().trim().equalsIgnoreCase(BARNETRYGD);
     }
 
-    private static boolean datoErEldreEnnTreÅr(LocalDate dato) {
+    private boolean erUtbetalingsDataStøttet(LocalDate tom) {
+        return tom != null && datoErEldreEnnTreÅr(tom);
+    }
+
+    private boolean datoErEldreEnnTreÅr(LocalDate dato) {
         return dato.isBefore(LocalDate.now().minusYears(3));
     }
 }

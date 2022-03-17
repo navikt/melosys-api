@@ -3,7 +3,6 @@ package no.nav.melosys.integrasjon.dokgen;
 import no.nav.melosys.exception.TekniskException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,7 +16,6 @@ public class DokgenConsumerProducer {
 
     private final String url;
 
-    @Autowired
     public DokgenConsumerProducer(@Value("${melosysdokgen.v1.url}") String url) {
         this.url = url;
     }

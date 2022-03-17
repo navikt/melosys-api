@@ -5,7 +5,6 @@ import no.nav.melosys.integrasjon.felles.RestConsumer;
 import no.nav.melosys.integrasjon.felles.SystemContextExchangeFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,7 +21,6 @@ public class MedlemskapRestConsumerProducer implements RestConsumer {
 
     private final String url;
 
-    @Autowired
     public MedlemskapRestConsumerProducer(@Value("${medlemskap.rest.url}") String url) {
         this.url = url;
     }

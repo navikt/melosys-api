@@ -13,7 +13,6 @@ import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -23,7 +22,6 @@ public class OpprettAnmodningsperiodeFraSed implements StegBehandler {
     private final AnmodningsperiodeService anmodningsperiodeService;
     private final BehandlingService behandlingService;
 
-    @Autowired
     public OpprettAnmodningsperiodeFraSed(AnmodningsperiodeService anmodningsperiodeService,
                                           BehandlingService behandlingService) {
         this.anmodningsperiodeService = anmodningsperiodeService;

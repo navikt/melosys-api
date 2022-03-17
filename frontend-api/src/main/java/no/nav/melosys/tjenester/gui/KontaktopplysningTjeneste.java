@@ -9,7 +9,6 @@ import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.tjenester.gui.dto.KontaktInfoDto;
 import no.nav.security.token.support.core.api.Protected;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,7 +24,6 @@ public class KontaktopplysningTjeneste {
     private final KontaktopplysningService kontaktopplysningService;
     private final Aksesskontroll aksesskontroll;
 
-    @Autowired
     public KontaktopplysningTjeneste(KontaktopplysningService kontaktopplysningService, Aksesskontroll aksesskontroll) {
         this.kontaktopplysningService = kontaktopplysningService;
         this.aksesskontroll = aksesskontroll;
@@ -48,8 +46,8 @@ public class KontaktopplysningTjeneste {
         value = "Lagrer/oppdaterer kontakt orgnummer og navn for gitt fagsak og orgnummer",
         response = Kontaktopplysning.class)
     public ResponseEntity lagKontaktopplysning(@PathVariable("saksnummer") String saksnummer,
-                                         @PathVariable("orgnr") String orgnr,
-                                         @RequestBody KontaktInfoDto kontaktInfoDto) {
+                                               @PathVariable("orgnr") String orgnr,
+                                               @RequestBody KontaktInfoDto kontaktInfoDto) {
         aksesskontroll.autoriserSakstilgang(saksnummer);
         Kontaktopplysning kontaktopplysning = kontaktopplysningService.lagEllerOppdaterKontaktopplysning(saksnummer, orgnr,
             kontaktInfoDto.kontaktorgnr(), kontaktInfoDto.kontaktnavn(), kontaktInfoDto.kontakttelefon());

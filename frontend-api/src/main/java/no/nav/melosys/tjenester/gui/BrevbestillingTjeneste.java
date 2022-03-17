@@ -23,7 +23,6 @@ import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.tjenester.gui.dto.brev.*;
 import no.nav.security.token.support.core.api.Protected;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.annotation.RequestScope;
@@ -47,7 +46,6 @@ public class BrevbestillingTjeneste {
     private final BrevmottakerService brevmottakerService;
     private final Aksesskontroll aksesskontroll;
 
-    @Autowired
     public BrevbestillingTjeneste(BrevbestillingService brevbestillingService,
                                   BehandlingService behandlingService,
                                   BrevmottakerService brevmottakerService, Aksesskontroll aksesskontroll) {

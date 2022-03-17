@@ -11,7 +11,6 @@ import no.nav.melosys.service.registeropplysninger.RegisteropplysningerRequest;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
@@ -27,7 +26,6 @@ public class HentRegisteropplysninger implements StegBehandler {
     private final BehandlingService behandlingService;
     private final PersondataFasade persondataFasade;
 
-    @Autowired
     public HentRegisteropplysninger(RegisteropplysningerService registeropplysningerService,
                                     BehandlingService behandlingService,
                                     @Qualifier("system") PersondataFasade persondataFasade) {
@@ -52,7 +50,7 @@ public class HentRegisteropplysninger implements StegBehandler {
             .behandlingID(prosessinstans.getBehandling().getId())
             .fnr(brukerId);
 
-        if(behandling.getFagsak().getType() == Sakstyper.EU_EOS) {
+        if (behandling.getFagsak().getType() == Sakstyper.EU_EOS) {
             registeropplysningerRequestBuilder
                 .saksopplysningTyper(utledSaksopplysningTyper(prosessinstans.getBehandling().getTema()));
         } else {

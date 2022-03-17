@@ -15,7 +15,6 @@ import no.nav.melosys.service.dokument.sed.datagrunnlag.SedDataGrunnlagMedSoknad
 import no.nav.melosys.service.dokument.sed.datagrunnlag.SedDataGrunnlagUtenSoknad;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.persondata.PersondataFasade;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
@@ -30,7 +29,6 @@ public class SedDataGrunnlagFactory {
     private final PersondataFasade persondataFasade;
     private final Unleash unleash;
 
-    @Autowired
     public SedDataGrunnlagFactory(AvklartefaktaService avklartefaktaService,
                                   AvklarteVirksomheterSystemService avklarteVirksomheterService,
                                   KodeverkService kodeverkService, PersondataFasade persondataFasade, Unleash unleash) {
@@ -52,7 +50,7 @@ public class SedDataGrunnlagFactory {
     }
 
     public SedDataGrunnlag av(Behandling behandling, SedType sedType) {
-        if(Arrays.asList(SedType.A002, SedType.A011).contains(sedType)){
+        if (Arrays.asList(SedType.A002, SedType.A011).contains(sedType)) {
             return new SedDataGrunnlagUtenSoknad(behandling, kodeverkService, hentPersondata(behandling));
         }
         return av(behandling);

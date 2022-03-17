@@ -13,7 +13,6 @@ import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.sak.OpprettSakRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.*;
@@ -25,7 +24,6 @@ public class OpprettFagsakOgBehandlingFraSed implements StegBehandler {
 
     private final FagsakService fagsakService;
 
-    @Autowired
     public OpprettFagsakOgBehandlingFraSed(FagsakService fagsakService) {
         this.fagsakService = fagsakService;
     }
