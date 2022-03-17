@@ -21,10 +21,7 @@ import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.dokument.BrevmottakerService;
-import no.nav.melosys.service.dokument.DokgenService;
-import no.nav.melosys.service.dokument.DokumentHentingService;
-import no.nav.melosys.service.dokument.DokumentproduksjonsInfo;
+import no.nav.melosys.service.dokument.*;
 import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
 import no.nav.melosys.service.dokument.brev.KopiMottaker;
 import no.nav.melosys.service.kodeverk.KodeverkService;
@@ -80,7 +77,7 @@ class DokgenServiceTest {
     @Mock
     private StorbritanniaMapper mockStorbritanniaMapper;
     @Mock
-    private DokumentHentingService dokumentHentingService;
+    private DokumentHentingSystemService mockDokumentHentingService;
     @Captor
     private ArgumentCaptor<DokgenBrevbestilling> brevbestillingCaptor;
 
@@ -93,11 +90,11 @@ class DokgenServiceTest {
     @BeforeEach
     void init() {
         DokgenMapperDatahenter dokgenMapperDatahenter = new DokgenMapperDatahenter(mockBehandlingsresultatService, mockEregFasade,
-            mockPersondataFasade, mockKodeverkService, unleash);
+            mockPersondataFasade, mockDokumentHentingService, mockKodeverkService, unleash);
 
         dokgenService = new DokgenService(mockDokgenConsumer, new DokumentproduksjonsInfoMapper(unleash),
             mockJoarkFasade,
-            new DokgenMalMapper(dokgenMapperDatahenter, mockInnvilgelseFtrlMapper, mockStorbritanniaMapper, dokumentHentingService),
+            new DokgenMalMapper(dokgenMapperDatahenter, mockInnvilgelseFtrlMapper, mockStorbritanniaMapper),
             mockBehandlingsService, mockEregFasade, mockKontaktOpplysningService,
             mockBrevMottakerService, mockProsessinstansService, mockSaksbehandlerService,
             mockUtenlandskMyndighetService);
