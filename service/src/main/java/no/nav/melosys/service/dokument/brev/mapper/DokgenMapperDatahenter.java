@@ -41,7 +41,7 @@ public class DokgenMapperDatahenter {
     protected DokgenMapperDatahenter(BehandlingsresultatService behandlingsresultatService,
                                      @Qualifier("system") EregFasade eregFasade,
                                      @Qualifier("system") PersondataFasade persondataFasade,
-                                     @Qualifier("system") DokumentHentingSystemService dokumentHentingService,
+                                     DokumentHentingSystemService dokumentHentingService,
                                      KodeverkService kodeverkService,
                                      Unleash unleash) {
         this.behandlingsresultatService = behandlingsresultatService;
