@@ -17,7 +17,7 @@ public class FeatureToggleConfig {
     @Bean
     public Unleash unleash(Environment environment) {
 
-        if (!Collections.disjoint(List.of(environment.getActiveProfiles()), List.of("local", "local-mock"))) {
+        if (!Collections.disjoint(List.of(environment.getActiveProfiles()), List.of("local", "local-mock", "test"))) {
             var fakeUnleash = new FakeUnleash();
             fakeUnleash.enableAll();
             return fakeUnleash;

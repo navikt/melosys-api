@@ -57,8 +57,6 @@ class DokgenMalMapperTest {
     @Mock
     private DokgenMapperDatahenter mockDokgenMapperDatahenter;
     @Mock
-    private DokumentHentingService dokumentHentingService;
-    @Mock
     private StorbritanniaMapper mockStorbritanniaMapper;
 
     private final FakeUnleash fakeUnleash = new FakeUnleash();
@@ -70,9 +68,7 @@ class DokgenMalMapperTest {
         dokgenMalMapper = new DokgenMalMapper(
             mockDokgenMapperDatahenter,
             mockInnvilgelseFtrlMapper,
-            mockStorbritanniaMapper,
-            dokumentHentingService
-        );
+            mockStorbritanniaMapper);
     }
 
     @Test
@@ -527,15 +523,13 @@ class DokgenMalMapperTest {
 
     @Test
     void skalMappeTilAvslagbrevMedRiktigeMangelbrevdatoer() {
-        LocalDate datoSeptember = LocalDate.of(2021, 9, 9);
         LocalDate datoOktober = LocalDate.of(2021, 10, 9);
         LocalDate datoDesember = LocalDate.of(2021, 12, 9);
         Behandling behandling = lagBehandling(lagFagsak(true));
         behandling.setRegistrertDato(LocalDateTime.of(2021, 10, 1, 0, 0).toInstant(ZoneOffset.UTC));
-        when(dokumentHentingService.hentDokumenter("MEL-123")).thenReturn(List.of(
-            lagJournalpost(datoSeptember),
-            lagJournalpost(datoDesember),
-            lagJournalpost(datoOktober)));
+        when(mockDokgenMapperDatahenter.hentMangelbrevDatoer(any())).thenReturn(List.of(
+            datoOktober.atStartOfDay(ZoneId.systemDefault()).toInstant(),
+            datoDesember.atStartOfDay(ZoneId.systemDefault()).toInstant()));
         when(mockDokgenMapperDatahenter.hentPersondata(any())).thenReturn(lagPersonDokument());
         DokgenBrevbestilling brevbestilling = new AvslagBrevbestilling.Builder()
             .medProduserbartdokument(AVSLAG_MANGLENDE_OPPLYSNINGER)
@@ -548,11 +542,10 @@ class DokgenMalMapperTest {
         assertThat(avslagbrev.getMottaker().type()).isEqualTo(Aktoersroller.BRUKER.getKode());
         assertThat(avslagbrev.getBehandlingstype()).isEqualTo(Behandlingstyper.SOEKNAD.getKode());
         assertThat(avslagbrev.getMangelbrevDatoer()).containsExactly(
-            LocalDate.of(2021, 10, 9),
-            LocalDate.of(2021, 12, 9));
+            datoOktober,
+            datoDesember);
         assertThat(avslagbrev.getMangelbrevDatoer()).isSorted();
         assertThat(avslagbrev.getFritekst()).isEqualTo("Hei");
-        Instant forventetInstant = datoDesember.atStartOfDay(ZoneId.of("Europe/Paris")).toInstant().plus(Period.ofWeeks(4));
     }
 
     @Test
@@ -564,9 +557,9 @@ class DokgenMalMapperTest {
         Behandling behandling = lagBehandling(lagFagsak(true));
         behandling.setRegistrertDato(LocalDateTime.of(2021, 10, 1, 0, 0).toInstant(ZoneOffset.UTC));
         when(mockDokgenMapperDatahenter.hentPersondata(any())).thenReturn(lagPersonDokument());
-        when(dokumentHentingService.hentDokumenter("MEL-123")).thenReturn(List.of(
-            lagJournalpost(datoOktober),
-            journalPostVirksomhet));
+        when(mockDokgenMapperDatahenter.hentMangelbrevDatoer(any())).thenReturn(List.of(
+            datoOktober.atStartOfDay(ZoneId.systemDefault()).toInstant()));
+
         DokgenBrevbestilling brevbestilling = new AvslagBrevbestilling.Builder()
             .medProduserbartdokument(AVSLAG_MANGLENDE_OPPLYSNINGER)
             .medBehandling(behandling)
@@ -574,13 +567,11 @@ class DokgenMalMapperTest {
 
         Avslagbrev avslagbrev = (Avslagbrev) dokgenMalMapper.mapBehandling(brevbestilling);
 
-        assertThat(avslagbrev.getMangelbrevDatoer()).containsExactly(
-            LocalDate.of(2021, 10, 9));
+        assertThat(avslagbrev.getMangelbrevDatoer()).containsExactly(datoOktober);
     }
 
     @Test
     void skalMappeAvslagsbrevPgaManglendeOpplysningerTilBruker() {
-        when(dokumentHentingService.hentDokumenter("MEL-123")).thenReturn(emptyList());
         when(mockDokgenMapperDatahenter.hentPersondata(any())).thenReturn(lagPersonDokument());
         Behandling behandling = lagBehandling(lagFagsak(true));
         DokgenBrevbestilling brevbestilling = new AvslagBrevbestilling.Builder()

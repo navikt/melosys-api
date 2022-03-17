@@ -1,22 +1,31 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
 import java.time.Instant;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Objects;
 
 import no.finn.unleash.Unleash;
+import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.FellesKodeverk;
+import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
+import no.nav.melosys.domain.kodeverk.Avsendertyper;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
+import no.nav.melosys.service.dokument.DokumentHentingService;
+import no.nav.melosys.service.dokument.DokumentHentingSystemService;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
+import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING_MANGLENDE_OPPLYSNINGER;
 import static org.springframework.util.StringUtils.hasText;
 
 @Component
@@ -27,14 +36,17 @@ public class DokgenMapperDatahenter {
     private final KodeverkService kodeverkService;
     private final PersondataFasade persondataFasade;
     private final Unleash unleash;
+    private final DokumentHentingService dokumentHentingService;
 
     protected DokgenMapperDatahenter(BehandlingsresultatService behandlingsresultatService,
                                      @Qualifier("system") EregFasade eregFasade,
                                      @Qualifier("system") PersondataFasade persondataFasade,
+                                     DokumentHentingSystemService dokumentHentingService,
                                      KodeverkService kodeverkService,
                                      Unleash unleash) {
         this.behandlingsresultatService = behandlingsresultatService;
         this.eregFasade = eregFasade;
+        this.dokumentHentingService = dokumentHentingService;
         this.kodeverkService = kodeverkService;
         this.persondataFasade = persondataFasade;
         this.unleash = unleash;
@@ -83,4 +95,23 @@ public class DokgenMapperDatahenter {
     String hentSammensattNavn(String fnr) {
         return persondataFasade.hentSammensattNavn(fnr);
     }
+
+    public List<Instant> hentMangelbrevDatoer(DokgenBrevbestilling brevbestilling) {
+        String saksnummer = brevbestilling.getBehandling().getFagsak().getSaksnummer();
+        Behandling behandling = brevbestilling.getBehandling();
+
+        List<Journalpost> dokumenter = dokumentHentingService.hentDokumenter(saksnummer).stream().filter(dokument ->
+            dokument.getHoveddokument().getTittel().equals(MELDING_MANGLENDE_OPPLYSNINGER.getBeskrivelse())
+                && dokument.getForsendelseJournalfoert() != null
+                && dokument.getForsendelseJournalfoert().isAfter(behandling.getRegistrertDato())
+                && dokument.getAvsenderType().equals(Avsendertyper.PERSON)
+        ).toList();
+
+        return dokumenter.stream()
+            .map(Journalpost::getForsendelseJournalfoert)
+            .filter(Objects::nonNull)
+            .sorted(Comparator.naturalOrder())
+            .toList();
+    }
+
 }

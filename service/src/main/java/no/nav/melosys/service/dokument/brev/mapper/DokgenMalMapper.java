@@ -1,26 +1,19 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
 import java.time.Instant;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Objects;
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.brev.*;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Avsendertyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.dokgen.dto.*;
 import no.nav.melosys.integrasjon.dokgen.dto.felles.Mottaker;
-import no.nav.melosys.service.dokument.DokumentHentingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static java.lang.String.format;
-import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING_MANGLENDE_OPPLYSNINGER;
 import static org.springframework.util.StringUtils.hasText;
 
 @Component
@@ -29,17 +22,14 @@ public class DokgenMalMapper {
     private final DokgenMapperDatahenter dokgenMapperDatahenter;
     private final InnvilgelseFtrlMapper innvilgelseFtrlMapper;
     private final StorbritanniaMapper storbritanniaMapper;
-    private final DokumentHentingService dokumentHentingService;
 
     @Autowired
     public DokgenMalMapper(DokgenMapperDatahenter dokgenMapperDatahenter,
                            InnvilgelseFtrlMapper innvilgelseFtrlMapper,
-                           StorbritanniaMapper storbritanniaMapper,
-                           DokumentHentingService dokumentHentingService) {
+                           StorbritanniaMapper storbritanniaMapper) {
         this.dokgenMapperDatahenter = dokgenMapperDatahenter;
         this.innvilgelseFtrlMapper = innvilgelseFtrlMapper;
         this.storbritanniaMapper = storbritanniaMapper;
-        this.dokumentHentingService = dokumentHentingService;
     }
 
     public DokgenDto mapBehandling(DokgenBrevbestilling mottattBrevbestilling) {
@@ -69,26 +59,8 @@ public class DokgenMalMapper {
         return mottattBrevbestilling.toBuilder().medPersonDokument(dokgenMapperDatahenter.hentPersondata(mottattBrevbestilling)).build();
     }
 
-    private List<Instant> hentMangelbrevDatoer(DokgenBrevbestilling brevbestilling) {
-        String saksnummer = brevbestilling.getBehandling().getFagsak().getSaksnummer();
-        Behandling behandling = brevbestilling.getBehandling();
-
-        List<Journalpost> dokumenter = dokumentHentingService.hentDokumenter(saksnummer).stream().filter(dokument ->
-            dokument.getHoveddokument().getTittel().equals(MELDING_MANGLENDE_OPPLYSNINGER.getBeskrivelse())
-                && dokument.getForsendelseJournalfoert() != null
-                && dokument.getForsendelseJournalfoert().isAfter(behandling.getRegistrertDato())
-                && dokument.getAvsenderType().equals(Avsendertyper.PERSON)
-        ).toList();
-
-        return dokumenter.stream()
-            .map(Journalpost::getForsendelseJournalfoert)
-            .filter(Objects::nonNull)
-            .sorted(Comparator.naturalOrder())
-            .toList();
-    }
-
     private Avslagbrev hentAvslagsbrev(DokgenBrevbestilling brevbestilling) {
-        List<Instant> mangelbrevDatoer = hentMangelbrevDatoer(brevbestilling);
+        List<Instant> mangelbrevDatoer = dokgenMapperDatahenter.hentMangelbrevDatoer(brevbestilling);
 
         return Avslagbrev.av(((AvslagBrevbestilling) brevbestilling).toBuilder().build(), mangelbrevDatoer);
     }
@@ -107,14 +79,14 @@ public class DokgenMalMapper {
                 ((MangelbrevBrevbestilling) brevbestilling).toBuilder()
                     .medVedtaksdato(dokgenMapperDatahenter.hentVedtaksdato(brevbestilling.getBehandling().getId()))
                     .build(),
-                DokumentasjonSvarfrist.beregnFristPaaMangelbrevFraDagensDato()
+                MangelbrevSvarfrist.beregnFristFraDato(Instant.now())
             );
             case MANGELBREV_ARBEIDSGIVER -> MangelbrevArbeidsgiver.av(
                 ((MangelbrevBrevbestilling) brevbestilling).toBuilder()
                     .medVedtaksdato(dokgenMapperDatahenter.hentVedtaksdato(brevbestilling.getBehandling().getId()))
                     .medFullmektigNavn(dokgenMapperDatahenter.hentFullmektigNavn(brevbestilling.getBehandling().getFagsak(), Representerer.BRUKER))
                     .build(),
-                DokumentasjonSvarfrist.beregnFristPaaMangelbrevFraDagensDato()
+                MangelbrevSvarfrist.beregnFristFraDato(Instant.now())
             );
             case INNVILGELSE_FOLKETRYGDLOVEN_2_8 -> innvilgelseFtrlMapper.map((InnvilgelseBrevbestilling) brevbestilling);
             case STORBRITANNIA -> storbritanniaMapper.map((InnvilgelseBrevbestilling) brevbestilling.toBuilder()
