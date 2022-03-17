@@ -19,7 +19,6 @@ import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
-import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.domain.person.Personopplysninger;
 import no.nav.melosys.exception.FunksjonellException;
@@ -31,7 +30,6 @@ import no.nav.melosys.service.dokument.DokumentServiceFasade;
 import no.nav.melosys.service.dokument.MuligMottakerDto;
 import no.nav.melosys.service.dokument.MuligeMottakereDto;
 import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
-import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory;
 import org.junit.jupiter.api.BeforeEach;
@@ -64,8 +62,6 @@ class BrevbestillingServiceTest {
     @Mock
     private KontaktopplysningService mockKontaktopplysningService;
     @Mock
-    private KodeverkService mockKodeverkService;
-    @Mock
     private BehandlingService mockBehandlingService;
 
     private final Behandling behandling = lagBehandling();
@@ -76,7 +72,7 @@ class BrevbestillingServiceTest {
     @BeforeEach
     void init() {
         brevbestillingService = new BrevbestillingService(mockBrevmottakerService, mockDokServiceFasade, mockBehandlingService, mockEregFasade,
-            mockKodeverkService, mockKontaktopplysningService, mockPersondataFasade, fakeUnleash);
+            mockKontaktopplysningService, mockPersondataFasade, fakeUnleash);
         fakeUnleash.enable("melosys.brev.GENERELT_FRITEKSTBREV_ARBEIDSGIVER");
         fakeUnleash.enable("melosys.brev.GENERELT_FRITEKSTBREV_BRUKER");
     }
@@ -364,26 +360,7 @@ class BrevbestillingServiceTest {
     }
 
     @Test
-    @Deprecated
     void hentBrevAdresseTilMottakere_brukerSomMottaker_returnererBrukeradresse() {
-        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
-        when(mockBrevmottakerService.avklarMottakere(any(), eq(Mottaker.av(Aktoersroller.BRUKER)), any(), eq(false), eq(false)))
-            .thenReturn(List.of(lagAktoer(Aktoersroller.BRUKER, null)));
-        when(mockPersondataFasade.hentPersonFraTps(any(), eq(Informasjonsbehov.STANDARD)))
-            .thenReturn(lagPERSOPLSaksopplysning());
-        when(mockKodeverkService.dekod(eq(FellesKodeverk.POSTNUMMER), anyString())).thenReturn("Oslo");
-
-        var brevAdresser = brevbestillingService.hentBrevAdresseTilMottakere(MANGELBREV_BRUKER, Aktoersroller.BRUKER, 123);
-
-        assertThat(brevAdresser).hasSize(1);
-        assertThat(brevAdresser.get(0))
-            .extracting(BrevAdresse::getMottakerNavn, BrevAdresse::getOrgnr, BrevAdresse::getAdresselinjer, BrevAdresse::getPostnr, BrevAdresse::getPoststed, BrevAdresse::getLand)
-            .containsExactly("Ola Nordmann", null, List.of("Gateadresse 43A"), "0123", "Oslo", "NO");
-    }
-
-    @Test
-    void hentBrevAdresseTilMottakereFraPdl_brukerSomMottaker_returnererBrukeradresse() {
-        fakeUnleash.enable("melosys.pdl.aktiv");
         when(mockBehandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
         when(mockBrevmottakerService.avklarMottakere(any(), eq(Mottaker.av(Aktoersroller.BRUKER)), any(), eq(false), eq(false)))
             .thenReturn(List.of(lagAktoer(Aktoersroller.BRUKER, null)));
