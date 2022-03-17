@@ -3,7 +3,6 @@ package no.nav.melosys.service.dokument;
 import java.time.LocalDate;
 import java.util.*;
 
-import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
@@ -89,14 +88,14 @@ final class DokumentServiceTest {
     private static long idTeller = 1L;
     private final AvklarteVirksomheterService avklarteVirksomheterService;
     private final DoksysFasade dokSysFasade;
-    private final DokumentService instans;
+    private final DokumentService dokumentService;
     private final BehandlingsresultatService behandlingsresultatService;
 
     public DokumentServiceTest() {
         avklarteVirksomheterService = mock(AvklarteVirksomheterService.class);
         dokSysFasade = mock(DoksysFasade.class);
         behandlingsresultatService = mock(BehandlingsresultatService.class);
-        instans = lagDokumentService(null);
+        dokumentService = lagDokumentService(null);
     }
 
     @Test
@@ -141,13 +140,13 @@ final class DokumentServiceTest {
 
     @Test
     void produserDokumentUtenBehandlingKasterUnntak() {
-        Throwable unntak = catchThrowable(() -> instans.produserDokument(ATTEST_A1, Mottaker.av(ARBEIDSGIVER), ~BEHANDLINGSID, new DoksysBrevbestilling.Builder().build()));
+        Throwable unntak = catchThrowable(() -> dokumentService.produserDokument(ATTEST_A1, Mottaker.av(ARBEIDSGIVER), ~BEHANDLINGSID, new DoksysBrevbestilling.Builder().build()));
         assertThat(unntak).isInstanceOf(IkkeFunnetException.class).hasNoCause().hasMessageContaining("finnes ikke");
     }
 
     @Test
     void produserDokumentUtenDokumenttypeKasterUnntak() {
-        Throwable unntak = catchThrowable(() -> instans.produserDokument(null, Mottaker.av(ARBEIDSGIVER), BEHANDLINGSID, new DoksysBrevbestilling.Builder().build()));
+        Throwable unntak = catchThrowable(() -> dokumentService.produserDokument(null, Mottaker.av(ARBEIDSGIVER), BEHANDLINGSID, new DoksysBrevbestilling.Builder().build()));
         assertThat(unntak).isInstanceOf(IllegalArgumentException.class).hasNoCause().hasMessageContaining("Ingen gyldig");
     }
 
@@ -233,7 +232,7 @@ final class DokumentServiceTest {
         when(saksbehandlerService.hentNavnForIdent(anyString())).thenReturn("Bob Lastname");
         UtenlandskMyndighetRepository utenlandskMyndighetRepository = mock(UtenlandskMyndighetRepository.class);
         BrevDataService brevDataService = new BrevDataService(behandlingsresultatRepository, persondataFasade,
-            saksbehandlerService, utenlandskMyndighetRepository, new FakeUnleash());
+            saksbehandlerService, utenlandskMyndighetRepository);
         BrevmottakerService brevmottakerService = new BrevmottakerService(mock(KontaktopplysningService.class),
             avklarteVirksomheterService,
             mock(UtenlandskMyndighetService.class),
@@ -415,6 +414,7 @@ final class DokumentServiceTest {
         PersondataFasade persondataFasade = mock(PersondataFasade.class);
         when(persondataFasade.hentFolkeregisterident(anyString()))
             .thenReturn(String.format("IDENT%s", aktør.getAktørId()));
+        when(persondataFasade.hentPerson(anyString())).thenReturn(PersonopplysningerObjectFactory.lagPersonopplysninger());
         return persondataFasade;
     }
 
