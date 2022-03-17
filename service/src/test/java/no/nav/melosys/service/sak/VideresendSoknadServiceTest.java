@@ -11,7 +11,6 @@ import no.nav.melosys.domain.Bostedsland;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.arkiv.DokumentReferanse;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.Bosted;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
@@ -76,8 +75,6 @@ class VideresendSoknadServiceTest {
         behandling.setFagsak(fagsak);
         fagsak.getBehandlinger().add(behandling);
 
-        behandlingsgrunnlagData.bosted.oppgittAdresse.setGatenavn("gate 123");
-
         when(fagsakService.hentFagsak(SAKSNUMMER)).thenReturn(fagsak);
     }
 
@@ -131,14 +128,13 @@ class VideresendSoknadServiceTest {
     }
 
     @Test
-    void henleggOgVideresend_ikkeLagretBostedsadresseISøknadEllerTPS_kasterException() {
+    void henleggOgVideresend_ingenAdresse_kasterException() {
         when(landvelgerService.hentBostedsland(behandling)).thenReturn(BOSTEDSLAND);
         behandling.setTema(Behandlingstema.ARBEID_FLERE_LAND);
-        behandlingsgrunnlagData.bosted = new Bosted();
-        when(persondataFasade.hentPerson(anyString())).thenReturn(PersonopplysningerObjectFactory.lagPersonopplysningerUtenBostedsadresse());
+        when(persondataFasade.hentPerson(anyString())).thenReturn(PersonopplysningerObjectFactory.lagPersonopplysningerUtenAdresser());
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> videresendSoknadService.videresend(SAKSNUMMER, "", "", Collections.emptySet()))
-            .withMessageContaining("mangler bostedsadresse");
+            .withMessageContaining("mangler adresse");
     }
 }

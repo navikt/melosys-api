@@ -304,6 +304,7 @@ query($ident: ID!, $historikk: Boolean!) {
     folkeregisterpersonstatus {
       status
       metadata {
+        historisk
         master
         endringer {
           type
@@ -386,7 +387,7 @@ query($ident: ID!, $historikk: Boolean!) {
         }
       }
     }
-    navn(historikk: $historikk) {
+    navn {
       fornavn
       mellomnavn
       etternavn
@@ -559,7 +560,7 @@ query($ident: ID!, $historikk: Boolean!) {
         }
       }
     }
-    navn(historikk: $historikk) {
+    navn {
       fornavn
       mellomnavn
       etternavn
@@ -637,7 +638,7 @@ query($ident: ID!, $historikk: Boolean!) {
         }
       }
     }
-    navn(historikk: $historikk) {
+    navn {
       fornavn
       mellomnavn
       etternavn
@@ -679,7 +680,7 @@ query($ident: ID!, $historikk: Boolean!) {
         }
       }
     }
-    navn(historikk: $historikk) {
+    navn {
       fornavn
       mellomnavn
       etternavn

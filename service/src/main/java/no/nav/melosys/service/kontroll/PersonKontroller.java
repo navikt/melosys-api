@@ -24,10 +24,6 @@ public final class PersonKontroller {
             && NORGE_ISO2_LANDKODE.equals(bostedsadresseOptional.get().strukturertAdresse().getLandkode());
     }
 
-    public static boolean harRegistrertBostedsadresse(Persondata persondata, BehandlingsgrunnlagData behandlingsgrunnlagData) {
-        return !persondata.manglerBostedsadresse() || !behandlingsgrunnlagData.bosted.oppgittAdresse.erTom();
-    }
-
     public static boolean harRegistrertAdresse(Persondata persondata, BehandlingsgrunnlagData behandlingsgrunnlagData) {
         return !persondata.manglerRegistrertAdresse() || !behandlingsgrunnlagData.bosted.oppgittAdresse.erTom();
     }

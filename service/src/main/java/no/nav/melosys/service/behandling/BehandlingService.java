@@ -386,7 +386,7 @@ public class BehandlingService {
 
     private void tilbakestillBehandlingsgrunnlag(Behandling behandling) {
         behandlingsresultatService.tømBehandlingsresultat(behandling.getId());
-        if (behandling.getTema() != ARBEID_FLERE_LAND) {
+        if (behandling.getTema() != ARBEID_FLERE_LAND && behandling.getBehandlingsgrunnlag() != null) {
             behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().soeknadsland.erUkjenteEllerAlleEosLand = false;
             BehandlingsgrunnlagKonverterer.oppdaterBehandlingsgrunnlag(behandling.getBehandlingsgrunnlag());
             behandlingsgrunnlagRepository.saveAndFlush(behandling.getBehandlingsgrunnlag());

@@ -115,10 +115,12 @@ public class EessiService {
     }
 
     @Transactional(readOnly = true)
-    public String opprettBucOgSed(Behandling behandling,
+    public String opprettBucOgSed(long behandlingID,
                                   BucType bucType,
                                   List<String> mottakerInstitusjoner,
                                   Collection<DokumentReferanse> vedleggReferanser) {
+
+        Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
 
         Fagsak fagsak = behandling.getFagsak();
         joarkFasade.validerDokumenterTilhørerSakOgHarTilgang(

@@ -256,7 +256,7 @@ public class FagsakService {
         oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(
             replikertBehandling, replikertBehandling.getInitierendeJournalpostId(), fagsak.hentAktørID(), SubjectHandler.getInstance().getUserID()
         );
-        if (unleash.isEnabled("melosys.api.ny.vurdering.medlperiode.slettes")) {
+        if (!unleash.isEnabled("melosys.api.ny.vurdering.medlperiode.beholdes")) {
             avsluttTidligereMedlPeriode(behandlingsresultat);
         }
         return replikertBehandling.getId();

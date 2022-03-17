@@ -69,8 +69,8 @@ public class VideresendSoknadService {
         log.info("Videresender søknad for sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandling.getId());
 
         final Bostedsland bostedsland = landvelgerService.hentBostedsland(behandling);
-        validerBehandlingOgBosted(behandling, bostedsland);
-        joarkFasade.validerDokumenterTilhørerSakOgHarTilgang(new HentJournalposterTilknyttetSakRequest(fagsak.getGsakSaksnummer(), saksnummer), vedleggReferanser);
+        valider(behandling, bostedsland);
+        validerDokumenterTilhørerSakOgTilgang(vedleggReferanser, fagsak);
 
         fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.VIDERESENDT);
         behandlingsresultatService.oppdaterBehandlingsresultattype(behandling.getId(), Behandlingsresultattyper.HENLEGGELSE);
@@ -89,18 +89,35 @@ public class VideresendSoknadService {
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 
-    private void validerBehandlingOgBosted(Behandling behandling, Bostedsland bostedsland) {
+    private void valider(Behandling behandling, Bostedsland bostedsland) {
+        validerErBehandlingAvSøknad(behandling);
+        validerBostedsland(behandling, bostedsland);
+        validerAdresse(behandling);
+    }
+
+    private void validerDokumenterTilhørerSakOgTilgang(Set<DokumentReferanse> vedleggReferanser, Fagsak fagsak) {
+        joarkFasade.validerDokumenterTilhørerSakOgHarTilgang(new HentJournalposterTilknyttetSakRequest(fagsak.getGsakSaksnummer(),
+                                                                                                       fagsak.getSaksnummer()), vedleggReferanser);
+    }
+
+    private void validerErBehandlingAvSøknad(Behandling behandling) {
         if (!behandling.erBehandlingAvSøknad()) {
             throw new FunksjonellException("Behandling " + behandling.getId() + " er ikke behandling av en søknad!");
         }
+    }
+
+    private void validerBostedsland(Behandling behandling, Bostedsland bostedsland) {
         if (bostedsland == null) {
             throw new FunksjonellException("Bostedsland ikke avklart for behandling " + behandling.getId());
         }
         if (bostedsland.getLandkodeobjekt() == Landkoder.NO) {
             throw new FunksjonellException("Kan ikke videresende søknad tilknyttet behandling " + behandling.getId() + " til Norge");
         }
-        if (!PersonKontroller.harRegistrertBostedsadresse(hentPersondata(behandling), behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata())) {
-            throw new FunksjonellException("Behandlingen mangler bostedsadresse!");
+    }
+
+    private void validerAdresse(Behandling behandling) {
+        if (!PersonKontroller.harRegistrertAdresse(hentPersondata(behandling), behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata())) {
+            throw new FunksjonellException("Behandlingen mangler adresse!");
         }
     }
 

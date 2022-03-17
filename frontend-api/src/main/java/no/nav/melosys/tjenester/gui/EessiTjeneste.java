@@ -64,11 +64,10 @@ public class EessiTjeneste {
     public ResponseEntity<OpprettBucSvarDto> opprettBuc(@RequestBody BucBestillingDto nyBucDto,
                                                         @PathVariable("behandlingID") long behandlingID) {
         aksesskontroll.autoriser(behandlingID);
-        Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
 
         OpprettBucSvarDto opprettBucSvarDto = new OpprettBucSvarDto(
             eessiService.opprettBucOgSed(
-                behandling,
+                behandlingID,
                 nyBucDto.bucType(),
                 nyBucDto.mottakerInstitusjoner(),
                 nyBucDto.vedlegg().stream()

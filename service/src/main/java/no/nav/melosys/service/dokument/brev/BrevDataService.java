@@ -21,6 +21,7 @@ import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -254,7 +255,7 @@ public class BrevDataService {
         BehandlingsgrunnlagData grunnlagData = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
         StrukturertAdresse oppgittAdresse = grunnlagData.bosted.oppgittAdresse;
         if (oppgittAdresse.erTom()) {
-            throw new FunksjonellException("Bruker har verken adresse i register eller oppgitt adresse i søknad");
+            throw new FunksjonellException(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE.getBeskrivelse());
         }
         String navn = persondataFasade.hentSammensattNavn(mottakerID);
         mottaker.setMottakeradresse(lagAdresse(oppgittAdresse));

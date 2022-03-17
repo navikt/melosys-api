@@ -51,9 +51,9 @@
         <token-support.version>1.3.8</token-support.version>
 
         <!-- Versjoner av eksterne biblioteker -->
-        <archunit.version>0.19.0</archunit.version>
+        <archunit.version>0.23.1</archunit.version>
         <apache-httpclients.version>4.5.13</apache-httpclients.version>
-        <caffeine.version>3.0.3</caffeine.version>
+        <caffeine.version>3.0.5</caffeine.version>
         <cxf.version>3.4.4</cxf.version>
         <commons-collections4.version>4.4</commons-collections4.version>
         <commons-lang.version>3.12.0</commons-lang.version>
@@ -72,13 +72,13 @@
         <micrometer-jvm-extras.version>0.2.2</micrometer-jvm-extras.version>
         <networknt.json-schema-validator.version>1.0.66</networknt.json-schema-validator.version>
         <ojdbc.version>18.15.0.0</ojdbc.version>
-        <okhttp.version>4.9.1</okhttp.version>
+        <okhttp.version>4.9.3</okhttp.version>
         <oracle.version>18</oracle.version>
         <oxmlparserv2.version>11.2.0.1.nojaxpservice</oxmlparserv2.version>
         <easy-random.version>5.0.0</easy-random.version>
         <restFixture.version>4.4</restFixture.version>
-        <shedlock.version>4.32.0</shedlock.version>
-        <slf4j.version>1.7.32</slf4j.version>
+        <shedlock.version>4.33.0</shedlock.version>
+        <slf4j.version>1.7.36</slf4j.version>
         <springfox.version>3.0.0</springfox.version>
         <swagger.version>1.5.21</swagger.version>
         <unleash.version>4.4.1</unleash.version>
@@ -87,7 +87,7 @@
         <asm.version>9.2</asm.version>
         <bcprov-jdk15on.version>1.68</bcprov-jdk15on.version>
         <cglib.version>3.3.0</cglib.version>
-        <classgraph.version>4.8.102</classgraph.version>
+        <classgraph.version>4.8.141</classgraph.version>
         <commons-logging.version>1.2</commons-logging.version>
         <istack.version>4.0.1</istack.version>
         <javassist.version>3.27.0-GA</javassist.version>
@@ -96,7 +96,7 @@
         <objenesis.version>3.2</objenesis.version>
         <osgi.version>6.0.0</osgi.version>
         <woodstox.version>6.2.6</woodstox.version>
-        <xmlsec.version>2.2.3</xmlsec.version>
+        <xmlsec.version>2.3.0</xmlsec.version>
         <medlemskapsunntak-api-v1.version>1.1</medlemskapsunntak-api-v1.version>
         <wiremock-standalone.version>2.27.2</wiremock-standalone.version>
         <nav-foedselsnummer.core.version>1.0-SNAPSHOT.6</nav-foedselsnummer.core.version>

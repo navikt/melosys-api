@@ -78,7 +78,7 @@ public class TrygdeavtaleService {
     public void overførResultat(long behandlingId, TrygdeavtaleResultat trygdeavtaleResultat) {
         avklarteMedfolgendeFamilieService.lagreMedfolgendeFamilieSomAvklartefakta(behandlingId, trygdeavtaleResultat.familie());
         avklarteVirksomheterService.lagreVirksomheterSomAvklartefakta(behandlingId, List.of(trygdeavtaleResultat.virksomhet()));
-        lovvalgsperiodeService.lagreLovvalgsperioder(behandlingId, List.of(lagLovvalgsperiode(trygdeavtaleResultat)));
+        lovvalgsperiodeService.lagreLovvalgsperioder(behandlingId, List.of(lagLovvalgsperiode(behandlingId, trygdeavtaleResultat)));
     }
 
     public TrygdeavtaleResultat hentResultat(long behandlingId) {
@@ -121,8 +121,9 @@ public class TrygdeavtaleService {
         return new AvklarteMedfolgendeFamilie(omfattetFamilie, ikkeOmfattetFamilie);
     }
 
-    private Lovvalgsperiode lagLovvalgsperiode(TrygdeavtaleResultat trygdeavtaleResultat) {
-        var lovvalgsperiode = new Lovvalgsperiode();
+    private Lovvalgsperiode lagLovvalgsperiode(long behandlingId, TrygdeavtaleResultat trygdeavtaleResultat) {
+        var eksisterendeLovvalgsperiode = hentLovvalgsperiode(behandlingId);
+        var lovvalgsperiode = eksisterendeLovvalgsperiode != null ? eksisterendeLovvalgsperiode : new Lovvalgsperiode();
 
         lovvalgsperiode.setFom(trygdeavtaleResultat.lovvalgsperiodeFom());
         lovvalgsperiode.setTom(trygdeavtaleResultat.lovvalgsperiodeTom());

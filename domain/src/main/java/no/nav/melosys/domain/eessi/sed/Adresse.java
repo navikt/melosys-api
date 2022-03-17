@@ -25,7 +25,7 @@ public class Adresse {
 
     public static Adresse lagAdresse(Adressetype adressetype, StrukturertAdresse strukturertAdresse) {
         if (strukturertAdresse == null) {
-            return Adresse.lagTomAdresse();
+            return null;
         }
 
         Adresse adresse = fraStrukturertAdresse(strukturertAdresse);
@@ -56,16 +56,12 @@ public class Adresse {
         if (kontaktadresse.semistrukturertAdresse() != null) {
             return lagAdresse(KONTAKTADRESSE, kontaktadresse.semistrukturertAdresse().tilStrukturertAdresse());
         }
-        return lagTomAdresse();
+        return null;
     }
 
     public static Adresse lagOppholdsadresse(Oppholdsadresse oppholdsadresse) {
         // Adressetype POSTADRESSE svarer til opphold i Rina
         return lagAdresse(Adressetype.POSTADRESSE, oppholdsadresse.strukturertAdresse());
-    }
-
-    public static Adresse lagTomAdresse() {
-        return new Adresse();
     }
 
     public static Adresse fraStrukturertAdresse(StrukturertAdresse strukturertAdresse) {
