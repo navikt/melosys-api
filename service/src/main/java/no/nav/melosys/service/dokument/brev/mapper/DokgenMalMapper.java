@@ -1,7 +1,6 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
 import java.time.Instant;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -75,11 +74,11 @@ public class DokgenMalMapper {
         Behandling behandling = brevbestilling.getBehandling();
 
         List<Journalpost> dokumenter = dokumentHentingService.hentDokumenter(saksnummer).stream().filter(dokument ->
-                dokument.getHoveddokument().getTittel().equals(MELDING_MANGLENDE_OPPLYSNINGER.getBeskrivelse())
-                    && dokument.getForsendelseJournalfoert() != null
-                    && dokument.getForsendelseJournalfoert().isAfter(behandling.getRegistrertDato())
-                    && dokument.getAvsenderType().equals(Avsendertyper.PERSON)
-            ).toList();
+            dokument.getHoveddokument().getTittel().equals(MELDING_MANGLENDE_OPPLYSNINGER.getBeskrivelse())
+                && dokument.getForsendelseJournalfoert() != null
+                && dokument.getForsendelseJournalfoert().isAfter(behandling.getRegistrertDato())
+                && dokument.getAvsenderType().equals(Avsendertyper.PERSON)
+        ).toList();
 
         return dokumenter.stream()
             .map(Journalpost::getForsendelseJournalfoert)
@@ -108,14 +107,14 @@ public class DokgenMalMapper {
                 ((MangelbrevBrevbestilling) brevbestilling).toBuilder()
                     .medVedtaksdato(dokgenMapperDatahenter.hentVedtaksdato(brevbestilling.getBehandling().getId()))
                     .build(),
-                MangelbrevSvarfrist.beregnFristFraDato(Instant.now())
+                DokumentasjonSvarfrist.beregnFristPaaMangelbrevFraDagensDato()
             );
             case MANGELBREV_ARBEIDSGIVER -> MangelbrevArbeidsgiver.av(
                 ((MangelbrevBrevbestilling) brevbestilling).toBuilder()
                     .medVedtaksdato(dokgenMapperDatahenter.hentVedtaksdato(brevbestilling.getBehandling().getId()))
                     .medFullmektigNavn(dokgenMapperDatahenter.hentFullmektigNavn(brevbestilling.getBehandling().getFagsak(), Representerer.BRUKER))
                     .build(),
-                MangelbrevSvarfrist.beregnFristFraDato(Instant.now())
+                DokumentasjonSvarfrist.beregnFristPaaMangelbrevFraDagensDato()
             );
             case INNVILGELSE_FOLKETRYGDLOVEN_2_8 -> innvilgelseFtrlMapper.map((InnvilgelseBrevbestilling) brevbestilling);
             case STORBRITANNIA -> storbritanniaMapper.map((InnvilgelseBrevbestilling) brevbestilling.toBuilder()

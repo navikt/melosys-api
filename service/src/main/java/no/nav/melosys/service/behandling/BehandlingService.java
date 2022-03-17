@@ -3,7 +3,6 @@ package no.nav.melosys.service.behandling;
 import java.lang.reflect.InvocationTargetException;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.Period;
 import java.util.*;
 
 import io.micrometer.core.instrument.Counter;
@@ -12,6 +11,7 @@ import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagKonverterer;
+import no.nav.melosys.domain.brev.DokumentasjonSvarfrist;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
@@ -35,7 +35,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static java.util.stream.Collectors.toList;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.*;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.ARBEID_FLERE_LAND;
 import static no.nav.melosys.metrics.MetrikkerNavn.*;
@@ -173,9 +172,6 @@ public class BehandlingService {
         }
     }
 
-    /**
-     * Knytt medlemsperioder fra MEDL til behandlingen.
-     */
     @Transactional
     public void knyttMedlemsperioder(long behandlingID, List<Long> periodeIder) {
         Behandling behandling = hentBehandling(behandlingID);
@@ -184,7 +180,7 @@ public class BehandlingService {
             throw new FunksjonellException("Medlemsperioder kan ikke lagres på behandling med status " + behandling.getStatus());
         }
         List<TidligereMedlemsperiode> tidligereMedlemsperioder = periodeIder.stream()
-            .map(pid -> new TidligereMedlemsperiode(behandlingID, pid)).collect(toList());
+            .map(pid -> new TidligereMedlemsperiode(behandlingID, pid)).toList();
         tidligereMedlemsperiodeRepository.deleteById_BehandlingId(behandlingID);
         tidligereMedlemsperiodeRepository.saveAll(tidligereMedlemsperioder);
     }
@@ -211,8 +207,8 @@ public class BehandlingService {
         log.info("Oppdaterer status for behandling {} fra {} til {}", behandling.getId(), behandling.getStatus(), status);
         behandling.setStatus(status);
 
-        Instant overstyrtToUkerSvarfrist = Instant.now().plus(Period.ofWeeks(2));
-        behandling.setDokumentasjonSvarfristDato(behandling.erVenterForDokumentasjon() ? overstyrtToUkerSvarfrist : null);
+        behandling.setDokumentasjonSvarfristDato(behandling.erVenterForDokumentasjon() ?
+            DokumentasjonSvarfrist.beregnFristFraDagensDatoVedManuelEndring() : null);
 
         behandlingRepository.save(behandling);
 
@@ -255,7 +251,7 @@ public class BehandlingService {
         return tidligereMedlemsperioder.stream()
             .map(TidligereMedlemsperiode::getId)
             .map(TidligereMedlemsperiodeId::getPeriodeId)
-            .collect(toList());
+            .toList();
     }
 
     @Transactional(rollbackFor = Exception.class)
