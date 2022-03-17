@@ -161,4 +161,6 @@ public class PersonopplysningerObjectFactory {
                 LocalDate.EPOCH, "PDL", "kilde", false)),
             Set.of(statsborgerskap_1, statsborgerskap_2, statsborgerskap_3));
     }
+
+
 }

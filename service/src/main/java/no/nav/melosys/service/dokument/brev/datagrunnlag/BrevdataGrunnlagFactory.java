@@ -1,6 +1,5 @@
 package no.nav.melosys.service.dokument.brev.datagrunnlag;
 
-import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.person.Informasjonsbehov;
@@ -21,19 +20,15 @@ public class BrevdataGrunnlagFactory {
     private final AvklarteVirksomheterService avklarteVirksomheterService;
     private final KodeverkService kodeverkService;
     private final PersondataFasade persondataFasade;
-    private final Unleash unleash;
 
     @Autowired
     public BrevdataGrunnlagFactory(AvklartefaktaService avklartefaktaService,
                                    AvklarteVirksomheterSystemService avklarteVirksomheterService,
-                                   KodeverkService kodeverkService,
-                                   PersondataFasade persondataFasade,
-                                   Unleash unleash) {
+                                   KodeverkService kodeverkService, PersondataFasade persondataFasade) {
         this.avklartefaktaService = avklartefaktaService;
         this.avklarteVirksomheterService = avklarteVirksomheterService;
         this.kodeverkService = kodeverkService;
         this.persondataFasade = persondataFasade;
-        this.unleash = unleash;
     }
 
     public BrevDataGrunnlag av(DoksysBrevbestilling brevbestilling) {
@@ -46,9 +41,7 @@ public class BrevdataGrunnlagFactory {
     }
 
     private Persondata hentPersondata(Behandling behandling) {
-        if (unleash.isEnabled("melosys.pdl.aktiv")) {
-            return persondataFasade.hentPerson(behandling.getFagsak().hentAktørID(), Informasjonsbehov.MED_FAMILIERELASJONER);
-        }
-        return behandling.hentPersonDokument();
+        return persondataFasade.hentPerson(behandling.getFagsak().hentAktørID(),
+            Informasjonsbehov.MED_FAMILIERELASJONER);
     }
 }

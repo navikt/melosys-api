@@ -2,12 +2,9 @@ package no.nav.melosys.service.dokument;
 
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.List;
 
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadTrygdeavtale;
@@ -26,14 +23,7 @@ import no.nav.melosys.domain.dokument.person.adresse.UstrukturertAdresse;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
-import no.nav.melosys.domain.person.KjoennType;
-import no.nav.melosys.domain.person.Master;
-import no.nav.melosys.domain.person.Navn;
-import no.nav.melosys.domain.person.Personopplysninger;
-import no.nav.melosys.domain.person.adresse.Kontaktadresse;
-import no.nav.melosys.domain.person.adresse.Oppholdsadresse;
 
-import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
 
@@ -48,7 +38,6 @@ public final class DokgenTestData {
     public static final String NAVN_ORG = "Advokatene AS";
     public static final String POSTBOKS_ORG = "POSTBOKS 200";
     public static final String POSTNR_ORG = "9990";
-    public static final String HUSNUMMER = "3";
     public static final String REGION = "NEVERLAND";
     public static final LocalDate LOVVALGSPERIODE_FOM = LocalDate.of(2020, 1, 1);
     public static final LocalDate LOVVALGSPERIODE_TOM = LocalDate.of(2021, 1, 1);
@@ -60,7 +49,6 @@ public final class DokgenTestData {
     public static Behandling lagBehandling(Fagsak fagsak) {
         Behandling behandling = new Behandling();
         behandling.setId(1L);
-        behandling.setSaksopplysninger(singleton(lagPersonopplysning()));
         behandling.setFagsak(fagsak);
         behandling.setType(Behandlingstyper.SOEKNAD);
         behandling.setBehandlingsgrunnlag(lagBehandlingsgrunnlag());
@@ -96,79 +84,6 @@ public final class DokgenTestData {
         saksopplysning.setType(SaksopplysningType.PERSOPL);
         saksopplysning.setDokument(lagPersonDokument());
         return saksopplysning;
-    }
-
-    public static Saksopplysning lagPersonopplysningPDL() {
-        Saksopplysning saksopplysning = new Saksopplysning();
-        saksopplysning.setType(SaksopplysningType.PDL_PERSOPL);
-        saksopplysning.setDokument(lagPersondata());
-        return saksopplysning;
-    }
-
-    public static Personopplysninger lagPersondata() {
-        return new Personopplysninger(
-            Collections.emptyList(),
-            lagBostedadresse(),
-            null,
-            Collections.emptySet(),
-            null,
-            null,
-            KjoennType.UKJENT,
-            Collections.singletonList(lagKontaktadresse()),
-            new Navn("Donald", null, "Duck"),
-            Collections.singletonList(lagOppholdsadresse()),
-            Collections.emptyList()
-        );
-    }
-
-    public static StrukturertAdresse lagStrukturertAdresse() {
-        return new StrukturertAdresse(
-            ADRESSELINJE_1_BRUKER,
-            HUSNUMMER,
-            POSTNR_BRUKER,
-            POSTSTED_BRUKER,
-            REGION,
-            Landkoder.SE.name()
-        );
-    }
-
-    public static Oppholdsadresse lagOppholdsadresse() {
-        return new Oppholdsadresse(
-            lagStrukturertAdresse(),
-            null,
-            LocalDate.now().minusYears(2),
-            LocalDate.now().plusYears(2),
-            Master.PDL.name(),
-            Master.PDL.name(),
-            LocalDateTime.now(),
-            false
-        );
-    }
-
-    public static Kontaktadresse lagKontaktadresse() {
-        return new Kontaktadresse(
-            lagStrukturertAdresse(),
-            null,
-            null,
-            LocalDate.now().minusYears(2),
-            LocalDate.now().plusYears(2),
-            Master.PDL.name(),
-            Master.PDL.name(),
-            LocalDateTime.now(),
-            false
-        );
-    }
-
-    public static no.nav.melosys.domain.person.adresse.Bostedsadresse lagBostedadresse() {
-        return new no.nav.melosys.domain.person.adresse.Bostedsadresse(
-            lagStrukturertAdresse(),
-            "",
-            LocalDate.now().minusYears(2),
-            LocalDate.now().plusYears(2),
-            Master.PDL.name(),
-            "",
-            false
-        );
     }
 
     public static PersonDokument lagPersonDokument() {
