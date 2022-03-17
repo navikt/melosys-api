@@ -11,6 +11,7 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadTrygdeavtale;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.ForetakUtland;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.JuridiskArbeidsgiverNorge;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.FysiskArbeidssted;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode;
@@ -128,6 +129,7 @@ class VedtakKontrollServiceTest {
         lovvalgsperiode.setFom(LocalDate.now());
         lovvalgsperiode.setTom(LocalDate.now().plusYears(3));
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1);
+        behandlingsgrunnlagData.juridiskArbeidsgiverNorge = lagJuridiskArbeidsgiverNorge();
         Collection<Kontrollfeil> resultat = vedtakKontrollService.utførKontroller(behandlingID, Sakstyper.EU_EOS);
         assertThat(resultat).isEmpty();
     }
@@ -214,9 +216,31 @@ class VedtakKontrollServiceTest {
             .contains(Kontroll_begrunnelser.ATTEST_MANGLER_ARBEIDSSTED);
     }
 
+    @Test
+    void utførKontroller_flereArbeidsgivereArt16_1_returnererKode() {
+        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1);
+        behandlingsgrunnlagData.juridiskArbeidsgiverNorge = lagJuridiskArbeidsgiverNorge();
+        behandlingsgrunnlagData.foretakUtland = lagForetakUtland();
+
+        Collection<Kontrollfeil> resultat = vedtakKontrollService.utførKontroller(behandlingID, Sakstyper.EU_EOS);
+        assertThat(resultat).extracting(Kontrollfeil::getKode).contains(Kontroll_begrunnelser.ANNET);
+    }
+
     private Behandlingsresultat lagBehandlingsresultat() {
         var behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setLovvalgsperioder(Set.of(lovvalgsperiode));
         return behandlingsresultat;
+    }
+
+    private JuridiskArbeidsgiverNorge lagJuridiskArbeidsgiverNorge() {
+        var juridiskArbeidsgiverNorge = new JuridiskArbeidsgiverNorge();
+        juridiskArbeidsgiverNorge.ekstraArbeidsgivere = List.of("Ekstra arbeidsgiver");
+        return juridiskArbeidsgiverNorge;
+    }
+
+    private List<ForetakUtland> lagForetakUtland() {
+        var foretakUtland = new ForetakUtland();
+        foretakUtland.uuid = "uuid-001-123";
+        return List.of(foretakUtland);
     }
 }
