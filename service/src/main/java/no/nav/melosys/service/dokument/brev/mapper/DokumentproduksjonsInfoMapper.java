@@ -125,7 +125,7 @@ public class DokumentproduksjonsInfoMapper {
         STORBRITANNIA("Vedtak om medlemskap, Attest for utsendt arbeidstaker"),
         STORBRITANNIA_VEDTAKSBREV("Vedtak om medlemskap"),
         STORBRITANNIA_ATTEST("Attest for utsendt arbeidstaker"),
-        AVSLAG_MANGLENDE_OPPLYSNINGER("Avslag pga manglende dokument");
+        AVSLAG_MANGLENDE_OPPLYSNINGER("Avslag pga manglende opplysninger");
 
         private final String tittel;
 
