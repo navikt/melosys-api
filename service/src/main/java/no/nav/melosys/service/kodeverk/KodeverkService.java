@@ -11,6 +11,7 @@ import java.util.Map;
 import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.integrasjon.kodeverk.Kode;
 import no.nav.melosys.integrasjon.kodeverk.KodeOppslag;
+import no.nav.melosys.integrasjon.kodeverk.KodeOppslagFraKodeverk;
 import no.nav.melosys.integrasjon.kodeverk.KodeverkRegister;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,6 +33,8 @@ public class KodeverkService {
 
     private static final long MILLIS_MELLOM_VÅKNE_OPP = 3600000;
     private static final long KLOKKESLETT_FOR_CACHE_REFRESH = 6;
+    public static final String UKJENT = KodeOppslagFraKodeverk.UKJENT;
+
 
     private Map<String, no.nav.melosys.integrasjon.kodeverk.Kodeverk> kodeverkCache; // Ikke aksesser denne usynkronisert med mindre du vet hva du gjør
     private KodeverkRegister kodeverkRegister;
