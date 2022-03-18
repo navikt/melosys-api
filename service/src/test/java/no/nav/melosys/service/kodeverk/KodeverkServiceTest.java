@@ -8,7 +8,6 @@ import no.nav.melosys.integrasjon.kodeverk.KodeOppslag;
 import no.nav.melosys.integrasjon.kodeverk.Kodeverk;
 import no.nav.melosys.integrasjon.kodeverk.KodeverkRegister;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -18,8 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static no.nav.melosys.domain.FellesKodeverk.LANDKODER;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.atMost;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class KodeverkServiceTest {
@@ -44,6 +42,7 @@ class KodeverkServiceTest {
 
     @Test
     void dekodOgCache_altOK() {
+        when(kodeOppslagMock.getTermFraKodeverk(eq(LANDKODER), eq(BAK), any(), any())).thenReturn(BAKVENDTLAND);
         // Sjekk opphenting av kodeverk...
         String res = kodeverkService.dekod(LANDKODER, BAK);
         assertThat(res).isEqualTo(BAKVENDTLAND);

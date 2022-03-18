@@ -19,19 +19,24 @@ import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdRestConsume
 import no.nav.melosys.integrasjon.kodeverk.KodeOppslag;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.*;
-import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
+import static no.nav.melosys.domain.FellesKodeverk.PERMISJONS_OG_PERMITTERINGS_BESKRIVELSE;
+import static no.nav.melosys.domain.FellesKodeverk.YRKER;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
+
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class AaregServiceTest {
     private static final String NAV_PERSONIDENT = "12345678990";
 
     private AaregService aaregService;
-    @Mock
     private KodeOppslag mockedKodeOppslag;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -49,6 +54,7 @@ class AaregServiceTest {
             .filter(ArbeidsforholdRestConsumerConfig.errorFilter())
             .build();
         ArbeidsforholdRestConsumer arbeidsforholdRestConsumer = new ArbeidsforholdRestConsumer(webClient);
+        mockedKodeOppslag = Mockito.mock(KodeOppslag.class);
         aaregService = new AaregService(arbeidsforholdRestConsumer, mockedKodeOppslag);
     }
 
@@ -59,6 +65,10 @@ class AaregServiceTest {
 
     @Test
     void getArbeidsforholdDokumentFromRestService() throws JsonProcessingException {
+        when(mockedKodeOppslag.getTermFraKodeverk(eq(PERMISJONS_OG_PERMITTERINGS_BESKRIVELSE), anyString()))
+            .thenReturn("Permisjon med foreldrepenger");
+        when(mockedKodeOppslag.getTermFraKodeverk(eq(YRKER), anyString()))
+            .thenReturn("IT-KONSULENT");
         wireMockServer.stubFor(get(urlPathEqualTo("/"))
             .withHeader("Nav-Personident", equalTo(NAV_PERSONIDENT))
             .withQueryParam("regelverk", equalTo("A_ORDNINGEN"))
