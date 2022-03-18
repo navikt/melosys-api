@@ -43,6 +43,10 @@ public class PersonopplysningerObjectFactory {
         return lagPersonopplysninger(false, false, false, true, false);
     }
 
+    public static Personopplysninger lagPersonopplysningerUtenOppholdsadresseOgKontaktadresse() {
+        return lagPersonopplysninger(false, false, true, true, false);
+    }
+
     public static Personopplysninger lagPersonopplysningerMedFamilie() {
         return lagPersonopplysninger(false, false, false, false, true);
     }
