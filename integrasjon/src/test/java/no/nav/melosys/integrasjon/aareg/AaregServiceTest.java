@@ -18,11 +18,8 @@ import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdRestConsume
 import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdRestConsumerConfig;
 import no.nav.melosys.integrasjon.kodeverk.KodeOppslag;
 import org.assertj.core.api.Assertions;
-import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.*;
+import org.mockito.Mock;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
@@ -34,6 +31,9 @@ class AaregServiceTest {
     private static final String NAV_PERSONIDENT = "12345678990";
 
     private AaregService aaregService;
+    @Mock
+    private KodeOppslag mockedKodeOppslag;
+
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private WireMockServer wireMockServer;
@@ -48,8 +48,8 @@ class AaregServiceTest {
             .baseUrl("http://localhost:" + wireMockServer.port())
             .filter(ArbeidsforholdRestConsumerConfig.errorFilter())
             .build();
-        ArbeidsforholdRestConsumer restConsumer = new ArbeidsforholdRestConsumer(webClient);
-        aaregService = lagAaregService(restConsumer);
+        ArbeidsforholdRestConsumer arbeidsforholdRestConsumer = new ArbeidsforholdRestConsumer(webClient);
+        aaregService = new AaregService(arbeidsforholdRestConsumer, mockedKodeOppslag);
     }
 
     @AfterAll
@@ -108,26 +108,6 @@ class AaregServiceTest {
                 LocalDate.of(2014, 7, 1),
                 LocalDate.of(2015, 12, 31))
             ).withMessage("Henting av arbeidsforhold fra Aareg feilet.");
-    }
-
-    private AaregService lagAaregService(ArbeidsforholdRestConsumer arbeidsforholdRestConsumer) {
-        return new AaregService(arbeidsforholdRestConsumer, getKodeOppslag());
-    }
-
-    @NotNull
-    private KodeOppslag getKodeOppslag() {
-        return (kodeverk, kode) -> {
-            switch (kodeverk) {
-                case "PermisjonsOgPermitteringsBeskrivelse":
-                    if (kode.equals("permisjonMedForeldrepenger"))
-                        return "Permisjon med foreldrepenger";
-                case "Yrker":
-                    if(kode.equals("2130123"))
-                        return "IT-KONSULENT";
-                default:
-                    throw new IllegalStateException("Ingen test data for kodeverk:" + kodeverk);
-            }
-        };
     }
 
     private static final String expectedRestResult = """

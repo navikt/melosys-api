@@ -14,7 +14,7 @@ import no.nav.melosys.tjenester.gui.dto.GateadresseDto;
 import no.nav.melosys.tjenester.gui.dto.OrganisasjonDto;
 import org.apache.commons.lang3.StringUtils;
 
-import static no.nav.melosys.service.kodeverk.KodeverkService.UKJENT;
+import static no.nav.melosys.integrasjon.kodeverk.KodeOppslagFraKodeverk.UKJENT;
 
 public class OrganisasjonSerializer extends StdSerializer<AbstraktOrganisasjon> {
 
