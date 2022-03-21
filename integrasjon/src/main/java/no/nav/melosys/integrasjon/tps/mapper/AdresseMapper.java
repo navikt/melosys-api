@@ -37,7 +37,7 @@ class AdresseMapper {
             if (bostedsadresse.getStrukturertAdresse() instanceof StedsadresseNorge stedsadresseNorge) {
                 final String postnr = stedsadresseNorge.getPoststed().getValue();
                 b.setPostnr(postnr);
-                b.setPoststed(kodeOppslag.getTerm(FellesKodeverk.POSTNUMMER.getNavn(), postnr));
+                b.setPoststed(kodeOppslag.getTermFraKodeverk(FellesKodeverk.POSTNUMMER, postnr));
             }
             b.setLand(Land.av(bostedsadresse.getStrukturertAdresse().getLandkode().getValue()));
         }
