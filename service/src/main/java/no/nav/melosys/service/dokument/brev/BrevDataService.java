@@ -8,7 +8,6 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import no.finn.unleash.Unleash;
 import no.nav.dok.brevdata.felles.v1.navfelles.Saksbehandler;
 import no.nav.dok.brevdata.felles.v1.navfelles.*;
 import no.nav.dok.brevdata.felles.v1.simpletypes.AktoerType;
@@ -54,18 +53,15 @@ public class BrevDataService {
     private final PersondataFasade persondataFasade;
     private final SaksbehandlerService saksbehandlerService;
     private final UtenlandskMyndighetRepository utenlandskMyndighetRepository;
-    private final Unleash unleash;
 
     public BrevDataService(BehandlingsresultatRepository behandlingsresultatRepository,
                            @Qualifier("system") PersondataFasade persondataFasade,
                            SaksbehandlerService saksbehandlerService,
-                           UtenlandskMyndighetRepository utenlandskMyndighetRepository,
-                           Unleash unleash) {
+                           UtenlandskMyndighetRepository utenlandskMyndighetRepository) {
         this.behandlingsresultatRepository = behandlingsresultatRepository;
         this.persondataFasade = persondataFasade;
         this.saksbehandlerService = saksbehandlerService;
         this.utenlandskMyndighetRepository = utenlandskMyndighetRepository;
-        this.unleash = unleash;
     }
 
     public DokumentbestillingMetadata lagBestillingMetadata(Produserbaredokumenter produserbartDokument,
@@ -282,9 +278,6 @@ public class BrevDataService {
     }
 
     private boolean brukerManglerAdresseFraRegister(Behandling behandling) {
-        if (unleash.isEnabled("melosys.pdl.aktiv")) {
-            return persondataFasade.hentPerson(behandling.getFagsak().hentAktørID()).manglerRegistrertAdresse();
-        }
-        return behandling.hentPersonDokument().manglerRegistrertAdresse();
+        return persondataFasade.hentPerson(behandling.getFagsak().hentAktørID()).manglerRegistrertAdresse();
     }
 }

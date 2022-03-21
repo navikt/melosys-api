@@ -28,7 +28,7 @@ import no.nav.melosys.integrasjon.dokgen.dto.felles.Person;
 import no.nav.melosys.integrasjon.dokgen.dto.storbritannia.attest.*;
 import no.nav.melosys.integrasjon.dokgen.dto.storbritannia.innvilgelse.InnvilgelseStorbritannia;
 import no.nav.melosys.integrasjon.dokgen.dto.storbritannia.innvilgelse.Soknad;
-import no.nav.melosys.service.dokument.DokumentHentingService;
+import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -87,7 +87,8 @@ class DokgenMalMapperTest {
 
     @Test
     void skalMappeMedBrukerAdressePDL() {
-        when(mockDokgenMapperDatahenter.hentPersondata(any())).thenReturn(lagPersondata());
+        when(mockDokgenMapperDatahenter.hentPersondata(any())).thenReturn(
+            PersonopplysningerObjectFactory.lagDonaldDuckPersondata());
 
         Behandling behandling = lagBehandling();
 

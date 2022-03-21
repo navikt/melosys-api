@@ -17,6 +17,6 @@ public class BrevdataGrunnlagSystemFactory extends BrevdataGrunnlagFactory {
                                          KodeverkService kodeverkService,
                                          @Qualifier("system") PersondataFasade persondataFasade,
                                          Unleash unleash) {
-        super(avklartefaktaService, avklarteVirksomheterService, kodeverkService, persondataFasade, unleash);
+        super(avklartefaktaService, avklarteVirksomheterService, kodeverkService, persondataFasade);
     }
 }
