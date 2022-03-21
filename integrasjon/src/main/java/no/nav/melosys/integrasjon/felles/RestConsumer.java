@@ -55,8 +55,6 @@ public interface RestConsumer {
             return new IkkeFunnetException(feilmelding);
         } else if (status.is4xxClientError()) {
             return new FunksjonellException(feilmelding);
-        } else if (status.is5xxServerError()) {
-            throw new TekniskException(feilmelding);
         } else {
             throw new TekniskException(feilmelding);
         }

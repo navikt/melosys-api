@@ -37,7 +37,6 @@ import static no.nav.melosys.domain.arkiv.DokumentVariant.lagDokumentVariant;
 
 /**
  * Sender et brev med søknad som vedlegg til utenlandsk myndighet
- * <p>
  * Transisjoner:
  * VS_SEND_SOKNAD -> VS_SEND_SOKNAD eller FEILET_MASKINELT hvis feil
  */
