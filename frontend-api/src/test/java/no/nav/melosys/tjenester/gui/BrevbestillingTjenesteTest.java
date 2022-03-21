@@ -26,7 +26,6 @@ import no.nav.melosys.service.brev.BrevbestillingService;
 import no.nav.melosys.service.dokument.BrevmottakerService;
 import no.nav.melosys.service.dokument.DokumentServiceFasade;
 import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
-import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
@@ -78,7 +77,7 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
             mock(AvklarteVirksomheterService.class), mock(UtenlandskMyndighetService.class), mock(BehandlingsresultatService.class),
             mock(TrygdeavgiftsberegningService.class), mock(LovvalgsperiodeService.class), mockBehandlingService);
         BrevbestillingService brevbestillingService = new BrevbestillingService(mockBrevmottakerService,
-            mockDokServiceFasade, mockBehandlingService, mockEregFasade, mock(KodeverkService.class), mockKontaktopplysningService,
+            mockDokServiceFasade, mockBehandlingService, mockEregFasade, mockKontaktopplysningService,
             mockPersondataFasade, fakeUnleash);
         brevbestillingTjeneste = new BrevbestillingTjeneste(brevbestillingService, mockBehandlingService, brevmottakerService, aksesskontroll);
         fakeUnleash.enable("melosys.brev.GENERELT_FRITEKSTBREV_ARBEIDSGIVER");
