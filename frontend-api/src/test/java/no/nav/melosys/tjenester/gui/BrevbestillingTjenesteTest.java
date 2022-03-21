@@ -23,6 +23,7 @@ import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.brev.BrevbestillingService;
+import no.nav.melosys.service.brev.DokumentNavnService;
 import no.nav.melosys.service.dokument.BrevmottakerService;
 import no.nav.melosys.service.dokument.DokumentServiceFasade;
 import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
@@ -65,6 +66,8 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
     private KontaktopplysningService mockKontaktopplysningService;
     @Mock
     private Aksesskontroll aksesskontroll;
+    @Mock
+    private DokumentNavnService mockDokumentNavnService;
     @Captor
     private ArgumentCaptor<BrevbestillingRequest> brevbestillingDtoCaptor;
     private final FakeUnleash fakeUnleash = new FakeUnleash();
@@ -78,7 +81,7 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
             mock(TrygdeavgiftsberegningService.class), mock(LovvalgsperiodeService.class), mockBehandlingService);
         BrevbestillingService brevbestillingService = new BrevbestillingService(mockBrevmottakerService,
             mockDokServiceFasade, mockBehandlingService, mockEregFasade, mockKontaktopplysningService,
-            mockPersondataFasade, fakeUnleash);
+            mockPersondataFasade, mockDokumentNavnService, fakeUnleash);
         brevbestillingTjeneste = new BrevbestillingTjeneste(brevbestillingService, mockBehandlingService, brevmottakerService, aksesskontroll);
         fakeUnleash.enable("melosys.brev.GENERELT_FRITEKSTBREV_ARBEIDSGIVER");
         fakeUnleash.enable("melosys.brev.GENERELT_FRITEKSTBREV_BRUKER");
