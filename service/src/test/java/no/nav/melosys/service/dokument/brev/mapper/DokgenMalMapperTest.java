@@ -203,7 +203,7 @@ class DokgenMalMapperTest {
             ).containsExactly(
                 TRYGDEMYNDIGHET,
                 "Finland",
-                forsendelseMottattDato.atStartOfDay(ZoneId.of("Europe/Paris")).toInstant().plus(Saksbehandlingstid.SAKSBEHANDLINGSTID_DAGER, ChronoUnit.DAYS)
+                forsendelseMottattDato.atStartOfDay(ZoneId.of("Europe/Paris")).toInstant().plus(Period.ofWeeks(Saksbehandlingstid.SAKSBEHANDLINGSTID_UKER))
             );
     }
 
