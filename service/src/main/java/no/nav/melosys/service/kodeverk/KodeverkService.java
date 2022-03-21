@@ -16,8 +16,6 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import static no.nav.melosys.integrasjon.kodeverk.KodeOppslagFraKodeverk.UKJENT;
-
 @Service
 public class KodeverkService {
     private static final Logger log = LoggerFactory.getLogger(KodeverkService.class);
@@ -31,7 +29,7 @@ public class KodeverkService {
     private KodeverkRegister kodeverkRegister;
     private KodeOppslag kodeOppslag;
 
-    public KodeverkService(KodeverkRegister kodeverkRegister) {
+    public KodeverkService(KodeverkRegister kodeverkRegister, KodeOppslag kodeOppslag) {
         this.kodeverkRegister = kodeverkRegister;
         this.kodeOppslag = kodeOppslag;
         this.kodeverkCache = new HashMap<>();
