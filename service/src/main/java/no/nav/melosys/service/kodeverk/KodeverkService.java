@@ -10,6 +10,8 @@ import java.util.Map;
 
 import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.integrasjon.kodeverk.Kode;
+import no.nav.melosys.integrasjon.kodeverk.KodeOppslag;
+import no.nav.melosys.integrasjon.kodeverk.KodeOppslagFraKodeverk;
 import no.nav.melosys.integrasjon.kodeverk.KodeverkRegister;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +20,8 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+
+import static no.nav.melosys.integrasjon.kodeverk.KodeOppslagFraKodeverk.UKJENT;
 
 /**
  * Klassen tilbyr tjenester for å slå opp kodeverk.
@@ -29,14 +33,17 @@ public class KodeverkService {
 
     private static final long MILLIS_MELLOM_VÅKNE_OPP = 3600000;
     private static final long KLOKKESLETT_FOR_CACHE_REFRESH = 6;
-    public static final String UKJENT = "UKJENT";
+    public static final String UKJENT = KodeOppslagFraKodeverk.UKJENT;
+
 
     private Map<String, no.nav.melosys.integrasjon.kodeverk.Kodeverk> kodeverkCache; // Ikke aksesser denne usynkronisert med mindre du vet hva du gjør
     private KodeverkRegister kodeverkRegister;
+    private KodeOppslag kodeOppslag;
 
     @Autowired
-    public KodeverkService(KodeverkRegister kodeverkRegister) {
+    public KodeverkService(KodeverkRegister kodeverkRegister, KodeOppslag kodeOppslag) {
         this.kodeverkRegister = kodeverkRegister;
+        this.kodeOppslag = kodeOppslag;
         this.kodeverkCache = new HashMap<>();
     }
 
@@ -70,18 +77,7 @@ public class KodeverkService {
         }
 
         List<Kode> kodeperioder = hentKodeverk(kodeverk.getNavn()).getKoder().get(kode);
-        if (kodeperioder == null) {
-            log.warn("Fant ikke term for kode {} i kodeverk {}", kode, kodeverk.getNavn());
-            return UKJENT;
-        }
-        // kodeperioder er en liste med samme kode men med forskjellige gyldighetsperiode. Det holder at en er gyldig.
-        for (Kode kandidat : kodeperioder) {
-            if (!kandidat.getGyldigFom().isAfter(dato) && !kandidat.getGyldigTom().isBefore(dato)) {
-                return kandidat.getNavn();
-            }
-        }
-        log.warn("Fant ingen gyldig term for kode {} i kodeverk {}", kode, kodeverk.getNavn());
-        return UKJENT;
+        return kodeOppslag.getTermFraKodeverk(kodeverk, kode, dato, kodeperioder);
     }
 
     public List<KodeDto> hentGyldigeKoderForKodeverk(FellesKodeverk kodeverk) {

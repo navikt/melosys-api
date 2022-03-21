@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.*;
 
 import no.nav.melosys.integrasjon.kodeverk.Kode;
+import no.nav.melosys.integrasjon.kodeverk.KodeOppslag;
 import no.nav.melosys.integrasjon.kodeverk.Kodeverk;
 import no.nav.melosys.integrasjon.kodeverk.KodeverkRegister;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,8 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static no.nav.melosys.domain.FellesKodeverk.LANDKODER;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.atMost;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class KodeverkServiceTest {
@@ -29,10 +29,12 @@ class KodeverkServiceTest {
 
     @Mock
     private KodeverkRegister kodeverkRegisterMock;
+    @Mock
+    private KodeOppslag kodeOppslagMock;
 
     @BeforeEach
     public void setup() {
-        kodeverkService = new KodeverkService(kodeverkRegisterMock);
+        kodeverkService = new KodeverkService(kodeverkRegisterMock, kodeOppslagMock);
         landkoder.put(BAK, Collections.singletonList(new Kode(BAK, BAKVENDTLAND, LocalDate.MIN, LocalDate.MAX)));
         Kodeverk mockLandkoder = new Kodeverk(LANDKODER.getNavn(), landkoder);
         Mockito.when(kodeverkRegisterMock.hentKodeverk(LANDKODER.getNavn())).thenReturn(mockLandkoder);
@@ -40,6 +42,7 @@ class KodeverkServiceTest {
 
     @Test
     void dekodOgCache_altOK() {
+        when(kodeOppslagMock.getTermFraKodeverk(eq(LANDKODER), eq(BAK), any(), any())).thenReturn(BAKVENDTLAND);
         // Sjekk opphenting av kodeverk...
         String res = kodeverkService.dekod(LANDKODER, BAK);
         assertThat(res).isEqualTo(BAKVENDTLAND);

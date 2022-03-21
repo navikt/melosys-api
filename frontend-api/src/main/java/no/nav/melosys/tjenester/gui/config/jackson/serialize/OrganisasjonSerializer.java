@@ -16,6 +16,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import static no.nav.melosys.service.kodeverk.KodeverkService.UKJENT;
 
+
 public class OrganisasjonSerializer extends StdSerializer<AbstraktOrganisasjon> {
 
     private final transient KodeverkService kodeverkService;
