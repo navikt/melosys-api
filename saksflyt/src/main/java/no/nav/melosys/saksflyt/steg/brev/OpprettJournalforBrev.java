@@ -15,10 +15,9 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
-import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.brev.TrygdeavtaleTittelService;
+import no.nav.melosys.service.brev.DokumentNavnService;
 import no.nav.melosys.service.dokument.DokgenService;
 import no.nav.melosys.service.dokument.DokumentproduksjonsInfo;
 import no.nav.melosys.service.persondata.PersondataFasade;
@@ -38,32 +37,29 @@ public class OpprettJournalforBrev implements StegBehandler {
     private static final Logger log = LoggerFactory.getLogger(OpprettJournalforBrev.class);
 
     private final BehandlingService behandlingService;
-    private final LovvalgsperiodeService lovvalgsperiodeService;
     private final DokgenService dokgenService;
     private final UtenlandskMyndighetService utenlandskMyndighetService;
     private final JoarkFasade joarkFasade;
     private final PersondataFasade persondataFasade;
     private final EregFasade eregFasade;
-    private final TrygdeavtaleTittelService trygdeavtaleTittelService;
+    private final DokumentNavnService dokumentNavnService;
     private final Unleash unleash;
 
     @Autowired
     public OpprettJournalforBrev(BehandlingService behandlingService,
-                                 LovvalgsperiodeService lovvalgsperiodeService,
                                  DokgenService dokgenService,
                                  UtenlandskMyndighetService utenlandskMyndighetService,
                                  @Qualifier("system") JoarkFasade joarkFasade,
                                  @Qualifier("system") PersondataFasade persondataFasade,
                                  @Qualifier("system") EregFasade eregFasade,
-                                 TrygdeavtaleTittelService trygdeavtaleTittelService, Unleash unleash) {
+                                 DokumentNavnService dokumentNavnService, Unleash unleash) {
         this.behandlingService = behandlingService;
-        this.lovvalgsperiodeService = lovvalgsperiodeService;
         this.dokgenService = dokgenService;
         this.utenlandskMyndighetService = utenlandskMyndighetService;
         this.joarkFasade = joarkFasade;
         this.persondataFasade = persondataFasade;
         this.eregFasade = eregFasade;
-        this.trygdeavtaleTittelService = trygdeavtaleTittelService;
+        this.dokumentNavnService = dokumentNavnService;
         this.unleash = unleash;
     }
 
@@ -114,7 +110,7 @@ public class OpprettJournalforBrev implements StegBehandler {
         DokumentproduksjonsInfo dokumentproduksjonsInfo = dokgenService.hentDokumentInfo(produserbartDokument);
 
         JournalpostBestilling bestilling = new JournalpostBestilling.Builder()
-            .medTittel(utledJournalføringsTittel(dokumentproduksjonsInfo, brevbestilling, mottaker))
+            .medTittel(utledJournalføringsTittel(behandling, dokumentproduksjonsInfo, brevbestilling, mottaker))
             .medBrevkode(dokumentproduksjonsInfo.dokgenMalnavn())
             .medDokumentKategori(dokumentproduksjonsInfo.dokumentKategoriKode())
             .medBrukerFnr(brukerFnr)
@@ -158,7 +154,7 @@ public class OpprettJournalforBrev implements StegBehandler {
         return behandling.hentPersonDokument().hentFolkeregisterident();
     }
 
-    public String utledJournalføringsTittel(DokumentproduksjonsInfo dokumentproduksjonsInfo, DokgenBrevbestilling brevbestilling, Aktoer mottaker) {
+    public String utledJournalføringsTittel(Behandling behandling, DokumentproduksjonsInfo dokumentproduksjonsInfo, DokgenBrevbestilling brevbestilling, Aktoer mottaker) {
         if (brevbestilling instanceof FritekstbrevBrevbestilling fritekstbrevBrevbestilling) {
             String fritekstTittel = fritekstbrevBrevbestilling.getFritekstTittel();
             if (isEmpty(fritekstTittel)) {
@@ -167,12 +163,9 @@ public class OpprettJournalforBrev implements StegBehandler {
             return fritekstTittel;
         }
         if (brevbestilling.getProduserbartdokument() == Produserbaredokumenter.STORBRITANNIA) {
-            return trygdeavtaleTittelService.utledDokumentNavn(brevbestilling.getBehandlingId(), dokumentproduksjonsInfo, mottaker);
+            return dokumentNavnService.utledDokumentNavn(behandling, dokumentproduksjonsInfo, mottaker);
         }
         return dokumentproduksjonsInfo.journalføringsTittel();
     }
 
-    private String lagEndringTittel(String tittel) {
-        return tittel + " - endring";
-    }
 }

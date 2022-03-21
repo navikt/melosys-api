@@ -67,7 +67,7 @@ class BrevbestillingServiceTest {
     @Mock
     private BehandlingService mockBehandlingService;
     @Mock
-    private TrygdeavtaleTittelService mockTrygdeavtaleTittelService;
+    private DokumentNavnService mockDokumentNavnService;
 
     private final Behandling behandling = lagBehandling();
     private final FakeUnleash fakeUnleash = new FakeUnleash();
@@ -77,7 +77,7 @@ class BrevbestillingServiceTest {
     @BeforeEach
     void init() {
         brevbestillingService = new BrevbestillingService(mockBrevmottakerService, mockDokServiceFasade, mockBehandlingService, mockEregFasade,
-            mockKodeverkService, mockKontaktopplysningService, mockPersondataFasade, mockTrygdeavtaleTittelService, fakeUnleash);
+            mockKodeverkService, mockKontaktopplysningService, mockPersondataFasade, mockDokumentNavnService, fakeUnleash);
         fakeUnleash.enable("melosys.brev.GENERELT_FRITEKSTBREV_ARBEIDSGIVER");
         fakeUnleash.enable("melosys.brev.GENERELT_FRITEKSTBREV_BRUKER");
     }
@@ -90,7 +90,7 @@ class BrevbestillingServiceTest {
         when(mockBrevmottakerService.avklarMottaker(eq(MANGELBREV_BRUKER), any(), eq(behandling)))
             .thenReturn(lagAktoer(BRUKER, null));
         when(mockPersondataFasade.hentSammensattNavn(anyString())).thenReturn("Ola Nordmann");
-        when(mockTrygdeavtaleTittelService.utledDokumentNavnForProduserbaredokumenterOgAktoerRolle(behandling, MANGELBREV_BRUKER, BRUKER, null)).thenReturn(MANGELBREV_BRUKER.getBeskrivelse());
+        when(mockDokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoerRolle(behandling, MANGELBREV_BRUKER, BRUKER)).thenReturn(MANGELBREV_BRUKER.getBeskrivelse());
 
         var muligeMottakere = brevbestillingService.hentMuligeMottakere(MANGELBREV_BRUKER, 123L, null);
 
@@ -115,7 +115,7 @@ class BrevbestillingServiceTest {
         when(mockBrevmottakerService.avklarMottaker(any(Produserbaredokumenter.class), any(), eq(behandling)))
             .thenReturn(lagAktoer(REPRESENTANT, "orgnr"));
         mockHentOrganisasjon("orgnr", "Fullmektig virksomhet");
-        when(mockTrygdeavtaleTittelService.utledDokumentNavnForProduserbaredokumenterOgAktoerRolle(behandling, MANGELBREV_BRUKER, BRUKER, null)).thenReturn(MANGELBREV_BRUKER.getBeskrivelse());
+        when(mockDokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoerRolle(behandling, MANGELBREV_BRUKER, BRUKER)).thenReturn(MANGELBREV_BRUKER.getBeskrivelse());
 
         var muligeMottakere = brevbestillingService.hentMuligeMottakere(MANGELBREV_BRUKER, 123L, null);
 
@@ -137,7 +137,7 @@ class BrevbestillingServiceTest {
         when(mockBrevmottakerService.hentMottakerliste(MANGELBREV_BRUKER, 123))
             .thenReturn(new Mottakerliste.Builder().medHovedMottaker(ARBEIDSGIVER).build());
         mockHentOrganisasjon("orgnr", "Ola Nordmann Rørleggerfirma");
-        when(mockTrygdeavtaleTittelService.utledDokumentNavnForProduserbaredokumenterOgAktoerRolle(null, MANGELBREV_BRUKER, ARBEIDSGIVER, null)).thenReturn(MANGELBREV_BRUKER.getBeskrivelse());
+        when(mockDokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoerRolle(null, MANGELBREV_BRUKER, ARBEIDSGIVER)).thenReturn(MANGELBREV_BRUKER.getBeskrivelse());
 
         var muligeMottakere = brevbestillingService.hentMuligeMottakere(MANGELBREV_BRUKER, 123L, "orgnr");
 
@@ -209,7 +209,7 @@ class BrevbestillingServiceTest {
             .thenReturn(lagAktoer(REPRESENTANT, "orgnrTilFullmektig"));
         when(mockPersondataFasade.hentSammensattNavn(anyString())).thenReturn("Ola Nordmann");
         mockHentOrganisasjon("orgnrTilFullmektig", "Fullmektig Virksomhet");
-        when(mockTrygdeavtaleTittelService.utledDokumentNavnForProduserbaredokumenterOgAktoerRolle(behandling, MANGELBREV_BRUKER, BRUKER, null)).thenReturn(MANGELBREV_BRUKER.getBeskrivelse());
+        when(mockDokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoerRolle(behandling, MANGELBREV_BRUKER, BRUKER)).thenReturn(MANGELBREV_BRUKER.getBeskrivelse());
 
         var muligeMottakere = brevbestillingService.hentMuligeMottakere(MANGELBREV_BRUKER, 123L, null);
 
@@ -244,9 +244,9 @@ class BrevbestillingServiceTest {
             .thenReturn(List.of(orgnr1, orgnr2));
         mockHentOrganisasjon("orgnr1", "Arbeidsgiver 1");
         mockHentOrganisasjon("orgnr2", "Arbeidsgiver 2");
-        when(mockTrygdeavtaleTittelService.utledDokumentNavnForProduserbaredokumenterOgAktoerRolle(behandling, MANGELBREV_BRUKER, BRUKER, null)).thenReturn(MANGELBREV_BRUKER.getBeskrivelse());
-        when(mockTrygdeavtaleTittelService.utledDokumentNavnForProduserbaredokumenterOgAktoer(behandling, MANGELBREV_BRUKER, orgnr1, "Kopi til arbeidsgiver")).thenReturn("Kopi til arbeidsgiver");
-        when(mockTrygdeavtaleTittelService.utledDokumentNavnForProduserbaredokumenterOgAktoer(behandling, MANGELBREV_BRUKER, orgnr2, "Kopi til arbeidsgiver")).thenReturn("Kopi til arbeidsgiver");
+        when(mockDokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoerRolle(behandling, MANGELBREV_BRUKER, BRUKER)).thenReturn(MANGELBREV_BRUKER.getBeskrivelse());
+        when(mockDokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoer(behandling, MANGELBREV_BRUKER, orgnr1, "Kopi til arbeidsgiver")).thenReturn("Kopi til arbeidsgiver");
+        when(mockDokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoer(behandling, MANGELBREV_BRUKER, orgnr2, "Kopi til arbeidsgiver")).thenReturn("Kopi til arbeidsgiver");
 
 
         var muligeMottakere = brevbestillingService.hentMuligeMottakere(MANGELBREV_BRUKER, 123L, null);
@@ -274,8 +274,8 @@ class BrevbestillingServiceTest {
         when(mockBrevmottakerService.avklarMottakere(eq(MANGELBREV_BRUKER), any(), eq(behandling), anyBoolean(), anyBoolean()))
             .thenReturn(List.of(orgnr));
         mockHentOrganisasjon("orgnr", "Fullmektig Virksomhet");
-        when(mockTrygdeavtaleTittelService.utledDokumentNavnForProduserbaredokumenterOgAktoerRolle(behandling, MANGELBREV_BRUKER, BRUKER, null)).thenReturn(MANGELBREV_BRUKER.getBeskrivelse());
-        when(mockTrygdeavtaleTittelService.utledDokumentNavnForProduserbaredokumenterOgAktoer(behandling, MANGELBREV_BRUKER, orgnr, "Kopi til arbeidsgivers fullmektig")).thenReturn("Kopi til arbeidsgivers fullmektig");
+        when(mockDokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoerRolle(behandling, MANGELBREV_BRUKER, BRUKER)).thenReturn(MANGELBREV_BRUKER.getBeskrivelse());
+        when(mockDokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoer(behandling, MANGELBREV_BRUKER, orgnr, "Kopi til arbeidsgivers fullmektig")).thenReturn("Kopi til arbeidsgivers fullmektig");
 
 
         var muligeMottakere = brevbestillingService.hentMuligeMottakere(MANGELBREV_BRUKER, 123L, null);
@@ -302,8 +302,8 @@ class BrevbestillingServiceTest {
         when(mockBrevmottakerService.avklarMottaker(MANGELBREV_BRUKER, FastMottakerMedOrgnr.av(FastMottakerMedOrgnr.SKATT), behandling))
             .thenReturn(skatteetaten);
         mockHentOrganisasjon("974761076", "Skatteetaten");
-        when(mockTrygdeavtaleTittelService.utledDokumentNavnForProduserbaredokumenterOgAktoerRolle(behandling, MANGELBREV_BRUKER, BRUKER, null)).thenReturn(MANGELBREV_BRUKER.getBeskrivelse());
-        when(mockTrygdeavtaleTittelService.utledDokumentNavnForProduserbaredokumenterOgAktoer(behandling, MANGELBREV_BRUKER, skatteetaten, "Kopi til Skatteetaten")).thenReturn("Kopi til Skatteetaten");
+        when(mockDokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoerRolle(behandling, MANGELBREV_BRUKER, BRUKER)).thenReturn(MANGELBREV_BRUKER.getBeskrivelse());
+        when(mockDokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoer(behandling, MANGELBREV_BRUKER, skatteetaten, "Kopi til Skatteetaten")).thenReturn("Kopi til Skatteetaten");
 
         var muligeMottakere = brevbestillingService.hentMuligeMottakere(MANGELBREV_BRUKER, 123L, null);
 
@@ -520,10 +520,10 @@ class BrevbestillingServiceTest {
         when(mockPersondataFasade.hentSammensattNavn(anyString())).thenReturn("Ola Nordmann");
         mockHentOrganisasjon("123", "Ståle Stål");
         mockHentOrganisasjon("974761076", "Skatt");
-        when(mockTrygdeavtaleTittelService.utledDokumentNavnForProduserbaredokumenterOgAktoerRolle(behandling, STORBRITANNIA, BRUKER, null)).thenReturn("Vedtak om medlemskap, Attest for utsendt arbeidstaker");
-        when(mockTrygdeavtaleTittelService.utledDokumentNavnForProduserbaredokumenterOgAktoer(behandling, STORBRITANNIA, arbeidsgiver, "Kopi til arbeidsgiver")).thenReturn("Kopi av vedtak om medlemskap, Attest for utsendt arbeidstaker");
-        when(mockTrygdeavtaleTittelService.utledDokumentNavnForProduserbaredokumenterOgAktoer(behandling, STORBRITANNIA, trygdemyndighet, "Kopi til utenlandsk trygdemyndighet")).thenReturn("Attest for utsendt arbeidstaker", "Utenlandsk trygdemyndighet");
-        when(mockTrygdeavtaleTittelService.utledDokumentNavnForProduserbaredokumenterOgAktoer(behandling, STORBRITANNIA, skatteetaten, "Kopi til Skatt")).thenReturn("Kopi av vedtak om medlemskap");
+        when(mockDokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoerRolle(behandling, STORBRITANNIA, BRUKER)).thenReturn("Vedtak om medlemskap, Attest for utsendt arbeidstaker");
+        when(mockDokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoer(behandling, STORBRITANNIA, arbeidsgiver, "Kopi til arbeidsgiver")).thenReturn("Kopi av vedtak om medlemskap, Attest for utsendt arbeidstaker");
+        when(mockDokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoer(behandling, STORBRITANNIA, trygdemyndighet, "Kopi til utenlandsk trygdemyndighet")).thenReturn("Attest for utsendt arbeidstaker", "Utenlandsk trygdemyndighet");
+        when(mockDokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoer(behandling, STORBRITANNIA, skatteetaten, "Kopi til Skatt")).thenReturn("Kopi av vedtak om medlemskap");
 
         var muligeMottakere = brevbestillingService.hentMuligeMottakere(STORBRITANNIA, 123L, null);
 

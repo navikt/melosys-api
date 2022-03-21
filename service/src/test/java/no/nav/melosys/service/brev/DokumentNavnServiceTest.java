@@ -1,7 +1,5 @@
 package no.nav.melosys.service.brev;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.stream.Stream;
 
 import no.finn.unleash.FakeUnleash;
@@ -34,11 +32,11 @@ import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.STORBRI
 import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1;
 import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk.UK_ART8_2;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class TrygdeavtaleTittelServiceTest {
+class DokumentNavnServiceTest {
 
     @Mock
     private BrevmottakerService mockBrevmottakerService;
@@ -49,11 +47,11 @@ class TrygdeavtaleTittelServiceTest {
     @Mock
     private BehandlingService mockBehandlingService;
 
-    private TrygdeavtaleTittelService trygdeavtaleTittelService;
+    private DokumentNavnService dokumentNavnService;
 
     @BeforeEach
     void setUp() {
-        trygdeavtaleTittelService = new TrygdeavtaleTittelService(mockBehandlingService, mockBrevmottakerService, mockDokgenService, mockLovvalgsperiodeService);
+        dokumentNavnService = new DokumentNavnService(mockBehandlingService, mockBrevmottakerService, mockDokgenService, mockLovvalgsperiodeService);
     }
 
     @Test
@@ -61,8 +59,8 @@ class TrygdeavtaleTittelServiceTest {
         Behandling behandling = new Behandling();
         behandling.setId(1L);
 
-        String dokumentNavn = trygdeavtaleTittelService.utledDokumentNavnForProduserbaredokumenterOgAktoerRolle(behandling, INNVILGELSE_YRKESAKTIV, BRUKER, "Kopi av medlemskap");
-        assertThat(dokumentNavn).isEqualTo("Kopi av medlemskap");
+        String dokumentNavn = dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoerRolle(behandling, INNVILGELSE_YRKESAKTIV, BRUKER);
+        assertThat(dokumentNavn).isEqualTo("Innvilgelse yrkesaktiv");
     }
 
     @Test
@@ -70,7 +68,7 @@ class TrygdeavtaleTittelServiceTest {
         Behandling behandling = new Behandling();
         behandling.setId(1L);
 
-        String dokumentNavn = trygdeavtaleTittelService.utledDokumentNavnForProduserbaredokumenterOgAktoerRolle(behandling, INNVILGELSE_YRKESAKTIV, BRUKER, null);
+        String dokumentNavn = dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoerRolle(behandling, INNVILGELSE_YRKESAKTIV, BRUKER);
         assertThat(dokumentNavn).isEqualTo(INNVILGELSE_YRKESAKTIV.getBeskrivelse());
     }
 
@@ -80,19 +78,18 @@ class TrygdeavtaleTittelServiceTest {
         Behandling behandling = new Behandling();
         behandling.setId(1L);
         behandling.setType(erNyVurdering ? NY_VURDERING : SOEKNAD);
-        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandling);
 
         if (!mottaker.erUtenlandskMyndighet() && !FastMottakerMedOrgnr.SKATT.getOrgnr().equals(mottaker.getOrgnr())) {
             when(mockLovvalgsperiodeService.hentValidertLovvalgsperiode(anyLong())).thenReturn(lagLovvalsperiode(skalHaAttest ? UK_ART6_1 : UK_ART8_2));
         }
 
-        when(mockBrevmottakerService.avklarMottakere(STORBRITANNIA, Mottaker.av(mottaker.getRolle()), behandling, false, true)).thenReturn(List.of(mottaker));
+        when(mockBrevmottakerService.avklarMottaker(STORBRITANNIA, Mottaker.av(mottaker.getRolle()), behandling)).thenReturn(mottaker);
 
         DokumentproduksjonsInfoMapper dokumentproduksjonsInfoMapper = new DokumentproduksjonsInfoMapper(new FakeUnleash());
         when(mockDokgenService.hentDokumentInfo(STORBRITANNIA)).thenReturn(dokumentproduksjonsInfoMapper.hentDokumentproduksjonsInfo(STORBRITANNIA));
 
 
-        String dokumentNavn = trygdeavtaleTittelService.utledDokumentNavnForProduserbaredokumenterOgAktoerRolle(behandling, STORBRITANNIA, mottaker.getRolle(), null);
+        String dokumentNavn = dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoerRolle(behandling, STORBRITANNIA, mottaker.getRolle());
         assertThat(dokumentNavn).isEqualTo(forventetTittel);
     }
 
@@ -102,7 +99,6 @@ class TrygdeavtaleTittelServiceTest {
         Behandling behandling = new Behandling();
         behandling.setId(1L);
         behandling.setType(erNyVurdering ? NY_VURDERING : SOEKNAD);
-        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandling);
 
         if (!mottaker.erUtenlandskMyndighet() && !FastMottakerMedOrgnr.SKATT.getOrgnr().equals(mottaker.getOrgnr())) {
             when(mockLovvalgsperiodeService.hentValidertLovvalgsperiode(anyLong())).thenReturn(lagLovvalsperiode(skalHaAttest ? UK_ART6_1 : UK_ART8_2));
@@ -112,7 +108,7 @@ class TrygdeavtaleTittelServiceTest {
         when(mockDokgenService.hentDokumentInfo(STORBRITANNIA)).thenReturn(dokumentproduksjonsInfoMapper.hentDokumentproduksjonsInfo(STORBRITANNIA));
 
 
-        String dokumentNavn = trygdeavtaleTittelService.utledDokumentNavnForProduserbaredokumenterOgAktoer(behandling, STORBRITANNIA, mottaker, null);
+        String dokumentNavn = dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoer(behandling, STORBRITANNIA, mottaker, null);
         assertThat(dokumentNavn).isEqualTo(forventetTittel);
     }
 
@@ -120,8 +116,8 @@ class TrygdeavtaleTittelServiceTest {
     @MethodSource("testparametre")
     void utledDokumentNavn_StorbritanniaInnvilgelseOgAttestMedUlikeParametre_korrektTittel(boolean skalHaAttest, boolean erNyVurdering, Aktoer mottaker, String forventetTittel) {
         Behandling behandling = new Behandling();
+        behandling.setId(123L);
         behandling.setType(erNyVurdering ? NY_VURDERING : SOEKNAD);
-        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandling);
 
         if (!mottaker.erUtenlandskMyndighet() && !FastMottakerMedOrgnr.SKATT.getOrgnr().equals(mottaker.getOrgnr())) {
             when(mockLovvalgsperiodeService.hentValidertLovvalgsperiode(anyLong())).thenReturn(lagLovvalsperiode(skalHaAttest ? UK_ART6_1 : UK_ART8_2));
@@ -130,7 +126,7 @@ class TrygdeavtaleTittelServiceTest {
         DokumentproduksjonsInfoMapper dokumentproduksjonsInfoMapper = new DokumentproduksjonsInfoMapper(new FakeUnleash());
 
 
-        String dokumentNavn = trygdeavtaleTittelService.utledDokumentNavn(123L, dokumentproduksjonsInfoMapper.hentDokumentproduksjonsInfo(STORBRITANNIA), mottaker);
+        String dokumentNavn = dokumentNavnService.utledDokumentNavn(behandling, dokumentproduksjonsInfoMapper.hentDokumentproduksjonsInfo(STORBRITANNIA), mottaker);
         assertThat(dokumentNavn).isEqualTo(forventetTittel);
     }
 

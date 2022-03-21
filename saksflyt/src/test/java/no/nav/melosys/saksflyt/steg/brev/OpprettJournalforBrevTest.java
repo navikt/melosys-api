@@ -17,10 +17,9 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.saksflyt.TestdataFactory;
-import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.brev.TrygdeavtaleTittelService;
+import no.nav.melosys.service.brev.DokumentNavnService;
 import no.nav.melosys.service.dokument.DokgenService;
 import no.nav.melosys.service.dokument.brev.mapper.DokumentproduksjonsInfoMapper;
 import no.nav.melosys.service.persondata.PersondataFasade;
@@ -46,8 +45,6 @@ class OpprettJournalforBrevTest {
     @Mock
     private BehandlingService mockBehandlingService;
     @Mock
-    private LovvalgsperiodeService mockLovvalgsperiodeService;
-    @Mock
     private DokgenService mockDokgenService;
     @Mock
     private UtenlandskMyndighetService mockUtenlandskMyndighetService;
@@ -58,7 +55,7 @@ class OpprettJournalforBrevTest {
     @Mock
     private PersondataFasade mockPersondataFasade;
     @Mock
-    private TrygdeavtaleTittelService mockTrygdeavtaleTittelService;
+    private DokumentNavnService mockDokumentNavnService;
 
     @Captor
     ArgumentCaptor<OpprettJournalpost> opprettJournalpostCaptor;
@@ -67,8 +64,8 @@ class OpprettJournalforBrevTest {
 
     @BeforeEach
     void init() {
-        opprettJournalforBrev = new OpprettJournalforBrev(mockBehandlingService, mockLovvalgsperiodeService, mockDokgenService,
-            mockUtenlandskMyndighetService, mockJoarkFasade, mockPersondataFasade, mockEregFasade, mockTrygdeavtaleTittelService, new FakeUnleash());
+        opprettJournalforBrev = new OpprettJournalforBrev(mockBehandlingService, mockDokgenService,
+            mockUtenlandskMyndighetService, mockJoarkFasade, mockPersondataFasade, mockEregFasade, mockDokumentNavnService, new FakeUnleash());
     }
 
     @Test
@@ -147,7 +144,7 @@ class OpprettJournalforBrevTest {
             .build();
         Prosessinstans prosessinstans = lagProsessinstansMedMottaker(behandling, mottaker, brevbestilling);
 
-        when(mockTrygdeavtaleTittelService.utledDokumentNavn(1L, dokumentproduksjonsInfoMapper.hentDokumentproduksjonsInfo(STORBRITANNIA), mottaker)).thenReturn("Vedtak om medlemskap, Attest for utsendt arbeidstaker");
+        when(mockDokumentNavnService.utledDokumentNavn(behandling, dokumentproduksjonsInfoMapper.hentDokumentproduksjonsInfo(STORBRITANNIA), mottaker)).thenReturn("Vedtak om medlemskap, Attest for utsendt arbeidstaker");
 
         opprettJournalforBrev.utfør(prosessinstans);
 
@@ -156,21 +153,6 @@ class OpprettJournalforBrevTest {
         OpprettJournalpost captured = opprettJournalpostCaptor.getValue();
         assertThat(captured.getHoveddokument().getTittel()).isEqualTo("Vedtak om medlemskap, Attest for utsendt arbeidstaker");
     }
-
-    private Prosessinstans mockStorbritannia(Aktoer mottaker) {
-        Behandling behandling = TestdataFactory.lagBehandling();
-        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
-        when(mockJoarkFasade.opprettJournalpost(any(), anyBoolean())).thenReturn("12234");
-        DokumentproduksjonsInfoMapper dokumentproduksjonsInfoMapper = new DokumentproduksjonsInfoMapper(new FakeUnleash());
-        when(mockDokgenService.hentDokumentInfo(any())).thenReturn(dokumentproduksjonsInfoMapper.hentDokumentproduksjonsInfo(STORBRITANNIA));
-
-        InnvilgelseBrevbestilling brevbestilling = new InnvilgelseBrevbestilling.Builder()
-            .medProduserbartdokument(STORBRITANNIA)
-            .build();
-
-        return lagProsessinstansMedMottaker(behandling, mottaker, brevbestilling);
-    }
-
 
     @Test
     void utførOpprettJournalforMangelbrevTilBruker() {

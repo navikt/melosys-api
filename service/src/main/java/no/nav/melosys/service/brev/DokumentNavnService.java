@@ -1,7 +1,5 @@
 package no.nav.melosys.service.brev;
 
-import java.util.List;
-
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.brev.FastMottakerMedOrgnr;
@@ -20,14 +18,14 @@ import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.STORBRI
 import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk.UK_ART8_2;
 
 @Service
-public class TrygdeavtaleTittelService {
+public class DokumentNavnService {
 
     private final BrevmottakerService brevmottakerService;
     private final DokgenService dokgenService;
     private final LovvalgsperiodeService lovvalgsperiodeService;
     private final BehandlingService behandlingService;
 
-    public TrygdeavtaleTittelService(BehandlingService behandlingService, BrevmottakerService brevmottakerService, DokgenService dokgenService, LovvalgsperiodeService lovvalgsperiodeService) {
+    public DokumentNavnService(BehandlingService behandlingService, BrevmottakerService brevmottakerService, DokgenService dokgenService, LovvalgsperiodeService lovvalgsperiodeService) {
         this.behandlingService = behandlingService;
         this.brevmottakerService = brevmottakerService;
         this.dokgenService = dokgenService;
@@ -35,28 +33,24 @@ public class TrygdeavtaleTittelService {
     }
 
 
-    public String utledDokumentNavnForProduserbaredokumenterOgAktoerRolle(Behandling behandling, Produserbaredokumenter produserbaredokumenter, Aktoersroller mottakerRolle, String fastTekst) {
+    public String utledDokumentNavnForProduserbaredokumenterOgAktoerRolle(Behandling behandling, Produserbaredokumenter produserbaredokumenter, Aktoersroller mottakerRolle) {
         if (!STORBRITANNIA.equals(produserbaredokumenter)) {
-            return fastTekst != null ? fastTekst : produserbaredokumenter.getBeskrivelse();
+            return produserbaredokumenter.getBeskrivelse();
         }
-        List<Aktoer> mottakere = brevmottakerService.avklarMottakere(produserbaredokumenter, Mottaker.av(mottakerRolle), behandling, false, true);
-        if (mottakere.size() > 1) {
-            throw new RuntimeException("Skal bare være en mottaker, men var: " + mottakere.size());
-        }
-        return utledDokumentNavnForProduserbaredokumenterOgAktoer(behandling, produserbaredokumenter, mottakere.get(0), null);
+        Aktoer mottaker = brevmottakerService.avklarMottaker(produserbaredokumenter, Mottaker.av(mottakerRolle), behandling);
+        return utledDokumentNavnForProduserbaredokumenterOgAktoer(behandling, produserbaredokumenter, mottaker, null);
     }
 
-    public String utledDokumentNavnForProduserbaredokumenterOgAktoer(Behandling behandling, Produserbaredokumenter produserbaredokumenter, Aktoer mottaker, String fastTekst) {
+    public String utledDokumentNavnForProduserbaredokumenterOgAktoer(Behandling behandling, Produserbaredokumenter produserbaredokumenter, Aktoer mottaker, String standardTekst) {
         if (!STORBRITANNIA.equals(produserbaredokumenter)) {
-            return fastTekst != null ? fastTekst : produserbaredokumenter.getBeskrivelse();
+            return standardTekst != null ? standardTekst : produserbaredokumenter.getBeskrivelse();
         }
         DokumentproduksjonsInfo dokumentproduksjonsInfo = dokgenService.hentDokumentInfo(produserbaredokumenter);
-        return utledDokumentNavn(behandling.getId(), dokumentproduksjonsInfo, mottaker);
+        return utledDokumentNavn(behandling, dokumentproduksjonsInfo, mottaker);
     }
 
-    public String utledDokumentNavn(long behandlingID, DokumentproduksjonsInfo dokumentproduksjonsInfo, Aktoer mottaker) {
-        String tittel = utledTittel(behandlingID, dokumentproduksjonsInfo, mottaker);
-        Behandling behandling = behandlingService.hentBehandling(behandlingID);
+    public String utledDokumentNavn(Behandling behandling, DokumentproduksjonsInfo dokumentproduksjonsInfo, Aktoer mottaker) {
+        String tittel = utledTittel(behandling, dokumentproduksjonsInfo, mottaker);
 
         if (behandling.erNyVurdering()) {
             return lagEndringTittel(tittel);
@@ -65,7 +59,7 @@ public class TrygdeavtaleTittelService {
         return tittel;
     }
 
-    private String utledTittel(long behandlingID, DokumentproduksjonsInfo dokumentproduksjonsInfo, Aktoer mottaker) {
+    private String utledTittel(Behandling behandling, DokumentproduksjonsInfo dokumentproduksjonsInfo, Aktoer mottaker) {
         if (mottaker.erUtenlandskMyndighet()) {
             return dokumentproduksjonsInfo.vedleggsTitler().get(VedleggTyper.ATTEST);
         }
@@ -76,7 +70,7 @@ public class TrygdeavtaleTittelService {
             return lagKopiTittel(vedtaksbrevTittel);
         }
 
-        boolean erArtikkel8_2 = lovvalgsperiodeService.hentValidertLovvalgsperiode(behandlingID).getBestemmelse() == UK_ART8_2;
+        boolean erArtikkel8_2 = lovvalgsperiodeService.hentValidertLovvalgsperiode(behandling.getId()).getBestemmelse() == UK_ART8_2;
 
         if (mottaker.erOrganisasjon()) {
             return lagKopiTittel(erArtikkel8_2 ? vedtaksbrevTittel : dokumentproduksjonsInfo.journalføringsTittel());
