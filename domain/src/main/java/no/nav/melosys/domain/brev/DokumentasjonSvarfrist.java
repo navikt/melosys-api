@@ -16,7 +16,7 @@ public class DokumentasjonSvarfrist {
     }
 
 
-    public static Instant beregnFristFraDagensDatoVedManuelEndring() {
+    public static Instant beregnFristFraDagensDato() {
         return Instant.now().plus(Period.ofWeeks(DOKUMENTASJON_SVARFRIST_UKER));
     }
 }

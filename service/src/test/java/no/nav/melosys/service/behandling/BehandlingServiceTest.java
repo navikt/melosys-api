@@ -497,25 +497,7 @@ class BehandlingServiceTest {
 
         assertThat(lagretBehandling.getDokumentasjonSvarfristDato()).isNull();
     }
-
-    @Test
-    void oppdaterStatus_statusEndretTilAvventDokPartxx_forventSvarfristPaaToUker() {
-        Behandling behandling = opprettBehandlingUnderBehandling();
-
-
-        behandlingService.endreStatus(behandling, AVVENT_DOK_PART);
-
-
-        verify(behandlingRepo).save(behandlingCaptor.capture());
-        Behandling lagretBehandling = behandlingCaptor.getValue();
-
-        assertThat(lagretBehandling.getDokumentasjonSvarfristDato()).isNotNull();
-        Instant forventetInstant = Instant.now().plus(Period.ofWeeks(2));
-        assertThat(lagretBehandling.getDokumentasjonSvarfristDato())
-            .isBetween(forventetInstant.minusSeconds(60), forventetInstant.plusSeconds(60));
-    }
-
-
+    
     @Test
     void avsluttNyVurderingUtenEndring_avslutterBehandlingOgSetterBehandlingsresultattypeRiktig() {
         Behandling behandling = new Behandling();

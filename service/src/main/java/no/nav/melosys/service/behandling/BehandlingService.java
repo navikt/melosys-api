@@ -208,7 +208,7 @@ public class BehandlingService {
         behandling.setStatus(status);
 
         behandling.setDokumentasjonSvarfristDato(behandling.erVenterForDokumentasjon() ?
-            DokumentasjonSvarfrist.beregnFristFraDagensDatoVedManuelEndring() : null);
+            DokumentasjonSvarfrist.beregnFristFraDagensDato() : null);
 
         behandlingRepository.save(behandling);
 
