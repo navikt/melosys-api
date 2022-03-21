@@ -24,7 +24,6 @@ import no.nav.tjeneste.virksomhet.inntekt.v3.meldinger.HentInntektListeBolkReque
 import no.nav.tjeneste.virksomhet.inntekt.v3.meldinger.HentInntektListeBolkResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -46,21 +45,17 @@ public class InntektService implements InntektFasade {
 
     private static final YearMonth JANUAR_2015 = YearMonth.of(2015, 1);
 
-    @Autowired
     public InntektService(InntektConsumer consumer, DokumentFactory dokumentFactory) {
         this.inntektConsumer = consumer;
         this.dokumentFactory = dokumentFactory;
-
         this.objectFactory = new ObjectFactory();
     }
 
-    // Henter inntekter for én ident fra hentInntektListeBolk for å få opplysninger om frilansforhold (se MELOSYS-1453).
     @Override
     public Saksopplysning hentInntektListe(String personID, YearMonth fom, YearMonth tom) {
 
         HentInntektListeBolkResponse response = hentInntektListeBolkResponse(personID, fom, tom);
 
-        // Response -> xml
         StringWriter xmlWriter = new StringWriter();
         try {
             no.nav.tjeneste.virksomhet.inntekt.v3.HentInntektListeBolkResponse xmlRoot = new no.nav.tjeneste.virksomhet.inntekt.v3.HentInntektListeBolkResponse();
@@ -80,7 +75,6 @@ public class InntektService implements InntektFasade {
         saksopplysning.setType(SaksopplysningType.INNTK);
         saksopplysning.setVersjon(INNTEKT_VERSJON);
 
-        // xml -> java objekter
         dokumentFactory.lagDokument(saksopplysning);
 
         return saksopplysning;

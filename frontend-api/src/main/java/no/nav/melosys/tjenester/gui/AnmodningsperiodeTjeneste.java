@@ -22,7 +22,6 @@ import no.nav.melosys.tjenester.gui.dto.anmodning.AnmodningsperiodePostDto;
 import no.nav.melosys.tjenester.gui.dto.anmodning.AnmodningsperiodeSkrivDto;
 import no.nav.melosys.tjenester.gui.dto.anmodning.AnmodningsperiodeSvarDto;
 import no.nav.security.token.support.core.api.Protected;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.WebApplicationContext;
@@ -37,7 +36,6 @@ public class AnmodningsperiodeTjeneste {
     private final LovvalgsperiodeService lovvalgsperiodeService;
     private final Aksesskontroll aksesskontroll;
 
-    @Autowired
     public AnmodningsperiodeTjeneste(AnmodningsperiodeService anmodningsperiodeService,
                                      LovvalgsperiodeService lovvalgsperiodeService,
                                      Aksesskontroll aksesskontroll) {

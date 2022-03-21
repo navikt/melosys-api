@@ -21,7 +21,6 @@ import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.AVKLAR_ARBEIDSGIVER;
@@ -36,7 +35,6 @@ public class AvklarArbeidsgiver implements StegBehandler {
     private final BehandlingService behandlingService;
     private final BehandlingsresultatService behandlingsresultatService;
 
-    @Autowired
     public AvklarArbeidsgiver(AktoerService aktoerService,
                               AvklarteVirksomheterSystemService avklarteVirksomheterService,
                               BehandlingService behandlingService,

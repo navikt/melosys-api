@@ -11,7 +11,6 @@ import no.nav.melosys.service.unntak.AnmodningUnntakService;
 import no.nav.melosys.tjenester.gui.dto.saksflyt.anmodningunntak.AnmodningUnntakDto;
 import no.nav.melosys.tjenester.gui.dto.saksflyt.anmodningunntak.AnmodningUnntakSvarDto;
 import no.nav.security.token.support.core.api.Protected;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,10 +22,10 @@ import org.springframework.web.context.WebApplicationContext;
 @Api(tags = {"saksflyt", "anmodningsperioder"})
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class AnmodningUnntakTjeneste {
+    
     private final AnmodningUnntakService anmodningUnntakService;
     private final Aksesskontroll aksesskontroll;
 
-    @Autowired
     public AnmodningUnntakTjeneste(AnmodningUnntakService anmodningUnntakService, Aksesskontroll aksesskontroll) {
         this.anmodningUnntakService = anmodningUnntakService;
         this.aksesskontroll = aksesskontroll;

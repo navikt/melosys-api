@@ -60,13 +60,6 @@ class TrygdeavtaleServiceTest {
     private final static LocalDate PERIODE_FOM = LocalDate.now();
     private final static LocalDate PERIODE_TOM = PERIODE_FOM.plusYears(1);
 
-    private static final String EKTEFELLE_FNR = "01108049800";
-    private static final String BARN1_FNR = "01100099728";
-    private static final String BARN2_FNR = "02109049878";
-    private static final String BARN_NAVN_1 = "Doffen Duck";
-    private static final String BARN_NAVN_2 = "Dole Duck";
-    private static final String EKTEFELLE_NAVN = "Dolly Duck";
-
     @Mock
     private EregFasade eregFasade;
     @Mock
@@ -93,6 +86,7 @@ class TrygdeavtaleServiceTest {
     @Test
     void overførResultat_altOk_lagresKorrekt() {
         var trygdeavtaleResultat = lagTrygdeavtaleAltFyltUtResultat();
+        when(lovvalgsperiodeService.hentLovvalgsperioder(anyLong())).thenReturn(List.of());
 
         trygdeavtaleService.overførResultat(1L, trygdeavtaleResultat);
 
@@ -118,22 +112,78 @@ class TrygdeavtaleServiceTest {
         assertThat(lovvalgsperioderArgumentCaptor.getValue())
             .hasSize(1)
             .flatExtracting(
+                Lovvalgsperiode::getId,
                 Lovvalgsperiode::getFom,
                 Lovvalgsperiode::getTom,
                 Lovvalgsperiode::getMedlemskapstype,
                 Lovvalgsperiode::getDekning,
                 Lovvalgsperiode::getInnvilgelsesresultat,
                 Lovvalgsperiode::getBestemmelse,
-                Lovvalgsperiode::getLovvalgsland
+                Lovvalgsperiode::getLovvalgsland,
+                Lovvalgsperiode::getMedlPeriodeID
             )
             .containsExactly(
+                null,
                 trygdeavtaleResultat.lovvalgsperiodeFom(),
                 trygdeavtaleResultat.lovvalgsperiodeTom(),
                 PLIKTIG,
                 FULL_DEKNING_FTRL,
                 INNVILGET,
                 Lovvalgbestemmelser_trygdeavtale_uk.valueOf(trygdeavtaleResultat.bestemmelse()),
-                Landkoder.NO
+                Landkoder.NO,
+                null
+            );
+    }
+
+    @Test
+    void overførResultat_lovvalgperiodeFinnesGrunnetNyVurdering_lagresKorrekt() {
+        var trygdeavtaleResultat = lagTrygdeavtaleAltFyltUtResultat();
+        when(lovvalgsperiodeService.hentLovvalgsperioder(anyLong())).thenReturn(List.of(lagLovvalgsperiode()));
+
+        trygdeavtaleService.overførResultat(1L, trygdeavtaleResultat);
+
+        verify(avklarteMedfolgendeFamilieService).lagreMedfolgendeFamilieSomAvklartefakta(eq(1L), avklarteMedfolgendeFamilieArgumentCaptor.capture());
+        verify(avklarteVirksomheterService).lagreVirksomheterSomAvklartefakta(1L, List.of(ORGNR_1));
+        verify(lovvalgsperiodeService).lagreLovvalgsperioder(eq(1L), lovvalgsperioderArgumentCaptor.capture());
+
+        assertThat(avklarteMedfolgendeFamilieArgumentCaptor.getValue().getFamilieIkkeOmfattetAvNorskTrygd())
+            .isNotNull()
+            .flatExtracting(
+                IkkeOmfattetFamilie::getUuid,
+                IkkeOmfattetFamilie::getBegrunnelse,
+                IkkeOmfattetFamilie::getBegrunnelseFritekst)
+            .containsExactlyInAnyOrder(
+                UUID_BARN_1, OVER_18_AR.getKode(), BEGRUNNELSE_BARN,
+                UUID_EKTEFELLE, EGEN_INNTEKT.getKode(), BEGRUNNELSE_SAMBOER
+            );
+        assertThat(avklarteMedfolgendeFamilieArgumentCaptor.getValue().getFamilieOmfattetAvNorskTrygd())
+            .hasSize(1)
+            .flatExtracting(OmfattetFamilie::getUuid)
+            .containsExactly(UUID_BARN_2);
+
+        assertThat(lovvalgsperioderArgumentCaptor.getValue())
+            .hasSize(1)
+            .flatExtracting(
+                Lovvalgsperiode::getId,
+                Lovvalgsperiode::getFom,
+                Lovvalgsperiode::getTom,
+                Lovvalgsperiode::getMedlemskapstype,
+                Lovvalgsperiode::getDekning,
+                Lovvalgsperiode::getInnvilgelsesresultat,
+                Lovvalgsperiode::getBestemmelse,
+                Lovvalgsperiode::getLovvalgsland,
+                Lovvalgsperiode::getMedlPeriodeID
+            )
+            .containsExactly(
+                11L,
+                trygdeavtaleResultat.lovvalgsperiodeFom(),
+                trygdeavtaleResultat.lovvalgsperiodeTom(),
+                PLIKTIG,
+                FULL_DEKNING_FTRL,
+                INNVILGET,
+                Lovvalgbestemmelser_trygdeavtale_uk.valueOf(trygdeavtaleResultat.bestemmelse()),
+                Landkoder.NO,
+                111L
             );
     }
 
@@ -303,9 +353,11 @@ class TrygdeavtaleServiceTest {
 
     private Lovvalgsperiode lagLovvalgsperiode() {
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
+        lovvalgsperiode.setId(11L);
         lovvalgsperiode.setBestemmelse(UK_ART6_1);
         lovvalgsperiode.setFom(PERIODE_FOM);
         lovvalgsperiode.setTom(PERIODE_TOM);
+        lovvalgsperiode.setMedlPeriodeID(111L);
         return lovvalgsperiode;
     }
 

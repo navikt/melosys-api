@@ -6,19 +6,15 @@ import java.util.Comparator;
 public interface HarMetadata {
     Metadata metadata();
 
-    default boolean erGyldigFør(LocalDateTime tidspunkt) {
-        return metadata().endringer().stream()
-            .filter(e -> e.registrert().isBefore(tidspunkt))
-            .max(Comparator.comparing(Endring::registrert))
-            .filter(Endring::erIkkeOpphør)
-            .isPresent();
-    }
-
     default boolean erGyldig() {
         return metadata().endringer().stream()
             .max(Comparator.comparing(Endring::registrert))
             .filter(Endring::erIkkeOpphør)
             .isPresent();
+    }
+
+    default boolean erIkkeHistorisk() {
+        return !metadata().historisk();
     }
 
     default LocalDateTime hentDatoSistRegistrert() {

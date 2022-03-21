@@ -1,29 +1,30 @@
 package no.nav.melosys.service.dokument.brev;
 
 import java.time.Instant;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Optional;
 
-import no.finn.unleash.FakeUnleash;
 import no.nav.dok.brevdata.felles.v1.navfelles.Mottaker;
 import no.nav.dok.brevdata.felles.v1.navfelles.Organisasjon;
 import no.nav.dok.brevdata.felles.v1.navfelles.Person;
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
-import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Representerer;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.doksys.DokumentbestillingMetadata;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.UtenlandskMyndighetRepository;
 import no.nav.melosys.service.ldap.SaksbehandlerService;
 import no.nav.melosys.service.persondata.PersondataFasade;
+import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,8 +36,9 @@ import org.w3c.dom.Element;
 
 import static java.util.Arrays.asList;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
-import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.*;
+import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagStrukturertAdresse;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -63,7 +65,7 @@ class BrevDataServiceTest {
     @BeforeEach
     public void setUp() {
         service = spy(new BrevDataService(behandlingsresultatRepository, persondataFasade, saksbehandlerService,
-                utenlandskMyndighetRepository, new FakeUnleash()));
+            utenlandskMyndighetRepository));
 
         when(behandlingsresultatRepository.findById(anyLong())).thenReturn(Optional.of(new Behandlingsresultat()));
         when(saksbehandlerService.hentNavnForIdent(anyString())).thenReturn("Joe Moe");
@@ -83,13 +85,14 @@ class BrevDataServiceTest {
 
     @Test
     void lagA1_tilUtenlandskMyndighet() {
-        Behandling behandling = lagBehandling(lagSaksopplysninger(), lagSøknadDokument());
+        Behandling behandling = lagBehandling(lagSøknadDokument());
         String institusjonID = "HR:Zxcd";
         Aktoer aktoerMyndighet = lagAktoerMyndighet(institusjonID);
         behandling.getFagsak().getAktører().add(aktoerMyndighet);
         BrevDataVedlegg brevData = new BrevDataVedlegg("Z123456");
         UtenlandskMyndighet myndighet = lagUtenlandskMyndighet();
-        DokumentbestillingMetadata metadata = service.lagBestillingMetadata(ATTEST_A1, aktoerMyndighet, null, behandling, brevData);
+        DokumentbestillingMetadata metadata = service.lagBestillingMetadata(ATTEST_A1, aktoerMyndighet, null,
+            behandling, brevData);
 
         assertThat(metadata.brukerID).isEqualTo(FNR);
         assertThat(metadata.mottakerID).isEqualTo(institusjonID);
@@ -123,18 +126,32 @@ class BrevDataServiceTest {
     }
 
     @Test
+    void lagMottaker_personUtenRegistrertAdresseGirFunksjonellException() {
+        Behandling behandling = lagBehandling(lagSøknadDokumentTomAdresse());
+        Aktoer aktoer = lagAktør(Aktoersroller.BRUKER);
+        when(persondataFasade.hentPerson(anyString())).thenReturn(PersonopplysningerObjectFactory.lagPersonopplysningerUtenAdresser());
+
+        assertThatExceptionOfType(FunksjonellException.class).isThrownBy(
+            () -> service.lagMottaker(aktoer, null, behandling)).withMessageContaining(
+            Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE.getBeskrivelse());
+    }
+
+    @Test
     void lagForvaltningsmelding_representantErNull_tilBruker() {
-        Behandling behandling = lagBehandling(lagSaksopplysninger(), lagSøknadDokument());
+        Behandling behandling = lagBehandling(lagSøknadDokument());
         BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingRequest());
         brevData.initierendeJournalpostForsendelseMottattTidspunkt = Instant.now();
         Aktoer mottaker = lagAktør(Aktoersroller.BRUKER);
+        when(persondataFasade.hentPerson(anyString())).thenReturn(PersonopplysningerObjectFactory.lagPersonopplysninger());
 
-        DokumentbestillingMetadata metadata = service.lagBestillingMetadata(MELDING_FORVENTET_SAKSBEHANDLINGSTID, mottaker, null, behandling, brevData);
+        DokumentbestillingMetadata metadata = service.lagBestillingMetadata(MELDING_FORVENTET_SAKSBEHANDLINGSTID,
+            mottaker, null, behandling, brevData);
 
         assertThat(metadata.brukerID).isEqualTo(FNR);
         assertThat(metadata.mottakerID).isEqualTo(FNR);
 
-        Element element = service.lagBrevXML(MELDING_FORVENTET_SAKSBEHANDLINGSTID, mottaker, null, behandling, brevData);
+        Element element = service.lagBrevXML(MELDING_FORVENTET_SAKSBEHANDLINGSTID, mottaker, null, behandling,
+            brevData);
         assertThat(element).isNotNull();
     }
 
@@ -155,7 +172,7 @@ class BrevDataServiceTest {
     @Test
     void lagForvaltningsmelding_representantIkkeNull_tilRepresentant() {
 
-        Behandling behandling = lagBehandling(lagSaksopplysninger(), lagSøknadDokument());
+        Behandling behandling = lagBehandling(lagSøknadDokument());
         behandling.getFagsak().getAktører().add(hentRepresentantAktør());
 
         BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingRequest());
@@ -163,26 +180,30 @@ class BrevDataServiceTest {
 
         Aktoer mottaker = lagAktør(Aktoersroller.REPRESENTANT);
 
-        DokumentbestillingMetadata metadata = service.lagBestillingMetadata(MELDING_FORVENTET_SAKSBEHANDLINGSTID, mottaker, null, behandling, brevData);
+        DokumentbestillingMetadata metadata = service.lagBestillingMetadata(MELDING_FORVENTET_SAKSBEHANDLINGSTID,
+            mottaker, null, behandling, brevData);
 
         assertThat(metadata.brukerID).isEqualTo(FNR);
         assertThat(metadata.mottakerID).isEqualTo(REP_ORGNR);
 
-        Element element = service.lagBrevXML(MELDING_FORVENTET_SAKSBEHANDLINGSTID, mottaker, null, behandling, brevData);
+        Element element = service.lagBrevXML(MELDING_FORVENTET_SAKSBEHANDLINGSTID, mottaker, null, behandling,
+            brevData);
         assertThat(element).isNotNull();
 
     }
 
     @Test
     void lagMangelbrevXml_mottakerErbrukerID() {
-        Behandling behandling = lagBehandling(lagSaksopplysninger(), lagSøknadDokument());
+        Behandling behandling = lagBehandling(lagSøknadDokument());
         BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingRequest());
         brevData.initierendeJournalpostForsendelseMottattTidspunkt = Instant.now();
+        when(persondataFasade.hentPerson(anyString())).thenReturn(PersonopplysningerObjectFactory.lagPersonopplysninger());
 
         Aktoer mottakerAktør = lagAktør(Aktoersroller.BRUKER);
         brevData.fritekst = "Test";
 
-        DokumentbestillingMetadata metadata = service.lagBestillingMetadata(MELDING_MANGLENDE_OPPLYSNINGER, mottakerAktør, null, behandling, brevData);
+        DokumentbestillingMetadata metadata = service.lagBestillingMetadata(MELDING_MANGLENDE_OPPLYSNINGER,
+            mottakerAktør, null, behandling, brevData);
 
         assertThat(metadata.brukerID).isEqualTo(FNR);
         assertThat(metadata.mottakerID).isEqualTo(FNR);
@@ -201,14 +222,15 @@ class BrevDataServiceTest {
 
     @Test
     void lagMangelbrevXml_mottakerErArbeidsgiver() {
-        Behandling behandling = lagBehandling(lagSaksopplysninger(), lagSøknadDokument());
+        Behandling behandling = lagBehandling(lagSøknadDokument());
         BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingRequest());
         brevData.initierendeJournalpostForsendelseMottattTidspunkt = Instant.now();
 
         Aktoer mottakerAktør = lagAktør(Aktoersroller.ARBEIDSGIVER);
         brevData.fritekst = "Test";
 
-        DokumentbestillingMetadata metadata = service.lagBestillingMetadata(MELDING_MANGLENDE_OPPLYSNINGER, mottakerAktør, null, behandling, brevData);
+        DokumentbestillingMetadata metadata = service.lagBestillingMetadata(MELDING_MANGLENDE_OPPLYSNINGER,
+            mottakerAktør, null, behandling, brevData);
 
         assertThat(metadata.brukerID).isEqualTo(FNR);
         assertThat(metadata.mottakerID).isEqualTo(ORGNR);
@@ -226,7 +248,8 @@ class BrevDataServiceTest {
 
     @Test
     void lagBrevXml_medBrukerMedAdresseIRegister_skalBerikes() {
-        Behandling behandling = lagBehandling(lagSaksopplysninger(), lagSøknadDokument());
+        Behandling behandling = lagBehandling(lagSøknadDokument());
+        when(persondataFasade.hentPerson(anyString())).thenReturn(PersonopplysningerObjectFactory.lagPersonopplysninger());
 
         BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingRequest());
         brevData.initierendeJournalpostForsendelseMottattTidspunkt = Instant.now();
@@ -239,7 +262,8 @@ class BrevDataServiceTest {
 
     @Test
     void lagBrevXml_medBrukerUtenAdresseIRegister_skalIkkeBerikes() {
-        Behandling behandling = lagBehandling(lagSaksopplysningerUtenAdresseIRegister(), lagSøknadDokument());
+        Behandling behandling = lagBehandling(lagSøknadDokument());
+        when(persondataFasade.hentPerson(anyString())).thenReturn(PersonopplysningerObjectFactory.lagPersonopplysninger());
 
         BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingRequest());
         brevData.initierendeJournalpostForsendelseMottattTidspunkt = Instant.now();
@@ -251,28 +275,28 @@ class BrevDataServiceTest {
     }
 
     @Test
-    void lagMetadataForInnvilgelsesbrevAngirDokTypeLikInnvilgelseYrkesaktiv() throws Exception {
+    void lagMetadataForInnvilgelsesbrevAngirDokTypeLikInnvilgelseYrkesaktiv() {
         testLagDokumentMetadata(INNVILGELSE_YRKESAKTIV, Aktoersroller.BRUKER);
     }
 
     @Test
-    void lagMetadataForMangelbrevAngirDokTypeLikMangelbrev() throws Exception {
+    void lagMetadataForMangelbrevAngirDokTypeLikMangelbrev() {
         testLagDokumentMetadata(MELDING_MANGLENDE_OPPLYSNINGER, Aktoersroller.ARBEIDSGIVER);
     }
 
     @Test
-    void lagMetadataForMangelbrevAngirDokTypeLikHenleggelse() throws Exception {
+    void lagMetadataForMangelbrevAngirDokTypeLikHenleggelse() {
         testLagDokumentMetadata(MELDING_HENLAGT_SAK, Aktoersroller.BRUKER);
     }
 
     @Test
-    void lagMetadataForInnvilgelseArbeidsgiverBrevAngirDokTypeLikArbeidsgiver() throws Exception {
+    void lagMetadataForInnvilgelseArbeidsgiverBrevAngirDokTypeLikArbeidsgiver() {
         testLagDokumentMetadata(INNVILGELSE_ARBEIDSGIVER, Aktoersroller.ARBEIDSGIVER);
     }
 
     @Test
     void avklarMottakerId_representantOgKontaktOpplysningFinnes_kontaktOpplysningForRepresentantBrukes() {
-        Behandling behandling = lagBehandling(lagSaksopplysninger(), lagSøknadDokument());
+        Behandling behandling = lagBehandling(lagSøknadDokument());
         behandling.getFagsak().getAktører().add(hentRepresentantAktør());
 
         Kontaktopplysning kontaktopplysning = new Kontaktopplysning();
@@ -284,7 +308,8 @@ class BrevDataServiceTest {
         Aktoer mottaker = lagAktør(Aktoersroller.REPRESENTANT);
         brevData.fritekst = "Test";
 
-        DokumentbestillingMetadata metadata = service.lagBestillingMetadata(MELDING_MANGLENDE_OPPLYSNINGER, mottaker, kontaktopplysning, behandling, brevData);
+        DokumentbestillingMetadata metadata = service.lagBestillingMetadata(MELDING_MANGLENDE_OPPLYSNINGER, mottaker,
+            kontaktopplysning, behandling, brevData);
 
         assertThat(metadata.brukerID).isEqualTo(FNR);
         assertThat(metadata.mottakerID).isEqualTo("KONTAKTORG_999");
@@ -295,21 +320,16 @@ class BrevDataServiceTest {
         assertThat(metadata.mottakerID).isEqualTo(REP_ORGNR);
     }
 
-    private Collection<Saksopplysning> lagSaksopplysningerUtenAdresseIRegister() {
-        Collection<Saksopplysning> saksopplysninger = new HashSet<>();
-        saksopplysninger.add(lagPersonsaksopplysning(new PersonDokument()));
-        return saksopplysninger;
-    }
-
     @Test
     void lagBestillingMetadata_medBrukerMottakerOgBrukerUtenAdresseIRegister_skalHaBrukernavnOgPostadresse() {
-        Collection<Saksopplysning> saksopplysninger = lagSaksopplysningerUtenAdresseIRegister();
+        when(persondataFasade.hentPerson(anyString())).thenReturn(PersonopplysningerObjectFactory.lagPersonopplysningerUtenAdresser());
 
-        Behandling behandling = lagBehandling(saksopplysninger, lagSøknadDokument());
+        Behandling behandling = lagBehandling(lagSøknadDokument());
         BrevData brevData = new BrevData("Z123456");
 
         Aktoer mottaker = lagAktør(Aktoersroller.BRUKER);
-        DokumentbestillingMetadata metadata = service.lagBestillingMetadata(MELDING_MANGLENDE_OPPLYSNINGER, mottaker, null, behandling, brevData);
+        DokumentbestillingMetadata metadata = service.lagBestillingMetadata(MELDING_MANGLENDE_OPPLYSNINGER, mottaker,
+            null, behandling, brevData);
         assertThat(metadata.postadresse.getGatenavn()).isEqualTo("Strukturert Gate");
         assertThat(metadata.brukerNavn).isEqualTo(sammensattNavn);
         assertThat(metadata.berik).isFalse();
@@ -317,12 +337,13 @@ class BrevDataServiceTest {
 
     @Test
     void lagBestillingMetadata_medBrukerMedAdresseIRegister_skalIkkeHaBrukerNavnEllerPostAdresse() {
-        Collection<Saksopplysning> saksopplysninger = lagSaksopplysninger();
-        Behandling behandling = lagBehandling(saksopplysninger, lagSøknadDokument());
+        Behandling behandling = lagBehandling(lagSøknadDokument());
         BrevData brevData = new BrevData("Z123456");
-
         Aktoer mottaker = lagAktør(Aktoersroller.BRUKER);
-        DokumentbestillingMetadata metadata = service.lagBestillingMetadata(MELDING_MANGLENDE_OPPLYSNINGER, mottaker, null, behandling, brevData);
+        when(persondataFasade.hentPerson(anyString())).thenReturn(PersonopplysningerObjectFactory.lagPersonopplysninger());
+
+        DokumentbestillingMetadata metadata = service.lagBestillingMetadata(MELDING_MANGLENDE_OPPLYSNINGER, mottaker,
+            null, behandling, brevData);
         assertThat(metadata.postadresse).isNull();
         assertThat(metadata.brukerNavn).isNull();
         assertThat(metadata.berik).isTrue();
@@ -330,11 +351,12 @@ class BrevDataServiceTest {
 
     @Test
     void lagBestillingMetadata_medUtenlandskMyndighet_skalUtfyllesMedBrukerNavn() {
-        Behandling behandling = lagBehandling(lagSaksopplysninger(), lagSøknadDokument());
+        Behandling behandling = lagBehandling(lagSøknadDokument());
         BrevData brevData = new BrevData("Z123456");
 
         Aktoer mottaker = lagAktør(Aktoersroller.TRYGDEMYNDIGHET);
-        DokumentbestillingMetadata metadata = service.lagBestillingMetadata(MELDING_MANGLENDE_OPPLYSNINGER, mottaker, null, behandling, brevData);
+        DokumentbestillingMetadata metadata = service.lagBestillingMetadata(MELDING_MANGLENDE_OPPLYSNINGER, mottaker,
+            null, behandling, brevData);
         assertThat(metadata.postadresse).isNull();
         assertThat(metadata.brukerNavn).isEqualTo(sammensattNavn);
         assertThat(metadata.utenlandskMyndighet).isNotNull();
@@ -352,8 +374,9 @@ class BrevDataServiceTest {
         Aktoer mottaker = lagAktør(Aktoersroller.ARBEIDSGIVER);
         brevData.fritekst = "Test";
 
-        Behandling behandling = lagBehandling(lagSaksopplysninger(), lagSøknadDokument());
-        DokumentbestillingMetadata metadata = service.lagBestillingMetadata(MELDING_MANGLENDE_OPPLYSNINGER, mottaker, kontaktopplysning, behandling, brevData);
+        Behandling behandling = lagBehandling(lagSøknadDokument());
+        DokumentbestillingMetadata metadata = service.lagBestillingMetadata(MELDING_MANGLENDE_OPPLYSNINGER, mottaker,
+            kontaktopplysning, behandling, brevData);
         assertThat(metadata.mottakerID).isEqualTo("KONTAKTORG_999");
 
         metadata = service.lagBestillingMetadata(MELDING_MANGLENDE_OPPLYSNINGER, mottaker, null, behandling, brevData);
@@ -361,19 +384,20 @@ class BrevDataServiceTest {
         assertThat(metadata.berik).isTrue();
     }
 
-    private void testLagDokumentMetadata(Produserbaredokumenter doktype, Aktoersroller rolle) throws Exception {
+    private void testLagDokumentMetadata(Produserbaredokumenter doktype, Aktoersroller rolle) {
+        when(persondataFasade.hentPerson(anyString())).thenReturn(PersonopplysningerObjectFactory.lagPersonopplysninger());
         testLagDokumentMetadata(doktype, lagAktør(rolle), rolle);
     }
 
-    private void testLagDokumentMetadata(Produserbaredokumenter doktype, Aktoer mottaker, Aktoersroller rolle) throws Exception {
-        DokumentbestillingMetadata resultat = service.lagBestillingMetadata(
-            doktype, mottaker, null, lagBehandling(lagSaksopplysninger(), lagSøknadDokument()), lagBrevData()
-        );
+    private void testLagDokumentMetadata(Produserbaredokumenter doktype, Aktoer mottaker, Aktoersroller rolle) {
+        DokumentbestillingMetadata resultat = service.lagBestillingMetadata(doktype, mottaker, null,
+            lagBehandling(lagSøknadDokument()), lagBrevData());
         DokumentbestillingMetadata forventet = lagDokumentbestillingMetadata(doktype, rolle);
         assertThat(resultat).usingRecursiveComparison().isEqualTo(forventet);
     }
 
-    private static DokumentbestillingMetadata lagDokumentbestillingMetadata(Produserbaredokumenter doktype, Aktoersroller rolle) {
+    private static DokumentbestillingMetadata lagDokumentbestillingMetadata(Produserbaredokumenter doktype,
+                                                                            Aktoersroller rolle) {
         DokumentbestillingMetadata forventet = new DokumentbestillingMetadata();
         forventet.brukerID = FNR;
         forventet.mottaker = lagAktør(rolle);
@@ -399,7 +423,7 @@ class BrevDataServiceTest {
         return brevDataDto;
     }
 
-    private static Behandling lagBehandling(Collection<Saksopplysning> saksopplysninger, BehandlingsgrunnlagData behandlingsgrunnlagData) {
+    private static Behandling lagBehandling(BehandlingsgrunnlagData behandlingsgrunnlagData) {
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer("MOCK-1");
         fagsak.setGsakSaksnummer(123L);
@@ -423,17 +447,7 @@ class BrevDataServiceTest {
         behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
         behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(behandlingsgrunnlagData);
 
-        behandling.getSaksopplysninger().addAll(saksopplysninger);
         return behandling;
-    }
-
-    private Collection<Saksopplysning> lagSaksopplysninger() {
-        Collection<Saksopplysning> saksopplysninger = new HashSet<>();
-
-        PersonDokument person = new PersonDokument();
-        person.setBostedsadresse(lagBostedsadresse());
-        saksopplysninger.add(lagPersonsaksopplysning(person));
-        return saksopplysninger;
     }
 
     private static Aktoer hentRepresentantAktør() {
@@ -449,4 +463,11 @@ class BrevDataServiceTest {
         søknad.bosted.oppgittAdresse = lagStrukturertAdresse();
         return søknad;
     }
+
+    private Soeknad lagSøknadDokumentTomAdresse() {
+        Soeknad soeknad = new Soeknad();
+        soeknad.bosted.oppgittAdresse = new StrukturertAdresse();
+        return soeknad;
+    }
+
 }

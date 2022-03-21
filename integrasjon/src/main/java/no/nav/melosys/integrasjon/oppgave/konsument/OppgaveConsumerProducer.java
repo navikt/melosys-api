@@ -2,7 +2,6 @@ package no.nav.melosys.integrasjon.oppgave.konsument;
 
 import no.nav.melosys.integrasjon.felles.SystemContextExchangeFilter;
 import no.nav.melosys.integrasjon.felles.UserContextExchangeFilter;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -17,7 +16,6 @@ public class OppgaveConsumerProducer {
 
     private final String url;
 
-    @Autowired
     public OppgaveConsumerProducer(@Value("${OppgaveAPI_v1.url}") String url) {
         this.url = url;
     }
@@ -39,10 +37,10 @@ public class OppgaveConsumerProducer {
     public OppgaveConsumer oppgaveSystemConsumer(WebClient.Builder webClientBuilder, SystemContextExchangeFilter systemContextExchangeFilter) {
         return new OppgaveConsumerImpl(
             webClientBuilder
-            .filter(systemContextExchangeFilter)
-            .defaultHeaders(this::defaultHeaders)
-            .baseUrl(url)
-            .build()
+                .filter(systemContextExchangeFilter)
+                .defaultHeaders(this::defaultHeaders)
+                .baseUrl(url)
+                .build()
         );
     }
 

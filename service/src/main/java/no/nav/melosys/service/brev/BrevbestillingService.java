@@ -7,7 +7,6 @@ import java.util.List;
 import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.domain.Kontaktopplysning;
 import no.nav.melosys.domain.brev.FastMottakerMedOrgnr;
 import no.nav.melosys.domain.brev.Mottaker;
@@ -17,7 +16,6 @@ import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
-import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.dokgen.DokgenAdresseMapper;
@@ -29,10 +27,7 @@ import no.nav.melosys.service.dokument.DokumentServiceFasade;
 import no.nav.melosys.service.dokument.MuligMottakerDto;
 import no.nav.melosys.service.dokument.MuligeMottakereDto;
 import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
-import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.persondata.PersondataFasade;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -61,22 +56,19 @@ public class BrevbestillingService {
     private final BrevmottakerService brevmottakerService;
     private final BehandlingService behandlingService;
     private final EregFasade eregFasade;
-    private final KodeverkService kodeverkService;
     private final KontaktopplysningService kontaktopplysningService;
     private final PersondataFasade persondataFasade;
     private final DokumentNavnService dokumentNavnService;
     private final Unleash unleash;
 
-    @Autowired
     public BrevbestillingService(BrevmottakerService brevmottakerService, DokumentServiceFasade dokumentServiceFasade,
-                                 BehandlingService behandlingService, EregFasade eregFasade, KodeverkService kodeverkService,
+                                 BehandlingService behandlingService, EregFasade eregFasade,
                                  KontaktopplysningService kontaktopplysningService, PersondataFasade persondataFasade,
                                  DokumentNavnService dokumentNavnService, Unleash unleash) {
         this.brevmottakerService = brevmottakerService;
         this.dokumentServiceFasade = dokumentServiceFasade;
         this.behandlingService = behandlingService;
         this.eregFasade = eregFasade;
-        this.kodeverkService = kodeverkService;
         this.kontaktopplysningService = kontaktopplysningService;
         this.persondataFasade = persondataFasade;
         this.dokumentNavnService = dokumentNavnService;
@@ -250,7 +242,7 @@ public class BrevbestillingService {
         OrganisasjonDokument orgDokument = null;
 
         if (mottaker.getRolle() == BRUKER) {
-            persondata = hentPersondata(behandling);
+            persondata = persondataFasade.hentPerson(behandling.getFagsak().hentAktørID());
         } else if (mottaker.getRolle() == ARBEIDSGIVER || mottaker.getRolle() == Aktoersroller.REPRESENTANT) {
             kontaktopplysning = kontaktopplysningService.hentKontaktopplysning(behandling.getFagsak().getSaksnummer(),
                 mottaker.getOrgnr()).orElse(null);
@@ -272,26 +264,11 @@ public class BrevbestillingService {
     }
 
     private String mapPoststed(Persondata persondata) {
-        final String poststed;
         Postadresse postadresse = persondata.hentGjeldendePostadresse();
         if (postadresse == null) {
             return null;
         }
-        poststed = postadresse.poststed();
-        if (unleash.isEnabled("melosys.pdl.aktiv")) {
-            return poststed;
-        }
-        return StringUtils.isEmpty(poststed)
-            ? kodeverkService.dekod(FellesKodeverk.POSTNUMMER, postadresse.postnr())
-            : poststed;
-    }
-
-    private Persondata hentPersondata(Behandling behandling) {
-        if (unleash.isEnabled("melosys.pdl.aktiv")) {
-            return persondataFasade.hentPerson(behandling.getFagsak().hentAktørID());
-        }
-        return (Persondata) persondataFasade.hentPersonFraTps(behandling.hentPersonDokument().hentFolkeregisterident(),
-            Informasjonsbehov.STANDARD).getDokument();
+        return postadresse.poststed();
     }
 
     @Transactional

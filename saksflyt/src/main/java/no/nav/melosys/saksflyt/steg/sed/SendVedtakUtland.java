@@ -24,7 +24,6 @@ import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.utpeking.UtpekingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
@@ -41,7 +40,6 @@ public class SendVedtakUtland extends AbstraktSendUtland {
     private final SedSomBrevService sedSomBrevService;
     private final UtpekingService utpekingService;
 
-    @Autowired
     public SendVedtakUtland(@Qualifier("system") EessiService eessiService,
                             BehandlingService behandlingService,
                             BehandlingsresultatService behandlingsresultatService,
@@ -93,7 +91,7 @@ public class SendVedtakUtland extends AbstraktSendUtland {
         Long behandlingID = prosessinstans.getBehandling().getId();
         var behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
         return new DoksysBrevbestilling.Builder().medProduserbartDokument(ATTEST_A1)
-            .medAvsenderNavn(hentSaksbehandler(prosessinstans))
+            .medAvsenderID(hentSaksbehandler(prosessinstans))
             .medMottakere(Mottaker.av(TRYGDEMYNDIGHET))
             .medBehandling(behandling)
             .medBegrunnelseKode(hentBegrunnelsekodeTilForkortetPeriode(prosessinstans))

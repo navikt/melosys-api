@@ -64,16 +64,10 @@ public class HenleggFagsakService {
         if (aktivBehandling.erNyVurdering() && unleash.isEnabled("melosys.behandling.AVSLUTTE_UTEN_ENDRING")) {
             behandlingService.avsluttNyVurdering(aktivBehandling.getId(), Behandlingsresultattyper.HENLEGGELSE);
         } else {
-            henleggFagsakEllerBehandling(fagsak);
+            fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.HENLAGT);
         }
-    }
-
-    private void henleggFagsakEllerBehandling(Fagsak fagsak) {
-        Behandling aktivBehandling = fagsak.hentAktivBehandling();
-
-        fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.HENLAGT);
         prosessinstansService.opprettProsessinstansFagsakHenlagt(aktivBehandling);
-        oppgaveService.ferdigstillOppgaveMedSaksnummer(aktivBehandling.getFagsak().getSaksnummer());
+        oppgaveService.ferdigstillOppgaveMedSaksnummer(fagsak.getSaksnummer());
     }
 
     private void oppdaterBehandlingsresultat(long behandlingID, Henleggelsesgrunner begrunnelseKode, String fritekst) {
@@ -95,11 +89,16 @@ public class HenleggFagsakService {
         Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
         Behandling aktivBehandling = fagsak.hentAktivBehandling();
 
-        if (aktivBehandling.erNyVurdering() && unleash.isEnabled("melosys.behandling.AVSLUTTE_UTEN_ENDRING") ) {
-            behandlingService.avsluttNyVurdering(aktivBehandling.getId(), Behandlingsresultattyper.HENLEGGELSE_BORTFALT);
+        if (aktivBehandling.erNyVurdering() && unleash.isEnabled("melosys.behandling.AVSLUTTE_UTEN_ENDRING")) {
+            henleggBehandlingSomBortfalt(aktivBehandling.getId(), saksnummer);
         } else {
             henleggSakSomBortfalt(fagsak);
         }
+    }
+
+    private void henleggBehandlingSomBortfalt(long behandlingId, String saksnummer) {
+        behandlingService.avsluttNyVurdering(behandlingId, Behandlingsresultattyper.HENLEGGELSE_BORTFALT);
+        oppgaveService.ferdigstillOppgaveMedSaksnummer(saksnummer);
     }
 
     private void henleggSakSomBortfalt(Fagsak fagsak) {

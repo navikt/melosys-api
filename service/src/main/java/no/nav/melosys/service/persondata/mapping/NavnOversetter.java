@@ -15,7 +15,9 @@ public final class NavnOversetter {
     }
 
     public static Navn oversett(Collection<no.nav.melosys.integrasjon.pdl.dto.person.Navn> navnListe) {
-        final var navn = navnListe.stream().max(Comparator.comparing(HarMetadata::hentDatoSistRegistrert))
+        final var navn = navnListe.stream()
+            .filter(HarMetadata::erIkkeHistorisk)
+            .max(Comparator.comparing(HarMetadata::hentDatoSistRegistrert))
             .orElseThrow(() -> new FunksjonellException("Navn forventes tilgengelig på alle personer."));
         return new Navn(navn.fornavn(), navn.mellomnavn(), navn.etternavn());
     }

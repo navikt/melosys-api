@@ -13,7 +13,6 @@ import no.nav.melosys.integrasjon.sakogbehandling.behandlingstatus.BehandlingSta
 import no.nav.melosys.integrasjon.sakogbehandling.behandlingstatus.BehandlingstatusClient;
 import no.nav.tjeneste.virksomhet.sakogbehandling.v1.meldinger.FinnSakOgBehandlingskjedeListeRequest;
 import no.nav.tjeneste.virksomhet.sakogbehandling.v1.meldinger.FinnSakOgBehandlingskjedeListeResponse;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -24,7 +23,6 @@ public class SakOgBehandlingService implements SakOgBehandlingFasade {
     private final BehandlingstatusClient behandlingstatusClient;
     private final DokumentFactory dokumentFactory;
 
-    @Autowired
     public SakOgBehandlingService(BehandlingskjedeConsumer behandlingskjedeConsumer, BehandlingstatusClient behandlingstatusClient, DokumentFactory dokumentFactory) {
         this.behandlingskjedeConsumer = behandlingskjedeConsumer;
         this.behandlingstatusClient = behandlingstatusClient;

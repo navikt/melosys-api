@@ -19,7 +19,6 @@ import no.nav.melosys.tjenester.gui.dto.eessi.OpprettBucSvarDto;
 import no.nav.security.token.support.core.api.Protected;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -37,7 +36,6 @@ public class EessiTjeneste {
     private final BehandlingService behandlingService;
     private final Aksesskontroll aksesskontroll;
 
-    @Autowired
     public EessiTjeneste(EessiService eessiService, BehandlingService behandlingService, Aksesskontroll aksesskontroll) {
         this.eessiService = eessiService;
         this.behandlingService = behandlingService;
@@ -64,11 +62,10 @@ public class EessiTjeneste {
     public ResponseEntity<OpprettBucSvarDto> opprettBuc(@RequestBody BucBestillingDto nyBucDto,
                                                         @PathVariable("behandlingID") long behandlingID) {
         aksesskontroll.autoriser(behandlingID);
-        Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
 
         OpprettBucSvarDto opprettBucSvarDto = new OpprettBucSvarDto(
             eessiService.opprettBucOgSed(
-                behandling,
+                behandlingID,
                 nyBucDto.bucType(),
                 nyBucDto.mottakerInstitusjoner(),
                 nyBucDto.vedlegg().stream()

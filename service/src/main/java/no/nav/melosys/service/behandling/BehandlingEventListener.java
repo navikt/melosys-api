@@ -10,8 +10,11 @@ import no.nav.melosys.domain.BehandlingsfristEndretEvent;
 import no.nav.melosys.domain.brev.MangelbrevSvarfrist;
 import no.nav.melosys.domain.dokument.DokumentBestiltEvent;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
+import no.nav.melosys.service.oppgave.OppgaveFactory;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,21 +68,25 @@ public class BehandlingEventListener {
     @EventListener
     @Async
     public void behandlingEndret(BehandlingEndretAvSaksbehandlerEvent behandlingEndretAvSaksbehandlerEvent) {
-        var behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingEndretAvSaksbehandlerEvent.getBehandlingID());
+        final var behandling = behandlingService.hentBehandling(behandlingEndretAvSaksbehandlerEvent.getBehandlingID());
         Optional<Oppgave> oppgave = oppgaveService.finnÅpenOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer());
         oppgave.ifPresent(value -> {
-                String type = behandlingEndretAvSaksbehandlerEvent.getBehandlingstype().getKode();
-                String tema = behandlingEndretAvSaksbehandlerEvent.getBehandlingstema().getKode();
-                LocalDate frist = behandlingEndretAvSaksbehandlerEvent.getBehandlingsfrist();
+            final Behandlingstyper type = behandlingEndretAvSaksbehandlerEvent.getBehandlingstype();
+            final Behandlingstema tema = behandlingEndretAvSaksbehandlerEvent.getBehandlingstema();
 
-                log.info("Oppdaterer oppgave {} med behandlingstype {}, behandlingstema {} og fristFerdigstillelse {}",
-                    value.getOppgaveId(), type, tema, frist);
+            final Oppgave behandlingsOppgaveForType = OppgaveFactory.lagBehandlingsOppgaveForType(tema, type).build();
 
-                oppgaveService.oppdaterOppgave(
-                    value.getOppgaveId(),
+            final LocalDate frist = behandlingEndretAvSaksbehandlerEvent.getBehandlingsfrist();
+
+            log.info("Oppdaterer oppgave {} med behandlingstype {}, behandlingstema {} og fristFerdigstillelse {}",
+                value.getOppgaveId(), type.getKode(), tema.getKode(), frist);
+
+            oppgaveService.oppdaterOppgave(
+                value.getOppgaveId(),
                     OppgaveOppdatering.builder()
-                        .behandlingstype(type)
-                        .behandlingstema(tema)
+                        .behandlingstema(behandlingsOppgaveForType.getBehandlingstema())
+                        .behandlingstype(behandlingsOppgaveForType.getBehandlingstype())
+                        .tema(behandlingsOppgaveForType.getTema())
                         .fristFerdigstillelse(frist)
                         .build());
             }

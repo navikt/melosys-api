@@ -19,7 +19,6 @@ import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
@@ -33,7 +32,6 @@ public class DefaultSedRuter implements SedRuter {
     private final BehandlingService behandlingService;
     private final OppgaveService oppgaveService;
 
-    @Autowired
     public DefaultSedRuter(ProsessinstansService prosessinstansService, FagsakService fagsakService,
                            BehandlingService behandlingService,
                            @Qualifier("system") OppgaveService oppgaveService) {
@@ -42,11 +40,7 @@ public class DefaultSedRuter implements SedRuter {
         this.behandlingService = behandlingService;
         this.oppgaveService = oppgaveService;
     }
-
-    /**
-     * Hvis SED'en er tilknyttet en sak går den til ferdigstilling av journalpost
-     * Ellers opprettes det en journalføringsoppgave
-     */
+    
     @Override
     public void rutSedTilBehandling(Prosessinstans prosessinstans, Long arkivsakID) {
         final MelosysEessiMelding eessiMelding = prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class);

@@ -23,7 +23,6 @@ import no.nav.melosys.service.dokument.DokumentproduksjonsInfo;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
@@ -45,7 +44,6 @@ public class OpprettJournalforBrev implements StegBehandler {
     private final DokumentNavnService dokumentNavnService;
     private final Unleash unleash;
 
-    @Autowired
     public OpprettJournalforBrev(BehandlingService behandlingService,
                                  DokgenService dokgenService,
                                  UtenlandskMyndighetService utenlandskMyndighetService,

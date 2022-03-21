@@ -16,10 +16,8 @@ import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-//A001
 @Service
 public class AnmodningOmUnntakSedRuter implements SedRuterForSedTyper {
 
@@ -29,7 +27,6 @@ public class AnmodningOmUnntakSedRuter implements SedRuterForSedTyper {
     private final FagsakService fagsakService;
     private final BehandlingsresultatService behandlingsresultatService;
 
-    @Autowired
     public AnmodningOmUnntakSedRuter(ProsessinstansService prosessinstansService, FagsakService fagsakService, BehandlingsresultatService behandlingsresultatService) {
         this.prosessinstansService = prosessinstansService;
         this.fagsakService = fagsakService;

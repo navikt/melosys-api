@@ -164,6 +164,25 @@ class OppgaveplukkerTest {
     }
 
     @Test
+    void oppgaveplukker_velgerIkkeSak_nårStatusErVenterPaaFagligAvklaring() {
+        List<Oppgave> oppgaver = new ArrayList<>();
+        oppgaver.add(opprettOppgave("1", Oppgavetyper.VUR, PrioritetType.LAV, LocalDate.of(2019, 8, 7), LocalDate.now(), "MEL-1"));
+        when(oppgaveFasade.finnUtildelteOppgaverEtterFrist(any(String.class))).thenReturn(oppgaver);
+
+        PlukkOppgaveInnDto plukkOppgaveInnDto = opprettPlukkOppgaveInnDto(Behandlingstema.UTSENDT_ARBEIDSTAKER.getKode());
+        Fagsak fagsak = new Fagsak();
+        Behandling behandling = new Behandling();
+        behandling.setStatus(Behandlingsstatus.AVVENT_FAGLIG_AVKLARING);
+        behandling.setFagsak(fagsak);
+        fagsak.setBehandlinger(Collections.singletonList(behandling));
+        when(fagsakService.hentFagsak(anyString())).thenReturn(fagsak);
+
+        Optional<Oppgave> oppgave = oppgaveplukker.plukkOppgave("Z01234", plukkOppgaveInnDto);
+
+        assertThat(oppgave).isNotPresent();
+    }
+
+    @Test
     void plukkOppgave_1_tilbakelagt() {
         List<Oppgave> oppgaver = new ArrayList<>();
         oppgaver.add(opprettOppgave("1", Oppgavetyper.BEH_SAK_MK, PrioritetType.NORM, LocalDate.of(2018, 8, 7), LocalDate.now(), "MEL-1"));

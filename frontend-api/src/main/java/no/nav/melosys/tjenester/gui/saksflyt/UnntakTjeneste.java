@@ -7,7 +7,6 @@ import no.nav.melosys.service.unntaksperiode.UnntaksperiodeService;
 import no.nav.melosys.tjenester.gui.dto.GodkjennUnntaksperiodeDto;
 import no.nav.melosys.tjenester.gui.dto.IkkeGodkjennUnntaksperiodeDto;
 import no.nav.security.token.support.core.api.Protected;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,7 +22,6 @@ public class UnntakTjeneste {
     private final UnntaksperiodeService unntaksperiodeService;
     private final Aksesskontroll aksesskontroll;
 
-    @Autowired
     public UnntakTjeneste(UnntaksperiodeService unntaksperiodeService, Aksesskontroll aksesskontroll) {
         this.unntaksperiodeService = unntaksperiodeService;
         this.aksesskontroll = aksesskontroll;

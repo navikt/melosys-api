@@ -26,7 +26,6 @@ import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.sob.SobService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -66,7 +65,6 @@ public class RegisteropplysningerService {
     private final RegisteropplysningerPeriodeFactory registeropplysningerPeriodeFactory;
     private final Unleash unleash;
 
-    @Autowired
     public RegisteropplysningerService(@Qualifier("system") PersondataFasade persondataFasade,
                                        MedlPeriodeService medlPeriodeService, @Qualifier("system") EregFasade eregFasade,
                                        AaregFasade aaregFasade,

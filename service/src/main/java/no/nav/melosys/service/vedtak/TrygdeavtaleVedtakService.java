@@ -8,6 +8,7 @@ import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
@@ -22,7 +23,6 @@ import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import static no.nav.melosys.service.vedtak.VedtaksfattingFasade.FRIST_KLAGE_UKER;
@@ -39,7 +39,6 @@ public class TrygdeavtaleVedtakService {
     private final VedtakKontrollService vedtakKontrollService;
 
 
-    @Autowired
     public TrygdeavtaleVedtakService(BehandlingsresultatService behandlingsresultatService,
                                      BehandlingService behandlingService,
                                      ProsessinstansService prosessinstansService,
@@ -77,8 +76,26 @@ public class TrygdeavtaleVedtakService {
         behandlingService.endreStatus(behandling, Behandlingsstatus.IVERKSETTER_VEDTAK);
 
         prosessinstansService.opprettProsessinstansIverksettVedtakTrygdeavtale(behandling, request);
-        dokgenService.produserOgDistribuerBrev(behandlingID, lagStorbritanniaBrevbestilling(request));
+
+        BrevbestillingRequest brevbestillingRequest = lagBrevbestilling(request);
+        dokgenService.produserOgDistribuerBrev(behandlingID, brevbestillingRequest);
         oppgaveService.ferdigstillOppgaveMedSaksnummer(saksnummer);
+    }
+
+    private BrevbestillingRequest lagBrevbestilling(FattVedtakRequest request) {
+        if (request.getBehandlingsresultatTypeKode() == Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL) {
+            return lagAvslagMangledeOpplysningerBrevbestilling(request);
+        }
+        return lagStorbritanniaBrevbestilling(request);
+    }
+
+    private BrevbestillingRequest lagAvslagMangledeOpplysningerBrevbestilling(FattVedtakRequest request) {
+        return new BrevbestillingRequest.Builder()
+            .medProduserbardokument(Produserbaredokumenter.AVSLAG_MANGLENDE_OPPLYSNINGER)
+            .medMottaker(Aktoersroller.BRUKER)
+            .medBestillersId(request.getBestillersId())
+            .medFritekst(request.getFritekst())
+            .build();
     }
 
     private BrevbestillingRequest lagStorbritanniaBrevbestilling(FattVedtakRequest request) {

@@ -5,7 +5,6 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.felles.RestConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,11 +14,10 @@ import reactor.core.publisher.Mono;
 
 @Configuration
 public class ArbeidsforholdRestConsumerConfig implements RestConsumer {
-    private static final Logger log = LoggerFactory.getLogger(ArbeidsforholdRestConsumerConfig.class);
 
+    private static final Logger log = LoggerFactory.getLogger(ArbeidsforholdRestConsumerConfig.class);
     private final String url;
 
-    @Autowired
     public ArbeidsforholdRestConsumerConfig(@Value("${arbeidsforhold.rest.url}") String url) {
         this.url = url;
     }

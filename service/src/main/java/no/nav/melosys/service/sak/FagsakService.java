@@ -26,7 +26,6 @@ import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,7 +48,6 @@ public class FagsakService {
 
     private final Counter sakerOpprettet = Metrics.counter(SAKER_OPPRETTET);
 
-    @Autowired
     public FagsakService(FagsakRepository fagsakRepository, BehandlingService behandlingService,
                          KontaktopplysningService kontaktopplysningService, @Lazy OppgaveService oppgaveService,
                          PersondataFasade persondataFasade, BehandlingsresultatService behandlingsresultatService,
@@ -95,8 +93,6 @@ public class FagsakService {
         fagsakRepository.save(sak);
     }
 
-    // Sletter myndigheter som ikke ligger i oppgitt liste og legger til de som mangler.
-    // Oppdaterer IKKE de som allerede finnes i database
     @Transactional
     public void oppdaterMyndigheter(String saksnummer, Collection<String> ider) {
         Fagsak fagsak = hentFagsak(saksnummer);
@@ -119,11 +115,6 @@ public class FagsakService {
         return aktør;
     }
 
-    /**
-     * - Oppretter en ny fagsak med en ny behandling.
-     * - Oppretter bruker, arbeidsgiver og representanter.
-     * - Oppretter tom behandlingsresultat.
-     */
     @Transactional
     public Fagsak nyFagsakOgBehandling(OpprettSakRequest opprettSakRequest) {
         Fagsak fagsak = new Fagsak();
@@ -192,7 +183,6 @@ public class FagsakService {
         return FAGSAKID_PREFIX + fagsakRepository.hentNesteSekvensVerdi();
     }
 
-    //Brukes for å avslutte behandling (og dermed fagsak) fra frontend i manuelle sed-behandlinger
     @Transactional
     public void avsluttFagsakOgBehandlingValiderBehandlingstype(Fagsak fagsak, Behandling behandling) {
         Behandlingstema behandlingstema = behandling.getTema();
@@ -256,7 +246,7 @@ public class FagsakService {
         oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(
             replikertBehandling, replikertBehandling.getInitierendeJournalpostId(), fagsak.hentAktørID(), SubjectHandler.getInstance().getUserID()
         );
-        if (unleash.isEnabled("melosys.api.ny.vurdering.medlperiode.slettes")) {
+        if (!unleash.isEnabled("melosys.api.ny.vurdering.medlperiode.beholdes")) {
             avsluttTidligereMedlPeriode(behandlingsresultat);
         }
         return replikertBehandling.getId();

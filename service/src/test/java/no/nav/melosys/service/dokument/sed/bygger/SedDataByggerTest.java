@@ -7,7 +7,6 @@ import java.util.*;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.Bosted;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.ForetakUtland;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.LuftfartBase;
 import no.nav.melosys.domain.dokument.felles.Land;
@@ -22,7 +21,6 @@ import no.nav.melosys.domain.eessi.sed.Virksomhet;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
-import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
@@ -285,6 +283,16 @@ class SedDataByggerTest {
     }
 
     @Test
+    void lag_utenKontaktadresse_kontadresseErNull() {
+        Persondata persondata = PersonopplysningerObjectFactory.lagPersonpplysningerUtenKontaktadresse();
+        SedDataGrunnlagMedSoknad sedDataGrunnlagMedSoknad = lagGrunnlagMedSøknad(persondata);
+
+        SedDataDto sedData = dataBygger.lag(sedDataGrunnlagMedSoknad, behandlingsresultat, PeriodeType.LOVVALGSPERIODE);
+
+        assertThat(sedData.getKontaktadresse()).isNull();
+    }
+
+    @Test
     void lag_medOppholdsadresse_oppholdsadresseMappes() {
         Persondata persondataMedOppholdsadresse = PersonopplysningerObjectFactory.lagPersonopplysninger();
         SedDataGrunnlagMedSoknad sedDataGrunnlagMedSoknad = lagGrunnlagMedSøknad(persondataMedOppholdsadresse);
@@ -293,6 +301,16 @@ class SedDataByggerTest {
 
         assertThat(sedData.getOppholdsadresse()).isNotNull()
             .extracting(Adresse::getGateadresse).isEqualTo("gatenavnOppholdsadresseFreg");
+    }
+
+    @Test
+    void lag_utenOppholdsadresse_oppholdsadresseErNull() {
+        Persondata persondata = PersonopplysningerObjectFactory.lagPersonopplysningerUtenOppholdsadresse();
+        SedDataGrunnlagMedSoknad sedDataGrunnlagMedSoknad = lagGrunnlagMedSøknad(persondata);
+
+        SedDataDto sedData = dataBygger.lag(sedDataGrunnlagMedSoknad, behandlingsresultat, PeriodeType.LOVVALGSPERIODE);
+
+        assertThat(sedData.getOppholdsadresse()).isNull();
     }
 
     @Test

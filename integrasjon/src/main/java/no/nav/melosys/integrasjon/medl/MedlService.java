@@ -18,7 +18,6 @@ import no.nav.tjenester.medlemskapsunntak.api.v1.MedlemskapsunntakForGet;
 import no.nav.tjenester.medlemskapsunntak.api.v1.MedlemskapsunntakForPost;
 import no.nav.tjenester.medlemskapsunntak.api.v1.MedlemskapsunntakForPut;
 import no.nav.tjenester.medlemskapsunntak.api.v1.Sporingsinformasjon;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import static no.nav.melosys.integrasjon.medl.MedlPeriodeKonverter.*;
@@ -30,12 +29,9 @@ public class MedlService {
     private final MedlemskapRestConsumer medlemskapRestConsumer;
     private final ObjectMapper objectMapper;
 
-    @Autowired
-    public MedlService(MedlemskapRestConsumer medlemskapRestConsumer,
-                       ObjectMapper objectMapper) {
+    public MedlService(MedlemskapRestConsumer medlemskapRestConsumer, ObjectMapper objectMapper) {
         this.medlemskapRestConsumer = medlemskapRestConsumer;
         this.objectMapper = objectMapper;
-
         this.objectMapper.registerModule(new JavaTimeModule());
     }
 

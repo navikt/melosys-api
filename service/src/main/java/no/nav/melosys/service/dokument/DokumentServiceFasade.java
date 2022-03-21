@@ -7,7 +7,6 @@ import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,7 +21,6 @@ public class DokumentServiceFasade {
     private final ApplicationEventPublisher applicationEventPublisher;
 
 
-    @Autowired
     public DokumentServiceFasade(DokumentService dokumentService, DokumentSystemService dokumentSystemService,
                                  DokgenService dokgenService, BehandlingService behandlingService,
                                  ApplicationEventPublisher applicationEventPublisher) {
@@ -42,10 +40,10 @@ public class DokumentServiceFasade {
 
     @Transactional
     public void produserDokument(long behandlingId, BrevbestillingRequest brevbestillingRequest) {
-        String saksbehandler = SubjectHandler.getInstance().getUserID();
+        String saksbehandlerID = SubjectHandler.getInstance().getUserID();
         var behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingId);
         DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medProduserbartDokument(brevbestillingRequest.getProduserbardokument())
-            .medAvsenderNavn(saksbehandler)
+            .medAvsenderID(saksbehandlerID)
             .medMottakere(Mottaker.av(brevbestillingRequest.getMottaker()))
             .medBegrunnelseKode(brevbestillingRequest.getBegrunnelseKode())
             .medYtterligereInformasjon(brevbestillingRequest.getYtterligereInformasjon())
@@ -59,9 +57,18 @@ public class DokumentServiceFasade {
         var brevbestillingDto = new BrevbestillingRequest.Builder()
             .medProduserbardokument(dokumentType)
             .medMottaker(mottaker.getRolle())
+            .medFritekst(hentFritekst(brevbestilling))
+            .medBestillersId(brevbestilling.getAvsenderID())
             .build();
 
         produserDokument(behandlingId, brevbestilling, brevbestillingDto, mottaker);
+    }
+
+    private String hentFritekst(DoksysBrevbestilling brevbestilling) {
+        if (brevbestilling.getProduserbartdokument() == Produserbaredokumenter.AVSLAG_MANGLENDE_OPPLYSNINGER) {
+            return brevbestilling.getFritekst();
+        }
+        return null;
     }
 
     private void produserDokument(long behandlingID, DoksysBrevbestilling brevbestilling, BrevbestillingRequest brevbestillingRequest, Mottaker mottaker) {

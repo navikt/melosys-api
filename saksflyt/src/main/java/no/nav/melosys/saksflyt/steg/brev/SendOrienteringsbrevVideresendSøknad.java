@@ -12,7 +12,6 @@ import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.behandling.BehandlingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.BEHANDLINGSRESULTAT_BEGRUNNELSE_FRITEKST;
@@ -26,7 +25,6 @@ public class SendOrienteringsbrevVideresendSøknad implements StegBehandler {
     private final BehandlingService behandlingService;
     private final BrevBestiller brevBestiller;
 
-    @Autowired
     public SendOrienteringsbrevVideresendSøknad(BehandlingService behandlingService, BrevBestiller brevBestiller) {
         this.behandlingService = behandlingService;
         this.brevBestiller = brevBestiller;
@@ -44,7 +42,7 @@ public class SendOrienteringsbrevVideresendSøknad implements StegBehandler {
         String fritekst = prosessinstans.getData(BEHANDLINGSRESULTAT_BEGRUNNELSE_FRITEKST);
 
         DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder()
-            .medAvsenderNavn(saksbehandler)
+            .medAvsenderID(saksbehandler)
             .medProduserbartDokument(Produserbaredokumenter.ORIENTERING_VIDERESENDT_SOEKNAD)
             .medMottakere(Mottaker.av(Aktoersroller.BRUKER))
             .medBehandling(behandling)

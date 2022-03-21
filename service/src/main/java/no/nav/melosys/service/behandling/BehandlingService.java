@@ -29,7 +29,6 @@ import no.nav.melosys.service.oppgave.OppgaveService;
 import org.apache.commons.beanutils.BeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -66,7 +65,6 @@ public class BehandlingService {
         );
     }
 
-    @Autowired
     public BehandlingService(BehandlingRepository behandlingRepository,
                              BehandlingsresultatRepository behandlingsresultatRepository,
                              TidligereMedlemsperiodeRepository tidligereMedlemsperiodeRepository,
@@ -386,7 +384,7 @@ public class BehandlingService {
 
     private void tilbakestillBehandlingsgrunnlag(Behandling behandling) {
         behandlingsresultatService.tømBehandlingsresultat(behandling.getId());
-        if (behandling.getTema() != ARBEID_FLERE_LAND) {
+        if (behandling.getTema() != ARBEID_FLERE_LAND && behandling.getBehandlingsgrunnlag() != null) {
             behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().soeknadsland.erUkjenteEllerAlleEosLand = false;
             BehandlingsgrunnlagKonverterer.oppdaterBehandlingsgrunnlag(behandling.getBehandlingsgrunnlag());
             behandlingsgrunnlagRepository.saveAndFlush(behandling.getBehandlingsgrunnlag());

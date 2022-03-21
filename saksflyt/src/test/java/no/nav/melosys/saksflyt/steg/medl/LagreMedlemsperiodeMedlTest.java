@@ -1,14 +1,15 @@
 package no.nav.melosys.saksflyt.steg.medl;
 
-import java.util.Collection;
 import java.util.List;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Medlemskapsperiode;
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.MedlemAvFolketrygdenService;
+import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.medl.MedlPeriodeService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,6 +22,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class LagreMedlemsperiodeMedlTest {
@@ -32,16 +34,23 @@ class LagreMedlemsperiodeMedlTest {
     @Mock
     private MedlPeriodeService medlPeriodeService;
 
+    @Mock
+    private BehandlingsresultatService behandlingsresultatService;
+
     private LagreMedlemsperiodeMedl lagreMedlemsperiodeMedl;
+
+    Behandlingsresultat behandlingsresultat = mock(Behandlingsresultat.class);
 
     @BeforeEach
     void init() {
-        lagreMedlemsperiodeMedl = new LagreMedlemsperiodeMedl(medlemAvFolketrygdenService, medlPeriodeService);
+        lagreMedlemsperiodeMedl = new LagreMedlemsperiodeMedl(medlemAvFolketrygdenService, medlPeriodeService, behandlingsresultatService);
+        when(behandlingsresultat.erAvslag()).thenReturn(false);
     }
 
     @Test
-    void utfør_feilerUtenMedlemskapsperiode() throws Exception {
+    void utfør_feilerUtenMedlemskapsperiode() {
         when(medlemAvFolketrygdenService.hentMedlemAvFolketrygden(anyLong())).thenReturn(lagMedlemAvFolketrygden());
+        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> lagreMedlemsperiodeMedl.utfør(lagProsessInstans()))
@@ -49,9 +58,10 @@ class LagreMedlemsperiodeMedlTest {
     }
 
     @Test
-    void utfør_erInnvilgelse_oppretterMedlPerioder() throws Exception {
+    void utfør_erInnvilgelse_oppretterMedlPerioder() {
         MedlemAvFolketrygden medlemAvFolketrygden = lagMedlemAvFolketrygden(new Medlemskapsperiode(), new Medlemskapsperiode());
         when(medlemAvFolketrygdenService.hentMedlemAvFolketrygden(anyLong())).thenReturn(medlemAvFolketrygden);
+        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
         lagreMedlemsperiodeMedl.utfør(lagProsessInstans());
 
@@ -59,12 +69,13 @@ class LagreMedlemsperiodeMedlTest {
     }
 
     @Test
-    void utfør_erInnvilgelse_opprettPerioder_Idempotent() throws Exception {
+    void utfør_erInnvilgelse_opprettPerioder_Idempotent() {
         Medlemskapsperiode lagretPeriode = new Medlemskapsperiode();
         lagretPeriode.setMedlPeriodeID(123L);
         MedlemAvFolketrygden medlemAvFolketrygden = lagMedlemAvFolketrygden(lagretPeriode, new Medlemskapsperiode());
 
         when(medlemAvFolketrygdenService.hentMedlemAvFolketrygden(anyLong())).thenReturn(medlemAvFolketrygden);
+        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
         lagreMedlemsperiodeMedl.utfør(lagProsessInstans());
 

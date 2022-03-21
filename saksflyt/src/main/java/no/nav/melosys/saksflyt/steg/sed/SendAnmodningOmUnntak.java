@@ -26,7 +26,6 @@ import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
@@ -42,7 +41,6 @@ public class SendAnmodningOmUnntak extends AbstraktSendUtland {
     private static final ZoneId TIME_ZONE_ID = ZoneId.systemDefault();
     private static final int SVARFRIST_MÅNEDER = 2;
 
-    @Autowired
     public SendAnmodningOmUnntak(@Qualifier("system") EessiService eessiService,
                                  BrevBestiller brevBestiller,
                                  BehandlingService behandlingService,
@@ -74,7 +72,7 @@ public class SendAnmodningOmUnntak extends AbstraktSendUtland {
 
     private Collection<Vedlegg> hentVedlegg(Prosessinstans prosessinstans) {
         final Set<DokumentReferanse> vedleggReferanser = prosessinstans.getData(ProsessDataKey.VEDLEGG_SED,
-            new TypeReference<Set<DokumentReferanse>>() {
+            new TypeReference<>() {
             }, Collections.emptySet());
         return eessiService.lagEessiVedlegg(prosessinstans.getBehandling().getFagsak(),
             vedleggReferanser);
@@ -88,7 +86,7 @@ public class SendAnmodningOmUnntak extends AbstraktSendUtland {
     private DoksysBrevbestilling lagBrevBestilling(Prosessinstans prosessinstans) {
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(prosessinstans.getBehandling().getId());
         return new DoksysBrevbestilling.Builder().medProduserbartDokument(Produserbaredokumenter.ANMODNING_UNNTAK)
-            .medAvsenderNavn(hentSaksbehandler(prosessinstans))
+            .medAvsenderID(hentSaksbehandler(prosessinstans))
             .medMottakere(Mottaker.av(TRYGDEMYNDIGHET))
             .medBehandling(behandling)
             .medYtterligereInformasjon(prosessinstans.getData(YTTERLIGERE_INFO_SED))

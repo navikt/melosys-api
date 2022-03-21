@@ -7,7 +7,6 @@ import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.service.dokument.DokumentServiceFasade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -16,14 +15,13 @@ public class BrevBestiller {
 
     private final DokumentServiceFasade dokumentServiceFasade;
 
-    @Autowired
     public BrevBestiller(DokumentServiceFasade dokumentServiceFasade) {
         this.dokumentServiceFasade = dokumentServiceFasade;
     }
 
     public void bestill(Produserbaredokumenter dokumentType, String avsender, Mottaker mottaker, Behandling behandling) {
         DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medProduserbartDokument(dokumentType)
-            .medAvsenderNavn(avsender)
+            .medAvsenderID(avsender)
             .medMottakere(mottaker)
             .medBehandling(behandling).build();
         bestill(brevbestilling);
