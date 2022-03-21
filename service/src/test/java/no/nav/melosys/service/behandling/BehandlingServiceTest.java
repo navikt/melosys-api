@@ -431,7 +431,7 @@ class BehandlingServiceTest {
     }
 
     @Test
-    void oppdaterStatus_statusEndretTilAnmodningUnntakSendt_forventSvarfristPaaToUker() {
+    void endreStatus_setterSvarFristPåToUker_nårNyStatusErAnmodningUnntakSendt() {
         Behandling behandling = opprettBehandlingUnderBehandling();
 
 
@@ -448,7 +448,7 @@ class BehandlingServiceTest {
     }
 
     @Test
-    void oppdaterStatus_statusEndretTilAvventDokPart_forventSvarfristPaaToUker() {
+    void endreStatus_setterSvarFristPåToUker_nårNyStatusErAvventDokPart() {
         Behandling behandling = opprettBehandlingUnderBehandling();
 
 
@@ -465,10 +465,10 @@ class BehandlingServiceTest {
     }
 
     @Test
-    void oppdaterStatus_statusEndretTilAvventDokUtl_forventSvarfristPaaToUker() {
+    void endreStatus_setterSvarFristPåToUker_nårNyStatusErAvventDokUtl() {
         Behandling behandling = opprettBehandlingUnderBehandling();
 
-        
+
         behandlingService.endreStatus(behandling, AVVENT_DOK_UTL);
 
 
@@ -482,7 +482,7 @@ class BehandlingServiceTest {
     }
 
     @Test
-    void oppdaterStatus_statusEndretTilUnderBehandling_forventSvarfristSattTilNull() {
+    void endreStatus_setterSvarFristTilNull_nårNyStatusErUnderBehandling() {
         Behandling behandling = new Behandling();
         behandling.setFagsak(new Fagsak());
         behandling.setId(BEHANDLING_ID);
