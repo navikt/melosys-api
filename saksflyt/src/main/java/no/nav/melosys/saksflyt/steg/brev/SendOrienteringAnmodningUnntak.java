@@ -9,7 +9,6 @@ import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.behandling.BehandlingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
@@ -24,7 +23,6 @@ public class SendOrienteringAnmodningUnntak implements StegBehandler {
     private final BrevBestiller brevBestiller;
     private final BehandlingService behandlingService;
 
-    @Autowired
     public SendOrienteringAnmodningUnntak(BrevBestiller brevBestiller, BehandlingService behandlingService) {
         this.brevBestiller = brevBestiller;
         this.behandlingService = behandlingService;

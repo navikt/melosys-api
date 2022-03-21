@@ -26,7 +26,6 @@ import no.nav.melosys.service.dokument.VedleggTyper;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -50,7 +49,6 @@ public class OpprettJournalforBrev implements StegBehandler {
     private final EregFasade eregFasade;
     private final Unleash unleash;
 
-    @Autowired
     public OpprettJournalforBrev(BehandlingService behandlingService,
                                  LovvalgsperiodeService lovvalgsperiodeService,
                                  DokgenService dokgenService,
@@ -191,8 +189,7 @@ public class OpprettJournalforBrev implements StegBehandler {
 
         if (mottaker.erOrganisasjon()) {
             return lagKopiTittel(erArtikkel8_2 ? vedtaksbrevTittel : dokumentproduksjonsInfo.journalføringsTittel());
-        }
-        else {
+        } else {
             return erArtikkel8_2 ? vedtaksbrevTittel : dokumentproduksjonsInfo.journalføringsTittel();
         }
     }

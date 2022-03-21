@@ -28,7 +28,6 @@ import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import no.nav.melosys.service.vedtak.VedtaksfattingFasade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.metrics.MetrikkerNavn.SVAR_AOU;
@@ -49,7 +48,6 @@ public class BestemBehandlingsmåteSvarAnmodningUnntak implements StegBehandler 
     private final VedtaksfattingFasade vedtaksfattingFasade;
     private final LovvalgsperiodeService lovvalgsperiodeService;
 
-    @Autowired
     public BestemBehandlingsmåteSvarAnmodningUnntak(AnmodningsperiodeService anmodningsperiodeService,
                                                     BehandlingService behandlingService,
                                                     BehandlingsresultatService behandlingsresultatService,

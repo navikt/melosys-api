@@ -2,7 +2,6 @@ package no.nav.melosys.saksflyt.steg.brev;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
@@ -20,7 +19,6 @@ import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING_HENLAGT_SAK;
@@ -34,7 +32,6 @@ public class SendHenleggelsesbrev implements StegBehandler {
     private final BrevBestiller brevBestiller;
     private final BehandlingsresultatService behandlingsresultatService;
 
-    @Autowired
     public SendHenleggelsesbrev(BrevBestiller brevBestiller, BehandlingsresultatService behandlingsresultatService) {
         this.brevBestiller = brevBestiller;
         this.behandlingsresultatService = behandlingsresultatService;

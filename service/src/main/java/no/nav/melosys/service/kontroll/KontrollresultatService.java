@@ -12,7 +12,6 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.kontroll.ufm.UfmKontrollService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,7 +26,6 @@ public class KontrollresultatService {
     private final UfmKontrollService ufmKontrollService;
     private final BehandlingService behandlingService;
 
-    @Autowired
     public KontrollresultatService(KontrollresultatRepository kontrollresultatRepository,
                                    BehandlingsresultatService behandlingsresultatService,
                                    UfmKontrollService ufmKontrollService,

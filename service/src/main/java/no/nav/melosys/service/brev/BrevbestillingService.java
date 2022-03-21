@@ -28,7 +28,6 @@ import no.nav.melosys.service.dokument.MuligMottakerDto;
 import no.nav.melosys.service.dokument.MuligeMottakereDto;
 import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
 import no.nav.melosys.service.persondata.PersondataFasade;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -61,7 +60,6 @@ public class BrevbestillingService {
     private final PersondataFasade persondataFasade;
     private final Unleash unleash;
 
-    @Autowired
     public BrevbestillingService(BrevmottakerService brevmottakerService, DokumentServiceFasade dokumentServiceFasade,
                                  BehandlingService behandlingService, EregFasade eregFasade, KontaktopplysningService kontaktopplysningService,
                                  PersondataFasade persondataFasade, Unleash unleash) {

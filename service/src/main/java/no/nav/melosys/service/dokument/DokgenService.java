@@ -24,7 +24,6 @@ import no.nav.melosys.service.dokument.brev.mapper.DokgenMalMapper;
 import no.nav.melosys.service.dokument.brev.mapper.DokumentproduksjonsInfoMapper;
 import no.nav.melosys.service.ldap.SaksbehandlerService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,7 +45,6 @@ public class DokgenService {
     private final SaksbehandlerService saksbehandlerService;
     private final UtenlandskMyndighetService utenlandskMyndighetService;
 
-    @Autowired
     public DokgenService(DokgenConsumer dokgenConsumer,
                          DokumentproduksjonsInfoMapper dokumentproduksjonsInfoMapper,
                          @Qualifier("system") JoarkFasade joarkFasade,

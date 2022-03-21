@@ -7,7 +7,6 @@ import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.integrasjon.joark.HentJournalposterTilknyttetSakRequest;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.service.sak.FagsakService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -16,7 +15,6 @@ public class DokumentHentingService {
     private final FagsakService fagsakService;
     private final JoarkFasade joarkFasade;
 
-    @Autowired
     public DokumentHentingService(FagsakService fagsakService, JoarkFasade joarkFasade) {
         this.fagsakService = fagsakService;
         this.joarkFasade = joarkFasade;

@@ -15,7 +15,6 @@ import no.nav.melosys.domain.person.PersonMedHistorikk;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.SaksopplysningRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,7 +25,6 @@ import static no.nav.melosys.service.persondata.PersondataService.PDL_PERS_SAKS_
 public class SaksopplysningerService {
     private final SaksopplysningRepository saksopplysningRepo;
 
-    @Autowired
     public SaksopplysningerService(SaksopplysningRepository saksopplysningRepo) {
         this.saksopplysningRepo = saksopplysningRepo;
     }

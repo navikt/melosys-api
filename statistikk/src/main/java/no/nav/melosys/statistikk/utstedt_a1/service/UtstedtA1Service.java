@@ -16,7 +16,6 @@ import no.nav.melosys.statistikk.utstedt_a1.integrasjon.dto.Periode;
 import no.nav.melosys.statistikk.utstedt_a1.integrasjon.dto.UtstedtA1Melding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,7 +27,6 @@ public class UtstedtA1Service {
     private final BehandlingsresultatService behandlingsresultatService;
     private final LandvelgerService landvelgerService;
 
-    @Autowired
     public UtstedtA1Service(UtstedtA1AivenProducer utstedtA1AivenProducer,
                             BehandlingsresultatService behandlingsresultatService,
                             LandvelgerService landvelgerService) {

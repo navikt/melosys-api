@@ -6,7 +6,6 @@ import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.sob.SobService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.SOB_BEHANDLING_OPPRETTET;
@@ -18,7 +17,6 @@ public class OppdaterStatusBehandlingOpprettet implements StegBehandler {
 
     private final SobService sobService;
 
-    @Autowired
     public OppdaterStatusBehandlingOpprettet(SobService sobService) {
         this.sobService = sobService;
     }

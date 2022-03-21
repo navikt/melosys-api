@@ -20,7 +20,6 @@ import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.registeropplysninger.RegisterOppslagService;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,10 +34,10 @@ public class AvklarteVirksomheterService {
     protected final BehandlingService behandlingService;
     protected final KodeverkService kodeverkService;
 
-    @Autowired
     public AvklarteVirksomheterService(AvklartefaktaService avklartefaktaService,
                                        RegisterOppslagService registerOppslagService,
-                                       BehandlingService behandlingService, KodeverkService kodeverkService) {
+                                       BehandlingService behandlingService,
+                                       KodeverkService kodeverkService) {
         this.avklartefaktaService = avklartefaktaService;
         this.registerOppslagService = registerOppslagService;
         this.behandlingService = behandlingService;
@@ -52,7 +51,7 @@ public class AvklarteVirksomheterService {
         return grunnlagData.foretakUtland.stream()
             .filter(uf -> avklarteOrgnumreOgUuider.contains(uf.uuid))
             .map(AvklartVirksomhet::new)
-            .collect(Collectors.toList());
+            .toList();
     }
 
     Set<String> hentNorskeSelvstendigeForetakOrgnumre(Behandling behandling) {

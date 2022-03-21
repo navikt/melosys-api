@@ -13,7 +13,6 @@ import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.OPPRETT_SØKNAD;
@@ -25,7 +24,6 @@ public class OpprettSoeknad implements StegBehandler {
 
     private final BehandlingsgrunnlagService behandlingsgrunnlagService;
 
-    @Autowired
     public OpprettSoeknad(BehandlingsgrunnlagService behandlingsgrunnlagService) {
         this.behandlingsgrunnlagService = behandlingsgrunnlagService;
     }
@@ -45,7 +43,8 @@ public class OpprettSoeknad implements StegBehandler {
                 case EU_EOS -> {
                     Soeknad soeknad = new Soeknad();
                     soeknad.periode = prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, Periode.class);
-                    soeknad.soeknadsland = prosessinstans.getData(ProsessDataKey.SØKNADSLAND, new TypeReference<>() {});
+                    soeknad.soeknadsland = prosessinstans.getData(ProsessDataKey.SØKNADSLAND, new TypeReference<>() {
+                    });
                     behandlingsgrunnlagService.opprettSøknadYrkesaktiveEøs(behandlingID, soeknad);
                 }
                 case FTRL -> behandlingsgrunnlagService.opprettSøknadFolketrygden(behandlingID, new SoeknadFtrl());

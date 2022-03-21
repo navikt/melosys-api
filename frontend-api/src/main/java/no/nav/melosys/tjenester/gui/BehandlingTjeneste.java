@@ -22,7 +22,6 @@ import no.nav.melosys.tjenester.gui.dto.saksopplysninger.SaksopplysningerTilDto;
 import no.nav.security.token.support.core.api.Protected;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -43,7 +42,6 @@ public class BehandlingTjeneste {
     private final Aksesskontroll aksesskontroll;
     private final BehandlingsresultatService behandlingsresultatService;
 
-    @Autowired
     public BehandlingTjeneste(BehandlingService behandlingService,
                               SaksopplysningerTilDto saksopplysningerTilDto,
                               SaksbehandlerService saksbehandlerService,
@@ -163,6 +161,7 @@ public class BehandlingTjeneste {
 
         return ResponseEntity.noContent().build();
     }
+
     @GetMapping("{behandlingID}/mulige-statuser")
     @ApiOperation("Hent mulige nye behandlingsstatuser for en behandling")
     public ResponseEntity<Collection<Behandlingsstatus>> hentMuligeStatuser(@PathVariable("behandlingID") long behandlingID) {

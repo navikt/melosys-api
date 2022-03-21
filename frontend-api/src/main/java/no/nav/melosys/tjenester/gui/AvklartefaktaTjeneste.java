@@ -15,7 +15,6 @@ import no.nav.melosys.tjenester.gui.dto.AvklartefaktaOppsummeringDto;
 import no.nav.melosys.tjenester.gui.dto.LagreMedfolgendeFamilieDto;
 import no.nav.melosys.tjenester.gui.dto.VirksomheterDto;
 import no.nav.security.token.support.core.api.Protected;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.WebApplicationContext;
@@ -23,7 +22,7 @@ import org.springframework.web.context.WebApplicationContext;
 @Protected
 @RestController
 @RequestMapping("/avklartefakta")
-@Api(tags = { "avklartefakta" })
+@Api(tags = {"avklartefakta"})
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class AvklartefaktaTjeneste {
 
@@ -32,7 +31,6 @@ public class AvklartefaktaTjeneste {
     private final AvklarteMedfolgendeFamilieService avklarteMedfolgendeFamilieService;
     private final Aksesskontroll aksesskontroll;
 
-    @Autowired
     public AvklartefaktaTjeneste(AvklartefaktaService avklartefaktaService,
                                  AvklarteVirksomheterService avklarteVirksomheterService,
                                  AvklarteMedfolgendeFamilieService avklarteMedfolgendeFamilieService,
@@ -45,8 +43,8 @@ public class AvklartefaktaTjeneste {
 
     @GetMapping("{behandlingID}")
     @ApiOperation(value = "Henter avklartefakta for en gitt behandling",
-                  response = Avklartefakta.class,
-                  responseContainer = "Set")
+        response = Avklartefakta.class,
+        responseContainer = "Set")
     public Set<AvklartefaktaDto> hentAvklarteFakta(@PathVariable("behandlingID") long behandlingID) {
         aksesskontroll.autoriser(behandlingID);
         return avklartefaktaService.hentAlleAvklarteFakta(behandlingID);
@@ -73,7 +71,7 @@ public class AvklartefaktaTjeneste {
     @PostMapping("{behandlingID}/virksomheter")
     @ApiOperation(value = "Lagre virksomheter som avklartefakta", response = AvklartefaktaOppsummeringDto.class)
     public AvklartefaktaOppsummeringDto lagreVirksomheterSomAvklarteFakta(@PathVariable("behandlingID") long behandlingID,
-                                                                   @RequestBody VirksomheterDto virksomheter) {
+                                                                          @RequestBody VirksomheterDto virksomheter) {
         aksesskontroll.autoriserSkrivTilRessurs(behandlingID, Ressurs.AVKLARTE_FAKTA);
 
         avklarteVirksomheterService.lagreVirksomheterSomAvklartefakta(behandlingID, virksomheter.getVirksomhetIDer());
@@ -84,7 +82,7 @@ public class AvklartefaktaTjeneste {
     @PostMapping("{behandlingID}/medfolgendeFamilie")
     @ApiOperation(value = "Lagre medfolgendeFamilie som avklartefakta", response = AvklartefaktaOppsummeringDto.class)
     public AvklartefaktaOppsummeringDto lagreMedfolgendeFamilieSomAvklarteFakta(@PathVariable("behandlingID") long behandlingID,
-        @RequestBody LagreMedfolgendeFamilieDto lagreMedfolgendeFamilieDto) {
+                                                                                @RequestBody LagreMedfolgendeFamilieDto lagreMedfolgendeFamilieDto) {
         aksesskontroll.autoriserSkrivTilRessurs(behandlingID, Ressurs.AVKLARTE_FAKTA);
 
         avklarteMedfolgendeFamilieService.lagreMedfolgendeFamilieSomAvklartefakta(behandlingID, lagreMedfolgendeFamilieDto.til());

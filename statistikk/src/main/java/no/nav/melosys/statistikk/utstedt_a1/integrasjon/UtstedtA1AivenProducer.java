@@ -10,7 +10,6 @@ import no.nav.melosys.service.JsonSchemaValidator;
 import no.nav.melosys.statistikk.utstedt_a1.integrasjon.dto.UtstedtA1Melding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -27,7 +26,6 @@ public class UtstedtA1AivenProducer {
     private final ObjectMapper objectMapper;
     private final String topicName;
 
-    @Autowired
     public UtstedtA1AivenProducer(@Qualifier("aivenUtstedtA1") KafkaTemplate<String, UtstedtA1Melding> aivenKafkaTemplate,
                                   ObjectMapper objectMapper,
                                   @Value("${kafka.aiven.a1-utstedt.topic}") String topicName) {

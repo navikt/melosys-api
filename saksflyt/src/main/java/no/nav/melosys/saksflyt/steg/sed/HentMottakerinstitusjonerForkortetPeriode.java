@@ -20,7 +20,6 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
@@ -35,8 +34,9 @@ public class HentMottakerinstitusjonerForkortetPeriode implements StegBehandler 
     private final EessiService eessiService;
     private final LandvelgerService landvelgerService;
 
-    @Autowired
-    public HentMottakerinstitusjonerForkortetPeriode(BehandlingsresultatService behandlingsresultatService, @Qualifier("system") EessiService eessiService, LandvelgerService landvelgerService) {
+    public HentMottakerinstitusjonerForkortetPeriode(BehandlingsresultatService behandlingsresultatService,
+                                                     @Qualifier("system") EessiService eessiService,
+                                                     LandvelgerService landvelgerService) {
         this.behandlingsresultatService = behandlingsresultatService;
         this.eessiService = eessiService;
         this.landvelgerService = landvelgerService;

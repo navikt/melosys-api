@@ -4,7 +4,6 @@ import no.nav.melosys.domain.VedtakMetadataLagretEvent;
 import no.nav.melosys.service.events.FeiletEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ApplicationEventMulticaster;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -17,7 +16,6 @@ public class UtstedtA1EventListener {
     private final UtstedtA1Service utstedtA1Service;
     private final ApplicationEventMulticaster melosysEventMulticaster;
 
-    @Autowired
     public UtstedtA1EventListener(UtstedtA1Service utstedtA1Service, ApplicationEventMulticaster melosysEventMulticaster) {
         this.utstedtA1Service = utstedtA1Service;
         this.melosysEventMulticaster = melosysEventMulticaster;

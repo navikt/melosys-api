@@ -13,26 +13,19 @@ import javax.xml.transform.stream.StreamSource;
 
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.Scope;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
-/**
- * SaksopplysningDokumentFactory konverterer et xml-resultat fra en ekstern tjeneste til et forenklet xml-dokument ved hejlp av XSLT med JAXP.
- * Xml-dokumentet blir deretter transformert med JAXB til et objekttre som tilhører et sentralt domene.
- * Klassen er ikke trådsikker.
- */
 @Component
 @Scope(BeanDefinition.SCOPE_PROTOTYPE)
 public class DokumentFactory {
-    // Spring JAXB 2 marshaller og unmarshaller
+    
     private final Jaxb2Marshaller marshaller;
     private final XsltTemplatesFactory xsltTemplatesFactory;
 
-    @Autowired
     public DokumentFactory(Jaxb2Marshaller marshaller, XsltTemplatesFactory xsltTemplatesFactory) {
         this.marshaller = marshaller;
         this.xsltTemplatesFactory = xsltTemplatesFactory;
@@ -42,11 +35,6 @@ public class DokumentFactory {
         return marshaller.createMarshaller();
     }
 
-    /**
-     * Lager {@code forenkletXml} på en {@link Saksopplysning} ut fra en predefinert xslt anvendt på feltet {@code dokumentXml}
-     * eller fra feltet {@code dokument} hvis feltet er ikke null.
-     * Det resulterende xml returneres.
-     */
     public String lagForenkletXml(Saksopplysning saksopplysning) {
         Assert.notNull(saksopplysning, "saksopplysning må ikke være null");
 
@@ -59,7 +47,6 @@ public class DokumentFactory {
             return null;
         }
 
-        // Hvis saksopplysning.getDokument() eksisterer kan man serialisere direkte for å få forenklet xml.
         if (dokument != null) {
             StreamResult result = new StreamResult(new StringWriter());
             marshaller.marshal(dokument, result);
@@ -71,7 +58,6 @@ public class DokumentFactory {
         return transformer(dokumentXml, type, versjon);
     }
 
-    // {@code dokumentXml} transformeres med en JAXP Transformer
     private String transformer(String dokumentXml, SaksopplysningType type, String versjon) {
         StreamResult outputTarget = new StreamResult(new StringWriter());
         try {
@@ -88,10 +74,6 @@ public class DokumentFactory {
         return outputTarget.getWriter().toString();
     }
 
-    /**
-     * Setter et {@link SaksopplysningDokument} på en {@link Saksopplysning} ut fra feltet {@code dokumentXml}.
-     * SaksopplysningDokumentet returneres.
-     */
     public SaksopplysningDokument lagDokument(Saksopplysning saksopplysning) {
         Assert.notNull(saksopplysning, "saksopplysning må ikke være null");
 
@@ -107,7 +89,6 @@ public class DokumentFactory {
         String forenkletXml = lagForenkletXml(saksopplysning);
         StringReader reader = new StringReader(forenkletXml);
 
-        // JAXB brukes til å opprette et SaksopplysningDokument
         SaksopplysningDokument dokument = (SaksopplysningDokument) marshaller.unmarshal(new StreamSource(reader));
         saksopplysning.setDokument(dokument);
 

@@ -11,7 +11,6 @@ import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.repository.VilkaarsresultatRepository;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,7 +23,6 @@ public class VilkaarsresultatService {
 
     private static final Collection<Vilkaar> IMMUTABLE_VILKAAR = Collections.singleton(FO_883_2004_INNGANGSVILKAAR);
 
-    @Autowired
     public VilkaarsresultatService(BehandlingsresultatService behandlingsresultatService,
                                    VilkaarsresultatRepository vilkaarsresultatRepo) {
         this.behandlingsresultatService = behandlingsresultatService;

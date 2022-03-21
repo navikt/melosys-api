@@ -1,6 +1,5 @@
 package no.nav.melosys.integrasjon.felles;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
@@ -13,7 +12,6 @@ public class EnvironmentHandler {
 
     private final Environment env;
 
-    @Autowired
     public EnvironmentHandler(Environment environment) {
         this.env = environment;
         EnvironmentHandlerHolder.ENV_HANDLER = this;
