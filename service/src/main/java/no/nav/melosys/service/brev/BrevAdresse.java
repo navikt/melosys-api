@@ -5,13 +5,13 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class BrevAdresse {
-    public final String mottakerNavn;
-    public final String orgnr;
-    public final List<String> adresselinjer;
-    public final String postnr;
-    public final String poststed;
-    public final String region;
-    public final String land;
+    private final String mottakerNavn;
+    private final String orgnr;
+    private final List<String> adresselinjer;
+    private final String postnr;
+    private final String poststed;
+    private final String region;
+    private final String land;
 
     public BrevAdresse(Builder builder) {
         this.mottakerNavn = builder.mottakerNavn;
