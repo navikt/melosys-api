@@ -655,7 +655,7 @@ query($ident: ID!, $historikk: Boolean!) {
         """;
 
     public static final String HENT_FORELDER_QUERY = """
-query($ident: ID!, $historikk: Boolean!) {
+query($ident: ID!) {
   hentPerson(ident: $ident) {
     foedsel {
       foedselsdato
