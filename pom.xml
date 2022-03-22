@@ -399,6 +399,11 @@
                 <artifactId>bcpkix-jdk15on</artifactId>
                 <version>${bcpkix-jdk15on.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.nimbusds</groupId>
+                <artifactId>nimbus-jose-jwt</artifactId>
+                <version>9.20</version>
+            </dependency>
 
             <!-- Transitive avhengiheter med konflikter -->
             <dependency>
