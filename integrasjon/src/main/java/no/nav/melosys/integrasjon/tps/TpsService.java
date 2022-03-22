@@ -34,7 +34,6 @@ import no.nav.tjeneste.virksomhet.person.v3.meldinger.HentPersonRequest;
 import no.nav.tjeneste.virksomhet.person.v3.meldinger.HentPersonResponse;
 import no.nav.tjeneste.virksomhet.person.v3.meldinger.HentPersonhistorikkRequest;
 import no.nav.tjeneste.virksomhet.person.v3.meldinger.HentPersonhistorikkResponse;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
@@ -48,7 +47,6 @@ public class TpsService implements TpsFasade {
     private final DokumentFactory dokumentFactory;
     private final KodeOppslag kodeOppslag;
 
-    @Autowired
     public TpsService(PersonConsumer personConsumer, DokumentFactory dokumentFactory, KodeOppslag kodeOppslag) {
         this.personConsumer = personConsumer;
         this.dokumentFactory = dokumentFactory;
@@ -86,17 +84,8 @@ public class TpsService implements TpsFasade {
         request.setAktoer(personIdent);
         request.getInformasjonsbehov().addAll(behov);
 
-        // Kall til TPS
-        HentPersonResponse response;
-        try {
-            response = personConsumer.hentPerson(request);
-        } catch (HentPersonSikkerhetsbegrensning hentPersonSikkerhetsbegrensning) {
-            throw new SikkerhetsbegrensningException(hentPersonSikkerhetsbegrensning);
-        } catch (HentPersonPersonIkkeFunnet hentPersonPersonIkkeFunnet) {
-            throw new IkkeFunnetException(hentPersonPersonIkkeFunnet);
-        }
+        HentPersonResponse response = hentPersonResponseFraTPS(request);
 
-        // Response -> xml
         StringWriter xmlWriter = new StringWriter();
         try {
             no.nav.tjeneste.virksomhet.person.v3.HentPersonResponse xmlRoot = new no.nav.tjeneste.virksomhet.person.v3.HentPersonResponse();
@@ -119,29 +108,10 @@ public class TpsService implements TpsFasade {
         personIdent.setIdent(norskIdent);
         request.setAktoer(personIdent);
 
-        Periode periode = new Periode();
-        try {
-            XMLGregorianCalendar xmlDato = KonverteringsUtils.localDateToXMLGregorianCalendar(dato);
-            /*
-            Når fom == tom leverer TPS all foregående historikk, mens fom < tom gir historikk med gyldighetsdato
-            innenfor perioden det søkes på.
-            */
-            periode.setFom(xmlDato);
-            periode.setTom(xmlDato);
-        } catch (DatatypeConfigurationException e) {
-            throw new IntegrasjonException(e);
-        }
+        Periode periode = hentAltForegaaendeHistorikkFraTPS(dato);
         request.setPeriode(periode);
 
-        // Kall til TPS
-        HentPersonhistorikkResponse response;
-        try {
-            response = personConsumer.hentPersonhistorikk(request);
-        } catch (HentPersonhistorikkSikkerhetsbegrensning hentPersonhistorikkSikkerhetsbegrensning) {
-            throw new SikkerhetsbegrensningException(hentPersonhistorikkSikkerhetsbegrensning);
-        } catch (HentPersonhistorikkPersonIkkeFunnet hentPersonhistorikkPersonIkkeFunnet) {
-            throw new IkkeFunnetException(hentPersonhistorikkPersonIkkeFunnet);
-        }
+        HentPersonhistorikkResponse response = hentPersonhistorikkResponseFraTPS(request);
 
         StringWriter xmlWriter = new StringWriter();
         try {
@@ -158,11 +128,11 @@ public class TpsService implements TpsFasade {
         saksopplysning.setType(SaksopplysningType.PERSHIST);
         saksopplysning.setVersjon(PERSONHISTORIKK_VERSJON);
 
-        // xml -> java objekter
         dokumentFactory.lagDokument(saksopplysning);
 
         return saksopplysning;
     }
+
 
     @Override
     public String hentSammensattNavn(String fnr) {
@@ -176,6 +146,38 @@ public class TpsService implements TpsFasade {
         Saksopplysning saksopplysning = hentPerson(fnr, Informasjonsbehov.INGEN);
         PersonDokument personDokument = (PersonDokument) saksopplysning.getDokument();
         return personDokument.getDiskresjonskode() != null && personDokument.getDiskresjonskode().erKode6();
+    }
+
+    private HentPersonResponse hentPersonResponseFraTPS(HentPersonRequest request) {
+        try {
+            return personConsumer.hentPerson(request);
+        } catch (HentPersonSikkerhetsbegrensning hentPersonSikkerhetsbegrensning) {
+            throw new SikkerhetsbegrensningException(hentPersonSikkerhetsbegrensning);
+        } catch (HentPersonPersonIkkeFunnet hentPersonPersonIkkeFunnet) {
+            throw new IkkeFunnetException(hentPersonPersonIkkeFunnet);
+        }
+    }
+
+    private HentPersonhistorikkResponse hentPersonhistorikkResponseFraTPS(HentPersonhistorikkRequest request) {
+        try {
+            return personConsumer.hentPersonhistorikk(request);
+        } catch (HentPersonhistorikkSikkerhetsbegrensning hentPersonhistorikkSikkerhetsbegrensning) {
+            throw new SikkerhetsbegrensningException(hentPersonhistorikkSikkerhetsbegrensning);
+        } catch (HentPersonhistorikkPersonIkkeFunnet hentPersonhistorikkPersonIkkeFunnet) {
+            throw new IkkeFunnetException(hentPersonhistorikkPersonIkkeFunnet);
+        }
+    }
+
+    private Periode hentAltForegaaendeHistorikkFraTPS(LocalDate dato) throws IntegrasjonException {
+        try {
+            Periode periode = new Periode();
+            XMLGregorianCalendar xmlDato = KonverteringsUtils.localDateToXMLGregorianCalendar(dato);
+            periode.setFom(xmlDato); // TPS gir all foregående historikk når fom == tom
+            periode.setTom(xmlDato);
+            return periode;
+        } catch (DatatypeConfigurationException e) {
+            throw new IntegrasjonException(e);
+        }
     }
 
     private Set<no.nav.tjeneste.virksomhet.person.v3.informasjon.Informasjonsbehov> mapInformasjonsbehovTilTps(Informasjonsbehov behov) {

@@ -8,7 +8,6 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import no.finn.unleash.Unleash;
 import no.nav.dok.brevdata.felles.v1.navfelles.Saksbehandler;
 import no.nav.dok.brevdata.felles.v1.navfelles.*;
 import no.nav.dok.brevdata.felles.v1.simpletypes.AktoerType;
@@ -31,7 +30,6 @@ import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.UtenlandskMyndighetRepository;
 import no.nav.melosys.service.ldap.SaksbehandlerService;
 import no.nav.melosys.service.persondata.PersondataFasade;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -44,9 +42,6 @@ import org.xml.sax.SAXException;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.*;
 
-/**
- * BrevDataService er ansvarlig for å mappe saksopplysninger i brevmalene.
- */
 @Service
 public class BrevDataService {
     static final String MELOSYS_ENHET_ID = "4530";
@@ -58,24 +53,17 @@ public class BrevDataService {
     private final PersondataFasade persondataFasade;
     private final SaksbehandlerService saksbehandlerService;
     private final UtenlandskMyndighetRepository utenlandskMyndighetRepository;
-    private final Unleash unleash;
 
-    @Autowired
     public BrevDataService(BehandlingsresultatRepository behandlingsresultatRepository,
                            @Qualifier("system") PersondataFasade persondataFasade,
                            SaksbehandlerService saksbehandlerService,
-                           UtenlandskMyndighetRepository utenlandskMyndighetRepository,
-                           Unleash unleash) {
+                           UtenlandskMyndighetRepository utenlandskMyndighetRepository) {
         this.behandlingsresultatRepository = behandlingsresultatRepository;
         this.persondataFasade = persondataFasade;
         this.saksbehandlerService = saksbehandlerService;
         this.utenlandskMyndighetRepository = utenlandskMyndighetRepository;
-        this.unleash = unleash;
     }
 
-    /**
-     * Genererer metada til doksys angående dokumentbestillingen.
-     */
     public DokumentbestillingMetadata lagBestillingMetadata(Produserbaredokumenter produserbartDokument,
                                                             Aktoer mottaker, Kontaktopplysning kontaktopplysning,
                                                             Behandling behandling, BrevData brevData) {
@@ -88,7 +76,6 @@ public class BrevDataService {
         metadata.brukerID = persondataFasade.hentFolkeregisterident(fagsak.hentAktørID());
 
         metadata.journalsakID = Long.toString(fagsak.getGsakSaksnummer());
-        // Fagområde=MED for alle dokumenter til bruker/arbeidsgiver, men kan være UFM for papir-SED til ikke-elektroniske land
         metadata.fagområde = Tema.MED.getKode();
         metadata.saksbehandler = brevData.saksbehandler;
         metadata.berik = true;
@@ -291,9 +278,6 @@ public class BrevDataService {
     }
 
     private boolean brukerManglerAdresseFraRegister(Behandling behandling) {
-        if (unleash.isEnabled("melosys.pdl.aktiv")) {
-            return persondataFasade.hentPerson(behandling.getFagsak().hentAktørID()).manglerRegistrertAdresse();
-        }
-        return behandling.hentPersonDokument().manglerRegistrertAdresse();
+        return persondataFasade.hentPerson(behandling.getFagsak().hentAktørID()).manglerRegistrertAdresse();
     }
 }

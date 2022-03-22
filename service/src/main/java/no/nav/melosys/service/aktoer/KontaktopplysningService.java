@@ -4,7 +4,6 @@ import no.nav.melosys.domain.Kontaktopplysning;
 import no.nav.melosys.domain.KontaktopplysningID;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.repository.KontaktopplysningRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 
@@ -12,7 +11,6 @@ import org.springframework.stereotype.Service;
 public class KontaktopplysningService {
     private final KontaktopplysningRepository kontaktopplysningRepository;
 
-    @Autowired
     public KontaktopplysningService(KontaktopplysningRepository kontaktopplysningRepository) {
         this.kontaktopplysningRepository = kontaktopplysningRepository;
     }

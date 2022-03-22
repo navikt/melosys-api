@@ -24,7 +24,6 @@ import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevdataGrunnlagFactory
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,7 +42,6 @@ public class DokumentService {
     private final BrevDataByggerVelger brevDataByggerVelger;
     private final BrevdataGrunnlagFactory brevdataGrunnlagFactory;
 
-    @Autowired
     public DokumentService(BehandlingService behandlingService,
                            BrevDataService brevDataService,
                            DoksysFasade dokSysFasade,
@@ -58,13 +56,6 @@ public class DokumentService {
         this.brevdataGrunnlagFactory = brevdataGrunnlagFactory;
     }
 
-    /**
-     * Kaller Doksys for å produsere et dokumentutkast
-     */
-    // Bruker Transactional for å støtte lazy loading gjennom Hibernate,
-    // selv om dataene som hentes ut egentlig er read-only. Det ser ut til å
-    // være påkrevd for Hibernate å finne en sesjon via Spring-transaksjonen
-    // for å kunne laste lazy collections i objektgrafen.
     @Transactional(readOnly = true)
     public byte[] produserUtkast(long behandlingID, BrevbestillingRequest brevbestillingRequest) {
         Produserbaredokumenter produserbartDokument = brevbestillingRequest.getProduserbardokument();
@@ -97,9 +88,6 @@ public class DokumentService {
         }
     }
 
-    /**
-     * Produserer et dokument i Doksys
-     */
     public void produserDokument(Produserbaredokumenter produserbartDokument,
                                  Mottaker mottaker,
                                  long behandlingID,

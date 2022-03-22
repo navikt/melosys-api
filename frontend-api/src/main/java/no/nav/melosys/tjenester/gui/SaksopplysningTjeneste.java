@@ -7,7 +7,6 @@ import io.swagger.annotations.ApiResponses;
 import no.nav.melosys.service.OppfriskSaksopplysningerService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.security.token.support.core.api.Protected;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,14 +15,13 @@ import org.springframework.web.context.WebApplicationContext;
 @Protected
 @RestController
 @RequestMapping("/saksopplysninger")
-@Api(tags = { "saksopplysninger" })
+@Api(tags = {"saksopplysninger"})
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class SaksopplysningTjeneste {
 
     private final OppfriskSaksopplysningerService oppfriskSaksopplysningerService;
     private final Aksesskontroll aksesskontroll;
 
-    @Autowired
     public SaksopplysningTjeneste(OppfriskSaksopplysningerService oppfriskSaksopplysningerService, Aksesskontroll aksesskontroll) {
         this.oppfriskSaksopplysningerService = oppfriskSaksopplysningerService;
         this.aksesskontroll = aksesskontroll;

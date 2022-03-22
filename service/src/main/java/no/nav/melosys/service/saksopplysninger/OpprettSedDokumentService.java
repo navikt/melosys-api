@@ -21,7 +21,6 @@ import no.nav.melosys.repository.SaksopplysningRepository;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -32,7 +31,6 @@ public class OpprettSedDokumentService {
     private final DokumentFactory dokumentFactory;
     private final SaksopplysningRepository saksopplysningRepository;
 
-    @Autowired
     public OpprettSedDokumentService(DokumentFactory dokumentFactory, SaksopplysningRepository saksopplysningRepository) {
         this.dokumentFactory = dokumentFactory;
         this.saksopplysningRepository = saksopplysningRepository;

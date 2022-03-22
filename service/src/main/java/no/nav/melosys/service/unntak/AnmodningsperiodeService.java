@@ -16,7 +16,6 @@ import no.nav.melosys.repository.AnmodningsperiodeRepository;
 import no.nav.melosys.repository.AnmodningsperiodeSvarRepository;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.kontroll.PeriodeKontroller;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,7 +27,6 @@ public class AnmodningsperiodeService {
     private final BehandlingsresultatService behandlingsresultatService;
     private final AnmodningsperiodeSvarRepository anmodningsperiodeSvarRepository;
 
-    @Autowired
     public AnmodningsperiodeService(AnmodningsperiodeRepository anmodningsperiodeRepository, BehandlingsresultatService behandlingsresultatService, AnmodningsperiodeSvarRepository anmodningsperiodeSvarRepository) {
         this.anmodningsperiodeRepository = anmodningsperiodeRepository;
         this.behandlingsresultatService = behandlingsresultatService;

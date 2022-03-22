@@ -14,7 +14,6 @@ import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.security.token.support.core.api.Protected;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -32,7 +31,6 @@ public class AktoerTjeneste {
     private final AktoerService aktoerService;
     private final FagsakService fagsakService;
 
-    @Autowired
     public AktoerTjeneste(Aksesskontroll aksesskontroll,
                           AktoerService aktoerService,
                           FagsakService fagsakService) {
@@ -71,8 +69,7 @@ public class AktoerTjeneste {
         value = "Lagrer/oppdaterer aktør informasjon for et gitt saksnummer.",
         response = AktoerDto.class)
     public ResponseEntity<AktoerDto> lagAktoerer(@PathVariable("saksnummer") String saksnummer,
-                                                 @RequestBody AktoerDto aktoerDto)
-        {
+                                                 @RequestBody AktoerDto aktoerDto) {
         Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
         aksesskontroll.autoriserSakstilgang(fagsak);
         Long databaseId = aktoerService.lagEllerOppdaterAktoer(fagsak, aktoerDto);

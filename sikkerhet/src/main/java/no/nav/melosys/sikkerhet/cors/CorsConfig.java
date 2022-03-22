@@ -3,7 +3,6 @@ package no.nav.melosys.sikkerhet.cors;
 import java.util.Arrays;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
@@ -18,7 +17,6 @@ public class CorsConfig {
 
     private final List<String> allowedOrigins;
 
-    @Autowired
     public CorsConfig(@Value("${cors.allowOrigin}") String... allowedOrigins) {
         this.allowedOrigins = Arrays.asList(allowedOrigins);
     }
@@ -36,4 +34,3 @@ public class CorsConfig {
         return new CorsFilter(source);
     }
 }
-  

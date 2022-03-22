@@ -12,7 +12,6 @@ import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.MedlemAvFolketrygdenService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.medl.MedlPeriodeService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static org.springframework.util.ObjectUtils.isEmpty;
@@ -24,7 +23,6 @@ public class LagreMedlemsperiodeMedl implements StegBehandler {
     private final MedlPeriodeService medlPeriodeService;
     private final BehandlingsresultatService behandlingsresultatService;
 
-    @Autowired
     public LagreMedlemsperiodeMedl(MedlemAvFolketrygdenService medlemAvFolketrygdenService,
                                    MedlPeriodeService medlPeriodeService,
                                    BehandlingsresultatService behandlingsresultatService) {
@@ -44,7 +42,7 @@ public class LagreMedlemsperiodeMedl implements StegBehandler {
         long behandlingId = behandling.getId();
         Behandlingsresultat resultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
 
-        if(resultat.erAvslag()) {
+        if (resultat.erAvslag()) {
             return;
         }
 

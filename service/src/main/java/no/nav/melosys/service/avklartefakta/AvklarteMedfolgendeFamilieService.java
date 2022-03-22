@@ -19,7 +19,6 @@ import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import org.apache.cxf.common.util.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,7 +36,6 @@ public class AvklarteMedfolgendeFamilieService {
 
     private final BehandlingsgrunnlagService behandlingsgrunnlagService;
 
-    @Autowired
     public AvklarteMedfolgendeFamilieService(BehandlingService behandlingService,
                                              BehandlingsresultatService behandlingsresultatService,
                                              AvklartefaktaService avklartefaktaService,

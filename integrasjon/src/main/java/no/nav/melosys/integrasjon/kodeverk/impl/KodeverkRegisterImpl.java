@@ -1,8 +1,8 @@
 package no.nav.melosys.integrasjon.kodeverk.impl;
 
-import java.util.*;
-import java.util.stream.Collectors;
-
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import javax.ws.rs.NotFoundException;
 
 import no.nav.melosys.integrasjon.kodeverk.Kode;
@@ -10,7 +10,6 @@ import no.nav.melosys.integrasjon.kodeverk.Kodeverk;
 import no.nav.melosys.integrasjon.kodeverk.KodeverkRegister;
 import no.nav.melosys.integrasjon.kodeverk.UkjentKodeverkException;
 import no.nav.melosys.integrasjon.kodeverk.impl.dto.KodeDto;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -20,7 +19,6 @@ public class KodeverkRegisterImpl implements KodeverkRegister {
 
     static final String BOKMÅL = "nb";
 
-    @Autowired
     KodeverkRegisterImpl(KodeverkConsumerImpl kodeverkConsumerImpl) {
         this.kodeverkConsumer = kodeverkConsumerImpl;
     }
@@ -34,7 +32,7 @@ public class KodeverkRegisterImpl implements KodeverkRegister {
                 List<Kode> termer = betydninger.stream().map(betydning -> {
                     String term = betydning.beskrivelser.get(BOKMÅL).term;
                     return new Kode(kode, term, betydning.gyldigFra, betydning.gyldigTil);
-                }).collect(Collectors.toList());
+                }).toList();
                 koder.put(kode, termer);
             });
             return new Kodeverk(kodeverkNavn, koder);

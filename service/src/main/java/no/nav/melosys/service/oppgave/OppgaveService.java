@@ -25,7 +25,6 @@ import no.nav.melosys.service.sak.FagsakService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
@@ -45,7 +44,6 @@ public class OppgaveService {
     private final PersondataFasade persondataFasade;
     private static final String UKJENT = "UKJENT";
 
-    @Autowired
     public OppgaveService(BehandlingService behandlingService,
                           FagsakService fagsakService,
                           OppgaveFasade oppgaveFasade,

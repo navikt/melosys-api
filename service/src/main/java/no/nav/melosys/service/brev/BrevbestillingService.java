@@ -7,7 +7,6 @@ import java.util.List;
 import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.domain.Kontaktopplysning;
 import no.nav.melosys.domain.brev.FastMottakerMedOrgnr;
 import no.nav.melosys.domain.brev.Mottaker;
@@ -17,7 +16,6 @@ import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
-import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.dokgen.DokgenAdresseMapper;
@@ -29,10 +27,7 @@ import no.nav.melosys.service.dokument.DokumentServiceFasade;
 import no.nav.melosys.service.dokument.MuligMottakerDto;
 import no.nav.melosys.service.dokument.MuligeMottakereDto;
 import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
-import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.persondata.PersondataFasade;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -61,23 +56,22 @@ public class BrevbestillingService {
     private final BrevmottakerService brevmottakerService;
     private final BehandlingService behandlingService;
     private final EregFasade eregFasade;
-    private final KodeverkService kodeverkService;
     private final KontaktopplysningService kontaktopplysningService;
     private final PersondataFasade persondataFasade;
+    private final DokumentNavnService dokumentNavnService;
     private final Unleash unleash;
 
-    @Autowired
     public BrevbestillingService(BrevmottakerService brevmottakerService, DokumentServiceFasade dokumentServiceFasade,
-                                 BehandlingService behandlingService, EregFasade eregFasade, KodeverkService kodeverkService,
+                                 BehandlingService behandlingService, EregFasade eregFasade,
                                  KontaktopplysningService kontaktopplysningService, PersondataFasade persondataFasade,
-                                 Unleash unleash) {
+                                 DokumentNavnService dokumentNavnService, Unleash unleash) {
         this.brevmottakerService = brevmottakerService;
         this.dokumentServiceFasade = dokumentServiceFasade;
         this.behandlingService = behandlingService;
         this.eregFasade = eregFasade;
-        this.kodeverkService = kodeverkService;
         this.kontaktopplysningService = kontaktopplysningService;
         this.persondataFasade = persondataFasade;
+        this.dokumentNavnService = dokumentNavnService;
         this.unleash = unleash;
     }
 
@@ -93,7 +87,7 @@ public class BrevbestillingService {
 
     private MuligMottakerDto lagHovedMottakerMuligMottakerDto(Produserbaredokumenter produserbaredokumenter, Behandling behandling, Aktoersroller hovedmottaker, String orgnrTilValgtArbeidsgiver) {
         return new MuligMottakerDto.Builder()
-            .medDokumentNavn(produserbaredokumenter.getBeskrivelse())
+            .medDokumentNavn(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoerRolle(behandling, produserbaredokumenter, hovedmottaker))
             .medMottakerNavn(hentMottakerNavn(produserbaredokumenter, behandling, hovedmottaker, orgnrTilValgtArbeidsgiver))
             .medRolle(hovedmottaker)
             .build();
@@ -159,8 +153,9 @@ public class BrevbestillingService {
         List<Aktoer> avklarteKopier = brevmottakerService.avklarMottakere(produserbaredokumenter, Mottaker.av(kopiMottaker), behandling, false, true);
         for (Aktoer avklartKopi : avklarteKopier) {
             var orgDokument = hentRettOrganisasjonsdokument(behandling, avklartKopi.getOrgnr());
+            String fastTekst = avklartKopi.getRolle() == ARBEIDSGIVER ? "Kopi til arbeidsgiver" : "Kopi til arbeidsgivers fullmektig";
             muligMottakerDtos.add(new MuligMottakerDto.Builder()
-                .medDokumentNavn(avklartKopi.getRolle() == ARBEIDSGIVER ? "Kopi til arbeidsgiver" : "Kopi til arbeidsgivers fullmektig")
+                .medDokumentNavn(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoer(behandling, produserbaredokumenter, avklartKopi, fastTekst))
                 .medMottakerNavn(orgDokument.getNavn())
                 .medRolle(avklartKopi.getRolle())
                 .medOrgnr(orgDokument.getOrgnummer())
@@ -174,8 +169,9 @@ public class BrevbestillingService {
 
         List<Aktoer> avklarteKopier = brevmottakerService.avklarMottakere(produserbaredokumenter, Mottaker.av(kopiMottaker), behandling);
         for (Aktoer avklartKopi : avklarteKopier) {
+            String fastTekst = "Kopi til utenlandsk trygdemyndighet";
             muligMottakerDtos.add(new MuligMottakerDto.Builder()
-                .medDokumentNavn("Kopi til utenlandsk trygdemyndighet")
+                .medDokumentNavn(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoer(behandling, produserbaredokumenter, avklartKopi, fastTekst))
                 .medMottakerNavn("Utenlandsk trygdemyndighet")
                 .medRolle(avklartKopi.getRolle())
                 .medInstitusjonId(avklartKopi.getInstitusjonId())
@@ -191,8 +187,9 @@ public class BrevbestillingService {
             Aktoer avklartMottaker = brevmottakerService.avklarMottaker(produserbaredokumenter, FastMottakerMedOrgnr.av(fastMottakerMedOrgnr), behandling);
             var orgDokument = hentRettOrganisasjonsdokument(behandling, avklartMottaker.getOrgnr());
 
+            String fastTekst = "Kopi til " + orgDokument.getNavn();
             muligMottakerDtos.add(new MuligMottakerDto.Builder()
-                .medDokumentNavn("Kopi til " + orgDokument.getNavn())
+                .medDokumentNavn(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoer(behandling, produserbaredokumenter, avklartMottaker, fastTekst))
                 .medMottakerNavn(orgDokument.getNavn())
                 .medRolle(avklartMottaker.getRolle())
                 .medOrgnr(orgDokument.getOrgnummer())
@@ -245,7 +242,7 @@ public class BrevbestillingService {
         OrganisasjonDokument orgDokument = null;
 
         if (mottaker.getRolle() == BRUKER) {
-            persondata = hentPersondata(behandling);
+            persondata = persondataFasade.hentPerson(behandling.getFagsak().hentAktørID());
         } else if (mottaker.getRolle() == ARBEIDSGIVER || mottaker.getRolle() == Aktoersroller.REPRESENTANT) {
             kontaktopplysning = kontaktopplysningService.hentKontaktopplysning(behandling.getFagsak().getSaksnummer(),
                 mottaker.getOrgnr()).orElse(null);
@@ -268,26 +265,11 @@ public class BrevbestillingService {
     }
 
     private String mapPoststed(Persondata persondata) {
-        final String poststed;
         Postadresse postadresse = persondata.hentGjeldendePostadresse();
         if (postadresse == null) {
             return null;
         }
-        poststed = postadresse.poststed();
-        if (unleash.isEnabled("melosys.pdl.aktiv")) {
-            return poststed;
-        }
-        return StringUtils.isEmpty(poststed)
-            ? kodeverkService.dekod(FellesKodeverk.POSTNUMMER, postadresse.postnr())
-            : poststed;
-    }
-
-    private Persondata hentPersondata(Behandling behandling) {
-        if (unleash.isEnabled("melosys.pdl.aktiv")) {
-            return persondataFasade.hentPerson(behandling.getFagsak().hentAktørID());
-        }
-        return (Persondata) persondataFasade.hentPersonFraTps(behandling.hentPersonDokument().hentFolkeregisterident(),
-            Informasjonsbehov.STANDARD).getDokument();
+        return postadresse.poststed();
     }
 
     @Transactional

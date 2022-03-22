@@ -9,7 +9,6 @@ import no.nav.melosys.service.registeropplysninger.RegisterOppslagService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.tjenester.gui.dto.PersonDto;
 import no.nav.security.token.support.core.api.Protected;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,7 +30,6 @@ public class PersonTjeneste {
     private final RegisterOppslagService registerOppslag;
     private final Aksesskontroll aksesskontroll;
 
-    @Autowired
     public PersonTjeneste(RegisterOppslagService registerOppslag, Aksesskontroll aksesskontroll) {
         this.registerOppslag = registerOppslag;
         this.aksesskontroll = aksesskontroll;

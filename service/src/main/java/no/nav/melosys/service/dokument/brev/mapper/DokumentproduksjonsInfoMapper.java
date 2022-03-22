@@ -12,7 +12,6 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.joark.DokumentKategoriKode;
 import no.nav.melosys.service.dokument.DokumentproduksjonsInfo;
 import no.nav.melosys.service.dokument.VedleggTyper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static java.lang.String.format;
@@ -84,7 +83,6 @@ public class DokumentproduksjonsInfoMapper {
             .build());
     }
 
-    @Autowired
     public DokumentproduksjonsInfoMapper(Unleash unleash) {
         this.unleash = unleash;
     }
@@ -125,7 +123,7 @@ public class DokumentproduksjonsInfoMapper {
         STORBRITANNIA("Vedtak om medlemskap, Attest for utsendt arbeidstaker"),
         STORBRITANNIA_VEDTAKSBREV("Vedtak om medlemskap"),
         STORBRITANNIA_ATTEST("Attest for utsendt arbeidstaker"),
-        AVSLAG_MANGLENDE_OPPLYSNINGER("Avslag pga manglende dokument");
+        AVSLAG_MANGLENDE_OPPLYSNINGER("Avslag pga manglende opplysninger");
 
         private final String tittel;
 
