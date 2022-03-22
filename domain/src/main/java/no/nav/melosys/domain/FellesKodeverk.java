@@ -17,12 +17,14 @@ public enum FellesKodeverk {
     LOVVALG_MEDL("LovvalgMedl"),
     PERIODESTATUS_MEDL("PeriodestatusMedl"),
     PERIODETYPE_MEDL("PeriodetypeMedl"),
+    PERMISJONS_OG_PERMITTERINGS_BESKRIVELSE("PermisjonsOgPermitteringsBeskrivelse"),
     PERSONSTATUSER("Personstatuser"),
     POSTNUMMER("Postnummer"),
     SKIPSREGISTRE("Skipsregistre"),
     SKIPSTYPER("Skipstyper"),
     SIVILSTANDER("Sivilstander"),
-    STATSBORGERSKAP_FREG("StatsborgerskapFreg");
+    STATSBORGERSKAP_FREG("StatsborgerskapFreg"),
+    YRKER("Yrker");
 
     FellesKodeverk(String navn) {
         this.navn = navn;

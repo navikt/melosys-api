@@ -14,7 +14,6 @@ import no.nav.melosys.tjenester.gui.dto.journalforing.JournalpostDto;
 import no.nav.security.token.support.core.api.Protected;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -31,7 +30,6 @@ public class JournalfoeringTjeneste {
     private final JournalfoeringService journalføringService;
     private final OppgaveService oppgaveService;
 
-    @Autowired
     public JournalfoeringTjeneste(JournalfoeringService journalføringService, OppgaveService oppgaveService) {
         this.journalføringService = journalføringService;
         this.oppgaveService = oppgaveService;

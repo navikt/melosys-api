@@ -1,7 +1,6 @@
 package no.nav.melosys.integrasjon.oppgave;
 
 import no.nav.melosys.integrasjon.oppgave.konsument.OppgaveConsumer;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
@@ -9,8 +8,7 @@ import org.springframework.stereotype.Service;
 @Qualifier("system")
 public class OppgaveSystemFasadeImpl extends OppgaveFasadeImpl {
 
-    @Autowired
-    public OppgaveSystemFasadeImpl(@Qualifier("system")OppgaveConsumer oppgaveConsumer) {
+    public OppgaveSystemFasadeImpl(@Qualifier("system") OppgaveConsumer oppgaveConsumer) {
         super(oppgaveConsumer);
     }
 }

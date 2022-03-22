@@ -15,7 +15,6 @@ import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import static no.nav.abac.xacml.StandardAttributter.ACTION_ID;
@@ -30,7 +29,6 @@ public class PepImpl implements Pep {
     private AbacService abacService;
     private AbacContext abacContext;
 
-    @Autowired
     public PepImpl(AbacService abacService, AbacContext abacContext) {
         this.abacService = abacService;
         this.abacContext = abacContext;
@@ -65,7 +63,7 @@ public class PepImpl implements Pep {
         }
     }
 
-    private String createLogString(String fnr, XacmlResponse response){
+    private String createLogString(String fnr, XacmlResponse response) {
         String userId = SubjectHandler.getInstance().getUserID();
         String advices = getAdvicesAsString(response.getAdvices());
         return String.format("Ident %s spurte om ressurs %s med pdp-svar %s %s", userId, fnr, response.getDecision(), advices);
@@ -76,8 +74,8 @@ public class PepImpl implements Pep {
         if (!advices.isEmpty()) {
             advicesAsText += " - Advices: ";
             advicesAsText += advices.stream()
-                                .map(Advice::toString)
-                                .collect( Collectors.joining(", ") );
+                .map(Advice::toString)
+                .collect(Collectors.joining(", "));
         }
         return advicesAsText;
     }

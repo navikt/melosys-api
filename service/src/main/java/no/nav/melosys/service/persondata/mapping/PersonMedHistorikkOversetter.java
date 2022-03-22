@@ -2,6 +2,7 @@ package no.nav.melosys.service.persondata.mapping;
 
 import java.time.LocalDate;
 import java.util.Collections;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -39,6 +40,7 @@ public final class PersonMedHistorikkOversetter {
                 .collect(Collectors.toUnmodifiableSet()),
             NavnOversetter.oversett(person.navn()),
             person.oppholdsadresse().stream().map(o -> OppholdsadresseOversetter.oversett(o, kodeverkService))
+                .filter(Objects::nonNull)
                 .collect(Collectors.toUnmodifiableSet()),
             person.sivilstand().stream().map(SivilstandOversetter::oversett).collect(Collectors.toUnmodifiableSet()),
             person.statsborgerskap().stream().map(StatsborgerskapOversetter::oversett)

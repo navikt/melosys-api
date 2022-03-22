@@ -8,6 +8,7 @@ import java.util.Locale;
 import java.util.TimeZone;
 import java.util.stream.Collectors;
 
+import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.dokument.arbeidsforhold.*;
 import no.nav.melosys.domain.dokument.felles.Periode;
@@ -105,9 +106,7 @@ public class ArbeidsforholdKonverter {
             dst.setPermisjonsPeriode(getPeriode(src.periode()));
             dst.setPermisjonsprosent(src.prosent());
 
-            // Permisjon-/permitteringstype (kodeverk: PermisjonsOgPermitteringsBeskrivelse)
-            // Finnes det en Enum med "PermisjonsOgPermitteringsBeskrivelse" ?
-            dst.setPermisjonOgPermittering(getTermFraKode("PermisjonsOgPermitteringsBeskrivelse", src.type()));
+            dst.setPermisjonOgPermittering(kodeOppslag.getTermFraKodeverk(FellesKodeverk.PERMISJONS_OG_PERMITTERINGS_BESKRIVELSE, src.type()));
             return dst;
         }).collect(Collectors.toList());
     }
@@ -124,14 +123,12 @@ public class ArbeidsforholdKonverter {
         return arbeidsavtalerSrc.stream().map(src -> {
             Arbeidsavtale dst = new Arbeidsavtale();
             dst.yrke = new Yrke(src.yrke());
-            // TODO: avklar om det finner en Enum klasse for Kodeverksoversikt navn
-            dst.yrke.setTerm(getTermFraKode("Yrker", src.yrke()));
+            dst.yrke.setTerm(kodeOppslag.getTermFraKodeverk(FellesKodeverk.YRKER, src.yrke()));
 
             dst.beregnetAntallTimerPrUke = src.beregnetAntallTimerPrUke();
             dst.arbeidstidsordning = new Arbeidstidsordning();
             dst.arbeidstidsordning.setKode(src.arbeidstidsordning());
 
-            // https://kodeverk-web.dev.adeo.no/kodeverksoversikt/kodeverk/Avl%C3%B8nningstyper
             dst.avloenningstype = ""; // Finnes ikke i nytt rest api
 
             dst.gyldighetsperiode = getPeriode(src.gyldighetsperiode());
@@ -149,9 +146,5 @@ public class ArbeidsforholdKonverter {
 
             return dst;
         }).collect(Collectors.toList());
-    }
-
-    private String getTermFraKode(String kodeverk, String kode) {
-        return kodeOppslag.getTerm(kodeverk, kode);
     }
 }

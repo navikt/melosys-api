@@ -19,7 +19,6 @@ import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.tjenester.gui.dto.brev.BrevbestillingDto;
 import no.nav.melosys.tjenester.gui.dto.dokumentarkiv.JournalpostInfoDto;
 import no.nav.security.token.support.core.api.Protected;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -41,7 +40,6 @@ public class DokumentTjeneste {
     private final EessiService eessiService;
     private final Aksesskontroll aksesskontroll;
 
-    @Autowired
     public DokumentTjeneste(DokumentServiceFasade dokumentServiceFasade,
                             DokumentHentingService dokumentHentingService,
                             EessiService eessiService,
@@ -72,7 +70,9 @@ public class DokumentTjeneste {
         return ResponseEntity.ok(dokumentListe);
     }
 
-    //TODO Slettes når nytt endepunkt i 'BrevbestillingTjeneste' er klare
+    /**
+     * @deprecated Slettes når nytt endepunkt i 'BrevbestillingTjeneste' er klare
+     */
     @Deprecated
     @PostMapping(value = "pdf/brev/utkast/{behandlingID}/{produserbartDokument}", produces = {APPLICATION_PDF, APPLICATION_JSON_UTF8})
     public ResponseEntity<byte[]> produserUtkastBrev(@PathVariable("behandlingID") long behandlingID,
@@ -100,7 +100,9 @@ public class DokumentTjeneste {
         return lagResponseAvDokument(dokument, sedType.name() + "_utkast.pdf");
     }
 
-    //TODO Slettes når nytt endepunkt i 'BrevbestillingTjeneste' er klare
+    /**
+     * @deprecated Slettes når nytt endepunkt i 'BrevbestillingTjeneste' er klare
+     */
     @Deprecated
     @PostMapping("opprett/{behandlingID}/{produserbartDokument}")
     public ResponseEntity<Void> produserDokument(@PathVariable("behandlingID") long behandlingID,

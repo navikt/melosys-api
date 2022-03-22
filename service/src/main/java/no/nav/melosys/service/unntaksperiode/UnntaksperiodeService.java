@@ -21,7 +21,6 @@ import no.nav.melosys.service.kontroll.PeriodeKontroller;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,7 +34,6 @@ public class UnntaksperiodeService {
     private final OppgaveService oppgaveService;
     private final ProsessinstansService prosessinstansService;
 
-    @Autowired
     public UnntaksperiodeService(BehandlingService behandlingService,
                                  BehandlingsresultatService behandlingsresultatService,
                                  LovvalgsperiodeService lovvalgsperiodeService,

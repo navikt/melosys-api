@@ -47,7 +47,7 @@ class FattetVedtakServiceTest {
         final FakeUnleash unleash = new FakeUnleash();
         unleash.enable("melosys.pdl.aktiv");
         fattetVedtakService = new FattetVedtakService(mockFattetVedtakProducer, mockBehandlingService,
-            mockBehandlingsresultatService, mockPersondataFasade, unleash);
+            mockBehandlingsresultatService, mockPersondataFasade);
     }
 
     @Test

@@ -29,7 +29,6 @@ import no.nav.melosys.service.sak.FagsakService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -38,7 +37,6 @@ import static no.nav.melosys.domain.arkiv.DokumentVariant.lagDokumentVariant;
 
 /**
  * Sender et brev med søknad som vedlegg til utenlandsk myndighet
- *
  * Transisjoner:
  * VS_SEND_SOKNAD -> VS_SEND_SOKNAD eller FEILET_MASKINELT hvis feil
  */
@@ -50,7 +48,6 @@ public class VideresendSoknad extends AbstraktSendUtland {
     private final FagsakService fagsakService;
     private final SedSomBrevService sedSomBrevService;
 
-    @Autowired
     protected VideresendSoknad(@Qualifier("system") EessiService eessiService,
                                BehandlingsresultatService behandlingsresultatService,
                                @Qualifier("system") JoarkFasade joarkFasade, FagsakService fagsakService,
@@ -80,7 +77,8 @@ public class VideresendSoknad extends AbstraktSendUtland {
 
     private Collection<Vedlegg> hentVedlegg(Prosessinstans prosessinstans) {
         final Set<DokumentReferanse> vedleggReferanser = prosessinstans.getData(ProsessDataKey.VEDLEGG_SED,
-            new TypeReference<Set<DokumentReferanse>>() {});
+            new TypeReference<Set<DokumentReferanse>>() {
+            });
         if (CollectionUtils.isEmpty(vedleggReferanser)) {
             throw new FunksjonellException("Kan ikke videresende søknad uten vedlegg!");
         }

@@ -15,7 +15,6 @@ import no.nav.tjeneste.virksomhet.organisasjon.v4.binding.HentOrganisasjonOrgani
 import no.nav.tjeneste.virksomhet.organisasjon.v4.binding.HentOrganisasjonUgyldigInput;
 import no.nav.tjeneste.virksomhet.organisasjon.v4.meldinger.HentOrganisasjonRequest;
 import no.nav.tjeneste.virksomhet.organisasjon.v4.meldinger.HentOrganisasjonResponse;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
@@ -27,7 +26,6 @@ public class EregService implements EregFasade {
     private final OrganisasjonConsumer organisasjonConsumer;
     private final DokumentFactory dokumentFactory;
 
-    @Autowired
     public EregService(OrganisasjonConsumer organisasjonConsumer, DokumentFactory dokumentFactory) {
         this.organisasjonConsumer = organisasjonConsumer;
         this.dokumentFactory = dokumentFactory;
@@ -37,7 +35,6 @@ public class EregService implements EregFasade {
     public Saksopplysning hentOrganisasjon(String orgnummer) {
         HentOrganisasjonResponse response = hentOrganisasjonResponse(orgnummer);
 
-        // Response -> xml
         StringWriter xmlWriter = new StringWriter();
         try {
             no.nav.tjeneste.virksomhet.organisasjon.v4.HentOrganisasjonResponse xmlRoot = new no.nav.tjeneste.virksomhet.organisasjon.v4.HentOrganisasjonResponse();
@@ -53,7 +50,6 @@ public class EregService implements EregFasade {
         saksopplysning.setType(SaksopplysningType.ORG);
         saksopplysning.setVersjon(ORGANISASJON_VERSJON);
 
-        // xml -> java objekter
         dokumentFactory.lagDokument(saksopplysning);
 
         return saksopplysning;
@@ -69,7 +65,7 @@ public class EregService implements EregFasade {
     public boolean organisasjonFinnes(String orgnummer) {
         try {
             return hentOrganisasjonResponse(orgnummer) != null;
-        } catch (IkkeFunnetException|IntegrasjonException e) {
+        } catch (IkkeFunnetException | IntegrasjonException e) {
             return false;
         }
     }

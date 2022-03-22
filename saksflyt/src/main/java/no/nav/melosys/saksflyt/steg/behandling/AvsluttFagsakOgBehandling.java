@@ -11,7 +11,6 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.sak.FagsakService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.AVSLUTT_SAK_OG_BEHANDLING;
@@ -25,7 +24,6 @@ public class AvsluttFagsakOgBehandling implements StegBehandler {
     private final BehandlingService behandlingService;
     private final BehandlingsresultatService behandlingsresultatService;
 
-    @Autowired
     public AvsluttFagsakOgBehandling(FagsakService fagsakService, BehandlingService behandlingService, BehandlingsresultatService behandlingsresultatService) {
         this.fagsakService = fagsakService;
         this.behandlingService = behandlingService;

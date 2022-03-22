@@ -5,7 +5,6 @@ import java.util.Optional;
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.MedlemAvFolketrygdenRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -13,7 +12,6 @@ public class MedlemAvFolketrygdenService {
 
     private final MedlemAvFolketrygdenRepository medlemAvFolketrygdenRepository;
 
-    @Autowired
     public MedlemAvFolketrygdenService(MedlemAvFolketrygdenRepository medlemAvFolketrygdenRepository) {
         this.medlemAvFolketrygdenRepository = medlemAvFolketrygdenRepository;
     }

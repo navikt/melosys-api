@@ -19,7 +19,6 @@ import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.meldinger.ProduserIkkere
 import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.meldinger.ProduserIkkeredigerbartDokumentResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import org.w3c.dom.Document;
@@ -47,7 +46,6 @@ public class DoksysService implements DoksysFasade {
 
     private final ObjectFactory objectFactory;
 
-    @Autowired
     public DoksysService(DokumentproduksjonConsumer dokumentproduksjonConsumer, DistribuerJournalpostConsumer distribuerJournalpostConsumer) {
         this.dokumentproduksjonConsumer = dokumentproduksjonConsumer;
         this.distribuerJournalpostConsumer = distribuerJournalpostConsumer;
@@ -81,11 +79,6 @@ public class DoksysService implements DoksysFasade {
 
         DokumentbestillingMetadata metadata = dokumentbestilling.getMetadata();
         info.setDokumenttypeId(metadata.dokumenttypeID);
-
-        // UtledRegisterInfo er utdatert.
-        // Deaktivering av registerutledning gjøres ved "setBerik" på mottaker
-
-        // Hvis vedlegg skal sendes, må denne settes først når vedleggene har blitt sendt
         info.setFerdigstillForsendelse(true);
 
         Fagsystemer bestillendeFagsystem = objectFactory.createFagsystemer();

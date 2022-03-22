@@ -10,7 +10,6 @@ import org.apache.kafka.clients.CommonClientConfigs;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.config.SslConfigs;
 import org.apache.kafka.common.serialization.StringSerializer;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -23,20 +22,23 @@ import org.springframework.kafka.support.serializer.JsonSerializer;
 
 @Configuration
 public class UtstedtA1AivenProducerConfig {
-    @Autowired
     private Environment env;
-
-    @Value("${kafka.aiven.brokers}")
     private String brokersUrl;
-
-    @Value("${kafka.aiven.keystorePath}")
     private String keystorePath;
-
-    @Value("${kafka.aiven.truststorePath}")
     private String truststorePath;
-
-    @Value("${kafka.aiven.credstorePassword}")
     private String credstorePassword;
+
+    public UtstedtA1AivenProducerConfig(Environment env,
+                                        @Value("${kafka.aiven.brokers}") String brokersUrl,
+                                        @Value("${kafka.aiven.keystorePath}") String keystorePath,
+                                        @Value("${kafka.aiven.truststorePath}") String truststorePath,
+                                        @Value("${kafka.aiven.credstorePassword}") String credstorePassword) {
+        this.env = env;
+        this.brokersUrl = brokersUrl;
+        this.keystorePath = keystorePath;
+        this.truststorePath = truststorePath;
+        this.credstorePassword = credstorePassword;
+    }
 
     @Bean
     @Qualifier("aivenUtstedtA1")

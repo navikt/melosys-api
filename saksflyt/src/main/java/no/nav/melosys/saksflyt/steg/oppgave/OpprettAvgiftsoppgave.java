@@ -11,7 +11,6 @@ import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.oppgave.OppgaveService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
@@ -23,7 +22,6 @@ public class OpprettAvgiftsoppgave implements StegBehandler {
     private final BehandlingsresultatService behandlingsresultatService;
     private final OppgaveService oppgaveService;
 
-    @Autowired
     public OpprettAvgiftsoppgave(BehandlingsresultatService behandlingsresultatService,
                                  @Qualifier("system") OppgaveService oppgaveService) {
         this.behandlingsresultatService = behandlingsresultatService;

@@ -10,7 +10,6 @@ import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.persondata.PersondataFasade;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
@@ -20,15 +19,11 @@ public class RegisterOppslagService {
     private final EregFasade eregFasade;
     private final PersondataFasade persondataFasade;
 
-    @Autowired
     public RegisterOppslagService(EregFasade eregFasade, PersondataFasade persondataFasade) {
         this.eregFasade = eregFasade;
         this.persondataFasade = persondataFasade;
     }
 
-    /**
-     *  Henter et sett med organisasjonsopplysninger
-     */
     public Set<OrganisasjonDokument> hentOrganisasjoner(Set<String> orgnumre) {
         Set<OrganisasjonDokument> organisasjoner = new HashSet<>();
         for (String orgnr : orgnumre) {
@@ -40,9 +35,6 @@ public class RegisterOppslagService {
         return organisasjoner;
     }
 
-    /**
-     * Henter organisasjonsopplysninger.
-     */
     public OrganisasjonDokument hentOrganisasjon(String orgnummer) {
         Saksopplysning saksopplysning = eregFasade.hentOrganisasjon(validerOgVaskOrgnr(orgnummer));
         return (OrganisasjonDokument) saksopplysning.getDokument();
@@ -56,10 +48,7 @@ public class RegisterOppslagService {
         Saksopplysning saksopplysning = persondataFasade.hentPersonFraTps(personnummer, Informasjonsbehov.STANDARD);
         return (PersonDokument) saksopplysning.getDokument();
     }
-
-    /**
-     * Fjerner mellomrom i orgnr
-     */
+    
     private String validerOgVaskOrgnr(String orgnr) {
         orgnr = orgnr.replace(" ", "");
 

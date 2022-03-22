@@ -26,7 +26,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -55,7 +54,6 @@ public class FagsakTjeneste {
     private final UtpekingService utpekingService;
     private final VideresendSoknadService videresendSoknadService;
 
-    @Autowired
     public FagsakTjeneste(FagsakService fagsakService, Aksesskontroll aksesskontroll, BehandlingsgrunnlagService behandlingsgrunnlagService,
                           HenleggFagsakService henleggFagsakService,
                           OpprettNySakFraOppgave opprettNySakFraOppgave, PersondataFasade persondataFasade,

@@ -9,7 +9,6 @@ import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.vilkaar.InngangsvilkaarService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -19,7 +18,6 @@ public class VurderInngangsvilkaar implements StegBehandler {
     private final InngangsvilkaarService inngangsvilkaarService;
     private final BehandlingService behandlingService;
 
-    @Autowired
     public VurderInngangsvilkaar(InngangsvilkaarService inngangsvilkaarService, BehandlingService behandlingService) {
         this.inngangsvilkaarService = inngangsvilkaarService;
         this.behandlingService = behandlingService;
