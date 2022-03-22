@@ -7,7 +7,6 @@ import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,7 +21,6 @@ public class DokumentServiceFasade {
     private final ApplicationEventPublisher applicationEventPublisher;
 
 
-    @Autowired
     public DokumentServiceFasade(DokumentService dokumentService, DokumentSystemService dokumentSystemService,
                                  DokgenService dokgenService, BehandlingService behandlingService,
                                  ApplicationEventPublisher applicationEventPublisher) {

@@ -36,8 +36,8 @@ jobs:
     needs: check_docker_image_exists
     if: needs.check_docker_image_exists.outputs.exists != 'true'
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/cache@v2
+      - uses: actions/checkout@v3
+      - uses: actions/cache@v3
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
@@ -79,7 +79,7 @@ jobs:
     needs: docker
     if: always() && (needs.docker.result == 'success' || needs.docker.result == 'skipped')
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Deploy to prod
         if: github.event.inputs.environment == 'prod'
         run: |

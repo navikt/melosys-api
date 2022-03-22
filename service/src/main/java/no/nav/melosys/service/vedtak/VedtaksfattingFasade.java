@@ -8,7 +8,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.service.behandling.BehandlingService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,7 +24,6 @@ public class VedtaksfattingFasade {
 
     public static final int FRIST_KLAGE_UKER = 6;
 
-    @Autowired
     public VedtaksfattingFasade(BehandlingService behandlingService,
                                 EosVedtakService eosVedtakService,
                                 EosVedtakSystemService eosVedtakSystemService,

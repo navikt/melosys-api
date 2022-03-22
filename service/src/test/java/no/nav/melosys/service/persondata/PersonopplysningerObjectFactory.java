@@ -3,6 +3,7 @@ package no.nav.melosys.service.persondata;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -246,4 +247,64 @@ public class PersonopplysningerObjectFactory {
             new Sivilstand(Sivilstandstype.GIFT, null, "relatertVedSivilstandID", LocalDate.MIN, null, "Dolly", "PDL",
                 false));
     }
+
+    public static Personopplysninger lagDonaldDuckPersondata() {
+        return new Personopplysninger(
+            emptyList(),
+            new Bostedsadresse(lagStrukturertAdresse(), "",
+                LocalDate.now().minusYears(2), LocalDate.now().plusYears(2), Master.PDL.name(), "", false),
+            null,
+            emptySet(),
+            null,
+            null,
+            KjoennType.UKJENT,
+            Collections.singletonList(lagKontaktadresse()),
+            new Navn("Donald", null, "Duck"),
+            Collections.singletonList(lagOppholdsadresse()),
+            emptyList()
+        );
+    }
+
+    private static Oppholdsadresse lagOppholdsadresse() {
+        return new Oppholdsadresse(
+            lagStrukturertAdresse(),
+            null,
+            LocalDate.now().minusYears(2),
+            LocalDate.now().plusYears(2),
+            Master.PDL.name(),
+            Master.PDL.name(),
+            LocalDateTime.now(),
+            false
+        );
+    }
+
+    private static Kontaktadresse lagKontaktadresse() {
+        return new Kontaktadresse(
+            lagStrukturertAdresse(),
+            null,
+            null,
+            LocalDate.now().minusYears(2),
+            LocalDate.now().plusYears(2),
+            Master.PDL.name(),
+            Master.PDL.name(),
+            LocalDateTime.now(),
+            false
+        );
+    }
+
+    private static StrukturertAdresse lagStrukturertAdresse() {
+        return new StrukturertAdresse(
+            ADRESSELINJE_1_BRUKER,
+            HUSNUMMER,
+            POSTNR_BRUKER,
+            POSTSTED_BRUKER,
+            REGION,
+            Landkoder.SE.name()
+        );
+    }
+    public static final String ADRESSELINJE_1_BRUKER = "Andebygata 1";
+    public static final String POSTNR_BRUKER = "9999";
+    public static final String POSTSTED_BRUKER = "Andeby";
+    public static final String REGION = "NEVERLAND";
+    public static final String HUSNUMMER = "3";
 }

@@ -17,7 +17,6 @@ import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
@@ -30,7 +29,6 @@ public class AdminInnvalideringSedRuter extends AdminSedRuter implements SedRute
     private final EessiService eessiService;
     private final Unleash unleash;
 
-    @Autowired
     public AdminInnvalideringSedRuter(FagsakService fagsakService,
                                       ProsessinstansService prosessinstansService,
                                       @Qualifier("system") OppgaveService oppgaveService,

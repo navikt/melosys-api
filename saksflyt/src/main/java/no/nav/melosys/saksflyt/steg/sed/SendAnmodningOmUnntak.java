@@ -26,7 +26,6 @@ import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
@@ -42,7 +41,6 @@ public class SendAnmodningOmUnntak extends AbstraktSendUtland {
     private static final ZoneId TIME_ZONE_ID = ZoneId.systemDefault();
     private static final int SVARFRIST_MÅNEDER = 2;
 
-    @Autowired
     public SendAnmodningOmUnntak(@Qualifier("system") EessiService eessiService,
                                  BrevBestiller brevBestiller,
                                  BehandlingService behandlingService,

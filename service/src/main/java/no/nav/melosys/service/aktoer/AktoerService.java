@@ -10,7 +10,6 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.AktoerRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,7 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class AktoerService {
     private final AktoerRepository aktørRepository;
 
-    @Autowired
     public AktoerService(AktoerRepository aktørRepository) {
         this.aktørRepository = aktørRepository;
     }
@@ -42,8 +40,7 @@ public class AktoerService {
         Aktoer aktoer;
         if (aktoerDto.getDatabaseID() == null) {
             aktoer = new Aktoer();
-        }
-        else {
+        } else {
             aktoer = aktørRepository.findById(aktoerDto.getDatabaseID())
                 .orElseThrow(() -> new IkkeFunnetException("Finner ikke aktør med id " + aktoerDto.getDatabaseID()));
         }

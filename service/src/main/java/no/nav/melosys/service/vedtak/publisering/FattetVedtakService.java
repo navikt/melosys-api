@@ -4,7 +4,6 @@ import java.time.ZoneId;
 import java.util.Collection;
 import java.util.Optional;
 
-import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadFtrl;
@@ -40,16 +39,14 @@ public class FattetVedtakService {
     private final BehandlingService behandlingService;
     private final BehandlingsresultatService behandlingsresultatService;
     private final PersondataFasade persondataFasade;
-    private final Unleash unleash;
 
     public FattetVedtakService(FattetVedtakProducer fattetVedtakProducer, BehandlingService behandlingService,
                                BehandlingsresultatService behandlingsresultatService,
-                               @Qualifier("system") PersondataFasade persondataFasade, Unleash unleash) {
+                               @Qualifier("system") PersondataFasade persondataFasade) {
         this.fattetVedtakProducer = fattetVedtakProducer;
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.persondataFasade = persondataFasade;
-        this.unleash = unleash;
     }
 
     @Transactional
@@ -74,10 +71,7 @@ public class FattetVedtakService {
     }
 
     private Persondata hentPersondata(Behandling behandling) {
-        if (unleash.isEnabled("melosys.pdl.aktiv")) {
-            return persondataFasade.hentPerson(behandling.getFagsak().hentAktørID());
-        }
-        return behandling.hentPersonDokument();
+        return persondataFasade.hentPerson(behandling.getFagsak().hentAktørID());
     }
 
     private Sak lagSak(Behandling behandling, Fagsak fagsak, Persondata persondata) {

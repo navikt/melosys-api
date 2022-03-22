@@ -24,7 +24,6 @@ import no.nav.melosys.integrasjon.oppgave.konsument.dto.OpprettOppgaveDto;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
@@ -44,7 +43,6 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
 
     private final OppgaveConsumer oppgaveConsumer;
 
-    @Autowired
     public OppgaveFasadeImpl(OppgaveConsumer oppgaveConsumer) {
         this.oppgaveConsumer = oppgaveConsumer;
     }

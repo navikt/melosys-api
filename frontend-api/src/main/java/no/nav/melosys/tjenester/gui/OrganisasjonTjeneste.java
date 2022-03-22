@@ -8,7 +8,6 @@ import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.service.registeropplysninger.RegisterOppslagService;
 import no.nav.melosys.tjenester.gui.dto.OrganisasjonDto;
 import no.nav.security.token.support.core.api.Protected;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,7 +24,6 @@ import org.springframework.web.context.WebApplicationContext;
 public class OrganisasjonTjeneste {
     private final RegisterOppslagService registerOppslag;
 
-    @Autowired
     public OrganisasjonTjeneste(RegisterOppslagService registerOppslag) {
         this.registerOppslag = registerOppslag;
     }

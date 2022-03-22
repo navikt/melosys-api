@@ -5,7 +5,6 @@ import java.util.Collections;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.integrasjon.felles.SystemContextClientRequestInterceptor;
 import no.nav.melosys.integrasjon.felles.UserContextClientRequestInterceptor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -19,7 +18,6 @@ public class EessiConsumerProducer {
 
     private final String url;
 
-    @Autowired
     public EessiConsumerProducer(@Value("${MelosysEessi.url}") String url) {
         this.url = url;
     }

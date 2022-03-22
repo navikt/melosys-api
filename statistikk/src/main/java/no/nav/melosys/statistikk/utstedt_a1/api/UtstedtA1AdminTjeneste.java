@@ -13,7 +13,6 @@ import no.nav.melosys.statistikk.utstedt_a1.service.UtstedtA1Service;
 import no.nav.security.token.support.core.api.Unprotected;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -32,7 +31,6 @@ public class UtstedtA1AdminTjeneste implements AdminTjeneste {
     private final VedtakMetadataRepository vedtakMetadataRepository;
     private final String apiKey;
 
-    @Autowired
     public UtstedtA1AdminTjeneste(
         UtstedtA1Service utstedtA1Service,
         VedtakMetadataRepository vedtakMetadataRepository,

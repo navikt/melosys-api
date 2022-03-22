@@ -3,7 +3,6 @@ package no.nav.melosys.integrasjon.avgiftoverforing;
 import no.nav.melosys.exception.TekniskException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,7 +17,6 @@ public class AvgiftOverforingConsumerProducer {
 
     private final String url;
 
-    @Autowired
     public AvgiftOverforingConsumerProducer(@Value("${melosysavgiftoverforing.url}") String url) {
         this.url = url;
     }

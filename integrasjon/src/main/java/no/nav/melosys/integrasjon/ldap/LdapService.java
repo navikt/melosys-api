@@ -14,7 +14,6 @@ import javax.naming.ldap.Rdn;
 import no.nav.melosys.exception.TekniskException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ldap.core.AttributesMapper;
 import org.springframework.ldap.core.LdapTemplate;
 import org.springframework.stereotype.Component;
@@ -29,7 +28,6 @@ public class LdapService {
 
     private static final Pattern IDENT_PATTERN = Pattern.compile("^[a-åA-Å]\\d{6}$");
 
-    @Autowired
     public LdapService(LdapTemplate ldapTemplate) {
         this.ldapTemplate = ldapTemplate;
     }
