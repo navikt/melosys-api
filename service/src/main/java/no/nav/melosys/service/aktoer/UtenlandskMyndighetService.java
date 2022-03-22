@@ -16,7 +16,6 @@ import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.sak.FagsakService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.TRYGDEMYNDIGHET;
@@ -29,7 +28,6 @@ public class UtenlandskMyndighetService {
     private final LandvelgerService landvelgerService;
     private final FagsakService fagsakService;
 
-    @Autowired
     public UtenlandskMyndighetService(UtenlandskMyndighetRepository utenlandskMyndighetRepository,
                                       LandvelgerService landvelgerService, FagsakService fagsakService) {
         this.utenlandskMyndighetRepository = utenlandskMyndighetRepository;

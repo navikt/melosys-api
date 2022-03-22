@@ -10,7 +10,6 @@ import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.dokgen.dto.*;
 import no.nav.melosys.integrasjon.dokgen.dto.felles.Mottaker;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static java.lang.String.format;
@@ -23,7 +22,6 @@ public class DokgenMalMapper {
     private final InnvilgelseFtrlMapper innvilgelseFtrlMapper;
     private final StorbritanniaMapper storbritanniaMapper;
 
-    @Autowired
     public DokgenMalMapper(DokgenMapperDatahenter dokgenMapperDatahenter,
                            InnvilgelseFtrlMapper innvilgelseFtrlMapper,
                            StorbritanniaMapper storbritanniaMapper) {
@@ -79,14 +77,14 @@ public class DokgenMalMapper {
                 ((MangelbrevBrevbestilling) brevbestilling).toBuilder()
                     .medVedtaksdato(dokgenMapperDatahenter.hentVedtaksdato(brevbestilling.getBehandling().getId()))
                     .build(),
-                MangelbrevSvarfrist.beregnFristFraDato(Instant.now())
+                DokumentasjonSvarfrist.beregnFristPaaMangelbrevFraDagensDato()
             );
             case MANGELBREV_ARBEIDSGIVER -> MangelbrevArbeidsgiver.av(
                 ((MangelbrevBrevbestilling) brevbestilling).toBuilder()
                     .medVedtaksdato(dokgenMapperDatahenter.hentVedtaksdato(brevbestilling.getBehandling().getId()))
                     .medFullmektigNavn(dokgenMapperDatahenter.hentFullmektigNavn(brevbestilling.getBehandling().getFagsak(), Representerer.BRUKER))
                     .build(),
-                MangelbrevSvarfrist.beregnFristFraDato(Instant.now())
+                DokumentasjonSvarfrist.beregnFristPaaMangelbrevFraDagensDato()
             );
             case INNVILGELSE_FOLKETRYGDLOVEN_2_8 -> innvilgelseFtrlMapper.map((InnvilgelseBrevbestilling) brevbestilling);
             case STORBRITANNIA -> storbritanniaMapper.map((InnvilgelseBrevbestilling) brevbestilling.toBuilder()

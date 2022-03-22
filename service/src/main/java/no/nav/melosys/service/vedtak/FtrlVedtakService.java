@@ -19,7 +19,6 @@ import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import static no.nav.melosys.service.vedtak.VedtaksfattingFasade.FRIST_KLAGE_UKER;
@@ -34,7 +33,6 @@ public class FtrlVedtakService {
     private final OppgaveService oppgaveService;
     private final DokgenService dokgenService;
 
-    @Autowired
     public FtrlVedtakService(BehandlingsresultatService behandlingsresultatService,
                              BehandlingService behandlingService,
                              ProsessinstansService prosessinstansService,

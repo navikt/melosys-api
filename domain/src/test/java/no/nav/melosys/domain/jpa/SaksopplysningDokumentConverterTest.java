@@ -22,6 +22,7 @@ import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.person.PersonMedHistorikk;
 import no.nav.melosys.domain.person.Personopplysninger;
+import no.nav.melosys.domain.person.PersonopplysningerObjectFactory;
 import org.jeasy.random.EasyRandom;
 import org.jeasy.random.EasyRandomParameters;
 import org.jeasy.random.randomizers.misc.EnumRandomizer;

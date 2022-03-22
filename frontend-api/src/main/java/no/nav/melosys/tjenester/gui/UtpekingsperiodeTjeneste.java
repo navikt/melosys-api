@@ -9,7 +9,6 @@ import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.utpeking.UtpekingService;
 import no.nav.melosys.tjenester.gui.dto.utpeking.UtpekingsperioderDto;
 import no.nav.security.token.support.core.api.Protected;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.WebApplicationContext;
@@ -24,7 +23,6 @@ public class UtpekingsperiodeTjeneste {
     private final UtpekingService utpekingService;
     private final Aksesskontroll aksesskontroll;
 
-    @Autowired
     public UtpekingsperiodeTjeneste(UtpekingService utpekingService, Aksesskontroll aksesskontroll) {
         this.utpekingService = utpekingService;
         this.aksesskontroll = aksesskontroll;
@@ -44,7 +42,7 @@ public class UtpekingsperiodeTjeneste {
     @PostMapping("{behandlingID}")
     @ApiOperation("Lagrer utpekingssperioder for en gitt behandling.")
     public UtpekingsperioderDto lagreUtpekingsperioder(@PathVariable("behandlingID") long behandlingID,
-                                                           @RequestBody UtpekingsperioderDto utpekingsperioderDto) {
+                                                       @RequestBody UtpekingsperioderDto utpekingsperioderDto) {
 
         aksesskontroll.autoriserSkriv(behandlingID);
 

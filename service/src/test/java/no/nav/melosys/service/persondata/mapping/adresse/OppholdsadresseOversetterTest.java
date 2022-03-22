@@ -44,6 +44,7 @@ class OppholdsadresseOversetterTest {
 
         final var oppholdsadresse = OppholdsadresseOversetter.oversett(oppholdsadressePDL, kodeverkService);
 
+        assertThat(oppholdsadresse).isNotNull();
         assertThat(oppholdsadresse.coAdressenavn()).isEqualTo("Kari Hansen");
         assertThat(oppholdsadresse.gyldigFraOgMed()).isEqualTo(LocalDate.parse("2020-01-01"));
         assertThat(oppholdsadresse.gyldigTilOgMed()).isEqualTo(LocalDate.parse("2020-05-05"));
@@ -81,6 +82,7 @@ class OppholdsadresseOversetterTest {
 
         final var oppholdsadresse = OppholdsadresseOversetter.oversett(oppholdsadressePDL, kodeverkService);
 
+        assertThat(oppholdsadresse).isNotNull();
         assertThat(oppholdsadresse.strukturertAdresse().getGatenavn()).isEqualTo("adressenavnNummer");
         assertThat(oppholdsadresse.strukturertAdresse().getHusnummerEtasjeLeilighet()).isEqualTo("bygningEtasjeLeilighet");
         assertThat(oppholdsadresse.strukturertAdresse().getPostboks()).isEqualTo("P.O.Box 1234 Place");
@@ -88,5 +90,22 @@ class OppholdsadresseOversetterTest {
         assertThat(oppholdsadresse.strukturertAdresse().getPoststed()).isEqualTo("Haworth");
         assertThat(oppholdsadresse.strukturertAdresse().getRegion()).isEqualTo("Yorkshire");
         assertThat(oppholdsadresse.strukturertAdresse().getLandkode()).isEqualTo("SE");
+    }
+
+    @Test
+    void oversettTomOppholdsadresse() {
+        var oppholdsadressePDL = new Oppholdsadresse(
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            metadata()
+        );
+
+        final var oppholdsadresse = OppholdsadresseOversetter.oversett(oppholdsadressePDL, kodeverkService);
+
+        assertThat(oppholdsadresse).isNull();
     }
 }

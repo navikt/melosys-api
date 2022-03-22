@@ -7,7 +7,6 @@ import no.nav.melosys.domain.TemaFactory;
 import no.nav.melosys.integrasjon.sakogbehandling.SakOgBehandlingFasade;
 import no.nav.melosys.integrasjon.sakogbehandling.behandlingstatus.BehandlingStatusMapper;
 import no.nav.melosys.service.behandling.BehandlingService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -15,7 +14,6 @@ public class SobService {
     private final BehandlingService behandlingService;
     private final SakOgBehandlingFasade sakOgBehandlingFasade;
 
-    @Autowired
     public SobService(BehandlingService behandlingService, SakOgBehandlingFasade sakOgBehandlingFasade) {
         this.behandlingService = behandlingService;
         this.sakOgBehandlingFasade = sakOgBehandlingFasade;

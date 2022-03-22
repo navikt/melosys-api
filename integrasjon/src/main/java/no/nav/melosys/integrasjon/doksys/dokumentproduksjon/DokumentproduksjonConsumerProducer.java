@@ -3,7 +3,6 @@ package no.nav.melosys.integrasjon.doksys.dokumentproduksjon;
 import no.nav.melosys.sikkerhet.sts.NAVSTSClient;
 import no.nav.melosys.sikkerhet.sts.StsConfigurationUtil;
 import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.DokumentproduksjonV3;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,8 +13,7 @@ public class DokumentproduksjonConsumerProducer {
 
     private DokumentproduksjonConsumerConfig config;
 
-    @Autowired
-    public void setConfig(DokumentproduksjonConsumerConfig config) {
+    public DokumentproduksjonConsumerProducer(DokumentproduksjonConsumerConfig config) {
         this.config = config;
     }
 

@@ -13,7 +13,6 @@ import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.tjenester.gui.dto.EndreVedtakDto;
 import no.nav.melosys.tjenester.gui.dto.FattVedtakDto;
 import no.nav.security.token.support.core.api.Protected;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -29,7 +28,6 @@ public class VedtakTjeneste {
     private final Aksesskontroll aksesskontroll;
     private final VedtakKontrollService vedtakKontrollService;
 
-    @Autowired
     public VedtakTjeneste(VedtaksfattingFasade vedtaksfattingFasade, Aksesskontroll aksesskontroll, VedtakKontrollService vedtakKontrollService) {
         this.vedtaksfattingFasade = vedtaksfattingFasade;
         this.aksesskontroll = aksesskontroll;
@@ -64,8 +62,8 @@ public class VedtakTjeneste {
     @PostMapping("{behandlingID}/kontroller")
     @ApiOperation(value = "Gjør kontroll på vedtaket, og returnerer eventuelle feilmeldinger som liste med KontrollfeilDto")
     public ResponseEntity<Void> kontrollerVedtak(@PathVariable("behandlingID") long behandlingID,
-                                 @RequestParam(value = "skalRegisteropplysningerOppdateres", required = false) boolean skalRegisteropplysningerOppdateres,
-                                 @RequestBody FattVedtakDto fattVedtakDto) throws ValideringException {
+                                                 @RequestParam(value = "skalRegisteropplysningerOppdateres", required = false) boolean skalRegisteropplysningerOppdateres,
+                                                 @RequestBody FattVedtakDto fattVedtakDto) throws ValideringException {
         if (fattVedtakDto.getVedtakstype() == null) {
             throw new FunksjonellException("Vedtakstype mangler.");
         }

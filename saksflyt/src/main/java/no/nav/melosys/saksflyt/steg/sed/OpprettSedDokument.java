@@ -8,7 +8,6 @@ import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.saksopplysninger.OpprettSedDokumentService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -17,7 +16,6 @@ public class OpprettSedDokument implements StegBehandler {
 
     private final OpprettSedDokumentService opprettSedDokumentService;
 
-    @Autowired
     public OpprettSedDokument(OpprettSedDokumentService opprettSedDokumentService) {
         this.opprettSedDokumentService = opprettSedDokumentService;
     }

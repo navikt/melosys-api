@@ -17,10 +17,8 @@ import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-//A009,A010
 @Service
 public class UnntaksperiodeSedRuter implements SedRuterForSedTyper {
 
@@ -30,7 +28,6 @@ public class UnntaksperiodeSedRuter implements SedRuterForSedTyper {
     private final FagsakService fagsakService;
     private final BehandlingsresultatService behandlingsresultatService;
 
-    @Autowired
     public UnntaksperiodeSedRuter(ProsessinstansService prosessinstansService, FagsakService fagsakService, BehandlingsresultatService behandlingsresultatService) {
         this.prosessinstansService = prosessinstansService;
         this.fagsakService = fagsakService;

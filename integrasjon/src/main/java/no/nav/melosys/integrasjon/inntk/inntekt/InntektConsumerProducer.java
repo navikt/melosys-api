@@ -4,7 +4,6 @@ package no.nav.melosys.integrasjon.inntk.inntekt;
 import no.nav.melosys.sikkerhet.sts.NAVSTSClient;
 import no.nav.melosys.sikkerhet.sts.StsConfigurationUtil;
 import no.nav.tjeneste.virksomhet.inntekt.v3.binding.InntektV3;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -16,7 +15,6 @@ public class InntektConsumerProducer {
 
     private InntektConsumerConfig config;
 
-    @Autowired
     public InntektConsumerProducer(InntektConsumerConfig config) {
         this.config = config;
     }

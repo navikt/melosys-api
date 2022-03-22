@@ -3,7 +3,6 @@ package no.nav.melosys.integrasjon.sakogbehandling.behandlingskjede;
 import no.nav.melosys.sikkerhet.sts.NAVSTSClient;
 import no.nav.melosys.sikkerhet.sts.StsConfigurationUtil;
 import no.nav.tjeneste.virksomhet.sakogbehandling.v1.binding.SakOgBehandlingV1;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -14,8 +13,7 @@ public class BehandlingskjedeConsumerProducer {
 
     private BehandlingskjedeConsumerConfig config;
 
-    @Autowired
-    public void setConfig(BehandlingskjedeConsumerConfig config) {
+    public BehandlingskjedeConsumerProducer(BehandlingskjedeConsumerConfig config) {
         this.config = config;
     }
 

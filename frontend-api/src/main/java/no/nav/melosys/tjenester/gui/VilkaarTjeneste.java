@@ -10,7 +10,6 @@ import no.nav.melosys.service.vilkaar.InngangsvilkaarService;
 import no.nav.melosys.service.vilkaar.VilkaarDto;
 import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
 import no.nav.security.token.support.core.api.Protected;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -29,7 +28,6 @@ public class VilkaarTjeneste {
     private final InngangsvilkaarService inngangsvilkaarService;
     private final Aksesskontroll aksesskontroll;
 
-    @Autowired
     public VilkaarTjeneste(VilkaarsresultatService vilkaarsresultatService,
                            InngangsvilkaarService inngangsvilkaarService,
                            Aksesskontroll aksesskontroll) {
@@ -47,7 +45,7 @@ public class VilkaarTjeneste {
     @PostMapping("{behandlingID}")
     @ApiOperation(value = "Lagre vilkår")
     public List<VilkaarDto> registrerVilkår(@PathVariable("behandlingID") long behandlingID,
-            @RequestBody List<VilkaarDto> vilkaarDtoer) {
+                                            @RequestBody List<VilkaarDto> vilkaarDtoer) {
         aksesskontroll.autoriserSkrivTilRessurs(behandlingID, Ressurs.VILKÅR);
         vilkaarsresultatService.registrerVilkår(behandlingID, vilkaarDtoer);
         return vilkaarsresultatService.hentVilkaar(behandlingID);

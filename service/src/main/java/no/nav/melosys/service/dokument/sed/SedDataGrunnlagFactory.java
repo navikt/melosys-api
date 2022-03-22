@@ -2,7 +2,6 @@ package no.nav.melosys.service.dokument.sed;
 
 import java.util.Arrays;
 
-import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.eessi.SedType;
@@ -15,7 +14,6 @@ import no.nav.melosys.service.dokument.sed.datagrunnlag.SedDataGrunnlagMedSoknad
 import no.nav.melosys.service.dokument.sed.datagrunnlag.SedDataGrunnlagUtenSoknad;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.persondata.PersondataFasade;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
@@ -28,17 +26,14 @@ public class SedDataGrunnlagFactory {
     private final AvklarteVirksomheterService avklarteVirksomheterService;
     private final KodeverkService kodeverkService;
     private final PersondataFasade persondataFasade;
-    private final Unleash unleash;
 
-    @Autowired
     public SedDataGrunnlagFactory(AvklartefaktaService avklartefaktaService,
                                   AvklarteVirksomheterSystemService avklarteVirksomheterService,
-                                  KodeverkService kodeverkService, PersondataFasade persondataFasade, Unleash unleash) {
+                                  KodeverkService kodeverkService, PersondataFasade persondataFasade) {
         this.avklartefaktaService = avklartefaktaService;
         this.avklarteVirksomheterService = avklarteVirksomheterService;
         this.kodeverkService = kodeverkService;
         this.persondataFasade = persondataFasade;
-        this.unleash = unleash;
     }
 
     public SedDataGrunnlag av(Behandling behandling) {
@@ -52,16 +47,13 @@ public class SedDataGrunnlagFactory {
     }
 
     public SedDataGrunnlag av(Behandling behandling, SedType sedType) {
-        if(Arrays.asList(SedType.A002, SedType.A011).contains(sedType)){
+        if (Arrays.asList(SedType.A002, SedType.A011).contains(sedType)) {
             return new SedDataGrunnlagUtenSoknad(behandling, kodeverkService, hentPersondata(behandling));
         }
         return av(behandling);
     }
 
     private Persondata hentPersondata(Behandling behandling) {
-        if (unleash.isEnabled("melosys.pdl.aktiv")) {
-            return persondataFasade.hentPerson(behandling.getFagsak().hentAktørID(), MED_FAMILIERELASJONER);
-        }
-        return behandling.hentPersonDokument();
+        return persondataFasade.hentPerson(behandling.getFagsak().hentAktørID(), MED_FAMILIERELASJONER);
     }
 }

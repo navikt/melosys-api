@@ -33,7 +33,7 @@ public interface RestConsumer {
         if (callID == null) {
             callID = MDCOperations.generateCallId();
         }
-      return callID;
+        return callID;
     }
 
     default Environment getEnv() {
@@ -55,7 +55,7 @@ public interface RestConsumer {
             return new IkkeFunnetException(feilmelding);
         } else if (status.is4xxClientError()) {
             return new FunksjonellException(feilmelding);
-        } else { // 5xx
+        } else {
             throw new TekniskException(feilmelding);
         }
     }

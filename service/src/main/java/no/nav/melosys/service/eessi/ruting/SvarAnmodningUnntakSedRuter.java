@@ -22,24 +22,20 @@ import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-//A002,A011
 @Service
 public class SvarAnmodningUnntakSedRuter implements SedRuterForSedTyper {
 
     private static final Logger log = LoggerFactory.getLogger(SvarAnmodningUnntakSedRuter.class);
+    private static final String MOTTATT_SED_BESKRIVELSE = "Mottatt svar på A001: SED %s";
 
     private final ProsessinstansService prosessinstansService;
     private final FagsakService fagsakService;
     private final AnmodningsperiodeService anmodningsperiodeService;
     private final OppgaveService oppgaveService;
-
-    private static final String MOTTATT_SED_BESKRIVELSE = "Mottatt svar på A001: SED %s";
-
-    @Autowired
+    
     public SvarAnmodningUnntakSedRuter(ProsessinstansService prosessinstansService, FagsakService fagsakService,
                                        AnmodningsperiodeService anmodningsperiodeService,
                                        @Qualifier("system") OppgaveService oppgaveService) {

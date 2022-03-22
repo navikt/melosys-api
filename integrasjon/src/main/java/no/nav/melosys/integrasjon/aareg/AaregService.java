@@ -10,18 +10,17 @@ import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdQuery;
 import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdResponse;
 import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdRestConsumer;
 import no.nav.melosys.integrasjon.kodeverk.KodeOppslag;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class AaregService implements AaregFasade {
+    
     private static final String ARBEIDSFORHOLD_REST_VERSJON = "REST 1.0";
 
     private final ArbeidsforholdRestConsumer arbeidsforholdRestConsumer;
     private final KodeOppslag kodeOppslag;
 
-    @Autowired
-    AaregService(ArbeidsforholdRestConsumer arbeidsforholdRestConsumer, KodeOppslag kodeOppslag) {
+    public AaregService(ArbeidsforholdRestConsumer arbeidsforholdRestConsumer, KodeOppslag kodeOppslag) {
         this.arbeidsforholdRestConsumer = arbeidsforholdRestConsumer;
         this.kodeOppslag = kodeOppslag;
     }

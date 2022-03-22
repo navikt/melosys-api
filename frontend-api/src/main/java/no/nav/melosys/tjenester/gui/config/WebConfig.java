@@ -9,7 +9,6 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.tjenester.gui.config.jackson.MelosysModule;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -26,7 +25,6 @@ public class WebConfig implements WebMvcConfigurer {
     private static final String FRONTEND_API_TJENESTER = "no.nav.melosys.tjenester.gui";
     private final KodeverkService kodeverkService;
 
-    @Autowired
     public WebConfig(KodeverkService kodeverkService) {
         this.kodeverkService = kodeverkService;
     }

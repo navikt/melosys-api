@@ -1,44 +1,38 @@
 package no.nav.melosys.saksflyt.steg.brev;
 
-import java.util.stream.Stream;
-
 import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
-import no.nav.melosys.domain.UtenlandskMyndighet;
 import no.nav.melosys.domain.arkiv.OpprettJournalpost;
-import no.nav.melosys.domain.brev.*;
+import no.nav.melosys.domain.brev.DokgenBrevbestilling;
+import no.nav.melosys.domain.brev.FritekstbrevBrevbestilling;
+import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
+import no.nav.melosys.domain.brev.MangelbrevBrevbestilling;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
-import no.nav.melosys.domain.kodeverk.begrunnelser.Nyvurderingbakgrunner;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.saksflyt.TestdataFactory;
-import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.brev.DokumentNavnService;
 import no.nav.melosys.service.dokument.DokgenService;
 import no.nav.melosys.service.dokument.brev.mapper.DokumentproduksjonsInfoMapper;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
+import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
-import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1;
-import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk.UK_ART8_2;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.*;
@@ -50,24 +44,18 @@ class OpprettJournalforBrevTest {
 
     @Mock
     private BehandlingService mockBehandlingService;
-
-    @Mock
-    private LovvalgsperiodeService mockLovvalgsperiodeService;
-
     @Mock
     private DokgenService mockDokgenService;
-
     @Mock
     private UtenlandskMyndighetService mockUtenlandskMyndighetService;
-
     @Mock
     private JoarkFasade mockJoarkFasade;
-
     @Mock
     private EregFasade mockEregFasade;
-
     @Mock
     private PersondataFasade mockPersondataFasade;
+    @Mock
+    private DokumentNavnService mockDokumentNavnService;
 
     @Captor
     ArgumentCaptor<OpprettJournalpost> opprettJournalpostCaptor;
@@ -76,8 +64,8 @@ class OpprettJournalforBrevTest {
 
     @BeforeEach
     void init() {
-        opprettJournalforBrev = new OpprettJournalforBrev(mockBehandlingService, mockLovvalgsperiodeService, mockDokgenService,
-            mockUtenlandskMyndighetService, mockJoarkFasade, mockPersondataFasade, mockEregFasade, new FakeUnleash());
+        opprettJournalforBrev = new OpprettJournalforBrev(mockBehandlingService, mockDokgenService,
+            mockUtenlandskMyndighetService, mockJoarkFasade, mockPersondataFasade, mockEregFasade, mockDokumentNavnService, new FakeUnleash());
     }
 
     @Test
@@ -141,58 +129,30 @@ class OpprettJournalforBrevTest {
         verify(mockJoarkFasade).opprettJournalpost(any(), anyBoolean());
     }
 
-    @ParameterizedTest
-    @MethodSource("testparametre")
-    void utfør_StorbritanniaInnvilgelseOgAttestMedUlikeParametre_korrektTittel(boolean skalHaAttest, boolean erNyVurdering, Aktoer mottaker, String forventetTittel){
-        if (mottaker.erUtenlandskMyndighet()) {
-            when(mockUtenlandskMyndighetService.hentUtenlandskMyndighetForInstitusjonID("1234")).thenReturn(new UtenlandskMyndighet());
-        }
-        else if (!FastMottakerMedOrgnr.SKATT.getOrgnr().equals(mottaker.getOrgnr())) {
-            when(mockLovvalgsperiodeService.hentValidertLovvalgsperiode(anyLong())).thenReturn(lagLovvalsperiode(skalHaAttest ? UK_ART6_1 : UK_ART8_2));
-        }
-        Prosessinstans prosessinstans = mockStorbritannia(mottaker, erNyVurdering);
+    @Test
+    void utfør_StorbritanniaInnvilgelseForBruker_korrektTittel() {
+        Behandling behandling = TestdataFactory.lagBehandling();
+        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
+        when(mockJoarkFasade.opprettJournalpost(any(), anyBoolean())).thenReturn("12234");
+        DokumentproduksjonsInfoMapper dokumentproduksjonsInfoMapper = new DokumentproduksjonsInfoMapper(new FakeUnleash());
+        when(mockDokgenService.hentDokumentInfo(any())).thenReturn(dokumentproduksjonsInfoMapper.hentDokumentproduksjonsInfo(STORBRITANNIA));
+        Aktoer mottaker = lagMottaker(BRUKER, "12234", null, null);
+
+        InnvilgelseBrevbestilling brevbestilling = new InnvilgelseBrevbestilling.Builder()
+            .medBehandlingId(1L)
+            .medProduserbartdokument(STORBRITANNIA)
+            .build();
+        Prosessinstans prosessinstans = lagProsessinstansMedMottaker(behandling, mottaker, brevbestilling);
+
+        when(mockDokumentNavnService.utledDokumentNavn(behandling, dokumentproduksjonsInfoMapper.hentDokumentproduksjonsInfo(STORBRITANNIA), mottaker)).thenReturn("Vedtak om medlemskap, Attest for utsendt arbeidstaker");
 
         opprettJournalforBrev.utfør(prosessinstans);
 
         verify(mockJoarkFasade).opprettJournalpost(opprettJournalpostCaptor.capture(), anyBoolean());
 
         OpprettJournalpost captured = opprettJournalpostCaptor.getValue();
-        assertThat(captured.getHoveddokument().getTittel()).isEqualTo(forventetTittel);
+        assertThat(captured.getHoveddokument().getTittel()).isEqualTo("Vedtak om medlemskap, Attest for utsendt arbeidstaker");
     }
-
-    private static Stream<Arguments> testparametre() {
-        return Stream.of(
-            Arguments.of(true, false, lagMottaker(BRUKER, "1234", null, null), "Vedtak om medlemskap, Attest for utsendt arbeidstaker"),
-            Arguments.of(false, false, lagMottaker(BRUKER, "1234", null, null), "Vedtak om medlemskap"),
-            Arguments.of(true, false, lagMottaker(ARBEIDSGIVER, null, "1234", null), "Kopi av vedtak om medlemskap, Attest for utsendt arbeidstaker"),
-            Arguments.of(false, false, lagMottaker(ARBEIDSGIVER, null, "1234", null), "Kopi av vedtak om medlemskap"),
-            Arguments.of(false, false, lagMottaker(TRYGDEMYNDIGHET, null, FastMottakerMedOrgnr.OrgNr.SKATTEETATEN_ORGNR.getOrgnr(), null), "Kopi av vedtak om medlemskap"),
-            Arguments.of(true, false, lagMottaker(TRYGDEMYNDIGHET, null, null, "1234"), "Attest for utsendt arbeidstaker"),
-
-            Arguments.of(true, true, lagMottaker(BRUKER, "1234", null, null), "Vedtak om medlemskap, Attest for utsendt arbeidstaker - endring"),
-            Arguments.of(false, true, lagMottaker(BRUKER, "1234", null, null), "Vedtak om medlemskap - endring"),
-            Arguments.of(true, true, lagMottaker(ARBEIDSGIVER, null, "1234", null), "Kopi av vedtak om medlemskap, Attest for utsendt arbeidstaker - endring"),
-            Arguments.of(false, true, lagMottaker(ARBEIDSGIVER, null, "1234", null), "Kopi av vedtak om medlemskap - endring"),
-            Arguments.of(false, true, lagMottaker(TRYGDEMYNDIGHET, null, FastMottakerMedOrgnr.OrgNr.SKATTEETATEN_ORGNR.getOrgnr(), null), "Kopi av vedtak om medlemskap - endring"),
-            Arguments.of(true, true, lagMottaker(TRYGDEMYNDIGHET, null, null, "1234"), "Attest for utsendt arbeidstaker - endring")
-        );
-    }
-
-    private Prosessinstans mockStorbritannia(Aktoer mottaker, boolean erNyVurdering) {
-        Behandling behandling = TestdataFactory.lagBehandling();
-        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
-        when(mockJoarkFasade.opprettJournalpost(any(), anyBoolean())).thenReturn("12234");
-        DokumentproduksjonsInfoMapper dokumentproduksjonsInfoMapper = new DokumentproduksjonsInfoMapper(new FakeUnleash());
-        when(mockDokgenService.hentDokumentInfo(any())).thenReturn(dokumentproduksjonsInfoMapper.hentDokumentproduksjonsInfo(STORBRITANNIA));
-
-        InnvilgelseBrevbestilling brevbestilling = new InnvilgelseBrevbestilling.Builder()
-            .medProduserbartdokument(STORBRITANNIA)
-            .medNyVurderingBakgrunn(erNyVurdering ? Nyvurderingbakgrunner.NYE_OPPLYSNINGER.getKode() : null)
-            .build();
-
-        return lagProsessinstansMedMottaker(behandling, mottaker, brevbestilling);
-    }
-
 
     @Test
     void utførOpprettJournalforMangelbrevTilBruker() {
@@ -293,7 +253,8 @@ class OpprettJournalforBrevTest {
         prosessinstans.setData(ProsessDataKey.MOTTAKER, mottaker.getRolle());
         if (mottaker.getAktørId() != null) prosessinstans.setData(ProsessDataKey.AKTØR_ID, mottaker.getAktørId());
         if (mottaker.getOrgnr() != null) prosessinstans.setData(ProsessDataKey.ORGNR, mottaker.getOrgnr());
-        if (mottaker.getInstitusjonId() != null) prosessinstans.setData(ProsessDataKey.INSTITUSJON_ID, mottaker.getInstitusjonId());
+        if (mottaker.getInstitusjonId() != null)
+            prosessinstans.setData(ProsessDataKey.INSTITUSJON_ID, mottaker.getInstitusjonId());
         return prosessinstans;
     }
 

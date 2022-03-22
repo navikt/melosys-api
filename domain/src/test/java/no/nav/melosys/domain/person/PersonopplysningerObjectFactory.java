@@ -1,4 +1,4 @@
-package no.nav.melosys.domain.jpa;
+package no.nav.melosys.domain.person;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -8,9 +8,7 @@ import java.util.Set;
 
 import no.nav.melosys.domain.adresse.SemistrukturertAdresse;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
-import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.kodeverk.Personstatuser;
-import no.nav.melosys.domain.person.*;
 import no.nav.melosys.domain.person.adresse.Bostedsadresse;
 import no.nav.melosys.domain.person.adresse.Kontaktadresse;
 import no.nav.melosys.domain.person.adresse.Oppholdsadresse;
@@ -19,41 +17,11 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySet;
 
 public class PersonopplysningerObjectFactory {
+
     public static Personopplysninger lagPersonopplysninger() {
-        return lagPersonopplysninger(false, false, false, false);
-    }
-
-    public static Personopplysninger lagPersonopplysningerStatløs() {
-        return lagPersonopplysninger(true, false, false, false);
-    }
-
-    public static Personopplysninger lagPersonopplysningerUtenBostedsadresse() {
-        return lagPersonopplysninger(false, true, false, false);
-    }
-
-    public static Personopplysninger lagPersoopplysningerUtenOppholdsadresse() {
-        return lagPersonopplysninger(false, false, true, false);
-
-    }
-
-    public static Personopplysninger lagPersoopplysningerUtenKontaktadresse() {
-        return lagPersonopplysninger(false, false, false, true);
-    }
-
-    private static Personopplysninger lagPersonopplysninger(
-        boolean erStatløs,
-        boolean erUtenBostedsadresse,
-        boolean erUtenOppholdsadresse,
-        boolean erUtenKontaktadresse) {
-        return new Personopplysninger(emptyList(), erUtenBostedsadresse ? null : lagBostedsadresse(), null, emptySet(),
-            lagFødesel(), null, lagKjønn(), erUtenKontaktadresse ? emptySet() : lagKontaktadresser(), lagNavn(), erUtenOppholdsadresse ? emptySet() : lagOppholdsadresser(),
-            lagStatsborgerskap(erStatløs));
-
-    }
-
-    public static Personopplysninger lagPersonopplysningerUtenAdresser() {
-        return new Personopplysninger(emptyList(), null, null, emptySet(), lagFødesel(), null,
-            lagKjønn(), emptyList(), lagNavn(), emptyList(), lagStatsborgerskap(false));
+        return new Personopplysninger(emptyList(), lagBostedsadresse(), null, emptySet(),
+            lagFødesel(), null, lagKjønn(), lagKontaktadresser(), lagNavn(), lagOppholdsadresser(),
+            lagStatsborgerskap());
     }
 
     private static Foedsel lagFødesel() {
@@ -140,16 +108,7 @@ public class PersonopplysningerObjectFactory {
         return new Navn("Ola", null, "Nordmann");
     }
 
-    private static Collection<Statsborgerskap> lagStatsborgerskap(boolean erStatløs) {
-        if (erStatløs) {
-            return List.of(new Statsborgerskap(Land.STATSLØS,
-                null,
-                LocalDate.EPOCH,
-                LocalDate.now(),
-                "PDL",
-                "Dolly",
-                false));
-        }
+    private static Collection<Statsborgerskap> lagStatsborgerskap() {
         return List.of(
             new Statsborgerskap("NOR", null, LocalDate.parse("2009-11-18"),
                 LocalDate.parse("1980-11-18"), "PDL", "Dolly", false),
@@ -202,4 +161,6 @@ public class PersonopplysningerObjectFactory {
                 LocalDate.EPOCH, "PDL", "kilde", false)),
             Set.of(statsborgerskap_1, statsborgerskap_2, statsborgerskap_3));
     }
+
+
 }

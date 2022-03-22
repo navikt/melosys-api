@@ -11,7 +11,6 @@ import no.nav.melosys.service.JsonSchemaValidator;
 import no.nav.melosys.service.vedtak.publisering.dto.FattetVedtak;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -29,8 +28,7 @@ public class FattetVedtakProducer {
     private final ObjectMapper objectMapper;
     private final String topicName;
 
-    @Autowired
-    public FattetVedtakProducer(@Qualifier("fattetVedtak") KafkaTemplate kafkaTemplate,
+    public FattetVedtakProducer(@Qualifier("fattetVedtak") KafkaTemplate<String, FattetVedtak> kafkaTemplate,
                                 @Value("${kafka.fattetvedtak.topic}") String topicName,
                                 ObjectMapper objectMapper) {
         this.kafkaTemplate = kafkaTemplate;

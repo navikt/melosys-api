@@ -4,7 +4,6 @@ import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.vedtak.publisering.FattetVedtakService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -12,7 +11,6 @@ public class PubliserVedtak implements StegBehandler {
 
     private final FattetVedtakService fattetVedtakService;
 
-    @Autowired
     public PubliserVedtak(FattetVedtakService fattetVedtakService) {
         this.fattetVedtakService = fattetVedtakService;
     }

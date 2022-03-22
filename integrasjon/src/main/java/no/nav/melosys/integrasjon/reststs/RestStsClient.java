@@ -9,7 +9,6 @@ import no.nav.melosys.integrasjon.felles.ExceptionMapper;
 import no.nav.melosys.integrasjon.felles.RestConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
@@ -23,17 +22,12 @@ public class RestStsClient implements RestConsumer {
     private static final Logger log = LoggerFactory.getLogger(RestStsClient.class);
 
     private static final Long EXPIRE_TIME_TO_REFRESH = 60L;
-
     private static final String ACCESS_TOKEN_KEY = "access_token";
     private static final String EXPIRES_IN_KEY = "expires_in";
-
     private volatile LocalDateTime expiryTime = LocalDateTime.now();
-
     private String token;
-
     private final RestTemplate restTemplate;
 
-    @Autowired
     public RestStsClient(@Qualifier("stsRestTemplate") RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }

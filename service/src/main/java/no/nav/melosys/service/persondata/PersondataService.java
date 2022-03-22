@@ -24,7 +24,6 @@ import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.persondata.mapping.*;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Primary;
@@ -45,7 +44,6 @@ public class PersondataService implements PersondataFasade {
     public static final String PDL_PERSOPL_VERSJON = "1.0";
     public static final String PDL_PERS_SAKS_VERSJON = "1.0";
 
-    @Autowired
     public PersondataService(BehandlingService behandlingService,
                              KodeverkService kodeverkService,
                              @Qualifier("saksbehandler") PDLConsumer pdlConsumer,

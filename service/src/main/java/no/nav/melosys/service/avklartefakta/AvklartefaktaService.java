@@ -12,12 +12,13 @@ import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesgrupper;
-import no.nav.melosys.domain.person.familie.*;
+import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie;
+import no.nav.melosys.domain.person.familie.IkkeOmfattetFamilie;
+import no.nav.melosys.domain.person.familie.OmfattetFamilie;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.AvklarteFaktaRepository;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,20 +30,18 @@ import static no.nav.melosys.domain.kodeverk.Avklartefaktatyper.VURDERING_MEDLEM
 @Service
 public class AvklartefaktaService {
 
-    private final AvklarteFaktaRepository avklarteFaktaRepository;
-
-    private final BehandlingsresultatRepository behandlingsresultatRepository;
-
-    private final AvklartefaktaDtoKonverterer faktaKonverterer;
-
     private static final String FANT_IKKE_RESULTAT = "Fant ikke behandlingsresultat for behandlingsid: ";
-
     private static final EnumSet<Avklartefaktatyper> MARITIME_FAKTATYPER = EnumSet.of(
         Avklartefaktatyper.SOKKEL_ELLER_SKIP,
         Avklartefaktatyper.ARBEIDSLAND);
 
-    @Autowired
-    public AvklartefaktaService(AvklarteFaktaRepository avklarteFaktaRepository, BehandlingsresultatRepository behandlingsresultatRepository, AvklartefaktaDtoKonverterer faktaKonverterer) {
+    private final AvklarteFaktaRepository avklarteFaktaRepository;
+    private final BehandlingsresultatRepository behandlingsresultatRepository;
+    private final AvklartefaktaDtoKonverterer faktaKonverterer;
+
+    public AvklartefaktaService(AvklarteFaktaRepository avklarteFaktaRepository,
+                                BehandlingsresultatRepository behandlingsresultatRepository,
+                                AvklartefaktaDtoKonverterer faktaKonverterer) {
         this.avklarteFaktaRepository = avklarteFaktaRepository;
         this.behandlingsresultatRepository = behandlingsresultatRepository;
         this.faktaKonverterer = faktaKonverterer;
@@ -151,7 +150,7 @@ public class AvklartefaktaService {
             .map(af -> new IkkeOmfattetFamilie(
                 af.getSubjekt(),
                 af.getRegistreringer().stream().findFirst().orElseThrow(() ->
-                    new TekniskException("Det mangler registreringer for avklartefakta med ID: " + af.getId()))
+                        new TekniskException("Det mangler registreringer for avklartefakta med ID: " + af.getId()))
                     .getBegrunnelseKode(),
                 af.getBegrunnelseFritekst()))
             .collect(Collectors.toSet());

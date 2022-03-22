@@ -5,7 +5,6 @@ import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.utpeking.UtpekingService;
 import no.nav.melosys.tjenester.gui.dto.utpeking.UtpekingAvvisDto;
 import no.nav.security.token.support.core.api.Protected;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,7 +21,6 @@ public class UtpekingTjeneste {
     private final Aksesskontroll aksesskontroll;
 
 
-    @Autowired
     public UtpekingTjeneste(UtpekingService utpekingService, Aksesskontroll aksesskontroll) {
         this.utpekingService = utpekingService;
         this.aksesskontroll = aksesskontroll;

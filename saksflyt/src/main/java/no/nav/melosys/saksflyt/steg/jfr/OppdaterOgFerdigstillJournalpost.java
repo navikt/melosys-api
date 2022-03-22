@@ -13,7 +13,6 @@ import no.nav.melosys.integrasjon.joark.JournalpostOppdatering;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
@@ -28,7 +27,6 @@ public class OppdaterOgFerdigstillJournalpost implements StegBehandler {
 
     private final JoarkFasade joarkFasade;
 
-    @Autowired
     public OppdaterOgFerdigstillJournalpost(@Qualifier("system") JoarkFasade joarkFasade) {
         this.joarkFasade = joarkFasade;
     }

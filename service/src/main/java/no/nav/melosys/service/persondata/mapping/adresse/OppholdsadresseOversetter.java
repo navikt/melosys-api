@@ -22,6 +22,8 @@ public final class OppholdsadresseOversetter {
         } else if (oppholdsadressePDL.matrikkeladresse() != null) {
             strukturertAdresse = PdlAdresseformatOversetter.lagStrukturertAdresse(oppholdsadressePDL.matrikkeladresse(),
                 kodeverkService);
+        } else {
+            return null;
         }
 
         return new Oppholdsadresse(strukturertAdresse,

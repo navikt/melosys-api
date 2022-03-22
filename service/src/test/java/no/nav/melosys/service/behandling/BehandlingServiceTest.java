@@ -3,16 +3,17 @@ package no.nav.melosys.service.behandling;
 import java.lang.reflect.InvocationTargetException;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.Period;
 import java.util.*;
 
 import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -430,6 +431,74 @@ class BehandlingServiceTest {
     }
 
     @Test
+    void endreStatus_setterSvarFristPåToUker_nårNyStatusErAnmodningUnntakSendt() {
+        Behandling behandling = opprettBehandlingUnderBehandling();
+
+
+        behandlingService.endreStatus(behandling, ANMODNING_UNNTAK_SENDT);
+
+
+        verify(behandlingRepo).save(behandlingCaptor.capture());
+        Behandling lagretBehandling = behandlingCaptor.getValue();
+
+        assertThat(lagretBehandling.getDokumentasjonSvarfristDato()).isNotNull();
+        Instant forventetInstant = Instant.now().plus(Period.ofWeeks(2));
+        assertThat(lagretBehandling.getDokumentasjonSvarfristDato())
+            .isBetween(forventetInstant.minusSeconds(60), forventetInstant.plusSeconds(60));
+    }
+
+    @Test
+    void endreStatus_setterSvarFristPåToUker_nårNyStatusErAvventDokPart() {
+        Behandling behandling = opprettBehandlingUnderBehandling();
+
+
+        behandlingService.endreStatus(behandling, AVVENT_DOK_PART);
+
+
+        verify(behandlingRepo).save(behandlingCaptor.capture());
+        Behandling lagretBehandling = behandlingCaptor.getValue();
+
+        assertThat(lagretBehandling.getDokumentasjonSvarfristDato()).isNotNull();
+        Instant forventetInstant = Instant.now().plus(Period.ofWeeks(2));
+        assertThat(lagretBehandling.getDokumentasjonSvarfristDato())
+            .isBetween(forventetInstant.minusSeconds(60), forventetInstant.plusSeconds(60));
+    }
+
+    @Test
+    void endreStatus_setterSvarFristPåToUker_nårNyStatusErAvventDokUtl() {
+        Behandling behandling = opprettBehandlingUnderBehandling();
+
+
+        behandlingService.endreStatus(behandling, AVVENT_DOK_UTL);
+
+
+        verify(behandlingRepo).save(behandlingCaptor.capture());
+        Behandling lagretBehandling = behandlingCaptor.getValue();
+
+        assertThat(lagretBehandling.getDokumentasjonSvarfristDato()).isNotNull();
+        Instant forventetInstant = Instant.now().plus(Period.ofWeeks(2));
+        assertThat(lagretBehandling.getDokumentasjonSvarfristDato())
+            .isBetween(forventetInstant.minusSeconds(60), forventetInstant.plusSeconds(60));
+    }
+
+    @Test
+    void endreStatus_setterSvarFristTilNull_nårNyStatusErUnderBehandling() {
+        Behandling behandling = new Behandling();
+        behandling.setFagsak(new Fagsak());
+        behandling.setId(BEHANDLING_ID);
+        behandling.setStatus(AVVENT_DOK_UTL);
+
+
+        behandlingService.endreStatus(behandling, UNDER_BEHANDLING);
+
+
+        verify(behandlingRepo).save(behandlingCaptor.capture());
+        Behandling lagretBehandling = behandlingCaptor.getValue();
+
+        assertThat(lagretBehandling.getDokumentasjonSvarfristDato()).isNull();
+    }
+    
+    @Test
     void avsluttNyVurderingUtenEndring_avslutterBehandlingOgSetterBehandlingsresultattypeRiktig() {
         Behandling behandling = new Behandling();
         behandling.setId(BEHANDLING_ID);
@@ -457,7 +526,7 @@ class BehandlingServiceTest {
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> behandlingService.avsluttNyVurdering(BEHANDLING_ID, Behandlingsresultattyper.FERDIGBEHANDLET))
-            .withMessageContaining("Behandling "+BEHANDLING_ID+" er ikke typen NY_VURDERING!");
+            .withMessageContaining("Behandling " + BEHANDLING_ID + " er ikke typen NY_VURDERING!");
     }
 
     @Test
@@ -551,5 +620,13 @@ class BehandlingServiceTest {
         behandlingsgrunnlagdata.periode = new Periode(LocalDate.of(2020, 1, 1), LocalDate.of(2021, 1, 1));
         behandlingsgrunnlag.setBehandlingsgrunnlagdata(behandlingsgrunnlagdata);
         return behandlingsgrunnlag;
+    }
+
+    private Behandling opprettBehandlingUnderBehandling() {
+        Behandling behandling = new Behandling();
+        behandling.setFagsak(new Fagsak());
+        behandling.setId(BEHANDLING_ID);
+        behandling.setStatus(UNDER_BEHANDLING);
+        return behandling;
     }
 }
