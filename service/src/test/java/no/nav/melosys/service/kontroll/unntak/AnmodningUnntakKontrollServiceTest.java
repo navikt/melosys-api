@@ -8,8 +8,10 @@ import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.ForetakUtland;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.JuridiskArbeidsgiverNorge;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.FysiskArbeidssted;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory;
@@ -51,7 +53,7 @@ class AnmodningUnntakKontrollServiceTest {
         final FakeUnleash unleash = new FakeUnleash();
         unleash.enable("melosys.pdl.aktiv");
         anmodningUnntakKontrollService = new AnmodningUnntakKontrollService(anmodningsperiodeService, behandlingService,
-                persondataFasade, unleash);
+            persondataFasade, unleash);
     }
 
     @Test
@@ -98,5 +100,29 @@ class AnmodningUnntakKontrollServiceTest {
         assertThat(resultat)
             .extracting(Kontrollfeil::getKode)
             .containsExactly(Kontroll_begrunnelser.MANGLENDE_OPPL_ANDRE_ARBEIDSFORHOLD_UTL);
+    }
+
+    @Test
+    void utførKontroller_flereArbeidsgivereArt16_1_returnererKode() {
+        anmodningsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1);
+        BehandlingsgrunnlagData behandlingsgrunnlagData = new BehandlingsgrunnlagData();
+        behandlingsgrunnlagData.juridiskArbeidsgiverNorge = lagJuridiskArbeidsgiverNorge();
+        behandlingsgrunnlagData.foretakUtland = lagForetakUtland();
+        when(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(lagBehandling(behandlingsgrunnlagData));
+
+        Collection<Kontrollfeil> resultat = anmodningUnntakKontrollService.utførKontroller(behandlingID);
+        assertThat(resultat).extracting(Kontrollfeil::getKode).contains(Kontroll_begrunnelser.IKKE_KUN_EN_VIRKSOMHET);
+    }
+
+    private JuridiskArbeidsgiverNorge lagJuridiskArbeidsgiverNorge() {
+        var juridiskArbeidsgiverNorge = new JuridiskArbeidsgiverNorge();
+        juridiskArbeidsgiverNorge.ekstraArbeidsgivere = List.of("Ekstra arbeidsgiver");
+        return juridiskArbeidsgiverNorge;
+    }
+
+    private List<ForetakUtland> lagForetakUtland() {
+        var foretakUtland = new ForetakUtland();
+        foretakUtland.uuid = "uuid-001-123";
+        return List.of(foretakUtland);
     }
 }

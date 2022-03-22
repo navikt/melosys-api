@@ -18,8 +18,7 @@ class VedtakKontrollFactory {
         VedtakKontroller::periodeOver24Mnd,
         VedtakKontroller::periodeManglerSluttdato,
         VedtakKontroller::arbeidsstedManglerFelter,
-        VedtakKontroller::foretakUtlandManglerFelter,
-        VedtakKontroller::kunEnArbeidsgiverOmArt16_1
+        VedtakKontroller::foretakUtlandManglerFelter
     );
 
     private static final Set<Function<VedtakKontrollData, Kontrollfeil>> KONTROLLER_TRYGDEAVTALER = Set.of(

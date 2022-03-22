@@ -5,7 +5,6 @@ import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadTrygdeavtale;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
 import no.nav.melosys.service.kontroll.*;
 import no.nav.melosys.service.validering.Kontrollfeil;
@@ -65,12 +64,6 @@ final class VedtakKontroller implements AdresseUtlandKontroller {
     static Kontrollfeil adresseRegistrert(VedtakKontrollData kontrollData) {
         return PersonKontroller.harRegistrertAdresse(kontrollData.getPersonDokument(), kontrollData.getBehandlingsgrunnlagData())
             ? null : new Kontrollfeil(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE);
-    }
-
-    static Kontrollfeil kunEnArbeidsgiverOmArt16_1(VedtakKontrollData kontrollData) {
-        int antallArbeidsgivere = kontrollData.getBehandlingsgrunnlagData().hentUtenlandskeArbeidsgivereUuid().size() + kontrollData.getBehandlingsgrunnlagData().hentAlleOrganisasjonsnumre().size();
-        return (kontrollData.getLovvalgsperiode().getBestemmelse() == Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1 && antallArbeidsgivere != 1)
-            ? new Kontrollfeil(Kontroll_begrunnelser.ANNET) : null;
     }
 
     private static boolean erBestemmelseDerTrygdeavtaleAttestSendes(LovvalgBestemmelse bestemmelse) {

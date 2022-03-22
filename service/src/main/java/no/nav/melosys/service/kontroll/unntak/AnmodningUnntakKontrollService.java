@@ -9,6 +9,7 @@ import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.kontroll.AdresseUtlandKontroller;
@@ -48,6 +49,7 @@ public class AnmodningUnntakKontrollService implements AdresseUtlandKontroller {
         return Set.of(
             AnmodningUnntakKontrollService::harRegistrertAdresse,
             AnmodningUnntakKontrollService::anmodningsperiodeManglerSluttdato,
+            AnmodningUnntakKontrollService::kunEnArbeidsgiverOmArt16_1,
             kontrollData -> AdresseUtlandKontroller.arbeidsstedManglerFelter(kontrollData.getBehandlingsgrunnlagData()),
             kontrollData -> AdresseUtlandKontroller.foretakUtlandManglerFelter(kontrollData.getBehandlingsgrunnlagData())
         );
@@ -84,5 +86,11 @@ public class AnmodningUnntakKontrollService implements AdresseUtlandKontroller {
     static Kontrollfeil anmodningsperiodeManglerSluttdato(AnmodningUnntakKontrollData kontrollData) {
         return kontrollData.getAnmodningsperiode().getTom() == null
             ? new Kontrollfeil(Kontroll_begrunnelser.INGEN_SLUTTDATO) : null;
+    }
+
+    static Kontrollfeil kunEnArbeidsgiverOmArt16_1(AnmodningUnntakKontrollData kontrollData) {
+        int antallArbeidsgivere = kontrollData.getBehandlingsgrunnlagData().hentUtenlandskeArbeidsgivereUuid().size() + kontrollData.getBehandlingsgrunnlagData().hentAlleOrganisasjonsnumre().size();
+        return (kontrollData.getAnmodningsperiode().getBestemmelse() == Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1 && antallArbeidsgivere != 1)
+            ? new Kontrollfeil(Kontroll_begrunnelser.IKKE_KUN_EN_VIRKSOMHET) : null;
     }
 }

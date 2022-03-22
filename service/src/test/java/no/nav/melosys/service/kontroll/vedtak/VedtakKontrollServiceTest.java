@@ -216,16 +216,6 @@ class VedtakKontrollServiceTest {
             .contains(Kontroll_begrunnelser.ATTEST_MANGLER_ARBEIDSSTED);
     }
 
-    @Test
-    void utførKontroller_flereArbeidsgivereArt16_1_returnererKode() {
-        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1);
-        behandlingsgrunnlagData.juridiskArbeidsgiverNorge = lagJuridiskArbeidsgiverNorge();
-        behandlingsgrunnlagData.foretakUtland = lagForetakUtland();
-
-        Collection<Kontrollfeil> resultat = vedtakKontrollService.utførKontroller(behandlingID, Sakstyper.EU_EOS);
-        assertThat(resultat).extracting(Kontrollfeil::getKode).contains(Kontroll_begrunnelser.ANNET);
-    }
-
     private Behandlingsresultat lagBehandlingsresultat() {
         var behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setLovvalgsperioder(Set.of(lovvalgsperiode));
@@ -236,11 +226,5 @@ class VedtakKontrollServiceTest {
         var juridiskArbeidsgiverNorge = new JuridiskArbeidsgiverNorge();
         juridiskArbeidsgiverNorge.ekstraArbeidsgivere = List.of("Ekstra arbeidsgiver");
         return juridiskArbeidsgiverNorge;
-    }
-
-    private List<ForetakUtland> lagForetakUtland() {
-        var foretakUtland = new ForetakUtland();
-        foretakUtland.uuid = "uuid-001-123";
-        return List.of(foretakUtland);
     }
 }

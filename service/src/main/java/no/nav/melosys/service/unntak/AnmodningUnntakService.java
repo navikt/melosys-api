@@ -74,6 +74,7 @@ public class AnmodningUnntakService {
 
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
         Fagsak fagsak = behandling.getFagsak();
+        validerAntallArbeidsgivere(behandlingID);
         log.info("Anmodning om unntak for sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandlingID);
 
         kontrollerAnmodningOmUnntak(behandlingID);
@@ -93,6 +94,10 @@ public class AnmodningUnntakService {
         return eessiService.validerOgAvklarMottakerInstitusjonerForBuc(
             StringUtils.isEmpty(mottakerinstitusjon) ? Collections.emptySet() : Set.of(mottakerinstitusjon),
             List.of(landkode), BucType.LA_BUC_01);
+    }
+
+    private void validerAntallArbeidsgivere(long behandlingID) {
+
     }
 
     @Transactional
