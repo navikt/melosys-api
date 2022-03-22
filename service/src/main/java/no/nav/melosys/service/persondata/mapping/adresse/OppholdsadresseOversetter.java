@@ -24,6 +24,10 @@ public final class OppholdsadresseOversetter {
                 kodeverkService);
         }
 
+        if (strukturertAdresse == null) {
+            return null;
+        }
+
         return new Oppholdsadresse(strukturertAdresse,
             oppholdsadressePDL.coAdressenavn(),
             KonverteringsUtils.localDateTimeToLocalDate(oppholdsadressePDL.gyldigFraOgMed()),
