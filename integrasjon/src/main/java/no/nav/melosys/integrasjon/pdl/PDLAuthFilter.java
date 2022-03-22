@@ -3,6 +3,7 @@ package no.nav.melosys.integrasjon.pdl;
 import java.util.function.Supplier;
 import javax.annotation.Nonnull;
 
+import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo;
 import no.nav.melosys.integrasjon.reststs.RestStsClient;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.reactive.function.client.ClientRequest;
@@ -26,6 +27,7 @@ public class PDLAuthFilter implements ExchangeFilterFunction {
     @Override
     public Mono<ClientResponse> filter(@Nonnull ClientRequest clientRequest,
                                        @Nonnull ExchangeFunction exchangeFunction) {
+        ThreadLocalAccessInfo.fromContextExchangeFilter(clientRequest.url().toString());
         return exchangeFunction.exchange(
             ClientRequest.from(clientRequest)
                 .header(HttpHeaders.AUTHORIZATION, authSupplier.get())

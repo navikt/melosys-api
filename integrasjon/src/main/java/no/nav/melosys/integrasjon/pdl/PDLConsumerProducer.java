@@ -2,6 +2,9 @@ package no.nav.melosys.integrasjon.pdl;
 
 import java.util.Collections;
 
+import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -12,6 +15,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 @Configuration
 public class PDLConsumerProducer {
+    private static final Logger log = LoggerFactory.getLogger(PDLConsumerProducer.class);
+
     private static final String TEMA_HEADER = "Tema";
     private static final String TEMA_HEADER_MEDLEMSKAP_VERDI = "MED";
 
@@ -20,6 +25,10 @@ public class PDLConsumerProducer {
     public PDLConsumer pdlConsumer(WebClient.Builder webclientBuilder,
                                    @Value("${PDL.url}") String pdlUrl,
                                    @Qualifier("system") PDLAuthFilter pdlSystemAuthFilter) {
+        if (ThreadLocalAccessInfo.isFrontendCall()) { // Debug only
+            ThreadLocalAccessInfo.warnFrontendCall(this, "PDLAuthFilterProducer");
+            log.warn("Blir kalt fra forntend\n{}", ThreadLocalAccessInfo.getInfo());
+        }
         return new PDLConsumerImpl(
             webclientBuilder(webclientBuilder, pdlUrl)
                 .filter(pdlSystemAuthFilter)
@@ -32,6 +41,10 @@ public class PDLConsumerProducer {
     public PDLConsumer pdlConsumerForSaksbehandler(WebClient.Builder webclientBuilder,
                                                    @Value("${PDL.url}") String pdlUrl,
                                                    @Qualifier("saksbehandler") PDLAuthFilter pdlSaksbehandlerAuthFilter) {
+        if (ThreadLocalAccessInfo.isProcessCall()) { // Debug only
+            ThreadLocalAccessInfo.warnFrontendCall(this, "PDLAuthFilterProducer");
+            log.warn("Blir kalt fra prosess\n{}", ThreadLocalAccessInfo.getInfo());
+        }
         return new PDLConsumerImpl(
             webclientBuilder(webclientBuilder, pdlUrl).filter(pdlSaksbehandlerAuthFilter).build());
     }
