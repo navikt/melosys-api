@@ -1,11 +1,9 @@
 package no.nav.melosys.integrasjon.pdl.dto.person;
 
 import java.io.InputStream;
-import java.util.List;
 import java.util.Map;
 
 import graphql.ExecutionInput;
-import graphql.GraphQLError;
 import graphql.ParseAndValidate;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.idl.RuntimeWiring;
@@ -19,56 +17,56 @@ import static org.assertj.core.api.Assertions.assertThat;
 class QueryTest {
     @Test
     void validerPerson() {
-        assertThat(validerQuery(Query.HENT_PERSON_QUERY)).isEmpty();
+        assertThat(erGyldigQuery(Query.HENT_PERSON_QUERY)).isTrue();
     }
 
     @Test
     void validerPersonHistorikk() {
-        assertThat(validerQuery(Query.HENT_PERSON_HISTORIKK_QUERY)).isEmpty();
+        assertThat(erGyldigQuery(Query.HENT_PERSON_HISTORIKK_QUERY)).isTrue();
     }
 
     @Test
     void validerAdressebeskyttelse() {
-        assertThat(validerQuery(Query.HENT_ADRESSEBESKYTTELSE_QUERY)).isEmpty();
+        assertThat(erGyldigQuery(Query.HENT_ADRESSEBESKYTTELSE_QUERY)).isTrue();
     }
 
     @Test
     void validerFamilierelasjoner() {
-        assertThat(validerQuery(Query.HENT_FAMILIERELASJONER_QUERY)).isEmpty();
+        assertThat(erGyldigQuery(Query.HENT_FAMILIERELASJONER_QUERY)).isTrue();
     }
 
     @Test
     void validerNavn() {
-        assertThat(validerQuery(Query.HENT_NAVN_QUERY)).isEmpty();
+        assertThat(erGyldigQuery(Query.HENT_NAVN_QUERY)).isTrue();
     }
 
     @Test
     void validerRelatert() {
-        assertThat(validerQuery(Query.HENT_RELATERT_VED_SIVILSTAND_QUERY)).isEmpty();
+        assertThat(erGyldigQuery(Query.HENT_RELATERT_VED_SIVILSTAND_QUERY)).isTrue();
     }
 
     @Test
     void validerBarn() {
-        assertThat(validerQuery(Query.HENT_BARN_QUERY)).isEmpty();
+        assertThat(erGyldigQuery(Query.HENT_BARN_QUERY)).isTrue();
     }
 
     @Test
     void validerForelder() {
-        assertThat(validerQuery(Query.HENT_FORELDER_QUERY)).isEmpty();
+        assertThat(erGyldigQuery(Query.HENT_FORELDER_QUERY)).isTrue();
     }
 
     @Test
     void validerStatsborgerskap() {
-        assertThat(validerQuery(Query.HENT_STATSBORGERSKAP_QUERY)).isEmpty();
+        assertThat(erGyldigQuery(Query.HENT_STATSBORGERSKAP_QUERY)).isTrue();
     }
 
-    private List<GraphQLError> validerQuery(String query) {
+    private boolean erGyldigQuery(String query) {
         Map<String, Object> variables = Map.of("ident", "42", "historikk", true);
         InputStream inputStream = getClass().getClassLoader().getResourceAsStream("pdl-schema.graphqls");
         TypeDefinitionRegistry typeRegistry = new SchemaParser().parse(inputStream);
         GraphQLSchema schema = new SchemaGenerator().makeExecutableSchema(typeRegistry, RuntimeWiring.MOCKED_WIRING);
 
         ExecutionInput executionInput = ExecutionInput.newExecutionInput().query(query).variables(variables).build();
-        return ParseAndValidate.parseAndValidate(schema, executionInput).getErrors();
+        return ParseAndValidate.parseAndValidate(schema, executionInput).getErrors().isEmpty();
     }
 }
