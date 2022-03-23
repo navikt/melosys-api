@@ -225,7 +225,7 @@ public class FagsakService {
     @Transactional
     public long opprettNyVurderingBehandling(String saksnummer) {
         Fagsak fagsak = hentFagsak(saksnummer);
-        Behandling behandling = fagsak.hentSistAktiveBehandling();
+        Behandling behandling = fagsak.hentSistAktivBehandling();
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
 
         validerOpprettNyVurdering(behandling, behandlingsresultat);

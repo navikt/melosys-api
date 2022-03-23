@@ -83,7 +83,7 @@ public class Oppgaveplukker {
                 throw new TekniskException("Fant ikke fagsak " + saksnummer);
             }
 
-            Behandling behandling = fagsak.hentSistAktiveBehandling();
+            Behandling behandling = fagsak.hentSistAktivBehandling();
             if (behandling.erVenterForDokumentasjon()) {
                 if (behandling.getDokumentasjonSvarfristDato() == null) {
                     log.error("Behandling {} tilhørende {} avventer dokumentasjon, men har ingen svarfristdato.", behandling.getId(), saksnummer);

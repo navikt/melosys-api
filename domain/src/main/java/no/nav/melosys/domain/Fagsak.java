@@ -2,7 +2,6 @@ package no.nav.melosys.domain;
 
 
 import java.util.*;
-import java.util.stream.Collectors;
 import javax.persistence.*;
 
 import no.nav.melosys.domain.kodeverk.*;
@@ -80,33 +79,32 @@ public class Fagsak extends RegistreringsInfo {
         this.behandlinger = behandlinger;
     }
 
-    /**
-     * Returnerer den aktive behandlingen knyttet til saken eller {@code null} hvis den ikke finnes.
-     */
     public Behandling hentAktivBehandling() {
-        List<Behandling> behandlingListe = getBehandlinger().stream()
-            .filter(Behandling::erAktiv).collect(Collectors.toList());
-        if (behandlingListe.size() > 1) {
+        List<Behandling> aktiveBehandlinger = getBehandlinger().stream().filter(Behandling::erAktiv).toList();
+        if (aktiveBehandlinger.size() > 1) {
             throw new TekniskException("Det finnes mer enn en aktiv behandling for sak " + saksnummer);
-        } else if (behandlingListe.size() == 1) {
-            return behandlingListe.get(0);
+        } else if (aktiveBehandlinger.size() == 1) {
+            return aktiveBehandlinger.get(0);
         } else {
             return null;
         }
     }
 
-    /**
-     * Returnerer den inaktive behandlingen knyttet til saken eller {@code null} hvis den ikke finnes.
-     */
-    public Behandling getTidligsteInaktiveBehandling() {
+    public Behandling hentSistOppdatertBehandling() {
+        return getBehandlinger().stream()
+            .max(Comparator.comparing(Behandling::getEndretDato))
+            .orElseThrow(() -> new IkkeFunnetException("Finner ikke behandlinger for fagsak " + saksnummer));
+    }
+
+    public Behandling hentSistAktivBehandling() {
+        return Optional.ofNullable(hentAktivBehandling()).orElse(hentSistOppdatertBehandling());
+    }
+
+    public Behandling hentTidligsteInaktiveBehandling() {
         return getBehandlinger().stream()
             .filter(Behandling::erInaktiv)
             .min(Comparator.comparing(RegistreringsInfo::getRegistrertDato))
             .orElse(null);
-    }
-
-    public Behandling hentSistAktiveBehandling() {
-        return Optional.ofNullable(hentAktivBehandling()).orElse(getSistOppdaterteBehandling());
     }
 
     public Aktoer hentBruker() {
@@ -128,15 +126,6 @@ public class Fagsak extends RegistreringsInfo {
         return hentAktørMedRolleType(Aktoersroller.ARBEIDSGIVER);
     }
 
-    /**
-     * Returnerer den sist oppdaterte behandlingen knyttet til saken
-     */
-    public Behandling getSistOppdaterteBehandling() {
-        return getBehandlinger().stream()
-            .max(Comparator.comparing(Behandling::getEndretDato))
-            .orElseThrow(() -> new IkkeFunnetException("Finner ikke behandlinger for fagsak " + saksnummer));
-    }
-
     private Aktoer hentAktørMedRolleType(Aktoersroller rolleType) {
         Collection<Aktoer> kandidater = hentAktørerMedRolleType(rolleType);
         if (kandidater.size() > 1) {
@@ -151,7 +140,7 @@ public class Fagsak extends RegistreringsInfo {
         }
         return aktører.stream()
             .filter(a -> rolleType == a.getRolle())
-            .collect(Collectors.toList());
+            .toList();
     }
 
     public boolean harAktørMedRolleType(Aktoersroller rolleType) {

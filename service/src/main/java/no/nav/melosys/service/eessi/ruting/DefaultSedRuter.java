@@ -40,7 +40,7 @@ public class DefaultSedRuter implements SedRuter {
         this.behandlingService = behandlingService;
         this.oppgaveService = oppgaveService;
     }
-    
+
     @Override
     public void rutSedTilBehandling(Prosessinstans prosessinstans, Long arkivsakID) {
         final MelosysEessiMelding eessiMelding = prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class);
@@ -51,7 +51,7 @@ public class DefaultSedRuter implements SedRuter {
             log.info("Oppretter oppgave sed {} i rinasak {}", eessiMelding.getSedId(), eessiMelding.getRinaSaksnummer());
             oppgaveService.opprettJournalføringsoppgave(eessiMelding.getJournalpostId(), prosessinstans.hentAktørIDFraDataEllerSED());
         } else {
-            Behandling behandling = fagsak.get().hentSistAktiveBehandling();
+            Behandling behandling = fagsak.get().hentSistAktivBehandling();
 
             if (behandling.erAktiv()) {
                 behandlingService.endreStatus(behandling.getId(), Behandlingsstatus.VURDER_DOKUMENT);
