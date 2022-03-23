@@ -117,7 +117,7 @@ public class OppgaveService {
     }
 
     public Behandling hentSistAktiveBehandling(String saksnummer) {
-        return fagsakService.hentFagsak(saksnummer).hentSistAktiveBehandling();
+        return fagsakService.hentFagsak(saksnummer).hentSistAktivBehandling();
     }
 
     public void opprettEllerGjenbrukBehandlingsoppgave(Behandling behandling, String journalpostID, String aktørID, @Nullable String tilordnetRessurs, @Nullable String beskrivelse) {
@@ -184,7 +184,7 @@ public class OppgaveService {
     public void opprettOppgaveForSak(String saksnummer) {
         log.info("Oppretter ny oppgave for saksnummer {}", saksnummer);
         Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
-        Behandling behandling = fagsak.hentSistAktiveBehandling();
+        Behandling behandling = fagsak.hentSistAktivBehandling();
         Optional<Oppgave> oppgave = finnSisteAvsluttetOppgaveMedFagsaksnummer(saksnummer);
         String tilordnetRessurs = oppgave.map(Oppgave::getTilordnetRessurs).orElse(null);
         String beskrivelse = oppgave.map(Oppgave::getBeskrivelse).orElse(null);
@@ -266,7 +266,7 @@ public class OppgaveService {
         behOppgaveDto.setSaksnummer(fagsak.getSaksnummer());
         behOppgaveDto.setSakstype(fagsak.getType());
 
-        Behandling behandling = fagsak.hentSistAktiveBehandling();
+        Behandling behandling = fagsak.hentSistAktivBehandling();
         behandling = behandlingService.hentBehandling(behandling.getId());
         behOppgaveDto.setBehandling(mapBehandling(behandling));
 

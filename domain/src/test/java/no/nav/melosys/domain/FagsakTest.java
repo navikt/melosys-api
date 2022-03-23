@@ -60,7 +60,7 @@ class FagsakTest {
         behandlinger.add(seinesteInaktiveBehandling);
         fagsak.setBehandlinger(behandlinger);
 
-        assertThat(fagsak.getTidligsteInaktiveBehandling()).isEqualTo(tidligsteInaktiveBehandling);
+        assertThat(fagsak.hentTidligsteInaktiveBehandling()).isEqualTo(tidligsteInaktiveBehandling);
     }
 
     @Test
@@ -71,7 +71,7 @@ class FagsakTest {
         behandling.setEndretDato(Instant.parse("2019-01-10T10:37:30.00Z"));
         fagsak.setBehandlinger(Collections.singletonList(behandling));
 
-        assertThat(fagsak.getSistOppdaterteBehandling()).isEqualTo(behandling);
+        assertThat(fagsak.hentSistOppdatertBehandling()).isEqualTo(behandling);
     }
 
     @Test
@@ -93,14 +93,14 @@ class FagsakTest {
             behandling2
         ));
 
-        assertThat(fagsak.getSistOppdaterteBehandling()).isEqualTo(sistOppdaterteBehandling);
+        assertThat(fagsak.hentSistOppdatertBehandling()).isEqualTo(sistOppdaterteBehandling);
     }
 
     @Test
     void getSistOppdaterteBehandling_ingenBehandlinger_kasterException() {
         var fagsak = new Fagsak();
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(fagsak::getSistOppdaterteBehandling)
+            .isThrownBy(fagsak::hentSistOppdatertBehandling)
             .withMessageContaining("Finner ikke behandlinger");
     }
 

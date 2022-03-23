@@ -41,11 +41,11 @@ public class ReplikerBehandling implements StegBehandler {
         String saksnummer = prosessinstans.getData(ProsessDataKey.SAKSNUMMER);
         Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
 
-        if (fagsak.getTidligsteInaktiveBehandling() == null) {
+        if (fagsak.hentTidligsteInaktiveBehandling() == null) {
             throw new FunksjonellException("Finner ingen avsluttet behandling på fagsak " + fagsak.getSaksnummer());
         }
 
-        Behandling tidligstInaktiveBehandling = fagsak.getTidligsteInaktiveBehandling();
+        Behandling tidligstInaktiveBehandling = fagsak.hentTidligsteInaktiveBehandling();
         Behandling nyBehandling = behandlingService.replikerBehandlingOgBehandlingsresultat(
             tidligstInaktiveBehandling,
             Behandlingsstatus.OPPRETTET,

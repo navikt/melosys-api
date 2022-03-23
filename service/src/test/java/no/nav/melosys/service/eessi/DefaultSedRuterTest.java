@@ -94,12 +94,12 @@ class DefaultSedRuterTest {
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
 
         Fagsak fagsak = hentFagsak();
-        fagsak.getSistOppdaterteBehandling().setStatus(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
+        fagsak.hentSistOppdatertBehandling().setStatus(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
 
         when(fagsakService.finnFagsakFraArkivsakID(GSAK_SAKSNUMMER)).thenReturn(Optional.of(fagsak));
         defaultSedRuter.rutSedTilBehandling(prosessinstans, GSAK_SAKSNUMMER);
         assertThat(prosessinstans.getBehandling()).isNotNull();
-        verify(prosessinstansService).opprettProsessinstansSedJournalføring(fagsak.hentSistAktiveBehandling(), melosysEessiMelding);
+        verify(prosessinstansService).opprettProsessinstansSedJournalføring(fagsak.hentSistAktivBehandling(), melosysEessiMelding);
         verify(behandlingService, never()).endreStatus(anyLong(), any());
         verify(oppgaveService, never()).finnÅpenOppgaveMedFagsaksnummer(any());
         verify(oppgaveService, never()).oppdaterOppgave(any(), any());
@@ -123,7 +123,7 @@ class DefaultSedRuterTest {
         verify(behandlingService, never()).endreStatus(anyLong(), any());
         verify(oppgaveService).opprettOppgave(oppgaveCaptor.capture());
         verify(oppgaveService).oppdaterOppgave(any(), oppgaveOppdateringArgumentCaptor.capture());
-        verify(prosessinstansService).opprettProsessinstansSedJournalføring(fagsak.hentSistAktiveBehandling(), melosysEessiMelding);
+        verify(prosessinstansService).opprettProsessinstansSedJournalføring(fagsak.hentSistAktivBehandling(), melosysEessiMelding);
         assertThat(oppgaveCaptor.getValue())
             .extracting(Oppgave::getSaksnummer)
             .isEqualTo(SAKSNUMMER);
