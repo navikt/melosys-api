@@ -12,6 +12,7 @@ import com.google.common.collect.Streams;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.Soeknadsland;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.exception.FunksjonellException;
@@ -50,11 +51,11 @@ public class LandvelgerService {
     }
 
     public Collection<Landkoder> hentAlleArbeidsland(long behandlingID) {
-        Behandling behandling = behandlingService.hentBehandling(behandlingID);
         Collection<Landkoder> alleArbeidsland = avklartefaktaService.hentAlleAvklarteArbeidsland(behandlingID);
         if (alleArbeidsland.isEmpty() || erArtikkel13(behandlingID)) {
+            Behandling behandling = behandlingService.hentBehandling(behandlingID);
             BehandlingsgrunnlagData grunnlagData = behandlingsgrunnlagService.hentBehandlingsgrunnlag(behandlingID).getBehandlingsgrunnlagdata();
-            var søknadsland = grunnlagData.soeknadsland;
+            Soeknadsland søknadsland = grunnlagData.soeknadsland;
             if (behandling.erAnmodningOmUnntak() && søknadsland.landkoder.isEmpty() && !søknadsland.erUkjenteEllerAlleEosLand) {
                 alleArbeidsland.add(behandling.hentSedDokument().getUnntakFraLovvalgslandKode());
             } else {
