@@ -24,6 +24,7 @@ import static no.nav.melosys.domain.util.BehandlingsgrunnlagUtils.*;
 
 @Service
 public class LandvelgerService {
+
     private final AvklartefaktaService avklartefaktaService;
     private final BehandlingsresultatService behandlingsresultatService;
     private final BehandlingsgrunnlagService behandlingsgrunnlagService;
@@ -47,8 +48,16 @@ public class LandvelgerService {
     public Collection<Landkoder> hentAlleArbeidsland(long behandlingID) {
         Collection<Landkoder> alleArbeidsland = avklartefaktaService.hentAlleAvklarteArbeidsland(behandlingID);
         if (alleArbeidsland.isEmpty() || erArtikkel13(behandlingID)) {
-            BehandlingsgrunnlagData grunnlagData = behandlingsgrunnlagService.hentBehandlingsgrunnlag(behandlingID).getBehandlingsgrunnlagdata();
-            alleArbeidsland.addAll(hentSøknadslandkoder(grunnlagData));
+            Behandlingsgrunnlag behandlingsgrunnlag =  behandlingsgrunnlagService.hentBehandlingsgrunnlag(behandlingID);
+            BehandlingsgrunnlagData grunnlagData = behandlingsgrunnlag.getBehandlingsgrunnlagdata();
+            Behandling behandling = behandlingsgrunnlag.getBehandling();
+            var søknadsland = grunnlagData.soeknadsland;
+
+            if (behandling.erAnmodningOmUnntak() && søknadsland.landkoder.isEmpty()) {
+                alleArbeidsland.add(behandling.hentSedDokument().getUnntakFraLovvalgslandKode());
+            } else {
+                alleArbeidsland.addAll(hentSøknadslandkoder(grunnlagData));
+            }
         }
 
         return alleArbeidsland;
