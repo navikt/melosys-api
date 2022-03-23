@@ -225,21 +225,13 @@ public class FagsakService {
     @Transactional
     public long opprettNyVurderingBehandling(String saksnummer) {
         Fagsak fagsak = hentFagsak(saksnummer);
-        Behandling behandling = fagsak.hentSistAktivBehandling();
-        Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
+        validerOpprettNyVurdering(fagsak);
+        Behandling behandling = hentBehandlingSomErUtgangspunktForRevurdering(fagsak);
 
-        validerOpprettNyVurdering(behandling, behandlingsresultat);
+        Behandling replikertBehandling = behandlingService.replikerBehandlingOgBehandlingsresultat(behandling, Behandlingsstatus.OPPRETTET,
+                                                                                                   avgjørBehandlingstype(fagsak));
 
-        Behandlingstyper behandlingstype;
-        if (behandling.erInaktiv()) {
-            behandlingstype = Behandlingstyper.NY_VURDERING;
-        } else {
-            behandlingstype = behandling.getType();
-        }
-
-        Behandling replikertBehandling = behandlingService.replikerBehandlingOgBehandlingsresultat(behandling, Behandlingsstatus.OPPRETTET, behandlingstype);
-
-        if (!behandling.erAvsluttet()) {
+        if (!fagsak.hentSistAktivBehandling().erAvsluttet()) {
             behandlingService.avsluttBehandling(behandling.getId());
         }
 
@@ -247,17 +239,33 @@ public class FagsakService {
             replikertBehandling, replikertBehandling.getInitierendeJournalpostId(), fagsak.hentAktørID(), SubjectHandler.getInstance().getUserID()
         );
         if (!unleash.isEnabled("melosys.api.ny.vurdering.medlperiode.beholdes")) {
-            avsluttTidligereMedlPeriode(behandlingsresultat);
+            avsluttTidligereMedlPeriode(behandlingsresultatService.hentBehandlingsresultat(behandling.getId()));
         }
         return replikertBehandling.getId();
     }
 
-    private void validerOpprettNyVurdering(Behandling behandling, Behandlingsresultat behandlingsresultat) {
-        if (behandling.erAktiv() && behandlingsresultat.erIkkeArtikkel16MedSendtAnmodningOmUnntak()) {
+    private void validerOpprettNyVurdering(Fagsak fagsak) {
+        Behandling sistAktivBehandling = fagsak.hentSistAktivBehandling();
+        Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(sistAktivBehandling.getId());
+        if (sistAktivBehandling.erAktiv() && behandlingsresultat.erIkkeArtikkel16MedSendtAnmodningOmUnntak()) {
             throw new FunksjonellException("Kan ikke revurdere en aktiv behandling");
-        } else if (behandling.erEndretPeriode()) {
+        } else if (sistAktivBehandling.erEndretPeriode()) {
             throw new FunksjonellException("Kan ikke revurdere en behandling av type " + Behandlingstyper.ENDRET_PERIODE.getBeskrivelse());
         }
+    }
+
+    Behandling hentBehandlingSomErUtgangspunktForRevurdering(Fagsak fagsak) {
+        return fagsak.hentSistAktivBehandling();
+    }
+
+    private Behandlingstyper avgjørBehandlingstype(Fagsak fagsak) {
+        Behandlingstyper behandlingstype;
+        if (!fagsak.harAktivBehandling()) {
+            behandlingstype = Behandlingstyper.NY_VURDERING;
+        } else {
+            behandlingstype = fagsak.hentSistAktivBehandling().getType();
+        }
+        return behandlingstype;
     }
 
     private void avsluttTidligereMedlPeriode(Behandlingsresultat behandlingsresultat) {

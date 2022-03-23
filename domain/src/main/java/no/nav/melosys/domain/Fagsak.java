@@ -79,6 +79,10 @@ public class Fagsak extends RegistreringsInfo {
         this.behandlinger = behandlinger;
     }
 
+    public boolean harAktivBehandling() {
+        return hentAktivBehandling() != null;
+    }
+
     public Behandling hentAktivBehandling() {
         List<Behandling> aktiveBehandlinger = getBehandlinger().stream().filter(Behandling::erAktiv).toList();
         if (aktiveBehandlinger.size() > 1) {
