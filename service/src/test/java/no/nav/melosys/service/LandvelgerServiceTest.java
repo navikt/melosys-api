@@ -186,18 +186,6 @@ class LandvelgerServiceTest {
     }
 
     @Test
-    void hentAlleArbeidsland_returnererSøknadslandskoder_dersomSøknadslandErUkjenteEllerAlleEosLand() {
-        lagBehandlingsresultat(lovvalgsperiode);
-        when(avklartefaktaService.hentAlleAvklarteArbeidsland(anyLong())).thenReturn(new HashSet<>(Arrays.asList(Landkoder.DK, Landkoder.NO)));
-        søknad.soeknadsland.erUkjenteEllerAlleEosLand = true;
-        behandling.setTema(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL);
-
-        Collection<Landkoder> arbeidsland = landvelgerService.hentAlleArbeidslandUtenMarginaltArbeid(behandlingID);
-
-        assertThat(arbeidsland).containsExactlyInAnyOrder(Landkoder.NO, Landkoder.DK);
-    }
-
-    @Test
     void hentUtenlandskTrygdemyndighetsland_medArt121_girSøknadsland() {
         mockBehandlingsgrunnlag();
         lagBehandlingsresultat(lovvalgsperiode);
