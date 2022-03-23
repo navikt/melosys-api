@@ -12,12 +12,10 @@ import com.google.common.collect.Streams;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.Soeknadsland;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
-import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,8 +53,8 @@ public class LandvelgerService {
             Behandlingsgrunnlag behandlingsgrunnlag =  behandlingsgrunnlagService.hentBehandlingsgrunnlag(behandlingID);
             BehandlingsgrunnlagData grunnlagData = behandlingsgrunnlag.getBehandlingsgrunnlagdata();
             Behandling behandling = behandlingsgrunnlag.getBehandling();
+            var søknadsland = grunnlagData.soeknadsland;
 
-            Soeknadsland søknadsland = grunnlagData.soeknadsland;
             if (behandling.erAnmodningOmUnntak() && søknadsland.landkoder.isEmpty()) {
                 alleArbeidsland.add(behandling.hentSedDokument().getUnntakFraLovvalgslandKode());
             } else {
