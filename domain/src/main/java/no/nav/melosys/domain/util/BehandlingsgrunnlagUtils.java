@@ -37,7 +37,7 @@ public final class BehandlingsgrunnlagUtils {
         }
         return søknadslandkoder.stream()
             .map(Landkoder::valueOf)
-            .collect(Collectors.toList());
+            .toList();
     }
 
     public static Soeknadsland hentSøknadsland(BehandlingsgrunnlagData grunnlagdata) {

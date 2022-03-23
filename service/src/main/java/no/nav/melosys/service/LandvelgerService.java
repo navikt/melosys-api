@@ -55,7 +55,7 @@ public class LandvelgerService {
             Behandling behandling = behandlingsgrunnlag.getBehandling();
 
             Soeknadsland søknadsland = grunnlagData.soeknadsland;
-            if (behandling.erAnmodningOmUnntak() && søknadsland.landkoder.isEmpty() && !søknadsland.erUkjenteEllerAlleEosLand) {
+            if (behandling.erAnmodningOmUnntak() && søknadsland.landkoder.isEmpty()) {
                 alleArbeidsland.add(behandling.hentSedDokument().getUnntakFraLovvalgslandKode());
             } else {
                 alleArbeidsland.addAll(hentSøknadslandkoder(grunnlagData));
