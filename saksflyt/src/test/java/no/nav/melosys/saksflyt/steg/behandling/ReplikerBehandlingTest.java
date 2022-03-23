@@ -51,7 +51,7 @@ class ReplikerBehandlingTest {
     void utfør_manglendeInaktivBehandling_feiler() {
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> replikerBehandling.utfør(prosessinstans))
-            .withMessageContaining("ingen avsluttet behandling");
+            .withMessageContaining("ingen inaktiv behandling");
     }
 
     @Test

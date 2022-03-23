@@ -7,7 +7,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.sak.FagsakService;
@@ -41,11 +40,7 @@ public class ReplikerBehandling implements StegBehandler {
         String saksnummer = prosessinstans.getData(ProsessDataKey.SAKSNUMMER);
         Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
 
-        if (fagsak.hentTidligsteInaktiveBehandling() == null) {
-            throw new FunksjonellException("Finner ingen avsluttet behandling på fagsak " + fagsak.getSaksnummer());
-        }
-
-        Behandling tidligstInaktiveBehandling = fagsak.hentTidligsteInaktiveBehandling();
+        Behandling tidligstInaktiveBehandling = fagsak.hentTidligstInaktivBehandling();
         Behandling nyBehandling = behandlingService.replikerBehandlingOgBehandlingsresultat(
             tidligstInaktiveBehandling,
             Behandlingsstatus.OPPRETTET,

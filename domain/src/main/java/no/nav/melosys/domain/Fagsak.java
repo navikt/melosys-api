@@ -5,6 +5,7 @@ import java.util.*;
 import javax.persistence.*;
 
 import no.nav.melosys.domain.kodeverk.*;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -104,11 +105,15 @@ public class Fagsak extends RegistreringsInfo {
         return Optional.ofNullable(hentAktivBehandling()).orElse(hentSistOppdatertBehandling());
     }
 
-    public Behandling hentTidligsteInaktiveBehandling() {
+    public Optional<Behandling> finnTidligstInaktivBehandling() {
         return getBehandlinger().stream()
             .filter(Behandling::erInaktiv)
-            .min(Comparator.comparing(RegistreringsInfo::getRegistrertDato))
-            .orElse(null);
+            .min(Comparator.comparing(RegistreringsInfo::getRegistrertDato));
+    }
+
+    public Behandling hentTidligstInaktivBehandling() {
+        return finnTidligstInaktivBehandling().orElseThrow(
+            () -> new FunksjonellException("Finner ingen inaktiv behandling på fagsak " + saksnummer));
     }
 
     public Aktoer hentBruker() {
