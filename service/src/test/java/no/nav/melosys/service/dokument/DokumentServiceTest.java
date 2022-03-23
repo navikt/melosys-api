@@ -316,11 +316,10 @@ final class DokumentServiceTest {
         AnmodningsperiodeService anmodningsperiodeService = mock(AnmodningsperiodeService.class);
         BehandlingsgrunnlagService behandlingsgrunnlagService = mock(BehandlingsgrunnlagService.class);
         BehandlingsresultatService behandlingsresultatService = mock(BehandlingsresultatService.class);
-        BehandlingService behandlingService = mock(BehandlingService.class);
         JoarkService joarkService = mock(JoarkService.class);
         VilkaarsresultatRepository vilkaarsresultatRepository = mock(VilkaarsresultatRepository.class);
         LandvelgerService landvelgerService = new LandvelgerService(avklartefaktaService, behandlingsresultatService,
-            behandlingsgrunnlagService, behandlingService);
+            behandlingsgrunnlagService);
         LovvalgsperiodeService lovvalgsperiodeService = mock(LovvalgsperiodeService.class);
         SaksopplysningerService saksopplysningerService = mock(SaksopplysningerService.class);
         UtenlandskMyndighetService utenlandskMyndighetService = mock(UtenlandskMyndighetService.class);
