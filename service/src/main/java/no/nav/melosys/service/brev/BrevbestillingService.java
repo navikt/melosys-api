@@ -259,6 +259,7 @@ public class BrevbestillingService {
             .medAdresselinjer(mapAdresselinjer(orgDokument, null, kontaktopplysning, persondata))
             .medPostnr(mapPostnr(orgDokument, persondata))
             .medPoststed(orgDokument != null ? DokgenAdresseMapper.mapPoststed(orgDokument) : mapPoststed(persondata))
+            .medRegion(mapRegionForAdresse(orgDokument, persondata))
             .medLand(mapLandForAdresse(orgDokument, persondata))
             .build();
     }
