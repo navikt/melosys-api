@@ -179,7 +179,6 @@ class LandvelgerServiceTest {
     @Test
     void hentAlleArbeidsland_returnererSøknadslandskoder_dersomSøknadslandHarLandkoder() {
         lagBehandlingsresultat(lovvalgsperiode);
-        when(behandlingService.hentBehandling(behandlingID)).thenReturn(behandling);
         when(avklartefaktaService.hentAlleAvklarteArbeidsland(anyLong())).thenReturn(new HashSet<>(Arrays.asList(Landkoder.DK, Landkoder.NO)));
         søknad.soeknadsland.landkoder = Arrays.asList(Landkoder.DK.getKode(), Landkoder.SE.getKode());
         behandling.setTema(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL);
@@ -192,7 +191,6 @@ class LandvelgerServiceTest {
     @Test
     void hentAlleArbeidsland_returnererSøknadslandskoder_dersomSøknadslandErUkjenteEllerAlleEosLand() {
         lagBehandlingsresultat(lovvalgsperiode);
-        when(behandlingService.hentBehandling(behandlingID)).thenReturn(behandling);
         when(avklartefaktaService.hentAlleAvklarteArbeidsland(anyLong())).thenReturn(new HashSet<>(Arrays.asList(Landkoder.DK, Landkoder.NO)));
         søknad.soeknadsland.erUkjenteEllerAlleEosLand = true;
         behandling.setTema(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL);
