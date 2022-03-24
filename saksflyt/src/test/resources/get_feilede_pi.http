@@ -1,7 +1,0 @@
-// @no-cookie-jar
-// @no-log
-GET https://{{melosys-api-url}}/admin/prosessinstanser/feilede
-Cache-Control: no-cache
-Content-Type: application/json
-Accept: application/json
-X-MELOSYS-ADMIN-APIKEY: {{melosys-admin-api-key}}
