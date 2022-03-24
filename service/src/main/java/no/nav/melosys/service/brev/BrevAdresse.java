@@ -1,7 +1,8 @@
 package no.nav.melosys.service.brev;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class BrevAdresse {
@@ -76,7 +77,7 @@ public class BrevAdresse {
 
         public Builder medAdresselinjer(List<String> adresselinjer) {
             this.adresselinjer = adresselinjer != null
-                ? adresselinjer.stream().filter(Objects::nonNull).collect(Collectors.toList())
+                ? adresselinjer.stream().filter(StringUtils::isNotEmpty).collect(Collectors.toList())
                 : null;
             return this;
         }
