@@ -6,6 +6,7 @@ import java.util.List;
 
 import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.brev.FastMottakerMedOrgnr;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.brev.Mottakerliste;
@@ -19,8 +20,10 @@ import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
+import no.nav.melosys.domain.person.Navn;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.domain.person.Personopplysninger;
+import no.nav.melosys.domain.person.adresse.Bostedsadresse;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
@@ -39,6 +42,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static java.util.Collections.emptyList;
+import static java.util.Collections.emptySet;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 import static no.nav.melosys.service.persondata.PersonopplysningerObjectFactory.*;
@@ -472,6 +476,20 @@ class BrevbestillingServiceTest {
     }
 
     @Test
+    void hentBrevAdresseTilMottakere_returnererAdresseMedKorrektAdresselinjer_nårCoAdresseErTomStreng() {
+        fakeUnleash.enable("melosys.pdl.aktiv");
+        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
+        when(mockBrevmottakerService.avklarMottakere(any(), eq(Mottaker.av(Aktoersroller.BRUKER)), any(), eq(false), eq(false)))
+            .thenReturn(List.of(lagAktoer(Aktoersroller.BRUKER, null)));
+        when(mockPersondataFasade.hentPerson(anyString())).thenReturn(lagPersondataMedTomCo());
+
+        var brevAdresser = brevbestillingService.hentBrevAdresseTilMottakere(MANGELBREV_BRUKER, Aktoersroller.BRUKER, 123L);
+
+        assertThat(brevAdresser).hasSize(1);
+        assertThat(brevAdresser.get(0).getAdresselinjer()).isEqualTo(List.of("gatenavnFraBostedsadresse 3"));
+    }
+
+    @Test
     void hentMuligeMottakere_hovedMottakerBruker_storbritanniaArtikkelUlik82() {
         when(mockBehandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
         when(mockBrevmottakerService.hentMottakerliste(STORBRITANNIA, 123L))
@@ -620,7 +638,12 @@ class BrevbestillingServiceTest {
         return saksopplysning;
     }
 
-    private Persondata lagPersondata() {
-        return lagPersonopplysninger();
+    private Persondata lagPersondataMedTomCo() {
+        var bostedsadresse = new Bostedsadresse(
+            new StrukturertAdresse("gatenavnFraBostedsadresse 3", null, null, null, null, null),
+            "", null, null, null, null, false);
+        return new Personopplysninger(
+            emptyList(), bostedsadresse, null, emptySet(), null, null,
+            null, emptySet(), new Navn(null, null, null), emptySet(), emptySet());
     }
 }
