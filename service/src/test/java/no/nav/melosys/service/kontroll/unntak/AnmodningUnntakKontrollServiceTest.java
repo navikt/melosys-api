@@ -12,6 +12,7 @@ import no.nav.melosys.domain.behandlingsgrunnlag.data.JuridiskArbeidsgiverNorge;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.FysiskArbeidssted;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
+import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory;
@@ -25,6 +26,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static no.nav.melosys.service.SaksbehandlingDataFactory.lagBehandling;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
@@ -32,6 +34,8 @@ import static org.mockito.Mockito.when;
 class AnmodningUnntakKontrollServiceTest {
     @Mock
     private AnmodningsperiodeService anmodningsperiodeService;
+    @Mock
+    private AvklarteVirksomheterService avklarteVirksomheterService;
     @Mock
     private BehandlingService behandlingService;
     @Mock
@@ -49,11 +53,13 @@ class AnmodningUnntakKontrollServiceTest {
         when(anmodningsperiodeService.hentFørsteAnmodningsperiode(behandlingID)).thenReturn(anmodningsperiode);
 
         when(persondataFasade.hentPerson(anyString())).thenReturn(PersonopplysningerObjectFactory.lagPersonopplysninger());
+        when(avklarteVirksomheterService.hentAntallVirksomheter(any())).thenReturn(1);
 
         final FakeUnleash unleash = new FakeUnleash();
         unleash.enable("melosys.pdl.aktiv");
-        anmodningUnntakKontrollService = new AnmodningUnntakKontrollService(anmodningsperiodeService, behandlingService,
-            persondataFasade, unleash);
+        anmodningUnntakKontrollService = new AnmodningUnntakKontrollService(
+            anmodningsperiodeService, avklarteVirksomheterService, behandlingService, persondataFasade, unleash
+        );
     }
 
     @Test
@@ -103,12 +109,9 @@ class AnmodningUnntakKontrollServiceTest {
     }
 
     @Test
-    void utførKontroller_flereArbeidsgivereArt16_1_returnererKode() {
-        anmodningsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1);
-        BehandlingsgrunnlagData behandlingsgrunnlagData = new BehandlingsgrunnlagData();
-        behandlingsgrunnlagData.juridiskArbeidsgiverNorge = lagJuridiskArbeidsgiverNorge();
-        behandlingsgrunnlagData.foretakUtland = lagForetakUtland();
-        when(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(lagBehandling(behandlingsgrunnlagData));
+    void utførKontroller_flereArbeidsgivere_returnererKode() {
+        when(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(lagBehandling());
+        when(avklarteVirksomheterService.hentAntallVirksomheter(any())).thenReturn(2);
 
         Collection<Kontrollfeil> resultat = anmodningUnntakKontrollService.utførKontroller(behandlingID);
         assertThat(resultat).extracting(Kontrollfeil::getKode).contains(Kontroll_begrunnelser.IKKE_KUN_EN_VIRKSOMHET);

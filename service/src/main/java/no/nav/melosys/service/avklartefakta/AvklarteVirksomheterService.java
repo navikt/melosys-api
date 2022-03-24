@@ -108,6 +108,10 @@ public class AvklarteVirksomheterService {
         return norskeVirksomheter;
     }
 
+    public int hentAntallVirksomheter(Behandling behandling) {
+        return hentAlleNorskeVirksomheter(behandling).size() + hentUtenlandskeVirksomheter(behandling).size();
+    }
+
     @Transactional
     public void lagreVirksomheterSomAvklartefakta(Long behandlingID, List<String> virksomhetIDer) {
         validerVirksomhetIDerGyldige(behandlingID, virksomhetIDer);
