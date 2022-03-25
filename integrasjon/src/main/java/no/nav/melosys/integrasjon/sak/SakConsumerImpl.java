@@ -27,14 +27,13 @@ import org.slf4j.LoggerFactory;
 public class SakConsumerImpl implements RestConsumer, SakConsumer {
     private static final Logger log = LoggerFactory.getLogger(SakConsumerImpl.class);
 
-    private static final GenericType<List<SakDto>> sakDtoListType = new GenericType<List<SakDto>>() {};
+    private static final GenericType<List<SakDto>> sakDtoListType = new GenericType<>() {
+    };
     private static final String X_CORRELATION_ID = "X-Correlation-ID";
 
-    private final boolean erSystem;
     private final WebTarget target;
 
-    SakConsumerImpl(String endpointUrl, boolean erSystem) {
-        this.erSystem = erSystem;
+    SakConsumerImpl(String endpointUrl) {
         try {
             SSLContext sslContext = SSLContext.getDefault();
             Client client = ClientBuilder.newBuilder().sslContext(sslContext).build();
@@ -43,11 +42,6 @@ public class SakConsumerImpl implements RestConsumer, SakConsumer {
             log.error("Feilet under oppsett av integrasjon mot Sak API", e);
             throw new IntegrasjonException("Feilet under oppsett av integrasjon mot Sak API");
         }
-    }
-
-    @Override
-    public boolean isSystem() {
-        return erSystem;
     }
 
     @Override
