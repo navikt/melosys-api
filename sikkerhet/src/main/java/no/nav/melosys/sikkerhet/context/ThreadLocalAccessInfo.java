@@ -45,12 +45,11 @@ public class ThreadLocalAccessInfo {
         }
     }
 
-    public static ThreadLocalAccessInfo preHandle(String requestUri) {
+    public static void preHandle(String requestUri) {
         if (threadLocalAccessInfo.get().requestUri != null) {
             throw new IllegalStateException("We should not have a thread local requestUri before controller request");
         }
         threadLocalAccessInfo.get().requestUri = requestUri;
-        return threadLocalAccessInfo.get();
     }
 
     public static void afterCompletion(String requestUri) {
