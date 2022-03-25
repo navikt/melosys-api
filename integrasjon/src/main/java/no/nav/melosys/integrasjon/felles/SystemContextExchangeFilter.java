@@ -35,8 +35,6 @@ public class SystemContextExchangeFilter implements ExchangeFilterFunction {
             log.warn("Blir kalt fra forntend\n{}", ThreadLocalAccessInfo.getInfo());
         }
 
-        log.info("SystemContextExchangeFilter restStsClient.getCallID" + restStsClient.getCallID());
-
         ClientRequest clientRequestWithBearerAuth = ClientRequest.from(clientRequest)
             .header(HttpHeaders.AUTHORIZATION, restStsClient.bearerToken())
             .build();

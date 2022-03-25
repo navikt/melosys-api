@@ -1,7 +1,8 @@
 package no.nav.melosys.integrasjon.joark.saf;
 
-import no.nav.melosys.integrasjon.felles.SystemContextExchangeFilter;
-import no.nav.melosys.integrasjon.felles.UserContextExchangeFilter;
+import no.nav.melosys.integrasjon.felles.AutoContextExchangeFilter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -13,6 +14,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 @Configuration
 public class SafConsumerProducer {
+    private static final Logger log = LoggerFactory.getLogger(SafConsumerProducer.class);
     private static final String NAV_CONSUMER_ID = "Nav-Consumer-Id";
 
     private final String url;
@@ -23,10 +25,10 @@ public class SafConsumerProducer {
 
     @Bean
     @Primary
-    public SafConsumer safConsumer(WebClient.Builder webClientBuilder, UserContextExchangeFilter userContextExchangeFilter) {
+    public SafConsumer safConsumer(WebClient.Builder webClientBuilder, AutoContextExchangeFilter autoContextExchangeFilter) {
         return new SafConsumerImpl(
             webClientBuilder
-                .filter(userContextExchangeFilter)
+                .filter(autoContextExchangeFilter)
                 .defaultHeaders(this::defaultHeaders)
                 .baseUrl(url)
                 .build()
@@ -35,14 +37,9 @@ public class SafConsumerProducer {
 
     @Bean
     @Qualifier("system")
-    public SafConsumer safSystemConsumer(WebClient.Builder webClientBuilder, SystemContextExchangeFilter systemContextExchangeFilter) {
-        return new SafConsumerImpl(
-            webClientBuilder
-                .filter(systemContextExchangeFilter)
-                .defaultHeaders(this::defaultHeaders)
-                .baseUrl(url)
-                .build()
-        );
+    public SafConsumer safSystemConsumer(WebClient.Builder webClientBuilder, AutoContextExchangeFilter systemContextExchangeFilter) {
+        log.info("no need for @Qualifier(\"system\") provided while we clean up");
+        return safConsumer(webClientBuilder, systemContextExchangeFilter);
     }
 
     private void defaultHeaders(HttpHeaders httpHeaders) {
