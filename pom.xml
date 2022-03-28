@@ -95,7 +95,7 @@
         <istack.version>4.0.1</istack.version>
         <javassist.version>3.27.0-GA</javassist.version>
         <jaxb2-basics-runtime.version>0.12.0</jaxb2-basics-runtime.version>
-        <joda-time.version>2.10.10</joda-time.version>
+        <joda-time.version>2.10.14</joda-time.version>
         <objenesis.version>3.2</objenesis.version>
         <osgi.version>6.0.0</osgi.version>
         <woodstox.version>6.2.6</woodstox.version>
