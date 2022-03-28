@@ -58,9 +58,9 @@ class FamiliemedlemmerDataFetcherTest {
     private void assertFetched(List<FamiliemedlemDto> familieDtoListe) {
         assertThat(familieDtoListe).containsExactlyInAnyOrder(
             new FamiliemedlemDto("etternavn barn", "fnrBarn", Familierelasjon.BARN, 42, "felles", "fnrAnnenForelder",
-                null, null),
+                null, null, null),
             new FamiliemedlemDto("etternavn fornavn", "fnr", Familierelasjon.RELATERT_VED_SIVILSTAND, null, null, null,
-                Sivilstandstype.GIFT, LocalDate.MIN));
+                Sivilstandstype.GIFT, false, LocalDate.MIN));
     }
 
     private Familiemedlem lagBarn() {

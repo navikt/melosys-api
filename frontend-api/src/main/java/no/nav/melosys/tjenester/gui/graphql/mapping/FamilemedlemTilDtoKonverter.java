@@ -3,6 +3,7 @@ package no.nav.melosys.tjenester.gui.graphql.mapping;
 import java.time.LocalDate;
 
 import no.nav.melosys.domain.person.Foedsel;
+import no.nav.melosys.domain.person.Sivilstand;
 import no.nav.melosys.domain.person.Sivilstandstype;
 import no.nav.melosys.domain.person.familie.Familiemedlem;
 import no.nav.melosys.tjenester.gui.graphql.dto.FamiliemedlemDto;
@@ -22,8 +23,14 @@ public final class FamilemedlemTilDtoKonverter {
             familiemedlem.erBarn() ? familiemedlem.foreldreansvarstype() : null,
             familiemedlem.erBarn() ? hentFolkeregisteridentAnnenForelder(familiemedlem) : null,
             familiemedlem.erRelatertVedSivilstand() ? hentSivilstandstype(familiemedlem) : null,
+            familiemedlem.erRelatertVedSivilstand() ? hentErHistorisk(familiemedlem) : null,
             familiemedlem.erRelatertVedSivilstand() ? hentSivilstandGyldighetsperiodeFom(familiemedlem) : null
         );
+    }
+
+    private static Boolean hentErHistorisk(Familiemedlem familiemedlem) {
+        Sivilstand sivilstand = familiemedlem.sivilstand();
+        return sivilstand != null ? sivilstand.erHistorisk() : null;
     }
 
     private static long beregnAlder(Foedsel fødsel) {

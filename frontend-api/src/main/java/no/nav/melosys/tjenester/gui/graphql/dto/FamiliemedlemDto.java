@@ -13,6 +13,7 @@ public record FamiliemedlemDto(
     String foreldreansvar,
     String fnrAnnenForelder,
     Sivilstandstype sivilstand,
+    Boolean erHistorisk,
     LocalDate sivilstandGyldighetsperiodeFom
 ) {
 }
