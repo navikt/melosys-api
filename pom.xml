@@ -67,7 +67,7 @@
         <ibmmq.version>9.2.5.0</ibmmq.version>
         <jackson.version>2.13.1</jackson.version>
         <javax.ws.rs-api.version>2.1.1</javax.ws.rs-api.version>
-        <json-smart.version>2.4.7</json-smart.version>
+        <json-smart.version>2.4.8</json-smart.version>
         <jms-api.version>2.0.1</jms-api.version>
         <micrometer-jvm-extras.version>0.2.2</micrometer-jvm-extras.version>
         <networknt.json-schema-validator.version>1.0.66</networknt.json-schema-validator.version>
