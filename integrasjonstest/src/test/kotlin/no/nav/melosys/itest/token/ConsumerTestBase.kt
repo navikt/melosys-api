@@ -1,6 +1,7 @@
 package no.nav.melosys.itest.token
 
 import com.github.tomakehurst.wiremock.WireMockServer
+import com.github.tomakehurst.wiremock.client.MappingBuilder
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.github.tomakehurst.wiremock.matching.StringValuePattern
@@ -34,8 +35,12 @@ abstract class ConsumerTestBase(
         }
     }
 
+    abstract fun createWireMock() : MappingBuilder
+
+    abstract fun getMockData(): String
+
     fun verifyHeaders(headers: Map<String, StringValuePattern>) {
-        val wireMock = WireMock.post("/graphql")
+        val wireMock = createWireMock()
         headers.forEach {
             wireMock.withHeader(it.key, it.value)
         }
@@ -76,6 +81,4 @@ abstract class ConsumerTestBase(
     fun setup() {
         wireMockServer.resetAll()
     }
-
-    abstract fun getMockData(): String
 }
