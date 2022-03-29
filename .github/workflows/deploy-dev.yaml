@@ -60,7 +60,7 @@ jobs:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-fss
           RESOURCE: nais.yml
-          VAR: APP_NAME=melosys,VAULT_CLUSTER=dev,URL=melosys-api.dev.intern.nav.no,KAFKA_POOL=nav-dev,image=${{ env.docker_image }}
+          VAR: APP_NAME=melosys,VAULT_CLUSTER=dev,URL=melosys-api.dev.intern.nav.no,KAFKA_POOL=nav-dev,IMAGE=${{ env.docker_image }}
       - name: Checkout latest code
         uses: actions/checkout@v3
         with:
