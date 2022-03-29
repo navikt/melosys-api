@@ -4,13 +4,11 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.stream.Stream;
 
 import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -66,7 +64,7 @@ public class AnmodningUnntakKontrollService implements AdresseUtlandKontroller {
         Set<Function<AnmodningUnntakKontrollData, Kontrollfeil>> kontroller
     ) {
         final var persondata = hentPersondata(behandling);
-        final int antallArbeidsgivere = avklarteVirksomheterService.hentAntallVirksomheter(behandling);
+        final int antallArbeidsgivere = avklarteVirksomheterService.hentAntallAvklarteVirksomheter(behandling);
         AnmodningUnntakKontrollData kontrollData = new AnmodningUnntakKontrollData(persondata,
             behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata(),
             anmodningsperiode,

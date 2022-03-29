@@ -8,10 +8,8 @@ import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.ForetakUtland;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.JuridiskArbeidsgiverNorge;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.FysiskArbeidssted;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.persondata.PersondataFasade;
@@ -53,7 +51,7 @@ class AnmodningUnntakKontrollServiceTest {
         when(anmodningsperiodeService.hentFørsteAnmodningsperiode(behandlingID)).thenReturn(anmodningsperiode);
 
         when(persondataFasade.hentPerson(anyString())).thenReturn(PersonopplysningerObjectFactory.lagPersonopplysninger());
-        when(avklarteVirksomheterService.hentAntallVirksomheter(any())).thenReturn(1);
+        when(avklarteVirksomheterService.hentAntallAvklarteVirksomheter(any())).thenReturn(1);
 
         final FakeUnleash unleash = new FakeUnleash();
         unleash.enable("melosys.pdl.aktiv");
@@ -111,21 +109,9 @@ class AnmodningUnntakKontrollServiceTest {
     @Test
     void utførKontroller_flereArbeidsgivere_returnererKode() {
         when(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(lagBehandling());
-        when(avklarteVirksomheterService.hentAntallVirksomheter(any())).thenReturn(2);
+        when(avklarteVirksomheterService.hentAntallAvklarteVirksomheter(any())).thenReturn(2);
 
         Collection<Kontrollfeil> resultat = anmodningUnntakKontrollService.utførKontroller(behandlingID);
         assertThat(resultat).extracting(Kontrollfeil::getKode).contains(Kontroll_begrunnelser.IKKE_KUN_EN_VIRKSOMHET);
-    }
-
-    private JuridiskArbeidsgiverNorge lagJuridiskArbeidsgiverNorge() {
-        var juridiskArbeidsgiverNorge = new JuridiskArbeidsgiverNorge();
-        juridiskArbeidsgiverNorge.ekstraArbeidsgivere = List.of("Ekstra arbeidsgiver");
-        return juridiskArbeidsgiverNorge;
-    }
-
-    private List<ForetakUtland> lagForetakUtland() {
-        var foretakUtland = new ForetakUtland();
-        foretakUtland.uuid = "uuid-001-123";
-        return List.of(foretakUtland);
     }
 }

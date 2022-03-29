@@ -13,7 +13,7 @@ public class AnmodningUnntakKontrollData {
     public AnmodningUnntakKontrollData(Persondata persondata,
                                        BehandlingsgrunnlagData behandlingsgrunnlagData,
                                        Anmodningsperiode anmodningsperiode,
-                                        int antallArbeidsgivere) {
+                                       int antallArbeidsgivere) {
         this.persondata = persondata;
         this.behandlingsgrunnlagData = behandlingsgrunnlagData;
         this.anmodningsperiode = anmodningsperiode;

@@ -108,8 +108,8 @@ public class AvklarteVirksomheterService {
         return norskeVirksomheter;
     }
 
-    public int hentAntallVirksomheter(Behandling behandling) {
-        return hentAlleNorskeVirksomheter(behandling).size() + hentUtenlandskeVirksomheter(behandling).size();
+    public int hentAntallAvklarteVirksomheter(Behandling behandling) {
+        return hentNorskeArbeidsgivendeOrgnumre(behandling).size() + hentUtenlandskeVirksomheter(behandling).size();
     }
 
     @Transactional

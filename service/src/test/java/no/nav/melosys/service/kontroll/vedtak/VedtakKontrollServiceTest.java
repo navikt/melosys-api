@@ -129,7 +129,7 @@ class VedtakKontrollServiceTest {
         lovvalgsperiode.setFom(LocalDate.now());
         lovvalgsperiode.setTom(LocalDate.now().plusYears(3));
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1);
-        behandlingsgrunnlagData.juridiskArbeidsgiverNorge = lagJuridiskArbeidsgiverNorge();
+        behandlingsgrunnlagData.juridiskArbeidsgiverNorge = new JuridiskArbeidsgiverNorge();
         Collection<Kontrollfeil> resultat = vedtakKontrollService.utførKontroller(behandlingID, Sakstyper.EU_EOS);
         assertThat(resultat).isEmpty();
     }
@@ -220,11 +220,5 @@ class VedtakKontrollServiceTest {
         var behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setLovvalgsperioder(Set.of(lovvalgsperiode));
         return behandlingsresultat;
-    }
-
-    private JuridiskArbeidsgiverNorge lagJuridiskArbeidsgiverNorge() {
-        var juridiskArbeidsgiverNorge = new JuridiskArbeidsgiverNorge();
-        juridiskArbeidsgiverNorge.ekstraArbeidsgivere = List.of("Ekstra arbeidsgiver");
-        return juridiskArbeidsgiverNorge;
     }
 }
