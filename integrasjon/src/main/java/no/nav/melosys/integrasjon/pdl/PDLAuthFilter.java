@@ -3,6 +3,8 @@ package no.nav.melosys.integrasjon.pdl;
 import java.util.function.Supplier;
 import javax.annotation.Nonnull;
 
+import no.finn.unleash.Unleash;
+import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo;
 import no.nav.melosys.integrasjon.reststs.RestStsClient;
 import org.springframework.http.HttpHeaders;
@@ -17,22 +19,34 @@ public class PDLAuthFilter implements ExchangeFilterFunction {
 
     private final RestStsClient restStsClient;
     private final Supplier<String> authSupplier;
+    private final Unleash unleash;
 
-    public PDLAuthFilter(RestStsClient restStsClient, Supplier<String> authSupplier) {
+    public PDLAuthFilter(RestStsClient restStsClient, Supplier<String> authSupplier, Unleash unleash) {
         this.restStsClient = restStsClient;
         this.authSupplier = authSupplier;
+        this.unleash = unleash;
     }
 
     @Nonnull
     @Override
     public Mono<ClientResponse> filter(@Nonnull ClientRequest clientRequest,
                                        @Nonnull ExchangeFunction exchangeFunction) {
-        ThreadLocalAccessInfo.fromContextExchangeFilter(clientRequest.url().toString());
+        String authToken = unleash.isEnabled("melosys.auto.token") ?
+            getStringSupplier(restStsClient).get()
+            : authSupplier.get();
+
         return exchangeFunction.exchange(
             ClientRequest.from(clientRequest)
-                .header(HttpHeaders.AUTHORIZATION, authSupplier.get())
+                .header(HttpHeaders.AUTHORIZATION, authToken)
                 .header(NAV_CONSUMER_TOKEN, restStsClient.bearerToken())
                 .build()
         );
+    }
+
+    private Supplier<String> getStringSupplier(RestStsClient restStsClient) {
+        if (ThreadLocalAccessInfo.isProcessCall()) {
+            return restStsClient::bearerToken;
+        }
+        return () -> "Bearer " + SubjectHandler.getInstance().getOidcTokenString();
     }
 }
