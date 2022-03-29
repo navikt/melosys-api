@@ -1,5 +1,6 @@
 package no.nav.melosys.service.utpeking;
 
+import no.finn.unleash.Unleash;
 import no.nav.melosys.repository.UtpekingsperiodeRepository;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.LovvalgsperiodeService;
@@ -19,10 +20,10 @@ public class UtpekingSystemService extends UtpekingService {
     public UtpekingSystemService(BehandlingService behandlingService, BehandlingsresultatService behandlingsresultatService,
                                  @Qualifier("system") EessiService eessiService, LandvelgerService landvelgerService,
                                  LovvalgsperiodeService lovvalgsperiodeService, @Qualifier("system") OppgaveService oppgaveService,
-                                 ProsessinstansService prosessinstansService, UtpekingsperiodeRepository utpekingsperiodeRepository,
+                                 ProsessinstansService prosessinstansService, Unleash unleash, UtpekingsperiodeRepository utpekingsperiodeRepository,
                                  @Qualifier("system") VedtakKontrollService vedtakKontrollService,
                                  ApplicationEventMulticaster melosysEventMulticaster) {
         super(behandlingService, behandlingsresultatService, eessiService, landvelgerService, lovvalgsperiodeService, oppgaveService,
-              prosessinstansService, utpekingsperiodeRepository, vedtakKontrollService, melosysEventMulticaster);
+            prosessinstansService, unleash, utpekingsperiodeRepository, vedtakKontrollService, melosysEventMulticaster);
     }
 }
