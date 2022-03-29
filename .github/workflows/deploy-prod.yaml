@@ -18,7 +18,7 @@ jobs:
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: prod-fss
-          RESOURCE: nais.yaml
+          RESOURCE: nais.yml
           VAR: APP_NAME=melosys,VAULT_CLUSTER=prod,URL=melosys-api.intern.nav.no,KAFKA_POOL=nav-prod
       - name: post-production
         uses: navikt/digihot-deploy/actions/post-production@v2
