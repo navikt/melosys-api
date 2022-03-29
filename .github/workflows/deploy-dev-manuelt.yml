@@ -1,11 +1,8 @@
 on:
-  push:
-    branches:
-      - 'master'
   workflow_dispatch:
     inputs:
       environment:
-        description: 'Miljø (dev, q1 eller prod)'
+        description: 'Miljø (dev eller q1)'
         required: true
         default: 'dev'
 
@@ -80,15 +77,6 @@ jobs:
     if: always() && (needs.docker.result == 'success' || needs.docker.result == 'skipped')
     steps:
       - uses: actions/checkout@v3
-      - name: Deploy to prod
-        if: github.event.inputs.environment == 'prod'
-        run: |
-          echo "CLUSTER=prod-fss" >> $GITHUB_ENV
-          echo "URL=melosys-api.intern.nav.no" >> $GITHUB_ENV
-          echo "ENVIRONMENT=prod" >> $GITHUB_ENV
-          echo "KAFKA_POOL=nav-prod" >> $GITHUB_ENV
-          echo "VAULT_CLUSTER=prod" >> $GITHUB_ENV
-          echo "APP_NAME=melosys" >> $GITHUB_ENV
       - name: Deploy to q1
         if: github.event.inputs.environment == 'q1'
         run: |
@@ -99,11 +87,11 @@ jobs:
           echo "VAULT_CLUSTER=dev" >> $GITHUB_ENV
           echo "APP_NAME=melosys-q1" >> $GITHUB_ENV
       - name: Deploy to dev
-        if: github.event.inputs.environment == 'dev' || (github.event_name == 'push' && github.ref == 'refs/heads/master')
+        if: github.event.inputs.environment == 'dev'
         run: |
           echo "CLUSTER=dev-fss" >> $GITHUB_ENV
           echo "URL=melosys-api.dev.intern.nav.no" >> $GITHUB_ENV
-          echo "ENVIRONMENT=dev" >> $GITHUB_ENV
+          echo "<<ENVIRONMENT>>=dev" >> $GITHUB_ENV
           echo "KAFKA_POOL=nav-dev" >> $GITHUB_ENV
           echo "VAULT_CLUSTER=dev" >> $GITHUB_ENV
           echo "APP_NAME=melosys" >> $GITHUB_ENV
@@ -114,7 +102,6 @@ jobs:
           CLUSTER: ${{ env.CLUSTER }}
           RESOURCE: nais.yml
           VAR: IMAGE=${{ env.IMAGE }},URL=${{ env.URL }},KAFKA_POOL=${{ env.KAFKA_POOL }},VAULT_CLUSTER=${{ env.VAULT_CLUSTER }},APP_NAME=${{ env.APP_NAME }}
-
       - name: Get commit message
         run: echo "COMMIT_MSG=$(git log --format=%s -n 1)" >> $GITHUB_ENV
       - name: Slack Notification
