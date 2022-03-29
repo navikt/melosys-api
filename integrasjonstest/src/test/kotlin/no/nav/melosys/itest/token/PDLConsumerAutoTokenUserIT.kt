@@ -9,14 +9,15 @@ import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.test.web.client.MockRestServiceServer
 import java.util.*
 
-class PDLConsumerIT(
-    @Autowired private val pdlConsumer: PDLConsumer,
+class PDLConsumerAutoTokenUserIT(
+    @Autowired @Qualifier("saksbehandler") private val pdlConsumer: PDLConsumer,
     @Autowired server: MockRestServiceServer,
     @Value("\${mockserver.port}") mockPort: Int,
 ) : PDLConsumerTestBase(server, mockPort) {
