@@ -23,7 +23,7 @@ import org.springframework.test.web.client.MockRestServiceServer
         UserContextExchangeFilter::class,
         SystemContextExchangeFilter::class,
     ],
-    properties = ["spring.profiles.active:itest-aareg"]
+    properties = ["spring.profiles.active:itest-token"]
 )
 open class OppgaveConsumerTestBase(
     server: MockRestServiceServer,
