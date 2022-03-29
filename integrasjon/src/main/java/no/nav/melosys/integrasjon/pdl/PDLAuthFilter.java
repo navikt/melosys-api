@@ -31,22 +31,24 @@ public class PDLAuthFilter implements ExchangeFilterFunction {
     @Override
     public Mono<ClientResponse> filter(@Nonnull ClientRequest clientRequest,
                                        @Nonnull ExchangeFunction exchangeFunction) {
-        String authToken = unleash.isEnabled("melosys.auto.token") ?
-            getStringSupplier(restStsClient).get()
-            : authSupplier.get();
-
         return exchangeFunction.exchange(
             ClientRequest.from(clientRequest)
-                .header(HttpHeaders.AUTHORIZATION, authToken)
+                .header(HttpHeaders.AUTHORIZATION, getTokenSupplier(unleash, restStsClient).get())
                 .header(NAV_CONSUMER_TOKEN, restStsClient.bearerToken())
                 .build()
         );
     }
 
-    private Supplier<String> getStringSupplier(RestStsClient restStsClient) {
+    private Supplier<String> getTokenSupplier(Unleash unleash, RestStsClient restStsClient) {
+        if (!unleash.isEnabled("melosys.auto.token")) {
+            return authSupplier;
+        }
         if (ThreadLocalAccessInfo.isProcessCall()) {
             return restStsClient::bearerToken;
         }
-        return () -> "Bearer " + SubjectHandler.getInstance().getOidcTokenString();
+        if (ThreadLocalAccessInfo.isFrontendCall()) {
+            return () -> "Bearer " + SubjectHandler.getInstance().getOidcTokenString();
+        }
+        throw new IllegalStateException("Må bli kalt fra frontend eller prosess");
     }
 }

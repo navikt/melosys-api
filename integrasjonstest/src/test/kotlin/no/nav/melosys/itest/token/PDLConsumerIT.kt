@@ -9,14 +9,13 @@ import no.nav.melosys.integrasjon.felles.EnvironmentHandler
 import no.nav.melosys.integrasjon.pdl.*
 import no.nav.melosys.integrasjon.reststs.RestStsClient
 import no.nav.melosys.integrasjon.reststs.StsRestTemplateProducer
+import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
+import no.nav.melosys.sikkerhet.context.SubjectHandler
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
-import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.*
 import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.web.reactive.function.client.WebClientAutoConfiguration
 import org.springframework.boot.test.autoconfigure.web.client.RestClientTest
@@ -24,6 +23,7 @@ import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.http.MediaType
 import org.springframework.mock.env.MockEnvironment
+import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.web.client.MockRestServiceServer
 import org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo
 import org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess
@@ -42,23 +42,12 @@ import java.util.*
     properties = ["spring.profiles.active:itest-aareg"]
 )
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class PDLConsumerMedProsessTokenIT(
+internal class PDLConsumerIT(
     @Autowired private val server: MockRestServiceServer,
-    @Autowired private val pdlConsumer: PDLConsumer,
+    @Autowired @Qualifier("system") private val pdlConsumer: PDLConsumer,
     @Value("\${mockserver.port}") private val mockPort: Int
 ) {
-
-    var wireMockServer: WireMockServer = WireMockServer(WireMockConfiguration.wireMockConfig().port(mockPort))
-
-    @BeforeAll
-    fun beforeAll() {
-        wireMockServer.start()
-    }
-
-    @AfterAll
-    fun afterAll() {
-        wireMockServer.stop()
-    }
+    val wireMockServer: WireMockServer = WireMockServer(WireMockConfiguration.wireMockConfig().port(mockPort))
 
     @TestConfiguration
     class TestConfig {
@@ -71,19 +60,19 @@ internal class PDLConsumerMedProsessTokenIT(
         }
     }
 
-    @BeforeEach
-    fun setup() {
-        wireMockServer.start()
-        val environment = Mockito.spy(MockEnvironment())
-        environment.setProperty("systemuser.username", "test")
-        environment.setProperty("systemuser.password", "test")
-        EnvironmentHandler(environment)
+    class TestSubjectHandler : SubjectHandler() {
+        override fun getOidcTokenString(): String {
+            return "--token-from-user--"
+        }
+
+        override fun getUserID(): String {
+            throw IllegalStateException("getUserID skal ikke bli brukt av test")
+        }
     }
 
-    @Test
-    fun testRequestFromProsess() {
-        val uuid = UUID.randomUUID()
-        ThreadLocalAccessInfo.beforExecuteProcess(uuid, "prossesSteg")
+    @BeforeAll
+    fun beforeAll() {
+        wireMockServer.start()
 
         server.expect(requestTo("/?grant_type=client_credentials&scope=openid"))
             .andRespond(
@@ -92,6 +81,26 @@ internal class PDLConsumerMedProsessTokenIT(
                     MediaType.APPLICATION_JSON
                 )
             )
+        val environment = Mockito.spy(MockEnvironment())
+        environment.setProperty("systemuser.username", "test")
+        environment.setProperty("systemuser.password", "test")
+        EnvironmentHandler(environment)
+    }
+
+    @AfterAll
+    fun afterAll() {
+        wireMockServer.stop()
+    }
+
+    @BeforeEach
+    fun setup() {
+        wireMockServer.resetAll()
+    }
+
+    @Test
+    fun testRequestFromProsess() {
+        val uuid = UUID.randomUUID()
+        ThreadLocalAccessInfo.beforExecuteProcess(uuid, "prossesSteg")
 
         wireMockServer.stubFor(
             WireMock.post("/graphql")
@@ -107,6 +116,30 @@ internal class PDLConsumerMedProsessTokenIT(
 
         pdlConsumer.hentIdenter("99026522600")
         ThreadLocalAccessInfo.afterExecuteProcess(uuid)
+    }
+
+    @Test
+    @DirtiesContext(methodMode = DirtiesContext.MethodMode.BEFORE_METHOD)
+    fun testRequestFraWeb() {
+        SpringSubjectHandler.set(TestSubjectHandler())
+
+        ThreadLocalAccessInfo.preHandle("request")
+
+        wireMockServer.stubFor(
+            WireMock.post("/graphql")
+                .withHeader("Authorization", WireMock.equalTo("Bearer --token-from-user--"))
+                .withHeader("Nav-Consumer-Token", WireMock.equalTo("Bearer --token-from-service--"))
+                .willReturn(
+                    WireMock.aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(mockData)
+                )
+        )
+
+        pdlConsumer.hentIdenter("99026522600")
+
+        ThreadLocalAccessInfo.afterCompletion("request")
     }
 
     private val mockData = """{
