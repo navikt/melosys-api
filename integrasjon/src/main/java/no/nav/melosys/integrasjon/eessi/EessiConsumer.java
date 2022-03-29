@@ -39,4 +39,6 @@ public interface EessiConsumer {
     SedGrunnlagDto hentSedGrunnlag(String rinaSaksnummer, String rinaDokumentID);
 
     void lukkBuc(String rinaSaksnummer);
+
+    List<String> hentMuligeAksjoner(String rinaSaksnummer);
 }

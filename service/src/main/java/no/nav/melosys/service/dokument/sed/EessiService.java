@@ -309,6 +309,18 @@ public class EessiService {
         return valgteMottakerinstitusjoner;
     }
 
+    /**
+     * Sjekker om en mulig aksjon er gyldig på input buc. Foreløpig trenger vi kun å sjekke "Create", men hvis dette
+     * senere skal utvides bør vi ta inn Aksjoner enum fra Eessi.
+     *
+     * @param rinaSaksnummer nummer på buc.
+     * @return true hvis vi kan opprette sed på buc.
+     */
+    public boolean kanOppretteSedPåBuc(String rinaSaksnummer) {
+        return eessiConsumer.hentMuligeAksjoner(rinaSaksnummer)
+            .stream().anyMatch(s -> s.split(" ")[2].equals("Create"));
+    }
+
     private Map<Landkoder, Set<String>> hentEessiMottakerinstitusjonerPerLand(BucType bucType, Set<String> landkoder) {
         return hentEessiMottakerinstitusjoner(bucType.name(), landkoder).stream()
             .collect(Collectors.groupingBy(

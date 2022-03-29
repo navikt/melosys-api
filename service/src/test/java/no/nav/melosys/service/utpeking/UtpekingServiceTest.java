@@ -6,7 +6,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.melding.UtpekingAvvis;
 import no.nav.melosys.domain.kodeverk.*;
@@ -67,11 +69,13 @@ class UtpekingServiceTest {
     @Mock
     private ApplicationEventMulticaster melosysEventMulticaster;
 
+
     @Captor
     private ArgumentCaptor<Collection<Lovvalgsperiode>> lovvalgsperiodeCaptor;
     @Captor
     private ArgumentCaptor<Collection<Landkoder>> landkoderCaptor;
 
+    private FakeUnleash unleash = new FakeUnleash();
     private UtpekingService utpekingService;
 
     private final long behandlingID = 431;
@@ -82,7 +86,7 @@ class UtpekingServiceTest {
     @BeforeEach
     public void setup() {
         utpekingService = new UtpekingService(behandlingService, behandlingsresultatService, eessiService, landvelgerService,
-            lovvalgsperiodeService, oppgaveService, prosessinstansService, utpekingsperiodeRepository, vedtakKontrollService, melosysEventMulticaster);
+            lovvalgsperiodeService, oppgaveService, prosessinstansService, unleash, utpekingsperiodeRepository, vedtakKontrollService, melosysEventMulticaster);
 
         fagsak.setBehandlinger(List.of(behandling));
         fagsak.setType(Sakstyper.EU_EOS);
@@ -96,8 +100,7 @@ class UtpekingServiceTest {
     }
 
     @Test
-    void utpekLovvalgsland_harUtpekingsperiode_lovvalgsperiodeOgProsessinstansOpprettes()
-        {
+    void utpekLovvalgsland_harUtpekingsperiode_lovvalgsperiodeOgProsessinstansOpprettes() {
         behandling.setTema(Behandlingstema.ARBEID_FLERE_LAND);
         Utpekingsperiode utpekingsperiode = new Utpekingsperiode(LocalDate.MIN, LocalDate.MAX, Landkoder.SE,
             Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B1, null);
@@ -233,6 +236,21 @@ class UtpekingServiceTest {
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> utpekingService.avvisUtpeking(behandlingID, lagUtpekingAvvis()))
             .withMessageContaining("er ikke aktiv");
+    }
+
+    @Test
+    void avvisUtpeking_bucKanIkkeOppretteSed_kasterException() {
+        unleash.enable("melosys.eessi.handlingssjekk_sed");
+        Saksopplysning saksopplysning = new Saksopplysning();
+        saksopplysning.setType(SaksopplysningType.SEDOPPL);
+        SedDokument sedDokument = new SedDokument();
+        sedDokument.setRinaSaksnummer("123");
+        saksopplysning.setDokument(sedDokument);
+        behandling.setSaksopplysninger(Set.of(saksopplysning));
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> utpekingService.avvisUtpeking(behandlingID, lagUtpekingAvvis()))
+            .withMessageContaining("Kan ikke opprette Sed på rinaSaknummer: 123");
     }
 
     @Test
