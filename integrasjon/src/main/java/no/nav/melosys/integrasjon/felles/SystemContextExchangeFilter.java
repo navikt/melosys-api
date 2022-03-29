@@ -2,8 +2,8 @@ package no.nav.melosys.integrasjon.felles;
 
 import javax.annotation.Nonnull;
 
+import no.finn.unleash.Unleash;
 import no.nav.melosys.integrasjon.reststs.RestStsClient;
-import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -19,20 +19,20 @@ public class SystemContextExchangeFilter implements ExchangeFilterFunction {
     private static final Logger log = LoggerFactory.getLogger(SystemContextExchangeFilter.class);
 
     private final RestStsClient restStsClient;
+    private final Unleash unleash;
 
-    public SystemContextExchangeFilter(RestStsClient restStsClient) {
+    public SystemContextExchangeFilter(RestStsClient restStsClient, Unleash unleash) {
         this.restStsClient = restStsClient;
+        this.unleash = unleash;
     }
 
     @Override
     @Nonnull
     public Mono<ClientResponse> filter(@Nonnull final ClientRequest clientRequest,
                                        @Nonnull final ExchangeFunction exchangeFunction) {
-        ThreadLocalAccessInfo.fromContextExchangeFilter(clientRequest.url().toString());
-
-        if (ThreadLocalAccessInfo.isFrontendCall()) { // Debug only
-            ThreadLocalAccessInfo.warnFrontendCall(this, clientRequest.url().toString());
-            log.warn("Blir kalt fra forntend\n{}", ThreadLocalAccessInfo.getInfo());
+        if (unleash.isEnabled("melosys.auto.token")) {
+            // Vi sletter SystemContextExchangeFilter og bytter ut med AutoContextExchangeFilter når vi vet at dette funker
+            return new AutoContextExchangeFilter(restStsClient).filter(clientRequest, exchangeFunction);
         }
 
         ClientRequest clientRequestWithBearerAuth = ClientRequest.from(clientRequest)

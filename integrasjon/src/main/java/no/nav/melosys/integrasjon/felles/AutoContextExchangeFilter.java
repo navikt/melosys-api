@@ -18,8 +18,6 @@ import javax.annotation.Nonnull;
 
 @Component
 public class AutoContextExchangeFilter implements ExchangeFilterFunction {
-    private static final Logger log = LoggerFactory.getLogger(AutoContextExchangeFilter.class);
-
     private final RestStsClient restStsClient;
 
     public AutoContextExchangeFilter(RestStsClient restStsClient) {
@@ -32,7 +30,6 @@ public class AutoContextExchangeFilter implements ExchangeFilterFunction {
                                        @Nonnull final ExchangeFunction exchangeFunction) {
 
         if (ThreadLocalAccessInfo.isProcessCall()) {
-            log.info("Kall fra prosess: {}", ThreadLocalAccessInfo.getInfo());
             ClientRequest clientRequestWithBearerAuth = ClientRequest.from(clientRequest)
                 .header(HttpHeaders.AUTHORIZATION, restStsClient.bearerToken())
                 .build();

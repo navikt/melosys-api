@@ -2,7 +2,9 @@ package no.nav.melosys.integrasjon.felles;
 
 import javax.annotation.Nonnull;
 
+import no.finn.unleash.Unleash;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.integrasjon.reststs.RestStsClient;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo;
 import org.slf4j.Logger;
@@ -19,14 +21,21 @@ import reactor.core.publisher.Mono;
 public class UserContextExchangeFilter implements ExchangeFilterFunction {
     private static final Logger log = LoggerFactory.getLogger(UserContextExchangeFilter.class);
 
+    private final RestStsClient restStsClient;
+    private final Unleash unleash;
+
+    public UserContextExchangeFilter(RestStsClient restStsClient, Unleash unleash) {
+        this.restStsClient = restStsClient;
+        this.unleash = unleash;
+    }
+
     @Nonnull
     @Override
     public Mono<ClientResponse> filter(@Nonnull final ClientRequest clientRequest,
                                        @Nonnull final ExchangeFunction exchangeFunction) {
-        ThreadLocalAccessInfo.fromContextExchangeFilter(clientRequest.url().toString());
-        if (ThreadLocalAccessInfo.isProcessCall()) { // Debug only
-            ThreadLocalAccessInfo.warnProcessCall(clientRequest.url().toString());
-            log.warn("Blir kalt fra prosess\n{}", ThreadLocalAccessInfo.getInfo());
+        if (unleash.isEnabled("melosys.auto.token")) {
+            // Vi sletter UserContextExchangeFilter og bytter ut med AutoContextExchangeFilter når vi vet at dette funker
+            return new AutoContextExchangeFilter(restStsClient).filter(clientRequest, exchangeFunction);
         }
 
         String oidcTokenString = SubjectHandler.getInstance().getOidcTokenString();
