@@ -34,29 +34,6 @@ open class OppgaveConsumerTestBase(
     }
 
     override fun getMockData(): String {
-        return """{
-          "id": 11519,
-          "tildeltEnhetsnr": "4530",
-          "endretAvEnhetsnr": "4530",
-          "journalpostId": "439654251",
-          "behandlesAvApplikasjon": "FS38",
-          "saksreferanse": "MEL-301",
-          "aktoerId": "1332607802528",
-          "tilordnetRessurs": "Z990757",
-          "beskrivelse": " ",
-          "tema": "MED",
-          "behandlingstema": "ab0390",
-          "oppgavetype": "BEH_SED",
-          "versjon": 3,
-          "opprettetAv": "srvmelosys",
-          "endretAv": "Z990757",
-          "prioritet": "NORM",
-          "status": "AAPNET",
-          "metadata": {},
-          "fristFerdigstillelse": "2019-12-26",
-          "aktivDato": "2019-10-03",
-          "opprettetTidspunkt": "2019-10-03T12:27:26.566+02:00",
-          "endretTidspunkt": "2019-10-03T18:24:55.697+02:00"
-        }"""
+        return "{}"
     }
 }

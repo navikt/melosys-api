@@ -38,6 +38,6 @@ class PDLConsumerUserIT(
                 Pair("Nav-Consumer-Token", WireMock.equalTo("Bearer --token-from-system--"))
             )
         )
-        pdlConsumer.hentIdenter("99026522600")
+        pdlConsumer.hentIdenter("0")
     }
 }

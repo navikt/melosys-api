@@ -44,7 +44,7 @@ class PDLConsumerAutoTokenSystemIT(
                 Pair("Nav-Consumer-Token", WireMock.equalTo("Bearer --token-from-system--"))
             )
         )
-        pdlConsumer.hentIdenter("99026522600")
+        pdlConsumer.hentIdenter("0")
 
         ThreadLocalAccessInfo.afterExecuteProcess(uuid)
     }
@@ -62,7 +62,7 @@ class PDLConsumerAutoTokenSystemIT(
             )
         )
 
-        pdlConsumer.hentIdenter("99026522600")
+        pdlConsumer.hentIdenter("0")
 
         ThreadLocalAccessInfo.afterControllerRequest("request")
     }
