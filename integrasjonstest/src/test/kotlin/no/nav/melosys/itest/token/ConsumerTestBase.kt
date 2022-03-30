@@ -42,7 +42,7 @@ abstract class ConsumerTestBase<T>(
     abstract fun getMockData(): T
 
     fun verifyHeaders(headers: Map<String, StringValuePattern>) {
-        val wireMock = createWireMock().apply { }
+        val wireMock = createWireMock()
         headers.forEach {
             wireMock.withHeader(it.key, it.value)
         }
