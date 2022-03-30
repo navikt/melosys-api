@@ -41,7 +41,7 @@ internal class AaregServiceIT(
     @Autowired private val server: MockRestServiceServer,
     @Autowired private val aaregService: AaregService,
     @Value("\${mockserver.port}") mockPort: Int,
-) : ConsumerTestBase(server, mockPort) {
+) : ConsumerTestBase<String>(server, mockPort) {
 
     override fun createWireMock(): MappingBuilder {
         return WireMock.get("/?regelverk=A_ORDNINGEN&ansettelsesperiodeFom=2022-03-26&ansettelsesperiodeTom=2022-03-27")
