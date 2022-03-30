@@ -60,14 +60,14 @@ internal class AaregServiceIT(
     }
 
     @Test
-    fun testRequestFromFront() {
+    fun authorizationSkalKommeFraBruker() {
         ThreadLocalAccessInfo.preHandle("request")
         runTest()
         ThreadLocalAccessInfo.afterCompletion("request")
     }
 
     @Test
-    fun testRequestFromProsess() {
+    fun authorizationSkalKommeFraSystem() {
         val uuid = UUID.randomUUID()
         ThreadLocalAccessInfo.beforExecuteProcess(uuid, "prossesSteg")
         runTest()

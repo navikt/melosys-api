@@ -28,7 +28,7 @@ class SafConsumerSystemIT(
     }
 
     @Test
-    fun authorizationSkalKommeFraService() {
+    fun authorizationSkalKommeFraSystem() {
         verifyHeaders(
             mapOf<String, StringValuePattern>(
                 Pair("Authorization", WireMock.equalTo("Bearer --token-from-system--")),

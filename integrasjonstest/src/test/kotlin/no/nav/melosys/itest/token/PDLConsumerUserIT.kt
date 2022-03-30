@@ -29,7 +29,7 @@ class PDLConsumerUserIT(
     }
 
     @Test
-    fun authorizationSkalKommeFraSaksbehandler() {
+    fun authorizationSkalKommeFraBruker() {
         SpringSubjectHandler.set(TestSubjectHandler())
 
         verifyHeaders(

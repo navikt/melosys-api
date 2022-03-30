@@ -28,7 +28,7 @@ class OppgaveConsumerUserIT(
     }
 
     @Test
-    fun authorizationSkalKommeFraSaksbehandler() {
+    fun authorizationSkalKommeFraBruker() {
         SpringSubjectHandler.set(TestSubjectHandler())
 
         verifyHeaders(

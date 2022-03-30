@@ -30,7 +30,7 @@ class SafConsumerUserIT(
     }
 
     @Test
-    fun authorizationSkalKommeFraUser() {
+    fun authorizationSkalKommeFraBruker() {
         SpringSubjectHandler.set(TestSubjectHandler())
 
         verifyHeaders(
@@ -43,7 +43,7 @@ class SafConsumerUserIT(
     }
 
     @Test
-    fun authorizationSkalKommeFraUser_Feiler_nårUtenSubjectHandler() {
+    fun authorizationSkalKommeFraBruker_Feiler_nårUtenSubjectHandler() {
         SpringSubjectHandler.set(NullSubjectHandler())
 
         AssertionsForClassTypes.assertThatExceptionOfType(TekniskException::class.java)

@@ -33,7 +33,7 @@ class OppgaveConsumerAutoTokenUserIT(
     }
 
     @Test
-    fun testRequestFromProsess() {
+    fun authorizationSkalKommeFraSystem() {
         val uuid = UUID.randomUUID()
         ThreadLocalAccessInfo.beforExecuteProcess(uuid, "prossesSteg")
 
@@ -48,7 +48,7 @@ class OppgaveConsumerAutoTokenUserIT(
     }
 
     @Test
-    fun testRequestFraWeb() {
+    fun authorizationSkalKommeFraBruker() {
         SpringSubjectHandler.set(TestSubjectHandler())
 
         ThreadLocalAccessInfo.preHandle("request")

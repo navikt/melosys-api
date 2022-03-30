@@ -34,7 +34,7 @@ class PDLConsumerAutoTokenSystemIT(
     }
 
     @Test
-    fun testRequestFromProsess() {
+    fun authorizationSkalKommeFraSystem() {
         val uuid = UUID.randomUUID()
         ThreadLocalAccessInfo.beforExecuteProcess(uuid, "prossesSteg")
 
@@ -50,7 +50,7 @@ class PDLConsumerAutoTokenSystemIT(
     }
 
     @Test
-    fun testRequestFraWeb() {
+    fun authorizationSkalKommeFraBruker() {
         SpringSubjectHandler.set(TestSubjectHandler())
 
         ThreadLocalAccessInfo.preHandle("request")
