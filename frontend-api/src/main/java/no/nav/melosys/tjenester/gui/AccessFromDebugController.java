@@ -15,8 +15,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(value = "/access", produces = MediaType.APPLICATION_JSON_VALUE)
 public class AccessFromDebugController {
 
-    @GetMapping("/stats")
-    public ResponseEntity<Map<String, Integer>> requestStats() {
-        return ResponseEntity.ok(ThreadLocalAccessInfo.debugInfo);
+    @GetMapping("/usage")
+    public ResponseEntity<Map<String, Integer>> usage() {
+        return ResponseEntity.ok(ThreadLocalAccessInfo.debugInfoUsage);
+    }
+
+    @GetMapping("/checks")
+    public ResponseEntity<Map<String, Integer>> checks() {
+        return ResponseEntity.ok(ThreadLocalAccessInfo.debugInfoChecks);
     }
 }

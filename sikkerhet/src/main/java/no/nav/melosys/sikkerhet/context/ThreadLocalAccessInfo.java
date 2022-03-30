@@ -9,7 +9,8 @@ public class ThreadLocalAccessInfo {
     private UUID processId;
     private String prosessSteg;
 
-    public final static Map<String, Integer> debugInfo = new ConcurrentHashMap<>(); // For debug only - will be removed
+    public final static Map<String, Integer> debugInfoUsage = new ConcurrentHashMap<>(); // For debug only - will be removed
+    public final static Map<String, Integer> debugInfoChecks = new ConcurrentHashMap<>(); // For debug only - will be removed
 
     public boolean isFromRequest() {
         return requestUri != null;
@@ -23,16 +24,11 @@ public class ThreadLocalAccessInfo {
         ThreadLocal.withInitial(ThreadLocalAccessInfo::new);
 
     public static void beforeControllerRequest(String requestUri) {
-        increaseCount("web"); // For debug only - will be removed
+        increaseCount(debugInfoUsage, "web"); // For debug only - will be removed
         if (threadLocalAccessInfo.get().requestUri != null) {
             throw new IllegalStateException("We should not have a thread local requestUri before controller request");
         }
         threadLocalAccessInfo.get().requestUri = requestUri;
-    }
-
-    private static void increaseCount(String source) {
-        Integer cnt = debugInfo.getOrDefault(source, 0);
-        debugInfo.put(source, cnt + 1);
     }
 
     public static void afterControllerRequest(String requestUri) {
@@ -44,7 +40,7 @@ public class ThreadLocalAccessInfo {
     }
 
     public static void beforExecuteProcess(UUID processId, String prosessSteg) {
-        increaseCount("process"); // For debug only - will be removed
+        increaseCount(debugInfoUsage, "process"); // For debug only - will be removed
         ThreadLocalAccessInfo threadLocalAccessInfo = ThreadLocalAccessInfo.threadLocalAccessInfo.get();
         if (threadLocalAccessInfo.processId != null || threadLocalAccessInfo.prosessSteg != null) {
             throw new IllegalStateException("processId and prosessSteg should always be null before execute ");
@@ -62,12 +58,14 @@ public class ThreadLocalAccessInfo {
     }
 
     public static boolean isFrontendCall() {
+        increaseCount(debugInfoChecks, "web"); // For debug only - will be removed
         ThreadLocalAccessInfo threadLocalAccessInfo = ThreadLocalAccessInfo.threadLocalAccessInfo.get();
         return threadLocalAccessInfo.isFromRequest()
             && !threadLocalAccessInfo.requestUri.equals("/admin/prosessinstanser/restart");
     }
 
     public static boolean isProcessCall() {
+        increaseCount(debugInfoChecks, "process"); // For debug only - will be removed
         ThreadLocalAccessInfo threadLocalAccessInfo = ThreadLocalAccessInfo.threadLocalAccessInfo.get();
         return threadLocalAccessInfo.isFromProcess();
     }
@@ -82,5 +80,10 @@ public class ThreadLocalAccessInfo {
             "requestUri='" + requestUri + '\'' +
             ", prossessId='" + processId + '\'' +
             '}';
+    }
+
+    private static void increaseCount(Map<String, Integer> map, String source) {
+        Integer cnt = map.getOrDefault(source, 0);
+        debugInfoUsage.put(source, cnt + 1);
     }
 }
