@@ -80,7 +80,7 @@ public class RestStsClient implements RestConsumer {
     private HttpEntity<?> createHttpEntity() {
         HttpHeaders headers = new HttpHeaders();
         headers.add(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE);
-        headers.add(HttpHeaders.AUTHORIZATION, basicAuth());
+        headers.add(HttpHeaders.AUTHORIZATION, getAuth());
 
         return new HttpEntity<>(headers);
     }

@@ -16,7 +16,15 @@ public class SakConsumerProducer {
     }
 
     @Bean
+    @Primary
     public SakConsumer sakConsumer() {
-        return new SakConsumerImpl(endpointUrl);
+        return new SakConsumerImpl(endpointUrl, false);
     }
+
+    @Bean
+    @Qualifier("system")
+    public SakConsumer sakSystemConsumer() {
+        return new SakConsumerImpl(endpointUrl, true);
+    }
+
 }

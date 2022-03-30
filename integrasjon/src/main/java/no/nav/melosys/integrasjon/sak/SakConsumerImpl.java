@@ -31,9 +31,11 @@ public class SakConsumerImpl implements RestConsumer, SakConsumer {
     };
     private static final String X_CORRELATION_ID = "X-Correlation-ID";
 
+    private final boolean erSystem;
     private final WebTarget target;
 
-    SakConsumerImpl(String endpointUrl) {
+    SakConsumerImpl(String endpointUrl, boolean erSystem) {
+        this.erSystem = erSystem;
         try {
             SSLContext sslContext = SSLContext.getDefault();
             Client client = ClientBuilder.newBuilder().sslContext(sslContext).build();
@@ -42,6 +44,11 @@ public class SakConsumerImpl implements RestConsumer, SakConsumer {
             log.error("Feilet under oppsett av integrasjon mot Sak API", e);
             throw new IntegrasjonException("Feilet under oppsett av integrasjon mot Sak API");
         }
+    }
+
+    @Override
+    public boolean isSystem() {
+        return erSystem;
     }
 
     @Override

@@ -9,14 +9,10 @@ import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.felles.mdc.MDCOperations;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
-import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 
 public interface RestConsumer {
-    Logger log = LoggerFactory.getLogger(RestConsumer.class);
 
     default String basicAuth() {
         return "Basic " + Base64.getEncoder().encodeToString(
@@ -25,12 +21,10 @@ public interface RestConsumer {
     }
 
     default String getAuth() {
-        if (ThreadLocalAccessInfo.isProcessCall()) {
-            log.info("use system for auth");
+        if (isSystem()) {
             return basicAuth();
         } else {
-            log.info("use logged in user for auth");
-                return "Bearer " + SubjectHandler.getInstance().getOidcTokenString();
+            return "Bearer " + SubjectHandler.getInstance().getOidcTokenString();
         }
     }
 
@@ -48,6 +42,10 @@ public interface RestConsumer {
 
     default String getUserID() {
         return SubjectHandler.getInstance().getUserID();
+    }
+
+    default boolean isSystem() {
+        return false;
     }
 
     default RuntimeException tilException(String feilmelding, HttpStatus status) {
