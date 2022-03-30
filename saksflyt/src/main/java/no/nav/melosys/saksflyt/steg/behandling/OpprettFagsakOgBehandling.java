@@ -47,6 +47,7 @@ public class OpprettFagsakOgBehandling implements StegBehandler {
     @Override
     public void utfør(Prosessinstans prosessinstans) {
         String aktørID = hentAktørID(prosessinstans);
+        String virksomhetID = prosessinstans.getData(VIRKSOMHET_ID);
         String arbeidsgiver = prosessinstans.getData(ARBEIDSGIVER);
         String representant = prosessinstans.getData(REPRESENTANT);
         String representantKontakperson = prosessinstans.getData(REPRESENTANT_KONTAKTPERSON);
@@ -59,6 +60,7 @@ public class OpprettFagsakOgBehandling implements StegBehandler {
 
         OpprettSakRequest opprettSakRequest = new OpprettSakRequest.Builder()
             .medAktørID(aktørID)
+            .medVirksomhetID(virksomhetID)
             .medArbeidsgiver(arbeidsgiver)
             .medFullmektig(representant != null ? new Fullmektig(representant, representantRepresenterer) : null)
             .medKontaktopplysninger(lagKontaktopplysningerForRepresentant(representant, representantKontakperson))
@@ -79,8 +81,10 @@ public class OpprettFagsakOgBehandling implements StegBehandler {
         if (StringUtils.isNotEmpty(aktørID)) {
             return aktørID;
         }
-
-        return persondataFasade.hentAktørIdForIdent(prosessinstans.getData(BRUKER_ID));
+        if (StringUtils.isNotEmpty(prosessinstans.getData(BRUKER_ID))) {
+            return persondataFasade.hentAktørIdForIdent(prosessinstans.getData(BRUKER_ID));
+        }
+        return null;
     }
 
     private List<Kontaktopplysning> lagKontaktopplysningerForRepresentant(String representant,

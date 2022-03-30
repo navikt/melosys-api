@@ -1,5 +1,6 @@
 package no.nav.melosys.saksflyt.steg.oppgave;
 
+import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
@@ -28,7 +29,8 @@ public class OpprettOppgave implements StegBehandler {
             prosessinstans.getBehandling(),
             prosessinstans.hentJournalpostID(),
             prosessinstans.getBehandling().getFagsak().hentAktørID(),
-            prosessinstans.hentSaksbehandlerHvisTilordnes()
+            prosessinstans.hentSaksbehandlerHvisTilordnes(),
+            prosessinstans.getData(ProsessDataKey.VIRKSOMHET_ID)
         );
     }
 }

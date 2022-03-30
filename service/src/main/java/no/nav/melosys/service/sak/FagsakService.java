@@ -123,12 +123,24 @@ public class FagsakService {
 
         HashSet<Aktoer> aktører = new HashSet<>();
 
-        Aktoer aktør = new Aktoer();
-        aktør.setAktørId(opprettSakRequest.getAktørID());
-        aktør.setUtenlandskPersonId(opprettSakRequest.getUtenlandskPersonId());
-        aktør.setFagsak(fagsak);
-        aktør.setRolle(Aktoersroller.BRUKER);
-        aktører.add(aktør);
+        String aktørID = opprettSakRequest.getAktørID();
+        if (aktørID != null) {
+            Aktoer aktør = new Aktoer();
+            aktør.setAktørId(aktørID);
+            aktør.setUtenlandskPersonId(opprettSakRequest.getUtenlandskPersonId());
+            aktør.setFagsak(fagsak);
+            aktør.setRolle(Aktoersroller.BRUKER);
+            aktører.add(aktør);
+        }
+
+        String virksomhetID = opprettSakRequest.getVirksomhetID();
+        if (virksomhetID != null) {
+            Aktoer virksomhet = new Aktoer();
+            virksomhet.setOrgnr(virksomhetID);
+            virksomhet.setFagsak(fagsak);
+            virksomhet.setRolle(Aktoersroller.ARBEIDSGIVER); // TODO: Endre når kodeverk er imlementert
+            aktører.add(virksomhet);
+        }
 
         String arbeidsgiver = opprettSakRequest.getArbeidsgiver();
         if (arbeidsgiver != null) {

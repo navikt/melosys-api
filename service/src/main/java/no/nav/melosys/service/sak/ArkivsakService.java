@@ -30,7 +30,19 @@ public class ArkivsakService {
         sakDto.setApplikasjon(Fagsystem.MELOSYS.getKode());
         sakDto.setSaksnummer(saksnummer);
         sakDto = sakConsumer.opprettSak(sakDto);
-        log.info("Sak opprettet med sakID: {}", sakDto.getId());
+        log.info("Sak opprettet med sakID: {} for bruker", sakDto.getId());
+        return sakDto.getId();
+    }
+
+    public Long opprettSakPåVirksomhet(String saksnummer, Behandlingstema behandlingstema, String orgnr) {
+        SakDto sakDto = new SakDto();
+
+        sakDto.setTema(TemaFactory.fraBehandlingstema(behandlingstema).getKode());
+        sakDto.setOrgnr(orgnr);
+        sakDto.setApplikasjon(Fagsystem.MELOSYS.getKode());
+        sakDto.setSaksnummer(saksnummer);
+        sakDto = sakConsumer.opprettSak(sakDto);
+        log.info("Sak opprettet med sakID: {} for virksomhet: {}", sakDto.getId(), sakDto.getOrgnr());
         return sakDto.getId();
     }
 

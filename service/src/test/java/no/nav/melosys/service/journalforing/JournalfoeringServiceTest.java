@@ -16,6 +16,7 @@ import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
@@ -32,8 +33,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -282,13 +282,14 @@ class JournalfoeringServiceTest {
     }
 
     @Test
-    void opprettOgJournalfør_brukerIDMangler_kasterException() {
+    void opprettOgJournalfør_brukerIDOgVirksomhetIDMangler_kasterException() {
         opprettDto.setBrukerID(null);
+        opprettDto.setVirksomhetID(null);
         when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> journalfoeringService.journalførOgOpprettSak(opprettDto))
-            .withMessageContaining("BrukerID mangler");
+            .withMessageContaining("Både BrukerID og VirksomhetID mangler. Krever én");
     }
 
     @Test

@@ -112,6 +112,9 @@ public class Fagsak extends RegistreringsInfo {
     }
 
     public String hentAktørID() {
+        if (hentBruker() == null) {
+            return null;
+        }
         return hentBruker().getAktørId();
     }
 

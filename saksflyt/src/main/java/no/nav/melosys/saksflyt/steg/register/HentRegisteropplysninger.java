@@ -9,6 +9,7 @@ import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerRequest;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -43,7 +44,12 @@ public class HentRegisteropplysninger implements StegBehandler {
     public void utfør(Prosessinstans prosessinstans) {
 
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(prosessinstans.getBehandling().getId());
-        String brukerId = persondataFasade.hentFolkeregisterident(behandling.getFagsak().hentAktørID());
+        String aktørId = behandling.getFagsak().hentAktørID();
+        if (StringUtils.isEmpty(aktørId)) {
+            log.info("Henter ikke registeropplysninger for behandling {} fordi den ikke har aktørId", behandling.getId());
+            return;
+        }
+        String brukerId = persondataFasade.hentFolkeregisterident(aktørId);
 
 
         var registeropplysningerRequestBuilder = RegisteropplysningerRequest.builder()
