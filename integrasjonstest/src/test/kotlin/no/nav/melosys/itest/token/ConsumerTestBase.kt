@@ -19,7 +19,7 @@ import org.springframework.test.web.client.match.MockRestRequestMatchers.request
 import org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-abstract class ConsumerTestBase(
+abstract class ConsumerTestBase<T>(
     private val server: MockRestServiceServer,
     mockPort: Int
 ) {
@@ -35,23 +35,26 @@ abstract class ConsumerTestBase(
         }
     }
 
-    abstract fun createWireMock() : MappingBuilder
+    abstract fun createWireMock(): MappingBuilder
 
-    abstract fun getMockData(): String
+    abstract fun getMockData(): T
 
     fun verifyHeaders(headers: Map<String, StringValuePattern>) {
-        val wireMock = createWireMock()
+        val wireMock = createWireMock().apply {  }
         headers.forEach {
             wireMock.withHeader(it.key, it.value)
         }
 
+        val response = WireMock.aResponse()
+            .withStatus(200)
+            .withHeader("Content-Type", "application/json")
+
+        val data = getMockData()
+        if (data is String) response.withBody(data)
+        if (data is ByteArray) response.withBody(data)
+
         wireMockServer.stubFor(
-            wireMock.willReturn(
-                WireMock.aResponse()
-                    .withStatus(200)
-                    .withHeader("Content-Type", "application/json")
-                    .withBody(getMockData())
-            )
+            wireMock.willReturn(response)
         )
     }
 

@@ -28,7 +28,7 @@ import org.springframework.test.web.client.MockRestServiceServer
 open class PDLConsumerTestBase(
     server: MockRestServiceServer,
     mockPort: Int
-) : ConsumerTestBase(server, mockPort){
+) : ConsumerTestBase<String>(server, mockPort){
 
     override fun createWireMock(): MappingBuilder {
         return WireMock.post("/graphql")

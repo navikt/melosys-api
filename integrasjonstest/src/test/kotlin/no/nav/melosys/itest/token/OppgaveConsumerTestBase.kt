@@ -28,7 +28,7 @@ import org.springframework.test.web.client.MockRestServiceServer
 open class OppgaveConsumerTestBase(
     server: MockRestServiceServer,
     mockPort: Int
-) : ConsumerTestBase(server, mockPort) {
+) : ConsumerTestBase<String>(server, mockPort) {
     override fun createWireMock(): MappingBuilder {
         return WireMock.get("/api/v1/oppgaver/1")
     }
