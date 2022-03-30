@@ -25,10 +25,6 @@ public class PDLConsumerProducer {
     public PDLConsumer pdlConsumer(WebClient.Builder webclientBuilder,
                                    @Value("${PDL.url}") String pdlUrl,
                                    @Qualifier("system") PDLAuthFilter pdlSystemAuthFilter) {
-        if (ThreadLocalAccessInfo.isFrontendCall()) { // Debug only
-            ThreadLocalAccessInfo.warnFrontendCall(this, "PDLAuthFilterProducer");
-            log.warn("Blir kalt fra forntend\n{}", ThreadLocalAccessInfo.getInfo());
-        }
         return new PDLConsumerImpl(
             webclientBuilder(webclientBuilder, pdlUrl)
                 .filter(pdlSystemAuthFilter)
@@ -41,10 +37,6 @@ public class PDLConsumerProducer {
     public PDLConsumer pdlConsumerForSaksbehandler(WebClient.Builder webclientBuilder,
                                                    @Value("${PDL.url}") String pdlUrl,
                                                    @Qualifier("saksbehandler") PDLAuthFilter pdlSaksbehandlerAuthFilter) {
-        if (ThreadLocalAccessInfo.isProcessCall()) { // Debug only
-            ThreadLocalAccessInfo.warnFrontendCall(this, "PDLAuthFilterProducer");
-            log.warn("Blir kalt fra prosess\n{}", ThreadLocalAccessInfo.getInfo());
-        }
         return new PDLConsumerImpl(
             webclientBuilder(webclientBuilder, pdlUrl).filter(pdlSaksbehandlerAuthFilter).build());
     }

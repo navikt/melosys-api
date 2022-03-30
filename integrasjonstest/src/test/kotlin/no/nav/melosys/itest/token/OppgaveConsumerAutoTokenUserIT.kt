@@ -51,7 +51,7 @@ class OppgaveConsumerAutoTokenUserIT(
     fun authorizationSkalKommeFraBruker() {
         SpringSubjectHandler.set(TestSubjectHandler())
 
-        ThreadLocalAccessInfo.preHandle("request")
+        ThreadLocalAccessInfo.beforeControllerRequest("request")
 
         verifyHeaders(
             mapOf<String, StringValuePattern>(
@@ -61,6 +61,6 @@ class OppgaveConsumerAutoTokenUserIT(
 
         oppgaveConsumer.hentOppgave("1")
 
-        ThreadLocalAccessInfo.afterCompletion("request")
+        ThreadLocalAccessInfo.afterControllerRequest("request")
     }
 }

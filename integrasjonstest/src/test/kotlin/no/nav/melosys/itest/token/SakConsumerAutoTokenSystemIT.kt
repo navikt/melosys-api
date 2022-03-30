@@ -48,7 +48,7 @@ class SakConsumerAutoTokenSystemIT(
     @Test
     fun authorizationSkalKommeFraBruker() {
         SpringSubjectHandler.set(TestSubjectHandler())
-        ThreadLocalAccessInfo.preHandle("request")
+        ThreadLocalAccessInfo.beforeControllerRequest("request")
 
         verifyHeaders(
             mapOf<String, StringValuePattern>(
@@ -57,7 +57,7 @@ class SakConsumerAutoTokenSystemIT(
         )
         sakConsumer.hentSak(1L)
 
-        ThreadLocalAccessInfo.afterCompletion("request")
+        ThreadLocalAccessInfo.afterControllerRequest("request")
     }
 
 }

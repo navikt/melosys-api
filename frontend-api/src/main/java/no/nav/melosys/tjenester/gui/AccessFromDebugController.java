@@ -15,30 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(value = "/access", produces = MediaType.APPLICATION_JSON_VALUE)
 public class AccessFromDebugController {
 
-    @GetMapping("/request/stats")
-    public ResponseEntity<Map<String, String>> requestStats() {
-        System.out.println(ThreadLocalAccessInfo.requestWithExtrernalCalls());
-        return ResponseEntity.ok(ThreadLocalAccessInfo.requestWithExtrernalCalls());
+    @GetMapping("/stats")
+    public ResponseEntity<Map<String, Integer>> requestStats() {
+        return ResponseEntity.ok(ThreadLocalAccessInfo.debugInfo);
     }
-
-    @GetMapping("/request/warn")
-    public ResponseEntity<Map<String, String>> debugWarnFront() {
-        return ResponseEntity.ok(ThreadLocalAccessInfo.debugWarnFront);
-    }
-
-    @GetMapping("/process/warn")
-    public ResponseEntity<Map<String, String>> debugWarnProcess() {
-        return ResponseEntity.ok(ThreadLocalAccessInfo.debugWarnProcess);
-    }
-
-    @GetMapping("/process/stats")
-    public ResponseEntity<Map<String, String>> processStats() {
-        return ResponseEntity.ok(ThreadLocalAccessInfo.processesWithExtrernalCalls());
-    }
-
-    @GetMapping("/both/stats")
-    public ResponseEntity<Map<String, String>> bothStats() {
-        return ResponseEntity.ok(ThreadLocalAccessInfo.bothWithExtrernalCalls());
-    }
-
 }

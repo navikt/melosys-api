@@ -49,7 +49,7 @@ class SafConsumerAutoTokenSystemIT(
     @Test
     fun authorizationSkalKommeFraBruker() {
         SpringSubjectHandler.set(TestSubjectHandler())
-        ThreadLocalAccessInfo.preHandle("request")
+        ThreadLocalAccessInfo.beforeControllerRequest("request")
 
         verifyHeaders(
             mapOf<String, StringValuePattern>(
@@ -59,6 +59,6 @@ class SafConsumerAutoTokenSystemIT(
         )
         safConsumer.hentDokument("1", "1")
 
-        ThreadLocalAccessInfo.afterCompletion("request")
+        ThreadLocalAccessInfo.afterControllerRequest("request")
     }
 }

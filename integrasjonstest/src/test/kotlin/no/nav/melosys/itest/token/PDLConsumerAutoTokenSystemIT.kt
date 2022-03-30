@@ -53,7 +53,7 @@ class PDLConsumerAutoTokenSystemIT(
     fun authorizationSkalKommeFraBruker() {
         SpringSubjectHandler.set(TestSubjectHandler())
 
-        ThreadLocalAccessInfo.preHandle("request")
+        ThreadLocalAccessInfo.beforeControllerRequest("request")
 
         verifyHeaders(
             mapOf<String, StringValuePattern>(
@@ -64,6 +64,6 @@ class PDLConsumerAutoTokenSystemIT(
 
         pdlConsumer.hentIdenter("99026522600")
 
-        ThreadLocalAccessInfo.afterCompletion("request")
+        ThreadLocalAccessInfo.afterControllerRequest("request")
     }
 }

@@ -16,7 +16,6 @@ import javax.annotation.Nonnull;
 
 @Component
 public class ArbeidsforholdContextExchangeFilter implements ExchangeFilterFunction {
-    private static final Logger log = LoggerFactory.getLogger(ArbeidsforholdContextExchangeFilter.class);
     private final RestStsClient restStsClient;
 
     public ArbeidsforholdContextExchangeFilter(RestStsClient restStsClient) {
@@ -27,12 +26,6 @@ public class ArbeidsforholdContextExchangeFilter implements ExchangeFilterFuncti
     @Nonnull
     public Mono<ClientResponse> filter(@Nonnull final ClientRequest clientRequest,
                                        @Nonnull final ExchangeFunction exchangeFunction) {
-        ThreadLocalAccessInfo.fromContextExchangeFilter(clientRequest.url().toString());
-        if (ThreadLocalAccessInfo.isFrontendCall()) { // Debug only
-            ThreadLocalAccessInfo.warnFrontendCall(this, clientRequest.url().toString());
-            log.warn("Blir kalt fra forntend\n{}", ThreadLocalAccessInfo.getInfo());
-        }
-
         String token = restStsClient.bearerToken();
         ClientRequest clientRequestWithBearerAuth = ClientRequest.from(clientRequest)
             .header(HttpHeaders.AUTHORIZATION, token)

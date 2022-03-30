@@ -61,9 +61,9 @@ internal class AaregServiceIT(
 
     @Test
     fun authorizationSkalKommeFraBruker() {
-        ThreadLocalAccessInfo.preHandle("request")
+        ThreadLocalAccessInfo.beforeControllerRequest("request")
         runTest()
-        ThreadLocalAccessInfo.afterCompletion("request")
+        ThreadLocalAccessInfo.afterControllerRequest("request")
     }
 
     @Test

@@ -10,20 +10,13 @@ public class RestControllerInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        String requestURI = request.getRequestURI();
-        System.out.println("######### preHandle ################");
-        System.out.println(requestURI);
-
-        ThreadLocalAccessInfo.preHandle(requestURI);
+        ThreadLocalAccessInfo.beforeControllerRequest(request.getRequestURI());
         return HandlerInterceptor.super.preHandle(request, response, handler);
     }
 
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
-        String requestURI = request.getRequestURI();
-        System.out.println("########### After ##############");
-        System.out.println(requestURI);
-        ThreadLocalAccessInfo.afterCompletion(requestURI);
+        ThreadLocalAccessInfo.afterControllerRequest(request.getRequestURI());
         HandlerInterceptor.super.afterCompletion(request, response, handler, ex);
     }
 
