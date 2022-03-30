@@ -84,4 +84,9 @@ public class RestStsClient implements RestConsumer {
 
         return new HttpEntity<>(headers);
     }
+
+    @Override
+    public boolean isSystem() {
+        return true;
+    }
 }
