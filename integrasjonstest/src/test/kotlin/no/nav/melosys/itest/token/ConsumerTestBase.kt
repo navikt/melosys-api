@@ -23,26 +23,18 @@ abstract class ConsumerTestBase<T>(
     private val server: MockRestServiceServer,
     mockPort: Int
 ) {
-    val wireMockServer: WireMockServer = WireMockServer(WireMockConfiguration.wireMockConfig().port(mockPort))
+    private val wireMockServer: WireMockServer = WireMockServer(WireMockConfiguration.wireMockConfig().port(mockPort))
 
-    class TestSubjectHandler : SubjectHandler() {
-        override fun getOidcTokenString(): String {
-            return "--token-from-user--"
-        }
+    open class TestSubjectHandler : SubjectHandler() {
+        override fun getOidcTokenString(): String? = "--token-from-user--"
 
         override fun getUserID(): String {
             throw IllegalStateException("getUserID skal ikke bli brukt av test")
         }
     }
 
-    class NullSubjectHandler : SubjectHandler() {
-        override fun getOidcTokenString(): String? {
-            return null
-        }
-
-        override fun getUserID(): String {
-            throw IllegalStateException("getUserID skal ikke bli brukt av test")
-        }
+    class NullSubjectHandler : TestSubjectHandler() {
+        override fun getOidcTokenString(): String? = null
     }
 
     abstract fun createWireMock(): MappingBuilder
@@ -50,7 +42,7 @@ abstract class ConsumerTestBase<T>(
     abstract fun getMockData(): T
 
     fun verifyHeaders(headers: Map<String, StringValuePattern>) {
-        val wireMock = createWireMock().apply {  }
+        val wireMock = createWireMock().apply { }
         headers.forEach {
             wireMock.withHeader(it.key, it.value)
         }
@@ -72,13 +64,6 @@ abstract class ConsumerTestBase<T>(
     fun beforeAll() {
         wireMockServer.start()
 
-        server.expect(requestTo("/?grant_type=client_credentials&scope=openid"))
-            .andRespond(
-                withSuccess(
-                    "{ \"access_token\": \"--token-from-system--\", \"expires_in\": \"123\" }",
-                    MediaType.APPLICATION_JSON
-                )
-            )
         val environment = Mockito.spy(MockEnvironment())
         environment.setProperty("systemuser.username", "test")
         environment.setProperty("systemuser.password", "test")
@@ -86,12 +71,17 @@ abstract class ConsumerTestBase<T>(
     }
 
     @AfterAll
-    fun afterAll() {
-        wireMockServer.stop()
-    }
+    fun afterAll() = wireMockServer.stop()
 
     @BeforeEach
     fun setup() {
         wireMockServer.resetAll()
+        server.expect(requestTo("/?grant_type=client_credentials&scope=openid"))
+            .andRespond(
+                withSuccess(
+                    "{ \"access_token\": \"--token-from-system--\", \"expires_in\": \"123\" }",
+                    MediaType.APPLICATION_JSON
+                )
+            )
     }
 }
