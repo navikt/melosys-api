@@ -1,6 +1,5 @@
 package no.nav.melosys.integrasjon.oppgave.konsument;
 
-import no.finn.unleash.Unleash;
 import no.nav.melosys.integrasjon.felles.SystemContextExchangeFilter;
 import no.nav.melosys.integrasjon.felles.UserContextExchangeFilter;
 import org.springframework.beans.factory.annotation.Qualifier;
