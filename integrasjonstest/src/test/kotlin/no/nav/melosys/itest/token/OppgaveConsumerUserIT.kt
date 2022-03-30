@@ -22,9 +22,7 @@ class OppgaveConsumerUserIT(
     @TestConfiguration
     class TestConfig {
         @Bean
-        fun unleash(): Unleash {
-            return FakeUnleash()
-        }
+        fun unleash(): Unleash = FakeUnleash()
     }
 
     @Test

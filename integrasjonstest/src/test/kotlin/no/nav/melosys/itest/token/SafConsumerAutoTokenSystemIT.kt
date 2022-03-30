@@ -25,9 +25,7 @@ class SafConsumerAutoTokenSystemIT(
     @TestConfiguration
     class TestConfig {
         @Bean
-        fun unleash(): Unleash {
-            return FakeUnleash().apply { enable("melosys.auto.token") }
-        }
+        fun unleash(): Unleash = FakeUnleash().apply { enable("melosys.auto.token") }
     }
 
     @Test

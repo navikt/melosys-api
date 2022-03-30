@@ -23,13 +23,8 @@ class OppgaveConsumerAutoTokenUserIT(
 
     @TestConfiguration
     class TestConfig {
-        val unleash = FakeUnleash()
-
         @Bean
-        fun unleash(): Unleash {
-            unleash.enable("melosys.auto.token")
-            return unleash
-        }
+        fun unleash(): Unleash = FakeUnleash().apply { enable("melosys.auto.token") }
     }
 
     @Test
