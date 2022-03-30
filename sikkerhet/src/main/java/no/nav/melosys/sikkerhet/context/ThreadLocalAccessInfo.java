@@ -84,6 +84,6 @@ public class ThreadLocalAccessInfo {
 
     private static void increaseCount(Map<String, Integer> map, String source) {
         Integer cnt = map.getOrDefault(source, 0);
-        debugInfoUsage.put(source, cnt + 1);
+        map.put(source, cnt + 1);
     }
 }
