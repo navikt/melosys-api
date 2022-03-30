@@ -35,6 +35,16 @@ abstract class ConsumerTestBase<T>(
         }
     }
 
+    class NullSubjectHandler : SubjectHandler() {
+        override fun getOidcTokenString(): String? {
+            return null
+        }
+
+        override fun getUserID(): String {
+            throw IllegalStateException("getUserID skal ikke bli brukt av test")
+        }
+    }
+
     abstract fun createWireMock(): MappingBuilder
 
     abstract fun getMockData(): T
