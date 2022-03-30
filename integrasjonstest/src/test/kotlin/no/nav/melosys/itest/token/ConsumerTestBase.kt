@@ -75,7 +75,7 @@ abstract class ConsumerTestBase<T>(
         server.expect(requestTo("/?grant_type=client_credentials&scope=openid"))
             .andRespond(
                 withSuccess(
-                    "{ \"access_token\": \"--token-from-service--\", \"expires_in\": \"123\" }",
+                    "{ \"access_token\": \"--token-from-system--\", \"expires_in\": \"123\" }",
                     MediaType.APPLICATION_JSON
                 )
             )

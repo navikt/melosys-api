@@ -40,8 +40,8 @@ class PDLConsumerAutoTokenSystemIT(
 
         verifyHeaders(
             mapOf<String, StringValuePattern>(
-                Pair("Authorization", WireMock.equalTo("Bearer --token-from-service--")),
-                Pair("Nav-Consumer-Token", WireMock.equalTo("Bearer --token-from-service--"))
+                Pair("Authorization", WireMock.equalTo("Bearer --token-from-system--")),
+                Pair("Nav-Consumer-Token", WireMock.equalTo("Bearer --token-from-system--"))
             )
         )
         pdlConsumer.hentIdenter("99026522600")
@@ -58,7 +58,7 @@ class PDLConsumerAutoTokenSystemIT(
         verifyHeaders(
             mapOf<String, StringValuePattern>(
                 Pair("Authorization", WireMock.equalTo("Bearer --token-from-user--")),
-                Pair("Nav-Consumer-Token", WireMock.equalTo("Bearer --token-from-service--"))
+                Pair("Nav-Consumer-Token", WireMock.equalTo("Bearer --token-from-system--"))
             )
         )
 

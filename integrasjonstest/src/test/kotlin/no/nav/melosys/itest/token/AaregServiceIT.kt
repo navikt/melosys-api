@@ -79,7 +79,7 @@ internal class AaregServiceIT(
 
         verifyHeaders(
             mapOf<String, StringValuePattern>(
-                Pair("Authorization", WireMock.equalTo("Bearer --token-from-service--")),
+                Pair("Authorization", WireMock.equalTo("Bearer --token-from-system--")),
                 Pair("Nav-Personident", WireMock.equalTo("121"))
             )
         )
