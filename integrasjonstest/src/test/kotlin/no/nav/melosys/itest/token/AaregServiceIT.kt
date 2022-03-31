@@ -60,7 +60,7 @@ internal class AaregServiceIT(
     }
 
     @Test
-    fun authorizationSkalKommeFraBruker() {
+    fun authorizationSkalKommeFraSystemSelvOmRequestKommerFraWeb() {
         ThreadLocalAccessInfo.beforeControllerRequest("request")
         runTest()
         ThreadLocalAccessInfo.afterControllerRequest("request")
