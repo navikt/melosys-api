@@ -1,5 +1,7 @@
 package no.nav.melosys.integrasjon.doksys.distribuerjournalpost;
 
+import java.io.IOException;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.exception.IntegrasjonException;
@@ -12,13 +14,13 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
-import java.io.IOException;
-
+@Retryable
 public class DistribuerJournalpostConsumer implements RestConsumer {
     private static final Logger log = LoggerFactory.getLogger(DistribuerJournalpostConsumer.class);
 
