@@ -19,7 +19,7 @@
         <graphql-spring-boot-starter.version>12.0.0</graphql-spring-boot-starter.version>
         <scala.version>2.13.4</scala.version>
         <testcontainers.version>1.16.3</testcontainers.version>
-        <okhttp3.version>4.9.1</okhttp3.version>
+        <wiremock.version>2.27.2</wiremock.version>
     </properties>
 
     <dependencyManagement>
@@ -115,11 +115,16 @@
             <artifactId>token-validation-spring-test</artifactId>
             <scope>test</scope>
         </dependency>
-
         <dependency>
             <groupId>no.nav.tjenestespesifikasjoner</groupId>
             <artifactId>nav-fim-aktoer-v2-tjenestespesifikasjon</artifactId>
             <version>${nav.tjenestespesifikasjoner.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.tomakehurst</groupId>
+            <artifactId>wiremock-standalone</artifactId>
+            <version>${wiremock.version}</version>
             <scope>test</scope>
         </dependency>
 
@@ -139,20 +144,6 @@
             <artifactId>graphql-spring-boot-starter</artifactId>
             <version>${graphql-spring-boot-starter.version}</version>
         </dependency>
-        <dependency>
-            <groupId>com.github.tomakehurst</groupId>
-            <artifactId>wiremock-standalone</artifactId>
-        </dependency>
-<!--        <dependency>--> <!-- to make this run on arm64 without ugly error messages -->
-<!--            <groupId>io.netty</groupId>-->
-<!--            <artifactId>netty-all</artifactId>-->
-<!--        </dependency>-->
-<!--        <dependency>-->
-<!--            <groupId>io.netty</groupId>-->
-<!--            <artifactId>netty-resolver-dns-native-macos</artifactId>-->
-<!--            <version>4.1.73.Final</version>-->
-<!--            <classifier>osx-aarch_64</classifier>-->
-<!--        </dependency>-->
     </dependencies>
 
     <build>
