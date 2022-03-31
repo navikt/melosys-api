@@ -47,16 +47,12 @@ internal class AaregServiceIT(
         return WireMock.get("/?regelverk=A_ORDNINGEN&ansettelsesperiodeFom=2022-03-26&ansettelsesperiodeTom=2022-03-27")
     }
 
-    override fun getMockData(): String {
-        return "[]"
-    }
+    override fun getMockData() = "[]"
 
     @TestConfiguration
     class TestConfig {
         @Bean
-        fun kodeOppslag(): KodeOppslag {
-            return KodeOppslagImpl()
-        }
+        fun kodeOppslag(): KodeOppslag = KodeOppslagImpl()
     }
 
     @Test

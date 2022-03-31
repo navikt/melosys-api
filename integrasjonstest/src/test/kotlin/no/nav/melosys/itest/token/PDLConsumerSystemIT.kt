@@ -3,7 +3,6 @@ package no.nav.melosys.itest.token
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.matching.StringValuePattern
 import no.finn.unleash.FakeUnleash
-import no.finn.unleash.Unleash
 import no.nav.melosys.integrasjon.pdl.PDLConsumer
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -22,7 +21,7 @@ class PDLConsumerSystemIT(
     @TestConfiguration
     class TestConfig {
         @Bean
-        fun unleash(): Unleash = FakeUnleash()
+        fun unleash() = FakeUnleash()
     }
 
     @Test

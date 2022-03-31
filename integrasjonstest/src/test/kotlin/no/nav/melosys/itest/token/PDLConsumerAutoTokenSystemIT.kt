@@ -3,7 +3,6 @@ package no.nav.melosys.itest.token
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.matching.StringValuePattern
 import no.finn.unleash.FakeUnleash
-import no.finn.unleash.Unleash
 import no.nav.melosys.integrasjon.pdl.PDLConsumer
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
@@ -25,7 +24,7 @@ class PDLConsumerAutoTokenSystemIT(
     @TestConfiguration
     class TestConfig {
         @Bean
-        fun unleash(): Unleash = FakeUnleash().apply { enable("melosys.auto.token") }
+        fun unleash() = FakeUnleash().apply { enable("melosys.auto.token") }
     }
 
     @Test

@@ -3,7 +3,6 @@ package no.nav.melosys.itest.token
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.matching.StringValuePattern
 import no.finn.unleash.FakeUnleash
-import no.finn.unleash.Unleash
 import no.nav.melosys.integrasjon.oppgave.konsument.OppgaveConsumer
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
 import org.junit.jupiter.api.Test
@@ -23,7 +22,7 @@ class OppgaveConsumerSystemIT(
     @TestConfiguration
     class TestConfig {
         @Bean
-        fun unleash(): Unleash = FakeUnleash()
+        fun unleash() = FakeUnleash()
     }
 
     @Test
