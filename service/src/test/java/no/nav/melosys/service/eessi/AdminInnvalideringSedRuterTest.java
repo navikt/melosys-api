@@ -109,8 +109,8 @@ class AdminInnvalideringSedRuterTest {
     @Test
     void rutSedTilBehandling_behandlingErUtlandUtpektOgAvsluttetHarMedlPeriode_oppdaterSaksstatusAnnullertOgOpphørMEDLPeriode() {
         var fagsak = lagFagsak(Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND, Behandlingsstatus.AVSLUTTET);
-        fagsak.hentSistAktiveBehandling().getSaksopplysninger().add(lagSedDokument());
-        Behandling sistAktiveBehandling = fagsak.hentSistAktiveBehandling();
+        fagsak.hentSistAktivBehandling().getSaksopplysninger().add(lagSedDokument());
+        Behandling sistAktiveBehandling = fagsak.hentSistAktivBehandling();
 
         Behandlingsresultat behandlingsresultat = lagBehandlingsresultat(true);
         behandlingsresultat.setBehandling(sistAktiveBehandling);
@@ -128,8 +128,8 @@ class AdminInnvalideringSedRuterTest {
     @Test
     void rutSedTilBehandling_behandlingErUtstasjoneringOgAktiv_oppdaterSaksstatusAnnullert() {
         var fagsak = lagFagsak(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING, Behandlingsstatus.UNDER_BEHANDLING);
-        fagsak.hentSistAktiveBehandling().getSaksopplysninger().add(lagSedDokument());
-        Behandling sistAktiveBehandling = fagsak.hentSistAktiveBehandling();
+        fagsak.hentSistAktivBehandling().getSaksopplysninger().add(lagSedDokument());
+        Behandling sistAktiveBehandling = fagsak.hentSistAktivBehandling();
 
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setBehandling(sistAktiveBehandling);
@@ -150,7 +150,7 @@ class AdminInnvalideringSedRuterTest {
     @Test
     void rutSedTilBehandling_behandlingErUnntakNorskTrygvØvrigAktivSedIkkeAnnullert_oppretterBehandlingsoppgave() {
         var fagsak = lagFagsak(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE, Behandlingsstatus.UNDER_BEHANDLING);
-        fagsak.hentSistAktiveBehandling().getSaksopplysninger().add(lagSedDokument());
+        fagsak.hentSistAktivBehandling().getSaksopplysninger().add(lagSedDokument());
 
         when(eessiService.hentTilknyttedeBucer(arkivsakID, List.of())).thenReturn(lagBucInformasjon("ÅPEN"));
         when(fagsakService.finnFagsakFraArkivsakID(arkivsakID)).thenReturn(Optional.of(fagsak));

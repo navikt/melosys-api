@@ -8,6 +8,7 @@ public record MottakerAdresseDto(Tittel tittel,
                                  List<String> adresselinjer,
                                  String postnr,
                                  String poststed,
+                                 String region,
                                  String land) {
 
     public static MottakerAdresseDto av(BrevAdresse brevAdresse) {
@@ -17,6 +18,7 @@ public record MottakerAdresseDto(Tittel tittel,
             brevAdresse.getAdresselinjer(),
             brevAdresse.getPostnr(),
             brevAdresse.getPoststed(),
+            brevAdresse.getRegion(),
             brevAdresse.getLand()
         );
     }

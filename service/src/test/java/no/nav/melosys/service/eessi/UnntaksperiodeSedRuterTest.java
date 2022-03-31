@@ -82,7 +82,7 @@ public class UnntaksperiodeSedRuterTest {
 
         unntaksperiodeSedRuter.rutSedTilBehandling(prosessinstans, 1L);
 
-        verify(prosessinstansService).opprettProsessinstansSedJournalføring(eq(fagsak.hentSistAktiveBehandling()), any(MelosysEessiMelding.class));
+        verify(prosessinstansService).opprettProsessinstansSedJournalføring(eq(fagsak.hentSistAktivBehandling()), any(MelosysEessiMelding.class));
     }
 
     @Test

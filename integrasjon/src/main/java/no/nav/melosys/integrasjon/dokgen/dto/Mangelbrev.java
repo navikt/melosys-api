@@ -1,7 +1,6 @@
 package no.nav.melosys.integrasjon.dokgen.dto;
 
 import java.time.Instant;
-import java.time.Period;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -38,7 +37,7 @@ public class Mangelbrev extends DokgenDto {
         this.datoVedtatt = brevbestilling.getVedtaksdato();
         this.datoInnsendingsfrist = datoInnsendingsfrist;
         this.sakstype = fagsak.getType().getKode();
-        this.behandlingstype = fagsak.getSistOppdaterteBehandling().getType().getKode();
+        this.behandlingstype = fagsak.hentSistOppdatertBehandling().getType().getKode();
         this.manglerInfoFritekst = brevbestilling.getManglerInfoFritekst();
         this.innledningFritekst = brevbestilling.getInnledningFritekst();
     }

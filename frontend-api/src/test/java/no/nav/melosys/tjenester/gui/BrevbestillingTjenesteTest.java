@@ -70,7 +70,6 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
     private DokumentNavnService mockDokumentNavnService;
     @Captor
     private ArgumentCaptor<BrevbestillingRequest> brevbestillingDtoCaptor;
-    private final FakeUnleash fakeUnleash = new FakeUnleash();
 
     private BrevbestillingTjeneste brevbestillingTjeneste;
 
@@ -81,10 +80,8 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
             mock(TrygdeavgiftsberegningService.class), mock(LovvalgsperiodeService.class), mockBehandlingService);
         BrevbestillingService brevbestillingService = new BrevbestillingService(mockBrevmottakerService,
             mockDokServiceFasade, mockBehandlingService, mockEregFasade, mockKontaktopplysningService,
-            mockPersondataFasade, mockDokumentNavnService, fakeUnleash);
+            mockPersondataFasade, mockDokumentNavnService);
         brevbestillingTjeneste = new BrevbestillingTjeneste(brevbestillingService, mockBehandlingService, brevmottakerService, aksesskontroll);
-        fakeUnleash.enable("melosys.brev.GENERELT_FRITEKSTBREV_ARBEIDSGIVER");
-        fakeUnleash.enable("melosys.brev.GENERELT_FRITEKSTBREV_BRUKER");
     }
 
     @Test

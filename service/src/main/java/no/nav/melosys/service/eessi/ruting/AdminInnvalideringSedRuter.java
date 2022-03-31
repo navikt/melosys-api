@@ -67,7 +67,7 @@ public class AdminInnvalideringSedRuter extends AdminSedRuter implements SedRute
             return;
         }
 
-        var sistAktiveBehandling = fagsak.get().hentSistAktiveBehandling();
+        var sistAktiveBehandling = fagsak.get().hentSistAktivBehandling();
         var sedDokument = sistAktiveBehandling.finnSedDokument();
         boolean aktivBehandlingErInvalidert = erAktivBehandlingInvalidert(sedDokument, arkivsakID);
 

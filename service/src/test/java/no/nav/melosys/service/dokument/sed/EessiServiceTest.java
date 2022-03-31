@@ -220,8 +220,8 @@ class EessiServiceTest {
     @Test
     void hentMottakerinstitusjoner_forventListeMedRettType() {
         when(eessiConsumer.hentMottakerinstitusjoner(anyString(), anyList())).thenReturn(Arrays.asList(
-            new Institusjon("1","Test1","NO"),
-            new Institusjon("2","Test2","NO")
+            new Institusjon("1", "Test1", "NO"),
+            new Institusjon("2", "Test2", "NO")
         ));
 
         List<Institusjon> mottakerinstitusjoner = eessiService.hentEessiMottakerinstitusjoner("LA_BUC_01", List.of("FR"));
@@ -600,6 +600,13 @@ class EessiServiceTest {
             .thenReturn(List.of(new Institusjon("2", "", "")));
 
         assertThat(eessiService.landErEessiReady(bucType.name(), land)).isTrue();
+    }
+
+    @Test
+    void kanOppretteSedPåBuc_fårCreateTilbake_true() {
+        when(eessiConsumer.hentMuligeAksjoner("5566")).thenReturn(Collections.singletonList("SedId SedType Create"));
+
+        assertThat(eessiService.kanOppretteSedPåBuc("5566")).isTrue();
     }
 
     private static Journalpost lagJournalpost(List<ArkivDokument> dokumenter) {

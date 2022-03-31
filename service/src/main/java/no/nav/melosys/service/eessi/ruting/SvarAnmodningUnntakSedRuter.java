@@ -35,7 +35,7 @@ public class SvarAnmodningUnntakSedRuter implements SedRuterForSedTyper {
     private final FagsakService fagsakService;
     private final AnmodningsperiodeService anmodningsperiodeService;
     private final OppgaveService oppgaveService;
-    
+
     public SvarAnmodningUnntakSedRuter(ProsessinstansService prosessinstansService, FagsakService fagsakService,
                                        AnmodningsperiodeService anmodningsperiodeService,
                                        @Qualifier("system") OppgaveService oppgaveService) {
@@ -83,7 +83,7 @@ public class SvarAnmodningUnntakSedRuter implements SedRuterForSedTyper {
     private Behandling hentBehandling(Long gsakSaksnummer) {
         return fagsakService
             .hentFagsakFraArkivsakID(gsakSaksnummer)
-            .hentSistAktiveBehandling();
+            .hentSistAktivBehandling();
     }
 
     private void oppdaterBehandlingOgOppgave(Behandling behandling, String sedType) {

@@ -44,8 +44,6 @@ class HenleggFagsakServiceTest {
 
     private HenleggFagsakService henleggFagsakService;
 
-    private final FakeUnleash unleash = new FakeUnleash();
-
     @Captor
     private ArgumentCaptor<Behandlingsresultat> behandlingsresultatCaptor;
 
@@ -58,15 +56,13 @@ class HenleggFagsakServiceTest {
 
     @BeforeEach
     public void setup() {
-        henleggFagsakService = new HenleggFagsakService(fagsakService, behandlingsresultatService, prosessinstansService, oppgaveService, behandlingService, unleash);
+        henleggFagsakService = new HenleggFagsakService(fagsakService, behandlingsresultatService, prosessinstansService, oppgaveService, behandlingService);
 
         behandling.setId(behandlingID);
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
         behandling.setFagsak(fagsak);
         fagsak.setSaksnummer(saksnummer);
         fagsak.getBehandlinger().add(behandling);
-
-        unleash.enableAll();
     }
 
     @Test

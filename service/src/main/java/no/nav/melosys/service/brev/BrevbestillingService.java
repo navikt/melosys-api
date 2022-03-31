@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Kontaktopplysning;
@@ -59,12 +58,14 @@ public class BrevbestillingService {
     private final KontaktopplysningService kontaktopplysningService;
     private final PersondataFasade persondataFasade;
     private final DokumentNavnService dokumentNavnService;
-    private final Unleash unleash;
 
-    public BrevbestillingService(BrevmottakerService brevmottakerService, DokumentServiceFasade dokumentServiceFasade,
-                                 BehandlingService behandlingService, EregFasade eregFasade,
-                                 KontaktopplysningService kontaktopplysningService, PersondataFasade persondataFasade,
-                                 DokumentNavnService dokumentNavnService, Unleash unleash) {
+    public BrevbestillingService(BrevmottakerService brevmottakerService,
+                                 DokumentServiceFasade dokumentServiceFasade,
+                                 BehandlingService behandlingService,
+                                 EregFasade eregFasade,
+                                 KontaktopplysningService kontaktopplysningService,
+                                 PersondataFasade persondataFasade,
+                                 DokumentNavnService dokumentNavnService) {
         this.brevmottakerService = brevmottakerService;
         this.dokumentServiceFasade = dokumentServiceFasade;
         this.behandlingService = behandlingService;
@@ -72,7 +73,6 @@ public class BrevbestillingService {
         this.kontaktopplysningService = kontaktopplysningService;
         this.persondataFasade = persondataFasade;
         this.dokumentNavnService = dokumentNavnService;
-        this.unleash = unleash;
     }
 
     @Transactional
@@ -214,13 +214,7 @@ public class BrevbestillingService {
         } else if (behandling.erKlage()) {
             brevmaler.add(MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE);
         }
-        brevmaler.addAll(asList(MANGELBREV_BRUKER, MANGELBREV_ARBEIDSGIVER));
-        if (unleash.isEnabled("melosys.brev.GENERELT_FRITEKSTBREV_BRUKER")) {
-            brevmaler.add(GENERELT_FRITEKSTBREV_BRUKER);
-        }
-        if (unleash.isEnabled("melosys.brev.GENERELT_FRITEKSTBREV_ARBEIDSGIVER")) {
-            brevmaler.add(GENERELT_FRITEKSTBREV_ARBEIDSGIVER);
-        }
+        brevmaler.addAll(asList(MANGELBREV_BRUKER, MANGELBREV_ARBEIDSGIVER, GENERELT_FRITEKSTBREV_BRUKER, GENERELT_FRITEKSTBREV_ARBEIDSGIVER));
         return behandling.erAktiv() ? brevmaler : emptyList();
     }
 
@@ -259,6 +253,7 @@ public class BrevbestillingService {
             .medAdresselinjer(mapAdresselinjer(orgDokument, null, kontaktopplysning, persondata))
             .medPostnr(mapPostnr(orgDokument, persondata))
             .medPoststed(orgDokument != null ? DokgenAdresseMapper.mapPoststed(orgDokument) : mapPoststed(persondata))
+            .medRegion(mapRegionForAdresse(orgDokument, persondata))
             .medLand(mapLandForAdresse(orgDokument, persondata))
             .build();
     }

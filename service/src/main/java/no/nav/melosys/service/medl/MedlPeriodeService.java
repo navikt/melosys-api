@@ -115,7 +115,7 @@ public class MedlPeriodeService {
     }
 
     public void avsluttTidligerMedlPeriode(Fagsak fagsak) {
-        Behandling tidligereBehandling = fagsak.getTidligsteInaktiveBehandling();
+        Behandling tidligereBehandling = fagsak.hentTidligsteInaktiveBehandling();
 
         if (tidligereBehandling != null) {
             Optional<Lovvalgsperiode> lovvalgsperiode = finnLovvalgsperiode(tidligereBehandling);
