@@ -11,7 +11,6 @@ public interface InntektFasade {
 
     @Retryable(
         value = {IntegrasjonException.class},
-        maxAttempts = 3,
         backoff = @Backoff(delay = 1_000, multiplier = 1.5))
     Saksopplysning hentInntektListe(String personID, YearMonth fom, YearMonth tom);
 }
