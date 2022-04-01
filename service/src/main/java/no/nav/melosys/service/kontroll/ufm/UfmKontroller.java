@@ -36,8 +36,8 @@ final class UfmKontroller {
             Kontroll_begrunnelser.INGEN_SLUTTDATO : null;
     }
 
-    static Kontroll_begrunnelser periodeOver24Mnd(UfmKontrollData kontrollData) {
-        return PeriodeKontroller.periodeOver24Mnd(
+    static Kontroll_begrunnelser periodeOver24MånederOgEnDag(UfmKontrollData kontrollData) {
+        return PeriodeKontroller.periodeOver24MånederOgEnDag(
             kontrollData.getSedDokument().getLovvalgsperiode().getFom(), kontrollData.getSedDokument().getLovvalgsperiode().getTom()) ?
             Kontroll_begrunnelser.PERIODEN_OVER_24_MD : null;
     }
@@ -45,7 +45,7 @@ final class UfmKontroller {
     static Kontroll_begrunnelser periodeOver5År(UfmKontrollData kontrollData) {
         return PeriodeKontroller.periodeOver5År(
             kontrollData.getSedDokument().getLovvalgsperiode().getFom(), kontrollData.getSedDokument().getLovvalgsperiode().getTom()) ?
-                Kontroll_begrunnelser.PERIODEN_OVER_5_AR : null;
+            Kontroll_begrunnelser.PERIODEN_OVER_5_AR : null;
     }
 
     static Kontroll_begrunnelser periodeStarterFørFørsteJuni2012(UfmKontrollData kontrollData) {

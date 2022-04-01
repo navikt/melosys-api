@@ -61,7 +61,7 @@ class KontrollFactory {
         return List.of(
             UfmKontroller::periodeErÅpen,
             UfmKontroller::periodeStarterFørFørsteJuni2012,
-            UfmKontroller::periodeOver24Mnd,
+            UfmKontroller::periodeOver24MånederOgEnDag,
             UfmKontroller::periodeOver1ÅrFremITid,
             UfmKontroller::overlappendeMedlemsperiode,
             UfmKontroller::lovvalgslandErNorge,

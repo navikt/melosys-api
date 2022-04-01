@@ -22,8 +22,12 @@ public final class PeriodeKontroller {
         return fom != null && tom == null;
     }
 
-    public static boolean periodeOver24Mnd(LocalDate fom, LocalDate tom) {
+    public static boolean periodeOver24Måneder(LocalDate fom, LocalDate tom) {
         return tom != null && ChronoUnit.MONTHS.between(fom, tom) >= 24;
+    }
+
+    public static boolean periodeOver24MånederOgEnDag(LocalDate fom, LocalDate tom) {
+        return tom != null && ChronoUnit.MONTHS.between(fom, tom.minusDays(1)) >= 24;
     }
 
     public static boolean periodeOver3År(LocalDate fom, LocalDate tom) {
@@ -63,6 +67,11 @@ public final class PeriodeKontroller {
         return date1.equals(date2);
     }
 
+    public static boolean periodeOverlapperMedInklusivPerioderFraSed(ErPeriode periode1, ErPeriode periode2) {
+        LocalDate inklusivPeriode2Fom = periode2.getFom() != null ? periode2.getFom().plusDays(1) : null;
+        return periodeOverlapper(periode1.getFom(), periode1.getTom(), inklusivPeriode2Fom, periode2.getTom());
+    }
+
     public static boolean periodeOverlapper(ErPeriode periode1, ErPeriode periode2) {
         return periodeOverlapper(periode1.getFom(), periode1.getTom(), periode2.getFom(), periode2.getTom());
     }
@@ -86,7 +95,6 @@ public final class PeriodeKontroller {
         }
 
         return fom1.isBefore(fom2) && tom1.isAfter(fom2) || fom1.isAfter(fom2) && fom1.isBefore(tom2);
-
     }
 
     private static boolean åpenPeriodeOverlapper(LocalDate fom, LocalDate tom, LocalDate åpenPeriode) {

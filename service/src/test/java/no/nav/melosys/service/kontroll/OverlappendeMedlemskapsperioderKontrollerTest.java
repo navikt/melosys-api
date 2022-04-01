@@ -107,11 +107,26 @@ class OverlappendeMedlemskapsperioderKontrollerTest {
 
     @Test
     void overlappendeMedlemsperiodeFraSed_overlappendePeriodeErUAVKL_registrerTreff() {
-        MedlemskapDokument medlemskapDokument = lagMedlemskapsDokument();
-        Medlemsperiode medlemsperiode = medlemskapDokument.getMedlemsperiode().get(0);
-        medlemsperiode.status = PeriodestatusMedl.UAVK.getKode();
+        MedlemskapDokument medlemskapDokument = lagUavklartMedlemskapsDokument();
         assertThat(OverlappendeMedlemskapsperioderKontroller.harOverlappendeMedlemsperiodeFraSed(
             medlemskapDokument, new Periode(LocalDate.EPOCH, LocalDate.EPOCH.plusYears(2)))
+        ).isTrue();
+    }
+
+
+    @Test
+    void overlappendeMedlemsperiode_overlappendePeriodeMedSammeStartDagSomSisteDagMedlemskap_ingenTreff() {
+        LocalDate sammeStartDagSomSisteDagMedlemskap = LocalDate.EPOCH.plusYears(2);
+        assertThat(OverlappendeMedlemskapsperioderKontroller.harOverlappendeMedlemsperiodeFraSed(
+            lagUavklartMedlemskapsDokument(), lagLovvalgsPeriode(sammeStartDagSomSisteDagMedlemskap, LocalDate.EPOCH.plusYears(4)))
+        ).isFalse();
+    }
+
+    @Test
+    void overlappendeMedlemsperiode_overlappendePeriode_enDagOver_registrerTreff() {
+        LocalDate enDagFørSisteDagMedlemsperiode = LocalDate.EPOCH.plusYears(2).minusDays(1);
+        assertThat(OverlappendeMedlemskapsperioderKontroller.harOverlappendeMedlemsperiodeFraSed(
+            lagUavklartMedlemskapsDokument(), lagLovvalgsPeriode(enDagFørSisteDagMedlemsperiode, LocalDate.EPOCH.plusYears(4)))
         ).isTrue();
     }
 
@@ -145,6 +160,13 @@ class OverlappendeMedlemskapsperioderKontrollerTest {
         medlemsperiode.periode = new Periode(LocalDate.EPOCH, LocalDate.EPOCH.plusYears(2));
 
         medlemskapDokument.medlemsperiode = Collections.singletonList(medlemsperiode);
+        return medlemskapDokument;
+    }
+
+    private MedlemskapDokument lagUavklartMedlemskapsDokument() {
+        MedlemskapDokument medlemskapDokument = lagMedlemskapsDokument();
+        Medlemsperiode medlemsperiode = medlemskapDokument.getMedlemsperiode().get(0);
+        medlemsperiode.status = PeriodestatusMedl.UAVK.getKode();
         return medlemskapDokument;
     }
 
