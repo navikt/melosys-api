@@ -3,19 +3,15 @@ package no.nav.melosys.itest.token
 import com.github.tomakehurst.wiremock.client.MappingBuilder
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.matching.UrlPattern
-import no.nav.melosys.domain.FellesKodeverk
-import no.nav.melosys.integrasjon.aareg.AaregService
 import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdContextExchangeFilter
+import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdQuery
 import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdRestConsumer
 import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdRestConsumerConfig
-import no.nav.melosys.integrasjon.kodeverk.Kode
-import no.nav.melosys.integrasjon.kodeverk.KodeOppslag
 import no.nav.melosys.integrasjon.reststs.RestStsClient
 import no.nav.melosys.integrasjon.reststs.StsRestTemplateProducer
 import org.springframework.boot.autoconfigure.web.reactive.function.client.WebClientAutoConfiguration
 import org.springframework.boot.test.autoconfigure.web.client.RestClientTest
 import org.springframework.test.web.client.MockRestServiceServer
-import java.time.LocalDate
 
 @RestClientTest(
     value = [
@@ -23,7 +19,6 @@ import java.time.LocalDate
         RestStsClient::class,
         WebClientAutoConfiguration::class,
 
-        AaregService::class,
         ArbeidsforholdRestConsumer::class,
         ArbeidsforholdRestConsumerConfig::class,
         ArbeidsforholdContextExchangeFilter::class,
@@ -32,7 +27,7 @@ import java.time.LocalDate
 )
 abstract class AaregServiceTestBase(
     server: MockRestServiceServer,
-    private val aaregService: AaregService,
+    private val arbeidsforholdRestConsumer: ArbeidsforholdRestConsumer,
     mockPort: Int
 ) : ConsumerTestBase<String>(server, mockPort) {
 
@@ -45,28 +40,8 @@ abstract class AaregServiceTestBase(
     }
 
     override fun executeRequest() {
-        val start = LocalDate.of(2022, 3, 26)
-        val stop = LocalDate.of(2022, 3, 27)
-        aaregService.finnArbeidsforholdPrArbeidstaker("121", start, stop)
+        val build = ArbeidsforholdQuery.Builder().build()
+        arbeidsforholdRestConsumer.finnArbeidsforholdPrArbeidstaker("121", build)
     }
-
-    class KodeOppslagImpl : KodeOppslag {
-        override fun getTermFraKodeverk(kodeverk: FellesKodeverk?, kode: String?): String {
-            return FellesKodeverk.ARBEIDSTIDSORDNINGER.name
-        }
-
-        override fun getTermFraKodeverk(kodeverk: FellesKodeverk?, kode: String?, dato: LocalDate?): String {
-            return FellesKodeverk.ARBEIDSTIDSORDNINGER.name
-        }
-        override fun getTermFraKodeverk(
-            kodeverk: FellesKodeverk?,
-            kode: String?,
-            dato: LocalDate?,
-            kodeperioder: MutableList<Kode>?
-        ): String {
-            return FellesKodeverk.ARBEIDSTIDSORDNINGER.name
-        }
-    }
-
 }
 
