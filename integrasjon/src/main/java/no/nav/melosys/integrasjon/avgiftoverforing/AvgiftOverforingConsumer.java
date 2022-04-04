@@ -6,9 +6,10 @@ import no.nav.melosys.integrasjon.avgiftoverforing.dto.AvgiftOverforingRepresent
 import no.nav.melosys.integrasjon.avgiftoverforing.dto.AvgiftOverforingRepresentantDto;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.web.reactive.function.client.WebClient;
 
-
+@Retryable
 public class AvgiftOverforingConsumer {
     private final WebClient webClient;
 
