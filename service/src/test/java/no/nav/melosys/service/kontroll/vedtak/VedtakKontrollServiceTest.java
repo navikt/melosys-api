@@ -85,7 +85,7 @@ class VedtakKontrollServiceTest {
     @Test
     void kontrollerInnvilgelse_feilFraKontroller_kasterExceptionMedFeilkode() {
         var behandlingsresultat = lagBehandlingsresultat();
-        when(persondataFasade.hentFolkeregisterident(behandling.getFagsak().hentAktørID())).thenReturn("fnr");
+        when(persondataFasade.hentFolkeregisterident(behandling.getFagsak().hentBrukersAktørID())).thenReturn("fnr");
 
         Consumer<ValideringException> medFeilkode = v -> assertThat(v.getFeilkoder())
             .extracting(KontrollfeilDto::getKode).containsExactly(Kontroll_begrunnelser.INGEN_SLUTTDATO.getKode());
@@ -100,7 +100,7 @@ class VedtakKontrollServiceTest {
         lovvalgsperiode.setTom(LocalDate.now());
         var behandlingsresultat = lagBehandlingsresultat();
         when(behandlingsresultatService.hentBehandlingsresultat(behandlingID)).thenReturn(behandlingsresultat);
-        when(persondataFasade.hentFolkeregisterident(behandling.getFagsak().hentAktørID())).thenReturn("fnr");
+        when(persondataFasade.hentFolkeregisterident(behandling.getFagsak().hentBrukersAktørID())).thenReturn("fnr");
 
         vedtakKontrollService.kontrollerVedtak(behandling.getId(), FØRSTEGANGSVEDTAK, true);
         verify(registeropplysningerService).hentOgLagreOpplysninger(any());

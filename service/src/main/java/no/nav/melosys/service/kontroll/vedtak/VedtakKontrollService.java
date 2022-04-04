@@ -69,7 +69,7 @@ public class VedtakKontrollService {
 
     private void hentNyeRegisteropplysninger(Behandlingsresultat behandlingsresultat, Behandling behandling) {
         Lovvalgsperiode lovvalgsperiode = behandlingsresultat.hentValidertLovvalgsperiode();
-        String fnr = persondataFasade.hentFolkeregisterident(behandling.getFagsak().hentAktørID());
+        String fnr = persondataFasade.hentFolkeregisterident(behandling.getFagsak().hentBrukersAktørID());
 
         registeropplysningerService.hentOgLagreOpplysninger(
             RegisteropplysningerRequest.builder()
@@ -118,7 +118,7 @@ public class VedtakKontrollService {
 
     private Persondata hentPersondata(Behandling behandling) {
         if (unleash.isEnabled("melosys.pdl.aktiv")) {
-            return persondataFasade.hentPerson(behandling.getFagsak().hentAktørID());
+            return persondataFasade.hentPerson(behandling.getFagsak().hentBrukersAktørID());
         }
         return behandling.hentPersonDokument();
     }

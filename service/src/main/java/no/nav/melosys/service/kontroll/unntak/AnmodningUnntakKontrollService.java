@@ -78,7 +78,7 @@ public class AnmodningUnntakKontrollService implements AdresseUtlandKontroller {
 
     private Persondata hentPersondata(Behandling behandling) {
         if (unleash.isEnabled("melosys.pdl.aktiv")) {
-            return persondataFasade.hentPerson(behandling.getFagsak().hentAktørID());
+            return persondataFasade.hentPerson(behandling.getFagsak().hentBrukersAktørID());
         }
         return behandling.hentPersonDokument();
     }

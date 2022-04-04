@@ -111,7 +111,7 @@ public class BrevbestillingService {
     }
 
     private String hentSammensattNavn(Behandling behandling) {
-        return persondataFasade.hentSammensattNavn(behandling.getFagsak().hentAktørID());
+        return persondataFasade.hentSammensattNavn(behandling.getFagsak().hentBrukersAktørID());
     }
 
     private List<MuligMottakerDto> lagKopiMottakereMuligMottakerDtos(Produserbaredokumenter produserbaredokumenter, Behandling behandling, Collection<Aktoersroller> kopiMottakere, Aktoersroller hovedmottaker) {
@@ -134,7 +134,7 @@ public class BrevbestillingService {
                 .medDokumentNavn("Kopi til bruker")
                 .medMottakerNavn(hentSammensattNavn(behandling))
                 .medRolle(BRUKER)
-                .medAktørId(behandling.getFagsak().hentAktørID())
+                .medAktørId(behandling.getFagsak().hentBrukersAktørID())
                 .build();
         } else {
             var orgDokument = hentRettOrganisasjonsdokument(behandling, avklartKopi.getOrgnr());
@@ -236,7 +236,7 @@ public class BrevbestillingService {
         OrganisasjonDokument orgDokument = null;
 
         if (mottaker.getRolle() == BRUKER) {
-            persondata = persondataFasade.hentPerson(behandling.getFagsak().hentAktørID());
+            persondata = persondataFasade.hentPerson(behandling.getFagsak().hentBrukersAktørID());
         } else if (mottaker.getRolle() == ARBEIDSGIVER || mottaker.getRolle() == Aktoersroller.REPRESENTANT) {
             kontaktopplysning = kontaktopplysningService.hentKontaktopplysning(behandling.getFagsak().getSaksnummer(),
                 mottaker.getOrgnr()).orElse(null);

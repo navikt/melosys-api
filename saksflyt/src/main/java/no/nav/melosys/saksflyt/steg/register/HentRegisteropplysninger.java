@@ -43,7 +43,7 @@ public class HentRegisteropplysninger implements StegBehandler {
     public void utfør(Prosessinstans prosessinstans) {
 
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(prosessinstans.getBehandling().getId());
-        String brukerId = persondataFasade.hentFolkeregisterident(behandling.getFagsak().hentAktørID());
+        String brukerId = persondataFasade.hentFolkeregisterident(behandling.getFagsak().hentBrukersAktørID());
 
 
         var registeropplysningerRequestBuilder = RegisteropplysningerRequest.builder()

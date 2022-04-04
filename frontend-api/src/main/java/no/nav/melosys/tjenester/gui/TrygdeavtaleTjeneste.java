@@ -72,7 +72,7 @@ public class TrygdeavtaleTjeneste {
         var behandlingsResultat = behandlingsresultatService.hentBehandlingsresultat(behandlingId);
 
         return ResponseEntity.ok(new TrygdeavtaleInfoDto(
-            behandling.getFagsak().hentAktørID(),
+            behandling.getFagsak().hentBrukersAktørID(),
             behandling.getTema().getKode(),
             behandling.getType().getKode(),
             aksesskontroll.behandlingKanRedigeresAvSaksbehandler(behandling, saksbehandler),
