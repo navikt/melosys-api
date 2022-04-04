@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.5.4</version>
+        <version>2.5.12</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -104,6 +104,8 @@
         <wiremock-standalone.version>2.27.2</wiremock-standalone.version>
         <nav-foedselsnummer.core.version>1.0-SNAPSHOT.6</nav-foedselsnummer.core.version>
         <xmlunit.version>2.9.0</xmlunit.version>
+        <javax.activation.version>1.1.1</javax.activation.version>
+        <org.jboss.logging.version>2.2.1</org.jboss.logging.version>
     </properties>
 
     <!-- Unngå å put scope i dependency management. Sett det heller der det
@@ -451,6 +453,21 @@
                 <groupId>io.github.classgraph</groupId>
                 <artifactId>classgraph</artifactId>
                 <version>${classgraph.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>javax.activation</groupId>
+                <artifactId>activation</artifactId>
+                <version>${javax.activation.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.logging</groupId>
+                <artifactId>jboss-logging-annotations</artifactId>
+                <version>${org.jboss.logging.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.logging</groupId>
+                <artifactId>jboss-logging-processor</artifactId>
+                <version>${org.jboss.logging.version}</version>
             </dependency>
 
             <!-- NAV felleskomponenter -->
