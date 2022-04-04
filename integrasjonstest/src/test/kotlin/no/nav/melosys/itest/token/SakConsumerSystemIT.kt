@@ -16,7 +16,7 @@ class SakConsumerSystemIT(
     @Autowired @Qualifier("system") private val  sakConsumer: SakConsumer,
     @Autowired server: MockRestServiceServer,
     @Value("\${mockserver.port}") mockPort: Int,
-) : SakConsumerTestBase(server, mockPort) {
+) : SakConsumerTestBase(server, mockPort, sakConsumer) {
 
     @TestConfiguration
     class TestConfig {
@@ -31,6 +31,6 @@ class SakConsumerSystemIT(
                 Pair("Authorization", WireMock.equalTo("Basic dGVzdDp0ZXN0")),
             )
         )
-        sakConsumer.hentSak(1L)
+        executeRequest()
     }
 }

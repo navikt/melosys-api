@@ -17,7 +17,7 @@ class PDLConsumerUserIT(
     @Autowired @Qualifier("saksbehandler") private val pdlConsumer: PDLConsumer,
     @Autowired server: MockRestServiceServer,
     @Value("\${mockserver.port}") mockPort: Int,
-) : PDLConsumerTestBase(server, mockPort) {
+) : PDLConsumerTestBase(server, mockPort, pdlConsumer) {
 
     @TestConfiguration
     class TestConfig {
@@ -35,6 +35,6 @@ class PDLConsumerUserIT(
                 Pair("Nav-Consumer-Token", WireMock.equalTo("Bearer --token-from-system--"))
             )
         )
-        pdlConsumer.hentIdenter("0")
+        executeRequest()
     }
 }

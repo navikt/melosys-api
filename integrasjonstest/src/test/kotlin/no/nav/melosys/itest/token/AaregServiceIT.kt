@@ -55,6 +55,12 @@ internal class AaregServiceIT(
         fun kodeOppslag(): KodeOppslag = KodeOppslagImpl()
     }
 
+    override fun executeRequest() {
+        val start = LocalDate.of(2022, 3, 26)
+        val stop = LocalDate.of(2022, 3, 27)
+        aaregService.finnArbeidsforholdPrArbeidstaker("121", start, stop)
+    }
+
     @Test
     fun authorizationSkalKommeFraSystemSelvOmRequestKommerFraWeb() {
         ThreadLocalAccessInfo.beforeControllerRequest("request")
@@ -79,10 +85,6 @@ internal class AaregServiceIT(
                 Pair("Nav-Personident", WireMock.equalTo("121"))
             )
         )
-
-        val start = LocalDate.of(2022, 3, 26)
-        val stop = LocalDate.of(2022, 3, 27)
-        aaregService.finnArbeidsforholdPrArbeidstaker("121", start, stop)
     }
 
     class KodeOppslagImpl : KodeOppslag {
@@ -93,7 +95,6 @@ internal class AaregServiceIT(
         override fun getTermFraKodeverk(kodeverk: FellesKodeverk?, kode: String?, dato: LocalDate?): String {
             return FellesKodeverk.ARBEIDSTIDSORDNINGER.name
         }
-
         override fun getTermFraKodeverk(
             kodeverk: FellesKodeverk?,
             kode: String?,

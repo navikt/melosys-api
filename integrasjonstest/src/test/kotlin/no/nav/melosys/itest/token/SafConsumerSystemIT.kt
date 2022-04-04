@@ -16,7 +16,7 @@ class SafConsumerSystemIT(
     @Autowired @Qualifier("system") private val safConsumer: SafConsumer,
     @Autowired server: MockRestServiceServer,
     @Value("\${mockserver.port}") mockPort: Int,
-) : SafConsumerTestBase(server, mockPort) {
+) : SafConsumerTestBase(server, mockPort, safConsumer) {
 
     @TestConfiguration
     class TestConfig {
@@ -32,6 +32,6 @@ class SafConsumerSystemIT(
                 Pair("Nav-Consumer-Id", WireMock.equalTo("melosys"))
             )
         )
-        safConsumer.hentDokument("1", "1")
+        executeRequest()
     }
 }

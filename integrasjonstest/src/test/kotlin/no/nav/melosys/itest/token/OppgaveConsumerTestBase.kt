@@ -4,6 +4,7 @@ import com.github.tomakehurst.wiremock.client.MappingBuilder
 import com.github.tomakehurst.wiremock.client.WireMock
 import no.nav.melosys.integrasjon.felles.SystemContextExchangeFilter
 import no.nav.melosys.integrasjon.felles.UserContextExchangeFilter
+import no.nav.melosys.integrasjon.oppgave.konsument.OppgaveConsumer
 import no.nav.melosys.integrasjon.oppgave.konsument.OppgaveConsumerImpl
 import no.nav.melosys.integrasjon.oppgave.konsument.OppgaveConsumerProducer
 import no.nav.melosys.integrasjon.reststs.RestStsClient
@@ -27,7 +28,8 @@ import org.springframework.test.web.client.MockRestServiceServer
 )
 open class OppgaveConsumerTestBase(
     server: MockRestServiceServer,
-    mockPort: Int
+    mockPort: Int,
+    private val oppgaveConsumer: OppgaveConsumer
 ) : ConsumerTestBase<String>(server, mockPort) {
     override fun createWireMock(): MappingBuilder {
         return WireMock.get("/api/v1/oppgaver/1")
@@ -35,5 +37,9 @@ open class OppgaveConsumerTestBase(
 
     override fun getMockData(): String {
         return "{}"
+    }
+
+    override fun executeRequest() {
+        oppgaveConsumer.hentOppgave("1")
     }
 }

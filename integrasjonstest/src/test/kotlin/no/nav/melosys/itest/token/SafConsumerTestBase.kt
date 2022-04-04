@@ -5,6 +5,7 @@ import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.matching.UrlPattern
 import no.nav.melosys.integrasjon.felles.SystemContextExchangeFilter
 import no.nav.melosys.integrasjon.felles.UserContextExchangeFilter
+import no.nav.melosys.integrasjon.joark.saf.SafConsumer
 import no.nav.melosys.integrasjon.joark.saf.SafConsumerImpl
 import no.nav.melosys.integrasjon.joark.saf.SafConsumerProducer
 import no.nav.melosys.integrasjon.reststs.RestStsClient
@@ -28,7 +29,8 @@ import org.springframework.test.web.client.MockRestServiceServer
 )
 open class SafConsumerTestBase(
     server: MockRestServiceServer,
-    mockPort: Int
+    mockPort: Int,
+    private val safConsumer: SafConsumer
 ) : ConsumerTestBase<ByteArray>(server, mockPort){
 
     override fun createWireMock(): MappingBuilder {
@@ -37,5 +39,9 @@ open class SafConsumerTestBase(
 
     override fun getMockData(): ByteArray {
         return ByteArray(0)
+    }
+
+    override fun executeRequest() {
+        safConsumer.hentDokument("1", "1")
     }
 }

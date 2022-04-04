@@ -8,6 +8,7 @@ import com.github.tomakehurst.wiremock.matching.StringValuePattern
 import no.nav.melosys.integrasjon.felles.EnvironmentHandler
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
 import no.nav.melosys.sikkerhet.context.SubjectHandler
+import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
@@ -18,6 +19,7 @@ import org.springframework.mock.env.MockEnvironment
 import org.springframework.test.web.client.MockRestServiceServer
 import org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo
 import org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess
+import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 abstract class ConsumerTestBase<T>(
@@ -41,6 +43,24 @@ abstract class ConsumerTestBase<T>(
     abstract fun createWireMock(): MappingBuilder
 
     abstract fun getMockData(): T
+
+    fun executeFromSystem(verify: () -> Unit) {
+        val uuid = UUID.randomUUID()
+        ThreadLocalAccessInfo.beforExecuteProcess(uuid, "prossesSteg")
+        verify()
+        executeRequest()
+        ThreadLocalAccessInfo.afterExecuteProcess(uuid)
+    }
+
+    fun executeFromController(verify: () -> Unit) {
+        SpringSubjectHandler.set(TestSubjectHandler())
+        ThreadLocalAccessInfo.beforeControllerRequest("request")
+        verify()
+        executeRequest()
+        ThreadLocalAccessInfo.afterControllerRequest("request")
+    }
+
+    abstract fun executeRequest()
 
     fun verifyHeaders(headers: Map<String, StringValuePattern>) {
         val wireMock = createWireMock()

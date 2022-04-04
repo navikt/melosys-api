@@ -17,7 +17,7 @@ class OppgaveConsumerSystemIT(
     @Autowired @Qualifier("system") private val oppgaveConsumer: OppgaveConsumer,
     @Autowired server: MockRestServiceServer,
     @Value("\${mockserver.port}") mockPort: Int,
-) : OppgaveConsumerTestBase(server, mockPort) {
+) : OppgaveConsumerTestBase(server, mockPort, oppgaveConsumer) {
 
     @TestConfiguration
     class TestConfig {
@@ -34,6 +34,6 @@ class OppgaveConsumerSystemIT(
                 Pair("Authorization", WireMock.equalTo("Bearer --token-from-system--")),
             )
         )
-        oppgaveConsumer.hentOppgave("1")
+        executeRequest()
     }
 }

@@ -4,6 +4,7 @@ import com.github.tomakehurst.wiremock.client.MappingBuilder
 import com.github.tomakehurst.wiremock.client.WireMock
 import no.nav.melosys.integrasjon.reststs.RestStsClient
 import no.nav.melosys.integrasjon.reststs.StsRestTemplateProducer
+import no.nav.melosys.integrasjon.sak.SakConsumer
 import no.nav.melosys.integrasjon.sak.SakConsumerImpl
 import no.nav.melosys.integrasjon.sak.SakConsumerProducer
 import org.springframework.boot.autoconfigure.web.reactive.function.client.WebClientAutoConfiguration
@@ -23,7 +24,8 @@ import org.springframework.test.web.client.MockRestServiceServer
 )
 open class SakConsumerTestBase(
     server: MockRestServiceServer, // TODO: Blir ikke brukt i SakConsumer så lag en ny base klasse eller skriv om
-    mockPort: Int
+    mockPort: Int,
+    private val  sakConsumer: SakConsumer
 ) : ConsumerTestBase<String>(server, mockPort){
 
     override fun createWireMock(): MappingBuilder {
@@ -32,5 +34,9 @@ open class SakConsumerTestBase(
 
     override fun getMockData(): String {
         return "{}"
+    }
+
+    override fun executeRequest() {
+        sakConsumer.hentSak(1L)
     }
 }

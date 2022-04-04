@@ -2,10 +2,7 @@ package no.nav.melosys.itest.token
 
 import com.github.tomakehurst.wiremock.client.MappingBuilder
 import com.github.tomakehurst.wiremock.client.WireMock
-import no.nav.melosys.integrasjon.pdl.PDLAuthFilter
-import no.nav.melosys.integrasjon.pdl.PDLAuthFilterProducer
-import no.nav.melosys.integrasjon.pdl.PDLConsumerImpl
-import no.nav.melosys.integrasjon.pdl.PDLConsumerProducer
+import no.nav.melosys.integrasjon.pdl.*
 import no.nav.melosys.integrasjon.reststs.RestStsClient
 import no.nav.melosys.integrasjon.reststs.StsRestTemplateProducer
 import org.springframework.boot.autoconfigure.web.reactive.function.client.WebClientAutoConfiguration
@@ -27,7 +24,8 @@ import org.springframework.test.web.client.MockRestServiceServer
 )
 open class PDLConsumerTestBase(
     server: MockRestServiceServer,
-    mockPort: Int
+    mockPort: Int,
+    private val pdlConsumer: PDLConsumer
 ) : ConsumerTestBase<String>(server, mockPort){
 
     override fun createWireMock(): MappingBuilder {
@@ -52,5 +50,9 @@ open class PDLConsumerTestBase(
           }
         }
         """
+    }
+
+    override fun executeRequest() {
+        pdlConsumer.hentIdenter("0")
     }
 }
