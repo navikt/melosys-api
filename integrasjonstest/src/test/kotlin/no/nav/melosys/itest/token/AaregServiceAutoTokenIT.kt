@@ -12,7 +12,7 @@ import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.test.web.client.MockRestServiceServer
 
-class AaregServiceIT(
+class AaregServiceAutoTokenIT(
     @Autowired private val aaregService: AaregService,
     @Autowired private val server: MockRestServiceServer,
     @Value("\${mockserver.port}") mockPort: Int,
@@ -24,7 +24,7 @@ class AaregServiceIT(
         fun kodeOppslag(): KodeOppslag = KodeOppslagImpl()
 
         @Bean
-        fun unleash() = FakeUnleash()
+        fun unleash() = FakeUnleash().apply { enable("melosys.auto.token") }
     }
 
     @Test
@@ -32,7 +32,7 @@ class AaregServiceIT(
         executeFromController {
             verifyHeaders(
                 mapOf<String, StringValuePattern>(
-                    Pair("Authorization", WireMock.equalTo("Bearer --token-from-system--")),
+                    Pair("Authorization", WireMock.equalTo("Bearer --token-from-user--")),
                     Pair("Nav-Consumer-Token", WireMock.equalTo("Bearer --token-from-system--"))
                 )
             )
