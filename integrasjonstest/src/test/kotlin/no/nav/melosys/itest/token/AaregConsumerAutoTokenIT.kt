@@ -11,11 +11,11 @@ import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.test.web.client.MockRestServiceServer
 
-class AaregServiceAutoTokenIT(
+class AaregConsumerAutoTokenIT(
     @Autowired private val arbeidsforholdRestConsumer: ArbeidsforholdRestConsumer,
     @Autowired private val server: MockRestServiceServer,
     @Value("\${mockserver.port}") mockPort: Int,
-) : AaregServiceTestBase(server, arbeidsforholdRestConsumer, mockPort) {
+) : AaregConsumerTestBase(server, arbeidsforholdRestConsumer, mockPort) {
 
     @TestConfiguration
     class TestConfig {

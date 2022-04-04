@@ -25,7 +25,7 @@ import org.springframework.test.web.client.MockRestServiceServer
     ],
     properties = ["spring.profiles.active:itest-token"]
 )
-abstract class AaregServiceTestBase(
+abstract class AaregConsumerTestBase(
     server: MockRestServiceServer,
     private val arbeidsforholdRestConsumer: ArbeidsforholdRestConsumer,
     mockPort: Int
