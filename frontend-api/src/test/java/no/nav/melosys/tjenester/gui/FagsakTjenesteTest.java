@@ -10,12 +10,14 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.Tilleggsinformasjon;
 import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.TilleggsinformasjonDetaljer;
+import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresse;
 import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresseNorge;
 import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresseUtland;
@@ -29,6 +31,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.persondata.PersondataFasade;
+import no.nav.melosys.service.registeropplysninger.RegisterOppslagService;
 import no.nav.melosys.service.sak.*;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.utpeking.UtpekingService;
@@ -61,12 +64,14 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
     private static final String FAGSAKSER_HENLEGG_POST_SCHEMA = "fagsaker-henlegg-post-schema.json";
 
     private static final String FNR = "12345678901";
+    private static final String ORGNR = "111111111";
 
     private static FagsakService fagsakService;
     private static OpprettNySakFraOppgave opprettNySakFraOppgave;
     private static Aksesskontroll aksesskontroll;
     private static HenleggFagsakService henleggFagsakService;
     private static UtpekingService utpekingService;
+    private static RegisterOppslagService registerOppslagService;
 
     private EasyRandom random;
 
@@ -121,7 +126,7 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
 
     @Test
     void fagsakSøkSchemaValidering() throws IOException {
-        valider(new FagsakSokDto("123", "MEL-123"), SOK_FAGSAKER_POST_SCHEMA);
+        valider(new FagsakSokDto("123", "MEL-123", "111111111"), SOK_FAGSAKER_POST_SCHEMA);
 
         List<FagsakOppsummeringDto> fagsakOppsummeringDtoList = random.objects(FagsakOppsummeringDto.class, 1).collect(Collectors.toList());
         List<BehandlingOversiktDto> behandlingOversiktDtoer = random.objects(BehandlingOversiktDto.class, 1).collect(Collectors.toList());
@@ -157,13 +162,33 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
         behandling.setId(123L);
         fagsak.setBehandlinger(Collections.singletonList(behandling));
         FagsakTjeneste instans = lagFagsakTjeneste(fagsak);
-        FagsakSokDto søkDto = new FagsakSokDto(FNR, null);
+        FagsakSokDto søkDto = new FagsakSokDto(FNR, null, null);
         List<FagsakOppsummeringDto> resultat = instans.hentFagsaker(søkDto);
         List<FagsakOppsummeringDto> forventet = Collections.singletonList(lagFagsakOppsummeringDto(behandling));
-        assertThat(forventet.size()).isEqualTo(resultat.size());
+        assertThat(forventet).hasSameSizeAs(resultat);
         for (int i = 0; i < forventet.size(); i++) {
             assertThat(resultat.get(i)).usingRecursiveComparison().isEqualTo(forventet.get(i));
         }
+    }
+
+    @Test
+    void hentFagsaker_medOrgnr_verifiserErMappetKorrekt() {
+        Fagsak fagsak = lagFagsak();
+        Behandling behandling = new Behandling();
+        behandling.setId(123L);
+        behandling.setFagsak(fagsak);
+        fagsak.setBehandlinger(List.of(behandling));
+        Aktoer aktoer = new Aktoer();
+        aktoer.setOrgnr(ORGNR);
+        aktoer.setRolle(Aktoersroller.ARBEIDSGIVER); //TODO: Endre etter kodeverksendring.
+        fagsak.setAktører(Set.of(aktoer));
+        FagsakTjeneste instans = lagFagsakTjeneste(fagsak);
+        var organisajonsdokument = new OrganisasjonDokument();
+        organisajonsdokument.setNavn("Moe Organisasjon");
+        when(registerOppslagService.hentOrganisasjon(ORGNR)).thenReturn(organisajonsdokument);
+
+        List<FagsakOppsummeringDto> resultat = instans.hentFagsaker(new FagsakSokDto(null, null, ORGNR));
+        assertThat(resultat).hasSize(1).extracting(FagsakOppsummeringDto::getSammensattNavn).containsExactly("Moe Organisasjon");
     }
 
     @Test
@@ -172,7 +197,7 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
         FagsakTjeneste instans = lagFagsakTjeneste(fagsak);
         when(fagsakService.finnFagsakFraSaksnummer("123")).thenReturn(Optional.of(fagsak));
 
-        List<FagsakOppsummeringDto> resultat = instans.hentFagsaker(new FagsakSokDto(null, "123"));
+        List<FagsakOppsummeringDto> resultat = instans.hentFagsaker(new FagsakSokDto(null, "123", null));
         assertThat(resultat).hasSize(1).element(0).extracting(FagsakOppsummeringDto::getSaksnummer).isEqualTo(fagsak.getSaksnummer());
     }
 
@@ -181,7 +206,7 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
         Fagsak fagsak = lagFagsak();
         FagsakTjeneste instans = lagFagsakTjeneste(fagsak);
 
-        List<FagsakOppsummeringDto> resultat = instans.hentFagsaker(new FagsakSokDto(null, "NEI-123"));
+        List<FagsakOppsummeringDto> resultat = instans.hentFagsaker(new FagsakSokDto(null, "NEI-123", null));
         assertThat(resultat).isEmpty();
     }
 
@@ -201,10 +226,10 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
         fagsak.setEndretDato(endretDateInstant);
 
         FagsakTjeneste instans = lagFagsakTjeneste(fagsak);
-        List<FagsakOppsummeringDto> fagsakOppsummeringDtoer = instans.hentFagsaker(new FagsakSokDto(FNR, null));
-        assertThat(fagsakOppsummeringDtoer.size()).isEqualTo(1);
+        List<FagsakOppsummeringDto> fagsakOppsummeringDtoer = instans.hentFagsaker(new FagsakSokDto(FNR, null, null));
+        assertThat(fagsakOppsummeringDtoer).hasSize(1);
         FagsakOppsummeringDto fagsakOppsummeringDto = fagsakOppsummeringDtoer.get(0);
-        assertThat(fagsakOppsummeringDto.getBehandlingOversikter().size()).isEqualTo(3);
+        assertThat(fagsakOppsummeringDto.getBehandlingOversikter()).hasSize(3);
 
         assertThat(fagsakOppsummeringDto.getSaksnummer()).isEqualTo("MEL-13");
         assertThat(fagsakOppsummeringDto.getOpprettetDato()).isEqualTo(reqDateInstant);
@@ -294,6 +319,7 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
         opprettNySakFraOppgave = mock(OpprettNySakFraOppgave.class);
         henleggFagsakService = mock(HenleggFagsakService.class);
         PersondataFasade persondataFasade = mock(PersondataFasade.class);
+        registerOppslagService = mock(RegisterOppslagService.class);
         utpekingService = mock(UtpekingService.class);
         VideresendSoknadService videresendSoknadService = mock(VideresendSoknadService.class);
         SaksopplysningerService saksopplysningerService = mock(SaksopplysningerService.class);
@@ -306,8 +332,9 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
         when(persondataFasade.hentSammensattNavn(any())).thenReturn("Joe Moe");
         //noinspection ArraysAsListWithZeroOrOneArgument
         doReturn(Arrays.asList(fagsak)).when(fagsakService).hentFagsakerMedAktør(Aktoersroller.BRUKER, FNR);
+        doReturn(Arrays.asList(fagsak)).when(fagsakService).hentFagsakerFraOrgnr(ORGNR);
         return new FagsakTjeneste(fagsakService, aksesskontroll, behandlingsgrunnlagService, henleggFagsakService, opprettNySakFraOppgave,
-                                  persondataFasade, saksopplysningerService, utpekingService, videresendSoknadService);
+                                  persondataFasade, saksopplysningerService, utpekingService, videresendSoknadService, registerOppslagService);
     }
 
     private static FagsakOppsummeringDto lagFagsakOppsummeringDto(Behandling behandling) {

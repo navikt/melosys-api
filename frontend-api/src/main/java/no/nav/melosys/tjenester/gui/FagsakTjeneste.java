@@ -16,6 +16,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.persondata.PersondataFasade;
+import no.nav.melosys.service.registeropplysninger.RegisterOppslagService;
 import no.nav.melosys.service.sak.*;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.utpeking.UtpekingService;
@@ -53,12 +54,13 @@ public class FagsakTjeneste {
     private final SaksopplysningerService saksopplysningerService;
     private final UtpekingService utpekingService;
     private final VideresendSoknadService videresendSoknadService;
+    private final RegisterOppslagService registerOppslagService;
 
     public FagsakTjeneste(FagsakService fagsakService, Aksesskontroll aksesskontroll, BehandlingsgrunnlagService behandlingsgrunnlagService,
                           HenleggFagsakService henleggFagsakService,
                           OpprettNySakFraOppgave opprettNySakFraOppgave, PersondataFasade persondataFasade,
                           SaksopplysningerService saksopplysningerService, UtpekingService utpekingService,
-                          VideresendSoknadService videresendSoknadService) {
+                          VideresendSoknadService videresendSoknadService, RegisterOppslagService registerOppslagService) {
         this.fagsakService = fagsakService;
         this.aksesskontroll = aksesskontroll;
         this.behandlingsgrunnlagService = behandlingsgrunnlagService;
@@ -68,6 +70,7 @@ public class FagsakTjeneste {
         this.saksopplysningerService = saksopplysningerService;
         this.utpekingService = utpekingService;
         this.videresendSoknadService = videresendSoknadService;
+        this.registerOppslagService = registerOppslagService;
     }
 
     @GetMapping("{saksnr}")
@@ -93,8 +96,8 @@ public class FagsakTjeneste {
 
     @PostMapping("/sok")
     @ApiOperation(
-        value = "Søk etter saker på ident eller saksnummer",
-        notes = ("Saker knyttet til en bruker søkes via fødselsnummer eller d-nummer."),
+        value = "Søk etter saker på ident eller saksnummer eller orgnr",
+        notes = ("Saker knyttet til en bruker søkes via fødselsnummer eller d-nummer. Saker knyttet til en organisasjon søkes via organisasjonsnummer."),
         response = FagsakOppsummeringDto.class,
         responseContainer = "List")
     public List<FagsakOppsummeringDto> hentFagsaker(@RequestBody FagsakSokDto fagsakSokDto) {
@@ -108,6 +111,9 @@ public class FagsakTjeneste {
                 aksesskontroll.autoriserSakstilgang(fagsak.get());
                 return tilFagsakOppsummeringDtoer(Collections.singletonList(fagsak.get()));
             }
+        }
+        else if (StringUtils.isNotEmpty(fagsakSokDto.orgnr())) {
+            return tilFagsakOppsummeringDtoer(fagsakService.hentFagsakerFraOrgnr(fagsakSokDto.orgnr()));
         }
 
         return Collections.emptyList();
@@ -265,7 +271,14 @@ public class FagsakTjeneste {
         if (behandlinger.isEmpty()) {
             return UKJENT_SAMMENSATT_NAVN;
         }
-        final String fnr = persondataFasade.hentFolkeregisterident(behandlinger.get(0).getFagsak().hentAktørID());
-        return persondataFasade.hentSammensattNavn(fnr);
+        var aktørId = behandlinger.get(0).getFagsak().hentAktørID();
+        if (aktørId != null) {
+            return persondataFasade.hentSammensattNavn(persondataFasade.hentFolkeregisterident(aktørId));
+        }
+        var orgnr = behandlinger.get(0).getFagsak().hentUnikArbeidsgiver().getOrgnr();
+        if (orgnr != null) {
+            return registerOppslagService.hentOrganisasjon(orgnr).getNavn();
+        }
+        return UKJENT_SAMMENSATT_NAVN;
     }
 }

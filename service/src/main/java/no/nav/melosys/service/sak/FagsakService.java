@@ -85,6 +85,10 @@ public class FagsakService {
         return fagsakRepository.findByRolleAndAktør(rolleType, aktørID);
     }
 
+    public List<Fagsak> hentFagsakerFraOrgnr(String orgnr) {
+        return fagsakRepository.findByRolleAndOrgnr(Aktoersroller.ARBEIDSGIVER, orgnr); // TODO: Endre når kodeverket merges
+    }
+
     @Transactional
     public void lagre(Fagsak sak) {
         if (sak.getSaksnummer() == null) {
