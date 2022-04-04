@@ -6,6 +6,7 @@ import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.github.tomakehurst.wiremock.matching.StringValuePattern
 import no.nav.melosys.integrasjon.felles.EnvironmentHandler
+import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
 import no.nav.melosys.sikkerhet.context.SubjectHandler
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
@@ -71,7 +72,10 @@ abstract class ConsumerTestBase<T>(
     }
 
     @AfterAll
-    fun afterAll() = wireMockServer.stop()
+    fun afterAll() {
+        SpringSubjectHandler.set(NullSubjectHandler())
+        wireMockServer.stop()
+    }
 
     @BeforeEach
     fun setup() {
