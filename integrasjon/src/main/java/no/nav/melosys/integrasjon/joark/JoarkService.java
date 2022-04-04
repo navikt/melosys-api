@@ -97,7 +97,7 @@ public class JoarkService implements JoarkFasade {
         return safConsumer.hentDokumentoversikt(hentJournalposterTilknyttetSakRequest.saksnummer())
             .stream()
             .map(no.nav.melosys.integrasjon.joark.saf.dto.journalpost.Journalpost::tilDomene)
-            .collect(Collectors.toList());
+            .toList();
 
     }
 
@@ -124,8 +124,8 @@ public class JoarkService implements JoarkFasade {
 
         if (StringUtils.isNotEmpty(journalpostOppdatering.getBrukerID())) {
             request.medBruker(journalpostOppdatering.getBrukerID());
-        } else {
-            request.medBruker(journalpostOppdatering.getVirksomhetID(), Bruker.BrukerIdType.ORGNR);
+        } else if (StringUtils.isNotEmpty(journalpostOppdatering.getVirksomhetOrgnr())) {
+            request.medBruker(journalpostOppdatering.getVirksomhetOrgnr(), Bruker.BrukerIdType.ORGNR);
         }
 
         final String hovedDokumentID = journalpostOppdatering.getHovedDokumentID();

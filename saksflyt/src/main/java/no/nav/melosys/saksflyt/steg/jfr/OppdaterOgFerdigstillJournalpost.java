@@ -43,7 +43,7 @@ public class OppdaterOgFerdigstillJournalpost implements StegBehandler {
 
         var behandling = prosessinstans.getBehandling();
         String brukerID = prosessinstans.getData(BRUKER_ID);
-        String virksomhetID = prosessinstans.getData(VIRKSOMHET_ID);
+        String virksomhetOrgnr = prosessinstans.getData(VIRKSOMHET_ORGNR);
         String avsenderID = prosessinstans.getData(AVSENDER_ID);
         String avsenderNavn = prosessinstans.getData(AVSENDER_NAVN);
         String avsenderLand = prosessinstans.getData(AVSENDER_LAND);
@@ -64,7 +64,7 @@ public class OppdaterOgFerdigstillJournalpost implements StegBehandler {
         JournalpostOppdatering journalpostOppdatering = new JournalpostOppdatering.Builder()
             .medSaksnummer(behandling.getFagsak().getSaksnummer())
             .medBrukerID(brukerID)
-            .medVirksomhetID(virksomhetID)
+            .medVirksomhetOrgnr(virksomhetOrgnr)
             .medHovedDokumentID(hovedDokumentID)
             .medAvsenderID(avsenderID)
             .medAvsenderNavn(avsenderNavn)

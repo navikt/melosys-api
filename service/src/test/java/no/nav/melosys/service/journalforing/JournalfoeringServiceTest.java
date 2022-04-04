@@ -16,7 +16,6 @@ import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
-import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
@@ -284,7 +283,7 @@ class JournalfoeringServiceTest {
     @Test
     void opprettOgJournalfør_brukerIDOgVirksomhetIDMangler_kasterException() {
         opprettDto.setBrukerID(null);
-        opprettDto.setVirksomhetID(null);
+        opprettDto.setVirksomhetOrgnr(null);
         when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
 
         assertThatExceptionOfType(FunksjonellException.class)

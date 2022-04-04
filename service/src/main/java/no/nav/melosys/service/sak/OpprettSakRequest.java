@@ -12,7 +12,7 @@ import org.apache.commons.collections4.CollectionUtils;
 
 public class OpprettSakRequest {
     private final String aktørID;
-    private final String virksomhetID;
+    private final String virksomhetOrgnr;
     private final String utenlandskPersonId;
     private final String arbeidsgiver;
     private final Fullmektig fullmektig;
@@ -25,7 +25,7 @@ public class OpprettSakRequest {
 
     private OpprettSakRequest(OpprettSakRequest.Builder builder) {
         this.aktørID = builder.aktørID;
-        this.virksomhetID = builder.virksomhetID;
+        this.virksomhetOrgnr = builder.virksomhetOrgnr;
         this.utenlandskPersonId = builder.utenlandskPersonId;
         this.arbeidsgiver = builder.arbeidsgiver;
         this.fullmektig = builder.fullmektig;
@@ -41,8 +41,8 @@ public class OpprettSakRequest {
         return aktørID;
     }
 
-    public String getVirksomhetID() {
-        return virksomhetID;
+    public String getVirksomhetOrgnr() {
+        return virksomhetOrgnr;
     }
 
     public String getUtenlandskPersonId() {
@@ -83,7 +83,7 @@ public class OpprettSakRequest {
 
     public static class Builder {
         private String aktørID;
-        private String virksomhetID;
+        private String virksomhetOrgnr;
         private String utenlandskPersonId;
         private String arbeidsgiver;
         private Fullmektig fullmektig;
@@ -99,8 +99,8 @@ public class OpprettSakRequest {
             return this;
         }
 
-        public Builder medVirksomhetID(String virksomhetID) {
-            this.virksomhetID = virksomhetID;
+        public Builder medVirksomhetOrgnr(String virksomhetOrgnr) {
+            this.virksomhetOrgnr = virksomhetOrgnr;
             return this;
         }
 

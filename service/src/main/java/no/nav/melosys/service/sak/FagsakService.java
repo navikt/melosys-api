@@ -137,10 +137,10 @@ public class FagsakService {
             aktører.add(aktør);
         }
 
-        String virksomhetID = opprettSakRequest.getVirksomhetID();
-        if (virksomhetID != null) {
+        String virksomhetOrgnr = opprettSakRequest.getVirksomhetOrgnr();
+        if (virksomhetOrgnr != null) {
             Aktoer virksomhet = new Aktoer();
-            virksomhet.setOrgnr(virksomhetID);
+            virksomhet.setOrgnr(virksomhetOrgnr);
             virksomhet.setFagsak(fagsak);
             virksomhet.setRolle(Aktoersroller.ARBEIDSGIVER); // TODO: Endre når kodeverk er imlementert
             aktører.add(virksomhet);

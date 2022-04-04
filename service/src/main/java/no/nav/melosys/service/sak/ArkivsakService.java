@@ -22,7 +22,7 @@ public class ArkivsakService {
         this.sakConsumer = sakConsumer;
     }
 
-    public Long opprettSak(String saksnummer, Behandlingstema behandlingstema, String aktørId) {
+    public Long opprettSakForBruker(String saksnummer, Behandlingstema behandlingstema, String aktørId) {
         SakDto sakDto = new SakDto();
 
         sakDto.setTema(TemaFactory.fraBehandlingstema(behandlingstema).getKode());
@@ -34,7 +34,7 @@ public class ArkivsakService {
         return sakDto.getId();
     }
 
-    public Long opprettSakPåVirksomhet(String saksnummer, Behandlingstema behandlingstema, String orgnr) {
+    public Long opprettSakForVirksomhet(String saksnummer, Behandlingstema behandlingstema, String orgnr) {
         SakDto sakDto = new SakDto();
 
         sakDto.setTema(TemaFactory.fraBehandlingstema(behandlingstema).getKode());

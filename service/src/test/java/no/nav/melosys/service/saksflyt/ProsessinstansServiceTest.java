@@ -294,15 +294,15 @@ class ProsessinstansServiceTest {
     }
 
     @Test
-    void opprettProsessinstansJournalføring_virksomhetID_settesIProsessinstans() {
+    void opprettProsessinstansJournalføring_virksomhetOrgnr_settesIProsessinstans() {
         JournalfoeringOpprettDto journalfoeringDto = lagJournalfoeringOpprettDto();
 
         journalfoeringDto.setBrukerID(null);
-        journalfoeringDto.setVirksomhetID("virksomhetID");
+        journalfoeringDto.setVirksomhetOrgnr("orgnr");
 
         Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.ANMODNING_OM_UNNTAK, journalfoeringDto);
 
-        assertThat(prosessinstans.getData(ProsessDataKey.VIRKSOMHET_ID)).isEqualTo("virksomhetID");
+        assertThat(prosessinstans.getData(ProsessDataKey.VIRKSOMHET_ORGNR)).isEqualTo("orgnr");
     }
 
 

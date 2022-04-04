@@ -10,7 +10,7 @@ public abstract class JournalfoeringDto {
     private String journalpostID;
     private String oppgaveID;
     private String brukerID;
-    private String virksomhetID;
+    private String virksomhetOrgnr;
     private String avsenderID;
     private String avsenderNavn;
     private Avsendertyper avsenderType;
@@ -44,12 +44,12 @@ public abstract class JournalfoeringDto {
         this.brukerID = brukerID;
     }
 
-    public String getVirksomhetID() {
-        return virksomhetID;
+    public String getVirksomhetOrgnr() {
+        return virksomhetOrgnr;
     }
 
-    public void setVirksomhetID(String virksomhetID) {
-        this.virksomhetID = virksomhetID;
+    public void setVirksomhetOrgnr(String virksomhetOrgnr) {
+        this.virksomhetOrgnr = virksomhetOrgnr;
     }
 
     public String getAvsenderID() {

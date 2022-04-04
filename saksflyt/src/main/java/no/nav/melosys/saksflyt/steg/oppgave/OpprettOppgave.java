@@ -30,7 +30,7 @@ public class OpprettOppgave implements StegBehandler {
             prosessinstans.hentJournalpostID(),
             prosessinstans.getBehandling().getFagsak().hentAktørID(),
             prosessinstans.hentSaksbehandlerHvisTilordnes(),
-            prosessinstans.getData(ProsessDataKey.VIRKSOMHET_ID)
+            prosessinstans.getData(ProsessDataKey.VIRKSOMHET_ORGNR)
         );
     }
 }

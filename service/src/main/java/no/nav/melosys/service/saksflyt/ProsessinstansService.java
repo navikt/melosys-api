@@ -65,6 +65,10 @@ public class ProsessinstansService {
     }
 
     public Prosessinstans lagJournalføringProsessinstans(ProsessType type, JournalfoeringDto journalfoeringDto) {
+        if (journalfoeringDto.getBrukerID() == null && journalfoeringDto.getVirksomhetOrgnr() == null) {
+            throw new FunksjonellException("Forventet at dokumentet journalføres på enten bruker eller virksomhet.");
+        }
+
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(type);
 
@@ -73,11 +77,8 @@ public class ProsessinstansService {
         prosessinstans.setData(ProsessDataKey.OPPGAVE_ID, journalfoeringDto.getOppgaveID());
         if (journalfoeringDto.getBrukerID() != null) {
             prosessinstans.setData(ProsessDataKey.BRUKER_ID, journalfoeringDto.getBrukerID());
-        } else if (journalfoeringDto.getVirksomhetID() != null) {
-            prosessinstans.setData(ProsessDataKey.VIRKSOMHET_ID, journalfoeringDto.getVirksomhetID());
-        }
-        else {
-            throw new FunksjonellException("Forventet at dokumentet journalføres på enten bruker eller virksomhet.");
+        } else if (journalfoeringDto.getVirksomhetOrgnr() != null) {
+            prosessinstans.setData(ProsessDataKey.VIRKSOMHET_ORGNR, journalfoeringDto.getVirksomhetOrgnr());
         }
 
         prosessinstans.setData(ProsessDataKey.AVSENDER_TYPE, journalfoeringDto.getAvsenderType());

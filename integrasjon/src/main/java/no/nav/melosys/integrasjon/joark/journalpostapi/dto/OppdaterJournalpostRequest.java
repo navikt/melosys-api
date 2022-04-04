@@ -64,7 +64,7 @@ public class OppdaterJournalpostRequest {
 
         public Builder medBruker(String fnr) {
             if (StringUtils.isNotEmpty(fnr)) {
-                this.bruker = Bruker.builder()
+                bruker = Bruker.builder()
                     .id(fnr).idType(Bruker.BrukerIdType.FNR)
                     .build();
             }

@@ -51,9 +51,9 @@ public class OpprettArkivsak implements StegBehandler {
 
         Long gsakSakId;
         if (StringUtils.isNotEmpty(aktørId)) {
-            gsakSakId = arkivsakService.opprettSak(saksnummer, behandlingstema, aktørId);
+            gsakSakId = arkivsakService.opprettSakForBruker(saksnummer, behandlingstema, aktørId);
         } else {
-            gsakSakId = arkivsakService.opprettSakPåVirksomhet(saksnummer, behandlingstema, prosessinstans.getData(ProsessDataKey.VIRKSOMHET_ID));
+            gsakSakId = arkivsakService.opprettSakForVirksomhet(saksnummer, behandlingstema, prosessinstans.getData(ProsessDataKey.VIRKSOMHET_ORGNR));
         }
         fagsak.setGsakSaksnummer(gsakSakId);
         fagsakService.lagre(fagsak);

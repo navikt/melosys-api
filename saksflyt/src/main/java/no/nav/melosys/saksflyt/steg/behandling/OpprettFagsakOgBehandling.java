@@ -2,6 +2,7 @@ package no.nav.melosys.saksflyt.steg.behandling;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
@@ -46,8 +47,8 @@ public class OpprettFagsakOgBehandling implements StegBehandler {
 
     @Override
     public void utfør(Prosessinstans prosessinstans) {
-        String aktørID = hentAktørID(prosessinstans);
-        String virksomhetID = prosessinstans.getData(VIRKSOMHET_ID);
+        String aktørID = finnAktørID(prosessinstans).orElse(null);
+        String virksomhetOrgnr = prosessinstans.getData(VIRKSOMHET_ORGNR);
         String arbeidsgiver = prosessinstans.getData(ARBEIDSGIVER);
         String representant = prosessinstans.getData(REPRESENTANT);
         String representantKontakperson = prosessinstans.getData(REPRESENTANT_KONTAKTPERSON);
@@ -60,7 +61,7 @@ public class OpprettFagsakOgBehandling implements StegBehandler {
 
         OpprettSakRequest opprettSakRequest = new OpprettSakRequest.Builder()
             .medAktørID(aktørID)
-            .medVirksomhetID(virksomhetID)
+            .medVirksomhetOrgnr(virksomhetOrgnr)
             .medArbeidsgiver(arbeidsgiver)
             .medFullmektig(representant != null ? new Fullmektig(representant, representantRepresenterer) : null)
             .medKontaktopplysninger(lagKontaktopplysningerForRepresentant(representant, representantKontakperson))
@@ -76,15 +77,18 @@ public class OpprettFagsakOgBehandling implements StegBehandler {
         log.info("Opprettet fagsak {} med behandling {}", fagsak.getSaksnummer(), behandling.getId());
     }
 
-    private String hentAktørID(Prosessinstans prosessinstans) {
+    private Optional<String> finnAktørID(Prosessinstans prosessinstans) {
         String aktørID = prosessinstans.getData(AKTØR_ID);
         if (StringUtils.isNotEmpty(aktørID)) {
-            return aktørID;
+            return Optional.of(aktørID);
         }
-        if (StringUtils.isNotEmpty(prosessinstans.getData(BRUKER_ID))) {
-            return persondataFasade.hentAktørIdForIdent(prosessinstans.getData(BRUKER_ID));
+
+        String brukerID = prosessinstans.getData(BRUKER_ID);
+        if (StringUtils.isNotEmpty(brukerID)) {
+            return Optional.of(persondataFasade.hentAktørIdForIdent(brukerID));
         }
-        return null;
+
+        return Optional.empty();
     }
 
     private List<Kontaktopplysning> lagKontaktopplysningerForRepresentant(String representant,

@@ -244,7 +244,7 @@ public class JournalfoeringService {
         if (journalfoeringDto.getAvsenderType() == null) {
             throw new FunksjonellException("AvsenderType mangler");
         }
-        if (StringUtils.isEmpty(journalfoeringDto.getBrukerID()) && StringUtils.isEmpty(journalfoeringDto.getVirksomhetID())) {
+        if (StringUtils.isEmpty(journalfoeringDto.getBrukerID()) && StringUtils.isEmpty(journalfoeringDto.getVirksomhetOrgnr())) {
             throw new FunksjonellException("Både BrukerID og VirksomhetID mangler. Krever én");
         }
         if (StringUtils.isEmpty(journalfoeringDto.getHoveddokument().getDokumentID())) {
