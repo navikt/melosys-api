@@ -5,10 +5,12 @@ import no.nav.melosys.integrasjon.trygdeavgift.dto.TrygdeavgiftDto;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
 @Component
+@Retryable
 public class TrygdeavgiftConsumer {
 
     private final WebClient webClient;

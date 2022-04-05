@@ -4,7 +4,9 @@ import no.nav.tjeneste.virksomhet.organisasjon.v4.binding.HentOrganisasjonOrgani
 import no.nav.tjeneste.virksomhet.organisasjon.v4.binding.HentOrganisasjonUgyldigInput;
 import no.nav.tjeneste.virksomhet.organisasjon.v4.meldinger.HentOrganisasjonRequest;
 import no.nav.tjeneste.virksomhet.organisasjon.v4.meldinger.HentOrganisasjonResponse;
+import org.springframework.retry.annotation.Retryable;
 
+@Retryable
 public interface OrganisasjonConsumer {
     HentOrganisasjonResponse hentOrganisasjon(HentOrganisasjonRequest request) throws HentOrganisasjonOrganisasjonIkkeFunnet, HentOrganisasjonUgyldigInput;
 }
