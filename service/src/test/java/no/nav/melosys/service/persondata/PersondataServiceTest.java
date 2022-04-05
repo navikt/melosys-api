@@ -3,7 +3,6 @@ package no.nav.melosys.service.persondata;
 import java.time.LocalDate;
 import java.util.*;
 
-import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.KjoennsType;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
@@ -52,14 +51,13 @@ class PersondataServiceTest {
     private SaksopplysningerService saksopplysningerService;
     @Mock
     private TpsService tpsService;
-    private final FakeUnleash fakeUnleash = new FakeUnleash();
 
     private PersondataService persondataService;
 
     @BeforeEach
     public void setup() {
         persondataService = new PersondataService(behandlingService, kodeverkService, pdlConsumer,
-                                                  saksopplysningerService, tpsService, fakeUnleash);
+                                                  saksopplysningerService, tpsService);
     }
 
     @Test
@@ -289,7 +287,6 @@ class PersondataServiceTest {
 
     @Test
     void harStrengtFortroligAdresse() {
-        fakeUnleash.enable("melosys.pdl.aktiv");
         when(pdlConsumer.hentAdressebeskyttelser(anyString())).thenReturn(
             List.of(new Adressebeskyttelse(AdressebeskyttelseGradering.UGRADERT, metadata()),
                 new Adressebeskyttelse(AdressebeskyttelseGradering.STRENGT_FORTROLIG, metadata())));

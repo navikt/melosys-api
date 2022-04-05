@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.domain.person.PersonMedHistorikk;
@@ -39,7 +38,6 @@ public class PersondataService implements PersondataFasade {
     private final PDLConsumer pdlConsumer;
     private final SaksopplysningerService saksopplysningerService;
     private final TpsService tpsService;
-    private final Unleash unleash;
 
     public static final String PDL_PERSOPL_VERSJON = "1.0";
     public static final String PDL_PERS_SAKS_VERSJON = "1.0";
@@ -48,14 +46,12 @@ public class PersondataService implements PersondataFasade {
                              KodeverkService kodeverkService,
                              @Qualifier("saksbehandler") PDLConsumer pdlConsumer,
                              SaksopplysningerService saksopplysningerService,
-                             TpsService tpsService,
-                             Unleash unleash) {
+                             TpsService tpsService) {
         this.behandlingService = behandlingService;
         this.kodeverkService = kodeverkService;
         this.pdlConsumer = pdlConsumer;
         this.saksopplysningerService = saksopplysningerService;
         this.tpsService = tpsService;
-        this.unleash = unleash;
     }
 
     @Override
@@ -215,9 +211,6 @@ public class PersondataService implements PersondataFasade {
 
     @Override
     public boolean harStrengtFortroligAdresse(String ident) {
-        if (unleash.isEnabled("melosys.pdl.aktiv")) {
-            return pdlConsumer.hentAdressebeskyttelser(ident).stream().anyMatch(Adressebeskyttelse::erStrengtFortrolig);
-        }
-        return tpsService.harStrengtFortroligAdresse(ident);
+        return pdlConsumer.hentAdressebeskyttelser(ident).stream().anyMatch(Adressebeskyttelse::erStrengtFortrolig);
     }
 }
