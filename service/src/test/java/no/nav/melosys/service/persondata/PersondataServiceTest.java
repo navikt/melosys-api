@@ -18,7 +18,6 @@ import no.nav.melosys.integrasjon.pdl.dto.identer.Ident;
 import no.nav.melosys.integrasjon.pdl.dto.identer.Identliste;
 import no.nav.melosys.integrasjon.pdl.dto.person.Adressebeskyttelse;
 import no.nav.melosys.integrasjon.pdl.dto.person.AdressebeskyttelseGradering;
-import no.nav.melosys.integrasjon.tps.TpsService;
 import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.DokgenTestData;
@@ -49,15 +48,13 @@ class PersondataServiceTest {
     private PDLConsumer pdlConsumer;
     @Mock
     private SaksopplysningerService saksopplysningerService;
-    @Mock
-    private TpsService tpsService;
 
     private PersondataService persondataService;
 
     @BeforeEach
     public void setup() {
         persondataService = new PersondataService(behandlingService, kodeverkService, pdlConsumer,
-                                                  saksopplysningerService, tpsService);
+                                                  saksopplysningerService);
     }
 
     @Test

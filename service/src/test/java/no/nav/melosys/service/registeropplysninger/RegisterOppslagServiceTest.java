@@ -27,7 +27,7 @@ class RegisterOppslagServiceTest {
 
     @BeforeEach
     void setup() {
-        registerOppslagService = new RegisterOppslagService(eregFasade, persondataFasade);
+        registerOppslagService = new RegisterOppslagService(eregFasade);
     }
 
     @Test
