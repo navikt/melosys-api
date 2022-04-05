@@ -10,8 +10,8 @@ import no.nav.melosys.tjenester.gui.graphql.dto.FamiliemedlemDto;
 
 import static java.time.temporal.ChronoUnit.YEARS;
 
-public final class FamilemedlemTilDtoKonverter {
-    private FamilemedlemTilDtoKonverter() {
+public final class FamiliemedlemTilDtoKonverter {
+    private FamiliemedlemTilDtoKonverter() {
     }
 
     public static FamiliemedlemDto tilDto(Familiemedlem familiemedlem) {
