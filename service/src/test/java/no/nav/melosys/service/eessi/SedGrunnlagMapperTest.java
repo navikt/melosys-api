@@ -25,13 +25,6 @@ class SedGrunnlagMapperTest {
             .isNotNull()
             .isInstanceOf(SedGrunnlag.class);
 
-        assertThat(sedGrunnlag.bosted.oppgittAdresse)
-            .extracting(
-                strukturertAdresse -> strukturertAdresse.getLandkode(),
-                strukturertAdresse -> strukturertAdresse.getPostnummer(),
-                strukturertAdresse -> strukturertAdresse.getPoststed())
-            .containsExactly("BE", "Testpostkode", "Testby");
-
         assertThat(sedGrunnlag.personOpplysninger.utenlandskIdent)
             .extracting(
                 utenlandskIdent -> utenlandskIdent.ident,
@@ -69,13 +62,6 @@ class SedGrunnlagMapperTest {
         assertThat(sedGrunnlag)
             .isNotNull()
             .isInstanceOf(SedGrunnlag.class);
-
-        assertThat(sedGrunnlag.bosted.oppgittAdresse)
-            .extracting(
-                strukturertAdresse -> strukturertAdresse.getLandkode(),
-                strukturertAdresse -> strukturertAdresse.getPostnummer(),
-                strukturertAdresse -> strukturertAdresse.getPoststed())
-            .containsExactly("BE", "Testpostkode", "Testby");
 
         assertThat(sedGrunnlag.personOpplysninger.utenlandskIdent)
             .extracting(

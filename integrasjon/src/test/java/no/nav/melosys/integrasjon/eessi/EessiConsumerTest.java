@@ -211,4 +211,14 @@ class EessiConsumerTest {
         server.expect(requestTo("/buc/" + rinaSaksnummer + "/lukk")).andRespond(withSuccess());
         eessiConsumer.lukkBuc(rinaSaksnummer);
     }
+
+    @Test
+    void hentMuligeAksjoner_listeMedAksjoner_ok() {
+        server.expect(requestTo("/buc/33/aksjoner"))
+            .andRespond(withSuccess("[\"SedId SedType Send\", \"SedId SedType Create\"]", MediaType.APPLICATION_JSON));
+        List<String> muligeAksjoner = eessiConsumer.hentMuligeAksjoner("33");
+        assertThat(muligeAksjoner)
+            .hasSize(2)
+            .contains("SedId SedType Send", "SedId SedType Create");
+    }
 }

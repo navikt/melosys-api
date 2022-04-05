@@ -1,11 +1,13 @@
 package no.nav.melosys.service.eessi;
 
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import no.nav.melosys.domain.behandlingsgrunnlag.SedGrunnlag;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.*;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.ForetakUtland;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.OpplysningerOmBrukeren;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.UtenlandskIdent;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.FysiskArbeidssted;
 import no.nav.melosys.domain.eessi.sed.*;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Overgangsregelbestemmelser;
@@ -22,13 +24,12 @@ public class SedGrunnlagMapper {
         SedGrunnlag sedGrunnlag = new SedGrunnlag();
 
         sedGrunnlag.personOpplysninger = tilPersonopplysninger(sedGrunnlagDto.getUtenlandskIdent());
-        sedGrunnlag.bosted = tilBosted(sedGrunnlagDto.getBostedsadresse());
         sedGrunnlag.arbeidPaaLand.fysiskeArbeidssteder = tilFysiskeArbeidssteder(sedGrunnlagDto.getArbeidssteder());
         sedGrunnlag.foretakUtland = tilForetakUtland(sedGrunnlagDto.getArbeidsgivendeVirksomheter(), sedGrunnlagDto.getSelvstendigeVirksomheter());
         sedGrunnlag.periode = tilPeriode(sedGrunnlagDto.getLovvalgsperioder());
         sedGrunnlag.ytterligereInformasjon = sedGrunnlagDto.getYtterligereInformasjon();
         if(!sedGrunnlagDto.erA001()) {
-            sedGrunnlag.soeknadsland.landkoder = sedGrunnlagDto.getLovvalgsperioder().stream().map(Lovvalgsperiode::getLovvalgsland).collect(Collectors.toList());
+            sedGrunnlag.soeknadsland.landkoder = sedGrunnlagDto.getLovvalgsperioder().stream().map(Lovvalgsperiode::getLovvalgsland).toList();
         }
 
         if (sedGrunnlagDto.erA003()) {
@@ -38,7 +39,7 @@ public class SedGrunnlagMapper {
                 .getNorskeArbeidsgivendeVirksomheter()
                 .stream()
                 .map(Virksomhet::hentOrgnrEllerNavn)
-                .collect(Collectors.toList());
+                .toList();
         }
 
         return sedGrunnlag;
@@ -48,7 +49,7 @@ public class SedGrunnlagMapper {
         return overgangsregelbestemmelser.stream()
             .map(Bestemmelse::tilMelosysBestemmelse)
             .map(Overgangsregelbestemmelser.class::cast)
-            .collect(Collectors.toList());
+            .toList();
     }
 
     private static Periode tilPeriode(List<Lovvalgsperiode> lovvalgsperioder) {
@@ -70,23 +71,17 @@ public class SedGrunnlagMapper {
     }
 
     private static List<UtenlandskIdent> tilUtenlandskIdent(List<Ident> utenlandskIdent) {
-        return utenlandskIdent.stream().map(Ident::tilUtenlandskIdent).collect(Collectors.toList());
-    }
-
-    private static Bosted tilBosted(Adresse bostedsadresse) {
-        Bosted bosted = new Bosted();
-        bosted.oppgittAdresse = bostedsadresse.tilStrukturertAdresse();
-        return bosted;
+        return utenlandskIdent.stream().map(Ident::tilUtenlandskIdent).toList();
     }
 
     private static List<FysiskArbeidssted> tilFysiskeArbeidssteder(List<no.nav.melosys.domain.eessi.sed.Arbeidssted> arbeidssteder) {
-        return arbeidssteder.stream().map(no.nav.melosys.domain.eessi.sed.Arbeidssted::tilFysiskArbeidssted).collect(Collectors.toList());
+        return arbeidssteder.stream().map(no.nav.melosys.domain.eessi.sed.Arbeidssted::tilFysiskArbeidssted).toList();
     }
 
     private static List<ForetakUtland> tilForetakUtland(List<Virksomhet> arbeidsgivendeVirksomheter, List<Virksomhet> selvstendigeVirksomheter) {
         return Stream.concat(
             arbeidsgivendeVirksomheter.stream().map(Virksomhet::tilForetakUtland),
             selvstendigeVirksomheter.stream().map(Virksomhet::tilSelvstendigForetakUtland)
-        ).collect(Collectors.toList());
+        ).toList();
     }
 }

@@ -16,6 +16,7 @@ type Saksopplysninger {
 type Personopplysninger {
     bostedsadresser: [Bostedsadresse!]!
     familiemedlemmer: [Familiemedlem!]!
+    foedsel: Foedsel!
     folkeregisteridentifikator: String
     folkeregisterpersonstatuser: [Folkeregisterpersonstatus!]!
     kjoenn: KjoennType!
@@ -53,6 +54,13 @@ enum Familierelasjonsrolle {
     FAR,
     MOR,
     RELATERT_VED_SIVILSTAND
+}
+
+type Foedsel {
+    foedselsaar: Int!
+    foedselsdato: Date
+    foedeland: String
+    foedested: String
 }
 
 type Folkeregisterpersonstatus {

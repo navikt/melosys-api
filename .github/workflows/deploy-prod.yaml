@@ -1,0 +1,38 @@
+name: deploy-prod
+on:
+  release:
+    types: [published]
+jobs:
+  deploy-prod:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: get release tag
+        run: |
+          APPLICATION=$(echo $GITHUB_REPOSITORY | cut -d "/" -f 2)
+          IMAGE=docker.pkg.github.com/$GITHUB_REPOSITORY/$APPLICATION:$GITHUB_SHA
+          echo "IMAGE=${IMAGE}" >> $GITHUB_ENV
+          echo $IMAGE
+      - name: Deploy
+        uses: nais/deploy/actions/deploy@v1
+        env:
+          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+          CLUSTER: prod-fss
+          RESOURCE: nais.yml
+          VAR: APP_NAME=melosys,VAULT_CLUSTER=prod,URL=melosys-api.intern.nav.no,KAFKA_POOL=nav-prod,IMAGE=${{ env.IMAGE }}
+      - name: post-production
+        uses: navikt/digihot-deploy/actions/post-production@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Get commit message
+        run: echo "COMMIT_MSG=$(git log --format=%s -n 1)" >> $GITHUB_ENV
+      - name: Slack Notification
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_COLOR: "${{ job.status == 'success' && 'good' || 'danger' }}"
+          SLACK_USERNAME: Github Actions
+          SLACK_ICON: https://github.com/github.png?size=48
+          SLACK_TITLE: "melosys-api ${{ job.status == 'success' && 'ble deployet' || 'kunne ikke deployes' }} til prod"
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_MESSAGE: ${{ env.COMMIT_MSG }}
+

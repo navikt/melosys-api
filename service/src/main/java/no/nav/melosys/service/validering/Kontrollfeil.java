@@ -34,4 +34,9 @@ public class Kontrollfeil {
         dto.setFelter(felter);
         return dto;
     }
+
+    @Override
+    public String toString() {
+        return String.format("%s %s", kode, felter);
+    }
 }
