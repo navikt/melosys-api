@@ -5,7 +5,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.domain.dokument.DokumentView;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
-import no.nav.melosys.service.registeropplysninger.RegisterOppslagService;
+import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService;
 import no.nav.melosys.tjenester.gui.dto.OrganisasjonDto;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.context.annotation.Scope;
@@ -22,9 +22,9 @@ import org.springframework.web.context.WebApplicationContext;
 @Api(tags = {"organisasjoner"})
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class OrganisasjonTjeneste {
-    private final RegisterOppslagService registerOppslag;
+    private final OrganisasjonOppslagService registerOppslag;
 
-    public OrganisasjonTjeneste(RegisterOppslagService registerOppslag) {
+    public OrganisasjonTjeneste(OrganisasjonOppslagService registerOppslag) {
         this.registerOppslag = registerOppslag;
     }
 

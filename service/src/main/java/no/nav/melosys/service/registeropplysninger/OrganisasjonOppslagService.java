@@ -12,10 +12,10 @@ import org.springframework.stereotype.Service;
 
 @Primary
 @Service
-public class RegisterOppslagService {
+public class OrganisasjonOppslagService {
     private final EregFasade eregFasade;
 
-    public RegisterOppslagService(EregFasade eregFasade) {
+    public OrganisasjonOppslagService(EregFasade eregFasade) {
         this.eregFasade = eregFasade;
     }
 
