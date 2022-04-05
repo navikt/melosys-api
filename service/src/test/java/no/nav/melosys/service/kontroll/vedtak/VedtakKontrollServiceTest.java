@@ -79,7 +79,7 @@ class VedtakKontrollServiceTest {
         final FakeUnleash unleash = new FakeUnleash();
         unleash.enable("melosys.pdl.aktiv");
         vedtakKontrollService = new VedtakKontrollService(behandlingService, behandlingsresultatService, lovvalgsperiodeService, persondataFasade,
-            registeropplysningerService, unleash);
+            registeropplysningerService);
     }
 
     @Test
