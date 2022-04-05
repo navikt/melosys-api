@@ -4,7 +4,6 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.List;
 
-import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.brev.FastMottakerMedOrgnr;
@@ -45,7 +44,7 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySet;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
-import static no.nav.melosys.service.persondata.PersonopplysningerObjectFactory.*;
+import static no.nav.melosys.service.persondata.PersonopplysningerObjectFactory.lagPersonopplysningerUtenOppholdsadresseOgKontaktadresse;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
@@ -70,7 +69,6 @@ class BrevbestillingServiceTest {
     private DokumentNavnService mockDokumentNavnService;
 
     private final Behandling behandling = lagBehandling();
-    private final FakeUnleash fakeUnleash = new FakeUnleash();
 
     private BrevbestillingService brevbestillingService;
 
@@ -460,7 +458,6 @@ class BrevbestillingServiceTest {
 
     @Test
     void hentBrevAdresseTilMottakere_returnererAdresseFelterSomNull_nårGjeldendePostadresseErNull() {
-        fakeUnleash.enable("melosys.pdl.aktiv");
         when(mockBehandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
         when(mockBrevmottakerService.avklarMottakere(any(), eq(Mottaker.av(Aktoersroller.BRUKER)), any(), eq(false), eq(false)))
             .thenReturn(List.of(lagAktoer(Aktoersroller.BRUKER, null)));
@@ -477,7 +474,6 @@ class BrevbestillingServiceTest {
 
     @Test
     void hentBrevAdresseTilMottakere_returnererAdresseMedKorrektAdresselinjer_nårCoAdresseErTomStreng() {
-        fakeUnleash.enable("melosys.pdl.aktiv");
         when(mockBehandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
         when(mockBrevmottakerService.avklarMottakere(any(), eq(Mottaker.av(Aktoersroller.BRUKER)), any(), eq(false), eq(false)))
             .thenReturn(List.of(lagAktoer(Aktoersroller.BRUKER, null)));
