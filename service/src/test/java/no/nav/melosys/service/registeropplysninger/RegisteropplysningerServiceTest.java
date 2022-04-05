@@ -5,8 +5,10 @@ import java.time.YearMonth;
 import java.util.List;
 import java.util.Optional;
 
-import no.finn.unleash.FakeUnleash;
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Saksopplysning;
+import no.nav.melosys.domain.SaksopplysningKildesystem;
+import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
@@ -61,14 +63,12 @@ class RegisteropplysningerServiceTest {
     @Mock
     private RegisteropplysningerPeriodeFactory registeropplysningerPeriodeFactory;
 
-    private final FakeUnleash unleash = new FakeUnleash();
-
     private RegisteropplysningerService registeropplysningerService;
 
     @BeforeEach
     public void setUp() throws Exception {
         registeropplysningerService = new RegisteropplysningerService(persondataFasade, medlPeriodeService, eregFasade, aaregFasade, behandlingService,
-            sobService, inntektService, utbetaldataService, saksopplysningerService, registeropplysningerPeriodeFactory, unleash);
+            sobService, inntektService, utbetaldataService, saksopplysningerService, registeropplysningerPeriodeFactory);
         when(persondataFasade.hentAktørIdForIdent(anyString())).thenReturn(AKTØR_ID);
 
         when(aaregFasade.finnArbeidsforholdPrArbeidstaker(anyString(), anyLocalDate(), anyLocalDate())).thenReturn(lagSaksopplysning(SaksopplysningType.ARBFORH));
@@ -99,8 +99,6 @@ class RegisteropplysningerServiceTest {
                     .inntektsopplysninger()
                     .medlemskapsopplysninger()
                     .organisasjonsopplysninger()
-                    .personhistorikkopplysninger()
-                    .personopplysninger()
                     .sakOgBehandlingopplysninger()
                     .utbetalingsopplysninger()
                     .build())
@@ -116,8 +114,6 @@ class RegisteropplysningerServiceTest {
         verify(inntektService).hentInntektListe(anyString(), anyYearMonth(), anyYearMonth());
         verify(medlPeriodeService).hentPeriodeListe(anyString(), anyLocalDate(), anyLocalDate());
         verify(eregFasade).hentOrganisasjon(anyString());
-        verify(persondataFasade).hentPersonhistorikk(anyString(), anyLocalDate());
-        verify(persondataFasade).hentPersonFraTps(anyString(), eq(Informasjonsbehov.STANDARD));
         verify(sobService).finnSakOgBehandlingskjedeListe(AKTØR_ID);
         verify(utbetaldataService).hentUtbetalingerBarnetrygd(anyString(), anyLocalDate(), anyLocalDate());
     }
@@ -157,9 +153,7 @@ class RegisteropplysningerServiceTest {
         arbeidsforholdFørOrg.verify(eregFasade).hentOrganisasjon(anyString());
 
         verify(medlPeriodeService).hentPeriodeListe(anyString(), anyLocalDate(), anyLocalDate());
-        verify(persondataFasade).hentPersonhistorikk(anyString(), anyLocalDate());
-        verify(persondataFasade).hentPersonFraTps(anyString(), eq(Informasjonsbehov.STANDARD));
-        verify(sobService).finnSakOgBehandlingskjedeListe(eq(AKTØR_ID));
+        verify(sobService).finnSakOgBehandlingskjedeListe(AKTØR_ID);
         verify(utbetaldataService).hentUtbetalingerBarnetrygd(anyString(), anyLocalDate(), anyLocalDate());
     }
 
@@ -174,22 +168,6 @@ class RegisteropplysningerServiceTest {
             .build());
 
         verify(aaregFasade).finnArbeidsforholdPrArbeidstaker(eq(FNR), anyLocalDate(), anyLocalDate());
-        verify(behandlingService).lagre(any(Behandling.class));
-    }
-
-
-    @Test
-    void hentPersonopplysninger() {
-        Behandling behandling = new Behandling();
-        Fagsak fagsak = new Fagsak();
-        fagsak.setSaksnummer("123");
-        behandling.setFagsak(fagsak);
-
-        registeropplysningerService.hentOgLagreOpplysninger(registeropplysningerRequest()
-            .saksopplysningTyper(saksopplysningstyper().personopplysninger().build())
-            .build());
-
-        verify(persondataFasade).hentPersonFraTps(FNR, Informasjonsbehov.STANDARD);
         verify(behandlingService).lagre(any(Behandling.class));
     }
 
@@ -268,24 +246,11 @@ class RegisteropplysningerServiceTest {
         verify(aaregFasade, never()).finnArbeidsforholdPrArbeidstaker(anyString(), any(), any());
         verify(inntektService, never()).hentInntektListe(anyString(), any(), any());
         verify(medlPeriodeService, never()).hentPeriodeListe(anyString(), any(), any());
-        verify(persondataFasade, never()).hentPersonhistorikk(anyString(), any());
         verify(utbetaldataService, never()).hentUtbetalingerBarnetrygd(anyString(), any(), any());
 
         verify(eregFasade).hentOrganisasjon(anyString());
-        verify(persondataFasade).hentPersonFraTps(anyString(), eq(Informasjonsbehov.STANDARD));
-        verify(sobService).finnSakOgBehandlingskjedeListe(eq(AKTØR_ID));
+        verify(sobService).finnSakOgBehandlingskjedeListe(AKTØR_ID);
         verify(behandlingService).lagre(any(Behandling.class));
-    }
-
-    @Test
-    void hentOgLagreOpplysninger_kunBehandlingID_forventHentBehandling() {
-        registeropplysningerService.hentOgLagreOpplysninger(RegisteropplysningerRequest.builder()
-            .fnr(FNR)
-            .behandlingID(1L)
-            .saksopplysningTyper(saksopplysningstyper().personopplysninger().build())
-            .build());
-
-        verify(behandlingService).hentBehandling(eq(1L));
     }
 
     private Behandling hentBehandling() {

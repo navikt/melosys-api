@@ -106,7 +106,6 @@ public final class ProsessflytDefinisjon {
                 OPPRETT_SØKNAD,
                 OPPRETT_ARKIVSAK,
                 SOB_BEHANDLING_OPPRETTET,
-                HENT_REGISTEROPPLYSNINGER,
                 GJENBRUK_OPPGAVE
             )
         );
