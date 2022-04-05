@@ -9,9 +9,6 @@ public final class FoedselTilDtoKonverter {
     }
 
     public static FoedselDto tilDto(Foedsel foedsel) {
-        if (foedsel == null) {
-            return null;
-        }
         return new FoedselDto(
             foedsel.fødselsår(),
             foedsel.fødselsdato(),

@@ -266,7 +266,7 @@ enum AdressebeskyttelseGradering {
 }
 
 type Foedsel {
-    foedselsaar: Int!
+    foedselsaar: Int
     foedselsdato: Date
     foedeland: String
     foedested: String
