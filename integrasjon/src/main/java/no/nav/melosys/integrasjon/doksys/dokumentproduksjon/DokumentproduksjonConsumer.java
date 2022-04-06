@@ -5,7 +5,9 @@ import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.meldinger.ProduserDokume
 import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.meldinger.ProduserDokumentutkastResponse;
 import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.meldinger.ProduserIkkeredigerbartDokumentRequest;
 import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.meldinger.ProduserIkkeredigerbartDokumentResponse;
+import org.springframework.retry.annotation.Retryable;
 
+@Retryable
 public interface DokumentproduksjonConsumer {
 
     ProduserDokumentutkastResponse produserDokumentutkast(ProduserDokumentutkastRequest request) throws ProduserDokumentutkastBrevdataValideringFeilet, ProduserDokumentutkastInputValideringFeilet;

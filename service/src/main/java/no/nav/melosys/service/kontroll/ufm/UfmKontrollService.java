@@ -4,7 +4,6 @@ import java.util.*;
 import java.util.function.Function;
 
 import io.micrometer.core.instrument.Metrics;
-import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
@@ -26,12 +25,10 @@ public class UfmKontrollService {
 
     private final KontrollFactory kontrollFactory;
     private final PersondataFasade persondataFasade;
-    private final Unleash unleash;
 
-    public UfmKontrollService(KontrollFactory kontrollFactory, PersondataFasade persondataFasade, Unleash unleash) {
+    public UfmKontrollService(KontrollFactory kontrollFactory, PersondataFasade persondataFasade) {
         this.kontrollFactory = kontrollFactory;
         this.persondataFasade = persondataFasade;
-        this.unleash = unleash;
     }
 
     static {
@@ -55,10 +52,7 @@ public class UfmKontrollService {
     }
 
     private Persondata hentPersondata(Behandling behandling) {
-        if (unleash.isEnabled("melosys.pdl.aktiv")) {
-            return persondataFasade.hentPerson(behandling.getFagsak().hentAktørID());
-        }
-        return behandling.hentPersonDokument();
+        return persondataFasade.hentPerson(behandling.getFagsak().hentAktørID());
     }
 
     private List<Kontroll_begrunnelser> utførKontroller(UfmKontrollData kontrollData,

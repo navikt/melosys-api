@@ -175,7 +175,7 @@ class BrevDataByggerA001Test {
     }
 
     private BrevDataGrunnlag lagBrevDataGrunnlag(DoksysBrevbestilling brevbestilling, Persondata persondata) {
-        RegisterOppslagSystemService registerOppslagService = new RegisterOppslagSystemService(ereg, persondataFasade);
+        RegisterOppslagSystemService registerOppslagService = new RegisterOppslagSystemService(ereg);
         AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService, mock(BehandlingService.class), mock(KodeverkService.class));
         return new BrevDataGrunnlag(brevbestilling, mock(KodeverkService.class), avklarteVirksomheterService, avklartefaktaService, persondata);
     }

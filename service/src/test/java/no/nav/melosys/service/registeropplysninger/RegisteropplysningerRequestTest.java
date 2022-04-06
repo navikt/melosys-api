@@ -1,11 +1,10 @@
 package no.nav.melosys.service.registeropplysninger;
 
-import no.finn.unleash.FakeUnleash;
+import java.util.Set;
+
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.exception.TekniskException;
 import org.junit.jupiter.api.Test;
-
-import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -32,14 +31,12 @@ class RegisteropplysningerRequestTest {
             .isThrownBy(() -> RegisteropplysningerRequest.builder()
                 .behandlingID(1L)
                 .saksopplysningTyper(RegisteropplysningerRequest.SaksopplysningTyper.builder()
-                    .personopplysninger()
                     .medlemskapsopplysninger()
                     .organisasjonsopplysninger()
                     .build())
                 .build())
             .withMessageContaining("Krever at fnr er satt ved henting av ")
-            .withMessageContaining(SaksopplysningType.MEDL.getBeskrivelse())
-            .withMessageContaining(SaksopplysningType.PERSOPL.getBeskrivelse());
+            .withMessageContaining(SaksopplysningType.MEDL.getBeskrivelse());
     }
 
     @Test
@@ -60,16 +57,11 @@ class RegisteropplysningerRequestTest {
             .behandlingID(1L)
             .fnr("12345678911")
             .saksopplysningTyper(RegisteropplysningerRequest.SaksopplysningTyper.builder()
-                .personopplysninger()
-                .personhistorikkopplysninger()
                 .organisasjonsopplysninger()
                 .build())
             .build();
 
-        FakeUnleash unleash = new FakeUnleash();
-        unleash.enable("melosys.pdl.aktiv");
-
-        Set<SaksopplysningType> opplysningstyper = registeropplysningerRequest.getOpplysningstyper(unleash);
+        Set<SaksopplysningType> opplysningstyper = registeropplysningerRequest.getOpplysningstyper();
         assertThat(opplysningstyper)
             .singleElement()
             .isEqualTo(SaksopplysningType.ORG);

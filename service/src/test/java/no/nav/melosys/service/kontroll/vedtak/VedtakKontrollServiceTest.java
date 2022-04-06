@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 
-import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadTrygdeavtale;
@@ -76,10 +75,8 @@ class VedtakKontrollServiceTest {
         when(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling);
         when(lovvalgsperiodeService.hentValidertLovvalgsperiode(behandlingID)).thenReturn(lovvalgsperiode);
 
-        final FakeUnleash unleash = new FakeUnleash();
-        unleash.enable("melosys.pdl.aktiv");
         vedtakKontrollService = new VedtakKontrollService(behandlingService, behandlingsresultatService, lovvalgsperiodeService, persondataFasade,
-            registeropplysningerService, unleash);
+            registeropplysningerService);
     }
 
     @Test

@@ -91,7 +91,7 @@ jobs:
         run: |
           echo "CLUSTER=dev-fss" >> $GITHUB_ENV
           echo "URL=melosys-api.dev.intern.nav.no" >> $GITHUB_ENV
-          echo "<<ENVIRONMENT>>=dev" >> $GITHUB_ENV
+          echo "ENVIRONMENT=dev" >> $GITHUB_ENV
           echo "KAFKA_POOL=nav-dev" >> $GITHUB_ENV
           echo "VAULT_CLUSTER=dev" >> $GITHUB_ENV
           echo "APP_NAME=melosys" >> $GITHUB_ENV

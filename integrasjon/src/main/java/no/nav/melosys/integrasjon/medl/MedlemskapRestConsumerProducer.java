@@ -26,7 +26,7 @@ public class MedlemskapRestConsumerProducer implements RestConsumer {
     }
 
     @Bean
-    @Primary
+    @Primary // Skal denne alltid kalles med system bruker?
     public MedlemskapRestConsumer medlemskapRestConsumer(WebClient.Builder webClientBuilder, SystemContextExchangeFilter systemContextExchangeFilter) {
         return new MedlemskapRestConsumer(
             webClientBuilder

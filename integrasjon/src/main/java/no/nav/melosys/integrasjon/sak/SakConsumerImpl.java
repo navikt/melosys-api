@@ -14,6 +14,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status.Family;
 
+import no.finn.unleash.Unleash;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.integrasjon.felles.ExceptionMapper;
 import no.nav.melosys.integrasjon.felles.FeilResponseDto;
@@ -21,20 +22,24 @@ import no.nav.melosys.integrasjon.felles.JacksonObjectMapperProvider;
 import no.nav.melosys.integrasjon.felles.RestConsumer;
 import no.nav.melosys.integrasjon.sak.dto.SakDto;
 import no.nav.melosys.integrasjon.sak.dto.SakSearchRequest;
+import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class SakConsumerImpl implements RestConsumer, SakConsumer {
     private static final Logger log = LoggerFactory.getLogger(SakConsumerImpl.class);
 
-    private static final GenericType<List<SakDto>> sakDtoListType = new GenericType<List<SakDto>>() {};
+    private static final GenericType<List<SakDto>> sakDtoListType = new GenericType<>() {
+    };
     private static final String X_CORRELATION_ID = "X-Correlation-ID";
 
     private final boolean erSystem;
+    private final Unleash unleash;
     private final WebTarget target;
 
-    SakConsumerImpl(String endpointUrl, boolean erSystem) {
+    SakConsumerImpl(String endpointUrl, boolean erSystem, Unleash unleash) {
         this.erSystem = erSystem;
+        this.unleash = unleash;
         try {
             SSLContext sslContext = SSLContext.getDefault();
             Client client = ClientBuilder.newBuilder().sslContext(sslContext).build();
@@ -47,6 +52,10 @@ public class SakConsumerImpl implements RestConsumer, SakConsumer {
 
     @Override
     public boolean isSystem() {
+        if (unleash.isEnabled("melosys.auto.token")) {
+            if (ThreadLocalAccessInfo.isProcessCall()) return true;
+            if (ThreadLocalAccessInfo.isFrontendCall()) return false;
+        }
         return erSystem;
     }
 
