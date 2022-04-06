@@ -42,7 +42,6 @@ public class FagsakService {
     private final KontaktopplysningService kontaktopplysningService;
     private final OppgaveService oppgaveService;
     private final PersondataFasade persondataFasade;
-    private final BehandlingsresultatService behandlingsresultatService;
     private final MedlPeriodeService medlPeriodeService;
     private final Unleash unleash;
 
@@ -50,14 +49,12 @@ public class FagsakService {
 
     public FagsakService(FagsakRepository fagsakRepository, BehandlingService behandlingService,
                          KontaktopplysningService kontaktopplysningService, @Lazy OppgaveService oppgaveService,
-                         PersondataFasade persondataFasade, BehandlingsresultatService behandlingsresultatService,
-                         MedlPeriodeService medlPeriodeService, Unleash unleash) {
+                         PersondataFasade persondataFasade, MedlPeriodeService medlPeriodeService, Unleash unleash) {
         this.fagsakRepository = fagsakRepository;
         this.behandlingService = behandlingService;
         this.kontaktopplysningService = kontaktopplysningService;
         this.oppgaveService = oppgaveService;
         this.persondataFasade = persondataFasade;
-        this.behandlingsresultatService = behandlingsresultatService;
         this.medlPeriodeService = medlPeriodeService;
         this.unleash = unleash;
     }
@@ -239,14 +236,14 @@ public class FagsakService {
             replikertBehandling, replikertBehandling.getInitierendeJournalpostId(), fagsak.hentAktørID(), SubjectHandler.getInstance().getUserID()
         );
         if (!unleash.isEnabled("melosys.api.ny.vurdering.medlperiode.beholdes")) {
-            avsluttTidligereMedlPeriode(behandlingsresultatService.hentBehandlingsresultat(behandling.getId()));
+            avsluttTidligereMedlPeriode(behandling.getBehandlingsresultat());
         }
         return replikertBehandling.getId();
     }
 
     private void validerOpprettNyVurdering(Fagsak fagsak) {
         Behandling sistAktivBehandling = fagsak.hentSistAktivBehandling();
-        Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(sistAktivBehandling.getId());
+        Behandlingsresultat behandlingsresultat = sistAktivBehandling.getBehandlingsresultat();
         if (sistAktivBehandling.erAktiv() && behandlingsresultat.erIkkeArtikkel16MedSendtAnmodningOmUnntak()) {
             throw new FunksjonellException("Kan ikke revurdere en aktiv behandling");
         } else if (sistAktivBehandling.erEndretPeriode()) {
@@ -255,7 +252,10 @@ public class FagsakService {
     }
 
     Behandling hentBehandlingSomErUtgangspunktForRevurdering(Fagsak fagsak) {
-        return fagsak.hentSistAktivBehandling();
+        if (fagsak.harAktivBehandling()) {
+            return fagsak.hentSistAktivBehandling();
+        }
+        return fagsak.hentBehandlingForNyVurdering();
     }
 
     private Behandlingstyper avgjørBehandlingstype(Fagsak fagsak) {

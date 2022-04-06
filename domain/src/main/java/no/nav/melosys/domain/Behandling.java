@@ -81,6 +81,9 @@ public class Behandling extends RegistreringsInfo {
     @OneToOne(mappedBy = "behandling", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private Behandlingsgrunnlag behandlingsgrunnlag;
 
+    @OneToOne(mappedBy = "behandling", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    private Behandlingsresultat behandlingsresultat;
+
     @ManyToOne()
     @JoinColumn(name = "opprinnelig_behandling_id")
     private Behandling opprinneligBehandling;
@@ -195,6 +198,14 @@ public class Behandling extends RegistreringsInfo {
 
     public void setBehandlingsgrunnlag(Behandlingsgrunnlag behandlingsgrunnlag) {
         this.behandlingsgrunnlag = behandlingsgrunnlag;
+    }
+
+    public Behandlingsresultat getBehandlingsresultat() {
+        return behandlingsresultat;
+    }
+
+    public void setBehandlingsresultat(Behandlingsresultat behandlingsresultat) {
+        this.behandlingsresultat = behandlingsresultat;
     }
 
     /**
@@ -444,6 +455,10 @@ public class Behandling extends RegistreringsInfo {
 
     public boolean harStatus(Behandlingsstatus status) {
         return this.status == status;
+    }
+
+    public boolean harBehandlingsresultat() {
+        return behandlingsresultat != null;
     }
 
     public boolean manglerSaksopplysningerAvType(List<SaksopplysningType> saksopplysningTyper) {

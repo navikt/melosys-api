@@ -19,6 +19,8 @@ import static no.nav.melosys.domain.kodeverk.Aktoersroller.TRYGDEMYNDIGHET;
 @EntityListeners(AuditingEntityListener.class)
 public class Fagsak extends RegistreringsInfo {
 
+    public static final String FINNER_IKKE_BEHANDLINGER_FOR_FAGSAK = "Finner ikke behandlinger for fagsak ";
+
     @Id
     @Column(name = "saksnummer", nullable = false)
     private String saksnummer;
@@ -95,14 +97,46 @@ public class Fagsak extends RegistreringsInfo {
         }
     }
 
+    public Behandling hentTidligstRegistrertBehandling() {
+        return getBehandlinger().stream()
+            .min(Comparator.comparing(Behandling::getRegistrertDato))
+            .orElseThrow(() -> new IkkeFunnetException(FINNER_IKKE_BEHANDLINGER_FOR_FAGSAK + saksnummer));
+    }
+
     public Behandling hentSistOppdatertBehandling() {
         return getBehandlinger().stream()
             .max(Comparator.comparing(Behandling::getEndretDato))
-            .orElseThrow(() -> new IkkeFunnetException("Finner ikke behandlinger for fagsak " + saksnummer));
+            .orElseThrow(() -> new IkkeFunnetException(FINNER_IKKE_BEHANDLINGER_FOR_FAGSAK + saksnummer));
     }
 
     public Behandling hentSistAktivBehandling() {
         return Optional.ofNullable(hentAktivBehandling()).orElse(hentSistOppdatertBehandling());
+    }
+
+    public Behandling hentBehandlingMedSistRegistrertVedtak() {
+        return getBehandlinger().stream()
+            .filter(Behandling::harBehandlingsresultat)
+            .filter(behandling -> behandling.getBehandlingsresultat().harVedtak())
+            .max(Comparator.comparing(behandling -> behandling.getBehandlingsresultat().getVedtakMetadata().registrertDato))
+            .orElseThrow(() -> new IkkeFunnetException("Finner ikke behandlinger med vedtak for " + saksnummer));
+    }
+
+    public Behandling hentBehandlingMedSistRegistrertRedigertUnntak() {
+        return getBehandlinger().stream()
+            .filter(Behandling::harBehandlingsresultat)
+            .filter(behandling -> behandling.getBehandlingsresultat().erRegistrertUnntak())
+            .max(Comparator.comparing(behandling -> behandling.getBehandlingsresultat().registrertDato))
+            .orElseThrow(() -> new IkkeFunnetException("Finner ikke behandlinger med registrert unntak for " + saksnummer));
+    }
+
+    public Behandling hentBehandlingForNyVurdering() {
+        var førsteBehandling = hentTidligstRegistrertBehandling();
+
+        return switch (førsteBehandling.getType()) {
+            case SOEKNAD -> hentBehandlingMedSistRegistrertVedtak();
+            case SED -> hentBehandlingMedSistRegistrertRedigertUnntak();
+            default -> throw new FunksjonellException("Kan ikke revurdere en behandling av type " + førsteBehandling.getType().getBeskrivelse());
+        };
     }
 
     public Optional<Behandling> finnTidligstInaktivBehandling() {
