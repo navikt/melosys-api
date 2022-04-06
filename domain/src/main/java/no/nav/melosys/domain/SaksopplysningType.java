@@ -18,8 +18,8 @@ public enum SaksopplysningType implements Kodeverk {
     SOB_SAK("SOB_SAK", "Sak og behandling-sak"),
     UTBETAL("UTBETAL", "Utbetaldata");
 
-    private String kode;
-    private String beskrivelse;
+    private final String kode;
+    private final String beskrivelse;
 
     SaksopplysningType(String kode, String beskrivelse) {
         this.kode = kode;
@@ -44,6 +44,6 @@ public enum SaksopplysningType implements Kodeverk {
         ARBFORH, INNTK, MEDL, PERSHIST, UTBETAL
     );
 
-    public static final Set<SaksopplysningType> TYPER_SOM_LAGRES_INITIELT = Set.of(ARBFORH, INNTK, MEDL, ORG, PERSHIST, PERSOPL, SOB_SAK, UTBETAL);
+    public static final Set<SaksopplysningType> TYPER_SOM_LAGRES_INITIELT = Set.of(ARBFORH, INNTK, MEDL, ORG, SOB_SAK, UTBETAL);
 }
 

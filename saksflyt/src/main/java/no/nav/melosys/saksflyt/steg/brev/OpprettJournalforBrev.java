@@ -1,6 +1,5 @@
 package no.nav.melosys.saksflyt.steg.brev;
 
-import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.arkiv.JournalpostBestilling;
@@ -42,7 +41,6 @@ public class OpprettJournalforBrev implements StegBehandler {
     private final PersondataFasade persondataFasade;
     private final EregFasade eregFasade;
     private final DokumentNavnService dokumentNavnService;
-    private final Unleash unleash;
 
     public OpprettJournalforBrev(BehandlingService behandlingService,
                                  DokgenService dokgenService,
@@ -50,7 +48,7 @@ public class OpprettJournalforBrev implements StegBehandler {
                                  @Qualifier("system") JoarkFasade joarkFasade,
                                  @Qualifier("system") PersondataFasade persondataFasade,
                                  @Qualifier("system") EregFasade eregFasade,
-                                 DokumentNavnService dokumentNavnService, Unleash unleash) {
+                                 DokumentNavnService dokumentNavnService) {
         this.behandlingService = behandlingService;
         this.dokgenService = dokgenService;
         this.utenlandskMyndighetService = utenlandskMyndighetService;
@@ -58,7 +56,6 @@ public class OpprettJournalforBrev implements StegBehandler {
         this.persondataFasade = persondataFasade;
         this.eregFasade = eregFasade;
         this.dokumentNavnService = dokumentNavnService;
-        this.unleash = unleash;
     }
 
     @Override
@@ -146,10 +143,7 @@ public class OpprettJournalforBrev implements StegBehandler {
     }
 
     private String hentBrukerFolkeregisterIdent(Behandling behandling) {
-        if (unleash.isEnabled("melosys.pdl.aktiv")) {
-            return persondataFasade.hentFolkeregisterident(behandling.getFagsak().hentAktørID());
-        }
-        return behandling.hentPersonDokument().hentFolkeregisterident();
+        return persondataFasade.hentFolkeregisterident(behandling.getFagsak().hentAktørID());
     }
 
     public String utledJournalføringsTittel(Behandling behandling, DokumentproduksjonsInfo dokumentproduksjonsInfo, DokgenBrevbestilling brevbestilling, Aktoer mottaker) {
