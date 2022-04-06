@@ -10,6 +10,7 @@ import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
 import no.nav.melosys.sikkerhet.context.SubjectHandler
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.TestInstance
@@ -93,7 +94,6 @@ abstract class ConsumerTestBase<T>(
 
     @AfterAll
     fun afterAll() {
-        SpringSubjectHandler.set(NullSubjectHandler()) // TODO: run after each
         wireMockServer.stop()
     }
 
@@ -107,5 +107,10 @@ abstract class ConsumerTestBase<T>(
                     MediaType.APPLICATION_JSON
                 )
             )
+    }
+
+    @AfterEach
+    fun afterEach() {
+        SpringSubjectHandler.set(NullSubjectHandler())
     }
 }
