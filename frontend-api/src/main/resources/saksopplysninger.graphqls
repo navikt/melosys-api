@@ -44,9 +44,7 @@ type Familiemedlem {
     alder: Int
     foreldreansvar: String
     fnrAnnenForelder: String
-    sivilstand: String
-    erHistorisk: Boolean
-    sivilstandGyldighetsperiodeFom: Date
+    sivilstand: Sivilstand
 }
 
 enum Familierelasjonsrolle {
