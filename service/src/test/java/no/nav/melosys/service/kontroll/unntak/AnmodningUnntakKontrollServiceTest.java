@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 
-import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.ForetakUtland;
@@ -53,11 +52,8 @@ class AnmodningUnntakKontrollServiceTest {
         when(persondataFasade.hentPerson(anyString())).thenReturn(PersonopplysningerObjectFactory.lagPersonopplysninger());
         when(avklarteVirksomheterService.hentAntallAvklarteVirksomheter(any())).thenReturn(1);
 
-        final FakeUnleash unleash = new FakeUnleash();
-        unleash.enable("melosys.pdl.aktiv");
         anmodningUnntakKontrollService = new AnmodningUnntakKontrollService(
-            anmodningsperiodeService, avklarteVirksomheterService, behandlingService, persondataFasade, unleash
-        );
+            anmodningsperiodeService, avklarteVirksomheterService, behandlingService, persondataFasade);
     }
 
     @Test

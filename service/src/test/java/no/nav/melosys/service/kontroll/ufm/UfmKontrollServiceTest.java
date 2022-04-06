@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.util.function.Function;
 
 import com.google.common.collect.Lists;
-import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
@@ -46,9 +45,7 @@ class UfmKontrollServiceTest {
 
     @BeforeEach
     public void setup() {
-        final FakeUnleash unleash = new FakeUnleash();
-        unleash.enable("melosys.pdl.aktiv");
-        ufmKontrollService = new UfmKontrollService(kontrollFactory, persondataFasade, unleash);
+        ufmKontrollService = new UfmKontrollService(kontrollFactory, persondataFasade);
         SedDokument sedDokument = new SedDokument();
         sedDokument.setSedType(SedType.A009);
         sedDokument.setLovvalgsperiode(new Periode(LocalDate.now(), LocalDate.now().plusMonths(1)));
