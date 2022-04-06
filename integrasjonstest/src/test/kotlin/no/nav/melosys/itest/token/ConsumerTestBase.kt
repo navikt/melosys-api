@@ -46,7 +46,7 @@ abstract class ConsumerTestBase<T>(
 
     fun executeFromSystem(verify: () -> Unit) {
         val uuid = UUID.randomUUID()
-        ThreadLocalAccessInfo.beforExecuteProcess(uuid, "prossesSteg")
+        ThreadLocalAccessInfo.beforeExecuteProcess(uuid, "prossesSteg")
         verify()
         executeRequest()
         ThreadLocalAccessInfo.afterExecuteProcess(uuid)
@@ -93,7 +93,7 @@ abstract class ConsumerTestBase<T>(
 
     @AfterAll
     fun afterAll() {
-        SpringSubjectHandler.set(NullSubjectHandler())
+        SpringSubjectHandler.set(NullSubjectHandler()) // TODO: run after each
         wireMockServer.stop()
     }
 

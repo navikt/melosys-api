@@ -4,8 +4,6 @@ import javax.annotation.Nonnull;
 
 import no.finn.unleash.Unleash;
 import no.nav.melosys.integrasjon.reststs.RestStsClient;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.ClientRequest;
@@ -16,8 +14,6 @@ import reactor.core.publisher.Mono;
 
 @Component
 public class SystemContextExchangeFilter implements ExchangeFilterFunction {
-    private static final Logger log = LoggerFactory.getLogger(SystemContextExchangeFilter.class);
-
     private final RestStsClient restStsClient;
     private final Unleash unleash;
 
@@ -32,7 +28,7 @@ public class SystemContextExchangeFilter implements ExchangeFilterFunction {
                                        @Nonnull final ExchangeFunction exchangeFunction) {
         if (unleash.isEnabled("melosys.auto.token")) {
             // Vi sletter SystemContextExchangeFilter og bytter ut med AutoContextExchangeFilter når vi vet at dette funker
-            return new AutoContextExchangeFilter(restStsClient).filter(clientRequest, exchangeFunction);
+            return new GenericContextExchangeFilter(restStsClient).filter(clientRequest, exchangeFunction);
         }
 
         ClientRequest clientRequestWithBearerAuth = ClientRequest.from(clientRequest)

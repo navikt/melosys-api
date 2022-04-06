@@ -88,7 +88,7 @@ public class ProsessinstansBehandlerImpl implements ProsessinstansBehandler {
 
     private Prosessinstans utførSteg(StegBehandler stegBehandler, Prosessinstans prosessinstans) {
         log.info("Utfører steg {} for prosessinstans {}", stegBehandler.inngangsSteg(), prosessinstans.getId());
-        ThreadLocalAccessInfo.beforExecuteProcess(prosessinstans.getId(), stegBehandler.inngangsSteg().getKode());
+        ThreadLocalAccessInfo.beforeExecuteProcess(prosessinstans.getId(), stegBehandler.inngangsSteg().getKode());
         try {
             stegBehandler.utfør(prosessinstans);
         } finally {

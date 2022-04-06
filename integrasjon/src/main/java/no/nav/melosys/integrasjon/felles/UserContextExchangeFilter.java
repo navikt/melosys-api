@@ -6,9 +6,6 @@ import no.finn.unleash.Unleash;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.reststs.RestStsClient;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
-import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.ClientRequest;
@@ -19,8 +16,6 @@ import reactor.core.publisher.Mono;
 
 @Component
 public class UserContextExchangeFilter implements ExchangeFilterFunction {
-    private static final Logger log = LoggerFactory.getLogger(UserContextExchangeFilter.class);
-
     private final RestStsClient restStsClient;
     private final Unleash unleash;
 
@@ -35,7 +30,7 @@ public class UserContextExchangeFilter implements ExchangeFilterFunction {
                                        @Nonnull final ExchangeFunction exchangeFunction) {
         if (unleash.isEnabled("melosys.auto.token")) {
             // Vi sletter UserContextExchangeFilter og bytter ut med AutoContextExchangeFilter når vi vet at dette funker
-            return new AutoContextExchangeFilter(restStsClient).filter(clientRequest, exchangeFunction);
+            return new GenericContextExchangeFilter(restStsClient).filter(clientRequest, exchangeFunction);
         }
 
         String oidcTokenString = SubjectHandler.getInstance().getOidcTokenString();

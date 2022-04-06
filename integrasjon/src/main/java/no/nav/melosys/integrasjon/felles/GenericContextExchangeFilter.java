@@ -4,8 +4,6 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.reststs.RestStsClient;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.ClientRequest;
@@ -17,10 +15,10 @@ import reactor.core.publisher.Mono;
 import javax.annotation.Nonnull;
 
 @Component
-public class AutoContextExchangeFilter implements ExchangeFilterFunction {
+public class GenericContextExchangeFilter implements ExchangeFilterFunction {
     private final RestStsClient restStsClient;
 
-    public AutoContextExchangeFilter(RestStsClient restStsClient) {
+    public GenericContextExchangeFilter(RestStsClient restStsClient) {
         this.restStsClient = restStsClient;
     }
 

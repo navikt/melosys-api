@@ -39,7 +39,7 @@ public class ThreadLocalAccessInfo {
         threadLocalStorage.remove();
     }
 
-    public static void beforExecuteProcess(UUID processId, String prosessSteg) {
+    public static void beforeExecuteProcess(UUID processId, String prosessSteg) {
         increaseCount(debugInfoUsage, "process"); // For debug only - will be removed
         ThreadLocalAccessInfo threadLocalAccessInfo = ThreadLocalAccessInfo.threadLocalStorage.get();
         if (threadLocalAccessInfo.processId != null || threadLocalAccessInfo.prosessSteg != null) {
