@@ -4,7 +4,6 @@ import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
-import no.nav.melosys.service.persondata.PersondataFasade;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,18 +15,16 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class RegisterOppslagServiceTest {
+class OrganisasjonOppslagServiceTest {
 
     @Mock
     private EregFasade eregFasade;
-    @Mock
-    private PersondataFasade persondataFasade;
 
-    private RegisterOppslagService registerOppslagService;
+    private OrganisasjonOppslagService organisasjonOppslagService;
 
     @BeforeEach
     void setup() {
-        registerOppslagService = new RegisterOppslagService(eregFasade);
+        organisasjonOppslagService = new OrganisasjonOppslagService(eregFasade);
     }
 
     @Test
@@ -38,7 +35,7 @@ class RegisterOppslagServiceTest {
         saksopplysning.setDokument(new OrganisasjonDokument());
         when(eregFasade.hentOrganisasjon(orgnrMedWhitespace.trim())).thenReturn(saksopplysning);
 
-        assertThat(registerOppslagService.hentOrganisasjon(orgnrMedWhitespace)).isInstanceOf(OrganisasjonDokument.class);
+        assertThat(organisasjonOppslagService.hentOrganisasjon(orgnrMedWhitespace)).isInstanceOf(OrganisasjonDokument.class);
     }
 
     @Test
@@ -46,7 +43,7 @@ class RegisterOppslagServiceTest {
         final var ugyldigOrgnr = "1";
 
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> registerOppslagService.hentOrganisasjon(ugyldigOrgnr))
+            .isThrownBy(() -> organisasjonOppslagService.hentOrganisasjon(ugyldigOrgnr))
             .withMessageContaining("Ugyldig orgnr");
     }
 

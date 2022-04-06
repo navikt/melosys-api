@@ -28,7 +28,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.kodeverk.KodeverkService;
-import no.nav.melosys.service.registeropplysninger.RegisterOppslagService;
+import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -54,7 +54,7 @@ class AvklarteVirksomheterServiceTest {
     private AvklartefaktaService avklartefaktaService;
 
     @Mock
-    private RegisterOppslagService registerOppslagService;
+    private OrganisasjonOppslagService organisasjonOppslagService;
 
     @Mock
     private BehandlingsgrunnlagService behandlingsgrunnlagService;
@@ -86,7 +86,7 @@ class AvklarteVirksomheterServiceTest {
 
         when(mockKodeverkService.dekod(any(FellesKodeverk.class), anyString())).thenReturn("Poststed");
 
-        avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService, behandlingService, mockKodeverkService);
+        avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, organisasjonOppslagService, behandlingService, mockKodeverkService);
     }
 
     @Test
@@ -165,7 +165,8 @@ class AvklarteVirksomheterServiceTest {
 
         leggTilIRegisterOppslag(Arrays.asList(orgnr2, orgnr3));
 
-        AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService, behandlingService, mockKodeverkService);
+        AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService,
+                                                                                                  organisasjonOppslagService, behandlingService, mockKodeverkService);
         assertThat(avklarteVirksomheterService.hentAlleNorskeVirksomheter(behandling, INGEN_ADRESSE).stream()
             .map(nv -> nv.orgnr)
             .collect(Collectors.toList())).contains(orgnr2, orgnr3);
@@ -186,7 +187,8 @@ class AvklarteVirksomheterServiceTest {
 
         leggTilIRegisterOppslag(selvstendigeForetak);
 
-        AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService, behandlingService, mockKodeverkService);
+        AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService,
+                                                                                                  organisasjonOppslagService, behandlingService, mockKodeverkService);
         assertThat(avklarteVirksomheterService.hentAlleNorskeVirksomheter(behandling, INGEN_ADRESSE).stream()
             .map(nv -> nv.orgnr)
             .collect(Collectors.toList())).contains(orgnr1);
@@ -316,7 +318,7 @@ class AvklarteVirksomheterServiceTest {
     }
 
     private void leggTilIRegisterOppslag(Collection<String> orgnumre) {
-        when(registerOppslagService.hentOrganisasjoner(eq(new HashSet<>(orgnumre)))).thenReturn(lagOrganisasjonDokumenter(orgnumre));
+        when(organisasjonOppslagService.hentOrganisasjoner(eq(new HashSet<>(orgnumre)))).thenReturn(lagOrganisasjonDokumenter(orgnumre));
     }
 
     private OrganisasjonDokument lagOrganisasjonDokument(String forretningsPostnr, String forretningsGatenavn) {
