@@ -16,9 +16,11 @@ import reactor.core.publisher.Mono;
 public class SystemContextExchangeFilter implements ExchangeFilterFunction {
     private final RestStsClient restStsClient;
     private final Unleash unleash;
+    private final GenericContextExchangeFilter genericContextExchangeFilter;
 
-    public SystemContextExchangeFilter(RestStsClient restStsClient, Unleash unleash) {
+    public SystemContextExchangeFilter(Unleash unleash, RestStsClient restStsClient, GenericContextExchangeFilter genericContextExchangeFilter) {
         this.restStsClient = restStsClient;
+        this.genericContextExchangeFilter = genericContextExchangeFilter;
         this.unleash = unleash;
     }
 
@@ -28,7 +30,7 @@ public class SystemContextExchangeFilter implements ExchangeFilterFunction {
                                        @Nonnull final ExchangeFunction exchangeFunction) {
         if (unleash.isEnabled("melosys.auto.token")) {
             // Vi sletter SystemContextExchangeFilter og bytter ut med AutoContextExchangeFilter når vi vet at dette funker
-            return new GenericContextExchangeFilter(restStsClient).filter(clientRequest, exchangeFunction);
+            return genericContextExchangeFilter.filter(clientRequest, exchangeFunction);
         }
 
         ClientRequest clientRequestWithBearerAuth = ClientRequest.from(clientRequest)

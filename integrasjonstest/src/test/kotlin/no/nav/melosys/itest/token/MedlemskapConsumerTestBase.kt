@@ -3,6 +3,7 @@ package no.nav.melosys.itest.token
 import com.github.tomakehurst.wiremock.client.MappingBuilder
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.matching.UrlPattern
+import no.nav.melosys.integrasjon.felles.GenericContextExchangeFilter
 import no.nav.melosys.integrasjon.felles.SystemContextExchangeFilter
 import no.nav.melosys.integrasjon.medl.MedlemskapRestConsumer
 import no.nav.melosys.integrasjon.medl.MedlemskapRestConsumerProducer
@@ -22,6 +23,7 @@ import java.time.LocalDate
         MedlemskapRestConsumer::class,
         MedlemskapRestConsumerProducer::class,
         SystemContextExchangeFilter::class,
+        GenericContextExchangeFilter::class
     ],
     properties = ["spring.profiles.active:itest-token"]
 )
