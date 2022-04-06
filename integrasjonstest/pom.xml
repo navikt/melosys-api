@@ -114,11 +114,16 @@
             <artifactId>token-validation-spring-test</artifactId>
             <scope>test</scope>
         </dependency>
-
         <dependency>
             <groupId>no.nav.tjenestespesifikasjoner</groupId>
             <artifactId>nav-fim-aktoer-v2-tjenestespesifikasjon</artifactId>
             <version>${nav.tjenestespesifikasjoner.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.tomakehurst</groupId>
+            <artifactId>wiremock-standalone</artifactId>
+            <version>${wiremock-standalone.version}</version>
             <scope>test</scope>
         </dependency>
 

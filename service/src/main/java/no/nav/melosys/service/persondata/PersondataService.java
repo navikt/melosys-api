@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.domain.person.PersonMedHistorikk;
 import no.nav.melosys.domain.person.Persondata;
@@ -18,7 +17,6 @@ import no.nav.melosys.integrasjon.pdl.dto.person.Adressebeskyttelse;
 import no.nav.melosys.integrasjon.pdl.dto.person.ForelderBarnRelasjon;
 import no.nav.melosys.integrasjon.pdl.dto.person.Person;
 import no.nav.melosys.integrasjon.pdl.dto.person.Sivilstand;
-import no.nav.melosys.integrasjon.tps.TpsService;
 import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.kodeverk.KodeverkService;
@@ -37,21 +35,16 @@ public class PersondataService implements PersondataFasade {
     private final KodeverkService kodeverkService;
     private final PDLConsumer pdlConsumer;
     private final SaksopplysningerService saksopplysningerService;
-    private final TpsService tpsService;
 
     public static final String PDL_PERSOPL_VERSJON = "1.0";
     public static final String PDL_PERS_SAKS_VERSJON = "1.0";
 
-    public PersondataService(BehandlingService behandlingService,
-                             KodeverkService kodeverkService,
-                             @Qualifier("saksbehandler") PDLConsumer pdlConsumer,
-                             SaksopplysningerService saksopplysningerService,
-                             TpsService tpsService) {
+    public PersondataService(BehandlingService behandlingService, KodeverkService kodeverkService,
+                             @Qualifier("saksbehandler") PDLConsumer pdlConsumer, SaksopplysningerService saksopplysningerService) {
         this.behandlingService = behandlingService;
         this.kodeverkService = kodeverkService;
         this.pdlConsumer = pdlConsumer;
         this.saksopplysningerService = saksopplysningerService;
-        this.tpsService = tpsService;
     }
 
     @Override
@@ -76,11 +69,6 @@ public class PersondataService implements PersondataFasade {
     public String hentFolkeregisterident(String ident) {
         return finnFolkeregisterident(ident)
             .orElseThrow(() -> new IkkeFunnetException("Finner ikke folkeregisterident!"));
-    }
-
-    @Override
-    public Saksopplysning hentPersonFraTps(String fnr, Informasjonsbehov behov) {
-        return tpsService.hentPerson(fnr, behov);
     }
 
     @Override
@@ -186,11 +174,6 @@ public class PersondataService implements PersondataFasade {
     @Override
     public Set<Familiemedlem> hentFamiliemedlemmerMedHistorikk(String ident) {
         return hentFamiliemedlemmer(pdlConsumer.hentFamilierelasjoner(ident));
-    }
-
-    @Override
-    public Saksopplysning hentPersonhistorikk(String fnr, LocalDate dato) {
-        return tpsService.hentPersonhistorikk(fnr, dato);
     }
 
     @Override

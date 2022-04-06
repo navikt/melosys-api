@@ -105,7 +105,7 @@
         <nav-foedselsnummer.core.version>1.0-SNAPSHOT.6</nav-foedselsnummer.core.version>
         <xmlunit.version>2.9.0</xmlunit.version>
         <javax.activation.version>1.1.1</javax.activation.version>
-        <org.jboss.logging.version>2.2.1</org.jboss.logging.version>
+        <org.jboss.logging.annotations.version>2.2.1.Final</org.jboss.logging.annotations.version>
     </properties>
 
     <!-- Unngå å put scope i dependency management. Sett det heller der det
@@ -462,12 +462,12 @@
             <dependency>
                 <groupId>org.jboss.logging</groupId>
                 <artifactId>jboss-logging-annotations</artifactId>
-                <version>${org.jboss.logging.version}</version>
+                <version>${org.jboss.logging.annotations.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.jboss.logging</groupId>
                 <artifactId>jboss-logging-processor</artifactId>
-                <version>${org.jboss.logging.version}</version>
+                <version>${org.jboss.logging.annotations.version}</version>
             </dependency>
 
             <!-- NAV felleskomponenter -->

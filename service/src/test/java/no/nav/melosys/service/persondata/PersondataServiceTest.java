@@ -18,7 +18,6 @@ import no.nav.melosys.integrasjon.pdl.dto.identer.Ident;
 import no.nav.melosys.integrasjon.pdl.dto.identer.Identliste;
 import no.nav.melosys.integrasjon.pdl.dto.person.Adressebeskyttelse;
 import no.nav.melosys.integrasjon.pdl.dto.person.AdressebeskyttelseGradering;
-import no.nav.melosys.integrasjon.tps.TpsService;
 import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.DokgenTestData;
@@ -49,15 +48,13 @@ class PersondataServiceTest {
     private PDLConsumer pdlConsumer;
     @Mock
     private SaksopplysningerService saksopplysningerService;
-    @Mock
-    private TpsService tpsService;
 
     private PersondataService persondataService;
 
     @BeforeEach
     public void setup() {
         persondataService = new PersondataService(behandlingService, kodeverkService, pdlConsumer,
-            saksopplysningerService, tpsService);
+                                                  saksopplysningerService);
     }
 
     @Test
@@ -145,7 +142,7 @@ class PersondataServiceTest {
         final var personMedHistorikk = persondataService.hentPersonMedHistorikk(1L);
         assertThat(personMedHistorikk.statsborgerskap()).containsExactly(
             new Statsborgerskap("NOR", null, LocalDate.parse("1989-08-07"),
-                null, "TPS", "TPS", false)
+                                null, "TPS", "TPS", false)
         );
     }
 
@@ -233,24 +230,24 @@ class PersondataServiceTest {
         final Set<Familiemedlem> familiemedlemmer = persondataService.hentFamiliemedlemmerMedHistorikk(1L);
         assertThat(familiemedlemmer).extracting(Familiemedlem::navn).extracting(Navn::fornavn).contains("BARN", "NAVN");
         assertThat(familiemedlemmer).extracting(Familiemedlem::familierelasjon).contains(Familierelasjon.BARN,
-            Familierelasjon.RELATERT_VED_SIVILSTAND);
+                                                                                         Familierelasjon.RELATERT_VED_SIVILSTAND);
     }
 
     private PersonDokument lagPersonDokumentMedFamiliemedlemmer(Sivilstand sivilstand) {
         PersonDokument person = new PersonDokument();
         List<no.nav.melosys.domain.dokument.person.Familiemedlem> familiemedlemmer = new ArrayList<>();
 
-        familiemedlemmer.add(lagFamiliemedlem("NAVN NAVNSEN", "354652678134", no.nav.melosys.domain.dokument.person.Familierelasjon.EKTE,
-            sivilstand));
-        familiemedlemmer.add(lagFamiliemedlem("BARN NAVNSEN", "134354652678", no.nav.melosys.domain.dokument.person.Familierelasjon.BARN,
-            null));
+        familiemedlemmer.add(lagFamilemedlem("NAVN NAVNSEN", "354652678134", no.nav.melosys.domain.dokument.person.Familierelasjon.EKTE,
+                                             sivilstand));
+        familiemedlemmer.add(lagFamilemedlem("BARN NAVNSEN", "134354652678", no.nav.melosys.domain.dokument.person.Familierelasjon.BARN,
+                                             null));
         person.setFamiliemedlemmer(familiemedlemmer);
         return person;
     }
 
-    private no.nav.melosys.domain.dokument.person.Familiemedlem lagFamiliemedlem(String navn, String fnr,
-                                                                                 no.nav.melosys.domain.dokument.person.Familierelasjon familierelasjon,
-                                                                                 Sivilstand sivilstand) {
+    private no.nav.melosys.domain.dokument.person.Familiemedlem lagFamilemedlem(String navn, String fnr,
+                                                                                no.nav.melosys.domain.dokument.person.Familierelasjon familierelasjon,
+                                                                                Sivilstand sivilstand) {
         no.nav.melosys.domain.dokument.person.Familiemedlem familiemedlem = new no.nav.melosys.domain.dokument.person.Familiemedlem();
         familiemedlem.fnr = fnr;
         familiemedlem.navn = navn;
@@ -282,7 +279,7 @@ class PersondataServiceTest {
             new Statsborgerskap(
                 "AIA", LocalDate.parse("2021-05-08"), LocalDate.parse("1979-11-18"), LocalDate.parse("1980-11-18"),
                 "PDL", "Dolly", false)
-        );
+            );
     }
 
     @Test
