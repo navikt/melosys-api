@@ -3,6 +3,7 @@ package no.nav.melosys.itest.token
 import com.github.tomakehurst.wiremock.client.MappingBuilder
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.matching.UrlPattern
+import no.nav.melosys.integrasjon.felles.GenericContextExchangeFilter
 import no.nav.melosys.integrasjon.felles.SystemContextExchangeFilter
 import no.nav.melosys.integrasjon.felles.UserContextExchangeFilter
 import no.nav.melosys.integrasjon.joark.saf.SafConsumer
@@ -24,6 +25,7 @@ import org.springframework.test.web.client.MockRestServiceServer
         SystemContextExchangeFilter::class,
         SafConsumerImpl::class,
         SafConsumerProducer::class,
+        GenericContextExchangeFilter::class
     ],
     properties = ["spring.profiles.active:itest-token"]
 )

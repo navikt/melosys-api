@@ -4,7 +4,6 @@ import javax.annotation.Nonnull;
 
 import no.finn.unleash.Unleash;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.reststs.RestStsClient;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
@@ -16,12 +15,12 @@ import reactor.core.publisher.Mono;
 
 @Component
 public class UserContextExchangeFilter implements ExchangeFilterFunction {
-    private final RestStsClient restStsClient;
     private final Unleash unleash;
+    private final GenericContextExchangeFilter genericContextExchangeFilter;
 
-    public UserContextExchangeFilter(RestStsClient restStsClient, Unleash unleash) {
-        this.restStsClient = restStsClient;
+    public UserContextExchangeFilter(Unleash unleash, GenericContextExchangeFilter genericContextExchangeFilter) {
         this.unleash = unleash;
+        this.genericContextExchangeFilter = genericContextExchangeFilter;
     }
 
     @Nonnull
@@ -30,7 +29,7 @@ public class UserContextExchangeFilter implements ExchangeFilterFunction {
                                        @Nonnull final ExchangeFunction exchangeFunction) {
         if (unleash.isEnabled("melosys.auto.token")) {
             // Vi sletter UserContextExchangeFilter og bytter ut med AutoContextExchangeFilter når vi vet at dette funker
-            return new GenericContextExchangeFilter(restStsClient).filter(clientRequest, exchangeFunction);
+            return genericContextExchangeFilter.filter(clientRequest, exchangeFunction);
         }
 
         String oidcTokenString = SubjectHandler.getInstance().getOidcTokenString();
