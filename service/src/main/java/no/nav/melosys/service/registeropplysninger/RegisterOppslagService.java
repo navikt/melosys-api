@@ -5,11 +5,8 @@ import java.util.Set;
 
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
-import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
-import no.nav.melosys.service.persondata.PersondataFasade;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
@@ -17,11 +14,9 @@ import org.springframework.stereotype.Service;
 @Service
 public class RegisterOppslagService {
     private final EregFasade eregFasade;
-    private final PersondataFasade persondataFasade;
 
-    public RegisterOppslagService(EregFasade eregFasade, PersondataFasade persondataFasade) {
+    public RegisterOppslagService(EregFasade eregFasade) {
         this.eregFasade = eregFasade;
-        this.persondataFasade = persondataFasade;
     }
 
     public Set<OrganisasjonDokument> hentOrganisasjoner(Set<String> orgnumre) {
@@ -40,15 +35,6 @@ public class RegisterOppslagService {
         return (OrganisasjonDokument) saksopplysning.getDokument();
     }
 
-    /**
-     * @deprecated /personer forsvinner ifm. overgang til PDL.
-     */
-    @Deprecated(forRemoval = true)
-    public PersonDokument hentPerson(String personnummer) {
-        Saksopplysning saksopplysning = persondataFasade.hentPersonFraTps(personnummer, Informasjonsbehov.STANDARD);
-        return (PersonDokument) saksopplysning.getDokument();
-    }
-    
     private String validerOgVaskOrgnr(String orgnr) {
         orgnr = orgnr.replace(" ", "");
 
