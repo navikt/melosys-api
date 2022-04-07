@@ -66,7 +66,7 @@ class ReplikerBehandlingTest {
         replikertBehandling.setId(11L);
         doReturn(replikertBehandling)
             .when(behandlingService)
-            .replikerBehandlingOgBehandlingsresultat(behandling,  Behandlingsstatus.OPPRETTET, Behandlingstyper.ENDRET_PERIODE);
+            .replikerBehandlingOgBehandlingsresultat(behandling, Behandlingstyper.ENDRET_PERIODE);
 
         replikerBehandling.utfør(prosessinstans);
 

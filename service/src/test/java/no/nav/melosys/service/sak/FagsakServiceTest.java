@@ -319,10 +319,10 @@ class FagsakServiceTest {
         replikertBehandling.setId(2L);
 
         when(fagsakRepo.findBySaksnummer(saksnummer)).thenReturn(Optional.of(fagsak));
-        when(behandlingService.replikerBehandlingOgBehandlingsresultat(any(), any(), any())).thenReturn(replikertBehandling);
+        when(behandlingService.replikerBehandlingOgBehandlingsresultat(any(), any())).thenReturn(replikertBehandling);
 
         long replikertBehandlingID = fagsakService.opprettNyVurderingBehandling(saksnummer);
-        verify(behandlingService).replikerBehandlingOgBehandlingsresultat(behandling, Behandlingsstatus.OPPRETTET, behandling.getType());
+        verify(behandlingService).replikerBehandlingOgBehandlingsresultat(behandling, behandling.getType());
         verify(behandlingService).avsluttBehandling(behandling.getId());
         assertThat(replikertBehandlingID).isEqualTo(replikertBehandling.getId());
     }
@@ -346,10 +346,10 @@ class FagsakServiceTest {
         replikertBehandling.setId(3L);
 
         when(fagsakRepo.findBySaksnummer(saksnummer)).thenReturn(Optional.of(fagsak));
-        when(behandlingService.replikerBehandlingOgBehandlingsresultat(any(), any(), any())).thenReturn(replikertBehandling);
+        when(behandlingService.replikerBehandlingOgBehandlingsresultat(any(), any())).thenReturn(replikertBehandling);
 
         long behandlingID = fagsakService.opprettNyVurderingBehandling(saksnummer);
-        verify(behandlingService).replikerBehandlingOgBehandlingsresultat(behandlingSomBleFattetIdag, Behandlingsstatus.OPPRETTET, Behandlingstyper.NY_VURDERING);
+        verify(behandlingService).replikerBehandlingOgBehandlingsresultat(behandlingSomBleFattetIdag, Behandlingstyper.NY_VURDERING);
 
         assertThat(behandlingID).isEqualTo(replikertBehandling.getId());
     }
@@ -373,10 +373,10 @@ class FagsakServiceTest {
         replikertBehandling.setId(3L);
 
         when(fagsakRepo.findBySaksnummer(saksnummer)).thenReturn(Optional.of(fagsak));
-        when(behandlingService.replikerBehandlingOgBehandlingsresultat(any(), any(), any())).thenReturn(replikertBehandling);
+        when(behandlingService.replikerBehandlingOgBehandlingsresultat(any(), any())).thenReturn(replikertBehandling);
 
         long behandlingID = fagsakService.opprettNyVurderingBehandling(saksnummer);
-        verify(behandlingService).replikerBehandlingOgBehandlingsresultat(behandlingSomBleFattetIgår, Behandlingsstatus.OPPRETTET, Behandlingstyper.NY_VURDERING);
+        verify(behandlingService).replikerBehandlingOgBehandlingsresultat(behandlingSomBleFattetIgår, Behandlingstyper.NY_VURDERING);
 
         assertThat(behandlingID).isEqualTo(replikertBehandling.getId());
     }
@@ -396,10 +396,10 @@ class FagsakServiceTest {
         replikertBehandling.setId(3L);
 
         when(fagsakRepo.findBySaksnummer(saksnummer)).thenReturn(Optional.of(fagsak));
-        when(behandlingService.replikerBehandlingOgBehandlingsresultat(any(), any(), any())).thenReturn(replikertBehandling);
+        when(behandlingService.replikerBehandlingOgBehandlingsresultat(any(), any())).thenReturn(replikertBehandling);
 
         long behandlingID = fagsakService.opprettNyVurderingBehandling(saksnummer);
-        verify(behandlingService).replikerBehandlingOgBehandlingsresultat(behandling, Behandlingsstatus.OPPRETTET, Behandlingstyper.NY_VURDERING);
+        verify(behandlingService).replikerBehandlingOgBehandlingsresultat(behandling, Behandlingstyper.NY_VURDERING);
 
         assertThat(behandlingID).isEqualTo(replikertBehandling.getId());
     }
@@ -423,10 +423,10 @@ class FagsakServiceTest {
         replikertBehandling.setId(3L);
 
         when(fagsakRepo.findBySaksnummer(saksnummer)).thenReturn(Optional.of(fagsak));
-        when(behandlingService.replikerBehandlingOgBehandlingsresultat(any(), any(), any())).thenReturn(replikertBehandling);
+        when(behandlingService.replikerBehandlingOgBehandlingsresultat(any(), any())).thenReturn(replikertBehandling);
 
         long behandlingID = fagsakService.opprettNyVurderingBehandling(saksnummer);
-        verify(behandlingService).replikerBehandlingOgBehandlingsresultat(behandlingSomBleRegistrertIdag, Behandlingsstatus.OPPRETTET, Behandlingstyper.NY_VURDERING);
+        verify(behandlingService).replikerBehandlingOgBehandlingsresultat(behandlingSomBleRegistrertIdag, Behandlingstyper.NY_VURDERING);
 
         assertThat(behandlingID).isEqualTo(replikertBehandling.getId());
     }
@@ -451,10 +451,10 @@ class FagsakServiceTest {
         replikertBehandling.setId(3L);
 
         when(fagsakRepo.findBySaksnummer(saksnummer)).thenReturn(Optional.of(fagsak));
-        when(behandlingService.replikerBehandlingOgBehandlingsresultat(any(), any(), any())).thenReturn(replikertBehandling);
+        when(behandlingService.replikerBehandlingOgBehandlingsresultat(any(), any())).thenReturn(replikertBehandling);
 
         long behandlingID = fagsakService.opprettNyVurderingBehandling(saksnummer);
-        verify(behandlingService).replikerBehandlingOgBehandlingsresultat(behandlingSomBleRegistrertIgår, Behandlingsstatus.OPPRETTET, Behandlingstyper.NY_VURDERING);
+        verify(behandlingService).replikerBehandlingOgBehandlingsresultat(behandlingSomBleRegistrertIgår, Behandlingstyper.NY_VURDERING);
 
         assertThat(behandlingID).isEqualTo(replikertBehandling.getId());
     }

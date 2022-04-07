@@ -2,7 +2,6 @@ package no.nav.melosys.saksflyt.steg.behandling;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
@@ -43,7 +42,6 @@ public class ReplikerBehandling implements StegBehandler {
         Behandling tidligstInaktiveBehandling = fagsak.hentTidligstInaktivBehandling();
         Behandling nyBehandling = behandlingService.replikerBehandlingOgBehandlingsresultat(
             tidligstInaktiveBehandling,
-            Behandlingsstatus.OPPRETTET,
             prosessinstans.getData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.class)
         );
 

@@ -254,11 +254,10 @@ public class BehandlingService {
 
     @Transactional(rollbackFor = Exception.class)
     public Behandling replikerBehandlingOgBehandlingsresultat(Behandling tidligsteInaktiveBehandling,
-                                                              Behandlingsstatus behandlingsstatus,
                                                               Behandlingstyper behandlingstype) {
         Behandling behandlingsreplika;
         try {
-            behandlingsreplika = replikerBehandling(tidligsteInaktiveBehandling, behandlingsstatus, behandlingstype);
+            behandlingsreplika = replikerBehandling(tidligsteInaktiveBehandling, OPPRETTET, behandlingstype);
             behandlingsresultatService.replikerBehandlingsresultat(tidligsteInaktiveBehandling, behandlingsreplika);
         } catch (InvocationTargetException | NoSuchMethodException | InstantiationException | IllegalAccessException e) {
             throw new TekniskException(String.format("Klarte ikke replikere behandling %s for fagsak %s",

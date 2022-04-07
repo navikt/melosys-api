@@ -18,7 +18,6 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.medl.MedlPeriodeService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.persondata.PersondataFasade;
@@ -225,8 +224,7 @@ public class FagsakService {
         validerOpprettNyVurdering(fagsak);
         Behandling behandling = hentBehandlingSomErUtgangspunktForRevurdering(fagsak);
 
-        Behandling replikertBehandling = behandlingService.replikerBehandlingOgBehandlingsresultat(behandling, Behandlingsstatus.OPPRETTET,
-                                                                                                   avgjørBehandlingstype(fagsak));
+        Behandling replikertBehandling = behandlingService.replikerBehandlingOgBehandlingsresultat(behandling, avgjørBehandlingstype(fagsak));
 
         if (!fagsak.hentSistAktivBehandling().erAvsluttet()) {
             behandlingService.avsluttBehandling(behandling.getId());
@@ -259,13 +257,10 @@ public class FagsakService {
     }
 
     private Behandlingstyper avgjørBehandlingstype(Fagsak fagsak) {
-        Behandlingstyper behandlingstype;
-        if (!fagsak.harAktivBehandling()) {
-            behandlingstype = Behandlingstyper.NY_VURDERING;
-        } else {
-            behandlingstype = fagsak.hentSistAktivBehandling().getType();
+        if (fagsak.harAktivBehandling()) {
+            return fagsak.hentSistAktivBehandling().getType();
         }
-        return behandlingstype;
+        return Behandlingstyper.NY_VURDERING;
     }
 
     private void avsluttTidligereMedlPeriode(Behandlingsresultat behandlingsresultat) {

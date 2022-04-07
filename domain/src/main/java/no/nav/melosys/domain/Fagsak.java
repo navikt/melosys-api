@@ -19,7 +19,7 @@ import static no.nav.melosys.domain.kodeverk.Aktoersroller.TRYGDEMYNDIGHET;
 @EntityListeners(AuditingEntityListener.class)
 public class Fagsak extends RegistreringsInfo {
 
-    public static final String FINNER_IKKE_BEHANDLINGER_FOR_FAGSAK = "Finner ikke behandlinger for fagsak ";
+    private static final String FINNER_IKKE_BEHANDLINGER_FOR_FAGSAK = "Finner ikke behandlinger for fagsak ";
 
     @Id
     @Column(name = "saksnummer", nullable = false)
