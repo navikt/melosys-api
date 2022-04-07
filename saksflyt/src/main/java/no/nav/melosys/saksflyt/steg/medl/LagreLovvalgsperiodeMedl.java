@@ -1,9 +1,7 @@
 package no.nav.melosys.saksflyt.steg.medl;
 
-import java.util.Optional;
-
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
@@ -15,13 +13,15 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class LagreLovvalgsperiodeMedl implements StegBehandler {
-
     private final BehandlingsresultatService behandlingsresultatService;
     private final MedlPeriodeService medlPeriodeService;
+    private final Unleash unleash;
 
-    public LagreLovvalgsperiodeMedl(BehandlingsresultatService behandlingsresultatService, MedlPeriodeService medlPeriodeService) {
+    public LagreLovvalgsperiodeMedl(BehandlingsresultatService behandlingsresultatService, MedlPeriodeService medlPeriodeService,
+                                    Unleash unleash) {
         this.behandlingsresultatService = behandlingsresultatService;
         this.medlPeriodeService = medlPeriodeService;
+        this.unleash = unleash;
     }
 
     @Override
@@ -32,14 +32,23 @@ public class LagreLovvalgsperiodeMedl implements StegBehandler {
     @Override
     public void utfør(Prosessinstans prosessinstans) {
         final long behandlingID = prosessinstans.getBehandling().getId();
-        final Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
-        final Optional<Lovvalgsperiode> lovvalgsperiode = behandlingsresultat.finnValidertLovvalgsperiode();
-
-        if (lovvalgsperiode.isPresent()) {
-            oppdaterLovvalgsperiode(prosessinstans.getBehandling(), lovvalgsperiode.get());
-        } else if (!behandlingsresultat.erAvslagManglendeOpplysninger()) {
-            throw new FunksjonellException("Finner ingen lovvalgsperiode for behandling " + behandlingID);
+        final var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
+        if (behandlingsresultat.erAvslagManglendeOpplysninger()) {
+            return;
         }
+
+        final var lovvalgsperiode = behandlingsresultat.hentValidertLovvalgsperiode();
+        final var behandling = prosessinstans.getBehandling();
+        if (unleash.isEnabled("melosys.api.ny.vurdering.medlperiode.beholdes") && behandling.erNyVurdering()) {
+            lovvalgsperiode.setMedlPeriodeID(hentOpprinneligMedlPeriodeID(behandling));
+        }
+        oppdaterLovvalgsperiode(behandling, lovvalgsperiode);
+    }
+
+    private Long hentOpprinneligMedlPeriodeID(Behandling behandling) {
+        final var opprinnelingResultat = behandlingsresultatService.hentBehandlingsresultat(
+            behandling.getOpprinneligBehandling().getId());
+        return opprinnelingResultat.hentValidertLovvalgsperiode().getMedlPeriodeID();
     }
 
     private void oppdaterLovvalgsperiode(Behandling behandling, Lovvalgsperiode lovvalgsperiode) {
@@ -50,7 +59,8 @@ public class LagreLovvalgsperiodeMedl implements StegBehandler {
         } else if (lovvalgsperiode.erInnvilget()) {
             opprettEllerOppdaterMedlPeriode(behandling, lovvalgsperiode);
         } else {
-            throw new FunksjonellException("Ukjent eller ikke-eksisterende innvilgelsesresultat for en lovvalgsperiode: " + lovvalgsperiode.getInnvilgelsesresultat());
+            throw new FunksjonellException(
+                "Ukjent eller ikke-eksisterende innvilgelsesresultat for en lovvalgsperiode: " + lovvalgsperiode.getInnvilgelsesresultat());
         }
     }
 

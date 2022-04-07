@@ -11,6 +11,8 @@ import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdress
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.integrasjon.joark.DokumentKategoriKode;
 import no.nav.melosys.service.dokument.DokumentproduksjonsInfo;
 
@@ -22,8 +24,17 @@ public final class TestdataFactory {
     public static Behandling lagBehandling() {
         Behandling behandling = new Behandling();
         behandling.setId(1L);
+        behandling.setType(Behandlingstyper.SOEKNAD);
+        behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         behandling.setSaksopplysninger(singleton(lagPersonopplysning()));
         behandling.setFagsak(lagFagsak());
+        return behandling;
+    }
+
+    public static Behandling lagBehandlingNyVurdering() {
+        var behandling = lagBehandling();
+        behandling.setId(3L);
+        behandling.setType(Behandlingstyper.NY_VURDERING);
         return behandling;
     }
 
