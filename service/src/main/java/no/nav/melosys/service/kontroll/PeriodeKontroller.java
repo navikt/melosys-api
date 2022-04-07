@@ -67,7 +67,7 @@ public final class PeriodeKontroller {
         return date1.equals(date2);
     }
 
-    public static boolean periodeOverlapperMedInklusivPerioderFraSed(ErPeriode periode1, ErPeriode periode2) {
+    public static boolean periodeOverlapperMedInklusivPerioder(ErPeriode periode1, ErPeriode periode2) {
         LocalDate inklusivPeriode2Fom = periode2.getFom() != null ? periode2.getFom().plusDays(1) : null;
         return periodeOverlapper(periode1.getFom(), periode1.getTom(), inklusivPeriode2Fom, periode2.getTom());
     }

@@ -45,7 +45,7 @@ class PeriodeKontrollerTest {
     }
 
     @Test
-    void periodeOver24MånederOgEnDag_periode24MånederMinus1Dag_true() {
+    void periodeOver24MånederOgEnDag_periode24MånederMinus1Dag_false() {
         assertThat(PeriodeKontroller.periodeOver24MånederOgEnDag(LocalDate.now(), LocalDate.now().plusMonths(24).minusDays(1))).isFalse();
     }
 
