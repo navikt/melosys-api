@@ -2,6 +2,7 @@ package no.nav.melosys.saksflyt.steg.medl;
 
 import java.util.NoSuchElementException;
 
+import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
@@ -47,7 +48,9 @@ class LagreLovvalgsperiodeMedlTest {
 
     @BeforeEach
     public void setup() {
-        lagreLovvalgsperiodeMedl = new LagreLovvalgsperiodeMedl(behandlingsresultatService, medlPeriodeService);
+        final FakeUnleash unleash = new FakeUnleash();
+        unleash.enable("melosys.api.ny.vurdering.medlperiode.beholdes");
+        lagreLovvalgsperiodeMedl = new LagreLovvalgsperiodeMedl(behandlingsresultatService, medlPeriodeService, unleash);
 
         behandling.setId(behandlingID);
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
@@ -124,7 +127,7 @@ class LagreLovvalgsperiodeMedlTest {
 
         lagreLovvalgsperiodeMedl.utfør(prosessinstans);
         verify(medlPeriodeService).oppdaterPeriodeEndelig(lovvalgsperiodeArgumentCaptor.capture(), eq(false));
-        assertThat(lovvalgsperiodeArgumentCaptor.getValue().getMedlPeriodeID()).isEqualTo(777L);
+        assertThat(lovvalgsperiodeArgumentCaptor.getValue().getMedlPeriodeID()).isEqualTo((opprinneligLovvalgsperiode.getMedlPeriodeID()));
     }
 
     @Test
