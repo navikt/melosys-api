@@ -2,7 +2,7 @@ on:
   workflow_dispatch:
     inputs:
       environment:
-        description: 'Miljø (dev eller q1)'
+        description: 'Miljø (dev, q1 eller prod)'
         required: true
         default: 'dev'
 
@@ -77,6 +77,14 @@ jobs:
     if: always() && (needs.docker.result == 'success' || needs.docker.result == 'skipped')
     steps:
       - uses: actions/checkout@v3
+      - name: Deploy to prod
+        if: github.event.inputs.environment == 'prod'
+        run: |
+          echo "CLUSTER=prod-fss" >> $GITHUB_ENV
+          echo "URL=melosys-api.intern.nav.no" >> $GITHUB_ENV
+          echo "KAFKA_POOL=nav-prod" >> $GITHUB_ENV
+          echo "VAULT_CLUSTER=prod" >> $GITHUB_ENV
+          echo "APP_NAME=melosys" >> $GITHUB_ENV
       - name: Deploy to q1
         if: github.event.inputs.environment == 'q1'
         run: |
@@ -91,7 +99,6 @@ jobs:
         run: |
           echo "CLUSTER=dev-fss" >> $GITHUB_ENV
           echo "URL=melosys-api.dev.intern.nav.no" >> $GITHUB_ENV
-          echo "ENVIRONMENT=dev" >> $GITHUB_ENV
           echo "KAFKA_POOL=nav-dev" >> $GITHUB_ENV
           echo "VAULT_CLUSTER=dev" >> $GITHUB_ENV
           echo "APP_NAME=melosys" >> $GITHUB_ENV
