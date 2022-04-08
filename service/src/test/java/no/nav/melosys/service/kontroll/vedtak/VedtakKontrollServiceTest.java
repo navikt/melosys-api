@@ -80,7 +80,7 @@ class VedtakKontrollServiceTest {
     }
 
     @Test
-    void kontrollerInnvilgelse_feilFraKontroller_kasterExceptionMedFeilkode() {
+    void kontrollerVedtakMedNyeRegisteropplysninger_feilFraKontroller_kasterExceptionMedFeilkode() {
         var behandlingsresultat = lagBehandlingsresultat();
         when(persondataFasade.hentFolkeregisterident(behandling.getFagsak().hentAktørID())).thenReturn("fnr");
 
@@ -93,7 +93,7 @@ class VedtakKontrollServiceTest {
     }
 
     @Test
-    void kontrollerInnvilgelse_oppdaterRegisteropplysninger_oppdatererRegisteropplysninger() throws ValideringException {
+    void kontrollerVedtak_oppdaterRegisteropplysninger_oppdatererRegisteropplysninger() throws ValideringException {
         lovvalgsperiode.setTom(LocalDate.now());
         var behandlingsresultat = lagBehandlingsresultat();
         when(behandlingsresultatService.hentBehandlingsresultat(behandlingID)).thenReturn(behandlingsresultat);
@@ -104,7 +104,7 @@ class VedtakKontrollServiceTest {
     }
 
     @Test
-    void kontrollerInnvilgelse_ikkeOppdaterRegisteropplysninger_oppdatererkke() throws ValideringException {
+    void kontrollererVedtak_ikkeOppdaterRegisteropplysninger_oppdatererkke() throws ValideringException {
         lovvalgsperiode.setTom(LocalDate.now());
 
         vedtakKontrollService.kontrollerVedtak(behandling.getId(), false, Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN);
