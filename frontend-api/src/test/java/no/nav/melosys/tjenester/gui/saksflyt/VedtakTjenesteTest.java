@@ -200,6 +200,7 @@ class VedtakTjenesteTest extends JsonSchemaTestParent {
     private FattVedtakDto lagFattVedtakDto() {
         var fattVedtak = new FattVedtakDto();
         fattVedtak.setVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK);
+        fattVedtak.setBehandlingsresultatTypeKode(Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN);
         return fattVedtak;
     }
 }
