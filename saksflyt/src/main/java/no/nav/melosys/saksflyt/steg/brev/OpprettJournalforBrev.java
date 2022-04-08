@@ -143,7 +143,7 @@ public class OpprettJournalforBrev implements StegBehandler {
     }
 
     private String hentBrukerFolkeregisterIdent(Behandling behandling) {
-        return persondataFasade.hentFolkeregisterident(behandling.getFagsak().hentAktørID());
+        return persondataFasade.hentFolkeregisterident(behandling.getFagsak().hentBrukersAktørID());
     }
 
     public String utledJournalføringsTittel(Behandling behandling, DokumentproduksjonsInfo dokumentproduksjonsInfo, DokgenBrevbestilling brevbestilling, Aktoer mottaker) {

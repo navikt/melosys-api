@@ -72,7 +72,7 @@ public class AnmodningUnntakKontrollService implements AdresseUtlandKontroller {
     }
 
     private Persondata hentPersondata(Behandling behandling) {
-        return persondataFasade.hentPerson(behandling.getFagsak().hentAktørID());
+        return persondataFasade.hentPerson(behandling.getFagsak().hentBrukersAktørID());
     }
 
     static Kontrollfeil harRegistrertAdresse(AnmodningUnntakKontrollData kontrollData) {

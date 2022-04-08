@@ -80,7 +80,7 @@ public class DokgenMapperDatahenter {
 
     Persondata hentPersondata(DokgenBrevbestilling brevbestilling) {
         final var behandling = brevbestilling.getBehandling();
-        return persondataFasade.hentPerson(behandling.getFagsak().hentAktørID());
+        return persondataFasade.hentPerson(behandling.getFagsak().hentBrukersAktørID());
     }
 
     String hentSammensattNavn(String fnr) {

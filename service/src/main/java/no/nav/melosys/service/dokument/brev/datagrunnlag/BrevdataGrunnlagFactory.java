@@ -40,9 +40,9 @@ public class BrevdataGrunnlagFactory {
 
     private Persondata hentPersondata(Behandling behandling) {
         if (avklartefaktaService.hentAvklarteMedfølgendeBarn(behandling.getId()).finnes()) {
-            return persondataFasade.hentPerson(behandling.getFagsak().hentAktørID(), Informasjonsbehov.MED_FAMILIERELASJONER);
+            return persondataFasade.hentPerson(behandling.getFagsak().hentBrukersAktørID(), Informasjonsbehov.MED_FAMILIERELASJONER);
         } else {
-            return persondataFasade.hentPerson(behandling.getFagsak().hentAktørID());
+            return persondataFasade.hentPerson(behandling.getFagsak().hentBrukersAktørID());
         }
     }
 }

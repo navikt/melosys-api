@@ -97,7 +97,7 @@ public class InngangsvilkaarService {
 
     private Set<Land> hentStatsborgerskapForPerioden(long behandlingID, ErPeriode periode) {
         final var behandling = behandlingService.hentBehandling(behandlingID);
-        final String aktørID = behandling.getFagsak().hentAktørID();
+        final String aktørID = behandling.getFagsak().hentBrukersAktørID();
         return avgjørGyldigeStatsborgerskapForPerioden(persondataFasade.hentStatsborgerskap(aktørID), periode);
     }
 

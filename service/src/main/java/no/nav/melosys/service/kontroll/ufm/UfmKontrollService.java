@@ -52,7 +52,7 @@ public class UfmKontrollService {
     }
 
     private Persondata hentPersondata(Behandling behandling) {
-        return persondataFasade.hentPerson(behandling.getFagsak().hentAktørID());
+        return persondataFasade.hentPerson(behandling.getFagsak().hentBrukersAktørID());
     }
 
     private List<Kontroll_begrunnelser> utførKontroller(UfmKontrollData kontrollData,
