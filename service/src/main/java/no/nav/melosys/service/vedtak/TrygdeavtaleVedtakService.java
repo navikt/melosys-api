@@ -63,7 +63,7 @@ public class TrygdeavtaleVedtakService {
         behandlingsresultat.setType(request.getBehandlingsresultatTypeKode());
 
         if (behandlingsresultat.erInnvilgelse()) {
-            vedtakKontrollService.kontrollerInnvilgelse(behandling, behandlingsresultat, request.getVedtakstype(), Sakstyper.TRYGDEAVTALE);
+            vedtakKontrollService.kontrollerVedtakMedNyeRegisteropplysninger(behandling, behandlingsresultat, Sakstyper.TRYGDEAVTALE, false);
         }
 
         oppdaterBehandlingsresultat(behandlingsresultat, request);

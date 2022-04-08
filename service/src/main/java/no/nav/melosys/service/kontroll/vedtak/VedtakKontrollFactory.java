@@ -30,6 +30,14 @@ class VedtakKontrollFactory {
         VedtakKontroller::representantIUtlandetMangler
     );
 
+    private static final Set<Function<VedtakKontrollData, Kontrollfeil>> KONTROLLER_AVSLAG = Set.of(
+        VedtakKontroller::adresseRegistrert
+    );
+
+    static Set<Function<VedtakKontrollData, Kontrollfeil>> hentKontrollerForAvslag() {
+        return KONTROLLER_AVSLAG;
+    }
+
     static Set<Function<VedtakKontrollData, Kontrollfeil>> hentKontrollerForVedtak(Sakstyper sakstype) {
         return switch (sakstype) {
             case EU_EOS -> KONTROLLER_EU_EOS;
