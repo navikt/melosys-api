@@ -24,11 +24,11 @@ class AaregConsumerAutoTokenIT(
     }
 
     @Test
-    fun authorizationSkalKommeFraBruker() {
+    fun authorizationSkalKommeFraSystemSelvOmKallKommerFraBruker() {
         executeFromController {
             verifyHeaders(
                 mapOf<String, StringValuePattern>(
-                    Pair("Authorization", WireMock.equalTo("Bearer --token-from-user--")),
+                    Pair("Authorization", WireMock.equalTo("Bearer --token-from-system--")),
                     Pair("Nav-Consumer-Token", WireMock.equalTo("Bearer --token-from-system--"))
                 )
             )
