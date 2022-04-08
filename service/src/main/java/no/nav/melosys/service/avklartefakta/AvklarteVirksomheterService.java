@@ -18,7 +18,7 @@ import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.kodeverk.KodeverkService;
-import no.nav.melosys.service.registeropplysninger.RegisterOppslagService;
+import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
@@ -30,16 +30,16 @@ import static no.nav.melosys.domain.kodeverk.Avklartefaktatyper.VIRKSOMHET;
 @Primary
 public class AvklarteVirksomheterService {
     protected final AvklartefaktaService avklartefaktaService;
-    protected final RegisterOppslagService registerOppslagService;
+    protected final OrganisasjonOppslagService organisasjonOppslagService;
     protected final BehandlingService behandlingService;
     protected final KodeverkService kodeverkService;
 
     public AvklarteVirksomheterService(AvklartefaktaService avklartefaktaService,
-                                       RegisterOppslagService registerOppslagService,
+                                       OrganisasjonOppslagService organisasjonOppslagService,
                                        BehandlingService behandlingService,
                                        KodeverkService kodeverkService) {
         this.avklartefaktaService = avklartefaktaService;
-        this.registerOppslagService = registerOppslagService;
+        this.organisasjonOppslagService = organisasjonOppslagService;
         this.behandlingService = behandlingService;
         this.kodeverkService = kodeverkService;
     }
@@ -81,7 +81,7 @@ public class AvklarteVirksomheterService {
 
     public List<AvklartVirksomhet> hentNorskeSelvstendigeForetak(Behandling behandling, Function<OrganisasjonDokument, Adresse> adressekonverterer) {
         Set<String> selvstendigeForetakOrgnumre = hentNorskeSelvstendigeForetakOrgnumre(behandling);
-        return registerOppslagService.hentOrganisasjoner(selvstendigeForetakOrgnumre).stream()
+        return organisasjonOppslagService.hentOrganisasjoner(selvstendigeForetakOrgnumre).stream()
             .map(org -> new AvklartVirksomhet(org.lagSammenslåttNavn(), org.getOrgnummer(), adressekonverterer.apply(org), Yrkesaktivitetstyper.SELVSTENDIG))
             .collect(Collectors.toList());
     }
@@ -92,7 +92,7 @@ public class AvklarteVirksomheterService {
 
     public List<AvklartVirksomhet> hentNorskeArbeidsgivere(Behandling behandling, Function<OrganisasjonDokument, Adresse> adressekonverterer) {
         Set<String> arbeidsgivendeOrgnumre = hentNorskeArbeidsgivendeOrgnumre(behandling);
-        return registerOppslagService.hentOrganisasjoner(arbeidsgivendeOrgnumre).stream()
+        return organisasjonOppslagService.hentOrganisasjoner(arbeidsgivendeOrgnumre).stream()
             .map(org -> new AvklartVirksomhet(org.lagSammenslåttNavn(), org.getOrgnummer(), adressekonverterer.apply(org), Yrkesaktivitetstyper.LOENNET_ARBEID))
             .collect(Collectors.toList());
     }

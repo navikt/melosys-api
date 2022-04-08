@@ -53,17 +53,14 @@ public class HentRegisteropplysninger implements StegBehandler {
         if (behandling.getFagsak().getType() == Sakstyper.EU_EOS) {
             registeropplysningerRequestBuilder
                 .saksopplysningTyper(utledSaksopplysningTyper(prosessinstans.getBehandling().getTema()));
-        } else {
-            registeropplysningerRequestBuilder
-                .saksopplysningTyper(RegisteropplysningerRequest.SaksopplysningTyper.builder().personopplysninger().build());
+
+            behandling.finnPeriode().ifPresent(periode -> {
+                registeropplysningerRequestBuilder.fom(periode.getFom());
+                registeropplysningerRequestBuilder.tom(periode.getTom());
+            });
+
+            registeropplysningerService.hentOgLagreOpplysninger(registeropplysningerRequestBuilder.build());
+            log.info("Hentet registeropplysninger for behandling {}", behandling.getId());
         }
-
-        behandling.finnPeriode().ifPresent(periode -> {
-            registeropplysningerRequestBuilder.fom(periode.getFom());
-            registeropplysningerRequestBuilder.tom(periode.getTom());
-        });
-
-        registeropplysningerService.hentOgLagreOpplysninger(registeropplysningerRequestBuilder.build());
-        log.info("Hentet registeropplysninger for behandling {}", behandling.getId());
     }
 }

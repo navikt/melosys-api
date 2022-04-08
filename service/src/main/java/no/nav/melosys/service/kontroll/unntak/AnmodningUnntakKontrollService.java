@@ -5,7 +5,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 
-import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
@@ -26,18 +25,14 @@ public class AnmodningUnntakKontrollService implements AdresseUtlandKontroller {
     private final AvklarteVirksomheterService avklarteVirksomheterService;
     private final BehandlingService behandlingService;
     private final PersondataFasade persondataFasade;
-    private final Unleash unleash;
 
     public AnmodningUnntakKontrollService(AnmodningsperiodeService anmodningsperiodeService,
-                                          AvklarteVirksomheterService avklarteVirksomheterService,
-                                          BehandlingService behandlingService,
-                                          PersondataFasade persondataFasade,
-                                          Unleash unleash) {
+                                          AvklarteVirksomheterService avklarteVirksomheterService, BehandlingService behandlingService,
+                                          PersondataFasade persondataFasade) {
         this.anmodningsperiodeService = anmodningsperiodeService;
         this.avklarteVirksomheterService = avklarteVirksomheterService;
         this.behandlingService = behandlingService;
         this.persondataFasade = persondataFasade;
-        this.unleash = unleash;
     }
 
     public Collection<Kontrollfeil> utførKontroller(long behandlingID) {
@@ -77,10 +72,7 @@ public class AnmodningUnntakKontrollService implements AdresseUtlandKontroller {
     }
 
     private Persondata hentPersondata(Behandling behandling) {
-        if (unleash.isEnabled("melosys.pdl.aktiv")) {
-            return persondataFasade.hentPerson(behandling.getFagsak().hentBrukersAktørID());
-        }
-        return behandling.hentPersonDokument();
+        return persondataFasade.hentPerson(behandling.getFagsak().hentBrukersAktørID());
     }
 
     static Kontrollfeil harRegistrertAdresse(AnmodningUnntakKontrollData kontrollData) {

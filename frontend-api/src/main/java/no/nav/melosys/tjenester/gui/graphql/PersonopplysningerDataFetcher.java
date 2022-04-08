@@ -56,7 +56,9 @@ public class PersonopplysningerDataFetcher implements DataFetcher<Personopplysni
             .sorted(Comparator.comparing(StatsborgerskapDto::gyldigFraOgMed,
                 Comparator.nullsFirst(Comparator.reverseOrder())))
             .toList();
+
         return new PersonopplysningerDto(bostedsadresseDtoList,
+            FoedselTilDtoKonverter.tilDto(personMedHistorikk.fødsel()),
             FolkeregisteridentifikatorTilDtoKonverter.tilDto(personMedHistorikk.folkeregisteridentifikator()),
             folkeregisterpersonstatusDtoList,
             personMedHistorikk.kjønn(),

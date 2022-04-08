@@ -4,7 +4,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Bostedsland;
 import no.nav.melosys.domain.Fagsak;
@@ -41,13 +40,10 @@ public class VideresendSoknadService {
     private final OppgaveService oppgaveService;
     private final PersondataFasade persondataFasade;
     private final ProsessinstansService prosessinstansService;
-    private final Unleash unleash;
 
-    public VideresendSoknadService(BehandlingsresultatService behandlingsresultatService, EessiService eessiService,
-                                   FagsakService fagsakService, JoarkFasade joarkFasade,
-                                   LandvelgerService landvelgerService, OppgaveService oppgaveService,
-                                   PersondataFasade persondataFasade, ProsessinstansService prosessinstansService,
-                                   Unleash unleash) {
+    public VideresendSoknadService(EessiService eessiService, FagsakService fagsakService, BehandlingsresultatService behandlingsresultatService,
+                                   JoarkFasade joarkFasade, LandvelgerService landvelgerService, OppgaveService oppgaveService,
+                                   PersondataFasade persondataFasade, ProsessinstansService prosessinstansService) {
         this.behandlingsresultatService = behandlingsresultatService;
         this.eessiService = eessiService;
         this.fagsakService = fagsakService;
@@ -56,7 +52,6 @@ public class VideresendSoknadService {
         this.oppgaveService = oppgaveService;
         this.persondataFasade = persondataFasade;
         this.prosessinstansService = prosessinstansService;
-        this.unleash = unleash;
     }
 
     @Transactional
@@ -122,9 +117,6 @@ public class VideresendSoknadService {
     }
 
     private Persondata hentPersondata(Behandling behandling) {
-        if (unleash.isEnabled("melosys.pdl.aktiv")) {
-            return persondataFasade.hentPerson(behandling.getFagsak().hentBrukersAktørID());
-        }
-        return behandling.hentPersonDokument();
+        return persondataFasade.hentPerson(behandling.getFagsak().hentBrukersAktørID());
     }
 }

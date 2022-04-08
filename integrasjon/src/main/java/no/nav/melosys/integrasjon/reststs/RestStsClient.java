@@ -48,7 +48,7 @@ public class RestStsClient implements RestConsumer {
         log.info("Henter oidc-token fra security-token-service");
         try {
             ResponseEntity<Map<String, Object>> response = restTemplate
-                .exchange(createUriString(), HttpMethod.GET, createHttpEntity(), new ParameterizedTypeReference<Map<String, Object>>() {
+                .exchange(createUriString(), HttpMethod.GET, createHttpEntity(), new ParameterizedTypeReference<>() {
                 });
 
             Map<String, Object> responseBody = Objects.requireNonNull(response.getBody());
@@ -82,7 +82,7 @@ public class RestStsClient implements RestConsumer {
         headers.add(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE);
         headers.add(HttpHeaders.AUTHORIZATION, getAuth());
 
-        return new HttpEntity(headers);
+        return new HttpEntity<>(headers);
     }
 
     @Override
