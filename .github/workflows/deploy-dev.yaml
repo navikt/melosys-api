@@ -44,7 +44,7 @@ jobs:
         uses: navikt/digihot-deploy/actions/pre-deploy@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - uses: actions/download-artifact@v2
+      - uses: actions/download-artifact@v3
         with:
           name: melosys-app
       - name: Build and publish Docker image
