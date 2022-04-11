@@ -26,7 +26,7 @@ jobs:
         run: |
           JAVA_HOME=/usr/local/openjdk-17
           mvn clean package -B -e -U
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           name: melosys-app
           path: |
