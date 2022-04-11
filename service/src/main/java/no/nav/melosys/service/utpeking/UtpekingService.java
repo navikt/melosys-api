@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.melding.UtpekingAvvis;
@@ -47,6 +48,7 @@ public class UtpekingService {
     private final LovvalgsperiodeService lovvalgsperiodeService;
     private final OppgaveService oppgaveService;
     private final ProsessinstansService prosessinstansService;
+    private final Unleash unleash;
     private final UtpekingsperiodeRepository utpekingsperiodeRepository;
     private final VedtakKontrollService vedtakKontrollService;
     private final ApplicationEventMulticaster melosysEventMulticaster;
@@ -55,7 +57,7 @@ public class UtpekingService {
                            EessiService eessiService, LandvelgerService landvelgerService,
                            LovvalgsperiodeService lovvalgsperiodeService, OppgaveService oppgaveService,
                            ProsessinstansService prosessinstansService,
-                           UtpekingsperiodeRepository utpekingsperiodeRepository, VedtakKontrollService vedtakKontrollService,
+                           Unleash unleash, UtpekingsperiodeRepository utpekingsperiodeRepository, VedtakKontrollService vedtakKontrollService,
                            ApplicationEventMulticaster melosysEventMulticaster) {
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
@@ -64,6 +66,7 @@ public class UtpekingService {
         this.lovvalgsperiodeService = lovvalgsperiodeService;
         this.oppgaveService = oppgaveService;
         this.prosessinstansService = prosessinstansService;
+        this.unleash = unleash;
         this.utpekingsperiodeRepository = utpekingsperiodeRepository;
         this.vedtakKontrollService = vedtakKontrollService;
         this.melosysEventMulticaster = melosysEventMulticaster;
@@ -94,8 +97,7 @@ public class UtpekingService {
     public void utpekLovvalgsland(Fagsak fagsak,
                                   Set<String> mottakerinstitusjoner,
                                   String ytterligereInformasjonSed,
-                                  String fritekstBrev)
-        {
+                                  String fritekstBrev) {
         Behandling behandling = fagsak.hentAktivBehandling();
         if (behandling.getTema() != Behandlingstema.ARBEID_FLERE_LAND) {
             throw new FunksjonellException("Utpeking kan ikke skje for en behandling med tema " + behandling.getTema());
@@ -131,7 +133,7 @@ public class UtpekingService {
         behandlingsresultat.setType(Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND);
         behandlingsresultat.setFastsattAvLand(Landkoder.NO);
         behandlingsresultat.settVedtakMetadata(Vedtakstyper.FØRSTEGANGSVEDTAK, null, LocalDate.now().plusWeeks(
-                VedtaksfattingFasade.FRIST_KLAGE_UKER));
+            VedtaksfattingFasade.FRIST_KLAGE_UKER));
         behandlingsresultatService.lagre(behandlingsresultat);
 
         melosysEventMulticaster.multicastEvent(new VedtakMetadataLagretEvent(behandlingsresultat.getId()));
@@ -147,6 +149,13 @@ public class UtpekingService {
         validerAvslagUtpeking(utpekingAvvis);
 
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
+
+        if (unleash.isEnabled("melosys.eessi.handlingssjekk_sed")) {
+            String rinaSaksnummer = behandling.hentSedDokument().getRinaSaksnummer();
+            if (!eessiService.kanOppretteSedPåBuc(rinaSaksnummer)) {
+                throw new FunksjonellException("Kan ikke opprette Sed på rinaSaknummer: " + rinaSaksnummer);
+            }
+        }
 
         if (!behandling.erAktiv()) {
             throw new FunksjonellException("Behandling " + behandlingID + " er ikke aktiv!");

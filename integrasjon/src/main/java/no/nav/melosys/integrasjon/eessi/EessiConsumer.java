@@ -9,7 +9,9 @@ import no.nav.melosys.domain.eessi.sed.SedDataDto;
 import no.nav.melosys.domain.eessi.sed.SedGrunnlagDto;
 import no.nav.melosys.integrasjon.eessi.dto.OpprettSedDto;
 import no.nav.melosys.integrasjon.eessi.dto.SaksrelasjonDto;
+import org.springframework.retry.annotation.Retryable;
 
+@Retryable
 public interface EessiConsumer {
 
     OpprettSedDto opprettBucOgSed(SedDataDto sedDataDto,
@@ -39,4 +41,6 @@ public interface EessiConsumer {
     SedGrunnlagDto hentSedGrunnlag(String rinaSaksnummer, String rinaDokumentID);
 
     void lukkBuc(String rinaSaksnummer);
+
+    List<String> hentMuligeAksjoner(String rinaSaksnummer);
 }

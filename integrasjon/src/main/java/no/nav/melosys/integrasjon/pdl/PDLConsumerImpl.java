@@ -21,13 +21,11 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.retry.annotation.Retryable;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import static no.nav.melosys.integrasjon.pdl.dto.identer.Query.HENT_IDENTER_QUERY;
 import static no.nav.melosys.integrasjon.pdl.dto.person.Query.*;
 
-@Retryable
 public class PDLConsumerImpl implements PDLConsumer {
     private static final Logger log = LoggerFactory.getLogger(PDLConsumerImpl.class);
     private static final ObjectWriter JSON_WRITER = new ObjectMapper().writer();
@@ -61,18 +59,8 @@ public class PDLConsumerImpl implements PDLConsumer {
     }
 
     @Override
-    public Person hentBarnMedHistorikk(String ident) {
-        return hentPersondata(HENT_BARN_QUERY, ident, true);
-    }
-
-    @Override
     public Person hentForelder(String ident) {
         return hentPersondata(HENT_FORELDER_QUERY, ident, false);
-    }
-
-    @Override
-    public Person hentForelderMedHistorikk(String ident) {
-        return hentPersondata(HENT_FORELDER_QUERY, ident, true);
     }
 
     @Override
@@ -93,11 +81,6 @@ public class PDLConsumerImpl implements PDLConsumer {
     @Override
     public Person hentRelatertVedSivilstand(String ident) {
         return hentPersondata(HENT_RELATERT_VED_SIVILSTAND_QUERY, ident, false);
-    }
-
-    @Override
-    public Person hentRelatertVedSivilstandMedHistorikk(String ident) {
-        return hentPersondata(HENT_RELATERT_VED_SIVILSTAND_QUERY, ident, true);
     }
 
     @Override

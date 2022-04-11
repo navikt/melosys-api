@@ -97,7 +97,7 @@ public class SvarAnmodningUnntakSedRuter implements SedRuterForSedTyper {
     }
 
     private void opprettOppgave(Behandling behandling, String sedType) {
-        String aktørID = behandling.getFagsak().hentAktørID();
+        String aktørID = behandling.getFagsak().hentBrukersAktørID();
 
         Oppgave.Builder oppgaveBuilder = OppgaveFactory.lagBehandlingsOppgaveForType(behandling.getTema(), behandling.getType())
             .setAktørId(aktørID)

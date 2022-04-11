@@ -5,7 +5,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 
-import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
@@ -35,16 +34,15 @@ public class VedtakKontrollService {
     private final LovvalgsperiodeService lovvalgsperiodeService;
     private final PersondataFasade persondataFasade;
     private final RegisteropplysningerService registeropplysningerService;
-    private final Unleash unleash;
 
-    public VedtakKontrollService(BehandlingService behandlingService, BehandlingsresultatService behandlingsresultatService, LovvalgsperiodeService lovvalgsperiodeService,
-                                 PersondataFasade persondataFasade, RegisteropplysningerService registeropplysningerService, Unleash unleash) {
+    public VedtakKontrollService(BehandlingService behandlingService, BehandlingsresultatService behandlingsresultatService,
+                                 LovvalgsperiodeService lovvalgsperiodeService, PersondataFasade persondataFasade,
+                                 RegisteropplysningerService registeropplysningerService) {
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
         this.persondataFasade = persondataFasade;
         this.registeropplysningerService = registeropplysningerService;
-        this.unleash = unleash;
     }
 
     @Transactional
@@ -69,7 +67,7 @@ public class VedtakKontrollService {
 
     private void hentNyeRegisteropplysninger(Behandlingsresultat behandlingsresultat, Behandling behandling) {
         Lovvalgsperiode lovvalgsperiode = behandlingsresultat.hentValidertLovvalgsperiode();
-        String fnr = persondataFasade.hentFolkeregisterident(behandling.getFagsak().hentAktørID());
+        String fnr = persondataFasade.hentFolkeregisterident(behandling.getFagsak().hentBrukersAktørID());
 
         registeropplysningerService.hentOgLagreOpplysninger(
             RegisteropplysningerRequest.builder()
@@ -117,9 +115,6 @@ public class VedtakKontrollService {
     }
 
     private Persondata hentPersondata(Behandling behandling) {
-        if (unleash.isEnabled("melosys.pdl.aktiv")) {
-            return persondataFasade.hentPerson(behandling.getFagsak().hentAktørID());
-        }
-        return behandling.hentPersonDokument();
+        return persondataFasade.hentPerson(behandling.getFagsak().hentBrukersAktørID());
     }
 }

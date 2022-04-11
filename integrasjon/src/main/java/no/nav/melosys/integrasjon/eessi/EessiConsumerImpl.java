@@ -43,7 +43,8 @@ public class EessiConsumerImpl implements EessiConsumer, JsonRestIntegrasjon {
             "/buc/{bucType}?sendAutomatisk={sendAutomatisk}&oppdaterEksisterende={oppdaterEksisterendeOmFinnes}",
             HttpMethod.POST,
             new HttpEntity<>(new OpprettBucOgSedDto(sedDataDto, vedlegg), getDefaultHeaders()),
-            new ParameterizedTypeReference<OpprettSedDto>() {},
+            new ParameterizedTypeReference<OpprettSedDto>() {
+            },
             bucType,
             sendAutomatisk,
             oppdaterEksisterendeOmFinnes);
@@ -72,14 +73,15 @@ public class EessiConsumerImpl implements EessiConsumer, JsonRestIntegrasjon {
     @Override
     public MelosysEessiMelding hentMelosysEessiMeldingFraJournalpostID(String journalpostID) {
         return exchange("/journalpost/{journalpostID}/eessimelding", HttpMethod.GET,
-            new HttpEntity<>(getDefaultHeaders()), new ParameterizedTypeReference<MelosysEessiMelding>(){
+            new HttpEntity<>(getDefaultHeaders()), new ParameterizedTypeReference<MelosysEessiMelding>() {
             }, journalpostID);
     }
 
     @Override
     public void lagreSaksrelasjon(SaksrelasjonDto saksrelasjonDto) {
         exchange("/sak", HttpMethod.POST, new HttpEntity<>(saksrelasjonDto, getDefaultHeaders()),
-            new ParameterizedTypeReference<Void>() {});
+            new ParameterizedTypeReference<Void>() {
+            });
     }
 
     @Override
@@ -116,7 +118,15 @@ public class EessiConsumerImpl implements EessiConsumer, JsonRestIntegrasjon {
     @Override
     public void lukkBuc(String rinaSaksnummer) {
         exchange("/buc/{rinaSaksnummer}/lukk", HttpMethod.POST,
-            new HttpEntity<>(getDefaultHeaders()), new ParameterizedTypeReference<Void>(){}, rinaSaksnummer);
+            new HttpEntity<>(getDefaultHeaders()), new ParameterizedTypeReference<Void>() {
+            }, rinaSaksnummer);
+    }
+
+    @Override
+    public List<String> hentMuligeAksjoner(String rinaSaksnummer) {
+        return exchange("/buc/{rinaSaksnummer}/aksjoner", HttpMethod.GET,
+            new HttpEntity<>(getDefaultHeaders()), new ParameterizedTypeReference<List<String>>() {
+            }, rinaSaksnummer);
     }
 
     private <T> T exchange(String uri, HttpMethod method, HttpEntity<?> entity, ParameterizedTypeReference<T> responseType, Object... variabler) {

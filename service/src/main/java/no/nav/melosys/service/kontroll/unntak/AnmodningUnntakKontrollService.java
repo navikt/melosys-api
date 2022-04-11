@@ -5,11 +5,11 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 
-import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.person.Persondata;
+import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.kontroll.AdresseUtlandKontroller;
 import no.nav.melosys.service.kontroll.PersonKontroller;
@@ -22,18 +22,17 @@ import org.springframework.stereotype.Component;
 public class AnmodningUnntakKontrollService implements AdresseUtlandKontroller {
 
     private final AnmodningsperiodeService anmodningsperiodeService;
+    private final AvklarteVirksomheterService avklarteVirksomheterService;
     private final BehandlingService behandlingService;
     private final PersondataFasade persondataFasade;
-    private final Unleash unleash;
 
     public AnmodningUnntakKontrollService(AnmodningsperiodeService anmodningsperiodeService,
-                                          BehandlingService behandlingService,
-                                          PersondataFasade persondataFasade,
-                                          Unleash unleash) {
+                                          AvklarteVirksomheterService avklarteVirksomheterService, BehandlingService behandlingService,
+                                          PersondataFasade persondataFasade) {
         this.anmodningsperiodeService = anmodningsperiodeService;
+        this.avklarteVirksomheterService = avklarteVirksomheterService;
         this.behandlingService = behandlingService;
         this.persondataFasade = persondataFasade;
-        this.unleash = unleash;
     }
 
     public Collection<Kontrollfeil> utførKontroller(long behandlingID) {
@@ -48,6 +47,7 @@ public class AnmodningUnntakKontrollService implements AdresseUtlandKontroller {
         return Set.of(
             AnmodningUnntakKontrollService::harRegistrertAdresse,
             AnmodningUnntakKontrollService::anmodningsperiodeManglerSluttdato,
+            AnmodningUnntakKontrollService::kunEnArbeidsgiver,
             kontrollData -> AdresseUtlandKontroller.arbeidsstedManglerFelter(kontrollData.getBehandlingsgrunnlagData()),
             kontrollData -> AdresseUtlandKontroller.foretakUtlandManglerFelter(kontrollData.getBehandlingsgrunnlagData())
         );
@@ -59,9 +59,11 @@ public class AnmodningUnntakKontrollService implements AdresseUtlandKontroller {
         Set<Function<AnmodningUnntakKontrollData, Kontrollfeil>> kontroller
     ) {
         final var persondata = hentPersondata(behandling);
+        final int antallArbeidsgivere = avklarteVirksomheterService.hentAntallAvklarteVirksomheter(behandling);
         AnmodningUnntakKontrollData kontrollData = new AnmodningUnntakKontrollData(persondata,
             behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata(),
-            anmodningsperiode
+            anmodningsperiode,
+            antallArbeidsgivere
         );
         return kontroller.stream()
             .map(f -> f.apply(kontrollData))
@@ -70,10 +72,7 @@ public class AnmodningUnntakKontrollService implements AdresseUtlandKontroller {
     }
 
     private Persondata hentPersondata(Behandling behandling) {
-        if (unleash.isEnabled("melosys.pdl.aktiv")) {
-            return persondataFasade.hentPerson(behandling.getFagsak().hentAktørID());
-        }
-        return behandling.hentPersonDokument();
+        return persondataFasade.hentPerson(behandling.getFagsak().hentBrukersAktørID());
     }
 
     static Kontrollfeil harRegistrertAdresse(AnmodningUnntakKontrollData kontrollData) {
@@ -84,5 +83,9 @@ public class AnmodningUnntakKontrollService implements AdresseUtlandKontroller {
     static Kontrollfeil anmodningsperiodeManglerSluttdato(AnmodningUnntakKontrollData kontrollData) {
         return kontrollData.getAnmodningsperiode().getTom() == null
             ? new Kontrollfeil(Kontroll_begrunnelser.INGEN_SLUTTDATO) : null;
+    }
+    static Kontrollfeil kunEnArbeidsgiver(AnmodningUnntakKontrollData kontrollData) {
+        return (kontrollData.getAntallArbeidsgivere() != 1)
+            ? new Kontrollfeil(Kontroll_begrunnelser.IKKE_KUN_EN_VIRKSOMHET) : null;
     }
 }

@@ -5,6 +5,7 @@ import java.util.Set;
 
 import no.nav.melosys.domain.VilkaarBegrunnelse;
 import no.nav.melosys.domain.Vilkaarsresultat;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LandvelgerService;
@@ -30,7 +31,7 @@ public class BrevDataByggerAnmodningUnntak implements BrevDataBygger {
         BrevDataAnmodningUnntak brevData = new BrevDataAnmodningUnntak(saksbehandler);
         long behandlingID = dataGrunnlag.getBehandling().getId();
         if (dataGrunnlag.getAvklarteVirksomheterGrunnlag().antallVirksomheter() != 1) {
-            throw new FunksjonellException("Ingen eller flere enn én norsk eller utenlandsk virksomhet oppgitt for avslag eller art 16.1");
+            throw new FunksjonellException(Kontroll_begrunnelser.IKKE_KUN_EN_VIRKSOMHET.getBeskrivelse());
         }
 
         brevData.hovedvirksomhet = dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentHovedvirksomhet();

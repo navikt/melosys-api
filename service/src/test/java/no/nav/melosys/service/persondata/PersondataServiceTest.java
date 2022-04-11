@@ -3,7 +3,6 @@ package no.nav.melosys.service.persondata;
 import java.time.LocalDate;
 import java.util.*;
 
-import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.KjoennsType;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
@@ -19,7 +18,6 @@ import no.nav.melosys.integrasjon.pdl.dto.identer.Ident;
 import no.nav.melosys.integrasjon.pdl.dto.identer.Identliste;
 import no.nav.melosys.integrasjon.pdl.dto.person.Adressebeskyttelse;
 import no.nav.melosys.integrasjon.pdl.dto.person.AdressebeskyttelseGradering;
-import no.nav.melosys.integrasjon.tps.TpsService;
 import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.DokgenTestData;
@@ -50,16 +48,13 @@ class PersondataServiceTest {
     private PDLConsumer pdlConsumer;
     @Mock
     private SaksopplysningerService saksopplysningerService;
-    @Mock
-    private TpsService tpsService;
-    private final FakeUnleash fakeUnleash = new FakeUnleash();
 
     private PersondataService persondataService;
 
     @BeforeEach
     public void setup() {
         persondataService = new PersondataService(behandlingService, kodeverkService, pdlConsumer,
-                                                  saksopplysningerService, tpsService, fakeUnleash);
+                                                  saksopplysningerService);
     }
 
     @Test
@@ -289,7 +284,6 @@ class PersondataServiceTest {
 
     @Test
     void harStrengtFortroligAdresse() {
-        fakeUnleash.enable("melosys.pdl.aktiv");
         when(pdlConsumer.hentAdressebeskyttelser(anyString())).thenReturn(
             List.of(new Adressebeskyttelse(AdressebeskyttelseGradering.UGRADERT, metadata()),
                 new Adressebeskyttelse(AdressebeskyttelseGradering.STRENGT_FORTROLIG, metadata())));

@@ -71,7 +71,7 @@ public class FattetVedtakService {
     }
 
     private Persondata hentPersondata(Behandling behandling) {
-        return persondataFasade.hentPerson(behandling.getFagsak().hentAktørID());
+        return persondataFasade.hentPerson(behandling.getFagsak().hentBrukersAktørID());
     }
 
     private Sak lagSak(Behandling behandling, Fagsak fagsak, Persondata persondata) {

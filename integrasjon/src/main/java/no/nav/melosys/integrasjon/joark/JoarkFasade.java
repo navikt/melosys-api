@@ -7,7 +7,9 @@ import java.util.List;
 import no.nav.melosys.domain.arkiv.DokumentReferanse;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.arkiv.OpprettJournalpost;
+import org.springframework.retry.annotation.Retryable;
 
+@Retryable
 public interface JoarkFasade {
 
     /**
