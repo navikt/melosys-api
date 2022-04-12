@@ -9,6 +9,7 @@ import io.micrometer.core.instrument.Metrics;
 import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
@@ -111,11 +112,36 @@ public class FagsakService {
         fagsakRepository.save(fagsak);
     }
 
-    private static Aktoer lagMyndighetAktør(Fagsak fagsak, String ID) {
+    @Transactional
+    public void oppdaterMyndigheterForTrygdeavtale(String saksnummer, Landkoder landkode) {
+        Fagsak fagsak = hentFagsak(saksnummer);
+
+        fagsak.getAktører().removeIf(aktoer -> aktoer.getTrygdemyndighetLand() != landkode
+            && aktoer.getRolle() == Aktoersroller.TRYGDEMYNDIGHET);
+
+        boolean harAlleredeTrygdemyndighet = fagsak.getAktører().stream().anyMatch(aktoer -> aktoer.getRolle() == Aktoersroller.TRYGDEMYNDIGHET);
+        if (!harAlleredeTrygdemyndighet) {
+            Aktoer nyTrygdemyndighet = lagMyndighetAktørForTrygdeavtaler(fagsak, landkode);
+            fagsak.getAktører().add(nyTrygdemyndighet);
+        }
+    }
+
+    private Aktoer lagMyndighetAktør(Fagsak fagsak, String ID) {
+        Aktoer aktør = lagMyndighetAktørUtenLand(fagsak);
+        aktør.setInstitusjonId(ID);
+        return aktør;
+    }
+
+    private Aktoer lagMyndighetAktørForTrygdeavtaler(Fagsak fagsak, Landkoder landkode) {
+        Aktoer aktør = lagMyndighetAktørUtenLand(fagsak);
+        aktør.setTrygdemyndighetLand(landkode);
+        return aktør;
+    }
+
+    private Aktoer lagMyndighetAktørUtenLand(Fagsak fagsak) {
         Aktoer aktør = new Aktoer();
         aktør.setFagsak(fagsak);
         aktør.setRolle(Aktoersroller.TRYGDEMYNDIGHET);
-        aktør.setInstitusjonId(ID);
         return aktør;
     }
 
