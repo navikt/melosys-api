@@ -28,7 +28,7 @@ public class Aktoer extends RegistreringsInfo {
     @Column(name = "aktoer_id", updatable = false)
     private String aktørId;
 
-    @Column(name = "institusjon_id", updatable = false)
+    @Column(name = "eu_eos_institusjon_id", updatable = false)
     private String institusjonId;
 
     @Enumerated(EnumType.STRING)
