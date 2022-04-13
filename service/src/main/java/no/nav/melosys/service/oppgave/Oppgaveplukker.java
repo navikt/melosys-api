@@ -75,8 +75,10 @@ public class Oppgaveplukker {
                 log.error("Behandling {} tilhørende {} avventer dokumentasjon, men har ingen svarfristdato.",
                     behandling.getId(), fagsak.getSaksnummer());
                 return true;
-            } else return behandling.getDokumentasjonSvarfristDato().isAfter(Instant.now());
-        } else return behandling.harStatus(Behandlingsstatus.AVVENT_FAGLIG_AVKLARING);
+            }
+            return behandling.getDokumentasjonSvarfristDato().isAfter(Instant.now());
+        }
+        return behandling.harStatus(Behandlingsstatus.AVVENT_FAGLIG_AVKLARING);
     }
 
     private boolean erTilbakeLagt(String saksbehandlerID, String oppgaveId) {
