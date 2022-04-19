@@ -127,7 +127,7 @@ type Sivilstand {
     relatertVedSivilstand: String
     gyldigFraOgMed: Date
     bekreftelsesdato: Date
-    master: String
+    master: String!
     kilde: String
     erHistorisk: Boolean!
 }
