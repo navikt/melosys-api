@@ -5,6 +5,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Set;
 
+import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
+import no.nav.melosys.domain.dokument.medlemskap.Periode;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.service.kontroll.*;
@@ -84,9 +86,10 @@ final class UfmKontroller {
     }
 
     static Kontroll_begrunnelser overlappendeMedlemsperiode(UfmKontrollData kontrollData) {
-        return OverlappendeMedlemskapsperioderKontroller.harOverlappendeMedlemsperiodeFraSed(
-            kontrollData.getMedlemskapDokument(), kontrollData.getSedDokument().getLovvalgsperiode()) ?
-            Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER : null;
+        MedlemskapDokument medlemskapDokument = kontrollData.getMedlemskapDokument();
+        Periode lovvalgsperiode = kontrollData.getSedDokument().getLovvalgsperiode();
+        return OverlappendeMedlemskapsperioderKontroller.harOverlappendeMedlemsperiodeFraSed(medlemskapDokument, lovvalgsperiode)
+            ? Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER : null;
     }
 
     static Kontroll_begrunnelser statsborgerskapIkkeMedlemsland(UfmKontrollData kontrollData) {

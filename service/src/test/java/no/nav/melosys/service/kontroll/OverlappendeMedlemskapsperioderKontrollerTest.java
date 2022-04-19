@@ -11,6 +11,8 @@ import no.nav.melosys.integrasjon.medl.PeriodestatusMedl;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class OverlappendeMedlemskapsperioderKontrollerTest {
 
@@ -115,19 +117,32 @@ class OverlappendeMedlemskapsperioderKontrollerTest {
 
 
     @Test
-    void overlappendeMedlemsperiode_overlappendePeriodeMedSammeStartDagSomSisteDagMedlemskap_ingenTreff() {
-        LocalDate sammeStartDagSomSisteDagMedlemskap = LocalDate.EPOCH.plusYears(2);
-        assertThat(OverlappendeMedlemskapsperioderKontroller.harOverlappendeMedlemsperiodeFraSed(
-            lagUavklartMedlemskapsDokument(), lagLovvalgsPeriode(sammeStartDagSomSisteDagMedlemskap, LocalDate.EPOCH.plusYears(4)))
-        ).isFalse();
+    void harOverlappendeMedlemsperiodeFraSed_inklusivOverlappendePeriode_ingenTreff() {
+        MedlemskapDokument medlemskapDokument = lagUavklartMedlemskapsDokument();
+        Lovvalgsperiode kontrollperiode = lagLovvalgsPeriode(LocalDate.EPOCH.plusYears(2), LocalDate.EPOCH.plusYears(4));
+
+
+        boolean erTattIKontroll = OverlappendeMedlemskapsperioderKontroller.harOverlappendeMedlemsperiodeFraSed(medlemskapDokument, kontrollperiode);
+
+
+        assertFalse(erTattIKontroll);
     }
 
     @Test
-    void overlappendeMedlemsperiode_overlappendePeriode_enDagOver_registrerTreff() {
-        LocalDate enDagFørSisteDagMedlemsperiode = LocalDate.EPOCH.plusYears(2).minusDays(1);
-        assertThat(OverlappendeMedlemskapsperioderKontroller.harOverlappendeMedlemsperiodeFraSed(
-            lagUavklartMedlemskapsDokument(), lagLovvalgsPeriode(enDagFørSisteDagMedlemsperiode, LocalDate.EPOCH.plusYears(4)))
-        ).isTrue();
+    void harOverlappendeMedlemsperiodeFraSed_inklusivOverlappendePeriode_medEnDagOver_registrerTreff() {
+        MedlemskapDokument medlemskapDokument = new MedlemskapDokument();
+        Medlemsperiode medlemsperiode = new Medlemsperiode();
+        medlemsperiode.status = PeriodestatusMedl.UAVK.getKode();
+        medlemsperiode.periode = new Periode(LocalDate.EPOCH, LocalDate.EPOCH.plusYears(2).plusDays(1));
+        medlemskapDokument.medlemsperiode = Collections.singletonList(medlemsperiode);
+
+        Lovvalgsperiode kontrollperiode = lagLovvalgsPeriode(LocalDate.EPOCH.plusYears(2), LocalDate.EPOCH.plusYears(4));
+
+
+        boolean erTattIKontroll = OverlappendeMedlemskapsperioderKontroller.harOverlappendeMedlemsperiodeFraSed(medlemskapDokument, kontrollperiode);
+
+
+        assertTrue(erTattIKontroll);
     }
 
     @Test
@@ -169,6 +184,7 @@ class OverlappendeMedlemskapsperioderKontrollerTest {
         medlemsperiode.status = PeriodestatusMedl.UAVK.getKode();
         return medlemskapDokument;
     }
+
 
     private static Lovvalgsperiode lagLovvalgsPeriode(LocalDate fom, LocalDate tom) {
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
