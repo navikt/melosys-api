@@ -35,7 +35,8 @@ public class VedtakKontrollService {
     private final PersondataFasade persondataFasade;
     private final RegisteropplysningerService registeropplysningerService;
 
-    public VedtakKontrollService(BehandlingService behandlingService, BehandlingsresultatService behandlingsresultatService,
+    public VedtakKontrollService(BehandlingService behandlingService,
+                                 BehandlingsresultatService behandlingsresultatService,
                                  LovvalgsperiodeService lovvalgsperiodeService, PersondataFasade persondataFasade,
                                  RegisteropplysningerService registeropplysningerService) {
         this.behandlingService = behandlingService;
@@ -91,14 +92,25 @@ public class VedtakKontrollService {
     }
 
     public Collection<Kontrollfeil> utførKontroller(long behandlingID, Sakstyper sakstype, boolean erAvslag) {
-        return utførKontroller(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID),
-            erAvslag ? null : lovvalgsperiodeService.hentValidertLovvalgsperiode(behandlingID), sakstype, erAvslag);
+        Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
+        return erAvslag ? utførKontrollerForAvslag(behandling) : utførKontroller(behandling,
+            lovvalgsperiodeService.hentValidertLovvalgsperiode(behandlingID), sakstype);
+    }
+
+    private Collection<Kontrollfeil> utførKontrollerForAvslag(Behandling behandling) {
+        Set<Function<VedtakKontrollData, Kontrollfeil>> vedtakKontroller =
+            VedtakKontrollFactory.hentKontrollerForAvslag();
+        var kontrollData = hentKontrollDataForAvslag(behandling);
+        return vedtakKontroller.stream()
+            .map(f -> f.apply(kontrollData))
+            .filter(Objects::nonNull)
+            .toList();
     }
 
     private Collection<Kontrollfeil> utførKontroller(Behandling behandling, Lovvalgsperiode lovvalgsperiode,
-                                                     Sakstyper sakstype, boolean erAvslag) {
+                                                     Sakstyper sakstype) {
         Set<Function<VedtakKontrollData, Kontrollfeil>> vedtakKontroller =
-            erAvslag ? VedtakKontrollFactory.hentKontrollerForAvslag() : VedtakKontrollFactory.hentKontrollerForVedtak(sakstype);
+            VedtakKontrollFactory.hentKontrollerForVedtak(sakstype);
         var vedtakKontrollData = hentVedtakKontrollData(behandling, lovvalgsperiode);
         return vedtakKontroller.stream()
             .map(f -> f.apply(vedtakKontrollData))
@@ -106,8 +118,16 @@ public class VedtakKontrollService {
             .toList();
     }
 
+    private VedtakKontrollData hentKontrollDataForAvslag(Behandling behandling) {
+        BehandlingsgrunnlagData behandlingsgrunnlagData =
+            behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
+        Persondata persondata = hentPersondata(behandling);
+        return new VedtakKontrollData(null, persondata, behandlingsgrunnlagData, null);
+    }
+
     private VedtakKontrollData hentVedtakKontrollData(Behandling behandling, Lovvalgsperiode lovvalgsperiode) {
-        BehandlingsgrunnlagData behandlingsgrunnlagData = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
+        BehandlingsgrunnlagData behandlingsgrunnlagData =
+            behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
         MedlemskapDokument medlemskapDokument = behandling.hentMedlemskapDokument();
         Persondata persondata = hentPersondata(behandling);
         return new VedtakKontrollData(medlemskapDokument, persondata, behandlingsgrunnlagData,
