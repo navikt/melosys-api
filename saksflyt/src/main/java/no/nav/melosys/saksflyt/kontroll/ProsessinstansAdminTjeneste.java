@@ -1,6 +1,7 @@
 package no.nav.melosys.saksflyt.kontroll;
 
 import java.util.List;
+import java.util.UUID;
 
 import no.nav.melosys.saksflyt.kontroll.dto.HentProsessinstansDto;
 import no.nav.melosys.saksflyt.kontroll.dto.RestartProsessinstanserRequest;
@@ -53,6 +54,17 @@ public class ProsessinstansAdminTjeneste implements AdminTjeneste {
         prosessinstansAdminService.restartProsessinstanser(request.getUuids());
 
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/skip-steg/{uuid}")
+    public ResponseEntity<String> skipStegProsessinstans(@RequestHeader(API_KEY_HEADER) String apiKey,
+                                                         @PathVariable UUID uuid) {
+        validerApikey(apiKey);
+
+        log.info("Forsøker å hoppe over steg for prosessinstans {}", uuid);
+        var nyttSteg = prosessinstansAdminService.skipStegProsessinstans(uuid);
+
+        return ResponseEntity.ok("SIST_FULLFORTE_STEG for prosessinstans %s satt til %s".formatted(uuid, nyttSteg.getKode()));
     }
 
     @Override

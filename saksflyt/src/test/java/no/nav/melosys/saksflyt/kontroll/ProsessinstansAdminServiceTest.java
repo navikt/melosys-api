@@ -131,6 +131,19 @@ class ProsessinstansAdminServiceTest {
         verify(behandleProsessinstansDelegate).behandleProsessinstans(prosessinstans);
     }
 
+    @Test
+    void skipStegProsessinstans_hopperTilNesteSteg() {
+        var prosessinstans = lagProsessinstans();
+        var uuid = prosessinstans.getId();
+
+        when(prosessinstansRepository.findById(uuid)).thenReturn(Optional.of(prosessinstans));
+
+        prosessinstansAdminService.skipStegProsessinstans(uuid);
+
+        assertThat(prosessinstans.getSistFullførtSteg()).isEqualTo(CURRENT_PROSESS_STEG);
+        verify(prosessinstansRepository).save(prosessinstans);
+    }
+
     private Prosessinstans lagProsessinstans() {
         return lagProsessinstans(LocalDateTime.now());
     }
