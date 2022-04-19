@@ -22,7 +22,7 @@ import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
 import no.nav.melosys.service.kodeverk.KodeverkService;
-import no.nav.melosys.service.registeropplysninger.RegisterOppslagSystemService;
+import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagSystemService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -42,7 +42,7 @@ class BrevDataByggerA1Test {
     @Mock
     private LandvelgerService landvelgerService;
     @Mock
-    RegisterOppslagSystemService registerOppslagService;
+    OrganisasjonOppslagSystemService registerOppslagService;
 
     private Set<String> avklarteOrganisasjoner;
     private Soeknad søknad;

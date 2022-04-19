@@ -18,7 +18,7 @@ import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory;
-import no.nav.melosys.service.registeropplysninger.RegisterOppslagService;
+import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,7 +41,7 @@ class BrevDataByggerAvslagYrkesaktivTest {
     @Mock
     AvklartefaktaService avklartefaktaService;
     @Mock
-    RegisterOppslagService registerOppslagService;
+    OrganisasjonOppslagService organisasjonOppslagService;
     @Mock
     LandvelgerService landvelgerService;
     @Mock
@@ -99,7 +99,8 @@ class BrevDataByggerAvslagYrkesaktivTest {
         when(organisasjonsDetaljer.hentStrukturertForretningsadresse()).thenReturn(lagStrukturertAdresse());
         organisasjonDokument.organisasjonDetaljer = organisasjonsDetaljer;
 
-        lenient().when(registerOppslagService.hentOrganisasjoner(orgSet)).thenReturn(new HashSet<>(Collections.singletonList(organisasjonDokument)));
+        lenient().when(
+                organisasjonOppslagService.hentOrganisasjoner(orgSet)).thenReturn(new HashSet<>(Collections.singletonList(organisasjonDokument)));
         when(vilkaarsresultatService.harVilkaarForArtikkel12(anyLong())).thenReturn(false);
         when(vilkaarsresultatService.harVilkaarForArtikkel16(anyLong())).thenReturn(true);
 
@@ -121,7 +122,8 @@ class BrevDataByggerAvslagYrkesaktivTest {
     }
 
     public BrevDataGrunnlag lagBrevressurser(Behandling behandling) {
-        AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService, mock(BehandlingService.class), kodeverkService);
+        AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService,
+                                                                                                  organisasjonOppslagService, mock(BehandlingService.class), kodeverkService);
         DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medBehandling(behandling).build();
         Persondata persondata = PersonopplysningerObjectFactory.lagPersonopplysninger();
         return new BrevDataGrunnlag(brevbestilling, kodeverkService, avklarteVirksomheterService, avklartefaktaService, persondata);

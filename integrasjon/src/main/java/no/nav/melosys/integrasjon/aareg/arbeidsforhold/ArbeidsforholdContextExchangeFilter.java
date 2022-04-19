@@ -1,8 +1,5 @@
 package no.nav.melosys.integrasjon.aareg.arbeidsforhold;
 
-import no.finn.unleash.Unleash;
-import no.nav.melosys.sikkerhet.context.SubjectHandler;
-import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo;
 import no.nav.melosys.integrasjon.reststs.RestStsClient;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
@@ -19,11 +16,9 @@ import java.util.function.Supplier;
 public class ArbeidsforholdContextExchangeFilter implements ExchangeFilterFunction {
     private static final String NAV_CONSUMER_TOKEN = "Nav-Consumer-Token";
     private final RestStsClient restStsClient;
-    private final Unleash unleash;
 
-    public ArbeidsforholdContextExchangeFilter(RestStsClient restStsClient, Unleash unleash) {
+    public ArbeidsforholdContextExchangeFilter(RestStsClient restStsClient) {
         this.restStsClient = restStsClient;
-        this.unleash = unleash;
     }
 
     @Override
@@ -32,23 +27,15 @@ public class ArbeidsforholdContextExchangeFilter implements ExchangeFilterFuncti
                                        @Nonnull final ExchangeFunction exchangeFunction) {
         return exchangeFunction.exchange(
             ClientRequest.from(clientRequest)
-                .header(HttpHeaders.AUTHORIZATION, getTokenSupplier(unleash, restStsClient).get())
+                .header(HttpHeaders.AUTHORIZATION, getTokenSupplier(restStsClient).get())
                 .header(NAV_CONSUMER_TOKEN, restStsClient.bearerToken())
                 .build()
         );
     }
 
-    private Supplier<String> getTokenSupplier(Unleash unleash, RestStsClient restStsClient) {
-        if (!unleash.isEnabled("melosys.auto.token")) {
-            return restStsClient::bearerToken;
-        }
-        if (ThreadLocalAccessInfo.isProcessCall()) {
-            return restStsClient::bearerToken;
-        }
-        if (ThreadLocalAccessInfo.isFrontendCall()) {
-            return () -> "Bearer " + SubjectHandler.getInstance().getOidcTokenString();
-        }
-        throw new IllegalStateException("Må bli kalt fra frontend eller prosess");
+    private Supplier<String> getTokenSupplier(RestStsClient restStsClient) {
+        // Om vi får lagt inn "0000-ga-aa-register-konsument" i sakbehandler token kan vi benytte dette når tilgjengelig
+        // https://nav-it.slack.com/archives/C01BSCJM127/p1649411252534409
+        return restStsClient::bearerToken;
     }
-
 }

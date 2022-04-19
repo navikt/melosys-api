@@ -5,9 +5,9 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 @Service
-public class RegisterOppslagSystemService extends RegisterOppslagService {
+public class OrganisasjonOppslagSystemService extends OrganisasjonOppslagService {
 
-    public RegisterOppslagSystemService(@Qualifier("system") EregFasade eregFasade) {
+    public OrganisasjonOppslagSystemService(@Qualifier("system") EregFasade eregFasade) {
         super(eregFasade);
     }
 }

@@ -51,7 +51,7 @@ public class OpprettOgFerdigstillAltinnJournalpost implements StegBehandler {
         final Behandling behandling = prosessinstans.getBehandling();
         final Fagsak fagsak = behandling.getFagsak();
 
-        String ident = persondataFasade.hentFolkeregisterident(fagsak.hentAktørID());
+        String ident = persondataFasade.hentFolkeregisterident(fagsak.hentBrukersAktørID());
         prosessinstans.setData(ProsessDataKey.BRUKER_ID, ident);
 
         Collection<AltinnDokument> dokumenter = altinnSoeknadService

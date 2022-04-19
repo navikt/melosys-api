@@ -63,7 +63,7 @@
         <graphql-java.version>17.3</graphql-java.version>
         <logback.version>1.2.11</logback.version>
         <logstash.version>7.0.1</logstash.version>
-        <hikaricp.version>4.0.3</hikaricp.version>
+        <hikaricp.version>5.0.1</hikaricp.version>
         <ibmmq.version>9.2.5.0</ibmmq.version>
         <jackson.version>2.13.1</jackson.version>
         <javax.ws.rs-api.version>2.1.1</javax.ws.rs-api.version>
@@ -83,22 +83,22 @@
         <swagger.version>1.5.21</swagger.version>
         <unleash.version>4.4.1</unleash.version>
         <bcpkix-jdk15on.version>1.70</bcpkix-jdk15on.version>
-        <nimbus-jose-jwt.version>9.20</nimbus-jose-jwt.version>
+        <nimbus-jose-jwt.version>9.21</nimbus-jose-jwt.version>
         <neethi.version>3.1.1</neethi.version>
 
         <!-- Transitive avhengigheter -->
-        <asm.version>9.2</asm.version>
+        <asm.version>9.3</asm.version>
         <bcprov-jdk15on.version>1.68</bcprov-jdk15on.version>
         <cglib.version>3.3.0</cglib.version>
         <classgraph.version>4.8.143</classgraph.version>
         <commons-logging.version>1.2</commons-logging.version>
         <istack.version>4.0.1</istack.version>
-        <javassist.version>3.27.0-GA</javassist.version>
+        <javassist.version>3.28.0-GA</javassist.version>
         <jaxb2-basics-runtime.version>0.12.0</jaxb2-basics-runtime.version>
         <joda-time.version>2.10.14</joda-time.version>
         <objenesis.version>3.2</objenesis.version>
         <osgi.version>6.0.0</osgi.version>
-        <woodstox.version>6.2.6</woodstox.version>
+        <woodstox.version>6.2.8</woodstox.version>
         <xmlsec.version>2.3.0</xmlsec.version>
         <medlemskapsunntak-api-v1.version>1.1</medlemskapsunntak-api-v1.version>
         <wiremock-standalone.version>2.27.2</wiremock-standalone.version>

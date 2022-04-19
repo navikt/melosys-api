@@ -44,7 +44,7 @@ jobs:
         run: |
           JAVA_HOME=/usr/local/openjdk-17
           mvn clean package -B -e -U
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           name: melosys-app
           path: |
@@ -58,7 +58,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     steps:
-      - uses: actions/download-artifact@v2
+      - uses: actions/download-artifact@v3
         with:
           name: melosys-app
       - name: GitHub Package Registry login
