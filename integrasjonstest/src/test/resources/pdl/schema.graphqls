@@ -461,7 +461,6 @@ type Sivilstand {
     gyldigFraOgMed: Date
     relatertVedSivilstand: String
     bekreftelsesdato: Date
-
     folkeregistermetadata: Folkeregistermetadata
     metadata: Metadata!
 }
