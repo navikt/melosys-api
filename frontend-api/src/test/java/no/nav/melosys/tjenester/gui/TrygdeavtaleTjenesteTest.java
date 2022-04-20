@@ -129,7 +129,7 @@ class TrygdeavtaleTjenesteTest {
         verify(trygdeavtaleService, never()).hentFamiliemedlemmer(any());
 
         assertThat(response).isNotNull();
-        assertThat(response.aktoerId()).isEqualTo(behandling.getFagsak().hentAktørID());
+        assertThat(response.aktoerId()).isEqualTo(behandling.getFagsak().hentBrukersAktørID());
         assertThat(response.behandlingstema()).isEqualTo(behandling.getTema().getKode());
         assertThat(response.behandlingstype()).isEqualTo(behandling.getType().getKode());
         assertThat(response.redigerbart()).isFalse();
@@ -153,7 +153,7 @@ class TrygdeavtaleTjenesteTest {
         verify(trygdeavtaleService).hentFamiliemedlemmer(any());
 
         assertThat(response).isNotNull();
-        assertThat(response.aktoerId()).isEqualTo(behandling.getFagsak().hentAktørID());
+        assertThat(response.aktoerId()).isEqualTo(behandling.getFagsak().hentBrukersAktørID());
         assertThat(response.behandlingstema()).isEqualTo(behandling.getTema().getKode());
         assertThat(response.behandlingstype()).isEqualTo(behandling.getType().getKode());
         assertThat(response.redigerbart()).isFalse();

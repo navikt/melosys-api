@@ -48,7 +48,7 @@ public class SaksoppplysningEventListener {
             }
 
             if (behandling.manglerSaksopplysningerAvType(List.of(SaksopplysningType.PDL_PERS_SAKS))) {
-                PersonMedHistorikk personMedHistorikk = persondataFasade.hentPersonMedHistorikk(behandling.getFagsak().hentAktørID());
+                PersonMedHistorikk personMedHistorikk = persondataFasade.hentPersonMedHistorikk(behandling.getFagsak().hentBrukersAktørID());
                 saksopplysningerService.lagrePersonMedHistorikk(behandling, personMedHistorikk);
             }
         }
@@ -57,9 +57,9 @@ public class SaksoppplysningEventListener {
     private Persondata hentPersondata(Behandling behandling) {
         if (avklartefaktaService.hentAvklarteMedfølgendeBarn(behandling.getId()).finnes()
             || avklartefaktaService.hentAvklarteMedfølgendeEktefelle(behandling.getId()).finnes()) {
-            return persondataFasade.hentPerson(behandling.getFagsak().hentAktørID(), Informasjonsbehov.MED_FAMILIERELASJONER);
+            return persondataFasade.hentPerson(behandling.getFagsak().hentBrukersAktørID(), Informasjonsbehov.MED_FAMILIERELASJONER);
         } else {
-            return persondataFasade.hentPerson(behandling.getFagsak().hentAktørID());
+            return persondataFasade.hentPerson(behandling.getFagsak().hentBrukersAktørID());
         }
     }
 }

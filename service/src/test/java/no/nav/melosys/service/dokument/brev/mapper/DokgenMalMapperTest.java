@@ -4,7 +4,6 @@ import java.time.*;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
-import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.arkiv.ArkivDokument;
 import no.nav.melosys.domain.arkiv.Journalpost;
@@ -58,8 +57,6 @@ class DokgenMalMapperTest {
     private DokgenMapperDatahenter mockDokgenMapperDatahenter;
     @Mock
     private StorbritanniaMapper mockStorbritanniaMapper;
-
-    private final FakeUnleash fakeUnleash = new FakeUnleash();
 
     private DokgenMalMapper dokgenMalMapper;
 
@@ -147,7 +144,6 @@ class DokgenMalMapperTest {
 
     @Test
     void mapping_persondataFraPdl_ok() {
-        fakeUnleash.enable("melosys.pdl.aktiv");
         when(mockDokgenMapperDatahenter.hentPersondata(any())).thenReturn(lagPersonDokument());
 
         Behandling behandling = lagBehandling();
@@ -172,7 +168,6 @@ class DokgenMalMapperTest {
                 POSTNR_BRUKER
             );
         assertThat(dokgenDto.getMottaker().adresselinjer()).contains(ADRESSELINJE_1_BRUKER);
-        fakeUnleash.disableAll();
     }
 
     @Test

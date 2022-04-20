@@ -47,7 +47,7 @@ public class SedSomBrevService {
         var fagsak = behandling.getFagsak();
         var utenlandskMyndighet = utenlandskMyndighetService.hentUtenlandskMyndighet(mottakerland);
         String institusjonID = utenlandskMyndighetService.lagInstitusjonsId(utenlandskMyndighet);
-        String brukerFnr = persondataFasade.hentFolkeregisterident(fagsak.hentAktørID());
+        String brukerFnr = persondataFasade.hentFolkeregisterident(fagsak.hentBrukersAktørID());
         byte[] sedPdf = eessiService.genererSedPdf(behandling.getId(), sedType);
         var tema = TemaFactory.fraBehandlingstema(behandling.getTema());
 

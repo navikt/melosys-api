@@ -115,7 +115,7 @@ class EosVedtakServiceTest {
             eq(mottakerinstitusjoner)
         );
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(any());
-        verify(vedtakKontrollService).kontrollerInnvilgelse(any(Behandling.class), any(Behandlingsresultat.class), eq(FØRSTEGANGSVEDTAK), eq(Sakstyper.EU_EOS));
+        verify(vedtakKontrollService).kontrollerVedtakMedNyeRegisteropplysninger(any(Behandling.class), any(Behandlingsresultat.class), eq(Sakstyper.EU_EOS), any(Boolean.class));
     }
 
     @Test

@@ -33,7 +33,7 @@ import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory;
-import no.nav.melosys.service.registeropplysninger.RegisterOppslagSystemService;
+import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagSystemService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
 import org.junit.jupiter.api.BeforeEach;
@@ -175,7 +175,7 @@ class BrevDataByggerA001Test {
     }
 
     private BrevDataGrunnlag lagBrevDataGrunnlag(DoksysBrevbestilling brevbestilling, Persondata persondata) {
-        RegisterOppslagSystemService registerOppslagService = new RegisterOppslagSystemService(ereg, persondataFasade);
+        OrganisasjonOppslagSystemService registerOppslagService = new OrganisasjonOppslagSystemService(ereg);
         AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService, mock(BehandlingService.class), mock(KodeverkService.class));
         return new BrevDataGrunnlag(brevbestilling, mock(KodeverkService.class), avklarteVirksomheterService, avklartefaktaService, persondata);
     }

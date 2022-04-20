@@ -55,7 +55,7 @@ public class FerdigstillJournalpostSed implements StegBehandler {
     }
 
     private String hentBrukerID(Prosessinstans prosessinstans) {
-        String aktørID = prosessinstans.getBehandling().getFagsak().hentAktørID();
+        String aktørID = prosessinstans.getBehandling().getFagsak().hentBrukersAktørID();
         return persondataFasade.hentFolkeregisterident(aktørID);
     }
 }

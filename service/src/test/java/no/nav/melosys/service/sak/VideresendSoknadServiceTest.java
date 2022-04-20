@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Bostedsland;
 import no.nav.melosys.domain.Fagsak;
@@ -67,10 +66,7 @@ class VideresendSoknadServiceTest {
 
     @BeforeEach
     public void setup() {
-        final FakeUnleash unleash = new FakeUnleash();
-        unleash.enable("melosys.pdl.aktiv");
-        videresendSoknadService = new VideresendSoknadService(behandlingsresultatService, eessiService, fagsakService,
-            joarkFasade, landvelgerService, oppgaveService, persondataFasade, prosessinstansService, unleash);
+        videresendSoknadService = new VideresendSoknadService(eessiService, fagsakService, behandlingsresultatService, joarkFasade, landvelgerService, oppgaveService, persondataFasade, prosessinstansService);
 
         behandling.setFagsak(fagsak);
         fagsak.getBehandlinger().add(behandling);
