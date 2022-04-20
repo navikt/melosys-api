@@ -3,14 +3,13 @@ package no.nav.melosys.tjenester.gui.graphql.mapping;
 import java.time.LocalDate;
 
 import no.nav.melosys.domain.person.Foedsel;
-import no.nav.melosys.domain.person.Sivilstandstype;
 import no.nav.melosys.domain.person.familie.Familiemedlem;
 import no.nav.melosys.tjenester.gui.graphql.dto.FamiliemedlemDto;
 
 import static java.time.temporal.ChronoUnit.YEARS;
 
-public final class FamilemedlemTilDtoKonverter {
-    private FamilemedlemTilDtoKonverter() {
+public final class FamiliemedlemTilDtoKonverter {
+    private FamiliemedlemTilDtoKonverter() {
     }
 
     public static FamiliemedlemDto tilDto(Familiemedlem familiemedlem) {
@@ -21,8 +20,7 @@ public final class FamilemedlemTilDtoKonverter {
             familiemedlem.erBarn() ? Math.toIntExact(beregnAlder(familiemedlem.fødsel())) : null,
             familiemedlem.erBarn() ? familiemedlem.foreldreansvarstype() : null,
             familiemedlem.erBarn() ? hentFolkeregisteridentAnnenForelder(familiemedlem) : null,
-            familiemedlem.erRelatertVedSivilstand() ? hentSivilstandstype(familiemedlem) : null,
-            familiemedlem.erRelatertVedSivilstand() ? hentSivilstandGyldighetsperiodeFom(familiemedlem) : null
+            familiemedlem.erRelatertVedSivilstand() ? familiemedlem.sivilstand() : null
         );
     }
 
@@ -34,14 +32,5 @@ public final class FamilemedlemTilDtoKonverter {
     private static String hentFolkeregisteridentAnnenForelder(Familiemedlem familiemedlem) {
         return familiemedlem.folkeregisteridentAnnenForelder() != null ?
             familiemedlem.folkeregisteridentAnnenForelder().identifikasjonsnummer() : null;
-    }
-
-    private static Sivilstandstype hentSivilstandstype(Familiemedlem familiemedlem) {
-        return familiemedlem.sivilstand() != null ? familiemedlem.sivilstand().type() : null;
-    }
-
-
-    private static LocalDate hentSivilstandGyldighetsperiodeFom(Familiemedlem familiemedlem) {
-        return familiemedlem.sivilstand() != null ? familiemedlem.sivilstand().gyldigFraOgMed() : null;
     }
 }

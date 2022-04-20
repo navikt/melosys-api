@@ -8,7 +8,7 @@ import graphql.schema.DataFetchingEnvironment;
 import no.nav.melosys.domain.person.familie.Familiemedlem;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.tjenester.gui.graphql.dto.FamiliemedlemDto;
-import no.nav.melosys.tjenester.gui.graphql.mapping.FamilemedlemTilDtoKonverter;
+import no.nav.melosys.tjenester.gui.graphql.mapping.FamiliemedlemTilDtoKonverter;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
@@ -32,6 +32,6 @@ public class FamiliemedlemmerDataFetcher implements DataFetcher<List<Familiemedl
             familiemedlemmer = persondataFasade.hentFamiliemedlemmerMedHistorikk(behandlingID);
         }
         return familiemedlemmer.stream().map(
-            FamilemedlemTilDtoKonverter::tilDto).toList();
+            FamiliemedlemTilDtoKonverter::tilDto).toList();
     }
 }

@@ -58,9 +58,9 @@ class FamiliemedlemmerDataFetcherTest {
     private void assertFetched(List<FamiliemedlemDto> familieDtoListe) {
         assertThat(familieDtoListe).containsExactlyInAnyOrder(
             new FamiliemedlemDto("etternavn barn", "fnrBarn", Familierelasjon.BARN, 42, "felles", "fnrAnnenForelder",
-                null, null),
+                null),
             new FamiliemedlemDto("etternavn fornavn", "fnr", Familierelasjon.RELATERT_VED_SIVILSTAND, null, null, null,
-                Sivilstandstype.GIFT, LocalDate.MIN));
+                lagSivilstandGift()));
     }
 
     private Familiemedlem lagBarn() {
@@ -72,7 +72,11 @@ class FamiliemedlemmerDataFetcherTest {
     private Familiemedlem lagRelatertVedsivilstand() {
         return new Familiemedlem(new Folkeregisteridentifikator("fnr"), new Navn("fornavn", null, "etternavn"),
             Familierelasjon.RELATERT_VED_SIVILSTAND, new Foedsel(LocalDate.MIN, null, null, null), null, "ukjent",
-            new Sivilstand(Sivilstandstype.GIFT, null, "relatertVedSivilstandID", LocalDate.MIN, null, "Dolly", "PDL",
-                false));
+            lagSivilstandGift());
+    }
+
+    private Sivilstand lagSivilstandGift() {
+        return new Sivilstand(Sivilstandstype.GIFT, null, "relatertVedSivilstandID", LocalDate.MIN, null, "Dolly", "PDL",
+            false);
     }
 }

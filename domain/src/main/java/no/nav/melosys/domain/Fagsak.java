@@ -111,7 +111,7 @@ public class Fagsak extends RegistreringsInfo {
         return hentAktørMedRolleType(Aktoersroller.BRUKER);
     }
 
-    public String hentAktørID() {
+    public String hentBrukersAktørID() {
         return hentBruker().getAktørId();
     }
 
