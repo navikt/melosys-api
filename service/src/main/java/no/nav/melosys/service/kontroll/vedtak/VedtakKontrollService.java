@@ -11,7 +11,7 @@ import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
-import no.nav.melosys.domain.kodeverk.Vedtakstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.service.LovvalgsperiodeService;
@@ -35,7 +35,8 @@ public class VedtakKontrollService {
     private final PersondataFasade persondataFasade;
     private final RegisteropplysningerService registeropplysningerService;
 
-    public VedtakKontrollService(BehandlingService behandlingService, BehandlingsresultatService behandlingsresultatService,
+    public VedtakKontrollService(BehandlingService behandlingService,
+                                 BehandlingsresultatService behandlingsresultatService,
                                  LovvalgsperiodeService lovvalgsperiodeService, PersondataFasade persondataFasade,
                                  RegisteropplysningerService registeropplysningerService) {
         this.behandlingService = behandlingService;
@@ -46,23 +47,25 @@ public class VedtakKontrollService {
     }
 
     @Transactional
-    public void kontrollerVedtak(long behandlingID, Vedtakstyper vedtakstype, boolean skalRegisteropplysningerOppdateres) throws ValideringException {
-        var behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
+    public void kontrollerVedtak(long behandlingId, boolean skalRegisteropplysningerOppdateres,
+                                 Behandlingsresultattyper behandlingsresultattype) throws ValideringException {
+        var behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingId);
         var sakstype = behandling.getFagsak().getType();
+        var erAvslag = behandlingsresultattype.equals(Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL);
+
         if (skalRegisteropplysningerOppdateres) {
-            var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
-            kontrollerInnvilgelse(behandling, behandlingsresultat, vedtakstype, sakstype);
+            var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingId);
+            kontrollerVedtakMedNyeRegisteropplysninger(behandling, behandlingsresultat, sakstype, erAvslag);
         } else {
-            kontrollerInnvilgelse(behandlingID, sakstype);
+            kontrollerVedtak(behandlingId, sakstype, erAvslag);
         }
     }
 
-    public void kontrollerInnvilgelse(Behandling behandling,
-                                      Behandlingsresultat behandlingsresultat,
-                                      Vedtakstyper vedtakstype,
-                                      Sakstyper sakstype) throws ValideringException {
+    public void kontrollerVedtakMedNyeRegisteropplysninger(Behandling behandling,
+                                                           Behandlingsresultat behandlingsresultat, Sakstyper sakstype,
+                                                           boolean erAvslag) throws ValideringException {
         hentNyeRegisteropplysninger(behandlingsresultat, behandling);
-        kontrollerInnvilgelse(behandling.getId(), sakstype);
+        kontrollerVedtak(behandling.getId(), sakstype, erAvslag);
     }
 
     private void hentNyeRegisteropplysninger(Behandlingsresultat behandlingsresultat, Behandling behandling) {
@@ -80,19 +83,28 @@ public class VedtakKontrollService {
                 .build());
     }
 
-    private void kontrollerInnvilgelse(long behandlingID, Sakstyper sakstype) throws ValideringException {
-        Collection<Kontrollfeil> kontrollfeil = utførKontroller(behandlingID, sakstype);
+    private void kontrollerVedtak(long behandlingID, Sakstyper sakstype, boolean erAvslag) throws ValideringException {
+        Collection<Kontrollfeil> kontrollfeil = utførKontroller(behandlingID, sakstype, erAvslag);
         if (!kontrollfeil.isEmpty()) {
             throw new ValideringException("Feil i validering. Kan ikke fatte vedtak.",
                 kontrollfeil.stream().map(Kontrollfeil::tilDto).toList());
         }
     }
 
-    public Collection<Kontrollfeil> utførKontroller(long behandlingID, Sakstyper sakstype) {
-        return utførKontroller(
-            behandlingService.hentBehandlingMedSaksopplysninger(behandlingID),
-            lovvalgsperiodeService.hentValidertLovvalgsperiode(behandlingID),
-            sakstype);
+    public Collection<Kontrollfeil> utførKontroller(long behandlingID, Sakstyper sakstype, boolean erAvslag) {
+        Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
+        return erAvslag ? utførKontrollerForAvslag(behandling) : utførKontroller(behandling,
+            lovvalgsperiodeService.hentValidertLovvalgsperiode(behandlingID), sakstype);
+    }
+
+    private Collection<Kontrollfeil> utførKontrollerForAvslag(Behandling behandling) {
+        Set<Function<VedtakKontrollData, Kontrollfeil>> vedtakKontroller =
+            VedtakKontrollFactory.hentKontrollerForAvslag();
+        var kontrollData = hentKontrollDataForAvslag(behandling);
+        return vedtakKontroller.stream()
+            .map(f -> f.apply(kontrollData))
+            .filter(Objects::nonNull)
+            .toList();
     }
 
     private Collection<Kontrollfeil> utførKontroller(Behandling behandling, Lovvalgsperiode lovvalgsperiode,
@@ -106,8 +118,16 @@ public class VedtakKontrollService {
             .toList();
     }
 
+    private VedtakKontrollData hentKontrollDataForAvslag(Behandling behandling) {
+        BehandlingsgrunnlagData behandlingsgrunnlagData =
+            behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
+        Persondata persondata = hentPersondata(behandling);
+        return new VedtakKontrollData(null, persondata, behandlingsgrunnlagData, null);
+    }
+
     private VedtakKontrollData hentVedtakKontrollData(Behandling behandling, Lovvalgsperiode lovvalgsperiode) {
-        BehandlingsgrunnlagData behandlingsgrunnlagData = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
+        BehandlingsgrunnlagData behandlingsgrunnlagData =
+            behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
         MedlemskapDokument medlemskapDokument = behandling.hentMedlemskapDokument();
         Persondata persondata = hentPersondata(behandling);
         return new VedtakKontrollData(medlemskapDokument, persondata, behandlingsgrunnlagData,
