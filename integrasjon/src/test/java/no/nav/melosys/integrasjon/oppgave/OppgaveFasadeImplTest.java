@@ -136,21 +136,19 @@ public final class OppgaveFasadeImplTest {
     }
 
     @Test
-    void finnUtildelteOppgaverEtterFrist_mottarBehandlingsOppgaveUtenSaksreferanse_returnererGyldigeOppgaver() throws Exception {
+    void finnUtildelteOppgaverEtterFrist_mottarOppgaveMedOgUtenSaksreferanse_returnererOppgaveMedSaksreferanse() throws Exception {
         OppgaveDto jfrOppgave = new OppgaveDto();
         jfrOppgave.setOppgavetype("JFR");
         OppgaveDto behOppgave = new OppgaveDto();
         behOppgave.setSaksreferanse("MEL-123");
-        OppgaveDto ikkeGyldigOppgave = new OppgaveDto();
 
         when(oppgaveConsumer.hentOppgaveListe(any(OppgaveSearchRequest.class)))
-            .thenReturn(List.of(jfrOppgave, behOppgave, ikkeGyldigOppgave));
+            .thenReturn(List.of(jfrOppgave, behOppgave));
 
         List<Oppgave> oppgaver = oppgaveFasadeImpl.finnUtildelteOppgaverEtterFrist("abbehandlingstema1234");
 
-        assertThat(oppgaver.size()).isEqualTo(2);
-        assertThat(oppgaver.get(0).getOppgavetype()).isEqualTo(Oppgavetyper.JFR);
-        assertThat(oppgaver.get(1).getSaksnummer()).isEqualTo("MEL-123");
+        assertThat(oppgaver.size()).isEqualTo(1);
+        assertThat(oppgaver.get(0).getSaksnummer()).isEqualTo("MEL-123");
     }
 
     private Oppgave lagOppgave() {
