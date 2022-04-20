@@ -69,7 +69,7 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
         List<OppgaveDto> oppgaver = oppgaveConsumer.hentOppgaveListe(searchRequestBuilder.build());
 
         return oppgaver.stream().map(OppgaveFasadeImpl::oppgaveMappingDtoTilDomain)
-            .filter(erGyldigJournalføringEllerBehandlingsoppgave)
+            .filter(erGyldigBehandlingsoppgave)
             .collect(Collectors.toList());
     }
 
@@ -298,8 +298,8 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
         return null;
     }
 
-    private final Predicate<Oppgave> erGyldigJournalføringEllerBehandlingsoppgave
-        = oppgave -> oppgave.getOppgavetype() == Oppgavetyper.JFR || oppgave.getSaksnummer() != null;
+    private final Predicate<Oppgave> erGyldigBehandlingsoppgave
+        = oppgave -> oppgave.getSaksnummer() != null;
 
     private static String[] hentGyldigeOppgavetyper() {
         return Stream.of(Oppgavetyper.values())
