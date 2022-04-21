@@ -55,10 +55,11 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
     }
 
     @Override
-    public List<Oppgave> finnUtildelteOppgaverEtterFrist(String behandlingstype) {
+    public List<Oppgave> finnUtildelteOppgaverEtterFrist(String behandlingstype, String behandlingstema) {
 
         OppgaveSearchRequest.Builder searchRequestBuilder = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
             .medBehandlingsType(behandlingstype)
+            .medBehandlingstema(behandlingstema)
             .medOppgaveTyper(hentGyldigeOppgavetyper())
             .medSorteringsfelt(SORTERINGSFELT)
             .medStatusKategori(OPPGAVE_STATUSKATEGORI_AAPEN)

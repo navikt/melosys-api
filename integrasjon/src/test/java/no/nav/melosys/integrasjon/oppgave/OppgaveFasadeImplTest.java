@@ -145,7 +145,8 @@ public final class OppgaveFasadeImplTest {
         when(oppgaveConsumer.hentOppgaveListe(any(OppgaveSearchRequest.class)))
             .thenReturn(List.of(jfrOppgave, behOppgave));
 
-        List<Oppgave> oppgaver = oppgaveFasadeImpl.finnUtildelteOppgaverEtterFrist("abbehandlingstema1234");
+        List<Oppgave> oppgaver =
+            oppgaveFasadeImpl.finnUtildelteOppgaverEtterFrist("abbehandlingstema1234", null);
 
         assertThat(oppgaver.size()).isEqualTo(1);
         assertThat(oppgaver.get(0).getSaksnummer()).isEqualTo("MEL-123");
