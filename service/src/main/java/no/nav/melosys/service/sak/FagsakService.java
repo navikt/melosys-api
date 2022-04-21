@@ -105,7 +105,7 @@ public class FagsakService {
             && aktoer.getRolle() == Aktoersroller.TRYGDEMYNDIGHET);
 
         Collection<Aktoer> nyeMyndigheter = ider.stream()
-            .map(id -> lagMyndighetAktør(fagsak, id))
+            .map(id -> lagMyndighetAktørForEuEos(fagsak, id))
             .toList();
 
         fagsak.getAktører().addAll(nyeMyndigheter);
@@ -124,24 +124,22 @@ public class FagsakService {
             Aktoer nyTrygdemyndighet = lagMyndighetAktørForTrygdeavtaler(fagsak, landkode);
             fagsak.getAktører().add(nyTrygdemyndighet);
         }
+        fagsakRepository.save(fagsak);
     }
 
-    private Aktoer lagMyndighetAktør(Fagsak fagsak, String ID) {
-        Aktoer aktør = lagMyndighetAktørUtenLand(fagsak);
+    private Aktoer lagMyndighetAktørForEuEos(Fagsak fagsak, String ID) {
+        Aktoer aktør = new Aktoer();
+        aktør.setFagsak(fagsak);
+        aktør.setRolle(Aktoersroller.TRYGDEMYNDIGHET);
         aktør.setInstitusjonId(ID);
         return aktør;
     }
 
     private Aktoer lagMyndighetAktørForTrygdeavtaler(Fagsak fagsak, Landkoder landkode) {
-        Aktoer aktør = lagMyndighetAktørUtenLand(fagsak);
-        aktør.setTrygdemyndighetLand(landkode);
-        return aktør;
-    }
-
-    private Aktoer lagMyndighetAktørUtenLand(Fagsak fagsak) {
         Aktoer aktør = new Aktoer();
         aktør.setFagsak(fagsak);
         aktør.setRolle(Aktoersroller.TRYGDEMYNDIGHET);
+        aktør.setTrygdemyndighetLand(landkode);
         return aktør;
     }
 
