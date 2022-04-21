@@ -97,7 +97,7 @@ public class StorbritanniaMapper {
                 persondokument.getSammensattNavn(),
                 persondokument.getFødselsdato(),
                 persondokument.hentFolkeregisterident(),
-                persondokument.hentGjeldendePostadresse().lagPostadresseListe()))
+                finnGyldigNorskAdresse(persondokument)))
             .representant(lagRepresentant(behandling.getBehandlingsgrunnlag()))
             .utsendelse(lagUtsendelse(lovvalgsperioder, persondokument))
             .build();
@@ -136,7 +136,7 @@ public class StorbritanniaMapper {
 
     private Ektefelle tilEktefelle(Map<String, MedfolgendeFamilie> medfølgendeFamilieMap, String uuid, String begrunnelse) {
         var medfølgendeFamilie = Optional.of(medfølgendeFamilieMap.get(uuid))
-            .orElseThrow(() -> new FunksjonellException("Avklart medfølgende familie " + uuid + " finnes ikke i behandlingsgrunnlaget"));
+            .orElseThrow(() -> kastFinnesIkkeIBehandlingsGrunnlagetException(uuid));
 
         IdentType identType = medfølgendeFamilie.utledIdentType();
         return new Ektefelle.Builder()
@@ -165,8 +165,7 @@ public class StorbritanniaMapper {
 
     private Barn tilBarn(Map<String, MedfolgendeFamilie> medfølgendeBarnMap, String uuid, String begrunnelse) {
         var medfølgendeBarn = Optional.of(medfølgendeBarnMap.get(uuid))
-            .orElseThrow(() -> new FunksjonellException("Avklart medfølgende familie " + uuid +
-                " finnes ikke i behandlingsgrunnlaget"));
+            .orElseThrow(() -> kastFinnesIkkeIBehandlingsGrunnlagetException(uuid));
         var identType = medfølgendeBarn.utledIdentType();
         return new Barn.Builder()
             .navn(medfølgendeBarn.getNavn())
@@ -200,27 +199,40 @@ public class StorbritanniaMapper {
 
         return new Utsendelse.Builder()
             .artikkel((Lovvalgbestemmelser_trygdeavtale_uk) bestemmelse)
-            .oppholdsadresseUK(finnGyldigAdresse(persondata, lovvalgsperiode))
+            .oppholdsadresseUK(finnGyldigStorbritanniaAdresse(persondata, lovvalgsperiode))
             .startdato(lovvalgsperiode.getFom())
             .sluttdato(lovvalgsperiode.getTom())
             .build();
     }
 
-    static List<String> finnGyldigAdresse(Persondata persondata, Lovvalgsperiode lovvalgsperiode) {
-        var optionalPersonAdresse = Stream.of(
-            persondata.finnBostedsadresse(),
-            persondata.finnOppholdsadresse(),
-            persondata.finnKontaktadresse())
-            .filter(Optional::isPresent)
-            .map(Optional::get)
-            .filter(personAdresse -> sjekkAdresseMotLand(personAdresse.strukturertAdresse()))
-            .filter(personAdresse -> sjekkOmAdresseGyldighetErInnenforLovalgsperiode(personAdresse, lovvalgsperiode))
-            .findFirst();
-        return optionalPersonAdresse.isPresent() ? optionalPersonAdresse.get().strukturertAdresse().toList() : List.of();
+    static List<String> finnGyldigNorskAdresse(Persondata persondata) {
+        return getPersonAdresseer(persondata)
+            .filter(personAdresse -> sjekkAdresseMotLand(personAdresse.strukturertAdresse(), Landkoder.NO))
+            .findFirst()
+            .map(personAdresse -> personAdresse.strukturertAdresse().toList())
+            .orElse(List.of());
     }
 
-    private static boolean sjekkAdresseMotLand(StrukturertAdresse adresse) {
-        return adresse != null && adresse.getLandkode().equals(Landkoder.GB.getKode());
+    static List<String> finnGyldigStorbritanniaAdresse(Persondata persondata, Lovvalgsperiode lovvalgsperiode) {
+        return getPersonAdresseer(persondata)
+            .filter(personAdresse -> sjekkAdresseMotLand(personAdresse.strukturertAdresse(), Landkoder.GB))
+            .filter(personAdresse -> sjekkOmAdresseGyldighetErInnenforLovalgsperiode(personAdresse, lovvalgsperiode))
+            .findFirst()
+            .map(personAdresse -> personAdresse.strukturertAdresse().toList())
+            .orElse(List.of());
+    }
+
+    private static Stream<PersonAdresse> getPersonAdresseer(Persondata persondata) {
+        return Stream.of(
+                persondata.finnBostedsadresse(),
+                persondata.finnOppholdsadresse(),
+                persondata.finnKontaktadresse())
+            .filter(Optional::isPresent)
+            .map(Optional::get);
+    }
+
+    private static boolean sjekkAdresseMotLand(StrukturertAdresse adresse, Landkoder landkode) {
+        return adresse != null && adresse.getLandkode().equals(landkode.getKode());
     }
 
     static boolean sjekkOmAdresseGyldighetErInnenforLovalgsperiode(PersonAdresse personAdresse, Lovvalgsperiode lovvalgsperiode) {
@@ -287,7 +299,7 @@ public class StorbritanniaMapper {
 
     private Person mapFamilieTilPerson(Map<String, MedfolgendeFamilie> medfølgendeFamilieMap, String uuid) {
         var medfølgendeFamilie = Optional.of(medfølgendeFamilieMap.get(uuid))
-            .orElseThrow(() -> new FunksjonellException("Avklart medfølgende familie " + uuid + " finnes ikke i behandlingsgrunnlaget"));
+            .orElseThrow(() -> kastFinnesIkkeIBehandlingsGrunnlagetException(uuid));
         var identType = medfølgendeFamilie.utledIdentType();
 
         return new Person(
@@ -295,6 +307,10 @@ public class StorbritanniaMapper {
             medfølgendeFamilie.datoFraFnr(),
             identType == FNR ? medfølgendeFamilie.getFnr() : null,
             identType == DNR ? medfølgendeFamilie.getFnr() : null);
+    }
+
+    private FunksjonellException kastFinnesIkkeIBehandlingsGrunnlagetException(String uuid) {
+        return new FunksjonellException("Avklart medfølgende familie " + uuid + " finnes ikke i behandlingsgrunnlaget");
     }
 
     private boolean erSkatteetaten(OrganisasjonDokument org) {

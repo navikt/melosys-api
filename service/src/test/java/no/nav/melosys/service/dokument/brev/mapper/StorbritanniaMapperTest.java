@@ -12,9 +12,14 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
+import no.nav.melosys.domain.dokument.felles.Land;
+import no.nav.melosys.domain.dokument.person.PersonDokument;
+import no.nav.melosys.domain.dokument.person.adresse.Gateadresse;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Medfolgende_barn_begrunnelser;
@@ -22,6 +27,12 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_b
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_ektefelle_samboer_begrunnelser_ftrl;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
+import no.nav.melosys.domain.person.Foedsel;
+import no.nav.melosys.domain.person.Navn;
+import no.nav.melosys.domain.person.Persondata;
+import no.nav.melosys.domain.person.Personopplysninger;
+import no.nav.melosys.domain.person.adresse.Bostedsadresse;
+import no.nav.melosys.domain.person.adresse.Kontaktadresse;
 import no.nav.melosys.domain.person.adresse.Oppholdsadresse;
 import no.nav.melosys.domain.person.adresse.PersonAdresse;
 import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie;
@@ -29,12 +40,15 @@ import no.nav.melosys.domain.person.familie.IkkeOmfattetFamilie;
 import no.nav.melosys.domain.person.familie.OmfattetFamilie;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.dokgen.dto.InnvilgelseOgAttestStorbritannia;
+import no.nav.melosys.integrasjon.dokgen.dto.storbritannia.attest.AttestStorbritannia;
 import no.nav.melosys.integrasjon.dokgen.dto.storbritannia.innvilgelse.Barn;
 import no.nav.melosys.integrasjon.dokgen.dto.storbritannia.innvilgelse.InnvilgelseStorbritannia;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterSystemService;
+import no.nav.melosys.service.dokument.DokgenTestData;
 import no.nav.melosys.service.dokument.brev.BrevDataTestUtils;
+import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -53,7 +67,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class StorbritanniaMapperTest {
+class StorbritanniaMapperTest {
     private static final String UUID_EKTEFELLE = "uuidEktefelle";
     private static final String UUID_BARN_1 = "uuidBarn1";
     private static final String UUID_BARN_2 = "uuidBarn2";
@@ -112,6 +126,47 @@ public class StorbritanniaMapperTest {
 
         assertThat(innvilgelseOgAttestStorbritannia.isSkalHaInfoOmRettigheter()).isTrue();
         assertThat(innvilgelseOgAttestStorbritannia.getNyVurderingBakgrunn()).isEqualTo(brevbestilling.getNyVurderingBakgrunn());
+    }
+
+    Personopplysninger lagPersonopplysninger() {
+        final var bostedsadresse = new Bostedsadresse(
+            new StrukturertAdresse("gate1", "42 C", null, null, null, Landkoder.SE.getKode()),
+            null, null, null, "PDL", null, false);
+
+        final var kontaktadresse = new Kontaktadresse(
+            new StrukturertAdresse("kontakt 1", null, null, null, null, Landkoder.NO.getKode()),
+            null, null, null, null, "PDL", null, null,
+            false);
+
+        final var oppholdsadresse = new Oppholdsadresse(
+            new StrukturertAdresse("tilleggOpphold", "opphold 1", null, null, null,
+                null, null, Landkoder.GB.getKode()), null,
+            LOVVALGSPERIODE_FOM, LOVVALGSPERIODE_TOM,
+            "PDL", null, null, false);
+
+        return new Personopplysninger(Collections.emptyList(), bostedsadresse, null, null,
+            new Foedsel(LocalDate.EPOCH, null, null, null), null, null,
+            List.of(kontaktadresse), new Navn("Ole", "", "Norman"), List.of(oppholdsadresse), Collections.emptyList());
+    }
+
+    @Test
+    void map_brukNorskBostedsAddresseOmMulig() {
+        mockHappyCase();
+
+        InnvilgelseBrevbestilling brevbestilling =
+            lagStorbritanniaBrevbestillingDefaultBuilder(medPeriode(lagTrygdeavtaleBehandling()))
+                .medPersonDokument(lagPersonopplysninger())
+                .build();
+
+        InnvilgelseOgAttestStorbritannia innvilgelseOgAttestStorbritannia = storbritanniaMapper.map(brevbestilling);
+        assertThat(innvilgelseOgAttestStorbritannia.isSkalHaAttest()).isTrue();
+
+        AttestStorbritannia attest = innvilgelseOgAttestStorbritannia.getAttest();
+        List<String> bostedsadresse = attest.getArbeidstaker().bostedsadresse();
+        System.out.println(bostedsadresse);
+
+        List<String> oppholdsadresseUK = attest.getUtsendelse().oppholdsadresseUK();
+        System.out.println(oppholdsadresseUK);
     }
 
     @Test
@@ -268,7 +323,7 @@ public class StorbritanniaMapperTest {
         return behandling;
     }
 
-    private InnvilgelseBrevbestilling lagStorbritanniaBrevbestilling(Behandling behandling) {
+    private InnvilgelseBrevbestilling.Builder lagStorbritanniaBrevbestillingDefaultBuilder(Behandling behandling) {
         return new InnvilgelseBrevbestilling.Builder()
             .medProduserbartdokument(STORBRITANNIA)
             .medPersonDokument(lagPersonDokument())
@@ -281,8 +336,12 @@ public class StorbritanniaMapperTest {
             .medBarnFritekst("barnFritekst")
             .medEktefelleFritekst("ektefelleFritekst")
             .medVedtaksdato(VEDTAKS_DATO_INSTANT)
-            .medVirksomhetArbeidsgiverSkalHaKopi(false)
-            .build();
+            .medVirksomhetArbeidsgiverSkalHaKopi(false);
+    }
+
+
+    private InnvilgelseBrevbestilling lagStorbritanniaBrevbestilling(Behandling behandling) {
+        return lagStorbritanniaBrevbestillingDefaultBuilder(behandling).build();
     }
 
     private AvklarteMedfolgendeFamilie lagOmfattetMedfølgendeEktefelle() {
@@ -517,43 +576,43 @@ public class StorbritanniaMapperTest {
     );
 
     private static final String FORVENTEDE_FELTER_FOR_ATTEST_STORBRITANNIA_MAPPING = String.format("""
-        {
-          "arbeidstaker" : {
-            "navn" : "Donald Duck",
-            "foedselsdato" : null,
-            "fnr" : "05058892382",
-            "bostedsadresse" : [ "Andebygata 1", "9999", "Andeby" ]
-          },
-          "medfolgendeFamiliemedlemmer" : {
-            "ektefelle" : {
-              "navn" : "Dolly Duck",
-              "foedselsdato" : "%s",
-              "fnr" : "%s",
-              "dnr" : null
-            },
-            "barn" : [ {
-              "navn" : "Doffen Duck",
-              "foedselsdato" : "%s",
-              "fnr" : "%s",
-              "dnr" : null
-            } ]
-          },
-          "arbeidsgiverNorge" : {
-            "virksomhetsnavn" : "Bang Hansen",
-            "fullstendigAdresse" : [ "Strukturert Gate 12B", "4321", "Poststed", "Bulgaria" ]
-          },
-          "utsendelse" : {
-            "artikkel" : "UK_ART6_1",
-            "oppholdsadresseUK" : [ ],
-            "startdato" : "%s",
-            "sluttdato" : "%s"
-          },
-          "representant" : {
-            "navn" : "Foretaksnavn",
-            "adresse" : [ "Uk address" ]
-          },
-          "vedtaksdato" : "%s"
-        }""",
+            {
+              "arbeidstaker" : {
+                "navn" : "Donald Duck",
+                "foedselsdato" : null,
+                "fnr" : "05058892382",
+                "bostedsadresse" : [ "Andebygata 1", "9999", "Andeby" ]
+              },
+              "medfolgendeFamiliemedlemmer" : {
+                "ektefelle" : {
+                  "navn" : "Dolly Duck",
+                  "foedselsdato" : "%s",
+                  "fnr" : "%s",
+                  "dnr" : null
+                },
+                "barn" : [ {
+                  "navn" : "Doffen Duck",
+                  "foedselsdato" : "%s",
+                  "fnr" : "%s",
+                  "dnr" : null
+                } ]
+              },
+              "arbeidsgiverNorge" : {
+                "virksomhetsnavn" : "Bang Hansen",
+                "fullstendigAdresse" : [ "Strukturert Gate 12B", "4321", "Poststed", "Bulgaria" ]
+              },
+              "utsendelse" : {
+                "artikkel" : "UK_ART6_1",
+                "oppholdsadresseUK" : [ ],
+                "startdato" : "%s",
+                "sluttdato" : "%s"
+              },
+              "representant" : {
+                "navn" : "Foretaksnavn",
+                "adresse" : [ "Uk address" ]
+              },
+              "vedtaksdato" : "%s"
+            }""",
         LocalDate.of(1980, 10, 1),
         EKTEFELLE_FNR,
         LocalDate.of(2000, 10, 1),
