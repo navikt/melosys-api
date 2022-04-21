@@ -8,6 +8,7 @@ import java.util.Optional;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.OppgaveTilbakelegging;
 import no.nav.melosys.exception.TekniskException;
@@ -43,8 +44,11 @@ public class Oppgaveplukker {
 
     @Transactional
     public synchronized Optional<Oppgave> plukkOppgave(String saksbehandlerID, PlukkOppgaveInnDto plukkDto) {
-
-        List<Oppgave> utildelteOppgaverEtterFrist = oppgaveFasade.finnUtildelteOppgaverEtterFrist(OppgaveFactory.hentOppgaveParametere(plukkDto.getBehandlingstema()).behandlingstype);
+        Behandlingstema behandlingstema = plukkDto.getBehandlingstema();
+        var parametere = OppgaveFactory.hentOppgaveParametere(behandlingstema);
+        List<Oppgave> utildelteOppgaverEtterFrist =
+            oppgaveFasade.finnUtildelteOppgaverEtterFrist(parametere.behandlingstype,
+                behandlingstema == Behandlingstema.YRKESAKTIV ? parametere.behandlingstema : null);
         var filtrerteOppgaver = utildelteOppgaverEtterFrist.stream()
             .filter(oppgave -> {
                 String saksnummer = oppgave.getSaksnummer();
