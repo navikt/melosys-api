@@ -11,10 +11,8 @@ import no.nav.melosys.domain.dokument.sakogbehandling.SobSakDokument;
 import no.nav.melosys.tjenester.gui.dto.eessi.SedDokumentDto;
 import no.nav.melosys.tjenester.gui.dto.inntekt.InntektDto;
 
-@JsonPropertyOrder({"person", "arbeidsforhold", "organisasjoner", "medlemskap", "inntekt", "sakOgBehandling", "sed"})
+@JsonPropertyOrder({"arbeidsforhold", "organisasjoner", "medlemskap", "inntekt", "sakOgBehandling", "sed"})
 public class SaksopplysningerDto {
-
-    private PersonUtenAdresseDto person;
 
     private PersonhistorikkDto personhistorikk;
 
@@ -32,7 +30,6 @@ public class SaksopplysningerDto {
 
     public SaksopplysningerDto() {
         // Frontend ønsker å motta et objekt, selv når saksopplysninger ikke finnes.
-        this.person = new PersonUtenAdresseDto();
         this.personhistorikk = new PersonhistorikkDto();
         this.arbeidsforhold = new ArbeidsforholdDokument();
         this.organisasjoner = new ArrayList<>();
@@ -40,14 +37,6 @@ public class SaksopplysningerDto {
         this.inntekt = new InntektDto();
         this.sakOgBehandling = new SobSakDokument();
         this.sed = new SedDokumentDto();
-    }
-
-    public PersonUtenAdresseDto getPerson() {
-        return person;
-    }
-
-    public void setPerson(PersonUtenAdresseDto person) {
-        this.person = person;
     }
 
     public PersonhistorikkDto getPersonhistorikk() {

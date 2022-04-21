@@ -135,13 +135,8 @@ class SaksopplysningerTilDtoTest {
         behandling.setSisteOpplysningerHentetDato(LocalDate.of(2018, 1, 1).atStartOfDay().toInstant(ZoneOffset.UTC));
         behandling.setSaksopplysninger(saksopplysninger);
 
-        SaksopplysningerDto saksopplysningerDto = saksopplysningerTilDto.getSaksopplysningerDto(saksopplysninger, behandling);
+        SaksopplysningerDto saksopplysningerDto = saksopplysningerTilDto.getSaksopplysningerDto(saksopplysninger);
 
-        PersonUtenAdresseDto person = saksopplysningerDto.getPerson();
-
-        assertThat(person).isNotNull();
-        assertThat(person.getStatsborgerskap()).isNotNull();
-        assertThat(person.getStatsborgerskapDato()).isNotNull();
         assertThat(saksopplysningerDto.getPersonhistorikk().bostedsadressePerioder)
             .extracting("bostedsadresse")
             .extracting("poststed")
