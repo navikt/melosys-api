@@ -44,11 +44,10 @@ public class Oppgaveplukker {
 
     @Transactional
     public synchronized Optional<Oppgave> plukkOppgave(String saksbehandlerID, PlukkOppgaveInnDto plukkDto) {
-        Behandlingstema behandlingstema = plukkDto.getBehandlingstema();
-        var parametere = OppgaveFactory.hentOppgaveParametere(behandlingstema);
+        var parametere =
+            OppgaveFactory.hentOppgaveParametere(plukkDto.getBehandlingstema());
         List<Oppgave> utildelteOppgaverEtterFrist =
-            oppgaveFasade.finnUtildelteOppgaverEtterFrist(parametere.behandlingstype,
-                behandlingstema == Behandlingstema.YRKESAKTIV ? parametere.behandlingstema : null);
+            oppgaveFasade.finnUtildelteOppgaverEtterFrist(parametere.behandlingstype, parametere.behandlingstema);
         var filtrerteOppgaver = utildelteOppgaverEtterFrist.stream()
             .filter(oppgave -> {
                 String saksnummer = oppgave.getSaksnummer();
