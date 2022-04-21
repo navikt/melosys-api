@@ -1,5 +1,6 @@
 package no.nav.melosys.saksflyt.kontroll;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -63,6 +64,8 @@ public class ProsessinstansAdminTjeneste implements AdminTjeneste {
 
         log.info("Forsøker å hoppe over steg for prosessinstans {}", uuid);
         var nyttSteg = prosessinstansAdminService.skipStegProsessinstans(uuid);
+
+        prosessinstansAdminService.restartProsessinstanser(Collections.singletonList(uuid));
 
         return ResponseEntity.ok("SIST_FULLFORTE_STEG for prosessinstans %s satt til %s".formatted(uuid, nyttSteg.getKode()));
     }
