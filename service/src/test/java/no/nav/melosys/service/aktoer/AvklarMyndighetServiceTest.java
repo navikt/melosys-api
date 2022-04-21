@@ -4,6 +4,7 @@ import java.util.*;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.repository.UtenlandskMyndighetRepository;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.sak.FagsakService;
@@ -47,6 +48,7 @@ public class AvklarMyndighetServiceTest {
 
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer("123");
+        fagsak.setType(Sakstyper.EU_EOS);
 
         behandling = new Behandling();
         behandling.setId(1L);
@@ -73,7 +75,7 @@ public class AvklarMyndighetServiceTest {
 
     @Test
     public void lagUtenlandskMyndighetFraBehandling_forventAktoerMedGyldigInstitusjonsId() {
-        when(utenlandskMyndighetRepository.findByLandkodeIsIn(any(Collection.class))).thenReturn(Arrays.asList(utenlandskMyndighet, utenlandskMyndighetReservert));
+        when(utenlandskMyndighetRepository.findByLandkodeIsIn(anyCollection())).thenReturn(Arrays.asList(utenlandskMyndighet, utenlandskMyndighetReservert));
 
         Map<UtenlandskMyndighet, Aktoer> aktoerer = utenlandskMyndighetService.lagUtenlandskeMyndigheterFraBehandling(behandling);
         assertThat(aktoerer).isNotEmpty();
