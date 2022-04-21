@@ -138,7 +138,7 @@ public class Aktoer extends RegistreringsInfo {
     }
 
     public boolean erUtenlandskMyndighet() {
-        return rolle == Aktoersroller.TRYGDEMYNDIGHET && institusjonId != null && trygdemyndighetLand != null;
+        return rolle == Aktoersroller.TRYGDEMYNDIGHET && (institusjonId != null || trygdemyndighetLand != null);
     }
 
     public boolean erBruker() {
