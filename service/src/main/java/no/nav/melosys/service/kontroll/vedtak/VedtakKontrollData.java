@@ -10,26 +10,42 @@ final class VedtakKontrollData extends KontrollData {
     private final Persondata persondata;
     private final BehandlingsgrunnlagData behandlingsgrunnlagData;
     private final Lovvalgsperiode lovvalgsperiode;
+    private final Lovvalgsperiode opprinneligLovvalgsperiode;
 
     VedtakKontrollData(MedlemskapDokument medlemskapDokument,
                        Persondata persondata,
                        BehandlingsgrunnlagData behandlingsgrunnlagData,
-                       Lovvalgsperiode lovvalgsperiode) {
+                       Lovvalgsperiode lovvalgsperiode,
+                       Lovvalgsperiode opprinneligLovvalgsperiode) {
         super(medlemskapDokument);
         this.behandlingsgrunnlagData = behandlingsgrunnlagData;
         this.persondata = persondata;
         this.lovvalgsperiode = lovvalgsperiode;
+        this.opprinneligLovvalgsperiode = opprinneligLovvalgsperiode;
+    }
+
+    VedtakKontrollData(Persondata persondata,
+                       BehandlingsgrunnlagData behandlingsgrunnlagData) {
+        super(null);
+        this.behandlingsgrunnlagData = behandlingsgrunnlagData;
+        this.persondata = persondata;
+        this.lovvalgsperiode = null;
+        this.opprinneligLovvalgsperiode = null;
     }
 
     BehandlingsgrunnlagData getBehandlingsgrunnlagData() {
         return behandlingsgrunnlagData;
     }
 
-    Persondata getPersonDokument() {
+    Persondata getPersondata() {
         return persondata;
     }
 
     Lovvalgsperiode getLovvalgsperiode() {
         return lovvalgsperiode;
+    }
+
+    public Lovvalgsperiode getOpprinneligLovvalgsperiode() {
+        return opprinneligLovvalgsperiode;
     }
 }
