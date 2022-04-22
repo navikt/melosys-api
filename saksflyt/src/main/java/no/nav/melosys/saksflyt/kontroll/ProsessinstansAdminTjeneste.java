@@ -1,6 +1,8 @@
 package no.nav.melosys.saksflyt.kontroll;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 import no.nav.melosys.saksflyt.kontroll.dto.HentProsessinstansDto;
 import no.nav.melosys.saksflyt.kontroll.dto.RestartProsessinstanserRequest;
@@ -22,37 +24,45 @@ public class ProsessinstansAdminTjeneste implements AdminTjeneste {
     private final ProsessinstansAdminService prosessinstansAdminService;
     private final String apiKey;
 
-    public ProsessinstansAdminTjeneste(ProsessinstansAdminService prosessinstansAdminService,
-                                       @Value("${Melosys-admin.apikey}") String apiKey) {
+    public ProsessinstansAdminTjeneste(ProsessinstansAdminService prosessinstansAdminService, @Value("${Melosys-admin.apikey}") String apiKey) {
         this.prosessinstansAdminService = prosessinstansAdminService;
         this.apiKey = apiKey;
     }
 
     @GetMapping("/feilede")
-    public ResponseEntity<List<HentProsessinstansDto>> hentFeiledeProsessinstanser(
-        @RequestHeader(API_KEY_HEADER) String apiKey) {
+    public ResponseEntity<List<HentProsessinstansDto>> hentFeiledeProsessinstanser(@RequestHeader(API_KEY_HEADER) String apiKey) {
 
         validerApikey(apiKey);
         return ResponseEntity.ok(prosessinstansAdminService.hentFeiledeProsessinstanser());
     }
 
     @PostMapping("/feilede/restart")
-    public ResponseEntity<List<HentProsessinstansDto>> restartAlleFeiledeProsessinstanser(
-        @RequestHeader(API_KEY_HEADER) String apiKey) {
+    public ResponseEntity<List<HentProsessinstansDto>> restartAlleFeiledeProsessinstanser(@RequestHeader(API_KEY_HEADER) String apiKey) {
 
         validerApikey(apiKey);
         return ResponseEntity.ok(prosessinstansAdminService.restartAlleFeiledeProsessinstanser());
     }
 
     @PostMapping("/restart")
-    public ResponseEntity<Void> restartProsessinstans(@RequestHeader(API_KEY_HEADER) String apiKey,
-                                                      @RequestBody RestartProsessinstanserRequest request) {
+    public ResponseEntity<Void> restartProsessinstans(@RequestHeader(API_KEY_HEADER) String apiKey, @RequestBody RestartProsessinstanserRequest request) {
         validerApikey(apiKey);
 
         log.info("Forsøker å restarte prosessinstanser {}", request.getUuids());
         prosessinstansAdminService.restartProsessinstanser(request.getUuids());
 
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/hopp-over-steg/{uuid}")
+    public ResponseEntity<String> hoppOverStegStegProsessinstans(@RequestHeader(API_KEY_HEADER) String apiKey, @PathVariable UUID uuid) {
+        validerApikey(apiKey);
+
+        log.info("Forsøker å hoppe over steg for prosessinstans {}", uuid);
+        var nyttSteg = prosessinstansAdminService.hoppOverStegProsessinstans(uuid);
+
+        prosessinstansAdminService.restartProsessinstanser(Collections.singletonList(uuid));
+
+        return ResponseEntity.ok("SIST_FULLFORTE_STEG for prosessinstans %s satt til %s og prosessinstans restartet".formatted(uuid, nyttSteg.getKode()));
     }
 
     @Override
