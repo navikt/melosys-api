@@ -132,13 +132,13 @@ class ProsessinstansAdminServiceTest {
     }
 
     @Test
-    void skipStegProsessinstans_hopperTilNesteSteg() {
+    void hoppOverStegProsessinstans_hopperTilNesteSteg() {
         var prosessinstans = lagProsessinstans();
         var uuid = prosessinstans.getId();
 
         when(prosessinstansRepository.findById(uuid)).thenReturn(Optional.of(prosessinstans));
 
-        prosessinstansAdminService.skipStegProsessinstans(uuid);
+        prosessinstansAdminService.hoppOverStegProsessinstans(uuid);
 
         assertThat(prosessinstans.getSistFullførtSteg()).isEqualTo(CURRENT_PROSESS_STEG);
         verify(prosessinstansRepository).save(prosessinstans);

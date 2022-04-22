@@ -55,7 +55,7 @@ public class ProsessinstansAdminService {
         setStatusRestartet(prosessinstanser);
     }
 
-    public ProsessSteg skipStegProsessinstans(UUID uuid) {
+    public ProsessSteg hoppOverStegProsessinstans(UUID uuid) {
         var prosessinstans = prosessinstansRepository.findById(uuid)
             .orElseThrow(() -> new IkkeFunnetException("Fant ikke prosessinstans med ID %s".formatted(uuid)));
         var nesteSteg = hentNesteSteg(prosessinstans)

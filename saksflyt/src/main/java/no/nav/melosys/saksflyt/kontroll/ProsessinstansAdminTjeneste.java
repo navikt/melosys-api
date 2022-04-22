@@ -57,13 +57,13 @@ public class ProsessinstansAdminTjeneste implements AdminTjeneste {
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/skip-steg/{uuid}")
-    public ResponseEntity<String> skipStegProsessinstans(@RequestHeader(API_KEY_HEADER) String apiKey,
-                                                         @PathVariable UUID uuid) {
+    @PostMapping("/hopp-over-steg/{uuid}")
+    public ResponseEntity<String> hoppOverStegStegProsessinstans(@RequestHeader(API_KEY_HEADER) String apiKey,
+                                                                 @PathVariable UUID uuid) {
         validerApikey(apiKey);
 
         log.info("Forsøker å hoppe over steg for prosessinstans {}", uuid);
-        var nyttSteg = prosessinstansAdminService.skipStegProsessinstans(uuid);
+        var nyttSteg = prosessinstansAdminService.hoppOverStegProsessinstans(uuid);
 
         prosessinstansAdminService.restartProsessinstanser(Collections.singletonList(uuid));
 

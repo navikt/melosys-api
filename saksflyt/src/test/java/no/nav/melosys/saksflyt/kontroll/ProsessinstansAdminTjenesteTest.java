@@ -54,20 +54,20 @@ public class ProsessinstansAdminTjenesteTest {
     }
 
     @Test
-    void skipStegProsessinstans_riktigApiKeyOppgitt_ok() {
+    void hoppOverStegProsessinstans_riktigApiKeyOppgitt_ok() {
         final var nyttSteg = ProsessSteg.AVSLUTT_SAK_OG_BEHANDLING;
-        when(mockProsessinstansAdminService.skipStegProsessinstans(UUID)).thenReturn(nyttSteg);
+        when(mockProsessinstansAdminService.hoppOverStegProsessinstans(UUID)).thenReturn(nyttSteg);
 
-        var response = prosessinstansAdminTjeneste.skipStegProsessinstans(API_KEY, UUID);
+        var response = prosessinstansAdminTjeneste.hoppOverStegStegProsessinstans(API_KEY, UUID);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isEqualTo("SIST_FULLFORTE_STEG for prosessinstans %s satt til %s".formatted(UUID, nyttSteg));
     }
 
     @Test
-    void skipStegProsessinstans_feilApiKeyOppgitt_forbidden() {
+    void hoppOverStegProsessinstans_feilApiKeyOppgitt_forbidden() {
         assertThatExceptionOfType(SikkerhetsbegrensningException.class)
-            .isThrownBy(() -> prosessinstansAdminTjeneste.skipStegProsessinstans("dumdum", UUID))
+            .isThrownBy(() -> prosessinstansAdminTjeneste.hoppOverStegStegProsessinstans("dumdum", UUID))
             .withMessageContaining("apikey");
     }
 }
