@@ -1,6 +1,5 @@
 package no.nav.melosys.service.vedtak;
 
-import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.persondata.PersondataFasade;
@@ -44,8 +43,6 @@ class FattetVedtakServiceTest {
 
     @BeforeEach
     void setUp() {
-        final FakeUnleash unleash = new FakeUnleash();
-        unleash.enable("melosys.pdl.aktiv");
         fattetVedtakService = new FattetVedtakService(mockFattetVedtakProducer, mockBehandlingService,
             mockBehandlingsresultatService, mockPersondataFasade);
     }

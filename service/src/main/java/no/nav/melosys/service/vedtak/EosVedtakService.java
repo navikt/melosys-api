@@ -81,7 +81,7 @@ public class EosVedtakService {
         behandlingsresultat.setType(request.getBehandlingsresultatTypeKode());
 
         if (behandlingsresultat.erInnvilgelse()) {
-            vedtakKontrollService.kontrollerInnvilgelse(behandling, behandlingsresultat, request.getVedtakstype(), Sakstyper.EU_EOS);
+            vedtakKontrollService.kontrollerVedtakMedNyeRegisteropplysninger(behandling, behandlingsresultat, Sakstyper.EU_EOS, false);
         }
 
         oppdaterBehandlingsresultat(behandlingsresultat, request.getVedtakstype(), request.getFritekst(), request.getNyVurderingBakgrunn());

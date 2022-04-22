@@ -2,7 +2,6 @@ package no.nav.melosys.service.oppgave;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
@@ -12,7 +11,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.OppgaveTilbakelegging;
-import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.oppgave.OppgaveFasade;
 import no.nav.melosys.repository.OppgaveTilbakeleggingRepository;
@@ -20,7 +18,6 @@ import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.oppgave.dto.PlukkOppgaveInnDto;
 import no.nav.melosys.service.oppgave.dto.TilbakeleggingDto;
 import no.nav.melosys.service.sak.FagsakService;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -47,14 +44,25 @@ public class Oppgaveplukker {
 
     @Transactional
     public synchronized Optional<Oppgave> plukkOppgave(String saksbehandlerID, PlukkOppgaveInnDto plukkDto) {
-        validerPlukkOppgave(plukkDto);
+        var parametere =
+            OppgaveFactory.hentOppgaveParametere(plukkDto.getBehandlingstema());
+        List<Oppgave> utildelteOppgaverEtterFrist =
+            oppgaveFasade.finnUtildelteOppgaverEtterFrist(parametere.behandlingstype, parametere.behandlingstema);
+        var filtrerteOppgaver = utildelteOppgaverEtterFrist.stream()
+            .filter(oppgave -> {
+                String saksnummer = oppgave.getSaksnummer();
+                Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
+                if (fagsak == null) {
+                    log.error("Fant ikke fagsak {} for oppgave {}", saksnummer, oppgave.getOppgaveId());
+                    throw new TekniskException("Fant ikke fagsak " + saksnummer);
+                }
+                return !venterSakPaaDokumentasjonEllerFagligAvklaring(fagsak);
+            }).toList();
 
-        Behandlingstema behandlingstema = Behandlingstema.valueOf(plukkDto.getBehandlingstema());
-        List<Oppgave> ufordelteOppgaver = oppgaveFasade.finnUtildelteOppgaverEtterFrist(OppgaveFactory.hentOppgaveParametere(behandlingstema).behandlingstype);
-
-        fjernOppgaverSomVenterForDokumentasjonEllerFagligAvklaring(ufordelteOppgaver);
-
-        Optional<Oppgave> valg = velgNeste(saksbehandlerID, ufordelteOppgaver);
+        Optional<Oppgave> valg = filtrerteOppgaver.stream()
+            .sorted(Oppgave.lavestTilHøyestPrioritet.reversed())
+            .filter(oppgave -> !erTilbakeLagt(saksbehandlerID, oppgave.getOppgaveId()))
+            .findFirst();
 
         if (valg.isPresent()) {
             oppdaterBehandlingsstatus(valg.get().getSaksnummer());
@@ -63,37 +71,30 @@ public class Oppgaveplukker {
         return valg;
     }
 
+    private boolean venterSakPaaDokumentasjonEllerFagligAvklaring(Fagsak fagsak) {
+        Behandling behandling = fagsak.hentSistAktivBehandling();
+        if (behandling.erVenterForDokumentasjon()) {
+            if (behandling.getDokumentasjonSvarfristDato() == null) {
+                log.error("Behandling {} tilhørende {} avventer dokumentasjon, men har ingen svarfristdato.",
+                    behandling.getId(), fagsak.getSaksnummer());
+                return true;
+            }
+            return behandling.getDokumentasjonSvarfristDato().isAfter(Instant.now());
+        }
+        return behandling.harStatus(Behandlingsstatus.AVVENT_FAGLIG_AVKLARING);
+    }
+
+    private boolean erTilbakeLagt(String saksbehandlerID, String oppgaveId) {
+        List<OppgaveTilbakelegging> tilbakelegging = oppgaveTilbakkeleggingRepo.findBySaksbehandlerIdAndOppgaveId(saksbehandlerID, oppgaveId);
+        return !tilbakelegging.isEmpty();
+    }
+
     private void oppdaterBehandlingsstatus(String saksnummer) {
         Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
         Behandling behandling = fagsak.hentAktivBehandling();
         if (behandling != null && (behandling.getStatus() == Behandlingsstatus.SVAR_ANMODNING_MOTTATT || behandling.getStatus() == Behandlingsstatus.OPPRETTET)) {
             behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
             behandlingService.lagre(behandling);
-        }
-    }
-
-    private void fjernOppgaverSomVenterForDokumentasjonEllerFagligAvklaring(List<Oppgave> oppgaver) {
-        Iterator<Oppgave> iter = oppgaver.iterator();
-        while (iter.hasNext()) {
-            Oppgave oppgave = iter.next();
-            String saksnummer = oppgave.getSaksnummer();
-            Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
-            if (fagsak == null) {
-                log.error("Fant ikke fagsak {} for oppgave {}", saksnummer, oppgave.getOppgaveId());
-                throw new TekniskException("Fant ikke fagsak " + saksnummer);
-            }
-
-            Behandling behandling = fagsak.hentSistAktivBehandling();
-            if (behandling.erVenterForDokumentasjon()) {
-                if (behandling.getDokumentasjonSvarfristDato() == null) {
-                    log.error("Behandling {} tilhørende {} avventer dokumentasjon, men har ingen svarfristdato.", behandling.getId(), saksnummer);
-                    iter.remove();
-                } else if (behandling.getDokumentasjonSvarfristDato().isAfter(Instant.now())) {
-                    iter.remove();
-                }
-            } else if (behandling.harStatus(Behandlingsstatus.AVVENT_FAGLIG_AVKLARING)) {
-                iter.remove();
-            }
         }
     }
 
@@ -118,28 +119,4 @@ public class Oppgaveplukker {
         log.info("Oppgave med oppgaveId {} er lagt tilbake. ", oppgaveId);
     }
 
-    private Optional<Oppgave> velgNeste(String saksbehandlerID, List<Oppgave> oppgaver) {
-
-        Optional<Oppgave> valg = oppgaver.stream().max(Oppgave.lavestTilHøyestPrioritet);
-        if (valg.isPresent()) {
-            String oppgaveId = valg.get().getOppgaveId();
-            if (erTilbakeLagt(saksbehandlerID, oppgaveId)) {
-                oppgaver.remove(valg.get());
-                return velgNeste(saksbehandlerID, oppgaver);
-            }
-        }
-
-        return valg;
-    }
-
-    private boolean erTilbakeLagt(String saksbehandlerID, String oppgaveId) {
-        List<OppgaveTilbakelegging> tilbakelegging = oppgaveTilbakkeleggingRepo.findBySaksbehandlerIdAndOppgaveId(saksbehandlerID, oppgaveId);
-        return !tilbakelegging.isEmpty();
-    }
-
-    private static void validerPlukkOppgave(PlukkOppgaveInnDto plukkDto) {
-        if (StringUtils.isEmpty(plukkDto.getBehandlingstema())) {
-            throw new FunksjonellException("Behandlingstema er påkrevd");
-        }
-    }
 }

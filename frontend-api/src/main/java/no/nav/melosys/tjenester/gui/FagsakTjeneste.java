@@ -16,7 +16,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.persondata.PersondataFasade;
-import no.nav.melosys.service.registeropplysninger.RegisterOppslagService;
+import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService;
 import no.nav.melosys.service.sak.*;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.utpeking.UtpekingService;
@@ -54,13 +54,13 @@ public class FagsakTjeneste {
     private final SaksopplysningerService saksopplysningerService;
     private final UtpekingService utpekingService;
     private final VideresendSoknadService videresendSoknadService;
-    private final RegisterOppslagService registerOppslagService;
+    private final OrganisasjonOppslagService organisasjonOppslagService;
 
     public FagsakTjeneste(FagsakService fagsakService, Aksesskontroll aksesskontroll, BehandlingsgrunnlagService behandlingsgrunnlagService,
                           HenleggFagsakService henleggFagsakService,
                           OpprettNySakFraOppgave opprettNySakFraOppgave, PersondataFasade persondataFasade,
                           SaksopplysningerService saksopplysningerService, UtpekingService utpekingService,
-                          VideresendSoknadService videresendSoknadService, RegisterOppslagService registerOppslagService) {
+                          VideresendSoknadService videresendSoknadService, OrganisasjonOppslagService organisasjonOppslagService) {
         this.fagsakService = fagsakService;
         this.aksesskontroll = aksesskontroll;
         this.behandlingsgrunnlagService = behandlingsgrunnlagService;
@@ -70,7 +70,7 @@ public class FagsakTjeneste {
         this.saksopplysningerService = saksopplysningerService;
         this.utpekingService = utpekingService;
         this.videresendSoknadService = videresendSoknadService;
-        this.registerOppslagService = registerOppslagService;
+        this.organisasjonOppslagService = organisasjonOppslagService;
     }
 
     @GetMapping("{saksnr}")
@@ -271,13 +271,13 @@ public class FagsakTjeneste {
         if (behandlinger.isEmpty()) {
             return UKJENT_SAMMENSATT_NAVN;
         }
-        var aktørId = behandlinger.get(0).getFagsak().hentAktørID();
+        var aktørId = behandlinger.get(0).getFagsak().hentBrukersAktørID();
         if (aktørId != null) {
             return persondataFasade.hentSammensattNavn(persondataFasade.hentFolkeregisterident(aktørId));
         }
         var orgnr = behandlinger.get(0).getFagsak().hentUnikArbeidsgiver().getOrgnr();
         if (orgnr != null) {
-            return registerOppslagService.hentOrganisasjon(orgnr).getNavn();
+            return organisasjonOppslagService.hentOrganisasjon(orgnr).getNavn();
         }
         return UKJENT_SAMMENSATT_NAVN;
     }

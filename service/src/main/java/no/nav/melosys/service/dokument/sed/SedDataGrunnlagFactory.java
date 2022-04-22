@@ -5,6 +5,7 @@ import java.util.Arrays;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.eessi.SedType;
+import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterSystemService;
@@ -16,8 +17,6 @@ import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
-
-import static no.nav.melosys.domain.person.Informasjonsbehov.MED_FAMILIERELASJONER;
 
 @Component
 @Primary
@@ -54,6 +53,10 @@ public class SedDataGrunnlagFactory {
     }
 
     private Persondata hentPersondata(Behandling behandling) {
-        return persondataFasade.hentPerson(behandling.getFagsak().hentAktørID(), MED_FAMILIERELASJONER);
+        if (avklartefaktaService.hentAvklarteMedfølgendeBarn(behandling.getId()).finnes()) {
+            return persondataFasade.hentPerson(behandling.getFagsak().hentBrukersAktørID(), Informasjonsbehov.MED_FAMILIERELASJONER);
+        } else {
+            return persondataFasade.hentPerson(behandling.getFagsak().hentBrukersAktørID());
+        }
     }
 }

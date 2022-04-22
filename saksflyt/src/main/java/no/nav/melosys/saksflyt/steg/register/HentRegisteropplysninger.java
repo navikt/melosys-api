@@ -44,7 +44,7 @@ public class HentRegisteropplysninger implements StegBehandler {
     public void utfør(Prosessinstans prosessinstans) {
 
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(prosessinstans.getBehandling().getId());
-        String aktørId = behandling.getFagsak().hentAktørID();
+        String aktørId = behandling.getFagsak().hentBrukersAktørID();
         if (StringUtils.isEmpty(aktørId)) {
             log.info("Henter ikke registeropplysninger for behandling {} fordi den ikke har aktørId", behandling.getId());
             return;
@@ -59,17 +59,14 @@ public class HentRegisteropplysninger implements StegBehandler {
         if (behandling.getFagsak().getType() == Sakstyper.EU_EOS) {
             registeropplysningerRequestBuilder
                 .saksopplysningTyper(utledSaksopplysningTyper(prosessinstans.getBehandling().getTema()));
-        } else {
-            registeropplysningerRequestBuilder
-                .saksopplysningTyper(RegisteropplysningerRequest.SaksopplysningTyper.builder().personopplysninger().build());
+
+            behandling.finnPeriode().ifPresent(periode -> {
+                registeropplysningerRequestBuilder.fom(periode.getFom());
+                registeropplysningerRequestBuilder.tom(periode.getTom());
+            });
+
+            registeropplysningerService.hentOgLagreOpplysninger(registeropplysningerRequestBuilder.build());
+            log.info("Hentet registeropplysninger for behandling {}", behandling.getId());
         }
-
-        behandling.finnPeriode().ifPresent(periode -> {
-            registeropplysningerRequestBuilder.fom(periode.getFom());
-            registeropplysningerRequestBuilder.tom(periode.getTom());
-        });
-
-        registeropplysningerService.hentOgLagreOpplysninger(registeropplysningerRequestBuilder.build());
-        log.info("Hentet registeropplysninger for behandling {}", behandling.getId());
     }
 }

@@ -40,7 +40,6 @@ class OppgaveTjenesteTest extends JsonSchemaTestParent {
     private static final String OPPGAVER_TILBAKELEGGE_SCHEMA = "oppgaver-tilbakelegg-post-schema.json";
     private static final String OPPGAVER_SOK_SCHEMA = "oppgaver-sok-schema.json";
     private static final String OPPGAVER_PLUKK_SCHEMA = "oppgaver-plukk-schema.json";
-    private static final String OPPGAVER_PLUKK_POST_SCHEMA = "oppgaver-plukk-post-schema.json";
 
     private OppgaveTjeneste oppgaveTjeneste;
     @Mock
@@ -62,8 +61,8 @@ class OppgaveTjenesteTest extends JsonSchemaTestParent {
             oppgaver.add(defaultEasyRandom().nextObject(BehandlingsoppgaveDto.class));
             oppgaver.add(defaultEasyRandom().nextObject(JournalfoeringsoppgaveDto.class));
         }
-
         when(oppgaveService.hentOppgaverMedAnsvarlig(anyString())).thenReturn(oppgaver);
+
         ResponseEntity<?> response = oppgaveTjeneste.mineOppgaver();
 
         OppgaveOversiktDto oppgaveOversikt = (OppgaveOversiktDto) response.getBody();
@@ -78,11 +77,6 @@ class OppgaveTjenesteTest extends JsonSchemaTestParent {
         behandling.setId(1L);
         when(oppgaveService.hentSistAktiveBehandling(anyString())).thenReturn(behandling);
 
-        PlukkOppgaveInnDto innData = new PlukkOppgaveInnDto();
-
-        String behandlingstema = behandling.getTema().getKode();
-        innData.setBehandlingstema(behandlingstema);
-
         Oppgave.Builder oppgaveBuilder = new Oppgave.Builder();
         oppgaveBuilder.setOppgaveId("1");
         oppgaveBuilder.setOppgavetype(Oppgavetyper.BEH_SAK_MK);
@@ -90,18 +84,16 @@ class OppgaveTjenesteTest extends JsonSchemaTestParent {
         oppgaveBuilder.setJournalpostId("123");
         oppgaveBuilder.setOppgavetype(Oppgavetyper.BEH_SAK_MK);
         Optional<Oppgave> plukket = Optional.of(oppgaveBuilder.build());
-
+        PlukkOppgaveInnDto innData = new PlukkOppgaveInnDto();
+        innData.setBehandlingstema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         when(oppgaveplukker.plukkOppgave(anyString(), eq(innData))).thenReturn(plukket);
 
-        valider(innData, OPPGAVER_PLUKK_POST_SCHEMA, logger);
 
         ResponseEntity<?> response = oppgaveTjeneste.plukkOppgave(innData);
 
         assertThat(response.getBody()).isExactlyInstanceOf(PlukketOppgaveDto.class);
-
         PlukketOppgaveDto entity = (PlukketOppgaveDto) response.getBody();
         valider(entity, OPPGAVER_PLUKK_SCHEMA, logger);
-
         assertThat(entity.getOppgaveID()).isEqualTo("1");
     }
 
@@ -118,7 +110,6 @@ class OppgaveTjenesteTest extends JsonSchemaTestParent {
         TilbakeleggingDto tilbakelegging = defaultEasyRandom().nextObject(TilbakeleggingDto.class);
 
         assertThat(tilbakelegging).isNotNull();
-
         valider(tilbakelegging, OPPGAVER_TILBAKELEGGE_SCHEMA, logger);
     }
 }

@@ -16,7 +16,7 @@ public interface OppgaveFasade {
      * Finner aktive og utildelte oppgaver som svarer til noen gitt kriterier.
      * Oppgave sorterer oppgavene stigende etter frist.
      */
-    List<Oppgave> finnUtildelteOppgaverEtterFrist(String behandlingstype);
+    List<Oppgave> finnUtildelteOppgaverEtterFrist(String behandlingstype, String behandlingstema);
 
     void oppdaterOppgave(String oppgaveID, OppgaveOppdatering oppgaveOppdatering);
 

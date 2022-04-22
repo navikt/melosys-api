@@ -40,8 +40,6 @@ public final class RegisteropplysningerFactory {
 
     private static RegisteropplysningerRequest.SaksopplysningTyper hentSaksopplysningTyperForBehandlingAvSøknad() {
         return RegisteropplysningerRequest.SaksopplysningTyper.builder()
-            .personopplysninger()
-            .personhistorikkopplysninger()
             .arbeidsforholdopplysninger()
             .inntektsopplysninger()
             .medlemskapsopplysninger()
@@ -52,8 +50,6 @@ public final class RegisteropplysningerFactory {
 
     private static RegisteropplysningerRequest.SaksopplysningTyper hentSaksopplysningTyperForRegistreringAvUnntak() {
         return RegisteropplysningerRequest.SaksopplysningTyper.builder()
-            .personopplysninger()
-            .personhistorikkopplysninger()
             .inntektsopplysninger()
             .medlemskapsopplysninger()
             .utbetalingsopplysninger()
@@ -62,8 +58,6 @@ public final class RegisteropplysningerFactory {
 
     private static RegisteropplysningerRequest.SaksopplysningTyper hentSaksopplysningTyperForAnmodningOmUnntak() {
         return RegisteropplysningerRequest.SaksopplysningTyper.builder()
-            .personopplysninger()
-            .personhistorikkopplysninger()
             .arbeidsforholdopplysninger()
             .inntektsopplysninger()
             .medlemskapsopplysninger()
@@ -74,8 +68,6 @@ public final class RegisteropplysningerFactory {
 
     private static RegisteropplysningerRequest.SaksopplysningTyper hentSaksopplysningTyperForBeslutningOmLovvalg() {
         return RegisteropplysningerRequest.SaksopplysningTyper.builder()
-            .personopplysninger()
-            .personhistorikkopplysninger()
             .arbeidsforholdopplysninger()
             .inntektsopplysninger()
             .medlemskapsopplysninger()
@@ -87,7 +79,6 @@ public final class RegisteropplysningerFactory {
 
     private static RegisteropplysningerRequest.SaksopplysningTyper hentSaksopplysningTyperForBehandlingAvØvrigeSedOgTrygdetid() {
         return RegisteropplysningerRequest.SaksopplysningTyper.builder()
-            .personopplysninger()
             .build();
     }
 }

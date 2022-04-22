@@ -22,7 +22,7 @@ import no.nav.melosys.service.dokument.brev.BrevDataAnmodningUnntak;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory;
-import no.nav.melosys.service.registeropplysninger.RegisterOppslagService;
+import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService;
 import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -49,7 +49,7 @@ class BrevDataByggerAnmodningUnntakTest {
     @Mock
     AvklartefaktaService avklartefaktaService;
     @Mock
-    RegisterOppslagService registerOppslagService;
+    OrganisasjonOppslagService organisasjonOppslagService;
     @Mock
     VilkaarsresultatService vilkaarsresultatService;
     @Mock
@@ -100,7 +100,8 @@ class BrevDataByggerAnmodningUnntakTest {
     }
 
     public BrevDataGrunnlag lagBrevressurser(Behandling behandling) {
-        AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService, mock(BehandlingService.class), kodeverkService);
+        AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService,
+                                                                                                  organisasjonOppslagService, mock(BehandlingService.class), kodeverkService);
 
         Set<String> orgSet = new HashSet<>(Collections.singletonList("987654321"));
         when(avklartefaktaService.hentAvklarteOrgnrOgUuid(behandling.getId())).thenReturn(orgSet);
@@ -112,7 +113,7 @@ class BrevDataByggerAnmodningUnntakTest {
         when(organisasjonsDetaljer.hentStrukturertForretningsadresse()).thenReturn(lagStrukturertAdresse());
         organisasjonDokument.organisasjonDetaljer = organisasjonsDetaljer;
 
-        when(registerOppslagService.hentOrganisasjoner(orgSet)).thenReturn(new HashSet<>(Collections.singletonList(organisasjonDokument)));
+        when(organisasjonOppslagService.hentOrganisasjoner(orgSet)).thenReturn(new HashSet<>(Collections.singletonList(organisasjonDokument)));
         DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medBehandling(behandling).build();
         Persondata persondata = PersonopplysningerObjectFactory.lagPersonopplysninger();
         return new BrevDataGrunnlag(brevbestilling, kodeverkService, avklarteVirksomheterService, avklartefaktaService, persondata);

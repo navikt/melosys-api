@@ -80,6 +80,7 @@ class PersonopplysningerDataFetcherTest {
             StrukturertAdresseformatDto::husnummerEtasjeLeilighet).containsExactlyInAnyOrder("42 C", null);
         assertThat(personopplysninger.bostedsadresser()).extracting(BostedsadresseDto::master)
             .containsExactlyInAnyOrder("NAV (PDL)", "");
+        assertThat(personopplysninger.foedsel().foedselsdato()).isEqualTo(LocalDate.MIN);
         assertThat(personopplysninger.folkeregisteridentifikator()).isEqualTo("identNr");
         assertThat(personopplysninger.folkeregisterpersonstatuser()).containsExactly(
             new FolkeregisterpersonstatusDto(Personstatuser.UDEFINERT.getKode(), "ny status fra PDL", "NAV (PDL)", Master.PDL.name(), LocalDate.parse("2019-11-18"), false));
@@ -94,8 +95,8 @@ class PersonopplysningerDataFetcherTest {
         assertThat(personopplysninger.oppholdsadresser()).extracting(OppholdsadresseDto::master)
             .containsExactlyInAnyOrder("NAV (PDL)", "");
         assertThat(personopplysninger.sivilstand()).flatExtracting(SivilstandDto::type,
-            SivilstandDto::relatertVedSivilstand, SivilstandDto::gyldigFraOgMed, SivilstandDto::bekreftelsesdato,
-            SivilstandDto::master, SivilstandDto::kilde, SivilstandDto::erHistorisk)
+                SivilstandDto::relatertVedSivilstand, SivilstandDto::gyldigFraOgMed, SivilstandDto::bekreftelsesdato,
+                SivilstandDto::master, SivilstandDto::kilde, SivilstandDto::erHistorisk)
             .containsExactly("Udefinert type", "relatertVedSivilstandID", LocalDate.MIN.plusDays(1), LocalDate.EPOCH, "NAV (PDL)", "kilde", false,
                 "Registrert partner", "relatertVedSivilstandID", LocalDate.MIN, LocalDate.EPOCH, "NAV (PDL)", "kilde", false);
 
@@ -130,6 +131,8 @@ class PersonopplysningerDataFetcherTest {
             new StrukturertAdresse("opphold 2", null, null, null, null, null), null, null, null, null, null, null,
             true);
 
+        final var foedsel = new Foedsel(LocalDate.MIN, LocalDate.MIN.getYear(), "Norge", "Oslo");
+
         final var statsborgerskap_1 = new Statsborgerskap("AAA", null, LocalDate.parse("2009-11-18"),
             LocalDate.parse("1980-11-18"), "PDL", "Dolly", false);
         final var statsborgerskap_2 = new Statsborgerskap("BBB", null, LocalDate.parse("1979-11-18"),
@@ -137,16 +140,22 @@ class PersonopplysningerDataFetcherTest {
         final var statsborgerskap_3 = new Statsborgerskap("CCC", null, null, LocalDate.parse("1980-11-18"), "PDL",
             "Dolly", false);
 
-        return new PersonMedHistorikk(Set.of(bostedsadresse_1, bostedsadresse_2),
-            null, null, new Folkeregisteridentifikator("identNr"),
+        return new PersonMedHistorikk(
+            Set.of(bostedsadresse_1, bostedsadresse_2),
+            null,
+            foedsel,
+            new Folkeregisteridentifikator("identNr"),
             Set.of(new Folkeregisterpersonstatus(Personstatuser.UDEFINERT, "ny status fra PDL", Master.PDL.name(), Master.PDL.name(), LocalDate.parse("2019-11-18"), false)),
             KjoennType.UKJENT,
             Set.of(kontaktadresse_1, kontaktadresse_2), new Navn("Ola", "Oops", "King"),
             Set.of(oppholdsadresse_1, oppholdsadresse_2), Set.of(
-            new Sivilstand(Sivilstandstype.REGISTRERT_PARTNER, null, "relatertVedSivilstandID", LocalDate.MIN,
-                LocalDate.EPOCH, "PDL", "kilde", false),
-            new Sivilstand(Sivilstandstype.UDEFINERT, "Udefinert type", "relatertVedSivilstandID", LocalDate.MIN.plusDays(1),
-                LocalDate.EPOCH, "PDL", "kilde", false)),
-            Set.of(statsborgerskap_1, statsborgerskap_2, statsborgerskap_3));
+            new Sivilstand(
+                Sivilstandstype.REGISTRERT_PARTNER, null, "relatertVedSivilstandID", LocalDate.MIN, LocalDate.EPOCH, "PDL", "kilde", false
+            ),
+            new Sivilstand(
+                Sivilstandstype.UDEFINERT, "Udefinert type", "relatertVedSivilstandID", LocalDate.MIN.plusDays(1), LocalDate.EPOCH, "PDL", "kilde", false)
+        ),
+            Set.of(statsborgerskap_1, statsborgerskap_2, statsborgerskap_3)
+        );
     }
 }

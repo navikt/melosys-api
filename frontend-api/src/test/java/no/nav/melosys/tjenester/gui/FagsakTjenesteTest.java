@@ -31,7 +31,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.persondata.PersondataFasade;
-import no.nav.melosys.service.registeropplysninger.RegisterOppslagService;
+import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService;
 import no.nav.melosys.service.sak.*;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.utpeking.UtpekingService;
@@ -71,7 +71,7 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
     private static Aksesskontroll aksesskontroll;
     private static HenleggFagsakService henleggFagsakService;
     private static UtpekingService utpekingService;
-    private static RegisterOppslagService registerOppslagService;
+    private static OrganisasjonOppslagService organisasjonOppslagService;
 
     private EasyRandom random;
 
@@ -185,7 +185,7 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
         FagsakTjeneste instans = lagFagsakTjeneste(fagsak);
         var organisajonsdokument = new OrganisasjonDokument();
         organisajonsdokument.setNavn("Moe Organisasjon");
-        when(registerOppslagService.hentOrganisasjon(ORGNR)).thenReturn(organisajonsdokument);
+        when(organisasjonOppslagService.hentOrganisasjon(ORGNR)).thenReturn(organisajonsdokument);
 
         List<FagsakOppsummeringDto> resultat = instans.hentFagsaker(new FagsakSokDto(null, null, ORGNR));
         assertThat(resultat).hasSize(1).extracting(FagsakOppsummeringDto::getSammensattNavn).containsExactly("Moe Organisasjon");
@@ -319,7 +319,7 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
         opprettNySakFraOppgave = mock(OpprettNySakFraOppgave.class);
         henleggFagsakService = mock(HenleggFagsakService.class);
         PersondataFasade persondataFasade = mock(PersondataFasade.class);
-        registerOppslagService = mock(RegisterOppslagService.class);
+        organisasjonOppslagService = mock(OrganisasjonOppslagService.class);
         utpekingService = mock(UtpekingService.class);
         VideresendSoknadService videresendSoknadService = mock(VideresendSoknadService.class);
         SaksopplysningerService saksopplysningerService = mock(SaksopplysningerService.class);
@@ -334,7 +334,7 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
         doReturn(Arrays.asList(fagsak)).when(fagsakService).hentFagsakerMedAktør(Aktoersroller.BRUKER, FNR);
         doReturn(Arrays.asList(fagsak)).when(fagsakService).hentFagsakerFraOrgnr(ORGNR);
         return new FagsakTjeneste(fagsakService, aksesskontroll, behandlingsgrunnlagService, henleggFagsakService, opprettNySakFraOppgave,
-                                  persondataFasade, saksopplysningerService, utpekingService, videresendSoknadService, registerOppslagService);
+                                  persondataFasade, saksopplysningerService, utpekingService, videresendSoknadService, organisasjonOppslagService);
     }
 
     private static FagsakOppsummeringDto lagFagsakOppsummeringDto(Behandling behandling) {

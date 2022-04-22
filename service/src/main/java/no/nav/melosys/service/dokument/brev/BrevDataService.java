@@ -73,7 +73,7 @@ public class BrevDataService {
         metadata.dokumenttypeID = DokumenttypeIdMapper.hentID(produserbartDokument);
         metadata.mottaker = mottaker;
         metadata.mottakerID = avklarMottakerId(mottaker, kontaktopplysning);
-        metadata.brukerID = persondataFasade.hentFolkeregisterident(fagsak.hentAktørID());
+        metadata.brukerID = persondataFasade.hentFolkeregisterident(fagsak.hentBrukersAktørID());
 
         metadata.journalsakID = Long.toString(fagsak.getGsakSaksnummer());
         metadata.fagområde = Tema.MED.getKode();
@@ -278,6 +278,6 @@ public class BrevDataService {
     }
 
     private boolean brukerManglerAdresseFraRegister(Behandling behandling) {
-        return persondataFasade.hentPerson(behandling.getFagsak().hentAktørID()).manglerRegistrertAdresse();
+        return persondataFasade.hentPerson(behandling.getFagsak().hentBrukersAktørID()).manglerRegistrertAdresse();
     }
 }

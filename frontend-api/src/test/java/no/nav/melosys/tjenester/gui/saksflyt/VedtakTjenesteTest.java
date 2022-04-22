@@ -151,7 +151,7 @@ class VedtakTjenesteTest extends JsonSchemaTestParent {
     @Test
     void kontrollerVedtak_feilmeldinger_kasterExceptions() throws ValideringException {
         doThrow(new ValideringException("melding", Collections.emptyList()))
-            .when(vedtakKontrollService).kontrollerVedtak(behandlingID, Vedtakstyper.FØRSTEGANGSVEDTAK, true);
+            .when(vedtakKontrollService).kontrollerVedtak(behandlingID, true, Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN);
 
         assertThatThrownBy(() -> vedtakTjeneste.kontrollerVedtak(behandlingID, true, lagFattVedtakDto()))
             .isInstanceOf(ValideringException.class)
@@ -200,6 +200,7 @@ class VedtakTjenesteTest extends JsonSchemaTestParent {
     private FattVedtakDto lagFattVedtakDto() {
         var fattVedtak = new FattVedtakDto();
         fattVedtak.setVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK);
+        fattVedtak.setBehandlingsresultatTypeKode(Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN);
         return fattVedtak;
     }
 }
