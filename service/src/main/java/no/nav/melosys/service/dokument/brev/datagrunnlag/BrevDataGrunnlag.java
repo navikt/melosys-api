@@ -1,6 +1,9 @@
 package no.nav.melosys.service.dokument.brev.datagrunnlag;
 
+import java.util.Optional;
+
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.person.Persondata;
@@ -26,7 +29,9 @@ public class BrevDataGrunnlag implements DataGrunnlag {
                             Persondata persondata) {
         this.brevbestilling = brevbestilling;
         final Behandling behandling = brevbestilling.getBehandling();
-        this.behandlingsgrunnlagData = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
+        this.behandlingsgrunnlagData = Optional.ofNullable(behandling.getBehandlingsgrunnlag())
+            .map(Behandlingsgrunnlag::getBehandlingsgrunnlagdata)
+            .orElse(null);
         this.person = persondata;
         this.avklarteVirksomheterGrunnlag = new AvklarteVirksomheterGrunnlag(behandling, avklarteVirksomheterService);
         this.bostedGrunnlag = new BostedGrunnlag(behandlingsgrunnlagData, person.finnBostedsadresse().orElse(null),
