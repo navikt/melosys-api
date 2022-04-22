@@ -61,7 +61,7 @@ public class ProsessinstansAdminTjenesteTest {
         var response = prosessinstansAdminTjeneste.hoppOverStegStegProsessinstans(API_KEY, UUID);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(response.getBody()).isEqualTo("SIST_FULLFORTE_STEG for prosessinstans %s satt til %s".formatted(UUID, nyttSteg));
+        assertThat(response.getBody()).isEqualTo("SIST_FULLFORTE_STEG for prosessinstans 00000000-0000-0000-0000-000000000000 satt til AVSLUTT_SAK_OG_BEHANDLING og prosessinstans restartet");
     }
 
     @Test
