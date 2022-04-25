@@ -1,9 +1,6 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Stream;
 import javax.transaction.Transactional;
 
@@ -42,6 +39,9 @@ import static org.springframework.util.ObjectUtils.isEmpty;
 
 @Component
 public class StorbritanniaMapper {
+    private static final String INGEN_ADRESSE_I_NORGE = "No address in Norway";
+    private static final String UKJENT = "Unknown";
+    private static final String BOSTED_UTENFOR_NORGE = "Resident outside of Norway";
 
     private final AvklarteMedfolgendeFamilieService avklarteMedfølgendeFamilieService;
     private final AvklarteVirksomheterSystemService avklarteVirksomheterSystemService;
@@ -210,7 +210,26 @@ public class StorbritanniaMapper {
             .filter(personAdresse -> sjekkAdresseMotLand(personAdresse.strukturertAdresse(), Landkoder.NO))
             .findFirst()
             .map(personAdresse -> personAdresse.strukturertAdresse().toList())
-            .orElse(List.of());
+            .orElse(findAdresseNårIkkeNorskAdresseMenAdresseIUk(persondata));
+    }
+
+    private static List<String> findAdresseNårIkkeNorskAdresseMenAdresseIUk(Persondata persondata) {
+        return getPersonAdresseer(persondata)
+            .filter(personAdresse -> sjekkAdresseMotLand(personAdresse.strukturertAdresse(), Landkoder.GB))
+            .findFirst()
+            .map(personAdresse -> List.of(INGEN_ADRESSE_I_NORGE))
+            .orElse(findAdresseNårIkkeNorskEllerUkAdresse(persondata));
+    }
+
+    private static List<String> findAdresseNårIkkeNorskEllerUkAdresse(Persondata persondata) {
+        return getPersonAdresseer(persondata)
+            .filter(personAdresse -> personAdresse.strukturertAdresse().getLandkode() != null)
+            .findFirst()
+            .map(personAdresse -> Stream.concat(
+                Stream.of(BOSTED_UTENFOR_NORGE),
+                personAdresse.strukturertAdresse().toList().stream()).toList()
+            )
+            .orElse(List.of(UKJENT));
     }
 
     static List<String> finnGyldigStorbritanniaAdresse(Persondata persondata, Lovvalgsperiode lovvalgsperiode) {
@@ -232,7 +251,7 @@ public class StorbritanniaMapper {
     }
 
     private static boolean sjekkAdresseMotLand(StrukturertAdresse adresse, Landkoder landkode) {
-        return adresse != null && adresse.getLandkode().equals(landkode.getKode());
+        return adresse != null && landkode != null && adresse.getLandkode() != null && adresse.getLandkode().equals(landkode.getKode());
     }
 
     static boolean sjekkOmAdresseGyldighetErInnenforLovalgsperiode(PersonAdresse personAdresse, Lovvalgsperiode lovvalgsperiode) {

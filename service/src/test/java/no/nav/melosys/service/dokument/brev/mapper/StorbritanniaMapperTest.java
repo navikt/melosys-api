@@ -16,9 +16,6 @@ import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
-import no.nav.melosys.domain.dokument.felles.Land;
-import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.dokument.person.adresse.Gateadresse;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
@@ -29,7 +26,6 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_t
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
 import no.nav.melosys.domain.person.Foedsel;
 import no.nav.melosys.domain.person.Navn;
-import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.domain.person.Personopplysninger;
 import no.nav.melosys.domain.person.adresse.Bostedsadresse;
 import no.nav.melosys.domain.person.adresse.Kontaktadresse;
@@ -46,9 +42,7 @@ import no.nav.melosys.integrasjon.dokgen.dto.storbritannia.innvilgelse.Innvilgel
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterSystemService;
-import no.nav.melosys.service.dokument.DokgenTestData;
 import no.nav.melosys.service.dokument.brev.BrevDataTestUtils;
-import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -128,19 +122,27 @@ class StorbritanniaMapperTest {
         assertThat(innvilgelseOgAttestStorbritannia.getNyVurderingBakgrunn()).isEqualTo(brevbestilling.getNyVurderingBakgrunn());
     }
 
-    Personopplysninger lagPersonopplysninger() {
+    private static String kodeEllerNull(Landkoder landkoder) {
+        return landkoder == null ? null : landkoder.getKode();
+    }
+
+    private static Personopplysninger lagPersonopplysninger(
+        Landkoder landkodeBosted,
+        Landkoder landkodeOpphold,
+        Landkoder landkodeKontakt) {
+
         final var bostedsadresse = new Bostedsadresse(
-            new StrukturertAdresse("gate1", "42 C", null, null, null, Landkoder.SE.getKode()),
+            new StrukturertAdresse("bosted", "42 C", null, null, null, kodeEllerNull(landkodeBosted)),
             null, null, null, "PDL", null, false);
 
         final var kontaktadresse = new Kontaktadresse(
-            new StrukturertAdresse("kontakt 1", null, null, null, null, Landkoder.NO.getKode()),
+            new StrukturertAdresse("kontakt 1", null, null, null, null, kodeEllerNull(landkodeKontakt)),
             null, null, null, null, "PDL", null, null,
             false);
 
         final var oppholdsadresse = new Oppholdsadresse(
             new StrukturertAdresse("tilleggOpphold", "opphold 1", null, null, null,
-                null, null, Landkoder.GB.getKode()), null,
+                null, null, kodeEllerNull(landkodeOpphold)), null,
             LOVVALGSPERIODE_FOM, LOVVALGSPERIODE_TOM,
             "PDL", null, null, false);
 
@@ -149,13 +151,48 @@ class StorbritanniaMapperTest {
             List.of(kontaktadresse), new Navn("Ole", "", "Norman"), List.of(oppholdsadresse), Collections.emptyList());
     }
 
-    @Test
-    void map_brukNorskBostedsAddresseOmMulig() {
+    private static List<Arguments> sjekkNorskeAdresser() {
+        return List.of(
+            Arguments.of(Landkoder.NO, Landkoder.NO, Landkoder.NO,
+                List.of("bosted 42 C", "Norge"), "Velg bosted, når alle addresser er norske"),
+            Arguments.of(Landkoder.SE, Landkoder.SE, Landkoder.NO,
+                List.of("kontakt 1", "Norge"), "Kun kontakt med norsk adresse"),
+            Arguments.of(Landkoder.SE, Landkoder.NO, Landkoder.SE,
+                List.of("tilleggOpphold", "opphold 1", "Norge"), "Kun opphold med norsk adresse"),
+            Arguments.of(Landkoder.NO, Landkoder.SE, Landkoder.SE,
+                List.of("bosted 42 C", "Norge"), "Kun bosted med norsk adresse"),
+            Arguments.of(Landkoder.GB, Landkoder.SE, Landkoder.SE,
+                List.of("No address in Norway"), "Ingen norske adresser, men adresse i UK"),
+            Arguments.of(Landkoder.GB, null, null,
+                List.of("No address in Norway"), "kun adresse i UK"),
+            Arguments.of(Landkoder.SE, Landkoder.SE, Landkoder.SE,
+                List.of("Resident outside of Norway", "bosted 42 C", "Sverige"), "Utenlandsk addresse"),
+            Arguments.of(null, null, null,
+                List.of("Unknown"), "ingen addresser") // TODO: Sjekk dette med fag
+        );
+    }
+
+    private static List<Arguments> ugyldigeNorskeAdresser() {
+        return List.of(
+            Arguments.of(Landkoder.SE, Landkoder.SE, Landkoder.SE, List.of(), "Ingen norske adresser")
+        );
+    }
+
+    @ParameterizedTest(name = "{4}")
+    @MethodSource("sjekkNorskeAdresser")
+    void map_brukNorskBostedsAddresse(
+        Landkoder landkodeBosted,
+        Landkoder landkodeOpphold,
+        Landkoder landkodeKontakt,
+        List<String> resultAddresse,
+        String grunn) {
+
         mockHappyCase();
+        Personopplysninger personopplysninger = lagPersonopplysninger(landkodeBosted, landkodeOpphold, landkodeKontakt);
 
         InnvilgelseBrevbestilling brevbestilling =
             lagStorbritanniaBrevbestillingDefaultBuilder(medPeriode(lagTrygdeavtaleBehandling()))
-                .medPersonDokument(lagPersonopplysninger())
+                .medPersonDokument(personopplysninger)
                 .build();
 
         InnvilgelseOgAttestStorbritannia innvilgelseOgAttestStorbritannia = storbritanniaMapper.map(brevbestilling);
@@ -163,7 +200,7 @@ class StorbritanniaMapperTest {
 
         AttestStorbritannia attest = innvilgelseOgAttestStorbritannia.getAttest();
         List<String> bostedsadresse = attest.getArbeidstaker().bostedsadresse();
-        System.out.println(bostedsadresse);
+        assertThat(bostedsadresse).isEqualTo(resultAddresse);
 
         List<String> oppholdsadresseUK = attest.getUtsendelse().oppholdsadresseUK();
         System.out.println(oppholdsadresseUK);
