@@ -113,7 +113,7 @@ public class Fagsak extends RegistreringsInfo {
         return Optional.ofNullable(hentAktivBehandling()).orElse(hentSistOppdatertBehandling());
     }
 
-    public Behandling hentBehandlingMedSistRegistrertVedtak() {
+    public Behandling hentBehandlingSistRegistrertHarVedtak() {
         return getBehandlinger().stream()
             .filter(Behandling::harBehandlingsresultat)
             .filter(behandling -> behandling.getBehandlingsresultat().harVedtak())
@@ -121,7 +121,7 @@ public class Fagsak extends RegistreringsInfo {
             .orElseThrow(() -> new IkkeFunnetException("Finner ikke behandlinger med vedtak for " + saksnummer));
     }
 
-    public Behandling hentBehandlingMedSistRegistrertRedigertUnntak() {
+    public Behandling hentBehandlingSistRegistrertMedRegistrertUnntak() {
         return getBehandlinger().stream()
             .filter(Behandling::harBehandlingsresultat)
             .filter(behandling -> behandling.getBehandlingsresultat().erRegistrertUnntak())
@@ -133,8 +133,8 @@ public class Fagsak extends RegistreringsInfo {
         var førsteBehandling = hentTidligstRegistrertBehandling();
 
         return switch (førsteBehandling.getType()) {
-            case SOEKNAD -> hentBehandlingMedSistRegistrertVedtak();
-            case SED -> hentBehandlingMedSistRegistrertRedigertUnntak();
+            case SOEKNAD -> hentBehandlingSistRegistrertHarVedtak();
+            case SED -> hentBehandlingSistRegistrertMedRegistrertUnntak();
             default -> throw new FunksjonellException("Kan ikke revurdere en behandling av type " + førsteBehandling.getType().getBeskrivelse());
         };
     }
