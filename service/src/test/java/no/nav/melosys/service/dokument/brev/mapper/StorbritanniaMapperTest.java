@@ -55,6 +55,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.STORBRITANNIA;
 import static no.nav.melosys.service.dokument.brev.mapper.DokgenMalMapperTest.*;
 import static no.nav.melosys.service.dokument.DokgenTestData.*;
+import static no.nav.melosys.service.dokument.brev.mapper.StorbritanniaMapper.UKJENT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.*;
@@ -131,13 +132,16 @@ class StorbritanniaMapperTest {
         Landkoder landkodeOpphold,
         Landkoder landkodeKontakt) {
 
+        var gyldigFom = LOVVALGSPERIODE_FOM;
+        var gyldigTom = LOVVALGSPERIODE_TOM;
+
         final var bostedsadresse = new Bostedsadresse(
             new StrukturertAdresse("bosted", "42 C", null, null, null, kodeEllerNull(landkodeBosted)),
-            null, null, null, "PDL", null, false);
+            null, gyldigFom, gyldigTom, "PDL", null, false);
 
         final var kontaktadresse = new Kontaktadresse(
             new StrukturertAdresse("kontakt 1", null, null, null, null, kodeEllerNull(landkodeKontakt)),
-            null, null, null, null, "PDL", null, null,
+            null, null, gyldigFom, gyldigTom, "PDL", null, null,
             false);
 
         final var oppholdsadresse = new Oppholdsadresse(
@@ -151,40 +155,51 @@ class StorbritanniaMapperTest {
             List.of(kontaktadresse), new Navn("Ole", "", "Norman"), List.of(oppholdsadresse), Collections.emptyList());
     }
 
-    private static List<Arguments> sjekkNorskeAdresser() {
+    private static List<Arguments> sjekkAdresser() {
         return List.of(
             Arguments.of(Landkoder.NO, Landkoder.NO, Landkoder.NO,
-                List.of("bosted 42 C", "Norge"), "Velg bosted, når alle addresser er norske"),
+                List.of("bosted 42 C", "Norge"),
+                List.of(UKJENT),
+                "Velg bosted, når alle addresser er norske"),
             Arguments.of(Landkoder.SE, Landkoder.SE, Landkoder.NO,
-                List.of("kontakt 1", "Norge"), "Kun kontakt med norsk adresse"),
+                List.of("kontakt 1", "Norge"),
+                List.of(UKJENT),
+                "Kun kontakt med norsk adresse"),
             Arguments.of(Landkoder.SE, Landkoder.NO, Landkoder.SE,
-                List.of("tilleggOpphold", "opphold 1", "Norge"), "Kun opphold med norsk adresse"),
+                List.of("tilleggOpphold", "opphold 1", "Norge"),
+                List.of(UKJENT),
+                "Kun opphold med norsk adresse"),
             Arguments.of(Landkoder.NO, Landkoder.SE, Landkoder.SE,
-                List.of("bosted 42 C", "Norge"), "Kun bosted med norsk adresse"),
+                List.of("bosted 42 C", "Norge"),
+                List.of(UKJENT),
+                "Kun bosted med norsk adresse"),
             Arguments.of(Landkoder.GB, Landkoder.SE, Landkoder.SE,
-                List.of("No address in Norway"), "Ingen norske adresser, men adresse i UK"),
+                List.of("No address in Norway"),
+                List.of("bosted 42 C", "Storbritannia"),
+                "Ingen norske adresser, men adresse i UK"),
             Arguments.of(Landkoder.GB, null, null,
-                List.of("No address in Norway"), "kun adresse i UK"),
+                List.of("No address in Norway"),
+                List.of("bosted 42 C", "Storbritannia"),
+                "kun adresse i UK"),
             Arguments.of(Landkoder.SE, Landkoder.SE, Landkoder.SE,
-                List.of("Resident outside of Norway", "bosted 42 C", "Sverige"), "Utenlandsk addresse"),
+                List.of("Resident outside of Norway", "bosted 42 C", "Sverige"),
+                List.of(UKJENT),
+                "Utenlandsk addresse, men ikke i UK"),
             Arguments.of(null, null, null,
-                List.of("Unknown"), "ingen addresser") // TODO: Sjekk dette med fag
+                List.of(UKJENT),
+                List.of(UKJENT),
+                "ingen addresser") // TODO: Sjekk dette med fag
         );
     }
 
-    private static List<Arguments> ugyldigeNorskeAdresser() {
-        return List.of(
-            Arguments.of(Landkoder.SE, Landkoder.SE, Landkoder.SE, List.of(), "Ingen norske adresser")
-        );
-    }
-
-    @ParameterizedTest(name = "{4}")
-    @MethodSource("sjekkNorskeAdresser")
+    @ParameterizedTest(name = "{5}")
+    @MethodSource("sjekkAdresser")
     void map_brukNorskBostedsAddresse(
         Landkoder landkodeBosted,
         Landkoder landkodeOpphold,
         Landkoder landkodeKontakt,
-        List<String> resultAddresse,
+        List<String> norskAddresse,
+        List<String> ukAddresse,
         String grunn) {
 
         mockHappyCase();
@@ -200,10 +215,10 @@ class StorbritanniaMapperTest {
 
         AttestStorbritannia attest = innvilgelseOgAttestStorbritannia.getAttest();
         List<String> bostedsadresse = attest.getArbeidstaker().bostedsadresse();
-        assertThat(bostedsadresse).isEqualTo(resultAddresse);
+        assertThat(bostedsadresse).isEqualTo(norskAddresse);
 
         List<String> oppholdsadresseUK = attest.getUtsendelse().oppholdsadresseUK();
-        System.out.println(oppholdsadresseUK);
+        assertThat(oppholdsadresseUK).isEqualTo(ukAddresse);
     }
 
     @Test

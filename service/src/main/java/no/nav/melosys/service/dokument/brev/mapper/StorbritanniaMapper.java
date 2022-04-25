@@ -39,9 +39,9 @@ import static org.springframework.util.ObjectUtils.isEmpty;
 
 @Component
 public class StorbritanniaMapper {
-    private static final String INGEN_ADRESSE_I_NORGE = "No address in Norway";
-    private static final String UKJENT = "Unknown";
-    private static final String BOSTED_UTENFOR_NORGE = "Resident outside of Norway";
+    static final String INGEN_ADRESSE_I_NORGE = "No address in Norway";
+    static final String UKJENT = "Unknown";
+    static final String BOSTED_UTENFOR_NORGE = "Resident outside of Norway";
 
     private final AvklarteMedfolgendeFamilieService avklarteMedfølgendeFamilieService;
     private final AvklarteVirksomheterSystemService avklarteVirksomheterSystemService;
@@ -238,7 +238,7 @@ public class StorbritanniaMapper {
             .filter(personAdresse -> sjekkOmAdresseGyldighetErInnenforLovalgsperiode(personAdresse, lovvalgsperiode))
             .findFirst()
             .map(personAdresse -> personAdresse.strukturertAdresse().toList())
-            .orElse(List.of());
+            .orElse(List.of(UKJENT));
     }
 
     private static Stream<PersonAdresse> getPersonAdresseer(Persondata persondata) {
