@@ -52,21 +52,17 @@ class StorbritaniaAdresseSjekkerTest {
         return new StorbritaniaAdresseSjekker(personopplysninger);
     }
 
-    @ParameterizedTest(name = "{4}")
+    @ParameterizedTest(name = "{2}")
     @MethodSource("gyldigePerioder")
-    void sjekkOmAdresseGyldighetErInnenforLovalgsperiode_for_gyldigePerioder(LocalDate lovFom, LocalDate lovTom, LocalDate gyldigFom, LocalDate gyldigTom, String grunn) {
-        var personAdresse = lagPersonAdresse(gyldigFom, gyldigTom);
-        Lovvalgsperiode lovvalgsperiode = lagLovvalgsperiode(lovFom, lovTom);
+    void sjekkOmAdresseGyldighetErInnenforLovalgsperiode_for_gyldigePerioder(Lovvalgsperiode lovvalgsperiode, PersonAdresse personAdresse, String grunn) {
         assertThat(StorbritaniaAdresseSjekker.sjekkOmAdresseGyldighetErInnenforLovalgsperiode(personAdresse, lovvalgsperiode))
             .withFailMessage(grunn)
             .isTrue();
     }
 
-    @ParameterizedTest(name = "{4}")
+    @ParameterizedTest(name = "{2}")
     @MethodSource("ugyldigePerioder")
-    void sjekkOmAdresseGyldighetErInnenforLovalgsperiode_for_ugyldigePerioder(LocalDate lovFom, LocalDate lovTom, LocalDate gyldigFom, LocalDate gyldigTom, String grunn) {
-        var personAdresse = lagPersonAdresse(gyldigFom, gyldigTom);
-        Lovvalgsperiode lovvalgsperiode = lagLovvalgsperiode(lovFom, lovTom);
+    void sjekkOmAdresseGyldighetErInnenforLovalgsperiode_for_ugyldigePerioder2(Lovvalgsperiode lovvalgsperiode, PersonAdresse personAdresse, String grunn) {
         assertThat(StorbritaniaAdresseSjekker.sjekkOmAdresseGyldighetErInnenforLovalgsperiode(personAdresse, lovvalgsperiode))
             .withFailMessage(grunn)
             .isFalse();
@@ -144,43 +140,48 @@ class StorbritaniaAdresseSjekkerTest {
     private static List<Arguments> gyldigePerioder() {
         return List.of(
             Arguments.of(
-                LocalDate.of(2020, 1, 1),
-                LocalDate.of(2021, 1, 1),
-
-                LocalDate.of(2020, 1, 1),
-                LocalDate.of(2021, 1, 1),
+                lagLovvalgsperiode(
+                    LocalDate.of(2020, 1, 1),
+                    LocalDate.of(2021, 1, 1)),
+                lagPersonAdresse(
+                    LocalDate.of(2020, 1, 1),
+                    LocalDate.of(2021, 1, 1)),
                 "lovalgsperiode er lik adresseperiode"
             ),
             Arguments.of(
-                LocalDate.of(2020, 1, 1),
-                LocalDate.of(2021, 1, 1),
-
-                LocalDate.of(2020, 2, 1),
-                LocalDate.of(2020, 3, 1),
+                lagLovvalgsperiode(
+                    LocalDate.of(2020, 1, 1),
+                    LocalDate.of(2021, 1, 1)),
+                lagPersonAdresse(
+                    LocalDate.of(2020, 2, 1),
+                    LocalDate.of(2020, 3, 1)),
                 "lovalgsperiode har start før og slutt etter adresseperiode"
             ),
             Arguments.of(
-                LocalDate.of(2020, 2, 1),
-                LocalDate.of(2020, 3, 1),
-
-                LocalDate.of(2020, 1, 1),
-                LocalDate.of(2021, 1, 1),
+                lagLovvalgsperiode(
+                    LocalDate.of(2020, 2, 1),
+                    LocalDate.of(2020, 3, 1)),
+                lagPersonAdresse(
+                    LocalDate.of(2020, 1, 1),
+                    LocalDate.of(2021, 1, 1)),
                 "adresseperiode har start før og slutt etter lovalgsperiode"
             ),
             Arguments.of(
-                LocalDate.of(2021, 1, 1),
-                LocalDate.of(2022, 1, 1),
-
-                LocalDate.of(2020, 1, 1),
-                LocalDate.of(2021, 1, 1),
+                lagLovvalgsperiode(
+                    LocalDate.of(2021, 1, 1),
+                    LocalDate.of(2022, 1, 1)),
+                lagPersonAdresse(
+                    LocalDate.of(2020, 1, 1),
+                    LocalDate.of(2021, 1, 1)),
                 "lovalgsperiode start er lik adresseperiode slutt"
             ),
             Arguments.of(
-                LocalDate.of(2020, 1, 1),
-                LocalDate.of(2021, 1, 1),
-
-                LocalDate.of(2021, 1, 1),
-                LocalDate.of(2022, 1, 1),
+                lagLovvalgsperiode(
+                    LocalDate.of(2020, 1, 1),
+                    LocalDate.of(2021, 1, 1)),
+                lagPersonAdresse(
+                    LocalDate.of(2021, 1, 1),
+                    LocalDate.of(2022, 1, 1)),
                 "lovalgsperiode slutt er lik adresseperiode start"
             )
         );
@@ -189,27 +190,18 @@ class StorbritaniaAdresseSjekkerTest {
     private static List<Arguments> ugyldigePerioder() {
         return List.of(
             Arguments.of(
-                LocalDate.of(2019, 1, 1),
-                LocalDate.of(2020, 1, 1),
-
-                LocalDate.of(2020, 2, 1),
-                LocalDate.of(2021, 1, 1),
+                lagLovvalgsperiode(LocalDate.of(2019, 1, 1), LocalDate.of(2020, 1, 1)),
+                lagPersonAdresse(LocalDate.of(2020, 2, 1), LocalDate.of(2021, 1, 1)),
                 "lovalgsperiode er før adresseperiode"
             ),
             Arguments.of(
-                LocalDate.of(2021, 1, 2),
-                LocalDate.of(2022, 1, 1),
-
-                LocalDate.of(2020, 1, 1),
-                LocalDate.of(2021, 1, 1),
+                lagLovvalgsperiode(LocalDate.of(2021, 1, 2), LocalDate.of(2022, 1, 1)),
+                lagPersonAdresse(LocalDate.of(2020, 1, 1), LocalDate.of(2021, 1, 1)),
                 "lovalgsperiode er etter adresseperiode"
             ),
             Arguments.of(
-                LocalDate.of(2020, 1, 1),
-                LocalDate.of(2021, 1, 1),
-
-                null,
-                null,
+                lagLovvalgsperiode(LocalDate.of(2020, 1, 1), LocalDate.of(2021, 1, 1)),
+                lagPersonAdresse(null, null),
                 "adresseperiode fom og tom er null"
             )
         );
