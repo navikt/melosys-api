@@ -271,11 +271,12 @@ public class FagsakTjeneste {
         if (behandlinger.isEmpty()) {
             return UKJENT_SAMMENSATT_NAVN;
         }
-        var aktørId = behandlinger.get(0).getFagsak().hentBrukersAktørID();
-        if (aktørId != null) {
-            return persondataFasade.hentSammensattNavn(persondataFasade.hentFolkeregisterident(aktørId));
+        var fagsak = behandlinger.get(0).getFagsak();
+        var aktørId = fagsak.finnBrukersAktørID();
+        if (aktørId.isPresent()) {
+            return persondataFasade.hentSammensattNavn(persondataFasade.hentFolkeregisterident(aktørId.get()));
         }
-        var orgnr = behandlinger.get(0).getFagsak().hentUnikArbeidsgiver().getOrgnr();
+        var orgnr = fagsak.hentUnikArbeidsgiver().getOrgnr();
         if (orgnr != null) {
             return organisasjonOppslagService.hentOrganisasjon(orgnr).getNavn();
         }

@@ -15,6 +15,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
+import java.util.Optional;
+
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.HENT_REGISTEROPPLYSNINGER;
 import static no.nav.melosys.service.registeropplysninger.RegisteropplysningerFactory.utledSaksopplysningTyper;
 
@@ -44,12 +46,12 @@ public class HentRegisteropplysninger implements StegBehandler {
     public void utfør(Prosessinstans prosessinstans) {
 
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(prosessinstans.getBehandling().getId());
-        String aktørId = behandling.getFagsak().hentBrukersAktørID();
-        if (StringUtils.isEmpty(aktørId)) {
+        Optional<String> aktørId = behandling.getFagsak().finnBrukersAktørID();
+        if (aktørId.isEmpty()) {
             log.info("Henter ikke registeropplysninger for behandling {} fordi den ikke har aktørId", behandling.getId());
             return;
         }
-        String brukerId = persondataFasade.hentFolkeregisterident(aktørId);
+        String brukerId = persondataFasade.hentFolkeregisterident(aktørId.get());
 
 
         var registeropplysningerRequestBuilder = RegisteropplysningerRequest.builder()

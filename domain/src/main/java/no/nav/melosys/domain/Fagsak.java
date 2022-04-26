@@ -5,6 +5,7 @@ import java.util.*;
 import javax.persistence.*;
 
 import no.nav.melosys.domain.kodeverk.*;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -113,9 +114,13 @@ public class Fagsak extends RegistreringsInfo {
 
     public String hentBrukersAktørID() {
         if (hentBruker() == null) {
-            return null;
+            throw new FunksjonellException("Finner ikke bruker på fagsak " + saksnummer);
         }
         return hentBruker().getAktørId();
+    }
+
+    public Optional<String> finnBrukersAktørID() {
+        return Optional.ofNullable(hentBruker()).map(Aktoer::getAktørId);
     }
 
     public List<Aktoer> hentMyndigheter() {
