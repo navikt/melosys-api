@@ -84,7 +84,9 @@ class HentRegisteropplysningerTest {
 
         verify(registeropplysningerService).hentOgLagreOpplysninger(requestCaptor.capture());
 
-        assertThat(requestCaptor.getValue()).extracting(RegisteropplysningerRequest::getBehandlingID, RegisteropplysningerRequest::getFnr, RegisteropplysningerRequest::getFom, RegisteropplysningerRequest::getTom).containsExactly(behandling.getId(), ident, periode.getFom(), periode.getTom());
+        assertThat(requestCaptor.getValue())
+            .extracting(RegisteropplysningerRequest::getBehandlingID, RegisteropplysningerRequest::getFnr, RegisteropplysningerRequest::getFom, RegisteropplysningerRequest::getTom)
+            .containsExactly(behandling.getId(), ident, periode.getFom(), periode.getTom());
     }
 
     @Test
