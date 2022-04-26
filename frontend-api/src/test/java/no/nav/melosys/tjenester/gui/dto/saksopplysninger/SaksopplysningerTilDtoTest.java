@@ -1,69 +1,23 @@
 package no.nav.melosys.tjenester.gui.dto.saksopplysninger;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URISyntaxException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.time.LocalDate;
-import java.time.ZoneOffset;
 import java.util.*;
-import java.util.stream.Collectors;
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.FellesKodeverk;
-import no.nav.melosys.domain.Saksopplysning;
-import no.nav.melosys.domain.SaksopplysningType;
-import no.nav.melosys.domain.dokument.DokumentFactory;
-import no.nav.melosys.domain.dokument.XsltTemplatesFactory;
 import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold;
 import no.nav.melosys.domain.dokument.felles.Periode;
-import no.nav.melosys.domain.dokument.jaxb.JaxbConfig;
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode;
-import no.nav.melosys.domain.jpa.SaksopplysningDokumentConverter;
-import no.nav.melosys.service.kodeverk.KodeverkService;
-import no.nav.melosys.tjenester.gui.dto.PersonUtenAdresseDto;
-import no.nav.melosys.tjenester.gui.dto.SaksopplysningerDto;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
-import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 
-import static no.nav.melosys.domain.SaksopplysningType.PERSHIST;
-import static no.nav.melosys.domain.SaksopplysningType.PERSOPL;
 import static no.nav.melosys.tjenester.gui.dto.saksopplysninger.SaksopplysningerTilDto.medlemsperiodeKomparator;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 class SaksopplysningerTilDtoTest {
-
-    private DokumentFactory dokumentFactory;
-
-    @Mock
-    private KodeverkService kodeverkService;
-
-    private SaksopplysningerTilDto saksopplysningerTilDto;
-
-    @BeforeEach
-    public void setUp() {
-        saksopplysningerTilDto = new SaksopplysningerTilDto(kodeverkService);
-        Jaxb2Marshaller marshaller = JaxbConfig.jaxb2Marshaller();
-        XsltTemplatesFactory xsltTemplatesFactory = new XsltTemplatesFactory();
-        dokumentFactory = new DokumentFactory(marshaller, xsltTemplatesFactory);
-
-        when(kodeverkService.dekod(eq(FellesKodeverk.POSTNUMMER), anyString())).thenReturn("sted");
-    }
 
     @Test
     void testArbeidsforholdSortering() {
@@ -117,65 +71,5 @@ class SaksopplysningerTilDtoTest {
         assertThat(medlemsperioder.get(1)).isEqualTo(medlemsperiode1);
         assertThat(medlemsperioder.get(2)).isEqualTo(medlemsperiode3);
         assertThat(medlemsperioder.get(3)).isEqualTo(medlemsperiode2);
-    }
-
-    @Test
-    void testKonverteringPersonMedStatsborgerskap() {
-        Saksopplysning personDokument = lagTpsDokumentFraJson("tps_person.json");
-        Saksopplysning personhistorikkDokument = lagDokumentFraXml("88888888882_historikk.xml", PERSHIST, "3.4");
-
-        assertThat(personDokument).isNotNull();
-        assertThat(personhistorikkDokument).isNotNull();
-
-        Set<Saksopplysning> saksopplysninger = new HashSet<>();
-        saksopplysninger.add(personDokument);
-        saksopplysninger.add(personhistorikkDokument);
-
-        Behandling behandling = new Behandling();
-        behandling.setSisteOpplysningerHentetDato(LocalDate.of(2018, 1, 1).atStartOfDay().toInstant(ZoneOffset.UTC));
-        behandling.setSaksopplysninger(saksopplysninger);
-
-        SaksopplysningerDto saksopplysningerDto = saksopplysningerTilDto.getSaksopplysningerDto(saksopplysninger);
-
-        assertThat(saksopplysningerDto.getPersonhistorikk().bostedsadressePerioder)
-            .extracting("bostedsadresse")
-            .extracting("poststed")
-            .contains("sted");
-    }
-
-    private Saksopplysning lagTpsDokumentFraJson(String jsonRessurs) {
-        final String jsonString;
-        try {
-            jsonString = Files.readString(Path.of(getClass().getClassLoader().getResource(jsonRessurs).toURI()));
-        } catch (IOException | URISyntaxException e) {
-            throw new IllegalStateException(e);
-        }
-
-        Saksopplysning saksopplysning = new Saksopplysning();
-        saksopplysning.setType(PERSOPL);
-        saksopplysning.setVersjon("3.0");
-        saksopplysning.setDokument(new SaksopplysningDokumentConverter().convertToEntityAttribute(jsonString));
-        return saksopplysning;
-    }
-
-    private Saksopplysning lagDokumentFraXml(String ressurs, SaksopplysningType type, String versjon) {
-        final InputStream kilde = getClass().getClassLoader().getResourceAsStream(ressurs);
-
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(kilde, StandardCharsets.UTF_8))) {
-            Saksopplysning saksopplysning = new Saksopplysning();
-
-            String xmlStr = reader.lines().collect(Collectors.joining(System.lineSeparator()));
-
-            saksopplysning.leggTilKildesystemOgMottattDokument(null, xmlStr);
-            saksopplysning.setType(type);
-            saksopplysning.setVersjon(versjon);
-
-            dokumentFactory.lagDokument(saksopplysning);
-
-            return saksopplysning;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
     }
 }

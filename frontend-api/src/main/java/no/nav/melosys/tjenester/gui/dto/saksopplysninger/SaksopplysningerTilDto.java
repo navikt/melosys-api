@@ -12,28 +12,18 @@ import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
-import no.nav.melosys.domain.dokument.person.PersonhistorikkDokument;
 import no.nav.melosys.domain.dokument.sakogbehandling.SobSakDokument;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
-import no.nav.melosys.service.kodeverk.KodeverkService;
-import no.nav.melosys.tjenester.gui.dto.PersonhistorikkDto;
 import no.nav.melosys.tjenester.gui.dto.SaksopplysningerDto;
 import no.nav.melosys.tjenester.gui.dto.eessi.SedDokumentDto;
 import no.nav.melosys.tjenester.gui.dto.inntekt.InntektDto;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.FellesKodeverk.POSTNUMMER;
 
 @Component
 public class SaksopplysningerTilDto {
     static final Comparator<Medlemsperiode> medlemsperiodeKomparator =
         (o1, o2) -> o2.getPeriode().getFom().compareTo(o1.getPeriode().getFom());
-
-    private final KodeverkService kodeverkService;
-
-    public SaksopplysningerTilDto(KodeverkService kodeverkService) {
-        this.kodeverkService = kodeverkService;
-    }
 
     public SaksopplysningerDto getSaksopplysningerDto(Set<Saksopplysning> saksopplysningSet) {
         SaksopplysningerDto dto = new SaksopplysningerDto();
@@ -60,13 +50,6 @@ public class SaksopplysningerTilDto {
                 }
                 case INNTK -> dto.setInntekt(new InntektDto((InntektDokument) dokument));
                 case SOB_SAK -> dto.setSakOgBehandling((SobSakDokument) dokument);
-                case PERSHIST -> {
-                    PersonhistorikkDokument personhistorikk = (PersonhistorikkDokument) dokument;
-                    dto.setPersonhistorikk(new PersonhistorikkDto(personhistorikk));
-                    dto.getPersonhistorikk().bostedsadressePerioder.forEach(bostedsadressePeriodeDto ->
-                        bostedsadressePeriodeDto.bostedsadresse.setPoststed(
-                            kodeverkService.dekod(POSTNUMMER, bostedsadressePeriodeDto.bostedsadresse.getPostnr())));
-                }
                 case SEDOPPL -> dto.setSed(SedDokumentDto.fra((SedDokument) dokument));
             }
         }

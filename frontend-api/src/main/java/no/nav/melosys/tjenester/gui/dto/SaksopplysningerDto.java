@@ -14,8 +14,6 @@ import no.nav.melosys.tjenester.gui.dto.inntekt.InntektDto;
 @JsonPropertyOrder({"arbeidsforhold", "organisasjoner", "medlemskap", "inntekt", "sakOgBehandling", "sed"})
 public class SaksopplysningerDto {
 
-    private PersonhistorikkDto personhistorikk;
-
     private ArbeidsforholdDokument arbeidsforhold;
 
     private List<OrganisasjonDokument> organisasjoner;
@@ -30,21 +28,12 @@ public class SaksopplysningerDto {
 
     public SaksopplysningerDto() {
         // Frontend ønsker å motta et objekt, selv når saksopplysninger ikke finnes.
-        this.personhistorikk = new PersonhistorikkDto();
         this.arbeidsforhold = new ArbeidsforholdDokument();
         this.organisasjoner = new ArrayList<>();
         this.medlemskap = new MedlemskapDokument();
         this.inntekt = new InntektDto();
         this.sakOgBehandling = new SobSakDokument();
         this.sed = new SedDokumentDto();
-    }
-
-    public PersonhistorikkDto getPersonhistorikk() {
-        return personhistorikk;
-    }
-
-    public void setPersonhistorikk(PersonhistorikkDto personhistorikk) {
-        this.personhistorikk = personhistorikk;
     }
 
     public ArbeidsforholdDokument getArbeidsforhold() {
