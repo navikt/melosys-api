@@ -2,10 +2,7 @@ package no.nav.melosys.service.dokument.brev.mapper;
 
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
-import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
 import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.Trygdedekninger;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
 import no.nav.melosys.domain.person.Foedsel;
 import no.nav.melosys.domain.person.Navn;
 import no.nav.melosys.domain.person.Persondata;
@@ -14,9 +11,6 @@ import no.nav.melosys.domain.person.adresse.Bostedsadresse;
 import no.nav.melosys.domain.person.adresse.Kontaktadresse;
 import no.nav.melosys.domain.person.adresse.Oppholdsadresse;
 import no.nav.melosys.domain.person.adresse.PersonAdresse;
-import no.nav.melosys.integrasjon.dokgen.dto.InnvilgelseOgAttestStorbritannia;
-import no.nav.melosys.integrasjon.dokgen.dto.storbritannia.attest.AttestStorbritannia;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -28,11 +22,10 @@ import java.util.List;
 import static no.nav.melosys.service.dokument.DokgenTestData.*;
 import static no.nav.melosys.service.dokument.brev.mapper.StorbritaniaAdresseSjekker.UKJENT;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 class StorbritaniaAdresseSjekkerTest {
 
-    private final static Lovvalgsperiode lovvalgsperiode = StorbritanniaMapperTest.lagLovvalgsperiode();
+    private final static Lovvalgsperiode LOVVALGSPERIODE = StorbritanniaMapperTest.lagLovvalgsperiode();
 
     @ParameterizedTest(name = "{5}")
     @MethodSource("sjekkAdresser")
@@ -46,7 +39,7 @@ class StorbritaniaAdresseSjekkerTest {
 
         StorbritaniaAdresseSjekker storbritaniaAdresseSjekker = lagStorbritaniaAdresseSjekker(landkodeBosted, landkodeOpphold, landkodeKontakt);
         List<String> gyldigNorskAdresse = storbritaniaAdresseSjekker.finnGyldigNorskAdresse();
-        List<String> gyldigUkAdresse = storbritaniaAdresseSjekker.finnGyldigStorbritanniaAdresse(lovvalgsperiode);
+        List<String> gyldigUkAdresse = storbritaniaAdresseSjekker.finnGyldigStorbritanniaAdresse(LOVVALGSPERIODE);
 
         assertThat(gyldigNorskAdresse).withFailMessage(grunn).isEqualTo(norskAddresse);
         assertThat(gyldigUkAdresse).withFailMessage(grunn).isEqualTo(ukAddresse);
@@ -62,18 +55,8 @@ class StorbritaniaAdresseSjekkerTest {
     @ParameterizedTest(name = "{4}")
     @MethodSource("gyldigePerioder")
     void sjekkOmAdresseGyldighetErInnenforLovalgsperiode_for_gyldigePerioder(LocalDate lovFom, LocalDate lovTom, LocalDate gyldigFom, LocalDate gyldigTom, String grunn) {
-        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setFom(lovFom);
-        lovvalgsperiode.setTom(lovTom);
-        PersonAdresse personAdresse = new Oppholdsadresse(null,
-            null,
-            gyldigFom,
-            gyldigTom,
-            null,
-            null,
-            null,
-            false
-        );
+        var personAdresse = lagPersonAdresse(gyldigFom, gyldigTom);
+        Lovvalgsperiode lovvalgsperiode = lagLovvalgsperiode(lovFom, lovTom);
         assertThat(StorbritaniaAdresseSjekker.sjekkOmAdresseGyldighetErInnenforLovalgsperiode(personAdresse, lovvalgsperiode))
             .withFailMessage(grunn)
             .isTrue();
@@ -82,18 +65,8 @@ class StorbritaniaAdresseSjekkerTest {
     @ParameterizedTest(name = "{4}")
     @MethodSource("ugyldigePerioder")
     void sjekkOmAdresseGyldighetErInnenforLovalgsperiode_for_ugyldigePerioder(LocalDate lovFom, LocalDate lovTom, LocalDate gyldigFom, LocalDate gyldigTom, String grunn) {
-        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setFom(lovFom);
-        lovvalgsperiode.setTom(lovTom);
-        PersonAdresse personAdresse = new Oppholdsadresse(null,
-            null,
-            gyldigFom,
-            gyldigTom,
-            null,
-            null,
-            null,
-            false
-        );
+        var personAdresse = lagPersonAdresse(gyldigFom, gyldigTom);
+        Lovvalgsperiode lovvalgsperiode = lagLovvalgsperiode(lovFom, lovTom);
         assertThat(StorbritaniaAdresseSjekker.sjekkOmAdresseGyldighetErInnenforLovalgsperiode(personAdresse, lovvalgsperiode))
             .withFailMessage(grunn)
             .isFalse();
@@ -240,5 +213,24 @@ class StorbritaniaAdresseSjekkerTest {
                 "adresseperiode fom og tom er null"
             )
         );
+    }
+
+    private static PersonAdresse lagPersonAdresse(LocalDate gyldigFom, LocalDate gyldigTom) {
+        return new Oppholdsadresse(null,
+            null,
+            gyldigFom,
+            gyldigTom,
+            null,
+            null,
+            null,
+            false
+        );
+    }
+
+    private static Lovvalgsperiode lagLovvalgsperiode(LocalDate lovFom, LocalDate lovTom) {
+        var lovvalgsperiode = new Lovvalgsperiode();
+        lovvalgsperiode.setFom(lovFom);
+        lovvalgsperiode.setTom(lovTom);
+        return lovvalgsperiode;
     }
 }
