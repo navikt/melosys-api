@@ -205,7 +205,7 @@ public class StorbritanniaMapper {
             .build();
     }
 
-    static List<String> finnGyldigNorskAdresse(Persondata persondata) {
+    List<String> finnGyldigNorskAdresse(Persondata persondata) {
         return getPersonAdresseer(persondata)
             .filter(personAdresse -> sjekkAdresseMotLand(personAdresse.strukturertAdresse(), Landkoder.NO))
             .findFirst()
@@ -213,7 +213,7 @@ public class StorbritanniaMapper {
             .orElse(findAdresseNårIkkeNorskAdresseMenAdresseIUk(persondata));
     }
 
-    private static List<String> findAdresseNårIkkeNorskAdresseMenAdresseIUk(Persondata persondata) {
+    private List<String> findAdresseNårIkkeNorskAdresseMenAdresseIUk(Persondata persondata) {
         return getPersonAdresseer(persondata)
             .filter(personAdresse -> sjekkAdresseMotLand(personAdresse.strukturertAdresse(), Landkoder.GB))
             .findFirst()
@@ -221,7 +221,7 @@ public class StorbritanniaMapper {
             .orElse(findAdresseNårIkkeNorskEllerUkAdresse(persondata));
     }
 
-    private static List<String> findAdresseNårIkkeNorskEllerUkAdresse(Persondata persondata) {
+    private List<String> findAdresseNårIkkeNorskEllerUkAdresse(Persondata persondata) {
         return getPersonAdresseer(persondata)
             .filter(personAdresse -> personAdresse.strukturertAdresse().getLandkode() != null)
             .findFirst()
@@ -232,7 +232,7 @@ public class StorbritanniaMapper {
             .orElse(List.of(UKJENT));
     }
 
-    static List<String> finnGyldigStorbritanniaAdresse(Persondata persondata, Lovvalgsperiode lovvalgsperiode) {
+    private List<String> finnGyldigStorbritanniaAdresse(Persondata persondata, Lovvalgsperiode lovvalgsperiode) {
         return getPersonAdresseer(persondata)
             .filter(personAdresse -> sjekkAdresseMotLand(personAdresse.strukturertAdresse(), Landkoder.GB))
             .filter(personAdresse -> sjekkOmAdresseGyldighetErInnenforLovalgsperiode(personAdresse, lovvalgsperiode))
@@ -241,7 +241,7 @@ public class StorbritanniaMapper {
             .orElse(List.of(UKJENT));
     }
 
-    private static Stream<PersonAdresse> getPersonAdresseer(Persondata persondata) {
+    private Stream<PersonAdresse> getPersonAdresseer(Persondata persondata) {
         return Stream.of(
                 persondata.finnBostedsadresse(),
                 persondata.finnOppholdsadresse(),
@@ -250,7 +250,7 @@ public class StorbritanniaMapper {
             .map(Optional::get);
     }
 
-    private static boolean sjekkAdresseMotLand(StrukturertAdresse adresse, Landkoder landkode) {
+    private boolean sjekkAdresseMotLand(StrukturertAdresse adresse, Landkoder landkode) {
         return adresse != null && landkode != null && adresse.getLandkode() != null && adresse.getLandkode().equals(landkode.getKode());
     }
 
