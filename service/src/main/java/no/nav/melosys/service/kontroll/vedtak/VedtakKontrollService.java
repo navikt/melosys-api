@@ -9,7 +9,6 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
-import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.person.Persondata;
@@ -93,8 +92,7 @@ public class VedtakKontrollService {
 
     public Collection<Kontrollfeil> utførKontroller(long behandlingID, Sakstyper sakstype, boolean erAvslag) {
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
-        return erAvslag ? utførKontrollerForAvslag(behandling) : utførKontroller(behandling,
-            lovvalgsperiodeService.hentValidertLovvalgsperiode(behandlingID), sakstype);
+        return erAvslag ? utførKontrollerForAvslag(behandling) : utførKontroller(behandling, sakstype);
     }
 
     private Collection<Kontrollfeil> utførKontrollerForAvslag(Behandling behandling) {
@@ -107,11 +105,10 @@ public class VedtakKontrollService {
             .toList();
     }
 
-    private Collection<Kontrollfeil> utførKontroller(Behandling behandling, Lovvalgsperiode lovvalgsperiode,
-                                                     Sakstyper sakstype) {
+    private Collection<Kontrollfeil> utførKontroller(Behandling behandling, Sakstyper sakstype) {
         Set<Function<VedtakKontrollData, Kontrollfeil>> vedtakKontroller =
             VedtakKontrollFactory.hentKontrollerForVedtak(sakstype);
-        var vedtakKontrollData = hentVedtakKontrollData(behandling, lovvalgsperiode);
+        var vedtakKontrollData = hentVedtakKontrollData(behandling);
         return vedtakKontroller.stream()
             .map(f -> f.apply(vedtakKontrollData))
             .filter(Objects::nonNull)
@@ -122,16 +119,19 @@ public class VedtakKontrollService {
         BehandlingsgrunnlagData behandlingsgrunnlagData =
             behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
         Persondata persondata = hentPersondata(behandling);
-        return new VedtakKontrollData(null, persondata, behandlingsgrunnlagData, null);
+        return VedtakKontrollData.lagKontrollDataForAvslag(persondata, behandlingsgrunnlagData);
     }
 
-    private VedtakKontrollData hentVedtakKontrollData(Behandling behandling, Lovvalgsperiode lovvalgsperiode) {
-        BehandlingsgrunnlagData behandlingsgrunnlagData =
-            behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
-        MedlemskapDokument medlemskapDokument = behandling.hentMedlemskapDokument();
-        Persondata persondata = hentPersondata(behandling);
+    private VedtakKontrollData hentVedtakKontrollData(Behandling behandling) {
+        Lovvalgsperiode lovvalgsperiode = lovvalgsperiodeService.hentValidertLovvalgsperiode(behandling.getId());
+        Lovvalgsperiode opprinneligLovvalgsperiode =
+            lovvalgsperiodeService.finnOpprinneligLovvalgsperiode(behandling.getId()).orElse(null);
+        var behandlingsgrunnlagData = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
+        var medlemskapDokument = behandling.hentMedlemskapDokument();
+        var persondata = hentPersondata(behandling);
+
         return new VedtakKontrollData(medlemskapDokument, persondata, behandlingsgrunnlagData,
-            lovvalgsperiode);
+            lovvalgsperiode, opprinneligLovvalgsperiode);
     }
 
     private Persondata hentPersondata(Behandling behandling) {
