@@ -119,7 +119,7 @@ public class VedtakKontrollService {
         BehandlingsgrunnlagData behandlingsgrunnlagData =
             behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
         Persondata persondata = hentPersondata(behandling);
-        return new VedtakKontrollData(persondata, behandlingsgrunnlagData);
+        return VedtakKontrollData.lagKontrollDataForAvslag(persondata, behandlingsgrunnlagData);
     }
 
     private VedtakKontrollData hentVedtakKontrollData(Behandling behandling) {

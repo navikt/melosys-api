@@ -4,9 +4,10 @@ import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.person.Persondata;
-import no.nav.melosys.service.kontroll.KontrollData;
 
-final class VedtakKontrollData extends KontrollData {
+final class VedtakKontrollData {
+
+    private final MedlemskapDokument medlemskapDokument;
     private final Persondata persondata;
     private final BehandlingsgrunnlagData behandlingsgrunnlagData;
     private final Lovvalgsperiode lovvalgsperiode;
@@ -17,20 +18,20 @@ final class VedtakKontrollData extends KontrollData {
                        BehandlingsgrunnlagData behandlingsgrunnlagData,
                        Lovvalgsperiode lovvalgsperiode,
                        Lovvalgsperiode opprinneligLovvalgsperiode) {
-        super(medlemskapDokument);
+        this.medlemskapDokument = medlemskapDokument;
         this.behandlingsgrunnlagData = behandlingsgrunnlagData;
         this.persondata = persondata;
         this.lovvalgsperiode = lovvalgsperiode;
         this.opprinneligLovvalgsperiode = opprinneligLovvalgsperiode;
     }
 
-    VedtakKontrollData(Persondata persondata,
-                       BehandlingsgrunnlagData behandlingsgrunnlagData) {
-        super(null);
-        this.behandlingsgrunnlagData = behandlingsgrunnlagData;
-        this.persondata = persondata;
-        this.lovvalgsperiode = null;
-        this.opprinneligLovvalgsperiode = null;
+    static VedtakKontrollData lagKontrollDataForAvslag(Persondata persondata,
+                                                       BehandlingsgrunnlagData behandlingsgrunnlagData) {
+        return new VedtakKontrollData(null, persondata, behandlingsgrunnlagData, null, null);
+    }
+
+    MedlemskapDokument getMedlemskapDokument() {
+        return medlemskapDokument;
     }
 
     BehandlingsgrunnlagData getBehandlingsgrunnlagData() {
@@ -45,7 +46,7 @@ final class VedtakKontrollData extends KontrollData {
         return lovvalgsperiode;
     }
 
-    public Lovvalgsperiode getOpprinneligLovvalgsperiode() {
+    Lovvalgsperiode getOpprinneligLovvalgsperiode() {
         return opprinneligLovvalgsperiode;
     }
 }
