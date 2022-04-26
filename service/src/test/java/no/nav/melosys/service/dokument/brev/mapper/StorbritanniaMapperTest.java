@@ -58,6 +58,7 @@ import static no.nav.melosys.service.dokument.DokgenTestData.*;
 import static no.nav.melosys.service.dokument.brev.mapper.StorbritanniaMapper.UKJENT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
@@ -204,20 +205,19 @@ class StorbritanniaMapperTest {
 
         mockHappyCase();
         Personopplysninger personopplysninger = lagPersonopplysninger(landkodeBosted, landkodeOpphold, landkodeKontakt);
-
         InnvilgelseBrevbestilling brevbestilling =
             lagStorbritanniaBrevbestillingDefaultBuilder(medPeriode(lagTrygdeavtaleBehandling()))
                 .medPersonDokument(personopplysninger)
                 .build();
 
         InnvilgelseOgAttestStorbritannia innvilgelseOgAttestStorbritannia = storbritanniaMapper.map(brevbestilling);
-        assertThat(innvilgelseOgAttestStorbritannia.isSkalHaAttest()).isTrue();
+        assertTrue(innvilgelseOgAttestStorbritannia.isSkalHaAttest());
 
         AttestStorbritannia attest = innvilgelseOgAttestStorbritannia.getAttest();
         List<String> bostedsadresse = attest.getArbeidstaker().bostedsadresse();
-        assertThat(bostedsadresse).isEqualTo(norskAddresse);
-
         List<String> oppholdsadresseUK = attest.getUtsendelse().oppholdsadresseUK();
+
+        assertThat(bostedsadresse).isEqualTo(norskAddresse);
         assertThat(oppholdsadresseUK).isEqualTo(ukAddresse);
     }
 
