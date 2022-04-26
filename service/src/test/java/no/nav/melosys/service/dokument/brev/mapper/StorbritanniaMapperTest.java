@@ -12,7 +12,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
-import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
@@ -24,13 +23,7 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_b
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_ektefelle_samboer_begrunnelser_ftrl;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
-import no.nav.melosys.domain.person.Foedsel;
-import no.nav.melosys.domain.person.Navn;
 import no.nav.melosys.domain.person.Personopplysninger;
-import no.nav.melosys.domain.person.adresse.Bostedsadresse;
-import no.nav.melosys.domain.person.adresse.Kontaktadresse;
-import no.nav.melosys.domain.person.adresse.Oppholdsadresse;
-import no.nav.melosys.domain.person.adresse.PersonAdresse;
 import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie;
 import no.nav.melosys.domain.person.familie.IkkeOmfattetFamilie;
 import no.nav.melosys.domain.person.familie.OmfattetFamilie;
@@ -53,13 +46,13 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.STORBRITANNIA;
-import static no.nav.melosys.service.dokument.brev.mapper.DokgenMalMapperTest.*;
 import static no.nav.melosys.service.dokument.DokgenTestData.*;
-import static no.nav.melosys.service.dokument.brev.mapper.StorbritanniaMapper.UKJENT;
+import static no.nav.melosys.service.dokument.brev.mapper.DokgenMalMapperTest.SOKNADSDATO;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -124,73 +117,8 @@ class StorbritanniaMapperTest {
         assertThat(innvilgelseOgAttestStorbritannia.getNyVurderingBakgrunn()).isEqualTo(brevbestilling.getNyVurderingBakgrunn());
     }
 
-    private static String kodeEllerNull(Landkoder landkoder) {
-        return landkoder == null ? null : landkoder.getKode();
-    }
-
-    private static Personopplysninger lagPersonopplysninger(
-        Landkoder landkodeBosted,
-        Landkoder landkodeOpphold,
-        Landkoder landkodeKontakt) {
-
-        var gyldigFom = LOVVALGSPERIODE_FOM;
-        var gyldigTom = LOVVALGSPERIODE_TOM;
-
-        final var bostedsadresse = new Bostedsadresse(
-            new StrukturertAdresse("bosted", "42 C", null, null, null, kodeEllerNull(landkodeBosted)),
-            null, gyldigFom, gyldigTom, "PDL", null, false);
-
-        final var kontaktadresse = new Kontaktadresse(
-            new StrukturertAdresse("kontakt 1", null, null, null, null, kodeEllerNull(landkodeKontakt)),
-            null, null, gyldigFom, gyldigTom, "PDL", null, null,
-            false);
-
-        final var oppholdsadresse = new Oppholdsadresse(
-            new StrukturertAdresse("tilleggOpphold", "opphold 1", null, null, null,
-                null, null, kodeEllerNull(landkodeOpphold)), null,
-            LOVVALGSPERIODE_FOM, LOVVALGSPERIODE_TOM,
-            "PDL", null, null, false);
-
-        return new Personopplysninger(Collections.emptyList(), bostedsadresse, null, null,
-            new Foedsel(LocalDate.EPOCH, null, null, null), null, null,
-            List.of(kontaktadresse), new Navn("Ole", "", "Norman"), List.of(oppholdsadresse), Collections.emptyList());
-    }
-
     private static List<Arguments> sjekkAdresser() {
-        return List.of(
-            Arguments.of(Landkoder.NO, Landkoder.NO, Landkoder.NO,
-                List.of("bosted 42 C", "Norge"),
-                List.of(UKJENT),
-                "Velg bosted, når alle addresser er norske"),
-            Arguments.of(Landkoder.SE, Landkoder.SE, Landkoder.NO,
-                List.of("kontakt 1", "Norge"),
-                List.of(UKJENT),
-                "Kun kontakt med norsk adresse"),
-            Arguments.of(Landkoder.SE, Landkoder.NO, Landkoder.SE,
-                List.of("tilleggOpphold", "opphold 1", "Norge"),
-                List.of(UKJENT),
-                "Kun opphold med norsk adresse"),
-            Arguments.of(Landkoder.NO, Landkoder.SE, Landkoder.SE,
-                List.of("bosted 42 C", "Norge"),
-                List.of(UKJENT),
-                "Kun bosted med norsk adresse"),
-            Arguments.of(Landkoder.GB, Landkoder.SE, Landkoder.SE,
-                List.of("No address in Norway"),
-                List.of("bosted 42 C", "Storbritannia"),
-                "Ingen norske adresser, men adresse i UK"),
-            Arguments.of(Landkoder.GB, null, null,
-                List.of("No address in Norway"),
-                List.of("bosted 42 C", "Storbritannia"),
-                "kun adresse i UK"),
-            Arguments.of(Landkoder.SE, Landkoder.SE, Landkoder.SE,
-                List.of("Resident outside of Norway", "bosted 42 C", "Sverige"),
-                List.of(UKJENT),
-                "Utenlandsk addresse, men ikke i UK"),
-            Arguments.of(null, null, null,
-                List.of(UKJENT),
-                List.of(UKJENT),
-                "ingen addresser")
-        );
+        return StorbritaniaAdresseSjekkerTest.sjekkAdresser();
     }
 
     @ParameterizedTest(name = "{5}")
@@ -204,7 +132,7 @@ class StorbritanniaMapperTest {
         String grunn) {
 
         mockHappyCase();
-        Personopplysninger personopplysninger = lagPersonopplysninger(landkodeBosted, landkodeOpphold, landkodeKontakt);
+        Personopplysninger personopplysninger = StorbritaniaAdresseSjekkerTest.lagPersonopplysninger(landkodeBosted, landkodeOpphold, landkodeKontakt);
         InnvilgelseBrevbestilling brevbestilling =
             lagStorbritanniaBrevbestillingDefaultBuilder(medPeriode(lagTrygdeavtaleBehandling()))
                 .medPersonDokument(personopplysninger)
@@ -283,47 +211,6 @@ class StorbritanniaMapperTest {
         InnvilgelseBrevbestilling brevbestilling = lagStorbritanniaBrevbestilling(lagTrygdeavtaleBehandling());
         InnvilgelseStorbritannia map = storbritanniaMapper.map(brevbestilling).getInnvilgelse();
         assertThat(map.getFamilie().minstEttOmfattetFamiliemedlem()).isFalse();
-    }
-
-    @ParameterizedTest(name = "{4}")
-    @MethodSource("gyldigePerioder")
-    void sjekkOmAdresseGyldighetErInnenforLovalgsperiode_for_gyldigePerioder(LocalDate lovFom, LocalDate lovTom, LocalDate gyldigFom, LocalDate gyldigTom, String grunn) {
-        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setFom(lovFom);
-        lovvalgsperiode.setTom(lovTom);
-        PersonAdresse personAdresse = new Oppholdsadresse(null,
-            null,
-            gyldigFom,
-            gyldigTom,
-            null,
-            null,
-            null,
-            false
-        );
-        assertThat(StorbritanniaMapper.sjekkOmAdresseGyldighetErInnenforLovalgsperiode(personAdresse, lovvalgsperiode))
-            .withFailMessage(grunn)
-            .isTrue();
-    }
-
-
-    @ParameterizedTest(name = "{4}")
-    @MethodSource("ugyldigePerioder")
-    void sjekkOmAdresseGyldighetErInnenforLovalgsperiode_for_ugyldigePerioder(LocalDate lovFom, LocalDate lovTom, LocalDate gyldigFom, LocalDate gyldigTom, String grunn) {
-        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setFom(lovFom);
-        lovvalgsperiode.setTom(lovTom);
-        PersonAdresse personAdresse = new Oppholdsadresse(null,
-            null,
-            gyldigFom,
-            gyldigTom,
-            null,
-            null,
-            null,
-            false
-        );
-        assertThat(StorbritanniaMapper.sjekkOmAdresseGyldighetErInnenforLovalgsperiode(personAdresse, lovvalgsperiode))
-            .withFailMessage(grunn)
-            .isFalse();
     }
 
     @Test
@@ -453,7 +340,7 @@ class StorbritanniaMapperTest {
         when(mockLovvalgsperiodeService.hentValidertLovvalgsperiode(anyLong())).thenReturn(lagLovvalgsperiode());
     }
 
-    private Lovvalgsperiode lagLovvalgsperiode() {
+    static Lovvalgsperiode lagLovvalgsperiode() {
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setFom(LOVVALGSPERIODE_FOM);
         lovvalgsperiode.setTom(LOVVALGSPERIODE_TOM);
@@ -499,79 +386,6 @@ class StorbritanniaMapperTest {
         );
     }
 
-    private static List<Arguments> gyldigePerioder() {
-        return List.of(
-            Arguments.of(
-                LocalDate.of(2020, 1, 1),
-                LocalDate.of(2021, 1, 1),
-
-                LocalDate.of(2020, 1, 1),
-                LocalDate.of(2021, 1, 1),
-                "lovalgsperiode er lik adresseperiode"
-            ),
-            Arguments.of(
-                LocalDate.of(2020, 1, 1),
-                LocalDate.of(2021, 1, 1),
-
-                LocalDate.of(2020, 2, 1),
-                LocalDate.of(2020, 3, 1),
-                "lovalgsperiode har start før og slutt etter adresseperiode"
-            ),
-            Arguments.of(
-                LocalDate.of(2020, 2, 1),
-                LocalDate.of(2020, 3, 1),
-
-                LocalDate.of(2020, 1, 1),
-                LocalDate.of(2021, 1, 1),
-                "adresseperiode har start før og slutt etter lovalgsperiode"
-            ),
-            Arguments.of(
-                LocalDate.of(2021, 1, 1),
-                LocalDate.of(2022, 1, 1),
-
-                LocalDate.of(2020, 1, 1),
-                LocalDate.of(2021, 1, 1),
-                "lovalgsperiode start er lik adresseperiode slutt"
-            ),
-            Arguments.of(
-                LocalDate.of(2020, 1, 1),
-                LocalDate.of(2021, 1, 1),
-
-                LocalDate.of(2021, 1, 1),
-                LocalDate.of(2022, 1, 1),
-                "lovalgsperiode slutt er lik adresseperiode start"
-            )
-        );
-    }
-
-    private static List<Arguments> ugyldigePerioder() {
-        return List.of(
-            Arguments.of(
-                LocalDate.of(2019, 1, 1),
-                LocalDate.of(2020, 1, 1),
-
-                LocalDate.of(2020, 2, 1),
-                LocalDate.of(2021, 1, 1),
-                "lovalgsperiode er før adresseperiode"
-            ),
-            Arguments.of(
-                LocalDate.of(2021, 1, 2),
-                LocalDate.of(2022, 1, 1),
-
-                LocalDate.of(2020, 1, 1),
-                LocalDate.of(2021, 1, 1),
-                "lovalgsperiode er etter adresseperiode"
-            ),
-            Arguments.of(
-                LocalDate.of(2020, 1, 1),
-                LocalDate.of(2021, 1, 1),
-
-                null,
-                null,
-                "adresseperiode fom og tom er null"
-            )
-        );
-    }
 
     private static final String FORVENTEDE_FELTER_FOR_INNVILGELSE_STORBRITANNIA_MAPPING = String.format("""
             {

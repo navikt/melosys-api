@@ -6,7 +6,6 @@ import javax.transaction.Transactional;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
-import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadTrygdeavtale;
@@ -16,11 +15,9 @@ import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.brev.FastMottakerMedOrgnr;
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
-import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
 import no.nav.melosys.domain.person.Persondata;
-import no.nav.melosys.domain.person.adresse.PersonAdresse;
 import no.nav.melosys.domain.person.familie.IkkeOmfattetFamilie;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.dokgen.dto.InnvilgelseOgAttestStorbritannia;
@@ -39,10 +36,6 @@ import static org.springframework.util.ObjectUtils.isEmpty;
 
 @Component
 public class StorbritanniaMapper {
-    static final String INGEN_ADRESSE_I_NORGE = "No address in Norway";
-    static final String UKJENT = "Unknown";
-    static final String BOSTED_UTENFOR_NORGE = "Resident outside of Norway";
-
     private final AvklarteMedfolgendeFamilieService avklarteMedfølgendeFamilieService;
     private final AvklarteVirksomheterSystemService avklarteVirksomheterSystemService;
     private final LovvalgsperiodeService lovvalgsperiodeService;
@@ -90,6 +83,8 @@ public class StorbritanniaMapper {
         var persondokument = brevbestilling.getPersondokument();
         var lovvalgsperioder = lovvalgsperiodeService.hentLovvalgsperioder(behandlingID);
 
+        var adresseSjekker = new StorbritaniaAdresseSjekker(persondokument);
+
         return new AttestStorbritannia.Builder(brevbestilling)
             .medfolgendeFamiliemedlemmer(mapMedfolgendeFamiliemedlemmer(behandlingID))
             .arbeidsgiverNorge(lagArbeidsgiverNorge(behandling))
@@ -97,7 +92,7 @@ public class StorbritanniaMapper {
                 persondokument.getSammensattNavn(),
                 persondokument.getFødselsdato(),
                 persondokument.hentFolkeregisterident(),
-                finnGyldigNorskAdresse(persondokument)))
+                adresseSjekker.finnGyldigNorskAdresse()))
             .representant(lagRepresentant(behandling.getBehandlingsgrunnlag()))
             .utsendelse(lagUtsendelse(lovvalgsperioder, persondokument))
             .build();
@@ -197,70 +192,16 @@ public class StorbritanniaMapper {
 
         var bestemmelse = lovvalgsperiode.getBestemmelse();
 
+        var adresseSjekker = new StorbritaniaAdresseSjekker(persondata);
+
         return new Utsendelse.Builder()
             .artikkel((Lovvalgbestemmelser_trygdeavtale_uk) bestemmelse)
-            .oppholdsadresseUK(finnGyldigStorbritanniaAdresse(persondata, lovvalgsperiode))
+            .oppholdsadresseUK(adresseSjekker.finnGyldigStorbritanniaAdresse(lovvalgsperiode))
             .startdato(lovvalgsperiode.getFom())
             .sluttdato(lovvalgsperiode.getTom())
             .build();
     }
 
-    List<String> finnGyldigNorskAdresse(Persondata persondata) {
-        return getPersonAdresseer(persondata)
-            .filter(personAdresse -> sjekkAdresseMotLand(personAdresse.strukturertAdresse(), Landkoder.NO))
-            .findFirst()
-            .map(personAdresse -> personAdresse.strukturertAdresse().toList())
-            .orElse(findAdresseNårIkkeNorskAdresseMenAdresseIUk(persondata));
-    }
-
-    private List<String> findAdresseNårIkkeNorskAdresseMenAdresseIUk(Persondata persondata) {
-        return getPersonAdresseer(persondata)
-            .filter(personAdresse -> sjekkAdresseMotLand(personAdresse.strukturertAdresse(), Landkoder.GB))
-            .findFirst()
-            .map(personAdresse -> List.of(INGEN_ADRESSE_I_NORGE))
-            .orElse(findAdresseNårIkkeNorskEllerUkAdresse(persondata));
-    }
-
-    private List<String> findAdresseNårIkkeNorskEllerUkAdresse(Persondata persondata) {
-        return getPersonAdresseer(persondata)
-            .filter(personAdresse -> personAdresse.strukturertAdresse().getLandkode() != null)
-            .findFirst()
-            .map(personAdresse -> Stream.concat(
-                Stream.of(BOSTED_UTENFOR_NORGE),
-                personAdresse.strukturertAdresse().toList().stream()).toList()
-            )
-            .orElse(List.of(UKJENT));
-    }
-
-    private List<String> finnGyldigStorbritanniaAdresse(Persondata persondata, Lovvalgsperiode lovvalgsperiode) {
-        return getPersonAdresseer(persondata)
-            .filter(personAdresse -> sjekkAdresseMotLand(personAdresse.strukturertAdresse(), Landkoder.GB))
-            .filter(personAdresse -> sjekkOmAdresseGyldighetErInnenforLovalgsperiode(personAdresse, lovvalgsperiode))
-            .findFirst()
-            .map(personAdresse -> personAdresse.strukturertAdresse().toList())
-            .orElse(List.of(UKJENT));
-    }
-
-    private Stream<PersonAdresse> getPersonAdresseer(Persondata persondata) {
-        return Stream.of(
-                persondata.finnBostedsadresse(),
-                persondata.finnOppholdsadresse(),
-                persondata.finnKontaktadresse())
-            .filter(Optional::isPresent)
-            .map(Optional::get);
-    }
-
-    private boolean sjekkAdresseMotLand(StrukturertAdresse adresse, Landkoder landkode) {
-        return adresse != null && landkode != null && adresse.getLandkode() != null && adresse.getLandkode().equals(landkode.getKode());
-    }
-
-    static boolean sjekkOmAdresseGyldighetErInnenforLovalgsperiode(PersonAdresse personAdresse, Lovvalgsperiode lovvalgsperiode) {
-        if (personAdresse.gyldigFraOgMed() == null) return false;
-        if (personAdresse.gyldigTilOgMed() == null) return false;
-
-        if (lovvalgsperiode.getTom().isBefore(personAdresse.gyldigFraOgMed())) return false;
-        return !lovvalgsperiode.getFom().isAfter(personAdresse.gyldigTilOgMed());
-    }
 
     private AvklartVirksomhet hentAvklartVirksomhet(Behandling behandling) {
         var avklarteVirksomheter = avklarteVirksomheterSystemService.hentNorskeArbeidsgivere(behandling);
