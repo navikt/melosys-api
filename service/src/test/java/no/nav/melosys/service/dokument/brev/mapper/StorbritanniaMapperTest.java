@@ -633,7 +633,7 @@ class StorbritanniaMapperTest {
                 "navn" : "Donald Duck",
                 "foedselsdato" : null,
                 "fnr" : "05058892382",
-                "bostedsadresse" : [ "Andebygata 1", "9999", "Andeby" ]
+                "bostedsadresse" : [ "Andebygata 1 42 C", "9999", "Norge" ]
               },
               "medfolgendeFamiliemedlemmer" : {
                 "ektefelle" : {
@@ -655,7 +655,7 @@ class StorbritanniaMapperTest {
               },
               "utsendelse" : {
                 "artikkel" : "UK_ART6_1",
-                "oppholdsadresseUK" : [ ],
+                "oppholdsadresseUK" : [ "Unknown" ],
                 "startdato" : "%s",
                 "sluttdato" : "%s"
               },
