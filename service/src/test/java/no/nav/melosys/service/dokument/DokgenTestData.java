@@ -96,7 +96,7 @@ public final class DokgenTestData {
             new Folkeregisteridentifikator(FNR_BRUKER), null,
 
             // For å få testene til å funke som med brukt med PersonDokument må fornavn og etternavn bytte plass.
-            // Utsetter å grave i dette etter ordre fra Eirik ;)
+            // Dette er nå en "feil" i prod og blir en egen oppgave å fikse.
             List.of(kontaktadresse), new Navn("Duck", null, "Donald"), Collections.emptyList(), Collections.emptyList());
     }
 
