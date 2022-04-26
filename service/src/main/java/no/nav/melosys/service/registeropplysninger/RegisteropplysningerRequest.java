@@ -23,7 +23,7 @@ public class RegisteropplysningerRequest {
     private final Informasjonsbehov informasjonsbehov;
 
     private RegisteropplysningerRequest(Long behandlingID, Set<SaksopplysningType> opplysningstyper,
-                                       String fnr, LocalDate fom, LocalDate tom, Informasjonsbehov informasjonsbehov) {
+                                        String fnr, LocalDate fom, LocalDate tom, Informasjonsbehov informasjonsbehov) {
         this.behandlingID = behandlingID;
         this.opplysningstyper = opplysningstyper;
         this.fnr = fnr;
@@ -121,10 +121,6 @@ public class RegisteropplysningerRequest {
                 throw new TekniskException("BehandlingID er påkrevd for å hente registeropplysninger");
             }
 
-            if (saksopplysningTyper.getOpplysningstyper().isEmpty()) {
-                throw new TekniskException("Krever minst én saksopplysningstype for å hente registeropplysninger");
-            }
-
             if (StringUtils.isEmpty(fnr) && !Collections.disjoint(SaksopplysningType.KREVER_FNR, saksopplysningTyper.getOpplysningstyper())) {
                 String påkrevdeSaksopplysningstyper = intersect(SaksopplysningType.KREVER_FNR, saksopplysningTyper.getOpplysningstyper())
                     .stream().map(SaksopplysningType::getBeskrivelse).collect(Collectors.joining(", "));
@@ -189,11 +185,6 @@ public class RegisteropplysningerRequest {
 
             public SaksopplysningTyperBuilder utbetalingsopplysninger() {
                 this.opplysningstyper.add(SaksopplysningType.UTBETAL);
-                return this;
-            }
-
-            public SaksopplysningTyperBuilder personopplysninger() {
-                this.opplysningstyper.add(SaksopplysningType.PDL_PERSOPL);
                 return this;
             }
 

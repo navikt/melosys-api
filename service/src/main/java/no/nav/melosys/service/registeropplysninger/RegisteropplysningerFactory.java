@@ -8,7 +8,8 @@ import no.nav.melosys.exception.TekniskException;
  */
 public final class RegisteropplysningerFactory {
 
-    private RegisteropplysningerFactory() {}
+    private RegisteropplysningerFactory() {
+    }
 
     public static RegisteropplysningerRequest.SaksopplysningTyper utledSaksopplysningTyper(Behandlingstema behandlingstema) {
         switch (behandlingstema) {
@@ -79,7 +80,6 @@ public final class RegisteropplysningerFactory {
 
     private static RegisteropplysningerRequest.SaksopplysningTyper hentSaksopplysningTyperForBehandlingAvØvrigeSedOgTrygdetid() {
         return RegisteropplysningerRequest.SaksopplysningTyper.builder()
-            .personopplysninger()
             .build();
     }
 }

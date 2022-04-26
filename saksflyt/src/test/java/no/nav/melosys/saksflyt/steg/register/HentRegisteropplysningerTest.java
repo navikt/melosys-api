@@ -5,7 +5,6 @@ import java.time.LocalDate;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadFtrl;
@@ -85,9 +84,7 @@ class HentRegisteropplysningerTest {
 
         verify(registeropplysningerService).hentOgLagreOpplysninger(requestCaptor.capture());
 
-        assertThat(requestCaptor.getValue())
-            .extracting(RegisteropplysningerRequest::getBehandlingID, RegisteropplysningerRequest::getFnr, RegisteropplysningerRequest::getFom, RegisteropplysningerRequest::getTom)
-            .containsExactly(behandling.getId(), ident, periode.getFom(), periode.getTom());
+        assertThat(requestCaptor.getValue()).extracting(RegisteropplysningerRequest::getBehandlingID, RegisteropplysningerRequest::getFnr, RegisteropplysningerRequest::getFom, RegisteropplysningerRequest::getTom).containsExactly(behandling.getId(), ident, periode.getFom(), periode.getTom());
     }
 
     @Test
@@ -125,18 +122,15 @@ class HentRegisteropplysningerTest {
     }
 
     @Test
-    void utfør_behandlingstypeTrygdetid_henterPersonopplysninger() {
+    void utfør_behandlingstypeTrygdetid_henterIngenting() {
         behandling.setTema(Behandlingstema.TRYGDETID);
         behandling.getFagsak().setType(Sakstyper.EU_EOS);
-
         var prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
 
         hentRegisteropplysninger.utfør(prosessinstans);
 
         verify(registeropplysningerService).hentOgLagreOpplysninger(requestCaptor.capture());
-
-        assertThat(requestCaptor.getValue().getOpplysningstyper())
-            .contains(SaksopplysningType.PDL_PERSOPL);
+        assertThat(requestCaptor.getValue().getOpplysningstyper()).isEmpty();
     }
 }
