@@ -188,7 +188,7 @@ class StorbritanniaMapperTest {
             Arguments.of(null, null, null,
                 List.of(UKJENT),
                 List.of(UKJENT),
-                "ingen addresser") // TODO: Sjekk dette med fag
+                "ingen addresser")
         );
     }
 
