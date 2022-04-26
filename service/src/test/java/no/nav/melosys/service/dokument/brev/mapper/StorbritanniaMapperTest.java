@@ -348,7 +348,7 @@ class StorbritanniaMapperTest {
             .isThrownBy(() ->
                 storbritanniaMapper.map(new InnvilgelseBrevbestilling.Builder()
                     .medBehandling(lagTrygdeavtaleBehandling())
-                    .medPersonDokument(lagPersonDokument())
+                    .medPersonDokument(lagPersondata())
                     .medVedtaksdato(VEDTAKS_DATO_INSTANT)
                     .build()
                 )
@@ -378,7 +378,7 @@ class StorbritanniaMapperTest {
     private InnvilgelseBrevbestilling.Builder lagStorbritanniaBrevbestillingDefaultBuilder(Behandling behandling) {
         return new InnvilgelseBrevbestilling.Builder()
             .medProduserbartdokument(STORBRITANNIA)
-            .medPersonDokument(lagPersonDokument())
+            .medPersonDokument(lagPersondata())
             .medBehandling(behandling)
             .medOrg(lagOrg())
             .medKontaktopplysning(lagKontaktOpplysning())

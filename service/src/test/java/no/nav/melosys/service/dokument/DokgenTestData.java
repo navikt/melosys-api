@@ -81,24 +81,15 @@ public final class DokgenTestData {
         return fagsak;
     }
 
-    public static Persondata lagPersonDokument() {
-        var gyldigFom = LOVVALGSPERIODE_FOM;
-        var gyldigTom = LOVVALGSPERIODE_TOM;
-
+    public static Persondata lagPersondata() {
         final var bostedsadresse = new no.nav.melosys.domain.person.adresse.Bostedsadresse(
             new StrukturertAdresse(ADRESSELINJE_1_BRUKER, "42 C", POSTNR_BRUKER, null, null, Landkoder.NO.getKode()),
-            null, gyldigFom, gyldigTom, "PDL", null, false);
+            null, null, null, "PDL", null, false);
 
         final var kontaktadresse = new Kontaktadresse(
             new StrukturertAdresse(ADRESSELINJE_1_BRUKER, null, POSTNR_BRUKER, POSTSTED_BRUKER, null, null),
-            null, null, gyldigFom, gyldigTom, "PDL", null, null,
+            null, null, null, null, "PDL", null, null,
             false);
-
-        final var oppholdsadresse = new Oppholdsadresse(
-            new StrukturertAdresse("tilleggOpphold", "opphold 1", null, null, null,
-                null, null, Landkoder.NO.getKode()), null,
-            LOVVALGSPERIODE_FOM, LOVVALGSPERIODE_TOM,
-            "PDL", null, null, false);
 
         return new Personopplysninger(Collections.emptyList(), bostedsadresse, null, null,
             new Foedsel(null, null, null, null),
@@ -106,7 +97,7 @@ public final class DokgenTestData {
 
             // For å få testene til å funke som med brukt med PersonDokument må fornavn og etternavn bytte plass.
             // Utsetter å grave i dette etter ordre fra Eirik ;)
-            List.of(kontaktadresse), new Navn("Duck", null, "Donald"), List.of(oppholdsadresse), Collections.emptyList());
+            List.of(kontaktadresse), new Navn("Duck", null, "Donald"), Collections.emptyList(), Collections.emptyList());
     }
 
     public static UstrukturertAdresse lagAdresse() {

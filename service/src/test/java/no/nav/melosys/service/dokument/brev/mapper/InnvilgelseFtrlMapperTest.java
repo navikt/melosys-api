@@ -232,7 +232,7 @@ class InnvilgelseFtrlMapperTest {
     private InnvilgelseBrevbestilling lagInnvilgelseBrevbestilling() {
         return new InnvilgelseBrevbestilling.Builder()
             .medBehandling(lagBehandling())
-            .medPersonDokument(lagPersonDokument())
+            .medPersonDokument(lagPersondata())
             .medForsendelseMottatt(Instant.EPOCH)
             .medBegrunnelseFritekst(BEGRUNNELSE_FRITEKST)
             .medSaksbehandlerNavn(SAKSBEHANDLER_NAVN)
