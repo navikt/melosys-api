@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadFtrl;
@@ -121,5 +122,21 @@ class HentRegisteropplysningerTest {
         hentRegisteropplysninger.utfør(prosessinstans);
 
         verify(registeropplysningerService, never()).hentOgLagreOpplysninger(any());
+    }
+
+    @Test
+    void utfør_behandlingstypeTrygdetid_henterPersonopplysninger() {
+        behandling.setTema(Behandlingstema.TRYGDETID);
+        behandling.getFagsak().setType(Sakstyper.EU_EOS);
+
+        var prosessinstans = new Prosessinstans();
+        prosessinstans.setBehandling(behandling);
+
+        hentRegisteropplysninger.utfør(prosessinstans);
+
+        verify(registeropplysningerService).hentOgLagreOpplysninger(requestCaptor.capture());
+
+        assertThat(requestCaptor.getValue().getOpplysningstyper())
+            .contains(SaksopplysningType.PDL_PERSOPL);
     }
 }

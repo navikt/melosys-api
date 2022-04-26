@@ -192,6 +192,11 @@ public class RegisteropplysningerRequest {
                 return this;
             }
 
+            public SaksopplysningTyperBuilder personopplysninger() {
+                this.opplysningstyper.add(SaksopplysningType.PDL_PERSOPL);
+                return this;
+            }
+
             public SaksopplysningTyper build() {
                 return new SaksopplysningTyper(opplysningstyper);
             }

@@ -79,6 +79,7 @@ public final class RegisteropplysningerFactory {
 
     private static RegisteropplysningerRequest.SaksopplysningTyper hentSaksopplysningTyperForBehandlingAvØvrigeSedOgTrygdetid() {
         return RegisteropplysningerRequest.SaksopplysningTyper.builder()
+            .personopplysninger()
             .build();
     }
 }
