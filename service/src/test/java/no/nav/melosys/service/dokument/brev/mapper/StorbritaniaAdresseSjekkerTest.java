@@ -37,19 +37,13 @@ class StorbritaniaAdresseSjekkerTest {
         List<String> ukAddresse,
         String grunn) {
 
-        StorbritaniaAdresseSjekker storbritaniaAdresseSjekker = lagStorbritaniaAdresseSjekker(landkodeBosted, landkodeOpphold, landkodeKontakt);
-        List<String> gyldigNorskAdresse = storbritaniaAdresseSjekker.finnGyldigNorskAdresse();
-        List<String> gyldigUkAdresse = storbritaniaAdresseSjekker.finnGyldigStorbritanniaAdresse(LOVVALGSPERIODE);
+        var persondata = lagPersonopplysninger(landkodeBosted, landkodeOpphold, landkodeKontakt);
+        var storbritaniaAdresseSjekker = new StorbritaniaAdresseSjekker(persondata);
+        var gyldigNorskAdresse = storbritaniaAdresseSjekker.finnGyldigNorskAdresse();
+        var gyldigUkAdresse = storbritaniaAdresseSjekker.finnGyldigStorbritanniaAdresse(LOVVALGSPERIODE);
 
         assertThat(gyldigNorskAdresse).withFailMessage(grunn).isEqualTo(norskAddresse);
         assertThat(gyldigUkAdresse).withFailMessage(grunn).isEqualTo(ukAddresse);
-    }
-
-    StorbritaniaAdresseSjekker lagStorbritaniaAdresseSjekker(Landkoder landkodeBosted,
-                                                             Landkoder landkodeOpphold,
-                                                             Landkoder landkodeKontakt) {
-        Persondata personopplysninger = lagPersonopplysninger(landkodeBosted, landkodeOpphold, landkodeKontakt);
-        return new StorbritaniaAdresseSjekker(personopplysninger);
     }
 
     @ParameterizedTest(name = "{2}")
@@ -68,7 +62,7 @@ class StorbritaniaAdresseSjekkerTest {
             .isFalse();
     }
 
-    static Personopplysninger lagPersonopplysninger(
+    static Persondata lagPersonopplysninger(
         Landkoder landkodeBosted,
         Landkoder landkodeOpphold,
         Landkoder landkodeKontakt) {

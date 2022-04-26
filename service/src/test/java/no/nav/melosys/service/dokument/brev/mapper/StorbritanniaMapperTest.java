@@ -23,6 +23,7 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_b
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_ektefelle_samboer_begrunnelser_ftrl;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
+import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.domain.person.Personopplysninger;
 import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie;
 import no.nav.melosys.domain.person.familie.IkkeOmfattetFamilie;
@@ -132,10 +133,10 @@ class StorbritanniaMapperTest {
         String grunn) {
 
         mockHappyCase();
-        Personopplysninger personopplysninger = StorbritaniaAdresseSjekkerTest.lagPersonopplysninger(landkodeBosted, landkodeOpphold, landkodeKontakt);
+        var persondata = StorbritaniaAdresseSjekkerTest.lagPersonopplysninger(landkodeBosted, landkodeOpphold, landkodeKontakt);
         InnvilgelseBrevbestilling brevbestilling =
             lagStorbritanniaBrevbestillingDefaultBuilder(medPeriode(lagTrygdeavtaleBehandling()))
-                .medPersonDokument(personopplysninger)
+                .medPersonDokument(persondata)
                 .build();
 
         InnvilgelseOgAttestStorbritannia innvilgelseOgAttestStorbritannia = storbritanniaMapper.map(brevbestilling);
