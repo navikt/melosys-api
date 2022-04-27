@@ -3,21 +3,27 @@ package no.nav.melosys.sikkerhet.context;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
+import org.junit.jupiter.api.TestInstance;
 import org.slf4j.LoggerFactory;
 
+import java.util.UUID;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ThreadLocalAccessInfoTest {
 
     private final ListAppender<ILoggingEvent> listAppender = new ListAppender<>();
 
-    @BeforeEach
+    @BeforeAll
     void setUp() {
         Logger logger = (Logger) LoggerFactory.getLogger("no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo");
         listAppender.setContext((LoggerContext) LoggerFactory.getILoggerFactory());
@@ -27,7 +33,7 @@ class ThreadLocalAccessInfoTest {
     }
 
     @Test
-    void isProcessCall_callIsUnregistered_logAndFallbacktoUseSystemToken() {
+    void isProcessCall_callIsUnregistered_logAndFallbackToReturnTrue() {
         assertTrue(ThreadLocalAccessInfo.isProcessCall());
         assertThat(listAppender.list)
             .singleElement()
@@ -35,4 +41,26 @@ class ThreadLocalAccessInfoTest {
                 .contains("Call have not been registret from RestController or Prosess")
             );
     }
+
+    @Test
+    void isProcessCall_callIsregistered_returnTrue() {
+        UUID uuid = UUID.randomUUID();
+        ThreadLocalAccessInfo.beforeExecuteProcess(uuid, "Test");
+
+        assertTrue(ThreadLocalAccessInfo.isProcessCall());
+        assertThat(listAppender.list).isEmpty();
+
+        ThreadLocalAccessInfo.afterExecuteProcess(uuid);
+    }
+
+    @Test
+    void isProcessCall_webCallIsregistered_returnFalse() {
+        ThreadLocalAccessInfo.beforeControllerRequest("test");
+
+        assertFalse(ThreadLocalAccessInfo.isProcessCall());
+        assertThat(listAppender.list).isEmpty();
+
+        ThreadLocalAccessInfo.afterControllerRequest("test");
+    }
+
 }
