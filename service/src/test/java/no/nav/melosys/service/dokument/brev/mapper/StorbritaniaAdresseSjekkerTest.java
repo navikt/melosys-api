@@ -20,7 +20,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static no.nav.melosys.service.dokument.DokgenTestData.*;
-import static no.nav.melosys.service.dokument.brev.mapper.StorbritaniaAdresseSjekker.UKJENT;
+import static no.nav.melosys.service.dokument.brev.mapper.StorbritanniaAdresseSjekker.UKJENT;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class StorbritaniaAdresseSjekkerTest {
@@ -38,7 +38,7 @@ class StorbritaniaAdresseSjekkerTest {
         String grunn) {
 
         var persondata = lagPersonopplysninger(landkodeBosted, landkodeOpphold, landkodeKontakt);
-        var storbritaniaAdresseSjekker = new StorbritaniaAdresseSjekker(persondata);
+        var storbritaniaAdresseSjekker = new StorbritanniaAdresseSjekker(persondata);
         var gyldigNorskAdresse = storbritaniaAdresseSjekker.finnGyldigNorskAdresse();
         var gyldigUkAdresse = storbritaniaAdresseSjekker.finnGyldigStorbritanniaAdresse(LOVVALGSPERIODE);
 
@@ -49,7 +49,7 @@ class StorbritaniaAdresseSjekkerTest {
     @ParameterizedTest(name = "{2}")
     @MethodSource("gyldigePerioder")
     void sjekkOmAdresseGyldighetErInnenforLovalgsperiode_for_gyldigePerioder(Lovvalgsperiode lovvalgsperiode, PersonAdresse personAdresse, String grunn) {
-        assertThat(StorbritaniaAdresseSjekker.sjekkOmAdresseGyldighetErInnenforLovalgsperiode(personAdresse, lovvalgsperiode))
+        assertThat(StorbritanniaAdresseSjekker.sjekkOmAdresseGyldighetErInnenforLovalgsperiode(personAdresse, lovvalgsperiode))
             .withFailMessage(grunn)
             .isTrue();
     }
@@ -57,7 +57,7 @@ class StorbritaniaAdresseSjekkerTest {
     @ParameterizedTest(name = "{2}")
     @MethodSource("ugyldigePerioder")
     void sjekkOmAdresseGyldighetErInnenforLovalgsperiode_for_ugyldigePerioder2(Lovvalgsperiode lovvalgsperiode, PersonAdresse personAdresse, String grunn) {
-        assertThat(StorbritaniaAdresseSjekker.sjekkOmAdresseGyldighetErInnenforLovalgsperiode(personAdresse, lovvalgsperiode))
+        assertThat(StorbritanniaAdresseSjekker.sjekkOmAdresseGyldighetErInnenforLovalgsperiode(personAdresse, lovvalgsperiode))
             .withFailMessage(grunn)
             .isFalse();
     }

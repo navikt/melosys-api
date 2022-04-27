@@ -11,19 +11,19 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 
-public class StorbritaniaAdresseSjekker {
+public class StorbritanniaAdresseSjekker {
     static final String INGEN_ADRESSE_I_NORGE = "No address in Norway";
     static final String UKJENT = "Unknown";
     static final String BOSTED_UTENFOR_NORGE = "Resident outside of Norway";
 
     private final Persondata persondata;
 
-    StorbritaniaAdresseSjekker(Persondata persondata) {
+    StorbritanniaAdresseSjekker(Persondata persondata) {
         this.persondata = persondata;
     }
 
     List<String> finnGyldigNorskAdresse() {
-        return getPersonAdresseer()
+        return getPersonAdresser()
             .filter(personAdresse -> sjekkAdresseMotLand(personAdresse.strukturertAdresse(), Landkoder.NO))
             .findFirst()
             .map(personAdresse -> personAdresse.strukturertAdresse().toList())
@@ -31,7 +31,7 @@ public class StorbritaniaAdresseSjekker {
     }
 
     List<String> finnGyldigStorbritanniaAdresse(Lovvalgsperiode lovvalgsperiode) {
-        return getPersonAdresseer()
+        return getPersonAdresser()
             .filter(personAdresse -> sjekkAdresseMotLand(personAdresse.strukturertAdresse(), Landkoder.GB))
             .filter(personAdresse -> sjekkOmAdresseGyldighetErInnenforLovalgsperiode(personAdresse, lovvalgsperiode))
             .findFirst()
@@ -40,7 +40,7 @@ public class StorbritaniaAdresseSjekker {
     }
 
     private List<String> findAdresseNårIkkeNorskAdresseMenAdresseIUk() {
-        return getPersonAdresseer()
+        return getPersonAdresser()
             .filter(personAdresse -> sjekkAdresseMotLand(personAdresse.strukturertAdresse(), Landkoder.GB))
             .findFirst()
             .map(personAdresse -> List.of(INGEN_ADRESSE_I_NORGE))
@@ -48,7 +48,7 @@ public class StorbritaniaAdresseSjekker {
     }
 
     private List<String> findAdresseNårIkkeNorskEllerUkAdresse() {
-        return getPersonAdresseer()
+        return getPersonAdresser()
             .filter(personAdresse -> personAdresse.strukturertAdresse().getLandkode() != null)
             .findFirst()
             .map(personAdresse -> Stream.concat(
@@ -58,7 +58,7 @@ public class StorbritaniaAdresseSjekker {
             .orElse(List.of(UKJENT));
     }
 
-    private Stream<PersonAdresse> getPersonAdresseer() {
+    private Stream<PersonAdresse> getPersonAdresser() {
         return Stream.of(
                 persondata.finnBostedsadresse(),
                 persondata.finnOppholdsadresse(),

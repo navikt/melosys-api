@@ -83,7 +83,7 @@ public class StorbritanniaMapper {
         var persondokument = brevbestilling.getPersondokument();
         var lovvalgsperioder = lovvalgsperiodeService.hentLovvalgsperioder(behandlingID);
 
-        var adresseSjekker = new StorbritaniaAdresseSjekker(persondokument);
+        var adresseSjekker = new StorbritanniaAdresseSjekker(persondokument);
 
         return new AttestStorbritannia.Builder(brevbestilling)
             .medfolgendeFamiliemedlemmer(mapMedfolgendeFamiliemedlemmer(behandlingID))
@@ -192,7 +192,7 @@ public class StorbritanniaMapper {
 
         var bestemmelse = lovvalgsperiode.getBestemmelse();
 
-        var adresseSjekker = new StorbritaniaAdresseSjekker(persondata);
+        var adresseSjekker = new StorbritanniaAdresseSjekker(persondata);
 
         return new Utsendelse.Builder()
             .artikkel((Lovvalgbestemmelser_trygdeavtale_uk) bestemmelse)
