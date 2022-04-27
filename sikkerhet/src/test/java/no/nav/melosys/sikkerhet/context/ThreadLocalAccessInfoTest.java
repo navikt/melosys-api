@@ -4,7 +4,6 @@ import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import ch.qos.logback.classic.Level;
@@ -43,7 +42,7 @@ class ThreadLocalAccessInfoTest {
     }
 
     @Test
-    void isProcessCall_callIsregistered_returnTrue() {
+    void isProcessCall_callIsRegistered_returnTrue() {
         UUID uuid = UUID.randomUUID();
         ThreadLocalAccessInfo.beforeExecuteProcess(uuid, "Test");
 
@@ -54,7 +53,7 @@ class ThreadLocalAccessInfoTest {
     }
 
     @Test
-    void isProcessCall_webCallIsregistered_returnFalse() {
+    void isProcessCall_webCallIsRegistered_returnFalse() {
         ThreadLocalAccessInfo.beforeControllerRequest("test");
 
         assertFalse(ThreadLocalAccessInfo.isProcessCall());
@@ -63,4 +62,27 @@ class ThreadLocalAccessInfoTest {
         ThreadLocalAccessInfo.afterControllerRequest("test");
     }
 
+    @Test
+    void isFrontendCall_callIsUnregistered_returnFalse() {
+        assertFalse(ThreadLocalAccessInfo.isFrontendCall());
+    }
+
+    @Test
+    void isFrontendCall_callIsRegistered_returnTrue() {
+        ThreadLocalAccessInfo.beforeControllerRequest("Test");
+
+        assertTrue(ThreadLocalAccessInfo.isFrontendCall());
+
+        ThreadLocalAccessInfo.afterControllerRequest("Test");
+    }
+
+    @Test
+    void isFrontendCall_webCallIsRegistered_returnFalse() {
+        UUID uuid = UUID.randomUUID();
+        ThreadLocalAccessInfo.beforeExecuteProcess(uuid, "Test");
+
+        assertFalse(ThreadLocalAccessInfo.isFrontendCall());
+
+        ThreadLocalAccessInfo.afterExecuteProcess(uuid);
+    }
 }
