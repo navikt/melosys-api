@@ -1,10 +1,15 @@
 package no.nav.melosys.sikkerhet.context;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Arrays;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ThreadLocalAccessInfo {
+    private static final Logger log = LoggerFactory.getLogger(ThreadLocalAccessInfo.class);
     private String requestUri;
     private UUID processId;
     private String prosessSteg;
@@ -67,9 +72,22 @@ public class ThreadLocalAccessInfo {
     }
 
     public static boolean isProcessCall() {
-        increaseCount(debugInfoChecks, "process"); // For debug only - will be removed
         ThreadLocalAccessInfo threadLocalAccessInfo = ThreadLocalAccessInfo.threadLocalStorage.get();
-        return threadLocalAccessInfo.isFromProcess();
+        if (threadLocalAccessInfo.isFromProcess()) {
+            increaseCount(debugInfoChecks, "process"); // For debug only - will be removed
+            return true;
+        }
+
+        if (!threadLocalAccessInfo.isFromWebRequest()) {
+            increaseCount(debugInfoChecks, "unknown"); // For debug only - will be removed
+            StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+            var stackTraceElements = Arrays.stream(stackTrace).map(StackTraceElement::toString).toList();
+            String stackTraceAsString = String.join("\n", stackTraceElements);
+            log.warn("Call have not been registret from RestController or Prosess\n{}", stackTraceAsString);
+            return true;
+        }
+
+        return false;
     }
 
     public static String getInfo() {
