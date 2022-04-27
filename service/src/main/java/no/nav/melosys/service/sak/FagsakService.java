@@ -85,8 +85,8 @@ public class FagsakService {
         return fagsakRepository.findByRolleAndAktør(rolleType, aktørID);
     }
 
-    public List<Fagsak> hentFagsakerFraOrgnr(String orgnr) {
-        return fagsakRepository.findByRolleAndOrgnr(Aktoersroller.ARBEIDSGIVER, orgnr); // TODO: Endre når kodeverket merges
+    public List<Fagsak> hentFagsakerMedOrgnr(Aktoersroller rolleType, String orgnr) {
+        return fagsakRepository.findByRolleAndOrgnr(rolleType, orgnr);
     }
 
     @Transactional
@@ -142,7 +142,7 @@ public class FagsakService {
             Aktoer virksomhet = new Aktoer();
             virksomhet.setOrgnr(virksomhetOrgnr);
             virksomhet.setFagsak(fagsak);
-            virksomhet.setRolle(Aktoersroller.ARBEIDSGIVER); // TODO: Endre når kodeverk er imlementert
+            virksomhet.setRolle(Aktoersroller.VIRKSOMHET);
             aktører.add(virksomhet);
         }
 

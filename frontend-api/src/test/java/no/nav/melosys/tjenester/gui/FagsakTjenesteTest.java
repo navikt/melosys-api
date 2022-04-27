@@ -172,6 +172,22 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
+    void hentFagsaker_medTomtFnr_verifiserAtNavnErUkjent() {
+        Fagsak fagsak = lagFagsak();
+        Behandling behandling = new Behandling();
+        behandling.setId(123L);
+        behandling.setFagsak(fagsak);
+        fagsak.setBehandlinger(List.of(behandling));
+        Aktoer aktoer = new Aktoer();
+        aktoer.setRolle(Aktoersroller.BRUKER);
+        fagsak.setAktører(Set.of(aktoer));
+        FagsakTjeneste instans = lagFagsakTjeneste(fagsak);
+
+        List<FagsakOppsummeringDto> resultat = instans.hentFagsaker(new FagsakSokDto(FNR, null, null));
+        assertThat(resultat).hasSize(1).extracting(FagsakOppsummeringDto::getSammensattNavn).containsExactly("UKJENT");
+    }
+
+    @Test
     void hentFagsaker_medOrgnr_verifiserErMappetKorrekt() {
         Fagsak fagsak = lagFagsak();
         Behandling behandling = new Behandling();
@@ -180,7 +196,7 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
         fagsak.setBehandlinger(List.of(behandling));
         Aktoer aktoer = new Aktoer();
         aktoer.setOrgnr(ORGNR);
-        aktoer.setRolle(Aktoersroller.ARBEIDSGIVER); //TODO: Endre etter kodeverksendring.
+        aktoer.setRolle(Aktoersroller.VIRKSOMHET);
         fagsak.setAktører(Set.of(aktoer));
         FagsakTjeneste instans = lagFagsakTjeneste(fagsak);
         var organisajonsdokument = new OrganisasjonDokument();
@@ -189,6 +205,22 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
 
         List<FagsakOppsummeringDto> resultat = instans.hentFagsaker(new FagsakSokDto(null, null, ORGNR));
         assertThat(resultat).hasSize(1).extracting(FagsakOppsummeringDto::getSammensattNavn).containsExactly("Moe Organisasjon");
+    }
+
+    @Test
+    void hentFagsaker_medTomtOrgnr_verifiserAtNavnErUkjent() {
+        Fagsak fagsak = lagFagsak();
+        Behandling behandling = new Behandling();
+        behandling.setId(123L);
+        behandling.setFagsak(fagsak);
+        fagsak.setBehandlinger(List.of(behandling));
+        Aktoer aktoer = new Aktoer();
+        aktoer.setRolle(Aktoersroller.VIRKSOMHET);
+        fagsak.setAktører(Set.of(aktoer));
+        FagsakTjeneste instans = lagFagsakTjeneste(fagsak);
+
+        List<FagsakOppsummeringDto> resultat = instans.hentFagsaker(new FagsakSokDto(null, null, ORGNR));
+        assertThat(resultat).hasSize(1).extracting(FagsakOppsummeringDto::getSammensattNavn).containsExactly("UKJENT");
     }
 
     @Test
@@ -330,9 +362,8 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
         when(behandlingsgrunnlagService.finnBehandlingsgrunnlag(1L)).thenReturn(Optional.of(behandlingsgrunnlag));
         when(fagsakService.hentFagsak("123")).thenReturn(fagsak);
         when(persondataFasade.hentSammensattNavn(any())).thenReturn("Joe Moe");
-        //noinspection ArraysAsListWithZeroOrOneArgument
-        doReturn(Arrays.asList(fagsak)).when(fagsakService).hentFagsakerMedAktør(Aktoersroller.BRUKER, FNR);
-        doReturn(Arrays.asList(fagsak)).when(fagsakService).hentFagsakerFraOrgnr(ORGNR);
+        doReturn(List.of(fagsak)).when(fagsakService).hentFagsakerMedAktør(Aktoersroller.BRUKER, FNR);
+        doReturn(List.of(fagsak)).when(fagsakService).hentFagsakerMedOrgnr(Aktoersroller.VIRKSOMHET, ORGNR);
         return new FagsakTjeneste(fagsakService, aksesskontroll, behandlingsgrunnlagService, henleggFagsakService, opprettNySakFraOppgave,
                                   persondataFasade, saksopplysningerService, utpekingService, videresendSoknadService, organisasjonOppslagService);
     }

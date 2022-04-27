@@ -43,7 +43,7 @@ import static no.nav.melosys.domain.util.BehandlingsgrunnlagUtils.hentSøknadsla
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class FagsakTjeneste {
     private static final Logger log = LoggerFactory.getLogger(FagsakTjeneste.class);
-    private static final String UKJENT_SAMMENSATT_NAVN = "UKJENT";
+    private static final String UKJENT_NAVN = "UKJENT";
 
     private final FagsakService fagsakService;
     private final OpprettNySakFraOppgave opprettNySakFraOppgave;
@@ -113,7 +113,7 @@ public class FagsakTjeneste {
             }
         }
         else if (StringUtils.isNotEmpty(fagsakSokDto.orgnr())) {
-            return tilFagsakOppsummeringDtoer(fagsakService.hentFagsakerFraOrgnr(fagsakSokDto.orgnr()));
+            return tilFagsakOppsummeringDtoer(fagsakService.hentFagsakerMedOrgnr(Aktoersroller.VIRKSOMHET, fagsakSokDto.orgnr()));
         }
 
         return Collections.emptyList();
@@ -224,7 +224,7 @@ public class FagsakTjeneste {
                 .map(this::tilBehandlingOversiktDto)
                 .toList();
 
-            fagsakOppsummeringDto.setSammensattNavn(hentSammensattNavn(behandlinger));
+            fagsakOppsummeringDto.setSammensattNavn(hentNavn(behandlinger));
             fagsakOppsummeringDto.setBehandlingOversikter(behandlingOversiktDtoer);
             fagsakListe.add(fagsakOppsummeringDto);
         }
@@ -267,19 +267,19 @@ public class FagsakTjeneste {
         }
     }
 
-    private String hentSammensattNavn(List<Behandling> behandlinger) {
+    private String hentNavn(List<Behandling> behandlinger) {
         if (behandlinger.isEmpty()) {
-            return UKJENT_SAMMENSATT_NAVN;
+            return UKJENT_NAVN;
         }
         var fagsak = behandlinger.get(0).getFagsak();
         var aktørId = fagsak.finnBrukersAktørID();
         if (aktørId.isPresent()) {
             return persondataFasade.hentSammensattNavn(persondataFasade.hentFolkeregisterident(aktørId.get()));
         }
-        var orgnr = fagsak.hentUnikArbeidsgiver().getOrgnr();
-        if (orgnr != null) {
-            return organisasjonOppslagService.hentOrganisasjon(orgnr).getNavn();
+        var orgnr = fagsak.finnVirksomhetsOrgnr();
+        if (orgnr.isPresent()) {
+            return organisasjonOppslagService.hentOrganisasjon(orgnr.get()).getNavn();
         }
-        return UKJENT_SAMMENSATT_NAVN;
+        return UKJENT_NAVN;
     }
 }

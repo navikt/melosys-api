@@ -11,8 +11,7 @@ import no.nav.melosys.exception.TekniskException;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.util.Assert;
 
-import static no.nav.melosys.domain.kodeverk.Aktoersroller.REPRESENTANT;
-import static no.nav.melosys.domain.kodeverk.Aktoersroller.TRYGDEMYNDIGHET;
+import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
 
 @Entity
 @Table(name = "fagsak")
@@ -132,6 +131,13 @@ public class Fagsak extends RegistreringsInfo {
      */
     public Aktoer hentUnikArbeidsgiver() {
         return hentAktørMedRolleType(Aktoersroller.ARBEIDSGIVER);
+    }
+    public Aktoer hentVirksomhet() {
+        return hentAktørMedRolleType(VIRKSOMHET);
+    }
+
+    public Optional<String> finnVirksomhetsOrgnr() {
+        return Optional.ofNullable(hentVirksomhet()).map(Aktoer::getOrgnr);
     }
 
     private Aktoer hentAktørMedRolleType(Aktoersroller rolleType) {
