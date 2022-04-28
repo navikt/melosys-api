@@ -15,7 +15,6 @@ final class BrevDataMapperRuter {
             .put(Produserbaredokumenter.ANMODNING_UNNTAK, AttestMapper.class)
             .put(Produserbaredokumenter.ATTEST_A1, AttestMapper.class)
             .put(Produserbaredokumenter.AVSLAG_ARBEIDSGIVER, AvslagArbeidsgiverMapper.class)
-            .put(Produserbaredokumenter.AVSLAG_MANGLENDE_OPPLYSNINGER, AvslagManglendeOpplysningerMapper.class) //TODO: Fjern når ny løsning er ferdigtestet (toggle "melosys.brev.AVSLAG_MANGLENDE_OPPLYSNINGER").
             .put(Produserbaredokumenter.AVSLAG_YRKESAKTIV, AvslagYrkesaktivMapper.class)
             .put(Produserbaredokumenter.INNVILGELSE_ARBEIDSGIVER, InnvilgelseArbeidsgiverMapper.class)
             .put(Produserbaredokumenter.INNVILGELSE_YRKESAKTIV, InnvilgelsesbrevMapper.class)
