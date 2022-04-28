@@ -14,6 +14,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Set;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
@@ -55,14 +57,18 @@ class AksesskontrollImplTest {
     @Test
     void autoriserSakstilgang_sjekkerBruker() {
         when(fagsakService.hentFagsak(saksnummer)).thenReturn(fagsak);
+
         aksesskontroll.autoriserSakstilgang(saksnummer);
+
         verify(brukertilgangKontroll).validerTilgangTilAktørID(aktørID);
     }
 
     @Test
     void autoriser_verifiserSjekkLesetilgang() {
         when(behandlingService.hentBehandling(behandlingID)).thenReturn(behandling);
+
         aksesskontroll.autoriser(behandlingID);
+
         verify(brukertilgangKontroll).validerTilgangTilAktørID(aktørID);
         verify(redigerbarKontroll, never()).sjekkRessursRedigerbar(behandling, Ressurs.UKJENT);
     }
@@ -70,8 +76,23 @@ class AksesskontrollImplTest {
     @Test
     void autoriser_skalSkrive_verifiserRedigerbarBehandling() {
         when(behandlingService.hentBehandling(behandlingID)).thenReturn(behandling);
+
         aksesskontroll.autoriser(behandlingID, Aksesstype.SKRIV);
+
         verify(brukertilgangKontroll).validerTilgangTilAktørID(aktørID);
+        verify(redigerbarKontroll).sjekkRessursRedigerbar(behandling, Ressurs.UKJENT);
+    }
+
+    @Test
+    void autoriser_harIkkeBruker_verifiserIkkeSjekkAktørID() {
+        Aktoer virksomhet = new Aktoer();
+        virksomhet.setRolle(Aktoersroller.VIRKSOMHET);
+        behandling.getFagsak().setAktører(Set.of(virksomhet));
+        when(behandlingService.hentBehandling(behandlingID)).thenReturn(behandling);
+
+        aksesskontroll.autoriser(behandlingID, Aksesstype.SKRIV);
+
+        verify(brukertilgangKontroll, never()).validerTilgangTilAktørID(any());
         verify(redigerbarKontroll).sjekkRessursRedigerbar(behandling, Ressurs.UKJENT);
     }
 
@@ -79,7 +100,9 @@ class AksesskontrollImplTest {
     void autoriserSkrivTilRessurs_verifiserRedigerbarBehandlingSjekkes() {
         final var skrivTilRessurs = Ressurs.AVKLARTE_FAKTA;
         when(behandlingService.hentBehandling(behandlingID)).thenReturn(behandling);
+
         aksesskontroll.autoriserSkrivTilRessurs(behandlingID, skrivTilRessurs);
+
         verify(brukertilgangKontroll).validerTilgangTilAktørID(aktørID);
         verify(redigerbarKontroll).sjekkRessursRedigerbar(behandling, skrivTilRessurs);
     }
@@ -87,7 +110,10 @@ class AksesskontrollImplTest {
     @Test
     void behandlingKanRedigeresAvSaksbehandler_behandlingIkkeRedigerbar_ikkeSann() {
         behandling.setStatus(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
-        assertThat(aksesskontroll.behandlingKanRedigeresAvSaksbehandler(behandling, "Z123")).isFalse();
+
+        var saksbehandlerHarTilgang = aksesskontroll.behandlingKanRedigeresAvSaksbehandler(behandling, "Z123");
+
+        assertThat(saksbehandlerHarTilgang).isFalse();
     }
 
     @Test
@@ -95,7 +121,10 @@ class AksesskontrollImplTest {
         final var saksbehandler = "Z111111";
         when(redigerbarKontroll.behandlingErRedigerbar(behandling)).thenReturn(true);
         when(oppgaveService.saksbehandlerErTilordnetOppgaveForSaksnummer(saksbehandler, saksnummer)).thenReturn(false);
-        assertThat(aksesskontroll.behandlingKanRedigeresAvSaksbehandler(behandling, saksbehandler)).isFalse();
+
+        var saksbehandlerHarTilgang = aksesskontroll.behandlingKanRedigeresAvSaksbehandler(behandling, saksbehandler);
+
+        assertThat(saksbehandlerHarTilgang).isFalse();
     }
 
     @Test
@@ -103,6 +132,9 @@ class AksesskontrollImplTest {
         final var saksbehandler = "Z111111";
         when(redigerbarKontroll.behandlingErRedigerbar(behandling)).thenReturn(true);
         when(oppgaveService.saksbehandlerErTilordnetOppgaveForSaksnummer(saksbehandler, saksnummer)).thenReturn(true);
-        assertThat(aksesskontroll.behandlingKanRedigeresAvSaksbehandler(behandling, saksbehandler)).isTrue();
+
+        var saksbehandlerHarTilgang = aksesskontroll.behandlingKanRedigeresAvSaksbehandler(behandling, saksbehandler);
+
+        assertThat(saksbehandlerHarTilgang).isTrue();
     }
 }
