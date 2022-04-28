@@ -27,7 +27,7 @@ public class StorbritanniaAdresseSjekker {
             .filter(personAdresse -> sjekkAdresseMotLand(personAdresse.strukturertAdresse(), Landkoder.NO))
             .findFirst()
             .map(personAdresse -> personAdresse.strukturertAdresse().toList())
-            .orElse(findAdresseNårIkkeNorskAdresseMenAdresseIUk());
+            .orElse(finnAdresseNårIkkeNorskAdresseMenAdresseIUk());
     }
 
     List<String> finnGyldigStorbritanniaAdresse(Lovvalgsperiode lovvalgsperiode) {
@@ -39,7 +39,7 @@ public class StorbritanniaAdresseSjekker {
             .orElse(List.of(UKJENT));
     }
 
-    private List<String> findAdresseNårIkkeNorskAdresseMenAdresseIUk() {
+    private List<String> finnAdresseNårIkkeNorskAdresseMenAdresseIUk() {
         return getPersonAdresser()
             .filter(personAdresse -> sjekkAdresseMotLand(personAdresse.strukturertAdresse(), Landkoder.GB))
             .findFirst()
