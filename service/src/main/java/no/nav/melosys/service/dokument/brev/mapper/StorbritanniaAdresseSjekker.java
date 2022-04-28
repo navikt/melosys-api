@@ -40,11 +40,11 @@ public class StorbritanniaAdresseSjekker {
     }
 
     private List<String> finnAdresseNårIkkeNorskAdresseMenAdresseIUk() {
-        return getPersonAdresser()
-            .filter(personAdresse -> sjekkAdresseMotLand(personAdresse.strukturertAdresse(), Landkoder.GB))
-            .findFirst()
-            .map(personAdresse -> List.of(INGEN_ADRESSE_I_NORGE))
-            .orElse(findAdresseNårIkkeNorskEllerUkAdresse());
+        boolean harUkAdresse = getPersonAdresser()
+            .anyMatch(personAdresse -> sjekkAdresseMotLand(personAdresse.strukturertAdresse(), Landkoder.GB));
+
+        if (harUkAdresse) return List.of(INGEN_ADRESSE_I_NORGE);
+        return findAdresseNårIkkeNorskEllerUkAdresse();
     }
 
     private List<String> findAdresseNårIkkeNorskEllerUkAdresse() {
