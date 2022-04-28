@@ -1,5 +1,7 @@
 package no.nav.melosys.service.aktoer;
 
+import no.nav.melosys.domain.Aktoer;
+
 public class AktoerDto {
 
     private String aktoerID;
@@ -9,6 +11,7 @@ public class AktoerDto {
     private String utenlandskPersonID;
     private String representererKode;
     private Long databaseID;
+    private String personIdent;
 
     public String getAktoerID() {
         return aktoerID;
@@ -58,6 +61,14 @@ public class AktoerDto {
         this.representererKode = representererKode;
     }
 
+    public String getPersonIdent() {
+        return personIdent;
+    }
+
+    public void setPersonIdent(String personIdent) {
+        this.personIdent = personIdent;
+    }
+
     public Long getDatabaseID() {
         return databaseID;
     }
@@ -65,4 +76,20 @@ public class AktoerDto {
     public void setDatabaseID(Long databaseID) {
         this.databaseID = databaseID;
     }
+
+    public static AktoerDto tilDto(Aktoer aktoer) {
+        AktoerDto aktoerDto = new AktoerDto();
+        aktoerDto.setAktoerID(aktoer.getAktørId());
+        aktoerDto.setInstitusjonsID(aktoer.getInstitusjonId());
+        aktoerDto.setOrgnr(aktoer.getOrgnr());
+        aktoerDto.setRolleKode(aktoer.getRolle().getKode());
+        aktoerDto.setUtenlandskPersonID(aktoer.getUtenlandskPersonId());
+        if (aktoer.getRepresenterer() != null) {
+            aktoerDto.setRepresentererKode(aktoer.getRepresenterer().getKode());
+        }
+        aktoerDto.setDatabaseID(aktoer.getId());
+        aktoerDto.setPersonIdent(aktoer.getPersonIdent());
+        return aktoerDto;
+    }
+
 }
