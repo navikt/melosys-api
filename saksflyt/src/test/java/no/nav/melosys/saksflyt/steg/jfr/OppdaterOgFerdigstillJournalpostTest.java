@@ -61,7 +61,7 @@ class OppdaterOgFerdigstillJournalpostTest {
 
     private Prosessinstans prosessinstans(boolean medAvsenderNavn) {
         var prosessinstans = new Prosessinstans();
-        prosessinstans.setType(ProsessType.JFR_NY_SAK);
+        prosessinstans.setType(ProsessType.JFR_NY_SAK_BRUKER);
         prosessinstans.setBehandling(new Behandling());
         prosessinstans.getBehandling().setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         prosessinstans.getBehandling().setFagsak(new Fagsak());

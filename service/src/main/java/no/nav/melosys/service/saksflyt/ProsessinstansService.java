@@ -21,7 +21,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.saksflyt.*;
-import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.metrics.MetrikkerNavn;
 import no.nav.melosys.repository.ProsessinstansRepository;
@@ -65,10 +64,6 @@ public class ProsessinstansService {
     }
 
     public Prosessinstans lagJournalføringProsessinstans(ProsessType type, JournalfoeringDto journalfoeringDto) {
-        if (journalfoeringDto.getBrukerID() == null && journalfoeringDto.getVirksomhetOrgnr() == null) {
-            throw new FunksjonellException("Forventet at dokumentet journalføres på enten bruker eller virksomhet.");
-        }
-
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(type);
 
@@ -77,7 +72,8 @@ public class ProsessinstansService {
         prosessinstans.setData(ProsessDataKey.OPPGAVE_ID, journalfoeringDto.getOppgaveID());
         if (journalfoeringDto.getBrukerID() != null) {
             prosessinstans.setData(ProsessDataKey.BRUKER_ID, journalfoeringDto.getBrukerID());
-        } else if (journalfoeringDto.getVirksomhetOrgnr() != null) {
+        }
+        if (journalfoeringDto.getVirksomhetOrgnr() != null) {
             prosessinstans.setData(ProsessDataKey.VIRKSOMHET_ORGNR, journalfoeringDto.getVirksomhetOrgnr());
         }
 

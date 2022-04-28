@@ -10,7 +10,6 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.sak.ArkivsakService;
 import no.nav.melosys.service.sak.FagsakService;
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -51,15 +50,15 @@ public class OpprettArkivsak implements StegBehandler {
         String saksnummer = fagsak.getSaksnummer();
         Behandlingstema behandlingstema = behandling.getTema();
 
-        Long gsakSakId;
+        Long arkivsakID;
         if (aktørId.isPresent()) {
-            gsakSakId = arkivsakService.opprettSakForBruker(saksnummer, behandlingstema, aktørId.get());
+            arkivsakID = arkivsakService.opprettSakForBruker(saksnummer, behandlingstema, aktørId.get());
         } else {
-            gsakSakId = arkivsakService.opprettSakForVirksomhet(saksnummer, behandlingstema, prosessinstans.getData(ProsessDataKey.VIRKSOMHET_ORGNR));
+            arkivsakID = arkivsakService.opprettSakForVirksomhet(saksnummer, behandlingstema, prosessinstans.getData(ProsessDataKey.VIRKSOMHET_ORGNR));
         }
-        fagsak.setGsakSaksnummer(gsakSakId);
+        fagsak.setGsakSaksnummer(arkivsakID);
         fagsakService.lagre(fagsak);
 
-        log.info("Opprettet arkivsak {} for fagsak {}", gsakSakId, saksnummer);
+        log.info("Opprettet arkivsak {} for fagsak {}", arkivsakID, saksnummer);
     }
 }

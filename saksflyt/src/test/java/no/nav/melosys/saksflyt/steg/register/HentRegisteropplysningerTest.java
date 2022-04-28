@@ -62,7 +62,7 @@ class HentRegisteropplysningerTest {
         fagsak.getAktører().add(bruker);
         behandling.setFagsak(fagsak);
 
-        when(behandlingService.hentBehandlingMedSaksopplysninger(behandling.getId())).thenReturn(behandling);
+        when(behandlingService.hentBehandling(behandling.getId())).thenReturn(behandling);
         when(persondataFasade.hentFolkeregisterident(aktørID)).thenReturn(ident);
     }
 

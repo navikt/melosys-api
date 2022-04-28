@@ -292,7 +292,7 @@ public class OppgaveService {
                 });
         }
 
-        final var aktørID = behandling.getFagsak().hentBrukersAktørID();
+        final var aktørID = behandling.getFagsak().finnBrukersAktørID().orElse(null);
         oppdaterFnrOgNavn(aktørID, behOppgaveDto);
         return behOppgaveDto;
     }

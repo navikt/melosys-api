@@ -133,7 +133,14 @@ public class JournalfoeringService {
                 "siden 'melosys.folketrygden.mvp' ikke er aktivert i unleash");
         }
 
-        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_NY_SAK, journalfoeringDto);
+        ProsessType prosessType;
+        if (StringUtils.isNotEmpty(journalfoeringDto.getBrukerID())) {
+            prosessType = ProsessType.JFR_NY_SAK_BRUKER;
+        } else {
+            prosessType = ProsessType.JFR_NY_SAK_VIRKSOMHET;
+        }
+
+        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(prosessType, journalfoeringDto);
         prosessinstans.setData(ProsessDataKey.SAKSTYPE, sakstype);
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, behandlingstema);
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, erBehandlingAvSøknad(behandlingstema) ? Behandlingstyper.SOEKNAD : Behandlingstyper.SED);
@@ -245,7 +252,10 @@ public class JournalfoeringService {
             throw new FunksjonellException("AvsenderType mangler");
         }
         if (StringUtils.isEmpty(journalfoeringDto.getBrukerID()) && StringUtils.isEmpty(journalfoeringDto.getVirksomhetOrgnr())) {
-            throw new FunksjonellException("Både BrukerID og VirksomhetID mangler. Krever én");
+            throw new FunksjonellException("Både BrukerID og VirksomhetOrgnr mangler. Krever én");
+        }
+        if (StringUtils.isNotEmpty(journalfoeringDto.getBrukerID()) && StringUtils.isNotEmpty(journalfoeringDto.getVirksomhetOrgnr())) {
+            throw new FunksjonellException("Både BrukerID og VirksomhetOrgnr finnes. Dette kan skape problemer. Velg én å journalføre dokumentet på.");
         }
         if (StringUtils.isEmpty(journalfoeringDto.getHoveddokument().getDokumentID())) {
             throw new FunksjonellException("DokumentID til hoveddokument mangler");

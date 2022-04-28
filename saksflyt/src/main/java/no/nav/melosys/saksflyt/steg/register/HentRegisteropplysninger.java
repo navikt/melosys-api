@@ -9,13 +9,10 @@ import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerRequest;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
-
-import java.util.Optional;
 
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.HENT_REGISTEROPPLYSNINGER;
 import static no.nav.melosys.service.registeropplysninger.RegisteropplysningerFactory.utledSaksopplysningTyper;
@@ -45,13 +42,8 @@ public class HentRegisteropplysninger implements StegBehandler {
     @Override
     public void utfør(Prosessinstans prosessinstans) {
 
-        Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(prosessinstans.getBehandling().getId());
-        Optional<String> aktørId = behandling.getFagsak().finnBrukersAktørID();
-        if (aktørId.isEmpty()) {
-            log.info("Henter ikke registeropplysninger for behandling {} fordi den ikke har aktørId", behandling.getId());
-            return;
-        }
-        String brukerId = persondataFasade.hentFolkeregisterident(aktørId.get());
+        Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
+        String brukerId = persondataFasade.hentFolkeregisterident(behandling.getFagsak().hentBrukersAktørID());
 
 
         var registeropplysningerRequestBuilder = RegisteropplysningerRequest.builder()

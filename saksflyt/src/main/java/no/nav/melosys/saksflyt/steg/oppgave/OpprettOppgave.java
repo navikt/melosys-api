@@ -28,7 +28,7 @@ public class OpprettOppgave implements StegBehandler {
         oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(
             prosessinstans.getBehandling(),
             prosessinstans.hentJournalpostID(),
-            prosessinstans.getBehandling().getFagsak().hentBrukersAktørID(),
+            prosessinstans.getBehandling().getFagsak().finnBrukersAktørID().orElse(null),
             prosessinstans.hentSaksbehandlerHvisTilordnes(),
             prosessinstans.getData(ProsessDataKey.VIRKSOMHET_ORGNR)
         );
