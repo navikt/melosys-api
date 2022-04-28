@@ -3,6 +3,7 @@ package no.nav.melosys.sikkerhet.context;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -13,6 +14,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.UUID;
 
+import static no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo.debugInfoUsage;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -29,6 +31,13 @@ class ThreadLocalAccessInfoTest {
         logger.setLevel(Level.WARN);
         logger.addAppender(listAppender);
         listAppender.start();
+    }
+
+    @AfterAll
+    void tearDown() {
+        debugInfoUsage.forEach((s, integer) ->
+            System.out.println(s + ": " + integer)
+        );
     }
 
     @Test
@@ -54,12 +63,21 @@ class ThreadLocalAccessInfoTest {
 
     @Test
     void isProcessCall_webCallIsRegistered_returnFalse() {
-        ThreadLocalAccessInfo.beforeControllerRequest("test");
+        ThreadLocalAccessInfo.beforeControllerRequest("test", false);
 
         assertFalse(ThreadLocalAccessInfo.isProcessCall());
         assertThat(listAppender.list).isEmpty();
 
         ThreadLocalAccessInfo.afterControllerRequest("test");
+    }
+
+    @Test
+    void isProcessCall_adminCallIsRegistrered_returnTrue() {
+        ThreadLocalAccessInfo.beforeControllerRequest("Test", true);
+
+        assertTrue(ThreadLocalAccessInfo.isProcessCall());
+
+        ThreadLocalAccessInfo.afterControllerRequest("Test");
     }
 
     @Test
@@ -69,7 +87,7 @@ class ThreadLocalAccessInfoTest {
 
     @Test
     void isFrontendCall_callIsRegistered_returnTrue() {
-        ThreadLocalAccessInfo.beforeControllerRequest("Test");
+        ThreadLocalAccessInfo.beforeControllerRequest("Test", false);
 
         assertTrue(ThreadLocalAccessInfo.isFrontendCall());
 

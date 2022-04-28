@@ -1,5 +1,6 @@
 package no.nav.melosys.tjenester.gui;
 
+import no.nav.melosys.service.AdminTjeneste;
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo;
 import org.springframework.web.servlet.HandlerInterceptor;
 
@@ -10,7 +11,8 @@ public class RestControllerInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        ThreadLocalAccessInfo.beforeControllerRequest(request.getRequestURI());
+        String adminAccessHeader = request.getHeader(AdminTjeneste.API_KEY_HEADER);
+        ThreadLocalAccessInfo.beforeControllerRequest(request.getRequestURI(), adminAccessHeader != null);
         return HandlerInterceptor.super.preHandle(request, response, handler);
     }
 
