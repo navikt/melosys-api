@@ -71,13 +71,13 @@ public class ThreadLocalAccessInfo {
         threadLocalStorage.remove();
     }
 
-    public static boolean isFrontendCall() {
+    public static boolean useOicdToken() {
         increaseCount(debugInfoChecks, "web"); // For debug only - will be removed
         ThreadLocalAccessInfo threadLocalAccessInfo = ThreadLocalAccessInfo.threadLocalStorage.get();
         return threadLocalAccessInfo.isFromWebRequest();
     }
 
-    public static boolean isProcessCall() {
+    public static boolean useSystemToken() {
         ThreadLocalAccessInfo threadLocalAccessInfo = ThreadLocalAccessInfo.threadLocalStorage.get();
         if (threadLocalAccessInfo.isFromProcess()) {
             increaseCount(debugInfoChecks, "process"); // For debug only - will be removed

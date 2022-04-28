@@ -33,7 +33,7 @@ class ThreadLocalAccessInfoTest {
 
     @Test
     void isProcessCall_callIsUnregistered_logAndFallbackToReturnTrue() {
-        assertTrue(ThreadLocalAccessInfo.isProcessCall());
+        assertTrue(ThreadLocalAccessInfo.useSystemToken());
         assertThat(listAppender.list)
             .singleElement()
             .matches(iLoggingEvent -> iLoggingEvent.getMessage()
@@ -46,7 +46,7 @@ class ThreadLocalAccessInfoTest {
         UUID uuid = UUID.randomUUID();
         ThreadLocalAccessInfo.beforeExecuteProcess(uuid, "Test");
 
-        assertTrue(ThreadLocalAccessInfo.isProcessCall());
+        assertTrue(ThreadLocalAccessInfo.useSystemToken());
         assertThat(listAppender.list).isEmpty();
 
         ThreadLocalAccessInfo.afterExecuteProcess(uuid);
@@ -56,7 +56,7 @@ class ThreadLocalAccessInfoTest {
     void isProcessCall_webCallIsRegistered_returnFalse() {
         ThreadLocalAccessInfo.beforeControllerRequest("test", false);
 
-        assertFalse(ThreadLocalAccessInfo.isProcessCall());
+        assertFalse(ThreadLocalAccessInfo.useSystemToken());
         assertThat(listAppender.list).isEmpty();
 
         ThreadLocalAccessInfo.afterControllerRequest("test");
@@ -66,21 +66,21 @@ class ThreadLocalAccessInfoTest {
     void isProcessCall_adminCallIsRegistrered_returnTrue() {
         ThreadLocalAccessInfo.beforeControllerRequest("Test", true);
 
-        assertTrue(ThreadLocalAccessInfo.isProcessCall());
+        assertTrue(ThreadLocalAccessInfo.useSystemToken());
 
         ThreadLocalAccessInfo.afterControllerRequest("Test");
     }
 
     @Test
     void isFrontendCall_callIsUnregistered_returnFalse() {
-        assertFalse(ThreadLocalAccessInfo.isFrontendCall());
+        assertFalse(ThreadLocalAccessInfo.useOicdToken());
     }
 
     @Test
     void isFrontendCall_callIsRegistered_returnTrue() {
         ThreadLocalAccessInfo.beforeControllerRequest("Test", false);
 
-        assertTrue(ThreadLocalAccessInfo.isFrontendCall());
+        assertTrue(ThreadLocalAccessInfo.useOicdToken());
 
         ThreadLocalAccessInfo.afterControllerRequest("Test");
     }
@@ -90,7 +90,7 @@ class ThreadLocalAccessInfoTest {
         UUID uuid = UUID.randomUUID();
         ThreadLocalAccessInfo.beforeExecuteProcess(uuid, "Test");
 
-        assertFalse(ThreadLocalAccessInfo.isFrontendCall());
+        assertFalse(ThreadLocalAccessInfo.useOicdToken());
 
         ThreadLocalAccessInfo.afterExecuteProcess(uuid);
     }
