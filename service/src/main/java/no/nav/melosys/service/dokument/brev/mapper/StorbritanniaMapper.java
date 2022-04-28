@@ -131,7 +131,7 @@ public class StorbritanniaMapper {
 
     private Ektefelle tilEktefelle(Map<String, MedfolgendeFamilie> medfølgendeFamilieMap, String uuid, String begrunnelse) {
         var medfølgendeFamilie = Optional.of(medfølgendeFamilieMap.get(uuid))
-            .orElseThrow(() -> kastFinnesIkkeIBehandlingsGrunnlagetException(uuid));
+            .orElseThrow(() -> finnesIkkeIBehandlingsGrunnlagetException(uuid));
 
         IdentType identType = medfølgendeFamilie.utledIdentType();
         return new Ektefelle.Builder()
@@ -160,7 +160,7 @@ public class StorbritanniaMapper {
 
     private Barn tilBarn(Map<String, MedfolgendeFamilie> medfølgendeBarnMap, String uuid, String begrunnelse) {
         var medfølgendeBarn = Optional.of(medfølgendeBarnMap.get(uuid))
-            .orElseThrow(() -> kastFinnesIkkeIBehandlingsGrunnlagetException(uuid));
+            .orElseThrow(() -> finnesIkkeIBehandlingsGrunnlagetException(uuid));
         var identType = medfølgendeBarn.utledIdentType();
         return new Barn.Builder()
             .navn(medfølgendeBarn.getNavn())
@@ -259,7 +259,7 @@ public class StorbritanniaMapper {
 
     private Person mapFamilieTilPerson(Map<String, MedfolgendeFamilie> medfølgendeFamilieMap, String uuid) {
         var medfølgendeFamilie = Optional.of(medfølgendeFamilieMap.get(uuid))
-            .orElseThrow(() -> kastFinnesIkkeIBehandlingsGrunnlagetException(uuid));
+            .orElseThrow(() -> finnesIkkeIBehandlingsGrunnlagetException(uuid));
         var identType = medfølgendeFamilie.utledIdentType();
 
         return new Person(
@@ -269,7 +269,7 @@ public class StorbritanniaMapper {
             identType == DNR ? medfølgendeFamilie.getFnr() : null);
     }
 
-    private FunksjonellException kastFinnesIkkeIBehandlingsGrunnlagetException(String uuid) {
+    private FunksjonellException finnesIkkeIBehandlingsGrunnlagetException(String uuid) {
         return new FunksjonellException("Avklart medfølgende familie " + uuid + " finnes ikke i behandlingsgrunnlaget");
     }
 
