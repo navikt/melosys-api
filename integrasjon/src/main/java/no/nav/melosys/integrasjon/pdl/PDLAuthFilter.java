@@ -46,7 +46,7 @@ public class PDLAuthFilter implements ExchangeFilterFunction {
         if (ThreadLocalAccessInfo.useSystemToken()) {
             return restStsClient::bearerToken;
         }
-        if (ThreadLocalAccessInfo.useOicdToken()) {
+        if (ThreadLocalAccessInfo.useOidcToken()) {
             return () -> "Bearer " + SubjectHandler.getInstance().getOidcTokenString();
         }
         throw new IllegalStateException("Må bli kalt fra frontend eller prosess");

@@ -54,7 +54,7 @@ public class SakConsumerImpl implements RestConsumer, SakConsumer {
     public boolean isSystem() {
         if (unleash.isEnabled("melosys.auto.token")) {
             if (ThreadLocalAccessInfo.useSystemToken()) return true;
-            if (ThreadLocalAccessInfo.useOicdToken()) return false;
+            if (ThreadLocalAccessInfo.useOidcToken()) return false;
         }
         return erSystem;
     }

@@ -71,7 +71,7 @@ public class ThreadLocalAccessInfo {
         threadLocalStorage.remove();
     }
 
-    public static boolean useOicdToken() {
+    public static boolean useOidcToken() {
         increaseCount(debugInfoChecks, "web"); // For debug only - will be removed
         ThreadLocalAccessInfo threadLocalAccessInfo = ThreadLocalAccessInfo.threadLocalStorage.get();
         return threadLocalAccessInfo.isFromWebRequest();

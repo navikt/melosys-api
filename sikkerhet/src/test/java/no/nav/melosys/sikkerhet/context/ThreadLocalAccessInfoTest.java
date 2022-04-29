@@ -73,14 +73,14 @@ class ThreadLocalAccessInfoTest {
 
     @Test
     void isFrontendCall_callIsUnregistered_returnFalse() {
-        assertFalse(ThreadLocalAccessInfo.useOicdToken());
+        assertFalse(ThreadLocalAccessInfo.useOidcToken());
     }
 
     @Test
     void isFrontendCall_callIsRegistered_returnTrue() {
         ThreadLocalAccessInfo.beforeControllerRequest("Test", false);
 
-        assertTrue(ThreadLocalAccessInfo.useOicdToken());
+        assertTrue(ThreadLocalAccessInfo.useOidcToken());
 
         ThreadLocalAccessInfo.afterControllerRequest("Test");
     }
@@ -90,7 +90,7 @@ class ThreadLocalAccessInfoTest {
         UUID uuid = UUID.randomUUID();
         ThreadLocalAccessInfo.beforeExecuteProcess(uuid, "Test");
 
-        assertFalse(ThreadLocalAccessInfo.useOicdToken());
+        assertFalse(ThreadLocalAccessInfo.useOidcToken());
 
         ThreadLocalAccessInfo.afterExecuteProcess(uuid);
     }
