@@ -27,7 +27,7 @@ public class GenericContextExchangeFilter implements ExchangeFilterFunction {
     public Mono<ClientResponse> filter(@Nonnull final ClientRequest clientRequest,
                                        @Nonnull final ExchangeFunction exchangeFunction) {
 
-        if (ThreadLocalAccessInfo.useSystemToken()) {
+        if (ThreadLocalAccessInfo.shouldUseSystemToken()) {
             ClientRequest clientRequestWithBearerAuth = ClientRequest.from(clientRequest)
                 .header(HttpHeaders.AUTHORIZATION, restStsClient.bearerToken())
                 .build();

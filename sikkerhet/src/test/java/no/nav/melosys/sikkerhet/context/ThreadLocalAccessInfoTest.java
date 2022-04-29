@@ -33,7 +33,7 @@ class ThreadLocalAccessInfoTest {
 
     @Test
     void isProcessCall_callIsUnregistered_logAndFallbackToReturnTrue() {
-        assertTrue(ThreadLocalAccessInfo.useSystemToken());
+        assertTrue(ThreadLocalAccessInfo.shouldUseSystemToken());
         assertThat(listAppender.list)
             .singleElement()
             .matches(iLoggingEvent -> iLoggingEvent.getMessage()
@@ -46,7 +46,7 @@ class ThreadLocalAccessInfoTest {
         UUID uuid = UUID.randomUUID();
         ThreadLocalAccessInfo.beforeExecuteProcess(uuid, "Test");
 
-        assertTrue(ThreadLocalAccessInfo.useSystemToken());
+        assertTrue(ThreadLocalAccessInfo.shouldUseSystemToken());
         assertThat(listAppender.list).isEmpty();
 
         ThreadLocalAccessInfo.afterExecuteProcess(uuid);
@@ -56,7 +56,7 @@ class ThreadLocalAccessInfoTest {
     void isProcessCall_webCallIsRegistered_returnFalse() {
         ThreadLocalAccessInfo.beforeControllerRequest("test", false);
 
-        assertFalse(ThreadLocalAccessInfo.useSystemToken());
+        assertFalse(ThreadLocalAccessInfo.shouldUseSystemToken());
         assertThat(listAppender.list).isEmpty();
 
         ThreadLocalAccessInfo.afterControllerRequest("test");
@@ -66,21 +66,21 @@ class ThreadLocalAccessInfoTest {
     void isProcessCall_adminCallIsRegistrered_returnTrue() {
         ThreadLocalAccessInfo.beforeControllerRequest("Test", true);
 
-        assertTrue(ThreadLocalAccessInfo.useSystemToken());
+        assertTrue(ThreadLocalAccessInfo.shouldUseSystemToken());
 
         ThreadLocalAccessInfo.afterControllerRequest("Test");
     }
 
     @Test
     void isFrontendCall_callIsUnregistered_returnFalse() {
-        assertFalse(ThreadLocalAccessInfo.useOidcToken());
+        assertFalse(ThreadLocalAccessInfo.shouldUseOidcToken());
     }
 
     @Test
     void isFrontendCall_callIsRegistered_returnTrue() {
         ThreadLocalAccessInfo.beforeControllerRequest("Test", false);
 
-        assertTrue(ThreadLocalAccessInfo.useOidcToken());
+        assertTrue(ThreadLocalAccessInfo.shouldUseOidcToken());
 
         ThreadLocalAccessInfo.afterControllerRequest("Test");
     }
@@ -90,7 +90,7 @@ class ThreadLocalAccessInfoTest {
         UUID uuid = UUID.randomUUID();
         ThreadLocalAccessInfo.beforeExecuteProcess(uuid, "Test");
 
-        assertFalse(ThreadLocalAccessInfo.useOidcToken());
+        assertFalse(ThreadLocalAccessInfo.shouldUseOidcToken());
 
         ThreadLocalAccessInfo.afterExecuteProcess(uuid);
     }

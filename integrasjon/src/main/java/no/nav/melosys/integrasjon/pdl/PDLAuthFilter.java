@@ -43,10 +43,10 @@ public class PDLAuthFilter implements ExchangeFilterFunction {
         if (!unleash.isEnabled("melosys.auto.token")) {
             return authSupplier;
         }
-        if (ThreadLocalAccessInfo.useSystemToken()) {
+        if (ThreadLocalAccessInfo.shouldUseSystemToken()) {
             return restStsClient::bearerToken;
         }
-        if (ThreadLocalAccessInfo.useOidcToken()) {
+        if (ThreadLocalAccessInfo.shouldUseOidcToken()) {
             return () -> "Bearer " + SubjectHandler.getInstance().getOidcTokenString();
         }
         throw new IllegalStateException("Må bli kalt fra frontend eller prosess");

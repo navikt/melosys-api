@@ -71,13 +71,13 @@ public class ThreadLocalAccessInfo {
         threadLocalStorage.remove();
     }
 
-    public static boolean useOidcToken() {
+    public static boolean shouldUseOidcToken() {
         increaseCount(debugInfoChecks, "web"); // For debug only - will be removed
         ThreadLocalAccessInfo threadLocalAccessInfo = ThreadLocalAccessInfo.threadLocalStorage.get();
         return threadLocalAccessInfo.isFromWebRequest();
     }
 
-    public static boolean useSystemToken() {
+    public static boolean shouldUseSystemToken() {
         ThreadLocalAccessInfo threadLocalAccessInfo = ThreadLocalAccessInfo.threadLocalStorage.get();
         if (threadLocalAccessInfo.isFromProcess()) {
             increaseCount(debugInfoChecks, "process"); // For debug only - will be removed
