@@ -13,6 +13,7 @@ public class ThreadLocalAccessInfo {
     private String requestUri;
     private UUID processId;
     private String prosessSteg;
+    private boolean isAdminRequest;
 
     public static final Map<String, Integer> debugInfoUsage = new ConcurrentHashMap<>(); // For debug only - will be removed
     public static final Map<String, Integer> debugInfoChecks = new ConcurrentHashMap<>(); // For debug only - will be removed
@@ -25,15 +26,21 @@ public class ThreadLocalAccessInfo {
         return processId != null;
     }
 
+    private boolean isFromAdminRequest() {
+        return isAdminRequest;
+    }
+
     private static final ThreadLocal<ThreadLocalAccessInfo> threadLocalStorage =
         ThreadLocal.withInitial(ThreadLocalAccessInfo::new);
 
-    public static void beforeControllerRequest(String requestUri) {
-        increaseCount(debugInfoUsage, "web"); // For debug only - will be removed
-        if (threadLocalStorage.get().requestUri != null) {
+    public static void beforeControllerRequest(String requestUri, boolean isAdminRequest) {
+        increaseCount(debugInfoUsage, "web, admin:" + isAdminRequest ); // For debug only - will be removed
+        ThreadLocalAccessInfo threadLocalAccessInfo = threadLocalStorage.get();
+        if (threadLocalAccessInfo.requestUri != null) {
             throw new IllegalStateException("We should not have a thread local requestUri before controller request");
         }
-        threadLocalStorage.get().requestUri = requestUri;
+        threadLocalAccessInfo.requestUri = requestUri;
+        threadLocalAccessInfo.isAdminRequest = isAdminRequest;
     }
 
     public static void afterControllerRequest(String requestUri) {
@@ -64,14 +71,13 @@ public class ThreadLocalAccessInfo {
         threadLocalStorage.remove();
     }
 
-    public static boolean isFrontendCall() {
+    public static boolean shouldUseOidcToken() {
         increaseCount(debugInfoChecks, "web"); // For debug only - will be removed
         ThreadLocalAccessInfo threadLocalAccessInfo = ThreadLocalAccessInfo.threadLocalStorage.get();
-        return threadLocalAccessInfo.isFromWebRequest()
-            && !threadLocalAccessInfo.requestUri.equals("/admin/prosessinstanser/restart");
+        return threadLocalAccessInfo.isFromWebRequest();
     }
 
-    public static boolean isProcessCall() {
+    public static boolean shouldUseSystemToken() {
         ThreadLocalAccessInfo threadLocalAccessInfo = ThreadLocalAccessInfo.threadLocalStorage.get();
         if (threadLocalAccessInfo.isFromProcess()) {
             increaseCount(debugInfoChecks, "process"); // For debug only - will be removed
@@ -86,8 +92,7 @@ public class ThreadLocalAccessInfo {
             log.warn("Call have not been registret from RestController or Prosess\n{}", stackTraceAsString);
             return true;
         }
-
-        return false;
+        return threadLocalAccessInfo.isFromAdminRequest();
     }
 
     public static String getInfo() {
