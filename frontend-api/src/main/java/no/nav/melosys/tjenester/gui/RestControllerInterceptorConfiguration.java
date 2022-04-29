@@ -8,9 +8,10 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
-public class RestControllerInterceptorConfiguration implements WebMvcConfigurer  {
+public class RestControllerInterceptorConfiguration implements WebMvcConfigurer {
 
-    private final Logger logger = LoggerFactory.getLogger(RestControllerInterceptorConfiguration.class);
+    private static final Logger logger = LoggerFactory.getLogger(RestControllerInterceptorConfiguration.class);
+
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(getRestControllerInterceptor());

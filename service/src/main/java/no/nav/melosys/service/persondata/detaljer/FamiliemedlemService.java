@@ -38,11 +38,11 @@ public class FamiliemedlemService {
         this.pdlConsumer = pdlConsumer;
     }
 
-    public Set<Familiemedlem> hentFamiliemedlemmerMedHistorikk(long behandlingID) {
+    public Set<Familiemedlem> hentFamiliemedlemmerFraBehandlingID(long behandlingID) {
         final Behandling behandling = behandlingService.hentBehandling(behandlingID);
         final String ident = behandling.getFagsak().hentBrukersAktørID();
         if (behandling.erAktiv()) {
-            return hentFamiliemedlemmerMedHistorikk(ident);
+            return hentFamiliemedlemmerFraIdent(ident);
         }
 
         if (saksopplysningerService.harTpsPersonopplysninger(behandlingID)) {
@@ -52,7 +52,7 @@ public class FamiliemedlemService {
         return saksopplysningerService.hentPdlPersonopplysninger(behandlingID).hentFamiliemedlemmer();
     }
 
-    public Set<Familiemedlem> hentFamiliemedlemmerMedHistorikk(String ident) {
+    public Set<Familiemedlem> hentFamiliemedlemmerFraIdent(String ident) {
         Person person = pdlConsumer.hentFamilierelasjoner(ident);
         return hentFamiliemedlemmer(person);
     }

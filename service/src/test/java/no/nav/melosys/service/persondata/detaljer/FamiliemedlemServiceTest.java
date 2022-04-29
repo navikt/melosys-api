@@ -49,7 +49,7 @@ class FamiliemedlemServiceTest {
         when(saksopplysningerService.harTpsPersonopplysninger(1L)).thenReturn(true);
         when(saksopplysningerService.hentTpsPersonopplysninger(inaktivBehandling.getId())).thenReturn(lagPersonDokumentMedFamiliemedlemmer(sivilstand));
 
-        final Set<Familiemedlem> familiemedlemmer = familiemedlemService.hentFamiliemedlemmerMedHistorikk(1L);
+        final Set<Familiemedlem> familiemedlemmer = familiemedlemService.hentFamiliemedlemmerFraBehandlingID(1L);
         assertThat(familiemedlemmer).extracting(Familiemedlem::navn).extracting(Navn::fornavn).contains("BARN", "NAVN");
         assertThat(familiemedlemmer).extracting(Familiemedlem::familierelasjon).contains(Familierelasjon.BARN,
             Familierelasjon.RELATERT_VED_SIVILSTAND);
@@ -62,7 +62,7 @@ class FamiliemedlemServiceTest {
         when(pdlConsumer.hentBarn("barnIdent")).thenReturn(lagPerson());
         when(pdlConsumer.hentRelatertVedSivilstand("relatertVedSivilstandID")).thenReturn(lagPerson());
 
-        final Set<Familiemedlem> familiemedlemmer = familiemedlemService.hentFamiliemedlemmerMedHistorikk(1L);
+        final Set<Familiemedlem> familiemedlemmer = familiemedlemService.hentFamiliemedlemmerFraBehandlingID(1L);
         assertThat(familiemedlemmer).extracting(Familiemedlem::familierelasjon).contains(Familierelasjon.BARN,
             Familierelasjon.RELATERT_VED_SIVILSTAND);
     }
@@ -74,7 +74,7 @@ class FamiliemedlemServiceTest {
         when(saksopplysningerService.harTpsPersonopplysninger(1L)).thenReturn(false);
         when(saksopplysningerService.hentPdlPersonopplysninger(1L)).thenReturn(PersonopplysningerObjectFactory.lagPersonopplysningerMedFamilie());
 
-        final Set<Familiemedlem> familiemedlemmer = familiemedlemService.hentFamiliemedlemmerMedHistorikk(1L);
+        final Set<Familiemedlem> familiemedlemmer = familiemedlemService.hentFamiliemedlemmerFraBehandlingID(1L);
         assertThat(familiemedlemmer).extracting(Familiemedlem::familierelasjon).contains(Familierelasjon.BARN,
             Familierelasjon.RELATERT_VED_SIVILSTAND);
     }

@@ -118,13 +118,13 @@ public class PersondataService implements PersondataFasade {
     private final FamiliemedlemService familiemedlemService;
 
     @Override
-    public Set<Familiemedlem> hentFamiliemedlemmerMedHistorikk(long behandlingID) {
-        return familiemedlemService.hentFamiliemedlemmerMedHistorikk(behandlingID);
+    public Set<Familiemedlem> hentFamiliemedlemmerFraBehandlingID(long behandlingID) {
+        return familiemedlemService.hentFamiliemedlemmerFraBehandlingID(behandlingID);
     }
 
     @Override
-    public Set<Familiemedlem> hentFamiliemedlemmerMedHistorikk(String ident) {
-        return familiemedlemService.hentFamiliemedlemmerMedHistorikk(ident);
+    public Set<Familiemedlem> hentFamiliemedlemmerFraIdent(String ident) {
+        return familiemedlemService.hentFamiliemedlemmerFraIdent(ident);
     }
 
     @Override
