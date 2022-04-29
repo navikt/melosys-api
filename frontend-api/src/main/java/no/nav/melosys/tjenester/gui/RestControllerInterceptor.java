@@ -11,8 +11,7 @@ public class RestControllerInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        String adminAccessHeader = request.getHeader(AdminTjeneste.API_KEY_HEADER);
-        ThreadLocalAccessInfo.beforeControllerRequest(request.getRequestURI(), adminAccessHeader != null);
+        ThreadLocalAccessInfo.beforeControllerRequest(request.getRequestURI(), isAdminRequest(request));
         return HandlerInterceptor.super.preHandle(request, response, handler);
     }
 
@@ -22,5 +21,10 @@ public class RestControllerInterceptor implements HandlerInterceptor {
         HandlerInterceptor.super.afterCompletion(request, response, handler, ex);
     }
 
+    private boolean isAdminRequest(HttpServletRequest request) {
+        boolean hasApiKeyHeader = request.getHeader(AdminTjeneste.API_KEY_HEADER) != null;
+        boolean requestStartsWithAdmin = request.getRequestURI().startsWith("/admin/");
+        return hasApiKeyHeader && requestStartsWithAdmin;
+    }
 }
 
