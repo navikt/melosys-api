@@ -19,13 +19,6 @@ class RegisteropplysningerRequestTest {
     }
 
     @Test
-    void valider_ingenSaksopplysningstype_forventException() {
-        assertThatExceptionOfType(TekniskException.class)
-            .isThrownBy(() -> RegisteropplysningerRequest.builder().behandlingID(1L).build())
-            .withMessageContaining("Krever minst én saksopplysningstype for å hente registeropplysninger");
-    }
-
-    @Test
     void valider_ingenFnrMenPåkrevd_forventException() {
         assertThatExceptionOfType(TekniskException.class)
             .isThrownBy(() -> RegisteropplysningerRequest.builder()
