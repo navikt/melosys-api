@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Comparators;
 import no.nav.melosys.domain.arkiv.ArkivDokument;
 import no.nav.melosys.domain.arkiv.Journalpost;
@@ -60,7 +59,7 @@ class DokumentTjenesteTest extends JsonSchemaTestParent {
 
     @Test
     void hentDokumenter() throws Exception {
-        List<Journalpost> journalposter = lagJournalposter(3);
+        List<Journalpost> journalposter = lagJournalposter();
         given(dokumentHentingService.hentDokumenter(anyString())).willReturn(journalposter);
 
         ResponseEntity<List<JournalpostInfoDto>> response = dokumentTjeneste.hentDokumenter("MEL-1873");
@@ -70,23 +69,6 @@ class DokumentTjenesteTest extends JsonSchemaTestParent {
         assertThat(inOrder).isTrue();
 
         validerArray(dtos, "dokumenter-oversikt-schema.json", log);
-    }
-
-    @Test
-    void hentBrevForhåndsvisning() throws IOException {
-        final byte[] MOCK_PDF = "bytes fra et brev".getBytes();
-        when(dokumentServiceFasade.produserUtkast(anyLong(), any())).thenReturn(MOCK_PDF);
-        BrevbestillingDto brevBestillingDto = new BrevbestillingDto.Builder()
-            .medProduserbardokument(Produserbaredokumenter.ATTEST_A1)
-            .medBegrunnelseKode("KODE")
-            .medFritekst("Fritekst.")
-            .medMottaker(Aktoersroller.TRYGDEMYNDIGHET)
-            .medYtterligereInformasjon("Ytterligere informasjon")
-            .build();
-
-        ResponseEntity response = dokumentTjeneste.produserUtkastBrev(1L, Produserbaredokumenter.ATTEST_A1, brevBestillingDto);
-        assertThat(response.getBody()).isEqualTo(MOCK_PDF);
-        valider(brevBestillingDto, "dokumenter-v2-utkast-post-schema.json", new ObjectMapper());
     }
 
     @Test
@@ -121,8 +103,8 @@ class DokumentTjenesteTest extends JsonSchemaTestParent {
             .withMessageContaining("Mottaker trengs for å bestille");
     }
 
-    private static List<Journalpost> lagJournalposter(int antall) {
-        return Stream.generate(DokumentTjenesteTest::lagJournalpost).limit(antall).collect(Collectors.toList());
+    private static List<Journalpost> lagJournalposter() {
+        return Stream.generate(DokumentTjenesteTest::lagJournalpost).limit(3).collect(Collectors.toList());
     }
 
     private static Journalpost lagJournalpost() {
