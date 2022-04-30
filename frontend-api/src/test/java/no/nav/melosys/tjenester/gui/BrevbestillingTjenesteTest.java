@@ -124,10 +124,10 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
         assertThat(brevmaler.get(2).getFelter()).hasSize(2);
         assertThat(brevmaler.get(2).getType()).isEqualTo(MANGELBREV_ARBEIDSGIVER);
 
-        assertThat(brevmaler.get(3).getFelter()).hasSize(3);
+        assertThat(brevmaler.get(3).getFelter()).hasSize(4);
         assertThat(brevmaler.get(3).getType()).isEqualTo(GENERELT_FRITEKSTBREV_BRUKER);
 
-        assertThat(brevmaler.get(4).getFelter()).hasSize(3);
+        assertThat(brevmaler.get(4).getFelter()).hasSize(4);
         assertThat(brevmaler.get(4).getType()).isEqualTo(GENERELT_FRITEKSTBREV_ARBEIDSGIVER);
 
     }

@@ -1,12 +1,14 @@
 package no.nav.melosys.domain.brev;
 
 import java.time.Instant;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Kontaktopplysning;
 import no.nav.melosys.domain.UtenlandskMyndighet;
+import no.nav.melosys.domain.arkiv.SaksvedleggBestilling;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
@@ -35,6 +37,7 @@ public class DokgenBrevbestilling extends Brevbestilling {
     private Instant vedtaksdato;
     private String saksbehandlerNavn;
     private Persondata persondokument;
+    private List<SaksvedleggBestilling> saksvedleggBestilling;
 
     public DokgenBrevbestilling() {
         super();
@@ -56,6 +59,7 @@ public class DokgenBrevbestilling extends Brevbestilling {
         this.vedtaksdato = builder.vedtaksdato;
         this.saksbehandlerNavn = builder.saksbehandlerNavn;
         this.persondokument = builder.persondokument;
+        this.saksvedleggBestilling = builder.saksvedleggBestilling;
     }
 
     public OrganisasjonDokument getOrg() {
@@ -110,6 +114,10 @@ public class DokgenBrevbestilling extends Brevbestilling {
         return persondokument;
     }
 
+    public List<SaksvedleggBestilling> getSaksvedleggBestilling() {
+        return saksvedleggBestilling;
+    }
+
     public Builder toBuilder() {
         return new Builder(this);
     }
@@ -131,6 +139,8 @@ public class DokgenBrevbestilling extends Brevbestilling {
         private Instant vedtaksdato;
         private String saksbehandlerNavn;
         private Persondata persondokument;
+        private List<SaksvedleggBestilling> saksvedleggBestilling;
+
 
         public Builder() {
         }
@@ -152,6 +162,7 @@ public class DokgenBrevbestilling extends Brevbestilling {
             this.vedtaksdato = brevbestilling.vedtaksdato;
             this.saksbehandlerNavn = brevbestilling.saksbehandlerNavn;
             this.persondokument = brevbestilling.persondokument;
+            this.saksvedleggBestilling = brevbestilling.saksvedleggBestilling;
         }
 
         public T medProduserbartdokument(Produserbaredokumenter produserbartdokument) {
@@ -231,6 +242,11 @@ public class DokgenBrevbestilling extends Brevbestilling {
 
         public T medPersonDokument(Persondata persondata) {
             this.persondokument = persondata;
+            return (T) this;
+        }
+
+        public T medSaksvedleggBestilling(List<SaksvedleggBestilling> saksvedleggBestilling) {
+            this.saksvedleggBestilling = saksvedleggBestilling;
             return (T) this;
         }
 

@@ -7,6 +7,7 @@ import java.util.Set;
 
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.arkiv.SaksvedleggBestilling;
 import no.nav.melosys.domain.brev.*;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
@@ -20,6 +21,7 @@ import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
 import no.nav.melosys.service.dokument.brev.KopiMottaker;
+import no.nav.melosys.service.dokument.brev.SaksvedleggRequest;
 import no.nav.melosys.service.dokument.brev.mapper.DokgenMalMapper;
 import no.nav.melosys.service.dokument.brev.mapper.DokumentproduksjonsInfoMapper;
 import no.nav.melosys.service.ldap.SaksbehandlerService;
@@ -44,6 +46,7 @@ public class DokgenService {
     private final ProsessinstansService prosessinstansService;
     private final SaksbehandlerService saksbehandlerService;
     private final UtenlandskMyndighetService utenlandskMyndighetService;
+    private final DokumentHentingService dokumentHentingService;
 
     public DokgenService(DokgenConsumer dokgenConsumer,
                          DokumentproduksjonsInfoMapper dokumentproduksjonsInfoMapper,
@@ -53,7 +56,8 @@ public class DokgenService {
                          KontaktopplysningService kontaktopplysningService,
                          BrevmottakerService brevmottakerService, ProsessinstansService prosessinstansService,
                          SaksbehandlerService saksbehandlerService,
-                         UtenlandskMyndighetService utenlandskMyndighetService) {
+                         UtenlandskMyndighetService utenlandskMyndighetService,
+                         DokumentHentingService dokumentHentingService) {
         this.dokgenConsumer = dokgenConsumer;
         this.dokumentproduksjonsInfoMapper = dokumentproduksjonsInfoMapper;
         this.joarkFasade = joarkFasade;
@@ -65,6 +69,7 @@ public class DokgenService {
         this.prosessinstansService = prosessinstansService;
         this.saksbehandlerService = saksbehandlerService;
         this.utenlandskMyndighetService = utenlandskMyndighetService;
+        this.dokumentHentingService = dokumentHentingService;
     }
 
     @Transactional
@@ -88,6 +93,7 @@ public class DokgenService {
             .medProduserbartdokument(produserbartdokument)
             .medBehandlingId(behandlingId)
             .medSaksbehandlerNavn(hentSaksbehandlerNavn(brevbestillingRequest.getBestillersId()))
+            .medSaksvedleggBestilling(lagSaksvedleggBestilling(brevbestillingRequest.getSaksVedlegg()))
             .medBestillUtkast(true);
 
         return produserBrev(mottaker, brevbestilling.build());
@@ -112,6 +118,10 @@ public class DokgenService {
         settJournalpostOpplysninger(behandling, builder);
 
         var dokgenDto = dokgenMalMapper.mapBehandling(builder.build());
+        if (brevbestilling.getSaksvedleggBestilling() != null && brevbestilling.getSaksvedleggBestilling().size() > 0) {
+            return dokgenConsumer.lagPdfMedVedlegg(malnavn, dokgenDto, brevbestilling.isBestillKopi(),
+                brevbestilling.isBestillUtkast(), hentVedleggDokumenterFraJoark(brevbestilling.getSaksvedleggBestilling()));
+        }
         return dokgenConsumer.lagPdf(malnavn, dokgenDto, brevbestilling.isBestillKopi(), brevbestilling.isBestillUtkast());
     }
 
@@ -125,6 +135,7 @@ public class DokgenService {
         brevbestilling
             .medProduserbartdokument(produserbartDokument)
             .medBehandlingId(behandlingId)
+            .medSaksvedleggBestilling(lagSaksvedleggBestilling(brevbestillingRequest.getSaksVedlegg()))
             .medSaksbehandlerNavn(hentSaksbehandlerNavn(brevbestillingRequest.getBestillersId()));
 
         List<Aktoer> mottakere = new ArrayList<>();
@@ -198,6 +209,26 @@ public class DokgenService {
         return kopimottakere.stream().map(KopiMottaker::rolle).anyMatch(kopimottaker -> kopimottaker == Aktoersroller.ARBEIDSGIVER);
     }
 
+    private List<SaksvedleggBestilling> lagSaksvedleggBestilling(List<SaksvedleggRequest> saksvedleggRequest) {
+        if (saksvedleggRequest == null) {
+            return null;
+        }
+
+        return saksvedleggRequest.stream()
+            .map(saksvedlegg -> new SaksvedleggBestilling(saksvedlegg.journalpostID(), saksvedlegg.dokumentID()))
+            .toList();
+    }
+
+    private List<byte[]> hentVedleggDokumenterFraJoark(List<SaksvedleggBestilling> saksvedleggBestillingListe) {
+        if (saksvedleggBestillingListe == null) {
+            return null;
+        }
+        return saksvedleggBestillingListe.stream()
+            .map(vedleggBestilling ->
+                dokumentHentingService.hentDokument(vedleggBestilling.journalpostID(), vedleggBestilling.dokumentID()))
+            .toList();
+    }
+
     private DokgenBrevbestilling.Builder<?> lagDokgenBrevbestilling(BrevbestillingRequest brevbestillingRequest) {
         return switch (brevbestillingRequest.getProduserbardokument()) {
             case MANGELBREV_ARBEIDSGIVER, MANGELBREV_BRUKER -> new MangelbrevBrevbestilling.Builder()
@@ -211,11 +242,12 @@ public class DokgenService {
                 .medBarnFritekst(brevbestillingRequest.getBarnFritekst())
                 .medVirksomhetArbeidsgiverSkalHaKopi(inneholderArbeidsgiverSomKopimottaker(brevbestillingRequest.getKopiMottakere()))
                 .medNyVurderingBakgrunn(brevbestillingRequest.getNyVurderingBakgrunn());
-            case GENERELT_FRITEKSTBREV_BRUKER, GENERELT_FRITEKSTBREV_ARBEIDSGIVER -> new FritekstbrevBrevbestilling.Builder()
-                .medFritekstTittel(brevbestillingRequest.getFritekstTittel())
-                .medFritekst(brevbestillingRequest.getFritekst())
-                .medKontaktpersonNavn(brevbestillingRequest.getKontaktpersonNavn())
-                .medKontaktopplysninger(brevbestillingRequest.isKontaktopplysninger());
+            case GENERELT_FRITEKSTBREV_BRUKER, GENERELT_FRITEKSTBREV_ARBEIDSGIVER ->
+                new FritekstbrevBrevbestilling.Builder()
+                    .medFritekstTittel(brevbestillingRequest.getFritekstTittel())
+                    .medFritekst(brevbestillingRequest.getFritekst())
+                    .medKontaktpersonNavn(brevbestillingRequest.getKontaktpersonNavn())
+                    .medKontaktopplysninger(brevbestillingRequest.isKontaktopplysninger());
             case AVSLAG_MANGLENDE_OPPLYSNINGER -> new AvslagBrevbestilling.Builder()
                 .medFritekst(brevbestillingRequest.getFritekst());
             default -> new DokgenBrevbestilling.Builder<>();

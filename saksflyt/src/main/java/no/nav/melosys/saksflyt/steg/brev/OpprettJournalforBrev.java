@@ -1,5 +1,7 @@
 package no.nav.melosys.saksflyt.steg.brev;
 
+import java.util.List;
+
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.arkiv.JournalpostBestilling;
@@ -18,6 +20,7 @@ import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.brev.DokumentNavnService;
 import no.nav.melosys.service.dokument.DokgenService;
+import no.nav.melosys.service.dokument.DokumentHentingService;
 import no.nav.melosys.service.dokument.DokumentproduksjonsInfo;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import org.slf4j.Logger;
@@ -41,6 +44,7 @@ public class OpprettJournalforBrev implements StegBehandler {
     private final PersondataFasade persondataFasade;
     private final EregFasade eregFasade;
     private final DokumentNavnService dokumentNavnService;
+    private final DokumentHentingService dokumentHentingService;
 
     public OpprettJournalforBrev(BehandlingService behandlingService,
                                  DokgenService dokgenService,
@@ -48,7 +52,8 @@ public class OpprettJournalforBrev implements StegBehandler {
                                  @Qualifier("system") JoarkFasade joarkFasade,
                                  @Qualifier("system") PersondataFasade persondataFasade,
                                  @Qualifier("system") EregFasade eregFasade,
-                                 DokumentNavnService dokumentNavnService) {
+                                 DokumentNavnService dokumentNavnService,
+                                 DokumentHentingService dokumentHentingService) {
         this.behandlingService = behandlingService;
         this.dokgenService = dokgenService;
         this.utenlandskMyndighetService = utenlandskMyndighetService;
@@ -56,6 +61,7 @@ public class OpprettJournalforBrev implements StegBehandler {
         this.persondataFasade = persondataFasade;
         this.eregFasade = eregFasade;
         this.dokumentNavnService = dokumentNavnService;
+        this.dokumentHentingService = dokumentHentingService;
     }
 
     @Override
@@ -114,6 +120,7 @@ public class OpprettJournalforBrev implements StegBehandler {
             .medMottakerIdType(utledMottakerIdType(orgnr, institusjonsid))
             .medSaksnummer(behandling.getFagsak().getSaksnummer())
             .medPdf(pdf)
+            .medVedlegg(hentVedleggDokumenterFraJoark(brevbestilling))
             .build();
 
         String journalpostId = joarkFasade.opprettJournalpost(OpprettJournalpost.lagJournalpostForBrev(bestilling), true);
@@ -144,6 +151,16 @@ public class OpprettJournalforBrev implements StegBehandler {
 
     private String hentBrukerFolkeregisterIdent(Behandling behandling) {
         return persondataFasade.hentFolkeregisterident(behandling.getFagsak().hentBrukersAktørID());
+    }
+
+    private List<byte[]> hentVedleggDokumenterFraJoark(DokgenBrevbestilling brevbestilling) {
+        if (brevbestilling.getSaksvedleggBestilling() == null){
+            return null;
+        }
+        return brevbestilling.getSaksvedleggBestilling().stream()
+            .map(vedleggBestilling ->
+                dokumentHentingService.hentDokument(vedleggBestilling.journalpostID(), vedleggBestilling.dokumentID()))
+            .toList();
     }
 
     public String utledJournalføringsTittel(Behandling behandling, DokumentproduksjonsInfo dokumentproduksjonsInfo, DokgenBrevbestilling brevbestilling, Aktoer mottaker) {

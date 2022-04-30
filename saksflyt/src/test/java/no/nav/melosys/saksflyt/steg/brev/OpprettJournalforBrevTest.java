@@ -19,6 +19,7 @@ import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.brev.DokumentNavnService;
 import no.nav.melosys.service.dokument.DokgenService;
+import no.nav.melosys.service.dokument.DokumentHentingService;
 import no.nav.melosys.service.dokument.brev.mapper.DokumentproduksjonsInfoMapper;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import org.junit.jupiter.api.BeforeEach;
@@ -53,7 +54,8 @@ class OpprettJournalforBrevTest {
     private PersondataFasade mockPersondataFasade;
     @Mock
     private DokumentNavnService mockDokumentNavnService;
-
+    @Mock
+    private DokumentHentingService mockDokumentHentingService;
     @Captor
     ArgumentCaptor<OpprettJournalpost> opprettJournalpostCaptor;
 
@@ -62,7 +64,8 @@ class OpprettJournalforBrevTest {
     @BeforeEach
     void init() {
         opprettJournalforBrev = new OpprettJournalforBrev(mockBehandlingService, mockDokgenService,
-            mockUtenlandskMyndighetService, mockJoarkFasade, mockPersondataFasade, mockEregFasade, mockDokumentNavnService);
+            mockUtenlandskMyndighetService, mockJoarkFasade, mockPersondataFasade, mockEregFasade,
+            mockDokumentNavnService, mockDokumentHentingService);
     }
 
     @Test
