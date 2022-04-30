@@ -8,6 +8,7 @@ import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
 import no.nav.melosys.service.dokument.brev.KopiMottaker;
+import no.nav.melosys.service.dokument.brev.SaksvedleggRequest;
 
 public class BrevbestillingDto {
 
@@ -26,6 +27,7 @@ public class BrevbestillingDto {
     private String fritekst;
     private boolean kontaktopplysninger;
     private String nyVurderingBakgrunn;
+    private List<SaksvedleggRequest> saksvedlegg;
 
     /**
      * @deprecated Benyttes i doksys, kommer til å bli erstattet av dokgen-variabel
@@ -60,7 +62,8 @@ public class BrevbestillingDto {
             .medKontaktopplysninger(this.isKontaktopplysninger())
             .medBegrunnelseKode(this.getBegrunnelseKode())
             .medYtterligereInformasjon(this.getYtterligereInformasjon())
-            .medNyVurderingBakgrunn(this.getNyVurderingBakgrunn());
+            .medNyVurderingBakgrunn(this.getNyVurderingBakgrunn())
+            .medSaksvedlegg(this.getSaksvedlegg());
     }
 
     public BrevbestillingDto(Builder builder) {
@@ -80,6 +83,7 @@ public class BrevbestillingDto {
         this.begrunnelseKode = builder.begrunnelseKode;
         this.ytterligereInformasjon = builder.ytterligereInformasjon;
         this.nyVurderingBakgrunn = builder.nyVurderingBakgrunn;
+        this.saksvedlegg = builder.saksvedlegg;
     }
 
     public Produserbaredokumenter getProduserbardokument() {
@@ -153,6 +157,10 @@ public class BrevbestillingDto {
         return nyVurderingBakgrunn;
     }
 
+    public List<SaksvedleggRequest> getSaksvedlegg() {
+        return saksvedlegg;
+    }
+
     public static class Builder {
         private Produserbaredokumenter produserbardokument;
         private Aktoersroller mottaker;
@@ -170,6 +178,7 @@ public class BrevbestillingDto {
         private String begrunnelseKode;
         private String ytterligereInformasjon;
         private String nyVurderingBakgrunn;
+        private List<SaksvedleggRequest> saksvedlegg;
 
         public Builder medProduserbardokument(Produserbaredokumenter produserbardokument) {
             this.produserbardokument = produserbardokument;
@@ -251,6 +260,11 @@ public class BrevbestillingDto {
             return this;
         }
 
+        public Builder medSaksvedlegg(List<SaksvedleggRequest> saksVedlegg) {
+            this.saksvedlegg = saksVedlegg;
+            return this;
+        }
+
         public BrevbestillingDto build() {
             return new BrevbestillingDto(this);
         }
@@ -269,14 +283,15 @@ public class BrevbestillingDto {
             && Objects.equals(kopiMottakere, that.kopiMottakere) && Objects.equals(fritekstTittel, that.fritekstTittel)
             && Objects.equals(fritekst, that.fritekst) && Objects.equals(begrunnelseKode, that.begrunnelseKode)
             && Objects.equals(ytterligereInformasjon, that.ytterligereInformasjon)
-            && Objects.equals(nyVurderingBakgrunn, that.nyVurderingBakgrunn);
+            && Objects.equals(nyVurderingBakgrunn, that.nyVurderingBakgrunn)
+            && Objects.equals(saksvedlegg, that.saksvedlegg);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(produserbardokument, mottaker, orgNr, innledningFritekst, manglerFritekst,
             begrunnelseFritekst, ektefelleFritekst, barnFritekst, kontaktpersonNavn, kopiMottakere, fritekstTittel,
-            fritekst, kontaktopplysninger, begrunnelseKode, ytterligereInformasjon, nyVurderingBakgrunn);
+            fritekst, kontaktopplysninger, begrunnelseKode, ytterligereInformasjon, nyVurderingBakgrunn, saksvedlegg);
     }
 
     @Override
@@ -298,6 +313,7 @@ public class BrevbestillingDto {
             ", begrunnelseKode='" + begrunnelseKode + '\'' +
             ", ytterligereInformasjon='" + ytterligereInformasjon + '\'' +
             ", nyVurderingBakgrunn='" + nyVurderingBakgrunn + '\'' +
+            ", saksvedlegg='" + saksvedlegg + '\'' +
             '}';
     }
 }
