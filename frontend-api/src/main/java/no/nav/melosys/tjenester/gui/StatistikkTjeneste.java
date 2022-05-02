@@ -27,6 +27,6 @@ public class StatistikkTjeneste {
     @GetMapping
     @ApiOperation(value = "Saksbehandlingsstatistikk", response = StatistikkDto.class)
     public ResponseEntity<StatistikkDto> hentStatistikk() {
-        return ResponseEntity.ok(new StatistikkDto(statistikkService.hentBehandlingstatistikk()));
+        return ResponseEntity.ok(new StatistikkDto(statistikkService.hentUtildelteOppgaverStatistikk()));
     }
 }
