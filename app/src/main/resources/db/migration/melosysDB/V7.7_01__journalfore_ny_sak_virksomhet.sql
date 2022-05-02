@@ -1,5 +1,5 @@
 INSERT INTO PROSESS_TYPE(KODE, NAVN) VALUES('JFR_NY_SAK_BRUKER','Journalføring med ny sak og søknad for bruker');
-INSERT INTO PROSESS_TYPE(KODE, NAVN) VALUES('JFR_NY_SAK_VIRKSOMHET','Journalføring med ny sak og søknad for virksomhet');
+INSERT INTO PROSESS_TYPE(KODE, NAVN) VALUES('JFR_NY_SAK_VIRKSOMHET','Journalføring med ny sak for virksomhet');
 
 UPDATE PROSESSINSTANS SET PROSESS_TYPE = 'JFR_NY_SAK' WHERE PROSESS_TYPE = 'JFR_NY_SAK_BRUKER';
 

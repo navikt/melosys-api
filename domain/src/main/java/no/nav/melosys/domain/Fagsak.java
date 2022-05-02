@@ -108,7 +108,7 @@ public class Fagsak extends RegistreringsInfo {
     }
 
     public Aktoer hentBruker() {
-        return hentAktørMedRolleType(Aktoersroller.BRUKER);
+        return hentAktørMedRolleType(BRUKER);
     }
 
     public String hentBrukersAktørID() {
@@ -130,8 +130,9 @@ public class Fagsak extends RegistreringsInfo {
      * Henter arbeidsgiver i tilfeller hvor det er forventet at det kun finnes en eller ingen
      */
     public Aktoer hentUnikArbeidsgiver() {
-        return hentAktørMedRolleType(Aktoersroller.ARBEIDSGIVER);
+        return hentAktørMedRolleType(ARBEIDSGIVER);
     }
+
     public Aktoer hentVirksomhet() {
         return hentAktørMedRolleType(VIRKSOMHET);
     }

@@ -72,9 +72,7 @@ public final class ProsessflytDefinisjon {
         PROSESS_FLYT_MAP.put(ProsessType.JFR_NY_SAK_VIRKSOMHET,
             new ProsessFlyt(ProsessType.JFR_NY_SAK_VIRKSOMHET,
                 OPPRETT_SAK_OG_BEH,
-                OPPRETT_SØKNAD,
                 OPPRETT_ARKIVSAK,
-                OPPDATER_SAKSRELASJON,
                 OPPDATER_OG_FERDIGSTILL_JOURNALPOST,
                 OPPRETT_OPPGAVE
             )
