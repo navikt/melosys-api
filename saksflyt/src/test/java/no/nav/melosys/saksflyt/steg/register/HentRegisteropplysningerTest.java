@@ -45,7 +45,7 @@ class HentRegisteropplysningerTest {
     private ArgumentCaptor<RegisteropplysningerRequest> requestCaptor;
 
     private final Behandling behandling = new Behandling();
-    private final String ident = "143545";
+    private final String aktørID = "54321";
 
     @BeforeEach
     public void setUp() {
@@ -55,7 +55,6 @@ class HentRegisteropplysningerTest {
 
         Aktoer bruker = new Aktoer();
         bruker.setRolle(Aktoersroller.BRUKER);
-        String aktørID = "34253";
         bruker.setAktørId(aktørID);
 
         Fagsak fagsak = new Fagsak();
@@ -63,11 +62,13 @@ class HentRegisteropplysningerTest {
         behandling.setFagsak(fagsak);
 
         when(behandlingService.hentBehandling(behandling.getId())).thenReturn(behandling);
-        when(persondataFasade.hentFolkeregisterident(aktørID)).thenReturn(ident);
     }
 
     @Test
     void utfør_behandlingstemaUtsendtArbeidstaker_henterPeriodeFraSøknad() {
+        String ident = "143545";
+        when(persondataFasade.hentFolkeregisterident(aktørID)).thenReturn(ident);
+
         behandling.getFagsak().setType(Sakstyper.EU_EOS);
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
 

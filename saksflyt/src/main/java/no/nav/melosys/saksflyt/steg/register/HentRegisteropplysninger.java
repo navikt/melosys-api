@@ -4,6 +4,7 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.persondata.PersondataFasade;
@@ -43,15 +44,15 @@ public class HentRegisteropplysninger implements StegBehandler {
     public void utfør(Prosessinstans prosessinstans) {
 
         Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
-        String brukerId = persondataFasade.hentFolkeregisterident(behandling.getFagsak().hentBrukersAktørID());
-
-
-        var registeropplysningerRequestBuilder = RegisteropplysningerRequest.builder()
-            .behandlingID(prosessinstans.getBehandling().getId())
-            .fnr(brukerId);
 
         if (behandling.getFagsak().getType() == Sakstyper.EU_EOS) {
-            registeropplysningerRequestBuilder
+            var aktørId = behandling.getFagsak().finnBrukersAktørID().orElseThrow(
+                () -> new FunksjonellException("Kan ikke hente registreopplysninger når bruker ikke har aktørID")
+            );
+
+            var registeropplysningerRequestBuilder = RegisteropplysningerRequest.builder()
+                .behandlingID(prosessinstans.getBehandling().getId())
+                .fnr(persondataFasade.hentFolkeregisterident(aktørId))
                 .saksopplysningTyper(utledSaksopplysningTyper(prosessinstans.getBehandling().getTema()));
 
             behandling.finnPeriode().ifPresent(periode -> {
