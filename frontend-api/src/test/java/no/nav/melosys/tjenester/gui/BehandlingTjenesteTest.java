@@ -95,7 +95,6 @@ class BehandlingTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    @Disabled("Til schema er oppdatert")
     void hentBehandling_erSchemaValidert() throws Exception {
         BehandlingDto behandlingDto = random.nextObject(BehandlingDto.class);
         behandlingDto.getSaksopplysninger().setSed(null);
