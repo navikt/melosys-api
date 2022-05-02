@@ -70,12 +70,8 @@ public class ProsessinstansService {
         prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, journalfoeringDto.getJournalpostID());
         prosessinstans.setData(ProsessDataKey.DOKUMENT_ID, journalfoeringDto.getHoveddokument().getDokumentID());
         prosessinstans.setData(ProsessDataKey.OPPGAVE_ID, journalfoeringDto.getOppgaveID());
-        if (journalfoeringDto.getBrukerID() != null) {
-            prosessinstans.setData(ProsessDataKey.BRUKER_ID, journalfoeringDto.getBrukerID());
-        }
-        if (journalfoeringDto.getVirksomhetOrgnr() != null) {
-            prosessinstans.setData(ProsessDataKey.VIRKSOMHET_ORGNR, journalfoeringDto.getVirksomhetOrgnr());
-        }
+        prosessinstans.setData(ProsessDataKey.BRUKER_ID, journalfoeringDto.getBrukerID());
+        prosessinstans.setData(ProsessDataKey.VIRKSOMHET_ORGNR, journalfoeringDto.getVirksomhetOrgnr());
 
         prosessinstans.setData(ProsessDataKey.AVSENDER_TYPE, journalfoeringDto.getAvsenderType());
         if (journalfoeringDto.getAvsenderType() == Avsendertyper.UTENLANDSK_TRYGDEMYNDIGHET) {
