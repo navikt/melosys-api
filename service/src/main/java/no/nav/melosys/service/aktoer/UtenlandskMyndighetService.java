@@ -103,7 +103,7 @@ public class UtenlandskMyndighetService {
 
     private Landkoder hentLandkodeForTrygdeavtale(Collection<Landkoder> landkoder) {
         if (landkoder.size() != 1) {
-            throw new FunksjonellException("Det kan kun være ett trygdemyndighetsland for bilaterale trygdeavtaler.");
+            throw new FunksjonellException("Fant ingen eller flere enn ett trygdemyndighetsland for bilaterale trygdeavtaler.");
         }
         return landkoder.stream().findFirst().get();
     }
