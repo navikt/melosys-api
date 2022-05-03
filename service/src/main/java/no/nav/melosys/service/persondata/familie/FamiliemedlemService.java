@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.person.Folkeregisteridentifikator;
 import no.nav.melosys.domain.person.familie.Familiemedlem;
 import no.nav.melosys.integrasjon.pdl.PDLConsumer;
 import no.nav.melosys.integrasjon.pdl.dto.person.ForelderBarnRelasjon;
@@ -83,7 +84,7 @@ public class FamiliemedlemService {
         return forelderBarnRelasjoner.stream()
             .filter(ForelderBarnRelasjon::erForelder)
             .map(forelderBarnRelasjon -> {
-                final var person = pdlConsumer.hentForelder(forelderBarnRelasjon.relatertPersonsIdent());
+                final Person person = pdlConsumer.hentForelder(forelderBarnRelasjon.relatertPersonsIdent());
                 return lagFamilieMedlemForelder(forelderBarnRelasjon, person);
             })
             .collect(Collectors.toUnmodifiableSet());
@@ -103,12 +104,12 @@ public class FamiliemedlemService {
     }
 
     private Familiemedlem oversettFamiliemedlem(Sivilstand sivilstand) {
-        var person = pdlConsumer.hentRelatertVedSivilstand(sivilstand.relatertVedSivilstand());
+        Person person = pdlConsumer.hentRelatertVedSivilstand(sivilstand.relatertVedSivilstand());
         return FamiliemedlemOversetter.oversettPersonRelatertVedSivilstandMedSivilstand(person, sivilstand);
     }
 
     private Set<Familiemedlem> hentBarn(Person person) {
-        final var folkeregisteridentifikator = FolkeregisteridentOversetter.oversett(
+        Folkeregisteridentifikator folkeregisteridentifikator = FolkeregisteridentOversetter.oversett(
             person.folkeregisteridentifikator());
         return person.forelderBarnRelasjon().stream()
             .filter(ForelderBarnRelasjon::erBarn)
