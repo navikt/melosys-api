@@ -26,6 +26,7 @@ public class Behandlingsresultat extends RegistreringsInfo {
 
     @MapsId
     @OneToOne(fetch = FetchType.EAGER, optional = false)
+    @JoinColumn(name = "behandling_id")
     private Behandling behandling;
 
     @Enumerated(EnumType.STRING)

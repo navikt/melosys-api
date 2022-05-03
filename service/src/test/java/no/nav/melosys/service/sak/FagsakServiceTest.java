@@ -19,6 +19,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.medl.MedlPeriodeService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.persondata.PersondataFasade;
@@ -51,6 +52,8 @@ class FagsakServiceTest {
     @Mock
     private PersondataFasade persondataFasade;
     @Mock
+    private BehandlingsresultatService behandlingsresultatService;
+    @Mock
     private MedlPeriodeService medlPeriodeService;
     private final FakeUnleash unleash = new FakeUnleash();
 
@@ -59,7 +62,7 @@ class FagsakServiceTest {
     @BeforeEach
     public void setUp() {
         fagsakService = new FagsakService(fagsakRepo, behandlingService, kontaktopplysningService, oppgaveService, persondataFasade,
-                                          medlPeriodeService, unleash);
+                                          behandlingsresultatService, medlPeriodeService, unleash);
     }
 
     @Test
@@ -260,7 +263,7 @@ class FagsakServiceTest {
         final String saksnummer = "MEL-1";
         Fagsak fagsak = lagFagsakMedBruker();
 
-        var behandling = lagBehandling(1L, ENDRET_PERIODE, AVSLUTTET, Instant.now(), null);
+        var behandling = lagBehandling(1L, ENDRET_PERIODE, AVSLUTTET, Instant.now());
 
         fagsak.setBehandlinger(List.of(behandling));
 
@@ -276,12 +279,12 @@ class FagsakServiceTest {
         final String saksnummer = "MEL-1";
         Fagsak fagsak = lagFagsakMedBruker();
 
-        var behandling =
-            lagBehandling(1L, null, UNDER_BEHANDLING, null, new Behandlingsresultat());
+        var behandling = lagBehandling(1L, null, UNDER_BEHANDLING, null);
 
         fagsak.setBehandlinger(List.of(behandling));
 
         when(fagsakRepo.findBySaksnummer(saksnummer)).thenReturn(Optional.of(fagsak));
+        when(behandlingsresultatService.hentBehandlingsresultat(behandling.getId())).thenReturn(new Behandlingsresultat());
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> fagsakService.opprettNyVurderingBehandling(saksnummer))
@@ -291,14 +294,14 @@ class FagsakServiceTest {
     @Test
     void opprettNyVurderingBehandling_behandlingErAktivErArt16AnmodningIkkeSendt_kastException() {
         final String saksnummer = "MEL-1";
+
+        var behandling = lagBehandling(1L, SOEKNAD, ANMODNING_UNNTAK_SENDT, null);
         Fagsak fagsak = lagFagsakMedBruker();
-
-        var behandling = lagBehandling(1L, SOEKNAD, ANMODNING_UNNTAK_SENDT, null,
-            lagBehandlingsresultatMedAnmodningsperiode(false));
-
         fagsak.setBehandlinger(List.of(behandling));
+        var behandlingsresultat = lagBehandlingsresultatMedAnmodningsperiode(behandling, false);
 
         when(fagsakRepo.findBySaksnummer(saksnummer)).thenReturn(Optional.of(fagsak));
+        when(behandlingsresultatService.hentBehandlingsresultat(behandling.getId())).thenReturn(behandlingsresultat);
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> fagsakService.opprettNyVurderingBehandling(saksnummer))
@@ -308,17 +311,17 @@ class FagsakServiceTest {
     @Test
     void opprettNyVurderingBehandling_behandlingErAktivErArt16AnmodningSendt_nyBehandlingOpprettet() {
         final String saksnummer = "MEL-1";
+
+        var behandling = lagBehandling(1L, SOEKNAD, ANMODNING_UNNTAK_SENDT, null);
         Fagsak fagsak = lagFagsakMedBruker();
-
-        var behandling = lagBehandling(1L, SOEKNAD, ANMODNING_UNNTAK_SENDT, null,
-            lagBehandlingsresultatMedAnmodningsperiode(true));
-
         fagsak.setBehandlinger(List.of(behandling));
+        var behandlingsresultat = lagBehandlingsresultatMedAnmodningsperiode(behandling, true);
 
         Behandling replikertBehandling = new Behandling();
         replikertBehandling.setId(2L);
 
         when(fagsakRepo.findBySaksnummer(saksnummer)).thenReturn(Optional.of(fagsak));
+        when(behandlingsresultatService.hentBehandlingsresultat(behandling.getId())).thenReturn(behandlingsresultat);
         when(behandlingService.replikerBehandlingOgBehandlingsresultat(any(), any())).thenReturn(replikertBehandling);
 
         long replikertBehandlingID = fagsakService.opprettNyVurderingBehandling(saksnummer);
@@ -334,11 +337,11 @@ class FagsakServiceTest {
         var idag = Instant.now();
         var igår = idag.minus(1, ChronoUnit.DAYS);
 
-        var behandlingSomBleFattetIgår =
-            lagBehandling(1L, SOEKNAD, AVSLUTTET, igår, lagBehandlingsresultat(1L, igår, lagVedtakMetadata(igår), null));
+        var behandlingSomBleFattetIgår = lagBehandling(1L, SOEKNAD, AVSLUTTET, igår);
+        var behandlingsresultatBleFattetIgår = lagBehandlingsresultat(behandlingSomBleFattetIgår, igår, lagVedtakMetadata(igår), null);
 
-        var behandlingSomBleFattetIdag =
-            lagBehandling(2L, SOEKNAD, AVSLUTTET, idag, lagBehandlingsresultat(2L, idag, lagVedtakMetadata(idag), null));
+        var behandlingSomBleFattetIdag = lagBehandling(2L, SOEKNAD, AVSLUTTET, idag);
+        var behandlingsresultatBleFattetIdag = lagBehandlingsresultat(behandlingSomBleFattetIdag, idag, lagVedtakMetadata(idag), null);
 
         fagsak.setBehandlinger(List.of(behandlingSomBleFattetIgår, behandlingSomBleFattetIdag));
 
@@ -346,6 +349,8 @@ class FagsakServiceTest {
         replikertBehandling.setId(3L);
 
         when(fagsakRepo.findBySaksnummer(saksnummer)).thenReturn(Optional.of(fagsak));
+        when(behandlingsresultatService.hentBehandlingsresultat(behandlingSomBleFattetIgår.getId())).thenReturn(behandlingsresultatBleFattetIgår);
+        when(behandlingsresultatService.hentBehandlingsresultat(behandlingSomBleFattetIdag.getId())).thenReturn(behandlingsresultatBleFattetIdag);
         when(behandlingService.replikerBehandlingOgBehandlingsresultat(any(), any())).thenReturn(replikertBehandling);
 
         long behandlingID = fagsakService.opprettNyVurderingBehandling(saksnummer);
@@ -361,11 +366,11 @@ class FagsakServiceTest {
         var idag = Instant.now();
         var igår = idag.minus(1, ChronoUnit.DAYS);
 
-        var behandlingSomBleFattetIgår =
-            lagBehandling(1L, SOEKNAD, AVSLUTTET, igår, lagBehandlingsresultat(1L, igår, lagVedtakMetadata(igår), null));
+        var behandlingSomBleFattetIgår = lagBehandling(1L, SOEKNAD, AVSLUTTET, igår);
+        var behandlingsresultatFattetIgår = lagBehandlingsresultat(behandlingSomBleFattetIgår, igår, lagVedtakMetadata(igår), null);
 
-        var behandlingSomBleFattetIdag =
-            lagBehandling(2L, SOEKNAD, AVSLUTTET, idag, lagBehandlingsresultat(2L, idag, null, null));
+        var behandlingSomBleFattetIdag = lagBehandling(2L, SOEKNAD, AVSLUTTET, idag);
+        var behandlingsresultatFattetIdag = lagBehandlingsresultat(behandlingSomBleFattetIdag, idag, null, null);
 
         fagsak.setBehandlinger(List.of(behandlingSomBleFattetIgår, behandlingSomBleFattetIdag));
 
@@ -374,6 +379,8 @@ class FagsakServiceTest {
 
         when(fagsakRepo.findBySaksnummer(saksnummer)).thenReturn(Optional.of(fagsak));
         when(behandlingService.replikerBehandlingOgBehandlingsresultat(any(), any())).thenReturn(replikertBehandling);
+        when(behandlingsresultatService.hentBehandlingsresultat(behandlingSomBleFattetIgår.getId())).thenReturn(behandlingsresultatFattetIgår);
+        when(behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatFattetIdag.getId())).thenReturn(behandlingsresultatFattetIdag);
 
         long behandlingID = fagsakService.opprettNyVurderingBehandling(saksnummer);
         verify(behandlingService).replikerBehandlingOgBehandlingsresultat(behandlingSomBleFattetIgår, Behandlingstyper.NY_VURDERING);
@@ -387,8 +394,8 @@ class FagsakServiceTest {
         Fagsak fagsak = lagFagsakMedBruker();
         var nå = Instant.now();
 
-        var behandling =
-            lagBehandling(1L, SED, AVSLUTTET, nå, lagBehandlingsresultat(1L, nå, null, REGISTRERT_UNNTAK));
+        var behandling = lagBehandling(1L, SED, AVSLUTTET, nå);
+        var behandlingsresultat = lagBehandlingsresultat(behandling, nå, null, REGISTRERT_UNNTAK);
 
         fagsak.setBehandlinger(List.of(behandling));
 
@@ -397,6 +404,7 @@ class FagsakServiceTest {
 
         when(fagsakRepo.findBySaksnummer(saksnummer)).thenReturn(Optional.of(fagsak));
         when(behandlingService.replikerBehandlingOgBehandlingsresultat(any(), any())).thenReturn(replikertBehandling);
+        when(behandlingsresultatService.hentBehandlingsresultat(behandling.getId())).thenReturn(behandlingsresultat);
 
         long behandlingID = fagsakService.opprettNyVurderingBehandling(saksnummer);
         verify(behandlingService).replikerBehandlingOgBehandlingsresultat(behandling, Behandlingstyper.NY_VURDERING);
@@ -411,11 +419,11 @@ class FagsakServiceTest {
         var idag = Instant.now();
         var igår = idag.minus(1, ChronoUnit.DAYS);
 
-        var behandlingSomBleRegistrertIgår =
-            lagBehandling(1L, SED, AVSLUTTET, igår, lagBehandlingsresultat(1L, igår, null, REGISTRERT_UNNTAK));
+        var behandlingSomBleRegistrertIgår = lagBehandling(1L, SED, AVSLUTTET, igår);
+        var behandlingsresultatRegistrertIgår = lagBehandlingsresultat(behandlingSomBleRegistrertIgår, igår, null, REGISTRERT_UNNTAK);
 
-        var behandlingSomBleRegistrertIdag =
-            lagBehandling(2L, SED, AVSLUTTET, idag, lagBehandlingsresultat(2L, idag, null, REGISTRERT_UNNTAK));
+        var behandlingSomBleRegistrertIdag = lagBehandling(2L, SED, AVSLUTTET, idag);
+        var behandlingsresultatRegistrertIdag = lagBehandlingsresultat(behandlingSomBleRegistrertIdag, idag, null, REGISTRERT_UNNTAK);
 
         fagsak.setBehandlinger(List.of(behandlingSomBleRegistrertIgår, behandlingSomBleRegistrertIdag));
 
@@ -424,6 +432,8 @@ class FagsakServiceTest {
 
         when(fagsakRepo.findBySaksnummer(saksnummer)).thenReturn(Optional.of(fagsak));
         when(behandlingService.replikerBehandlingOgBehandlingsresultat(any(), any())).thenReturn(replikertBehandling);
+        when(behandlingsresultatService.hentBehandlingsresultat(behandlingSomBleRegistrertIgår.getId())).thenReturn(behandlingsresultatRegistrertIgår);
+        when(behandlingsresultatService.hentBehandlingsresultat(behandlingSomBleRegistrertIdag.getId())).thenReturn(behandlingsresultatRegistrertIdag);
 
         long behandlingID = fagsakService.opprettNyVurderingBehandling(saksnummer);
         verify(behandlingService).replikerBehandlingOgBehandlingsresultat(behandlingSomBleRegistrertIdag, Behandlingstyper.NY_VURDERING);
@@ -439,11 +449,11 @@ class FagsakServiceTest {
         var igår = idag.minus(1, ChronoUnit.DAYS);
 
 
-        var behandlingSomBleRegistrertIgår =
-            lagBehandling(1L, SED, AVSLUTTET, igår, lagBehandlingsresultat(1L, igår, null, REGISTRERT_UNNTAK));
+        var behandlingSomBleRegistrertIgår = lagBehandling(1L, SED, AVSLUTTET, igår);
+        var behandlingsresultatRegistrertIgår = lagBehandlingsresultat(behandlingSomBleRegistrertIgår, igår, null, REGISTRERT_UNNTAK);
 
-        var behandlingSomBleRegistrertIdag =
-            lagBehandling(2L, SED, AVSLUTTET, idag, lagBehandlingsresultat(2L, idag, null, null));
+        var behandlingSomBleRegistrertIdag = lagBehandling(2L, SED, AVSLUTTET, idag);
+        var behandlingsresultatRegistrertIdag = lagBehandlingsresultat(behandlingSomBleRegistrertIdag, idag, null, null);
 
         fagsak.setBehandlinger(List.of(behandlingSomBleRegistrertIgår, behandlingSomBleRegistrertIdag));
 
@@ -452,6 +462,8 @@ class FagsakServiceTest {
 
         when(fagsakRepo.findBySaksnummer(saksnummer)).thenReturn(Optional.of(fagsak));
         when(behandlingService.replikerBehandlingOgBehandlingsresultat(any(), any())).thenReturn(replikertBehandling);
+        when(behandlingsresultatService.hentBehandlingsresultat(behandlingSomBleRegistrertIgår.getId())).thenReturn(behandlingsresultatRegistrertIgår);
+        when(behandlingsresultatService.hentBehandlingsresultat(behandlingSomBleRegistrertIdag.getId())).thenReturn(behandlingsresultatRegistrertIdag);
 
         long behandlingID = fagsakService.opprettNyVurderingBehandling(saksnummer);
         verify(behandlingService).replikerBehandlingOgBehandlingsresultat(behandlingSomBleRegistrertIgår, Behandlingstyper.NY_VURDERING);
@@ -491,31 +503,32 @@ class FagsakServiceTest {
         return fagsak;
     }
 
-    private Behandling lagBehandling(long id, Behandlingstyper type, Behandlingsstatus status, Instant registrertDato, Behandlingsresultat behandlingsresultat) {
+    private Behandling lagBehandling(long id, Behandlingstyper type, Behandlingsstatus status, Instant registrertDato) {
         var behandling = new Behandling();
         behandling.setId(id);
         behandling.setType(type);
         behandling.setStatus(status);
         behandling.setEndretDato(registrertDato);
         behandling.setRegistrertDato(registrertDato);
-        behandling.setBehandlingsresultat(behandlingsresultat);
         return behandling;
     }
 
-    private Behandlingsresultat lagBehandlingsresultat(long id, Instant registrertDato, VedtakMetadata vedtakMetadata, Behandlingsresultattyper type) {
+    private Behandlingsresultat lagBehandlingsresultat(Behandling behandling, Instant registrertDato, VedtakMetadata vedtakMetadata, Behandlingsresultattyper type) {
         var behandlingsresultat = new Behandlingsresultat();
-        behandlingsresultat.setId(id);
+        behandlingsresultat.setId(behandling.getId());
+        behandlingsresultat.setBehandling(behandling);
         behandlingsresultat.setRegistrertDato(registrertDato);
         behandlingsresultat.setVedtakMetadata(vedtakMetadata);
         behandlingsresultat.setType(type);
         return behandlingsresultat;
     }
 
-    private Behandlingsresultat lagBehandlingsresultatMedAnmodningsperiode(boolean sendtTilUtlandet) {
+    private Behandlingsresultat lagBehandlingsresultatMedAnmodningsperiode(Behandling behandling, boolean sendtTilUtlandet) {
         var anmodningsperiode = new Anmodningsperiode();
         anmodningsperiode.setSendtUtland(sendtTilUtlandet);
         var behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setAnmodningsperioder(Set.of(anmodningsperiode));
+        behandlingsresultat.setBehandling(behandling);
         return behandlingsresultat;
     }
 

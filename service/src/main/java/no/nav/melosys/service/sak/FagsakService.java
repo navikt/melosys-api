@@ -18,6 +18,7 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.medl.MedlPeriodeService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.persondata.PersondataFasade;
@@ -41,6 +42,7 @@ public class FagsakService {
     private final KontaktopplysningService kontaktopplysningService;
     private final OppgaveService oppgaveService;
     private final PersondataFasade persondataFasade;
+    private final BehandlingsresultatService behandlingsresultatService;
     private final MedlPeriodeService medlPeriodeService;
     private final Unleash unleash;
 
@@ -48,12 +50,14 @@ public class FagsakService {
 
     public FagsakService(FagsakRepository fagsakRepository, BehandlingService behandlingService,
                          KontaktopplysningService kontaktopplysningService, @Lazy OppgaveService oppgaveService,
-                         PersondataFasade persondataFasade, MedlPeriodeService medlPeriodeService, Unleash unleash) {
+                         PersondataFasade persondataFasade, BehandlingsresultatService behandlingsresultatService,
+                         MedlPeriodeService medlPeriodeService, Unleash unleash) {
         this.fagsakRepository = fagsakRepository;
         this.behandlingService = behandlingService;
         this.kontaktopplysningService = kontaktopplysningService;
         this.oppgaveService = oppgaveService;
         this.persondataFasade = persondataFasade;
+        this.behandlingsresultatService = behandlingsresultatService;
         this.medlPeriodeService = medlPeriodeService;
         this.unleash = unleash;
     }
@@ -234,14 +238,14 @@ public class FagsakService {
             replikertBehandling, replikertBehandling.getInitierendeJournalpostId(), fagsak.hentBrukersAktørID(), SubjectHandler.getInstance().getUserID()
         );
         if (!unleash.isEnabled("melosys.api.ny.vurdering.medlperiode.beholdes")) {
-            avsluttTidligereMedlPeriode(behandling.getBehandlingsresultat());
+            avsluttTidligereMedlPeriode(behandlingsresultatService.hentBehandlingsresultat(behandling.getId()));
         }
         return replikertBehandling.getId();
     }
 
     private void validerOpprettNyVurdering(Fagsak fagsak) {
         Behandling sistAktivBehandling = fagsak.hentSistAktivBehandling();
-        Behandlingsresultat behandlingsresultat = sistAktivBehandling.getBehandlingsresultat();
+        Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(sistAktivBehandling.getId());
         if (sistAktivBehandling.erAktiv() && behandlingsresultat.erIkkeArtikkel16MedSendtAnmodningOmUnntak()) {
             throw new FunksjonellException("Kan ikke revurdere en aktiv behandling");
         } else if (sistAktivBehandling.erEndretPeriode()) {
@@ -253,7 +257,37 @@ public class FagsakService {
         if (fagsak.harAktivBehandling()) {
             return fagsak.hentSistAktivBehandling();
         }
-        return fagsak.hentBehandlingForNyVurdering();
+        return hentBehandlingForNyVurdering(fagsak);
+    }
+
+    public Behandling hentBehandlingForNyVurdering(Fagsak fagsak) {
+        var førsteBehandling = fagsak.hentTidligstRegistrertBehandling();
+
+        return switch (førsteBehandling.getType()) {
+            case SOEKNAD -> hentBehandlingSistRegistrertHarVedtak(fagsak);
+            case SED -> hentBehandlingSistRegistrertMedRegistrertUnntak(fagsak);
+            default -> throw new FunksjonellException("Kan ikke revurdere en behandling av type " + førsteBehandling.getType().getBeskrivelse());
+        };
+    }
+
+    public Behandling hentBehandlingSistRegistrertHarVedtak(Fagsak fagsak) {
+        return fagsak.getBehandlinger().stream()
+            .map(behandling -> behandlingsresultatService.hentBehandlingsresultat(behandling.getId()))
+            .filter(Objects::nonNull)
+            .filter(Behandlingsresultat::harVedtak)
+            .max(Comparator.comparing(behandlingsresultat -> behandlingsresultat.getVedtakMetadata().getRegistrertDato()))
+            .map(Behandlingsresultat::getBehandling)
+            .orElseThrow(() -> new IkkeFunnetException("Finner ikke behandlinger med vedtak for " + fagsak.getSaksnummer()));
+    }
+
+    public Behandling hentBehandlingSistRegistrertMedRegistrertUnntak(Fagsak fagsak) {
+        return fagsak.getBehandlinger().stream()
+            .map(behandling -> behandlingsresultatService.hentBehandlingsresultat(behandling.getId()))
+            .filter(Objects::nonNull)
+            .filter(Behandlingsresultat::erRegistrertUnntak)
+            .max(Comparator.comparing(RegistreringsInfo::getRegistrertDato))
+            .map(Behandlingsresultat::getBehandling)
+            .orElseThrow(() -> new IkkeFunnetException("Finner ikke behandlinger med registrert unntak for " + fagsak.getSaksnummer()));
     }
 
     private Behandlingstyper avgjørBehandlingstype(Fagsak fagsak) {
