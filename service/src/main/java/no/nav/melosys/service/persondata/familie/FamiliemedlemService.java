@@ -19,6 +19,8 @@ import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.persondata.mapping.FamiliemedlemOversetter;
 import no.nav.melosys.service.persondata.mapping.FoedselOversetter;
 import no.nav.melosys.service.persondata.mapping.FolkeregisteridentOversetter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
@@ -26,7 +28,7 @@ import static java.time.temporal.ChronoUnit.YEARS;
 
 @Service
 public class FamiliemedlemService {
-
+    private static final Logger log = LoggerFactory.getLogger(FamiliemedlemService.class);
     private final BehandlingService behandlingService;
     private final SaksopplysningerService saksopplysningerService;
     private final PDLConsumer pdlConsumer;
@@ -40,16 +42,20 @@ public class FamiliemedlemService {
     }
 
     public Set<Familiemedlem> hentFamiliemedlemmerFraBehandlingID(long behandlingID) {
+        log.info("[{}] Henter familiemedlemmer fra behandlingsID", behandlingID);
         final Behandling behandling = behandlingService.hentBehandling(behandlingID);
         final String ident = behandling.getFagsak().hentBrukersAktørID();
         if (behandling.erAktiv()) {
+            log.info("[{}] Jobber med aktiv behandling", behandlingID);
             return hentFamiliemedlemmerFraIdent(ident);
         }
 
         if (saksopplysningerService.harTpsPersonopplysninger(behandlingID)) {
+            log.info("[{}] Sjekker TPS personopplysinger", behandlingID);
             return saksopplysningerService.hentTpsPersonopplysninger(behandlingID).hentFamiliemedlemmer();
         }
 
+        log.info("[{}] Sjekker PDL personopplysinger", behandlingID);
         return saksopplysningerService.hentPdlPersonopplysninger(behandlingID).hentFamiliemedlemmer();
     }
 
