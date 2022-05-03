@@ -122,7 +122,7 @@ public class OpprettJournalforBrev implements StegBehandler {
             .medMottakerIdType(utledMottakerIdType(orgnr, institusjonsid))
             .medSaksnummer(behandling.getFagsak().getSaksnummer())
             .medPdf(pdf)
-            .medVedlegg(hentVedleggDokumenterFraJoark(brevbestilling))
+            .medVedlegg(hentVedleggDokumenterFraJoark(brevbestilling, behandling.getFagsak().getSaksnummer()))
             .build();
 
         String journalpostId = joarkFasade.opprettJournalpost(OpprettJournalpost.lagJournalpostForBrev(bestilling), true);
@@ -155,11 +155,10 @@ public class OpprettJournalforBrev implements StegBehandler {
         return persondataFasade.hentFolkeregisterident(behandling.getFagsak().hentBrukersAktørID());
     }
 
-    private List<Vedlegg> hentVedleggDokumenterFraJoark(DokgenBrevbestilling brevbestilling) {
+    private List<Vedlegg> hentVedleggDokumenterFraJoark(DokgenBrevbestilling brevbestilling, String fagsaknummer) {
         if (brevbestilling.getSaksvedleggBestilling() == null) {
             return null;
         }
-        String fagsaknummer = brevbestilling.getBehandling().getFagsak().getSaksnummer();
         List<Journalpost> journalposterForSaken = dokumentHentingService.hentDokumenter(fagsaknummer);
         List<SaksvedleggBestilling> saksvedleggbestillingListe = brevbestilling.getSaksvedleggBestilling();
 
