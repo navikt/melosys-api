@@ -389,30 +389,6 @@ class FagsakServiceTest {
     }
 
     @Test
-    void opprettNyVurderingBehandling_behandlingErSed_nyBehandlingOpprettetNyVurderingReplikerFraSistRegistrerteUnntak() {
-        final String saksnummer = "MEL-1";
-        Fagsak fagsak = lagFagsakMedBruker();
-        var nå = Instant.now();
-
-        var behandling = lagBehandling(1L, SED, AVSLUTTET, nå);
-        var behandlingsresultat = lagBehandlingsresultat(behandling, nå, null, REGISTRERT_UNNTAK);
-
-        fagsak.setBehandlinger(List.of(behandling));
-
-        Behandling replikertBehandling = new Behandling();
-        replikertBehandling.setId(3L);
-
-        when(fagsakRepo.findBySaksnummer(saksnummer)).thenReturn(Optional.of(fagsak));
-        when(behandlingService.replikerBehandlingOgBehandlingsresultat(any(), any())).thenReturn(replikertBehandling);
-        when(behandlingsresultatService.hentBehandlingsresultat(behandling.getId())).thenReturn(behandlingsresultat);
-
-        long behandlingID = fagsakService.opprettNyVurderingBehandling(saksnummer);
-        verify(behandlingService).replikerBehandlingOgBehandlingsresultat(behandling, Behandlingstyper.NY_VURDERING);
-
-        assertThat(behandlingID).isEqualTo(replikertBehandling.getId());
-    }
-
-    @Test
     void opprettNyVurderingBehandling_toBehandlingerAvTypeSed_nyBehandlingOpprettetNyVurderingReplikerFraSistRegistrerteUnntak() {
         final String saksnummer = "MEL-1";
         Fagsak fagsak = lagFagsakMedBruker();
