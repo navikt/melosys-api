@@ -74,6 +74,7 @@ public class FysiskDokument extends ArkivDokument {
                 FysiskDokument fysiskDokument = new FysiskDokument();
                 fysiskDokument.setTittel(journalpostBestilling.getTittel());
                 fysiskDokument.setBrevkode(journalpostBestilling.getBrevkode());
+                fysiskDokument.setDokumentKategori(journalpostBestilling.getDokumentKategori());
                 fysiskDokument.setDokumentVarianter(Collections.singletonList(lagDokumentVariant(vedleggBestilling)));
                 return fysiskDokument;
             }
