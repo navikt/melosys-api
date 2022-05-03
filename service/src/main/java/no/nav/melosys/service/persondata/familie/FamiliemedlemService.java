@@ -95,12 +95,13 @@ public class FamiliemedlemService {
 
     private Set<Familiemedlem> hentRelatertVedSivilstand(Collection<Sivilstand> sivilstandRelasjoner) {
         return sivilstandRelasjoner.stream()
-            .filter(HarMetadata::erIkkeHistorisk)
-            .map(Sivilstand::relatertVedSivilstand)
-            .distinct()
             .filter(Objects::nonNull)
-            .map(pdlConsumer::hentRelatertVedSivilstand)
-            .map(FamiliemedlemOversetter::oversettRelatertVedSivilstand)
+            .filter(HarMetadata::erIkkeHistorisk)
+            .map(sivilstand -> {
+                var relatertPerson = pdlConsumer.hentRelatertVedSivilstand(sivilstand.relatertVedSivilstand());
+                return FamiliemedlemOversetter.oversettPersonDirekteMedRelatertVedSivilstand(relatertPerson,
+                    sivilstand);
+            })
             .collect(Collectors.toUnmodifiableSet());
     }
 

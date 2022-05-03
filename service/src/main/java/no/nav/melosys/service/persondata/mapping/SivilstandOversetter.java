@@ -20,7 +20,7 @@ public final class SivilstandOversetter {
             .orElse(null);
     }
 
-    static Sivilstand oversett(no.nav.melosys.integrasjon.pdl.dto.person.Sivilstand sivilstand) {
+    public static Sivilstand oversett(no.nav.melosys.integrasjon.pdl.dto.person.Sivilstand sivilstand) {
         return new Sivilstand(
             Sivilstandstype.valueOf(sivilstand.type().name()),
             null,

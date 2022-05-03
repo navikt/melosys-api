@@ -66,4 +66,16 @@ public final class FamiliemedlemOversetter {
             SivilstandOversetter.oversettForRelatertVedSivilstand(relatertVedSivilstand.sivilstand())
         );
     }
+
+    public static Familiemedlem oversettPersonDirekteMedRelatertVedSivilstand(Person person, no.nav.melosys.integrasjon.pdl.dto.person.Sivilstand sivilstand) {
+        return new Familiemedlem(
+            FolkeregisteridentOversetter.oversett(person.folkeregisteridentifikator()),
+            NavnOversetter.oversett(person.navn()),
+            Familierelasjon.RELATERT_VED_SIVILSTAND,
+            FoedselOversetter.oversett(person.foedsel()),
+            null,
+            null,
+            SivilstandOversetter.oversett(sivilstand)
+        );
+    }
 }

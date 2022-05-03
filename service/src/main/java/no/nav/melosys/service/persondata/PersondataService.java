@@ -25,6 +25,8 @@ import no.nav.melosys.service.persondata.mapping.NavnOversetter;
 import no.nav.melosys.service.persondata.mapping.PersonMedHistorikkOversetter;
 import no.nav.melosys.service.persondata.mapping.PersonopplysningerOversetter;
 import no.nav.melosys.service.persondata.mapping.StatsborgerskapOversetter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Primary;
@@ -33,6 +35,9 @@ import org.springframework.stereotype.Service;
 @Service
 @Primary
 public class PersondataService implements PersondataFasade {
+
+    private final static Logger log = LoggerFactory.getLogger(PersondataService.class);
+
     private final BehandlingService behandlingService;
     private final KodeverkService kodeverkService;
     private final PDLConsumer pdlConsumer;
@@ -112,6 +117,7 @@ public class PersondataService implements PersondataFasade {
 
     @Override
     public PersonMedHistorikk hentPersonMedHistorikk(String ident) {
+        log.info("Henter person med historikk ved bruk av ident");
         return PersonMedHistorikkOversetter.oversett(pdlConsumer.hentPersonMedHistorikk(ident), kodeverkService);
     }
 
