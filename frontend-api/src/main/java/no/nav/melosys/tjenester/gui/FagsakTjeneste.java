@@ -265,7 +265,7 @@ public class FagsakTjeneste {
         if (behandlinger.isEmpty()) {
             return UKJENT_SAMMENSATT_NAVN;
         }
-        final String fnr = persondataFasade.hentFolkeregisterident(behandlinger.get(0).getFagsak().hentAktørID());
+        final String fnr = persondataFasade.hentFolkeregisterident(behandlinger.get(0).getFagsak().hentBrukersAktørID());
         return persondataFasade.hentSammensattNavn(fnr);
     }
 }

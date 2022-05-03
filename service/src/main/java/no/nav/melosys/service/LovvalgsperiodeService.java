@@ -65,7 +65,7 @@ public class LovvalgsperiodeService {
         lovvalgsperiodeRepo.flush();
         List<Lovvalgsperiode> perioderMedBehandling = lovvalgsperioder.stream()
             .map(l -> kopierLovvalgsperiodeMedBehandlingsResultat(l, behandlingsresultat))
-            .collect(Collectors.toList());
+            .toList();
         return new ArrayList<>(lovvalgsperiodeRepo.saveAll(perioderMedBehandling));
     }
 
@@ -125,7 +125,7 @@ public class LovvalgsperiodeService {
             .orElseThrow(() -> new IkkeFunnetException("Fant ingen opprinnelig lovvalgsperiode for " + behandlingId));
     }
 
-    Optional<Lovvalgsperiode> finnOpprinneligLovvalgsperiode(long behandlingId) {
+    public Optional<Lovvalgsperiode> finnOpprinneligLovvalgsperiode(long behandlingId) {
         return behandlingRepository.findById(behandlingId).map(Behandling::getOpprinneligBehandling)
             .flatMap(behandling -> lovvalgsperiodeRepo.findByBehandlingsresultatId(behandling.getId()).stream().findFirst());
     }

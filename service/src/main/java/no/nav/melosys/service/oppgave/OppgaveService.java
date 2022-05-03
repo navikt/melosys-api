@@ -189,7 +189,7 @@ public class OppgaveService {
         String tilordnetRessurs = oppgave.map(Oppgave::getTilordnetRessurs).orElse(null);
         String beskrivelse = oppgave.map(Oppgave::getBeskrivelse).orElse(null);
 
-        opprettEllerGjenbrukBehandlingsoppgave(behandling, behandling.getInitierendeJournalpostId(), fagsak.hentAktørID(), tilordnetRessurs, beskrivelse);
+        opprettEllerGjenbrukBehandlingsoppgave(behandling, behandling.getInitierendeJournalpostId(), fagsak.hentBrukersAktørID(), tilordnetRessurs, beskrivelse);
     }
 
     public boolean saksbehandlerErTilordnetOppgaveForSaksnummer(String saksbehandler, String saksnummer) {
@@ -287,7 +287,7 @@ public class OppgaveService {
                 });
         }
 
-        final var aktørID = behandling.getFagsak().hentAktørID();
+        final var aktørID = behandling.getFagsak().hentBrukersAktørID();
         oppdaterFnrOgNavn(aktørID, behOppgaveDto);
         return behOppgaveDto;
     }
@@ -314,7 +314,7 @@ public class OppgaveService {
     private boolean harBeskyttelsesbehov(long behandlingID) {
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
         // TODO TPS krever fnr. Kall til hentFolkeregisterident fjernes etter overgang til PDL.
-        final String brukersFnr = persondataFasade.hentFolkeregisterident(behandling.getFagsak().hentAktørID());
+        final String brukersFnr = persondataFasade.hentFolkeregisterident(behandling.getFagsak().hentBrukersAktørID());
         if (persondataFasade.harStrengtFortroligAdresse(brukersFnr)) {
             return true;
         } else if (behandling.getBehandlingsgrunnlag() == null) {

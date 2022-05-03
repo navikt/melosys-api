@@ -8,6 +8,7 @@ import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessStatus;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
+import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.saksflyt.api.ProsessinstansBehandler;
 import no.nav.melosys.saksflyt.prosessflyt.ProsessFlyt;
@@ -87,7 +88,12 @@ public class ProsessinstansBehandlerImpl implements ProsessinstansBehandler {
 
     private Prosessinstans utførSteg(StegBehandler stegBehandler, Prosessinstans prosessinstans) {
         log.info("Utfører steg {} for prosessinstans {}", stegBehandler.inngangsSteg(), prosessinstans.getId());
-        stegBehandler.utfør(prosessinstans);
+        ThreadLocalAccessInfo.beforeExecuteProcess(prosessinstans.getId(), stegBehandler.inngangsSteg().getKode());
+        try {
+            stegBehandler.utfør(prosessinstans);
+        } finally {
+            ThreadLocalAccessInfo.afterExecuteProcess(prosessinstans.getId());
+        }
         prosessinstans.setSistFullførtSteg(stegBehandler.inngangsSteg());
         return lagreProsessinstans(prosessinstans);
     }

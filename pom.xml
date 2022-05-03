@@ -39,7 +39,7 @@
         <java.version>17</java.version>
 
         <!-- Melosys -->
-        <melosys.jsonschema.version>1.35.160</melosys.jsonschema.version>
+        <melosys.jsonschema.version>1.35.167</melosys.jsonschema.version>
         <melosys.internt.kodeverk.version>5.15.110</melosys.internt.kodeverk.version>
         <melosys.brev.version>1.2.124</melosys.brev.version>
 
@@ -54,7 +54,7 @@
         <archunit.version>0.23.1</archunit.version>
         <apache-httpclients.version>4.5.13</apache-httpclients.version>
         <caffeine.version>3.0.6</caffeine.version>
-        <cxf.version>3.5.1</cxf.version>
+        <cxf.version>3.5.2</cxf.version>
         <commons-collections4.version>4.4</commons-collections4.version>
         <commons-lang.version>3.12.0</commons-lang.version>
         <commons-text.version>1.9</commons-text.version>
@@ -63,7 +63,7 @@
         <graphql-java.version>17.3</graphql-java.version>
         <logback.version>1.2.11</logback.version>
         <logstash.version>7.0.1</logstash.version>
-        <hikaricp.version>4.0.3</hikaricp.version>
+        <hikaricp.version>5.0.1</hikaricp.version>
         <ibmmq.version>9.2.5.0</ibmmq.version>
         <jackson.version>2.13.1</jackson.version>
         <javax.ws.rs-api.version>2.1.1</javax.ws.rs-api.version>
@@ -83,29 +83,29 @@
         <swagger.version>1.5.21</swagger.version>
         <unleash.version>4.4.1</unleash.version>
         <bcpkix-jdk15on.version>1.70</bcpkix-jdk15on.version>
-        <nimbus-jose-jwt.version>9.20</nimbus-jose-jwt.version>
+        <nimbus-jose-jwt.version>9.21</nimbus-jose-jwt.version>
         <neethi.version>3.1.1</neethi.version>
 
         <!-- Transitive avhengigheter -->
-        <asm.version>9.2</asm.version>
+        <asm.version>9.3</asm.version>
         <bcprov-jdk15on.version>1.68</bcprov-jdk15on.version>
         <cglib.version>3.3.0</cglib.version>
         <classgraph.version>4.8.143</classgraph.version>
         <commons-logging.version>1.2</commons-logging.version>
         <istack.version>4.0.1</istack.version>
-        <javassist.version>3.27.0-GA</javassist.version>
+        <javassist.version>3.28.0-GA</javassist.version>
         <jaxb2-basics-runtime.version>0.12.0</jaxb2-basics-runtime.version>
         <joda-time.version>2.10.14</joda-time.version>
         <objenesis.version>3.2</objenesis.version>
         <osgi.version>6.0.0</osgi.version>
-        <woodstox.version>6.2.6</woodstox.version>
+        <woodstox.version>6.2.8</woodstox.version>
         <xmlsec.version>2.3.0</xmlsec.version>
         <medlemskapsunntak-api-v1.version>1.1</medlemskapsunntak-api-v1.version>
         <wiremock-standalone.version>2.27.2</wiremock-standalone.version>
         <nav-foedselsnummer.core.version>1.0-SNAPSHOT.6</nav-foedselsnummer.core.version>
         <xmlunit.version>2.9.0</xmlunit.version>
         <javax.activation.version>1.1.1</javax.activation.version>
-        <org.jboss.logging.version>2.2.1</org.jboss.logging.version>
+        <org.jboss.logging.annotations.version>2.2.1.Final</org.jboss.logging.annotations.version>
     </properties>
 
     <!-- Unngå å put scope i dependency management. Sett det heller der det
@@ -462,12 +462,12 @@
             <dependency>
                 <groupId>org.jboss.logging</groupId>
                 <artifactId>jboss-logging-annotations</artifactId>
-                <version>${org.jboss.logging.version}</version>
+                <version>${org.jboss.logging.annotations.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.jboss.logging</groupId>
                 <artifactId>jboss-logging-processor</artifactId>
-                <version>${org.jboss.logging.version}</version>
+                <version>${org.jboss.logging.annotations.version}</version>
             </dependency>
 
             <!-- NAV felleskomponenter -->

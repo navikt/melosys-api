@@ -5,13 +5,9 @@ import java.util.Map;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 
 public class StatistikkDto {
-    private final Map<Behandlingstema, Long> aapneBehandlinger;
+    private final Map<Behandlingstema, Long> antallUtildelteOppgaverPerBehandlingstema;
 
-    public StatistikkDto(Map<Behandlingstema, Long> antallÅpneBehandlingerPerTema) {
-        aapneBehandlinger = antallÅpneBehandlingerPerTema;
-    }
-
-    public Map<Behandlingstema, Long> getAapneBehandlinger() {
-        return aapneBehandlinger;
+    public StatistikkDto(Map<Behandlingstema, Long> antallUtildelteOppgaverPerBehandlingstema) {
+        this.antallUtildelteOppgaverPerBehandlingstema = antallUtildelteOppgaverPerBehandlingstema;
     }
 }

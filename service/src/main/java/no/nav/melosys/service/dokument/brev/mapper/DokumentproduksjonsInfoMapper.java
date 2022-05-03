@@ -24,10 +24,14 @@ public class DokumentproduksjonsInfoMapper {
 
     private static final ImmutableMap<Produserbaredokumenter, DokumentproduksjonsInfo> DOKUMENTPRODUKSJONS_INFO_MAP;
     static final Set<Produserbaredokumenter> DOKUMENTMALER_PRODSATT = Set.of(
+        AVSLAG_MANGLENDE_OPPLYSNINGER,
+        GENERELT_FRITEKSTBREV_BRUKER,
+        GENERELT_FRITEKSTBREV_ARBEIDSGIVER,
         MANGELBREV_ARBEIDSGIVER,
         MANGELBREV_BRUKER,
         MELDING_FORVENTET_SAKSBEHANDLINGSTID,
-        MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD
+        MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD,
+        STORBRITANNIA
     );
 
     static {

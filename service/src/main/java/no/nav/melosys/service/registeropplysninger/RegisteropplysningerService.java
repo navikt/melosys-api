@@ -7,7 +7,6 @@ import java.util.stream.Collectors;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
-import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
@@ -47,8 +46,6 @@ public class RegisteropplysningerService {
             .put(SaksopplysningType.INNTK, this::hentInntektsopplysninger)
             .put(SaksopplysningType.MEDL, this::hentMedlemskapsopplysninger)
             .put(SaksopplysningType.ORG, this::hentOrganisasjonsopplysninger)
-            .put(SaksopplysningType.PERSHIST, this::hentPersonhistorikk)
-            .put(SaksopplysningType.PERSOPL, this::hentPersonopplysninger)
             .put(SaksopplysningType.SOB_SAK, this::hentSakOgBehandlingSaker)
             .put(SaksopplysningType.UTBETAL, this::hentUtbetalingsopplysninger)
             .build());
@@ -63,18 +60,16 @@ public class RegisteropplysningerService {
     private final UtbetaldataService utbetaldataService;
     private final SaksopplysningerService saksopplysningerService;
     private final RegisteropplysningerPeriodeFactory registeropplysningerPeriodeFactory;
-    private final Unleash unleash;
 
     public RegisteropplysningerService(@Qualifier("system") PersondataFasade persondataFasade,
-                                       MedlPeriodeService medlPeriodeService, @Qualifier("system") EregFasade eregFasade,
+                                       MedlPeriodeService medlPeriodeService,
+                                       @Qualifier("system") EregFasade eregFasade,
                                        AaregFasade aaregFasade,
                                        BehandlingService behandlingService,
-                                       SobService sobService,
-                                       InntektService inntektService,
+                                       SobService sobService, InntektService inntektService,
                                        UtbetaldataService utbetaldataService,
                                        SaksopplysningerService saksopplysningerService,
-                                       RegisteropplysningerPeriodeFactory registeropplysningerPeriodeFactory,
-                                       Unleash unleash) {
+                                       RegisteropplysningerPeriodeFactory registeropplysningerPeriodeFactory) {
         this.persondataFasade = persondataFasade;
         this.medlPeriodeService = medlPeriodeService;
         this.eregFasade = eregFasade;
@@ -85,23 +80,26 @@ public class RegisteropplysningerService {
         this.utbetaldataService = utbetaldataService;
         this.saksopplysningerService = saksopplysningerService;
         this.registeropplysningerPeriodeFactory = registeropplysningerPeriodeFactory;
-        this.unleash = unleash;
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void hentOgLagreOpplysninger(RegisteropplysningerRequest registeropplysningerRequest) {
-        Behandling behandling = behandlingService.hentBehandling(registeropplysningerRequest.getBehandlingID());
-
         if (PeriodeKontroller.feilIPeriode(registeropplysningerRequest.getFom(), registeropplysningerRequest.getTom())) {
             log.warn("Henter ikke registeropplysninger for behandling {} pga feil i periode. fom={}, tom={}", registeropplysningerRequest.getBehandlingID(), registeropplysningerRequest.getFom(), registeropplysningerRequest.getTom());
-            registeropplysningerRequest = registeropplysningerRequest.lagKopiUtenPeriodeOgOpplysningstyperSomKreverPeriode(unleash);
+            registeropplysningerRequest = registeropplysningerRequest.lagKopiUtenPeriodeOgOpplysningstyperSomKreverPeriode();
         }
+        if (registeropplysningerRequest.getOpplysningstyper().isEmpty()) {
+            log.info("Var ingen registeropplysninger å hente for behandling {}", registeropplysningerRequest.getBehandlingID());
+            return;
+        };
+
+        Behandling behandling = behandlingService.hentBehandling(registeropplysningerRequest.getBehandlingID());
 
         hentOgLagreOpplysninger(registeropplysningerRequest, behandling);
     }
 
     private void hentOgLagreOpplysninger(RegisteropplysningerRequest registeropplysningerRequest, Behandling behandling) {
-        for (var opplysningstype : sorterteSaksopplysningstyper(registeropplysningerRequest.getOpplysningstyper(unleash))) {
+        for (var opplysningstype : sorterteSaksopplysningstyper(registeropplysningerRequest.getOpplysningstyper())) {
             if (!SAKSOPPLYSNING_TYPE_FUNCTION_MAP.containsKey(opplysningstype)) {
                 throw new TekniskException("Støtter ikke å hente opplysninger for saksopplysningType " + opplysningstype);
             }
@@ -147,11 +145,6 @@ public class RegisteropplysningerService {
         RegisteropplysningerPeriodeFactory.DatoPeriode periodeForArbeidsforhold = registeropplysningerPeriodeFactory.hentPeriodeForArbeidsforhold(fom, tom, behandling);
         Saksopplysning saksopplysning = aaregFasade.finnArbeidsforholdPrArbeidstaker(registeropplysningerRequest.getFnr(), periodeForArbeidsforhold.fom, periodeForArbeidsforhold.tom);
 
-        return List.of(saksopplysning);
-    }
-
-    private List<Saksopplysning> hentPersonopplysninger(RegisteropplysningerRequest registeropplysningerRequest, Behandling behandling) {
-        Saksopplysning saksopplysning = persondataFasade.hentPersonFraTps(registeropplysningerRequest.getFnr(), registeropplysningerRequest.getInformasjonsbehov());
         return List.of(saksopplysning);
     }
 
@@ -210,11 +203,6 @@ public class RegisteropplysningerService {
         }
 
         return saksopplysninger;
-    }
-
-    private List<Saksopplysning> hentPersonhistorikk(RegisteropplysningerRequest registeropplysningerRequest, Behandling behandling) {
-        Saksopplysning saksopplysning = persondataFasade.hentPersonhistorikk(registeropplysningerRequest.getFnr(), registeropplysningerRequest.getFom());
-        return List.of(saksopplysning);
     }
 
     private List<Saksopplysning> hentSakOgBehandlingSaker(RegisteropplysningerRequest registeropplysningerRequest, Behandling behandling) {

@@ -497,12 +497,15 @@ class BehandlingServiceTest {
 
         assertThat(lagretBehandling.getDokumentasjonSvarfristDato()).isNull();
     }
-    
+
     @Test
-    void avsluttNyVurderingUtenEndring_avslutterBehandlingOgSetterBehandlingsresultattypeRiktig() {
+    void settNyVurderingTilFerdigbehandlet_avslutterBehandlingOgSetterBehandlingsresultattypeRiktig() {
+        Fagsak fagsak = new Fagsak();
+        fagsak.setSaksnummer(SAKSNUMMER);
         Behandling behandling = new Behandling();
         behandling.setId(BEHANDLING_ID);
         behandling.setType(Behandlingstyper.NY_VURDERING);
+        behandling.setFagsak(fagsak);
         when(behandlingRepo.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
 
         behandlingService.settNyVurderingTilFerdigbehandlet(BEHANDLING_ID);
@@ -515,6 +518,7 @@ class BehandlingServiceTest {
         assertThat(behandlingEndretStatusEvent.getBehandlingID()).isEqualTo(BEHANDLING_ID);
         assertThat(behandlingEndretStatusEvent.getBehandlingsstatus()).isEqualTo(AVSLUTTET);
         verify(behandlingsresultatService).oppdaterBehandlingsresultattype(BEHANDLING_ID, Behandlingsresultattyper.FERDIGBEHANDLET);
+        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(SAKSNUMMER);
     }
 
     @Test

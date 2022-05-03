@@ -3,6 +3,9 @@ package no.nav.melosys.integrasjon.pdl;
 import java.util.function.Supplier;
 import javax.annotation.Nonnull;
 
+import no.finn.unleash.Unleash;
+import no.nav.melosys.sikkerhet.context.SubjectHandler;
+import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo;
 import no.nav.melosys.integrasjon.reststs.RestStsClient;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.reactive.function.client.ClientRequest;
@@ -16,10 +19,12 @@ public class PDLAuthFilter implements ExchangeFilterFunction {
 
     private final RestStsClient restStsClient;
     private final Supplier<String> authSupplier;
+    private final Unleash unleash;
 
-    public PDLAuthFilter(RestStsClient restStsClient, Supplier<String> authSupplier) {
+    public PDLAuthFilter(RestStsClient restStsClient, Supplier<String> authSupplier, Unleash unleash) {
         this.restStsClient = restStsClient;
         this.authSupplier = authSupplier;
+        this.unleash = unleash;
     }
 
     @Nonnull
@@ -28,9 +33,22 @@ public class PDLAuthFilter implements ExchangeFilterFunction {
                                        @Nonnull ExchangeFunction exchangeFunction) {
         return exchangeFunction.exchange(
             ClientRequest.from(clientRequest)
-                .header(HttpHeaders.AUTHORIZATION, authSupplier.get())
+                .header(HttpHeaders.AUTHORIZATION, getTokenSupplier(unleash, restStsClient).get())
                 .header(NAV_CONSUMER_TOKEN, restStsClient.bearerToken())
                 .build()
         );
+    }
+
+    private Supplier<String> getTokenSupplier(Unleash unleash, RestStsClient restStsClient) {
+        if (!unleash.isEnabled("melosys.auto.token")) {
+            return authSupplier;
+        }
+        if (ThreadLocalAccessInfo.shouldUseSystemToken()) {
+            return restStsClient::bearerToken;
+        }
+        if (ThreadLocalAccessInfo.shouldUseOidcToken()) {
+            return () -> "Bearer " + SubjectHandler.getInstance().getOidcTokenString();
+        }
+        throw new IllegalStateException("Må bli kalt fra frontend eller prosess");
     }
 }

@@ -334,16 +334,13 @@ public class BehandlingService {
 
     public void avsluttNyVurdering(long behandlingId, Behandlingsresultattyper nyBehandlingsResultatType) {
         Behandling behandling = hentBehandling(behandlingId);
-        if (!behandling.erNyVurdering()) {
-            throw new FunksjonellException("Behandling " + behandling.getId() + " er ikke typen NY_VURDERING!");
-        }
-        avsluttBehandling(behandling);
-
-        behandlingsresultatService.oppdaterBehandlingsresultattype(behandling.getId(), nyBehandlingsResultatType);
+        avsluttNyVurdering(behandling, nyBehandlingsResultatType);
     }
 
     public void settNyVurderingTilFerdigbehandlet(long behandlingId) {
-        avsluttNyVurdering(behandlingId, Behandlingsresultattyper.FERDIGBEHANDLET);
+        Behandling behandling = hentBehandling(behandlingId);
+        avsluttNyVurdering(behandling, Behandlingsresultattyper.FERDIGBEHANDLET);
+        oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 
     @Transactional(readOnly = true)
@@ -404,6 +401,15 @@ public class BehandlingService {
             return MuligeManuelleBehandlingsendringer.hentMuligeTyper(behandling);
         }
         return Collections.emptySet();
+    }
+
+    private void avsluttNyVurdering(Behandling behandling, Behandlingsresultattyper nyBehandlingsResultatType) {
+        if (!behandling.erNyVurdering()) {
+            throw new FunksjonellException("Behandling " + behandling.getId() + " er ikke typen NY_VURDERING!");
+        }
+        avsluttBehandling(behandling);
+
+        behandlingsresultatService.oppdaterBehandlingsresultattype(behandling.getId(), nyBehandlingsResultatType);
     }
 
     private boolean saksbehandlerKanEndreStatus(Behandling behandling, Behandlingsstatus status) {

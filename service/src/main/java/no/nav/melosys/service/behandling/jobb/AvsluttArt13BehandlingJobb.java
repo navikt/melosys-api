@@ -4,10 +4,13 @@ import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+
+import java.util.UUID;
 
 @Component
 public class AvsluttArt13BehandlingJobb {
@@ -25,10 +28,16 @@ public class AvsluttArt13BehandlingJobb {
     @Scheduled(cron = "0 0 0 * * *")
     @SchedulerLock(name = "avsluttBehandlingArt13Jobb", lockAtLeastFor = "10m")
     public void avsluttBehandlingArt13() {
-        behandlingService.hentBehandlingerMedstatus(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING)
-            .stream()
-            .map(Behandling::getId)
-            .forEach(this::avsluttHvis2MndHarPassert);
+        UUID processId = UUID.randomUUID();
+        ThreadLocalAccessInfo.beforeExecuteProcess(processId, "AvsluttArt13BehandlingJobb");
+        try {
+            behandlingService.hentBehandlingerMedstatus(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING)
+                .stream()
+                .map(Behandling::getId)
+                .forEach(this::avsluttHvis2MndHarPassert);
+        } finally {
+            ThreadLocalAccessInfo.afterExecuteProcess(processId);
+        }
     }
 
     private void avsluttHvis2MndHarPassert(long behandlingID) {

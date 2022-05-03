@@ -1,10 +1,8 @@
 package no.nav.melosys.service.persondata;
 
-import java.time.LocalDate;
 import java.util.Optional;
 import java.util.Set;
 
-import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.domain.person.PersonMedHistorikk;
 import no.nav.melosys.domain.person.Persondata;
@@ -22,15 +20,9 @@ public interface PersondataFasade {
 
     String hentFolkeregisterident(String ident);
 
-    @Deprecated
-    Saksopplysning hentPersonFraTps(String fnr, Informasjonsbehov behov);
-
     Persondata hentPerson(String ident);
 
     Persondata hentPerson(String ident, Informasjonsbehov informasjonsbehov);
-
-    @Deprecated
-    Saksopplysning hentPersonhistorikk(String fnr, LocalDate dato);
 
     PersonMedHistorikk hentPersonMedHistorikk(long behandlingID);
 

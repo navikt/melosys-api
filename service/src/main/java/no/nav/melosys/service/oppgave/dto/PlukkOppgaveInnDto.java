@@ -1,14 +1,16 @@
 package no.nav.melosys.service.oppgave.dto;
 
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
+
 public class PlukkOppgaveInnDto {
 
-    private String behandlingstema;
+    private Behandlingstema behandlingstema;
 
-    public String getBehandlingstema() {
+    public Behandlingstema getBehandlingstema() {
         return behandlingstema;
     }
 
-    public void setBehandlingstema(String behandlingstema) {
+    public void setBehandlingstema(Behandlingstema behandlingstema) {
         this.behandlingstema = behandlingstema;
     }
 }

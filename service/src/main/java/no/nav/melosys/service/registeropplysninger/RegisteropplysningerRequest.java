@@ -7,7 +7,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.exception.TekniskException;
@@ -24,7 +23,7 @@ public class RegisteropplysningerRequest {
     private final Informasjonsbehov informasjonsbehov;
 
     private RegisteropplysningerRequest(Long behandlingID, Set<SaksopplysningType> opplysningstyper,
-                                       String fnr, LocalDate fom, LocalDate tom, Informasjonsbehov informasjonsbehov) {
+                                        String fnr, LocalDate fom, LocalDate tom, Informasjonsbehov informasjonsbehov) {
         this.behandlingID = behandlingID;
         this.opplysningstyper = opplysningstyper;
         this.fnr = fnr;
@@ -41,13 +40,7 @@ public class RegisteropplysningerRequest {
         return behandlingID;
     }
 
-    public Set<SaksopplysningType> getOpplysningstyper(Unleash unleash) {
-        // Hvis PDL er aktiv skal vi ikke lagre ned person data fra TPS
-        if(unleash.isEnabled("melosys.pdl.aktiv")){
-            return opplysningstyper.stream()
-                .filter(p -> !SaksopplysningType.PERSOPL.name().equals(p.getKode()) && !SaksopplysningType.PERSHIST.name().equals(p.getKode()))
-                .collect(Collectors.toSet());
-        }
+    public Set<SaksopplysningType> getOpplysningstyper() {
         return opplysningstyper;
     }
 
@@ -67,8 +60,8 @@ public class RegisteropplysningerRequest {
         return Objects.requireNonNullElse(informasjonsbehov, Informasjonsbehov.STANDARD);
     }
 
-    RegisteropplysningerRequest lagKopiUtenPeriodeOgOpplysningstyperSomKreverPeriode(Unleash unleash) {
-        Set<SaksopplysningType> opplysningstyperSet = getOpplysningstyper(unleash).stream().collect(Collectors.toSet());
+    RegisteropplysningerRequest lagKopiUtenPeriodeOgOpplysningstyperSomKreverPeriode() {
+        Set<SaksopplysningType> opplysningstyperSet = new HashSet<>(getOpplysningstyper());
         opplysningstyperSet.removeAll(SaksopplysningType.KREVER_PERIODE);
         return new RegisteropplysningerRequest(getBehandlingID(), opplysningstyperSet, getFnr(), null, null, getInformasjonsbehov());
     }
@@ -128,10 +121,6 @@ public class RegisteropplysningerRequest {
                 throw new TekniskException("BehandlingID er påkrevd for å hente registeropplysninger");
             }
 
-            if (saksopplysningTyper.getOpplysningstyper().isEmpty()) {
-                throw new TekniskException("Krever minst én saksopplysningstype for å hente registeropplysninger");
-            }
-
             if (StringUtils.isEmpty(fnr) && !Collections.disjoint(SaksopplysningType.KREVER_FNR, saksopplysningTyper.getOpplysningstyper())) {
                 String påkrevdeSaksopplysningstyper = intersect(SaksopplysningType.KREVER_FNR, saksopplysningTyper.getOpplysningstyper())
                     .stream().map(SaksopplysningType::getBeskrivelse).collect(Collectors.joining(", "));
@@ -186,16 +175,6 @@ public class RegisteropplysningerRequest {
 
             public SaksopplysningTyperBuilder organisasjonsopplysninger() {
                 this.opplysningstyper.add(SaksopplysningType.ORG);
-                return this;
-            }
-
-            public SaksopplysningTyperBuilder personhistorikkopplysninger() {
-                this.opplysningstyper.add(SaksopplysningType.PERSHIST);
-                return this;
-            }
-
-            public SaksopplysningTyperBuilder personopplysninger() {
-                this.opplysningstyper.add(SaksopplysningType.PERSOPL);
                 return this;
             }
 

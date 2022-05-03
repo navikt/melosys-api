@@ -36,7 +36,7 @@ public class SobService {
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
         Fagsak fagsak = behandling.getFagsak();
         sakOgBehandlingFasade.sendBehandlingOpprettet(
-            lagBehandlingStatusMapper(fagsak.getSaksnummer(), behandling, fagsak.hentAktørID())
+            lagBehandlingStatusMapper(fagsak.getSaksnummer(), behandling, fagsak.hentBrukersAktørID())
         );
     }
 
@@ -44,7 +44,7 @@ public class SobService {
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
         Fagsak fagsak = behandling.getFagsak();
         sakOgBehandlingFasade.sendBehandlingAvsluttet(
-            lagBehandlingStatusMapper(fagsak.getSaksnummer(), behandling, fagsak.hentAktørID())
+            lagBehandlingStatusMapper(fagsak.getSaksnummer(), behandling, fagsak.hentBrukersAktørID())
         );
     }
 }

@@ -9,18 +9,32 @@ import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.GeografiskAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
+import no.nav.melosys.domain.kodeverk.Saksstatuser;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.integrasjon.joark.DokumentKategoriKode;
 import no.nav.melosys.service.dokument.DokumentproduksjonsInfo;
 
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
+import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
 
 public final class TestdataFactory {
     public static Behandling lagBehandling() {
         Behandling behandling = new Behandling();
         behandling.setId(1L);
+        behandling.setType(Behandlingstyper.SOEKNAD);
+        behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         behandling.setSaksopplysninger(singleton(lagPersonopplysning()));
         behandling.setFagsak(lagFagsak());
+        return behandling;
+    }
+
+    public static Behandling lagBehandlingNyVurdering() {
+        var behandling = lagBehandling();
+        behandling.setId(3L);
+        behandling.setType(Behandlingstyper.NY_VURDERING);
         return behandling;
     }
 
@@ -57,10 +71,25 @@ public final class TestdataFactory {
         return saksopplysning;
     }
 
-    static Fagsak lagFagsak() {
-        Fagsak fagsak = new Fagsak();
+    public static Fagsak lagFagsak() {
+        return lagFagsak("MEL-test");
+    }
+
+    public static Fagsak lagFagsak(String saksnummer) {
+        var fagsak = new Fagsak();
+        fagsak.setSaksnummer(saksnummer);
+        fagsak.setStatus(Saksstatuser.OPPRETTET);
+        fagsak.setType(Sakstyper.EU_EOS);
+        fagsak.getAktører().add(lagBruker());
         fagsak.setGsakSaksnummer(123L);
         return fagsak;
+    }
+
+    public static Aktoer lagBruker() {
+        var aktoer = new Aktoer();
+        aktoer.setRolle(BRUKER);
+        aktoer.setAktørId("aktørID");
+        return aktoer;
     }
 
     static OrganisasjonsDetaljer lagOrgDetaljerMedPostadresse() {
