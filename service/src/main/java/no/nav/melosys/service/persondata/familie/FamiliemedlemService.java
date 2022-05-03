@@ -96,6 +96,7 @@ public class FamiliemedlemService {
     private Set<Familiemedlem> hentRelatertVedSivilstand(Collection<Sivilstand> sivilstandRelasjoner) {
         return sivilstandRelasjoner.stream()
             .filter(Objects::nonNull)
+            .filter(sivilstand -> Objects.nonNull(sivilstand.relatertVedSivilstand()))
             .filter(HarMetadata::erIkkeHistorisk)
             .map(sivilstand -> {
                 var relatertPerson = pdlConsumer.hentRelatertVedSivilstand(sivilstand.relatertVedSivilstand());
