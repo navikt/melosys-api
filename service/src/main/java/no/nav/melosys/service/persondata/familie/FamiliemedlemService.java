@@ -1,4 +1,4 @@
-package no.nav.melosys.service.persondata.detaljer;
+package no.nav.melosys.service.persondata.familie;
 
 import java.time.LocalDate;
 import java.util.Collection;

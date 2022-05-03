@@ -20,7 +20,7 @@ import no.nav.melosys.integrasjon.pdl.dto.person.Person;
 import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.kodeverk.KodeverkService;
-import no.nav.melosys.service.persondata.detaljer.FamiliemedlemService;
+import no.nav.melosys.service.persondata.familie.FamiliemedlemService;
 import no.nav.melosys.service.persondata.mapping.NavnOversetter;
 import no.nav.melosys.service.persondata.mapping.PersonMedHistorikkOversetter;
 import no.nav.melosys.service.persondata.mapping.PersonopplysningerOversetter;
