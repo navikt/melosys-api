@@ -10,7 +10,6 @@ import java.util.stream.Collectors;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.person.familie.Familiemedlem;
 import no.nav.melosys.integrasjon.pdl.PDLConsumer;
-import no.nav.melosys.integrasjon.pdl.dto.HarMetadata;
 import no.nav.melosys.integrasjon.pdl.dto.person.ForelderBarnRelasjon;
 import no.nav.melosys.integrasjon.pdl.dto.person.Person;
 import no.nav.melosys.integrasjon.pdl.dto.person.Sivilstand;
@@ -42,20 +41,22 @@ public class FamiliemedlemService {
     }
 
     public Set<Familiemedlem> hentFamiliemedlemmerFraBehandlingID(long behandlingID) {
-        log.info("[{}] Henter familiemedlemmer fra behandlingsID", behandlingID);
+        log.debug("[MELOSYS-{}] Henter familiemedlemmer fra behandlingID", behandlingID);
         final Behandling behandling = behandlingService.hentBehandling(behandlingID);
         final String ident = behandling.getFagsak().hentBrukersAktørID();
+
         if (behandling.erAktiv()) {
-            log.info("[{}] Jobber med aktiv behandling", behandlingID);
+            log.debug("[MELOSYS-{}] Er en aktiv behandling, og tar i bruk ident", behandlingID);
             return hentFamiliemedlemmerFraIdent(ident);
         }
+        log.debug("[MELOSYS-{}] Er ikke en aktiv behandling", behandlingID);
 
         if (saksopplysningerService.harTpsPersonopplysninger(behandlingID)) {
-            log.info("[{}] Sjekker TPS personopplysinger", behandlingID);
+            log.debug("[MELOSYS-{}] Henter TPS personopplysinger", behandlingID);
             return saksopplysningerService.hentTpsPersonopplysninger(behandlingID).hentFamiliemedlemmer();
         }
 
-        log.info("[{}] Sjekker PDL personopplysinger", behandlingID);
+        log.debug("[MELOSYS-{}] Henter PDL personopplysinger", behandlingID);
         return saksopplysningerService.hentPdlPersonopplysninger(behandlingID).hentFamiliemedlemmer();
     }
 
@@ -69,7 +70,7 @@ public class FamiliemedlemService {
         if (erPersonUnder18(person)) {
             familiemedlemmer.addAll(hentForeldre(person.forelderBarnRelasjon()));
         }
-        familiemedlemmer.addAll(hentRelatertVedSivilstand(person.sivilstand()));
+        familiemedlemmer.addAll(hentFamiliemedlemmerRelatertVedSivilstand(person.sivilstand()));
         familiemedlemmer.addAll(hentBarn(person));
         return familiemedlemmer;
     }
@@ -93,17 +94,17 @@ public class FamiliemedlemService {
             forelderBarnRelasjon.relatertPersonsRolle());
     }
 
-    private Set<Familiemedlem> hentRelatertVedSivilstand(Collection<Sivilstand> sivilstandRelasjoner) {
+    private Set<Familiemedlem> hentFamiliemedlemmerRelatertVedSivilstand(Collection<Sivilstand> sivilstandRelasjoner) {
         return sivilstandRelasjoner.stream()
             .filter(Objects::nonNull)
-            .filter(sivilstand -> Objects.nonNull(sivilstand.relatertVedSivilstand()))
-            .filter(HarMetadata::erIkkeHistorisk)
-            .map(sivilstand -> {
-                var relatertPerson = pdlConsumer.hentRelatertVedSivilstand(sivilstand.relatertVedSivilstand());
-                return FamiliemedlemOversetter.oversettPersonDirekteMedRelatertVedSivilstand(relatertPerson,
-                    sivilstand);
-            })
+            .filter(Sivilstand::erAktivFamiliemedlem)
+            .map(this::oversettFamiliemedlem)
             .collect(Collectors.toUnmodifiableSet());
+    }
+
+    private Familiemedlem oversettFamiliemedlem(Sivilstand sivilstand) {
+        var person = pdlConsumer.hentRelatertVedSivilstand(sivilstand.relatertVedSivilstand());
+        return FamiliemedlemOversetter.oversettPersonRelatertVedSivilstandMedSivilstand(person, sivilstand);
     }
 
     private Set<Familiemedlem> hentBarn(Person person) {
