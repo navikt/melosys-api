@@ -7,6 +7,7 @@ import java.util.List;
 
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.eessi.SedType;
+import no.nav.melosys.domain.eessi.Vedlegg;
 import no.nav.melosys.domain.msm.AltinnDokument;
 
 import static no.nav.melosys.domain.arkiv.DokumentVariant.lagDokumentVariant;
@@ -65,17 +66,17 @@ public class FysiskDokument extends ArkivDokument {
     }
 
     static List<FysiskDokument> lagFysiskDokumentFraVedlegg(JournalpostBestilling journalpostBestilling,
-                                                            List<byte[]> vedlegg) {
+                                                            List<Vedlegg> vedlegg) {
         if (vedlegg == null) {
             return null;
         }
         return vedlegg.stream().map(
             vedleggBestilling -> {
                 FysiskDokument fysiskDokument = new FysiskDokument();
-                fysiskDokument.setTittel(journalpostBestilling.getTittel());
+                fysiskDokument.setTittel(vedleggBestilling.getTittel());
                 fysiskDokument.setBrevkode(journalpostBestilling.getBrevkode());
                 fysiskDokument.setDokumentKategori(journalpostBestilling.getDokumentKategori());
-                fysiskDokument.setDokumentVarianter(Collections.singletonList(lagDokumentVariant(vedleggBestilling)));
+                fysiskDokument.setDokumentVarianter(Collections.singletonList(lagDokumentVariant(vedleggBestilling.getInnhold())));
                 return fysiskDokument;
             }
         ).toList();

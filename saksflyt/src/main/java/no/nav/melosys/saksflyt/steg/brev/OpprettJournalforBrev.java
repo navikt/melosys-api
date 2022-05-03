@@ -1,18 +1,20 @@
 package no.nav.melosys.saksflyt.steg.brev;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.arkiv.JournalpostBestilling;
-import no.nav.melosys.domain.arkiv.OpprettJournalpost;
+import no.nav.melosys.domain.arkiv.*;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.brev.FritekstbrevBrevbestilling;
+import no.nav.melosys.domain.eessi.Vedlegg;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
@@ -153,14 +155,17 @@ public class OpprettJournalforBrev implements StegBehandler {
         return persondataFasade.hentFolkeregisterident(behandling.getFagsak().hentBrukersAktørID());
     }
 
-    private List<byte[]> hentVedleggDokumenterFraJoark(DokgenBrevbestilling brevbestilling) {
-        if (brevbestilling.getSaksvedleggBestilling() == null){
+    private List<Vedlegg> hentVedleggDokumenterFraJoark(DokgenBrevbestilling brevbestilling) {
+        if (brevbestilling.getSaksvedleggBestilling() == null) {
             return null;
         }
-        return brevbestilling.getSaksvedleggBestilling().stream()
-            .map(vedleggBestilling ->
-                dokumentHentingService.hentDokument(vedleggBestilling.journalpostID(), vedleggBestilling.dokumentID()))
-            .toList();
+        String fagsaknummer = brevbestilling.getBehandling().getFagsak().getSaksnummer();
+        List<Journalpost> journalposterForSaken = dokumentHentingService.hentDokumenter(fagsaknummer);
+        List<SaksvedleggBestilling> saksvedleggbestillingListe = brevbestilling.getSaksvedleggBestilling();
+
+        return saksvedleggbestillingListe.stream()
+            .map(saksvedlegg -> hentArkivDokumentForJournalpostBlantJournalposter(saksvedlegg, journalposterForSaken))
+            .map(arkivDokument -> new Vedlegg(arkivDokument.getDokumentVarianter().get(0).getData(), arkivDokument.getTittel())).toList();
     }
 
     public String utledJournalføringsTittel(Behandling behandling, DokumentproduksjonsInfo dokumentproduksjonsInfo, DokgenBrevbestilling brevbestilling, Aktoer mottaker) {
@@ -175,6 +180,14 @@ public class OpprettJournalforBrev implements StegBehandler {
             return dokumentNavnService.utledDokumentNavn(behandling, dokumentproduksjonsInfo, mottaker);
         }
         return dokumentproduksjonsInfo.journalføringsTittel();
+    }
+
+    private ArkivDokument hentArkivDokumentForJournalpostBlantJournalposter(SaksvedleggBestilling saksvedlegg, List<Journalpost> journalposter) {
+        return journalposter.stream()
+            .filter(journalpost -> saksvedlegg.journalpostID().equals(journalpost.getJournalpostId()))
+            .findFirst()
+            .orElseThrow(() -> new IkkeFunnetException(String.format("Finner ikke journalpost %s for saken %s", saksvedlegg.dokumentID(), "saksnummer")))
+            .hentArkivDokument(saksvedlegg.dokumentID());
     }
 
 }

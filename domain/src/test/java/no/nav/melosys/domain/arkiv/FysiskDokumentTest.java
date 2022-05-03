@@ -3,6 +3,7 @@ package no.nav.melosys.domain.arkiv;
 import java.util.Arrays;
 import java.util.List;
 
+import no.nav.melosys.domain.eessi.Vedlegg;
 import org.assertj.core.groups.Tuple;
 import org.junit.jupiter.api.Test;
 
@@ -12,9 +13,11 @@ class FysiskDokumentTest {
 
     @Test
     void lagFysiskDokumentFraVedlegg_lagerFysiskDokumentMedKorrektInformasjon() {
-        byte[] vedlegg1 = new byte[]{1, 2, 3};
-        byte[] vedlegg2 = new byte[]{4, 5, 6};
-        JournalpostBestilling journalpostBestilling = new JournalpostBestilling.Builder().medTittel("tittel y0")
+        var vedlegg1Innhold = new byte[]{1, 2, 3};
+        var vedlegg2Innhold = new byte[]{4, 5, 6};
+        Vedlegg vedlegg1 = new Vedlegg(vedlegg1Innhold, "tittel for vedlegg1");
+        Vedlegg vedlegg2 = new Vedlegg(vedlegg2Innhold, "tittel for vedlegg2");
+        JournalpostBestilling journalpostBestilling = new JournalpostBestilling.Builder()
             .medBrevkode("brevkode y0")
             .medDokumentKategori("kategory y0").build();
 
@@ -27,7 +30,9 @@ class FysiskDokumentTest {
             FysiskDokument::getBrevkode,
             FysiskDokument::getDokumentKategori,
             fysiskDokument -> fysiskDokument.getDokumentVarianter().get(0).getData()
-        ).containsExactlyInAnyOrder(Tuple.tuple("tittel y0", "brevkode y0", "kategory y0", vedlegg1),
-            Tuple.tuple("tittel y0", "brevkode y0", "kategory y0", vedlegg2));
+        ).containsExactlyInAnyOrder(
+            Tuple.tuple("tittel for vedlegg1", "brevkode y0", "kategory y0", vedlegg1Innhold),
+            Tuple.tuple("tittel for vedlegg2", "brevkode y0", "kategory y0", vedlegg2Innhold)
+        );
     }
 }
