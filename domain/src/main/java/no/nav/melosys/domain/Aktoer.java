@@ -107,11 +107,19 @@ public class Aktoer extends RegistreringsInfo {
     }
 
     public boolean erPerson() {
-        return Aktoersroller.BRUKER == rolle || (Aktoersroller.REPRESENTANT == rolle && aktørId != null);
+        return switch (rolle) {
+            case BRUKER -> true;
+            case REPRESENTANT -> aktørId != null;
+            default -> false;
+        };
     }
 
     public boolean erOrganisasjon() {
-        return Aktoersroller.ARBEIDSGIVER == rolle || (Aktoersroller.REPRESENTANT == rolle && orgnr != null);
+        return switch (rolle) {
+            case BRUKER -> false;
+            case REPRESENTANT -> orgnr != null;
+            default -> true;
+        };
     }
 
     public boolean erUtenlandskMyndighet() {
