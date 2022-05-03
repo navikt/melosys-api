@@ -96,11 +96,11 @@ public class DokgenService {
             .medSaksvedleggBestilling(lagSaksvedleggBestilling(brevbestillingRequest.getSaksVedlegg()))
             .medBestillUtkast(true);
 
-        return produserBrev(mottaker, brevbestilling.build());
+        return produserBrev(mottaker, brevbestilling.build(), true);
     }
 
     @Transactional
-    public byte[] produserBrev(Aktoer mottaker, DokgenBrevbestilling brevbestilling) {
+    public byte[] produserBrev(Aktoer mottaker, DokgenBrevbestilling brevbestilling, boolean skalFletteVedlegg) {
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(brevbestilling.getBehandlingId());
         String malnavn = dokumentproduksjonsInfoMapper.hentMalnavn(brevbestilling.getProduserbartdokument());
         String orgnr = mottaker != null ? mottaker.getOrgnr() : null;

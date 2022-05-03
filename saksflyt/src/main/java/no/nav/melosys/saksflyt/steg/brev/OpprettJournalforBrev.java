@@ -107,7 +107,7 @@ public class OpprettJournalforBrev implements StegBehandler {
             sammensattNavn = persondataFasade.hentSammensattNavn(fnr);
         }
 
-        byte[] pdf = dokgenService.produserBrev(mottaker, brevbestilling);
+        byte[] pdf = dokgenService.produserBrev(mottaker, brevbestilling, false);
         log.info("Produserbartdokument {} for behandling {} produsert", produserbartDokument, behandling.getId());
 
         DokumentproduksjonsInfo dokumentproduksjonsInfo = dokgenService.hentDokumentInfo(produserbartDokument);

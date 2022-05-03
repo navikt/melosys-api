@@ -118,7 +118,7 @@ class DokgenServiceTest {
             .medProduserbartdokument(ATTEST_A1)
             .build();
 
-        assertThatThrownBy(() -> dokgenService.produserBrev(new Aktoer(), brevbestilling))
+        assertThatThrownBy(() -> dokgenService.produserBrev(new Aktoer(), brevbestilling, false))
             .isInstanceOf(FunksjonellException.class)
             .hasMessage("ProduserbartDokument ATTEST_A1 er ikke støttet");
     }
@@ -141,7 +141,7 @@ class DokgenServiceTest {
             .build();
 
 
-        byte[] pdfResponse = dokgenService.produserBrev(mottaker, brevbestilling);
+        byte[] pdfResponse = dokgenService.produserBrev(mottaker, brevbestilling, false);
 
 
         assertThat(pdfResponse).isNotNull();
@@ -171,7 +171,7 @@ class DokgenServiceTest {
             .build();
 
 
-        byte[] pdfResponse = dokgenService.produserBrev(mottaker, brevbestilling);
+        byte[] pdfResponse = dokgenService.produserBrev(mottaker, brevbestilling, false);
 
 
         assertThat(pdfResponse).isNotNull();

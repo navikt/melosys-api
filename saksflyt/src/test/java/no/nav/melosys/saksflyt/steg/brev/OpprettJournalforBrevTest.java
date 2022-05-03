@@ -101,7 +101,7 @@ class OpprettJournalforBrevTest {
         opprettJournalforBrev.utfør(prosessinstans);
 
         verify(mockBehandlingService).hentBehandlingMedSaksopplysninger(anyLong());
-        verify(mockDokgenService).produserBrev(any(Aktoer.class), any(DokgenBrevbestilling.class));
+        verify(mockDokgenService).produserBrev(any(Aktoer.class), any(DokgenBrevbestilling.class), eq(false));
         verify(mockJoarkFasade).opprettJournalpost(any(), anyBoolean());
     }
 
@@ -126,7 +126,7 @@ class OpprettJournalforBrevTest {
         opprettJournalforBrev.utfør(prosessinstans);
 
         verify(mockBehandlingService).hentBehandlingMedSaksopplysninger(anyLong());
-        verify(mockDokgenService).produserBrev(any(Aktoer.class), any(DokgenBrevbestilling.class));
+        verify(mockDokgenService).produserBrev(any(Aktoer.class), any(DokgenBrevbestilling.class), eq(false));
         verify(mockJoarkFasade).opprettJournalpost(any(), anyBoolean());
     }
 
@@ -172,7 +172,7 @@ class OpprettJournalforBrevTest {
         opprettJournalforBrev.utfør(prosessinstans);
 
         verify(mockBehandlingService).hentBehandlingMedSaksopplysninger(anyLong());
-        verify(mockDokgenService).produserBrev(any(Aktoer.class), any(MangelbrevBrevbestilling.class));
+        verify(mockDokgenService).produserBrev(any(Aktoer.class), any(MangelbrevBrevbestilling.class), eq(false));
         verify(mockJoarkFasade).opprettJournalpost(any(), anyBoolean());
     }
 
@@ -194,7 +194,7 @@ class OpprettJournalforBrevTest {
         opprettJournalforBrev.utfør(prosessinstans);
 
         verify(mockBehandlingService).hentBehandlingMedSaksopplysninger(anyLong());
-        verify(mockDokgenService).produserBrev(any(Aktoer.class), refEq(brevbestilling));
+        verify(mockDokgenService).produserBrev(any(Aktoer.class), refEq(brevbestilling), eq(false));
         verify(mockJoarkFasade).opprettJournalpost(any(), anyBoolean());
     }
 
@@ -232,7 +232,7 @@ class OpprettJournalforBrevTest {
         opprettJournalforBrev.utfør(prosessinstans);
 
         verify(mockBehandlingService).hentBehandlingMedSaksopplysninger(anyLong());
-        verify(mockDokgenService).produserBrev(any(Aktoer.class), refEq(brevbestilling));
+        verify(mockDokgenService).produserBrev(any(Aktoer.class), refEq(brevbestilling), eq(false));
         verify(mockJoarkFasade).opprettJournalpost(any(), anyBoolean());
     }
 
