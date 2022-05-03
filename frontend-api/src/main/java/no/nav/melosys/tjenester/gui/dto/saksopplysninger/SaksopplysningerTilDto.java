@@ -1,123 +1,59 @@
 package no.nav.melosys.tjenester.gui.dto.saksopplysninger;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.Comparator;
 import java.util.Set;
 
-import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
-import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
-import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.dokument.person.PersonhistorikkDokument;
 import no.nav.melosys.domain.dokument.sakogbehandling.SobSakDokument;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
-import no.nav.melosys.service.kodeverk.KodeverkService;
-import no.nav.melosys.tjenester.gui.dto.PersonUtenAdresseDto;
-import no.nav.melosys.tjenester.gui.dto.PersonhistorikkDto;
 import no.nav.melosys.tjenester.gui.dto.SaksopplysningerDto;
 import no.nav.melosys.tjenester.gui.dto.eessi.SedDokumentDto;
 import no.nav.melosys.tjenester.gui.dto.inntekt.InntektDto;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.FellesKodeverk.POSTNUMMER;
 
 @Component
 public class SaksopplysningerTilDto {
-    private static final ZoneId TIME_ZONE_ID = ZoneId.systemDefault();
-
     static final Comparator<Medlemsperiode> medlemsperiodeKomparator =
         (o1, o2) -> o2.getPeriode().getFom().compareTo(o1.getPeriode().getFom());
 
-    private final KodeverkService kodeverkService;
-
-    public SaksopplysningerTilDto(KodeverkService kodeverkService) {
-        this.kodeverkService = kodeverkService;
-    }
-
-    public SaksopplysningerDto getSaksopplysningerDto(Set<Saksopplysning> saksopplysningSet, Behandling behandling) {
+    public SaksopplysningerDto getSaksopplysningerDto(Set<Saksopplysning> saksopplysningSet) {
         SaksopplysningerDto dto = new SaksopplysningerDto();
-        Periode søknadsperiode = null;
-        Land historiskStatsborgerskap = null;
 
         for (Saksopplysning saksopplysning : saksopplysningSet) {
             SaksopplysningType type = saksopplysning.getType();
             SaksopplysningDokument dokument = saksopplysning.getDokument();
 
             switch (type) {
-                case PERSOPL:
-                    dto.setPerson(new PersonUtenAdresseDto((PersonDokument) dokument));
-                    break;
-                case ARBFORH:
+                case ARBFORH -> {
                     ArbeidsforholdDokument arbeidsforholdDokument = (ArbeidsforholdDokument) dokument;
                     if (arbeidsforholdDokument != null && arbeidsforholdDokument.getArbeidsforhold() != null) {
                         arbeidsforholdDokument.getArbeidsforhold().sort(new ArbeidsforholdComparator());
                     }
                     dto.setArbeidsforhold(arbeidsforholdDokument);
-                    break;
-                case ORG:
-                    dto.getOrganisasjoner().add((OrganisasjonDokument) dokument);
-                    break;
-                case MEDL:
+                }
+                case ORG -> dto.getOrganisasjoner().add((OrganisasjonDokument) dokument);
+                case MEDL -> {
                     MedlemskapDokument medlemskapDokument = (MedlemskapDokument) dokument;
                     if (medlemskapDokument != null && medlemskapDokument.getMedlemsperiode() != null) {
                         medlemskapDokument.getMedlemsperiode().sort(Comparator.comparing(Medlemsperiode::getType).thenComparing(medlemsperiodeKomparator));
                     }
                     dto.setMedlemskap(medlemskapDokument);
-                    break;
-                case INNTK:
-                    dto.setInntekt(new InntektDto((InntektDokument) dokument));
-                    break;
-                case SOB_SAK:
-                    dto.setSakOgBehandling((SobSakDokument) dokument);
-                    break;
-                case PERSHIST:
-                    PersonhistorikkDokument personhistorikk = (PersonhistorikkDokument) dokument;
-                    dto.setPersonhistorikk(new PersonhistorikkDto(personhistorikk));
-
-                    dto.getPersonhistorikk().bostedsadressePerioder.forEach(bostedsadressePeriodeDto ->
-                        bostedsadressePeriodeDto.bostedsadresse.setPoststed(
-                            kodeverkService.dekod(POSTNUMMER, bostedsadressePeriodeDto.bostedsadresse.getPostnr())));
-
-                    if (!personhistorikk.statsborgerskapListe.isEmpty()) {
-                        historiskStatsborgerskap = personhistorikk.statsborgerskapListe.get(0).statsborgerskap;
-                    }
-                    break;
-                case SEDOPPL:
-                    dto.setSed(SedDokumentDto.fra((SedDokument) dokument));
-                    break;
-                default:
-                    break;
+                }
+                case INNTK -> dto.setInntekt(new InntektDto((InntektDokument) dokument));
+                case SOB_SAK -> dto.setSakOgBehandling((SobSakDokument) dokument);
+                case SEDOPPL -> dto.setSed(SedDokumentDto.fra((SedDokument) dokument));
             }
         }
-
-        LocalDate gjeldendeDato = hentGjeldendeDato(behandling);
-
-        if (søknadsperiode != null && søknadsperiode.getFom() != null && søknadsperiode.getFom().isBefore(gjeldendeDato)) {
-            dto.getPerson().setStatsborgerskap(historiskStatsborgerskap);
-            dto.getPerson().setStatsborgerskapDato(søknadsperiode.getFom());
-        } else {
-            dto.getPerson().setStatsborgerskapDato(gjeldendeDato);
-        }
-
         return dto;
-    }
-
-    private static LocalDate hentGjeldendeDato(Behandling behandling) {
-        if (behandling.getSistOpplysningerHentetDato() != null) {
-            return LocalDateTime.ofInstant(behandling.getSistOpplysningerHentetDato(), TIME_ZONE_ID).toLocalDate();
-        }
-        return LocalDateTime.ofInstant(behandling.getEndretDato(), TIME_ZONE_ID).toLocalDate();
     }
 
     /**

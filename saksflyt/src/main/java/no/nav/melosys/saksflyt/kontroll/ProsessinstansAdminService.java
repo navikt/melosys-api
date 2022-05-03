@@ -9,6 +9,8 @@ import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.domain.saksflyt.ProsessinstansHendelse;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.saksflyt.impl.BehandleProsessinstansDelegate;
 import no.nav.melosys.saksflyt.kontroll.dto.HentProsessinstansDto;
@@ -53,6 +55,18 @@ public class ProsessinstansAdminService {
         setStatusRestartet(prosessinstanser);
     }
 
+    public ProsessSteg hoppOverStegProsessinstans(UUID uuid) {
+        var prosessinstans = prosessinstansRepository.findById(uuid)
+            .orElseThrow(() -> new IkkeFunnetException("Fant ikke prosessinstans med ID %s".formatted(uuid)));
+        var nesteSteg = hentNesteSteg(prosessinstans)
+            .orElseThrow(() -> new TekniskException("Fant ikke neste steg for prosessinstans med ID %s".formatted(uuid)));
+
+        prosessinstans.setSistFullførtSteg(nesteSteg);
+        prosessinstansRepository.save(prosessinstans);
+
+        return nesteSteg;
+    }
+
     private HentProsessinstansDto mapTilHentProsessinstansDto(Prosessinstans prosessinstans) {
         Long behandlingID = Optional.ofNullable(prosessinstans.getBehandling())
             .map(Behandling::getId)
@@ -67,7 +81,9 @@ public class ProsessinstansAdminService {
             saksnummer,
             prosessinstans.getType().getKode(),
             prosessinstans.getEndretDato(),
-            hentFeiletSteg(prosessinstans),
+            hentNesteSteg(prosessinstans)
+                .map(ProsessSteg::getKode)
+                .orElse(null),
             prosessinstans.getHendelser()
                 .stream()
                 .max(Comparator.comparing(ProsessinstansHendelse::getDato))
@@ -75,14 +91,9 @@ public class ProsessinstansAdminService {
                 .orElse(null));
     }
 
-    private String hentFeiletSteg(Prosessinstans prosessinstans) {
-        var sisteFullførtSteg = Optional.ofNullable(prosessinstans.getSistFullførtSteg())
-            .orElse(null);
-
+    private Optional<ProsessSteg> hentNesteSteg(Prosessinstans prosessinstans) {
         return ProsessflytDefinisjon.finnFlytForProsessType(prosessinstans.getType())
-            .map(it -> it.nesteSteg(sisteFullførtSteg))
-            .map(ProsessSteg::getKode)
-            .orElse(null);
+            .map(it -> it.nesteSteg(prosessinstans.getSistFullførtSteg()));
     }
 
     private void setStatusRestartet(Collection<Prosessinstans> prosessinstanser) {

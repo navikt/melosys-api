@@ -190,7 +190,7 @@ public class BehandlingTjeneste {
         behandlingDto.setBehandlingID(behandling.getId());
         behandlingDto.setRedigerbart(aksesskontroll.behandlingKanRedigeresAvSaksbehandler(behandling, saksbehandler));
         behandlingDto.setOppsummering(tilOppsummeringDto(behandling));
-        var saksopplysningerDto = saksopplysningerTilDto.getSaksopplysningerDto(behandling.getSaksopplysninger(), behandling);
+        var saksopplysningerDto = saksopplysningerTilDto.getSaksopplysningerDto(behandling.getSaksopplysninger());
         behandlingDto.setSaksopplysninger(saksopplysningerDto);
         return behandlingDto;
     }

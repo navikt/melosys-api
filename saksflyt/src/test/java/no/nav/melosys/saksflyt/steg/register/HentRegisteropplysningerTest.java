@@ -123,4 +123,17 @@ class HentRegisteropplysningerTest {
 
         verify(registeropplysningerService, never()).hentOgLagreOpplysninger(any());
     }
+
+    @Test
+    void utfør_behandlingstypeTrygdetid_henterIngenting() {
+        behandling.setTema(Behandlingstema.TRYGDETID);
+        behandling.getFagsak().setType(Sakstyper.EU_EOS);
+        var prosessinstans = new Prosessinstans();
+        prosessinstans.setBehandling(behandling);
+
+        hentRegisteropplysninger.utfør(prosessinstans);
+
+        verify(registeropplysningerService).hentOgLagreOpplysninger(requestCaptor.capture());
+        assertThat(requestCaptor.getValue().getOpplysningstyper()).isEmpty();
+    }
 }

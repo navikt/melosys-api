@@ -24,6 +24,7 @@ public enum GrunnlagMedl {
     FO_13_4("FO_13_4"),
     FO_15("FO_15"),
     FO_16("FO_16"),
+    FO_987_2009_14_11("FO_987_2009_14_11"),
     MEDFT("MEDFT"),
     IMEDEOS("IMEDEOS"),
     FTL_2_8("FTL_2-8"),

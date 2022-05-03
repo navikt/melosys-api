@@ -55,7 +55,7 @@ abstract class ConsumerTestBase<T>(
 
     fun executeFromController(verify: () -> Unit) {
         SpringSubjectHandler.set(TestSubjectHandler())
-        ThreadLocalAccessInfo.beforeControllerRequest("request")
+        ThreadLocalAccessInfo.beforeControllerRequest("request", false)
         verify()
         executeRequest()
         ThreadLocalAccessInfo.afterControllerRequest("request")
