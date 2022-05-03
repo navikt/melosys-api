@@ -264,13 +264,13 @@ public class FagsakService {
         var førsteBehandling = fagsak.hentTidligstRegistrertBehandling();
 
         return switch (førsteBehandling.getType()) {
-            case SOEKNAD -> hentBehandlingSistRegistrertHarVedtak(fagsak);
-            case SED -> hentBehandlingSistRegistrertMedRegistrertUnntak(fagsak);
+            case SOEKNAD -> hentBehandlingMedSistRegistrertVedtak(fagsak);
+            case SED -> hentBehandlingMedSistRegistrertUnntak(fagsak);
             default -> throw new FunksjonellException("Kan ikke revurdere en behandling av type " + førsteBehandling.getType().getBeskrivelse());
         };
     }
 
-    public Behandling hentBehandlingSistRegistrertHarVedtak(Fagsak fagsak) {
+    public Behandling hentBehandlingMedSistRegistrertVedtak(Fagsak fagsak) {
         return fagsak.getBehandlinger().stream()
             .map(behandling -> behandlingsresultatService.hentBehandlingsresultat(behandling.getId()))
             .filter(Objects::nonNull)
@@ -280,7 +280,7 @@ public class FagsakService {
             .orElseThrow(() -> new IkkeFunnetException("Finner ikke behandlinger med vedtak for " + fagsak.getSaksnummer()));
     }
 
-    public Behandling hentBehandlingSistRegistrertMedRegistrertUnntak(Fagsak fagsak) {
+    public Behandling hentBehandlingMedSistRegistrertUnntak(Fagsak fagsak) {
         return fagsak.getBehandlinger().stream()
             .map(behandling -> behandlingsresultatService.hentBehandlingsresultat(behandling.getId()))
             .filter(Objects::nonNull)
