@@ -106,12 +106,20 @@ public class Aktoer extends RegistreringsInfo {
         this.representerer = representerer;
     }
 
+    public boolean erPerson() {
+        return Aktoersroller.BRUKER == rolle || (Aktoersroller.REPRESENTANT == rolle && aktørId != null);
+    }
+
+    public boolean erOrganisasjon() {
+        return Aktoersroller.ARBEIDSGIVER == rolle || (Aktoersroller.REPRESENTANT == rolle && orgnr != null);
+    }
+
     public boolean erUtenlandskMyndighet() {
         return Aktoersroller.TRYGDEMYNDIGHET == rolle && institusjonId != null;
     }
 
-    public boolean erOrganisasjon() {
-        return !Aktoersroller.BRUKER.equals(rolle);
+    public boolean erBruker() {
+        return Aktoersroller.BRUKER.equals(rolle);
     }
 
     public Landkoder hentMyndighetLandkode() {

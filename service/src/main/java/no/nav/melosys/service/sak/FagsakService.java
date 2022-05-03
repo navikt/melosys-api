@@ -141,8 +141,7 @@ public class FagsakService {
 
         Fullmektig fullmektig = opprettSakRequest.getFullmektig();
         if (fullmektig != null) {
-            Aktoer aktørFullmektig = new Aktoer();
-            aktørFullmektig.setOrgnr(fullmektig.getRepresentantID());
+            Aktoer aktørFullmektig = lagAktørFullmektigMedID(fullmektig.getRepresentantID());
             aktørFullmektig.setFagsak(fagsak);
             aktørFullmektig.setRolle(Aktoersroller.REPRESENTANT);
             aktørFullmektig.setRepresenterer(fullmektig.getRepresenterer());
@@ -177,6 +176,16 @@ public class FagsakService {
 
         sakerOpprettet.increment();
         return fagsak;
+    }
+
+    private Aktoer lagAktørFullmektigMedID(String representantID) {
+        Aktoer aktørFullmektig = new Aktoer();
+        if (representantID.length() == 11) {
+            aktørFullmektig.setAktørId(representantID);
+        } else {
+            aktørFullmektig.setOrgnr(representantID);
+        }
+        return aktørFullmektig;
     }
 
     private String hentNesteSaksnummer() {
