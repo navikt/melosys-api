@@ -36,12 +36,12 @@ import org.springframework.stereotype.Service;
 @Primary
 public class PersondataService implements PersondataFasade {
 
-    private final static Logger log = LoggerFactory.getLogger(PersondataService.class);
-
+    private static final Logger log = LoggerFactory.getLogger(PersondataService.class);
     private final BehandlingService behandlingService;
     private final KodeverkService kodeverkService;
     private final PDLConsumer pdlConsumer;
     private final SaksopplysningerService saksopplysningerService;
+    private final FamiliemedlemService familiemedlemService;
 
     public static final String PDL_PERSOPL_VERSJON = "1.0";
     public static final String PDL_PERS_SAKS_VERSJON = "1.0";
@@ -117,11 +117,9 @@ public class PersondataService implements PersondataFasade {
 
     @Override
     public PersonMedHistorikk hentPersonMedHistorikk(String ident) {
-        log.info("Henter person med historikk ved bruk av ident");
+        log.debug("Henter person med historikk ved bruk av ident");
         return PersonMedHistorikkOversetter.oversett(pdlConsumer.hentPersonMedHistorikk(ident), kodeverkService);
     }
-
-    private final FamiliemedlemService familiemedlemService;
 
     @Override
     public Set<Familiemedlem> hentFamiliemedlemmerFraBehandlingID(long behandlingID) {
