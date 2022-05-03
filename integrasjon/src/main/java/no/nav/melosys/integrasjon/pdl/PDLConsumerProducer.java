@@ -24,7 +24,7 @@ public class PDLConsumerProducer implements WebClientConfig {
         return new PDLConsumerImpl(
             webclientBuilder(webclientBuilder, pdlUrl)
                 .filter(pdlSystemAuthFilter)
-                .filter(errorFilter("Kall mot PDL feilet. %s - %s"))
+                .filter(errorFilter("Kall mot PDL feilet."))
                 .build()
         );
     }
@@ -37,7 +37,7 @@ public class PDLConsumerProducer implements WebClientConfig {
         return new PDLConsumerImpl(
             webclientBuilder(webclientBuilder, pdlUrl)
                 .filter(pdlSaksbehandlerAuthFilter)
-                .filter(errorFilter("Kall mot PDL feilet. %s - %s"))
+                .filter(errorFilter("Kall mot PDL feilet."))
                 .build());
     }
 

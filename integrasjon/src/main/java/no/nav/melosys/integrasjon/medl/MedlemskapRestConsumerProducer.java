@@ -30,7 +30,7 @@ public class MedlemskapRestConsumerProducer implements RestConsumer, WebClientCo
                 .baseUrl(url)
                 .filter(systemContextExchangeFilter)
                 .filter(headerFilter())
-                .filter(errorFilter("Kall mot Medl feilet. %s - %s"))
+                .filter(errorFilter("Kall mot Medl feilet."))
                 .build()
         );
     }

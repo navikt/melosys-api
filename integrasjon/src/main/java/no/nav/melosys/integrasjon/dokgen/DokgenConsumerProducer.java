@@ -19,7 +19,7 @@ public class DokgenConsumerProducer implements WebClientConfig {
         return new DokgenConsumer(
             webClientBuilder
                 .baseUrl(url)
-                .filter(errorFilter("Kall mot dokumentgenereringstjeneste feilet. %s - %s"))
+                .filter(errorFilter("Kall mot dokumentgenereringstjeneste feilet."))
                 .build()
         );
     }

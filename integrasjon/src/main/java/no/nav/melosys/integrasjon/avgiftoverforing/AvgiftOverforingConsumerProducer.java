@@ -19,7 +19,7 @@ public class AvgiftOverforingConsumerProducer implements WebClientConfig {
         return new AvgiftOverforingConsumer(
             webClientBuilder
                 .baseUrl(url)
-                .filter(errorFilter("Kall mot avgift-overføring feilet. %s - %s"))
+                .filter(errorFilter("Kall mot avgift-overføring feilet."))
                 .build()
         );
     }

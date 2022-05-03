@@ -27,7 +27,7 @@ public class OppgaveConsumerProducer implements WebClientConfig {
             webClientBuilder
                 .defaultHeaders(this::defaultHeaders)
                 .filter(userContextExchangeFilter)
-                .filter(errorFilter("Kall mot Oppgave feilet. %s - %s"))
+                .filter(errorFilter("Kall mot Oppgave feilet."))
                 .baseUrl(url)
                 .build()
         );
@@ -41,7 +41,7 @@ public class OppgaveConsumerProducer implements WebClientConfig {
             webClientBuilder
                 .filter(systemContextExchangeFilter)
                 .defaultHeaders(this::defaultHeaders)
-                .filter(errorFilter("Kall mot Oppgave feilet. %s - %s"))
+                .filter(errorFilter("Kall mot Oppgave feilet."))
                 .baseUrl(url)
                 .build()
         );

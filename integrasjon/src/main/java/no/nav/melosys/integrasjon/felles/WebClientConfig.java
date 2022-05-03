@@ -11,7 +11,7 @@ public interface WebClientConfig {
                 return response.bodyToMono(String.class)
                     .defaultIfEmpty(response.statusCode().getReasonPhrase())
                     .flatMap(
-                        errorBody -> Mono.error(new TekniskException(String.format(feilmelding, response.statusCode(), errorBody))));
+                        errorBody -> Mono.error(new TekniskException(feilmelding + " " + response.statusCode() + " - " + errorBody)));
             }
             return Mono.just(response);
         });
