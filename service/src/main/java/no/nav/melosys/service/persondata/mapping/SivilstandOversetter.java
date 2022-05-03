@@ -14,6 +14,7 @@ public final class SivilstandOversetter {
     public static Sivilstand oversettForRelatertVedSivilstand(
         Collection<no.nav.melosys.integrasjon.pdl.dto.person.Sivilstand> sivilstandListe) {
         return sivilstandListe.stream()
+            .filter(HarMetadata::erIkkeHistorisk)
             .max(Comparator.comparing(HarMetadata::hentDatoSistRegistrert))
             .map(SivilstandOversetter::oversett)
             .orElse(null);

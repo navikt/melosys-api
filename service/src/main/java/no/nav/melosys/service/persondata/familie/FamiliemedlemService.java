@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.person.familie.Familiemedlem;
 import no.nav.melosys.integrasjon.pdl.PDLConsumer;
+import no.nav.melosys.integrasjon.pdl.dto.HarMetadata;
 import no.nav.melosys.integrasjon.pdl.dto.person.ForelderBarnRelasjon;
 import no.nav.melosys.integrasjon.pdl.dto.person.Person;
 import no.nav.melosys.integrasjon.pdl.dto.person.Sivilstand;
@@ -88,7 +89,9 @@ public class FamiliemedlemService {
 
     private Set<Familiemedlem> hentRelatertVedSivilstand(Collection<Sivilstand> sivilstandRelasjoner) {
         return sivilstandRelasjoner.stream()
+            .filter(HarMetadata::erIkkeHistorisk)
             .map(Sivilstand::relatertVedSivilstand)
+            .distinct()
             .filter(Objects::nonNull)
             .map(pdlConsumer::hentRelatertVedSivilstand)
             .map(FamiliemedlemOversetter::oversettRelatertVedSivilstand)
