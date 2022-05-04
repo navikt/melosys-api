@@ -10,6 +10,7 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.service.aktoer.AktoerDto;
 import no.nav.melosys.service.aktoer.AktoerService;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import org.junit.jupiter.api.Test;
@@ -39,6 +40,8 @@ class AktoerTjenesteTest extends JsonSchemaTestParent {
     private AktoerService aktoerService;
     @MockBean
     private FagsakService fagsakService;
+    @MockBean
+    private PersondataFasade persondataFasade;
 
     @Autowired
     private MockMvc mockMvc;
@@ -101,7 +104,7 @@ class AktoerTjenesteTest extends JsonSchemaTestParent {
         mockMvc.perform(get("/api/fagsaker/{saksnummer}/aktoerer", "MELTEST-1")
                 .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
-            .andExpect(responseBody(objectMapper).containsObjectAsJson(Collections.singletonList(AktoerDto.tilDto(aktoerMyndighet)), new TypeReference<List<AktoerDto>>() {
+            .andExpect(responseBody(objectMapper).containsObjectAsJson(Collections.singletonList(AktoerDto.tilDto(aktoerMyndighet, persondataFasade)), new TypeReference<List<AktoerDto>>() {
             }));
     }
 

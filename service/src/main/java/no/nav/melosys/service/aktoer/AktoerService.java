@@ -10,6 +10,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.AktoerRepository;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,9 +18,11 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class AktoerService {
     private final AktoerRepository aktørRepository;
+    private final PersondataFasade persondataFasade;
 
-    public AktoerService(AktoerRepository aktørRepository) {
+    public AktoerService(AktoerRepository aktørRepository, PersondataFasade persondataFasade) {
         this.aktørRepository = aktørRepository;
+        this.persondataFasade = persondataFasade;
     }
 
     public List<Aktoer> hentfagsakAktører(Fagsak fagsak, Aktoersroller aktoersrolle, Representerer representerer) {
@@ -50,7 +53,11 @@ public class AktoerService {
         aktoer.setUtenlandskPersonId(aktoerDto.getUtenlandskPersonID());
         aktoer.setOrgnr(aktoerDto.getOrgnr());
         aktoer.setRolle(Aktoersroller.valueOf(aktoerDto.getRolleKode()));
-        aktoer.setAktørId(aktoerDto.getAktoerID());
+        if (aktoerDto.getPersonIdent() != null && !aktoerDto.getPersonIdent().isBlank()) {
+            aktoer.setAktørId(persondataFasade.hentAktørIdForIdent(aktoerDto.getPersonIdent()));
+        } else {
+            aktoer.setAktørId(aktoerDto.getAktoerID());
+        }
 
         if (aktoerDto.getRepresentererKode() != null) {
             aktoer.setRepresenterer(Representerer.valueOf(aktoerDto.getRepresentererKode()));

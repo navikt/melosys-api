@@ -12,6 +12,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.repository.AktoerRepository;
 import no.nav.melosys.service.aktoer.AktoerDto;
 import no.nav.melosys.service.aktoer.AktoerService;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,6 +32,8 @@ class AktoerServiceTest {
 
     @Mock
     private AktoerRepository aktoerRepository;
+    @Mock
+    private PersondataFasade persondataFasade;
 
     private AktoerService aktoerService;
 
@@ -43,7 +46,7 @@ class AktoerServiceTest {
 
     @BeforeEach
     public void setUp() {
-        aktoerService = new AktoerService(aktoerRepository);
+        aktoerService = new AktoerService(aktoerRepository, persondataFasade);
         aktoer = new Aktoer();
         aktoer.setId(aktoerId);
     }

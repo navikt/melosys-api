@@ -18,6 +18,7 @@ import no.nav.melosys.service.aktoer.AktoerService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterSystemService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -75,7 +76,8 @@ class AvklarArbeidsgiverTest {
     @Test
     void utfør_medAvklartNorskVirksomhet_arbeidsgiveraktørOpprettes() {
         AktoerRepository aktoerRepository = mock(AktoerRepository.class);
-        AvklarArbeidsgiver steg = new AvklarArbeidsgiver(new AktoerService(aktoerRepository), avklarteVirksomheterService,
+        PersondataFasade persondataFasade = mock(PersondataFasade.class);
+        AvklarArbeidsgiver steg = new AvklarArbeidsgiver(new AktoerService(aktoerRepository, persondataFasade), avklarteVirksomheterService,
             behandlingService, behandlingsresultatService);
 
         List<AvklartVirksomhet> avklarteVirksomheter = Collections.singletonList(avklartVirksomhet);
@@ -96,7 +98,8 @@ class AvklarArbeidsgiverTest {
     @Test
     void utfør_utenAvklartNorskVirksomhet_arbeidsgiveraktorerSlettes() {
         AktoerRepository aktoerRepository = mock(AktoerRepository.class);
-        AvklarArbeidsgiver steg = new AvklarArbeidsgiver(new AktoerService(aktoerRepository), avklarteVirksomheterService,
+        PersondataFasade persondataFasade = mock(PersondataFasade.class);
+        AvklarArbeidsgiver steg = new AvklarArbeidsgiver(new AktoerService(aktoerRepository, persondataFasade), avklarteVirksomheterService,
             behandlingService, behandlingsresultatService);
         when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
 
