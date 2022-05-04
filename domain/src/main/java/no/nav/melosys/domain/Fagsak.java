@@ -113,8 +113,6 @@ public class Fagsak extends RegistreringsInfo {
         return Optional.ofNullable(hentAktivBehandling()).orElse(hentSistOppdatertBehandling());
     }
 
-
-
     public Optional<Behandling> finnTidligstInaktivBehandling() {
         return getBehandlinger().stream()
             .filter(Behandling::erInaktiv)

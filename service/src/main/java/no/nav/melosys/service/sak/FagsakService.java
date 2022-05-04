@@ -233,7 +233,7 @@ public class FagsakService {
             behandling = hentBehandlingSomErUtgangspunktForRevurdering(fagsak);
             replikertBehandling = behandlingService.replikerBehandlingOgBehandlingsresultat(behandling, avgjørBehandlingstype(fagsak));
         } catch (FunksjonellException e) {
-            behandling = fagsak.hentSistAktivBehandling();
+            behandling = fagsak.hentSistOppdatertBehandling();
             replikertBehandling = behandlingService.replikerBehandlingUtenBehandlingsresultat(behandling, avgjørBehandlingstype(fagsak));
         }
 
@@ -261,7 +261,7 @@ public class FagsakService {
         }
     }
 
-    Behandling hentBehandlingSomErUtgangspunktForRevurdering(Fagsak fagsak) {
+    public Behandling hentBehandlingSomErUtgangspunktForRevurdering(Fagsak fagsak) {
         if (fagsak.harAktivBehandling()) {
             return fagsak.hentSistAktivBehandling();
         }

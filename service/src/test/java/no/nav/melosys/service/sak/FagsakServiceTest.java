@@ -389,7 +389,7 @@ class FagsakServiceTest {
     }
 
     @Test
-    void opprettNyVurderingBehandling_behandlingHarIkkeVedtak_nyBehandlingOpprettetNyVurderingReplikerFraSistAktiveUtenBehandlingsgrunnlag() {
+    void opprettNyVurderingBehandling_behandlingHarIkkeVedtak_replikerUtenBehandlingsresultatFraSistOppdaterteBehandling() {
         final String saksnummer = "MEL-1";
         Fagsak fagsak = lagFagsakMedBruker();
 
@@ -471,7 +471,7 @@ class FagsakServiceTest {
     }
 
     @Test
-    void opprettNyVurderingBehandling_behandlingerAvTypeSedHarIkkeRegistrertUnntakt_nyBehandlingOpprettetNyVurderingReplikerFraSistAktiveUtenBehandlingsresultat() {
+    void opprettNyVurderingBehandling_behandlingerAvTypeSedHarIkkeRegistrertUnntakt_replikerUtenBehandlingsresultatFraSistOppdaterteBehandling() {
         final String saksnummer = "MEL-1";
         Fagsak fagsak = lagFagsakMedBruker();
 
@@ -494,7 +494,7 @@ class FagsakServiceTest {
     }
 
     @Test
-    void opprettNyVurderingBehandling_behandlingerAvTypeAnnetEnnSedOgSøknad_nyBehandlingOpprettetNyVurderingReplikerFraSistAktiveUtenBehandlingsresultat() {
+    void opprettNyVurderingBehandling_behandlingerAvTypeAnnetEnnSedOgSøknad_replikerUtenBehandlingsresultatFraSistOppdaterteBehandling() {
         final String saksnummer = "MEL-1";
         Fagsak fagsak = lagFagsakMedBruker();
 
