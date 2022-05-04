@@ -67,9 +67,29 @@ public final class PeriodeKontroller {
         return date1.equals(date2);
     }
 
-    public static boolean periodeOverlapperMedInklusivPerioder(ErPeriode periode1, ErPeriode periode2) {
-        LocalDate inklusivPeriode2Fom = periode2.getFom() != null ? periode2.getFom().plusDays(1) : null;
-        return periodeOverlapper(periode1.getFom(), periode1.getTom(), inklusivPeriode2Fom, periode2.getTom());
+    public static boolean perioderOverlapperMerEnn1Dag(ErPeriode periode1, ErPeriode periode2) {
+        return periodeOverlapperMerEnn1Dag(periode1.getFom(), periode1.getTom(), periode2.getFom(), periode2.getTom());
+    }
+
+    private static boolean periodeOverlapperMerEnn1Dag(LocalDate fom1, LocalDate tom1, LocalDate fom2, LocalDate tom2) {
+
+        if (fom1 == null || fom2 == null) {
+            throw new IllegalArgumentException("Fom-dato kan ikke være null!");
+        } else if (tom1 == null && tom2 == null) {
+            throw new IllegalArgumentException("Kan ikke avgjøre om to åpne periode overlapper");
+        }
+
+        if (datoErLik(fom1, fom2) || datoErLik(tom1, tom2) || datoErLik(fom1, tom2) || datoErLik(tom1, fom2)) {
+            return true;
+        }
+
+        if (tom1 == null) {
+            return åpenPeriodeOverlapper(fom2, tom2, fom1);
+        } else if (tom2 == null) {
+            return åpenPeriodeOverlapper(fom1, tom1, fom2);
+        }
+
+        return fom1.isBefore(fom2) && tom1.isAfter(fom2) || fom1.isAfter(fom2) && fom1.isBefore(tom2);
     }
 
     public static boolean periodeOverlapper(ErPeriode periode1, ErPeriode periode2) {
