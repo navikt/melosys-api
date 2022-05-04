@@ -46,13 +46,21 @@ public class PdlObjectFactory {
             Collections.emptyList(),
             Set.of(new no.nav.melosys.integrasjon.pdl.dto.person.Navn("fornavn", "mellomnavn", "etternavn", metadata())),
             Collections.emptyList(),
-            Set.of(new Sivilstand(Sivilstandstype.GIFT, "relatertVedSivilstandID", LocalDate.MIN, LocalDate.EPOCH,
-                lagMetadata())),
+            Set.of(lagSivilstand()),
             Set.of(new no.nav.melosys.integrasjon.pdl.dto.person.Statsborgerskap("AIA", null,
                     LocalDate.parse("1979-11-18"), LocalDate.parse("1980-11-18"), lagMetadata(LocalDateTime.MIN)),
                 new no.nav.melosys.integrasjon.pdl.dto.person.Statsborgerskap("NOR", LocalDate.parse("2021-05-08"), null,
                     null, lagMetadata(LocalDateTime.MAX))),
             null);
+    }
+
+    public static Sivilstand lagSivilstand() {
+        return lagSivilstand("relatertVedSivilstandID");
+    }
+
+    public static Sivilstand lagSivilstand(String relatertVedSivilstandId) {
+        return new Sivilstand(Sivilstandstype.GIFT, relatertVedSivilstandId, LocalDate.MIN, LocalDate.EPOCH,
+            lagMetadata());
     }
 
     public static Bostedsadresse lagBostedsadresseMedMatrikkelAdresse() {
@@ -164,6 +172,6 @@ public class PdlObjectFactory {
             LocalDateTime.parse("2021-06-07T10:04:52"),
             null,
             null
-            );
+        );
     }
 }

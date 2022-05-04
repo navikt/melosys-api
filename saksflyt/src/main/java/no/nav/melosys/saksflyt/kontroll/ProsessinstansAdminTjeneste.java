@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/admin/prosessinstanser")
 public class ProsessinstansAdminTjeneste implements AdminTjeneste {
 
-    private final Logger log = LoggerFactory.getLogger(ProsessinstansAdminTjeneste.class);
+    private static final Logger log = LoggerFactory.getLogger(ProsessinstansAdminTjeneste.class);
 
     private final ProsessinstansAdminService prosessinstansAdminService;
     private final String apiKey;

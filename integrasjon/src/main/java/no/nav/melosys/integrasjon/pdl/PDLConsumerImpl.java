@@ -46,7 +46,9 @@ public class PDLConsumerImpl implements PDLConsumer {
         GraphQLResponse<HentIdenterResponse> response = webClient.post()
             .header(CALL_ID, UUID.randomUUID().toString())
             .bodyValue(graphQLRequest)
-            .retrieve().bodyToMono(new ParameterizedTypeReference<GraphQLResponse<HentIdenterResponse>>() {})
+            .retrieve()
+            .bodyToMono(new ParameterizedTypeReference<GraphQLResponse<HentIdenterResponse>>() {
+            })
             .block();
 
         håndterFeil(response);
@@ -65,7 +67,7 @@ public class PDLConsumerImpl implements PDLConsumer {
 
     @Override
     public Person hentFamilierelasjoner(String ident) {
-        return hentPersondata(HENT_FAMILIERELASJONER_QUERY, ident, true);
+        return hentPersondata(HENT_FAMILIERELASJONER_QUERY, ident, false);
     }
 
     @Override
@@ -104,7 +106,9 @@ public class PDLConsumerImpl implements PDLConsumer {
         GraphQLResponse<HentPersonResponse> response = webClient.post()
             .header(CALL_ID, UUID.randomUUID().toString())
             .bodyValue(graphQLRequest)
-            .retrieve().bodyToMono(new ParameterizedTypeReference<GraphQLResponse<HentPersonResponse>>() {})
+            .retrieve()
+            .bodyToMono(new ParameterizedTypeReference<GraphQLResponse<HentPersonResponse>>() {
+            })
             .block();
 
         håndterFeil(response);

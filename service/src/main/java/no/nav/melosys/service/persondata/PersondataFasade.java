@@ -12,9 +12,9 @@ import no.nav.melosys.domain.person.familie.Familiemedlem;
 public interface PersondataFasade {
     String hentAktørIdForIdent(String ident);
 
-    Set<Familiemedlem> hentFamiliemedlemmerMedHistorikk(long behandlingID);
+    Set<Familiemedlem> hentFamiliemedlemmerFraBehandlingID(long behandlingID);
 
-    Set<Familiemedlem> hentFamiliemedlemmerMedHistorikk(String ident);
+    Set<Familiemedlem> hentFamiliemedlemmerFraIdent(String ident);
 
     Optional<String> finnFolkeregisterident(String ident);
 

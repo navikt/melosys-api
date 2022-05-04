@@ -36,7 +36,7 @@ class FamiliemedlemmerDataFetcherTest {
         when(executionStepInfo.getParent()).thenReturn(executionStepInfo);
         when(executionStepInfo.getArgument("behandlingID")).thenReturn(1L);
         when(executionStepInfo.getArgument("ident")).thenReturn(null);
-        when(persondataFasade.hentFamiliemedlemmerMedHistorikk(1L)).thenReturn(medlemmer);
+        when(persondataFasade.hentFamiliemedlemmerFraBehandlingID(1L)).thenReturn(medlemmer);
 
         final var familieDtoListe = familiemedlemmerDataFetcher.get(dataFetchingEnvironment);
         assertFetched(familieDtoListe);
@@ -49,7 +49,7 @@ class FamiliemedlemmerDataFetcherTest {
         when(dataFetchingEnvironment.getExecutionStepInfo()).thenReturn(executionStepInfo);
         when(executionStepInfo.getParent()).thenReturn(executionStepInfo);
         when(executionStepInfo.getArgument("ident")).thenReturn("Z990077");
-        when(persondataFasade.hentFamiliemedlemmerMedHistorikk("Z990077")).thenReturn(medlemmer);
+        when(persondataFasade.hentFamiliemedlemmerFraIdent("Z990077")).thenReturn(medlemmer);
 
         final var familieDtoListe = familiemedlemmerDataFetcher.get(dataFetchingEnvironment);
         assertFetched(familieDtoListe);
