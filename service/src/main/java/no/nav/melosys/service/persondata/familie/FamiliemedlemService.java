@@ -98,7 +98,7 @@ public class FamiliemedlemService {
     private Set<Familiemedlem> hentFamiliemedlemmerRelatertVedSivilstand(Collection<Sivilstand> sivilstandRelasjoner) {
         return sivilstandRelasjoner.stream()
             .filter(Objects::nonNull)
-            .filter(Sivilstand::erAktivFamiliemedlem)
+            .filter(Sivilstand::erAktiv)
             .map(this::oversettFamiliemedlem)
             .collect(Collectors.toUnmodifiableSet());
     }

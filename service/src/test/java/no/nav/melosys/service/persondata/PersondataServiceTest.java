@@ -2,6 +2,7 @@ package no.nav.melosys.service.persondata;
 
 import java.time.LocalDate;
 import java.util.*;
+import java.util.function.Predicate;
 
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.KjoennsType;
@@ -32,8 +33,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static no.nav.melosys.integrasjon.pdl.dto.identer.IdentGruppe.*;
 import static no.nav.melosys.service.SaksbehandlingDataFactory.*;
-import static no.nav.melosys.service.persondata.PdlObjectFactory.lagPerson;
-import static no.nav.melosys.service.persondata.PdlObjectFactory.metadata;
+import static no.nav.melosys.service.persondata.PdlObjectFactory.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -92,15 +92,20 @@ class PersondataServiceTest {
 
     @Test
     void hentPersonMedFamilie() {
+        String forventetRelatertVedSivilstandID = "forventetRelatertVedSivilstandID";
+
         when(pdlConsumer.hentPerson(anyString())).thenReturn(lagPerson());
         when(familiemedlemService.hentFamiliemedlemmer(lagPerson())).thenReturn(
             Set.of(
                 FamiliemedlemOversetter.oversettBarn(lagPerson(), lagFolkeregisterIdent("identForelder1")),
-                FamiliemedlemOversetter.oversettRelatertVedSivilstand(lagPerson())
+                FamiliemedlemOversetter.oversettPersonRelatertVedSivilstandMedSivilstand(lagPerson(),
+                    lagSivilstand(forventetRelatertVedSivilstandID))
             ));
 
-        final Personopplysninger persondata = (Personopplysninger) persondataService.hentPerson("ident",
+
+        Personopplysninger persondata = (Personopplysninger) persondataService.hentPerson("ident",
             Informasjonsbehov.MED_FAMILIERELASJONER);
+
 
         assertThat(persondata.bostedsadresse()).isNotNull();
         assertThat(persondata.dødsfall()).isEqualTo(new Doedsfall(LocalDate.MAX));
@@ -115,7 +120,14 @@ class PersondataServiceTest {
                 null, "PDL", "Dolly", false));
         assertThat(persondata.familiemedlemmer()).isNotEmpty()
             .anyMatch(Familiemedlem::erBarn)
+            .anyMatch(harForventetRelatertVedSivilstandId(forventetRelatertVedSivilstandID))
             .anyMatch(Familiemedlem::erRelatertVedSivilstand);
+    }
+
+    @NotNull
+    private Predicate<Familiemedlem> harForventetRelatertVedSivilstandId(String forventetRelatertVedSivilstandID) {
+        return familiemedlem -> familiemedlem.sivilstand() != null &&
+            forventetRelatertVedSivilstandID.equals(familiemedlem.sivilstand().relatertVedSivilstand());
     }
 
     @NotNull
@@ -159,7 +171,7 @@ class PersondataServiceTest {
         );
     }
 
-    private static PersonDokument lagPersonDokument(no.nav.melosys.domain.dokument.person.Sivilstand sivilstand) {
+    private PersonDokument lagPersonDokument(no.nav.melosys.domain.dokument.person.Sivilstand sivilstand) {
         PersonDokument person = new PersonDokument();
         person.setKjønn(new KjoennsType("K"));
         person.setFornavn("Kari");

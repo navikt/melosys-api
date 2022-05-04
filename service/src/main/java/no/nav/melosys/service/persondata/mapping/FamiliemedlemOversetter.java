@@ -55,18 +55,6 @@ public final class FamiliemedlemOversetter {
         };
     }
 
-    public static Familiemedlem oversettRelatertVedSivilstand(Person relatertVedSivilstand) {
-        return new Familiemedlem(
-            FolkeregisteridentOversetter.oversett(relatertVedSivilstand.folkeregisteridentifikator()),
-            NavnOversetter.oversett(relatertVedSivilstand.navn()),
-            Familierelasjon.RELATERT_VED_SIVILSTAND,
-            FoedselOversetter.oversett(relatertVedSivilstand.foedsel()),
-            null,
-            null,
-            SivilstandOversetter.oversettForRelatertVedSivilstand(relatertVedSivilstand.sivilstand())
-        );
-    }
-
     public static Familiemedlem oversettPersonRelatertVedSivilstandMedSivilstand(Person person, no.nav.melosys.integrasjon.pdl.dto.person.Sivilstand sivilstand) {
         return new Familiemedlem(
             FolkeregisteridentOversetter.oversett(person.folkeregisteridentifikator()),
