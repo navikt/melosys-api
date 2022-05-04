@@ -19,71 +19,90 @@ class OverlappendeMedlemskapsperioderKontrollerTest {
     @Test
     void overlappendeMedlemsperiode_tidligerePeriodeIkkeOverlappendePerioder_ingenTreff() {
         assertThat(OverlappendeMedlemskapsperioderKontroller.harOverlappendeMedlemsperiode(
-            lagMedlemskapsDokument(), lagLovvalgsPeriode(LocalDate.EPOCH.minusYears(2),
-                LocalDate.EPOCH.minusYears(1)))
+            lagMedlemskapsDokument(),
+            lagLovvalgsPeriode(LocalDate.EPOCH.minusYears(2), LocalDate.EPOCH.minusYears(1)),
+            null)
         ).isFalse();
     }
 
     @Test
     void overlappendeMedlemsperiode_senerePeriodeIkkeOverlappendePerioder_ingenTreff() {
         assertThat(OverlappendeMedlemskapsperioderKontroller.harOverlappendeMedlemsperiode(
-            lagMedlemskapsDokument(), lagLovvalgsPeriode(LocalDate.EPOCH.plusYears(3),
-                LocalDate.EPOCH.plusYears(5L)))).isFalse();
+            lagMedlemskapsDokument(),
+            lagLovvalgsPeriode(LocalDate.EPOCH.plusYears(3), LocalDate.EPOCH.plusYears(5L)),
+            null)
+        ).isFalse();
     }
 
     @Test
     void overlappendeMedlemsperiode_overlappendePeriode_registrerTreff_1() {
         assertThat(OverlappendeMedlemskapsperioderKontroller.harOverlappendeMedlemsperiode(
-            lagMedlemskapsDokument(), lagLovvalgsPeriode(LocalDate.EPOCH, LocalDate.EPOCH.plusYears(1)))
+            lagMedlemskapsDokument(),
+            lagLovvalgsPeriode(LocalDate.EPOCH, LocalDate.EPOCH.plusYears(1)),
+            null)
         ).isTrue();
     }
 
     @Test
     void overlappendeMedlemsperiode_overlappendePeriode_registrerTreff_2() {
         assertThat(OverlappendeMedlemskapsperioderKontroller.harOverlappendeMedlemsperiode(
-            lagMedlemskapsDokument(), lagLovvalgsPeriode(LocalDate.EPOCH.plusYears(1), LocalDate.EPOCH.plusYears(5)))
+            lagMedlemskapsDokument(),
+            lagLovvalgsPeriode(LocalDate.EPOCH.plusYears(1), LocalDate.EPOCH.plusYears(5)),
+            null)
         ).isTrue();
     }
 
     @Test
     void overlappendeMedlemsperiode_overlappendePeriode_registrerTreff_3() {
         assertThat(OverlappendeMedlemskapsperioderKontroller.harOverlappendeMedlemsperiode(
-            lagMedlemskapsDokument(), lagLovvalgsPeriode(LocalDate.EPOCH.minusYears(1), LocalDate.EPOCH.plusYears(5)))
+            lagMedlemskapsDokument(),
+            lagLovvalgsPeriode(LocalDate.EPOCH.minusYears(1), LocalDate.EPOCH.plusYears(5)),
+            null)
         ).isTrue();
     }
 
     @Test
     void overlappendeMedlemsperiode_overlappendePeriode_registrerTreff_4() {
         assertThat(OverlappendeMedlemskapsperioderKontroller.harOverlappendeMedlemsperiode(
-            lagMedlemskapsDokument(), lagLovvalgsPeriode(LocalDate.EPOCH.minusYears(1),
-                LocalDate.EPOCH.plusYears(1)))).isTrue();
+            lagMedlemskapsDokument(),
+            lagLovvalgsPeriode(LocalDate.EPOCH.minusYears(1), LocalDate.EPOCH.plusYears(1)),
+            null)
+        ).isTrue();
     }
 
     @Test
     void overlappendeMedlemsperiode_overlappendePeriode_registrerTreff_5() {
         assertThat(OverlappendeMedlemskapsperioderKontroller.harOverlappendeMedlemsperiode(
-            lagMedlemskapsDokument(), lagLovvalgsPeriode(LocalDate.EPOCH, LocalDate.EPOCH.plusYears(2)))
+            lagMedlemskapsDokument(),
+            lagLovvalgsPeriode(LocalDate.EPOCH, LocalDate.EPOCH.plusYears(2)),
+            null)
         ).isTrue();
     }
 
     @Test
     void overlappendeMedlemsperiode_overlappendePeriode_registrerTreff_6() {
         assertThat(OverlappendeMedlemskapsperioderKontroller.harOverlappendeMedlemsperiode(
-            lagMedlemskapsDokument(), lagLovvalgsPeriode(LocalDate.EPOCH.plusYears(2), LocalDate.EPOCH.plusYears(3)))
+            lagMedlemskapsDokument(),
+            lagLovvalgsPeriode(LocalDate.EPOCH.plusYears(2), LocalDate.EPOCH.plusYears(3)),
+            null)
         ).isTrue();
     }
 
     @Test
     void overlappendeMedlemsperiode_overlappendePeriode_registrerTreff_7() {
         assertThat(OverlappendeMedlemskapsperioderKontroller.harOverlappendeMedlemsperiode(
-            lagMedlemskapsDokument(), lagLovvalgsPeriode(LocalDate.EPOCH.plusYears(2), LocalDate.EPOCH.plusYears(2)))
+            lagMedlemskapsDokument(),
+            lagLovvalgsPeriode(LocalDate.EPOCH.plusYears(2), LocalDate.EPOCH.plusYears(2)),
+            null)
         ).isTrue();
     }
 
     @Test
     void overlappendeMedlemsperiode_overlappendePeriodeOgTomErNull_registrerTreff() {
         assertThat(OverlappendeMedlemskapsperioderKontroller.harOverlappendeMedlemsperiode(
-            lagMedlemskapsDokument(), lagLovvalgsPeriode(LocalDate.EPOCH.minusYears(1), null))
+            lagMedlemskapsDokument(),
+            lagLovvalgsPeriode(LocalDate.EPOCH.minusYears(1),
+                null), null)
         ).isTrue();
     }
 
@@ -93,7 +112,9 @@ class OverlappendeMedlemskapsperioderKontrollerTest {
         Medlemsperiode medlemsperiode = medlemskapDokument.getMedlemsperiode().get(0);
         medlemsperiode.status = PeriodestatusMedl.AVST.getKode();
         assertThat(OverlappendeMedlemskapsperioderKontroller.harOverlappendeMedlemsperiode(
-            medlemskapDokument, lagLovvalgsPeriode(LocalDate.EPOCH, LocalDate.EPOCH.plusYears(2)))
+            medlemskapDokument,
+            lagLovvalgsPeriode(LocalDate.EPOCH, LocalDate.EPOCH.plusYears(2)),
+            null)
         ).isFalse();
     }
 
@@ -103,7 +124,9 @@ class OverlappendeMedlemskapsperioderKontrollerTest {
         Medlemsperiode medlemsperiode = medlemskapDokument.getMedlemsperiode().get(0);
         medlemsperiode.status = PeriodestatusMedl.UAVK.getKode();
         assertThat(OverlappendeMedlemskapsperioderKontroller.harOverlappendeMedlemsperiode(
-            medlemskapDokument, lagLovvalgsPeriode(LocalDate.EPOCH, LocalDate.EPOCH.plusYears(2)))
+            medlemskapDokument,
+            lagLovvalgsPeriode(LocalDate.EPOCH, LocalDate.EPOCH.plusYears(2)),
+            null)
         ).isTrue();
     }
 
@@ -151,19 +174,35 @@ class OverlappendeMedlemskapsperioderKontrollerTest {
         Medlemsperiode medlemsperiode = medlemskapDokument.getMedlemsperiode().get(0);
         medlemsperiode.kilde = "LAANEKASSEN";
         assertThat(OverlappendeMedlemskapsperioderKontroller.harOverlappendeMedlemsperiode(
-            medlemskapDokument, lagLovvalgsPeriode(LocalDate.EPOCH, LocalDate.EPOCH.plusYears(2)))
+            medlemskapDokument,
+            lagLovvalgsPeriode(LocalDate.EPOCH, LocalDate.EPOCH.plusYears(2)),
+            null)
         ).isFalse();
     }
 
     @Test
-    void overlappendeMedlemsperiode_lovvalgsperiodeNyVurderingSammeMedlPeriodeID_ingenTreff() {
+    void overlappendeMedlemsperiode_overlappendePeriodeNyVurderingLovvalgsperiodeHarSammeMedlPeriodeID_ingenTreff() {
         MedlemskapDokument medlemskapDokument = lagMedlemskapsDokument();
         Medlemsperiode medlemsperiode = medlemskapDokument.getMedlemsperiode().get(0);
         medlemsperiode.id = 123L;
         Lovvalgsperiode lovvalgsperiode = lagLovvalgsPeriode(LocalDate.EPOCH, LocalDate.EPOCH.plusYears(2));
         lovvalgsperiode.setMedlPeriodeID(123L);
         assertThat(OverlappendeMedlemskapsperioderKontroller.harOverlappendeMedlemsperiode(
-            medlemskapDokument, lovvalgsperiode)
+            medlemskapDokument, lovvalgsperiode, null)
+        ).isFalse();
+    }
+
+    @Test
+    void overlappendeMedlemsperiode_overlappendePeriodeNyVurderingOpprinneligPeriodeHarSammeMedlPeriodeID_ingenTreff() {
+        MedlemskapDokument medlemskapDokument = lagMedlemskapsDokument();
+        Medlemsperiode medlemsperiode = medlemskapDokument.getMedlemsperiode().get(0);
+        medlemsperiode.id = 123L;
+        Lovvalgsperiode opprinneligLovvalgsperiode = lagLovvalgsPeriode(LocalDate.EPOCH, LocalDate.EPOCH.plusYears(2));
+        opprinneligLovvalgsperiode.setMedlPeriodeID(123L);
+        assertThat(OverlappendeMedlemskapsperioderKontroller.harOverlappendeMedlemsperiode(
+            medlemskapDokument,
+            lagLovvalgsPeriode(LocalDate.EPOCH, LocalDate.EPOCH.plusYears(2)),
+            opprinneligLovvalgsperiode)
         ).isFalse();
     }
 

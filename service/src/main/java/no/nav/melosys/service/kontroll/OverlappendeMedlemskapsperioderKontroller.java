@@ -14,14 +14,17 @@ public final class OverlappendeMedlemskapsperioderKontroller {
                                                               ErPeriode kontrollperiode) {
         return medlemskapDokument.hentMedlemsperioderHvorKildeIkkeLånekassen().stream().anyMatch(
             medlemsperiode -> !PeriodestatusMedl.AVST.getKode().equals(medlemsperiode.status)
-                && PeriodeKontroller.periodeOverlapperMedInklusivPerioder(medlemsperiode.getPeriode(), kontrollperiode));
+                && PeriodeKontroller.periodeOverlapper(kontrollperiode, medlemsperiode.getPeriode()));
     }
 
     public static boolean harOverlappendeMedlemsperiode(MedlemskapDokument medlemskapDokument,
-                                                        Lovvalgsperiode kontrollperiode) {
+                                                        Lovvalgsperiode kontrollperiode,
+                                                        Lovvalgsperiode opprinneligPeriodeTilKontrollperiode) {
         return medlemskapDokument.hentMedlemsperioderHvorKildeIkkeLånekassen().stream().anyMatch(
             medlemsperiode -> !PeriodestatusMedl.AVST.getKode().equals(medlemsperiode.status)
-                && PeriodeKontroller.periodeOverlapper(medlemsperiode.getPeriode(), kontrollperiode)
-                && (kontrollperiode.erNyPeriodeForMedl() || !kontrollperiode.harSammeMedlID(medlemsperiode.id)));
+                && PeriodeKontroller.periodeOverlapper(kontrollperiode, medlemsperiode.getPeriode())
+                && (kontrollperiode.erNyPeriodeForMedl() || !kontrollperiode.harSammeMedlID(medlemsperiode.id))
+                && (opprinneligPeriodeTilKontrollperiode == null || !opprinneligPeriodeTilKontrollperiode.harSammeMedlID(medlemsperiode.id)
+            ));
     }
 }

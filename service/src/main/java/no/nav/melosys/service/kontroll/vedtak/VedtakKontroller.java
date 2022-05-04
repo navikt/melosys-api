@@ -17,9 +17,10 @@ final class VedtakKontroller implements AdresseUtlandKontroller {
     static Kontrollfeil overlappendeMedlemsperiode(VedtakKontrollData kontrollData) {
         MedlemskapDokument medlemskapDokument = kontrollData.getMedlemskapDokument();
         Lovvalgsperiode lovvalgsperiode = kontrollData.getLovvalgsperiode();
+        Lovvalgsperiode opprinneligLovvalgsperiode = kontrollData.getOpprinneligLovvalgsperiode();
 
         return OverlappendeMedlemskapsperioderKontroller.harOverlappendeMedlemsperiode(medlemskapDokument,
-            lovvalgsperiode) ? new Kontrollfeil(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER) : null;
+            lovvalgsperiode, opprinneligLovvalgsperiode) ? new Kontrollfeil(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER) : null;
     }
 
     static Kontrollfeil periodeOver24Mnd(VedtakKontrollData kontrollData) {
@@ -62,7 +63,7 @@ final class VedtakKontroller implements AdresseUtlandKontroller {
     }
 
     static Kontrollfeil adresseRegistrert(VedtakKontrollData kontrollData) {
-        return PersonKontroller.harRegistrertAdresse(kontrollData.getPersonDokument(), kontrollData.getBehandlingsgrunnlagData())
+        return PersonKontroller.harRegistrertAdresse(kontrollData.getPersondata(), kontrollData.getBehandlingsgrunnlagData())
             ? null : new Kontrollfeil(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE);
     }
 
