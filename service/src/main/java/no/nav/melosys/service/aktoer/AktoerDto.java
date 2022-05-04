@@ -11,7 +11,6 @@ public class AktoerDto {
     private String utenlandskPersonID;
     private String representererKode;
     private Long databaseID;
-    private String personIdent;
 
     public String getAktoerID() {
         return aktoerID;
@@ -61,14 +60,6 @@ public class AktoerDto {
         this.representererKode = representererKode;
     }
 
-    public String getPersonIdent() {
-        return personIdent;
-    }
-
-    public void setPersonIdent(String personIdent) {
-        this.personIdent = personIdent;
-    }
-
     public Long getDatabaseID() {
         return databaseID;
     }
@@ -88,7 +79,6 @@ public class AktoerDto {
             aktoerDto.setRepresentererKode(aktoer.getRepresenterer().getKode());
         }
         aktoerDto.setDatabaseID(aktoer.getId());
-        aktoerDto.setPersonIdent(aktoer.getPersonIdent());
         return aktoerDto;
     }
 

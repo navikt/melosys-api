@@ -177,7 +177,6 @@ class AktoerServiceTest {
         assertThat(aktoer.getOrgnr()).isEqualTo(aktoerDto.getOrgnr());
         assertThat(aktoer.getRolle()).hasToString(aktoerDto.getRolleKode());
         assertThat(aktoer.getRepresenterer()).hasToString(aktoerDto.getRepresentererKode());
-        assertThat(aktoer.getPersonIdent()).isEqualTo(aktoerDto.getPersonIdent());
     }
 
     private AktoerDto lagAktoerDto() {
@@ -187,7 +186,6 @@ class AktoerServiceTest {
         aktoerDto.setUtenlandskPersonID("utenlandskPersonID");
         aktoerDto.setOrgnr("orgnr");
         aktoerDto.setRepresentererKode("BRUKER");
-        aktoerDto.setPersonIdent("21075114491");
         return aktoerDto;
     }
 }
