@@ -5,25 +5,29 @@ import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.dokument.utbetaling.UtbetalingDokument;
 import no.nav.melosys.domain.person.Persondata;
-import no.nav.melosys.service.kontroll.KontrollData;
 
-class UfmKontrollData extends KontrollData {
+class UfmKontrollData {
 
-    private SedDokument sedDokument;
-    private Persondata persondata;
-    private InntektDokument inntektDokument;
-    private UtbetalingDokument utbetalingDokument;
+    private final MedlemskapDokument medlemskapDokument;
+    private final SedDokument sedDokument;
+    private final Persondata persondata;
+    private final InntektDokument inntektDokument;
+    private final UtbetalingDokument utbetalingDokument;
 
     UfmKontrollData(SedDokument sedDokument,
                     Persondata persondata,
                     MedlemskapDokument medlemskapDokument,
                     InntektDokument inntektDokument,
                     UtbetalingDokument utbetalingDokument) {
-        super(medlemskapDokument);
+        this.medlemskapDokument  = medlemskapDokument;
         this.sedDokument = sedDokument;
         this.persondata = persondata;
         this.inntektDokument = inntektDokument;
         this.utbetalingDokument = utbetalingDokument;
+    }
+
+    MedlemskapDokument getMedlemskapDokument() {
+        return medlemskapDokument;
     }
 
     SedDokument getSedDokument() {

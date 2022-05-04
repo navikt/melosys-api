@@ -2,9 +2,7 @@ package no.nav.melosys.integrasjon.pdl;
 
 import java.util.Collections;
 
-import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import no.nav.melosys.integrasjon.felles.WebClientConfig;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -14,9 +12,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
 
 @Configuration
-public class PDLConsumerProducer {
-    private static final Logger log = LoggerFactory.getLogger(PDLConsumerProducer.class);
-
+public class PDLConsumerProducer implements WebClientConfig {
     private static final String TEMA_HEADER = "Tema";
     private static final String TEMA_HEADER_MEDLEMSKAP_VERDI = "MED";
 
@@ -28,6 +24,7 @@ public class PDLConsumerProducer {
         return new PDLConsumerImpl(
             webclientBuilder(webclientBuilder, pdlUrl)
                 .filter(pdlSystemAuthFilter)
+                .filter(errorFilter("Kall mot PDL feilet."))
                 .build()
         );
     }
@@ -38,7 +35,10 @@ public class PDLConsumerProducer {
                                                    @Value("${PDL.url}") String pdlUrl,
                                                    @Qualifier("saksbehandler") PDLAuthFilter pdlSaksbehandlerAuthFilter) {
         return new PDLConsumerImpl(
-            webclientBuilder(webclientBuilder, pdlUrl).filter(pdlSaksbehandlerAuthFilter).build());
+            webclientBuilder(webclientBuilder, pdlUrl)
+                .filter(pdlSaksbehandlerAuthFilter)
+                .filter(errorFilter("Kall mot PDL feilet."))
+                .build());
     }
 
     private WebClient.Builder webclientBuilder(WebClient.Builder webclientBuilder, String pdlUrl) {

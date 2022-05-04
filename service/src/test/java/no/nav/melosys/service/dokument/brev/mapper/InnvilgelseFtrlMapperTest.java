@@ -50,9 +50,11 @@ import static no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2
 import static no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_barn_begrunnelser_ftrl.IKKE_SOEKERS_BARN;
 import static no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_ektefelle_samboer_begrunnelser_ftrl.IKKE_TRE_AV_FEM_SISTE_ÅR;
 import static no.nav.melosys.service.dokument.DokgenTestData.*;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
 
 @ExtendWith(MockitoExtension.class)
 class InnvilgelseFtrlMapperTest {
@@ -109,18 +111,18 @@ class InnvilgelseFtrlMapperTest {
 
         assertThat(innvilgelseFtrl).isNotNull();
         assertThat(innvilgelseFtrl.getDatoMottatt()).isEqualTo(LocalDate.EPOCH);
-        assertThat(innvilgelseFtrl.getPerioder().size()).isEqualTo(1);
+        assertThat(innvilgelseFtrl.getPerioder()).hasSize(1);
         assertThat(innvilgelseFtrl.isErFullstendigInnvilget()).isTrue();
         assertThat(innvilgelseFtrl.getFtrl_2_8_begrunnelse()).isEqualTo(ANSATT_I_NORSK_VIRKSOMHET_IKKE_UTSENDT.getKode());
         assertThat(innvilgelseFtrl.isVurderingMedlemskapEktefelle()).isTrue();
         assertThat(innvilgelseFtrl.isVurderingLovvalgBarn()).isTrue();
-        assertThat(innvilgelseFtrl.getOmfattetFamilie().size()).isEqualTo(2);
+        assertThat(innvilgelseFtrl.getOmfattetFamilie()).hasSize(2);
         for (FamiliemedlemInfo familiemedlemInfo : innvilgelseFtrl.getOmfattetFamilie()) {
             assertThat(familiemedlemInfo.ident()).is(new Condition<>(s -> List.of(EKTEFELLE_FNR, BARN1_FNR, BARN2_FNR).contains(s), "fnr"));
             assertThat(familiemedlemInfo.navn()).is(new Condition<>(s -> List.of(EKTEFELLE_NAVN, BARN1_NAVN, BARN2_NAVN).contains(s), "navn"));
             assertThat(familiemedlemInfo.identType()).is(new Condition<>(s -> List.of(FNR, DNR, DATO).contains(s), "identType"));
         }
-        assertThat(innvilgelseFtrl.getIkkeOmfattetBarn().size()).isZero();
+        assertThat(innvilgelseFtrl.getIkkeOmfattetBarn()).isEmpty();
         assertThat(innvilgelseFtrl.getIkkeOmfattetEktefelle()).isNull();
         assertThat(innvilgelseFtrl.getInnvilgelse().innledningFritekst()).isNull();
         assertThat(innvilgelseFtrl.getInnvilgelse().begrunnelseFritekst()).isEqualTo(BEGRUNNELSE_FRITEKST);
@@ -153,7 +155,7 @@ class InnvilgelseFtrlMapperTest {
         assertThat(innvilgelseFtrl.getSaksopplysninger().saksnummer()).isEqualTo(SAKSNUMMER);
         assertThat(innvilgelseFtrl.getDagensDato().truncatedTo(ChronoUnit.DAYS)).isEqualTo(Instant.now().truncatedTo(ChronoUnit.DAYS));
         assertThat(innvilgelseFtrl.getSaksopplysninger().navnBruker()).isEqualTo(SAMMENSATT_NAVN_BRUKER);
-        assertThat(innvilgelseFtrl.getMottaker().adresselinjer().isEmpty()).isFalse();
+        assertThat(innvilgelseFtrl.getMottaker().adresselinjer()).isNotEmpty();
         assertThat(innvilgelseFtrl.getMottaker().postnr()).isEqualTo(POSTNR_BRUKER);
         assertThat(innvilgelseFtrl.getMottaker().poststed()).isEqualTo(POSTSTED_BRUKER);
         assertThat(innvilgelseFtrl.getMottaker().land()).isNull();
@@ -167,9 +169,9 @@ class InnvilgelseFtrlMapperTest {
 
         InnvilgelseFtrl innvilgelseFtrl = innvilgelseFtrlMapper.map(lagInnvilgelseBrevbestilling());
 
-        assertThat(innvilgelseFtrl.getOmfattetFamilie().size()).isZero();
+        assertThat(innvilgelseFtrl.getOmfattetFamilie()).isEmpty();
 
-        assertThat(innvilgelseFtrl.getIkkeOmfattetBarn().size()).isEqualTo(2);
+        assertThat(innvilgelseFtrl.getIkkeOmfattetBarn()).hasSize(2);
 
         for (no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.IkkeOmfattetBarn familiemedlemInfo : innvilgelseFtrl.getIkkeOmfattetBarn()) {
             assertThat(familiemedlemInfo.info().ident()).is(new Condition<>(s -> List.of(BARN1_FNR, BARN2_FNR).contains(s), "fnr"));
@@ -225,14 +227,14 @@ class InnvilgelseFtrlMapperTest {
 
         InnvilgelseFtrl innvilgelseFtrl = innvilgelseFtrlMapper.map(lagInnvilgelseBrevbestilling());
 
-        assertThat(innvilgelseFtrl.getPerioder().size()).isEqualTo(2);
+        assertThat(innvilgelseFtrl.getPerioder()).hasSize(2);
         assertThat(innvilgelseFtrl.isErFullstendigInnvilget()).isFalse();
     }
 
     private InnvilgelseBrevbestilling lagInnvilgelseBrevbestilling() {
         return new InnvilgelseBrevbestilling.Builder()
             .medBehandling(lagBehandling())
-            .medPersonDokument(lagPersonDokument())
+            .medPersonDokument(lagPersondata())
             .medForsendelseMottatt(Instant.EPOCH)
             .medBegrunnelseFritekst(BEGRUNNELSE_FRITEKST)
             .medSaksbehandlerNavn(SAKSBEHANDLER_NAVN)

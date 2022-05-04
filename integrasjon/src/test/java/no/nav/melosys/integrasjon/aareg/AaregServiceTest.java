@@ -18,7 +18,10 @@ import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdRestConsume
 import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdRestConsumerConfig;
 import no.nav.melosys.integrasjon.kodeverk.KodeOppslag;
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.mockito.Mockito;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -117,7 +120,7 @@ class AaregServiceTest {
                 NAV_PERSONIDENT,
                 LocalDate.of(2014, 7, 1),
                 LocalDate.of(2015, 12, 31))
-            ).withMessage("Henting av arbeidsforhold fra Aareg feilet.");
+            ).withMessageContaining("Henting av arbeidsforhold fra Aareg feilet.");
     }
 
     private static final String expectedRestResult = """
