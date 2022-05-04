@@ -73,9 +73,9 @@ public class StorbritanniaAdresseSjekker {
 
     static boolean sjekkOmAdresseGyldighetErInnenforLovalgsperiode(PersonAdresse personAdresse, Lovvalgsperiode lovvalgsperiode) {
         if (personAdresse.gyldigFraOgMed() == null) return false;
-        if (personAdresse.gyldigTilOgMed() == null) return false;
 
-        if (lovvalgsperiode.getTom().isBefore(personAdresse.gyldigFraOgMed())) return false;
+        if (lovvalgsperiode.getTom() != null && lovvalgsperiode.getTom().isBefore(personAdresse.gyldigFraOgMed())) return false;
+        if(personAdresse.gyldigTilOgMed() == null) return true;
         return !lovvalgsperiode.getFom().isAfter(personAdresse.gyldigTilOgMed());
     }
 }

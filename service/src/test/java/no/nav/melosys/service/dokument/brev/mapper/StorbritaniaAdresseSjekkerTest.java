@@ -177,6 +177,15 @@ class StorbritaniaAdresseSjekkerTest {
                     LocalDate.of(2021, 1, 1),
                     LocalDate.of(2022, 1, 1)),
                 "lovalgsperiode slutt er lik adresseperiode start"
+            ),
+            Arguments.of(
+                lagLovvalgsperiode(
+                    LocalDate.of(2020, 1, 1),
+                    LocalDate.of(2021, 1, 1)),
+                lagPersonAdresse(
+                    LocalDate.of(2021, 1, 1),
+                    null),
+                "personadresse gyldigTom er null"
             )
         );
     }
