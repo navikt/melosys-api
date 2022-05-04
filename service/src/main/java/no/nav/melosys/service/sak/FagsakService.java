@@ -226,11 +226,19 @@ public class FagsakService {
     public long opprettNyVurderingBehandling(String saksnummer) {
         Fagsak fagsak = hentFagsak(saksnummer);
         validerOpprettNyVurdering(fagsak);
-        Behandling behandling = hentBehandlingSomErUtgangspunktForRevurdering(fagsak);
 
-        Behandling replikertBehandling = behandlingService.replikerBehandlingOgBehandlingsresultat(behandling, avgjørBehandlingstype(fagsak));
+        Behandling behandling;
+        Behandling replikertBehandling;
+        try {
+            behandling = hentBehandlingSomErUtgangspunktForRevurdering(fagsak);
+            replikertBehandling = behandlingService.replikerBehandlingOgBehandlingsresultat(behandling, avgjørBehandlingstype(fagsak));
+        } catch (FunksjonellException e) {
+            behandling = fagsak.hentSistAktivBehandling();
+            replikertBehandling = behandlingService.replikerBehandlingUtenBehandlingsresultat(behandling, avgjørBehandlingstype(fagsak));
+        }
 
-        if (!fagsak.hentSistAktivBehandling().erAvsluttet()) {
+
+        if (!behandling.erAvsluttet()) {
             behandlingService.avsluttBehandling(behandling.getId());
         }
 

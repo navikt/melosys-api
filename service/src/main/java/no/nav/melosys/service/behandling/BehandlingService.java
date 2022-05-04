@@ -253,11 +253,38 @@ public class BehandlingService {
     }
 
     @Transactional(rollbackFor = Exception.class)
+    public Behandling replikerBehandlingUtenBehandlingsresultat(Behandling tidligsteInaktiveBehandling, Behandlingstyper behandlingstype) {
+        Behandling behandlingsreplika;
+        try {
+            behandlingsreplika = replikerBehandlingUtenBehandlingsgrunnlagOgSaksopplysninger(tidligsteInaktiveBehandling, behandlingstype);
+        } catch (InvocationTargetException | NoSuchMethodException | InstantiationException | IllegalAccessException e) {
+            throw new TekniskException(String.format("Klarte ikke replikere behandling %s for fagsak %s",
+                tidligsteInaktiveBehandling.getId(), tidligsteInaktiveBehandling.getFagsak().getSaksnummer()), e);
+        }
+        return behandlingsreplika;
+    }
+
+    Behandling replikerBehandlingUtenBehandlingsgrunnlagOgSaksopplysninger(Behandling tidligsteInaktiveBehandling, Behandlingstyper behandlingstype)
+        throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+        Behandling behandlingsreplika = (Behandling) BeanUtils.cloneBean(tidligsteInaktiveBehandling);
+        behandlingsreplika.setId(null);
+        behandlingsreplika.setType(behandlingstype);
+        behandlingsreplika.setStatus(OPPRETTET);
+        behandlingsreplika.setOpprinneligBehandling(tidligsteInaktiveBehandling);
+        behandlingsreplika.setBehandlingsgrunnlag(null);
+        behandlingsreplika.setBehandlingsnotater(Collections.emptySet());
+        behandlingsreplika.setBehandlingsfrist(hentBehandlingsfristForBehandlingstema(tidligsteInaktiveBehandling.getTema()));
+        behandlingsreplika.setSaksopplysninger(new HashSet<>());
+        behandlingRepository.save(behandlingsreplika);
+        return behandlingsreplika;
+    }
+
+    @Transactional(rollbackFor = Exception.class)
     public Behandling replikerBehandlingOgBehandlingsresultat(Behandling tidligsteInaktiveBehandling,
                                                               Behandlingstyper behandlingstype) {
         Behandling behandlingsreplika;
         try {
-            behandlingsreplika = replikerBehandling(tidligsteInaktiveBehandling, OPPRETTET, behandlingstype);
+            behandlingsreplika = replikerBehandling(tidligsteInaktiveBehandling, behandlingstype);
             behandlingsresultatService.replikerBehandlingsresultat(tidligsteInaktiveBehandling, behandlingsreplika);
         } catch (InvocationTargetException | NoSuchMethodException | InstantiationException | IllegalAccessException e) {
             throw new TekniskException(String.format("Klarte ikke replikere behandling %s for fagsak %s",
@@ -267,12 +294,12 @@ public class BehandlingService {
         return behandlingsreplika;
     }
 
-    Behandling replikerBehandling(Behandling tidligsteInaktiveBehandling, Behandlingsstatus behandlingsstatus, Behandlingstyper behandlingstype)
+    Behandling replikerBehandling(Behandling tidligsteInaktiveBehandling, Behandlingstyper behandlingstype)
         throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         Behandling behandlingsreplika = (Behandling) BeanUtils.cloneBean(tidligsteInaktiveBehandling);
         behandlingsreplika.setId(null);
         behandlingsreplika.setType(behandlingstype);
-        behandlingsreplika.setStatus(behandlingsstatus);
+        behandlingsreplika.setStatus(OPPRETTET);
         behandlingsreplika.setOpprinneligBehandling(tidligsteInaktiveBehandling);
         behandlingsreplika.setBehandlingsgrunnlag(replikerBehandlingsgrunnlag(behandlingsreplika, tidligsteInaktiveBehandling.getBehandlingsgrunnlag()));
         behandlingsreplika.setBehandlingsnotater(Collections.emptySet());

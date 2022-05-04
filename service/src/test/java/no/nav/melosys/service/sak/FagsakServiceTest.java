@@ -389,6 +389,29 @@ class FagsakServiceTest {
     }
 
     @Test
+    void opprettNyVurderingBehandling_behandlingHarIkkeVedtak_nyBehandlingOpprettetNyVurderingReplikerFraSistAktiveUtenBehandlingsgrunnlag() {
+        final String saksnummer = "MEL-1";
+        Fagsak fagsak = lagFagsakMedBruker();
+
+        var behandling = lagBehandling(2L, SOEKNAD, AVSLUTTET, Instant.now());
+        var behandlingsresultat = lagBehandlingsresultat(behandling, Instant.now(), null, null);
+
+        fagsak.setBehandlinger(List.of(behandling));
+
+        Behandling replikertBehandling = new Behandling();
+        replikertBehandling.setId(3L);
+
+        when(fagsakRepo.findBySaksnummer(saksnummer)).thenReturn(Optional.of(fagsak));
+        when(behandlingService.replikerBehandlingUtenBehandlingsresultat(any(), any())).thenReturn(replikertBehandling);
+        when(behandlingsresultatService.hentBehandlingsresultat(behandlingsresultat.getId())).thenReturn(behandlingsresultat);
+
+        long behandlingID = fagsakService.opprettNyVurderingBehandling(saksnummer);
+        verify(behandlingService).replikerBehandlingUtenBehandlingsresultat(behandling, Behandlingstyper.NY_VURDERING);
+
+        assertThat(behandlingID).isEqualTo(replikertBehandling.getId());
+    }
+
+    @Test
     void opprettNyVurderingBehandling_toBehandlingerAvTypeSed_nyBehandlingOpprettetNyVurderingReplikerFraSistRegistrerteUnntak() {
         final String saksnummer = "MEL-1";
         Fagsak fagsak = lagFagsakMedBruker();
@@ -443,6 +466,52 @@ class FagsakServiceTest {
 
         long behandlingID = fagsakService.opprettNyVurderingBehandling(saksnummer);
         verify(behandlingService).replikerBehandlingOgBehandlingsresultat(behandlingSomBleRegistrertIgår, Behandlingstyper.NY_VURDERING);
+
+        assertThat(behandlingID).isEqualTo(replikertBehandling.getId());
+    }
+
+    @Test
+    void opprettNyVurderingBehandling_behandlingerAvTypeSedHarIkkeRegistrertUnntakt_nyBehandlingOpprettetNyVurderingReplikerFraSistAktiveUtenBehandlingsresultat() {
+        final String saksnummer = "MEL-1";
+        Fagsak fagsak = lagFagsakMedBruker();
+
+        var behandling = lagBehandling(2L, SED, AVSLUTTET, Instant.now());
+        var behandlingsresultat = lagBehandlingsresultat(behandling, Instant.now(), null, null);
+
+        fagsak.setBehandlinger(List.of(behandling));
+
+        Behandling replikertBehandling = new Behandling();
+        replikertBehandling.setId(3L);
+
+        when(fagsakRepo.findBySaksnummer(saksnummer)).thenReturn(Optional.of(fagsak));
+        when(behandlingService.replikerBehandlingUtenBehandlingsresultat(any(), any())).thenReturn(replikertBehandling);
+        when(behandlingsresultatService.hentBehandlingsresultat(behandling.getId())).thenReturn(behandlingsresultat);
+
+        long behandlingID = fagsakService.opprettNyVurderingBehandling(saksnummer);
+        verify(behandlingService).replikerBehandlingUtenBehandlingsresultat(behandling, Behandlingstyper.NY_VURDERING);
+
+        assertThat(behandlingID).isEqualTo(replikertBehandling.getId());
+    }
+
+    @Test
+    void opprettNyVurderingBehandling_behandlingerAvTypeAnnetEnnSedOgSøknad_nyBehandlingOpprettetNyVurderingReplikerFraSistAktiveUtenBehandlingsresultat() {
+        final String saksnummer = "MEL-1";
+        Fagsak fagsak = lagFagsakMedBruker();
+
+        var behandling = lagBehandling(2L, KLAGE, AVSLUTTET, Instant.now());
+        var behandlingsresultat = lagBehandlingsresultat(behandling, Instant.now(), null, null);
+
+        fagsak.setBehandlinger(List.of(behandling));
+
+        Behandling replikertBehandling = new Behandling();
+        replikertBehandling.setId(3L);
+
+        when(fagsakRepo.findBySaksnummer(saksnummer)).thenReturn(Optional.of(fagsak));
+        when(behandlingService.replikerBehandlingUtenBehandlingsresultat(any(), any())).thenReturn(replikertBehandling);
+        when(behandlingsresultatService.hentBehandlingsresultat(behandling.getId())).thenReturn(behandlingsresultat);
+
+        long behandlingID = fagsakService.opprettNyVurderingBehandling(saksnummer);
+        verify(behandlingService).replikerBehandlingUtenBehandlingsresultat(behandling, Behandlingstyper.NY_VURDERING);
 
         assertThat(behandlingID).isEqualTo(replikertBehandling.getId());
     }

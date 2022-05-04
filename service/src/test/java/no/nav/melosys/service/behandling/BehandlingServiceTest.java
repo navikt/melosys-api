@@ -36,6 +36,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.*;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.ENDRET_PERIODE;
+import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.NY_VURDERING;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.*;
@@ -345,15 +346,16 @@ class BehandlingServiceTest {
     @Test
     void replikerBehandling_replikererObjekterOgCollections() throws NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
         Behandling tidligsteInaktiveBehandling = opprettBehandlingMedData();
-        Behandling replikertBehandling = behandlingService.replikerBehandling(tidligsteInaktiveBehandling, OPPRETTET, ENDRET_PERIODE);
+        Behandling replikertBehandling = behandlingService.replikerBehandling(tidligsteInaktiveBehandling, ENDRET_PERIODE);
 
         assertThat(replikertBehandling.getId()).isNull();
+        assertThat(replikertBehandling.getTema()).isEqualTo(tidligsteInaktiveBehandling.getTema());
         assertThat(replikertBehandling.getStatus()).isEqualTo(OPPRETTET);
         assertThat(replikertBehandling.getDokumentasjonSvarfristDato()).isEqualTo(tidligsteInaktiveBehandling.getDokumentasjonSvarfristDato());
         assertThat(replikertBehandling.getInitierendeJournalpostId()).isEqualTo(tidligsteInaktiveBehandling.getInitierendeJournalpostId());
         assertThat(replikertBehandling.getBehandlingsfrist()).isEqualTo(LocalDate.now().plusWeeks(4));
 
-        assertThat(replikertBehandling.getSaksopplysninger().size()).isEqualTo(1);
+        assertThat(replikertBehandling.getSaksopplysninger()).hasSize(1);
         assertThat(replikertBehandling.getSaksopplysninger()).allMatch(saksopplysning -> saksopplysning.getId() == null);
         assertThat(replikertBehandling.getSaksopplysninger()).allMatch(saksopplysning -> saksopplysning.getBehandling().equals(replikertBehandling));
         assertThat(replikertBehandling.getSaksopplysninger()).allMatch(saksopplysning -> saksopplysning.getKilder().iterator().next().getMottattDokument().equals("dokxml"));
@@ -367,9 +369,25 @@ class BehandlingServiceTest {
         Behandling tidligsteInaktiveBehandling = opprettBehandlingMedData();
         tidligsteInaktiveBehandling.setBehandlingsgrunnlag(null);
 
-        assertThat(behandlingService.replikerBehandling(tidligsteInaktiveBehandling, OPPRETTET, Behandlingstyper.NY_VURDERING))
+        assertThat(behandlingService.replikerBehandling(tidligsteInaktiveBehandling, Behandlingstyper.NY_VURDERING))
             .extracting(Behandling::getBehandlingsgrunnlag).isNull();
+    }
 
+    @Test
+    void replikerBehandlingUtenBehandlingsgrunnlagOgSaksopplysninger_replikererObjekterOgCollections() throws NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
+        Behandling tidligsteInaktiveBehandling = opprettBehandlingMedData();
+        assertThat(tidligsteInaktiveBehandling.getBehandlingsgrunnlag()).isNotNull();
+
+        Behandling replikertBehandling = behandlingService.replikerBehandlingUtenBehandlingsgrunnlagOgSaksopplysninger(tidligsteInaktiveBehandling, NY_VURDERING);
+
+        assertThat(replikertBehandling.getId()).isNull();
+        assertThat(replikertBehandling.getTema()).isEqualTo(tidligsteInaktiveBehandling.getTema());
+        assertThat(replikertBehandling.getStatus()).isEqualTo(OPPRETTET);
+        assertThat(replikertBehandling.getDokumentasjonSvarfristDato()).isEqualTo(tidligsteInaktiveBehandling.getDokumentasjonSvarfristDato());
+        assertThat(replikertBehandling.getInitierendeJournalpostId()).isEqualTo(tidligsteInaktiveBehandling.getInitierendeJournalpostId());
+        assertThat(replikertBehandling.getBehandlingsfrist()).isEqualTo(LocalDate.now().plusWeeks(4));
+        assertThat(replikertBehandling.getBehandlingsgrunnlag()).isNull();
+        assertThat(replikertBehandling.getSaksopplysninger()).isEmpty();
     }
 
     @Test
@@ -590,24 +608,24 @@ class BehandlingServiceTest {
         behandling.setSaksopplysninger(new LinkedHashSet<>());
 
         behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
-        behandling.getSaksopplysninger().add(opprettSaksopplysning("dokxml", SaksopplysningType.INNTK, "2020-02-11T09:37:30Z"));
+        behandling.getSaksopplysninger().add(opprettSaksopplysning());
         return behandling;
     }
 
-    private Saksopplysning opprettSaksopplysning(String dokxml, SaksopplysningType saksopplysningType, String endretDato) {
+    private Saksopplysning opprettSaksopplysning() {
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setBehandling(opprettTomBehandlingMedId());
-        saksopplysning.setKilder(opprettSaksopplysningkildeMedID(dokxml));
-        saksopplysning.setType(saksopplysningType);
-        saksopplysning.setEndretDato(Instant.parse(endretDato));
+        saksopplysning.setKilder(opprettSaksopplysningkildeMedID());
+        saksopplysning.setType(SaksopplysningType.INNTK);
+        saksopplysning.setEndretDato(Instant.parse("2020-02-11T09:37:30Z"));
         return saksopplysning;
     }
 
-    private Set<SaksopplysningKilde> opprettSaksopplysningkildeMedID(String dokxml) {
+    private Set<SaksopplysningKilde> opprettSaksopplysningkildeMedID() {
         var kilde = new SaksopplysningKilde();
         kilde.setId(123321L);
         kilde.setKilde(SaksopplysningKildesystem.EREG);
-        kilde.setMottattDokument(dokxml);
+        kilde.setMottattDokument("dokxml");
         return Collections.singleton(kilde);
     }
 
