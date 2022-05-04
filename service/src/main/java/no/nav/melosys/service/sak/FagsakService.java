@@ -181,7 +181,7 @@ public class FagsakService {
     private Aktoer lagAktørFullmektigMedID(String representantID) {
         Aktoer aktørFullmektig = new Aktoer();
         if (representantID.length() == 11) {
-            aktørFullmektig.setAktørId(representantID);
+            aktørFullmektig.setAktørId(persondataFasade.hentAktørIdForIdent(representantID));
         } else {
             aktørFullmektig.setOrgnr(representantID);
         }
