@@ -23,8 +23,8 @@ import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
 import no.nav.melosys.domain.person.*;
+import no.nav.melosys.domain.person.adresse.Bostedsadresse;
 import no.nav.melosys.domain.person.adresse.Kontaktadresse;
-import no.nav.melosys.domain.person.adresse.Oppholdsadresse;
 
 import static java.util.Collections.singletonList;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
@@ -82,7 +82,7 @@ public final class DokgenTestData {
     }
 
     public static Persondata lagPersondata() {
-        final var bostedsadresse = new no.nav.melosys.domain.person.adresse.Bostedsadresse(
+        final var bostedsadresse = new Bostedsadresse(
             new StrukturertAdresse(ADRESSELINJE_1_BRUKER, "42 C", POSTNR_BRUKER, null, null, Landkoder.NO.getKode()),
             null, null, null, "PDL", null, false);
 
