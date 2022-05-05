@@ -3,7 +3,9 @@ package no.nav.melosys.service.persondata.familie;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.person.Folkeregisteridentifikator;
 import no.nav.melosys.domain.person.familie.Familiemedlem;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.pdl.PDLConsumer;
+import no.nav.melosys.integrasjon.pdl.dto.HarMetadata;
 import no.nav.melosys.integrasjon.pdl.dto.person.ForelderBarnRelasjon;
 import no.nav.melosys.integrasjon.pdl.dto.person.Person;
 import no.nav.melosys.integrasjon.pdl.dto.person.Sivilstand;
@@ -24,6 +26,7 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.time.temporal.ChronoUnit.YEARS;
 
@@ -64,41 +67,56 @@ public class FamiliemedlemService {
 
     public Set<Familiemedlem> hentFamiliemedlemmerFraIdent(String ident) {
         Person person = pdlConsumer.hentFamilierelasjoner(ident);
-        return hentFamiliemedlemmer(person);
+        return hentFamiliemedlemmer(person, ident);
     }
 
-    public Set<Familiemedlem> hentFamiliemedlemmer(Person hovedperson) {
+    public Set<Familiemedlem> hentFamiliemedlemmer(Person hovedperson, String identTilHovedperson) {
         Set<Familiemedlem> familiemedlemmer = new HashSet<>();
         if (erPersonUnder18(hovedperson)) {
             familiemedlemmer.addAll(hentForeldre(hovedperson.forelderBarnRelasjon()));
         }
 
-        familiemedlemmer.addAll(hentFamiliemedlemmerRelatertVedSivilstand(hovedperson));
+        familiemedlemmer.addAll(hentEktefellerOgPartnere(hovedperson, identTilHovedperson));
         familiemedlemmer.addAll(hentBarn(hovedperson));
         return familiemedlemmer;
     }
 
     @NotNull
-    private Collection<Familiemedlem> hentFamiliemedlemmerRelatertVedSivilstand(Person hovedperson) {
+    private Collection<Familiemedlem> hentEktefellerOgPartnere(Person hovedperson, String identTilHovedperson) {
+        var unikeIdenter = hentUnikeIdenterFraSivilstandTilHovedperson(hovedperson);
+        return unikeIdenter.map(ident -> oversettTilEktefelleEllerPartner(ident, identTilHovedperson))
+                .filter(EktefelleEllerPartnerFamiliemedlem::erAktiv)
+                .map(ektefelleEllerPartner ->
+                        FamiliemedlemOversetter.oversettEktefelleEllerPartner(
+                                ektefelleEllerPartner.getPerson(),
+                                ektefelleEllerPartner.getSivilstand()))
+                .collect(Collectors.toUnmodifiableSet());
+    }
+
+    @NotNull
+    private EktefelleEllerPartnerFamiliemedlem oversettTilEktefelleEllerPartner(String ident, String identTilHovedperson) {
+        Person person = pdlConsumer.hentEktefelleEllerPartner(ident);
+        Sivilstand sivilstand = hentSisteSivilstandKnyttetTilHovedperson(person, identTilHovedperson);
+        return new EktefelleEllerPartnerFamiliemedlem(ident, person, sivilstand);
+    }
+
+    @NotNull
+    private Sivilstand hentSisteSivilstandKnyttetTilHovedperson(Person person, String identTilHovedperson) {
+        return person.sivilstand().stream()
+                .filter(Objects::nonNull)
+                .filter(sivilstand -> identTilHovedperson.equals(sivilstand.relatertVedSivilstand()))
+                .min(this::sammenlignSisteDatoRegistrert)
+                .orElseThrow(() -> new IkkeFunnetException("I Ektefelle/Partner fant vi ikke forventet Sivilstand " +
+                        "knyttet til hovedperson"));
+    }
+
+    @NotNull
+    private Stream<String> hentUnikeIdenterFraSivilstandTilHovedperson(Person hovedperson) {
         return hovedperson.sivilstand().stream()
+                .filter(HarMetadata::erIkkeHistorisk)
                 .map(Sivilstand::relatertVedSivilstand)
                 .filter(Objects::nonNull)
-                .distinct()
-                .map(ident -> {
-                    Person person = pdlConsumer.hentRelatertVedSivilstand(ident);
-                    Sivilstand sivilstand = person.sivilstand().stream()
-                            .filter(Objects::nonNull)
-                            .min(this::sammenlignSisteDatoRegistrert)
-                            .get();
-
-                    return new EktefelleFamiliemedlem(ident, person, sivilstand);
-                })
-                .filter(EktefelleFamiliemedlem::erAktiv)
-                .map(ektefelleFamiliemedlem ->
-                        FamiliemedlemOversetter.oversettPersonRelatertVedSivilstandMedSivilstand(
-                                ektefelleFamiliemedlem.getPerson(),
-                                ektefelleFamiliemedlem.getSivilstand()))
-                .collect(Collectors.toUnmodifiableSet());
+                .distinct();
     }
 
     private boolean erPersonUnder18(Person person) {
@@ -135,12 +153,12 @@ public class FamiliemedlemService {
                 .collect(Collectors.toUnmodifiableSet());
     }
 
-    class EktefelleFamiliemedlem {
+    class EktefelleEllerPartnerFamiliemedlem {
         private final String ident;
         private final Person person;
         private final Sivilstand sivilstand;
 
-        public EktefelleFamiliemedlem(String ident, Person person, Sivilstand sivilstand) {
+        public EktefelleEllerPartnerFamiliemedlem(String ident, Person person, Sivilstand sivilstand) {
             this.ident = ident;
             this.person = person;
             this.sivilstand = sivilstand;

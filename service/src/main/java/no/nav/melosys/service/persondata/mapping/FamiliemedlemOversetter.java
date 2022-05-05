@@ -14,13 +14,13 @@ public final class FamiliemedlemOversetter {
     public static Familiemedlem oversettBarn(Person barn,
                                              Folkeregisteridentifikator folkeregisteridentGjeldendeForelder) {
         return new Familiemedlem(
-            FolkeregisteridentOversetter.oversett(barn.folkeregisteridentifikator()),
-            NavnOversetter.oversett(barn.navn()),
-            Familierelasjon.BARN,
-            FoedselOversetter.oversett(barn.foedsel()),
-            hentFnrAnnenForelder(barn, folkeregisteridentGjeldendeForelder),
-            ForeldreansvarOversetter.oversett(barn.foreldreansvar()),
-            null
+                FolkeregisteridentOversetter.oversett(barn.folkeregisteridentifikator()),
+                NavnOversetter.oversett(barn.navn()),
+                Familierelasjon.BARN,
+                FoedselOversetter.oversett(barn.foedsel()),
+                hentFnrAnnenForelder(barn, folkeregisteridentGjeldendeForelder),
+                ForeldreansvarOversetter.oversett(barn.foreldreansvar()),
+                null
         );
     }
 
@@ -28,22 +28,22 @@ public final class FamiliemedlemOversetter {
                                                                    Folkeregisteridentifikator folkeregisterident) {
         final String fnrGjeldendeForelder = folkeregisterident.identifikasjonsnummer();
         return barn.forelderBarnRelasjon().stream()
-            .filter(ForelderBarnRelasjon::erForelder)
-            .filter(forelderBarnRelasjon -> !fnrGjeldendeForelder.equals(forelderBarnRelasjon.relatertPersonsIdent()))
-            .findAny()
-            .map(forelderBarnRelasjon -> new Folkeregisteridentifikator(forelderBarnRelasjon.relatertPersonsIdent()))
-            .orElse(null);
+                .filter(ForelderBarnRelasjon::erForelder)
+                .filter(forelderBarnRelasjon -> !fnrGjeldendeForelder.equals(forelderBarnRelasjon.relatertPersonsIdent()))
+                .findAny()
+                .map(forelderBarnRelasjon -> new Folkeregisteridentifikator(forelderBarnRelasjon.relatertPersonsIdent()))
+                .orElse(null);
     }
 
     public static Familiemedlem oversettForelder(Person forelder, Familierelasjonsrolle familierelasjonsrolle) {
         return new Familiemedlem(
-            FolkeregisteridentOversetter.oversett(forelder.folkeregisteridentifikator()),
-            NavnOversetter.oversett(forelder.navn()),
-            oversettTilFamilierelasjonForeldre(familierelasjonsrolle),
-            FoedselOversetter.oversett(forelder.foedsel()),
-            null,
-            null,
-            null
+                FolkeregisteridentOversetter.oversett(forelder.folkeregisteridentifikator()),
+                NavnOversetter.oversett(forelder.navn()),
+                oversettTilFamilierelasjonForeldre(familierelasjonsrolle),
+                FoedselOversetter.oversett(forelder.foedsel()),
+                null,
+                null,
+                null
         );
     }
 
@@ -55,15 +55,15 @@ public final class FamiliemedlemOversetter {
         };
     }
 
-    public static Familiemedlem oversettPersonRelatertVedSivilstandMedSivilstand(Person hovedperson, no.nav.melosys.integrasjon.pdl.dto.person.Sivilstand sivilstand) {
+    public static Familiemedlem oversettEktefelleEllerPartner(Person person, no.nav.melosys.integrasjon.pdl.dto.person.Sivilstand sivilstand) {
         return new Familiemedlem(
-            FolkeregisteridentOversetter.oversett(hovedperson.folkeregisteridentifikator()),
-            NavnOversetter.oversett(hovedperson.navn()),
-            Familierelasjon.RELATERT_VED_SIVILSTAND,
-            FoedselOversetter.oversett(hovedperson.foedsel()),
-            null,
-            null,
-            SivilstandOversetter.oversett(sivilstand)
+                FolkeregisteridentOversetter.oversett(person.folkeregisteridentifikator()),
+                NavnOversetter.oversett(person.navn()),
+                Familierelasjon.RELATERT_VED_SIVILSTAND,
+                FoedselOversetter.oversett(person.foedsel()),
+                null,
+                null,
+                SivilstandOversetter.oversett(sivilstand)
         );
     }
 }
