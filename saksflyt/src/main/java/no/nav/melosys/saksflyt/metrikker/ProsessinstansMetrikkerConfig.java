@@ -24,4 +24,19 @@ public class ProsessinstansMetrikkerConfig {
             }
         };
     }
+
+    @Bean
+    public MeterBinder ProsessinstansFeiledeStegMetrikker(MeterRegistry meterRegistry,
+                                               ProsessinstansStatusCache statusCache) {
+        return registry -> {
+            for (ProsessType prosessType : ProsessType.values()) {
+                String gaugeNavn = MetrikkerNavn.PROSESSINSTANSER_FEILET_STEG + prosessType.getKode().toLowerCase() + ".feilet";
+                Gauge.builder(
+                    gaugeNavn,
+                    statusCache,
+                    type -> statusCache.antallProsessinstanserFeilet(prosessType)
+                ).register(meterRegistry);
+            }
+        };
+    }
 }
