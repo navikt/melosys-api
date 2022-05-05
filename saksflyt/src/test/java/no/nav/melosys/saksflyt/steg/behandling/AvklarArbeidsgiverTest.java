@@ -76,7 +76,6 @@ class AvklarArbeidsgiverTest {
     @Test
     void utfør_medAvklartNorskVirksomhet_arbeidsgiveraktørOpprettes() {
         AktoerRepository aktoerRepository = mock(AktoerRepository.class);
-        PersondataFasade persondataFasade = mock(PersondataFasade.class);
         AvklarArbeidsgiver steg = new AvklarArbeidsgiver(new AktoerService(aktoerRepository), avklarteVirksomheterService,
             behandlingService, behandlingsresultatService);
 
@@ -98,7 +97,6 @@ class AvklarArbeidsgiverTest {
     @Test
     void utfør_utenAvklartNorskVirksomhet_arbeidsgiveraktorerSlettes() {
         AktoerRepository aktoerRepository = mock(AktoerRepository.class);
-        PersondataFasade persondataFasade = mock(PersondataFasade.class);
         AvklarArbeidsgiver steg = new AvklarArbeidsgiver(new AktoerService(aktoerRepository), avklarteVirksomheterService,
             behandlingService, behandlingsresultatService);
         when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);

@@ -40,8 +40,6 @@ class AktoerTjenesteTest extends JsonSchemaTestParent {
     private AktoerService aktoerService;
     @MockBean
     private FagsakService fagsakService;
-    @MockBean
-    private PersondataFasade persondataFasade;
 
     @Autowired
     private MockMvc mockMvc;

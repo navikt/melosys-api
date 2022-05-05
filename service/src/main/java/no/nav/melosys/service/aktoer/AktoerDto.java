@@ -5,13 +5,13 @@ import no.nav.melosys.domain.Aktoer;
 public class AktoerDto {
 
     private String aktoerID;
+    private String personIdent;
     private String institusjonsID;
     private String orgnr;
     private String rolleKode;
     private String utenlandskPersonID;
     private String representererKode;
     private Long databaseID;
-    private String personIdent;
 
     public String getAktoerID() {
         return aktoerID;
@@ -19,6 +19,14 @@ public class AktoerDto {
 
     public void setAktoerID(String aktoerID) {
         this.aktoerID = aktoerID;
+    }
+
+    public String getPersonIdent() {
+        return personIdent;
+    }
+
+    public void setPersonIdent(String personIdent) {
+        this.personIdent = personIdent;
     }
 
     public String getInstitusjonsID() {
@@ -59,14 +67,6 @@ public class AktoerDto {
 
     public void setRepresentererKode(String representererKode) {
         this.representererKode = representererKode;
-    }
-
-    public String getPersonIdent() {
-        return personIdent;
-    }
-
-    public void setPersonIdent(String personIdent) {
-        this.personIdent = personIdent;
     }
 
     public Long getDatabaseID() {
