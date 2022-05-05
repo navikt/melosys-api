@@ -4,6 +4,7 @@ import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.matching.StringValuePattern
 import no.finn.unleash.FakeUnleash
 import no.nav.melosys.integrasjon.pdl.PDLConsumer
+import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
@@ -24,6 +25,12 @@ class PDLConsumerSystemIT(
         fun unleash() = FakeUnleash()
     }
 
+    @Test
+    fun skalBrukeErrorFilterOgGiRiktigFeilmelding() {
+        executeErrorFromServer { error ->
+            Assertions.assertThat(error).startsWith("Kall mot PDL feilet.")
+        }
+    }
     @Test
     fun authorizationSkalKommeFraSystem() {
         verifyHeaders(

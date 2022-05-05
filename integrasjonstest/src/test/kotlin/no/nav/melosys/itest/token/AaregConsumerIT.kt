@@ -4,6 +4,7 @@ import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.matching.StringValuePattern
 import no.finn.unleash.FakeUnleash
 import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdRestConsumer
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -32,6 +33,13 @@ class AaregConsumerIT(
                     Pair("Nav-Consumer-Token", WireMock.equalTo("Bearer --token-from-system--"))
                 )
             )
+        }
+    }
+
+    @Test
+    fun skalBrukeErrorFilterOgGiRiktigFeilmelding() {
+        executeErrorFromServer { error ->
+            assertThat(error).startsWith("Henting av arbeidsforhold fra Aareg feilet")
         }
     }
 
