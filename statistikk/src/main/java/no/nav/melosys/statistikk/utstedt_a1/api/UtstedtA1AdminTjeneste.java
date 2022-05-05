@@ -44,10 +44,12 @@ public class UtstedtA1AdminTjeneste implements AdminTjeneste {
     @PostMapping("/{behandlingID}/publiserMelding")
     public ResponseEntity<Void> publiserMelding(
         @RequestHeader(API_KEY_HEADER) String apiKey,
-        @PathVariable long behandlingID
-    ) {
+        @PathVariable long behandlingID) {
         validerApikey(apiKey);
+
+        log.info("Forsøker å produserer melding om utstedt A1 for behandling {}", behandlingID);
         utstedtA1Service.sendMeldingOmUtstedtA1(behandlingID);
+
         return ResponseEntity.noContent().build();
     }
 
@@ -57,6 +59,7 @@ public class UtstedtA1AdminTjeneste implements AdminTjeneste {
         @RequestParam("fom") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate fom
     ) {
         validerApikey(apiKey);
+
         return ResponseEntity.ok(
             publiserEksisterendeBehandlinger(vedtakMetadataRepository
                 .findBehandlingsresultatIdByRegistrertDatoIsGreaterThanEqual(

@@ -1,7 +1,10 @@
 package no.nav.melosys.service.oppgave;
 
 import no.nav.melosys.service.AdminTjeneste;
+import no.nav.melosys.service.sak.FagsakAdminTjeneste;
 import no.nav.security.token.support.core.api.Unprotected;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +17,7 @@ public class OppgaveAdminTjeneste implements AdminTjeneste {
 
     private final OppgaveService oppgaveService;
     private final String apiKey;
+    private static final Logger log = LoggerFactory.getLogger(OppgaveAdminTjeneste.class);
 
     public OppgaveAdminTjeneste(@Qualifier("system") OppgaveService oppgaveService,
                                 @Value("${Melosys-admin.apikey}") String apiKey) {
@@ -26,7 +30,9 @@ public class OppgaveAdminTjeneste implements AdminTjeneste {
                                                        @PathVariable String saksnummer) {
         validerApikey(apiKey);
 
+        log.info("Forsøker å opprette oppgave for sak {}", saksnummer);
         oppgaveService.opprettOppgaveForSak(saksnummer);
+
         return ResponseEntity.noContent().build();
     }
 

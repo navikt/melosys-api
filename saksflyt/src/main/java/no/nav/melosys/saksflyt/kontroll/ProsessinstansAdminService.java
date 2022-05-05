@@ -67,6 +67,14 @@ public class ProsessinstansAdminService {
         return nesteSteg;
     }
 
+    public void ferdigstillProsessinstans(UUID uuid) {
+        var prosessinstans = prosessinstansRepository.findById(uuid)
+            .orElseThrow(() -> new IkkeFunnetException("Fant ikke prosessinstans med ID %s".formatted(uuid)));
+        prosessinstans.setStatus(ProsessStatus.FERDIG);
+
+        prosessinstansRepository.save(prosessinstans);
+    }
+
     private HentProsessinstansDto mapTilHentProsessinstansDto(Prosessinstans prosessinstans) {
         Long behandlingID = Optional.ofNullable(prosessinstans.getBehandling())
             .map(Behandling::getId)
