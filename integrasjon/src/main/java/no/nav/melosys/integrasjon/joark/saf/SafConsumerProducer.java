@@ -2,6 +2,7 @@ package no.nav.melosys.integrasjon.joark.saf;
 
 import no.nav.melosys.integrasjon.felles.SystemContextExchangeFilter;
 import no.nav.melosys.integrasjon.felles.UserContextExchangeFilter;
+import no.nav.melosys.integrasjon.felles.WebClientConfig;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -12,7 +13,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
 
 @Configuration
-public class SafConsumerProducer {
+public class SafConsumerProducer implements WebClientConfig {
     private static final String NAV_CONSUMER_ID = "Nav-Consumer-Id";
 
     private final String url;
@@ -27,6 +28,7 @@ public class SafConsumerProducer {
         return new SafConsumerImpl(
             webClientBuilder
                 .filter(userContextExchangeFilter)
+                .filter(errorFilter("Kall mot SAF feilet."))
                 .defaultHeaders(this::defaultHeaders)
                 .baseUrl(url)
                 .build()
@@ -39,6 +41,7 @@ public class SafConsumerProducer {
         return new SafConsumerImpl(
             webClientBuilder
                 .filter(systemContextExchangeFilter)
+                .filter(errorFilter("Kall mot SAF feilet."))
                 .defaultHeaders(this::defaultHeaders)
                 .baseUrl(url)
                 .build()
