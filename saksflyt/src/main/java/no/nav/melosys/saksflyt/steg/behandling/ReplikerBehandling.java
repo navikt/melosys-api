@@ -14,6 +14,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import java.util.Optional;
+
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.REPLIKER_BEHANDLING;
 
 
@@ -41,14 +43,14 @@ public class ReplikerBehandling implements StegBehandler {
         Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
         var behandlingstype = prosessinstans.getData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.class);
 
-        Behandling behandlingBruktForReplikering;
+        Optional<Behandling> behandlingBruktForReplikering = fagsakService.hentBehandlingSomErUtgangspunktForRevurdering(fagsak);
         Behandling nyBehandling;
-        try {
-            behandlingBruktForReplikering = fagsakService.hentBehandlingSomErUtgangspunktForRevurdering(fagsak);
-            nyBehandling = behandlingService.replikerBehandlingOgBehandlingsresultat(behandlingBruktForReplikering, behandlingstype);
-        } catch (FunksjonellException e) {
-            behandlingBruktForReplikering = fagsak.hentSistOppdatertBehandling();
-            nyBehandling = behandlingService.replikerBehandlingUtenBehandlingsresultat(behandlingBruktForReplikering, behandlingstype);
+
+        if (behandlingBruktForReplikering.isPresent()) {
+            nyBehandling = behandlingService.replikerBehandlingOgBehandlingsresultat(behandlingBruktForReplikering.get(), behandlingstype);
+        } else {
+            behandlingBruktForReplikering = Optional.of(fagsak.hentSistOppdatertBehandling());
+            nyBehandling = behandlingService.replikerBehandlingUtenBehandlingsresultat(behandlingBruktForReplikering.get(), behandlingstype);
         }
 
         prosessinstans.setBehandling(nyBehandling);
@@ -56,6 +58,6 @@ public class ReplikerBehandling implements StegBehandler {
         fagsakService.lagre(fagsak);
 
         log.info("Behandling {} replikert og behandling {} har blitt opprettet for {}",
-            behandlingBruktForReplikering.getId(), nyBehandling.getId(), saksnummer);
+            behandlingBruktForReplikering.get().getId(), nyBehandling.getId(), saksnummer);
     }
 }

@@ -227,26 +227,25 @@ public class FagsakService {
         Fagsak fagsak = hentFagsak(saksnummer);
         validerOpprettNyVurdering(fagsak);
 
-        Behandling behandling;
+        Optional<Behandling> behandling = hentBehandlingSomErUtgangspunktForRevurdering(fagsak);
         Behandling replikertBehandling;
-        try {
-            behandling = hentBehandlingSomErUtgangspunktForRevurdering(fagsak);
-            replikertBehandling = behandlingService.replikerBehandlingOgBehandlingsresultat(behandling, avgjørBehandlingstype(fagsak));
-        } catch (FunksjonellException e) {
-            behandling = fagsak.hentSistOppdatertBehandling();
-            replikertBehandling = behandlingService.replikerBehandlingUtenBehandlingsresultat(behandling, avgjørBehandlingstype(fagsak));
+
+        if (behandling.isPresent()) {
+            replikertBehandling = behandlingService.replikerBehandlingOgBehandlingsresultat(behandling.get(), avgjørBehandlingstype(fagsak));
+        } else {
+            behandling = Optional.of(fagsak.hentSistOppdatertBehandling());
+            replikertBehandling = behandlingService.replikerBehandlingUtenBehandlingsresultat(behandling.get(), avgjørBehandlingstype(fagsak));
         }
 
-
-        if (!behandling.erAvsluttet()) {
-            behandlingService.avsluttBehandling(behandling.getId());
+        if (!behandling.get().erAvsluttet()) {
+            behandlingService.avsluttBehandling(behandling.get().getId());
         }
 
         oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(
             replikertBehandling, replikertBehandling.getInitierendeJournalpostId(), fagsak.hentBrukersAktørID(), SubjectHandler.getInstance().getUserID()
         );
         if (!unleash.isEnabled("melosys.api.ny.vurdering.medlperiode.beholdes")) {
-            avsluttTidligereMedlPeriode(behandlingsresultatService.hentBehandlingsresultat(behandling.getId()));
+            avsluttTidligereMedlPeriode(behandlingsresultatService.hentBehandlingsresultat(behandling.get().getId()));
         }
         return replikertBehandling.getId();
     }
@@ -261,41 +260,39 @@ public class FagsakService {
         }
     }
 
-    public Behandling hentBehandlingSomErUtgangspunktForRevurdering(Fagsak fagsak) {
+    public Optional<Behandling> hentBehandlingSomErUtgangspunktForRevurdering(Fagsak fagsak) {
         if (fagsak.harAktivBehandling()) {
-            return fagsak.hentSistAktivBehandling();
+            return Optional.of(fagsak.hentSistAktivBehandling());
         }
         return hentBehandlingForNyVurdering(fagsak);
     }
 
-    public Behandling hentBehandlingForNyVurdering(Fagsak fagsak) {
+    public Optional<Behandling> hentBehandlingForNyVurdering(Fagsak fagsak) {
         var førsteBehandling = fagsak.hentTidligstRegistrertBehandling();
 
         return switch (førsteBehandling.getType()) {
             case SOEKNAD -> hentBehandlingMedSistRegistrertVedtak(fagsak);
             case SED -> hentBehandlingMedSistRegistrertUnntak(fagsak);
-            default -> throw new FunksjonellException("Kan ikke revurdere en behandling av type " + førsteBehandling.getType().getBeskrivelse());
+            default -> Optional.empty();
         };
     }
 
-    public Behandling hentBehandlingMedSistRegistrertVedtak(Fagsak fagsak) {
+    public Optional<Behandling> hentBehandlingMedSistRegistrertVedtak(Fagsak fagsak) {
         return fagsak.getBehandlinger().stream()
             .map(behandling -> behandlingsresultatService.hentBehandlingsresultat(behandling.getId()))
             .filter(Objects::nonNull)
             .filter(Behandlingsresultat::harVedtak)
             .max(Comparator.comparing(behandlingsresultat -> behandlingsresultat.getVedtakMetadata().getRegistrertDato()))
-            .map(Behandlingsresultat::getBehandling)
-            .orElseThrow(() -> new IkkeFunnetException("Finner ikke behandlinger med vedtak for " + fagsak.getSaksnummer()));
+            .map(Behandlingsresultat::getBehandling);
     }
 
-    public Behandling hentBehandlingMedSistRegistrertUnntak(Fagsak fagsak) {
+    public Optional<Behandling> hentBehandlingMedSistRegistrertUnntak(Fagsak fagsak) {
         return fagsak.getBehandlinger().stream()
             .map(behandling -> behandlingsresultatService.hentBehandlingsresultat(behandling.getId()))
             .filter(Objects::nonNull)
             .filter(Behandlingsresultat::erRegistrertUnntak)
             .max(Comparator.comparing(RegistreringsInfo::getRegistrertDato))
-            .map(Behandlingsresultat::getBehandling)
-            .orElseThrow(() -> new IkkeFunnetException("Finner ikke behandlinger med registrert unntak for " + fagsak.getSaksnummer()));
+            .map(Behandlingsresultat::getBehandling);
     }
 
     private Behandlingstyper avgjørBehandlingstype(Fagsak fagsak) {

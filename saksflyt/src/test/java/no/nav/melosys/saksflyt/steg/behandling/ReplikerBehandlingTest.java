@@ -1,6 +1,7 @@
 package no.nav.melosys.saksflyt.steg.behandling;
 
 import java.util.List;
+import java.util.Optional;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
@@ -46,7 +47,7 @@ class ReplikerBehandlingTest {
         behandling.setId(1L);
         Behandling replikertBehandling = new Behandling();
         replikertBehandling.setId(2L);
-        when(fagsakService.hentBehandlingSomErUtgangspunktForRevurdering(fagsak)).thenReturn(behandling);
+        when(fagsakService.hentBehandlingSomErUtgangspunktForRevurdering(fagsak)).thenReturn(Optional.of(behandling));
         when(behandlingService.replikerBehandlingOgBehandlingsresultat(behandling, Behandlingstyper.ENDRET_PERIODE)).thenReturn(replikertBehandling);
 
         replikerBehandling.utfør(prosessinstans);
@@ -63,7 +64,7 @@ class ReplikerBehandlingTest {
         fagsak.setBehandlinger(List.of(behandling));
         Behandling replikertBehandling = new Behandling();
         replikertBehandling.setId(2L);
-        when(fagsakService.hentBehandlingSomErUtgangspunktForRevurdering(fagsak)).thenThrow(new FunksjonellException(""));
+        when(fagsakService.hentBehandlingSomErUtgangspunktForRevurdering(fagsak)).thenReturn(Optional.empty());
         when(behandlingService.replikerBehandlingUtenBehandlingsresultat(behandling, Behandlingstyper.ENDRET_PERIODE)).thenReturn(replikertBehandling);
 
         replikerBehandling.utfør(prosessinstans);
