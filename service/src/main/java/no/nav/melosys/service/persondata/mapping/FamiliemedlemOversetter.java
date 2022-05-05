@@ -55,12 +55,12 @@ public final class FamiliemedlemOversetter {
         };
     }
 
-    public static Familiemedlem oversettPersonRelatertVedSivilstandMedSivilstand(Person person, no.nav.melosys.integrasjon.pdl.dto.person.Sivilstand sivilstand) {
+    public static Familiemedlem oversettPersonRelatertVedSivilstandMedSivilstand(Person hovedperson, no.nav.melosys.integrasjon.pdl.dto.person.Sivilstand sivilstand) {
         return new Familiemedlem(
-            FolkeregisteridentOversetter.oversett(person.folkeregisteridentifikator()),
-            NavnOversetter.oversett(person.navn()),
+            FolkeregisteridentOversetter.oversett(hovedperson.folkeregisteridentifikator()),
+            NavnOversetter.oversett(hovedperson.navn()),
             Familierelasjon.RELATERT_VED_SIVILSTAND,
-            FoedselOversetter.oversett(person.foedsel()),
+            FoedselOversetter.oversett(hovedperson.foedsel()),
             null,
             null,
             SivilstandOversetter.oversett(sivilstand)
