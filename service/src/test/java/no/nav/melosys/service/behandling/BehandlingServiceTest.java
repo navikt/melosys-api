@@ -54,7 +54,7 @@ class BehandlingServiceTest {
     private static final List<Long> PERIODE_IDS = Arrays.asList(2L, 3L);
 
     @Mock
-    private BehandlingRepository behandlingRepo;
+    private BehandlingRepository behandlingRepository;
     @Mock
     private BehandlingsresultatRepository behandlingsresultatRepository;
     @Mock
@@ -84,7 +84,7 @@ class BehandlingServiceTest {
 
     @BeforeEach
     public void setUp() {
-        behandlingService = new BehandlingService(behandlingRepo, behandlingsresultatRepository, tidligereMedlemsperiodeRepo, behandlingsgrunnlagRepo, behandlingsresultatService, oppgaveService, applicationEventPublisher, fakeUnleash);
+        behandlingService = new BehandlingService(behandlingRepository, behandlingsresultatRepository, tidligereMedlemsperiodeRepo, behandlingsgrunnlagRepo, behandlingsresultatService, oppgaveService, applicationEventPublisher, fakeUnleash);
 
         behandling = new Behandling();
         behandling.setId(BEHANDLING_ID);
@@ -92,7 +92,7 @@ class BehandlingServiceTest {
 
     @Test
     void hentBehandling() {
-        when(behandlingRepo.findWithSaksopplysningerById(BEHANDLING_ID)).thenReturn(null);
+        when(behandlingRepository.findWithSaksopplysningerById(BEHANDLING_ID)).thenReturn(null);
 
         assertThatExceptionOfType(IkkeFunnetException.class)
             .isThrownBy(() -> behandlingService.hentBehandlingMedSaksopplysninger(BEHANDLING_ID))
@@ -105,12 +105,12 @@ class BehandlingServiceTest {
         behandling.setType(ENDRET_PERIODE);
         behandling.setFagsak(new Fagsak());
         behandling.setBehandlingsgrunnlag(opprettBehandlingsgrunnlag());
-        when(behandlingRepo.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
+        when(behandlingRepository.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(BEHANDLINGSRESULTAT);
 
         behandlingService.endreBehandling(BEHANDLING_ID, Sakstyper.EU_EOS, BEHANDLING_TYPE, BEHANDLING_TEMA, BEHANDLING_STATUS, BEHANDLING_FRIST);
 
-        verify(behandlingRepo, times(4)).save(behandlingCaptor.capture());
+        verify(behandlingRepository, times(4)).save(behandlingCaptor.capture());
         verify(applicationEventPublisher, times(4)).publishEvent(behandlingEventCaptor.capture());
 
         var lagredeBehandlinger = behandlingCaptor.getAllValues();
@@ -142,11 +142,11 @@ class BehandlingServiceTest {
         behandling.setBehandlingsfrist(BEHANDLING_FRIST);
         behandling.setFagsak(new Fagsak());
         behandling.setBehandlingsgrunnlag(opprettBehandlingsgrunnlag());
-        when(behandlingRepo.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
+        when(behandlingRepository.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
 
         behandlingService.endreBehandling(BEHANDLING_ID, Sakstyper.EU_EOS, BEHANDLING_TYPE, null, null, BEHANDLING_FRIST);
 
-        verify(behandlingRepo, never()).save(any());
+        verify(behandlingRepository, never()).save(any());
         verify(applicationEventPublisher, never()).publishEvent(any());
     }
 
@@ -159,7 +159,7 @@ class BehandlingServiceTest {
 
         behandlingService.endreTema(behandling, UTSENDT_ARBEIDSTAKER);
 
-        verify(behandlingRepo).save(behandlingCaptor.capture());
+        verify(behandlingRepository).save(behandlingCaptor.capture());
         verify(behandlingsresultatService).tømBehandlingsresultat(BEHANDLING_ID);
         verify(applicationEventPublisher).publishEvent(behandlingEndretAvSaksbehandlerEventArgumentCaptor.capture());
         assertThat(behandlingCaptor.getValue().getTema()).isEqualTo(UTSENDT_ARBEIDSTAKER);
@@ -176,7 +176,7 @@ class BehandlingServiceTest {
 
         behandlingService.endreTema(behandling, ØVRIGE_SED_MED);
 
-        verify(behandlingRepo).save(behandlingCaptor.capture());
+        verify(behandlingRepository).save(behandlingCaptor.capture());
         verify(behandlingsresultatService).tømBehandlingsresultat(BEHANDLING_ID);
         verify(applicationEventPublisher).publishEvent(behandlingEndretAvSaksbehandlerEventArgumentCaptor.capture());
         assertThat(behandlingCaptor.getValue().getTema()).isEqualTo(ØVRIGE_SED_MED);
@@ -187,13 +187,13 @@ class BehandlingServiceTest {
     @Test
     void endreBehandlingstema_ugyldigNyttTemaForSøknad_exceptionKastes() {
         behandling.setTema(ARBEID_FLERE_LAND);
-        when(behandlingRepo.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
+        when(behandlingRepository.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(BEHANDLINGSRESULTAT);
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> behandlingService.endreBehandlingstemaTilBehandling(BEHANDLING_ID, ØVRIGE_SED_MED))
             .withMessage("Ikke mulig å endre behandlingstema");
-        verify(behandlingRepo, never()).save(any(Behandling.class));
+        verify(behandlingRepository, never()).save(any(Behandling.class));
         verify(behandlingsresultatService, never()).tømBehandlingsresultat(BEHANDLING_ID);
         verify(oppgaveService, never()).oppdaterOppgave(any(), any());
     }
@@ -206,7 +206,7 @@ class BehandlingServiceTest {
         behandling.setStatus(Behandlingsstatus.VURDER_DOKUMENT);
         behandling.setFagsak(fagsak);
         behandling.setId(BEHANDLING_ID);
-        when(behandlingRepo.findById(anyLong())).thenReturn(Optional.of(behandling));
+        when(behandlingRepository.findById(anyLong())).thenReturn(Optional.of(behandling));
 
         behandlingService.endreStatus(BEHANDLING_ID, Behandlingsstatus.AVVENT_DOK_PART);
 
@@ -227,9 +227,9 @@ class BehandlingServiceTest {
         behandling.setId(BEHANDLING_ID);
         behandling.setFagsak(fagsak);
         behandling.setStatus(Behandlingsstatus.VURDER_DOKUMENT);
-        when(behandlingRepo.findById(anyLong())).thenReturn(Optional.of(behandling));
+        when(behandlingRepository.findById(anyLong())).thenReturn(Optional.of(behandling));
         behandlingService.endreStatus(BEHANDLING_ID, Behandlingsstatus.ANMODNING_UNNTAK_SENDT);
-        verify(behandlingRepo).save(behandling);
+        verify(behandlingRepository).save(behandling);
         verify(applicationEventPublisher).publishEvent(behandlingEndretStatusEventCaptor.capture());
 
         BehandlingEndretStatusEvent behandlingEndretStatusEvent = behandlingEndretStatusEventCaptor.getValue();
@@ -241,7 +241,7 @@ class BehandlingServiceTest {
     void oppdaterStatus_behIkkeFunnet() {
         Behandling behandling = new Behandling();
         behandling.setStatus(Behandlingsstatus.VURDER_DOKUMENT);
-        when(behandlingRepo.findById(anyLong())).thenReturn(Optional.empty());
+        when(behandlingRepository.findById(anyLong())).thenReturn(Optional.empty());
 
         assertThatExceptionOfType(IkkeFunnetException.class)
             .isThrownBy(() -> behandlingService.endreStatus(BEHANDLING_ID, Behandlingsstatus.AVVENT_DOK_PART));
@@ -265,7 +265,7 @@ class BehandlingServiceTest {
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
         behandling.setFagsak(fagsak);
         behandling.setId(BEHANDLING_ID);
-        when(behandlingRepo.findById(anyLong())).thenReturn(Optional.of(behandling));
+        when(behandlingRepository.findById(anyLong())).thenReturn(Optional.of(behandling));
         behandlingService.endreStatus(BEHANDLING_ID, Behandlingsstatus.AVSLUTTET);
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(fagsak.getSaksnummer());
     }
@@ -275,14 +275,14 @@ class BehandlingServiceTest {
         Behandling behandling = new Behandling();
         behandling.setStatus(Behandlingsstatus.VURDER_DOKUMENT);
 
-        when(behandlingRepo.findById(anyLong())).thenReturn(Optional.of(behandling));
+        when(behandlingRepository.findById(anyLong())).thenReturn(Optional.of(behandling));
         behandlingService.endreStatus(BEHANDLING_ID, Behandlingsstatus.VURDER_DOKUMENT);
-        verify(behandlingRepo, never()).save(any());
+        verify(behandlingRepository, never()).save(any());
     }
 
     @Test
     void knyttMedlemsperioder_ingenBehandling() {
-        when(behandlingRepo.findById(anyLong())).thenReturn(Optional.empty());
+        when(behandlingRepository.findById(anyLong())).thenReturn(Optional.empty());
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> behandlingService.knyttMedlemsperioder(BEHANDLING_ID, PERIODE_IDS))
@@ -294,7 +294,7 @@ class BehandlingServiceTest {
         Behandlingsstatus behandlingsstatus = Behandlingsstatus.AVSLUTTET;
         Behandling behandling = new Behandling();
         behandling.setStatus(behandlingsstatus);
-        when(behandlingRepo.findById(anyLong())).thenReturn(Optional.of(behandling));
+        when(behandlingRepository.findById(anyLong())).thenReturn(Optional.of(behandling));
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> behandlingService.knyttMedlemsperioder(BEHANDLING_ID, PERIODE_IDS))
@@ -305,7 +305,7 @@ class BehandlingServiceTest {
     void knyttMedlemsperioder() {
         Behandling behandling = new Behandling();
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
-        when(behandlingRepo.findById(anyLong())).thenReturn(Optional.of(behandling));
+        when(behandlingRepository.findById(anyLong())).thenReturn(Optional.of(behandling));
 
         behandlingService.knyttMedlemsperioder(BEHANDLING_ID, PERIODE_IDS);
         verify(tidligereMedlemsperiodeRepo).deleteById_BehandlingId(BEHANDLING_ID);
@@ -336,7 +336,7 @@ class BehandlingServiceTest {
         String initierendeJournalpostId = "234";
         String initierendeDokumentId = "221234";
         Behandling behandling = behandlingService.nyBehandling(new Fagsak(), Behandlingsstatus.OPPRETTET, Behandlingstyper.SOEKNAD, Behandlingstema.UTSENDT_ARBEIDSTAKER, initierendeJournalpostId, initierendeDokumentId);
-        verify(behandlingRepo).save(any(Behandling.class));
+        verify(behandlingRepository).save(any(Behandling.class));
         assertThat(behandling.getType()).isEqualTo(Behandlingstyper.SOEKNAD);
         assertThat(behandling.getStatus()).isEqualTo(Behandlingsstatus.OPPRETTET);
         assertThat(behandling.getInitierendeJournalpostId()).isEqualTo(initierendeJournalpostId);
@@ -374,11 +374,11 @@ class BehandlingServiceTest {
     }
 
     @Test
-    void replikerBehandlingUtenBehandlingsgrunnlagOgSaksopplysninger_replikererObjekterOgCollections() throws NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
+    void replikerBehandlingUtenBehandlingsgrunnlagSaksopplysningerOgResultat_replikererObjekterOgCollections() throws NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
         Behandling tidligsteInaktiveBehandling = opprettBehandlingMedData();
         assertThat(tidligsteInaktiveBehandling.getBehandlingsgrunnlag()).isNotNull();
 
-        Behandling replikertBehandling = behandlingService.replikerBehandlingUtenBehandlingsgrunnlagOgSaksopplysninger(tidligsteInaktiveBehandling, NY_VURDERING);
+        Behandling replikertBehandling = behandlingService.replikerBehandlingUtenBehandlingsgrunnlagSaksopplysningerOgResultat(tidligsteInaktiveBehandling, NY_VURDERING);
 
         assertThat(replikertBehandling.getId()).isNull();
         assertThat(replikertBehandling.getTema()).isEqualTo(tidligsteInaktiveBehandling.getTema());
@@ -388,17 +388,20 @@ class BehandlingServiceTest {
         assertThat(replikertBehandling.getBehandlingsfrist()).isEqualTo(LocalDate.now().plusWeeks(4));
         assertThat(replikertBehandling.getBehandlingsgrunnlag()).isNull();
         assertThat(replikertBehandling.getSaksopplysninger()).isEmpty();
+
+        verify(behandlingRepository).save(replikertBehandling);
+        verify(behandlingsresultatService).lagre(any());
     }
 
     @Test
     void avsluttBehandling() {
         Behandling behandling = new Behandling();
         behandling.setId(BEHANDLING_ID);
-        when(behandlingRepo.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
+        when(behandlingRepository.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
 
         behandlingService.avsluttBehandling(BEHANDLING_ID);
 
-        verify(behandlingRepo).save(behandlingCaptor.capture());
+        verify(behandlingRepository).save(behandlingCaptor.capture());
         verify(applicationEventPublisher).publishEvent(behandlingEndretStatusEventCaptor.capture());
         Behandling lagretBehandling = behandlingCaptor.getValue();
         assertThat(lagretBehandling.getStatus()).isEqualTo(Behandlingsstatus.AVSLUTTET);
@@ -412,7 +415,7 @@ class BehandlingServiceTest {
         Behandling behandling = new Behandling();
         behandling.setId(BEHANDLING_ID);
         behandling.setStatus(AVSLUTTET);
-        when(behandlingRepo.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
+        when(behandlingRepository.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> behandlingService.avsluttBehandling(BEHANDLING_ID))
@@ -424,11 +427,11 @@ class BehandlingServiceTest {
         Behandling behandling = new Behandling();
         behandling.setId(BEHANDLING_ID);
         behandling.setType(Behandlingstyper.NY_VURDERING);
-        when(behandlingRepo.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
+        when(behandlingRepository.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
 
         behandlingService.avsluttNyVurdering(BEHANDLING_ID, Behandlingsresultattyper.HENLEGGELSE_BORTFALT);
 
-        verify(behandlingRepo).save(behandlingCaptor.capture());
+        verify(behandlingRepository).save(behandlingCaptor.capture());
         verify(applicationEventPublisher).publishEvent(behandlingEndretStatusEventCaptor.capture());
         Behandling lagretBehandling = behandlingCaptor.getValue();
         assertThat(lagretBehandling.getStatus()).isEqualTo(Behandlingsstatus.AVSLUTTET);
@@ -443,7 +446,7 @@ class BehandlingServiceTest {
         Behandling behandling = new Behandling();
         behandling.setId(BEHANDLING_ID);
         behandling.setType(Behandlingstyper.NY_VURDERING);
-        when(behandlingRepo.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
+        when(behandlingRepository.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
 
         behandlingService.avsluttNyVurdering(BEHANDLING_ID, Behandlingsresultattyper.FERDIGBEHANDLET);
     }
@@ -456,7 +459,7 @@ class BehandlingServiceTest {
         behandlingService.endreStatus(behandling, ANMODNING_UNNTAK_SENDT);
 
 
-        verify(behandlingRepo).save(behandlingCaptor.capture());
+        verify(behandlingRepository).save(behandlingCaptor.capture());
         Behandling lagretBehandling = behandlingCaptor.getValue();
 
         assertThat(lagretBehandling.getDokumentasjonSvarfristDato()).isNotNull();
@@ -473,7 +476,7 @@ class BehandlingServiceTest {
         behandlingService.endreStatus(behandling, AVVENT_DOK_PART);
 
 
-        verify(behandlingRepo).save(behandlingCaptor.capture());
+        verify(behandlingRepository).save(behandlingCaptor.capture());
         Behandling lagretBehandling = behandlingCaptor.getValue();
 
         assertThat(lagretBehandling.getDokumentasjonSvarfristDato()).isNotNull();
@@ -490,7 +493,7 @@ class BehandlingServiceTest {
         behandlingService.endreStatus(behandling, AVVENT_DOK_UTL);
 
 
-        verify(behandlingRepo).save(behandlingCaptor.capture());
+        verify(behandlingRepository).save(behandlingCaptor.capture());
         Behandling lagretBehandling = behandlingCaptor.getValue();
 
         assertThat(lagretBehandling.getDokumentasjonSvarfristDato()).isNotNull();
@@ -510,7 +513,7 @@ class BehandlingServiceTest {
         behandlingService.endreStatus(behandling, UNDER_BEHANDLING);
 
 
-        verify(behandlingRepo).save(behandlingCaptor.capture());
+        verify(behandlingRepository).save(behandlingCaptor.capture());
         Behandling lagretBehandling = behandlingCaptor.getValue();
 
         assertThat(lagretBehandling.getDokumentasjonSvarfristDato()).isNull();
@@ -524,11 +527,11 @@ class BehandlingServiceTest {
         behandling.setId(BEHANDLING_ID);
         behandling.setType(Behandlingstyper.NY_VURDERING);
         behandling.setFagsak(fagsak);
-        when(behandlingRepo.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
+        when(behandlingRepository.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
 
         behandlingService.settNyVurderingTilFerdigbehandlet(BEHANDLING_ID);
 
-        verify(behandlingRepo).save(behandlingCaptor.capture());
+        verify(behandlingRepository).save(behandlingCaptor.capture());
         verify(applicationEventPublisher).publishEvent(behandlingEndretStatusEventCaptor.capture());
         Behandling lagretBehandling = behandlingCaptor.getValue();
         assertThat(lagretBehandling.getStatus()).isEqualTo(Behandlingsstatus.AVSLUTTET);
@@ -544,7 +547,7 @@ class BehandlingServiceTest {
         Behandling behandling = new Behandling();
         behandling.setId(BEHANDLING_ID);
         behandling.setStatus(AVSLUTTET);
-        when(behandlingRepo.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
+        when(behandlingRepository.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> behandlingService.avsluttNyVurdering(BEHANDLING_ID, Behandlingsresultattyper.FERDIGBEHANDLET))
@@ -557,7 +560,7 @@ class BehandlingServiceTest {
         behandling.setId(BEHANDLING_ID);
         behandling.setStatus(AVSLUTTET);
         behandling.setType(Behandlingstyper.NY_VURDERING);
-        when(behandlingRepo.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
+        when(behandlingRepository.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> behandlingService.avsluttNyVurdering(BEHANDLING_ID, Behandlingsresultattyper.HENLEGGELSE_BORTFALT))
@@ -572,7 +575,7 @@ class BehandlingServiceTest {
         behandlingService.endreBehandlingsstatusFraOpprettetTilUnderBehandling(behandling);
 
         assertThat(behandling.getStatus()).isEqualTo(Behandlingsstatus.UNDER_BEHANDLING);
-        verify(behandlingRepo).save(behandling);
+        verify(behandlingRepository).save(behandling);
     }
 
     @Test
@@ -582,7 +585,7 @@ class BehandlingServiceTest {
 
         behandlingService.endreBehandlingsstatusFraOpprettetTilUnderBehandling(behandling);
 
-        verify(behandlingRepo, never()).save(any());
+        verify(behandlingRepository, never()).save(any());
     }
 
     @Test
@@ -590,12 +593,12 @@ class BehandlingServiceTest {
         LocalDate nå = LocalDate.now();
         Behandling behandling = new Behandling();
         behandling.setBehandlingsfrist(nå);
-        when(behandlingRepo.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
+        when(behandlingRepository.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
 
         behandlingService.endreBehandlingsfrist(BEHANDLING_ID, nå.plusWeeks(1));
 
         assertThat(behandling.getBehandlingsfrist()).isEqualTo(nå.plusWeeks(1));
-        verify(behandlingRepo).save(behandling);
+        verify(behandlingRepository).save(behandling);
         verify(applicationEventPublisher).publishEvent(any(BehandlingsfristEndretEvent.class));
     }
 

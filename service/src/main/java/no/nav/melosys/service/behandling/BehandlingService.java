@@ -256,7 +256,7 @@ public class BehandlingService {
     public Behandling replikerBehandlingUtenBehandlingsresultat(Behandling tidligsteInaktiveBehandling, Behandlingstyper behandlingstype) {
         Behandling behandlingsreplika;
         try {
-            behandlingsreplika = replikerBehandlingUtenBehandlingsgrunnlagOgSaksopplysninger(tidligsteInaktiveBehandling, behandlingstype);
+            behandlingsreplika = replikerBehandlingUtenBehandlingsgrunnlagSaksopplysningerOgResultat(tidligsteInaktiveBehandling, behandlingstype);
         } catch (InvocationTargetException | NoSuchMethodException | InstantiationException | IllegalAccessException e) {
             throw new TekniskException(String.format("Klarte ikke replikere behandling %s for fagsak %s",
                 tidligsteInaktiveBehandling.getId(), tidligsteInaktiveBehandling.getFagsak().getSaksnummer()), e);
@@ -264,7 +264,7 @@ public class BehandlingService {
         return behandlingsreplika;
     }
 
-    Behandling replikerBehandlingUtenBehandlingsgrunnlagOgSaksopplysninger(Behandling tidligsteInaktiveBehandling, Behandlingstyper behandlingstype)
+    Behandling replikerBehandlingUtenBehandlingsgrunnlagSaksopplysningerOgResultat(Behandling tidligsteInaktiveBehandling, Behandlingstyper behandlingstype)
         throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         Behandling behandlingsreplika = (Behandling) BeanUtils.cloneBean(tidligsteInaktiveBehandling);
         behandlingsreplika.setId(null);
@@ -276,6 +276,11 @@ public class BehandlingService {
         behandlingsreplika.setBehandlingsfrist(hentBehandlingsfristForBehandlingstema(tidligsteInaktiveBehandling.getTema()));
         behandlingsreplika.setSaksopplysninger(new HashSet<>());
         behandlingRepository.save(behandlingsreplika);
+
+        Behandlingsresultat tomtBehandlingsresultat = new Behandlingsresultat();
+        tomtBehandlingsresultat.setBehandling(behandlingsreplika);
+        behandlingsresultatService.lagre(tomtBehandlingsresultat);
+
         return behandlingsreplika;
     }
 
