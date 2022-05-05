@@ -77,7 +77,7 @@ class AvklarArbeidsgiverTest {
     void utfør_medAvklartNorskVirksomhet_arbeidsgiveraktørOpprettes() {
         AktoerRepository aktoerRepository = mock(AktoerRepository.class);
         PersondataFasade persondataFasade = mock(PersondataFasade.class);
-        AvklarArbeidsgiver steg = new AvklarArbeidsgiver(new AktoerService(aktoerRepository, persondataFasade), avklarteVirksomheterService,
+        AvklarArbeidsgiver steg = new AvklarArbeidsgiver(new AktoerService(aktoerRepository), avklarteVirksomheterService,
             behandlingService, behandlingsresultatService);
 
         List<AvklartVirksomhet> avklarteVirksomheter = Collections.singletonList(avklartVirksomhet);
@@ -99,7 +99,7 @@ class AvklarArbeidsgiverTest {
     void utfør_utenAvklartNorskVirksomhet_arbeidsgiveraktorerSlettes() {
         AktoerRepository aktoerRepository = mock(AktoerRepository.class);
         PersondataFasade persondataFasade = mock(PersondataFasade.class);
-        AvklarArbeidsgiver steg = new AvklarArbeidsgiver(new AktoerService(aktoerRepository, persondataFasade), avklarteVirksomheterService,
+        AvklarArbeidsgiver steg = new AvklarArbeidsgiver(new AktoerService(aktoerRepository), avklarteVirksomheterService,
             behandlingService, behandlingsresultatService);
         when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
 

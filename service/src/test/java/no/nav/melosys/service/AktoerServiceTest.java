@@ -32,8 +32,6 @@ class AktoerServiceTest {
 
     @Mock
     private AktoerRepository aktoerRepository;
-    @Mock
-    private PersondataFasade persondataFasade;
 
     private AktoerService aktoerService;
 
@@ -46,7 +44,7 @@ class AktoerServiceTest {
 
     @BeforeEach
     public void setUp() {
-        aktoerService = new AktoerService(aktoerRepository, persondataFasade);
+        aktoerService = new AktoerService(aktoerRepository);
         aktoer = new Aktoer();
         aktoer.setId(aktoerId);
     }
@@ -180,6 +178,7 @@ class AktoerServiceTest {
         assertThat(aktoer.getOrgnr()).isEqualTo(aktoerDto.getOrgnr());
         assertThat(aktoer.getRolle()).hasToString(aktoerDto.getRolleKode());
         assertThat(aktoer.getRepresenterer()).hasToString(aktoerDto.getRepresentererKode());
+        assertThat(aktoer.getPersonIdent()).isEqualTo(aktoerDto.getPersonIdent());
     }
 
     private AktoerDto lagAktoerDto() {
@@ -189,6 +188,7 @@ class AktoerServiceTest {
         aktoerDto.setUtenlandskPersonID("utenlandskPersonID");
         aktoerDto.setOrgnr("orgnr");
         aktoerDto.setRepresentererKode("BRUKER");
+        aktoerDto.setPersonIdent("21075114491");
         return aktoerDto;
     }
 }

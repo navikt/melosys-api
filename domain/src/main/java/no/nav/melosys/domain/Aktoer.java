@@ -42,6 +42,9 @@ public class Aktoer extends RegistreringsInfo {
     @Column(name = "representerer")
     private Representerer representerer;
 
+    @Column(name = "person_ident")
+    private String personIdent;
+
     public Long getId() {
         return id;
     }
@@ -104,6 +107,14 @@ public class Aktoer extends RegistreringsInfo {
 
     public void setRepresenterer(Representerer representerer) {
         this.representerer = representerer;
+    }
+
+    public String getPersonIdent() {
+        return personIdent;
+    }
+
+    public void setPersonIdent(String ident) {
+        this.personIdent = ident;
     }
 
     public boolean erUtenlandskMyndighet() {

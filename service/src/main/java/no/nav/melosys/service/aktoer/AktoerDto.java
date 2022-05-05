@@ -1,7 +1,6 @@
 package no.nav.melosys.service.aktoer;
 
 import no.nav.melosys.domain.Aktoer;
-import no.nav.melosys.service.persondata.PersondataFasade;
 
 public class AktoerDto {
 
@@ -62,14 +61,6 @@ public class AktoerDto {
         this.representererKode = representererKode;
     }
 
-    public Long getDatabaseID() {
-        return databaseID;
-    }
-
-    public void setDatabaseID(Long databaseID) {
-        this.databaseID = databaseID;
-    }
-
     public String getPersonIdent() {
         return personIdent;
     }
@@ -78,7 +69,15 @@ public class AktoerDto {
         this.personIdent = personIdent;
     }
 
-    public static AktoerDto tilDto(Aktoer aktoer, PersondataFasade persondataFasade) {
+    public Long getDatabaseID() {
+        return databaseID;
+    }
+
+    public void setDatabaseID(Long databaseID) {
+        this.databaseID = databaseID;
+    }
+
+    public static AktoerDto tilDto(Aktoer aktoer) {
         AktoerDto aktoerDto = new AktoerDto();
         aktoerDto.setAktoerID(aktoer.getAktørId());
         aktoerDto.setInstitusjonsID(aktoer.getInstitusjonId());
@@ -89,9 +88,7 @@ public class AktoerDto {
             aktoerDto.setRepresentererKode(aktoer.getRepresenterer().getKode());
         }
         aktoerDto.setDatabaseID(aktoer.getId());
-        if (aktoer.getAktørId() != null) {
-            aktoerDto.setPersonIdent(persondataFasade.hentFolkeregisterident(aktoer.getAktørId()));
-        }
+        aktoerDto.setPersonIdent(aktoer.getPersonIdent());
         return aktoerDto;
     }
 

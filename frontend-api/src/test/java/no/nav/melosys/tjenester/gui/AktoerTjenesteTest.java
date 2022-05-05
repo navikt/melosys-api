@@ -56,6 +56,7 @@ class AktoerTjenesteTest extends JsonSchemaTestParent {
         aktoerDto.setRepresentererKode("BRUKER");
         aktoerDto.setOrgnr("123456789");
         aktoerDto.setDatabaseID(2L);
+        aktoerDto.setPersonIdent("30056928150");
 
 
         validerArray(Collections.singletonList(aktoerDto), AKTOER_SCHEMA, log);
@@ -104,12 +105,12 @@ class AktoerTjenesteTest extends JsonSchemaTestParent {
         mockMvc.perform(get("/api/fagsaker/{saksnummer}/aktoerer", "MELTEST-1")
                 .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
-            .andExpect(responseBody(objectMapper).containsObjectAsJson(Collections.singletonList(AktoerDto.tilDto(aktoerMyndighet, persondataFasade)), new TypeReference<List<AktoerDto>>() {
+            .andExpect(responseBody(objectMapper).containsObjectAsJson(Collections.singletonList(AktoerDto.tilDto(aktoerMyndighet)), new TypeReference<List<AktoerDto>>() {
             }));
     }
 
     @Test
-    void slettAktoer_ok() throws Exception {
+    void slettAktoer_ok() throws Exception{
         mockMvc.perform(delete("/api/fagsaker/aktoerer/{databaseID}", 123L))
             .andExpect(status().isNoContent());
     }

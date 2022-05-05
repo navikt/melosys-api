@@ -29,16 +29,13 @@ public class AktoerTjeneste {
     private final Aksesskontroll aksesskontroll;
     private final AktoerService aktoerService;
     private final FagsakService fagsakService;
-    private final PersondataFasade persondataFasade;
 
     public AktoerTjeneste(Aksesskontroll aksesskontroll,
                           AktoerService aktoerService,
-                          FagsakService fagsakService,
-                          PersondataFasade persondataFasade) {
+                          FagsakService fagsakService) {
         this.aksesskontroll = aksesskontroll;
         this.aktoerService = aktoerService;
         this.fagsakService = fagsakService;
-        this.persondataFasade = persondataFasade;
     }
 
     @GetMapping("/{saksnummer}/aktoerer")
@@ -63,7 +60,7 @@ public class AktoerTjeneste {
         }
 
         List<Aktoer> aktører = aktoerService.hentfagsakAktører(fagsak, rolle, representantRepresenterer);
-        return aktører.stream().map(aktoer -> AktoerDto.tilDto(aktoer, persondataFasade)).toList();
+        return aktører.stream().map(AktoerDto::tilDto).toList();
     }
 
     @PostMapping("/{saksnummer}/aktoerer")
