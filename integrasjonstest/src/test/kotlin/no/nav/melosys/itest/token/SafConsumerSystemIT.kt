@@ -4,6 +4,7 @@ import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.matching.StringValuePattern
 import no.finn.unleash.FakeUnleash
 import no.nav.melosys.integrasjon.joark.saf.SafConsumer
+import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
@@ -22,6 +23,13 @@ class SafConsumerSystemIT(
     class TestConfig {
         @Bean
         fun unleash() = FakeUnleash()
+    }
+
+    @Test
+    fun skalBrukeErrorFilterOgGiRiktigFeilmelding() {
+        executeErrorFromServer { error ->
+            Assertions.assertThat(error).startsWith("Kall mot SAF feilet.")
+        }
     }
 
     @Test
