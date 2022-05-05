@@ -5,12 +5,11 @@ import com.github.tomakehurst.wiremock.matching.StringValuePattern
 import no.nav.melosys.integrasjon.sak.SakConsumer
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.test.web.client.MockRestServiceServer
 
 class SakConsumerIT(
-    @Autowired @Qualifier("system") private val sakConsumer: SakConsumer,
+    @Autowired private val sakConsumer: SakConsumer,
     @Autowired server: MockRestServiceServer,
     @Value("\${mockserver.port}") mockPort: Int,
 ) : SakConsumerTestBase(server, mockPort, sakConsumer) {
