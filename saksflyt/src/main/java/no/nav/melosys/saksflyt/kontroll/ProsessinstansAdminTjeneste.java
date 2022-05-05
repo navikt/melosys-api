@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/admin/prosessinstanser")
 public class ProsessinstansAdminTjeneste implements AdminTjeneste {
 
-    private final Logger log = LoggerFactory.getLogger(ProsessinstansAdminTjeneste.class);
+    private static final Logger log = LoggerFactory.getLogger(ProsessinstansAdminTjeneste.class);
 
     private final ProsessinstansAdminService prosessinstansAdminService;
     private final String apiKey;
@@ -31,15 +31,17 @@ public class ProsessinstansAdminTjeneste implements AdminTjeneste {
 
     @GetMapping("/feilede")
     public ResponseEntity<List<HentProsessinstansDto>> hentFeiledeProsessinstanser(@RequestHeader(API_KEY_HEADER) String apiKey) {
-
         validerApikey(apiKey);
+
         return ResponseEntity.ok(prosessinstansAdminService.hentFeiledeProsessinstanser());
     }
 
     @PostMapping("/feilede/restart")
     public ResponseEntity<List<HentProsessinstansDto>> restartAlleFeiledeProsessinstanser(@RequestHeader(API_KEY_HEADER) String apiKey) {
-
         validerApikey(apiKey);
+
+        log.info("Forsøker å restarte alle feilede prosessinstanser");
+
         return ResponseEntity.ok(prosessinstansAdminService.restartAlleFeiledeProsessinstanser());
     }
 
@@ -63,6 +65,17 @@ public class ProsessinstansAdminTjeneste implements AdminTjeneste {
         prosessinstansAdminService.restartProsessinstanser(Collections.singletonList(uuid));
 
         return ResponseEntity.ok("SIST_FULLFORTE_STEG for prosessinstans %s satt til %s og prosessinstans restartet".formatted(uuid, nyttSteg.getKode()));
+    }
+
+    @PostMapping("/ferdigstill/{uuid}")
+    public ResponseEntity<Void> ferdigstillProsessinstans(@RequestHeader(API_KEY_HEADER) String apiKey, @PathVariable UUID uuid) {
+        validerApikey(apiKey);
+
+        log.info("Ferdigstiller prosessinstans {}", uuid);
+
+        prosessinstansAdminService.ferdigstillProsessinstans(uuid);
+
+        return ResponseEntity.noContent().build();
     }
 
     @Override

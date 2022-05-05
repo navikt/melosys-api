@@ -5,6 +5,7 @@ import com.github.tomakehurst.wiremock.matching.StringValuePattern
 import no.finn.unleash.FakeUnleash
 import no.nav.melosys.integrasjon.oppgave.konsument.OppgaveConsumer
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
+import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
@@ -23,6 +24,13 @@ class OppgaveConsumerSystemIT(
     class TestConfig {
         @Bean
         fun unleash() = FakeUnleash()
+    }
+
+    @Test
+    fun skalBrukeErrorFilterOgGiRiktigFeilmelding() {
+        executeErrorFromServer { error ->
+            Assertions.assertThat(error).startsWith("Kall mot Oppgave feilet.")
+        }
     }
 
     @Test

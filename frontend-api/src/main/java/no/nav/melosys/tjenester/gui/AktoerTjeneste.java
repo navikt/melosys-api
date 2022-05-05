@@ -10,6 +10,7 @@ import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.service.aktoer.AktoerDto;
 import no.nav.melosys.service.aktoer.AktoerService;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.security.token.support.core.api.Protected;
@@ -18,8 +19,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.WebApplicationContext;
-
-import static java.util.stream.Collectors.toList;
 
 @Protected
 @RestController
@@ -61,7 +60,7 @@ public class AktoerTjeneste {
         }
 
         List<Aktoer> aktører = aktoerService.hentfagsakAktører(fagsak, rolle, representantRepresenterer);
-        return aktører.stream().map(this::tilDto).collect(toList());
+        return aktører.stream().map(AktoerDto::tilDto).toList();
     }
 
     @PostMapping("/{saksnummer}/aktoerer")
@@ -84,19 +83,5 @@ public class AktoerTjeneste {
     public ResponseEntity<Void> slettAktoer(@PathVariable("databaseID") long databaseID) {
         aktoerService.slettAktoer(databaseID);
         return ResponseEntity.noContent().build();
-    }
-
-    private AktoerDto tilDto(Aktoer aktoer) {
-        AktoerDto aktoerDto = new AktoerDto();
-        aktoerDto.setAktoerID(aktoer.getAktørId());
-        aktoerDto.setInstitusjonsID(aktoer.getInstitusjonId());
-        aktoerDto.setOrgnr(aktoer.getOrgnr());
-        aktoerDto.setRolleKode(aktoer.getRolle().getKode());
-        aktoerDto.setUtenlandskPersonID(aktoer.getUtenlandskPersonId());
-        if (aktoer.getRepresenterer() != null) {
-            aktoerDto.setRepresentererKode(aktoer.getRepresenterer().getKode());
-        }
-        aktoerDto.setDatabaseID(aktoer.getId());
-        return aktoerDto;
     }
 }

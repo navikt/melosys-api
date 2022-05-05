@@ -340,7 +340,7 @@ class JournalfoeringServiceTest {
         fagsak.getBehandlinger().add(behandling);
 
         when(fagsakService.hentFagsak(saksnummer)).thenReturn(fagsak);
-        when(prosessinstansService.lagJournalføringProsessinstans(eq(ProsessType.JFR_NY_BEHANDLING), any()))
+        when(prosessinstansService.lagJournalføringProsessinstans(eq(ProsessType.JFR_NY_VURDERING), any()))
             .thenReturn(new Prosessinstans());
         when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
 
