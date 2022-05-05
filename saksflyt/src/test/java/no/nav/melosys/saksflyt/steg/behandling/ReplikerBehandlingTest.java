@@ -51,7 +51,7 @@ class ReplikerBehandlingTest {
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
         fagsak.setBehandlinger(List.of(behandling));
         when(fagsakService.hentBehandlingSomErUtgangspunktForRevurdering(fagsak)).thenReturn(Optional.empty());
-        when(behandlingService.replikerBehandlingUtenBehandlingsresultat(behandling, Behandlingstyper.ENDRET_PERIODE)).thenReturn(new Behandling());
+        when(behandlingService.replikerBehandlingMedNyttBehandlingsresultat(behandling, Behandlingstyper.ENDRET_PERIODE)).thenReturn(new Behandling());
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> replikerBehandling.utfør(prosessinstans))
@@ -62,6 +62,7 @@ class ReplikerBehandlingTest {
     void utfør_finnesBehandlingSomErUtgangspunktForRevurdering_settStegOpprettOppgave() {
         Behandling behandling = new Behandling();
         behandling.setId(1L);
+        behandling.setStatus(Behandlingsstatus.AVSLUTTET);
         Behandling replikertBehandling = new Behandling();
         replikertBehandling.setId(2L);
         when(fagsakService.hentBehandlingSomErUtgangspunktForRevurdering(fagsak)).thenReturn(Optional.of(behandling));
@@ -78,16 +79,17 @@ class ReplikerBehandlingTest {
     void utfør_finnesIkkeBehandlingSomErUtgangspunktForRevurdering_settStegOpprettOppgave() {
         Behandling behandling = new Behandling();
         behandling.setId(1L);
+        behandling.setStatus(Behandlingsstatus.AVSLUTTET);
         fagsak.setBehandlinger(List.of(behandling));
         Behandling replikertBehandling = new Behandling();
         replikertBehandling.setId(2L);
         when(fagsakService.hentBehandlingSomErUtgangspunktForRevurdering(fagsak)).thenReturn(Optional.empty());
-        when(behandlingService.replikerBehandlingUtenBehandlingsresultat(behandling, Behandlingstyper.ENDRET_PERIODE)).thenReturn(replikertBehandling);
+        when(behandlingService.replikerBehandlingMedNyttBehandlingsresultat(behandling, Behandlingstyper.ENDRET_PERIODE)).thenReturn(replikertBehandling);
 
         replikerBehandling.utfør(prosessinstans);
 
         verify(fagsakService).lagre(fagsak);
         assertThat(prosessinstans.getBehandling()).isEqualTo(replikertBehandling);
-        verify(behandlingService).replikerBehandlingUtenBehandlingsresultat(behandling, Behandlingstyper.ENDRET_PERIODE);
+        verify(behandlingService).replikerBehandlingMedNyttBehandlingsresultat(behandling, Behandlingstyper.ENDRET_PERIODE);
     }
 }

@@ -21,7 +21,6 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.BehandlingsgrunnlagRepository;
-import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.TidligereMedlemsperiodeRepository;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import org.junit.jupiter.api.BeforeEach;
@@ -56,8 +55,6 @@ class BehandlingServiceTest {
     @Mock
     private BehandlingRepository behandlingRepository;
     @Mock
-    private BehandlingsresultatRepository behandlingsresultatRepository;
-    @Mock
     private TidligereMedlemsperiodeRepository tidligereMedlemsperiodeRepo;
     @Mock
     private BehandlingsgrunnlagRepository behandlingsgrunnlagRepo;
@@ -74,8 +71,6 @@ class BehandlingServiceTest {
     @Captor
     private ArgumentCaptor<Behandling> behandlingCaptor;
     @Captor
-    private ArgumentCaptor<Behandlingsresultat> behandlingsresultatCaptor;
-    @Captor
     private ArgumentCaptor<BehandlingEvent> behandlingEventCaptor;
     @Captor
     private ArgumentCaptor<BehandlingEndretAvSaksbehandlerEvent> behandlingEndretAvSaksbehandlerEventArgumentCaptor;
@@ -86,7 +81,7 @@ class BehandlingServiceTest {
 
     @BeforeEach
     public void setUp() {
-        behandlingService = new BehandlingService(behandlingRepository, behandlingsresultatRepository, tidligereMedlemsperiodeRepo, behandlingsgrunnlagRepo, behandlingsresultatService, oppgaveService, applicationEventPublisher, fakeUnleash);
+        behandlingService = new BehandlingService(behandlingRepository, tidligereMedlemsperiodeRepo, behandlingsgrunnlagRepo, behandlingsresultatService, oppgaveService, applicationEventPublisher, fakeUnleash);
 
         behandling = new Behandling();
         behandling.setId(BEHANDLING_ID);
@@ -338,7 +333,8 @@ class BehandlingServiceTest {
         String initierendeJournalpostId = "234";
         String initierendeDokumentId = "221234";
         Behandling behandling = behandlingService.nyBehandling(new Fagsak(), Behandlingsstatus.OPPRETTET, Behandlingstyper.SOEKNAD, Behandlingstema.UTSENDT_ARBEIDSTAKER, initierendeJournalpostId, initierendeDokumentId);
-        verify(behandlingRepository).save(any(Behandling.class));
+        verify(behandlingRepository).save(behandling);
+        verify(behandlingsresultatService).lagreNyttBehandlingsresultat(behandling);
         assertThat(behandling.getType()).isEqualTo(Behandlingstyper.SOEKNAD);
         assertThat(behandling.getStatus()).isEqualTo(Behandlingsstatus.OPPRETTET);
         assertThat(behandling.getInitierendeJournalpostId()).isEqualTo(initierendeJournalpostId);
@@ -376,11 +372,11 @@ class BehandlingServiceTest {
     }
 
     @Test
-    void replikerBehandlingUtenBehandlingsgrunnlagSaksopplysningerOgResultat_replikererObjekterOgCollections() throws NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
+    void replikerBehandlingMedNyttBehandlingsresultat_replikererOgLagrerNyttBehandlingsresultat() {
         Behandling tidligsteInaktiveBehandling = opprettBehandlingMedData();
         assertThat(tidligsteInaktiveBehandling.getBehandlingsgrunnlag()).isNotNull();
 
-        Behandling replikertBehandling = behandlingService.replikerBehandlingUtenBehandlingsgrunnlagSaksopplysningerOgResultat(tidligsteInaktiveBehandling, NY_VURDERING);
+        Behandling replikertBehandling = behandlingService.replikerBehandlingMedNyttBehandlingsresultat(tidligsteInaktiveBehandling, NY_VURDERING);
 
         assertThat(replikertBehandling.getId()).isNull();
         assertThat(replikertBehandling.getTema()).isEqualTo(tidligsteInaktiveBehandling.getTema());
@@ -392,11 +388,7 @@ class BehandlingServiceTest {
         assertThat(replikertBehandling.getSaksopplysninger()).isEmpty();
 
         verify(behandlingRepository).save(replikertBehandling);
-        verify(behandlingsresultatService).lagre(behandlingsresultatCaptor.capture());
-        var behandlingsresultat = behandlingsresultatCaptor.getValue();
-        assertThat(behandlingsresultat.getBehandling()).isEqualTo(replikertBehandling);
-        assertThat(behandlingsresultat.getBehandlingsmåte()).isEqualTo(Behandlingsmaate.UDEFINERT);
-        assertThat(behandlingsresultat.getType()).isEqualTo(Behandlingsresultattyper.IKKE_FASTSATT);
+        verify(behandlingsresultatService).lagreNyttBehandlingsresultat(replikertBehandling);
     }
 
     @Test

@@ -50,7 +50,7 @@ public class ReplikerBehandling implements StegBehandler {
             nyBehandling = behandlingService.replikerBehandlingOgBehandlingsresultat(behandlingBruktForReplikering.get(), behandlingstype);
         } else {
             behandlingBruktForReplikering = Optional.of(fagsak.hentSistOppdatertBehandling());
-            nyBehandling = behandlingService.replikerBehandlingUtenBehandlingsresultat(behandlingBruktForReplikering.get(), behandlingstype);
+            nyBehandling = behandlingService.replikerBehandlingMedNyttBehandlingsresultat(behandlingBruktForReplikering.get(), behandlingstype);
         }
 
         if (behandlingBruktForReplikering.get().erAktiv()) {

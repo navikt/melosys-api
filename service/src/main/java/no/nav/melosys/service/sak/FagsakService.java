@@ -234,7 +234,7 @@ public class FagsakService {
             replikertBehandling = behandlingService.replikerBehandlingOgBehandlingsresultat(behandling.get(), avgjørBehandlingstype(fagsak));
         } else {
             behandling = Optional.of(fagsak.hentSistOppdatertBehandling());
-            replikertBehandling = behandlingService.replikerBehandlingUtenBehandlingsresultat(behandling.get(), avgjørBehandlingstype(fagsak));
+            replikertBehandling = behandlingService.replikerBehandlingMedNyttBehandlingsresultat(behandling.get(), avgjørBehandlingstype(fagsak));
         }
 
         if (!behandling.get().erAvsluttet()) {
