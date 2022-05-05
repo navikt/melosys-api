@@ -53,6 +53,10 @@ public class ReplikerBehandling implements StegBehandler {
             nyBehandling = behandlingService.replikerBehandlingUtenBehandlingsresultat(behandlingBruktForReplikering.get(), behandlingstype);
         }
 
+        if (behandlingBruktForReplikering.get().erAktiv()) {
+            throw new FunksjonellException("Støtter ikke opprettelse av ny behandling når behandling som er utgangspunkt for revurdering er aktiv");
+        }
+
         prosessinstans.setBehandling(nyBehandling);
 
         fagsakService.lagre(fagsak);

@@ -279,6 +279,8 @@ public class BehandlingService {
 
         Behandlingsresultat tomtBehandlingsresultat = new Behandlingsresultat();
         tomtBehandlingsresultat.setBehandling(behandlingsreplika);
+        tomtBehandlingsresultat.setType(Behandlingsresultattyper.IKKE_FASTSATT);
+        tomtBehandlingsresultat.setBehandlingsmåte(Behandlingsmaate.UDEFINERT);
         behandlingsresultatService.lagre(tomtBehandlingsresultat);
 
         return behandlingsreplika;

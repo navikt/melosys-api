@@ -74,6 +74,8 @@ class BehandlingServiceTest {
     @Captor
     private ArgumentCaptor<Behandling> behandlingCaptor;
     @Captor
+    private ArgumentCaptor<Behandlingsresultat> behandlingsresultatCaptor;
+    @Captor
     private ArgumentCaptor<BehandlingEvent> behandlingEventCaptor;
     @Captor
     private ArgumentCaptor<BehandlingEndretAvSaksbehandlerEvent> behandlingEndretAvSaksbehandlerEventArgumentCaptor;
@@ -390,7 +392,11 @@ class BehandlingServiceTest {
         assertThat(replikertBehandling.getSaksopplysninger()).isEmpty();
 
         verify(behandlingRepository).save(replikertBehandling);
-        verify(behandlingsresultatService).lagre(any());
+        verify(behandlingsresultatService).lagre(behandlingsresultatCaptor.capture());
+        var behandlingsresultat = behandlingsresultatCaptor.getValue();
+        assertThat(behandlingsresultat.getBehandling()).isEqualTo(replikertBehandling);
+        assertThat(behandlingsresultat.getBehandlingsmåte()).isEqualTo(Behandlingsmaate.UDEFINERT);
+        assertThat(behandlingsresultat.getType()).isEqualTo(Behandlingsresultattyper.IKKE_FASTSATT);
     }
 
     @Test
