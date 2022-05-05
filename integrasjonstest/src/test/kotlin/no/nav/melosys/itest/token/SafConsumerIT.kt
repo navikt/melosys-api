@@ -3,7 +3,12 @@ package no.nav.melosys.itest.token
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.matching.StringValuePattern
 import no.nav.melosys.exception.TekniskException
+import no.nav.melosys.integrasjon.felles.GenericContextExchangeFilter
 import no.nav.melosys.integrasjon.joark.saf.SafConsumer
+import no.nav.melosys.integrasjon.joark.saf.SafConsumerImpl
+import no.nav.melosys.integrasjon.joark.saf.SafConsumerProducer
+import no.nav.melosys.integrasjon.reststs.RestStsClient
+import no.nav.melosys.integrasjon.reststs.StsRestTemplateProducer
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import org.assertj.core.api.Assertions
@@ -11,13 +16,27 @@ import org.assertj.core.api.AssertionsForClassTypes
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.autoconfigure.web.reactive.function.client.WebClientAutoConfiguration
+import org.springframework.boot.test.autoconfigure.web.client.RestClientTest
 import org.springframework.test.web.client.MockRestServiceServer
 
+@RestClientTest(
+    value = [
+        StsRestTemplateProducer::class,
+        RestStsClient::class,
+        WebClientAutoConfiguration::class,
+
+        SafConsumerImpl::class,
+        SafConsumerProducer::class,
+        GenericContextExchangeFilter::class
+    ],
+    properties = ["spring.profiles.active:itest-token"]
+)
 class SafConsumerIT(
     @Autowired private val safConsumer: SafConsumer,
     @Autowired server: MockRestServiceServer,
     @Value("\${mockserver.port}") mockPort: Int,
-) : SafConsumerTestBase(server, mockPort, safConsumer) {
+) : ConsumerTestBase<ByteArray>(server, mockPort) {
 
     @Test
     fun authorizationSkalKommeFraSystem() {
@@ -71,5 +90,13 @@ class SafConsumerIT(
         executeErrorFromServer { error ->
             Assertions.assertThat(error).startsWith("Kall mot SAF feilet.")
         }
+    }
+
+    override fun getMockData(): ByteArray {
+        return ByteArray(0)
+    }
+
+    override fun executeRequest() {
+        safConsumer.hentDokument("1", "1")
     }
 }
