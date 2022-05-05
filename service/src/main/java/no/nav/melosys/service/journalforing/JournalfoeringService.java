@@ -192,7 +192,7 @@ public class JournalfoeringService {
 
         ProsessType prosessType;
         if (behandlingstype != null) {
-            prosessType = ProsessType.JFR_NY_BEHANDLING;
+            prosessType = ProsessType.JFR_NY_VURDERING;
         } else {
             prosessType = ProsessType.JFR_KNYTT;
         }

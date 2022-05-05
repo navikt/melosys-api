@@ -5,6 +5,7 @@ import java.util.*;
 import javax.persistence.*;
 
 import no.nav.melosys.domain.kodeverk.*;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -17,6 +18,8 @@ import static no.nav.melosys.domain.kodeverk.Aktoersroller.TRYGDEMYNDIGHET;
 @Table(name = "fagsak")
 @EntityListeners(AuditingEntityListener.class)
 public class Fagsak extends RegistreringsInfo {
+
+    private static final String FINNER_IKKE_BEHANDLINGER_FOR_FAGSAK = "Finner ikke behandlinger for fagsak ";
 
     @Id
     @Column(name = "saksnummer", nullable = false)
@@ -79,6 +82,10 @@ public class Fagsak extends RegistreringsInfo {
         this.behandlinger = behandlinger;
     }
 
+    public boolean harAktivBehandling() {
+        return hentAktivBehandling() != null;
+    }
+
     public Behandling hentAktivBehandling() {
         List<Behandling> aktiveBehandlinger = getBehandlinger().stream().filter(Behandling::erAktiv).toList();
         if (aktiveBehandlinger.size() > 1) {
@@ -90,21 +97,31 @@ public class Fagsak extends RegistreringsInfo {
         }
     }
 
+    public Behandling hentTidligstRegistrertBehandling() {
+        return getBehandlinger().stream()
+            .min(Comparator.comparing(Behandling::getRegistrertDato))
+            .orElseThrow(() -> new IkkeFunnetException(FINNER_IKKE_BEHANDLINGER_FOR_FAGSAK + saksnummer));
+    }
+
     public Behandling hentSistOppdatertBehandling() {
         return getBehandlinger().stream()
             .max(Comparator.comparing(Behandling::getEndretDato))
-            .orElseThrow(() -> new IkkeFunnetException("Finner ikke behandlinger for fagsak " + saksnummer));
+            .orElseThrow(() -> new IkkeFunnetException(FINNER_IKKE_BEHANDLINGER_FOR_FAGSAK + saksnummer));
     }
 
     public Behandling hentSistAktivBehandling() {
         return Optional.ofNullable(hentAktivBehandling()).orElse(hentSistOppdatertBehandling());
     }
 
-    public Behandling hentTidligsteInaktiveBehandling() {
+    public Optional<Behandling> finnTidligstInaktivBehandling() {
         return getBehandlinger().stream()
             .filter(Behandling::erInaktiv)
-            .min(Comparator.comparing(RegistreringsInfo::getRegistrertDato))
-            .orElse(null);
+            .min(Comparator.comparing(RegistreringsInfo::getRegistrertDato));
+    }
+
+    public Behandling hentTidligstInaktivBehandling() {
+        return finnTidligstInaktivBehandling().orElseThrow(
+            () -> new FunksjonellException("Finner ingen inaktiv behandling på fagsak " + saksnummer));
     }
 
     public Aktoer hentBruker() {
