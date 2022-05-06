@@ -42,7 +42,7 @@ class OpprettFagsakOgBehandlingTest {
     @Test
     void utfør_typeJfrNySak_fagsakBliropprettet() {
         Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setType(ProsessType.JFR_NY_SAK);
+        prosessinstans.setType(ProsessType.JFR_NY_SAK_BRUKER);
         String aktørId = "1000104568393";
         String journalpostId = "44553";
         String dokumentId = "222221";
