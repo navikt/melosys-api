@@ -5,6 +5,7 @@ import com.github.tomakehurst.wiremock.client.MappingBuilder
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.github.tomakehurst.wiremock.matching.StringValuePattern
+import com.github.tomakehurst.wiremock.matching.UrlPattern
 import no.nav.melosys.integrasjon.felles.EnvironmentHandler
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
 import no.nav.melosys.sikkerhet.context.SubjectHandler
@@ -38,7 +39,7 @@ abstract class ConsumerTestBase<T>(
         override fun getOidcTokenString(): String? = null
     }
 
-    abstract fun createWireMock(): MappingBuilder
+    open fun createWireMock(): MappingBuilder = WireMock.get(UrlPattern.ANY)
 
     abstract fun getMockData(): T
 

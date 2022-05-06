@@ -1,7 +1,7 @@
 package no.nav.melosys.integrasjon.medl;
 
+import no.nav.melosys.integrasjon.felles.GenericContextExchangeFilter;
 import no.nav.melosys.integrasjon.felles.RestConsumer;
-import no.nav.melosys.integrasjon.felles.SystemContextExchangeFilter;
 import no.nav.melosys.integrasjon.felles.WebClientConfig;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -23,18 +23,17 @@ public class MedlemskapRestConsumerProducer implements RestConsumer, WebClientCo
     }
 
     @Bean
-    @Primary // Skal denne alltid kalles med system bruker?
-    public MedlemskapRestConsumer medlemskapRestConsumer(WebClient.Builder webClientBuilder, SystemContextExchangeFilter systemContextExchangeFilter) {
+    @Primary
+    public MedlemskapRestConsumer medlemskapRestConsumer(WebClient.Builder webClientBuilder, GenericContextExchangeFilter genericContextExchangeFilter) {
         return new MedlemskapRestConsumer(
             webClientBuilder
                 .baseUrl(url)
-                .filter(systemContextExchangeFilter)
+                .filter(genericContextExchangeFilter)
                 .filter(headerFilter())
                 .filter(errorFilter("Kall mot Medl feilet."))
                 .build()
         );
     }
-
 
     private ExchangeFilterFunction headerFilter() {
         return ExchangeFilterFunction.ofRequestProcessor(

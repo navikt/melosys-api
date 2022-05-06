@@ -2,19 +2,17 @@ package no.nav.melosys.itest.token
 
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.matching.StringValuePattern
-import no.nav.melosys.integrasjon.felles.GenericContextExchangeFilter
-import no.nav.melosys.integrasjon.medl.MedlemskapRestConsumer
-import no.nav.melosys.integrasjon.medl.MedlemskapRestConsumerProducer
 import no.nav.melosys.integrasjon.reststs.RestStsClient
 import no.nav.melosys.integrasjon.reststs.StsRestTemplateProducer
-import org.assertj.core.api.Assertions
+import no.nav.melosys.integrasjon.sak.SakConsumer
+import no.nav.melosys.integrasjon.sak.SakConsumerImpl
+import no.nav.melosys.integrasjon.sak.SakConsumerProducer
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.web.reactive.function.client.WebClientAutoConfiguration
 import org.springframework.boot.test.autoconfigure.web.client.RestClientTest
 import org.springframework.test.web.client.MockRestServiceServer
-import java.time.LocalDate
 
 @RestClientTest(
     value = [
@@ -22,14 +20,13 @@ import java.time.LocalDate
         RestStsClient::class,
         WebClientAutoConfiguration::class,
 
-        MedlemskapRestConsumer::class,
-        MedlemskapRestConsumerProducer::class,
-        GenericContextExchangeFilter::class
+        SakConsumerImpl::class,
+        SakConsumerProducer::class,
     ],
     properties = ["spring.profiles.active:itest-token"]
 )
-class MedlemskapConsumerIT(
-    @Autowired private val medlemskapRestConsumer: MedlemskapRestConsumer,
+class SakConsumerIT(
+    @Autowired private val sakConsumer: SakConsumer,
     @Autowired server: MockRestServiceServer,
     @Value("\${mockserver.port}") mockPort: Int,
 ) : ConsumerTestBase<String>(server, mockPort) {
@@ -39,7 +36,7 @@ class MedlemskapConsumerIT(
         executeFromSystem {
             verifyHeaders(
                 mapOf<String, StringValuePattern>(
-                    Pair("Authorization", WireMock.equalTo("Bearer --token-from-system--")),
+                    Pair("Authorization", WireMock.equalTo("Basic dGVzdDp0ZXN0")),
                 )
             )
         }
@@ -60,27 +57,17 @@ class MedlemskapConsumerIT(
     fun authorizationSkalKommeFraSystemNårHverkenSystemEllerBrukerErKilde() {
         verifyHeaders(
             mapOf<String, StringValuePattern>(
-                Pair("Authorization", WireMock.equalTo("Bearer --token-from-system--")),
+                Pair("Authorization", WireMock.equalTo("Basic dGVzdDp0ZXN0")),
             )
         )
         executeRequest()
     }
 
-    @Test
-    fun skalBrukeErrorFilterOgGiRiktigFeilmelding() {
-        executeErrorFromServer { error ->
-            Assertions.assertThat(error).startsWith("Kall mot Medl feilet.")
-        }
-    }
-
     override fun getMockData(): String {
-        return "[]"
+        return "{}"
     }
 
     override fun executeRequest() {
-        val fom = LocalDate.now().minusDays(2)
-        val tom = LocalDate.now().plusDays(2)
-        val fnr = "12345678990"
-        medlemskapRestConsumer.hentPeriodeListe(fnr, fom, tom)
+        sakConsumer.hentSak(1L)
     }
 }

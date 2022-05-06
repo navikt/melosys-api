@@ -1,7 +1,6 @@
 package no.nav.melosys.integrasjon.oppgave.konsument;
 
-import no.nav.melosys.integrasjon.felles.SystemContextExchangeFilter;
-import no.nav.melosys.integrasjon.felles.UserContextExchangeFilter;
+import no.nav.melosys.integrasjon.felles.GenericContextExchangeFilter;
 import no.nav.melosys.integrasjon.felles.WebClientConfig;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,11 +21,11 @@ public class OppgaveConsumerProducer implements WebClientConfig {
 
     @Bean
     @Primary
-    public OppgaveConsumer oppgaveConsumer(WebClient.Builder webClientBuilder, UserContextExchangeFilter userContextExchangeFilter) {
+    public OppgaveConsumer oppgaveConsumer(WebClient.Builder webClientBuilder, GenericContextExchangeFilter genericContextExchangeFilter) {
         return new OppgaveConsumerImpl(
             webClientBuilder
                 .defaultHeaders(this::defaultHeaders)
-                .filter(userContextExchangeFilter)
+                .filter(genericContextExchangeFilter)
                 .filter(errorFilter("Kall mot Oppgave feilet."))
                 .baseUrl(url)
                 .build()
@@ -36,15 +35,8 @@ public class OppgaveConsumerProducer implements WebClientConfig {
     @Bean
     @Qualifier("system")
     public OppgaveConsumer oppgaveSystemConsumer(WebClient.Builder webClientBuilder,
-                                                 SystemContextExchangeFilter systemContextExchangeFilter) {
-        return new OppgaveConsumerImpl(
-            webClientBuilder
-                .filter(systemContextExchangeFilter)
-                .defaultHeaders(this::defaultHeaders)
-                .filter(errorFilter("Kall mot Oppgave feilet."))
-                .baseUrl(url)
-                .build()
-        );
+                                                 GenericContextExchangeFilter genericContextExchangeFilter) {
+        return oppgaveConsumer(webClientBuilder, genericContextExchangeFilter);
     }
 
     private void defaultHeaders(HttpHeaders httpHeaders) {
