@@ -259,7 +259,9 @@ public class BrevbestillingService {
                 throw new FunksjonellException("Mottakersrolle støttes ikke: " + mottaker.getRolle());
         }
 
-        Assert.isTrue((orgDokument != null) || (persondata != null), "Orgdata eller persondata forventes for å sende brev.");
+        if (orgDokument == null && persondata == null) {
+            throw new FunksjonellException("Orgdata eller persondata forventes for å sende brev.");
+        }
 
         return new BrevAdresse.Builder()
             .medMottakerNavn(mapNavn(orgDokument, persondata))
