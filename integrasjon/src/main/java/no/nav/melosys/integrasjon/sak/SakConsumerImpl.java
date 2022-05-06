@@ -49,6 +49,7 @@ public class SakConsumerImpl implements RestConsumer, SakConsumer {
     public boolean isSystem() {
         if (ThreadLocalAccessInfo.shouldUseSystemToken()) return true;
         if (ThreadLocalAccessInfo.shouldUseOidcToken()) return false;
+        log.warn("Kall er enten system eller oidc, så skal ikke være mulig å havne her! Faller tilbake til system=true");
         return true;
     }
 
