@@ -1,4 +1,4 @@
-package no.nav.melosys.repository;
+package no.nav.melosys.domain.metrikker;
 
 import no.nav.melosys.domain.saksflyt.ProsessStatus;
 import no.nav.melosys.domain.saksflyt.ProsessType;

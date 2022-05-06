@@ -58,7 +58,7 @@ public class ProsessinstansAdminService {
     public ProsessSteg hoppOverStegProsessinstans(UUID uuid) {
         var prosessinstans = prosessinstansRepository.findById(uuid)
             .orElseThrow(() -> new IkkeFunnetException("Fant ikke prosessinstans med ID %s".formatted(uuid)));
-        var nesteSteg = hentNesteSteg(prosessinstans)
+        var nesteSteg = ProsessflytDefinisjon.hentNesteSteg(prosessinstans.getType(), prosessinstans.getSistFullførtSteg())
             .orElseThrow(() -> new TekniskException("Fant ikke neste steg for prosessinstans med ID %s".formatted(uuid)));
 
         prosessinstans.setSistFullførtSteg(nesteSteg);
@@ -89,7 +89,7 @@ public class ProsessinstansAdminService {
             saksnummer,
             prosessinstans.getType().getKode(),
             prosessinstans.getEndretDato(),
-            hentNesteSteg(prosessinstans)
+            ProsessflytDefinisjon.hentNesteSteg(prosessinstans.getType(), prosessinstans.getSistFullførtSteg())
                 .map(ProsessSteg::getKode)
                 .orElse(null),
             prosessinstans.getHendelser()
@@ -97,11 +97,6 @@ public class ProsessinstansAdminService {
                 .max(Comparator.comparing(ProsessinstansHendelse::getDato))
                 .map(ProsessinstansHendelse::getMelding)
                 .orElse(null));
-    }
-
-    private Optional<ProsessSteg> hentNesteSteg(Prosessinstans prosessinstans) {
-        return ProsessflytDefinisjon.finnFlytForProsessType(prosessinstans.getType())
-            .map(it -> it.nesteSteg(prosessinstans.getSistFullførtSteg()));
     }
 
     private void setStatusRestartet(Collection<Prosessinstans> prosessinstanser) {
