@@ -275,6 +275,10 @@ public class OppgaveService {
         behandling = behandlingService.hentBehandling(behandling.getId());
         behOppgaveDto.setBehandling(mapBehandling(behandling));
 
+        if (fagsak.finnVirksomhetsOrgnr().isPresent()) {
+            return behOppgaveDto;
+        }
+
         if (behandling.erBehandlingAvSøknad()) {
             Soeknad søknadDokument = (Soeknad) behandlingsgrunnlagService
                 .hentBehandlingsgrunnlag(behandling.getId()).getBehandlingsgrunnlagdata();
@@ -292,7 +296,7 @@ public class OppgaveService {
                 });
         }
 
-        final var aktørID = behandling.getFagsak().finnBrukersAktørID().orElse(null);
+        final var aktørID = behandling.getFagsak().hentBrukersAktørID();
         oppdaterFnrOgNavn(aktørID, behOppgaveDto);
         return behOppgaveDto;
     }
