@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class ProsessinstansMetrikkerConfig {
+
     @Bean
     public MeterBinder ProsessinstansMetrikker(MeterRegistry meterRegistry,
                                                ProsessinstansStatusCache statusCache) {
@@ -30,7 +31,7 @@ public class ProsessinstansMetrikkerConfig {
                                                ProsessinstansStatusCache statusCache) {
         return registry -> {
             for (ProsessType prosessType : ProsessType.values()) {
-                String gaugeNavn = MetrikkerNavn.PROSESSINSTANSER_FEILET_STEG + prosessType.getKode().toLowerCase() + ".feilet";
+                String gaugeNavn = MetrikkerNavn.PROSESSINSTANSER_STEG + prosessType.getKode().toLowerCase() + ".feilet";
                 Gauge.builder(
                     gaugeNavn,
                     statusCache,
