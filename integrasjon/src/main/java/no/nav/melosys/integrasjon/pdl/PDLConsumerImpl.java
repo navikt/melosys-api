@@ -1,5 +1,11 @@
 package no.nav.melosys.integrasjon.pdl;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.function.Predicate;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
@@ -17,12 +23,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.function.Predicate;
-
 import static no.nav.melosys.integrasjon.pdl.dto.identer.Query.HENT_IDENTER_QUERY;
 import static no.nav.melosys.integrasjon.pdl.dto.person.Query.*;
 
@@ -33,7 +33,7 @@ public class PDLConsumerImpl implements PDLConsumer {
     private static final String HISTORIKK = "historikk";
     private static final String IDENT = "ident";
     private static final Predicate<GraphQLError> NOT_FOUND = e -> e.hasExtension() && e.extensions().hasCode(
-            PDLFeilkode.NOT_FOUND);
+        PDLFeilkode.NOT_FOUND);
     private final WebClient webClient;
 
     public PDLConsumerImpl(WebClient webClient) {
@@ -44,13 +44,14 @@ public class PDLConsumerImpl implements PDLConsumer {
     public Identliste hentIdenter(String ident) {
         var graphQLRequest = new GraphQLRequest(HENT_IDENTER_QUERY, Map.of(IDENT, ident));
 
-        GraphQLResponse<HentIdenterResponse> response = webClient.post()
-                .header(CALL_ID, UUID.randomUUID().toString())
-                .bodyValue(graphQLRequest)
-                .retrieve()
-                .bodyToMono(new ParameterizedTypeReference<GraphQLResponse<HentIdenterResponse>>() {
-                })
-                .block();
+        GraphQLResponse<HentIdenterResponse> response = webClient
+            .post()
+            .header(CALL_ID, UUID.randomUUID().toString())
+            .bodyValue(graphQLRequest)
+            .retrieve()
+            .bodyToMono(new ParameterizedTypeReference<GraphQLResponse<HentIdenterResponse>>() {
+            })
+            .block();
 
         håndterFeil(response);
         return response.data().hentIdenter();
@@ -105,12 +106,12 @@ public class PDLConsumerImpl implements PDLConsumer {
         var graphQLRequest = new GraphQLRequest(query, Map.of(HISTORIKK, historikk, IDENT, ident));
 
         GraphQLResponse<HentPersonResponse> response = webClient.post()
-                .header(CALL_ID, UUID.randomUUID().toString())
-                .bodyValue(graphQLRequest)
-                .retrieve()
-                .bodyToMono(new ParameterizedTypeReference<GraphQLResponse<HentPersonResponse>>() {
-                })
-                .block();
+            .header(CALL_ID, UUID.randomUUID().toString())
+            .bodyValue(graphQLRequest)
+            .retrieve()
+            .bodyToMono(new ParameterizedTypeReference<GraphQLResponse<HentPersonResponse>>() {
+            })
+            .block();
 
         håndterFeil(response);
         return response.data().hentPerson();

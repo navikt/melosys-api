@@ -1,5 +1,10 @@
 package no.nav.melosys.service.persondata;
 
+import java.util.Comparator;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.domain.person.PersonMedHistorikk;
@@ -26,11 +31,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
-
-import java.util.Comparator;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 @Primary
@@ -62,24 +62,24 @@ public class PersondataService implements PersondataFasade {
     @Cacheable("aktoerID")
     public String hentAktørIdForIdent(String ident) {
         return pdlConsumer.hentIdenter(ident).identer()
-                .stream().filter(Ident::erAktørID)
-                .findFirst().map(Ident::ident)
-                .orElseThrow(() -> new IkkeFunnetException("Finner ikke aktørID!"));
+            .stream().filter(Ident::erAktørID)
+            .findFirst().map(Ident::ident)
+            .orElseThrow(() -> new IkkeFunnetException("Finner ikke aktørID!"));
     }
 
     @Override
     @Cacheable("folkeregisterIdent")
     public Optional<String> finnFolkeregisterident(String ident) {
         return pdlConsumer.hentIdenter(ident).identer()
-                .stream().filter(Ident::erFolkeregisterIdent)
-                .findFirst().map(Ident::ident);
+            .stream().filter(Ident::erFolkeregisterIdent)
+            .findFirst().map(Ident::ident);
     }
 
     @Override
     @Cacheable("folkeregisterIdent")
     public String hentFolkeregisterident(String ident) {
         return finnFolkeregisterident(ident)
-                .orElseThrow(() -> new IkkeFunnetException("Finner ikke folkeregisterident!"));
+            .orElseThrow(() -> new IkkeFunnetException("Finner ikke folkeregisterident!"));
     }
 
     @Override
@@ -91,7 +91,7 @@ public class PersondataService implements PersondataFasade {
     public Persondata hentPerson(String ident, Informasjonsbehov informasjonsbehov) {
         return switch (informasjonsbehov) {
             case INGEN, STANDARD -> PersonopplysningerOversetter.oversett(pdlConsumer.hentPerson(ident),
-                    kodeverkService);
+                kodeverkService);
             case MED_FAMILIERELASJONER -> lagPersondataMedFamilie(ident);
         };
     }
@@ -99,8 +99,8 @@ public class PersondataService implements PersondataFasade {
     private Persondata lagPersondataMedFamilie(String ident) {
         final Person person = pdlConsumer.hentPerson(ident);
         return PersonopplysningerOversetter.oversettMedFamilie(person,
-                familiemedlemService.hentFamiliemedlemmer(person, ident),
-                kodeverkService);
+            familiemedlemService.hentFamiliemedlemmer(person, ident),
+            kodeverkService);
     }
 
     @Override
@@ -112,7 +112,7 @@ public class PersondataService implements PersondataFasade {
         }
 
         return saksopplysningerService.finnPdlPersonhistorikkTilSaksbehandler(behandlingID)
-                .orElseGet(() -> PersonMedHistorikkOversetter.lagHistorikkFraTpsData(saksopplysningerService.hentTpsPersonopplysninger(behandlingID), kodeverkService));
+            .orElseGet(() -> PersonMedHistorikkOversetter.lagHistorikkFraTpsData(saksopplysningerService.hentTpsPersonopplysninger(behandlingID), kodeverkService));
     }
 
     @Override
@@ -134,17 +134,17 @@ public class PersondataService implements PersondataFasade {
     @Override
     public String hentSammensattNavn(String ident) {
         return pdlConsumer.hentNavn(ident).stream()
-                .max(Comparator.comparing(n -> n.metadata().datoSistRegistrert()))
-                .map(NavnOversetter::tilSammensattNavn)
-                .orElse(NavnOversetter.UKJENT);
+            .max(Comparator.comparing(n -> n.metadata().datoSistRegistrert()))
+            .map(NavnOversetter::tilSammensattNavn)
+            .orElse(NavnOversetter.UKJENT);
     }
 
     @Override
     public Set<Statsborgerskap> hentStatsborgerskap(String ident) {
         return pdlConsumer.hentStatsborgerskap(ident).stream()
-                .filter(HarMetadata::erGyldig)
-                .map(StatsborgerskapOversetter::oversett)
-                .collect(Collectors.toUnmodifiableSet());
+            .filter(HarMetadata::erGyldig)
+            .map(StatsborgerskapOversetter::oversett)
+            .collect(Collectors.toUnmodifiableSet());
     }
 
     @Override
