@@ -79,7 +79,7 @@ public class BrevbestillingTjeneste {
             .medBestillersId(SubjectHandler.getInstance().getUserID())
             .build();
         byte[] pdf = brevbestillingService.produserUtkast(behandlingID, brevbestillingRequest);
-        return new ResponseEntity<>(pdf, genPdfHeaders("utkast_" + behandlingID, false), HttpStatus.OK);
+        return new ResponseEntity<>(pdf, genPdfHeaders("utkast_" + behandlingID), HttpStatus.OK);
     }
 
     @PostMapping("opprett/{behandlingID}")
@@ -248,11 +248,11 @@ public class BrevbestillingTjeneste {
         }
     }
 
-    private HttpHeaders genPdfHeaders(String navn, boolean download) {
+    private HttpHeaders genPdfHeaders(String navn) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_PDF);
         String filename = navn + ".pdf";
-        ContentDisposition.Builder contentDisposition = ContentDisposition.builder(download ? "attachment" : "inline");
+        ContentDisposition.Builder contentDisposition = ContentDisposition.builder("inline");
         contentDisposition.filename(filename);
         headers.setContentDisposition(contentDisposition.build());
         headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
