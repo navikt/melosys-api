@@ -83,21 +83,21 @@ public class FamiliemedlemService {
 
     @NotNull
     private Collection<Familiemedlem> hentEktefellerOgPartnere(Person hovedperson, String identTilHovedperson) {
-        var unikeIdenter = hentUnikeIdenterFraSivilstandTilHovedperson(hovedperson);
-        return unikeIdenter.map(ident -> oversettTilEktefelleEllerPartner(ident, identTilHovedperson))
-                .filter(EktefelleEllerPartnerFamiliemedlem::erAktiv)
+        return hentUnikeIdenterFraSivilstandTilHovedperson(hovedperson)
+                .map(ident -> lagEktefelleEllerPartner(ident, identTilHovedperson))
+                .filter(EktefelleEllerPartner::erAktiv)
                 .map(ektefelleEllerPartner ->
                         FamiliemedlemOversetter.oversettEktefelleEllerPartner(
-                                ektefelleEllerPartner.getPerson(),
-                                ektefelleEllerPartner.getSivilstand()))
+                                ektefelleEllerPartner.person(),
+                                ektefelleEllerPartner.sivilstand()))
                 .collect(Collectors.toUnmodifiableSet());
     }
 
     @NotNull
-    private EktefelleEllerPartnerFamiliemedlem oversettTilEktefelleEllerPartner(String ident, String identTilHovedperson) {
+    private EktefelleEllerPartner lagEktefelleEllerPartner(String ident, String identTilHovedperson) {
         Person person = pdlConsumer.hentEktefelleEllerPartner(ident);
         Sivilstand sivilstand = hentSisteSivilstandKnyttetTilHovedperson(person, identTilHovedperson);
-        return new EktefelleEllerPartnerFamiliemedlem(ident, person, sivilstand);
+        return new EktefelleEllerPartner(ident, person, sivilstand);
     }
 
     @NotNull
@@ -153,31 +153,10 @@ public class FamiliemedlemService {
                 .collect(Collectors.toUnmodifiableSet());
     }
 
-    class EktefelleEllerPartnerFamiliemedlem {
-        private final String ident;
-        private final Person person;
-        private final Sivilstand sivilstand;
-
-        public EktefelleEllerPartnerFamiliemedlem(String ident, Person person, Sivilstand sivilstand) {
-            this.ident = ident;
-            this.person = person;
-            this.sivilstand = sivilstand;
-        }
+    record EktefelleEllerPartner(String ident, Person person, Sivilstand sivilstand) {
 
         public boolean erAktiv() {
             return !sivilstand.metadata().historisk();
-        }
-
-        public String getIdent() {
-            return ident;
-        }
-
-        public Person getPerson() {
-            return person;
-        }
-
-        public Sivilstand getSivilstand() {
-            return sivilstand;
         }
     }
 }

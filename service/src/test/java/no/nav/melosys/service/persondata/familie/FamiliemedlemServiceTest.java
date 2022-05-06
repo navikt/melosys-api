@@ -107,7 +107,7 @@ class FamiliemedlemServiceTest {
                 .first()
                 .matches(Familiemedlem::erRelatertVedSivilstand)
                 .extracting(Familiemedlem::navn)
-                .matches(navn -> navn.harLikFornavn(PERSON_GIFT_FORNAVN), "Har likt fornavn");
+                .matches(navn -> navn.harLiktFornavn(PERSON_GIFT_FORNAVN), "Har likt fornavn");
 
         verify(pdlConsumer, times(1)).hentEktefelleEllerPartner(IDENT_PERSON_GIFT);
         verify(pdlConsumer, times(1)).hentEktefelleEllerPartner(IDENT_PERSON_GIFT_HISTORISK);

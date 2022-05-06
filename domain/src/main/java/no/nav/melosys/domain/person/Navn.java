@@ -13,7 +13,7 @@ public record Navn(String fornavn, String mellomnavn, String etternavn) {
         return mellomnavn == null ? "" : " " + mellomnavn();
     }
 
-    public boolean harLikFornavn(String navn) {
+    public boolean harLiktFornavn(String navn) {
         return nonNull(fornavn) && fornavn.equals(navn);
     }
 
