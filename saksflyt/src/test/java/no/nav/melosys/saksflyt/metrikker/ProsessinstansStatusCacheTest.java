@@ -3,7 +3,7 @@ package no.nav.melosys.saksflyt.metrikker;
 import java.util.Arrays;
 import java.util.List;
 
-import no.nav.melosys.repository.ProsessinstansAntall;
+import no.nav.melosys.domain.metrikker.ProsessinstansAntall;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

@@ -4,17 +4,19 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.UUID;
 
+import no.nav.melosys.domain.metrikker.ProsessinstansAntall;
+import no.nav.melosys.domain.metrikker.ProsessinstansStegAntall;
 import no.nav.melosys.domain.saksflyt.*;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 public interface ProsessinstansRepository extends JpaRepository<Prosessinstans, UUID> {
-    @Query("SELECT NEW no.nav.melosys.repository.ProsessinstansAntall(p.type, p.status, COUNT(p)) FROM Prosessinstans p "
+    @Query("SELECT NEW no.nav.melosys.domain.metrikker.ProsessinstansAntall(p.type, p.status, COUNT(p)) FROM Prosessinstans p "
         + "WHERE p.status <> no.nav.melosys.domain.saksflyt.ProsessStatus.FERDIG "
         + "AND p.type IN (?1) GROUP BY p.type, p.status")
     Collection<ProsessinstansAntall> antallAktiveOgFeiletPerTypeOgStatus(Collection<ProsessType> typer);
 
-    @Query("SELECT NEW no.nav.melosys.repository.ProsessinstansStegAntall(p.sistFullførtSteg, p.type, p.status, COUNT(p)) FROM Prosessinstans p "
+    @Query("SELECT NEW no.nav.melosys.domain.metrikker.ProsessinstansStegAntall(p.sistFullførtSteg, p.type, p.status, COUNT(p)) FROM Prosessinstans p "
         + "WHERE p.status <> no.nav.melosys.domain.saksflyt.ProsessStatus.FERDIG "
         + "AND p.sistFullførtSteg IN (?1) GROUP BY p.type, p.sistFullførtSteg, p.status")
     Collection<ProsessinstansStegAntall> antallAktiveOgFeiletPerStegOgStatus(Collection<ProsessSteg> prosessSteg);
