@@ -607,10 +607,10 @@ class BrevbestillingServiceTest {
         return aktoer;
     }
 
-    private Aktoer lagAktoerPerson(Aktoersroller aktoersroller, String aktørID) {
+    private Aktoer lagAktoerPerson(Aktoersroller aktoersroller, String personIdent) {
         var aktoer = new Aktoer();
         aktoer.setRolle(aktoersroller);
-        aktoer.setAktørId(aktørID);
+        aktoer.setPersonIdent(personIdent);
         return aktoer;
     }
 

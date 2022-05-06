@@ -98,7 +98,7 @@ public class BrevbestillingService {
             if (avklartMottaker.getRolle() == BRUKER) {
                 return hentSammensattNavn(behandling);
             } else if (avklartMottaker.erPerson()){
-                return persondataFasade.hentSammensattNavn(avklartMottaker.getAktørId());
+                return persondataFasade.hentSammensattNavn(avklartMottaker.getPersonIdent());
             } else {
                 var orgDokument = hentRettOrganisasjonsdokument(behandling, avklartMottaker.getOrgnr());
                 return orgDokument.getNavn();

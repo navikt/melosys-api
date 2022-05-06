@@ -120,7 +120,7 @@ public class Aktoer extends RegistreringsInfo {
     public boolean erPerson() {
         return switch (rolle) {
             case BRUKER -> true;
-            case REPRESENTANT -> aktørId != null;
+            case REPRESENTANT -> personIdent != null;
             default -> false;
         };
     }
