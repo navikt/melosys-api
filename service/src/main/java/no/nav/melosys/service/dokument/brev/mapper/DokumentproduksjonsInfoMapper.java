@@ -31,7 +31,8 @@ public class DokumentproduksjonsInfoMapper {
         MANGELBREV_BRUKER,
         MELDING_FORVENTET_SAKSBEHANDLINGSTID,
         MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD,
-        STORBRITANNIA
+        STORBRITANNIA,
+        MELDING_HENLAGT_SAK
     );
 
     static {
@@ -84,7 +85,11 @@ public class DokumentproduksjonsInfoMapper {
                 new DokumentproduksjonsInfo("avslag_manglende_opplysninger",
                     DokumentKategoriKode.VB.getKode(),
                     JournalforingsTittel.AVSLAG_MANGLENDE_OPPLYSNINGER.getTittel(), null))
-            .build());
+            .put(MELDING_HENLAGT_SAK,
+                new DokumentproduksjonsInfo("henleggelse",
+                    DokumentKategoriKode.IB.getKode(),
+                    JournalforingsTittel.MELDING_HENLAGT_SAK.getTittel(), null))
+                        .build());
     }
 
     public DokumentproduksjonsInfoMapper(Unleash unleash) {
@@ -127,7 +132,8 @@ public class DokumentproduksjonsInfoMapper {
         STORBRITANNIA("Vedtak om medlemskap, Attest for utsendt arbeidstaker"),
         STORBRITANNIA_VEDTAKSBREV("Vedtak om medlemskap"),
         STORBRITANNIA_ATTEST("Attest for utsendt arbeidstaker"),
-        AVSLAG_MANGLENDE_OPPLYSNINGER("Avslag pga manglende opplysninger");
+        AVSLAG_MANGLENDE_OPPLYSNINGER("Avslag pga manglende opplysninger"),
+        MELDING_HENLAGT_SAK("Henleggelse av søknad");
 
         private final String tittel;
 
