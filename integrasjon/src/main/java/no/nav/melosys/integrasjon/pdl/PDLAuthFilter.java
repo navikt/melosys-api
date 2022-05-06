@@ -3,6 +3,7 @@ package no.nav.melosys.integrasjon.pdl;
 import java.util.function.Supplier;
 import javax.annotation.Nonnull;
 
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo;
 import no.nav.melosys.integrasjon.reststs.RestStsClient;
@@ -41,6 +42,6 @@ public class PDLAuthFilter implements ExchangeFilterFunction {
         if (ThreadLocalAccessInfo.shouldUseOidcToken()) {
             return () -> "Bearer " + SubjectHandler.getInstance().getOidcTokenString();
         }
-        throw new IllegalStateException("Må bli kalt fra frontend eller prosess");
+        throw new TekniskException("Uregistert kall prøver å registrere token provider");
     }
 }

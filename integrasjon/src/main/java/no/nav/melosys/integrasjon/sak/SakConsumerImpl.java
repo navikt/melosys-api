@@ -15,6 +15,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status.Family;
 
 import no.nav.melosys.exception.IntegrasjonException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.felles.ExceptionMapper;
 import no.nav.melosys.integrasjon.felles.FeilResponseDto;
 import no.nav.melosys.integrasjon.felles.JacksonObjectMapperProvider;
@@ -49,8 +50,7 @@ public class SakConsumerImpl implements RestConsumer, SakConsumer {
     public boolean isSystem() {
         if (ThreadLocalAccessInfo.shouldUseSystemToken()) return true;
         if (ThreadLocalAccessInfo.shouldUseOidcToken()) return false;
-        log.warn("Kall er enten system eller oidc, så skal ikke være mulig å havne her! Faller tilbake til system=true");
-        return true;
+        throw new TekniskException("Uregistert kall prøver å registrere token provider");
     }
 
     @Override
