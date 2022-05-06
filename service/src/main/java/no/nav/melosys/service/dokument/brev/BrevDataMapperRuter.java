@@ -20,6 +20,7 @@ final class BrevDataMapperRuter {
             .put(Produserbaredokumenter.INNVILGELSE_YRKESAKTIV, InnvilgelsesbrevMapper.class)
             .put(Produserbaredokumenter.INNVILGELSE_YRKESAKTIV_FLERE_LAND, InnvilgelsesbrevFlereLandMapper.class)
             .put(Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID, ForvaltningsmeldingMapper.class)
+            .put(Produserbaredokumenter.MELDING_HENLAGT_SAK, HenleggelsesbrevMapper.class)
             .put(Produserbaredokumenter.MELDING_MANGLENDE_OPPLYSNINGER, MangelbrevMapper.class)
             .put(Produserbaredokumenter.ORIENTERING_ANMODNING_UNNTAK, AnmodningUnntakMapper.class)
             .put(Produserbaredokumenter.ORIENTERING_UTPEKING_UTLAND, UtpekingAnnetLandMapper.class)
