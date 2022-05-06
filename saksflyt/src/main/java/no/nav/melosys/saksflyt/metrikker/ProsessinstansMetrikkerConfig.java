@@ -16,23 +16,32 @@ public class ProsessinstansMetrikkerConfig {
     public MeterBinder ProsessinstansMetrikker(MeterRegistry meterRegistry,
                                                ProsessinstansStatusCache statusCache) {
         return registry -> {
-            for (ProsessType prosessType : ProsessType.values()) {
-                String gaugeNavnProsessinstansType = MetrikkerNavn.PROSESSINSTANSER + prosessType.getKode().toLowerCase() + ".feilet";
-                Gauge.builder(
-                    gaugeNavnProsessinstansType,
-                    statusCache,
-                    type -> statusCache.antallProsessinstanserFeiletPåType(prosessType)
-                ).register(meterRegistry);
-
-                for (ProsessSteg prosessSteg : ProsessSteg.values()) {
-                    String gaugeNavnProsessinstansSteg = MetrikkerNavn.PROSESSINSTANSER_STEG + prosessSteg.getKode().toLowerCase() + ".feilet";
-                    Gauge.builder(
-                        gaugeNavnProsessinstansSteg,
-                        statusCache,
-                        type -> statusCache.antallProsessinstanserFeiletPåSteg(prosessSteg)
-                    ).register(meterRegistry);
-                }
-            }
+            registrerAntallFeiledeProsessinstanserGruppertPåType(meterRegistry, statusCache);
+            registrerAntallFeiledeProsessinstanserGruppertPåSteg(meterRegistry, statusCache);
         };
+    }
+
+    private void registrerAntallFeiledeProsessinstanserGruppertPåType(MeterRegistry meterRegistry,
+                                                                      ProsessinstansStatusCache statusCache) {
+        for (ProsessType prosessType : ProsessType.values()) {
+            String gaugeNavnProsessinstansType = MetrikkerNavn.PROSESSINSTANSER + prosessType.getKode().toLowerCase() + ".feilet";
+            Gauge.builder(
+                gaugeNavnProsessinstansType,
+                statusCache,
+                type -> statusCache.antallProsessinstanserFeiletPåType(prosessType)
+            ).register(meterRegistry);
+        }
+    }
+
+    private void registrerAntallFeiledeProsessinstanserGruppertPåSteg(MeterRegistry meterRegistry,
+                                                                      ProsessinstansStatusCache statusCache) {
+        for (ProsessSteg prosessSteg : ProsessSteg.values()) {
+            String gaugeNavnProsessinstansSteg = MetrikkerNavn.PROSESSINSTANSER_STEG + prosessSteg.getKode().toLowerCase() + ".feilet";
+            Gauge.builder(
+                gaugeNavnProsessinstansSteg,
+                statusCache,
+                type -> statusCache.antallProsessinstanserFeiletPåSteg(prosessSteg)
+            ).register(meterRegistry);
+        }
     }
 }
