@@ -48,8 +48,8 @@ public class ProsessinstansStatusCache {
 
         long sumAntall = 0;
         for (ProsessStatus prosessStatus : statuser) {
-            Pair<ProsessSteg, ProsessStatus> prosessTypeOgSteg = Pair.of(prosessSteg, prosessStatus);
-            Long antall = antallPerStegOgStatus.get(prosessTypeOgSteg);
+            Pair<ProsessSteg, ProsessStatus> prosessStegOgStatus = Pair.of(prosessSteg, prosessStatus);
+            Long antall = antallPerStegOgStatus.get(prosessStegOgStatus);
             if (antall != null) {
                 sumAntall = sumAntall + antall;
             }
@@ -62,8 +62,8 @@ public class ProsessinstansStatusCache {
 
         long sumAntall = 0;
         for (ProsessStatus prosessStatus : statuser) {
-            Pair<ProsessType, ProsessStatus> prosessTypeOgSteg = Pair.of(prosessType, prosessStatus);
-            Long antall = antallPerTypeOgStatus.get(prosessTypeOgSteg);
+            Pair<ProsessType, ProsessStatus> prosessTypeOgStatus = Pair.of(prosessType, prosessStatus);
+            Long antall = antallPerTypeOgStatus.get(prosessTypeOgStatus);
             if (antall != null) {
                 sumAntall = sumAntall + antall;
             }
