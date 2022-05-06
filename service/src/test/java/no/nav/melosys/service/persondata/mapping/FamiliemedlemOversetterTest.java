@@ -1,7 +1,5 @@
 package no.nav.melosys.service.persondata.mapping;
 
-import java.time.LocalDate;
-
 import no.nav.melosys.domain.person.Foedsel;
 import no.nav.melosys.domain.person.Folkeregisteridentifikator;
 import no.nav.melosys.domain.person.Navn;
@@ -9,6 +7,8 @@ import no.nav.melosys.domain.person.familie.Familiemedlem;
 import no.nav.melosys.domain.person.familie.Familierelasjon;
 import no.nav.melosys.integrasjon.pdl.dto.person.Familierelasjonsrolle;
 import org.junit.jupiter.api.Test;
+
+import java.time.LocalDate;
 
 import static no.nav.melosys.domain.person.familie.Familierelasjon.RELATERT_VED_SIVILSTAND;
 import static no.nav.melosys.service.persondata.PdlObjectFactory.lagPerson;
@@ -19,7 +19,7 @@ class FamiliemedlemOversetterTest {
     @Test
     void oversettBarn() {
         Familiemedlem familiemedlem = FamiliemedlemOversetter.oversettBarn(lagPerson(),
-            new Folkeregisteridentifikator("identForelder1"));
+                new Folkeregisteridentifikator("identForelder1"));
 
 
         assertThat(familiemedlem.folkeregisteridentifikator()).isEqualTo(new Folkeregisteridentifikator("IdNr"));
@@ -45,7 +45,7 @@ class FamiliemedlemOversetterTest {
         String forventetSivilstandID = "forventetSivilstandID";
 
 
-        Familiemedlem familiemedlem = FamiliemedlemOversetter.oversettPersonRelatertVedSivilstandMedSivilstand(lagPerson(), lagSivilstand(forventetSivilstandID));
+        Familiemedlem familiemedlem = FamiliemedlemOversetter.oversettEktefelleEllerPartner(lagPerson(), lagSivilstand(forventetSivilstandID));
 
 
         assertThat(familiemedlem.folkeregisteridentifikator()).isEqualTo(new Folkeregisteridentifikator("IdNr"));

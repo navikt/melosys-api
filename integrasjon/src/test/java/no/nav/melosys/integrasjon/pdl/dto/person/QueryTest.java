@@ -1,8 +1,5 @@
 package no.nav.melosys.integrasjon.pdl.dto.person;
 
-import java.io.InputStream;
-import java.util.Map;
-
 import graphql.ExecutionInput;
 import graphql.ParseAndValidate;
 import graphql.schema.GraphQLSchema;
@@ -11,6 +8,9 @@ import graphql.schema.idl.SchemaGenerator;
 import graphql.schema.idl.SchemaParser;
 import graphql.schema.idl.TypeDefinitionRegistry;
 import org.junit.jupiter.api.Test;
+
+import java.io.InputStream;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -42,7 +42,7 @@ class QueryTest {
 
     @Test
     void validerRelatert() {
-        assertThat(erGyldigQuery(Query.HENT_RELATERT_VED_SIVILSTAND_QUERY)).isTrue();
+        assertThat(erGyldigQuery(Query.HENT_EKTEFELLE_ELLER_PARTNER_QUERY)).isTrue();
     }
 
     @Test

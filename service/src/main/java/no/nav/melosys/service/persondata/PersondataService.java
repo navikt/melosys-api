@@ -99,7 +99,7 @@ public class PersondataService implements PersondataFasade {
     private Persondata lagPersondataMedFamilie(String ident) {
         final Person person = pdlConsumer.hentPerson(ident);
         return PersonopplysningerOversetter.oversettMedFamilie(person,
-            familiemedlemService.hentFamiliemedlemmer(person),
+            familiemedlemService.hentFamiliemedlemmer(person, ident),
             kodeverkService);
     }
 
