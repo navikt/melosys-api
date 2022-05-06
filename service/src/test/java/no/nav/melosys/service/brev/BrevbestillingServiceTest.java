@@ -416,7 +416,7 @@ class BrevbestillingServiceTest {
     }
 
     @Test
-    void hentBrevAdresseTilMottakere_brukersFullmaktSomMottaker_returnererFullmektigsAdresse() {
+    void hentBrevAdresseTilMottakere_brukersFullmaktOrganisasjonSomMottaker_returnererFullmektigsAdresse() {
         var behandling = new Behandling();
         behandling.setFagsak(new Fagsak());
         when(mockBehandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
@@ -430,6 +430,23 @@ class BrevbestillingServiceTest {
         assertThat(brevAdresser.get(0))
             .extracting(BrevAdresse::getMottakerNavn, BrevAdresse::getOrgnr, BrevAdresse::getAdresselinjer, BrevAdresse::getPostnr, BrevAdresse::getPoststed, BrevAdresse::getRegion, BrevAdresse::getLand)
             .containsExactly("Ola Nordmann Fullmektig", "orgNr", List.of("Gateadresse 43A"), "0123", "Oslo", null, Land.NORGE);
+    }
+
+    @Test
+    void hentBrevAdresseTilMottakere_brukersFullmaktPersonSomMottaker_returnererFullmektigsAdresse() {
+        var behandling = new Behandling();
+        behandling.setFagsak(new Fagsak());
+        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
+        when(mockBrevmottakerService.avklarMottakere(any(), eq(Mottaker.av(Aktoersroller.BRUKER)), any(), eq(false), eq(false)))
+            .thenReturn(List.of(lagAktoerPerson(Aktoersroller.REPRESENTANT, "fnr")));
+        when(mockPersondataFasade.hentPerson("fnr")).thenReturn(lagPersonopplysningerUtenOppholdsadresseOgKontaktadresse());
+
+        var brevAdresser = brevbestillingService.hentBrevAdresseTilMottakere(MANGELBREV_BRUKER, Aktoersroller.BRUKER, 123);
+
+        assertThat(brevAdresser).hasSize(1);
+        assertThat(brevAdresser.get(0))
+            .extracting(BrevAdresse::getMottakerNavn, BrevAdresse::getOrgnr, BrevAdresse::getAdresselinjer, BrevAdresse::getPostnr, BrevAdresse::getPoststed, BrevAdresse::getRegion, BrevAdresse::getLand)
+            .containsExactly("Nordmann Ola", null, List.of("gatenavnFraBostedsadresse 3"), "1234", "Oslo", "Norge", "NO");
     }
 
     @Test
