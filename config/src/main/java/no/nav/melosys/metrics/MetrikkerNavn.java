@@ -12,8 +12,8 @@ public final class MetrikkerNavn {
     public static final String BEHANDLINGSTYPER_OPPRETTET = METRIKKER_NAMESPACE + "behandlingstyper.opprettet";
     public static final String BEHANDLINGER_AVSLUTTET = METRIKKER_NAMESPACE + "behandlinger.avsluttet";
     public static final String PROSESSINSTANSER = METRIKKER_NAMESPACE + "prosessinstanser.";
-    public static final String PROSESSINSTANSER_OPPRETTET = METRIKKER_NAMESPACE + PROSESSINSTANSER + "opprettet";
-    public static final String PROSESSINSTANSER_STEG = METRIKKER_NAMESPACE +  PROSESSINSTANSER + "steg.";
+    public static final String PROSESSINSTANSER_OPPRETTET = PROSESSINSTANSER + "opprettet";
+    public static final String PROSESSINSTANSER_STEG = PROSESSINSTANSER + "steg.";
     public static final String UNNTAKSPERIODE_KONTROLL_TREFF = METRIKKER_NAMESPACE + "unntakperiode.treffbegrunnelse";
     public static final String SVAR_AOU = METRIKKER_NAMESPACE + "svar.aou";
     public static final String EVENTS_FEILET = METRIKKER_NAMESPACE + "events.feilet";
