@@ -35,11 +35,11 @@ public class ProsessinstansStatusCache {
         this.maksDataLevetidMs = millisLevetidICache;
     }
 
-    double antallProsessinstanserFeilet(ProsessType type) {
+    double antallProsessinstanserFeiletPåType(ProsessType type) {
         return antallProsessinstanserMedTypeOgStatus(type, STATUS_FEILET);
     }
 
-    double antallProsessinstanserFeiletPaSteg(ProsessSteg prosessSteg) {
+    double antallProsessinstanserFeiletPåSteg(ProsessSteg prosessSteg) {
         return antallProsessinstanserMedStegOgStatus(prosessSteg, STATUS_FEILET);
     }
 

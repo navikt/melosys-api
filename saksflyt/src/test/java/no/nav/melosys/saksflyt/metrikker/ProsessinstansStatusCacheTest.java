@@ -39,8 +39,8 @@ public class ProsessinstansStatusCacheTest {
     public void antallProsessinstanserFeilet() {
         when(prosessinstansRepository.antallAktiveOgFeiletPerTypeOgStatus(anyCollection()))
             .thenReturn(prosessinstansMetrikkerList);
-        assertThat(cache.antallProsessinstanserFeilet(JFR_NY_VURDERING)).isEqualTo(0.0);
-        assertThat(cache.antallProsessinstanserFeilet(JFR_KNYTT)).isEqualTo(1.0);
-        assertThat(cache.antallProsessinstanserFeilet(IVERKSETT_VEDTAK_EOS)).isEqualTo(2.0);
+        assertThat(cache.antallProsessinstanserFeiletPåType(JFR_NY_VURDERING)).isEqualTo(0.0);
+        assertThat(cache.antallProsessinstanserFeiletPåType(JFR_KNYTT)).isEqualTo(1.0);
+        assertThat(cache.antallProsessinstanserFeiletPåType(IVERKSETT_VEDTAK_EOS)).isEqualTo(2.0);
     }
 }

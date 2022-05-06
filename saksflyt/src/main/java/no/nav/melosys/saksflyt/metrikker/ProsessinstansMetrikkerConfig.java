@@ -21,7 +21,7 @@ public class ProsessinstansMetrikkerConfig {
                 Gauge.builder(
                     gaugeNavnProsessinstansType,
                     statusCache,
-                    type -> statusCache.antallProsessinstanserFeilet(prosessType)
+                    type -> statusCache.antallProsessinstanserFeiletPåType(prosessType)
                 ).register(meterRegistry);
 
                 for (ProsessSteg prosessSteg : ProsessSteg.values()) {
@@ -29,7 +29,7 @@ public class ProsessinstansMetrikkerConfig {
                     Gauge.builder(
                         gaugeNavnProsessinstansSteg,
                         statusCache,
-                        type -> statusCache.antallProsessinstanserFeiletPaSteg(prosessSteg)
+                        type -> statusCache.antallProsessinstanserFeiletPåSteg(prosessSteg)
                     ).register(meterRegistry);
                 }
             }
