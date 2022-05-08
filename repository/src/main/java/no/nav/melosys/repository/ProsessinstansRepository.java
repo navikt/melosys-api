@@ -16,10 +16,13 @@ public interface ProsessinstansRepository extends JpaRepository<Prosessinstans, 
         + "AND p.type IN (?1) GROUP BY p.type, p.status")
     Collection<ProsessinstansAntall> antallAktiveOgFeiletPerTypeOgStatus(Collection<ProsessType> typer);
 
-    @Query("SELECT NEW no.nav.melosys.domain.metrikker.ProsessinstansStegAntall(p.sistFullførtSteg, p.type, p.status, COUNT(p)) FROM Prosessinstans p "
+    @Query("SELECT NEW no.nav.melosys.domain.metrikker.ProsessinstansStegAntall(p.sistFullførtSteg, p.type, p.status, COUNT(p)) "
+        + "FROM Prosessinstans p "
         + "WHERE p.status <> no.nav.melosys.domain.saksflyt.ProsessStatus.FERDIG "
-        + "AND p.sistFullførtSteg IN (?1) GROUP BY p.type, p.sistFullførtSteg, p.status")
-    Collection<ProsessinstansStegAntall> antallAktiveOgFeiletPerStegOgStatus(Collection<ProsessSteg> prosessSteg);
+        + "AND p.sistFullførtSteg IN (?1) OR ((?2) = TRUE AND p.sistFullførtSteg IS NULL) "
+        + "GROUP BY p.type, p.sistFullførtSteg, p.status")
+    Collection<ProsessinstansStegAntall> antallAktiveOgFeiletPerStegOgStatus(Collection<ProsessSteg> prosessSteg,
+                                                                             boolean taMedForsteStegIProsessFlyt);
 
     Optional<Prosessinstans> findByBehandling_IdAndStatusIs(long id, ProsessStatus prosessStatus);
 

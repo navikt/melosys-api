@@ -5,12 +5,12 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 
+import no.nav.melosys.domain.metrikker.ProsessinstansAntall;
+import no.nav.melosys.domain.metrikker.ProsessinstansStegAntall;
 import no.nav.melosys.domain.saksflyt.ProsessStatus;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.ProsessType;
-import no.nav.melosys.domain.metrikker.ProsessinstansAntall;
 import no.nav.melosys.repository.ProsessinstansRepository;
-import no.nav.melosys.domain.metrikker.ProsessinstansStegAntall;
 import no.nav.melosys.saksflyt.prosessflyt.ProsessflytDefinisjon;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Value;
@@ -91,7 +91,7 @@ public class ProsessinstansStatusCache {
         }
 
         Collection<ProsessinstansStegAntall> prosessinstansMetrikkerForStegOgStatus = prosessinstansRepository.
-            antallAktiveOgFeiletPerStegOgStatus(PROSESS_STEG);
+            antallAktiveOgFeiletPerStegOgStatus(PROSESS_STEG, true);
 
         antallPerStegOgStatus = new HashMap<>();
         for (ProsessinstansStegAntall prosessinstansStegAntall : prosessinstansMetrikkerForStegOgStatus) {
