@@ -94,16 +94,15 @@ public class VedtakKontrollService {
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
 
         return  switch (behandlingsresultattype) {
-            case AVSLAG_MANGLENDE_OPPL -> utførKontrollerForAvslag(behandling);
-//            case HENLEGGELSE -> utførKontrollerForHenleggelse(behandling);
+            case AVSLAG_MANGLENDE_OPPL, HENLEGGELSE -> utførKontrollerForAvslagOgHenleggelse(behandling);
             default -> utførKontroller(behandling, sakstype);
         };
     }
 
-    private Collection<Kontrollfeil> utførKontrollerForAvslag(Behandling behandling) {
+    private Collection<Kontrollfeil> utførKontrollerForAvslagOgHenleggelse(Behandling behandling) {
         Set<Function<VedtakKontrollData, Kontrollfeil>> vedtakKontroller =
-            VedtakKontrollFactory.hentKontrollerForAvslag();
-        var kontrollData = hentKontrollDataForAvslag(behandling);
+            VedtakKontrollFactory.hentKontrollerForAvslagOgHenleggelse();
+        var kontrollData = hentKontrollDataForAvslagOgHenleggelse(behandling);
         return vedtakKontroller.stream()
             .map(f -> f.apply(kontrollData))
             .filter(Objects::nonNull)
@@ -120,7 +119,7 @@ public class VedtakKontrollService {
             .toList();
     }
 
-    private VedtakKontrollData hentKontrollDataForAvslag(Behandling behandling) {
+    private VedtakKontrollData hentKontrollDataForAvslagOgHenleggelse(Behandling behandling) {
         BehandlingsgrunnlagData behandlingsgrunnlagData =
             behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
         Persondata persondata = hentPersondata(behandling);

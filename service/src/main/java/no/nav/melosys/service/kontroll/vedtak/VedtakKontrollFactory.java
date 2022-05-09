@@ -30,12 +30,12 @@ class VedtakKontrollFactory {
         VedtakKontroller::representantIUtlandetMangler
     );
 
-    private static final Set<Function<VedtakKontrollData, Kontrollfeil>> KONTROLLER_AVSLAG = Set.of(
+    private static final Set<Function<VedtakKontrollData, Kontrollfeil>> KONTROLLER_AVSLAG_HENLEGGELSE = Set.of(
         VedtakKontroller::adresseRegistrert
     );
 
-    static Set<Function<VedtakKontrollData, Kontrollfeil>> hentKontrollerForAvslag() {
-        return KONTROLLER_AVSLAG;
+    static Set<Function<VedtakKontrollData, Kontrollfeil>> hentKontrollerForAvslagOgHenleggelse() {
+        return KONTROLLER_AVSLAG_HENLEGGELSE;
     }
 
     static Set<Function<VedtakKontrollData, Kontrollfeil>> hentKontrollerForVedtak(Sakstyper sakstype) {
