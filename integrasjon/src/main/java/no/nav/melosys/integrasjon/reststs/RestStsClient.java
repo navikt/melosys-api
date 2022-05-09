@@ -2,6 +2,7 @@ package no.nav.melosys.integrasjon.reststs;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
@@ -13,6 +14,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -46,9 +49,20 @@ public class RestStsClient implements RestConsumer {
 
     private String generateToken() {
         log.info("Henter oidc-token fra security-token-service");
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<String, String>();
+        params.add("grant_type", "client_credentials");
+        params.add("scope", "openid");
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+        headers.add(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE);
+        headers.add(HttpHeaders.AUTHORIZATION, getAuth());
+
+        HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(params, headers);
+
         try {
             ResponseEntity<Map<String, Object>> response = restTemplate
-                .exchange(createUriString(), HttpMethod.GET, createHttpEntity(), new ParameterizedTypeReference<>() {
+                .exchange("/token", HttpMethod.POST, entity, new ParameterizedTypeReference<>() {
                 });
 
             Map<String, Object> responseBody = Objects.requireNonNull(response.getBody());
