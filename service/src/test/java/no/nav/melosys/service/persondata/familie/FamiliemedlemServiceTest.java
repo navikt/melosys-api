@@ -1,11 +1,19 @@
 package no.nav.melosys.service.persondata.familie;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.person.Sivilstand;
 import no.nav.melosys.domain.person.Navn;
 import no.nav.melosys.domain.person.familie.Familiemedlem;
 import no.nav.melosys.domain.person.familie.Familierelasjon;
 import no.nav.melosys.integrasjon.pdl.PDLConsumer;
+import no.nav.melosys.integrasjon.pdl.dto.identer.Ident;
+import no.nav.melosys.integrasjon.pdl.dto.identer.IdentGruppe;
+import no.nav.melosys.integrasjon.pdl.dto.identer.Identliste;
 import no.nav.melosys.integrasjon.pdl.dto.person.Person;
 import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -15,11 +23,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
 
 import static no.nav.melosys.service.SaksbehandlingDataFactory.lagInaktivBehandlingSomIkkeResulterIVedtak;
 import static no.nav.melosys.service.persondata.PdlObjectFactory.lagPerson;
@@ -38,6 +41,7 @@ class FamiliemedlemServiceTest {
     private SaksopplysningerService saksopplysningerService;
     @InjectMocks
     private FamiliemedlemService familiemedlemService;
+
 
     @Test
     void hentFamiliemedlemmerFraBehandlingID_inaktivBehandlingMedTpsData() {
@@ -64,7 +68,8 @@ class FamiliemedlemServiceTest {
         when(pdlConsumer.hentBarn(IDENT_BARN)).thenReturn(lagPerson());
         when(pdlConsumer.hentEktefelleEllerPartner(IDENT_PERSON_GIFT)).thenReturn(lagPersonGift());
         when(pdlConsumer.hentEktefelleEllerPartner(IDENT_PERSON_GIFT_HISTORISK)).thenReturn(lagPersonGiftHistorisk());
-
+        when(pdlConsumer.hentIdenter(IDENT_HOVEDPERSON)).thenReturn(new Identliste(Set.of(new Ident(IDENT_HOVEDPERSON,
+            IdentGruppe.FOLKEREGISTERIDENT))));
 
         Set<Familiemedlem> familiemedlemmer = familiemedlemService.hentFamiliemedlemmerFraBehandlingID(behandlingID);
 
@@ -102,12 +107,12 @@ class FamiliemedlemServiceTest {
 
 
         assertThat(familiemedlemmer)
-                .isNotEmpty()
-                .hasSize(1)
-                .first()
-                .matches(Familiemedlem::erRelatertVedSivilstand)
-                .extracting(Familiemedlem::navn)
-                .matches(navn -> navn.harLiktFornavn(PERSON_GIFT_FORNAVN), "Har likt fornavn");
+            .isNotEmpty()
+            .hasSize(1)
+            .first()
+            .matches(Familiemedlem::erRelatertVedSivilstand)
+            .extracting(Familiemedlem::navn)
+            .matches(navn -> navn.harLiktFornavn(PERSON_GIFT_FORNAVN), "Har likt fornavn");
 
         verify(pdlConsumer, times(1)).hentEktefelleEllerPartner(IDENT_PERSON_GIFT);
         verify(pdlConsumer, times(1)).hentEktefelleEllerPartner(IDENT_PERSON_GIFT_HISTORISK);

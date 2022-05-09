@@ -14,6 +14,7 @@ import no.nav.melosys.domain.person.familie.Familiemedlem;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.pdl.PDLConsumer;
 import no.nav.melosys.integrasjon.pdl.dto.HarMetadata;
+import no.nav.melosys.integrasjon.pdl.dto.identer.Ident;
 import no.nav.melosys.integrasjon.pdl.dto.person.ForelderBarnRelasjon;
 import no.nav.melosys.integrasjon.pdl.dto.person.Person;
 import no.nav.melosys.integrasjon.pdl.dto.person.Sivilstand;
@@ -67,7 +68,13 @@ public class FamiliemedlemService {
 
     public Set<Familiemedlem> hentFamiliemedlemmerFraIdent(String ident) {
         Person person = pdlConsumer.hentFamilierelasjoner(ident);
-        return hentFamiliemedlemmer(person, ident);
+        String fnr = pdlConsumer.hentIdenter(ident)
+            .identer().stream()
+            .filter(Ident::erFolkeregisterIdent)
+            .findFirst()
+            .map(Ident::ident)
+            .orElse(ident);
+        return hentFamiliemedlemmer(person, fnr);
     }
 
     public Set<Familiemedlem> hentFamiliemedlemmer(Person hovedperson, String identTilHovedperson) {
