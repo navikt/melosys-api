@@ -66,6 +66,14 @@ public class BehandlingsresultatService {
         behandlingsresultatRepository.save(resultat);
     }
 
+    public void lagreNyttBehandlingsresultat(Behandling behandling) {
+        Behandlingsresultat nyttBehandlingsresultat = new Behandlingsresultat();
+        nyttBehandlingsresultat.setBehandling(behandling);
+        nyttBehandlingsresultat.setType(Behandlingsresultattyper.IKKE_FASTSATT);
+        nyttBehandlingsresultat.setBehandlingsmåte(Behandlingsmaate.UDEFINERT);
+        behandlingsresultatRepository.save(nyttBehandlingsresultat);
+    }
+
     @Transactional(rollbackFor = Exception.class)
     public void replikerBehandlingsresultat(Behandling tidligsteInaktiveBehandling, Behandling behandlingsreplika)
         throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {

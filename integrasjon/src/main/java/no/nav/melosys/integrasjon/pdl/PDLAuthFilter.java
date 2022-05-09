@@ -3,7 +3,7 @@ package no.nav.melosys.integrasjon.pdl;
 import java.util.function.Supplier;
 import javax.annotation.Nonnull;
 
-import no.finn.unleash.Unleash;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo;
 import no.nav.melosys.integrasjon.reststs.RestStsClient;
@@ -18,13 +18,9 @@ public class PDLAuthFilter implements ExchangeFilterFunction {
     private static final String NAV_CONSUMER_TOKEN = "Nav-Consumer-Token";
 
     private final RestStsClient restStsClient;
-    private final Supplier<String> authSupplier;
-    private final Unleash unleash;
 
-    public PDLAuthFilter(RestStsClient restStsClient, Supplier<String> authSupplier, Unleash unleash) {
+    public PDLAuthFilter(RestStsClient restStsClient) {
         this.restStsClient = restStsClient;
-        this.authSupplier = authSupplier;
-        this.unleash = unleash;
     }
 
     @Nonnull
@@ -33,22 +29,19 @@ public class PDLAuthFilter implements ExchangeFilterFunction {
                                        @Nonnull ExchangeFunction exchangeFunction) {
         return exchangeFunction.exchange(
             ClientRequest.from(clientRequest)
-                .header(HttpHeaders.AUTHORIZATION, getTokenSupplier(unleash, restStsClient).get())
+                .header(HttpHeaders.AUTHORIZATION, getTokenSupplier(restStsClient).get())
                 .header(NAV_CONSUMER_TOKEN, restStsClient.bearerToken())
                 .build()
         );
     }
 
-    private Supplier<String> getTokenSupplier(Unleash unleash, RestStsClient restStsClient) {
-        if (!unleash.isEnabled("melosys.auto.token")) {
-            return authSupplier;
-        }
+    private Supplier<String> getTokenSupplier(RestStsClient restStsClient) {
         if (ThreadLocalAccessInfo.shouldUseSystemToken()) {
             return restStsClient::bearerToken;
         }
         if (ThreadLocalAccessInfo.shouldUseOidcToken()) {
             return () -> "Bearer " + SubjectHandler.getInstance().getOidcTokenString();
         }
-        throw new IllegalStateException("Må bli kalt fra frontend eller prosess");
+        throw new TekniskException("Uregistert kall prøver å registrere token provider");
     }
 }

@@ -148,7 +148,9 @@ public class Prosessinstans {
     }
 
     public void setData(ProsessDataKey key, String value) {
-        this.data.setProperty(key.getKode(), value);
+        if (value != null) {
+            this.data.setProperty(key.getKode(), value);
+        }
     }
 
     /**

@@ -85,6 +85,10 @@ public class FagsakService {
         return fagsakRepository.findByRolleAndAktør(rolleType, aktørID);
     }
 
+    public List<Fagsak> hentFagsakerMedOrgnr(Aktoersroller rolleType, String orgnr) {
+        return fagsakRepository.findByRolleAndOrgnr(rolleType, orgnr);
+    }
+
     @Transactional
     public void lagre(Fagsak sak) {
         if (sak.getSaksnummer() == null) {
@@ -123,12 +127,24 @@ public class FagsakService {
 
         HashSet<Aktoer> aktører = new HashSet<>();
 
-        Aktoer aktør = new Aktoer();
-        aktør.setAktørId(opprettSakRequest.getAktørID());
-        aktør.setUtenlandskPersonId(opprettSakRequest.getUtenlandskPersonId());
-        aktør.setFagsak(fagsak);
-        aktør.setRolle(Aktoersroller.BRUKER);
-        aktører.add(aktør);
+        String aktørID = opprettSakRequest.getAktørID();
+        if (aktørID != null) {
+            Aktoer aktør = new Aktoer();
+            aktør.setAktørId(aktørID);
+            aktør.setUtenlandskPersonId(opprettSakRequest.getUtenlandskPersonId());
+            aktør.setFagsak(fagsak);
+            aktør.setRolle(Aktoersroller.BRUKER);
+            aktører.add(aktør);
+        }
+
+        String virksomhetOrgnr = opprettSakRequest.getVirksomhetOrgnr();
+        if (virksomhetOrgnr != null) {
+            Aktoer virksomhet = new Aktoer();
+            virksomhet.setOrgnr(virksomhetOrgnr);
+            virksomhet.setFagsak(fagsak);
+            virksomhet.setRolle(Aktoersroller.VIRKSOMHET);
+            aktører.add(virksomhet);
+        }
 
         String arbeidsgiver = opprettSakRequest.getArbeidsgiver();
         if (arbeidsgiver != null) {
@@ -141,8 +157,7 @@ public class FagsakService {
 
         Fullmektig fullmektig = opprettSakRequest.getFullmektig();
         if (fullmektig != null) {
-            Aktoer aktørFullmektig = new Aktoer();
-            aktørFullmektig.setOrgnr(fullmektig.getRepresentantID());
+            Aktoer aktørFullmektig = lagAktørFullmektigMedID(fullmektig.getRepresentantID());
             aktørFullmektig.setFagsak(fagsak);
             aktørFullmektig.setRolle(Aktoersroller.REPRESENTANT);
             aktørFullmektig.setRepresenterer(fullmektig.getRepresenterer());
@@ -177,6 +192,16 @@ public class FagsakService {
 
         sakerOpprettet.increment();
         return fagsak;
+    }
+
+    private Aktoer lagAktørFullmektigMedID(String representantID) {
+        Aktoer aktørFullmektig = new Aktoer();
+        if (representantID.length() == 11) {
+            aktørFullmektig.setPersonIdent(representantID);
+        } else {
+            aktørFullmektig.setOrgnr(representantID);
+        }
+        return aktørFullmektig;
     }
 
     private String hentNesteSaksnummer() {
@@ -225,39 +250,81 @@ public class FagsakService {
     @Transactional
     public long opprettNyVurderingBehandling(String saksnummer) {
         Fagsak fagsak = hentFagsak(saksnummer);
-        Behandling behandling = fagsak.hentSistAktivBehandling();
-        Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
+        validerOpprettNyVurdering(fagsak);
 
-        validerOpprettNyVurdering(behandling, behandlingsresultat);
+        Optional<Behandling> behandling = hentBehandlingSomErUtgangspunktForRevurdering(fagsak);
+        Behandling replikertBehandling;
 
-        Behandlingstyper behandlingstype;
-        if (behandling.erInaktiv()) {
-            behandlingstype = Behandlingstyper.NY_VURDERING;
+        if (behandling.isPresent()) {
+            replikertBehandling = behandlingService.replikerBehandlingOgBehandlingsresultat(behandling.get(), avgjørBehandlingstype(fagsak));
         } else {
-            behandlingstype = behandling.getType();
+            behandling = Optional.of(fagsak.hentSistOppdatertBehandling());
+            replikertBehandling = behandlingService.replikerBehandlingMedNyttBehandlingsresultat(behandling.get(), avgjørBehandlingstype(fagsak));
         }
 
-        Behandling replikertBehandling = behandlingService.replikerBehandlingOgBehandlingsresultat(behandling, Behandlingsstatus.OPPRETTET, behandlingstype);
-
-        if (!behandling.erAvsluttet()) {
-            behandlingService.avsluttBehandling(behandling.getId());
+        if (!behandling.get().erAvsluttet()) {
+            behandlingService.avsluttBehandling(behandling.get().getId());
         }
 
         oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(
             replikertBehandling, replikertBehandling.getInitierendeJournalpostId(), fagsak.hentBrukersAktørID(), SubjectHandler.getInstance().getUserID()
         );
         if (!unleash.isEnabled("melosys.api.ny.vurdering.medlperiode.beholdes")) {
-            avsluttTidligereMedlPeriode(behandlingsresultat);
+            avsluttTidligereMedlPeriode(behandlingsresultatService.hentBehandlingsresultat(behandling.get().getId()));
         }
         return replikertBehandling.getId();
     }
 
-    private void validerOpprettNyVurdering(Behandling behandling, Behandlingsresultat behandlingsresultat) {
-        if (behandling.erAktiv() && behandlingsresultat.erIkkeArtikkel16MedSendtAnmodningOmUnntak()) {
+    private void validerOpprettNyVurdering(Fagsak fagsak) {
+        Behandling sistAktivBehandling = fagsak.hentSistAktivBehandling();
+        Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(sistAktivBehandling.getId());
+        if (sistAktivBehandling.erAktiv() && behandlingsresultat.erIkkeArtikkel16MedSendtAnmodningOmUnntak()) {
             throw new FunksjonellException("Kan ikke revurdere en aktiv behandling");
-        } else if (behandling.erEndretPeriode()) {
+        } else if (sistAktivBehandling.erEndretPeriode()) {
             throw new FunksjonellException("Kan ikke revurdere en behandling av type " + Behandlingstyper.ENDRET_PERIODE.getBeskrivelse());
         }
+    }
+
+    public Optional<Behandling> hentBehandlingSomErUtgangspunktForRevurdering(Fagsak fagsak) {
+        if (fagsak.harAktivBehandling()) {
+            return Optional.of(fagsak.hentSistAktivBehandling());
+        }
+        return hentBehandlingForNyVurdering(fagsak);
+    }
+
+    public Optional<Behandling> hentBehandlingForNyVurdering(Fagsak fagsak) {
+        var førsteBehandling = fagsak.hentTidligstRegistrertBehandling();
+
+        return switch (førsteBehandling.getType()) {
+            case SOEKNAD -> hentBehandlingMedSistRegistrertVedtak(fagsak);
+            case SED -> hentBehandlingMedSistRegistrertUnntak(fagsak);
+            default -> Optional.empty();
+        };
+    }
+
+    public Optional<Behandling> hentBehandlingMedSistRegistrertVedtak(Fagsak fagsak) {
+        return fagsak.getBehandlinger().stream()
+            .map(behandling -> behandlingsresultatService.hentBehandlingsresultat(behandling.getId()))
+            .filter(Objects::nonNull)
+            .filter(Behandlingsresultat::harVedtak)
+            .max(Comparator.comparing(behandlingsresultat -> behandlingsresultat.getVedtakMetadata().getRegistrertDato()))
+            .map(Behandlingsresultat::getBehandling);
+    }
+
+    public Optional<Behandling> hentBehandlingMedSistRegistrertUnntak(Fagsak fagsak) {
+        return fagsak.getBehandlinger().stream()
+            .map(behandling -> behandlingsresultatService.hentBehandlingsresultat(behandling.getId()))
+            .filter(Objects::nonNull)
+            .filter(Behandlingsresultat::erRegistrertUnntak)
+            .max(Comparator.comparing(RegistreringsInfo::getRegistrertDato))
+            .map(Behandlingsresultat::getBehandling);
+    }
+
+    private Behandlingstyper avgjørBehandlingstype(Fagsak fagsak) {
+        if (fagsak.harAktivBehandling()) {
+            return fagsak.hentSistAktivBehandling().getType();
+        }
+        return Behandlingstyper.NY_VURDERING;
     }
 
     private void avsluttTidligereMedlPeriode(Behandlingsresultat behandlingsresultat) {

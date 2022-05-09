@@ -1,9 +1,5 @@
 package no.nav.melosys.service.persondata;
 
-import java.time.LocalDate;
-import java.util.*;
-import java.util.function.Predicate;
-
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.KjoennsType;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
@@ -30,6 +26,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.time.LocalDate;
+import java.util.*;
+import java.util.function.Predicate;
 
 import static no.nav.melosys.integrasjon.pdl.dto.identer.IdentGruppe.*;
 import static no.nav.melosys.service.SaksbehandlingDataFactory.*;
@@ -59,7 +59,7 @@ class PersondataServiceTest {
     @BeforeEach
     public void setup() {
         persondataService = new PersondataService(behandlingService, kodeverkService, pdlConsumer,
-            saksopplysningerService, familiemedlemService);
+                saksopplysningerService, familiemedlemService);
     }
 
     @Test
@@ -72,8 +72,8 @@ class PersondataServiceTest {
     void hentAktørID_finnesIkke_feiler() {
         when(pdlConsumer.hentIdenter("321")).thenReturn(lagTomIdentliste());
         assertThatExceptionOfType(IkkeFunnetException.class)
-            .isThrownBy(() -> persondataService.hentAktørIdForIdent("321"))
-            .withMessageContaining("Finner ikke aktørID");
+                .isThrownBy(() -> persondataService.hentAktørIdForIdent("321"))
+                .withMessageContaining("Finner ikke aktørID");
     }
 
     @Test
@@ -86,8 +86,8 @@ class PersondataServiceTest {
     void hentFolkeregisterIdent_finnesIkke_feiler() {
         when(pdlConsumer.hentIdenter(anyString())).thenReturn(lagTomIdentliste());
         assertThatExceptionOfType(IkkeFunnetException.class)
-            .isThrownBy(() -> persondataService.hentFolkeregisterident("123"))
-            .withMessageContaining("Finner ikke folkeregisterident");
+                .isThrownBy(() -> persondataService.hentFolkeregisterident("123"))
+                .withMessageContaining("Finner ikke folkeregisterident");
     }
 
     @Test
@@ -95,16 +95,16 @@ class PersondataServiceTest {
         String forventetRelatertVedSivilstandID = "forventetRelatertVedSivilstandID";
 
         when(pdlConsumer.hentPerson(anyString())).thenReturn(lagPerson());
-        when(familiemedlemService.hentFamiliemedlemmer(lagPerson())).thenReturn(
-            Set.of(
-                FamiliemedlemOversetter.oversettBarn(lagPerson(), lagFolkeregisterIdent("identForelder1")),
-                FamiliemedlemOversetter.oversettPersonRelatertVedSivilstandMedSivilstand(lagPerson(),
-                    lagSivilstand(forventetRelatertVedSivilstandID))
-            ));
+        when(familiemedlemService.hentFamiliemedlemmer(lagPerson(), "IdNr")).thenReturn(
+                Set.of(
+                        FamiliemedlemOversetter.oversettBarn(lagPerson(), lagFolkeregisterIdent("identForelder1")),
+                        FamiliemedlemOversetter.oversettEktefelleEllerPartner(lagPerson(),
+                                lagSivilstand(forventetRelatertVedSivilstandID))
+                ));
 
 
-        Personopplysninger persondata = (Personopplysninger) persondataService.hentPerson("ident",
-            Informasjonsbehov.MED_FAMILIERELASJONER);
+        Personopplysninger persondata = (Personopplysninger) persondataService.hentPerson("IdNr",
+                Informasjonsbehov.MED_FAMILIERELASJONER);
 
 
         assertThat(persondata.bostedsadresse()).isNotNull();
@@ -114,20 +114,20 @@ class PersondataServiceTest {
         assertThat(persondata.kjønn()).isEqualTo(KjoennType.UKJENT);
         assertThat(persondata.navn()).isEqualTo(new Navn("fornavn", "mellomnavn", "etternavn"));
         assertThat(persondata.statsborgerskap()).containsExactlyInAnyOrder(
-            new Statsborgerskap("AIA", null, LocalDate.parse("1979-11-18"),
-                LocalDate.parse("1980-11-18"), "PDL", "Dolly", false),
-            new Statsborgerskap("NOR", LocalDate.parse("2021-05-08"), null,
-                null, "PDL", "Dolly", false));
+                new Statsborgerskap("AIA", null, LocalDate.parse("1979-11-18"),
+                        LocalDate.parse("1980-11-18"), "PDL", "Dolly", false),
+                new Statsborgerskap("NOR", LocalDate.parse("2021-05-08"), null,
+                        null, "PDL", "Dolly", false));
         assertThat(persondata.familiemedlemmer()).isNotEmpty()
-            .anyMatch(Familiemedlem::erBarn)
-            .anyMatch(harForventetRelatertVedSivilstandId(forventetRelatertVedSivilstandID))
-            .anyMatch(Familiemedlem::erRelatertVedSivilstand);
+                .anyMatch(Familiemedlem::erBarn)
+                .anyMatch(harForventetRelatertVedSivilstandId(forventetRelatertVedSivilstandID))
+                .anyMatch(Familiemedlem::erRelatertVedSivilstand);
     }
 
     @NotNull
     private Predicate<Familiemedlem> harForventetRelatertVedSivilstandId(String forventetRelatertVedSivilstandID) {
         return familiemedlem -> familiemedlem.sivilstand() != null &&
-            forventetRelatertVedSivilstandID.equals(familiemedlem.sivilstand().relatertVedSivilstand());
+                forventetRelatertVedSivilstandID.equals(familiemedlem.sivilstand().relatertVedSivilstand());
     }
 
     @NotNull
@@ -149,10 +149,10 @@ class PersondataServiceTest {
         assertThat(personMedHistorikk.kjønn()).isEqualTo(KjoennType.UKJENT);
         assertThat(personMedHistorikk.navn()).isEqualTo(new Navn("fornavn", "mellomnavn", "etternavn"));
         assertThat(personMedHistorikk.statsborgerskap()).containsExactlyInAnyOrder(
-            new Statsborgerskap("AIA", null, LocalDate.parse("1979-11-18"),
-                LocalDate.parse("1980-11-18"), "PDL", "Dolly", false),
-            new Statsborgerskap("NOR", LocalDate.parse("2021-05-08"), null,
-                null, "PDL", "Dolly", false)
+                new Statsborgerskap("AIA", null, LocalDate.parse("1979-11-18"),
+                        LocalDate.parse("1980-11-18"), "PDL", "Dolly", false),
+                new Statsborgerskap("NOR", LocalDate.parse("2021-05-08"), null,
+                        null, "PDL", "Dolly", false)
         );
     }
 
@@ -166,8 +166,8 @@ class PersondataServiceTest {
 
         final var personMedHistorikk = persondataService.hentPersonMedHistorikk(1L);
         assertThat(personMedHistorikk.statsborgerskap()).containsExactly(
-            new Statsborgerskap("NOR", null, LocalDate.parse("1989-08-07"),
-                null, "TPS", "TPS", false)
+                new Statsborgerskap("NOR", null, LocalDate.parse("1989-08-07"),
+                        null, "TPS", "TPS", false)
         );
     }
 
@@ -197,12 +197,12 @@ class PersondataServiceTest {
 
         final var personMedHistorikk = persondataService.hentPersonMedHistorikk(1L);
         assertThat(personMedHistorikk.statsborgerskap()).containsExactlyInAnyOrder(
-            new Statsborgerskap("AAA", null, LocalDate.parse("2009-11-18"),
-                LocalDate.parse("1980-11-18"), "PDL", "Dolly", false),
-            new Statsborgerskap("BBB", null, LocalDate.parse("1979-11-18"),
-                LocalDate.parse("1980-11-18"), "PDL", "Dolly", false),
-            new Statsborgerskap("CCC", null, null,
-                LocalDate.parse("1980-11-18"), "PDL", "Dolly", false)
+                new Statsborgerskap("AAA", null, LocalDate.parse("2009-11-18"),
+                        LocalDate.parse("1980-11-18"), "PDL", "Dolly", false),
+                new Statsborgerskap("BBB", null, LocalDate.parse("1979-11-18"),
+                        LocalDate.parse("1980-11-18"), "PDL", "Dolly", false),
+                new Statsborgerskap("CCC", null, null,
+                        LocalDate.parse("1980-11-18"), "PDL", "Dolly", false)
         );
     }
 
@@ -214,15 +214,15 @@ class PersondataServiceTest {
 
         final var personMedHistorikk = persondataService.hentPersonMedHistorikk(1L);
         assertThat(personMedHistorikk.statsborgerskap()).containsExactly(
-            new Statsborgerskap("NOR", null, LocalDate.parse("1989-08-07"),
-                null, "TPS", "TPS", false)
+                new Statsborgerskap("NOR", null, LocalDate.parse("1989-08-07"),
+                        null, "TPS", "TPS", false)
         );
     }
 
     @Test
     void hentSammensatNavn() {
         when(pdlConsumer.hentNavn(anyString())).thenReturn(Set.of(
-            new no.nav.melosys.integrasjon.pdl.dto.person.Navn("Fornavn", "Mellom", "Etternavnsen", metadata())
+                new no.nav.melosys.integrasjon.pdl.dto.person.Navn("Fornavn", "Mellom", "Etternavnsen", metadata())
         ));
 
         assertThat(persondataService.hentSammensattNavn("")).isEqualTo("Etternavnsen Mellom Fornavn");
@@ -231,23 +231,23 @@ class PersondataServiceTest {
     @Test
     void hentStatsborgerskap() {
         when(pdlConsumer.hentStatsborgerskap("ident")).thenReturn(Set.of(
-            new no.nav.melosys.integrasjon.pdl.dto.person.Statsborgerskap("AIA", LocalDate.parse("2021-05-08"), LocalDate.parse(
-                "1979-11-18"),
-                LocalDate.parse("1980-11-18"), metadata()))
+                new no.nav.melosys.integrasjon.pdl.dto.person.Statsborgerskap("AIA", LocalDate.parse("2021-05-08"), LocalDate.parse(
+                        "1979-11-18"),
+                        LocalDate.parse("1980-11-18"), metadata()))
         );
 
         assertThat(persondataService.hentStatsborgerskap("ident")).containsExactly(
-            new Statsborgerskap(
-                "AIA", LocalDate.parse("2021-05-08"), LocalDate.parse("1979-11-18"), LocalDate.parse("1980-11-18"),
-                "PDL", "Dolly", false)
+                new Statsborgerskap(
+                        "AIA", LocalDate.parse("2021-05-08"), LocalDate.parse("1979-11-18"), LocalDate.parse("1980-11-18"),
+                        "PDL", "Dolly", false)
         );
     }
 
     @Test
     void harStrengtFortroligAdresse() {
         when(pdlConsumer.hentAdressebeskyttelser(anyString())).thenReturn(
-            List.of(new Adressebeskyttelse(AdressebeskyttelseGradering.UGRADERT, metadata()),
-                new Adressebeskyttelse(AdressebeskyttelseGradering.STRENGT_FORTROLIG, metadata())));
+                List.of(new Adressebeskyttelse(AdressebeskyttelseGradering.UGRADERT, metadata()),
+                        new Adressebeskyttelse(AdressebeskyttelseGradering.STRENGT_FORTROLIG, metadata())));
 
         assertThat(persondataService.harStrengtFortroligAdresse("")).isTrue();
     }

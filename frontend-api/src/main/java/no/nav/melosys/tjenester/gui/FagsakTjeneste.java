@@ -16,6 +16,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.persondata.PersondataFasade;
+import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService;
 import no.nav.melosys.service.sak.*;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.utpeking.UtpekingService;
@@ -42,7 +43,7 @@ import static no.nav.melosys.domain.util.BehandlingsgrunnlagUtils.hentSøknadsla
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class FagsakTjeneste {
     private static final Logger log = LoggerFactory.getLogger(FagsakTjeneste.class);
-    private static final String UKJENT_SAMMENSATT_NAVN = "UKJENT";
+    private static final String UKJENT_NAVN = "UKJENT";
 
     private final FagsakService fagsakService;
     private final OpprettNySakFraOppgave opprettNySakFraOppgave;
@@ -53,12 +54,13 @@ public class FagsakTjeneste {
     private final SaksopplysningerService saksopplysningerService;
     private final UtpekingService utpekingService;
     private final VideresendSoknadService videresendSoknadService;
+    private final OrganisasjonOppslagService organisasjonOppslagService;
 
     public FagsakTjeneste(FagsakService fagsakService, Aksesskontroll aksesskontroll, BehandlingsgrunnlagService behandlingsgrunnlagService,
                           HenleggFagsakService henleggFagsakService,
                           OpprettNySakFraOppgave opprettNySakFraOppgave, PersondataFasade persondataFasade,
                           SaksopplysningerService saksopplysningerService, UtpekingService utpekingService,
-                          VideresendSoknadService videresendSoknadService) {
+                          VideresendSoknadService videresendSoknadService, OrganisasjonOppslagService organisasjonOppslagService) {
         this.fagsakService = fagsakService;
         this.aksesskontroll = aksesskontroll;
         this.behandlingsgrunnlagService = behandlingsgrunnlagService;
@@ -68,6 +70,7 @@ public class FagsakTjeneste {
         this.saksopplysningerService = saksopplysningerService;
         this.utpekingService = utpekingService;
         this.videresendSoknadService = videresendSoknadService;
+        this.organisasjonOppslagService = organisasjonOppslagService;
     }
 
     @GetMapping("{saksnr}")
@@ -93,8 +96,8 @@ public class FagsakTjeneste {
 
     @PostMapping("/sok")
     @ApiOperation(
-        value = "Søk etter saker på ident eller saksnummer",
-        notes = ("Saker knyttet til en bruker søkes via fødselsnummer eller d-nummer."),
+        value = "Søk etter saker på ident eller saksnummer eller orgnr",
+        notes = ("Saker knyttet til en bruker søkes via fødselsnummer eller d-nummer. Saker knyttet til en organisasjon søkes via organisasjonsnummer."),
         response = FagsakOppsummeringDto.class,
         responseContainer = "List")
     public List<FagsakOppsummeringDto> hentFagsaker(@RequestBody FagsakSokDto fagsakSokDto) {
@@ -108,6 +111,9 @@ public class FagsakTjeneste {
                 aksesskontroll.autoriserSakstilgang(fagsak.get());
                 return tilFagsakOppsummeringDtoer(Collections.singletonList(fagsak.get()));
             }
+        }
+        else if (StringUtils.isNotEmpty(fagsakSokDto.orgnr())) {
+            return tilFagsakOppsummeringDtoer(fagsakService.hentFagsakerMedOrgnr(Aktoersroller.VIRKSOMHET, fagsakSokDto.orgnr()));
         }
 
         return Collections.emptyList();
@@ -218,7 +224,7 @@ public class FagsakTjeneste {
                 .map(this::tilBehandlingOversiktDto)
                 .toList();
 
-            fagsakOppsummeringDto.setSammensattNavn(hentSammensattNavn(behandlinger));
+            fagsakOppsummeringDto.setSammensattNavn(hentNavn(behandlinger));
             fagsakOppsummeringDto.setBehandlingOversikter(behandlingOversiktDtoer);
             fagsakListe.add(fagsakOppsummeringDto);
         }
@@ -261,11 +267,19 @@ public class FagsakTjeneste {
         }
     }
 
-    private String hentSammensattNavn(List<Behandling> behandlinger) {
+    private String hentNavn(List<Behandling> behandlinger) {
         if (behandlinger.isEmpty()) {
-            return UKJENT_SAMMENSATT_NAVN;
+            return UKJENT_NAVN;
         }
-        final String fnr = persondataFasade.hentFolkeregisterident(behandlinger.get(0).getFagsak().hentBrukersAktørID());
-        return persondataFasade.hentSammensattNavn(fnr);
+        var fagsak = behandlinger.get(0).getFagsak();
+        var aktørId = fagsak.finnBrukersAktørID();
+        if (aktørId.isPresent()) {
+            return persondataFasade.hentSammensattNavn(persondataFasade.hentFolkeregisterident(aktørId.get()));
+        }
+        var orgnr = fagsak.finnVirksomhetsOrgnr();
+        if (orgnr.isPresent()) {
+            return organisasjonOppslagService.hentOrganisasjon(orgnr.get()).getNavn();
+        }
+        return UKJENT_NAVN;
     }
 }
