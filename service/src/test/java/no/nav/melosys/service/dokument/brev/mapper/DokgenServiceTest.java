@@ -183,42 +183,26 @@ class DokgenServiceTest {
     }
 
     @Test
-    void produserBrev_skalProdusereUtkastMedVedlegg_nårBrevbestillingInneholderVedlegg() {
-        when(mockDokgenConsumer.lagPdfMedVedlegg(anyString(), any(), eq(false), eq(true), any())).thenReturn(expectedPdf);
+    void produserBrev_skalIkkeProdusereUtkastMedVedlegg_nårDetIkkeBesOmÅFletteVedlegg() {
         when(mockJoarkFasade.hentJournalpost(any())).thenReturn(lagJournalpost());
         when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(lagBehandling());
         when(mockPersondataFasade.hentPerson(anyString())).thenReturn(lagPersonopplysninger());
         when(mockKodeverkService.dekod(FellesKodeverk.POSTNUMMER, "0123")).thenReturn("Aker");
         when(mockKodeverkService.dekod(FellesKodeverk.LANDKODER_ISO2, "NO")).thenReturn("Norge");
-        Aktoer mottaker = new Aktoer();
-        mottaker.setRolle(Aktoersroller.BRUKER);
-        when(mockBrevMottakerService.avklarMottakere(any(), any(), any(), eq(true), eq(false))).thenReturn(
-            List.of(mottaker));
+        var saksvedleggBestilling = Arrays.asList(new SaksvedleggBestilling("100", "200"),
+            new SaksvedleggBestilling("300", "400"));
 
-        byte[] vedlegg1 = new byte[]{1, 2, 3};
-        byte[] vedlegg2 = new byte[]{4, 5, 6};
-        var saksvedleggRequest = Arrays.asList(new SaksvedleggRequest("100", "200"),
-            new SaksvedleggRequest("300", "400"));
-        when(mockDokumentHentingService.hentDokument("100", "200")).thenReturn(vedlegg1);
-        when(mockDokumentHentingService.hentDokument("300", "400")).thenReturn(vedlegg2);
-
-        BrevbestillingRequest brevbestillingRequest = new BrevbestillingRequest.Builder()
-            .medProduserbardokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD)
-            .medMottaker(Aktoersroller.BRUKER)
-            .medBestillersId("Z123456")
-            .medSaksvedlegg(saksvedleggRequest)
+        MangelbrevBrevbestilling brevbestilling = new MangelbrevBrevbestilling.Builder()
+            .medProduserbartdokument(MANGELBREV_BRUKER)
+            .medBehandlingId(123)
+            .medSaksvedleggBestilling(saksvedleggBestilling)
             .build();
 
 
-        byte[] pdfResponse = dokgenService.produserUtkast(123L, brevbestillingRequest);
+        dokgenService.produserBrev(new Aktoer(), brevbestilling, false);
 
 
-        assertThat(pdfResponse).isNotNull();
-        assertThat(pdfResponse).isEqualTo(expectedPdf);
-
-        verify(mockDokgenConsumer).lagPdfMedVedlegg(any(), any(), eq(false), eq(true), listArgumentCaptor.capture());
-        List<byte[]> sendteVedlegg = listArgumentCaptor.getValue();
-        assertThat(sendteVedlegg).hasSize(2).contains(vedlegg1, vedlegg2);
+        verify(mockDokgenConsumer).lagPdf(any(), any(), eq(false), eq(false));
     }
 
     @Test
@@ -320,6 +304,45 @@ class DokgenServiceTest {
         verify(mockDokgenConsumer).lagPdf(any(), any(), eq(false), eq(true));
         verify(mockEregFasade).hentOrganisasjon("987654321");
         verify(mockKontaktOpplysningService).hentKontaktopplysning(any(), any());
+    }
+
+    @Test
+    void produserUtkast_skalProdusereUtkastMedVedlegg_nårBrevbestillingInneholderVedlegg() {
+        when(mockDokgenConsumer.lagPdfMedVedlegg(anyString(), any(), eq(false), eq(true), any())).thenReturn(expectedPdf);
+        when(mockJoarkFasade.hentJournalpost(any())).thenReturn(lagJournalpost());
+        when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(lagBehandling());
+        when(mockPersondataFasade.hentPerson(anyString())).thenReturn(lagPersonopplysninger());
+        when(mockKodeverkService.dekod(FellesKodeverk.POSTNUMMER, "0123")).thenReturn("Aker");
+        when(mockKodeverkService.dekod(FellesKodeverk.LANDKODER_ISO2, "NO")).thenReturn("Norge");
+        Aktoer mottaker = new Aktoer();
+        mottaker.setRolle(Aktoersroller.BRUKER);
+        when(mockBrevMottakerService.avklarMottakere(any(), any(), any(), eq(true), eq(false))).thenReturn(
+            List.of(mottaker));
+
+        byte[] vedlegg1 = new byte[]{1, 2, 3};
+        byte[] vedlegg2 = new byte[]{4, 5, 6};
+        var saksvedleggRequest = Arrays.asList(new SaksvedleggRequest("100", "200"),
+            new SaksvedleggRequest("300", "400"));
+        when(mockDokumentHentingService.hentDokument("100", "200")).thenReturn(vedlegg1);
+        when(mockDokumentHentingService.hentDokument("300", "400")).thenReturn(vedlegg2);
+
+        BrevbestillingRequest brevbestillingRequest = new BrevbestillingRequest.Builder()
+            .medProduserbardokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD)
+            .medMottaker(Aktoersroller.BRUKER)
+            .medBestillersId("Z123456")
+            .medSaksvedlegg(saksvedleggRequest)
+            .build();
+
+
+        byte[] pdfResponse = dokgenService.produserUtkast(123L, brevbestillingRequest);
+
+
+        assertThat(pdfResponse).isNotNull();
+        assertThat(pdfResponse).isEqualTo(expectedPdf);
+
+        verify(mockDokgenConsumer).lagPdfMedVedlegg(any(), any(), eq(false), eq(true), listArgumentCaptor.capture());
+        List<byte[]> sendteVedlegg = listArgumentCaptor.getValue();
+        assertThat(sendteVedlegg).hasSize(2).contains(vedlegg1, vedlegg2);
     }
 
     @Test

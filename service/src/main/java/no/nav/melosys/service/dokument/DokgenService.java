@@ -29,6 +29,7 @@ import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import static org.springframework.util.StringUtils.hasText;
 
@@ -118,7 +119,7 @@ public class DokgenService {
         settJournalpostOpplysninger(behandling, builder);
 
         var dokgenDto = dokgenMalMapper.mapBehandling(builder.build());
-        if (brevbestilling.getSaksvedleggBestilling() != null && brevbestilling.getSaksvedleggBestilling().size() > 0) {
+        if (!CollectionUtils.isEmpty(brevbestilling.getSaksvedleggBestilling()) && skalFletteVedlegg) {
             return dokgenConsumer.lagPdfMedVedlegg(malnavn, dokgenDto, brevbestilling.isBestillKopi(),
                 brevbestilling.isBestillUtkast(), hentVedleggDokumenterFraJoark(brevbestilling.getSaksvedleggBestilling()));
         }

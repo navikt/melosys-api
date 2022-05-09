@@ -1,6 +1,5 @@
 package no.nav.melosys.saksflyt.steg.brev;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import no.nav.melosys.domain.Aktoer;
@@ -163,8 +162,11 @@ public class OpprettJournalforBrev implements StegBehandler {
         List<SaksvedleggBestilling> saksvedleggbestillingListe = brevbestilling.getSaksvedleggBestilling();
 
         return saksvedleggbestillingListe.stream()
-            .map(saksvedlegg -> hentArkivDokumentForJournalpostBlantJournalposter(saksvedlegg, journalposterForSaken))
-            .map(arkivDokument -> new Vedlegg(arkivDokument.getDokumentVarianter().get(0).getData(), arkivDokument.getTittel())).toList();
+            .map(saksvedlegg -> {
+                var arkivDokument = hentArkivDokumentFraJournalpost(saksvedlegg, journalposterForSaken);
+                byte[] vedleggInnhold = joarkFasade.hentDokument(saksvedlegg.journalpostID(), saksvedlegg.dokumentID());
+                return new Vedlegg(vedleggInnhold, arkivDokument.getTittel());
+            }).toList();
     }
 
     public String utledJournalføringsTittel(Behandling behandling, DokumentproduksjonsInfo dokumentproduksjonsInfo, DokgenBrevbestilling brevbestilling, Aktoer mottaker) {
@@ -181,11 +183,11 @@ public class OpprettJournalforBrev implements StegBehandler {
         return dokumentproduksjonsInfo.journalføringsTittel();
     }
 
-    private ArkivDokument hentArkivDokumentForJournalpostBlantJournalposter(SaksvedleggBestilling saksvedlegg, List<Journalpost> journalposter) {
+    private ArkivDokument hentArkivDokumentFraJournalpost(SaksvedleggBestilling saksvedlegg, List<Journalpost> journalposter) {
         return journalposter.stream()
             .filter(journalpost -> saksvedlegg.journalpostID().equals(journalpost.getJournalpostId()))
             .findFirst()
-            .orElseThrow(() -> new IkkeFunnetException(String.format("Finner ikke journalpost %s for saken %s", saksvedlegg.dokumentID(), "saksnummer")))
+            .orElseThrow(() -> new IkkeFunnetException(String.format("Finner ikke journalpost %s for saken %s", saksvedlegg.journalpostID(), "saksnummer")))
             .hentArkivDokument(saksvedlegg.dokumentID());
     }
 
