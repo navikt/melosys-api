@@ -111,10 +111,15 @@ public class FamiliemedlemService {
     private Sivilstand hentSisteSivilstandKnyttetTilHovedperson(Person person, String fødselsNrTilHovedperson) {
         return person.sivilstand().stream()
             .filter(Objects::nonNull)
-            .filter(sivilstand -> fødselsNrTilHovedperson.equals(sivilstand.relatertVedSivilstand()))
+            .filter(sivilstand -> erRelatertTilHovedperson(fødselsNrTilHovedperson, sivilstand))
             .min(this::sammenlignSisteDatoRegistrert)
             .orElseThrow(() -> new IkkeFunnetException("I Ektefelle/Partner fant vi ikke forventet Sivilstand " +
                 "knyttet til hovedperson"));
+    }
+
+    private boolean erRelatertTilHovedperson(String fødselsNrTilHovedperson, Sivilstand sivilstand) {
+        log.info("FødselsNr til hovedperson et knyttet til Sivilstand: {}", sivilstand);
+        return fødselsNrTilHovedperson.equals(sivilstand.relatertVedSivilstand());
     }
 
     @NotNull
@@ -146,7 +151,10 @@ public class FamiliemedlemService {
     }
 
     private int sammenlignSisteDatoRegistrert(Sivilstand sivilstand1, Sivilstand sivilstand2) {
-        return sivilstand2.hentDatoSistRegistrert().compareTo(sivilstand1.hentDatoSistRegistrert());
+        int resultat = sivilstand2.hentDatoSistRegistrert().compareTo(sivilstand1.hentDatoSistRegistrert());
+        log.info("sammenlignSisteDatoRegistrert resultat '{}' med sivilstand1:\n{}\n\n " +
+            "og sivilstand2:\n{}", resultat, sivilstand1, sivilstand2);
+        return resultat;
     }
 
     private Set<Familiemedlem> hentBarn(Person person) {

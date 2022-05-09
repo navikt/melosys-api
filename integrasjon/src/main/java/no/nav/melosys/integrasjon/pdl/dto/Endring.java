@@ -8,4 +8,13 @@ public record Endring(Endringstype type, LocalDateTime registrert, String kilde)
     public boolean erIkkeOpphør() {
         return type != OPPHOER;
     }
+
+    @Override
+    public String toString() {
+        return "Endring{" +
+            "type=" + type +
+            ", registrert=" + registrert +
+            ", kilde='" + kilde + '\'' +
+            '}';
+    }
 }

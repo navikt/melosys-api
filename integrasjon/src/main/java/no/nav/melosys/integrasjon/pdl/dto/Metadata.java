@@ -11,4 +11,13 @@ public record Metadata(String master, boolean historisk, List<Endring> endringer
             .max(LocalDateTime::compareTo)
             .orElse(LocalDateTime.MIN);
     }
+
+    @Override
+    public String toString() {
+        return "Metadata{" +
+            "master='" + master + '\'' +
+            ", historisk=" + historisk +
+            ", endringer=" + endringer +
+            '}';
+    }
 }
