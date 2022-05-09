@@ -137,6 +137,22 @@ class VedtakKontrollServiceTest {
     }
 
     @Test
+    void utførKontroller_HenleggelsePersonMedRegistrertAdresse__returnererTomCollection() {
+        Collection<Kontrollfeil> resultat = vedtakKontrollService.utførKontroller(behandlingID, Sakstyper.EU_EOS, Behandlingsresultattyper.HENLEGGELSE);
+        assertThat(resultat).isEmpty();
+    }
+
+    @Test
+    void utførKontroller_HenleggelsePersonUtenRegistrertAdresse_returnererKode() {
+        when(persondataFasade.hentPerson(anyString())).thenReturn(PersonopplysningerObjectFactory.lagPersonopplysningerUtenAdresser());
+
+        Collection<Kontrollfeil> resultat = vedtakKontrollService.utførKontroller(behandlingID, Sakstyper.EU_EOS, Behandlingsresultattyper.HENLEGGELSE);
+        assertThat(resultat)
+            .extracting(Kontrollfeil::getKode)
+            .contains(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE);
+    }
+
+    @Test
     void utførKontroller_periodeOver24MndArt16IkkeOverlappendePeriode_returnererTomCollection() {
         lovvalgsperiode.setFom(LocalDate.now());
         lovvalgsperiode.setTom(LocalDate.now().plusYears(3));
