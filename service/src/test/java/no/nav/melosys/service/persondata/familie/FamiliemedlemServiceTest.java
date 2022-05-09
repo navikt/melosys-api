@@ -77,6 +77,31 @@ class FamiliemedlemServiceTest {
         assertThat(familiemedlemmer).extracting(Familiemedlem::familierelasjon).contains(Familierelasjon.BARN, Familierelasjon.RELATERT_VED_SIVILSTAND);
     }
 
+    @Test
+    void hentSisteSivilstandKnyttetTilHovedperson_medFlereTidligereGiftemålRegistrertSamtidig_forventEttGiftemål() {
+
+        Person relatertGiftPerson = lagPersonGiftHistoriskMedFlereTidligereGiftemålRegistrertSamtidig();
+        String fødselsNrTilHovedperson = IDENT_HOVEDPERSON;
+
+
+        no.nav.melosys.integrasjon.pdl.dto.person.Sivilstand sisteSivilstand = familiemedlemService.hentSisteSivilstandKnyttetTilHovedperson(relatertGiftPerson,
+            fødselsNrTilHovedperson);
+
+        assertThat(sisteSivilstand).isNotNull();
+    }
+
+    @Test
+    void hentSisteSivilstandKnyttetTilHovedperson_medFlereTidligereGiftemålRegistrertSamtidig_medAnnenData_forventEttGiftemål() {
+
+        Person relatertGiftPerson = lagPersonGiftHistoriskMedFlereTidligereGiftemålRegistrertSamtidig_alternativ();
+        String fødselsNrTilHovedperson = IDENT_HOVEDPERSON;
+
+
+        no.nav.melosys.integrasjon.pdl.dto.person.Sivilstand sisteSivilstand = familiemedlemService.hentSisteSivilstandKnyttetTilHovedperson(relatertGiftPerson,
+            fødselsNrTilHovedperson);
+
+        assertThat(sisteSivilstand).isNotNull();
+    }
 
     @Test
     void hentFamiliemedlemmerFraBehandlingID_inaktivBehandling() {

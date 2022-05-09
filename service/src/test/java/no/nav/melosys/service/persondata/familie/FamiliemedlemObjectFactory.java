@@ -155,27 +155,135 @@ public class FamiliemedlemObjectFactory {
             Collections.emptyList(),
             Set.of(new Navn("ROTAT", "", "KAFFE", lagAktivMetadata())),
             Collections.emptyList(),
-            Set.of(
-                new Sivilstand(Sivilstandstype.GIFT,
-                    IDENT_HOVEDPERSON,
-                    LocalDate.of(2019, 8, 3),
-                    null,
-                    lagAktivMetadata(toLocalDateTime("2022-04-27T14:57:56"))),
-                new Sivilstand(Sivilstandstype.SEPARERT,
-                    IDENT_HOVEDPERSON,
-                    LocalDate.of(2013, 1, 3),
-                    null,
-                    lagHistoriskMetadata(toLocalDateTime("2022-04-28T13:28:43"))),
-                new Sivilstand(Sivilstandstype.SKILT,
-                    NULL_IDENT_NÅR_SKILT,
-                    LocalDate.of(2014, 4, 9),
-                    null,
-                    lagHistoriskMetadata(toLocalDateTime("2022-05-04T12:20:45")))
-            ),
+            lagSkiltSivilstand(),
             Set.of(new Statsborgerskap("NOR", LocalDate.parse("2021-05-08"), null, null, lagAktivMetadata(LocalDateTime.MAX))),
             Collections.emptyList());
     }
 
+    public static Person lagPersonGiftHistoriskMedFlereTidligereGiftemålRegistrertSamtidig() {
+        return new Person(
+            Collections.emptySet(),
+            Set.of(lagNorskBostedsadresse()),
+            Collections.emptySet(),
+            Set.of(lagFødselsdatoForVoksen()),
+            Set.of(new Folkeregisteridentifikator(IDENT_PERSON_GIFT_HISTORISK, lagAktivMetadata())),
+            Collections.emptySet(),
+            Collections.emptySet(),
+            Collections.emptySet(),
+            Set.of(new Kjoenn(KjoennType.KVINNE, lagAktivMetadata())),
+            Collections.emptyList(),
+            Set.of(new Navn("ROTAT", "", "KAFFE", lagAktivMetadata())),
+            Collections.emptyList(),
+            lagSkiltSivilstandMedFlereTidligereGiftemålRegistrertSamtidig(),
+            Set.of(new Statsborgerskap("NOR", LocalDate.parse("2021-05-08"), null, null, lagAktivMetadata(LocalDateTime.MAX))),
+            Collections.emptyList());
+    }
+
+    public static Person lagPersonGiftHistoriskMedFlereTidligereGiftemålRegistrertSamtidig_alternativ() {
+        return new Person(
+            Collections.emptySet(),
+            Set.of(lagNorskBostedsadresse()),
+            Collections.emptySet(),
+            Set.of(lagFødselsdatoForVoksen()),
+            Set.of(new Folkeregisteridentifikator(IDENT_PERSON_GIFT_HISTORISK, lagAktivMetadata())),
+            Collections.emptySet(),
+            Collections.emptySet(),
+            Collections.emptySet(),
+            Set.of(new Kjoenn(KjoennType.KVINNE, lagAktivMetadata())),
+            Collections.emptyList(),
+            Set.of(new Navn("ROTAT", "", "KAFFE", lagAktivMetadata())),
+            Collections.emptyList(),
+            lagSkiltSivilstandMedFlereTidligereGiftemålRegistrertSamtidig_alternativ(),
+            Set.of(new Statsborgerskap("NOR", LocalDate.parse("2021-05-08"), null, null, lagAktivMetadata(LocalDateTime.MAX))),
+            Collections.emptyList());
+    }
+
+    @NotNull
+    private static Set<Sivilstand> lagSkiltSivilstand() {
+        return Set.of(
+            new Sivilstand(Sivilstandstype.GIFT,
+                IDENT_HOVEDPERSON,
+                LocalDate.of(2019, 8, 3),
+                null,
+                lagAktivMetadata(toLocalDateTime("2022-04-27T14:57:56"))),
+            new Sivilstand(Sivilstandstype.SEPARERT,
+                IDENT_HOVEDPERSON,
+                LocalDate.of(2013, 1, 3),
+                null,
+                lagHistoriskMetadata(toLocalDateTime("2022-04-28T13:28:43"))),
+            new Sivilstand(Sivilstandstype.SKILT,
+                NULL_IDENT_NÅR_SKILT,
+                LocalDate.of(2014, 4, 9),
+                null,
+                lagHistoriskMetadata(toLocalDateTime("2022-05-04T12:20:45")))
+        );
+    }
+
+    @NotNull
+    private static Set<Sivilstand> lagSkiltSivilstandMedFlereTidligereGiftemålRegistrertSamtidig() {
+        return Set.of(
+            new Sivilstand(Sivilstandstype.GIFT,
+                "04076703200",
+                LocalDate.of(2011, 4, 1),
+                null,
+                lagHistoriskMetadata(toLocalDateTime("2022-04-22T17:12:05"))),
+
+            new Sivilstand(Sivilstandstype.SEPARERT,
+                "07019021321",
+                LocalDate.of(2013, 4, 23),
+                null,
+                lagHistoriskMetadata(toLocalDateTime("2022-04-22T17:12:05"))),
+
+            new Sivilstand(Sivilstandstype.SKILT,
+                null,
+                LocalDate.of(2014, 4, 1),
+                null,
+                lagHistoriskMetadata(toLocalDateTime("2022-04-22T17:12:05"))),
+
+
+            new Sivilstand(Sivilstandstype.GIFT,
+                "27096314960",
+                LocalDate.of(2019, 4, 7),
+                null,
+                lagAktivMetadata(toLocalDateTime("2022-04-22T17:12:05"))),
+
+            new Sivilstand(Sivilstandstype.GIFT,
+                IDENT_HOVEDPERSON,
+                LocalDate.of(2019, 8, 3),
+                null,
+                lagAktivMetadata(toLocalDateTime("2022-05-04T12:29:51")))
+
+        );
+    }
+
+    @NotNull
+    private static Set<Sivilstand> lagSkiltSivilstandMedFlereTidligereGiftemålRegistrertSamtidig_alternativ() {
+        return Set.of(
+            new Sivilstand(Sivilstandstype.UGIFT,
+                null,
+                LocalDate.of(1999, 12, 16),
+                null,
+                lagHistoriskMetadata(toLocalDateTime("2022-04-27T14:57:58"))),
+
+            new Sivilstand(Sivilstandstype.GIFT,
+                IDENT_HOVEDPERSON,
+                LocalDate.of(2011, 2, 2),
+                null,
+                lagAktivMetadata(toLocalDateTime("2022-04-27T14:57:58"))),
+
+            new Sivilstand(Sivilstandstype.SKILT,
+                null,
+                LocalDate.of(2014, 4, 9),
+                null,
+                lagAktivMetadata(toLocalDateTime("2022-05-04T12:20:45"))),
+
+            new Sivilstand(Sivilstandstype.SEPARERT,
+                IDENT_HOVEDPERSON,
+                LocalDate.of(2013, 3, 1),
+                null,
+                lagHistoriskMetadata(toLocalDateTime("2022-04-28T13:28:43")))
+        );
+    }
 
     public static Behandling lagBehandling() {
         Behandling behandling = new Behandling();

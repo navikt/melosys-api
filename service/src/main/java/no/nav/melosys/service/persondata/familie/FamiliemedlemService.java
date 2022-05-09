@@ -104,11 +104,13 @@ public class FamiliemedlemService {
     private EktefelleEllerPartner lagEktefelleEllerPartner(String ident, String fødselsNrTilHovedperson) {
         Person person = pdlConsumer.hentEktefelleEllerPartner(ident);
         Sivilstand sivilstand = hentSisteSivilstandKnyttetTilHovedperson(person, fødselsNrTilHovedperson);
-        return new EktefelleEllerPartner(ident, person, sivilstand);
+        EktefelleEllerPartner ektefelleEllerPartner = new EktefelleEllerPartner(ident, person, sivilstand);
+        log.info("Opprettet EktefelleEllerPartner med data: {}", ektefelleEllerPartner);
+        return ektefelleEllerPartner;
     }
 
     @NotNull
-    private Sivilstand hentSisteSivilstandKnyttetTilHovedperson(Person person, String fødselsNrTilHovedperson) {
+    Sivilstand hentSisteSivilstandKnyttetTilHovedperson(Person person, String fødselsNrTilHovedperson) {
         Sivilstand sisteSivilstand = person.sivilstand().stream()
             .filter(Objects::nonNull)
             .filter(sivilstand -> erRelatertTilHovedperson(fødselsNrTilHovedperson, sivilstand))
@@ -169,11 +171,6 @@ public class FamiliemedlemService {
     }
 
     record EktefelleEllerPartner(String ident, Person person, Sivilstand sivilstand) {
-
-        EktefelleEllerPartner {
-            log.info("Opprettet EktefelleEllerPartner med data: {}", this);
-        }
-
         public boolean erAktiv() {
             return !sivilstand.metadata().historisk();
         }
