@@ -94,6 +94,7 @@ class UtpekingServiceTest {
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
         behandling.setFagsak(fagsak);
         behandlingsresultat.setId(behandlingID);
+        behandlingsresultat.setType(Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND);
 
         when(behandlingService.hentBehandling(eq(behandlingID))).thenReturn(behandling);
         when(behandlingsresultatService.hentBehandlingsresultat(eq(behandlingID))).thenReturn(behandlingsresultat);
@@ -120,7 +121,7 @@ class UtpekingServiceTest {
         verify(lovvalgsperiodeService).lagreLovvalgsperioder(eq(behandlingID), lovvalgsperiodeCaptor.capture());
         verify(prosessinstansService).opprettProsessinstansUtpekAnnetLand(eq(behandling), eq(Landkoder.SE), eq(mottakerInstitusjoner), isNull(), isNull());
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(eq(fagsak.getSaksnummer()));
-        verify(vedtakKontrollService).utførKontroller(behandlingID, Sakstyper.EU_EOS, false);
+        verify(vedtakKontrollService).utførKontroller(behandlingID, Sakstyper.EU_EOS, behandlingsresultat.getType());
 
         assertThat(behandlingsresultat)
             .extracting(Behandlingsresultat::getType, Behandlingsresultat::getBegrunnelseFritekst, Behandlingsresultat::getFastsattAvLand)

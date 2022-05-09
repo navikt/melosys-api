@@ -46,25 +46,24 @@ public class VedtakKontrollService {
     }
 
     @Transactional
-    public void kontrollerVedtak(long behandlingId, boolean skalRegisteropplysningerOppdateres,
-                                 Behandlingsresultattyper behandlingsresultattype) throws ValideringException {
+    public void kontroller(long behandlingId, boolean skalRegisteropplysningerOppdateres,
+                           Behandlingsresultattyper behandlingsresultattype) throws ValideringException {
         var behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingId);
         var sakstype = behandling.getFagsak().getType();
-        var erAvslag = behandlingsresultattype.equals(Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL);
 
         if (skalRegisteropplysningerOppdateres) {
             var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingId);
-            kontrollerVedtakMedNyeRegisteropplysninger(behandling, behandlingsresultat, sakstype, erAvslag);
+            kontrollerVedtakMedNyeRegisteropplysninger(behandling, behandlingsresultat, sakstype, behandlingsresultattype);
         } else {
-            kontrollerVedtak(behandlingId, sakstype, erAvslag);
+            kontrollerVedtak(behandlingId, sakstype, behandlingsresultattype);
         }
     }
 
     public void kontrollerVedtakMedNyeRegisteropplysninger(Behandling behandling,
                                                            Behandlingsresultat behandlingsresultat, Sakstyper sakstype,
-                                                           boolean erAvslag) throws ValideringException {
+                                                           Behandlingsresultattyper behandlingsresultattype) throws ValideringException {
         hentNyeRegisteropplysninger(behandlingsresultat, behandling);
-        kontrollerVedtak(behandling.getId(), sakstype, erAvslag);
+        kontrollerVedtak(behandling.getId(), sakstype, behandlingsresultattype);
     }
 
     private void hentNyeRegisteropplysninger(Behandlingsresultat behandlingsresultat, Behandling behandling) {
@@ -82,17 +81,23 @@ public class VedtakKontrollService {
                 .build());
     }
 
-    private void kontrollerVedtak(long behandlingID, Sakstyper sakstype, boolean erAvslag) throws ValideringException {
-        Collection<Kontrollfeil> kontrollfeil = utførKontroller(behandlingID, sakstype, erAvslag);
+    public void kontrollerVedtak(long behandlingID, Sakstyper sakstype, Behandlingsresultattyper behandlingsresultattype) throws ValideringException {
+        Collection<Kontrollfeil> kontrollfeil =  utførKontroller(behandlingID, sakstype, behandlingsresultattype);
+
         if (!kontrollfeil.isEmpty()) {
             throw new ValideringException("Feil i validering. Kan ikke fatte vedtak.",
                 kontrollfeil.stream().map(Kontrollfeil::tilDto).toList());
         }
     }
 
-    public Collection<Kontrollfeil> utførKontroller(long behandlingID, Sakstyper sakstype, boolean erAvslag) {
+    public Collection<Kontrollfeil> utførKontroller(long behandlingID, Sakstyper sakstype, Behandlingsresultattyper behandlingsresultattype) {
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
-        return erAvslag ? utførKontrollerForAvslag(behandling) : utførKontroller(behandling, sakstype);
+
+        return  switch (behandlingsresultattype) {
+            case AVSLAG_MANGLENDE_OPPL -> utførKontrollerForAvslag(behandling);
+//            case HENLEGGELSE -> utførKontrollerForHenleggelse(behandling);
+            default -> utførKontroller(behandling, sakstype);
+        };
     }
 
     private Collection<Kontrollfeil> utførKontrollerForAvslag(Behandling behandling) {

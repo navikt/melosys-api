@@ -68,7 +68,7 @@ public class VedtakTjeneste {
             throw new FunksjonellException("Vedtakstype mangler.");
         }
         aksesskontroll.autoriser(behandlingID, skalRegisteropplysningerOppdateres ? Aksesstype.SKRIV : Aksesstype.LES);
-        vedtakKontrollService.kontrollerVedtak(behandlingID, skalRegisteropplysningerOppdateres, fattVedtakDto.getBehandlingsresultatTypeKode());
+        vedtakKontrollService.kontroller(behandlingID, skalRegisteropplysningerOppdateres, fattVedtakDto.getBehandlingsresultatTypeKode());
         return ResponseEntity.noContent().build();
     }
 
