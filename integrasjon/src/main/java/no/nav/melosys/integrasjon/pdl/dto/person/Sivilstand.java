@@ -15,15 +15,4 @@ public record Sivilstand(Sivilstandstype type,
     public boolean erAktiv() {
         return erIkkeHistorisk() && Objects.nonNull(relatertVedSivilstand);
     }
-
-    @Override
-    public String toString() {
-        return "Sivilstand{" +
-            "type=" + type +
-            ", relatertVedSivilstand='" + relatertVedSivilstand + '\'' +
-            ", gyldigFraOgMed=" + gyldigFraOgMed +
-            ", bekreftelsesdato=" + bekreftelsesdato +
-            ", metadata=" + metadata +
-            '}';
-    }
 }

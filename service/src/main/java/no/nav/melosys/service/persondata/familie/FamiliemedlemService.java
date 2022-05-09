@@ -109,16 +109,19 @@ public class FamiliemedlemService {
 
     @NotNull
     private Sivilstand hentSisteSivilstandKnyttetTilHovedperson(Person person, String fødselsNrTilHovedperson) {
-        return person.sivilstand().stream()
+        Sivilstand sisteSivilstand = person.sivilstand().stream()
             .filter(Objects::nonNull)
             .filter(sivilstand -> erRelatertTilHovedperson(fødselsNrTilHovedperson, sivilstand))
             .min(this::sammenlignSisteDatoRegistrert)
             .orElseThrow(() -> new IkkeFunnetException("I Ektefelle/Partner fant vi ikke forventet Sivilstand " +
                 "knyttet til hovedperson"));
+
+        // TODO: Ta vekk pga. GDPR
+        log.info("Siste sivilstand til {} var: {}", fødselsNrTilHovedperson, sisteSivilstand);
+        return sisteSivilstand;
     }
 
     private boolean erRelatertTilHovedperson(String fødselsNrTilHovedperson, Sivilstand sivilstand) {
-        log.info("FødselsNr til hovedperson et knyttet til Sivilstand: {}", sivilstand);
         return fødselsNrTilHovedperson.equals(sivilstand.relatertVedSivilstand());
     }
 
@@ -151,10 +154,7 @@ public class FamiliemedlemService {
     }
 
     private int sammenlignSisteDatoRegistrert(Sivilstand sivilstand1, Sivilstand sivilstand2) {
-        int resultat = sivilstand2.hentDatoSistRegistrert().compareTo(sivilstand1.hentDatoSistRegistrert());
-        log.info("sammenlignSisteDatoRegistrert resultat '{}' med sivilstand1:\n{}\n\n " +
-            "og sivilstand2:\n{}", resultat, sivilstand1, sivilstand2);
-        return resultat;
+        return sivilstand2.hentDatoSistRegistrert().compareTo(sivilstand1.hentDatoSistRegistrert());
     }
 
     private Set<Familiemedlem> hentBarn(Person person) {
@@ -169,6 +169,10 @@ public class FamiliemedlemService {
     }
 
     record EktefelleEllerPartner(String ident, Person person, Sivilstand sivilstand) {
+
+        EktefelleEllerPartner {
+            log.info("Opprettet EktefelleEllerPartner med data: {}", this);
+        }
 
         public boolean erAktiv() {
             return !sivilstand.metadata().historisk();
