@@ -68,30 +68,30 @@ public class FamiliemedlemService {
 
     public Set<Familiemedlem> hentFamiliemedlemmerFraIdent(String ident) {
         Person person = pdlConsumer.hentFamilierelasjoner(ident);
-        String fnr = pdlConsumer.hentIdenter(ident)
+        String fødselsNr = pdlConsumer.hentIdenter(ident)
             .identer().stream()
             .filter(Ident::erFolkeregisterIdent)
             .findFirst()
             .map(Ident::ident)
             .orElse(ident);
-        return hentFamiliemedlemmer(person, fnr);
+        return hentFamiliemedlemmer(person, fødselsNr);
     }
 
-    public Set<Familiemedlem> hentFamiliemedlemmer(Person hovedperson, String identTilHovedperson) {
+    public Set<Familiemedlem> hentFamiliemedlemmer(Person hovedperson, String fødselsNrTilHovedperson) {
         Set<Familiemedlem> familiemedlemmer = new HashSet<>();
         if (erPersonUnder18(hovedperson)) {
             familiemedlemmer.addAll(hentForeldre(hovedperson.forelderBarnRelasjon()));
         }
 
-        familiemedlemmer.addAll(hentEktefellerOgPartnere(hovedperson, identTilHovedperson));
+        familiemedlemmer.addAll(hentEktefellerOgPartnere(hovedperson, fødselsNrTilHovedperson));
         familiemedlemmer.addAll(hentBarn(hovedperson));
         return familiemedlemmer;
     }
 
     @NotNull
-    private Collection<Familiemedlem> hentEktefellerOgPartnere(Person hovedperson, String identTilHovedperson) {
+    private Collection<Familiemedlem> hentEktefellerOgPartnere(Person hovedperson, String fødselsNrTilHovedperson) {
         return hentUnikeIdenterFraSivilstandTilHovedperson(hovedperson)
-            .map(ident -> lagEktefelleEllerPartner(ident, identTilHovedperson))
+            .map(ident -> lagEktefelleEllerPartner(ident, fødselsNrTilHovedperson))
             .filter(EktefelleEllerPartner::erAktiv)
             .map(ektefelleEllerPartner ->
                 FamiliemedlemOversetter.oversettEktefelleEllerPartner(
@@ -101,17 +101,17 @@ public class FamiliemedlemService {
     }
 
     @NotNull
-    private EktefelleEllerPartner lagEktefelleEllerPartner(String ident, String identTilHovedperson) {
+    private EktefelleEllerPartner lagEktefelleEllerPartner(String ident, String fødselsNrTilHovedperson) {
         Person person = pdlConsumer.hentEktefelleEllerPartner(ident);
-        Sivilstand sivilstand = hentSisteSivilstandKnyttetTilHovedperson(person, identTilHovedperson);
+        Sivilstand sivilstand = hentSisteSivilstandKnyttetTilHovedperson(person, fødselsNrTilHovedperson);
         return new EktefelleEllerPartner(ident, person, sivilstand);
     }
 
     @NotNull
-    private Sivilstand hentSisteSivilstandKnyttetTilHovedperson(Person person, String identTilHovedperson) {
+    private Sivilstand hentSisteSivilstandKnyttetTilHovedperson(Person person, String fødselsNrTilHovedperson) {
         return person.sivilstand().stream()
             .filter(Objects::nonNull)
-            .filter(sivilstand -> identTilHovedperson.equals(sivilstand.relatertVedSivilstand()))
+            .filter(sivilstand -> fødselsNrTilHovedperson.equals(sivilstand.relatertVedSivilstand()))
             .min(this::sammenlignSisteDatoRegistrert)
             .orElseThrow(() -> new IkkeFunnetException("I Ektefelle/Partner fant vi ikke forventet Sivilstand " +
                 "knyttet til hovedperson"));
