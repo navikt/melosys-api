@@ -62,7 +62,7 @@
         <guava.version>31.1-jre</guava.version>
         <graphql-java.version>17.3</graphql-java.version>
         <logback.version>1.2.11</logback.version>
-        <logstash.version>7.0.1</logstash.version>
+        <logstash.version>7.1</logstash.version>
         <hikaricp.version>5.0.1</hikaricp.version>
         <ibmmq.version>9.2.5.0</ibmmq.version>
         <jackson.version>2.13.1</jackson.version>
@@ -99,7 +99,7 @@
         <objenesis.version>3.2</objenesis.version>
         <osgi.version>6.0.0</osgi.version>
         <woodstox.version>6.2.8</woodstox.version>
-        <xmlsec.version>2.3.0</xmlsec.version>
+        <xmlsec.version>3.0.0</xmlsec.version>
         <medlemskapsunntak-api-v1.version>1.1</medlemskapsunntak-api-v1.version>
         <wiremock-standalone.version>2.27.2</wiremock-standalone.version>
         <nav-foedselsnummer.core.version>1.0-SNAPSHOT.6</nav-foedselsnummer.core.version>
