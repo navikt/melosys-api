@@ -48,7 +48,8 @@
         <abac.spring.version>1.6.0</abac.spring.version>
         <behandlingstatus.version>1.1.0</behandlingstatus.version>
         <doksys.dokumentproduksjon.version>3.3.4</doksys.dokumentproduksjon.version>
-        <token-support.version>2.0.5</token-support.version>
+        <token-support.version>2.0.16</token-support.version>
+        <token-validation-test-support.version>2.0.5</token-validation-test-support.version>
 
         <!-- Versjoner av eksterne biblioteker -->
         <archunit.version>0.23.1</archunit.version>
@@ -609,8 +610,13 @@
             </dependency>
             <dependency>
                 <groupId>no.nav.security</groupId>
-                <artifactId>token-validation-test-support</artifactId>
+                <artifactId>token-validation-core</artifactId>
                 <version>${token-support.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.nav.security</groupId>
+                <artifactId>token-validation-test-support</artifactId>
+                <version>${token-validation-test-support.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.awaitility</groupId>
