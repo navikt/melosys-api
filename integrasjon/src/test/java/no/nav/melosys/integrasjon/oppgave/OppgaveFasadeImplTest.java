@@ -45,7 +45,7 @@ public final class OppgaveFasadeImplTest {
     }
 
     @Test
-    void opprettOppgave_vurderDokument_setterData() throws Exception {
+    void opprettOppgave_vurderDokument_setterData() {
         final String behandlingstema = "ae9999";
         Oppgave.Builder oppgaveBuilder = new Oppgave.Builder()
             .setOppgavetype(Oppgavetyper.VUR)
@@ -64,7 +64,7 @@ public final class OppgaveFasadeImplTest {
     }
 
     @Test
-    void opprettOppgave_gyldigOppgave_validerDto() throws Exception {
+    void opprettOppgave_gyldigOppgave_validerDto() {
         Oppgave oppgave = lagOppgave();
 
         oppgaveFasadeImpl.opprettOppgave(oppgave);
@@ -75,6 +75,7 @@ public final class OppgaveFasadeImplTest {
         assertThat(oppgaveDto).isNotNull();
         assertThat(oppgaveDto.getJournalpostId()).isEqualTo(oppgave.getJournalpostId());
         assertThat(oppgaveDto.getAktørId()).isEqualTo(oppgave.getAktørId());
+        assertThat(oppgaveDto.getOrgnr()).isEqualTo(oppgave.getOrgnr());
         assertThat(oppgaveDto.getBehandlesAvApplikasjon()).isEqualTo(Fagsystem.MELOSYS.getKode());
         assertThat(oppgaveDto.getBehandlingstype()).isEqualTo(oppgave.getBehandlingstype());
         assertThat(oppgaveDto.getBeskrivelse()).isEqualTo("bla bla");
@@ -86,7 +87,7 @@ public final class OppgaveFasadeImplTest {
     }
 
     @Test
-    void finnOppgaveListeMedAnsvarlig_gyldigOppgave_verifiserToKallMotOppgave() throws Exception {
+    void finnOppgaveListeMedAnsvarlig_gyldigOppgave_verifiserToKallMotOppgave() {
         OppgaveDto oppgaveDto = new OppgaveDto();
         when(oppgaveConsumer.hentOppgaveListe(any(OppgaveSearchRequest.class)))
             .thenReturn(Collections.singletonList(oppgaveDto));
@@ -102,7 +103,7 @@ public final class OppgaveFasadeImplTest {
     }
 
     @Test
-    void finnOppgaveListeMedAnsvarlig_toDuplikateOppgaver_filtrererUtDuplikater() throws Exception {
+    void finnOppgaveListeMedAnsvarlig_toDuplikateOppgaver_filtrererUtDuplikater() {
         final String oppgaveID = "123duplikat";
 
         OppgaveDto oppgaveDto1 = new OppgaveDto();
@@ -136,7 +137,7 @@ public final class OppgaveFasadeImplTest {
     }
 
     @Test
-    void finnUtildelteOppgaverEtterFrist_mottarOppgaveMedOgUtenSaksreferanse_returnererOppgaveMedSaksreferanse() throws Exception {
+    void finnUtildelteOppgaverEtterFrist_mottarOppgaveMedOgUtenSaksreferanse_returnererOppgaveMedSaksreferanse() {
         OppgaveDto jfrOppgave = new OppgaveDto();
         jfrOppgave.setOppgavetype("JFR");
         OppgaveDto behOppgave = new OppgaveDto();
@@ -156,6 +157,7 @@ public final class OppgaveFasadeImplTest {
         Oppgave.Builder oppgaveBuilder = new Oppgave.Builder();
         oppgaveBuilder.setAktivDato(LocalDate.now());
         oppgaveBuilder.setAktørId("aktoer123");
+        oppgaveBuilder.setAktørId("orgnr");
         oppgaveBuilder.setBehandlingstype("aebehandlingstype1234");
         oppgaveBuilder.setBehandlingstema("abbehandlingstema1234");
         oppgaveBuilder.setBeskrivelse("bla bla");

@@ -1,14 +1,12 @@
 package no.nav.melosys.itest.token
 
+import com.github.tomakehurst.wiremock.client.MappingBuilder
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.matching.StringValuePattern
-import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdContextExchangeFilter
-import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdQuery
-import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdRestConsumer
-import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdRestConsumerConfig
+import no.nav.melosys.integrasjon.pdl.*
 import no.nav.melosys.integrasjon.reststs.RestStsClient
 import no.nav.melosys.integrasjon.reststs.StsRestTemplateProducer
-import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -22,21 +20,22 @@ import org.springframework.test.web.client.MockRestServiceServer
         RestStsClient::class,
         WebClientAutoConfiguration::class,
 
-        ArbeidsforholdRestConsumer::class,
-        ArbeidsforholdRestConsumerConfig::class,
-        ArbeidsforholdContextExchangeFilter::class,
+        PDLConsumerImpl::class,
+        PDLConsumerProducer::class,
+        PDLAuthFilter::class,
+        PDLAuthFilterProducer::class,
     ],
     properties = ["spring.profiles.active:itest-token"]
 )
-class AaregConsumerIT(
-    @Autowired private val arbeidsforholdRestConsumer: ArbeidsforholdRestConsumer,
-    @Autowired private val server: MockRestServiceServer,
+class PDLConsumerIT(
+    @Autowired private val pdlConsumer: PDLConsumer,
+    @Autowired server: MockRestServiceServer,
     @Value("\${mockserver.port}") mockPort: Int,
 ) : ConsumerTestBase<String>(server, mockPort) {
 
     @Test
-    fun authorizationSkalKommeFraBruker() {
-        executeFromController {
+    fun authorizationSkalKommeFraSystem() {
+        executeFromSystem {
             verifyHeaders(
                 mapOf<String, StringValuePattern>(
                     Pair("Authorization", WireMock.equalTo("Bearer --token-from-system--")),
@@ -47,11 +46,11 @@ class AaregConsumerIT(
     }
 
     @Test
-    fun authorizationSkalKommeFraSystem() {
-        executeFromSystem {
+    fun authorizationSkalKommeFraBruker() {
+        executeFromController {
             verifyHeaders(
                 mapOf<String, StringValuePattern>(
-                    Pair("Authorization", WireMock.equalTo("Bearer --token-from-system--")),
+                    Pair("Authorization", WireMock.equalTo("Bearer --token-from-user--")),
                     Pair("Nav-Consumer-Token", WireMock.equalTo("Bearer --token-from-system--"))
                 )
             )
@@ -72,16 +71,36 @@ class AaregConsumerIT(
     @Test
     fun skalBrukeErrorFilterOgGiRiktigFeilmelding() {
         executeErrorFromServer { error ->
-            assertThat(error).startsWith("Henting av arbeidsforhold fra Aareg feilet")
+            Assertions.assertThat(error).startsWith("Kall mot PDL feilet.")
         }
     }
 
+    override fun createWireMock(): MappingBuilder {
+        return WireMock.post("/graphql")
+    }
+
     override fun getMockData(): String {
-        return "[]"
+        return """{
+          "data": {
+            "hentIdenter": {
+              "identer": [
+                {
+                  "ident": "99026522600",
+                  "gruppe": "FOLKEREGISTERIDENT"
+                },
+                {
+                  "ident": "9834873315250",
+                  "gruppe": "AKTORID"
+                }
+              ]
+            }
+          }
+        }
+        """
     }
 
     override fun executeRequest() {
-        val build = ArbeidsforholdQuery.Builder().build()
-        arbeidsforholdRestConsumer.finnArbeidsforholdPrArbeidstaker("121", build)
+        pdlConsumer.hentIdenter("0")
     }
 }
+

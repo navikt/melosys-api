@@ -44,7 +44,7 @@ public class ArkivsakServiceTest {
         sakDto.setId(sakID);
         when(sakConsumer.opprettSak(any())).thenReturn(sakDto);
 
-        Long opprettetSakID = arkivsakService.opprettSak(saksnummer, behandlingstema, aktørID);
+        Long opprettetSakID = arkivsakService.opprettSakForBruker(saksnummer, behandlingstema, aktørID);
 
         assertThat(opprettetSakID).isEqualTo(sakID);
         verify(sakConsumer).opprettSak(captor.capture());
@@ -64,7 +64,7 @@ public class ArkivsakServiceTest {
         sakDto.setId(sakID);
         when(sakConsumer.opprettSak(any())).thenReturn(sakDto);
 
-        Long opprettetSakID = arkivsakService.opprettSak(saksnummer, behandlingstema, aktørID);
+        Long opprettetSakID = arkivsakService.opprettSakForBruker(saksnummer, behandlingstema, aktørID);
 
         assertThat(opprettetSakID).isEqualTo(sakID);
         verify(sakConsumer).opprettSak(captor.capture());
@@ -78,7 +78,7 @@ public class ArkivsakServiceTest {
         final Long sakID = 11111L;
         SakDto sakDto = new SakDto();
         sakDto.setTema(Tema.UFM.getKode());
-        when(sakConsumer.hentSak(eq(sakID))).thenReturn(sakDto);
+        when(sakConsumer.hentSak(sakID)).thenReturn(sakDto);
 
         Tema tema = arkivsakService.hentTemaFraSak(sakID);
         assertThat(tema).isEqualTo(Tema.UFM);

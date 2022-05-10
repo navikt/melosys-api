@@ -98,12 +98,12 @@ class PersondataServiceTest {
         when(familiemedlemService.hentFamiliemedlemmer(lagPerson())).thenReturn(
             Set.of(
                 FamiliemedlemOversetter.oversettBarn(lagPerson(), lagFolkeregisterIdent("identForelder1")),
-                FamiliemedlemOversetter.oversettPersonRelatertVedSivilstandMedSivilstand(lagPerson(),
+                FamiliemedlemOversetter.oversettEktefelleEllerPartner(lagPerson(),
                     lagSivilstand(forventetRelatertVedSivilstandID))
             ));
 
 
-        Personopplysninger persondata = (Personopplysninger) persondataService.hentPerson("ident",
+        Personopplysninger persondata = (Personopplysninger) persondataService.hentPerson("IdNr",
             Informasjonsbehov.MED_FAMILIERELASJONER);
 
 

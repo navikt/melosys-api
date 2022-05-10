@@ -71,6 +71,15 @@ public class OppdaterJournalpostRequest {
             return this;
         }
 
+         public Builder medBruker(String id, Bruker.BrukerIdType idType) {
+             if (StringUtils.isNotEmpty(id)) {
+                 this.bruker = Bruker.builder()
+                     .id(id).idType(idType)
+                     .build();
+             }
+             return this;
+         }
+
         public Builder medAvsender(AvsenderMottaker avsender) {
             this.avsenderMottaker = avsender;
             return this;

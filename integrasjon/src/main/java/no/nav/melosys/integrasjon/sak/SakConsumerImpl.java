@@ -14,8 +14,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status.Family;
 
-import no.finn.unleash.Unleash;
 import no.nav.melosys.exception.IntegrasjonException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.felles.ExceptionMapper;
 import no.nav.melosys.integrasjon.felles.FeilResponseDto;
 import no.nav.melosys.integrasjon.felles.JacksonObjectMapperProvider;
@@ -33,13 +33,9 @@ public class SakConsumerImpl implements RestConsumer, SakConsumer {
     };
     private static final String X_CORRELATION_ID = "X-Correlation-ID";
 
-    private final boolean erSystem;
-    private final Unleash unleash;
     private final WebTarget target;
 
-    SakConsumerImpl(String endpointUrl, boolean erSystem, Unleash unleash) {
-        this.erSystem = erSystem;
-        this.unleash = unleash;
+    SakConsumerImpl(String endpointUrl) {
         try {
             SSLContext sslContext = SSLContext.getDefault();
             Client client = ClientBuilder.newBuilder().sslContext(sslContext).build();
@@ -52,11 +48,9 @@ public class SakConsumerImpl implements RestConsumer, SakConsumer {
 
     @Override
     public boolean isSystem() {
-        if (unleash.isEnabled("melosys.auto.token")) {
-            if (ThreadLocalAccessInfo.shouldUseSystemToken()) return true;
-            if (ThreadLocalAccessInfo.shouldUseOidcToken()) return false;
-        }
-        return erSystem;
+        if (ThreadLocalAccessInfo.shouldUseSystemToken()) return true;
+        if (ThreadLocalAccessInfo.shouldUseOidcToken()) return false;
+        throw new TekniskException("Uregistert kall prøver å registrere token provider");
     }
 
     @Override

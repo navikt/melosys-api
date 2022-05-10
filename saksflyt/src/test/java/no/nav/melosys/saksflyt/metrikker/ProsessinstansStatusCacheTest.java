@@ -3,7 +3,7 @@ package no.nav.melosys.saksflyt.metrikker;
 import java.util.Arrays;
 import java.util.List;
 
-import no.nav.melosys.repository.ProsessinstansAntall;
+import no.nav.melosys.domain.metrikker.ProsessinstansAntall;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -39,8 +39,8 @@ public class ProsessinstansStatusCacheTest {
     public void antallProsessinstanserFeilet() {
         when(prosessinstansRepository.antallAktiveOgFeiletPerTypeOgStatus(anyCollection()))
             .thenReturn(prosessinstansMetrikkerList);
-        assertThat(cache.antallProsessinstanserFeilet(JFR_NY_VURDERING)).isEqualTo(0.0);
-        assertThat(cache.antallProsessinstanserFeilet(JFR_KNYTT)).isEqualTo(1.0);
-        assertThat(cache.antallProsessinstanserFeilet(IVERKSETT_VEDTAK_EOS)).isEqualTo(2.0);
+        assertThat(cache.antallProsessinstanserFeiletPåType(JFR_NY_VURDERING)).isEqualTo(0.0);
+        assertThat(cache.antallProsessinstanserFeiletPåType(JFR_KNYTT)).isEqualTo(1.0);
+        assertThat(cache.antallProsessinstanserFeiletPåType(IVERKSETT_VEDTAK_EOS)).isEqualTo(2.0);
     }
 }

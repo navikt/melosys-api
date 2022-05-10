@@ -15,11 +15,9 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.joark.journalpostapi.JournalpostapiConsumer;
-import no.nav.melosys.integrasjon.joark.journalpostapi.dto.AvsenderMottaker;
-import no.nav.melosys.integrasjon.joark.journalpostapi.dto.FerdigstillJournalpostRequest;
-import no.nav.melosys.integrasjon.joark.journalpostapi.dto.OppdaterJournalpostRequest;
-import no.nav.melosys.integrasjon.joark.journalpostapi.dto.OpprettJournalpostRequest;
+import no.nav.melosys.integrasjon.joark.journalpostapi.dto.*;
 import no.nav.melosys.integrasjon.joark.saf.SafConsumer;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -99,7 +97,7 @@ public class JoarkService implements JoarkFasade {
         return safConsumer.hentDokumentoversikt(hentJournalposterTilknyttetSakRequest.saksnummer())
             .stream()
             .map(no.nav.melosys.integrasjon.joark.saf.dto.journalpost.Journalpost::tilDomene)
-            .collect(Collectors.toList());
+            .toList();
 
     }
 
@@ -121,9 +119,14 @@ public class JoarkService implements JoarkFasade {
         OppdaterJournalpostRequest.Builder request = new OppdaterJournalpostRequest.Builder()
             .medDatoMottatt(journalpostOppdatering.getMottattDato())
             .medTittel(journalpostOppdatering.getTittel())
-            .medBruker(journalpostOppdatering.getBrukerID())
             .medSaksnummer(journalpostOppdatering.getSaksnummer())
             .medTema(journalpostOppdatering.getTema());
+
+        if (StringUtils.isNotEmpty(journalpostOppdatering.getBrukerID())) {
+            request.medBruker(journalpostOppdatering.getBrukerID());
+        } else if (StringUtils.isNotEmpty(journalpostOppdatering.getVirksomhetOrgnr())) {
+            request.medBruker(journalpostOppdatering.getVirksomhetOrgnr(), Bruker.BrukerIdType.ORGNR);
+        }
 
         final String hovedDokumentID = journalpostOppdatering.getHovedDokumentID();
         if (hovedDokumentID != null) {

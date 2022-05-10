@@ -266,7 +266,7 @@ class ProsessinstansServiceTest {
         final String institusjonsIdForDk = "ID_FOR_DK";
         when(utenlandskMyndighetService.lagInstitusjonsId(Landkoder.DK)).thenReturn(institusjonsIdForDk);
 
-        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_NY_SAK, journalfoeringDto);
+        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_NY_SAK_BRUKER, journalfoeringDto);
 
         assertThat(prosessinstans.getData(ProsessDataKey.AVSENDER_ID)).isEqualTo(institusjonsIdForDk);
     }
@@ -292,6 +292,19 @@ class ProsessinstansServiceTest {
 
         assertThat(prosessinstans.getData(ProsessDataKey.SKAL_SENDES_FORVALTNINGSMELDING, Boolean.class)).isFalse();
     }
+
+    @Test
+    void opprettProsessinstansJournalføring_virksomhetOrgnr_settesIProsessinstans() {
+        JournalfoeringOpprettDto journalfoeringDto = lagJournalfoeringOpprettDto();
+
+        journalfoeringDto.setBrukerID(null);
+        journalfoeringDto.setVirksomhetOrgnr("orgnr");
+
+        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.ANMODNING_OM_UNNTAK, journalfoeringDto);
+
+        assertThat(prosessinstans.getData(ProsessDataKey.VIRKSOMHET_ORGNR)).isEqualTo("orgnr");
+    }
+
 
     @Test
     void opprettProsessinstansJournalføring_skalTilordnesTrue_settesIProsessinstans() {
@@ -327,7 +340,7 @@ class ProsessinstansServiceTest {
         journalfoeringDto.setVedlegg(vedlegg);
         journalfoeringDto.getHoveddokument().getLogiskeVedlegg().add("tittel");
 
-        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_NY_SAK, journalfoeringDto);
+        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_NY_SAK_BRUKER, journalfoeringDto);
 
         var fysiskeVedleggTypeReference = new TypeReference<Map<String, String>>() {
         };
@@ -351,7 +364,7 @@ class ProsessinstansServiceTest {
         vedlegg.add(fysiskVedlegg2);
         journalfoeringDto.setVedlegg(vedlegg);
 
-        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_NY_SAK, journalfoeringDto);
+        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_NY_SAK_BRUKER, journalfoeringDto);
 
         var fysiskeVedleggTypeReference = new TypeReference<Map<String, String>>() {
         };

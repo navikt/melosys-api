@@ -85,6 +85,10 @@ public class FagsakService {
         return fagsakRepository.findByRolleAndAktør(rolleType, aktørID);
     }
 
+    public List<Fagsak> hentFagsakerMedOrgnr(Aktoersroller rolleType, String orgnr) {
+        return fagsakRepository.findByRolleAndOrgnr(rolleType, orgnr);
+    }
+
     @Transactional
     public void lagre(Fagsak sak) {
         if (sak.getSaksnummer() == null) {
@@ -123,12 +127,24 @@ public class FagsakService {
 
         HashSet<Aktoer> aktører = new HashSet<>();
 
-        Aktoer aktør = new Aktoer();
-        aktør.setAktørId(opprettSakRequest.getAktørID());
-        aktør.setUtenlandskPersonId(opprettSakRequest.getUtenlandskPersonId());
-        aktør.setFagsak(fagsak);
-        aktør.setRolle(Aktoersroller.BRUKER);
-        aktører.add(aktør);
+        String aktørID = opprettSakRequest.getAktørID();
+        if (aktørID != null) {
+            Aktoer aktør = new Aktoer();
+            aktør.setAktørId(aktørID);
+            aktør.setUtenlandskPersonId(opprettSakRequest.getUtenlandskPersonId());
+            aktør.setFagsak(fagsak);
+            aktør.setRolle(Aktoersroller.BRUKER);
+            aktører.add(aktør);
+        }
+
+        String virksomhetOrgnr = opprettSakRequest.getVirksomhetOrgnr();
+        if (virksomhetOrgnr != null) {
+            Aktoer virksomhet = new Aktoer();
+            virksomhet.setOrgnr(virksomhetOrgnr);
+            virksomhet.setFagsak(fagsak);
+            virksomhet.setRolle(Aktoersroller.VIRKSOMHET);
+            aktører.add(virksomhet);
+        }
 
         String arbeidsgiver = opprettSakRequest.getArbeidsgiver();
         if (arbeidsgiver != null) {

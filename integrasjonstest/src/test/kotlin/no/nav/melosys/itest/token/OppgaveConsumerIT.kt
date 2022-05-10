@@ -2,13 +2,13 @@ package no.nav.melosys.itest.token
 
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.matching.StringValuePattern
-import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdContextExchangeFilter
-import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdQuery
-import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdRestConsumer
-import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdRestConsumerConfig
+import no.nav.melosys.integrasjon.felles.GenericContextExchangeFilter
+import no.nav.melosys.integrasjon.oppgave.konsument.OppgaveConsumer
+import no.nav.melosys.integrasjon.oppgave.konsument.OppgaveConsumerImpl
+import no.nav.melosys.integrasjon.oppgave.konsument.OppgaveConsumerProducer
 import no.nav.melosys.integrasjon.reststs.RestStsClient
 import no.nav.melosys.integrasjon.reststs.StsRestTemplateProducer
-import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -22,29 +22,17 @@ import org.springframework.test.web.client.MockRestServiceServer
         RestStsClient::class,
         WebClientAutoConfiguration::class,
 
-        ArbeidsforholdRestConsumer::class,
-        ArbeidsforholdRestConsumerConfig::class,
-        ArbeidsforholdContextExchangeFilter::class,
+        OppgaveConsumerImpl::class,
+        OppgaveConsumerProducer::class,
+        GenericContextExchangeFilter::class
     ],
     properties = ["spring.profiles.active:itest-token"]
 )
-class AaregConsumerIT(
-    @Autowired private val arbeidsforholdRestConsumer: ArbeidsforholdRestConsumer,
-    @Autowired private val server: MockRestServiceServer,
+class OppgaveConsumerIT(
+    @Autowired private val oppgaveConsumer: OppgaveConsumer,
+    @Autowired server: MockRestServiceServer,
     @Value("\${mockserver.port}") mockPort: Int,
 ) : ConsumerTestBase<String>(server, mockPort) {
-
-    @Test
-    fun authorizationSkalKommeFraBruker() {
-        executeFromController {
-            verifyHeaders(
-                mapOf<String, StringValuePattern>(
-                    Pair("Authorization", WireMock.equalTo("Bearer --token-from-system--")),
-                    Pair("Nav-Consumer-Token", WireMock.equalTo("Bearer --token-from-system--"))
-                )
-            )
-        }
-    }
 
     @Test
     fun authorizationSkalKommeFraSystem() {
@@ -52,7 +40,17 @@ class AaregConsumerIT(
             verifyHeaders(
                 mapOf<String, StringValuePattern>(
                     Pair("Authorization", WireMock.equalTo("Bearer --token-from-system--")),
-                    Pair("Nav-Consumer-Token", WireMock.equalTo("Bearer --token-from-system--"))
+                )
+            )
+        }
+    }
+
+    @Test
+    fun authorizationSkalKommeFraBruker() {
+        executeFromController {
+            verifyHeaders(
+                mapOf<String, StringValuePattern>(
+                    Pair("Authorization", WireMock.equalTo("Bearer --token-from-user--")),
                 )
             )
         }
@@ -63,25 +61,24 @@ class AaregConsumerIT(
         verifyHeaders(
             mapOf<String, StringValuePattern>(
                 Pair("Authorization", WireMock.equalTo("Bearer --token-from-system--")),
-                Pair("Nav-Consumer-Token", WireMock.equalTo("Bearer --token-from-system--"))
             )
         )
         executeRequest()
     }
 
+
     @Test
-    fun skalBrukeErrorFilterOgGiRiktigFeilmelding() {
+    fun brukeErrorFilter_kast_riktigFeilmelding() {
         executeErrorFromServer { error ->
-            assertThat(error).startsWith("Henting av arbeidsforhold fra Aareg feilet")
+            Assertions.assertThat(error).startsWith("Kall mot Oppgave feilet.")
         }
     }
 
     override fun getMockData(): String {
-        return "[]"
+        return "{}"
     }
 
     override fun executeRequest() {
-        val build = ArbeidsforholdQuery.Builder().build()
-        arbeidsforholdRestConsumer.finnArbeidsforholdPrArbeidstaker("121", build)
+        oppgaveConsumer.hentOppgave("1")
     }
 }

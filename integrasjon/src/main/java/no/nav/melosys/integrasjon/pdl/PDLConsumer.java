@@ -12,13 +12,22 @@ import org.springframework.retry.annotation.Retryable;
 @Retryable
 public interface PDLConsumer {
     Identliste hentIdenter(String ident);
+
     Person hentBarn(String ident);
+
     Person hentForelder(String ident);
+
     Person hentFamilierelasjoner(String ident);
+
     Person hentPerson(String ident);
+
     Person hentPersonMedHistorikk(String ident);
-    Person hentRelatertVedSivilstand(String ident);
+
+    Person hentEktefelleEllerPartner(String ident);
+
     Collection<Adressebeskyttelse> hentAdressebeskyttelser(String ident);
+
     Collection<Navn> hentNavn(String fnr);
+
     Collection<Statsborgerskap> hentStatsborgerskap(String ident);
 }

@@ -4,6 +4,7 @@ import java.util.EnumMap;
 import java.util.Map;
 import java.util.Optional;
 
+import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.*;
@@ -54,8 +55,8 @@ public final class ProsessflytDefinisjon {
             )
         );
 
-        PROSESS_FLYT_MAP.put(ProsessType.JFR_NY_SAK,
-            new ProsessFlyt(ProsessType.JFR_NY_SAK,
+        PROSESS_FLYT_MAP.put(ProsessType.JFR_NY_SAK_BRUKER,
+            new ProsessFlyt(ProsessType.JFR_NY_SAK_BRUKER,
                 OPPRETT_SAK_OG_BEH,
                 OPPRETT_SØKNAD,
                 OPPRETT_ARKIVSAK,
@@ -66,6 +67,15 @@ public final class ProsessflytDefinisjon {
                 VURDER_INNGANGSVILKÅR,
                 OPPRETT_OPPGAVE,
                 SEND_FORVALTNINGSMELDING
+            )
+        );
+
+        PROSESS_FLYT_MAP.put(ProsessType.JFR_NY_SAK_VIRKSOMHET,
+            new ProsessFlyt(ProsessType.JFR_NY_SAK_VIRKSOMHET,
+                OPPRETT_SAK_OG_BEH,
+                OPPRETT_ARKIVSAK,
+                OPPDATER_OG_FERDIGSTILL_JOURNALPOST,
+                OPPRETT_OPPGAVE
             )
         );
 
@@ -315,5 +325,10 @@ public final class ProsessflytDefinisjon {
 
     public static Optional<ProsessFlyt> finnFlytForProsessType(ProsessType prosessType) {
         return Optional.ofNullable(PROSESS_FLYT_MAP.get(prosessType));
+    }
+
+    public static Optional<ProsessSteg> hentNesteSteg(ProsessType prosessType, ProsessSteg sistFullfortSteg) {
+        return ProsessflytDefinisjon.finnFlytForProsessType(prosessType)
+            .map(it -> it.nesteSteg(sistFullfortSteg));
     }
 }

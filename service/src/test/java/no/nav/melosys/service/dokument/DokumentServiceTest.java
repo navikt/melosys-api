@@ -72,7 +72,6 @@ import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
 import org.junit.jupiter.api.Test;
 
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
-import static no.nav.melosys.domain.kodeverk.Avklartefaktatyper.*;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.*;
 import static no.nav.melosys.service.persondata.PersonopplysningerObjectFactory.lagPersonopplysninger;
@@ -215,10 +214,10 @@ final class DokumentServiceTest {
         Behandling behandling = lagBehandling();
         BehandlingService behandlingService = mockBehandlingService(behandling);
         PersondataFasade persondataFasade = mockPersondataFasade(aktør);
-        Avklartefakta arbeidsgiverFaktum = lagAvklarteFakta(VIRKSOMHET, ORGNR);
-        Avklartefakta yrkesgruppeFaktum = lagAvklarteFakta(YRKESGRUPPE, AvklartYrkesgruppeType.ORDINAER.name(), null);
+        Avklartefakta arbeidsgiverFaktum = lagAvklarteFakta(Avklartefaktatyper.VIRKSOMHET, ORGNR);
+        Avklartefakta yrkesgruppeFaktum = lagAvklarteFakta(Avklartefaktatyper.YRKESGRUPPE, AvklartYrkesgruppeType.ORDINAER.name(), null);
         Behandlingsresultat behandlingsresultat = lagBehandlingsresultat(Arrays.asList(arbeidsgiverFaktum,
-            lagAvklarteFakta(ARBEIDSLAND, "SE"),
+            lagAvklarteFakta(Avklartefaktatyper.ARBEIDSLAND, "SE"),
             yrkesgruppeFaktum));
         BehandlingsresultatRepository behandlingsresultatRepository = mockBehandlingsresultatRepo(behandlingsresultat);
         AvklarteFaktaRepository avklarteFaktaRepository = mockAvklarteFaktaRepository(arbeidsgiverFaktum, yrkesgruppeFaktum);
@@ -306,9 +305,9 @@ final class DokumentServiceTest {
 
     private static AvklarteFaktaRepository mockAvklarteFaktaRepository(Avklartefakta arbeidsgiverFaktum, Avklartefakta yrkesgruppeFaktum) {
         AvklarteFaktaRepository avklarteFaktaRepository = mock(AvklarteFaktaRepository.class);
-        when(avklarteFaktaRepository.findByBehandlingsresultatIdAndType(BEHANDLINGSID, YRKESGRUPPE)).thenReturn(Optional.of(yrkesgruppeFaktum));
+        when(avklarteFaktaRepository.findByBehandlingsresultatIdAndType(BEHANDLINGSID, Avklartefaktatyper.YRKESGRUPPE)).thenReturn(Optional.of(yrkesgruppeFaktum));
         when(avklarteFaktaRepository.findByBehandlingsresultatIdAndTypeAndFakta(BEHANDLINGSID,
-            VIRKSOMHET,
+            Avklartefaktatyper.VIRKSOMHET,
             "TRUE")).thenReturn(Collections.singleton(arbeidsgiverFaktum));
         return avklarteFaktaRepository;
     }

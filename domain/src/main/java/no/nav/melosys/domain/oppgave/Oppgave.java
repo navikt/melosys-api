@@ -11,6 +11,7 @@ import no.nav.melosys.domain.kodeverk.Oppgavetyper;
 
 public final class Oppgave {
     private final String aktørId;
+    private final String orgnr;
     private final String behandlingstema;
     private final String behandlingstype;
     private final String beskrivelse;
@@ -32,6 +33,7 @@ public final class Oppgave {
 
     public static class Builder {
         private String aktørId;
+        private String orgnr;
         private Fagsystem behandlesAvApplikasjon;
         private String behandlingstema;
         private String behandlingstype;
@@ -116,6 +118,12 @@ public final class Oppgave {
             return this;
         }
 
+        public Builder setOrgnr(String orgnr) {
+            this.orgnr = orgnr;
+            return this;
+        }
+
+
         public Builder setBehandlingstype(String behandlingstype) {
             this.behandlingstype = behandlingstype;
             return this;
@@ -164,6 +172,7 @@ public final class Oppgave {
         this.tilordnetRessurs = builder.tilordnetRessurs;
         this.versjon = builder.versjon;
         this.aktørId = builder.aktørId;
+        this.orgnr = builder.orgnr;
         this.behandlingstype = builder.behandlingstype;
         this.behandlingstema = builder.behandlingstema;
         this.beskrivelse = builder.beskrivelse;
@@ -175,6 +184,10 @@ public final class Oppgave {
 
     public String getAktørId() {
         return aktørId;
+    }
+
+    public String getOrgnr() {
+        return orgnr;
     }
 
     public Fagsystem getBehandlesAvApplikasjon() {

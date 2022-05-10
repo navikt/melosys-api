@@ -33,7 +33,8 @@ import org.springframework.util.Assert;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
-import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
+import static no.nav.melosys.domain.kodeverk.Aktoersroller.ARBEIDSGIVER;
+import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 import static no.nav.melosys.integrasjon.dokgen.DokgenAdresseMapper.*;
 
@@ -97,7 +98,7 @@ public class BrevbestillingService {
             Aktoer avklartMottaker = brevmottakerService.avklarMottaker(produserbaredokumenter, Mottaker.av(hovedmottaker), behandling);
             if (avklartMottaker.getRolle() == BRUKER) {
                 return hentSammensattNavn(behandling);
-            } else if (avklartMottaker.erPerson()){
+            } else if (avklartMottaker.erPerson()) {
                 return persondataFasade.hentSammensattNavn(avklartMottaker.getPersonIdent());
             } else {
                 var orgDokument = hentRettOrganisasjonsdokument(behandling, avklartMottaker.getOrgnr());
@@ -236,18 +237,31 @@ public class BrevbestillingService {
         Kontaktopplysning kontaktopplysning = null;
         OrganisasjonDokument orgDokument = null;
 
-        if (mottaker.erPerson()) {
-            persondata = persondataFasade.hentPerson(behandling.getFagsak().hentBrukersAktørID());
-        } else if (mottaker.erOrganisasjon()) {
-            kontaktopplysning = kontaktopplysningService.hentKontaktopplysning(behandling.getFagsak().getSaksnummer(),
-                mottaker.getOrgnr()).orElse(null);
-            String mottakerOrgnr = kontaktopplysning != null && kontaktopplysning.getKontaktOrgnr() != null ? kontaktopplysning.getKontaktOrgnr() : mottaker.getOrgnr();
-            orgDokument = (OrganisasjonDokument) eregFasade.hentOrganisasjon(mottakerOrgnr).getDokument();
-        } else {
-            throw new FunksjonellException("Mottakersrolle støttes ikke: " + mottaker.getRolle());
+        switch (mottaker.getRolle()) {
+            case BRUKER: {
+                persondata = persondataFasade.hentPerson(behandling.getFagsak().hentBrukersAktørID());
+                break;
+            }
+            case REPRESENTANT: {
+                if (mottaker.erPerson()) {
+                    persondata = persondataFasade.hentPerson(mottaker.getPersonIdent());
+                    break;
+                }
+            }
+            case ARBEIDSGIVER: {
+                kontaktopplysning = kontaktopplysningService.hentKontaktopplysning(behandling.getFagsak().getSaksnummer(),
+                    mottaker.getOrgnr()).orElse(null);
+                String mottakerOrgnr = kontaktopplysning != null && kontaktopplysning.getKontaktOrgnr() != null ? kontaktopplysning.getKontaktOrgnr() : mottaker.getOrgnr();
+                orgDokument = (OrganisasjonDokument) eregFasade.hentOrganisasjon(mottakerOrgnr).getDokument();
+                break;
+            }
+            default:
+                throw new FunksjonellException("Mottakersrolle støttes ikke: " + mottaker.getRolle());
         }
 
-        Assert.isTrue((orgDokument != null) || (persondata != null), "Orgdata eller persondata forventes for å sende brev.");
+        if (orgDokument == null && persondata == null) {
+            throw new FunksjonellException("Orgdata eller persondata forventes for å sende brev.");
+        }
 
         return new BrevAdresse.Builder()
             .medMottakerNavn(mapNavn(orgDokument, persondata))
