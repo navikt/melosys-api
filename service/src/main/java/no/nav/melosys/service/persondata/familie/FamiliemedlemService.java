@@ -69,23 +69,24 @@ public class FamiliemedlemService {
 
     @NotNull
     private Collection<Familiemedlem> hentEktefellerOgPartnere(Person hovedperson) {
-        List<Sivilstand> aktiveSivilstander = hovedperson.sivilstand().stream().toList();
+        List<Sivilstand> sivilstanderTilHovedperson = hovedperson.sivilstand().stream().toList();
 
-        if (aktiveSivilstander.isEmpty()) {
+        if (sivilstanderTilHovedperson.isEmpty()) {
             return Collections.emptySet();
         }
 
-        if (aktiveSivilstander.size() > 1) {
-            Optional<Sivilstand> sisteSivilstand = aktiveSivilstander.stream().min(this::sammenlignSisteDatoRegistrert);
+        if (sivilstanderTilHovedperson.size() > 1) {
+            Optional<Sivilstand> sisteSivilstand = sivilstanderTilHovedperson.stream()
+                .min(this::sammenlignSisteDatoRegistrert);
             return hentEktefelleEllerPartner(sisteSivilstand.get());
         }
 
-        return hentEktefelleEllerPartner(aktiveSivilstander.get(0));
+        return hentEktefelleEllerPartner(sivilstanderTilHovedperson.get(0));
     }
 
     @NotNull
     private Set<Familiemedlem> hentEktefelleEllerPartner(Sivilstand sivilstand) {
-        if (sivilstand.erGyldigSomEktefelleEllerPartner()) {
+        if (sivilstand.erGyldigForEktefelleEllerPartner()) {
             return lagFamiliemedlemFraSivilstand(sivilstand);
         } else {
             return Collections.emptySet();

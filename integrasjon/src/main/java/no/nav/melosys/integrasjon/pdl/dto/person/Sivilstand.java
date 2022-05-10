@@ -12,7 +12,7 @@ public record Sivilstand(Sivilstandstype type,
                          LocalDate bekreftelsesdato,
                          Metadata metadata) implements HarMetadata {
 
-    public boolean erGyldigSomEktefelleEllerPartner() {
+    public boolean erGyldigForEktefelleEllerPartner() {
         return erIkkeHistorisk() && Objects.nonNull(relatertVedSivilstand) &&
             (Sivilstandstype.GIFT.equals(type) || Sivilstandstype.REGISTRERT_PARTNER.equals(type));
     }
