@@ -81,12 +81,12 @@ public class FamiliemedlemService {
         List<Sivilstand> aktiveSivilstander = hovedperson.sivilstand().stream().toList();
 
         if (aktiveSivilstander.isEmpty()) {
-            log.info("Har ingen ektefelle/partner");
+            log.debug("Har ingen ektefelle/partner");
             return Collections.emptySet();
         }
 
         if (aktiveSivilstander.size() > 1) {
-            log.info("Fant {} aktiv sivilstand, begynner å lete etter siste registrerte aktiv sivilstand",
+            log.debug("Fant {} aktiv sivilstand, begynner å lete etter siste registrerte aktiv sivilstand",
                 aktiveSivilstander.size());
             Optional<Sivilstand> sisteSivilstand = aktiveSivilstander.stream().min(this::sammenlignSisteDatoRegistrert);
             return hentEktefelleEllerPartner(sisteSivilstand.get());
@@ -97,14 +97,14 @@ public class FamiliemedlemService {
 
     @NotNull
     private Set<Familiemedlem> hentEktefelleEllerPartner(Sivilstand sivilstand) {
-        log.info("Henter ektefelle/partner registrert {} av typen {}",
+        log.debug("Henter ektefelle/partner registrert {} av typen {}",
             sivilstand.hentDatoSistRegistrert(), sivilstand.type());
 
         if (sivilstand.erGyldigSomEktefelleEllerPartner()) {
-            log.info("Fant bare ett aktiv familiemedlem, lager et familiemedlem med sivilstand: {}", sivilstand);
+            log.debug("Fant bare ett aktiv familiemedlem, lager et familiemedlem med sivilstand: {}", sivilstand);
             return lagFamiliemedlemFraSivilstand(sivilstand);
         } else {
-            log.info("Fant ingen gyldige sivilstand som kan være familiemedlem");
+            log.debug("Fant ingen gyldige sivilstand som kan være familiemedlem");
             return Collections.emptySet();
         }
     }
@@ -121,7 +121,7 @@ public class FamiliemedlemService {
         Person person = pdlConsumer.hentEktefelleEllerPartner(ident);
         Sivilstand sivilstand = hentSisteSivilstandKnyttetTilHovedperson(person, fødselsNrTilHovedperson);
         EktefelleEllerPartner ektefelleEllerPartner = new EktefelleEllerPartner(ident, person, sivilstand);
-        log.info("Opprettet EktefelleEllerPartner med data: {}", ektefelleEllerPartner);
+        log.debug("Opprettet EktefelleEllerPartner med data: {}", ektefelleEllerPartner);
         return ektefelleEllerPartner;
     }
 
@@ -134,8 +134,7 @@ public class FamiliemedlemService {
             .orElseThrow(() -> new IkkeFunnetException("I Ektefelle/Partner fant vi ikke forventet Sivilstand " +
                 "knyttet til hovedperson"));
 
-        // TODO: Ta vekk pga. GDPR
-        log.info("Siste sivilstand til {} var: {}", fødselsNrTilHovedperson, sisteSivilstand);
+        log.debug("Siste sivilstand var: {}", sisteSivilstand);
         return sisteSivilstand;
     }
 
