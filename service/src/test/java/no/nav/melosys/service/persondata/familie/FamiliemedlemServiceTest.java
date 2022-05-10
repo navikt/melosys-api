@@ -11,9 +11,6 @@ import no.nav.melosys.domain.person.Navn;
 import no.nav.melosys.domain.person.familie.Familiemedlem;
 import no.nav.melosys.domain.person.familie.Familierelasjon;
 import no.nav.melosys.integrasjon.pdl.PDLConsumer;
-import no.nav.melosys.integrasjon.pdl.dto.identer.Ident;
-import no.nav.melosys.integrasjon.pdl.dto.identer.IdentGruppe;
-import no.nav.melosys.integrasjon.pdl.dto.identer.Identliste;
 import no.nav.melosys.integrasjon.pdl.dto.person.Person;
 import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -42,7 +39,6 @@ class FamiliemedlemServiceTest {
     @InjectMocks
     private FamiliemedlemService familiemedlemService;
 
-
     @Test
     void hentFamiliemedlemmerFraBehandlingID_inaktivBehandlingMedTpsData() {
         var inaktivBehandling = lagInaktivBehandlingSomIkkeResulterIVedtak();
@@ -67,9 +63,6 @@ class FamiliemedlemServiceTest {
         when(pdlConsumer.hentFamilierelasjoner(IDENT_HOVEDPERSON)).thenReturn(lagHovedpersonMedBarn());
         when(pdlConsumer.hentBarn(IDENT_BARN)).thenReturn(lagPerson());
         when(pdlConsumer.hentEktefelleEllerPartner(IDENT_PERSON_GIFT)).thenReturn(lagPersonGift());
-        when(pdlConsumer.hentEktefelleEllerPartner(IDENT_PERSON_GIFT_HISTORISK)).thenReturn(lagPersonGiftHistorisk());
-        when(pdlConsumer.hentIdenter(IDENT_HOVEDPERSON)).thenReturn(new Identliste(Set.of(new Ident(IDENT_HOVEDPERSON,
-            IdentGruppe.FOLKEREGISTERIDENT))));
 
         Set<Familiemedlem> familiemedlemmer = familiemedlemService.hentFamiliemedlemmerFraBehandlingID(behandlingID);
 
@@ -91,9 +84,9 @@ class FamiliemedlemServiceTest {
     }
 
     @Test
-    void hentSisteSivilstandKnyttetTilHovedperson_medFlereTidligereGiftemålRegistrertSamtidig_medAnnenData_forventEttGiftemål() {
+    void hentSisteSivilstandKnyttetTilHovedperson_medFlereTidligereGiftemålRegistrertSamtidig_medUgiftData_forventEttGiftemål() {
 
-        Person relatertGiftPerson = lagPersonGiftHistoriskMedFlereTidligereGiftemålRegistrertSamtidig_alternativ();
+        Person relatertGiftPerson = lagPersonGiftHistoriskMedFlereTidligereGiftemålRegistrertSamtidig_medUgiftData();
         String fødselsNrTilHovedperson = IDENT_HOVEDPERSON;
 
 
@@ -122,14 +115,11 @@ class FamiliemedlemServiceTest {
 
         Person hovedperson = lagHovedperson();
         Person giftPerson = lagPersonGift();
-        Person giftHistoriskPerson = lagPersonGiftHistorisk();
 
         when(pdlConsumer.hentEktefelleEllerPartner(IDENT_PERSON_GIFT)).thenReturn(giftPerson);
-        when(pdlConsumer.hentEktefelleEllerPartner(IDENT_PERSON_GIFT_HISTORISK)).thenReturn(giftHistoriskPerson);
 
 
-        Set<Familiemedlem> familiemedlemmer = familiemedlemService.hentFamiliemedlemmer(hovedperson, IDENT_HOVEDPERSON);
-
+        Set<Familiemedlem> familiemedlemmer = familiemedlemService.hentFamiliemedlemmer(hovedperson);
 
         assertThat(familiemedlemmer)
             .isNotEmpty()
@@ -140,7 +130,6 @@ class FamiliemedlemServiceTest {
             .matches(navn -> navn.harLiktFornavn(PERSON_GIFT_FORNAVN), "Har likt fornavn");
 
         verify(pdlConsumer, times(1)).hentEktefelleEllerPartner(IDENT_PERSON_GIFT);
-        verify(pdlConsumer, times(1)).hentEktefelleEllerPartner(IDENT_PERSON_GIFT_HISTORISK);
     }
 
     private PersonDokument lagPersonDokumentMedFamiliemedlemmer(Sivilstand sivilstand) {
