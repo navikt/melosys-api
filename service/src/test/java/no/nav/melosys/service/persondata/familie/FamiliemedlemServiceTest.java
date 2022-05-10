@@ -71,32 +71,6 @@ class FamiliemedlemServiceTest {
     }
 
     @Test
-    void hentSisteSivilstandKnyttetTilHovedperson_medFlereTidligereGiftemålRegistrertSamtidig_forventEttGiftemål() {
-
-        Person relatertGiftPerson = lagPersonGiftHistoriskMedFlereTidligereGiftemålRegistrertSamtidig();
-        String fødselsNrTilHovedperson = IDENT_HOVEDPERSON;
-
-
-        no.nav.melosys.integrasjon.pdl.dto.person.Sivilstand sisteSivilstand = familiemedlemService.hentSisteSivilstandKnyttetTilHovedperson(relatertGiftPerson,
-            fødselsNrTilHovedperson);
-
-        assertThat(sisteSivilstand).isNotNull();
-    }
-
-    @Test
-    void hentSisteSivilstandKnyttetTilHovedperson_medFlereTidligereGiftemålRegistrertSamtidig_medUgiftData_forventEttGiftemål() {
-
-        Person relatertGiftPerson = lagPersonGiftHistoriskMedFlereTidligereGiftemålRegistrertSamtidig_medUgiftData();
-        String fødselsNrTilHovedperson = IDENT_HOVEDPERSON;
-
-
-        no.nav.melosys.integrasjon.pdl.dto.person.Sivilstand sisteSivilstand = familiemedlemService.hentSisteSivilstandKnyttetTilHovedperson(relatertGiftPerson,
-            fødselsNrTilHovedperson);
-
-        assertThat(sisteSivilstand).isNotNull();
-    }
-
-    @Test
     void hentFamiliemedlemmerFraBehandlingID_inaktivBehandling() {
         final var inaktivBehandling = lagInaktivBehandlingSomIkkeResulterIVedtak();
         when(behandlingService.hentBehandling(1L)).thenReturn(inaktivBehandling);

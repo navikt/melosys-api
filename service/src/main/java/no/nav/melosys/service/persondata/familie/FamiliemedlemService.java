@@ -7,7 +7,6 @@ import java.util.stream.Collectors;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.person.Folkeregisteridentifikator;
 import no.nav.melosys.domain.person.familie.Familiemedlem;
-import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.pdl.PDLConsumer;
 import no.nav.melosys.integrasjon.pdl.dto.person.ForelderBarnRelasjon;
 import no.nav.melosys.integrasjon.pdl.dto.person.Person;
@@ -18,8 +17,6 @@ import no.nav.melosys.service.persondata.mapping.FamiliemedlemOversetter;
 import no.nav.melosys.service.persondata.mapping.FoedselOversetter;
 import no.nav.melosys.service.persondata.mapping.FolkeregisteridentOversetter;
 import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
@@ -27,7 +24,6 @@ import static java.time.temporal.ChronoUnit.YEARS;
 
 @Service
 public class FamiliemedlemService {
-    private static final Logger log = LoggerFactory.getLogger(FamiliemedlemService.class);
     private final BehandlingService behandlingService;
     private final SaksopplysningerService saksopplysningerService;
     private final PDLConsumer pdlConsumer;
@@ -41,22 +37,17 @@ public class FamiliemedlemService {
     }
 
     public Set<Familiemedlem> hentFamiliemedlemmerFraBehandlingID(long behandlingID) {
-        log.debug("[MELOSYS-{}] Henter familiemedlemmer fra behandlingID", behandlingID);
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
         String ident = behandling.getFagsak().hentBrukersAktørID();
 
         if (behandling.erAktiv()) {
-            log.debug("[MELOSYS-{}] Er en aktiv behandling, og tar i bruk ident", behandlingID);
             return hentFamiliemedlemmerFraIdent(ident);
         }
-        log.debug("[MELOSYS-{}] Er ikke en aktiv behandling", behandlingID);
 
         if (saksopplysningerService.harTpsPersonopplysninger(behandlingID)) {
-            log.debug("[MELOSYS-{}] Henter TPS personopplysinger", behandlingID);
             return saksopplysningerService.hentTpsPersonopplysninger(behandlingID).hentFamiliemedlemmer();
         }
 
-        log.debug("[MELOSYS-{}] Henter PDL personopplysinger", behandlingID);
         return saksopplysningerService.hentPdlPersonopplysninger(behandlingID).hentFamiliemedlemmer();
     }
 
@@ -81,13 +72,10 @@ public class FamiliemedlemService {
         List<Sivilstand> aktiveSivilstander = hovedperson.sivilstand().stream().toList();
 
         if (aktiveSivilstander.isEmpty()) {
-            log.debug("Har ingen ektefelle/partner");
             return Collections.emptySet();
         }
 
         if (aktiveSivilstander.size() > 1) {
-            log.debug("Fant {} aktiv sivilstand, begynner å lete etter siste registrerte aktiv sivilstand",
-                aktiveSivilstander.size());
             Optional<Sivilstand> sisteSivilstand = aktiveSivilstander.stream().min(this::sammenlignSisteDatoRegistrert);
             return hentEktefelleEllerPartner(sisteSivilstand.get());
         }
@@ -97,14 +85,9 @@ public class FamiliemedlemService {
 
     @NotNull
     private Set<Familiemedlem> hentEktefelleEllerPartner(Sivilstand sivilstand) {
-        log.debug("Henter ektefelle/partner registrert {} av typen {}",
-            sivilstand.hentDatoSistRegistrert(), sivilstand.type());
-
         if (sivilstand.erGyldigSomEktefelleEllerPartner()) {
-            log.debug("Fant bare ett aktiv familiemedlem, lager et familiemedlem med sivilstand: {}", sivilstand);
             return lagFamiliemedlemFraSivilstand(sivilstand);
         } else {
-            log.debug("Fant ingen gyldige sivilstand som kan være familiemedlem");
             return Collections.emptySet();
         }
     }
@@ -114,32 +97,6 @@ public class FamiliemedlemService {
         String ident = sivilstand.relatertVedSivilstand();
         Person person = pdlConsumer.hentEktefelleEllerPartner(ident);
         return Set.of(FamiliemedlemOversetter.oversettEktefelleEllerPartner(person, sivilstand));
-    }
-
-    @NotNull
-    private EktefelleEllerPartner lagEktefelleEllerPartner(String ident, String fødselsNrTilHovedperson) {
-        Person person = pdlConsumer.hentEktefelleEllerPartner(ident);
-        Sivilstand sivilstand = hentSisteSivilstandKnyttetTilHovedperson(person, fødselsNrTilHovedperson);
-        EktefelleEllerPartner ektefelleEllerPartner = new EktefelleEllerPartner(ident, person, sivilstand);
-        log.debug("Opprettet EktefelleEllerPartner med data: {}", ektefelleEllerPartner);
-        return ektefelleEllerPartner;
-    }
-
-    @NotNull
-    Sivilstand hentSisteSivilstandKnyttetTilHovedperson(Person person, String fødselsNrTilHovedperson) {
-        Sivilstand sisteSivilstand = person.sivilstand().stream()
-            .filter(Objects::nonNull)
-            .filter(sivilstand -> erRelatertTilHovedperson(sivilstand, fødselsNrTilHovedperson))
-            .min(this::sammenlignSisteDatoRegistrert)
-            .orElseThrow(() -> new IkkeFunnetException("I Ektefelle/Partner fant vi ikke forventet Sivilstand " +
-                "knyttet til hovedperson"));
-
-        log.debug("Siste sivilstand var: {}", sisteSivilstand);
-        return sisteSivilstand;
-    }
-
-    private boolean erRelatertTilHovedperson(Sivilstand sivilstand, String fødselsNrTilHovedperson) {
-        return fødselsNrTilHovedperson.equals(sivilstand.relatertVedSivilstand());
     }
 
     private boolean erPersonUnder18(Person person) {
@@ -174,11 +131,5 @@ public class FamiliemedlemService {
             .map(pdlConsumer::hentBarn)
             .map(barn -> FamiliemedlemOversetter.oversettBarn(barn, folkeregisteridentifikator))
             .collect(Collectors.toUnmodifiableSet());
-    }
-
-    record EktefelleEllerPartner(String ident, Person person, Sivilstand sivilstand) {
-        public boolean erAktiv() {
-            return !sivilstand.metadata().historisk();
-        }
     }
 }
