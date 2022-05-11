@@ -1,6 +1,5 @@
 package no.nav.melosys.service.journalforing;
 
-import java.util.Comparator;
 import java.util.Optional;
 
 import no.finn.unleash.Unleash;
@@ -216,10 +215,7 @@ public class JournalfoeringService {
     }
 
     private void validerIkkeAvsluttetBehandling(Fagsak fagsak) {
-        Behandling sisteBehandling = fagsak.getBehandlinger()
-            .stream()
-            .max(Comparator.comparing(Behandling::getRegistrertDato))
-            .orElseThrow(() -> new FunksjonellException("Fant ingen behandlinger på fagsak " + fagsak.getSaksnummer()));
+        Behandling sisteBehandling = fagsak.hentSistOppdatertBehandling();
         if (!sisteBehandling.erAvsluttet())
             throw new FunksjonellException(
                 String.format("sisteBehandling (ID:%d) for Fagsak %s er avsluttet",
