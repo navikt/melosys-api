@@ -409,10 +409,6 @@ class JournalfoeringServiceTest {
 
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer(saksnummer);
-        Behandling behandling = new Behandling();
-        behandling.setId(1L);
-        behandling.setStatus(Behandlingsstatus.AVSLUTTET);
-        fagsak.setBehandlinger(List.of(behandling));
 
         when(fagsakService.hentFagsak(saksnummer)).thenReturn(fagsak);
         when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
@@ -424,6 +420,30 @@ class JournalfoeringServiceTest {
             .isThrownBy(() -> journalfoeringService.journalførOgTilordneSak(tilordneDto))
             .withMessageContaining(" er ikke en lovlig behandlingstype ved knytting av dokument til sak");
 
+        tilordneDto.setBehandlingstypeKode(Behandlingstyper.KLAGE.getKode());
+        fagsak.setType(Sakstyper.EU_EOS);
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> journalfoeringService.journalførOgTilordneSak(tilordneDto))
+            .withMessageContaining(" er ikke en lovlig behandlingstype ved knytting av dokument til sak");
+    }
+
+    @Test
+    void tilordneSakOgJournalfør_avsluttetetBehandlingErIkkeTillattVedKnyttingAvDokument_kasterException() {
+        final String saksnummer = "MEL-0123";
+        tilordneDto.setSaksnummer(saksnummer);
+
+        Fagsak fagsak = new Fagsak();
+        fagsak.setSaksnummer(saksnummer);
+        Behandling behandling = new Behandling();
+        behandling.setId(1L);
+        behandling.setStatus(Behandlingsstatus.AVSLUTTET);
+        fagsak.setBehandlinger(List.of(behandling));
+
+        when(fagsakService.hentFagsak(saksnummer)).thenReturn(fagsak);
+        when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
+
+        fagsak.setType(Sakstyper.TRYGDEAVTALE);
         tilordneDto.setBehandlingstypeKode(null);
 
         assertThatExceptionOfType(FunksjonellException.class)
