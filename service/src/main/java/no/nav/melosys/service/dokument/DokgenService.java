@@ -218,6 +218,9 @@ public class DokgenService {
                 .medKontaktopplysninger(brevbestillingRequest.isKontaktopplysninger());
             case AVSLAG_MANGLENDE_OPPLYSNINGER -> new AvslagBrevbestilling.Builder()
                 .medFritekst(brevbestillingRequest.getFritekst());
+            case MELDING_HENLAGT_SAK -> new HenleggelseBrevbestilling.Builder()
+                .medFritekst(brevbestillingRequest.getFritekst())
+                .medBegrunnelseKode(brevbestillingRequest.getBegrunnelseKode());
             default -> new DokgenBrevbestilling.Builder<>();
         };
     }
