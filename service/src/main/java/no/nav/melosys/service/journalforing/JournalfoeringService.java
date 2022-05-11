@@ -1,5 +1,6 @@
 package no.nav.melosys.service.journalforing;
 
+import java.util.Comparator;
 import java.util.Optional;
 
 import no.finn.unleash.Unleash;
@@ -201,7 +202,8 @@ public class JournalfoeringService {
         if (behandlingstype != null) {
             prosessType = ProsessType.JFR_NY_VURDERING;
         } else {
-            throw new FunksjonellException("behandlingstype mangler for sak:" + saksnummer);
+            validerIkkeAvsluttetBehandling(fagsak);
+            prosessType = ProsessType.JFR_KNYTT;
         }
 
         Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(prosessType, journalfoeringDto);
@@ -211,6 +213,18 @@ public class JournalfoeringService {
         prosessinstans.setData(ProsessDataKey.JFR_INGEN_VURDERING, journalfoeringDto.isIngenVurdering());
 
         prosessinstansService.lagre(prosessinstans);
+    }
+
+    private void validerIkkeAvsluttetBehandling(Fagsak fagsak) {
+        Behandling sisteBehandling = fagsak.getBehandlinger()
+            .stream()
+            .max(Comparator.comparing(Behandling::getRegistrertDato))
+            .orElseThrow(() -> new FunksjonellException("Fant ingen behandlinger på fagsak " + fagsak.getSaksnummer()));
+        if (!sisteBehandling.erAvsluttet())
+            throw new FunksjonellException(
+                String.format("sisteBehandling (ID:%d) for Fagsak %s er avsluttet",
+                    sisteBehandling.getId(), fagsak.getSaksnummer())
+            );
     }
 
     private void validerKanTilknytteJournalpostForSedTilSak(Journalpost journalpost, String tilknyttTilSaksnummer) {
