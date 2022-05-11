@@ -471,12 +471,15 @@ class JournalfoeringServiceTest {
 
         when(fagsakService.hentFagsak(saksnummer)).thenReturn(fagsak);
         when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
+        Prosessinstans value = new Prosessinstans();
         when(prosessinstansService.lagJournalføringProsessinstans(eq(ProsessType.JFR_KNYTT), any()))
-            .thenReturn(new Prosessinstans());
+            .thenReturn(value);
 
         tilordneDto.setBehandlingstypeKode(null);
         journalfoeringService.journalførOgTilordneSak(tilordneDto);
-        verify(prosessinstansService).lagre(any(Prosessinstans.class));
+        verify(prosessinstansService).lagre(value);
+
+        assertThat(value.getBehandling().getId()).isEqualTo(behandling.getId());
     }
 
     @Test
