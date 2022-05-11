@@ -15,9 +15,10 @@ import no.nav.melosys.integrasjon.pdl.dto.person.Person;
 import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory;
+import no.nav.melosys.service.persondata.familie.medlem.EktefelleEllerPartnerFamiliemedlem;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -36,8 +37,17 @@ class FamiliemedlemServiceTest {
     private PDLConsumer pdlConsumer;
     @Mock
     private SaksopplysningerService saksopplysningerService;
-    @InjectMocks
+
     private FamiliemedlemService familiemedlemService;
+
+
+    @BeforeEach
+    public void beforeEach() {
+        this.familiemedlemService = new FamiliemedlemService(behandlingService,
+            saksopplysningerService,
+            new EktefelleEllerPartnerFamiliemedlem(pdlConsumer),
+            pdlConsumer);
+    }
 
     @Test
     void hentFamiliemedlemmerFraBehandlingID_inaktivBehandlingMedTpsData() {
@@ -64,6 +74,23 @@ class FamiliemedlemServiceTest {
         when(pdlConsumer.hentBarn(IDENT_BARN)).thenReturn(lagPerson());
         when(pdlConsumer.hentEktefelleEllerPartner(IDENT_PERSON_GIFT)).thenReturn(lagPersonGift());
 
+
+        Set<Familiemedlem> familiemedlemmer = familiemedlemService.hentFamiliemedlemmerFraBehandlingID(behandlingID);
+
+
+        assertThat(familiemedlemmer).extracting(Familiemedlem::familierelasjon).contains(Familierelasjon.BARN, Familierelasjon.RELATERT_VED_SIVILSTAND);
+    }
+
+    @Test
+    void hentFamiliemedlemmerFraBehandlingID_aktivBehandling_korrigertPåSammeDato() {
+        long behandlingID = 1L;
+        when(behandlingService.hentBehandling(behandlingID)).thenReturn(lagBehandling());
+        when(pdlConsumer.hentFamilierelasjoner(IDENT_HOVEDPERSON))
+            .thenReturn(lagHovedpersonMedBarn_medKorrigertGiftSeparertSkiltPåSammeDato());
+        when(pdlConsumer.hentBarn(IDENT_BARN)).thenReturn(lagPerson());
+        when(pdlConsumer.hentEktefelleEllerPartner(IDENT_PERSON_GIFT)).thenReturn(lagPersonGift());
+
+
         Set<Familiemedlem> familiemedlemmer = familiemedlemService.hentFamiliemedlemmerFraBehandlingID(behandlingID);
 
 
@@ -86,14 +113,13 @@ class FamiliemedlemServiceTest {
 
     @Test
     void hentFamiliemedlemmer_dobbeltGiftemålSituasjon_forventerEttGiftemål_ogEttBarn() {
-
         Person hovedperson = lagHovedperson();
         Person giftPerson = lagPersonGift();
-
         when(pdlConsumer.hentEktefelleEllerPartner(IDENT_PERSON_GIFT)).thenReturn(giftPerson);
 
 
         Set<Familiemedlem> familiemedlemmer = familiemedlemService.hentFamiliemedlemmer(hovedperson);
+
 
         assertThat(familiemedlemmer)
             .isNotEmpty()
@@ -102,7 +128,6 @@ class FamiliemedlemServiceTest {
             .matches(Familiemedlem::erRelatertVedSivilstand)
             .extracting(Familiemedlem::navn)
             .matches(navn -> navn.harLiktFornavn(PERSON_GIFT_FORNAVN), "Har likt fornavn");
-
         verify(pdlConsumer, times(1)).hentEktefelleEllerPartner(IDENT_PERSON_GIFT);
     }
 

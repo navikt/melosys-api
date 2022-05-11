@@ -1,7 +1,9 @@
 package no.nav.melosys.service.persondata.familie;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
@@ -10,13 +12,12 @@ import no.nav.melosys.domain.person.familie.Familiemedlem;
 import no.nav.melosys.integrasjon.pdl.PDLConsumer;
 import no.nav.melosys.integrasjon.pdl.dto.person.ForelderBarnRelasjon;
 import no.nav.melosys.integrasjon.pdl.dto.person.Person;
-import no.nav.melosys.integrasjon.pdl.dto.person.Sivilstand;
 import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.persondata.familie.medlem.EktefelleEllerPartnerFamiliemedlem;
 import no.nav.melosys.service.persondata.mapping.FamiliemedlemOversetter;
 import no.nav.melosys.service.persondata.mapping.FoedselOversetter;
 import no.nav.melosys.service.persondata.mapping.FolkeregisteridentOversetter;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
@@ -26,13 +27,16 @@ import static java.time.temporal.ChronoUnit.YEARS;
 public class FamiliemedlemService {
     private final BehandlingService behandlingService;
     private final SaksopplysningerService saksopplysningerService;
+    private final EktefelleEllerPartnerFamiliemedlem ektefelleEllerPartnerFamiliemedlem;
     private final PDLConsumer pdlConsumer;
 
     public FamiliemedlemService(BehandlingService behandlingService,
                                 SaksopplysningerService saksopplysningerService,
+                                EktefelleEllerPartnerFamiliemedlem ektefelleEllerPartnerFamiliemedlem,
                                 @Qualifier("saksbehandler") PDLConsumer pdlConsumer) {
         this.behandlingService = behandlingService;
         this.saksopplysningerService = saksopplysningerService;
+        this.ektefelleEllerPartnerFamiliemedlem = ektefelleEllerPartnerFamiliemedlem;
         this.pdlConsumer = pdlConsumer;
     }
 
@@ -61,44 +65,11 @@ public class FamiliemedlemService {
         if (erPersonUnder18(hovedperson)) {
             familiemedlemmer.addAll(hentForeldre(hovedperson.forelderBarnRelasjon()));
         }
-
-        familiemedlemmer.addAll(hentEktefellerOgPartnere(hovedperson));
+        familiemedlemmer.addAll(ektefelleEllerPartnerFamiliemedlem.hentEktefelleEllerPartner(hovedperson.sivilstand()));
         familiemedlemmer.addAll(hentBarn(hovedperson));
         return familiemedlemmer;
     }
 
-    @NotNull
-    private Collection<Familiemedlem> hentEktefellerOgPartnere(Person hovedperson) {
-        List<Sivilstand> sivilstanderTilHovedperson = hovedperson.sivilstand().stream().toList();
-
-        if (sivilstanderTilHovedperson.isEmpty()) {
-            return Collections.emptySet();
-        }
-
-        if (sivilstanderTilHovedperson.size() > 1) {
-            Optional<Sivilstand> sisteSivilstand = sivilstanderTilHovedperson.stream()
-                .min(this::sammenlignSisteDatoRegistrert);
-            return hentEktefelleEllerPartner(sisteSivilstand.get());
-        }
-
-        return hentEktefelleEllerPartner(sivilstanderTilHovedperson.get(0));
-    }
-
-    @NotNull
-    private Set<Familiemedlem> hentEktefelleEllerPartner(Sivilstand sivilstand) {
-        if (sivilstand.erGyldigForEktefelleEllerPartner()) {
-            return lagFamiliemedlemFraSivilstand(sivilstand);
-        } else {
-            return Collections.emptySet();
-        }
-    }
-
-    @NotNull
-    private Set<Familiemedlem> lagFamiliemedlemFraSivilstand(Sivilstand sivilstand) {
-        String ident = sivilstand.relatertVedSivilstand();
-        Person person = pdlConsumer.hentEktefelleEllerPartner(ident);
-        return Set.of(FamiliemedlemOversetter.oversettEktefelleEllerPartner(person, sivilstand));
-    }
 
     private boolean erPersonUnder18(Person person) {
         return YEARS.between(FoedselOversetter.oversett(person.foedsel()).fødselsdato(), LocalDate.now()) < 18;
@@ -119,9 +90,6 @@ public class FamiliemedlemService {
             forelderBarnRelasjon.relatertPersonsRolle());
     }
 
-    private int sammenlignSisteDatoRegistrert(Sivilstand sivilstand1, Sivilstand sivilstand2) {
-        return sivilstand2.hentDatoSistRegistrert().compareTo(sivilstand1.hentDatoSistRegistrert());
-    }
 
     private Set<Familiemedlem> hentBarn(Person person) {
         Folkeregisteridentifikator folkeregisteridentifikator = FolkeregisteridentOversetter
