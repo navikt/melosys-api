@@ -1,7 +1,9 @@
 package no.nav.melosys.service.journalforing;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import no.finn.unleash.FakeUnleash;
@@ -407,6 +409,10 @@ class JournalfoeringServiceTest {
 
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer(saksnummer);
+        Behandling behandling = new Behandling();
+        behandling.setId(1L);
+        behandling.setStatus(Behandlingsstatus.AVSLUTTET);
+        fagsak.setBehandlinger(List.of(behandling));
 
         when(fagsakService.hentFagsak(saksnummer)).thenReturn(fagsak);
         when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
@@ -417,6 +423,18 @@ class JournalfoeringServiceTest {
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> journalfoeringService.journalførOgTilordneSak(tilordneDto))
             .withMessageContaining(" er ikke en lovlig behandlingstype ved knytting av dokument til sak");
+
+        tilordneDto.setBehandlingstypeKode(null);
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> journalfoeringService.journalførOgTilordneSak(tilordneDto))
+            .withMessageContaining("sisteBehandling (ID:1) for Fagsak MEL-0123 er avsluttet");
+
+        fagsak.setType(Sakstyper.EU_EOS);
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> journalfoeringService.journalførOgTilordneSak(tilordneDto))
+            .withMessageContaining("sisteBehandling (ID:1) for Fagsak MEL-0123 er avsluttet");
     }
 
     @Test
