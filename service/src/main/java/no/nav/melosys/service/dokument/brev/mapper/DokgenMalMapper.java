@@ -63,10 +63,6 @@ public class DokgenMalMapper {
         return Avslagbrev.av(((AvslagBrevbestilling) brevbestilling).toBuilder().build(), mangelbrevDatoer);
     }
 
-    private Henleggelsesbrev hentHenleggelsesbrev(DokgenBrevbestilling brevbestilling) {
-        return Henleggelsesbrev.av(((Henleggelsesbrevbestilling) brevbestilling).toBuilder().build());
-    }
-
     private DokgenDto lagDokgenDtoFraBestilling(DokgenBrevbestilling brevbestilling) {
         return switch (brevbestilling.getProduserbartdokument()) {
             case MELDING_FORVENTET_SAKSBEHANDLINGSTID, MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD -> SaksbehandlingstidSoknad.av(
@@ -102,7 +98,8 @@ public class DokgenMalMapper {
                 Aktoersroller.ARBEIDSGIVER
             );
             case AVSLAG_MANGLENDE_OPPLYSNINGER -> hentAvslagsbrev(brevbestilling);
-            case MELDING_HENLAGT_SAK -> hentHenleggelsesbrev(brevbestilling);
+            case MELDING_HENLAGT_SAK ->
+                Henleggelsesbrev.av(((HenleggelseBrevbestilling) brevbestilling).toBuilder().build());
             default -> throw new FunksjonellException(
                 format("ProduserbartDokument %s er ikke støttet av melosys-dokgen",
                     brevbestilling.getProduserbartdokument()));

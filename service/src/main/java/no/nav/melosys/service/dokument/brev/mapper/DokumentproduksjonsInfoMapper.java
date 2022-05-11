@@ -87,7 +87,7 @@ public class DokumentproduksjonsInfoMapper {
                 new DokumentproduksjonsInfo("henleggelse",
                     DokumentKategoriKode.IB.getKode(),
                     JournalforingsTittel.MELDING_HENLAGT_SAK.getTittel(), null))
-                        .build());
+            .build());
     }
 
     public DokumentproduksjonsInfoMapper(Unleash unleash) {

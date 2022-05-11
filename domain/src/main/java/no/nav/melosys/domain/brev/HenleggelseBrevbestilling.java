@@ -1,15 +1,15 @@
 package no.nav.melosys.domain.brev;
 
-public class Henleggelsesbrevbestilling extends DokgenBrevbestilling {
+public class HenleggelseBrevbestilling extends DokgenBrevbestilling {
     private String fritekst;
     private String begrunnelseKode;
 
-    public Henleggelsesbrevbestilling() {
+    public HenleggelseBrevbestilling() {
         super();
         //Tom constructor på grunn av deserialsering i prosessinstans
     }
 
-    public Henleggelsesbrevbestilling(Henleggelsesbrevbestilling.Builder builder) {
+    public HenleggelseBrevbestilling(HenleggelseBrevbestilling.Builder builder) {
         super(builder);
         this.fritekst = builder.fritekst;
         this.begrunnelseKode = builder.begrunnelseKode;
@@ -34,7 +34,7 @@ public class Henleggelsesbrevbestilling extends DokgenBrevbestilling {
         public Builder() {
         }
 
-        public Builder(Henleggelsesbrevbestilling fritekstbrevBrevbestilling) {
+        public Builder(HenleggelseBrevbestilling fritekstbrevBrevbestilling) {
             super(fritekstbrevBrevbestilling);
             this.fritekst = fritekstbrevBrevbestilling.fritekst;
             this.begrunnelseKode = fritekstbrevBrevbestilling.begrunnelseKode;
@@ -50,8 +50,8 @@ public class Henleggelsesbrevbestilling extends DokgenBrevbestilling {
             return this;
         }
 
-        public Henleggelsesbrevbestilling build() {
-            return new Henleggelsesbrevbestilling(this);
+        public HenleggelseBrevbestilling build() {
+            return new HenleggelseBrevbestilling(this);
         }
     }
 }

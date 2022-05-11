@@ -1,7 +1,7 @@
 package no.nav.melosys.integrasjon.dokgen.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import no.nav.melosys.domain.brev.Henleggelsesbrevbestilling;
+import no.nav.melosys.domain.brev.HenleggelseBrevbestilling;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 
 import java.time.LocalDate;
@@ -16,7 +16,7 @@ public class Henleggelsesbrev extends DokgenDto {
     @JsonFormat(shape = STRING)
     private final LocalDate datoMottatt;
 
-    private Henleggelsesbrev(Henleggelsesbrevbestilling brevbestilling, Aktoersroller mottakerType) {
+    private Henleggelsesbrev(HenleggelseBrevbestilling brevbestilling, Aktoersroller mottakerType) {
         super(brevbestilling, mottakerType);
         this.fritekst = brevbestilling.getFritekst();
         this.begrunnelseKode = brevbestilling.getBegrunnelseKode();
@@ -40,7 +40,7 @@ public class Henleggelsesbrev extends DokgenDto {
         return datoMottatt;
     }
 
-    public static Henleggelsesbrev av(Henleggelsesbrevbestilling brevbestilling) {
+    public static Henleggelsesbrev av(HenleggelseBrevbestilling brevbestilling) {
         return new Henleggelsesbrev(brevbestilling, Aktoersroller.BRUKER);
     }
 }
