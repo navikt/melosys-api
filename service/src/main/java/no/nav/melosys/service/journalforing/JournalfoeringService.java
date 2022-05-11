@@ -201,14 +201,11 @@ public class JournalfoeringService {
         if (behandlingstype != null) {
             prosessType = ProsessType.JFR_NY_VURDERING;
         } else {
-            prosessType = ProsessType.JFR_KNYTT;
+            throw new FunksjonellException("behandlingstype mangler for sak:" + saksnummer);
         }
 
         Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(prosessType, journalfoeringDto);
 
-        if (prosessType == ProsessType.JFR_KNYTT) {
-            prosessinstans.setBehandling(fagsak.hentSistAktivBehandling());
-        }
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, behandlingstype);
         prosessinstans.setData(ProsessDataKey.SAKSNUMMER, saksnummer);
         prosessinstans.setData(ProsessDataKey.JFR_INGEN_VURDERING, journalfoeringDto.isIngenVurdering());
@@ -227,12 +224,16 @@ public class JournalfoeringService {
     }
 
     private void validerBehandlingstype(Sakstyper sakstype, Behandlingstyper behandlingstype) {
-        if (sakstype == Sakstyper.EU_EOS && behandlingstype != Behandlingstyper.ENDRET_PERIODE) {
+        if (sakstype == Sakstyper.EU_EOS && erGyildigBehandlingstypeForEuEøs(behandlingstype)) {
             throw new FunksjonellException(behandlingstype + " er ikke en lovlig behandlingstype ved knytting av dokument til sak");
         }
         if (sakstype == Sakstyper.TRYGDEAVTALE && behandlingstype != Behandlingstyper.NY_VURDERING) {
             throw new FunksjonellException(behandlingstype + " er ikke en lovlig behandlingstype ved knytting av dokument til sak");
         }
+    }
+
+    private boolean erGyildigBehandlingstypeForEuEøs(Behandlingstyper behandlingstype) {
+        return behandlingstype != Behandlingstyper.ENDRET_PERIODE && behandlingstype != Behandlingstyper.NY_VURDERING;
     }
 
     private void valider(JournalfoeringDto journalfoeringDto) {
