@@ -33,11 +33,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.verification.VerificationMode;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class JournalfoeringServiceTest {
@@ -455,6 +455,28 @@ class JournalfoeringServiceTest {
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> journalfoeringService.journalførOgTilordneSak(tilordneDto))
             .withMessageContaining("sisteBehandling (ID:1) for Fagsak MEL-0123 er avsluttet");
+    }
+
+    @Test
+    void tilordneSakOgJournalfør_knyttVedAktiveBehandling_prosessinstansOpprettet() {
+        final String saksnummer = "MEL-0123";
+        tilordneDto.setSaksnummer(saksnummer);
+
+        Fagsak fagsak = new Fagsak();
+        fagsak.setSaksnummer(saksnummer);
+        Behandling behandling = new Behandling();
+        behandling.setId(1L);
+        behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
+        fagsak.setBehandlinger(List.of(behandling));
+
+        when(fagsakService.hentFagsak(saksnummer)).thenReturn(fagsak);
+        when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
+        when(prosessinstansService.lagJournalføringProsessinstans(eq(ProsessType.JFR_KNYTT), any()))
+            .thenReturn(new Prosessinstans());
+
+        tilordneDto.setBehandlingstypeKode(null);
+        journalfoeringService.journalførOgTilordneSak(tilordneDto);
+        verify(prosessinstansService).lagre(any(Prosessinstans.class));
     }
 
     @Test
