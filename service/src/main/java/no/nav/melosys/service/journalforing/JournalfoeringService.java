@@ -220,11 +220,13 @@ public class JournalfoeringService {
     private void validerTomBehandlingsType(Fagsak fagsak) {
         Behandling sisteBehandling = fagsak.hentSistRegistrertBehandling();
 
-        if (!sisteBehandling.erBehandlingAvSed() && sisteBehandling.erAvsluttet())
-            throw new FunksjonellException(
-                String.format("Den siste oppdaterte behandlingen (%d) for fagsak %s er avsluttet",
-                    sisteBehandling.getId(), fagsak.getSaksnummer())
-            );
+        if (sisteBehandling.getType() == Behandlingstyper.SED) return;
+        if (!sisteBehandling.erAvsluttet()) return;
+
+        throw new FunksjonellException(
+            String.format("Den siste oppdaterte behandlingen (%d) for fagsak %s er avsluttet",
+                sisteBehandling.getId(), fagsak.getSaksnummer())
+        );
     }
 
     private void validerKanTilknytteJournalpostForSedTilSak(Journalpost journalpost, String tilknyttTilSaksnummer) {
