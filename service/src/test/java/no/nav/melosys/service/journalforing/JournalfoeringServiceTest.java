@@ -1,5 +1,6 @@
 package no.nav.melosys.service.journalforing;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
@@ -475,6 +476,34 @@ class JournalfoeringServiceTest {
         verify(prosessinstansService).lagre(value);
 
         assertThat(value.getBehandling().getId()).isEqualTo(behandling.getId());
+    }
+
+    @Test
+    void tilordneSakOgJournalfør_flereBehandlinger_hentSisteRegistrerteVedFeiletValidering() {
+        tilordneDto.setSaksnummer(SAKSNUMMER);
+
+        Fagsak fagsak = new Fagsak();
+        fagsak.setSaksnummer(SAKSNUMMER);
+        Behandling behandling1 = new Behandling();
+        behandling1.setId(1L);
+        behandling1.setRegistrertDato(Instant.parse("2020-01-01T00:00:00Z"));
+        behandling1.setStatus(Behandlingsstatus.AVSLUTTET);
+
+        Behandling behandling2 = new Behandling();
+        behandling2.setId(2L);
+        behandling2.setRegistrertDato(Instant.parse("2021-01-01T00:00:00Z"));
+        behandling2.setStatus(Behandlingsstatus.AVSLUTTET);
+        fagsak.setBehandlinger(List.of(behandling1, behandling2));
+
+        when(fagsakService.hentFagsak(SAKSNUMMER)).thenReturn(fagsak);
+        when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
+
+        fagsak.setType(Sakstyper.EU_EOS);
+        tilordneDto.setBehandlingstypeKode(null);
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> journalfoeringService.journalførOgTilordneSak(tilordneDto))
+            .withMessage("Den siste oppdaterte behandlingen (2) for fagsak " + SAKSNUMMER + " er avsluttet");
     }
 
     @Test
