@@ -35,8 +35,8 @@ import static org.springframework.util.ObjectUtils.isEmpty;
 import static org.springframework.util.StringUtils.hasText;
 
 @Component
-public class OpprettJournalforBrev implements StegBehandler {
-    private static final Logger log = LoggerFactory.getLogger(OpprettJournalforBrev.class);
+public class OpprettOgJournalforBrev implements StegBehandler {
+    private static final Logger log = LoggerFactory.getLogger(OpprettOgJournalforBrev.class);
 
     private final BehandlingService behandlingService;
     private final DokgenService dokgenService;
@@ -47,14 +47,14 @@ public class OpprettJournalforBrev implements StegBehandler {
     private final DokumentNavnService dokumentNavnService;
     private final DokumentHentingService dokumentHentingService;
 
-    public OpprettJournalforBrev(BehandlingService behandlingService,
-                                 DokgenService dokgenService,
-                                 UtenlandskMyndighetService utenlandskMyndighetService,
-                                 @Qualifier("system") JoarkFasade joarkFasade,
-                                 @Qualifier("system") PersondataFasade persondataFasade,
-                                 @Qualifier("system") EregFasade eregFasade,
-                                 DokumentNavnService dokumentNavnService,
-                                 DokumentHentingService dokumentHentingService) {
+    public OpprettOgJournalforBrev(BehandlingService behandlingService,
+                                   DokgenService dokgenService,
+                                   UtenlandskMyndighetService utenlandskMyndighetService,
+                                   @Qualifier("system") JoarkFasade joarkFasade,
+                                   @Qualifier("system") PersondataFasade persondataFasade,
+                                   @Qualifier("system") EregFasade eregFasade,
+                                   DokumentNavnService dokumentNavnService,
+                                   DokumentHentingService dokumentHentingService) {
         this.behandlingService = behandlingService;
         this.dokgenService = dokgenService;
         this.utenlandskMyndighetService = utenlandskMyndighetService;

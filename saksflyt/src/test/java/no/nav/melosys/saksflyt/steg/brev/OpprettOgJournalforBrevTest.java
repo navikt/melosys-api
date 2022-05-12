@@ -42,7 +42,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class OpprettJournalforBrevTest {
+class OpprettOgJournalforBrevTest {
 
     @Mock
     private BehandlingService mockBehandlingService;
@@ -63,11 +63,11 @@ class OpprettJournalforBrevTest {
     @Captor
     ArgumentCaptor<OpprettJournalpost> opprettJournalpostCaptor;
 
-    private OpprettJournalforBrev opprettJournalforBrev;
+    private OpprettOgJournalforBrev opprettJournalforBrev;
 
     @BeforeEach
     void init() {
-        opprettJournalforBrev = new OpprettJournalforBrev(mockBehandlingService, mockDokgenService,
+        opprettJournalforBrev = new OpprettOgJournalforBrev(mockBehandlingService, mockDokgenService,
             mockUtenlandskMyndighetService, mockJoarkFasade, mockPersondataFasade, mockEregFasade,
             mockDokumentNavnService, mockDokumentHentingService);
     }
