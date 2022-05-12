@@ -7,7 +7,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.RegistreringsInfo;
 import no.nav.melosys.domain.arkiv.DokumentReferanse;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
@@ -217,10 +216,9 @@ public class FagsakTjeneste {
             fagsakOppsummeringDto.setSaksstatus(fagsak.getStatus());
             fagsakOppsummeringDto.setOpprettetDato(fagsak.getRegistrertDato());
 
-            List<Behandling> behandlinger = fagsak.getBehandlinger();
+            List<Behandling> behandlinger = fagsak.hentBehandlingerSortertPåRegistertDato();
 
             List<BehandlingOversiktDto> behandlingOversiktDtoer = behandlinger.stream()
-                .sorted(Comparator.comparing(RegistreringsInfo::getRegistrertDato).reversed())
                 .map(this::tilBehandlingOversiktDto)
                 .toList();
 

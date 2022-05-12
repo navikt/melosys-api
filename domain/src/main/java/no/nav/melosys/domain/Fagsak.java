@@ -102,6 +102,19 @@ public class Fagsak extends RegistreringsInfo {
             .orElseThrow(() -> new IkkeFunnetException(FINNER_IKKE_BEHANDLINGER_FOR_FAGSAK + saksnummer));
     }
 
+    public List<Behandling> hentBehandlingerSortertPåRegistertDato() {
+        return getBehandlinger().stream()
+            .sorted(Comparator.comparing(RegistreringsInfo::getRegistrertDato).reversed())
+            .toList();
+    }
+
+    public Behandling hentSistRegistrertBehandling() {
+        return hentBehandlingerSortertPåRegistertDato()
+            .stream()
+            .findFirst()
+            .orElseThrow(() -> new IkkeFunnetException(FINNER_IKKE_BEHANDLINGER_FOR_FAGSAK + saksnummer));
+    }
+
     public Behandling hentSistOppdatertBehandling() {
         return getBehandlinger().stream()
             .max(Comparator.comparing(Behandling::getEndretDato))

@@ -218,7 +218,7 @@ public class JournalfoeringService {
     }
 
     private void validerIkkeAvsluttetBehandling(Fagsak fagsak) {
-        Behandling sisteBehandling = fagsak.hentSistOppdatertBehandling();
+        Behandling sisteBehandling = fagsak.hentSistRegistrertBehandling();
         if (sisteBehandling.erAvsluttet())
             throw new FunksjonellException(
                 String.format("Den siste oppdaterte behandlingen (%d) for fagsak %s er avsluttet",
