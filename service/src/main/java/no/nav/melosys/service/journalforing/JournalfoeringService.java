@@ -201,7 +201,7 @@ public class JournalfoeringService {
         if (behandlingstype != null) {
             prosessType = ProsessType.JFR_NY_VURDERING;
         } else {
-            validerIkkeAvsluttetBehandling(fagsak);
+            validerTomBehandlingsType(fagsak);
             prosessType = ProsessType.JFR_KNYTT;
         }
 
@@ -217,9 +217,10 @@ public class JournalfoeringService {
         prosessinstansService.lagre(prosessinstans);
     }
 
-    private void validerIkkeAvsluttetBehandling(Fagsak fagsak) {
+    private void validerTomBehandlingsType(Fagsak fagsak) {
         Behandling sisteBehandling = fagsak.hentSistRegistrertBehandling();
-        if (sisteBehandling.erAvsluttet())
+
+        if (!sisteBehandling.erBehandlingAvSed() && sisteBehandling.erAvsluttet())
             throw new FunksjonellException(
                 String.format("Den siste oppdaterte behandlingen (%d) for fagsak %s er avsluttet",
                     sisteBehandling.getId(), fagsak.getSaksnummer())
