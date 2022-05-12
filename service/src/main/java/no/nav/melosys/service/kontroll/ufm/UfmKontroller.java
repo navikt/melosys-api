@@ -39,9 +39,9 @@ final class UfmKontroller {
     }
 
     static Kontroll_begrunnelser periodeOver24MånederOgEnDag(UfmKontrollData kontrollData) {
-        return PeriodeKontroller.periodeOver24MånederOgEnDag(
-            kontrollData.getSedDokument().getLovvalgsperiode().getFom(), kontrollData.getSedDokument().getLovvalgsperiode().getTom()) ?
-            Kontroll_begrunnelser.PERIODEN_OVER_24_MD : null;
+        LocalDate fom = kontrollData.getSedDokument().getLovvalgsperiode().getFom();
+        LocalDate tom = kontrollData.getSedDokument().getLovvalgsperiode().getTom();
+        return PeriodeKontroller.periodeOver2ÅrOgEnDag(fom, tom) ? Kontroll_begrunnelser.PERIODEN_OVER_24_MD : null;
     }
 
     static Kontroll_begrunnelser periodeOver5År(UfmKontrollData kontrollData) {
