@@ -12,6 +12,7 @@ import no.nav.melosys.domain.msm.AltinnDokument;
 
 import static no.nav.melosys.domain.arkiv.DokumentVariant.lagDokumentVariant;
 
+@SuppressWarnings("ALL")
 public class FysiskDokument extends ArkivDokument {
     private static final String DOKUMENT_KATEGORI_SED = "SED";
     private static final String DOKUMENT_KATEGORI_SOKNAD = "SOK";
@@ -65,18 +66,18 @@ public class FysiskDokument extends ArkivDokument {
         return fysiskDokument;
     }
 
-    static List<FysiskDokument> lagFysiskDokumentFraVedlegg(JournalpostBestilling journalpostBestilling,
-                                                            List<Vedlegg> vedlegg) {
-        if (vedlegg == null) {
+    static List<FysiskDokument> lagFysiskDokumentListeFraVedlegg(JournalpostBestilling journalpostBestilling,
+                                                                 List<Vedlegg> vedleggListe) {
+        if (vedleggListe == null) {
             return null;
         }
-        return vedlegg.stream().map(
-            vedleggBestilling -> {
+        return vedleggListe.stream().map(
+            vedlegg -> {
                 FysiskDokument fysiskDokument = new FysiskDokument();
-                fysiskDokument.setTittel(vedleggBestilling.getTittel());
+                fysiskDokument.setTittel(vedlegg.getTittel());
                 fysiskDokument.setBrevkode(journalpostBestilling.getBrevkode());
                 fysiskDokument.setDokumentKategori(journalpostBestilling.getDokumentKategori());
-                fysiskDokument.setDokumentVarianter(Collections.singletonList(lagDokumentVariant(vedleggBestilling.getInnhold())));
+                fysiskDokument.setDokumentVarianter(Collections.singletonList(lagDokumentVariant(vedlegg.getInnhold())));
                 return fysiskDokument;
             }
         ).toList();

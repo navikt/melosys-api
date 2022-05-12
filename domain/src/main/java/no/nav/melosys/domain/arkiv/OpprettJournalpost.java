@@ -123,7 +123,7 @@ public class OpprettJournalpost extends Journalpost {
         opprettJournalpost.setKorrespondansepartNavn(bestilling.getMottakerNavn());
         opprettJournalpost.setKorrespondansepartIdType(bestilling.getMottakerIdType());
         opprettJournalpost.setInnhold(opprettJournalpost.getHoveddokument().getTittel());
-        opprettJournalpost.setVedlegg(FysiskDokument.lagFysiskDokumentFraVedlegg(bestilling, bestilling.getVedlegg()));
+        opprettJournalpost.setVedlegg(FysiskDokument.lagFysiskDokumentListeFraVedlegg(bestilling, bestilling.getVedlegg()));
 
         return opprettJournalpost;
     }

@@ -12,7 +12,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class FysiskDokumentTest {
 
     @Test
-    void lagFysiskDokumentFraVedlegg_lagerFysiskDokumentMedKorrektInformasjon() {
+    void lagFysiskDokumentListeFraVedlegg_lagerFysiskDokumentMedKorrektInformasjon() {
         var vedlegg1Innhold = new byte[]{1, 2, 3};
         var vedlegg2Innhold = new byte[]{4, 5, 6};
         Vedlegg vedlegg1 = new Vedlegg(vedlegg1Innhold, "tittel for vedlegg1");
@@ -22,7 +22,7 @@ class FysiskDokumentTest {
             .medDokumentKategori("kategory y0").build();
 
 
-        List<FysiskDokument> fysiskeDokumenter = FysiskDokument.lagFysiskDokumentFraVedlegg(journalpostBestilling,
+        List<FysiskDokument> fysiskeDokumenter = FysiskDokument.lagFysiskDokumentListeFraVedlegg(journalpostBestilling,
             Arrays.asList(vedlegg1, vedlegg2));
 
         assertThat(fysiskeDokumenter).hasSize(2).extracting(
