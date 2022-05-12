@@ -479,6 +479,31 @@ class JournalfoeringServiceTest {
     }
 
     @Test
+    void tilordneSakOgJournalfør_knyttVedBehandlingstypeSED_prosessinstansOpprettet() {
+        tilordneDto.setSaksnummer(SAKSNUMMER);
+
+        Fagsak fagsak = new Fagsak();
+        fagsak.setSaksnummer(SAKSNUMMER);
+        Behandling behandling = new Behandling();
+        behandling.setId(1L);
+        behandling.setStatus(Behandlingsstatus.AVSLUTTET);
+        behandling.setType(Behandlingstyper.SED);
+        fagsak.setBehandlinger(List.of(behandling));
+
+        when(fagsakService.hentFagsak(SAKSNUMMER)).thenReturn(fagsak);
+        when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
+        Prosessinstans value = new Prosessinstans();
+        when(prosessinstansService.lagJournalføringProsessinstans(eq(ProsessType.JFR_KNYTT), any()))
+            .thenReturn(value);
+
+        tilordneDto.setBehandlingstypeKode(null);
+        journalfoeringService.journalførOgTilordneSak(tilordneDto);
+        verify(prosessinstansService).lagre(value);
+
+        assertThat(value.getBehandling().getId()).isEqualTo(behandling.getId());
+    }
+
+    @Test
     void tilordneSakOgJournalfør_flereBehandlinger_hentSisteRegistrerteVedFeiletValidering() {
         tilordneDto.setSaksnummer(SAKSNUMMER);
 
