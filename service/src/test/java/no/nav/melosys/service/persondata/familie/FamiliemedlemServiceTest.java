@@ -15,7 +15,7 @@ import no.nav.melosys.integrasjon.pdl.dto.person.Person;
 import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory;
-import no.nav.melosys.service.persondata.familie.medlem.EktefelleEllerPartnerFamiliemedlem;
+import no.nav.melosys.service.persondata.familie.medlem.EktefelleEllerPartnerFamiliemedlemFilter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -45,7 +45,7 @@ class FamiliemedlemServiceTest {
     public void beforeEach() {
         this.familiemedlemService = new FamiliemedlemService(behandlingService,
             saksopplysningerService,
-            new EktefelleEllerPartnerFamiliemedlem(pdlConsumer),
+            new EktefelleEllerPartnerFamiliemedlemFilter(pdlConsumer),
             pdlConsumer);
     }
 

@@ -16,17 +16,17 @@ import org.springframework.stereotype.Component;
 import static no.nav.melosys.integrasjon.pdl.dto.person.Sivilstandstype.*;
 
 @Component
-public class EktefelleEllerPartnerFamiliemedlem {
+public class EktefelleEllerPartnerFamiliemedlemFilter {
 
     private final PDLConsumer pdlConsumer;
 
-    public EktefelleEllerPartnerFamiliemedlem(PDLConsumer pdlConsumer) {
+    public EktefelleEllerPartnerFamiliemedlemFilter(PDLConsumer pdlConsumer) {
         this.pdlConsumer = pdlConsumer;
     }
 
     @NotNull
-    public Collection<Familiemedlem> hentEktefelleEllerPartner(Collection<Sivilstand> sivilstandCollection) {
-        List<Sivilstand> sivilstanderTilHovedperson = sivilstandCollection.stream().toList();
+    public Collection<Familiemedlem> hentEktefelleEllerPartnerFraSivilstander(Collection<Sivilstand> sivilstander) {
+        List<Sivilstand> sivilstanderTilHovedperson = sivilstander.stream().toList();
 
         if (sivilstanderTilHovedperson.isEmpty()) {
             return Collections.emptySet();
@@ -38,10 +38,10 @@ public class EktefelleEllerPartnerFamiliemedlem {
 
             Optional<Sivilstand> sisteSivilstand = aktuelleSivilstanderTilHovedperson.stream()
                 .min(this::sammenlignSisteDatoRegistrert);
-            return hentEktefelleEllerPartner(sisteSivilstand.get());
+            return hentEktefelleEllerPartnerFraSivilstander(sisteSivilstand.get());
         }
 
-        return hentEktefelleEllerPartner(sivilstanderTilHovedperson.get(0));
+        return hentEktefelleEllerPartnerFraSivilstander(sivilstanderTilHovedperson.get(0));
     }
 
     private List<Sivilstand> hentSivilstanderSomIkkeErGiftSamtidigSomSeparertEllerSkilt(List<Sivilstand> sivilstanderTilHovedperson) {
@@ -63,7 +63,7 @@ public class EktefelleEllerPartnerFamiliemedlem {
     }
 
     @NotNull
-    private Set<Familiemedlem> hentEktefelleEllerPartner(Sivilstand sivilstand) {
+    private Set<Familiemedlem> hentEktefelleEllerPartnerFraSivilstander(Sivilstand sivilstand) {
         if (sivilstand.erGyldigForEktefelleEllerPartner()) {
             return lagFamiliemedlemFraSivilstand(sivilstand);
         } else {

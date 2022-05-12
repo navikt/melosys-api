@@ -14,7 +14,7 @@ import no.nav.melosys.integrasjon.pdl.dto.person.ForelderBarnRelasjon;
 import no.nav.melosys.integrasjon.pdl.dto.person.Person;
 import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.persondata.familie.medlem.EktefelleEllerPartnerFamiliemedlem;
+import no.nav.melosys.service.persondata.familie.medlem.EktefelleEllerPartnerFamiliemedlemFilter;
 import no.nav.melosys.service.persondata.mapping.FamiliemedlemOversetter;
 import no.nav.melosys.service.persondata.mapping.FoedselOversetter;
 import no.nav.melosys.service.persondata.mapping.FolkeregisteridentOversetter;
@@ -27,16 +27,16 @@ import static java.time.temporal.ChronoUnit.YEARS;
 public class FamiliemedlemService {
     private final BehandlingService behandlingService;
     private final SaksopplysningerService saksopplysningerService;
-    private final EktefelleEllerPartnerFamiliemedlem ektefelleEllerPartnerFamiliemedlem;
+    private final EktefelleEllerPartnerFamiliemedlemFilter ektefelleEllerPartnerFamiliemedlemFilter;
     private final PDLConsumer pdlConsumer;
 
     public FamiliemedlemService(BehandlingService behandlingService,
                                 SaksopplysningerService saksopplysningerService,
-                                EktefelleEllerPartnerFamiliemedlem ektefelleEllerPartnerFamiliemedlem,
+                                EktefelleEllerPartnerFamiliemedlemFilter ektefelleEllerPartnerFamiliemedlemFilter,
                                 @Qualifier("saksbehandler") PDLConsumer pdlConsumer) {
         this.behandlingService = behandlingService;
         this.saksopplysningerService = saksopplysningerService;
-        this.ektefelleEllerPartnerFamiliemedlem = ektefelleEllerPartnerFamiliemedlem;
+        this.ektefelleEllerPartnerFamiliemedlemFilter = ektefelleEllerPartnerFamiliemedlemFilter;
         this.pdlConsumer = pdlConsumer;
     }
 
@@ -65,7 +65,8 @@ public class FamiliemedlemService {
         if (erPersonUnder18(hovedperson)) {
             familiemedlemmer.addAll(hentForeldre(hovedperson.forelderBarnRelasjon()));
         }
-        familiemedlemmer.addAll(ektefelleEllerPartnerFamiliemedlem.hentEktefelleEllerPartner(hovedperson.sivilstand()));
+        familiemedlemmer.addAll(ektefelleEllerPartnerFamiliemedlemFilter.hentEktefelleEllerPartnerFraSivilstander(
+            hovedperson.sivilstand()));
         familiemedlemmer.addAll(hentBarn(hovedperson));
         return familiemedlemmer;
     }

@@ -5,7 +5,7 @@ import java.util.Collection;
 import no.nav.melosys.domain.person.familie.Familiemedlem;
 import no.nav.melosys.integrasjon.pdl.PDLConsumer;
 import no.nav.melosys.integrasjon.pdl.dto.person.Sivilstand;
-import no.nav.melosys.service.persondata.familie.medlem.EktefelleEllerPartnerFamiliemedlem;
+import no.nav.melosys.service.persondata.familie.medlem.EktefelleEllerPartnerFamiliemedlemFilter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -17,13 +17,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class EktefelleEllerPartnerFamiliemedlemTest {
+class EktefelleEllerPartnerFamiliemedlemFilterTest {
 
     @Mock
     private PDLConsumer pdlConsumer;
 
     @InjectMocks
-    private EktefelleEllerPartnerFamiliemedlem ektefelleEllerPartnerFamiliemedlem;
+    private EktefelleEllerPartnerFamiliemedlemFilter ektefelleEllerPartnerFamiliemedlemFilter;
 
     @Test
     void test() {
@@ -31,7 +31,8 @@ class EktefelleEllerPartnerFamiliemedlemTest {
         Collection<Sivilstand> sivilstandTilHovedperson = lagSivilstandForHovedperson();
 
 
-        var result = ektefelleEllerPartnerFamiliemedlem.hentEktefelleEllerPartner(sivilstandTilHovedperson);
+        var result = ektefelleEllerPartnerFamiliemedlemFilter.hentEktefelleEllerPartnerFraSivilstander(
+            sivilstandTilHovedperson);
 
 
         assertThat(result).hasSize(1);
