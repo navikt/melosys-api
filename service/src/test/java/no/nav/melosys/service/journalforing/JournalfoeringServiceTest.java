@@ -448,13 +448,13 @@ class JournalfoeringServiceTest {
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> journalfoeringService.journalførOgTilordneSak(tilordneDto))
-            .withMessageContaining("sisteBehandling (ID:1) for Fagsak MEL-0123 er avsluttet");
+            .withMessageContaining("Den siste oppdaterte behandlingen (1) for fagsak MEL-0123 er avsluttet");
 
         fagsak.setType(Sakstyper.EU_EOS);
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> journalfoeringService.journalførOgTilordneSak(tilordneDto))
-            .withMessageContaining("sisteBehandling (ID:1) for Fagsak MEL-0123 er avsluttet");
+            .withMessageContaining("Den siste oppdaterte behandlingen (1) for fagsak MEL-0123 er avsluttet");
     }
 
     @Test
