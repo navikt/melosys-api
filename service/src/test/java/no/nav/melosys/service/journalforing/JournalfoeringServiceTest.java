@@ -429,7 +429,7 @@ class JournalfoeringServiceTest {
     }
 
     @Test
-    void tilordneSakOgJournalfør_avsluttetetBehandlingErIkkeTillattVedKnyttingAvDokument_kasterException() {
+    void tilordneSakOgJournalfør_avsluttetBehandlingErIkkeTillattVedKnyttingAvDokument_kasterException() {
         final String saksnummer = "MEL-0123";
         tilordneDto.setSaksnummer(saksnummer);
 
