@@ -216,7 +216,7 @@ public class FagsakTjeneste {
             fagsakOppsummeringDto.setSaksstatus(fagsak.getStatus());
             fagsakOppsummeringDto.setOpprettetDato(fagsak.getRegistrertDato());
 
-            List<Behandling> behandlinger = fagsak.hentBehandlingerSortertPåRegistertDato();
+            List<Behandling> behandlinger = fagsak.hentBehandlingerSortertSynkendePåRegistrertDato();
 
             List<BehandlingOversiktDto> behandlingOversiktDtoer = behandlinger.stream()
                 .map(this::tilBehandlingOversiktDto)

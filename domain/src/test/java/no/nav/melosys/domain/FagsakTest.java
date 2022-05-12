@@ -1,11 +1,7 @@
 package no.nav.melosys.domain;
 
 import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
@@ -112,7 +108,7 @@ class FagsakTest {
 
         fagsak.setBehandlinger(List.of(behandling1, behandling2));
 
-        List<Instant> registrerteDatoer = fagsak.hentBehandlingerSortertPåRegistertDato().stream().map(Behandling::getRegistrertDato).toList();
+        List<Instant> registrerteDatoer = fagsak.hentBehandlingerSortertSynkendePåRegistrertDato().stream().map(Behandling::getRegistrertDato).toList();
         assertThat(registrerteDatoer)
             .isEqualTo(List.of(behandling2.registrertDato, behandling1.registrertDato));
     }
