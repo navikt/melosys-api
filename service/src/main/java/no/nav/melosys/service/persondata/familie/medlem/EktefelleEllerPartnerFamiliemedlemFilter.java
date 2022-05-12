@@ -34,32 +34,49 @@ public class EktefelleEllerPartnerFamiliemedlemFilter {
 
         if (sivilstanderTilHovedperson.size() > 1) {
             List<Sivilstand> aktuelleSivilstanderTilHovedperson =
-                hentSivilstanderSomIkkeErGiftSamtidigSomSeparertEllerSkilt(sivilstanderTilHovedperson);
+                hentSivilstanderSomIkkeErGiftOgSkiltPåSammeTidspunkt(sivilstanderTilHovedperson);
 
-            Optional<Sivilstand> sisteSivilstand = aktuelleSivilstanderTilHovedperson.stream()
-                .min(this::sammenlignSisteDatoRegistrert);
+            Optional<Sivilstand> sisteSivilstand = hentSisteSivilstand(aktuelleSivilstanderTilHovedperson);
             return hentEktefelleEllerPartnerFraSivilstander(sisteSivilstand.get());
         }
 
         return hentEktefelleEllerPartnerFraSivilstander(sivilstanderTilHovedperson.get(0));
     }
 
-    private List<Sivilstand> hentSivilstanderSomIkkeErGiftSamtidigSomSeparertEllerSkilt(List<Sivilstand> sivilstanderTilHovedperson) {
+    @NotNull
+    private Optional<Sivilstand> hentSisteSivilstand(List<Sivilstand> aktuelleSivilstanderTilHovedperson) {
+        return aktuelleSivilstanderTilHovedperson.stream().min(this::sammenlignSisteDatoRegistrert);
+    }
+
+    private List<Sivilstand> hentSivilstanderSomIkkeErGiftOgSkiltPåSammeTidspunkt(List<Sivilstand> sivilstanderTilHovedperson) {
         return sivilstanderTilHovedperson.stream()
             .collect(Collectors.groupingBy(HarMetadata::hentDatoSistRegistrert)).values().stream()
-            .map(this::lagSivilstanderSomIkkeErSeparertEllerSkilt)
+            .map(this::lagSivilstanderSomIkkeErSkiltOgGiftSamtidig)
             .filter(Objects::nonNull)
             .flatMap(Collection::stream).toList();
     }
 
-    private List<Sivilstand> lagSivilstanderSomIkkeErSeparertEllerSkilt(List<Sivilstand> sivilstandList) {
+    private List<Sivilstand> lagSivilstanderSomIkkeErSkiltOgGiftSamtidig(List<Sivilstand> sivilstandList) {
         List<Sivilstandstype> sivilstandstyper = sivilstandList.stream().map(Sivilstand::type).toList();
-        return erIkkeGiftSamtidigSomSkiltEllerSeparert(sivilstandstyper) ? sivilstandList : null;
+
+        if (erGiftSamtidigSomSeparertUtenÅVæreSkilt(sivilstandstyper)) {
+            return hentSeparertSivilstand(sivilstandList);
+        }
+
+        return erIkkeGiftSamtidigSomSkilt(sivilstandstyper) ? sivilstandList : null;
     }
 
-    private boolean erIkkeGiftSamtidigSomSkiltEllerSeparert(List<Sivilstandstype> sivilstandstyper) {
-        return !sivilstandstyper.containsAll(List.of(GIFT, SEPARERT)) &&
-            !sivilstandstyper.containsAll(List.of(GIFT, SKILT));
+    @NotNull
+    private List<Sivilstand> hentSeparertSivilstand(List<Sivilstand> sivilstandList) {
+        return sivilstandList.stream().filter(sivilstand -> sivilstand.type() == SEPARERT).toList();
+    }
+
+    private boolean erGiftSamtidigSomSeparertUtenÅVæreSkilt(List<Sivilstandstype> sivilstandstyper) {
+        return sivilstandstyper.containsAll(List.of(GIFT, SEPARERT)) && !sivilstandstyper.contains(SKILT);
+    }
+
+    private boolean erIkkeGiftSamtidigSomSkilt(List<Sivilstandstype> sivilstandstyper) {
+        return !sivilstandstyper.containsAll(List.of(GIFT, SKILT));
     }
 
     @NotNull
