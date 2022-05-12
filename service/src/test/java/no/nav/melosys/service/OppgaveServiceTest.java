@@ -20,6 +20,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
+import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.oppgave.OppgaveFasade;
 import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -39,7 +40,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
@@ -53,6 +54,8 @@ class OppgaveServiceTest {
     private OppgaveFasade oppgaveFasade;
     @Mock
     private PersondataFasade persondataFasade;
+    @Mock
+    private EregFasade eregFasade;
     @Mock
     private SaksopplysningerService saksopplysningerService;
     @Mock
@@ -76,7 +79,9 @@ class OppgaveServiceTest {
             fagsakService,
             oppgaveFasade,
             saksopplysningerService,
-            behandlingsgrunnlagService, persondataFasade);
+            behandlingsgrunnlagService,
+            persondataFasade,
+            eregFasade);
 
         oppgave = new Oppgave.Builder()
             .setOppgavetype(Oppgavetyper.BEH_SAK_MK)
@@ -117,7 +122,7 @@ class OppgaveServiceTest {
 
         List<OppgaveDto> mineSaker = oppgaveService.hentOppgaverMedAnsvarlig(tilordnetRessurs);
 
-        assertThat(mineSaker.size()).isEqualTo(2);
+        assertThat(mineSaker).hasSize(2);
 
         Optional<OppgaveDto> behOppgOpt = mineSaker.stream()
             .filter(o -> o.getOppgaveID().equals(behOppgID))
@@ -134,7 +139,7 @@ class OppgaveServiceTest {
     }
 
     @Test
-    void hentOppgaverMedAnsvarlig_aktøridErNull_forventUkjentFNROgSammenssattNavn() {
+    void hentOppgaverMedAnsvarlig_aktøridOgOrgnrErNull_forventUkjentIdOgNavn() {
         final String jfrOppgID = "2";
         final String tilordnetRessurs = "Z2222";
 
@@ -142,21 +147,79 @@ class OppgaveServiceTest {
         oppgave.setOppgaveId(jfrOppgID);
         oppgave.setOppgavetype(Oppgavetyper.JFR);
         oppgave.setAktørId(null);
+        oppgave.setOrgnr(null);
         Set<Oppgave> oppgaver = Set.of(oppgave.build());
 
         when(oppgaveFasade.finnOppgaverMedAnsvarlig(tilordnetRessurs)).thenReturn(oppgaver);
 
         List<OppgaveDto> mineSaker = oppgaveService.hentOppgaverMedAnsvarlig(tilordnetRessurs);
 
-        assertThat(mineSaker.size()).isEqualTo(1);
+        assertThat(mineSaker).hasSize(1);
 
         Optional<OppgaveDto> jfrOppgDt = mineSaker.stream().findFirst();
 
-        assertThat(jfrOppgDt.isPresent()).isTrue();
+        assertThat(jfrOppgDt).isPresent();
         OppgaveDto oppgaveDto = jfrOppgDt.get();
 
-        assertThat(oppgaveDto.getFnr()).isEqualTo("UKJENT");
-        assertThat(oppgaveDto.getSammensattNavn()).isEqualTo("UKJENT");
+        assertThat(oppgaveDto.getId()).isEqualTo("UKJENT");
+        assertThat(oppgaveDto.getNavn()).isEqualTo("UKJENT");
+    }
+
+    @Test
+    void hentOppgaverMedAnsvarlig_aktørIdEksisterer_forventFnrOgSammensattNavn() {
+        final String jfrOppgID = "2";
+        final String tilordnetRessurs = "Z2222";
+
+        Oppgave.Builder oppgave = new Oppgave.Builder();
+        oppgave.setOppgaveId(jfrOppgID);
+        oppgave.setOppgavetype(Oppgavetyper.JFR);
+        oppgave.setAktørId("1111");
+        oppgave.setOrgnr(null);
+        Set<Oppgave> oppgaver = Set.of(oppgave.build());
+
+        when(oppgaveFasade.finnOppgaverMedAnsvarlig(tilordnetRessurs)).thenReturn(oppgaver);
+        when(persondataFasade.finnFolkeregisterident("1111")).thenReturn(Optional.of("fnr"));
+        when(persondataFasade.hentSammensattNavn("fnr")).thenReturn("sammensatt navn");
+
+        List<OppgaveDto> mineSaker = oppgaveService.hentOppgaverMedAnsvarlig(tilordnetRessurs);
+
+        assertThat(mineSaker).hasSize(1);
+
+        Optional<OppgaveDto> jfrOppgDt = mineSaker.stream().findFirst();
+
+        assertThat(jfrOppgDt).isPresent();
+        OppgaveDto oppgaveDto = jfrOppgDt.get();
+
+        assertThat(oppgaveDto.getId()).isEqualTo("fnr");
+        assertThat(oppgaveDto.getNavn()).isEqualTo("sammensatt navn");
+    }
+
+    @Test
+    void hentOppgaverMedAnsvarlig_orgnrEksisterer_forventOrgnrOgNavn() {
+        final String jfrOppgID = "2";
+        final String tilordnetRessurs = "Z2222";
+
+        Oppgave.Builder oppgave = new Oppgave.Builder();
+        oppgave.setOppgaveId(jfrOppgID);
+        oppgave.setOppgavetype(Oppgavetyper.JFR);
+        oppgave.setAktivDato(null);
+        oppgave.setOrgnr("2222");
+        Set<Oppgave> oppgaver = Set.of(oppgave.build());
+
+        when(oppgaveFasade.finnOppgaverMedAnsvarlig(tilordnetRessurs)).thenReturn(oppgaver);
+        when(eregFasade.hentOrganisasjonNavn("2222")).thenReturn("organisasjonsnavn");
+
+        List<OppgaveDto> mineSaker = oppgaveService.hentOppgaverMedAnsvarlig(tilordnetRessurs);
+
+        assertThat(mineSaker).hasSize(1);
+
+        Optional<OppgaveDto> jfrOppgDt = mineSaker.stream().findFirst();
+
+        assertThat(jfrOppgDt).isPresent();
+        OppgaveDto oppgaveDto = jfrOppgDt.get();
+
+        assertThat(oppgaveDto.getId()).isEqualTo("2222");
+        assertThat(oppgaveDto.getNavn()).isEqualTo("organisasjonsnavn");
     }
 
     @Test
