@@ -237,7 +237,7 @@ public class JournalfoeringService {
     }
 
     private void validerBehandlingstype(Sakstyper sakstype, Behandlingstyper behandlingstype) {
-        if (sakstype == Sakstyper.EU_EOS && erGyildigBehandlingstypeForEuEøs(behandlingstype)) {
+        if (sakstype == Sakstyper.EU_EOS && erUgyldigBehandlingstypeForEuEøs(behandlingstype)) {
             throw new FunksjonellException(behandlingstype + " er ikke en lovlig behandlingstype ved knytting av dokument til sak");
         }
         if (sakstype == Sakstyper.TRYGDEAVTALE && behandlingstype != Behandlingstyper.NY_VURDERING) {
@@ -245,7 +245,7 @@ public class JournalfoeringService {
         }
     }
 
-    private boolean erGyildigBehandlingstypeForEuEøs(Behandlingstyper behandlingstype) {
+    private boolean erUgyldigBehandlingstypeForEuEøs(Behandlingstyper behandlingstype) {
         return behandlingstype != Behandlingstyper.ENDRET_PERIODE && behandlingstype != Behandlingstyper.NY_VURDERING;
     }
 
