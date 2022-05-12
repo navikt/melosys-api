@@ -158,7 +158,7 @@ public class OpprettOgJournalforBrev implements StegBehandler {
         if (brevbestilling.getSaksvedleggBestilling() == null) {
             return null;
         }
-        List<Journalpost> journalposterForSaken = dokumentHentingService.hentDokumenter(fagsaknummer);
+        List<Journalpost> journalposterForSaken = dokumentHentingService.hentJournalposter(fagsaknummer);
         List<SaksvedleggBestilling> saksvedleggbestillingListe = brevbestilling.getSaksvedleggBestilling();
 
         return saksvedleggbestillingListe.stream()

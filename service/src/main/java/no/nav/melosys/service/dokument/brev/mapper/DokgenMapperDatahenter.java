@@ -91,7 +91,7 @@ public class DokgenMapperDatahenter {
         String saksnummer = brevbestilling.getBehandling().getFagsak().getSaksnummer();
         Behandling behandling = brevbestilling.getBehandling();
 
-        List<Journalpost> dokumenter = dokumentHentingService.hentDokumenter(saksnummer).stream().filter(dokument ->
+        List<Journalpost> dokumenter = dokumentHentingService.hentJournalposter(saksnummer).stream().filter(dokument ->
             dokument.getHoveddokument().getTittel().equals(MELDING_MANGLENDE_OPPLYSNINGER.getBeskrivelse())
                 && dokument.getForsendelseJournalfoert() != null
                 && dokument.getForsendelseJournalfoert().isAfter(behandling.getRegistrertDato())

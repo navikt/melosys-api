@@ -269,7 +269,7 @@ class OpprettOgJournalforBrevTest {
         when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
         when(mockJoarkFasade.opprettJournalpost(any(), anyBoolean())).thenReturn("12234");
         when(mockDokgenService.hentDokumentInfo(any())).thenReturn(TestdataFactory.lagDokumentInfo());
-        when(mockDokumentHentingService.hentDokumenter("MEL-test")).thenReturn(
+        when(mockDokumentHentingService.hentJournalposter("MEL-test")).thenReturn(
             List.of(lagJournalpost("1", "2", "tittel 1"),
                 lagJournalpost("3", "4", "tittel 2")
             )
@@ -290,7 +290,7 @@ class OpprettOgJournalforBrevTest {
 
         opprettJournalforBrev.utfør(prosessinstans);
 
-        verify(mockDokumentHentingService).hentDokumenter("MEL-test");
+        verify(mockDokumentHentingService).hentJournalposter("MEL-test");
         verify(mockJoarkFasade).hentDokument("1", "2");
         verify(mockJoarkFasade).hentDokument("3", "4");
         verify(mockJoarkFasade).opprettJournalpost(opprettJournalpostCaptor.capture(), anyBoolean());

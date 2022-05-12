@@ -60,7 +60,7 @@ class DokumentTjenesteTest extends JsonSchemaTestParent {
     @Test
     void hentDokumenter() throws Exception {
         List<Journalpost> journalposter = lagJournalposter();
-        given(dokumentHentingService.hentDokumenter(anyString())).willReturn(journalposter);
+        given(dokumentHentingService.hentJournalposter(anyString())).willReturn(journalposter);
 
         ResponseEntity<List<JournalpostInfoDto>> response = dokumentTjeneste.hentDokumenter("MEL-1873");
         List<JournalpostInfoDto> dtos = response.getBody();
