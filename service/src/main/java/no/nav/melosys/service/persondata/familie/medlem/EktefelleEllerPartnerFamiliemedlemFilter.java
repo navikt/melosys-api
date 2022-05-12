@@ -34,7 +34,7 @@ public class EktefelleEllerPartnerFamiliemedlemFilter {
 
         if (sivilstanderTilHovedperson.size() > 1) {
             List<Sivilstand> aktuelleSivilstanderTilHovedperson =
-                hentSivilstanderSomIkkeErGiftOgSkiltPåSammeTidspunkt(sivilstanderTilHovedperson);
+                hentSivilstanderSomIkkeErGiftOgSkiltEllerSeparertOgSkiltPåSammeTidspunkt(sivilstanderTilHovedperson);
 
             Optional<Sivilstand> sisteSivilstand = hentSisteSivilstand(aktuelleSivilstanderTilHovedperson);
             return hentEktefelleEllerPartnerFraSivilstander(sisteSivilstand.get());
@@ -48,22 +48,22 @@ public class EktefelleEllerPartnerFamiliemedlemFilter {
         return aktuelleSivilstanderTilHovedperson.stream().min(this::sammenlignSisteDatoRegistrert);
     }
 
-    private List<Sivilstand> hentSivilstanderSomIkkeErGiftOgSkiltPåSammeTidspunkt(List<Sivilstand> sivilstanderTilHovedperson) {
+    private List<Sivilstand> hentSivilstanderSomIkkeErGiftOgSkiltEllerSeparertOgSkiltPåSammeTidspunkt(List<Sivilstand> sivilstanderTilHovedperson) {
         return sivilstanderTilHovedperson.stream()
             .collect(Collectors.groupingBy(HarMetadata::hentDatoSistRegistrert)).values().stream()
-            .map(this::lagSivilstanderSomIkkeErSkiltOgGiftSamtidig)
+            .map(this::lagSivilstanderSomIkkeErGiftOgSkiltEllerSeparertOgSkiltSamtidig)
             .filter(Objects::nonNull)
             .flatMap(Collection::stream).toList();
     }
 
-    private List<Sivilstand> lagSivilstanderSomIkkeErSkiltOgGiftSamtidig(List<Sivilstand> sivilstandList) {
+    private List<Sivilstand> lagSivilstanderSomIkkeErGiftOgSkiltEllerSeparertOgSkiltSamtidig(List<Sivilstand> sivilstandList) {
         List<Sivilstandstype> sivilstandstyper = sivilstandList.stream().map(Sivilstand::type).toList();
 
         if (erGiftSamtidigSomSeparertUtenÅVæreSkilt(sivilstandstyper)) {
             return hentSeparertSivilstand(sivilstandList);
         }
 
-        return erIkkeGiftSamtidigSomSkilt(sivilstandstyper) ? sivilstandList : null;
+        return erIkkeGiftOgSkiltEllerSeparertOgSkiltSamtidig(sivilstandstyper) ? sivilstandList : null;
     }
 
     @NotNull
@@ -75,8 +75,8 @@ public class EktefelleEllerPartnerFamiliemedlemFilter {
         return sivilstandstyper.containsAll(List.of(GIFT, SEPARERT)) && !sivilstandstyper.contains(SKILT);
     }
 
-    private boolean erIkkeGiftSamtidigSomSkilt(List<Sivilstandstype> sivilstandstyper) {
-        return !sivilstandstyper.containsAll(List.of(GIFT, SKILT));
+    private boolean erIkkeGiftOgSkiltEllerSeparertOgSkiltSamtidig(List<Sivilstandstype> sivilstandstyper) {
+        return !sivilstandstyper.containsAll(List.of(GIFT, SKILT)) && !sivilstandstyper.containsAll(List.of(SEPARERT, SKILT));
     }
 
     @NotNull
