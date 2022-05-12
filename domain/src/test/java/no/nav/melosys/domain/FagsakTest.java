@@ -1,7 +1,11 @@
 package no.nav.melosys.domain;
 
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
@@ -94,6 +98,39 @@ class FagsakTest {
         ));
 
         assertThat(fagsak.hentSistOppdatertBehandling()).isEqualTo(sistOppdaterteBehandling);
+    }
+
+    @Test
+    void hentBehandlingerSortertPåRegistertDato_medToBehandlinger_sortertRiktig() {
+        Fagsak fagsak = new Fagsak();
+
+        Behandling behandling1 = new Behandling();
+        behandling1.setRegistrertDato(Instant.parse("2020-01-01T00:00:00Z"));
+
+        Behandling behandling2 = new Behandling();
+        behandling2.setRegistrertDato(Instant.parse("2021-01-01T00:00:00Z"));
+
+        fagsak.setBehandlinger(List.of(behandling1, behandling2));
+
+        List<Instant> registrerteDatoer = fagsak.hentBehandlingerSortertPåRegistertDato().stream().map(Behandling::getRegistrertDato).toList();
+        assertThat(registrerteDatoer)
+            .isEqualTo(List.of(behandling2.registrertDato, behandling1.registrertDato));
+    }
+
+    @Test
+    void hentSistOppdatertBehandling_medToBehandlinger_retunerNyeste() {
+        Fagsak fagsak = new Fagsak();
+
+        Behandling behandling1 = new Behandling();
+        behandling1.setRegistrertDato(Instant.parse("2020-01-01T00:00:00Z"));
+
+        Behandling behandling2 = new Behandling();
+        behandling2.setRegistrertDato(Instant.parse("2021-01-01T00:00:00Z"));
+
+        fagsak.setBehandlinger(List.of(behandling1, behandling2));
+
+        assertThat(fagsak.hentSistRegistrertBehandling().getRegistrertDato())
+            .isEqualTo(behandling2.getRegistrertDato());
     }
 
     @Test
