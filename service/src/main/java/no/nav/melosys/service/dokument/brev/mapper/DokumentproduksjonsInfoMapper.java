@@ -21,7 +21,6 @@ import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 @Component
 public class DokumentproduksjonsInfoMapper {
     private final Unleash unleash;
-
     private static final ImmutableMap<Produserbaredokumenter, DokumentproduksjonsInfo> DOKUMENTPRODUKSJONS_INFO_MAP;
     static final Set<Produserbaredokumenter> DOKUMENTMALER_PRODSATT = Set.of(
         AVSLAG_MANGLENDE_OPPLYSNINGER,
@@ -84,6 +83,10 @@ public class DokumentproduksjonsInfoMapper {
                 new DokumentproduksjonsInfo("avslag_manglende_opplysninger",
                     DokumentKategoriKode.VB.getKode(),
                     JournalforingsTittel.AVSLAG_MANGLENDE_OPPLYSNINGER.getTittel(), null))
+            .put(MELDING_HENLAGT_SAK,
+                new DokumentproduksjonsInfo("henleggelse",
+                    DokumentKategoriKode.IB.getKode(),
+                    JournalforingsTittel.MELDING_HENLAGT_SAK.getTittel(), null))
             .build());
     }
 
@@ -127,7 +130,8 @@ public class DokumentproduksjonsInfoMapper {
         STORBRITANNIA("Vedtak om medlemskap, Attest for utsendt arbeidstaker"),
         STORBRITANNIA_VEDTAKSBREV("Vedtak om medlemskap"),
         STORBRITANNIA_ATTEST("Attest for utsendt arbeidstaker"),
-        AVSLAG_MANGLENDE_OPPLYSNINGER("Avslag pga manglende opplysninger");
+        AVSLAG_MANGLENDE_OPPLYSNINGER("Avslag pga manglende opplysninger"),
+        MELDING_HENLAGT_SAK("Henleggelse av søknad");
 
         private final String tittel;
 
