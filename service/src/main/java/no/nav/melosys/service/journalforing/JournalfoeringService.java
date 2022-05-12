@@ -221,7 +221,7 @@ public class JournalfoeringService {
         Behandling sisteBehandling = fagsak.hentSistOppdatertBehandling();
         if (sisteBehandling.erAvsluttet())
             throw new FunksjonellException(
-                String.format("sisteBehandling (ID:%d) for Fagsak %s er avsluttet",
+                String.format("Den siste oppdaterte behandlingen (%d) for fagsak %s er avsluttet",
                     sisteBehandling.getId(), fagsak.getSaksnummer())
             );
     }
