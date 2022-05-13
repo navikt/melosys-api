@@ -66,10 +66,11 @@ public class OpprettJournalforBrev implements StegBehandler {
     @Override
     public void utfør(Prosessinstans prosessinstans) {
         String aktørId = prosessinstans.getData(AKTØR_ID);
+        String personIdent = prosessinstans.getData(PERSON_IDENT);
         String orgnr = prosessinstans.getData(ORGNR);
         String institusjonsid = prosessinstans.getData(INSTITUSJON_ID);
 
-        if (isEmpty(aktørId) && isEmpty(orgnr) && isEmpty(institusjonsid)) {
+        if (isEmpty(aktørId) && isEmpty(personIdent) && isEmpty(orgnr) && isEmpty(institusjonsid)) {
             throw new FunksjonellException("Mangler mottaker");
         }
         if (prosessinstans.getBehandling() == null) {
@@ -93,6 +94,10 @@ public class OpprettJournalforBrev implements StegBehandler {
             sammensattNavn = utenlandskMyndighetService.hentUtenlandskMyndighetForInstitusjonID(institusjonsid).navn;
         } else if (!isEmpty(orgnr)) {
             mottaker.setOrgnr(orgnr);
+        } else if (!isEmpty(personIdent)) {
+            mottaker.setPersonIdent(personIdent);
+            fnr = persondataFasade.hentFolkeregisterident(personIdent);
+            sammensattNavn = persondataFasade.hentSammensattNavn(fnr);
         } else {
             mottaker.setAktørId(aktørId);
             fnr = persondataFasade.hentFolkeregisterident(aktørId);
