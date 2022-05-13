@@ -7,16 +7,20 @@ import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
+import no.nav.melosys.service.behandling.BehandlingService;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Primary
 @Service
 public class OrganisasjonOppslagService {
     private final EregFasade eregFasade;
+    private final BehandlingService behandlingService;
 
-    public OrganisasjonOppslagService(EregFasade eregFasade) {
+    public OrganisasjonOppslagService(EregFasade eregFasade, BehandlingService behandlingService) {
         this.eregFasade = eregFasade;
+        this.behandlingService = behandlingService;
     }
 
     public Set<OrganisasjonDokument> hentOrganisasjoner(Set<String> orgnumre) {
@@ -33,6 +37,16 @@ public class OrganisasjonOppslagService {
     public OrganisasjonDokument hentOrganisasjon(String orgnummer) {
         Saksopplysning saksopplysning = eregFasade.hentOrganisasjon(validerOgVaskOrgnr(orgnummer));
         return (OrganisasjonDokument) saksopplysning.getDokument();
+    }
+
+    @Transactional
+    public OrganisasjonDokument hentOrganisasjonTilVirksomhet(long behandlingID) {
+        var orgnummer = behandlingService.hentBehandling(behandlingID).getFagsak().finnVirksomhetsOrgnr();
+        if (orgnummer.isEmpty()) {
+            throw new FunksjonellException("Finner ingen virksomheter tilknyttet behandling " + behandlingID);
+        }
+
+        return hentOrganisasjon(orgnummer.get());
     }
 
     private String validerOgVaskOrgnr(String orgnr) {
