@@ -224,7 +224,7 @@ public class FagsakTjeneste {
                 .map(this::tilBehandlingOversiktDto)
                 .toList();
 
-            fagsakOppsummeringDto.setSammensattNavn(hentNavn(behandlinger));
+            fagsakOppsummeringDto.setNavn(hentNavn(behandlinger));
             fagsakOppsummeringDto.setBehandlingOversikter(behandlingOversiktDtoer);
             fagsakListe.add(fagsakOppsummeringDto);
         }

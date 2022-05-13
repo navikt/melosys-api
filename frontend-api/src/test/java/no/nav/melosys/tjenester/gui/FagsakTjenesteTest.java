@@ -184,7 +184,7 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
         FagsakTjeneste instans = lagFagsakTjeneste(fagsak);
 
         List<FagsakOppsummeringDto> resultat = instans.hentFagsaker(new FagsakSokDto(FNR, null, null));
-        assertThat(resultat).hasSize(1).extracting(FagsakOppsummeringDto::getSammensattNavn).containsExactly("UKJENT");
+        assertThat(resultat).hasSize(1).extracting(FagsakOppsummeringDto::getNavn).containsExactly("UKJENT");
     }
 
     @Test
@@ -204,7 +204,7 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
         when(organisasjonOppslagService.hentOrganisasjon(ORGNR)).thenReturn(organisajonsdokument);
 
         List<FagsakOppsummeringDto> resultat = instans.hentFagsaker(new FagsakSokDto(null, null, ORGNR));
-        assertThat(resultat).hasSize(1).extracting(FagsakOppsummeringDto::getSammensattNavn).containsExactly("Moe Organisasjon");
+        assertThat(resultat).hasSize(1).extracting(FagsakOppsummeringDto::getNavn).containsExactly("Moe Organisasjon");
     }
 
     @Test
@@ -220,7 +220,7 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
         FagsakTjeneste instans = lagFagsakTjeneste(fagsak);
 
         List<FagsakOppsummeringDto> resultat = instans.hentFagsaker(new FagsakSokDto(null, null, ORGNR));
-        assertThat(resultat).hasSize(1).extracting(FagsakOppsummeringDto::getSammensattNavn).containsExactly("UKJENT");
+        assertThat(resultat).hasSize(1).extracting(FagsakOppsummeringDto::getNavn).containsExactly("UKJENT");
     }
 
     @Test
@@ -265,7 +265,7 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
 
         assertThat(fagsakOppsummeringDto.getSaksnummer()).isEqualTo("MEL-13");
         assertThat(fagsakOppsummeringDto.getOpprettetDato()).isEqualTo(reqDateInstant);
-        assertThat(fagsakOppsummeringDto.getSammensattNavn()).isEqualTo("Joe Moe");
+        assertThat(fagsakOppsummeringDto.getNavn()).isEqualTo("Joe Moe");
 
         BehandlingOversiktDto behandlingFørst = fagsakOppsummeringDto.getBehandlingOversikter().get(0);
         assertThat(behandlingFørst.getBehandlingID()).isEqualTo(1L);
@@ -375,7 +375,7 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
         result.setSakstype(Sakstyper.EU_EOS);
         result.setSaksstatus(Saksstatuser.OPPRETTET);
         result.setSaksnummer("MEL-1");
-        result.setSammensattNavn("Joe Moe");
+        result.setNavn("Joe Moe");
 
         BehandlingOversiktDto behandlingOversiktDto = new BehandlingOversiktDto();
         behandlingOversiktDto.setBehandlingID(behandling.getId());
