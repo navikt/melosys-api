@@ -100,7 +100,10 @@ public class ProsessinstansStatusCache {
 
             if (feiletSteg != null) {
                 Pair<ProsessSteg, ProsessStatus> stegOgStatus = Pair.of(feiletSteg, prosessinstansStegAntall.getProsessStatus());
-                antallPerStegOgStatus.put(stegOgStatus, prosessinstansStegAntall.getAntall());
+                antallPerStegOgStatus.compute(stegOgStatus,
+                    (eksisterendeStegOgStatus, eksisterendeAntall) -> eksisterendeAntall == null
+                        ? prosessinstansStegAntall.getAntall()
+                        : eksisterendeAntall + prosessinstansStegAntall.getAntall());
             }
         }
     }
