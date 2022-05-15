@@ -51,7 +51,7 @@ class BehandleProsessinstansDelegateTest {
         final var låsReferanse = "12_12_1";
         prosessinstans.setLåsReferanse(låsReferanse);
 
-        var eksisterendeProsessinstans = prosessinstans(låsReferanse, ProsessStatus.UNDER_BEHANDLING);
+        var eksisterendeProsessinstans = prosessinstans(låsReferanse);
         when(prosessinstansRepository.findAllByIdNotAndStatusNotInAndLåsReferanseStartingWith(eq(prosessinstans.getId()), any(), any()))
             .thenReturn(Set.of(new ProsessinstansInfo(eksisterendeProsessinstans)));
 
@@ -65,12 +65,13 @@ class BehandleProsessinstansDelegateTest {
         final var låsReferanse = "12_12_1";
         prosessinstans.setLåsReferanse(låsReferanse);
 
-        var eksisterendeProsessinstans = prosessinstans("12_13_1", ProsessStatus.UNDER_BEHANDLING);
+        var eksisterendeProsessinstans = prosessinstans("12_13_1");
         when(prosessinstansRepository.findAllByIdNotAndStatusNotInAndLåsReferanseStartingWith(eq(prosessinstans.getId()), any(), any()))
             .thenReturn(Set.of(new ProsessinstansInfo(eksisterendeProsessinstans)));
 
         behandleProsessinstansDelegate.oppdaterStatusOmSkalPåVent(prosessinstans);
         assertThat(prosessinstans.getStatus()).isEqualTo(ProsessStatus.PÅ_VENT);
+        verify(prosessinstansRepository).save(prosessinstans);
     }
 
     @Test
@@ -87,11 +88,11 @@ class BehandleProsessinstansDelegateTest {
         verifyNoInteractions(prosessinstansBehandler);
     }
 
-    private Prosessinstans prosessinstans(String låsReferanse, ProsessStatus prosessStatus) {
+    private Prosessinstans prosessinstans(String låsReferanse) {
         var prosessinstans = new Prosessinstans();
         prosessinstans.setId(UUID.randomUUID());
         prosessinstans.setLåsReferanse(låsReferanse);
-        prosessinstans.setStatus(prosessStatus);
+        prosessinstans.setStatus(ProsessStatus.UNDER_BEHANDLING);
         return prosessinstans;
     }
 }
