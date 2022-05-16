@@ -101,9 +101,9 @@ public class ProsessinstansAdminService {
     }
 
     private void setStatusRestartet(Collection<Prosessinstans> prosessinstanser) {
-        prosessinstanser.forEach(p -> p.setStatus(ProsessStatus.RESTARTET));
+        prosessinstanser.forEach(prosessinstans -> prosessinstans.setStatus(ProsessStatus.RESTARTET));
         LocalDateTime nå = LocalDateTime.now();
-        prosessinstanser.forEach(p -> p.setEndretDato(nå));
+        prosessinstanser.forEach(prosessinstans -> prosessinstans.setEndretDato(nå));
 
         prosessinstansRepository
             .saveAll(prosessinstanser)
