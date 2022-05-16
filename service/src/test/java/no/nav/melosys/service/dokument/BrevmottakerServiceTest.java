@@ -470,10 +470,7 @@ class BrevmottakerServiceTest {
 
     @Test
     void hentKontaktopplysning_mottakerBruker_girTomtResultat() {
-        Aktoer aktoer = new Aktoer();
-        aktoer.setRolle(BRUKER);
-
-        Kontaktopplysning kontaktopplysning = brevmottakerService.hentKontaktopplysning("MEL-123", aktoer);
+        Kontaktopplysning kontaktopplysning = brevmottakerService.hentKontaktopplysning("MEL-123", lagAktoer(BRUKER));
         assertThat(kontaktopplysning).isNull();
 
         verifyNoInteractions(kontaktopplysningService);
@@ -483,8 +480,7 @@ class BrevmottakerServiceTest {
     void hentKontaktopplysning_mottakerArbeidsgiver_returnererKontaktopplysning() {
         String orgnr = "987654321";
         when(kontaktopplysningService.hentKontaktopplysning(any(), eq(orgnr))).thenReturn(lagKontaktOpplysning(false));
-        Aktoer aktoer = new Aktoer();
-        aktoer.setRolle(ARBEIDSGIVER);
+        Aktoer aktoer = lagAktoer(ARBEIDSGIVER);
         aktoer.setOrgnr(orgnr);
 
         Kontaktopplysning kontaktopplysning = brevmottakerService.hentKontaktopplysning("MEL-123", aktoer);
@@ -498,8 +494,7 @@ class BrevmottakerServiceTest {
     void hentKontaktopplysning_mottakerRepresentant_returnererKontaktopplysning() {
         String orgnr = "123456789";
         when(kontaktopplysningService.hentKontaktopplysning(any(), eq(orgnr))).thenReturn(lagKontaktOpplysning(true));
-        Aktoer aktoer = new Aktoer();
-        aktoer.setRolle(REPRESENTANT);
+        Aktoer aktoer = lagAktoer(REPRESENTANT);
         aktoer.setOrgnr(orgnr);
 
         Kontaktopplysning kontaktopplysning = brevmottakerService.hentKontaktopplysning("MEL-123", aktoer);
@@ -538,10 +533,9 @@ class BrevmottakerServiceTest {
     }
 
     private void initMocksForFtrlVedtaksbrev(Representerer representerer, long norskinntekt, boolean selvbetalende) {
-        Aktoer aktoer = new Aktoer();
-        aktoer.setRolle(selvbetalende ? BRUKER : REPRESENTANT_TRYGDEAVGIFT);
-        Optional<Trygdeavgiftsberegningsresultat> trygdeavgiftsberegningsresultat =
-            Optional.of(new Trygdeavgiftsberegningsresultat(norskinntekt, null, aktoer, emptyList()));
+        Optional<Trygdeavgiftsberegningsresultat> trygdeavgiftsberegningsresultat = Optional.of(
+            new Trygdeavgiftsberegningsresultat(norskinntekt, null, lagAktoer(selvbetalende ? BRUKER : REPRESENTANT_TRYGDEAVGIFT), emptyList())
+        );
 
         when(trygdeavgiftsberegningService.finnBeregningsresultat(anyLong())).thenReturn(trygdeavgiftsberegningsresultat);
 
@@ -551,16 +545,19 @@ class BrevmottakerServiceTest {
         when(behandling.getFagsak()).thenReturn(fagsak);
     }
 
+    private Aktoer lagAktoer(Aktoersroller rolle) {
+        var aktoer = new Aktoer();
+        aktoer.setRolle(rolle);
+        return aktoer;
+    }
+
     private Fagsak lagFagsakMedRepresentantOrg(Representerer representerer) {
         Fagsak fagsak = new Fagsak();
-        Aktoer bruker = new Aktoer();
-        bruker.setRolle(BRUKER);
-        fagsak.getAktører().add(bruker);
+        fagsak.getAktører().add(lagAktoer(BRUKER));
 
         if (representerer != null) {
-            Aktoer representant = new Aktoer();
+            Aktoer representant = lagAktoer(REPRESENTANT);
             representant.setRepresenterer(representerer);
-            representant.setRolle(REPRESENTANT);
             representant.setOrgnr("REP-ORGNR");
             fagsak.getAktører().add(representant);
         }
@@ -569,14 +566,11 @@ class BrevmottakerServiceTest {
 
     private Fagsak lagFagsakMedRepresentantPerson(Representerer representerer) {
         Fagsak fagsak = new Fagsak();
-        Aktoer bruker = new Aktoer();
-        bruker.setRolle(BRUKER);
-        fagsak.getAktører().add(bruker);
+        fagsak.getAktører().add(lagAktoer(BRUKER));
 
         if (representerer != null) {
-            Aktoer representant = new Aktoer();
+            Aktoer representant = lagAktoer(REPRESENTANT);
             representant.setRepresenterer(representerer);
-            representant.setRolle(REPRESENTANT);
             representant.setPersonIdent("REP-FNR");
             fagsak.getAktører().add(representant);
         }
@@ -612,8 +606,7 @@ class BrevmottakerServiceTest {
     }
 
     private Aktoer lagAktoerUtenlandskMyndighet() {
-        Aktoer aktoer = new Aktoer();
-        aktoer.setRolle(TRYGDEMYNDIGHET);
+        Aktoer aktoer = lagAktoer(TRYGDEMYNDIGHET);
         aktoer.setInstitusjonId("CZ:SZUC10416");
         return aktoer;
     }
