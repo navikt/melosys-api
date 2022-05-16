@@ -83,12 +83,11 @@ public class DokgenMapperDatahenter {
         return behandlingsresultatService.hentBehandlingsresultat(behandlingId);
     }
 
-    Persondata hentPersondata(DokgenBrevbestilling brevbestilling, Aktoer mottaker) {
+    Persondata hentPersondata(Aktoer mottaker) {
         if (StringUtils.hasText(mottaker.getPersonIdent())) {
             return persondataFasade.hentPerson(mottaker.getPersonIdent());
         }
-        final var behandling = brevbestilling.getBehandling();
-        return persondataFasade.hentPerson(behandling.getFagsak().hentBrukersAktørID());
+        return persondataFasade.hentPerson(mottaker.getAktørId());
     }
 
     String hentSammensattNavn(String fnr) {
