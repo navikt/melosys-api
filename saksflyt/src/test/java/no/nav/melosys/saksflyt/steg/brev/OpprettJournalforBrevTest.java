@@ -77,6 +77,7 @@ class OpprettJournalforBrevTest {
     @Test
     void utførFeilerVedManglendeMottaker() {
         Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setBehandling(TestdataFactory.lagBehandling());
         assertThatThrownBy(() -> opprettJournalforBrev.utfør(prosessinstans))
             .isInstanceOf(FunksjonellException.class)
             .hasMessage("Mangler mottaker");
