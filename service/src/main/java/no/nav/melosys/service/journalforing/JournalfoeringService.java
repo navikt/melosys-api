@@ -201,7 +201,7 @@ public class JournalfoeringService {
         if (behandlingstype != null) {
             prosessType = ProsessType.JFR_NY_VURDERING;
         } else {
-            validerTomBehandlingsType(fagsak);
+            validerNårBehandlingstypeIkkeOppgitt(fagsak);
             prosessType = ProsessType.JFR_KNYTT;
         }
 
@@ -217,7 +217,7 @@ public class JournalfoeringService {
         prosessinstansService.lagre(prosessinstans);
     }
 
-    private void validerTomBehandlingsType(Fagsak fagsak) {
+    private void validerNårBehandlingstypeIkkeOppgitt(Fagsak fagsak) {
         Behandling sisteBehandling = fagsak.hentSistRegistrertBehandling();
 
         // Det skal fortsatt være mulig å journalføre uten å opprette ny behandling
