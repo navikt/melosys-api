@@ -5,10 +5,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.FellesKodeverk;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
@@ -86,7 +83,10 @@ public class DokgenMapperDatahenter {
         return behandlingsresultatService.hentBehandlingsresultat(behandlingId);
     }
 
-    Persondata hentPersondata(DokgenBrevbestilling brevbestilling) {
+    Persondata hentPersondata(DokgenBrevbestilling brevbestilling, Aktoer mottaker) {
+        if (StringUtils.hasText(mottaker.getPersonIdent())) {
+            return persondataFasade.hentPerson(mottaker.getPersonIdent());
+        }
         final var behandling = brevbestilling.getBehandling();
         return persondataFasade.hentPerson(behandling.getFagsak().hentBrukersAktørID());
     }

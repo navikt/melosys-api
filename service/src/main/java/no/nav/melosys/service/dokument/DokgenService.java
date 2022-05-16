@@ -111,7 +111,7 @@ public class DokgenService {
 
         settJournalpostOpplysninger(behandling, builder);
 
-        var dokgenDto = dokgenMalMapper.mapBehandling(builder.build());
+        var dokgenDto = dokgenMalMapper.mapBehandling(builder.build(), mottaker);
         return dokgenConsumer.lagPdf(malnavn, dokgenDto, brevbestilling.isBestillKopi(), brevbestilling.isBestillUtkast());
     }
 

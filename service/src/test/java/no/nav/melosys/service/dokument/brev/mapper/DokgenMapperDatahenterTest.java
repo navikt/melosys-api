@@ -38,6 +38,10 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class DokgenMapperDatahenterTest {
 
+    private final String ORGNR = "87654321";
+    private final String FNR = "12345678901";
+    private final String AKTOER_ID = "123";
+
     @Mock
     private EregFasade eregFasade;
     @Mock
@@ -89,36 +93,42 @@ class DokgenMapperDatahenterTest {
 
     @Test
     void hentFullmektigNavn_fullmektigPerson_henterSammensattNavnPerson() {
-        Aktoer fullmektig = new Aktoer();
-        fullmektig.setRolle(Aktoersroller.REPRESENTANT);
-        fullmektig.setRepresenterer(Representerer.BRUKER);
-        fullmektig.setPersonIdent("fnr");
-
         Fagsak fagsak = new Fagsak();
-        fagsak.setAktører(Set.of(fullmektig, new Aktoer()));
+        fagsak.setAktører(Set.of(lagMottakerFullmektigPerson(), new Aktoer()));
 
-        when(persondataFasade.hentSammensattNavn("fnr")).thenReturn("Etternavn, Fornavn");
+        when(persondataFasade.hentSammensattNavn(FNR)).thenReturn("Etternavn, Fornavn");
 
         dokgenMapperDatahenter.hentFullmektigNavn(fagsak, Representerer.BRUKER);
 
-        verify(persondataFasade).hentSammensattNavn("fnr");
+        verify(persondataFasade).hentSammensattNavn(FNR);
     }
 
     @Test
     void hentFullmektigNavn_fullmektigPerson_henterNavnOrganisasjon() {
-        Aktoer fullmektig = new Aktoer();
-        fullmektig.setRolle(Aktoersroller.REPRESENTANT);
-        fullmektig.setRepresenterer(Representerer.BRUKER);
-        fullmektig.setOrgnr("orgnr");
-
         Fagsak fagsak = new Fagsak();
-        fagsak.setAktører(Set.of(fullmektig, new Aktoer()));
+        fagsak.setAktører(Set.of(lagMottakerFullmektigOrgnr(), new Aktoer()));
 
-        when(eregFasade.hentOrganisasjonNavn("orgnr")).thenReturn("Orgnavn");
+        when(eregFasade.hentOrganisasjonNavn(ORGNR)).thenReturn("Orgnavn");
 
         dokgenMapperDatahenter.hentFullmektigNavn(fagsak, Representerer.BRUKER);
 
-        verify(eregFasade).hentOrganisasjonNavn("orgnr");
+        verify(eregFasade).hentOrganisasjonNavn(ORGNR);
+    }
+
+    @Test
+    void hentPersondata_mottakerAktørID_brukerAktørID() {
+        DokgenBrevbestilling brevbestilling = new DokgenBrevbestilling().toBuilder().medBehandling(lagBehandling()).build();
+
+        dokgenMapperDatahenter.hentPersondata(brevbestilling, lagMottakerBruker());
+
+        verify(persondataFasade).hentPerson(brevbestilling.getBehandling().getFagsak().hentBrukersAktørID());
+    }
+
+    @Test
+    void hentPersondata_mottakerPersonIdent_brukerPersonIdent() {
+        dokgenMapperDatahenter.hentPersondata(new DokgenBrevbestilling(), lagMottakerFullmektigPerson());
+
+        verify(persondataFasade).hentPerson(FNR);
     }
 
     private Journalpost lagJournalpost(LocalDate forsendelseJournalfoertDato) {
@@ -131,5 +141,28 @@ class DokgenMapperDatahenterTest {
         journalpost.setAvsenderType(Avsendertyper.PERSON);
 
         return journalpost;
+    }
+
+    private Aktoer lagMottakerBruker() {
+        Aktoer mottaker = new Aktoer();
+        mottaker.setRolle(Aktoersroller.BRUKER);
+        mottaker.setAktørId(AKTOER_ID);
+        return mottaker;
+    }
+
+    private Aktoer lagMottakerFullmektigPerson() {
+        Aktoer mottaker = new Aktoer();
+        mottaker.setRolle(Aktoersroller.REPRESENTANT);
+        mottaker.setRepresenterer(Representerer.BRUKER);
+        mottaker.setPersonIdent(FNR);
+        return mottaker;
+    }
+
+    private Aktoer lagMottakerFullmektigOrgnr() {
+        Aktoer mottaker = new Aktoer();
+        mottaker.setRolle(Aktoersroller.REPRESENTANT);
+        mottaker.setRepresenterer(Representerer.BRUKER);
+        mottaker.setOrgnr(ORGNR);
+        return mottaker;
     }
 }
