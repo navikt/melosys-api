@@ -200,6 +200,7 @@ class ProsessinstansServiceTest {
         Aktoer mottaker = new Aktoer();
         mottaker.setRolle(Aktoersroller.BRUKER);
         mottaker.setAktørId("123");
+        mottaker.setPersonIdent(null);
         mottaker.setOrgnr(null);
 
         DokgenBrevbestilling brevbestilling = new MangelbrevBrevbestilling.Builder()
@@ -226,6 +227,61 @@ class ProsessinstansServiceTest {
         Aktoer mottaker = new Aktoer();
         mottaker.setRolle(Aktoersroller.ARBEIDSGIVER);
         mottaker.setAktørId(null);
+        mottaker.setPersonIdent(null);
+        mottaker.setOrgnr("987654321");
+
+        DokgenBrevbestilling brevbestilling = new MangelbrevBrevbestilling.Builder()
+            .medProduserbartdokument(MANGELBREV_ARBEIDSGIVER)
+            .build();
+
+        prosessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(behandling, mottaker, brevbestilling);
+
+        verify(prosessinstansRepo).save(piCaptor.capture());
+
+        Prosessinstans lagretInstans = piCaptor.getValue();
+        assertThat(lagretInstans.getType()).isEqualTo(ProsessType.OPPRETT_OG_DISTRIBUER_BREV);
+        assertThat(lagretInstans.getData(ProsessDataKey.MOTTAKER, String.class)).isEqualTo(mottaker.getRolle().name());
+        assertThat(lagretInstans.getData(ProsessDataKey.ORGNR)).isEqualTo(mottaker.getOrgnr());
+        MangelbrevBrevbestilling lagretBrevbestilling = (MangelbrevBrevbestilling) lagretInstans.getData(ProsessDataKey.BREVBESTILLING, DokgenBrevbestilling.class);
+        assertThat(lagretBrevbestilling.getProduserbartdokument()).isEqualTo(MANGELBREV_ARBEIDSGIVER);
+        assertThat(lagretInstans.getData(ProsessDataKey.SAKSBEHANDLER)).isEqualTo(saksbehandler);
+    }
+
+    @Test
+    void opprettProsessinstansOpprettOgDistribuerBrevRepresentantPerson() {
+        String saksbehandler = settInnloggetSaksbehandler();
+        Behandling behandling = lagBehandling();
+        Aktoer mottaker = new Aktoer();
+        mottaker.setRolle(Aktoersroller.REPRESENTANT);
+        mottaker.setAktørId(null);
+        mottaker.setPersonIdent("123");
+        mottaker.setOrgnr(null);
+
+        DokgenBrevbestilling brevbestilling = new MangelbrevBrevbestilling.Builder()
+            .medProduserbartdokument(MANGELBREV_ARBEIDSGIVER)
+            .build();
+
+        prosessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(behandling, mottaker, brevbestilling);
+
+        verify(prosessinstansRepo).save(piCaptor.capture());
+
+        Prosessinstans lagretInstans = piCaptor.getValue();
+        assertThat(lagretInstans.getType()).isEqualTo(ProsessType.OPPRETT_OG_DISTRIBUER_BREV);
+        assertThat(lagretInstans.getData(ProsessDataKey.MOTTAKER, String.class)).isEqualTo(mottaker.getRolle().name());
+        assertThat(lagretInstans.getData(ProsessDataKey.PERSON_IDENT)).isEqualTo(mottaker.getPersonIdent());
+        MangelbrevBrevbestilling lagretBrevbestilling = (MangelbrevBrevbestilling) lagretInstans.getData(ProsessDataKey.BREVBESTILLING, DokgenBrevbestilling.class);
+        assertThat(lagretBrevbestilling.getProduserbartdokument()).isEqualTo(MANGELBREV_ARBEIDSGIVER);
+        assertThat(lagretInstans.getData(ProsessDataKey.SAKSBEHANDLER)).isEqualTo(saksbehandler);
+    }
+
+    @Test
+    void opprettProsessinstansOpprettOgDistribuerBrevRepresentantOrganisasjon() {
+        String saksbehandler = settInnloggetSaksbehandler();
+        Behandling behandling = lagBehandling();
+        Aktoer mottaker = new Aktoer();
+        mottaker.setRolle(Aktoersroller.REPRESENTANT);
+        mottaker.setAktørId(null);
+        mottaker.setPersonIdent(null);
         mottaker.setOrgnr("987654321");
 
         DokgenBrevbestilling brevbestilling = new MangelbrevBrevbestilling.Builder()

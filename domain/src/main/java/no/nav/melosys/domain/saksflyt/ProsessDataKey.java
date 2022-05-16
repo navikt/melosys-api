@@ -42,6 +42,7 @@ public enum ProsessDataKey {
     OPPGAVE_ID("oppgaveID"),
     OPPHOLDSLAND("oppholdsland"),
     ORGNR("orgnr"),
+    PERSON_IDENT("personIdent"),
     PRODUSERBART_BREV("produserbartBrev"),
     REPRESENTANT("representant"),
     REPRESENTANT_KONTAKTPERSON("representantKontakperson"),
