@@ -220,6 +220,8 @@ public class JournalfoeringService {
     private void validerTomBehandlingsType(Fagsak fagsak) {
         Behandling sisteBehandling = fagsak.hentSistRegistrertBehandling();
 
+        // Det skal fortsatt være mulig å journalføre uten å opprette ny behandling
+        // ved behandlingstype SED - https://jira.adeo.no/browse/MELOSYS-4982
         if (sisteBehandling.getType() == Behandlingstyper.SED) return;
         if (!sisteBehandling.erAvsluttet()) return;
 
