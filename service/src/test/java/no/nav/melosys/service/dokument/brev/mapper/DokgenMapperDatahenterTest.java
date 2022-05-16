@@ -2,14 +2,20 @@ package no.nav.melosys.service.dokument.brev.mapper;
 
 import java.time.*;
 import java.util.List;
+import java.util.Set;
 
 import no.finn.unleash.Unleash;
+import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.arkiv.ArkivDokument;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.brev.AvslagBrevbestilling;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
+import no.nav.melosys.domain.brev.FritekstbrevBrevbestilling;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
+import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.DokumentHentingSystemService;
@@ -21,12 +27,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.AVSLAG_MANGLENDE_OPPLYSNINGER;
-import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING_MANGLENDE_OPPLYSNINGER;
+import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 import static no.nav.melosys.service.dokument.DokgenTestData.lagBehandling;
 import static no.nav.melosys.service.dokument.DokgenTestData.lagFagsak;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -79,6 +85,40 @@ class DokgenMapperDatahenterTest {
                 datoOktober.atStartOfDay(ZoneId.systemDefault()).toInstant(),
                 datoDesember.atStartOfDay(ZoneId.systemDefault()).toInstant()
             );
+    }
+
+    @Test
+    void hentFullmektigNavn_fullmektigPerson_henterSammensattNavnPerson() {
+        Aktoer fullmektig = new Aktoer();
+        fullmektig.setRolle(Aktoersroller.REPRESENTANT);
+        fullmektig.setRepresenterer(Representerer.BRUKER);
+        fullmektig.setPersonIdent("fnr");
+
+        Fagsak fagsak = new Fagsak();
+        fagsak.setAktører(Set.of(fullmektig, new Aktoer()));
+
+        when(persondataFasade.hentSammensattNavn("fnr")).thenReturn("Etternavn, Fornavn");
+
+        dokgenMapperDatahenter.hentFullmektigNavn(fagsak, Representerer.BRUKER);
+
+        verify(persondataFasade).hentSammensattNavn("fnr");
+    }
+
+    @Test
+    void hentFullmektigNavn_fullmektigPerson_henterNavnOrganisasjon() {
+        Aktoer fullmektig = new Aktoer();
+        fullmektig.setRolle(Aktoersroller.REPRESENTANT);
+        fullmektig.setRepresenterer(Representerer.BRUKER);
+        fullmektig.setOrgnr("orgnr");
+
+        Fagsak fagsak = new Fagsak();
+        fagsak.setAktører(Set.of(fullmektig, new Aktoer()));
+
+        when(eregFasade.hentOrganisasjonNavn("orgnr")).thenReturn("Orgnavn");
+
+        dokgenMapperDatahenter.hentFullmektigNavn(fagsak, Representerer.BRUKER);
+
+        verify(eregFasade).hentOrganisasjonNavn("orgnr");
     }
 
     private Journalpost lagJournalpost(LocalDate forsendelseJournalfoertDato) {

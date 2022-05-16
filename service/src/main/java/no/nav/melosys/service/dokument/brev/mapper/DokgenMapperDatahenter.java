@@ -22,6 +22,7 @@ import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING_MANGLENDE_OPPLYSNINGER;
 import static org.springframework.util.StringUtils.hasText;
@@ -64,7 +65,14 @@ public class DokgenMapperDatahenter {
 
     String hentFullmektigNavn(Fagsak fagsak, Representerer representerer) {
         return fagsak.finnRepresentant(representerer)
-            .map(aktoer -> eregFasade.hentOrganisasjonNavn(aktoer.getOrgnr()))
+            .map(aktoer -> {
+                if (StringUtils.hasText(aktoer.getOrgnr())) {
+                    return eregFasade.hentOrganisasjonNavn(aktoer.getOrgnr());
+                } else if (StringUtils.hasText(aktoer.getPersonIdent())) {
+                    return persondataFasade.hentSammensattNavn(aktoer.getPersonIdent());
+                }
+                return null;
+            })
             .orElse(null);
     }
 
