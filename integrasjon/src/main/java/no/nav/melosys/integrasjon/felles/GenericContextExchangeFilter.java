@@ -1,7 +1,9 @@
 package no.nav.melosys.integrasjon.felles;
 
+import javax.annotation.Nonnull;
+
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.reststs.RestStsClient;
+import no.nav.melosys.integrasjon.reststs.RestSts;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo;
 import org.springframework.http.HttpHeaders;
@@ -12,14 +14,12 @@ import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.ExchangeFunction;
 import reactor.core.publisher.Mono;
 
-import javax.annotation.Nonnull;
-
 @Component
 public class GenericContextExchangeFilter implements ExchangeFilterFunction {
-    private final RestStsClient restStsClient;
+    private final RestSts restSts;
 
-    public GenericContextExchangeFilter(RestStsClient restStsClient) {
-        this.restStsClient = restStsClient;
+    public GenericContextExchangeFilter(RestSts restSts) {
+        this.restSts = restSts;
     }
 
     @Nonnull
@@ -29,7 +29,7 @@ public class GenericContextExchangeFilter implements ExchangeFilterFunction {
 
         if (ThreadLocalAccessInfo.shouldUseSystemToken()) {
             ClientRequest clientRequestWithBearerAuth = ClientRequest.from(clientRequest)
-                .header(HttpHeaders.AUTHORIZATION, restStsClient.bearerToken())
+                .header(HttpHeaders.AUTHORIZATION, restSts.bearerToken())
                 .build();
             return exchangeFunction.exchange(clientRequestWithBearerAuth);
         }

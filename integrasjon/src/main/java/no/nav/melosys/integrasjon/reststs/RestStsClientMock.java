@@ -13,14 +13,16 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
 
 @Service
-@Profile("!local-mock")
-public class RestStsClient implements RestSts {
-    private static final Logger log = LoggerFactory.getLogger(RestStsClient.class);
+@Profile("local-mock")
+public class RestStsClientMock implements RestSts {
+
+    private static final Logger log = LoggerFactory.getLogger(RestStsClientMock.class);
 
     private static final Long EXPIRE_TIME_TO_REFRESH = 60L;
     private static final String ACCESS_TOKEN_KEY = "access_token";
@@ -29,7 +31,7 @@ public class RestStsClient implements RestSts {
     private String token;
     private final RestTemplate restTemplate;
 
-    public RestStsClient(@Qualifier("stsRestTemplate") RestTemplate restTemplate) {
+    public RestStsClientMock(@Qualifier("stsRestTemplate") RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
 
@@ -47,9 +49,20 @@ public class RestStsClient implements RestSts {
 
     private String generateToken() {
         log.info("Henter oidc-token fra security-token-service");
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<String, String>();
+        params.add("grant_type", "client_credentials");
+        params.add("scope", "openid");
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+        headers.add(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE);
+        headers.add(HttpHeaders.AUTHORIZATION, getAuth());
+
+        HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(params, headers);
+
         try {
             ResponseEntity<Map<String, Object>> response = restTemplate
-                .exchange(createUriString(), HttpMethod.GET, createHttpEntity(), new ParameterizedTypeReference<>() {
+                .exchange("/token", HttpMethod.POST, entity, new ParameterizedTypeReference<>() {
                 });
 
             Map<String, Object> responseBody = Objects.requireNonNull(response.getBody());
@@ -70,20 +83,6 @@ public class RestStsClient implements RestSts {
 
     private void setExpiryTime(long expiryTime) {
         this.expiryTime = LocalDateTime.now().plus(Duration.ofSeconds(expiryTime - EXPIRE_TIME_TO_REFRESH));
-    }
-
-    private String createUriString() {
-        return UriComponentsBuilder.fromPath("/")
-            .queryParam("grant_type", "client_credentials")
-            .queryParam("scope", "openid").toUriString();
-    }
-
-    private HttpEntity<?> createHttpEntity() {
-        HttpHeaders headers = new HttpHeaders();
-        headers.add(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE);
-        headers.add(HttpHeaders.AUTHORIZATION, getAuth());
-
-        return new HttpEntity<>(headers);
     }
 
     @Override
