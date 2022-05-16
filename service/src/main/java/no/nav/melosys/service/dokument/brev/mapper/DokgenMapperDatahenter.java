@@ -5,10 +5,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.FellesKodeverk;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
@@ -22,6 +19,7 @@ import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING_MANGLENDE_OPPLYSNINGER;
 import static org.springframework.util.StringUtils.hasText;
@@ -64,7 +62,14 @@ public class DokgenMapperDatahenter {
 
     String hentFullmektigNavn(Fagsak fagsak, Representerer representerer) {
         return fagsak.finnRepresentant(representerer)
-            .map(aktoer -> eregFasade.hentOrganisasjonNavn(aktoer.getOrgnr()))
+            .map(aktoer -> {
+                if (StringUtils.hasText(aktoer.getOrgnr())) {
+                    return eregFasade.hentOrganisasjonNavn(aktoer.getOrgnr());
+                } else if (StringUtils.hasText(aktoer.getPersonIdent())) {
+                    return persondataFasade.hentSammensattNavn(aktoer.getPersonIdent());
+                }
+                return null;
+            })
             .orElse(null);
     }
 
@@ -78,7 +83,10 @@ public class DokgenMapperDatahenter {
         return behandlingsresultatService.hentBehandlingsresultat(behandlingId);
     }
 
-    Persondata hentPersondata(DokgenBrevbestilling brevbestilling) {
+    Persondata hentPersondata(DokgenBrevbestilling brevbestilling, Aktoer mottaker) {
+        if (StringUtils.hasText(mottaker.getPersonIdent())) {
+            return persondataFasade.hentPerson(mottaker.getPersonIdent());
+        }
         final var behandling = brevbestilling.getBehandling();
         return persondataFasade.hentPerson(behandling.getFagsak().hentBrukersAktørID());
     }

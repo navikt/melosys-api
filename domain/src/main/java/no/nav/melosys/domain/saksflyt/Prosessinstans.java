@@ -18,6 +18,8 @@ import no.nav.melosys.domain.serializer.LovvalgBestemmelseDeserializer;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.hibernate.annotations.GenericGenerator;
 
+import static org.springframework.util.ObjectUtils.isEmpty;
+
 /**
  * Arbeidstabell for saksflyt.
  */
@@ -102,6 +104,10 @@ public class Prosessinstans {
 
     public Properties getData() {
         return data;
+    }
+
+    public boolean hasData(ProsessDataKey key) {
+        return !isEmpty(getData(key));
     }
 
     /**
