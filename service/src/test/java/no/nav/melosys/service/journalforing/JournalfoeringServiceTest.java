@@ -435,6 +435,7 @@ class JournalfoeringServiceTest {
         Behandling behandling = new Behandling();
         behandling.setId(1L);
         behandling.setStatus(Behandlingsstatus.AVSLUTTET);
+        behandling.setType(Behandlingstyper.SOEKNAD);
         fagsak.setBehandlinger(List.of(behandling));
 
         when(fagsakService.hentFagsak(SAKSNUMMER)).thenReturn(fagsak);
@@ -513,11 +514,13 @@ class JournalfoeringServiceTest {
         behandling1.setId(1L);
         behandling1.setRegistrertDato(Instant.parse("2020-01-01T00:00:00Z"));
         behandling1.setStatus(Behandlingsstatus.AVSLUTTET);
+        behandling1.setType(Behandlingstyper.SOEKNAD);
 
         Behandling behandling2 = new Behandling();
         behandling2.setId(2L);
         behandling2.setRegistrertDato(Instant.parse("2021-01-01T00:00:00Z"));
         behandling2.setStatus(Behandlingsstatus.AVSLUTTET);
+        behandling2.setType(Behandlingstyper.SOEKNAD);
         fagsak.setBehandlinger(List.of(behandling1, behandling2));
 
         when(fagsakService.hentFagsak(SAKSNUMMER)).thenReturn(fagsak);
