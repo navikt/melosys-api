@@ -73,7 +73,7 @@ public class OpprettJournalforBrev implements StegBehandler {
         Aktoer mottaker = lagMottaker(mottakerType, mottakerID, prosessinstans);
 
         var brevbestilling = prosessinstans.getData(BREVBESTILLING, DokgenBrevbestilling.class);
-        Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(prosessinstans.getBehandling().getId());
+        Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
         Produserbaredokumenter produserbartDokument = brevbestilling.getProduserbartdokument();
 
         byte[] pdf = dokgenService.produserBrev(mottaker, brevbestilling);
@@ -105,17 +105,17 @@ public class OpprettJournalforBrev implements StegBehandler {
         } else if (prosessinstans.hasData(ORGNR)) {
             return MottakerType.ORGANISASJON;
         } else if (prosessinstans.hasData(PERSON_IDENT)) {
-            return MottakerType.PERSON;
+            return MottakerType.PERSON_MED_FNR;
         } else if (prosessinstans.hasData(AKTØR_ID)) {
-            return MottakerType.AKTØR;
+            return MottakerType.PERSON_MED_AKTØR_ID;
         }
         throw new FunksjonellException("Mangler mottaker");
     }
 
     private String utledMottakerID(MottakerType mottakerType, Prosessinstans prosessinstans) {
         return switch (mottakerType) {
-            case AKTØR -> prosessinstans.getData(AKTØR_ID);
-            case PERSON -> prosessinstans.getData(PERSON_IDENT);
+            case PERSON_MED_AKTØR_ID -> prosessinstans.getData(AKTØR_ID);
+            case PERSON_MED_FNR -> prosessinstans.getData(PERSON_IDENT);
             case ORGANISASJON -> prosessinstans.getData(ORGNR);
             case INSTITUSJON -> prosessinstans.getData(INSTITUSJON_ID);
         };
@@ -125,8 +125,8 @@ public class OpprettJournalforBrev implements StegBehandler {
         var mottaker = new Aktoer();
         mottaker.setRolle(prosessinstans.getData(MOTTAKER, Aktoersroller.class, null));
         switch (mottakerType) {
-            case AKTØR -> mottaker.setAktørId(mottakerID);
-            case PERSON -> mottaker.setPersonIdent(mottakerID);
+            case PERSON_MED_AKTØR_ID -> mottaker.setAktørId(mottakerID);
+            case PERSON_MED_FNR -> mottaker.setPersonIdent(mottakerID);
             case ORGANISASJON -> mottaker.setOrgnr(mottakerID);
             case INSTITUSJON -> mottaker.setInstitusjonId(mottakerID);
         }
@@ -135,7 +135,7 @@ public class OpprettJournalforBrev implements StegBehandler {
 
     private String utledNavn(String mottakerID, MottakerType mottakerType) {
         return switch (mottakerType) {
-            case AKTØR, PERSON -> persondataFasade.hentSammensattNavn(mottakerID);
+            case PERSON_MED_AKTØR_ID, PERSON_MED_FNR -> persondataFasade.hentSammensattNavn(mottakerID);
             case ORGANISASJON -> eregFasade.hentOrganisasjonNavn(mottakerID);
             case INSTITUSJON -> utenlandskMyndighetService.hentUtenlandskMyndighetForInstitusjonID(mottakerID).navn;
         };
@@ -143,7 +143,7 @@ public class OpprettJournalforBrev implements StegBehandler {
 
     private OpprettJournalpost.KorrespondansepartIdType utledMottakerIdType(MottakerType mottakerType) {
         return switch (mottakerType) {
-            case AKTØR, PERSON -> OpprettJournalpost.KorrespondansepartIdType.FNR;
+            case PERSON_MED_AKTØR_ID, PERSON_MED_FNR -> OpprettJournalpost.KorrespondansepartIdType.FNR;
             case INSTITUSJON -> OpprettJournalpost.KorrespondansepartIdType.UTENLANDSK_ORGANISASJON;
             case ORGANISASJON -> OpprettJournalpost.KorrespondansepartIdType.ORGNR;
         };

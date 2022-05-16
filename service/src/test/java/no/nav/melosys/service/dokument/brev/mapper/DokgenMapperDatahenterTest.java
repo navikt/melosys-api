@@ -104,7 +104,7 @@ class DokgenMapperDatahenterTest {
     }
 
     @Test
-    void hentFullmektigNavn_fullmektigPerson_henterNavnOrganisasjon() {
+    void hentFullmektigNavn_fullmektigOrg_henterNavnOrganisasjon() {
         Fagsak fagsak = new Fagsak();
         fagsak.setAktører(Set.of(lagMottakerFullmektigOrgnr(), new Aktoer()));
 
