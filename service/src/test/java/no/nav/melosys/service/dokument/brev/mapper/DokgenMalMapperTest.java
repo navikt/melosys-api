@@ -71,7 +71,7 @@ class DokgenMalMapperTest {
 
     @Test
     void feilerNårProduserbartDokumentIkkeErStøttet() {
-        when(mockDokgenMapperDatahenter.hentPersondata(any())).thenReturn(lagPersondata());
+        when(mockDokgenMapperDatahenter.hentPersondata(any(), any())).thenReturn(lagPersondata());
 
         DokgenBrevbestilling brevbestilling = new DokgenBrevbestilling.Builder<>()
             .medProduserbartdokument(ATTEST_A1)
@@ -85,7 +85,7 @@ class DokgenMalMapperTest {
 
     @Test
     void skalMappeMedBrukerAdressePDL() {
-        when(mockDokgenMapperDatahenter.hentPersondata(any())).thenReturn(
+        when(mockDokgenMapperDatahenter.hentPersondata(any(), any())).thenReturn(
             PersonopplysningerObjectFactory.lagDonaldDuckPersondata());
 
         Behandling behandling = lagBehandling();
@@ -117,7 +117,7 @@ class DokgenMalMapperTest {
 
     @Test
     void skalMappeMedBrukerAdresse() {
-        when(mockDokgenMapperDatahenter.hentPersondata(any())).thenReturn(lagPersondata());
+        when(mockDokgenMapperDatahenter.hentPersondata(any(), any())).thenReturn(lagPersondata());
 
         Behandling behandling = lagBehandling();
 
@@ -145,7 +145,7 @@ class DokgenMalMapperTest {
 
     @Test
     void mapping_persondataFraPdl_ok() {
-        when(mockDokgenMapperDatahenter.hentPersondata(any())).thenReturn(lagPersondata());
+        when(mockDokgenMapperDatahenter.hentPersondata(any(), any())).thenReturn(lagPersondata());
 
         Behandling behandling = lagBehandling();
 
@@ -174,7 +174,7 @@ class DokgenMalMapperTest {
     @Test
     void mapping_avsenderMyndighet_ok() {
         when(mockDokgenMapperDatahenter.hentLandnavnFraLandkode("FI")).thenReturn("Finland");
-        when(mockDokgenMapperDatahenter.hentPersondata(any())).thenReturn(lagPersondata());
+        when(mockDokgenMapperDatahenter.hentPersondata(any(), any())).thenReturn(lagPersondata());
 
         Behandling behandling = lagBehandling();
         LocalDate forsendelseMottattDato = LocalDate.of(2022, 1, 19);
@@ -205,7 +205,7 @@ class DokgenMalMapperTest {
 
     @Test
     void skalMappeMedFullmektigAdresse() {
-        when(mockDokgenMapperDatahenter.hentPersondata(any())).thenReturn(lagPersondata());
+        when(mockDokgenMapperDatahenter.hentPersondata(any(), any())).thenReturn(lagPersondata());
 
         Behandling behandling = lagBehandling();
 
@@ -234,7 +234,7 @@ class DokgenMalMapperTest {
 
     @Test
     void skalMappeMedFullmektigForretningsAdresse() {
-        when(mockDokgenMapperDatahenter.hentPersondata(any())).thenReturn(lagPersondata());
+        when(mockDokgenMapperDatahenter.hentPersondata(any(), any())).thenReturn(lagPersondata());
 
         Behandling behandling = lagBehandling();
 
@@ -267,7 +267,7 @@ class DokgenMalMapperTest {
 
     @Test
     void skalMappeMedFullmektigMedKontaktpersonAdresse() {
-        when(mockDokgenMapperDatahenter.hentPersondata(any())).thenReturn(lagPersondata());
+        when(mockDokgenMapperDatahenter.hentPersondata(any(), any())).thenReturn(lagPersondata());
 
         Behandling behandling = lagBehandling();
 
@@ -298,7 +298,7 @@ class DokgenMalMapperTest {
     @Test
     void skalMappeMangelbrevTilBruker() {
         when(mockDokgenMapperDatahenter.hentNorskPoststed(any())).thenReturn("Andeby");
-        when(mockDokgenMapperDatahenter.hentPersondata(any())).thenReturn(lagPersondata());
+        when(mockDokgenMapperDatahenter.hentPersondata(any(), any())).thenReturn(lagPersondata());
 
         Behandling behandling = lagBehandling(lagFagsak(true));
 
@@ -332,7 +332,7 @@ class DokgenMalMapperTest {
     @Test
     void skalMappeMangelbrevTilArbeidsgiver() {
         when(mockDokgenMapperDatahenter.hentNorskPoststed(any())).thenReturn("Andeby");
-        when(mockDokgenMapperDatahenter.hentPersondata(any())).thenReturn(lagPersondata());
+        when(mockDokgenMapperDatahenter.hentPersondata(any(), any())).thenReturn(lagPersondata());
         when(mockDokgenMapperDatahenter.hentFullmektigNavn(any(), eq(Representerer.BRUKER))).thenReturn("Fullmektig AS");
 
         Behandling behandling = lagBehandling(lagFagsak(true));
@@ -368,7 +368,7 @@ class DokgenMalMapperTest {
 
     @Test
     void skalMappeInnvilgelsesbrevTilBruker() {
-        when(mockDokgenMapperDatahenter.hentPersondata(any())).thenReturn(lagPersondata());
+        when(mockDokgenMapperDatahenter.hentPersondata(any(), any())).thenReturn(lagPersondata());
         when(mockInnvilgelseFtrlMapper.map(any())).thenReturn(lagInnvilgelseFtrl());
 
         Behandling behandling = lagBehandling(lagFagsak(true));
@@ -388,7 +388,7 @@ class DokgenMalMapperTest {
 
     @Test
     void skalMappeStorbritanniabrev() {
-        when(mockDokgenMapperDatahenter.hentPersondata(any())).thenReturn(lagPersondata());
+        when(mockDokgenMapperDatahenter.hentPersondata(any(), any())).thenReturn(lagPersondata());
         when(mockStorbritanniaMapper.map(any())).thenReturn(lagInnvilgelseOgAttestStorbritannia());
 
         Behandling behandling = lagBehandling(lagFagsak(true));
@@ -449,7 +449,7 @@ class DokgenMalMapperTest {
 
     @Test
     void skalMappeFritekstbrevTilBruker() {
-        when(mockDokgenMapperDatahenter.hentPersondata(any())).thenReturn(lagPersondata());
+        when(mockDokgenMapperDatahenter.hentPersondata(any(), any())).thenReturn(lagPersondata());
         when(mockDokgenMapperDatahenter.hentFullmektigNavn(any(), eq(Representerer.BRUKER))).thenReturn("Fullmektig AS");
 
         Behandling behandling = lagBehandling(lagFagsak(true));
@@ -486,7 +486,7 @@ class DokgenMalMapperTest {
 
     @Test
     void skalMappeFritekstbrevTilArbeidsgiver() {
-        when(mockDokgenMapperDatahenter.hentPersondata(any())).thenReturn(lagPersondata());
+        when(mockDokgenMapperDatahenter.hentPersondata(any(), any())).thenReturn(lagPersondata());
         when(mockDokgenMapperDatahenter.hentFullmektigNavn(any(), eq(Representerer.ARBEIDSGIVER))).thenReturn(null);
 
         Behandling behandling = lagBehandling(lagFagsak(true));
@@ -527,7 +527,7 @@ class DokgenMalMapperTest {
         when(mockDokgenMapperDatahenter.hentMangelbrevDatoer(any())).thenReturn(List.of(
             datoOktober.atStartOfDay(ZoneId.systemDefault()).toInstant(),
             datoDesember.atStartOfDay(ZoneId.systemDefault()).toInstant()));
-        when(mockDokgenMapperDatahenter.hentPersondata(any())).thenReturn(lagPersondata());
+        when(mockDokgenMapperDatahenter.hentPersondata(any(), any())).thenReturn(lagPersondata());
         DokgenBrevbestilling brevbestilling = new AvslagBrevbestilling.Builder()
             .medProduserbartdokument(AVSLAG_MANGLENDE_OPPLYSNINGER)
             .medBehandling(behandling)
@@ -553,7 +553,7 @@ class DokgenMalMapperTest {
         journalPostVirksomhet.setAvsenderType(Avsendertyper.ORGANISASJON);
         Behandling behandling = lagBehandling(lagFagsak(true));
         behandling.setRegistrertDato(LocalDateTime.of(2021, 10, 1, 0, 0).toInstant(ZoneOffset.UTC));
-        when(mockDokgenMapperDatahenter.hentPersondata(any())).thenReturn(lagPersondata());
+        when(mockDokgenMapperDatahenter.hentPersondata(any(), any())).thenReturn(lagPersondata());
         when(mockDokgenMapperDatahenter.hentMangelbrevDatoer(any())).thenReturn(List.of(
             datoOktober.atStartOfDay(ZoneId.systemDefault()).toInstant()));
 
@@ -569,7 +569,7 @@ class DokgenMalMapperTest {
 
     @Test
     void skalMappeAvslagsbrevPgaManglendeOpplysningerTilBruker() {
-        when(mockDokgenMapperDatahenter.hentPersondata(any())).thenReturn(lagPersondata());
+        when(mockDokgenMapperDatahenter.hentPersondata(any(), any())).thenReturn(lagPersondata());
         Behandling behandling = lagBehandling(lagFagsak(true));
         DokgenBrevbestilling brevbestilling = new AvslagBrevbestilling.Builder()
             .medProduserbartdokument(AVSLAG_MANGLENDE_OPPLYSNINGER)
