@@ -195,19 +195,19 @@ public final class DokgenTestData {
     }
 
     public static Aktoer lagMottaker(Aktoersroller rolle) {
-        Aktoer representant = new Aktoer();
+        Aktoer mottaker = new Aktoer();
         switch (rolle) {
             case BRUKER -> {
-                representant.setRolle(BRUKER);
-                representant.setAktørId(FNR_BRUKER);
+                mottaker.setRolle(BRUKER);
+                mottaker.setAktørId(FNR_BRUKER);
             }
             case ARBEIDSGIVER -> {
-                representant.setRolle(ARBEIDSGIVER);
-                representant.setOrgnr(ORGNR_REPRESENTANT);
+                mottaker.setRolle(ARBEIDSGIVER);
+                mottaker.setOrgnr(ORGNR_REPRESENTANT);
             }
             default -> throw new IllegalArgumentException("Mottaker må være person eller arbeidsgiver");
         }
-        return representant;
+        return mottaker;
     }
 
     public static Aktoer lagMottakerRepresentant(Aktoertype aktoertype, Representerer representerer) {
