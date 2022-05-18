@@ -26,7 +26,7 @@ class EktefelleEllerPartnerFamiliemedlemFilterTest {
     private EktefelleEllerPartnerFamiliemedlemFilter ektefelleEllerPartnerFamiliemedlemFilter;
 
     @Test
-    void test() {
+    void hentEktefelleEllerPartnerFraSivilstander_fårGiftSivilstandTilbake() {
         when(pdlConsumer.hentEktefelleEllerPartner(IDENT_PERSON_GIFT)).thenReturn(lagPersonGift());
         Collection<Sivilstand> sivilstandTilHovedperson = lagSivilstandForHovedperson();
 

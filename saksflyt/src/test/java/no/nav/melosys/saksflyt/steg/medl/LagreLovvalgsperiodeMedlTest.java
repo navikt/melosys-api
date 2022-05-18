@@ -110,7 +110,7 @@ class LagreLovvalgsperiodeMedlTest {
     }
 
     @Test
-    void utfør_nyVurdering_oppdatererPeriode() {
+    void utfør_nyVurderingOgPeriodeFinnes_oppdaterPeriode() {
         Behandling behandling = TestdataFactory.lagBehandlingNyVurdering();
         prosessinstans.setBehandling(behandling);
         Behandling opprinneligBehandling = TestdataFactory.lagBehandling();
@@ -126,8 +126,28 @@ class LagreLovvalgsperiodeMedlTest {
         when(behandlingsresultatService.hentBehandlingsresultat(behandling.getId())).thenReturn(behandlingsresultat);
 
         lagreLovvalgsperiodeMedl.utfør(prosessinstans);
+
         verify(medlPeriodeService).oppdaterPeriodeEndelig(lovvalgsperiodeArgumentCaptor.capture(), eq(false));
         assertThat(lovvalgsperiodeArgumentCaptor.getValue().getMedlPeriodeID()).isEqualTo((opprinneligLovvalgsperiode.getMedlPeriodeID()));
+    }
+
+    @Test
+    void utfør_nyVurderingOgPeriodeFinnesIkke_opprettPeriode() {
+        Behandling behandling = TestdataFactory.lagBehandlingNyVurdering();
+        prosessinstans.setBehandling(behandling);
+        Behandling opprinneligBehandling = TestdataFactory.lagBehandling();
+        behandling.setOpprinneligBehandling(opprinneligBehandling);
+        Behandlingsresultat opprinneligResultat = new Behandlingsresultat();
+
+        when(behandlingsresultatService.hentBehandlingsresultat(opprinneligBehandling.getId())).thenReturn(opprinneligResultat);
+        Lovvalgsperiode nyLovvalgsperiode = lagLovvalgsperiode(null, Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1,
+                                                               InnvilgelsesResultat.INNVILGET);
+        behandlingsresultat.getLovvalgsperioder().add(nyLovvalgsperiode);
+        when(behandlingsresultatService.hentBehandlingsresultat(behandling.getId())).thenReturn(behandlingsresultat);
+
+        lagreLovvalgsperiodeMedl.utfør(prosessinstans);
+
+        verify(medlPeriodeService).opprettPeriodeEndelig(nyLovvalgsperiode, behandling.getId(), false);
     }
 
     @Test
