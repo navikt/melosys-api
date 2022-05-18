@@ -12,6 +12,7 @@ import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadTrygdeavtale;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Soeknadsland;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.RepresentantIUtlandet;
+import no.nav.melosys.domain.dokument.arbeidsforhold.Aktoertype;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
@@ -27,6 +28,7 @@ import no.nav.melosys.domain.person.adresse.Bostedsadresse;
 import no.nav.melosys.domain.person.adresse.Kontaktadresse;
 
 import static java.util.Collections.singletonList;
+import static no.nav.melosys.domain.kodeverk.Aktoersroller.ARBEIDSGIVER;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
 
 public final class DokgenTestData {
@@ -43,6 +45,8 @@ public final class DokgenTestData {
     public static final String REGION = "NEVERLAND";
     public static final LocalDate LOVVALGSPERIODE_FOM = LocalDate.of(2020, 1, 1);
     public static final LocalDate LOVVALGSPERIODE_TOM = LocalDate.of(2021, 1, 1);
+    public static final String FNR_REPRESENTANT = "30098000492";
+    public static final String ORGNR_REPRESENTANT = "810072512";
 
     public static Behandling lagBehandling() {
         return lagBehandling(lagFagsak());
@@ -190,4 +194,31 @@ public final class DokgenTestData {
         return lovvalgsperiode;
     }
 
+    public static Aktoer lagMottaker(Aktoersroller rolle) {
+        Aktoer representant = new Aktoer();
+        switch (rolle) {
+            case BRUKER -> {
+                representant.setRolle(BRUKER);
+                representant.setAktørId(FNR_BRUKER);
+            }
+            case ARBEIDSGIVER -> {
+                representant.setRolle(ARBEIDSGIVER);
+                representant.setOrgnr(ORGNR_REPRESENTANT);
+            }
+            default -> throw new IllegalArgumentException("Mottaker må være person eller arbeidsgiver");
+        }
+        return representant;
+    }
+
+    public static Aktoer lagMottakerRepresentant(Aktoertype aktoertype, Representerer representerer) {
+        Aktoer representant = new Aktoer();
+        switch (aktoertype) {
+            case PERSON -> representant.setPersonIdent(FNR_REPRESENTANT);
+            case ORGANISASJON -> representant.setOrgnr(ORGNR_REPRESENTANT);
+            default -> throw new IllegalArgumentException("Representant må være person eller organisasjon");
+        }
+        representant.setRolle(Aktoersroller.REPRESENTANT);
+        representant.setRepresenterer(representerer);
+        return representant;
+    }
 }

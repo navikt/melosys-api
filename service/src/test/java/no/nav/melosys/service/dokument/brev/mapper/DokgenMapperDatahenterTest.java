@@ -116,17 +116,15 @@ class DokgenMapperDatahenterTest {
     }
 
     @Test
-    void hentPersondata_mottakerAktørID_brukerAktørID() {
-        DokgenBrevbestilling brevbestilling = new DokgenBrevbestilling().toBuilder().medBehandling(lagBehandling()).build();
+    void hentPersonMottaker_mottakerAktørID_brukerAktørID() {
+        dokgenMapperDatahenter.hentPersonMottaker(lagMottakerBruker());
 
-        dokgenMapperDatahenter.hentPersondata(brevbestilling, lagMottakerBruker());
-
-        verify(persondataFasade).hentPerson(brevbestilling.getBehandling().getFagsak().hentBrukersAktørID());
+        verify(persondataFasade).hentPerson(AKTOER_ID);
     }
 
     @Test
-    void hentPersondata_mottakerPersonIdent_brukerPersonIdent() {
-        dokgenMapperDatahenter.hentPersondata(new DokgenBrevbestilling(), lagMottakerFullmektigPerson());
+    void hentPersonMottaker_mottakerPersonIdent_brukerPersonIdent() {
+        dokgenMapperDatahenter.hentPersonMottaker(lagMottakerFullmektigPerson());
 
         verify(persondataFasade).hentPerson(FNR);
     }
