@@ -45,7 +45,7 @@ public class PeriodeOverlappSjekk {
 
     private void validerTilOgMedDato() {
         if (isNull(tom1) && isNull(tom2)) {
-            throw new IllegalArgumentException("Kan ikke avgjøre om to åpne periode overlapper");
+            throw new IllegalArgumentException("Kan ikke ha to åpne perioder samtidig");
         }
     }
 

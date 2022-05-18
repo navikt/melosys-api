@@ -92,6 +92,13 @@ final class UfmKontroller {
             ? Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER : null;
     }
 
+    static Kontroll_begrunnelser overlappendeMedlemsperiodeMerEnn1Dag(UfmKontrollData kontrollData) {
+        MedlemskapDokument medlemskapDokument = kontrollData.getMedlemskapDokument();
+        Periode lovvalgsperiode = kontrollData.getSedDokument().getLovvalgsperiode();
+        return OverlappendeMedlemskapsperioderKontroller.harOverlappendeMedlemsperiodeMerEnn1DagFraSed(medlemskapDokument, lovvalgsperiode)
+            ? Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER : null;
+    }
+
     static Kontroll_begrunnelser statsborgerskapIkkeMedlemsland(UfmKontrollData kontrollData) {
         return avsenderErNordiskEllerAvtaleland(kontrollData.getSedDokument().getAvsenderLandkode())
             || erStatsløs(kontrollData.getSedDokument().getStatsborgerskapKoder())

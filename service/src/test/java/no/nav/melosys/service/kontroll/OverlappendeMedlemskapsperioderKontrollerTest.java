@@ -10,6 +10,7 @@ import no.nav.melosys.domain.dokument.medlemskap.Periode;
 import no.nav.melosys.integrasjon.medl.PeriodestatusMedl;
 import org.junit.jupiter.api.Test;
 
+import static no.nav.melosys.service.kontroll.OverlappendeMedlemskapsperioderKontroller.harOverlappendeMedlemsperiodeMerEnn1DagFraSed;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -145,7 +146,7 @@ class OverlappendeMedlemskapsperioderKontrollerTest {
         Lovvalgsperiode kontrollperiode = lagLovvalgsPeriode(LocalDate.EPOCH.plusYears(2), LocalDate.EPOCH.plusYears(4));
 
 
-        boolean erTattIKontroll = OverlappendeMedlemskapsperioderKontroller.harOverlappendeMedlemsperiodeFraSed(medlemskapDokument, kontrollperiode);
+        boolean erTattIKontroll = harOverlappendeMedlemsperiodeMerEnn1DagFraSed(medlemskapDokument, kontrollperiode);
 
 
         assertFalse(erTattIKontroll);
@@ -162,7 +163,7 @@ class OverlappendeMedlemskapsperioderKontrollerTest {
         Lovvalgsperiode kontrollperiode = lagLovvalgsPeriode(LocalDate.EPOCH.plusYears(2), LocalDate.EPOCH.plusYears(4));
 
 
-        boolean erTattIKontroll = OverlappendeMedlemskapsperioderKontroller.harOverlappendeMedlemsperiodeFraSed(medlemskapDokument, kontrollperiode);
+        boolean erTattIKontroll = OverlappendeMedlemskapsperioderKontroller.harOverlappendeMedlemsperiodeMerEnn1DagFraSed(medlemskapDokument, kontrollperiode);
 
 
         assertTrue(erTattIKontroll);
