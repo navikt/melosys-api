@@ -9,11 +9,11 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.arkiv.ArkivDokument;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.brev.*;
+import no.nav.melosys.domain.dokument.arbeidsforhold.Aktoertype;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.GeografiskAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Representerer;
@@ -37,7 +37,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
-import static no.nav.melosys.domain.kodeverk.Aktoersroller.TRYGDEMYNDIGHET;
+import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 import static no.nav.melosys.service.dokument.DokgenTestData.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -71,21 +71,24 @@ class DokgenMalMapperTest {
 
     @Test
     void feilerNårProduserbartDokumentIkkeErStøttet() {
-        when(mockDokgenMapperDatahenter.hentPersondata(any(), any())).thenReturn(lagPersondata());
+        when(mockDokgenMapperDatahenter.hentPersondata(any())).thenReturn(lagPersondata());
+        when(mockDokgenMapperDatahenter.hentPersonMottaker(any())).thenReturn(lagPersondata());
 
         DokgenBrevbestilling brevbestilling = new DokgenBrevbestilling.Builder<>()
             .medProduserbartdokument(ATTEST_A1)
             .medBehandling(lagBehandling())
             .build();
 
-        assertThatThrownBy(() -> dokgenMalMapper.mapBehandling(brevbestilling, lagMottakerBruker()))
+        assertThatThrownBy(() -> dokgenMalMapper.mapBehandling(brevbestilling, lagMottaker(BRUKER)))
             .isInstanceOf(FunksjonellException.class)
             .hasMessageContaining("ProduserbartDokument ATTEST_A1 er ikke støttet av melosys-dokgen");
     }
 
     @Test
     void skalMappeMedBrukerAdressePDL() {
-        when(mockDokgenMapperDatahenter.hentPersondata(any(), any())).thenReturn(
+        when(mockDokgenMapperDatahenter.hentPersondata(any())).thenReturn(
+            PersonopplysningerObjectFactory.lagDonaldDuckPersondata());
+        when(mockDokgenMapperDatahenter.hentPersonMottaker(any())).thenReturn(
             PersonopplysningerObjectFactory.lagDonaldDuckPersondata());
 
         Behandling behandling = lagBehandling();
@@ -96,7 +99,7 @@ class DokgenMalMapperTest {
             .medForsendelseMottatt(Instant.now())
             .build();
 
-        DokgenDto dokgenDto = dokgenMalMapper.mapBehandling(brevbestilling, lagMottakerBruker());
+        DokgenDto dokgenDto = dokgenMalMapper.mapBehandling(brevbestilling, lagMottaker(BRUKER));
 
         assertThat(dokgenDto)
             .isInstanceOf(SaksbehandlingstidSoknad.class)
@@ -117,7 +120,8 @@ class DokgenMalMapperTest {
 
     @Test
     void skalMappeMedBrukerAdresse() {
-        when(mockDokgenMapperDatahenter.hentPersondata(any(), any())).thenReturn(lagPersondata());
+        when(mockDokgenMapperDatahenter.hentPersondata(any())).thenReturn(lagPersondata());
+        when(mockDokgenMapperDatahenter.hentPersonMottaker(any())).thenReturn(lagPersondata());
 
         Behandling behandling = lagBehandling();
 
@@ -127,7 +131,7 @@ class DokgenMalMapperTest {
             .medForsendelseMottatt(Instant.now())
             .build();
 
-        DokgenDto dokgenDto = dokgenMalMapper.mapBehandling(brevbestilling, lagMottakerBruker());
+        DokgenDto dokgenDto = dokgenMalMapper.mapBehandling(brevbestilling, lagMottaker(BRUKER));
 
         assertThat(dokgenDto)
             .isInstanceOf(SaksbehandlingstidSoknad.class)
@@ -145,7 +149,8 @@ class DokgenMalMapperTest {
 
     @Test
     void mapping_persondataFraPdl_ok() {
-        when(mockDokgenMapperDatahenter.hentPersondata(any(), any())).thenReturn(lagPersondata());
+        when(mockDokgenMapperDatahenter.hentPersondata(any())).thenReturn(lagPersondata());
+        when(mockDokgenMapperDatahenter.hentPersonMottaker(any())).thenReturn(lagPersondata());
 
         Behandling behandling = lagBehandling();
 
@@ -155,7 +160,7 @@ class DokgenMalMapperTest {
             .medForsendelseMottatt(Instant.now())
             .build();
 
-        DokgenDto dokgenDto = dokgenMalMapper.mapBehandling(brevbestilling, lagMottakerPerson());
+        DokgenDto dokgenDto = dokgenMalMapper.mapBehandling(brevbestilling, lagMottaker(BRUKER));
 
         assertThat(dokgenDto)
             .isInstanceOf(SaksbehandlingstidSoknad.class)
@@ -174,7 +179,8 @@ class DokgenMalMapperTest {
     @Test
     void mapping_avsenderMyndighet_ok() {
         when(mockDokgenMapperDatahenter.hentLandnavnFraLandkode("FI")).thenReturn("Finland");
-        when(mockDokgenMapperDatahenter.hentPersondata(any(), any())).thenReturn(lagPersondata());
+        when(mockDokgenMapperDatahenter.hentPersondata(any())).thenReturn(lagPersondata());
+        when(mockDokgenMapperDatahenter.hentPersonMottaker(any())).thenReturn(lagPersondata());
 
         Behandling behandling = lagBehandling();
         LocalDate forsendelseMottattDato = LocalDate.of(2022, 1, 19);
@@ -186,7 +192,7 @@ class DokgenMalMapperTest {
             .medAvsenderLand("FI")
             .build();
 
-        DokgenDto dokgenDto = dokgenMalMapper.mapBehandling(brevbestilling, null);
+        DokgenDto dokgenDto = dokgenMalMapper.mapBehandling(brevbestilling, lagMottaker(BRUKER));
 
         assertThat(dokgenDto)
             .isInstanceOf(SaksbehandlingstidSoknad.class);
@@ -205,7 +211,8 @@ class DokgenMalMapperTest {
 
     @Test
     void skalMappeMedFullmektigAdresse() {
-        when(mockDokgenMapperDatahenter.hentPersondata(any(), any())).thenReturn(lagPersondata());
+        when(mockDokgenMapperDatahenter.hentPersondata(any())).thenReturn(lagPersondata());
+        when(mockDokgenMapperDatahenter.hentPersonMottaker(any())).thenReturn(lagPersondata());
 
         Behandling behandling = lagBehandling();
 
@@ -216,7 +223,7 @@ class DokgenMalMapperTest {
             .medForsendelseMottatt(Instant.now())
             .build();
 
-        DokgenDto dokgenDto = dokgenMalMapper.mapBehandling(brevbestilling, lagMottakerOrg());
+        DokgenDto dokgenDto = dokgenMalMapper.mapBehandling(brevbestilling, lagMottaker(ARBEIDSGIVER));
 
         assertThat(dokgenDto)
             .isInstanceOf(SaksbehandlingstidSoknad.class)
@@ -234,7 +241,8 @@ class DokgenMalMapperTest {
 
     @Test
     void skalMappeMedFullmektigForretningsAdresse() {
-        when(mockDokgenMapperDatahenter.hentPersondata(any(), any())).thenReturn(lagPersondata());
+        when(mockDokgenMapperDatahenter.hentPersondata(any())).thenReturn(lagPersondata());
+        when(mockDokgenMapperDatahenter.hentPersonMottaker(any())).thenReturn(lagPersondata());
 
         Behandling behandling = lagBehandling();
 
@@ -249,7 +257,7 @@ class DokgenMalMapperTest {
             .medForsendelseMottatt(Instant.now())
             .build();
 
-        DokgenDto dokgenDto = dokgenMalMapper.mapBehandling(brevbestilling, lagMottakerOrg());
+        DokgenDto dokgenDto = dokgenMalMapper.mapBehandling(brevbestilling, lagMottakerRepresentant(Aktoertype.ORGANISASJON, Representerer.BRUKER));
 
         assertThat(dokgenDto)
             .isInstanceOf(SaksbehandlingstidSoknad.class)
@@ -267,7 +275,8 @@ class DokgenMalMapperTest {
 
     @Test
     void skalMappeMedFullmektigMedKontaktpersonAdresse() {
-        when(mockDokgenMapperDatahenter.hentPersondata(any(), any())).thenReturn(lagPersondata());
+        when(mockDokgenMapperDatahenter.hentPersondata(any())).thenReturn(lagPersondata());
+        when(mockDokgenMapperDatahenter.hentPersonMottaker(any())).thenReturn(lagPersondata());
 
         Behandling behandling = lagBehandling();
 
@@ -279,7 +288,7 @@ class DokgenMalMapperTest {
             .medForsendelseMottatt(Instant.now())
             .build();
 
-        DokgenDto dokgenDto = dokgenMalMapper.mapBehandling(brevbestilling, lagMottakerPerson());
+        DokgenDto dokgenDto = dokgenMalMapper.mapBehandling(brevbestilling, lagMottakerRepresentant(Aktoertype.ORGANISASJON, Representerer.BRUKER));
 
         assertThat(dokgenDto)
             .isInstanceOf(SaksbehandlingstidSoknad.class)
@@ -298,7 +307,8 @@ class DokgenMalMapperTest {
     @Test
     void skalMappeMangelbrevTilBruker() {
         when(mockDokgenMapperDatahenter.hentNorskPoststed(any())).thenReturn("Andeby");
-        when(mockDokgenMapperDatahenter.hentPersondata(any(), any())).thenReturn(lagPersondata());
+        when(mockDokgenMapperDatahenter.hentPersondata(any())).thenReturn(lagPersondata());
+        when(mockDokgenMapperDatahenter.hentPersonMottaker(any())).thenReturn(lagPersondata());
 
         Behandling behandling = lagBehandling(lagFagsak(true));
 
@@ -312,7 +322,7 @@ class DokgenMalMapperTest {
             .medManglerInfoFritekst("Dummy")
             .build();
 
-        DokgenDto dokgenDto = dokgenMalMapper.mapBehandling(brevbestilling, lagMottakerBruker());
+        DokgenDto dokgenDto = dokgenMalMapper.mapBehandling(brevbestilling, lagMottaker(BRUKER));
 
         assertThat(dokgenDto)
             .isInstanceOf(MangelbrevBruker.class);
@@ -332,7 +342,8 @@ class DokgenMalMapperTest {
     @Test
     void skalMappeMangelbrevTilArbeidsgiver() {
         when(mockDokgenMapperDatahenter.hentNorskPoststed(any())).thenReturn("Andeby");
-        when(mockDokgenMapperDatahenter.hentPersondata(any(), any())).thenReturn(lagPersondata());
+        when(mockDokgenMapperDatahenter.hentPersondata(any())).thenReturn(lagPersondata());
+        when(mockDokgenMapperDatahenter.hentPersonMottaker(any())).thenReturn(lagPersondata());
         when(mockDokgenMapperDatahenter.hentFullmektigNavn(any(), eq(Representerer.BRUKER))).thenReturn("Fullmektig AS");
 
         Behandling behandling = lagBehandling(lagFagsak(true));
@@ -347,7 +358,7 @@ class DokgenMalMapperTest {
             .medManglerInfoFritekst("Dummy")
             .build();
 
-        DokgenDto dokgenDto = dokgenMalMapper.mapBehandling(brevbestilling, lagMottakerBruker());
+        DokgenDto dokgenDto = dokgenMalMapper.mapBehandling(brevbestilling, lagMottaker(ARBEIDSGIVER));
 
         assertThat(dokgenDto)
             .isInstanceOf(MangelbrevArbeidsgiver.class);
@@ -368,7 +379,8 @@ class DokgenMalMapperTest {
 
     @Test
     void skalMappeInnvilgelsesbrevTilBruker() {
-        when(mockDokgenMapperDatahenter.hentPersondata(any(), any())).thenReturn(lagPersondata());
+        when(mockDokgenMapperDatahenter.hentPersondata(any())).thenReturn(lagPersondata());
+        when(mockDokgenMapperDatahenter.hentPersonMottaker(any())).thenReturn(lagPersondata());
         when(mockInnvilgelseFtrlMapper.map(any())).thenReturn(lagInnvilgelseFtrl());
 
         Behandling behandling = lagBehandling(lagFagsak(true));
@@ -382,13 +394,14 @@ class DokgenMalMapperTest {
             .medInnledningFritekst("Dummy")
             .build();
 
-        assertThat(dokgenMalMapper.mapBehandling(brevbestilling, lagMottakerBruker()))
+        assertThat(dokgenMalMapper.mapBehandling(brevbestilling, lagMottaker(BRUKER)))
             .isInstanceOf(InnvilgelseFtrl.class);
     }
 
     @Test
     void skalMappeStorbritanniabrev() {
-        when(mockDokgenMapperDatahenter.hentPersondata(any(), any())).thenReturn(lagPersondata());
+        when(mockDokgenMapperDatahenter.hentPersondata(any())).thenReturn(lagPersondata());
+        when(mockDokgenMapperDatahenter.hentPersonMottaker(any())).thenReturn(lagPersondata());
         when(mockStorbritanniaMapper.map(any())).thenReturn(lagInnvilgelseOgAttestStorbritannia());
 
         Behandling behandling = lagBehandling(lagFagsak(true));
@@ -402,7 +415,7 @@ class DokgenMalMapperTest {
             .medInnledningFritekst("Dummy")
             .build();
 
-        DokgenDto dokgenDto = dokgenMalMapper.mapBehandling(brevbestilling, lagMottakerBruker());
+        DokgenDto dokgenDto = dokgenMalMapper.mapBehandling(brevbestilling, lagMottaker(BRUKER));
         assertThat(dokgenDto).isInstanceOf(InnvilgelseOgAttestStorbritannia.class);
 
         InnvilgelseStorbritannia innvilgelse = ((InnvilgelseOgAttestStorbritannia) dokgenDto).getInnvilgelse();
@@ -449,7 +462,8 @@ class DokgenMalMapperTest {
 
     @Test
     void skalMappeFritekstbrevTilBruker() {
-        when(mockDokgenMapperDatahenter.hentPersondata(any(), any())).thenReturn(lagPersondata());
+        when(mockDokgenMapperDatahenter.hentPersondata(any())).thenReturn(lagPersondata());
+        when(mockDokgenMapperDatahenter.hentPersonMottaker(any())).thenReturn(lagPersondata());
         when(mockDokgenMapperDatahenter.hentFullmektigNavn(any(), eq(Representerer.BRUKER))).thenReturn("Fullmektig AS");
 
         Behandling behandling = lagBehandling(lagFagsak(true));
@@ -463,7 +477,7 @@ class DokgenMalMapperTest {
             .medSaksbehandlerNavn("Fetter Anton")
             .build();
 
-        DokgenDto dokgenDto = dokgenMalMapper.mapBehandling(brevbestilling, lagMottakerBruker());
+        DokgenDto dokgenDto = dokgenMalMapper.mapBehandling(brevbestilling, lagMottaker(BRUKER));
         assertThat(dokgenDto).isInstanceOf(Fritekstbrev.class);
 
         assertThat((Fritekstbrev) dokgenDto)
@@ -481,12 +495,13 @@ class DokgenMalMapperTest {
                 "Fetter Anton"
             );
 
-        assertThat(dokgenDto.getMottaker().type()).isEqualTo(Aktoersroller.BRUKER.getKode());
+        assertThat(dokgenDto.getMottaker().type()).isEqualTo(BRUKER.getKode());
     }
 
     @Test
     void skalMappeFritekstbrevTilArbeidsgiver() {
-        when(mockDokgenMapperDatahenter.hentPersondata(any(), any())).thenReturn(lagPersondata());
+        when(mockDokgenMapperDatahenter.hentPersondata(any())).thenReturn(lagPersondata());
+        when(mockDokgenMapperDatahenter.hentPersonMottaker(any())).thenReturn(lagPersondata());
         when(mockDokgenMapperDatahenter.hentFullmektigNavn(any(), eq(Representerer.ARBEIDSGIVER))).thenReturn(null);
 
         Behandling behandling = lagBehandling(lagFagsak(true));
@@ -499,7 +514,7 @@ class DokgenMalMapperTest {
             .medKontaktopplysninger(true)
             .build();
 
-        DokgenDto dokgenDto = dokgenMalMapper.mapBehandling(brevbestilling, lagMottakerOrg());
+        DokgenDto dokgenDto = dokgenMalMapper.mapBehandling(brevbestilling, lagMottaker(ARBEIDSGIVER));
         assertThat(dokgenDto).isInstanceOf(Fritekstbrev.class);
 
         assertThat((Fritekstbrev) dokgenDto)
@@ -515,7 +530,7 @@ class DokgenMalMapperTest {
                 null
             );
 
-        assertThat(dokgenDto.getMottaker().type()).isEqualTo(Aktoersroller.ARBEIDSGIVER.getKode());
+        assertThat(dokgenDto.getMottaker().type()).isEqualTo(ARBEIDSGIVER.getKode());
     }
 
     @Test
@@ -527,16 +542,17 @@ class DokgenMalMapperTest {
         when(mockDokgenMapperDatahenter.hentMangelbrevDatoer(any())).thenReturn(List.of(
             datoOktober.atStartOfDay(ZoneId.systemDefault()).toInstant(),
             datoDesember.atStartOfDay(ZoneId.systemDefault()).toInstant()));
-        when(mockDokgenMapperDatahenter.hentPersondata(any(), any())).thenReturn(lagPersondata());
+        when(mockDokgenMapperDatahenter.hentPersondata(any())).thenReturn(lagPersondata());
+        when(mockDokgenMapperDatahenter.hentPersonMottaker(any())).thenReturn(lagPersondata());
         DokgenBrevbestilling brevbestilling = new AvslagBrevbestilling.Builder()
             .medProduserbartdokument(AVSLAG_MANGLENDE_OPPLYSNINGER)
             .medBehandling(behandling)
             .medFritekst("Hei")
             .build();
 
-        Avslagbrev avslagbrev = (Avslagbrev) dokgenMalMapper.mapBehandling(brevbestilling, lagMottakerBruker());
+        Avslagbrev avslagbrev = (Avslagbrev) dokgenMalMapper.mapBehandling(brevbestilling, lagMottaker(BRUKER));
 
-        assertThat(avslagbrev.getMottaker().type()).isEqualTo(Aktoersroller.BRUKER.getKode());
+        assertThat(avslagbrev.getMottaker().type()).isEqualTo(BRUKER.getKode());
         assertThat(avslagbrev.getBehandlingstype()).isEqualTo(Behandlingstyper.SOEKNAD.getKode());
         assertThat(avslagbrev.getMangelbrevDatoer()).containsExactly(
             datoOktober,
@@ -553,7 +569,9 @@ class DokgenMalMapperTest {
         journalPostVirksomhet.setAvsenderType(Avsendertyper.ORGANISASJON);
         Behandling behandling = lagBehandling(lagFagsak(true));
         behandling.setRegistrertDato(LocalDateTime.of(2021, 10, 1, 0, 0).toInstant(ZoneOffset.UTC));
-        when(mockDokgenMapperDatahenter.hentPersondata(any(), any())).thenReturn(lagPersondata());
+        when(mockDokgenMapperDatahenter.hentPersondata(any())).thenReturn(lagPersondata());
+        when(mockDokgenMapperDatahenter.hentPersonMottaker(any())).thenReturn(lagPersondata());
+        when(mockDokgenMapperDatahenter.hentPersonMottaker(any())).thenReturn(lagPersondata());
         when(mockDokgenMapperDatahenter.hentMangelbrevDatoer(any())).thenReturn(List.of(
             datoOktober.atStartOfDay(ZoneId.systemDefault()).toInstant()));
 
@@ -562,23 +580,24 @@ class DokgenMalMapperTest {
             .medBehandling(behandling)
             .build();
 
-        Avslagbrev avslagbrev = (Avslagbrev) dokgenMalMapper.mapBehandling(brevbestilling, lagMottakerBruker());
+        Avslagbrev avslagbrev = (Avslagbrev) dokgenMalMapper.mapBehandling(brevbestilling, lagMottaker(BRUKER));
 
         assertThat(avslagbrev.getMangelbrevDatoer()).containsExactly(datoOktober);
     }
 
     @Test
     void skalMappeAvslagsbrevPgaManglendeOpplysningerTilBruker() {
-        when(mockDokgenMapperDatahenter.hentPersondata(any(), any())).thenReturn(lagPersondata());
+        when(mockDokgenMapperDatahenter.hentPersondata(any())).thenReturn(lagPersondata());
+        when(mockDokgenMapperDatahenter.hentPersonMottaker(any())).thenReturn(lagPersondata());
         Behandling behandling = lagBehandling(lagFagsak(true));
         DokgenBrevbestilling brevbestilling = new AvslagBrevbestilling.Builder()
             .medProduserbartdokument(AVSLAG_MANGLENDE_OPPLYSNINGER)
             .medBehandling(behandling)
             .build();
 
-        DokgenDto dokgenDto = dokgenMalMapper.mapBehandling(brevbestilling, lagMottakerBruker());
+        DokgenDto dokgenDto = dokgenMalMapper.mapBehandling(brevbestilling, lagMottaker(BRUKER));
 
-        assertThat(dokgenDto.getMottaker().type()).isEqualTo(Aktoersroller.BRUKER.getKode());
+        assertThat(dokgenDto.getMottaker().type()).isEqualTo(BRUKER.getKode());
     }
 
     private Aktoer lagMottakerBruker() {
@@ -616,6 +635,7 @@ class DokgenMalMapperTest {
             .medInnledningFritekst("Innledning")
             .medBehandling(lagBehandling())
             .medPersonDokument(lagPersondata())
+            .medPersonMottaker(lagPersondata())
             .build();
     }
 
