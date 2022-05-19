@@ -12,6 +12,7 @@ import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
+import no.nav.melosys.domain.dokument.arbeidsforhold.Aktoertype;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Representerer;
@@ -58,6 +59,7 @@ class BrevDataServiceTest {
     private static final String FNR = "Fnr";
     private static final String ORGNR = "Org-Nr";
     private static final String REP_ORGNR = "REP_Org-Nr";
+    private static final String REP_FNR = "REP_Fnr";
     private static final String AKTØRID = "Aktør-Id";
 
     private static final String sammensattNavn = "ALTFOR SAMMENSATT";
@@ -157,34 +159,66 @@ class BrevDataServiceTest {
 
     private static Aktoer lagAktør(Aktoersroller type) {
         Aktoer aktør = new Aktoer();
-        aktør.setAktørId(type.name());
-        aktør.setAktørId(AKTØRID);
-        aktør.setInstitusjonId("HR:987");
-        if (type == Aktoersroller.REPRESENTANT) {
-            aktør.setOrgnr(REP_ORGNR);
-        } else {
-            aktør.setOrgnr(ORGNR);
-        }
         aktør.setRolle(type);
+        switch (type) {
+            case BRUKER -> aktør.setAktørId(AKTØRID);
+            case ARBEIDSGIVER, VIRKSOMHET -> aktør.setOrgnr(ORGNR);
+            case TRYGDEMYNDIGHET -> aktør.setInstitusjonId("HR:987");
+            case REPRESENTANT -> throw new IllegalArgumentException("Bruk lagAktørRepresentant() for fullmekitg mottaker");
+        }
+        return aktør;
+    }
+
+    private static Aktoer lagAktørRepresentant(Aktoertype mottakerType) {
+        Aktoer aktør = new Aktoer();
+        aktør.setRolle(Aktoersroller.REPRESENTANT);
+        switch (mottakerType) {
+            case PERSON -> aktør.setPersonIdent(REP_FNR);
+            case ORGANISASJON -> aktør.setOrgnr(REP_ORGNR);
+            default -> throw new IllegalArgumentException("Mottakertype må være person eller organisasjon");
+        }
         return aktør;
     }
 
     @Test
-    void lagForvaltningsmelding_representantIkkeNull_tilRepresentant() {
+    void lagForvaltningsmelding_representantErOrganisasjon_tilRepresentant() {
 
         Behandling behandling = lagBehandling(lagSøknadDokument());
-        behandling.getFagsak().getAktører().add(hentRepresentantAktør());
+        behandling.getFagsak().getAktører().add(hentRepresentantOrgAktør());
 
         BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingRequest());
         brevData.initierendeJournalpostForsendelseMottattTidspunkt = Instant.now();
 
-        Aktoer mottaker = lagAktør(Aktoersroller.REPRESENTANT);
+        Aktoer mottaker = lagAktørRepresentant(Aktoertype.ORGANISASJON);
 
         DokumentbestillingMetadata metadata = service.lagBestillingMetadata(MELDING_FORVENTET_SAKSBEHANDLINGSTID,
             mottaker, null, behandling, brevData);
 
         assertThat(metadata.brukerID).isEqualTo(FNR);
         assertThat(metadata.mottakerID).isEqualTo(REP_ORGNR);
+
+        Element element = service.lagBrevXML(MELDING_FORVENTET_SAKSBEHANDLINGSTID, mottaker, null, behandling,
+            brevData);
+        assertThat(element).isNotNull();
+
+    }
+
+    @Test
+    void lagForvaltningsmelding_representantErPerson_tilRepresentant() {
+
+        Behandling behandling = lagBehandling(lagSøknadDokument());
+        behandling.getFagsak().getAktører().add(hentRepresentantPersonAktør());
+
+        BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingRequest());
+        brevData.initierendeJournalpostForsendelseMottattTidspunkt = Instant.now();
+
+        Aktoer mottaker = lagAktørRepresentant(Aktoertype.PERSON);
+
+        DokumentbestillingMetadata metadata = service.lagBestillingMetadata(MELDING_FORVENTET_SAKSBEHANDLINGSTID,
+            mottaker, null, behandling, brevData);
+
+        assertThat(metadata.brukerID).isEqualTo(FNR);
+        assertThat(metadata.mottakerID).isEqualTo(REP_FNR);
 
         Element element = service.lagBrevXML(MELDING_FORVENTET_SAKSBEHANDLINGSTID, mottaker, null, behandling,
             brevData);
@@ -297,7 +331,7 @@ class BrevDataServiceTest {
     @Test
     void avklarMottakerId_representantOgKontaktOpplysningFinnes_kontaktOpplysningForRepresentantBrukes() {
         Behandling behandling = lagBehandling(lagSøknadDokument());
-        behandling.getFagsak().getAktører().add(hentRepresentantAktør());
+        behandling.getFagsak().getAktører().add(hentRepresentantOrgAktør());
 
         Kontaktopplysning kontaktopplysning = new Kontaktopplysning();
         kontaktopplysning.setKontaktopplysningID(new KontaktopplysningID("MELTEST-1", "999"));
@@ -305,7 +339,7 @@ class BrevDataServiceTest {
         kontaktopplysning.setKontaktOrgnr("KONTAKTORG_999");
 
         BrevData brevData = new BrevData("Z123456");
-        Aktoer mottaker = lagAktør(Aktoersroller.REPRESENTANT);
+        Aktoer mottaker = lagAktørRepresentant(Aktoertype.ORGANISASJON);
         brevData.fritekst = "Test";
 
         DokumentbestillingMetadata metadata = service.lagBestillingMetadata(MELDING_MANGLENDE_OPPLYSNINGER, mottaker,
@@ -450,10 +484,18 @@ class BrevDataServiceTest {
         return behandling;
     }
 
-    private static Aktoer hentRepresentantAktør() {
+    private static Aktoer hentRepresentantOrgAktør() {
         Aktoer aktørArbRep = new Aktoer();
         aktørArbRep.setRolle(Aktoersroller.REPRESENTANT);
         aktørArbRep.setOrgnr(REP_ORGNR);
+        aktørArbRep.setRepresenterer(Representerer.ARBEIDSGIVER);
+        return aktørArbRep;
+    }
+
+    private static Aktoer hentRepresentantPersonAktør() {
+        Aktoer aktørArbRep = new Aktoer();
+        aktørArbRep.setRolle(Aktoersroller.REPRESENTANT);
+        aktørArbRep.setPersonIdent(REP_FNR);
         aktørArbRep.setRepresenterer(Representerer.ARBEIDSGIVER);
         return aktørArbRep;
     }

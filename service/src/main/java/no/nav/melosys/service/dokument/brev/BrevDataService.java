@@ -99,25 +99,17 @@ public class BrevDataService {
     }
 
     private String avklarMottakerId(Aktoer mottaker, Kontaktopplysning kontaktopplysning) {
-        Aktoersroller mottakerRolle = mottaker.getRolle();
+        return switch (mottaker.getRolle()) {
+            case ARBEIDSGIVER -> avklarMottakerIDForOrg(mottaker, kontaktopplysning);
+            case REPRESENTANT -> mottaker.erOrganisasjon() ? avklarMottakerIDForOrg(mottaker, kontaktopplysning) : mottaker.getPersonIdent();
+            case BRUKER -> persondataFasade.hentFolkeregisterident(mottaker.getAktørId());
+            case TRYGDEMYNDIGHET -> mottaker.erUtenlandskMyndighet() ? mottaker.getInstitusjonId() : mottaker.getOrgnr();
+            default -> throw new TekniskException(mottaker.getRolle() + " støttes ikke.");
+        };
+    }
 
-        if (mottakerRolle == ARBEIDSGIVER || mottakerRolle == REPRESENTANT) {
-            return (kontaktopplysning != null && kontaktopplysning.getKontaktOrgnr() != null) ? kontaktopplysning.getKontaktOrgnr() : mottaker.getOrgnr();
-        } else if (mottakerRolle == BRUKER) {
-            try {
-                return persondataFasade.hentFolkeregisterident(mottaker.getAktørId());
-            } catch (IkkeFunnetException e) {
-                throw new TekniskException(e);
-            }
-        } else if (mottakerRolle == TRYGDEMYNDIGHET) {
-            if (mottaker.erUtenlandskMyndighet()) {
-                return mottaker.getInstitusjonId();
-            } else {
-                return mottaker.getOrgnr();
-            }
-        }
-
-        throw new TekniskException(mottakerRolle + " støttes ikke.");
+    private String avklarMottakerIDForOrg(Aktoer mottaker, Kontaktopplysning kontaktopplysning) {
+        return (kontaktopplysning != null && kontaktopplysning.getKontaktOrgnr() != null) ? kontaktopplysning.getKontaktOrgnr() : mottaker.getOrgnr();
     }
 
     UtenlandskMyndighet hentMyndighetFraAktoer(Aktoer aktoer) {
@@ -157,7 +149,7 @@ public class BrevDataService {
         final FellesType fellesType = new FellesType();
         fellesType.setFagsaksnummer(behandling.getFagsak().getSaksnummer());
         if (mottaker.getRolle() == REPRESENTANT) {
-            fellesType.setFullmektig(mottaker.getOrgnr());
+            fellesType.setFullmektig(mottaker.erOrganisasjon() ? mottaker.getOrgnr() : mottaker.getPersonIdent());
         }
         if (kontaktopplysning != null) {
             fellesType.setKontaktperson(kontaktopplysning.getKontaktNavn());
