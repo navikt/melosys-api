@@ -235,6 +235,7 @@ class InnvilgelseFtrlMapperTest {
         return new InnvilgelseBrevbestilling.Builder()
             .medBehandling(lagBehandling())
             .medPersonDokument(lagPersondata())
+            .medPersonMottaker(lagPersondata())
             .medForsendelseMottatt(Instant.EPOCH)
             .medBegrunnelseFritekst(BEGRUNNELSE_FRITEKST)
             .medSaksbehandlerNavn(SAKSBEHANDLER_NAVN)

@@ -11,6 +11,7 @@ import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.person.Persondata;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.DokumentHentingService;
@@ -83,12 +84,22 @@ public class DokgenMapperDatahenter {
         return behandlingsresultatService.hentBehandlingsresultat(behandlingId);
     }
 
-    Persondata hentPersondata(DokgenBrevbestilling brevbestilling, Aktoer mottaker) {
+    Persondata hentPersondata(DokgenBrevbestilling brevbestilling) {
+        final var behandling = brevbestilling.getBehandling();
+        return persondataFasade.hentPerson(behandling.getFagsak().hentBrukersAktørID());
+    }
+
+    Persondata hentPersonMottaker(Aktoer mottaker) {
+        if (mottaker.erOrganisasjon()) {
+            return null;
+        }
         if (StringUtils.hasText(mottaker.getPersonIdent())) {
             return persondataFasade.hentPerson(mottaker.getPersonIdent());
         }
-        final var behandling = brevbestilling.getBehandling();
-        return persondataFasade.hentPerson(behandling.getFagsak().hentBrukersAktørID());
+        if (StringUtils.hasText(mottaker.getAktørId())) {
+            return persondataFasade.hentPerson(mottaker.getAktørId());
+        }
+        throw new FunksjonellException("PersonMottaker mangler aktørID og personIdent");
     }
 
     String hentSammensattNavn(String fnr) {

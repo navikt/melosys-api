@@ -112,15 +112,15 @@ public final class DokgenAdresseMapper {
         }
 
         OrganisasjonDokument org = brevbestilling.getOrg();
-        Persondata persondata = brevbestilling.getPersondokument();
+        Persondata personMottaker = brevbestilling.getPersonMottaker();
         return new Mottaker(
-            mapNavn(org, persondata),
-            mapAdresselinjer(org, brevbestilling.getKontaktpersonNavn(), brevbestilling.getKontaktopplysning(), persondata),
-            mapPostnr(org, persondata),
-            mapPoststed(org, persondata),
-            mapLandForAdresse(org, persondata),
+            mapNavn(org, personMottaker),
+            mapAdresselinjer(org, brevbestilling.getKontaktpersonNavn(), brevbestilling.getKontaktopplysning(), personMottaker),
+            mapPostnr(org, personMottaker),
+            mapPoststed(org, personMottaker),
+            mapLandForAdresse(org, personMottaker),
             mottakerType.getKode(),
-            mapRegionForAdresse(org, persondata)
+            mapRegionForAdresse(org, personMottaker)
         );
     }
 }
