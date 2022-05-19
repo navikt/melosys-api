@@ -29,7 +29,6 @@ import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.Assert;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
@@ -48,6 +47,7 @@ public class BrevbestillingService {
         MANGELBREV_ARBEIDSGIVER,
         GENERELT_FRITEKSTBREV_BRUKER,
         GENERELT_FRITEKSTBREV_ARBEIDSGIVER,
+        GENERELT_FRITEKSTBREV_VIRKSOMHET,
         AVSLAG_MANGLENDE_OPPLYSNINGER
     );
 
@@ -211,12 +211,17 @@ public class BrevbestillingService {
         List<Produserbaredokumenter> brevmaler = new ArrayList<>();
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingId);
 
-        if (behandling.getType() == Behandlingstyper.SOEKNAD) {
-            brevmaler.add(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD);
-        } else if (behandling.erKlage()) {
-            brevmaler.add(MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE);
+        if (behandling.getFagsak().behandlingGjelder() == BRUKER) {
+            if (behandling.getType() == Behandlingstyper.SOEKNAD) {
+                brevmaler.add(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD);
+            } else if (behandling.erKlage()) {
+                brevmaler.add(MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE);
+            }
+
+            brevmaler.addAll(asList(MANGELBREV_BRUKER, MANGELBREV_ARBEIDSGIVER, GENERELT_FRITEKSTBREV_BRUKER, GENERELT_FRITEKSTBREV_ARBEIDSGIVER));
+        } else {
+            brevmaler.add(GENERELT_FRITEKSTBREV_VIRKSOMHET);
         }
-        brevmaler.addAll(asList(MANGELBREV_BRUKER, MANGELBREV_ARBEIDSGIVER, GENERELT_FRITEKSTBREV_BRUKER, GENERELT_FRITEKSTBREV_ARBEIDSGIVER));
         return behandling.erAktiv() ? brevmaler : emptyList();
     }
 
@@ -248,7 +253,7 @@ public class BrevbestillingService {
                     break;
                 }
             }
-            case ARBEIDSGIVER: {
+            case VIRKSOMHET, ARBEIDSGIVER: {
                 kontaktopplysning = kontaktopplysningService.hentKontaktopplysning(behandling.getFagsak().getSaksnummer(),
                     mottaker.getOrgnr()).orElse(null);
                 String mottakerOrgnr = kontaktopplysning != null && kontaktopplysning.getKontaktOrgnr() != null ? kontaktopplysning.getKontaktOrgnr() : mottaker.getOrgnr();

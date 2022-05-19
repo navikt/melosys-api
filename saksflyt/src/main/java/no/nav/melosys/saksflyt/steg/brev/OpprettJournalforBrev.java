@@ -2,6 +2,7 @@ package no.nav.melosys.saksflyt.steg.brev;
 
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.arkiv.BrukerIdType;
 import no.nav.melosys.domain.arkiv.JournalpostBestilling;
 import no.nav.melosys.domain.arkiv.OpprettJournalpost;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
@@ -81,19 +82,19 @@ public class OpprettJournalforBrev implements StegBehandler {
 
         DokumentproduksjonsInfo dokumentproduksjonsInfo = dokgenService.hentDokumentInfo(produserbartDokument);
 
-        JournalpostBestilling bestilling = new JournalpostBestilling.Builder()
+        JournalpostBestilling.Builder bestilling = new JournalpostBestilling.Builder()
             .medTittel(utledJournalføringsTittel(behandling, dokumentproduksjonsInfo, brevbestilling, mottaker))
             .medBrevkode(dokumentproduksjonsInfo.dokgenMalnavn())
             .medDokumentKategori(dokumentproduksjonsInfo.dokumentKategoriKode())
-            .medBrukerFnr(hentBrukerFolkeregisterIdent(behandling))
             .medMottakerNavn(utledNavn(mottakerID, mottakerType))
             .medMottakerId(mottakerType == MottakerType.PERSON_MED_AKTØR_ID ? persondataFasade.hentFolkeregisterident(mottakerID) : mottakerID)
             .medMottakerIdType(utledMottakerIdType(mottakerType))
             .medSaksnummer(behandling.getFagsak().getSaksnummer())
-            .medPdf(pdf)
-            .build();
+            .medPdf(pdf);
 
-        String journalpostId = joarkFasade.opprettJournalpost(OpprettJournalpost.lagJournalpostForBrev(bestilling), true);
+        settBruker(behandling, bestilling);
+
+        String journalpostId = joarkFasade.opprettJournalpost(OpprettJournalpost.lagJournalpostForBrev(bestilling.build()), true);
 
         log.info("Brev for behandling {} er journalført, journalpostId {}", behandling.getId(), journalpostId);
         prosessinstans.setData(DISTRIBUERBAR_JOURNALPOST_ID, journalpostId);
@@ -141,16 +142,25 @@ public class OpprettJournalforBrev implements StegBehandler {
         };
     }
 
+    private void settBruker(Behandling behandling, JournalpostBestilling.Builder bestilling) {
+        var fagsak = behandling.getFagsak();
+        if (fagsak.harAktørMedRolleType(Aktoersroller.VIRKSOMHET)) {
+            bestilling
+                .medBrukerId(fagsak.hentVirksomhet().getOrgnr())
+                .medBrukerIdType(BrukerIdType.ORGNR);
+        } else {
+            bestilling
+                .medBrukerId(persondataFasade.hentFolkeregisterident(fagsak.hentBrukersAktørID()))
+                .medBrukerIdType(BrukerIdType.FOLKEREGISTERIDENT);
+        }
+    }
+
     private OpprettJournalpost.KorrespondansepartIdType utledMottakerIdType(MottakerType mottakerType) {
         return switch (mottakerType) {
             case PERSON_MED_AKTØR_ID, PERSON_MED_FNR -> OpprettJournalpost.KorrespondansepartIdType.FNR;
             case INSTITUSJON -> OpprettJournalpost.KorrespondansepartIdType.UTENLANDSK_ORGANISASJON;
             case ORGANISASJON -> OpprettJournalpost.KorrespondansepartIdType.ORGNR;
         };
-    }
-
-    private String hentBrukerFolkeregisterIdent(Behandling behandling) {
-        return persondataFasade.hentFolkeregisterident(behandling.getFagsak().hentBrukersAktørID());
     }
 
     public String utledJournalføringsTittel(Behandling behandling, DokumentproduksjonsInfo

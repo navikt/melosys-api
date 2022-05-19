@@ -4,9 +4,11 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.finn.unleash.FakeUnleash;
+import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
@@ -274,7 +276,24 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    void hentTilgjengeligeMaler_lagerRiktigeMottakerTilBehandlingstypeSoknadForBruker() {
+    void hentTilgjengeligeMaler_lagerRiktigeMottakereForVirksomhet() {
+        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(lagBehandling(Behandlingstyper.SOEKNAD));
+        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling(Behandlingstyper.SOEKNAD));
+        when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
+
+        List<BrevmalDto> brevmaler = brevbestillingTjeneste.hentTilgjengeligeMaler(123L);
+
+        List<Produserbaredokumenter> arbeidsgiverBrev = List.of(GENERELT_FRITEKSTBREV_VIRKSOMHET);
+        brevmaler.stream().filter(brevmal -> arbeidsgiverBrev.contains(brevmal.getType()))
+            .forEach(brevmalDto ->
+                assertThat(brevmalDto.getMuligeMottakere())
+                    .extracting(MottakerDto::getType)
+                    .hasSize(2)
+                    .containsExactlyInAnyOrder("Virksomhet", "Annen organisasjon"));
+    }
+
+    @Test
+    void hentTilgjengeligeMaler_lagerRiktigeMottakerTilBrukerBehandlingstypeSoknad() {
         when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(lagBehandling(Behandlingstyper.SOEKNAD));
         when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling(Behandlingstyper.SOEKNAD));
         when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
@@ -295,7 +314,7 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    void hentTilgjengeligeMaler_lagerRiktigeMottakerTilBehandlingstypeKlage() {
+    void hentTilgjengeligeMaler_lagerRiktigeMottakerTilBrukerBehandlingstypeKlage() {
         when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(lagBehandling(Behandlingstyper.KLAGE));
         when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling(Behandlingstyper.KLAGE));
         when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
@@ -375,9 +394,12 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
     }
 
     private Behandling lagBehandling(Behandlingstyper type) {
-        var behandling = new Behandling();
-        Fagsak fagsak = new Fagsak();
+        Aktoer bruker = new Aktoer();
+        bruker.setRolle(Aktoersroller.BRUKER);
+        var fagsak = new Fagsak();
         fagsak.setType(Sakstyper.EU_EOS);
+        fagsak.setAktører(Set.of(bruker));
+        var behandling = new Behandling();
         behandling.setId(1L);
         behandling.setFagsak(fagsak);
         behandling.setType(type);

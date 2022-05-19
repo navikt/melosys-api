@@ -141,6 +141,10 @@ public class Aktoer extends RegistreringsInfo {
         return Aktoersroller.BRUKER.equals(rolle);
     }
 
+    public boolean erVirksomhet() {
+        return Aktoersroller.VIRKSOMHET.equals(rolle);
+    }
+
     public Landkoder hentMyndighetLandkode() {
         if (erUtenlandskMyndighet()) {
             return UtenlandskMyndighet.konverterInstitusjonIdTilLandkode(institusjonId);

@@ -211,7 +211,7 @@ public class DokgenService {
                 .medBarnFritekst(brevbestillingRequest.getBarnFritekst())
                 .medVirksomhetArbeidsgiverSkalHaKopi(inneholderArbeidsgiverSomKopimottaker(brevbestillingRequest.getKopiMottakere()))
                 .medNyVurderingBakgrunn(brevbestillingRequest.getNyVurderingBakgrunn());
-            case GENERELT_FRITEKSTBREV_BRUKER, GENERELT_FRITEKSTBREV_ARBEIDSGIVER -> new FritekstbrevBrevbestilling.Builder()
+            case GENERELT_FRITEKSTBREV_BRUKER, GENERELT_FRITEKSTBREV_ARBEIDSGIVER, GENERELT_FRITEKSTBREV_VIRKSOMHET -> new FritekstbrevBrevbestilling.Builder()
                 .medFritekstTittel(brevbestillingRequest.getFritekstTittel())
                 .medFritekst(brevbestillingRequest.getFritekst())
                 .medKontaktpersonNavn(brevbestillingRequest.getKontaktpersonNavn())

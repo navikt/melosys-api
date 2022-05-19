@@ -4,7 +4,8 @@ public final class JournalpostBestilling {
     private final String tittel;
     private final String brevkode;
     private final String dokumentKategori;
-    private final String brukerFnr;
+    private final String brukerId;
+    private final BrukerIdType brukerIdType;
     private final String mottakerNavn;
     private final String mottakerId;
     private final OpprettJournalpost.KorrespondansepartIdType mottakerIdType;
@@ -15,7 +16,8 @@ public final class JournalpostBestilling {
         this.tittel = builder.tittel;
         this.brevkode = builder.brevkode;
         this.dokumentKategori = builder.dokumentKategori;
-        this.brukerFnr = builder.brukerFnr;
+        this.brukerId = builder.brukerId;
+        this.brukerIdType = builder.brukerIdType;
         this.mottakerNavn = builder.mottakerNavn;
         this.mottakerId = builder.mottakerId;
         this.mottakerIdType = builder.mottakerIdType;
@@ -35,8 +37,12 @@ public final class JournalpostBestilling {
         return dokumentKategori;
     }
 
-    public String getBrukerFnr() {
-        return brukerFnr;
+    public String getBrukerId() {
+        return brukerId;
+    }
+
+    public BrukerIdType getBrukerIdType() {
+        return brukerIdType;
     }
 
     public String getMottakerNavn() {
@@ -63,7 +69,8 @@ public final class JournalpostBestilling {
         private String tittel;
         private String brevkode;
         private String dokumentKategori;
-        private String brukerFnr;
+        private String brukerId;
+        private BrukerIdType brukerIdType;
         private String mottakerNavn;
         private String mottakerId;
         private OpprettJournalpost.KorrespondansepartIdType mottakerIdType;
@@ -85,8 +92,13 @@ public final class JournalpostBestilling {
             return this;
         }
 
-        public Builder medBrukerFnr(String brukerFnr) {
-            this.brukerFnr = brukerFnr;
+        public Builder medBrukerId(String brukerId) {
+            this.brukerId = brukerId;
+            return this;
+        }
+
+        public Builder medBrukerIdType(BrukerIdType brukerIdType) {
+            this.brukerIdType = brukerIdType;
             return this;
         }
 

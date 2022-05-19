@@ -75,6 +75,10 @@ public class DokumentproduksjonsInfoMapper {
                 new DokumentproduksjonsInfo("fritekstbrev",
                     DokumentKategoriKode.IB.getKode(),
                     null, null))
+            .put(GENERELT_FRITEKSTBREV_VIRKSOMHET,
+                new DokumentproduksjonsInfo("fritekstbrev",
+                    DokumentKategoriKode.IB.getKode(),
+                    null, null))
             .put(GENERELT_FRITEKSTBREV_ARBEIDSGIVER,
                 new DokumentproduksjonsInfo("fritekstbrev",
                     DokumentKategoriKode.IB.getKode(),
