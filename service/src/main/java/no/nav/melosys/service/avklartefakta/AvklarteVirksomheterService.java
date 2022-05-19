@@ -87,7 +87,7 @@ public class AvklarteVirksomheterService {
         Set<String> selvstendigeForetakOrgnumre = hentNorskeSelvstendigeForetakOrgnumre(behandling);
         return organisasjonOppslagService.hentOrganisasjoner(selvstendigeForetakOrgnumre).stream()
             .map(org -> new AvklartVirksomhet(org.lagSammenslåttNavn(), org.getOrgnummer(), adressekonverterer.apply(org), Yrkesaktivitetstyper.SELVSTENDIG))
-            .toList();
+            .collect(Collectors.toList());
     }
 
     public List<AvklartVirksomhet> hentNorskeArbeidsgivere(Behandling behandling) {
@@ -98,7 +98,7 @@ public class AvklarteVirksomheterService {
         Set<String> arbeidsgivendeOrgnumre = hentNorskeArbeidsgivendeOrgnumre(behandling);
         return organisasjonOppslagService.hentOrganisasjoner(arbeidsgivendeOrgnumre).stream()
             .map(org -> new AvklartVirksomhet(org.lagSammenslåttNavn(), org.getOrgnummer(), adressekonverterer.apply(org), Yrkesaktivitetstyper.LOENNET_ARBEID))
-            .toList();
+            .collect(Collectors.toList());
     }
 
     public List<AvklartVirksomhet> hentAlleNorskeVirksomheter(Behandling behandling) {
