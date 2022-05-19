@@ -83,7 +83,7 @@ public class OpprettJournalpost extends Journalpost {
         final var behandlingsgrunnlag = fagsak.hentSistAktivBehandling().getBehandlingsgrunnlag();
         opprettJournalpost.setHoveddokument(lagFysiskHovedDokumentAltinn(hovedDokument, behandlingsgrunnlag));
         opprettJournalpost.setInnhold(opprettJournalpost.getHoveddokument().getTittel());
-        opprettJournalpost.setVedlegg(dokumenter.stream().map(FysiskDokument::lagFysiskDokumentAltinn).collect(Collectors.toList()));
+        opprettJournalpost.setVedlegg(dokumenter.stream().map(FysiskDokument::lagFysiskDokumentAltinn).toList());
         opprettJournalpost.setSaksnummer(fagsak.getSaksnummer());
         opprettJournalpost.setMottaksKanal(ALTINN);
         opprettJournalpost.setEksternReferanseId(hovedDokument.getSoknadID());
@@ -117,8 +117,8 @@ public class OpprettJournalpost extends Journalpost {
         opprettJournalpost.setJournalførendeEnhet(MEDLEMSKAP_OG_AVGIFT);
         opprettJournalpost.setTema(MEDLEMSKAP);
         opprettJournalpost.setSaksnummer(bestilling.getSaksnummer());
-        opprettJournalpost.setBrukerId(bestilling.getBrukerFnr());
-        opprettJournalpost.setBrukerIdType(BrukerIdType.FOLKEREGISTERIDENT);
+        opprettJournalpost.setBrukerId(bestilling.getBrukerId());
+        opprettJournalpost.setBrukerIdType(bestilling.getBrukerIdType());
         opprettJournalpost.setKorrespondansepartId(bestilling.getMottakerId());
         opprettJournalpost.setKorrespondansepartNavn(bestilling.getMottakerNavn());
         opprettJournalpost.setKorrespondansepartIdType(bestilling.getMottakerIdType());

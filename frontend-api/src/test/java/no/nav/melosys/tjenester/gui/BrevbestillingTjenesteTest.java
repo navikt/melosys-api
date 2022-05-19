@@ -274,7 +274,24 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    void hentTilgjengeligeMaler_lagerRiktigeMottakerTilBehandlingstypeSoknadForBruker() {
+    void hentTilgjengeligeMaler_lagerRiktigeMottakereForVirksomhet() {
+        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(lagBehandling(Behandlingstyper.SOEKNAD));
+        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling(Behandlingstyper.SOEKNAD));
+        when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
+
+        List<BrevmalDto> brevmaler = brevbestillingTjeneste.hentTilgjengeligeMaler(123L);
+
+        List<Produserbaredokumenter> arbeidsgiverBrev = List.of(GENERELT_FRITEKSTBREV_VIRKSOMHET);
+        brevmaler.stream().filter(brevmal -> arbeidsgiverBrev.contains(brevmal.getType()))
+            .forEach(brevmalDto ->
+                assertThat(brevmalDto.getMuligeMottakere())
+                    .extracting(MottakerDto::getType)
+                    .hasSize(2)
+                    .containsExactlyInAnyOrder("Virksomhet", "Annen organisasjon"));
+    }
+
+    @Test
+    void hentTilgjengeligeMaler_lagerRiktigeMottakerTilBrukerBehandlingstypeSoknad() {
         when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(lagBehandling(Behandlingstyper.SOEKNAD));
         when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling(Behandlingstyper.SOEKNAD));
         when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
@@ -295,7 +312,7 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    void hentTilgjengeligeMaler_lagerRiktigeMottakerTilBehandlingstypeKlage() {
+    void hentTilgjengeligeMaler_lagerRiktigeMottakerTilBrukerBehandlingstypeKlage() {
         when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(lagBehandling(Behandlingstyper.KLAGE));
         when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling(Behandlingstyper.KLAGE));
         when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());

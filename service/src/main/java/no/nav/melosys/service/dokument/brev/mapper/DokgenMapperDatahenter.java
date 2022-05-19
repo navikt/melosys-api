@@ -84,7 +84,10 @@ public class DokgenMapperDatahenter {
         return behandlingsresultatService.hentBehandlingsresultat(behandlingId);
     }
 
-    Persondata hentPersondata(DokgenBrevbestilling brevbestilling) {
+    Persondata hentPersondata(DokgenBrevbestilling brevbestilling, Aktoer mottaker) {
+        if (mottaker.erVirksomhet()) {
+            return null;
+        }
         final var behandling = brevbestilling.getBehandling();
         return persondataFasade.hentPerson(behandling.getFagsak().hentBrukersAktørID());
     }

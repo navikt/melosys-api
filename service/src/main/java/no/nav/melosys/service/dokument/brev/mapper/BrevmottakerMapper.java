@@ -6,8 +6,7 @@ import no.nav.melosys.domain.brev.Mottakerliste;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 
 import static no.nav.melosys.domain.brev.BrevkopiRegel.*;
-import static no.nav.melosys.domain.kodeverk.Aktoersroller.ARBEIDSGIVER;
-import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
+import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 
 public class BrevmottakerMapper {
@@ -57,7 +56,11 @@ public class BrevmottakerMapper {
                 .medHovedMottaker(ARBEIDSGIVER)
                 .medBrevkopiRegler(
                     BRUKER_FÅR_KOPI
-                ).build()
+                ).build(),
+
+            GENERELT_FRITEKSTBREV_VIRKSOMHET, new Mottakerliste.Builder()
+                .medHovedMottaker(VIRKSOMHET)
+                .build()
         );
     }
 }

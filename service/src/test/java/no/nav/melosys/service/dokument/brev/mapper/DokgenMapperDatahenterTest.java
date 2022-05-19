@@ -12,7 +12,6 @@ import no.nav.melosys.domain.arkiv.ArkivDokument;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.brev.AvslagBrevbestilling;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
-import no.nav.melosys.domain.brev.FritekstbrevBrevbestilling;
 import no.nav.melosys.domain.dokument.arbeidsforhold.Aktoertype;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
@@ -32,8 +31,7 @@ import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 import static no.nav.melosys.service.dokument.DokgenTestData.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class DokgenMapperDatahenterTest {
@@ -109,6 +107,25 @@ class DokgenMapperDatahenterTest {
         dokgenMapperDatahenter.hentFullmektigNavn(fagsak, Representerer.BRUKER);
 
         verify(eregFasade).hentOrganisasjonNavn(ORGNR_REPRESENTANT);
+    }
+
+    @Test
+    void hentPersondata_mottakerErIkkeVirksomhet_kallerPersondataFasade() {
+        DokgenBrevbestilling brevbestilling = new DokgenBrevbestilling.Builder<>().medBehandling(lagBehandling()).build();
+
+        dokgenMapperDatahenter.hentPersondata(brevbestilling, lagMottaker(Aktoersroller.BRUKER));
+
+        verify(persondataFasade).hentPerson(any());
+    }
+
+    @Test
+    void hentPersondata_mottakerErVirksomhet_returnererNull() {
+        DokgenBrevbestilling brevbestilling = new DokgenBrevbestilling.Builder<>().medBehandling(lagBehandling()).build();
+
+        var response = dokgenMapperDatahenter.hentPersondata(brevbestilling, lagMottaker(Aktoersroller.VIRKSOMHET));
+
+        assertThat(response).isNull();
+        verify(persondataFasade, never()).hentPerson(any());
     }
 
     @Test

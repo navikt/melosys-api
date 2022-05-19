@@ -3,7 +3,6 @@ package no.nav.melosys.tjenester.gui;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -39,6 +38,7 @@ import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
 @RequestScope
 public class BrevbestillingTjeneste {
     private static final String BRUKER_ELLER_BRUKERS_FULLMEKTIG = "Bruker eller brukers fullmektig";
+    private static final String VIRKSOMHET_TYPE = "Virksomhet";
     private static final String ARBEIDSGIVER_ELLER_ARBEIDSGIVERS_FULLMEKTIG = "Arbeidsgiver eller arbeidsgivers fullmektig";
 
     private final BrevbestillingService brevbestillingService;
@@ -101,7 +101,7 @@ public class BrevbestillingTjeneste {
                 return switch (p) {
                     case MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE -> lagBrevMalDtoForForventetSaksbehandlingstid(p, hovedMottaker, behandlingId);
                     case MANGELBREV_BRUKER, MANGELBREV_ARBEIDSGIVER -> lagBrevMalDtoForMangelbrev(p, hovedMottaker, behandlingId);
-                    case GENERELT_FRITEKSTBREV_BRUKER, GENERELT_FRITEKSTBREV_ARBEIDSGIVER -> lagBrevMalDtoForFritekstbrev(p, hovedMottaker, behandlingId);
+                    case GENERELT_FRITEKSTBREV_BRUKER, GENERELT_FRITEKSTBREV_ARBEIDSGIVER, GENERELT_FRITEKSTBREV_VIRKSOMHET -> lagBrevMalDtoForFritekstbrev(p, hovedMottaker, behandlingId);
                     default -> null;
                 };
             })
@@ -191,22 +191,30 @@ public class BrevbestillingTjeneste {
     private List<MottakerDto> hentMottakereForBrev(Produserbaredokumenter produserbartdokument, Aktoersroller hovedMottaker, long behandlingId) {
         List<MottakerDto> mottakere = new ArrayList<>();
         var builder = new MottakerDto.Builder()
-            .medType(hovedMottaker == Aktoersroller.BRUKER ? BRUKER_ELLER_BRUKERS_FULLMEKTIG : ARBEIDSGIVER_ELLER_ARBEIDSGIVERS_FULLMEKTIG)
+            .medType(mapType(hovedMottaker))
             .medRolle(hovedMottaker);
 
         leggTilAdresseOgFeilmelding(builder, produserbartdokument, hovedMottaker, behandlingId);
 
         mottakere.add(builder.build());
-        if (hovedMottaker == Aktoersroller.ARBEIDSGIVER) {
+        if (hovedMottaker == Aktoersroller.ARBEIDSGIVER || hovedMottaker == Aktoersroller.VIRKSOMHET) {
             mottakere.add(
                 new MottakerDto.Builder()
                     .medType("Annen organisasjon")
-                    .medRolle(hovedMottaker)
+                    .medRolle(Aktoersroller.ARBEIDSGIVER)
                     .orgnrSettesAvSaksbehandler()
                     .build()
             );
         }
         return mottakere;
+    }
+
+    private String mapType(Aktoersroller hovedmottaker) {
+        return switch (hovedmottaker) {
+            case BRUKER -> BRUKER_ELLER_BRUKERS_FULLMEKTIG;
+            case VIRKSOMHET -> VIRKSOMHET_TYPE;
+            default -> ARBEIDSGIVER_ELLER_ARBEIDSGIVERS_FULLMEKTIG;
+        };
     }
 
     private FeltValgDto hentFritekstTittelValg(long behandlingId) {
@@ -237,7 +245,7 @@ public class BrevbestillingTjeneste {
             if (aktoersroller == Aktoersroller.BRUKER && brevAdresser.stream().allMatch(BrevAdresse::isAdresselinjerEmpty)) {
                 builder.medFeilmelding("Bruker har ingen registrert adresse.");
             } else {
-                builder.medAdresse(brevAdresser.stream().map(MottakerAdresseDto::av).collect(Collectors.toList()));
+                builder.medAdresse(brevAdresser.stream().map(MottakerAdresseDto::av).toList());
             }
         } catch (TekniskException e) {
             if ("Finner ikke arbeidsforholddokument".equals(e.getMessage())) {
