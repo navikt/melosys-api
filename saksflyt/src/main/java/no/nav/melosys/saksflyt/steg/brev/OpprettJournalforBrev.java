@@ -87,7 +87,7 @@ public class OpprettJournalforBrev implements StegBehandler {
             .medDokumentKategori(dokumentproduksjonsInfo.dokumentKategoriKode())
             .medBrukerFnr(hentBrukerFolkeregisterIdent(behandling))
             .medMottakerNavn(utledNavn(mottakerID, mottakerType))
-            .medMottakerId(mottakerID)
+            .medMottakerId(mottakerType == MottakerType.PERSON_MED_AKTØR_ID ? persondataFasade.hentFolkeregisterident(mottakerID) : mottakerID)
             .medMottakerIdType(utledMottakerIdType(mottakerType))
             .medSaksnummer(behandling.getFagsak().getSaksnummer())
             .medPdf(pdf)
