@@ -93,6 +93,8 @@ public class BrevDataService {
             metadata.berik = false;
             metadata.utenlandskMyndighet = hentMyndighetFraAktoer(mottaker);
             metadata.brukerNavn = persondataFasade.hentSammensattNavn(metadata.brukerID);
+        } else if (mottaker.erPerson()) {
+            metadata.brukerNavn = persondataFasade.hentSammensattNavn(metadata.mottakerID);
         }
         return metadata;
     }
