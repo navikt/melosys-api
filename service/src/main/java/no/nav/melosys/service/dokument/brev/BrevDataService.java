@@ -39,7 +39,8 @@ import org.w3c.dom.Element;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
+import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
+import static no.nav.melosys.domain.kodeverk.Aktoersroller.REPRESENTANT;
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.*;
 
 @Service
@@ -64,9 +65,7 @@ public class BrevDataService {
         this.utenlandskMyndighetRepository = utenlandskMyndighetRepository;
     }
 
-    public DokumentbestillingMetadata lagBestillingMetadata(Produserbaredokumenter produserbartDokument,
-                                                            Aktoer mottaker, Kontaktopplysning kontaktopplysning,
-                                                            Behandling behandling, BrevData brevData) {
+    public DokumentbestillingMetadata lagBestillingMetadata(Produserbaredokumenter produserbartDokument, Aktoer mottaker, Kontaktopplysning kontaktopplysning, Behandling behandling, BrevData brevData) {
         Fagsak fagsak = behandling.getFagsak();
 
         DokumentbestillingMetadata metadata = new DokumentbestillingMetadata();
