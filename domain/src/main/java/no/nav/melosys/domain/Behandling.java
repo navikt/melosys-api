@@ -333,9 +333,8 @@ public class Behandling extends RegistreringsInfo {
     }
 
     public boolean erRedigerbar() {
-        return !(status == Behandlingsstatus.IVERKSETTER_VEDTAK
-            || (status == Behandlingsstatus.ANMODNING_UNNTAK_SENDT && tema != Behandlingstema.IKKE_YRKESAKTIV)
-            || erInaktiv());
+        return erAktiv() && status != Behandlingsstatus.IVERKSETTER_VEDTAK &&
+            !(status == Behandlingsstatus.ANMODNING_UNNTAK_SENDT && tema != IKKE_YRKESAKTIV);
     }
 
     public boolean erVenterForDokumentasjon() {
