@@ -4,9 +4,10 @@ import java.time.Instant;
 import java.util.HashSet;
 import java.util.Optional;
 
-import no.nav.dok.brevdata.felles.v1.navfelles.Mottaker;
-import no.nav.dok.brevdata.felles.v1.navfelles.Organisasjon;
-import no.nav.dok.brevdata.felles.v1.navfelles.Person;
+import no.nav.dok.brevdata.felles.v1.navfelles.*;
+import no.nav.dok.brevdata.felles.v1.simpletypes.AktoerType;
+import no.nav.dok.brevdata.felles.v1.simpletypes.Spraakkode;
+import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
@@ -61,6 +62,7 @@ class BrevDataServiceTest {
     private static final String REP_ORGNR = "REP_Org-Nr";
     private static final String REP_FNR = "REP_Fnr";
     private static final String AKTØRID = "Aktør-Id";
+    private static final String INSTITUSJON_ID = "HR:Zxcd";
 
     private static final String sammensattNavn = "ALTFOR SAMMENSATT";
 
@@ -88,8 +90,7 @@ class BrevDataServiceTest {
     @Test
     void lagA1_tilUtenlandskMyndighet() {
         Behandling behandling = lagBehandling(lagSøknadDokument());
-        String institusjonID = "HR:Zxcd";
-        Aktoer aktoerMyndighet = lagAktoerMyndighet(institusjonID);
+        Aktoer aktoerMyndighet = lagAktoerMyndighet();
         behandling.getFagsak().getAktører().add(aktoerMyndighet);
         BrevDataVedlegg brevData = new BrevDataVedlegg("Z123456");
         UtenlandskMyndighet myndighet = lagUtenlandskMyndighet();
@@ -97,7 +98,7 @@ class BrevDataServiceTest {
             behandling, brevData);
 
         assertThat(metadata.brukerID).isEqualTo(FNR);
-        assertThat(metadata.mottakerID).isEqualTo(institusjonID);
+        assertThat(metadata.mottakerID).isEqualTo(INSTITUSJON_ID);
         assertThat(metadata.utenlandskMyndighet).isEqualTo(myndighet);
         assertThat(metadata.brukerNavn).isEqualTo(sammensattNavn);
 
@@ -106,10 +107,10 @@ class BrevDataServiceTest {
         assertThat(element).isNotNull();
     }
 
-    private static Aktoer lagAktoerMyndighet(String institusjonID) {
+    private static Aktoer lagAktoerMyndighet() {
         Aktoer myndighet = new Aktoer();
         myndighet.setRolle(Aktoersroller.TRYGDEMYNDIGHET);
-        myndighet.setInstitusjonId(institusjonID);
+        myndighet.setInstitusjonId(INSTITUSJON_ID);
         return myndighet;
     }
 
@@ -205,6 +206,7 @@ class BrevDataServiceTest {
 
     @Test
     void lagForvaltningsmelding_representantErPerson_tilRepresentant() {
+        when(persondataFasade.hentPerson(anyString())).thenReturn(PersonopplysningerObjectFactory.lagPersonopplysninger());
 
         Behandling behandling = lagBehandling(lagSøknadDokument());
         behandling.getFagsak().getAktører().add(hentRepresentantPersonAktør());
@@ -418,6 +420,140 @@ class BrevDataServiceTest {
         assertThat(metadata.berik).isTrue();
     }
 
+    @Test
+    void lagMottaker_bruker_riktigeVerdier() {
+        when(persondataFasade.hentPerson(AKTØRID)).thenReturn(PersonopplysningerObjectFactory.lagPersonopplysninger());
+        var mottaker = new Aktoer();
+        mottaker.setRolle(Aktoersroller.BRUKER);
+        mottaker.setAktørId(AKTØRID);
+
+        var behandling = lagBehandling(new BehandlingsgrunnlagData());
+
+        var brevMottaker = service.lagMottaker(mottaker, null, behandling);
+
+        Mottaker expectedBrevMottaker = new Person();
+        expectedBrevMottaker.setTypeKode(AktoerType.PERSON);
+        expectedBrevMottaker.setSpraakkode(Spraakkode.NB);
+        expectedBrevMottaker.setId(FNR);
+        expectedBrevMottaker.setMottakeradresse(lagPlassholderAdresse());
+        expectedBrevMottaker.setBerik(true);
+        expectedBrevMottaker.setNavn(BrevDataService.PLASSHOLDER_TEKST);
+        expectedBrevMottaker.setKortNavn(BrevDataService.PLASSHOLDER_TEKST);
+
+        assertThat(brevMottaker).isEqualTo(expectedBrevMottaker);
+    }
+
+    @Test
+    void lagMottaker_arbeidsgiver_riktigeVerdier() {
+        var mottaker = new Aktoer();
+        mottaker.setRolle(Aktoersroller.ARBEIDSGIVER);
+        mottaker.setOrgnr(ORGNR);
+
+        var behandling = lagBehandling(new BehandlingsgrunnlagData());
+
+        var brevMottaker = service.lagMottaker(mottaker, null, behandling);
+
+        Mottaker expectedBrevMottaker = new Organisasjon();
+        expectedBrevMottaker.setId(ORGNR);
+        expectedBrevMottaker.setTypeKode(AktoerType.ORGANISASJON);
+        expectedBrevMottaker.setNavn(BrevDataService.PLASSHOLDER_TEKST);
+        expectedBrevMottaker.setKortNavn(BrevDataService.PLASSHOLDER_TEKST);
+        expectedBrevMottaker.setMottakeradresse(lagPlassholderAdresse());
+        expectedBrevMottaker.setSpraakkode(Spraakkode.NB);
+
+        assertThat(brevMottaker).isEqualTo(expectedBrevMottaker);
+    }
+
+    @Test
+    void lagMottaker_trygdemyndighetUtenlandsk_riktigeVerdier() {
+        var mottaker = lagAktoerMyndighet();
+        var behandling = lagBehandling(new BehandlingsgrunnlagData());
+
+        var brevMottaker = service.lagMottaker(mottaker, null, behandling);
+
+        var myndighet = lagUtenlandskMyndighet();
+        Mottaker expectedBrevMottaker = new Person();
+        expectedBrevMottaker.setId(INSTITUSJON_ID);
+        expectedBrevMottaker.setTypeKode(AktoerType.PERSON);
+        expectedBrevMottaker.setBerik(false);
+        expectedBrevMottaker.setNavn(myndighet.navn);
+        expectedBrevMottaker.setKortNavn(myndighet.navn);
+        expectedBrevMottaker.setSpraakkode(Spraakkode.NB);
+        expectedBrevMottaker.setMottakeradresse(UtenlandskPostadresse.builder()
+            .withAdresselinje1(myndighet.gateadresse)
+            .withAdresselinje2(myndighet.postnummer + " " + myndighet.poststed)
+            .withAdresselinje3("")
+            .withLand(myndighet.land)
+            .build());
+
+        assertThat(brevMottaker).isEqualTo(expectedBrevMottaker);
+    }
+
+    @Test
+    void lagMottaker_trygdemyndighetIkkeUtenlandsk_riktigeVerdier() {
+        var mottaker = new Aktoer();
+        mottaker.setRolle(Aktoersroller.TRYGDEMYNDIGHET);
+        mottaker.setOrgnr(ORGNR);
+
+        var behandling = lagBehandling(new BehandlingsgrunnlagData());
+
+        var brevMottaker = service.lagMottaker(mottaker, null, behandling);
+
+        Mottaker expectedBrevMottaker = new Organisasjon();
+        expectedBrevMottaker.setId(ORGNR);
+        expectedBrevMottaker.setTypeKode(AktoerType.ORGANISASJON);
+        expectedBrevMottaker.setNavn(BrevDataService.PLASSHOLDER_TEKST);
+        expectedBrevMottaker.setKortNavn(BrevDataService.PLASSHOLDER_TEKST);
+        expectedBrevMottaker.setMottakeradresse(lagPlassholderAdresse());
+        expectedBrevMottaker.setSpraakkode(Spraakkode.NB);
+
+        assertThat(brevMottaker).isEqualTo(expectedBrevMottaker);
+    }
+
+    @Test
+    void lagMottaker_representantPerson_riktigeVerdier() {
+        when(persondataFasade.hentPerson(REP_FNR)).thenReturn(PersonopplysningerObjectFactory.lagPersonopplysninger());
+        var mottaker = new Aktoer();
+        mottaker.setRolle(Aktoersroller.REPRESENTANT);
+        mottaker.setPersonIdent(REP_FNR);
+
+        var behandling = lagBehandling(new BehandlingsgrunnlagData());
+
+        var brevMottaker = service.lagMottaker(mottaker, null, behandling);
+
+        Mottaker expectedBrevMottaker = new Person();
+        expectedBrevMottaker.setTypeKode(AktoerType.PERSON);
+        expectedBrevMottaker.setSpraakkode(Spraakkode.NB);
+        expectedBrevMottaker.setId(REP_FNR);
+        expectedBrevMottaker.setMottakeradresse(lagPlassholderAdresse());
+        expectedBrevMottaker.setBerik(true);
+        expectedBrevMottaker.setNavn(BrevDataService.PLASSHOLDER_TEKST);
+        expectedBrevMottaker.setKortNavn(BrevDataService.PLASSHOLDER_TEKST);
+
+        assertThat(brevMottaker).isEqualTo(expectedBrevMottaker);
+    }
+
+    @Test
+    void lagMottaker_representantOrganisasjon_riktigeVerdier() {
+        var mottaker = new Aktoer();
+        mottaker.setRolle(Aktoersroller.REPRESENTANT);
+        mottaker.setOrgnr(REP_ORGNR);
+
+        var behandling = lagBehandling(new BehandlingsgrunnlagData());
+
+        var brevMottaker = service.lagMottaker(mottaker, null, behandling);
+
+        Mottaker expectedBrevMottaker = new Organisasjon();
+        expectedBrevMottaker.setId(REP_ORGNR);
+        expectedBrevMottaker.setTypeKode(AktoerType.ORGANISASJON);
+        expectedBrevMottaker.setNavn(BrevDataService.PLASSHOLDER_TEKST);
+        expectedBrevMottaker.setKortNavn(BrevDataService.PLASSHOLDER_TEKST);
+        expectedBrevMottaker.setMottakeradresse(lagPlassholderAdresse());
+        expectedBrevMottaker.setSpraakkode(Spraakkode.NB);
+
+        assertThat(brevMottaker).isEqualTo(expectedBrevMottaker);
+    }
+
     private void testLagDokumentMetadata(Produserbaredokumenter doktype, Aktoersroller rolle) {
         when(persondataFasade.hentPerson(anyString())).thenReturn(PersonopplysningerObjectFactory.lagPersonopplysninger());
         testLagDokumentMetadata(doktype, lagAktør(rolle), rolle);
@@ -510,6 +646,15 @@ class BrevDataServiceTest {
         Soeknad soeknad = new Soeknad();
         soeknad.bosted.oppgittAdresse = new StrukturertAdresse();
         return soeknad;
+    }
+
+    private NorskPostadresse lagPlassholderAdresse() {
+        return NorskPostadresse.builder()
+            .withAdresselinje1(BrevDataService.PLASSHOLDER_TEKST)
+            .withPostnummer(BrevDataService.PLASSHOLDER_POSTNUMMER)
+            .withPoststed(BrevDataService.PLASSHOLDER_TEKST)
+            .withLand(BrevDataService.PLASSHOLDER_TEKST)
+            .build();
     }
 
 }
