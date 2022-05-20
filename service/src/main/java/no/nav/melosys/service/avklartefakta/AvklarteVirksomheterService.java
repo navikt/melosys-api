@@ -20,6 +20,8 @@ import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +31,8 @@ import static no.nav.melosys.domain.kodeverk.Avklartefaktatyper.VIRKSOMHET;
 @Service
 @Primary
 public class AvklarteVirksomheterService {
+    private static final Logger log = LoggerFactory.getLogger(AvklarteVirksomheterService.class);
+
     protected final AvklartefaktaService avklartefaktaService;
     protected final OrganisasjonOppslagService organisasjonOppslagService;
     protected final BehandlingService behandlingService;
@@ -103,7 +107,19 @@ public class AvklarteVirksomheterService {
 
     public List<AvklartVirksomhet> hentAlleNorskeVirksomheter(Behandling behandling, Function<OrganisasjonDokument, Adresse> adressekonverterer) {
         List<AvklartVirksomhet> norskeVirksomheter = hentNorskeArbeidsgivere(behandling, adressekonverterer);
-        norskeVirksomheter.addAll(hentNorskeSelvstendigeForetak(behandling, adressekonverterer));
+        Set<String> norskeVirksomheterOrgnr = norskeVirksomheter.stream()
+            .map(AvklartVirksomhet::getOrgnr).collect(Collectors.toSet());
+
+        List<AvklartVirksomhet> norskeSelvstendigeForetak = hentNorskeSelvstendigeForetak(behandling, adressekonverterer);
+        for (AvklartVirksomhet norskSelvstendigForetak : norskeSelvstendigeForetak) {
+            if (norskeVirksomheterOrgnr.contains(norskSelvstendigForetak.getOrgnr())) {
+                log.warn("Fant selvstendige foretak med samme orgnummer({}) som allerede er hentet fra norskeArbeidsgivere",
+                    norskSelvstendigForetak.getOrgnr());
+            } else {
+                norskeVirksomheter.add(norskSelvstendigForetak);
+            }
+        }
+
         return norskeVirksomheter;
     }
 
