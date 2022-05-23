@@ -16,7 +16,6 @@ import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.aktoer.AktoerService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
-import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterSystemService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import org.slf4j.Logger;
@@ -31,16 +30,16 @@ public class AvklarArbeidsgiver implements StegBehandler {
     private static final Function<OrganisasjonDokument, Adresse> INGEN_ADRESSE = org -> null;
 
     private final AktoerService aktoerService;
-    private final AvklarteVirksomheterService avklarteVirksomheterSystemService;
+    private final AvklarteVirksomheterService AvklarteVirksomheterService;
     private final BehandlingService behandlingService;
     private final BehandlingsresultatService behandlingsresultatService;
 
     public AvklarArbeidsgiver(AktoerService aktoerService,
-                              AvklarteVirksomheterSystemService avklarteVirksomheterService,
+                              AvklarteVirksomheterService avklarteVirksomheterService,
                               BehandlingService behandlingService,
                               BehandlingsresultatService behandlingsresultatService) {
         this.aktoerService = aktoerService;
-        this.avklarteVirksomheterSystemService = avklarteVirksomheterService;
+        this.AvklarteVirksomheterService = avklarteVirksomheterService;
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
     }
@@ -59,7 +58,7 @@ public class AvklarArbeidsgiver implements StegBehandler {
             Fagsak fagsak = behandling.getFagsak();
             String saksnummer = fagsak.getSaksnummer();
 
-            List<AvklartVirksomhet> avklarteNorskeArbeidsgivere = avklarteVirksomheterSystemService.hentNorskeArbeidsgivere(behandling, INGEN_ADRESSE);
+            List<AvklartVirksomhet> avklarteNorskeArbeidsgivere = AvklarteVirksomheterService.hentNorskeArbeidsgivere(behandling, INGEN_ADRESSE);
             List<String> norskeOrgnumre = avklarteNorskeArbeidsgivere.stream()
                 .map(avklartVirksomhet -> avklartVirksomhet.orgnr)
                 .collect(Collectors.toList());

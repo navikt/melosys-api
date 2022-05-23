@@ -33,7 +33,7 @@ import no.nav.melosys.integrasjon.dokgen.dto.storbritannia.innvilgelse.Barn;
 import no.nav.melosys.integrasjon.dokgen.dto.storbritannia.innvilgelse.InnvilgelseStorbritannia;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
-import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterSystemService;
+import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.dokument.brev.BrevDataTestUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -78,7 +78,7 @@ class StorbritanniaMapperTest {
     @Mock
     private LovvalgsperiodeService mockLovvalgsperiodeService;
     @Mock
-    private AvklarteVirksomheterSystemService mockAvklarteVirksomheterSystemService;
+    private AvklarteVirksomheterService avklarteVirksomheterService;
 
     private StorbritanniaMapper storbritanniaMapper;
 
@@ -86,7 +86,7 @@ class StorbritanniaMapperTest {
     void setup() {
         storbritanniaMapper = new StorbritanniaMapper(
             mockAvklarteMedfolgendeFamilieService,
-            mockAvklarteVirksomheterSystemService,
+            avklarteVirksomheterService,
             mockLovvalgsperiodeService);
     }
 
@@ -161,7 +161,7 @@ class StorbritanniaMapperTest {
     void map_ingenNorskeVirksomheter_kastFunksjonellException() {
         mockLovvalgsperiode();
 
-        when(mockAvklarteVirksomheterSystemService.hentNorskeArbeidsgivere(any())).thenReturn(Collections.emptyList());
+        when(avklarteVirksomheterService.hentNorskeArbeidsgivere(any())).thenReturn(Collections.emptyList());
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> storbritanniaMapper.map(lagStorbritanniaBrevbestilling(lagTrygdeavtaleBehandling())))
@@ -203,7 +203,7 @@ class StorbritanniaMapperTest {
         mockMedfølgendeFamilieDefaultCase();
         mockLovvalgsperiode();
         when(mockLovvalgsperiodeService.hentLovvalgsperioder(anyLong())).thenReturn(List.of(lagLovvalgsperiode()));
-        when(mockAvklarteVirksomheterSystemService.hentNorskeArbeidsgivere(any())).thenReturn(lagAvklarteVirksomheter());
+        when(avklarteVirksomheterService.hentNorskeArbeidsgivere(any())).thenReturn(lagAvklarteVirksomheter());
         when(mockAvklarteMedfolgendeFamilieService.hentAvklartMedfølgendeEktefelle(anyLong())).thenReturn(lagIkkeOmfattetMedfølgendeEktefelle());
         when(mockAvklarteMedfolgendeFamilieService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(lagIkkeOmfattetMedfølgendeBarn());
 
@@ -334,7 +334,7 @@ class StorbritanniaMapperTest {
         when(mockAvklarteMedfolgendeFamilieService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(lagAvklartMedfølgendeBarn());
         when(mockAvklarteMedfolgendeFamilieService.hentMedfølgendEktefelle(anyLong())).thenReturn(lagMedfølgendeEktefelle());
         when(mockAvklarteMedfolgendeFamilieService.hentMedfølgendeBarn(anyLong())).thenReturn(lagMedfølgendeBarn());
-        when(mockAvklarteVirksomheterSystemService.hentNorskeArbeidsgivere(any())).thenReturn(lagAvklarteVirksomheter());
+        when(avklarteVirksomheterService.hentNorskeArbeidsgivere(any())).thenReturn(lagAvklarteVirksomheter());
         when(mockLovvalgsperiodeService.hentLovvalgsperioder(anyLong())).thenReturn(List.of(lagLovvalgsperiode()));
         when(mockLovvalgsperiodeService.hentValidertLovvalgsperiode(anyLong())).thenReturn(lagLovvalgsperiode());
     }

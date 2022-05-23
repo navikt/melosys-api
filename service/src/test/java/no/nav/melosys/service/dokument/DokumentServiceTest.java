@@ -49,7 +49,6 @@ import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
-import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterSystemService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaDtoKonverterer;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -248,7 +247,7 @@ final class DokumentServiceTest {
         KodeverkService kodeverkService = new KodeverkService(kodeverkRegister, kodeOppslag);
         EregFasade eregFasade = mockEregFasade();
         OrganisasjonOppslagSystemService registerOppslagService = new OrganisasjonOppslagSystemService(eregFasade);
-        AvklarteVirksomheterSystemService avklarteVirksomheterSystemService = new AvklarteVirksomheterSystemService(avklartefaktaService, registerOppslagService, mock(BehandlingService.class), mock(KodeverkService.class));
+        AvklarteVirksomheterService avklarteVirksomheterSystemService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService, mock(BehandlingService.class), mock(KodeverkService.class));
         DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medBehandling(lagBehandling()).build();
         Persondata persondata = PersonopplysningerObjectFactory.lagPersonopplysninger();
         BrevDataGrunnlag dataGrunnlag = new BrevDataGrunnlag(brevbestilling, kodeverkService, avklarteVirksomheterSystemService, avklartefaktaService, persondata);
