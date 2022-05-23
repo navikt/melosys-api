@@ -5,6 +5,7 @@ import java.util.Collections;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.integrasjon.felles.SystemContextClientRequestInterceptor;
 import no.nav.melosys.integrasjon.felles.UserContextClientRequestInterceptor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
@@ -32,7 +33,7 @@ public class EessiConsumerProducer {
     }
 
     @Bean
-
+    @Qualifier("system")
     public EessiConsumer melosysEessiSystemConsumer(ObjectMapper objectMapper,
                                                     SystemContextClientRequestInterceptor interceptor,
                                                     RestTemplateBuilder restTemplateBuilder) {
