@@ -12,7 +12,6 @@ import no.nav.melosys.domain.msm.AltinnDokument;
 
 import static no.nav.melosys.domain.arkiv.DokumentVariant.lagDokumentVariant;
 
-@SuppressWarnings("ALL")
 public class FysiskDokument extends ArkivDokument {
     private static final String DOKUMENT_KATEGORI_SED = "SED";
     private static final String DOKUMENT_KATEGORI_SOKNAD = "SOK";
@@ -97,7 +96,6 @@ public class FysiskDokument extends ArkivDokument {
         return switch (dokumentType) {
             case SOKNAD -> "Søknad om A1 for utsendte arbeidstakere i EØS/Sveits";
             case FULLMAKT -> "Fullmakt";
-            default -> throw new IllegalArgumentException("Ukjent AltinnDokumentType " + dokumentType);
         };
     }
 
