@@ -113,14 +113,14 @@ public class FagsakService {
     }
 
     @Transactional
-    public void oppdaterMyndigheterForTrygdeavtale(String saksnummer, Landkoder landkode) {
+    public void oppdaterMyndighetForTrygdeavtale(String saksnummer, Landkoder landkode) {
         Fagsak fagsak = hentFagsak(saksnummer);
 
         fagsak.getAktører().removeIf(aktoer -> aktoer.getTrygdemyndighetLand() != landkode
             && aktoer.getRolle() == Aktoersroller.TRYGDEMYNDIGHET);
 
-        boolean harAlleredeTrygdemyndighet = fagsak.getAktører().stream().anyMatch(aktoer -> aktoer.getRolle() == Aktoersroller.TRYGDEMYNDIGHET);
-        if (!harAlleredeTrygdemyndighet) {
+        boolean harIngenTrygdemyndigheter = fagsak.hentMyndigheter().isEmpty();
+        if (harIngenTrygdemyndigheter) {
             Aktoer nyTrygdemyndighet = lagMyndighetAktørForTrygdeavtaler(fagsak, landkode);
             fagsak.getAktører().add(nyTrygdemyndighet);
         }

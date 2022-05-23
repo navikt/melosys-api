@@ -1,6 +1,5 @@
 package no.nav.melosys.domain;
 
-
 import java.util.*;
 import javax.persistence.*;
 

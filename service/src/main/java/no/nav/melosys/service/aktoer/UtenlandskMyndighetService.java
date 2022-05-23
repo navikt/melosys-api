@@ -42,7 +42,7 @@ public class UtenlandskMyndighetService {
         Collection<Landkoder> landkoder = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandling.getId());
         if (!landkoder.isEmpty()) {
             if (behandling.getFagsak().getType() == Sakstyper.TRYGDEAVTALE) {
-                fagsakService.oppdaterMyndigheterForTrygdeavtale(saksnummer, hentLandkodeForTrygdeavtale(landkoder));
+                fagsakService.oppdaterMyndighetForTrygdeavtale(saksnummer, hentLandkodeForTrygdeavtale(landkoder));
             } else {
                 Collection<String> institusjonsIder = konverterLandkodeTilInstitusjonsId(landkoder);
                 fagsakService.oppdaterMyndigheter(saksnummer, institusjonsIder);
