@@ -62,7 +62,7 @@ class SendVedtaksbrevInnlandTest {
     private static final long ART13_1B1_UTPEKING_BEHANDLINGSID = 53L;
     private static final long ART12_1_FORKORTET_PERIODE_BEHANDLINGSID = 54L;
 
-    private static DokumentSystemService dokService;
+    private static DokumentService dokService;
 
     private static SendVedtaksbrevInnland lagStegbehandler(Behandling behandling) {
         return lagStegbehandler(behandling, "Z123456");
@@ -102,7 +102,7 @@ class SendVedtaksbrevInnlandTest {
         when(byggerVelger.hent(eq(ORIENTERING_UTPEKING_UTLAND), any())).thenReturn(brevDataByggerUtpekingAnnetLand);
 
         dokService = spy(lagDokumentService(byggerVelger));
-        DokumentServiceFasade dokumentServiceFasade = new DokumentServiceFasade(mock(DokumentService.class), dokService, mock(DokgenService.class),
+        DokumentServiceFasade dokumentServiceFasade = new DokumentServiceFasade(dokService, mock(DokgenService.class),
             mock(BehandlingService.class), mock(ApplicationEventPublisher.class));
         BrevBestiller brevBestiller = new BrevBestiller(dokumentServiceFasade);
 
@@ -130,7 +130,7 @@ class SendVedtaksbrevInnlandTest {
         return behandlingService;
     }
 
-    private static DokumentSystemService lagDokumentService(BrevDataByggerVelger brevDataByggerVelger) {
+    private static DokumentService lagDokumentService(BrevDataByggerVelger brevDataByggerVelger) {
         AvklarteVirksomheterService avklarteVirksomheterService = mock(AvklarteVirksomheterService.class);
         when(avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(any())).thenReturn(Set.of("123456789"));
         BehandlingService behandlingService = mockBehandlingService();
@@ -144,7 +144,7 @@ class SendVedtaksbrevInnlandTest {
         BrevmottakerService brevmottakerService = new BrevmottakerService(kontaktopplysningService,
             avklarteVirksomheterService, utenlandskMyndighetService, behandlingsresultatService,
             mock(TrygdeavgiftsberegningService.class), mock(LovvalgsperiodeService.class), behandlingService);
-        return spy(new DokumentSystemService(behandlingService, brevDataService, dokSysFasade,
+        return spy(new DokumentService(behandlingService, brevDataService, dokSysFasade,
             brevmottakerService, brevDataByggerVelger, mock(BrevdataGrunnlagSystemFactory.class)));
     }
 
