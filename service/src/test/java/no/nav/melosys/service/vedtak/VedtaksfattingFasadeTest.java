@@ -42,9 +42,6 @@ class VedtaksfattingFasadeTest {
     private EosVedtakService mockEosVedtakService;
 
     @Mock
-    private EosVedtakSystemService mockEosVedtakSystemService;
-
-    @Mock
     private FtrlVedtakService mockFtrlVedtakService;
 
     @Mock
@@ -56,7 +53,7 @@ class VedtaksfattingFasadeTest {
 
     @BeforeEach
     void init() {
-        vedtaksfattingFasade = new VedtaksfattingFasade(mockBehandlingService, mockEosVedtakService, mockEosVedtakSystemService, mockFtrlVedtakService, trygdeavtaleVedtakService);
+        vedtaksfattingFasade = new VedtaksfattingFasade(mockBehandlingService, mockEosVedtakService, mockFtrlVedtakService, trygdeavtaleVedtakService);
         behandling = lagBehandling();
 
         SpringSubjectHandler.set(new TestSubjectHandler());
@@ -80,7 +77,6 @@ class VedtaksfattingFasadeTest {
         vedtaksfattingFasade.fattVedtak(behandlingID, lagFattEosVedtakRequest());
 
         verify(mockEosVedtakService).fattVedtak(eq(behandling), any(FattVedtakRequest.class));
-        verifyNoInteractions(mockEosVedtakSystemService);
         verifyNoInteractions(mockFtrlVedtakService);
     }
 
@@ -90,8 +86,7 @@ class VedtaksfattingFasadeTest {
 
         vedtaksfattingFasade.fattVedtak(behandlingID, FASTSATT_LOVVALGSLAND);
 
-        verify(mockEosVedtakSystemService).fattVedtak(behandling, FASTSATT_LOVVALGSLAND, FØRSTEGANGSVEDTAK);
-        verifyNoInteractions(mockEosVedtakService);
+        verify(mockEosVedtakService).fattVedtak(behandling, FASTSATT_LOVVALGSLAND, FØRSTEGANGSVEDTAK);
         verifyNoInteractions(mockFtrlVedtakService);
     }
 
@@ -104,7 +99,6 @@ class VedtaksfattingFasadeTest {
 
         verify(mockFtrlVedtakService).fattVedtak(eq(behandling), any(FattVedtakRequest.class));
         verifyNoInteractions(mockEosVedtakService);
-        verifyNoInteractions(mockEosVedtakSystemService);
     }
 
     @Test
@@ -116,7 +110,6 @@ class VedtaksfattingFasadeTest {
 
         verify(trygdeavtaleVedtakService).fattVedtak(eq(behandling), any(FattVedtakRequest.class));
         verifyNoInteractions(mockEosVedtakService);
-        verifyNoInteractions(mockEosVedtakSystemService);
     }
 
     @Test
@@ -127,7 +120,6 @@ class VedtaksfattingFasadeTest {
         vedtaksfattingFasade.endreVedtak(behandlingID, ENDRINGER_ARBEIDSSITUASJON, null, null);
 
         verify(mockEosVedtakService).endreVedtaksperiode(eq(behandling), eq(ENDRINGER_ARBEIDSSITUASJON), isNull(), isNull());
-        verifyNoInteractions(mockEosVedtakSystemService);
     }
 
     @Test
@@ -140,11 +132,10 @@ class VedtaksfattingFasadeTest {
             .hasMessage("Vedtaksendring for sakstype FTRL er ikke støttet.");
 
         verifyNoInteractions(mockEosVedtakService);
-        verifyNoInteractions(mockEosVedtakSystemService);
     }
 
     @Test
-    void endreVedtak_TRYGDEAVTALER_kasterException() throws Exception {
+    void endreVedtak_TRYGDEAVTALER_kasterException() {
         setFagsakPåBehandling(Sakstyper.TRYGDEAVTALE);
         when(mockBehandlingService.hentBehandling(behandlingID)).thenReturn(behandling);
 
@@ -153,7 +144,6 @@ class VedtaksfattingFasadeTest {
             .hasMessage("Vedtaksendring for sakstype TRYGDEAVTALE er ikke støttet.");
 
         verifyNoInteractions(mockEosVedtakService);
-        verifyNoInteractions(mockEosVedtakSystemService);
     }
 
     private Behandling lagBehandling() {
