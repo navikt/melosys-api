@@ -29,7 +29,7 @@ import no.nav.melosys.service.dokument.DokumentHentingSystemService;
 import no.nav.melosys.service.dokument.DokumentproduksjonsInfo;
 import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
 import no.nav.melosys.service.dokument.brev.KopiMottaker;
-import no.nav.melosys.service.dokument.brev.SaksvedleggRequest;
+import no.nav.melosys.service.dokument.brev.SaksvedleggDto;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.ldap.SaksbehandlerService;
 import no.nav.melosys.service.persondata.PersondataFasade;
@@ -321,8 +321,8 @@ class DokgenServiceTest {
 
         byte[] vedlegg1 = new byte[]{1, 2, 3};
         byte[] vedlegg2 = new byte[]{4, 5, 6};
-        var saksvedleggRequest = Arrays.asList(new SaksvedleggRequest("100", "200"),
-            new SaksvedleggRequest("300", "400"));
+        var saksvedleggDto = Arrays.asList(new SaksvedleggDto("100", "200"),
+            new SaksvedleggDto("300", "400"));
         when(mockDokumentHentingService.hentDokument("100", "200")).thenReturn(vedlegg1);
         when(mockDokumentHentingService.hentDokument("300", "400")).thenReturn(vedlegg2);
 
@@ -330,7 +330,7 @@ class DokgenServiceTest {
             .medProduserbardokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD)
             .medMottaker(Aktoersroller.BRUKER)
             .medBestillersId("Z123456")
-            .medSaksvedlegg(saksvedleggRequest)
+            .medSaksvedlegg(saksvedleggDto)
             .build();
 
 
@@ -440,12 +440,12 @@ class DokgenServiceTest {
         when(mockSaksbehandlerService.hentNavnForIdent(anyString())).thenReturn("Saksbehandler, Ole");
         when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(new Behandling());
         when(mockBrevMottakerService.avklarMottakere(any(), any(), any(), eq(false), eq(false))).thenReturn(List.of(bruker));
-        var saksvedleggRequest = Arrays.asList(new SaksvedleggRequest("100", "200"),
-            new SaksvedleggRequest("300", "400"));
+        var saksvedleggDto = Arrays.asList(new SaksvedleggDto("100", "200"),
+            new SaksvedleggDto("300", "400"));
         BrevbestillingRequest brevbestillingRequest = new BrevbestillingRequest.Builder()
             .medProduserbardokument(MANGELBREV_BRUKER)
             .medBestillersId("Z123456")
-            .medSaksvedlegg(saksvedleggRequest)
+            .medSaksvedlegg(saksvedleggDto)
             .build();
 
 

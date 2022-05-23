@@ -24,7 +24,7 @@ public class BrevbestillingRequest {
     private String fritekst;
     private boolean kontaktopplysninger;
     private String nyVurderingBakgrunn;
-    private List<SaksvedleggRequest> saksVedlegg;
+    private List<SaksvedleggDto> saksVedlegg;
 
     /**
      * @deprecated Benyttes i doksys, kommer til å bli erstattet av dokgen-variabel
@@ -143,7 +143,7 @@ public class BrevbestillingRequest {
         return nyVurderingBakgrunn;
     }
 
-    public List<SaksvedleggRequest> getSaksVedlegg() {
+    public List<SaksvedleggDto> getSaksVedlegg() {
         return saksVedlegg;
     }
 
@@ -166,7 +166,7 @@ public class BrevbestillingRequest {
         private String begrunnelseKode;
         private String ytterligereInformasjon;
         private String nyVurderingBakgrunn;
-        private List<SaksvedleggRequest> saksVedlegg;
+        private List<SaksvedleggDto> saksVedlegg;
 
         public Builder medProduserbardokument(Produserbaredokumenter produserbardokument) {
             this.produserbardokument = produserbardokument;
@@ -258,7 +258,7 @@ public class BrevbestillingRequest {
             return this;
         }
 
-        public Builder medSaksvedlegg(List<SaksvedleggRequest> saksVedlegg) {
+        public Builder medSaksvedlegg(List<SaksvedleggDto> saksVedlegg) {
             this.saksVedlegg = saksVedlegg;
             return this;
         }

@@ -8,7 +8,7 @@ import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
 import no.nav.melosys.service.dokument.brev.KopiMottaker;
-import no.nav.melosys.service.dokument.brev.SaksvedleggRequest;
+import no.nav.melosys.service.dokument.brev.SaksvedleggDto;
 
 public class BrevbestillingDto {
 
@@ -27,7 +27,7 @@ public class BrevbestillingDto {
     private String fritekst;
     private boolean kontaktopplysninger;
     private String nyVurderingBakgrunn;
-    private List<SaksvedleggRequest> saksvedlegg;
+    private List<SaksvedleggDto> saksvedlegg;
 
     /**
      * @deprecated Benyttes i doksys, kommer til å bli erstattet av dokgen-variabel
@@ -157,7 +157,7 @@ public class BrevbestillingDto {
         return nyVurderingBakgrunn;
     }
 
-    public List<SaksvedleggRequest> getSaksvedlegg() {
+    public List<SaksvedleggDto> getSaksvedlegg() {
         return saksvedlegg;
     }
 
@@ -178,7 +178,7 @@ public class BrevbestillingDto {
         private String begrunnelseKode;
         private String ytterligereInformasjon;
         private String nyVurderingBakgrunn;
-        private List<SaksvedleggRequest> saksvedlegg;
+        private List<SaksvedleggDto> saksvedlegg;
 
         public Builder medProduserbardokument(Produserbaredokumenter produserbardokument) {
             this.produserbardokument = produserbardokument;
@@ -260,7 +260,7 @@ public class BrevbestillingDto {
             return this;
         }
 
-        public Builder medSaksvedlegg(List<SaksvedleggRequest> saksVedlegg) {
+        public Builder medSaksvedlegg(List<SaksvedleggDto> saksVedlegg) {
             this.saksvedlegg = saksVedlegg;
             return this;
         }

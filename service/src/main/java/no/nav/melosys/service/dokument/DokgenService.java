@@ -21,7 +21,7 @@ import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
 import no.nav.melosys.service.dokument.brev.KopiMottaker;
-import no.nav.melosys.service.dokument.brev.SaksvedleggRequest;
+import no.nav.melosys.service.dokument.brev.SaksvedleggDto;
 import no.nav.melosys.service.dokument.brev.mapper.DokgenMalMapper;
 import no.nav.melosys.service.dokument.brev.mapper.DokumentproduksjonsInfoMapper;
 import no.nav.melosys.service.ldap.SaksbehandlerService;
@@ -210,12 +210,12 @@ public class DokgenService {
         return kopimottakere.stream().map(KopiMottaker::rolle).anyMatch(kopimottaker -> kopimottaker == Aktoersroller.ARBEIDSGIVER);
     }
 
-    private List<SaksvedleggBestilling> lagSaksvedleggBestilling(List<SaksvedleggRequest> saksvedleggRequest) {
-        if (saksvedleggRequest == null) {
+    private List<SaksvedleggBestilling> lagSaksvedleggBestilling(List<SaksvedleggDto> saksvedleggDtoer) {
+        if (saksvedleggDtoer == null) {
             return null;
         }
 
-        return saksvedleggRequest.stream()
+        return saksvedleggDtoer.stream()
             .map(saksvedlegg -> new SaksvedleggBestilling(saksvedlegg.journalpostID(), saksvedlegg.dokumentID()))
             .toList();
     }
