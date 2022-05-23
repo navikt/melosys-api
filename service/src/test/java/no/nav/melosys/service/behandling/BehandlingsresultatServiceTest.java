@@ -5,6 +5,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.*;
 
+import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
@@ -45,11 +46,14 @@ class BehandlingsresultatServiceTest {
     @Mock
     private VilkaarsresultatService vilkaarsresultatService;
 
+    private final FakeUnleash fakeUnleash = new FakeUnleash();
+
+
     private BehandlingsresultatService behandlingsresultatService;
 
     @BeforeEach
     public void setUp() {
-        behandlingsresultatService = spy(new BehandlingsresultatService(behandlingsresultatRepo, vilkaarsresultatService));
+        behandlingsresultatService = spy(new BehandlingsresultatService(behandlingsresultatRepo, vilkaarsresultatService, fakeUnleash));
     }
 
     @Test
@@ -224,6 +228,28 @@ class BehandlingsresultatServiceTest {
 
         assertThat(behandlingsresultatreplika.getUtfallRegistreringUnntak()).isNull();
         assertThat(behandlingsresultatreplika.getUtfallUtpeking()).isNull();
+    }
+
+    @Test
+    void replikerBehandlingsresultat_replikererBehandlingsresultatObjekterOgCollections()
+        throws NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
+        fakeUnleash.enableAll();
+
+        Behandling tidligsteInaktiveBehandling = new Behandling();
+        tidligsteInaktiveBehandling.setId(1L);
+
+        Behandlingsresultat behandlingsresultat = opprettBehandlingsresultatMedData(tidligsteInaktiveBehandling);
+        doReturn(behandlingsresultat).when(behandlingsresultatService).hentBehandlingsresultat(1L);
+
+
+        behandlingsresultatService.replikerBehandlingsresultat(tidligsteInaktiveBehandling, new Behandling());
+
+
+        ArgumentCaptor<Behandlingsresultat> captor = ArgumentCaptor.forClass(Behandlingsresultat.class);
+        verify(behandlingsresultatRepo).save(captor.capture());
+        Behandlingsresultat behandlingsresultatreplika = captor.getValue();
+
+        assertThat(behandlingsresultatreplika.getType()).isEqualTo(Behandlingsresultattyper.IKKE_FASTSATT);
     }
 
     @Test
