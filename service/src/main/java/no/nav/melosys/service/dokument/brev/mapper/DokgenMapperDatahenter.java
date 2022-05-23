@@ -15,7 +15,6 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.DokumentHentingService;
-import no.nav.melosys.service.dokument.DokumentHentingSystemService;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import org.springframework.stereotype.Component;
@@ -36,7 +35,7 @@ public class DokgenMapperDatahenter {
     protected DokgenMapperDatahenter(BehandlingsresultatService behandlingsresultatService,
                                      EregFasade eregFasade,
                                      PersondataFasade persondataFasade,
-                                     DokumentHentingSystemService dokumentHentingService,
+                                     DokumentHentingService dokumentHentingService,
                                      KodeverkService kodeverkService) {
         this.behandlingsresultatService = behandlingsresultatService;
         this.eregFasade = eregFasade;
