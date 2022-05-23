@@ -32,8 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
-import static no.nav.melosys.domain.kodeverk.Aktoersroller.ARBEIDSGIVER;
-import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
+import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 import static no.nav.melosys.integrasjon.dokgen.DokgenAdresseMapper.*;
 
@@ -105,7 +104,7 @@ public class BrevbestillingService {
                 return orgDokument.getNavn();
             }
         }
-        if (hovedmottaker == ARBEIDSGIVER) {
+        if (hovedmottaker == ARBEIDSGIVER || hovedmottaker == VIRKSOMHET) {
             var orgDokument = (OrganisasjonDokument) eregFasade.hentOrganisasjon(orgnrTilValgtArbeidsgiver).getDokument();
             return orgDokument.getNavn();
         }
