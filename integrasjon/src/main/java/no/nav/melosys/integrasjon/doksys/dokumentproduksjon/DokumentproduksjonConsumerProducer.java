@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Primary;
 @Configuration
 public class DokumentproduksjonConsumerProducer {
 
-    private DokumentproduksjonConsumerConfig config;
+    private final DokumentproduksjonConsumerConfig config;
 
     public DokumentproduksjonConsumerProducer(DokumentproduksjonConsumerConfig config) {
         this.config = config;
@@ -20,13 +20,6 @@ public class DokumentproduksjonConsumerProducer {
     @Primary
     public DokumentproduksjonConsumer dokumentproduksjonConsumer() {
         DokumentproduksjonV3 port = wrapWithSts(config.getPort(), NAVSTSClient.StsClientType.SECURITYCONTEXT_TIL_SAML);
-        return new DokumentproduksjonConsumerImpl(port);
-    }
-
-    @Bean
-
-    public DokumentproduksjonConsumer dokumentproduksjonSystemConsumer() {
-        DokumentproduksjonV3 port = wrapWithSts(config.getPort(), NAVSTSClient.StsClientType.SYSTEM_SAML);
         return new DokumentproduksjonConsumerImpl(port);
     }
 

@@ -31,13 +31,6 @@ public class OppgaveConsumerProducer implements WebClientConfig {
         );
     }
 
-    @Bean
-
-    public OppgaveConsumer oppgaveSystemConsumer(WebClient.Builder webClientBuilder,
-                                                 GenericContextExchangeFilter genericContextExchangeFilter) {
-        return oppgaveConsumer(webClientBuilder, genericContextExchangeFilter);
-    }
-
     private void defaultHeaders(HttpHeaders httpHeaders) {
         httpHeaders.add(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE);
         httpHeaders.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
