@@ -39,9 +39,6 @@ import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 @Service
 public class BrevmottakerService {
     private static final Logger log = LoggerFactory.getLogger(BrevmottakerService.class);
-    private static final Set<Produserbaredokumenter> DOKUMENTER_TIL_BRUKER = Collections.unmodifiableSet(EnumSet.of(MELDING_FORVENTET_SAKSBEHANDLINGSTID,
-        MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE,
-        AVSLAG_YRKESAKTIV, ORIENTERING_ANMODNING_UNNTAK, MELDING_MANGLENDE_OPPLYSNINGER, MELDING_HENLAGT_SAK, INNVILGELSE_YRKESAKTIV));
 
     private final KontaktopplysningService kontaktopplysningService;
     private final AvklarteVirksomheterService avklarteVirksomheterService;
@@ -67,17 +64,13 @@ public class BrevmottakerService {
     }
 
     Aktoersroller avklarMottakerRolleFraDokument(Produserbaredokumenter produserbartDokument) {
-        Aktoersroller mottakerRolle;
-        if (DOKUMENTER_TIL_BRUKER.contains(produserbartDokument)) {
-            mottakerRolle = BRUKER;
-        } else if (List.of(INNVILGELSE_ARBEIDSGIVER, AVSLAG_ARBEIDSGIVER).contains(produserbartDokument)) {
-            mottakerRolle = ARBEIDSGIVER;
-        } else if (List.of(ANMODNING_UNNTAK, ATTEST_A1).contains(produserbartDokument)) {
-            mottakerRolle = TRYGDEMYNDIGHET;
-        } else {
-            throw new TekniskException("Valg av mottakerRolle støttes ikke for " + produserbartDokument);
-        }
-        return mottakerRolle;
+        return switch (produserbartDokument) {
+            case MELDING_FORVENTET_SAKSBEHANDLINGSTID, MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE,
+                AVSLAG_YRKESAKTIV, ORIENTERING_ANMODNING_UNNTAK, MELDING_MANGLENDE_OPPLYSNINGER, MELDING_HENLAGT_SAK, INNVILGELSE_YRKESAKTIV -> BRUKER;
+            case INNVILGELSE_ARBEIDSGIVER, AVSLAG_ARBEIDSGIVER -> ARBEIDSGIVER;
+            case ANMODNING_UNNTAK, ATTEST_A1 -> TRYGDEMYNDIGHET;
+            default -> throw new TekniskException("Valg av mottakerRolle støttes ikke for " + produserbartDokument);
+        };
     }
 
     public Aktoer avklarMottaker(Produserbaredokumenter produserbartDokument, Mottaker mottaker, Behandling behandling) {
@@ -100,18 +93,12 @@ public class BrevmottakerService {
     }
 
     public List<Aktoer> avklarMottakere(Produserbaredokumenter produserbartDokument, Mottaker mottaker, Behandling behandling, boolean forhåndsvisning, boolean kunAvklarteVirksomheter) {
-        List<Aktoer> mottakere;
-        Aktoersroller mottakerRolle = mottaker.getRolle();
-        if (mottakerRolle == BRUKER) {
-            mottakere = avklarMottakereForBruker(produserbartDokument, behandling, forhåndsvisning);
-        } else if (mottakerRolle == ARBEIDSGIVER) {
-            mottakere = avklarMottakereForArbeidsgiver(behandling, kunAvklarteVirksomheter);
-        } else if (mottakerRolle == TRYGDEMYNDIGHET) {
-            mottakere = avklarMottakereForMyndigheter(mottaker, behandling, produserbartDokument);
-        } else {
-            throw new FunksjonellException(mottakerRolle + " støttes ikke.");
-        }
-        return mottakere;
+        return switch (mottaker.getRolle()) {
+            case BRUKER -> avklarMottakereForBruker(produserbartDokument, behandling, forhåndsvisning);
+            case ARBEIDSGIVER -> avklarMottakereForArbeidsgiver(behandling, kunAvklarteVirksomheter);
+            case TRYGDEMYNDIGHET -> avklarMottakereForMyndigheter(mottaker, behandling, produserbartDokument);
+            default -> throw new FunksjonellException("%s støttes ikke.".formatted(mottaker.getRolle()));
+        };
     }
 
     @Transactional

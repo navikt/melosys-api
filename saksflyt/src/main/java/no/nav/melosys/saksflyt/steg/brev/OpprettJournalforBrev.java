@@ -28,7 +28,6 @@ import org.springframework.stereotype.Component;
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.*;
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.OPPRETT_OG_JOURNALFØR_BREV;
 import static org.springframework.util.ObjectUtils.isEmpty;
-import static org.springframework.util.StringUtils.hasText;
 
 @Component
 public class OpprettJournalforBrev implements StegBehandler {
@@ -65,39 +64,17 @@ public class OpprettJournalforBrev implements StegBehandler {
 
     @Override
     public void utfør(Prosessinstans prosessinstans) {
-        String aktørId = prosessinstans.getData(AKTØR_ID);
-        String orgnr = prosessinstans.getData(ORGNR);
-        String institusjonsid = prosessinstans.getData(INSTITUSJON_ID);
-
-        if (isEmpty(aktørId) && isEmpty(orgnr) && isEmpty(institusjonsid)) {
-            throw new FunksjonellException("Mangler mottaker");
-        }
         if (prosessinstans.getBehandling() == null) {
             throw new FunksjonellException("Prosessinstans mangler behandling");
         }
 
-        Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(prosessinstans.getBehandling().getId());
-        String brukerFnr = hentBrukerFolkeregisterIdent(behandling);
-        Aktoersroller mottakerrolle = prosessinstans.getData(MOTTAKER, Aktoersroller.class, null);
+        MottakerType mottakerType = utledMottakerType(prosessinstans);
+        String mottakerID = utledMottakerID(mottakerType, prosessinstans);
+        Aktoer mottaker = lagMottaker(mottakerType, mottakerID, prosessinstans);
+
         var brevbestilling = prosessinstans.getData(BREVBESTILLING, DokgenBrevbestilling.class);
+        Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
         Produserbaredokumenter produserbartDokument = brevbestilling.getProduserbartdokument();
-
-        String fnr = null;
-        String sammensattNavn = null;
-
-        Aktoer mottaker = new Aktoer();
-        mottaker.setRolle(mottakerrolle);
-
-        if (!isEmpty(institusjonsid)) {
-            mottaker.setInstitusjonId(institusjonsid);
-            sammensattNavn = utenlandskMyndighetService.hentUtenlandskMyndighetForInstitusjonID(institusjonsid).navn;
-        } else if (!isEmpty(orgnr)) {
-            mottaker.setOrgnr(orgnr);
-        } else {
-            mottaker.setAktørId(aktørId);
-            fnr = persondataFasade.hentFolkeregisterident(aktørId);
-            sammensattNavn = persondataFasade.hentSammensattNavn(fnr);
-        }
 
         byte[] pdf = dokgenService.produserBrev(mottaker, brevbestilling);
         log.info("Produserbartdokument {} for behandling {} produsert", produserbartDokument, behandling.getId());
@@ -108,10 +85,10 @@ public class OpprettJournalforBrev implements StegBehandler {
             .medTittel(utledJournalføringsTittel(behandling, dokumentproduksjonsInfo, brevbestilling, mottaker))
             .medBrevkode(dokumentproduksjonsInfo.dokgenMalnavn())
             .medDokumentKategori(dokumentproduksjonsInfo.dokumentKategoriKode())
-            .medBrukerFnr(brukerFnr)
-            .medMottakerNavn(hasText(orgnr) ? eregFasade.hentOrganisasjonNavn(orgnr) : sammensattNavn)
-            .medMottakerId(utledMottakerId(orgnr, fnr, institusjonsid))
-            .medMottakerIdType(utledMottakerIdType(orgnr, institusjonsid))
+            .medBrukerFnr(hentBrukerFolkeregisterIdent(behandling))
+            .medMottakerNavn(utledNavn(mottakerID, mottakerType))
+            .medMottakerId(mottakerType == MottakerType.PERSON_MED_AKTØR_ID ? persondataFasade.hentFolkeregisterident(mottakerID) : mottakerID)
+            .medMottakerIdType(utledMottakerIdType(mottakerType))
             .medSaksnummer(behandling.getFagsak().getSaksnummer())
             .medPdf(pdf)
             .build();
@@ -122,31 +99,62 @@ public class OpprettJournalforBrev implements StegBehandler {
         prosessinstans.setData(DISTRIBUERBAR_JOURNALPOST_ID, journalpostId);
     }
 
-    private String utledMottakerId(String orgnr, String fnr, String institusjonId) {
-        if (hasText(institusjonId)) {
-            return institusjonId;
+    private MottakerType utledMottakerType(Prosessinstans prosessinstans) {
+        if (prosessinstans.hasData(INSTITUSJON_ID)) {
+            return MottakerType.INSTITUSJON;
+        } else if (prosessinstans.hasData(ORGNR)) {
+            return MottakerType.ORGANISASJON;
+        } else if (prosessinstans.hasData(PERSON_IDENT)) {
+            return MottakerType.PERSON_MED_FNR;
+        } else if (prosessinstans.hasData(AKTØR_ID)) {
+            return MottakerType.PERSON_MED_AKTØR_ID;
         }
-        if (hasText(orgnr)) {
-            return orgnr;
-        }
-        return fnr;
+        throw new FunksjonellException("Mangler mottaker");
     }
 
-    private OpprettJournalpost.KorrespondansepartIdType utledMottakerIdType(String orgnr, String institusjonId) {
-        if (hasText(institusjonId)) {
-            return OpprettJournalpost.KorrespondansepartIdType.UTENLANDSK_ORGANISASJON;
+    private String utledMottakerID(MottakerType mottakerType, Prosessinstans prosessinstans) {
+        return switch (mottakerType) {
+            case PERSON_MED_AKTØR_ID -> prosessinstans.getData(AKTØR_ID);
+            case PERSON_MED_FNR -> prosessinstans.getData(PERSON_IDENT);
+            case ORGANISASJON -> prosessinstans.getData(ORGNR);
+            case INSTITUSJON -> prosessinstans.getData(INSTITUSJON_ID);
+        };
+    }
+
+    private Aktoer lagMottaker(MottakerType mottakerType, String mottakerID, Prosessinstans prosessinstans) {
+        var mottaker = new Aktoer();
+        mottaker.setRolle(prosessinstans.getData(MOTTAKER, Aktoersroller.class, null));
+        switch (mottakerType) {
+            case PERSON_MED_AKTØR_ID -> mottaker.setAktørId(mottakerID);
+            case PERSON_MED_FNR -> mottaker.setPersonIdent(mottakerID);
+            case ORGANISASJON -> mottaker.setOrgnr(mottakerID);
+            case INSTITUSJON -> mottaker.setInstitusjonId(mottakerID);
         }
-        if (hasText(orgnr)) {
-            return OpprettJournalpost.KorrespondansepartIdType.ORGNR;
-        }
-        return OpprettJournalpost.KorrespondansepartIdType.FNR;
+        return mottaker;
+    }
+
+    private String utledNavn(String mottakerID, MottakerType mottakerType) {
+        return switch (mottakerType) {
+            case PERSON_MED_AKTØR_ID, PERSON_MED_FNR -> persondataFasade.hentSammensattNavn(mottakerID);
+            case ORGANISASJON -> eregFasade.hentOrganisasjonNavn(mottakerID);
+            case INSTITUSJON -> utenlandskMyndighetService.hentUtenlandskMyndighetForInstitusjonID(mottakerID).navn;
+        };
+    }
+
+    private OpprettJournalpost.KorrespondansepartIdType utledMottakerIdType(MottakerType mottakerType) {
+        return switch (mottakerType) {
+            case PERSON_MED_AKTØR_ID, PERSON_MED_FNR -> OpprettJournalpost.KorrespondansepartIdType.FNR;
+            case INSTITUSJON -> OpprettJournalpost.KorrespondansepartIdType.UTENLANDSK_ORGANISASJON;
+            case ORGANISASJON -> OpprettJournalpost.KorrespondansepartIdType.ORGNR;
+        };
     }
 
     private String hentBrukerFolkeregisterIdent(Behandling behandling) {
         return persondataFasade.hentFolkeregisterident(behandling.getFagsak().hentBrukersAktørID());
     }
 
-    public String utledJournalføringsTittel(Behandling behandling, DokumentproduksjonsInfo dokumentproduksjonsInfo, DokgenBrevbestilling brevbestilling, Aktoer mottaker) {
+    public String utledJournalføringsTittel(Behandling behandling, DokumentproduksjonsInfo
+        dokumentproduksjonsInfo, DokgenBrevbestilling brevbestilling, Aktoer mottaker) {
         if (brevbestilling instanceof FritekstbrevBrevbestilling fritekstbrevBrevbestilling) {
             String fritekstTittel = fritekstbrevBrevbestilling.getFritekstTittel();
             if (isEmpty(fritekstTittel)) {
@@ -159,5 +167,4 @@ public class OpprettJournalforBrev implements StegBehandler {
         }
         return dokumentproduksjonsInfo.journalføringsTittel();
     }
-
 }

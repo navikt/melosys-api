@@ -1,5 +1,6 @@
 package no.nav.melosys.saksflyt.impl;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Set;
 import java.util.UUID;
@@ -35,6 +36,8 @@ public class BehandleProsessinstansDelegate {
     void oppdaterStatusOmSkalPåVent(Prosessinstans prosessinstans) {
         if (skalSettesPåVent(prosessinstans)) {
             prosessinstans.setStatus(ProsessStatus.PÅ_VENT);
+            prosessinstans.setEndretDato(LocalDateTime.now());
+            prosessinstansRepository.save(prosessinstans);
             log.info("Prosessinstans {} satt på vent", prosessinstans.getId());
         }
     }
@@ -64,9 +67,9 @@ public class BehandleProsessinstansDelegate {
 
         if (aktiveLåsReferanser.contains(låsReferanse)) {
             return false;
-        } else {
-            return aktiveLåsReferanser.stream().anyMatch(p -> p.getReferanse().equals(låsReferanse.getReferanse()));
         }
+        return aktiveLåsReferanser.stream().anyMatch(
+            sedLåsReferanse -> sedLåsReferanse.getReferanse().equals(låsReferanse.getReferanse()));
     }
 
     private Collection<SedLåsReferanse> finnAndreAktiveLåsMedSammeReferanse(UUID id, SedLåsReferanse låsReferanse) {

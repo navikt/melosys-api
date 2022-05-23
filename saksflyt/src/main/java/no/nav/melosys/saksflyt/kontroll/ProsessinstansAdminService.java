@@ -1,7 +1,7 @@
 package no.nav.melosys.saksflyt.kontroll;
 
+import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.saksflyt.ProsessStatus;
@@ -32,7 +32,7 @@ public class ProsessinstansAdminService {
         return prosessinstansRepository.findAllByStatus(ProsessStatus.FEILET).stream()
             .map(this::mapTilHentProsessinstansDto)
             .sorted(Comparator.comparing(HentProsessinstansDto::endretDato))
-            .collect(Collectors.toList());
+            .toList();
     }
 
     public List<HentProsessinstansDto> restartAlleFeiledeProsessinstanser() {
@@ -40,7 +40,7 @@ public class ProsessinstansAdminService {
 
         setStatusRestartet(prosessinstanser);
 
-        return prosessinstanser.stream().map(this::mapTilHentProsessinstansDto).collect(Collectors.toList());
+        return prosessinstanser.stream().map(this::mapTilHentProsessinstansDto).toList();
     }
 
     public void restartProsessinstanser(Iterable<UUID> uuids) {
@@ -71,6 +71,7 @@ public class ProsessinstansAdminService {
         var prosessinstans = prosessinstansRepository.findById(uuid)
             .orElseThrow(() -> new IkkeFunnetException("Fant ikke prosessinstans med ID %s".formatted(uuid)));
         prosessinstans.setStatus(ProsessStatus.FERDIG);
+        prosessinstans.setEndretDato(LocalDateTime.now());
 
         prosessinstansRepository.save(prosessinstans);
     }
@@ -100,7 +101,9 @@ public class ProsessinstansAdminService {
     }
 
     private void setStatusRestartet(Collection<Prosessinstans> prosessinstanser) {
-        prosessinstanser.forEach(p -> p.setStatus(ProsessStatus.RESTARTET));
+        prosessinstanser.forEach(prosessinstans -> prosessinstans.setStatus(ProsessStatus.RESTARTET));
+        LocalDateTime nå = LocalDateTime.now();
+        prosessinstanser.forEach(prosessinstans -> prosessinstans.setEndretDato(nå));
 
         prosessinstansRepository
             .saveAll(prosessinstanser)

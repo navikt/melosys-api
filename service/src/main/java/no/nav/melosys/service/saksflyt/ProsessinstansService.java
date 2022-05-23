@@ -291,6 +291,9 @@ public class ProsessinstansService {
         if (hasText(mottaker.getAktørId())) {
             prosessinstans.setData(AKTØR_ID, mottaker.getAktørId());
         }
+        if (hasText(mottaker.getPersonIdent())) {
+            prosessinstans.setData(PERSON_IDENT, mottaker.getPersonIdent());
+        }
         if (hasText(mottaker.getOrgnr())) {
             prosessinstans.setData(ORGNR, mottaker.getOrgnr());
         }
