@@ -105,7 +105,7 @@ class OpprettOgJournalforBrevTest {
 
         opprettJournalforBrev.utfør(prosessinstans);
 
-        verify(mockBehandlingService).hentBehandlingMedSaksopplysninger(anyLong());
+        verify(mockBehandlingService).hentBehandling(anyLong());
         verify(mockDokgenService).produserBrev(any(Aktoer.class), any(DokgenBrevbestilling.class), eq(false));
         verify(mockJoarkFasade).opprettJournalpost(any(), anyBoolean());
     }
@@ -130,7 +130,7 @@ class OpprettOgJournalforBrevTest {
 
         opprettJournalforBrev.utfør(prosessinstans);
 
-        verify(mockBehandlingService).hentBehandlingMedSaksopplysninger(anyLong());
+        verify(mockBehandlingService).hentBehandling(anyLong());
         verify(mockDokgenService).produserBrev(any(Aktoer.class), any(DokgenBrevbestilling.class), eq(false));
         verify(mockJoarkFasade).opprettJournalpost(any(), anyBoolean());
     }
@@ -176,7 +176,7 @@ class OpprettOgJournalforBrevTest {
 
         opprettJournalforBrev.utfør(prosessinstans);
 
-        verify(mockBehandlingService).hentBehandlingMedSaksopplysninger(anyLong());
+        verify(mockBehandlingService).hentBehandling(anyLong());
         verify(mockDokgenService).produserBrev(any(Aktoer.class), any(MangelbrevBrevbestilling.class), eq(false));
         verify(mockJoarkFasade).opprettJournalpost(any(), anyBoolean());
     }
@@ -198,7 +198,7 @@ class OpprettOgJournalforBrevTest {
 
         opprettJournalforBrev.utfør(prosessinstans);
 
-        verify(mockBehandlingService).hentBehandlingMedSaksopplysninger(anyLong());
+        verify(mockBehandlingService).hentBehandling(anyLong());
         //noinspection ConstantConditions - brevbestilling er ikke null
         verify(mockDokgenService).produserBrev(any(Aktoer.class), refEq(brevbestilling), eq(false));
         verify(mockJoarkFasade).opprettJournalpost(any(), anyBoolean());
@@ -237,7 +237,7 @@ class OpprettOgJournalforBrevTest {
 
         opprettJournalforBrev.utfør(prosessinstans);
 
-        verify(mockBehandlingService).hentBehandlingMedSaksopplysninger(anyLong());
+        verify(mockBehandlingService).hentBehandling(anyLong());
         //noinspection ConstantConditions - brevbestilling er ikke null
         verify(mockDokgenService).produserBrev(any(Aktoer.class), refEq(brevbestilling), eq(false));
         verify(mockJoarkFasade).opprettJournalpost(any(), anyBoolean());
@@ -246,7 +246,7 @@ class OpprettOgJournalforBrevTest {
     @Test
     void utfør_feilerMedIkkeFunnetException_NårJournalpostIkkeFinnesForVedleggsdokument() {
         Behandling behandling = TestdataFactory.lagBehandling();
-        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
+        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandling);
         when(mockDokgenService.hentDokumentInfo(any())).thenReturn(TestdataFactory.lagDokumentInfo());
 
         List<SaksvedleggBestilling> saksvedleggBestillingList = List.of(new SaksvedleggBestilling("1", "2"));
@@ -267,7 +267,7 @@ class OpprettOgJournalforBrevTest {
     @Test
     void utfør_henterVedleggDokumenterFraJoark() {
         Behandling behandling = TestdataFactory.lagBehandling();
-        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
+        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandling);
         when(mockJoarkFasade.opprettJournalpost(any(), anyBoolean())).thenReturn("12234");
         when(mockDokgenService.hentDokumentInfo(any())).thenReturn(TestdataFactory.lagDokumentInfo());
         when(mockDokumentHentingService.hentJournalposter("MEL-test")).thenReturn(
