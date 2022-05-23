@@ -39,7 +39,8 @@ class AnmodningsperiodeServiceTest {
 
     @BeforeEach
     public void setUp() {
-        anmodningsperiodeService = new AnmodningsperiodeService(anmodningsperiodeRepository, behandlingsresultatService, anmodningsperiodeSvarRepository);
+        anmodningsperiodeService = new AnmodningsperiodeService(anmodningsperiodeRepository, anmodningsperiodeSvarRepository,
+                                                                behandlingsresultatService);
     }
 
     @Test
