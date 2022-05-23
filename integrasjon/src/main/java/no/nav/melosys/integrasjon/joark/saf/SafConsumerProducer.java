@@ -1,7 +1,7 @@
 package no.nav.melosys.integrasjon.joark.saf;
 
-import no.nav.melosys.integrasjon.felles.SystemContextExchangeFilter;
-import no.nav.melosys.integrasjon.felles.UserContextExchangeFilter;
+import no.nav.melosys.integrasjon.felles.GenericContextExchangeFilter;
+import no.nav.melosys.integrasjon.felles.WebClientConfig;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -12,7 +12,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
 
 @Configuration
-public class SafConsumerProducer {
+public class SafConsumerProducer implements WebClientConfig {
     private static final String NAV_CONSUMER_ID = "Nav-Consumer-Id";
 
     private final String url;
@@ -23,10 +23,11 @@ public class SafConsumerProducer {
 
     @Bean
     @Primary
-    public SafConsumer safConsumer(WebClient.Builder webClientBuilder, UserContextExchangeFilter userContextExchangeFilter) {
+    public SafConsumer safConsumer(WebClient.Builder webClientBuilder, GenericContextExchangeFilter genericContextExchangeFilter) {
         return new SafConsumerImpl(
             webClientBuilder
-                .filter(userContextExchangeFilter)
+                .filter(genericContextExchangeFilter)
+                .filter(errorFilter("Kall mot SAF feilet."))
                 .defaultHeaders(this::defaultHeaders)
                 .baseUrl(url)
                 .build()
@@ -35,14 +36,8 @@ public class SafConsumerProducer {
 
     @Bean
     @Qualifier("system")
-    public SafConsumer safSystemConsumer(WebClient.Builder webClientBuilder, SystemContextExchangeFilter systemContextExchangeFilter) {
-        return new SafConsumerImpl(
-            webClientBuilder
-                .filter(systemContextExchangeFilter)
-                .defaultHeaders(this::defaultHeaders)
-                .baseUrl(url)
-                .build()
-        );
+    public SafConsumer safSystemConsumer(WebClient.Builder webClientBuilder, GenericContextExchangeFilter genericContextExchangeFilter) {
+        return safConsumer(webClientBuilder, genericContextExchangeFilter);
     }
 
     private void defaultHeaders(HttpHeaders httpHeaders) {

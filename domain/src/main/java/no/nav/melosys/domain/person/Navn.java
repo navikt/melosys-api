@@ -2,6 +2,8 @@ package no.nav.melosys.domain.person;
 
 import java.util.Arrays;
 
+import static java.util.Objects.nonNull;
+
 public record Navn(String fornavn, String mellomnavn, String etternavn) {
     public String tilSammensattNavn() {
         return (etternavn + leggTilMellomnavn() + " " + fornavn).trim();
@@ -11,6 +13,9 @@ public record Navn(String fornavn, String mellomnavn, String etternavn) {
         return mellomnavn == null ? "" : " " + mellomnavn();
     }
 
+    public boolean harLiktFornavn(String navn) {
+        return nonNull(fornavn) && fornavn.equals(navn);
+    }
 
     // A B C -> C, A B
     public static String navnEtternavnFørst(String fulltNavnEtternavnSist) {

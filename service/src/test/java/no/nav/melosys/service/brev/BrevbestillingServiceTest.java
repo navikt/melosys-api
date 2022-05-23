@@ -84,7 +84,7 @@ class BrevbestillingServiceTest {
         when(mockBrevmottakerService.hentMottakerliste(MANGELBREV_BRUKER, 123L))
             .thenReturn(new Mottakerliste.Builder().medHovedMottaker(BRUKER).build());
         when(mockBrevmottakerService.avklarMottaker(eq(MANGELBREV_BRUKER), any(), eq(behandling)))
-            .thenReturn(lagAktoer(BRUKER, null));
+            .thenReturn(lagAktoerOrg(BRUKER, null));
         when(mockPersondataFasade.hentSammensattNavn(anyString())).thenReturn("Ola Nordmann");
         when(mockDokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoerRolle(behandling, MANGELBREV_BRUKER, BRUKER)).thenReturn(MANGELBREV_BRUKER.getBeskrivelse());
 
@@ -104,12 +104,12 @@ class BrevbestillingServiceTest {
     }
 
     @Test
-    void hentMuligeMottakere_hovedMottakerBrukerMedFullmektig_returnererFullmektigSomHovedMottaker() {
+    void hentMuligeMottakere_hovedMottakerBrukerMedFullmektigOrganisasjon_returnererFullmektigOrganisasjonSomHovedMottaker() {
         when(mockBehandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
         when(mockBrevmottakerService.hentMottakerliste(MANGELBREV_BRUKER, 123))
             .thenReturn(new Mottakerliste.Builder().medHovedMottaker(BRUKER).build());
         when(mockBrevmottakerService.avklarMottaker(any(Produserbaredokumenter.class), any(), eq(behandling)))
-            .thenReturn(lagAktoer(REPRESENTANT, "orgnr"));
+            .thenReturn(lagAktoerOrg(REPRESENTANT, "orgnr"));
         mockHentOrganisasjon("orgnr", "Fullmektig virksomhet");
         when(mockDokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoerRolle(behandling, MANGELBREV_BRUKER, BRUKER)).thenReturn(MANGELBREV_BRUKER.getBeskrivelse());
 
@@ -123,6 +123,31 @@ class BrevbestillingServiceTest {
                 MuligMottakerDto::getAktørId,
                 MuligMottakerDto::getOrgnr)
             .containsExactly(MANGELBREV_BRUKER.getBeskrivelse(), "Fullmektig virksomhet", BRUKER, null, null);
+        assertThat(muligeMottakere)
+            .extracting(MuligeMottakereDto::getKopiMottakere, MuligeMottakereDto::getFasteMottakere)
+            .containsExactly(emptyList(), emptyList());
+    }
+
+    @Test
+    void hentMuligeMottakere_hovedMottakerBrukerMedFullmektigPerson_returnererFullmektigPersonSomHovedMottaker() {
+        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
+        when(mockBrevmottakerService.hentMottakerliste(MANGELBREV_BRUKER, 123))
+            .thenReturn(new Mottakerliste.Builder().medHovedMottaker(BRUKER).build());
+        when(mockBrevmottakerService.avklarMottaker(any(Produserbaredokumenter.class), any(), eq(behandling)))
+            .thenReturn(lagAktoerPerson(REPRESENTANT, "fnr"));
+        when(mockPersondataFasade.hentSammensattNavn("fnr")).thenReturn("Ola Nordmann");
+        when(mockDokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoerRolle(behandling, MANGELBREV_BRUKER, BRUKER)).thenReturn(MANGELBREV_BRUKER.getBeskrivelse());
+
+        var muligeMottakere = brevbestillingService.hentMuligeMottakere(MANGELBREV_BRUKER, 123L, null);
+
+        assertThat(muligeMottakere.getHovedMottaker())
+            .extracting(
+                MuligMottakerDto::getDokumentNavn,
+                MuligMottakerDto::getMottakerNavn,
+                MuligMottakerDto::getRolle,
+                MuligMottakerDto::getAktørId,
+                MuligMottakerDto::getOrgnr)
+            .containsExactly(MANGELBREV_BRUKER.getBeskrivelse(), "Ola Nordmann", BRUKER, null, null);
         assertThat(muligeMottakere)
             .extracting(MuligeMottakereDto::getKopiMottakere, MuligeMottakereDto::getFasteMottakere)
             .containsExactly(emptyList(), emptyList());
@@ -159,7 +184,7 @@ class BrevbestillingServiceTest {
         mockHentOrganisasjon("orgnr", "Ola Nordmann Rørleggerfirma");
 
         when(mockBrevmottakerService.avklarMottaker(any(Produserbaredokumenter.class), any(), eq(behandling)))
-            .thenReturn(lagAktoer(BRUKER, null));
+            .thenReturn(lagAktoerOrg(BRUKER, null));
 
         var muligeMottakere = brevbestillingService.hentMuligeMottakere(MANGELBREV_BRUKER, 123L, "orgnr");
 
@@ -179,7 +204,7 @@ class BrevbestillingServiceTest {
         when(mockBrevmottakerService.hentMottakerliste(MANGELBREV_BRUKER, 123))
             .thenReturn(new Mottakerliste.Builder().medHovedMottaker(ARBEIDSGIVER).medKopiMottaker(BRUKER).build());
         when(mockBrevmottakerService.avklarMottaker(eq(MANGELBREV_BRUKER), any(), eq(behandling)))
-            .thenReturn(lagAktoer(REPRESENTANT, "orgnrTilFullmektig"));
+            .thenReturn(lagAktoerOrg(REPRESENTANT, "orgnrTilFullmektig"));
         mockHentOrganisasjon("orgnr", "Ola Nordmann Rørleggerfirma");
         mockHentOrganisasjon("orgnrTilFullmektig", "Fullmektig Virksomhet");
 
@@ -202,7 +227,7 @@ class BrevbestillingServiceTest {
         when(mockBrevmottakerService.hentMottakerliste(MANGELBREV_BRUKER, 123))
             .thenReturn(new Mottakerliste.Builder().medHovedMottaker(BRUKER).medKopiMottaker(BRUKER).build());
         when(mockBrevmottakerService.avklarMottaker(eq(MANGELBREV_BRUKER), any(), eq(behandling)))
-            .thenReturn(lagAktoer(REPRESENTANT, "orgnrTilFullmektig"));
+            .thenReturn(lagAktoerOrg(REPRESENTANT, "orgnrTilFullmektig"));
         when(mockPersondataFasade.hentSammensattNavn(anyString())).thenReturn("Ola Nordmann");
         mockHentOrganisasjon("orgnrTilFullmektig", "Fullmektig Virksomhet");
         when(mockDokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoerRolle(behandling, MANGELBREV_BRUKER, BRUKER)).thenReturn(MANGELBREV_BRUKER.getBeskrivelse());
@@ -233,9 +258,9 @@ class BrevbestillingServiceTest {
         when(mockBrevmottakerService.hentMottakerliste(MANGELBREV_BRUKER, 123))
             .thenReturn(new Mottakerliste.Builder().medHovedMottaker(BRUKER).medKopiMottaker(ARBEIDSGIVER).build());
         when(mockBrevmottakerService.avklarMottaker(eq(MANGELBREV_BRUKER), any(), eq(behandling)))
-            .thenReturn(lagAktoer(BRUKER, null));
-        Aktoer orgnr1 = lagAktoer(ARBEIDSGIVER, "orgnr1");
-        Aktoer orgnr2 = lagAktoer(ARBEIDSGIVER, "orgnr2");
+            .thenReturn(lagAktoerOrg(BRUKER, null));
+        Aktoer orgnr1 = lagAktoerOrg(ARBEIDSGIVER, "orgnr1");
+        Aktoer orgnr2 = lagAktoerOrg(ARBEIDSGIVER, "orgnr2");
         when(mockBrevmottakerService.avklarMottakere(eq(MANGELBREV_BRUKER), any(), eq(behandling), anyBoolean(), anyBoolean()))
             .thenReturn(List.of(orgnr1, orgnr2));
         mockHentOrganisasjon("orgnr1", "Arbeidsgiver 1");
@@ -265,8 +290,8 @@ class BrevbestillingServiceTest {
         when(mockBrevmottakerService.hentMottakerliste(MANGELBREV_BRUKER, 123))
             .thenReturn(new Mottakerliste.Builder().medHovedMottaker(BRUKER).medKopiMottaker(ARBEIDSGIVER).build());
         when(mockBrevmottakerService.avklarMottaker(eq(MANGELBREV_BRUKER), any(), eq(behandling)))
-            .thenReturn(lagAktoer(BRUKER, null));
-        Aktoer orgnr = lagAktoer(REPRESENTANT, "orgnr");
+            .thenReturn(lagAktoerOrg(BRUKER, null));
+        Aktoer orgnr = lagAktoerOrg(REPRESENTANT, "orgnr");
         when(mockBrevmottakerService.avklarMottakere(eq(MANGELBREV_BRUKER), any(), eq(behandling), anyBoolean(), anyBoolean()))
             .thenReturn(List.of(orgnr));
         mockHentOrganisasjon("orgnr", "Fullmektig Virksomhet");
@@ -293,7 +318,7 @@ class BrevbestillingServiceTest {
         when(mockBrevmottakerService.hentMottakerliste(MANGELBREV_BRUKER, 123))
             .thenReturn(new Mottakerliste.Builder().medHovedMottaker(BRUKER).medFastMottaker(FastMottakerMedOrgnr.SKATT).build());
         when(mockBrevmottakerService.avklarMottaker(MANGELBREV_BRUKER, Mottaker.av(BRUKER), behandling))
-            .thenReturn(lagAktoer(BRUKER, null));
+            .thenReturn(lagAktoerOrg(BRUKER, null));
         Aktoer skatteetaten = FastMottakerMedOrgnr.av(FastMottakerMedOrgnr.SKATT).getAktør();
         when(mockBrevmottakerService.avklarMottaker(MANGELBREV_BRUKER, FastMottakerMedOrgnr.av(FastMottakerMedOrgnr.SKATT), behandling))
             .thenReturn(skatteetaten);
@@ -379,7 +404,7 @@ class BrevbestillingServiceTest {
     void hentBrevAdresseTilMottakere_brukerSomMottaker_returnererBrukeradresse() {
         when(mockBehandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
         when(mockBrevmottakerService.avklarMottakere(any(), eq(Mottaker.av(Aktoersroller.BRUKER)), any(), eq(false), eq(false)))
-            .thenReturn(List.of(lagAktoer(Aktoersroller.BRUKER, null)));
+            .thenReturn(List.of(lagAktoerOrg(Aktoersroller.BRUKER, null)));
         when(mockPersondataFasade.hentPerson(anyString())).thenReturn(lagPersonopplysningerUtenOppholdsadresseOgKontaktadresse());
 
         var brevAdresser = brevbestillingService.hentBrevAdresseTilMottakere(MANGELBREV_BRUKER, Aktoersroller.BRUKER, 123);
@@ -391,12 +416,12 @@ class BrevbestillingServiceTest {
     }
 
     @Test
-    void hentBrevAdresseTilMottakere_brukersFullmaktSomMottaker_returnererFullmektigsAdresse() {
+    void hentBrevAdresseTilMottakere_brukersFullmaktOrganisasjonSomMottaker_returnererFullmektigsAdresse() {
         var behandling = new Behandling();
         behandling.setFagsak(new Fagsak());
         when(mockBehandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
         when(mockBrevmottakerService.avklarMottakere(any(), eq(Mottaker.av(Aktoersroller.BRUKER)), any(), eq(false), eq(false)))
-            .thenReturn(List.of(lagAktoer(Aktoersroller.REPRESENTANT, "orgNr")));
+            .thenReturn(List.of(lagAktoerOrg(Aktoersroller.REPRESENTANT, "orgNr")));
         when(mockEregFasade.hentOrganisasjon("orgNr")).thenReturn(lagORGSaksopplysning("orgNr", "Ola Nordmann Fullmektig"));
 
         var brevAdresser = brevbestillingService.hentBrevAdresseTilMottakere(MANGELBREV_BRUKER, Aktoersroller.BRUKER, 123);
@@ -408,13 +433,30 @@ class BrevbestillingServiceTest {
     }
 
     @Test
+    void hentBrevAdresseTilMottakere_brukersFullmaktPersonSomMottaker_returnererFullmektigsAdresse() {
+        var behandling = new Behandling();
+        behandling.setFagsak(new Fagsak());
+        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
+        when(mockBrevmottakerService.avklarMottakere(any(), eq(Mottaker.av(Aktoersroller.BRUKER)), any(), eq(false), eq(false)))
+            .thenReturn(List.of(lagAktoerPerson(Aktoersroller.REPRESENTANT, "fnr")));
+        when(mockPersondataFasade.hentPerson("fnr")).thenReturn(lagPersonopplysningerUtenOppholdsadresseOgKontaktadresse());
+
+        var brevAdresser = brevbestillingService.hentBrevAdresseTilMottakere(MANGELBREV_BRUKER, Aktoersroller.BRUKER, 123);
+
+        assertThat(brevAdresser).hasSize(1);
+        assertThat(brevAdresser.get(0))
+            .extracting(BrevAdresse::getMottakerNavn, BrevAdresse::getOrgnr, BrevAdresse::getAdresselinjer, BrevAdresse::getPostnr, BrevAdresse::getPoststed, BrevAdresse::getRegion, BrevAdresse::getLand)
+            .containsExactly("Nordmann Ola", null, List.of("gatenavnFraBostedsadresse 3"), "1234", "Oslo", "Norge", "NO");
+    }
+
+    @Test
     void hentBrevAdresseTilMottakere_arbeidsgiverSomMottaker_returnererArbeidsgiverAdresser() {
         var behandling = new Behandling();
         behandling.setFagsak(new Fagsak());
 
         when(mockBehandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
         when(mockBrevmottakerService.avklarMottakere(any(), eq(Mottaker.av(Aktoersroller.ARBEIDSGIVER)), any(), eq(false), eq(false)))
-            .thenReturn(List.of(lagAktoer(Aktoersroller.ARBEIDSGIVER, "orgNr1"), lagAktoer(Aktoersroller.ARBEIDSGIVER, "orgNr2")));
+            .thenReturn(List.of(lagAktoerOrg(Aktoersroller.ARBEIDSGIVER, "orgNr1"), lagAktoerOrg(Aktoersroller.ARBEIDSGIVER, "orgNr2")));
         when(mockEregFasade.hentOrganisasjon("orgNr1")).thenReturn(lagORGSaksopplysning("orgNr1", "Ola Nordmann Rørleggerfirma"));
         when(mockEregFasade.hentOrganisasjon("orgNr2")).thenReturn(lagORGSaksopplysning("orgNr2", "Ida Nordmann Rørleggerfirma"));
 
@@ -445,7 +487,7 @@ class BrevbestillingServiceTest {
         behandling.setFagsak(new Fagsak());
         when(mockBehandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
         when(mockBrevmottakerService.avklarMottakere(any(), eq(Mottaker.av(Aktoersroller.ARBEIDSGIVER)), any(), eq(false), eq(false)))
-            .thenReturn(List.of(lagAktoer(Aktoersroller.REPRESENTANT, "orgNr")));
+            .thenReturn(List.of(lagAktoerOrg(Aktoersroller.REPRESENTANT, "orgNr")));
         when(mockEregFasade.hentOrganisasjon("orgNr")).thenReturn(lagORGSaksopplysning("orgNr", "Ola Nordmann Fullmektig"));
 
         var brevAdresser = brevbestillingService.hentBrevAdresseTilMottakere(MANGELBREV_ARBEIDSGIVER, Aktoersroller.ARBEIDSGIVER, 123);
@@ -460,7 +502,7 @@ class BrevbestillingServiceTest {
     void hentBrevAdresseTilMottakere_returnererAdresseFelterSomNull_nårGjeldendePostadresseErNull() {
         when(mockBehandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
         when(mockBrevmottakerService.avklarMottakere(any(), eq(Mottaker.av(Aktoersroller.BRUKER)), any(), eq(false), eq(false)))
-            .thenReturn(List.of(lagAktoer(Aktoersroller.BRUKER, null)));
+            .thenReturn(List.of(lagAktoerOrg(Aktoersroller.BRUKER, null)));
         Personopplysninger persondata = PersonopplysningerObjectFactory.lagPersonopplysningerUtenAdresser();
         when(mockPersondataFasade.hentPerson(anyString())).thenReturn(persondata);
 
@@ -476,7 +518,7 @@ class BrevbestillingServiceTest {
     void hentBrevAdresseTilMottakere_returnererAdresseMedKorrektAdresselinjer_nårCoAdresseErTomStreng() {
         when(mockBehandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
         when(mockBrevmottakerService.avklarMottakere(any(), eq(Mottaker.av(Aktoersroller.BRUKER)), any(), eq(false), eq(false)))
-            .thenReturn(List.of(lagAktoer(Aktoersroller.BRUKER, null)));
+            .thenReturn(List.of(lagAktoerOrg(Aktoersroller.BRUKER, null)));
         when(mockPersondataFasade.hentPerson(anyString())).thenReturn(lagPersondataMedTomCo());
 
         var brevAdresser = brevbestillingService.hentBrevAdresseTilMottakere(MANGELBREV_BRUKER, Aktoersroller.BRUKER, 123L);
@@ -496,14 +538,14 @@ class BrevbestillingServiceTest {
                 .medFastMottaker(FastMottakerMedOrgnr.SKATT)
                 .build());
         when(mockBrevmottakerService.avklarMottaker(eq(STORBRITANNIA), any(), eq(behandling)))
-            .thenReturn(lagAktoer(BRUKER, null));
-        Aktoer arbeidsgiver = lagAktoer(ARBEIDSGIVER, "123");
+            .thenReturn(lagAktoerOrg(BRUKER, null));
+        Aktoer arbeidsgiver = lagAktoerOrg(ARBEIDSGIVER, "123");
         when(mockBrevmottakerService.avklarMottakere(STORBRITANNIA, Mottaker.av(ARBEIDSGIVER), behandling, false, true))
             .thenReturn(List.of(arbeidsgiver));
-        Aktoer trygdemyndighet = lagAktoer(TRYGDEMYNDIGHET, "456");
+        Aktoer trygdemyndighet = lagAktoerOrg(TRYGDEMYNDIGHET, "456");
         when(mockBrevmottakerService.avklarMottakere(STORBRITANNIA, Mottaker.av(TRYGDEMYNDIGHET), behandling))
             .thenReturn(List.of(trygdemyndighet));
-        Aktoer skatteetaten = lagAktoer(TRYGDEMYNDIGHET, "974761076");
+        Aktoer skatteetaten = lagAktoerOrg(TRYGDEMYNDIGHET, "974761076");
         when(mockBrevmottakerService.avklarMottaker(STORBRITANNIA, FastMottakerMedOrgnr.av(FastMottakerMedOrgnr.SKATT), behandling))
             .thenReturn(skatteetaten);
         when(mockPersondataFasade.hentSammensattNavn(anyString())).thenReturn("Ola Nordmann");
@@ -575,10 +617,17 @@ class BrevbestillingServiceTest {
         verify(mockDokServiceFasade).produserUtkast(333L, brevbestillingRequest);
     }
 
-    private Aktoer lagAktoer(Aktoersroller aktoersroller, String orgNummer) {
+    private Aktoer lagAktoerOrg(Aktoersroller aktoersroller, String orgNummer) {
         var aktoer = new Aktoer();
         aktoer.setRolle(aktoersroller);
         aktoer.setOrgnr(orgNummer);
+        return aktoer;
+    }
+
+    private Aktoer lagAktoerPerson(Aktoersroller aktoersroller, String personIdent) {
+        var aktoer = new Aktoer();
+        aktoer.setRolle(aktoersroller);
+        aktoer.setPersonIdent(personIdent);
         return aktoer;
     }
 

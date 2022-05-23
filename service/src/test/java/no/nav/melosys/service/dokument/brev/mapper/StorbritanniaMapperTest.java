@@ -15,6 +15,7 @@ import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Medfolgende_barn_begrunnelser;
@@ -22,13 +23,12 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_b
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_ektefelle_samboer_begrunnelser_ftrl;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
-import no.nav.melosys.domain.person.adresse.Oppholdsadresse;
-import no.nav.melosys.domain.person.adresse.PersonAdresse;
 import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie;
 import no.nav.melosys.domain.person.familie.IkkeOmfattetFamilie;
 import no.nav.melosys.domain.person.familie.OmfattetFamilie;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.dokgen.dto.InnvilgelseOgAttestStorbritannia;
+import no.nav.melosys.integrasjon.dokgen.dto.storbritannia.attest.AttestStorbritannia;
 import no.nav.melosys.integrasjon.dokgen.dto.storbritannia.innvilgelse.Barn;
 import no.nav.melosys.integrasjon.dokgen.dto.storbritannia.innvilgelse.InnvilgelseStorbritannia;
 import no.nav.melosys.service.LovvalgsperiodeService;
@@ -45,15 +45,17 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.STORBRITANNIA;
-import static no.nav.melosys.service.dokument.brev.mapper.DokgenMalMapperTest.*;
 import static no.nav.melosys.service.dokument.DokgenTestData.*;
+import static no.nav.melosys.service.dokument.brev.mapper.DokgenMalMapperTest.SOKNADSDATO;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
-import static org.mockito.ArgumentMatchers.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class StorbritanniaMapperTest {
+class StorbritanniaMapperTest {
     private static final String UUID_EKTEFELLE = "uuidEktefelle";
     private static final String UUID_BARN_1 = "uuidBarn1";
     private static final String UUID_BARN_2 = "uuidBarn2";
@@ -112,6 +114,38 @@ public class StorbritanniaMapperTest {
 
         assertThat(innvilgelseOgAttestStorbritannia.isSkalHaInfoOmRettigheter()).isTrue();
         assertThat(innvilgelseOgAttestStorbritannia.getNyVurderingBakgrunn()).isEqualTo(brevbestilling.getNyVurderingBakgrunn());
+    }
+
+    private static List<Arguments> sjekkAdresser() {
+        return StorbritaniaAdresseSjekkerTest.sjekkAdresser();
+    }
+
+    @ParameterizedTest(name = "{5}")
+    @MethodSource("sjekkAdresser")
+    void map_brukNorskBostedsAddresse(
+        Landkoder landkodeBosted,
+        Landkoder landkodeOpphold,
+        Landkoder landkodeKontakt,
+        List<String> norskAddresse,
+        List<String> ukAddresse,
+        String grunn) {
+
+        mockHappyCase();
+        var persondata = StorbritaniaAdresseSjekkerTest.lagPersonopplysninger(landkodeBosted, landkodeOpphold, landkodeKontakt);
+        InnvilgelseBrevbestilling brevbestilling =
+            lagStorbritanniaBrevbestillingDefaultBuilder(medPeriode(lagTrygdeavtaleBehandling()))
+                .medPersonDokument(persondata)
+                .build();
+
+        InnvilgelseOgAttestStorbritannia innvilgelseOgAttestStorbritannia = storbritanniaMapper.map(brevbestilling);
+        assertTrue(innvilgelseOgAttestStorbritannia.isSkalHaAttest());
+
+        AttestStorbritannia attest = innvilgelseOgAttestStorbritannia.getAttest();
+        List<String> bostedsadresse = attest.getArbeidstaker().bostedsadresse();
+        List<String> oppholdsadresseUK = attest.getUtsendelse().oppholdsadresseUK();
+
+        assertThat(bostedsadresse).isEqualTo(norskAddresse);
+        assertThat(oppholdsadresseUK).isEqualTo(ukAddresse);
     }
 
     @Test
@@ -178,47 +212,6 @@ public class StorbritanniaMapperTest {
         assertThat(map.getFamilie().minstEttOmfattetFamiliemedlem()).isFalse();
     }
 
-    @ParameterizedTest(name = "{4}")
-    @MethodSource("gyldigePerioder")
-    void sjekkOmAdresseGyldighetErInnenforLovalgsperiode_for_gyldigePerioder(LocalDate lovFom, LocalDate lovTom, LocalDate gyldigFom, LocalDate gyldigTom, String grunn) {
-        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setFom(lovFom);
-        lovvalgsperiode.setTom(lovTom);
-        PersonAdresse personAdresse = new Oppholdsadresse(null,
-            null,
-            gyldigFom,
-            gyldigTom,
-            null,
-            null,
-            null,
-            false
-        );
-        assertThat(StorbritanniaMapper.sjekkOmAdresseGyldighetErInnenforLovalgsperiode(personAdresse, lovvalgsperiode))
-            .withFailMessage(grunn)
-            .isTrue();
-    }
-
-
-    @ParameterizedTest(name = "{4}")
-    @MethodSource("ugyldigePerioder")
-    void sjekkOmAdresseGyldighetErInnenforLovalgsperiode_for_ugyldigePerioder(LocalDate lovFom, LocalDate lovTom, LocalDate gyldigFom, LocalDate gyldigTom, String grunn) {
-        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setFom(lovFom);
-        lovvalgsperiode.setTom(lovTom);
-        PersonAdresse personAdresse = new Oppholdsadresse(null,
-            null,
-            gyldigFom,
-            gyldigTom,
-            null,
-            null,
-            null,
-            false
-        );
-        assertThat(StorbritanniaMapper.sjekkOmAdresseGyldighetErInnenforLovalgsperiode(personAdresse, lovvalgsperiode))
-            .withFailMessage(grunn)
-            .isFalse();
-    }
-
     @Test
     void map_medToLovvalgperioder_kastFunksjonellException() {
         mockHappyCase();
@@ -241,7 +234,7 @@ public class StorbritanniaMapperTest {
             .isThrownBy(() ->
                 storbritanniaMapper.map(new InnvilgelseBrevbestilling.Builder()
                     .medBehandling(lagTrygdeavtaleBehandling())
-                    .medPersonDokument(lagPersonDokument())
+                    .medPersonDokument(lagPersondata())
                     .medVedtaksdato(VEDTAKS_DATO_INSTANT)
                     .build()
                 )
@@ -268,10 +261,10 @@ public class StorbritanniaMapperTest {
         return behandling;
     }
 
-    private InnvilgelseBrevbestilling lagStorbritanniaBrevbestilling(Behandling behandling) {
+    private InnvilgelseBrevbestilling.Builder lagStorbritanniaBrevbestillingDefaultBuilder(Behandling behandling) {
         return new InnvilgelseBrevbestilling.Builder()
             .medProduserbartdokument(STORBRITANNIA)
-            .medPersonDokument(lagPersonDokument())
+            .medPersonDokument(lagPersondata())
             .medBehandling(behandling)
             .medOrg(lagOrg())
             .medKontaktopplysning(lagKontaktOpplysning())
@@ -281,8 +274,12 @@ public class StorbritanniaMapperTest {
             .medBarnFritekst("barnFritekst")
             .medEktefelleFritekst("ektefelleFritekst")
             .medVedtaksdato(VEDTAKS_DATO_INSTANT)
-            .medVirksomhetArbeidsgiverSkalHaKopi(false)
-            .build();
+            .medVirksomhetArbeidsgiverSkalHaKopi(false);
+    }
+
+
+    private InnvilgelseBrevbestilling lagStorbritanniaBrevbestilling(Behandling behandling) {
+        return lagStorbritanniaBrevbestillingDefaultBuilder(behandling).build();
     }
 
     private AvklarteMedfolgendeFamilie lagOmfattetMedfølgendeEktefelle() {
@@ -342,7 +339,7 @@ public class StorbritanniaMapperTest {
         when(mockLovvalgsperiodeService.hentValidertLovvalgsperiode(anyLong())).thenReturn(lagLovvalgsperiode());
     }
 
-    private Lovvalgsperiode lagLovvalgsperiode() {
+    static Lovvalgsperiode lagLovvalgsperiode() {
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setFom(LOVVALGSPERIODE_FOM);
         lovvalgsperiode.setTom(LOVVALGSPERIODE_TOM);
@@ -388,79 +385,6 @@ public class StorbritanniaMapperTest {
         );
     }
 
-    private static List<Arguments> gyldigePerioder() {
-        return List.of(
-            Arguments.of(
-                LocalDate.of(2020, 1, 1),
-                LocalDate.of(2021, 1, 1),
-
-                LocalDate.of(2020, 1, 1),
-                LocalDate.of(2021, 1, 1),
-                "lovalgsperiode er lik adresseperiode"
-            ),
-            Arguments.of(
-                LocalDate.of(2020, 1, 1),
-                LocalDate.of(2021, 1, 1),
-
-                LocalDate.of(2020, 2, 1),
-                LocalDate.of(2020, 3, 1),
-                "lovalgsperiode har start før og slutt etter adresseperiode"
-            ),
-            Arguments.of(
-                LocalDate.of(2020, 2, 1),
-                LocalDate.of(2020, 3, 1),
-
-                LocalDate.of(2020, 1, 1),
-                LocalDate.of(2021, 1, 1),
-                "adresseperiode har start før og slutt etter lovalgsperiode"
-            ),
-            Arguments.of(
-                LocalDate.of(2021, 1, 1),
-                LocalDate.of(2022, 1, 1),
-
-                LocalDate.of(2020, 1, 1),
-                LocalDate.of(2021, 1, 1),
-                "lovalgsperiode start er lik adresseperiode slutt"
-            ),
-            Arguments.of(
-                LocalDate.of(2020, 1, 1),
-                LocalDate.of(2021, 1, 1),
-
-                LocalDate.of(2021, 1, 1),
-                LocalDate.of(2022, 1, 1),
-                "lovalgsperiode slutt er lik adresseperiode start"
-            )
-        );
-    }
-
-    private static List<Arguments> ugyldigePerioder() {
-        return List.of(
-            Arguments.of(
-                LocalDate.of(2019, 1, 1),
-                LocalDate.of(2020, 1, 1),
-
-                LocalDate.of(2020, 2, 1),
-                LocalDate.of(2021, 1, 1),
-                "lovalgsperiode er før adresseperiode"
-            ),
-            Arguments.of(
-                LocalDate.of(2021, 1, 2),
-                LocalDate.of(2022, 1, 1),
-
-                LocalDate.of(2020, 1, 1),
-                LocalDate.of(2021, 1, 1),
-                "lovalgsperiode er etter adresseperiode"
-            ),
-            Arguments.of(
-                LocalDate.of(2020, 1, 1),
-                LocalDate.of(2021, 1, 1),
-
-                null,
-                null,
-                "adresseperiode fom og tom er null"
-            )
-        );
-    }
 
     private static final String FORVENTEDE_FELTER_FOR_INNVILGELSE_STORBRITANNIA_MAPPING = String.format("""
             {
@@ -517,43 +441,43 @@ public class StorbritanniaMapperTest {
     );
 
     private static final String FORVENTEDE_FELTER_FOR_ATTEST_STORBRITANNIA_MAPPING = String.format("""
-        {
-          "arbeidstaker" : {
-            "navn" : "Donald Duck",
-            "foedselsdato" : null,
-            "fnr" : "05058892382",
-            "bostedsadresse" : [ "Andebygata 1", "9999", "Andeby" ]
-          },
-          "medfolgendeFamiliemedlemmer" : {
-            "ektefelle" : {
-              "navn" : "Dolly Duck",
-              "foedselsdato" : "%s",
-              "fnr" : "%s",
-              "dnr" : null
-            },
-            "barn" : [ {
-              "navn" : "Doffen Duck",
-              "foedselsdato" : "%s",
-              "fnr" : "%s",
-              "dnr" : null
-            } ]
-          },
-          "arbeidsgiverNorge" : {
-            "virksomhetsnavn" : "Bang Hansen",
-            "fullstendigAdresse" : [ "Strukturert Gate 12B", "4321", "Poststed", "Bulgaria" ]
-          },
-          "utsendelse" : {
-            "artikkel" : "UK_ART6_1",
-            "oppholdsadresseUK" : [ ],
-            "startdato" : "%s",
-            "sluttdato" : "%s"
-          },
-          "representant" : {
-            "navn" : "Foretaksnavn",
-            "adresse" : [ "Uk address" ]
-          },
-          "vedtaksdato" : "%s"
-        }""",
+            {
+              "arbeidstaker" : {
+                "navn" : "Donald Duck",
+                "foedselsdato" : null,
+                "fnr" : "05058892382",
+                "bostedsadresse" : [ "Andebygata 1 42 C", "9999", "Norge" ]
+              },
+              "medfolgendeFamiliemedlemmer" : {
+                "ektefelle" : {
+                  "navn" : "Dolly Duck",
+                  "foedselsdato" : "%s",
+                  "fnr" : "%s",
+                  "dnr" : null
+                },
+                "barn" : [ {
+                  "navn" : "Doffen Duck",
+                  "foedselsdato" : "%s",
+                  "fnr" : "%s",
+                  "dnr" : null
+                } ]
+              },
+              "arbeidsgiverNorge" : {
+                "virksomhetsnavn" : "Bang Hansen",
+                "fullstendigAdresse" : [ "Strukturert Gate 12B", "4321", "Poststed", "Bulgaria" ]
+              },
+              "utsendelse" : {
+                "artikkel" : "UK_ART6_1",
+                "oppholdsadresseUK" : [ "Unknown" ],
+                "startdato" : "%s",
+                "sluttdato" : "%s"
+              },
+              "representant" : {
+                "navn" : "Foretaksnavn",
+                "adresse" : [ "Uk address" ]
+              },
+              "vedtaksdato" : "%s"
+            }""",
         LocalDate.of(1980, 10, 1),
         EKTEFELLE_FNR,
         LocalDate.of(2000, 10, 1),

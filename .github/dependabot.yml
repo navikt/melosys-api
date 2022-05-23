@@ -6,6 +6,8 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    # Disable all pull requests for Maven (Snyk will create fixes for vulnerabilites)
+    open-pull-requests-limit: 0
 
   - package-ecosystem: "github-actions"
     directory: "/"

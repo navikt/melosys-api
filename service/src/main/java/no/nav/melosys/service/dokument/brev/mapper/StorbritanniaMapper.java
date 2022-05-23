@@ -1,15 +1,11 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Stream;
 import javax.transaction.Transactional;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
-import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadTrygdeavtale;
@@ -19,11 +15,9 @@ import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.brev.FastMottakerMedOrgnr;
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
-import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
 import no.nav.melosys.domain.person.Persondata;
-import no.nav.melosys.domain.person.adresse.PersonAdresse;
 import no.nav.melosys.domain.person.familie.IkkeOmfattetFamilie;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.dokgen.dto.InnvilgelseOgAttestStorbritannia;
@@ -42,7 +36,6 @@ import static org.springframework.util.ObjectUtils.isEmpty;
 
 @Component
 public class StorbritanniaMapper {
-
     private final AvklarteMedfolgendeFamilieService avklarteMedfølgendeFamilieService;
     private final AvklarteVirksomheterSystemService avklarteVirksomheterSystemService;
     private final LovvalgsperiodeService lovvalgsperiodeService;
@@ -90,6 +83,8 @@ public class StorbritanniaMapper {
         var persondokument = brevbestilling.getPersondokument();
         var lovvalgsperioder = lovvalgsperiodeService.hentLovvalgsperioder(behandlingID);
 
+        var adresseSjekker = new StorbritanniaAdresseSjekker(persondokument);
+
         return new AttestStorbritannia.Builder(brevbestilling)
             .medfolgendeFamiliemedlemmer(mapMedfolgendeFamiliemedlemmer(behandlingID))
             .arbeidsgiverNorge(lagArbeidsgiverNorge(behandling))
@@ -97,7 +92,7 @@ public class StorbritanniaMapper {
                 persondokument.getSammensattNavn(),
                 persondokument.getFødselsdato(),
                 persondokument.hentFolkeregisterident(),
-                persondokument.hentGjeldendePostadresse().lagPostadresseListe()))
+                adresseSjekker.finnGyldigNorskAdresse()))
             .representant(lagRepresentant(behandling.getBehandlingsgrunnlag()))
             .utsendelse(lagUtsendelse(lovvalgsperioder, persondokument))
             .build();
@@ -136,7 +131,7 @@ public class StorbritanniaMapper {
 
     private Ektefelle tilEktefelle(Map<String, MedfolgendeFamilie> medfølgendeFamilieMap, String uuid, String begrunnelse) {
         var medfølgendeFamilie = Optional.of(medfølgendeFamilieMap.get(uuid))
-            .orElseThrow(() -> new FunksjonellException("Avklart medfølgende familie " + uuid + " finnes ikke i behandlingsgrunnlaget"));
+            .orElseThrow(() -> finnesIkkeIBehandlingsGrunnlagetException(uuid));
 
         IdentType identType = medfølgendeFamilie.utledIdentType();
         return new Ektefelle.Builder()
@@ -165,8 +160,7 @@ public class StorbritanniaMapper {
 
     private Barn tilBarn(Map<String, MedfolgendeFamilie> medfølgendeBarnMap, String uuid, String begrunnelse) {
         var medfølgendeBarn = Optional.of(medfølgendeBarnMap.get(uuid))
-            .orElseThrow(() -> new FunksjonellException("Avklart medfølgende familie " + uuid +
-                " finnes ikke i behandlingsgrunnlaget"));
+            .orElseThrow(() -> finnesIkkeIBehandlingsGrunnlagetException(uuid));
         var identType = medfølgendeBarn.utledIdentType();
         return new Barn.Builder()
             .navn(medfølgendeBarn.getNavn())
@@ -198,38 +192,16 @@ public class StorbritanniaMapper {
 
         var bestemmelse = lovvalgsperiode.getBestemmelse();
 
+        var adresseSjekker = new StorbritanniaAdresseSjekker(persondata);
+
         return new Utsendelse.Builder()
             .artikkel((Lovvalgbestemmelser_trygdeavtale_uk) bestemmelse)
-            .oppholdsadresseUK(finnGyldigAdresse(persondata, lovvalgsperiode))
+            .oppholdsadresseUK(adresseSjekker.finnGyldigStorbritanniaAdresse(lovvalgsperiode))
             .startdato(lovvalgsperiode.getFom())
             .sluttdato(lovvalgsperiode.getTom())
             .build();
     }
 
-    static List<String> finnGyldigAdresse(Persondata persondata, Lovvalgsperiode lovvalgsperiode) {
-        var optionalPersonAdresse = Stream.of(
-            persondata.finnBostedsadresse(),
-            persondata.finnOppholdsadresse(),
-            persondata.finnKontaktadresse())
-            .filter(Optional::isPresent)
-            .map(Optional::get)
-            .filter(personAdresse -> sjekkAdresseMotLand(personAdresse.strukturertAdresse()))
-            .filter(personAdresse -> sjekkOmAdresseGyldighetErInnenforLovalgsperiode(personAdresse, lovvalgsperiode))
-            .findFirst();
-        return optionalPersonAdresse.isPresent() ? optionalPersonAdresse.get().strukturertAdresse().toList() : List.of();
-    }
-
-    private static boolean sjekkAdresseMotLand(StrukturertAdresse adresse) {
-        return adresse != null && adresse.getLandkode().equals(Landkoder.GB.getKode());
-    }
-
-    static boolean sjekkOmAdresseGyldighetErInnenforLovalgsperiode(PersonAdresse personAdresse, Lovvalgsperiode lovvalgsperiode) {
-        if (personAdresse.gyldigFraOgMed() == null) return false;
-        if (personAdresse.gyldigTilOgMed() == null) return false;
-
-        if (lovvalgsperiode.getTom().isBefore(personAdresse.gyldigFraOgMed())) return false;
-        return !lovvalgsperiode.getFom().isAfter(personAdresse.gyldigTilOgMed());
-    }
 
     private AvklartVirksomhet hentAvklartVirksomhet(Behandling behandling) {
         var avklarteVirksomheter = avklarteVirksomheterSystemService.hentNorskeArbeidsgivere(behandling);
@@ -287,7 +259,7 @@ public class StorbritanniaMapper {
 
     private Person mapFamilieTilPerson(Map<String, MedfolgendeFamilie> medfølgendeFamilieMap, String uuid) {
         var medfølgendeFamilie = Optional.of(medfølgendeFamilieMap.get(uuid))
-            .orElseThrow(() -> new FunksjonellException("Avklart medfølgende familie " + uuid + " finnes ikke i behandlingsgrunnlaget"));
+            .orElseThrow(() -> finnesIkkeIBehandlingsGrunnlagetException(uuid));
         var identType = medfølgendeFamilie.utledIdentType();
 
         return new Person(
@@ -295,6 +267,10 @@ public class StorbritanniaMapper {
             medfølgendeFamilie.datoFraFnr(),
             identType == FNR ? medfølgendeFamilie.getFnr() : null,
             identType == DNR ? medfølgendeFamilie.getFnr() : null);
+    }
+
+    private FunksjonellException finnesIkkeIBehandlingsGrunnlagetException(String uuid) {
+        return new FunksjonellException("Avklart medfølgende familie " + uuid + " finnes ikke i behandlingsgrunnlaget");
     }
 
     private boolean erSkatteetaten(OrganisasjonDokument org) {

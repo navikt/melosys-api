@@ -118,7 +118,7 @@ public class DokgenService {
 
         settJournalpostOpplysninger(behandling, builder);
 
-        var dokgenDto = dokgenMalMapper.mapBehandling(builder.build());
+        var dokgenDto = dokgenMalMapper.mapBehandling(builder.build(), mottaker);
         if (!CollectionUtils.isEmpty(brevbestilling.getSaksvedleggBestilling()) && skalFletteVedlegg) {
             return dokgenConsumer.lagPdfMedVedlegg(malnavn, dokgenDto, brevbestilling.isBestillKopi(),
                 brevbestilling.isBestillUtkast(), hentVedleggDokumenterFraJoark(brevbestilling.getSaksvedleggBestilling()));
@@ -251,6 +251,9 @@ public class DokgenService {
                     .medKontaktopplysninger(brevbestillingRequest.isKontaktopplysninger());
             case AVSLAG_MANGLENDE_OPPLYSNINGER -> new AvslagBrevbestilling.Builder()
                 .medFritekst(brevbestillingRequest.getFritekst());
+            case MELDING_HENLAGT_SAK -> new HenleggelseBrevbestilling.Builder()
+                .medFritekst(brevbestillingRequest.getFritekst())
+                .medBegrunnelseKode(brevbestillingRequest.getBegrunnelseKode());
             default -> new DokgenBrevbestilling.Builder<>();
         };
     }

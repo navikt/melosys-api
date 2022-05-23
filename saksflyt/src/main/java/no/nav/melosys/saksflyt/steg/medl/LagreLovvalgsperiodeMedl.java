@@ -1,6 +1,7 @@
 package no.nav.melosys.saksflyt.steg.medl;
 
-import no.finn.unleash.Unleash;
+import java.util.Optional;
+
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
@@ -15,13 +16,10 @@ import org.springframework.stereotype.Component;
 public class LagreLovvalgsperiodeMedl implements StegBehandler {
     private final BehandlingsresultatService behandlingsresultatService;
     private final MedlPeriodeService medlPeriodeService;
-    private final Unleash unleash;
 
-    public LagreLovvalgsperiodeMedl(BehandlingsresultatService behandlingsresultatService, MedlPeriodeService medlPeriodeService,
-                                    Unleash unleash) {
+    public LagreLovvalgsperiodeMedl(BehandlingsresultatService behandlingsresultatService, MedlPeriodeService medlPeriodeService) {
         this.behandlingsresultatService = behandlingsresultatService;
         this.medlPeriodeService = medlPeriodeService;
-        this.unleash = unleash;
     }
 
     @Override
@@ -39,16 +37,16 @@ public class LagreLovvalgsperiodeMedl implements StegBehandler {
 
         final var lovvalgsperiode = behandlingsresultat.hentValidertLovvalgsperiode();
         final var behandling = prosessinstans.getBehandling();
-        if (unleash.isEnabled("melosys.api.ny.vurdering.medlperiode.beholdes") && behandling.erNyVurdering()) {
-            lovvalgsperiode.setMedlPeriodeID(hentOpprinneligMedlPeriodeID(behandling));
+        if (behandling.erNyVurdering()) {
+            lovvalgsperiode.setMedlPeriodeID(finnOpprinneligMedlPeriodeID(behandling).orElse(null));
         }
         oppdaterLovvalgsperiode(behandling, lovvalgsperiode);
     }
 
-    private Long hentOpprinneligMedlPeriodeID(Behandling behandling) {
+    private Optional<Long> finnOpprinneligMedlPeriodeID(Behandling behandling) {
         final var opprinnelingResultat = behandlingsresultatService.hentBehandlingsresultat(
             behandling.getOpprinneligBehandling().getId());
-        return opprinnelingResultat.hentValidertLovvalgsperiode().getMedlPeriodeID();
+        return opprinnelingResultat.finnValidertLovvalgsperiode().map(Lovvalgsperiode::getMedlPeriodeID);
     }
 
     private void oppdaterLovvalgsperiode(Behandling behandling, Lovvalgsperiode lovvalgsperiode) {

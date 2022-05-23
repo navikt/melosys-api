@@ -81,7 +81,7 @@ public class AksesskontrollImpl implements Aksesskontroll {
     }
 
     private void autoriser(Behandling behandling, Aksesstype aksesstype, Ressurs ressurs, boolean validerTilordnet) {
-        brukertilgangKontroll.validerTilgangTilAktørID(behandling.getFagsak().hentBrukersAktørID());
+        behandling.getFagsak().finnBrukersAktørID().ifPresent(brukertilgangKontroll::validerTilgangTilAktørID);
 
         if (aksesstype == SKRIV) {
             if (validerTilordnet) {

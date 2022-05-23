@@ -1,7 +1,7 @@
 package no.nav.melosys.integrasjon.oppgave.konsument;
 
-import no.nav.melosys.integrasjon.felles.SystemContextExchangeFilter;
-import no.nav.melosys.integrasjon.felles.UserContextExchangeFilter;
+import no.nav.melosys.integrasjon.felles.GenericContextExchangeFilter;
+import no.nav.melosys.integrasjon.felles.WebClientConfig;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -12,8 +12,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
 
 @Configuration
-public class OppgaveConsumerProducer {
-
+public class OppgaveConsumerProducer implements WebClientConfig {
     private final String url;
 
     public OppgaveConsumerProducer(@Value("${OppgaveAPI_v1.url}") String url) {
@@ -22,11 +21,12 @@ public class OppgaveConsumerProducer {
 
     @Bean
     @Primary
-    public OppgaveConsumer oppgaveConsumer(WebClient.Builder webClientBuilder, UserContextExchangeFilter userContextExchangeFilter) {
+    public OppgaveConsumer oppgaveConsumer(WebClient.Builder webClientBuilder, GenericContextExchangeFilter genericContextExchangeFilter) {
         return new OppgaveConsumerImpl(
             webClientBuilder
-                .filter(userContextExchangeFilter)
                 .defaultHeaders(this::defaultHeaders)
+                .filter(genericContextExchangeFilter)
+                .filter(errorFilter("Kall mot Oppgave feilet."))
                 .baseUrl(url)
                 .build()
         );
@@ -34,14 +34,9 @@ public class OppgaveConsumerProducer {
 
     @Bean
     @Qualifier("system")
-    public OppgaveConsumer oppgaveSystemConsumer(WebClient.Builder webClientBuilder, SystemContextExchangeFilter systemContextExchangeFilter) {
-        return new OppgaveConsumerImpl(
-            webClientBuilder
-                .filter(systemContextExchangeFilter)
-                .defaultHeaders(this::defaultHeaders)
-                .baseUrl(url)
-                .build()
-        );
+    public OppgaveConsumer oppgaveSystemConsumer(WebClient.Builder webClientBuilder,
+                                                 GenericContextExchangeFilter genericContextExchangeFilter) {
+        return oppgaveConsumer(webClientBuilder, genericContextExchangeFilter);
     }
 
     private void defaultHeaders(HttpHeaders httpHeaders) {

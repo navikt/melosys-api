@@ -20,7 +20,8 @@ import no.nav.melosys.domain.person.Persondata;
         @JsonSubTypes.Type(value = MangelbrevBrevbestilling.class),
         @JsonSubTypes.Type(value = InnvilgelseBrevbestilling.class),
         @JsonSubTypes.Type(value = FritekstbrevBrevbestilling.class),
-        @JsonSubTypes.Type(value = AvslagBrevbestilling.class)
+        @JsonSubTypes.Type(value = AvslagBrevbestilling.class),
+        @JsonSubTypes.Type(value = HenleggelseBrevbestilling.class)
     }
 )
 public class DokgenBrevbestilling extends Brevbestilling {
@@ -37,6 +38,7 @@ public class DokgenBrevbestilling extends Brevbestilling {
     private Instant vedtaksdato;
     private String saksbehandlerNavn;
     private Persondata persondokument;
+    private Persondata personMottaker;
     private List<SaksvedleggBestilling> saksvedleggBestilling;
 
     public DokgenBrevbestilling() {
@@ -59,6 +61,7 @@ public class DokgenBrevbestilling extends Brevbestilling {
         this.vedtaksdato = builder.vedtaksdato;
         this.saksbehandlerNavn = builder.saksbehandlerNavn;
         this.persondokument = builder.persondokument;
+        this.personMottaker = builder.personMottaker;
         this.saksvedleggBestilling = builder.saksvedleggBestilling;
     }
 
@@ -114,6 +117,10 @@ public class DokgenBrevbestilling extends Brevbestilling {
         return persondokument;
     }
 
+    public Persondata getPersonMottaker() {
+        return personMottaker;
+    }
+
     public List<SaksvedleggBestilling> getSaksvedleggBestilling() {
         return saksvedleggBestilling;
     }
@@ -139,6 +146,7 @@ public class DokgenBrevbestilling extends Brevbestilling {
         private Instant vedtaksdato;
         private String saksbehandlerNavn;
         private Persondata persondokument;
+        private Persondata personMottaker;
         private List<SaksvedleggBestilling> saksvedleggBestilling;
 
 
@@ -162,6 +170,7 @@ public class DokgenBrevbestilling extends Brevbestilling {
             this.vedtaksdato = brevbestilling.vedtaksdato;
             this.saksbehandlerNavn = brevbestilling.saksbehandlerNavn;
             this.persondokument = brevbestilling.persondokument;
+            this.personMottaker = brevbestilling.personMottaker;
             this.saksvedleggBestilling = brevbestilling.saksvedleggBestilling;
         }
 
@@ -242,6 +251,11 @@ public class DokgenBrevbestilling extends Brevbestilling {
 
         public T medPersonDokument(Persondata persondata) {
             this.persondokument = persondata;
+            return (T) this;
+        }
+
+        public T medPersonMottaker(Persondata personMottaker) {
+            this.personMottaker = personMottaker;
             return (T) this;
         }
 

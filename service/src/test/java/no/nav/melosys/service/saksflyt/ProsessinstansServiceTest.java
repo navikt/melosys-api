@@ -200,6 +200,7 @@ class ProsessinstansServiceTest {
         Aktoer mottaker = new Aktoer();
         mottaker.setRolle(Aktoersroller.BRUKER);
         mottaker.setAktørId("123");
+        mottaker.setPersonIdent(null);
         mottaker.setOrgnr(null);
 
         DokgenBrevbestilling brevbestilling = new MangelbrevBrevbestilling.Builder()
@@ -226,6 +227,61 @@ class ProsessinstansServiceTest {
         Aktoer mottaker = new Aktoer();
         mottaker.setRolle(Aktoersroller.ARBEIDSGIVER);
         mottaker.setAktørId(null);
+        mottaker.setPersonIdent(null);
+        mottaker.setOrgnr("987654321");
+
+        DokgenBrevbestilling brevbestilling = new MangelbrevBrevbestilling.Builder()
+            .medProduserbartdokument(MANGELBREV_ARBEIDSGIVER)
+            .build();
+
+        prosessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(behandling, mottaker, brevbestilling);
+
+        verify(prosessinstansRepo).save(piCaptor.capture());
+
+        Prosessinstans lagretInstans = piCaptor.getValue();
+        assertThat(lagretInstans.getType()).isEqualTo(ProsessType.OPPRETT_OG_DISTRIBUER_BREV);
+        assertThat(lagretInstans.getData(ProsessDataKey.MOTTAKER, String.class)).isEqualTo(mottaker.getRolle().name());
+        assertThat(lagretInstans.getData(ProsessDataKey.ORGNR)).isEqualTo(mottaker.getOrgnr());
+        MangelbrevBrevbestilling lagretBrevbestilling = (MangelbrevBrevbestilling) lagretInstans.getData(ProsessDataKey.BREVBESTILLING, DokgenBrevbestilling.class);
+        assertThat(lagretBrevbestilling.getProduserbartdokument()).isEqualTo(MANGELBREV_ARBEIDSGIVER);
+        assertThat(lagretInstans.getData(ProsessDataKey.SAKSBEHANDLER)).isEqualTo(saksbehandler);
+    }
+
+    @Test
+    void opprettProsessinstansOpprettOgDistribuerBrevRepresentantPerson() {
+        String saksbehandler = settInnloggetSaksbehandler();
+        Behandling behandling = lagBehandling();
+        Aktoer mottaker = new Aktoer();
+        mottaker.setRolle(Aktoersroller.REPRESENTANT);
+        mottaker.setAktørId(null);
+        mottaker.setPersonIdent("123");
+        mottaker.setOrgnr(null);
+
+        DokgenBrevbestilling brevbestilling = new MangelbrevBrevbestilling.Builder()
+            .medProduserbartdokument(MANGELBREV_ARBEIDSGIVER)
+            .build();
+
+        prosessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(behandling, mottaker, brevbestilling);
+
+        verify(prosessinstansRepo).save(piCaptor.capture());
+
+        Prosessinstans lagretInstans = piCaptor.getValue();
+        assertThat(lagretInstans.getType()).isEqualTo(ProsessType.OPPRETT_OG_DISTRIBUER_BREV);
+        assertThat(lagretInstans.getData(ProsessDataKey.MOTTAKER, String.class)).isEqualTo(mottaker.getRolle().name());
+        assertThat(lagretInstans.getData(ProsessDataKey.PERSON_IDENT)).isEqualTo(mottaker.getPersonIdent());
+        MangelbrevBrevbestilling lagretBrevbestilling = (MangelbrevBrevbestilling) lagretInstans.getData(ProsessDataKey.BREVBESTILLING, DokgenBrevbestilling.class);
+        assertThat(lagretBrevbestilling.getProduserbartdokument()).isEqualTo(MANGELBREV_ARBEIDSGIVER);
+        assertThat(lagretInstans.getData(ProsessDataKey.SAKSBEHANDLER)).isEqualTo(saksbehandler);
+    }
+
+    @Test
+    void opprettProsessinstansOpprettOgDistribuerBrevRepresentantOrganisasjon() {
+        String saksbehandler = settInnloggetSaksbehandler();
+        Behandling behandling = lagBehandling();
+        Aktoer mottaker = new Aktoer();
+        mottaker.setRolle(Aktoersroller.REPRESENTANT);
+        mottaker.setAktørId(null);
+        mottaker.setPersonIdent(null);
         mottaker.setOrgnr("987654321");
 
         DokgenBrevbestilling brevbestilling = new MangelbrevBrevbestilling.Builder()
@@ -266,7 +322,7 @@ class ProsessinstansServiceTest {
         final String institusjonsIdForDk = "ID_FOR_DK";
         when(utenlandskMyndighetService.lagInstitusjonsId(Landkoder.DK)).thenReturn(institusjonsIdForDk);
 
-        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_NY_SAK, journalfoeringDto);
+        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_NY_SAK_BRUKER, journalfoeringDto);
 
         assertThat(prosessinstans.getData(ProsessDataKey.AVSENDER_ID)).isEqualTo(institusjonsIdForDk);
     }
@@ -292,6 +348,19 @@ class ProsessinstansServiceTest {
 
         assertThat(prosessinstans.getData(ProsessDataKey.SKAL_SENDES_FORVALTNINGSMELDING, Boolean.class)).isFalse();
     }
+
+    @Test
+    void opprettProsessinstansJournalføring_virksomhetOrgnr_settesIProsessinstans() {
+        JournalfoeringOpprettDto journalfoeringDto = lagJournalfoeringOpprettDto();
+
+        journalfoeringDto.setBrukerID(null);
+        journalfoeringDto.setVirksomhetOrgnr("orgnr");
+
+        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.ANMODNING_OM_UNNTAK, journalfoeringDto);
+
+        assertThat(prosessinstans.getData(ProsessDataKey.VIRKSOMHET_ORGNR)).isEqualTo("orgnr");
+    }
+
 
     @Test
     void opprettProsessinstansJournalføring_skalTilordnesTrue_settesIProsessinstans() {
@@ -327,7 +396,7 @@ class ProsessinstansServiceTest {
         journalfoeringDto.setVedlegg(vedlegg);
         journalfoeringDto.getHoveddokument().getLogiskeVedlegg().add("tittel");
 
-        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_NY_SAK, journalfoeringDto);
+        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_NY_SAK_BRUKER, journalfoeringDto);
 
         var fysiskeVedleggTypeReference = new TypeReference<Map<String, String>>() {
         };
@@ -351,7 +420,7 @@ class ProsessinstansServiceTest {
         vedlegg.add(fysiskVedlegg2);
         journalfoeringDto.setVedlegg(vedlegg);
 
-        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_NY_SAK, journalfoeringDto);
+        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_NY_SAK_BRUKER, journalfoeringDto);
 
         var fysiskeVedleggTypeReference = new TypeReference<Map<String, String>>() {
         };

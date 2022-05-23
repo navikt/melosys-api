@@ -32,7 +32,8 @@ public class PDLConsumerImpl implements PDLConsumer {
     private static final String CALL_ID = "Nav-Call-Id";
     private static final String HISTORIKK = "historikk";
     private static final String IDENT = "ident";
-
+    private static final Predicate<GraphQLError> NOT_FOUND = e -> e.hasExtension() && e.extensions().hasCode(
+        PDLFeilkode.NOT_FOUND);
     private final WebClient webClient;
 
     public PDLConsumerImpl(WebClient webClient) {
@@ -43,10 +44,13 @@ public class PDLConsumerImpl implements PDLConsumer {
     public Identliste hentIdenter(String ident) {
         var graphQLRequest = new GraphQLRequest(HENT_IDENTER_QUERY, Map.of(IDENT, ident));
 
-        GraphQLResponse<HentIdenterResponse> response = webClient.post()
+        GraphQLResponse<HentIdenterResponse> response = webClient
+            .post()
             .header(CALL_ID, UUID.randomUUID().toString())
             .bodyValue(graphQLRequest)
-            .retrieve().bodyToMono(new ParameterizedTypeReference<GraphQLResponse<HentIdenterResponse>>() {})
+            .retrieve()
+            .bodyToMono(new ParameterizedTypeReference<GraphQLResponse<HentIdenterResponse>>() {
+            })
             .block();
 
         håndterFeil(response);
@@ -65,7 +69,7 @@ public class PDLConsumerImpl implements PDLConsumer {
 
     @Override
     public Person hentFamilierelasjoner(String ident) {
-        return hentPersondata(HENT_FAMILIERELASJONER_QUERY, ident, true);
+        return hentPersondata(HENT_FAMILIERELASJONER_QUERY, ident, false);
     }
 
     @Override
@@ -79,8 +83,8 @@ public class PDLConsumerImpl implements PDLConsumer {
     }
 
     @Override
-    public Person hentRelatertVedSivilstand(String ident) {
-        return hentPersondata(HENT_RELATERT_VED_SIVILSTAND_QUERY, ident, false);
+    public Person hentEktefelleEllerPartner(String ident) {
+        return hentPersondata(HENT_EKTEFELLE_ELLER_PARTNER_QUERY, ident, false);
     }
 
     @Override
@@ -104,7 +108,9 @@ public class PDLConsumerImpl implements PDLConsumer {
         GraphQLResponse<HentPersonResponse> response = webClient.post()
             .header(CALL_ID, UUID.randomUUID().toString())
             .bodyValue(graphQLRequest)
-            .retrieve().bodyToMono(new ParameterizedTypeReference<GraphQLResponse<HentPersonResponse>>() {})
+            .retrieve()
+            .bodyToMono(new ParameterizedTypeReference<GraphQLResponse<HentPersonResponse>>() {
+            })
             .block();
 
         håndterFeil(response);
@@ -122,9 +128,6 @@ public class PDLConsumerImpl implements PDLConsumer {
             throw new IntegrasjonException("Kall mot PDL feilet: " + tilJSON(response.errors()));
         }
     }
-
-    private static final Predicate<GraphQLError> NOT_FOUND = e -> e.hasExtension() && e.extensions().hasCode(
-        PDLFeilkode.NOT_FOUND);
 
     private String tilJSON(List<GraphQLError> errors) {
         String graphQLErrorsAsJSON = null;

@@ -14,6 +14,7 @@ public class OpprettOppgaveDto {
     private LocalDate aktivDato;
     @JsonProperty("aktoerId")
     private String aktørId;
+    private String orgnr;
     private String behandlesAvApplikasjon;
     private String behandlingstema;
     private String behandlingstype;
@@ -44,6 +45,14 @@ public class OpprettOppgaveDto {
 
     public void setAktørId(String aktørId) {
         this.aktørId = aktørId;
+    }
+
+    public String getOrgnr() {
+        return orgnr;
+    }
+
+    public void setOrgnr(String orgnr) {
+        this.orgnr = orgnr;
     }
 
     public String getBehandlesAvApplikasjon() {
@@ -155,6 +164,7 @@ public class OpprettOppgaveDto {
         return "OpprettOppgaveDto{" +
             "aktivDato=" + aktivDato +
             ", aktørId='" + aktørId + '\'' +
+            ", orgnr='" + orgnr + '\'' +
             ", behandlesAvApplikasjon='" + behandlesAvApplikasjon + '\'' +
             ", behandlingstema='" + behandlingstema + '\'' +
             ", behandlingstype='" + behandlingstype + '\'' +

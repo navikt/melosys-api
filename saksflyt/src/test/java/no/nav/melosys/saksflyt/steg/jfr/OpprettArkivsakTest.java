@@ -55,7 +55,7 @@ class OpprettArkivsakTest {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
 
-        when(arkivsakService.opprettSak(eq(fagsak.getSaksnummer()), eq(behandling.getTema()), eq(aktørID))).thenReturn(forventetArkivsakID);
+        when(arkivsakService.opprettSakForBruker(fagsak.getSaksnummer(), behandling.getTema(), aktørID)).thenReturn(forventetArkivsakID);
         opprettArkivsak.utfør(prosessinstans);
 
         assertThat(fagsak.getGsakSaksnummer()).isEqualTo(forventetArkivsakID);
