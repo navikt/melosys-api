@@ -3,7 +3,6 @@ package no.nav.melosys.integrasjon.doksys.dokumentproduksjon;
 import no.nav.melosys.sikkerhet.sts.NAVSTSClient;
 import no.nav.melosys.sikkerhet.sts.StsConfigurationUtil;
 import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.DokumentproduksjonV3;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -25,7 +24,7 @@ public class DokumentproduksjonConsumerProducer {
     }
 
     @Bean
-    @Qualifier("system")
+
     public DokumentproduksjonConsumer dokumentproduksjonSystemConsumer() {
         DokumentproduksjonV3 port = wrapWithSts(config.getPort(), NAVSTSClient.StsClientType.SYSTEM_SAML);
         return new DokumentproduksjonConsumerImpl(port);

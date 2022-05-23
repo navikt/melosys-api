@@ -23,7 +23,6 @@ import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 //A003
@@ -41,7 +40,7 @@ public class ArbeidFlereLandSedRuter implements SedRuterForSedTyper {
     public ArbeidFlereLandSedRuter(ProsessinstansService prosessinstansService, FagsakService fagsakService,
                                    BehandlingService behandlingService,
                                    BehandlingsresultatService behandlingsresultatService,
-                                   @Qualifier("system") OppgaveService oppgaveService) {
+                                    OppgaveService oppgaveService) {
         this.prosessinstansService = prosessinstansService;
         this.fagsakService = fagsakService;
         this.behandlingService = behandlingService;

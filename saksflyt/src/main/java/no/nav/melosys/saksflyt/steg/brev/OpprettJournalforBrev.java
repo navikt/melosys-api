@@ -22,7 +22,6 @@ import no.nav.melosys.service.dokument.DokumentproduksjonsInfo;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.*;
@@ -44,9 +43,9 @@ public class OpprettJournalforBrev implements StegBehandler {
     public OpprettJournalforBrev(BehandlingService behandlingService,
                                  DokgenService dokgenService,
                                  UtenlandskMyndighetService utenlandskMyndighetService,
-                                 @Qualifier("system") JoarkFasade joarkFasade,
-                                 @Qualifier("system") PersondataFasade persondataFasade,
-                                 @Qualifier("system") EregFasade eregFasade,
+                                 JoarkFasade joarkFasade,
+                                 PersondataFasade persondataFasade,
+                                 EregFasade eregFasade,
                                  DokumentNavnService dokumentNavnService) {
         this.behandlingService = behandlingService;
         this.dokgenService = dokgenService;

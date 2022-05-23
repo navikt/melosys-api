@@ -15,7 +15,6 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.repository.BehandlingsgrunnlagRepository;
 import no.nav.melosys.service.behandling.BehandlingService;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,7 +33,7 @@ public class BehandlingsgrunnlagService {
 
     public BehandlingsgrunnlagService(BehandlingsgrunnlagRepository behandlingsgrunnlagRepository,
                                       BehandlingService behandlingService,
-                                      @Qualifier("system") JoarkFasade joarkFasade) {
+                                      JoarkFasade joarkFasade) {
         this.behandlingsgrunnlagRepository = behandlingsgrunnlagRepository;
         this.behandlingService = behandlingService;
         this.joarkFasade = joarkFasade;

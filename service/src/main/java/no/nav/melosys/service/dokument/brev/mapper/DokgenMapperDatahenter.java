@@ -18,7 +18,6 @@ import no.nav.melosys.service.dokument.DokumentHentingService;
 import no.nav.melosys.service.dokument.DokumentHentingSystemService;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.persondata.PersondataFasade;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -35,8 +34,8 @@ public class DokgenMapperDatahenter {
     private final DokumentHentingService dokumentHentingService;
 
     protected DokgenMapperDatahenter(BehandlingsresultatService behandlingsresultatService,
-                                     @Qualifier("system") EregFasade eregFasade,
-                                     @Qualifier("system") PersondataFasade persondataFasade,
+                                     EregFasade eregFasade,
+                                     PersondataFasade persondataFasade,
                                      DokumentHentingSystemService dokumentHentingService,
                                      KodeverkService kodeverkService) {
         this.behandlingsresultatService = behandlingsresultatService;

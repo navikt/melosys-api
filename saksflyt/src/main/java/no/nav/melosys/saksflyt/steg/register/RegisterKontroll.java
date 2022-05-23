@@ -6,7 +6,6 @@ import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.kontroll.KontrollresultatService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -16,7 +15,7 @@ public class RegisterKontroll implements StegBehandler {
 
     private final KontrollresultatService kontrollresultatService;
 
-    public RegisterKontroll(@Qualifier("system") KontrollresultatService kontrollresultatService) {
+    public RegisterKontroll(KontrollresultatService kontrollresultatService) {
         this.kontrollresultatService = kontrollresultatService;
     }
 

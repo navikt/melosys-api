@@ -25,7 +25,6 @@ import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.sob.SobService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -61,9 +60,9 @@ public class RegisteropplysningerService {
     private final SaksopplysningerService saksopplysningerService;
     private final RegisteropplysningerPeriodeFactory registeropplysningerPeriodeFactory;
 
-    public RegisteropplysningerService(@Qualifier("system") PersondataFasade persondataFasade,
+    public RegisteropplysningerService(PersondataFasade persondataFasade,
                                        MedlPeriodeService medlPeriodeService,
-                                       @Qualifier("system") EregFasade eregFasade,
+                                       EregFasade eregFasade,
                                        AaregFasade aaregFasade,
                                        BehandlingService behandlingService,
                                        SobService sobService, InntektService inntektService,
@@ -91,7 +90,8 @@ public class RegisteropplysningerService {
         if (registeropplysningerRequest.getOpplysningstyper().isEmpty()) {
             log.info("Var ingen registeropplysninger å hente for behandling {}", registeropplysningerRequest.getBehandlingID());
             return;
-        };
+        }
+        ;
 
         Behandling behandling = behandlingService.hentBehandling(registeropplysningerRequest.getBehandlingID());
 

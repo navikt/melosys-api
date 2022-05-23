@@ -2,7 +2,6 @@ package no.nav.melosys.integrasjon.oppgave.konsument;
 
 import no.nav.melosys.integrasjon.felles.GenericContextExchangeFilter;
 import no.nav.melosys.integrasjon.felles.WebClientConfig;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -33,7 +32,7 @@ public class OppgaveConsumerProducer implements WebClientConfig {
     }
 
     @Bean
-    @Qualifier("system")
+
     public OppgaveConsumer oppgaveSystemConsumer(WebClient.Builder webClientBuilder,
                                                  GenericContextExchangeFilter genericContextExchangeFilter) {
         return oppgaveConsumer(webClientBuilder, genericContextExchangeFilter);

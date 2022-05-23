@@ -5,16 +5,15 @@ import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.bygger.SedDataBygger;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 @Service
-@Qualifier("system")
+
 public class EessiSystemService extends EessiService {
     public EessiSystemService(SedDataBygger sedDataBygger,
-                              @Qualifier("system") SedDataGrunnlagFactory dataGrunnlagFactory,
-                              @Qualifier("system") EessiConsumer eessiConsumer,
-                              @Qualifier("system") JoarkFasade joarkFasade,
+                              SedDataGrunnlagFactory dataGrunnlagFactory,
+                              EessiConsumer eessiConsumer,
+                              JoarkFasade joarkFasade,
                               BehandlingService behandlingService,
                               BehandlingsresultatService behandlingsresultatService) {
         super(behandlingService, behandlingsresultatService, eessiConsumer, joarkFasade, sedDataBygger,

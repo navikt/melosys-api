@@ -27,7 +27,6 @@ import no.nav.melosys.service.persondata.mapping.PersonopplysningerOversetter;
 import no.nav.melosys.service.persondata.mapping.StatsborgerskapOversetter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
@@ -48,7 +47,7 @@ public class PersondataService implements PersondataFasade {
 
     public PersondataService(BehandlingService behandlingService,
                              KodeverkService kodeverkService,
-                             @Qualifier("saksbehandler") PDLConsumer pdlConsumer,
+                             PDLConsumer pdlConsumer,
                              SaksopplysningerService saksopplysningerService,
                              FamiliemedlemService familiemedlemService) {
         this.behandlingService = behandlingService;

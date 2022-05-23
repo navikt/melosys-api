@@ -1,6 +1,5 @@
 package no.nav.melosys.itest
 
-import no.finn.unleash.Unleash
 import no.nav.melosys.domain.arkiv.*
 import no.nav.melosys.domain.eessi.BucType
 import no.nav.melosys.domain.eessi.Periode
@@ -11,7 +10,6 @@ import no.nav.melosys.domain.saksflyt.ProsessStatus
 import no.nav.melosys.domain.saksflyt.Prosessinstans
 import no.nav.melosys.integrasjon.joark.JoarkFasade
 import no.nav.melosys.repository.ProsessinstansRepository
-import org.assertj.core.api.Assertions
 import org.awaitility.Awaitility
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -26,7 +24,6 @@ import java.util.stream.Collectors
 
 internal class SedMottakTestIT : ComponentTestBase() {
     @Autowired
-    @Qualifier("system")
     private val joarkFasade: JoarkFasade? = null
 
     @Autowired

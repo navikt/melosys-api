@@ -5,13 +5,12 @@ import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.persondata.familie.FamiliemedlemService;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 @Service
-@Qualifier("system")
+
 public class PersondataSystemService extends PersondataService {
-    public PersondataSystemService(BehandlingService behandlingService, KodeverkService kodeverkService, @Qualifier("system") PDLConsumer pdlConsumer,
+    public PersondataSystemService(BehandlingService behandlingService, KodeverkService kodeverkService, PDLConsumer pdlConsumer,
                                    SaksopplysningerService saksopplysningerService, FamiliemedlemService familiemedlemService) {
         super(behandlingService, kodeverkService, pdlConsumer, saksopplysningerService, familiemedlemService);
     }

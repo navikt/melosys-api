@@ -30,7 +30,6 @@ import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.UtenlandskMyndighetRepository;
 import no.nav.melosys.service.ldap.SaksbehandlerService;
 import no.nav.melosys.service.persondata.PersondataFasade;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -56,7 +55,7 @@ public class BrevDataService {
     private final UtenlandskMyndighetRepository utenlandskMyndighetRepository;
 
     public BrevDataService(BehandlingsresultatRepository behandlingsresultatRepository,
-                           @Qualifier("system") PersondataFasade persondataFasade,
+                           PersondataFasade persondataFasade,
                            SaksbehandlerService saksbehandlerService,
                            UtenlandskMyndighetRepository utenlandskMyndighetRepository) {
         this.behandlingsresultatRepository = behandlingsresultatRepository;
@@ -100,9 +99,11 @@ public class BrevDataService {
     private String avklarMottakerId(Aktoer mottaker, Kontaktopplysning kontaktopplysning) {
         return switch (mottaker.getRolle()) {
             case ARBEIDSGIVER -> avklarMottakerIDForOrg(mottaker, kontaktopplysning);
-            case REPRESENTANT -> mottaker.erOrganisasjon() ? avklarMottakerIDForOrg(mottaker, kontaktopplysning) : mottaker.getPersonIdent();
+            case REPRESENTANT ->
+                mottaker.erOrganisasjon() ? avklarMottakerIDForOrg(mottaker, kontaktopplysning) : mottaker.getPersonIdent();
             case BRUKER -> persondataFasade.hentFolkeregisterident(mottaker.getAktørId());
-            case TRYGDEMYNDIGHET -> mottaker.erUtenlandskMyndighet() ? mottaker.getInstitusjonId() : mottaker.getOrgnr();
+            case TRYGDEMYNDIGHET ->
+                mottaker.erUtenlandskMyndighet() ? mottaker.getInstitusjonId() : mottaker.getOrgnr();
             default -> throw new TekniskException(mottaker.getRolle() + " støttes ikke.");
         };
     }
@@ -178,8 +179,10 @@ public class BrevDataService {
         return switch (mottakerRolle) {
             case BRUKER -> lagMottakerForBruker(behandling, mottakerID);
             case ARBEIDSGIVER -> lagMottakerForOrganisasjon(mottakerID);
-            case TRYGDEMYNDIGHET -> mottaker.erUtenlandskMyndighet() ? lagMottakerForUtenlandskTrygdemyndighet(mottaker) : lagMottakerForOrganisasjon(mottakerID);
-            case REPRESENTANT -> mottaker.erOrganisasjon() ? lagMottakerForOrganisasjon(mottakerID) : lagMottakerForRepresentantPerson(behandling, mottakerID);
+            case TRYGDEMYNDIGHET ->
+                mottaker.erUtenlandskMyndighet() ? lagMottakerForUtenlandskTrygdemyndighet(mottaker) : lagMottakerForOrganisasjon(mottakerID);
+            case REPRESENTANT ->
+                mottaker.erOrganisasjon() ? lagMottakerForOrganisasjon(mottakerID) : lagMottakerForRepresentantPerson(behandling, mottakerID);
             default -> throw new TekniskException(mottakerRolle + " støttes ikke.");
         };
     }

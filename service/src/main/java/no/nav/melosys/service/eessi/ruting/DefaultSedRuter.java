@@ -19,7 +19,6 @@ import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -34,7 +33,7 @@ public class DefaultSedRuter implements SedRuter {
 
     public DefaultSedRuter(ProsessinstansService prosessinstansService, FagsakService fagsakService,
                            BehandlingService behandlingService,
-                           @Qualifier("system") OppgaveService oppgaveService) {
+                           OppgaveService oppgaveService) {
         this.prosessinstansService = prosessinstansService;
         this.fagsakService = fagsakService;
         this.behandlingService = behandlingService;

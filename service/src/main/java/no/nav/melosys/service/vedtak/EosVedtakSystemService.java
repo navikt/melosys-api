@@ -8,7 +8,6 @@ import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.kontroll.vedtak.VedtakKontrollService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.event.ApplicationEventMulticaster;
 import org.springframework.stereotype.Service;
 
@@ -17,13 +16,13 @@ public class EosVedtakSystemService extends EosVedtakService {
 
     public EosVedtakSystemService(BehandlingService behandlingService,
                                   BehandlingsresultatService behandlingsresultatService,
-                                  @Qualifier("system") OppgaveService oppgaveService,
+                                   OppgaveService oppgaveService,
                                   ProsessinstansService prosessinstansService,
-                                  @Qualifier("system") EessiService eessiService,
+                                   EessiService eessiService,
                                   LandvelgerService landvelgerService,
                                   AvklartefaktaService avklartefaktaService,
                                   ApplicationEventMulticaster melosysEventMulticaster,
-                                  @Qualifier("system") VedtakKontrollService vedtakKontrollService) {
+                                   VedtakKontrollService vedtakKontrollService) {
         super(behandlingService, behandlingsresultatService, oppgaveService, prosessinstansService,
             eessiService, landvelgerService, avklartefaktaService, melosysEventMulticaster, vedtakKontrollService);
     }

@@ -8,7 +8,6 @@ import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.dokument.sed.EessiService;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -17,7 +16,7 @@ public class OpprettSedGrunnlag implements StegBehandler {
     private final BehandlingsgrunnlagService behandlingsgrunnlagService;
     private final EessiService eessiService;
 
-    public OpprettSedGrunnlag(BehandlingsgrunnlagService behandlingsgrunnlagService, @Qualifier("system") EessiService eessiService) {
+    public OpprettSedGrunnlag(BehandlingsgrunnlagService behandlingsgrunnlagService, EessiService eessiService) {
         this.behandlingsgrunnlagService = behandlingsgrunnlagService;
         this.eessiService = eessiService;
     }

@@ -17,7 +17,6 @@ import no.nav.melosys.service.oppgave.OppgaveFactory;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -32,7 +31,7 @@ public class BehandlingEventListener {
     private final BehandlingService behandlingService;
     private final OppgaveService oppgaveService;
 
-    public BehandlingEventListener(BehandlingService behandlingService, @Qualifier("system") OppgaveService oppgaveService) {
+    public BehandlingEventListener(BehandlingService behandlingService, OppgaveService oppgaveService) {
         this.behandlingService = behandlingService;
         this.oppgaveService = oppgaveService;
     }

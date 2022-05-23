@@ -10,7 +10,6 @@ import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.sak.FagsakService;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -20,7 +19,7 @@ public class OppdaterSaksrelasjon implements StegBehandler {
     private final EessiService eessiService;
     private final FagsakService fagsakService;
 
-    public OppdaterSaksrelasjon(@Qualifier("system") JoarkFasade joarkFasade, @Qualifier("system") EessiService eessiService, FagsakService fagsakService) {
+    public OppdaterSaksrelasjon(JoarkFasade joarkFasade, EessiService eessiService, FagsakService fagsakService) {
         this.joarkFasade = joarkFasade;
         this.eessiService = eessiService;
         this.fagsakService = fagsakService;
@@ -34,10 +33,10 @@ public class OppdaterSaksrelasjon implements StegBehandler {
     @Override
     public void utfør(Prosessinstans prosessinstans) {
         finnEessiMelding(prosessinstans).ifPresent(melosysEessiMelding -> eessiService.lagreSaksrelasjon(
-                hentArkivsakID(prosessinstans),
-                melosysEessiMelding.getRinaSaksnummer(),
-                melosysEessiMelding.getBucType()
-            ));
+            hentArkivsakID(prosessinstans),
+            melosysEessiMelding.getRinaSaksnummer(),
+            melosysEessiMelding.getBucType()
+        ));
     }
 
     private Optional<MelosysEessiMelding> finnEessiMelding(Prosessinstans prosessinstans) {

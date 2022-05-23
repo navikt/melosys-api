@@ -16,7 +16,6 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,7 +34,7 @@ public class MedlPeriodeService {
 
     private static final String FEIL_VED_OPPDATERING_MEDL = "Opprettelse av periode i MEDL feilet med retur av null medlPeriodeID fra MEDL tjeneste for behandling ";
 
-    public MedlPeriodeService(@Qualifier("system") PersondataFasade persondataFasade,
+    public MedlPeriodeService(PersondataFasade persondataFasade,
                               MedlService medlService,
                               BehandlingsresultatService behandlingsresultatService,
                               LovvalgsperiodeRepository lovvalgsperiodeRepository,
