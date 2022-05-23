@@ -247,10 +247,10 @@ final class DokumentServiceTest {
         KodeverkService kodeverkService = new KodeverkService(kodeverkRegister, kodeOppslag);
         EregFasade eregFasade = mockEregFasade();
         OrganisasjonOppslagService registerOppslagService = new OrganisasjonOppslagService(eregFasade);
-        AvklarteVirksomheterService avklarteVirksomheterSystemService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService, mock(BehandlingService.class), mock(KodeverkService.class));
+        AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService, mock(BehandlingService.class), mock(KodeverkService.class));
         DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medBehandling(lagBehandling()).build();
         Persondata persondata = PersonopplysningerObjectFactory.lagPersonopplysninger();
-        BrevDataGrunnlag dataGrunnlag = new BrevDataGrunnlag(brevbestilling, kodeverkService, avklarteVirksomheterSystemService, avklartefaktaService, persondata);
+        BrevDataGrunnlag dataGrunnlag = new BrevDataGrunnlag(brevbestilling, kodeverkService, avklarteVirksomheterService, avklartefaktaService, persondata);
         BrevdataGrunnlagFactory brevdataGrunnlagFactory = mock(BrevdataGrunnlagFactory.class);
         when(brevdataGrunnlagFactory.av(any())).thenReturn(dataGrunnlag);
         return brevdataGrunnlagFactory;

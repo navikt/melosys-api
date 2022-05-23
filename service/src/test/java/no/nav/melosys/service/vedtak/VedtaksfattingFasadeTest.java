@@ -81,7 +81,7 @@ class VedtaksfattingFasadeTest {
     }
 
     @Test
-    void fattVedtak_delvisAutomatisert_skalKalleEosVedtakSystemService() throws Exception {
+    void fattVedtak_delvisAutomatisert_skalKalleEosVedtakService() throws Exception {
         when(mockBehandlingService.hentBehandling(behandlingID)).thenReturn(behandling);
 
         vedtaksfattingFasade.fattVedtak(behandlingID, FASTSATT_LOVVALGSLAND);
