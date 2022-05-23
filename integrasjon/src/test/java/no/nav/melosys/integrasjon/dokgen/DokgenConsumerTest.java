@@ -156,6 +156,7 @@ class DokgenConsumerTest {
         MangelbrevBrevbestilling mangelbrevBrevbestilling = new MangelbrevBrevbestilling.Builder()
             .medBehandling(lagBehandling())
             .medPersonDokument((Persondata) lagPersondokument().getDokument())
+            .medPersonMottaker((Persondata) lagPersondokument().getDokument())
             .build();
         return MangelbrevBruker.av(mangelbrevBrevbestilling, Instant.now());
     }

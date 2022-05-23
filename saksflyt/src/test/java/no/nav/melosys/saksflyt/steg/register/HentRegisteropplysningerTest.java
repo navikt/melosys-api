@@ -45,7 +45,7 @@ class HentRegisteropplysningerTest {
     private ArgumentCaptor<RegisteropplysningerRequest> requestCaptor;
 
     private final Behandling behandling = new Behandling();
-    private final String ident = "143545";
+    private final String aktørID = "54321";
 
     @BeforeEach
     public void setUp() {
@@ -55,19 +55,20 @@ class HentRegisteropplysningerTest {
 
         Aktoer bruker = new Aktoer();
         bruker.setRolle(Aktoersroller.BRUKER);
-        String aktørID = "34253";
         bruker.setAktørId(aktørID);
 
         Fagsak fagsak = new Fagsak();
         fagsak.getAktører().add(bruker);
         behandling.setFagsak(fagsak);
 
-        when(behandlingService.hentBehandlingMedSaksopplysninger(behandling.getId())).thenReturn(behandling);
-        when(persondataFasade.hentFolkeregisterident(aktørID)).thenReturn(ident);
+        when(behandlingService.hentBehandling(behandling.getId())).thenReturn(behandling);
     }
 
     @Test
     void utfør_behandlingstemaUtsendtArbeidstaker_henterPeriodeFraSøknad() {
+        String ident = "143545";
+        when(persondataFasade.hentFolkeregisterident(aktørID)).thenReturn(ident);
+
         behandling.getFagsak().setType(Sakstyper.EU_EOS);
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
 
@@ -121,5 +122,18 @@ class HentRegisteropplysningerTest {
         hentRegisteropplysninger.utfør(prosessinstans);
 
         verify(registeropplysningerService, never()).hentOgLagreOpplysninger(any());
+    }
+
+    @Test
+    void utfør_behandlingstypeTrygdetid_henterIngenting() {
+        behandling.setTema(Behandlingstema.TRYGDETID);
+        behandling.getFagsak().setType(Sakstyper.EU_EOS);
+        var prosessinstans = new Prosessinstans();
+        prosessinstans.setBehandling(behandling);
+
+        hentRegisteropplysninger.utfør(prosessinstans);
+
+        verify(registeropplysningerService).hentOgLagreOpplysninger(requestCaptor.capture());
+        assertThat(requestCaptor.getValue().getOpplysningstyper()).isEmpty();
     }
 }

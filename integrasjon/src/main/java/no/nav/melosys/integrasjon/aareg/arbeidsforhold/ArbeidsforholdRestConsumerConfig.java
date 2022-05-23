@@ -1,21 +1,14 @@
 package no.nav.melosys.integrasjon.aareg.arbeidsforhold;
 
 
-import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.felles.RestConsumer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import no.nav.melosys.integrasjon.felles.WebClientConfig;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
 @Configuration
-public class ArbeidsforholdRestConsumerConfig implements RestConsumer {
-
-    private static final Logger log = LoggerFactory.getLogger(ArbeidsforholdRestConsumerConfig.class);
+public class ArbeidsforholdRestConsumerConfig implements WebClientConfig {
     private final String url;
 
     public ArbeidsforholdRestConsumerConfig(@Value("${arbeidsforhold.rest.url}") String url) {
@@ -23,24 +16,12 @@ public class ArbeidsforholdRestConsumerConfig implements RestConsumer {
     }
 
     @Bean
-    ArbeidsforholdRestConsumer arbeidsforholdRestConsumer(WebClient.Builder webClientBuilder, ArbeidsforholdContextExchangeFilter systemContextExchangeFilter) {
+    ArbeidsforholdRestConsumer arbeidsforholdRestConsumer(WebClient.Builder webClientBuilder,
+                                                          ArbeidsforholdContextExchangeFilter systemContextExchangeFilter) {
         return new ArbeidsforholdRestConsumer(webClientBuilder
             .baseUrl(url)
             .filter(systemContextExchangeFilter)
-            .filter(errorFilter())
+            .filter(errorFilter("Henting av arbeidsforhold fra Aareg feilet"))
             .build());
-    }
-
-    public static ExchangeFilterFunction errorFilter() {
-        return ExchangeFilterFunction.ofResponseProcessor(response -> {
-            if (response.statusCode().isError()) {
-                return response.bodyToMono(String.class)
-                    .flatMap(errorBody -> {
-                        log.error("Kall mot arreg-rest feilet. {} - {}", response.statusCode(), errorBody);
-                        return Mono.error(new TekniskException("Henting av arbeidsforhold fra Aareg feilet."));
-                    });
-            }
-            return Mono.just(response);
-        });
     }
 }

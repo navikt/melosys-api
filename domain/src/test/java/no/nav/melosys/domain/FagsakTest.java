@@ -41,7 +41,7 @@ class FagsakTest {
     }
 
     @Test
-    void getTidligsteInaktivBehandling_toInaktive() {
+    void hentTidligsteInaktivBehandling_toInaktive() {
         Fagsak fagsak = new Fagsak();
         Behandling tidligsteInaktiveBehandling = new Behandling();
         tidligsteInaktiveBehandling.setRegistrertDato(Instant.parse("2019-01-10T10:37:30.00Z"));
@@ -60,7 +60,7 @@ class FagsakTest {
         behandlinger.add(seinesteInaktiveBehandling);
         fagsak.setBehandlinger(behandlinger);
 
-        assertThat(fagsak.hentTidligsteInaktiveBehandling()).isEqualTo(tidligsteInaktiveBehandling);
+        assertThat(fagsak.hentTidligstInaktivBehandling()).isEqualTo(tidligsteInaktiveBehandling);
     }
 
     @Test

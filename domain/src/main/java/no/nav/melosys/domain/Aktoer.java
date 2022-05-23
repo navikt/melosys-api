@@ -22,6 +22,9 @@ public class Aktoer extends RegistreringsInfo {
     @JoinColumn(name = "saksnummer", updatable = false)
     private Fagsak fagsak;
 
+    @Column(name = "person_ident")
+    private String personIdent;
+
     @Column(name = "aktoer_id", updatable = false)
     private String aktørId;
 
@@ -56,6 +59,14 @@ public class Aktoer extends RegistreringsInfo {
 
     public void setFagsak(Fagsak fagsak) {
         this.fagsak = fagsak;
+    }
+
+    public String getPersonIdent() {
+        return personIdent;
+    }
+
+    public void setPersonIdent(String ident) {
+        this.personIdent = ident;
     }
 
     public String getAktørId() {
@@ -106,12 +117,28 @@ public class Aktoer extends RegistreringsInfo {
         this.representerer = representerer;
     }
 
+    public boolean erPerson() {
+        return switch (rolle) {
+            case BRUKER -> true;
+            case REPRESENTANT -> personIdent != null;
+            default -> false;
+        };
+    }
+
+    public boolean erOrganisasjon() {
+        return switch (rolle) {
+            case BRUKER -> false;
+            case REPRESENTANT -> orgnr != null;
+            default -> true;
+        };
+    }
+
     public boolean erUtenlandskMyndighet() {
         return Aktoersroller.TRYGDEMYNDIGHET == rolle && institusjonId != null;
     }
 
-    public boolean erOrganisasjon() {
-        return !Aktoersroller.BRUKER.equals(rolle);
+    public boolean erBruker() {
+        return Aktoersroller.BRUKER.equals(rolle);
     }
 
     public Landkoder hentMyndighetLandkode() {

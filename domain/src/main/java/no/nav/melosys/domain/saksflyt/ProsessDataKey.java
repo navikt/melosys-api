@@ -42,6 +42,7 @@ public enum ProsessDataKey {
     OPPGAVE_ID("oppgaveID"),
     OPPHOLDSLAND("oppholdsland"),
     ORGNR("orgnr"),
+    PERSON_IDENT("personIdent"),
     PRODUSERBART_BREV("produserbartBrev"),
     REPRESENTANT("representant"),
     REPRESENTANT_KONTAKTPERSON("representantKontakperson"),
@@ -62,6 +63,7 @@ public enum ProsessDataKey {
     UTPEKT_LAND("utpektLand"),
     VARSLE_UTLAND("varsleUtland"),
     VEDLEGG_SED("vedleggTilSed"),
+    VIRKSOMHET_ORGNR("virksomhetOrgnr"),
     YTTERLIGERE_INFO_SED("ytterligereInformasjonSed");
 
     private final String kode;

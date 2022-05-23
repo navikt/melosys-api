@@ -5,15 +5,13 @@ import com.github.tomakehurst.wiremock.client.MappingBuilder
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.github.tomakehurst.wiremock.matching.StringValuePattern
+import com.github.tomakehurst.wiremock.matching.UrlPattern
 import no.nav.melosys.integrasjon.felles.EnvironmentHandler
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
 import no.nav.melosys.sikkerhet.context.SubjectHandler
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
-import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.TestInstance
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.*
 import org.mockito.Mockito
 import org.springframework.http.MediaType
 import org.springframework.mock.env.MockEnvironment
@@ -41,7 +39,7 @@ abstract class ConsumerTestBase<T>(
         override fun getOidcTokenString(): String? = null
     }
 
-    abstract fun createWireMock(): MappingBuilder
+    open fun createWireMock(): MappingBuilder = WireMock.get(UrlPattern.ANY)
 
     abstract fun getMockData(): T
 
@@ -53,9 +51,29 @@ abstract class ConsumerTestBase<T>(
         ThreadLocalAccessInfo.afterExecuteProcess(uuid)
     }
 
+    fun executeErrorFromServer(verify: (String) -> Unit) {
+        wireMockServer.stubFor(
+            createWireMock()
+                .willReturn(
+                    WireMock.aResponse()
+                        .withStatus(500)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody("{\"melding\": \"Internal Server Error\"}")
+                )
+        )
+
+        try {
+            executeRequest()
+        } catch (exception: Exception) {
+            assertThat(exception.message)
+                .endsWith("500 INTERNAL_SERVER_ERROR - {\"melding\": \"Internal Server Error\"}")
+            verify(exception.message!!)
+        }
+    }
+
     fun executeFromController(verify: () -> Unit) {
         SpringSubjectHandler.set(TestSubjectHandler())
-        ThreadLocalAccessInfo.beforeControllerRequest("request")
+        ThreadLocalAccessInfo.beforeControllerRequest("request", false)
         verify()
         executeRequest()
         ThreadLocalAccessInfo.afterControllerRequest("request")

@@ -13,12 +13,13 @@ import com.github.tomakehurst.wiremock.WireMockServer;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdRestConsumer;
-import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdRestConsumerConfig;
 import no.nav.melosys.integrasjon.kodeverk.KodeOppslag;
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.mockito.Mockito;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -26,7 +27,6 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static no.nav.melosys.domain.FellesKodeverk.PERMISJONS_OG_PERMITTERINGS_BESKRIVELSE;
 import static no.nav.melosys.domain.FellesKodeverk.YRKER;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
@@ -51,7 +51,6 @@ class AaregServiceTest {
 
         WebClient webClient = WebClient.builder()
             .baseUrl("http://localhost:" + wireMockServer.port())
-            .filter(ArbeidsforholdRestConsumerConfig.errorFilter())
             .build();
         ArbeidsforholdRestConsumer arbeidsforholdRestConsumer = new ArbeidsforholdRestConsumer(webClient);
         mockedKodeOppslag = Mockito.mock(KodeOppslag.class);
@@ -100,24 +99,6 @@ class AaregServiceTest {
         });
         String result = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(arbeidsforhold);
         Assertions.assertThat(result).isEqualToIgnoringNewLines(expectedRestResult);
-    }
-
-    @Test
-    void getArbeidsforholdDokumentFromRestService_error_returnererBeskrivendeTekst() {
-        wireMockServer.stubFor(get(urlPathEqualTo("/"))
-            .willReturn(aResponse()
-                .withStatus(500)
-                .withHeader("Content-Type", "application/json")
-                .withBody("{\"melding\": \"Internal Server Error\"}")
-            )
-        );
-
-        assertThatExceptionOfType(TekniskException.class)
-            .isThrownBy(() -> aaregService.finnArbeidsforholdPrArbeidstaker(
-                NAV_PERSONIDENT,
-                LocalDate.of(2014, 7, 1),
-                LocalDate.of(2015, 12, 31))
-            ).withMessage("Henting av arbeidsforhold fra Aareg feilet.");
     }
 
     private static final String expectedRestResult = """

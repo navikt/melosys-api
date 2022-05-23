@@ -397,9 +397,12 @@ public class Behandlingsresultat extends RegistreringsInfo {
                 && l.getTilleggsbestemmelse() == Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1);
     }
 
+    public boolean erRegistrertUnntak() {
+        return type == Behandlingsresultattyper.REGISTRERT_UNNTAK;
+    }
+
     public boolean erGodkjenningRegistreringUnntak() {
-        return type == Behandlingsresultattyper.REGISTRERT_UNNTAK
-            && utfallRegistreringUnntak == Utfallregistreringunntak.GODKJENT;
+        return erRegistrertUnntak() && utfallRegistreringUnntak == Utfallregistreringunntak.GODKJENT;
     }
 
     public boolean a1Produseres() {

@@ -55,10 +55,11 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
     }
 
     @Override
-    public List<Oppgave> finnUtildelteOppgaverEtterFrist(String behandlingstype) {
+    public List<Oppgave> finnUtildelteOppgaverEtterFrist(String behandlingstype, String behandlingstema) {
 
         OppgaveSearchRequest.Builder searchRequestBuilder = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
             .medBehandlingsType(behandlingstype)
+            .medBehandlingstema(behandlingstema)
             .medOppgaveTyper(hentGyldigeOppgavetyper())
             .medSorteringsfelt(SORTERINGSFELT)
             .medStatusKategori(OPPGAVE_STATUSKATEGORI_AAPEN)
@@ -69,7 +70,7 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
         List<OppgaveDto> oppgaver = oppgaveConsumer.hentOppgaveListe(searchRequestBuilder.build());
 
         return oppgaver.stream().map(OppgaveFasadeImpl::oppgaveMappingDtoTilDomain)
-            .filter(erGyldigJournalføringEllerBehandlingsoppgave)
+            .filter(erGyldigBehandlingsoppgave)
             .collect(Collectors.toList());
     }
 
@@ -93,6 +94,7 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
         OpprettOppgaveDto oppgaveDto = new OpprettOppgaveDto();
         oppgaveDto.setAktivDato(idag);
         oppgaveDto.setAktørId(oppgave.getAktørId());
+        oppgaveDto.setOrgnr(oppgave.getOrgnr());
         oppgaveDto.setBehandlingstema(oppgave.getBehandlingstema());
         oppgaveDto.setBehandlingstype(oppgave.getBehandlingstype());
         oppgaveDto.setBeskrivelse(oppgave.getBeskrivelse());
@@ -298,8 +300,8 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
         return null;
     }
 
-    private final Predicate<Oppgave> erGyldigJournalføringEllerBehandlingsoppgave
-        = oppgave -> oppgave.getOppgavetype() == Oppgavetyper.JFR || oppgave.getSaksnummer() != null;
+    private final Predicate<Oppgave> erGyldigBehandlingsoppgave
+        = oppgave -> oppgave.getSaksnummer() != null;
 
     private static String[] hentGyldigeOppgavetyper() {
         return Stream.of(Oppgavetyper.values())

@@ -55,6 +55,7 @@ import static org.mockito.Mockito.*;
 class DokgenServiceTest {
 
     public static final String FNR = "99887766554";
+    public static final String ORGNR = "987654321";
 
     @Mock
     private DokgenConsumer mockDokgenConsumer;
@@ -132,8 +133,7 @@ class DokgenServiceTest {
         when(mockKodeverkService.dekod(FellesKodeverk.POSTNUMMER, "0123")).thenReturn("Aker");
         when(mockKodeverkService.dekod(FellesKodeverk.LANDKODER_ISO2, "NO")).thenReturn("Norge");
 
-        Aktoer mottaker = new Aktoer();
-        mottaker.setRolle(Aktoersroller.BRUKER);
+        Aktoer mottaker = lagBruker();
 
         MangelbrevBrevbestilling brevbestilling = new MangelbrevBrevbestilling.Builder()
             .medProduserbartdokument(MANGELBREV_BRUKER)
@@ -153,7 +153,7 @@ class DokgenServiceTest {
     }
 
     @Test
-    void produserBrevTilRepresentantOk() {
+    void produserBrevTilRepresentantOrganisasjonOk() {
         when(mockDokgenConsumer.lagPdf(anyString(), any(), eq(false), eq(false))).thenReturn(expectedPdf);
         when(mockJoarkFasade.hentJournalpost(any())).thenReturn(lagJournalpost());
         when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(lagBehandling());
@@ -161,9 +161,7 @@ class DokgenServiceTest {
         when(mockEregFasade.hentOrganisasjon(any())).thenReturn(lagSaksopplysning());
         when(mockKontaktOpplysningService.hentKontaktopplysning(any(), any())).thenReturn(of(lagKontaktOpplysning()));
 
-        Aktoer mottaker = new Aktoer();
-        mottaker.setRolle(Aktoersroller.REPRESENTANT);
-        mottaker.setOrgnr("123456789");
+        Aktoer mottaker = lagRepresentant(ORGNR, Representerer.BRUKER);
 
         DokgenBrevbestilling brevbestilling = new DokgenBrevbestilling.Builder<>()
             .medProduserbartdokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD)
@@ -199,10 +197,33 @@ class DokgenServiceTest {
             .build();
 
 
-        dokgenService.produserBrev(new Aktoer(), brevbestilling, false);
+        dokgenService.produserBrev(lagBruker(), brevbestilling, false);
 
 
         verify(mockDokgenConsumer).lagPdf(any(), any(), eq(false), eq(false));
+    }
+
+    @Test
+    void produserBrevTilRepresentantPersonOk() {
+        when(mockDokgenConsumer.lagPdf(anyString(), any(), eq(false), eq(false))).thenReturn(expectedPdf);
+        when(mockJoarkFasade.hentJournalpost(any())).thenReturn(lagJournalpost());
+        when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(lagBehandling());
+        when(mockPersondataFasade.hentPerson(anyString())).thenReturn(lagPersonopplysninger());
+        when(mockKodeverkService.dekod(FellesKodeverk.POSTNUMMER, "0123")).thenReturn("Aker");
+        when(mockKodeverkService.dekod(FellesKodeverk.LANDKODER_ISO2, "NO")).thenReturn("Norge");
+
+        DokgenBrevbestilling brevbestilling = new DokgenBrevbestilling.Builder<>()
+            .medProduserbartdokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD)
+            .medBehandlingId(123)
+            .build();
+
+        byte[] pdfResponse = dokgenService.produserBrev(lagRepresentant(FNR, Representerer.BRUKER), brevbestilling, false);
+
+        assertThat(pdfResponse).isNotNull();
+        assertThat(pdfResponse).isEqualTo(expectedPdf);
+
+        verify(mockDokgenConsumer).lagPdf(any(), any(), eq(false), eq(false));
+        verify(mockPersondataFasade, times(2)).hentPerson(any());
     }
 
     @Test
@@ -213,10 +234,8 @@ class DokgenServiceTest {
         when(mockPersondataFasade.hentPerson(anyString())).thenReturn(lagPersonopplysninger());
         when(mockKodeverkService.dekod(FellesKodeverk.POSTNUMMER, "0123")).thenReturn("Aker");
         when(mockKodeverkService.dekod(FellesKodeverk.LANDKODER_ISO2, "NO")).thenReturn("Norge");
-        Aktoer mottaker = new Aktoer();
-        mottaker.setRolle(Aktoersroller.BRUKER);
         when(mockBrevMottakerService.avklarMottakere(any(), any(), any(), eq(true), eq(false))).thenReturn(
-            List.of(mottaker));
+            List.of(lagBruker()));
 
         BrevbestillingRequest brevbestillingRequest = new BrevbestillingRequest.Builder()
             .medProduserbardokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD)
@@ -247,12 +266,8 @@ class DokgenServiceTest {
         when(mockEregFasade.hentOrganisasjon(any())).thenReturn(lagSaksopplysning());
         when(mockKontaktOpplysningService.hentKontaktopplysning(any(), any())).thenReturn(of(lagKontaktOpplysning()));
 
-        Aktoer representant = new Aktoer();
-        representant.setRolle(Aktoersroller.REPRESENTANT);
-        representant.setRepresenterer(Representerer.BRUKER);
-        representant.setOrgnr("987654321");
-        when(mockBrevMottakerService.avklarMottakere(any(), any(), any(), eq(true), eq(false))).thenReturn(
-            List.of(representant));
+        when(mockBrevMottakerService.avklarMottakere(any(), any(), any(), eq(true), eq(false)))
+            .thenReturn(List.of(lagRepresentant(ORGNR, Representerer.BRUKER)));
 
         BrevbestillingRequest brevbestillingRequest = new BrevbestillingRequest.Builder()
             .medProduserbardokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD)
@@ -268,7 +283,7 @@ class DokgenServiceTest {
         assertThat(pdfResponse).isEqualTo(expectedPdf);
 
         verify(mockDokgenConsumer).lagPdf(any(), any(), eq(false), eq(true));
-        verify(mockEregFasade).hentOrganisasjon("987654321");
+        verify(mockEregFasade).hentOrganisasjon(ORGNR);
         verify(mockKontaktOpplysningService).hentKontaktopplysning(any(), any());
     }
 
@@ -281,12 +296,8 @@ class DokgenServiceTest {
         when(mockEregFasade.hentOrganisasjon(any())).thenReturn(lagSaksopplysning());
         when(mockKontaktOpplysningService.hentKontaktopplysning(any(), any())).thenReturn(of(lagKontaktOpplysning()));
 
-        Aktoer representant = new Aktoer();
-        representant.setRolle(Aktoersroller.REPRESENTANT);
-        representant.setRepresenterer(Representerer.ARBEIDSGIVER);
-        representant.setOrgnr("987654321");
-        when(mockBrevMottakerService.avklarMottakere(any(), any(), any(), eq(true), eq(false))).thenReturn(
-            List.of(representant));
+        when(mockBrevMottakerService.avklarMottakere(any(), any(), any(), eq(true), eq(false)))
+            .thenReturn(List.of(lagRepresentant(ORGNR, Representerer.ARBEIDSGIVER)));
 
         BrevbestillingRequest brevbestillingRequest = new BrevbestillingRequest.Builder()
             .medProduserbardokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD)
@@ -302,7 +313,7 @@ class DokgenServiceTest {
         assertThat(pdfResponse).isEqualTo(expectedPdf);
 
         verify(mockDokgenConsumer).lagPdf(any(), any(), eq(false), eq(true));
-        verify(mockEregFasade).hentOrganisasjon("987654321");
+        verify(mockEregFasade).hentOrganisasjon(ORGNR);
         verify(mockKontaktOpplysningService).hentKontaktopplysning(any(), any());
     }
 
@@ -314,8 +325,7 @@ class DokgenServiceTest {
         when(mockPersondataFasade.hentPerson(anyString())).thenReturn(lagPersonopplysninger());
         when(mockKodeverkService.dekod(FellesKodeverk.POSTNUMMER, "0123")).thenReturn("Aker");
         when(mockKodeverkService.dekod(FellesKodeverk.LANDKODER_ISO2, "NO")).thenReturn("Norge");
-        Aktoer mottaker = new Aktoer();
-        mottaker.setRolle(Aktoersroller.BRUKER);
+        Aktoer mottaker = lagBruker();
         when(mockBrevMottakerService.avklarMottakere(any(), any(), any(), eq(true), eq(false))).thenReturn(
             List.of(mottaker));
 
@@ -383,7 +393,7 @@ class DokgenServiceTest {
         BrevbestillingRequest brevbestillingRequest = new BrevbestillingRequest.Builder()
             .medProduserbardokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD)
             .medMottaker(Aktoersroller.ARBEIDSGIVER)
-            .medOrgNr("987654321")
+            .medOrgNr(ORGNR)
             .medBestillersId("Z123456")
             .build();
 
@@ -411,7 +421,7 @@ class DokgenServiceTest {
             .medBestillersId("Z123456")
             .medManglerFritekst("Mangler")
             .medMottaker(Aktoersroller.ARBEIDSGIVER)
-            .medOrgNr("987654321")
+            .medOrgNr(ORGNR)
             .medKopiMottakere(List.of(new KopiMottaker(Aktoersroller.BRUKER, null, "1223", null)))
             .build();
 
@@ -492,5 +502,24 @@ class DokgenServiceTest {
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setDokument(lagOrg());
         return saksopplysning;
+    }
+
+    private Aktoer lagBruker() {
+        var aktoer = new Aktoer();
+        aktoer.setRolle(Aktoersroller.BRUKER);
+        aktoer.setAktørId(FNR);
+        return aktoer;
+    }
+
+    private Aktoer lagRepresentant(String mottakerID, Representerer representerer) {
+        var aktoer = new Aktoer();
+        aktoer.setRolle(Aktoersroller.REPRESENTANT);
+        aktoer.setRepresenterer(representerer);
+        if (mottakerID.equals(ORGNR)) {
+            aktoer.setOrgnr(ORGNR);
+        } else if (mottakerID.equals(FNR)) {
+            aktoer.setPersonIdent(FNR);
+        }
+        return aktoer;
     }
 }

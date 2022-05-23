@@ -7,12 +7,14 @@ import no.nav.melosys.domain.ErPeriode;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.person.Informasjonsbehov;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.kontroll.KontrollresultatService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerRequest;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
+import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import no.nav.melosys.service.vilkaar.InngangsvilkaarService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +27,7 @@ import static no.nav.melosys.service.registeropplysninger.RegisteropplysningerFa
 public class OppfriskSaksopplysningerService {
     private static final Logger log = LoggerFactory.getLogger(OppfriskSaksopplysningerService.class);
 
+    private final AnmodningsperiodeService anmodningsperiodeService;
     private final BehandlingService behandlingService;
     private final BehandlingsresultatService behandlingsresultatService;
     private final KontrollresultatService kontrollresultatService;
@@ -32,12 +35,14 @@ public class OppfriskSaksopplysningerService {
     private final RegisteropplysningerService registeropplysningerService;
     private final PersondataFasade persondataFasade;
 
-    public OppfriskSaksopplysningerService(BehandlingService behandlingService,
+    public OppfriskSaksopplysningerService(AnmodningsperiodeService anmodningsperiodeService,
+                                           BehandlingService behandlingService,
                                            BehandlingsresultatService behandlingsresultatService,
                                            KontrollresultatService kontrollresultatService,
                                            InngangsvilkaarService inngangsvilkaarService,
                                            RegisteropplysningerService registeropplysningerService,
                                            PersondataFasade persondataFasade) {
+        this.anmodningsperiodeService = anmodningsperiodeService;
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.kontrollresultatService = kontrollresultatService;
@@ -48,9 +53,13 @@ public class OppfriskSaksopplysningerService {
 
     @Transactional
     public void oppfriskSaksopplysning(long behandlingID, boolean medFamilierelasjoner) {
-        log.info("Starter oppfrisking av behandlingID: {} ", behandlingID);
+        Behandling behandling = behandlingService.hentBehandling(behandlingID);
 
-        Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
+        if (behandling.erUtsending() && anmodningsperiodeService.harSendtAnmodningsperiode(behandlingID)) {
+            throw new FunksjonellException("Anmodning om unntak er sendt for behandling %s. ".formatted(
+                behandlingID) +  "Det er ikke lenger mulig å endre behandlingsgrunnlag og saksopplysninger");
+        }
+
         String aktørID = behandling.getFagsak().hentBrukersAktørID();
         String brukerID = persondataFasade.hentFolkeregisterident(aktørID);
 
@@ -71,6 +80,7 @@ public class OppfriskSaksopplysningerService {
                 : Informasjonsbehov.STANDARD)
             .build();
 
+        log.info("Starter oppfrisking av behandlingID: {} ", behandlingID);
         registeropplysningerService.hentOgLagreOpplysninger(registeropplysningerRequest);
         behandlingsresultatService.tømBehandlingsresultat(behandlingID);
 

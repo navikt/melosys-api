@@ -30,7 +30,7 @@ import static org.mockito.Mockito.when;
 class ProsessinstansAdminServiceTest {
 
     // Viktig at forrige og current er steg som kommer rett etter hverandre i samme prosess(type)
-    private static final ProsessType PROSESS_TYPE = ProsessType.JFR_NY_SAK;
+    private static final ProsessType PROSESS_TYPE = ProsessType.JFR_NY_SAK_BRUKER;
     private static final ProsessSteg FORSTE_PROSSESS_STEG = ProsessSteg.OPPRETT_SAK_OG_BEH;
     private static final ProsessSteg FORRIGE_PROSSESS_STEG = ProsessSteg.OPPRETT_SØKNAD;
     private static final ProsessSteg CURRENT_PROSESS_STEG = ProsessSteg.OPPRETT_ARKIVSAK;
@@ -129,6 +129,19 @@ class ProsessinstansAdminServiceTest {
         assertThat(prosessinstans.getStatus()).isEqualTo(ProsessStatus.RESTARTET);
         verify(prosessinstansRepository).saveAll(singletonList(prosessinstans));
         verify(behandleProsessinstansDelegate).behandleProsessinstans(prosessinstans);
+    }
+
+    @Test
+    void hoppOverStegProsessinstans_hopperTilNesteSteg() {
+        var prosessinstans = lagProsessinstans();
+        var uuid = prosessinstans.getId();
+
+        when(prosessinstansRepository.findById(uuid)).thenReturn(Optional.of(prosessinstans));
+
+        prosessinstansAdminService.hoppOverStegProsessinstans(uuid);
+
+        assertThat(prosessinstans.getSistFullførtSteg()).isEqualTo(CURRENT_PROSESS_STEG);
+        verify(prosessinstansRepository).save(prosessinstans);
     }
 
     private Prosessinstans lagProsessinstans() {

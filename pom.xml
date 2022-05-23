@@ -39,8 +39,8 @@
         <java.version>17</java.version>
 
         <!-- Melosys -->
-        <melosys.jsonschema.version>1.35.160</melosys.jsonschema.version>
-        <melosys.internt.kodeverk.version>5.15.110</melosys.internt.kodeverk.version>
+        <melosys.jsonschema.version>1.35.169</melosys.jsonschema.version>
+        <melosys.internt.kodeverk.version>5.15.112</melosys.internt.kodeverk.version>
         <melosys.brev.version>1.2.124</melosys.brev.version>
 
         <!-- NAV -->
@@ -48,13 +48,14 @@
         <abac.spring.version>1.6.0</abac.spring.version>
         <behandlingstatus.version>1.1.0</behandlingstatus.version>
         <doksys.dokumentproduksjon.version>3.3.4</doksys.dokumentproduksjon.version>
-        <token-support.version>2.0.5</token-support.version>
+        <token-support.version>2.0.16</token-support.version>
+        <token-validation-test-support.version>2.0.5</token-validation-test-support.version>
 
         <!-- Versjoner av eksterne biblioteker -->
         <archunit.version>0.23.1</archunit.version>
         <apache-httpclients.version>4.5.13</apache-httpclients.version>
         <caffeine.version>3.0.6</caffeine.version>
-        <cxf.version>3.5.1</cxf.version>
+        <cxf.version>3.5.2</cxf.version>
         <commons-collections4.version>4.4</commons-collections4.version>
         <commons-lang.version>3.12.0</commons-lang.version>
         <commons-text.version>1.9</commons-text.version>
@@ -62,10 +63,10 @@
         <guava.version>31.1-jre</guava.version>
         <graphql-java.version>17.3</graphql-java.version>
         <logback.version>1.2.11</logback.version>
-        <logstash.version>7.0.1</logstash.version>
+        <logstash.version>7.1</logstash.version>
         <hikaricp.version>5.0.1</hikaricp.version>
         <ibmmq.version>9.2.5.0</ibmmq.version>
-        <jackson.version>2.13.1</jackson.version>
+        <jackson.version>2.13.2.20220328</jackson.version>
         <javax.ws.rs-api.version>2.1.1</javax.ws.rs-api.version>
         <json-smart.version>2.4.8</json-smart.version>
         <jms-api.version>2.0.1</jms-api.version>
@@ -77,22 +78,22 @@
         <oxmlparserv2.version>11.2.0.1.nojaxpservice</oxmlparserv2.version>
         <easy-random.version>5.0.0</easy-random.version>
         <restFixture.version>4.4</restFixture.version>
-        <shedlock.version>4.33.0</shedlock.version>
+        <shedlock.version>4.35.0</shedlock.version>
         <slf4j.version>1.7.36</slf4j.version>
         <springfox.version>3.0.0</springfox.version>
         <swagger.version>1.5.21</swagger.version>
         <unleash.version>4.4.1</unleash.version>
         <bcpkix-jdk15on.version>1.70</bcpkix-jdk15on.version>
-        <nimbus-jose-jwt.version>9.21</nimbus-jose-jwt.version>
+        <nimbus-jose-jwt.version>9.22</nimbus-jose-jwt.version>
         <neethi.version>3.1.1</neethi.version>
 
         <!-- Transitive avhengigheter -->
         <asm.version>9.3</asm.version>
         <bcprov-jdk15on.version>1.68</bcprov-jdk15on.version>
         <cglib.version>3.3.0</cglib.version>
-        <classgraph.version>4.8.143</classgraph.version>
+        <classgraph.version>4.8.146</classgraph.version>
         <commons-logging.version>1.2</commons-logging.version>
-        <istack.version>4.0.1</istack.version>
+        <istack.version>4.1.1</istack.version>
         <javassist.version>3.28.0-GA</javassist.version>
         <jaxb2-basics-runtime.version>0.12.0</jaxb2-basics-runtime.version>
         <joda-time.version>2.10.14</joda-time.version>
@@ -387,7 +388,7 @@
             <dependency>
                 <groupId>com.google.errorprone</groupId>
                 <artifactId>error_prone_annotations</artifactId>
-                <version>2.7.1</version>
+                <version>2.13.1</version>
             </dependency>
             <dependency>
                 <groupId>commons-logging</groupId>
@@ -412,7 +413,7 @@
             <dependency>
                 <groupId>org.checkerframework</groupId>
                 <artifactId>checker-qual</artifactId>
-                <version>3.13.0</version>
+                <version>3.22.0</version>
             </dependency>
             <dependency>
                 <groupId>org.javassist</groupId>
@@ -609,8 +610,13 @@
             </dependency>
             <dependency>
                 <groupId>no.nav.security</groupId>
-                <artifactId>token-validation-test-support</artifactId>
+                <artifactId>token-validation-core</artifactId>
                 <version>${token-support.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.nav.security</groupId>
+                <artifactId>token-validation-test-support</artifactId>
+                <version>${token-validation-test-support.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.awaitility</groupId>

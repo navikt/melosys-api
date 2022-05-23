@@ -25,6 +25,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -36,6 +37,8 @@ import static org.mockito.Mockito.*;
 class BehandlingsresultatServiceTest {
     private static final String AVKLARTEFAKTA_REGISTRERING_BEGRUNNELSE_KODE = "AvklartefaktaRegistrering-begrunnelsekode";
 
+    @Captor
+    private ArgumentCaptor<Behandlingsresultat> behandlingsresultatCaptor;
 
     @Mock
     private BehandlingsresultatRepository behandlingsresultatRepo;
@@ -90,6 +93,19 @@ class BehandlingsresultatServiceTest {
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setId(667L);
         return behandlingsresultat;
+    }
+
+    @Test
+    void lagreNyttBehandlingsresultat_lagresKorrekt() {
+        var behandling = new Behandling();
+
+        behandlingsresultatService.lagreNyttBehandlingsresultat(behandling);
+
+        verify(behandlingsresultatRepo).save(behandlingsresultatCaptor.capture());
+        var behandlingsresultat = behandlingsresultatCaptor.getValue();
+        assertThat(behandlingsresultat.getBehandling()).isEqualTo(behandling);
+        assertThat(behandlingsresultat.getBehandlingsmåte()).isEqualTo(Behandlingsmaate.UDEFINERT);
+        assertThat(behandlingsresultat.getType()).isEqualTo(Behandlingsresultattyper.IKKE_FASTSATT);
     }
 
     @Test

@@ -1,7 +1,7 @@
 package no.nav.melosys.saksflyt.kontroll;
 
+import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.saksflyt.ProsessStatus;
@@ -9,6 +9,8 @@ import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.domain.saksflyt.ProsessinstansHendelse;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.saksflyt.impl.BehandleProsessinstansDelegate;
 import no.nav.melosys.saksflyt.kontroll.dto.HentProsessinstansDto;
@@ -30,7 +32,7 @@ public class ProsessinstansAdminService {
         return prosessinstansRepository.findAllByStatus(ProsessStatus.FEILET).stream()
             .map(this::mapTilHentProsessinstansDto)
             .sorted(Comparator.comparing(HentProsessinstansDto::endretDato))
-            .collect(Collectors.toList());
+            .toList();
     }
 
     public List<HentProsessinstansDto> restartAlleFeiledeProsessinstanser() {
@@ -38,7 +40,7 @@ public class ProsessinstansAdminService {
 
         setStatusRestartet(prosessinstanser);
 
-        return prosessinstanser.stream().map(this::mapTilHentProsessinstansDto).collect(Collectors.toList());
+        return prosessinstanser.stream().map(this::mapTilHentProsessinstansDto).toList();
     }
 
     public void restartProsessinstanser(Iterable<UUID> uuids) {
@@ -51,6 +53,27 @@ public class ProsessinstansAdminService {
         }
 
         setStatusRestartet(prosessinstanser);
+    }
+
+    public ProsessSteg hoppOverStegProsessinstans(UUID uuid) {
+        var prosessinstans = prosessinstansRepository.findById(uuid)
+            .orElseThrow(() -> new IkkeFunnetException("Fant ikke prosessinstans med ID %s".formatted(uuid)));
+        var nesteSteg = ProsessflytDefinisjon.hentNesteSteg(prosessinstans.getType(), prosessinstans.getSistFullførtSteg())
+            .orElseThrow(() -> new TekniskException("Fant ikke neste steg for prosessinstans med ID %s".formatted(uuid)));
+
+        prosessinstans.setSistFullførtSteg(nesteSteg);
+        prosessinstansRepository.save(prosessinstans);
+
+        return nesteSteg;
+    }
+
+    public void ferdigstillProsessinstans(UUID uuid) {
+        var prosessinstans = prosessinstansRepository.findById(uuid)
+            .orElseThrow(() -> new IkkeFunnetException("Fant ikke prosessinstans med ID %s".formatted(uuid)));
+        prosessinstans.setStatus(ProsessStatus.FERDIG);
+        prosessinstans.setEndretDato(LocalDateTime.now());
+
+        prosessinstansRepository.save(prosessinstans);
     }
 
     private HentProsessinstansDto mapTilHentProsessinstansDto(Prosessinstans prosessinstans) {
@@ -67,7 +90,9 @@ public class ProsessinstansAdminService {
             saksnummer,
             prosessinstans.getType().getKode(),
             prosessinstans.getEndretDato(),
-            hentFeiletSteg(prosessinstans),
+            ProsessflytDefinisjon.hentNesteSteg(prosessinstans.getType(), prosessinstans.getSistFullførtSteg())
+                .map(ProsessSteg::getKode)
+                .orElse(null),
             prosessinstans.getHendelser()
                 .stream()
                 .max(Comparator.comparing(ProsessinstansHendelse::getDato))
@@ -75,18 +100,10 @@ public class ProsessinstansAdminService {
                 .orElse(null));
     }
 
-    private String hentFeiletSteg(Prosessinstans prosessinstans) {
-        var sisteFullførtSteg = Optional.ofNullable(prosessinstans.getSistFullførtSteg())
-            .orElse(null);
-
-        return ProsessflytDefinisjon.finnFlytForProsessType(prosessinstans.getType())
-            .map(it -> it.nesteSteg(sisteFullførtSteg))
-            .map(ProsessSteg::getKode)
-            .orElse(null);
-    }
-
     private void setStatusRestartet(Collection<Prosessinstans> prosessinstanser) {
-        prosessinstanser.forEach(p -> p.setStatus(ProsessStatus.RESTARTET));
+        prosessinstanser.forEach(prosessinstans -> prosessinstans.setStatus(ProsessStatus.RESTARTET));
+        LocalDateTime nå = LocalDateTime.now();
+        prosessinstanser.forEach(prosessinstans -> prosessinstans.setEndretDato(nå));
 
         prosessinstansRepository
             .saveAll(prosessinstanser)

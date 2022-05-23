@@ -2,29 +2,33 @@ package no.nav.melosys.service.dokument;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadTrygdeavtale;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Soeknadsland;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.RepresentantIUtlandet;
+import no.nav.melosys.domain.dokument.arbeidsforhold.Aktoertype;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.GeografiskAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
-import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.dokument.person.adresse.Bostedsadresse;
-import no.nav.melosys.domain.dokument.person.adresse.Gateadresse;
 import no.nav.melosys.domain.dokument.person.adresse.UstrukturertAdresse;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
+import no.nav.melosys.domain.person.*;
+import no.nav.melosys.domain.person.adresse.Bostedsadresse;
+import no.nav.melosys.domain.person.adresse.Kontaktadresse;
 
 import static java.util.Collections.singletonList;
+import static no.nav.melosys.domain.kodeverk.Aktoersroller.ARBEIDSGIVER;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
 
 public final class DokgenTestData {
@@ -41,6 +45,8 @@ public final class DokgenTestData {
     public static final String REGION = "NEVERLAND";
     public static final LocalDate LOVVALGSPERIODE_FOM = LocalDate.of(2020, 1, 1);
     public static final LocalDate LOVVALGSPERIODE_TOM = LocalDate.of(2021, 1, 1);
+    public static final String FNR_REPRESENTANT = "30098000492";
+    public static final String ORGNR_REPRESENTANT = "810072512";
 
     public static Behandling lagBehandling() {
         return lagBehandling(lagFagsak());
@@ -79,25 +85,23 @@ public final class DokgenTestData {
         return fagsak;
     }
 
-    public static Saksopplysning lagPersonopplysning() {
-        Saksopplysning saksopplysning = new Saksopplysning();
-        saksopplysning.setType(SaksopplysningType.PERSOPL);
-        saksopplysning.setDokument(lagPersonDokument());
-        return saksopplysning;
-    }
+    public static Persondata lagPersondata() {
+        final var bostedsadresse = new Bostedsadresse(
+            new StrukturertAdresse(ADRESSELINJE_1_BRUKER, "42 C", POSTNR_BRUKER, null, null, Landkoder.NO.getKode()),
+            null, null, null, "PDL", null, false);
 
-    public static PersonDokument lagPersonDokument() {
-        PersonDokument personDokument = new PersonDokument();
-        personDokument.setFnr(FNR_BRUKER);
-        personDokument.setSammensattNavn(SAMMENSATT_NAVN_BRUKER);
-        personDokument.setGjeldendePostadresse(lagAdresse());
-        Bostedsadresse bostedsadresse = new Bostedsadresse();
-        bostedsadresse.setLand(new Land(Land.STORBRITANNIA));
-        Gateadresse gateadresse = new Gateadresse();
-        gateadresse.setGatenavn("UK Street 48");
-        bostedsadresse.setGateadresse(gateadresse);
-        personDokument.setBostedsadresse(bostedsadresse);
-        return personDokument;
+        final var kontaktadresse = new Kontaktadresse(
+            new StrukturertAdresse(ADRESSELINJE_1_BRUKER, null, POSTNR_BRUKER, POSTSTED_BRUKER, null, null),
+            null, null, null, null, "PDL", null, null,
+            false);
+
+        return new Personopplysninger(Collections.emptyList(), bostedsadresse, null, null,
+            new Foedsel(null, null, null, null),
+            new Folkeregisteridentifikator(FNR_BRUKER), null,
+
+            // For å få testene til å funke som med brukt med PersonDokument må fornavn og etternavn bytte plass.
+            // Dette er nå en "feil" i prod og blir en egen oppgave å fikse.
+            List.of(kontaktadresse), new Navn("Duck", null, "Donald"), Collections.emptyList(), Collections.emptyList());
     }
 
     public static UstrukturertAdresse lagAdresse() {
@@ -105,6 +109,7 @@ public final class DokgenTestData {
         ustrukturertAdresse.adresselinje1 = ADRESSELINJE_1_BRUKER;
         ustrukturertAdresse.postnr = POSTNR_BRUKER;
         ustrukturertAdresse.poststed = POSTSTED_BRUKER;
+        ustrukturertAdresse.land = new Land(Land.NORGE);
         return ustrukturertAdresse;
     }
 
@@ -189,4 +194,31 @@ public final class DokgenTestData {
         return lovvalgsperiode;
     }
 
+    public static Aktoer lagMottaker(Aktoersroller rolle) {
+        Aktoer mottaker = new Aktoer();
+        switch (rolle) {
+            case BRUKER -> {
+                mottaker.setRolle(BRUKER);
+                mottaker.setAktørId(FNR_BRUKER);
+            }
+            case ARBEIDSGIVER -> {
+                mottaker.setRolle(ARBEIDSGIVER);
+                mottaker.setOrgnr(ORGNR_REPRESENTANT);
+            }
+            default -> throw new IllegalArgumentException("Mottaker må være person eller arbeidsgiver");
+        }
+        return mottaker;
+    }
+
+    public static Aktoer lagMottakerRepresentant(Aktoertype aktoertype, Representerer representerer) {
+        Aktoer representant = new Aktoer();
+        switch (aktoertype) {
+            case PERSON -> representant.setPersonIdent(FNR_REPRESENTANT);
+            case ORGANISASJON -> representant.setOrgnr(ORGNR_REPRESENTANT);
+            default -> throw new IllegalArgumentException("Representant må være person eller organisasjon");
+        }
+        representant.setRolle(Aktoersroller.REPRESENTANT);
+        representant.setRepresenterer(representerer);
+        return representant;
+    }
 }

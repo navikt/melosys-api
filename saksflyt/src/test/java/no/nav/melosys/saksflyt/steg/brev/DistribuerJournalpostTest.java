@@ -97,6 +97,7 @@ class DistribuerJournalpostTest {
         String journalpostId = "12345";
 
         Prosessinstans prosessinstans = setupHappypath(journalpostId, Aktoersroller.REPRESENTANT);
+        prosessinstans.setData(ProsessDataKey.ORGNR, "123456789");
 
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setDokument(TestdataFactory.lagOrgMedPostadresse());
@@ -113,6 +114,7 @@ class DistribuerJournalpostTest {
     void utførDistribuerJournalpostMedForretningsadresse() {
         String journalpostId = "12345";
         Prosessinstans prosessinstans = setupHappypath(journalpostId, Aktoersroller.REPRESENTANT);
+        prosessinstans.setData(ProsessDataKey.ORGNR, "123456789");
 
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setDokument(TestdataFactory.lagOrgMedForretningsadresse());
@@ -124,6 +126,17 @@ class DistribuerJournalpostTest {
         distribuerJournalpost.utfør(prosessinstans);
 
         verify(mockDoksysFasade).distribuerJournalpost(eq(journalpostId), any(StrukturertAdresse.class), any(), any());
+    }
+
+    @Test
+    void utførDistribuerJournalpostMedReperesentantPerson() {
+        String journalpostId = "12345";
+        Prosessinstans prosessinstans = setupHappypath(journalpostId, Aktoersroller.REPRESENTANT);
+        prosessinstans.setData(ProsessDataKey.AKTØR_ID, "12345678901");
+
+        distribuerJournalpost.utfør(prosessinstans);
+
+        verify(mockDoksysFasade).distribuerJournalpost(eq(journalpostId));
     }
 
     @Test

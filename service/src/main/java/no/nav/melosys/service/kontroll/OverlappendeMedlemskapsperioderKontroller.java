@@ -18,10 +18,13 @@ public final class OverlappendeMedlemskapsperioderKontroller {
     }
 
     public static boolean harOverlappendeMedlemsperiode(MedlemskapDokument medlemskapDokument,
-                                                        Lovvalgsperiode kontrollperiode) {
+                                                        Lovvalgsperiode kontrollperiode,
+                                                        Lovvalgsperiode opprinneligPeriodeTilKontrollperiode) {
         return medlemskapDokument.hentMedlemsperioderHvorKildeIkkeLånekassen().stream().anyMatch(
             medlemsperiode -> !PeriodestatusMedl.AVST.getKode().equals(medlemsperiode.status)
                 && PeriodeKontroller.periodeOverlapper(kontrollperiode, medlemsperiode.getPeriode())
-                && (kontrollperiode.erNyPeriodeForMedl() || !kontrollperiode.harSammeMedlID(medlemsperiode.id)));
+                && (kontrollperiode.erNyPeriodeForMedl() || !kontrollperiode.harSammeMedlID(medlemsperiode.id))
+                && (opprinneligPeriodeTilKontrollperiode == null || !opprinneligPeriodeTilKontrollperiode.harSammeMedlID(medlemsperiode.id)
+            ));
     }
 }

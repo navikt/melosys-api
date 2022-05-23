@@ -120,7 +120,7 @@ public class OppgaveService {
         return fagsakService.hentFagsak(saksnummer).hentSistAktivBehandling();
     }
 
-    public void opprettEllerGjenbrukBehandlingsoppgave(Behandling behandling, String journalpostID, String aktørID, @Nullable String tilordnetRessurs, @Nullable String beskrivelse) {
+    public void opprettEllerGjenbrukBehandlingsoppgave(Behandling behandling, String journalpostID, @Nullable String aktørID, @Nullable String tilordnetRessurs, @Nullable String beskrivelse, @Nullable String orgnr) {
 
         Optional<Oppgave> eksisterendeOppgave = finnÅpenOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer());
 
@@ -130,10 +130,11 @@ public class OppgaveService {
                 .setJournalpostId(journalpostID)
                 .setBeskrivelse(beskrivelse)
                 .setAktørId(aktørID)
+                .setOrgnr(orgnr)
                 .setSaksnummer(behandling.getFagsak().getSaksnummer())
                 .build();
 
-            String oppgaveID = harBeskyttelsesbehov(behandling.getId())
+            String oppgaveID = StringUtils.isNotEmpty(aktørID) && harBeskyttelsesbehov(behandling.getId())
                 ? oppgaveFasade.opprettSensitivOppgave(oppgave)
                 : oppgaveFasade.opprettOppgave(oppgave);
             log.info("Opprettet oppgave {} for behandling {}", oppgaveID, behandling.getId());
@@ -143,8 +144,12 @@ public class OppgaveService {
         }
     }
 
+    public void opprettEllerGjenbrukBehandlingsoppgave(Behandling behandling, String journalpostID, String aktørID, @Nullable String tilordnetRessurs, @Nullable String orgnr) {
+        opprettEllerGjenbrukBehandlingsoppgave(behandling, journalpostID, aktørID, tilordnetRessurs, lagOppgaveBeskrivelse(behandling), orgnr);
+    }
+
     public void opprettEllerGjenbrukBehandlingsoppgave(Behandling behandling, String journalpostID, String aktørID, @Nullable String tilordnetRessurs) {
-        opprettEllerGjenbrukBehandlingsoppgave(behandling, journalpostID, aktørID, tilordnetRessurs, lagOppgaveBeskrivelse(behandling));
+        opprettEllerGjenbrukBehandlingsoppgave(behandling, journalpostID, aktørID, tilordnetRessurs, null);
     }
 
     private String lagOppgaveBeskrivelse(Behandling behandling) {
@@ -189,7 +194,7 @@ public class OppgaveService {
         String tilordnetRessurs = oppgave.map(Oppgave::getTilordnetRessurs).orElse(null);
         String beskrivelse = oppgave.map(Oppgave::getBeskrivelse).orElse(null);
 
-        opprettEllerGjenbrukBehandlingsoppgave(behandling, behandling.getInitierendeJournalpostId(), fagsak.hentBrukersAktørID(), tilordnetRessurs, beskrivelse);
+        opprettEllerGjenbrukBehandlingsoppgave(behandling, behandling.getInitierendeJournalpostId(), fagsak.hentBrukersAktørID(), tilordnetRessurs, beskrivelse, null);
     }
 
     public boolean saksbehandlerErTilordnetOppgaveForSaksnummer(String saksbehandler, String saksnummer) {
@@ -269,6 +274,10 @@ public class OppgaveService {
         Behandling behandling = fagsak.hentSistAktivBehandling();
         behandling = behandlingService.hentBehandling(behandling.getId());
         behOppgaveDto.setBehandling(mapBehandling(behandling));
+
+        if (fagsak.finnVirksomhetsOrgnr().isPresent()) {
+            return behOppgaveDto;
+        }
 
         if (behandling.erBehandlingAvSøknad()) {
             Soeknad søknadDokument = (Soeknad) behandlingsgrunnlagService

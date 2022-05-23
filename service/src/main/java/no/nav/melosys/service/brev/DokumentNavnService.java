@@ -72,10 +72,10 @@ public class DokumentNavnService {
 
         boolean erArtikkel8_2 = lovvalgsperiodeService.hentValidertLovvalgsperiode(behandling.getId()).getBestemmelse() == UK_ART8_2;
 
-        if (mottaker.erOrganisasjon()) {
-            return lagKopiTittel(erArtikkel8_2 ? vedtaksbrevTittel : dokumentproduksjonsInfo.journalføringsTittel());
-        } else {
+        if (mottaker.erBruker()) {
             return erArtikkel8_2 ? vedtaksbrevTittel : dokumentproduksjonsInfo.journalføringsTittel();
+        } else {
+            return lagKopiTittel(erArtikkel8_2 ? vedtaksbrevTittel : dokumentproduksjonsInfo.journalføringsTittel());
         }
     }
 
