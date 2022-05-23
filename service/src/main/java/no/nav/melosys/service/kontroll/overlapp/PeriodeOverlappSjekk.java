@@ -1,6 +1,8 @@
 package no.nav.melosys.service.kontroll.overlapp;
 
+
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 
 import no.nav.melosys.domain.ErPeriode;
 
@@ -24,10 +26,6 @@ public class PeriodeOverlappSjekk {
     }
 
     public boolean harPeriodeSomOverlapperMerEnn1Dag() {
-        if (harLikeStartDatoerEllerSluttDatoer()) {
-            return true;
-        }
-
         if (isNull(tom1)) {
             return åpenPeriodeOverlapper(fom2, tom2, fom1);
         }
@@ -40,7 +38,58 @@ public class PeriodeOverlappSjekk {
     }
 
     private boolean periodeOverlapperMerEnn1Dag() {
-        return fom1.isBefore(fom2) && tom1.isAfter(fom2) || fom1.isBefore(tom2) && fom1.isAfter(fom2);
+        if (harPeriodeSomOverlapper()) {
+            LocalDate startTidNærmestSluttTid = fom1.isBefore(fom2) ? fom2 : fom1;
+            LocalDate sluttTidNærmestStartTid = tom1.isBefore(tom2) ? tom1 : tom2;
+            long dagerOverlap = ChronoUnit.DAYS.between(startTidNærmestSluttTid, sluttTidNærmestStartTid);
+
+            LocalDate startTidLengstVekkFraSluttTid = fom1.isBefore(fom1) ? fom1 : fom2;
+            LocalDate sluttTidLengstVekkFraStartTid = tom1.isAfter(tom2) ? tom1 : tom2;
+
+            if (harPeriodeNesteÅr(startTidLengstVekkFraSluttTid, sluttTidLengstVekkFraStartTid)) {
+                return overlapperSammeDagNesteÅrEllerStørre(dagerOverlap);
+            }
+            return overlapperMerEnnEnDagSammeÅr(dagerOverlap);
+        }
+        return false;
+    }
+
+    private boolean overlapperMerEnnEnDagSammeÅr(long dagerOverlap) {
+        return dagerOverlap > 1;
+    }
+
+    private boolean harPeriodeNesteÅr(LocalDate startTid, LocalDate sluttTid) {
+        return ChronoUnit.YEARS.between(startTid, sluttTid) >= 1;
+    }
+
+    private boolean overlapperSammeDagNesteÅrEllerStørre(long dagerOverlap) {
+        return dagerOverlap >= 1;
+    }
+
+
+//    private boolean harOverEnDagOverlap() {
+//        // fom/tom1 surrounds fom/tom2
+//        if ((fom1.isEqual(fom2) || fom1.isBefore(fom2)) && (tom1.isEqual(tom2) || tom1.isAfter(tom2))) {
+//            var daysOverlap = ChronoUnit.DAYS.between(fom2, tom2);
+//            return daysOverlap > 1;
+//        }
+//
+//        // fom/tom2 surrounds fom/tom1
+//        if ((fom2.isEqual(fom1) || fom2.isBefore(fom1)) && (tom2.isEqual(tom1) || tom2.isAfter(tom1))) {
+//            var daysOverlap = ChronoUnit.DAYS.between(fom1, tom1);
+//            return daysOverlap > 1;
+//        }
+//
+//        return true;
+//
+//    }
+
+    private boolean harPeriodeSomOverlapper() {
+        return ((fom1 == null || tom2 == null || (fom1.isBefore(tom2) || fom1.isEqual(tom2)))
+            && (fom2 == null || tom1 == null || (fom2.isBefore(tom1) || fom2.isEqual(tom1)))
+            && (fom1 == null || tom1 == null || (fom1.isBefore(tom1) || fom1.isEqual(tom1)))
+            && (fom2 == null || tom2 == null || (fom2.isBefore(tom2) || fom2.isEqual(tom2)))
+        );
     }
 
     private void validerTilOgMedDato() {
