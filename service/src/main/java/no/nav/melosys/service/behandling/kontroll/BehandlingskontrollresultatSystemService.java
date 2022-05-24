@@ -1,6 +1,8 @@
-package no.nav.melosys.service.behandling;
+package no.nav.melosys.service.behandling.kontroll;
 
 import no.nav.melosys.repository.KontrollresultatRepository;
+import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.ufm.kontroll.UfmKontrollSystemService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;

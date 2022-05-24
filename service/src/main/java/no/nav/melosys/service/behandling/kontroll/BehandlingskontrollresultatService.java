@@ -1,4 +1,4 @@
-package no.nav.melosys.service.behandling;
+package no.nav.melosys.service.behandling.kontroll;
 
 import java.util.List;
 
@@ -7,6 +7,8 @@ import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Kontrollresultat;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.repository.KontrollresultatRepository;
+import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.ufm.kontroll.UfmKontrollService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
