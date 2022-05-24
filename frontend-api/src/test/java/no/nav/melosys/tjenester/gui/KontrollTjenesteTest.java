@@ -7,7 +7,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.service.kontroll.ferdigbehandling.FerdigbehandlingKontrollService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
-import no.nav.melosys.tjenester.gui.dto.FattVedtakDto;
+import no.nav.melosys.tjenester.gui.dto.kontroller.FerdigbehandlingKontrollerDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,24 +36,18 @@ class KontrollTjenesteTest extends JsonSchemaTestParent {
 
     @Test
     void kontrollerFerdigbehandling_ingenFeilmeldinger_ingentingSkjer() throws ValideringException {
-        kontrollTjeneste.kontrollerFerdigbehandling(BEHANDLING_ID, true, lagFattVedtakDto());
+        kontrollTjeneste.kontrollerFerdigbehandling(lagFerdigbehandlingKontrollerDto());
     }
 
     @Test
     void kontrollerFerdigbehandling_feilmeldinger_kasterExceptions() throws ValideringException {
-        doThrow(new ValideringException("melding", Collections.emptyList()))
-            .when(mockFerdigbehandlingKontrollService).kontroller(BEHANDLING_ID, true, Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN);
+        doThrow(new ValideringException("melding", Collections.emptyList())).when(mockFerdigbehandlingKontrollService).kontroller(BEHANDLING_ID, true, Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN);
 
-        assertThatThrownBy(() -> kontrollTjeneste.kontrollerFerdigbehandling(BEHANDLING_ID, true, lagFattVedtakDto()))
-            .isInstanceOf(ValideringException.class)
-            .hasMessage("melding");
+        assertThatThrownBy(() -> kontrollTjeneste.kontrollerFerdigbehandling(lagFerdigbehandlingKontrollerDto())).isInstanceOf(ValideringException.class).hasMessage("melding");
     }
 
-    private FattVedtakDto lagFattVedtakDto() {
-        var fattVedtak = new FattVedtakDto();
-        fattVedtak.setVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK);
-        fattVedtak.setBehandlingsresultatTypeKode(Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN);
-        return fattVedtak;
+    private FerdigbehandlingKontrollerDto lagFerdigbehandlingKontrollerDto() {
+        return new FerdigbehandlingKontrollerDto(BEHANDLING_ID, Vedtakstyper.FØRSTEGANGSVEDTAK, Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN, true);
     }
 }
 
