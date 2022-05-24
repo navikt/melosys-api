@@ -250,22 +250,22 @@ public class OppgaveService {
         journalfoeringsoppgaveDto.setJournalpostID(oppgave.getJournalpostId());
         String aktørId = oppgave.getAktørId();
         String orgnr = oppgave.getOrgnr();
-        oppdaterIdOgNavn(Optional.ofNullable(aktørId), Optional.ofNullable(orgnr), journalfoeringsoppgaveDto);
+        oppdaterIdOgNavn(aktørId, orgnr, journalfoeringsoppgaveDto);
         return journalfoeringsoppgaveDto;
     }
 
-    private void oppdaterIdOgNavn(Optional<String> aktørID, Optional<String> orgnr, OppgaveDto oppgaveDto) {
-        if (aktørID.isPresent()) {
-            String fnr = persondataFasade.finnFolkeregisterident(aktørID.get()).orElse(null);
+    private void oppdaterIdOgNavn(String aktørID, String orgnr, OppgaveDto oppgaveDto) {
+        if (aktørID != null) {
+            String fnr = persondataFasade.finnFolkeregisterident(aktørID).orElse(null);
             if (StringUtils.isNotEmpty(fnr)) {
                 oppgaveDto.setId(fnr);
                 oppgaveDto.setNavn(persondataFasade.hentSammensattNavn(fnr));
                 return;
             }
         }
-        if (orgnr.isPresent()) {
-            oppgaveDto.setId(orgnr.get());
-            oppgaveDto.setNavn(eregFasade.hentOrganisasjonNavn(orgnr.get()));
+        if (orgnr != null) {
+            oppgaveDto.setId(orgnr);
+            oppgaveDto.setNavn(eregFasade.hentOrganisasjonNavn(orgnr));
             return;
         }
         oppgaveDto.setId(UKJENT);
@@ -282,11 +282,11 @@ public class OppgaveService {
         behandling = behandlingService.hentBehandling(behandling.getId());
         behOppgaveDto.setBehandling(mapBehandling(behandling));
 
-        var aktørID = fagsak.finnBrukersAktørID();
-        var orgnr = fagsak.finnVirksomhetsOrgnr();
+        var aktørID = fagsak.finnBrukersAktørID().orElse(null);
+        var orgnr = fagsak.finnVirksomhetsOrgnr().orElse(null);
         oppdaterIdOgNavn(aktørID, orgnr, behOppgaveDto);
 
-        if (orgnr.isPresent()) {
+        if (orgnr != null) {
             return behOppgaveDto;
         }
 
