@@ -99,7 +99,7 @@ public class FagsakService {
     }
 
     @Transactional
-    public void oppdaterMyndigheter(String saksnummer, Collection<String> ider) {
+    public void oppdaterMyndigheterForEuEos(String saksnummer, Collection<String> ider) {
         Fagsak fagsak = hentFagsak(saksnummer);
         fagsak.getAktører().removeIf(aktoer -> !ider.contains(aktoer.getInstitusjonId())
             && aktoer.getRolle() == Aktoersroller.TRYGDEMYNDIGHET);

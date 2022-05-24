@@ -189,7 +189,7 @@ class FagsakServiceTest {
         when(fagsakRepo.findBySaksnummer(saksnummer)).thenReturn(Optional.of(eksisterendeFagsak));
 
         List<String> nyeInstitusjonsIder = Collections.singletonList("Ny institusjonsid");
-        fagsakService.oppdaterMyndigheter(saksnummer, nyeInstitusjonsIder);
+        fagsakService.oppdaterMyndigheterForEuEos(saksnummer, nyeInstitusjonsIder);
 
         ArgumentCaptor<Fagsak> captor = ArgumentCaptor.forClass(Fagsak.class);
         verify(fagsakRepo).save(captor.capture());
@@ -212,7 +212,7 @@ class FagsakServiceTest {
         eksisterendeFagsak.getAktører().add(bruker);
 
         List<String> nyeInstitusjonsIder = Collections.singletonList("Ny institusjonsid");
-        fagsakService.oppdaterMyndigheter(saksnummer, nyeInstitusjonsIder);
+        fagsakService.oppdaterMyndigheterForEuEos(saksnummer, nyeInstitusjonsIder);
 
         ArgumentCaptor<Fagsak> captor = ArgumentCaptor.forClass(Fagsak.class);
         verify(fagsakRepo).save(captor.capture());

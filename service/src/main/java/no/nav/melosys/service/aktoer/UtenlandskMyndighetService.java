@@ -45,7 +45,7 @@ public class UtenlandskMyndighetService {
                 fagsakService.oppdaterMyndighetForTrygdeavtale(saksnummer, hentLandkodeForTrygdeavtale(landkoder));
             } else {
                 Collection<String> institusjonsIder = konverterLandkodeTilInstitusjonsId(landkoder);
-                fagsakService.oppdaterMyndigheter(saksnummer, institusjonsIder);
+                fagsakService.oppdaterMyndigheterForEuEos(saksnummer, institusjonsIder);
             }
         }
     }

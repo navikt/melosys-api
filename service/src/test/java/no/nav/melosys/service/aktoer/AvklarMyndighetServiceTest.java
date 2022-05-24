@@ -89,7 +89,7 @@ public class AvklarMyndighetServiceTest {
 
         utenlandskMyndighetService.avklarUtenlandskMyndighetSomAktørOgLagre(behandling);
 
-        verify(fagsakService).oppdaterMyndigheter(eq(behandling.getFagsak().getSaksnummer()), stringListArgumentCaptor.capture());
+        verify(fagsakService).oppdaterMyndigheterForEuEos(eq(behandling.getFagsak().getSaksnummer()), stringListArgumentCaptor.capture());
         assertThat(stringListArgumentCaptor.getValue()).containsExactlyInAnyOrder(forventetInstitusjonIdIT, forventetInstitusjonIdCZ);
     }
 }
