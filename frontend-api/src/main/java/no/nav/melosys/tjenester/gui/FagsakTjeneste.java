@@ -13,11 +13,11 @@ import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService;
 import no.nav.melosys.service.sak.*;
+import no.nav.melosys.service.saksopplysninger.SaksopplysningerService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.utpeking.UtpekingService;
 import no.nav.melosys.tjenester.gui.dto.*;
@@ -111,8 +111,7 @@ public class FagsakTjeneste {
                 aksesskontroll.autoriserSakstilgang(fagsak.get());
                 return tilFagsakOppsummeringDtoer(Collections.singletonList(fagsak.get()));
             }
-        }
-        else if (StringUtils.isNotEmpty(fagsakSokDto.orgnr())) {
+        } else if (StringUtils.isNotEmpty(fagsakSokDto.orgnr())) {
             return tilFagsakOppsummeringDtoer(fagsakService.hentFagsakerMedOrgnr(Aktoersroller.VIRKSOMHET, fagsakSokDto.orgnr()));
         }
 

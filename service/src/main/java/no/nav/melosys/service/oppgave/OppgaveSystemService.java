@@ -1,11 +1,11 @@
 package no.nav.melosys.service.oppgave;
 
 import no.nav.melosys.integrasjon.oppgave.OppgaveFasade;
-import no.nav.melosys.service.persondata.PersondataFasade;
-import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.sak.FagsakService;
+import no.nav.melosys.service.saksopplysninger.SaksopplysningerService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
