@@ -1,5 +1,6 @@
 package no.nav.melosys.saksflyt.impl;
 
+import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.Set;
 
@@ -55,6 +56,7 @@ public class ProsessinstansFerdigListener {
     private void oppdaterStatusOgBehandleProsessinstans(Prosessinstans prosessinstans) {
         log.info("Prosessinstans {} startes opp etter å ha vært på vent", prosessinstans.getId());
         prosessinstans.setStatus(ProsessStatus.KLAR);
+        prosessinstans.setEndretDato(LocalDateTime.now());
         prosessinstansRepository.save(prosessinstans);
         prosessinstansBehandler.behandleProsessinstans(prosessinstans);
     }

@@ -54,14 +54,14 @@ public class DokumentServiceFasade {
 
     @Transactional
     public void produserDokument(Produserbaredokumenter dokumentType, Mottaker mottaker, long behandlingId, DoksysBrevbestilling brevbestilling) {
-        var brevbestillingDto = new BrevbestillingRequest.Builder()
+        var brevbestillingRequest = new BrevbestillingRequest.Builder()
             .medProduserbardokument(dokumentType)
             .medMottaker(mottaker.getRolle())
             .medFritekst(hentFritekst(brevbestilling))
             .medBestillersId(brevbestilling.getAvsenderID())
             .build();
 
-        produserDokument(behandlingId, brevbestilling, brevbestillingDto, mottaker);
+        produserDokument(behandlingId, brevbestilling, brevbestillingRequest, mottaker);
     }
 
     private String hentFritekst(DoksysBrevbestilling brevbestilling) {

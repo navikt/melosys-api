@@ -2,7 +2,6 @@ package no.nav.melosys.saksflyt.steg.medl;
 
 import java.util.NoSuchElementException;
 
-import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
@@ -48,9 +47,7 @@ class LagreLovvalgsperiodeMedlTest {
 
     @BeforeEach
     public void setup() {
-        final FakeUnleash unleash = new FakeUnleash();
-        unleash.enable("melosys.api.ny.vurdering.medlperiode.beholdes");
-        lagreLovvalgsperiodeMedl = new LagreLovvalgsperiodeMedl(behandlingsresultatService, medlPeriodeService, unleash);
+        lagreLovvalgsperiodeMedl = new LagreLovvalgsperiodeMedl(behandlingsresultatService, medlPeriodeService);
 
         behandling.setId(behandlingID);
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
@@ -110,7 +107,7 @@ class LagreLovvalgsperiodeMedlTest {
     }
 
     @Test
-    void utfør_nyVurdering_oppdatererPeriode() {
+    void utfør_nyVurderingOgPeriodeFinnes_oppdaterPeriode() {
         Behandling behandling = TestdataFactory.lagBehandlingNyVurdering();
         prosessinstans.setBehandling(behandling);
         Behandling opprinneligBehandling = TestdataFactory.lagBehandling();
@@ -126,8 +123,28 @@ class LagreLovvalgsperiodeMedlTest {
         when(behandlingsresultatService.hentBehandlingsresultat(behandling.getId())).thenReturn(behandlingsresultat);
 
         lagreLovvalgsperiodeMedl.utfør(prosessinstans);
+
         verify(medlPeriodeService).oppdaterPeriodeEndelig(lovvalgsperiodeArgumentCaptor.capture(), eq(false));
         assertThat(lovvalgsperiodeArgumentCaptor.getValue().getMedlPeriodeID()).isEqualTo((opprinneligLovvalgsperiode.getMedlPeriodeID()));
+    }
+
+    @Test
+    void utfør_nyVurderingOgPeriodeFinnesIkke_opprettPeriode() {
+        Behandling behandling = TestdataFactory.lagBehandlingNyVurdering();
+        prosessinstans.setBehandling(behandling);
+        Behandling opprinneligBehandling = TestdataFactory.lagBehandling();
+        behandling.setOpprinneligBehandling(opprinneligBehandling);
+        Behandlingsresultat opprinneligResultat = new Behandlingsresultat();
+
+        when(behandlingsresultatService.hentBehandlingsresultat(opprinneligBehandling.getId())).thenReturn(opprinneligResultat);
+        Lovvalgsperiode nyLovvalgsperiode = lagLovvalgsperiode(null, Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1,
+                                                               InnvilgelsesResultat.INNVILGET);
+        behandlingsresultat.getLovvalgsperioder().add(nyLovvalgsperiode);
+        when(behandlingsresultatService.hentBehandlingsresultat(behandling.getId())).thenReturn(behandlingsresultat);
+
+        lagreLovvalgsperiodeMedl.utfør(prosessinstans);
+
+        verify(medlPeriodeService).opprettPeriodeEndelig(nyLovvalgsperiode, behandling.getId(), false);
     }
 
     @Test

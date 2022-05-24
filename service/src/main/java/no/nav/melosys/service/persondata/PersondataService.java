@@ -17,7 +17,6 @@ import no.nav.melosys.integrasjon.pdl.dto.HarMetadata;
 import no.nav.melosys.integrasjon.pdl.dto.identer.Ident;
 import no.nav.melosys.integrasjon.pdl.dto.person.Adressebeskyttelse;
 import no.nav.melosys.integrasjon.pdl.dto.person.Person;
-import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.persondata.familie.FamiliemedlemService;
@@ -25,6 +24,7 @@ import no.nav.melosys.service.persondata.mapping.NavnOversetter;
 import no.nav.melosys.service.persondata.mapping.PersonMedHistorikkOversetter;
 import no.nav.melosys.service.persondata.mapping.PersonopplysningerOversetter;
 import no.nav.melosys.service.persondata.mapping.StatsborgerskapOversetter;
+import no.nav.melosys.service.saksopplysninger.SaksopplysningerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -99,7 +99,7 @@ public class PersondataService implements PersondataFasade {
     private Persondata lagPersondataMedFamilie(String ident) {
         final Person person = pdlConsumer.hentPerson(ident);
         return PersonopplysningerOversetter.oversettMedFamilie(person,
-            familiemedlemService.hentFamiliemedlemmer(person, ident),
+            familiemedlemService.hentFamiliemedlemmer(person),
             kodeverkService);
     }
 
