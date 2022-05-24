@@ -1,10 +1,5 @@
 package no.nav.melosys.domain.arkiv;
 
-import no.nav.melosys.domain.eessi.Vedlegg;
-import org.springframework.data.util.Pair;
-
-import javax.persistence.Tuple;
-import javax.persistence.TupleElement;
 import java.util.List;
 
 public final class JournalpostBestilling {
