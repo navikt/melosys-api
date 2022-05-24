@@ -7,7 +7,6 @@ import java.util.List;
 
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.eessi.SedType;
-import no.nav.melosys.domain.eessi.Vedlegg;
 import no.nav.melosys.domain.msm.AltinnDokument;
 
 import static no.nav.melosys.domain.arkiv.DokumentVariant.lagDokumentVariant;

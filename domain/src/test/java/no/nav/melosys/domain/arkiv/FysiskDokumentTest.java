@@ -3,7 +3,6 @@ package no.nav.melosys.domain.arkiv;
 import java.util.Arrays;
 import java.util.List;
 
-import no.nav.melosys.domain.eessi.Vedlegg;
 import org.assertj.core.groups.Tuple;
 import org.junit.jupiter.api.Test;
 

@@ -1,4 +1,4 @@
-package no.nav.melosys.domain.eessi;
+package no.nav.melosys.domain.arkiv;
 
 import java.util.Arrays;
 import java.util.Objects;
