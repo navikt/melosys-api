@@ -1,5 +1,12 @@
 package no.nav.melosys.domain.arkiv;
 
+import no.nav.melosys.domain.eessi.Vedlegg;
+import org.springframework.data.util.Pair;
+
+import javax.persistence.Tuple;
+import javax.persistence.TupleElement;
+import java.util.List;
+
 public final class JournalpostBestilling {
     private final String tittel;
     private final String brevkode;
@@ -10,6 +17,7 @@ public final class JournalpostBestilling {
     private final OpprettJournalpost.KorrespondansepartIdType mottakerIdType;
     private final String saksnummer;
     private final byte[] pdf;
+    private final List<Vedlegg> vedlegg;
 
     private JournalpostBestilling(Builder builder) {
         this.tittel = builder.tittel;
@@ -21,6 +29,7 @@ public final class JournalpostBestilling {
         this.mottakerIdType = builder.mottakerIdType;
         this.saksnummer = builder.saksnummer;
         this.pdf = builder.pdf;
+        this.vedlegg = builder.vedlegg;
     }
 
     public String getTittel() {
@@ -59,6 +68,10 @@ public final class JournalpostBestilling {
         return pdf;
     }
 
+    public List<Vedlegg> getVedlegg() {
+        return vedlegg;
+    }
+
     public static class Builder {
         private String tittel;
         private String brevkode;
@@ -69,6 +82,7 @@ public final class JournalpostBestilling {
         private OpprettJournalpost.KorrespondansepartIdType mottakerIdType;
         private String saksnummer;
         private byte[] pdf;
+        private List<Vedlegg> vedlegg;
 
         public Builder medTittel(String tittel) {
             this.tittel = tittel;
@@ -112,6 +126,11 @@ public final class JournalpostBestilling {
 
         public Builder medPdf(byte[] pdf) {
             this.pdf = pdf;
+            return this;
+        }
+
+        public Builder medVedlegg(List<Vedlegg> vedlegg) {
+            this.vedlegg = vedlegg;
             return this;
         }
 

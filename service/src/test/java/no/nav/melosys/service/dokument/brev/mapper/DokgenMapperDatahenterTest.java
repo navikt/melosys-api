@@ -72,7 +72,7 @@ class DokgenMapperDatahenterTest {
             .medFritekst("Hei")
             .build();
 
-        when(dokumentHentingService.hentDokumenter(any())).thenReturn(List.of(
+        when(dokumentHentingService.hentJournalposter(any())).thenReturn(List.of(
             lagJournalpost(datoSeptember),
             lagJournalpost(datoDesember),
             lagJournalpost(datoOktober)));
