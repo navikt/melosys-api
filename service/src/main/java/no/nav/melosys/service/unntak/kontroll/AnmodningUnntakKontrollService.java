@@ -9,6 +9,7 @@ import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.person.Persondata;
+import no.nav.melosys.service.arbeidutland.kontroll.ArbeidUtlandKontrollService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.kontroll.PersonKontroller;
@@ -18,7 +19,7 @@ import no.nav.melosys.service.validering.Kontrollfeil;
 import org.springframework.stereotype.Component;
 
 @Component
-public class AnmodningUnntakKontrollService implements AdresseUtlandKontroller {
+public class AnmodningUnntakKontrollService {
 
     private final AnmodningsperiodeService anmodningsperiodeService;
     private final AvklarteVirksomheterService avklarteVirksomheterService;
@@ -47,8 +48,8 @@ public class AnmodningUnntakKontrollService implements AdresseUtlandKontroller {
             AnmodningUnntakKontrollService::harRegistrertAdresse,
             AnmodningUnntakKontrollService::anmodningsperiodeManglerSluttdato,
             AnmodningUnntakKontrollService::kunEnArbeidsgiver,
-            kontrollData -> AdresseUtlandKontroller.arbeidsstedManglerFelter(kontrollData.getBehandlingsgrunnlagData()),
-            kontrollData -> AdresseUtlandKontroller.foretakUtlandManglerFelter(kontrollData.getBehandlingsgrunnlagData())
+            kontrollData -> ArbeidUtlandKontrollService.arbeidsstedManglerFelter(kontrollData.getBehandlingsgrunnlagData()),
+            kontrollData -> ArbeidUtlandKontrollService.foretakUtlandManglerFelter(kontrollData.getBehandlingsgrunnlagData())
         );
     }
 
