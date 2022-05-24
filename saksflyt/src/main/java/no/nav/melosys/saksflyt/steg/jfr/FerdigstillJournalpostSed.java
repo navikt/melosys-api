@@ -1,9 +1,13 @@
 package no.nav.melosys.saksflyt.steg.jfr;
 
+import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.arkiv.Journalpost;
+import no.nav.melosys.domain.arkiv.Journalposttype;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
+import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.integrasjon.joark.JournalpostOppdatering;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
@@ -36,26 +40,38 @@ public class FerdigstillJournalpostSed implements StegBehandler {
 
     @Override
     public void utfør(Prosessinstans prosessinstans) {
-
-        final var behandling = prosessinstans.getBehandling();
-
-        final String saksnummer = behandling.getFagsak().getSaksnummer();
-        final String brukerID = hentBrukerID(prosessinstans);
         final MelosysEessiMelding eessiMelding = prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class);
-        final String tittel = prosessinstans.getData(ProsessDataKey.HOVEDDOKUMENT_TITTEL);
-        JournalpostOppdatering journalpostOppdatering = new JournalpostOppdatering.Builder()
-            .medBrukerID(brukerID)
-            .medSaksnummer(saksnummer)
-            .medTittel(tittel)
-            .medTema(fraBehandlingstema(behandling.getTema()).getKode())
-            .build();
 
-        joarkFasade.oppdaterJournalpost(eessiMelding.getJournalpostId(), journalpostOppdatering, true);
-        log.info("Journalpost {} ferdigstilt for behandling {}", eessiMelding.getJournalpostId(), behandling.getId());
+        if (erJournalpostFerdigstilt(eessiMelding.getJournalpostId())) {
+            log.warn("Journalposten {} er allerede ferdigstilt, ignorerer oppdatering.", eessiMelding.getJournalpostId());
+        } else {
+            final var behandling = prosessinstans.getBehandling();
+
+            final String saksnummer = behandling.getFagsak().getSaksnummer();
+            final String brukerID = hentBrukerID(prosessinstans);
+            final String tittel = prosessinstans.getData(ProsessDataKey.HOVEDDOKUMENT_TITTEL);
+
+            JournalpostOppdatering journalpostOppdatering = new JournalpostOppdatering.Builder()
+                .medBrukerID(brukerID)
+                .medSaksnummer(saksnummer)
+                .medTittel(tittel)
+                .medTema(fraBehandlingstema(behandling.getTema()).getKode())
+                .build();
+
+            joarkFasade.oppdaterJournalpost(eessiMelding.getJournalpostId(), journalpostOppdatering, true);
+
+            log.info("Journalpost {} ferdigstilt for behandling {}", eessiMelding.getJournalpostId(), behandling.getId());
+        }
     }
 
     private String hentBrukerID(Prosessinstans prosessinstans) {
         String aktørID = prosessinstans.getBehandling().getFagsak().hentBrukersAktørID();
         return persondataFasade.hentFolkeregisterident(aktørID);
+    }
+
+    private boolean erJournalpostFerdigstilt(String journalpostId) {
+        Journalpost journalpost = joarkFasade.hentJournalpost(journalpostId);
+
+        return (journalpost.isErFerdigstilt() && journalpost.getJournalposttype() == Journalposttype.INN);
     }
 }
