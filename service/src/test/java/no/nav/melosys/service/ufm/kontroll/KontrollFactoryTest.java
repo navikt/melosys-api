@@ -1,4 +1,4 @@
-package no.nav.melosys.service.kontroll.ufm;
+package no.nav.melosys.service.ufm.kontroll;
 
 import java.util.List;
 import java.util.function.Function;
@@ -40,7 +40,7 @@ class KontrollFactoryTest {
     @Test
     void hentKontrollerA008_verifiserIngenKontroller() {
         assertThatExceptionOfType(UnsupportedOperationException.class)
-            .isThrownBy(() ->kontrollFactory.hentKontrollerForSedType(SedType.A008))
+            .isThrownBy(() -> kontrollFactory.hentKontrollerForSedType(SedType.A008))
             .withMessageContaining("A008 er ikke støttet");
     }
 }

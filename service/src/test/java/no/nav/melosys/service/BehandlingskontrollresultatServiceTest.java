@@ -9,9 +9,9 @@ import no.nav.melosys.domain.Kontrollresultat;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.repository.KontrollresultatRepository;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.behandling.BehandlingskontrollresultatService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.kontroll.KontrollresultatService;
-import no.nav.melosys.service.kontroll.ufm.UfmKontrollService;
+import no.nav.melosys.service.ufm.kontroll.UfmKontrollService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,7 +25,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class KontrollresultatServiceTest {
+public class BehandlingskontrollresultatServiceTest {
     @Mock
     private KontrollresultatRepository kontrollresultatRepository;
     @Mock
@@ -37,11 +37,11 @@ public class KontrollresultatServiceTest {
     @Captor
     private ArgumentCaptor<List<Kontrollresultat>> kontrollresultaterCaptor;
 
-    private KontrollresultatService kontrollresultatService;
+    private BehandlingskontrollresultatService behandlingskontrollresultatService;
 
     @BeforeEach
     public void setUp() {
-        kontrollresultatService = new KontrollresultatService(kontrollresultatRepository, behandlingsresultatService, ufmKontrollService, behandlingService);
+        behandlingskontrollresultatService = new BehandlingskontrollresultatService(kontrollresultatRepository, behandlingsresultatService, ufmKontrollService, behandlingService);
 
         when(kontrollresultatRepository.saveAll(anyCollection())).thenReturn(List.of());
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(lagBehandlingsresultat());
@@ -55,7 +55,7 @@ public class KontrollresultatServiceTest {
     @Test
     public void utførKontrollerOgRegistrerFeil() throws Exception {
         when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(new Behandling());
-        kontrollresultatService.utførKontrollerOgRegistrerFeil(1L);
+        behandlingskontrollresultatService.utførKontrollerOgRegistrerFeil(1L);
 
         verify(behandlingService).hentBehandlingMedSaksopplysninger(anyLong());
         verify(ufmKontrollService).utførKontroller(any(Behandling.class));

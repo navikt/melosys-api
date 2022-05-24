@@ -1,4 +1,4 @@
-package no.nav.melosys.service.kontroll.ufm;
+package no.nav.melosys.service.ufm.kontroll;
 
 import java.util.*;
 import java.util.function.Function;
@@ -56,7 +56,7 @@ public class UfmKontrollService {
     }
 
     private List<Kontroll_begrunnelser> utførKontroller(UfmKontrollData kontrollData,
-                                                              Collection<Function<UfmKontrollData, Kontroll_begrunnelser>> kontroller) {
+                                                        Collection<Function<UfmKontrollData, Kontroll_begrunnelser>> kontroller) {
         return kontroller.stream()
             .map(f -> f.apply(kontrollData))
             .filter(Objects::nonNull)

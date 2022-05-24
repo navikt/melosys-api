@@ -1,4 +1,4 @@
-package no.nav.melosys.service.kontroll.vedtak;
+package no.nav.melosys.service.vedtak.kontroll;
 
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadTrygdeavtale;
@@ -6,7 +6,11 @@ import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
-import no.nav.melosys.service.kontroll.*;
+import no.nav.melosys.service.kontroll.ArbeidsstedKontroller;
+import no.nav.melosys.service.kontroll.OverlappendeMedlemskapsperioderKontroller;
+import no.nav.melosys.service.kontroll.PeriodeKontroller;
+import no.nav.melosys.service.kontroll.PersonKontroller;
+import no.nav.melosys.service.unntak.kontroll.AdresseUtlandKontroller;
 import no.nav.melosys.service.validering.Kontrollfeil;
 
 final class VedtakKontroller implements AdresseUtlandKontroller {

@@ -1,4 +1,4 @@
-package no.nav.melosys.service.kontroll.ufm;
+package no.nav.melosys.service.ufm.kontroll;
 
 import no.nav.melosys.service.persondata.PersondataFasade;
 import org.springframework.beans.factory.annotation.Qualifier;

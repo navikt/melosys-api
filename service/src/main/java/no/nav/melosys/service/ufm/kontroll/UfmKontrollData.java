@@ -1,4 +1,4 @@
-package no.nav.melosys.service.kontroll.ufm;
+package no.nav.melosys.service.ufm.kontroll;
 
 import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
@@ -6,7 +6,7 @@ import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.dokument.utbetaling.UtbetalingDokument;
 import no.nav.melosys.domain.person.Persondata;
 
-class UfmKontrollData {
+public class UfmKontrollData {
 
     private final MedlemskapDokument medlemskapDokument;
     private final SedDokument sedDokument;
@@ -19,7 +19,7 @@ class UfmKontrollData {
                     MedlemskapDokument medlemskapDokument,
                     InntektDokument inntektDokument,
                     UtbetalingDokument utbetalingDokument) {
-        this.medlemskapDokument  = medlemskapDokument;
+        this.medlemskapDokument = medlemskapDokument;
         this.sedDokument = sedDokument;
         this.persondata = persondata;
         this.inntektDokument = inntektDokument;

@@ -21,9 +21,9 @@ import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
-import no.nav.melosys.service.kontroll.vedtak.VedtakKontrollService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
+import no.nav.melosys.service.vedtak.kontroll.VedtakKontrollService;
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
 import no.nav.melosys.sikkerhet.context.TestSubjectHandler;
 import org.junit.jupiter.api.BeforeEach;
@@ -348,7 +348,7 @@ class EosVedtakServiceTest {
     }
 
     private FattVedtakRequest lagRequest(Behandlingsresultattyper behandlingsresultattype, Vedtakstyper vedtakstype,
-                                            String behandlingsresultatFritekst, String fritekstSed, Set<String> mottakerinstitusjoner) {
+                                         String behandlingsresultatFritekst, String fritekstSed, Set<String> mottakerinstitusjoner) {
         return new FattVedtakRequest.Builder()
             .medBehandlingsresultat(behandlingsresultattype)
             .medVedtakstype(vedtakstype)

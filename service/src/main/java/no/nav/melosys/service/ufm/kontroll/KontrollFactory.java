@@ -1,4 +1,4 @@
-package no.nav.melosys.service.kontroll.ufm;
+package no.nav.melosys.service.ufm.kontroll;
 
 import java.util.List;
 import java.util.function.Function;
@@ -8,7 +8,7 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import org.springframework.stereotype.Service;
 
 @Service
-class KontrollFactory {
+public class KontrollFactory {
 
     List<Function<UfmKontrollData, Kontroll_begrunnelser>> hentKontrollerForSedType(final SedType sedType) {
         switch (sedType) {

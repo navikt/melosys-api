@@ -1,5 +1,8 @@
 package no.nav.melosys.service.saksopplysninger;
 
+import java.util.Collections;
+import java.util.Set;
+
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.BehandlingEndretStatusEvent;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
@@ -9,7 +12,6 @@ import no.nav.melosys.domain.person.Personopplysninger;
 import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie;
 import no.nav.melosys.domain.person.familie.OmfattetFamilie;
 import no.nav.melosys.service.SaksbehandlingDataFactory;
-import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.persondata.PersondataFasade;
@@ -19,9 +21,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.Collections;
-import java.util.Set;
 
 import static org.mockito.Mockito.*;
 
@@ -42,7 +41,7 @@ class SaksopplysningEventListenerTest {
     @BeforeEach
     void setUp() {
         saksoppplysningEventListener = new SaksoppplysningEventListener(saksopplysningerService, behandlingService, persondataFasade,
-                avklartefaktaService);
+            avklartefaktaService);
     }
 
     @Test

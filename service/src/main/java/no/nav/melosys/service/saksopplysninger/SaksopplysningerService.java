@@ -1,4 +1,4 @@
-package no.nav.melosys.service;
+package no.nav.melosys.service.saksopplysninger;
 
 import java.time.Instant;
 import java.util.List;

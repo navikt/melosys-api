@@ -1,4 +1,4 @@
-package no.nav.melosys.service.kontroll.vedtak;
+package no.nav.melosys.service.vedtak.kontroll;
 
 import java.util.Collections;
 import java.util.Set;

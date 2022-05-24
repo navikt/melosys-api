@@ -1,4 +1,4 @@
-package no.nav.melosys.service.kontroll.unntak;
+package no.nav.melosys.service.unntak.kontroll;
 
 import java.time.LocalDate;
 import java.util.Collection;

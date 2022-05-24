@@ -1,4 +1,4 @@
-package no.nav.melosys.service.kontroll.vedtak;
+package no.nav.melosys.service.vedtak.kontroll;
 
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingService;

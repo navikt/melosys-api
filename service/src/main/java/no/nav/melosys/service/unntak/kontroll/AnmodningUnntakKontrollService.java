@@ -1,4 +1,4 @@
-package no.nav.melosys.service.kontroll.unntak;
+package no.nav.melosys.service.unntak.kontroll;
 
 import java.util.Collection;
 import java.util.Objects;
@@ -11,7 +11,6 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.kontroll.AdresseUtlandKontroller;
 import no.nav.melosys.service.kontroll.PersonKontroller;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
@@ -84,6 +83,7 @@ public class AnmodningUnntakKontrollService implements AdresseUtlandKontroller {
         return kontrollData.getAnmodningsperiode().getTom() == null
             ? new Kontrollfeil(Kontroll_begrunnelser.INGEN_SLUTTDATO) : null;
     }
+
     static Kontrollfeil kunEnArbeidsgiver(AnmodningUnntakKontrollData kontrollData) {
         return (kontrollData.getAntallArbeidsgivere() != 1)
             ? new Kontrollfeil(Kontroll_begrunnelser.IKKE_KUN_EN_VIRKSOMHET) : null;

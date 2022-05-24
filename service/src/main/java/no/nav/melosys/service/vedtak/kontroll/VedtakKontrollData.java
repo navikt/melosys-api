@@ -1,4 +1,4 @@
-package no.nav.melosys.service.kontroll.vedtak;
+package no.nav.melosys.service.vedtak.kontroll;
 
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;

@@ -3,7 +3,7 @@ package no.nav.melosys.saksflyt.steg.register;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
-import no.nav.melosys.service.kontroll.KontrollresultatService;
+import no.nav.melosys.service.behandling.BehandlingskontrollresultatService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -14,10 +14,10 @@ public class RegisterKontroll implements StegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(RegisterKontroll.class);
 
-    private final KontrollresultatService kontrollresultatService;
+    private final BehandlingskontrollresultatService behandlingskontrollresultatService;
 
-    public RegisterKontroll(@Qualifier("system") KontrollresultatService kontrollresultatService) {
-        this.kontrollresultatService = kontrollresultatService;
+    public RegisterKontroll(@Qualifier("system") BehandlingskontrollresultatService behandlingskontrollresultatService) {
+        this.behandlingskontrollresultatService = behandlingskontrollresultatService;
     }
 
     @Override
@@ -29,6 +29,6 @@ public class RegisterKontroll implements StegBehandler {
     public void utfør(Prosessinstans prosessinstans) {
         final long behandlingID = prosessinstans.getBehandling().getId();
         log.info("Utfører registerkontroll for behandling {}", behandlingID);
-        kontrollresultatService.utførKontrollerOgRegistrerFeil(behandlingID);
+        behandlingskontrollresultatService.utførKontrollerOgRegistrerFeil(behandlingID);
     }
 }

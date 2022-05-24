@@ -1,4 +1,4 @@
-package no.nav.melosys.service.kontroll;
+package no.nav.melosys.service.behandling;
 
 import java.util.List;
 
@@ -7,9 +7,7 @@ import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Kontrollresultat;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.repository.KontrollresultatRepository;
-import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.kontroll.ufm.UfmKontrollService;
+import no.nav.melosys.service.ufm.kontroll.UfmKontrollService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Primary;
@@ -18,18 +16,18 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Primary
-public class KontrollresultatService {
-    private static final Logger log = LoggerFactory.getLogger(KontrollresultatService.class);
+public class BehandlingskontrollresultatService {
+    private static final Logger log = LoggerFactory.getLogger(BehandlingskontrollresultatService.class);
 
     private final KontrollresultatRepository kontrollresultatRepository;
     private final BehandlingsresultatService behandlingsresultatService;
     private final UfmKontrollService ufmKontrollService;
     private final BehandlingService behandlingService;
 
-    public KontrollresultatService(KontrollresultatRepository kontrollresultatRepository,
-                                   BehandlingsresultatService behandlingsresultatService,
-                                   UfmKontrollService ufmKontrollService,
-                                   BehandlingService behandlingService) {
+    public BehandlingskontrollresultatService(KontrollresultatRepository kontrollresultatRepository,
+                                              BehandlingsresultatService behandlingsresultatService,
+                                              UfmKontrollService ufmKontrollService,
+                                              BehandlingService behandlingService) {
         this.kontrollresultatRepository = kontrollresultatRepository;
         this.behandlingsresultatService = behandlingsresultatService;
         this.ufmKontrollService = ufmKontrollService;

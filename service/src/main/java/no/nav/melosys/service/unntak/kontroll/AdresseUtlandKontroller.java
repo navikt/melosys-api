@@ -1,4 +1,4 @@
-package no.nav.melosys.service.kontroll;
+package no.nav.melosys.service.unntak.kontroll;
 
 import java.util.ArrayList;
 import java.util.List;

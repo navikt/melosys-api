@@ -5,11 +5,12 @@ import java.util.List;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.ForetakUtland;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.FysiskArbeidssted;
+import no.nav.melosys.service.unntak.kontroll.AdresseUtlandKontroller;
 import no.nav.melosys.service.validering.Kontrollfeil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static no.nav.melosys.service.kontroll.AdresseUtlandKontroller.*;
+import static no.nav.melosys.service.unntak.kontroll.AdresseUtlandKontroller.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class AdresseUtlandKontrollerTest {

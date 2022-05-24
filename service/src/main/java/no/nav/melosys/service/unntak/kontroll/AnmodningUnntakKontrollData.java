@@ -1,4 +1,4 @@
-package no.nav.melosys.service.kontroll.unntak;
+package no.nav.melosys.service.unntak.kontroll;
 
 import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;

@@ -1,4 +1,4 @@
-package no.nav.melosys.service.kontroll.ufm;
+package no.nav.melosys.service.ufm.kontroll;
 
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -45,7 +45,7 @@ final class UfmKontroller {
     static Kontroll_begrunnelser periodeOver5År(UfmKontrollData kontrollData) {
         return PeriodeKontroller.periodeOver5År(
             kontrollData.getSedDokument().getLovvalgsperiode().getFom(), kontrollData.getSedDokument().getLovvalgsperiode().getTom()) ?
-                Kontroll_begrunnelser.PERIODEN_OVER_5_AR : null;
+            Kontroll_begrunnelser.PERIODEN_OVER_5_AR : null;
     }
 
     static Kontroll_begrunnelser periodeStarterFørFørsteJuni2012(UfmKontrollData kontrollData) {

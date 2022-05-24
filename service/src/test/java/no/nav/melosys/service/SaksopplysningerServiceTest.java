@@ -10,6 +10,7 @@ import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.domain.person.Personopplysninger;
 import no.nav.melosys.repository.SaksopplysningRepository;
 import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory;
+import no.nav.melosys.service.saksopplysninger.SaksopplysningerService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
