@@ -219,7 +219,7 @@ public class JournalfoeringService {
 
     private void validerNårBehandlingstypeIkkeOppgitt(Fagsak fagsak) {
         Behandling sisteBehandling = fagsak.hentSistRegistrertBehandling();
-        if (!sisteBehandling.erAvsluttet()) return;
+        if (sisteBehandling.erAktiv()) return;
 
         Behandling førsteBehandling = fagsak.hentTidligstRegistrertBehandling();
         // Journalføre uten å opprette ny behandling kun gjelde hvis første behandling hadde behandlingstype SOEKNAD.
