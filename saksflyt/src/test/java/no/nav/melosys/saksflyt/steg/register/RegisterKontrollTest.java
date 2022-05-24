@@ -2,7 +2,7 @@ package no.nav.melosys.saksflyt.steg.register;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.service.kontroll.KontrollresultatService;
+import no.nav.melosys.service.behandling.kontroll.BehandlingskontrollresultatService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,13 +16,13 @@ import static org.mockito.Mockito.verify;
 public class RegisterKontrollTest {
 
     @Mock
-    private KontrollresultatService kontrollresultatService;
+    private BehandlingskontrollresultatService behandlingskontrollresultatService;
 
     private RegisterKontroll registerKontroll;
 
     @BeforeEach
     public void setup() {
-        registerKontroll = new RegisterKontroll(kontrollresultatService);
+        registerKontroll = new RegisterKontroll(behandlingskontrollresultatService);
     }
 
     @Test
@@ -33,6 +33,6 @@ public class RegisterKontrollTest {
 
         registerKontroll.utfør(prosessinstans);
 
-        verify(kontrollresultatService).utførKontrollerOgRegistrerFeil(anyLong());
+        verify(behandlingskontrollresultatService).utførKontrollerOgRegistrerFeil(anyLong());
     }
 }
