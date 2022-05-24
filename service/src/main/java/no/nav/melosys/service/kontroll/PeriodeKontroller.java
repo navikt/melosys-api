@@ -8,9 +8,7 @@ import java.time.temporal.ChronoUnit;
 
 import no.nav.melosys.domain.ErPeriode;
 import no.nav.melosys.service.kontroll.overlapp.PeriodeOverlappSjekk;
-import org.springframework.stereotype.Component;
 
-@Component
 public final class PeriodeKontroller {
 
     private static final LocalDate FØRSTE_JUNI_2012 = LocalDate.of(2012, 6, 1);
