@@ -9,7 +9,7 @@ import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.person.Persondata;
-import no.nav.melosys.service.adresse.kontroll.AdresseUtlandKontrollService;
+import no.nav.melosys.service.arbeidutland.kontroll.ArbeidUtlandKontrollService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.kontroll.PersonKontroller;
@@ -48,8 +48,8 @@ public class AnmodningUnntakKontrollService {
             AnmodningUnntakKontrollService::harRegistrertAdresse,
             AnmodningUnntakKontrollService::anmodningsperiodeManglerSluttdato,
             AnmodningUnntakKontrollService::kunEnArbeidsgiver,
-            kontrollData -> AdresseUtlandKontrollService.arbeidsstedManglerFelter(kontrollData.getBehandlingsgrunnlagData()),
-            kontrollData -> AdresseUtlandKontrollService.foretakUtlandManglerFelter(kontrollData.getBehandlingsgrunnlagData())
+            kontrollData -> ArbeidUtlandKontrollService.arbeidsstedManglerFelter(kontrollData.getBehandlingsgrunnlagData()),
+            kontrollData -> ArbeidUtlandKontrollService.foretakUtlandManglerFelter(kontrollData.getBehandlingsgrunnlagData())
         );
     }
 

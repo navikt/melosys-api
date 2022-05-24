@@ -1,4 +1,4 @@
-package no.nav.melosys.service.adresse.kontroll;
+package no.nav.melosys.service.arbeidutland.kontroll;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,7 +10,7 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.service.kontroll.AdresseKontroller;
 import no.nav.melosys.service.validering.Kontrollfeil;
 
-public class AdresseUtlandKontrollService {
+public class ArbeidUtlandKontrollService {
     static String ARBEIDSSTED_FIRMANAVN = "behandlingsgrunnlag.arbeidPaaLand.fysiskeArbeidssteder[%d].virksomhetNavn";
     static String ARBEIDSSTED_LAND = "behandlingsgrunnlag.arbeidPaaLand.fysiskeArbeidssteder[%d].adresse.landkode";
     static String FORETAK_UTLAND_NAVN = "behandlingsgrunnlag.foretakUtland[%d].navn";

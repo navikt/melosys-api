@@ -6,7 +6,7 @@ import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
-import no.nav.melosys.service.adresse.kontroll.AdresseUtlandKontrollService;
+import no.nav.melosys.service.arbeidutland.kontroll.ArbeidUtlandKontrollService;
 import no.nav.melosys.service.kontroll.ArbeidsstedKontroller;
 import no.nav.melosys.service.kontroll.OverlappendeMedlemskapsperioderKontroller;
 import no.nav.melosys.service.kontroll.PeriodeKontroller;
@@ -50,11 +50,11 @@ final class VedtakKontroller {
     }
 
     static Kontrollfeil arbeidsstedManglerFelter(VedtakKontrollData kontrollData) {
-        return AdresseUtlandKontrollService.arbeidsstedManglerFelter(kontrollData.getBehandlingsgrunnlagData());
+        return ArbeidUtlandKontrollService.arbeidsstedManglerFelter(kontrollData.getBehandlingsgrunnlagData());
     }
 
     static Kontrollfeil foretakUtlandManglerFelter(VedtakKontrollData kontrollData) {
-        return AdresseUtlandKontrollService.foretakUtlandManglerFelter(kontrollData.getBehandlingsgrunnlagData());
+        return ArbeidUtlandKontrollService.foretakUtlandManglerFelter(kontrollData.getBehandlingsgrunnlagData());
     }
 
     static Kontrollfeil representantIUtlandetMangler(VedtakKontrollData kontrollData) {
