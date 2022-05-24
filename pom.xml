@@ -48,7 +48,7 @@
         <abac.spring.version>1.6.0</abac.spring.version>
         <behandlingstatus.version>1.1.0</behandlingstatus.version>
         <doksys.dokumentproduksjon.version>3.3.4</doksys.dokumentproduksjon.version>
-        <token-support.version>2.0.16</token-support.version>
+        <token-support.version>2.0.20</token-support.version>
         <token-validation-test-support.version>2.0.5</token-validation-test-support.version>
 
         <!-- Versjoner av eksterne biblioteker -->
