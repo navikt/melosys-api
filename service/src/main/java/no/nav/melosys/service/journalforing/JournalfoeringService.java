@@ -201,7 +201,9 @@ public class JournalfoeringService {
         if (behandlingstype != null) {
             prosessType = ProsessType.JFR_NY_VURDERING;
         } else {
-            validerNårBehandlingstypeIkkeOppgitt(fagsak);
+            if (unleash.isEnabled("melosys.api.journalfoering.alltid.opprett.ny.behandling")) {
+                validerNårBehandlingstypeIkkeOppgitt(fagsak);
+            }
             prosessType = ProsessType.JFR_KNYTT;
         }
 
@@ -255,7 +257,10 @@ public class JournalfoeringService {
     }
 
     private boolean erUgyldigBehandlingstypeForEuEøs(Behandlingstyper behandlingstype) {
-        return behandlingstype != Behandlingstyper.ENDRET_PERIODE && behandlingstype != Behandlingstyper.NY_VURDERING;
+        if (unleash.isEnabled("melosys.api.journalfoering.alltid.opprett.ny.behandling")) {
+            return behandlingstype != Behandlingstyper.ENDRET_PERIODE && behandlingstype != Behandlingstyper.NY_VURDERING;
+        }
+        return behandlingstype != Behandlingstyper.ENDRET_PERIODE;
     }
 
     private void valider(JournalfoeringDto journalfoeringDto) {
