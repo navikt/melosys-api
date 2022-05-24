@@ -3,7 +3,6 @@ package no.nav.melosys.tjenester.gui.dto;
 import java.time.Instant;
 import java.time.LocalDate;
 
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
@@ -21,7 +20,6 @@ public class BehandlingOppsummeringDto {
     private Instant svarFrist;
     private LocalDate behandlingsfrist;
     private Behandlingsresultattyper behandlingsresultattype;
-    private Aktoersroller behandlingGjelder;
 
     public Behandlingsstatus getBehandlingsstatus() {
         return behandlingsstatus;
@@ -101,13 +99,5 @@ public class BehandlingOppsummeringDto {
 
     public void setBehandlingsresultattype(Behandlingsresultattyper behandlingsresultattype) {
         this.behandlingsresultattype = behandlingsresultattype;
-    }
-
-    public Aktoersroller getBehandlingGjelder() {
-        return behandlingGjelder;
-    }
-
-    public void setBehandlingGjelder(Aktoersroller behandlingGjelder) {
-        this.behandlingGjelder = behandlingGjelder;
     }
 }

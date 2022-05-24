@@ -218,7 +218,7 @@ public class Fagsak extends RegistreringsInfo {
         return Sakstyper.EU_EOS == sakstype;
     }
 
-    public Aktoersroller behandlingGjelder() {
+    public Aktoersroller getHovedpartRolle() {
         if (harAktørMedRolleType(BRUKER)) {
             return BRUKER;
         } else if (harAktørMedRolleType(VIRKSOMHET)) {

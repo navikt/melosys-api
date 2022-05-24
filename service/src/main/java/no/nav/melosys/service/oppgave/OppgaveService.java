@@ -250,25 +250,25 @@ public class OppgaveService {
         journalfoeringsoppgaveDto.setJournalpostID(oppgave.getJournalpostId());
         String aktørId = oppgave.getAktørId();
         String orgnr = oppgave.getOrgnr();
-        oppdaterIdOgNavn(aktørId, orgnr, journalfoeringsoppgaveDto);
+        oppdaterHovedpartIdentOgNavn(aktørId, orgnr, journalfoeringsoppgaveDto);
         return journalfoeringsoppgaveDto;
     }
 
-    private void oppdaterIdOgNavn(String aktørID, String orgnr, OppgaveDto oppgaveDto) {
+    private void oppdaterHovedpartIdentOgNavn(String aktørID, String orgnr, OppgaveDto oppgaveDto) {
         if (aktørID != null) {
             String fnr = persondataFasade.finnFolkeregisterident(aktørID).orElse(null);
             if (StringUtils.isNotEmpty(fnr)) {
-                oppgaveDto.setId(fnr);
+                oppgaveDto.setHovedpartIdent(fnr);
                 oppgaveDto.setNavn(persondataFasade.hentSammensattNavn(fnr));
                 return;
             }
         }
         if (orgnr != null) {
-            oppgaveDto.setId(orgnr);
+            oppgaveDto.setHovedpartIdent(orgnr);
             oppgaveDto.setNavn(eregFasade.hentOrganisasjonNavn(orgnr));
             return;
         }
-        oppgaveDto.setId(UKJENT);
+        oppgaveDto.setHovedpartIdent(UKJENT);
         oppgaveDto.setNavn(UKJENT);
     }
 
@@ -284,7 +284,7 @@ public class OppgaveService {
 
         var aktørID = fagsak.finnBrukersAktørID().orElse(null);
         var orgnr = fagsak.finnVirksomhetsOrgnr().orElse(null);
-        oppdaterIdOgNavn(aktørID, orgnr, behOppgaveDto);
+        oppdaterHovedpartIdentOgNavn(aktørID, orgnr, behOppgaveDto);
 
         if (orgnr != null) {
             return behOppgaveDto;

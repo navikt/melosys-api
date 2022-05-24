@@ -2,6 +2,7 @@ package no.nav.melosys.tjenester.gui.dto;
 
 import java.time.Instant;
 
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 
@@ -13,6 +14,7 @@ public class FagsakDto {
     private Saksstatuser saksstatus;
     private Instant registrertDato;
     private Instant endretDato;
+    private Aktoersroller hovedpartRolle;
 
     public String getSaksnummer() {
         return saksnummer;
@@ -60,5 +62,13 @@ public class FagsakDto {
 
     public void setEndretDato(Instant endretDato) {
         this.endretDato = endretDato;
+    }
+
+    public Aktoersroller getHovedpartRolle() {
+        return hovedpartRolle;
+    }
+
+    public void setHovedpartRolle(Aktoersroller hovedpartRolle) {
+        this.hovedpartRolle = hovedpartRolle;
     }
 }

@@ -204,6 +204,7 @@ public class FagsakTjeneste {
         fagsakDto.setSaksstatus(fagsak.getStatus());
         fagsakDto.setRegistrertDato(fagsak.getRegistrertDato());
         fagsakDto.setEndretDato(fagsak.getEndretDato());
+        fagsakDto.setHovedpartRolle(fagsak.getHovedpartRolle());
 
         return fagsakDto;
     }
@@ -216,6 +217,7 @@ public class FagsakTjeneste {
             fagsakOppsummeringDto.setSakstype(fagsak.getType());
             fagsakOppsummeringDto.setSaksstatus(fagsak.getStatus());
             fagsakOppsummeringDto.setOpprettetDato(fagsak.getRegistrertDato());
+            fagsakOppsummeringDto.setHovedpartRolle(fagsak.getHovedpartRolle());
 
             List<Behandling> behandlinger = fagsak.getBehandlinger();
 
