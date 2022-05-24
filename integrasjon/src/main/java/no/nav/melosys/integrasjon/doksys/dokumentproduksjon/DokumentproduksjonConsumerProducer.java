@@ -2,6 +2,7 @@ package no.nav.melosys.integrasjon.doksys.dokumentproduksjon;
 
 import no.nav.melosys.sikkerhet.sts.NAVSTSClient;
 import no.nav.melosys.sikkerhet.sts.StsConfigurationUtil;
+import no.nav.melosys.sikkerhet.sts.StsLogin;
 import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.DokumentproduksjonV3;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -11,10 +12,12 @@ import org.springframework.context.annotation.Primary;
 @Configuration
 public class DokumentproduksjonConsumerProducer {
 
-    private DokumentproduksjonConsumerConfig config;
+    private final DokumentproduksjonConsumerConfig config;
+    private final StsLogin stsLogin;
 
-    public DokumentproduksjonConsumerProducer(DokumentproduksjonConsumerConfig config) {
+    public DokumentproduksjonConsumerProducer(DokumentproduksjonConsumerConfig config, StsLogin stsLogin) {
         this.config = config;
+        this.stsLogin = stsLogin;
     }
 
     @Bean
@@ -38,6 +41,6 @@ public class DokumentproduksjonConsumerProducer {
     }
 
     private DokumentproduksjonV3 wrapWithSts(DokumentproduksjonV3 port, NAVSTSClient.StsClientType oidcTilSaml) {
-        return StsConfigurationUtil.wrapWithSts(port, oidcTilSaml);
+        return StsConfigurationUtil.wrapWithSts(port, oidcTilSaml, stsLogin);
     }
 }
