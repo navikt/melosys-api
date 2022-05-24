@@ -43,7 +43,8 @@ public class FerdigstillJournalpostSed implements StegBehandler {
         final MelosysEessiMelding eessiMelding = prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class);
 
         if (erJournalpostFerdigstilt(eessiMelding.getJournalpostId())) {
-            log.warn("Journalposten {} er allerede ferdigstilt, ignorerer oppdatering.", eessiMelding.getJournalpostId());
+            log.warn("Journalpost {} for sed {} i RINA-sak {} er allerede ferdigstilt. Behandler ikke videre",
+                eessiMelding.getJournalpostId(), eessiMelding.getSedId(), eessiMelding.getRinaSaksnummer());
         } else {
             final var behandling = prosessinstans.getBehandling();
 
