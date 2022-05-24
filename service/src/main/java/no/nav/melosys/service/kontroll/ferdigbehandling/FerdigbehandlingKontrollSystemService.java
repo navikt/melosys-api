@@ -1,4 +1,4 @@
-package no.nav.melosys.service.kontroll.vedtak;
+package no.nav.melosys.service.kontroll.ferdigbehandling;
 
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -10,10 +10,10 @@ import org.springframework.stereotype.Service;
 
 @Service
 @Qualifier("system")
-public class VedtakKontrollSystemService extends VedtakKontrollService {
-    public VedtakKontrollSystemService(BehandlingService behandlingService, BehandlingsresultatService behandlingsresultatService,
-                                       LovvalgsperiodeService lovvalgsperiodeService,
-                                       @Qualifier("system") PersondataFasade persondataFasade, RegisteropplysningerService registeropplysningerService) {
+public class FerdigbehandlingKontrollSystemService extends FerdigbehandlingKontrollService {
+    public FerdigbehandlingKontrollSystemService(BehandlingService behandlingService, BehandlingsresultatService behandlingsresultatService,
+                                                 LovvalgsperiodeService lovvalgsperiodeService,
+                                                 @Qualifier("system") PersondataFasade persondataFasade, RegisteropplysningerService registeropplysningerService) {
         super(behandlingService, behandlingsresultatService, lovvalgsperiodeService, persondataFasade, registeropplysningerService);
     }
 }

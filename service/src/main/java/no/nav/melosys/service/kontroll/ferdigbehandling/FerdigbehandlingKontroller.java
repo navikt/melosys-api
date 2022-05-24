@@ -1,4 +1,4 @@
-package no.nav.melosys.service.kontroll.vedtak;
+package no.nav.melosys.service.kontroll.ferdigbehandling;
 
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadTrygdeavtale;
@@ -9,12 +9,12 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_t
 import no.nav.melosys.service.kontroll.*;
 import no.nav.melosys.service.validering.Kontrollfeil;
 
-final class VedtakKontroller implements AdresseUtlandKontroller {
+final class FerdigbehandlingKontroller implements AdresseUtlandKontroller {
 
-    private VedtakKontroller() {
+    private FerdigbehandlingKontroller() {
     }
 
-    static Kontrollfeil overlappendeMedlemsperiode(VedtakKontrollData kontrollData) {
+    static Kontrollfeil overlappendeMedlemsperiode(FerdigbehandlingKontrollData kontrollData) {
         MedlemskapDokument medlemskapDokument = kontrollData.getMedlemskapDokument();
         Lovvalgsperiode lovvalgsperiode = kontrollData.getLovvalgsperiode();
         Lovvalgsperiode opprinneligLovvalgsperiode = kontrollData.getOpprinneligLovvalgsperiode();
@@ -23,7 +23,7 @@ final class VedtakKontroller implements AdresseUtlandKontroller {
             lovvalgsperiode, opprinneligLovvalgsperiode) ? new Kontrollfeil(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER) : null;
     }
 
-    static Kontrollfeil periodeOver24Mnd(VedtakKontrollData kontrollData) {
+    static Kontrollfeil periodeOver24Mnd(FerdigbehandlingKontrollData kontrollData) {
         Lovvalgsperiode lovvalgsperiode = kontrollData.getLovvalgsperiode();
 
         return lovvalgsperiode.erArtikkel12()
@@ -31,13 +31,13 @@ final class VedtakKontroller implements AdresseUtlandKontroller {
             ? new Kontrollfeil(Kontroll_begrunnelser.PERIODEN_OVER_24_MD) : null;
     }
 
-    static Kontrollfeil periodeManglerSluttdato(VedtakKontrollData kontrollData) {
+    static Kontrollfeil periodeManglerSluttdato(FerdigbehandlingKontrollData kontrollData) {
         Lovvalgsperiode lovvalgsperiode = kontrollData.getLovvalgsperiode();
 
         return lovvalgsperiode.getTom() == null ? new Kontrollfeil(Kontroll_begrunnelser.INGEN_SLUTTDATO) : null;
     }
 
-    static Kontrollfeil periodeOverTreÅr(VedtakKontrollData kontrollData) {
+    static Kontrollfeil periodeOverTreÅr(FerdigbehandlingKontrollData kontrollData) {
         Lovvalgsperiode lovvalgsperiode = kontrollData.getLovvalgsperiode();
 
         return lovvalgsperiode.getBestemmelse() == Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1
@@ -45,15 +45,15 @@ final class VedtakKontroller implements AdresseUtlandKontroller {
             ? new Kontrollfeil(Kontroll_begrunnelser.MER_ENN_TRE_ÅR) : null;
     }
 
-    static Kontrollfeil arbeidsstedManglerFelter(VedtakKontrollData kontrollData) {
+    static Kontrollfeil arbeidsstedManglerFelter(FerdigbehandlingKontrollData kontrollData) {
         return AdresseUtlandKontroller.arbeidsstedManglerFelter(kontrollData.getBehandlingsgrunnlagData());
     }
 
-    static Kontrollfeil foretakUtlandManglerFelter(VedtakKontrollData kontrollData) {
+    static Kontrollfeil foretakUtlandManglerFelter(FerdigbehandlingKontrollData kontrollData) {
         return AdresseUtlandKontroller.foretakUtlandManglerFelter(kontrollData.getBehandlingsgrunnlagData());
     }
 
-    static Kontrollfeil representantIUtlandetMangler(VedtakKontrollData kontrollData) {
+    static Kontrollfeil representantIUtlandetMangler(FerdigbehandlingKontrollData kontrollData) {
         var lovvalgsperiode = kontrollData.getLovvalgsperiode();
         var behandlingsgrunnlagData = (SoeknadTrygdeavtale) kontrollData.getBehandlingsgrunnlagData();
 
@@ -62,7 +62,7 @@ final class VedtakKontroller implements AdresseUtlandKontroller {
             ? new Kontrollfeil(Kontroll_begrunnelser.ATTEST_MANGLER_ARBEIDSSTED) : null;
     }
 
-    static Kontrollfeil adresseRegistrert(VedtakKontrollData kontrollData) {
+    static Kontrollfeil adresseRegistrert(FerdigbehandlingKontrollData kontrollData) {
         return PersonKontroller.harRegistrertAdresse(kontrollData.getPersondata(), kontrollData.getBehandlingsgrunnlagData())
             ? null : new Kontrollfeil(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE);
     }

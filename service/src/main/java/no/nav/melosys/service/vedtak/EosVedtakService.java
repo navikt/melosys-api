@@ -23,7 +23,7 @@ import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
-import no.nav.melosys.service.kontroll.vedtak.VedtakKontrollService;
+import no.nav.melosys.service.kontroll.ferdigbehandling.FerdigbehandlingKontrollService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.slf4j.Logger;
@@ -46,13 +46,13 @@ public class EosVedtakService {
     private final LandvelgerService landvelgerService;
     private final AvklartefaktaService avklartefaktaService;
     private final ApplicationEventMulticaster melosysEventMulticaster;
-    private final VedtakKontrollService vedtakKontrollService;
+    private final FerdigbehandlingKontrollService ferdigbehandlingKontrollService;
 
     public EosVedtakService(BehandlingService behandlingService, BehandlingsresultatService behandlingsresultatService,
                             OppgaveService oppgaveService, ProsessinstansService prosessinstansService,
                             EessiService eessiService, LandvelgerService landvelgerService,
                             AvklartefaktaService avklartefaktaService, ApplicationEventMulticaster melosysEventMulticaster,
-                            VedtakKontrollService vedtakKontrollService) {
+                            FerdigbehandlingKontrollService ferdigbehandlingKontrollService) {
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.oppgaveService = oppgaveService;
@@ -61,7 +61,7 @@ public class EosVedtakService {
         this.landvelgerService = landvelgerService;
         this.avklartefaktaService = avklartefaktaService;
         this.melosysEventMulticaster = melosysEventMulticaster;
-        this.vedtakKontrollService = vedtakKontrollService;
+        this.ferdigbehandlingKontrollService = ferdigbehandlingKontrollService;
     }
 
     public void fattVedtak(Behandling behandling, Behandlingsresultattyper behandlingsresultattype, Vedtakstyper vedtakstype) throws ValideringException {
@@ -81,7 +81,7 @@ public class EosVedtakService {
         behandlingsresultat.setType(request.getBehandlingsresultatTypeKode());
 
         if (behandlingsresultat.erInnvilgelse()) {
-            vedtakKontrollService.kontrollerVedtakMedNyeRegisteropplysninger(behandling, behandlingsresultat, Sakstyper.EU_EOS, request.getBehandlingsresultatTypeKode());
+            ferdigbehandlingKontrollService.kontrollerVedtakMedNyeRegisteropplysninger(behandling, behandlingsresultat, Sakstyper.EU_EOS, request.getBehandlingsresultatTypeKode());
         }
 
         oppdaterBehandlingsresultat(behandlingsresultat, request.getVedtakstype(), request.getFritekst(), request.getNyVurderingBakgrunn());

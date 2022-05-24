@@ -1,4 +1,4 @@
-package no.nav.melosys.service.kontroll.vedtak;
+package no.nav.melosys.service.kontroll.ferdigbehandling;
 
 import java.util.Collection;
 import java.util.Objects;
@@ -26,7 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Primary
-public class VedtakKontrollService {
+public class FerdigbehandlingKontrollService {
 
     private final BehandlingService behandlingService;
     private final BehandlingsresultatService behandlingsresultatService;
@@ -34,10 +34,10 @@ public class VedtakKontrollService {
     private final PersondataFasade persondataFasade;
     private final RegisteropplysningerService registeropplysningerService;
 
-    public VedtakKontrollService(BehandlingService behandlingService,
-                                 BehandlingsresultatService behandlingsresultatService,
-                                 LovvalgsperiodeService lovvalgsperiodeService, PersondataFasade persondataFasade,
-                                 RegisteropplysningerService registeropplysningerService) {
+    public FerdigbehandlingKontrollService(BehandlingService behandlingService,
+                                           BehandlingsresultatService behandlingsresultatService,
+                                           LovvalgsperiodeService lovvalgsperiodeService, PersondataFasade persondataFasade,
+                                           RegisteropplysningerService registeropplysningerService) {
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
@@ -100,8 +100,8 @@ public class VedtakKontrollService {
     }
 
     private Collection<Kontrollfeil> utførKontrollerForAvslagOgHenleggelse(Behandling behandling) {
-        Set<Function<VedtakKontrollData, Kontrollfeil>> vedtakKontroller =
-            VedtakKontrollFactory.hentKontrollerForAvslagOgHenleggelse();
+        Set<Function<FerdigbehandlingKontrollData, Kontrollfeil>> vedtakKontroller =
+            FerdigbehandlingKontrollFactory.hentKontrollerForAvslagOgHenleggelse();
         var kontrollData = hentKontrollDataForAvslagOgHenleggelse(behandling);
         return vedtakKontroller.stream()
             .map(f -> f.apply(kontrollData))
@@ -110,8 +110,8 @@ public class VedtakKontrollService {
     }
 
     private Collection<Kontrollfeil> utførKontroller(Behandling behandling, Sakstyper sakstype) {
-        Set<Function<VedtakKontrollData, Kontrollfeil>> vedtakKontroller =
-            VedtakKontrollFactory.hentKontrollerForVedtak(sakstype);
+        Set<Function<FerdigbehandlingKontrollData, Kontrollfeil>> vedtakKontroller =
+            FerdigbehandlingKontrollFactory.hentKontrollerForVedtak(sakstype);
         var vedtakKontrollData = hentVedtakKontrollData(behandling);
         return vedtakKontroller.stream()
             .map(f -> f.apply(vedtakKontrollData))
@@ -119,14 +119,14 @@ public class VedtakKontrollService {
             .toList();
     }
 
-    private VedtakKontrollData hentKontrollDataForAvslagOgHenleggelse(Behandling behandling) {
+    private FerdigbehandlingKontrollData hentKontrollDataForAvslagOgHenleggelse(Behandling behandling) {
         BehandlingsgrunnlagData behandlingsgrunnlagData =
             behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
         Persondata persondata = hentPersondata(behandling);
-        return VedtakKontrollData.lagKontrollDataForAvslag(persondata, behandlingsgrunnlagData);
+        return FerdigbehandlingKontrollData.lagKontrollDataForAvslag(persondata, behandlingsgrunnlagData);
     }
 
-    private VedtakKontrollData hentVedtakKontrollData(Behandling behandling) {
+    private FerdigbehandlingKontrollData hentVedtakKontrollData(Behandling behandling) {
         Lovvalgsperiode lovvalgsperiode = lovvalgsperiodeService.hentValidertLovvalgsperiode(behandling.getId());
         Lovvalgsperiode opprinneligLovvalgsperiode =
             lovvalgsperiodeService.finnOpprinneligLovvalgsperiode(behandling.getId()).orElse(null);
@@ -134,7 +134,7 @@ public class VedtakKontrollService {
         var medlemskapDokument = behandling.hentMedlemskapDokument();
         var persondata = hentPersondata(behandling);
 
-        return new VedtakKontrollData(medlemskapDokument, persondata, behandlingsgrunnlagData,
+        return new FerdigbehandlingKontrollData(medlemskapDokument, persondata, behandlingsgrunnlagData,
             lovvalgsperiode, opprinneligLovvalgsperiode);
     }
 
