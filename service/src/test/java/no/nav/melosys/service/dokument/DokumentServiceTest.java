@@ -247,8 +247,7 @@ final class DokumentServiceTest {
         KodeOppslag kodeOppslag = mock(KodeOppslag.class);
         KodeverkService kodeverkService = new KodeverkService(kodeverkRegister, kodeOppslag);
         EregFasade eregFasade = mockEregFasade();
-        BehandlingService behandlingService = mock(BehandlingService.class);
-        OrganisasjonOppslagSystemService registerOppslagService = new OrganisasjonOppslagSystemService(eregFasade, behandlingService);
+        OrganisasjonOppslagSystemService registerOppslagService = new OrganisasjonOppslagSystemService(eregFasade);
         AvklarteVirksomheterSystemService avklarteVirksomheterSystemService = new AvklarteVirksomheterSystemService(avklartefaktaService, registerOppslagService, mock(BehandlingService.class), mock(KodeverkService.class));
         DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medBehandling(lagBehandling()).build();
         Persondata persondata = PersonopplysningerObjectFactory.lagPersonopplysninger();

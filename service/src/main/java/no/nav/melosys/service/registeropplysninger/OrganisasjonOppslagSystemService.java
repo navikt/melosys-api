@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class OrganisasjonOppslagSystemService extends OrganisasjonOppslagService {
 
-    public OrganisasjonOppslagSystemService(@Qualifier("system") EregFasade eregFasade, BehandlingService behandlingService) {
-        super(eregFasade, behandlingService);
+    public OrganisasjonOppslagSystemService(@Qualifier("system") EregFasade eregFasade) {
+        super(eregFasade);
     }
 }

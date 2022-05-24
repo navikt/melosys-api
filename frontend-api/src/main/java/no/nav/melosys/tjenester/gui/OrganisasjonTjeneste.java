@@ -34,11 +34,4 @@ public class OrganisasjonTjeneste {
     public ResponseEntity<OrganisasjonDokument> hentOrganisasjon(@PathVariable("orgnr") String orgnummer) {
         return ResponseEntity.ok(registerOppslag.hentOrganisasjon(orgnummer));
     }
-
-    @GetMapping("virksomhet/{behandlingID}")
-    @JsonView(DokumentView.FrontendApi.class)
-    @ApiOperation(value = "Henter organisasjon for VIRKSOMHET-aktør dersom den finnes", response = OrganisasjonDto.class)
-    public ResponseEntity<OrganisasjonDokument> hentOrganisasjonTilVirksomhet(@PathVariable("behandlingID") long behandlingID) {
-        return ResponseEntity.ok(registerOppslag.hentOrganisasjonTilVirksomhet(behandlingID));
-    }
 }
