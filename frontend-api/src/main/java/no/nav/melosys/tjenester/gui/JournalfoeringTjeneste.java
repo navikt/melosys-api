@@ -72,4 +72,20 @@ public class JournalfoeringTjeneste {
         oppgaveService.ferdigstillOppgave(journalføringDto.getOppgaveID());
         return ResponseEntity.noContent().build();
     }
+
+    @PostMapping("knytt")
+    @ApiOperation(value = "Journalfør og knytt til fagsak asynkront")
+    public ResponseEntity<Void> journalførOgKnyttTilSak(@RequestBody JournalfoeringTilordneDto journalføringDto) {
+        journalføringService.journalførOgKnyttTilEksisterendeSak(journalføringDto);
+        oppgaveService.ferdigstillOppgave(journalføringDto.getOppgaveID());
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("nyvurdering")
+    @ApiOperation(value = "Journalfør og opprett ny vurdering asynkront")
+    public ResponseEntity<Void> journalførOgOpprettNyVurdering(@RequestBody JournalfoeringTilordneDto journalføringDto) {
+        journalføringService.journalførOgOpprettNyVurdering(journalføringDto);
+        oppgaveService.ferdigstillOppgave(journalføringDto.getOppgaveID());
+        return ResponseEntity.noContent().build();
+    }
 }
