@@ -2,7 +2,7 @@ package no.nav.melosys.saksflyt.steg.register;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.service.behandling.kontroll.BehandlingskontrollresultatService;
+import no.nav.melosys.service.kontroll.behandling.BehandlingskontrollresultatService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

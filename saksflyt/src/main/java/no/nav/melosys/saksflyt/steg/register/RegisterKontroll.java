@@ -3,7 +3,7 @@ package no.nav.melosys.saksflyt.steg.register;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
-import no.nav.melosys.service.behandling.kontroll.BehandlingskontrollresultatService;
+import no.nav.melosys.service.kontroll.behandling.BehandlingskontrollresultatService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
