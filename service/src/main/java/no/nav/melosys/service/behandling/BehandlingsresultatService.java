@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
@@ -27,11 +28,13 @@ public class BehandlingsresultatService {
 
     private final BehandlingsresultatRepository behandlingsresultatRepository;
     private final VilkaarsresultatService vilkaarsresultatService;
+    private final Unleash unleash;
 
     public BehandlingsresultatService(BehandlingsresultatRepository behandlingsresultatRepository,
-                                      @Lazy VilkaarsresultatService vilkaarsresultatService) {
+                                      @Lazy VilkaarsresultatService vilkaarsresultatService, Unleash unleash) {
         this.behandlingsresultatRepository = behandlingsresultatRepository;
         this.vilkaarsresultatService = vilkaarsresultatService;
+        this.unleash = unleash;
     }
 
     @Transactional
@@ -85,6 +88,9 @@ public class BehandlingsresultatService {
         behandlingsresultatsreplika.setVedtakMetadata(null);
         behandlingsresultatsreplika.setUtfallRegistreringUnntak(null);
         behandlingsresultatsreplika.setUtfallUtpeking(null);
+        if (unleash.isEnabled("melosys.ikke_kopier_behandlingsresultattype")) {
+            behandlingsresultatsreplika.setType(Behandlingsresultattyper.IKKE_FASTSATT);
+        }
 
         replikerAvklartefakta(behandlingsresultat, behandlingsresultatsreplika);
         replikerLovvalgsperioder(behandlingsresultat, behandlingsresultatsreplika);
