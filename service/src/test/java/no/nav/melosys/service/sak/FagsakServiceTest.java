@@ -326,6 +326,31 @@ class FagsakServiceTest {
     }
 
     @Test
+    void opprettNyVurderingBehandling_behandlingErAvTemaBeslutningLovvalgNorge_nyBehandlingOpprettet() {
+        final String saksnummer = "MEL-1";
+
+        var behandling = lagBehandling(1L, SED, AVSLUTTET, null);
+        behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
+        Fagsak fagsak = lagFagsakMedBruker();
+        fagsak.setBehandlinger(List.of(behandling));
+        var behandlingsresultat = lagBehandlingsresultat(behandling, Instant.now(), lagVedtakMetadata(Instant.now()), null);
+
+        Behandling replikertBehandling = new Behandling();
+        replikertBehandling.setId(2L);
+
+        when(fagsakRepo.findBySaksnummer(saksnummer)).thenReturn(Optional.of(fagsak));
+        when(behandlingsresultatService.hentBehandlingsresultat(behandling.getId())).thenReturn(behandlingsresultat);
+        when(behandlingService.replikerBehandlingOgBehandlingsresultat(any(), any())).thenReturn(replikertBehandling);
+
+
+        long replikertBehandlingID = fagsakService.opprettNyVurderingBehandling(saksnummer);
+
+
+        verify(behandlingService).replikerBehandlingOgBehandlingsresultat(behandling, Behandlingstyper.NY_VURDERING);
+        assertThat(replikertBehandlingID).isEqualTo(replikertBehandling.getId());
+    }
+
+    @Test
     void opprettNyVurderingBehandling_toBehandlingerErAvsluttet_nyBehandlingOpprettetNyVurderingReplikerFraSistRegistrerteVedtak() {
         final String saksnummer = "MEL-1";
         Fagsak fagsak = lagFagsakMedBruker();
@@ -364,7 +389,7 @@ class FagsakServiceTest {
 
         var behandlingSomBleFattetIgår = lagBehandling(1L, SOEKNAD, AVSLUTTET, igår);
         var behandlingsresultatFattetIgår = lagBehandlingsresultat(behandlingSomBleFattetIgår, igår, lagVedtakMetadata(igår), null);
-        behandlingSomBleFattetIgår.setTema(Behandlingstema.ARBEID_ETT_LAND_ØVRIG);
+        behandlingSomBleFattetIgår.setTema(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
 
         var behandlingSomBleFattetIdag = lagBehandling(2L, SOEKNAD, AVSLUTTET, idag);
         var behandlingsresultatFattetIdag = lagBehandlingsresultat(behandlingSomBleFattetIdag, idag, null, null);
@@ -417,7 +442,7 @@ class FagsakServiceTest {
 
         var behandlingSomBleRegistrertIgår = lagBehandling(1L, SED, AVSLUTTET, igår);
         var behandlingsresultatRegistrertIgår = lagBehandlingsresultat(behandlingSomBleRegistrertIgår, igår, null, REGISTRERT_UNNTAK);
-        behandlingSomBleRegistrertIgår.setTema(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
+        behandlingSomBleRegistrertIgår.setTema(Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND);
 
         var behandlingSomBleRegistrertIdag = lagBehandling(2L, SED, AVSLUTTET, idag);
         var behandlingsresultatRegistrertIdag = lagBehandlingsresultat(behandlingSomBleRegistrertIdag, idag, null, REGISTRERT_UNNTAK);
@@ -448,7 +473,7 @@ class FagsakServiceTest {
 
         var behandlingSomBleRegistrertIgår = lagBehandling(1L, SED, AVSLUTTET, igår);
         var behandlingsresultatRegistrertIgår = lagBehandlingsresultat(behandlingSomBleRegistrertIgår, igår, null, REGISTRERT_UNNTAK);
-        behandlingSomBleRegistrertIgår.setTema(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
+        behandlingSomBleRegistrertIgår.setTema(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING);
 
         var behandlingSomBleRegistrertIdag = lagBehandling(2L, SED, AVSLUTTET, idag);
         var behandlingsresultatRegistrertIdag = lagBehandlingsresultat(behandlingSomBleRegistrertIdag, idag, null, null);
