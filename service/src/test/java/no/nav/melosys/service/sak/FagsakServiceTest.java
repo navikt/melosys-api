@@ -57,7 +57,7 @@ class FagsakServiceTest {
     @BeforeEach
     public void setUp() {
         fagsakService = new FagsakService(fagsakRepo, behandlingService, kontaktopplysningService, oppgaveService, persondataFasade,
-                                          behandlingsresultatService);
+            behandlingsresultatService);
     }
 
     @Test
@@ -334,6 +334,7 @@ class FagsakServiceTest {
 
         var behandlingSomBleFattetIgår = lagBehandling(1L, SOEKNAD, AVSLUTTET, igår);
         var behandlingsresultatBleFattetIgår = lagBehandlingsresultat(behandlingSomBleFattetIgår, igår, lagVedtakMetadata(igår), null);
+        behandlingSomBleFattetIgår.setTema(Behandlingstema.ARBEID_ETT_LAND_ØVRIG);
 
         var behandlingSomBleFattetIdag = lagBehandling(2L, SOEKNAD, AVSLUTTET, idag);
         var behandlingsresultatBleFattetIdag = lagBehandlingsresultat(behandlingSomBleFattetIdag, idag, lagVedtakMetadata(idag), null);
@@ -363,6 +364,7 @@ class FagsakServiceTest {
 
         var behandlingSomBleFattetIgår = lagBehandling(1L, SOEKNAD, AVSLUTTET, igår);
         var behandlingsresultatFattetIgår = lagBehandlingsresultat(behandlingSomBleFattetIgår, igår, lagVedtakMetadata(igår), null);
+        behandlingSomBleFattetIgår.setTema(Behandlingstema.ARBEID_ETT_LAND_ØVRIG);
 
         var behandlingSomBleFattetIdag = lagBehandling(2L, SOEKNAD, AVSLUTTET, idag);
         var behandlingsresultatFattetIdag = lagBehandlingsresultat(behandlingSomBleFattetIdag, idag, null, null);
@@ -415,6 +417,7 @@ class FagsakServiceTest {
 
         var behandlingSomBleRegistrertIgår = lagBehandling(1L, SED, AVSLUTTET, igår);
         var behandlingsresultatRegistrertIgår = lagBehandlingsresultat(behandlingSomBleRegistrertIgår, igår, null, REGISTRERT_UNNTAK);
+        behandlingSomBleRegistrertIgår.setTema(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
 
         var behandlingSomBleRegistrertIdag = lagBehandling(2L, SED, AVSLUTTET, idag);
         var behandlingsresultatRegistrertIdag = lagBehandlingsresultat(behandlingSomBleRegistrertIdag, idag, null, REGISTRERT_UNNTAK);
@@ -445,6 +448,7 @@ class FagsakServiceTest {
 
         var behandlingSomBleRegistrertIgår = lagBehandling(1L, SED, AVSLUTTET, igår);
         var behandlingsresultatRegistrertIgår = lagBehandlingsresultat(behandlingSomBleRegistrertIgår, igår, null, REGISTRERT_UNNTAK);
+        behandlingSomBleRegistrertIgår.setTema(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
 
         var behandlingSomBleRegistrertIdag = lagBehandling(2L, SED, AVSLUTTET, idag);
         var behandlingsresultatRegistrertIdag = lagBehandlingsresultat(behandlingSomBleRegistrertIdag, idag, null, null);
