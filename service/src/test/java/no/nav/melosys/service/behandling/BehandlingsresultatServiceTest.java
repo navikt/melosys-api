@@ -231,9 +231,9 @@ class BehandlingsresultatServiceTest {
     }
 
     @Test
-    void replikerBehandlingsresultat_replikererBehandlingsresultatObjekterOgCollections()
+    void replikerBehandlingsresultat_toggleEnabled_replikererBehandlingsresultatUtenBehandlingsresultattype()
         throws NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
-        fakeUnleash.enableAll();
+        fakeUnleash.enable("melosys.ikke_kopier_behandlingsresultattype");
 
         Behandling tidligsteInaktiveBehandling = new Behandling();
         tidligsteInaktiveBehandling.setId(1L);
