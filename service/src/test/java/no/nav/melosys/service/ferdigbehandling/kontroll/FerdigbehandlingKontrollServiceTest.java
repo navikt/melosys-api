@@ -1,4 +1,4 @@
-package no.nav.melosys.service.vedtak.kontroll;
+package no.nav.melosys.service.ferdigbehandling.kontroll;
 
 import java.time.LocalDate;
 import java.util.Collection;
@@ -25,6 +25,7 @@ import no.nav.melosys.integrasjon.medl.PeriodestatusMedl;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
+import no.nav.melosys.service.ferdigbehandling.kontroll.FerdigbehandlingKontrollService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
@@ -43,7 +44,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class VedtakKontrollServiceTest {
+class FerdigbehandlingKontrollServiceTest {
     @Mock
     private BehandlingService behandlingService;
     @Mock
@@ -61,7 +62,7 @@ class VedtakKontrollServiceTest {
     private final BehandlingsgrunnlagData behandlingsgrunnlagData = new BehandlingsgrunnlagData();
     private final Behandling behandling = lagBehandling(behandlingsgrunnlagData);
 
-    private VedtakKontrollService vedtakKontrollService;
+    private FerdigbehandlingKontrollService ferdigbehandlingKontrollService;
 
     @BeforeEach
     void setup() {
@@ -75,7 +76,7 @@ class VedtakKontrollServiceTest {
         when(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling);
         lenient().when(lovvalgsperiodeService.hentValidertLovvalgsperiode(behandlingID)).thenReturn(lovvalgsperiode);
 
-        vedtakKontrollService = new VedtakKontrollService(behandlingService, behandlingsresultatService, lovvalgsperiodeService, persondataFasade,
+        ferdigbehandlingKontrollService = new FerdigbehandlingKontrollService(behandlingService, behandlingsresultatService, lovvalgsperiodeService, persondataFasade,
             registeropplysningerService);
     }
 
@@ -87,7 +88,7 @@ class VedtakKontrollServiceTest {
         Consumer<ValideringException> medFeilkode = v -> assertThat(v.getFeilkoder())
             .extracting(KontrollfeilDto::getKode).containsExactly(Kontroll_begrunnelser.INGEN_SLUTTDATO.getKode());
 
-        assertThatThrownBy(() -> vedtakKontrollService.kontrollerVedtakMedNyeRegisteropplysninger(behandling, behandlingsresultat, Sakstyper.EU_EOS, false))
+        assertThatThrownBy(() -> ferdigbehandlingKontrollService.kontrollerVedtakMedNyeRegisteropplysninger(behandling, behandlingsresultat, Sakstyper.EU_EOS, Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN))
             .isInstanceOfSatisfying(ValideringException.class, medFeilkode)
             .hasMessage("Feil i validering. Kan ikke fatte vedtak.");
     }
@@ -99,7 +100,7 @@ class VedtakKontrollServiceTest {
         when(behandlingsresultatService.hentBehandlingsresultat(behandlingID)).thenReturn(behandlingsresultat);
         when(persondataFasade.hentFolkeregisterident(behandling.getFagsak().hentBrukersAktørID())).thenReturn("fnr");
 
-        vedtakKontrollService.kontrollerVedtak(behandling.getId(), true, Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN);
+        ferdigbehandlingKontrollService.kontroller(behandling.getId(), true, Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN);
         verify(registeropplysningerService).hentOgLagreOpplysninger(any());
     }
 
@@ -107,7 +108,7 @@ class VedtakKontrollServiceTest {
     void kontrollererVedtak_ikkeOppdaterRegisteropplysninger_oppdatererkke() throws ValideringException {
         lovvalgsperiode.setTom(LocalDate.now());
 
-        vedtakKontrollService.kontrollerVedtak(behandling.getId(), false, Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN);
+        ferdigbehandlingKontrollService.kontroller(behandling.getId(), false, Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN);
         verify(registeropplysningerService, never()).hentOgLagreOpplysninger(any());
     }
 
@@ -116,13 +117,13 @@ class VedtakKontrollServiceTest {
         lovvalgsperiode.setFom(LocalDate.now());
         lovvalgsperiode.setTom(LocalDate.now().plusYears(1));
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
-        Collection<Kontrollfeil> resultat = vedtakKontrollService.utførKontroller(behandlingID, Sakstyper.EU_EOS, false);
+        Collection<Kontrollfeil> resultat = ferdigbehandlingKontrollService.utførKontroller(behandlingID, Sakstyper.EU_EOS, Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN);
         assertThat(resultat).isEmpty();
     }
 
     @Test
     void utførKontroller_AvslagPersonMedRegistrertAdresse__returnererTomCollection() {
-        Collection<Kontrollfeil> resultat = vedtakKontrollService.utførKontroller(behandlingID, Sakstyper.EU_EOS, true);
+        Collection<Kontrollfeil> resultat = ferdigbehandlingKontrollService.utførKontroller(behandlingID, Sakstyper.EU_EOS, Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL);
         assertThat(resultat).isEmpty();
     }
 
@@ -130,7 +131,23 @@ class VedtakKontrollServiceTest {
     void utførKontroller_AvslagPersonUtenRegistrertAdresse_returnererKode() {
         when(persondataFasade.hentPerson(anyString())).thenReturn(PersonopplysningerObjectFactory.lagPersonopplysningerUtenAdresser());
 
-        Collection<Kontrollfeil> resultat = vedtakKontrollService.utførKontroller(behandlingID, Sakstyper.EU_EOS, true);
+        Collection<Kontrollfeil> resultat = ferdigbehandlingKontrollService.utførKontroller(behandlingID, Sakstyper.EU_EOS, Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL);
+        assertThat(resultat)
+            .extracting(Kontrollfeil::getKode)
+            .contains(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE);
+    }
+
+    @Test
+    void utførKontroller_HenleggelsePersonMedRegistrertAdresse__returnererTomCollection() {
+        Collection<Kontrollfeil> resultat = ferdigbehandlingKontrollService.utførKontroller(behandlingID, Sakstyper.EU_EOS, Behandlingsresultattyper.HENLEGGELSE);
+        assertThat(resultat).isEmpty();
+    }
+
+    @Test
+    void utførKontroller_HenleggelsePersonUtenRegistrertAdresse_returnererKode() {
+        when(persondataFasade.hentPerson(anyString())).thenReturn(PersonopplysningerObjectFactory.lagPersonopplysningerUtenAdresser());
+
+        Collection<Kontrollfeil> resultat = ferdigbehandlingKontrollService.utførKontroller(behandlingID, Sakstyper.EU_EOS, Behandlingsresultattyper.HENLEGGELSE);
         assertThat(resultat)
             .extracting(Kontrollfeil::getKode)
             .contains(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE);
@@ -141,7 +158,7 @@ class VedtakKontrollServiceTest {
         lovvalgsperiode.setFom(LocalDate.now());
         lovvalgsperiode.setTom(LocalDate.now().plusYears(3));
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1);
-        Collection<Kontrollfeil> resultat = vedtakKontrollService.utførKontroller(behandlingID, Sakstyper.EU_EOS, false);
+        Collection<Kontrollfeil> resultat = ferdigbehandlingKontrollService.utførKontroller(behandlingID, Sakstyper.EU_EOS, Behandlingsresultattyper.ANMODNING_OM_UNNTAK);
         assertThat(resultat).isEmpty();
     }
 
@@ -156,7 +173,7 @@ class VedtakKontrollServiceTest {
         medlemsperiode.status = PeriodestatusMedl.GYLD.getKode();
         medlemskapDokument.getMedlemsperiode().add(medlemsperiode);
 
-        Collection<Kontrollfeil> resultat = vedtakKontrollService.utførKontroller(behandlingID, Sakstyper.EU_EOS, false);
+        Collection<Kontrollfeil> resultat = ferdigbehandlingKontrollService.utførKontroller(behandlingID, Sakstyper.EU_EOS, Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
         assertThat(resultat).extracting(Kontrollfeil::getKode).containsExactlyInAnyOrder(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER, Kontroll_begrunnelser.PERIODEN_OVER_24_MD);
     }
 
@@ -167,7 +184,7 @@ class VedtakKontrollServiceTest {
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
         when(persondataFasade.hentPerson(anyString())).thenReturn(PersonopplysningerObjectFactory.lagPersonopplysningerUtenAdresser());
 
-        Collection<Kontrollfeil> resultat = vedtakKontrollService.utførKontroller(behandlingID, Sakstyper.EU_EOS, false);
+        Collection<Kontrollfeil> resultat = ferdigbehandlingKontrollService.utførKontroller(behandlingID, Sakstyper.EU_EOS, Behandlingsresultattyper.IKKE_FASTSATT);
         assertThat(resultat).extracting(Kontrollfeil::getKode).contains(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE);
     }
 
@@ -177,7 +194,7 @@ class VedtakKontrollServiceTest {
         lovvalgsperiode.setTom(null);
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
 
-        Collection<Kontrollfeil> resultat = vedtakKontrollService.utførKontroller(behandlingID, Sakstyper.EU_EOS, false);
+        Collection<Kontrollfeil> resultat = ferdigbehandlingKontrollService.utførKontroller(behandlingID, Sakstyper.EU_EOS, Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND);
         assertThat(resultat).extracting(Kontrollfeil::getKode).contains(Kontroll_begrunnelser.INGEN_SLUTTDATO);
     }
 
@@ -188,7 +205,7 @@ class VedtakKontrollServiceTest {
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1);
         behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(new SoeknadTrygdeavtale());
 
-        Collection<Kontrollfeil> resultat = vedtakKontrollService.utførKontroller(behandlingID, Sakstyper.TRYGDEAVTALE, false);
+        Collection<Kontrollfeil> resultat = ferdigbehandlingKontrollService.utførKontroller(behandlingID, Sakstyper.TRYGDEAVTALE, Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN);
         assertThat(resultat).extracting(Kontrollfeil::getKode).contains(Kontroll_begrunnelser.MER_ENN_TRE_ÅR);
     }
 
@@ -198,7 +215,7 @@ class VedtakKontrollServiceTest {
         lovvalgsperiode.setTom(LocalDate.now().plusYears(1));
         behandlingsgrunnlagData.arbeidPaaLand.fysiskeArbeidssteder = List.of(new FysiskArbeidssted());
 
-        Collection<Kontrollfeil> resultat = vedtakKontrollService.utførKontroller(behandlingID, Sakstyper.EU_EOS, false);
+        Collection<Kontrollfeil> resultat = ferdigbehandlingKontrollService.utførKontroller(behandlingID, Sakstyper.EU_EOS, Behandlingsresultattyper.ANMODNING_OM_UNNTAK);
         assertThat(resultat)
             .extracting(Kontrollfeil::getKode)
             .contains(Kontroll_begrunnelser.MANGLENDE_OPPL_ARBEIDSSTED);
@@ -210,7 +227,7 @@ class VedtakKontrollServiceTest {
         lovvalgsperiode.setTom(LocalDate.now().plusYears(1));
         behandlingsgrunnlagData.foretakUtland = List.of(new ForetakUtland());
 
-        Collection<Kontrollfeil> resultat = vedtakKontrollService.utførKontroller(behandlingID, Sakstyper.EU_EOS, false);
+        Collection<Kontrollfeil> resultat = ferdigbehandlingKontrollService.utførKontroller(behandlingID, Sakstyper.EU_EOS, Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
         assertThat(resultat)
             .extracting(Kontrollfeil::getKode)
             .contains(Kontroll_begrunnelser.MANGLENDE_OPPL_ANDRE_ARBEIDSFORHOLD_UTL);
@@ -221,7 +238,7 @@ class VedtakKontrollServiceTest {
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1);
         behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(new SoeknadTrygdeavtale());
 
-        Collection<Kontrollfeil> resultat = vedtakKontrollService.utførKontroller(behandlingID, Sakstyper.TRYGDEAVTALE, false);
+        Collection<Kontrollfeil> resultat = ferdigbehandlingKontrollService.utførKontroller(behandlingID, Sakstyper.TRYGDEAVTALE, Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN);
         assertThat(resultat)
             .extracting(Kontrollfeil::getKode)
             .contains(Kontroll_begrunnelser.ATTEST_MANGLER_ARBEIDSSTED);
