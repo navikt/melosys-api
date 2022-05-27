@@ -114,7 +114,7 @@ class FagsakTest {
     }
 
     @Test
-    void hentSistOppdatertBehandling_medToBehandlinger_retunerNyeste() {
+    void hentSistOppdatertBehandling_medToBehandlinger_returnerNyeste() {
         Fagsak fagsak = new Fagsak();
 
         Behandling behandling1 = new Behandling();
