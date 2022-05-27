@@ -79,7 +79,7 @@ public class BrevDataService {
         metadata.saksbehandler = brevData.saksbehandler;
         metadata.berik = true;
 
-        if (mottaker.getRolle() == BRUKER) {
+        if (mottaker.erBruker()) {
             if (personManglerAdresseFraRegister(behandling.getFagsak().hentBrukersAktørID())) {
                 BehandlingsgrunnlagData grunnlagData = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
                 StrukturertAdresse oppgittAdresse = grunnlagData.bosted.oppgittAdresse;
