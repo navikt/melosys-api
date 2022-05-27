@@ -3,7 +3,10 @@ package no.nav.melosys.tjenester.gui;
 import java.io.IOException;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -28,11 +31,11 @@ import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService;
 import no.nav.melosys.service.sak.*;
+import no.nav.melosys.service.saksopplysninger.SaksopplysningerService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.utpeking.UtpekingService;
 import no.nav.melosys.tjenester.gui.dto.*;
@@ -275,8 +278,8 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
         assertThat(behandlingFørst.getLand().landkoder.get(0)).isEqualTo("DK");
         assertThat(behandlingFørst.getLand().erUkjenteEllerAlleEosLand).isFalse();
 
-        assertThat(behandlingFørst.getPeriode().getFom()).isEqualTo(LocalDate.of(2019,1,1));
-        assertThat(behandlingFørst.getPeriode().getTom()).isEqualTo(LocalDate.of(2019,2,1));
+        assertThat(behandlingFørst.getPeriode().getFom()).isEqualTo(LocalDate.of(2019, 1, 1));
+        assertThat(behandlingFørst.getPeriode().getTom()).isEqualTo(LocalDate.of(2019, 2, 1));
     }
 
     @Test
@@ -367,7 +370,7 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
             doReturn(List.of(fagsak)).when(fagsakService).hentFagsakerMedOrgnr(Aktoersroller.VIRKSOMHET, ORGNR);
         }
         return new FagsakTjeneste(fagsakService, aksesskontroll, behandlingsgrunnlagService, henleggFagsakService, opprettNySakFraOppgave,
-                                  persondataFasade, saksopplysningerService, utpekingService, videresendSoknadService, organisasjonOppslagService);
+            persondataFasade, saksopplysningerService, utpekingService, videresendSoknadService, organisasjonOppslagService);
     }
 
     private static FagsakOppsummeringDto lagFagsakOppsummeringDto(Behandling behandling) {

@@ -20,10 +20,11 @@ import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.kontroll.KontrollresultatService;
+import no.nav.melosys.service.behandling.kontroll.BehandlingskontrollresultatService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerRequest;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
+import no.nav.melosys.service.saksopplysninger.OppfriskSaksopplysningerService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import no.nav.melosys.service.vilkaar.InngangsvilkaarService;
 import org.junit.jupiter.api.BeforeEach;
@@ -48,7 +49,7 @@ class OppfriskSaksopplysningerServiceTest {
     @Mock
     private BehandlingsresultatService behandlingsresultatService;
     @Mock
-    private KontrollresultatService kontrollresultatService;
+    private BehandlingskontrollresultatService behandlingskontrollresultatService;
     @Mock
     private InngangsvilkaarService inngangsvilkaarService;
     @Mock
@@ -63,12 +64,12 @@ class OppfriskSaksopplysningerServiceTest {
     @BeforeEach
     public void setUp() {
         oppfriskSaksopplysningerService = new OppfriskSaksopplysningerService(anmodningsperiodeService,
-                                                                              behandlingService,
-                                                                              behandlingsresultatService,
-                                                                              kontrollresultatService,
-                                                                              inngangsvilkaarService,
-                                                                              registeropplysningerService,
-                                                                              persondataFasade);
+            behandlingService,
+            behandlingsresultatService,
+            behandlingskontrollresultatService,
+            inngangsvilkaarService,
+            registeropplysningerService,
+            persondataFasade);
     }
 
     @Test
@@ -104,7 +105,7 @@ class OppfriskSaksopplysningerServiceTest {
 
         oppfriskSaksopplysningerService.oppfriskSaksopplysning(BEHANDLING_ID, false);
 
-        verify(kontrollresultatService).utførKontrollerOgRegistrerFeil(BEHANDLING_ID);
+        verify(behandlingskontrollresultatService).utførKontrollerOgRegistrerFeil(BEHANDLING_ID);
     }
 
     @Test

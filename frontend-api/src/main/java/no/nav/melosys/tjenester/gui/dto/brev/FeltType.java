@@ -15,4 +15,8 @@ public enum FeltType {
      * SJEKKBOKS er en checkbox som gir verdiene true/false.
      */
     SJEKKBOKS,
+    /**
+     * VEDLEGG er en vedleggskomponent som tillater saksbehandler å laste opp vedlegg som sendes med brevet
+     */
+    VEDLEGG,
 }
