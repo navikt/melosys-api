@@ -13,6 +13,7 @@ import no.nav.melosys.integrasjon.reststs.RestStsClient
 import no.nav.melosys.integrasjon.reststs.StsRestTemplateProducer
 import no.nav.melosys.sikkerhet.sts.StsLogin
 import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.meldinger.ProduserIkkeredigerbartDokumentRequest
+import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -48,6 +49,11 @@ class DokumentproduksjonConsumerIT(
         securityWireMockServer.start()
     }
 
+    @AfterAll
+    fun afterAll2() {
+        securityWireMockServer.stop()
+    }
+
     @Test
     fun test() {
         dokumentproduksjonConsumer.produserIkkeredigerbartDokument(ProduserIkkeredigerbartDokumentRequest())
@@ -61,13 +67,15 @@ class DokumentproduksjonConsumerIT(
     fun authorizationSkalKommeFraSystem() {
         securityWireMockServer.start()
 
-        securityWireMockServer.stubFor(WireMock.get("")
-            .willReturn(WireMock.aResponse()
-                .withStatus(200)
-                .withHeader("Content-Type", "application/json")
-                .withBody("""{"jwt":"token"}"""))
+        securityWireMockServer.stubFor(
+            WireMock.post("/SecurityTokenServiceProvider/")
+                .willReturn(
+                    WireMock.aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "texy/xml")
+                        .withBody(sts_response)
+                )
         )
-
 
         executeFromSystem {
             verifyHeaders(
@@ -80,10 +88,21 @@ class DokumentproduksjonConsumerIT(
 
     @Test
     fun authorizationSkalKommeFraBruker() {
+        securityWireMockServer.stubFor(
+            WireMock.post("/SecurityTokenServiceProvider/")
+                .willReturn(
+                    WireMock.aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "texy/xml")
+                        .withBody(sts_response)
+                )
+        )
+
+
         executeFromController {
             verifyHeaders(
                 mapOf<String, StringValuePattern>(
-                    Pair("Authorization", WireMock.equalTo("Bearer --token-from-user--")),
+//                    Pair("Authorization", WireMock.equalTo("Bearer --token-from-user--")),
                 )
             )
         }
@@ -120,4 +139,27 @@ class DokumentproduksjonConsumerIT(
         dokumentproduksjonConsumer.produserIkkeredigerbartDokument(ProduserIkkeredigerbartDokumentRequest())
     }
 
+    private val sts_response = """
+<?xml version="1.0" encoding="UTF-8"?>
+<soapenv:Envelope xmlns:wsa="http://www.w3.org/2005/08/addressing" xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/">
+    <soapenv:Header>
+        <wsa:MessageID>urn:uuid:5e22dd04-7a8e-494a-a05e-2fff16ecf883</wsa:MessageID>
+        <wsa:Action>http://docs.oasis-open.org/ws-sx/ws-trust/200512/RSTRC/IssueFinal</wsa:Action>
+        <wsa:To>http://www.w3.org/2005/08/addressing/anonymous</wsa:To>
+    </soapenv:Header>
+    <soapenv:Body>
+        <wst:RequestSecurityTokenResponseCollection xmlns:wst="http://docs.oasis-open.org/ws-sx/ws-trust/200512">
+            <wst:RequestSecurityTokenResponse Context="supportLater">
+             <wst:TokenType>http://docs.oasis-open.org/wss/oasis-wss-saml-token-profile-1.1#SAMLV2.0</wst:TokenType>
+                <wst:RequestedSecurityToken>
+                    <saml2:Assertion Version="2.0" ID="SAML-8d11de08-b17f-45ba-bd18-68098a4d28ce" IssueInstant="2018-09-06T10:28:45Z"
+                                     xmlns:saml2="urn:oasis:names:tc:SAML:2.0:assertion">
+                        <saml2:Issuer>SomeOne</saml2:Issuer>
+                    </saml2:Assertion>
+                </wst:RequestedSecurityToken>
+            </wst:RequestSecurityTokenResponse>
+        </wst:RequestSecurityTokenResponseCollection>
+    </soapenv:Body>
+</soapenv:Envelope>
+""".trimIndent()
 }

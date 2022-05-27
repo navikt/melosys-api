@@ -23,24 +23,18 @@ public class DokumentproduksjonConsumerProducer {
     @Bean
     @Primary
     public DokumentproduksjonConsumer dokumentproduksjonConsumer() {
-        DokumentproduksjonV3 port = wrapWithSts(config.getPort(), NAVSTSClient.StsClientType.SECURITYCONTEXT_TIL_SAML);
-        return new DokumentproduksjonConsumerImpl(port);
+        return new DokumentproduksjonConsumerAutoTokenAware(config, stsLogin);
     }
 
     @Bean
     @Qualifier("system")
     public DokumentproduksjonConsumer dokumentproduksjonSystemConsumer() {
-        DokumentproduksjonV3 port = wrapWithSts(config.getPort(), NAVSTSClient.StsClientType.SYSTEM_SAML);
-        return new DokumentproduksjonConsumerImpl(port);
+        return new DokumentproduksjonConsumerAutoTokenAware(config, stsLogin);
     }
 
     @Bean
     public DokumentproduksjonSelftestConsumer dokumentproduksjonSelftestConsumer() {
-        DokumentproduksjonV3 port = wrapWithSts(config.getPort(), NAVSTSClient.StsClientType.SYSTEM_SAML);
+        DokumentproduksjonV3 port = StsConfigurationUtil.wrapWithSts(config.getPort(), NAVSTSClient.StsClientType.SYSTEM_SAML, stsLogin);
         return new DokumentproduksjonSelftestConsumerImpl(port, config.getEndpointUrl());
-    }
-
-    private DokumentproduksjonV3 wrapWithSts(DokumentproduksjonV3 port, NAVSTSClient.StsClientType oidcTilSaml) {
-        return StsConfigurationUtil.wrapWithSts(port, oidcTilSaml, stsLogin);
     }
 }

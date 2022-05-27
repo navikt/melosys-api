@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.List;
 import javax.xml.namespace.QName;
 
-import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo;
 import no.nav.melosys.sikkerhet.sts.NAVSTSClient.StsClientType;
 import org.apache.cxf.Bus;
 import org.apache.cxf.BusException;
@@ -50,22 +49,11 @@ public class StsConfigurationUtil {
         }
 
         Client client = ClientProxy.getClient(port);
-        if (ThreadLocalAccessInfo.shouldUseSystemToken()) {
-            configureStsForOnBehalfOfWithOidc(client, login);
-        } else {
-            configureStsForSystemUser(client, login);
+        switch (samlTokenType) {
+            case SECURITYCONTEXT_TIL_SAML -> configureStsForOnBehalfOfWithOidc(client, login);
+            case SYSTEM_SAML -> configureStsForSystemUser(client, login);
+            default -> throw new IllegalArgumentException("Unknown enum value: " + samlTokenType);
         }
-
-//        switch (samlTokenType) {
-//            case SECURITYCONTEXT_TIL_SAML:
-//                configureStsForOnBehalfOfWithOidc(client, login);
-//                break;
-//            case SYSTEM_SAML:
-//                configureStsForSystemUser(client, login);
-//                break;
-//            default:
-//                throw new IllegalArgumentException("Unknown enum value: " + samlTokenType);
-//        }
         return port;
     }
 
