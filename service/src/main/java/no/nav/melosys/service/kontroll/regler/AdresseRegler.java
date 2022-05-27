@@ -8,9 +8,6 @@ import static org.apache.commons.lang.StringUtils.isBlank;
 
 public final class AdresseRegler {
 
-    private AdresseRegler() {
-    }
-
     public static boolean manglerArbeidstedOpplysninger(FysiskArbeidssted arbeidssted) {
         return arbeidssted == null
             || manglerArbeidsstedVirksomhetsnavn(arbeidssted)

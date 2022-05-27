@@ -11,9 +11,6 @@ public final class PeriodeRegler {
 
     private static final LocalDate FØRSTE_JUNI_2012 = LocalDate.of(2012, 6, 1);
 
-    private PeriodeRegler() {
-    }
-
     public static boolean feilIPeriode(LocalDate fom, LocalDate tom) {
         return fom == null || tom != null && fom.isAfter(tom);
     }

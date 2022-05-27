@@ -1,12 +1,17 @@
 package no.nav.melosys.service.kontroll.ferdigbehandling;
 
+import java.util.Collections;
+import java.util.Set;
+import java.util.function.Function;
+
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadTrygdeavtale;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
-import no.nav.melosys.service.kontroll.arbeidutland.ArbeidUtlandKontrollService;
+import no.nav.melosys.service.kontroll.arbeidutland.ArbeidUtlandKontroller;
 import no.nav.melosys.service.kontroll.regler.ArbeidsstedRegler;
 import no.nav.melosys.service.kontroll.regler.OverlappendeMedlemskapsperioderRegler;
 import no.nav.melosys.service.kontroll.regler.PeriodeRegler;
@@ -15,8 +20,6 @@ import no.nav.melosys.service.validering.Kontrollfeil;
 
 final class FerdigbehandlingKontroller {
 
-    private FerdigbehandlingKontroller() {
-    }
 
     static Kontrollfeil overlappendeMedlemsperiode(FerdigbehandlingKontrollData kontrollData) {
         MedlemskapDokument medlemskapDokument = kontrollData.getMedlemskapDokument();
@@ -50,11 +53,11 @@ final class FerdigbehandlingKontroller {
     }
 
     static Kontrollfeil arbeidsstedManglerFelter(FerdigbehandlingKontrollData kontrollData) {
-        return ArbeidUtlandKontrollService.arbeidsstedManglerFelter(kontrollData.getBehandlingsgrunnlagData());
+        return ArbeidUtlandKontroller.arbeidsstedManglerFelter(kontrollData.getBehandlingsgrunnlagData());
     }
 
     static Kontrollfeil foretakUtlandManglerFelter(FerdigbehandlingKontrollData kontrollData) {
-        return ArbeidUtlandKontrollService.foretakUtlandManglerFelter(kontrollData.getBehandlingsgrunnlagData());
+        return ArbeidUtlandKontroller.foretakUtlandManglerFelter(kontrollData.getBehandlingsgrunnlagData());
     }
 
     static Kontrollfeil representantIUtlandetMangler(FerdigbehandlingKontrollData kontrollData) {

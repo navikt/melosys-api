@@ -2,20 +2,15 @@ package no.nav.melosys.service.kontroll.regler;
 
 import java.time.LocalDate;
 
-import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.person.adresse.Bostedsadresse;
-import no.nav.melosys.service.kontroll.regler.PersonRegler;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 
 class PersonReglerTest {
-
-    private final PersonDokument personDokument = new PersonDokument();
-    private final BehandlingsgrunnlagData behandlingsgrunnlagData = new BehandlingsgrunnlagData();
 
     @Test
     void personDød_personErDød_true() {

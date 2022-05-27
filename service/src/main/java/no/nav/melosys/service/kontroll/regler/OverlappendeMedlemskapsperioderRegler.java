@@ -7,9 +7,6 @@ import no.nav.melosys.integrasjon.medl.PeriodestatusMedl;
 
 public final class OverlappendeMedlemskapsperioderRegler {
 
-    private OverlappendeMedlemskapsperioderRegler() {
-    }
-
     public static boolean harOverlappendeMedlemsperiodeFraSed(MedlemskapDokument medlemskapDokument,
                                                               ErPeriode kontrollperiode) {
         return medlemskapDokument.hentMedlemsperioderHvorKildeIkkeLånekassen().stream().anyMatch(

@@ -10,7 +10,7 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.service.kontroll.regler.AdresseRegler;
 import no.nav.melosys.service.validering.Kontrollfeil;
 
-public class ArbeidUtlandKontrollService {
+public class ArbeidUtlandKontroller {
     static String ARBEIDSSTED_FIRMANAVN = "behandlingsgrunnlag.arbeidPaaLand.fysiskeArbeidssteder[%d].virksomhetNavn";
     static String ARBEIDSSTED_LAND = "behandlingsgrunnlag.arbeidPaaLand.fysiskeArbeidssteder[%d].adresse.landkode";
     static String FORETAK_UTLAND_NAVN = "behandlingsgrunnlag.foretakUtland[%d].navn";

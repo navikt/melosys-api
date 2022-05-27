@@ -7,12 +7,20 @@ import java.util.function.Function;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.service.validering.Kontrollfeil;
 
-public class FerdigbehandlingKontrollFactory {
+public class FerdigbehandlingRegelsett {
 
-    private FerdigbehandlingKontrollFactory() {
+    static Set<Function<FerdigbehandlingKontrollData, Kontrollfeil>> hentRegelsettForVedtak(Sakstyper sakstype) {
+        return switch (sakstype) {
+            case EU_EOS -> REGELSETT_EU_EOS;
+            case FTRL -> Collections.emptySet();
+            case TRYGDEAVTALE -> REGELSETT_TRYGDEAVTALER;
+        };
+    }
+    static Set<Function<FerdigbehandlingKontrollData, Kontrollfeil>> hentRegelsettForAvslagOgHenleggelse() {
+        return REGELSETT_AVSLAG_HENLEGGELSE;
     }
 
-    private static final Set<Function<FerdigbehandlingKontrollData, Kontrollfeil>> KONTROLLER_EU_EOS = Set.of(
+    private static final Set<Function<FerdigbehandlingKontrollData, Kontrollfeil>> REGELSETT_EU_EOS = Set.of(
         FerdigbehandlingKontroller::adresseRegistrert,
         FerdigbehandlingKontroller::overlappendeMedlemsperiode,
         FerdigbehandlingKontroller::periodeOver24Mnd,
@@ -21,7 +29,7 @@ public class FerdigbehandlingKontrollFactory {
         FerdigbehandlingKontroller::foretakUtlandManglerFelter
     );
 
-    private static final Set<Function<FerdigbehandlingKontrollData, Kontrollfeil>> KONTROLLER_TRYGDEAVTALER = Set.of(
+    private static final Set<Function<FerdigbehandlingKontrollData, Kontrollfeil>> REGELSETT_TRYGDEAVTALER = Set.of(
         FerdigbehandlingKontroller::adresseRegistrert,
         FerdigbehandlingKontroller::overlappendeMedlemsperiode,
         FerdigbehandlingKontroller::periodeOverTreÅr,
@@ -30,19 +38,7 @@ public class FerdigbehandlingKontrollFactory {
         FerdigbehandlingKontroller::representantIUtlandetMangler
     );
 
-    private static final Set<Function<FerdigbehandlingKontrollData, Kontrollfeil>> KONTROLLER_AVSLAG_HENLEGGELSE = Set.of(
+    private static final Set<Function<FerdigbehandlingKontrollData, Kontrollfeil>> REGELSETT_AVSLAG_HENLEGGELSE = Set.of(
         FerdigbehandlingKontroller::adresseRegistrert
     );
-
-    static Set<Function<FerdigbehandlingKontrollData, Kontrollfeil>> hentKontrollerForAvslagOgHenleggelse() {
-        return KONTROLLER_AVSLAG_HENLEGGELSE;
-    }
-
-    static Set<Function<FerdigbehandlingKontrollData, Kontrollfeil>> hentKontrollerForVedtak(Sakstyper sakstype) {
-        return switch (sakstype) {
-            case EU_EOS -> KONTROLLER_EU_EOS;
-            case FTRL -> Collections.emptySet();
-            case TRYGDEAVTALE -> KONTROLLER_TRYGDEAVTALER;
-        };
-    }
 }

@@ -25,8 +25,6 @@ import no.nav.melosys.domain.eessi.melding.Arbeidssted;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.integrasjon.medl.PeriodestatusMedl;
-import no.nav.melosys.service.kontroll.ufm.UfmKontrollData;
-import no.nav.melosys.service.kontroll.ufm.UfmKontroller;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -114,35 +112,6 @@ class UfmKontrollerTest {
     @Test
     void arbeidssted_erSvalbard_verifiserBegrunnelse() {
         assertThat(UfmKontroller.arbeidssted(kontrollData())).isEqualTo(Kontroll_begrunnelser.ARBEIDSSTED_UTENFOR_EOS);
-    }
-
-    @Test
-    void lovvalgslandErNorge_erNorge_registrerTreff() {
-        assertThat(UfmKontroller.lovvalgslandErNorge(Landkoder.NO)).isTrue();
-    }
-
-    @Test
-    void lovvalgslandErNorge_erSverige_ingenTreff() {
-        assertThat(UfmKontroller.lovvalgslandErNorge(Landkoder.SE)).isFalse();
-    }
-
-
-    @Test
-    void statsborgerskapErMedlemsland_statsborgerSE_registrerTreff() {
-        assertThat(UfmKontroller.statsborgerskapErMedlemsland(Lists.newArrayList(Landkoder.SE.getKode())))
-            .isTrue();
-    }
-
-    @Test
-    void statsborgerskapErMedlemsland_statsborgerSEOgUS_registrerTreff() {
-        assertThat(UfmKontroller.statsborgerskapErMedlemsland(Lists.newArrayList(Landkoder.SE.getKode(), "US")))
-            .isTrue();
-    }
-
-    @Test
-    void statsborgerskapErMedlemsland_statsborgerUS_ingenTreff() {
-        assertThat(UfmKontroller.statsborgerskapErMedlemsland(Lists.newArrayList("US")))
-            .isFalse();
     }
 
     private UfmKontrollData kontrollData() {

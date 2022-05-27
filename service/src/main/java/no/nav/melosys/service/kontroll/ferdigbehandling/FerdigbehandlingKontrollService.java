@@ -101,7 +101,7 @@ public class FerdigbehandlingKontrollService {
 
     private Collection<Kontrollfeil> utførKontrollerForAvslagOgHenleggelse(Behandling behandling) {
         Set<Function<FerdigbehandlingKontrollData, Kontrollfeil>> vedtakKontroller =
-            FerdigbehandlingKontrollFactory.hentKontrollerForAvslagOgHenleggelse();
+            FerdigbehandlingRegelsett.hentRegelsettForAvslagOgHenleggelse();
         var kontrollData = hentKontrollDataForAvslagOgHenleggelse(behandling);
         return vedtakKontroller.stream()
             .map(f -> f.apply(kontrollData))
@@ -111,7 +111,7 @@ public class FerdigbehandlingKontrollService {
 
     private Collection<Kontrollfeil> utførKontroller(Behandling behandling, Sakstyper sakstype) {
         Set<Function<FerdigbehandlingKontrollData, Kontrollfeil>> vedtakKontroller =
-            FerdigbehandlingKontrollFactory.hentKontrollerForVedtak(sakstype);
+            FerdigbehandlingRegelsett.hentRegelsettForVedtak(sakstype);
         var vedtakKontrollData = hentVedtakKontrollData(behandling);
         return vedtakKontroller.stream()
             .map(f -> f.apply(vedtakKontrollData))

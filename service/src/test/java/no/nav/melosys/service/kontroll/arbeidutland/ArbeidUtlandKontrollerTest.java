@@ -5,14 +5,13 @@ import java.util.List;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.ForetakUtland;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.FysiskArbeidssted;
-import no.nav.melosys.service.kontroll.arbeidutland.ArbeidUtlandKontrollService;
 import no.nav.melosys.service.validering.Kontrollfeil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class ArbeidUtlandKontrollServiceTest {
+class ArbeidUtlandKontrollerTest {
 
     private BehandlingsgrunnlagData behandlingsgrunnlagData;
 
@@ -27,17 +26,17 @@ class ArbeidUtlandKontrollServiceTest {
 
     @Test
     void utførKontroller_arbeidsstedManglerFelter_returnererKode() {
-        Kontrollfeil kontrollfeil = ArbeidUtlandKontrollService.arbeidsstedManglerFelter(behandlingsgrunnlagData);
+        Kontrollfeil kontrollfeil = ArbeidUtlandKontroller.arbeidsstedManglerFelter(behandlingsgrunnlagData);
         assertThat(kontrollfeil)
             .extracting(Kontrollfeil::getKode, Kontrollfeil::getFelter)
-            .contains(List.of(String.format(ArbeidUtlandKontrollService.ARBEIDSSTED_FIRMANAVN, 0), String.format(ArbeidUtlandKontrollService.ARBEIDSSTED_LAND, 0)));
+            .contains(List.of(String.format(ArbeidUtlandKontroller.ARBEIDSSTED_FIRMANAVN, 0), String.format(ArbeidUtlandKontroller.ARBEIDSSTED_LAND, 0)));
     }
 
     @Test
     void utførKontroller_foretakUtlandManglerFelter_returnererKode() {
-        Kontrollfeil kontrollfeil = ArbeidUtlandKontrollService.foretakUtlandManglerFelter(behandlingsgrunnlagData);
+        Kontrollfeil kontrollfeil = ArbeidUtlandKontroller.foretakUtlandManglerFelter(behandlingsgrunnlagData);
         assertThat(kontrollfeil)
             .extracting(Kontrollfeil::getKode, Kontrollfeil::getFelter)
-            .contains(List.of(String.format(ArbeidUtlandKontrollService.FORETAK_UTLAND_NAVN, 0), String.format(ArbeidUtlandKontrollService.FORETAK_UTLAND_LAND, 0)));
+            .contains(List.of(String.format(ArbeidUtlandKontroller.FORETAK_UTLAND_NAVN, 0), String.format(ArbeidUtlandKontroller.FORETAK_UTLAND_LAND, 0)));
     }
 }

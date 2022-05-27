@@ -9,9 +9,6 @@ import no.nav.melosys.domain.person.adresse.Bostedsadresse;
 public final class PersonRegler {
     private static final String NORGE_ISO2_LANDKODE = "NO";
 
-    private PersonRegler() {
-    }
-
     public static boolean erPersonDød(Persondata persondata) {
         return persondata.erPersonDød();
     }

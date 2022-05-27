@@ -20,7 +20,7 @@ import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.kontroll.behandling.BehandlingskontrollresultatService;
+import no.nav.melosys.service.kontroll.ufm.UfmKontrollService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerRequest;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
@@ -49,7 +49,7 @@ class OppfriskSaksopplysningerServiceTest {
     @Mock
     private BehandlingsresultatService behandlingsresultatService;
     @Mock
-    private BehandlingskontrollresultatService behandlingskontrollresultatService;
+    private UfmKontrollService ufmKontrollService;
     @Mock
     private InngangsvilkaarService inngangsvilkaarService;
     @Mock
@@ -66,7 +66,7 @@ class OppfriskSaksopplysningerServiceTest {
         oppfriskSaksopplysningerService = new OppfriskSaksopplysningerService(anmodningsperiodeService,
             behandlingService,
             behandlingsresultatService,
-            behandlingskontrollresultatService,
+            ufmKontrollService,
             inngangsvilkaarService,
             registeropplysningerService,
             persondataFasade);
@@ -105,7 +105,7 @@ class OppfriskSaksopplysningerServiceTest {
 
         oppfriskSaksopplysningerService.oppfriskSaksopplysning(BEHANDLING_ID, false);
 
-        verify(behandlingskontrollresultatService).utførKontrollerOgRegistrerFeil(BEHANDLING_ID);
+        verify(ufmKontrollService).utførKontrollerOgRegistrerFeil(BEHANDLING_ID);
     }
 
     @Test
