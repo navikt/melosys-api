@@ -61,6 +61,14 @@ class DokumentproduksjonConsumerIT(
     fun authorizationSkalKommeFraSystem() {
         securityWireMockServer.start()
 
+        securityWireMockServer.stubFor(WireMock.get("")
+            .willReturn(WireMock.aResponse()
+                .withStatus(200)
+                .withHeader("Content-Type", "application/json")
+                .withBody("""{"jwt":"token"}"""))
+        )
+
+
         executeFromSystem {
             verifyHeaders(
                 mapOf<String, StringValuePattern>(
