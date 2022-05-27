@@ -5,6 +5,7 @@ import java.util.*;
 import javax.persistence.*;
 
 import no.nav.melosys.domain.kodeverk.*;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
@@ -83,6 +84,11 @@ public class Fagsak extends RegistreringsInfo {
 
     public boolean harAktivBehandling() {
         return hentAktivBehandling() != null;
+    }
+
+    public boolean harMinstEnBehandlingAvType(Behandlingstyper behandlingstype) {
+        return behandlinger.stream()
+            .anyMatch(behandling -> behandling.getType() == behandlingstype);
     }
 
     public Behandling hentAktivBehandling() {
