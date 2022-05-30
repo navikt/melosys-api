@@ -223,17 +223,14 @@ public class JournalfoeringService {
         Behandling sisteBehandling = fagsak.hentSistRegistrertBehandling();
         if (sisteBehandling.erAktiv()) return;
 
-        boolean harMinstEnBehandlingAvTypeSoeknad = fagsak.harMinstEnBehandlingAvType(Behandlingstyper.SOEKNAD);
-        // Journalføre uten å opprette ny behandling kun gjelde hvis en av behandlingene hadde behandlingstype SOEKNAD.
-        // Det skal fortsatt være mulig å journalføre uten å opprette ny behandling dersom første behandling hadde
-        // behandlingstype SED. Dette er fordi det i SED-behandlinger (unntak fra medlemskap) ofte kommer mange
-        // påfølgende SED-er som ikke skal utløse nye behandlinger i saken. Det gir derfor ikke mening å "tvinge"
-        // saksbehandler gjennom en ny vurdering i disse tilfellene. - https://jira.adeo.no/browse/MELOSYS-4982
-        if (!harMinstEnBehandlingAvTypeSoeknad) return;
+        // Journalføre uten å opprette ny behandling gjelder kun hvis en av behandlingene har behandlingstype SOEKNAD.
+        // Det skal fortsatt være mulig å journalføre uten å opprette ny behandling dersom første behandling har
+        // behandlingstype SED. - https://jira.adeo.no/browse/MELOSYS-4982
+        if (!fagsak.harMinstEnBehandlingAvType(Behandlingstyper.SOEKNAD)) return;
 
         throw new FunksjonellException(
-            String.format("Den siste oppdaterte behandlingen (%d) for fagsak %s er avsluttet",
-                sisteBehandling.getId(), fagsak.getSaksnummer())
+            String.format("Kan ikke knytte dokumentet til eksisterende sak (%s) når behandling er avsluttet",
+                fagsak.getSaksnummer())
         );
     }
 

@@ -446,13 +446,13 @@ class JournalfoeringServiceTest {
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> journalfoeringService.journalførOgTilordneSak(tilordneDto))
-            .withMessage("Den siste oppdaterte behandlingen (1) for fagsak " + SAKSNUMMER + " er avsluttet");
+            .withMessage("Kan ikke knytte dokumentet til eksisterende sak (" + SAKSNUMMER + ") når behandling er avsluttet");
 
         fagsak.setType(Sakstyper.EU_EOS);
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> journalfoeringService.journalførOgTilordneSak(tilordneDto))
-            .withMessage("Den siste oppdaterte behandlingen (1) for fagsak " + SAKSNUMMER + " er avsluttet");
+            .withMessage("Kan ikke knytte dokumentet til eksisterende sak (" + SAKSNUMMER + ") når behandling er avsluttet");
     }
 
     @Test
@@ -531,7 +531,7 @@ class JournalfoeringServiceTest {
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> journalfoeringService.journalførOgTilordneSak(tilordneDto))
-            .withMessage("Den siste oppdaterte behandlingen (2) for fagsak " + SAKSNUMMER + " er avsluttet");
+            .withMessage("Kan ikke knytte dokumentet til eksisterende sak (" + SAKSNUMMER + ") når behandling er avsluttet");
     }
 
     @Test
