@@ -30,23 +30,87 @@ class PeriodeKontrollerTest {
     }
 
     @Test
+    void periodeOver2ÅrOgEnDag_periodePå3År_true() {
+        assertThat(PeriodeKontroller.periodeOver2ÅrOgEnDag(
+            LocalDate.now(),
+            LocalDate.now().plusYears(3)))
+            .isTrue();
+    }
+
+    @Test
+    void periodeOver2ÅrOgEnDag_periodePå2År_false() {
+        assertThat(PeriodeKontroller.periodeOver2ÅrOgEnDag(
+            LocalDate.now(),
+            LocalDate.now().plusYears(2)))
+            .isFalse();
+    }
+
+    @Test
+    void periodeOver2ÅrOgEnDag_periodePå2ÅrOg1Dag_true() {
+        assertThat(PeriodeKontroller.periodeOver2ÅrOgEnDag(
+            LocalDate.now(),
+            LocalDate.now().plusYears(2).plusDays(1)))
+            .isTrue();
+    }
+
+    @Test
+    void periodeOver2ÅrOgEnDag_periodePå2År2MånederOg1Dag_true() {
+        assertThat(PeriodeKontroller.periodeOver2ÅrOgEnDag(
+            LocalDate.now(),
+            LocalDate.now().plusYears(2).plusMonths(2).plusDays(1)))
+            .isTrue();
+    }
+
+    @Test
+    void periodeOver2ÅrOgEnDag_periode24MånederMinus1Dag_false() {
+        assertThat(PeriodeKontroller.periodeOver2ÅrOgEnDag(
+            LocalDate.now(),
+            LocalDate.now().plusYears(2).minusDays(1)))
+            .isFalse();
+    }
+
+    @Test
+    void periodeOver2ÅrOgEnDag_periode23Måneder_false() {
+        assertThat(PeriodeKontroller.periodeOver2ÅrOgEnDag(
+            LocalDate.now(),
+            LocalDate.now().plusMonths(23)))
+            .isFalse();
+    }
+
+    @Test
+    void periodeOver2ÅrOgEnDag_periode14Mnd_false() {
+        assertThat(PeriodeKontroller.periodeOver2ÅrOgEnDag(
+            LocalDate.now(),
+            LocalDate.now().plusMonths(14)))
+            .isFalse();
+    }
+
+    @Test
+    void periodeOver2ÅrOgEnDag_edgeCase_periodePåSammeDag_false() {
+        assertThat(PeriodeKontroller.periodeOver2ÅrOgEnDag(
+            LocalDate.now(),
+            LocalDate.now()))
+            .isFalse();
+    }
+
+    @Test
     void periodeOver24Mnd_periodeOver24Mnd_true() {
-        assertThat(PeriodeKontroller.periodeOver24Mnd(LocalDate.now(), LocalDate.now().plusYears(3))).isTrue();
+        assertThat(PeriodeKontroller.periodeOver24Måneder(LocalDate.now(), LocalDate.now().plusYears(3))).isTrue();
     }
 
     @Test
-    void periodeoOver24Mnd_periode24Mnd_true() {
-        assertThat(PeriodeKontroller.periodeOver24Mnd(LocalDate.now(), LocalDate.now().plusMonths(24))).isTrue();
+    void periodeOver24Mnd_periode24Mnd_false() {
+        assertThat(PeriodeKontroller.periodeOver24Måneder(LocalDate.now(), LocalDate.now().plusMonths(24))).isTrue();
     }
 
     @Test
-    void periodeoOver24Mnd_periode23Mnd_false() {
-        assertThat(PeriodeKontroller.periodeOver24Mnd(LocalDate.now(), LocalDate.now().plusMonths(23))).isFalse();
+    void periodeOver24Mnd_periode23Mnd_false() {
+        assertThat(PeriodeKontroller.periodeOver24Måneder(LocalDate.now(), LocalDate.now().plusMonths(23))).isFalse();
     }
 
     @Test
     void periodeOver24Mnd_periode14Mnd_false() {
-        assertThat(PeriodeKontroller.periodeOver24Mnd(LocalDate.now(), LocalDate.now().plusMonths(14))).isFalse();
+        assertThat(PeriodeKontroller.periodeOver24Måneder(LocalDate.now(), LocalDate.now().plusMonths(14))).isFalse();
     }
 
     @Test
