@@ -47,26 +47,18 @@ class DokumentproduksjonConsumerIT(
         WireMockServer(WireMockConfiguration.wireMockConfig().port(mockSecurityUrl))
 
     @BeforeAll
-    fun beforeAll2() {
+    fun beforeAllForDokumentproduksjonConsumer() {
         securityWireMockServer.start()
     }
 
     @AfterAll
-    fun afterAll2() {
+    fun afterAllForDokumentproduksjonConsumer() {
         securityWireMockServer.stop()
     }
 
     @BeforeEach
-    fun setup2() {
+    fun setupForDokumentproduksjonConsumer() {
         securityWireMockServer.resetAll()
-    }
-
-    override fun createWireMock(): MappingBuilder {
-        return WireMock.post("/soap/services/dokumentproduksjon/v3")
-    }
-
-    @Test
-    fun authorizationSkalKommeFraSystem() {
         securityWireMockServer.stubFor(
             WireMock.post("/SecurityTokenServiceProvider/")
                 .willReturn(
@@ -76,6 +68,14 @@ class DokumentproduksjonConsumerIT(
                         .withBody(sts_response)
                 )
         )
+    }
+
+    override fun createWireMock(): MappingBuilder {
+        return WireMock.post("/soap/services/dokumentproduksjon/v3")
+    }
+
+    @Test
+    fun authorizationSkalKommeFraSystem() {
 
         executeFromSystem {
             verifyHeaders(
@@ -88,15 +88,6 @@ class DokumentproduksjonConsumerIT(
 
     @Test
     fun  authorizationSkalKommeFraBruker() {
-        securityWireMockServer.stubFor(
-            WireMock.post("/SecurityTokenServiceProvider/")
-                .willReturn(
-                    WireMock.aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type", "text/xml")
-                        .withBody(sts_response)
-                )
-        )
 
         executeFromController {
             verifyHeaders(
@@ -111,7 +102,7 @@ class DokumentproduksjonConsumerIT(
     fun authorizationSkalKommeFraSystemNårHverkenSystemEllerBrukerErKilde() {
         verifyHeaders(
             mapOf<String, StringValuePattern>(
-                Pair("Authorization", WireMock.equalTo("Basic dGVzdDp0ZXN0")),
+                Pair("SOAPAction", WireMock.equalTo("\"http://nav.no/tjeneste/virksomhet/dokumentproduksjon/v3/Dokumentproduksjon_v3/produserIkkeredigerbartDokumentRequest\"")),
             )
         )
         executeRequest()
