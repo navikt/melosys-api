@@ -7,7 +7,6 @@ import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.github.tomakehurst.wiremock.matching.StringValuePattern
 import no.nav.melosys.integrasjon.doksys.dokumentproduksjon.DokumentproduksjonConsumer
 import no.nav.melosys.integrasjon.doksys.dokumentproduksjon.DokumentproduksjonConsumerConfig
-import no.nav.melosys.integrasjon.doksys.dokumentproduksjon.DokumentproduksjonConsumerImpl
 import no.nav.melosys.integrasjon.doksys.dokumentproduksjon.DokumentproduksjonConsumerProducer
 import no.nav.melosys.integrasjon.reststs.RestStsClient
 import no.nav.melosys.integrasjon.reststs.StsRestTemplateProducer
@@ -29,7 +28,6 @@ import org.springframework.test.web.client.MockRestServiceServer
         RestStsClient::class,
         WebClientAutoConfiguration::class,
 
-        DokumentproduksjonConsumerImpl::class,
         DokumentproduksjonConsumerConfig::class,
         DokumentproduksjonConsumerProducer::class,
         StsLogin::class,
