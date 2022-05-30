@@ -27,11 +27,11 @@ public class PeriodeOverlappSjekk {
 
     public boolean harPeriodeSomOverlapperMerEnn1Dag() {
         if (isNull(tom1)) {
-            return åpenPeriodeOverlapper(fom2, tom2, fom1);
+            return åpenPeriodeOverlapperMerEnn1Dag(fom2, tom2, fom1);
         }
 
         if (isNull(tom2)) {
-            return åpenPeriodeOverlapper(fom1, tom1, fom2);
+            return åpenPeriodeOverlapperMerEnn1Dag(fom1, tom1, fom2);
         }
 
         return periodeOverlapperMerEnn1Dag();
@@ -39,7 +39,7 @@ public class PeriodeOverlappSjekk {
 
     private boolean periodeOverlapperMerEnn1Dag() {
         if (harPeriodeSomOverlapper()) {
-            return hentAntallDagerOverlapp() > 1;
+            return hentAntallDagerOverlapp() > 0;
         }
         return false;
     }
@@ -51,7 +51,7 @@ public class PeriodeOverlappSjekk {
     }
 
     private boolean harPeriodeSomOverlapper() {
-        return (tom2 == null || fom1.isBefore(tom2)) && (tom1 == null || tom1.isAfter(fom2));
+        return (tom2 == null || (fom1.isBefore(tom2) || fom1.isEqual(tom2))) && (tom1 == null || (tom1.isAfter(fom2) || tom1.isEqual(fom2)));
     }
 
     private void validerTilOgMedDato() {
@@ -66,7 +66,7 @@ public class PeriodeOverlappSjekk {
         }
     }
 
-    private boolean åpenPeriodeOverlapper(LocalDate fom, LocalDate tom, LocalDate åpenPeriode) {
-        return fom.isAfter(åpenPeriode) && tom.isAfter(åpenPeriode);
+    private boolean åpenPeriodeOverlapperMerEnn1Dag(LocalDate fom, LocalDate tom, LocalDate åpenFom) {
+        return fom.isAfter(åpenFom) || tom.isAfter(åpenFom);
     }
 }
