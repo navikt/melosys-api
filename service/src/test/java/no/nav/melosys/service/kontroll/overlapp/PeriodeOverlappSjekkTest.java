@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import no.nav.melosys.domain.dokument.medlemskap.Periode;
 import org.junit.jupiter.api.Test;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -460,5 +461,32 @@ class PeriodeOverlappSjekkTest {
 
 
         assertTrue(periodeOverlapperMerEnn1Dag);
+    }
+
+    @Test
+    void harPeriodeSomOverlapperMerEnn1Dag_manglerFomPåMedlemsperiode_kasterIllegalArgumentException() {
+        Periode kontrollperiode = new Periode(LocalDate.EPOCH, LocalDate.EPOCH.plusYears(1));
+        Periode medlemsperiodeUtenFom = new Periode(null, LocalDate.EPOCH.plusYears(2));
+
+        assertThatThrownBy(() -> new PeriodeOverlappSjekk(kontrollperiode, medlemsperiodeUtenFom))
+            .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void harPeriodeSomOverlapperMerEnn1Dag_manglerFomPåKontrollperiode_kasterIllegalArgumentException() {
+        Periode kontrollperiodeUtenFom = new Periode(null, LocalDate.EPOCH.plusYears(1));
+        Periode medlemsperiode = new Periode(LocalDate.EPOCH.plusYears(1), LocalDate.EPOCH.plusYears(2));
+
+        assertThatThrownBy(() -> new PeriodeOverlappSjekk(kontrollperiodeUtenFom, medlemsperiode))
+            .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void harPeriodeSomOverlapperMerEnn1Dag_manglerTomPåBeggePerioder_kasterIllegalArgumentException() {
+        Periode kontrollperiodeUtenTom = new Periode(LocalDate.EPOCH, null);
+        Periode medlemsperiodeUtenTom = new Periode(LocalDate.EPOCH.plusYears(1), null);
+
+        assertThatThrownBy(() -> new PeriodeOverlappSjekk(kontrollperiodeUtenTom, medlemsperiodeUtenTom))
+            .isInstanceOf(IllegalArgumentException.class);
     }
 }
