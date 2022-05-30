@@ -59,27 +59,6 @@ class DokumentproduksjonConsumerIT(
     @BeforeEach
     fun setupForDokumentproduksjonConsumer() {
         securityWireMockServer.resetAll()
-        securityWireMockServer.stubFor(
-            post("/SecurityTokenServiceProvider/")
-                .withRequestBody(
-                    matchingXPath(
-                        "/Envelope/Header/Security/UsernameToken/Username",
-                        equalToXml("<wsse:Username>srvmelosys</wsse:Username>")
-                    )
-                )
-                .withRequestBody(
-                    matchingXPath(
-                        "/Envelope/Header/Security/UsernameToken/Password",
-                        equalToXml("<wsse:Password Type=\"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-username-token-profile-1.0#PasswordText\">dummy</wsse:Password>")
-                    )
-                )
-                .willReturn(
-                    aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type", "text/xml")
-                        .withBody(sts_response)
-                )
-        )
     }
 
     override fun createWireMock(): MappingBuilder {
@@ -88,6 +67,12 @@ class DokumentproduksjonConsumerIT(
 
     @Test
     fun authorizationSkalKommeFraSystem() {
+        securityWireMockServer.stubFor(
+            defaultWireMockMappings()
+                .withRequestBody(
+                    notMatching(".*BinarySecurityToken.*")
+                )
+        )
         executeFromSystem {
             verifyHeaders(
                 mapOf<String, StringValuePattern>(
@@ -102,6 +87,23 @@ class DokumentproduksjonConsumerIT(
 
     @Test
     fun authorizationSkalKommeFraBruker() {
+        val binarySecurityToken = """
+                <wsse:BinarySecurityToken
+                        xmlns:wsse="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd"
+                        EncodingType="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-soap-message-security-1.0#Base64Binary"
+                        ValueType="urn:ietf:params:oauth:token-type:jwt">LS10b2tlbi1mcm9tLXVzZXItLQ==
+                </wsse:BinarySecurityToken>
+        """.trimIndent()
+
+        securityWireMockServer.stubFor(
+            defaultWireMockMappings()
+                .withRequestBody(
+                    matchingXPath(
+                        "/Envelope/Body/RequestSecurityToken/OnBehalfOf/BinarySecurityToken",
+                        equalToXml(binarySecurityToken)
+                    )
+                )
+        )
         executeFromController {
             verifyHeaders(
                 mapOf<String, StringValuePattern>(
@@ -116,6 +118,12 @@ class DokumentproduksjonConsumerIT(
 
     @Test
     fun authorizationSkalKommeFraSystemNårHverkenSystemEllerBrukerErKilde() {
+        securityWireMockServer.stubFor(
+            defaultWireMockMappings()
+                .withRequestBody(
+                    notMatching(".*BinarySecurityToken.*")
+                )
+        )
         verifyHeaders(
             mapOf<String, StringValuePattern>(
                 Pair(
@@ -147,6 +155,32 @@ class DokumentproduksjonConsumerIT(
     override fun executeRequest() {
         dokumentproduksjonConsumer.produserIkkeredigerbartDokument(ProduserIkkeredigerbartDokumentRequest())
     }
+
+    private fun defaultWireMockMappings() = post("/SecurityTokenServiceProvider/")
+        .withRequestBody(
+            matchingXPath(
+                "/Envelope/Header/Security/UsernameToken/Username",
+                equalToXml("<wsse:Username>srvmelosys</wsse:Username>")
+            )
+        )
+        .withRequestBody(
+            matchingXPath(
+                "/Envelope/Header/Security/UsernameToken/Password",
+                equalToXml(
+                    """
+                        <wsse:Password Type="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-username-token-profile-1.0#PasswordText">
+                            dummy
+                        </wsse:Password>
+                    """.trimIndent()
+                )
+            )
+        )
+        .willReturn(
+            aResponse()
+                .withStatus(200)
+                .withHeader("Content-Type", "text/xml")
+                .withBody(sts_response)
+        )
 
     private val sts_response = """
         <?xml version="1.0" encoding="UTF-8"?>
