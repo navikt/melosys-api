@@ -34,10 +34,6 @@ public class StsConfigurationUtil {
         throw new IllegalAccessError("Skal ikke instansieres");
     }
 
-    public static <T> T wrapWithSts(T port, NAVSTSClient.StsClientType samlTokenType) {
-        return wrapWithSts(port, samlTokenType, null);
-    }
-
     public static <T> T wrapWithSts(T port, NAVSTSClient.StsClientType samlTokenType, StsLogin login) {
 
         //Ignorer sts-kall ved mock-kjøring
