@@ -42,7 +42,6 @@ public class StsConfigurationUtil {
 
         //Ignorer sts-kall ved mock-kjøring
         final String aktivProfil = System.getProperty(SPRING_ACTIVE_PROFILES);
-//        if(aktivProfil == null ) return port;
 
         if (aktivProfil != null && List.of("local-mock", "test").contains(aktivProfil)) {
             return port;
@@ -62,7 +61,7 @@ public class StsConfigurationUtil {
         stsClient.setOnBehalfOf(new OnBehalfOfWithOidcCallbackHandler());
         client.getRequestContext().put(SecurityConstants.STS_CLIENT, stsClient);
         client.getRequestContext().put(SecurityConstants.CACHE_ISSUED_TOKEN_IN_ENDPOINT, false);
-        setEndpointPolicyReference(client, "classpath:stsPolicy.xml");
+        setEndpointPolicyReference(client, login.getStsPolicy());
     }
 
     private static void configureStsForSystemUser(Client client, StsLogin login) {
@@ -70,7 +69,7 @@ public class StsConfigurationUtil {
 
         STSClient stsClient = createBasicSTSClient(StsClientType.SYSTEM_SAML, client.getBus(), login);
         client.getRequestContext().put(SecurityConstants.STS_CLIENT, stsClient);
-        setEndpointPolicyReference(client, "classpath:stsPolicy.xml");
+        setEndpointPolicyReference(client, login.getStsPolicy());
     }
 
     private static STSClient createBasicSTSClient(StsClientType type, Bus bus, StsLogin login) {
@@ -85,7 +84,7 @@ public class StsConfigurationUtil {
             // Endpoint must be set on clients request context
             // as the wrapping requestcontext is not available
             // when creating the client from WSDL (ref cxf-users mailinglist)
-            stsClient.getClient().getRequestContext().put(Message.ENDPOINT_ADDRESS, login.getLocation());
+            stsClient.getClient().getRequestContext().put(Message.ENDPOINT_ADDRESS, login.getSecurityTokenServiceUrl());
         } catch (BusException | EndpointException e) {
             throw new IllegalStateException("Failed to set endpoint address of STSClient", e);
         }
@@ -102,6 +101,9 @@ public class StsConfigurationUtil {
 
     private static void setEndpointPolicyReference(Client client, String uri) {
         Policy policy = resolvePolicyReference(client, uri);
+        if (policy == null) {
+            throw new IllegalStateException("Failed to resolve policy reference: " + uri);
+        }
         setClientEndpointPolicy(client, policy);
     }
 

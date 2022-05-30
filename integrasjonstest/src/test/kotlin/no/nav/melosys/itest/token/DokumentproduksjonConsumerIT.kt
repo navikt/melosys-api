@@ -76,7 +76,6 @@ class DokumentproduksjonConsumerIT(
 
     @Test
     fun authorizationSkalKommeFraSystem() {
-
         executeFromSystem {
             verifyHeaders(
                 mapOf<String, StringValuePattern>(
@@ -88,7 +87,6 @@ class DokumentproduksjonConsumerIT(
 
     @Test
     fun  authorizationSkalKommeFraBruker() {
-
         executeFromController {
             verifyHeaders(
                 mapOf<String, StringValuePattern>(
