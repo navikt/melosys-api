@@ -61,26 +61,19 @@ class DokumentproduksjonConsumerIT(
         securityWireMockServer.resetAll()
     }
 
-    override fun createWireMock(): MappingBuilder {
-        return post("/soap/services/dokumentproduksjon/v3")
-    }
+    override fun createWireMock(): MappingBuilder = post("/soap/services/dokumentproduksjon/v3")
 
     @Test
     fun authorizationSkalKommeFraSystem() {
         securityWireMockServer.stubFor(
-            defaultWireMockMappings()
+            defaultSecurityServiceWireMockMappings()
                 .withRequestBody(
                     notMatching(".*BinarySecurityToken.*")
                 )
         )
         executeFromSystem {
             verifyHeaders(
-                mapOf<String, StringValuePattern>(
-                    Pair(
-                        "SOAPAction",
-                        equalTo("\"http://nav.no/tjeneste/virksomhet/dokumentproduksjon/v3/Dokumentproduksjon_v3/produserIkkeredigerbartDokumentRequest\"")
-                    ),
-                )
+                soapActionHeader()
             )
         }
     }
@@ -96,7 +89,7 @@ class DokumentproduksjonConsumerIT(
         """.trimIndent()
 
         securityWireMockServer.stubFor(
-            defaultWireMockMappings()
+            defaultSecurityServiceWireMockMappings()
                 .withRequestBody(
                     matchingXPath(
                         "/Envelope/Body/RequestSecurityToken/OnBehalfOf/BinarySecurityToken",
@@ -106,12 +99,7 @@ class DokumentproduksjonConsumerIT(
         )
         executeFromController {
             verifyHeaders(
-                mapOf<String, StringValuePattern>(
-                    Pair(
-                        "SOAPAction",
-                        equalTo("\"http://nav.no/tjeneste/virksomhet/dokumentproduksjon/v3/Dokumentproduksjon_v3/produserIkkeredigerbartDokumentRequest\"")
-                    ),
-                )
+                soapActionHeader()
             )
         }
     }
@@ -119,68 +107,69 @@ class DokumentproduksjonConsumerIT(
     @Test
     fun authorizationSkalKommeFraSystemNårHverkenSystemEllerBrukerErKilde() {
         securityWireMockServer.stubFor(
-            defaultWireMockMappings()
+            defaultSecurityServiceWireMockMappings()
                 .withRequestBody(
                     notMatching(".*BinarySecurityToken.*")
                 )
         )
         verifyHeaders(
-            mapOf<String, StringValuePattern>(
-                Pair(
-                    "SOAPAction",
-                    equalTo("\"http://nav.no/tjeneste/virksomhet/dokumentproduksjon/v3/Dokumentproduksjon_v3/produserIkkeredigerbartDokumentRequest\"")
-                ),
-            )
+            soapActionHeader()
         )
         executeRequest()
     }
 
-    override fun getMockData(): String {
-        return """
-            <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/">
-                <SOAP-ENV:Header/>
-                <SOAP-ENV:Body>
-                    <ns3:produserIkkeredigerbartDokumentResponse
-                            xmlns:ns3="http://nav.no/tjeneste/virksomhet/dokumentproduksjon/v3">
-                        <response>
-                            <journalpostId>989808</journalpostId>
-                            <dokumentId>22616</dokumentId>
-                        </response>
-                    </ns3:produserIkkeredigerbartDokumentResponse>
-                </SOAP-ENV:Body>
-            </SOAP-ENV:Envelope>
-        """.trimIndent()
-    }
+    private fun soapActionHeader() = mapOf<String, StringValuePattern>(
+        Pair(
+            "SOAPAction",
+            equalTo("\"http://nav.no/tjeneste/virksomhet/dokumentproduksjon/v3/Dokumentproduksjon_v3/produserIkkeredigerbartDokumentRequest\"")
+        )
+    )
+
+    override fun getMockData(): String = """
+        <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/">
+            <SOAP-ENV:Header/>
+            <SOAP-ENV:Body>
+                <ns3:produserIkkeredigerbartDokumentResponse
+                        xmlns:ns3="http://nav.no/tjeneste/virksomhet/dokumentproduksjon/v3">
+                    <response>
+                        <journalpostId>989808</journalpostId>
+                        <dokumentId>22616</dokumentId>
+                    </response>
+                </ns3:produserIkkeredigerbartDokumentResponse>
+            </SOAP-ENV:Body>
+        </SOAP-ENV:Envelope>
+    """.trimIndent()
 
     override fun executeRequest() {
         dokumentproduksjonConsumer.produserIkkeredigerbartDokument(ProduserIkkeredigerbartDokumentRequest())
     }
 
-    private fun defaultWireMockMappings() = post("/SecurityTokenServiceProvider/")
-        .withRequestBody(
-            matchingXPath(
-                "/Envelope/Header/Security/UsernameToken/Username",
-                equalToXml("<wsse:Username>srvmelosys</wsse:Username>")
+    private fun defaultSecurityServiceWireMockMappings(): MappingBuilder =
+        post("/SecurityTokenServiceProvider/")
+            .withRequestBody(
+                matchingXPath(
+                    "/Envelope/Header/Security/UsernameToken/Username",
+                    equalToXml("<wsse:Username>srvmelosys</wsse:Username>")
+                )
             )
-        )
-        .withRequestBody(
-            matchingXPath(
-                "/Envelope/Header/Security/UsernameToken/Password",
-                equalToXml(
-                    """
+            .withRequestBody(
+                matchingXPath(
+                    "/Envelope/Header/Security/UsernameToken/Password",
+                    equalToXml(
+                        """
                         <wsse:Password Type="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-username-token-profile-1.0#PasswordText">
                             dummy
                         </wsse:Password>
                     """.trimIndent()
+                    )
                 )
             )
-        )
-        .willReturn(
-            aResponse()
-                .withStatus(200)
-                .withHeader("Content-Type", "text/xml")
-                .withBody(sts_response)
-        )
+            .willReturn(
+                aResponse()
+                    .withStatus(200)
+                    .withHeader("Content-Type", "text/xml")
+                    .withBody(sts_response)
+            )
 
     private val sts_response = """
         <?xml version="1.0" encoding="UTF-8"?>
