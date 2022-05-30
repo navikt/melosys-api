@@ -5,7 +5,7 @@ import com.github.tomakehurst.wiremock.matching.StringValuePattern
 import no.nav.melosys.integrasjon.felles.GenericContextExchangeFilter
 import no.nav.melosys.integrasjon.medl.MedlemskapRestConsumer
 import no.nav.melosys.integrasjon.medl.MedlemskapRestConsumerProducer
-import no.nav.melosys.integrasjon.reststs.RestStsClient
+import no.nav.melosys.integrasjon.reststs.RestTokenServiceClientClient
 import no.nav.melosys.integrasjon.reststs.StsRestTemplateProducer
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
@@ -19,7 +19,7 @@ import java.time.LocalDate
 @RestClientTest(
     value = [
         StsRestTemplateProducer::class,
-        RestStsClient::class,
+        RestTokenServiceClientClient::class,
         WebClientAutoConfiguration::class,
 
         MedlemskapRestConsumer::class,

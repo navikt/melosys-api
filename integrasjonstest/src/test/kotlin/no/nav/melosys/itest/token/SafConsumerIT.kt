@@ -7,7 +7,7 @@ import no.nav.melosys.integrasjon.felles.GenericContextExchangeFilter
 import no.nav.melosys.integrasjon.joark.saf.SafConsumer
 import no.nav.melosys.integrasjon.joark.saf.SafConsumerImpl
 import no.nav.melosys.integrasjon.joark.saf.SafConsumerProducer
-import no.nav.melosys.integrasjon.reststs.RestStsClient
+import no.nav.melosys.integrasjon.reststs.RestTokenServiceClientClient
 import no.nav.melosys.integrasjon.reststs.StsRestTemplateProducer
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
@@ -23,7 +23,7 @@ import org.springframework.test.web.client.MockRestServiceServer
 @RestClientTest(
     value = [
         StsRestTemplateProducer::class,
-        RestStsClient::class,
+        RestTokenServiceClientClient::class,
         WebClientAutoConfiguration::class,
 
         SafConsumerImpl::class,

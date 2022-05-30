@@ -20,9 +20,9 @@ import org.springframework.web.client.RestTemplate;
 
 @Service
 @Profile("local-mock")
-public class RestStsClientMock implements RestSts {
+public class RestTokenServiceClientMockClient implements RestStsClient {
 
-    private static final Logger log = LoggerFactory.getLogger(RestStsClientMock.class);
+    private static final Logger log = LoggerFactory.getLogger(RestTokenServiceClientMockClient.class);
 
     private static final Long EXPIRE_TIME_TO_REFRESH = 60L;
     private static final String ACCESS_TOKEN_KEY = "access_token";
@@ -31,7 +31,7 @@ public class RestStsClientMock implements RestSts {
     private String token;
     private final RestTemplate restTemplate;
 
-    public RestStsClientMock(@Qualifier("stsRestTemplate") RestTemplate restTemplate) {
+    public RestTokenServiceClientMockClient(@Qualifier("stsRestTemplate") RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
 

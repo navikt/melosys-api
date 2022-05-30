@@ -3,7 +3,7 @@ package no.nav.melosys.integrasjon.aareg.arbeidsforhold;
 import java.util.function.Supplier;
 import javax.annotation.Nonnull;
 
-import no.nav.melosys.integrasjon.reststs.RestSts;
+import no.nav.melosys.integrasjon.reststs.RestStsClient;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.ClientRequest;
@@ -15,10 +15,10 @@ import reactor.core.publisher.Mono;
 @Component
 public class ArbeidsforholdContextExchangeFilter implements ExchangeFilterFunction {
     private static final String NAV_CONSUMER_TOKEN = "Nav-Consumer-Token";
-    private final RestSts restSts;
+    private final RestStsClient restStsClient;
 
-    public ArbeidsforholdContextExchangeFilter(RestSts restSts) {
-        this.restSts = restSts;
+    public ArbeidsforholdContextExchangeFilter(RestStsClient restStsClient) {
+        this.restStsClient = restStsClient;
     }
 
     @Override
@@ -27,15 +27,15 @@ public class ArbeidsforholdContextExchangeFilter implements ExchangeFilterFuncti
                                        @Nonnull final ExchangeFunction exchangeFunction) {
         return exchangeFunction.exchange(
             ClientRequest.from(clientRequest)
-                .header(HttpHeaders.AUTHORIZATION, getTokenSupplier(restSts).get())
-                .header(NAV_CONSUMER_TOKEN, restSts.bearerToken())
+                .header(HttpHeaders.AUTHORIZATION, getTokenSupplier(restStsClient).get())
+                .header(NAV_CONSUMER_TOKEN, restStsClient.bearerToken())
                 .build()
         );
     }
 
-    private Supplier<String> getTokenSupplier(RestSts restSts) {
+    private Supplier<String> getTokenSupplier(RestStsClient restStsClient) {
         // Om vi får lagt inn "0000-ga-aa-register-konsument" i sakbehandler token kan vi benytte dette når tilgjengelig
         // https://nav-it.slack.com/archives/C01BSCJM127/p1649411252534409
-        return restSts::bearerToken;
+        return restStsClient::bearerToken;
     }
 }
