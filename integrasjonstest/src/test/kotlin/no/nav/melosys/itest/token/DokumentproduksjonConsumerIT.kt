@@ -2,7 +2,7 @@ package no.nav.melosys.itest.token
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.MappingBuilder
-import com.github.tomakehurst.wiremock.client.WireMock
+import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.github.tomakehurst.wiremock.matching.StringValuePattern
 import no.nav.melosys.integrasjon.doksys.dokumentproduksjon.DokumentproduksjonConsumer
@@ -60,9 +60,21 @@ class DokumentproduksjonConsumerIT(
     fun setupForDokumentproduksjonConsumer() {
         securityWireMockServer.resetAll()
         securityWireMockServer.stubFor(
-            WireMock.post("/SecurityTokenServiceProvider/")
+            post("/SecurityTokenServiceProvider/")
+                .withRequestBody(
+                    matchingXPath(
+                        "/Envelope/Header/Security/UsernameToken/Username",
+                        equalToXml("<wsse:Username>srvmelosys</wsse:Username>")
+                    )
+                )
+                .withRequestBody(
+                    matchingXPath(
+                        "/Envelope/Header/Security/UsernameToken/Password",
+                        equalToXml("<wsse:Password Type=\"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-username-token-profile-1.0#PasswordText\">dummy</wsse:Password>")
+                    )
+                )
                 .willReturn(
-                    WireMock.aResponse()
+                    aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "text/xml")
                         .withBody(sts_response)
@@ -71,7 +83,7 @@ class DokumentproduksjonConsumerIT(
     }
 
     override fun createWireMock(): MappingBuilder {
-        return WireMock.post("/soap/services/dokumentproduksjon/v3")
+        return post("/soap/services/dokumentproduksjon/v3")
     }
 
     @Test
@@ -79,18 +91,24 @@ class DokumentproduksjonConsumerIT(
         executeFromSystem {
             verifyHeaders(
                 mapOf<String, StringValuePattern>(
-                    Pair("SOAPAction", WireMock.equalTo("\"http://nav.no/tjeneste/virksomhet/dokumentproduksjon/v3/Dokumentproduksjon_v3/produserIkkeredigerbartDokumentRequest\"")),
+                    Pair(
+                        "SOAPAction",
+                        equalTo("\"http://nav.no/tjeneste/virksomhet/dokumentproduksjon/v3/Dokumentproduksjon_v3/produserIkkeredigerbartDokumentRequest\"")
+                    ),
                 )
             )
         }
     }
 
     @Test
-    fun  authorizationSkalKommeFraBruker() {
+    fun authorizationSkalKommeFraBruker() {
         executeFromController {
             verifyHeaders(
                 mapOf<String, StringValuePattern>(
-                    Pair("SOAPAction", WireMock.equalTo("\"http://nav.no/tjeneste/virksomhet/dokumentproduksjon/v3/Dokumentproduksjon_v3/produserIkkeredigerbartDokumentRequest\"")),
+                    Pair(
+                        "SOAPAction",
+                        equalTo("\"http://nav.no/tjeneste/virksomhet/dokumentproduksjon/v3/Dokumentproduksjon_v3/produserIkkeredigerbartDokumentRequest\"")
+                    ),
                 )
             )
         }
@@ -100,7 +118,10 @@ class DokumentproduksjonConsumerIT(
     fun authorizationSkalKommeFraSystemNårHverkenSystemEllerBrukerErKilde() {
         verifyHeaders(
             mapOf<String, StringValuePattern>(
-                Pair("SOAPAction", WireMock.equalTo("\"http://nav.no/tjeneste/virksomhet/dokumentproduksjon/v3/Dokumentproduksjon_v3/produserIkkeredigerbartDokumentRequest\"")),
+                Pair(
+                    "SOAPAction",
+                    equalTo("\"http://nav.no/tjeneste/virksomhet/dokumentproduksjon/v3/Dokumentproduksjon_v3/produserIkkeredigerbartDokumentRequest\"")
+                ),
             )
         )
         executeRequest()
