@@ -2,33 +2,34 @@ package no.nav.melosys.integrasjon.utbetaldata.utbetaling;
 
 import no.nav.melosys.sikkerhet.sts.NAVSTSClient;
 import no.nav.melosys.sikkerhet.sts.StsConfigurationUtil;
+import no.nav.melosys.sikkerhet.sts.StsLogin;
 import no.nav.tjeneste.virksomhet.utbetaling.v1.UtbetalingV1;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import static no.nav.melosys.sikkerhet.sts.NAVSTSClient.StsClientType.SYSTEM_SAML;
-
 @Configuration
 public class UtbetalingConsumerProducer {
-    private UtbetalingConsumerConfig consumerConfig;
+    private final UtbetalingConsumerConfig consumerConfig;
+    private final StsLogin stsLogin;
 
-    public UtbetalingConsumerProducer(UtbetalingConsumerConfig consumerConfig) {
+    public UtbetalingConsumerProducer(UtbetalingConsumerConfig consumerConfig, StsLogin stsLogin) {
         this.consumerConfig = consumerConfig;
+        this.stsLogin = stsLogin;
     }
 
     @Bean
     public UtbetalingConsumer utbetalingConsumer() {
-        UtbetalingV1 port = wrapWithSts(consumerConfig.getPort(), SYSTEM_SAML);
+        UtbetalingV1 port = wrapWithSts(consumerConfig.getPort());
         return new UtbetalingConsumerImpl(port);
     }
 
     @Bean
     public UtbetalingSelftestConsumer utbetalingSelftestConsumer() {
-        UtbetalingV1 port = wrapWithSts(consumerConfig.getPort(), SYSTEM_SAML);
+        UtbetalingV1 port = wrapWithSts(consumerConfig.getPort());
         return new UtbetalingSelftestConsumerImpl(port, consumerConfig.getEndpointUrl());
     }
 
-    UtbetalingV1 wrapWithSts(UtbetalingV1 port, NAVSTSClient.StsClientType samlTokenType) {
-        return StsConfigurationUtil.wrapWithSts(port, samlTokenType);
+    UtbetalingV1 wrapWithSts(UtbetalingV1 port) {
+        return StsConfigurationUtil.wrapWithSts(port, NAVSTSClient.StsClientType.SYSTEM_SAML, stsLogin);
     }
 }
