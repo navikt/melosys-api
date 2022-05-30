@@ -4,11 +4,11 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.ValideringException;
+import no.nav.melosys.service.ferdigbehandling.kontroll.FerdigbehandlingKontrollService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.tilgang.Aksesstype;
 import no.nav.melosys.service.vedtak.FattVedtakRequest;
 import no.nav.melosys.service.vedtak.VedtaksfattingFasade;
-import no.nav.melosys.service.vedtak.kontroll.VedtakKontrollService;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.tjenester.gui.dto.EndreVedtakDto;
 import no.nav.melosys.tjenester.gui.dto.FattVedtakDto;
@@ -26,12 +26,12 @@ import org.springframework.web.context.WebApplicationContext;
 public class VedtakTjeneste {
     private final VedtaksfattingFasade vedtaksfattingFasade;
     private final Aksesskontroll aksesskontroll;
-    private final VedtakKontrollService vedtakKontrollService;
+    private final FerdigbehandlingKontrollService ferdigbehandlingKontrollService;
 
-    public VedtakTjeneste(VedtaksfattingFasade vedtaksfattingFasade, Aksesskontroll aksesskontroll, VedtakKontrollService vedtakKontrollService) {
+    public VedtakTjeneste(VedtaksfattingFasade vedtaksfattingFasade, Aksesskontroll aksesskontroll, FerdigbehandlingKontrollService ferdigbehandlingKontrollService) {
         this.vedtaksfattingFasade = vedtaksfattingFasade;
         this.aksesskontroll = aksesskontroll;
-        this.vedtakKontrollService = vedtakKontrollService;
+        this.ferdigbehandlingKontrollService = ferdigbehandlingKontrollService;
     }
 
     @PostMapping("{behandlingID}/fatt")
@@ -59,6 +59,10 @@ public class VedtakTjeneste {
         return ResponseEntity.noContent().build();
     }
 
+    /**
+     * @deprecated Flyttes til KontrollTjeneste
+     */
+    @Deprecated
     @PostMapping("{behandlingID}/kontroller")
     @ApiOperation(value = "Gjør kontroll på vedtaket, og returnerer eventuelle feilmeldinger som liste med KontrollfeilDto")
     public ResponseEntity<Void> kontrollerVedtak(@PathVariable("behandlingID") long behandlingID,
@@ -68,7 +72,7 @@ public class VedtakTjeneste {
             throw new FunksjonellException("Vedtakstype mangler.");
         }
         aksesskontroll.autoriser(behandlingID, skalRegisteropplysningerOppdateres ? Aksesstype.SKRIV : Aksesstype.LES);
-        vedtakKontrollService.kontrollerVedtak(behandlingID, skalRegisteropplysningerOppdateres, fattVedtakDto.getBehandlingsresultatTypeKode());
+        ferdigbehandlingKontrollService.kontroller(behandlingID, skalRegisteropplysningerOppdateres, fattVedtakDto.getBehandlingsresultatTypeKode());
         return ResponseEntity.noContent().build();
     }
 

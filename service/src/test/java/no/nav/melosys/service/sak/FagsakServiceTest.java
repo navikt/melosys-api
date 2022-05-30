@@ -57,7 +57,7 @@ class FagsakServiceTest {
     @BeforeEach
     public void setUp() {
         fagsakService = new FagsakService(fagsakRepo, behandlingService, kontaktopplysningService, oppgaveService, persondataFasade,
-                                          behandlingsresultatService);
+            behandlingsresultatService);
     }
 
     @Test
@@ -322,6 +322,31 @@ class FagsakServiceTest {
         long replikertBehandlingID = fagsakService.opprettNyVurderingBehandling(saksnummer);
         verify(behandlingService).replikerBehandlingOgBehandlingsresultat(behandling, behandling.getType());
         verify(behandlingService).avsluttBehandling(behandling.getId());
+        assertThat(replikertBehandlingID).isEqualTo(replikertBehandling.getId());
+    }
+
+    @Test
+    void opprettNyVurderingBehandling_behandlingErAvTemaBeslutningLovvalgNorge_nyBehandlingOpprettet() {
+        final String saksnummer = "MEL-1";
+
+        var behandling = lagBehandling(1L, SED, AVSLUTTET, null);
+        behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
+        Fagsak fagsak = lagFagsakMedBruker();
+        fagsak.setBehandlinger(List.of(behandling));
+        var behandlingsresultat = lagBehandlingsresultat(behandling, Instant.now(), lagVedtakMetadata(Instant.now()), null);
+
+        Behandling replikertBehandling = new Behandling();
+        replikertBehandling.setId(2L);
+
+        when(fagsakRepo.findBySaksnummer(saksnummer)).thenReturn(Optional.of(fagsak));
+        when(behandlingsresultatService.hentBehandlingsresultat(behandling.getId())).thenReturn(behandlingsresultat);
+        when(behandlingService.replikerBehandlingOgBehandlingsresultat(any(), any())).thenReturn(replikertBehandling);
+
+
+        long replikertBehandlingID = fagsakService.opprettNyVurderingBehandling(saksnummer);
+
+
+        verify(behandlingService).replikerBehandlingOgBehandlingsresultat(behandling, Behandlingstyper.NY_VURDERING);
         assertThat(replikertBehandlingID).isEqualTo(replikertBehandling.getId());
     }
 

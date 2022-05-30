@@ -1,11 +1,11 @@
-package no.nav.melosys.service.vedtak.kontroll;
+package no.nav.melosys.service.ferdigbehandling.kontroll;
 
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.person.Persondata;
 
-final class VedtakKontrollData {
+public class FerdigbehandlingKontrollData {
 
     private final MedlemskapDokument medlemskapDokument;
     private final Persondata persondata;
@@ -13,11 +13,11 @@ final class VedtakKontrollData {
     private final Lovvalgsperiode lovvalgsperiode;
     private final Lovvalgsperiode opprinneligLovvalgsperiode;
 
-    VedtakKontrollData(MedlemskapDokument medlemskapDokument,
-                       Persondata persondata,
-                       BehandlingsgrunnlagData behandlingsgrunnlagData,
-                       Lovvalgsperiode lovvalgsperiode,
-                       Lovvalgsperiode opprinneligLovvalgsperiode) {
+    FerdigbehandlingKontrollData(MedlemskapDokument medlemskapDokument,
+                                 Persondata persondata,
+                                 BehandlingsgrunnlagData behandlingsgrunnlagData,
+                                 Lovvalgsperiode lovvalgsperiode,
+                                 Lovvalgsperiode opprinneligLovvalgsperiode) {
         this.medlemskapDokument = medlemskapDokument;
         this.behandlingsgrunnlagData = behandlingsgrunnlagData;
         this.persondata = persondata;
@@ -25,9 +25,9 @@ final class VedtakKontrollData {
         this.opprinneligLovvalgsperiode = opprinneligLovvalgsperiode;
     }
 
-    static VedtakKontrollData lagKontrollDataForAvslag(Persondata persondata,
-                                                       BehandlingsgrunnlagData behandlingsgrunnlagData) {
-        return new VedtakKontrollData(null, persondata, behandlingsgrunnlagData, null, null);
+    static FerdigbehandlingKontrollData lagKontrollDataForAvslag(Persondata persondata,
+                                                                 BehandlingsgrunnlagData behandlingsgrunnlagData) {
+        return new FerdigbehandlingKontrollData(null, persondata, behandlingsgrunnlagData, null, null);
     }
 
     MedlemskapDokument getMedlemskapDokument() {

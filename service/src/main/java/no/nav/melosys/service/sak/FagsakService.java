@@ -284,11 +284,12 @@ public class FagsakService {
     public Optional<Behandling> hentBehandlingForNyVurdering(Fagsak fagsak) {
         var førsteBehandling = fagsak.hentTidligstRegistrertBehandling();
 
-        return switch (førsteBehandling.getType()) {
-            case SOEKNAD -> hentBehandlingMedSistRegistrertVedtak(fagsak);
-            case SED -> hentBehandlingMedSistRegistrertUnntak(fagsak);
-            default -> Optional.empty();
-        };
+        if (førsteBehandling.getType() == Behandlingstyper.SOEKNAD || førsteBehandling.erBeslutningLovvalgNorge()) {
+            return hentBehandlingMedSistRegistrertVedtak(fagsak);
+        } else if (førsteBehandling.getType() == Behandlingstyper.SED) {
+            return hentBehandlingMedSistRegistrertUnntak(fagsak);
+        }
+        return Optional.empty();
     }
 
     public Optional<Behandling> hentBehandlingMedSistRegistrertVedtak(Fagsak fagsak) {
