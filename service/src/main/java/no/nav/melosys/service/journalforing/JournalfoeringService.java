@@ -226,8 +226,8 @@ public class JournalfoeringService {
         if (!fagsak.harMinstEnBehandlingAvType(Behandlingstyper.SOEKNAD)) return;
 
         throw new FunksjonellException(
-            "Saker kun bestående av avsluttede behandlinger med f.eks behandlingstype SED har lov til å knytte " +
-                "til eksisterende sak uten å opprette ny behandling."
+            "Saker kun bestående av avsluttede behandlinger med f.eks behandlingstype SED har lov til å knytte til " +
+                "eksisterende sak uten å opprette ny behandling. Denne saken inneholder en behandling med behandlingstype SOEKNAD."
         );
     }
 

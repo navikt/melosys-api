@@ -446,13 +446,15 @@ class JournalfoeringServiceTest {
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> journalfoeringService.journalførOgTilordneSak(tilordneDto))
-            .withMessage("Kan ikke knytte dokumentet til eksisterende sak (" + SAKSNUMMER + ") når behandling er avsluttet");
+            .withMessage("Saker kun bestående av avsluttede behandlinger med f.eks behandlingstype SED har lov til å knytte til " +
+                "eksisterende sak uten å opprette ny behandling. Denne saken inneholder en behandling med behandlingstype SOEKNAD.");
 
         fagsak.setType(Sakstyper.EU_EOS);
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> journalfoeringService.journalførOgTilordneSak(tilordneDto))
-            .withMessage("Kan ikke knytte dokumentet til eksisterende sak (" + SAKSNUMMER + ") når behandling er avsluttet");
+            .withMessage("Saker kun bestående av avsluttede behandlinger med f.eks behandlingstype SED har lov til å knytte til " +
+                "eksisterende sak uten å opprette ny behandling. Denne saken inneholder en behandling med behandlingstype SOEKNAD.");
     }
 
     @Test
@@ -531,7 +533,8 @@ class JournalfoeringServiceTest {
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> journalfoeringService.journalførOgTilordneSak(tilordneDto))
-            .withMessage("Kan ikke knytte dokumentet til eksisterende sak (" + SAKSNUMMER + ") når behandling er avsluttet");
+            .withMessage("Saker kun bestående av avsluttede behandlinger med f.eks behandlingstype SED har lov til å knytte til " +
+                "eksisterende sak uten å opprette ny behandling. Denne saken inneholder en behandling med behandlingstype SOEKNAD.");
     }
 
     @Test
