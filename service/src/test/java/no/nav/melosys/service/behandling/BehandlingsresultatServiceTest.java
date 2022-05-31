@@ -108,7 +108,7 @@ class BehandlingsresultatServiceTest {
         verify(behandlingsresultatRepo).save(behandlingsresultatCaptor.capture());
         var behandlingsresultat = behandlingsresultatCaptor.getValue();
         assertThat(behandlingsresultat.getBehandling()).isEqualTo(behandling);
-        assertThat(behandlingsresultat.getBehandlingsmåte()).isEqualTo(Behandlingsmaate.UDEFINERT);
+        assertThat(behandlingsresultat.getBehandlingsmåte()).isEqualTo(Behandlingsmaate.MANUELT);
         assertThat(behandlingsresultat.getType()).isEqualTo(Behandlingsresultattyper.IKKE_FASTSATT);
     }
 
@@ -274,7 +274,7 @@ class BehandlingsresultatServiceTest {
     @Test
     void oppdaterBehandlingsmaate_bhmåteUdefinert_verifiserOppdatert() {
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-        behandlingsresultat.setBehandlingsmåte(Behandlingsmaate.UDEFINERT);
+        behandlingsresultat.setBehandlingsmåte(Behandlingsmaate.MANUELT);
         when(behandlingsresultatRepo.findById(anyLong())).thenReturn(Optional.of(behandlingsresultat));
         behandlingsresultatService.oppdaterBehandlingsMaate(1L, Behandlingsmaate.AUTOMATISERT);
         verify(behandlingsresultatRepo).save(behandlingsresultat);

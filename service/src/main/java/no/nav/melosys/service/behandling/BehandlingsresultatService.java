@@ -73,7 +73,7 @@ public class BehandlingsresultatService {
         Behandlingsresultat nyttBehandlingsresultat = new Behandlingsresultat();
         nyttBehandlingsresultat.setBehandling(behandling);
         nyttBehandlingsresultat.setType(Behandlingsresultattyper.IKKE_FASTSATT);
-        nyttBehandlingsresultat.setBehandlingsmåte(Behandlingsmaate.UDEFINERT);
+        nyttBehandlingsresultat.setBehandlingsmåte(Behandlingsmaate.MANUELT);
         behandlingsresultatRepository.save(nyttBehandlingsresultat);
     }
 
@@ -211,9 +211,6 @@ public class BehandlingsresultatService {
 
     public void oppdaterBehandlingsMaate(Long id, Behandlingsmaate behandlingsmaate) {
         Behandlingsresultat behandlingsresultat = hentBehandlingsresultat(id);
-        if (behandlingsresultat.getBehandlingsmåte() != Behandlingsmaate.UDEFINERT) {
-            throw new FunksjonellException("Behandlingsmaate kan ikke oppdateres etter det er definert!");
-        }
 
         behandlingsresultat.setBehandlingsmåte(behandlingsmaate);
         behandlingsresultatRepository.save(behandlingsresultat);
