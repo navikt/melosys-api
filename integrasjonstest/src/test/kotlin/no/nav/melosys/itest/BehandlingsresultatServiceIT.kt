@@ -41,7 +41,7 @@ internal class BehandlingsresultatServiceIT(
 
         val behandlingsresultat = lagBehandlingsresultat(behandlinger.orginal)
         behandlingsresultatRepository.save(behandlingsresultat)
-        behandlingsresultatService.replikerBehandlingsresultat(behandlinger.orginal, behandlinger.replika)
+        behandlingsresultatService.replikerBehandlingsresultat(behandlinger.orginal, behandlinger.replika, Behandlingstyper.NY_VURDERING)
 
         val replikaResultat = behandlingsresultatRepository.findById(behandlinger.replika.id).get()
 
