@@ -13,9 +13,7 @@ import no.nav.tjeneste.virksomhet.organisasjon.v4.meldinger.HentOrganisasjonResp
 public class OrganisasjonConsumerAutoTokenAware implements OrganisasjonConsumer {
 
     private final StsLogin stsLogin;
-
     private final OrganisasjonV4 systemPort;
-
     private final OrganisasjonV4 saksbehandlerPort;
 
     public OrganisasjonConsumerAutoTokenAware(OrganisasjonConsumerConfig config, StsLogin stsLogin) {
