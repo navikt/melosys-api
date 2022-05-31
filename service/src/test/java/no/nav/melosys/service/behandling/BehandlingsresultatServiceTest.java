@@ -16,6 +16,7 @@ import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
 import no.nav.melosys.exception.FunksjonellException;
@@ -65,7 +66,9 @@ class BehandlingsresultatServiceTest {
 
         when(behandlingsresultatRepo.findById(anyLong())).thenReturn(Optional.of(behandlingsresultat));
 
+
         behandlingsresultatService.tømBehandlingsresultat(1L);
+
 
         assertThat(behandlingsresultat.getAvklartefakta()).isEmpty();
         assertThat(behandlingsresultat.getLovvalgsperioder()).isEmpty();
@@ -88,7 +91,10 @@ class BehandlingsresultatServiceTest {
         resultat.getBehandlingsresultatBegrunnelser().add(begrunnelse);
         when(behandlingsresultatRepo.findById(anyLong())).thenReturn(Optional.of(resultat));
 
+
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(4L);
+
+
         begrunnelse = behandlingsresultat.getBehandlingsresultatBegrunnelser().iterator().next();
         assertThat(begrunnelse.getKode()).isEqualTo(Henleggelsesgrunner.ANNET.getKode());
     }
@@ -103,7 +109,9 @@ class BehandlingsresultatServiceTest {
     void lagreNyttBehandlingsresultat_lagresKorrekt() {
         var behandling = new Behandling();
 
+
         behandlingsresultatService.lagreNyttBehandlingsresultat(behandling);
+
 
         verify(behandlingsresultatRepo).save(behandlingsresultatCaptor.capture());
         var behandlingsresultat = behandlingsresultatCaptor.getValue();
@@ -145,7 +153,11 @@ class BehandlingsresultatServiceTest {
 
         doReturn(behandlingsresultat).when(behandlingsresultatService).hentBehandlingsresultat(1L);
 
-        behandlingsresultatService.replikerBehandlingsresultat(tidligsteInaktiveBehandling, behandlingsreplika);
+
+        behandlingsresultatService.replikerBehandlingsresultat(tidligsteInaktiveBehandling,
+            behandlingsreplika,
+            Behandlingstyper.NY_VURDERING);
+
 
         ArgumentCaptor<Behandlingsresultat> captor = ArgumentCaptor.forClass(Behandlingsresultat.class);
         verify(behandlingsresultatRepo).save(captor.capture());
@@ -156,7 +168,8 @@ class BehandlingsresultatServiceTest {
             .matches(b -> b.getBehandling().equals(behandlingsreplika))
             .matches(b -> b.getBehandlingsmåte().equals(behandlingsresultat.getBehandlingsmåte()))
             .matches(b -> b.getType().equals(behandlingsresultat.getType()))
-            .matches(b -> b.getVedtakMetadata() == null);
+            .matches(b -> b.getVedtakMetadata() == null)
+            .matches(b -> b.getBehandlingsmåte() == Behandlingsmaate.MANUELT);
 
         assertThat(behandlingsresultatreplika.getLovvalgsperioder())
             .singleElement()
@@ -242,14 +255,42 @@ class BehandlingsresultatServiceTest {
         doReturn(behandlingsresultat).when(behandlingsresultatService).hentBehandlingsresultat(1L);
 
 
-        behandlingsresultatService.replikerBehandlingsresultat(tidligsteInaktiveBehandling, new Behandling());
+        behandlingsresultatService.replikerBehandlingsresultat(tidligsteInaktiveBehandling,
+            new Behandling(),
+            Behandlingstyper.NY_VURDERING);
 
 
         ArgumentCaptor<Behandlingsresultat> captor = ArgumentCaptor.forClass(Behandlingsresultat.class);
         verify(behandlingsresultatRepo).save(captor.capture());
         Behandlingsresultat behandlingsresultatreplika = captor.getValue();
 
-        assertThat(behandlingsresultatreplika.getType()).isEqualTo(Behandlingsresultattyper.IKKE_FASTSATT);
+        assertThat(behandlingsresultatreplika)
+            .matches(b -> b.getType().equals(Behandlingsresultattyper.IKKE_FASTSATT))
+            .matches(b -> b.getBehandlingsmåte().equals(Behandlingsmaate.MANUELT));
+    }
+
+    @Test
+    void replikerBehandlingsresultat_replikererBehandlingsmåte_nårNyBehandlingsTypeIkkeErNyVurdering()
+        throws NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
+        fakeUnleash.enable("melosys.ikke_kopier_behandlingsresultattype");
+        Behandling tidligsteInaktiveBehandling = new Behandling();
+        tidligsteInaktiveBehandling.setId(1L);
+
+        Behandlingsresultat behandlingsresultat = opprettBehandlingsresultatMedData(tidligsteInaktiveBehandling);
+        behandlingsresultat.setBehandlingsmåte(Behandlingsmaate.AUTOMATISERT);
+        doReturn(behandlingsresultat).when(behandlingsresultatService).hentBehandlingsresultat(1L);
+
+
+        behandlingsresultatService.replikerBehandlingsresultat(tidligsteInaktiveBehandling,
+            new Behandling(),
+            Behandlingstyper.SOEKNAD);
+
+
+        ArgumentCaptor<Behandlingsresultat> captor = ArgumentCaptor.forClass(Behandlingsresultat.class);
+        verify(behandlingsresultatRepo).save(captor.capture());
+        Behandlingsresultat behandlingsresultatreplika = captor.getValue();
+
+        assertThat(behandlingsresultatreplika.getBehandlingsmåte()).isEqualTo(Behandlingsmaate.AUTOMATISERT);
     }
 
     @Test
@@ -258,7 +299,9 @@ class BehandlingsresultatServiceTest {
         behandlingsresultat.setType(Behandlingsresultattyper.ANMODNING_OM_UNNTAK);
         doReturn(Optional.of(behandlingsresultat)).when(behandlingsresultatRepo).findById(1L);
 
+
         behandlingsresultatService.oppdaterBehandlingsresultattype(1L, Behandlingsresultattyper.IKKE_FASTSATT);
+
 
         assertThat(behandlingsresultat.getType()).isEqualTo(Behandlingsresultattyper.IKKE_FASTSATT);
         verify(behandlingsresultatRepo).save(behandlingsresultat);
@@ -276,7 +319,11 @@ class BehandlingsresultatServiceTest {
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setBehandlingsmåte(Behandlingsmaate.MANUELT);
         when(behandlingsresultatRepo.findById(anyLong())).thenReturn(Optional.of(behandlingsresultat));
+
+
         behandlingsresultatService.oppdaterBehandlingsMaate(1L, Behandlingsmaate.AUTOMATISERT);
+
+
         verify(behandlingsresultatRepo).save(behandlingsresultat);
         assertThat(behandlingsresultat.getBehandlingsmåte()).isEqualTo(Behandlingsmaate.AUTOMATISERT);
     }
@@ -285,14 +332,22 @@ class BehandlingsresultatServiceTest {
     void oppdaterUtfallRegistreringUnntak_ikkeSatt_lagres() {
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         when(behandlingsresultatRepo.findById(1L)).thenReturn(Optional.of(behandlingsresultat));
+
+
         behandlingsresultatService.oppdaterUtfallRegistreringUnntak(1, Utfallregistreringunntak.GODKJENT);
+
+
         verify(behandlingsresultatRepo).save(behandlingsresultat);
     }
 
     @Test
     void oppdaterUtfallRegistreringUnntak_alleredeSatt_kasterException() {
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+
+
         behandlingsresultat.setUtfallRegistreringUnntak(Utfallregistreringunntak.GODKJENT);
+
+
         when(behandlingsresultatRepo.findById(1L)).thenReturn(Optional.of(behandlingsresultat));
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> behandlingsresultatService.oppdaterUtfallRegistreringUnntak(1, Utfallregistreringunntak.GODKJENT))
@@ -307,7 +362,9 @@ class BehandlingsresultatServiceTest {
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         when(behandlingsresultatRepo.findById(1L)).thenReturn(Optional.of(behandlingsresultat));
 
+
         behandlingsresultatService.oppdaterBegrunnelser(1L, Set.of(behandlingsresultatBegrunnelse), "fri");
+
 
         verify(behandlingsresultatRepo).save(behandlingsresultat);
         assertThat(behandlingsresultatBegrunnelse.getBehandlingsresultat()).isEqualTo(behandlingsresultat);
@@ -318,6 +375,7 @@ class BehandlingsresultatServiceTest {
         ArgumentCaptor<Behandlingsresultat> captor = ArgumentCaptor.forClass(Behandlingsresultat.class);
         var behandlingsresultat = new Behandlingsresultat();
         when(behandlingsresultatRepo.findById(1L)).thenReturn(Optional.of(behandlingsresultat));
+
 
         behandlingsresultatService.oppdaterFritekster(
             1L, "fritekst for begrunnelse", "fritekst for innledning");
