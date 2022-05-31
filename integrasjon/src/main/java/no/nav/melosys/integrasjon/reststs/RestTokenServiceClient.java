@@ -19,8 +19,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 @Service
 @Profile("!local-mock")
-public class RestTokenServiceClientClient implements RestStsClient {
-    private static final Logger log = LoggerFactory.getLogger(RestTokenServiceClientClient.class);
+public class RestTokenServiceClient implements RestStsClient {
+    private static final Logger log = LoggerFactory.getLogger(RestTokenServiceClient.class);
 
     private static final Long EXPIRE_TIME_TO_REFRESH = 60L;
     private static final String ACCESS_TOKEN_KEY = "access_token";
@@ -29,7 +29,7 @@ public class RestTokenServiceClientClient implements RestStsClient {
     private String token;
     private final RestTemplate restTemplate;
 
-    public RestTokenServiceClientClient(@Qualifier("stsRestTemplate") RestTemplate restTemplate) {
+    public RestTokenServiceClient(@Qualifier("stsRestTemplate") RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
 

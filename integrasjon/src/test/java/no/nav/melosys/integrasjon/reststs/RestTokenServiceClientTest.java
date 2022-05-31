@@ -25,14 +25,14 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 public class RestTokenServiceClientTest {
 
-    private RestTokenServiceClientClient restTokenServiceClient;
+    private RestTokenServiceClient restTokenServiceClient;
 
     @Mock
     private RestTemplate restTemplate;
 
     @BeforeEach
     public void setUp() {
-        restTokenServiceClient = spy(new RestTokenServiceClientClient(restTemplate));
+        restTokenServiceClient = spy(new RestTokenServiceClient(restTemplate));
 
         // Setter environment som "singleton"
         MockEnvironment environment = spy(new MockEnvironment());
