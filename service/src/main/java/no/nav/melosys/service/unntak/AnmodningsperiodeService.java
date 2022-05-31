@@ -47,17 +47,18 @@ public class AnmodningsperiodeService {
             .anyMatch(Anmodningsperiode::erSendtUtland);
     }
 
-    public Optional<AnmodningsperiodeSvar> hentAnmodningsperiodeSvar(long anmodningsperiodeID) {
+    private Optional<AnmodningsperiodeSvar> finnAnmodningsperiodeSvar(long anmodningsperiodeID) {
         return anmodningsperiodeSvarRepository.findById(anmodningsperiodeID);
     }
 
-    public Collection<AnmodningsperiodeSvar> hentAnmodningsperiodeSvarForBehandling(long behandlingID) {
+    public AnmodningsperiodeSvar hentAnmodningsperiodeSvarForBehandling(long behandlingID) {
         return hentAnmodningsperioder(behandlingID).stream()
             .map(Anmodningsperiode::getId)
-            .map(this::hentAnmodningsperiodeSvar)
+            .map(this::finnAnmodningsperiodeSvar)
             .filter(Optional::isPresent)
             .map(Optional::get)
-            .toList();
+            .findFirst()
+            .orElseThrow(() -> new FunksjonellException("Finner ingen AnmodningsperiodeSvar for behandling " + behandlingID));
     }
 
     @Transactional

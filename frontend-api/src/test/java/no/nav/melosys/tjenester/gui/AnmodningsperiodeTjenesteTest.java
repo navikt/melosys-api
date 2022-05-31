@@ -10,7 +10,6 @@ import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
-import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import no.nav.melosys.tjenester.gui.dto.anmodning.AnmodningsperiodeGetDto;
@@ -43,19 +42,17 @@ class AnmodningsperiodeTjenesteTest extends JsonSchemaTestParent {
     @Mock
     private AnmodningsperiodeService anmodningsperiodeService;
     @Mock
-    private LovvalgsperiodeService lovvalgsperiodeService;
-    @Mock
     private Aksesskontroll aksesskontroll;
 
     private AnmodningsperiodeTjeneste anmodningsperiodeTjeneste;
 
-    private EasyRandom random = new EasyRandom(new EasyRandomParameters()
+    private final EasyRandom random = new EasyRandom(new EasyRandomParameters()
         .excludeField(ofType(Behandlingsresultat.class))
         .randomize(ofType(LovvalgBestemmelse.class), () -> new EnumRandomizer<>(Lovvalgbestemmelser_883_2004.class).getRandomValue()));
 
     @BeforeEach
     public void setUp() {
-        anmodningsperiodeTjeneste = new AnmodningsperiodeTjeneste(anmodningsperiodeService, lovvalgsperiodeService, aksesskontroll);
+        anmodningsperiodeTjeneste = new AnmodningsperiodeTjeneste(anmodningsperiodeService, aksesskontroll);
     }
 
     @Test
