@@ -2,7 +2,7 @@ package no.nav.melosys.saksflyt.steg.register;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.service.kontroll.ufm.UfmKontrollService;
+import no.nav.melosys.service.kontroll.feature.ufm.UfmKontrollService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
