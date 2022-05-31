@@ -223,13 +223,11 @@ public class JournalfoeringService {
         Behandling sisteBehandling = fagsak.hentSistRegistrertBehandling();
         if (sisteBehandling.erAktiv()) return;
 
-        // Saker kun bestående av avsluttede behandlinger med f.eks behandlingstype SED har lov til å knytte
-        // til eksisterende sak uten å opprette ny behandling. https://jira.adeo.no/browse/MELOSYS-4982
         if (!fagsak.harMinstEnBehandlingAvType(Behandlingstyper.SOEKNAD)) return;
 
         throw new FunksjonellException(
-            String.format("Kan ikke knytte dokumentet til eksisterende sak (%s) når behandling er avsluttet",
-                fagsak.getSaksnummer())
+            "Saker kun bestående av avsluttede behandlinger med f.eks behandlingstype SED har lov til å knytte " +
+                "til eksisterende sak uten å opprette ny behandling."
         );
     }
 
