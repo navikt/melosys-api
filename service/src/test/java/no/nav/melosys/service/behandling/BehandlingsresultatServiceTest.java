@@ -154,9 +154,7 @@ class BehandlingsresultatServiceTest {
         doReturn(behandlingsresultat).when(behandlingsresultatService).hentBehandlingsresultat(1L);
 
 
-        behandlingsresultatService.replikerBehandlingsresultat(tidligsteInaktiveBehandling,
-            behandlingsreplika,
-            Behandlingstyper.NY_VURDERING);
+        behandlingsresultatService.replikerBehandlingsresultat(tidligsteInaktiveBehandling, behandlingsreplika);
 
 
         ArgumentCaptor<Behandlingsresultat> captor = ArgumentCaptor.forClass(Behandlingsresultat.class);
@@ -255,9 +253,7 @@ class BehandlingsresultatServiceTest {
         doReturn(behandlingsresultat).when(behandlingsresultatService).hentBehandlingsresultat(1L);
 
 
-        behandlingsresultatService.replikerBehandlingsresultat(tidligsteInaktiveBehandling,
-            new Behandling(),
-            Behandlingstyper.NY_VURDERING);
+        behandlingsresultatService.replikerBehandlingsresultat(tidligsteInaktiveBehandling, new Behandling());
 
 
         ArgumentCaptor<Behandlingsresultat> captor = ArgumentCaptor.forClass(Behandlingsresultat.class);
@@ -267,30 +263,6 @@ class BehandlingsresultatServiceTest {
         assertThat(behandlingsresultatreplika)
             .matches(b -> b.getType().equals(Behandlingsresultattyper.IKKE_FASTSATT))
             .matches(b -> b.getBehandlingsmåte().equals(Behandlingsmaate.MANUELT));
-    }
-
-    @Test
-    void replikerBehandlingsresultat_replikererBehandlingsmåte_nårNyBehandlingsTypeIkkeErNyVurdering()
-        throws NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
-        fakeUnleash.enable("melosys.ikke_kopier_behandlingsresultattype");
-        Behandling tidligsteInaktiveBehandling = new Behandling();
-        tidligsteInaktiveBehandling.setId(1L);
-
-        Behandlingsresultat behandlingsresultat = opprettBehandlingsresultatMedData(tidligsteInaktiveBehandling);
-        behandlingsresultat.setBehandlingsmåte(Behandlingsmaate.AUTOMATISERT);
-        doReturn(behandlingsresultat).when(behandlingsresultatService).hentBehandlingsresultat(1L);
-
-
-        behandlingsresultatService.replikerBehandlingsresultat(tidligsteInaktiveBehandling,
-            new Behandling(),
-            Behandlingstyper.SOEKNAD);
-
-
-        ArgumentCaptor<Behandlingsresultat> captor = ArgumentCaptor.forClass(Behandlingsresultat.class);
-        verify(behandlingsresultatRepo).save(captor.capture());
-        Behandlingsresultat behandlingsresultatreplika = captor.getValue();
-
-        assertThat(behandlingsresultatreplika.getBehandlingsmåte()).isEqualTo(Behandlingsmaate.AUTOMATISERT);
     }
 
     @Test

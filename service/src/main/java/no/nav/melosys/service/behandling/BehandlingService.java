@@ -280,7 +280,7 @@ public class BehandlingService {
         Behandling behandlingsreplika;
         try {
             behandlingsreplika = replikerBehandling(tidligsteInaktiveBehandling, behandlingstype);
-            behandlingsresultatService.replikerBehandlingsresultat(tidligsteInaktiveBehandling, behandlingsreplika, behandlingstype);
+            behandlingsresultatService.replikerBehandlingsresultat(tidligsteInaktiveBehandling, behandlingsreplika);
         } catch (InvocationTargetException | NoSuchMethodException | InstantiationException |
                  IllegalAccessException e) {
             throw new TekniskException(String.format("Klarte ikke replikere behandling %s for fagsak %s",

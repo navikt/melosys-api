@@ -79,9 +79,7 @@ public class BehandlingsresultatService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public void replikerBehandlingsresultat(Behandling tidligsteInaktiveBehandling,
-                                            Behandling behandlingsreplika,
-                                            Behandlingstyper replikertBehandlingstype)
+    public void replikerBehandlingsresultat(Behandling tidligsteInaktiveBehandling, Behandling behandlingsreplika)
         throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         Behandlingsresultat behandlingsresultat = hentBehandlingsresultat(tidligsteInaktiveBehandling.getId());
 
@@ -91,9 +89,7 @@ public class BehandlingsresultatService {
         behandlingsresultatsreplika.setVedtakMetadata(null);
         behandlingsresultatsreplika.setUtfallRegistreringUnntak(null);
         behandlingsresultatsreplika.setUtfallUtpeking(null);
-        if (replikertBehandlingstype.equals(Behandlingstyper.NY_VURDERING)) {
-            behandlingsresultatsreplika.setBehandlingsmåte(Behandlingsmaate.MANUELT);
-        }
+        behandlingsresultatsreplika.setBehandlingsmåte(Behandlingsmaate.MANUELT);
         if (unleash.isEnabled("melosys.ikke_kopier_behandlingsresultattype")) {
             behandlingsresultatsreplika.setType(Behandlingsresultattyper.IKKE_FASTSATT);
         }

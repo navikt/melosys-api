@@ -32,7 +32,7 @@ internal class BehandlingsresultatServiceIT(
     private val behandlingsresultatRepository: BehandlingsresultatRepository,
     @Autowired
     private val fagsakRepository: FagsakRepository
-    ) : DataJpaTestBase() {
+) : DataJpaTestBase() {
     data class Behandlinger(val orginal: Behandling, val replika: Behandling)
 
     @Test
@@ -41,7 +41,7 @@ internal class BehandlingsresultatServiceIT(
 
         val behandlingsresultat = lagBehandlingsresultat(behandlinger.orginal)
         behandlingsresultatRepository.save(behandlingsresultat)
-        behandlingsresultatService.replikerBehandlingsresultat(behandlinger.orginal, behandlinger.replika, Behandlingstyper.NY_VURDERING)
+        behandlingsresultatService.replikerBehandlingsresultat(behandlinger.orginal, behandlinger.replika)
 
         val replikaResultat = behandlingsresultatRepository.findById(behandlinger.replika.id).get()
 
