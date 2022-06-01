@@ -54,7 +54,6 @@ class OppgaveTjenesteTest extends JsonSchemaTestParent {
         SpringSubjectHandler.set(new TestSubjectHandler());
     }
 
-    @Disabled("Venter på skjema")
     @Test
     void mineOppgaver() throws IOException {
         List<OppgaveDto> oppgaver = new ArrayList<>();

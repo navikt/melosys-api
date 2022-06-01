@@ -104,7 +104,6 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
         assertThatCode(() -> valider(jsonString, FAGSAKER_VIDERESEND_POST_SCHEMA, log)).doesNotThrowAnyException();
     }
 
-    @Disabled("Venter på skjema")
     @Test
     void fagsakSchemaValidering() throws JsonProcessingException {
         FagsakDto fagsakDto = random.nextObject(FagsakDto.class);
@@ -129,7 +128,6 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
         assertThatCode(() -> valider(jsonString, FAGSAKER_UTPEK_POST_SCHEMA, log)).doesNotThrowAnyException();
     }
 
-    @Disabled("Venter på skjema")
     @Test
     void fagsakSøkSchemaValidering() throws IOException {
         valider(new FagsakSokDto("123", "MEL-123", "111111111"), SOK_FAGSAKER_POST_SCHEMA);
