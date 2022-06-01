@@ -30,6 +30,8 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class UfmKontrollerTest {
+
+    private final LocalDate DATE = LocalDate.of(2022, 6, 20);
     @Test
     void feilIPeriode_erFeil_verifiserBegrunnelse() {
         assertThat(UfmKontroller.feilIPeriode(kontrollData(null, null))).isEqualTo(Kontroll_begrunnelser.FEIL_I_PERIODEN);
@@ -37,7 +39,7 @@ class UfmKontrollerTest {
 
     @Test
     void periodeErÅpen_erFeil_verifiserBegrunnelse() {
-        assertThat(UfmKontroller.periodeErÅpen(kontrollData(LocalDate.now(), null))).isEqualTo(Kontroll_begrunnelser.INGEN_SLUTTDATO);
+        assertThat(UfmKontroller.periodeErÅpen(kontrollData(DATE, null))).isEqualTo(Kontroll_begrunnelser.INGEN_SLUTTDATO);
     }
 
     @Test
@@ -52,7 +54,7 @@ class UfmKontrollerTest {
 
     @Test
     void periodeEldreEnn5År_erFeil_verifiserBegrunnelse() {
-        assertThat(UfmKontroller.periodeStarterFørFørsteJuni2012(kontrollData(LocalDate.now().minusYears(10), null))).isEqualTo(Kontroll_begrunnelser.PERIODE_FOR_GAMMEL);
+        assertThat(UfmKontroller.periodeStarterFørFørsteJuni2012(kontrollData(DATE.minusYears(11), null))).isEqualTo(Kontroll_begrunnelser.PERIODE_FOR_GAMMEL);
     }
 
     @Test
@@ -144,7 +146,7 @@ class UfmKontrollerTest {
     }
 
     private UfmKontrollData kontrollData() {
-        return kontrollData(LocalDate.now().plusMonths(15), LocalDate.now().plusYears(10));
+        return kontrollData(DATE.plusMonths(15), DATE.plusYears(10));
     }
 
     private UfmKontrollData kontrollData(LocalDate fom, LocalDate tom) {
@@ -164,13 +166,13 @@ class UfmKontrollerTest {
         sedDokument.setArbeidssteder(arbeidssteder);
 
         PersonDokument personDokument = new PersonDokument();
-        personDokument.setDødsdato(LocalDate.now());
+        personDokument.setDødsdato(DATE);
         personDokument.setBostedsadresse(new Bostedsadresse());
         personDokument.getBostedsadresse().setLand(new Land("NOR"));
 
         MedlemskapDokument medlemskapDokument = new MedlemskapDokument();
         Medlemsperiode medlemsperiode = new Medlemsperiode();
-        medlemsperiode.periode = new Periode(LocalDate.now(), LocalDate.now().plusYears(2));
+        medlemsperiode.periode = new Periode(DATE, DATE.plusYears(2));
         medlemsperiode.status = PeriodestatusMedl.UAVK.getKode();
         medlemskapDokument.getMedlemsperiode().add(medlemsperiode);
 
