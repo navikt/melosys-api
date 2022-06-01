@@ -5,6 +5,7 @@ import java.util.*;
 import javax.persistence.*;
 
 import no.nav.melosys.domain.kodeverk.*;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
@@ -85,6 +86,11 @@ public class Fagsak extends RegistreringsInfo {
         return hentAktivBehandling() != null;
     }
 
+    public boolean harMinstEnBehandlingAvType(Behandlingstyper behandlingstype) {
+        return behandlinger.stream()
+            .anyMatch(behandling -> behandling.getType() == behandlingstype);
+    }
+
     public Behandling hentAktivBehandling() {
         List<Behandling> aktiveBehandlinger = getBehandlinger().stream().filter(Behandling::erAktiv).toList();
         if (aktiveBehandlinger.size() > 1) {
@@ -99,6 +105,19 @@ public class Fagsak extends RegistreringsInfo {
     public Behandling hentTidligstRegistrertBehandling() {
         return getBehandlinger().stream()
             .min(Comparator.comparing(Behandling::getRegistrertDato))
+            .orElseThrow(() -> new IkkeFunnetException(FINNER_IKKE_BEHANDLINGER_FOR_FAGSAK + saksnummer));
+    }
+
+    public List<Behandling> hentBehandlingerSortertSynkendePåRegistrertDato() {
+        return getBehandlinger().stream()
+            .sorted(Comparator.comparing(RegistreringsInfo::getRegistrertDato).reversed())
+            .toList();
+    }
+
+    public Behandling hentSistRegistrertBehandling() {
+        return hentBehandlingerSortertSynkendePåRegistrertDato()
+            .stream()
+            .findFirst()
             .orElseThrow(() -> new IkkeFunnetException(FINNER_IKKE_BEHANDLINGER_FOR_FAGSAK + saksnummer));
     }
 

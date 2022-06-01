@@ -1,11 +1,5 @@
 package no.nav.melosys.service.utpeking;
 
-import java.time.LocalDate;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-
 import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.eessi.BucType;
@@ -23,7 +17,7 @@ import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
-import no.nav.melosys.service.kontroll.vedtak.VedtakKontrollService;
+import no.nav.melosys.service.ferdigbehandling.kontroll.FerdigbehandlingKontrollService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import no.nav.melosys.service.vedtak.VedtaksfattingFasade;
@@ -34,6 +28,12 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.context.event.ApplicationEventMulticaster;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 
 @Service
 @Primary
@@ -50,14 +50,14 @@ public class UtpekingService {
     private final ProsessinstansService prosessinstansService;
     private final Unleash unleash;
     private final UtpekingsperiodeRepository utpekingsperiodeRepository;
-    private final VedtakKontrollService vedtakKontrollService;
+    private final FerdigbehandlingKontrollService ferdigbehandlingKontrollService;
     private final ApplicationEventMulticaster melosysEventMulticaster;
 
     public UtpekingService(BehandlingService behandlingService, BehandlingsresultatService behandlingsresultatService,
                            EessiService eessiService, LandvelgerService landvelgerService,
                            LovvalgsperiodeService lovvalgsperiodeService, OppgaveService oppgaveService,
                            ProsessinstansService prosessinstansService,
-                           Unleash unleash, UtpekingsperiodeRepository utpekingsperiodeRepository, VedtakKontrollService vedtakKontrollService,
+                           Unleash unleash, UtpekingsperiodeRepository utpekingsperiodeRepository, FerdigbehandlingKontrollService ferdigbehandlingKontrollService,
                            ApplicationEventMulticaster melosysEventMulticaster) {
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
@@ -68,7 +68,7 @@ public class UtpekingService {
         this.prosessinstansService = prosessinstansService;
         this.unleash = unleash;
         this.utpekingsperiodeRepository = utpekingsperiodeRepository;
-        this.vedtakKontrollService = vedtakKontrollService;
+        this.ferdigbehandlingKontrollService = ferdigbehandlingKontrollService;
         this.melosysEventMulticaster = melosysEventMulticaster;
     }
 
@@ -121,7 +121,7 @@ public class UtpekingService {
         validerUtpekingsperiode(utpekingsperiode);
 
         opprettLovvalgsperiode(behandlingID, utpekingsperiode);
-        vedtakKontrollService.utførKontroller(behandlingID, fagsak.getType(), false);
+        ferdigbehandlingKontrollService.utførKontroller(behandlingID, fagsak.getType(), behandlingsresultat.getType());
         oppdaterBehandlingsresultat(behandlingsresultat);
         prosessinstansService.opprettProsessinstansUtpekAnnetLand(
             behandling, utpekingsperiode.getLovvalgsland(), mottakerinstitusjoner, ytterligereInformasjonSed, fritekstBrev

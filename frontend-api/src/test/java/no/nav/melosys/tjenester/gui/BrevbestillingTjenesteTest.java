@@ -1,15 +1,11 @@
 package no.nav.melosys.tjenester.gui;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
@@ -39,14 +35,13 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 import static no.nav.melosys.tjenester.gui.FeltvalgAlternativKode.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
@@ -124,10 +119,10 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
         assertThat(brevmaler.get(2).getFelter()).hasSize(2);
         assertThat(brevmaler.get(2).getType()).isEqualTo(MANGELBREV_ARBEIDSGIVER);
 
-        assertThat(brevmaler.get(3).getFelter()).hasSize(3);
+        assertThat(brevmaler.get(3).getFelter()).hasSize(4);
         assertThat(brevmaler.get(3).getType()).isEqualTo(GENERELT_FRITEKSTBREV_BRUKER);
 
-        assertThat(brevmaler.get(4).getFelter()).hasSize(3);
+        assertThat(brevmaler.get(4).getFelter()).hasSize(4);
         assertThat(brevmaler.get(4).getType()).isEqualTo(GENERELT_FRITEKSTBREV_ARBEIDSGIVER);
 
     }
@@ -305,73 +300,6 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
         assertThat(brevmaler.get(0)).hasFieldOrPropertyWithValue("type", MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE);
         assertThat(brevmaler.get(0).getMuligeMottakere()).extracting(MottakerDto::getType)
             .containsExactly("Bruker eller brukers fullmektig");
-    }
-
-    @Test
-    void skalReturnereUtkast() throws Exception {
-        byte[] forventetPdf = "UTKAST".getBytes(StandardCharsets.UTF_8);
-        when(mockDokServiceFasade.produserUtkast(anyLong(), any())).thenReturn(forventetPdf);
-
-        BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder()
-            .medProduserbardokument(MANGELBREV_BRUKER)
-            .medMottaker(Aktoersroller.BRUKER)
-            .medInnledningFritekst("Innledning")
-            .medManglerFritekst("Mangler")
-            .build();
-        ResponseEntity<byte[]> responseEntity = brevbestillingTjeneste.produserUtkast(123L, brevbestillingDto);
-
-        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(responseEntity.getBody()).isEqualTo(forventetPdf);
-
-        valider(brevbestillingDto, "dokumenter-v2-utkast-post-schema.json", new ObjectMapper());
-    }
-
-    @Test
-    void skalBestilleProduseringAvBrev() throws Exception {
-        settInnloggetSaksbehandler();
-
-        BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder()
-            .medProduserbardokument(MANGELBREV_BRUKER)
-            .medMottaker(Aktoersroller.BRUKER)
-            .medInnledningFritekst("Innledning")
-            .medManglerFritekst("Mangler")
-            .build();
-        brevbestillingTjeneste.produserBrev(123L, brevbestillingDto);
-
-        verify(mockDokServiceFasade).produserDokument(anyLong(), brevbestillingDtoCaptor.capture());
-
-        assertThat(brevbestillingDtoCaptor.getValue()).extracting(
-            BrevbestillingRequest::getProduserbardokument,
-            BrevbestillingRequest::getMottaker,
-            BrevbestillingRequest::getInnledningFritekst,
-            BrevbestillingRequest::getBestillersId
-        ).containsExactly(MANGELBREV_BRUKER, Aktoersroller.BRUKER, "Innledning", SAKSBEHANDLER);
-
-        valider(brevbestillingDto, "dokumenter-v2-opprett-post-schema.json", new ObjectMapper());
-    }
-
-    @Test
-    void skalBestilleProduseringAvFritekstbrev() throws Exception {
-        settInnloggetSaksbehandler();
-
-        BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder()
-            .medProduserbardokument(GENERELT_FRITEKSTBREV_BRUKER)
-            .medMottaker(Aktoersroller.BRUKER)
-            .medFritekstTittel("Tittel")
-            .medFritekst("Innhold")
-            .build();
-        brevbestillingTjeneste.produserBrev(123L, brevbestillingDto);
-
-        verify(mockDokServiceFasade).produserDokument(anyLong(), brevbestillingDtoCaptor.capture());
-
-        assertThat(brevbestillingDtoCaptor.getValue()).extracting(
-            BrevbestillingRequest::getProduserbardokument,
-            BrevbestillingRequest::getMottaker,
-            BrevbestillingRequest::getFritekstTittel,
-            BrevbestillingRequest::getFritekst
-        ).containsExactly(GENERELT_FRITEKSTBREV_BRUKER, Aktoersroller.BRUKER, "Tittel", "Innhold");
-
-        valider(brevbestillingDto, "dokumenter-v2-opprett-post-schema.json", new ObjectMapper());
     }
 
     private Behandling lagBehandling(Behandlingstyper type) {

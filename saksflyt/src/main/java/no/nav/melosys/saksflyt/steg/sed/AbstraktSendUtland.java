@@ -8,7 +8,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.eessi.BucType;
-import no.nav.melosys.domain.eessi.Vedlegg;
+import no.nav.melosys.domain.arkiv.Vedlegg;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;

@@ -2,7 +2,6 @@ package no.nav.melosys.saksflyt.steg.medl;
 
 import java.util.Optional;
 
-import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
@@ -17,13 +16,10 @@ import org.springframework.stereotype.Component;
 public class LagreLovvalgsperiodeMedl implements StegBehandler {
     private final BehandlingsresultatService behandlingsresultatService;
     private final MedlPeriodeService medlPeriodeService;
-    private final Unleash unleash;
 
-    public LagreLovvalgsperiodeMedl(BehandlingsresultatService behandlingsresultatService, MedlPeriodeService medlPeriodeService,
-                                    Unleash unleash) {
+    public LagreLovvalgsperiodeMedl(BehandlingsresultatService behandlingsresultatService, MedlPeriodeService medlPeriodeService) {
         this.behandlingsresultatService = behandlingsresultatService;
         this.medlPeriodeService = medlPeriodeService;
-        this.unleash = unleash;
     }
 
     @Override
@@ -41,7 +37,7 @@ public class LagreLovvalgsperiodeMedl implements StegBehandler {
 
         final var lovvalgsperiode = behandlingsresultat.hentValidertLovvalgsperiode();
         final var behandling = prosessinstans.getBehandling();
-        if (unleash.isEnabled("melosys.api.ny.vurdering.medlperiode.beholdes") && behandling.erNyVurdering()) {
+        if (behandling.erNyVurdering()) {
             lovvalgsperiode.setMedlPeriodeID(finnOpprinneligMedlPeriodeID(behandling).orElse(null));
         }
         oppdaterLovvalgsperiode(behandling, lovvalgsperiode);

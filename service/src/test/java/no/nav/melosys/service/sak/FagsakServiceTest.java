@@ -5,7 +5,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Representerer;
@@ -20,7 +19,6 @@ import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.medl.MedlPeriodeService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import org.junit.jupiter.api.BeforeEach;
@@ -53,16 +51,13 @@ class FagsakServiceTest {
     private PersondataFasade persondataFasade;
     @Mock
     private BehandlingsresultatService behandlingsresultatService;
-    @Mock
-    private MedlPeriodeService medlPeriodeService;
-    private final FakeUnleash unleash = new FakeUnleash();
 
     private FagsakService fagsakService;
 
     @BeforeEach
     public void setUp() {
         fagsakService = new FagsakService(fagsakRepo, behandlingService, kontaktopplysningService, oppgaveService, persondataFasade,
-                                          behandlingsresultatService, medlPeriodeService, unleash);
+            behandlingsresultatService);
     }
 
     @Test
@@ -327,6 +322,31 @@ class FagsakServiceTest {
         long replikertBehandlingID = fagsakService.opprettNyVurderingBehandling(saksnummer);
         verify(behandlingService).replikerBehandlingOgBehandlingsresultat(behandling, behandling.getType());
         verify(behandlingService).avsluttBehandling(behandling.getId());
+        assertThat(replikertBehandlingID).isEqualTo(replikertBehandling.getId());
+    }
+
+    @Test
+    void opprettNyVurderingBehandling_behandlingErAvTemaBeslutningLovvalgNorge_nyBehandlingOpprettet() {
+        final String saksnummer = "MEL-1";
+
+        var behandling = lagBehandling(1L, SED, AVSLUTTET, null);
+        behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
+        Fagsak fagsak = lagFagsakMedBruker();
+        fagsak.setBehandlinger(List.of(behandling));
+        var behandlingsresultat = lagBehandlingsresultat(behandling, Instant.now(), lagVedtakMetadata(Instant.now()), null);
+
+        Behandling replikertBehandling = new Behandling();
+        replikertBehandling.setId(2L);
+
+        when(fagsakRepo.findBySaksnummer(saksnummer)).thenReturn(Optional.of(fagsak));
+        when(behandlingsresultatService.hentBehandlingsresultat(behandling.getId())).thenReturn(behandlingsresultat);
+        when(behandlingService.replikerBehandlingOgBehandlingsresultat(any(), any())).thenReturn(replikertBehandling);
+
+
+        long replikertBehandlingID = fagsakService.opprettNyVurderingBehandling(saksnummer);
+
+
+        verify(behandlingService).replikerBehandlingOgBehandlingsresultat(behandling, Behandlingstyper.NY_VURDERING);
         assertThat(replikertBehandlingID).isEqualTo(replikertBehandling.getId());
     }
 

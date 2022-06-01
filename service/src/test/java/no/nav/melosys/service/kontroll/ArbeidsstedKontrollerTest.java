@@ -63,7 +63,7 @@ class ArbeidsstedKontrollerTest {
         return representantIUtlandet;
     }
 
-    private SedDokument lagSedDokument(String landKode, String  by) {
+    private SedDokument lagSedDokument(String landKode, String by) {
         SedDokument sedDokument = new SedDokument();
         Adresse adresse_1 = new Adresse();
         adresse_1.by = "By_1";
