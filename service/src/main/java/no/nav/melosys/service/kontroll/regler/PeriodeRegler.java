@@ -2,10 +2,12 @@ package no.nav.melosys.service.kontroll.regler;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.Period;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 
 import no.nav.melosys.domain.ErPeriode;
+import no.nav.melosys.service.kontroll.regler.overlapp.PeriodeOverlappSjekk;
 
 public final class PeriodeRegler {
 
@@ -19,8 +21,20 @@ public final class PeriodeRegler {
         return fom != null && tom == null;
     }
 
-    public static boolean periodeOver24Mnd(LocalDate fom, LocalDate tom) {
+    public static boolean periodeOver24Måneder(LocalDate fom, LocalDate tom) {
         return tom != null && ChronoUnit.MONTHS.between(fom, tom) >= 24;
+    }
+
+    public static boolean periodeOver2ÅrOgEnDag(LocalDate fom, LocalDate tom) {
+        return tom != null && antallÅr(fom, tom) > 2 || antallÅr(fom, tom) >= 2 && antallDager(fom, tom) > 0;
+    }
+
+    private static int antallÅr(LocalDate fom, LocalDate tom) {
+        return Period.between(fom, tom).getYears();
+    }
+
+    private static int antallDager(LocalDate fom, LocalDate tom) {
+        return Period.between(fom, tom).getDays();
     }
 
     public static boolean periodeOver3År(LocalDate fom, LocalDate tom) {
@@ -60,6 +74,12 @@ public final class PeriodeRegler {
         return date1.equals(date2);
     }
 
+    public static boolean perioderOverlapperMerEnn1Dag(ErPeriode kontrollperiode, ErPeriode medlemsperiode) {
+        PeriodeOverlappSjekk periodeOverlappSjekk = new PeriodeOverlappSjekk(kontrollperiode, medlemsperiode);
+        return periodeOverlappSjekk.harPeriodeSomOverlapperMerEnn1Dag();
+    }
+
+
     public static boolean periodeOverlapper(ErPeriode periode1, ErPeriode periode2) {
         return periodeOverlapper(periode1.getFom(), periode1.getTom(), periode2.getFom(), periode2.getTom());
     }
@@ -83,7 +103,6 @@ public final class PeriodeRegler {
         }
 
         return fom1.isBefore(fom2) && tom1.isAfter(fom2) || fom1.isAfter(fom2) && fom1.isBefore(tom2);
-
     }
 
     private static boolean åpenPeriodeOverlapper(LocalDate fom, LocalDate tom, LocalDate åpenPeriode) {

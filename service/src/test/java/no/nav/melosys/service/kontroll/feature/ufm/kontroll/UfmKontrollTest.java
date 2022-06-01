@@ -41,8 +41,8 @@ class UfmKontrollTest {
     }
 
     @Test
-    void periodeOver24Mnd_erFeil_verifiserBegrunnelse() {
-        assertThat(UfmKontroll.periodeOver24Mnd(kontrollData())).isEqualTo(Kontroll_begrunnelser.PERIODEN_OVER_24_MD);
+    void periodeOver24MndOgEnDag_erFeil_verifiserBegrunnelse() {
+        assertThat(UfmKontroll.periodeOver24MånederOgEnDag(kontrollData())).isEqualTo(Kontroll_begrunnelser.PERIODEN_OVER_24_MD);
     }
 
     @Test

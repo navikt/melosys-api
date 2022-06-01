@@ -14,6 +14,13 @@ public final class OverlappendeMedlemskapsperioderRegler {
                 && PeriodeRegler.periodeOverlapper(kontrollperiode, medlemsperiode.getPeriode()));
     }
 
+    public static boolean harOverlappendeMedlemsperiodeMerEnn1DagFraSed(MedlemskapDokument medlemskapDokument,
+                                                                        ErPeriode kontrollperiode) {
+        return medlemskapDokument.hentMedlemsperioderHvorKildeIkkeLånekassen().stream().anyMatch(
+            medlemsperiode -> !PeriodestatusMedl.AVST.getKode().equals(medlemsperiode.status)
+                && PeriodeRegler.perioderOverlapperMerEnn1Dag(kontrollperiode, medlemsperiode.getPeriode()));
+    }
+
     public static boolean harOverlappendeMedlemsperiode(MedlemskapDokument medlemskapDokument,
                                                         Lovvalgsperiode kontrollperiode,
                                                         Lovvalgsperiode opprinneligPeriodeTilKontrollperiode) {

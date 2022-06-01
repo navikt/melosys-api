@@ -32,7 +32,7 @@ final class FerdigbehandlingKontroll {
         Lovvalgsperiode lovvalgsperiode = kontrollData.lovvalgsperiode();
 
         return lovvalgsperiode.erArtikkel12()
-            && PeriodeRegler.periodeOver24Mnd(lovvalgsperiode.getFom(), lovvalgsperiode.getTom())
+            && PeriodeRegler.periodeOver24Måneder(lovvalgsperiode.getFom(), lovvalgsperiode.getTom())
             ? new Kontrollfeil(Kontroll_begrunnelser.PERIODEN_OVER_24_MD) : null;
     }
 

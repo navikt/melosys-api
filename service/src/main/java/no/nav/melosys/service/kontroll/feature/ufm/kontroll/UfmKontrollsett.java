@@ -53,7 +53,7 @@ public class UfmKontrollsett {
     private static final Set<Function<UfmKontrollData, Kontroll_begrunnelser>> REGELSETT_A009 = Set.of(
         UfmKontroll::periodeErÅpen,
         UfmKontroll::periodeStarterFørFørsteJuni2012,
-        UfmKontroll::periodeOver24Mnd,
+        UfmKontroll::periodeOver24MånederOgEnDag,
         UfmKontroll::periodeOver1ÅrFremITid,
         UfmKontroll::overlappendeMedlemsperiode,
         UfmKontroll::lovvalgslandErNorge,

@@ -32,22 +32,22 @@ class PeriodeReglerTest {
 
     @Test
     void periodeOver24Mnd_periodeOver24Mnd_true() {
-        assertThat(PeriodeRegler.periodeOver24Mnd(LocalDate.now(), LocalDate.now().plusYears(3))).isTrue();
+        assertThat(PeriodeRegler.periodeOver24Måneder(LocalDate.now(), LocalDate.now().plusYears(3))).isTrue();
     }
 
     @Test
     void periodeoOver24Mnd_periode24Mnd_true() {
-        assertThat(PeriodeRegler.periodeOver24Mnd(LocalDate.now(), LocalDate.now().plusMonths(24))).isTrue();
+        assertThat(PeriodeRegler.periodeOver24Måneder(LocalDate.now(), LocalDate.now().plusMonths(24))).isTrue();
     }
 
     @Test
     void periodeoOver24Mnd_periode23Mnd_false() {
-        assertThat(PeriodeRegler.periodeOver24Mnd(LocalDate.now(), LocalDate.now().plusMonths(23))).isFalse();
+        assertThat(PeriodeRegler.periodeOver24Måneder(LocalDate.now(), LocalDate.now().plusMonths(23))).isFalse();
     }
 
     @Test
     void periodeOver24Mnd_periode14Mnd_false() {
-        assertThat(PeriodeRegler.periodeOver24Mnd(LocalDate.now(), LocalDate.now().plusMonths(14))).isFalse();
+        assertThat(PeriodeRegler.periodeOver24Måneder(LocalDate.now(), LocalDate.now().plusMonths(14))).isFalse();
     }
 
     @Test
