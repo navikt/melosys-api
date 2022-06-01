@@ -64,31 +64,38 @@ public class FysiskDokument extends ArkivDokument {
         return fysiskDokument;
     }
 
-    private static String hentTittelForSedType(SedType sedType) {
-        switch (sedType) {
-            case A002:
-                return "Delvis eller fullt avslag på søknad om unntak";
-            case A003:
-                return "Beslutning om lovvalg";
-            case A008:
-                return "Melding om relevant informasjon";
-            case A011:
-                return "Innvilgelse av søknad om unntak";
-            default:
-                throw new IllegalArgumentException("Kan ikke opprette journalpost av sed-type " + sedType);
+    static List<FysiskDokument> lagFysiskDokumentListeFraVedlegg(JournalpostBestilling journalpostBestilling,
+                                                                 List<Vedlegg> vedleggListe) {
+        if (vedleggListe == null) {
+            return null;
         }
+        return vedleggListe.stream().map(
+            vedlegg -> {
+                FysiskDokument fysiskDokument = new FysiskDokument();
+                fysiskDokument.setTittel(vedlegg.getTittel());
+                fysiskDokument.setBrevkode(journalpostBestilling.getBrevkode());
+                fysiskDokument.setDokumentKategori(journalpostBestilling.getDokumentKategori());
+                fysiskDokument.setDokumentVarianter(Collections.singletonList(lagDokumentVariant(vedlegg.getInnhold())));
+                return fysiskDokument;
+            }
+        ).toList();
+    }
+
+    private static String hentTittelForSedType(SedType sedType) {
+        return switch (sedType) {
+            case A002 -> "Delvis eller fullt avslag på søknad om unntak";
+            case A003 -> "Beslutning om lovvalg";
+            case A008 -> "Melding om relevant informasjon";
+            case A011 -> "Innvilgelse av søknad om unntak";
+            default -> throw new IllegalArgumentException("Kan ikke opprette journalpost av sed-type " + sedType);
+        };
     }
 
     private static String hentTittelForAltinnDokument(AltinnDokument.AltinnDokumentType dokumentType) {
-        switch (dokumentType) {
-            case SOKNAD:
-                return "Søknad om A1 for utsendte arbeidstakere i EØS/Sveits";
-            case FULLMAKT:
-                return "Fullmakt";
-            default:
-                throw new IllegalArgumentException("Ukjent AltinnDokumentType " + dokumentType);
-
-        }
+        return switch (dokumentType) {
+            case SOKNAD -> "Søknad om A1 for utsendte arbeidstakere i EØS/Sveits";
+            case FULLMAKT -> "Fullmakt";
+        };
     }
 
     public List<DokumentVariant> getDokumentVarianter() {

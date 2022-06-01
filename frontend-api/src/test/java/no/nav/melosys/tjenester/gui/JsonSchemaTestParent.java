@@ -43,6 +43,7 @@ public class JsonSchemaTestParent {
             .overrideDefaultInitialization(true)
             .stringLengthRange(2, 10)
             .randomize(named("fnr").and(ofType(String.class)), new NumericStringRandomizer(11))
+            .randomize(named("hovedpartIdent").and(ofType(String.class)), new NumericStringRandomizer(11))
             .randomize(named("orgnummer").and(ofType(String.class)), new NumericStringRandomizer(9));
     }
 

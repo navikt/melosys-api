@@ -1,5 +1,7 @@
 package no.nav.melosys.service.unntak;
 
+import java.time.LocalDate;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
 
@@ -9,9 +11,12 @@ import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
+import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.service.LandvelgerService;
@@ -19,17 +24,20 @@ import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
-import no.nav.melosys.service.kontroll.unntak.AnmodningUnntakKontrollService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
+import no.nav.melosys.service.unntak.kontroll.AnmodningUnntakKontrollService;
 import no.nav.melosys.sikkerhet.context.TestSubjectHandler;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
@@ -64,6 +72,9 @@ class AnmodningUnntakServiceTest {
     private static final String FRITEKST_SED = "Ytterligere info som fritekst";
     private static final String SAKSNUMMER = "MEL-111";
     private static final String MOTTAKER_INSTITUSJON = "SE:432";
+
+    @Captor
+    private ArgumentCaptor<Collection<Lovvalgsperiode>> lovvalgsperioder;
 
     @BeforeEach
     public void setUp() {
@@ -123,14 +134,15 @@ class AnmodningUnntakServiceTest {
         behandling.setTema(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL);
 
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
-        when(anmodningsperiodeService.hentAnmodningsperiodeSvarForBehandling(anyLong())).thenReturn(Collections.singletonList(new AnmodningsperiodeSvar()));
-        when(lovvalgsperiodeService.hentLovvalgsperioder(anyLong())).thenReturn(Collections.singletonList(new Lovvalgsperiode()));
+        when(anmodningsperiodeService.hentAnmodningsperiodeSvarForBehandling(anyLong())).thenReturn(lagAnmodningsperiodeSvar());
 
         anmodningUnntakService.anmodningOmUnntakSvar(BEHANDLING_ID, FRITEKST_SED);
 
         verify(behandlingService).hentBehandling(BEHANDLING_ID);
         verify(anmodningsperiodeService).hentAnmodningsperiodeSvarForBehandling(BEHANDLING_ID);
-        verify(lovvalgsperiodeService).hentLovvalgsperioder(BEHANDLING_ID);
+        verify(lovvalgsperiodeService).lagreLovvalgsperioder(eq(BEHANDLING_ID), lovvalgsperioder.capture());
+        assertThat(lovvalgsperioder.getValue()).containsExactly(
+            Lovvalgsperiode.av(lagAnmodningsperiodeSvar(), Medlemskapstyper.PLIKTIG));
         verify(prosessinstansService).opprettProsessinstansAnmodningOmUnntakMottakSvar(behandling, FRITEKST_SED);
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(SAKSNUMMER);
     }
@@ -158,44 +170,17 @@ class AnmodningUnntakServiceTest {
     }
 
     @Test
-    void anmodningOmUnntakSvar_behandlingHarIngenAnmodningsperiodeSvar_forventException() {
-        Behandling behandling = lagBehandling();
-        behandling.setTema(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL);
-        behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
-        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
-
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> anmodningUnntakService.anmodningOmUnntakSvar(BEHANDLING_ID, null))
-            .withMessageContaining("Finner ingen AnmodningsperiodeSvar for behandling 1");
-    }
-
-    @Test
-    void anmodningOmUnntakSvar_behandlingHarIngenLovvalgsperiode_forventException() {
-        Behandling behandling = lagBehandling();
-        behandling.setTema(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL);
-        behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
-
-        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
-        when(anmodningsperiodeService.hentAnmodningsperiodeSvarForBehandling(anyLong())).thenReturn(Collections.singletonList(new AnmodningsperiodeSvar()));
-
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> anmodningUnntakService.anmodningOmUnntakSvar(BEHANDLING_ID, null))
-            .withMessageContaining("Finner ingen Lovvalgsperioder for behandling 1");
-    }
-
-    @Test
     void anmodningOmUnntakSvar_avslagForLangFritekst_forventException() {
         Behandling behandling = lagBehandling();
         behandling.setTema(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL);
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
 
-        AnmodningsperiodeSvar anmodningsperiodeSvar = new AnmodningsperiodeSvar();
+        AnmodningsperiodeSvar anmodningsperiodeSvar = lagAnmodningsperiodeSvar();
         anmodningsperiodeSvar.setBegrunnelseFritekst(RandomStringUtils.random(256));
         anmodningsperiodeSvar.setAnmodningsperiodeSvarType(Anmodningsperiodesvartyper.AVSLAG);
 
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
-        when(anmodningsperiodeService.hentAnmodningsperiodeSvarForBehandling(anyLong())).thenReturn(Collections.singletonList(anmodningsperiodeSvar));
-        when(lovvalgsperiodeService.hentLovvalgsperioder(anyLong())).thenReturn(Collections.singletonList(new Lovvalgsperiode()));
+        when(anmodningsperiodeService.hentAnmodningsperiodeSvarForBehandling(anyLong())).thenReturn(anmodningsperiodeSvar);
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> anmodningUnntakService.anmodningOmUnntakSvar(BEHANDLING_ID, null))
@@ -219,5 +204,20 @@ class AnmodningUnntakServiceTest {
         saksopplysning.setType(SaksopplysningType.PERSOPL);
         saksopplysning.setDokument(personDokument);
         return saksopplysning;
+    }
+
+    private static AnmodningsperiodeSvar lagAnmodningsperiodeSvar() {
+        AnmodningsperiodeSvar anmodningsperiodeSvar = new AnmodningsperiodeSvar();
+        anmodningsperiodeSvar.setAnmodningsperiodeSvarType(Anmodningsperiodesvartyper.INNVILGELSE);
+        anmodningsperiodeSvar.setAnmodningsperiode(lagAnmodningsperiode());
+        return anmodningsperiodeSvar;
+    }
+
+    private static Anmodningsperiode lagAnmodningsperiode() {
+        return new Anmodningsperiode(
+            LocalDate.EPOCH,
+            LocalDate.MAX,
+            Landkoder.NO, Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1, null,
+            Landkoder.SE, Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1, Trygdedekninger.FULL_DEKNING_EOSFO);
     }
 }

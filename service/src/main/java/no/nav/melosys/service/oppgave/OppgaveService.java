@@ -16,13 +16,13 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.oppgave.OppgaveFasade;
 import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
-import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.felles.dto.SoeknadslandDto;
 import no.nav.melosys.service.oppgave.dto.*;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.sak.FagsakService;
+import no.nav.melosys.service.saksopplysninger.SaksopplysningerService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -250,25 +250,25 @@ public class OppgaveService {
         journalfoeringsoppgaveDto.setJournalpostID(oppgave.getJournalpostId());
         String aktørId = oppgave.getAktørId();
         String orgnr = oppgave.getOrgnr();
-        oppdaterIdOgNavn(Optional.ofNullable(aktørId), Optional.ofNullable(orgnr), journalfoeringsoppgaveDto);
+        oppdaterHovedpartIdentOgNavn(aktørId, orgnr, journalfoeringsoppgaveDto);
         return journalfoeringsoppgaveDto;
     }
 
-    private void oppdaterIdOgNavn(Optional<String> aktørID, Optional<String> orgnr, OppgaveDto oppgaveDto) {
-        if (aktørID.isPresent()) {
-            String fnr = persondataFasade.finnFolkeregisterident(aktørID.get()).orElse(null);
+    private void oppdaterHovedpartIdentOgNavn(String aktørID, String orgnr, OppgaveDto oppgaveDto) {
+        if (aktørID != null) {
+            String fnr = persondataFasade.finnFolkeregisterident(aktørID).orElse(null);
             if (StringUtils.isNotEmpty(fnr)) {
-                oppgaveDto.setId(fnr);
+                oppgaveDto.setHovedpartIdent(fnr);
                 oppgaveDto.setNavn(persondataFasade.hentSammensattNavn(fnr));
                 return;
             }
         }
-        if (orgnr.isPresent()) {
-            oppgaveDto.setId(orgnr.get());
-            oppgaveDto.setNavn(eregFasade.hentOrganisasjonNavn(orgnr.get()));
+        if (orgnr != null) {
+            oppgaveDto.setHovedpartIdent(orgnr);
+            oppgaveDto.setNavn(eregFasade.hentOrganisasjonNavn(orgnr));
             return;
         }
-        oppgaveDto.setId(UKJENT);
+        oppgaveDto.setHovedpartIdent(UKJENT);
         oppgaveDto.setNavn(UKJENT);
     }
 
@@ -282,11 +282,11 @@ public class OppgaveService {
         behandling = behandlingService.hentBehandling(behandling.getId());
         behOppgaveDto.setBehandling(mapBehandling(behandling));
 
-        var aktørID = fagsak.finnBrukersAktørID();
-        var orgnr = fagsak.finnVirksomhetsOrgnr();
-        oppdaterIdOgNavn(aktørID, orgnr, behOppgaveDto);
+        var aktørID = fagsak.finnBrukersAktørID().orElse(null);
+        var orgnr = fagsak.finnVirksomhetsOrgnr().orElse(null);
+        oppdaterHovedpartIdentOgNavn(aktørID, orgnr, behOppgaveDto);
 
-        if (orgnr.isPresent()) {
+        if (orgnr != null) {
             return behOppgaveDto;
         }
 

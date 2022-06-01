@@ -92,7 +92,7 @@ public class VideresendSoknadService {
 
     private void validerDokumenterTilhørerSakOgTilgang(Set<DokumentReferanse> vedleggReferanser, Fagsak fagsak) {
         joarkFasade.validerDokumenterTilhørerSakOgHarTilgang(new HentJournalposterTilknyttetSakRequest(fagsak.getGsakSaksnummer(),
-                                                                                                       fagsak.getSaksnummer()), vedleggReferanser);
+            fagsak.getSaksnummer()), vedleggReferanser);
     }
 
     private void validerErBehandlingAvSøknad(Behandling behandling) {

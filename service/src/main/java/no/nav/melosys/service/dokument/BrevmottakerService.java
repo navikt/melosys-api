@@ -238,7 +238,7 @@ public class BrevmottakerService {
     }
 
     public Kontaktopplysning hentKontaktopplysning(String saksnummer, Aktoer mottaker) {
-        if (mottaker != null && List.of(ARBEIDSGIVER, REPRESENTANT).contains(mottaker.getRolle())) {
+        if (mottaker != null && mottaker.erOrganisasjon()) {
             return kontaktopplysningService.hentKontaktopplysning(saksnummer, mottaker.getOrgnr()).orElse(null);
         }
         return null;

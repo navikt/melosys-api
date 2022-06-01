@@ -23,7 +23,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -105,7 +104,6 @@ public class BehandlingTjeneste {
         return ResponseEntity.ok(tidligereMedlemsperioderDto);
     }
 
-    @Transactional
     @GetMapping("{behandlingID}")
     @JsonView(DokumentView.FrontendApi.class)
     @ApiOperation(value = "Hent en spesifikk behandling", response = BehandlingDto.class)
@@ -211,7 +209,6 @@ public class BehandlingTjeneste {
         behandlingOppsummeringDto.setSvarFrist(behandling.getDokumentasjonSvarfristDato());
         behandlingOppsummeringDto.setBehandlingsfrist(behandling.getBehandlingsfrist());
         behandlingOppsummeringDto.setBehandlingsresultattype(behandlingsresultat.getType());
-        behandlingOppsummeringDto.setBehandlingGjelder(behandling.getFagsak().behandlingGjelder());
         return behandlingOppsummeringDto;
     }
 }

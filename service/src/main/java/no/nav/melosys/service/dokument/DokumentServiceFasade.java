@@ -54,21 +54,24 @@ public class DokumentServiceFasade {
 
     @Transactional
     public void produserDokument(Produserbaredokumenter dokumentType, Mottaker mottaker, long behandlingId, DoksysBrevbestilling brevbestilling) {
-        var brevbestillingDto = new BrevbestillingRequest.Builder()
+        var brevbestillingRequest = new BrevbestillingRequest.Builder()
             .medProduserbardokument(dokumentType)
             .medMottaker(mottaker.getRolle())
             .medFritekst(hentFritekst(brevbestilling))
+            .medBegrunnelseKode(brevbestilling.getBegrunnelseKode())
             .medBestillersId(brevbestilling.getAvsenderID())
             .build();
 
-        produserDokument(behandlingId, brevbestilling, brevbestillingDto, mottaker);
+        produserDokument(behandlingId, brevbestilling, brevbestillingRequest, mottaker);
     }
 
     private String hentFritekst(DoksysBrevbestilling brevbestilling) {
-        if (brevbestilling.getProduserbartdokument() == Produserbaredokumenter.AVSLAG_MANGLENDE_OPPLYSNINGER) {
-            return brevbestilling.getFritekst();
-        }
-        return null;
+        if (brevbestilling.getProduserbartdokument() == null) return null;
+
+        return switch (brevbestilling.getProduserbartdokument()) {
+            case AVSLAG_MANGLENDE_OPPLYSNINGER, MELDING_HENLAGT_SAK -> brevbestilling.getFritekst();
+            default -> null;
+        };
     }
 
     private void produserDokument(long behandlingID, DoksysBrevbestilling brevbestilling, BrevbestillingRequest brevbestillingRequest, Mottaker mottaker) {

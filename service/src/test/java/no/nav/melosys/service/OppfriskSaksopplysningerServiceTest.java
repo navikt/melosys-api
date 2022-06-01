@@ -17,12 +17,15 @@ import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.person.Informasjonsbehov;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.kontroll.KontrollresultatService;
+import no.nav.melosys.service.behandling.kontroll.BehandlingskontrollresultatService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerRequest;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
+import no.nav.melosys.service.saksopplysninger.OppfriskSaksopplysningerService;
+import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import no.nav.melosys.service.vilkaar.InngangsvilkaarService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,6 +34,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
@@ -39,11 +43,13 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class OppfriskSaksopplysningerServiceTest {
     @Mock
+    private AnmodningsperiodeService anmodningsperiodeService;
+    @Mock
     private BehandlingService behandlingService;
     @Mock
     private BehandlingsresultatService behandlingsresultatService;
     @Mock
-    private KontrollresultatService kontrollresultatService;
+    private BehandlingskontrollresultatService behandlingskontrollresultatService;
     @Mock
     private InngangsvilkaarService inngangsvilkaarService;
     @Mock
@@ -57,17 +63,19 @@ class OppfriskSaksopplysningerServiceTest {
 
     @BeforeEach
     public void setUp() {
-        oppfriskSaksopplysningerService = new OppfriskSaksopplysningerService(
-            behandlingService, behandlingsresultatService,
-            kontrollresultatService, inngangsvilkaarService,
-            registeropplysningerService, persondataFasade);
-
-        when(persondataFasade.hentFolkeregisterident(anyString())).thenReturn("322211");
+        oppfriskSaksopplysningerService = new OppfriskSaksopplysningerService(anmodningsperiodeService,
+            behandlingService,
+            behandlingsresultatService,
+            behandlingskontrollresultatService,
+            inngangsvilkaarService,
+            registeropplysningerService,
+            persondataFasade);
     }
 
     @Test
     void oppfriskSaksopplysning() {
-        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(lagBehandling());
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling());
+        when(persondataFasade.hentFolkeregisterident(anyString())).thenReturn("322211");
 
         oppfriskSaksopplysningerService.oppfriskSaksopplysning(BEHANDLING_ID, false);
 
@@ -76,16 +84,28 @@ class OppfriskSaksopplysningerServiceTest {
     }
 
     @Test
+    void oppfriskSaksopplysning_anmodningOmUnntakSendt_feiler() {
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling());
+        lagBehandling().setTema(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL);
+        when(anmodningsperiodeService.harSendtAnmodningsperiode(BEHANDLING_ID)).thenReturn(true);
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> oppfriskSaksopplysningerService.oppfriskSaksopplysning(BEHANDLING_ID, false))
+            .withMessageContaining("Anmodning om unntak er sendt");
+    }
+
+    @Test
     void oppfriskSaksopplysning_medSED_kallerKontroller() {
         Behandling behandling = lagBehandling();
         behandling.setTema(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE);
 
         behandling.getSaksopplysninger().add(lagSED());
-        when(behandlingService.hentBehandlingMedSaksopplysninger(eq(BEHANDLING_ID))).thenReturn(behandling);
+        when(behandlingService.hentBehandling(BEHANDLING_ID)).thenReturn(behandling);
+        when(persondataFasade.hentFolkeregisterident(anyString())).thenReturn("322211");
 
         oppfriskSaksopplysningerService.oppfriskSaksopplysning(BEHANDLING_ID, false);
 
-        verify(kontrollresultatService).utførKontrollerOgRegistrerFeil(eq(BEHANDLING_ID));
+        verify(behandlingskontrollresultatService).utførKontrollerOgRegistrerFeil(BEHANDLING_ID);
     }
 
     @Test
@@ -100,7 +120,8 @@ class OppfriskSaksopplysningerServiceTest {
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.getVilkaarsresultater().add(vilkaarsresultat);
 
-        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        when(persondataFasade.hentFolkeregisterident(anyString())).thenReturn("322211");
         when(inngangsvilkaarService.vurderOgLagreInngangsvilkår(anyLong(), anyList(), anyBoolean(), any(Periode.class))).thenReturn(true);
 
         oppfriskSaksopplysningerService.oppfriskSaksopplysning(BEHANDLING_ID, false);
@@ -111,9 +132,12 @@ class OppfriskSaksopplysningerServiceTest {
     @Test
     void oppfriskSaksopplysning_utenFamilierelasjoner_girForventetInformasjonsbehov() {
         Behandling behandling = lagBehandling();
-        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        when(persondataFasade.hentFolkeregisterident(anyString())).thenReturn("322211");
         ArgumentCaptor<RegisteropplysningerRequest> requestCaptor = ArgumentCaptor.forClass(RegisteropplysningerRequest.class);
+
         oppfriskSaksopplysningerService.oppfriskSaksopplysning(BEHANDLING_ID, false);
+
         verify(registeropplysningerService).hentOgLagreOpplysninger(requestCaptor.capture());
         assertThat(requestCaptor.getValue().getInformasjonsbehov()).isEqualTo(Informasjonsbehov.STANDARD);
     }
@@ -121,9 +145,12 @@ class OppfriskSaksopplysningerServiceTest {
     @Test
     void oppfriskSaksopplysning_medFamilierelasjoner_girForventetInformasjonsbehov() {
         Behandling behandling = lagBehandling();
-        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        when(persondataFasade.hentFolkeregisterident(anyString())).thenReturn("322211");
         ArgumentCaptor<RegisteropplysningerRequest> requestCaptor = ArgumentCaptor.forClass(RegisteropplysningerRequest.class);
+
         oppfriskSaksopplysningerService.oppfriskSaksopplysning(BEHANDLING_ID, true);
+
         verify(registeropplysningerService).hentOgLagreOpplysninger(requestCaptor.capture());
         assertThat(requestCaptor.getValue().getInformasjonsbehov()).isEqualTo(Informasjonsbehov.MED_FAMILIERELASJONER);
     }

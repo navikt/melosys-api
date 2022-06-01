@@ -1,10 +1,10 @@
 package no.nav.melosys.service.persondata;
 
 import no.nav.melosys.integrasjon.pdl.PDLConsumer;
-import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.persondata.familie.FamiliemedlemService;
+import no.nav.melosys.service.saksopplysninger.SaksopplysningerService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 

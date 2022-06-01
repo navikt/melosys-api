@@ -11,7 +11,7 @@ public class OppgaveDto {
     private String oppgaveID;
     private PrioritetType prioritet;
     private String navn;
-    private String id;
+    private String hovedpartIdent;
     private int versjon;
 
     //Getter brukes av Jackson for å serialisere oppgave objekter til frontend i OppgaveTjeneste
@@ -64,11 +64,11 @@ public class OppgaveDto {
         this.navn = navn;
     }
 
-    public String getId() {
-        return id;
+    public String getHovedpartIdent() {
+        return hovedpartIdent;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setHovedpartIdent(String hovedpartIdent) {
+        this.hovedpartIdent = hovedpartIdent;
     }
 }

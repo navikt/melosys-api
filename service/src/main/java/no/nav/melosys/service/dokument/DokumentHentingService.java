@@ -28,9 +28,9 @@ public class DokumentHentingService {
     }
 
     /**
-     * Henter dokumenter knyttet til en sak med et gitt saksnummer
+     * Henter journalposter knyttet til en sak med et gitt saksnummer
      */
-    public List<Journalpost> hentDokumenter(String saksnummer) {
+    public List<Journalpost> hentJournalposter(String saksnummer) {
         Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
         return joarkFasade.hentJournalposterTilknyttetSak(new HentJournalposterTilknyttetSakRequest(fagsak.getGsakSaksnummer(), saksnummer));
     }

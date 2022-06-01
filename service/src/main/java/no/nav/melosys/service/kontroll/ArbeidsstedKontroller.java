@@ -11,6 +11,10 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
 public final class ArbeidsstedKontroller {
+
+    private ArbeidsstedKontroller() {
+    }
+
     private static final String[] BYER_FRA_SVALBARD = {"Ny-Ålesund", "Ny-Alesund", "Svalbard", "Sveagruva", "Hopen",
         "Bjørnøya", "Bjornoya", "Spitsbergen", "Longyearbyen"};
 
@@ -18,8 +22,6 @@ public final class ArbeidsstedKontroller {
         arbeidssted -> StringUtils.equals(arbeidssted.adresse.land, Landkoder.SJ.getKode())
             || matchAnyIgnoreCase(arbeidssted.adresse.by, BYER_FRA_SVALBARD);
 
-    private ArbeidsstedKontroller() {
-    }
 
     public static boolean representantIUtlandetMangler(RepresentantIUtlandet representantIUtlandet) {
         return representantIUtlandet == null || representantIUtlandet.representantNavn == null;

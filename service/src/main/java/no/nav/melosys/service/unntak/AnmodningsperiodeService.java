@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.AnmodningsperiodeSvar;
@@ -24,10 +23,12 @@ import static org.springframework.util.StringUtils.hasText;
 @Service
 public class AnmodningsperiodeService {
     private final AnmodningsperiodeRepository anmodningsperiodeRepository;
-    private final BehandlingsresultatService behandlingsresultatService;
     private final AnmodningsperiodeSvarRepository anmodningsperiodeSvarRepository;
+    private final BehandlingsresultatService behandlingsresultatService;
 
-    public AnmodningsperiodeService(AnmodningsperiodeRepository anmodningsperiodeRepository, BehandlingsresultatService behandlingsresultatService, AnmodningsperiodeSvarRepository anmodningsperiodeSvarRepository) {
+    public AnmodningsperiodeService(AnmodningsperiodeRepository anmodningsperiodeRepository,
+                                    AnmodningsperiodeSvarRepository anmodningsperiodeSvarRepository,
+                                    BehandlingsresultatService behandlingsresultatService) {
         this.anmodningsperiodeRepository = anmodningsperiodeRepository;
         this.behandlingsresultatService = behandlingsresultatService;
         this.anmodningsperiodeSvarRepository = anmodningsperiodeSvarRepository;
@@ -41,17 +42,23 @@ public class AnmodningsperiodeService {
         return anmodningsperiodeRepository.findByBehandlingsresultatId(behandlingID);
     }
 
-    public Optional<AnmodningsperiodeSvar> hentAnmodningsperiodeSvar(long anmodningsperiodeID) {
+    public boolean harSendtAnmodningsperiode(long behandlingID) {
+        return anmodningsperiodeRepository.findByBehandlingsresultatId(behandlingID).stream()
+            .anyMatch(Anmodningsperiode::erSendtUtland);
+    }
+
+    private Optional<AnmodningsperiodeSvar> finnAnmodningsperiodeSvar(long anmodningsperiodeID) {
         return anmodningsperiodeSvarRepository.findById(anmodningsperiodeID);
     }
 
-    public Collection<AnmodningsperiodeSvar> hentAnmodningsperiodeSvarForBehandling(long behandlingID) {
+    public AnmodningsperiodeSvar hentAnmodningsperiodeSvarForBehandling(long behandlingID) {
         return hentAnmodningsperioder(behandlingID).stream()
             .map(Anmodningsperiode::getId)
-            .map(this::hentAnmodningsperiodeSvar)
+            .map(this::finnAnmodningsperiodeSvar)
             .filter(Optional::isPresent)
             .map(Optional::get)
-            .collect(Collectors.toList());
+            .findFirst()
+            .orElseThrow(() -> new FunksjonellException("Finner ingen AnmodningsperiodeSvar for behandling " + behandlingID));
     }
 
     @Transactional

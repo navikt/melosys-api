@@ -39,7 +39,7 @@
         <java.version>17</java.version>
 
         <!-- Melosys -->
-        <melosys.jsonschema.version>1.35.169</melosys.jsonschema.version>
+        <melosys.jsonschema.version>1.35.171</melosys.jsonschema.version>
         <melosys.internt.kodeverk.version>5.15.113</melosys.internt.kodeverk.version>
         <melosys.brev.version>1.2.124</melosys.brev.version>
 
@@ -48,7 +48,7 @@
         <abac.spring.version>1.6.0</abac.spring.version>
         <behandlingstatus.version>1.1.0</behandlingstatus.version>
         <doksys.dokumentproduksjon.version>3.3.4</doksys.dokumentproduksjon.version>
-        <token-support.version>2.0.16</token-support.version>
+        <token-support.version>2.0.20</token-support.version>
         <token-validation-test-support.version>2.0.5</token-validation-test-support.version>
 
         <!-- Versjoner av eksterne biblioteker -->
@@ -84,7 +84,7 @@
         <swagger.version>1.5.21</swagger.version>
         <unleash.version>4.4.1</unleash.version>
         <bcpkix-jdk15on.version>1.70</bcpkix-jdk15on.version>
-        <nimbus-jose-jwt.version>9.21</nimbus-jose-jwt.version>
+        <nimbus-jose-jwt.version>9.22</nimbus-jose-jwt.version>
         <neethi.version>3.1.1</neethi.version>
 
         <!-- Transitive avhengigheter -->

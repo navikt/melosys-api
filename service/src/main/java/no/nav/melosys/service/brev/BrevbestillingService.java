@@ -210,7 +210,7 @@ public class BrevbestillingService {
         List<Produserbaredokumenter> brevmaler = new ArrayList<>();
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingId);
 
-        if (behandling.getFagsak().behandlingGjelder() == BRUKER) {
+        if (behandling.getFagsak().getHovedpartRolle() == BRUKER) {
             if (behandling.getType() == Behandlingstyper.SOEKNAD) {
                 brevmaler.add(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD);
             } else if (behandling.erKlage()) {

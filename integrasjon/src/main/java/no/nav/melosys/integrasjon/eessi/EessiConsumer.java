@@ -3,6 +3,7 @@ package no.nav.melosys.integrasjon.eessi;
 import java.util.Collection;
 import java.util.List;
 
+import no.nav.melosys.domain.arkiv.Vedlegg;
 import no.nav.melosys.domain.eessi.*;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.eessi.sed.SedDataDto;

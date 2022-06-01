@@ -31,6 +31,7 @@ import no.nav.melosys.service.oppgave.dto.JournalfoeringsoppgaveDto;
 import no.nav.melosys.service.oppgave.dto.OppgaveDto;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.sak.FagsakService;
+import no.nav.melosys.service.saksopplysninger.SaksopplysningerService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -161,7 +162,7 @@ class OppgaveServiceTest {
         assertThat(jfrOppgDt).isPresent();
         OppgaveDto oppgaveDto = jfrOppgDt.get();
 
-        assertThat(oppgaveDto.getId()).isEqualTo("UKJENT");
+        assertThat(oppgaveDto.getHovedpartIdent()).isEqualTo("UKJENT");
         assertThat(oppgaveDto.getNavn()).isEqualTo("UKJENT");
     }
 
@@ -190,7 +191,7 @@ class OppgaveServiceTest {
         assertThat(jfrOppgDt).isPresent();
         OppgaveDto oppgaveDto = jfrOppgDt.get();
 
-        assertThat(oppgaveDto.getId()).isEqualTo("fnr");
+        assertThat(oppgaveDto.getHovedpartIdent()).isEqualTo("fnr");
         assertThat(oppgaveDto.getNavn()).isEqualTo("sammensatt navn");
     }
 
@@ -218,7 +219,7 @@ class OppgaveServiceTest {
         assertThat(jfrOppgDt).isPresent();
         OppgaveDto oppgaveDto = jfrOppgDt.get();
 
-        assertThat(oppgaveDto.getId()).isEqualTo("2222");
+        assertThat(oppgaveDto.getHovedpartIdent()).isEqualTo("2222");
         assertThat(oppgaveDto.getNavn()).isEqualTo("organisasjonsnavn");
     }
 

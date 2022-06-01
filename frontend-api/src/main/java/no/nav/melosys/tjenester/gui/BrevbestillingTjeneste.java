@@ -181,6 +181,11 @@ public class BrevbestillingTjeneste {
                     .medBeskrivelse(BrevmalFeltKode.FRITEKST.getBeskrivelse())
                     .medFeltType(FeltType.FRITEKST)
                     .erPåkrevd()
+                    .build(),
+                new BrevmalFeltDto.Builder()
+                    .medKode(BrevmalFeltKode.VEDLEGG.getKode())
+                    .medBeskrivelse(BrevmalFeltKode.VEDLEGG.getBeskrivelse())
+                    .medFeltType(FeltType.VEDLEGG)
                     .build()
             ))
             .medMuligeMottakere(mottakere)
