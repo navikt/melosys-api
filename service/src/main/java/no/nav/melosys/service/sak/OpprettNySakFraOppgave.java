@@ -44,7 +44,7 @@ public class OpprettNySakFraOppgave {
         final Oppgave oppgave = validerOppgave(opprettSakDto.getOppgaveID());
         validerJournalpost(joarkFasade.hentJournalpost(oppgave.getJournalpostId()));
         switch (opprettSakDto.getSakstype()) {
-            case EU_EOS -> prosessinstansService.opprettProsessinstansNySak(
+            case EU_EOS -> prosessinstansService.opprettProsessinstansNySakEØS(
                 oppgave.getJournalpostId(),
                 opprettSakDto,
                 erBehandlingAvSøknad(opprettSakDto.getBehandlingstema()) ? Behandlingstyper.SOEKNAD : Behandlingstyper.SED

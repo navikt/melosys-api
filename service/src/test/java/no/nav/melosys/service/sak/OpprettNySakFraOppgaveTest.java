@@ -66,7 +66,7 @@ class OpprettNySakFraOppgaveTest {
         when(oppgaveService.hentOppgaveMedOppgaveID(opprettSakDto.getOppgaveID())).thenReturn(oppgave);
         when(joarkFasade.hentJournalpost("1234")).thenReturn(lagJournalpost(Journalposttype.INN));
         opprettNySakFraOppgave.bestillNySakOgBehandling(opprettSakDto);
-        verify(prosessinstansService).opprettProsessinstansNySak(oppgave.getJournalpostId(), opprettSakDto, Behandlingstyper.SED);
+        verify(prosessinstansService).opprettProsessinstansNySakEØS(oppgave.getJournalpostId(), opprettSakDto, Behandlingstyper.SED);
     }
 
     @Test
