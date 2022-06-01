@@ -9,7 +9,7 @@ import no.nav.melosys.service.validering.Kontrollfeil;
 
 public class AnmodningUnntakKontrollsett {
 
-    static Set<Function<AnmodningUnntakKontrollData, Kontrollfeil>> hentRegler() {
+    public static Set<Function<AnmodningUnntakKontrollData, Kontrollfeil>> hentRegler() {
         return REGLER_ANMODNING_UNNTAK;
     }
 
@@ -17,7 +17,7 @@ public class AnmodningUnntakKontrollsett {
         AnmodningUnntakKontroll::harRegistrertAdresse,
         AnmodningUnntakKontroll::anmodningsperiodeManglerSluttdato,
         AnmodningUnntakKontroll::kunEnArbeidsgiver,
-        kontrollData -> ArbeidUtlandKontroll.arbeidsstedManglerFelter(kontrollData.getBehandlingsgrunnlagData()),
-        kontrollData -> ArbeidUtlandKontroll.foretakUtlandManglerFelter(kontrollData.getBehandlingsgrunnlagData())
+        kontrollData -> ArbeidUtlandKontroll.arbeidsstedManglerFelter(kontrollData.behandlingsgrunnlagData()),
+        kontrollData -> ArbeidUtlandKontroll.foretakUtlandManglerFelter(kontrollData.behandlingsgrunnlagData())
     );
 }

@@ -10,14 +10,14 @@ import no.nav.melosys.service.validering.Kontrollfeil;
 
 public class FerdigbehandlingKontrollsett {
 
-    static Set<Function<FerdigbehandlingKontrollData, Kontrollfeil>> hentRegelsettForVedtak(Sakstyper sakstype) {
+    public static Set<Function<FerdigbehandlingKontrollData, Kontrollfeil>> hentRegelsettForVedtak(Sakstyper sakstype) {
         return switch (sakstype) {
             case EU_EOS -> REGELSETT_EU_EOS;
             case FTRL -> Collections.emptySet();
             case TRYGDEAVTALE -> REGELSETT_TRYGDEAVTALER;
         };
     }
-    static Set<Function<FerdigbehandlingKontrollData, Kontrollfeil>> hentRegelsettForAvslagOgHenleggelse() {
+    public static Set<Function<FerdigbehandlingKontrollData, Kontrollfeil>> hentRegelsettForAvslagOgHenleggelse() {
         return REGELSETT_AVSLAG_HENLEGGELSE;
     }
 

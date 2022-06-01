@@ -18,16 +18,16 @@ final class FerdigbehandlingKontroll {
 
 
     static Kontrollfeil overlappendeMedlemsperiode(FerdigbehandlingKontrollData kontrollData) {
-        MedlemskapDokument medlemskapDokument = kontrollData.getMedlemskapDokument();
-        Lovvalgsperiode lovvalgsperiode = kontrollData.getLovvalgsperiode();
-        Lovvalgsperiode opprinneligLovvalgsperiode = kontrollData.getOpprinneligLovvalgsperiode();
+        MedlemskapDokument medlemskapDokument = kontrollData.medlemskapDokument();
+        Lovvalgsperiode lovvalgsperiode = kontrollData.lovvalgsperiode();
+        Lovvalgsperiode opprinneligLovvalgsperiode = kontrollData.opprinneligLovvalgsperiode();
 
         return OverlappendeMedlemskapsperioderRegler.harOverlappendeMedlemsperiode(medlemskapDokument,
             lovvalgsperiode, opprinneligLovvalgsperiode) ? new Kontrollfeil(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER) : null;
     }
 
     static Kontrollfeil periodeOver24Mnd(FerdigbehandlingKontrollData kontrollData) {
-        Lovvalgsperiode lovvalgsperiode = kontrollData.getLovvalgsperiode();
+        Lovvalgsperiode lovvalgsperiode = kontrollData.lovvalgsperiode();
 
         return lovvalgsperiode.erArtikkel12()
             && PeriodeRegler.periodeOver24Mnd(lovvalgsperiode.getFom(), lovvalgsperiode.getTom())
@@ -35,13 +35,13 @@ final class FerdigbehandlingKontroll {
     }
 
     static Kontrollfeil periodeManglerSluttdato(FerdigbehandlingKontrollData kontrollData) {
-        Lovvalgsperiode lovvalgsperiode = kontrollData.getLovvalgsperiode();
+        Lovvalgsperiode lovvalgsperiode = kontrollData.lovvalgsperiode();
 
         return lovvalgsperiode.getTom() == null ? new Kontrollfeil(Kontroll_begrunnelser.INGEN_SLUTTDATO) : null;
     }
 
     static Kontrollfeil periodeOverTreÅr(FerdigbehandlingKontrollData kontrollData) {
-        Lovvalgsperiode lovvalgsperiode = kontrollData.getLovvalgsperiode();
+        Lovvalgsperiode lovvalgsperiode = kontrollData.lovvalgsperiode();
 
         return lovvalgsperiode.getBestemmelse() == Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1
             && PeriodeRegler.periodeOver3År(lovvalgsperiode.getFom(), lovvalgsperiode.getTom())
@@ -49,16 +49,16 @@ final class FerdigbehandlingKontroll {
     }
 
     static Kontrollfeil arbeidsstedManglerFelter(FerdigbehandlingKontrollData kontrollData) {
-        return ArbeidUtlandKontroll.arbeidsstedManglerFelter(kontrollData.getBehandlingsgrunnlagData());
+        return ArbeidUtlandKontroll.arbeidsstedManglerFelter(kontrollData.behandlingsgrunnlagData());
     }
 
     static Kontrollfeil foretakUtlandManglerFelter(FerdigbehandlingKontrollData kontrollData) {
-        return ArbeidUtlandKontroll.foretakUtlandManglerFelter(kontrollData.getBehandlingsgrunnlagData());
+        return ArbeidUtlandKontroll.foretakUtlandManglerFelter(kontrollData.behandlingsgrunnlagData());
     }
 
     static Kontrollfeil representantIUtlandetMangler(FerdigbehandlingKontrollData kontrollData) {
-        var lovvalgsperiode = kontrollData.getLovvalgsperiode();
-        var behandlingsgrunnlagData = (SoeknadTrygdeavtale) kontrollData.getBehandlingsgrunnlagData();
+        var lovvalgsperiode = kontrollData.lovvalgsperiode();
+        var behandlingsgrunnlagData = (SoeknadTrygdeavtale) kontrollData.behandlingsgrunnlagData();
 
         return erBestemmelseDerTrygdeavtaleAttestSendes(lovvalgsperiode.getBestemmelse())
             && ArbeidsstedRegler.representantIUtlandetMangler(behandlingsgrunnlagData.getRepresentantIUtlandet())
@@ -66,7 +66,7 @@ final class FerdigbehandlingKontroll {
     }
 
     static Kontrollfeil adresseRegistrert(FerdigbehandlingKontrollData kontrollData) {
-        return PersonRegler.harRegistrertAdresse(kontrollData.getPersondata(), kontrollData.getBehandlingsgrunnlagData())
+        return PersonRegler.harRegistrertAdresse(kontrollData.persondata(), kontrollData.behandlingsgrunnlagData())
             ? null : new Kontrollfeil(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE);
     }
 

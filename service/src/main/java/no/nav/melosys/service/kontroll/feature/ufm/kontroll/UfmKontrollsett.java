@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class UfmKontrollsett {
 
-    static Set<Function<UfmKontrollData, Kontroll_begrunnelser>> hentRegelsettForSedType(final SedType sedType) {
+    public static Set<Function<UfmKontrollData, Kontroll_begrunnelser>> hentRegelsettForSedType(final SedType sedType) {
         return switch (sedType) {
             case A001 -> REGELSETT_A001;
             case A003 -> REGELSETT_A003;

@@ -25,7 +25,6 @@ import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.integrasjon.medl.PeriodestatusMedl;
 import no.nav.melosys.service.kontroll.feature.ufm.data.UfmKontrollData;
-import no.nav.melosys.service.kontroll.feature.ufm.UfmKontroller;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -33,86 +32,86 @@ import static org.assertj.core.api.Assertions.assertThat;
 class UfmKontrollTest {
     @Test
     void feilIPeriode_erFeil_verifiserBegrunnelse() {
-        assertThat(UfmKontroller.feilIPeriode(kontrollData(null, null))).isEqualTo(Kontroll_begrunnelser.FEIL_I_PERIODEN);
+        assertThat(UfmKontroll.feilIPeriode(kontrollData(null, null))).isEqualTo(Kontroll_begrunnelser.FEIL_I_PERIODEN);
     }
 
     @Test
     void periodeErÅpen_erFeil_verifiserBegrunnelse() {
-        assertThat(UfmKontroller.periodeErÅpen(kontrollData(LocalDate.now(), null))).isEqualTo(Kontroll_begrunnelser.INGEN_SLUTTDATO);
+        assertThat(UfmKontroll.periodeErÅpen(kontrollData(LocalDate.now(), null))).isEqualTo(Kontroll_begrunnelser.INGEN_SLUTTDATO);
     }
 
     @Test
     void periodeOver24Mnd_erFeil_verifiserBegrunnelse() {
-        assertThat(UfmKontroller.periodeOver24Mnd(kontrollData())).isEqualTo(Kontroll_begrunnelser.PERIODEN_OVER_24_MD);
+        assertThat(UfmKontroll.periodeOver24Mnd(kontrollData())).isEqualTo(Kontroll_begrunnelser.PERIODEN_OVER_24_MD);
     }
 
     @Test
     void periodeOver5År_erFeil_verifiserBegrunnelse() {
-        assertThat(UfmKontroller.periodeOver5År(kontrollData())).isEqualTo(Kontroll_begrunnelser.PERIODEN_OVER_5_AR);
+        assertThat(UfmKontroll.periodeOver5År(kontrollData())).isEqualTo(Kontroll_begrunnelser.PERIODEN_OVER_5_AR);
     }
 
     @Test
     void periodeEldreEnn5År_erFeil_verifiserBegrunnelse() {
-        assertThat(UfmKontroller.periodeStarterFørFørsteJuni2012(kontrollData(LocalDate.now().minusYears(10), null))).isEqualTo(Kontroll_begrunnelser.PERIODE_FOR_GAMMEL);
+        assertThat(UfmKontroll.periodeStarterFørFørsteJuni2012(kontrollData(LocalDate.ofYearDay(2012, 1), null))).isEqualTo(Kontroll_begrunnelser.PERIODE_FOR_GAMMEL);
     }
 
     @Test
     void periodeOver1ÅrFremITid_erFeil_verifiserBegrunnelse() {
-        assertThat(UfmKontroller.periodeOver1ÅrFremITid(kontrollData())).isEqualTo(Kontroll_begrunnelser.PERIODE_LANGT_FREM_I_TID);
+        assertThat(UfmKontroll.periodeOver1ÅrFremITid(kontrollData())).isEqualTo(Kontroll_begrunnelser.PERIODE_LANGT_FREM_I_TID);
     }
 
     @Test
     void utbetaltYtelserFraOffentligIPeriode_erFeil_verifiserBegrunnelse() {
-        assertThat(UfmKontroller.utbetaltYtelserFraOffentligIPeriode(kontrollData())).isEqualTo(Kontroll_begrunnelser.MOTTAR_YTELSER);
+        assertThat(UfmKontroll.utbetaltYtelserFraOffentligIPeriode(kontrollData())).isEqualTo(Kontroll_begrunnelser.MOTTAR_YTELSER);
     }
 
     @Test
     void utbetaltBarnetrygdytelser_erFeil_verifiserBegrunnelse() {
-        assertThat(UfmKontroller.utbetaltBarnetrygdytelser(kontrollData())).isEqualTo(Kontroll_begrunnelser.MOTTAR_YTELSER);
+        assertThat(UfmKontroll.utbetaltBarnetrygdytelser(kontrollData())).isEqualTo(Kontroll_begrunnelser.MOTTAR_YTELSER);
     }
 
     @Test
     void lovvalgslandErNorge_erFeil_verifiserBegrunnelse() {
-        assertThat(UfmKontroller.lovvalgslandErNorge(kontrollData())).isEqualTo(Kontroll_begrunnelser.LOVVALGSLAND_NORGE);
+        assertThat(UfmKontroll.lovvalgslandErNorge(kontrollData())).isEqualTo(Kontroll_begrunnelser.LOVVALGSLAND_NORGE);
     }
 
     @Test
     void overlappendeMedlemsperiode_erFeil_verifiserBegrunnelse() {
-        assertThat(UfmKontroller.overlappendeMedlemsperiode(kontrollData())).isEqualTo(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER);
+        assertThat(UfmKontroll.overlappendeMedlemsperiode(kontrollData())).isEqualTo(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER);
     }
 
     @Test
     void statsborgerskapIkkeMedlemsland_erFeil_verifiserBegrunnelse() {
-        assertThat(UfmKontroller.statsborgerskapIkkeMedlemsland(kontrollData())).isEqualTo(Kontroll_begrunnelser.TREDJELANDSBORGER_IKKE_AVTALELAND);
+        assertThat(UfmKontroll.statsborgerskapIkkeMedlemsland(kontrollData())).isEqualTo(Kontroll_begrunnelser.TREDJELANDSBORGER_IKKE_AVTALELAND);
     }
 
     @Test
     void statsborgerskapStatsløs_erOK_ikkeSjekkMedlemsland() {
         UfmKontrollData kontrollData = kontrollData();
-        kontrollData.getSedDokument().setStatsborgerskapKoder(List.of("XS"));
-        assertThat(UfmKontroller.statsborgerskapIkkeMedlemsland(kontrollData)).isNull();
+        kontrollData.sedDokument().setStatsborgerskapKoder(List.of("XS"));
+        assertThat(UfmKontroll.statsborgerskapIkkeMedlemsland(kontrollData)).isNull();
     }
 
     @Test
     void avtalelandErSverige_erOK_ikkeSjekkMedlemsland() {
         UfmKontrollData kontrollData = kontrollData();
-        kontrollData.getSedDokument().setAvsenderLandkode(Landkoder.SE);
-        assertThat(UfmKontroller.statsborgerskapIkkeMedlemsland(kontrollData)).isNull();
+        kontrollData.sedDokument().setAvsenderLandkode(Landkoder.SE);
+        assertThat(UfmKontroll.statsborgerskapIkkeMedlemsland(kontrollData)).isNull();
     }
 
     @Test
     void personDød_erFeil_verifiserBegrunnelse() {
-        assertThat(UfmKontroller.personDød(kontrollData())).isEqualTo(Kontroll_begrunnelser.PERSON_DOD);
+        assertThat(UfmKontroll.personDød(kontrollData())).isEqualTo(Kontroll_begrunnelser.PERSON_DOD);
     }
 
     @Test
     void personBosattINorge_erFeil_verifiserBegrunnelse() {
-        assertThat(UfmKontroller.personBosattINorge(kontrollData())).isEqualTo(Kontroll_begrunnelser.BOSATT_I_NORGE);
+        assertThat(UfmKontroll.personBosattINorge(kontrollData())).isEqualTo(Kontroll_begrunnelser.BOSATT_I_NORGE);
     }
 
     @Test
     void arbeidssted_erSvalbard_verifiserBegrunnelse() {
-        assertThat(UfmKontroller.arbeidssted(kontrollData())).isEqualTo(Kontroll_begrunnelser.ARBEIDSSTED_UTENFOR_EOS);
+        assertThat(UfmKontroll.arbeidssted(kontrollData())).isEqualTo(Kontroll_begrunnelser.ARBEIDSSTED_UTENFOR_EOS);
     }
 
     private UfmKontrollData kontrollData() {
