@@ -54,7 +54,7 @@ class UfmKontrollerTest {
 
     @Test
     void periodeEldreEnn5År_erFeil_verifiserBegrunnelse() {
-        assertThat(UfmKontroller.periodeStarterFørFørsteJuni2012(kontrollData(NOW.minusYears(10), null))).isEqualTo(Kontroll_begrunnelser.PERIODE_FOR_GAMMEL);
+        assertThat(UfmKontroller.periodeStarterFørFørsteJuni2012(kontrollData(NOW.minusYears(11), null))).isEqualTo(Kontroll_begrunnelser.PERIODE_FOR_GAMMEL);
     }
 
     @Test
