@@ -4,13 +4,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class StsLogin {
+public class StsLoginConfig {
     private final String securityTokenServiceUrl;
     private final String username;
     private final String password;
     private final String stsPolicy;
 
-    public StsLogin(
+    public StsLoginConfig(
         @Value("${securityTokenService.url}") String securityTokenServiceUrl,
         @Value("${systemuser.username}") String username,
         @Value("${systemuser.password}") String password,

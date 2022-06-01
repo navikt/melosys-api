@@ -9,7 +9,7 @@ import no.nav.melosys.integrasjon.doksys.dokumentproduksjon.DokumentproduksjonCo
 import no.nav.melosys.integrasjon.doksys.dokumentproduksjon.DokumentproduksjonConsumerConfig
 import no.nav.melosys.integrasjon.doksys.dokumentproduksjon.DokumentproduksjonConsumerProducer
 import no.nav.melosys.integrasjon.reststs.StsRestTemplateProducer
-import no.nav.melosys.sikkerhet.sts.StsLogin
+import no.nav.melosys.sikkerhet.sts.StsLoginConfig
 import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.meldinger.ProduserIkkeredigerbartDokumentRequest
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
@@ -26,7 +26,7 @@ import org.springframework.test.web.client.MockRestServiceServer
 
         DokumentproduksjonConsumerConfig::class,
         DokumentproduksjonConsumerProducer::class,
-        StsLogin::class,
+        StsLoginConfig::class,
     ],
     properties = ["spring.profiles.active:itest-token"]
 )
