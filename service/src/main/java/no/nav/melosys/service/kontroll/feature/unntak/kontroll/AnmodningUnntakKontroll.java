@@ -7,6 +7,9 @@ import no.nav.melosys.service.validering.Kontrollfeil;
 
 public class AnmodningUnntakKontroll {
 
+    private AnmodningUnntakKontroll() {
+    }
+
     static Kontrollfeil harRegistrertAdresse(AnmodningUnntakKontrollData kontrollData) {
         return PersonRegler.harRegistrertAdresse(kontrollData.persondata(), kontrollData.behandlingsgrunnlagData())
             ? null : new Kontrollfeil(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE);

@@ -16,6 +16,8 @@ import no.nav.melosys.service.validering.Kontrollfeil;
 
 final class FerdigbehandlingKontroll {
 
+    private FerdigbehandlingKontroll() {
+    }
 
     static Kontrollfeil overlappendeMedlemsperiode(FerdigbehandlingKontrollData kontrollData) {
         MedlemskapDokument medlemskapDokument = kontrollData.medlemskapDokument();

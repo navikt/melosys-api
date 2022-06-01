@@ -8,6 +8,9 @@ import no.nav.melosys.service.kontroll.regler.*;
 
 final class UfmKontroll {
 
+    private UfmKontroll() {
+    }
+
     static Kontroll_begrunnelser feilIPeriode(UfmKontrollData kontrollData) {
         return PeriodeRegler.feilIPeriode(
             kontrollData.sedDokument().getLovvalgsperiode().getFom(), kontrollData.sedDokument().getLovvalgsperiode().getTom()) ?
