@@ -1,6 +1,9 @@
 package no.nav.melosys.service.sak;
 
+import java.util.Optional;
+
 import no.finn.unleash.Unleash;
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.arkiv.Journalposttype;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
@@ -9,7 +12,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.integrasjon.joark.JoarkFasade;
+import no.nav.melosys.service.journalforing.JournalfoeringService;
 import no.nav.melosys.service.journalforing.dto.PeriodeDto;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
@@ -25,14 +28,14 @@ import static no.nav.melosys.service.sak.SakstypeBehandlingstemaKobling.erGyldig
 
 @Service
 public class OpprettNySakFraOppgave {
-    private final JoarkFasade joarkFasade;
+    private final JournalfoeringService journalfoeringService;
     private final OppgaveService oppgaveService;
     private final ProsessinstansService prosessinstansService;
     private final Unleash unleash;
 
-    public OpprettNySakFraOppgave(JoarkFasade joarkFasade, OppgaveService oppgaveService, @Lazy ProsessinstansService prosessinstansService,
-                                  Unleash unleash) {
-        this.joarkFasade = joarkFasade;
+    public OpprettNySakFraOppgave(JournalfoeringService journalfoeringService, OppgaveService oppgaveService,
+                                  @Lazy ProsessinstansService prosessinstansService, Unleash unleash) {
+        this.journalfoeringService = journalfoeringService;
         this.oppgaveService = oppgaveService;
         this.prosessinstansService = prosessinstansService;
         this.unleash = unleash;
@@ -42,7 +45,7 @@ public class OpprettNySakFraOppgave {
     public void bestillNySakOgBehandling(OpprettSakDto opprettSakDto) {
         validerOpprettSakDto(opprettSakDto);
         final Oppgave oppgave = validerOppgave(opprettSakDto.getOppgaveID());
-        validerJournalpost(joarkFasade.hentJournalpost(oppgave.getJournalpostId()));
+        validerJournalpost(journalfoeringService.hentJournalpost(oppgave.getJournalpostId()));
         switch (opprettSakDto.getSakstype()) {
             case EU_EOS -> prosessinstansService.opprettProsessinstansNySakEØS(
                 oppgave.getJournalpostId(),
@@ -125,6 +128,16 @@ public class OpprettNySakFraOppgave {
     private void validerJournalpost(Journalpost journalpost) {
         if (journalpost.getJournalposttype() == Journalposttype.UT) {
             throw new FunksjonellException("Ny sak kan ikke opprettes fra utgående journalposter siden brev refererer til mottaksdato.");
+        }
+        validerSedTilknytning(journalpost);
+    }
+
+    private void validerSedTilknytning(Journalpost journalpost) {
+        Optional<Fagsak> optionalFagsak = journalfoeringService.finnSakTilknyttetSedJournalpost(journalpost);
+        if (journalpost.mottaksKanalErEessi() && optionalFagsak.isPresent()) {
+            throw new FunksjonellException(
+                "SED-en som er tilknyttet Gosys-oppgaven du har valgt er allerede koblet til %s".formatted(
+                    optionalFagsak.get().getSaksnummer()));
         }
     }
 }

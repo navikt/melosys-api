@@ -95,7 +95,6 @@ public class JournalfoeringService {
     }
 
     private void validerKanOppretteSakFraSed(Journalpost journalpost) {
-
         final MelosysEessiMelding melosysEessiMelding = eessiService.hentSedTilknyttetJournalpost(journalpost.getJournalpostId());
         validerSkalIkkeBehandlesAutomatisk(melosysEessiMelding);
 
@@ -103,6 +102,13 @@ public class JournalfoeringService {
         if (tilknyttetFagsak.isPresent()) {
             throw new FunksjonellException(String.format("RINA-sak %s er allerede tilknyttet %s", melosysEessiMelding.getRinaSaksnummer(), tilknyttetFagsak.get().getSaksnummer()));
         }
+    }
+
+    public Optional<Fagsak> finnSakTilknyttetSedJournalpost(Journalpost journalpost) {
+        if (!journalpost.mottaksKanalErEessi()) {
+            return Optional.empty();
+        }
+        return finnSakTilknyttetSed(eessiService.hentSedTilknyttetJournalpost(journalpost.getJournalpostId()));
     }
 
     private Optional<Fagsak> finnSakTilknyttetSed(MelosysEessiMelding melosysEessiMelding) {

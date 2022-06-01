@@ -3,8 +3,10 @@ package no.nav.melosys.service.sak;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import no.finn.unleash.FakeUnleash;
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.arkiv.Journalposttype;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
@@ -13,8 +15,8 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.service.felles.dto.SoeknadslandDto;
+import no.nav.melosys.service.journalforing.JournalfoeringService;
 import no.nav.melosys.service.journalforing.dto.PeriodeDto;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
@@ -33,7 +35,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class OpprettNySakFraOppgaveTest {
     @Mock
-    private JoarkFasade joarkFasade;
+    private JournalfoeringService journalfoeringService;
     @Mock
     private OppgaveService oppgaveService;
     @Mock
@@ -53,7 +55,7 @@ class OpprettNySakFraOppgaveTest {
 
     @BeforeEach
     public void setUp() {
-        opprettNySakFraOppgave = new OpprettNySakFraOppgave(joarkFasade, oppgaveService, prosessinstansService, unleash);
+        opprettNySakFraOppgave = new OpprettNySakFraOppgave(journalfoeringService, oppgaveService, prosessinstansService, unleash);
         unleash.enableAll();
     }
 
@@ -64,7 +66,7 @@ class OpprettNySakFraOppgaveTest {
         opprettSakDto.setBehandlingstema(Behandlingstema.ØVRIGE_SED_MED);
         Oppgave oppgave = new Oppgave.Builder().setOppgavetype(Oppgavetyper.BEH_SAK_MK).setJournalpostId("1234").build();
         when(oppgaveService.hentOppgaveMedOppgaveID(opprettSakDto.getOppgaveID())).thenReturn(oppgave);
-        when(joarkFasade.hentJournalpost("1234")).thenReturn(lagJournalpost(Journalposttype.INN));
+        when(journalfoeringService.hentJournalpost("1234")).thenReturn(lagJournalpost(Journalposttype.INN, "skanning"));
 
         opprettNySakFraOppgave.bestillNySakOgBehandling(opprettSakDto);
 
@@ -78,7 +80,7 @@ class OpprettNySakFraOppgaveTest {
         opprettSakDto.setBehandlingstema(Behandlingstema.ARBEID_I_UTLANDET);
         Oppgave oppgave = new Oppgave.Builder().setOppgavetype(Oppgavetyper.BEH_SAK_MK).setJournalpostId("1234").build();
         when(oppgaveService.hentOppgaveMedOppgaveID(opprettSakDto.getOppgaveID())).thenReturn(oppgave);
-        when(joarkFasade.hentJournalpost("1234")).thenReturn(lagJournalpost(Journalposttype.INN));
+        when(journalfoeringService.hentJournalpost("1234")).thenReturn(lagJournalpost(Journalposttype.INN, "skanning"));
 
         opprettNySakFraOppgave.bestillNySakOgBehandling(opprettSakDto);
 
@@ -93,7 +95,7 @@ class OpprettNySakFraOppgaveTest {
         unleash.enableAll();
         Oppgave oppgave = new Oppgave.Builder().setOppgavetype(Oppgavetyper.BEH_SAK_MK).setJournalpostId("1234").build();
         when(oppgaveService.hentOppgaveMedOppgaveID(opprettSakDto.getOppgaveID())).thenReturn(oppgave);
-        when(joarkFasade.hentJournalpost("1234")).thenReturn(lagJournalpost(Journalposttype.INN));
+        when(journalfoeringService.hentJournalpost("1234")).thenReturn(lagJournalpost(Journalposttype.INN, "skanning"));
 
         opprettNySakFraOppgave.bestillNySakOgBehandling(opprettSakDto);
 
@@ -145,16 +147,49 @@ class OpprettNySakFraOppgaveTest {
         opprettSakDto.setBehandlingstema(Behandlingstema.ØVRIGE_SED_MED);
         Oppgave oppgave = new Oppgave.Builder().setOppgavetype(Oppgavetyper.BEH_SAK_MK).setJournalpostId("jpID").build();
         when(oppgaveService.hentOppgaveMedOppgaveID(opprettSakDto.getOppgaveID())).thenReturn(oppgave);
-        when(joarkFasade.hentJournalpost("jpID")).thenReturn(lagJournalpost(Journalposttype.UT));
+        when(journalfoeringService.hentJournalpost("jpID")).thenReturn(lagJournalpost(Journalposttype.UT, "NAV"));
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> opprettNySakFraOppgave.bestillNySakOgBehandling(opprettSakDto))
             .withMessageContaining("utgående journalposter");
     }
 
-    private Journalpost lagJournalpost(Journalposttype journalposttype) {
+    @Test
+    void bestillNySakOgBehandling_journalpostFraSedKnyttetTilSak_feiler() {
+        OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
+        opprettSakDto.setSakstype(Sakstyper.EU_EOS);
+        opprettSakDto.setBehandlingstema(Behandlingstema.ØVRIGE_SED_MED);
+        Oppgave oppgave = new Oppgave.Builder().setOppgavetype(Oppgavetyper.BEH_SAK_MK).setJournalpostId("jpID").build();
+        when(oppgaveService.hentOppgaveMedOppgaveID(opprettSakDto.getOppgaveID())).thenReturn(oppgave);
+        final Journalpost journalpost = lagJournalpost(Journalposttype.INN, "EESSI");
+        when(journalfoeringService.hentJournalpost("jpID")).thenReturn(journalpost);
+        when(journalfoeringService.finnSakTilknyttetSedJournalpost(journalpost)).thenReturn(Optional.of(new Fagsak()));
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> opprettNySakFraOppgave.bestillNySakOgBehandling(opprettSakDto))
+            .withMessageContaining("SED-en som er tilknyttet Gosys-oppgaven du har valgt er allerede koblet til ");
+    }
+
+    @Test
+    void bestillNySakOgBehandling_journalpostFraSedKnyttetTilSak_oppretterProsess() {
+        OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
+        opprettSakDto.setSakstype(Sakstyper.EU_EOS);
+        opprettSakDto.setBehandlingstema(Behandlingstema.ØVRIGE_SED_MED);
+        Oppgave oppgave = new Oppgave.Builder().setOppgavetype(Oppgavetyper.BEH_SAK_MK).setJournalpostId("jpID").build();
+        when(oppgaveService.hentOppgaveMedOppgaveID(opprettSakDto.getOppgaveID())).thenReturn(oppgave);
+        final Journalpost journalpost = lagJournalpost(Journalposttype.INN, "EESSI");
+        when(journalfoeringService.hentJournalpost("jpID")).thenReturn(journalpost);
+        when(journalfoeringService.finnSakTilknyttetSedJournalpost(journalpost)).thenReturn(Optional.empty());
+
+        opprettNySakFraOppgave.bestillNySakOgBehandling(opprettSakDto);
+
+        verify(prosessinstansService).opprettProsessinstansNySakEØS(oppgave.getJournalpostId(), opprettSakDto, Behandlingstyper.SED);
+    }
+
+    private Journalpost lagJournalpost(Journalposttype journalposttype, String mottakskanal) {
         final Journalpost journalpost = new Journalpost("jpID");
         journalpost.setJournalposttype(journalposttype);
+        journalpost.setMottaksKanal(mottakskanal);
         return journalpost;
     }
 
@@ -208,7 +243,7 @@ class OpprettNySakFraOppgaveTest {
         opprettSakDto.setSoknadDto(null);
         Oppgave oppgave = new Oppgave.Builder().setOppgavetype(Oppgavetyper.BEH_SAK_MK).setJournalpostId("1234").build();
         when(oppgaveService.hentOppgaveMedOppgaveID(opprettSakDto.getOppgaveID())).thenReturn(oppgave);
-        when(joarkFasade.hentJournalpost("1234")).thenReturn(lagJournalpost(Journalposttype.INN));
+        when(journalfoeringService.hentJournalpost("1234")).thenReturn(lagJournalpost(Journalposttype.INN, "skanning"));
 
         opprettNySakFraOppgave.bestillNySakOgBehandling(opprettSakDto);
 
@@ -223,7 +258,7 @@ class OpprettNySakFraOppgaveTest {
         opprettSakDto.setSoknadDto(null);
         Oppgave oppgave = new Oppgave.Builder().setOppgavetype(Oppgavetyper.BEH_SAK_MK).setJournalpostId("1234").build();
         when(oppgaveService.hentOppgaveMedOppgaveID(opprettSakDto.getOppgaveID())).thenReturn(oppgave);
-        when(joarkFasade.hentJournalpost("1234")).thenReturn(lagJournalpost(Journalposttype.INN));
+        when(journalfoeringService.hentJournalpost("1234")).thenReturn(lagJournalpost(Journalposttype.INN, "skanning"));
 
         opprettNySakFraOppgave.bestillNySakOgBehandling(opprettSakDto);
 
