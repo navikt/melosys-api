@@ -135,4 +135,31 @@ class DokumentServiceFasadeTest {
             BrevbestillingRequest::getFritekst
         ).containsExactly("Z123456", BRUKER, "avslag fritekst");
     }
+
+    @Test
+    void skal_lageRiktigDokgenBrevRequest_ved_meldingHenleggSak_() {
+        when(mockDokgenService.erTilgjengeligDokgenmal(eq(Produserbaredokumenter.MELDING_HENLAGT_SAK))).thenReturn(true);
+
+        DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder()
+            .medProduserbartDokument(Produserbaredokumenter.MELDING_HENLAGT_SAK)
+            .medAvsenderID("Z123456")
+            .medMottakere(List.of(Mottaker.av(BRUKER)))
+            .medFritekst("henlagt sak fritekst")
+            .medBegrunnelseKode("ANNET")
+            .build();
+
+        dokumentServiceFasade.produserDokument(Produserbaredokumenter.MELDING_HENLAGT_SAK, Mottaker.av(BRUKER), 1L, brevbestilling);
+
+        verify(mockDokgenService).produserOgDistribuerBrev(eq(1L), brevbestillingRequestCaptor.capture());
+        verifyNoInteractions(mockDokumentService);
+
+        var dokgenBrevbestillingRequest = brevbestillingRequestCaptor.getValue();
+
+        assertThat(dokgenBrevbestillingRequest).extracting(
+            BrevbestillingRequest::getBestillersId,
+            BrevbestillingRequest::getMottaker,
+            BrevbestillingRequest::getFritekst,
+            BrevbestillingRequest::getBegrunnelseKode
+        ).containsExactly("Z123456", BRUKER, "henlagt sak fritekst", "ANNET");
+    }
 }

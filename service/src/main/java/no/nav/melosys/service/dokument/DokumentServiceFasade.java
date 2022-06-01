@@ -58,6 +58,7 @@ public class DokumentServiceFasade {
             .medProduserbardokument(dokumentType)
             .medMottaker(mottaker.getRolle())
             .medFritekst(hentFritekst(brevbestilling))
+            .medBegrunnelseKode(brevbestilling.getBegrunnelseKode())
             .medBestillersId(brevbestilling.getAvsenderID())
             .build();
 
@@ -65,10 +66,12 @@ public class DokumentServiceFasade {
     }
 
     private String hentFritekst(DoksysBrevbestilling brevbestilling) {
-        if (brevbestilling.getProduserbartdokument() == Produserbaredokumenter.AVSLAG_MANGLENDE_OPPLYSNINGER) {
-            return brevbestilling.getFritekst();
-        }
-        return null;
+        if (brevbestilling.getProduserbartdokument() == null) return null;
+
+        return switch (brevbestilling.getProduserbartdokument()) {
+            case AVSLAG_MANGLENDE_OPPLYSNINGER, MELDING_HENLAGT_SAK -> brevbestilling.getFritekst();
+            default -> null;
+        };
     }
 
     private void produserDokument(long behandlingID, DoksysBrevbestilling brevbestilling, BrevbestillingRequest brevbestillingRequest, Mottaker mottaker) {
