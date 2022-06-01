@@ -6,8 +6,8 @@ public final class JournalpostBestilling {
     private final String tittel;
     private final String brevkode;
     private final String dokumentKategori;
-    private final String brukerId;
-    private final BrukerIdType brukerIdType;
+    private final String hovedpartId;
+    private final BrukerIdType hovedpartIdType;
     private final String mottakerNavn;
     private final String mottakerId;
     private final OpprettJournalpost.KorrespondansepartIdType mottakerIdType;
@@ -19,8 +19,8 @@ public final class JournalpostBestilling {
         this.tittel = builder.tittel;
         this.brevkode = builder.brevkode;
         this.dokumentKategori = builder.dokumentKategori;
-        this.brukerId = builder.brukerId;
-        this.brukerIdType = builder.brukerIdType;
+        this.hovedpartId = builder.hovedpartId;
+        this.hovedpartIdType = builder.hovedpartIdType;
         this.mottakerNavn = builder.mottakerNavn;
         this.mottakerId = builder.mottakerId;
         this.mottakerIdType = builder.mottakerIdType;
@@ -41,12 +41,12 @@ public final class JournalpostBestilling {
         return dokumentKategori;
     }
 
-    public String getBrukerId() {
-        return brukerId;
+    public String getHovedpartId() {
+        return hovedpartId;
     }
 
-    public BrukerIdType getBrukerIdType() {
-        return brukerIdType;
+    public BrukerIdType getHovedpartIdType() {
+        return hovedpartIdType;
     }
 
     public String getMottakerNavn() {
@@ -77,8 +77,8 @@ public final class JournalpostBestilling {
         private String tittel;
         private String brevkode;
         private String dokumentKategori;
-        private String brukerId;
-        private BrukerIdType brukerIdType;
+        private String hovedpartId;
+        private BrukerIdType hovedpartIdType;
         private String mottakerNavn;
         private String mottakerId;
         private OpprettJournalpost.KorrespondansepartIdType mottakerIdType;
@@ -101,13 +101,13 @@ public final class JournalpostBestilling {
             return this;
         }
 
-        public Builder medBrukerId(String brukerId) {
-            this.brukerId = brukerId;
+        public Builder medHovedpartId(String hovedpartId) {
+            this.hovedpartId = hovedpartId;
             return this;
         }
 
-        public Builder medBrukerIdType(BrukerIdType brukerIdType) {
-            this.brukerIdType = brukerIdType;
+        public Builder medHovedpartIdType(BrukerIdType hovedpartIdType) {
+            this.hovedpartIdType = hovedpartIdType;
             return this;
         }
 

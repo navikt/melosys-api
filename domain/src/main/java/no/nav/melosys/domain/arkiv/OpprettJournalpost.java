@@ -2,7 +2,6 @@ package no.nav.melosys.domain.arkiv;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import com.google.common.collect.MoreCollectors;
 import no.nav.melosys.domain.Fagsak;
@@ -117,8 +116,8 @@ public class OpprettJournalpost extends Journalpost {
         opprettJournalpost.setJournalførendeEnhet(MEDLEMSKAP_OG_AVGIFT);
         opprettJournalpost.setTema(MEDLEMSKAP);
         opprettJournalpost.setSaksnummer(bestilling.getSaksnummer());
-        opprettJournalpost.setBrukerId(bestilling.getBrukerId());
-        opprettJournalpost.setBrukerIdType(bestilling.getBrukerIdType());
+        opprettJournalpost.setBrukerId(bestilling.getHovedpartId());
+        opprettJournalpost.setBrukerIdType(bestilling.getHovedpartIdType());
         opprettJournalpost.setKorrespondansepartId(bestilling.getMottakerId());
         opprettJournalpost.setKorrespondansepartNavn(bestilling.getMottakerNavn());
         opprettJournalpost.setKorrespondansepartIdType(bestilling.getMottakerIdType());

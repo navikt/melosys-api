@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
+import static java.util.Collections.emptyList;
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.*;
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.OPPRETT_OG_JOURNALFØR_BREV;
 import static org.springframework.util.ObjectUtils.isEmpty;
@@ -99,7 +100,7 @@ public class OpprettOgJournalforBrev implements StegBehandler {
             .medPdf(pdf)
             .medVedlegg(hentVedleggDokumenterFraJoark(brevbestilling, behandling.getFagsak().getSaksnummer()));
 
-        settBruker(behandling, bestilling);
+        settHovedpart(behandling, bestilling);
 
         String journalpostId = joarkFasade.opprettJournalpost(OpprettJournalpost.lagJournalpostForBrev(bestilling.build()), true);
 
@@ -149,16 +150,16 @@ public class OpprettOgJournalforBrev implements StegBehandler {
         };
     }
 
-    private void settBruker(Behandling behandling, JournalpostBestilling.Builder bestilling) {
+    private void settHovedpart(Behandling behandling, JournalpostBestilling.Builder bestilling) {
         var fagsak = behandling.getFagsak();
         if (fagsak.harAktørMedRolleType(Aktoersroller.VIRKSOMHET)) {
             bestilling
-                .medBrukerId(fagsak.hentVirksomhet().getOrgnr())
-                .medBrukerIdType(BrukerIdType.ORGNR);
+                .medHovedpartId(fagsak.hentVirksomhet().getOrgnr())
+                .medHovedpartIdType(BrukerIdType.ORGNR);
         } else {
             bestilling
-                .medBrukerId(persondataFasade.hentFolkeregisterident(fagsak.hentBrukersAktørID()))
-                .medBrukerIdType(BrukerIdType.FOLKEREGISTERIDENT);
+                .medHovedpartId(persondataFasade.hentFolkeregisterident(fagsak.hentBrukersAktørID()))
+                .medHovedpartIdType(BrukerIdType.FOLKEREGISTERIDENT);
         }
     }
 

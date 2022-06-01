@@ -11,6 +11,7 @@ import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.brev.BrevAdresse;
@@ -39,6 +40,7 @@ import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
 public class BrevbestillingTjeneste {
     private static final String BRUKER_ELLER_BRUKERS_FULLMEKTIG = "Bruker eller brukers fullmektig";
     private static final String VIRKSOMHET_TYPE = "Virksomhet";
+    private static final String ANNEN_ORGANISASJON = "Annen organisasjon";
     private static final String ARBEIDSGIVER_ELLER_ARBEIDSGIVERS_FULLMEKTIG = "Arbeidsgiver eller arbeidsgivers fullmektig";
 
     private final BrevbestillingService brevbestillingService;
@@ -205,7 +207,7 @@ public class BrevbestillingTjeneste {
         if (hovedMottaker == Aktoersroller.ARBEIDSGIVER || hovedMottaker == Aktoersroller.VIRKSOMHET) {
             mottakere.add(
                 new MottakerDto.Builder()
-                    .medType("Annen organisasjon")
+                    .medType(ANNEN_ORGANISASJON)
                     .medRolle(Aktoersroller.ARBEIDSGIVER)
                     .orgnrSettesAvSaksbehandler()
                     .build()
@@ -218,7 +220,8 @@ public class BrevbestillingTjeneste {
         return switch (hovedmottaker) {
             case BRUKER -> BRUKER_ELLER_BRUKERS_FULLMEKTIG;
             case VIRKSOMHET -> VIRKSOMHET_TYPE;
-            default -> ARBEIDSGIVER_ELLER_ARBEIDSGIVERS_FULLMEKTIG;
+            case ARBEIDSGIVER -> ARBEIDSGIVER_ELLER_ARBEIDSGIVERS_FULLMEKTIG;
+            default -> throw new FunksjonellException("Vi støtter ikke brev med hovedmottaker: " + hovedmottaker.getKode());
         };
     }
 
