@@ -8,7 +8,6 @@ import com.github.tomakehurst.wiremock.matching.StringValuePattern
 import no.nav.melosys.integrasjon.doksys.dokumentproduksjon.DokumentproduksjonConsumer
 import no.nav.melosys.integrasjon.doksys.dokumentproduksjon.DokumentproduksjonConsumerConfig
 import no.nav.melosys.integrasjon.doksys.dokumentproduksjon.DokumentproduksjonConsumerProducer
-import no.nav.melosys.integrasjon.reststs.RestStsClient
 import no.nav.melosys.integrasjon.reststs.StsRestTemplateProducer
 import no.nav.melosys.sikkerhet.sts.StsLogin
 import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.meldinger.ProduserIkkeredigerbartDokumentRequest
@@ -18,15 +17,12 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.boot.autoconfigure.web.reactive.function.client.WebClientAutoConfiguration
 import org.springframework.boot.test.autoconfigure.web.client.RestClientTest
 import org.springframework.test.web.client.MockRestServiceServer
 
 @RestClientTest(
     value = [
         StsRestTemplateProducer::class,
-        RestStsClient::class,
-        WebClientAutoConfiguration::class,
 
         DokumentproduksjonConsumerConfig::class,
         DokumentproduksjonConsumerProducer::class,
