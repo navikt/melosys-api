@@ -124,7 +124,9 @@ public class AvklarteVirksomheterService {
     }
 
     public int hentAntallAvklarteVirksomheter(Behandling behandling) {
-        return hentNorskeArbeidsgivendeOrgnumre(behandling).size() + hentUtenlandskeVirksomheter(behandling).size();
+        return hentNorskeArbeidsgivendeOrgnumre(behandling).size()
+            + hentNorskeSelvstendigeForetakOrgnumre(behandling).size()
+            + hentUtenlandskeVirksomheter(behandling).size();
     }
 
     @Transactional

@@ -201,6 +201,9 @@ public class JournalfoeringService {
         if (behandlingstype != null) {
             prosessType = ProsessType.JFR_NY_VURDERING;
         } else {
+            if (unleash.isEnabled("melosys.api.journalfoering.alltid.opprett.ny.behandling")) {
+                validerNårBehandlingstypeIkkeOppgitt(fagsak);
+            }
             prosessType = ProsessType.JFR_KNYTT;
         }
 
@@ -216,6 +219,18 @@ public class JournalfoeringService {
         prosessinstansService.lagre(prosessinstans);
     }
 
+    private void validerNårBehandlingstypeIkkeOppgitt(Fagsak fagsak) {
+        Behandling sisteBehandling = fagsak.hentSistRegistrertBehandling();
+        if (sisteBehandling.erAktiv()) return;
+
+        if (!fagsak.harMinstEnBehandlingAvType(Behandlingstyper.SOEKNAD)) return;
+
+        throw new FunksjonellException(
+            "Saker kun bestående av avsluttede behandlinger med f.eks behandlingstype SED har lov til å knytte til " +
+                "eksisterende sak uten å opprette ny behandling. Denne saken inneholder en behandling med behandlingstype SOEKNAD."
+        );
+    }
+
     private void validerKanTilknytteJournalpostForSedTilSak(Journalpost journalpost, String tilknyttTilSaksnummer) {
         final MelosysEessiMelding melosysEessiMelding = eessiService.hentSedTilknyttetJournalpost(journalpost.getJournalpostId());
         validerSkalIkkeBehandlesAutomatisk(melosysEessiMelding);
@@ -227,12 +242,19 @@ public class JournalfoeringService {
     }
 
     private void validerBehandlingstype(Sakstyper sakstype, Behandlingstyper behandlingstype) {
-        if (sakstype == Sakstyper.EU_EOS && behandlingstype != Behandlingstyper.ENDRET_PERIODE) {
+        if (sakstype == Sakstyper.EU_EOS && erUgyldigBehandlingstypeForEuEøs(behandlingstype)) {
             throw new FunksjonellException(behandlingstype + " er ikke en lovlig behandlingstype ved knytting av dokument til sak");
         }
         if (sakstype == Sakstyper.TRYGDEAVTALE && behandlingstype != Behandlingstyper.NY_VURDERING) {
             throw new FunksjonellException(behandlingstype + " er ikke en lovlig behandlingstype ved knytting av dokument til sak");
         }
+    }
+
+    private boolean erUgyldigBehandlingstypeForEuEøs(Behandlingstyper behandlingstype) {
+        if (unleash.isEnabled("melosys.api.journalfoering.alltid.opprett.ny.behandling")) {
+            return behandlingstype != Behandlingstyper.ENDRET_PERIODE && behandlingstype != Behandlingstyper.NY_VURDERING;
+        }
+        return behandlingstype != Behandlingstyper.ENDRET_PERIODE;
     }
 
     private void valider(JournalfoeringDto journalfoeringDto) {

@@ -14,7 +14,7 @@ import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelseFlereLand;
 import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
-import no.nav.melosys.service.kontroll.PeriodeKontroller;
+import no.nav.melosys.service.kontroll.regler.PeriodeRegler;
 import no.nav.melosys.service.saksopplysninger.SaksopplysningerService;
 import org.apache.commons.collections4.ListUtils;
 
@@ -65,7 +65,7 @@ public class BrevDataByggerInnvilgelseFlereLand implements BrevDataBygger {
         brevdata.harAvklartMaritimTypeSkip = maritimType.stream().anyMatch(mt -> mt == Maritimtyper.SKIP);
 
         brevdata.erMarginaltArbeid = avklartefaktaService.harMarginaltArbeid(behandlingID);
-        brevdata.erBegrensetPeriode = !PeriodeKontroller.periodeErLik(
+        brevdata.erBegrensetPeriode = !PeriodeRegler.periodeErLik(
             grunnlagData.periode.getFom(), grunnlagData.periode.getTom(), brevdata.lovvalgsperiode.getFom(), brevdata.lovvalgsperiode.getTom()
         );
 

@@ -1,9 +1,7 @@
 package no.nav.melosys.tjenester.gui;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -11,10 +9,7 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.AnmodningsperiodeSvar;
-import no.nav.melosys.domain.Lovvalgsperiode;
-import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import no.nav.melosys.tjenester.gui.dto.anmodning.AnmodningsperiodeGetDto;
@@ -33,14 +28,10 @@ import org.springframework.web.context.WebApplicationContext;
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class AnmodningsperiodeTjeneste {
     private final AnmodningsperiodeService anmodningsperiodeService;
-    private final LovvalgsperiodeService lovvalgsperiodeService;
     private final Aksesskontroll aksesskontroll;
 
-    public AnmodningsperiodeTjeneste(AnmodningsperiodeService anmodningsperiodeService,
-                                     LovvalgsperiodeService lovvalgsperiodeService,
-                                     Aksesskontroll aksesskontroll) {
+    public AnmodningsperiodeTjeneste(AnmodningsperiodeService anmodningsperiodeService, Aksesskontroll aksesskontroll) {
         this.anmodningsperiodeService = anmodningsperiodeService;
-        this.lovvalgsperiodeService = lovvalgsperiodeService;
         this.aksesskontroll = aksesskontroll;
     }
 
@@ -60,7 +51,7 @@ public class AnmodningsperiodeTjeneste {
         aksesskontroll.autoriserSkriv(behandlingID);
         Collection<Anmodningsperiode> anmodningsperioder = anmodningsperiodeService.lagreAnmodningsperioder(
             behandlingID, anmodningsperiodePostDto.getAnmodningsperioder().stream().map(AnmodningsperiodeSkrivDto::til)
-                .collect(Collectors.toList())
+                .toList()
         );
         return AnmodningsperiodeGetDto.av(anmodningsperioder);
     }
@@ -94,10 +85,6 @@ public class AnmodningsperiodeTjeneste {
         aksesskontroll.autoriserSkriv(behandlingID);
 
         AnmodningsperiodeSvar svar = anmodningsperiodeService.lagreAnmodningsperiodeSvar(anmodningsperiodeID, anmodningsperiodeSvarDto.til());
-
-        Lovvalgsperiode lovvalgsperiode = Lovvalgsperiode.av(svar, Medlemskapstyper.PLIKTIG);
-        lovvalgsperiodeService.lagreLovvalgsperioder(behandlingID, Collections.singleton(lovvalgsperiode));
-
         return AnmodningsperiodeSvarDto.av(svar);
     }
 }
