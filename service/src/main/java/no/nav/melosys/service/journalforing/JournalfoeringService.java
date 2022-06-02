@@ -62,14 +62,13 @@ public class JournalfoeringService {
         return joarkFasade.hentJournalpost(journalpostID);
     }
 
-    public Optional<String> finnBrukerIdent(Journalpost journalpost) {
+    public Optional<String> finnHovedpartIdent(Journalpost journalpost) {
         if (journalpost.getBrukerIdType() == null || journalpost.getBrukerId() == null) {
             return Optional.empty();
         }
         return switch (journalpost.getBrukerIdType()) {
-            case FOLKEREGISTERIDENT -> Optional.of(journalpost.getBrukerId());
+            case FOLKEREGISTERIDENT, ORGNR -> Optional.of(journalpost.getBrukerId());
             case AKTØR_ID -> Optional.of(persondataFasade.hentFolkeregisterident(journalpost.getBrukerId()));
-            case ORGNR -> Optional.empty();
         };
     }
 

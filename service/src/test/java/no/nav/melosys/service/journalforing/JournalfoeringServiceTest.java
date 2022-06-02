@@ -103,7 +103,7 @@ class JournalfoeringServiceTest {
     void finnBrukerIdent_brukerIdentErFolkeregisterident_returnererIdent() {
         journalpost.setBrukerId("123");
         journalpost.setBrukerIdType(BrukerIdType.FOLKEREGISTERIDENT);
-        assertThat(journalfoeringService.finnBrukerIdent(journalpost)).contains(journalpost.getBrukerId());
+        assertThat(journalfoeringService.finnHovedpartIdent(journalpost)).isPresent().get().isEqualTo("123");
     }
 
     @Test
@@ -112,19 +112,19 @@ class JournalfoeringServiceTest {
         journalpost.setBrukerId("123");
         journalpost.setBrukerIdType(BrukerIdType.AKTØR_ID);
         when(persondataFasade.hentFolkeregisterident(journalpost.getBrukerId())).thenReturn(ident);
-        assertThat(journalfoeringService.finnBrukerIdent(journalpost)).contains(ident);
+        assertThat(journalfoeringService.finnHovedpartIdent(journalpost)).isPresent().get().isEqualTo(ident);
     }
 
     @Test
-    void finnBrukerIdent_brukerIdentErOrgnr_returnererIngenting() {
+    void finnBrukerIdent_brukerIdentErOrgnr_returnererOrgnr() {
         journalpost.setBrukerId("123");
         journalpost.setBrukerIdType(BrukerIdType.ORGNR);
-        assertThat(journalfoeringService.finnBrukerIdent(journalpost)).isEmpty();
+        assertThat(journalfoeringService.finnHovedpartIdent(journalpost)).isPresent().get().isEqualTo("123");
     }
 
     @Test
     void finnBrukerIdent_brukerErNull_returnererIngenting() {
-        assertThat(journalfoeringService.finnBrukerIdent(journalpost)).isEmpty();
+        assertThat(journalfoeringService.finnHovedpartIdent(journalpost)).isEmpty();
     }
 
     @Test
