@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static no.nav.melosys.domain.kodeverk.Trygdedekninger.*;
-import static no.nav.melosys.service.kontroll.PeriodeKontroller.feilIPeriode;
+import static no.nav.melosys.service.kontroll.regler.PeriodeRegler.feilIPeriode;
 
 @Service
 public class MedlemskapsperiodeService {
