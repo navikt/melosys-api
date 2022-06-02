@@ -14,7 +14,7 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.AnmodningsperiodeRepository;
 import no.nav.melosys.repository.AnmodningsperiodeSvarRepository;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.kontroll.PeriodeKontroller;
+import no.nav.melosys.service.kontroll.regler.PeriodeRegler;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,17 +47,18 @@ public class AnmodningsperiodeService {
             .anyMatch(Anmodningsperiode::erSendtUtland);
     }
 
-    public Optional<AnmodningsperiodeSvar> hentAnmodningsperiodeSvar(long anmodningsperiodeID) {
+    private Optional<AnmodningsperiodeSvar> finnAnmodningsperiodeSvar(long anmodningsperiodeID) {
         return anmodningsperiodeSvarRepository.findById(anmodningsperiodeID);
     }
 
-    public Collection<AnmodningsperiodeSvar> hentAnmodningsperiodeSvarForBehandling(long behandlingID) {
+    public AnmodningsperiodeSvar hentAnmodningsperiodeSvarForBehandling(long behandlingID) {
         return hentAnmodningsperioder(behandlingID).stream()
             .map(Anmodningsperiode::getId)
-            .map(this::hentAnmodningsperiodeSvar)
+            .map(this::finnAnmodningsperiodeSvar)
             .filter(Optional::isPresent)
             .map(Optional::get)
-            .toList();
+            .findFirst()
+            .orElseThrow(() -> new FunksjonellException("Finner ingen AnmodningsperiodeSvar for behandling " + behandlingID));
     }
 
     @Transactional
@@ -146,7 +147,7 @@ public class AnmodningsperiodeService {
         if (!anmodningsperiodeSvar.erGyldigDelvisInnvilgelse()) {
             throw new FunksjonellException("Periode må være fyllt ut ved " + Anmodningsperiodesvartyper.DELVIS_INNVILGELSE);
         }
-        if (PeriodeKontroller.feilIPeriode(anmodningsperiodeSvar.getInnvilgetFom(), anmodningsperiodeSvar.getInnvilgetTom())) {
+        if (PeriodeRegler.feilIPeriode(anmodningsperiodeSvar.getInnvilgetFom(), anmodningsperiodeSvar.getInnvilgetTom())) {
             throw new FunksjonellException("Periode er ikke gyldig");
         }
     }

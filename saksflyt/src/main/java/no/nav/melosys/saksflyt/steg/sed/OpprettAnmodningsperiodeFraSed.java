@@ -5,6 +5,7 @@ import java.util.Collections;
 import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
@@ -51,7 +52,11 @@ public class OpprettAnmodningsperiodeFraSed implements StegBehandler {
             null,
             sedDokument.getUnntakFraLovvalgslandKode(),
             sedDokument.getUnntakFraLovvalgBestemmelse(),
-            Trygdedekninger.UTEN_DEKNING
+            avjørTrygdedekning(sedDokument.getLovvalgslandKode())
         );
+    }
+
+    private static Trygdedekninger avjørTrygdedekning(Landkoder lovvalgslandKode) {
+        return lovvalgslandKode == Landkoder.NO ? Trygdedekninger.FULL_DEKNING_EOSFO : Trygdedekninger.UTEN_DEKNING;
     }
 }

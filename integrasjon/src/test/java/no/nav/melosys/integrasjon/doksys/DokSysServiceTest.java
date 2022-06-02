@@ -8,6 +8,7 @@ import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Kontaktopplysning;
 import no.nav.melosys.domain.UtenlandskMyndighet;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
+import no.nav.melosys.domain.dokument.arbeidsforhold.Aktoertype;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.integrasjon.doksys.distribuerjournalpost.DistribuerJournalpostConsumer;
@@ -15,6 +16,7 @@ import no.nav.melosys.integrasjon.doksys.distribuerjournalpost.dto.DistribuerJou
 import no.nav.melosys.integrasjon.doksys.distribuerjournalpost.dto.DistribuerJournalpostResponse;
 import no.nav.melosys.integrasjon.doksys.dokumentproduksjon.DokumentproduksjonConsumer;
 import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.informasjon.Dokumentbestillingsinformasjon;
+import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.informasjon.Organisasjon;
 import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.informasjon.Person;
 import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.informasjon.UtenlandskPostadresse;
 import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.meldinger.ProduserDokumentutkastRequest;
@@ -39,6 +41,12 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class DokSysServiceTest {
+
+    private final String FNR = "12345678901";
+    private final String ORGNR = "98765432";
+    private final String INSITUSJON_ID = "DK:1234";
+    private final String REP_FNR = "10987654321";
+    private final String REP_ORGNR = "87654321";
 
     @Mock
     private DokumentproduksjonConsumer dokumentproduksjonConsumer;
@@ -79,6 +87,8 @@ class DokSysServiceTest {
         assertThat(dokInfo.getDokumenttypeId()).isEqualTo(metadata.dokumenttypeID);
         assertThat(dokInfo.getAdresse()).isNull();
         assertThat(dokInfo.getMottaker().isBerik()).isTrue();
+        assertThat(dokInfo.getMottaker()).isInstanceOf(Person.class);
+        assertThat(((Person) dokInfo.getBruker()).getIdent()).isEqualTo(FNR);
     }
 
     @Test
@@ -103,40 +113,57 @@ class DokSysServiceTest {
 
         UtenlandskPostadresse adresse = (UtenlandskPostadresse) dokInfo.getAdresse();
         assertThat(adresse.getAdresselinje1()).isEqualTo(
-                postadresse.getGatenavn() +" "+ postadresse.getHusnummerEtasjeLeilighet());
-        assertThat(adresse.getAdresselinje2()).isEqualTo(postadresse.getPostnummer() +" "+ postadresse.getPoststed());
+            postadresse.getGatenavn() + " " + postadresse.getHusnummerEtasjeLeilighet());
+        assertThat(adresse.getAdresselinje2()).isEqualTo(postadresse.getPostnummer() + " " + postadresse.getPoststed());
         assertThat(adresse.getAdresselinje3()).isEqualTo(postadresse.getRegion());
         assertThat(adresse.getLand().getValue()).isEqualTo(postadresse.getLandkode());
         assertThat(((Person) dokInfo.getBruker()).getNavn()).isEqualTo("Kim Se");
     }
 
-    private Dokumentbestillingsinformasjon hentDokumentBestillingInfoFraCaptor(ArgumentCaptor<ProduserIkkeredigerbartDokumentRequest> captor) {
-        return captor.getValue().getDokumentbestillingsinformasjon();
+    @Test
+    void produserIkkeredigerbartDokument_tilArbeidsgiver() throws Exception {
+        DokumentbestillingMetadata metadata = lagMetadataMedArbeidsgiver();
+        when(dokumentproduksjonConsumer.produserIkkeredigerbartDokument(any())).thenReturn(new ProduserIkkeredigerbartDokumentResponse());
+
+        dokSysService.produserIkkeredigerbartDokument(new Dokumentbestilling(metadata, lagBrevData()));
+
+        ArgumentCaptor<ProduserIkkeredigerbartDokumentRequest> captor = ArgumentCaptor.forClass(ProduserIkkeredigerbartDokumentRequest.class);
+        verify(dokumentproduksjonConsumer).produserIkkeredigerbartDokument(captor.capture());
+
+        Dokumentbestillingsinformasjon dokInfo = hentDokumentBestillingInfoFraCaptor(captor);
+        assertThat(dokInfo.getMottaker()).isInstanceOf(Organisasjon.class);
+        assertThat(((Organisasjon) dokInfo.getMottaker()).getOrgnummer()).isEqualTo(ORGNR);
     }
 
-    private DokumentbestillingMetadata lagMetadataForBruker(StrukturertAdresse postadresse) {
-        DokumentbestillingMetadata metadata = new DokumentbestillingMetadata();
-        metadata.dokumenttypeID = "dok_1234";
-        metadata.brukerNavn = "Kim Se";
-        metadata.mottaker = lagAktør(Aktoersroller.BRUKER);
-        metadata.postadresse = postadresse;
-        if (postadresse == null) {
-            metadata.berik = true;
-        }
-        return metadata;
+    @Test
+    void produserIkkeredigerbartDokument_tilRepresentantPerson() throws Exception {
+        DokumentbestillingMetadata metadata = lagMetadataMedRepresentant(Aktoertype.PERSON);
+        when(dokumentproduksjonConsumer.produserIkkeredigerbartDokument(any())).thenReturn(new ProduserIkkeredigerbartDokumentResponse());
+
+        dokSysService.produserIkkeredigerbartDokument(new Dokumentbestilling(metadata, lagBrevData()));
+
+        ArgumentCaptor<ProduserIkkeredigerbartDokumentRequest> captor = ArgumentCaptor.forClass(ProduserIkkeredigerbartDokumentRequest.class);
+        verify(dokumentproduksjonConsumer).produserIkkeredigerbartDokument(captor.capture());
+
+        Dokumentbestillingsinformasjon dokInfo = hentDokumentBestillingInfoFraCaptor(captor);
+        assertThat(dokInfo.getMottaker().isBerik()).isTrue();
+        assertThat(dokInfo.getMottaker()).isInstanceOf(Person.class);
+        assertThat(((Person) dokInfo.getMottaker()).getIdent()).isEqualTo(REP_FNR);
     }
 
-    private Aktoer lagAktør(Aktoersroller rolle) {
-        Aktoer aktør = new Aktoer();
-        aktør.setRolle(rolle);
-        if (rolle == Aktoersroller.BRUKER) {
-            aktør.setAktørId("1234");
-        } else if (rolle == Aktoersroller.TRYGDEMYNDIGHET) {
-            aktør.setInstitusjonId("DK:234");
-        } else {
-            aktør.setOrgnr("98765");
-        }
-        return aktør;
+    @Test
+    void produserIkkeredigerbartDokument_tilRepresentantOrganisasjon() throws Exception {
+        DokumentbestillingMetadata metadata = lagMetadataMedRepresentant(Aktoertype.ORGANISASJON);
+        when(dokumentproduksjonConsumer.produserIkkeredigerbartDokument(any())).thenReturn(new ProduserIkkeredigerbartDokumentResponse());
+
+        dokSysService.produserIkkeredigerbartDokument(new Dokumentbestilling(metadata, lagBrevData()));
+
+        ArgumentCaptor<ProduserIkkeredigerbartDokumentRequest> captor = ArgumentCaptor.forClass(ProduserIkkeredigerbartDokumentRequest.class);
+        verify(dokumentproduksjonConsumer).produserIkkeredigerbartDokument(captor.capture());
+
+        Dokumentbestillingsinformasjon dokInfo = hentDokumentBestillingInfoFraCaptor(captor);
+        assertThat(dokInfo.getMottaker()).isInstanceOf(Organisasjon.class);
+        assertThat(((Organisasjon) dokInfo.getMottaker()).getOrgnummer()).isEqualTo(REP_ORGNR);
     }
 
     @Test
@@ -152,6 +179,8 @@ class DokSysServiceTest {
         Dokumentbestillingsinformasjon dokInfo = hentDokumentBestillingInfoFraCaptor(captor);
         assertThat(dokInfo.getMottaker().isBerik()).isFalse();
         assertThat(dokInfo.getMottaker()).isInstanceOf(Person.class);
+        assertThat(((Person) dokInfo.getMottaker()).getNavn()).isEqualTo(metadata.utenlandskMyndighet.navn);
+
 
         UtenlandskPostadresse utenlandskPostadresse = (UtenlandskPostadresse) dokInfo.getAdresse();
         assertThat(utenlandskPostadresse.getAdresselinje1()).isEqualTo(metadata.utenlandskMyndighet.gateadresse);
@@ -318,9 +347,70 @@ class DokSysServiceTest {
         assertEquals(strukturertAdresse.getPostnummer(), request.getAdresse().getPostnummer());
     }
 
+    private Dokumentbestillingsinformasjon hentDokumentBestillingInfoFraCaptor(ArgumentCaptor<ProduserIkkeredigerbartDokumentRequest> captor) {
+        return captor.getValue().getDokumentbestillingsinformasjon();
+    }
+
+    private DokumentbestillingMetadata lagMetadataForBruker(StrukturertAdresse postadresse) {
+        DokumentbestillingMetadata metadata = new DokumentbestillingMetadata();
+        metadata.dokumenttypeID = "dok_1234";
+        metadata.brukerNavn = "Kim Se";
+        metadata.brukerID = FNR;
+        metadata.mottaker = lagAktør(Aktoersroller.BRUKER);
+        metadata.postadresse = postadresse;
+        if (postadresse == null) {
+            metadata.berik = true;
+        }
+        return metadata;
+    }
+
+    private Aktoer lagAktør(Aktoersroller rolle) {
+        Aktoer aktør = new Aktoer();
+        aktør.setRolle(rolle);
+        switch (rolle) {
+            case BRUKER -> aktør.setAktørId(FNR);
+            case TRYGDEMYNDIGHET -> aktør.setInstitusjonId(INSITUSJON_ID);
+            case REPRESENTANT -> throw new IllegalArgumentException("For representant, bruk lagAktørRepresentant()");
+            default -> aktør.setOrgnr(ORGNR);
+        }
+        return aktør;
+    }
+
+    private Aktoer lagAktørRepresentant(Aktoertype mottakerType) {
+        Aktoer aktør = new Aktoer();
+        aktør.setRolle(Aktoersroller.REPRESENTANT);
+        switch (mottakerType) {
+            case PERSON -> aktør.setPersonIdent(REP_FNR);
+            case ORGANISASJON -> aktør.setOrgnr(REP_ORGNR);
+            default -> throw new IllegalArgumentException("Mottakertype må være person eller organisasjon");
+        }
+        return aktør;
+    }
+
+    private DokumentbestillingMetadata lagMetadataMedArbeidsgiver() {
+        DokumentbestillingMetadata metadata = new DokumentbestillingMetadata();
+        metadata.mottaker = lagAktør(Aktoersroller.ARBEIDSGIVER);
+        metadata.mottakerID = ORGNR;
+        metadata.dokumenttypeID = "dok_1234";
+        return metadata;
+    }
+
+    private DokumentbestillingMetadata lagMetadataMedRepresentant(Aktoertype representantType) {
+        DokumentbestillingMetadata metadata = new DokumentbestillingMetadata();
+        metadata.mottaker = lagAktørRepresentant(representantType);
+        metadata.mottakerID = switch (representantType) {
+            case PERSON -> REP_FNR;
+            case ORGANISASJON -> REP_ORGNR;
+            default -> throw new IllegalArgumentException("Mottakertype må være person eller organisasjon");
+        };
+        metadata.dokumenttypeID = "dok_1234";
+        return metadata;
+    }
+
     private DokumentbestillingMetadata lagMetadataMedMyndighet() {
         DokumentbestillingMetadata metadata = new DokumentbestillingMetadata();
         metadata.mottaker = lagAktør(Aktoersroller.TRYGDEMYNDIGHET);
+        metadata.mottakerID = ORGNR;
         metadata.utenlandskMyndighet = lagUtenlandskMyndighet();
         metadata.dokumenttypeID = "dok_1234";
         return metadata;

@@ -10,7 +10,7 @@ import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.behandling.kontroll.BehandlingskontrollresultatService;
+import no.nav.melosys.service.kontroll.feature.ufm.UfmKontrollService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerRequest;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
@@ -30,7 +30,7 @@ public class OppfriskSaksopplysningerService {
     private final AnmodningsperiodeService anmodningsperiodeService;
     private final BehandlingService behandlingService;
     private final BehandlingsresultatService behandlingsresultatService;
-    private final BehandlingskontrollresultatService behandlingskontrollresultatService;
+    private final UfmKontrollService ufmKontrollService;
     private final InngangsvilkaarService inngangsvilkaarService;
     private final RegisteropplysningerService registeropplysningerService;
     private final PersondataFasade persondataFasade;
@@ -38,14 +38,14 @@ public class OppfriskSaksopplysningerService {
     public OppfriskSaksopplysningerService(AnmodningsperiodeService anmodningsperiodeService,
                                            BehandlingService behandlingService,
                                            BehandlingsresultatService behandlingsresultatService,
-                                           BehandlingskontrollresultatService behandlingskontrollresultatService,
+                                           UfmKontrollService ufmKontrollService,
                                            InngangsvilkaarService inngangsvilkaarService,
                                            RegisteropplysningerService registeropplysningerService,
                                            PersondataFasade persondataFasade) {
         this.anmodningsperiodeService = anmodningsperiodeService;
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
-        this.behandlingskontrollresultatService = behandlingskontrollresultatService;
+        this.ufmKontrollService = ufmKontrollService;
         this.inngangsvilkaarService = inngangsvilkaarService;
         this.registeropplysningerService = registeropplysningerService;
         this.persondataFasade = persondataFasade;
@@ -85,7 +85,7 @@ public class OppfriskSaksopplysningerService {
         behandlingsresultatService.tømBehandlingsresultat(behandlingID);
 
         if (behandling.erBehandlingAvSed()) {
-            behandlingskontrollresultatService.utførKontrollerOgRegistrerFeil(behandlingID);
+            ufmKontrollService.utførKontrollerOgRegistrerFeil(behandlingID);
         }
 
         if (behandling.kanResultereIVedtak()

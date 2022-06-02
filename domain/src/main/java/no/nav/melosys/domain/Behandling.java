@@ -371,6 +371,10 @@ public class Behandling extends RegistreringsInfo {
         return tema == Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND;
     }
 
+    public boolean erBeslutningLovvalgNorge() {
+        return tema == BESLUTNING_LOVVALG_NORGE;
+    }
+
     public boolean erUtsending() {
         return tema == Behandlingstema.UTSENDT_ARBEIDSTAKER || tema == Behandlingstema.UTSENDT_SELVSTENDIG;
     }

@@ -97,6 +97,39 @@ class FagsakTest {
     }
 
     @Test
+    void hentBehandlingerSortertPåRegistertDato_medToBehandlinger_sortertRiktig() {
+        Fagsak fagsak = new Fagsak();
+
+        Behandling behandling1 = new Behandling();
+        behandling1.setRegistrertDato(Instant.parse("2020-01-01T00:00:00Z"));
+
+        Behandling behandling2 = new Behandling();
+        behandling2.setRegistrertDato(Instant.parse("2021-01-01T00:00:00Z"));
+
+        fagsak.setBehandlinger(List.of(behandling1, behandling2));
+
+        List<Instant> registrerteDatoer = fagsak.hentBehandlingerSortertSynkendePåRegistrertDato().stream().map(Behandling::getRegistrertDato).toList();
+        assertThat(registrerteDatoer)
+            .isEqualTo(List.of(behandling2.registrertDato, behandling1.registrertDato));
+    }
+
+    @Test
+    void hentSistOppdatertBehandling_medToBehandlinger_returnerNyeste() {
+        Fagsak fagsak = new Fagsak();
+
+        Behandling behandling1 = new Behandling();
+        behandling1.setRegistrertDato(Instant.parse("2020-01-01T00:00:00Z"));
+
+        Behandling behandling2 = new Behandling();
+        behandling2.setRegistrertDato(Instant.parse("2021-01-01T00:00:00Z"));
+
+        fagsak.setBehandlinger(List.of(behandling1, behandling2));
+
+        assertThat(fagsak.hentSistRegistrertBehandling().getRegistrertDato())
+            .isEqualTo(behandling2.getRegistrertDato());
+    }
+
+    @Test
     void getSistOppdaterteBehandling_ingenBehandlinger_kasterException() {
         var fagsak = new Fagsak();
         assertThatExceptionOfType(FunksjonellException.class)

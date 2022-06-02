@@ -7,9 +7,9 @@ import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
+import no.nav.melosys.service.kontroll.feature.ferdigbehandling.FerdigbehandlingKontrollService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
-import no.nav.melosys.service.vedtak.kontroll.VedtakKontrollService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.event.ApplicationEventMulticaster;
 import org.springframework.stereotype.Service;
@@ -21,9 +21,9 @@ public class UtpekingSystemService extends UtpekingService {
                                  @Qualifier("system") EessiService eessiService, LandvelgerService landvelgerService,
                                  LovvalgsperiodeService lovvalgsperiodeService, @Qualifier("system") OppgaveService oppgaveService,
                                  ProsessinstansService prosessinstansService, Unleash unleash, UtpekingsperiodeRepository utpekingsperiodeRepository,
-                                 @Qualifier("system") VedtakKontrollService vedtakKontrollService,
+                                 @Qualifier("system") FerdigbehandlingKontrollService ferdigbehandlingKontrollService,
                                  ApplicationEventMulticaster melosysEventMulticaster) {
         super(behandlingService, behandlingsresultatService, eessiService, landvelgerService, lovvalgsperiodeService, oppgaveService,
-            prosessinstansService, unleash, utpekingsperiodeRepository, vedtakKontrollService, melosysEventMulticaster);
+            prosessinstansService, unleash, utpekingsperiodeRepository, ferdigbehandlingKontrollService, melosysEventMulticaster);
     }
 }

@@ -94,6 +94,23 @@ class AvklarteVirksomheterServiceTest {
     }
 
     @Test
+    void hentAntallAvklarteVirksomheter_summererArbeidsgivereOgSelvstendigNæringsdrivendeINorgeOgUtenlandskeVirksomheter() {
+        when(avklartefaktaService.hentAvklarteOrgnrOgUuid(anyLong())).thenReturn(new HashSet<>(Arrays.asList(orgnr1, orgnr2, orgnr3, orgnr4, uuid1)));
+        ForetakUtland foretakUtland1 = lagForetakUtland("Utland1", uuid1, null);
+        ForetakUtland foretakUtland2 = lagForetakUtland("Utland2", uuid1, "SE-123456789");
+        List<ForetakUtland> foretakUtlandListe = Arrays.asList(foretakUtland1, foretakUtland2);
+        List<String> selvstendigeForetak = Arrays.asList(orgnr1, orgnr2);
+        List<String> arbeidgivendeEkstraOrgnumre = Arrays.asList(orgnr3, orgnr4);
+        Set<Saksopplysning> saksopplysninger = lagArbeidsforholdOpplysninger(Collections.emptyList());
+        behandling.setSaksopplysninger(saksopplysninger);
+        behandling.setBehandlingsgrunnlag(lagBehandlingsgrunnlag(selvstendigeForetak, foretakUtlandListe, arbeidgivendeEkstraOrgnumre));
+
+        int antallAvklarteForetak = avklarteVirksomheterService.hentAntallAvklarteVirksomheter(behandling);
+
+        assertThat(antallAvklarteForetak).isEqualTo(6);
+    }
+
+    @Test
     void hentUtenlandskeVirksomheter_girListeMedKunAvklarteForetak() {
         ForetakUtland foretak1 = lagForetakUtland("Utland1", uuid1, null);
         ForetakUtland foretak2 = lagForetakUtland("Utland2", uuid2, "SE-123456789");

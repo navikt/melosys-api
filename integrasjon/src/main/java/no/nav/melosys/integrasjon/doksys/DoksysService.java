@@ -252,9 +252,15 @@ public class DoksysService implements DoksysFasade {
                 return lagPerson(mottakerID, brukerNavn, berik);
             case ARBEIDSGIVER:
             case REPRESENTANT:
-                Organisasjon organisasjon = objectFactory.createOrganisasjon();
-                organisasjon.setOrgnummer(mottakerID);
-                return organisasjon;
+                if (metadata.mottaker.erOrganisasjon()) {
+                    Organisasjon organisasjon = objectFactory.createOrganisasjon();
+                    organisasjon.setOrgnummer(mottakerID);
+                    return organisasjon;
+                } else {
+                    Person person = objectFactory.createPerson();
+                    person.setIdent(mottakerID);
+                    return person;
+                }
             case TRYGDEMYNDIGHET:
                 if (metadata.mottaker.erUtenlandskMyndighet()) {
                     // Dokprod støtter ikke utenlandske myndigheter så vi lager en falsk person
