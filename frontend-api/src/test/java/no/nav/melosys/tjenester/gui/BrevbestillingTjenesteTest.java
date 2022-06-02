@@ -7,6 +7,7 @@ import java.util.List;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.TekniskException;
@@ -136,7 +137,7 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
         List<BrevmalDto> brevmaler = brevbestillingTjeneste.hentTilgjengeligeMaler(123L);
         assertThat(brevmaler).hasSize(4);
         assertThat(brevmaler.get(0).getMuligeMottakere().get(0).getFeilmelding())
-            .isEqualTo("Bruker har ingen registrert adresse.");
+            .isEqualTo(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE.getBeskrivelse());
     }
 
     @Test
@@ -149,7 +150,7 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
         List<BrevmalDto> brevmaler = brevbestillingTjeneste.hentTilgjengeligeMaler(123L);
         assertThat(brevmaler).hasSize(4);
         assertThat(brevmaler.get(1).getMuligeMottakere().get(0).getFeilmelding())
-            .isEqualTo("Finner ingen arbeidsgivere. Hent registeropplysninger.");
+            .isEqualTo(Kontroll_begrunnelser.INGEN_ARBEIDSGIVERE.getBeskrivelse());
     }
 
     @Test
