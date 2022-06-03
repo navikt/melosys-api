@@ -4,7 +4,7 @@ import com.github.tomakehurst.wiremock.client.MappingBuilder
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.matching.StringValuePattern
 import no.nav.melosys.integrasjon.pdl.*
-import no.nav.melosys.integrasjon.reststs.RestStsClient
+import no.nav.melosys.integrasjon.reststs.RestTokenServiceClient
 import no.nav.melosys.integrasjon.reststs.StsRestTemplateProducer
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
@@ -17,7 +17,7 @@ import org.springframework.test.web.client.MockRestServiceServer
 @RestClientTest(
     value = [
         StsRestTemplateProducer::class,
-        RestStsClient::class,
+        RestTokenServiceClient::class,
         WebClientAutoConfiguration::class,
 
         PDLConsumerImpl::class,

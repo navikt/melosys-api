@@ -4,9 +4,9 @@ import java.util.function.Supplier;
 import javax.annotation.Nonnull;
 
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.integrasjon.reststs.RestStsClient;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo;
-import no.nav.melosys.integrasjon.reststs.RestStsClient;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.reactive.function.client.ClientRequest;
 import org.springframework.web.reactive.function.client.ClientResponse;

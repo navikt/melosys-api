@@ -1,5 +1,7 @@
 package no.nav.melosys.integrasjon.felles;
 
+import javax.annotation.Nonnull;
+
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.reststs.RestStsClient;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
@@ -11,8 +13,6 @@ import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.ExchangeFunction;
 import reactor.core.publisher.Mono;
-
-import javax.annotation.Nonnull;
 
 @Component
 public class GenericContextExchangeFilter implements ExchangeFilterFunction {

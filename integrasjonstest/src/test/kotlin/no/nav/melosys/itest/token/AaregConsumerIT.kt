@@ -6,7 +6,7 @@ import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdContextExch
 import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdQuery
 import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdRestConsumer
 import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdRestConsumerConfig
-import no.nav.melosys.integrasjon.reststs.RestStsClient
+import no.nav.melosys.integrasjon.reststs.RestTokenServiceClient
 import no.nav.melosys.integrasjon.reststs.StsRestTemplateProducer
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -19,7 +19,7 @@ import org.springframework.test.web.client.MockRestServiceServer
 @RestClientTest(
     value = [
         StsRestTemplateProducer::class,
-        RestStsClient::class,
+        RestTokenServiceClient::class,
         WebClientAutoConfiguration::class,
 
         ArbeidsforholdRestConsumer::class,
