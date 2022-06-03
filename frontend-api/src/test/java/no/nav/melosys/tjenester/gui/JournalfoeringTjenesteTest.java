@@ -54,7 +54,6 @@ class JournalfoeringTjenesteTest extends JsonSchemaTestParent {
         random = new EasyRandom(new EasyRandomParameters().collectionSizeRange(1, 4));
     }
 
-    @Disabled("venter på skjema")
     @Test
     void hentJournalpost_validerKallOgSchema() throws IOException {
         Journalpost journalpost = random.nextObject(Journalpost.class);
