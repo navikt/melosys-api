@@ -34,6 +34,8 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class OpprettNySakFraOppgaveTest {
+    private static final String JP_ID = "jpID";
+
     @Mock
     private JournalfoeringService journalfoeringService;
     @Mock
@@ -145,9 +147,9 @@ class OpprettNySakFraOppgaveTest {
         OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
         opprettSakDto.setSakstype(Sakstyper.EU_EOS);
         opprettSakDto.setBehandlingstema(Behandlingstema.ØVRIGE_SED_MED);
-        Oppgave oppgave = new Oppgave.Builder().setOppgavetype(Oppgavetyper.BEH_SAK_MK).setJournalpostId("jpID").build();
+        Oppgave oppgave = new Oppgave.Builder().setOppgavetype(Oppgavetyper.BEH_SAK_MK).setJournalpostId(JP_ID).build();
         when(oppgaveService.hentOppgaveMedOppgaveID(opprettSakDto.getOppgaveID())).thenReturn(oppgave);
-        when(journalfoeringService.hentJournalpost("jpID")).thenReturn(lagJournalpost(Journalposttype.UT, "NAV"));
+        when(journalfoeringService.hentJournalpost(JP_ID)).thenReturn(lagJournalpost(Journalposttype.UT, "NAV"));
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> opprettNySakFraOppgave.bestillNySakOgBehandling(opprettSakDto))
@@ -155,14 +157,14 @@ class OpprettNySakFraOppgaveTest {
     }
 
     @Test
-    void bestillNySakOgBehandling_journalpostFraSedKnyttetTilSak_feiler() {
+    void bestillNySakOgBehandling_journalpostFraSedErKnyttetTilEksisterendeSak_feiler() {
         OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
         opprettSakDto.setSakstype(Sakstyper.EU_EOS);
         opprettSakDto.setBehandlingstema(Behandlingstema.ØVRIGE_SED_MED);
-        Oppgave oppgave = new Oppgave.Builder().setOppgavetype(Oppgavetyper.BEH_SAK_MK).setJournalpostId("jpID").build();
+        Oppgave oppgave = new Oppgave.Builder().setOppgavetype(Oppgavetyper.BEH_SAK_MK).setJournalpostId(JP_ID).build();
         when(oppgaveService.hentOppgaveMedOppgaveID(opprettSakDto.getOppgaveID())).thenReturn(oppgave);
         final Journalpost journalpost = lagJournalpost(Journalposttype.INN, "EESSI");
-        when(journalfoeringService.hentJournalpost("jpID")).thenReturn(journalpost);
+        when(journalfoeringService.hentJournalpost(JP_ID)).thenReturn(journalpost);
         when(journalfoeringService.finnSakTilknyttetSedJournalpost(journalpost)).thenReturn(Optional.of(new Fagsak()));
 
         assertThatExceptionOfType(FunksjonellException.class)
@@ -171,14 +173,14 @@ class OpprettNySakFraOppgaveTest {
     }
 
     @Test
-    void bestillNySakOgBehandling_journalpostFraSedKnyttetTilSak_oppretterProsess() {
+    void bestillNySakOgBehandling_journalpostFraSedErIkkeKnyttetTilEksisterendeSak_oppretterProsess() {
         OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
         opprettSakDto.setSakstype(Sakstyper.EU_EOS);
         opprettSakDto.setBehandlingstema(Behandlingstema.ØVRIGE_SED_MED);
-        Oppgave oppgave = new Oppgave.Builder().setOppgavetype(Oppgavetyper.BEH_SAK_MK).setJournalpostId("jpID").build();
+        Oppgave oppgave = new Oppgave.Builder().setOppgavetype(Oppgavetyper.BEH_SAK_MK).setJournalpostId(JP_ID).build();
         when(oppgaveService.hentOppgaveMedOppgaveID(opprettSakDto.getOppgaveID())).thenReturn(oppgave);
         final Journalpost journalpost = lagJournalpost(Journalposttype.INN, "EESSI");
-        when(journalfoeringService.hentJournalpost("jpID")).thenReturn(journalpost);
+        when(journalfoeringService.hentJournalpost(JP_ID)).thenReturn(journalpost);
         when(journalfoeringService.finnSakTilknyttetSedJournalpost(journalpost)).thenReturn(Optional.empty());
 
         opprettNySakFraOppgave.bestillNySakOgBehandling(opprettSakDto);
@@ -187,7 +189,7 @@ class OpprettNySakFraOppgaveTest {
     }
 
     private Journalpost lagJournalpost(Journalposttype journalposttype, String mottakskanal) {
-        final Journalpost journalpost = new Journalpost("jpID");
+        final Journalpost journalpost = new Journalpost(JP_ID);
         journalpost.setJournalposttype(journalposttype);
         journalpost.setMottaksKanal(mottakskanal);
         return journalpost;

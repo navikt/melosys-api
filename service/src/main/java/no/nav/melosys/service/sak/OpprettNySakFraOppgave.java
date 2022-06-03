@@ -134,7 +134,7 @@ public class OpprettNySakFraOppgave {
 
     private void validerSedTilknytning(Journalpost journalpost) {
         Optional<Fagsak> optionalFagsak = journalfoeringService.finnSakTilknyttetSedJournalpost(journalpost);
-        if (journalpost.mottaksKanalErEessi() && optionalFagsak.isPresent()) {
+        if (optionalFagsak.isPresent()) {
             throw new FunksjonellException(
                 "SED-en som er tilknyttet Gosys-oppgaven du har valgt er allerede koblet til %s".formatted(
                     optionalFagsak.get().getSaksnummer()));
