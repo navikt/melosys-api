@@ -243,7 +243,7 @@ public class Fagsak extends RegistreringsInfo {
         } else if (harAktørMedRolleType(VIRKSOMHET)) {
             return VIRKSOMHET;
         } else {
-            return null;
+            throw new FunksjonellException("Fagsak må ha hovedpart - enten BRUKER eller VIRKSOMHET");
         }
     }
 
