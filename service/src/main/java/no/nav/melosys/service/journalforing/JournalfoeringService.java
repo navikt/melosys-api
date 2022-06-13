@@ -237,6 +237,57 @@ public class JournalfoeringService {
         );
     }
 
+    @Transactional
+    public void journalførOgKnyttTilEksisterendeSak(JournalfoeringTilordneDto journalfoeringDto) {
+        var journalpost = joarkFasade.hentJournalpost(journalfoeringDto.getJournalpostID());
+        var saksnummer = journalfoeringDto.getSaksnummer();
+        var fagsak = fagsakService.hentFagsak(saksnummer);
+
+        if (journalpost.mottaksKanalErEessi()) {
+            validerKanTilknytteJournalpostForSedTilSak(journalpost, saksnummer);
+        }
+        if (unleash.isEnabled("melosys.api.journalfoering.alltid.opprett.ny.behandling")) {
+            validerNårBehandlingstypeIkkeOppgitt(fagsak); //TODO: Endre navn til validerKnyttTilEksisterendeSak(?) når featuretoggle melosys.api.journalfoering.alltid.opprett.ny.behandling fjernes
+        }
+        valider(journalfoeringDto);
+
+        log.info("{} knytter journalpost {} til eksisterende sak {}", SubjectHandler.getInstance().getUserID(), journalfoeringDto.getJournalpostID(), saksnummer);
+
+        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_KNYTT, journalfoeringDto);
+        prosessinstans.setBehandling(fagsak.hentSistAktivBehandling());
+        prosessinstans.setData(ProsessDataKey.SAKSNUMMER, saksnummer);
+        prosessinstans.setData(ProsessDataKey.JFR_INGEN_VURDERING, journalfoeringDto.isIngenVurdering());
+
+        prosessinstansService.lagre(prosessinstans);
+    }
+
+    @Transactional
+    public void journalførOgOpprettNyVurdering(JournalfoeringTilordneDto journalfoeringDto) {
+        var journalpost = joarkFasade.hentJournalpost(journalfoeringDto.getJournalpostID());
+        var saksnummer = journalfoeringDto.getSaksnummer();
+        var fagsak = fagsakService.hentFagsak(saksnummer);
+        var behandlingstype = Behandlingstyper.valueOf(journalfoeringDto.getBehandlingstypeKode());
+
+        if (fagsak.hentAktivBehandling() != null) {
+            throw new FunksjonellException("Det finnes allerede en aktiv behandling på fagsak " + saksnummer);
+        }
+        if (journalpost.mottaksKanalErEessi()) {
+            validerKanTilknytteJournalpostForSedTilSak(journalpost, saksnummer);
+        }
+
+        valider(journalfoeringDto);
+        validerBehandlingstype(fagsak.getType(), behandlingstype);
+
+        log.info("{} knytter journalpost {} til sak {} og lager ny vurdering", SubjectHandler.getInstance().getUserID(), journalfoeringDto.getJournalpostID(), saksnummer);
+
+        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_NY_VURDERING, journalfoeringDto);
+        prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, behandlingstype);
+        prosessinstans.setData(ProsessDataKey.SAKSNUMMER, saksnummer);
+        prosessinstans.setData(ProsessDataKey.JFR_INGEN_VURDERING, journalfoeringDto.isIngenVurdering());
+
+        prosessinstansService.lagre(prosessinstans);
+    }
+
     private void validerKanTilknytteJournalpostForSedTilSak(Journalpost journalpost, String tilknyttTilSaksnummer) {
         final MelosysEessiMelding melosysEessiMelding = eessiService.hentSedTilknyttetJournalpost(journalpost.getJournalpostId());
         validerSkalIkkeBehandlesAutomatisk(melosysEessiMelding);
