@@ -13,7 +13,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.DokgenService;
@@ -53,7 +52,7 @@ public class TrygdeavtaleVedtakService {
         this.ferdigbehandlingKontrollService = ferdigbehandlingKontrollService;
     }
 
-    public void fattVedtak(Behandling behandling, FattVedtakRequest request) throws ValideringException {
+    public void fattVedtak(Behandling behandling, FattVedtakRequest request) {
         long behandlingID = behandling.getId();
 
         String saksnummer = behandling.getFagsak().getSaksnummer();

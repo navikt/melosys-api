@@ -5,7 +5,6 @@ import java.util.stream.Collectors;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.domain.arkiv.DokumentReferanse;
-import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.unntak.AnmodningUnntakService;
 import no.nav.melosys.tjenester.gui.dto.saksflyt.anmodningunntak.AnmodningUnntakDto;
@@ -22,7 +21,7 @@ import org.springframework.web.context.WebApplicationContext;
 @Api(tags = {"saksflyt", "anmodningsperioder"})
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class AnmodningUnntakTjeneste {
-    
+
     private final AnmodningUnntakService anmodningUnntakService;
     private final Aksesskontroll aksesskontroll;
 
@@ -34,8 +33,7 @@ public class AnmodningUnntakTjeneste {
     @PostMapping("{behandlingID}/bestill")
     @ApiOperation(value = "Anmodning om unntak for en gitt behandling")
     public ResponseEntity<Void> anmodningOmUnntak(@PathVariable("behandlingID") long behandlingID,
-                                                  @RequestBody AnmodningUnntakDto anmodningUnntakDto)
-        throws ValideringException {
+                                                  @RequestBody AnmodningUnntakDto anmodningUnntakDto) {
         aksesskontroll.autoriserSkriv(behandlingID);
         anmodningUnntakService.anmodningOmUnntak(behandlingID,
             anmodningUnntakDto.getMottakerinstitusjon(),

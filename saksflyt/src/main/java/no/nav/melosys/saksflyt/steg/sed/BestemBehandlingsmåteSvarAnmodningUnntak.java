@@ -17,8 +17,8 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
+import no.nav.melosys.exception.StrengValideringException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.exception.validering.KontrollfeilDto;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.LovvalgsperiodeService;
@@ -107,7 +107,7 @@ public class BestemBehandlingsmåteSvarAnmodningUnntak implements StegBehandler 
         try {
             vedtaksfattingFasade.fattVedtak(behandlingID, Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
             behandlingsresultatService.oppdaterBehandlingsMaate(behandlingID, Behandlingsmaate.DELVIS_AUTOMATISERT);
-        } catch (ValideringException e) {
+        } catch (StrengValideringException e) {
             log.info("Kan ikke fatte vedtak automatisk pga. treff i vedtakkontroller: {}. Endrer behandlingsstatus til {}",
                 e.getFeilkoder().stream().map(KontrollfeilDto::getKode).collect(Collectors.joining(", ")),
                 Behandlingsstatus.SVAR_ANMODNING_MOTTATT);

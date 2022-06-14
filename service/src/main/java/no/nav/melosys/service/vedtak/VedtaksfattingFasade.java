@@ -6,6 +6,7 @@ import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.StrengValideringException;
 import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import org.springframework.stereotype.Service;
@@ -38,14 +39,14 @@ public class VedtaksfattingFasade {
     }
 
     @Transactional(noRollbackFor = {ValideringException.class})
-    public void fattVedtak(long behandlingID, Behandlingsresultattyper behandlingsresultattype) throws ValideringException {
+    public void fattVedtak(long behandlingID, Behandlingsresultattyper behandlingsresultattype) throws StrengValideringException {
         var behandling = behandlingService.hentBehandling(behandlingID);
 
         eosVedtakSystemService.fattVedtak(behandling, behandlingsresultattype, Vedtakstyper.FØRSTEGANGSVEDTAK);
     }
 
     @Transactional(noRollbackFor = {ValideringException.class})
-    public void fattVedtak(long behandlingID, FattVedtakRequest fattVedtakRequest) throws ValideringException {
+    public void fattVedtak(long behandlingID, FattVedtakRequest fattVedtakRequest) throws StrengValideringException {
         var behandling = behandlingService.hentBehandling(behandlingID);
 
         validerKanFattesVedtakAvTema(behandling);

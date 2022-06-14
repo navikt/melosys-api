@@ -12,6 +12,7 @@ import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.person.Persondata;
+import no.nav.melosys.exception.StrengValideringException;
 import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -49,7 +50,7 @@ public class FerdigbehandlingKontrollService {
 
     @Transactional
     public void kontroller(long behandlingId, boolean skalRegisteropplysningerOppdateres,
-                           Behandlingsresultattyper behandlingsresultattype) throws ValideringException {
+                           Behandlingsresultattyper behandlingsresultattype) {
         var behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingId);
         var sakstype = behandling.getFagsak().getType();
 
@@ -63,9 +64,26 @@ public class FerdigbehandlingKontrollService {
 
     public void kontrollerVedtakMedNyeRegisteropplysninger(Behandling behandling,
                                                            Behandlingsresultat behandlingsresultat, Sakstyper sakstype,
-                                                           Behandlingsresultattyper behandlingsresultattype) throws ValideringException {
+                                                           Behandlingsresultattyper behandlingsresultattype) {
         hentNyeRegisteropplysninger(behandlingsresultat, behandling);
         kontrollerVedtak(behandling.getId(), sakstype, behandlingsresultattype);
+    }
+
+    public void strengKontrollerVedtakMedNyeRegisteropplysninger(Behandling behandling,
+                                                                 Behandlingsresultat behandlingsresultat, Sakstyper sakstype,
+                                                                 Behandlingsresultattyper behandlingsresultattype) throws StrengValideringException {
+        hentNyeRegisteropplysninger(behandlingsresultat, behandling);
+        strengKontrollerVedtak(behandling, sakstype, behandlingsresultattype);
+    }
+
+    private void strengKontrollerVedtak(Behandling behandling, Sakstyper sakstype, Behandlingsresultattyper behandlingsresultattype) throws StrengValideringException {
+        Collection<Kontrollfeil> kontrollfeil = utførKontroller(behandling.getId(), sakstype, behandlingsresultattype);
+
+        if (!kontrollfeil.isEmpty()) {
+            throw new StrengValideringException("Feil i validering. Kan ikke fatte vedtak.",
+                kontrollfeil.stream().map(Kontrollfeil::tilDto).toList());
+
+        }
     }
 
     private void hentNyeRegisteropplysninger(Behandlingsresultat behandlingsresultat, Behandling behandling) {
@@ -83,8 +101,8 @@ public class FerdigbehandlingKontrollService {
                 .build());
     }
 
-    public void kontrollerVedtak(long behandlingID, Sakstyper sakstype, Behandlingsresultattyper behandlingsresultattype) throws ValideringException {
-        Collection<Kontrollfeil> kontrollfeil =  utførKontroller(behandlingID, sakstype, behandlingsresultattype);
+    public void kontrollerVedtak(long behandlingID, Sakstyper sakstype, Behandlingsresultattyper behandlingsresultattype) {
+        Collection<Kontrollfeil> kontrollfeil = utførKontroller(behandlingID, sakstype, behandlingsresultattype);
 
         if (!kontrollfeil.isEmpty()) {
             throw new ValideringException("Feil i validering. Kan ikke fatte vedtak.",
@@ -95,7 +113,7 @@ public class FerdigbehandlingKontrollService {
     public Collection<Kontrollfeil> utførKontroller(long behandlingID, Sakstyper sakstype, Behandlingsresultattyper behandlingsresultattype) {
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
 
-        return  switch (behandlingsresultattype) {
+        return switch (behandlingsresultattype) {
             case AVSLAG_MANGLENDE_OPPL, HENLEGGELSE -> utførKontrollerForAvslagOgHenleggelse(behandling);
             default -> utførKontroller(behandling, sakstype);
         };

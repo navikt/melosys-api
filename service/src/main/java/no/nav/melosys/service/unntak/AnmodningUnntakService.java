@@ -25,9 +25,9 @@ import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
+import no.nav.melosys.service.kontroll.feature.unntak.AnmodningUnntakKontrollService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
-import no.nav.melosys.service.kontroll.feature.unntak.AnmodningUnntakKontrollService;
 import no.nav.melosys.service.validering.Kontrollfeil;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import org.apache.commons.lang3.StringUtils;
@@ -73,7 +73,7 @@ public class AnmodningUnntakService {
 
     @Transactional
     public void anmodningOmUnntak(long behandlingID, String mottakerinstitusjon,
-                                  Set<DokumentReferanse> vedleggReferanser, String ytterligereInformasjonSed) throws ValideringException {
+                                  Set<DokumentReferanse> vedleggReferanser, String ytterligereInformasjonSed) {
         Set<String> mottakerinstitusjoner = validerMottakerInstitusjon(behandlingID, mottakerinstitusjon);
 
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
@@ -140,7 +140,7 @@ public class AnmodningUnntakService {
         }
     }
 
-    private void kontrollerAnmodningOmUnntak(long behandlingID) throws ValideringException {
+    private void kontrollerAnmodningOmUnntak(long behandlingID) {
         Collection<Kontrollfeil> feilValideringer = anmodningUnntakKontrollService.utførKontroller(behandlingID);
         if (!feilValideringer.isEmpty()) {
             throw new ValideringException("Feil i validering. Kan ikke sende anmodning om unntak.",

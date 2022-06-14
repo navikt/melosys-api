@@ -35,12 +35,12 @@ class KontrollTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    void kontrollerFerdigbehandling_ingenFeilmeldinger_ingentingSkjer() throws ValideringException {
+    void kontrollerFerdigbehandling_ingenFeilmeldinger_ingentingSkjer() {
         kontrollTjeneste.kontrollerFerdigbehandling(lagFerdigbehandlingKontrollerDto());
     }
 
     @Test
-    void kontrollerFerdigbehandling_feilmeldinger_kasterExceptions() throws ValideringException {
+    void kontrollerFerdigbehandling_feilmeldinger_kasterExceptions() {
         doThrow(new ValideringException("melding", Collections.emptyList())).when(mockFerdigbehandlingKontrollService).kontroller(BEHANDLING_ID, true, Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN);
 
         assertThatThrownBy(() -> kontrollTjeneste.kontrollerFerdigbehandling(lagFerdigbehandlingKontrollerDto())).isInstanceOf(ValideringException.class).hasMessage("melding");

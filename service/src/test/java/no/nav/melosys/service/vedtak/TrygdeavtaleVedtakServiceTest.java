@@ -13,7 +13,6 @@ import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Nyvurderingbakgrunner;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
-import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.DokgenService;
@@ -82,7 +81,7 @@ class TrygdeavtaleVedtakServiceTest {
     }
 
     @Test
-    void fattVedtak_førstegangsvedtak_fatterVedtak() throws ValideringException {
+    void fattVedtak_førstegangsvedtak_fatterVedtak() {
         var behandlingsresultat = lagBehandlingsresultat();
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
 
@@ -128,7 +127,7 @@ class TrygdeavtaleVedtakServiceTest {
     }
 
     @Test
-    void fattVedtak_korrigert_vedtak_fatterVedtak() throws ValideringException {
+    void fattVedtak_korrigert_vedtak_fatterVedtak() {
         var behandlingsresultat = lagBehandlingsresultat();
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
 
@@ -174,7 +173,7 @@ class TrygdeavtaleVedtakServiceTest {
     }
 
     @Test
-    void fattVedtak_endringsvedtak_fatterVedtak() throws ValideringException {
+    void fattVedtak_endringsvedtak_fatterVedtak() {
         var behandlingsresultat = lagBehandlingsresultat();
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
 
@@ -220,7 +219,7 @@ class TrygdeavtaleVedtakServiceTest {
     }
 
     @Test
-    void fattVedtak_avslag_manglende_opplysninger_fatterVedtak() throws ValideringException {
+    void fattVedtak_avslag_manglende_opplysninger_fatterVedtak() {
         var behandlingsresultat = new Behandlingsresultat();
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
 

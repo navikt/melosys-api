@@ -17,7 +17,7 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.ValideringException;
+import no.nav.melosys.exception.StrengValideringException;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -64,7 +64,7 @@ public class EosVedtakService {
         this.ferdigbehandlingKontrollService = ferdigbehandlingKontrollService;
     }
 
-    public void fattVedtak(Behandling behandling, Behandlingsresultattyper behandlingsresultattype, Vedtakstyper vedtakstype) throws ValideringException {
+    public void fattVedtak(Behandling behandling, Behandlingsresultattyper behandlingsresultattype, Vedtakstyper vedtakstype) throws StrengValideringException {
         FattVedtakRequest request = new FattVedtakRequest.Builder()
             .medBehandlingsresultat(behandlingsresultattype)
             .medVedtakstype(vedtakstype)
@@ -72,7 +72,7 @@ public class EosVedtakService {
         fattVedtak(behandling, request);
     }
 
-    public void fattVedtak(Behandling behandling, FattVedtakRequest request) throws ValideringException {
+    public void fattVedtak(Behandling behandling, FattVedtakRequest request) throws StrengValideringException {
         long behandlingID = behandling.getId();
 
         log.info("Fatter vedtak for (EU_EØS) sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandlingID);
@@ -81,7 +81,7 @@ public class EosVedtakService {
         behandlingsresultat.setType(request.getBehandlingsresultatTypeKode());
 
         if (behandlingsresultat.erInnvilgelse()) {
-            ferdigbehandlingKontrollService.kontrollerVedtakMedNyeRegisteropplysninger(behandling, behandlingsresultat, Sakstyper.EU_EOS, request.getBehandlingsresultatTypeKode());
+            ferdigbehandlingKontrollService.strengKontrollerVedtakMedNyeRegisteropplysninger(behandling, behandlingsresultat, Sakstyper.EU_EOS, request.getBehandlingsresultatTypeKode());
         }
 
         oppdaterBehandlingsresultat(behandlingsresultat, request.getVedtakstype(), request.getFritekst(), request.getNyVurderingBakgrunn());

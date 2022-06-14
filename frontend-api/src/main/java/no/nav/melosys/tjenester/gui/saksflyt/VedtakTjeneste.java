@@ -3,7 +3,6 @@ package no.nav.melosys.tjenester.gui.saksflyt;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.FerdigbehandlingKontrollService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.tilgang.Aksesstype;
@@ -37,7 +36,7 @@ public class VedtakTjeneste {
     @PostMapping("{behandlingID}/fatt")
     @ApiOperation(value = "Fatter et vedtak for en gitt behandling")
     public ResponseEntity<Void> fattVedtak(@PathVariable("behandlingID") long behandlingID,
-                                           @RequestBody FattVedtakDto fattVedtakDto) throws ValideringException {
+                                           @RequestBody FattVedtakDto fattVedtakDto) {
         if (fattVedtakDto == null || fattVedtakDto.getBehandlingsresultatTypeKode() == null || fattVedtakDto.getVedtakstype() == null) {
             throw new FunksjonellException("BehandlingsresultatTypeKode eller vedtakstype mangler.");
         }
@@ -67,7 +66,7 @@ public class VedtakTjeneste {
     @ApiOperation(value = "Gjør kontroll på vedtaket, og returnerer eventuelle feilmeldinger som liste med KontrollfeilDto")
     public ResponseEntity<Void> kontrollerVedtak(@PathVariable("behandlingID") long behandlingID,
                                                  @RequestParam(value = "skalRegisteropplysningerOppdateres", required = false) boolean skalRegisteropplysningerOppdateres,
-                                                 @RequestBody FattVedtakDto fattVedtakDto) throws ValideringException {
+                                                 @RequestBody FattVedtakDto fattVedtakDto) {
         if (fattVedtakDto.getVedtakstype() == null) {
             throw new FunksjonellException("Vedtakstype mangler.");
         }

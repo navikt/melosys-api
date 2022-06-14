@@ -93,7 +93,7 @@ class FerdigbehandlingKontrollServiceTest {
     }
 
     @Test
-    void kontrollerVedtak_oppdaterRegisteropplysninger_oppdatererRegisteropplysninger() throws ValideringException {
+    void kontrollerVedtak_oppdaterRegisteropplysninger_oppdatererRegisteropplysninger() {
         lovvalgsperiode.setTom(LocalDate.now());
         var behandlingsresultat = lagBehandlingsresultat();
         when(behandlingsresultatService.hentBehandlingsresultat(behandlingID)).thenReturn(behandlingsresultat);
@@ -104,7 +104,7 @@ class FerdigbehandlingKontrollServiceTest {
     }
 
     @Test
-    void kontrollererVedtak_ikkeOppdaterRegisteropplysninger_oppdatererkke() throws ValideringException {
+    void kontrollererVedtak_ikkeOppdaterRegisteropplysninger_oppdatererkke() {
         lovvalgsperiode.setTom(LocalDate.now());
 
         ferdigbehandlingKontrollService.kontroller(behandling.getId(), false, Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN);

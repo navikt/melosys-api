@@ -4,11 +4,11 @@ import java.util.Collection;
 
 import no.nav.melosys.exception.validering.KontrollfeilDto;
 
-public class ValideringException extends RuntimeException {
+public class StrengValideringException extends Exception {
 
     private final Collection<KontrollfeilDto> feilkoder;
 
-    public ValideringException(String message, Collection<KontrollfeilDto> feilkoder) {
+    public StrengValideringException(String message, Collection<KontrollfeilDto> feilkoder) {
         super(message);
         this.feilkoder = feilkoder;
     }
