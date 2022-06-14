@@ -53,7 +53,7 @@ public final class JournalpostDto {
             avsenderID,
             journalpost.getAvsenderNavn(),
             journalpost.getAvsenderType(),
-            avsenderID.equalsIgnoreCase(hovedpartIdent),
+            avsenderID != null && avsenderID.equalsIgnoreCase(hovedpartIdent),
             hoveddokument,
             vedlegg);
     }
