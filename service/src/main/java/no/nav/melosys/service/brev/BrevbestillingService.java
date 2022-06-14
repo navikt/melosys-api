@@ -207,21 +207,24 @@ public class BrevbestillingService {
 
     @Transactional
     public List<Produserbaredokumenter> hentMuligeProduserbaredokumenter(long behandlingId) {
-        List<Produserbaredokumenter> brevmaler = new ArrayList<>();
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingId);
 
-        if (behandling.getFagsak().getHovedpartRolle() == BRUKER) {
-            if (behandling.getType() == Behandlingstyper.SOEKNAD) {
-                brevmaler.add(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD);
-            } else if (behandling.erKlage()) {
-                brevmaler.add(MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE);
-            }
-
-            brevmaler.addAll(asList(MANGELBREV_BRUKER, MANGELBREV_ARBEIDSGIVER, GENERELT_FRITEKSTBREV_BRUKER, GENERELT_FRITEKSTBREV_ARBEIDSGIVER));
-        } else {
-            brevmaler.add(GENERELT_FRITEKSTBREV_VIRKSOMHET);
+        if (behandling.erInaktiv()) {
+            return emptyList();
         }
-        return behandling.erAktiv() ? brevmaler : emptyList();
+        if (behandling.getFagsak().getHovedpartRolle() == VIRKSOMHET) {
+            return List.of(GENERELT_FRITEKSTBREV_VIRKSOMHET);
+        }
+
+        List<Produserbaredokumenter> brevmaler = new ArrayList<>();
+        if (behandling.getType() == Behandlingstyper.SOEKNAD) {
+            brevmaler.add(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD);
+        } else if (behandling.erKlage()) {
+            brevmaler.add(MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE);
+        }
+
+        brevmaler.addAll(asList(MANGELBREV_BRUKER, MANGELBREV_ARBEIDSGIVER, GENERELT_FRITEKSTBREV_BRUKER, GENERELT_FRITEKSTBREV_ARBEIDSGIVER));
+        return brevmaler;
     }
 
     @Transactional

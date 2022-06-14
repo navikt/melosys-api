@@ -155,7 +155,6 @@ public class BrevmottakerService {
         return List.of(virksomhet);
     }
 
-    // Dokumenter til arbeidsgiver sendes bare til representant når representant finnes.
     private List<Aktoer> avklarMottakereForArbeidsgiver(Behandling behandling, boolean kunAvklarteVirksomheter) {
         Fagsak fagsak = behandling.getFagsak();
         Optional<Aktoer> representant = fagsak.finnRepresentant(Representerer.ARBEIDSGIVER);

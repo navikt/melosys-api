@@ -130,8 +130,7 @@ class OpprettOgJournalforBrevTest {
         when(mockEregFasade.hentOrganisasjonNavn(virksomhet.getOrgnr())).thenReturn("organisasjonsnavn");
 
         var brevbestilling = new DokgenBrevbestilling.Builder<>().medProduserbartdokument(GENERELT_FRITEKSTBREV_VIRKSOMHET).build();
-        Aktoer mottaker = lagMottaker(Aktoersroller.VIRKSOMHET, null, virksomhet.getOrgnr(), null);
-        Prosessinstans prosessinstans = lagProsessinstansMedMottaker(behandling, mottaker, brevbestilling);
+        var prosessinstans = lagProsessinstansMedMottaker(behandling, virksomhet, brevbestilling);
 
 
         opprettJournalforBrev.utfør(prosessinstans);
@@ -192,7 +191,7 @@ class OpprettOgJournalforBrevTest {
         when(mockJoarkFasade.opprettJournalpost(any(), anyBoolean())).thenReturn("12234");
         DokumentproduksjonsInfoMapper dokumentproduksjonsInfoMapper = new DokumentproduksjonsInfoMapper(new FakeUnleash());
         when(mockDokgenService.hentDokumentInfo(any())).thenReturn(dokumentproduksjonsInfoMapper.hentDokumentproduksjonsInfo(STORBRITANNIA));
-        Aktoer mottaker = lagMottaker(Aktoersroller.BRUKER, "12234", null, null);
+        Aktoer mottaker = lagMottaker("12234");
 
         InnvilgelseBrevbestilling brevbestilling = new InnvilgelseBrevbestilling.Builder()
             .medBehandlingId(1L)
@@ -357,7 +356,7 @@ class OpprettOgJournalforBrevTest {
     }
 
     private Prosessinstans lagProsessinstans(Behandling behandling, DokgenBrevbestilling brevbestilling) {
-        Aktoer mottaker = lagMottaker(Aktoersroller.BRUKER, "1234", null, null);
+        Aktoer mottaker = lagMottaker("1234");
 
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
@@ -388,12 +387,12 @@ class OpprettOgJournalforBrevTest {
         return prosessinstans;
     }
 
-    private static Aktoer lagMottaker(Aktoersroller rolle, String aktørID, String orgnr, String institusjonsId) {
+    private static Aktoer lagMottaker(String aktørID) {
         Aktoer mottaker = new Aktoer();
-        mottaker.setRolle(rolle);
+        mottaker.setRolle(Aktoersroller.BRUKER);
         mottaker.setAktørId(aktørID);
-        mottaker.setOrgnr(orgnr);
-        mottaker.setInstitusjonId(institusjonsId);
+        mottaker.setOrgnr(null);
+        mottaker.setInstitusjonId(null);
         return mottaker;
     }
 
