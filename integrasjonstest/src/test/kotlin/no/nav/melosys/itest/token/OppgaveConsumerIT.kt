@@ -6,7 +6,7 @@ import no.nav.melosys.integrasjon.felles.GenericContextExchangeFilter
 import no.nav.melosys.integrasjon.oppgave.konsument.OppgaveConsumer
 import no.nav.melosys.integrasjon.oppgave.konsument.OppgaveConsumerImpl
 import no.nav.melosys.integrasjon.oppgave.konsument.OppgaveConsumerProducer
-import no.nav.melosys.integrasjon.reststs.RestStsClient
+import no.nav.melosys.integrasjon.reststs.RestTokenServiceClient
 import no.nav.melosys.integrasjon.reststs.StsRestTemplateProducer
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
@@ -19,7 +19,7 @@ import org.springframework.test.web.client.MockRestServiceServer
 @RestClientTest(
     value = [
         StsRestTemplateProducer::class,
-        RestStsClient::class,
+        RestTokenServiceClient::class,
         WebClientAutoConfiguration::class,
 
         OppgaveConsumerImpl::class,

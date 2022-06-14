@@ -23,16 +23,16 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class RestStsClientTest {
+public class RestTokenServiceClientTest {
 
-    private RestStsClient restSTSClient;
+    private RestTokenServiceClient restTokenServiceClient;
 
     @Mock
     private RestTemplate restTemplate;
 
     @BeforeEach
     public void setUp() {
-        restSTSClient = spy(new RestStsClient(restTemplate));
+        restTokenServiceClient = spy(new RestTokenServiceClient(restTemplate));
 
         // Setter environment som "singleton"
         MockEnvironment environment = spy(new MockEnvironment());
@@ -55,22 +55,22 @@ public class RestStsClientTest {
         when(restTemplate.exchange(anyString(), any(HttpMethod.class), any(HttpEntity.class), any(ParameterizedTypeReference.class)))
                 .thenReturn(responseEntity);
 
-        String token = restSTSClient.collectToken();
-        verify(restSTSClient, times(1)).basicAuth();
+        String token = restTokenServiceClient.collectToken();
+        verify(restTokenServiceClient, times(1)).basicAuth();
         assertNotNull(token);
         assertFalse(token.isEmpty());
 
         body.put("access_token", "cba321");
         body.put("expires_in", 3600L);
 
-        String secondToken = restSTSClient.collectToken();
-        verify(restSTSClient, times(2)).basicAuth();
+        String secondToken = restTokenServiceClient.collectToken();
+        verify(restTokenServiceClient, times(2)).basicAuth();
         assertNotEquals(token, secondToken);
 
         body.put("access_token", "abccba");
 
-        String thirdToken = restSTSClient.collectToken();
-        verify(restSTSClient, times(2)).basicAuth();
+        String thirdToken = restTokenServiceClient.collectToken();
+        verify(restTokenServiceClient, times(2)).basicAuth();
         assertEquals(secondToken, thirdToken);
     }
 }
