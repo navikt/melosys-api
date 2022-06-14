@@ -1,4 +1,4 @@
-package no.nav.melosys.tjenester.gui;
+package no.nav.melosys.tjenester.gui.kontroll;
 
 import io.swagger.annotations.Api;
 import no.nav.melosys.exception.FunksjonellException;
@@ -21,12 +21,12 @@ import org.springframework.web.context.WebApplicationContext;
 @RequestMapping("/kontroll")
 @Api(tags = "kontroll")
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
-public class KontrollTjeneste {
+public class KontrollController {
 
     private final FerdigbehandlingKontrollService ferdigbehandlingKontrollService;
     private final Aksesskontroll aksesskontroll;
 
-    public KontrollTjeneste(FerdigbehandlingKontrollService ferdigbehandlingKontrollService, Aksesskontroll aksesskontroll) {
+    public KontrollController(FerdigbehandlingKontrollService ferdigbehandlingKontrollService, Aksesskontroll aksesskontroll) {
         this.ferdigbehandlingKontrollService = ferdigbehandlingKontrollService;
         this.aksesskontroll = aksesskontroll;
     }
