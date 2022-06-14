@@ -40,7 +40,7 @@ public class JournalfoeringTjeneste {
     public ResponseEntity<JournalpostDto> hentJournalpostOpplysninger(@PathVariable("journalpostID") String journalpostID) {
         log.debug("Journalpost med ID {} hentes.", journalpostID);
         Journalpost journalpost = journalføringService.hentJournalpost(journalpostID);
-        JournalpostDto journalpostDto = JournalpostDto.av(journalpost, journalføringService.finnBrukerIdent(journalpost).orElse(null));
+        JournalpostDto journalpostDto = JournalpostDto.av(journalpost, journalføringService.finnHovedpartIdent(journalpost).orElse(null));
 
         if (journalpost.mottaksKanalErEessi()) {
             journalføringService.finnBehandlingstemaForSedTilknyttetJournalpost(journalpostID)

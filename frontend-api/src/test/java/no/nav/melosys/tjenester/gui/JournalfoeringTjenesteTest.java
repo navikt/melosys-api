@@ -15,6 +15,7 @@ import no.nav.melosys.tjenester.gui.dto.journalforing.JournalpostDto;
 import org.jeasy.random.EasyRandom;
 import org.jeasy.random.EasyRandomParameters;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -58,7 +59,7 @@ class JournalfoeringTjenesteTest extends JsonSchemaTestParent {
         Journalpost journalpost = random.nextObject(Journalpost.class);
         journalpost.setAvsenderId(SAMPLE_ORGNR);
         when(journalføringService.hentJournalpost(anyString())).thenReturn(journalpost);
-        when(journalføringService.finnBrukerIdent(journalpost)).thenReturn(Optional.of(SAMPLE_FNR));
+        when(journalføringService.finnHovedpartIdent(journalpost)).thenReturn(Optional.of(SAMPLE_FNR));
 
         JournalpostDto journalpostDto = tjeneste.hentJournalpostOpplysninger(anyString()).getBody();
 

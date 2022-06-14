@@ -1,52 +1,61 @@
 package no.nav.melosys.tjenester.gui.dto.journalforing;
 
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
+import no.nav.melosys.domain.arkiv.BrukerIdType;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
 import no.nav.melosys.tjenester.gui.dto.dokumentarkiv.DokumentDto;
 
 public final class JournalpostDto {
-    private Instant mottattDato;
-    private String brukerID;
-    private String avsenderID;
-    private String avsenderNavn;
-    private Avsendertyper avsenderType;
-    private boolean erBrukerAvsender;
-    private DokumentDto hoveddokument;
-    private List<DokumentDto> vedlegg = new ArrayList<>();
+    private final Instant mottattDato;
+    private final String brukerID;
+    private final String virksomhetOrgnr;
+    private final String avsenderID;
+    private final String avsenderNavn;
+    private final Avsendertyper avsenderType;
+    private final boolean erHovedpartAvsender;
+    private final DokumentDto hoveddokument;
+    private final List<DokumentDto> vedlegg;
     private BehandlingsInformasjon behandlingsInformasjon;
 
     private JournalpostDto(Instant mottattDato, String brukerID,
-                           String avsenderID, String avsenderNavn,
-                           Avsendertyper avsenderType, boolean erBrukerAvsender) {
+                           String virksomhetOrgnr, String avsenderID, String avsenderNavn,
+                           Avsendertyper avsenderType, boolean erHovedpartAvsender,
+                           DokumentDto hoveddokument, List<DokumentDto> vedlegg) {
         this.mottattDato = mottattDato;
         this.brukerID = brukerID;
+        this.virksomhetOrgnr = virksomhetOrgnr;
         this.avsenderID = avsenderID;
         this.avsenderNavn = avsenderNavn;
         this.avsenderType = avsenderType;
-        this.erBrukerAvsender = erBrukerAvsender;
+        this.erHovedpartAvsender = erHovedpartAvsender;
+        this.hoveddokument = hoveddokument;
+        this.vedlegg = vedlegg;
     }
 
-    public static JournalpostDto av(Journalpost journalpost, String brukerID) {
-        Instant mottattDato = journalpost.getForsendelseMottatt();
-
+    public static JournalpostDto av(Journalpost journalpost, String hovedpartIdent) {
+        var hovedpartErBruker = journalpost.getBrukerIdType() != BrukerIdType.ORGNR;
         String avsenderID = journalpost.getAvsenderId();
-        String avsenderNavn = journalpost.getAvsenderNavn();
-        Avsendertyper avsenderType = journalpost.getAvsenderType();
-        boolean erBrukerAvsender = brukerID != null && brukerID.equalsIgnoreCase(avsenderID);
-        JournalpostDto dto = new JournalpostDto(mottattDato, brukerID, avsenderID, avsenderNavn, avsenderType, erBrukerAvsender);
-        DokumentDto dokumentDto = new DokumentDto(journalpost.getHoveddokument().getDokumentId(),
-            journalpost.getHoveddokument().getTittel(), journalpost.getHoveddokument().hentLogiskeVedleggTitler());
-        dto.setHoveddokument(dokumentDto);
-        dto.setVedlegg(journalpost.getVedleggListe().stream()
+        DokumentDto hoveddokument = new DokumentDto(
+            journalpost.getHoveddokument().getDokumentId(),
+            journalpost.getHoveddokument().getTittel(),
+            journalpost.getHoveddokument().hentLogiskeVedleggTitler());
+        List<DokumentDto> vedlegg = journalpost.getVedleggListe().stream()
             .map(v -> new DokumentDto(v.getDokumentId(), v.getTittel(), v.hentLogiskeVedleggTitler()))
-            .collect(Collectors.toList()));
+            .toList();
 
-        return dto;
+        return new JournalpostDto(
+            journalpost.getForsendelseMottatt(),
+            hovedpartErBruker ? hovedpartIdent : null,
+            !hovedpartErBruker ? hovedpartIdent : null,
+            avsenderID,
+            journalpost.getAvsenderNavn(),
+            journalpost.getAvsenderType(),
+            avsenderID.equalsIgnoreCase(hovedpartIdent),
+            hoveddokument,
+            vedlegg);
     }
 
     public Instant getMottattDato() {
@@ -57,8 +66,12 @@ public final class JournalpostDto {
         return brukerID;
     }
 
-    public boolean isErBrukerAvsender() {
-        return erBrukerAvsender;
+    public String getVirksomhetOrgnr() {
+        return virksomhetOrgnr;
+    }
+
+    public boolean isErHovedpartAvsender() {
+        return erHovedpartAvsender;
     }
 
     public String getAvsenderID() {
@@ -77,16 +90,8 @@ public final class JournalpostDto {
         return hoveddokument;
     }
 
-    private void setHoveddokument(DokumentDto hoveddokument) {
-        this.hoveddokument = hoveddokument;
-    }
-
     public List<DokumentDto> getVedlegg() {
         return vedlegg;
-    }
-
-    private void setVedlegg(List<DokumentDto> vedlegg) {
-        this.vedlegg = vedlegg;
     }
 
     public BehandlingsInformasjon getBehandlingsInformasjon() {

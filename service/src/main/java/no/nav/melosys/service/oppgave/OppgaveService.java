@@ -13,6 +13,7 @@ import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.oppgave.OppgaveFasade;
 import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -42,6 +43,7 @@ public class OppgaveService {
     private final SaksopplysningerService saksopplysningerService;
     private final BehandlingsgrunnlagService behandlingsgrunnlagService;
     private final PersondataFasade persondataFasade;
+    private final EregFasade eregFasade;
     private static final String UKJENT = "UKJENT";
 
     public OppgaveService(BehandlingService behandlingService,
@@ -49,13 +51,15 @@ public class OppgaveService {
                           OppgaveFasade oppgaveFasade,
                           SaksopplysningerService saksopplysningerService,
                           BehandlingsgrunnlagService behandlingsgrunnlagService,
-                          PersondataFasade persondataFasade) {
+                          PersondataFasade persondataFasade,
+                          EregFasade eregFasade) {
         this.behandlingService = behandlingService;
         this.fagsakService = fagsakService;
         this.oppgaveFasade = oppgaveFasade;
         this.saksopplysningerService = saksopplysningerService;
         this.behandlingsgrunnlagService = behandlingsgrunnlagService;
         this.persondataFasade = persondataFasade;
+        this.eregFasade = eregFasade;
     }
 
     public List<Oppgave> finnOppgaverMedBrukerID(String brukerIdent) {
@@ -245,24 +249,27 @@ public class OppgaveService {
         JournalfoeringsoppgaveDto journalfoeringsoppgaveDto = new JournalfoeringsoppgaveDto();
         journalfoeringsoppgaveDto.setJournalpostID(oppgave.getJournalpostId());
         String aktørId = oppgave.getAktørId();
-        oppdaterFnrOgNavn(aktørId, journalfoeringsoppgaveDto);
+        String orgnr = oppgave.getOrgnr();
+        oppdaterHovedpartIdentOgNavn(aktørId, orgnr, journalfoeringsoppgaveDto);
         return journalfoeringsoppgaveDto;
     }
 
-    private void oppdaterFnrOgNavn(String aktørID, OppgaveDto oppgaveDto) {
-        if (aktørID == null) {
-            oppgaveDto.setFnr(UKJENT);
-            oppgaveDto.setSammensattNavn(UKJENT);
+    private void oppdaterHovedpartIdentOgNavn(String aktørID, String orgnr, OppgaveDto oppgaveDto) {
+        if (aktørID != null) {
+            String fnr = persondataFasade.finnFolkeregisterident(aktørID).orElse(null);
+            if (StringUtils.isNotEmpty(fnr)) {
+                oppgaveDto.setHovedpartIdent(fnr);
+                oppgaveDto.setNavn(persondataFasade.hentSammensattNavn(fnr));
+                return;
+            }
+        }
+        if (orgnr != null) {
+            oppgaveDto.setHovedpartIdent(orgnr);
+            oppgaveDto.setNavn(eregFasade.hentOrganisasjonNavn(orgnr));
             return;
         }
-        final String fnr = persondataFasade.finnFolkeregisterident(aktørID).orElse(null);
-        if (StringUtils.isNotEmpty(fnr)) {
-            oppgaveDto.setFnr(fnr);
-            oppgaveDto.setSammensattNavn(persondataFasade.hentSammensattNavn(fnr));
-        } else {
-            oppgaveDto.setFnr(UKJENT);
-            oppgaveDto.setSammensattNavn(UKJENT);
-        }
+        oppgaveDto.setHovedpartIdent(UKJENT);
+        oppgaveDto.setNavn(UKJENT);
     }
 
     private OppgaveDto lagBehandlingsoppgaveDto(Oppgave oppgave) {
@@ -275,7 +282,11 @@ public class OppgaveService {
         behandling = behandlingService.hentBehandling(behandling.getId());
         behOppgaveDto.setBehandling(mapBehandling(behandling));
 
-        if (fagsak.finnVirksomhetsOrgnr().isPresent()) {
+        var aktørID = fagsak.finnBrukersAktørID().orElse(null);
+        var orgnr = fagsak.finnVirksomhetsOrgnr().orElse(null);
+        oppdaterHovedpartIdentOgNavn(aktørID, orgnr, behOppgaveDto);
+
+        if (orgnr != null) {
             return behOppgaveDto;
         }
 
@@ -295,9 +306,6 @@ public class OppgaveService {
                     );
                 });
         }
-
-        final var aktørID = behandling.getFagsak().hentBrukersAktørID();
-        oppdaterFnrOgNavn(aktørID, behOppgaveDto);
         return behOppgaveDto;
     }
 
