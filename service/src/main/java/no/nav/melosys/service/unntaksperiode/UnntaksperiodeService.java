@@ -17,7 +17,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.kontroll.PeriodeKontroller;
+import no.nav.melosys.service.kontroll.regler.PeriodeRegler;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.apache.commons.lang3.StringUtils;
@@ -71,7 +71,7 @@ public class UnntaksperiodeService {
         if (endretPeriode.fom() == null || endretPeriode.tom() == null) {
             throw new FunksjonellException("Oppgi både startdato og sluttdato ved endring av periode");
         }
-        if (PeriodeKontroller.feilIPeriode(endretPeriode.fom(), endretPeriode.tom())) {
+        if (PeriodeRegler.feilIPeriode(endretPeriode.fom(), endretPeriode.tom())) {
             throw new FunksjonellException(
                 String.format("Feil i perioden %s - %s som det forsøkes å endre til", endretPeriode.fom(), endretPeriode.tom()));
         }
@@ -79,7 +79,7 @@ public class UnntaksperiodeService {
 
     private void validerPeriodeFraBehandling(Behandling behandling) {
         ErPeriode periode = behandling.hentPeriode();
-        if (PeriodeKontroller.feilIPeriode(periode.getFom(), periode.getTom())) {
+        if (PeriodeRegler.feilIPeriode(periode.getFom(), periode.getTom())) {
             throw new FunksjonellException(String.format("Behandling %s har feil i perioden", behandling.getId()));
         }
     }

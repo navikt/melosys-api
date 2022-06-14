@@ -26,7 +26,7 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
-import no.nav.melosys.service.unntak.kontroll.AnmodningUnntakKontrollService;
+import no.nav.melosys.service.kontroll.feature.unntak.AnmodningUnntakKontrollService;
 import no.nav.melosys.sikkerhet.context.TestSubjectHandler;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.BeforeEach;

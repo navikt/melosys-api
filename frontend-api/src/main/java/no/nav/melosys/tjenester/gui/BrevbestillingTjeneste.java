@@ -9,6 +9,7 @@ import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
@@ -251,13 +252,13 @@ public class BrevbestillingTjeneste {
         try {
             var brevAdresser = brevbestillingService.hentBrevAdresseTilMottakere(produserbaredokumenter, aktoersroller, behandlingId);
             if (aktoersroller == Aktoersroller.BRUKER && brevAdresser.stream().allMatch(BrevAdresse::isAdresselinjerEmpty)) {
-                builder.medFeilmelding("Bruker har ingen registrert adresse.");
+                builder.medFeilmelding(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE.getBeskrivelse());
             } else {
                 builder.medAdresse(brevAdresser.stream().map(MottakerAdresseDto::av).toList());
             }
         } catch (TekniskException e) {
             if ("Finner ikke arbeidsforholddokument".equals(e.getMessage())) {
-                builder.medFeilmelding("Finner ingen arbeidsgivere. Hent registeropplysninger.");
+                builder.medFeilmelding(Kontroll_begrunnelser.INGEN_ARBEIDSGIVERE.getBeskrivelse());
             } else {
                 throw new TekniskException(e);
             }

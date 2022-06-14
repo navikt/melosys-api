@@ -18,7 +18,7 @@ import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.DokgenService;
 import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
-import no.nav.melosys.service.ferdigbehandling.kontroll.FerdigbehandlingKontrollService;
+import no.nav.melosys.service.kontroll.feature.ferdigbehandling.FerdigbehandlingKontrollService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.slf4j.Logger;

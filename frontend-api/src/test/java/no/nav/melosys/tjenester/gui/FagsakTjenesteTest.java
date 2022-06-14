@@ -143,19 +143,19 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
     @Test
     void hentFagsakGir200OkOgDto() {
         Fagsak fagsak = lagFagsak();
-        testHentFagsak(ResponseEntity.status(HttpStatus.OK).body(lagFagsakDto(fagsak)));
-    }
+        Aktoer bruker = new Aktoer();
+        bruker.setRolle(Aktoersroller.BRUKER);
+        fagsak.setAktører(Set.of(bruker));
 
-    private void testHentFagsak(ResponseEntity<FagsakDto> forventning) {
-        Fagsak fagsak = lagFagsak();
+        var forventning = ResponseEntity.status(HttpStatus.OK).body(lagFagsakDto(fagsak));
         FagsakTjeneste instans = lagFagsakTjeneste(fagsak);
+
+
         ResponseEntity<FagsakDto> resultat = instans.hentFagsak("123");
+
+
         assertThat(resultat.getStatusCode()).isEqualTo(forventning.getStatusCode());
-        if (forventning.getBody() == null) {
-            assertThat(resultat.getBody()).isNull();
-        } else {
-            assertThat(resultat.getBody()).usingRecursiveComparison().isEqualTo(forventning.getBody());
-        }
+        assertThat(resultat.getBody()).usingRecursiveComparison().isEqualTo(forventning.getBody());
     }
 
     @Test
@@ -236,6 +236,9 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
     @Test
     void hentFagsaker_medSaksnummer_finnerSakMottarListeMedEttElement() {
         Fagsak fagsak = lagFagsak();
+        Aktoer bruker = new Aktoer();
+        bruker.setRolle(Aktoersroller.BRUKER);
+        fagsak.setAktører(Set.of(bruker));
         FagsakTjeneste instans = lagFagsakTjeneste(fagsak);
         when(fagsakService.finnFagsakFraSaksnummer("123")).thenReturn(Optional.of(fagsak));
 
@@ -409,6 +412,7 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
         resultat.setSaksnummer(fagsak.getSaksnummer());
         resultat.setSakstype(fagsak.getType());
         resultat.setSaksstatus(fagsak.getStatus());
+        resultat.setHovedpartRolle(fagsak.getHovedpartRolle());
         return resultat;
     }
 
