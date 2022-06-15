@@ -28,11 +28,11 @@ import no.nav.melosys.domain.person.adresse.Bostedsadresse;
 import no.nav.melosys.domain.person.adresse.Kontaktadresse;
 
 import static java.util.Collections.singletonList;
-import static no.nav.melosys.domain.kodeverk.Aktoersroller.ARBEIDSGIVER;
-import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
+import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
 
 public final class DokgenTestData {
     public static final String FNR_BRUKER = "05058892382";
+    public static final String ORGNR = "999999999";
     public static final String SAMMENSATT_NAVN_BRUKER = "Donald Duck";
     public static final String ADRESSELINJE_1_BRUKER = "Andebygata 1";
     public static final String POSTNR_BRUKER = "9999";
@@ -122,6 +122,7 @@ public final class DokgenTestData {
     public static OrganisasjonDokument lagOrg() {
         OrganisasjonDokument organisasjonDokument = new OrganisasjonDokument();
         organisasjonDokument.setNavn(NAVN_ORG);
+        organisasjonDokument.setOrgnummer(ORGNR);
         organisasjonDokument.setOrganisasjonDetaljer(lagOrgDetaljer());
         return organisasjonDokument;
     }
@@ -201,11 +202,15 @@ public final class DokgenTestData {
                 mottaker.setRolle(BRUKER);
                 mottaker.setAktørId(FNR_BRUKER);
             }
+            case VIRKSOMHET -> {
+                mottaker.setRolle(VIRKSOMHET);
+                mottaker.setOrgnr(ORGNR);
+            }
             case ARBEIDSGIVER -> {
                 mottaker.setRolle(ARBEIDSGIVER);
                 mottaker.setOrgnr(ORGNR_REPRESENTANT);
             }
-            default -> throw new IllegalArgumentException("Mottaker må være person eller arbeidsgiver");
+            default -> throw new IllegalArgumentException("Støtter ikke aktoersrolle " + rolle.getKode());
         }
         return mottaker;
     }

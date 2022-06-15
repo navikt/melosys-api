@@ -56,7 +56,7 @@ public class DokgenMalMapper {
 
     private DokgenBrevbestilling berikBestillingMedPersondata(DokgenBrevbestilling mottattBrevbestilling, Aktoer mottaker) {
         return mottattBrevbestilling.toBuilder()
-            .medPersonDokument(dokgenMapperDatahenter.hentPersondata(mottattBrevbestilling))
+            .medPersonDokument(dokgenMapperDatahenter.hentPersondata(mottattBrevbestilling, mottaker))
             .medPersonMottaker(dokgenMapperDatahenter.hentPersonMottaker(mottaker))
             .build();
     }
@@ -96,6 +96,9 @@ public class DokgenMalMapper {
             case GENERELT_FRITEKSTBREV_BRUKER -> Fritekstbrev.av(((FritekstbrevBrevbestilling) brevbestilling).toBuilder()
                     .medNavnFullmektig(dokgenMapperDatahenter.hentFullmektigNavn(brevbestilling.getBehandling().getFagsak(), Representerer.BRUKER)).build(),
                 Aktoersroller.BRUKER
+            );
+            case GENERELT_FRITEKSTBREV_VIRKSOMHET -> Fritekstbrev.av(
+                ((FritekstbrevBrevbestilling) brevbestilling).toBuilder().build(), Aktoersroller.VIRKSOMHET
             );
             case GENERELT_FRITEKSTBREV_ARBEIDSGIVER -> Fritekstbrev.av(((FritekstbrevBrevbestilling) brevbestilling).toBuilder()
                     .medNavnFullmektig(dokgenMapperDatahenter.hentFullmektigNavn(brevbestilling.getBehandling().getFagsak(), Representerer.ARBEIDSGIVER)).build(),

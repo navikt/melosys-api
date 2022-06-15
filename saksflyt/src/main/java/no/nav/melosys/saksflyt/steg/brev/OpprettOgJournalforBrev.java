@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
+import static java.util.Collections.emptyList;
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.*;
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.OPPRETT_OG_JOURNALFØR_BREV;
 import static org.springframework.util.ObjectUtils.isEmpty;
@@ -88,20 +89,20 @@ public class OpprettOgJournalforBrev implements StegBehandler {
 
         DokumentproduksjonsInfo dokumentproduksjonsInfo = dokgenService.hentDokumentInfo(produserbartDokument);
 
-        JournalpostBestilling bestilling = new JournalpostBestilling.Builder()
+        JournalpostBestilling.Builder bestilling = new JournalpostBestilling.Builder()
             .medTittel(utledJournalføringsTittel(behandling, dokumentproduksjonsInfo, brevbestilling, mottaker))
             .medBrevkode(dokumentproduksjonsInfo.dokgenMalnavn())
             .medDokumentKategori(dokumentproduksjonsInfo.dokumentKategoriKode())
-            .medBrukerFnr(hentBrukerFolkeregisterIdent(behandling))
             .medMottakerNavn(utledNavn(mottakerID, mottakerType))
             .medMottakerId(mottakerType == MottakerType.PERSON_MED_AKTØR_ID ? persondataFasade.hentFolkeregisterident(mottakerID) : mottakerID)
             .medMottakerIdType(utledMottakerIdType(mottakerType))
             .medSaksnummer(behandling.getFagsak().getSaksnummer())
             .medPdf(pdf)
-            .medVedlegg(hentVedleggDokumenterFraJoark(brevbestilling, behandling.getFagsak().getSaksnummer()))
-            .build();
+            .medVedlegg(hentVedleggDokumenterFraJoark(brevbestilling, behandling.getFagsak().getSaksnummer()));
 
-        String journalpostId = joarkFasade.opprettJournalpost(OpprettJournalpost.lagJournalpostForBrev(bestilling), true);
+        settHovedpart(behandling, bestilling);
+
+        String journalpostId = joarkFasade.opprettJournalpost(OpprettJournalpost.lagJournalpostForBrev(bestilling.build()), true);
 
         log.info("Brev for behandling {} er journalført, journalpostId {}", behandling.getId(), journalpostId);
         prosessinstans.setData(DISTRIBUERBAR_JOURNALPOST_ID, journalpostId);
@@ -149,16 +150,25 @@ public class OpprettOgJournalforBrev implements StegBehandler {
         };
     }
 
+    private void settHovedpart(Behandling behandling, JournalpostBestilling.Builder bestilling) {
+        var fagsak = behandling.getFagsak();
+        if (fagsak.harAktørMedRolleType(Aktoersroller.VIRKSOMHET)) {
+            bestilling
+                .medHovedpartId(fagsak.hentVirksomhet().getOrgnr())
+                .medHovedpartIdType(BrukerIdType.ORGNR);
+        } else {
+            bestilling
+                .medHovedpartId(persondataFasade.hentFolkeregisterident(fagsak.hentBrukersAktørID()))
+                .medHovedpartIdType(BrukerIdType.FOLKEREGISTERIDENT);
+        }
+    }
+
     private OpprettJournalpost.KorrespondansepartIdType utledMottakerIdType(MottakerType mottakerType) {
         return switch (mottakerType) {
             case PERSON_MED_AKTØR_ID, PERSON_MED_FNR -> OpprettJournalpost.KorrespondansepartIdType.FNR;
             case INSTITUSJON -> OpprettJournalpost.KorrespondansepartIdType.UTENLANDSK_ORGANISASJON;
             case ORGANISASJON -> OpprettJournalpost.KorrespondansepartIdType.ORGNR;
         };
-    }
-
-    private String hentBrukerFolkeregisterIdent(Behandling behandling) {
-        return persondataFasade.hentFolkeregisterident(behandling.getFagsak().hentBrukersAktørID());
     }
 
     private List<Vedlegg> hentVedleggDokumenterFraJoark(DokgenBrevbestilling brevbestilling, String fagsaknummer) {

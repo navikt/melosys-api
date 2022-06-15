@@ -3,6 +3,7 @@ package no.nav.melosys.service.dokument;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import com.google.common.collect.Sets;
 import no.nav.melosys.domain.*;
@@ -127,10 +128,36 @@ class BrevmottakerServiceTest {
     }
 
     @Test
+    void avklarMottakere_medVirksomhetRolleOgIngenVirksomhet_feiler() {
+        var mottaker = Mottaker.av(VIRKSOMHET);
+        when(behandling.getFagsak()).thenReturn(new Fagsak());
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> brevmottakerService.avklarMottakere(null, mottaker, behandling))
+            .withMessageContaining("Virksomhet er ikke registrert.");
+    }
+
+    @Test
+    void avklarMottakere_medVirksomhetRolleOgVirksomhet_girVirksomhetAktør() {
+        Aktoer virksomhet = new Aktoer();
+        virksomhet.setRolle(VIRKSOMHET);
+        virksomhet.setOrgnr("orgnr");
+        var fagsak = new Fagsak();
+        fagsak.setAktører(Set.of(virksomhet));
+        when(behandling.getFagsak()).thenReturn(fagsak);
+
+        List<Aktoer> aktoers = brevmottakerService.avklarMottakere(null, Mottaker.av(VIRKSOMHET), behandling);
+
+        assertThat(aktoers)
+            .hasSize(1)
+            .contains(virksomhet);
+    }
+
+    @Test
     void avklarMottakere_medArbeidsgiverRolleOgIngenArbeidsgivere_feiler() {
         when(behandling.getFagsak()).thenReturn(lagFagsakMedRepresentantOrg(null));
-        when(avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(eq(behandling))).thenReturn(Collections.emptySet());
-        when(avklarteVirksomheterService.hentUtenlandskeVirksomheter(eq(behandling))).thenReturn(Collections.emptyList());
+        when(avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(behandling)).thenReturn(Collections.emptySet());
+        when(avklarteVirksomheterService.hentUtenlandskeVirksomheter(behandling)).thenReturn(Collections.emptyList());
 
         assertThatThrownBy(() -> brevmottakerService.avklarMottakere(null, Mottaker.av(ARBEIDSGIVER), behandling))
             .isInstanceOf(FunksjonellException.class)
@@ -139,7 +166,7 @@ class BrevmottakerServiceTest {
 
     @Test
     void avklarMottakere_medArbeidsgiverRolle_girArbeidsgiverAktører() {
-        when(avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(eq(behandling))).thenReturn(Sets.newHashSet("123456789", "987654321"));
+        when(avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(behandling)).thenReturn(Sets.newHashSet("123456789", "987654321"));
         when(behandling.getFagsak()).thenReturn(lagFagsakMedRepresentantOrg(null));
 
         List<Aktoer> arbeidsgivere = brevmottakerService.avklarMottakere(null, Mottaker.av(ARBEIDSGIVER), behandling);
@@ -152,8 +179,8 @@ class BrevmottakerServiceTest {
     @Test
     void avklarMottakere_medBareUtenlandskeArbeidsgivere_girIngenMottakere() {
         when(behandling.getFagsak()).thenReturn(lagFagsakMedRepresentantOrg(null));
-        when(avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(eq(behandling))).thenReturn(Collections.emptySet());
-        when(avklarteVirksomheterService.hentUtenlandskeVirksomheter(eq(behandling)))
+        when(avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(behandling)).thenReturn(Collections.emptySet());
+        when(avklarteVirksomheterService.hentUtenlandskeVirksomheter(behandling))
             .thenReturn(Collections.singletonList(new AvklartVirksomhet(new ForetakUtland())));
 
         List<Aktoer> arbeidsgivere = brevmottakerService.avklarMottakere(null, Mottaker.av(ARBEIDSGIVER), behandling);
@@ -196,7 +223,7 @@ class BrevmottakerServiceTest {
 
     @Test
     void avklarMottakere_medArbeidsgiverRolleOgRepresentantForBruker_girArbeidsgiverAktører() {
-        when(avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(eq(behandling))).thenReturn(Sets.newHashSet("123456789", "987654321"));
+        when(avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(behandling)).thenReturn(Sets.newHashSet("123456789", "987654321"));
         when(behandling.getFagsak()).thenReturn(lagFagsakMedRepresentantOrg(Representerer.BRUKER));
 
         List<Aktoer> arbeidsgivere = brevmottakerService.avklarMottakere(null, Mottaker.av(ARBEIDSGIVER), behandling);
@@ -230,7 +257,7 @@ class BrevmottakerServiceTest {
 
     @Test
     void avklarMottakere_art12_1_CZerReservertFraA1_forventerIngenAktør() {
-        when(utenlandskMyndighetService.lagUtenlandskeMyndigheterFraBehandling(eq(behandling))).thenReturn(Collections.singletonMap(lagUtenlandskMyndighet(), lagAktoerUtenlandskMyndighet()));
+        when(utenlandskMyndighetService.lagUtenlandskeMyndigheterFraBehandling(behandling)).thenReturn(Collections.singletonMap(lagUtenlandskMyndighet(), lagAktoerUtenlandskMyndighet()));
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
         List<Aktoer> myndigheter = brevmottakerService.avklarMottakere(Produserbaredokumenter.ATTEST_A1, Mottaker.av(TRYGDEMYNDIGHET), behandling);
@@ -239,7 +266,7 @@ class BrevmottakerServiceTest {
 
     @Test
     void avklarMottakere_art_11_4_2_CZerReservertFraA1_forventerIngenAktør() {
-        when(utenlandskMyndighetService.lagUtenlandskeMyndigheterFraBehandling(eq(behandling))).thenReturn(Collections.singletonMap(lagUtenlandskMyndighet(), lagAktoerUtenlandskMyndighet()));
+        when(utenlandskMyndighetService.lagUtenlandskeMyndigheterFraBehandling(behandling)).thenReturn(Collections.singletonMap(lagUtenlandskMyndighet(), lagAktoerUtenlandskMyndighet()));
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
         behandlingsresultat.hentValidertLovvalgsperiode().setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_4_2);
@@ -249,7 +276,7 @@ class BrevmottakerServiceTest {
 
     @Test
     void avklarMottakere_A001_CZerReservertFraA1_forventerMyndighetAktør() {
-        when(utenlandskMyndighetService.lagUtenlandskeMyndigheterFraBehandling(eq(behandling))).thenReturn(Collections.singletonMap(lagUtenlandskMyndighet(), lagAktoerUtenlandskMyndighet()));
+        when(utenlandskMyndighetService.lagUtenlandskeMyndigheterFraBehandling(behandling)).thenReturn(Collections.singletonMap(lagUtenlandskMyndighet(), lagAktoerUtenlandskMyndighet()));
 
         List<Aktoer> myndigheter = brevmottakerService.avklarMottakere(Produserbaredokumenter.ANMODNING_UNNTAK, Mottaker.av(TRYGDEMYNDIGHET), behandling);
         assertThat(myndigheter)
@@ -487,7 +514,7 @@ class BrevmottakerServiceTest {
         assertThat(kontaktopplysning).isNotNull();
         assertThat(kontaktopplysning.getKontaktNavn()).isEqualTo("Kari Arbeidsgiver");
 
-        verify(kontaktopplysningService).hentKontaktopplysning(eq("MEL-123"), eq(orgnr));
+        verify(kontaktopplysningService).hentKontaktopplysning("MEL-123", orgnr);
     }
 
     @Test
@@ -501,7 +528,7 @@ class BrevmottakerServiceTest {
         assertThat(kontaktopplysning).isNotNull();
         assertThat(kontaktopplysning.getKontaktNavn()).isEqualTo("Ole Fullmektig");
 
-        verify(kontaktopplysningService).hentKontaktopplysning(eq("MEL-123"), eq(orgnr));
+        verify(kontaktopplysningService).hentKontaktopplysning("MEL-123", orgnr);
     }
 
     @Test

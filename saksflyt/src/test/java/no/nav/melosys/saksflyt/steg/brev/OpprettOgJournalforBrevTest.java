@@ -6,6 +6,7 @@ import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.arkiv.*;
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.brev.FritekstbrevBrevbestilling;
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
@@ -34,12 +35,13 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Set;
+
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class OpprettOgJournalforBrevTest {
@@ -105,9 +107,56 @@ class OpprettOgJournalforBrevTest {
 
         opprettJournalforBrev.utfør(prosessinstans);
 
+        verify(mockPersondataFasade, times(2)).hentFolkeregisterident(any());
         verify(mockBehandlingService).hentBehandling(anyLong());
         verify(mockDokgenService).produserBrev(any(Aktoer.class), any(DokgenBrevbestilling.class), eq(false));
         verify(mockJoarkFasade).opprettJournalpost(any(), anyBoolean());
+    }
+
+    @Test
+    void utførOpprettJournalforBrevTilVirksomhet() {
+        Aktoer virksomhet = new Aktoer();
+        virksomhet.setOrgnr("orgnr");
+        virksomhet.setRolle(Aktoersroller.VIRKSOMHET);
+        var fagsak = new Fagsak();
+        fagsak.setAktører(Set.of(virksomhet));
+        Behandling behandling = new Behandling();
+        behandling.setFagsak(fagsak);
+        behandling.setId(1L);
+
+        when(mockBehandlingService.hentBehandling(behandling.getId())).thenReturn(behandling);
+        when(mockJoarkFasade.opprettJournalpost(any(), anyBoolean())).thenReturn("12234");
+        when(mockDokgenService.hentDokumentInfo(any())).thenReturn(TestdataFactory.lagDokumentInfo());
+        when(mockEregFasade.hentOrganisasjonNavn(virksomhet.getOrgnr())).thenReturn("organisasjonsnavn");
+
+        var brevbestilling = new DokgenBrevbestilling.Builder<>().medProduserbartdokument(GENERELT_FRITEKSTBREV_VIRKSOMHET).build();
+        var prosessinstans = lagProsessinstansMedMottaker(behandling, virksomhet, brevbestilling);
+
+
+        opprettJournalforBrev.utfør(prosessinstans);
+
+
+        verify(mockPersondataFasade, never()).hentFolkeregisterident(any());
+        verify(mockBehandlingService).hentBehandling(anyLong());
+        verify(mockDokgenService).produserBrev(any(Aktoer.class), any(DokgenBrevbestilling.class), eq(false));
+        verify(mockJoarkFasade).opprettJournalpost(opprettJournalpostCaptor.capture(), anyBoolean());
+
+        OpprettJournalpost opprettJournalpost = opprettJournalpostCaptor.getValue();
+        assertThat(opprettJournalpost)
+            .isNotNull()
+            .extracting(
+                Journalpost::getBrukerId,
+                Journalpost::getBrukerIdType,
+                Journalpost::getKorrespondansepartId,
+                Journalpost::getKorrespondansepartNavn,
+                OpprettJournalpost::getKorrespondansepartIdType
+            ).containsExactly(
+                virksomhet.getOrgnr(),
+                BrukerIdType.ORGNR,
+                virksomhet.getOrgnr(),
+                "organisasjonsnavn",
+                OpprettJournalpost.KorrespondansepartIdType.ORGNR.getKode()
+            );
     }
 
     @Test
