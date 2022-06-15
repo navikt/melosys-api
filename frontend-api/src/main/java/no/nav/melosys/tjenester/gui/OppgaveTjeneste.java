@@ -3,7 +3,6 @@ package no.nav.melosys.tjenester.gui;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -18,6 +17,7 @@ import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.tjenester.gui.dto.oppgave.OppgaveOversiktDto;
 import no.nav.melosys.tjenester.gui.dto.oppgave.PlukketOppgaveDto;
 import no.nav.security.token.support.core.api.Protected;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
@@ -105,16 +105,23 @@ public class OppgaveTjeneste {
 
     @GetMapping("/sok")
     @ApiOperation(
-        value = "Søk etter oppgaver knyttet til et fødselsnummer eller d-nummer",
+        value = "Søk etter oppgaver knyttet til et fødselsnummer, d-nummer, eller organisasjonsnummer",
         response = no.nav.melosys.tjenester.gui.dto.oppgave.OppgaveDto.class,
         responseContainer = "List")
-    public ResponseEntity<List<no.nav.melosys.tjenester.gui.dto.oppgave.OppgaveDto>> søkOppgaverMedBrukerID(@RequestParam("fnr") String fnr) {
-        if (fnr == null) {
-            throw new FunksjonellException("Fødselsnummer eller D-nummer mangler.");
+    public ResponseEntity<List<no.nav.melosys.tjenester.gui.dto.oppgave.OppgaveDto>> søkOppgaverMedFnrDnrEllerOrgnr(
+        @RequestParam(name = "fnrDnr", required = false) String fnrDnr,
+        @RequestParam(name = "orgnr", required = false) String orgnr) {
+        if (StringUtils.isEmpty(fnrDnr) && StringUtils.isEmpty(orgnr)) {
+            throw new FunksjonellException("Finner ingen søkekriteria. Du kan velge mellom: Fødselsnummer/D-nummer eller organisasjonsnummer");
+        }
+        if (StringUtils.isNotEmpty(fnrDnr) && StringUtils.isNotEmpty(orgnr)) {
+            throw new FunksjonellException("Fant både fnr/dnr og orgnr. Du må velge kun én av: Fødselsnummer/D-nummer eller organisasjonsnummer");
         }
         try {
-            return ResponseEntity.ok(oppgaveService.finnOppgaverMedBrukerID(fnr).stream()
-                .map(no.nav.melosys.tjenester.gui.dto.oppgave.OppgaveDto::av).collect(Collectors.toList()));
+            var oppgaveliste = StringUtils.isNotEmpty(fnrDnr)
+                ? oppgaveService.finnOppgaverMedBrukerID(fnrDnr)
+                : oppgaveService.finnOppgaverMedOrgnr(orgnr);
+            return ResponseEntity.ok(oppgaveliste.stream().map(no.nav.melosys.tjenester.gui.dto.oppgave.OppgaveDto::av).toList());
         } catch (IkkeFunnetException e) {
             return ResponseEntity.ok(new ArrayList<>());
         }

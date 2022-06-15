@@ -70,6 +70,10 @@ public class OppgaveService {
         return oppgaveFasade.finnOppgaverMedBrukerID(aktørId);
     }
 
+    public List<Oppgave> finnOppgaverMedOrgnr(String orgnr) {
+        return oppgaveFasade.finnOppgaverMedOrgnr(orgnr);
+    }
+
     public List<OppgaveDto> hentOppgaverMedAnsvarlig(String ansvarligID) {
         Collection<Oppgave> oppgaverFraDomain = oppgaveFasade.finnOppgaverMedAnsvarlig(ansvarligID);
         return oppgaverTilDtoer(oppgaverFraDomain);

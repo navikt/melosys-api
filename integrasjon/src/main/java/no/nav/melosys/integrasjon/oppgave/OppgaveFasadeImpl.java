@@ -234,6 +234,21 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
     }
 
     @Override
+    public List<Oppgave> finnOppgaverMedOrgnr(String orgnr) {
+        OppgaveSearchRequest oppgaveSearchRequest = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
+            .medOrgnr(orgnr)
+            .medTema(new String[]{Tema.MED.getKode(), Tema.UFM.getKode()})
+            .medOppgaveTyper(hentGyldigeOppgavetyper())
+            .medSorteringsfelt(SORTERINGSFELT)
+            .medStatusKategori(OPPGAVE_STATUSKATEGORI_AAPEN)
+            .build();
+
+        return oppgaveConsumer.hentOppgaveListe(oppgaveSearchRequest).stream()
+            .map(OppgaveFasadeImpl::oppgaveMappingDtoTilDomain)
+            .toList();
+    }
+
+    @Override
     public List<Oppgave> finnÅpneOppgaverMedSaksnummer(String saksnummer) {
         OppgaveSearchRequest oppgaveSearchRequest = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
             .medSaksreferanse(new String[]{saksnummer})

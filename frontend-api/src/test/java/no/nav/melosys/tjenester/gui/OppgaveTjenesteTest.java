@@ -11,6 +11,7 @@ import no.nav.melosys.domain.kodeverk.Oppgavetyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.oppgave.Oppgaveplukker;
 import no.nav.melosys.service.oppgave.dto.*;
@@ -29,9 +30,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class OppgaveTjenesteTest extends JsonSchemaTestParent {
@@ -98,13 +100,45 @@ class OppgaveTjenesteTest extends JsonSchemaTestParent {
         assertThat(entity.getOppgaveID()).isEqualTo("1");
     }
 
+    @Disabled("Frem til skjema-fiks")
     @Test
-    void søkOppgaverMedBrukerID() throws IOException {
+    void søkOppgaverMedFnrDnrEllerOrgnr() throws IOException {
         List<Oppgave> oppgaver = defaultEasyRandom().objects(Oppgave.class, 3).collect(Collectors.toList());
         when(oppgaveService.finnOppgaverMedBrukerID(anyString())).thenReturn(oppgaver);
 
-        validerArray(oppgaveTjeneste.søkOppgaverMedBrukerID("").getBody(), OPPGAVER_SOK_SCHEMA, logger);
+        validerArray(oppgaveTjeneste.søkOppgaverMedFnrDnrEllerOrgnr("", null).getBody(), OPPGAVER_SOK_SCHEMA, logger);
     }
+
+    @Test
+    void søkOppgaverMedFnrDnrEllerOrgnr_fnrSendesInn_kallerRettFunksjon() {
+        oppgaveTjeneste.søkOppgaverMedFnrDnrEllerOrgnr("fnrdnr", "");
+
+        verify(oppgaveService).finnOppgaverMedBrukerID("fnrdnr");
+        verify(oppgaveService, never()).finnOppgaverMedOrgnr(anyString());
+    }
+
+    @Test
+    void søkOppgaverMedFnrDnrEllerOrgnr_orgnrSendesInn_kallerRettFunksjon() {
+        oppgaveTjeneste.søkOppgaverMedFnrDnrEllerOrgnr("", "orgnr");
+
+        verify(oppgaveService).finnOppgaverMedOrgnr("orgnr");
+        verify(oppgaveService, never()).finnOppgaverMedBrukerID(anyString());
+    }
+
+    @Test
+    void søkOppgaverMedFnrDnrEllerOrgnr_fnrOgOrgnrSendesInn_kasterFeil() {
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> oppgaveTjeneste.søkOppgaverMedFnrDnrEllerOrgnr("fnrdnr", "orgnr"))
+            .withMessageContaining("Fant både fnr/dnr og orgnr");
+    }
+
+    @Test
+    void søkOppgaverMedFnrDnrEllerOrgnr_ingentingSendesInn_kasterFeil() {
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> oppgaveTjeneste.søkOppgaverMedFnrDnrEllerOrgnr("", ""))
+            .withMessageContaining("Finner ingen søkekriteria");
+    }
+
 
     @Test
     void tilbakeleggOppgave() throws Exception {
