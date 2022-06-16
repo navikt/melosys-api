@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.AnmodningsperiodeSvar;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
@@ -25,9 +26,9 @@ import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
+import no.nav.melosys.service.kontroll.feature.unntak.AnmodningUnntakKontrollService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
-import no.nav.melosys.service.kontroll.feature.unntak.AnmodningUnntakKontrollService;
 import no.nav.melosys.service.validering.Kontrollfeil;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import org.apache.commons.lang3.StringUtils;
@@ -50,6 +51,7 @@ public class AnmodningUnntakService {
     private final EessiService eessiService;
     private final AnmodningUnntakKontrollService anmodningUnntakKontrollService;
     private final JoarkFasade joarkFasade;
+    private final Unleash unleash;
 
     public AnmodningUnntakService(BehandlingService behandlingService,
                                   BehandlingsresultatService behandlingsresultatService, OppgaveService oppgaveService,
@@ -58,7 +60,7 @@ public class AnmodningUnntakService {
                                   LovvalgsperiodeService lovvalgsperiodeService,
                                   LandvelgerService landvelgerService,
                                   EessiService eessiService,
-                                  AnmodningUnntakKontrollService anmodningUnntakKontrollService, JoarkFasade joarkFasade) {
+                                  AnmodningUnntakKontrollService anmodningUnntakKontrollService, JoarkFasade joarkFasade, Unleash unleash) {
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.oppgaveService = oppgaveService;
@@ -69,6 +71,7 @@ public class AnmodningUnntakService {
         this.eessiService = eessiService;
         this.anmodningUnntakKontrollService = anmodningUnntakKontrollService;
         this.joarkFasade = joarkFasade;
+        this.unleash = unleash;
     }
 
     @Transactional
@@ -104,6 +107,13 @@ public class AnmodningUnntakService {
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
         validerBehandlingstemaUnntak(behandling);
         validerBehandlingsstatus(behandling);
+
+        if (unleash.isEnabled("melosys.eessi.handlingssjekk_sed")) {
+            String rinaSaksnummer = behandling.hentSedDokument().getRinaSaksnummer();
+            if (!eessiService.kanOppretteSedPåBuc(rinaSaksnummer)) {
+                throw new FunksjonellException("Kan ikke opprette Sed på rinaSaknummer: " + rinaSaksnummer);
+            }
+        }
 
         AnmodningsperiodeSvar anmodningsperiodeSvar =
             anmodningsperiodeService.hentAnmodningsperiodeSvarForBehandling(behandlingID);
