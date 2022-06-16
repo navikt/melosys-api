@@ -29,7 +29,7 @@ public abstract class DokgenDto {
     private Mottaker mottaker;
 
     protected DokgenDto(DokgenBrevbestilling brevbestilling, Aktoersroller mottakerType) {
-        this.saksopplysninger = Saksopplysninger.av(brevbestilling);
+        this.saksopplysninger = Saksopplysninger.av(brevbestilling, mottakerType);
         this.dagensDato = Instant.now();
         this.saksbehandlerNavn = brevbestilling.getSaksbehandlerNavn();
         this.mottaker = mapMottaker(brevbestilling, mottakerType);

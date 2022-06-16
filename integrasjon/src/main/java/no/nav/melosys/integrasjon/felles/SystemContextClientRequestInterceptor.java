@@ -1,7 +1,6 @@
 package no.nav.melosys.integrasjon.felles;
 
 import java.io.IOException;
-
 import javax.annotation.Nonnull;
 
 import no.nav.melosys.integrasjon.reststs.RestStsClient;

@@ -216,7 +216,8 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
-    public void opprettProsessinstansNySak(String journalpostID, OpprettSakDto opprettSakDto, Behandlingstyper behandlingstype) {
+    public void opprettProsessinstansNySakEØS(String journalpostID, OpprettSakDto opprettSakDto,
+                                              Behandlingstyper behandlingstype) {
         Prosessinstans prosessinstans = new Prosessinstans();
 
         prosessinstans.setType(ProsessType.OPPRETT_NY_SAK_EOS);

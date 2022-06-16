@@ -32,7 +32,7 @@ internal class BehandlingsresultatServiceIT(
     private val behandlingsresultatRepository: BehandlingsresultatRepository,
     @Autowired
     private val fagsakRepository: FagsakRepository
-    ) : DataJpaTestBase() {
+) : DataJpaTestBase() {
     data class Behandlinger(val orginal: Behandling, val replika: Behandling)
 
     @Test

@@ -11,6 +11,7 @@ import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
 import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
@@ -73,7 +74,7 @@ public class BehandlingsresultatService {
         Behandlingsresultat nyttBehandlingsresultat = new Behandlingsresultat();
         nyttBehandlingsresultat.setBehandling(behandling);
         nyttBehandlingsresultat.setType(Behandlingsresultattyper.IKKE_FASTSATT);
-        nyttBehandlingsresultat.setBehandlingsmåte(Behandlingsmaate.UDEFINERT);
+        nyttBehandlingsresultat.setBehandlingsmåte(Behandlingsmaate.MANUELT);
         behandlingsresultatRepository.save(nyttBehandlingsresultat);
     }
 
@@ -88,6 +89,7 @@ public class BehandlingsresultatService {
         behandlingsresultatsreplika.setVedtakMetadata(null);
         behandlingsresultatsreplika.setUtfallRegistreringUnntak(null);
         behandlingsresultatsreplika.setUtfallUtpeking(null);
+        behandlingsresultatsreplika.setBehandlingsmåte(Behandlingsmaate.MANUELT);
         if (unleash.isEnabled("melosys.ikke_kopier_behandlingsresultattype")) {
             behandlingsresultatsreplika.setType(Behandlingsresultattyper.IKKE_FASTSATT);
         }
@@ -201,7 +203,7 @@ public class BehandlingsresultatService {
 
     public void oppdaterBehandlingsresultattype(Long id, Behandlingsresultattyper behandlingsresultattype) {
         Optional<Behandlingsresultat> optionalBehandlingsresultat = behandlingsresultatRepository.findById(id);
-        if (optionalBehandlingsresultat.isPresent()){
+        if (optionalBehandlingsresultat.isPresent()) {
             Behandlingsresultat behandlingsresultat = optionalBehandlingsresultat.get();
             log.info("Setter behandlingsresultattype på {} til {}", id, behandlingsresultattype);
             behandlingsresultat.setType(behandlingsresultattype);
@@ -211,9 +213,6 @@ public class BehandlingsresultatService {
 
     public void oppdaterBehandlingsMaate(Long id, Behandlingsmaate behandlingsmaate) {
         Behandlingsresultat behandlingsresultat = hentBehandlingsresultat(id);
-        if (behandlingsresultat.getBehandlingsmåte() != Behandlingsmaate.UDEFINERT) {
-            throw new FunksjonellException("Behandlingsmaate kan ikke oppdateres etter det er definert!");
-        }
 
         behandlingsresultat.setBehandlingsmåte(behandlingsmaate);
         behandlingsresultatRepository.save(behandlingsresultat);
