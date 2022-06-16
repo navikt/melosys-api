@@ -9,6 +9,7 @@ import java.util.Set;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.medlemskap.Periode;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
+import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
@@ -17,9 +18,11 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
+import no.nav.melosys.service.kontroll.feature.godkjennunntak.GodkjennUnntakKontrollService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.junit.jupiter.api.BeforeEach;
@@ -47,6 +50,8 @@ class UnntaksperiodeServiceTest {
     private BehandlingsresultatService behandlingsresultatService;
     @Mock
     private LovvalgsperiodeService lovvalgsperiodeService;
+    @Mock
+    private GodkjennUnntakKontrollService godkjennUnntakKontrollService;
 
     private UnntaksperiodeService unntaksperiodeService;
 
@@ -57,7 +62,7 @@ class UnntaksperiodeServiceTest {
 
     @BeforeEach
     public void setUp() {
-        unntaksperiodeService = new UnntaksperiodeService(behandlingService, behandlingsresultatService, lovvalgsperiodeService, oppgaveService, prosessinstansService);
+        unntaksperiodeService = new UnntaksperiodeService(behandlingService, behandlingsresultatService, lovvalgsperiodeService, oppgaveService, prosessinstansService, godkjennUnntakKontrollService);
         behandling.setId(1L);
         behandling.setFagsak(new Fagsak());
         behandling.getFagsak().setSaksnummer("MEL-123hei");
@@ -83,6 +88,18 @@ class UnntaksperiodeServiceTest {
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> unntaksperiodeService.godkjennPeriode(1L, unntaksperiodeGodkjenning))
             .withMessageContaining("ikke av tema");
+    }
+
+    @Test
+    void godkjennPeriode_frontendHarIkkeHindretAtDetSendesUgyldigUnntakTilBackend_forventException() {
+        behandling.setTema(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING);
+        behandling.hentSedDokument().setSedType(SedType.A009);
+        behandling.hentSedDokument().setLovvalgsperiode(new Periode(LocalDate.of(2000, 1, 1), LocalDate.of(2004, 1,
+            1)));
+        UnntaksperiodeGodkjenning unntaksperiodeGodkjenning = UnntaksperiodeGodkjenning.builder().build();
+
+        assertThatExceptionOfType(ValideringException.class)
+            .isThrownBy(() -> unntaksperiodeService.godkjennPeriode(1L, unntaksperiodeGodkjenning));
     }
 
     @Test

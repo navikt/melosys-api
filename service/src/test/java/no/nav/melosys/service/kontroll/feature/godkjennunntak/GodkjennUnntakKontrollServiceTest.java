@@ -49,7 +49,7 @@ class GodkjennUnntakKontrollServiceTest {
         when(behandlingService.hentBehandling(1L)).thenReturn(behandling);
 
 
-        assertDoesNotThrow(() -> godkjennUnntakKontrollService.utførKontroller(1L));
+        assertDoesNotThrow(() -> godkjennUnntakKontrollService.utførKontroll(1L));
     }
 
 
@@ -69,10 +69,8 @@ class GodkjennUnntakKontrollServiceTest {
         behandling.setSaksopplysninger(Set.of(saksopplysning));
         when(behandlingService.hentBehandling(1L)).thenReturn(behandling);
 
-        assertThatThrownBy(() -> godkjennUnntakKontrollService.utførKontroller(1L))
+
+        assertThatThrownBy(() -> godkjennUnntakKontrollService.utførKontroll(1L))
             .isInstanceOf(ValideringException.class);
-
     }
-
-
 }

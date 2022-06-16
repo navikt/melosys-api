@@ -3,6 +3,7 @@ package no.nav.melosys.service.unntaksperiode;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
+import no.nav.melosys.service.kontroll.feature.godkjennunntak.GodkjennUnntakKontrollService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -15,7 +16,8 @@ public class UnntaksperiodeSystemService extends UnntaksperiodeService {
                                        BehandlingsresultatService behandlingsresultatService,
                                        LovvalgsperiodeService lovvalgsperiodeService,
                                        @Qualifier("system") OppgaveService oppgaveService,
-                                       ProsessinstansService prosessinstansService) {
-        super(behandlingService, behandlingsresultatService, lovvalgsperiodeService, oppgaveService, prosessinstansService);
+                                       ProsessinstansService prosessinstansService,
+                                       GodkjennUnntakKontrollService godkjennUnntakKontrollService) {
+        super(behandlingService, behandlingsresultatService, lovvalgsperiodeService, oppgaveService, prosessinstansService, godkjennUnntakKontrollService);
     }
 }

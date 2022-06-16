@@ -17,6 +17,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
+import no.nav.melosys.service.kontroll.feature.godkjennunntak.GodkjennUnntakKontrollService;
 import no.nav.melosys.service.kontroll.regler.PeriodeRegler;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
@@ -33,17 +34,19 @@ public class UnntaksperiodeService {
     private final LovvalgsperiodeService lovvalgsperiodeService;
     private final OppgaveService oppgaveService;
     private final ProsessinstansService prosessinstansService;
+    private final GodkjennUnntakKontrollService godkjennUnntakKontrollService;
 
     public UnntaksperiodeService(BehandlingService behandlingService,
                                  BehandlingsresultatService behandlingsresultatService,
                                  LovvalgsperiodeService lovvalgsperiodeService,
                                  OppgaveService oppgaveService,
-                                 ProsessinstansService prosessinstansService) {
+                                 ProsessinstansService prosessinstansService, GodkjennUnntakKontrollService godkjennUnntakKontrollService) {
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
         this.oppgaveService = oppgaveService;
         this.prosessinstansService = prosessinstansService;
+        this.godkjennUnntakKontrollService = godkjennUnntakKontrollService;
     }
 
     @Transactional
@@ -136,6 +139,7 @@ public class UnntaksperiodeService {
         } else if (behandling.erInaktiv()) {
             throw new FunksjonellException(String.format("Behandling %s er inaktiv", behandling.getId()));
         }
+        godkjennUnntakKontrollService.utførKontroll(behandling);
     }
 
     private void validerBegrunnelser(Set<Ikke_godkjent_begrunnelser> begrunnelser, String fritekst) {
