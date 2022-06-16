@@ -9,7 +9,6 @@ import java.util.Set;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.medlemskap.Periode;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
-import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
@@ -18,7 +17,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
@@ -91,18 +89,6 @@ class UnntaksperiodeServiceTest {
     }
 
     @Test
-    void godkjennPeriode_frontendHarIkkeHindretAtDetSendesUgyldigUnntakTilBackend_forventException() {
-        behandling.setTema(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING);
-        behandling.hentSedDokument().setSedType(SedType.A009);
-        behandling.hentSedDokument().setLovvalgsperiode(new Periode(LocalDate.of(2000, 1, 1), LocalDate.of(2004, 1,
-            1)));
-        UnntaksperiodeGodkjenning unntaksperiodeGodkjenning = UnntaksperiodeGodkjenning.builder().build();
-
-        assertThatExceptionOfType(ValideringException.class)
-            .isThrownBy(() -> unntaksperiodeService.godkjennPeriode(1L, unntaksperiodeGodkjenning));
-    }
-
-    @Test
     void godkjennPeriode_sedDokumentHarOppNedPeriode_forventException() {
         Saksopplysning sedSaksopplysning = new Saksopplysning();
         sedSaksopplysning.setType(SaksopplysningType.SEDOPPL);
@@ -143,9 +129,10 @@ class UnntaksperiodeServiceTest {
         forventetLovvalgsperiode.setMedlemskapstype(Medlemskapstyper.UNNTATT);
         forventetLovvalgsperiode.setDekning(Trygdedekninger.UTEN_DEKNING);
         Collection<Lovvalgsperiode> forventedeLovvalgsperioder = Collections.singleton(forventetLovvalgsperiode);
-        verify(lovvalgsperiodeService).lagreLovvalgsperioder(eq(1L), eq(forventedeLovvalgsperioder));
+        verify(lovvalgsperiodeService).lagreLovvalgsperioder(1L, forventedeLovvalgsperioder);
         verify(prosessinstansService).opprettProsessinstansGodkjennUnntaksperiode(any(), eq(false), eq(null));
-        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(eq(behandling.getFagsak().getSaksnummer()));
+        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
+        verify(godkjennUnntakKontrollService).utførKontroll(behandling);
     }
 
     @Test
