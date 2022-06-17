@@ -6,6 +6,7 @@ import java.util.Objects;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.dokument.medlemskap.Periode;
+import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.kontroll.feature.godkjennunntak.data.GodkjennUnntakKontrollData;
@@ -36,26 +37,18 @@ public class GodkjennUnntakKontrollService {
 
     @Transactional(readOnly = true)
     public void utførKontroll(Behandling behandling) {
-        if (behandling.getTema() == null || behandling.hentSedDokument() == null) {
-            log.debug("Ikke relevant for behandling uten tema eller sed med behandlingID '{}'", behandling.getId());
+        SedDokument sedDokument = behandling.hentSedDokument();
+        if (sedDokument == null) {
+            log.debug("Ikke relevant for behandling med behandlingID '{}'", behandling.getId());
             return;
         }
 
-        Periode lovvalgsperiode = behandling.hentSedDokument().getLovvalgsperiode();
+        Periode lovvalgsperiode = sedDokument.getLovvalgsperiode();
         GodkjennUnntakKontrollData kontrollData = new GodkjennUnntakKontrollData(
             lovvalgsperiode.getFom(),
             lovvalgsperiode.getTom());
 
-        List<Kontrollfeil> feilValideringer = GodkjennUnntakKontrollsett.hentRegelsett(behandling)
-            .stream()
-            .map(f -> f.apply(kontrollData))
-            .filter(Objects::nonNull)
-            .toList();
-
-        if (!feilValideringer.isEmpty()) {
-            throw new ValideringException("Feil i unntak som gjør at vi ikke kan manuelt godkjenne",
-                feilValideringer.stream().map(Kontrollfeil::tilDto).toList());
-        }
+        kjørOgSjekkFeilmeldinger(behandling, kontrollData);
     }
 
     @Transactional(readOnly = true)
@@ -67,7 +60,10 @@ public class GodkjennUnntakKontrollService {
         }
 
         GodkjennUnntakKontrollData kontrollData = new GodkjennUnntakKontrollData(periodeFom, periodeTom);
+        kjørOgSjekkFeilmeldinger(behandling, kontrollData);
+    }
 
+    private void kjørOgSjekkFeilmeldinger(Behandling behandling, GodkjennUnntakKontrollData kontrollData) {
         List<Kontrollfeil> feilValideringer = GodkjennUnntakKontrollsett.hentRegelsett(behandling)
             .stream()
             .map(f -> f.apply(kontrollData))
