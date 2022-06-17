@@ -1,6 +1,6 @@
 package no.nav.melosys.service.kontroll.feature.godkjennunntak.data;
 
-import no.nav.melosys.domain.dokument.medlemskap.Periode;
+import java.time.LocalDate;
 
-public record GodkjennUnntakKontrollData(Periode lovvalgsperiode) {
+public record GodkjennUnntakKontrollData(LocalDate periodeFom, LocalDate periodeTom) {
 }
