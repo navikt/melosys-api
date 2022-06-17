@@ -95,6 +95,7 @@ public class BrevmottakerService {
     public List<Aktoer> avklarMottakere(Produserbaredokumenter produserbartDokument, Mottaker mottaker, Behandling behandling, boolean forhåndsvisning, boolean kunAvklarteVirksomheter) {
         return switch (mottaker.getRolle()) {
             case BRUKER -> avklarMottakereForBruker(produserbartDokument, behandling, forhåndsvisning);
+            case VIRKSOMHET -> avklarMottakereForVirksomhet(behandling);
             case ARBEIDSGIVER -> avklarMottakereForArbeidsgiver(behandling, kunAvklarteVirksomheter);
             case TRYGDEMYNDIGHET -> avklarMottakereForMyndigheter(mottaker, behandling, produserbartDokument);
             default -> throw new FunksjonellException("%s støttes ikke.".formatted(mottaker.getRolle()));
@@ -146,7 +147,14 @@ public class BrevmottakerService {
         return mottakere;
     }
 
-    // Dokumenter til arbeidsgiver sendes bare til representant når representant finnes.
+    private List<Aktoer> avklarMottakereForVirksomhet(Behandling behandling) {
+        Aktoer virksomhet = behandling.getFagsak().hentVirksomhet();
+        if (virksomhet == null) {
+            throw new FunksjonellException("Virksomhet er ikke registrert.");
+        }
+        return List.of(virksomhet);
+    }
+
     private List<Aktoer> avklarMottakereForArbeidsgiver(Behandling behandling, boolean kunAvklarteVirksomheter) {
         Fagsak fagsak = behandling.getFagsak();
         Optional<Aktoer> representant = fagsak.finnRepresentant(Representerer.ARBEIDSGIVER);
@@ -180,7 +188,7 @@ public class BrevmottakerService {
     private List<Aktoer> avklarArbeidsgiver(Set<String> arbeidsgiverOrgnumre) {
         return arbeidsgiverOrgnumre.stream()
             .map(BrevmottakerService::lagAktoerForArbeidsgiver)
-            .collect(Collectors.toList());
+            .toList();
     }
 
     private static Aktoer lagAktoerForArbeidsgiver(String orgnr) {
@@ -206,7 +214,7 @@ public class BrevmottakerService {
                     .stream()
                     .filter(e -> myndighetØnskerA1(e.getKey()))
                     .map(Map.Entry::getValue)
-                    .collect(Collectors.toList());
+                    .toList();
             } else {
                 return new ArrayList<>(utenlandskMyndighetAktoerMap.values());
             }

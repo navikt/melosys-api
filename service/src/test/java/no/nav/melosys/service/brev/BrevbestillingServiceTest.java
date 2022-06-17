@@ -3,6 +3,7 @@ package no.nav.melosys.service.brev;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
@@ -84,7 +85,7 @@ class BrevbestillingServiceTest {
         when(mockBrevmottakerService.hentMottakerliste(MANGELBREV_BRUKER, 123L))
             .thenReturn(new Mottakerliste.Builder().medHovedMottaker(BRUKER).build());
         when(mockBrevmottakerService.avklarMottaker(eq(MANGELBREV_BRUKER), any(), eq(behandling)))
-            .thenReturn(lagAktoerOrg(BRUKER, null));
+            .thenReturn(lagAktoerPerson(BRUKER, null));
         when(mockPersondataFasade.hentSammensattNavn(anyString())).thenReturn("Ola Nordmann");
         when(mockDokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoerRolle(behandling, MANGELBREV_BRUKER, BRUKER)).thenReturn(MANGELBREV_BRUKER.getBeskrivelse());
 
@@ -154,11 +155,36 @@ class BrevbestillingServiceTest {
     }
 
     @Test
+    void hentMuligeMottakere_hovedMottakerVirksomhet_returnererVirksomhetSomHovedMottaker() {
+        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
+        when(mockBrevmottakerService.hentMottakerliste(GENERELT_FRITEKSTBREV_VIRKSOMHET, 123L))
+            .thenReturn(new Mottakerliste.Builder().medHovedMottaker(VIRKSOMHET).build());
+        mockHentOrganisasjon("orgnr", "Equinor AS");
+        when(mockDokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoerRolle(behandling, GENERELT_FRITEKSTBREV_VIRKSOMHET, VIRKSOMHET))
+            .thenReturn(GENERELT_FRITEKSTBREV_VIRKSOMHET.getBeskrivelse());
+
+        var muligeMottakere = brevbestillingService.hentMuligeMottakere(GENERELT_FRITEKSTBREV_VIRKSOMHET, 123L, "orgnr");
+
+        assertThat(muligeMottakere.getHovedMottaker())
+            .extracting(
+                MuligMottakerDto::getDokumentNavn,
+                MuligMottakerDto::getMottakerNavn,
+                MuligMottakerDto::getRolle,
+                MuligMottakerDto::getAktørId,
+                MuligMottakerDto::getOrgnr)
+            .containsExactly(GENERELT_FRITEKSTBREV_VIRKSOMHET.getBeskrivelse(), "Equinor AS", VIRKSOMHET, null, null);
+        assertThat(muligeMottakere)
+            .extracting(MuligeMottakereDto::getKopiMottakere, MuligeMottakereDto::getFasteMottakere)
+            .containsExactly(emptyList(), emptyList());
+    }
+
+    @Test
     void hentMuligeMottakere_hovedMottakerArbeidsgiver_returnererArbeidsgiverSomHovedMottaker() {
         when(mockBrevmottakerService.hentMottakerliste(MANGELBREV_BRUKER, 123))
             .thenReturn(new Mottakerliste.Builder().medHovedMottaker(ARBEIDSGIVER).build());
         mockHentOrganisasjon("orgnr", "Ola Nordmann Rørleggerfirma");
-        when(mockDokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoerRolle(null, MANGELBREV_BRUKER, ARBEIDSGIVER)).thenReturn(MANGELBREV_BRUKER.getBeskrivelse());
+        when(mockDokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoerRolle(null, MANGELBREV_BRUKER, ARBEIDSGIVER))
+            .thenReturn(MANGELBREV_BRUKER.getBeskrivelse());
 
         var muligeMottakere = brevbestillingService.hentMuligeMottakere(MANGELBREV_BRUKER, 123L, "orgnr");
 
@@ -355,8 +381,17 @@ class BrevbestillingServiceTest {
     }
 
     @Test
+    void hentBrevMaler_behandlingGjelderVirksomhet_returnererIkkeMangelbrev() {
+        behandling.getFagsak().setAktører(Set.of(lagAktoerOrg(VIRKSOMHET, "orgnr")));
+        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
+
+        List<Produserbaredokumenter> brevMaler = brevbestillingService.hentMuligeProduserbaredokumenter(123L);
+
+        assertThat(brevMaler).hasSize(1).containsExactly(GENERELT_FRITEKSTBREV_VIRKSOMHET);
+    }
+
+    @Test
     void hentBrevMaler_behandlingAvsluttet_returnererTomListe() {
-        var behandling = new Behandling();
         behandling.setStatus(Behandlingsstatus.AVSLUTTET);
         when(mockBehandlingService.hentBehandlingMedSaksopplysninger(321L)).thenReturn(behandling);
         List<Produserbaredokumenter> brevMaler = brevbestillingService.hentMuligeProduserbaredokumenter(321L);
@@ -366,7 +401,6 @@ class BrevbestillingServiceTest {
 
     @Test
     void hentBrevMaler_behandlingErSoeknad_returnererSoeknadMalITillegg() {
-        var behandling = new Behandling();
         behandling.setType(Behandlingstyper.SOEKNAD);
         when(mockBehandlingService.hentBehandlingMedSaksopplysninger(321L)).thenReturn(behandling);
         List<Produserbaredokumenter> brevMaler = brevbestillingService.hentMuligeProduserbaredokumenter(321L);
@@ -384,7 +418,6 @@ class BrevbestillingServiceTest {
 
     @Test
     void hentBrevMaler_behandlingErKlage_returnererKlageMalITillegg() {
-        var behandling = new Behandling();
         behandling.setType(Behandlingstyper.KLAGE);
         when(mockBehandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
         List<Produserbaredokumenter> brevMaler = brevbestillingService.hentMuligeProduserbaredokumenter(123L);
@@ -411,8 +444,22 @@ class BrevbestillingServiceTest {
 
         assertThat(brevAdresser).hasSize(1);
         assertThat(brevAdresser.get(0))
-            .extracting(BrevAdresse::getMottakerNavn, BrevAdresse::getOrgnr, BrevAdresse::getAdresselinjer, BrevAdresse::getPostnr, BrevAdresse::getPoststed, BrevAdresse::getRegion, BrevAdresse::getLand)
-            .containsExactly("Nordmann Ola", null, List.of("gatenavnFraBostedsadresse 3"), "1234", "Oslo", "Norge", "NO");
+            .extracting(
+                BrevAdresse::getMottakerNavn,
+                BrevAdresse::getOrgnr,
+                BrevAdresse::getAdresselinjer,
+                BrevAdresse::getPostnr,
+                BrevAdresse::getPoststed,
+                BrevAdresse::getRegion,
+                BrevAdresse::getLand)
+            .containsExactly(
+                "Nordmann Ola",
+                null,
+                List.of("gatenavnFraBostedsadresse 3"),
+                "1234",
+                "Oslo",
+                "Norge",
+                "NO");
     }
 
     @Test
@@ -428,8 +475,22 @@ class BrevbestillingServiceTest {
 
         assertThat(brevAdresser).hasSize(1);
         assertThat(brevAdresser.get(0))
-            .extracting(BrevAdresse::getMottakerNavn, BrevAdresse::getOrgnr, BrevAdresse::getAdresselinjer, BrevAdresse::getPostnr, BrevAdresse::getPoststed, BrevAdresse::getRegion, BrevAdresse::getLand)
-            .containsExactly("Ola Nordmann Fullmektig", "orgNr", List.of("Gateadresse 43A"), "0123", "Oslo", null, Land.NORGE);
+            .extracting(
+                BrevAdresse::getMottakerNavn,
+                BrevAdresse::getOrgnr,
+                BrevAdresse::getAdresselinjer,
+                BrevAdresse::getPostnr,
+                BrevAdresse::getPoststed,
+                BrevAdresse::getRegion,
+                BrevAdresse::getLand)
+            .containsExactly(
+                "Ola Nordmann Fullmektig",
+                "orgNr",
+                List.of("Gateadresse 43A"),
+                "0123",
+                "Oslo",
+                null,
+                Land.NORGE);
     }
 
     @Test
@@ -445,8 +506,22 @@ class BrevbestillingServiceTest {
 
         assertThat(brevAdresser).hasSize(1);
         assertThat(brevAdresser.get(0))
-            .extracting(BrevAdresse::getMottakerNavn, BrevAdresse::getOrgnr, BrevAdresse::getAdresselinjer, BrevAdresse::getPostnr, BrevAdresse::getPoststed, BrevAdresse::getRegion, BrevAdresse::getLand)
-            .containsExactly("Nordmann Ola", null, List.of("gatenavnFraBostedsadresse 3"), "1234", "Oslo", "Norge", "NO");
+            .extracting(
+                BrevAdresse::getMottakerNavn,
+                BrevAdresse::getOrgnr,
+                BrevAdresse::getAdresselinjer,
+                BrevAdresse::getPostnr,
+                BrevAdresse::getPoststed,
+                BrevAdresse::getRegion,
+                BrevAdresse::getLand)
+            .containsExactly(
+                "Nordmann Ola",
+                null,
+                List.of("gatenavnFraBostedsadresse 3"),
+                "1234",
+                "Oslo",
+                "Norge",
+                "NO");
     }
 
     @Test
@@ -464,11 +539,39 @@ class BrevbestillingServiceTest {
 
         assertThat(brevAdresser).hasSize(2);
         assertThat(brevAdresser.get(0))
-            .extracting(BrevAdresse::getMottakerNavn, BrevAdresse::getOrgnr, BrevAdresse::getAdresselinjer, BrevAdresse::getPostnr, BrevAdresse::getPoststed, BrevAdresse::getRegion, BrevAdresse::getLand)
-            .containsExactly("Ola Nordmann Rørleggerfirma", "orgNr1", List.of("Gateadresse 43A"), "0123", "Oslo", null, Land.NORGE);
+            .extracting(
+                BrevAdresse::getMottakerNavn,
+                BrevAdresse::getOrgnr,
+                BrevAdresse::getAdresselinjer,
+                BrevAdresse::getPostnr,
+                BrevAdresse::getPoststed,
+                BrevAdresse::getRegion,
+                BrevAdresse::getLand)
+            .containsExactly(
+                "Ola Nordmann Rørleggerfirma",
+                "orgNr1",
+                List.of("Gateadresse 43A"),
+                "0123",
+                "Oslo",
+                null,
+                Land.NORGE);
         assertThat(brevAdresser.get(1))
-            .extracting(BrevAdresse::getMottakerNavn, BrevAdresse::getOrgnr, BrevAdresse::getAdresselinjer, BrevAdresse::getPostnr, BrevAdresse::getPoststed, BrevAdresse::getRegion, BrevAdresse::getLand)
-            .containsExactly("Ida Nordmann Rørleggerfirma", "orgNr2", List.of("Gateadresse 43A"), "0123", "Oslo", null, Land.NORGE);
+            .extracting(
+                BrevAdresse::getMottakerNavn,
+                BrevAdresse::getOrgnr,
+                BrevAdresse::getAdresselinjer,
+                BrevAdresse::getPostnr,
+                BrevAdresse::getPoststed,
+                BrevAdresse::getRegion,
+                BrevAdresse::getLand)
+            .containsExactly(
+                "Ida Nordmann Rørleggerfirma",
+                "orgNr2",
+                List.of("Gateadresse 43A"),
+                "0123",
+                "Oslo",
+                null,
+                Land.NORGE);
     }
 
     @Test
@@ -494,8 +597,50 @@ class BrevbestillingServiceTest {
 
         assertThat(brevAdresser).hasSize(1);
         assertThat(brevAdresser.get(0))
-            .extracting(BrevAdresse::getMottakerNavn, BrevAdresse::getOrgnr, BrevAdresse::getAdresselinjer, BrevAdresse::getPostnr, BrevAdresse::getPoststed, BrevAdresse::getRegion, BrevAdresse::getLand)
-            .containsExactly("Ola Nordmann Fullmektig", "orgNr", List.of("Gateadresse 43A"), "0123", "Oslo", null, Land.NORGE);
+            .extracting(
+                BrevAdresse::getMottakerNavn,
+                BrevAdresse::getOrgnr, BrevAdresse::getAdresselinjer,
+                BrevAdresse::getPostnr,
+                BrevAdresse::getPoststed,
+                BrevAdresse::getRegion,
+                BrevAdresse::getLand)
+            .containsExactly(
+                "Ola Nordmann Fullmektig",
+                "orgNr",
+                List.of("Gateadresse 43A"),
+                "0123",
+                "Oslo",
+                null,
+                Land.NORGE);
+    }
+
+    @Test
+    void hentBrevAdresseTilMottakere_virksomhetSomMottaker_returnererVirksomhetAdresse() {
+        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
+        when(mockBrevmottakerService.avklarMottakere(any(), eq(Mottaker.av(VIRKSOMHET)), any(), eq(false), eq(false)))
+            .thenReturn(List.of(lagAktoerOrg(VIRKSOMHET, "orgNr1")));
+        when(mockEregFasade.hentOrganisasjon("orgNr1")).thenReturn(lagORGSaksopplysning("orgNr1", "Ola Nordmann Rørleggerfirma"));
+
+        var brevAdresser = brevbestillingService.hentBrevAdresseTilMottakere(GENERELT_FRITEKSTBREV_VIRKSOMHET, VIRKSOMHET, 123);
+
+        assertThat(brevAdresser).hasSize(1);
+        assertThat(brevAdresser.get(0))
+            .extracting(
+                BrevAdresse::getMottakerNavn,
+                BrevAdresse::getOrgnr,
+                BrevAdresse::getAdresselinjer,
+                BrevAdresse::getPostnr,
+                BrevAdresse::getPoststed,
+                BrevAdresse::getRegion,
+                BrevAdresse::getLand)
+            .containsExactly(
+                "Ola Nordmann Rørleggerfirma",
+                "orgNr1",
+                List.of("Gateadresse 43A"),
+                "0123",
+                "Oslo",
+                null,
+                Land.NORGE);
     }
 
     @Test
@@ -510,7 +655,14 @@ class BrevbestillingServiceTest {
 
         assertThat(brevAdresser).hasSize(1);
         assertThat(brevAdresser.get(0))
-            .extracting(BrevAdresse::getMottakerNavn, BrevAdresse::getOrgnr, BrevAdresse::getAdresselinjer, BrevAdresse::getPostnr, BrevAdresse::getPoststed, BrevAdresse::getRegion, BrevAdresse::getLand)
+            .extracting(
+                BrevAdresse::getMottakerNavn,
+                BrevAdresse::getOrgnr,
+                BrevAdresse::getAdresselinjer,
+                BrevAdresse::getPostnr,
+                BrevAdresse::getPoststed,
+                BrevAdresse::getRegion,
+                BrevAdresse::getLand)
             .containsExactly("Nordmann Ola", null, null, null, null, null, null);
     }
 

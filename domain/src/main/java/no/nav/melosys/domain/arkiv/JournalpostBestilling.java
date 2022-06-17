@@ -6,7 +6,8 @@ public final class JournalpostBestilling {
     private final String tittel;
     private final String brevkode;
     private final String dokumentKategori;
-    private final String brukerFnr;
+    private final String hovedpartId;
+    private final BrukerIdType hovedpartIdType;
     private final String mottakerNavn;
     private final String mottakerId;
     private final OpprettJournalpost.KorrespondansepartIdType mottakerIdType;
@@ -18,7 +19,8 @@ public final class JournalpostBestilling {
         this.tittel = builder.tittel;
         this.brevkode = builder.brevkode;
         this.dokumentKategori = builder.dokumentKategori;
-        this.brukerFnr = builder.brukerFnr;
+        this.hovedpartId = builder.hovedpartId;
+        this.hovedpartIdType = builder.hovedpartIdType;
         this.mottakerNavn = builder.mottakerNavn;
         this.mottakerId = builder.mottakerId;
         this.mottakerIdType = builder.mottakerIdType;
@@ -39,8 +41,12 @@ public final class JournalpostBestilling {
         return dokumentKategori;
     }
 
-    public String getBrukerFnr() {
-        return brukerFnr;
+    public String getHovedpartId() {
+        return hovedpartId;
+    }
+
+    public BrukerIdType getHovedpartIdType() {
+        return hovedpartIdType;
     }
 
     public String getMottakerNavn() {
@@ -71,7 +77,8 @@ public final class JournalpostBestilling {
         private String tittel;
         private String brevkode;
         private String dokumentKategori;
-        private String brukerFnr;
+        private String hovedpartId;
+        private BrukerIdType hovedpartIdType;
         private String mottakerNavn;
         private String mottakerId;
         private OpprettJournalpost.KorrespondansepartIdType mottakerIdType;
@@ -94,8 +101,13 @@ public final class JournalpostBestilling {
             return this;
         }
 
-        public Builder medBrukerFnr(String brukerFnr) {
-            this.brukerFnr = brukerFnr;
+        public Builder medHovedpartId(String hovedpartId) {
+            this.hovedpartId = hovedpartId;
+            return this;
+        }
+
+        public Builder medHovedpartIdType(BrukerIdType hovedpartIdType) {
+            this.hovedpartIdType = hovedpartIdType;
             return this;
         }
 

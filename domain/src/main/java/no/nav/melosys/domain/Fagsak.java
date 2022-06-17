@@ -233,6 +233,20 @@ public class Fagsak extends RegistreringsInfo {
         this.saksnummer = saksnummer;
     }
 
+    public static boolean erSakstypeEøs(Sakstyper sakstype) {
+        return Sakstyper.EU_EOS == sakstype;
+    }
+
+    public Aktoersroller getHovedpartRolle() {
+        if (harAktørMedRolleType(BRUKER)) {
+            return BRUKER;
+        } else if (harAktørMedRolleType(VIRKSOMHET)) {
+            return VIRKSOMHET;
+        } else {
+            throw new FunksjonellException("Fagsak må ha hovedpart - enten BRUKER eller VIRKSOMHET");
+        }
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -248,10 +262,5 @@ public class Fagsak extends RegistreringsInfo {
     public int hashCode() {
         return 31;
     }
-
-    public static boolean erSakstypeEøs(Sakstyper sakstype) {
-        return Sakstyper.EU_EOS == sakstype;
-    }
-
 
 }

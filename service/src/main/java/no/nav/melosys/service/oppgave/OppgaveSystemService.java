@@ -1,5 +1,6 @@
 package no.nav.melosys.service.oppgave;
 
+import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.oppgave.OppgaveFasade;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
@@ -18,7 +19,8 @@ public class OppgaveSystemService extends OppgaveService {
                                 @Qualifier("system") OppgaveFasade oppgaveFasade,
                                 SaksopplysningerService saksopplysningerService,
                                 BehandlingsgrunnlagService behandlingsgrunnlagService,
-                                @Qualifier("system") PersondataFasade persondataFasade) {
-        super(behandlingService, fagsakService, oppgaveFasade, saksopplysningerService, behandlingsgrunnlagService, persondataFasade);
+                                @Qualifier("system") PersondataFasade persondataFasade,
+                                @Qualifier("system") EregFasade eregFasade) {
+        super(behandlingService, fagsakService, oppgaveFasade, saksopplysningerService, behandlingsgrunnlagService, persondataFasade, eregFasade);
     }
 }
