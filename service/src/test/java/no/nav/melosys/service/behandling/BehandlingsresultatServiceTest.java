@@ -160,7 +160,7 @@ class BehandlingsresultatServiceTest {
             .matches(b -> b.getId() == null)
             .matches(b -> b.getBehandling().equals(behandlingsreplika))
             .matches(b -> b.getBehandlingsmåte().equals(behandlingsresultat.getBehandlingsmåte()))
-            .matches(b -> b.getType().equals(Behandlingsresultattyper.IKKE_FASTSATT))
+            .matches(b -> b.getType() == Behandlingsresultattyper.IKKE_FASTSATT)
             .matches(b -> b.getVedtakMetadata() == null)
             .matches(b -> b.getBehandlingsmåte() == Behandlingsmaate.MANUELT);
 
@@ -234,29 +234,6 @@ class BehandlingsresultatServiceTest {
 
         assertThat(behandlingsresultatreplika.getUtfallRegistreringUnntak()).isNull();
         assertThat(behandlingsresultatreplika.getUtfallUtpeking()).isNull();
-    }
-
-    @Test
-    void replikerBehandlingsresultat_toggleEnabled_replikererBehandlingsresultatUtenBehandlingsresultattype()
-        throws NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
-
-        Behandling tidligsteInaktiveBehandling = new Behandling();
-        tidligsteInaktiveBehandling.setId(1L);
-
-        Behandlingsresultat behandlingsresultat = opprettBehandlingsresultatMedData(tidligsteInaktiveBehandling);
-        doReturn(behandlingsresultat).when(behandlingsresultatService).hentBehandlingsresultat(1L);
-
-
-        behandlingsresultatService.replikerBehandlingsresultat(tidligsteInaktiveBehandling, new Behandling());
-
-
-        ArgumentCaptor<Behandlingsresultat> captor = ArgumentCaptor.forClass(Behandlingsresultat.class);
-        verify(behandlingsresultatRepo).save(captor.capture());
-        Behandlingsresultat behandlingsresultatreplika = captor.getValue();
-
-        assertThat(behandlingsresultatreplika)
-            .matches(b -> b.getType().equals(Behandlingsresultattyper.IKKE_FASTSATT))
-            .matches(b -> b.getBehandlingsmåte().equals(Behandlingsmaate.MANUELT));
     }
 
     @Test
