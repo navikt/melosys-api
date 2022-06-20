@@ -60,6 +60,7 @@ class OppgaveConsumerImplTest {
             OppgaveDto::getBehandlesAvApplikasjon,
             OppgaveDto::getSaksreferanse,
             OppgaveDto::getAktørId,
+            OppgaveDto::getOrgnr,
             OppgaveDto::getTilordnetRessurs,
             OppgaveDto::getBeskrivelse,
             OppgaveDto::getTema,
@@ -79,6 +80,7 @@ class OppgaveConsumerImplTest {
             "FS38",
             "MEL-301",
             "1332607802528",
+            "orgnr",
             "Z990757",
             " ",
             "MED",
@@ -120,7 +122,6 @@ class OppgaveConsumerImplTest {
             new OppgaveSearchRequest.Builder("123")
                 .medOppgaveTyper(new String[]{"BEH_SED", "BEH_SAK"})
                 .medAktørId("123")
-                .medOrgnr("orgnr")
                 .medBehandlingstema("ab2344")
                 .medBehandlingsType("ba432?")
                 .medBehandlesAvApplikasjon("FS38")

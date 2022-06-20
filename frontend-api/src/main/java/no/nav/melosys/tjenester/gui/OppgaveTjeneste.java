@@ -112,10 +112,10 @@ public class OppgaveTjeneste {
         @RequestParam(name = "fnrDnr", required = false) String fnrDnr,
         @RequestParam(name = "orgnr", required = false) String orgnr) {
         if (StringUtils.isEmpty(fnrDnr) && StringUtils.isEmpty(orgnr)) {
-            throw new FunksjonellException("Finner ingen søkekriteria. Du kan velge mellom: Fødselsnummer/D-nummer eller organisasjonsnummer");
+            throw new FunksjonellException("Finner ingen søkekriteria. API støtter fnr/dnr og orgnr");
         }
         if (StringUtils.isNotEmpty(fnrDnr) && StringUtils.isNotEmpty(orgnr)) {
-            throw new FunksjonellException("Fant både fnr/dnr og orgnr. Du må velge kun én av: Fødselsnummer/D-nummer eller organisasjonsnummer");
+            throw new FunksjonellException("Fant både fnr/dnr og orgnr. API støtter kun én.");
         }
         try {
             var oppgaveliste = StringUtils.isNotEmpty(fnrDnr)
