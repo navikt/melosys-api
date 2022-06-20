@@ -19,11 +19,13 @@ import org.springframework.boot.test.autoconfigure.web.client.RestClientTest
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.boot.test.web.client.MockServerRestTemplateCustomizer
 import org.springframework.boot.web.client.RestTemplateBuilder
+import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Bean
 import org.springframework.http.MediaType
 import org.springframework.test.web.client.MockRestServiceServer
 import org.springframework.test.web.client.match.MockRestRequestMatchers
 import org.springframework.test.web.client.response.MockRestResponseCreators
+import org.springframework.web.client.RestTemplate
 
 
 @RestClientTest(
@@ -41,11 +43,12 @@ import org.springframework.test.web.client.response.MockRestResponseCreators
 class EessiConsumerIT(
     @Autowired private val eessiConsumer: EessiConsumer,
     @Autowired server: MockRestServiceServer,
-    @Value("\${mockserver.port}") mockPort: Int
+    @Value("\${mockserver.port}") mockPort: Int,
+    @Autowired private val applicationContext: ApplicationContext
 ) : ConsumerTestBase<String>(server, mockPort) {
 
     companion object {
-        val customizer: MockServerRestTemplateCustomizer = MockServerRestTemplateCustomizer()
+        val customizer = MockServerRestTemplateCustomizer()
     }
 
     @TestConfiguration
@@ -59,26 +62,28 @@ class EessiConsumerIT(
 
     @BeforeEach
     fun before() {
-        // TODO: finn ut hvordan vi kan slå opp riktig her
-        // https://stackoverflow.com/questions/47538025/spring-boot-testing-of-a-rest-client-using-restclienttest
-        val first = customizer.servers.values.first()
-        first.expect(MockRestRequestMatchers.requestTo("/buc/123/aksjoner"))
+        val stsRestTemplate = getStsRestTemplate()
+        val restServiceServer = customizer.servers
+            .filterKeys { restTemplate -> restTemplate != stsRestTemplate }
+            .values
+            .first()
+
+        restServiceServer!!.expect(MockRestRequestMatchers.requestTo("/buc/123/aksjoner"))
             .andRespond(
                 MockRestResponseCreators.withSuccess(
-                    """
-                        []
-                    """.trimIndent(),
-                    MediaType.APPLICATION_JSON
+                    "[]", MediaType.APPLICATION_JSON
                 )
             )
     }
 
     override fun getSecurityMock(): MockRestServiceServer {
-        println("---------")
-        println(customizer.servers.size)
-        // TODO: finn ut hvordan vi kan slå opp riktig her
-        return customizer.servers.values.drop(1).first()
+        val stsRestTemplate = getStsRestTemplate()
+        return customizer.servers[stsRestTemplate]!!
     }
+
+    private fun getStsRestTemplate() = applicationContext
+        .autowireCapableBeanFactory
+        .getBean("stsRestTemplate") as RestTemplate
 
     @Test
     fun authorizationSkalKommeFraSystem() {

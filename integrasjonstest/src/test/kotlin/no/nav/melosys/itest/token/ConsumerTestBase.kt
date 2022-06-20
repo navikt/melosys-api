@@ -127,16 +127,6 @@ abstract class ConsumerTestBase<T>(
             )
     }
 
-    fun setupSecurityMock() {
-        getSecurityMock().expect(requestTo("/?grant_type=client_credentials&scope=openid"))
-            .andRespond(
-                withSuccess(
-                    "{ \"access_token\": \"--token-from-system--\", \"expires_in\": \"123\" }",
-                    MediaType.APPLICATION_JSON
-                )
-            )
-    }
-
     open fun getSecurityMock(): MockRestServiceServer {
         return server
     }
