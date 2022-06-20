@@ -3,16 +3,18 @@ package no.nav.melosys.tjenester.gui.dto;
 import java.time.Instant;
 import java.util.List;
 
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 
 public class FagsakOppsummeringDto {
     private String saksnummer;
-    private String sammensattNavn;
+    private String navn;
     private Sakstyper sakstype;
     private Saksstatuser saksstatus;
     private Instant opprettetDato;
     private List<BehandlingOversiktDto> behandlingOversikter;
+    private Aktoersroller hovedpartRolle;
 
     public String getSaksnummer() {
         return saksnummer;
@@ -22,12 +24,12 @@ public class FagsakOppsummeringDto {
         this.saksnummer = saksnummer;
     }
 
-    public String getSammensattNavn() {
-        return sammensattNavn;
+    public String getNavn() {
+        return navn;
     }
 
-    public void setSammensattNavn(String sammensattNavn) {
-        this.sammensattNavn = sammensattNavn;
+    public void setNavn(String navn) {
+        this.navn = navn;
     }
 
     public Sakstyper getSakstype() {
@@ -62,4 +64,11 @@ public class FagsakOppsummeringDto {
         this.behandlingOversikter = behandlingOversikter;
     }
 
+    public Aktoersroller getHovedpartRolle() {
+        return hovedpartRolle;
+    }
+
+    public void setHovedpartRolle(Aktoersroller hovedpartRolle) {
+        this.hovedpartRolle = hovedpartRolle;
+    }
 }

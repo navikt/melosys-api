@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static no.nav.melosys.service.kontroll.PeriodeKontroller.datoEldreEnn2Mnd;
+import static no.nav.melosys.service.kontroll.regler.PeriodeRegler.datoEldreEnn2Mnd;
 
 @Service
 public class AvsluttArt13BehandlingService {

@@ -2,7 +2,6 @@ package no.nav.melosys.tjenester.gui.saksflyt;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collections;
 import java.util.Set;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -11,8 +10,7 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Nyvurderingbakgrunner;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.ValideringException;
-import no.nav.melosys.service.kontroll.vedtak.VedtakKontrollService;
+import no.nav.melosys.service.kontroll.feature.ferdigbehandling.FerdigbehandlingKontrollService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.vedtak.FattVedtakRequest;
 import no.nav.melosys.service.vedtak.VedtaksfattingFasade;
@@ -31,7 +29,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -45,7 +42,7 @@ class VedtakTjenesteTest extends JsonSchemaTestParent {
     @Mock
     private Aksesskontroll aksesskontroll;
     @Mock
-    private VedtakKontrollService vedtakKontrollService;
+    private FerdigbehandlingKontrollService ferdigbehandlingKontrollService;
 
     private VedtakTjeneste vedtakTjeneste;
 
@@ -56,7 +53,7 @@ class VedtakTjenesteTest extends JsonSchemaTestParent {
 
     @BeforeEach
     public void setUp() {
-        vedtakTjeneste = new VedtakTjeneste(vedtaksfattingFasade, aksesskontroll, vedtakKontrollService);
+        vedtakTjeneste = new VedtakTjeneste(vedtaksfattingFasade, aksesskontroll, ferdigbehandlingKontrollService);
         SpringSubjectHandler.set(new TestSubjectHandler());
     }
 
@@ -144,21 +141,6 @@ class VedtakTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    void kontrollerVedtak_ingenFeilmeldinger_ingentingSkjer() throws ValideringException {
-        vedtakTjeneste.kontrollerVedtak(behandlingID, true, lagFattVedtakDto());
-    }
-
-    @Test
-    void kontrollerVedtak_feilmeldinger_kasterExceptions() throws ValideringException {
-        doThrow(new ValideringException("melding", Collections.emptyList()))
-            .when(vedtakKontrollService).kontrollerVedtak(behandlingID, true, Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN);
-
-        assertThatThrownBy(() -> vedtakTjeneste.kontrollerVedtak(behandlingID, true, lagFattVedtakDto()))
-            .isInstanceOf(ValideringException.class)
-            .hasMessage("melding");
-    }
-
-    @Test
     void skalMappeTilDto_EOS() throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();
         FattVedtakDto eosVedtakDto = objectMapper.readValue(hentJsonRequest("fattEosVedtak.json"), FattVedtakDto.class);
@@ -195,12 +177,5 @@ class VedtakTjenesteTest extends JsonSchemaTestParent {
 
     private InputStream hentJsonRequest(String filnavn) {
         return getClass().getClassLoader().getResourceAsStream(filnavn);
-    }
-
-    private FattVedtakDto lagFattVedtakDto() {
-        var fattVedtak = new FattVedtakDto();
-        fattVedtak.setVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK);
-        fattVedtak.setBehandlingsresultatTypeKode(Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN);
-        return fattVedtak;
     }
 }

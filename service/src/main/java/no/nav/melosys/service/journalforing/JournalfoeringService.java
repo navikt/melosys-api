@@ -62,14 +62,13 @@ public class JournalfoeringService {
         return joarkFasade.hentJournalpost(journalpostID);
     }
 
-    public Optional<String> finnBrukerIdent(Journalpost journalpost) {
+    public Optional<String> finnHovedpartIdent(Journalpost journalpost) {
         if (journalpost.getBrukerIdType() == null || journalpost.getBrukerId() == null) {
             return Optional.empty();
         }
         return switch (journalpost.getBrukerIdType()) {
-            case FOLKEREGISTERIDENT -> Optional.of(journalpost.getBrukerId());
+            case FOLKEREGISTERIDENT, ORGNR -> Optional.of(journalpost.getBrukerId());
             case AKTØR_ID -> Optional.of(persondataFasade.hentFolkeregisterident(journalpost.getBrukerId()));
-            case ORGNR -> Optional.empty();
         };
     }
 
@@ -95,7 +94,6 @@ public class JournalfoeringService {
     }
 
     private void validerKanOppretteSakFraSed(Journalpost journalpost) {
-
         final MelosysEessiMelding melosysEessiMelding = eessiService.hentSedTilknyttetJournalpost(journalpost.getJournalpostId());
         validerSkalIkkeBehandlesAutomatisk(melosysEessiMelding);
 
@@ -103,6 +101,13 @@ public class JournalfoeringService {
         if (tilknyttetFagsak.isPresent()) {
             throw new FunksjonellException(String.format("RINA-sak %s er allerede tilknyttet %s", melosysEessiMelding.getRinaSaksnummer(), tilknyttetFagsak.get().getSaksnummer()));
         }
+    }
+
+    public Optional<Fagsak> finnSakTilknyttetSedJournalpost(Journalpost journalpost) {
+        if (!journalpost.mottaksKanalErEessi()) {
+            return Optional.empty();
+        }
+        return finnSakTilknyttetSed(eessiService.hentSedTilknyttetJournalpost(journalpost.getJournalpostId()));
     }
 
     private Optional<Fagsak> finnSakTilknyttetSed(MelosysEessiMelding melosysEessiMelding) {
@@ -201,6 +206,9 @@ public class JournalfoeringService {
         if (behandlingstype != null) {
             prosessType = ProsessType.JFR_NY_VURDERING;
         } else {
+            if (unleash.isEnabled("melosys.api.journalfoering.alltid.opprett.ny.behandling")) {
+                validerNårBehandlingstypeIkkeOppgitt(fagsak);
+            }
             prosessType = ProsessType.JFR_KNYTT;
         }
 
@@ -209,6 +217,69 @@ public class JournalfoeringService {
         if (prosessType == ProsessType.JFR_KNYTT) {
             prosessinstans.setBehandling(fagsak.hentSistAktivBehandling());
         }
+        prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, behandlingstype);
+        prosessinstans.setData(ProsessDataKey.SAKSNUMMER, saksnummer);
+        prosessinstans.setData(ProsessDataKey.JFR_INGEN_VURDERING, journalfoeringDto.isIngenVurdering());
+
+        prosessinstansService.lagre(prosessinstans);
+    }
+
+    private void validerNårBehandlingstypeIkkeOppgitt(Fagsak fagsak) {
+        Behandling sisteBehandling = fagsak.hentSistRegistrertBehandling();
+        if (sisteBehandling.erAktiv()) return;
+
+        if (!fagsak.harMinstEnBehandlingAvType(Behandlingstyper.SOEKNAD)) return;
+
+        throw new FunksjonellException(
+            "Saker kun bestående av avsluttede behandlinger med f.eks behandlingstype SED har lov til å knytte til " +
+                "eksisterende sak uten å opprette ny behandling. Denne saken inneholder en behandling med behandlingstype SOEKNAD."
+        );
+    }
+
+    @Transactional
+    public void journalførOgKnyttTilEksisterendeSak(JournalfoeringTilordneDto journalfoeringDto) {
+        var journalpost = joarkFasade.hentJournalpost(journalfoeringDto.getJournalpostID());
+        var saksnummer = journalfoeringDto.getSaksnummer();
+        var fagsak = fagsakService.hentFagsak(saksnummer);
+
+        if (journalpost.mottaksKanalErEessi()) {
+            validerKanTilknytteJournalpostForSedTilSak(journalpost, saksnummer);
+        }
+        if (unleash.isEnabled("melosys.api.journalfoering.alltid.opprett.ny.behandling")) {
+            validerNårBehandlingstypeIkkeOppgitt(fagsak); //TODO: Endre navn til validerKnyttTilEksisterendeSak(?) når featuretoggle melosys.api.journalfoering.alltid.opprett.ny.behandling fjernes
+        }
+        valider(journalfoeringDto);
+
+        log.info("{} knytter journalpost {} til eksisterende sak {}", SubjectHandler.getInstance().getUserID(), journalfoeringDto.getJournalpostID(), saksnummer);
+
+        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_KNYTT, journalfoeringDto);
+        prosessinstans.setBehandling(fagsak.hentSistAktivBehandling());
+        prosessinstans.setData(ProsessDataKey.SAKSNUMMER, saksnummer);
+        prosessinstans.setData(ProsessDataKey.JFR_INGEN_VURDERING, journalfoeringDto.isIngenVurdering());
+
+        prosessinstansService.lagre(prosessinstans);
+    }
+
+    @Transactional
+    public void journalførOgOpprettNyVurdering(JournalfoeringTilordneDto journalfoeringDto) {
+        var journalpost = joarkFasade.hentJournalpost(journalfoeringDto.getJournalpostID());
+        var saksnummer = journalfoeringDto.getSaksnummer();
+        var fagsak = fagsakService.hentFagsak(saksnummer);
+        var behandlingstype = Behandlingstyper.valueOf(journalfoeringDto.getBehandlingstypeKode());
+
+        if (fagsak.hentAktivBehandling() != null) {
+            throw new FunksjonellException("Det finnes allerede en aktiv behandling på fagsak " + saksnummer);
+        }
+        if (journalpost.mottaksKanalErEessi()) {
+            validerKanTilknytteJournalpostForSedTilSak(journalpost, saksnummer);
+        }
+
+        valider(journalfoeringDto);
+        validerBehandlingstype(fagsak.getType(), behandlingstype);
+
+        log.info("{} knytter journalpost {} til sak {} og lager ny vurdering", SubjectHandler.getInstance().getUserID(), journalfoeringDto.getJournalpostID(), saksnummer);
+
+        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_NY_VURDERING, journalfoeringDto);
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, behandlingstype);
         prosessinstans.setData(ProsessDataKey.SAKSNUMMER, saksnummer);
         prosessinstans.setData(ProsessDataKey.JFR_INGEN_VURDERING, journalfoeringDto.isIngenVurdering());
@@ -227,12 +298,19 @@ public class JournalfoeringService {
     }
 
     private void validerBehandlingstype(Sakstyper sakstype, Behandlingstyper behandlingstype) {
-        if (sakstype == Sakstyper.EU_EOS && behandlingstype != Behandlingstyper.ENDRET_PERIODE) {
+        if (sakstype == Sakstyper.EU_EOS && erUgyldigBehandlingstypeForEuEøs(behandlingstype)) {
             throw new FunksjonellException(behandlingstype + " er ikke en lovlig behandlingstype ved knytting av dokument til sak");
         }
         if (sakstype == Sakstyper.TRYGDEAVTALE && behandlingstype != Behandlingstyper.NY_VURDERING) {
             throw new FunksjonellException(behandlingstype + " er ikke en lovlig behandlingstype ved knytting av dokument til sak");
         }
+    }
+
+    private boolean erUgyldigBehandlingstypeForEuEøs(Behandlingstyper behandlingstype) {
+        if (unleash.isEnabled("melosys.api.journalfoering.alltid.opprett.ny.behandling")) {
+            return behandlingstype != Behandlingstyper.ENDRET_PERIODE && behandlingstype != Behandlingstyper.NY_VURDERING;
+        }
+        return behandlingstype != Behandlingstyper.ENDRET_PERIODE;
     }
 
     private void valider(JournalfoeringDto journalfoeringDto) {

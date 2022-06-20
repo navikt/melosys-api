@@ -3,6 +3,7 @@ package no.nav.melosys.service.dokument.brev.mapper;
 import java.time.Instant;
 import java.util.List;
 
+import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.brev.*;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
@@ -30,9 +31,9 @@ public class DokgenMalMapper {
         this.storbritanniaMapper = storbritanniaMapper;
     }
 
-    public DokgenDto mapBehandling(DokgenBrevbestilling mottattBrevbestilling) {
+    public DokgenDto mapBehandling(DokgenBrevbestilling mottattBrevbestilling, Aktoer aktoerMottaker) {
         // Henter opplysninger på nytt for å sikre at korrekt adresse benyttes (med mindre myndighet)
-        DokgenBrevbestilling brevbestilling = berikBestillingMedPersondata(mottattBrevbestilling);
+        DokgenBrevbestilling brevbestilling = berikBestillingMedPersondata(mottattBrevbestilling, aktoerMottaker);
         DokgenDto dto = lagDokgenDtoFraBestilling(brevbestilling);
 
         Mottaker mottaker = dto.getMottaker();
@@ -53,8 +54,11 @@ public class DokgenMalMapper {
         return new Mottaker(mottakerMedKoder.navn(), mottakerMedKoder.adresselinjer(), mottakerMedKoder.postnr(), poststed, land, mottakerMedKoder.type(), mottakerMedKoder.region());
     }
 
-    private DokgenBrevbestilling berikBestillingMedPersondata(DokgenBrevbestilling mottattBrevbestilling) {
-        return mottattBrevbestilling.toBuilder().medPersonDokument(dokgenMapperDatahenter.hentPersondata(mottattBrevbestilling)).build();
+    private DokgenBrevbestilling berikBestillingMedPersondata(DokgenBrevbestilling mottattBrevbestilling, Aktoer mottaker) {
+        return mottattBrevbestilling.toBuilder()
+            .medPersonDokument(dokgenMapperDatahenter.hentPersondata(mottattBrevbestilling, mottaker))
+            .medPersonMottaker(dokgenMapperDatahenter.hentPersonMottaker(mottaker))
+            .build();
     }
 
     private Avslagbrev hentAvslagsbrev(DokgenBrevbestilling brevbestilling) {
@@ -93,11 +97,15 @@ public class DokgenMalMapper {
                     .medNavnFullmektig(dokgenMapperDatahenter.hentFullmektigNavn(brevbestilling.getBehandling().getFagsak(), Representerer.BRUKER)).build(),
                 Aktoersroller.BRUKER
             );
+            case GENERELT_FRITEKSTBREV_VIRKSOMHET -> Fritekstbrev.av(
+                ((FritekstbrevBrevbestilling) brevbestilling).toBuilder().build(), Aktoersroller.VIRKSOMHET
+            );
             case GENERELT_FRITEKSTBREV_ARBEIDSGIVER -> Fritekstbrev.av(((FritekstbrevBrevbestilling) brevbestilling).toBuilder()
                     .medNavnFullmektig(dokgenMapperDatahenter.hentFullmektigNavn(brevbestilling.getBehandling().getFagsak(), Representerer.ARBEIDSGIVER)).build(),
                 Aktoersroller.ARBEIDSGIVER
             );
             case AVSLAG_MANGLENDE_OPPLYSNINGER -> hentAvslagsbrev(brevbestilling);
+            case MELDING_HENLAGT_SAK -> Henleggelsesbrev.av(((HenleggelseBrevbestilling) brevbestilling).toBuilder().build());
             default -> throw new FunksjonellException(
                 format("ProduserbartDokument %s er ikke støttet av melosys-dokgen",
                     brevbestilling.getProduserbartdokument()));

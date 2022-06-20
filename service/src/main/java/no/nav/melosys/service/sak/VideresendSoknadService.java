@@ -19,7 +19,7 @@ import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
-import no.nav.melosys.service.kontroll.PersonKontroller;
+import no.nav.melosys.service.kontroll.regler.PersonRegler;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
@@ -92,7 +92,7 @@ public class VideresendSoknadService {
 
     private void validerDokumenterTilhørerSakOgTilgang(Set<DokumentReferanse> vedleggReferanser, Fagsak fagsak) {
         joarkFasade.validerDokumenterTilhørerSakOgHarTilgang(new HentJournalposterTilknyttetSakRequest(fagsak.getGsakSaksnummer(),
-                                                                                                       fagsak.getSaksnummer()), vedleggReferanser);
+            fagsak.getSaksnummer()), vedleggReferanser);
     }
 
     private void validerErBehandlingAvSøknad(Behandling behandling) {
@@ -111,7 +111,7 @@ public class VideresendSoknadService {
     }
 
     private void validerAdresse(Behandling behandling) {
-        if (!PersonKontroller.harRegistrertAdresse(hentPersondata(behandling), behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata())) {
+        if (!PersonRegler.harRegistrertAdresse(hentPersondata(behandling), behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata())) {
             throw new FunksjonellException("Behandlingen mangler adresse!");
         }
     }

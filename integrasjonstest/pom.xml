@@ -12,13 +12,13 @@
     <artifactId>integrasjonstest</artifactId>
 
     <properties>
-        <kotlin.version>1.6.20</kotlin.version>
+        <kotlin.version>1.6.21</kotlin.version>
         <kotlin.compiler.jvmTarget>${java.version}</kotlin.compiler.jvmTarget>
 
         <commons-cli.version>1.5.0</commons-cli.version>
         <graphql-spring-boot-starter.version>12.0.0</graphql-spring-boot-starter.version>
         <scala.version>2.13.8</scala.version>
-        <testcontainers.version>1.16.3</testcontainers.version>
+        <testcontainers.version>1.17.1</testcontainers.version>
     </properties>
 
     <dependencyManagement>
@@ -41,7 +41,7 @@
             <dependency>
                 <groupId>org.reflections</groupId>
                 <artifactId>reflections</artifactId>
-                <version>0.9.11</version>
+                <version>0.10.2</version>
             </dependency>
             <dependency>
                 <groupId>org.scala-lang</groupId>
@@ -244,7 +244,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
-                <version>3.2.0</version>
+                <version>3.3.0</version>
                 <executions>
                     <execution>
                         <id>add-source</id>

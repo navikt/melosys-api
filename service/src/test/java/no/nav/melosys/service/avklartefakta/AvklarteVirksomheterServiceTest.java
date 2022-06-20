@@ -5,6 +5,9 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.domain.Saksopplysning;
@@ -36,6 +39,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.slf4j.LoggerFactory;
 
 import static no.nav.melosys.domain.kodeverk.Avklartefaktatyper.VIRKSOMHET;
 import static no.nav.melosys.service.BehandlingsgrunnlagStub.lagBehandlingsgrunnlag;
@@ -90,6 +94,23 @@ class AvklarteVirksomheterServiceTest {
     }
 
     @Test
+    void hentAntallAvklarteVirksomheter_summererArbeidsgivereOgSelvstendigNæringsdrivendeINorgeOgUtenlandskeVirksomheter() {
+        when(avklartefaktaService.hentAvklarteOrgnrOgUuid(anyLong())).thenReturn(new HashSet<>(Arrays.asList(orgnr1, orgnr2, orgnr3, orgnr4, uuid1)));
+        ForetakUtland foretakUtland1 = lagForetakUtland("Utland1", uuid1, null);
+        ForetakUtland foretakUtland2 = lagForetakUtland("Utland2", uuid1, "SE-123456789");
+        List<ForetakUtland> foretakUtlandListe = Arrays.asList(foretakUtland1, foretakUtland2);
+        List<String> selvstendigeForetak = Arrays.asList(orgnr1, orgnr2);
+        List<String> arbeidgivendeEkstraOrgnumre = Arrays.asList(orgnr3, orgnr4);
+        Set<Saksopplysning> saksopplysninger = lagArbeidsforholdOpplysninger(Collections.emptyList());
+        behandling.setSaksopplysninger(saksopplysninger);
+        behandling.setBehandlingsgrunnlag(lagBehandlingsgrunnlag(selvstendigeForetak, foretakUtlandListe, arbeidgivendeEkstraOrgnumre));
+
+        int antallAvklarteForetak = avklarteVirksomheterService.hentAntallAvklarteVirksomheter(behandling);
+
+        assertThat(antallAvklarteForetak).isEqualTo(6);
+    }
+
+    @Test
     void hentUtenlandskeVirksomheter_girListeMedKunAvklarteForetak() {
         ForetakUtland foretak1 = lagForetakUtland("Utland1", uuid1, null);
         ForetakUtland foretak2 = lagForetakUtland("Utland2", uuid2, "SE-123456789");
@@ -131,7 +152,7 @@ class AvklarteVirksomheterServiceTest {
         Set<Saksopplysning> saksopplysninger =
             lagArbeidsforholdOpplysninger(Collections.emptyList());
         behandling.setSaksopplysninger(saksopplysninger);
-        behandling.setBehandlingsgrunnlag(lagBehandlingsgrunnlag(Collections.emptyList(),Collections.emptyList(), arbeidgivendeEkstraOrgnumre));
+        behandling.setBehandlingsgrunnlag(lagBehandlingsgrunnlag(Collections.emptyList(), Collections.emptyList(), arbeidgivendeEkstraOrgnumre));
 
         Set<String> avklarteSelvstendigeOrgnumre = avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(behandling);
         assertThat(avklarteSelvstendigeOrgnumre).containsOnly(orgnr1);
@@ -143,7 +164,7 @@ class AvklarteVirksomheterServiceTest {
         Set<Saksopplysning> saksopplysninger =
             lagArbeidsforholdOpplysninger(arbeidgivendeOrgnumreEkstra);
         behandling.setSaksopplysninger(saksopplysninger);
-        behandling.setBehandlingsgrunnlag(lagBehandlingsgrunnlag(Collections.emptyList(),Collections.emptyList(), Collections.emptyList()));
+        behandling.setBehandlingsgrunnlag(lagBehandlingsgrunnlag(Collections.emptyList(), Collections.emptyList(), Collections.emptyList()));
 
         Set<String> avklarteSelvstendigeOrgnumre = avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(behandling);
         assertThat(avklarteSelvstendigeOrgnumre).containsOnly(orgnr1);
@@ -166,10 +187,43 @@ class AvklarteVirksomheterServiceTest {
         leggTilIRegisterOppslag(Arrays.asList(orgnr2, orgnr3));
 
         AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService,
-                                                                                                  organisasjonOppslagService, behandlingService, mockKodeverkService);
+            organisasjonOppslagService, behandlingService, mockKodeverkService);
         assertThat(avklarteVirksomheterService.hentAlleNorskeVirksomheter(behandling, INGEN_ADRESSE).stream()
             .map(nv -> nv.orgnr)
             .collect(Collectors.toList())).contains(orgnr2, orgnr3);
+    }
+
+    @Test
+    void hentAlleNorskeVirksomheter_SammeOrgNummerFraNorskeArbeidsgivereOgNorskeSelvstendigeForetak_UnngåDuplikater() {
+        ListAppender<ILoggingEvent> listAppender = new ListAppender<>();
+        ((Logger) LoggerFactory.getLogger("no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService"))
+            .addAppender(listAppender);
+        listAppender.start();
+
+        List<String> arbeidsgivereRegister = Collections.singletonList(orgnr3);
+
+        Set<Saksopplysning> saksopplysninger =
+            lagArbeidsforholdOpplysninger(arbeidsgivereRegister);
+
+        behandling.setSaksopplysninger(saksopplysninger);
+        Behandlingsgrunnlag behandlingsgrunnlag = lagBehandlingsgrunnlag(arbeidsgivereRegister, Collections.emptyList(), Collections.emptyList());
+        behandling.setBehandlingsgrunnlag(behandlingsgrunnlag);
+
+        Set<String> avklarteOrganisasjoner = new HashSet<>(arbeidsgivereRegister);
+        when(avklartefaktaService.hentAvklarteOrgnrOgUuid(anyLong())).thenReturn(avklarteOrganisasjoner);
+
+        leggTilIRegisterOppslag(arbeidsgivereRegister);
+
+        AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService,
+            organisasjonOppslagService, behandlingService, mockKodeverkService);
+        assertThat(avklarteVirksomheterService.hentAlleNorskeVirksomheter(behandling, INGEN_ADRESSE))
+            .singleElement()
+            .matches(avklartVirksomhet -> avklartVirksomhet.getOrgnr().equals(orgnr3));
+
+        assertThat(listAppender.list)
+            .singleElement()
+            .extracting(ILoggingEvent::getMessage)
+            .isEqualTo("Fant selvstendige foretak med samme orgnummer({}) som allerede er hentet fra norskeArbeidsgivere");
     }
 
     @Test
@@ -188,7 +242,7 @@ class AvklarteVirksomheterServiceTest {
         leggTilIRegisterOppslag(selvstendigeForetak);
 
         AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService,
-                                                                                                  organisasjonOppslagService, behandlingService, mockKodeverkService);
+            organisasjonOppslagService, behandlingService, mockKodeverkService);
         assertThat(avklarteVirksomheterService.hentAlleNorskeVirksomheter(behandling, INGEN_ADRESSE).stream()
             .map(nv -> nv.orgnr)
             .collect(Collectors.toList())).contains(orgnr1);
@@ -269,7 +323,7 @@ class AvklarteVirksomheterServiceTest {
     void utfyllManglendeAdressefelter_utenlandskIngenForretningsadressePostadresseUtenPostnummer_postnummerTomString() {
         var organisasjonDokument = lagOrganisasjonDokument(null, null, null, "DK");
         organisasjonDokument.organisasjonDetaljer.forretningsadresse = Collections.emptyList();
-        organisasjonDokument.organisasjonDetaljer.postadresse.stream().findFirst().ifPresent(a -> ((SemistrukturertAdresse)a).setPostnr(null));
+        organisasjonDokument.organisasjonDetaljer.postadresse.stream().findFirst().ifPresent(a -> ((SemistrukturertAdresse) a).setPostnr(null));
         StrukturertAdresse adresse = avklarteVirksomheterService.utfyllManglendeAdressefelter(organisasjonDokument);
 
         assertThat(adresse.getGatenavn()).isEqualTo("Postgatenavn");

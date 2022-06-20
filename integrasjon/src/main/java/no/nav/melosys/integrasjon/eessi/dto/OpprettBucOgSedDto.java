@@ -2,7 +2,7 @@ package no.nav.melosys.integrasjon.eessi.dto;
 
 import java.util.Collection;
 
-import no.nav.melosys.domain.eessi.Vedlegg;
+import no.nav.melosys.domain.arkiv.Vedlegg;
 import no.nav.melosys.domain.eessi.sed.SedDataDto;
 
 public class OpprettBucOgSedDto {

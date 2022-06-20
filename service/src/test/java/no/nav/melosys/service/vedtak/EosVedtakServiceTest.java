@@ -21,7 +21,7 @@ import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
-import no.nav.melosys.service.kontroll.vedtak.VedtakKontrollService;
+import no.nav.melosys.service.kontroll.feature.ferdigbehandling.FerdigbehandlingKontrollService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
@@ -61,7 +61,7 @@ class EosVedtakServiceTest {
     @Mock
     private ApplicationEventMulticaster melosysEventMulticaster;
     @Mock
-    private VedtakKontrollService vedtakKontrollService;
+    private FerdigbehandlingKontrollService ferdigbehandlingKontrollService;
 
     private EosVedtakService vedtakService;
 
@@ -73,7 +73,7 @@ class EosVedtakServiceTest {
     @BeforeEach
     void setUp() {
         vedtakService = new EosVedtakService(behandlingService, behandlingsresultatService, oppgaveService, prosessinstansService,
-            eessiService, landvelgerService, avklartefaktaService, melosysEventMulticaster, vedtakKontrollService);
+            eessiService, landvelgerService, avklartefaktaService, melosysEventMulticaster, ferdigbehandlingKontrollService);
 
         SpringSubjectHandler.set(new TestSubjectHandler());
 
@@ -115,7 +115,7 @@ class EosVedtakServiceTest {
             eq(mottakerinstitusjoner)
         );
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(any());
-        verify(vedtakKontrollService).kontrollerVedtakMedNyeRegisteropplysninger(any(Behandling.class), any(Behandlingsresultat.class), eq(Sakstyper.EU_EOS), any(Boolean.class));
+        verify(ferdigbehandlingKontrollService).kontrollerVedtakMedNyeRegisteropplysninger(any(Behandling.class), any(Behandlingsresultat.class), eq(Sakstyper.EU_EOS), any(Behandlingsresultattyper.class));
     }
 
     @Test
@@ -348,7 +348,7 @@ class EosVedtakServiceTest {
     }
 
     private FattVedtakRequest lagRequest(Behandlingsresultattyper behandlingsresultattype, Vedtakstyper vedtakstype,
-                                            String behandlingsresultatFritekst, String fritekstSed, Set<String> mottakerinstitusjoner) {
+                                         String behandlingsresultatFritekst, String fritekstSed, Set<String> mottakerinstitusjoner) {
         return new FattVedtakRequest.Builder()
             .medBehandlingsresultat(behandlingsresultattype)
             .medVedtakstype(vedtakstype)

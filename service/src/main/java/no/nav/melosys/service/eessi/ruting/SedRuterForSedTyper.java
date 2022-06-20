@@ -6,7 +6,7 @@ import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.dokument.medlemskap.Periode;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
-import no.nav.melosys.service.kontroll.PeriodeKontroller;
+import no.nav.melosys.service.kontroll.regler.PeriodeRegler;
 
 public interface SedRuterForSedTyper extends SedRuter {
 
@@ -17,8 +17,8 @@ public interface SedRuterForSedTyper extends SedRuter {
         String lovvalgsLand = melosysEessiMelding.getLovvalgsland();
 
         return behandlingsresultat.finnValidertLovvalgsperiode().map(lovvalgsperiode ->
-            !PeriodeKontroller.periodeErLik(lovvalgsperiode.getFom(), lovvalgsperiode.getTom(), periode.getFom(), periode.getTom())
-                || !lovvalgsLand.equalsIgnoreCase(lovvalgsperiode.getLovvalgsland().getKode()))
+                !PeriodeRegler.periodeErLik(lovvalgsperiode.getFom(), lovvalgsperiode.getTom(), periode.getFom(), periode.getTom())
+                    || !lovvalgsLand.equalsIgnoreCase(lovvalgsperiode.getLovvalgsland().getKode()))
             .orElse(true);
     }
 

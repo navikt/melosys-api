@@ -216,7 +216,8 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
-    public void opprettProsessinstansNySak(String journalpostID, OpprettSakDto opprettSakDto, Behandlingstyper behandlingstype) {
+    public void opprettProsessinstansNySakEØS(String journalpostID, OpprettSakDto opprettSakDto,
+                                              Behandlingstyper behandlingstype) {
         Prosessinstans prosessinstans = new Prosessinstans();
 
         prosessinstans.setType(ProsessType.OPPRETT_NY_SAK_EOS);
@@ -290,6 +291,9 @@ public class ProsessinstansService {
         prosessinstans.setData(MOTTAKER, mottaker.getRolle());
         if (hasText(mottaker.getAktørId())) {
             prosessinstans.setData(AKTØR_ID, mottaker.getAktørId());
+        }
+        if (hasText(mottaker.getPersonIdent())) {
+            prosessinstans.setData(PERSON_IDENT, mottaker.getPersonIdent());
         }
         if (hasText(mottaker.getOrgnr())) {
             prosessinstans.setData(ORGNR, mottaker.getOrgnr());

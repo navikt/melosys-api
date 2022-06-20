@@ -1,16 +1,16 @@
 package no.nav.melosys.tjenester.gui;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import no.finn.unleash.FakeUnleash;
+import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.TekniskException;
@@ -26,7 +26,6 @@ import no.nav.melosys.service.brev.BrevbestillingService;
 import no.nav.melosys.service.brev.DokumentNavnService;
 import no.nav.melosys.service.dokument.BrevmottakerService;
 import no.nav.melosys.service.dokument.DokumentServiceFasade;
-import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
@@ -35,18 +34,15 @@ import no.nav.melosys.tjenester.gui.dto.brev.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 import static no.nav.melosys.tjenester.gui.FeltvalgAlternativKode.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
@@ -68,8 +64,6 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
     private Aksesskontroll aksesskontroll;
     @Mock
     private DokumentNavnService mockDokumentNavnService;
-    @Captor
-    private ArgumentCaptor<BrevbestillingRequest> brevbestillingDtoCaptor;
 
     private BrevbestillingTjeneste brevbestillingTjeneste;
 
@@ -124,10 +118,10 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
         assertThat(brevmaler.get(2).getFelter()).hasSize(2);
         assertThat(brevmaler.get(2).getType()).isEqualTo(MANGELBREV_ARBEIDSGIVER);
 
-        assertThat(brevmaler.get(3).getFelter()).hasSize(3);
+        assertThat(brevmaler.get(3).getFelter()).hasSize(4);
         assertThat(brevmaler.get(3).getType()).isEqualTo(GENERELT_FRITEKSTBREV_BRUKER);
 
-        assertThat(brevmaler.get(4).getFelter()).hasSize(3);
+        assertThat(brevmaler.get(4).getFelter()).hasSize(4);
         assertThat(brevmaler.get(4).getType()).isEqualTo(GENERELT_FRITEKSTBREV_ARBEIDSGIVER);
 
     }
@@ -141,7 +135,7 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
         List<BrevmalDto> brevmaler = brevbestillingTjeneste.hentTilgjengeligeMaler(123L);
         assertThat(brevmaler).hasSize(4);
         assertThat(brevmaler.get(0).getMuligeMottakere().get(0).getFeilmelding())
-            .isEqualTo("Bruker har ingen registrert adresse.");
+            .isEqualTo(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE.getBeskrivelse());
     }
 
     @Test
@@ -154,7 +148,7 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
         List<BrevmalDto> brevmaler = brevbestillingTjeneste.hentTilgjengeligeMaler(123L);
         assertThat(brevmaler).hasSize(4);
         assertThat(brevmaler.get(1).getMuligeMottakere().get(0).getFeilmelding())
-            .isEqualTo("Finner ingen arbeidsgivere. Hent registeropplysninger.");
+            .isEqualTo(Kontroll_begrunnelser.INGEN_ARBEIDSGIVERE.getBeskrivelse());
     }
 
     @Test
@@ -274,7 +268,24 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    void hentTilgjengeligeMaler_lagerRiktigeMottakerTilBehandlingstypeSoknadForBruker() {
+    void hentTilgjengeligeMaler_lagerRiktigeMottakereForVirksomhet() {
+        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(lagBehandling(Behandlingstyper.SOEKNAD));
+        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling(Behandlingstyper.SOEKNAD));
+        when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
+
+        List<BrevmalDto> brevmaler = brevbestillingTjeneste.hentTilgjengeligeMaler(123L);
+
+        List<Produserbaredokumenter> arbeidsgiverBrev = List.of(GENERELT_FRITEKSTBREV_VIRKSOMHET);
+        brevmaler.stream().filter(brevmal -> arbeidsgiverBrev.contains(brevmal.getType()))
+            .forEach(brevmalDto ->
+                assertThat(brevmalDto.getMuligeMottakere())
+                    .extracting(MottakerDto::getType)
+                    .hasSize(2)
+                    .containsExactlyInAnyOrder("Virksomhet", "Annen organisasjon"));
+    }
+
+    @Test
+    void hentTilgjengeligeMaler_lagerRiktigeMottakerTilBrukerBehandlingstypeSoknad() {
         when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(lagBehandling(Behandlingstyper.SOEKNAD));
         when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling(Behandlingstyper.SOEKNAD));
         when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
@@ -295,7 +306,7 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    void hentTilgjengeligeMaler_lagerRiktigeMottakerTilBehandlingstypeKlage() {
+    void hentTilgjengeligeMaler_lagerRiktigeMottakerTilBrukerBehandlingstypeKlage() {
         when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(lagBehandling(Behandlingstyper.KLAGE));
         when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling(Behandlingstyper.KLAGE));
         when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
@@ -307,86 +318,16 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
             .containsExactly("Bruker eller brukers fullmektig");
     }
 
-    @Test
-    void skalReturnereUtkast() throws Exception {
-        byte[] forventetPdf = "UTKAST".getBytes(StandardCharsets.UTF_8);
-        when(mockDokServiceFasade.produserUtkast(anyLong(), any())).thenReturn(forventetPdf);
-
-        BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder()
-            .medProduserbardokument(MANGELBREV_BRUKER)
-            .medMottaker(Aktoersroller.BRUKER)
-            .medInnledningFritekst("Innledning")
-            .medManglerFritekst("Mangler")
-            .build();
-        ResponseEntity<byte[]> responseEntity = brevbestillingTjeneste.produserUtkast(123L, brevbestillingDto);
-
-        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(responseEntity.getBody()).isEqualTo(forventetPdf);
-
-        valider(brevbestillingDto, "dokumenter-v2-utkast-post-schema.json", new ObjectMapper());
-    }
-
-    @Test
-    void skalBestilleProduseringAvBrev() throws Exception {
-        settInnloggetSaksbehandler();
-
-        BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder()
-            .medProduserbardokument(MANGELBREV_BRUKER)
-            .medMottaker(Aktoersroller.BRUKER)
-            .medInnledningFritekst("Innledning")
-            .medManglerFritekst("Mangler")
-            .build();
-        brevbestillingTjeneste.produserBrev(123L, brevbestillingDto);
-
-        verify(mockDokServiceFasade).produserDokument(anyLong(), brevbestillingDtoCaptor.capture());
-
-        assertThat(brevbestillingDtoCaptor.getValue()).extracting(
-            BrevbestillingRequest::getProduserbardokument,
-            BrevbestillingRequest::getMottaker,
-            BrevbestillingRequest::getInnledningFritekst,
-            BrevbestillingRequest::getBestillersId
-        ).containsExactly(MANGELBREV_BRUKER, Aktoersroller.BRUKER, "Innledning", SAKSBEHANDLER);
-
-        valider(brevbestillingDto, "dokumenter-v2-opprett-post-schema.json", new ObjectMapper());
-    }
-
-    @Test
-    void skalBestilleProduseringAvFritekstbrev() throws Exception {
-        settInnloggetSaksbehandler();
-
-        BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder()
-            .medProduserbardokument(GENERELT_FRITEKSTBREV_BRUKER)
-            .medMottaker(Aktoersroller.BRUKER)
-            .medFritekstTittel("Tittel")
-            .medFritekst("Innhold")
-            .build();
-        brevbestillingTjeneste.produserBrev(123L, brevbestillingDto);
-
-        verify(mockDokServiceFasade).produserDokument(anyLong(), brevbestillingDtoCaptor.capture());
-
-        assertThat(brevbestillingDtoCaptor.getValue()).extracting(
-            BrevbestillingRequest::getProduserbardokument,
-            BrevbestillingRequest::getMottaker,
-            BrevbestillingRequest::getFritekstTittel,
-            BrevbestillingRequest::getFritekst
-        ).containsExactly(GENERELT_FRITEKSTBREV_BRUKER, Aktoersroller.BRUKER, "Tittel", "Innhold");
-
-        valider(brevbestillingDto, "dokumenter-v2-opprett-post-schema.json", new ObjectMapper());
-    }
-
     private Behandling lagBehandling(Behandlingstyper type) {
-        var behandling = new Behandling();
-        Fagsak fagsak = new Fagsak();
+        Aktoer bruker = new Aktoer();
+        bruker.setRolle(Aktoersroller.BRUKER);
+        var fagsak = new Fagsak();
         fagsak.setType(Sakstyper.EU_EOS);
+        fagsak.setAktører(Set.of(bruker));
+        var behandling = new Behandling();
         behandling.setId(1L);
         behandling.setFagsak(fagsak);
         behandling.setType(type);
         return behandling;
-    }
-
-    private void settInnloggetSaksbehandler() {
-        SubjectHandler subjectHandler = mock(SpringSubjectHandler.class);
-        SubjectHandler.set(subjectHandler);
-        when(subjectHandler.getUserID()).thenReturn(SAKSBEHANDLER);
     }
 }

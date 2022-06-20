@@ -1,5 +1,10 @@
 package no.nav.melosys.service.persondata.familie;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.person.Sivilstand;
 import no.nav.melosys.domain.person.Navn;
@@ -7,19 +12,15 @@ import no.nav.melosys.domain.person.familie.Familiemedlem;
 import no.nav.melosys.domain.person.familie.Familierelasjon;
 import no.nav.melosys.integrasjon.pdl.PDLConsumer;
 import no.nav.melosys.integrasjon.pdl.dto.person.Person;
-import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory;
+import no.nav.melosys.service.persondata.familie.medlem.EktefelleEllerPartnerFamiliemedlemFilter;
+import no.nav.melosys.service.saksopplysninger.SaksopplysningerService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
 
 import static no.nav.melosys.service.SaksbehandlingDataFactory.lagInaktivBehandlingSomIkkeResulterIVedtak;
 import static no.nav.melosys.service.persondata.PdlObjectFactory.lagPerson;
@@ -36,8 +37,17 @@ class FamiliemedlemServiceTest {
     private PDLConsumer pdlConsumer;
     @Mock
     private SaksopplysningerService saksopplysningerService;
-    @InjectMocks
+
     private FamiliemedlemService familiemedlemService;
+
+
+    @BeforeEach
+    public void beforeEach() {
+        this.familiemedlemService = new FamiliemedlemService(behandlingService,
+            saksopplysningerService,
+            new EktefelleEllerPartnerFamiliemedlemFilter(pdlConsumer),
+            pdlConsumer);
+    }
 
     @Test
     void hentFamiliemedlemmerFraBehandlingID_inaktivBehandlingMedTpsData() {
@@ -63,7 +73,6 @@ class FamiliemedlemServiceTest {
         when(pdlConsumer.hentFamilierelasjoner(IDENT_HOVEDPERSON)).thenReturn(lagHovedpersonMedBarn());
         when(pdlConsumer.hentBarn(IDENT_BARN)).thenReturn(lagPerson());
         when(pdlConsumer.hentEktefelleEllerPartner(IDENT_PERSON_GIFT)).thenReturn(lagPersonGift());
-        when(pdlConsumer.hentEktefelleEllerPartner(IDENT_PERSON_GIFT_HISTORISK)).thenReturn(lagPersonGiftHistorisk());
 
 
         Set<Familiemedlem> familiemedlemmer = familiemedlemService.hentFamiliemedlemmerFraBehandlingID(behandlingID);
@@ -72,6 +81,21 @@ class FamiliemedlemServiceTest {
         assertThat(familiemedlemmer).extracting(Familiemedlem::familierelasjon).contains(Familierelasjon.BARN, Familierelasjon.RELATERT_VED_SIVILSTAND);
     }
 
+    @Test
+    void hentFamiliemedlemmerFraBehandlingID_aktivBehandling_korrigertPåSammeDato() {
+        long behandlingID = 1L;
+        when(behandlingService.hentBehandling(behandlingID)).thenReturn(lagBehandling());
+        when(pdlConsumer.hentFamilierelasjoner(IDENT_HOVEDPERSON))
+            .thenReturn(lagHovedpersonMedBarn_medKorrigertGiftSeparertSkiltPåSammeDato());
+        when(pdlConsumer.hentBarn(IDENT_BARN)).thenReturn(lagPerson());
+        when(pdlConsumer.hentEktefelleEllerPartner(IDENT_PERSON_GIFT)).thenReturn(lagPersonGift());
+
+
+        Set<Familiemedlem> familiemedlemmer = familiemedlemService.hentFamiliemedlemmerFraBehandlingID(behandlingID);
+
+
+        assertThat(familiemedlemmer).extracting(Familiemedlem::familierelasjon).contains(Familierelasjon.BARN, Familierelasjon.RELATERT_VED_SIVILSTAND);
+    }
 
     @Test
     void hentFamiliemedlemmerFraBehandlingID_inaktivBehandling() {
@@ -89,28 +113,22 @@ class FamiliemedlemServiceTest {
 
     @Test
     void hentFamiliemedlemmer_dobbeltGiftemålSituasjon_forventerEttGiftemål_ogEttBarn() {
-
         Person hovedperson = lagHovedperson();
         Person giftPerson = lagPersonGift();
-        Person giftHistoriskPerson = lagPersonGiftHistorisk();
-
         when(pdlConsumer.hentEktefelleEllerPartner(IDENT_PERSON_GIFT)).thenReturn(giftPerson);
-        when(pdlConsumer.hentEktefelleEllerPartner(IDENT_PERSON_GIFT_HISTORISK)).thenReturn(giftHistoriskPerson);
 
 
-        Set<Familiemedlem> familiemedlemmer = familiemedlemService.hentFamiliemedlemmer(hovedperson, IDENT_HOVEDPERSON);
+        Set<Familiemedlem> familiemedlemmer = familiemedlemService.hentFamiliemedlemmer(hovedperson);
 
 
         assertThat(familiemedlemmer)
-                .isNotEmpty()
-                .hasSize(1)
-                .first()
-                .matches(Familiemedlem::erRelatertVedSivilstand)
-                .extracting(Familiemedlem::navn)
-                .matches(navn -> navn.harLiktFornavn(PERSON_GIFT_FORNAVN), "Har likt fornavn");
-
+            .isNotEmpty()
+            .hasSize(1)
+            .first()
+            .matches(Familiemedlem::erRelatertVedSivilstand)
+            .extracting(Familiemedlem::navn)
+            .matches(navn -> navn.harLiktFornavn(PERSON_GIFT_FORNAVN), "Har likt fornavn");
         verify(pdlConsumer, times(1)).hentEktefelleEllerPartner(IDENT_PERSON_GIFT);
-        verify(pdlConsumer, times(1)).hentEktefelleEllerPartner(IDENT_PERSON_GIFT_HISTORISK);
     }
 
     private PersonDokument lagPersonDokumentMedFamiliemedlemmer(Sivilstand sivilstand) {

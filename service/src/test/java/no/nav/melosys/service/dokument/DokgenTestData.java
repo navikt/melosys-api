@@ -12,6 +12,7 @@ import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadTrygdeavtale;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Soeknadsland;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.RepresentantIUtlandet;
+import no.nav.melosys.domain.dokument.arbeidsforhold.Aktoertype;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
@@ -27,10 +28,11 @@ import no.nav.melosys.domain.person.adresse.Bostedsadresse;
 import no.nav.melosys.domain.person.adresse.Kontaktadresse;
 
 import static java.util.Collections.singletonList;
-import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
+import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
 
 public final class DokgenTestData {
     public static final String FNR_BRUKER = "05058892382";
+    public static final String ORGNR = "999999999";
     public static final String SAMMENSATT_NAVN_BRUKER = "Donald Duck";
     public static final String ADRESSELINJE_1_BRUKER = "Andebygata 1";
     public static final String POSTNR_BRUKER = "9999";
@@ -43,6 +45,8 @@ public final class DokgenTestData {
     public static final String REGION = "NEVERLAND";
     public static final LocalDate LOVVALGSPERIODE_FOM = LocalDate.of(2020, 1, 1);
     public static final LocalDate LOVVALGSPERIODE_TOM = LocalDate.of(2021, 1, 1);
+    public static final String FNR_REPRESENTANT = "30098000492";
+    public static final String ORGNR_REPRESENTANT = "810072512";
 
     public static Behandling lagBehandling() {
         return lagBehandling(lagFagsak());
@@ -118,6 +122,7 @@ public final class DokgenTestData {
     public static OrganisasjonDokument lagOrg() {
         OrganisasjonDokument organisasjonDokument = new OrganisasjonDokument();
         organisasjonDokument.setNavn(NAVN_ORG);
+        organisasjonDokument.setOrgnummer(ORGNR);
         organisasjonDokument.setOrganisasjonDetaljer(lagOrgDetaljer());
         return organisasjonDokument;
     }
@@ -190,4 +195,35 @@ public final class DokgenTestData {
         return lovvalgsperiode;
     }
 
+    public static Aktoer lagMottaker(Aktoersroller rolle) {
+        Aktoer mottaker = new Aktoer();
+        switch (rolle) {
+            case BRUKER -> {
+                mottaker.setRolle(BRUKER);
+                mottaker.setAktørId(FNR_BRUKER);
+            }
+            case VIRKSOMHET -> {
+                mottaker.setRolle(VIRKSOMHET);
+                mottaker.setOrgnr(ORGNR);
+            }
+            case ARBEIDSGIVER -> {
+                mottaker.setRolle(ARBEIDSGIVER);
+                mottaker.setOrgnr(ORGNR_REPRESENTANT);
+            }
+            default -> throw new IllegalArgumentException("Støtter ikke aktoersrolle " + rolle.getKode());
+        }
+        return mottaker;
+    }
+
+    public static Aktoer lagMottakerRepresentant(Aktoertype aktoertype, Representerer representerer) {
+        Aktoer representant = new Aktoer();
+        switch (aktoertype) {
+            case PERSON -> representant.setPersonIdent(FNR_REPRESENTANT);
+            case ORGANISASJON -> representant.setOrgnr(ORGNR_REPRESENTANT);
+            default -> throw new IllegalArgumentException("Representant må være person eller organisasjon");
+        }
+        representant.setRolle(Aktoersroller.REPRESENTANT);
+        representant.setRepresenterer(representerer);
+        return representant;
+    }
 }

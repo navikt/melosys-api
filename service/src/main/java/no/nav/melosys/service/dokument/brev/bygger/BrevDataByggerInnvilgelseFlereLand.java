@@ -8,14 +8,14 @@ import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.LovvalgsperiodeService;
-import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelseFlereLand;
 import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
-import no.nav.melosys.service.kontroll.PeriodeKontroller;
+import no.nav.melosys.service.kontroll.regler.PeriodeRegler;
+import no.nav.melosys.service.saksopplysninger.SaksopplysningerService;
 import org.apache.commons.collections4.ListUtils;
 
 public class BrevDataByggerInnvilgelseFlereLand implements BrevDataBygger {
@@ -50,7 +50,7 @@ public class BrevDataByggerInnvilgelseFlereLand implements BrevDataBygger {
 
         brevdata.arbeidsgivere =
             ListUtils.union(dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentNorskeArbeidsgivere(),
-                            dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentUtenlandskeArbeidsgivere());
+                dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentUtenlandskeArbeidsgivere());
 
         brevdata.lovvalgsperiode = lovvalgsperiodeService.hentValidertLovvalgsperiode(behandlingID);
         brevdata.erUkjenteEllerAlleEosLand = landvelgerService.erUkjenteEllerAlleEosLand(behandlingID);
@@ -65,7 +65,7 @@ public class BrevDataByggerInnvilgelseFlereLand implements BrevDataBygger {
         brevdata.harAvklartMaritimTypeSkip = maritimType.stream().anyMatch(mt -> mt == Maritimtyper.SKIP);
 
         brevdata.erMarginaltArbeid = avklartefaktaService.harMarginaltArbeid(behandlingID);
-        brevdata.erBegrensetPeriode = !PeriodeKontroller.periodeErLik(
+        brevdata.erBegrensetPeriode = !PeriodeRegler.periodeErLik(
             grunnlagData.periode.getFom(), grunnlagData.periode.getTom(), brevdata.lovvalgsperiode.getFom(), brevdata.lovvalgsperiode.getTom()
         );
 

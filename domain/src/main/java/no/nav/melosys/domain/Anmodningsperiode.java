@@ -188,26 +188,45 @@ public class Anmodningsperiode implements PeriodeOmLovvalg {
         return anmodetAv;
     }
 
-    public void setAnmodetAv(String anmodetAv) {
-        this.anmodetAv = anmodetAv;
-    }
-
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof Anmodningsperiode that)) {
-            return false;
-        }
-        return Objects.equals(this.behandlingsresultat, that.behandlingsresultat)
-            && Objects.equals(this.fom, that.fom);
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Anmodningsperiode that = (Anmodningsperiode) o;
+        return Objects.equals(behandlingsresultat, that.behandlingsresultat)
+            && Objects.equals(fom, that.fom) && Objects.equals(tom, that.tom)
+            && lovvalgsland == that.lovvalgsland
+            && Objects.equals(bestemmelse, that.bestemmelse)
+            && Objects.equals(tilleggsbestemmelse, that.tilleggsbestemmelse)
+            && unntakFraLovvalgsland == that.unntakFraLovvalgsland
+            && Objects.equals(unntakFraBestemmelse, that.unntakFraBestemmelse)
+            && dekning == that.dekning
+            && Objects.equals(medlPeriodeID, that.medlPeriodeID)
+            && sendtUtland == that.sendtUtland
+            && Objects.equals(anmodetAv, that.anmodetAv);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(behandlingsresultat, fom);
+        return Objects.hash(behandlingsresultat, fom, tom, lovvalgsland, bestemmelse, tilleggsbestemmelse,
+                            unntakFraLovvalgsland, unntakFraBestemmelse, dekning, medlPeriodeID, sendtUtland,
+                            anmodetAv);
     }
+
+    @Override
+    public String toString() {
+        return "Anmodningsperiode{" + "id=" + id + ", fom=" + fom + ", tom=" + tom + ", lovvalgsland=" + lovvalgsland
+            + ", bestemmelse=" + bestemmelse + ", tilleggsbestemmelse=" + tilleggsbestemmelse
+            + ", unntakFraLovvalgsland=" + unntakFraLovvalgsland + ", unntakFraBestemmelse=" + unntakFraBestemmelse
+            + ", dekning=" + dekning + ", medlPeriodeID=" + medlPeriodeID + ", sendtUtland=" + sendtUtland
+            + ", anmodetAv='" + anmodetAv + '\'' + ", anmodningsperiodeSvar=" + anmodningsperiodeSvar + '}';
+    }
+
+    public void setAnmodetAv(String anmodetAv) {
+        this.anmodetAv = anmodetAv;
+    }
+
+
 
     public boolean gjelderSammeLandOgUnntakSom(Anmodningsperiode periode2) {
         return lovvalgsland == periode2.getLovvalgsland() &&

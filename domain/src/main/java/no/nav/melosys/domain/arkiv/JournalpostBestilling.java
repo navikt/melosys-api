@@ -1,26 +1,32 @@
 package no.nav.melosys.domain.arkiv;
 
+import java.util.List;
+
 public final class JournalpostBestilling {
     private final String tittel;
     private final String brevkode;
     private final String dokumentKategori;
-    private final String brukerFnr;
+    private final String hovedpartId;
+    private final BrukerIdType hovedpartIdType;
     private final String mottakerNavn;
     private final String mottakerId;
     private final OpprettJournalpost.KorrespondansepartIdType mottakerIdType;
     private final String saksnummer;
     private final byte[] pdf;
+    private final List<Vedlegg> vedlegg;
 
     private JournalpostBestilling(Builder builder) {
         this.tittel = builder.tittel;
         this.brevkode = builder.brevkode;
         this.dokumentKategori = builder.dokumentKategori;
-        this.brukerFnr = builder.brukerFnr;
+        this.hovedpartId = builder.hovedpartId;
+        this.hovedpartIdType = builder.hovedpartIdType;
         this.mottakerNavn = builder.mottakerNavn;
         this.mottakerId = builder.mottakerId;
         this.mottakerIdType = builder.mottakerIdType;
         this.saksnummer = builder.saksnummer;
         this.pdf = builder.pdf;
+        this.vedlegg = builder.vedlegg;
     }
 
     public String getTittel() {
@@ -35,8 +41,12 @@ public final class JournalpostBestilling {
         return dokumentKategori;
     }
 
-    public String getBrukerFnr() {
-        return brukerFnr;
+    public String getHovedpartId() {
+        return hovedpartId;
+    }
+
+    public BrukerIdType getHovedpartIdType() {
+        return hovedpartIdType;
     }
 
     public String getMottakerNavn() {
@@ -59,16 +69,22 @@ public final class JournalpostBestilling {
         return pdf;
     }
 
+    public List<Vedlegg> getVedlegg() {
+        return vedlegg;
+    }
+
     public static class Builder {
         private String tittel;
         private String brevkode;
         private String dokumentKategori;
-        private String brukerFnr;
+        private String hovedpartId;
+        private BrukerIdType hovedpartIdType;
         private String mottakerNavn;
         private String mottakerId;
         private OpprettJournalpost.KorrespondansepartIdType mottakerIdType;
         private String saksnummer;
         private byte[] pdf;
+        private List<Vedlegg> vedlegg;
 
         public Builder medTittel(String tittel) {
             this.tittel = tittel;
@@ -85,8 +101,13 @@ public final class JournalpostBestilling {
             return this;
         }
 
-        public Builder medBrukerFnr(String brukerFnr) {
-            this.brukerFnr = brukerFnr;
+        public Builder medHovedpartId(String hovedpartId) {
+            this.hovedpartId = hovedpartId;
+            return this;
+        }
+
+        public Builder medHovedpartIdType(BrukerIdType hovedpartIdType) {
+            this.hovedpartIdType = hovedpartIdType;
             return this;
         }
 
@@ -112,6 +133,11 @@ public final class JournalpostBestilling {
 
         public Builder medPdf(byte[] pdf) {
             this.pdf = pdf;
+            return this;
+        }
+
+        public Builder medVedlegg(List<Vedlegg> vedlegg) {
+            this.vedlegg = vedlegg;
             return this;
         }
 

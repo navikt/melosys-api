@@ -2,7 +2,7 @@ package no.nav.melosys.itest.token
 
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.matching.StringValuePattern
-import no.nav.melosys.integrasjon.reststs.RestStsClient
+import no.nav.melosys.integrasjon.reststs.RestTokenServiceClient
 import no.nav.melosys.integrasjon.reststs.StsRestTemplateProducer
 import no.nav.melosys.integrasjon.sak.SakConsumer
 import no.nav.melosys.integrasjon.sak.SakConsumerImpl
@@ -17,7 +17,7 @@ import org.springframework.test.web.client.MockRestServiceServer
 @RestClientTest(
     value = [
         StsRestTemplateProducer::class,
-        RestStsClient::class,
+        RestTokenServiceClient::class,
         WebClientAutoConfiguration::class,
 
         SakConsumerImpl::class,

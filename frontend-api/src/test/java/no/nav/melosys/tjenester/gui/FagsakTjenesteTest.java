@@ -3,7 +3,10 @@ package no.nav.melosys.tjenester.gui;
 import java.io.IOException;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -28,11 +31,11 @@ import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService;
 import no.nav.melosys.service.sak.*;
+import no.nav.melosys.service.saksopplysninger.SaksopplysningerService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.utpeking.UtpekingService;
 import no.nav.melosys.tjenester.gui.dto.*;
@@ -139,19 +142,19 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
     @Test
     void hentFagsakGir200OkOgDto() {
         Fagsak fagsak = lagFagsak();
-        testHentFagsak(ResponseEntity.status(HttpStatus.OK).body(lagFagsakDto(fagsak)));
-    }
+        Aktoer bruker = new Aktoer();
+        bruker.setRolle(Aktoersroller.BRUKER);
+        fagsak.setAktører(Set.of(bruker));
 
-    private void testHentFagsak(ResponseEntity<FagsakDto> forventning) {
-        Fagsak fagsak = lagFagsak();
+        var forventning = ResponseEntity.status(HttpStatus.OK).body(lagFagsakDto(fagsak));
         FagsakTjeneste instans = lagFagsakTjeneste(fagsak);
+
+
         ResponseEntity<FagsakDto> resultat = instans.hentFagsak("123");
+
+
         assertThat(resultat.getStatusCode()).isEqualTo(forventning.getStatusCode());
-        if (forventning.getBody() == null) {
-            assertThat(resultat.getBody()).isNull();
-        } else {
-            assertThat(resultat.getBody()).usingRecursiveComparison().isEqualTo(forventning.getBody());
-        }
+        assertThat(resultat.getBody()).usingRecursiveComparison().isEqualTo(forventning.getBody());
     }
 
     @Test
@@ -184,7 +187,9 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
         FagsakTjeneste instans = lagFagsakTjeneste(fagsak);
 
         List<FagsakOppsummeringDto> resultat = instans.hentFagsaker(new FagsakSokDto(FNR, null, null));
-        assertThat(resultat).hasSize(1).extracting(FagsakOppsummeringDto::getSammensattNavn).containsExactly("UKJENT");
+        assertThat(resultat).hasSize(1)
+            .flatExtracting(FagsakOppsummeringDto::getNavn, FagsakOppsummeringDto::getHovedpartRolle)
+            .containsExactly("UKJENT", Aktoersroller.BRUKER);
     }
 
     @Test
@@ -204,7 +209,9 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
         when(organisasjonOppslagService.hentOrganisasjon(ORGNR)).thenReturn(organisajonsdokument);
 
         List<FagsakOppsummeringDto> resultat = instans.hentFagsaker(new FagsakSokDto(null, null, ORGNR));
-        assertThat(resultat).hasSize(1).extracting(FagsakOppsummeringDto::getSammensattNavn).containsExactly("Moe Organisasjon");
+        assertThat(resultat).hasSize(1)
+            .flatExtracting(FagsakOppsummeringDto::getNavn, FagsakOppsummeringDto::getHovedpartRolle)
+            .containsExactly("Moe Organisasjon", Aktoersroller.VIRKSOMHET);
     }
 
     @Test
@@ -220,12 +227,17 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
         FagsakTjeneste instans = lagFagsakTjeneste(fagsak);
 
         List<FagsakOppsummeringDto> resultat = instans.hentFagsaker(new FagsakSokDto(null, null, ORGNR));
-        assertThat(resultat).hasSize(1).extracting(FagsakOppsummeringDto::getSammensattNavn).containsExactly("UKJENT");
+        assertThat(resultat).hasSize(1)
+            .flatExtracting(FagsakOppsummeringDto::getNavn, FagsakOppsummeringDto::getHovedpartRolle)
+            .containsExactly("UKJENT", Aktoersroller.VIRKSOMHET);
     }
 
     @Test
     void hentFagsaker_medSaksnummer_finnerSakMottarListeMedEttElement() {
         Fagsak fagsak = lagFagsak();
+        Aktoer bruker = new Aktoer();
+        bruker.setRolle(Aktoersroller.BRUKER);
+        fagsak.setAktører(Set.of(bruker));
         FagsakTjeneste instans = lagFagsakTjeneste(fagsak);
         when(fagsakService.finnFagsakFraSaksnummer("123")).thenReturn(Optional.of(fagsak));
 
@@ -265,7 +277,7 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
 
         assertThat(fagsakOppsummeringDto.getSaksnummer()).isEqualTo("MEL-13");
         assertThat(fagsakOppsummeringDto.getOpprettetDato()).isEqualTo(reqDateInstant);
-        assertThat(fagsakOppsummeringDto.getSammensattNavn()).isEqualTo("Joe Moe");
+        assertThat(fagsakOppsummeringDto.getNavn()).isEqualTo("Joe Moe");
 
         BehandlingOversiktDto behandlingFørst = fagsakOppsummeringDto.getBehandlingOversikter().get(0);
         assertThat(behandlingFørst.getBehandlingID()).isEqualTo(1L);
@@ -275,8 +287,8 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
         assertThat(behandlingFørst.getLand().landkoder.get(0)).isEqualTo("DK");
         assertThat(behandlingFørst.getLand().erUkjenteEllerAlleEosLand).isFalse();
 
-        assertThat(behandlingFørst.getPeriode().getFom()).isEqualTo(LocalDate.of(2019,1,1));
-        assertThat(behandlingFørst.getPeriode().getTom()).isEqualTo(LocalDate.of(2019,2,1));
+        assertThat(behandlingFørst.getPeriode().getFom()).isEqualTo(LocalDate.of(2019, 1, 1));
+        assertThat(behandlingFørst.getPeriode().getTom()).isEqualTo(LocalDate.of(2019, 2, 1));
     }
 
     @Test
@@ -367,7 +379,7 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
             doReturn(List.of(fagsak)).when(fagsakService).hentFagsakerMedOrgnr(Aktoersroller.VIRKSOMHET, ORGNR);
         }
         return new FagsakTjeneste(fagsakService, aksesskontroll, behandlingsgrunnlagService, henleggFagsakService, opprettNySakFraOppgave,
-                                  persondataFasade, saksopplysningerService, utpekingService, videresendSoknadService, organisasjonOppslagService);
+            persondataFasade, saksopplysningerService, utpekingService, videresendSoknadService, organisasjonOppslagService);
     }
 
     private static FagsakOppsummeringDto lagFagsakOppsummeringDto(Behandling behandling) {
@@ -375,7 +387,8 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
         result.setSakstype(Sakstyper.EU_EOS);
         result.setSaksstatus(Saksstatuser.OPPRETTET);
         result.setSaksnummer("MEL-1");
-        result.setSammensattNavn("Joe Moe");
+        result.setNavn("Joe Moe");
+        result.setHovedpartRolle(Aktoersroller.BRUKER);
 
         BehandlingOversiktDto behandlingOversiktDto = new BehandlingOversiktDto();
         behandlingOversiktDto.setBehandlingID(behandling.getId());
@@ -398,6 +411,7 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
         resultat.setSaksnummer(fagsak.getSaksnummer());
         resultat.setSakstype(fagsak.getType());
         resultat.setSaksstatus(fagsak.getStatus());
+        resultat.setHovedpartRolle(fagsak.getHovedpartRolle());
         return resultat;
     }
 

@@ -62,7 +62,7 @@ public class DokumentTjeneste {
     @GetMapping("/oversikt/{saksnummer}")
     @ApiOperation(value = "Henter alle dokumenter knyttet til en fagsak", response = JournalpostInfoDto.class, responseContainer = "List")
     public ResponseEntity<List<JournalpostInfoDto>> hentDokumenter(@PathVariable("saksnummer") String saksnummer) {
-        List<JournalpostInfoDto> dokumentListe = dokumentHentingService.hentDokumenter(saksnummer)
+        List<JournalpostInfoDto> dokumentListe = dokumentHentingService.hentJournalposter(saksnummer)
             .stream()
             .map(JournalpostInfoDto::av)
             .sorted(Comparator.comparing(JournalpostInfoDto::hentGjeldendeTidspunkt, Comparator.nullsFirst(Comparator.reverseOrder())))

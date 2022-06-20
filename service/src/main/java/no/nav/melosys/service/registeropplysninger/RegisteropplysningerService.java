@@ -17,11 +17,11 @@ import no.nav.melosys.integrasjon.aareg.AaregFasade;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.inntk.InntektService;
 import no.nav.melosys.integrasjon.utbetaldata.UtbetaldataService;
-import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.kontroll.PeriodeKontroller;
+import no.nav.melosys.service.kontroll.regler.PeriodeRegler;
 import no.nav.melosys.service.medl.MedlPeriodeService;
 import no.nav.melosys.service.persondata.PersondataFasade;
+import no.nav.melosys.service.saksopplysninger.SaksopplysningerService;
 import no.nav.melosys.service.sob.SobService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -84,14 +84,15 @@ public class RegisteropplysningerService {
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void hentOgLagreOpplysninger(RegisteropplysningerRequest registeropplysningerRequest) {
-        if (PeriodeKontroller.feilIPeriode(registeropplysningerRequest.getFom(), registeropplysningerRequest.getTom())) {
+        if (PeriodeRegler.feilIPeriode(registeropplysningerRequest.getFom(), registeropplysningerRequest.getTom())) {
             log.warn("Henter ikke registeropplysninger for behandling {} pga feil i periode. fom={}, tom={}", registeropplysningerRequest.getBehandlingID(), registeropplysningerRequest.getFom(), registeropplysningerRequest.getTom());
             registeropplysningerRequest = registeropplysningerRequest.lagKopiUtenPeriodeOgOpplysningstyperSomKreverPeriode();
         }
         if (registeropplysningerRequest.getOpplysningstyper().isEmpty()) {
             log.info("Var ingen registeropplysninger å hente for behandling {}", registeropplysningerRequest.getBehandlingID());
             return;
-        };
+        }
+        ;
 
         Behandling behandling = behandlingService.hentBehandling(registeropplysningerRequest.getBehandlingID());
 
