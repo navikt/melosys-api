@@ -28,8 +28,12 @@ public class Aktoer extends RegistreringsInfo {
     @Column(name = "aktoer_id", updatable = false)
     private String aktørId;
 
-    @Column(name = "institusjon_id", updatable = false)
+    @Column(name = "eu_eos_institusjon_id", updatable = false)
     private String institusjonId;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "trygdemyndighet_land", updatable = false)
+    private Landkoder trygdemyndighetLand;
 
     @Column(name = "orgnr")
     private String orgnr;
@@ -134,7 +138,7 @@ public class Aktoer extends RegistreringsInfo {
     }
 
     public boolean erUtenlandskMyndighet() {
-        return Aktoersroller.TRYGDEMYNDIGHET == rolle && institusjonId != null;
+        return rolle == Aktoersroller.TRYGDEMYNDIGHET && (institusjonId != null || trygdemyndighetLand != null);
     }
 
     public boolean erBruker() {
@@ -145,9 +149,17 @@ public class Aktoer extends RegistreringsInfo {
         return Aktoersroller.VIRKSOMHET.equals(rolle);
     }
 
+    public Landkoder getTrygdemyndighetLand() {
+        return trygdemyndighetLand;
+    }
+
+    public void setTrygdemyndighetLand(Landkoder trygdemyndighetLandkode) {
+        this.trygdemyndighetLand = trygdemyndighetLandkode;
+    }
+
     public Landkoder hentMyndighetLandkode() {
         if (erUtenlandskMyndighet()) {
-            return UtenlandskMyndighet.konverterInstitusjonIdTilLandkode(institusjonId);
+            return institusjonId != null ? UtenlandskMyndighet.konverterInstitusjonIdTilLandkode(institusjonId) : trygdemyndighetLand;
         }
         throw new TekniskException("Aktør " + id + " er ikke en utenlandsk myndighet");
     }
@@ -157,14 +169,14 @@ public class Aktoer extends RegistreringsInfo {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof Aktoer)) {
+        if (!(o instanceof Aktoer that)) {
             return false;
         }
-        Aktoer that = (Aktoer) o;
         return Objects.equals(this.fagsak, that.fagsak)
             && Objects.equals(this.aktørId, that.aktørId)
             && Objects.equals(this.orgnr, that.orgnr)
             && Objects.equals(this.institusjonId, that.institusjonId)
+            && Objects.equals(this.trygdemyndighetLand, that.trygdemyndighetLand)
             && Objects.equals(this.utenlandskPersonId, that.utenlandskPersonId)
             && Objects.equals(this.rolle, that.rolle);
     }
