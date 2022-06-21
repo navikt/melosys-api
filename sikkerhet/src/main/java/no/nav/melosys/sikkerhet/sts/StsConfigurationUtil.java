@@ -28,72 +28,47 @@ import org.apache.cxf.ws.security.trust.STSClient;
 import org.apache.neethi.Policy;
 
 public class StsConfigurationUtil {
-
-    private static final String STS_URL_KEY = "securityTokenService.url";
-    private static final String STS_USER_USERNAME = "systemuser.username";
-    @SuppressWarnings("squid:S2068")
-    private static final String STS_USER_PASSWORD = "systemuser.password";
     private static final String SPRING_ACTIVE_PROFILES = "spring.profiles.active";
 
     private StsConfigurationUtil() {
         throw new IllegalAccessError("Skal ikke instansieres");
     }
 
-    public static <T> T wrapWithSts(T port, NAVSTSClient.StsClientType samlTokenType) {
+    public static <T> T wrapWithSts(T port, NAVSTSClient.StsClientType samlTokenType, StsLoginConfig login) {
 
         //Ignorer sts-kall ved mock-kjøring
         final String aktivProfil = System.getProperty(SPRING_ACTIVE_PROFILES);
+
         if (aktivProfil != null && List.of("local-mock", "test").contains(aktivProfil)) {
             return port;
         }
 
         Client client = ClientProxy.getClient(port);
         switch (samlTokenType) {
-            case SECURITYCONTEXT_TIL_SAML:
-                configureStsForOnBehalfOfWithOidc(client);
-                break;
-            case SYSTEM_SAML:
-                configureStsForSystemUser(client);
-                break;
-            default:
-                throw new IllegalArgumentException("Unknown enum value: " + samlTokenType);
+            case SECURITYCONTEXT_TIL_SAML -> configureStsForOnBehalfOfWithOidc(client, login);
+            case SYSTEM_SAML -> configureStsForSystemUser(client, login);
+            default -> throw new IllegalArgumentException("Unknown enum value: " + samlTokenType);
         }
         return port;
     }
 
-    private static void configureStsForOnBehalfOfWithOidc(Client client) {
-        String location = requireProperty(STS_URL_KEY);
-        String username = requireProperty(STS_USER_USERNAME);
-        String password = requireProperty(STS_USER_PASSWORD);
-
-        STSClient stsClient = createBasicSTSClient(StsClientType.SECURITYCONTEXT_TIL_SAML, client.getBus(), location, username, password);
+    private static void configureStsForOnBehalfOfWithOidc(Client client, StsLoginConfig login) {
+        STSClient stsClient = createBasicSTSClient(StsClientType.SECURITYCONTEXT_TIL_SAML, client.getBus(), login);
         stsClient.setOnBehalfOf(new OnBehalfOfWithOidcCallbackHandler());
         client.getRequestContext().put(SecurityConstants.STS_CLIENT, stsClient);
         client.getRequestContext().put(SecurityConstants.CACHE_ISSUED_TOKEN_IN_ENDPOINT, false);
-        setEndpointPolicyReference(client, "classpath:stsPolicy.xml");
+        setEndpointPolicyReference(client, login.getStsPolicy());
     }
 
-    private static void configureStsForSystemUser(Client client) {
-        String location = requireProperty(STS_URL_KEY);
-        String username = requireProperty(STS_USER_USERNAME);
-        String password = requireProperty(STS_USER_PASSWORD);
-
+    private static void configureStsForSystemUser(Client client, StsLoginConfig login) {
         new WSAddressingFeature().initialize(client, client.getBus());
 
-        STSClient stsClient = createBasicSTSClient(StsClientType.SYSTEM_SAML, client.getBus(), location, username, password);
+        STSClient stsClient = createBasicSTSClient(StsClientType.SYSTEM_SAML, client.getBus(), login);
         client.getRequestContext().put(SecurityConstants.STS_CLIENT, stsClient);
-        setEndpointPolicyReference(client, "classpath:stsPolicy.xml");
+        setEndpointPolicyReference(client, login.getStsPolicy());
     }
 
-    private static String requireProperty(String key) {
-        String property = System.getProperty(key);
-        if (property == null) {
-            throw new IllegalStateException("Required property " + key + " not available.");
-        }
-        return property;
-    }
-
-    private static STSClient createBasicSTSClient(StsClientType type, Bus bus, String location, String username, String password) {
+    private static STSClient createBasicSTSClient(StsClientType type, Bus bus, StsLoginConfig login) {
         STSClient stsClient = new NAVSTSClient(bus, type);
         stsClient.setWsdlLocation("wsdl/ws-trust-1.4-service.wsdl");
         stsClient.setServiceQName(new QName("http://docs.oasis-open.org/ws-sx/ws-trust/200512/wsdl", "SecurityTokenServiceProvider"));
@@ -105,7 +80,7 @@ public class StsConfigurationUtil {
             // Endpoint must be set on clients request context
             // as the wrapping requestcontext is not available
             // when creating the client from WSDL (ref cxf-users mailinglist)
-            stsClient.getClient().getRequestContext().put(Message.ENDPOINT_ADDRESS, location);
+            stsClient.getClient().getRequestContext().put(Message.ENDPOINT_ADDRESS, login.getSecurityTokenServiceUrl());
         } catch (BusException | EndpointException e) {
             throw new IllegalStateException("Failed to set endpoint address of STSClient", e);
         }
@@ -114,14 +89,17 @@ public class StsConfigurationUtil {
         stsClient.getInInterceptors().add(new LoggingInInterceptor());
 
         HashMap<String, Object> properties = new HashMap<>();
-        properties.put(SecurityConstants.USERNAME, username);
-        properties.put(SecurityConstants.PASSWORD, password);
+        properties.put(SecurityConstants.USERNAME, login.getUsername());
+        properties.put(SecurityConstants.PASSWORD, login.getPassword());
         stsClient.setProperties(properties);
         return stsClient;
     }
 
     private static void setEndpointPolicyReference(Client client, String uri) {
         Policy policy = resolvePolicyReference(client, uri);
+        if (policy == null) {
+            throw new IllegalStateException("Failed to resolve policy reference: " + uri);
+        }
         setClientEndpointPolicy(client, policy);
     }
 
