@@ -16,15 +16,13 @@ import org.assertj.core.api.AssertionsForClassTypes
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.boot.autoconfigure.web.reactive.function.client.WebClientAutoConfiguration
 import org.springframework.boot.test.autoconfigure.web.client.RestClientTest
-import org.springframework.test.web.client.MockRestServiceServer
 
 @RestClientTest(
     value = [
         StsRestTemplateProducer::class,
         RestTokenServiceClient::class,
-        WebClientAutoConfiguration::class,
+        MockRestServerProvider::class,
 
         SafConsumerImpl::class,
         SafConsumerProducer::class,
@@ -34,9 +32,9 @@ import org.springframework.test.web.client.MockRestServiceServer
 )
 class SafConsumerIT(
     @Autowired private val safConsumer: SafConsumer,
-    @Autowired server: MockRestServiceServer,
+    @Autowired mockRestServerProvider: MockRestServerProvider,
     @Value("\${mockserver.port}") mockPort: Int,
-) : ConsumerTestBase<ByteArray>(server, mockPort) {
+) : ConsumerWireMockTestBase<ByteArray>(mockRestServerProvider, mockPort) {
 
     @Test
     fun authorizationSkalKommeFraSystem() {

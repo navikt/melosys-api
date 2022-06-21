@@ -48,6 +48,11 @@ abstract class ConsumerWireMockTestBase<T>(
         wireMockServer.stop()
     }
 
+    @BeforeEach
+    fun setup_ConsumerWireMockTestBase() {
+        wireMockServer.resetAll()
+    }
+
     override fun stubError() {
         wireMockServer.stubFor(
             createWireMock()

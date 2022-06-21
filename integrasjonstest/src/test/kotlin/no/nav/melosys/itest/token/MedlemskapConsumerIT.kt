@@ -11,16 +11,14 @@ import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.boot.autoconfigure.web.reactive.function.client.WebClientAutoConfiguration
 import org.springframework.boot.test.autoconfigure.web.client.RestClientTest
-import org.springframework.test.web.client.MockRestServiceServer
 import java.time.LocalDate
 
 @RestClientTest(
     value = [
         StsRestTemplateProducer::class,
         RestTokenServiceClient::class,
-        WebClientAutoConfiguration::class,
+        MockRestServerProvider::class,
 
         MedlemskapRestConsumer::class,
         MedlemskapRestConsumerProducer::class,
@@ -30,9 +28,9 @@ import java.time.LocalDate
 )
 class MedlemskapConsumerIT(
     @Autowired private val medlemskapRestConsumer: MedlemskapRestConsumer,
-    @Autowired server: MockRestServiceServer,
+    @Autowired mockRestServerProvider: MockRestServerProvider,
     @Value("\${mockserver.port}") mockPort: Int,
-) : ConsumerTestBase<String>(server, mockPort) {
+) : ConsumerWireMockTestBase<String>(mockRestServerProvider, mockPort) {
 
     @Test
     fun authorizationSkalKommeFraSystem() {
