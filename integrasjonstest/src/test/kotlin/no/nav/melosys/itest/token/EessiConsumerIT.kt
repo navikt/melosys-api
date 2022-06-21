@@ -6,10 +6,12 @@ import no.nav.melosys.integrasjon.eessi.EessiConsumerProducer
 import no.nav.melosys.integrasjon.felles.GenericContextClientRequestInterceptor
 import no.nav.melosys.integrasjon.reststs.RestStsClient
 import no.nav.melosys.integrasjon.reststs.StsRestTemplateProducer
+import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.client.RestClientTest
 import org.springframework.http.HttpMethod
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.test.web.client.match.MockRestRequestMatchers.*
 import org.springframework.test.web.client.response.MockRestResponseCreators
@@ -78,8 +80,24 @@ class EessiConsumerIT(
         executeRequest()
     }
 
-    override fun stubError() {
+    @Test
+    fun skalBrukeErrorFilterOgGiRiktigFeilmelding() {
+        executeErrorFromServer { error ->
+            Assertions.assertThat(error).contains(errorFromServerMessage())
+        }
     }
+
+    override fun stubError() {
+        mockRestServerProvider.getServiceUnderTestMockServer()
+            .expect(requestTo("/buc/123/aksjoner"))
+            .andRespond(
+                MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("error")
+            )
+
+    }
+
+    override fun errorFromServerMessage() = "500 Internal Server Error: \"error\""
 
     override fun executeRequest() {
         eessiConsumer.hentMuligeAksjoner("123")

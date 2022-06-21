@@ -46,13 +46,15 @@ abstract class StsTestBase<T>(
     fun executeErrorFromServer(verify: (String) -> Unit) {
         stubError()
         try {
-            executeRequest()
+            executeFromSystem { }
         } catch (exception: Exception) {
             assertThat(exception.message)
-                .endsWith("500 INTERNAL_SERVER_ERROR - {\"melding\": \"Internal Server Error\"}")
+                .endsWith(errorFromServerMessage())
             verify(exception.message!!)
         }
     }
+
+    open fun errorFromServerMessage() = "500 INTERNAL_SERVER_ERROR - {\"melding\": \"Internal Server Error\"}"
 
     fun executeFromController(verify: () -> Unit) {
         SpringSubjectHandler.set(TestSubjectHandler())
