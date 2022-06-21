@@ -118,6 +118,7 @@ abstract class ConsumerTestBase<T>(
     @BeforeEach
     fun setup() {
         wireMockServer.resetAll()
+        getSecurityMock().reset()
         getSecurityMock().expect(requestTo("/?grant_type=client_credentials&scope=openid"))
             .andRespond(
                 withSuccess(
