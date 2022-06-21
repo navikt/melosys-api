@@ -35,10 +35,13 @@ abstract class StsTestBase<T>(
 
     fun executeFromSystem(verify: () -> Unit) {
         val uuid = UUID.randomUUID()
-        ThreadLocalAccessInfo.beforeExecuteProcess(uuid, "prossesSteg")
-        verify()
-        executeRequest()
-        ThreadLocalAccessInfo.afterExecuteProcess(uuid)
+        try {
+            ThreadLocalAccessInfo.beforeExecuteProcess(uuid, "prossesSteg")
+            verify()
+            executeRequest()
+        } finally {
+            ThreadLocalAccessInfo.afterExecuteProcess(uuid)
+        }
     }
 
     abstract fun stubError()
@@ -58,10 +61,15 @@ abstract class StsTestBase<T>(
 
     fun executeFromController(verify: () -> Unit) {
         SpringSubjectHandler.set(TestSubjectHandler())
-        ThreadLocalAccessInfo.beforeControllerRequest("request", false)
-        verify()
-        executeRequest()
-        ThreadLocalAccessInfo.afterControllerRequest("request")
+        try {
+            ThreadLocalAccessInfo.beforeControllerRequest("request", false)
+            verify()
+            executeRequest()
+
+        } finally {
+            ThreadLocalAccessInfo.afterControllerRequest("request")
+        }
+
     }
 
     abstract fun executeRequest()
