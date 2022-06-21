@@ -9,7 +9,10 @@ import no.nav.melosys.domain.arkiv.DokumentReferanse;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.arkiv.Vedlegg;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
-import no.nav.melosys.domain.eessi.*;
+import no.nav.melosys.domain.eessi.BucInformasjon;
+import no.nav.melosys.domain.eessi.BucType;
+import no.nav.melosys.domain.eessi.Institusjon;
+import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.eessi.sed.SedDataDto;
 import no.nav.melosys.domain.eessi.sed.UtpekingAvvisDto;
@@ -605,9 +608,23 @@ class EessiServiceTest {
 
     @Test
     void kanOppretteSedPåBuc_fårCreateTilbake_true() {
-        when(eessiConsumer.hentMuligeAksjoner("5566")).thenReturn(Collections.singletonList("SedId SedType Create"));
+        when(eessiConsumer.hentMuligeAksjoner("5566")).thenReturn(Collections.singletonList("5fcffb7e6a9640acac5a09abc5a08ef6 A004 Create"));
 
-        assertThat(eessiService.kanOppretteSedPåBuc("5566")).isTrue();
+        assertThat(eessiService.kanOppretteSedTyperPåBuc("5566", SedType.A004)).isTrue();
+    }
+
+    @Test
+    void kanOppretteSedPåBuc_fårCreateTilbakePåFeilSed_false() {
+        when(eessiConsumer.hentMuligeAksjoner("5566")).thenReturn(Collections.singletonList("5fcffb7e6a9640acac5a09abc5a08ef6 A004 Create"));
+
+        assertThat(eessiService.kanOppretteSedTyperPåBuc("5566", SedType.A011)).isFalse();
+    }
+
+    @Test
+    void kanOppretteSedPåBuc_tomListe_false() {
+        when(eessiConsumer.hentMuligeAksjoner("5566")).thenReturn(Collections.emptyList());
+
+        assertThat(eessiService.kanOppretteSedTyperPåBuc("5566", SedType.A011)).isFalse();
     }
 
     private static Journalpost lagJournalpost(List<ArkivDokument> dokumenter) {
