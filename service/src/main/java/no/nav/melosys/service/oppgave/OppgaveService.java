@@ -62,12 +62,16 @@ public class OppgaveService {
         this.eregFasade = eregFasade;
     }
 
-    public List<Oppgave> finnOppgaverMedBrukerID(String brukerIdent) {
-        String aktørId = persondataFasade.hentAktørIdForIdent(brukerIdent);
+    public List<Oppgave> finnOppgaverMedPersonIdent(String personIdent) {
+        String aktørId = persondataFasade.hentAktørIdForIdent(personIdent);
         if (aktørId == null) {
-            throw new IkkeFunnetException("Finner ikke aktørId for ident " + brukerIdent);
+            throw new IkkeFunnetException("Finner ikke aktørId for ident " + personIdent);
         }
-        return oppgaveFasade.finnOppgaverMedBrukerID(aktørId);
+        return oppgaveFasade.finnOppgaverMedAktørId(aktørId);
+    }
+
+    public List<Oppgave> finnOppgaverMedOrgnr(String orgnr) {
+        return oppgaveFasade.finnOppgaverMedOrgnr(orgnr);
     }
 
     public List<OppgaveDto> hentOppgaverMedAnsvarlig(String ansvarligID) {
