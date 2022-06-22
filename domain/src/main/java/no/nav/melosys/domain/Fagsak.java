@@ -32,6 +32,10 @@ public class Fagsak extends RegistreringsInfo {
     private Sakstyper type;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "tema", nullable = false)
+    private Sakstemaer tema;
+
+    @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private Saksstatuser status;
 
@@ -55,6 +59,14 @@ public class Fagsak extends RegistreringsInfo {
 
     public void setType(Sakstyper type) {
         this.type = type;
+    }
+
+    public Sakstemaer getTema() {
+        return tema;
+    }
+
+    public void setTema(Sakstemaer tema) {
+        this.tema = tema;
     }
 
     public Saksstatuser getStatus() {

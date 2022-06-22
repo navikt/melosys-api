@@ -6,10 +6,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Representerer;
-import no.nav.melosys.domain.kodeverk.Saksstatuser;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
@@ -94,6 +91,7 @@ class FagsakServiceTest {
         OpprettSakRequest opprettSakRequest = new OpprettSakRequest.Builder()
             .medAktørID("123456789")
             .medSakstype(Sakstyper.EU_EOS)
+            .medSakstema(Sakstemaer.MEDLEMSKAP_LOVVALG)
             .medBehandlingstype(SOEKNAD)
             .medBehandlingstema(Behandlingstema.UTSENDT_ARBEIDSTAKER)
             .medInitierendeJournalpostId(initierendeJournalpostId)
@@ -108,6 +106,7 @@ class FagsakServiceTest {
             eq(Behandlingstema.UTSENDT_ARBEIDSTAKER), eq(initierendeJournalpostId), eq(initierendeDokumentId));
         assertThat(fagsak.getBehandlinger()).isNotEmpty();
         assertThat(fagsak.getType()).isEqualTo(Sakstyper.EU_EOS);
+        assertThat(fagsak.getTema()).isEqualTo(Sakstemaer.MEDLEMSKAP_LOVVALG);
         Aktoer forventetFullmektig = new Aktoer();
         forventetFullmektig.setFagsak(fagsak);
         forventetFullmektig.setRolle(Aktoersroller.REPRESENTANT);

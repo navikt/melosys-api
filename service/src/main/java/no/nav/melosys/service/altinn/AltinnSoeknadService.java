@@ -11,6 +11,7 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Fullmektig;
 import no.nav.melosys.domain.Kontaktopplysning;
 import no.nav.melosys.domain.kodeverk.Representerer;
+import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -53,6 +54,7 @@ public class AltinnSoeknadService {
 
         OpprettSakRequest opprettSakRequest = new OpprettSakRequest.Builder()
             .medSakstype(Sakstyper.EU_EOS)
+            .medSakstema(Sakstemaer.MEDLEMSKAP_LOVVALG)
             .medAktørID(hentAktørID(søknad))
             .medUtenlandskPersonId(hentUtenlandskPersonId(søknad))
             .medArbeidsgiver(hentArbeidsgiverID(søknad))
