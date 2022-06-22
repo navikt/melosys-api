@@ -12,6 +12,7 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.arkiv.DokumentReferanse;
 import no.nav.melosys.domain.eessi.BucType;
+import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
@@ -108,16 +109,17 @@ public class AnmodningUnntakService {
         validerBehandlingstemaUnntak(behandling);
         validerBehandlingsstatus(behandling);
 
-        if (unleash.isEnabled("melosys.eessi.handlingssjekk_sed")) {
-            String rinaSaksnummer = behandling.hentSedDokument().getRinaSaksnummer();
-            if (!eessiService.kanOppretteSedPåBuc(rinaSaksnummer)) {
-                throw new FunksjonellException("Kan ikke opprette Sed på rinaSaknummer: " + rinaSaksnummer);
-            }
-        }
-
         AnmodningsperiodeSvar anmodningsperiodeSvar =
             anmodningsperiodeService.hentAnmodningsperiodeSvarForBehandling(behandlingID);
         validerSvar(anmodningsperiodeSvar);
+
+        if (unleash.isEnabled("melosys.eessi.handlingssjekk_sed")) {
+            String rinaSaksnummer = behandling.hentSedDokument().getRinaSaksnummer();
+            SedType sedType = anmodningsperiodeSvar.erInnvilgelse() ? SedType.A011 : SedType.A002;
+            if (!eessiService.kanOppretteSedTyperPåBuc(rinaSaksnummer, sedType)) {
+                throw new FunksjonellException("Kan ikke opprette SedType " + sedType + " på rinaSaknummer: " + rinaSaksnummer);
+            }
+        }
 
         Lovvalgsperiode lovvalgsperiode = Lovvalgsperiode.av(anmodningsperiodeSvar, Medlemskapstyper.PLIKTIG);
         lovvalgsperiodeService.lagreLovvalgsperioder(behandlingID, Collections.singleton(lovvalgsperiode));

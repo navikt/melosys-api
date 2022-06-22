@@ -1,8 +1,15 @@
 package no.nav.melosys.service.utpeking;
 
+import java.time.LocalDate;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+
 import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.eessi.BucType;
+import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.melding.UtpekingAvvis;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak;
@@ -28,12 +35,6 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.context.event.ApplicationEventMulticaster;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDate;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
 
 @Service
 @Primary
@@ -152,8 +153,8 @@ public class UtpekingService {
 
         if (unleash.isEnabled("melosys.eessi.handlingssjekk_sed")) {
             String rinaSaksnummer = behandling.hentSedDokument().getRinaSaksnummer();
-            if (!eessiService.kanOppretteSedPåBuc(rinaSaksnummer)) {
-                throw new FunksjonellException("Kan ikke opprette Sed på rinaSaknummer: " + rinaSaksnummer);
+            if (!eessiService.kanOppretteSedTyperPåBuc(rinaSaksnummer, SedType.A004)) {
+                throw new FunksjonellException("Kan ikke opprette SedType A004 på rinaSaknummer: " + rinaSaksnummer);
             }
         }
 
