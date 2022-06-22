@@ -6,26 +6,21 @@ import com.github.tomakehurst.wiremock.matching.StringValuePattern
 import no.nav.melosys.integrasjon.doksys.dokumentproduksjon.DokumentproduksjonConsumer
 import no.nav.melosys.integrasjon.doksys.dokumentproduksjon.DokumentproduksjonConsumerConfig
 import no.nav.melosys.integrasjon.doksys.dokumentproduksjon.DokumentproduksjonConsumerProducer
-import no.nav.melosys.integrasjon.reststs.StsRestTemplateProducer
 import no.nav.melosys.sikkerhet.sts.StsLoginConfig
 import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.meldinger.ProduserIkkeredigerbartDokumentRequest
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebClient
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 
 @WebMvcTest(
     value = [
-        StsRestTemplateProducer::class,
-
         DokumentproduksjonConsumerConfig::class,
         DokumentproduksjonConsumerProducer::class,
         StsLoginConfig::class,
     ],
     properties = ["spring.profiles.active:itest-token"]
 )
-@AutoConfigureWebClient
 class DokumentproduksjonConsumerIT(
     @Autowired private val dokumentproduksjonConsumer: DokumentproduksjonConsumer,
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,
