@@ -13,7 +13,10 @@ import no.nav.melosys.domain.arkiv.DokumentReferanse;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.arkiv.Vedlegg;
 import no.nav.melosys.domain.behandlingsgrunnlag.SedGrunnlag;
-import no.nav.melosys.domain.eessi.*;
+import no.nav.melosys.domain.eessi.BucInformasjon;
+import no.nav.melosys.domain.eessi.BucType;
+import no.nav.melosys.domain.eessi.Institusjon;
+import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.eessi.melding.UtpekingAvvis;
 import no.nav.melosys.domain.eessi.sed.SedDataDto;
@@ -311,15 +314,16 @@ public class EessiService {
     }
 
     /**
-     * Sjekker om en mulig aksjon er gyldig på input buc. Foreløpig trenger vi kun å sjekke "Create", men hvis dette
+     * Sjekker om en mulig aksjon er gyldig på input buc for en liste med sed typer. Foreløpig trenger vi kun å sjekke "Create", men hvis dette
      * senere skal utvides bør vi ta inn Aksjoner enum fra Eessi.
      *
      * @param rinaSaksnummer nummer på buc.
+     * @param sedType hvilke SedTyper vi ønsker å sjekke Create mot
      * @return true hvis vi kan opprette sed på buc.
      */
-    public boolean kanOppretteSedPåBuc(String rinaSaksnummer) {
+    public boolean kanOppretteSedTyperPåBuc(String rinaSaksnummer, SedType sedType) {
         return eessiConsumer.hentMuligeAksjoner(rinaSaksnummer)
-            .stream().anyMatch(s -> s.split(" ")[2].equals("Create"));
+            .stream().anyMatch(s -> sedType.name().equals(s.split(" ")[1]) && s.split(" ")[2].equals("Create"));
     }
 
     private Map<Landkoder, Set<String>> hentEessiMottakerinstitusjonerPerLand(BucType bucType, Set<String> landkoder) {

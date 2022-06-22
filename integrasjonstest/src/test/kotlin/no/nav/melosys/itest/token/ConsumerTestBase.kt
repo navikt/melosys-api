@@ -30,9 +30,7 @@ abstract class ConsumerTestBase<T>(
     open class TestSubjectHandler : SubjectHandler() {
         override fun getOidcTokenString(): String? = "--token-from-user--"
 
-        override fun getUserID(): String {
-            throw IllegalStateException("getUserID skal ikke bli brukt av test")
-        }
+        override fun getUserID(): String? = "Z123"
     }
 
     class NullSubjectHandler : TestSubjectHandler() {

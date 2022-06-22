@@ -10,6 +10,8 @@ import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.UtenlandskMyndighet;
 import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.UtenlandskMyndighetRepository;
 import no.nav.melosys.service.LandvelgerService;
@@ -39,8 +41,12 @@ public class UtenlandskMyndighetService {
         String saksnummer = behandling.getFagsak().getSaksnummer();
         Collection<Landkoder> landkoder = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandling.getId());
         if (!landkoder.isEmpty()) {
-            Collection<String> institusjonsIder = konverterLandkodeTilInstitusjonsId(landkoder);
-            fagsakService.oppdaterMyndigheter(saksnummer, institusjonsIder);
+            if (behandling.getFagsak().getType() == Sakstyper.TRYGDEAVTALE) {
+                fagsakService.oppdaterMyndighetForTrygdeavtale(saksnummer, hentLandkodeForTrygdeavtale(landkoder));
+            } else {
+                Collection<String> institusjonsIder = konverterLandkodeTilInstitusjonsId(landkoder);
+                fagsakService.oppdaterMyndigheterForEuEos(saksnummer, institusjonsIder);
+            }
         }
     }
 
@@ -93,5 +99,12 @@ public class UtenlandskMyndighetService {
     public String lagInstitusjonsId(UtenlandskMyndighet utenlandskMyndighet) {
         return utenlandskMyndighet.landkode
             + (utenlandskMyndighet.institusjonskode == null ? "" : ":" + utenlandskMyndighet.institusjonskode);
+    }
+
+    private Landkoder hentLandkodeForTrygdeavtale(Collection<Landkoder> landkoder) {
+        if (landkoder.size() != 1) {
+            throw new FunksjonellException("Fant ingen eller flere enn ett trygdemyndighetsland for bilaterale trygdeavtaler.");
+        }
+        return landkoder.stream().findFirst().get();
     }
 }

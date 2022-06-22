@@ -251,7 +251,7 @@ class UtpekingServiceTest {
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> utpekingService.avvisUtpeking(behandlingID, lagUtpekingAvvis()))
-            .withMessageContaining("Kan ikke opprette Sed på rinaSaknummer: 123");
+            .withMessageContaining("Kan ikke opprette SedType A004 på rinaSaknummer: 123");
     }
 
     @Test
