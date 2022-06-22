@@ -219,7 +219,7 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
     }
 
     @Override
-    public List<Oppgave> finnOppgaverMedBrukerID(String aktørId) {
+    public List<Oppgave> finnOppgaverMedAktørId(String aktørId) {
         OppgaveSearchRequest oppgaveSearchRequest = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
             .medAktørId(aktørId)
             .medTema(new String[]{Tema.MED.getKode(), Tema.UFM.getKode()})

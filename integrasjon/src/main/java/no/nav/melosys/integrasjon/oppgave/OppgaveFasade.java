@@ -30,7 +30,7 @@ public interface OppgaveFasade {
      * Finner oppgaver relatert til en bruker.
      * Oppgaver sorteres stigende etter frist.
      */
-    List<Oppgave> finnOppgaverMedBrukerID(String aktørID);
+    List<Oppgave> finnOppgaverMedAktørId(String aktørID);
 
     /**
      * Finner oppgaver relatert til en virksomhet.

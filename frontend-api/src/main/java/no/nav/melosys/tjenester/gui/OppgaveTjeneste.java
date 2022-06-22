@@ -108,18 +108,18 @@ public class OppgaveTjeneste {
         value = "Søk etter oppgaver knyttet til et fødselsnummer, d-nummer, eller organisasjonsnummer",
         response = no.nav.melosys.tjenester.gui.dto.oppgave.OppgaveDto.class,
         responseContainer = "List")
-    public ResponseEntity<List<no.nav.melosys.tjenester.gui.dto.oppgave.OppgaveDto>> søkOppgaverMedFnrDnrEllerOrgnr(
-        @RequestParam(name = "fnrDnr", required = false) String fnrDnr,
+    public ResponseEntity<List<no.nav.melosys.tjenester.gui.dto.oppgave.OppgaveDto>> søkOppgaverMedPersonIdentEllerOrgnr(
+        @RequestParam(name = "personIdent", required = false) String personIdent,
         @RequestParam(name = "orgnr", required = false) String orgnr) {
-        if (StringUtils.isEmpty(fnrDnr) && StringUtils.isEmpty(orgnr)) {
-            throw new FunksjonellException("Finner ingen søkekriteria. API støtter fnr/dnr og orgnr");
+        if (StringUtils.isEmpty(personIdent) && StringUtils.isEmpty(orgnr)) {
+            throw new FunksjonellException("Finner ingen søkekriteria. API støtter personIdent(fnr eller dnr) og orgnr");
         }
-        if (StringUtils.isNotEmpty(fnrDnr) && StringUtils.isNotEmpty(orgnr)) {
-            throw new FunksjonellException("Fant både fnr/dnr og orgnr. API støtter kun én.");
+        if (StringUtils.isNotEmpty(personIdent) && StringUtils.isNotEmpty(orgnr)) {
+            throw new FunksjonellException("Fant både personIdent og orgnr. API støtter kun én.");
         }
         try {
-            var oppgaveliste = StringUtils.isNotEmpty(fnrDnr)
-                ? oppgaveService.finnOppgaverMedBrukerID(fnrDnr)
+            var oppgaveliste = StringUtils.isNotEmpty(personIdent)
+                ? oppgaveService.finnOppgaverMedPersonIdent(personIdent)
                 : oppgaveService.finnOppgaverMedOrgnr(orgnr);
             return ResponseEntity.ok(oppgaveliste.stream().map(no.nav.melosys.tjenester.gui.dto.oppgave.OppgaveDto::av).toList());
         } catch (IkkeFunnetException e) {

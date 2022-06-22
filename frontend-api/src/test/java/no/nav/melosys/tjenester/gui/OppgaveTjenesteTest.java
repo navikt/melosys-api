@@ -102,40 +102,40 @@ class OppgaveTjenesteTest extends JsonSchemaTestParent {
 
     @Disabled("Frem til skjema-fiks")
     @Test
-    void søkOppgaverMedFnrDnrEllerOrgnr() throws IOException {
+    void søkOppgaverMedPersonIdentEllerOrgnr() throws IOException {
         List<Oppgave> oppgaver = defaultEasyRandom().objects(Oppgave.class, 3).collect(Collectors.toList());
-        when(oppgaveService.finnOppgaverMedBrukerID(anyString())).thenReturn(oppgaver);
+        when(oppgaveService.finnOppgaverMedPersonIdent(anyString())).thenReturn(oppgaver);
 
-        validerArray(oppgaveTjeneste.søkOppgaverMedFnrDnrEllerOrgnr("", null).getBody(), OPPGAVER_SOK_SCHEMA, logger);
+        validerArray(oppgaveTjeneste.søkOppgaverMedPersonIdentEllerOrgnr("", null).getBody(), OPPGAVER_SOK_SCHEMA, logger);
     }
 
     @Test
-    void søkOppgaverMedFnrDnrEllerOrgnr_fnrSendesInn_kallerRettFunksjon() {
-        oppgaveTjeneste.søkOppgaverMedFnrDnrEllerOrgnr("fnrdnr", "");
+    void søkOppgaverMedPersonIdentEllerOrgnr_fnrSendesInn_kallerRettFunksjon() {
+        oppgaveTjeneste.søkOppgaverMedPersonIdentEllerOrgnr("fnr", "");
 
-        verify(oppgaveService).finnOppgaverMedBrukerID("fnrdnr");
+        verify(oppgaveService).finnOppgaverMedPersonIdent("fnr");
         verify(oppgaveService, never()).finnOppgaverMedOrgnr(anyString());
     }
 
     @Test
-    void søkOppgaverMedFnrDnrEllerOrgnr_orgnrSendesInn_kallerRettFunksjon() {
-        oppgaveTjeneste.søkOppgaverMedFnrDnrEllerOrgnr("", "orgnr");
+    void søkOppgaverMedPersonIdentEllerOrgnr_orgnrSendesInn_kallerRettFunksjon() {
+        oppgaveTjeneste.søkOppgaverMedPersonIdentEllerOrgnr("", "orgnr");
 
         verify(oppgaveService).finnOppgaverMedOrgnr("orgnr");
-        verify(oppgaveService, never()).finnOppgaverMedBrukerID(anyString());
+        verify(oppgaveService, never()).finnOppgaverMedPersonIdent(anyString());
     }
 
     @Test
-    void søkOppgaverMedFnrDnrEllerOrgnr_fnrOgOrgnrSendesInn_kasterFeil() {
+    void søkOppgaverMedPersonIdentEllerOrgnr_fnrOgOrgnrSendesInn_kasterFeil() {
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> oppgaveTjeneste.søkOppgaverMedFnrDnrEllerOrgnr("fnrdnr", "orgnr"))
-            .withMessageContaining("Fant både fnr/dnr og orgnr");
+            .isThrownBy(() -> oppgaveTjeneste.søkOppgaverMedPersonIdentEllerOrgnr("fnr", "orgnr"))
+            .withMessageContaining("Fant både personIdent og orgnr. API støtter kun én.");
     }
 
     @Test
-    void søkOppgaverMedFnrDnrEllerOrgnr_ingentingSendesInn_kasterFeil() {
+    void søkOppgaverMedPersonIdentEllerOrgnr_ingentingSendesInn_kasterFeil() {
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> oppgaveTjeneste.søkOppgaverMedFnrDnrEllerOrgnr("", ""))
+            .isThrownBy(() -> oppgaveTjeneste.søkOppgaverMedPersonIdentEllerOrgnr("", ""))
             .withMessageContaining("Finner ingen søkekriteria");
     }
 
