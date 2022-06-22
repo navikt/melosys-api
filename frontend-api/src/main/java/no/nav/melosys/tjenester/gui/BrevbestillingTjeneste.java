@@ -17,7 +17,6 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.brev.BrevAdresse;
 import no.nav.melosys.service.brev.BrevbestillingService;
-import no.nav.melosys.service.dokument.BrevmottakerService;
 import no.nav.melosys.service.dokument.MuligeMottakereDto;
 import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
@@ -29,7 +28,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.annotation.RequestScope;
 
 import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
+import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
 
@@ -39,27 +38,21 @@ import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
 @Api(tags = {"dokumenterv2"})
 @RequestScope
 public class BrevbestillingTjeneste {
-    private static final String BRUKER_ELLER_BRUKERS_FULLMEKTIG = "Bruker eller brukers fullmektig";
-    private static final String VIRKSOMHET_TYPE = "Virksomhet";
-    private static final String ANNEN_ORGANISASJON = "Annen organisasjon";
-    private static final String ARBEIDSGIVER_ELLER_ARBEIDSGIVERS_FULLMEKTIG = "Arbeidsgiver eller arbeidsgivers fullmektig";
 
     private final BrevbestillingService brevbestillingService;
     private final BehandlingService behandlingService;
-    private final BrevmottakerService brevmottakerService;
     private final Aksesskontroll aksesskontroll;
 
     public BrevbestillingTjeneste(BrevbestillingService brevbestillingService,
                                   BehandlingService behandlingService,
-                                  BrevmottakerService brevmottakerService, Aksesskontroll aksesskontroll) {
+                                  Aksesskontroll aksesskontroll) {
         this.brevbestillingService = brevbestillingService;
         this.behandlingService = behandlingService;
-        this.brevmottakerService = brevmottakerService;
         this.aksesskontroll = aksesskontroll;
     }
 
     @GetMapping(value = "/tilgjengelige-maler/{behandlingID}", produces = APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Henter alle tilgjengelige brevmaler for en behandling", response = BrevmalDto.class, responseContainer = "List")
+    @ApiOperation(value = "Henter alle tilgjengelige brevmaler for en behandling", response = BrevmalTypeDto.class, responseContainer = "List")
     public List<BrevmalDto> hentTilgjengeligeMaler(@PathVariable long behandlingID) {
         aksesskontroll.autoriser(behandlingID);
         return byggBrevmalListe(behandlingID);
@@ -97,35 +90,93 @@ public class BrevbestillingTjeneste {
     }
 
     private List<BrevmalDto> byggBrevmalListe(long behandlingId) {
-        List<Produserbaredokumenter> produserbareDokumenter = brevbestillingService.hentMuligeProduserbaredokumenter(behandlingId);
+        List<MottakerDto> mottakere = hentTilgjengeligeMottakere(behandlingId);
 
-        return produserbareDokumenter.stream().map(p -> {
-                Aktoersroller hovedMottaker = brevmottakerService.hentMottakerliste(p, behandlingId).getHovedMottaker();
-                return switch (p) {
-                    case MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE -> lagBrevMalDtoForForventetSaksbehandlingstid(p, hovedMottaker, behandlingId);
-                    case MANGELBREV_BRUKER, MANGELBREV_ARBEIDSGIVER -> lagBrevMalDtoForMangelbrev(p, hovedMottaker, behandlingId);
-                    case GENERELT_FRITEKSTBREV_BRUKER, GENERELT_FRITEKSTBREV_ARBEIDSGIVER, GENERELT_FRITEKSTBREV_VIRKSOMHET -> lagBrevMalDtoForFritekstbrev(p, hovedMottaker, behandlingId);
+        return mottakere.stream().map(m -> {
+            List<Produserbaredokumenter> produserbareDokumenter = brevbestillingService.hentMuligeProduserbaredokumenter(behandlingId, m.getRolle());
+
+            List<BrevmalTypeDto> typer = produserbareDokumenter.stream().map(p -> switch (p) {
+                    case MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE -> lagBrevMalDtoForForventetSaksbehandlingstid(p);
+                    case MANGELBREV_BRUKER, MANGELBREV_ARBEIDSGIVER -> lagBrevMalDtoForMangelbrev(p, behandlingId);
+                    case GENERELT_FRITEKSTBREV_BRUKER, GENERELT_FRITEKSTBREV_ARBEIDSGIVER, GENERELT_FRITEKSTBREV_VIRKSOMHET -> lagBrevMalDtoForFritekstbrev(p, behandlingId);
                     default -> null;
-                };
-            })
-            .filter(Objects::nonNull)
-            .toList();
+                })
+                .filter(Objects::nonNull)
+                .toList();
+            return new BrevmalDto(m, typer);
+        }).toList();
     }
 
-    private BrevmalDto lagBrevMalDtoForForventetSaksbehandlingstid(Produserbaredokumenter produserbartdokument, Aktoersroller hovedMottaker, long behandlingId) {
+    private List<MottakerDto> hentTilgjengeligeMottakere(long behandlingId) {
+        var fagsak = behandlingService.hentBehandling(behandlingId).getFagsak();
+        List<MottakerDto> mottakere = new ArrayList<>();
+
+        if (fagsak.getHovedpartRolle() == BRUKER) {
+            mottakere.addAll(lagMottakereForRolle(behandlingId, BRUKER));
+            mottakere.addAll(lagMottakereForRolle(behandlingId, ARBEIDSGIVER));
+        } else if (fagsak.getHovedpartRolle() == VIRKSOMHET) {
+            mottakere.addAll(lagMottakereForRolle(behandlingId, VIRKSOMHET));
+        } else {
+            throw new FunksjonellException("Sak må ha hovedpart for å kunne sende brev");
+        }
+        return mottakere;
+    }
+
+    private List<MottakerDto> lagMottakereForRolle(long behandlingId, Aktoersroller rolle) {
+        List<MottakerDto> mottakere = new ArrayList<>();
         var builder = new MottakerDto.Builder()
-            .medType(BRUKER_ELLER_BRUKERS_FULLMEKTIG)
-            .medRolle(hovedMottaker);
+            .medType(mapType(rolle))
+            .medRolle(rolle);
 
-        leggTilAdresseOgFeilmelding(builder, produserbartdokument, hovedMottaker, behandlingId);
+        leggTilAdresseOgFeilmelding(builder, rolle, behandlingId);
 
-        return new BrevmalDto.Builder()
+        mottakere.add(builder.build());
+
+        if (rolle == Aktoersroller.ARBEIDSGIVER || rolle == Aktoersroller.VIRKSOMHET) {
+            mottakere.add(
+                new MottakerDto.Builder()
+                    .medType(MottakerType.ANNEN_ORGANISASJON)
+                    .medRolle(Aktoersroller.ARBEIDSGIVER)
+                    .orgnrSettesAvSaksbehandler()
+                    .build()
+            );
+        }
+        return mottakere;
+    }
+
+    private MottakerType mapType(Aktoersroller hovedmottaker) {
+        return switch (hovedmottaker) {
+            case BRUKER -> MottakerType.BRUKER_ELLER_BRUKERS_FULLMEKTIG;
+            case VIRKSOMHET -> MottakerType.VIRKSOMHET;
+            case ARBEIDSGIVER -> MottakerType.ARBEIDSGIVER_ELLER_ARBEIDSGIVERS_FULLMEKTIG;
+            default -> throw new FunksjonellException("Vi støtter ikke brev med hovedmottaker: " + hovedmottaker.getKode());
+        };
+    }
+
+    private void leggTilAdresseOgFeilmelding(MottakerDto.Builder builder, Aktoersroller aktoersroller, long behandlingId) {
+        try {
+            var brevAdresser = brevbestillingService.hentBrevAdresseTilMottakere(aktoersroller, behandlingId);
+            if (aktoersroller == BRUKER && brevAdresser.stream().allMatch(BrevAdresse::isAdresselinjerEmpty)) {
+                builder.medFeilmelding(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE.getBeskrivelse());
+            } else {
+                builder.medAdresse(brevAdresser.stream().map(MottakerAdresseDto::av).toList());
+            }
+        } catch (TekniskException e) {
+            if ("Finner ikke arbeidsforholddokument".equals(e.getMessage())) {
+                builder.medFeilmelding(Kontroll_begrunnelser.INGEN_ARBEIDSGIVERE.getBeskrivelse());
+            } else {
+                throw new TekniskException(e);
+            }
+        }
+    }
+
+    private BrevmalTypeDto lagBrevMalDtoForForventetSaksbehandlingstid(Produserbaredokumenter produserbartdokument) {
+        return new BrevmalTypeDto.Builder()
             .medType(produserbartdokument)
-            .medMuligeMottakere(singletonList(builder.build()))
             .build();
     }
 
-    private BrevmalDto lagBrevMalDtoForMangelbrev(Produserbaredokumenter produserbartdokument, Aktoersroller hovedMottaker, long behandlingId) {
+    private BrevmalTypeDto lagBrevMalDtoForMangelbrev(Produserbaredokumenter produserbartdokument, long behandlingId) {
         List<FeltvalgAlternativDto> feltvalgAlternativDtos = new ArrayList<>();
         Behandling behandling = behandlingService.hentBehandling(behandlingId);
 
@@ -135,9 +186,8 @@ public class BrevbestillingTjeneste {
         feltvalgAlternativDtos.add(new FeltvalgAlternativDto(FeltvalgAlternativKode.FRITEKST.getKode(), "Fritekst (erstatter standardtekst)", true));
 
         FeltValgDto feltValgDto = new FeltValgDto(feltvalgAlternativDtos, FeltValgType.RADIO);
-        List<MottakerDto> mottakere = hentMottakereForBrev(produserbartdokument, hovedMottaker, behandlingId);
 
-        return new BrevmalDto.Builder()
+        return new BrevmalTypeDto.Builder()
             .medType(produserbartdokument)
             .medFelter(asList(
                 new BrevmalFeltDto.Builder()
@@ -154,15 +204,11 @@ public class BrevbestillingTjeneste {
                     .erPåkrevd()
                     .build()
             ))
-            .medMuligeMottakere(mottakere)
-            .medMottakereHjelpetekst("Hvis bruker eller arbeidsgiver har fullmektig som er lagt inn i sidemenyen, vil brevet automatisk bli sendt til denne.")
             .build();
     }
 
-    private BrevmalDto lagBrevMalDtoForFritekstbrev(Produserbaredokumenter produserbartdokument, Aktoersroller hovedMottaker, long behandlingId) {
-        List<MottakerDto> mottakere = hentMottakereForBrev(produserbartdokument, hovedMottaker, behandlingId);
-
-        return new BrevmalDto.Builder()
+    private BrevmalTypeDto lagBrevMalDtoForFritekstbrev(Produserbaredokumenter produserbartdokument, long behandlingId) {
+        return new BrevmalTypeDto.Builder()
             .medType(produserbartdokument)
             .medFelter(asList(
                 new BrevmalFeltDto.Builder()
@@ -191,39 +237,7 @@ public class BrevbestillingTjeneste {
                     .medFeltType(FeltType.VEDLEGG)
                     .build()
             ))
-            .medMuligeMottakere(mottakere)
-            .medMottakereHjelpetekst("Hvis bruker eller arbeidsgiver har fullmektig som er lagt inn i sidemenyen, vil brevet automatisk bli sendt til denne.")
             .build();
-    }
-
-    private List<MottakerDto> hentMottakereForBrev(Produserbaredokumenter produserbartdokument, Aktoersroller hovedMottaker, long behandlingId) {
-        List<MottakerDto> mottakere = new ArrayList<>();
-        var builder = new MottakerDto.Builder()
-            .medType(mapType(hovedMottaker))
-            .medRolle(hovedMottaker);
-
-        leggTilAdresseOgFeilmelding(builder, produserbartdokument, hovedMottaker, behandlingId);
-
-        mottakere.add(builder.build());
-        if (hovedMottaker == Aktoersroller.ARBEIDSGIVER || hovedMottaker == Aktoersroller.VIRKSOMHET) {
-            mottakere.add(
-                new MottakerDto.Builder()
-                    .medType(ANNEN_ORGANISASJON)
-                    .medRolle(Aktoersroller.ARBEIDSGIVER)
-                    .orgnrSettesAvSaksbehandler()
-                    .build()
-            );
-        }
-        return mottakere;
-    }
-
-    private String mapType(Aktoersroller hovedmottaker) {
-        return switch (hovedmottaker) {
-            case BRUKER -> BRUKER_ELLER_BRUKERS_FULLMEKTIG;
-            case VIRKSOMHET -> VIRKSOMHET_TYPE;
-            case ARBEIDSGIVER -> ARBEIDSGIVER_ELLER_ARBEIDSGIVERS_FULLMEKTIG;
-            default -> throw new FunksjonellException("Vi støtter ikke brev med hovedmottaker: " + hovedmottaker.getKode());
-        };
     }
 
     private FeltValgDto hentFritekstTittelValg(long behandlingId) {
@@ -246,23 +260,6 @@ public class BrevbestillingTjeneste {
         valgAlternativer.add(new FeltvalgAlternativDto(FeltvalgAlternativKode.FRITEKST.getKode(), FeltvalgAlternativKode.FRITEKST.getBeskrivelse(), true));
 
         return new FeltValgDto(valgAlternativer, FeltValgType.SELECT);
-    }
-
-    private void leggTilAdresseOgFeilmelding(MottakerDto.Builder builder, Produserbaredokumenter produserbaredokumenter, Aktoersroller aktoersroller, long behandlingId) {
-        try {
-            var brevAdresser = brevbestillingService.hentBrevAdresseTilMottakere(produserbaredokumenter, aktoersroller, behandlingId);
-            if (aktoersroller == Aktoersroller.BRUKER && brevAdresser.stream().allMatch(BrevAdresse::isAdresselinjerEmpty)) {
-                builder.medFeilmelding(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE.getBeskrivelse());
-            } else {
-                builder.medAdresse(brevAdresser.stream().map(MottakerAdresseDto::av).toList());
-            }
-        } catch (TekniskException e) {
-            if ("Finner ikke arbeidsforholddokument".equals(e.getMessage())) {
-                builder.medFeilmelding(Kontroll_begrunnelser.INGEN_ARBEIDSGIVERE.getBeskrivelse());
-            } else {
-                throw new TekniskException(e);
-            }
-        }
     }
 
     private HttpHeaders genPdfHeaders(String navn) {

@@ -46,8 +46,8 @@ public class MottakerDto {
         private Collection<MottakerAdresseDto> adresser;
         private String feilmelding;
 
-        public Builder medType(String type) {
-            this.type = type;
+        public Builder medType(MottakerType mottakerType) {
+            this.type = mottakerType.getBeskrivelse();
             return this;
         }
 
