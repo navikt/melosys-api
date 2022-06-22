@@ -10,6 +10,7 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
@@ -104,8 +105,7 @@ public class ArbeidFlereLandSedRuter implements SedRuterForSedTyper {
 
     private void opprettNySak(Prosessinstans prosessinstans, MelosysEessiMelding melosysEessiMelding) {
         prosessinstansService.opprettProsessinstansNySakArbeidFlereLand(
-            melosysEessiMelding,
-            hentBehandlingstema(melosysEessiMelding),
+            melosysEessiMelding, hentSakstema(melosysEessiMelding), hentBehandlingstema(melosysEessiMelding),
             prosessinstans.hentAktørIDFraDataEllerSED()
         );
     }
@@ -128,6 +128,12 @@ public class ArbeidFlereLandSedRuter implements SedRuterForSedTyper {
     @Override
     public Collection<SedType> gjelderSedTyper() {
         return Collections.singleton(SedType.A003);
+    }
+
+    private Sakstemaer hentSakstema(MelosysEessiMelding melosysEessiMelding) {
+        return Landkoder.NO.getKode().equals(melosysEessiMelding.getLovvalgsland())
+            ? Sakstemaer.MEDLEMSKAP_LOVVALG
+            : Sakstemaer.UNNTAK;
     }
 
     public Behandlingstema hentBehandlingstema(MelosysEessiMelding melosysEessiMelding) {
