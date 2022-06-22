@@ -18,11 +18,11 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.autoconfigure.web.client.RestClientTest
-import org.springframework.test.web.client.MockRestServiceServer
 
 @RestClientTest(
     value = [
         StsRestTemplateProducer::class,
+        MockRestServerProvider::class,
 
         DokumentproduksjonConsumerConfig::class,
         DokumentproduksjonConsumerProducer::class,
@@ -32,10 +32,10 @@ import org.springframework.test.web.client.MockRestServiceServer
 )
 class DokumentproduksjonConsumerIT(
     @Autowired private val dokumentproduksjonConsumer: DokumentproduksjonConsumer,
-    @Autowired server: MockRestServiceServer,
+    @Autowired mockRestServerProvider: MockRestServerProvider,
     @Value("\${mockserver.port}") mockPort: Int,
     @Value("\${mockserver.security.port}") mockSecurityUrl: Int
-) : ConsumerTestBase<String>(server, mockPort) {
+) : ConsumerWireMockTestBase<String>(mockRestServerProvider, mockPort) {
 
     private val securityWireMockServer: WireMockServer =
         WireMockServer(WireMockConfiguration.wireMockConfig().port(mockSecurityUrl))

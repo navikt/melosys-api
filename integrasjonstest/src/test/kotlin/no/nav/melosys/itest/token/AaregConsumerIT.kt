@@ -12,15 +12,13 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.boot.autoconfigure.web.reactive.function.client.WebClientAutoConfiguration
 import org.springframework.boot.test.autoconfigure.web.client.RestClientTest
-import org.springframework.test.web.client.MockRestServiceServer
 
 @RestClientTest(
     value = [
         StsRestTemplateProducer::class,
         RestTokenServiceClient::class,
-        WebClientAutoConfiguration::class,
+        MockRestServerProvider::class,
 
         ArbeidsforholdRestConsumer::class,
         ArbeidsforholdRestConsumerConfig::class,
@@ -30,9 +28,9 @@ import org.springframework.test.web.client.MockRestServiceServer
 )
 class AaregConsumerIT(
     @Autowired private val arbeidsforholdRestConsumer: ArbeidsforholdRestConsumer,
-    @Autowired private val server: MockRestServiceServer,
+    @Autowired mockRestServerProvider: MockRestServerProvider,
     @Value("\${mockserver.port}") mockPort: Int,
-) : ConsumerTestBase<String>(server, mockPort) {
+) : ConsumerWireMockTestBase<String>(mockRestServerProvider, mockPort) {
 
     @Test
     fun authorizationSkalKommeFraBruker() {
