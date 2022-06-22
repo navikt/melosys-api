@@ -1,5 +1,6 @@
 package no.nav.melosys.itest.token
 
+import com.github.tomakehurst.wiremock.client.WireMock
 import no.nav.melosys.integrasjon.eessi.EessiConsumer
 import no.nav.melosys.integrasjon.eessi.EessiConsumerImpl
 import no.nav.melosys.integrasjon.eessi.EessiConsumerProducer
@@ -9,18 +10,14 @@ import no.nav.melosys.integrasjon.reststs.StsRestTemplateProducer
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.client.RestClientTest
-import org.springframework.http.HttpMethod
-import org.springframework.http.HttpStatus
-import org.springframework.http.MediaType
-import org.springframework.test.web.client.match.MockRestRequestMatchers.*
-import org.springframework.test.web.client.response.MockRestResponseCreators
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebClient
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 
-@RestClientTest(
+@WebMvcTest(
     value = [
         StsRestTemplateProducer::class,
         RestStsClient::class,
-        MockRestServerProvider::class,
 
         EessiConsumerImpl::class,
         EessiConsumerProducer::class,
@@ -28,32 +25,19 @@ import org.springframework.test.web.client.response.MockRestResponseCreators
     ],
     properties = ["spring.profiles.active:itest-token"]
 )
+@AutoConfigureWebClient
 class EessiConsumerIT(
     @Autowired private val eessiConsumer: EessiConsumer,
-    @Autowired private val mockRestServerProvider: MockRestServerProvider
-) : StsTestBase<String>(mockRestServerProvider) {
-
-    private fun verifyEessiHeaders(headers: Map<String, String>) {
-        mockRestServerProvider.getServiceUnderTestMockServer()
-            .expect(requestTo("/buc/123/aksjoner"))
-            .andExpect(method(HttpMethod.GET)).apply {
-                headers.forEach {
-                    andExpect(header(it.key, it.value))
-                }
-            }
-            .andRespond(
-                MockRestResponseCreators.withSuccess(
-                    "[]", MediaType.APPLICATION_JSON
-                )
-            )
-    }
+    @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,
+    @Value("\${mockserver.security.port}") mockSecurityUrl: Int
+) : ConsumerTestBase<String>(mockServiceUnderTestPort, mockSecurityUrl) {
 
     @Test
     fun authorizationSkalKommeFraSystem() {
         executeFromSystem {
-            verifyEessiHeaders(
+            verifyHeaders(
                 mapOf(
-                    Pair("Authorization", "Bearer --token-from-system--"),
+                    Pair("Authorization", WireMock.equalTo("Bearer --token-from-system--")),
                 )
             )
         }
@@ -62,9 +46,9 @@ class EessiConsumerIT(
     @Test
     fun authorizationSkalKommeFraBruker() {
         executeFromController {
-            verifyEessiHeaders(
+            verifyHeaders(
                 mapOf(
-                    Pair("Authorization", "Bearer --token-from-user--"),
+                    Pair("Authorization", WireMock.equalTo("Bearer --token-from-user--")),
                 )
             )
         }
@@ -72,9 +56,9 @@ class EessiConsumerIT(
 
     @Test
     fun authorizationSkalKommeFraSystemNårHverkenSystemEllerBrukerErKilde() {
-        verifyEessiHeaders(
+        verifyHeaders(
             mapOf(
-                Pair("Authorization", "Bearer --token-from-system--"),
+                Pair("Authorization", WireMock.equalTo("Bearer --token-from-system--")),
             )
         )
         executeRequest()
@@ -87,17 +71,8 @@ class EessiConsumerIT(
         }
     }
 
-    override fun stubError() {
-        mockRestServerProvider.getServiceUnderTestMockServer()
-            .expect(requestTo("/buc/123/aksjoner"))
-            .andRespond(
-                MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("error")
-            )
-
-    }
-
-    override fun errorFromServerMessage() = "500 Internal Server Error: \"error\""
+    override fun errorFromServerMessage() = "500 Server Error: \"{\"melding\": \"Internal Server Error\"}\""
+    override fun getMockData(): String = "[]"
 
     override fun executeRequest() {
         eessiConsumer.hentMuligeAksjoner("123")
