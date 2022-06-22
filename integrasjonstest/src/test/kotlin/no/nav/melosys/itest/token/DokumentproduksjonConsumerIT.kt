@@ -29,6 +29,8 @@ class DokumentproduksjonConsumerIT(
 
     override fun createWireMock(): MappingBuilder = post("/soap/services/dokumentproduksjon/v3")
 
+    override fun defaultStsWireMockStub() {}
+
     @Test
     fun authorizationSkalKommeFraSystem() {
         stsMockServer.stubFor(

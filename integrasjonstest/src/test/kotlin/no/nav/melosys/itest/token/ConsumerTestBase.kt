@@ -24,7 +24,8 @@ abstract class ConsumerTestBase<T>(
     private val serviceUnderTestMockServer: WireMockServer =
         WireMockServer(WireMockConfiguration.wireMockConfig().port(mockPort))
 
-    protected val stsMockServer: WireMockServer = WireMockServer(WireMockConfiguration.wireMockConfig().port(stsMockPort))
+    protected val stsMockServer: WireMockServer =
+        WireMockServer(WireMockConfiguration.wireMockConfig().port(stsMockPort))
 
     open fun createWireMock(): MappingBuilder = WireMock.get(UrlPattern.ANY)
 
@@ -41,6 +42,35 @@ abstract class ConsumerTestBase<T>(
         environment.setProperty("systemuser.username", "test")
         environment.setProperty("systemuser.password", "test")
         EnvironmentHandler(environment)
+    }
+
+    @AfterAll
+    fun afterAll() {
+        serviceUnderTestMockServer.stop()
+        stsMockServer.stop()
+    }
+
+    @BeforeEach
+    fun setup() {
+        serviceUnderTestMockServer.resetAll()
+        stsMockServer.resetAll()
+        defaultStsWireMockStub()
+    }
+
+    open fun defaultStsWireMockStub() {
+        stsMockServer.stubFor(
+            WireMock.get("/?grant_type=client_credentials&scope=openid").willReturn(
+                WireMock.aResponse()
+                    .withStatus(200)
+                    .withHeader("Content-Type", "application/json")
+                    .withBody("{ \"access_token\": \"--token-from-system--\", \"expires_in\": \"123\" }")
+            )
+        )
+    }
+
+    @AfterEach
+    fun afterEach() {
+        SpringSubjectHandler.set(NullSubjectHandler())
     }
 
     fun verifyHeaders(headers: Map<String, StringValuePattern>) {
@@ -62,35 +92,6 @@ abstract class ConsumerTestBase<T>(
         )
     }
 
-    @AfterAll
-    fun afterAll() {
-        serviceUnderTestMockServer.stop()
-        stsMockServer.stop()
-    }
-
-    @BeforeEach
-    fun setup() {
-        serviceUnderTestMockServer.resetAll()
-        stsMockServer.resetAll()
-
-        stsMockServer.stubFor(
-            stsWireMockRequest()
-        )
-    }
-
-        open fun stsWireMockRequest(): MappingBuilder =
-        WireMock.get("/?grant_type=client_credentials&scope=openid").willReturn(
-            WireMock.aResponse()
-                .withStatus(200)
-                .withHeader("Content-Type", "application/json")
-                .withBody("{ \"access_token\": \"--token-from-system--\", \"expires_in\": \"123\" }")
-        )
-
-    @AfterEach
-    fun afterEach() {
-        SpringSubjectHandler.set(NullSubjectHandler())
-    }
-
     fun executeFromSystem(verify: () -> Unit) {
         val uuid = UUID.randomUUID()
         try {
@@ -99,17 +100,6 @@ abstract class ConsumerTestBase<T>(
             executeRequest()
         } finally {
             ThreadLocalAccessInfo.afterExecuteProcess(uuid)
-        }
-    }
-
-    fun executeErrorFromServer(verify: (String) -> Unit) {
-        stubError()
-        try {
-            executeFromSystem { }
-        } catch (exception: Exception) {
-            Assertions.assertThat(exception.message)
-                .endsWith(errorFromServerMessage())
-            verify(exception.message!!)
         }
     }
 
@@ -122,6 +112,17 @@ abstract class ConsumerTestBase<T>(
 
         } finally {
             ThreadLocalAccessInfo.afterControllerRequest("request")
+        }
+    }
+
+    fun executeErrorFromServer(verify: (String) -> Unit) {
+        stubError()
+        try {
+            executeFromSystem { }
+        } catch (exception: Exception) {
+            Assertions.assertThat(exception.message)
+                .endsWith(errorFromServerMessage())
+            verify(exception.message!!)
         }
     }
 
