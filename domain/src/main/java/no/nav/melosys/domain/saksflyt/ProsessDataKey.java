@@ -23,6 +23,7 @@ public enum ProsessDataKey {
     BRUKER_ID("brukerID"),
     DISTRIBUERBAR_JOURNALPOST_ID("distribuerbarJournalpostID"),
     DISTRIBUER_MOTTAKER_LAND("distribuerMottakerLand"),
+    DISTRIBUSJONSTYPE("distribusjonsType"),
     DOKUMENT_ID("dokumentID"),
     EESSI_MELDING("eessiMelding"),
     EESSI_MOTTAKERE("eessiMottakere"),
@@ -64,8 +65,7 @@ public enum ProsessDataKey {
     VARSLE_UTLAND("varsleUtland"),
     VEDLEGG_SED("vedleggTilSed"),
     VIRKSOMHET_ORGNR("virksomhetOrgnr"),
-    YTTERLIGERE_INFO_SED("ytterligereInformasjonSed"),
-    DISTRIBUSJONSTYPE("distribusjonsType");
+    YTTERLIGERE_INFO_SED("ytterligereInformasjonSed");
 
     private final String kode;
 
