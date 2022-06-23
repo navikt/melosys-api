@@ -67,7 +67,7 @@ public class DokumentproduksjonsInfoMapper {
                     JournalforingsTittel.INNVILGELSE_FTRL_2_8.getTittel())
             )
             .put(STORBRITANNIA,
-                new DokumentproduksjonsInfo("uk_innvilgelse_og_attest",
+                new DokumentproduksjonsInfo("trygdeavtale_uk",
                     DokumentKategoriKode.VB.getKode(),
                     JournalforingsTittel.STORBRITANNIA.getTittel(),
                     Map.of(VedleggTyper.VEDTAKSBREV, JournalforingsTittel.STORBRITANNIA_VEDTAKSBREV.getTittel(),
