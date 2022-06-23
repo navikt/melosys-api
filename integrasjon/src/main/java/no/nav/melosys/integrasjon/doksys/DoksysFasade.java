@@ -2,7 +2,7 @@ package no.nav.melosys.integrasjon.doksys;
 
 import no.nav.melosys.domain.Kontaktopplysning;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
-import no.nav.melosys.domain.kodeverk.Distribusjonstyper;
+import no.nav.melosys.domain.brev.Distribusjonstype;
 
 public interface DoksysFasade {
 
@@ -10,9 +10,9 @@ public interface DoksysFasade {
 
     DokumentbestillingResponse produserIkkeredigerbartDokument(Dokumentbestilling dokumentbestilling);
 
-    String distribuerJournalpost(String journalpostId, StrukturertAdresse mottakeradresse, Distribusjonstyper distribusjonstype);
+    String distribuerJournalpost(String journalpostId, StrukturertAdresse mottakeradresse, Distribusjonstype distribusjonstype);
 
-    String distribuerJournalpost(String journalpostId, StrukturertAdresse mottakeradresse, Kontaktopplysning kontaktopplysning, String kontaktpersonNavn, Distribusjonstyper distribusjonstype);
+    String distribuerJournalpost(String journalpostId, StrukturertAdresse mottakeradresse, Kontaktopplysning kontaktopplysning, String kontaktpersonNavn, Distribusjonstype distribusjonstype);
 
-    String distribuerJournalpost(String journalpostId, Distribusjonstyper distribusjonstype);
+    String distribuerJournalpost(String journalpostId, Distribusjonstype distribusjonstype);
 }

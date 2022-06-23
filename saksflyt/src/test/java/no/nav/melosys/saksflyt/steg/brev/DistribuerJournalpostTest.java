@@ -6,10 +6,10 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.UtenlandskMyndighet;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
+import no.nav.melosys.domain.brev.Distribusjonstype;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.brev.MangelbrevBrevbestilling;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Distribusjonstyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
@@ -86,18 +86,18 @@ class DistribuerJournalpostTest {
     @Test
     void utførDistribuerJournalpostUtenAdresse() {
         String journalpostId = "12345";
-        Prosessinstans prosessinstans = setupHappypath(journalpostId, Aktoersroller.BRUKER, Distribusjonstyper.VIKTIG);
+        Prosessinstans prosessinstans = setupHappypath(journalpostId, Aktoersroller.BRUKER, Distribusjonstype.VIKTIG);
 
         distribuerJournalpost.utfør(prosessinstans);
 
-        verify(mockDoksysFasade).distribuerJournalpost(eq(journalpostId), eq(Distribusjonstyper.VIKTIG));
+        verify(mockDoksysFasade).distribuerJournalpost(eq(journalpostId), eq(Distribusjonstype.VIKTIG));
     }
 
     @Test
     void utførDistribuerJournalpostMedPostadresse() {
         String journalpostId = "12345";
 
-        Prosessinstans prosessinstans = setupHappypath(journalpostId, Aktoersroller.REPRESENTANT, Distribusjonstyper.ANNET);
+        Prosessinstans prosessinstans = setupHappypath(journalpostId, Aktoersroller.REPRESENTANT, Distribusjonstype.ANNET);
         prosessinstans.setData(ProsessDataKey.ORGNR, "123456789");
 
         Saksopplysning saksopplysning = new Saksopplysning();
@@ -108,13 +108,13 @@ class DistribuerJournalpostTest {
 
         distribuerJournalpost.utfør(prosessinstans);
 
-        verify(mockDoksysFasade).distribuerJournalpost(eq(journalpostId), any(StrukturertAdresse.class), any(), any(), eq(Distribusjonstyper.ANNET));
+        verify(mockDoksysFasade).distribuerJournalpost(eq(journalpostId), any(StrukturertAdresse.class), any(), any(), eq(Distribusjonstype.ANNET));
     }
 
     @Test
     void utførDistribuerJournalpostMedForretningsadresse() {
         String journalpostId = "12345";
-        Prosessinstans prosessinstans = setupHappypath(journalpostId, Aktoersroller.REPRESENTANT, Distribusjonstyper.VEDTAK);
+        Prosessinstans prosessinstans = setupHappypath(journalpostId, Aktoersroller.REPRESENTANT, Distribusjonstype.VEDTAK);
         prosessinstans.setData(ProsessDataKey.ORGNR, "123456789");
 
         Saksopplysning saksopplysning = new Saksopplysning();
@@ -126,25 +126,25 @@ class DistribuerJournalpostTest {
 
         distribuerJournalpost.utfør(prosessinstans);
 
-        verify(mockDoksysFasade).distribuerJournalpost(eq(journalpostId), any(StrukturertAdresse.class), any(), any(), eq(Distribusjonstyper.VEDTAK));
+        verify(mockDoksysFasade).distribuerJournalpost(eq(journalpostId), any(StrukturertAdresse.class), any(), any(), eq(Distribusjonstype.VEDTAK));
     }
 
     @Test
     void utførDistribuerJournalpostMedReperesentantPerson() {
         String journalpostId = "12345";
-        Prosessinstans prosessinstans = setupHappypath(journalpostId, Aktoersroller.REPRESENTANT, Distribusjonstyper.ANNET);
+        Prosessinstans prosessinstans = setupHappypath(journalpostId, Aktoersroller.REPRESENTANT, Distribusjonstype.ANNET);
         prosessinstans.setData(ProsessDataKey.AKTØR_ID, "12345678901");
 
         distribuerJournalpost.utfør(prosessinstans);
 
-        verify(mockDoksysFasade).distribuerJournalpost(eq(journalpostId), eq(Distribusjonstyper.ANNET));
+        verify(mockDoksysFasade).distribuerJournalpost(eq(journalpostId), eq(Distribusjonstype.ANNET));
     }
 
     @Test
     void utførDistribuerJournalpostMedUtenlandskMyndighet() {
         final String journalpostId = "12345";
         final String institusjonId = "GB:A100";
-        Prosessinstans prosessinstans = setupHappypath(journalpostId, Aktoersroller.TRYGDEMYNDIGHET, Distribusjonstyper.VIKTIG);
+        Prosessinstans prosessinstans = setupHappypath(journalpostId, Aktoersroller.TRYGDEMYNDIGHET, Distribusjonstype.VIKTIG);
         prosessinstans.setData(ProsessDataKey.INSTITUSJON_ID, institusjonId);
 
         var utenlandskMyndighet = new UtenlandskMyndighet();
@@ -154,14 +154,14 @@ class DistribuerJournalpostTest {
 
         distribuerJournalpost.utfør(prosessinstans);
 
-        verify(mockDoksysFasade).distribuerJournalpost(eq(journalpostId), any(StrukturertAdresse.class), eq(Distribusjonstyper.VIKTIG));
+        verify(mockDoksysFasade).distribuerJournalpost(eq(journalpostId), any(StrukturertAdresse.class), eq(Distribusjonstype.VIKTIG));
     }
 
-    private Prosessinstans setupHappypath(String journalpostId, Aktoersroller rolle, Distribusjonstyper distribusjonstyper) {
+    private Prosessinstans setupHappypath(String journalpostId, Aktoersroller rolle, Distribusjonstype distribusjonstype) {
         Behandling behandling = TestdataFactory.lagBehandling();
         Prosessinstans prosessinstans = new Prosessinstans();
         DokgenBrevbestilling brevbestilling = new MangelbrevBrevbestilling.Builder()
-            .medDistribusjonstype(distribusjonstyper)
+            .medDistribusjonstype(distribusjonstype)
             .build();
 
         prosessinstans.setBehandling(behandling);

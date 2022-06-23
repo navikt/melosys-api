@@ -11,7 +11,6 @@ import no.nav.melosys.domain.UtenlandskMyndighet;
 import no.nav.melosys.domain.arkiv.SaksvedleggBestilling;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
-import no.nav.melosys.domain.kodeverk.Distribusjonstyper;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.person.Persondata;
 
@@ -149,7 +148,7 @@ public class DokgenBrevbestilling extends Brevbestilling {
         private Persondata persondokument;
         private Persondata personMottaker;
         private List<SaksvedleggBestilling> saksvedleggBestilling;
-        private Distribusjonstyper distribusjonstype;
+        private Distribusjonstype distribusjonstype;
 
 
         public Builder() {
@@ -267,7 +266,7 @@ public class DokgenBrevbestilling extends Brevbestilling {
             return (T) this;
         }
 
-        public T medDistribusjonstype(Distribusjonstyper distribusjonstype) {
+        public T medDistribusjonstype(Distribusjonstype distribusjonstype) {
             this.distribusjonstype = distribusjonstype;
             return (T) this;
         }

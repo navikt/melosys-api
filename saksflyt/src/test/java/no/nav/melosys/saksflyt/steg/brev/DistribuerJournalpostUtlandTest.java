@@ -2,7 +2,7 @@ package no.nav.melosys.saksflyt.steg.brev;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
-import no.nav.melosys.domain.kodeverk.Distribusjonstyper;
+import no.nav.melosys.domain.brev.Distribusjonstype;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
@@ -42,14 +42,14 @@ class DistribuerJournalpostUtlandTest {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setData(ProsessDataKey.DISTRIBUERBAR_JOURNALPOST_ID, "12345");
         prosessinstans.setData(ProsessDataKey.DISTRIBUER_MOTTAKER_LAND, Landkoder.SE);
-        prosessinstans.setData(ProsessDataKey.DISTRIBUSJONSTYPE, Distribusjonstyper.VEDTAK);
+        prosessinstans.setData(ProsessDataKey.DISTRIBUSJONSTYPE, Distribusjonstype.VEDTAK);
         prosessinstans.setBehandling(new Behandling());
         when(utenlandskMyndighetService.hentUtenlandskMyndighet(eq(Landkoder.SE))).thenReturn(lagUtenlandskMyndighet());
 
         distribuerJournalpostUtland.utfør(prosessinstans);
 
         ArgumentCaptor<StrukturertAdresse> captor = ArgumentCaptor.forClass(StrukturertAdresse.class);
-        verify(doksysFasade).distribuerJournalpost(eq("12345"), captor.capture(), eq(Distribusjonstyper.VEDTAK));
+        verify(doksysFasade).distribuerJournalpost(eq("12345"), captor.capture(), eq(Distribusjonstype.VEDTAK));
 
         StrukturertAdresse strukturertAdresse = captor.getValue();
         assertThat(strukturertAdresse).isNotNull();
