@@ -3,9 +3,11 @@ package no.nav.melosys.saksflyt.steg.brev;
 import java.util.Optional;
 
 import no.nav.melosys.domain.UtenlandskMyndighet;
+import no.nav.melosys.domain.kodeverk.Distribusjonstyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
+import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.doksys.DoksysFasade;
@@ -44,15 +46,16 @@ public class DistribuerJournalpostUtland implements StegBehandler {
             Landkoder mottakerLand = Optional.ofNullable(prosessinstans.getData(ProsessDataKey.DISTRIBUER_MOTTAKER_LAND, Landkoder.class))
                 .orElseThrow(() -> new IkkeFunnetException("Kan ikke distribuere journalpost da mottakerland ikke er satt"));
             UtenlandskMyndighet utenlandskMyndighet = utenlandskMyndighetService.hentUtenlandskMyndighet(mottakerLand);
-            log.info("Bestiller distribuering av journalpost {} til land {} i behandling {}",
-                distribuerbarJournalpost, mottakerLand, prosessinstans.getBehandling().getId());
+            Distribusjonstyper distribusjonstype =  prosessinstans.getData(ProsessDataKey.DISTRIBUSJONSTYPE, Distribusjonstyper.class);
+            log.info("Bestiller distribuering av journalpost {} til land {} i behandling {} med distribusjonstype {}",
+                distribuerbarJournalpost, mottakerLand, prosessinstans.getBehandling().getId(), distribusjonstype);
 
-            bestillDistribuering(distribuerbarJournalpost, utenlandskMyndighet);
+            bestillDistribuering(distribuerbarJournalpost, utenlandskMyndighet, distribusjonstype);
         }
     }
 
-    private void bestillDistribuering(String journalpostId, UtenlandskMyndighet utenlandskMyndighet) {
-        String bestillingsId = doksysFasade.distribuerJournalpost(journalpostId, utenlandskMyndighet.getAdresse());
+    private void bestillDistribuering(String journalpostId, UtenlandskMyndighet utenlandskMyndighet, Distribusjonstyper distribusjonstype) {
+        String bestillingsId = doksysFasade.distribuerJournalpost(journalpostId, utenlandskMyndighet.getAdresse(), distribusjonstype);
         log.info("Distribuering av journalpost {} bestilt med bestillingsId {}", journalpostId, bestillingsId);
     }
 }

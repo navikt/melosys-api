@@ -15,6 +15,7 @@ import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.eessi.melding.UtpekingAvvis;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
+import no.nav.melosys.domain.kodeverk.Distribusjonstyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Ikke_godkjent_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
@@ -192,6 +193,7 @@ public class ProsessinstansService {
             .build();
 
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSRESULTATTYPE, behandlingsresultatType.getKode());
+        prosessinstans.setData(ProsessDataKey.DISTRIBUSJONSTYPE, Distribusjonstyper.VEDTAK);
 
         lagre(prosessinstans);
     }
@@ -203,6 +205,8 @@ public class ProsessinstansService {
             .medBegrunnelseFritekst(request.getBegrunnelseFritekst())
             .build();
 
+        prosessinstans.setData(ProsessDataKey.DISTRIBUSJONSTYPE, Distribusjonstyper.VEDTAK);
+
         lagre(prosessinstans);
     }
 
@@ -212,6 +216,8 @@ public class ProsessinstansService {
             .medBehandling(behandling)
             .medBegrunnelseFritekst(request.getBegrunnelseFritekst())
             .build();
+
+        prosessinstans.setData(ProsessDataKey.DISTRIBUSJONSTYPE, Distribusjonstyper.VEDTAK);
 
         lagre(prosessinstans);
     }
@@ -259,6 +265,8 @@ public class ProsessinstansService {
             .medYtterligereinformasjonSed(fritekstSed)
             .build();
 
+        prosessinstans.setData(ProsessDataKey.DISTRIBUSJONSTYPE, Distribusjonstyper.VEDTAK);
+
         lagre(prosessinstans);
     }
 
@@ -286,6 +294,7 @@ public class ProsessinstansService {
 
     public void opprettProsessinstansOpprettOgDistribuerBrev(Behandling behandling, Aktoer mottaker, DokgenBrevbestilling brevbestilling) {
         Prosessinstans prosessinstans = new Prosessinstans();
+        // Er HVA FAEN ER DET DU VIL?
         prosessinstans.setType(ProsessType.OPPRETT_OG_DISTRIBUER_BREV);
         prosessinstans.setData(BREVBESTILLING, brevbestilling);
         prosessinstans.setData(MOTTAKER, mottaker.getRolle());
@@ -344,6 +353,8 @@ public class ProsessinstansService {
             .medBegrunnelseFritekst(fritekstBrev)
             .build();
 
+        prosessinstans.setData(ProsessDataKey.DISTRIBUSJONSTYPE, Distribusjonstyper.VIKTIG);
+
         lagre(prosessinstans);
     }
 
@@ -359,7 +370,10 @@ public class ProsessinstansService {
             .medYtterligereinformasjonSed(ytterligereInformasjonSed)
             .medBegrunnelseFritekst(fritekstBrev)
             .build();
+
         prosessinstans.setData(ProsessDataKey.UTPEKT_LAND, utpektLand);
+        prosessinstans.setData(ProsessDataKey.DISTRIBUSJONSTYPE, Distribusjonstyper.VEDTAK);
+
         lagre(prosessinstans);
     }
 
