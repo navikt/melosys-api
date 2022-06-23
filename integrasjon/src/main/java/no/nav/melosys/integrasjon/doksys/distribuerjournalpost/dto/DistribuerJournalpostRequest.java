@@ -74,8 +74,8 @@ public final class DistribuerJournalpostRequest {
         private String bestillendeFagsystem;
         private String dokumentProdApp;
         private Adresse adresse;
-        Distribusjonstype distribusjonstype;
-        Distribusjonstidspunkt distribusjonstidspunkt;
+        private Distribusjonstype distribusjonstype;
+        private Distribusjonstidspunkt distribusjonstidspunkt;
 
         DistribuerJournalpostRequestBuilder() {
         }
