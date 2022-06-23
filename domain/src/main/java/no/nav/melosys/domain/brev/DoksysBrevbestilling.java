@@ -21,9 +21,8 @@ public final class DoksysBrevbestilling extends Brevbestilling {
                                  Behandling behandling,
                                  String begrunnelseKode,
                                  String fritekst,
-                                 String ytterligereInformasjon,
-                                 Distribusjonstype distribusjonstype) {
-        super(produserbartdokument, behandling, avsenderID, distribusjonstype);
+                                 String ytterligereInformasjon) {
+        super(produserbartdokument, behandling, avsenderID);
         this.mottakerRolle = mottakerRolle;
         this.mottaker = mottaker;
         this.begrunnelseKode = begrunnelseKode;
@@ -40,7 +39,6 @@ public final class DoksysBrevbestilling extends Brevbestilling {
         private String begrunnelseKode;
         private String fritekst;
         private String ytterligereInformasjon;
-        private Distribusjonstype distribusjonstype;
 
         public Builder medProduserbartDokument(Produserbaredokumenter produserbartdokument) {
             this.produserbartdokument = produserbartdokument;
@@ -88,11 +86,6 @@ public final class DoksysBrevbestilling extends Brevbestilling {
             return this;
         }
 
-        public Builder medDistribusjonstype(Distribusjonstype distribusjonstype) {
-            this.distribusjonstype = distribusjonstype;
-            return this;
-        }
-
         public DoksysBrevbestilling build() {
             return new DoksysBrevbestilling(
                 produserbartdokument,
@@ -102,8 +95,7 @@ public final class DoksysBrevbestilling extends Brevbestilling {
                 behandling,
                 begrunnelseKode,
                 fritekst,
-                ytterligereInformasjon,
-                distribusjonstype
+                ytterligereInformasjon
             );
         }
     }

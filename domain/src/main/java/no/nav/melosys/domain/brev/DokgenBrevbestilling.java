@@ -40,6 +40,7 @@ public class DokgenBrevbestilling extends Brevbestilling {
     private Persondata persondokument;
     private Persondata personMottaker;
     private List<SaksvedleggBestilling> saksvedleggBestilling;
+    private Distribusjonstype distribusjonstype;
 
     public DokgenBrevbestilling() {
         super();
@@ -47,7 +48,7 @@ public class DokgenBrevbestilling extends Brevbestilling {
     }
 
     protected DokgenBrevbestilling(Builder<?> builder) {
-        super(builder.produserbartdokument, builder.behandling, builder.avsenderNavn, builder.distribusjonstype);
+        super(builder.produserbartdokument, builder.behandling, builder.avsenderNavn);
         this.org = builder.org;
         this.kontaktopplysning = builder.kontaktopplysning;
         this.utenlandskMyndighet = builder.utenlandskMyndighet;
@@ -63,6 +64,7 @@ public class DokgenBrevbestilling extends Brevbestilling {
         this.persondokument = builder.persondokument;
         this.personMottaker = builder.personMottaker;
         this.saksvedleggBestilling = builder.saksvedleggBestilling;
+        this.distribusjonstype = builder.distribusjonstype;
     }
 
     public OrganisasjonDokument getOrg() {
@@ -123,6 +125,10 @@ public class DokgenBrevbestilling extends Brevbestilling {
 
     public List<SaksvedleggBestilling> getSaksvedleggBestilling() {
         return saksvedleggBestilling;
+    }
+
+    public Distribusjonstype getDistribusjonstype() {
+        return distribusjonstype;
     }
 
     public Builder toBuilder() {
