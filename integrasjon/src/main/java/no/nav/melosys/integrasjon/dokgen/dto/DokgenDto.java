@@ -12,14 +12,15 @@ import com.fasterxml.jackson.datatype.jsr310.ser.InstantSerializer;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.integrasjon.dokgen.dto.felles.Mottaker;
-import no.nav.melosys.integrasjon.dokgen.dto.felles.Saksopplysninger;
+import no.nav.melosys.integrasjon.dokgen.dto.felles.Saksinfo;
+import no.nav.melosys.integrasjon.dokgen.dto.felles.SaksinfoBruker;
 
 import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
 import static no.nav.melosys.integrasjon.dokgen.DokgenAdresseMapper.mapMottaker;
 
 @JsonInclude(Include.NON_EMPTY)
 public abstract class DokgenDto {
-    private final Saksopplysninger saksopplysninger;
+    private final Saksinfo saksinfo;
 
     @JsonSerialize(using = InstantSerializer.class)
     @JsonFormat(shape = STRING)
@@ -28,15 +29,19 @@ public abstract class DokgenDto {
     private final String saksbehandlerNavn;
     private Mottaker mottaker;
 
-    protected DokgenDto(DokgenBrevbestilling brevbestilling, Aktoersroller mottakerType) {
-        this.saksopplysninger = Saksopplysninger.av(brevbestilling, mottakerType);
+    protected DokgenDto(DokgenBrevbestilling brevbestilling, Aktoersroller mottakerType, Saksinfo saksinfo) {
+        this.saksinfo = saksinfo;
         this.dagensDato = Instant.now();
         this.saksbehandlerNavn = brevbestilling.getSaksbehandlerNavn();
         this.mottaker = mapMottaker(brevbestilling, mottakerType);
     }
 
-    public Saksopplysninger getSaksopplysninger() {
-        return saksopplysninger;
+    protected DokgenDto(DokgenBrevbestilling brevbestilling, Aktoersroller mottakerType) {
+        this(brevbestilling, mottakerType, SaksinfoBruker.av(brevbestilling));
+    }
+
+    public Saksinfo getSaksinfo() {
+        return saksinfo;
     }
 
     public Instant getDagensDato() {

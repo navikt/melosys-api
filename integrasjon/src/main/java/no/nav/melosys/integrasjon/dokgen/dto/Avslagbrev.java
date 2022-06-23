@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import no.nav.melosys.domain.brev.AvslagBrevbestilling;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.integrasjon.dokgen.dto.felles.SaksinfoBruker;
 
 import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
 
@@ -61,5 +62,10 @@ public class Avslagbrev extends DokgenDto {
 
     public LocalDate getDatoMottatt() {
         return datoMottatt;
+    }
+
+    @Override
+    public SaksinfoBruker getSaksinfo() {
+        return (SaksinfoBruker) super.getSaksinfo();
     }
 }

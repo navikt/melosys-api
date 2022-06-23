@@ -2,6 +2,7 @@ package no.nav.melosys.integrasjon.dokgen.dto;
 
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.integrasjon.dokgen.dto.felles.SaksinfoBruker;
 import no.nav.melosys.integrasjon.dokgen.dto.storbritannia.attest.AttestStorbritannia;
 import no.nav.melosys.integrasjon.dokgen.dto.storbritannia.innvilgelse.InnvilgelseStorbritannia;
 
@@ -81,5 +82,10 @@ public class InnvilgelseOgAttestStorbritannia extends DokgenDto {
 
     public String getNyVurderingBakgrunn() {
         return nyVurderingBakgrunn;
+    }
+
+    @Override
+    public SaksinfoBruker getSaksinfo() {
+        return (SaksinfoBruker) super.getSaksinfo();
     }
 }

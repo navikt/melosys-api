@@ -2,6 +2,7 @@ package no.nav.melosys.integrasjon.dokgen.dto;
 
 import no.nav.melosys.domain.brev.FritekstbrevBrevbestilling;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.integrasjon.dokgen.dto.felles.Saksinfo;
 
 public class Fritekstbrev extends DokgenDto {
     private final String fritekstTittel;
@@ -9,8 +10,8 @@ public class Fritekstbrev extends DokgenDto {
     private final boolean medKontaktopplysninger;
     private final String navnFullmektig;
 
-    private Fritekstbrev(FritekstbrevBrevbestilling brevbestilling, Aktoersroller mottakerType) {
-        super(brevbestilling, mottakerType);
+    protected Fritekstbrev(FritekstbrevBrevbestilling brevbestilling, Aktoersroller mottakerType, Saksinfo saksinfo) {
+        super(brevbestilling, mottakerType, saksinfo);
         this.fritekstTittel = brevbestilling.getFritekstTittel();
         this.fritekst = brevbestilling.getFritekst();
         this.medKontaktopplysninger = brevbestilling.isKontaktopplysninger();
@@ -31,9 +32,5 @@ public class Fritekstbrev extends DokgenDto {
 
     public String getNavnFullmektig() {
         return navnFullmektig;
-    }
-
-    public static Fritekstbrev av(FritekstbrevBrevbestilling brevbestilling, Aktoersroller mottakerType) {
-        return new Fritekstbrev(brevbestilling, mottakerType);
     }
 }

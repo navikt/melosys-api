@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.ser.InstantSerializer;
 import no.nav.melosys.domain.brev.MangelbrevBrevbestilling;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.integrasjon.dokgen.dto.felles.SaksinfoBruker;
 
 import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
 
@@ -68,5 +69,10 @@ public class Mangelbrev extends DokgenDto {
 
     public String getInnledningFritekst() {
         return innledningFritekst;
+    }
+
+    @Override
+    public SaksinfoBruker getSaksinfo() {
+        return (SaksinfoBruker) super.getSaksinfo();
     }
 }
