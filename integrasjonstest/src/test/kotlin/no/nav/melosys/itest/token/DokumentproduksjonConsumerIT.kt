@@ -1,29 +1,20 @@
 package no.nav.melosys.itest.token
 
-import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.MappingBuilder
 import com.github.tomakehurst.wiremock.client.WireMock.*
-import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.github.tomakehurst.wiremock.matching.StringValuePattern
 import no.nav.melosys.integrasjon.doksys.dokumentproduksjon.DokumentproduksjonConsumer
 import no.nav.melosys.integrasjon.doksys.dokumentproduksjon.DokumentproduksjonConsumerConfig
 import no.nav.melosys.integrasjon.doksys.dokumentproduksjon.DokumentproduksjonConsumerProducer
-import no.nav.melosys.integrasjon.reststs.StsRestTemplateProducer
 import no.nav.melosys.sikkerhet.sts.StsLoginConfig
 import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.meldinger.ProduserIkkeredigerbartDokumentRequest
-import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.boot.test.autoconfigure.web.client.RestClientTest
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 
-@RestClientTest(
+@WebMvcTest(
     value = [
-        StsRestTemplateProducer::class,
-        MockRestServerProvider::class,
-
         DokumentproduksjonConsumerConfig::class,
         DokumentproduksjonConsumerProducer::class,
         StsLoginConfig::class,
@@ -32,34 +23,17 @@ import org.springframework.boot.test.autoconfigure.web.client.RestClientTest
 )
 class DokumentproduksjonConsumerIT(
     @Autowired private val dokumentproduksjonConsumer: DokumentproduksjonConsumer,
-    @Autowired mockRestServerProvider: MockRestServerProvider,
-    @Value("\${mockserver.port}") mockPort: Int,
-    @Value("\${mockserver.security.port}") mockSecurityUrl: Int
-) : ConsumerWireMockTestBase<String>(mockRestServerProvider, mockPort) {
-
-    private val securityWireMockServer: WireMockServer =
-        WireMockServer(WireMockConfiguration.wireMockConfig().port(mockSecurityUrl))
-
-    @BeforeAll
-    fun beforeAllForDokumentproduksjonConsumer() {
-        securityWireMockServer.start()
-    }
-
-    @AfterAll
-    fun afterAllForDokumentproduksjonConsumer() {
-        securityWireMockServer.stop()
-    }
-
-    @BeforeEach
-    fun setupForDokumentproduksjonConsumer() {
-        securityWireMockServer.resetAll()
-    }
+    @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,
+    @Value("\${mockserver.security.port}") mockSecurityPort: Int
+) : ConsumerWireMockTestBase<String>(mockServiceUnderTestPort, mockSecurityPort) {
 
     override fun createWireMock(): MappingBuilder = post("/soap/services/dokumentproduksjon/v3")
 
+    override fun defaultStsWireMockStub() {}
+
     @Test
     fun authorizationSkalKommeFraSystem() {
-        securityWireMockServer.stubFor(
+        stsMockServer.stubFor(
             defaultSecurityServiceWireMockMappings()
                 .withRequestBody(
                     notMatching(".*BinarySecurityToken.*")
@@ -82,7 +56,7 @@ class DokumentproduksjonConsumerIT(
                 </wsse:BinarySecurityToken>
         """.trimIndent()
 
-        securityWireMockServer.stubFor(
+        stsMockServer.stubFor(
             defaultSecurityServiceWireMockMappings()
                 .withRequestBody(
                     matchingXPath(
@@ -100,7 +74,7 @@ class DokumentproduksjonConsumerIT(
 
     @Test
     fun authorizationSkalKommeFraSystemNårHverkenSystemEllerBrukerErKilde() {
-        securityWireMockServer.stubFor(
+        stsMockServer.stubFor(
             defaultSecurityServiceWireMockMappings()
                 .withRequestBody(
                     notMatching(".*BinarySecurityToken.*")

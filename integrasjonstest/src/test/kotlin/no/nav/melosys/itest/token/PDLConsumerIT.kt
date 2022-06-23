@@ -10,13 +10,13 @@ import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.boot.test.autoconfigure.web.client.RestClientTest
+import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebClient
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 
-@RestClientTest(
+@WebMvcTest(
     value = [
         StsRestTemplateProducer::class,
         RestTokenServiceClient::class,
-        MockRestServerProvider::class,
 
         PDLConsumerImpl::class,
         PDLConsumerProducer::class,
@@ -25,11 +25,12 @@ import org.springframework.boot.test.autoconfigure.web.client.RestClientTest
     ],
     properties = ["spring.profiles.active:itest-token"]
 )
+@AutoConfigureWebClient
 class PDLConsumerIT(
     @Autowired private val pdlConsumer: PDLConsumer,
-    @Autowired mockRestServerProvider: MockRestServerProvider,
-    @Value("\${mockserver.port}") mockPort: Int,
-) : ConsumerWireMockTestBase<String>(mockRestServerProvider, mockPort) {
+    @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,
+    @Value("\${mockserver.security.port}") mockSecurityPort: Int
+) : ConsumerWireMockTestBase<String>(mockServiceUnderTestPort, mockSecurityPort) {
 
     @Test
     fun authorizationSkalKommeFraSystem() {
