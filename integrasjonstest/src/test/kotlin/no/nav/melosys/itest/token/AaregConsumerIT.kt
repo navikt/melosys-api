@@ -30,8 +30,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 class AaregConsumerIT(
     @Autowired private val arbeidsforholdRestConsumer: ArbeidsforholdRestConsumer,
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,
-    @Value("\${mockserver.security.port}") mockSecurityUrl: Int
-) : ConsumerTestBase<String>(mockServiceUnderTestPort, mockSecurityUrl) {
+    @Value("\${mockserver.security.port}") mockSecurityPort: Int
+) : ConsumerTestBase<String>(mockServiceUnderTestPort, mockSecurityPort) {
 
     @Test
     fun authorizationSkalKommeFraBruker() {

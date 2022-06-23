@@ -30,8 +30,8 @@ import java.time.LocalDate
 class MedlemskapConsumerIT(
     @Autowired private val medlemskapRestConsumer: MedlemskapRestConsumer,
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,
-    @Value("\${mockserver.security.port}") mockSecurityUrl: Int
-) : ConsumerTestBase<String>(mockServiceUnderTestPort, mockSecurityUrl) {
+    @Value("\${mockserver.security.port}") mockSecurityPort: Int
+) : ConsumerTestBase<String>(mockServiceUnderTestPort, mockSecurityPort) {
 
     @Test
     fun authorizationSkalKommeFraSystem() {

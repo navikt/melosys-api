@@ -30,8 +30,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 class OppgaveConsumerIT(
     @Autowired private val oppgaveConsumer: OppgaveConsumer,
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,
-    @Value("\${mockserver.security.port}") mockSecurityUrl: Int
-) : ConsumerTestBase<String>(mockServiceUnderTestPort, mockSecurityUrl) {
+    @Value("\${mockserver.security.port}") mockSecurityPort: Int
+) : ConsumerTestBase<String>(mockServiceUnderTestPort, mockSecurityPort) {
 
     @Test
     fun authorizationSkalKommeFraSystem() {

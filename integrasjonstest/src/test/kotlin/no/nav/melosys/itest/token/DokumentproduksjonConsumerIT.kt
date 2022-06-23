@@ -24,8 +24,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 class DokumentproduksjonConsumerIT(
     @Autowired private val dokumentproduksjonConsumer: DokumentproduksjonConsumer,
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,
-    @Value("\${mockserver.security.port}") mockSecurityUrl: Int
-) : ConsumerTestBase<String>(mockServiceUnderTestPort, mockSecurityUrl) {
+    @Value("\${mockserver.security.port}") mockSecurityPort: Int
+) : ConsumerTestBase<String>(mockServiceUnderTestPort, mockSecurityPort) {
 
     override fun createWireMock(): MappingBuilder = post("/soap/services/dokumentproduksjon/v3")
 
