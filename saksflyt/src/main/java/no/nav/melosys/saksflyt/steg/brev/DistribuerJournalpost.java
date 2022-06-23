@@ -92,12 +92,12 @@ public class DistribuerJournalpost implements StegBehandler {
                 orgAdresse.setPoststed(
                     kodeverkService.dekod(FellesKodeverk.POSTNUMMER, orgAdresse.getPostnummer()));
             }
-            bestillingsId = doksysFasade.distribuerJournalpost(journalpostId, orgAdresse, kontaktopplysning, brevbestilling.getKontaktpersonNavn());
+            bestillingsId = doksysFasade.distribuerJournalpost(journalpostId, orgAdresse, kontaktopplysning, brevbestilling.getKontaktpersonNavn(), brevbestilling.getDistribusjonstype());
         } else if (hasText(institusjonId)) {
             var utenlandskMyndighet = utenlandskMyndighetService.hentUtenlandskMyndighetForInstitusjonID(institusjonId);
-            bestillingsId = doksysFasade.distribuerJournalpost(journalpostId, utenlandskMyndighet.getAdresse());
+            bestillingsId = doksysFasade.distribuerJournalpost(journalpostId, utenlandskMyndighet.getAdresse(), brevbestilling.getDistribusjonstype());
         } else {
-            bestillingsId = doksysFasade.distribuerJournalpost(journalpostId);
+            bestillingsId = doksysFasade.distribuerJournalpost(journalpostId, brevbestilling.getDistribusjonstype());
         }
         log.info("Distribuering av journalpostId {} bestilt med bestillingsId {}", journalpostId, bestillingsId);
     }
