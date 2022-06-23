@@ -3,7 +3,7 @@ package no.nav.melosys.saksflyt.steg.brev;
 import java.util.Optional;
 
 import no.nav.melosys.domain.UtenlandskMyndighet;
-import no.nav.melosys.domain.brev.Distribusjonstype;
+import no.nav.melosys.domain.arkiv.Distribusjonstype;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;

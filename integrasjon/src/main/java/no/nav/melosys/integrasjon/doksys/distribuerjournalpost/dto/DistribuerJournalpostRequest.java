@@ -1,8 +1,8 @@
 package no.nav.melosys.integrasjon.doksys.distribuerjournalpost.dto;
 
 
-import no.nav.melosys.domain.brev.Distribusjonstidspunkt;
-import no.nav.melosys.domain.brev.Distribusjonstype;
+import no.nav.melosys.domain.arkiv.Distribusjonstidspunkt;
+import no.nav.melosys.domain.arkiv.Distribusjonstype;
 
 public final class DistribuerJournalpostRequest {
 

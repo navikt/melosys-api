@@ -1,4 +1,4 @@
-package no.nav.melosys.domain.brev;
+package no.nav.melosys.domain.arkiv;
 
 public enum Distribusjonstidspunkt {
     KJERNETID,

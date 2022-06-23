@@ -2,7 +2,7 @@ package no.nav.melosys.saksflyt.steg.brev;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
-import no.nav.melosys.domain.brev.Distribusjonstype;
+import no.nav.melosys.domain.arkiv.Distribusjonstype;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;

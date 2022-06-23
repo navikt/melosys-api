@@ -7,6 +7,7 @@ import java.util.Set;
 
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.arkiv.Distribusjonstype;
 import no.nav.melosys.domain.arkiv.SaksvedleggBestilling;
 import no.nav.melosys.domain.brev.*;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;

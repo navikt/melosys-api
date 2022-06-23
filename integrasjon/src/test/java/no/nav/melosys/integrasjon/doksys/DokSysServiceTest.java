@@ -8,7 +8,7 @@ import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Kontaktopplysning;
 import no.nav.melosys.domain.UtenlandskMyndighet;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
-import no.nav.melosys.domain.brev.Distribusjonstype;
+import no.nav.melosys.domain.arkiv.Distribusjonstype;
 import no.nav.melosys.domain.dokument.arbeidsforhold.Aktoertype;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
