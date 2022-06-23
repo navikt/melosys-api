@@ -29,7 +29,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static no.nav.melosys.tjenester.gui.FeltvalgAlternativKode.*;
+import static no.nav.melosys.tjenester.gui.dto.brev.FeltvalgAlternativKode.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;

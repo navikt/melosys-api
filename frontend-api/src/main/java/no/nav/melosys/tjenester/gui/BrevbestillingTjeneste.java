@@ -92,18 +92,21 @@ public class BrevbestillingTjeneste {
     private List<BrevmalDto> byggBrevmalListe(long behandlingId) {
         List<MottakerDto> mottakere = hentTilgjengeligeMottakere(behandlingId);
 
-        return mottakere.stream().map(m -> {
-            List<Produserbaredokumenter> produserbareDokumenter = brevbestillingService.hentMuligeProduserbaredokumenter(behandlingId, m.getRolle());
+        return mottakere.stream().map(mottaker -> {
+            List<Produserbaredokumenter> produserbareDokumenter = brevbestillingService.hentMuligeProduserbaredokumenter(behandlingId, mottaker.getRolle());
 
             List<BrevmalTypeDto> typer = produserbareDokumenter.stream().map(p -> switch (p) {
-                    case MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE -> lagBrevMalDtoForForventetSaksbehandlingstid(p);
-                    case MANGELBREV_BRUKER, MANGELBREV_ARBEIDSGIVER -> lagBrevMalDtoForMangelbrev(p, behandlingId);
-                    case GENERELT_FRITEKSTBREV_BRUKER, GENERELT_FRITEKSTBREV_ARBEIDSGIVER, GENERELT_FRITEKSTBREV_VIRKSOMHET -> lagBrevMalDtoForFritekstbrev(p, behandlingId);
+                    case MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE ->
+                        lagBrevmalTypeDtoForForventetSaksbehandlingstid(p);
+                    case MANGELBREV_BRUKER, MANGELBREV_ARBEIDSGIVER ->
+                        lagBrevmalTypeDtoForMangelbrev(p, behandlingId);
+                    case GENERELT_FRITEKSTBREV_BRUKER, GENERELT_FRITEKSTBREV_ARBEIDSGIVER, GENERELT_FRITEKSTBREV_VIRKSOMHET ->
+                        lagBrevmalTypeDtoForFritekstbrev(p, behandlingId);
                     default -> null;
                 })
                 .filter(Objects::nonNull)
                 .toList();
-            return new BrevmalDto(m, typer);
+            return new BrevmalDto(mottaker, typer);
         }).toList();
     }
 
@@ -170,13 +173,11 @@ public class BrevbestillingTjeneste {
         }
     }
 
-    private BrevmalTypeDto lagBrevMalDtoForForventetSaksbehandlingstid(Produserbaredokumenter produserbartdokument) {
-        return new BrevmalTypeDto.Builder()
-            .medType(produserbartdokument)
-            .build();
+    private BrevmalTypeDto lagBrevmalTypeDtoForForventetSaksbehandlingstid(Produserbaredokumenter produserbartdokument) {
+        return new BrevmalTypeDto.Builder().medType(produserbartdokument).build();
     }
 
-    private BrevmalTypeDto lagBrevMalDtoForMangelbrev(Produserbaredokumenter produserbartdokument, long behandlingId) {
+    private BrevmalTypeDto lagBrevmalTypeDtoForMangelbrev(Produserbaredokumenter produserbartdokument, long behandlingId) {
         List<FeltvalgAlternativDto> feltvalgAlternativDtos = new ArrayList<>();
         Behandling behandling = behandlingService.hentBehandling(behandlingId);
 
@@ -191,15 +192,13 @@ public class BrevbestillingTjeneste {
             .medType(produserbartdokument)
             .medFelter(asList(
                 new BrevmalFeltDto.Builder()
-                    .medKode(BrevmalFeltKode.INNLEDNING_FRITEKST.getKode())
-                    .medBeskrivelse(BrevmalFeltKode.INNLEDNING_FRITEKST.getBeskrivelse())
+                    .medKodeOgBeskrivelse(BrevmalFeltKode.INNLEDNING_FRITEKST)
                     .medFeltType(FeltType.FRITEKST)
                     .erPåkrevd()
                     .medValg(feltValgDto)
                     .build(),
                 new BrevmalFeltDto.Builder()
-                    .medKode(BrevmalFeltKode.MANGLER_FRITEKST.getKode())
-                    .medBeskrivelse(BrevmalFeltKode.MANGLER_FRITEKST.getBeskrivelse())
+                    .medKodeOgBeskrivelse(BrevmalFeltKode.MANGLER_FRITEKST)
                     .medFeltType(FeltType.FRITEKST)
                     .erPåkrevd()
                     .build()
@@ -207,13 +206,12 @@ public class BrevbestillingTjeneste {
             .build();
     }
 
-    private BrevmalTypeDto lagBrevMalDtoForFritekstbrev(Produserbaredokumenter produserbartdokument, long behandlingId) {
+    private BrevmalTypeDto lagBrevmalTypeDtoForFritekstbrev(Produserbaredokumenter produserbartdokument, long behandlingId) {
         return new BrevmalTypeDto.Builder()
             .medType(produserbartdokument)
             .medFelter(asList(
                 new BrevmalFeltDto.Builder()
-                    .medKode(BrevmalFeltKode.BREV_TITTEL.getKode())
-                    .medBeskrivelse(BrevmalFeltKode.BREV_TITTEL.getBeskrivelse())
+                    .medKodeOgBeskrivelse(BrevmalFeltKode.BREV_TITTEL)
                     .medFeltType(FeltType.TEKST)
                     .medHjelpetekst("Tittelen du skriver inn her, vil bli tittelen på brevet når du sender det ut.")
                     .medValg(hentFritekstTittelValg(behandlingId))
@@ -221,19 +219,16 @@ public class BrevbestillingTjeneste {
                     .erPåkrevd()
                     .build(),
                 new BrevmalFeltDto.Builder()
-                    .medKode(BrevmalFeltKode.STANDARDTEKST_KONTAKTINFORMASJON.getKode())
-                    .medBeskrivelse(BrevmalFeltKode.STANDARDTEKST_KONTAKTINFORMASJON.getBeskrivelse())
+                    .medKodeOgBeskrivelse(BrevmalFeltKode.STANDARDTEKST_KONTAKTINFORMASJON)
                     .medFeltType(FeltType.SJEKKBOKS)
                     .build(),
                 new BrevmalFeltDto.Builder()
-                    .medKode(BrevmalFeltKode.FRITEKST.getKode())
-                    .medBeskrivelse(BrevmalFeltKode.FRITEKST.getBeskrivelse())
+                    .medKodeOgBeskrivelse(BrevmalFeltKode.FRITEKST)
                     .medFeltType(FeltType.FRITEKST)
                     .erPåkrevd()
                     .build(),
                 new BrevmalFeltDto.Builder()
-                    .medKode(BrevmalFeltKode.VEDLEGG.getKode())
-                    .medBeskrivelse(BrevmalFeltKode.VEDLEGG.getBeskrivelse())
+                    .medKodeOgBeskrivelse(BrevmalFeltKode.VEDLEGG)
                     .medFeltType(FeltType.VEDLEGG)
                     .build()
             ))
