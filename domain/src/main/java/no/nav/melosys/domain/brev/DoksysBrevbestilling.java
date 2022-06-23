@@ -5,6 +5,7 @@ import java.util.Collection;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Distribusjonstyper;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 
 public final class DoksysBrevbestilling extends Brevbestilling {
@@ -21,8 +22,9 @@ public final class DoksysBrevbestilling extends Brevbestilling {
                                  Behandling behandling,
                                  String begrunnelseKode,
                                  String fritekst,
-                                 String ytterligereInformasjon) {
-        super(produserbartdokument, behandling, avsenderID);
+                                 String ytterligereInformasjon,
+                                 Distribusjonstyper distribusjonstype) {
+        super(produserbartdokument, behandling, avsenderID, distribusjonstype);
         this.mottakerRolle = mottakerRolle;
         this.mottaker = mottaker;
         this.begrunnelseKode = begrunnelseKode;
@@ -39,6 +41,7 @@ public final class DoksysBrevbestilling extends Brevbestilling {
         private String begrunnelseKode;
         private String fritekst;
         private String ytterligereInformasjon;
+        private Distribusjonstyper distribusjonstype;
 
         public Builder medProduserbartDokument(Produserbaredokumenter produserbartdokument) {
             this.produserbartdokument = produserbartdokument;
@@ -86,6 +89,11 @@ public final class DoksysBrevbestilling extends Brevbestilling {
             return this;
         }
 
+        public Builder medDistribusjonstype(Distribusjonstyper distribusjonstype) {
+            this.distribusjonstype = distribusjonstype;
+            return this;
+        }
+
         public DoksysBrevbestilling build() {
             return new DoksysBrevbestilling(
                 produserbartdokument,
@@ -95,7 +103,8 @@ public final class DoksysBrevbestilling extends Brevbestilling {
                 behandling,
                 begrunnelseKode,
                 fritekst,
-                ytterligereInformasjon
+                ytterligereInformasjon,
+                distribusjonstype
             );
         }
     }

@@ -11,6 +11,7 @@ import no.nav.melosys.domain.UtenlandskMyndighet;
 import no.nav.melosys.domain.arkiv.SaksvedleggBestilling;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
+import no.nav.melosys.domain.kodeverk.Distribusjonstyper;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.person.Persondata;
 
@@ -47,7 +48,7 @@ public class DokgenBrevbestilling extends Brevbestilling {
     }
 
     protected DokgenBrevbestilling(Builder<?> builder) {
-        super(builder.produserbartdokument, builder.behandling, builder.avsenderNavn);
+        super(builder.produserbartdokument, builder.behandling, builder.avsenderNavn, builder.distribusjonstype);
         this.org = builder.org;
         this.kontaktopplysning = builder.kontaktopplysning;
         this.utenlandskMyndighet = builder.utenlandskMyndighet;
@@ -148,6 +149,7 @@ public class DokgenBrevbestilling extends Brevbestilling {
         private Persondata persondokument;
         private Persondata personMottaker;
         private List<SaksvedleggBestilling> saksvedleggBestilling;
+        private Distribusjonstyper distribusjonstype;
 
 
         public Builder() {
@@ -172,6 +174,7 @@ public class DokgenBrevbestilling extends Brevbestilling {
             this.persondokument = brevbestilling.persondokument;
             this.personMottaker = brevbestilling.personMottaker;
             this.saksvedleggBestilling = brevbestilling.saksvedleggBestilling;
+            this.distribusjonstype = brevbestilling.distribusjonstype;
         }
 
         public T medProduserbartdokument(Produserbaredokumenter produserbartdokument) {
@@ -261,6 +264,11 @@ public class DokgenBrevbestilling extends Brevbestilling {
 
         public T medSaksvedleggBestilling(List<SaksvedleggBestilling> saksvedleggBestilling) {
             this.saksvedleggBestilling = saksvedleggBestilling;
+            return (T) this;
+        }
+
+        public T medDistribusjonstype(Distribusjonstyper distribusjonstype) {
+            this.distribusjonstype = distribusjonstype;
             return (T) this;
         }
 
