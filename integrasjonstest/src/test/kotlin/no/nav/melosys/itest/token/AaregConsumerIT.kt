@@ -31,7 +31,7 @@ class AaregConsumerIT(
     @Autowired private val arbeidsforholdRestConsumer: ArbeidsforholdRestConsumer,
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,
     @Value("\${mockserver.security.port}") mockSecurityPort: Int
-) : ConsumerTestBase<String>(mockServiceUnderTestPort, mockSecurityPort) {
+) : ConsumerWireMockTestBase<String>(mockServiceUnderTestPort, mockSecurityPort) {
 
     @Test
     fun authorizationSkalKommeFraBruker() {

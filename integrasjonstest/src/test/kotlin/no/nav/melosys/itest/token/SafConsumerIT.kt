@@ -35,7 +35,7 @@ class SafConsumerIT(
     @Autowired private val safConsumer: SafConsumer,
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,
     @Value("\${mockserver.security.port}") mockSecurityPort: Int
-) : ConsumerTestBase<ByteArray>(mockServiceUnderTestPort, mockSecurityPort) {
+) : ConsumerWireMockTestBase<ByteArray>(mockServiceUnderTestPort, mockSecurityPort) {
 
     @Test
     fun authorizationSkalKommeFraSystem() {

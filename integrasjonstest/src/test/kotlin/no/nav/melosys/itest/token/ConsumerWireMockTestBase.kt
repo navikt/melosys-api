@@ -17,7 +17,7 @@ import org.springframework.mock.env.MockEnvironment
 import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-abstract class ConsumerTestBase<T>(
+abstract class ConsumerWireMockTestBase<T>(
     mockPort: Int,
     stsMockPort: Int
 ) {

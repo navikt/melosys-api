@@ -31,7 +31,7 @@ class OppgaveConsumerIT(
     @Autowired private val oppgaveConsumer: OppgaveConsumer,
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,
     @Value("\${mockserver.security.port}") mockSecurityPort: Int
-) : ConsumerTestBase<String>(mockServiceUnderTestPort, mockSecurityPort) {
+) : ConsumerWireMockTestBase<String>(mockServiceUnderTestPort, mockSecurityPort) {
 
     @Test
     fun authorizationSkalKommeFraSystem() {

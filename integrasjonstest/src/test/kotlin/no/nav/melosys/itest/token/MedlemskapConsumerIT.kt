@@ -31,7 +31,7 @@ class MedlemskapConsumerIT(
     @Autowired private val medlemskapRestConsumer: MedlemskapRestConsumer,
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,
     @Value("\${mockserver.security.port}") mockSecurityPort: Int
-) : ConsumerTestBase<String>(mockServiceUnderTestPort, mockSecurityPort) {
+) : ConsumerWireMockTestBase<String>(mockServiceUnderTestPort, mockSecurityPort) {
 
     @Test
     fun authorizationSkalKommeFraSystem() {
