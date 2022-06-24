@@ -9,6 +9,7 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Fullmektig;
 import no.nav.melosys.domain.Kontaktopplysning;
 import no.nav.melosys.domain.kodeverk.Representerer;
+import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -57,6 +58,7 @@ public class OpprettFagsakOgBehandling implements StegBehandler {
         Behandlingstyper behandlingstype = prosessinstans.getData(BEHANDLINGSTYPE, Behandlingstyper.class);
         Behandlingstema behandlingstema = prosessinstans.getData(BEHANDLINGSTEMA, Behandlingstema.class);
         Sakstyper sakstype = prosessinstans.getData(SAKSTYPE, Sakstyper.class);
+        Sakstemaer sakstema = prosessinstans.getData(SAKSTEMA, Sakstemaer.class);
 
         OpprettSakRequest opprettSakRequest = new OpprettSakRequest.Builder()
             .medAktørID(aktørID)
@@ -65,6 +67,7 @@ public class OpprettFagsakOgBehandling implements StegBehandler {
             .medFullmektig(representant != null ? new Fullmektig(representant, representantRepresenterer) : null)
             .medKontaktopplysninger(lagKontaktopplysningerForRepresentant(representant, representantKontakperson))
             .medSakstype(sakstype)
+            .medSakstema(sakstema)
             .medBehandlingstema(behandlingstema)
             .medBehandlingstype(behandlingstype)
             .medInitierendeJournalpostId(initierendeJournalpostId)
