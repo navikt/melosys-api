@@ -1,4 +1,4 @@
-package no.nav.melosys.tjenester.gui;
+package no.nav.melosys.tjenester.gui.dto.brev;
 
 import java.util.Collections;
 import java.util.List;
@@ -21,8 +21,6 @@ import no.nav.melosys.service.brev.DokumentNavnService;
 import no.nav.melosys.service.dokument.BrevmottakerService;
 import no.nav.melosys.service.dokument.DokumentServiceFasade;
 import no.nav.melosys.service.persondata.PersondataFasade;
-import no.nav.melosys.service.tilgang.Aksesskontroll;
-import no.nav.melosys.tjenester.gui.dto.brev.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,7 +33,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
+class ByggBrevmalListeTest {
 
     @Mock
     private BehandlingService mockBehandlingService;
@@ -50,28 +48,27 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
     @Mock
     private KontaktopplysningService mockKontaktopplysningService;
     @Mock
-    private Aksesskontroll aksesskontroll;
-    @Mock
     private DokumentNavnService mockDokumentNavnService;
 
-    private BrevbestillingTjeneste brevbestillingTjeneste;
+    private ByggBrevmalListe byggBrevmalListe;
+
 
     @BeforeEach
     void init() {
         BrevbestillingService brevbestillingService = new BrevbestillingService(mockBrevmottakerService,
             mockDokServiceFasade, mockBehandlingService, mockEregFasade, mockKontaktopplysningService,
             mockPersondataFasade, mockDokumentNavnService);
-        brevbestillingTjeneste = new BrevbestillingTjeneste(brevbestillingService, mockBehandlingService, aksesskontroll);
+        byggBrevmalListe = new ByggBrevmalListe(brevbestillingService, mockBehandlingService);
     }
 
     @Test
-    void hentTilgjengeligeMaler_brukerErHovedpart_returnererTilgjengeligeMaler() {
+    void byggBrevmalDtoListe_brukerErHovedpart_returnererTilgjengeligeMaler() {
         when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(lagBehandling(null));
         when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling(null));
         when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
 
 
-        List<BrevmalDto> tilgjengeligeMaler = brevbestillingTjeneste.hentTilgjengeligeMaler(123L);
+        List<BrevmalDto> tilgjengeligeMaler = byggBrevmalListe.byggBrevmalDtoListe(123L);
 
 
         assertThat(tilgjengeligeMaler)
@@ -105,7 +102,7 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    void hentTilgjengeligeMaler_virksomhetErHovedpart_returnererTilgjengeligeMaler() {
+    void byggBrevmalDtoListe_virksomhetErHovedpart_returnererTilgjengeligeMaler() {
         Aktoer virksomhet = new Aktoer();
         virksomhet.setRolle(Aktoersroller.VIRKSOMHET);
         var behandling = lagBehandling(null);
@@ -115,7 +112,7 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
         when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
 
 
-        List<BrevmalDto> tilgjengeligeMaler = brevbestillingTjeneste.hentTilgjengeligeMaler(123L);
+        List<BrevmalDto> tilgjengeligeMaler = byggBrevmalListe.byggBrevmalDtoListe(123L);
 
 
         assertThat(tilgjengeligeMaler)
@@ -140,13 +137,13 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    void hentTilgjengeligeMaler_behandlingErSoeknad_returnererSoeknadMal() {
+    void byggBrevmalDtoListe_behandlingErSoeknad_returnererSoeknadMal() {
         when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(lagBehandling(Behandlingstyper.SOEKNAD));
         when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling(Behandlingstyper.SOEKNAD));
         when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
 
 
-        List<BrevmalDto> tilgjengeligeMaler = brevbestillingTjeneste.hentTilgjengeligeMaler(123L);
+        List<BrevmalDto> tilgjengeligeMaler = byggBrevmalListe.byggBrevmalDtoListe(123L);
 
 
         assertThat(tilgjengeligeMaler).hasSize(3);
@@ -169,13 +166,13 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    void hentTilgjengeligeMaler_behandlingErKlage_returnererKlageMal() {
+    void byggBrevmalDtoListe_behandlingErKlage_returnererKlageMal() {
         when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(lagBehandling(Behandlingstyper.KLAGE));
         when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling(Behandlingstyper.KLAGE));
         when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
 
 
-        List<BrevmalDto> tilgjengeligeMaler = brevbestillingTjeneste.hentTilgjengeligeMaler(123L);
+        List<BrevmalDto> tilgjengeligeMaler = byggBrevmalListe.byggBrevmalDtoListe(123L);
 
 
         assertThat(tilgjengeligeMaler).hasSize(3);
@@ -198,13 +195,13 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    void hentTilgjengeligeMaler_brukerAdresseNull_returnererMalMedFeilmelding() {
+    void byggBrevmalDtoListe_brukerAdresseNull_returnererMalMedFeilmelding() {
         when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(lagBehandling(null));
         when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling(null));
         when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
 
 
-        List<BrevmalDto> tilgjengeligeMaler = brevbestillingTjeneste.hentTilgjengeligeMaler(123L);
+        List<BrevmalDto> tilgjengeligeMaler = byggBrevmalListe.byggBrevmalDtoListe(123L);
 
 
         assertThat(tilgjengeligeMaler).hasSize(3);
@@ -218,14 +215,14 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    void hentTilgjengeligeMaler_registerOpplysningerIkkeHentet_returnererMalMedFeilmelding() {
+    void byggBrevmalDtoListe_registerOpplysningerIkkeHentet_returnererMalMedFeilmelding() {
         when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(lagBehandling(null));
         when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling(null));
         when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean()))
             .thenThrow(new TekniskException("Finner ikke arbeidsforholddokument"));
 
 
-        List<BrevmalDto> tilgjengeligeMaler = brevbestillingTjeneste.hentTilgjengeligeMaler(123L);
+        List<BrevmalDto> tilgjengeligeMaler = byggBrevmalListe.byggBrevmalDtoListe(123L);
 
 
         assertThat(tilgjengeligeMaler).hasSize(3);
@@ -240,13 +237,13 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
 
 
     @Test
-    void hentTilgjengeligeMaler_mangelbrev_lagerRiktigeValg() {
+    void byggBrevmalDtoListe_mangelbrev_lagerRiktigeValg() {
         when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(lagBehandling(Behandlingstyper.SOEKNAD));
         when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling(Behandlingstyper.SOEKNAD));
         when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
 
 
-        List<BrevmalDto> tilgjengeligeMaler = brevbestillingTjeneste.hentTilgjengeligeMaler(123L);
+        List<BrevmalDto> tilgjengeligeMaler = byggBrevmalListe.byggBrevmalDtoListe(123L);
 
 
         var mangelbrevMal = tilgjengeligeMaler.get(0).getBrevTyper().get(1);
@@ -297,7 +294,7 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    void hentTilgjengeligeMaler_EUEØS_lagerRiktigeTittelValgForFritekstbrev() {
+    void byggBrevmalDtoListe_EUEØS_lagerRiktigeTittelValgForFritekstbrev() {
         Behandling behandlingEUEOS = lagBehandling(Behandlingstyper.SOEKNAD);
         behandlingEUEOS.getFagsak().setType(Sakstyper.EU_EOS);
         when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandlingEUEOS);
@@ -305,7 +302,7 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
         when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
 
 
-        List<BrevmalDto> tilgjengeligeMaler = brevbestillingTjeneste.hentTilgjengeligeMaler(123L);
+        List<BrevmalDto> tilgjengeligeMaler = byggBrevmalListe.byggBrevmalDtoListe(123L);
 
 
         assertThat(tilgjengeligeMaler).hasSize(3);
@@ -322,7 +319,7 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    void hentTilgjengeligeMaler_FTLR_lagerRiktigeTittelValgForFritekstbrev() {
+    void byggBrevmalDtoListe_FTLR_lagerRiktigeTittelValgForFritekstbrev() {
         Behandling behandlingFTRL = lagBehandling(Behandlingstyper.SOEKNAD);
         behandlingFTRL.getFagsak().setType(Sakstyper.FTRL);
         when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandlingFTRL);
@@ -330,7 +327,7 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
         when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
 
 
-        List<BrevmalDto> tilgjengeligeMaler = brevbestillingTjeneste.hentTilgjengeligeMaler(123L);
+        List<BrevmalDto> tilgjengeligeMaler = byggBrevmalListe.byggBrevmalDtoListe(123L);
 
 
         assertThat(tilgjengeligeMaler).hasSize(3);
@@ -351,7 +348,7 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    void hentTilgjengeligeMaler_lagerRiktigeTittelValgForFritekstbrevForTrygdeavtale() {
+    void byggBrevmalDtoListe_lagerRiktigeTittelValgForFritekstbrevForTrygdeavtale() {
         Behandling behandlingTrygdeavtale = lagBehandling(Behandlingstyper.SOEKNAD);
         behandlingTrygdeavtale.getFagsak().setType(Sakstyper.TRYGDEAVTALE);
         when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandlingTrygdeavtale);
@@ -359,7 +356,7 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
         when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
 
 
-        List<BrevmalDto> tilgjengeligeMaler = brevbestillingTjeneste.hentTilgjengeligeMaler(123L);
+        List<BrevmalDto> tilgjengeligeMaler = byggBrevmalListe.byggBrevmalDtoListe(123L);
 
 
         assertThat(tilgjengeligeMaler).hasSize(3);
