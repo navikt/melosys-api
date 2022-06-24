@@ -11,6 +11,7 @@ import io.micrometer.core.instrument.Metrics;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.arkiv.DokumentReferanse;
+import no.nav.melosys.domain.arkiv.Distribusjonstype;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.eessi.melding.UtpekingAvvis;
@@ -192,6 +193,7 @@ public class ProsessinstansService {
             .build();
 
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSRESULTATTYPE, behandlingsresultatType.getKode());
+        prosessinstans.setData(ProsessDataKey.DISTRIBUSJONSTYPE, Distribusjonstype.VEDTAK);
 
         lagre(prosessinstans);
     }
@@ -203,6 +205,8 @@ public class ProsessinstansService {
             .medBegrunnelseFritekst(request.getBegrunnelseFritekst())
             .build();
 
+        prosessinstans.setData(ProsessDataKey.DISTRIBUSJONSTYPE, Distribusjonstype.VEDTAK);
+
         lagre(prosessinstans);
     }
 
@@ -212,6 +216,8 @@ public class ProsessinstansService {
             .medBehandling(behandling)
             .medBegrunnelseFritekst(request.getBegrunnelseFritekst())
             .build();
+
+        prosessinstans.setData(ProsessDataKey.DISTRIBUSJONSTYPE, Distribusjonstype.VEDTAK);
 
         lagre(prosessinstans);
     }
@@ -258,6 +264,8 @@ public class ProsessinstansService {
             .medBegrunnelseFritekst(fritekst)
             .medYtterligereinformasjonSed(fritekstSed)
             .build();
+
+        prosessinstans.setData(ProsessDataKey.DISTRIBUSJONSTYPE, Distribusjonstype.VEDTAK);
 
         lagre(prosessinstans);
     }
@@ -344,6 +352,8 @@ public class ProsessinstansService {
             .medBegrunnelseFritekst(fritekstBrev)
             .build();
 
+        prosessinstans.setData(ProsessDataKey.DISTRIBUSJONSTYPE, Distribusjonstype.VIKTIG);
+
         lagre(prosessinstans);
     }
 
@@ -359,7 +369,10 @@ public class ProsessinstansService {
             .medYtterligereinformasjonSed(ytterligereInformasjonSed)
             .medBegrunnelseFritekst(fritekstBrev)
             .build();
+
         prosessinstans.setData(ProsessDataKey.UTPEKT_LAND, utpektLand);
+        prosessinstans.setData(ProsessDataKey.DISTRIBUSJONSTYPE, Distribusjonstype.VEDTAK);
+
         lagre(prosessinstans);
     }
 
