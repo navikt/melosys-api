@@ -1,108 +1,104 @@
-package no.nav.melosys.integrasjon.aareg;
+package no.nav.melosys.integrasjon.aareg
 
-import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.List;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.introspect.AnnotatedMember;
-import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.github.tomakehurst.wiremock.WireMockServer;
-import no.nav.melosys.domain.Saksopplysning;
-import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold;
-import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
-import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdRestConsumer;
-import no.nav.melosys.integrasjon.kodeverk.KodeOppslag;
-import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
-import org.mockito.Mockito;
-import org.springframework.web.reactive.function.client.WebClient;
-
-import static com.github.tomakehurst.wiremock.client.WireMock.*;
-import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
-import static no.nav.melosys.domain.FellesKodeverk.PERMISJONS_OG_PERMITTERINGS_BESKRIVELSE;
-import static no.nav.melosys.domain.FellesKodeverk.YRKER;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
-
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.introspect.AnnotatedMember
+import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.github.tomakehurst.wiremock.WireMockServer
+import com.github.tomakehurst.wiremock.client.WireMock
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration
+import no.nav.melosys.domain.FellesKodeverk
+import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument
+import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdRestConsumer
+import no.nav.melosys.integrasjon.kodeverk.KodeOppslag
+import org.assertj.core.api.Assertions
+import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
+import org.mockito.ArgumentMatchers
+import org.mockito.Mockito
+import org.mockito.kotlin.whenever
+import org.springframework.web.reactive.function.client.WebClient
+import java.time.LocalDate
+import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class AaregServiceTest {
-    private static final String NAV_PERSONIDENT = "12345678990";
-
-    private AaregService aaregService;
-    private KodeOppslag mockedKodeOppslag;
-
-    private final ObjectMapper objectMapper = new ObjectMapper();
-
-    private WireMockServer wireMockServer;
-
-    @BeforeAll
-    void setupBeforeAll() {
-        objectMapper.registerModule(new JavaTimeModule());
-        wireMockServer = new WireMockServer(wireMockConfig().dynamicPort());
-        wireMockServer.start();
-
-        WebClient webClient = WebClient.builder()
-            .baseUrl("http://localhost:" + wireMockServer.port())
-            .build();
-        ArbeidsforholdRestConsumer arbeidsforholdRestConsumer = new ArbeidsforholdRestConsumer(webClient);
-        mockedKodeOppslag = Mockito.mock(KodeOppslag.class);
-        aaregService = new AaregService(arbeidsforholdRestConsumer, mockedKodeOppslag);
+internal class AaregServiceTest {
+    companion object {
+        private const val NAV_PERSONIDENT = "12345678990"
     }
+
+    private val wireMockServer: WireMockServer =
+        WireMockServer(WireMockConfiguration.wireMockConfig().dynamicPort()).apply {
+            start()
+        }
+
+    private val mockedKodeOppslag: KodeOppslag = Mockito.mock(KodeOppslag::class.java)
+    private val aaregService: AaregService = AaregService(arbeidsforholdRestConsumer(), mockedKodeOppslag)
+
+    private fun arbeidsforholdRestConsumer() = ArbeidsforholdRestConsumer(
+        WebClient.builder()
+            .baseUrl("http://localhost:" + wireMockServer.port())
+            .build()
+    )
 
     @AfterAll
-    void tearDown() {
-        wireMockServer.stop();
+    fun tearDown() {
+        wireMockServer.stop()
     }
 
+    // Ikke sjekk disse siden daylight saving vil forandre offset med 1 time og få testen til å feile
     @Test
-    void getArbeidsforholdDokumentFromRestService() throws JsonProcessingException {
-        when(mockedKodeOppslag.getTermFraKodeverk(eq(PERMISJONS_OG_PERMITTERINGS_BESKRIVELSE), anyString()))
-            .thenReturn("Permisjon med foreldrepenger");
-        when(mockedKodeOppslag.getTermFraKodeverk(eq(YRKER), anyString()))
-            .thenReturn("IT-KONSULENT");
-        wireMockServer.stubFor(get(urlPathEqualTo("/"))
-            .withHeader("Nav-Personident", equalTo(NAV_PERSONIDENT))
-            .withQueryParam("regelverk", equalTo("A_ORDNINGEN"))
-            .withQueryParam("ansettelsesperiodeFom", equalTo("2014-07-01"))
-            .withQueryParam("ansettelsesperiodeTom", equalTo("2015-12-31"))
-            .willReturn(aResponse()
-                .withStatus(200)
-                .withHeader("Content-Type", "application/json")
-                .withBody(responsAaregRestBody)
+    fun testDokumentFromRestService() {
+        whenever(
+            mockedKodeOppslag.getTermFraKodeverk(
+                ArgumentMatchers.eq(FellesKodeverk.PERMISJONS_OG_PERMITTERINGS_BESKRIVELSE),
+                ArgumentMatchers.anyString()
             )
-        );
-        Saksopplysning saksopplysning = aaregService.finnArbeidsforholdPrArbeidstaker(
+        ).thenReturn("Permisjon med foreldrepenger")
+
+        whenever(
+            mockedKodeOppslag.getTermFraKodeverk(
+                ArgumentMatchers.eq(FellesKodeverk.YRKER),
+                ArgumentMatchers.anyString()
+            )
+        ).thenReturn("IT-KONSULENT")
+
+        wireMockServer.stubFor(
+            WireMock.get(WireMock.urlPathEqualTo("/"))
+                .withHeader("Nav-Personident", WireMock.equalTo(NAV_PERSONIDENT))
+                .withQueryParam("regelverk", WireMock.equalTo("A_ORDNINGEN"))
+                .withQueryParam("ansettelsesperiodeFom", WireMock.equalTo("2014-07-01"))
+                .withQueryParam("ansettelsesperiodeTom", WireMock.equalTo("2015-12-31"))
+                .willReturn(
+                    WireMock.aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(responsAaregRestBody)
+                )
+        )
+        val saksopplysning = aaregService.finnArbeidsforholdPrArbeidstaker(
             NAV_PERSONIDENT,
             LocalDate.of(2014, 7, 1),
-            LocalDate.of(2015, 12, 31));
-        ArbeidsforholdDokument arbeidsforholdDokument = (ArbeidsforholdDokument) saksopplysning.getDokument();
-
-        List<Arbeidsforhold> arbeidsforhold = arbeidsforholdDokument.getArbeidsforhold();
-
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
-        objectMapper.setAnnotationIntrospector(new JacksonAnnotationIntrospector() {
-            @Override
-            public boolean hasIgnoreMarker(final AnnotatedMember m) {
-                // Ikke sjekk disse siden daylight saving vil forandre offset med 1 time og få testen til å feile
-                List<String> exclusions = Arrays.asList("opprettelsestidspunkt", "sistBekreftet");
-                return exclusions.contains(m.getName()) || super.hasIgnoreMarker(m);
-            }
-        });
-        String result = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(arbeidsforhold);
-        Assertions.assertThat(result).isEqualToIgnoringNewLines(expectedRestResult);
+            LocalDate.of(2015, 12, 31)
+        )
+        val arbeidsforholdDokument = saksopplysning.dokument as ArbeidsforholdDokument
+        val arbeidsforhold = arbeidsforholdDokument.getArbeidsforhold()
+        val objectMapper = ObjectMapper().apply {
+            registerModule(JavaTimeModule())
+            setAnnotationIntrospector(object : JacksonAnnotationIntrospector() {
+                override fun hasIgnoreMarker(m: AnnotatedMember): Boolean {
+                    // Ikke sjekk disse siden daylight saving vil forandre offset med 1 time og få testen til å feile
+                    val exclusions = Arrays.asList("opprettelsestidspunkt", "sistBekreftet")
+                    return exclusions.contains(m.name) || super.hasIgnoreMarker(m)
+                }
+            })
+        }
+        val result = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(arbeidsforhold)
+        Assertions.assertThat(result).isEqualToIgnoringWhitespace(expectedRestResult)
     }
 
-    private static final String expectedRestResult = """
-        [ {
+    private val expectedRestResult = """[ {
           "arbeidsforholdID" : "abc-321",
           "arbeidsforholdIDnav" : 123456,
           "ansettelsesPeriode" : {
@@ -166,9 +162,9 @@ class AaregServiceTest {
             },
             "rapporteringsAarMaaned" : [ 2018, 5 ]
           } ]
-        } ]""";
+} ]""".trimIndent()
 
-    private static final String responsAaregRestBody = """
+    private val responsAaregRestBody = """
         [
           {
             "ansettelsesperiode": {
@@ -321,5 +317,6 @@ class AaregServiceTest {
             ]
           }
         ]
-        """;
+    """.trimIndent()
+
 }
