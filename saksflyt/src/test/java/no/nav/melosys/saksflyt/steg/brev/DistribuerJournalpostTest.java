@@ -90,7 +90,7 @@ class DistribuerJournalpostTest {
 
         distribuerJournalpost.utfør(prosessinstans);
 
-        verify(mockDoksysFasade).distribuerJournalpost(eq(journalpostId), eq(Distribusjonstype.VIKTIG));
+        verify(mockDoksysFasade).distribuerJournalpost(journalpostId, Distribusjonstype.VIKTIG);
     }
 
     @Test
@@ -137,7 +137,7 @@ class DistribuerJournalpostTest {
 
         distribuerJournalpost.utfør(prosessinstans);
 
-        verify(mockDoksysFasade).distribuerJournalpost(eq(journalpostId), eq(Distribusjonstype.ANNET));
+        verify(mockDoksysFasade).distribuerJournalpost(journalpostId, Distribusjonstype.ANNET);
     }
 
     @Test
