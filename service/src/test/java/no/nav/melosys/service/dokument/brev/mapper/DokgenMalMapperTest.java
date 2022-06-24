@@ -104,7 +104,7 @@ class DokgenMalMapperTest {
 
         assertThat((SaksbehandlingstidSoknad) dokgenDto)
             .extracting(
-                dto -> dto.getSaksinfo().getNavnBruker(),
+                dto -> dto.getSaksinfo().navnBruker(),
                 dto -> dto.getMottaker().navn(),
                 dto -> dto.getMottaker().postnr(),
                 dto -> dto.getMottaker().poststed(),
@@ -135,7 +135,7 @@ class DokgenMalMapperTest {
 
         assertThat((SaksbehandlingstidSoknad) dokgenDto)
             .extracting(
-                dto -> dto.getSaksinfo().getNavnBruker(),
+                dto -> dto.getSaksinfo().navnBruker(),
                 dto -> dto.getMottaker().navn(),
                 dto -> dto.getMottaker().postnr()
             ).containsExactly(
@@ -163,7 +163,7 @@ class DokgenMalMapperTest {
 
         assertThat((SaksbehandlingstidSoknad) dokgenDto)
             .extracting(
-                dto -> dto.getSaksinfo().getNavnBruker(),
+                dto -> dto.getSaksinfo().navnBruker(),
                 dto -> dto.getMottaker().navn(),
                 dto -> dto.getMottaker().postnr()
             ).containsExactly(
@@ -225,7 +225,7 @@ class DokgenMalMapperTest {
 
         assertThat((SaksbehandlingstidSoknad) dokgenDto)
             .extracting(
-                dto -> dto.getSaksinfo().getNavnBruker(),
+                dto -> dto.getSaksinfo().navnBruker(),
                 dto -> dto.getMottaker().navn(),
                 dto -> dto.getMottaker().postnr()
             ).containsExactly(
@@ -258,7 +258,7 @@ class DokgenMalMapperTest {
 
         assertThat((SaksbehandlingstidSoknad) dokgenDto)
             .extracting(
-                dto -> dto.getSaksinfo().getNavnBruker(),
+                dto -> dto.getSaksinfo().navnBruker(),
                 dto -> dto.getMottaker().navn(),
                 dto -> dto.getMottaker().postnr()
             ).containsExactly(
@@ -288,7 +288,7 @@ class DokgenMalMapperTest {
 
         assertThat((SaksbehandlingstidSoknad) dokgenDto)
             .extracting(
-                dto -> dto.getSaksinfo().getNavnBruker(),
+                dto -> dto.getSaksinfo().navnBruker(),
                 dto -> dto.getMottaker().navn(),
                 dto -> dto.getMottaker().postnr()
             ).containsExactly(
@@ -527,9 +527,9 @@ class DokgenMalMapperTest {
 
         assertThat((SaksinfoVirksomhet) dokgenDto.getSaksinfo())
             .extracting(
-                SaksinfoVirksomhet::getSaksnummer,
-                SaksinfoVirksomhet::getNavnVirksomhet,
-                SaksinfoVirksomhet::getOrgnr)
+                SaksinfoVirksomhet::saksnummer,
+                SaksinfoVirksomhet::navnVirksomhet,
+                SaksinfoVirksomhet::orgnr)
             .containsExactly(
                 SAKSNUMMER,
                 NAVN_ORG,
