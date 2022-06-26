@@ -219,9 +219,6 @@
     </dependencies>
 
     <build>
-        <finalName>${project.artifactId}</finalName>
-        <testSourceDirectory>${project.basedir}/src/test/kotlin</testSourceDirectory>
-        <sourceDirectory>${project.basedir}/src/main/kotlin</sourceDirectory>
         <plugins>
             <plugin>
                 <groupId>org.jetbrains.kotlin</groupId>
@@ -236,7 +233,8 @@
                         </goals>
                         <configuration>
                             <sourceDirs>
-                                <source>src/main/kotlin</source>
+                                <source>${project.basedir}/src/main/kotlin</source>
+                                <source>${project.basedir}/src/main/java</source>
                             </sourceDirs>
                         </configuration>
                     </execution>
@@ -248,7 +246,8 @@
                         </goals>
                         <configuration>
                             <sourceDirs>
-                                <source>src/test/kotlin</source>
+                                <source>${project.basedir}/src/test/kotlin</source>
+                                <source>${project.basedir}/src/test/java</source>
                                 <source>src/test/resources</source>
                             </sourceDirs>
                         </configuration>
@@ -270,6 +269,36 @@
                         <version>${kotlin.version}</version>
                     </dependency>
                 </dependencies>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <executions>
+                    <!-- Replacing default-compile as it is treated specially by maven -->
+                    <execution>
+                        <id>default-compile</id>
+                        <phase>none</phase>
+                    </execution>
+                    <!-- Replacing default-testCompile as it is treated specially by maven -->
+                    <execution>
+                        <id>default-testCompile</id>
+                        <phase>none</phase>
+                    </execution>
+                    <execution>
+                        <id>java-compile</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>java-test-compile</id>
+                        <phase>test-compile</phase>
+                        <goals>
+                            <goal>testCompile</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
