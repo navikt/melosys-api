@@ -1,4 +1,4 @@
-package no.nav.melosys.tjenester.gui.dto.brev;
+package no.nav.melosys.tjenester.gui;
 
 import java.util.Collections;
 import java.util.List;
@@ -21,6 +21,7 @@ import no.nav.melosys.service.brev.DokumentNavnService;
 import no.nav.melosys.service.dokument.BrevmottakerService;
 import no.nav.melosys.service.dokument.DokumentServiceFasade;
 import no.nav.melosys.service.persondata.PersondataFasade;
+import no.nav.melosys.tjenester.gui.dto.brev.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,7 +34,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class ByggBrevmalListeTest {
+class BrevmalListeByggerTest {
 
     @Mock
     private BehandlingService mockBehandlingService;
@@ -50,7 +51,7 @@ class ByggBrevmalListeTest {
     @Mock
     private DokumentNavnService mockDokumentNavnService;
 
-    private ByggBrevmalListe byggBrevmalListe;
+    private BrevmalListeBygger brevmalListeBygger;
 
 
     @BeforeEach
@@ -58,7 +59,7 @@ class ByggBrevmalListeTest {
         BrevbestillingService brevbestillingService = new BrevbestillingService(mockBrevmottakerService,
             mockDokServiceFasade, mockBehandlingService, mockEregFasade, mockKontaktopplysningService,
             mockPersondataFasade, mockDokumentNavnService);
-        byggBrevmalListe = new ByggBrevmalListe(brevbestillingService, mockBehandlingService);
+        brevmalListeBygger = new BrevmalListeBygger(brevbestillingService, mockBehandlingService);
     }
 
     @Test
@@ -68,7 +69,7 @@ class ByggBrevmalListeTest {
         when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
 
 
-        List<BrevmalDto> tilgjengeligeMaler = byggBrevmalListe.byggBrevmalDtoListe(123L);
+        List<BrevmalDto> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
 
 
         assertThat(tilgjengeligeMaler)
@@ -112,7 +113,7 @@ class ByggBrevmalListeTest {
         when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
 
 
-        List<BrevmalDto> tilgjengeligeMaler = byggBrevmalListe.byggBrevmalDtoListe(123L);
+        List<BrevmalDto> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
 
 
         assertThat(tilgjengeligeMaler)
@@ -143,7 +144,7 @@ class ByggBrevmalListeTest {
         when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
 
 
-        List<BrevmalDto> tilgjengeligeMaler = byggBrevmalListe.byggBrevmalDtoListe(123L);
+        List<BrevmalDto> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
 
 
         assertThat(tilgjengeligeMaler).hasSize(3);
@@ -172,7 +173,7 @@ class ByggBrevmalListeTest {
         when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
 
 
-        List<BrevmalDto> tilgjengeligeMaler = byggBrevmalListe.byggBrevmalDtoListe(123L);
+        List<BrevmalDto> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
 
 
         assertThat(tilgjengeligeMaler).hasSize(3);
@@ -201,7 +202,7 @@ class ByggBrevmalListeTest {
         when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
 
 
-        List<BrevmalDto> tilgjengeligeMaler = byggBrevmalListe.byggBrevmalDtoListe(123L);
+        List<BrevmalDto> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
 
 
         assertThat(tilgjengeligeMaler).hasSize(3);
@@ -222,7 +223,7 @@ class ByggBrevmalListeTest {
             .thenThrow(new TekniskException("Finner ikke arbeidsforholddokument"));
 
 
-        List<BrevmalDto> tilgjengeligeMaler = byggBrevmalListe.byggBrevmalDtoListe(123L);
+        List<BrevmalDto> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
 
 
         assertThat(tilgjengeligeMaler).hasSize(3);
@@ -243,7 +244,7 @@ class ByggBrevmalListeTest {
         when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
 
 
-        List<BrevmalDto> tilgjengeligeMaler = byggBrevmalListe.byggBrevmalDtoListe(123L);
+        List<BrevmalDto> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
 
 
         var mangelbrevMal = tilgjengeligeMaler.get(0).getBrevTyper().get(1);
@@ -302,7 +303,7 @@ class ByggBrevmalListeTest {
         when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
 
 
-        List<BrevmalDto> tilgjengeligeMaler = byggBrevmalListe.byggBrevmalDtoListe(123L);
+        List<BrevmalDto> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
 
 
         assertThat(tilgjengeligeMaler).hasSize(3);
@@ -327,7 +328,7 @@ class ByggBrevmalListeTest {
         when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
 
 
-        List<BrevmalDto> tilgjengeligeMaler = byggBrevmalListe.byggBrevmalDtoListe(123L);
+        List<BrevmalDto> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
 
 
         assertThat(tilgjengeligeMaler).hasSize(3);
@@ -356,7 +357,7 @@ class ByggBrevmalListeTest {
         when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
 
 
-        List<BrevmalDto> tilgjengeligeMaler = byggBrevmalListe.byggBrevmalDtoListe(123L);
+        List<BrevmalDto> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
 
 
         assertThat(tilgjengeligeMaler).hasSize(3);

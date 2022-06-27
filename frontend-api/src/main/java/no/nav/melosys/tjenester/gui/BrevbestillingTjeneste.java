@@ -9,7 +9,9 @@ import no.nav.melosys.service.dokument.MuligeMottakereDto;
 import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
-import no.nav.melosys.tjenester.gui.dto.brev.*;
+import no.nav.melosys.tjenester.gui.dto.brev.BrevbestillingDto;
+import no.nav.melosys.tjenester.gui.dto.brev.BrevmalDto;
+import no.nav.melosys.tjenester.gui.dto.brev.HentMuligeMottakereRequestDto;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
@@ -26,22 +28,22 @@ import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
 public class BrevbestillingTjeneste {
 
     private final BrevbestillingService brevbestillingService;
-    private final ByggBrevmalListe byggBrevmalListe;
+    private final BrevmalListeBygger brevmalListeBygger;
     private final Aksesskontroll aksesskontroll;
 
     public BrevbestillingTjeneste(BrevbestillingService brevbestillingService,
-                                  ByggBrevmalListe byggBrevmalListe,
+                                  BrevmalListeBygger brevmalListeBygger,
                                   Aksesskontroll aksesskontroll) {
         this.brevbestillingService = brevbestillingService;
-        this.byggBrevmalListe = byggBrevmalListe;
+        this.brevmalListeBygger = brevmalListeBygger;
         this.aksesskontroll = aksesskontroll;
     }
 
     @GetMapping(value = "/tilgjengelige-maler/{behandlingID}", produces = APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Henter alle tilgjengelige brevmaler for en behandling", response = BrevmalTypeDto.class, responseContainer = "List")
+    @ApiOperation(value = "Henter alle tilgjengelige brevmaler for en behandling", response = BrevmalDto.class, responseContainer = "List")
     public List<BrevmalDto> hentTilgjengeligeMaler(@PathVariable long behandlingID) {
         aksesskontroll.autoriser(behandlingID);
-        return byggBrevmalListe.byggBrevmalDtoListe(behandlingID);
+        return brevmalListeBygger.byggBrevmalDtoListe(behandlingID);
     }
 
     @PostMapping(value = "/mulige-mottakere/{behandlingID}", produces = APPLICATION_JSON_VALUE)

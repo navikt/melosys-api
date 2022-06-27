@@ -1,4 +1,4 @@
-package no.nav.melosys.tjenester.gui.dto.brev;
+package no.nav.melosys.tjenester.gui;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,18 +15,19 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.brev.BrevAdresse;
 import no.nav.melosys.service.brev.BrevbestillingService;
+import no.nav.melosys.tjenester.gui.dto.brev.*;
 import org.springframework.stereotype.Component;
 
 import static java.util.Arrays.asList;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
 
 @Component
-public class ByggBrevmalListe {
+public class BrevmalListeBygger {
 
     private final BrevbestillingService brevbestillingService;
     private final BehandlingService behandlingService;
 
-    public ByggBrevmalListe(BrevbestillingService brevbestillingService, BehandlingService behandlingService) {
+    public BrevmalListeBygger(BrevbestillingService brevbestillingService, BehandlingService behandlingService) {
         this.brevbestillingService = brevbestillingService;
         this.behandlingService = behandlingService;
     }
@@ -38,12 +39,9 @@ public class ByggBrevmalListe {
             List<Produserbaredokumenter> produserbareDokumenter = brevbestillingService.hentMuligeProduserbaredokumenter(behandlingId, mottaker.getRolle());
 
             List<BrevmalTypeDto> typer = produserbareDokumenter.stream().map(p -> switch (p) {
-                    case MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE ->
-                        lagBrevmalTypeDtoForForventetSaksbehandlingstid(p);
-                    case MANGELBREV_BRUKER, MANGELBREV_ARBEIDSGIVER ->
-                        lagBrevmalTypeDtoForMangelbrev(p, behandlingId);
-                    case GENERELT_FRITEKSTBREV_BRUKER, GENERELT_FRITEKSTBREV_ARBEIDSGIVER, GENERELT_FRITEKSTBREV_VIRKSOMHET ->
-                        lagBrevmalTypeDtoForFritekstbrev(p, behandlingId);
+                    case MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE -> lagBrevmalTypeDtoForForventetSaksbehandlingstid(p);
+                    case MANGELBREV_BRUKER, MANGELBREV_ARBEIDSGIVER -> lagBrevmalTypeDtoForMangelbrev(p, behandlingId);
+                    case GENERELT_FRITEKSTBREV_BRUKER, GENERELT_FRITEKSTBREV_ARBEIDSGIVER, GENERELT_FRITEKSTBREV_VIRKSOMHET -> lagBrevmalTypeDtoForFritekstbrev(p, behandlingId);
                     default -> null;
                 })
                 .filter(Objects::nonNull)
