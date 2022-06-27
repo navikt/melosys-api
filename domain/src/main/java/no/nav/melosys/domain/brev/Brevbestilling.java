@@ -7,7 +7,6 @@ public abstract class Brevbestilling {
     protected Produserbaredokumenter produserbartdokument;
     protected Behandling behandling;
     protected String avsenderID;
-
     protected Brevbestilling() {
         //Tom constructor på grunn av deserialsering i prosessinstans
     }
@@ -29,4 +28,5 @@ public abstract class Brevbestilling {
     public String getAvsenderID() {
         return avsenderID;
     }
+
 }

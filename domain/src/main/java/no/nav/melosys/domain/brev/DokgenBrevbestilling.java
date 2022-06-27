@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Kontaktopplysning;
 import no.nav.melosys.domain.UtenlandskMyndighet;
+import no.nav.melosys.domain.arkiv.Distribusjonstype;
 import no.nav.melosys.domain.arkiv.SaksvedleggBestilling;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
@@ -40,6 +41,7 @@ public class DokgenBrevbestilling extends Brevbestilling {
     private Persondata persondokument;
     private Persondata personMottaker;
     private List<SaksvedleggBestilling> saksvedleggBestilling;
+    private Distribusjonstype distribusjonstype;
 
     public DokgenBrevbestilling() {
         super();
@@ -63,6 +65,7 @@ public class DokgenBrevbestilling extends Brevbestilling {
         this.persondokument = builder.persondokument;
         this.personMottaker = builder.personMottaker;
         this.saksvedleggBestilling = builder.saksvedleggBestilling;
+        this.distribusjonstype = builder.distribusjonstype;
     }
 
     public OrganisasjonDokument getOrg() {
@@ -125,6 +128,10 @@ public class DokgenBrevbestilling extends Brevbestilling {
         return saksvedleggBestilling;
     }
 
+    public Distribusjonstype getDistribusjonstype() {
+        return distribusjonstype;
+    }
+
     public Builder toBuilder() {
         return new Builder(this);
     }
@@ -148,6 +155,7 @@ public class DokgenBrevbestilling extends Brevbestilling {
         private Persondata persondokument;
         private Persondata personMottaker;
         private List<SaksvedleggBestilling> saksvedleggBestilling;
+        private Distribusjonstype distribusjonstype;
 
 
         public Builder() {
@@ -172,6 +180,7 @@ public class DokgenBrevbestilling extends Brevbestilling {
             this.persondokument = brevbestilling.persondokument;
             this.personMottaker = brevbestilling.personMottaker;
             this.saksvedleggBestilling = brevbestilling.saksvedleggBestilling;
+            this.distribusjonstype = brevbestilling.distribusjonstype;
         }
 
         public T medProduserbartdokument(Produserbaredokumenter produserbartdokument) {
@@ -261,6 +270,11 @@ public class DokgenBrevbestilling extends Brevbestilling {
 
         public T medSaksvedleggBestilling(List<SaksvedleggBestilling> saksvedleggBestilling) {
             this.saksvedleggBestilling = saksvedleggBestilling;
+            return (T) this;
+        }
+
+        public T medDistribusjonstype(Distribusjonstype distribusjonstype) {
+            this.distribusjonstype = distribusjonstype;
             return (T) this;
         }
 

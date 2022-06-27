@@ -11,6 +11,7 @@ import no.nav.melosys.domain.kodeverk.Oppgavetyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.oppgave.Oppgaveplukker;
 import no.nav.melosys.service.oppgave.dto.*;
@@ -19,6 +20,7 @@ import no.nav.melosys.sikkerhet.context.TestSubjectHandler;
 import no.nav.melosys.tjenester.gui.dto.oppgave.OppgaveOversiktDto;
 import no.nav.melosys.tjenester.gui.dto.oppgave.PlukketOppgaveDto;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -28,9 +30,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class OppgaveTjenesteTest extends JsonSchemaTestParent {
@@ -97,13 +100,45 @@ class OppgaveTjenesteTest extends JsonSchemaTestParent {
         assertThat(entity.getOppgaveID()).isEqualTo("1");
     }
 
+    @Disabled("Frem til skjema-fiks")
     @Test
-    void søkOppgaverMedBrukerID() throws IOException {
+    void søkOppgaverMedPersonIdentEllerOrgnr() throws IOException {
         List<Oppgave> oppgaver = defaultEasyRandom().objects(Oppgave.class, 3).collect(Collectors.toList());
-        when(oppgaveService.finnOppgaverMedBrukerID(anyString())).thenReturn(oppgaver);
+        when(oppgaveService.finnOppgaverMedPersonIdent(anyString())).thenReturn(oppgaver);
 
-        validerArray(oppgaveTjeneste.søkOppgaverMedBrukerID("").getBody(), OPPGAVER_SOK_SCHEMA, logger);
+        validerArray(oppgaveTjeneste.søkOppgaverMedPersonIdentEllerOrgnr("", null).getBody(), OPPGAVER_SOK_SCHEMA, logger);
     }
+
+    @Test
+    void søkOppgaverMedPersonIdentEllerOrgnr_fnrSendesInn_kallerRettFunksjon() {
+        oppgaveTjeneste.søkOppgaverMedPersonIdentEllerOrgnr("fnr", "");
+
+        verify(oppgaveService).finnOppgaverMedPersonIdent("fnr");
+        verify(oppgaveService, never()).finnOppgaverMedOrgnr(anyString());
+    }
+
+    @Test
+    void søkOppgaverMedPersonIdentEllerOrgnr_orgnrSendesInn_kallerRettFunksjon() {
+        oppgaveTjeneste.søkOppgaverMedPersonIdentEllerOrgnr("", "orgnr");
+
+        verify(oppgaveService).finnOppgaverMedOrgnr("orgnr");
+        verify(oppgaveService, never()).finnOppgaverMedPersonIdent(anyString());
+    }
+
+    @Test
+    void søkOppgaverMedPersonIdentEllerOrgnr_fnrOgOrgnrSendesInn_kasterFeil() {
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> oppgaveTjeneste.søkOppgaverMedPersonIdentEllerOrgnr("fnr", "orgnr"))
+            .withMessageContaining("Fant både personIdent og orgnr. API støtter kun én.");
+    }
+
+    @Test
+    void søkOppgaverMedPersonIdentEllerOrgnr_ingentingSendesInn_kasterFeil() {
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> oppgaveTjeneste.søkOppgaverMedPersonIdentEllerOrgnr("", ""))
+            .withMessageContaining("Finner ingen søkekriteria");
+    }
+
 
     @Test
     void tilbakeleggOppgave() throws Exception {

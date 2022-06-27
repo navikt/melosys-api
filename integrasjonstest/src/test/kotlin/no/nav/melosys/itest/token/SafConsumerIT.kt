@@ -16,15 +16,13 @@ import org.assertj.core.api.AssertionsForClassTypes
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.boot.autoconfigure.web.reactive.function.client.WebClientAutoConfiguration
-import org.springframework.boot.test.autoconfigure.web.client.RestClientTest
-import org.springframework.test.web.client.MockRestServiceServer
+import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebClient
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 
-@RestClientTest(
+@WebMvcTest(
     value = [
         StsRestTemplateProducer::class,
         RestTokenServiceClient::class,
-        WebClientAutoConfiguration::class,
 
         SafConsumerImpl::class,
         SafConsumerProducer::class,
@@ -32,11 +30,12 @@ import org.springframework.test.web.client.MockRestServiceServer
     ],
     properties = ["spring.profiles.active:itest-token"]
 )
+@AutoConfigureWebClient
 class SafConsumerIT(
     @Autowired private val safConsumer: SafConsumer,
-    @Autowired server: MockRestServiceServer,
-    @Value("\${mockserver.port}") mockPort: Int,
-) : ConsumerTestBase<ByteArray>(server, mockPort) {
+    @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,
+    @Value("\${mockserver.security.port}") mockSecurityPort: Int
+) : ConsumerWireMockTestBase<ByteArray>(mockServiceUnderTestPort, mockSecurityPort) {
 
     @Test
     fun authorizationSkalKommeFraSystem() {

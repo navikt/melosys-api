@@ -11,6 +11,7 @@ import no.nav.melosys.domain.arkiv.DokumentReferanse;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
+import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
@@ -26,9 +27,9 @@ import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
+import no.nav.melosys.service.kontroll.feature.unntak.AnmodningUnntakKontrollService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
-import no.nav.melosys.service.kontroll.feature.unntak.AnmodningUnntakKontrollService;
 import no.nav.melosys.sikkerhet.context.TestSubjectHandler;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -208,11 +209,12 @@ class AnmodningUnntakServiceTest {
         behandling.setSaksopplysninger(Set.of(saksopplysning));
 
         when(behandlingService.hentBehandling(BEHANDLING_ID)).thenReturn(behandling);
-        when(eessiService.kanOppretteSedPåBuc("55667788")).thenReturn(false);
+        when(anmodningsperiodeService.hentAnmodningsperiodeSvarForBehandling(BEHANDLING_ID)).thenReturn(lagAnmodningsperiodeSvar());
+        when(eessiService.kanOppretteSedTyperPåBuc("55667788", SedType.A011)).thenReturn(false);
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> anmodningUnntakService.anmodningOmUnntakSvar(BEHANDLING_ID, null))
-            .withMessageContaining("Kan ikke opprette Sed på rinaSaknummer: 55667788");
+            .withMessageContaining("Kan ikke opprette SedType A011 på rinaSaknummer: 55667788");
     }
 
     private static Behandling lagBehandling() {

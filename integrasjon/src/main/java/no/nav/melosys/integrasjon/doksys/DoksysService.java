@@ -2,6 +2,8 @@ package no.nav.melosys.integrasjon.doksys;
 
 import no.nav.melosys.domain.Kontaktopplysning;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
+import no.nav.melosys.domain.arkiv.Distribusjonstidspunkt;
+import no.nav.melosys.domain.arkiv.Distribusjonstype;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IntegrasjonException;
@@ -40,7 +42,6 @@ public class DoksysService implements DoksysFasade {
     private static final String FALSK_MOTTAKER_ID = "11111111111";
     private static final String LINE_SEPARATOR = System.lineSeparator();
     private static final String SYS_AVSENDER = "Melosys";
-
     private final DokumentproduksjonConsumer dokumentproduksjonConsumer;
     private final DistribuerJournalpostConsumer distribuerJournalpostConsumer;
 
@@ -139,7 +140,7 @@ public class DoksysService implements DoksysFasade {
     }
 
     @Override
-    public String distribuerJournalpost(String journalpostId, StrukturertAdresse mottakeradresse) {
+    public String distribuerJournalpost(String journalpostId, StrukturertAdresse mottakeradresse, Distribusjonstype distribusjonstype) {
         DistribuerJournalpostRequest request = DistribuerJournalpostRequest.builder()
             .journalpostId(journalpostId)
             .bestillendeFagsystem(MELOSYS.getKode())
@@ -147,29 +148,35 @@ public class DoksysService implements DoksysFasade {
             .adresse("NO".equalsIgnoreCase(mottakeradresse.getLandkode())
                 ? norskAdresse(mottakeradresse)
                 : utenlandskAdresse(mottakeradresse))
+            .distribusjonstype(distribusjonstype)
+            .distribusjonstidspunkt(Distribusjonstidspunkt.KJERNETID)
             .build();
 
         return distribuerJournalpostConsumer.distribuerJournalpost(request).getBestillingsId();
     }
 
     @Override
-    public String distribuerJournalpost(String journalpostId, StrukturertAdresse mottakeradresse, Kontaktopplysning kontaktopplysning, String kontaktpersonNavn) {
+    public String distribuerJournalpost(String journalpostId, StrukturertAdresse mottakeradresse, Kontaktopplysning kontaktopplysning, String kontaktpersonNavn, Distribusjonstype distribusjonstype) {
         DistribuerJournalpostRequest request = DistribuerJournalpostRequest.builder()
             .journalpostId(journalpostId)
             .bestillendeFagsystem(MELOSYS.getKode())
             .dokumentProdApp(MELOSYS.getKode())
             .adresse(mapAdresse(mottakeradresse, kontaktopplysning, kontaktpersonNavn))
+            .distribusjonstype(distribusjonstype)
+            .distribusjonstidspunkt(Distribusjonstidspunkt.KJERNETID)
             .build();
 
         return distribuerJournalpostConsumer.distribuerJournalpost(request).getBestillingsId();
     }
 
     @Override
-    public String distribuerJournalpost(String journalpostId) {
+    public String distribuerJournalpost(String journalpostId, Distribusjonstype distribusjonstype) {
         DistribuerJournalpostRequest request = DistribuerJournalpostRequest.builder()
             .journalpostId(journalpostId)
             .bestillendeFagsystem(MELOSYS.getKode())
             .dokumentProdApp(MELOSYS.getKode())
+            .distribusjonstype(distribusjonstype)
+            .distribusjonstidspunkt(Distribusjonstidspunkt.KJERNETID)
             .build();
 
         return distribuerJournalpostConsumer.distribuerJournalpost(request).getBestillingsId();
