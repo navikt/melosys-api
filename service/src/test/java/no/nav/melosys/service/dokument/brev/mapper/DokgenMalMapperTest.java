@@ -25,7 +25,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.dokgen.dto.*;
 import no.nav.melosys.integrasjon.dokgen.dto.felles.Innvilgelse;
 import no.nav.melosys.integrasjon.dokgen.dto.felles.Person;
-import no.nav.melosys.integrasjon.dokgen.dto.felles.Saksopplysninger;
+import no.nav.melosys.integrasjon.dokgen.dto.felles.SaksinfoVirksomhet;
 import no.nav.melosys.integrasjon.dokgen.dto.storbritannia.attest.*;
 import no.nav.melosys.integrasjon.dokgen.dto.storbritannia.innvilgelse.InnvilgelseStorbritannia;
 import no.nav.melosys.integrasjon.dokgen.dto.storbritannia.innvilgelse.Soknad;
@@ -102,10 +102,9 @@ class DokgenMalMapperTest {
 
         DokgenDto dokgenDto = dokgenMalMapper.mapBehandling(brevbestilling, lagMottaker(BRUKER));
 
-        assertThat(dokgenDto)
-            .isInstanceOf(SaksbehandlingstidSoknad.class)
+        assertThat((SaksbehandlingstidSoknad) dokgenDto)
             .extracting(
-                dto -> dto.getSaksopplysninger().navnBruker(),
+                dto -> dto.getSaksinfo().navnBruker(),
                 dto -> dto.getMottaker().navn(),
                 dto -> dto.getMottaker().postnr(),
                 dto -> dto.getMottaker().poststed(),
@@ -134,10 +133,9 @@ class DokgenMalMapperTest {
 
         DokgenDto dokgenDto = dokgenMalMapper.mapBehandling(brevbestilling, lagMottaker(BRUKER));
 
-        assertThat(dokgenDto)
-            .isInstanceOf(SaksbehandlingstidSoknad.class)
+        assertThat((SaksbehandlingstidSoknad) dokgenDto)
             .extracting(
-                dto -> dto.getSaksopplysninger().navnBruker(),
+                dto -> dto.getSaksinfo().navnBruker(),
                 dto -> dto.getMottaker().navn(),
                 dto -> dto.getMottaker().postnr()
             ).containsExactly(
@@ -163,10 +161,9 @@ class DokgenMalMapperTest {
 
         DokgenDto dokgenDto = dokgenMalMapper.mapBehandling(brevbestilling, lagMottaker(BRUKER));
 
-        assertThat(dokgenDto)
-            .isInstanceOf(SaksbehandlingstidSoknad.class)
+        assertThat((SaksbehandlingstidSoknad) dokgenDto)
             .extracting(
-                dto -> dto.getSaksopplysninger().navnBruker(),
+                dto -> dto.getSaksinfo().navnBruker(),
                 dto -> dto.getMottaker().navn(),
                 dto -> dto.getMottaker().postnr()
             ).containsExactly(
@@ -226,10 +223,9 @@ class DokgenMalMapperTest {
 
         DokgenDto dokgenDto = dokgenMalMapper.mapBehandling(brevbestilling, lagMottaker(ARBEIDSGIVER));
 
-        assertThat(dokgenDto)
-            .isInstanceOf(SaksbehandlingstidSoknad.class)
+        assertThat((SaksbehandlingstidSoknad) dokgenDto)
             .extracting(
-                dto -> dto.getSaksopplysninger().navnBruker(),
+                dto -> dto.getSaksinfo().navnBruker(),
                 dto -> dto.getMottaker().navn(),
                 dto -> dto.getMottaker().postnr()
             ).containsExactly(
@@ -260,10 +256,9 @@ class DokgenMalMapperTest {
 
         DokgenDto dokgenDto = dokgenMalMapper.mapBehandling(brevbestilling, lagMottakerRepresentant(Aktoertype.ORGANISASJON, Representerer.BRUKER));
 
-        assertThat(dokgenDto)
-            .isInstanceOf(SaksbehandlingstidSoknad.class)
+        assertThat((SaksbehandlingstidSoknad) dokgenDto)
             .extracting(
-                dto -> dto.getSaksopplysninger().navnBruker(),
+                dto -> dto.getSaksinfo().navnBruker(),
                 dto -> dto.getMottaker().navn(),
                 dto -> dto.getMottaker().postnr()
             ).containsExactly(
@@ -291,10 +286,9 @@ class DokgenMalMapperTest {
 
         DokgenDto dokgenDto = dokgenMalMapper.mapBehandling(brevbestilling, lagMottakerRepresentant(Aktoertype.ORGANISASJON, Representerer.BRUKER));
 
-        assertThat(dokgenDto)
-            .isInstanceOf(SaksbehandlingstidSoknad.class)
+        assertThat((SaksbehandlingstidSoknad) dokgenDto)
             .extracting(
-                dto -> dto.getSaksopplysninger().navnBruker(),
+                dto -> dto.getSaksinfo().navnBruker(),
                 dto -> dto.getMottaker().navn(),
                 dto -> dto.getMottaker().postnr()
             ).containsExactly(
@@ -531,11 +525,11 @@ class DokgenMalMapperTest {
                 "Fetter Anton"
             );
 
-        assertThat(dokgenDto.getSaksopplysninger())
+        assertThat((SaksinfoVirksomhet) dokgenDto.getSaksinfo())
             .extracting(
-                Saksopplysninger::saksnummer,
-                Saksopplysninger::navnBruker,
-                Saksopplysninger::fnr)
+                SaksinfoVirksomhet::saksnummer,
+                SaksinfoVirksomhet::navnVirksomhet,
+                SaksinfoVirksomhet::orgnr)
             .containsExactly(
                 SAKSNUMMER,
                 NAVN_ORG,

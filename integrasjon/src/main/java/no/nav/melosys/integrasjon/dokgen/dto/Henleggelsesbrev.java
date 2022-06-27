@@ -3,6 +3,7 @@ package no.nav.melosys.integrasjon.dokgen.dto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import no.nav.melosys.domain.brev.HenleggelseBrevbestilling;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.integrasjon.dokgen.dto.felles.SaksinfoBruker;
 
 import java.time.LocalDate;
 
@@ -42,5 +43,10 @@ public class Henleggelsesbrev extends DokgenDto {
 
     public static Henleggelsesbrev av(HenleggelseBrevbestilling brevbestilling) {
         return new Henleggelsesbrev(brevbestilling, Aktoersroller.BRUKER);
+    }
+
+    @Override
+    public SaksinfoBruker getSaksinfo() {
+        return (SaksinfoBruker) super.getSaksinfo();
     }
 }
