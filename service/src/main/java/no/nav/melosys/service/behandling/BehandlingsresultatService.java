@@ -5,13 +5,11 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
-import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
 import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
@@ -29,13 +27,11 @@ public class BehandlingsresultatService {
 
     private final BehandlingsresultatRepository behandlingsresultatRepository;
     private final VilkaarsresultatService vilkaarsresultatService;
-    private final Unleash unleash;
 
     public BehandlingsresultatService(BehandlingsresultatRepository behandlingsresultatRepository,
-                                      @Lazy VilkaarsresultatService vilkaarsresultatService, Unleash unleash) {
+                                      @Lazy VilkaarsresultatService vilkaarsresultatService) {
         this.behandlingsresultatRepository = behandlingsresultatRepository;
         this.vilkaarsresultatService = vilkaarsresultatService;
-        this.unleash = unleash;
     }
 
     @Transactional
@@ -90,9 +86,7 @@ public class BehandlingsresultatService {
         behandlingsresultatsreplika.setUtfallRegistreringUnntak(null);
         behandlingsresultatsreplika.setUtfallUtpeking(null);
         behandlingsresultatsreplika.setBehandlingsmåte(Behandlingsmaate.MANUELT);
-        if (unleash.isEnabled("melosys.ikke_kopier_behandlingsresultattype")) {
-            behandlingsresultatsreplika.setType(Behandlingsresultattyper.IKKE_FASTSATT);
-        }
+        behandlingsresultatsreplika.setType(Behandlingsresultattyper.IKKE_FASTSATT);
 
         replikerAvklartefakta(behandlingsresultat, behandlingsresultatsreplika);
         replikerLovvalgsperioder(behandlingsresultat, behandlingsresultatsreplika);

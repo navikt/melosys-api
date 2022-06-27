@@ -5,7 +5,6 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.*;
 
-import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
@@ -16,7 +15,6 @@ import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
 import no.nav.melosys.exception.FunksjonellException;
@@ -47,14 +45,11 @@ class BehandlingsresultatServiceTest {
     @Mock
     private VilkaarsresultatService vilkaarsresultatService;
 
-    private final FakeUnleash fakeUnleash = new FakeUnleash();
-
-
     private BehandlingsresultatService behandlingsresultatService;
 
     @BeforeEach
     public void setUp() {
-        behandlingsresultatService = spy(new BehandlingsresultatService(behandlingsresultatRepo, vilkaarsresultatService, fakeUnleash));
+        behandlingsresultatService = spy(new BehandlingsresultatService(behandlingsresultatRepo, vilkaarsresultatService));
     }
 
     @Test
@@ -165,7 +160,7 @@ class BehandlingsresultatServiceTest {
             .matches(b -> b.getId() == null)
             .matches(b -> b.getBehandling().equals(behandlingsreplika))
             .matches(b -> b.getBehandlingsmåte().equals(behandlingsresultat.getBehandlingsmåte()))
-            .matches(b -> b.getType().equals(behandlingsresultat.getType()))
+            .matches(b -> b.getType() == Behandlingsresultattyper.IKKE_FASTSATT)
             .matches(b -> b.getVedtakMetadata() == null)
             .matches(b -> b.getBehandlingsmåte() == Behandlingsmaate.MANUELT);
 
@@ -239,30 +234,6 @@ class BehandlingsresultatServiceTest {
 
         assertThat(behandlingsresultatreplika.getUtfallRegistreringUnntak()).isNull();
         assertThat(behandlingsresultatreplika.getUtfallUtpeking()).isNull();
-    }
-
-    @Test
-    void replikerBehandlingsresultat_toggleEnabled_replikererBehandlingsresultatUtenBehandlingsresultattype()
-        throws NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
-        fakeUnleash.enable("melosys.ikke_kopier_behandlingsresultattype");
-
-        Behandling tidligsteInaktiveBehandling = new Behandling();
-        tidligsteInaktiveBehandling.setId(1L);
-
-        Behandlingsresultat behandlingsresultat = opprettBehandlingsresultatMedData(tidligsteInaktiveBehandling);
-        doReturn(behandlingsresultat).when(behandlingsresultatService).hentBehandlingsresultat(1L);
-
-
-        behandlingsresultatService.replikerBehandlingsresultat(tidligsteInaktiveBehandling, new Behandling());
-
-
-        ArgumentCaptor<Behandlingsresultat> captor = ArgumentCaptor.forClass(Behandlingsresultat.class);
-        verify(behandlingsresultatRepo).save(captor.capture());
-        Behandlingsresultat behandlingsresultatreplika = captor.getValue();
-
-        assertThat(behandlingsresultatreplika)
-            .matches(b -> b.getType().equals(Behandlingsresultattyper.IKKE_FASTSATT))
-            .matches(b -> b.getBehandlingsmåte().equals(Behandlingsmaate.MANUELT));
     }
 
     @Test
