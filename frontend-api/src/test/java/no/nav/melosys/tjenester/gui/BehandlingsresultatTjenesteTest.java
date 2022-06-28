@@ -10,6 +10,7 @@ import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Nyvurderingbakgrunner;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
+import no.nav.melosys.service.behandling.AngiBehandlingsresultatService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.tjenester.gui.dto.BehandlingsresultatDto;
@@ -39,10 +40,12 @@ class BehandlingsresultatTjenesteTest extends JsonSchemaTestParent {
 
     @Mock
     private BehandlingsresultatService behandlingsresultatService;
+    @Mock
+    private AngiBehandlingsresultatService angiBehandlingsresultatService;
 
     @BeforeEach
     public void setUp() {
-        behandlingsresultatTjeneste = new BehandlingsresultatTjeneste(behandlingsresultatService, mock(Aksesskontroll.class));
+        behandlingsresultatTjeneste = new BehandlingsresultatTjeneste(behandlingsresultatService, angiBehandlingsresultatService, mock(Aksesskontroll.class));
     }
 
     @Test

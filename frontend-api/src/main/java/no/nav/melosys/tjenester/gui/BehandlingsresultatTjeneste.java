@@ -3,8 +3,11 @@ package no.nav.melosys.tjenester.gui;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
+import no.nav.melosys.service.behandling.AngiBehandlingsresultatService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
+import no.nav.melosys.tjenester.gui.dto.AngiBehandlingsresultattypeDto;
 import no.nav.melosys.tjenester.gui.dto.BehandlingsresultatDto;
 import no.nav.melosys.tjenester.gui.dto.LagreFritekstDto;
 import no.nav.security.token.support.core.api.Protected;
@@ -22,10 +25,12 @@ import org.springframework.web.context.WebApplicationContext;
 public class BehandlingsresultatTjeneste {
 
     private final BehandlingsresultatService behandlingsresultatService;
+    private final AngiBehandlingsresultatService angiBehandlingsresultatService;
     private final Aksesskontroll aksesskontroll;
 
-    public BehandlingsresultatTjeneste(BehandlingsresultatService behandlingsresultatService, Aksesskontroll aksesskontroll) {
+    public BehandlingsresultatTjeneste(BehandlingsresultatService behandlingsresultatService, AngiBehandlingsresultatService angiBehandlingsresultatService, Aksesskontroll aksesskontroll) {
         this.behandlingsresultatService = behandlingsresultatService;
+        this.angiBehandlingsresultatService = angiBehandlingsresultatService;
         this.aksesskontroll = aksesskontroll;
     }
 
@@ -53,5 +58,18 @@ public class BehandlingsresultatTjeneste {
                 lagreFritekstDto.begrunnelseFritekst(),
                 lagreFritekstDto.innledningFritekst())
         ));
+    }
+
+    @PostMapping("{behandlingID}/resultat/type")
+    @ApiOperation(value = "Angir behandlingsresultattype og avslutter behandling og sak")
+    public ResponseEntity<Void> angiBehandlingsresultattype(
+            @PathVariable("behandlingID") long behandlingID,
+            @RequestBody AngiBehandlingsresultattypeDto angiBehandlingsresultattypeDto) {
+        aksesskontroll.autoriserSkriv(behandlingID);
+
+        var behandlingsresultattype = Behandlingsresultattyper.valueOf(angiBehandlingsresultattypeDto.type());
+        angiBehandlingsresultatService.oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling(behandlingID, behandlingsresultattype);
+
+        return ResponseEntity.noContent().build();
     }
 }
