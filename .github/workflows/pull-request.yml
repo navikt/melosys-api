@@ -14,4 +14,4 @@ jobs:
       - name: Build
         run: |
           JAVA_HOME=/usr/local/openjdk-17
-          mvn clean package -B -e -U
+          mvn clean verify -B -e -U
