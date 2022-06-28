@@ -1,10 +1,8 @@
-package no.nav.melosys.itest.token
+package no.nav.melosys.integrasjon.sak
 
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.matching.StringValuePattern
-import no.nav.melosys.integrasjon.sak.SakConsumer
-import no.nav.melosys.integrasjon.sak.SakConsumerImpl
-import no.nav.melosys.integrasjon.sak.SakConsumerProducer
+import no.nav.melosys.integrasjon.ConsumerWireMockTestBase
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -15,9 +13,9 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
         SakConsumerImpl::class,
         SakConsumerProducer::class,
     ],
-    properties = ["spring.profiles.active:itest-token"]
+    properties = ["spring.profiles.active:token-test"]
 )
-class SakConsumerIT(
+class SakConsumerTokenTest(
     @Autowired private val sakConsumer: SakConsumer,
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,
     @Value("\${mockserver.security.port}") mockSecurityPort: Int
