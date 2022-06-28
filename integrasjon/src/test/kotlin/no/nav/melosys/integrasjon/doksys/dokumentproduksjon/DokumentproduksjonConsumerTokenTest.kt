@@ -1,11 +1,9 @@
-package no.nav.melosys.itest.token
+package no.nav.melosys.integrasjon.doksys.dokumentproduksjon
 
 import com.github.tomakehurst.wiremock.client.MappingBuilder
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.matching.StringValuePattern
-import no.nav.melosys.integrasjon.doksys.dokumentproduksjon.DokumentproduksjonConsumer
-import no.nav.melosys.integrasjon.doksys.dokumentproduksjon.DokumentproduksjonConsumerConfig
-import no.nav.melosys.integrasjon.doksys.dokumentproduksjon.DokumentproduksjonConsumerProducer
+import no.nav.melosys.integrasjon.ConsumerWireMockTestBase
 import no.nav.melosys.sikkerhet.sts.StsLoginConfig
 import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.meldinger.ProduserIkkeredigerbartDokumentRequest
 import org.junit.jupiter.api.Test
@@ -17,11 +15,11 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
     value = [
         DokumentproduksjonConsumerConfig::class,
         DokumentproduksjonConsumerProducer::class,
-        StsLoginConfig::class,
+        StsLoginConfig::class
     ],
-    properties = ["spring.profiles.active:itest-token"]
+    properties = ["spring.profiles.active:token-test"]
 )
-class DokumentproduksjonConsumerIT(
+class DokumentproduksjonConsumerTokenTest(
     @Autowired private val dokumentproduksjonConsumer: DokumentproduksjonConsumer,
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,
     @Value("\${mockserver.security.port}") mockSecurityPort: Int
@@ -37,6 +35,7 @@ class DokumentproduksjonConsumerIT(
             defaultSecurityServiceWireMockMappings()
                 .withRequestBody(
                     notMatching(".*BinarySecurityToken.*")
+
                 )
         )
         executeFromSystem {
