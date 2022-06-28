@@ -42,7 +42,6 @@ class ArbeidsforholdKonverter(
 
     private fun getAntallTimerForTimeloennet(antallTimerForTimeloennet: List<AntallTimerForTimeloennet>?): List<AntallTimerIPerioden> {
         if (antallTimerForTimeloennet == null) return emptyList()
-
         return antallTimerForTimeloennet.map {
             AntallTimerIPerioden().apply {
                 antallTimer = it.antallTimer()
@@ -91,8 +90,9 @@ class ArbeidsforholdKonverter(
         if (arbeidsavtalerSrc == null) return emptyList()
         return arbeidsavtalerSrc.map {
             Arbeidsavtale().apply {
-                yrke = Yrke(it.yrke())
-                yrke.term = kodeOppslag.getTermFraKodeverk(FellesKodeverk.YRKER, it.yrke())
+                yrke = Yrke(it.yrke()).apply {
+                    term = kodeOppslag.getTermFraKodeverk(FellesKodeverk.YRKER, it.yrke())
+                }
                 beregnetAntallTimerPrUke = it.beregnetAntallTimerPrUke()
                 arbeidstidsordning = Arbeidstidsordning()
                 arbeidstidsordning.kode = it.arbeidstidsordning()
