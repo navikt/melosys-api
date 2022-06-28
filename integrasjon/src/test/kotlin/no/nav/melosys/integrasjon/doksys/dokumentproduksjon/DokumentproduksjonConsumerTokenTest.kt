@@ -10,15 +10,16 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.context.annotation.Import
 
 @WebMvcTest(
     value = [
         DokumentproduksjonConsumerConfig::class,
         DokumentproduksjonConsumerProducer::class,
-        StsLoginConfig::class
     ],
     properties = ["spring.profiles.active:token-test"]
 )
+@Import(StsLoginConfig::class)
 class DokumentproduksjonConsumerTokenTest(
     @Autowired private val dokumentproduksjonConsumer: DokumentproduksjonConsumer,
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,
