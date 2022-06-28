@@ -1,9 +1,7 @@
-package no.nav.melosys.itest.token
+package no.nav.melosys.integrasjon.eessi
 
 import com.github.tomakehurst.wiremock.client.WireMock
-import no.nav.melosys.integrasjon.eessi.EessiConsumer
-import no.nav.melosys.integrasjon.eessi.EessiConsumerImpl
-import no.nav.melosys.integrasjon.eessi.EessiConsumerProducer
+import no.nav.melosys.integrasjon.ConsumerWireMockTestBase
 import no.nav.melosys.integrasjon.felles.GenericContextClientRequestInterceptor
 import no.nav.melosys.integrasjon.reststs.RestStsClient
 import no.nav.melosys.integrasjon.reststs.StsRestTemplateProducer
@@ -23,10 +21,10 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
         EessiConsumerProducer::class,
         GenericContextClientRequestInterceptor::class
     ],
-    properties = ["spring.profiles.active:itest-token"]
+    properties = ["spring.profiles.active:token-test"]
 )
 @AutoConfigureWebClient
-class EessiConsumerIT(
+class EessiConsumerTokenTest(
     @Autowired private val eessiConsumer: EessiConsumer,
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,
     @Value("\${mockserver.security.port}") mockSecurityPort: Int
@@ -78,4 +76,3 @@ class EessiConsumerIT(
         eessiConsumer.hentMuligeAksjoner("123")
     }
 }
-
