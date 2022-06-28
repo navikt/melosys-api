@@ -1,12 +1,10 @@
-package no.nav.melosys.itest.token
+package no.nav.melosys.integrasjon.joark.saf
 
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.matching.StringValuePattern
 import no.nav.melosys.exception.TekniskException
+import no.nav.melosys.integrasjon.ConsumerWireMockTestBase
 import no.nav.melosys.integrasjon.felles.GenericContextExchangeFilter
-import no.nav.melosys.integrasjon.joark.saf.SafConsumer
-import no.nav.melosys.integrasjon.joark.saf.SafConsumerImpl
-import no.nav.melosys.integrasjon.joark.saf.SafConsumerProducer
 import no.nav.melosys.integrasjon.reststs.RestTokenServiceClient
 import no.nav.melosys.integrasjon.reststs.StsRestTemplateProducer
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
@@ -28,10 +26,10 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
         SafConsumerProducer::class,
         GenericContextExchangeFilter::class
     ],
-    properties = ["spring.profiles.active:itest-token"]
+    properties = ["spring.profiles.active:token-test"]
 )
 @AutoConfigureWebClient
-class SafConsumerIT(
+class SafConsumerTokenTest(
     @Autowired private val safConsumer: SafConsumer,
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,
     @Value("\${mockserver.security.port}") mockSecurityPort: Int
