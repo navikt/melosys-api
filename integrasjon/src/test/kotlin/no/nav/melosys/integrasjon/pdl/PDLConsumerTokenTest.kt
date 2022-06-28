@@ -1,9 +1,9 @@
-package no.nav.melosys.itest.token
+package no.nav.melosys.integrasjon.pdl
 
 import com.github.tomakehurst.wiremock.client.MappingBuilder
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.matching.StringValuePattern
-import no.nav.melosys.integrasjon.pdl.*
+import no.nav.melosys.integrasjon.ConsumerWireMockTestBase
 import no.nav.melosys.integrasjon.reststs.RestTokenServiceClient
 import no.nav.melosys.integrasjon.reststs.StsRestTemplateProducer
 import org.assertj.core.api.Assertions
@@ -23,10 +23,10 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
         PDLAuthFilter::class,
         PDLAuthFilterProducer::class,
     ],
-    properties = ["spring.profiles.active:itest-token"]
+    properties = ["spring.profiles.active:token-test"]
 )
 @AutoConfigureWebClient
-class PDLConsumerIT(
+class PDLConsumerTokenTest(
     @Autowired private val pdlConsumer: PDLConsumer,
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,
     @Value("\${mockserver.security.port}") mockSecurityPort: Int
@@ -102,4 +102,3 @@ class PDLConsumerIT(
         pdlConsumer.hentIdenter("0")
     }
 }
-
