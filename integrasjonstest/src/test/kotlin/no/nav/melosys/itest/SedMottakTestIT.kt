@@ -1,6 +1,9 @@
 package no.nav.melosys.itest
 
-import no.finn.unleash.Unleash
+import io.kotest.assertions.extracting
+import io.kotest.matchers.collections.shouldContainAll
+import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.collections.shouldHaveSize
 import no.nav.melosys.domain.arkiv.*
 import no.nav.melosys.domain.eessi.BucType
 import no.nav.melosys.domain.eessi.Periode
@@ -11,7 +14,6 @@ import no.nav.melosys.domain.saksflyt.ProsessStatus
 import no.nav.melosys.domain.saksflyt.Prosessinstans
 import no.nav.melosys.integrasjon.joark.JoarkFasade
 import no.nav.melosys.repository.ProsessinstansRepository
-import org.assertj.core.api.Assertions
 import org.awaitility.Awaitility
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -24,17 +26,11 @@ import java.util.*
 import java.util.List
 import java.util.stream.Collectors
 
-internal class SedMottakTestIT : ComponentTestBase() {
-    @Autowired
-    @Qualifier("system")
-    private val joarkFasade: JoarkFasade? = null
-
-    @Autowired
-    @Qualifier("melosysEessiMelding")
-    private val melosysEessiMeldingKafkaTemplate: KafkaTemplate<String, MelosysEessiMelding>? = null
-
-    @Autowired
-    private val prosessinstansRepository: ProsessinstansRepository? = null
+class SedMottakTestIT(
+    @Autowired @Qualifier("system") private val joarkFasade: JoarkFasade,
+    @Autowired @Qualifier("melosysEessiMelding") private val melosysEessiMeldingKafkaTemplate: KafkaTemplate<String, MelosysEessiMelding>,
+    @Autowired private val prosessinstansRepository: ProsessinstansRepository,
+) : ComponentTestBase() {
 
     lateinit var rinaSaksnummer: String
     private val kafkaTopic = "teammelosys.eessi.v1-local"
@@ -57,33 +53,37 @@ internal class SedMottakTestIT : ComponentTestBase() {
         val eessiMeldingX007 = melosysEessiMelding(
             BucType.LA_BUC_04, SedType.X007, null, null, opprettEessiJournalpost(SedType.X007)
         )
-        melosysEessiMeldingKafkaTemplate!!.send(kafkaTopic, eessiMeldingA009)
+
+
+        melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingA009)
         melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingX001)
         melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingX007)
+
         Awaitility.await().timeout(Duration.ofSeconds(20)).pollInterval(Duration.ofSeconds(3))
             .until {
-                prosessinstansRepository!!.findAllByStatusNotInAndLåsReferanseStartingWith(
-                    List.of(ProsessStatus.FERDIG),
+                prosessinstansRepository.findAllByStatusNotInAndLåsReferanseStartingWith(
+                    listOf(ProsessStatus.FERDIG),
                     rinaSaksnummer
                 ).isEmpty()
             }
-        val prosessinstanserSortert = prosessinstansRepository!!.findAllByLåsReferanseStartingWith(rinaSaksnummer)
+
+
+        val prosessinstanserSortert = prosessinstansRepository.findAllByLåsReferanseStartingWith(rinaSaksnummer)
             .stream()
             .sorted(Comparator.comparing { obj: Prosessinstans -> obj.endretDato })
             .collect(Collectors.toList())
 
 //        Hver SED blir til en mottaksprosess + en behandlingsprosess
-//        Assertions.assertThat(prosessinstanserSortert)
-//            .extracting<String, RuntimeException> { obj: Prosessinstans -> obj.låsReferanse }
-//            .hasSize(6)
-//            .containsExactly(
-//                eessiMeldingA009.lagUnikIdentifikator(),
-//                eessiMeldingA009.lagUnikIdentifikator(),
-//                eessiMeldingX001.lagUnikIdentifikator(),
-//                eessiMeldingX001.lagUnikIdentifikator(),
-//                eessiMeldingX007.lagUnikIdentifikator(),
-//                eessiMeldingX007.lagUnikIdentifikator()
-//            )
+        extracting(prosessinstanserSortert) { låsReferanse }
+            .shouldHaveSize(6)
+            .shouldContainExactly(
+                eessiMeldingA009.lagUnikIdentifikator(),
+                eessiMeldingA009.lagUnikIdentifikator(),
+                eessiMeldingX001.lagUnikIdentifikator(),
+                eessiMeldingX001.lagUnikIdentifikator(),
+                eessiMeldingX007.lagUnikIdentifikator(),
+                eessiMeldingX007.lagUnikIdentifikator()
+            )
     }
 
     private fun melosysEessiMelding(
@@ -137,6 +137,6 @@ internal class SedMottakTestIT : ComponentTestBase() {
         request.mottaksKanal = "EESSI"
         request.journalposttype = Journalposttype.INN
         request.innhold = "$sedType-tittel"
-        return joarkFasade!!.opprettJournalpost(request, false)
+        return joarkFasade.opprettJournalpost(request, false)
     }
 }

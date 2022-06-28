@@ -6,13 +6,13 @@ import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.github.tomakehurst.wiremock.matching.StringValuePattern
 import com.github.tomakehurst.wiremock.matching.UrlPattern
+import io.mockk.spyk
 import no.nav.melosys.integrasjon.felles.EnvironmentHandler
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
 import no.nav.melosys.sikkerhet.context.SubjectHandler
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.*
-import org.mockito.Mockito
 import org.springframework.mock.env.MockEnvironment
 import java.util.*
 
@@ -38,7 +38,7 @@ abstract class ConsumerWireMockTestBase<T>(
         serviceUnderTestMockServer.start()
         stsMockServer.start()
 
-        val environment = Mockito.spy(MockEnvironment())
+        val environment = spyk(MockEnvironment())
         environment.setProperty("systemuser.username", "test")
         environment.setProperty("systemuser.password", "test")
         EnvironmentHandler(environment)

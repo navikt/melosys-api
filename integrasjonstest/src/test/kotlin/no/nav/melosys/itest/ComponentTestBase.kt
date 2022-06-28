@@ -13,7 +13,7 @@ import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
 
 @Testcontainers
-@ActiveProfiles(profiles = ["test"])
+@ActiveProfiles("test")
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @SpringBootTest(
     classes = [Application::class],
@@ -26,6 +26,8 @@ import org.testcontainers.junit.jupiter.Testcontainers
 @EnableMockOAuth2Server
 class ComponentTestBase {
     companion object {
+
+
         @Container
         var DB = OracleContainer()
 

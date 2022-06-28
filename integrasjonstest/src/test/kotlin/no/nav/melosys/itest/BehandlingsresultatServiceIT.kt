@@ -1,5 +1,8 @@
 package no.nav.melosys.itest
 
+import io.kotest.assertions.extracting
+import io.kotest.matchers.sequences.singleElement
+import io.kotest.matchers.should
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.avklartefakta.Avklartefakta
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering

@@ -28,6 +28,7 @@ class ComponentTestConfig {
     companion object {
         init {
             System.setProperty("kafkaPort", SocketUtils.findAvailableTcpPort(60000, 65535).toString())
+            System.setProperty("spring.profiles.active", "test")
         }
     }
 
