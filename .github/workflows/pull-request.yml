@@ -1,17 +1,45 @@
+#on: pull_request
+#
+#jobs:
+#  build:
+#    runs-on: [self-hosted, java-17]
+#    steps:
+#      - uses: actions/checkout@v3
+#      - uses: actions/cache@v3
+#        with:
+#          path: ~/.m2/repository
+#          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+#          restore-keys: |
+#            ${{ runner.os }}-maven-
+#      - name: Build
+#        run: |
+#          JAVA_HOME=/usr/local/openjdk-17
+#          mvn clean verify -B -e -U
+
+name: Maven Test
+
 on: pull_request
 
 jobs:
   build:
-    runs-on: [self-hosted, java-17]
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/cache@v3
+      - name: Checkout
+        uses: actions/checkout@v3
+#      - name: Setup Maven
+#        uses: actions/cache@preview
+#        with:
+#          path: ~/.m2/repository
+#          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+#          restore-keys: |
+#            ${{ runner.os }}-maven-
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
         with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-
-      - name: Build
-        run: |
-          JAVA_HOME=/usr/local/openjdk-17
-          mvn clean verify -B -e -U
+          java-version: '17'
+          distribution: 'adopt-openj9'
+      - name: Build and test
+        run: mvn clean verify -B -e -U
