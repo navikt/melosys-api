@@ -660,6 +660,14 @@
         </dependency>
     </dependencies>
 
+    <repositories>
+        <repository>
+            <id>freg-abac</id>
+            <name>freg-abac on Github Packages</name>
+            <url>https://maven.pkg.github.com/navikt/freg-abac</url>
+        </repository>
+    </repositories>
+
     <build>
         <pluginManagement>
             <plugins>
