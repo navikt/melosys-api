@@ -1,7 +1,7 @@
 package no.nav.melosys.service.dokument.brev.datagrunnlag;
 
 import no.finn.unleash.Unleash;
-import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterSystemService;
+import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.persondata.PersondataFasade;
@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 public class BrevdataGrunnlagSystemFactory extends BrevdataGrunnlagFactory {
 
     public BrevdataGrunnlagSystemFactory(AvklartefaktaService avklartefaktaService,
-                                         AvklarteVirksomheterSystemService avklarteVirksomheterService,
+                                         AvklarteVirksomheterService avklarteVirksomheterService,
                                          KodeverkService kodeverkService,
                                          PersondataFasade persondataFasade,
                                          Unleash unleash) {

@@ -1,6 +1,9 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 import javax.transaction.Transactional;
 
@@ -27,7 +30,7 @@ import no.nav.melosys.integrasjon.dokgen.dto.storbritannia.attest.*;
 import no.nav.melosys.integrasjon.dokgen.dto.storbritannia.innvilgelse.*;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
-import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterSystemService;
+import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.behandlingsgrunnlag.data.IdentType.DNR;
@@ -37,14 +40,14 @@ import static org.springframework.util.ObjectUtils.isEmpty;
 @Component
 public class StorbritanniaMapper {
     private final AvklarteMedfolgendeFamilieService avklarteMedfølgendeFamilieService;
-    private final AvklarteVirksomheterSystemService avklarteVirksomheterSystemService;
+    private final AvklarteVirksomheterService avklarteVirksomheterService;
     private final LovvalgsperiodeService lovvalgsperiodeService;
 
     public StorbritanniaMapper(AvklarteMedfolgendeFamilieService avklarteMedfølgendeFamilieService,
-                               AvklarteVirksomheterSystemService avklarteVirksomheterSystemService,
+                               AvklarteVirksomheterService avklarteVirksomheterService,
                                LovvalgsperiodeService lovvalgsperiodeService) {
         this.avklarteMedfølgendeFamilieService = avklarteMedfølgendeFamilieService;
-        this.avklarteVirksomheterSystemService = avklarteVirksomheterSystemService;
+        this.avklarteVirksomheterService = avklarteVirksomheterService;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
     }
 
@@ -204,7 +207,7 @@ public class StorbritanniaMapper {
 
 
     private AvklartVirksomhet hentAvklartVirksomhet(Behandling behandling) {
-        var avklarteVirksomheter = avklarteVirksomheterSystemService.hentNorskeArbeidsgivere(behandling);
+        var avklarteVirksomheter = avklarteVirksomheterService.hentNorskeArbeidsgivere(behandling);
         if (avklarteVirksomheter.size() != 1) {
             throw new FunksjonellException("Fant " + avklarteVirksomheter.size() + " avklarte virksomheter for behandling: " + behandling + ". Må være 1 for trygdeavtale");
         }
