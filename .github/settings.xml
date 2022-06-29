@@ -1,7 +1,9 @@
-<servers>
-    <server>
-        <id>freg-abac</id>
-        <username>x-access-token</username>
-        <password>${env.GITHUB_TOKEN}</password>
-    </server>
-</servers>
+<settings>
+    <servers>
+        <server>
+            <id>freg-abac</id>
+            <username>x-access-token</username>
+            <password>${env.GITHUB_TOKEN}</password>
+        </server>
+    </servers>
+</settings>
