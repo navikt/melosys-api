@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 @Qualifier("system")
 public class OppgaveSystemFasadeImpl extends OppgaveFasadeImpl {
 
-    public OppgaveSystemFasadeImpl(@Qualifier("system") OppgaveConsumer oppgaveConsumer) {
+    public OppgaveSystemFasadeImpl(OppgaveConsumer oppgaveConsumer) {
         super(oppgaveConsumer);
     }
 }

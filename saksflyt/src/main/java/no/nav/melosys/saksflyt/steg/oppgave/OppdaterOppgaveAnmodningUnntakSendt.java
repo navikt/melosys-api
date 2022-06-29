@@ -11,7 +11,6 @@ import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -21,7 +20,7 @@ public class OppdaterOppgaveAnmodningUnntakSendt implements StegBehandler {
 
     private final OppgaveService oppgaveService;
 
-    public OppdaterOppgaveAnmodningUnntakSendt(@Qualifier("system") OppgaveService oppgaveService) {
+    public OppdaterOppgaveAnmodningUnntakSendt(OppgaveService oppgaveService) {
         this.oppgaveService = oppgaveService;
     }
 

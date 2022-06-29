@@ -14,7 +14,7 @@ public class SedDataGrunnlagSystemFactory extends SedDataGrunnlagFactory {
     public SedDataGrunnlagSystemFactory(AvklartefaktaService avklartefaktaService,
                                         AvklarteVirksomheterSystemService avklarteVirksomheterService,
                                         KodeverkService kodeverkService,
-                                        @Qualifier("system") PersondataFasade persondataFasade) {
+                                        PersondataFasade persondataFasade) {
         super(avklartefaktaService, avklarteVirksomheterService, kodeverkService, persondataFasade);
     }
 }

@@ -23,7 +23,6 @@ import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,7 +41,7 @@ public class InngangsvilkaarService {
 
     public InngangsvilkaarService(BehandlingService behandlingService,
                                   InngangsvilkaarConsumer inngangsvilkaarConsumer,
-                                  @Qualifier("system") PersondataFasade persondataFasade,
+                                  PersondataFasade persondataFasade,
                                   VilkaarsresultatService vilkaarsresultatService) {
         this.behandlingService = behandlingService;
         this.inngangsvilkaarConsumer = inngangsvilkaarConsumer;

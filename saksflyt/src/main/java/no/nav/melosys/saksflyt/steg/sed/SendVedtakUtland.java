@@ -24,7 +24,6 @@ import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.utpeking.UtpekingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.TRYGDEMYNDIGHET;
@@ -40,12 +39,12 @@ public class SendVedtakUtland extends AbstraktSendUtland {
     private final SedSomBrevService sedSomBrevService;
     private final UtpekingService utpekingService;
 
-    public SendVedtakUtland(@Qualifier("system") EessiService eessiService,
+    public SendVedtakUtland(EessiService eessiService,
                             BehandlingService behandlingService,
                             BehandlingsresultatService behandlingsresultatService,
                             BrevBestiller brevBestiller,
                             SedSomBrevService sedSomBrevService,
-                            @Qualifier("system") UtpekingService utpekingService) {
+                            UtpekingService utpekingService) {
         super(eessiService, behandlingsresultatService);
         this.behandlingService = behandlingService;
         this.brevBestiller = brevBestiller;

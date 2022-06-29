@@ -14,7 +14,7 @@ public class UfmKontrollSystemService extends UfmKontrollService {
     public UfmKontrollSystemService(KontrollresultatRepository kontrollresultatRepository,
                                     BehandlingsresultatService behandlingsresultatService,
                                     BehandlingService behandlingService,
-                                    @Qualifier("system") PersondataFasade persondataFasade) {
+                                    PersondataFasade persondataFasade) {
         super(kontrollresultatRepository, behandlingsresultatService, behandlingService, persondataFasade);
     }
 }

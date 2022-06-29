@@ -13,7 +13,6 @@ import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.persondata.PersondataFasade;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -23,9 +22,9 @@ public class SedSomBrevService {
     private final PersondataFasade persondataFasade;
     private final UtenlandskMyndighetService utenlandskMyndighetService;
 
-    public SedSomBrevService(@Qualifier("system") EessiService eessiService,
-                             @Qualifier("system") JoarkFasade joarkFasade,
-                             @Qualifier("system") PersondataFasade persondataFasade,
+    public SedSomBrevService(EessiService eessiService,
+                             JoarkFasade joarkFasade,
+                             PersondataFasade persondataFasade,
                              UtenlandskMyndighetService utenlandskMyndighetService) {
         this.eessiService = eessiService;
         this.joarkFasade = joarkFasade;

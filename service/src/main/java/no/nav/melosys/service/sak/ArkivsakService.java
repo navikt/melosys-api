@@ -8,7 +8,6 @@ import no.nav.melosys.integrasjon.sak.SakConsumer;
 import no.nav.melosys.integrasjon.sak.dto.SakDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -18,7 +17,7 @@ public class ArkivsakService {
 
     private final SakConsumer sakConsumer;
 
-    public ArkivsakService(@Qualifier("system") SakConsumer sakConsumer) {
+    public ArkivsakService(SakConsumer sakConsumer) {
         this.sakConsumer = sakConsumer;
     }
 

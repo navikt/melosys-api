@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 @Service
 @Qualifier("system")
 public class PersondataSystemService extends PersondataService {
-    public PersondataSystemService(BehandlingService behandlingService, KodeverkService kodeverkService, @Qualifier("system") PDLConsumer pdlConsumer,
+    public PersondataSystemService(BehandlingService behandlingService, KodeverkService kodeverkService, PDLConsumer pdlConsumer,
                                    SaksopplysningerService saksopplysningerService, FamiliemedlemService familiemedlemService) {
         super(behandlingService, kodeverkService, pdlConsumer, saksopplysningerService, familiemedlemService);
     }

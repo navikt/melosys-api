@@ -14,7 +14,7 @@ public class UnntaksperiodeSystemService extends UnntaksperiodeService {
     public UnntaksperiodeSystemService(BehandlingService behandlingService,
                                        BehandlingsresultatService behandlingsresultatService,
                                        LovvalgsperiodeService lovvalgsperiodeService,
-                                       @Qualifier("system") OppgaveService oppgaveService,
+                                       OppgaveService oppgaveService,
                                        ProsessinstansService prosessinstansService) {
         super(behandlingService, behandlingsresultatService, lovvalgsperiodeService, oppgaveService, prosessinstansService);
     }

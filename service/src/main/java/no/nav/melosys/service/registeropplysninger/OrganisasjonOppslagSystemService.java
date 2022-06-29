@@ -1,13 +1,12 @@
 package no.nav.melosys.service.registeropplysninger;
 
 import no.nav.melosys.integrasjon.ereg.EregFasade;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 @Service
 public class OrganisasjonOppslagSystemService extends OrganisasjonOppslagService {
 
-    public OrganisasjonOppslagSystemService(@Qualifier("system") EregFasade eregFasade) {
+    public OrganisasjonOppslagSystemService(EregFasade eregFasade) {
         super(eregFasade);
     }
 }

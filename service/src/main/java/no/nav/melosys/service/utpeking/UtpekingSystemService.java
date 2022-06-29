@@ -18,10 +18,10 @@ import org.springframework.stereotype.Service;
 @Qualifier("system")
 public class UtpekingSystemService extends UtpekingService {
     public UtpekingSystemService(BehandlingService behandlingService, BehandlingsresultatService behandlingsresultatService,
-                                 @Qualifier("system") EessiService eessiService, LandvelgerService landvelgerService,
-                                 LovvalgsperiodeService lovvalgsperiodeService, @Qualifier("system") OppgaveService oppgaveService,
+                                 EessiService eessiService, LandvelgerService landvelgerService,
+                                 LovvalgsperiodeService lovvalgsperiodeService, OppgaveService oppgaveService,
                                  ProsessinstansService prosessinstansService, Unleash unleash, UtpekingsperiodeRepository utpekingsperiodeRepository,
-                                 @Qualifier("system") FerdigbehandlingKontrollService ferdigbehandlingKontrollService,
+                                 FerdigbehandlingKontrollService ferdigbehandlingKontrollService,
                                  ApplicationEventMulticaster melosysEventMulticaster) {
         super(behandlingService, behandlingsresultatService, eessiService, landvelgerService, lovvalgsperiodeService, oppgaveService,
             prosessinstansService, unleash, utpekingsperiodeRepository, ferdigbehandlingKontrollService, melosysEventMulticaster);

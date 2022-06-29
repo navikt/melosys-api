@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 @Qualifier("system")
 public class EregSystemService extends EregService implements EregFasade {
 
-    public EregSystemService(@Qualifier("system") OrganisasjonConsumer organisasjonConsumer, DokumentFactory dokumentFactory) {
+    public EregSystemService(OrganisasjonConsumer organisasjonConsumer, DokumentFactory dokumentFactory) {
         super(organisasjonConsumer, dokumentFactory);
     }
 }

@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 @Qualifier("system")
 public class JoarkSystemService extends JoarkService {
     public JoarkSystemService(JournalpostapiConsumer journalpostapiConsumer,
-                              @Qualifier("system") SafConsumer safConsumer) {
+                              SafConsumer safConsumer) {
         super(journalpostapiConsumer, safConsumer);
     }
 }

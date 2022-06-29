@@ -19,7 +19,6 @@ import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.*;
@@ -37,8 +36,8 @@ public class DistribuerJournalpost implements StegBehandler {
     private final UtenlandskMyndighetService utenlandskMyndighetService;
     private final KodeverkService kodeverkService;
 
-    public DistribuerJournalpost(@Qualifier("system") DoksysFasade doksysFasade,
-                                 @Qualifier("system") EregFasade eregFasade,
+    public DistribuerJournalpost(DoksysFasade doksysFasade,
+                                 EregFasade eregFasade,
                                  KontaktopplysningService kontaktopplysningService,
                                  BehandlingService behandlingService,
                                  UtenlandskMyndighetService utenlandskMyndighetService,

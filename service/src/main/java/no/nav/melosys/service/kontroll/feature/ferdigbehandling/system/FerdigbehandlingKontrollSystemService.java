@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 public class FerdigbehandlingKontrollSystemService extends FerdigbehandlingKontrollService {
     public FerdigbehandlingKontrollSystemService(BehandlingService behandlingService, BehandlingsresultatService behandlingsresultatService,
                                                  LovvalgsperiodeService lovvalgsperiodeService,
-                                                 @Qualifier("system") PersondataFasade persondataFasade, RegisteropplysningerService registeropplysningerService) {
+                                                 PersondataFasade persondataFasade, RegisteropplysningerService registeropplysningerService) {
         super(behandlingService, behandlingsresultatService, lovvalgsperiodeService, persondataFasade, registeropplysningerService);
     }
 }

@@ -20,7 +20,7 @@ public class PDLConsumerProducer implements WebClientConfig {
     @Qualifier("system")
     public PDLConsumer pdlConsumer(WebClient.Builder webclientBuilder,
                                    @Value("${PDL.url}") String pdlUrl,
-                                   @Qualifier("system") PDLAuthFilter pdlSystemAuthFilter) {
+                                   PDLAuthFilter pdlSystemAuthFilter) {
         return new PDLConsumerImpl(
             webclientBuilder(webclientBuilder, pdlUrl)
                 .filter(pdlSystemAuthFilter)

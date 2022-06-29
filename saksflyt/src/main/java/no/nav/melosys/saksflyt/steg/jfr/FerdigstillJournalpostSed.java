@@ -1,20 +1,17 @@
 package no.nav.melosys.saksflyt.steg.jfr;
 
-import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.arkiv.Journalposttype;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.integrasjon.joark.JournalpostOppdatering;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.TemaFactory.fraBehandlingstema;
@@ -27,8 +24,8 @@ public class FerdigstillJournalpostSed implements StegBehandler {
     private final JoarkFasade joarkFasade;
     private final PersondataFasade persondataFasade;
 
-    public FerdigstillJournalpostSed(@Qualifier("system") JoarkFasade joarkFasade,
-                                     @Qualifier("system") PersondataFasade persondataFasade) {
+    public FerdigstillJournalpostSed(JoarkFasade joarkFasade,
+                                     PersondataFasade persondataFasade) {
         this.joarkFasade = joarkFasade;
         this.persondataFasade = persondataFasade;
     }

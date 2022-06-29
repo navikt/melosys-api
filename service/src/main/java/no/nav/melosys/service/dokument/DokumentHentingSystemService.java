@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 @Service
 @Qualifier("system")
 public class DokumentHentingSystemService extends DokumentHentingService {
-    public DokumentHentingSystemService(FagsakService fagsakService, @Qualifier("system") JoarkFasade joarkFasade) {
+    public DokumentHentingSystemService(FagsakService fagsakService, JoarkFasade joarkFasade) {
         super(fagsakService, joarkFasade);
     }
 }

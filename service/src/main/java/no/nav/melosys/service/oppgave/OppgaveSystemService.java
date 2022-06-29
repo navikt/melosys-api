@@ -16,11 +16,11 @@ public class OppgaveSystemService extends OppgaveService {
 
     public OppgaveSystemService(BehandlingService behandlingService,
                                 FagsakService fagsakService,
-                                @Qualifier("system") OppgaveFasade oppgaveFasade,
+                                OppgaveFasade oppgaveFasade,
                                 SaksopplysningerService saksopplysningerService,
                                 BehandlingsgrunnlagService behandlingsgrunnlagService,
-                                @Qualifier("system") PersondataFasade persondataFasade,
-                                @Qualifier("system") EregFasade eregFasade) {
+                                PersondataFasade persondataFasade,
+                                EregFasade eregFasade) {
         super(behandlingService, fagsakService, oppgaveFasade, saksopplysningerService, behandlingsgrunnlagService, persondataFasade, eregFasade);
     }
 }

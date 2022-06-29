@@ -20,7 +20,6 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.HENT_MOTTAKERINSTITUSJON_FORKORTET_PERIODE;
@@ -35,7 +34,7 @@ public class HentMottakerinstitusjonerForkortetPeriode implements StegBehandler 
     private final LandvelgerService landvelgerService;
 
     public HentMottakerinstitusjonerForkortetPeriode(BehandlingsresultatService behandlingsresultatService,
-                                                     @Qualifier("system") EessiService eessiService,
+                                                     EessiService eessiService,
                                                      LandvelgerService landvelgerService) {
         this.behandlingsresultatService = behandlingsresultatService;
         this.eessiService = eessiService;
