@@ -680,30 +680,30 @@
                         <encoding>UTF-8</encoding>
                     </configuration>
                 </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-enforcer-plugin</artifactId>
-                    <version>${maven-enforcer-plugin.version}</version>
-                    <executions>
-                        <execution>
-                            <id>enforce-versions</id>
-                            <goals>
-                                <goal>enforce</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                    <configuration>
-                        <rules>
-                            <requireMavenVersion>
-                                <version>3.6.0</version>
-                            </requireMavenVersion>
-                            <requireJavaVersion>
-                                <version>${java.version}</version>
-                            </requireJavaVersion>
-                            <dependencyConvergence/>
-                        </rules>
-                    </configuration>
-                </plugin>
+<!--                <plugin>-->
+<!--                    <groupId>org.apache.maven.plugins</groupId>-->
+<!--                    <artifactId>maven-enforcer-plugin</artifactId>-->
+<!--                    <version>${maven-enforcer-plugin.version}</version>-->
+<!--                    <executions>-->
+<!--                        <execution>-->
+<!--                            <id>enforce-versions</id>-->
+<!--                            <goals>-->
+<!--                                <goal>enforce</goal>-->
+<!--                            </goals>-->
+<!--                        </execution>-->
+<!--                    </executions>-->
+<!--                    <configuration>-->
+<!--                        <rules>-->
+<!--                            <requireMavenVersion>-->
+<!--                                <version>3.6.0</version>-->
+<!--                            </requireMavenVersion>-->
+<!--                            <requireJavaVersion>-->
+<!--                                <version>${java.version}</version>-->
+<!--                            </requireJavaVersion>-->
+<!--                            <dependencyConvergence/>-->
+<!--                        </rules>-->
+<!--                    </configuration>-->
+<!--                </plugin>-->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
