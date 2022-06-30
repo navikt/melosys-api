@@ -4,7 +4,7 @@ import no.nav.melosys.integrasjon.doksys.DoksysFasade;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.brev.BrevDataByggerVelger;
 import no.nav.melosys.service.dokument.brev.BrevDataService;
-import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevdataGrunnlagSystemFactory;
+import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevdataGrunnlagFactory;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -15,7 +15,7 @@ public class DokumentSystemService extends DokumentService {
                                  DoksysFasade dokSysFasade,
                                  BrevmottakerService brevmottakerService,
                                  BrevDataByggerVelger brevDataByggerVelger,
-                                 BrevdataGrunnlagSystemFactory brevdataGrunnlagSystemFactory) {
-        super(behandlingService, brevDataService, dokSysFasade, brevmottakerService, brevDataByggerVelger, brevdataGrunnlagSystemFactory);
+                                 BrevdataGrunnlagFactory brevdataGrunnlagFactory) {
+        super(behandlingService, brevDataService, dokSysFasade, brevmottakerService, brevDataByggerVelger, brevdataGrunnlagFactory);
     }
 }
