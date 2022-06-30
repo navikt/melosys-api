@@ -26,7 +26,6 @@ import java.util.stream.Collectors
 
 internal class SedMottakTestIT : ComponentTestBase() {
     @Autowired
-    @Qualifier("system")
     private val joarkFasade: JoarkFasade? = null
 
     @Autowired
