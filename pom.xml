@@ -657,8 +657,9 @@
 
     <repositories>
         <repository>
-            <id>github-package-registry-navikt</id>
-            <url>https://maven.pkg.github.com/navikt/maven-release</url>
+            <id>freg-abac</id>
+            <name>freg-abac on Github Packages</name>
+            <url>https://maven.pkg.github.com/navikt/freg-abac</url>
         </repository>
     </repositories>
 

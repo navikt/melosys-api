@@ -1,9 +1,9 @@
 <settings>
     <servers>
         <server>
-            <id>github-package-registry-navikt</id>
-            <username>token</username>
-            <password>${env.GITHUB_TOKEN}</password>
+            <id>freg-abac</id>
+            <username>x-access-token</username>
+            <password>${env.PASSWORD}</password>
         </server>
     </servers>
 </settings>
