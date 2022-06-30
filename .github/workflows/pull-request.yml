@@ -42,4 +42,4 @@ jobs:
           java-version: '17'
           distribution: 'adopt-openj9'
       - name: Build and test
-        run: mvn clean verify -B -e -U --settings .github/settings.xml
+        run: mvn clean verify -X -B -e -U --settings .github/settings.xml
