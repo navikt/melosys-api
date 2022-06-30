@@ -59,6 +59,6 @@ public class SendHenleggelsesbrev implements StegBehandler {
             .findFirst().orElseThrow(() -> new IkkeFunnetException("Finner ingen henleggelsesgrunn"));
 
         brevBestiller.bestill(MELDING_HENLAGT_SAK, Collections.singleton(Mottaker.av(Aktoersroller.BRUKER)), fritekst,
-            begrunnelseKode, saksbehandler, behandling);
+            saksbehandler, begrunnelseKode, behandling);
     }
 }
