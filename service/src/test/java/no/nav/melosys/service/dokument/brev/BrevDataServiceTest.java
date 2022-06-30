@@ -321,11 +321,6 @@ class BrevDataServiceTest {
     }
 
     @Test
-    void lagMetadataForMangelbrevAngirDokTypeLikHenleggelse() {
-        testLagDokumentMetadata(MELDING_HENLAGT_SAK, Aktoersroller.BRUKER);
-    }
-
-    @Test
     void lagMetadataForInnvilgelseArbeidsgiverBrevAngirDokTypeLikArbeidsgiver() {
         testLagDokumentMetadata(INNVILGELSE_ARBEIDSGIVER, Aktoersroller.ARBEIDSGIVER);
     }
