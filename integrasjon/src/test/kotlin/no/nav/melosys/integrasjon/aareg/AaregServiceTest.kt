@@ -47,7 +47,6 @@ internal class AaregServiceTest {
         wireMockServer.stop()
     }
 
-    // Ikke sjekk disse siden daylight saving vil forandre offset med 1 time og få testen til å feile
     @Test
     fun testDokumentFromRestService() {
         whenever(
