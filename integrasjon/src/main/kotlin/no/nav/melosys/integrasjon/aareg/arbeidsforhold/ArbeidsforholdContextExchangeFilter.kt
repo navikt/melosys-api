@@ -12,10 +12,6 @@ import java.util.function.Supplier
 
 @Component
 class ArbeidsforholdContextExchangeFilter(private val restStsClient: RestStsClient) : ExchangeFilterFunction {
-    companion object {
-        private const val NAV_CONSUMER_TOKEN = "Nav-Consumer-Token"
-    }
-
     override fun filter(
         clientRequest: ClientRequest,
         exchangeFunction: ExchangeFunction
@@ -32,5 +28,9 @@ class ArbeidsforholdContextExchangeFilter(private val restStsClient: RestStsClie
         // Om vi får lagt inn "0000-ga-aa-register-konsument" i sakbehandler token kan vi benytte dette når tilgjengelig
         // https://nav-it.slack.com/archives/C01BSCJM127/p1649411252534409
         return Supplier { restStsClient.bearerToken() }
+    }
+
+    companion object {
+        private const val NAV_CONSUMER_TOKEN = "Nav-Consumer-Token"
     }
 }
