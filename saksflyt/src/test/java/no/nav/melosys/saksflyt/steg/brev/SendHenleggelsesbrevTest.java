@@ -70,6 +70,7 @@ class SendHenleggelsesbrevTest {
 
         verify(brevBestiller).bestill(eq(Produserbaredokumenter.MELDING_HENLAGT_SAK),
             eq(Collections.singleton(Mottaker.av(Aktoersroller.BRUKER))),
-            eq(behandlingsresultat.getBegrunnelseFritekst()), any(String.class), any(String.class), eq(behandling));
+            eq(behandlingsresultat.getBegrunnelseFritekst()), any(String.class),
+            eq(Henleggelsesgrunner.ANNET.getKode()), eq(behandling));
     }
 }
