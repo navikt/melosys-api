@@ -1,7 +1,7 @@
 <settings>
     <servers>
         <server>
-            <id>freg-abac</id>
+            <id>github-package-registry-navikt</id>
             <username>token</username>
             <password>${env.GITHUB_TOKEN}</password>
         </server>
