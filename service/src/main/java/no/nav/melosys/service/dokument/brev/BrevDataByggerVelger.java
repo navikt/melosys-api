@@ -80,7 +80,6 @@ public class BrevDataByggerVelger {
             case ORIENTERING_VIDERESENDT_SOEKNAD ->
                 new BrevDataByggerVideresend(landvelgerService, utenlandskMyndighetService,
                     brevbestillingRequest);
-            case MELDING_HENLAGT_SAK -> new BrevDataByggerHenleggelse(joarkService, brevbestillingRequest);
             case MELDING_MANGLENDE_OPPLYSNINGER, MELDING_FORVENTET_SAKSBEHANDLINGSTID ->
                 new BrevDataByggerMedMottattDato(
                     brevbestillingRequest, joarkService);

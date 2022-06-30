@@ -1,4 +1,4 @@
-package no.nav.melosys.tjenester.gui;
+package no.nav.melosys.tjenester.gui.dto.brev;
 
 public enum FeltvalgAlternativKode {
 

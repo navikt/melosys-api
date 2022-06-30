@@ -1,7 +1,5 @@
 package no.nav.melosys.tjenester.gui.dto.brev;
 
-import no.nav.melosys.tjenester.gui.FeltvalgAlternativKode;
-
 public class FeltvalgAlternativDto {
 
     private final String kode;

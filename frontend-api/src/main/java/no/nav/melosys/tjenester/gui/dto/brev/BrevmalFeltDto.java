@@ -63,13 +63,9 @@ public class BrevmalFeltDto {
         private FeltValgDto valg;
         private Integer tegnBegrensning;
 
-        public Builder medKode(String kode) {
-            this.kode = kode;
-            return this;
-        }
-
-        public Builder medBeskrivelse(String beskrivelse) {
-            this.beskrivelse = beskrivelse;
+        public Builder medKodeOgBeskrivelse(BrevmalFeltKode brevmalFeltKode) {
+            this.kode = brevmalFeltKode.getKode();
+            this.beskrivelse = brevmalFeltKode.getBeskrivelse();
             return this;
         }
 

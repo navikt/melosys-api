@@ -53,6 +53,20 @@ public class DokumentServiceFasade {
     }
 
     @Transactional
+    public void produserOgDistribuerBrev(Produserbaredokumenter produserbartDokument, Mottaker mottaker, String fritekst,
+                                 String begrunnelseKode, String avsenderId, long behandlingId) {
+        var brevbestillingRequest = new BrevbestillingRequest.Builder()
+            .medProduserbardokument(produserbartDokument)
+            .medMottaker(mottaker.getRolle())
+            .medFritekst(fritekst)
+            .medBegrunnelseKode(begrunnelseKode)
+            .medBestillersId(avsenderId)
+            .build();
+
+        dokgenService.produserOgDistribuerBrev(behandlingId, brevbestillingRequest);
+    }
+
+    @Transactional
     public void produserDokument(Produserbaredokumenter dokumentType, Mottaker mottaker, long behandlingId, DoksysBrevbestilling brevbestilling) {
         var brevbestillingRequest = new BrevbestillingRequest.Builder()
             .medProduserbardokument(dokumentType)
