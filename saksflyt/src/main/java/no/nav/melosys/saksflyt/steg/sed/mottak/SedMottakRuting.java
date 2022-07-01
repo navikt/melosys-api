@@ -18,7 +18,6 @@ import no.nav.melosys.service.eessi.ruting.SedRuter;
 import no.nav.melosys.service.eessi.ruting.SedRuterForSedTyper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -33,8 +32,8 @@ public class SedMottakRuting implements StegBehandler {
 
     public SedMottakRuting(Collection<SedRuterForSedTyper> ruterForSedTyper,
                            DefaultSedRuter defaultSedRuter,
-                           @Qualifier("system") EessiService eessiService,
-                           @Qualifier("system") JoarkFasade joarkFasade) {
+                           EessiService eessiService,
+                           JoarkFasade joarkFasade) {
         this.defaultSedRuter = defaultSedRuter;
         this.eessiService = eessiService;
         this.sedRutereForSedTyper = ruterForSedTyper;

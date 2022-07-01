@@ -25,7 +25,7 @@ import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.BrevmottakerService;
 import no.nav.melosys.service.dokument.DokgenService;
-import no.nav.melosys.service.dokument.DokumentHentingSystemService;
+import no.nav.melosys.service.dokument.DokumentHentingService;
 import no.nav.melosys.service.dokument.DokumentproduksjonsInfo;
 import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
 import no.nav.melosys.service.dokument.brev.KopiMottaker;
@@ -86,7 +86,7 @@ class DokgenServiceTest {
     @Mock
     private StorbritanniaMapper mockStorbritanniaMapper;
     @Mock
-    private DokumentHentingSystemService mockDokumentHentingService;
+    private DokumentHentingService mockDokumentHentingService;
     @Captor
     private ArgumentCaptor<DokgenBrevbestilling> brevbestillingCaptor;
     @Captor

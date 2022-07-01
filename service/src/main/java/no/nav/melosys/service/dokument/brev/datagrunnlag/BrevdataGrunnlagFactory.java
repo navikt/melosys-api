@@ -5,7 +5,6 @@ import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
-import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterSystemService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.persondata.PersondataFasade;
@@ -21,7 +20,7 @@ public class BrevdataGrunnlagFactory {
     private final PersondataFasade persondataFasade;
 
     public BrevdataGrunnlagFactory(AvklartefaktaService avklartefaktaService,
-                                   AvklarteVirksomheterSystemService avklarteVirksomheterService,
+                                   AvklarteVirksomheterService avklarteVirksomheterService,
                                    KodeverkService kodeverkService, PersondataFasade persondataFasade) {
         this.avklartefaktaService = avklartefaktaService;
         this.avklarteVirksomheterService = avklarteVirksomheterService;

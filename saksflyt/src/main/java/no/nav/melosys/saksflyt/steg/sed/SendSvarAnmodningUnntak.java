@@ -7,7 +7,6 @@ import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -16,7 +15,7 @@ public class SendSvarAnmodningUnntak implements StegBehandler {
 
     private final EessiService eessiService;
 
-    public SendSvarAnmodningUnntak(@Qualifier("system") EessiService eessiService) {
+    public SendSvarAnmodningUnntak(EessiService eessiService) {
         this.eessiService = eessiService;
     }
 

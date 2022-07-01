@@ -14,7 +14,6 @@ import no.nav.melosys.service.saksopplysninger.SaksopplysningerService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import no.nav.melosys.service.utpeking.UtpekingService;
 import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -34,15 +33,15 @@ public class BrevDataByggerVelger {
 
     public BrevDataByggerVelger(AnmodningsperiodeService anmodningsperiodeService,
                                 AvklartefaktaService avklartefaktaService,
-                                @Qualifier("system") JoarkService joarkService,
+                                JoarkService joarkService,
                                 LandvelgerService landvelgerService,
                                 LovvalgsperiodeService lovvalgsperiodeService,
                                 SaksopplysningerService saksopplysningerService,
                                 UtenlandskMyndighetService utenlandskMyndighetService,
-                                @Qualifier("system") UtpekingService utpekingService,
+                                UtpekingService utpekingService,
                                 VilkaarsresultatRepository vilkaarsresultatRepository,
                                 VilkaarsresultatService vilkaarsresultatService,
-                                @Qualifier("system") PersondataFasade persondataFasade,
+                                PersondataFasade persondataFasade,
                                 BehandlingsgrunnlagService behandlingsgrunnlagService) {
         this.anmodningsperiodeService = anmodningsperiodeService;
         this.avklartefaktaService = avklartefaktaService;
