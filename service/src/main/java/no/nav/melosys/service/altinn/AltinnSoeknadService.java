@@ -26,7 +26,6 @@ import no.nav.melosys.service.sak.OpprettSakRequest;
 import no.nav.melosys.soknad_altinn.Kontaktperson;
 import no.nav.melosys.soknad_altinn.MedlemskapArbeidEOSM;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -40,7 +39,7 @@ public class AltinnSoeknadService {
     public AltinnSoeknadService(SoknadMottakConsumer soknadMottakConsumer,
                                 FagsakService fagsakService,
                                 BehandlingsgrunnlagService behandlingsgrunnlagService,
-                                @Qualifier("system") PersondataFasade persondataFasade,
+                                PersondataFasade persondataFasade,
                                 AvklarteVirksomheterService avklarteVirksomheterService) {
         this.soknadMottakConsumer = soknadMottakConsumer;
         this.fagsakService = fagsakService;

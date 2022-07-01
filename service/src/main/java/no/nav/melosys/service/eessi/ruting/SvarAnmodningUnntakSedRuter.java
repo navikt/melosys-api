@@ -22,7 +22,6 @@ import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -38,7 +37,7 @@ public class SvarAnmodningUnntakSedRuter implements SedRuterForSedTyper {
 
     public SvarAnmodningUnntakSedRuter(ProsessinstansService prosessinstansService, FagsakService fagsakService,
                                        AnmodningsperiodeService anmodningsperiodeService,
-                                       @Qualifier("system") OppgaveService oppgaveService) {
+                                       OppgaveService oppgaveService) {
         this.prosessinstansService = prosessinstansService;
         this.fagsakService = fagsakService;
         this.anmodningsperiodeService = anmodningsperiodeService;

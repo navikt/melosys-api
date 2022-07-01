@@ -8,7 +8,6 @@ import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
-import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterSystemService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.sed.datagrunnlag.SedDataGrunnlag;
 import no.nav.melosys.service.dokument.sed.datagrunnlag.SedDataGrunnlagMedSoknad;
@@ -27,7 +26,7 @@ public class SedDataGrunnlagFactory {
     private final PersondataFasade persondataFasade;
 
     public SedDataGrunnlagFactory(AvklartefaktaService avklartefaktaService,
-                                  AvklarteVirksomheterSystemService avklarteVirksomheterService,
+                                  AvklarteVirksomheterService avklarteVirksomheterService,
                                   KodeverkService kodeverkService, PersondataFasade persondataFasade) {
         this.avklartefaktaService = avklartefaktaService;
         this.avklarteVirksomheterService = avklarteVirksomheterService;

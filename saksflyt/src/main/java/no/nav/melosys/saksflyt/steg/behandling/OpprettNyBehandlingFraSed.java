@@ -16,7 +16,6 @@ import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.sak.FagsakService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -30,7 +29,7 @@ public class OpprettNyBehandlingFraSed implements StegBehandler {
 
     public OpprettNyBehandlingFraSed(FagsakService fagsakService,
                                      BehandlingService behandlingService,
-                                     @Qualifier("system") OppgaveService oppgaveService) {
+                                     OppgaveService oppgaveService) {
         this.fagsakService = fagsakService;
         this.behandlingService = behandlingService;
         this.oppgaveService = oppgaveService;

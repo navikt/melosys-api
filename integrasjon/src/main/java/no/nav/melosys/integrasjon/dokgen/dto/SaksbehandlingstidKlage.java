@@ -2,13 +2,13 @@ package no.nav.melosys.integrasjon.dokgen.dto;
 
 
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.ser.InstantSerializer;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.integrasjon.dokgen.dto.felles.SaksinfoBruker;
 
 import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
 
@@ -48,4 +48,8 @@ public class SaksbehandlingstidKlage extends DokgenDto {
         return datoVedtak;
     }
 
+    @Override
+    public SaksinfoBruker getSaksinfo() {
+        return (SaksinfoBruker) super.getSaksinfo();
+    }
 }

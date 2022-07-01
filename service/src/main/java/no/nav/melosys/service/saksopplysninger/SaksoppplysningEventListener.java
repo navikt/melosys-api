@@ -13,7 +13,6 @@ import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.persondata.PersondataFasade;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,7 +27,7 @@ public class SaksoppplysningEventListener {
 
     public SaksoppplysningEventListener(SaksopplysningerService saksopplysningerService,
                                         BehandlingService behandlingService,
-                                        @Qualifier("system") PersondataFasade persondataFasade,
+                                        PersondataFasade persondataFasade,
                                         AvklartefaktaService avklartefaktaService) {
         this.saksopplysningerService = saksopplysningerService;
         this.behandlingService = behandlingService;

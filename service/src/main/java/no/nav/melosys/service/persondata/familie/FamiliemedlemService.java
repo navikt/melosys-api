@@ -18,7 +18,6 @@ import no.nav.melosys.service.persondata.mapping.FamiliemedlemOversetter;
 import no.nav.melosys.service.persondata.mapping.FoedselOversetter;
 import no.nav.melosys.service.persondata.mapping.FolkeregisteridentOversetter;
 import no.nav.melosys.service.saksopplysninger.SaksopplysningerService;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import static java.time.temporal.ChronoUnit.YEARS;
@@ -33,7 +32,7 @@ public class FamiliemedlemService {
     public FamiliemedlemService(BehandlingService behandlingService,
                                 SaksopplysningerService saksopplysningerService,
                                 EktefelleEllerPartnerFamiliemedlemFilter ektefelleEllerPartnerFamiliemedlemFilter,
-                                @Qualifier("saksbehandler") PDLConsumer pdlConsumer) {
+                                PDLConsumer pdlConsumer) {
         this.behandlingService = behandlingService;
         this.saksopplysningerService = saksopplysningerService;
         this.ektefelleEllerPartnerFamiliemedlemFilter = ektefelleEllerPartnerFamiliemedlemFilter;

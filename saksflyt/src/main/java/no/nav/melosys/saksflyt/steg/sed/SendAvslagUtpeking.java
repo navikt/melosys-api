@@ -6,7 +6,6 @@ import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.dokument.sed.EessiService;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -14,7 +13,7 @@ public class SendAvslagUtpeking implements StegBehandler {
 
     private final EessiService eessiService;
 
-    public SendAvslagUtpeking(@Qualifier("system") EessiService eessiService) {
+    public SendAvslagUtpeking(EessiService eessiService) {
         this.eessiService = eessiService;
     }
 
