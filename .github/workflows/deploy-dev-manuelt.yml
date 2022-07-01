@@ -7,8 +7,8 @@ on:
         default: 'dev'
 
 env:
-  IMAGE: docker.pkg.github.com/${{ github.repository }}/melosys-api:${{ github.sha }}
-  IMAGE_MANIFEST: https://docker.pkg.github.com/v2/${{ github.repository }}/melosys-api/manifests/${{ github.sha }}
+  IMAGE: ghcr.io/${{ github.repository }}/melosys-api:${{ github.sha }}
+  IMAGE_MANIFEST: https://ghcr.io/v2/${{ github.repository }}/melosys-api/manifests/${{ github.sha }}
 
 jobs:
   check_docker_image_exists:
@@ -63,7 +63,7 @@ jobs:
           name: melosys-app
       - name: GitHub Package Registry login
         run: |
-          echo ${GITHUB_TOKEN} | docker login -u ${GITHUB_REPOSITORY} --password-stdin docker.pkg.github.com
+          echo ${GITHUB_TOKEN} | docker login -u ${GITHUB_REPOSITORY} --password-stdin ghcr.io
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Docker build
