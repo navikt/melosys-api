@@ -10,7 +10,7 @@ jobs:
       - name: get release tag
         run: |
           APPLICATION=$(echo $GITHUB_REPOSITORY | cut -d "/" -f 2)
-          IMAGE=docker.pkg.github.com/$GITHUB_REPOSITORY/$APPLICATION:$GITHUB_SHA
+          IMAGE=ghcr.io/$GITHUB_REPOSITORY/$APPLICATION:$GITHUB_SHA
           echo "IMAGE=${IMAGE}" >> $GITHUB_ENV
           echo $IMAGE
       - name: Deploy

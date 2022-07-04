@@ -21,6 +21,7 @@ import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 @Component
 public class DokumentproduksjonsInfoMapper {
     private final Unleash unleash;
+
     private static final ImmutableMap<Produserbaredokumenter, DokumentproduksjonsInfo> DOKUMENTPRODUKSJONS_INFO_MAP;
     static final Set<Produserbaredokumenter> DOKUMENTMALER_PRODSATT = Set.of(
         AVSLAG_MANGLENDE_OPPLYSNINGER,
@@ -31,7 +32,8 @@ public class DokumentproduksjonsInfoMapper {
         MANGELBREV_BRUKER,
         MELDING_FORVENTET_SAKSBEHANDLINGSTID,
         MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD,
-        STORBRITANNIA
+        STORBRITANNIA,
+        MELDING_HENLAGT_SAK
     );
 
     static {

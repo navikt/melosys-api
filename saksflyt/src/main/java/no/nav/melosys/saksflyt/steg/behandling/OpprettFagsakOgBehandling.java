@@ -21,7 +21,6 @@ import no.nav.melosys.service.sak.OpprettSakRequest;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.*;
@@ -35,7 +34,7 @@ public class OpprettFagsakOgBehandling implements StegBehandler {
     private final PersondataFasade persondataFasade;
 
     public OpprettFagsakOgBehandling(FagsakService fagsakService,
-                                     @Qualifier("system") PersondataFasade persondataFasade) {
+                                     PersondataFasade persondataFasade) {
         this.fagsakService = fagsakService;
         this.persondataFasade = persondataFasade;
     }

@@ -7,7 +7,6 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.arkiv.*;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.brev.FritekstbrevBrevbestilling;
-import no.nav.melosys.domain.arkiv.Vedlegg;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
@@ -26,10 +25,8 @@ import no.nav.melosys.service.dokument.DokumentproduksjonsInfo;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-import static java.util.Collections.emptyList;
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.*;
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.OPPRETT_OG_JOURNALFØR_BREV;
 import static org.springframework.util.ObjectUtils.isEmpty;
@@ -50,9 +47,9 @@ public class OpprettOgJournalforBrev implements StegBehandler {
     public OpprettOgJournalforBrev(BehandlingService behandlingService,
                                    DokgenService dokgenService,
                                    UtenlandskMyndighetService utenlandskMyndighetService,
-                                   @Qualifier("system") JoarkFasade joarkFasade,
-                                   @Qualifier("system") PersondataFasade persondataFasade,
-                                   @Qualifier("system") EregFasade eregFasade,
+                                   JoarkFasade joarkFasade,
+                                   PersondataFasade persondataFasade,
+                                   EregFasade eregFasade,
                                    DokumentNavnService dokumentNavnService,
                                    DokumentHentingService dokumentHentingService) {
         this.behandlingService = behandlingService;

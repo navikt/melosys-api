@@ -30,7 +30,6 @@ import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.UtenlandskMyndighetRepository;
 import no.nav.melosys.service.ldap.SaksbehandlerService;
 import no.nav.melosys.service.persondata.PersondataFasade;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,7 +38,6 @@ import org.w3c.dom.Element;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.REPRESENTANT;
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.*;
 
@@ -56,7 +54,7 @@ public class BrevDataService {
     private final UtenlandskMyndighetRepository utenlandskMyndighetRepository;
 
     public BrevDataService(BehandlingsresultatRepository behandlingsresultatRepository,
-                           @Qualifier("system") PersondataFasade persondataFasade,
+                           PersondataFasade persondataFasade,
                            SaksbehandlerService saksbehandlerService,
                            UtenlandskMyndighetRepository utenlandskMyndighetRepository) {
         this.behandlingsresultatRepository = behandlingsresultatRepository;

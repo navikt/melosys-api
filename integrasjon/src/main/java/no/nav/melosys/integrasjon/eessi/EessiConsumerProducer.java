@@ -4,12 +4,10 @@ import java.util.Collections;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.integrasjon.felles.GenericContextClientRequestInterceptor;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 import org.springframework.web.client.RestTemplate;
 
 @Configuration
@@ -22,20 +20,11 @@ public class EessiConsumerProducer {
     }
 
     @Bean
-    @Primary
     public EessiConsumer melosysEessiConsumer(ObjectMapper objectMapper,
                                               GenericContextClientRequestInterceptor interceptor,
                                               RestTemplateBuilder restTemplateBuilder) {
         RestTemplate restTemplate = restTemplateBuilder.rootUri(url).build();
         restTemplate.setInterceptors(Collections.singletonList(interceptor));
         return new EessiConsumerImpl(restTemplate, objectMapper);
-    }
-
-    @Bean
-    @Qualifier("system")
-    public EessiConsumer melosysEessiSystemConsumer(ObjectMapper objectMapper,
-                                                    GenericContextClientRequestInterceptor interceptor,
-                                                    RestTemplateBuilder restTemplateBuilder) {
-        return melosysEessiConsumer(objectMapper, interceptor, restTemplateBuilder);
     }
 }

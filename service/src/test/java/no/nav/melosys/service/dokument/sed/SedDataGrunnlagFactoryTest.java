@@ -6,7 +6,7 @@ import java.util.Set;
 import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie;
 import no.nav.melosys.domain.person.familie.OmfattetFamilie;
 import no.nav.melosys.service.SaksbehandlingDataFactory;
-import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterSystemService;
+import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.persondata.PersondataFasade;
@@ -27,7 +27,7 @@ class SedDataGrunnlagFactoryTest {
     @Mock
     private AvklartefaktaService avklartefaktaService;
     @Mock
-    private AvklarteVirksomheterSystemService avklarteVirksomheterService;
+    private AvklarteVirksomheterService avklarteVirksomheterService;
     @Mock
     private KodeverkService kodeverkService;
     @Mock

@@ -34,7 +34,7 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.*;
 import no.nav.melosys.service.dokument.brev.*;
 import no.nav.melosys.service.dokument.brev.bygger.*;
-import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevdataGrunnlagSystemFactory;
+import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevdataGrunnlagFactory;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.context.ApplicationEventPublisher;
@@ -145,7 +145,7 @@ class SendVedtaksbrevInnlandTest {
             avklarteVirksomheterService, utenlandskMyndighetService, behandlingsresultatService,
             mock(TrygdeavgiftsberegningService.class), mock(LovvalgsperiodeService.class), behandlingService);
         return spy(new DokumentSystemService(behandlingService, brevDataService, dokSysFasade,
-            brevmottakerService, brevDataByggerVelger, mock(BrevdataGrunnlagSystemFactory.class)));
+            brevmottakerService, brevDataByggerVelger, mock(BrevdataGrunnlagFactory.class)));
     }
 
     private static BehandlingsresultatService mockBehandlingsresultatService() {

@@ -3,7 +3,6 @@ package no.nav.melosys.service.brev;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Set;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
@@ -365,27 +364,38 @@ class BrevbestillingServiceTest {
     }
 
     @Test
-    void hentBrevMaler_behandlingIkkeAvsluttet_returnererMaler() {
+    void hentBrevMaler_tilBruker_returnererKorrektListe() {
         when(mockBehandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
 
-        List<Produserbaredokumenter> brevMaler = brevbestillingService.hentMuligeProduserbaredokumenter(123L);
+        List<Produserbaredokumenter> brevMaler = brevbestillingService.hentMuligeProduserbaredokumenter(123L, BRUKER);
 
         assertThat(brevMaler)
-            .hasSize(4)
+            .hasSize(2)
             .containsExactlyInAnyOrder(
                 MANGELBREV_BRUKER,
+                GENERELT_FRITEKSTBREV_BRUKER
+            );
+    }
+
+    @Test
+    void hentBrevMaler_tilArbeidsgiver_returnererKorrektListe() {
+        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
+
+        List<Produserbaredokumenter> brevMaler = brevbestillingService.hentMuligeProduserbaredokumenter(123L, ARBEIDSGIVER);
+
+        assertThat(brevMaler)
+            .hasSize(2)
+            .containsExactlyInAnyOrder(
                 MANGELBREV_ARBEIDSGIVER,
-                GENERELT_FRITEKSTBREV_BRUKER,
                 GENERELT_FRITEKSTBREV_ARBEIDSGIVER
             );
     }
 
     @Test
-    void hentBrevMaler_behandlingGjelderVirksomhet_returnererIkkeMangelbrev() {
-        behandling.getFagsak().setAktører(Set.of(lagAktoerOrg(VIRKSOMHET, "orgnr")));
+    void hentBrevMaler_tilVirksomhet_returnererKorrektListe() {
         when(mockBehandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
 
-        List<Produserbaredokumenter> brevMaler = brevbestillingService.hentMuligeProduserbaredokumenter(123L);
+        List<Produserbaredokumenter> brevMaler = brevbestillingService.hentMuligeProduserbaredokumenter(123L, VIRKSOMHET);
 
         assertThat(brevMaler).hasSize(1).containsExactly(GENERELT_FRITEKSTBREV_VIRKSOMHET);
     }
@@ -394,7 +404,7 @@ class BrevbestillingServiceTest {
     void hentBrevMaler_behandlingAvsluttet_returnererTomListe() {
         behandling.setStatus(Behandlingsstatus.AVSLUTTET);
         when(mockBehandlingService.hentBehandlingMedSaksopplysninger(321L)).thenReturn(behandling);
-        List<Produserbaredokumenter> brevMaler = brevbestillingService.hentMuligeProduserbaredokumenter(321L);
+        List<Produserbaredokumenter> brevMaler = brevbestillingService.hentMuligeProduserbaredokumenter(321L, BRUKER);
 
         assertThat(brevMaler).isEmpty();
     }
@@ -403,16 +413,14 @@ class BrevbestillingServiceTest {
     void hentBrevMaler_behandlingErSoeknad_returnererSoeknadMalITillegg() {
         behandling.setType(Behandlingstyper.SOEKNAD);
         when(mockBehandlingService.hentBehandlingMedSaksopplysninger(321L)).thenReturn(behandling);
-        List<Produserbaredokumenter> brevMaler = brevbestillingService.hentMuligeProduserbaredokumenter(321L);
+        List<Produserbaredokumenter> brevMaler = brevbestillingService.hentMuligeProduserbaredokumenter(321L, BRUKER);
 
         assertThat(brevMaler)
-            .hasSize(5)
+            .hasSize(3)
             .containsExactlyInAnyOrder(
                 MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD,
                 MANGELBREV_BRUKER,
-                MANGELBREV_ARBEIDSGIVER,
-                GENERELT_FRITEKSTBREV_BRUKER,
-                GENERELT_FRITEKSTBREV_ARBEIDSGIVER
+                GENERELT_FRITEKSTBREV_BRUKER
             );
     }
 
@@ -420,16 +428,14 @@ class BrevbestillingServiceTest {
     void hentBrevMaler_behandlingErKlage_returnererKlageMalITillegg() {
         behandling.setType(Behandlingstyper.KLAGE);
         when(mockBehandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
-        List<Produserbaredokumenter> brevMaler = brevbestillingService.hentMuligeProduserbaredokumenter(123L);
+        List<Produserbaredokumenter> brevMaler = brevbestillingService.hentMuligeProduserbaredokumenter(123L, BRUKER);
 
         assertThat(brevMaler)
-            .hasSize(5)
+            .hasSize(3)
             .containsExactlyInAnyOrder(
                 MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE,
                 MANGELBREV_BRUKER,
-                MANGELBREV_ARBEIDSGIVER,
-                GENERELT_FRITEKSTBREV_BRUKER,
-                GENERELT_FRITEKSTBREV_ARBEIDSGIVER
+                GENERELT_FRITEKSTBREV_BRUKER
             );
     }
 
@@ -440,7 +446,7 @@ class BrevbestillingServiceTest {
             .thenReturn(List.of(lagAktoerOrg(Aktoersroller.BRUKER, null)));
         when(mockPersondataFasade.hentPerson(anyString())).thenReturn(lagPersonopplysningerUtenOppholdsadresseOgKontaktadresse());
 
-        var brevAdresser = brevbestillingService.hentBrevAdresseTilMottakere(MANGELBREV_BRUKER, Aktoersroller.BRUKER, 123);
+        var brevAdresser = brevbestillingService.hentBrevAdresseTilMottakere(Aktoersroller.BRUKER, 123);
 
         assertThat(brevAdresser).hasSize(1);
         assertThat(brevAdresser.get(0))
@@ -471,7 +477,7 @@ class BrevbestillingServiceTest {
             .thenReturn(List.of(lagAktoerOrg(Aktoersroller.REPRESENTANT, "orgNr")));
         when(mockEregFasade.hentOrganisasjon("orgNr")).thenReturn(lagORGSaksopplysning("orgNr", "Ola Nordmann Fullmektig"));
 
-        var brevAdresser = brevbestillingService.hentBrevAdresseTilMottakere(MANGELBREV_BRUKER, Aktoersroller.BRUKER, 123);
+        var brevAdresser = brevbestillingService.hentBrevAdresseTilMottakere(Aktoersroller.BRUKER, 123);
 
         assertThat(brevAdresser).hasSize(1);
         assertThat(brevAdresser.get(0))
@@ -502,7 +508,7 @@ class BrevbestillingServiceTest {
             .thenReturn(List.of(lagAktoerPerson(Aktoersroller.REPRESENTANT, "fnr")));
         when(mockPersondataFasade.hentPerson("fnr")).thenReturn(lagPersonopplysningerUtenOppholdsadresseOgKontaktadresse());
 
-        var brevAdresser = brevbestillingService.hentBrevAdresseTilMottakere(MANGELBREV_BRUKER, Aktoersroller.BRUKER, 123);
+        var brevAdresser = brevbestillingService.hentBrevAdresseTilMottakere(Aktoersroller.BRUKER, 123);
 
         assertThat(brevAdresser).hasSize(1);
         assertThat(brevAdresser.get(0))
@@ -535,7 +541,7 @@ class BrevbestillingServiceTest {
         when(mockEregFasade.hentOrganisasjon("orgNr1")).thenReturn(lagORGSaksopplysning("orgNr1", "Ola Nordmann Rørleggerfirma"));
         when(mockEregFasade.hentOrganisasjon("orgNr2")).thenReturn(lagORGSaksopplysning("orgNr2", "Ida Nordmann Rørleggerfirma"));
 
-        var brevAdresser = brevbestillingService.hentBrevAdresseTilMottakere(MANGELBREV_ARBEIDSGIVER, Aktoersroller.ARBEIDSGIVER, 123);
+        var brevAdresser = brevbestillingService.hentBrevAdresseTilMottakere(Aktoersroller.ARBEIDSGIVER, 123);
 
         assertThat(brevAdresser).hasSize(2);
         assertThat(brevAdresser.get(0))
@@ -579,7 +585,7 @@ class BrevbestillingServiceTest {
         when(mockBrevmottakerService.avklarMottakere(any(), eq(Mottaker.av(Aktoersroller.ARBEIDSGIVER)), any(), eq(false), eq(false)))
             .thenReturn(emptyList());
 
-        var brevAdresser = brevbestillingService.hentBrevAdresseTilMottakere(MANGELBREV_ARBEIDSGIVER, Aktoersroller.ARBEIDSGIVER, 123L);
+        var brevAdresser = brevbestillingService.hentBrevAdresseTilMottakere(Aktoersroller.ARBEIDSGIVER, 123L);
 
         assertThat(brevAdresser).isEmpty();
     }
@@ -593,7 +599,7 @@ class BrevbestillingServiceTest {
             .thenReturn(List.of(lagAktoerOrg(Aktoersroller.REPRESENTANT, "orgNr")));
         when(mockEregFasade.hentOrganisasjon("orgNr")).thenReturn(lagORGSaksopplysning("orgNr", "Ola Nordmann Fullmektig"));
 
-        var brevAdresser = brevbestillingService.hentBrevAdresseTilMottakere(MANGELBREV_ARBEIDSGIVER, Aktoersroller.ARBEIDSGIVER, 123);
+        var brevAdresser = brevbestillingService.hentBrevAdresseTilMottakere(Aktoersroller.ARBEIDSGIVER, 123);
 
         assertThat(brevAdresser).hasSize(1);
         assertThat(brevAdresser.get(0))
@@ -621,7 +627,7 @@ class BrevbestillingServiceTest {
             .thenReturn(List.of(lagAktoerOrg(VIRKSOMHET, "orgNr1")));
         when(mockEregFasade.hentOrganisasjon("orgNr1")).thenReturn(lagORGSaksopplysning("orgNr1", "Ola Nordmann Rørleggerfirma"));
 
-        var brevAdresser = brevbestillingService.hentBrevAdresseTilMottakere(GENERELT_FRITEKSTBREV_VIRKSOMHET, VIRKSOMHET, 123);
+        var brevAdresser = brevbestillingService.hentBrevAdresseTilMottakere(VIRKSOMHET, 123);
 
         assertThat(brevAdresser).hasSize(1);
         assertThat(brevAdresser.get(0))
@@ -651,7 +657,7 @@ class BrevbestillingServiceTest {
         Personopplysninger persondata = PersonopplysningerObjectFactory.lagPersonopplysningerUtenAdresser();
         when(mockPersondataFasade.hentPerson(anyString())).thenReturn(persondata);
 
-        var brevAdresser = brevbestillingService.hentBrevAdresseTilMottakere(MANGELBREV_BRUKER, Aktoersroller.BRUKER, 123L);
+        var brevAdresser = brevbestillingService.hentBrevAdresseTilMottakere(Aktoersroller.BRUKER, 123L);
 
         assertThat(brevAdresser).hasSize(1);
         assertThat(brevAdresser.get(0))
@@ -673,7 +679,7 @@ class BrevbestillingServiceTest {
             .thenReturn(List.of(lagAktoerOrg(Aktoersroller.BRUKER, null)));
         when(mockPersondataFasade.hentPerson(anyString())).thenReturn(lagPersondataMedTomCo());
 
-        var brevAdresser = brevbestillingService.hentBrevAdresseTilMottakere(MANGELBREV_BRUKER, Aktoersroller.BRUKER, 123L);
+        var brevAdresser = brevbestillingService.hentBrevAdresseTilMottakere(Aktoersroller.BRUKER, 123L);
 
         assertThat(brevAdresser).hasSize(1);
         assertThat(brevAdresser.get(0).getAdresselinjer()).isEqualTo(List.of("gatenavnFraBostedsadresse 3"));

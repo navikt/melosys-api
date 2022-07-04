@@ -12,7 +12,6 @@ import no.nav.melosys.service.registeropplysninger.RegisteropplysningerRequest;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.HENT_REGISTEROPPLYSNINGER;
@@ -29,7 +28,7 @@ public class HentRegisteropplysninger implements StegBehandler {
 
     public HentRegisteropplysninger(RegisteropplysningerService registeropplysningerService,
                                     BehandlingService behandlingService,
-                                    @Qualifier("system") PersondataFasade persondataFasade) {
+                                    PersondataFasade persondataFasade) {
         this.registeropplysningerService = registeropplysningerService;
         this.behandlingService = behandlingService;
         this.persondataFasade = persondataFasade;

@@ -16,6 +16,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 
+import java.util.Collections;
 import java.util.List;
 
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
@@ -138,17 +139,9 @@ class DokumentServiceFasadeTest {
 
     @Test
     void skal_lageRiktigDokgenBrevRequest_ved_meldingHenleggSak_() {
-        when(mockDokgenService.erTilgjengeligDokgenmal(eq(Produserbaredokumenter.MELDING_HENLAGT_SAK))).thenReturn(true);
 
-        DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder()
-            .medProduserbartDokument(Produserbaredokumenter.MELDING_HENLAGT_SAK)
-            .medAvsenderID("Z123456")
-            .medMottakere(List.of(Mottaker.av(BRUKER)))
-            .medFritekst("henlagt sak fritekst")
-            .medBegrunnelseKode("ANNET")
-            .build();
-
-        dokumentServiceFasade.produserDokument(Produserbaredokumenter.MELDING_HENLAGT_SAK, Mottaker.av(BRUKER), 1L, brevbestilling);
+        dokumentServiceFasade.produserOgDistribuerBrev(Produserbaredokumenter.MELDING_HENLAGT_SAK, Mottaker.av(BRUKER),
+            "henlagt sak fritekst", "ANNET", "Z123456", 1L);
 
         verify(mockDokgenService).produserOgDistribuerBrev(eq(1L), brevbestillingRequestCaptor.capture());
         verifyNoInteractions(mockDokumentService);

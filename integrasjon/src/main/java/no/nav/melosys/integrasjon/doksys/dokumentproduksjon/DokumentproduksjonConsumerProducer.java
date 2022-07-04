@@ -4,10 +4,8 @@ import no.nav.melosys.sikkerhet.sts.NAVSTSClient;
 import no.nav.melosys.sikkerhet.sts.StsConfigurationUtil;
 import no.nav.melosys.sikkerhet.sts.StsLoginConfig;
 import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.DokumentproduksjonV3;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 
 @Configuration
 public class DokumentproduksjonConsumerProducer {
@@ -21,17 +19,9 @@ public class DokumentproduksjonConsumerProducer {
     }
 
     @Bean
-    @Primary
-    public DokumentproduksjonConsumer dokumentproduksjonConsumer() {
-        return new DokumentproduksjonConsumerAutoTokenAware(config, stsLoginConfig);
-    }
-
-    @Bean
-    @Qualifier("system")
     public DokumentproduksjonConsumer dokumentproduksjonSystemConsumer() {
         return new DokumentproduksjonConsumerAutoTokenAware(config, stsLoginConfig);
     }
-
     @Bean
     public DokumentproduksjonSelftestConsumer dokumentproduksjonSelftestConsumer() {
         DokumentproduksjonV3 port = StsConfigurationUtil.wrapWithSts(config.getPort(), NAVSTSClient.StsClientType.SYSTEM_SAML, stsLoginConfig);
