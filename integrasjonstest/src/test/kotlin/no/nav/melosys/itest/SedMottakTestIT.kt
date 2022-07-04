@@ -1,7 +1,6 @@
 package no.nav.melosys.itest
 
 import io.kotest.assertions.extracting
-import io.kotest.matchers.collections.shouldContainAll
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldHaveSize
 import no.nav.melosys.domain.arkiv.*
@@ -23,11 +22,10 @@ import org.springframework.kafka.core.KafkaTemplate
 import java.time.Duration
 import java.time.LocalDate
 import java.util.*
-import java.util.List
 import java.util.stream.Collectors
 
 class SedMottakTestIT(
-    @Autowired @Qualifier("system") private val joarkFasade: JoarkFasade,
+    @Autowired private val joarkFasade: JoarkFasade,
     @Autowired @Qualifier("melosysEessiMelding") private val melosysEessiMeldingKafkaTemplate: KafkaTemplate<String, MelosysEessiMelding>,
     @Autowired private val prosessinstansRepository: ProsessinstansRepository,
 ) : ComponentTestBase() {
@@ -96,7 +94,7 @@ class SedMottakTestIT(
         val eessiMelding = MelosysEessiMelding()
         eessiMelding.aktoerId = "1111111111111"
         eessiMelding.anmodningUnntak = null
-        eessiMelding.arbeidssteder = List.of()
+        eessiMelding.arbeidssteder = emptyList()
         eessiMelding.bucType = bucType.name
         eessiMelding.gsakSaksnummer = null
         eessiMelding.artikkel = artikkel
@@ -108,7 +106,7 @@ class SedMottakTestIT(
         eessiMelding.sedType = sedType.name
         eessiMelding.sedId = sedType.name
         eessiMelding.rinaSaksnummer = rinaSaksnummer
-        eessiMelding.statsborgerskap = List.of()
+        eessiMelding.statsborgerskap = emptyList()
         eessiMelding.sedVersjon = "1"
         return eessiMelding
     }
