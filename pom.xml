@@ -518,7 +518,7 @@
             </dependency>
             <!--MEDL2 -->
             <dependency>
-                <groupId>no.nav.tjenester</groupId>
+                <groupId>no.nav.melosys.ekstern.tjenester</groupId>
                 <artifactId>medlemskapsunntak-api-v1</artifactId>
                 <version>${medlemskapsunntak-api-v1.version}</version>
             </dependency>
@@ -665,6 +665,10 @@
             <id>freg-abac</id>
             <name>freg-abac on Github Packages</name>
             <url>https://maven.pkg.github.com/navikt/freg-abac</url>
+        </repository>
+        <repository>
+            <id>legacy</id>
+            <url>https://maven.pkg.github.com/navikt/legacy-avhengigheter</url>
         </repository>
     </repositories>
 
