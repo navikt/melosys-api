@@ -6,7 +6,6 @@ import java.util.Objects;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
@@ -80,7 +79,7 @@ public class BrevmalListeBygger {
             mottakere.add(
                 new MottakerDto.Builder()
                     .medType(MottakerType.ANNEN_ORGANISASJON)
-                    .medRolle(Aktoersroller.ARBEIDSGIVER)
+                    .medRolle(rolle)
                     .orgnrSettesAvSaksbehandler()
                     .build()
             );
@@ -100,7 +99,7 @@ public class BrevmalListeBygger {
     private void leggTilAdresseOgFeilmelding(MottakerDto.Builder builder, Aktoersroller aktoersroller, long behandlingId) {
         try {
             var brevAdresser = brevbestillingService.hentBrevAdresseTilMottakere(aktoersroller, behandlingId);
-            if (aktoersroller == BRUKER && brevAdresser.stream().allMatch(BrevAdresse::isAdresselinjerEmpty)) {
+            if ((aktoersroller == BRUKER || aktoersroller == VIRKSOMHET) && brevAdresser.stream().allMatch(BrevAdresse::isAdresselinjerEmpty)) {
                 builder.medFeilmelding(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE.getBeskrivelse());
             } else {
                 builder.medAdresse(brevAdresser.stream().map(MottakerAdresseDto::av).toList());
@@ -177,12 +176,17 @@ public class BrevmalListeBygger {
     }
 
     private FeltValgDto hentFritekstTittelValg(long behandlingId) {
-        Behandling behandling = behandlingService.hentBehandling(behandlingId);
-        Sakstyper fagsakType = behandling.getFagsak().getType();
+        var behandling = behandlingService.hentBehandling(behandlingId);
+        var fagsak = behandling.getFagsak();
+        var fritekstFeltvalgAlternativDto = new FeltvalgAlternativDto(FeltvalgAlternativKode.FRITEKST, true);
+
+        if (fagsak.getHovedpartRolle() == VIRKSOMHET) {
+            return new FeltValgDto(List.of(fritekstFeltvalgAlternativDto), FeltValgType.SELECT);
+        }
 
         final List<FeltvalgAlternativDto> valgAlternativer = new ArrayList<>();
 
-        switch (fagsakType) {
+        switch (fagsak.getType()) {
             case EU_EOS:
                 valgAlternativer.add(new FeltvalgAlternativDto(FeltvalgAlternativKode.HENVENDELSE_OM_TRYGDETILHØRLIGHET));
                 break;
@@ -193,7 +197,7 @@ public class BrevmalListeBygger {
                 valgAlternativer.add(new FeltvalgAlternativDto(FeltvalgAlternativKode.HENVENDELSE_OM_MEDLEMSKAP));
         }
 
-        valgAlternativer.add(new FeltvalgAlternativDto(FeltvalgAlternativKode.FRITEKST.getKode(), FeltvalgAlternativKode.FRITEKST.getBeskrivelse(), true));
+        valgAlternativer.add(fritekstFeltvalgAlternativDto);
 
         return new FeltValgDto(valgAlternativer, FeltValgType.SELECT);
     }
