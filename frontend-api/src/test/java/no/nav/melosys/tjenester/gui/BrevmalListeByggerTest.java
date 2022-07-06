@@ -130,11 +130,10 @@ class BrevmalListeByggerTest {
                 Produserbaredokumenter.GENERELT_FRITEKSTBREV_VIRKSOMHET);
 
         assertThat(tilgjengeligeMaler.get(1).getBrevTyper())
-            .hasSize(2)
+            .hasSize(1)
             .extracting(BrevmalTypeDto::getType)
             .contains(
-                Produserbaredokumenter.MANGELBREV_ARBEIDSGIVER,
-                Produserbaredokumenter.GENERELT_FRITEKSTBREV_ARBEIDSGIVER);
+                Produserbaredokumenter.GENERELT_FRITEKSTBREV_VIRKSOMHET);
     }
 
     @Test
