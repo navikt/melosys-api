@@ -4,9 +4,9 @@ import java.time.LocalDate;
 import java.util.List;
 
 import no.nav.melosys.integrasjon.felles.RestConsumer;
-import no.nav.tjenester.medlemskapsunntak.api.v1.MedlemskapsunntakForGet;
-import no.nav.tjenester.medlemskapsunntak.api.v1.MedlemskapsunntakForPost;
-import no.nav.tjenester.medlemskapsunntak.api.v1.MedlemskapsunntakForPut;
+import no.nav.melosys.ekstern.tjenester.medlemskapsunntak.api.v1.MedlemskapsunntakForGet;
+import no.nav.melosys.ekstern.tjenester.medlemskapsunntak.api.v1.MedlemskapsunntakForPost;
+import no.nav.melosys.ekstern.tjenester.medlemskapsunntak.api.v1.MedlemskapsunntakForPut;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.retry.annotation.Retryable;
