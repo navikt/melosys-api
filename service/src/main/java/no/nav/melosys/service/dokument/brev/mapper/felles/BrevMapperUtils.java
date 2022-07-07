@@ -11,7 +11,7 @@ import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 public final class BrevMapperUtils {
-    private static final ZoneId TIME_ZONE_ID = ZoneId.systemDefault();
+    private static final ZoneId TIME_ZONE_ID = ZoneId.of("Europe/Paris");
 
     private BrevMapperUtils() {
     }
