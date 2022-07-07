@@ -57,7 +57,7 @@ class SedMottakTestIT(
         melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingX001)
         melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingX007)
 
-        Awaitility.await().timeout(Duration.ofSeconds(60)).pollInterval(Duration.ofSeconds(3))
+        Awaitility.await().timeout(Duration.ofMinutes(10)).pollInterval(Duration.ofSeconds(3))
             .until {
                 prosessinstansRepository.findAllByStatusNotInAndLåsReferanseStartingWith(
                     listOf(ProsessStatus.FERDIG),
