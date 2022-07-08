@@ -43,4 +43,4 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
       - name: Build and test
-        run: mvn clean verify -B -e -U --settings .github/settings.xml
+        run: mvn clean verify -B -e -U -X --settings .github/settings.xml
