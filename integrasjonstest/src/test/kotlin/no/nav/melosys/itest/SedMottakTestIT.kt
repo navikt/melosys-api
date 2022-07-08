@@ -15,7 +15,6 @@ import no.nav.melosys.integrasjon.joark.JoarkFasade
 import no.nav.melosys.repository.ProsessinstansRepository
 import org.awaitility.Awaitility
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
@@ -40,7 +39,6 @@ class SedMottakTestIT(
     }
 
     @Test
-    @Disabled("Ser ut som vi trenger at kafaka kjøre for denne")
     fun mottaSED_mottar3SED_blirBehandletEtterHverandre() {
         //Periode på 6 år - fører til et kontrolltreff
         val eessiMeldingA009 = melosysEessiMelding(
