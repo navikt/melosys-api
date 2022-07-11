@@ -3,6 +3,7 @@ package no.nav.melosys.itest
 import io.kotest.assertions.extracting
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldHaveSize
+import no.nav.melosys.domain.FellesKodeverk
 import no.nav.melosys.domain.arkiv.*
 import no.nav.melosys.domain.eessi.BucType
 import no.nav.melosys.domain.eessi.Periode
@@ -12,20 +13,27 @@ import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
 import no.nav.melosys.domain.saksflyt.ProsessStatus
 import no.nav.melosys.domain.saksflyt.Prosessinstans
 import no.nav.melosys.integrasjon.joark.JoarkFasade
+import no.nav.melosys.integrasjon.kodeverk.Kode
+import no.nav.melosys.integrasjon.kodeverk.KodeOppslag
+import no.nav.melosys.integrasjon.kodeverk.Kodeverk
+import no.nav.melosys.integrasjon.kodeverk.KodeverkRegister
 import no.nav.melosys.repository.ProsessinstansRepository
+import no.nav.melosys.service.kodeverk.KodeverkService
 import org.awaitility.Awaitility
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.boot.test.context.TestConfiguration
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Import
+import org.springframework.context.annotation.Primary
 import org.springframework.kafka.core.KafkaTemplate
-import org.springframework.test.annotation.DirtiesContext
 import java.time.Duration
 import java.time.LocalDate
 import java.util.*
 import java.util.stream.Collectors
 
-@DirtiesContext
+@Import(SedMottakTestIT.TestConfig::class)
 class SedMottakTestIT(
     @Autowired private val joarkFasade: JoarkFasade,
     @Autowired @Qualifier("melosysEessiMelding") private val melosysEessiMeldingKafkaTemplate: KafkaTemplate<String, MelosysEessiMelding>,
@@ -34,6 +42,50 @@ class SedMottakTestIT(
 
     lateinit var rinaSaksnummer: String
     private val kafkaTopic = "teammelosys.eessi.v1-local"
+
+    @TestConfiguration
+    class TestConfig {
+        @Bean
+        @Primary
+        fun kodeverkRegisterStub(): KodeverkRegister? {
+            return KodeverkRegister {
+                val kode = Kode("DUMMY", "DUMMY", LocalDate.now().minusYears(1), LocalDate.now().plusYears(1))
+                val kodeMap = mapOf(Pair("DUMMY", listOf(kode)))
+                Kodeverk("DUMMY", kodeMap)
+            }
+        }
+
+        @Bean
+        @Primary
+        fun kodeOppslagStub(): KodeOppslag? {
+            open class KodeOppslagImpl : KodeOppslag {
+                override fun getTermFraKodeverk(kodeverk: FellesKodeverk, kode: String): String {
+                    return "DUMMY"
+                }
+
+                override fun getTermFraKodeverk(kodeverk: FellesKodeverk, kode: String, dato: LocalDate): String {
+                    return "DUMMY"
+                }
+
+                override fun getTermFraKodeverk(
+                    kodeverk: FellesKodeverk,
+                    kode: String,
+                    dato: LocalDate,
+                    kodeperioder: List<Kode>?
+                ): String {
+                    return "DUMMY"
+                }
+            }
+
+            return KodeOppslagImpl()
+        }
+
+        @Bean
+        @Primary
+        fun kodeverkServiceStub(kodeverkRegister: KodeverkRegister?, kodeOppslag: KodeOppslag?): KodeverkService? {
+            return KodeverkService(kodeverkRegister, kodeOppslag)
+        }
+    }
 
     @BeforeEach
     fun setup() {
