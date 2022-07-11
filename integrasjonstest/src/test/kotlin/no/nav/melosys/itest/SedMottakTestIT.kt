@@ -19,11 +19,13 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.kafka.core.KafkaTemplate
+import org.springframework.test.annotation.DirtiesContext
 import java.time.Duration
 import java.time.LocalDate
 import java.util.*
 import java.util.stream.Collectors
 
+@DirtiesContext
 class SedMottakTestIT(
     @Autowired private val joarkFasade: JoarkFasade,
     @Autowired @Qualifier("melosysEessiMelding") private val melosysEessiMeldingKafkaTemplate: KafkaTemplate<String, MelosysEessiMelding>,
