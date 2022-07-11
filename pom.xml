@@ -90,6 +90,7 @@
         <nimbus-jose-jwt.version>9.22</nimbus-jose-jwt.version>
         <neethi.version>3.1.1</neethi.version>
         <mockito-kotlin.version>4.0.0</mockito-kotlin.version>
+        <kotest.version>5.3.2</kotest.version>
 
         <!-- Transitive avhengigheter -->
         <asm.version>9.3</asm.version>
