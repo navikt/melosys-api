@@ -43,50 +43,6 @@ class SedMottakTestIT(
     lateinit var rinaSaksnummer: String
     private val kafkaTopic = "teammelosys.eessi.v1-local"
 
-    @TestConfiguration
-    class TestConfig {
-        @Bean
-        @Primary
-        fun kodeverkRegisterStub(): KodeverkRegister? {
-            return KodeverkRegister {
-                val kode = Kode("DUMMY", "DUMMY", LocalDate.now().minusYears(1), LocalDate.now().plusYears(1))
-                val kodeMap = mapOf(Pair("DUMMY", listOf(kode)))
-                Kodeverk("DUMMY", kodeMap)
-            }
-        }
-
-        @Bean
-        @Primary
-        fun kodeOppslagStub(): KodeOppslag? {
-            open class KodeOppslagImpl : KodeOppslag {
-                override fun getTermFraKodeverk(kodeverk: FellesKodeverk, kode: String): String {
-                    return "DUMMY"
-                }
-
-                override fun getTermFraKodeverk(kodeverk: FellesKodeverk, kode: String, dato: LocalDate): String {
-                    return "DUMMY"
-                }
-
-                override fun getTermFraKodeverk(
-                    kodeverk: FellesKodeverk,
-                    kode: String,
-                    dato: LocalDate,
-                    kodeperioder: List<Kode>?
-                ): String {
-                    return "DUMMY"
-                }
-            }
-
-            return KodeOppslagImpl()
-        }
-
-        @Bean
-        @Primary
-        fun kodeverkServiceStub(kodeverkRegister: KodeverkRegister?, kodeOppslag: KodeOppslag?): KodeverkService? {
-            return KodeverkService(kodeverkRegister, kodeOppslag)
-        }
-    }
-
     @BeforeEach
     fun setup() {
         rinaSaksnummer = Random().nextInt(100000).toString()
@@ -190,5 +146,47 @@ class SedMottakTestIT(
         request.journalposttype = Journalposttype.INN
         request.innhold = "$sedType-tittel"
         return joarkFasade.opprettJournalpost(request, false)
+    }
+
+    @TestConfiguration
+    class TestConfig {
+        @Bean
+        @Primary
+        fun kodeverkRegisterStub(): KodeverkRegister? = KodeverkRegister {
+            Kodeverk(
+                "DUMMY", mapOf(
+                    Pair(
+                        "DUMMY",
+                        listOf(Kode("DUMMY", "DUMMY", LocalDate.now().minusYears(1), LocalDate.now().plusYears(1)))
+                    )
+                )
+            )
+        }
+
+        @Bean
+        @Primary
+        fun kodeOppslagStub(): KodeOppslag? {
+            open class KodeOppslagImpl : KodeOppslag {
+                override fun getTermFraKodeverk(kodeverk: FellesKodeverk, kode: String): String = "DUMMY"
+
+                override fun getTermFraKodeverk(kodeverk: FellesKodeverk, kode: String, dato: LocalDate): String =
+                    "DUMMY"
+
+                override fun getTermFraKodeverk(
+                    kodeverk: FellesKodeverk,
+                    kode: String,
+                    dato: LocalDate,
+                    kodeperioder: List<Kode>?
+                ): String = "DUMMY"
+            }
+
+            return KodeOppslagImpl()
+        }
+
+        @Bean
+        @Primary
+        fun kodeverkServiceStub(kodeverkRegister: KodeverkRegister?, kodeOppslag: KodeOppslag?): KodeverkService? {
+            return KodeverkService(kodeverkRegister, kodeOppslag)
+        }
     }
 }
