@@ -1,24 +1,32 @@
-package no.nav.melosys.itest.token
+package no.nav.melosys.integrasjon.oppgave.konsument
 
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.matching.StringValuePattern
-import no.nav.melosys.integrasjon.sak.SakConsumer
-import no.nav.melosys.integrasjon.sak.SakConsumerImpl
-import no.nav.melosys.integrasjon.sak.SakConsumerProducer
+import no.nav.melosys.integrasjon.ConsumerWireMockTestBase
+import no.nav.melosys.integrasjon.felles.GenericContextExchangeFilter
+import no.nav.melosys.integrasjon.reststs.RestTokenServiceClient
+import no.nav.melosys.integrasjon.reststs.StsRestTemplateProducer
+import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebClient
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 
 @WebMvcTest(
     value = [
-        SakConsumerImpl::class,
-        SakConsumerProducer::class,
+        StsRestTemplateProducer::class,
+        RestTokenServiceClient::class,
+
+        OppgaveConsumerImpl::class,
+        OppgaveConsumerProducer::class,
+        GenericContextExchangeFilter::class
     ],
-    properties = ["spring.profiles.active:itest-token"]
+    properties = ["spring.profiles.active:token-test"]
 )
-class SakConsumerIT(
-    @Autowired private val sakConsumer: SakConsumer,
+@AutoConfigureWebClient
+class OppgaveConsumerTokenTest(
+    @Autowired private val oppgaveConsumer: OppgaveConsumer,
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,
     @Value("\${mockserver.security.port}") mockSecurityPort: Int
 ) : ConsumerWireMockTestBase<String>(mockServiceUnderTestPort, mockSecurityPort) {
@@ -28,7 +36,7 @@ class SakConsumerIT(
         executeFromSystem {
             verifyHeaders(
                 mapOf<String, StringValuePattern>(
-                    Pair("Authorization", WireMock.equalTo("Basic dGVzdDp0ZXN0")),
+                    Pair("Authorization", WireMock.equalTo("Bearer --token-from-system--")),
                 )
             )
         }
@@ -49,10 +57,18 @@ class SakConsumerIT(
     fun authorizationSkalKommeFraSystemNårHverkenSystemEllerBrukerErKilde() {
         verifyHeaders(
             mapOf<String, StringValuePattern>(
-                Pair("Authorization", WireMock.equalTo("Basic dGVzdDp0ZXN0")),
+                Pair("Authorization", WireMock.equalTo("Bearer --token-from-system--")),
             )
         )
         executeRequest()
+    }
+
+
+    @Test
+    fun brukeErrorFilter_kast_riktigFeilmelding() {
+        executeErrorFromServer { error ->
+            Assertions.assertThat(error).startsWith("Kall mot Oppgave feilet.")
+        }
     }
 
     override fun getMockData(): String {
@@ -60,6 +76,6 @@ class SakConsumerIT(
     }
 
     override fun executeRequest() {
-        sakConsumer.hentSak(1L)
+        oppgaveConsumer.hentOppgave("1")
     }
 }

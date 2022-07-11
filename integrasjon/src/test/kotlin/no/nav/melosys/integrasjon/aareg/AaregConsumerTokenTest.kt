@@ -1,7 +1,8 @@
-package no.nav.melosys.itest.token
+package no.nav.melosys.integrasjon.aareg
 
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.matching.StringValuePattern
+import no.nav.melosys.integrasjon.ConsumerWireMockTestBase
 import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdContextExchangeFilter
 import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdQuery
 import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdRestConsumer
@@ -24,10 +25,10 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
         ArbeidsforholdRestConsumerConfig::class,
         ArbeidsforholdContextExchangeFilter::class,
     ],
-    properties = ["spring.profiles.active:itest-token"]
+    properties = ["spring.profiles.active:token-test"]
 )
 @AutoConfigureWebClient
-class AaregConsumerIT(
+class AaregConsumerTokenTest(
     @Autowired private val arbeidsforholdRestConsumer: ArbeidsforholdRestConsumer,
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,
     @Value("\${mockserver.security.port}") mockSecurityPort: Int
