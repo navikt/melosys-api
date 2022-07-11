@@ -1,4 +1,4 @@
-package no.nav.melosys.itest.token
+package no.nav.melosys.integrasjon
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.MappingBuilder

@@ -1,6 +1,7 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
 import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.adresse.SemistrukturertAdresse;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.person.Foedsel;
@@ -11,14 +12,15 @@ import no.nav.melosys.domain.person.adresse.Bostedsadresse;
 import no.nav.melosys.domain.person.adresse.Kontaktadresse;
 import no.nav.melosys.domain.person.adresse.Oppholdsadresse;
 import no.nav.melosys.domain.person.adresse.PersonAdresse;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.time.LocalDate;
-import java.util.Collections;
 import java.util.List;
 
+import static java.util.Collections.emptyList;
 import static no.nav.melosys.service.dokument.DokgenTestData.*;
 import static no.nav.melosys.service.dokument.brev.mapper.StorbritanniaAdresseSjekker.UKJENT;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -62,6 +64,28 @@ class StorbritaniaAdresseSjekkerTest {
             .isFalse();
     }
 
+    @Test
+    void finnGyldigNorskAdresse_brukerHarSemistrukturertAdresse_mappesKorrekt() {
+        var semistrukturertAdresse = new SemistrukturertAdresse(
+            "adresselinje 1", "adresselinje 2", null, null,
+            "postnr", "poststed", Landkoder.SE.getKode());
+        var kontaktadresse = new Kontaktadresse(
+            null, semistrukturertAdresse, null, null,
+            null, "PDL", null, null, false);
+        var persondata = new Personopplysninger(emptyList(), null, null, null,
+            new Foedsel(LocalDate.EPOCH, null, null, null), null, null,
+            List.of(kontaktadresse), new Navn("Ole", "", "Norman"), emptyList(), emptyList());
+
+
+        var storbritanniaAdresseSjekker = new StorbritanniaAdresseSjekker(persondata);
+        var gyldigNorskAdresse = storbritanniaAdresseSjekker.finnGyldigNorskAdresse();
+
+
+        assertThat(gyldigNorskAdresse).isEqualTo(
+            List.of("Resident outside of Norway", "adresselinje 1 adresselinje 2", "postnr", "poststed", "Sverige")
+        );
+    }
+
     static Persondata lagPersonopplysninger(
         Landkoder landkodeBosted,
         Landkoder landkodeOpphold,
@@ -85,9 +109,9 @@ class StorbritaniaAdresseSjekkerTest {
             LOVVALGSPERIODE_FOM, LOVVALGSPERIODE_TOM,
             "PDL", null, null, false);
 
-        return new Personopplysninger(Collections.emptyList(), bostedsadresse, null, null,
+        return new Personopplysninger(emptyList(), bostedsadresse, null, null,
             new Foedsel(LocalDate.EPOCH, null, null, null), null, null,
-            List.of(kontaktadresse), new Navn("Ole", "", "Norman"), List.of(oppholdsadresse), Collections.emptyList());
+            List.of(kontaktadresse), new Navn("Ole", "", "Norman"), List.of(oppholdsadresse), emptyList());
     }
 
     private static String kodeEllerNull(Landkoder landkoder) {

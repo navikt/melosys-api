@@ -15,6 +15,10 @@
         <kotlin.version>1.6.21</kotlin.version>
         <kotlin.compiler.jvmTarget>${java.version}</kotlin.compiler.jvmTarget>
         <kotest.version>5.3.2</kotest.version>
+        <commons-cli.version>1.5.0</commons-cli.version>
+        <graphql-spring-boot-starter.version>12.0.0</graphql-spring-boot-starter.version>
+        <scala.version>2.13.8</scala.version>
+        <testcontainers.version>1.17.1</testcontainers.version>
 
         <commons-cli.version>1.5.0</commons-cli.version>
         <graphql-spring-boot-starter.version>12.0.0</graphql-spring-boot-starter.version>
@@ -32,12 +36,12 @@
             <dependency>
                 <groupId>net.java.dev.jna</groupId>
                 <artifactId>jna</artifactId>
-                <version>5.5.0</version>
+                <version>5.11.0</version>
             </dependency>
             <dependency>
                 <groupId>net.java.dev.jna</groupId>
                 <artifactId>jna-platform</artifactId>
-                <version>5.5.0</version>
+                <version>5.11.0</version>
             </dependency>
             <dependency>
                 <groupId>org.jetbrains</groupId>

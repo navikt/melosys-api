@@ -1,10 +1,9 @@
-package no.nav.melosys.itest.token
+package no.nav.melosys.integrasjon.medl
 
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.matching.StringValuePattern
+import no.nav.melosys.integrasjon.ConsumerWireMockTestBase
 import no.nav.melosys.integrasjon.felles.GenericContextExchangeFilter
-import no.nav.melosys.integrasjon.medl.MedlemskapRestConsumer
-import no.nav.melosys.integrasjon.medl.MedlemskapRestConsumerProducer
 import no.nav.melosys.integrasjon.reststs.RestTokenServiceClient
 import no.nav.melosys.integrasjon.reststs.StsRestTemplateProducer
 import org.assertj.core.api.Assertions
@@ -24,10 +23,10 @@ import java.time.LocalDate
         MedlemskapRestConsumerProducer::class,
         GenericContextExchangeFilter::class
     ],
-    properties = ["spring.profiles.active:itest-token"]
+    properties = ["spring.profiles.active:token-test"]
 )
 @AutoConfigureWebClient
-class MedlemskapConsumerIT(
+class MedlemskapConsumerTokenTest(
     @Autowired private val medlemskapRestConsumer: MedlemskapRestConsumer,
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,
     @Value("\${mockserver.security.port}") mockSecurityPort: Int

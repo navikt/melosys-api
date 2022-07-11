@@ -1,14 +1,16 @@
-package no.nav.melosys.itest.token
+package no.nav.melosys.integrasjon.joark.saf
 
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.matching.StringValuePattern
+import no.nav.melosys.exception.TekniskException
+import no.nav.melosys.integrasjon.ConsumerWireMockTestBase
 import no.nav.melosys.integrasjon.felles.GenericContextExchangeFilter
-import no.nav.melosys.integrasjon.oppgave.konsument.OppgaveConsumer
-import no.nav.melosys.integrasjon.oppgave.konsument.OppgaveConsumerImpl
-import no.nav.melosys.integrasjon.oppgave.konsument.OppgaveConsumerProducer
 import no.nav.melosys.integrasjon.reststs.RestTokenServiceClient
 import no.nav.melosys.integrasjon.reststs.StsRestTemplateProducer
+import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
+import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import org.assertj.core.api.Assertions
+import org.assertj.core.api.AssertionsForClassTypes
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -20,18 +22,18 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
         StsRestTemplateProducer::class,
         RestTokenServiceClient::class,
 
-        OppgaveConsumerImpl::class,
-        OppgaveConsumerProducer::class,
+        SafConsumerImpl::class,
+        SafConsumerProducer::class,
         GenericContextExchangeFilter::class
     ],
-    properties = ["spring.profiles.active:itest-token"]
+    properties = ["spring.profiles.active:token-test"]
 )
 @AutoConfigureWebClient
-class OppgaveConsumerIT(
-    @Autowired private val oppgaveConsumer: OppgaveConsumer,
+class SafConsumerTokenTest(
+    @Autowired private val safConsumer: SafConsumer,
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,
     @Value("\${mockserver.security.port}") mockSecurityPort: Int
-) : ConsumerWireMockTestBase<String>(mockServiceUnderTestPort, mockSecurityPort) {
+) : ConsumerWireMockTestBase<ByteArray>(mockServiceUnderTestPort, mockSecurityPort) {
 
     @Test
     fun authorizationSkalKommeFraSystem() {
@@ -39,6 +41,7 @@ class OppgaveConsumerIT(
             verifyHeaders(
                 mapOf<String, StringValuePattern>(
                     Pair("Authorization", WireMock.equalTo("Bearer --token-from-system--")),
+                    Pair("Nav-Consumer-Id", WireMock.equalTo("melosys"))
                 )
             )
         }
@@ -50,6 +53,7 @@ class OppgaveConsumerIT(
             verifyHeaders(
                 mapOf<String, StringValuePattern>(
                     Pair("Authorization", WireMock.equalTo("Bearer --token-from-user--")),
+                    Pair("Nav-Consumer-Id", WireMock.equalTo("melosys"))
                 )
             )
         }
@@ -60,24 +64,36 @@ class OppgaveConsumerIT(
         verifyHeaders(
             mapOf<String, StringValuePattern>(
                 Pair("Authorization", WireMock.equalTo("Bearer --token-from-system--")),
+                Pair("Nav-Consumer-Id", WireMock.equalTo("melosys"))
             )
         )
         executeRequest()
     }
 
+    @Test
+    fun authorizationSkalKommeFraBruker_Feiler_nårUtenSubjectHandler() {
+        ThreadLocalAccessInfo.beforeControllerRequest("request", false)
+        SpringSubjectHandler.set(NullSubjectHandler())
+
+        AssertionsForClassTypes.assertThatExceptionOfType(TekniskException::class.java)
+            .isThrownBy { executeRequest() }
+            .withMessageContaining("Token mangler fra bruker! ThreadLocalAccessInfo{requestUri='request', prossessId='null'}")
+
+        ThreadLocalAccessInfo.afterControllerRequest("request")
+    }
 
     @Test
-    fun brukeErrorFilter_kast_riktigFeilmelding() {
+    fun skalBrukeErrorFilterOgGiRiktigFeilmelding() {
         executeErrorFromServer { error ->
-            Assertions.assertThat(error).startsWith("Kall mot Oppgave feilet.")
+            Assertions.assertThat(error).startsWith("Kall mot SAF feilet.")
         }
     }
 
-    override fun getMockData(): String {
-        return "{}"
+    override fun getMockData(): ByteArray {
+        return ByteArray(0)
     }
 
     override fun executeRequest() {
-        oppgaveConsumer.hentOppgave("1")
+        safConsumer.hentDokument("1", "1")
     }
 }

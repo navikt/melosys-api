@@ -1,18 +1,12 @@
-package no.nav.melosys.itest.token
+package no.nav.melosys.integrasjon.pdl
 
+import com.github.tomakehurst.wiremock.client.MappingBuilder
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.matching.StringValuePattern
-import no.nav.melosys.exception.TekniskException
-import no.nav.melosys.integrasjon.felles.GenericContextExchangeFilter
-import no.nav.melosys.integrasjon.joark.saf.SafConsumer
-import no.nav.melosys.integrasjon.joark.saf.SafConsumerImpl
-import no.nav.melosys.integrasjon.joark.saf.SafConsumerProducer
+import no.nav.melosys.integrasjon.ConsumerWireMockTestBase
 import no.nav.melosys.integrasjon.reststs.RestTokenServiceClient
 import no.nav.melosys.integrasjon.reststs.StsRestTemplateProducer
-import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
-import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import org.assertj.core.api.Assertions
-import org.assertj.core.api.AssertionsForClassTypes
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -24,18 +18,19 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
         StsRestTemplateProducer::class,
         RestTokenServiceClient::class,
 
-        SafConsumerImpl::class,
-        SafConsumerProducer::class,
-        GenericContextExchangeFilter::class
+        PDLConsumerImpl::class,
+        PDLConsumerProducer::class,
+        PDLAuthFilter::class,
+        PDLAuthFilterProducer::class,
     ],
-    properties = ["spring.profiles.active:itest-token"]
+    properties = ["spring.profiles.active:token-test"]
 )
 @AutoConfigureWebClient
-class SafConsumerIT(
-    @Autowired private val safConsumer: SafConsumer,
+class PDLConsumerTokenTest(
+    @Autowired private val pdlConsumer: PDLConsumer,
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,
     @Value("\${mockserver.security.port}") mockSecurityPort: Int
-) : ConsumerWireMockTestBase<ByteArray>(mockServiceUnderTestPort, mockSecurityPort) {
+) : ConsumerWireMockTestBase<String>(mockServiceUnderTestPort, mockSecurityPort) {
 
     @Test
     fun authorizationSkalKommeFraSystem() {
@@ -43,7 +38,7 @@ class SafConsumerIT(
             verifyHeaders(
                 mapOf<String, StringValuePattern>(
                     Pair("Authorization", WireMock.equalTo("Bearer --token-from-system--")),
-                    Pair("Nav-Consumer-Id", WireMock.equalTo("melosys"))
+                    Pair("Nav-Consumer-Token", WireMock.equalTo("Bearer --token-from-system--"))
                 )
             )
         }
@@ -55,7 +50,7 @@ class SafConsumerIT(
             verifyHeaders(
                 mapOf<String, StringValuePattern>(
                     Pair("Authorization", WireMock.equalTo("Bearer --token-from-user--")),
-                    Pair("Nav-Consumer-Id", WireMock.equalTo("melosys"))
+                    Pair("Nav-Consumer-Token", WireMock.equalTo("Bearer --token-from-system--"))
                 )
             )
         }
@@ -66,36 +61,44 @@ class SafConsumerIT(
         verifyHeaders(
             mapOf<String, StringValuePattern>(
                 Pair("Authorization", WireMock.equalTo("Bearer --token-from-system--")),
-                Pair("Nav-Consumer-Id", WireMock.equalTo("melosys"))
+                Pair("Nav-Consumer-Token", WireMock.equalTo("Bearer --token-from-system--"))
             )
         )
         executeRequest()
     }
 
     @Test
-    fun authorizationSkalKommeFraBruker_Feiler_nårUtenSubjectHandler() {
-        ThreadLocalAccessInfo.beforeControllerRequest("request", false)
-        SpringSubjectHandler.set(NullSubjectHandler())
-
-        AssertionsForClassTypes.assertThatExceptionOfType(TekniskException::class.java)
-            .isThrownBy { executeRequest() }
-            .withMessageContaining("Token mangler fra bruker! ThreadLocalAccessInfo{requestUri='request', prossessId='null'}")
-
-        ThreadLocalAccessInfo.afterControllerRequest("request")
-    }
-
-    @Test
     fun skalBrukeErrorFilterOgGiRiktigFeilmelding() {
         executeErrorFromServer { error ->
-            Assertions.assertThat(error).startsWith("Kall mot SAF feilet.")
+            Assertions.assertThat(error).startsWith("Kall mot PDL feilet.")
         }
     }
 
-    override fun getMockData(): ByteArray {
-        return ByteArray(0)
+    override fun createWireMock(): MappingBuilder {
+        return WireMock.post("/graphql")
+    }
+
+    override fun getMockData(): String {
+        return """{
+          "data": {
+            "hentIdenter": {
+              "identer": [
+                {
+                  "ident": "99026522600",
+                  "gruppe": "FOLKEREGISTERIDENT"
+                },
+                {
+                  "ident": "9834873315250",
+                  "gruppe": "AKTORID"
+                }
+              ]
+            }
+          }
+        }
+        """
     }
 
     override fun executeRequest() {
-        safConsumer.hentDokument("1", "1")
+        pdlConsumer.hentIdenter("0")
     }
 }
