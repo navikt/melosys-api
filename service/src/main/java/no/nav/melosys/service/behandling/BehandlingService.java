@@ -453,7 +453,9 @@ public class BehandlingService {
 
     private LocalDate hentBehandlingsfristForBehandlingstema(Behandlingstema behandlingstema) {
         return switch (behandlingstema) {
-            case UTSENDT_ARBEIDSTAKER, UTSENDT_SELVSTENDIG, ARBEID_FLERE_LAND, ARBEID_ETT_LAND_ØVRIG, IKKE_YRKESAKTIV, ARBEID_I_UTLANDET, ARBEID_NORGE_BOSATT_ANNET_LAND, YRKESAKTIV ->
+            case UTSENDT_ARBEIDSTAKER, UTSENDT_SELVSTENDIG, ARBEID_FLERE_LAND,
+                ARBEID_ETT_LAND_ØVRIG, IKKE_YRKESAKTIV, ARBEID_I_UTLANDET, ARBEID_NORGE_BOSATT_ANNET_LAND,
+                YRKESAKTIV, FORESPØRSEL_TRYGDEMYNDIGHET, UNNTAK_MEDLEMSKAP, REGISTRERING_UNNTAK, PENSJONIST ->
                 LocalDate.now().plusDays(30);
             case REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING, REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE ->
                 LocalDate.now().plusWeeks(2);
