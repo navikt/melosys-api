@@ -86,6 +86,16 @@ public class MedlService {
         return opprettPeriode(fnr, periodeOmLovvalg, PeriodestatusMedl.UAVK, LovvalgMedl.FORL, kildedokumenttypeMedl);
     }
 
+    public void oppdaterDatoForPeriode(Long medlPeriodeID, LocalDate fom, LocalDate tom) {
+        MedlemskapsunntakForPut request = MedlemskapsunntakForPut.builder()
+            .unntakId(medlPeriodeID)
+            .fraOgMed(fom)
+            .tilOgMed(tom)
+            // TODO: Antar flere av feltene her er obligatoriske. Kopiere fra forrige periode? Bruke standardverdier?
+            .build();
+        medlemskapRestConsumer.oppdaterPeriode(request);
+    }
+
     public void oppdaterPeriodeEndelig(Lovvalgsperiode lovvalgsperiode, KildedokumenttypeMedl kildedokumenttypeMedl) {
         oppdaterPeriode(lovvalgsperiode, PeriodestatusMedl.GYLD, LovvalgMedl.ENDL, kildedokumenttypeMedl);
     }

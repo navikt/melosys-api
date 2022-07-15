@@ -88,6 +88,11 @@ public class MedlPeriodeService {
         lagreMedlPeriodeId(medlPeriodeId, medlemskapsperiode);
     }
 
+    public void oppdaterEksisterendePeriode(Long medlPeriodeID, LocalDate fom, LocalDate tom) {
+        log.info("Oppdaterer MEDL-periode for {} til \"{}\"-\"{}\"", medlPeriodeID, fom, tom);
+        medlService.oppdaterDatoForPeriode(medlPeriodeID, fom, tom);
+    }
+
     public void oppdaterPeriodeEndelig(Lovvalgsperiode lovvalgsperiode, boolean erSed) {
         log.info("Oppdaterer MEDL-periode {} til status endelig", lovvalgsperiode.getMedlPeriodeID());
         medlService.oppdaterPeriodeEndelig(lovvalgsperiode, hentKildedokumenttype(erSed));

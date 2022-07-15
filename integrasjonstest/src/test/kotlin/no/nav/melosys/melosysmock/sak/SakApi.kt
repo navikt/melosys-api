@@ -34,7 +34,7 @@ class SakApi {
             aktoerId = sak.aktoerId,
             orgnr = opprettSakRequest.orgnr,
             opprettetAv = "Melosys-mock :-)",
-            opprettetTidspunkt = "1900-01-01"
+            opprettetTidspunkt = "1900-01-01T12:00:00+01:00"
         )
     }
 
@@ -48,7 +48,7 @@ class SakApi {
                 aktoerId = it.aktoerId,
                 orgnr = "orgnr123321",
                 opprettetAv = "Melosys-mock :-)",
-                opprettetTidspunkt = "1900-01-01"
+                opprettetTidspunkt = "1900-01-01T12:00:00+01:00"
             )
         }
     }

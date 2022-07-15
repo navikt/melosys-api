@@ -2,9 +2,11 @@ package no.nav.melosys.saksflyt.steg.medl;
 
 import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.kontroll.regler.PeriodeRegler;
@@ -45,7 +47,8 @@ public class LagreAnmodningsperiodeIMedl implements StegBehandler {
         }
 
         if (erOppdatertA001(prosessinstans)) {
-            // TODO: Oppdater eksisterende periode i MEDL med disse datoene
+            var forrigeAnmodningsPeriode = finnAnmodningsperiodeForForrigeA001(behandling);
+            medlPeriodeService.oppdaterEksisterendePeriode(forrigeAnmodningsPeriode.getMedlPeriodeID(), anmodningsperiode.getFom(), anmodningsperiode.getTom());
         } else {
             medlPeriodeService.opprettPeriodeUnderAvklaring(anmodningsperiode, behandlingID, behandling.erBehandlingAvSed());
         }
@@ -53,5 +56,15 @@ public class LagreAnmodningsperiodeIMedl implements StegBehandler {
 
     private boolean erOppdatertA001(Prosessinstans prosessinstans) {
         return prosessinstans.getBehandling().erAnmodningOmUnntak() && Boolean.TRUE.equals(prosessinstans.getData(ProsessDataKey.ER_OPPDATERT_SED, Boolean.class));
+    }
+
+    private Anmodningsperiode finnAnmodningsperiodeForForrigeA001(Behandling behandling) {
+        var fagsak = behandling.getFagsak();
+        var a001Behandling = fagsak.hentBehandlingerSortertSynkendePåRegistrertDato().stream()
+            .filter(Behandling::erAnmodningOmUnntak)
+            .filter(b -> !b.getId().equals(behandling.getId()))
+            .findFirst()
+            .orElseThrow(() -> new FunksjonellException("Fant ingen tidligere A001 behandling for fagsak %s".format(fagsak.getSaksnummer())));
+        return behandlingsresultatService.hentBehandlingsresultat(a001Behandling.getId()).hentValidertAnmodningsperiode();
     }
 }
