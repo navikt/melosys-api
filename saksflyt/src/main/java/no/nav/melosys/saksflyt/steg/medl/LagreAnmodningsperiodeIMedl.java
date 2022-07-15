@@ -2,6 +2,7 @@ package no.nav.melosys.saksflyt.steg.medl;
 
 import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
@@ -37,10 +38,20 @@ public class LagreAnmodningsperiodeIMedl implements StegBehandler {
         final Behandling behandling = prosessinstans.getBehandling();
         final long behandlingID = behandling.getId();
         Anmodningsperiode anmodningsperiode = behandlingsresultatService.hentBehandlingsresultat(behandlingID).hentValidertAnmodningsperiode();
+
         if (PeriodeRegler.feilIPeriode(anmodningsperiode.getFom(), anmodningsperiode.getTom())) {
             log.info("Lagrer ikke anmodningsperiode i MEDL pga ulogisk periode. BehID={}", behandlingID);
+            return;
+        }
+
+        if (erOppdatertA001(prosessinstans)) {
+            // TODO: Oppdater eksisterende periode i MEDL med disse datoene
         } else {
             medlPeriodeService.opprettPeriodeUnderAvklaring(anmodningsperiode, behandlingID, behandling.erBehandlingAvSed());
         }
+    }
+
+    private boolean erOppdatertA001(Prosessinstans prosessinstans) {
+        return prosessinstans.getBehandling().erAnmodningOmUnntak() && Boolean.TRUE.equals(prosessinstans.getData(ProsessDataKey.ER_OPPDATERT_SED, Boolean.class));
     }
 }
