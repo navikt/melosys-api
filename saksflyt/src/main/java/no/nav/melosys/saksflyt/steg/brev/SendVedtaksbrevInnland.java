@@ -111,6 +111,9 @@ public class SendVedtaksbrevInnland implements StegBehandler {
             Produserbaredokumenter avslagTypeArbeidsgiver = (behandlingsresultatType != Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL)
                 ? AVSLAG_ARBEIDSGIVER : AVSLAG_MANGLENDE_OPPLYSNINGER;
 
+            // TODO: Temp fiks for https://jira.adeo.no/browse/MELOSYS-5243
+            if (avslagTypeArbeidsgiver == AVSLAG_MANGLENDE_OPPLYSNINGER) return;
+
             DoksysBrevbestilling.Builder brevbestillingArbeidsgiver = new DoksysBrevbestilling.Builder()
                 .medProduserbartDokument(avslagTypeArbeidsgiver)
                 .medAvsenderID(saksbehandler)
