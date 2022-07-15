@@ -107,12 +107,12 @@ public class SendVedtaksbrevInnland implements StegBehandler {
             .build();
         brevBestiller.bestill(brevbestilling);
 
-        if (behandling.getFagsak().harAktørMedRolleType(ARBEIDSGIVER)) {
-            Produserbaredokumenter avslagTypeArbeidsgiver = (behandlingsresultatType != Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL)
-                ? AVSLAG_ARBEIDSGIVER : AVSLAG_MANGLENDE_OPPLYSNINGER;
+        if (behandling.getFagsak().harAktørMedRolleType(ARBEIDSGIVER)
+            //Temp fiks for https://jira.adeo.no/browse/MELOSYS-5243
+            && behandlingsresultatType != Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL) {
 
             DoksysBrevbestilling.Builder brevbestillingArbeidsgiver = new DoksysBrevbestilling.Builder()
-                .medProduserbartDokument(avslagTypeArbeidsgiver)
+                .medProduserbartDokument(AVSLAG_ARBEIDSGIVER)
                 .medAvsenderID(saksbehandler)
                 .medBehandling(behandling)
                 .medMottakere(Mottaker.av(ARBEIDSGIVER))
