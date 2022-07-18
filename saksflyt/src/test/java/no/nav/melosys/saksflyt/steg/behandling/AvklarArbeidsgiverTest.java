@@ -15,10 +15,9 @@ import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.repository.AktoerRepository;
 import no.nav.melosys.service.aktoer.AktoerService;
-import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterSystemService;
+import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.persondata.PersondataFasade;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -38,7 +37,7 @@ class AvklarArbeidsgiverTest {
 
     Behandling behandling = new Behandling();
     @Mock
-    AvklarteVirksomheterSystemService avklarteVirksomheterService;
+    AvklarteVirksomheterService avklarteVirksomheterService;
 
     private AvklarArbeidsgiver avklarArbeidsgiver;
     private Prosessinstans prosessinstans;

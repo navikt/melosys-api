@@ -5,7 +5,6 @@ import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.oppgave.OppgaveService;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.OPPRETT_OPPGAVE;
@@ -14,7 +13,7 @@ import static no.nav.melosys.domain.saksflyt.ProsessSteg.OPPRETT_OPPGAVE;
 public class OpprettOppgave implements StegBehandler {
     private final OppgaveService oppgaveService;
 
-    public OpprettOppgave(@Qualifier("system") OppgaveService oppgaveService) {
+    public OpprettOppgave(OppgaveService oppgaveService) {
         this.oppgaveService = oppgaveService;
     }
 

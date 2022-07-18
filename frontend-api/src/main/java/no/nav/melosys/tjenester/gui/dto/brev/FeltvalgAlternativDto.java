@@ -1,7 +1,5 @@
 package no.nav.melosys.tjenester.gui.dto.brev;
 
-import no.nav.melosys.tjenester.gui.FeltvalgAlternativKode;
-
 public class FeltvalgAlternativDto {
 
     private final String kode;
@@ -14,10 +12,10 @@ public class FeltvalgAlternativDto {
         this.visFelt = false;
     }
 
-    public FeltvalgAlternativDto(String kode, String beskrivelse) {
-        this.kode = kode;
-        this.beskrivelse = beskrivelse;
-        this.visFelt = false;
+    public FeltvalgAlternativDto(FeltvalgAlternativKode feltvalgAlternativKode, boolean visFelt) {
+        this.kode = feltvalgAlternativKode.getKode();
+        this.beskrivelse = feltvalgAlternativKode.getBeskrivelse();
+        this.visFelt = visFelt;
     }
 
     public FeltvalgAlternativDto(String kode, String beskrivelse, boolean visFelt) {

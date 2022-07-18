@@ -16,6 +16,7 @@ import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.service.LandvelgerService;
@@ -99,6 +100,9 @@ public class EosVedtakService {
     public void endreVedtaksperiode(Behandling behandling, Endretperiode endretperiode, String fritekst, String fritekstSed) {
         final long behandlingID = behandling.getId();
         var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
+        if(behandling.getType().equals(Behandlingstyper.ENDRET_PERIODE)) {
+            behandlingsresultat.setType(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
+        }
         if (!behandlingsresultat.hentValidertLovvalgsperiode().erArtikkel12()) {
             throw new FunksjonellException("Behandling av forkortet periode gjelder kun art. 12.");
         }

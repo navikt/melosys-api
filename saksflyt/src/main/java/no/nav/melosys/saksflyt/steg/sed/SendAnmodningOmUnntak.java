@@ -11,10 +11,10 @@ import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.arkiv.DokumentReferanse;
+import no.nav.melosys.domain.arkiv.Vedlegg;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.eessi.BucType;
-import no.nav.melosys.domain.arkiv.Vedlegg;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
@@ -26,7 +26,6 @@ import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.TRYGDEMYNDIGHET;
@@ -41,7 +40,7 @@ public class SendAnmodningOmUnntak extends AbstraktSendUtland {
     private static final ZoneId TIME_ZONE_ID = ZoneId.systemDefault();
     private static final int SVARFRIST_MÅNEDER = 2;
 
-    public SendAnmodningOmUnntak(@Qualifier("system") EessiService eessiService,
+    public SendAnmodningOmUnntak(EessiService eessiService,
                                  BrevBestiller brevBestiller,
                                  BehandlingService behandlingService,
                                  BehandlingsresultatService behandlingsresultatService,

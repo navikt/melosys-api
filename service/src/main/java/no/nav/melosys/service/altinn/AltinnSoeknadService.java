@@ -11,6 +11,7 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Fullmektig;
 import no.nav.melosys.domain.Kontaktopplysning;
 import no.nav.melosys.domain.kodeverk.Representerer;
+import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -26,7 +27,6 @@ import no.nav.melosys.service.sak.OpprettSakRequest;
 import no.nav.melosys.soknad_altinn.Kontaktperson;
 import no.nav.melosys.soknad_altinn.MedlemskapArbeidEOSM;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -40,7 +40,7 @@ public class AltinnSoeknadService {
     public AltinnSoeknadService(SoknadMottakConsumer soknadMottakConsumer,
                                 FagsakService fagsakService,
                                 BehandlingsgrunnlagService behandlingsgrunnlagService,
-                                @Qualifier("system") PersondataFasade persondataFasade,
+                                PersondataFasade persondataFasade,
                                 AvklarteVirksomheterService avklarteVirksomheterService) {
         this.soknadMottakConsumer = soknadMottakConsumer;
         this.fagsakService = fagsakService;
@@ -54,6 +54,7 @@ public class AltinnSoeknadService {
 
         OpprettSakRequest opprettSakRequest = new OpprettSakRequest.Builder()
             .medSakstype(Sakstyper.EU_EOS)
+            .medSakstema(Sakstemaer.MEDLEMSKAP_LOVVALG)
             .medAktørID(hentAktørID(søknad))
             .medUtenlandskPersonId(hentUtenlandskPersonId(søknad))
             .medArbeidsgiver(hentArbeidsgiverID(søknad))

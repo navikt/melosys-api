@@ -4,6 +4,7 @@ import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.person.Persondata;
+import no.nav.melosys.domain.person.adresse.Kontaktadresse;
 import no.nav.melosys.domain.person.adresse.PersonAdresse;
 
 import java.util.List;
@@ -49,13 +50,19 @@ public class StorbritanniaAdresseSjekker {
 
     private List<String> findAdresseNårIkkeNorskEllerUkAdresse() {
         return getPersonAdresser()
-            .filter(personAdresse -> personAdresse.strukturertAdresse().getLandkode() != null)
+            .filter(personAdresse -> hentStrukturertAdresse(personAdresse).getLandkode() != null)
             .findFirst()
             .map(personAdresse -> Stream.concat(
                 Stream.of(BOSTED_UTENFOR_NORGE),
-                personAdresse.strukturertAdresse().toList().stream()).toList()
+                hentStrukturertAdresse(personAdresse).toList().stream()).toList()
             )
             .orElse(List.of(UKJENT));
+    }
+
+    private StrukturertAdresse hentStrukturertAdresse(PersonAdresse personAdresse) {
+        return personAdresse instanceof Kontaktadresse kontaktadresse
+            ? kontaktadresse.hentEllerLagStrukturertAdresse()
+            : personAdresse.strukturertAdresse();
     }
 
     private Stream<PersonAdresse> getPersonAdresser() {

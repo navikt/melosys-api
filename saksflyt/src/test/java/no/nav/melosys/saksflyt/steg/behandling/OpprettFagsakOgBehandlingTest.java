@@ -4,8 +4,9 @@ import java.util.Collections;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.kodeverk.Sakstemaer;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
-import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.service.persondata.PersondataFasade;
@@ -19,6 +20,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static no.nav.melosys.domain.saksflyt.ProsessDataKey.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
@@ -49,13 +51,15 @@ class OpprettFagsakOgBehandlingTest {
         String arbeidsgiver = "104568393";
         String representant = "rep";
         String representantKontaktperson = "kontaktperson";
-        prosessinstans.setData(ProsessDataKey.AKTØR_ID, aktørId);
-        prosessinstans.setData(ProsessDataKey.ARBEIDSGIVER, arbeidsgiver);
-        prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, journalpostId);
-        prosessinstans.setData(ProsessDataKey.DOKUMENT_ID, dokumentId);
-        prosessinstans.setData(ProsessDataKey.REPRESENTANT, representant);
-        prosessinstans.setData(ProsessDataKey.REPRESENTANT_KONTAKTPERSON, representantKontaktperson);
-        prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, Behandlingstema.UTSENDT_ARBEIDSTAKER);
+        prosessinstans.setData(AKTØR_ID, aktørId);
+        prosessinstans.setData(ARBEIDSGIVER, arbeidsgiver);
+        prosessinstans.setData(JOURNALPOST_ID, journalpostId);
+        prosessinstans.setData(DOKUMENT_ID, dokumentId);
+        prosessinstans.setData(REPRESENTANT, representant);
+        prosessinstans.setData(REPRESENTANT_KONTAKTPERSON, representantKontaktperson);
+        prosessinstans.setData(BEHANDLINGSTEMA, Behandlingstema.UTSENDT_ARBEIDSTAKER);
+        prosessinstans.setData(SAKSTYPE, Sakstyper.EU_EOS);
+        prosessinstans.setData(SAKSTEMA, Sakstemaer.MEDLEMSKAP_LOVVALG);
 
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer("MELTEST-333");
@@ -65,13 +69,16 @@ class OpprettFagsakOgBehandlingTest {
         opprettFagsakOgBehandling.utfør(prosessinstans);
 
         verify(fagsakService).nyFagsakOgBehandling(opprettSakRequestArgumentCaptor.capture());
-        assertThat(opprettSakRequestArgumentCaptor.getValue().getAktørID()).isEqualTo(aktørId);
-        assertThat(opprettSakRequestArgumentCaptor.getValue().getArbeidsgiver()).isEqualTo(arbeidsgiver);
-        assertThat(opprettSakRequestArgumentCaptor.getValue().getInitierendeJournalpostId()).isEqualTo(journalpostId);
-        assertThat(opprettSakRequestArgumentCaptor.getValue().getInitierendeDokumentId()).isEqualTo(dokumentId);
-        assertThat(opprettSakRequestArgumentCaptor.getValue().getFullmektig().getRepresentantID())
+        OpprettSakRequest opprettSakRequest = opprettSakRequestArgumentCaptor.getValue();
+        assertThat(opprettSakRequest.getAktørID()).isEqualTo(aktørId);
+        assertThat(opprettSakRequest.getArbeidsgiver()).isEqualTo(arbeidsgiver);
+        assertThat(opprettSakRequest.getInitierendeJournalpostId()).isEqualTo(journalpostId);
+        assertThat(opprettSakRequest.getInitierendeDokumentId()).isEqualTo(dokumentId);
+        assertThat(opprettSakRequest.getFullmektig().getRepresentantID())
             .isEqualTo(representant);
-        assertThat(opprettSakRequestArgumentCaptor.getValue().getKontaktopplysninger().get(0).getKontaktNavn())
+        assertThat(opprettSakRequest.getKontaktopplysninger().get(0).getKontaktNavn())
             .isEqualTo(representantKontaktperson);
+        assertThat(opprettSakRequest.getSakstype()).isEqualTo(Sakstyper.EU_EOS);
+        assertThat(opprettSakRequest.getSakstema()).isEqualTo(Sakstemaer.MEDLEMSKAP_LOVVALG);
     }
 }

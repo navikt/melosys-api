@@ -9,6 +9,7 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Fullmektig;
 import no.nav.melosys.domain.Kontaktopplysning;
 import no.nav.melosys.domain.kodeverk.Representerer;
+import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -21,7 +22,6 @@ import no.nav.melosys.service.sak.OpprettSakRequest;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.*;
@@ -35,7 +35,7 @@ public class OpprettFagsakOgBehandling implements StegBehandler {
     private final PersondataFasade persondataFasade;
 
     public OpprettFagsakOgBehandling(FagsakService fagsakService,
-                                     @Qualifier("system") PersondataFasade persondataFasade) {
+                                     PersondataFasade persondataFasade) {
         this.fagsakService = fagsakService;
         this.persondataFasade = persondataFasade;
     }
@@ -58,6 +58,7 @@ public class OpprettFagsakOgBehandling implements StegBehandler {
         Behandlingstyper behandlingstype = prosessinstans.getData(BEHANDLINGSTYPE, Behandlingstyper.class);
         Behandlingstema behandlingstema = prosessinstans.getData(BEHANDLINGSTEMA, Behandlingstema.class);
         Sakstyper sakstype = prosessinstans.getData(SAKSTYPE, Sakstyper.class);
+        Sakstemaer sakstema = prosessinstans.getData(SAKSTEMA, Sakstemaer.class);
 
         OpprettSakRequest opprettSakRequest = new OpprettSakRequest.Builder()
             .medAktørID(aktørID)
@@ -66,6 +67,7 @@ public class OpprettFagsakOgBehandling implements StegBehandler {
             .medFullmektig(representant != null ? new Fullmektig(representant, representantRepresenterer) : null)
             .medKontaktopplysninger(lagKontaktopplysningerForRepresentant(representant, representantKontakperson))
             .medSakstype(sakstype)
+            .medSakstema(sakstema)
             .medBehandlingstema(behandlingstema)
             .medBehandlingstype(behandlingstype)
             .medInitierendeJournalpostId(initierendeJournalpostId)

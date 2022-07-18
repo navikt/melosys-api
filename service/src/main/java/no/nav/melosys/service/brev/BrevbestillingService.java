@@ -206,31 +206,35 @@ public class BrevbestillingService {
     }
 
     @Transactional
-    public List<Produserbaredokumenter> hentMuligeProduserbaredokumenter(long behandlingId) {
+    public List<Produserbaredokumenter> hentMuligeProduserbaredokumenter(long behandlingId, Aktoersroller rolle) {
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingId);
 
         if (behandling.erInaktiv()) {
             return emptyList();
         }
-        if (behandling.getFagsak().getHovedpartRolle() == VIRKSOMHET) {
-            return List.of(GENERELT_FRITEKSTBREV_VIRKSOMHET);
+        switch (rolle) {
+            case BRUKER:
+                List<Produserbaredokumenter> brevmaler = new ArrayList<>();
+                if (behandling.getType() == Behandlingstyper.SOEKNAD) {
+                    brevmaler.add(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD);
+                } else if (behandling.erKlage()) {
+                    brevmaler.add(MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE);
+                }
+                brevmaler.addAll(asList(MANGELBREV_BRUKER, GENERELT_FRITEKSTBREV_BRUKER));
+                return brevmaler;
+            case ARBEIDSGIVER:
+                return List.of(MANGELBREV_ARBEIDSGIVER, GENERELT_FRITEKSTBREV_ARBEIDSGIVER);
+            case VIRKSOMHET:
+                return List.of(GENERELT_FRITEKSTBREV_VIRKSOMHET);
+            default:
+                throw new FunksjonellException("Rollen " + rolle + " kan ikke sende brev gjennom brevmenyen");
         }
-
-        List<Produserbaredokumenter> brevmaler = new ArrayList<>();
-        if (behandling.getType() == Behandlingstyper.SOEKNAD) {
-            brevmaler.add(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD);
-        } else if (behandling.erKlage()) {
-            brevmaler.add(MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE);
-        }
-
-        brevmaler.addAll(asList(MANGELBREV_BRUKER, MANGELBREV_ARBEIDSGIVER, GENERELT_FRITEKSTBREV_BRUKER, GENERELT_FRITEKSTBREV_ARBEIDSGIVER));
-        return brevmaler;
     }
 
     @Transactional
-    public List<BrevAdresse> hentBrevAdresseTilMottakere(Produserbaredokumenter produserbaredokumenter, Aktoersroller aktoersroller, long behandlingId) {
+    public List<BrevAdresse> hentBrevAdresseTilMottakere(Aktoersroller aktoersroller, long behandlingId) {
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingId);
-        var mottakere = brevmottakerService.avklarMottakere(produserbaredokumenter, Mottaker.av(aktoersroller), behandling, false, false);
+        var mottakere = brevmottakerService.avklarMottakere(null, Mottaker.av(aktoersroller), behandling, false, false);
         List<BrevAdresse> brevAdresser = new ArrayList<>();
 
         for (Aktoer mottaker : mottakere) {

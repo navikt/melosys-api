@@ -18,7 +18,6 @@ import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.altinn.AltinnSoeknadService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.persondata.PersondataFasade;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -31,9 +30,9 @@ public class OpprettOgFerdigstillAltinnJournalpost implements StegBehandler {
 
     public OpprettOgFerdigstillAltinnJournalpost(AltinnSoeknadService altinnSoeknadService,
                                                  BehandlingService behandlingService,
-                                                 @Qualifier("system") EregFasade eregFasade,
-                                                 @Qualifier("system") JoarkFasade joarkFasade,
-                                                 @Qualifier("system") PersondataFasade persondataFasade) {
+                                                 EregFasade eregFasade,
+                                                 JoarkFasade joarkFasade,
+                                                 PersondataFasade persondataFasade) {
         this.altinnSoeknadService = altinnSoeknadService;
         this.behandlingService = behandlingService;
         this.eregFasade = eregFasade;

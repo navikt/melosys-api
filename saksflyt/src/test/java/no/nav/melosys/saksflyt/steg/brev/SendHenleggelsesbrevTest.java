@@ -1,10 +1,12 @@
 package no.nav.melosys.saksflyt.steg.brev;
 
+import java.util.Collections;
+
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.BehandlingsresultatBegrunnelse;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.brev.DoksysBrevbestilling;
+import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
@@ -16,12 +18,12 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.BEHANDLINGSRESULTAT_BEGRUNNELSE_FRITEKST;
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -66,12 +68,9 @@ class SendHenleggelsesbrevTest {
 
         sendHenleggelsesbrev.utfør(prosessinstans);
 
-        ArgumentCaptor<DoksysBrevbestilling> brevbestillingCaptor = ArgumentCaptor.forClass(DoksysBrevbestilling.class);
-        verify(brevBestiller).bestill(brevbestillingCaptor.capture());
-        DoksysBrevbestilling brevbestilling = brevbestillingCaptor.getValue();
-
-        assertThat(brevbestilling.getProduserbartdokument()).isEqualTo(Produserbaredokumenter.MELDING_HENLAGT_SAK);
-        assertThat(brevbestilling.getMottakere().iterator().next().getRolle()).isEqualTo(Aktoersroller.BRUKER);
-        assertThat(brevbestilling.getFritekst()).isEqualTo(behandlingsresultat.getBegrunnelseFritekst());
+        verify(brevBestiller).bestill(eq(Produserbaredokumenter.MELDING_HENLAGT_SAK),
+            eq(Collections.singleton(Mottaker.av(Aktoersroller.BRUKER))),
+            eq(behandlingsresultat.getBegrunnelseFritekst()), any(String.class),
+            eq(Henleggelsesgrunner.ANNET.getKode()), eq(behandling));
     }
 }
