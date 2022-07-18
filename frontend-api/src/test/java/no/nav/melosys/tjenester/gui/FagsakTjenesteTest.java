@@ -56,10 +56,7 @@ import static org.mockito.Mockito.*;
 
 class FagsakTjenesteTest extends JsonSchemaTestParent {
     private static final Logger log = LoggerFactory.getLogger(FagsakTjenesteTest.class);
-    private static final String FAGSAKER_SCHEMA = "fagsaker-schema.json";
     private static final String FAGSAKER_OPPRETT_SCHEMA = "fagsaker-opprett-post-schema.json";
-    private static final String SOK_FAGSAKER_SCHEMA = "fagsaker-sok-schema.json";
-    private static final String SOK_FAGSAKER_POST_SCHEMA = "fagsaker-sok-post-schema.json";
     private static final String FAGSAKER_UTPEK_POST_SCHEMA = "fagsaker-utpek-post-schema.json";
     private static final String FAGSAKER_VIDERESEND_POST_SCHEMA = "fagsaker-henleggvideresend-post-schema.json";
     private static final String FAGSAKSER_HENLEGG_POST_SCHEMA = "fagsaker-henlegg-post-schema.json";
@@ -102,14 +99,6 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    void fagsakSchemaValidering() throws JsonProcessingException {
-        FagsakDto fagsakDto = random.nextObject(FagsakDto.class);
-
-        String jsonString = objectMapperMedKodeverkServiceStub().writeValueAsString(fagsakDto);
-        assertThatCode(() -> valider(jsonString, FAGSAKER_SCHEMA, log)).doesNotThrowAnyException();
-    }
-
-    @Test
     void fagsakOpprettSchemaValidering() throws JsonProcessingException {
         OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
 
@@ -123,18 +112,6 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
 
         String jsonString = objectMapperMedKodeverkServiceStub().writeValueAsString(utpekDto);
         assertThatCode(() -> valider(jsonString, FAGSAKER_UTPEK_POST_SCHEMA, log)).doesNotThrowAnyException();
-    }
-
-    @Test
-    void fagsakSøkSchemaValidering() throws IOException {
-        valider(new FagsakSokDto("123", "MEL-123", "111111111"), SOK_FAGSAKER_POST_SCHEMA);
-
-        List<FagsakOppsummeringDto> fagsakOppsummeringDtoList = random.objects(FagsakOppsummeringDto.class, 1).collect(Collectors.toList());
-        List<BehandlingOversiktDto> behandlingOversiktDtoer = random.objects(BehandlingOversiktDto.class, 1).collect(Collectors.toList());
-        behandlingOversiktDtoer.get(0).setLand(new SoeknadslandDto(Collections.singletonList(Landkoder.NO.getKode()), false));
-        fagsakOppsummeringDtoList.get(0).setBehandlingOversikter(behandlingOversiktDtoer);
-
-        assertThatCode(() -> validerArray(fagsakOppsummeringDtoList, SOK_FAGSAKER_SCHEMA, log)).doesNotThrowAnyException();
     }
 
     @Test
