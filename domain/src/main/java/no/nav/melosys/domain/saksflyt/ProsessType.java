@@ -32,11 +32,12 @@ public enum ProsessType implements Kodeverk {
     REGISTRERING_UNNTAK_AVVIS("REGISTRERING_UNNTAK_AVVIS", "Avviser en untaksperiode og avslutter behandling"),
     REGISTRERING_UNNTAK_NY_SAK("REGISTRERING_UNNTAK_NY_SAK", "Registrering av unntak - ny sak"),
     REGISTRERING_UNNTAK_NY_BEHANDLING("REGISTRERING_UNNTAK_NY_BEHANDLING", "Registrering av unntak - ny behandling"),
+    SEND_BREV("SEND_BREV", "Send brev"),
     UTPEKING_AVVIS("UTPEKING_AVVIS", "Avviser utpeking mottatt i en A003"),
     VIDERESEND_SOKNAD("VIDERESEND_SOKNAD", "Videresend søknad");
 
-    private String kode;
-    private String beskrivelse;
+    private final String kode;
+    private final String beskrivelse;
 
     ProsessType(String kode, String beskrivelse) {
         this.kode = kode;

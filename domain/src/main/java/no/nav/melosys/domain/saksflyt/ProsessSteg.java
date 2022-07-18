@@ -8,6 +8,7 @@ public enum ProsessSteg implements Kodeverk {
     AVKLAR_MYNDIGHET("AVKLAR_MYNDIGHET", "Avklaring av utenlandsk trygdemyndighet"),
     AVSLUTT_SAK_OG_BEHANDLING("AVSLUTT_SAK_OG_BEHANDLING", "Avslutt fagsak og aktiv behandling"),
     AVSLUTT_TIDLIGERE_MEDL_PERIODE("AVSLUTT_TIDLIGERE_MEDL_PERIODE", "Avslutter tidligere periode i Medl"),
+    BESTILL_BREV("BESTILL_BREV", "Bestill brev"),
     BESTEM_BEHANDLINGMÅTE_SED("BESTEM_BEHANDLINGMÅTE_SED", "Bestemmer videre behandlingsmåte for en mottatt SED etter registerkontroll"),
     BESTEM_BEHANDLINGSMÅTE_SVAR_ANMODNING_UNNTAK("BESTEM_BEHANDLINGSMÅTE_SVAR_ANMODNING_UNNTAK", "Oppdaterer behandling eller fatter vedtak etter mottak av svar på anmodning om unntak"),
     DISTRIBUER_JOURNALPOST("DISTRIBUER_JOURNALPOST", "Distribuer journalpost"),

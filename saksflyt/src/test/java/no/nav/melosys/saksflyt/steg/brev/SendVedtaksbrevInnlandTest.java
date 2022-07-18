@@ -22,7 +22,6 @@ import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.doksys.DoksysFasade;
-import no.nav.melosys.saksflyt.brev.BrevBestiller;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
@@ -35,6 +34,7 @@ import no.nav.melosys.service.dokument.*;
 import no.nav.melosys.service.dokument.brev.*;
 import no.nav.melosys.service.dokument.brev.bygger.*;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevdataGrunnlagFactory;
+import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.context.ApplicationEventPublisher;
@@ -104,12 +104,11 @@ class SendVedtaksbrevInnlandTest {
         dokService = spy(lagDokumentService(byggerVelger));
         DokumentServiceFasade dokumentServiceFasade = new DokumentServiceFasade(mock(DokumentService.class), dokService, mock(DokgenService.class),
             mock(BehandlingService.class), mock(ApplicationEventPublisher.class));
-        BrevBestiller brevBestiller = new BrevBestiller(dokumentServiceFasade);
 
         BehandlingService behandlingService = mock(BehandlingService.class);
         when(behandlingService.hentBehandlingMedSaksopplysninger(behandling.getId())).thenReturn(behandling);
 
-        return new SendVedtaksbrevInnland(brevBestiller, behandlingService, mockBehandlingsresultatService());
+        return new SendVedtaksbrevInnland(behandlingService, mockBehandlingsresultatService(), mock(ProsessinstansService.class));
     }
 
     private static BehandlingService mockBehandlingService() {
@@ -155,7 +154,7 @@ class SendVedtaksbrevInnlandTest {
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGSID)).thenReturn(behandlingsresultat);
         Lovvalgsperiode periode2 = lagLovvalgsperiode(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1, LocalDate.now().plusDays(30), Landkoder.DK, false);
         Behandlingsresultat behandlingsresultatMedFlerePerioder = lagBehandlingsresultat(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, new HashSet<>(Arrays.asList(periode, periode2)), null);
-        assertThat(behandlingsresultatMedFlerePerioder.getLovvalgsperioder().size()).isGreaterThan(1);
+        assertThat(behandlingsresultatMedFlerePerioder.getLovvalgsperioder()).hasSizeGreaterThan(1);
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGSID_MED_FLERE_PERIODER)).thenReturn(behandlingsresultatMedFlerePerioder);
 
         Behandlingsresultat behandlingsresultatUtenPerioder = lagBehandlingsresultatUtenPerioder(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);

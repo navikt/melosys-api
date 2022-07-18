@@ -13,6 +13,7 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.arkiv.Distribusjonstype;
 import no.nav.melosys.domain.arkiv.DokumentReferanse;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
+import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.eessi.melding.UtpekingAvvis;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
@@ -494,6 +495,16 @@ public class ProsessinstansService {
             .build();
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL);
         prosessinstans.setData(ProsessDataKey.GSAK_SAK_ID, arkivsakID);
+
+        lagre(prosessinstans);
+    }
+
+    public void opprettProsessinstansSendBrev(Behandling behandling, DoksysBrevbestilling brevbestilling) {
+        Prosessinstans prosessinstans = new ProsessinstansBuilder()
+            .medType(ProsessType.SEND_BREV)
+            .medBehandling(behandling)
+            .build();
+        prosessinstans.setData(BREVBESTILLING, brevbestilling);
 
         lagre(prosessinstans);
     }
