@@ -24,10 +24,7 @@ import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresse;
 import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresseNorge;
 import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresseUtland;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.Saksstatuser;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.exception.FunksjonellException;
@@ -385,6 +382,7 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
 
     private static FagsakOppsummeringDto lagFagsakOppsummeringDto(Behandling behandling) {
         FagsakOppsummeringDto result = new FagsakOppsummeringDto();
+        result.setSakstema(Sakstemaer.MEDLEMSKAP_LOVVALG);
         result.setSakstype(Sakstyper.EU_EOS);
         result.setSaksstatus(Saksstatuser.OPPRETTET);
         result.setSaksnummer("MEL-1");
@@ -410,6 +408,7 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
         resultat.setGsakSaksnummer(fagsak.getGsakSaksnummer());
         resultat.setRegistrertDato(fagsak.getRegistrertDato());
         resultat.setSaksnummer(fagsak.getSaksnummer());
+        resultat.setSakstema(fagsak.getTema());
         resultat.setSakstype(fagsak.getType());
         resultat.setSaksstatus(fagsak.getStatus());
         resultat.setHovedpartRolle(fagsak.getHovedpartRolle());

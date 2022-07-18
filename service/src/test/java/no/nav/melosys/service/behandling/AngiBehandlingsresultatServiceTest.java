@@ -4,6 +4,7 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
+import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
@@ -44,7 +45,7 @@ class AngiBehandlingsresultatServiceTest {
 
     @Test
     void oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling_gyldigScenario_kallerKorrekt() {
-        var behandlingsresultat = lagBehandlingsresultat(Sakstyper.FTRL, Behandlingstyper.FØRSTEGANG, Behandlingstema.YRKESAKTIV);
+        var behandlingsresultat = lagBehandlingsresultat(Sakstemaer.MEDLEMSKAP_LOVVALG, Sakstyper.FTRL, Behandlingstyper.FØRSTEGANG, Behandlingstema.YRKESAKTIV);
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
 
 
@@ -59,7 +60,7 @@ class AngiBehandlingsresultatServiceTest {
 
     @Test
     void oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling_ugyldigScenario_kasterFeilmelding() {
-        var behandlingsresultat = lagBehandlingsresultat(Sakstyper.EU_EOS, Behandlingstyper.HENVENDELSE, Behandlingstema.ARBEID_ETT_LAND_ØVRIG);
+        var behandlingsresultat = lagBehandlingsresultat(Sakstemaer.UNNTAK, Sakstyper.EU_EOS, Behandlingstyper.HENVENDELSE, Behandlingstema.ARBEID_ETT_LAND_ØVRIG);
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
 
 
@@ -69,8 +70,9 @@ class AngiBehandlingsresultatServiceTest {
             .withMessageContaining("Denne saken kan ikke sette behandlingsresultattype til MEDLEM_I_FOLKETRYGDEN");
     }
 
-    private Behandlingsresultat lagBehandlingsresultat(Sakstyper sakstype, Behandlingstyper behandlingstype, Behandlingstema behandlingstema) {
+    private Behandlingsresultat lagBehandlingsresultat(Sakstemaer sakstema, Sakstyper sakstype, Behandlingstyper behandlingstype, Behandlingstema behandlingstema) {
         var fagsak = new Fagsak();
+        fagsak.setTema(sakstema);
         fagsak.setType(sakstype);
         var behandling = new Behandling();
         behandling.setFagsak(fagsak);
