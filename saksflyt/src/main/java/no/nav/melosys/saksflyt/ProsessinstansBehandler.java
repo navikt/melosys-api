@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.api;
+package no.nav.melosys.saksflyt;
 
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 
