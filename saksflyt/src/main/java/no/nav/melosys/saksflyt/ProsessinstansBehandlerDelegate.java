@@ -15,21 +15,23 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @Component
-public class BehandleProsessinstansDelegate {
+public class ProsessinstansBehandlerDelegate {
 
-    private static final Logger log = LoggerFactory.getLogger(BehandleProsessinstansDelegate.class);
+    private static final Logger log = LoggerFactory.getLogger(ProsessinstansBehandlerDelegate.class);
 
     private final ProsessinstansBehandler prosessinstansBehandler;
     private final ProsessinstansRepository prosessinstansRepository;
 
-    public BehandleProsessinstansDelegate(ProsessinstansBehandler prosessinstansBehandler, ProsessinstansRepository prosessinstansRepository) {
+    public ProsessinstansBehandlerDelegate(ProsessinstansBehandler prosessinstansBehandler, ProsessinstansRepository prosessinstansRepository) {
         this.prosessinstansBehandler = prosessinstansBehandler;
         this.prosessinstansRepository = prosessinstansRepository;
     }
 
     public void behandleProsessinstans(Prosessinstans prosessinstans) {
         oppdaterStatusOmSkalPåVent(prosessinstans);
-        behandleProsessinstansHvisKlar(prosessinstans);
+        if (!prosessinstans.erPåVent()) {
+            prosessinstansBehandler.behandleProsessinstans(prosessinstans);
+        }
     }
 
     void oppdaterStatusOmSkalPåVent(Prosessinstans prosessinstans) {
@@ -38,12 +40,6 @@ public class BehandleProsessinstansDelegate {
             prosessinstans.setEndretDato(LocalDateTime.now());
             prosessinstansRepository.save(prosessinstans);
             log.info("Prosessinstans {} satt på vent", prosessinstans.getId());
-        }
-    }
-
-    void behandleProsessinstansHvisKlar(Prosessinstans prosessinstans) {
-        if (!prosessinstans.erPåVent()) {
-            prosessinstansBehandler.behandleProsessinstans(prosessinstans);
         }
     }
 

@@ -7,7 +7,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 @EnableAsync
 @Configuration
-public class SaksflytThreadPoolConfig {
+public class ThreadPoolConfig {
 
     @Bean(name = "saksflytThreadPoolTaskExecutor")
     public ThreadPoolTaskExecutor saksflytThreadPoolTaskExecutor() {

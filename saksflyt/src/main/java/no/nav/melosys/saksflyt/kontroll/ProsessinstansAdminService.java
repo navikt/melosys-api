@@ -12,7 +12,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.ProsessinstansRepository;
-import no.nav.melosys.saksflyt.BehandleProsessinstansDelegate;
+import no.nav.melosys.saksflyt.ProsessinstansBehandlerDelegate;
 import no.nav.melosys.saksflyt.kontroll.dto.HentProsessinstansDto;
 import no.nav.melosys.saksflyt.prosessflyt.ProsessflytDefinisjon;
 import org.springframework.stereotype.Service;
@@ -20,11 +20,11 @@ import org.springframework.stereotype.Service;
 @Service
 public class ProsessinstansAdminService {
 
-    private final BehandleProsessinstansDelegate behandleProsessinstansDelegate;
+    private final ProsessinstansBehandlerDelegate prosessinstansBehandlerDelegate;
     private final ProsessinstansRepository prosessinstansRepository;
 
-    public ProsessinstansAdminService(BehandleProsessinstansDelegate behandleProsessinstansDelegate, ProsessinstansRepository prosessinstansRepository) {
-        this.behandleProsessinstansDelegate = behandleProsessinstansDelegate;
+    public ProsessinstansAdminService(ProsessinstansBehandlerDelegate prosessinstansBehandlerDelegate, ProsessinstansRepository prosessinstansRepository) {
+        this.prosessinstansBehandlerDelegate = prosessinstansBehandlerDelegate;
         this.prosessinstansRepository = prosessinstansRepository;
     }
 
@@ -39,6 +39,7 @@ public class ProsessinstansAdminService {
         Collection<Prosessinstans> prosessinstanser = prosessinstansRepository.findAllByStatus(ProsessStatus.FEILET);
 
         setStatusRestartet(prosessinstanser);
+        behandle(prosessinstanser);
 
         return prosessinstanser.stream().map(this::mapTilHentProsessinstansDto).toList();
     }
@@ -53,6 +54,7 @@ public class ProsessinstansAdminService {
         }
 
         setStatusRestartet(prosessinstanser);
+        behandle(prosessinstanser);
     }
 
     public ProsessSteg hoppOverStegProsessinstans(UUID uuid) {
@@ -104,11 +106,12 @@ public class ProsessinstansAdminService {
         prosessinstanser.forEach(prosessinstans -> prosessinstans.setStatus(ProsessStatus.RESTARTET));
         LocalDateTime nå = LocalDateTime.now();
         prosessinstanser.forEach(prosessinstans -> prosessinstans.setEndretDato(nå));
+        prosessinstansRepository.saveAll(prosessinstanser);
+    }
 
-        prosessinstansRepository
-            .saveAll(prosessinstanser)
-            .stream()
+    private void behandle(Collection<Prosessinstans> prosessinstanser) {
+        prosessinstanser.stream()
             .sorted(Comparator.comparing(Prosessinstans::getRegistrertDato))
-            .forEach(behandleProsessinstansDelegate::behandleProsessinstans);
+            .forEach(prosessinstansBehandlerDelegate::behandleProsessinstans);
     }
 }

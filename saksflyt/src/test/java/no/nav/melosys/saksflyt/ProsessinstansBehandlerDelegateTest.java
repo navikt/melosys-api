@@ -18,20 +18,20 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class BehandleProsessinstansDelegateTest {
+class ProsessinstansBehandlerDelegateTest {
 
     @Mock
     private ProsessinstansRepository prosessinstansRepository;
     @Mock
     private ProsessinstansBehandler prosessinstansBehandler;
 
-    private BehandleProsessinstansDelegate behandleProsessinstansDelegate;
+    private ProsessinstansBehandlerDelegate prosessinstansBehandlerDelegate;
 
     private Prosessinstans prosessinstans;
 
     @BeforeEach
     void setup() {
-        behandleProsessinstansDelegate = new BehandleProsessinstansDelegate(prosessinstansBehandler, prosessinstansRepository);
+        prosessinstansBehandlerDelegate = new ProsessinstansBehandlerDelegate(prosessinstansBehandler, prosessinstansRepository);
         prosessinstans = new Prosessinstans();
         prosessinstans.setId(UUID.randomUUID());
     }
@@ -39,7 +39,7 @@ class BehandleProsessinstansDelegateTest {
     @Test
     void oppdaterStatusOmSkalPåVent_harIkkeLås_settesIkkePåVent() {
         prosessinstans.setStatus(ProsessStatus.KLAR);
-        behandleProsessinstansDelegate.oppdaterStatusOmSkalPåVent(prosessinstans);
+        prosessinstansBehandlerDelegate.oppdaterStatusOmSkalPåVent(prosessinstans);
         assertThat(prosessinstans.getStatus()).isEqualTo(ProsessStatus.KLAR);
         verifyNoInteractions(prosessinstansRepository, prosessinstansBehandler);
     }
@@ -54,7 +54,7 @@ class BehandleProsessinstansDelegateTest {
         when(prosessinstansRepository.findAllByIdNotAndStatusNotInAndLåsReferanseStartingWith(eq(prosessinstans.getId()), any(), any()))
             .thenReturn(Set.of(new ProsessinstansInfo(eksisterendeProsessinstans)));
 
-        behandleProsessinstansDelegate.oppdaterStatusOmSkalPåVent(prosessinstans);
+        prosessinstansBehandlerDelegate.oppdaterStatusOmSkalPåVent(prosessinstans);
         assertThat(prosessinstans.getStatus()).isEqualTo(ProsessStatus.KLAR);
     }
 
@@ -68,7 +68,7 @@ class BehandleProsessinstansDelegateTest {
         when(prosessinstansRepository.findAllByIdNotAndStatusNotInAndLåsReferanseStartingWith(eq(prosessinstans.getId()), any(), any()))
             .thenReturn(Set.of(new ProsessinstansInfo(eksisterendeProsessinstans)));
 
-        behandleProsessinstansDelegate.oppdaterStatusOmSkalPåVent(prosessinstans);
+        prosessinstansBehandlerDelegate.oppdaterStatusOmSkalPåVent(prosessinstans);
         assertThat(prosessinstans.getStatus()).isEqualTo(ProsessStatus.PÅ_VENT);
         verify(prosessinstansRepository).save(prosessinstans);
     }
@@ -76,14 +76,18 @@ class BehandleProsessinstansDelegateTest {
     @Test
     void behandleOpprettetProsessinstans_statusErKlar_behandlesVidere() {
         prosessinstans.setStatus(ProsessStatus.KLAR);
-        behandleProsessinstansDelegate.behandleProsessinstansHvisKlar(prosessinstans);
+        if (!prosessinstans.erPåVent()) {
+            prosessinstansBehandlerDelegate.behandleProsessinstans(prosessinstans);
+        }
         verify(prosessinstansBehandler).behandleProsessinstans(prosessinstans);
     }
 
     @Test
     void behandleOpprettetProsessinstans_statusErPåVent_behandlesIkke() {
         prosessinstans.setStatus(ProsessStatus.PÅ_VENT);
-        behandleProsessinstansDelegate.behandleProsessinstansHvisKlar(prosessinstans);
+        if (!prosessinstans.erPåVent()) {
+            prosessinstansBehandlerDelegate.behandleProsessinstans(prosessinstans);
+        }
         verifyNoInteractions(prosessinstansBehandler);
     }
 
