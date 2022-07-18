@@ -8,7 +8,7 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.saksflyt.*;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.repository.ProsessinstansRepository;
-import no.nav.melosys.saksflyt.impl.BehandleProsessinstansDelegate;
+import no.nav.melosys.saksflyt.BehandleProsessinstansDelegate;
 import no.nav.melosys.saksflyt.kontroll.dto.HentProsessinstansDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

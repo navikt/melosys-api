@@ -12,7 +12,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.ProsessinstansRepository;
-import no.nav.melosys.saksflyt.impl.BehandleProsessinstansDelegate;
+import no.nav.melosys.saksflyt.BehandleProsessinstansDelegate;
 import no.nav.melosys.saksflyt.kontroll.dto.HentProsessinstansDto;
 import no.nav.melosys.saksflyt.prosessflyt.ProsessflytDefinisjon;
 import org.springframework.stereotype.Service;

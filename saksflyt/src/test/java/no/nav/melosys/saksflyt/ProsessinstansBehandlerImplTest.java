@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.impl;
+package no.nav.melosys.saksflyt;
 
 import java.util.Collections;
 import java.util.UUID;
@@ -6,7 +6,6 @@ import java.util.UUID;
 import no.nav.melosys.domain.saksflyt.*;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.repository.ProsessinstansRepository;
-import no.nav.melosys.saksflyt.ProsessinstansBehandler;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

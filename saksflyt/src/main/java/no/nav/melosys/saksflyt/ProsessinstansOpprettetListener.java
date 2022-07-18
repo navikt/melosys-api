@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.impl;
+package no.nav.melosys.saksflyt;
 
 import no.nav.melosys.service.saksflyt.ProsessinstansOpprettetEvent;
 import org.springframework.stereotype.Component;

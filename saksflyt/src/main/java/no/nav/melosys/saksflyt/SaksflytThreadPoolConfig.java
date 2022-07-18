@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.impl;
+package no.nav.melosys.saksflyt;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.impl;
+package no.nav.melosys.saksflyt;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -9,7 +9,6 @@ import no.nav.melosys.domain.saksflyt.ProsessStatus;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.repository.ProsessinstansRepository;
-import no.nav.melosys.saksflyt.ProsessinstansBehandler;
 import no.nav.melosys.saksflyt.prosessflyt.ProsessFlyt;
 import no.nav.melosys.saksflyt.prosessflyt.ProsessflytDefinisjon;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
