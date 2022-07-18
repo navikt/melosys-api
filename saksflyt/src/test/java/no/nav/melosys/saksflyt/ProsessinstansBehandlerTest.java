@@ -20,7 +20,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class ProsessinstansBehandlerImplTest {
+class ProsessinstansBehandlerTest {
 
     @Mock
     private ProsessinstansRepository prosessinstansRepository;
@@ -36,7 +36,7 @@ class ProsessinstansBehandlerImplTest {
     @BeforeEach
     public void setup() {
         when(stegbehandler.inngangsSteg()).thenReturn(ProsessSteg.SED_MOTTAK_RUTING);
-        prosessinstansBehandler = new ProsessinstansBehandlerImpl(Collections.singleton(stegbehandler), prosessinstansRepository, applicationEventPublisher);
+        prosessinstansBehandler = new ProsessinstansBehandler(Collections.singleton(stegbehandler), prosessinstansRepository, applicationEventPublisher);
 
         when(prosessinstans.getId()).thenReturn(UUID.randomUUID());
         prosessinstans.setType(ProsessType.MOTTAK_SED);
