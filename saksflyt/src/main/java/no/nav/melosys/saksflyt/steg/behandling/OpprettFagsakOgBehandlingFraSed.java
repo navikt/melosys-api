@@ -3,6 +3,7 @@ package no.nav.melosys.saksflyt.steg.behandling;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
+import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -37,6 +38,7 @@ public class OpprettFagsakOgBehandlingFraSed implements StegBehandler {
     public void utfør(Prosessinstans prosessinstans) {
         MelosysEessiMelding melosysEessiMelding = prosessinstans.getData(EESSI_MELDING, MelosysEessiMelding.class);
 
+        Sakstemaer sakstema = prosessinstans.getData(SAKSTEMA, Sakstemaer.class);
         Behandlingstema behandlingstema = prosessinstans.getData(BEHANDLINGSTEMA, Behandlingstema.class);
 
         OpprettSakRequest opprettSakRequest = new OpprettSakRequest.Builder()
@@ -46,6 +48,7 @@ public class OpprettFagsakOgBehandlingFraSed implements StegBehandler {
             .medInitierendeJournalpostId(melosysEessiMelding.getJournalpostId())
             .medInitierendeDokumentId(melosysEessiMelding.getDokumentId())
             .medSakstype(Sakstyper.EU_EOS)
+            .medSakstema(sakstema)
             .build();
 
         Fagsak fagsak = fagsakService.nyFagsakOgBehandling(opprettSakRequest);

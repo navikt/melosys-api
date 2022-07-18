@@ -10,6 +10,7 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Kontaktopplysning;
 import no.nav.melosys.domain.kodeverk.Representerer;
+import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
@@ -75,6 +76,7 @@ class AltinnSoeknadServiceTest {
 
         OpprettSakRequest req = captor.getValue();
         assertThat(req.getSakstype()).isEqualTo(Sakstyper.EU_EOS);
+        assertThat(req.getSakstema()).isEqualTo(Sakstemaer.MEDLEMSKAP_LOVVALG);
         assertThat(req.getBehandlingstema()).isEqualTo(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         assertThat(req.getBehandlingstype()).isEqualTo(Behandlingstyper.SOEKNAD);
         assertThat(req.getArbeidsgiver()).isEqualTo(søknad.getInnhold().getArbeidsgiver().getVirksomhetsnummer());

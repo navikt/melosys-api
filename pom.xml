@@ -522,7 +522,6 @@
             <dependency>
                 <groupId>no.nav.tjenestespesifikasjoner</groupId>
                 <artifactId>sakogbehandling-tjenestespesifikasjon</artifactId>
-                <!--<artifactId>nav-fim-sakogbehandling-v1-tjenestespesifikasjon</artifactId>-->
                 <version>${nav.tjenestespesifikasjoner.version}</version>
             </dependency>
             <!--MEDL2 -->

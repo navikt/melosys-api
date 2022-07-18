@@ -14,6 +14,7 @@ import no.nav.melosys.domain.arkiv.BrukerIdType;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
+import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
@@ -75,7 +76,7 @@ class JournalfoeringServiceTest {
 
     @BeforeEach
     public void setup() {
-        unleash.enableAll();
+        unleash.enable("melosys.api.journalfoering.alltid.opprett.ny.behandling", "melosys.folketrygden.mvp");
         journalpost = new Journalpost("123");
         journalpost.setHoveddokument(new ArkivDokument());
 
@@ -147,7 +148,10 @@ class JournalfoeringServiceTest {
 
         journalfoeringService.journalførOgOpprettSak(opprettDto);
 
-        verify(prosessinstansService).lagre(any(Prosessinstans.class));
+        verify(prosessinstansService).lagre(prosessinstansArgumentCaptor.capture());
+        var lagretProsessinstans = prosessinstansArgumentCaptor.getValue();
+        assertThat(lagretProsessinstans.getData(ProsessDataKey.SAKSTYPE, Sakstyper.class)).isEqualTo(Sakstyper.EU_EOS);
+        assertThat(lagretProsessinstans.getData(ProsessDataKey.SAKSTEMA, Sakstemaer.class)).isEqualTo(Sakstemaer.MEDLEMSKAP_LOVVALG);
     }
 
     @Test
@@ -162,7 +166,10 @@ class JournalfoeringServiceTest {
 
         journalfoeringService.journalførOgOpprettSak(opprettDto);
 
-        verify(prosessinstansService).lagre(any(Prosessinstans.class));
+        verify(prosessinstansService).lagre(prosessinstansArgumentCaptor.capture());
+        var lagretProsessinstans = prosessinstansArgumentCaptor.getValue();
+        assertThat(lagretProsessinstans.getData(ProsessDataKey.SAKSTYPE, Sakstyper.class)).isEqualTo(Sakstyper.EU_EOS);
+        assertThat(lagretProsessinstans.getData(ProsessDataKey.SAKSTEMA, Sakstemaer.class)).isEqualTo(Sakstemaer.MEDLEMSKAP_LOVVALG);
     }
 
     @Test
