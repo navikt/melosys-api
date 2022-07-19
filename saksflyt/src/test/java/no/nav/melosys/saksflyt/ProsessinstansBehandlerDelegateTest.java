@@ -73,24 +73,6 @@ class ProsessinstansBehandlerDelegateTest {
         verify(prosessinstansRepository).save(prosessinstans);
     }
 
-    @Test
-    void behandleOpprettetProsessinstans_statusErKlar_behandlesVidere() {
-        prosessinstans.setStatus(ProsessStatus.KLAR);
-        if (!prosessinstans.erPåVent()) {
-            prosessinstansBehandlerDelegate.behandleProsessinstans(prosessinstans);
-        }
-        verify(prosessinstansBehandler).behandleProsessinstans(prosessinstans);
-    }
-
-    @Test
-    void behandleOpprettetProsessinstans_statusErPåVent_behandlesIkke() {
-        prosessinstans.setStatus(ProsessStatus.PÅ_VENT);
-        if (!prosessinstans.erPåVent()) {
-            prosessinstansBehandlerDelegate.behandleProsessinstans(prosessinstans);
-        }
-        verifyNoInteractions(prosessinstansBehandler);
-    }
-
     private Prosessinstans prosessinstans(String låsReferanse) {
         var prosessinstans = new Prosessinstans();
         prosessinstans.setId(UUID.randomUUID());
