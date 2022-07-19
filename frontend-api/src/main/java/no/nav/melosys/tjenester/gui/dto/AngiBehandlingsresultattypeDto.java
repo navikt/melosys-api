@@ -1,3 +1,5 @@
 package no.nav.melosys.tjenester.gui.dto;
 
-public record AngiBehandlingsresultattypeDto(String type) {}
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
+
+public record AngiBehandlingsresultattypeDto(Behandlingsresultattyper type) {}

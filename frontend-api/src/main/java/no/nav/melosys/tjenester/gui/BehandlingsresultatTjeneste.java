@@ -3,7 +3,6 @@ package no.nav.melosys.tjenester.gui;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.service.behandling.AngiBehandlingsresultatService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
@@ -67,8 +66,7 @@ public class BehandlingsresultatTjeneste {
             @RequestBody AngiBehandlingsresultattypeDto angiBehandlingsresultattypeDto) {
         aksesskontroll.autoriserSkriv(behandlingID);
 
-        var behandlingsresultattype = Behandlingsresultattyper.valueOf(angiBehandlingsresultattypeDto.type());
-        angiBehandlingsresultatService.oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling(behandlingID, behandlingsresultattype);
+        angiBehandlingsresultatService.oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling(behandlingID, angiBehandlingsresultattypeDto.type());
 
         return ResponseEntity.noContent().build();
     }

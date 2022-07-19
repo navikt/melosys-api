@@ -9,6 +9,8 @@ import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.sak.FagsakService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +22,8 @@ import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.NY_VU
 
 @Service
 public class AngiBehandlingsresultatService {
+
+    private static final Logger log = LoggerFactory.getLogger(AngiBehandlingsresultatService.class);
 
     private final BehandlingsresultatService behandlingsresultatService;
     private final FagsakService fagsakService;
@@ -37,6 +41,7 @@ public class AngiBehandlingsresultatService {
 
         validerBehandlingsresultattype(behandlingsresultattype, behandlingsresultat.getBehandling(), fagsak);
 
+        log.info("Avslutter sak {} og setter behandlingsresultattype {} på behandling {}", fagsak.getSaksnummer(), behandlingsresultattype, behandlingID);
         behandlingsresultat.setType(behandlingsresultattype);
         behandlingsresultatService.lagre(behandlingsresultat);
         fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.LOVVALG_AVKLART);
@@ -45,8 +50,8 @@ public class AngiBehandlingsresultatService {
     private void validerBehandlingsresultattype(Behandlingsresultattyper behandlingsresultattype, Behandling behandling, Fagsak fagsak) {
         var sakstype = fagsak.getType();
         var sakstema = fagsak.getTema();
-        var behandlingstype = behandling.getType();
         var behandlingstema = behandling.getTema();
+        var behandlingstype = behandling.getType();
 
         if (sakstema != Sakstemaer.MEDLEMSKAP_LOVVALG) {
             throw new FunksjonellException(String.format("Kan ikke endre behandlingsresultattype på sak %s siden den har sakstema %s", fagsak.getSaksnummer(), sakstema));
@@ -54,25 +59,29 @@ public class AngiBehandlingsresultatService {
 
         if (behandlingsresultattype == MEDLEM_I_FOLKETRYGDEN &&
             sakstype == FTRL &&
-            Set.of(FØRSTEGANG, NY_VURDERING).contains(behandlingstype) &&
-            Set.of(YRKESAKTIV, IKKE_YRKESAKTIV, PENSJONIST).contains(behandlingstema)) {
+            Set.of(YRKESAKTIV, IKKE_YRKESAKTIV, PENSJONIST).contains(behandlingstema) &&
+            Set.of(FØRSTEGANG, NY_VURDERING).contains(behandlingstype)
+        ) {
             return;
         }
         if (behandlingsresultattype == UNNTATT_MEDLEMSKAP &&
             sakstype == FTRL &&
-            Set.of(FØRSTEGANG, NY_VURDERING).contains(behandlingstype) &&
-            behandlingstema == UNNTAK_MEDLEMSKAP) {
+            behandlingstema == UNNTAK_MEDLEMSKAP &&
+            Set.of(FØRSTEGANG, NY_VURDERING).contains(behandlingstype)
+        ) {
             return;
         }
         if (behandlingsresultattype == FASTSATT_LOVVALGSLAND &&
             Set.of(EU_EOS, TRYGDEAVTALE).contains(sakstype) &&
-            Set.of(FØRSTEGANG, NY_VURDERING).contains(behandlingstype) &&
-            Set.of(YRKESAKTIV, IKKE_YRKESAKTIV, PENSJONIST).contains(behandlingstema)) {
+            Set.of(YRKESAKTIV, IKKE_YRKESAKTIV, PENSJONIST).contains(behandlingstema) &&
+            Set.of(FØRSTEGANG, NY_VURDERING).contains(behandlingstype)
+        ) {
             return;
         }
         if (behandlingsresultattype == AVSLAG_SØKNAD &&
-            Set.of(FØRSTEGANG, NY_VURDERING).contains(behandlingstype) &&
-            Set.of(ARBEID_ETT_LAND_ØVRIG, YRKESAKTIV, IKKE_YRKESAKTIV, PENSJONIST, UNNTAK_MEDLEMSKAP).contains(behandlingstema)) {
+            Set.of(ARBEID_ETT_LAND_ØVRIG, YRKESAKTIV, IKKE_YRKESAKTIV, PENSJONIST, UNNTAK_MEDLEMSKAP).contains(behandlingstema) &&
+            Set.of(FØRSTEGANG, NY_VURDERING).contains(behandlingstype)
+        ) {
             return;
         }
 
