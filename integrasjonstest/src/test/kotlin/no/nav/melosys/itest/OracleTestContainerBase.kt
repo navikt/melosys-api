@@ -10,7 +10,7 @@ import org.testcontainers.junit.jupiter.Testcontainers
 open class OracleTestContainerBase {
     companion object {
         @Container
-        var DB = OracleContainer()
+        var DB = OracleContainer("ghcr.io/navikt/melosys-legacy-avhengigheter/oracle-xe:18.4.0-slim")
 
         @DynamicPropertySource
         @JvmStatic
