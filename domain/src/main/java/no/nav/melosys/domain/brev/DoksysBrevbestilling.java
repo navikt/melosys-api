@@ -2,6 +2,7 @@ package no.nav.melosys.domain.brev;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import no.nav.melosys.domain.Behandling;
@@ -11,7 +12,7 @@ import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 @JsonTypeInfo(use = JsonTypeInfo.Id.DEDUCTION, defaultImpl = DoksysBrevbestilling.class)
 public class DoksysBrevbestilling extends Brevbestilling {
     private Aktoersroller mottakerRolle;
-    private Collection<Mottaker> mottakere; //NOTE Flytt opp til Brevbestilling
+    private Collection<Mottaker> mottakere;
     private String begrunnelseKode;
     private String fritekst;
     private String ytterligereInformasjon;
@@ -57,6 +58,14 @@ public class DoksysBrevbestilling extends Brevbestilling {
         return ytterligereInformasjon;
     }
 
+    public void leggTilMottaker(Mottaker mottaker) {
+        if (mottakere == null) {
+            mottakere = List.of(mottaker);
+        }
+        else {
+            mottakere.add(mottaker);
+        }
+    }
     public static class Builder {
         private Produserbaredokumenter produserbartdokument;
         private String avsenderID;

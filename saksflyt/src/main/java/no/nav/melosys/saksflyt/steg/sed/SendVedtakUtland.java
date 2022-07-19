@@ -91,11 +91,12 @@ public class SendVedtakUtland extends AbstraktSendUtland {
             prosessinstans.setData(ProsessDataKey.DISTRIBUERBAR_JOURNALPOST_ID, journalpostID);
             prosessinstans.setData(ProsessDataKey.DISTRIBUER_MOTTAKER_LAND, utpektLand);
         } else {
-            DoksysBrevbestilling.Builder brevbestilling = new DoksysBrevbestilling.Builder()
+            DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder()
                 .medProduserbartDokument(ATTEST_A1)
                 .medAvsenderID(hentSaksbehandler(prosessinstans))
-                .medBegrunnelseKode(hentBegrunnelsekodeTilForkortetPeriode(prosessinstans));
-            prosessinstansService.opprettProsessinstansSendBrev(behandling, brevbestilling, List.of(Mottaker.av(TRYGDEMYNDIGHET)));
+                .medBegrunnelseKode(hentBegrunnelsekodeTilForkortetPeriode(prosessinstans))
+                .build();
+            prosessinstansService.opprettProsessinstansSendBrev(behandling, brevbestilling, Mottaker.av(TRYGDEMYNDIGHET));
         }
     }
 

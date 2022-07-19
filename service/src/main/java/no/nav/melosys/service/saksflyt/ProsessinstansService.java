@@ -235,7 +235,7 @@ public class ProsessinstansService {
         prosessinstans.setType(ProsessType.OPPRETT_NY_SAK_EOS);
         prosessinstans.setData(ProsessDataKey.SAKSTYPE, opprettSakDto.getSakstype());
         prosessinstans.setData(SAKSTEMA,
-                               SakstypeSakstemaKobling.sakstema(Sakstyper.EU_EOS, opprettSakDto.getBehandlingstema()));
+            SakstypeSakstemaKobling.sakstema(Sakstyper.EU_EOS, opprettSakDto.getBehandlingstema()));
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, behandlingstype);
         prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, journalpostID);
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, opprettSakDto.getBehandlingstema());
@@ -254,7 +254,7 @@ public class ProsessinstansService {
         prosessinstans.setType(ProsessType.OPPRETT_NY_SAK_FTRL_TRYGDEAVTALE);
         prosessinstans.setData(ProsessDataKey.SAKSTYPE, opprettSakDto.getSakstype());
         prosessinstans.setData(SAKSTEMA, SakstypeSakstemaKobling.sakstema(opprettSakDto.getSakstype(),
-                                                                          opprettSakDto.getBehandlingstema()));
+            opprettSakDto.getBehandlingstema()));
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.SOEKNAD);
         prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, journalpostID);
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, opprettSakDto.getBehandlingstema());
@@ -501,15 +501,21 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
-    public void opprettProsessinstansSendBrev(Behandling behandling, DoksysBrevbestilling.Builder brevbestilling, List<Mottaker> mottakere) {
+    public void opprettProsessinstansSendBrev(Behandling behandling, DoksysBrevbestilling brevbestilling, List<Mottaker> mottakere) {
         for (Mottaker mottaker : mottakere) {
-            Prosessinstans prosessinstans = new ProsessinstansBuilder()
-                .medType(ProsessType.SEND_BREV)
-                .medBehandling(behandling)
-                .build();
-            prosessinstans.setData(BREVBESTILLING, brevbestilling.medMottakere(List.of(mottaker)).build());
-
-            lagre(prosessinstans);
+            opprettProsessinstansSendBrev(behandling, brevbestilling, mottaker);
         }
+    }
+
+    public void opprettProsessinstansSendBrev(Behandling behandling, DoksysBrevbestilling brevbestilling, Mottaker mottaker) {
+        brevbestilling.leggTilMottaker(mottaker);
+
+        Prosessinstans prosessinstans = new ProsessinstansBuilder()
+            .medType(ProsessType.SEND_BREV)
+            .medBehandling(behandling)
+            .build();
+        prosessinstans.setData(BREVBESTILLING, brevbestilling);
+
+        lagre(prosessinstans);
     }
 }

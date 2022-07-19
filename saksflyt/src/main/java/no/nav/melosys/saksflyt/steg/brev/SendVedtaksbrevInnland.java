@@ -98,22 +98,24 @@ public class SendVedtaksbrevInnland implements StegBehandler {
             mottakerListe = List.of(Mottaker.av(BRUKER));
         }
 
-        DoksysBrevbestilling.Builder brevbestilling = new DoksysBrevbestilling.Builder()
+        DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder()
             .medProduserbartDokument(avslagTypeBruker)
             .medAvsenderID(saksbehandler)
-            .medFritekst(fritekst);
+            .medFritekst(fritekst)
+            .build();
         prosessinstansService.opprettProsessinstansSendBrev(behandling, brevbestilling, mottakerListe);
 
         if (behandling.getFagsak().harAktørMedRolleType(ARBEIDSGIVER)
             //Temp fiks for https://jira.adeo.no/browse/MELOSYS-5243
             && behandlingsresultatType != Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL) {
 
-            DoksysBrevbestilling.Builder brevbestillingArbeidsgiver = new DoksysBrevbestilling.Builder()
+            DoksysBrevbestilling brevbestillingArbeidsgiver = new DoksysBrevbestilling.Builder()
                 .medProduserbartDokument(AVSLAG_ARBEIDSGIVER)
                 .medAvsenderID(saksbehandler)
-                .medFritekst(fritekst);
+                .medFritekst(fritekst)
+                .build();
 
-            prosessinstansService.opprettProsessinstansSendBrev(behandling, brevbestillingArbeidsgiver, List.of(Mottaker.av(ARBEIDSGIVER)));
+            prosessinstansService.opprettProsessinstansSendBrev(behandling, brevbestillingArbeidsgiver, Mottaker.av(ARBEIDSGIVER));
         }
     }
 
@@ -133,18 +135,20 @@ public class SendVedtaksbrevInnland implements StegBehandler {
             mottakerListe.add(FastMottakerMedOrgnr.av(STATLIG_SKATTEOPPKREVING));
         }
 
-        DoksysBrevbestilling.Builder innvilgelseBrukerOgSkatt = new DoksysBrevbestilling.Builder().medProduserbartDokument(innvilgelseType)
+        DoksysBrevbestilling innvilgelseBrukerOgSkatt = new DoksysBrevbestilling.Builder().medProduserbartDokument(innvilgelseType)
             .medAvsenderID(saksbehandler)
             .medBegrunnelseKode(begrunnelseKode)
-            .medFritekst(fritekst);
+            .medFritekst(fritekst)
+            .build();
         prosessinstansService.opprettProsessinstansSendBrev(behandling, innvilgelseBrukerOgSkatt, mottakerListe);
     }
 
     private void sendUtpekingsbrev(Behandling behandling, String saksbehandler, String fritekst) {
-        DoksysBrevbestilling.Builder brevbestilling = new DoksysBrevbestilling.Builder().medProduserbartDokument(ORIENTERING_UTPEKING_UTLAND)
+        DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medProduserbartDokument(ORIENTERING_UTPEKING_UTLAND)
             .medAvsenderID(saksbehandler)
-            .medFritekst(fritekst);
-        prosessinstansService.opprettProsessinstansSendBrev(behandling, brevbestilling, List.of(Mottaker.av(BRUKER)));
+            .medFritekst(fritekst)
+            .build();
+        prosessinstansService.opprettProsessinstansSendBrev(behandling, brevbestilling, Mottaker.av(BRUKER));
     }
 
     private void sendOrienteringTilArbeidsgiver(Behandling behandling, Behandlingsresultat resultat, String saksbehandler) {
@@ -153,10 +157,11 @@ public class SendVedtaksbrevInnland implements StegBehandler {
         if (behandling.getFagsak().harAktørMedRolleType(ARBEIDSGIVER)
             && !lovvalgsperiode.erArtikkel13()
             && !lovvalgsperiode.erArtikkel11_4()) {
-            DoksysBrevbestilling.Builder brevbestilling = new DoksysBrevbestilling.Builder()
+            DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder()
                 .medProduserbartDokument(INNVILGELSE_ARBEIDSGIVER)
-                .medAvsenderID(saksbehandler);
-            prosessinstansService.opprettProsessinstansSendBrev(behandling, brevbestilling, List.of(Mottaker.av(ARBEIDSGIVER)));
+                .medAvsenderID(saksbehandler)
+                .build();
+            prosessinstansService.opprettProsessinstansSendBrev(behandling, brevbestilling, Mottaker.av(ARBEIDSGIVER));
         }
     }
 
