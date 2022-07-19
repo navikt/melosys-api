@@ -43,6 +43,6 @@ public class BestillBrev implements StegBehandler {
         brevbestilling.setBehandling(behandling);
         brevBestiller.bestill(brevbestilling);
 
-        log.info("Brev for behandling {} er bestilt og sendt", brevbestilling.getBehandling().getId());
+        log.info("Brev for behandling {} er bestilt", behandling.getId());
     }
 }
