@@ -1,12 +1,9 @@
 package no.nav.melosys.tjenester.gui;
 
-import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 
-import no.nav.melosys.domain.dokument.DokumentView;
 import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.Tilleggsinformasjon;
 import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.TilleggsinformasjonDetaljer;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.GeografiskAdresse;
@@ -23,7 +20,9 @@ import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.ldap.SaksbehandlerService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
-import no.nav.melosys.tjenester.gui.dto.*;
+import no.nav.melosys.tjenester.gui.dto.EndreBehandlingDto;
+import no.nav.melosys.tjenester.gui.dto.EndreBehandlingsfristDto;
+import no.nav.melosys.tjenester.gui.dto.TidligereMedlemsperioderDto;
 import no.nav.melosys.tjenester.gui.dto.saksopplysninger.SaksopplysningerTilDto;
 import no.nav.melosys.tjenester.gui.util.NumericStringRandomizer;
 import org.jeasy.random.EasyRandom;
@@ -42,7 +41,7 @@ import static org.jeasy.random.FieldPredicates.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class BehandlingTjenesteTest extends JsonSchemaTestParent {
+class BehandlingTjenesteTest {
     private static final Logger log = LoggerFactory.getLogger(BehandlingTjenesteTest.class);
     private static final String TIDLIGERE_MEDLEMSPERIODER_SCHEMA = "behandlinger-tidligeremedlemsperioder-post-schema.json";
     private static final String BEHANDLINGER_SCHEMA = "behandlinger-behandling-schema.json";
@@ -84,53 +83,6 @@ class BehandlingTjenesteTest extends JsonSchemaTestParent {
             .randomize(named("fnrAnnenForelder").and(ofType(String.class)), new NumericStringRandomizer(11))
             .randomize(named("orgnummer").and(ofType(String.class)), new NumericStringRandomizer(9))
         );
-    }
-
-    @Test
-    void behandlingerPerioderValidering() throws Exception {
-        TidligereMedlemsperioderDto tidligereMedlemsperioderDto = new TidligereMedlemsperioderDto();
-        tidligereMedlemsperioderDto.periodeIder = PERIODE_IDER;
-        valider(tidligereMedlemsperioderDto, TIDLIGERE_MEDLEMSPERIODER_SCHEMA, log);
-    }
-
-    @Test
-    void hentBehandling_erSchemaValidert() throws Exception {
-        BehandlingDto behandlingDto = random.nextObject(BehandlingDto.class);
-        behandlingDto.getSaksopplysninger().setSed(null);
-        String jsonString = objectMapperMedKodeverkServiceStub()
-            .writerWithView(DokumentView.FrontendApi.class)
-            .writeValueAsString(behandlingDto);
-        valider(jsonString, BEHANDLINGER_SCHEMA, log);
-    }
-
-    @Test
-    void endreBehandlingstemaValidering() throws Exception {
-        EndreBehandlingstemaDto endreBehandlingstemaDto = new EndreBehandlingstemaDto(Behandlingstema.ARBEID_NORGE_BOSATT_ANNET_LAND.getKode());
-        valider(endreBehandlingstemaDto, ENDRE_BEHANDLINGSTEMA_POST_SCHEMA, log);
-    }
-
-    @Test
-    void endreBehandlinsstatusValidering() throws Exception {
-        EndreBehandlingsstatusDto behandlingsstatusDto = new EndreBehandlingsstatusDto(Behandlingsstatus.AVVENT_FAGLIG_AVKLARING.getKode());
-        valider(behandlingsstatusDto, ENDRE_BEHANDLINGSSTATUS_POST_SCHEMA, log);
-    }
-
-    @Test
-    void hentMuligeBehandlingstemaValidering() throws IOException {
-        Collection<Behandlingstema> muligeBehandlingstema = behandlingTjeneste.hentMuligeBehandlingstema(BEHANDLING_ID).getBody();
-        validerArray(muligeBehandlingstema, ENDRE_BEHANDLINGSTEMA_SCHEMA, log);
-    }
-
-    @Test
-    void hentMuligeBehandlinsstatuserValidering() throws IOException {
-        Collection<Behandlingsstatus> muligeStatuser = behandlingTjeneste.hentMuligeStatuser(BEHANDLING_ID).getBody();
-        validerArray(muligeStatuser, ENDRE_BEHANDLINGSSTATUS_SCHEMA, log);
-    }
-
-    @Test
-    void hentMuligeBehandlingstyperValidering() throws IOException {
-        Collection<Behandlingstyper> muligeTyper = behandlingTjeneste.hentMuligeTyper(BEHANDLING_ID).getBody();
-        validerArray(muligeTyper, ENDRE_BEHANDLINGSTYPE_SCHEMA, log);
     }
 
     @Test

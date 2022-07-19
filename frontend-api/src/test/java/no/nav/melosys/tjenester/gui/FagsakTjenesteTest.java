@@ -7,12 +7,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
@@ -25,7 +20,6 @@ import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresse;
 import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresseNorge;
 import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresseUtland;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
@@ -39,13 +33,11 @@ import no.nav.melosys.service.saksopplysninger.SaksopplysningerService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.utpeking.UtpekingService;
 import no.nav.melosys.tjenester.gui.dto.*;
-import no.nav.melosys.tjenester.gui.dto.dokumentarkiv.VedleggDto;
 import no.nav.melosys.tjenester.gui.util.NumericStringRandomizer;
 import no.nav.melosys.tjenester.gui.util.SaksbehandlingDataFactory;
 import org.jeasy.random.EasyRandom;
 import org.jeasy.random.EasyRandomParameters;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,7 +49,7 @@ import static org.assertj.core.api.Assertions.*;
 import static org.jeasy.random.FieldPredicates.*;
 import static org.mockito.Mockito.*;
 
-class FagsakTjenesteTest extends JsonSchemaTestParent {
+class FagsakTjenesteTest {
     private static final Logger log = LoggerFactory.getLogger(FagsakTjenesteTest.class);
     private static final String FAGSAKER_SCHEMA = "fagsaker-schema.json";
     private static final String FAGSAKER_OPPRETT_SCHEMA = "fagsaker-opprett-post-schema.json";
@@ -91,53 +83,6 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
             .randomize(MidlertidigPostadresse.class, () -> Math.random() > 0.5 ? random.nextObject(MidlertidigPostadresseNorge.class) : random.nextObject(MidlertidigPostadresseUtland.class))
             .randomize(named("fnr").and(ofType(String.class)), new NumericStringRandomizer(11))
             .randomize(named("orgnummer").and(ofType(String.class)), new NumericStringRandomizer(9)));
-    }
-
-    @Test
-    void videresendSchemaValidering() throws JsonProcessingException {
-        VideresendDto videresendDto = new VideresendDto();
-        videresendDto.setMottakerinstitusjon("SE:123");
-        videresendDto.setFritekst("fri som fuglen");
-        videresendDto.setVedlegg(Set.of(new VedleggDto("1", "1")));
-
-        String jsonString = objectMapperMedKodeverkServiceStub().writeValueAsString(videresendDto);
-        assertThatCode(() -> valider(jsonString, FAGSAKER_VIDERESEND_POST_SCHEMA, log)).doesNotThrowAnyException();
-    }
-
-    @Test
-    void fagsakSchemaValidering() throws JsonProcessingException {
-        FagsakDto fagsakDto = random.nextObject(FagsakDto.class);
-
-        String jsonString = objectMapperMedKodeverkServiceStub().writeValueAsString(fagsakDto);
-        assertThatCode(() -> valider(jsonString, FAGSAKER_SCHEMA, log)).doesNotThrowAnyException();
-    }
-
-    @Test
-    void fagsakOpprettSchemaValidering() throws JsonProcessingException {
-        OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
-
-        String jsonString = new ObjectMapper().registerModule(new JavaTimeModule()).configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false).writeValueAsString(opprettSakDto);
-        assertThatCode(() -> valider(jsonString, FAGSAKER_OPPRETT_SCHEMA, log)).doesNotThrowAnyException();
-    }
-
-    @Test
-    void fagsakUtpekSchemaValidering() throws JsonProcessingException {
-        UtpekDto utpekDto = new UtpekDto(Set.of("SE:123"), "fri SED", "fri brev");
-
-        String jsonString = objectMapperMedKodeverkServiceStub().writeValueAsString(utpekDto);
-        assertThatCode(() -> valider(jsonString, FAGSAKER_UTPEK_POST_SCHEMA, log)).doesNotThrowAnyException();
-    }
-
-    @Test
-    void fagsakSøkSchemaValidering() throws IOException {
-        valider(new FagsakSokDto("123", "MEL-123", "111111111"), SOK_FAGSAKER_POST_SCHEMA);
-
-        List<FagsakOppsummeringDto> fagsakOppsummeringDtoList = random.objects(FagsakOppsummeringDto.class, 1).collect(Collectors.toList());
-        List<BehandlingOversiktDto> behandlingOversiktDtoer = random.objects(BehandlingOversiktDto.class, 1).collect(Collectors.toList());
-        behandlingOversiktDtoer.get(0).setLand(new SoeknadslandDto(Collections.singletonList(Landkoder.NO.getKode()), false));
-        fagsakOppsummeringDtoList.get(0).setBehandlingOversikter(behandlingOversiktDtoer);
-
-        assertThatCode(() -> validerArray(fagsakOppsummeringDtoList, SOK_FAGSAKER_SCHEMA, log)).doesNotThrowAnyException();
     }
 
     @Test
@@ -315,8 +260,6 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
         String begrunnelseKode = Henleggelsesgrunner.OPPHOLD_UTL_AVLYST.getKode();
         String fritekst = "Dette er fritekst";
         HenleggelseDto henleggelseDto = new HenleggelseDto(fritekst, begrunnelseKode);
-
-        valider(henleggelseDto, FAGSAKSER_HENLEGG_POST_SCHEMA);
 
         Fagsak fagsak = lagFagsak();
         FagsakTjeneste instans = lagFagsakTjeneste(fagsak);

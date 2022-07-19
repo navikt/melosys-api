@@ -33,7 +33,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class AvklartefaktaTjenesteTest extends JsonSchemaTestParent {
+class AvklartefaktaTjenesteTest {
     private static final Logger log = LoggerFactory.getLogger(AvklartefaktaTjenesteTest.class);
 
     private static final String AVKLARTEFAKTA_SCHEMA = "avklartefakta-schema.json";
@@ -62,31 +62,12 @@ class AvklartefaktaTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    void hentAvklartefakta() throws Exception {
-        Set<AvklartefaktaDto> mockliste = defaultEasyRandom().objects(AvklartefaktaDto.class, 4).collect(Collectors.toSet());
-        when(avklartefaktaService.hentAlleAvklarteFakta(1L)).thenReturn(mockliste);
-
-        Set<AvklartefaktaDto> avklartefaktaDtoSet = avklartefaktaTjeneste.hentAvklarteFakta(1L);
-        validerArray(avklartefaktaDtoSet, AVKLARTEFAKTA_SCHEMA, log);
-    }
-
-    @Test
-    void lagreAvklartefaktaGirKopiAvInput() {
-        Set<AvklartefaktaDto> avklartefaktaDtoer = defaultEasyRandom().objects(AvklartefaktaDto.class, 4).collect(Collectors.toSet());
-        when(avklartefaktaService.hentAlleAvklarteFakta(1L)).thenReturn(avklartefaktaDtoer);
-        Set<AvklartefaktaDto> resultat = avklartefaktaTjeneste.lagreAvklarteFakta(1, avklartefaktaDtoer);
-        assertThat(resultat).isEqualTo(avklartefaktaDtoer);
-    }
-
-    @Test
     void lagreMedfolgendeFamilieSomAvklarteFakta_énAvHverMuligInput_returnererKorrekt() throws IOException {
         LagreMedfolgendeFamilieDto lagreMedfolgendeFamilieDto = new LagreMedfolgendeFamilieDto(Set.of(
             new MedfolgendeFamilieDto(uuid1, true, null, null),
             new MedfolgendeFamilieDto(uuid2, false, OVER_18_AR.getKode(), "fritekstForUuid2"),
             new MedfolgendeFamilieDto(uuid3, true, null, null),
             new MedfolgendeFamilieDto(uuid4, false, SAMBOER_UTEN_FELLES_BARN.getKode(), "fritekstForUuid4")));
-
-        valider(lagreMedfolgendeFamilieDto, AVKLARTEFAKTA_MEDFOLGENDEFAMILIE_POST_SCHEMA, log);
 
         when(avklartefaktaService.hentAlleAvklarteFakta(eq(1L))).thenReturn(Set.of(
             lagAvklartefaktaDto(uuid1, Avklartefaktatyper.VURDERING_LOVVALG_BARN, true, null, null),
@@ -95,8 +76,6 @@ class AvklartefaktaTjenesteTest extends JsonSchemaTestParent {
             lagAvklartefaktaDto(uuid4, Avklartefaktatyper.VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER, false, "fritekstForUuid4", SAMBOER_UTEN_FELLES_BARN.getKode())));
 
         AvklartefaktaOppsummeringDto response = avklartefaktaTjeneste.lagreMedfolgendeFamilieSomAvklarteFakta(1L, lagreMedfolgendeFamilieDto);
-
-        valider(response, AVKLARTEFAKTA_OPPSUMMERING_SCHEMA, log);
 
         List<MedfolgendeFamilieDto> medFolgendeFamilieFraResponse = response.getMedfolgendeFamilie()
             .stream().sorted(Comparator.comparing(MedfolgendeFamilieDto::uuid)).collect(Collectors.toList());

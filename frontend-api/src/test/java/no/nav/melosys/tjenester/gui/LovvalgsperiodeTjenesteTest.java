@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.Optional;
 
 import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
@@ -32,8 +32,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.Mockito.*;
 
-final class LovvalgsperiodeTjenesteTest extends JsonSchemaTestParent {
-    private static final String LOVVALGSPERIODER_SCHEMA = "lovvalgsperioder-schema.json";
+final class LovvalgsperiodeTjenesteTest {
     private static final LocalDate FOM = LocalDate.now();
     private static final LovvalgsperiodeDto FORVENTET = new LovvalgsperiodeDto(new PeriodeDto(FOM, FOM),
             Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_2,
@@ -105,7 +104,6 @@ final class LovvalgsperiodeTjenesteTest extends JsonSchemaTestParent {
         @SuppressWarnings("unchecked")
         Collection<LovvalgsperiodeDto> resultatliste = (Collection<LovvalgsperiodeDto>) resultat.getBody();
         assertThat(resultatliste).hasSize(forventet.size());
-        validerArray(resultatliste, LOVVALGSPERIODER_SCHEMA);
     }
 
     @Test
@@ -114,18 +112,16 @@ final class LovvalgsperiodeTjenesteTest extends JsonSchemaTestParent {
     }
 
     private void testLagreLovvalgsperioder(long behandlingsid,
-            Collection<LovvalgsperiodeDto> perioder) throws Exception {
+            Collection<LovvalgsperiodeDto> perioder) {
         LovvalgsperiodeService lovvalgsperiodeService = lagLovvalgsperiodeService();
         Aksesskontroll aksesskontroll = mock(Aksesskontroll.class);
         LovvalgsperiodeTjeneste instans = new LovvalgsperiodeTjeneste(lovvalgsperiodeService, aksesskontroll);
-        validerArray(perioder, LOVVALGSPERIODER_SCHEMA);
         Collection<LovvalgsperiodeDto> resultat = instans.lagreLovvalgsperioder(behandlingsid, perioder);
         assertThat(resultat).hasSize(perioder.size());
         if (!perioder.isEmpty()) {
             assertThat(perioder.iterator().next())
                     .usingRecursiveComparison().isEqualTo(resultat.iterator().next());
         }
-        validerArray(resultat, LOVVALGSPERIODER_SCHEMA);
     }
 
     private static LovvalgsperiodeService lagLovvalgsperiodeService() {

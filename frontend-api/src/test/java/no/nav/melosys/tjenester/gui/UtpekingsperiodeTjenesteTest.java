@@ -31,7 +31,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class UtpekingsperiodeTjenesteTest extends JsonSchemaTestParent {
+class UtpekingsperiodeTjenesteTest {
 
     private static final Logger log = LoggerFactory.getLogger(UtpekingsperiodeTjenesteTest.class);
     private static final String UTPEKINGSPERIODER_SCHEMA = "utpekingsperioder-schema.json";
@@ -53,45 +53,8 @@ class UtpekingsperiodeTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    void hentUtpekingsperioder() throws IOException {
-        when(utpekingService.hentUtpekingsperioder(anyLong())).thenReturn(lagUtpekingsperioder());
-
-        UtpekingsperioderDto utpekingsperioderDto = utpekingsperiodeTjeneste.hentUtpekingsperioder(123L);
-
-        String jsonString = objectMapperMedKodeverkServiceStub().writeValueAsString(utpekingsperioderDto);
-        valider(jsonString, UTPEKINGSPERIODER_SCHEMA, log);
-
-        verify(aksesskontroll).autoriser(anyLong());
-        verify(utpekingService).hentUtpekingsperioder(anyLong());
-    }
-
-    @Test
-    void deserialiserUtpekingsperioder() throws Exception {
-        String json = """
-            {
-               "utpekingsperioder":[
-                  {
-                     "fomDato":"2021-08-13",
-                     "tomDato":"2021-11-11",
-                     "lovvalgsbestemmelse":"FO_883_2004_ART13_1B1",
-                     "tilleggsbestemmelse":null,
-                     "lovvalgsland":"FR"
-                  }
-               ]
-            }""";
-
-        assertThat(objectMapper().readValue(json, UtpekingsperioderDto.class))
-            .extracting(UtpekingsperioderDto::utpekingsperioder)
-            .asList()
-            .hasSize(1);
-    }
-
-    @Test
-    void lagreUtpekingsperioder() throws IOException {
+    void lagreUtpekingsperioder() {
         UtpekingsperioderDto utpekingsperioderDto = UtpekingsperioderDto.av(lagUtpekingsperioder());
-
-        String jsonString = objectMapperMedKodeverkServiceStub().writeValueAsString(utpekingsperioderDto);
-        valider(jsonString, UTPEKINGSPERIODER_SCHEMA, log);
 
         utpekingsperiodeTjeneste.lagreUtpekingsperioder(123L, utpekingsperioderDto);
 

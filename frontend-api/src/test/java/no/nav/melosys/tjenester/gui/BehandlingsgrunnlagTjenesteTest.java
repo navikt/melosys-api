@@ -1,7 +1,6 @@
 package no.nav.melosys.tjenester.gui;
 
 
-import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
@@ -25,8 +24,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -37,8 +34,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class BehandlingsgrunnlagTjenesteTest extends JsonSchemaTestParent {
-    private static final Logger log = LoggerFactory.getLogger(BehandlingsgrunnlagTjenesteTest.class);
+public class BehandlingsgrunnlagTjenesteTest {
 
     @Mock
     private BehandlingsgrunnlagService behandlingsgrunnlagService;
@@ -66,7 +62,7 @@ public class BehandlingsgrunnlagTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    void hentBehandlingsgrunnlag_erSoeknad_validerSchema() throws Exception{
+    void hentBehandlingsgrunnlag_erSoeknad_validerSchema() {
         Soeknad soeknad = random.nextObject(Soeknad.class);
         Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
         behandlingsgrunnlag.setType(Behandlingsgrunnlagtyper.SØKNAD_A1_YRKESAKTIVE_EØS);
@@ -76,13 +72,10 @@ public class BehandlingsgrunnlagTjenesteTest extends JsonSchemaTestParent {
         ResponseEntity<BehandlingsgrunnlagGetDto> responseEntity = behandlingsgrunnlagTjeneste.hentBehandlingsgrunnlag(123);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(responseEntity.getBody()).isInstanceOf(BehandlingsgrunnlagGetDto.class);
-
-        String json = objectMapperMedKodeverkServiceStub().writeValueAsString(responseEntity.getBody());
-        valider(json, "behandlingsgrunnlag-schema.json", log);
     }
 
     @Test
-    void hentBehandlingsgrunnlag_erSedGrunnlag_validerSchema() throws IOException {
+    void hentBehandlingsgrunnlag_erSedGrunnlag_validerSchema()  {
         Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
         behandlingsgrunnlag.setType(Behandlingsgrunnlagtyper.SED);
 
@@ -97,8 +90,5 @@ public class BehandlingsgrunnlagTjenesteTest extends JsonSchemaTestParent {
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(responseEntity.getBody()).isNotNull();
         assertThat(responseEntity.getBody()).isInstanceOf(BehandlingsgrunnlagGetDto.class);
-
-        String json = objectMapperMedKodeverkServiceStub().writeValueAsString(responseEntity.getBody());
-        valider(json, "behandlingsgrunnlag-schema.json", log);
     }
 }

@@ -5,7 +5,6 @@ import java.util.Set;
 import no.nav.melosys.domain.arkiv.DokumentReferanse;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.unntak.AnmodningUnntakService;
-import no.nav.melosys.tjenester.gui.JsonSchemaTestParent;
 import no.nav.melosys.tjenester.gui.dto.dokumentarkiv.VedleggDto;
 import no.nav.melosys.tjenester.gui.dto.saksflyt.anmodningunntak.AnmodningUnntakDto;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,8 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
-class AnmodningUnntakTjenesteTest extends JsonSchemaTestParent {
-    private static final String ANMODNING_UNNTAK_POST_SCHEMA = "saksflyt-anmodningsperioder-bestill-post-schema.json";
+class AnmodningUnntakTjenesteTest {
 
     @Mock
     private AnmodningUnntakService anmodningUnntakService;
@@ -49,6 +47,5 @@ class AnmodningUnntakTjenesteTest extends JsonSchemaTestParent {
         verify(anmodningUnntakService).anmodningOmUnntak(behandlingID, mottakerInstitusjon,
             Set.of(new DokumentReferanse(vedleggDto.journalpostID(), vedleggDto.dokumentID())), fritekstSed);
 
-        valider(dto, ANMODNING_UNNTAK_POST_SCHEMA);
     }
 }

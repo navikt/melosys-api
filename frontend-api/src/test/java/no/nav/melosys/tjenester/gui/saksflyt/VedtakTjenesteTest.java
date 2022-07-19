@@ -1,6 +1,5 @@
 package no.nav.melosys.tjenester.gui.saksflyt;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.Set;
 
@@ -16,7 +15,6 @@ import no.nav.melosys.service.vedtak.FattVedtakRequest;
 import no.nav.melosys.service.vedtak.VedtaksfattingFasade;
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
 import no.nav.melosys.sikkerhet.context.TestSubjectHandler;
-import no.nav.melosys.tjenester.gui.JsonSchemaTestParent;
 import no.nav.melosys.tjenester.gui.dto.EndreVedtakDto;
 import no.nav.melosys.tjenester.gui.dto.FattVedtakDto;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,9 +30,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
-class VedtakTjenesteTest extends JsonSchemaTestParent {
-    private static final String FATT_VEDTAK_SCHEMA = "saksflyt-vedtak-fatt-post-schema.json";
-    private static final String ENDRE_PERIODE_SCHEMA = "saksflyt-vedtak-endre-post-schema.json";
+class VedtakTjenesteTest {
     private static final long behandlingID = 3;
 
     @Mock
@@ -46,7 +42,6 @@ class VedtakTjenesteTest extends JsonSchemaTestParent {
 
     private VedtakTjeneste vedtakTjeneste;
 
-    @Override
     protected ObjectMapper objectMapper() {
         return new ObjectMapper();
     }
@@ -67,8 +62,6 @@ class VedtakTjenesteTest extends JsonSchemaTestParent {
 
         verify(aksesskontroll).autoriserSkriv(behandlingID);
         verify(vedtaksfattingFasade).fattVedtak(eq(behandlingID), any(FattVedtakRequest.class));
-
-        valider(fattVedtakDto, FATT_VEDTAK_SCHEMA);
     }
 
     @Test
@@ -82,8 +75,6 @@ class VedtakTjenesteTest extends JsonSchemaTestParent {
 
         verify(aksesskontroll).autoriserSkriv(behandlingID);
         verify(vedtaksfattingFasade).fattVedtak(eq(behandlingID), any(FattVedtakRequest.class));
-
-        valider(fattVedtakDto, FATT_VEDTAK_SCHEMA);
     }
 
     @Test
@@ -97,8 +88,6 @@ class VedtakTjenesteTest extends JsonSchemaTestParent {
 
         verify(aksesskontroll).autoriserSkriv(behandlingID);
         verify(vedtaksfattingFasade).fattVedtak(eq(behandlingID), any(FattVedtakRequest.class));
-
-        valider(fattVedtakDto, FATT_VEDTAK_SCHEMA);
     }
 
     @Test
@@ -122,15 +111,13 @@ class VedtakTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    void endreVedtak_fungerer() throws IOException {
+    void endreVedtak_fungerer() {
         EndreVedtakDto endreVedtakDto = new EndreVedtakDto();
         endreVedtakDto.setBegrunnelseKode(Endretperiode.ENDRINGER_ARBEIDSSITUASJON);
         vedtakTjeneste.endreVedtak(behandlingID, endreVedtakDto);
 
         verify(aksesskontroll).autoriserSkriv(behandlingID);
         verify(vedtaksfattingFasade).endreVedtak(behandlingID, Endretperiode.ENDRINGER_ARBEIDSSITUASJON, null, endreVedtakDto.getFritekstSed());
-
-        valider(endreVedtakDto, ENDRE_PERIODE_SCHEMA);
     }
 
     @Test

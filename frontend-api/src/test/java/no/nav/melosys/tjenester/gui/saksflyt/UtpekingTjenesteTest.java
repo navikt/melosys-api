@@ -1,11 +1,8 @@
 package no.nav.melosys.tjenester.gui.saksflyt;
 
-import java.io.IOException;
-
 import no.nav.melosys.domain.eessi.melding.UtpekingAvvis;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.utpeking.UtpekingService;
-import no.nav.melosys.tjenester.gui.JsonSchemaTestParent;
 import no.nav.melosys.tjenester.gui.dto.utpeking.UtpekingAvvisDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,9 +15,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
-class UtpekingTjenesteTest extends JsonSchemaTestParent {
-
-    private static final String UTPEKING_AVVIS_POST_SCHEMA = "saksflyt-utpeking-avvis-post-schema.json";
+class UtpekingTjenesteTest {
 
     @Mock
     private UtpekingService utpekingService;
@@ -34,15 +29,13 @@ class UtpekingTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    public void avvisUtpeking() throws IOException {
+    public void avvisUtpeking() {
 
         UtpekingAvvisDto utpekingAvvisDto = new UtpekingAvvisDto();
         utpekingAvvisDto.setFritekst("test");
         utpekingAvvisDto.setNyttLovvalgsland("DK");
         utpekingAvvisDto.setBegrunnelseUtenlandskMyndighet("test");
         utpekingAvvisDto.setVilSendeAnmodningOmMerInformasjon(false);
-
-        valider(utpekingAvvisDto, UTPEKING_AVVIS_POST_SCHEMA);
 
         utpekingTjeneste.avvisUtpeking(1L, utpekingAvvisDto);
 

@@ -1,10 +1,6 @@
 package no.nav.melosys.tjenester.gui;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
@@ -14,13 +10,11 @@ import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.oppgave.Oppgaveplukker;
-import no.nav.melosys.service.oppgave.dto.*;
+import no.nav.melosys.service.oppgave.dto.PlukkOppgaveInnDto;
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
 import no.nav.melosys.sikkerhet.context.TestSubjectHandler;
-import no.nav.melosys.tjenester.gui.dto.oppgave.OppgaveOversiktDto;
 import no.nav.melosys.tjenester.gui.dto.oppgave.PlukketOppgaveDto;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -36,13 +30,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class OppgaveTjenesteTest extends JsonSchemaTestParent {
+class OppgaveTjenesteTest {
     private static final Logger logger = LoggerFactory.getLogger(OppgaveTjenesteTest.class);
-
-    private static final String OPPGAVER_OVERSIKT_SCHEMA = "oppgaver-oversikt-schema.json";
-    private static final String OPPGAVER_TILBAKELEGGE_SCHEMA = "oppgaver-tilbakelegg-post-schema.json";
-    private static final String OPPGAVER_SOK_SCHEMA = "oppgaver-sok-schema.json";
-    private static final String OPPGAVER_PLUKK_SCHEMA = "oppgaver-plukk-schema.json";
 
     private OppgaveTjeneste oppgaveTjeneste;
     @Mock
@@ -57,23 +46,7 @@ class OppgaveTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    void mineOppgaver() throws IOException {
-        List<OppgaveDto> oppgaver = new ArrayList<>();
-        int oppgaveNr = 1 + defaultEasyRandom().nextInt(2);
-        for (int i = 0; i < oppgaveNr; i++) {
-            oppgaver.add(defaultEasyRandom().nextObject(BehandlingsoppgaveDto.class));
-            oppgaver.add(defaultEasyRandom().nextObject(JournalfoeringsoppgaveDto.class));
-        }
-        when(oppgaveService.hentOppgaverMedAnsvarlig(anyString())).thenReturn(oppgaver);
-
-        ResponseEntity<?> response = oppgaveTjeneste.mineOppgaver();
-
-        OppgaveOversiktDto oppgaveOversikt = (OppgaveOversiktDto) response.getBody();
-        valider(oppgaveOversikt, OPPGAVER_OVERSIKT_SCHEMA, logger);
-    }
-
-    @Test
-    void plukkOppgave() throws IOException {
+    void plukkOppgave() {
         Behandling behandling = new Behandling();
         behandling.setType(Behandlingstyper.SOEKNAD);
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
@@ -96,17 +69,7 @@ class OppgaveTjenesteTest extends JsonSchemaTestParent {
 
         assertThat(response.getBody()).isExactlyInstanceOf(PlukketOppgaveDto.class);
         PlukketOppgaveDto entity = (PlukketOppgaveDto) response.getBody();
-        valider(entity, OPPGAVER_PLUKK_SCHEMA, logger);
         assertThat(entity.getOppgaveID()).isEqualTo("1");
-    }
-
-    @Disabled("Frem til skjema-fiks")
-    @Test
-    void søkOppgaverMedPersonIdentEllerOrgnr() throws IOException {
-        List<Oppgave> oppgaver = defaultEasyRandom().objects(Oppgave.class, 3).collect(Collectors.toList());
-        when(oppgaveService.finnOppgaverMedPersonIdent(anyString())).thenReturn(oppgaver);
-
-        validerArray(oppgaveTjeneste.søkOppgaverMedPersonIdentEllerOrgnr("", null).getBody(), OPPGAVER_SOK_SCHEMA, logger);
     }
 
     @Test
@@ -137,14 +100,5 @@ class OppgaveTjenesteTest extends JsonSchemaTestParent {
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> oppgaveTjeneste.søkOppgaverMedPersonIdentEllerOrgnr("", ""))
             .withMessageContaining("Finner ingen søkekriteria");
-    }
-
-
-    @Test
-    void tilbakeleggOppgave() throws Exception {
-        TilbakeleggingDto tilbakelegging = defaultEasyRandom().nextObject(TilbakeleggingDto.class);
-
-        assertThat(tilbakelegging).isNotNull();
-        valider(tilbakelegging, OPPGAVER_TILBAKELEGGE_SCHEMA, logger);
     }
 }

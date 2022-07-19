@@ -1,8 +1,6 @@
 package no.nav.melosys.tjenester.gui;
 
-import java.io.IOException;
 import java.time.Instant;
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -30,11 +28,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class BehandlingsnotatTjenesteTest extends JsonSchemaTestParent {
-
-    private static final String BEHANDLINGNOTAT_GET_SCHEMA = "fagsaker-notater-schema.json";
-    private static final String BEHANDLINGNOTAT_POST_SCHEMA = "fagsaker-notater-post-schema.json";
-    private static final String BEHANDLINGNOTAT_PUT_SCHEMA = "fagsaker-notater-put-schema.json";
+public class BehandlingsnotatTjenesteTest {
 
     private final String saksbehandler = "Z224234";
     private final String saksbehandlerNavn = "Morteni Mortenseni";
@@ -55,7 +49,7 @@ public class BehandlingsnotatTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    void hentBehandlingsnotaterForFagsak_hentes_validerSchema() throws IOException {
+    void hentBehandlingsnotaterForFagsak_hentes_validerSchema() {
 
         final String saksnummer = "MEL-222";
         Behandlingsnotat behandlingsnotat = lagBehandlingsnotat();
@@ -71,16 +65,12 @@ public class BehandlingsnotatTjenesteTest extends JsonSchemaTestParent {
         assertThat(dto.getNotatId()).isEqualTo(behandlingsnotat.getId());
         assertThat(dto.getRegistrertAvNavn()).isEqualTo(saksbehandlerNavn);
         assertThat(dto.getTekst()).isEqualTo(behandlingsnotat.getTekst());
-
-
-        validerArray((Collection) res.getBody(), BEHANDLINGNOTAT_GET_SCHEMA);
     }
 
     @Test
-    void oppdaterBehandlingsnotat_blirOppdatert_validerSchema() throws IOException {
+    void oppdaterBehandlingsnotat_blirOppdatert_validerSchema() {
 
         BehandlingsnotatPostDto req = new BehandlingsnotatPostDto("teteteksssst");
-        valider(req, BEHANDLINGNOTAT_PUT_SCHEMA);
 
         final String saksnummer = "MEL-222";
         Behandlingsnotat behandlingsnotat = lagBehandlingsnotat();
@@ -92,10 +82,9 @@ public class BehandlingsnotatTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    void opprettBehandlingsnotat_blirOpprettet_validerSchema() throws IOException {
+    void opprettBehandlingsnotat_blirOpprettet_validerSchema() {
 
         BehandlingsnotatPostDto req = new BehandlingsnotatPostDto("teteteksssst");
-        valider(req, BEHANDLINGNOTAT_POST_SCHEMA);
 
         final String saksnummer = "MEL-222";
         Behandlingsnotat behandlingsnotat = lagBehandlingsnotat();

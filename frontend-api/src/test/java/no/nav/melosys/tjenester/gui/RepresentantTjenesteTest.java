@@ -1,12 +1,7 @@
 package no.nav.melosys.tjenester.gui;
 
-import java.io.IOException;
-import java.util.List;
-
 import no.nav.melosys.domain.folketrygden.ValgtRepresentant;
 import no.nav.melosys.service.representant.RepresentantService;
-import no.nav.melosys.service.representant.dto.RepresentantDataDto;
-import no.nav.melosys.service.representant.dto.RepresentantDto;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.tjenester.gui.dto.ValgtRepresentantDto;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,13 +18,8 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class RepresentantTjenesteTest extends JsonSchemaTestParent {
+class RepresentantTjenesteTest {
     private static final Logger log = LoggerFactory.getLogger(RepresentantTjenesteTest.class);
-
-    private static final String REPRESENTANT_LISTE_SCHEMA="representant-liste-schema.json";
-    private static final String REPRESENTANT_SCHEMA="representant-representant-schema.json";
-    private static final String VALGTREPRESENTANT_SCHEMA="representant-valgt-schema.json";
-    private static final String VALGTREPRESENTANT_POST_SCHEMA="representant-valgt-post-schema.json";
 
     @Mock
     private RepresentantService representantService;
@@ -44,35 +34,9 @@ class RepresentantTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    void hentRepresentantListe_validerSchema() throws IOException {
-        when(representantService.hentRepresentantListe())
-            .thenReturn(List.of(
-                new RepresentantDto("id1", "navn1"),
-                new RepresentantDto("id2", "navn2")));
-
-        var response = representantTjeneste.hentRepresentantListe().getBody();
-
-        validerArray(response, REPRESENTANT_LISTE_SCHEMA, log);
-    }
-
-    @Test
-    void hentRepresentant_validerSchema() throws IOException {
-        when(representantService.hentRepresentant("id")).thenReturn(
-            new RepresentantDataDto("id", "navn", List.of("adresselinje1", "adresselinje2"), "postnummer", "123456789"));
-
-        var response = representantTjeneste.hentRepresentant("id").getBody();
-
-        valider(response, REPRESENTANT_SCHEMA, log);
-    }
-
-    @Test
-    void oppdaterValgtRepresentant_validerResponse() throws IOException {
+    void oppdaterValgtRepresentant_validerResponse() {
         var request = new ValgtRepresentantDto("repnr", true, "123456789", "kontaktperson");
-
-        valider(request, VALGTREPRESENTANT_POST_SCHEMA, log);
-
         when(representantService.oppdaterValgtRepresentant(anyLong(), any(ValgtRepresentant.class))).thenReturn(request.til());
-
         var response = representantTjeneste.lagreValgtRepresentant(1L, request).getBody();
 
         assertThat(response).isNotNull();
@@ -80,11 +44,10 @@ class RepresentantTjenesteTest extends JsonSchemaTestParent {
         assertThat(response.selvbetalende()).isEqualTo(request.selvbetalende());
         assertThat(response.organisasjonsnummer()).isEqualTo(request.organisasjonsnummer());
         assertThat(response.kontaktperson()).isEqualTo(request.kontaktperson());
-        valider(response, VALGTREPRESENTANT_SCHEMA, log);
     }
 
     @Test
-    void hentValgtRepresentant_validerResponse() throws IOException {
+    void hentValgtRepresentant_validerResponse() {
         var forventetResponse = new ValgtRepresentantDto("repnr", true, "123456789", "kontaktperson");
 
         when(representantService.hentValgtRepresentant(anyLong())).thenReturn(forventetResponse.til());
@@ -96,6 +59,5 @@ class RepresentantTjenesteTest extends JsonSchemaTestParent {
         assertThat(response.selvbetalende()).isEqualTo(forventetResponse.selvbetalende());
         assertThat(response.organisasjonsnummer()).isEqualTo(forventetResponse.organisasjonsnummer());
         assertThat(response.kontaktperson()).isEqualTo(forventetResponse.kontaktperson());
-        valider(response, VALGTREPRESENTANT_SCHEMA, log);
     }
 }

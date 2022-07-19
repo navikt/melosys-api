@@ -1,9 +1,5 @@
 package no.nav.melosys.tjenester.gui;
 
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.AnmodningsperiodeSvar;
 import no.nav.melosys.domain.Behandlingsresultat;
@@ -23,8 +19,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.jeasy.random.FieldPredicates.ofType;
@@ -33,11 +31,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class AnmodningsperiodeTjenesteTest extends JsonSchemaTestParent {
-    private static final Logger logger = LoggerFactory.getLogger(AnmodningsperiodeTjenesteTest.class);
-    private static final String ANMODNINGSPERIODER_GET_SCHEMA = "anmodningsperioder-schema.json";
-    private static final String ANMODNINGSPERIODER_POST_SCHEMA = "anmodningsperioder-post-schema.json";
-    private static final String ANMODNINGSPERIODER_SVAR_SCHEMA = "anmodningsperioder-svar-schema.json";
+class AnmodningsperiodeTjenesteTest {
 
     @Mock
     private AnmodningsperiodeService anmodningsperiodeService;
@@ -61,7 +55,6 @@ class AnmodningsperiodeTjenesteTest extends JsonSchemaTestParent {
 
         AnmodningsperiodeGetDto anmodningsperiodeGetDto = anmodningsperiodeTjeneste.hentAnmodningsperioder(1L);
         assertThat(anmodningsperiodeGetDto.getAnmodningsperioder()).isNotEmpty();
-        valider(anmodningsperiodeGetDto, ANMODNINGSPERIODER_GET_SCHEMA, logger);
     }
 
     @Test
@@ -77,8 +70,6 @@ class AnmodningsperiodeTjenesteTest extends JsonSchemaTestParent {
 
         verify(aksesskontroll).autoriserSkriv(anyLong());
         verify(anmodningsperiodeService).lagreAnmodningsperioder(anyLong(), anyCollection());
-        valider(postDto, ANMODNINGSPERIODER_POST_SCHEMA, logger);
-        valider(anmodningsperiodeGetDto, ANMODNINGSPERIODER_GET_SCHEMA, logger);
     }
 
     @Test
@@ -99,7 +90,6 @@ class AnmodningsperiodeTjenesteTest extends JsonSchemaTestParent {
         assertThat(svarDto).isNotNull();
         assertThat(svarDto.begrunnelseFritekst()).isNotEmpty();
         assertThat(svarDto.anmodningsperiodeSvarType()).isEqualTo(Anmodningsperiodesvartyper.INNVILGELSE.name());
-        valider(svarDto, ANMODNINGSPERIODER_SVAR_SCHEMA, logger);
     }
 
     @Test
@@ -124,7 +114,6 @@ class AnmodningsperiodeTjenesteTest extends JsonSchemaTestParent {
         assertThat(svarDto).isNotNull();
         assertThat(svarDto.anmodningsperiodeSvarType()).isEqualTo(Anmodningsperiodesvartyper.INNVILGELSE.name());
         verify(aksesskontroll).autoriserSkriv(anyLong());
-        valider(svarDto, ANMODNINGSPERIODER_SVAR_SCHEMA, logger);
     }
 
     private Set<Anmodningsperiode> mockAnmodningsperioder() {
