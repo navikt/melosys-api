@@ -103,7 +103,7 @@ public class SendVedtaksbrevInnland implements StegBehandler {
             .medAvsenderID(saksbehandler)
             .medFritekst(fritekst)
             .build();
-        prosessinstansService.opprettProsessinstansSendBrev(behandling, brevbestilling, mottakerListe);
+        prosessinstansService.opprettProsessinstanserSendBrev(behandling, brevbestilling, mottakerListe);
 
         if (behandling.getFagsak().harAktørMedRolleType(ARBEIDSGIVER)
             //Temp fiks for https://jira.adeo.no/browse/MELOSYS-5243
@@ -140,7 +140,7 @@ public class SendVedtaksbrevInnland implements StegBehandler {
             .medBegrunnelseKode(begrunnelseKode)
             .medFritekst(fritekst)
             .build();
-        prosessinstansService.opprettProsessinstansSendBrev(behandling, innvilgelseBrukerOgSkatt, mottakerListe);
+        prosessinstansService.opprettProsessinstanserSendBrev(behandling, innvilgelseBrukerOgSkatt, mottakerListe);
     }
 
     private void sendUtpekingsbrev(Behandling behandling, String saksbehandler, String fritekst) {

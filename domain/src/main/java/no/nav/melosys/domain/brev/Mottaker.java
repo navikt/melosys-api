@@ -9,7 +9,6 @@ public final class Mottaker {
     private Aktoer aktør;
 
     private Mottaker() {
-        super();
     }
 
     private Mottaker(Aktoer aktør) {

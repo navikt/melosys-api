@@ -16,8 +16,6 @@ public class DoksysBrevbestilling extends Brevbestilling {
     private String ytterligereInformasjon;
 
     public DoksysBrevbestilling() {
-        super();
-        //Tom constructor på grunn av deserialsering i prosessinstans
     }
 
     protected DoksysBrevbestilling(Produserbaredokumenter produserbartdokument,
@@ -59,6 +57,7 @@ public class DoksysBrevbestilling extends Brevbestilling {
     public void settMottaker(Mottaker mottaker) {
         mottakere = List.of(mottaker);
     }
+
     public static class Builder {
         private Produserbaredokumenter produserbartdokument;
         private String avsenderID;

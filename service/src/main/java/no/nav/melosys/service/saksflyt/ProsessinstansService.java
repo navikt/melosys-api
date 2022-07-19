@@ -501,7 +501,7 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
-    public void opprettProsessinstansSendBrev(Behandling behandling, DoksysBrevbestilling brevbestilling, List<Mottaker> mottakere) {
+    public void opprettProsessinstanserSendBrev(Behandling behandling, DoksysBrevbestilling brevbestilling, List<Mottaker> mottakere) {
         for (Mottaker mottaker : mottakere) {
             opprettProsessinstansSendBrev(behandling, brevbestilling, mottaker);
         }
