@@ -70,10 +70,14 @@ public class ProsessinstansBehandler {
         final long ANTALL_TIMER_FØR_GJENOPPRETTELSE = 24;
         final Set<ProsessStatus> MIDLERTIDIGE_STATUSER = Set.of(KLAR, UNDER_BEHANDLING, PÅ_VENT, RESTARTET);
         Collection<Prosessinstans> prosesser = prosessinstansRepository.findAllByStatusIn(MIDLERTIDIGE_STATUSER);
+        LocalDateTime nå = LocalDateTime.now();
         prosesser.stream()
             .filter(prosess -> prosess.getEndretDato().isBefore(LocalDateTime.now().plusHours(24)))
             .forEach(prosess -> {
                 log.warn("Prosessinstans {} gjenopprettet etter {} timer", prosess.getId(), ANTALL_TIMER_FØR_GJENOPPRETTELSE);
+                prosess.setStatus(ProsessStatus.RESTARTET);
+                prosess.setEndretDato(nå);
+                prosessinstansRepository.save(prosess);
                 applicationEventPublisher.publishEvent(new ProsessinstansOpprettetEvent(prosess));
             });
     }
