@@ -57,7 +57,7 @@ public class DokumentServiceFasade {
                                  String begrunnelseKode, String avsenderId, long behandlingId) {
         var brevbestillingRequest = new BrevbestillingRequest.Builder()
             .medProduserbardokument(produserbartDokument)
-            .medMottaker(mottaker.getRolle())
+            .medMottaker(mottaker.hentAktørsRolle())
             .medFritekst(fritekst)
             .medBegrunnelseKode(begrunnelseKode)
             .medBestillersId(avsenderId)
@@ -70,7 +70,7 @@ public class DokumentServiceFasade {
     public void produserDokument(Produserbaredokumenter dokumentType, Mottaker mottaker, long behandlingId, DoksysBrevbestilling brevbestilling) {
         var brevbestillingRequest = new BrevbestillingRequest.Builder()
             .medProduserbardokument(dokumentType)
-            .medMottaker(mottaker.getRolle())
+            .medMottaker(mottaker.hentAktørsRolle())
             .medFritekst(hentFritekst(brevbestilling))
             .medBegrunnelseKode(brevbestilling.getBegrunnelseKode())
             .medBestillersId(brevbestilling.getAvsenderID())

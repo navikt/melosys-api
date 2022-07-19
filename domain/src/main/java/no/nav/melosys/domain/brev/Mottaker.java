@@ -2,11 +2,9 @@ package no.nav.melosys.domain.brev;
 
 import java.util.Objects;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 
-@JsonIgnoreProperties(ignoreUnknown = true)
 public final class Mottaker {
     private Aktoer aktør;
 
@@ -32,7 +30,7 @@ public final class Mottaker {
         return aktør;
     }
 
-    public Aktoersroller getRolle() {
+    public Aktoersroller hentAktørsRolle() {
         return aktør.getRolle();
     }
 

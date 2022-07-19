@@ -508,7 +508,7 @@ public class ProsessinstansService {
     }
 
     public void opprettProsessinstansSendBrev(Behandling behandling, DoksysBrevbestilling brevbestilling, Mottaker mottaker) {
-        brevbestilling.leggTilMottaker(mottaker);
+        brevbestilling.settMottaker(mottaker);
 
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.SEND_BREV)
