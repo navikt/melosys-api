@@ -19,7 +19,6 @@ import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.*;
@@ -37,8 +36,8 @@ public class DistribuerJournalpost implements StegBehandler {
     private final UtenlandskMyndighetService utenlandskMyndighetService;
     private final KodeverkService kodeverkService;
 
-    public DistribuerJournalpost(@Qualifier("system") DoksysFasade doksysFasade,
-                                 @Qualifier("system") EregFasade eregFasade,
+    public DistribuerJournalpost(DoksysFasade doksysFasade,
+                                 EregFasade eregFasade,
                                  KontaktopplysningService kontaktopplysningService,
                                  BehandlingService behandlingService,
                                  UtenlandskMyndighetService utenlandskMyndighetService,
@@ -92,12 +91,12 @@ public class DistribuerJournalpost implements StegBehandler {
                 orgAdresse.setPoststed(
                     kodeverkService.dekod(FellesKodeverk.POSTNUMMER, orgAdresse.getPostnummer()));
             }
-            bestillingsId = doksysFasade.distribuerJournalpost(journalpostId, orgAdresse, kontaktopplysning, brevbestilling.getKontaktpersonNavn());
+            bestillingsId = doksysFasade.distribuerJournalpost(journalpostId, orgAdresse, kontaktopplysning, brevbestilling.getKontaktpersonNavn(), brevbestilling.getDistribusjonstype());
         } else if (hasText(institusjonId)) {
             var utenlandskMyndighet = utenlandskMyndighetService.hentUtenlandskMyndighetForInstitusjonID(institusjonId);
-            bestillingsId = doksysFasade.distribuerJournalpost(journalpostId, utenlandskMyndighet.getAdresse());
+            bestillingsId = doksysFasade.distribuerJournalpost(journalpostId, utenlandskMyndighet.getAdresse(), brevbestilling.getDistribusjonstype());
         } else {
-            bestillingsId = doksysFasade.distribuerJournalpost(journalpostId);
+            bestillingsId = doksysFasade.distribuerJournalpost(journalpostId, brevbestilling.getDistribusjonstype());
         }
         log.info("Distribuering av journalpostId {} bestilt med bestillingsId {}", journalpostId, bestillingsId);
     }

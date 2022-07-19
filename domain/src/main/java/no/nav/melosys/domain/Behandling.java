@@ -427,6 +427,10 @@ public class Behandling extends RegistreringsInfo {
             || Behandlingstema.BESLUTNING_LOVVALG_NORGE.getKode().equalsIgnoreCase(behandlingstemaKode);
     }
 
+    public static boolean erAnmodningOmUnntak(Behandlingstema behandlingstema) {
+        return erAnmodningOmUnntak(behandlingstema.getKode());
+    }
+
     private static boolean erAnmodningOmUnntak(String behandlingstemaKode) {
         return Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL.getKode().equalsIgnoreCase(behandlingstemaKode);
     }
@@ -437,6 +441,10 @@ public class Behandling extends RegistreringsInfo {
 
     public static boolean erBehandlingAvSedForespørsler(String behandlingstemaKode) {
         return erBehandlingAvSedForespørsler(Behandlingstema.valueOf(behandlingstemaKode));
+    }
+
+    public static boolean erRegistreringAvUnntak(Behandlingstema behandlingstema) {
+        return erRegistreringAvUnntak(behandlingstema.getKode());
     }
 
     private static boolean erRegistreringAvUnntak(String behandlingstemaKode) {

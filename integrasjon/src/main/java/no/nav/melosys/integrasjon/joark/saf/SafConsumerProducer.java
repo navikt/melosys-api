@@ -2,11 +2,9 @@ package no.nav.melosys.integrasjon.joark.saf;
 
 import no.nav.melosys.integrasjon.felles.GenericContextExchangeFilter;
 import no.nav.melosys.integrasjon.felles.WebClientConfig;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -22,7 +20,6 @@ public class SafConsumerProducer implements WebClientConfig {
     }
 
     @Bean
-    @Primary
     public SafConsumer safConsumer(WebClient.Builder webClientBuilder, GenericContextExchangeFilter genericContextExchangeFilter) {
         return new SafConsumerImpl(
             webClientBuilder
@@ -32,12 +29,6 @@ public class SafConsumerProducer implements WebClientConfig {
                 .baseUrl(url)
                 .build()
         );
-    }
-
-    @Bean
-    @Qualifier("system")
-    public SafConsumer safSystemConsumer(WebClient.Builder webClientBuilder, GenericContextExchangeFilter genericContextExchangeFilter) {
-        return safConsumer(webClientBuilder, genericContextExchangeFilter);
     }
 
     private void defaultHeaders(HttpHeaders httpHeaders) {

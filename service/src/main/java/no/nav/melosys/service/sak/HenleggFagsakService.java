@@ -15,7 +15,6 @@ import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,7 +31,7 @@ public class HenleggFagsakService {
     public HenleggFagsakService(FagsakService fagsakService,
                                 BehandlingsresultatService behandlingsresultatService,
                                 ProsessinstansService prosessinstansService,
-                                @Qualifier("system") OppgaveService oppgaveService,
+                                OppgaveService oppgaveService,
                                 BehandlingService behandlingService) {
         this.fagsakService = fagsakService;
         this.behandlingsresultatService = behandlingsresultatService;

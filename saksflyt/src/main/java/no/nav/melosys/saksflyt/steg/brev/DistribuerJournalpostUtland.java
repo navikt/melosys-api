@@ -3,6 +3,7 @@ package no.nav.melosys.saksflyt.steg.brev;
 import java.util.Optional;
 
 import no.nav.melosys.domain.UtenlandskMyndighet;
+import no.nav.melosys.domain.arkiv.Distribusjonstype;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
@@ -44,15 +45,16 @@ public class DistribuerJournalpostUtland implements StegBehandler {
             Landkoder mottakerLand = Optional.ofNullable(prosessinstans.getData(ProsessDataKey.DISTRIBUER_MOTTAKER_LAND, Landkoder.class))
                 .orElseThrow(() -> new IkkeFunnetException("Kan ikke distribuere journalpost da mottakerland ikke er satt"));
             UtenlandskMyndighet utenlandskMyndighet = utenlandskMyndighetService.hentUtenlandskMyndighet(mottakerLand);
-            log.info("Bestiller distribuering av journalpost {} til land {} i behandling {}",
-                distribuerbarJournalpost, mottakerLand, prosessinstans.getBehandling().getId());
+            Distribusjonstype distribusjonstype =  prosessinstans.getData(ProsessDataKey.DISTRIBUSJONSTYPE, Distribusjonstype.class);
+            log.info("Bestiller distribuering av journalpost {} til land {} i behandling {} med distribusjonstype {}",
+                distribuerbarJournalpost, mottakerLand, prosessinstans.getBehandling().getId(), distribusjonstype);
 
-            bestillDistribuering(distribuerbarJournalpost, utenlandskMyndighet);
+            bestillDistribuering(distribuerbarJournalpost, utenlandskMyndighet, distribusjonstype);
         }
     }
 
-    private void bestillDistribuering(String journalpostId, UtenlandskMyndighet utenlandskMyndighet) {
-        String bestillingsId = doksysFasade.distribuerJournalpost(journalpostId, utenlandskMyndighet.getAdresse());
+    private void bestillDistribuering(String journalpostId, UtenlandskMyndighet utenlandskMyndighet, Distribusjonstype distribusjonstype) {
+        String bestillingsId = doksysFasade.distribuerJournalpost(journalpostId, utenlandskMyndighet.getAdresse(), distribusjonstype);
         log.info("Distribuering av journalpost {} bestilt med bestillingsId {}", journalpostId, bestillingsId);
     }
 }

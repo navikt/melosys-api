@@ -9,6 +9,7 @@ import com.fasterxml.jackson.datatype.jsr310.ser.InstantSerializer;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
+import no.nav.melosys.integrasjon.dokgen.dto.felles.SaksinfoBruker;
 
 import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
@@ -63,6 +64,11 @@ public class SaksbehandlingstidSoknad extends DokgenDto {
 
     public String getAvsenderLand() {
         return avsenderLand;
+    }
+
+    @Override
+    public SaksinfoBruker getSaksinfo() {
+        return (SaksinfoBruker) super.getSaksinfo();
     }
 
     private Aktoersroller utledAvsendertype(Avsendertyper avsendertype) {

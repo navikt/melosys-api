@@ -12,9 +12,9 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.arkiv.DokumentReferanse;
 import no.nav.melosys.domain.arkiv.FysiskDokument;
 import no.nav.melosys.domain.arkiv.Journalpost;
+import no.nav.melosys.domain.arkiv.Vedlegg;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.SedType;
-import no.nav.melosys.domain.arkiv.Vedlegg;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
@@ -29,7 +29,6 @@ import no.nav.melosys.service.sak.FagsakService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -48,9 +47,9 @@ public class VideresendSoknad extends AbstraktSendUtland {
     private final FagsakService fagsakService;
     private final SedSomBrevService sedSomBrevService;
 
-    protected VideresendSoknad(@Qualifier("system") EessiService eessiService,
+    protected VideresendSoknad(EessiService eessiService,
                                BehandlingsresultatService behandlingsresultatService,
-                               @Qualifier("system") JoarkFasade joarkFasade, FagsakService fagsakService,
+                               JoarkFasade joarkFasade, FagsakService fagsakService,
                                SedSomBrevService sedSomBrevService) {
         super(eessiService, behandlingsresultatService);
         this.joarkFasade = joarkFasade;

@@ -5,7 +5,6 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
-import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
@@ -28,13 +27,11 @@ public class BehandlingsresultatService {
 
     private final BehandlingsresultatRepository behandlingsresultatRepository;
     private final VilkaarsresultatService vilkaarsresultatService;
-    private final Unleash unleash;
 
     public BehandlingsresultatService(BehandlingsresultatRepository behandlingsresultatRepository,
-                                      @Lazy VilkaarsresultatService vilkaarsresultatService, Unleash unleash) {
+                                      @Lazy VilkaarsresultatService vilkaarsresultatService) {
         this.behandlingsresultatRepository = behandlingsresultatRepository;
         this.vilkaarsresultatService = vilkaarsresultatService;
-        this.unleash = unleash;
     }
 
     @Transactional
@@ -73,7 +70,7 @@ public class BehandlingsresultatService {
         Behandlingsresultat nyttBehandlingsresultat = new Behandlingsresultat();
         nyttBehandlingsresultat.setBehandling(behandling);
         nyttBehandlingsresultat.setType(Behandlingsresultattyper.IKKE_FASTSATT);
-        nyttBehandlingsresultat.setBehandlingsmåte(Behandlingsmaate.UDEFINERT);
+        nyttBehandlingsresultat.setBehandlingsmåte(Behandlingsmaate.MANUELT);
         behandlingsresultatRepository.save(nyttBehandlingsresultat);
     }
 
@@ -88,9 +85,8 @@ public class BehandlingsresultatService {
         behandlingsresultatsreplika.setVedtakMetadata(null);
         behandlingsresultatsreplika.setUtfallRegistreringUnntak(null);
         behandlingsresultatsreplika.setUtfallUtpeking(null);
-        if (unleash.isEnabled("melosys.ikke_kopier_behandlingsresultattype")) {
-            behandlingsresultatsreplika.setType(Behandlingsresultattyper.IKKE_FASTSATT);
-        }
+        behandlingsresultatsreplika.setBehandlingsmåte(Behandlingsmaate.MANUELT);
+        behandlingsresultatsreplika.setType(Behandlingsresultattyper.IKKE_FASTSATT);
 
         replikerAvklartefakta(behandlingsresultat, behandlingsresultatsreplika);
         replikerLovvalgsperioder(behandlingsresultat, behandlingsresultatsreplika);
@@ -201,7 +197,7 @@ public class BehandlingsresultatService {
 
     public void oppdaterBehandlingsresultattype(Long id, Behandlingsresultattyper behandlingsresultattype) {
         Optional<Behandlingsresultat> optionalBehandlingsresultat = behandlingsresultatRepository.findById(id);
-        if (optionalBehandlingsresultat.isPresent()){
+        if (optionalBehandlingsresultat.isPresent()) {
             Behandlingsresultat behandlingsresultat = optionalBehandlingsresultat.get();
             log.info("Setter behandlingsresultattype på {} til {}", id, behandlingsresultattype);
             behandlingsresultat.setType(behandlingsresultattype);
@@ -211,9 +207,6 @@ public class BehandlingsresultatService {
 
     public void oppdaterBehandlingsMaate(Long id, Behandlingsmaate behandlingsmaate) {
         Behandlingsresultat behandlingsresultat = hentBehandlingsresultat(id);
-        if (behandlingsresultat.getBehandlingsmåte() != Behandlingsmaate.UDEFINERT) {
-            throw new FunksjonellException("Behandlingsmaate kan ikke oppdateres etter det er definert!");
-        }
 
         behandlingsresultat.setBehandlingsmåte(behandlingsmaate);
         behandlingsresultatRepository.save(behandlingsresultat);

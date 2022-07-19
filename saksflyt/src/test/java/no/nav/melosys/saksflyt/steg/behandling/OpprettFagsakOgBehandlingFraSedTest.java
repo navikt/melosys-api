@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
+import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
@@ -26,7 +27,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class OpprettFagsakOgBehandlingFraSedTest {
+class OpprettFagsakOgBehandlingFraSedTest {
 
     @Mock
     private FagsakService fagsakService;
@@ -37,25 +38,29 @@ public class OpprettFagsakOgBehandlingFraSedTest {
     private ArgumentCaptor<OpprettSakRequest> opprettSakRequestArgumentCaptor;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         opprettFagsakOgBehandlingFraSed = new OpprettFagsakOgBehandlingFraSed(fagsakService);
-        when(fagsakService.nyFagsakOgBehandling(any())).thenReturn(hentFagsak());
+        when(fagsakService.nyFagsakOgBehandling(any())).thenReturn(lagFagsak());
     }
 
     @Test
-    public void utfør_verifiserNyFagsakOgBehandlingBlirOpprettet() throws Exception {
-        Prosessinstans prosessinstans = hentProsessinstans();
+    void utfør_verifiserNyFagsakOgBehandlingBlirOpprettet() {
+        Prosessinstans prosessinstans = lagProsessinstans();
         prosessinstans.setType(ProsessType.ANMODNING_OM_UNNTAK);
+
         opprettFagsakOgBehandlingFraSed.utfør(prosessinstans);
+
         verify(fagsakService).nyFagsakOgBehandling(opprettSakRequestArgumentCaptor.capture());
         assertThat(opprettSakRequestArgumentCaptor.getValue().getSakstype()).isEqualTo(Sakstyper.EU_EOS);
+        assertThat(opprettSakRequestArgumentCaptor.getValue().getSakstema()).isEqualTo(Sakstemaer.UNNTAK);
     }
 
-    private Prosessinstans hentProsessinstans() {
+    private Prosessinstans lagProsessinstans() {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, "123");
         prosessinstans.setData(ProsessDataKey.DOKUMENT_ID, "321");
         prosessinstans.setData(ProsessDataKey.GSAK_SAK_ID, 123);
+        prosessinstans.setData(ProsessDataKey.SAKSTEMA, Sakstemaer.UNNTAK);
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, Behandlingstema.BESLUTNING_LOVVALG_NORGE);
 
         MelosysEessiMelding melosysEessiMelding = new MelosysEessiMelding();
@@ -66,7 +71,7 @@ public class OpprettFagsakOgBehandlingFraSedTest {
         return prosessinstans;
     }
 
-    private Fagsak hentFagsak() {
+    private Fagsak lagFagsak() {
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer("MEL-123");
 

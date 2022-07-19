@@ -49,6 +49,23 @@ class UfmKontrollTest {
     }
 
     @Test
+    void periodeOver24MndOgEnDag_medNøyaktig2ÅrOg1Dag_erRett() {
+        UfmKontrollData kontrollData = kontrollData(DATE.plusYears(2), DATE.plusYears(4));
+
+
+        assertThat(UfmKontroll.periodeOver24MånederOgEnDag(kontrollData)).isNull();
+    }
+
+    @Test
+    void periodeOver24MndOgEnDag_medOver1DagOverlapp_erFeil_verifiserBegrunnelse() {
+        UfmKontrollData kontrollData = kontrollData(DATE.plusYears(2).minusDays(1), DATE.plusYears(4));
+
+
+        assertThat(UfmKontroll.periodeOver24MånederOgEnDag(kontrollData)).isEqualTo(Kontroll_begrunnelser.PERIODEN_OVER_24_MD);
+    }
+
+
+    @Test
     void periodeOver5År_erFeil_verifiserBegrunnelse() {
         assertThat(UfmKontroll.periodeOver5År(kontrollData())).isEqualTo(Kontroll_begrunnelser.PERIODEN_OVER_5_AR);
     }

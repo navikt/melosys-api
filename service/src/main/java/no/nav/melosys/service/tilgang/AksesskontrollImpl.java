@@ -42,7 +42,7 @@ public class AksesskontrollImpl implements Aksesskontroll {
 
     @Override
     public void autoriserSakstilgang(Fagsak fagsak) {
-        brukertilgangKontroll.validerTilgangTilAktørID(fagsak.hentBrukersAktørID());
+        fagsak.finnBrukersAktørID().ifPresent(brukertilgangKontroll::validerTilgangTilAktørID);
     }
 
     @Override

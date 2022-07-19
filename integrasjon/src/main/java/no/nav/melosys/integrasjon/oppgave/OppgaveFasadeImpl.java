@@ -71,7 +71,7 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
 
         return oppgaver.stream().map(OppgaveFasadeImpl::oppgaveMappingDtoTilDomain)
             .filter(erGyldigBehandlingsoppgave)
-            .collect(Collectors.toList());
+            .toList();
     }
 
     @Override
@@ -219,7 +219,7 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
     }
 
     @Override
-    public List<Oppgave> finnOppgaverMedBrukerID(String aktørId) {
+    public List<Oppgave> finnOppgaverMedAktørId(String aktørId) {
         OppgaveSearchRequest oppgaveSearchRequest = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
             .medAktørId(aktørId)
             .medTema(new String[]{Tema.MED.getKode(), Tema.UFM.getKode()})
@@ -230,7 +230,22 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
 
         return oppgaveConsumer.hentOppgaveListe(oppgaveSearchRequest).stream()
             .map(OppgaveFasadeImpl::oppgaveMappingDtoTilDomain)
-            .collect(Collectors.toList());
+            .toList();
+    }
+
+    @Override
+    public List<Oppgave> finnOppgaverMedOrgnr(String orgnr) {
+        OppgaveSearchRequest oppgaveSearchRequest = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
+            .medOrgnr(orgnr)
+            .medTema(new String[]{Tema.MED.getKode(), Tema.UFM.getKode()})
+            .medOppgaveTyper(hentGyldigeOppgavetyper())
+            .medSorteringsfelt(SORTERINGSFELT)
+            .medStatusKategori(OPPGAVE_STATUSKATEGORI_AAPEN)
+            .build();
+
+        return oppgaveConsumer.hentOppgaveListe(oppgaveSearchRequest).stream()
+            .map(OppgaveFasadeImpl::oppgaveMappingDtoTilDomain)
+            .toList();
     }
 
     @Override
@@ -244,7 +259,7 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
 
         return oppgaveConsumer.hentOppgaveListe(oppgaveSearchRequest).stream()
             .map(OppgaveFasadeImpl::oppgaveMappingDtoTilDomain)
-            .collect(Collectors.toList());
+            .toList();
     }
 
     @Override
@@ -260,7 +275,7 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
 
         return oppgaveConsumer.hentOppgaveListe(oppgaveSearchRequest).stream()
             .map(OppgaveFasadeImpl::oppgaveMappingDtoTilDomain)
-            .collect(Collectors.toList());
+            .toList();
     }
 
     static Oppgave oppgaveMappingDtoTilDomain(OppgaveDto oppgaveDto) {
@@ -269,6 +284,7 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
         domainOppgaveBuilder
             .setAktivDato(oppgaveDto.getAktivDato())
             .setAktørId(oppgaveDto.getAktørId())
+            .setOrgnr(oppgaveDto.getOrgnr())
             .setBeskrivelse(oppgaveDto.getBeskrivelse())
             .setOpprettetTidspunkt(oppgaveDto.getOpprettetTidspunkt())
             .setFristFerdigstillelse(oppgaveDto.getFristFerdigstillelse())

@@ -11,7 +11,6 @@ import no.nav.melosys.service.oppgave.OppgaveFactory;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.GJENBRUK_OPPGAVE;
@@ -22,7 +21,7 @@ public class GjenbrukOppgave implements StegBehandler {
 
     private final OppgaveService oppgaveService;
 
-    public GjenbrukOppgave(@Qualifier("system") OppgaveService oppgaveService) {
+    public GjenbrukOppgave(OppgaveService oppgaveService) {
         this.oppgaveService = oppgaveService;
     }
 

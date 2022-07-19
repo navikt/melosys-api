@@ -21,7 +21,6 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.vedtak.publisering.dto.Fullmektig;
 import no.nav.melosys.service.vedtak.publisering.dto.*;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,7 +41,7 @@ public class FattetVedtakService {
 
     public FattetVedtakService(FattetVedtakProducer fattetVedtakProducer, BehandlingService behandlingService,
                                BehandlingsresultatService behandlingsresultatService,
-                               @Qualifier("system") PersondataFasade persondataFasade) {
+                               PersondataFasade persondataFasade) {
         this.fattetVedtakProducer = fattetVedtakProducer;
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;

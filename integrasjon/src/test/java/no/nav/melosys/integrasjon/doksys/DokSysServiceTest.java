@@ -8,6 +8,7 @@ import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Kontaktopplysning;
 import no.nav.melosys.domain.UtenlandskMyndighet;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
+import no.nav.melosys.domain.arkiv.Distribusjonstype;
 import no.nav.melosys.domain.dokument.arbeidsforhold.Aktoertype;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
@@ -200,13 +201,14 @@ class DokSysServiceTest {
         when(distribuerJournalpostConsumer.distribuerJournalpost(any(DistribuerJournalpostRequest.class)))
             .thenReturn(new DistribuerJournalpostResponse("123"));
 
-        dokSysService.distribuerJournalpost("123456", mottakeradresse);
+        dokSysService.distribuerJournalpost("123456", mottakeradresse, Distribusjonstype.VIKTIG);
 
         ArgumentCaptor<DistribuerJournalpostRequest> captor = ArgumentCaptor.forClass(DistribuerJournalpostRequest.class);
         verify(distribuerJournalpostConsumer).distribuerJournalpost(captor.capture());
 
         assertThat(captor.getValue().getJournalpostId()).isEqualTo("123456");
         assertThat(captor.getValue().getAdresse().getAdresseType()).isEqualTo("norskPostadresse");
+        assertThat(captor.getValue().getDistribusjonstype()).isEqualTo(Distribusjonstype.VIKTIG);
     }
 
     @Test
@@ -222,13 +224,14 @@ class DokSysServiceTest {
         when(distribuerJournalpostConsumer.distribuerJournalpost(any(DistribuerJournalpostRequest.class)))
             .thenReturn(new DistribuerJournalpostResponse("123"));
 
-        dokSysService.distribuerJournalpost("123456", mottakeradresse);
+        dokSysService.distribuerJournalpost("123456", mottakeradresse, Distribusjonstype.VIKTIG);
 
         ArgumentCaptor<DistribuerJournalpostRequest> captor = ArgumentCaptor.forClass(DistribuerJournalpostRequest.class);
         verify(distribuerJournalpostConsumer).distribuerJournalpost(captor.capture());
 
         assertThat(captor.getValue().getJournalpostId()).isEqualTo("123456");
         assertThat(captor.getValue().getAdresse().getAdresseType()).isEqualTo("utenlandskPostadresse");
+        assertThat(captor.getValue().getDistribusjonstype()).isEqualTo(Distribusjonstype.VIKTIG);
     }
 
     @Test
@@ -238,13 +241,14 @@ class DokSysServiceTest {
         when(distribuerJournalpostConsumer.distribuerJournalpost(any(DistribuerJournalpostRequest.class)))
             .thenReturn(new DistribuerJournalpostResponse("123"));
 
-        dokSysService.distribuerJournalpost(journalpostId);
+        dokSysService.distribuerJournalpost(journalpostId, Distribusjonstype.ANNET);
 
         ArgumentCaptor<DistribuerJournalpostRequest> captor = ArgumentCaptor.forClass(DistribuerJournalpostRequest.class);
         verify(distribuerJournalpostConsumer).distribuerJournalpost(captor.capture());
 
         assertEquals(journalpostId, captor.getValue().getJournalpostId());
         assertNull(captor.getValue().getAdresse());
+        assertThat(captor.getValue().getDistribusjonstype()).isEqualTo(Distribusjonstype.ANNET);
     }
 
     @Test
@@ -258,7 +262,7 @@ class DokSysServiceTest {
         when(distribuerJournalpostConsumer.distribuerJournalpost(any(DistribuerJournalpostRequest.class)))
             .thenReturn(new DistribuerJournalpostResponse("123"));
 
-        dokSysService.distribuerJournalpost(journalpostId, strukturertAdresse, null, null);
+        dokSysService.distribuerJournalpost(journalpostId, strukturertAdresse, null, null, Distribusjonstype.VEDTAK);
 
         ArgumentCaptor<DistribuerJournalpostRequest> captor = ArgumentCaptor.forClass(DistribuerJournalpostRequest.class);
         verify(distribuerJournalpostConsumer).distribuerJournalpost(captor.capture());
@@ -268,6 +272,7 @@ class DokSysServiceTest {
         assertEquals("norskPostadresse", request.getAdresse().getAdresseType());
         assertEquals(strukturertAdresse.getGatenavn(), request.getAdresse().getAdresselinje1());
         assertEquals(strukturertAdresse.getPostnummer(), request.getAdresse().getPostnummer());
+        assertThat(captor.getValue().getDistribusjonstype()).isEqualTo(Distribusjonstype.VEDTAK);
     }
 
     @Test
@@ -281,7 +286,7 @@ class DokSysServiceTest {
         when(distribuerJournalpostConsumer.distribuerJournalpost(any(DistribuerJournalpostRequest.class)))
             .thenReturn(new DistribuerJournalpostResponse("123"));
 
-        dokSysService.distribuerJournalpost(journalpostId, strukturertAdresse, null, null);
+        dokSysService.distribuerJournalpost(journalpostId, strukturertAdresse, null, null, Distribusjonstype.VEDTAK);
 
         ArgumentCaptor<DistribuerJournalpostRequest> captor = ArgumentCaptor.forClass(DistribuerJournalpostRequest.class);
         verify(distribuerJournalpostConsumer).distribuerJournalpost(captor.capture());
@@ -291,6 +296,7 @@ class DokSysServiceTest {
         assertEquals("utenlandskPostadresse", request.getAdresse().getAdresseType());
         assertEquals(strukturertAdresse.getGatenavn(), request.getAdresse().getAdresselinje1());
         assertNull(request.getAdresse().getPostnummer());
+        assertThat(captor.getValue().getDistribusjonstype()).isEqualTo(Distribusjonstype.VEDTAK);
     }
 
     @Test
@@ -307,7 +313,7 @@ class DokSysServiceTest {
         when(distribuerJournalpostConsumer.distribuerJournalpost(any(DistribuerJournalpostRequest.class)))
             .thenReturn(new DistribuerJournalpostResponse("123"));
 
-        dokSysService.distribuerJournalpost(journalpostId, strukturertAdresse, kontaktopplysning, null);
+        dokSysService.distribuerJournalpost(journalpostId, strukturertAdresse, kontaktopplysning, null, Distribusjonstype.VEDTAK);
 
         ArgumentCaptor<DistribuerJournalpostRequest> captor = ArgumentCaptor.forClass(DistribuerJournalpostRequest.class);
         verify(distribuerJournalpostConsumer).distribuerJournalpost(captor.capture());
@@ -318,6 +324,7 @@ class DokSysServiceTest {
         assertEquals("Att: Fetter Anton", request.getAdresse().getAdresselinje1());
         assertEquals(strukturertAdresse.getGatenavn(), request.getAdresse().getAdresselinje2());
         assertEquals(strukturertAdresse.getPostnummer(), request.getAdresse().getPostnummer());
+        assertThat(captor.getValue().getDistribusjonstype()).isEqualTo(Distribusjonstype.VEDTAK);
     }
 
     @Test
@@ -334,7 +341,7 @@ class DokSysServiceTest {
         when(distribuerJournalpostConsumer.distribuerJournalpost(any(DistribuerJournalpostRequest.class)))
             .thenReturn(new DistribuerJournalpostResponse("123"));
 
-        dokSysService.distribuerJournalpost(journalpostId, strukturertAdresse, kontaktopplysning, "Kari Kontakt");
+        dokSysService.distribuerJournalpost(journalpostId, strukturertAdresse, kontaktopplysning, "Kari Kontakt", Distribusjonstype.ANNET);
 
         ArgumentCaptor<DistribuerJournalpostRequest> captor = ArgumentCaptor.forClass(DistribuerJournalpostRequest.class);
         verify(distribuerJournalpostConsumer).distribuerJournalpost(captor.capture());
@@ -345,6 +352,7 @@ class DokSysServiceTest {
         assertEquals("Att: Kari Kontakt", request.getAdresse().getAdresselinje1());
         assertEquals(strukturertAdresse.getGatenavn(), request.getAdresse().getAdresselinje2());
         assertEquals(strukturertAdresse.getPostnummer(), request.getAdresse().getPostnummer());
+        assertThat(captor.getValue().getDistribusjonstype()).isEqualTo(Distribusjonstype.ANNET);
     }
 
     private Dokumentbestillingsinformasjon hentDokumentBestillingInfoFraCaptor(ArgumentCaptor<ProduserIkkeredigerbartDokumentRequest> captor) {

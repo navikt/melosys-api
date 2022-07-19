@@ -5,10 +5,13 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
 
+import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.arkiv.DokumentReferanse;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
+import no.nav.melosys.domain.dokument.sed.SedDokument;
+import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
@@ -24,9 +27,9 @@ import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
+import no.nav.melosys.service.kontroll.feature.unntak.AnmodningUnntakKontrollService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
-import no.nav.melosys.service.kontroll.feature.unntak.AnmodningUnntakKontrollService;
 import no.nav.melosys.sikkerhet.context.TestSubjectHandler;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -37,6 +40,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static no.nav.melosys.domain.SaksopplysningType.SEDOPPL;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.*;
@@ -65,6 +69,7 @@ class AnmodningUnntakServiceTest {
     private AnmodningUnntakKontrollService anmodningUnntakKontrollService;
     @Mock
     private JoarkFasade joarkFasade;
+    private FakeUnleash unleash = new FakeUnleash();
 
     private AnmodningUnntakService anmodningUnntakService;
 
@@ -80,7 +85,7 @@ class AnmodningUnntakServiceTest {
     public void setUp() {
         anmodningUnntakService = new AnmodningUnntakService(
             behandlingService, behandlingsresultatService, oppgaveService, prosessinstansService, anmodningsperiodeService,
-            lovvalgsperiodeService, landvelgerService, eessiService, anmodningUnntakKontrollService, joarkFasade);
+            lovvalgsperiodeService, landvelgerService, eessiService, anmodningUnntakKontrollService, joarkFasade, unleash);
 
         TestSubjectHandler.set(new TestSubjectHandler());
     }
@@ -185,6 +190,31 @@ class AnmodningUnntakServiceTest {
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> anmodningUnntakService.anmodningOmUnntakSvar(BEHANDLING_ID, null))
             .withMessageContaining("Kan ikke ha fritekst lengre enn 255 for avslag på anmodning om unntak");
+    }
+
+    @Test
+    void anmodningOmUnntakSvar_kanIkkeOppretteSedPåBuc_forventException() {
+        unleash.enable("melosys.eessi.handlingssjekk_sed");
+
+        Behandling behandling = lagBehandling();
+        behandling.setTema(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL);
+        behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
+        Saksopplysning saksopplysning = new Saksopplysning();
+        saksopplysning.setType(SEDOPPL);
+
+        SedDokument sedDokument = new SedDokument();
+        sedDokument.setRinaSaksnummer("55667788");
+        saksopplysning.setDokument(sedDokument);
+
+        behandling.setSaksopplysninger(Set.of(saksopplysning));
+
+        when(behandlingService.hentBehandling(BEHANDLING_ID)).thenReturn(behandling);
+        when(anmodningsperiodeService.hentAnmodningsperiodeSvarForBehandling(BEHANDLING_ID)).thenReturn(lagAnmodningsperiodeSvar());
+        when(eessiService.kanOppretteSedTyperPåBuc("55667788", SedType.A011)).thenReturn(false);
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> anmodningUnntakService.anmodningOmUnntakSvar(BEHANDLING_ID, null))
+            .withMessageContaining("Kan ikke opprette SedType A011 på rinaSaknummer: 55667788");
     }
 
     private static Behandling lagBehandling() {

@@ -10,6 +10,7 @@ import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.integrasjon.dokgen.dto.felles.Innvilgelse;
+import no.nav.melosys.integrasjon.dokgen.dto.felles.SaksinfoBruker;
 import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.*;
 
 import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
@@ -120,6 +121,11 @@ public class InnvilgelseFtrl extends DokgenDto {
         return loennUtlandSkattepliktig;
     }
 
+    @Override
+    public SaksinfoBruker getSaksinfo() {
+        return (SaksinfoBruker) super.getSaksinfo();
+    }
+
     public InnvilgelseFtrl(Builder builder) {
         super(builder.brevbestilling, Aktoersroller.BRUKER);
         this.innvilgelse = Innvilgelse.av(builder.brevbestilling);
@@ -145,7 +151,7 @@ public class InnvilgelseFtrl extends DokgenDto {
         this.loennUtlandSkattepliktig = builder.loennUtlandSkattepliktig;
     }
 
-    static public class Builder {
+    public static class Builder {
         private List<Periode> perioder;
         private boolean erFullstendigInnvilget;
         private String ftrl_2_8_begrunnelse;

@@ -7,6 +7,7 @@ import java.util.Set;
 
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.arkiv.Distribusjonstype;
 import no.nav.melosys.domain.arkiv.SaksvedleggBestilling;
 import no.nav.melosys.domain.brev.*;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
@@ -26,7 +27,6 @@ import no.nav.melosys.service.dokument.brev.mapper.DokgenMalMapper;
 import no.nav.melosys.service.dokument.brev.mapper.DokumentproduksjonsInfoMapper;
 import no.nav.melosys.service.ldap.SaksbehandlerService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -51,9 +51,9 @@ public class DokgenService {
 
     public DokgenService(DokgenConsumer dokgenConsumer,
                          DokumentproduksjonsInfoMapper dokumentproduksjonsInfoMapper,
-                         @Qualifier("system") JoarkFasade joarkFasade,
+                         JoarkFasade joarkFasade,
                          DokgenMalMapper dokgenMalMapper, BehandlingService behandlingService,
-                         @Qualifier("system") EregFasade eregFasade,
+                         EregFasade eregFasade,
                          KontaktopplysningService kontaktopplysningService,
                          BrevmottakerService brevmottakerService, ProsessinstansService prosessinstansService,
                          SaksbehandlerService saksbehandlerService,
@@ -233,28 +233,32 @@ public class DokgenService {
     private DokgenBrevbestilling.Builder<?> lagDokgenBrevbestilling(BrevbestillingRequest brevbestillingRequest) {
         return switch (brevbestillingRequest.getProduserbardokument()) {
             case MANGELBREV_ARBEIDSGIVER, MANGELBREV_BRUKER -> new MangelbrevBrevbestilling.Builder()
+                .medDistribusjonstype(Distribusjonstype.VIKTIG)
                 .medInnledningFritekst(brevbestillingRequest.getInnledningFritekst())
                 .medManglerInfoFritekst(brevbestillingRequest.getManglerFritekst())
                 .medKontaktpersonNavn(brevbestillingRequest.getKontaktpersonNavn());
             case INNVILGELSE_FOLKETRYGDLOVEN_2_8, STORBRITANNIA -> new InnvilgelseBrevbestilling.Builder()
+                .medDistribusjonstype(Distribusjonstype.VEDTAK)
                 .medInnledningFritekst(brevbestillingRequest.getInnledningFritekst())
                 .medBegrunnelseFritekst(brevbestillingRequest.getBegrunnelseFritekst())
                 .medEktefelleFritekst(brevbestillingRequest.getEktefelleFritekst())
                 .medBarnFritekst(brevbestillingRequest.getBarnFritekst())
                 .medVirksomhetArbeidsgiverSkalHaKopi(inneholderArbeidsgiverSomKopimottaker(brevbestillingRequest.getKopiMottakere()))
                 .medNyVurderingBakgrunn(brevbestillingRequest.getNyVurderingBakgrunn());
-            case GENERELT_FRITEKSTBREV_BRUKER, GENERELT_FRITEKSTBREV_ARBEIDSGIVER ->
-                new FritekstbrevBrevbestilling.Builder()
-                    .medFritekstTittel(brevbestillingRequest.getFritekstTittel())
-                    .medFritekst(brevbestillingRequest.getFritekst())
-                    .medKontaktpersonNavn(brevbestillingRequest.getKontaktpersonNavn())
-                    .medKontaktopplysninger(brevbestillingRequest.isKontaktopplysninger());
+            case GENERELT_FRITEKSTBREV_BRUKER, GENERELT_FRITEKSTBREV_ARBEIDSGIVER, GENERELT_FRITEKSTBREV_VIRKSOMHET -> new FritekstbrevBrevbestilling.Builder()
+                .medDistribusjonstype(Distribusjonstype.VIKTIG)
+                .medFritekstTittel(brevbestillingRequest.getFritekstTittel())
+                .medFritekst(brevbestillingRequest.getFritekst())
+                .medKontaktpersonNavn(brevbestillingRequest.getKontaktpersonNavn())
+                .medKontaktopplysninger(brevbestillingRequest.isKontaktopplysninger());
             case AVSLAG_MANGLENDE_OPPLYSNINGER -> new AvslagBrevbestilling.Builder()
+                .medDistribusjonstype(Distribusjonstype.VEDTAK)
                 .medFritekst(brevbestillingRequest.getFritekst());
             case MELDING_HENLAGT_SAK -> new HenleggelseBrevbestilling.Builder()
+                .medDistribusjonstype(Distribusjonstype.VIKTIG)
                 .medFritekst(brevbestillingRequest.getFritekst())
                 .medBegrunnelseKode(brevbestillingRequest.getBegrunnelseKode());
-            default -> new DokgenBrevbestilling.Builder<>();
+            default -> new DokgenBrevbestilling.Builder<>().medDistribusjonstype(Distribusjonstype.VIKTIG);
         };
     }
 }

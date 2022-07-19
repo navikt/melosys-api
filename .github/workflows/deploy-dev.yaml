@@ -9,7 +9,7 @@ on:
     branches:
       - master
 env:
-  docker_image: docker.pkg.github.com/${{ github.repository }}/melosys-api:${{ github.sha }}
+  docker_image: ghcr.io/${{ github.repository }}/melosys-api:${{ github.sha }}
 jobs:
   build:
     name: Build
@@ -52,7 +52,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           docker build --tag ${docker_image} .
-          docker login docker.pkg.github.com -u ${GITHUB_REPOSITORY} -p ${GITHUB_TOKEN}
+          docker login ghcr.io -u ${GITHUB_REPOSITORY} -p ${GITHUB_TOKEN}
           docker push ${docker_image}
       - name: Deploy til dev (Q2)
         uses: nais/deploy/actions/deploy@v1

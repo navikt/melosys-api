@@ -15,10 +15,8 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.DokumentHentingService;
-import no.nav.melosys.service.dokument.DokumentHentingSystemService;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.persondata.PersondataFasade;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -35,9 +33,9 @@ public class DokgenMapperDatahenter {
     private final DokumentHentingService dokumentHentingService;
 
     protected DokgenMapperDatahenter(BehandlingsresultatService behandlingsresultatService,
-                                     @Qualifier("system") EregFasade eregFasade,
-                                     @Qualifier("system") PersondataFasade persondataFasade,
-                                     DokumentHentingSystemService dokumentHentingService,
+                                     EregFasade eregFasade,
+                                     PersondataFasade persondataFasade,
+                                     DokumentHentingService dokumentHentingService,
                                      KodeverkService kodeverkService) {
         this.behandlingsresultatService = behandlingsresultatService;
         this.eregFasade = eregFasade;
@@ -84,7 +82,10 @@ public class DokgenMapperDatahenter {
         return behandlingsresultatService.hentBehandlingsresultat(behandlingId);
     }
 
-    Persondata hentPersondata(DokgenBrevbestilling brevbestilling) {
+    Persondata hentPersondata(DokgenBrevbestilling brevbestilling, Aktoer mottaker) {
+        if (mottaker.erVirksomhet()) {
+            return null;
+        }
         final var behandling = brevbestilling.getBehandling();
         return persondataFasade.hentPerson(behandling.getFagsak().hentBrukersAktørID());
     }

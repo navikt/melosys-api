@@ -45,6 +45,7 @@ import no.nav.melosys.tjenester.gui.util.SaksbehandlingDataFactory;
 import org.jeasy.random.EasyRandom;
 import org.jeasy.random.EasyRandomParameters;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -142,19 +143,19 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
     @Test
     void hentFagsakGir200OkOgDto() {
         Fagsak fagsak = lagFagsak();
-        testHentFagsak(ResponseEntity.status(HttpStatus.OK).body(lagFagsakDto(fagsak)));
-    }
+        Aktoer bruker = new Aktoer();
+        bruker.setRolle(Aktoersroller.BRUKER);
+        fagsak.setAktører(Set.of(bruker));
 
-    private void testHentFagsak(ResponseEntity<FagsakDto> forventning) {
-        Fagsak fagsak = lagFagsak();
+        var forventning = ResponseEntity.status(HttpStatus.OK).body(lagFagsakDto(fagsak));
         FagsakTjeneste instans = lagFagsakTjeneste(fagsak);
+
+
         ResponseEntity<FagsakDto> resultat = instans.hentFagsak("123");
+
+
         assertThat(resultat.getStatusCode()).isEqualTo(forventning.getStatusCode());
-        if (forventning.getBody() == null) {
-            assertThat(resultat.getBody()).isNull();
-        } else {
-            assertThat(resultat.getBody()).usingRecursiveComparison().isEqualTo(forventning.getBody());
-        }
+        assertThat(resultat.getBody()).usingRecursiveComparison().isEqualTo(forventning.getBody());
     }
 
     @Test
@@ -187,7 +188,9 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
         FagsakTjeneste instans = lagFagsakTjeneste(fagsak);
 
         List<FagsakOppsummeringDto> resultat = instans.hentFagsaker(new FagsakSokDto(FNR, null, null));
-        assertThat(resultat).hasSize(1).extracting(FagsakOppsummeringDto::getSammensattNavn).containsExactly("UKJENT");
+        assertThat(resultat).hasSize(1)
+            .flatExtracting(FagsakOppsummeringDto::getNavn, FagsakOppsummeringDto::getHovedpartRolle)
+            .containsExactly("UKJENT", Aktoersroller.BRUKER);
     }
 
     @Test
@@ -207,7 +210,9 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
         when(organisasjonOppslagService.hentOrganisasjon(ORGNR)).thenReturn(organisajonsdokument);
 
         List<FagsakOppsummeringDto> resultat = instans.hentFagsaker(new FagsakSokDto(null, null, ORGNR));
-        assertThat(resultat).hasSize(1).extracting(FagsakOppsummeringDto::getSammensattNavn).containsExactly("Moe Organisasjon");
+        assertThat(resultat).hasSize(1)
+            .flatExtracting(FagsakOppsummeringDto::getNavn, FagsakOppsummeringDto::getHovedpartRolle)
+            .containsExactly("Moe Organisasjon", Aktoersroller.VIRKSOMHET);
     }
 
     @Test
@@ -223,12 +228,17 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
         FagsakTjeneste instans = lagFagsakTjeneste(fagsak);
 
         List<FagsakOppsummeringDto> resultat = instans.hentFagsaker(new FagsakSokDto(null, null, ORGNR));
-        assertThat(resultat).hasSize(1).extracting(FagsakOppsummeringDto::getSammensattNavn).containsExactly("UKJENT");
+        assertThat(resultat).hasSize(1)
+            .flatExtracting(FagsakOppsummeringDto::getNavn, FagsakOppsummeringDto::getHovedpartRolle)
+            .containsExactly("UKJENT", Aktoersroller.VIRKSOMHET);
     }
 
     @Test
     void hentFagsaker_medSaksnummer_finnerSakMottarListeMedEttElement() {
         Fagsak fagsak = lagFagsak();
+        Aktoer bruker = new Aktoer();
+        bruker.setRolle(Aktoersroller.BRUKER);
+        fagsak.setAktører(Set.of(bruker));
         FagsakTjeneste instans = lagFagsakTjeneste(fagsak);
         when(fagsakService.finnFagsakFraSaksnummer("123")).thenReturn(Optional.of(fagsak));
 
@@ -268,7 +278,7 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
 
         assertThat(fagsakOppsummeringDto.getSaksnummer()).isEqualTo("MEL-13");
         assertThat(fagsakOppsummeringDto.getOpprettetDato()).isEqualTo(reqDateInstant);
-        assertThat(fagsakOppsummeringDto.getSammensattNavn()).isEqualTo("Joe Moe");
+        assertThat(fagsakOppsummeringDto.getNavn()).isEqualTo("Joe Moe");
 
         BehandlingOversiktDto behandlingFørst = fagsakOppsummeringDto.getBehandlingOversikter().get(0);
         assertThat(behandlingFørst.getBehandlingID()).isEqualTo(1L);
@@ -378,7 +388,8 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
         result.setSakstype(Sakstyper.EU_EOS);
         result.setSaksstatus(Saksstatuser.OPPRETTET);
         result.setSaksnummer("MEL-1");
-        result.setSammensattNavn("Joe Moe");
+        result.setNavn("Joe Moe");
+        result.setHovedpartRolle(Aktoersroller.BRUKER);
 
         BehandlingOversiktDto behandlingOversiktDto = new BehandlingOversiktDto();
         behandlingOversiktDto.setBehandlingID(behandling.getId());
@@ -401,6 +412,7 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
         resultat.setSaksnummer(fagsak.getSaksnummer());
         resultat.setSakstype(fagsak.getType());
         resultat.setSaksstatus(fagsak.getStatus());
+        resultat.setHovedpartRolle(fagsak.getHovedpartRolle());
         return resultat;
     }
 

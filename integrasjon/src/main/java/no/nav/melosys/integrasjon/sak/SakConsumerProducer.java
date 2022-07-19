@@ -1,10 +1,8 @@
 package no.nav.melosys.integrasjon.sak;
 
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 
 @Configuration
 public class SakConsumerProducer {
@@ -16,15 +14,7 @@ public class SakConsumerProducer {
     }
 
     @Bean
-    @Primary
     public SakConsumer sakConsumer() {
         return new SakConsumerImpl(endpointUrl);
     }
-
-    @Bean
-    @Qualifier("system")
-    public SakConsumer sakSystemConsumer() {
-        return sakConsumer();
-    }
-
 }

@@ -5,7 +5,6 @@ import java.util.Optional;
 
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.service.journalforing.JournalfoeringService;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringOpprettDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringSedDto;
@@ -31,7 +30,6 @@ import static org.mockito.Mockito.when;
 class JournalfoeringTjenesteTest extends JsonSchemaTestParent {
     private static final Logger log = LoggerFactory.getLogger(JournalfoeringTjenesteTest.class);
     private static final String JOURNALFOERING_SCHEMA = "journalforing-schema.json";
-    private static final String JOURNALFOERING_TILORDNE_SCHEMA = "journalforing-tilordne-post-schema.json";
     private static final String JOURNALFOERING_OPPRETT_SCHEMA = "journalforing-opprett-post-schema.json";
     private static final String JOURNALFOERING_SED_SCHEMA = "journalforing-sed-post-schema.json";
     private static final String SAMPLE_ORGNR = "899655123";
@@ -58,7 +56,7 @@ class JournalfoeringTjenesteTest extends JsonSchemaTestParent {
         Journalpost journalpost = random.nextObject(Journalpost.class);
         journalpost.setAvsenderId(SAMPLE_ORGNR);
         when(journalføringService.hentJournalpost(anyString())).thenReturn(journalpost);
-        when(journalføringService.finnBrukerIdent(journalpost)).thenReturn(Optional.of(SAMPLE_FNR));
+        when(journalføringService.finnHovedpartIdent(journalpost)).thenReturn(Optional.of(SAMPLE_FNR));
 
         JournalpostDto journalpostDto = tjeneste.hentJournalpostOpplysninger(anyString()).getBody();
 
@@ -67,17 +65,23 @@ class JournalfoeringTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    void journalføringTilordne_validerKallOgSchema() throws IOException {
+    void journalførOgKnyttTilSak_validerKall() {
         JournalfoeringTilordneDto journalføringDto = random.nextObject(JournalfoeringTilordneDto.class);
-        journalføringDto.setVirksomhetOrgnr(null);
-        journalføringDto.setBrukerID(SAMPLE_FNR);
-        journalføringDto.setBehandlingstypeKode(Behandlingstyper.ENDRET_PERIODE.getKode());
 
-        tjeneste.journalførOgTilordneSak(journalføringDto);
+        tjeneste.journalførOgKnyttTilSak(journalføringDto);
 
-        verify(journalføringService).journalførOgTilordneSak(journalføringDto);
+        verify(journalføringService).journalførOgKnyttTilEksisterendeSak(journalføringDto);
         verify(oppgaveService).ferdigstillOppgave(journalføringDto.getOppgaveID());
-        valider(journalføringDto, JOURNALFOERING_TILORDNE_SCHEMA, log);
+    }
+
+    @Test
+    void journalførOgOpprettNyVurdering_validerKall() {
+        JournalfoeringTilordneDto journalføringDto = random.nextObject(JournalfoeringTilordneDto.class);
+
+        tjeneste.journalførOgOpprettNyVurdering(journalføringDto);
+
+        verify(journalføringService).journalførOgOpprettNyVurdering(journalføringDto);
+        verify(oppgaveService).ferdigstillOppgave(journalføringDto.getOppgaveID());
     }
 
     @Test

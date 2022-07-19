@@ -7,6 +7,7 @@ import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
@@ -90,24 +91,47 @@ public class FagsakService {
     }
 
     @Transactional
-    public void oppdaterMyndigheter(String saksnummer, Collection<String> ider) {
+    public void oppdaterMyndigheterForEuEos(String saksnummer, Collection<String> ider) {
         Fagsak fagsak = hentFagsak(saksnummer);
         fagsak.getAktører().removeIf(aktoer -> !ider.contains(aktoer.getInstitusjonId())
             && aktoer.getRolle() == Aktoersroller.TRYGDEMYNDIGHET);
 
         Collection<Aktoer> nyeMyndigheter = ider.stream()
-            .map(id -> lagMyndighetAktør(fagsak, id))
+            .map(id -> lagMyndighetAktørForEuEos(fagsak, id))
             .toList();
 
         fagsak.getAktører().addAll(nyeMyndigheter);
         fagsakRepository.save(fagsak);
     }
 
-    private static Aktoer lagMyndighetAktør(Fagsak fagsak, String ID) {
+    @Transactional
+    public void oppdaterMyndighetForTrygdeavtale(String saksnummer, Landkoder landkode) {
+        Fagsak fagsak = hentFagsak(saksnummer);
+
+        fagsak.getAktører().removeIf(aktoer -> aktoer.getTrygdemyndighetLand() != landkode
+            && aktoer.getRolle() == Aktoersroller.TRYGDEMYNDIGHET);
+
+        boolean harIngenTrygdemyndigheter = fagsak.hentMyndigheter().isEmpty();
+        if (harIngenTrygdemyndigheter) {
+            Aktoer nyTrygdemyndighet = lagMyndighetAktørForTrygdeavtaler(fagsak, landkode);
+            fagsak.getAktører().add(nyTrygdemyndighet);
+        }
+        fagsakRepository.save(fagsak);
+    }
+
+    private Aktoer lagMyndighetAktørForEuEos(Fagsak fagsak, String ID) {
         Aktoer aktør = new Aktoer();
         aktør.setFagsak(fagsak);
         aktør.setRolle(Aktoersroller.TRYGDEMYNDIGHET);
         aktør.setInstitusjonId(ID);
+        return aktør;
+    }
+
+    private Aktoer lagMyndighetAktørForTrygdeavtaler(Fagsak fagsak, Landkoder landkode) {
+        Aktoer aktør = new Aktoer();
+        aktør.setFagsak(fagsak);
+        aktør.setRolle(Aktoersroller.TRYGDEMYNDIGHET);
+        aktør.setTrygdemyndighetLand(landkode);
         return aktør;
     }
 
@@ -159,6 +183,7 @@ public class FagsakService {
         Instant nå = Instant.now();
 
         fagsak.setType(opprettSakRequest.getSakstype());
+        fagsak.setTema(opprettSakRequest.getSakstema());
         fagsak.setAktører(aktører);
         fagsak.setRegistrertDato(nå);
         fagsak.setEndretDato(nå);
