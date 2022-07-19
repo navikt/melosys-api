@@ -67,7 +67,7 @@ class AngiBehandlingsresultatServiceTest {
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> angiBehandlingsresultatService
                 .oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling(BEHANDLING_ID, Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN))
-            .withMessageContaining("Denne saken kan ikke sette behandlingsresultattype til MEDLEM_I_FOLKETRYGDEN");
+            .withMessageContaining("Kan ikke endre behandlingsresultattype");
     }
 
     private Behandlingsresultat lagBehandlingsresultat(Sakstemaer sakstema, Sakstyper sakstype, Behandlingstyper behandlingstype, Behandlingstema behandlingstema) {

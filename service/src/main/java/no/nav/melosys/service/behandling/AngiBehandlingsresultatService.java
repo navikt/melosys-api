@@ -21,8 +21,6 @@ import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.NY_VU
 @Service
 public class AngiBehandlingsresultatService {
 
-    private static final String FEILMELDING = "Kan ikke sette behandlingsresultattype til %s på sak %s";
-
     private final BehandlingsresultatService behandlingsresultatService;
     private final FagsakService fagsakService;
 
@@ -51,7 +49,7 @@ public class AngiBehandlingsresultatService {
         var behandlingstema = behandling.getTema();
 
         if (sakstema != Sakstemaer.MEDLEMSKAP_LOVVALG) {
-            throw new FunksjonellException(String.format(FEILMELDING, behandlingsresultattype, fagsak.getSaksnummer()));
+            throw new FunksjonellException(String.format("Kan ikke endre behandlingsresultattype på sak %s siden den har sakstema %s", fagsak.getSaksnummer(), sakstema));
         }
 
         if (behandlingsresultattype == MEDLEM_I_FOLKETRYGDEN &&
@@ -78,7 +76,7 @@ public class AngiBehandlingsresultatService {
             return;
         }
 
-        throw new FunksjonellException(String.format(FEILMELDING, behandlingsresultattype, fagsak.getSaksnummer()));
+        throw new FunksjonellException(String.format("Kan ikke endre behandlingsresultattype til %s på sak %s", behandlingsresultattype, fagsak.getSaksnummer()));
     }
 
 }
