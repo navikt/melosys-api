@@ -13,14 +13,19 @@ import no.nav.melosys.saksflyt.prosessflyt.ProsessFlyt;
 import no.nav.melosys.saksflyt.prosessflyt.ProsessflytDefinisjon;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.saksflyt.ProsessinstansFerdigEvent;
+import no.nav.melosys.service.saksflyt.ProsessinstansOpprettetEvent;
 import no.nav.melosys.sikkerhet.context.SaksflytSubjektHolder;
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+
+import static no.nav.melosys.domain.saksflyt.ProsessStatus.*;
 
 @Component
 public class ProsessinstansBehandler {
@@ -51,13 +56,26 @@ public class ProsessinstansBehandler {
             return;
         }
 
-        prosessinstans.setStatus(ProsessStatus.UNDER_BEHANDLING);
+        prosessinstans.setStatus(UNDER_BEHANDLING);
         lagreProsessinstans(prosessinstans);
 
         ProsessflytDefinisjon.finnFlytForProsessType(prosessinstans.getType()).ifPresentOrElse(
             prosessFlyt -> this.utførFlyt(prosessinstans, prosessFlyt),
             () -> this.behandleFlytIkkeFunnet(prosessinstans)
         );
+    }
+
+    @EventListener
+    public void gjenopprettProsesserSomHengerVedOppstart(ApplicationReadyEvent applicationReady) {
+        final long ANTALL_TIMER_FØR_GJENOPPRETTELSE = 24;
+        final Set<ProsessStatus> MIDLERTIDIGE_STATUSER = Set.of(KLAR, UNDER_BEHANDLING, PÅ_VENT, RESTARTET);
+        Collection<Prosessinstans> prosesser = prosessinstansRepository.findAllByStatusIn(MIDLERTIDIGE_STATUSER);
+        prosesser.stream()
+            .filter(prosess -> prosess.getEndretDato().isBefore(LocalDateTime.now().plusHours(24)))
+            .forEach(prosess -> {
+                log.warn("Prosessinstans {} gjenopprettet etter {} timer", prosess.getId(), ANTALL_TIMER_FØR_GJENOPPRETTELSE);
+                applicationEventPublisher.publishEvent(new ProsessinstansOpprettetEvent(prosess));
+            });
     }
 
     private void utførFlyt(Prosessinstans prosessinstans, ProsessFlyt prosessFlyt) {
