@@ -11,6 +11,7 @@ import org.springframework.test.context.DynamicPropertySource
 import org.testcontainers.containers.OracleContainer
 import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
+import org.testcontainers.utility.DockerImageName
 
 @Testcontainers
 @ActiveProfiles("test")
@@ -29,7 +30,10 @@ class ComponentTestBase {
 
 
         @Container
-        var DB = OracleContainer("ghcr.io/navikt/melosys-legacy-avhengigheter/oracle-xe:18.4.0-slim")
+        var DB = OracleContainer(
+            DockerImageName.parse("ghcr.io/navikt/melosys-legacy-avhengigheter/oracle-xe:18.4.0-slim")
+                .asCompatibleSubstituteFor("gvenzl/oracle-xe")
+        )
 
         @DynamicPropertySource
         @JvmStatic
