@@ -2,6 +2,7 @@ package no.nav.melosys.service.saksflyt;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
@@ -14,6 +15,7 @@ import no.nav.melosys.domain.arkiv.Distribusjonstype;
 import no.nav.melosys.domain.arkiv.DokumentReferanse;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
+import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.eessi.melding.UtpekingAvvis;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
@@ -499,13 +501,15 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
-    public void opprettProsessinstansSendBrev(Behandling behandling, DoksysBrevbestilling brevbestilling) {
-        Prosessinstans prosessinstans = new ProsessinstansBuilder()
-            .medType(ProsessType.SEND_BREV)
-            .medBehandling(behandling)
-            .build();
-        prosessinstans.setData(BREVBESTILLING, brevbestilling);
+    public void opprettProsessinstansSendBrev(Behandling behandling, DoksysBrevbestilling.Builder brevbestilling, List<Mottaker> mottakere) {
+        for (Mottaker mottaker : mottakere) {
+            Prosessinstans prosessinstans = new ProsessinstansBuilder()
+                .medType(ProsessType.SEND_BREV)
+                .medBehandling(behandling)
+                .build();
+            prosessinstans.setData(BREVBESTILLING, brevbestilling.medMottakere(List.of(mottaker)).build());
 
-        lagre(prosessinstans);
+            lagre(prosessinstans);
+        }
     }
 }

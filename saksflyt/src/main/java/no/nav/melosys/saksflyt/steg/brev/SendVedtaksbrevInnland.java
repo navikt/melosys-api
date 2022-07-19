@@ -98,26 +98,22 @@ public class SendVedtaksbrevInnland implements StegBehandler {
             mottakerListe = List.of(Mottaker.av(BRUKER));
         }
 
-        DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder()
+        DoksysBrevbestilling.Builder brevbestilling = new DoksysBrevbestilling.Builder()
             .medProduserbartDokument(avslagTypeBruker)
             .medAvsenderID(saksbehandler)
-            .medMottakere(mottakerListe)
-            .medFritekst(fritekst)
-            .build();
-        prosessinstansService.opprettProsessinstansSendBrev(behandling, brevbestilling);
+            .medFritekst(fritekst);
+        prosessinstansService.opprettProsessinstansSendBrev(behandling, brevbestilling, mottakerListe);
 
         if (behandling.getFagsak().harAktørMedRolleType(ARBEIDSGIVER)
             //Temp fiks for https://jira.adeo.no/browse/MELOSYS-5243
             && behandlingsresultatType != Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL) {
 
-            DoksysBrevbestilling brevbestillingArbeidsgiver = new DoksysBrevbestilling.Builder()
+            DoksysBrevbestilling.Builder brevbestillingArbeidsgiver = new DoksysBrevbestilling.Builder()
                 .medProduserbartDokument(AVSLAG_ARBEIDSGIVER)
                 .medAvsenderID(saksbehandler)
-                .medMottakere(Mottaker.av(ARBEIDSGIVER))
-                .medFritekst(fritekst)
-                .build();
+                .medFritekst(fritekst);
 
-            prosessinstansService.opprettProsessinstansSendBrev(behandling, brevbestillingArbeidsgiver);
+            prosessinstansService.opprettProsessinstansSendBrev(behandling, brevbestillingArbeidsgiver, List.of(Mottaker.av(ARBEIDSGIVER)));
         }
     }
 
@@ -137,22 +133,18 @@ public class SendVedtaksbrevInnland implements StegBehandler {
             mottakerListe.add(FastMottakerMedOrgnr.av(STATLIG_SKATTEOPPKREVING));
         }
 
-        DoksysBrevbestilling innvilgelseBrukerOgSkatt = new DoksysBrevbestilling.Builder().medProduserbartDokument(innvilgelseType)
+        DoksysBrevbestilling.Builder innvilgelseBrukerOgSkatt = new DoksysBrevbestilling.Builder().medProduserbartDokument(innvilgelseType)
             .medAvsenderID(saksbehandler)
             .medBegrunnelseKode(begrunnelseKode)
-            .medMottakere(mottakerListe)
-            .medFritekst(fritekst)
-            .build();
-        prosessinstansService.opprettProsessinstansSendBrev(behandling, innvilgelseBrukerOgSkatt);
+            .medFritekst(fritekst);
+        prosessinstansService.opprettProsessinstansSendBrev(behandling, innvilgelseBrukerOgSkatt, mottakerListe);
     }
 
     private void sendUtpekingsbrev(Behandling behandling, String saksbehandler, String fritekst) {
-        DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medProduserbartDokument(ORIENTERING_UTPEKING_UTLAND)
+        DoksysBrevbestilling.Builder brevbestilling = new DoksysBrevbestilling.Builder().medProduserbartDokument(ORIENTERING_UTPEKING_UTLAND)
             .medAvsenderID(saksbehandler)
-            .medMottakere(Mottaker.av(BRUKER))
-            .medFritekst(fritekst)
-            .build();
-        prosessinstansService.opprettProsessinstansSendBrev(behandling, brevbestilling);
+            .medFritekst(fritekst);
+        prosessinstansService.opprettProsessinstansSendBrev(behandling, brevbestilling, List.of(Mottaker.av(BRUKER)));
     }
 
     private void sendOrienteringTilArbeidsgiver(Behandling behandling, Behandlingsresultat resultat, String saksbehandler) {
@@ -161,11 +153,10 @@ public class SendVedtaksbrevInnland implements StegBehandler {
         if (behandling.getFagsak().harAktørMedRolleType(ARBEIDSGIVER)
             && !lovvalgsperiode.erArtikkel13()
             && !lovvalgsperiode.erArtikkel11_4()) {
-            DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medProduserbartDokument(INNVILGELSE_ARBEIDSGIVER)
-                .medAvsenderID(saksbehandler)
-                .medMottakere(Mottaker.av(ARBEIDSGIVER))
-                .build();
-            prosessinstansService.opprettProsessinstansSendBrev(behandling, brevbestilling);
+            DoksysBrevbestilling.Builder brevbestilling = new DoksysBrevbestilling.Builder()
+                .medProduserbartDokument(INNVILGELSE_ARBEIDSGIVER)
+                .medAvsenderID(saksbehandler);
+            prosessinstansService.opprettProsessinstansSendBrev(behandling, brevbestilling, List.of(Mottaker.av(ARBEIDSGIVER)));
         }
     }
 

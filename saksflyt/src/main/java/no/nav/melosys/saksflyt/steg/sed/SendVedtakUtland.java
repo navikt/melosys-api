@@ -81,14 +81,6 @@ public class SendVedtakUtland extends AbstraktSendUtland {
         return sendUtland(BucType.LA_BUC_02, prosessinstans);
     }
 
-    private DoksysBrevbestilling lagBrevBestilling(Prosessinstans prosessinstans) {
-        return new DoksysBrevbestilling.Builder().medProduserbartDokument(ATTEST_A1)
-            .medAvsenderID(hentSaksbehandler(prosessinstans))
-            .medMottakere(Mottaker.av(TRYGDEMYNDIGHET))
-            .medBegrunnelseKode(hentBegrunnelsekodeTilForkortetPeriode(prosessinstans))
-            .build();
-    }
-
     @Override
     protected void sendBrev(Prosessinstans prosessinstans) {
         var behandling = prosessinstans.getBehandling();
@@ -99,7 +91,11 @@ public class SendVedtakUtland extends AbstraktSendUtland {
             prosessinstans.setData(ProsessDataKey.DISTRIBUERBAR_JOURNALPOST_ID, journalpostID);
             prosessinstans.setData(ProsessDataKey.DISTRIBUER_MOTTAKER_LAND, utpektLand);
         } else {
-            prosessinstansService.opprettProsessinstansSendBrev(behandling, lagBrevBestilling(prosessinstans));
+            DoksysBrevbestilling.Builder brevbestilling = new DoksysBrevbestilling.Builder()
+                .medProduserbartDokument(ATTEST_A1)
+                .medAvsenderID(hentSaksbehandler(prosessinstans))
+                .medBegrunnelseKode(hentBegrunnelsekodeTilForkortetPeriode(prosessinstans));
+            prosessinstansService.opprettProsessinstansSendBrev(behandling, brevbestilling, List.of(Mottaker.av(TRYGDEMYNDIGHET)));
         }
     }
 
