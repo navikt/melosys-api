@@ -23,9 +23,7 @@ import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.saksflyt.brev.BrevBestiller;
 import no.nav.melosys.saksflyt.steg.sed.SendVedtakUtland;
-import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.brev.SedSomBrevService;
 import no.nav.melosys.service.dokument.sed.EessiService;
@@ -45,17 +43,15 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class SendVedtakUtlandTest {
     @Mock
-    private BehandlingService behandlingService;
-    @Mock
     private BehandlingsresultatService behandlingsresultatService;
     @Mock
     private EessiService eessiService;
     @Mock
-    private BrevBestiller brevBestiller;
-    @Mock
     private SedSomBrevService sedSomBrevService;
     @Mock
     private UtpekingService utpekingService;
+    @Mock
+    private ProsessinstansService prosessinstansService;
 
     private SendVedtakUtland sendVedtakUtland;
 
@@ -84,7 +80,7 @@ class SendVedtakUtlandTest {
         behandlingsresultat = lagBehandlingsresultat();
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
-        sendVedtakUtland = new SendVedtakUtland(eessiService, behandlingsresultatService, sedSomBrevService, utpekingService, mock(ProsessinstansService.class));
+        sendVedtakUtland = new SendVedtakUtland(eessiService, behandlingsresultatService, sedSomBrevService, utpekingService, prosessinstansService);
     }
 
     private Behandlingsresultat lagBehandlingsresultat() {
@@ -112,13 +108,12 @@ class SendVedtakUtlandTest {
 
     @Test
     void utfør_ingenInstitusjonEessiKlar_senderBrev() {
-        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(prosessinstans.getBehandling());
-        when(behandlingsresultatService.hentBehandlingsresultatMedAvklartefakta(anyLong()))
+        when(behandlingsresultatService.hentBehandlingsresultatMedAvklartefakta(behandling.getId()))
             .thenReturn(lagBehandlingsresultat());
 
         sendVedtakUtland.utfør(prosessinstans);
-        verify(brevBestiller).bestill(brevbestillingArgumentCaptor.capture());
-        assertThat(brevbestillingArgumentCaptor.getValue().getMottakere()).contains(Mottaker.av(Aktoersroller.TRYGDEMYNDIGHET));
+
+        verify(prosessinstansService).opprettProsessinstansSendBrev(eq(behandling), brevbestillingArgumentCaptor.capture(), eq(Mottaker.av(Aktoersroller.TRYGDEMYNDIGHET)));
         assertThat(brevbestillingArgumentCaptor.getValue().getProduserbartdokument()).isEqualTo(Produserbaredokumenter.ATTEST_A1);
     }
 
