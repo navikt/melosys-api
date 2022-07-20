@@ -17,9 +17,12 @@ import no.nav.melosys.saksflyt.kontroll.dto.HentProsessinstansDto;
 import no.nav.melosys.saksflyt.prosessflyt.ProsessflytDefinisjon;
 import org.springframework.stereotype.Service;
 
+import static java.time.LocalDateTime.now;
+
 @Service
 public class ProsessinstansAdminService {
 
+    public static final int ANTALL_TIMER_FØR_RESTART = 24;
     private final ProsessinstansBehandlerDelegate prosessinstansBehandlerDelegate;
     private final ProsessinstansRepository prosessinstansRepository;
 
@@ -30,6 +33,14 @@ public class ProsessinstansAdminService {
 
     public List<HentProsessinstansDto> hentFeiledeProsessinstanser() {
         return prosessinstansRepository.findAllByStatus(ProsessStatus.FEILET).stream()
+            .map(this::mapTilHentProsessinstansDto)
+            .sorted(Comparator.comparing(HentProsessinstansDto::endretDato))
+            .toList();
+    }
+
+    public List<HentProsessinstansDto> hentFastlåsteProsessinstanser() {
+        return prosessinstansRepository.findAllByStatusIn(ProsessStatus.hentAktiveStatuser()).stream()
+            .filter(prosessinstans -> prosessinstans.getEndretDato().isBefore(now().minusHours(ANTALL_TIMER_FØR_RESTART)))
             .map(this::mapTilHentProsessinstansDto)
             .sorted(Comparator.comparing(HentProsessinstansDto::endretDato))
             .toList();
@@ -48,8 +59,17 @@ public class ProsessinstansAdminService {
         Collection<Prosessinstans> prosessinstanser = prosessinstansRepository.findAllById(uuids);
 
         for (var prosessinstans : prosessinstanser) {
-            if (prosessinstans.getStatus() != ProsessStatus.FEILET) {
-                throw new FunksjonellException("Prosessinstans " + prosessinstans.getId() + " har status " + prosessinstans.getStatus());
+            if (prosessinstans.getStatus() == ProsessStatus.FERDIG) {
+                throw new FunksjonellException(
+                    "Prosessinstans %s har status %s".formatted(prosessinstans.getId(), prosessinstans.getStatus()));
+            }
+            if (ProsessStatus.hentAktiveStatuser().contains(
+                prosessinstans.getStatus()) && prosessinstans.getRegistrertDato().isAfter(
+                now().minusHours(ANTALL_TIMER_FØR_RESTART))) {
+                throw new FunksjonellException(
+                    "Prosessinstans %s er registrert %s, siden mindre enn %s".formatted(prosessinstans.getId(),
+                                                                                        prosessinstans.getRegistrertDato(),
+                                                                                        ANTALL_TIMER_FØR_RESTART));
             }
         }
 
@@ -73,7 +93,7 @@ public class ProsessinstansAdminService {
         var prosessinstans = prosessinstansRepository.findById(uuid)
             .orElseThrow(() -> new IkkeFunnetException("Fant ikke prosessinstans med ID %s".formatted(uuid)));
         prosessinstans.setStatus(ProsessStatus.FERDIG);
-        prosessinstans.setEndretDato(LocalDateTime.now());
+        prosessinstans.setEndretDato(now());
 
         prosessinstansRepository.save(prosessinstans);
     }
@@ -104,7 +124,7 @@ public class ProsessinstansAdminService {
 
     private void setStatusRestartet(Collection<Prosessinstans> prosessinstanser) {
         prosessinstanser.forEach(prosessinstans -> prosessinstans.setStatus(ProsessStatus.RESTARTET));
-        LocalDateTime nå = LocalDateTime.now();
+        LocalDateTime nå = now();
         prosessinstanser.forEach(prosessinstans -> prosessinstans.setEndretDato(nå));
         prosessinstansRepository.saveAll(prosessinstanser);
     }

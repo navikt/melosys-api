@@ -25,7 +25,7 @@ import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.saksflyt.ProsessStatus.*;
+import static no.nav.melosys.domain.saksflyt.ProsessStatus.UNDER_BEHANDLING;
 
 @Component
 public class ProsessinstansBehandler {
@@ -68,8 +68,8 @@ public class ProsessinstansBehandler {
     @EventListener
     public void gjenopprettProsesserSomHengerVedOppstart(ApplicationReadyEvent applicationReady) {
         final long ANTALL_TIMER_FØR_GJENOPPRETTELSE = 24;
-        final Set<ProsessStatus> MIDLERTIDIGE_STATUSER = Set.of(KLAR, UNDER_BEHANDLING, PÅ_VENT, RESTARTET);
-        Collection<Prosessinstans> prosesser = prosessinstansRepository.findAllByStatusIn(MIDLERTIDIGE_STATUSER);
+        Collection<Prosessinstans> prosesser = prosessinstansRepository.findAllByStatusIn(
+            ProsessStatus.hentAktiveStatuser());
         LocalDateTime nå = LocalDateTime.now();
         prosesser.stream()
             .filter(prosess -> prosess.getEndretDato().isBefore(LocalDateTime.now().plusHours(24)))
