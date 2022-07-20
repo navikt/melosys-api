@@ -62,9 +62,7 @@ class EosVedtakServiceTest {
     private ApplicationEventMulticaster melosysEventMulticaster;
     @Mock
     private FerdigbehandlingKontrollService ferdigbehandlingKontrollService;
-
     private EosVedtakService vedtakService;
-
     private final long behandlingID = 1L;
     private final Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
     private final Behandling behandling = new Behandling();
@@ -261,6 +259,19 @@ class EosVedtakServiceTest {
 
         verify(prosessinstansService).harVedtakInstans(behandlingID);
         verifyNoMoreInteractions(prosessinstansService);
+    }
+
+    @Test
+    void endreVedtak_endrePeriode_behandlingsResultat_blir_FASTSATT_LOVVALGSLAND() {
+        final Endretperiode endretperiodeBegrunnelse = Endretperiode.RETURNERT_NORGE;
+        leggTilMyndighetAktoer();
+        leggTilLovvalgsperiode();
+        behandling.setType(Behandlingstyper.ENDRET_PERIODE);
+
+        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
+
+        vedtakService.endreVedtaksperiode(behandling, endretperiodeBegrunnelse, "FRITEKST", "FRITEKST_SED");
+        assertThat(behandlingsresultat.getType()).isEqualTo(FASTSATT_LOVVALGSLAND);
     }
 
     @Test

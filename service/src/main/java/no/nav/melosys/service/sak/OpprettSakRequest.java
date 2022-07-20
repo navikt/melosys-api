@@ -5,6 +5,7 @@ import java.util.List;
 
 import no.nav.melosys.domain.Fullmektig;
 import no.nav.melosys.domain.Kontaktopplysning;
+import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -22,6 +23,7 @@ public class OpprettSakRequest {
     private final String initierendeJournalpostId;
     private final String initierendeDokumentId;
     private final Sakstyper sakstype;
+    private final Sakstemaer sakstema;
 
     private OpprettSakRequest(OpprettSakRequest.Builder builder) {
         this.aktørID = builder.aktørID;
@@ -35,6 +37,7 @@ public class OpprettSakRequest {
         this.initierendeJournalpostId = builder.initierendeJournalpostId;
         this.initierendeDokumentId = builder.initierendeDokumentId;
         this.sakstype = builder.sakstype;
+        this.sakstema = builder.sakstema;
     }
 
     public String getAktørID() {
@@ -81,6 +84,10 @@ public class OpprettSakRequest {
         return sakstype;
     }
 
+    public Sakstemaer getSakstema() {
+        return sakstema;
+    }
+
     public static class Builder {
         private String aktørID;
         private String virksomhetOrgnr;
@@ -93,6 +100,7 @@ public class OpprettSakRequest {
         private String initierendeJournalpostId;
         private String initierendeDokumentId;
         private Sakstyper sakstype;
+        private Sakstemaer sakstema;
 
         public Builder medAktørID(String aktørID) {
             this.aktørID = aktørID;
@@ -148,6 +156,11 @@ public class OpprettSakRequest {
 
         public Builder medSakstype(Sakstyper sakstype) {
             this.sakstype = sakstype;
+            return this;
+        }
+
+        public Builder medSakstema(Sakstemaer sakstema) {
+            this.sakstema = sakstema;
             return this;
         }
 

@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.impl;
+package no.nav.melosys.saksflyt;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -8,14 +8,13 @@ import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessStatus;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo;
 import no.nav.melosys.repository.ProsessinstansRepository;
-import no.nav.melosys.saksflyt.api.ProsessinstansBehandler;
 import no.nav.melosys.saksflyt.prosessflyt.ProsessFlyt;
 import no.nav.melosys.saksflyt.prosessflyt.ProsessflytDefinisjon;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.saksflyt.ProsessinstansFerdigEvent;
 import no.nav.melosys.sikkerhet.context.SaksflytSubjektHolder;
+import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -24,17 +23,17 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ProsessinstansBehandlerImpl implements ProsessinstansBehandler {
+public class ProsessinstansBehandler {
 
-    private static final Logger log = LoggerFactory.getLogger(ProsessinstansBehandlerImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(ProsessinstansBehandler.class);
 
     private final Map<ProsessSteg, StegBehandler> stegbehandlerMap = new EnumMap<>(ProsessSteg.class);
     private final ProsessinstansRepository prosessinstansRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
 
-    public ProsessinstansBehandlerImpl(Collection<StegBehandler> stegbehandlere,
-                                       ProsessinstansRepository prosessinstansRepository,
-                                       ApplicationEventPublisher applicationEventPublisher) {
+    public ProsessinstansBehandler(Collection<StegBehandler> stegbehandlere,
+                                   ProsessinstansRepository prosessinstansRepository,
+                                   ApplicationEventPublisher applicationEventPublisher) {
         stegbehandlere.forEach(s -> stegbehandlerMap.put(s.inngangsSteg(), s));
         this.prosessinstansRepository = prosessinstansRepository;
         this.applicationEventPublisher = applicationEventPublisher;

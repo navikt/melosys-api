@@ -10,13 +10,15 @@ import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.arkiv.DokumentReferanse;
 import no.nav.melosys.domain.arkiv.Distribusjonstype;
+import no.nav.melosys.domain.arkiv.DokumentReferanse;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.eessi.melding.UtpekingAvvis;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Sakstemaer;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Ikke_godkjent_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
@@ -30,6 +32,7 @@ import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.journalforing.dto.DokumentDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringDto;
 import no.nav.melosys.service.sak.OpprettSakDto;
+import no.nav.melosys.service.sak.SakstypeSakstemaKobling;
 import no.nav.melosys.service.soknad.SoknadMottatt;
 import no.nav.melosys.service.vedtak.FattVedtakRequest;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
@@ -228,6 +231,8 @@ public class ProsessinstansService {
 
         prosessinstans.setType(ProsessType.OPPRETT_NY_SAK_EOS);
         prosessinstans.setData(ProsessDataKey.SAKSTYPE, opprettSakDto.getSakstype());
+        prosessinstans.setData(SAKSTEMA,
+                               SakstypeSakstemaKobling.sakstema(Sakstyper.EU_EOS, opprettSakDto.getBehandlingstema()));
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, behandlingstype);
         prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, journalpostID);
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, opprettSakDto.getBehandlingstema());
@@ -245,6 +250,8 @@ public class ProsessinstansService {
 
         prosessinstans.setType(ProsessType.OPPRETT_NY_SAK_FTRL_TRYGDEAVTALE);
         prosessinstans.setData(ProsessDataKey.SAKSTYPE, opprettSakDto.getSakstype());
+        prosessinstans.setData(SAKSTEMA, SakstypeSakstemaKobling.sakstema(opprettSakDto.getSakstype(),
+                                                                          opprettSakDto.getBehandlingstema()));
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.SOEKNAD);
         prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, journalpostID);
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, opprettSakDto.getBehandlingstema());
@@ -307,7 +314,7 @@ public class ProsessinstansService {
             prosessinstans.setData(ORGNR, mottaker.getOrgnr());
         }
         if (hasText(mottaker.getInstitusjonId())) {
-            // FIXME: Parsing av variabelen feiler pga ":". Burde fikses på en skikkelig måte
+            // TODO Parsing av variabelen feiler pga ":". Burde fikses på en skikkelig måte
             prosessinstans.setData(INSTITUSJON_ID, String.format("\"%s\"", mottaker.getInstitusjonId()));
         }
         prosessinstans.setBehandling(behandling);
@@ -426,6 +433,7 @@ public class ProsessinstansService {
             .medType(ProsessType.REGISTRERING_UNNTAK_NY_SAK)
             .medEessiMelding(melosysEessiMelding)
             .build();
+        prosessinstans.setData(SAKSTEMA, Sakstemaer.UNNTAK);
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, behandlingstema);
         prosessinstans.setData(ProsessDataKey.AKTØR_ID, aktørID);
 
@@ -443,11 +451,13 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
-    public void opprettProsessinstansNySakArbeidFlereLand(MelosysEessiMelding melosysEessiMelding, Behandlingstema behandlingstema, String aktørID) {
+    public void opprettProsessinstansNySakArbeidFlereLand(MelosysEessiMelding melosysEessiMelding, Sakstemaer sakstema,
+                                                          Behandlingstema behandlingstema, String aktørID) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.ARBEID_FLERE_LAND_NY_SAK)
             .medEessiMelding(melosysEessiMelding)
             .build();
+        prosessinstans.setData(SAKSTEMA, sakstema);
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, behandlingstema);
         prosessinstans.setData(ProsessDataKey.AKTØR_ID, aktørID);
 
@@ -471,6 +481,7 @@ public class ProsessinstansService {
             .medEessiMelding(eessiMelding)
             .build();
 
+        prosessinstans.setData(SAKSTEMA, Sakstemaer.UNNTAK);
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL);
         prosessinstans.setData(ProsessDataKey.AKTØR_ID, aktørID);
         lagre(prosessinstans);

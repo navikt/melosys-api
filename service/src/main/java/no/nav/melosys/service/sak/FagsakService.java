@@ -183,6 +183,7 @@ public class FagsakService {
         Instant nå = Instant.now();
 
         fagsak.setType(opprettSakRequest.getSakstype());
+        fagsak.setTema(opprettSakRequest.getSakstema());
         fagsak.setAktører(aktører);
         fagsak.setRegistrertDato(nå);
         fagsak.setEndretDato(nå);

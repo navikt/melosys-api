@@ -26,7 +26,6 @@
         <module>integrasjon</module>
         <module>repository</module>
         <module>saksflyt</module>
-        <module>saksflyt-api</module>
         <module>service</module>
         <module>sikkerhet</module>
         <module>statistikk</module>
@@ -43,7 +42,7 @@
 
         <!-- Melosys -->
         <melosys.jsonschema.version>1.35.172</melosys.jsonschema.version>
-        <melosys.internt.kodeverk.version>5.15.115</melosys.internt.kodeverk.version>
+        <melosys.internt.kodeverk.version>5.15.120</melosys.internt.kodeverk.version>
         <melosys.brev.version>1.2.124</melosys.brev.version>
 
         <!-- NAV -->
@@ -64,7 +63,7 @@
         <commons-text.version>1.9</commons-text.version>
         <findbugs.jsr305.version>3.0.2</findbugs.jsr305.version>
         <guava.version>31.1-jre</guava.version>
-        <graphql-java.version>17.3</graphql-java.version>
+        <graphql-java.version>18.2</graphql-java.version>
         <logback.version>1.2.11</logback.version>
         <logstash.version>7.1</logstash.version>
         <hikaricp.version>5.0.1</hikaricp.version>
@@ -172,11 +171,6 @@
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>saksflyt</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>saksflyt-api</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -518,7 +512,6 @@
             <dependency>
                 <groupId>no.nav.tjenestespesifikasjoner</groupId>
                 <artifactId>sakogbehandling-tjenestespesifikasjon</artifactId>
-                <!--<artifactId>nav-fim-sakogbehandling-v1-tjenestespesifikasjon</artifactId>-->
                 <version>${nav.tjenestespesifikasjoner.version}</version>
             </dependency>
             <!--MEDL2 -->
