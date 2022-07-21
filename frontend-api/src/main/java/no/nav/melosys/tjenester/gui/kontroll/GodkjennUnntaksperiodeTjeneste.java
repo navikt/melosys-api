@@ -22,13 +22,13 @@ import org.springframework.web.context.WebApplicationContext;
 @RequestMapping("/kontroll")
 @Api(tags = "kontroll")
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
-public class GodkjennUnntaksperiodeController {
+public class GodkjennUnntaksperiodeTjeneste {
 
-    private static final Logger log = LoggerFactory.getLogger(GodkjennUnntaksperiodeController.class);
+    private static final Logger log = LoggerFactory.getLogger(GodkjennUnntaksperiodeTjeneste.class);
     private final Aksesskontroll aksesskontroll;
     private final GodkjennUnntakKontrollService godkjennUnntakKontrollService;
 
-    public GodkjennUnntaksperiodeController(Aksesskontroll aksesskontroll, GodkjennUnntakKontrollService godkjennUnntakKontrollService) {
+    public GodkjennUnntaksperiodeTjeneste(Aksesskontroll aksesskontroll, GodkjennUnntakKontrollService godkjennUnntakKontrollService) {
         this.aksesskontroll = aksesskontroll;
         this.godkjennUnntakKontrollService = godkjennUnntakKontrollService;
     }

@@ -21,12 +21,12 @@ import org.springframework.web.context.WebApplicationContext;
 @RequestMapping("/kontroll")
 @Api(tags = "kontroll")
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
-public class KontrollController {
+public class KontrollTjeneste {
 
     private final FerdigbehandlingKontrollService ferdigbehandlingKontrollService;
     private final Aksesskontroll aksesskontroll;
 
-    public KontrollController(FerdigbehandlingKontrollService ferdigbehandlingKontrollService, Aksesskontroll aksesskontroll) {
+    public KontrollTjeneste(FerdigbehandlingKontrollService ferdigbehandlingKontrollService, Aksesskontroll aksesskontroll) {
         this.ferdigbehandlingKontrollService = ferdigbehandlingKontrollService;
         this.aksesskontroll = aksesskontroll;
     }

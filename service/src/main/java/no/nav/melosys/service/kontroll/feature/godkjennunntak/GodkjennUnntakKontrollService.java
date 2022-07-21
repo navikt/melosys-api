@@ -48,7 +48,7 @@ public class GodkjennUnntakKontrollService {
             lovvalgsperiode.getFom(),
             lovvalgsperiode.getTom());
 
-        kjørOgSjekkFeilmeldinger(behandling, kontrollData);
+        utførKontrollOgSjekkFeilmeldinger(behandling, kontrollData);
     }
 
     @Transactional(readOnly = true)
@@ -60,10 +60,10 @@ public class GodkjennUnntakKontrollService {
         }
 
         GodkjennUnntakKontrollData kontrollData = new GodkjennUnntakKontrollData(periodeFom, periodeTom);
-        kjørOgSjekkFeilmeldinger(behandling, kontrollData);
+        utførKontrollOgSjekkFeilmeldinger(behandling, kontrollData);
     }
 
-    private void kjørOgSjekkFeilmeldinger(Behandling behandling, GodkjennUnntakKontrollData kontrollData) {
+    private void utførKontrollOgSjekkFeilmeldinger(Behandling behandling, GodkjennUnntakKontrollData kontrollData) {
         List<Kontrollfeil> feilValideringer = GodkjennUnntakKontrollsett.hentRegelsett(behandling)
             .stream()
             .map(f -> f.apply(kontrollData))
