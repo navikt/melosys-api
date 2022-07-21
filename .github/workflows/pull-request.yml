@@ -53,7 +53,7 @@ jobs:
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          password: ${{ secrets.READER_TOKEN }}
       - name: Build and test
         run: |
           mvn clean verify -B -e -U -X --settings .github/settings.xml
