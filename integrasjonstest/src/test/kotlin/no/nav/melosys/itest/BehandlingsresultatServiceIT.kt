@@ -75,6 +75,7 @@ internal class BehandlingsresultatServiceIT(
             saksnummer = "MEL-1001"
             type = Sakstyper.TRYGDEAVTALE
             status = Saksstatuser.LOVVALG_AVKLART
+            tema = Sakstemaer.MEDLEMSKAP_LOVVALG
             leggTilRegisteringInfo()
         }.also { fsak ->
             fagsakRepository.save(fsak)
