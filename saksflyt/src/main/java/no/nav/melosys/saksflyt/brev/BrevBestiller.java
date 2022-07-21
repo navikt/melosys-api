@@ -21,17 +21,6 @@ public class BrevBestiller {
         this.dokumentServiceFasade = dokumentServiceFasade;
     }
 
-    /**
-     * @deprecated Prodsatte dokgenmaler erstattes av bestill(Produserbaredokumenter dokumentType, Collection...), doksys og dokgen maler som toggles erstattes av bestill(DoksysBrevbestilling)
-     */
-    public void bestill(Produserbaredokumenter dokumentType, String avsender, Mottaker mottaker, Behandling behandling) {
-        DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medProduserbartDokument(dokumentType)
-            .medAvsenderID(avsender)
-            .medMottakere(mottaker)
-            .medBehandling(behandling).build();
-        bestill(brevbestilling);
-    }
-
     public void bestill(Produserbaredokumenter dokumentType, Collection<Mottaker> mottakere, String fritekst,
                         String saksbehandler, String begrunnelseKode, Behandling behandling) {
         for(Mottaker mottaker : mottakere) {
