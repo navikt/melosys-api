@@ -20,10 +20,10 @@ import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.saksflyt.brev.BrevBestiller;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
+import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,16 +43,16 @@ import static no.nav.melosys.domain.saksflyt.ProsessSteg.SEND_VEDTAKSBREV_INNLAN
 public class SendVedtaksbrevInnland implements StegBehandler {
     private static final Logger log = LoggerFactory.getLogger(SendVedtaksbrevInnland.class);
 
-    private final BrevBestiller brevBestiller;
     private final BehandlingService behandlingService;
     private final BehandlingsresultatService behandlingsresultatService;
+    private final ProsessinstansService prosessinstansService;
 
-    public SendVedtaksbrevInnland(BrevBestiller brevBestiller,
-                                  BehandlingService behandlingService,
-                                  BehandlingsresultatService behandlingsresultatService) {
-        this.brevBestiller = brevBestiller;
+    public SendVedtaksbrevInnland(BehandlingService behandlingService,
+                                  BehandlingsresultatService behandlingsresultatService,
+                                  ProsessinstansService prosessinstansService) {
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
+        this.prosessinstansService = prosessinstansService;
     }
 
     @Override
@@ -101,24 +101,21 @@ public class SendVedtaksbrevInnland implements StegBehandler {
         DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder()
             .medProduserbartDokument(avslagTypeBruker)
             .medAvsenderID(saksbehandler)
-            .medBehandling(behandling)
-            .medMottakere(mottakerListe)
             .medFritekst(fritekst)
             .build();
-        brevBestiller.bestill(brevbestilling);
+        prosessinstansService.opprettProsessinstanserSendBrev(behandling, brevbestilling, mottakerListe);
 
         if (behandling.getFagsak().harAktørMedRolleType(ARBEIDSGIVER)
             //Temp fiks for https://jira.adeo.no/browse/MELOSYS-5243
             && behandlingsresultatType != Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL) {
 
-            DoksysBrevbestilling.Builder brevbestillingArbeidsgiver = new DoksysBrevbestilling.Builder()
+            DoksysBrevbestilling brevbestillingArbeidsgiver = new DoksysBrevbestilling.Builder()
                 .medProduserbartDokument(AVSLAG_ARBEIDSGIVER)
                 .medAvsenderID(saksbehandler)
-                .medBehandling(behandling)
-                .medMottakere(Mottaker.av(ARBEIDSGIVER))
-                .medFritekst(fritekst);
+                .medFritekst(fritekst)
+                .build();
 
-            brevBestiller.bestill(brevbestillingArbeidsgiver.build());
+            prosessinstansService.opprettProsessinstansSendBrev(behandling, brevbestillingArbeidsgiver, Mottaker.av(ARBEIDSGIVER));
         }
     }
 
@@ -140,22 +137,18 @@ public class SendVedtaksbrevInnland implements StegBehandler {
 
         DoksysBrevbestilling innvilgelseBrukerOgSkatt = new DoksysBrevbestilling.Builder().medProduserbartDokument(innvilgelseType)
             .medAvsenderID(saksbehandler)
-            .medBehandling(behandling)
             .medBegrunnelseKode(begrunnelseKode)
-            .medMottakere(mottakerListe)
             .medFritekst(fritekst)
             .build();
-        brevBestiller.bestill(innvilgelseBrukerOgSkatt);
+        prosessinstansService.opprettProsessinstanserSendBrev(behandling, innvilgelseBrukerOgSkatt, mottakerListe);
     }
 
     private void sendUtpekingsbrev(Behandling behandling, String saksbehandler, String fritekst) {
         DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medProduserbartDokument(ORIENTERING_UTPEKING_UTLAND)
             .medAvsenderID(saksbehandler)
-            .medBehandling(behandling)
-            .medMottakere(Mottaker.av(BRUKER))
             .medFritekst(fritekst)
             .build();
-        brevBestiller.bestill(brevbestilling);
+        prosessinstansService.opprettProsessinstansSendBrev(behandling, brevbestilling, Mottaker.av(BRUKER));
     }
 
     private void sendOrienteringTilArbeidsgiver(Behandling behandling, Behandlingsresultat resultat, String saksbehandler) {
@@ -164,7 +157,11 @@ public class SendVedtaksbrevInnland implements StegBehandler {
         if (behandling.getFagsak().harAktørMedRolleType(ARBEIDSGIVER)
             && !lovvalgsperiode.erArtikkel13()
             && !lovvalgsperiode.erArtikkel11_4()) {
-            brevBestiller.bestill(INNVILGELSE_ARBEIDSGIVER, saksbehandler, Mottaker.av(ARBEIDSGIVER), behandling);
+            DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder()
+                .medProduserbartDokument(INNVILGELSE_ARBEIDSGIVER)
+                .medAvsenderID(saksbehandler)
+                .build();
+            prosessinstansService.opprettProsessinstansSendBrev(behandling, brevbestilling, Mottaker.av(ARBEIDSGIVER));
         }
     }
 

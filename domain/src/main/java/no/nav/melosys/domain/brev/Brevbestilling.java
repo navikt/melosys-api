@@ -29,4 +29,7 @@ public abstract class Brevbestilling {
         return avsenderID;
     }
 
+    public void setBehandling(Behandling behandling) {
+        this.behandling = behandling;
+    }
 }

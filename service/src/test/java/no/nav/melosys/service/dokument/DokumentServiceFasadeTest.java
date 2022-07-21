@@ -16,7 +16,6 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 
-import java.util.Collections;
 import java.util.List;
 
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
