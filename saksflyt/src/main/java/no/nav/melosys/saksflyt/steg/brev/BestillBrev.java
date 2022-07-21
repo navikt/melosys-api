@@ -40,6 +40,10 @@ public class BestillBrev implements StegBehandler {
             throw new FunksjonellException("Prosessinstans mangler brevbestilling");
         }
 
+        if (brevbestilling.getMottakere().size() != 1) {
+            throw new FunksjonellException("Prosessinstans skal sende brev til én mottaker, fant " + brevbestilling.getMottakere().size());
+        }
+
         brevbestilling.setBehandling(behandling);
         brevBestiller.bestill(brevbestilling);
 
