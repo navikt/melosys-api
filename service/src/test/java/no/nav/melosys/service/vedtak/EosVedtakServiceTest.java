@@ -34,6 +34,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.event.ApplicationEventMulticaster;
 
 import static no.nav.melosys.domain.kodeverk.Vedtakstyper.FØRSTEGANGSVEDTAK;
+import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper.AVSLAG_SØKNAD;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper.FASTSATT_LOVVALGSLAND;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.IVERKSETTER_VEDTAK;
 import static no.nav.melosys.service.vedtak.VedtaksfattingFasade.FRIST_KLAGE_UKER;
@@ -229,20 +230,22 @@ class EosVedtakServiceTest {
     }
 
     @Test
-    void fattVedtak_erAvslagLovvalgsperiodeIkkeInnvilget_fatterVedtak() throws Exception {
+    void fattVedtak_erAvslag_fatterVedtak() throws Exception {
         mockBehandlingsresultat();
-
+        behandlingsresultat.setType(AVSLAG_SØKNAD);
         leggTilLovvalgsperiode(InnvilgelsesResultat.AVSLAATT);
+        when(landvelgerService.hentUtenlandskTrygdemyndighetsland(behandling.getId())).thenReturn(Set.of(Landkoder.SE));
 
-        vedtakService.fattVedtak(behandling, lagRequest(FASTSATT_LOVVALGSLAND, FØRSTEGANGSVEDTAK, null, null, null));
+        vedtakService.fattVedtak(behandling, lagRequest(AVSLAG_SØKNAD, FØRSTEGANGSVEDTAK, null, null, null));
 
         verify(prosessinstansService).opprettProsessinstansIverksettVedtakEos(
             eq(behandling),
-            eq(FASTSATT_LOVVALGSLAND),
+            eq(AVSLAG_SØKNAD),
             isNull(),
             isNull(),
             anySet()
         );
+        verifyNoInteractions(eessiService);
     }
 
     @Test

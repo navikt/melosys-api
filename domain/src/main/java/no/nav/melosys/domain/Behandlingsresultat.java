@@ -248,9 +248,8 @@ public class Behandlingsresultat extends RegistreringsInfo {
     }
 
     public boolean erAvslag() {
-        return erAvslagManglendeOpplysninger() ||
-            (type == Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
-                && hentValidertLovvalgsperiode().erAvslått());
+        return erAvslagManglendeOpplysninger() || (type == Behandlingsresultattyper.AVSLAG_SØKNAD)
+            || (type == Behandlingsresultattyper.FASTSATT_LOVVALGSLAND && hentValidertLovvalgsperiode().erAvslått());
     }
 
     public boolean erAvslagManglendeOpplysninger() {
