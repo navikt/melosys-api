@@ -43,4 +43,6 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
       - name: Build and test
-        run: mvn clean verify -B -e -U -X --settings .github/settings.xml
+        run: |
+          echo ${GITHUB_TOKEN} | docker login ghcr.io -u ${GITHUB_REPOSITORY} --password-stdin
+          mvn clean verify -B -e -U -X --settings .github/settings.xml
