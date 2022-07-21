@@ -230,7 +230,7 @@ class EosVedtakServiceTest {
     }
 
     @Test
-    void fattVedtak_erAvslag_fatterVedtak() throws Exception {
+    void fattVedtak_erAvslag_fatterVedtakUtenKallTilEessi() throws Exception {
         mockBehandlingsresultat();
         behandlingsresultat.setType(AVSLAG_SØKNAD);
         leggTilLovvalgsperiode(InnvilgelsesResultat.AVSLAATT);
