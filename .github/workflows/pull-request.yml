@@ -20,9 +20,6 @@ name: Maven Test
 
 on: pull_request
 
-env:
-  REGISTRY: ghcr.io
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -32,6 +29,7 @@ jobs:
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       PASSWORD: ${{ secrets.READER_TOKEN }}
+      REGISTRY: ghcr.io
 
     steps:
       - name: Checkout
@@ -55,5 +53,4 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.READER_TOKEN }}
       - name: Build and test
-        run: |
-          mvn clean verify -B -e -U -X --settings .github/settings.xml
+        run: mvn clean verify -B -e -U -X --settings .github/settings.xml
