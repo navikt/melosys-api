@@ -8,10 +8,9 @@ import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode
 import no.nav.melosys.domain.dokument.medlemskap.Periode
 import no.nav.melosys.domain.util.LandkoderUtils
-import no.nav.melosys.ekstern.tjenester.medlemskapsunntak.api.v1.MedlemskapsunntakForGet
-import no.nav.melosys.ekstern.tjenester.medlemskapsunntak.api.v1.MedlemskapsunntakForPost
-import no.nav.melosys.ekstern.tjenester.medlemskapsunntak.api.v1.MedlemskapsunntakForPost.MedlemskapsunntakForPostBuilder
-import no.nav.melosys.ekstern.tjenester.medlemskapsunntak.api.v1.MedlemskapsunntakForPut
+import no.nav.melosys.integrasjon.medl.api.v1.MedlemskapsunntakForGet
+import no.nav.melosys.integrasjon.medl.api.v1.MedlemskapsunntakForPost
+import no.nav.melosys.integrasjon.medl.api.v1.MedlemskapsunntakForPut
 import no.nav.melosys.exception.TekniskException
 import java.time.LocalDate
 
@@ -24,7 +23,7 @@ class MedlService(
         objectMapper.registerModule(JavaTimeModule())
     }
 
-    fun hentPeriodeListe(fnr: String, fom: LocalDate, tom: LocalDate): Saksopplysning {
+    fun hentPeriodeListe(fnr: String, fom: LocalDate?, tom: LocalDate?): Saksopplysning {
         val periodeListeResponse = medlemskapRestConsumer.hentPeriodeListe(fnr, fom, tom)
         val medlemskapDokument = MedlemskapDokument()
         val medlemsperioder: MutableList<Medlemsperiode> = ArrayList()
@@ -32,14 +31,14 @@ class MedlService(
             val medlemsperiode = Medlemsperiode()
             medlemsperiode.id = m.unntakId
             medlemsperiode.periode = Periode(m.fraOgMed, m.tilOgMed)
-            medlemsperiode.type = if (m.medlem) "PMMEDSKP" else "PUMEDSKP"
+            medlemsperiode.type = if (m.medlem!!) "PMMEDSKP" else "PUMEDSKP"
             medlemsperiode.status = m.status
             medlemsperiode.grunnlagstype = m.grunnlag
             medlemsperiode.land = m.lovvalgsland
             medlemsperiode.lovvalg = m.lovvalg
             medlemsperiode.trygdedekning = m.dekning
             val sporingsinformasjon = m.sporingsinformasjon
-            medlemsperiode.kildedokumenttype = sporingsinformasjon.kildedokument
+            medlemsperiode.kildedokumenttype = sporingsinformasjon!!.kildedokument
             medlemsperiode.kilde = sporingsinformasjon.kilde
             medlemsperioder.add(medlemsperiode)
         }
@@ -101,30 +100,31 @@ class MedlService(
         val eksisterendePeriode = hentEksisterendePeriode(
             medlPeriodeID!!
         )
-        val sporingsinformasjon = MedlemskapsunntakForPut.SporingsinformasjonForPut.builder()
-            .kildedokument(eksisterendePeriode!!.sporingsinformasjon.kildedokument)
-            .versjon(eksisterendePeriode.sporingsinformasjon.versjon)
-            .build()
-        val request = MedlemskapsunntakForPut.builder()
-            .unntakId(eksisterendePeriode.unntakId)
-            .fraOgMed(eksisterendePeriode.fraOgMed)
-            .tilOgMed(eksisterendePeriode.tilOgMed)
-            .status(PeriodestatusMedl.AVST.kode)
-            .statusaarsak(årsak.kode)
-            .dekning(eksisterendePeriode.dekning)
-            .lovvalgsland(eksisterendePeriode.lovvalgsland)
-            .lovvalg(LovvalgMedl.ENDL.kode)
-            .grunnlag(eksisterendePeriode.grunnlag)
-            .sporingsinformasjon(sporingsinformasjon)
-            .build()
+        val request = MedlemskapsunntakForPut(
+            unntakId = eksisterendePeriode!!.unntakId,
+            fraOgMed = eksisterendePeriode.fraOgMed,
+            tilOgMed = eksisterendePeriode.tilOgMed,
+            status = PeriodestatusMedl.AVST.kode,
+            statusaarsak = årsak.kode,
+            dekning = eksisterendePeriode.dekning,
+            lovvalgsland = eksisterendePeriode.lovvalgsland,
+            lovvalg = LovvalgMedl.ENDL.kode,
+            grunnlag = eksisterendePeriode.grunnlag,
+            sporingsinformasjon = MedlemskapsunntakForPut.SporingsinformasjonForPut(
+                kildedokument = eksisterendePeriode!!.sporingsinformasjon!!.kildedokument,
+                versjon = eksisterendePeriode.sporingsinformasjon!!.versjon
+            )
+        )
+
         medlemskapRestConsumer.oppdaterPeriode(request)
     }
+
     private fun opprettPeriode(
         fnr: String, bestemmelse: HarBestemmelse<*>, periodestatusMedl: PeriodestatusMedl,
         lovvalgMedl: LovvalgMedl, kildedokumenttypeMedl: KildedokumenttypeMedl
     ): Long? {
 
-        var request: MedlemskapsunntakForPostBuilder? = null
+        var request: MedlemskapsunntakForPost? = null
         if (bestemmelse is PeriodeOmLovvalg) {
             request = lovvalgRequest(bestemmelse)
         } else if (bestemmelse is Medlemskapsperiode) {
@@ -135,45 +135,45 @@ class MedlService(
             throw TekniskException("Oppretting av periode i MEDL feilet")
         }
 
-        val sporingsinformasjon = MedlemskapsunntakForPost.SporingsinformasjonForPost.builder()
-            .kildedokument(kildedokumenttypeMedl.getKode())
-            .build()
+        request.apply {
+            sporingsinformasjon = MedlemskapsunntakForPost.SporingsinformasjonForPost().apply {
+                kildedokument = kildedokumenttypeMedl.getKode()
+            }
+            ident = fnr
+            status = periodestatusMedl.kode
+            lovvalg = lovvalgMedl.kode
+        }
 
-        request
-            .sporingsinformasjon(sporingsinformasjon)
-            .ident(fnr)
-            .status(periodestatusMedl.kode)
-            .lovvalg(lovvalgMedl.kode)
-
-        return medlemskapRestConsumer.opprettPeriode(request.build())!!.unntakId
+        return medlemskapRestConsumer.opprettPeriode(request)!!.unntakId
     }
 
-    private fun lovvalgRequest(periodeOmLovvalg: PeriodeOmLovvalg): MedlemskapsunntakForPostBuilder? {
-        return MedlemskapsunntakForPost.builder()
-            .fraOgMed(periodeOmLovvalg.fom)
-            .tilOgMed(periodeOmLovvalg.tom)
-            .dekning(MedlPeriodeKonverter.tilMedlTrygdeDekningEos(periodeOmLovvalg.dekning).kode)
-            .lovvalgsland(LandkoderUtils.tilIso3(periodeOmLovvalg.lovvalgsland.kode))
-            .grunnlag(
+    private fun lovvalgRequest(periodeOmLovvalg: PeriodeOmLovvalg): MedlemskapsunntakForPost {
+        return MedlemskapsunntakForPost().apply {
+            fraOgMed = periodeOmLovvalg.fom
+            tilOgMed = periodeOmLovvalg.tom
+            dekning = MedlPeriodeKonverter.tilMedlTrygdeDekningEos(periodeOmLovvalg.dekning).kode
+            lovvalgsland = LandkoderUtils.tilIso3(periodeOmLovvalg.lovvalgsland.kode)
+            grunnlag =
                 MedlPeriodeKonverter.tilGrunnlagMedltype(
                     MedlPeriodeKonverter.hentLovvalgBestemmelse(
                         periodeOmLovvalg
                     )
                 ).kode
-            )
+        }
     }
-    private fun medlemskapsperiodeRequest(medlemskapsperiode: Medlemskapsperiode): MedlemskapsunntakForPostBuilder? {
-        return MedlemskapsunntakForPost.builder()
-            .fraOgMed(medlemskapsperiode.fom)
-            .tilOgMed(medlemskapsperiode.tom)
-            .dekning(
+
+    private fun medlemskapsperiodeRequest(medlemskapsperiode: Medlemskapsperiode): MedlemskapsunntakForPost {
+        return MedlemskapsunntakForPost().apply {
+            fraOgMed = medlemskapsperiode.fom
+            tilOgMed = medlemskapsperiode.tom
+            dekning =
                 MedlPeriodeKonverter.tilMedlTrygdeDekningFtrl(
                     medlemskapsperiode.dekning,
                     medlemskapsperiode.bestemmelse
                 ).kode
-            )
-            .lovvalgsland(LandkoderUtils.tilIso3(medlemskapsperiode.arbeidsland))
-            .grunnlag(MedlPeriodeKonverter.tilGrunnlagMedltype(medlemskapsperiode.bestemmelse).kode)
+            lovvalgsland = LandkoderUtils.tilIso3(medlemskapsperiode.arbeidsland)
+            grunnlag = MedlPeriodeKonverter.tilGrunnlagMedltype(medlemskapsperiode.bestemmelse).kode
+        }
     }
 
     private fun oppdaterPeriode(
@@ -183,24 +183,24 @@ class MedlService(
         val medlPeriodeID = lovvalgsperiode.medlPeriodeID
             ?: throw TekniskException("Det er ikke lagret noen medlPeriodeID på lovvalgsperiode som skal oppdateres i MEDL")
         val eksisterendePeriode = hentEksisterendePeriode(medlPeriodeID)
-        val sporingsinformasjon = MedlemskapsunntakForPut.SporingsinformasjonForPut.builder()
-            .kildedokument(kildedokumenttypeMedl.getKode())
-            .versjon(eksisterendePeriode!!.sporingsinformasjon.versjon)
-            .build()
         val bestemmelse = MedlPeriodeKonverter.hentLovvalgBestemmelse(lovvalgsperiode)
-        val request = MedlemskapsunntakForPut.builder()
-            .unntakId(medlPeriodeID)
-            .fraOgMed(lovvalgsperiode.fom)
-            .tilOgMed(lovvalgsperiode.tom)
-            .status(periodestatusMedl.kode)
-            .dekning(MedlPeriodeKonverter.tilMedlTrygdeDekningEos(lovvalgsperiode.dekning).kode)
-            .lovvalgsland(LandkoderUtils.tilIso3(lovvalgsperiode.lovvalgsland.kode))
-            .lovvalg(lovvalgMedl.kode)
-            .grunnlag(MedlPeriodeKonverter.tilGrunnlagMedltype(bestemmelse).kode)
-            .sporingsinformasjon(sporingsinformasjon)
-            .build()
+        val request = MedlemskapsunntakForPut().apply {
+            unntakId=medlPeriodeID
+            fraOgMed=lovvalgsperiode.fom
+            tilOgMed=lovvalgsperiode.tom
+            status=periodestatusMedl.kode
+            dekning=MedlPeriodeKonverter.tilMedlTrygdeDekningEos(lovvalgsperiode.dekning).kode
+            lovvalgsland=LandkoderUtils.tilIso3(lovvalgsperiode.lovvalgsland.kode)
+            lovvalg=lovvalgMedl.kode
+            grunnlag=MedlPeriodeKonverter.tilGrunnlagMedltype(bestemmelse).kode
+            sporingsinformasjon= MedlemskapsunntakForPut.SporingsinformasjonForPut().apply {
+                kildedokument=kildedokumenttypeMedl.getKode()
+                versjon=eksisterendePeriode!!.sporingsinformasjon!!.versjon
+            }
+        }
         medlemskapRestConsumer.oppdaterPeriode(request)
     }
+
     private fun hentEksisterendePeriode(medlPeriodeID: Long): MedlemskapsunntakForGet? {
         return medlemskapRestConsumer.hentPeriode(medlPeriodeID.toString())
     }

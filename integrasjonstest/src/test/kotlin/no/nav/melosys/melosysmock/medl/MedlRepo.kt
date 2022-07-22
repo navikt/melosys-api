@@ -2,14 +2,14 @@ package no.nav.melosys.melosysmock.medl
 
 import no.nav.melosys.melosysmock.person.PersonRepo
 import no.nav.melosys.melosysmock.utils.lagRandomLongId
-import no.nav.melosys.ekstern.tjenester.medlemskapsunntak.api.v1.MedlemskapsunntakForGet
-import no.nav.melosys.ekstern.tjenester.medlemskapsunntak.api.v1.MedlemskapsunntakForPost
-import no.nav.melosys.ekstern.tjenester.medlemskapsunntak.api.v1.MedlemskapsunntakForPut
-import no.nav.melosys.ekstern.tjenester.medlemskapsunntak.api.v1.Sporingsinformasjon
+import no.nav.melosys.integrasjon.medl.api.v1.MedlemskapsunntakForGet
+import no.nav.melosys.integrasjon.medl.api.v1.MedlemskapsunntakForPost
+import no.nav.melosys.integrasjon.medl.api.v1.MedlemskapsunntakForPut
+import no.nav.melosys.integrasjon.medl.api.v1.Sporingsinformasjon
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-typealias MedlRepository = MutableMap<Long, MedlemskapsunntakForGet>
+typealias MedlRepository = MutableMap<Long?, MedlemskapsunntakForGet>
 
 object MedlRepo {
     val repo: MedlRepository = mutableMapOf()
@@ -36,10 +36,10 @@ fun MedlRepository.oppdater(medlemskapsunntakForPut: MedlemskapsunntakForPut): M
                 ?.let { eksisterendeMedlemskapsunntak ->
                     medlemskapsunntakForPut.tilGet()
                         .apply {
-                            sporingsinformasjon.run {
-                                registrert = eksisterendeMedlemskapsunntak.sporingsinformasjon.registrert
-                                besluttet = eksisterendeMedlemskapsunntak.sporingsinformasjon.besluttet
-                                opprettet = eksisterendeMedlemskapsunntak.sporingsinformasjon.opprettet
+                            sporingsinformasjon?.run {
+                                registrert = eksisterendeMedlemskapsunntak.sporingsinformasjon!!.registrert
+                                besluttet = eksisterendeMedlemskapsunntak.sporingsinformasjon!!.besluttet
+                                opprettet = eksisterendeMedlemskapsunntak.sporingsinformasjon!!.opprettet
                             }
                         }
                         .also(::lagre)
@@ -61,8 +61,8 @@ fun MedlRepository.finn(
     fom: LocalDate,
     tom: LocalDate
 ): Collection<MedlemskapsunntakForGet> = finn(fnr)
-    .filter { it.fraOgMed.isEqual(fom) || it.fraOgMed.isAfter(fom) }
-    .filter { it.tilOgMed.isEqual(tom) || it.tilOgMed.isBefore(tom) }
+    .filter { it.fraOgMed!!.isEqual(fom) || it.fraOgMed!!.isAfter(fom) }
+    .filter { it.tilOgMed!!.isEqual(tom) || it.tilOgMed!!.isBefore(tom) }
 
 @JvmName("nullableFinn")
 fun MedlRepository.finn(
@@ -95,7 +95,7 @@ fun MedlemskapsunntakForPost.tilGet(): MedlemskapsunntakForGet =
                 registrert = LocalDate.now()
                 besluttet = LocalDate.now()
                 kilde = SRVMELOSYS
-                kildedokument = it.sporingsinformasjon.kildedokument
+                kildedokument = it.sporingsinformasjon!!.kildedokument
                 opprettet = LocalDateTime.now()
                 opprettetAv = SRVMELOSYS
                 sistEndret = LocalDateTime.now()
@@ -117,9 +117,9 @@ fun MedlemskapsunntakForPut.tilGet(): MedlemskapsunntakForGet =
             grunnlag = it.grunnlag
             medlem = true
             Sporingsinformasjon().apply {
-                versjon = it.sporingsinformasjon.versjon
+                versjon = it.sporingsinformasjon!!.versjon
                 kilde = SRVMELOSYS
-                kildedokument = it.sporingsinformasjon.kildedokument
+                kildedokument = it.sporingsinformasjon!!.kildedokument
                 opprettetAv = SRVMELOSYS
                 sistEndretAv = SRVMELOSYS
                 sistEndret = LocalDateTime.now()
