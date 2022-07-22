@@ -86,7 +86,7 @@ public class EosVedtakService {
         }
 
         oppdaterBehandlingsresultat(behandlingsresultat, request.getVedtakstype(), request.getFritekst(), request.getNyVurderingBakgrunn());
-        Set<String> mottakerinstitusjoner = validerOgAvklarMottakerInstitusjoner(behandling, request.getMottakerinstitusjoner(), behandlingsresultat);
+        Set<String> mottakerinstitusjoner = avklarMottakerInstitusjoner(behandling, request.getMottakerinstitusjoner(), behandlingsresultat);
 
         if (prosessinstansService.harVedtakInstans(behandlingID)) {
             throw new FunksjonellException("Det finnes allerede en vedtak-prosess for behandling " + behandling);
@@ -100,7 +100,7 @@ public class EosVedtakService {
     public void endreVedtaksperiode(Behandling behandling, Endretperiode endretperiode, String fritekst, String fritekstSed) {
         final long behandlingID = behandling.getId();
         var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
-        if(behandling.getType().equals(Behandlingstyper.ENDRET_PERIODE)) {
+        if (behandling.getType().equals(Behandlingstyper.ENDRET_PERIODE)) {
             behandlingsresultat.setType(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
         }
         if (!behandlingsresultat.hentValidertLovvalgsperiode().erArtikkel12()) {
@@ -138,11 +138,11 @@ public class EosVedtakService {
         melosysEventMulticaster.multicastEvent(new VedtakMetadataLagretEvent(behandling.getId()));
     }
 
-    private Set<String> validerOgAvklarMottakerInstitusjoner(Behandling behandling,
-                                                             Set<String> mottakerinstitusjoner,
-                                                             Behandlingsresultat behandlingsresultat) {
+    private Set<String> avklarMottakerInstitusjoner(Behandling behandling,
+                                                    Set<String> mottakerinstitusjoner,
+                                                    Behandlingsresultat behandlingsresultat) {
         Collection<Landkoder> landkoder = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandling.getId());
-        if (mottakereTrenges(behandling) && skalSedSendes(behandlingsresultat, landkoder)) {
+        if (!behandling.erNorgeUtpekt() && skalSedSendes(behandlingsresultat, landkoder)) {
             mottakerinstitusjoner = eessiService.validerOgAvklarMottakerInstitusjonerForBuc(
                 mottakerinstitusjoner,
                 landkoder,
@@ -152,10 +152,6 @@ public class EosVedtakService {
             mottakerinstitusjoner = Collections.emptySet();
         }
         return mottakerinstitusjoner;
-    }
-
-    private static boolean mottakereTrenges(Behandling behandling) {
-        return !behandling.erNorgeUtpekt();
     }
 
     private static boolean skalSedSendes(Behandlingsresultat behandlingsresultat, Collection<Landkoder> landkoder) {
