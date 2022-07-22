@@ -15,219 +15,340 @@ import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
-import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.integrasjon.doksys.DoksysFasade;
-import no.nav.melosys.saksflyt.brev.BrevBestiller;
-import no.nav.melosys.saksflyt.steg.StegBehandler;
-import no.nav.melosys.service.LovvalgsperiodeService;
-import no.nav.melosys.service.aktoer.KontaktopplysningService;
-import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
-import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService;
-import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.dokument.*;
-import no.nav.melosys.service.dokument.brev.*;
-import no.nav.melosys.service.dokument.brev.bygger.*;
-import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevdataGrunnlagFactory;
+import no.nav.melosys.service.dokument.brev.BrevData;
+import no.nav.melosys.service.saksflyt.ProsessinstansService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.springframework.context.ApplicationEventPublisher;
+import org.mockito.Captor;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static no.nav.melosys.domain.brev.FastMottakerMedOrgnr.*;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
+import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 class SendVedtaksbrevInnlandTest {
-    private static final long BEHANDLINGSID = 42L;
-    private static final long BEHANDLINGSID_UTEN_PERIODER = -43L;
-    private static final long BEHANDLINGSID_MED_FLERE_PERIODER = 43L;
-    private static final long ART16_1_INNVILGET_BEHANDLINGSID = 44L;
-    private static final long ART16_1_INNVILGET_UTENLANDSK_VIRKSOMHET_BEHANDLINGSID = -44L;
-    private static final long BEHANDLINGSID_NORSK_LOVVALG_UTEN_INNVILGET_BESTEMMELSE = 46L;
-    private static final long ART12_1_INNVILGET_BEHANDLINGSID = 47L;
-    private static final long ART12_2_INNVILGET_BEHANDLINGSID = 48L;
-    private static final long ART12_1_AVSLÅTT_BEHANDLINGSID = 49L;
-    private static final long BEHANDLINGSID_MANGLENDE_OPPL = 50L;
-    private static final long ART13_1A_INNVILGET_BEHANDLINGSID = 51L;
-    private static final long ART11_4_INNVILGET_BEHANDLINGSID = 52L;
-    private static final long ART13_1B1_UTPEKING_BEHANDLINGSID = 53L;
-    private static final long ART12_1_FORKORTET_PERIODE_BEHANDLINGSID = 54L;
+    private static final long BEHANDLINGID = 1L;
 
-    private static DokumentSystemService dokService;
+    @Captor
+    private ArgumentCaptor<DoksysBrevbestilling> doksysBrevbestillingArgumentCaptor;
 
-    private static SendVedtaksbrevInnland lagStegbehandler(Behandling behandling) {
-        return lagStegbehandler(behandling, "Z123456");
+    @Mock
+    private BehandlingService behandlingService;
+    @Mock
+    private ProsessinstansService prosessinstansService;
+    @Mock
+    private BehandlingsresultatService behandlingsresultatService;
+
+    private final Behandling behandling = lagBehandling();
+
+    private SendVedtaksbrevInnland sendVedtaksbrevInnland;
+
+    @BeforeEach
+    public void setUp() {
+        when(behandlingService.hentBehandlingMedSaksopplysninger(BEHANDLINGID)).thenReturn(behandling);
+
+        sendVedtaksbrevInnland = new SendVedtaksbrevInnland(behandlingService, behandlingsresultatService, prosessinstansService);
     }
 
-    private static SendVedtaksbrevInnland lagStegbehandler(Behandling behandling, String saksbehandler) {
-        BrevDataA1 brevdata = new BrevDataA1();
-        BrevDataVedlegg brevdataVedlegg = new BrevDataVedlegg(saksbehandler);
-        brevdataVedlegg.brevDataA1 = brevdata;
-        BrevDataByggerVedlegg brevDataByggerVedlegg = mock(BrevDataByggerVedlegg.class);
-        when(brevDataByggerVedlegg.lag(any(), any())).thenReturn(brevdataVedlegg);
-        BrevDataByggerAvslagYrkesaktiv brevDataByggerAvslagYrkesaktiv = mock(BrevDataByggerAvslagYrkesaktiv.class);
-        BrevDataAvslagYrkesaktiv brevdataAvslag = new BrevDataAvslagYrkesaktiv(new BrevbestillingRequest(), saksbehandler);
-        when(brevDataByggerAvslagYrkesaktiv.lag(any(), any())).thenReturn(brevdataAvslag);
+    @Test
+    void utfør_medFlereLovvalgsperioder_girUnntak() {
+        Lovvalgsperiode lovvalgsperiode1 = lagLovvalgsperiodeArt16_1();
+        Lovvalgsperiode lovvalgsperiode2 = lagLovvalgsperiode(FO_883_2004_ART12_1, LocalDate.now().plusDays(30), Landkoder.DK, false);
+        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGID))
+            .thenReturn(lagBehandlingsresultat(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, Set.of(lovvalgsperiode1, lovvalgsperiode2), null));
+        var prosessinstans = lagProsessinstans();
 
-        BrevDataAvslagArbeidsgiver brevDataAvslagArbeidsgiver = new BrevDataAvslagArbeidsgiver(saksbehandler);
-        BrevDataByggerAvslagArbeidsgiver brevDataByggerAvslagArbeidsgiver = mock(BrevDataByggerAvslagArbeidsgiver.class);
-        when(brevDataByggerAvslagArbeidsgiver.lag(any(), any())).thenReturn(brevDataAvslagArbeidsgiver);
 
-        var brevDataByggerUtpekingAnnetLand = mock(BrevDataByggerUtpekingAnnetLand.class);
-        BrevDataUtpekingAnnetLand brevDataUtpekingAnnetLand = mock(BrevDataUtpekingAnnetLand.class);
-        when(brevDataByggerUtpekingAnnetLand.lag(any(), any())).thenReturn(brevDataUtpekingAnnetLand);
-
-        BrevDataByggerStandard brevDataByggerStandard = mock(BrevDataByggerStandard.class);
-        BrevData standardBrevData = new BrevData();
-        when(brevDataByggerStandard.lag(any(), any())).thenReturn(standardBrevData);
-
-        BrevDataByggerVelger byggerVelger = mock(BrevDataByggerVelger.class);
-        when(byggerVelger.hent(eq(ANMODNING_UNNTAK), any())).thenReturn(brevDataByggerVedlegg);
-        when(byggerVelger.hent(eq(ATTEST_A1), any())).thenReturn(brevDataByggerVedlegg);
-        when(byggerVelger.hent(eq(INNVILGELSE_YRKESAKTIV), any())).thenReturn(brevDataByggerVedlegg);
-        when(byggerVelger.hent(eq(INNVILGELSE_YRKESAKTIV_FLERE_LAND), any())).thenReturn(brevDataByggerVedlegg);
-        when(byggerVelger.hent(eq(AVSLAG_YRKESAKTIV), any())).thenReturn(brevDataByggerAvslagYrkesaktiv);
-        when(byggerVelger.hent(eq(AVSLAG_ARBEIDSGIVER), any())).thenReturn(brevDataByggerAvslagArbeidsgiver);
-        when(byggerVelger.hent(eq(INNVILGELSE_ARBEIDSGIVER), any())).thenReturn(brevDataByggerStandard);
-        when(byggerVelger.hent(eq(AVSLAG_MANGLENDE_OPPLYSNINGER), any())).thenReturn(brevDataByggerStandard);
-        when(byggerVelger.hent(eq(ORIENTERING_UTPEKING_UTLAND), any())).thenReturn(brevDataByggerUtpekingAnnetLand);
-
-        dokService = spy(lagDokumentService(byggerVelger));
-        DokumentServiceFasade dokumentServiceFasade = new DokumentServiceFasade(mock(DokumentService.class), dokService, mock(DokgenService.class),
-            mock(BehandlingService.class), mock(ApplicationEventPublisher.class));
-        BrevBestiller brevBestiller = new BrevBestiller(dokumentServiceFasade);
-
-        BehandlingService behandlingService = mock(BehandlingService.class);
-        when(behandlingService.hentBehandlingMedSaksopplysninger(behandling.getId())).thenReturn(behandling);
-
-        return new SendVedtaksbrevInnland(brevBestiller, behandlingService, mockBehandlingsresultatService());
+        assertThatExceptionOfType(UnsupportedOperationException.class)
+            .isThrownBy(() -> sendVedtaksbrevInnland.utfør(prosessinstans))
+            .withMessageContaining("Flere enn en lovvalgsperiode er ikke støttet");
     }
 
-    private static BehandlingService mockBehandlingService() {
-        Fagsak fagsak = lagFagsak();
-        Behandling behandling = lagBehandling(fagsak);
-        BehandlingService behandlingService = mock(BehandlingService.class);
-        List<Long> behandlingReferanser = Arrays.asList(ART16_1_INNVILGET_BEHANDLINGSID,
-            ART16_1_INNVILGET_UTENLANDSK_VIRKSOMHET_BEHANDLINGSID,
-            ART12_1_INNVILGET_BEHANDLINGSID,
-            ART12_1_AVSLÅTT_BEHANDLINGSID,
-            ART12_2_INNVILGET_BEHANDLINGSID,
-            BEHANDLINGSID_MANGLENDE_OPPL,
-            ART13_1A_INNVILGET_BEHANDLINGSID,
-            ART13_1B1_UTPEKING_BEHANDLINGSID,
-            ART11_4_INNVILGET_BEHANDLINGSID,
-            ART12_1_FORKORTET_PERIODE_BEHANDLINGSID);
-        when(behandlingService.hentBehandlingMedSaksopplysninger(longThat(behandlingReferanser::contains))).thenReturn(behandling);
-        return behandlingService;
+    @Test
+    void utfør_avslagManglendeOppl_bestillerAvslagManglendeOppl() {
+        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGID))
+            .thenReturn(lagBehandlingsresultatUtenPerioder(Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL));
+
+
+        sendVedtaksbrevInnland.utfør(lagProsessinstans());
+
+
+        verify(prosessinstansService).opprettProsessinstanserSendBrev(eq(behandling), doksysBrevbestillingArgumentCaptor.capture(), eq(List.of(Mottaker.av(BRUKER))));
+        assertThat(doksysBrevbestillingArgumentCaptor.getValue().getProduserbartdokument()).isEqualTo(AVSLAG_MANGLENDE_OPPLYSNINGER);
+        verify(prosessinstansService, never()).opprettProsessinstansSendBrev(eq(behandling), any(DoksysBrevbestilling.class), eq(Mottaker.av(ARBEIDSGIVER)));
     }
 
-    private static DokumentSystemService lagDokumentService(BrevDataByggerVelger brevDataByggerVelger) {
-        AvklarteVirksomheterService avklarteVirksomheterService = mock(AvklarteVirksomheterService.class);
-        when(avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(any())).thenReturn(Set.of("123456789"));
-        BehandlingService behandlingService = mockBehandlingService();
-        BehandlingsresultatService behandlingsresultatService = mock(BehandlingsresultatService.class);
-        BrevDataService brevDataService = mock(BrevDataService.class);
-        DoksysFasade dokSysFasade = mock(DoksysFasade.class);
-        UtenlandskMyndighetService utenlandskMyndighetService = mock(UtenlandskMyndighetService.class);
-        when(utenlandskMyndighetService.lagUtenlandskeMyndigheterFraBehandling(any()))
-            .thenReturn(Collections.singletonMap(new UtenlandskMyndighet(), new Aktoer()));
-        KontaktopplysningService kontaktopplysningService = mock(KontaktopplysningService.class);
-        BrevmottakerService brevmottakerService = new BrevmottakerService(kontaktopplysningService,
-            avklarteVirksomheterService, utenlandskMyndighetService, behandlingsresultatService,
-            mock(TrygdeavgiftsberegningService.class), mock(LovvalgsperiodeService.class), behandlingService);
-        return spy(new DokumentSystemService(behandlingService, brevDataService, dokSysFasade,
-            brevmottakerService, brevDataByggerVelger, mock(BrevdataGrunnlagFactory.class)));
+    @Test
+    void utfør_utenPeriode_feiler() {
+        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGID))
+            .thenReturn(lagBehandlingsresultatUtenPerioder(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND));
+        var prosessinstans = lagProsessinstans();
+
+
+        assertThatExceptionOfType(NoSuchElementException.class)
+            .isThrownBy(() -> sendVedtaksbrevInnland.utfør(prosessinstans))
+            .withMessageContaining("Ingen lovvalgsperiode finnes");
     }
 
-    private static BehandlingsresultatService mockBehandlingsresultatService() {
-        BehandlingsresultatService behandlingsresultatService = mock(BehandlingsresultatService.class);
-        Lovvalgsperiode periode = lagLovvalgsperiodeArt16_1();
-        Behandlingsresultat behandlingsresultat = lagUgyldigBehandlingsresultat(periode);
-        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGSID)).thenReturn(behandlingsresultat);
-        Lovvalgsperiode periode2 = lagLovvalgsperiode(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1, LocalDate.now().plusDays(30), Landkoder.DK, false);
-        Behandlingsresultat behandlingsresultatMedFlerePerioder = lagBehandlingsresultat(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, new HashSet<>(Arrays.asList(periode, periode2)), null);
-        assertThat(behandlingsresultatMedFlerePerioder.getLovvalgsperioder().size()).isGreaterThan(1);
-        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGSID_MED_FLERE_PERIODER)).thenReturn(behandlingsresultatMedFlerePerioder);
+    @Test
+    void utfør_innvilgelse12_1_vedtakOgKopiTilSkattSendes() {
+        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGID))
+            .thenReturn(lagBehandlingsresultat(lagInnvilgetLovvalgsperiode(FO_883_2004_ART12_1)));
 
-        Behandlingsresultat behandlingsresultatUtenPerioder = lagBehandlingsresultatUtenPerioder(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
-        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGSID_UTEN_PERIODER)).thenReturn(behandlingsresultatUtenPerioder);
 
-        Behandlingsresultat behandlingsresultatManglendeOppl = lagBehandlingsresultatUtenPerioder(Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL);
-        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGSID_MANGLENDE_OPPL)).thenReturn(behandlingsresultatManglendeOppl);
+        sendVedtaksbrevInnland.utfør(lagProsessinstans());
 
-        Behandlingsresultat behandlingsresultatInnvilgetArt16 = lagBehandlingsresultat(periode);
-        behandlingsresultatInnvilgetArt16.getAnmodningsperioder().add(lagAnmodningsperiodeMedSvar());
-        when(behandlingsresultatService.hentBehandlingsresultat(ART16_1_INNVILGET_BEHANDLINGSID)).thenReturn(behandlingsresultatInnvilgetArt16);
 
-        Behandlingsresultat behandlingsresultatInnvilgetArt16MedUtenlandskKonsern = lagBehandlingsresultat(periode);
-        when(behandlingsresultatService.hentBehandlingsresultat(ART16_1_INNVILGET_UTENLANDSK_VIRKSOMHET_BEHANDLINGSID)).thenReturn(behandlingsresultatInnvilgetArt16MedUtenlandskKonsern);
+        var mottakere = List.of(Mottaker.av(BRUKER), FastMottakerMedOrgnr.av(SKATT));
+        verify(prosessinstansService).opprettProsessinstanserSendBrev(eq(behandling), doksysBrevbestillingArgumentCaptor.capture(), eq(mottakere));
+        assertThat(doksysBrevbestillingArgumentCaptor.getValue().getProduserbartdokument()).isEqualTo(INNVILGELSE_YRKESAKTIV);
+    }
 
-        Behandlingsresultat innvilgetResultat12_1 = lagBehandlingsresultat(lagInnvilgetLovvalgsperiode(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1));
-        when(behandlingsresultatService.hentBehandlingsresultat(ART12_1_INNVILGET_BEHANDLINGSID)).thenReturn(innvilgetResultat12_1);
+    @Test
+    void utfør_innvilgelse11_4_senderIkkeOrienteringTilArbeidsgiver() {
+        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGID))
+            .thenReturn(lagBehandlingsresultat(lagInnvilgetLovvalgsperiode(FO_883_2004_ART11_4_2)));
 
-        Behandlingsresultat innvilgetResultat13_1A = lagBehandlingsresultat(lagInnvilgetLovvalgsperiode(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A));
-        when(behandlingsresultatService.hentBehandlingsresultat(ART13_1A_INNVILGET_BEHANDLINGSID)).thenReturn(innvilgetResultat13_1A);
 
-        Behandlingsresultat avslåttResultat12_1 = lagBehandlingsresultat(lagLovvalgsperiode(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1, LocalDate.now(), Landkoder.HR, false));
-        when(behandlingsresultatService.hentBehandlingsresultat(ART12_1_AVSLÅTT_BEHANDLINGSID)).thenReturn(avslåttResultat12_1);
+        sendVedtaksbrevInnland.utfør(lagProsessinstans());
 
-        Behandlingsresultat innvilgetResultat12_2 = lagBehandlingsresultat(lagInnvilgetLovvalgsperiode(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_2));
-        when(behandlingsresultatService.hentBehandlingsresultat(ART12_2_INNVILGET_BEHANDLINGSID)).thenReturn(innvilgetResultat12_2);
 
-        Behandlingsresultat innvilgetResultat11_4 = lagBehandlingsresultat(lagInnvilgetLovvalgsperiode(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_4_2));
-        when(behandlingsresultatService.hentBehandlingsresultat(ART11_4_INNVILGET_BEHANDLINGSID)).thenReturn(innvilgetResultat11_4);
+        var mottakere = List.of(Mottaker.av(BRUKER), FastMottakerMedOrgnr.av(SKATT));
+        verify(prosessinstansService).opprettProsessinstanserSendBrev(eq(behandling), doksysBrevbestillingArgumentCaptor.capture(), eq(mottakere));
+        assertThat(doksysBrevbestillingArgumentCaptor.getValue().getProduserbartdokument()).isEqualTo(INNVILGELSE_YRKESAKTIV);
+        verify(prosessinstansService, never()).opprettProsessinstansSendBrev(eq(behandling), any(DoksysBrevbestilling.class), eq(Mottaker.av(ARBEIDSGIVER)));
+    }
 
-        Behandlingsresultat uktpekingsResultat = lagBehandlingsresultat(lagUtpekingsperiode(), lagLovvalgsperiode(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B1, LocalDate.now(), Landkoder.SE, true));
-        when(behandlingsresultatService.hentBehandlingsresultat(ART13_1B1_UTPEKING_BEHANDLINGSID)).thenReturn(uktpekingsResultat);
+    @Test
+    void utfør_innvilgelse13_1A_vedtakOgKopiTilSkattSendes() {
+        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGID))
+            .thenReturn(lagBehandlingsresultat(lagInnvilgetLovvalgsperiode(FO_883_2004_ART13_1A)));
 
-        Behandlingsresultat norskLovvalgUtenInnvilgetBestemmelse = lagBehandlingsresultat(lagInnvilgetLovvalgsperiode(Lovvalgbestemmelser_883_2004.FO_883_2004_ANNET));
-        norskLovvalgUtenInnvilgetBestemmelse.setType(Behandlingsresultattyper.IKKE_FASTSATT);
-        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGSID_NORSK_LOVVALG_UTEN_INNVILGET_BESTEMMELSE)).thenReturn(norskLovvalgUtenInnvilgetBestemmelse);
 
-        Behandlingsresultat endretPeriode12_1resultat = lagBehandlingsresultat(lagInnvilgetLovvalgsperiode(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1));
-        endretPeriode12_1resultat.getAvklartefakta().add(
+        sendVedtaksbrevInnland.utfør(lagProsessinstans());
+
+
+        var mottakere = List.of(Mottaker.av(BRUKER), FastMottakerMedOrgnr.av(SKATT));
+        verify(prosessinstansService).opprettProsessinstanserSendBrev(eq(behandling), doksysBrevbestillingArgumentCaptor.capture(), eq(mottakere));
+        assertThat(doksysBrevbestillingArgumentCaptor.getValue().getProduserbartdokument()).isEqualTo(INNVILGELSE_YRKESAKTIV_FLERE_LAND);
+    }
+
+    @Test
+    void utfør_utpeking13_1B1_senderOrienteringsbrev() {
+        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGID))
+            .thenReturn(lagBehandlingsresultat(lagUtpekingsperiode(), lagLovvalgsperiode(FO_883_2004_ART13_1B1, LocalDate.now(), Landkoder.SE, true)));
+
+
+        sendVedtaksbrevInnland.utfør(lagProsessinstans());
+
+
+        verify(prosessinstansService).opprettProsessinstansSendBrev(eq(behandling), doksysBrevbestillingArgumentCaptor.capture(), eq(Mottaker.av(BRUKER)));
+        assertThat(doksysBrevbestillingArgumentCaptor.getValue().getProduserbartdokument()).isEqualTo(ORIENTERING_UTPEKING_UTLAND);
+    }
+
+    @Test
+    void utfør_innvilgelse13_1A_senderIkkeInnvilgelseTilArbeidsgiver() {
+        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGID))
+            .thenReturn(lagBehandlingsresultat(lagInnvilgetLovvalgsperiode(FO_883_2004_ART13_1A)));
+        var prosessinstans = lagProsessinstans();
+
+
+        sendVedtaksbrevInnland.utfør(prosessinstans);
+
+
+        verify(prosessinstansService, never()).opprettProsessinstansSendBrev(eq(behandling), any(DoksysBrevbestilling.class), eq(Mottaker.av(ARBEIDSGIVER)));
+    }
+
+    @Test
+    void utfør_innvilgelse13_1AMedUtenlandskForetak_senderBrevTilStatligSkatteoppkreving() {
+        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGID))
+            .thenReturn(lagBehandlingsresultat(lagInnvilgetLovvalgsperiode(FO_883_2004_ART13_1A)));
+        ForetakUtland arbeidsgiverUtland = new ForetakUtland();
+        arbeidsgiverUtland.selvstendigNæringsvirksomhet = false;
+        behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().foretakUtland.add(arbeidsgiverUtland);
+
+
+        sendVedtaksbrevInnland.utfør(lagProsessinstans());
+
+
+        var mottakere = List.of(Mottaker.av(BRUKER), FastMottakerMedOrgnr.av(SKATT), FastMottakerMedOrgnr.av(STATLIG_SKATTEOPPKREVING));
+        verify(prosessinstansService).opprettProsessinstanserSendBrev(eq(behandling), doksysBrevbestillingArgumentCaptor.capture(), eq(mottakere));
+        assertThat(doksysBrevbestillingArgumentCaptor.getValue().getProduserbartdokument()).isEqualTo(INNVILGELSE_YRKESAKTIV_FLERE_LAND);
+    }
+
+    @Test
+    void utfør_innvilgelse16_1MedUtenlandskSelvstendigArbeid_senderIkkeBrevTilStatligSkatteoppkreving() {
+        var behandlingsresultat = lagBehandlingsresultat(lagLovvalgsperiodeArt16_1());
+        behandlingsresultat.getAnmodningsperioder().add(lagAnmodningsperiodeMedSvar());
+        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGID)).thenReturn(behandlingsresultat);
+        ForetakUtland utenlandskSelvstendigVirksomhet = new ForetakUtland();
+        utenlandskSelvstendigVirksomhet.selvstendigNæringsvirksomhet = true;
+        behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().foretakUtland.add(utenlandskSelvstendigVirksomhet);
+
+
+        sendVedtaksbrevInnland.utfør(lagProsessinstans());
+
+
+        var mottakere = List.of(Mottaker.av(BRUKER), FastMottakerMedOrgnr.av(SKATT));
+        verify(prosessinstansService).opprettProsessinstanserSendBrev(eq(behandling), any(DoksysBrevbestilling.class), eq(mottakere));
+    }
+
+    @Test
+    void utfør_innvilgelse16_1SaksbehandlerIkkeSatt_brukerSaksbehandlerSomAnmodetOmUnntakVedBrevbestilling() {
+        var behandlingsresultat = lagBehandlingsresultat(lagLovvalgsperiodeArt16_1());
+        behandlingsresultat.getAnmodningsperioder().add(lagAnmodningsperiodeMedSvar());
+        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGID)).thenReturn(behandlingsresultat);
+        var prosessinstans = lagProsessinstans();
+
+
+        sendVedtaksbrevInnland.utfør(prosessinstans);
+
+
+        assertThat(prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER)).isNull();
+        var mottakere = List.of(Mottaker.av(BRUKER), FastMottakerMedOrgnr.av(SKATT));
+        verify(prosessinstansService).opprettProsessinstanserSendBrev(eq(behandling), doksysBrevbestillingArgumentCaptor.capture(), eq(mottakere));
+        assertThat(doksysBrevbestillingArgumentCaptor.getValue().getAvsenderID()).isEqualTo("Z111111");
+    }
+
+    @Test
+    void utfør_innvilgelse12_1_senderIkkeBrevTilStatligSkatteoppkreving() {
+        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGID))
+            .thenReturn(lagBehandlingsresultat(lagInnvilgetLovvalgsperiode(FO_883_2004_ART12_1)));
+        behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().foretakUtland.add(new ForetakUtland());
+
+
+        sendVedtaksbrevInnland.utfør(lagProsessinstans());
+
+
+        var mottakere = List.of(Mottaker.av(BRUKER), FastMottakerMedOrgnr.av(SKATT));
+        verify(prosessinstansService).opprettProsessinstanserSendBrev(eq(behandling), any(DoksysBrevbestilling.class), eq(mottakere));
+    }
+
+    @Test
+    void utfør_innvilgelse12_1_senderInnvilgelseTilArbeidsgiver() {
+        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGID))
+            .thenReturn(lagBehandlingsresultat(lagInnvilgetLovvalgsperiode(FO_883_2004_ART12_1)));
+
+
+        sendVedtaksbrevInnland.utfør(lagProsessinstans());
+
+
+        verify(prosessinstansService).opprettProsessinstansSendBrev(eq(behandling), doksysBrevbestillingArgumentCaptor.capture(), eq(Mottaker.av(ARBEIDSGIVER)));
+        assertThat(doksysBrevbestillingArgumentCaptor.getValue().getProduserbartdokument()).isEqualTo(INNVILGELSE_ARBEIDSGIVER);
+    }
+
+    @Test
+    void utfør_avslag12_1_senderTilHelfoOgSkatt() {
+        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGID))
+            .thenReturn(lagBehandlingsresultat(lagLovvalgsperiode(FO_883_2004_ART12_1, LocalDate.now(), Landkoder.HR, false)));
+
+
+        sendVedtaksbrevInnland.utfør(lagProsessinstans());
+
+
+        var mottakere = List.of(Mottaker.av(BRUKER), av(HELFO), av(SKATT));
+        verify(prosessinstansService).opprettProsessinstanserSendBrev(eq(behandling), doksysBrevbestillingArgumentCaptor.capture(), eq(mottakere));
+        assertThat(doksysBrevbestillingArgumentCaptor.getValue().getProduserbartdokument()).isEqualTo(AVSLAG_YRKESAKTIV);
+    }
+
+    @Test
+    void utfør_avslag12_1MedArbeidsgiver_senderTilArbeidsgiver() {
+        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGID))
+            .thenReturn(lagBehandlingsresultat(lagLovvalgsperiode(FO_883_2004_ART12_1, LocalDate.now(), Landkoder.HR, false)));
+        Aktoer arbeidsgiver = new Aktoer();
+        arbeidsgiver.setRolle(ARBEIDSGIVER);
+        arbeidsgiver.setOrgnr("123456789");
+        behandling.getFagsak().getAktører().add(arbeidsgiver);
+
+
+        sendVedtaksbrevInnland.utfør(lagProsessinstans());
+
+
+        verify(prosessinstansService).opprettProsessinstansSendBrev(eq(behandling), doksysBrevbestillingArgumentCaptor.capture(), eq(Mottaker.av(ARBEIDSGIVER)));
+        assertThat(doksysBrevbestillingArgumentCaptor.getValue().getProduserbartdokument()).isEqualTo(AVSLAG_ARBEIDSGIVER);
+    }
+
+
+    @Test
+    void utfør_PåInnvilgelsesBrevBestemtAv12_2_senderBrevTilSkattOgKopiTilArbeidsgiver() {
+        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGID))
+            .thenReturn(lagBehandlingsresultat(lagInnvilgetLovvalgsperiode(FO_883_2004_ART12_2)));
+
+
+        sendVedtaksbrevInnland.utfør(lagProsessinstans());
+
+
+        var mottakere = List.of(Mottaker.av(BRUKER), FastMottakerMedOrgnr.av(SKATT));
+        verify(prosessinstansService).opprettProsessinstanserSendBrev(eq(behandling), any(DoksysBrevbestilling.class), eq(mottakere));
+        verify(prosessinstansService).opprettProsessinstansSendBrev(eq(behandling), doksysBrevbestillingArgumentCaptor.capture(), eq(Mottaker.av(ARBEIDSGIVER)));
+        assertThat(doksysBrevbestillingArgumentCaptor.getValue().getProduserbartdokument()).isEqualTo(INNVILGELSE_ARBEIDSGIVER);
+    }
+
+    @Test
+    void utfør_PåFastsattLovvalgINorgeUtenInnvilgetBestemmelse_GårTilFeiletMaskinelt() {
+        var behandlingsresultat = lagBehandlingsresultat(lagInnvilgetLovvalgsperiode(FO_883_2004_ANNET));
+        behandlingsresultat.setType(Behandlingsresultattyper.IKKE_FASTSATT);
+        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGID)).thenReturn(behandlingsresultat);
+        var prosessinstans = lagProsessinstans();
+
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> sendVedtaksbrevInnland.utfør(prosessinstans))
+            .withMessageContaining("Vedtaksbrev kan ikke sendes for behandling");
+    }
+
+    @Test
+    void utfør_PåInnvilgelsesBrev12_1_medBegrunnelsekodeForkortetPeriode_oppdatererBrevdata() {
+        var behandlingsresultat = lagBehandlingsresultat(lagInnvilgetLovvalgsperiode(FO_883_2004_ART12_1));
+        behandlingsresultat.getAvklartefakta().add(
             new Avklartefakta(
-                endretPeriode12_1resultat,
+                behandlingsresultat,
                 Avklartefaktatyper.AARSAK_ENDRING_PERIODE.getKode(),
                 Avklartefaktatyper.AARSAK_ENDRING_PERIODE,
                 null,
                 Endretperiode.ENDRINGER_ARBEIDSSITUASJON.getKode()));
-        when(behandlingsresultatService.hentBehandlingsresultat(ART12_1_FORKORTET_PERIODE_BEHANDLINGSID)).thenReturn(endretPeriode12_1resultat);
-        return behandlingsresultatService;
+        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGID)).thenReturn(behandlingsresultat);
+
+
+        sendVedtaksbrevInnland.utfør(lagProsessinstans());
+
+
+        var mottakere = List.of(Mottaker.av(BRUKER), FastMottakerMedOrgnr.av(SKATT));
+        verify(prosessinstansService).opprettProsessinstanserSendBrev(eq(behandling), doksysBrevbestillingArgumentCaptor.capture(), eq(mottakere));
+        assertThat(doksysBrevbestillingArgumentCaptor.getValue().getBegrunnelseKode()).isEqualTo(Endretperiode.ENDRINGER_ARBEIDSSITUASJON.getKode());
     }
 
-    private static Anmodningsperiode lagAnmodningsperiodeMedSvar() {
-        Anmodningsperiode anmodningsperiode = new Anmodningsperiode();
-        anmodningsperiode.setAnmodetAv("Z111111");
-        anmodningsperiode.setAnmodningsperiodeSvar(new AnmodningsperiodeSvar());
-        anmodningsperiode.getAnmodningsperiodeSvar().setAnmodningsperiodeSvarType(Anmodningsperiodesvartyper.INNVILGELSE);
-        return anmodningsperiode;
+    private Prosessinstans lagProsessinstans() {
+        var prosessinstans = new Prosessinstans();
+        prosessinstans.setBehandling(behandling);
+        prosessinstans.setType(ProsessType.IVERKSETT_VEDTAK_EOS);
+        var brevdata = new BrevData();
+        prosessinstans.setData(ProsessDataKey.BREVDATA, brevdata);
+        return prosessinstans;
     }
 
-    private static Behandling lagBehandling(Fagsak fagsak) {
-        return lagBehandling(fagsak, 777);
-    }
-
-    private static Behandling lagBehandling(long behandlingsid) {
-        return lagBehandling(null, behandlingsid);
-    }
-
-    private static Behandling lagBehandling(Fagsak fagsak, long behandlingsid) {
+    private static Behandling lagBehandling() {
         Behandling behandling = new Behandling();
-        behandling.setId(behandlingsid);
+        behandling.setId(BEHANDLINGID);
         behandling.setType(Behandlingstyper.SOEKNAD);
         behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
         behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(new Soeknad());
-        behandling.setFagsak(fagsak != null ? fagsak : lagFagsak());
+        behandling.setFagsak(lagFagsak());
         return behandling;
     }
 
@@ -252,8 +373,16 @@ class SendVedtaksbrevInnlandTest {
         return fagsak;
     }
 
+    private static Anmodningsperiode lagAnmodningsperiodeMedSvar() {
+        Anmodningsperiode anmodningsperiode = new Anmodningsperiode();
+        anmodningsperiode.setAnmodetAv("Z111111");
+        anmodningsperiode.setAnmodningsperiodeSvar(new AnmodningsperiodeSvar());
+        anmodningsperiode.getAnmodningsperiodeSvar().setAnmodningsperiodeSvarType(Anmodningsperiodesvartyper.INNVILGELSE);
+        return anmodningsperiode;
+    }
+
     private static Lovvalgsperiode lagLovvalgsperiodeArt16_1() {
-        return lagInnvilgetLovvalgsperiode(Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1);
+        return lagInnvilgetLovvalgsperiode(FO_883_2004_ART16_1);
     }
 
     private static Lovvalgsperiode lagInnvilgetLovvalgsperiode(Lovvalgbestemmelser_883_2004 bestemmelse) {
@@ -279,7 +408,7 @@ class SendVedtaksbrevInnlandTest {
         utpekingsperiode.setFom(LocalDate.MIN);
         utpekingsperiode.setTom(LocalDate.MIN.plusDays(1));
         utpekingsperiode.setLovvalgsland(Landkoder.PL);
-        utpekingsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B1);
+        utpekingsperiode.setBestemmelse(FO_883_2004_ART13_1B1);
         return utpekingsperiode;
     }
 
@@ -288,10 +417,6 @@ class SendVedtaksbrevInnlandTest {
             Collections.singleton(periode),
             Landkoder.NO
         );
-    }
-
-    private static Behandlingsresultat lagUgyldigBehandlingsresultat(Lovvalgsperiode periode) {
-        return lagBehandlingsresultat(Behandlingsresultattyper.IKKE_FASTSATT, Collections.singleton(periode), Landkoder.AT);
     }
 
     private static Behandlingsresultat lagBehandlingsresultat(Utpekingsperiode utpekingsperiode, Lovvalgsperiode lovvalgsperiode) {
@@ -316,236 +441,5 @@ class SendVedtaksbrevInnlandTest {
 
     private static Behandlingsresultat lagBehandlingsresultatUtenPerioder(Behandlingsresultattyper behandlingstype) {
         return lagBehandlingsresultat(behandlingstype, Collections.emptySet(), Landkoder.NO);
-    }
-
-    @Test
-    final void utfør_medFlereLovvalgsperioder_girUnntak() {
-        Prosessinstans prosessinstans = lagProsessinstans(BEHANDLINGSID_MED_FLERE_PERIODER);
-        StegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
-        assertThatExceptionOfType(UnsupportedOperationException.class)
-            .isThrownBy(() -> instans.utfør(prosessinstans))
-            .withMessageContaining("Flere enn en lovvalgsperiode er ikke støttet");
-    }
-
-    @Test
-    final void utfør_avslagManglendeOppl_bestillerAvslagManglendeOppl() {
-        Prosessinstans prosessinstans = lagProsessinstans(BEHANDLINGSID_MANGLENDE_OPPL);
-        StegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
-        instans.utfør(prosessinstans);
-        verify(dokService).produserDokument(eq(AVSLAG_MANGLENDE_OPPLYSNINGER), eq(Mottaker.av(BRUKER)), anyLong(), any());
-        // Temp fiks for https://jira.adeo.no/browse/MELOSYS-5243
-        verify(dokService, never()).produserDokument(eq(AVSLAG_MANGLENDE_OPPLYSNINGER), eq(Mottaker.av(ARBEIDSGIVER)), anyLong(), any());
-    }
-
-    @Test
-    final void utfør_avslagManglendeOppl_senderIkkeTilSkattOgHelfo() {
-        Prosessinstans prosessinstans = lagProsessinstans(BEHANDLINGSID_MANGLENDE_OPPL);
-        StegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
-        instans.utfør(prosessinstans);
-        verify(dokService, never()).produserDokument(eq(AVSLAG_MANGLENDE_OPPLYSNINGER), eq(FastMottakerMedOrgnr.av(SKATT)), anyLong(), any());
-        verify(dokService, never()).produserDokument(eq(AVSLAG_MANGLENDE_OPPLYSNINGER), eq(FastMottakerMedOrgnr.av(HELFO)), anyLong(), any());
-    }
-
-    @Test
-    final void utfør_utenPeriode_feiler() {
-        Prosessinstans prosessinstans = lagProsessinstans(BEHANDLINGSID_UTEN_PERIODER);
-        StegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
-        assertThatExceptionOfType(NoSuchElementException.class)
-            .isThrownBy(() -> instans.utfør(prosessinstans))
-            .withMessageContaining("Ingen lovvalgsperiode finnes");
-    }
-
-    @Test
-    final void utfør_påInnvilgelsesBrevBestemtAv12_1_tilSendSed() {
-        Prosessinstans prosessinstans = lagProsessinstans(ART12_1_INNVILGET_BEHANDLINGSID);
-        StegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
-        instans.utfør(prosessinstans);
-    }
-
-    @Test
-    void utfør_innvilgelses12_1_vedtakOgKopiTilSkattSendes() {
-        Prosessinstans prosessinstans = lagProsessinstans(ART12_1_INNVILGET_BEHANDLINGSID);
-        StegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
-
-        instans.utfør(prosessinstans);
-
-        verify(dokService).produserDokument(eq(INNVILGELSE_YRKESAKTIV), eq(Mottaker.av(BRUKER)), anyLong(), any());
-        verify(dokService).produserDokument(eq(INNVILGELSE_YRKESAKTIV), eq(FastMottakerMedOrgnr.av(SKATT)), anyLong(), any());
-    }
-
-    @Test
-    final void utfør_innvilgelses11_4_senderIkkeOrienteringTilArbeidsgiver() {
-        Prosessinstans prosessinstans = lagProsessinstans(ART11_4_INNVILGET_BEHANDLINGSID);
-
-        StegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
-        instans.utfør(prosessinstans);
-
-        verify(dokService).produserDokument(eq(INNVILGELSE_YRKESAKTIV), eq(Mottaker.av(BRUKER)), anyLong(), any());
-        verify(dokService, never()).produserDokument(eq(INNVILGELSE_ARBEIDSGIVER), any(), anyLong(), any());
-    }
-
-    @Test
-    void utfør_innvilgelses13_1A_vedtakOgKopiTilSkattSendes() {
-        Prosessinstans prosessinstans = lagProsessinstans(ART13_1A_INNVILGET_BEHANDLINGSID);
-        StegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
-
-        instans.utfør(prosessinstans);
-
-        verify(dokService).produserDokument(eq(INNVILGELSE_YRKESAKTIV_FLERE_LAND), eq(Mottaker.av(BRUKER)), anyLong(), any());
-        verify(dokService).produserDokument(eq(INNVILGELSE_YRKESAKTIV_FLERE_LAND), eq(FastMottakerMedOrgnr.av(SKATT)), anyLong(), any());
-    }
-
-    @Test
-    void utfør_utpeking_senderOrienteringsbrev() {
-        Prosessinstans prosessinstans = lagProsessinstans(ART13_1B1_UTPEKING_BEHANDLINGSID);
-        StegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
-        instans.utfør(prosessinstans);
-
-        verify(dokService).produserDokument(eq(ORIENTERING_UTPEKING_UTLAND), eq(Mottaker.av(BRUKER)), anyLong(), any());
-    }
-
-    @Test
-    void utfør_innvilgelses13_1A_senderIkkeInnvilgelseTilArbeidsgiver() {
-        Prosessinstans prosessinstans = lagProsessinstans(ART13_1A_INNVILGET_BEHANDLINGSID);
-        StegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
-
-        instans.utfør(prosessinstans);
-
-        verify(dokService, never()).produserDokument(eq(INNVILGELSE_ARBEIDSGIVER), any(), anyLong(), any());
-    }
-
-    @Test
-    void utfør_innvilgelsesMedUtenlandskForetak_senderBrevTilStatligSkatteoppkreving() {
-        Prosessinstans prosessinstans = lagProsessinstans(ART13_1A_INNVILGET_BEHANDLINGSID);
-        StegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
-        ForetakUtland arbeidsgiverUtland = new ForetakUtland();
-        arbeidsgiverUtland.selvstendigNæringsvirksomhet = Boolean.FALSE;
-        prosessinstans.getBehandling().getBehandlingsgrunnlag().getBehandlingsgrunnlagdata()
-            .foretakUtland.add(arbeidsgiverUtland);
-        instans.utfør(prosessinstans);
-
-        verify(dokService).produserDokument(eq(INNVILGELSE_YRKESAKTIV_FLERE_LAND), eq(FastMottakerMedOrgnr.av(STATLIG_SKATTEOPPKREVING)), anyLong(), any());
-    }
-
-    @Test
-    void utfør_innvilgelse161MedUtenlandskSelvstendigArbeid_senderIkkeBrevTilStatligSkatteoppkreving() {
-        Prosessinstans prosessinstans = lagProsessinstans(ART16_1_INNVILGET_BEHANDLINGSID);
-        StegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
-        ForetakUtland utenlandskSelvstendigVirksomhet = new ForetakUtland();
-        utenlandskSelvstendigVirksomhet.selvstendigNæringsvirksomhet = Boolean.TRUE;
-        prosessinstans.getBehandling().getBehandlingsgrunnlag().getBehandlingsgrunnlagdata()
-            .foretakUtland.add(utenlandskSelvstendigVirksomhet);
-
-        instans.utfør(prosessinstans);
-
-        verify(dokService, never()).produserDokument(any(), eq(FastMottakerMedOrgnr.av(STATLIG_SKATTEOPPKREVING)), anyLong(), any());
-    }
-
-    @Test
-    void utfør_innvilgelse161SaksbehandlerIkkeSatt_brukerSaksbehandlerSomAnmodetOmUnntakVedBrevbestilling() {
-        Prosessinstans prosessinstans = lagProsessinstans(ART16_1_INNVILGET_BEHANDLINGSID);
-        StegBehandler instans = lagStegbehandler(prosessinstans.getBehandling(), null);
-
-        instans.utfør(prosessinstans);
-
-        var dokumentBestillingCaptor = ArgumentCaptor.forClass(DoksysBrevbestilling.class);
-
-        verify(dokService).produserDokument(
-            eq(INNVILGELSE_YRKESAKTIV), eq(Mottaker.av(BRUKER)), eq(ART16_1_INNVILGET_BEHANDLINGSID), dokumentBestillingCaptor.capture()
-        );
-        assertThat(dokumentBestillingCaptor.getValue()).extracting(DoksysBrevbestilling::getAvsenderID).isEqualTo("Z111111");
-    }
-
-    @Test
-    void utfør_innvilgelses12_senderIkkeBrevTilStatligSkatteoppkreving() {
-        Prosessinstans prosessinstans = lagProsessinstans(ART12_1_INNVILGET_BEHANDLINGSID);
-        prosessinstans.getBehandling().getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().foretakUtland.add(new ForetakUtland());
-        StegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
-        instans.utfør(prosessinstans);
-
-        verify(dokService, never()).produserDokument(any(), eq(FastMottakerMedOrgnr.av(STATLIG_SKATTEOPPKREVING)), anyLong(), any());
-    }
-
-    @Test
-    void utfør_innvilgelses12_senderInnvilgelseTilArbeidsgiver() {
-        Prosessinstans prosessinstans = lagProsessinstans(ART12_1_INNVILGET_BEHANDLINGSID);
-        StegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
-
-        instans.utfør(prosessinstans);
-
-        verify(dokService).produserDokument(eq(INNVILGELSE_ARBEIDSGIVER), any(), anyLong(), any());
-    }
-
-    @Test
-    final void utfør_avslag12_1_tilOppdaterResultat() {
-        Prosessinstans prosessinstans = lagProsessinstans(ART12_1_AVSLÅTT_BEHANDLINGSID);
-        StegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
-        instans.utfør(prosessinstans);
-    }
-
-    @Test
-    final void utfør_avslagMedArbeidsgiver_senderTilArbeidsgiver() {
-        Prosessinstans prosessinstans = lagProsessinstans(ART12_1_AVSLÅTT_BEHANDLINGSID);
-        Behandling behandling = prosessinstans.getBehandling();
-        Aktoer arbeidsgiver = new Aktoer();
-        arbeidsgiver.setRolle(ARBEIDSGIVER);
-        arbeidsgiver.setOrgnr("123456789");
-        behandling.getFagsak().getAktører().add(arbeidsgiver);
-        StegBehandler instans = lagStegbehandler(behandling);
-        instans.utfør(prosessinstans);
-        verify(dokService).produserDokument(eq(AVSLAG_ARBEIDSGIVER), eq(Mottaker.av(ARBEIDSGIVER)), anyLong(), any());
-    }
-
-    @Test
-    final void utfør_avslag12_1_senderTilHelfoOgSkatt() {
-        Prosessinstans prosessinstans = lagProsessinstans(ART12_1_AVSLÅTT_BEHANDLINGSID);
-        StegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
-        instans.utfør(prosessinstans);
-        verify(dokService).produserDokument(eq(AVSLAG_YRKESAKTIV), eq(FastMottakerMedOrgnr.av(HELFO)), anyLong(), any());
-        verify(dokService).produserDokument(eq(AVSLAG_YRKESAKTIV), eq(FastMottakerMedOrgnr.av(SKATT)), anyLong(), any());
-    }
-
-    @Test
-    final void utfør_PåInnvilgelsesBrevBestemtAv12_2_tilSendSed() {
-        Prosessinstans prosessinstans = lagProsessinstans(ART12_2_INNVILGET_BEHANDLINGSID);
-        StegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
-        instans.utfør(prosessinstans);
-    }
-
-    @Test
-    final void utfør_PåInnvilgelsesBrevBestemtAv16_1_tilSendSed() {
-        Prosessinstans prosessinstans = lagProsessinstans(ART16_1_INNVILGET_BEHANDLINGSID);
-        lagStegbehandler(prosessinstans.getBehandling()).utfør(prosessinstans);
-    }
-
-    @Test
-    final void utfør_PåFastsattLovvalgINorgeUtenInnvilgetBestemmelseGårTilFeiletMaskinelt() {
-        Prosessinstans prosessinstans = lagProsessinstans(BEHANDLINGSID_NORSK_LOVVALG_UTEN_INNVILGET_BESTEMMELSE);
-        StegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> instans.utfør(prosessinstans))
-            .withMessageContaining("Vedtaksbrev kan ikke sendes for behandling");
-    }
-
-    @Test
-    final void utfør_PåInnvilgelsesBrev_medBegrunnelsekode_oppdatererBrevdata() {
-        Prosessinstans prosessinstans = lagProsessinstans(ART12_1_FORKORTET_PERIODE_BEHANDLINGSID);
-        StegBehandler instans = lagStegbehandler(lagBehandling(ART12_1_FORKORTET_PERIODE_BEHANDLINGSID));
-        ArgumentCaptor<DoksysBrevbestilling> captor = ArgumentCaptor.forClass(DoksysBrevbestilling.class);
-
-        instans.utfør(prosessinstans);
-
-        verify(dokService, atLeastOnce()).produserDokument(any(Produserbaredokumenter.class), eq(Mottaker.av(BRUKER)), anyLong(), captor.capture());
-        assertThat(captor.getValue().getBegrunnelseKode()).isEqualTo(Endretperiode.ENDRINGER_ARBEIDSSITUASJON.getKode());
-    }
-
-    private static Prosessinstans lagProsessinstans(long behandlingsid) {
-        Prosessinstans resultat = new Prosessinstans();
-        Behandling behandling = lagBehandling(behandlingsid);
-        resultat.setBehandling(behandling);
-        resultat.setType(ProsessType.IVERKSETT_VEDTAK_EOS);
-        BrevData brevdata = new BrevData();
-        resultat.setData(ProsessDataKey.BREVDATA, brevdata);
-        return resultat;
     }
 }

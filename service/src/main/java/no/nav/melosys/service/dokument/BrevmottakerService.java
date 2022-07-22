@@ -1,7 +1,6 @@
 package no.nav.melosys.service.dokument;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avgift.Trygdeavgiftsberegningsresultat;
@@ -76,10 +75,10 @@ public class BrevmottakerService {
     public Aktoer avklarMottaker(Produserbaredokumenter produserbartDokument, Mottaker mottaker, Behandling behandling) {
         List<Aktoer> mottakere = avklarMottakere(produserbartDokument, mottaker, behandling, false, false);
         if (mottakere.size() < 1) {
-            throw new FunksjonellException("Finner ikke avklart mottaker for produserbart dokument " + produserbartDokument.getKode() + " og rolle " + mottaker.getRolle() + " for behandling " + behandling.getId());
+            throw new FunksjonellException("Finner ikke avklart mottaker for produserbart dokument " + produserbartDokument.getKode() + " og rolle " + mottaker.hentAktørsRolle() + " for behandling " + behandling.getId());
         }
         if (mottakere.size() > 1) {
-            throw new FunksjonellException("Flere enn én mottaker ble funnet for produserbart dokument " + produserbartDokument.getKode() + " og rolle " + mottaker.getRolle() + " for behandling " + behandling.getId());
+            throw new FunksjonellException("Flere enn én mottaker ble funnet for produserbart dokument " + produserbartDokument.getKode() + " og rolle " + mottaker.hentAktørsRolle() + " for behandling " + behandling.getId());
         }
         return mottakere.get(0);
     }
@@ -93,12 +92,12 @@ public class BrevmottakerService {
     }
 
     public List<Aktoer> avklarMottakere(Produserbaredokumenter produserbartDokument, Mottaker mottaker, Behandling behandling, boolean forhåndsvisning, boolean kunAvklarteVirksomheter) {
-        return switch (mottaker.getRolle()) {
+        return switch (mottaker.hentAktørsRolle()) {
             case BRUKER -> avklarMottakereForBruker(produserbartDokument, behandling, forhåndsvisning);
             case VIRKSOMHET -> avklarMottakereForVirksomhet(behandling);
             case ARBEIDSGIVER -> avklarMottakereForArbeidsgiver(behandling, kunAvklarteVirksomheter);
             case TRYGDEMYNDIGHET -> avklarMottakereForMyndigheter(mottaker, behandling, produserbartDokument);
-            default -> throw new FunksjonellException("%s støttes ikke.".formatted(mottaker.getRolle()));
+            default -> throw new FunksjonellException("%s støttes ikke.".formatted(mottaker.hentAktørsRolle()));
         };
     }
 

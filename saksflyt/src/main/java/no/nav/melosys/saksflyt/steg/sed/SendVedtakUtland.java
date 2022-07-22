@@ -16,11 +16,10 @@ import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.saksflyt.brev.BrevBestiller;
-import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.brev.SedSomBrevService;
 import no.nav.melosys.service.dokument.sed.EessiService;
+import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import no.nav.melosys.service.utpeking.UtpekingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,22 +33,18 @@ import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.ATTEST_
 public class SendVedtakUtland extends AbstraktSendUtland {
     private static final Logger log = LoggerFactory.getLogger(SendVedtakUtland.class);
 
-    private final BehandlingService behandlingService;
-    private final BrevBestiller brevBestiller;
     private final SedSomBrevService sedSomBrevService;
     private final UtpekingService utpekingService;
+    private final ProsessinstansService prosessinstansService;
 
     public SendVedtakUtland(EessiService eessiService,
-                            BehandlingService behandlingService,
                             BehandlingsresultatService behandlingsresultatService,
-                            BrevBestiller brevBestiller,
                             SedSomBrevService sedSomBrevService,
-                            UtpekingService utpekingService) {
+                            UtpekingService utpekingService, ProsessinstansService prosessinstansService) {
         super(eessiService, behandlingsresultatService);
-        this.behandlingService = behandlingService;
-        this.brevBestiller = brevBestiller;
         this.sedSomBrevService = sedSomBrevService;
         this.utpekingService = utpekingService;
+        this.prosessinstansService = prosessinstansService;
     }
 
     @Override
@@ -86,17 +81,6 @@ public class SendVedtakUtland extends AbstraktSendUtland {
         return sendUtland(BucType.LA_BUC_02, prosessinstans);
     }
 
-    private DoksysBrevbestilling lagBrevBestilling(Prosessinstans prosessinstans) {
-        Long behandlingID = prosessinstans.getBehandling().getId();
-        var behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
-        return new DoksysBrevbestilling.Builder().medProduserbartDokument(ATTEST_A1)
-            .medAvsenderID(hentSaksbehandler(prosessinstans))
-            .medMottakere(Mottaker.av(TRYGDEMYNDIGHET))
-            .medBehandling(behandling)
-            .medBegrunnelseKode(hentBegrunnelsekodeTilForkortetPeriode(prosessinstans))
-            .build();
-    }
-
     @Override
     protected void sendBrev(Prosessinstans prosessinstans) {
         var behandling = prosessinstans.getBehandling();
@@ -107,7 +91,12 @@ public class SendVedtakUtland extends AbstraktSendUtland {
             prosessinstans.setData(ProsessDataKey.DISTRIBUERBAR_JOURNALPOST_ID, journalpostID);
             prosessinstans.setData(ProsessDataKey.DISTRIBUER_MOTTAKER_LAND, utpektLand);
         } else {
-            brevBestiller.bestill(lagBrevBestilling(prosessinstans));
+            DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder()
+                .medProduserbartDokument(ATTEST_A1)
+                .medAvsenderID(hentSaksbehandler(prosessinstans))
+                .medBegrunnelseKode(hentBegrunnelsekodeTilForkortetPeriode(prosessinstans))
+                .build();
+            prosessinstansService.opprettProsessinstansSendBrev(behandling, brevbestilling, Mottaker.av(TRYGDEMYNDIGHET));
         }
     }
 

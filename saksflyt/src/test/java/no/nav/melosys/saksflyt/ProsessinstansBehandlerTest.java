@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.impl;
+package no.nav.melosys.saksflyt;
 
 import java.util.Collections;
 import java.util.UUID;
@@ -6,7 +6,6 @@ import java.util.UUID;
 import no.nav.melosys.domain.saksflyt.*;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.repository.ProsessinstansRepository;
-import no.nav.melosys.saksflyt.api.ProsessinstansBehandler;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,7 +20,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class ProsessinstansBehandlerImplTest {
+class ProsessinstansBehandlerTest {
 
     @Mock
     private ProsessinstansRepository prosessinstansRepository;
@@ -37,7 +36,7 @@ class ProsessinstansBehandlerImplTest {
     @BeforeEach
     public void setup() {
         when(stegbehandler.inngangsSteg()).thenReturn(ProsessSteg.SED_MOTTAK_RUTING);
-        prosessinstansBehandler = new ProsessinstansBehandlerImpl(Collections.singleton(stegbehandler), prosessinstansRepository, applicationEventPublisher);
+        prosessinstansBehandler = new ProsessinstansBehandler(Collections.singleton(stegbehandler), prosessinstansRepository, applicationEventPublisher);
 
         when(prosessinstans.getId()).thenReturn(UUID.randomUUID());
         prosessinstans.setType(ProsessType.MOTTAK_SED);

@@ -12,6 +12,7 @@ import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.FysiskArbeid
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
+import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
@@ -23,6 +24,7 @@ public final class SaksbehandlingDataFactory {
     public static Fagsak lagFagsak(String saksnummer) {
         var fagsak = new Fagsak();
         fagsak.setSaksnummer(saksnummer);
+        fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
         fagsak.setStatus(Saksstatuser.OPPRETTET);
         fagsak.setType(Sakstyper.EU_EOS);
         fagsak.getAktører().add(lagBruker());

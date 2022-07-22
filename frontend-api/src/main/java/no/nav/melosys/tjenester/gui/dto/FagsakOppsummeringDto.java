@@ -5,11 +5,13 @@ import java.util.List;
 
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
+import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 
 public class FagsakOppsummeringDto {
     private String saksnummer;
     private String navn;
+    private Sakstemaer sakstema;
     private Sakstyper sakstype;
     private Saksstatuser saksstatus;
     private Instant opprettetDato;
@@ -30,6 +32,14 @@ public class FagsakOppsummeringDto {
 
     public void setNavn(String navn) {
         this.navn = navn;
+    }
+
+    public Sakstemaer getSakstema() {
+        return sakstema;
+    }
+
+    public void setSakstema(Sakstemaer sakstema) {
+        this.sakstema = sakstema;
     }
 
     public Sakstyper getSakstype() {

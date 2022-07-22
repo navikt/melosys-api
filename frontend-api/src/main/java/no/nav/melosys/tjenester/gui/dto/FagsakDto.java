@@ -4,12 +4,14 @@ import java.time.Instant;
 
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
+import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 
 public class FagsakDto {
 
     private String saksnummer;
     private Long gsakSaksnummer;
+    private Sakstemaer sakstema;
     private Sakstyper sakstype;
     private Saksstatuser saksstatus;
     private Instant registrertDato;
@@ -30,6 +32,14 @@ public class FagsakDto {
 
     public void setGsakSaksnummer(Long gsakSaksnummer) {
         this.gsakSaksnummer = gsakSaksnummer;
+    }
+
+    public Sakstemaer getSakstema() {
+        return sakstema;
+    }
+
+    public void setSakstema(Sakstemaer saksema) {
+        this.sakstema = saksema;
     }
 
     public Sakstyper getSakstype() {

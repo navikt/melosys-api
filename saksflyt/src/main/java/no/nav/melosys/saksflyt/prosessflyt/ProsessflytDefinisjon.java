@@ -27,6 +27,13 @@ public final class ProsessflytDefinisjon {
         );
 
         PROSESS_FLYT_MAP.put(
+            ProsessType.SEND_BREV,
+            new ProsessFlyt(ProsessType.SEND_BREV,
+                BESTILL_BREV
+            )
+        );
+
+        PROSESS_FLYT_MAP.put(
             ProsessType.HENLEGG_SAK,
             new ProsessFlyt(ProsessType.HENLEGG_SAK,
                 SEND_HENLEGGELSESBREV,
