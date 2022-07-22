@@ -31,7 +31,7 @@ public class KontrollTjeneste {
         this.aksesskontroll = aksesskontroll;
     }
 
-    @PostMapping("ferdigbehandling")
+    @PostMapping("/ferdigbehandling")
     public ResponseEntity<Void> kontrollerFerdigbehandling(@RequestBody FerdigbehandlingKontrollerDto ferdigbehandlingKontrollerDto) throws ValideringException {
 
         if (ferdigbehandlingKontrollerDto.vedtakstype() == null) {

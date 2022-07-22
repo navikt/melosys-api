@@ -8,17 +8,17 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
-import no.nav.melosys.service.kontroll.feature.godkjennunntak.data.GodkjennUnntakKontrollData;
+import no.nav.melosys.service.kontroll.feature.godkjennunntak.data.UnntaksperiodeKontrollData;
 import no.nav.melosys.service.validering.Kontrollfeil;
 
 import static java.util.Objects.nonNull;
 
-public final class GodkjennUnntakKontrollsett {
+public final class UnntaksperiodeKontrollsett {
 
-    private GodkjennUnntakKontrollsett() {
+    private UnntaksperiodeKontrollsett() {
     }
 
-    public static Set<Function<GodkjennUnntakKontrollData, Kontrollfeil>> hentRegelsett(Behandling behandling) {
+    public static Set<Function<UnntaksperiodeKontrollData, Kontrollfeil>> hentRegelsett(Behandling behandling) {
         if (skalBehandlingKontrollereGodkjennUnntak(behandling)) {
             return REGELSETT_UNNTAK_NORSK_TRYGD_UTSTASJONERING;
         }
@@ -32,6 +32,6 @@ public final class GodkjennUnntakKontrollsett {
             && SedType.A009.equals(sedDokument.getSedType());
     }
 
-    private static final Set<Function<GodkjennUnntakKontrollData, Kontrollfeil>> REGELSETT_UNNTAK_NORSK_TRYGD_UTSTASJONERING =
-        Set.of(GodkjennUnntakKontroll::periodeOver24MånederOgEnDag);
+    private static final Set<Function<UnntaksperiodeKontrollData, Kontrollfeil>> REGELSETT_UNNTAK_NORSK_TRYGD_UTSTASJONERING =
+        Set.of(UnntaksperiodeKontroll::periodeOver24MånederOgEnDag);
 }

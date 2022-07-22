@@ -2,5 +2,5 @@ package no.nav.melosys.service.kontroll.feature.godkjennunntak.data;
 
 import java.time.LocalDate;
 
-public record GodkjennUnntakKontrollData(LocalDate periodeFom, LocalDate periodeTom) {
+public record UnntaksperiodeKontrollData(LocalDate periodeFom, LocalDate periodeTom) {
 }

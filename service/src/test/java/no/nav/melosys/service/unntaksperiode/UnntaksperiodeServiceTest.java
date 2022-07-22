@@ -20,7 +20,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.kontroll.feature.godkjennunntak.GodkjennUnntakKontrollService;
+import no.nav.melosys.service.kontroll.feature.godkjennunntak.UnntaksperiodeKontrollService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,6 +38,9 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class UnntaksperiodeServiceTest {
 
+    private final Periode PERIODE_OK = new Periode(LocalDate.now(), LocalDate.now().plusYears(2));
+    private final Periode PERIODE_BAD = new Periode(LocalDate.now(), LocalDate.now().minusYears(2));
+    private final Behandling behandling = new Behandling();
     @Mock
     private ProsessinstansService prosessinstansService;
     @Mock
@@ -49,18 +52,12 @@ class UnntaksperiodeServiceTest {
     @Mock
     private LovvalgsperiodeService lovvalgsperiodeService;
     @Mock
-    private GodkjennUnntakKontrollService godkjennUnntakKontrollService;
-
+    private UnntaksperiodeKontrollService unntaksperiodeKontrollService;
     private UnntaksperiodeService unntaksperiodeService;
-
-    private final Periode PERIODE_OK = new Periode(LocalDate.now(), LocalDate.now().plusYears(2));
-    private final Periode PERIODE_BAD = new Periode(LocalDate.now(), LocalDate.now().minusYears(2));
-
-    private final Behandling behandling = new Behandling();
 
     @BeforeEach
     public void setUp() {
-        unntaksperiodeService = new UnntaksperiodeService(behandlingService, behandlingsresultatService, lovvalgsperiodeService, oppgaveService, prosessinstansService, godkjennUnntakKontrollService);
+        unntaksperiodeService = new UnntaksperiodeService(behandlingService, behandlingsresultatService, lovvalgsperiodeService, oppgaveService, prosessinstansService, unntaksperiodeKontrollService);
         behandling.setId(1L);
         behandling.setFagsak(new Fagsak());
         behandling.getFagsak().setSaksnummer("MEL-123hei");
@@ -132,7 +129,7 @@ class UnntaksperiodeServiceTest {
         verify(lovvalgsperiodeService).lagreLovvalgsperioder(1L, forventedeLovvalgsperioder);
         verify(prosessinstansService).opprettProsessinstansGodkjennUnntaksperiode(any(), eq(false), eq(null));
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
-        verify(godkjennUnntakKontrollService).utførKontroll(behandling);
+        verify(unntaksperiodeKontrollService).kontrollPeriode(behandling, new Periode(unntaksperiode.fom(), unntaksperiode.tom()));
     }
 
     @Test
@@ -143,8 +140,7 @@ class UnntaksperiodeServiceTest {
             .build();
 
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> unntaksperiodeService.godkjennPeriode(1L, endretUnntaksperiodeGodkjenning))
-            .withMessageContaining("Feil i perioden 2001-01-01 - 2000-01-01 som det forsøkes å endre til");
+            .isThrownBy(() -> unntaksperiodeService.godkjennPeriode(1L, endretUnntaksperiodeGodkjenning));
     }
 
     @Test
@@ -155,8 +151,7 @@ class UnntaksperiodeServiceTest {
             .build();
 
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> unntaksperiodeService.godkjennPeriode(1L, endretUnntaksperiodeGodkjenning))
-            .withMessageContaining("Oppgi både startdato og sluttdato ved endring av periode");
+            .isThrownBy(() -> unntaksperiodeService.godkjennPeriode(1L, endretUnntaksperiodeGodkjenning));
     }
 
     @Test

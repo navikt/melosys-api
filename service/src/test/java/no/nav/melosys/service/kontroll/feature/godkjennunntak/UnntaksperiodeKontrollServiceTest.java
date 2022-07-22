@@ -24,13 +24,13 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class GodkjennUnntakKontrollServiceTest {
+class UnntaksperiodeKontrollServiceTest {
 
     @Mock
     private BehandlingService behandlingService;
 
     @InjectMocks
-    private GodkjennUnntakKontrollService godkjennUnntakKontrollService;
+    private UnntaksperiodeKontrollService unntaksperiodeKontrollService;
 
     private Behandling behandling;
     private Saksopplysning saksopplysning;
@@ -56,54 +56,55 @@ class GodkjennUnntakKontrollServiceTest {
 
     @Test
     void utførKontroll_A009_enTestbarGodkjennUnntakKontroll_medPeriodePå2ÅrOgEnDag_forventerIngenFeil() {
-        Periode gyldigPeriodePå2ÅrOgEnDag = new Periode(
+        Periode gyldigPeriode = new Periode(
             LocalDate.of(2070, 1, 1),
             LocalDate.of(2072, 1, 1));
-        sedDokument.setLovvalgsperiode(gyldigPeriodePå2ÅrOgEnDag);
+        sedDokument.setLovvalgsperiode(gyldigPeriode);
 
 
-        assertDoesNotThrow(() -> godkjennUnntakKontrollService.utførKontroll(1L));
+        assertDoesNotThrow(() -> unntaksperiodeKontrollService.kontrollPeriode(1L, gyldigPeriode));
     }
 
 
     @Test
     void utførKontroll_A009_enTestbarGodkjennUnntakKontroll_medPeriodePå2ÅrOgFemDager_forventerFeil() {
-        Periode gyldigPeriodePå2ÅrOgEnDag = new Periode(
+        Periode gyldigPeriode = new Periode(
             LocalDate.of(2070, 1, 1),
             LocalDate.of(2072, 1, 5));
-        sedDokument.setLovvalgsperiode(gyldigPeriodePå2ÅrOgEnDag);
+        sedDokument.setLovvalgsperiode(gyldigPeriode);
 
 
-        assertThatThrownBy(() -> godkjennUnntakKontrollService.utførKontroll(1L))
+        assertThatThrownBy(() -> unntaksperiodeKontrollService.kontrollPeriode(1L, gyldigPeriode))
             .isInstanceOf(ValideringException.class);
     }
 
     @Test
     void kontrollPeriode_A009_og_REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING_medPeriodePå2ÅrOgEnDag_forventerIngenFeil() {
-        LocalDate ugyldigPeriodeFom = LocalDate.of(2050, 1, 1);
-        LocalDate ugyldigPeriodeTom = LocalDate.of(2052, 1, 1);
+        Periode gyldigPeriode = new Periode(
+            LocalDate.of(2050, 1, 1),
+            LocalDate.of(2052, 1, 1));
 
-
-        assertDoesNotThrow(() -> godkjennUnntakKontrollService.kontrollPeriode(1L, ugyldigPeriodeFom, ugyldigPeriodeTom));
+        assertDoesNotThrow(() -> unntaksperiodeKontrollService.kontrollPeriode(1L, gyldigPeriode));
     }
 
     @Test
     void kontrollPeriode_A009_enTestbarGodkjennUnntakKontroll_medPeriodePå2ÅrOgFemDager_forventerFeil() {
-        LocalDate ugyldigPeriodeFom = LocalDate.of(2050, 1, 1);
-        LocalDate ugyldigPeriodeTom = LocalDate.of(2052, 1, 5);
-
+        Periode ugyldigPeriode = new Periode(
+            LocalDate.of(2050, 1, 1),
+            LocalDate.of(2052, 1, 5));
 
         assertThatThrownBy(() -> {
-            godkjennUnntakKontrollService.kontrollPeriode(1L, ugyldigPeriodeFom, ugyldigPeriodeTom);
+            unntaksperiodeKontrollService.kontrollPeriode(1L, ugyldigPeriode);
         }).isInstanceOf(ValideringException.class);
     }
 
     @Test
     void kontrollPeriode_A003_enUtestbarGodkjennUnntakKontroll_medPeriodePå2ÅrOgFemDager_forventerIngenFeil() {
+        Periode gyldigPeriode = new Periode(
+            LocalDate.of(2050, 1, 1),
+            LocalDate.of(2052, 1, 5));
         sedDokument.setSedType(SedType.A003);
-        LocalDate ugyldigPeriodeFom = LocalDate.of(2050, 1, 1);
-        LocalDate ugyldigPeriodeTom = LocalDate.of(2052, 1, 5);
 
-        assertDoesNotThrow(() -> godkjennUnntakKontrollService.kontrollPeriode(1L, ugyldigPeriodeFom, ugyldigPeriodeTom));
+        assertDoesNotThrow(() -> unntaksperiodeKontrollService.kontrollPeriode(1L, gyldigPeriode));
     }
 }
