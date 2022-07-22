@@ -67,9 +67,8 @@ public class ProsessinstansAdminService {
                 prosessinstans.getStatus()) && prosessinstans.getRegistrertDato().isAfter(
                 now().minusHours(ANTALL_TIMER_FØR_RESTART))) {
                 throw new FunksjonellException(
-                    "Prosessinstans %s er registrert %s, siden mindre enn %s".formatted(prosessinstans.getId(),
-                                                                                        prosessinstans.getRegistrertDato(),
-                                                                                        ANTALL_TIMER_FØR_RESTART));
+                    "Prosessinstans %s er registrert %s, for mindre enn %s timer siden".formatted(
+                        prosessinstans.getId(), prosessinstans.getRegistrertDato(), ANTALL_TIMER_FØR_RESTART));
             }
         }
 

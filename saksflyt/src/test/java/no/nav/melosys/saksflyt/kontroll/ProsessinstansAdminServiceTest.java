@@ -125,7 +125,7 @@ class ProsessinstansAdminServiceTest {
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> prosessinstansAdminService.restartProsessinstanser(singletonList(uuid)))
-            .withMessageContaining("siden mindre enn");
+            .withMessageContaining("for mindre enn");
     }
 
     @Test

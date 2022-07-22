@@ -71,8 +71,8 @@ public class ProsessinstansBehandler {
         Collection<Prosessinstans> prosesser = prosessinstansRepository.findAllByStatusIn(
             ProsessStatus.hentAktiveStatuser());
         LocalDateTime nå = LocalDateTime.now();
-        prosesser.stream()
-            .filter(prosess -> prosess.getEndretDato().isBefore(LocalDateTime.now().plusHours(24)))
+        prosesser.stream().filter(prosess -> prosess.getEndretDato().isBefore(
+                LocalDateTime.now().minusHours(ANTALL_TIMER_FØR_GJENOPPRETTELSE)))
             .forEach(prosess -> {
                 log.warn("Prosessinstans {} gjenopprettet etter {} timer", prosess.getId(), ANTALL_TIMER_FØR_GJENOPPRETTELSE);
                 prosess.setStatus(ProsessStatus.RESTARTET);
