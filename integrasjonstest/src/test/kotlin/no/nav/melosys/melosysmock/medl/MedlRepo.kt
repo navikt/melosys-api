@@ -80,51 +80,49 @@ private const val SRVMELOSYS = "srvmelosys"
 
 fun MedlemskapsunntakForPost.tilGet(): MedlemskapsunntakForGet =
     let {
-        MedlemskapsunntakForGet.builder()
-            .ident(it.ident)
-            .fraOgMed(it.fraOgMed)
-            .tilOgMed(it.tilOgMed)
-            .status(it.status)
-            .dekning(it.dekning)
-            .lovvalgsland(it.lovvalgsland)
-            .lovvalg(it.lovvalg)
-            .grunnlag(it.grunnlag)
-            .medlem(true)
-            .sporingsinformasjon(
-                Sporingsinformasjon.builder()
-                    .versjon(0)
-                    .registrert(LocalDate.now())
-                    .besluttet(LocalDate.now())
-                    .kilde(SRVMELOSYS)
-                    .kildedokument(it.sporingsinformasjon.kildedokument)
-                    .opprettet(LocalDateTime.now())
-                    .opprettetAv(SRVMELOSYS)
-                    .sistEndret(LocalDateTime.now())
-                    .sistEndretAv(SRVMELOSYS)
-                    .build()
-            ).build()
+        MedlemskapsunntakForGet().apply {
+            ident = it.ident
+            fraOgMed = it.fraOgMed
+            tilOgMed = it.tilOgMed
+            status = it.status
+            dekning = it.dekning
+            lovvalgsland = it.lovvalgsland
+            lovvalg = it.lovvalg
+            grunnlag = it.grunnlag
+            medlem = true
+            Sporingsinformasjon().apply {
+                versjon = 0
+                registrert = LocalDate.now()
+                besluttet = LocalDate.now()
+                kilde = SRVMELOSYS
+                kildedokument = it.sporingsinformasjon.kildedokument
+                opprettet = LocalDateTime.now()
+                opprettetAv = SRVMELOSYS
+                sistEndret = LocalDateTime.now()
+                sistEndretAv = SRVMELOSYS
+            }
+        }
     }
 
 fun MedlemskapsunntakForPut.tilGet(): MedlemskapsunntakForGet =
     let {
-        MedlemskapsunntakForGet.builder()
-            .unntakId(it.unntakId)
-            .fraOgMed(it.fraOgMed)
-            .tilOgMed(it.tilOgMed)
-            .status(it.status)
-            .dekning(it.dekning)
-            .lovvalgsland(it.lovvalgsland)
-            .lovvalg(it.lovvalg)
-            .grunnlag(it.grunnlag)
-            .medlem(true)
-            .sporingsinformasjon(
-                Sporingsinformasjon.builder()
-                    .versjon(it.sporingsinformasjon.versjon)
-                    .kilde(SRVMELOSYS)
-                    .kildedokument(it.sporingsinformasjon.kildedokument)
-                    .opprettetAv(SRVMELOSYS)
-                    .sistEndretAv(SRVMELOSYS)
-                    .sistEndret(LocalDateTime.now())
-                    .build()
-            ).build()
+        MedlemskapsunntakForGet().apply {
+            unntakId = it.unntakId
+            fraOgMed = it.fraOgMed
+            tilOgMed = it.tilOgMed
+            status = it.status
+            dekning = it.dekning
+            lovvalgsland = it.lovvalgsland
+            lovvalg = it.lovvalg
+            grunnlag = it.grunnlag
+            medlem = true
+            Sporingsinformasjon().apply {
+                versjon = it.sporingsinformasjon.versjon
+                kilde = SRVMELOSYS
+                kildedokument = it.sporingsinformasjon.kildedokument
+                opprettetAv = SRVMELOSYS
+                sistEndretAv = SRVMELOSYS
+                sistEndret = LocalDateTime.now()
+            }
+        }
     }
