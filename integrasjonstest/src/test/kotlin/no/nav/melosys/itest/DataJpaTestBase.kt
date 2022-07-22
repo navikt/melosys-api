@@ -8,12 +8,9 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit.jupiter.SpringExtension
 
-@ActiveProfiles(profiles = ["test"])
+@ActiveProfiles("test")
 @ExtendWith(SpringExtension::class)
-@DataJpaTest(
-    showSql = false,
-    properties = ["spring.profiles.active:test"]
-)
+@DataJpaTest(showSql = false)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @EnableJpaRepositories("no.nav.melosys.repository")
 @EntityScan("no.nav.melosys.domain")

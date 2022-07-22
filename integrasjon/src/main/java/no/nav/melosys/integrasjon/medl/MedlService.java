@@ -14,10 +14,10 @@ import no.nav.melosys.domain.dokument.medlemskap.Periode;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.util.LandkoderUtils;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.tjenester.medlemskapsunntak.api.v1.MedlemskapsunntakForGet;
-import no.nav.tjenester.medlemskapsunntak.api.v1.MedlemskapsunntakForPost;
-import no.nav.tjenester.medlemskapsunntak.api.v1.MedlemskapsunntakForPut;
-import no.nav.tjenester.medlemskapsunntak.api.v1.Sporingsinformasjon;
+import no.nav.melosys.ekstern.tjenester.medlemskapsunntak.api.v1.MedlemskapsunntakForGet;
+import no.nav.melosys.ekstern.tjenester.medlemskapsunntak.api.v1.MedlemskapsunntakForPost;
+import no.nav.melosys.ekstern.tjenester.medlemskapsunntak.api.v1.MedlemskapsunntakForPut;
+import no.nav.melosys.ekstern.tjenester.medlemskapsunntak.api.v1.Sporingsinformasjon;
 import org.springframework.stereotype.Service;
 
 import static no.nav.melosys.integrasjon.medl.MedlPeriodeKonverter.*;

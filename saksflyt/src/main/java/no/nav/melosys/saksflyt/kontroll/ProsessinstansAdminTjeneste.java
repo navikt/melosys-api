@@ -36,6 +36,13 @@ public class ProsessinstansAdminTjeneste implements AdminTjeneste {
         return ResponseEntity.ok(prosessinstansAdminService.hentFeiledeProsessinstanser());
     }
 
+    @GetMapping("/laaste")
+    public ResponseEntity<List<HentProsessinstansDto>> hentFastlåsteProsessinstanser(@RequestHeader(API_KEY_HEADER) String apiKey) {
+        validerApikey(apiKey);
+
+        return ResponseEntity.ok(prosessinstansAdminService.hentFastlåsteProsessinstanser());
+    }
+
     @PostMapping("/feilede/restart")
     public ResponseEntity<List<HentProsessinstansDto>> restartAlleFeiledeProsessinstanser(@RequestHeader(API_KEY_HEADER) String apiKey) {
         validerApikey(apiKey);

@@ -14,7 +14,8 @@
     <dependencies>
         <dependency>
             <groupId>no.nav.freg</groupId>
-            <artifactId>abac-spring</artifactId>
+            <artifactId>freg-abac-spring</artifactId>
+            <version>${abac.spring.version}</version>
         </dependency>
         <dependency>
             <groupId>no.nav.melosys</groupId>

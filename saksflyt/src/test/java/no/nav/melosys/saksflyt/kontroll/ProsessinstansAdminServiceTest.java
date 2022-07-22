@@ -102,9 +102,9 @@ class ProsessinstansAdminServiceTest {
     }
 
     @Test
-    void restartProsessinstans_prosessinstansHarStatusKlar_kasterFeil() {
+    void restartProsessinstans_prosessinstansHarStatusFerdig_kanIkkeGjenstartes() {
         Prosessinstans prosessinstans = lagProsessinstans();
-        prosessinstans.setStatus(ProsessStatus.KLAR);
+        prosessinstans.setStatus(ProsessStatus.FERDIG);
         UUID uuid = prosessinstans.getId();
 
         when(prosessinstansRepository.findAllById(anyList()))
@@ -113,6 +113,32 @@ class ProsessinstansAdminServiceTest {
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> prosessinstansAdminService.restartProsessinstanser(singletonList(uuid)))
             .withMessageContaining("har status");
+    }
+    @Test
+    void restartProsessinstans_prosessinstansErNyOgHarStatusKlar_kasterFeil() {
+        Prosessinstans prosessinstans = lagProsessinstans(LocalDateTime.now());
+        prosessinstans.setStatus(ProsessStatus.KLAR);
+        UUID uuid = prosessinstans.getId();
+
+        when(prosessinstansRepository.findAllById(anyList()))
+            .thenReturn(singletonList(prosessinstans));
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> prosessinstansAdminService.restartProsessinstanser(singletonList(uuid)))
+            .withMessageContaining("for mindre enn");
+    }
+
+    @Test
+    void restartProsessinstans_prosessinstansErGammelOgHarStatusKlar_blirRestartet() {
+        Prosessinstans prosessinstans = lagProsessinstans(LocalDateTime.now().minusDays(2));
+        prosessinstans.setStatus(ProsessStatus.KLAR);
+        when(prosessinstansRepository.findAllById(Set.of(prosessinstans.getId()))).thenReturn(List.of(prosessinstans));
+
+        prosessinstansAdminService.restartProsessinstanser(Set.of(prosessinstans.getId()));
+
+        assertThat(prosessinstans.getStatus()).isEqualTo(ProsessStatus.RESTARTET);
+        verify(prosessinstansRepository).saveAll(singletonList(prosessinstans));
+        verify(prosessinstansBehandlerDelegate).behandleProsessinstans(prosessinstans);
     }
 
     @Test
