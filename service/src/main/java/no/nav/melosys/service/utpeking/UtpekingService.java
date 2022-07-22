@@ -1,13 +1,11 @@
 package no.nav.melosys.service.utpeking;
 
 import java.time.LocalDate;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.melding.UtpekingAvvis;
@@ -148,27 +146,35 @@ public class UtpekingService {
     @Transactional
     public void avvisUtpeking(long behandlingID, UtpekingAvvis utpekingAvvis) {
         validerAvslagUtpeking(utpekingAvvis);
-
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
-
-        if (unleash.isEnabled("melosys.eessi.handlingssjekk_sed")) {
-            String rinaSaksnummer = behandling.hentSedDokument().getRinaSaksnummer();
-            if (!eessiService.kanOppretteSedTyperPåBuc(rinaSaksnummer, SedType.A004)) {
-                throw new FunksjonellException("Kan ikke opprette SedType A004 på rinaSaknummer: " + rinaSaksnummer);
-            }
-        }
 
         if (!behandling.erAktiv()) {
             throw new FunksjonellException("Behandling " + behandlingID + " er ikke aktiv!");
         }
 
+        if (unleash.isEnabled("melosys.eessi.handlingssjekk_sed")) {
+            SedDokument sedDokument = behandling.hentSedDokument();
+            String rinaSaksnummer = sedDokument.getRinaSaksnummer();
+
+            if (sedDokument.getSedType().equals(SedType.A004) && !eessiService.kanOppretteSedTyperPåBuc(rinaSaksnummer, SedType.A004)) {
+                throw new FunksjonellException("Kan ikke opprette SedType A004 på rinaSaknummer: " + rinaSaksnummer);
+            }
+        }
+
         if (behandling.erBeslutningLovvalgAnnetLand()) {
             behandlingsresultatService.oppdaterUtfallRegistreringUnntak(behandlingID, Utfallregistreringunntak.IKKE_GODKJENT);
         } else if (behandling.erNorgeUtpekt()) {
+            SedDokument sedDokument = behandling.hentSedDokument();
+
+            if (sedDokument.getSedType().equals(SedType.A003) && sedDokument.getLovvalgslandKode().equals(Landkoder.NO)) {
+                behandlingsresultatService.oppdaterBehandlingsresultattype(behandlingID, Behandlingsresultattyper.UTPEKING_NORGE_AVVIST);
+            }
+
             behandlingsresultatService.oppdaterUtfallUtpeking(behandlingID, Utfallregistreringunntak.IKKE_GODKJENT);
         } else {
             throw new FunksjonellException("Kan ikke avvise utpeking for en behandling med tema " + behandling.getTema());
         }
+
 
         prosessinstansService.opprettProsessinstansAvvisUtpeking(behandling, utpekingAvvis);
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
