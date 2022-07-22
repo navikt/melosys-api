@@ -1,20 +1,17 @@
 package no.nav.melosys.tjenester.gui;
 
 
-import java.util.List;
 import java.util.UUID;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
-import no.nav.melosys.domain.behandlingsgrunnlag.SedGrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.GeografiskAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
 import no.nav.melosys.domain.kodeverk.Behandlingsgrunnlagtyper;
 import no.nav.melosys.domain.kodeverk.Flyvningstyper;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Overgangsregelbestemmelser;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
-import no.nav.melosys.tjenester.gui.dto.behandlingsgrunnlag.BehandlingsgrunnlagGetDto;
 import no.nav.melosys.tjenester.gui.util.NumericStringRandomizer;
 import org.jeasy.random.EasyRandom;
 import org.jeasy.random.EasyRandomParameters;
@@ -22,33 +19,41 @@ import org.jeasy.random.randomizers.misc.EnumRandomizer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.jeasy.random.FieldPredicates.named;
 import static org.jeasy.random.FieldPredicates.ofType;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@WebMvcTest(controllers = {BehandlingsgrunnlagTjeneste.class})
 @ExtendWith(MockitoExtension.class)
 public class BehandlingsgrunnlagTjenesteTest {
 
-    @Mock
+    @MockBean
     private BehandlingsgrunnlagService behandlingsgrunnlagService;
-    @Mock
+    @MockBean
     private Aksesskontroll aksesskontroll;
 
-    private BehandlingsgrunnlagTjeneste behandlingsgrunnlagTjeneste;
+    @Autowired
+    private MockMvc mockMvc;
+    @Autowired
+    private ObjectMapper objectMapper;
 
+    private static final String BASE_URL = "/api/behandlingsgrunnlag";
     private EasyRandom random;
 
     @BeforeEach
     public void setup() {
-        behandlingsgrunnlagTjeneste = new BehandlingsgrunnlagTjeneste(behandlingsgrunnlagService, aksesskontroll);
-
         random = new EasyRandom(new EasyRandomParameters()
             .overrideDefaultInitialization(true)
             .collectionSizeRange(1, 4)
@@ -62,33 +67,30 @@ public class BehandlingsgrunnlagTjenesteTest {
     }
 
     @Test
-    void hentBehandlingsgrunnlag_erSoeknad_validerSchema() {
+    void hentBehandlingsgrunnlag() throws Exception {
         Soeknad soeknad = random.nextObject(Soeknad.class);
         Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
         behandlingsgrunnlag.setType(Behandlingsgrunnlagtyper.SØKNAD_A1_YRKESAKTIVE_EØS);
         behandlingsgrunnlag.setBehandlingsgrunnlagdata(soeknad);
         when(behandlingsgrunnlagService.hentBehandlingsgrunnlag(anyLong())).thenReturn(behandlingsgrunnlag);
 
-        ResponseEntity<BehandlingsgrunnlagGetDto> responseEntity = behandlingsgrunnlagTjeneste.hentBehandlingsgrunnlag(123);
-        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(responseEntity.getBody()).isInstanceOf(BehandlingsgrunnlagGetDto.class);
+        mockMvc.perform(get(BASE_URL + "/{behandlingID}", 1L)
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
     }
 
     @Test
-    void hentBehandlingsgrunnlag_erSedGrunnlag_validerSchema()  {
+    void oppdaterBehandlingsgrunnlag() throws Exception {
+        Soeknad soeknad = random.nextObject(Soeknad.class);
         Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
-        behandlingsgrunnlag.setType(Behandlingsgrunnlagtyper.SED);
+        behandlingsgrunnlag.setType(Behandlingsgrunnlagtyper.SØKNAD_A1_YRKESAKTIVE_EØS);
+        behandlingsgrunnlag.setBehandlingsgrunnlagdata(soeknad);
+        when(behandlingsgrunnlagService.oppdaterBehandlingsgrunnlag(anyLong(), any())).thenReturn(behandlingsgrunnlag);
 
-        SedGrunnlag sedGrunnlag = random.nextObject(SedGrunnlag.class);
-        sedGrunnlag.overgangsregelbestemmelser = List.of(Overgangsregelbestemmelser.FO_1408_1971_ART14_2_A, Overgangsregelbestemmelser.FO_1408_1971_ART14_2_B);
-        sedGrunnlag.ytterligereInformasjon = "fritekst";
-        behandlingsgrunnlag.setBehandlingsgrunnlagdata(sedGrunnlag);
-
-        when(behandlingsgrunnlagService.hentBehandlingsgrunnlag(anyLong())).thenReturn(behandlingsgrunnlag);
-
-        ResponseEntity<BehandlingsgrunnlagGetDto> responseEntity = behandlingsgrunnlagTjeneste.hentBehandlingsgrunnlag(1);
-        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(responseEntity.getBody()).isNotNull();
-        assertThat(responseEntity.getBody()).isInstanceOf(BehandlingsgrunnlagGetDto.class);
+        mockMvc.perform(post(BASE_URL + "/{behandlingID}", 1L)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(soeknad)))
+            .andExpect(status().isOk());
     }
+
 }

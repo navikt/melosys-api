@@ -1,9 +1,15 @@
 package no.nav.melosys.tjenester.gui;
 
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.AnmodningsperiodeSvar;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
@@ -17,44 +23,52 @@ import org.jeasy.random.randomizers.misc.EnumRandomizer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 import static org.jeasy.random.FieldPredicates.ofType;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@WebMvcTest(controllers = {AnmodningsperiodeTjeneste.class})
 @ExtendWith(MockitoExtension.class)
 class AnmodningsperiodeTjenesteTest {
 
-    @Mock
+    @MockBean
     private AnmodningsperiodeService anmodningsperiodeService;
-    @Mock
+    @MockBean
     private Aksesskontroll aksesskontroll;
 
-    private AnmodningsperiodeTjeneste anmodningsperiodeTjeneste;
+    @Autowired
+    private MockMvc mockMvc;
+    @Autowired
+    private ObjectMapper objectMapper;
 
     private final EasyRandom random = new EasyRandom(new EasyRandomParameters()
         .excludeField(ofType(Behandlingsresultat.class))
         .randomize(ofType(LovvalgBestemmelse.class), () -> new EnumRandomizer<>(Lovvalgbestemmelser_883_2004.class).getRandomValue()));
 
-    @BeforeEach
-    public void setUp() {
-        anmodningsperiodeTjeneste = new AnmodningsperiodeTjeneste(anmodningsperiodeService, aksesskontroll);
-    }
+    private static final String BASE_URL = "/api/anmodningsperioder";
 
     @Test
     void hentAnmodningsperioder() throws Exception {
         when(anmodningsperiodeService.hentAnmodningsperioder(1L)).thenReturn(mockAnmodningsperioder());
 
-        AnmodningsperiodeGetDto anmodningsperiodeGetDto = anmodningsperiodeTjeneste.hentAnmodningsperioder(1L);
-        assertThat(anmodningsperiodeGetDto.getAnmodningsperioder()).isNotEmpty();
+        mockMvc.perform(get(BASE_URL + "/{behandlingID}", 1L)
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.anmodningsperioder.length()", equalTo(3)));
     }
 
     @Test
@@ -62,11 +76,13 @@ class AnmodningsperiodeTjenesteTest {
         Set<Anmodningsperiode> mockAnmodninger = random.objects(Anmodningsperiode.class, 3).collect(Collectors.toSet());
         when(anmodningsperiodeService.lagreAnmodningsperioder(anyLong(), anyCollection()))
             .thenReturn(mockAnmodninger);
+        var postDto = AnmodningsperiodePostDto.av(mockAnmodninger);
 
-        AnmodningsperiodePostDto postDto = AnmodningsperiodePostDto.av(mockAnmodninger);
-
-        AnmodningsperiodeGetDto anmodningsperiodeGetDto =
-            anmodningsperiodeTjeneste.lagreAnmodningsperioder(1L, AnmodningsperiodePostDto.av(mockAnmodninger));
+        mockMvc.perform(post(BASE_URL + "/{behandlingID}", 1L)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(postDto)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.anmodningsperioder.length()", equalTo(3)));
 
         verify(aksesskontroll).autoriserSkriv(anyLong());
         verify(anmodningsperiodeService).lagreAnmodningsperioder(anyLong(), anyCollection());
@@ -74,7 +90,6 @@ class AnmodningsperiodeTjenesteTest {
 
     @Test
     void hentAnmodningsperiodeSvar() throws Exception {
-
         Anmodningsperiode anmodningsperiode = new Anmodningsperiode();
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setId(1L);
@@ -86,15 +101,15 @@ class AnmodningsperiodeTjenesteTest {
 
         when(anmodningsperiodeService.finnAnmodningsperiode(anyLong())).thenReturn(Optional.of(anmodningsperiode));
 
-        AnmodningsperiodeSvarDto svarDto = anmodningsperiodeTjeneste.hentAnmodningsperiodeSvar(1L);
-        assertThat(svarDto).isNotNull();
-        assertThat(svarDto.begrunnelseFritekst()).isNotEmpty();
-        assertThat(svarDto.anmodningsperiodeSvarType()).isEqualTo(Anmodningsperiodesvartyper.INNVILGELSE.name());
+        mockMvc.perform(get(BASE_URL + "/{anmodningsperiodeID}/svar", 1L)
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.begrunnelseFritekst", equalTo("test")))
+            .andExpect(jsonPath("$.anmodningsperiodeSvarType", equalTo(Anmodningsperiodesvartyper.INNVILGELSE.name())));
     }
 
     @Test
     void lagreAnmodningsperiodeSvar() throws Exception {
-
         Anmodningsperiode anmodningsperiode = new Anmodningsperiode();
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setId(1L);
@@ -110,9 +125,13 @@ class AnmodningsperiodeTjenesteTest {
         when(anmodningsperiodeService.lagreAnmodningsperiodeSvar(anyLong(), any()))
             .thenReturn(svar);
 
-        AnmodningsperiodeSvarDto svarDto = anmodningsperiodeTjeneste.lagreAnmodningsperiodeSvar(1L, AnmodningsperiodeSvarDto.tom());
-        assertThat(svarDto).isNotNull();
-        assertThat(svarDto.anmodningsperiodeSvarType()).isEqualTo(Anmodningsperiodesvartyper.INNVILGELSE.name());
+        mockMvc.perform(post(BASE_URL + "/{anmodningsperiodeID}/svar", 1L)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(AnmodningsperiodeSvarDto.tom())))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.begrunnelseFritekst", equalTo("fritekst")))
+            .andExpect(jsonPath("$.anmodningsperiodeSvarType", equalTo(Anmodningsperiodesvartyper.INNVILGELSE.name())));
+
         verify(aksesskontroll).autoriserSkriv(anyLong());
     }
 
