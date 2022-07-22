@@ -9,10 +9,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class BrevMapperUtilsTest {
+class BrevMapperUtilsTest {
 
     @Test
-    public void convertToXMLGregorianCalendarRemoveTimezone() {
+    void convertToXMLGregorianCalendarRemoveTimezone() {
         LocalDate localDate = LocalDate.parse("2019-04-01");
         Instant april_1 = localDate.atStartOfDay(ZoneId.of("Europe/Paris")).toInstant();
         XMLGregorianCalendar xmlGregorianCalendar = BrevMapperUtils.convertToXMLGregorianCalendarRemoveTimezone(april_1);
