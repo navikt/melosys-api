@@ -9,28 +9,22 @@ import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.AnmodningsperiodeSvar;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
-import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
-import no.nav.melosys.tjenester.gui.dto.anmodning.AnmodningsperiodeGetDto;
 import no.nav.melosys.tjenester.gui.dto.anmodning.AnmodningsperiodePostDto;
 import no.nav.melosys.tjenester.gui.dto.anmodning.AnmodningsperiodeSvarDto;
 import org.jeasy.random.EasyRandom;
 import org.jeasy.random.EasyRandomParameters;
 import org.jeasy.random.randomizers.misc.EnumRandomizer;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.jeasy.random.FieldPredicates.ofType;
 import static org.mockito.ArgumentMatchers.*;
@@ -42,7 +36,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = {AnmodningsperiodeTjeneste.class})
-@ExtendWith(MockitoExtension.class)
 class AnmodningsperiodeTjenesteTest {
 
     @MockBean

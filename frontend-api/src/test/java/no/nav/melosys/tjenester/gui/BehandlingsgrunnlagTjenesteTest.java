@@ -1,6 +1,8 @@
 package no.nav.melosys.tjenester.gui;
 
 
+import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -12,14 +14,13 @@ import no.nav.melosys.domain.kodeverk.Behandlingsgrunnlagtyper;
 import no.nav.melosys.domain.kodeverk.Flyvningstyper;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
+import no.nav.melosys.tjenester.gui.dto.behandlingsgrunnlag.PeriodeOgLandPostDto;
 import no.nav.melosys.tjenester.gui.util.NumericStringRandomizer;
 import org.jeasy.random.EasyRandom;
 import org.jeasy.random.EasyRandomParameters;
 import org.jeasy.random.randomizers.misc.EnumRandomizer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -36,7 +37,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = {BehandlingsgrunnlagTjeneste.class})
-@ExtendWith(MockitoExtension.class)
 public class BehandlingsgrunnlagTjenesteTest {
 
     @MockBean
@@ -91,6 +91,16 @@ public class BehandlingsgrunnlagTjenesteTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(soeknad)))
             .andExpect(status().isOk());
+    }
+
+    @Test
+    void oppdaterBehandlingsgrunnlagPeriodeOgLand() throws Exception {
+        var periodeOgLandPostDto = new PeriodeOgLandPostDto(LocalDate.now(), LocalDate.now().plusYears(1), List.of("Denmark", "Sweden"));
+
+        mockMvc.perform(post(BASE_URL + "/{behandlingID}/periodeOgLand", 1L)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(periodeOgLandPostDto)))
+            .andExpect(status().isNoContent());
     }
 
 }
