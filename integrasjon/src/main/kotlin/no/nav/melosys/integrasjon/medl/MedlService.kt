@@ -24,7 +24,7 @@ class MedlService(
         objectMapper.registerModule(JavaTimeModule())
     }
 
-    fun hentPeriodeListe(fnr: String?, fom: LocalDate?, tom: LocalDate?): Saksopplysning {
+    fun hentPeriodeListe(fnr: String, fom: LocalDate, tom: LocalDate): Saksopplysning {
         val periodeListeResponse = medlemskapRestConsumer.hentPeriodeListe(fnr, fom, tom)
         val medlemskapDokument = MedlemskapDokument()
         val medlemsperioder: MutableList<Medlemsperiode> = ArrayList()
@@ -145,7 +145,7 @@ class MedlService(
             .status(periodestatusMedl.kode)
             .lovvalg(lovvalgMedl.kode)
 
-        return medlemskapRestConsumer.opprettPeriode(request.build()).unntakId
+        return medlemskapRestConsumer.opprettPeriode(request.build())!!.unntakId
     }
 
     private fun lovvalgRequest(periodeOmLovvalg: PeriodeOmLovvalg): MedlemskapsunntakForPostBuilder? {
