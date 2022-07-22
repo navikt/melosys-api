@@ -188,6 +188,16 @@ class UtpekingServiceTest {
     void avvisUtpeking_utpekingAvAnnetLand_oppdaterUtfallRegistreringUnntak() {
         behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND);
 
+        Saksopplysning saksopplysning = new Saksopplysning();
+        saksopplysning.setType(SaksopplysningType.SEDOPPL);
+        SedDokument sedDokument = new SedDokument();
+        sedDokument.setRinaSaksnummer("123");
+        sedDokument.setSedType(SedType.A003);
+        sedDokument.setLovvalgslandKode(Landkoder.NO);
+        saksopplysning.setDokument(sedDokument);
+
+        behandling.setSaksopplysninger(Set.of(saksopplysning));
+
         utpekingService.avvisUtpeking(behandlingID, lagUtpekingAvvis());
 
         verify(behandlingsresultatService).oppdaterUtfallRegistreringUnntak(eq(behandlingID), eq(Utfallregistreringunntak.IKKE_GODKJENT));
@@ -198,16 +208,6 @@ class UtpekingServiceTest {
     void avvisUtpeking_utpekingAvNorge_oppdaterUtfallUtpeking() {
         behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
 
-        utpekingService.avvisUtpeking(behandlingID, lagUtpekingAvvis());
-
-        verify(behandlingsresultatService).oppdaterUtfallUtpeking(eq(behandlingID), eq(Utfallregistreringunntak.IKKE_GODKJENT));
-        verify(prosessinstansService).opprettProsessinstansAvvisUtpeking(eq(behandling), any(UtpekingAvvis.class));
-        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(eq(fagsak.getSaksnummer()));
-    }
-
-    @Test
-    void avvisUtpeking_utpekingAvNorge_A003_med_behandlingsresultatType_UTPEKT_NORGE_AVVIST() {
-        unleash.enable("melosys.eessi.handlingssjekk_sed");
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setType(SaksopplysningType.SEDOPPL);
         SedDokument sedDokument = new SedDokument();
@@ -217,14 +217,29 @@ class UtpekingServiceTest {
         saksopplysning.setDokument(sedDokument);
 
         behandling.setSaksopplysninger(Set.of(saksopplysning));
+
+        utpekingService.avvisUtpeking(behandlingID, lagUtpekingAvvis());
+
+        verify(behandlingsresultatService).oppdaterUtfallUtpeking(eq(behandlingID), eq(Utfallregistreringunntak.IKKE_GODKJENT));
+        verify(prosessinstansService).opprettProsessinstansAvvisUtpeking(eq(behandling), any(UtpekingAvvis.class));
+        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(eq(fagsak.getSaksnummer()));
+    }
+
+    @Test
+    void avvisUtpeking_utpekingAvNorge_A003_med_behandlingsresultatType_UTPEKT_NORGE_AVVIST() {
+        Saksopplysning saksopplysning = new Saksopplysning();
+        saksopplysning.setType(SaksopplysningType.SEDOPPL);
+        SedDokument sedDokument = new SedDokument();
+        sedDokument.setRinaSaksnummer("123");
+        sedDokument.setSedType(SedType.A003);
+        sedDokument.setLovvalgslandKode(Landkoder.NO);
+        saksopplysning.setDokument(sedDokument);
+        behandling.setSaksopplysninger(Set.of(saksopplysning));
         behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
 
         utpekingService.avvisUtpeking(behandlingID, lagUtpekingAvvis());
-        behandlingsresultat.setType(Behandlingsresultattyper.UTPEKING_NORGE_AVVIST);
 
-        when(behandlingsresultatService.hentBehandlingsresultat(eq(behandlingID))).thenReturn(behandlingsresultat);
-        verify(behandlingsresultatService).oppdaterBehandlingsresultattype(eq(behandlingID), eq(Behandlingsresultattyper.UTPEKING_NORGE_AVVIST));
-        assertThat(behandlingsresultat.getType()).isEqualTo(Behandlingsresultattyper.UTPEKING_NORGE_AVVIST);
+        verify(behandlingsresultatService).oppdaterBehandlingsresultattype(behandlingID, Behandlingsresultattyper.UTPEKING_NORGE_AVVIST);
     }
 
     @Test
@@ -264,21 +279,6 @@ class UtpekingServiceTest {
 
     @Test
     void avvisUtpeking_bucKanIkkeOppretteSed_kasterException() {
-        unleash.enable("melosys.eessi.handlingssjekk_sed");
-        Saksopplysning saksopplysning = new Saksopplysning();
-        saksopplysning.setType(SaksopplysningType.SEDOPPL);
-        SedDokument sedDokument = new SedDokument();
-        sedDokument.setRinaSaksnummer("123");
-        saksopplysning.setDokument(sedDokument);
-        behandling.setSaksopplysninger(Set.of(saksopplysning));
-
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> utpekingService.avvisUtpeking(behandlingID, lagUtpekingAvvis()))
-            .withMessageContaining("Kan ikke opprette SedType A004 på rinaSaknummer: 123");
-    }
-
-    @Test
-    void avvisUtpeking_bucKanIkkeOppretteSed_A004_kasterException() {
         unleash.enable("melosys.eessi.handlingssjekk_sed");
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setType(SaksopplysningType.SEDOPPL);
