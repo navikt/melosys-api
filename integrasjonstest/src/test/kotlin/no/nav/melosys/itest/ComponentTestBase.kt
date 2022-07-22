@@ -6,14 +6,11 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
 import org.springframework.test.context.ActiveProfiles
-import org.testcontainers.junit.jupiter.Testcontainers
 
-@Testcontainers
 @ActiveProfiles("test")
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @SpringBootTest(
     classes = [Application::class],
-    properties = ["spring.profiles.active:test"],
     webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT
 )
 @Import(
