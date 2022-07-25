@@ -1,5 +1,6 @@
 package no.nav.melosys.tjenester.gui;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.service.journalforing.JournalfoeringService;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringOpprettDto;
@@ -10,24 +11,35 @@ import org.jeasy.random.EasyRandom;
 import org.jeasy.random.EasyRandomParameters;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@ExtendWith(MockitoExtension.class)
+@WebMvcTest(controllers = {JournalfoeringTjeneste.class})
 class JournalfoeringTjenesteTest {
     private static final String SAMPLE_ORGNR = "899655123";
     private static final String SAMPLE_FNR = "77777777772";
 
     private EasyRandom random;
 
-    @Mock
+    @MockBean
     private JournalfoeringService journalføringService;
-    @Mock
+    @MockBean
     private OppgaveService oppgaveService;
 
+    @Autowired
+    private MockMvc mockMvc;
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    private static final String BASE_URL = "/api/journalforing";
     private JournalfoeringTjeneste tjeneste;
 
     @BeforeEach
@@ -38,27 +50,35 @@ class JournalfoeringTjenesteTest {
     }
 
     @Test
-    void journalførOgKnyttTilSak_validerKall() {
+    void journalførOgKnyttTilSak_validerKall() throws Exception {
         JournalfoeringTilordneDto journalføringDto = random.nextObject(JournalfoeringTilordneDto.class);
 
-        tjeneste.journalførOgKnyttTilSak(journalføringDto);
+        mockMvc.perform(post(BASE_URL + "/knytt")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(journalføringDto))
+            )
+            .andExpect(status().isNoContent());
 
-        verify(journalføringService).journalførOgKnyttTilEksisterendeSak(journalføringDto);
+        verify(journalføringService).journalførOgKnyttTilEksisterendeSak(any(JournalfoeringTilordneDto.class));
         verify(oppgaveService).ferdigstillOppgave(journalføringDto.getOppgaveID());
     }
 
     @Test
-    void journalførOgOpprettNyVurdering_validerKall() {
+    void journalførOgOpprettNyVurdering_validerKall() throws Exception {
         JournalfoeringTilordneDto journalføringDto = random.nextObject(JournalfoeringTilordneDto.class);
 
-        tjeneste.journalførOgOpprettNyVurdering(journalføringDto);
+        mockMvc.perform(post(BASE_URL + "/nyvurdering")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(journalføringDto))
+            )
+            .andExpect(status().isNoContent());
 
-        verify(journalføringService).journalførOgOpprettNyVurdering(journalføringDto);
+        verify(journalføringService).journalførOgOpprettNyVurdering(any(JournalfoeringTilordneDto.class));
         verify(oppgaveService).ferdigstillOppgave(journalføringDto.getOppgaveID());
     }
 
     @Test
-    void journalføringOpprett_validerKallOgSchema() {
+    void journalføringOpprett_validerKallOgSchema() throws Exception {
         JournalfoeringOpprettDto journalføringDto = random.nextObject(JournalfoeringOpprettDto.class);
         journalføringDto.setVirksomhetOrgnr(null);
         journalføringDto.setBrukerID(SAMPLE_FNR);
@@ -66,14 +86,18 @@ class JournalfoeringTjenesteTest {
         journalføringDto.setArbeidsgiverID(SAMPLE_ORGNR);
         journalføringDto.setRepresentantID(SAMPLE_ORGNR);
 
-        tjeneste.journalførOgOpprettSak(journalføringDto);
+        mockMvc.perform(post(BASE_URL + "/opprett")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(journalføringDto))
+            )
+            .andExpect(status().isNoContent());
 
-        verify(journalføringService).journalførOgOpprettSak(journalføringDto);
+        verify(journalføringService).journalførOgOpprettSak(any(JournalfoeringOpprettDto.class));
         verify(oppgaveService).ferdigstillOppgave(journalføringDto.getOppgaveID());
     }
 
     @Test
-    void journalføringOpprett_validerKallOgSchemaMedRepresentantIDNull() {
+    void journalføringOpprett_validerKallOgSchemaMedRepresentantIDNull() throws Exception {
         JournalfoeringOpprettDto journalføringDto = random.nextObject(JournalfoeringOpprettDto.class);
         journalføringDto.setVirksomhetOrgnr(null);
         journalføringDto.setBrukerID(SAMPLE_FNR);
@@ -81,14 +105,18 @@ class JournalfoeringTjenesteTest {
         journalføringDto.setArbeidsgiverID(SAMPLE_ORGNR);
         journalføringDto.setRepresentantID(null);
 
-        tjeneste.journalførOgOpprettSak(journalføringDto);
+        mockMvc.perform(post(BASE_URL + "/opprett")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(journalføringDto))
+            )
+            .andExpect(status().isNoContent());
 
-        verify(journalføringService).journalførOgOpprettSak(journalføringDto);
+        verify(journalføringService).journalførOgOpprettSak(any(JournalfoeringOpprettDto.class));
         verify(oppgaveService).ferdigstillOppgave(journalføringDto.getOppgaveID());
     }
 
     @Test
-    void journalføringOpprett_validerKallOgSchemaMedBrukerIDNull() {
+    void journalføringOpprett_validerKallOgSchemaMedBrukerIDNull() throws Exception {
         JournalfoeringOpprettDto journalføringDto = random.nextObject(JournalfoeringOpprettDto.class);
         journalføringDto.setVirksomhetOrgnr(SAMPLE_ORGNR);
         journalføringDto.setBrukerID(null);
@@ -96,22 +124,30 @@ class JournalfoeringTjenesteTest {
         journalføringDto.setArbeidsgiverID(SAMPLE_ORGNR);
         journalføringDto.setRepresentantID(SAMPLE_ORGNR);
 
-        tjeneste.journalførOgOpprettSak(journalføringDto);
+        mockMvc.perform(post(BASE_URL + "/opprett")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(journalføringDto))
+            )
+            .andExpect(status().isNoContent());
 
-        verify(journalføringService).journalførOgOpprettSak(journalføringDto);
+        verify(journalføringService).journalførOgOpprettSak(any(JournalfoeringOpprettDto.class));
         verify(oppgaveService).ferdigstillOppgave(journalføringDto.getOppgaveID());
     }
 
     @Test
-    void journalførSed_validerSchema() {
+    void journalførSed_validerSchema() throws Exception {
         JournalfoeringSedDto journalføringSedDto = new JournalfoeringSedDto();
         journalføringSedDto.setOppgaveID("123123");
         journalføringSedDto.setBrukerID(SAMPLE_FNR);
         journalføringSedDto.setJournalpostID("1231231232");
 
-        tjeneste.journalførSed(journalføringSedDto);
+        mockMvc.perform(post(BASE_URL + "/sed")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(journalføringSedDto))
+            )
+            .andExpect(status().isNoContent());
 
-        verify(journalføringService).journalførSed(journalføringSedDto);
+        verify(journalføringService).journalførSed(any(JournalfoeringSedDto.class));
         verify(oppgaveService).ferdigstillOppgave(journalføringSedDto.getOppgaveID());
     }
 }
