@@ -1,10 +1,10 @@
 package no.nav.melosys.tjenester.gui;
 
-import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.Utpekingsperiode;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
@@ -15,54 +15,70 @@ import no.nav.melosys.tjenester.gui.dto.utpeking.UtpekingsperioderDto;
 import org.jeasy.random.EasyRandom;
 import org.jeasy.random.EasyRandomParameters;
 import org.jeasy.random.randomizers.misc.EnumRandomizer;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static no.nav.melosys.tjenester.gui.util.ResponseBodyMatchers.responseBody;
 import static org.jeasy.random.FieldPredicates.ofType;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@ExtendWith(MockitoExtension.class)
+@WebMvcTest(controllers = {UtpekingsperiodeTjeneste.class})
 class UtpekingsperiodeTjenesteTest {
 
-    private static final Logger log = LoggerFactory.getLogger(UtpekingsperiodeTjenesteTest.class);
-    private static final String UTPEKINGSPERIODER_SCHEMA = "utpekingsperioder-schema.json";
     private EasyRandom random = new EasyRandom(new EasyRandomParameters()
         .randomize(ofType(LovvalgBestemmelse.class), () ->
             new EnumRandomizer<>(Lovvalgbestemmelser_883_2004.class).getRandomValue()));
-    @Captor
-    ArgumentCaptor<List<Utpekingsperiode>> captor;
 
-    @Mock
+    @MockBean
     private Aksesskontroll aksesskontroll;
-    @Mock
+    @MockBean
     private UtpekingService utpekingService;
-    private UtpekingsperiodeTjeneste utpekingsperiodeTjeneste;
 
-    @BeforeEach
-    public void settOpp() {
-        utpekingsperiodeTjeneste = new UtpekingsperiodeTjeneste(utpekingService, aksesskontroll);
+    @Autowired
+    private MockMvc mockMvc;
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    private static final String BASE_URL = "/api/utpekingsperioder";
+
+    @Test
+    void hentUtpekingsperioder() throws Exception {
+        List<Utpekingsperiode> utpekingsperioder = lagUtpekingsperioder();
+        UtpekingsperioderDto utpekingsperioderDto = UtpekingsperioderDto.av(utpekingsperioder);
+
+        when(utpekingService.hentUtpekingsperioder(123L)).thenReturn(utpekingsperioder);
+
+        mockMvc.perform(get(BASE_URL + "/{behandlingID}", 123L)
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(responseBody(objectMapper).containsObjectAsJson(utpekingsperioderDto, UtpekingsperioderDto.class));
+
     }
 
     @Test
-    void lagreUtpekingsperioder() {
-        UtpekingsperioderDto utpekingsperioderDto = UtpekingsperioderDto.av(lagUtpekingsperioder());
+    void lagreUtpekingsperioder() throws Exception {
+        List<Utpekingsperiode> utpekingsperioder = lagUtpekingsperioder();
+        UtpekingsperioderDto utpekingsperioderDto = UtpekingsperioderDto.av(utpekingsperioder);
 
-        utpekingsperiodeTjeneste.lagreUtpekingsperioder(123L, utpekingsperioderDto);
+        when(utpekingService.lagreUtpekingsperioder(eq(123L), any())).thenReturn(utpekingsperioder);
+
+        mockMvc.perform(post(BASE_URL + "/{behandlingID}", 123L)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(utpekingsperioderDto)))
+            .andExpect(status().isOk())
+            .andExpect(responseBody(objectMapper).containsObjectAsJson(utpekingsperioderDto, UtpekingsperioderDto.class));
 
         verify(aksesskontroll).autoriserSkriv(anyLong());
-        verify(utpekingService).lagreUtpekingsperioder(eq(123L), captor.capture());
-
-        List<Utpekingsperiode> utpekingsperioder = captor.getValue();
-        assertThat(utpekingsperioder.size()).isEqualTo(3);
     }
 
     private List<Utpekingsperiode> lagUtpekingsperioder() {
