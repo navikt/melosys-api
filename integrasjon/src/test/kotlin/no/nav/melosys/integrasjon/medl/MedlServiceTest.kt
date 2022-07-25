@@ -1,306 +1,293 @@
-package no.nav.melosys.integrasjon.medl;
+package no.nav.melosys.integrasjon.medl
 
-import java.time.LocalDate;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import no.nav.melosys.domain.Lovvalgsperiode;
-import no.nav.melosys.domain.Medlemskapsperiode;
-import no.nav.melosys.domain.Saksopplysning;
-import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
-import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode;
-import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser;
-import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
-import no.nav.melosys.domain.kodeverk.Trygdedekninger;
-import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.medl.api.v1.MedlemskapsunntakForGet;
-import no.nav.melosys.integrasjon.medl.api.v1.MedlemskapsunntakForPost;
-import no.nav.melosys.integrasjon.medl.api.v1.MedlemskapsunntakForPut;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
-import org.mockito.ArgumentCaptor;
-
-import static java.util.Arrays.asList;
-import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1;
-import static no.nav.melosys.integrasjon.medl.LovvalgMedl.*;
-import static no.nav.melosys.integrasjon.medl.PeriodestatusMedl.AVST;
-import static no.nav.melosys.integrasjon.medl.PeriodestatusMedl.GYLD;
-import static no.nav.melosys.integrasjon.medl.StatusaarsakMedl.AVVIST;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.Mockito.*;
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import no.nav.melosys.domain.Lovvalgsperiode
+import no.nav.melosys.domain.Medlemskapsperiode
+import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument
+import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
+import no.nav.melosys.domain.kodeverk.Landkoder
+import no.nav.melosys.domain.kodeverk.Medlemskapstyper
+import no.nav.melosys.domain.kodeverk.Trygdedekninger
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004
+import no.nav.melosys.exception.TekniskException
+import no.nav.melosys.integrasjon.medl.api.v1.MedlemskapsunntakForGet
+import no.nav.melosys.integrasjon.medl.api.v1.MedlemskapsunntakForPost
+import no.nav.melosys.integrasjon.medl.api.v1.MedlemskapsunntakForPut
+import org.assertj.core.api.Assertions
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
+import org.mockito.ArgumentCaptor
+import org.mockito.ArgumentMatchers
+import org.mockito.Mockito
+import java.io.IOException
+import java.time.LocalDate
+import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class MedlServiceTest {
-
-    private MedlService medlService;
-
-    private final String FNR = "77777777773";
-
-    private MedlemskapRestConsumer mockRestConsumer;
-    private ObjectMapper objectMapper;
+internal class MedlServiceTest {
+    private var medlService: MedlService? = null
+    private val FNR = "77777777773"
+    private var mockRestConsumer = Mockito.mock(MedlemskapRestConsumer::class.java)
+    private var objectMapper = ObjectMapper()
 
     @BeforeAll
-    void init() {
-        objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
-
-        mockRestConsumer = mock(MedlemskapRestConsumer.class);
-        medlService = new MedlService(mockRestConsumer, objectMapper);
+    fun init() {
+        objectMapper.registerModule(JavaTimeModule())
+        medlService = MedlService(mockRestConsumer, objectMapper)
     }
 
     @BeforeEach
-    void setUp() {
-        reset(mockRestConsumer);
+    fun setUp() {
+        Mockito.reset(mockRestConsumer)
     }
 
     @Test
-    void skalHentPeriodeliste() throws Exception {
-        when(mockRestConsumer.hentPeriodeListe(eq(FNR), any(), any())).thenReturn(
-            asList(hentJsonResponse("gyldigPeriodelisteResponse", MedlemskapsunntakForGet[].class))
-        );
-
-        Saksopplysning saksopplysning = medlService.hentPeriodeListe(FNR, null, null);
-        assertThat(saksopplysning).isNotNull();
-        assertThat(saksopplysning.getKilder()).isNotEmpty();
-        assertThat(saksopplysning.getKilder().iterator().next().getMottattDokument()).isNotNull();
-
-        MedlemskapDokument medlemskapDokument = (MedlemskapDokument) saksopplysning.getDokument();
-
-        assertThat(medlemskapDokument).isNotNull();
-        assertThat(medlemskapDokument.getMedlemsperiode()).hasSize(1);
-
-        Medlemsperiode medlemsperiode = medlemskapDokument.getMedlemsperiode().get(0);
-        assertThat(medlemsperiode.getType()).isEqualTo("PUMEDSKP");
-        assertThat(medlemsperiode.getStatus()).isEqualTo(GYLD.getKode());
-        assertThat(medlemsperiode.getLovvalg()).isEqualTo(ENDL.getKode());
-        assertThat(medlemsperiode.getKilde()).isEqualTo("INFOTR");
-        assertThat(medlemsperiode.getGrunnlagstype()).isEqualTo("IMEDEOS");
+    @Throws(Exception::class)
+    fun skalHentPeriodeliste() {
+        Mockito.`when`(
+            mockRestConsumer!!.hentPeriodeListe(
+                ArgumentMatchers.eq(FNR),
+                ArgumentMatchers.any(),
+                ArgumentMatchers.any()
+            )
+        ).thenReturn(
+            Arrays.asList(*hentJsonResponse("gyldigPeriodelisteResponse", Array<MedlemskapsunntakForGet>::class.java))
+        )
+        val saksopplysning = medlService!!.hentPeriodeListe(FNR, null, null)
+        Assertions.assertThat(saksopplysning).isNotNull
+        Assertions.assertThat(saksopplysning.kilder).isNotEmpty
+        Assertions.assertThat(saksopplysning.kilder.iterator().next().mottattDokument).isNotNull
+        val medlemskapDokument = saksopplysning.dokument as MedlemskapDokument
+        Assertions.assertThat(medlemskapDokument).isNotNull
+        Assertions.assertThat(medlemskapDokument.getMedlemsperiode()).hasSize(1)
+        val medlemsperiode = medlemskapDokument.getMedlemsperiode()[0]
+        Assertions.assertThat(medlemsperiode.getType()).isEqualTo("PUMEDSKP")
+        Assertions.assertThat(medlemsperiode.getStatus()).isEqualTo(PeriodestatusMedl.GYLD.kode)
+        Assertions.assertThat(medlemsperiode.getLovvalg()).isEqualTo(LovvalgMedl.ENDL.kode)
+        Assertions.assertThat(medlemsperiode.getKilde()).isEqualTo("INFOTR")
+        Assertions.assertThat(medlemsperiode.getGrunnlagstype()).isEqualTo("IMEDEOS")
     }
 
     @Test
-    void skalOpprettPeriodeEndelig() throws Exception {
-        when(mockRestConsumer.opprettPeriode(any())).thenReturn(
-            hentJsonResponse("gyldigPeriodeResponse", MedlemskapsunntakForGet.class)
-        );
-
-        Lovvalgsperiode lovvalgsperiode = lagLovvalgsPeriode();
-        medlService.opprettPeriodeEndelig(FNR, lovvalgsperiode, KildedokumenttypeMedl.HENV_SOKNAD);
-
-        ArgumentCaptor<MedlemskapsunntakForPost> captor = ArgumentCaptor.forClass(MedlemskapsunntakForPost.class);
-
-        verify(mockRestConsumer).opprettPeriode(captor.capture());
-
-        MedlemskapsunntakForPost request = captor.getValue();
-
-        assertThat(request.getIdent()).isEqualTo(FNR);
-        assertThat(request.getFraOgMed()).isEqualTo(lovvalgsperiode.getFom());
-        assertThat(request.getTilOgMed()).isEqualTo(lovvalgsperiode.getTom());
-        assertThat(request.getStatus()).isEqualTo(GYLD.getKode());
-        assertThat(request.getDekning()).isEqualTo(DekningMedl.FULL.getKode());
-        assertThat(request.getLovvalgsland()).isEqualTo("BEL");
-        assertThat(request.getLovvalg()).isEqualTo(ENDL.getKode());
-        assertThat(request.getGrunnlag()).isEqualTo("FO_11_4_1");
-        assertThat(request.getSporingsinformasjon().getKildedokument()).isEqualTo(KildedokumenttypeMedl.HENV_SOKNAD.getKode());
+    @Throws(Exception::class)
+    fun skalOpprettPeriodeEndelig() {
+        Mockito.`when`(mockRestConsumer!!.opprettPeriode(ArgumentMatchers.any())).thenReturn(
+            hentJsonResponse("gyldigPeriodeResponse", MedlemskapsunntakForGet::class.java)
+        )
+        val lovvalgsperiode = lagLovvalgsPeriode()
+        medlService!!.opprettPeriodeEndelig(FNR, lovvalgsperiode, KildedokumenttypeMedl.HENV_SOKNAD)
+        val captor = ArgumentCaptor.forClass(
+            MedlemskapsunntakForPost::class.java
+        )
+        Mockito.verify(mockRestConsumer).opprettPeriode(captor.capture())
+        val request = captor.value
+        Assertions.assertThat(request.ident).isEqualTo(FNR)
+        Assertions.assertThat(request.fraOgMed).isEqualTo(lovvalgsperiode.fom)
+        Assertions.assertThat(request.tilOgMed).isEqualTo(lovvalgsperiode.tom)
+        Assertions.assertThat(request.status).isEqualTo(PeriodestatusMedl.GYLD.kode)
+        Assertions.assertThat(request.dekning).isEqualTo(DekningMedl.FULL.kode)
+        Assertions.assertThat(request.lovvalgsland).isEqualTo("BEL")
+        Assertions.assertThat(request.lovvalg).isEqualTo(LovvalgMedl.ENDL.kode)
+        Assertions.assertThat(request.grunnlag).isEqualTo("FO_11_4_1")
+        Assertions.assertThat(request.sporingsinformasjon!!.kildedokument)
+            .isEqualTo(KildedokumenttypeMedl.HENV_SOKNAD.getKode())
     }
 
     @Test
-    void skalOpprettPeriodeUnderAvklaring() throws Exception {
-        when(mockRestConsumer.opprettPeriode(any())).thenReturn(
-            hentJsonResponse("gyldigPeriodeResponse", MedlemskapsunntakForGet.class)
-        );
-
-        Lovvalgsperiode lovvalgsperiode = lagLovvalgsPeriode();
-        medlService.opprettPeriodeUnderAvklaring(FNR, lovvalgsperiode, KildedokumenttypeMedl.HENV_SOKNAD);
-
-        ArgumentCaptor<MedlemskapsunntakForPost> captor = ArgumentCaptor.forClass(MedlemskapsunntakForPost.class);
-
-        verify(mockRestConsumer).opprettPeriode(captor.capture());
-
-        MedlemskapsunntakForPost request = captor.getValue();
-
-        assertThat(request.getIdent()).isEqualTo(FNR);
-        assertThat(request.getFraOgMed()).isEqualTo(lovvalgsperiode.getFom());
-        assertThat(request.getTilOgMed()).isEqualTo(lovvalgsperiode.getTom());
-        assertThat(request.getStatus()).isEqualTo(UAVK.getKode());
-        assertThat(request.getDekning()).isEqualTo(DekningMedl.FULL.getKode());
-        assertThat(request.getLovvalgsland()).isEqualTo("BEL");
-        assertThat(request.getLovvalg()).isEqualTo(UAVK.getKode());
-        assertThat(request.getGrunnlag()).isEqualTo("FO_11_4_1");
-        assertThat(request.getSporingsinformasjon().getKildedokument()).isEqualTo(KildedokumenttypeMedl.HENV_SOKNAD.getKode());
+    @Throws(Exception::class)
+    fun skalOpprettPeriodeUnderAvklaring() {
+        Mockito.`when`(mockRestConsumer!!.opprettPeriode(ArgumentMatchers.any())).thenReturn(
+            hentJsonResponse("gyldigPeriodeResponse", MedlemskapsunntakForGet::class.java)
+        )
+        val lovvalgsperiode = lagLovvalgsPeriode()
+        medlService!!.opprettPeriodeUnderAvklaring(FNR, lovvalgsperiode, KildedokumenttypeMedl.HENV_SOKNAD)
+        val captor = ArgumentCaptor.forClass(
+            MedlemskapsunntakForPost::class.java
+        )
+        Mockito.verify(mockRestConsumer).opprettPeriode(captor.capture())
+        val request = captor.value
+        Assertions.assertThat(request.ident).isEqualTo(FNR)
+        Assertions.assertThat(request.fraOgMed).isEqualTo(lovvalgsperiode.fom)
+        Assertions.assertThat(request.tilOgMed).isEqualTo(lovvalgsperiode.tom)
+        Assertions.assertThat(request.status).isEqualTo(LovvalgMedl.UAVK.kode)
+        Assertions.assertThat(request.dekning).isEqualTo(DekningMedl.FULL.kode)
+        Assertions.assertThat(request.lovvalgsland).isEqualTo("BEL")
+        Assertions.assertThat(request.lovvalg).isEqualTo(LovvalgMedl.UAVK.kode)
+        Assertions.assertThat(request.grunnlag).isEqualTo("FO_11_4_1")
+        Assertions.assertThat(request.sporingsinformasjon!!.kildedokument)
+            .isEqualTo(KildedokumenttypeMedl.HENV_SOKNAD.getKode())
     }
 
     @Test
-    void skalOpprettPeriodeForeløpig() throws Exception {
-        when(mockRestConsumer.opprettPeriode(any())).thenReturn(
-            hentJsonResponse("gyldigPeriodeResponse", MedlemskapsunntakForGet.class)
-        );
-
-        Lovvalgsperiode lovvalgsperiode = lagLovvalgsPeriode();
-        medlService.opprettPeriodeForeløpig(FNR, lovvalgsperiode, KildedokumenttypeMedl.HENV_SOKNAD);
-
-        ArgumentCaptor<MedlemskapsunntakForPost> captor = ArgumentCaptor.forClass(MedlemskapsunntakForPost.class);
-
-        verify(mockRestConsumer).opprettPeriode(captor.capture());
-
-        MedlemskapsunntakForPost request = captor.getValue();
-
-        assertThat(request.getIdent()).isEqualTo(FNR);
-        assertThat(request.getFraOgMed()).isEqualTo(lovvalgsperiode.getFom());
-        assertThat(request.getTilOgMed()).isEqualTo(lovvalgsperiode.getTom());
-        assertThat(request.getStatus()).isEqualTo(UAVK.getKode());
-        assertThat(request.getDekning()).isEqualTo(DekningMedl.FULL.getKode());
-        assertThat(request.getLovvalgsland()).isEqualTo("BEL");
-        assertThat(request.getLovvalg()).isEqualTo(FORL.getKode());
-        assertThat(request.getGrunnlag()).isEqualTo("FO_11_4_1");
-        assertThat(request.getSporingsinformasjon().getKildedokument()).isEqualTo(KildedokumenttypeMedl.HENV_SOKNAD.getKode());
+    @Throws(Exception::class)
+    fun skalOpprettPeriodeForeløpig() {
+        Mockito.`when`(mockRestConsumer!!.opprettPeriode(ArgumentMatchers.any())).thenReturn(
+            hentJsonResponse("gyldigPeriodeResponse", MedlemskapsunntakForGet::class.java)
+        )
+        val lovvalgsperiode = lagLovvalgsPeriode()
+        medlService!!.opprettPeriodeForeløpig(FNR, lovvalgsperiode, KildedokumenttypeMedl.HENV_SOKNAD)
+        val captor = ArgumentCaptor.forClass(
+            MedlemskapsunntakForPost::class.java
+        )
+        Mockito.verify(mockRestConsumer).opprettPeriode(captor.capture())
+        val request = captor.value
+        Assertions.assertThat(request.ident).isEqualTo(FNR)
+        Assertions.assertThat(request.fraOgMed).isEqualTo(lovvalgsperiode.fom)
+        Assertions.assertThat(request.tilOgMed).isEqualTo(lovvalgsperiode.tom)
+        Assertions.assertThat(request.status).isEqualTo(LovvalgMedl.UAVK.kode)
+        Assertions.assertThat(request.dekning).isEqualTo(DekningMedl.FULL.kode)
+        Assertions.assertThat(request.lovvalgsland).isEqualTo("BEL")
+        Assertions.assertThat(request.lovvalg).isEqualTo(LovvalgMedl.FORL.kode)
+        Assertions.assertThat(request.grunnlag).isEqualTo("FO_11_4_1")
+        Assertions.assertThat(request.sporingsinformasjon!!.kildedokument)
+            .isEqualTo(KildedokumenttypeMedl.HENV_SOKNAD.getKode())
     }
 
     @Test
-    void skalOppdaterePeriodeEndelig() throws Exception {
-        when(mockRestConsumer.hentPeriode(any())).thenReturn(
-            hentJsonResponse("gyldigPeriodeResponse", MedlemskapsunntakForGet.class)
-        );
-        when(mockRestConsumer.oppdaterPeriode(any())).thenReturn(
-            hentJsonResponse("gyldigPeriodeResponse", MedlemskapsunntakForGet.class)
-        );
-
-        Lovvalgsperiode lovvalgsperiode = lagLovvalgsPeriode();
-        lovvalgsperiode.setMedlPeriodeID(123456L);
-        medlService.oppdaterPeriodeEndelig(lovvalgsperiode, KildedokumenttypeMedl.HENV_SOKNAD);
-
-        ArgumentCaptor<MedlemskapsunntakForPut> captor = ArgumentCaptor.forClass(MedlemskapsunntakForPut.class);
-
-        verify(mockRestConsumer).oppdaterPeriode(captor.capture());
-
-        MedlemskapsunntakForPut request = captor.getValue();
-
-        assertThat(request.getUnntakId()).isEqualTo(123456L);
-        assertThat(request.getFraOgMed()).isEqualTo(lovvalgsperiode.getFom());
-        assertThat(request.getTilOgMed()).isEqualTo(lovvalgsperiode.getTom());
-        assertThat(request.getStatus()).isEqualTo(GYLD.getKode());
-        assertThat(request.getDekning()).isEqualTo(DekningMedl.FULL.getKode());
-        assertThat(request.getLovvalgsland()).isEqualTo("BEL");
-        assertThat(request.getLovvalg()).isEqualTo(ENDL.getKode());
-        assertThat(request.getGrunnlag()).isEqualTo("FO_11_4_1");
-        assertThat(request.getSporingsinformasjon().getKildedokument()).isEqualTo(KildedokumenttypeMedl.HENV_SOKNAD.getKode());
+    @Throws(Exception::class)
+    fun skalOppdaterePeriodeEndelig() {
+        Mockito.`when`(mockRestConsumer!!.hentPeriode(ArgumentMatchers.any())).thenReturn(
+            hentJsonResponse("gyldigPeriodeResponse", MedlemskapsunntakForGet::class.java)
+        )
+        Mockito.`when`(mockRestConsumer!!.oppdaterPeriode(ArgumentMatchers.any())).thenReturn(
+            hentJsonResponse("gyldigPeriodeResponse", MedlemskapsunntakForGet::class.java)
+        )
+        val lovvalgsperiode = lagLovvalgsPeriode()
+        lovvalgsperiode.medlPeriodeID = 123456L
+        medlService!!.oppdaterPeriodeEndelig(lovvalgsperiode, KildedokumenttypeMedl.HENV_SOKNAD)
+        val captor = ArgumentCaptor.forClass(
+            MedlemskapsunntakForPut::class.java
+        )
+        Mockito.verify(mockRestConsumer).oppdaterPeriode(captor.capture())
+        val (unntakId, fraOgMed, tilOgMed, status, _, dekning, lovvalgsland, lovvalg, grunnlag, sporingsinformasjon) = captor.value
+        Assertions.assertThat(unntakId).isEqualTo(123456L)
+        Assertions.assertThat(fraOgMed).isEqualTo(lovvalgsperiode.fom)
+        Assertions.assertThat(tilOgMed).isEqualTo(lovvalgsperiode.tom)
+        Assertions.assertThat(status).isEqualTo(PeriodestatusMedl.GYLD.kode)
+        Assertions.assertThat(dekning).isEqualTo(DekningMedl.FULL.kode)
+        Assertions.assertThat(lovvalgsland).isEqualTo("BEL")
+        Assertions.assertThat(lovvalg).isEqualTo(LovvalgMedl.ENDL.kode)
+        Assertions.assertThat(grunnlag).isEqualTo("FO_11_4_1")
+        Assertions.assertThat(sporingsinformasjon!!.kildedokument)
+            .isEqualTo(KildedokumenttypeMedl.HENV_SOKNAD.getKode())
     }
 
     @Test
-    void skalOpprettePeriodeEndeligFtrl() throws Exception {
-        when(mockRestConsumer.opprettPeriode(any())).thenReturn(
-            hentJsonResponse("gyldigPeriodeResponse", MedlemskapsunntakForGet.class)
-        );
-
-        Medlemskapsperiode medlemskapsperiode = lagMedlemskapsPeriode();
-
-        medlService.opprettPeriodeEndelig(FNR, medlemskapsperiode, KildedokumenttypeMedl.HENV_SOKNAD);
-
-        ArgumentCaptor<MedlemskapsunntakForPost> captor = ArgumentCaptor.forClass(MedlemskapsunntakForPost.class);
-
-        verify(mockRestConsumer).opprettPeriode(captor.capture());
-
-        MedlemskapsunntakForPost request = captor.getValue();
-
-        assertThat(request.getFraOgMed()).isEqualTo(medlemskapsperiode.getFom());
-        assertThat(request.getTilOgMed()).isEqualTo(medlemskapsperiode.getTom());
-        assertThat(request.getStatus()).isEqualTo(GYLD.getKode());
-        assertThat(request.getDekning()).isEqualTo(DekningMedl.FTRL_2_9_1_LEDD_A.getKode());
-        assertThat(request.getLovvalgsland()).isEqualTo("BEL");
-        assertThat(request.getLovvalg()).isEqualTo(ENDL.getKode());
-        assertThat(request.getGrunnlag()).isEqualTo(GrunnlagMedl.FTL_2_8.getKode());
-        assertThat(request.getSporingsinformasjon().getKildedokument()).isEqualTo(KildedokumenttypeMedl.HENV_SOKNAD.getKode());
+    @Throws(Exception::class)
+    fun skalOpprettePeriodeEndeligFtrl() {
+        Mockito.`when`(mockRestConsumer!!.opprettPeriode(ArgumentMatchers.any())).thenReturn(
+            hentJsonResponse("gyldigPeriodeResponse", MedlemskapsunntakForGet::class.java)
+        )
+        val medlemskapsperiode = lagMedlemskapsPeriode()
+        medlService!!.opprettPeriodeEndelig(FNR, medlemskapsperiode, KildedokumenttypeMedl.HENV_SOKNAD)
+        val captor = ArgumentCaptor.forClass(
+            MedlemskapsunntakForPost::class.java
+        )
+        Mockito.verify(mockRestConsumer).opprettPeriode(captor.capture())
+        val request = captor.value
+        Assertions.assertThat(request.fraOgMed).isEqualTo(medlemskapsperiode.fom)
+        Assertions.assertThat(request.tilOgMed).isEqualTo(medlemskapsperiode.tom)
+        Assertions.assertThat(request.status).isEqualTo(PeriodestatusMedl.GYLD.kode)
+        Assertions.assertThat(request.dekning).isEqualTo(DekningMedl.FTRL_2_9_1_LEDD_A.kode)
+        Assertions.assertThat(request.lovvalgsland).isEqualTo("BEL")
+        Assertions.assertThat(request.lovvalg).isEqualTo(LovvalgMedl.ENDL.kode)
+        Assertions.assertThat(request.grunnlag).isEqualTo(GrunnlagMedl.FTL_2_8.kode)
+        Assertions.assertThat(request.sporingsinformasjon!!.kildedokument)
+            .isEqualTo(KildedokumenttypeMedl.HENV_SOKNAD.getKode())
     }
 
     @Test
-    void skalOppdaterePeriodeForeløpig() throws Exception {
-        when(mockRestConsumer.hentPeriode(any())).thenReturn(
-            hentJsonResponse("gyldigPeriodeResponse", MedlemskapsunntakForGet.class)
-        );
-        when(mockRestConsumer.oppdaterPeriode(any())).thenReturn(
-            hentJsonResponse("gyldigPeriodeResponse", MedlemskapsunntakForGet.class)
-        );
-
-        Lovvalgsperiode lovvalgsperiode = lagLovvalgsPeriode();
-        lovvalgsperiode.setMedlPeriodeID(123456L);
-        medlService.oppdaterPeriodeForeløpig(lovvalgsperiode, KildedokumenttypeMedl.HENV_SOKNAD);
-
-        ArgumentCaptor<MedlemskapsunntakForPut> captor = ArgumentCaptor.forClass(MedlemskapsunntakForPut.class);
-
-        verify(mockRestConsumer).oppdaterPeriode(captor.capture());
-
-        MedlemskapsunntakForPut request = captor.getValue();
-
-        assertThat(request.getUnntakId()).isEqualTo(123456L);
-        assertThat(request.getFraOgMed()).isEqualTo(lovvalgsperiode.getFom());
-        assertThat(request.getTilOgMed()).isEqualTo(lovvalgsperiode.getTom());
-        assertThat(request.getStatus()).isEqualTo(UAVK.getKode());
-        assertThat(request.getDekning()).isEqualTo(DekningMedl.FULL.getKode());
-        assertThat(request.getLovvalgsland()).isEqualTo("BEL");
-        assertThat(request.getLovvalg()).isEqualTo(FORL.getKode());
-        assertThat(request.getGrunnlag()).isEqualTo("FO_11_4_1");
-        assertThat(request.getSporingsinformasjon().getKildedokument()).isEqualTo(KildedokumenttypeMedl.HENV_SOKNAD.getKode());
+    @Throws(Exception::class)
+    fun skalOppdaterePeriodeForeløpig() {
+        Mockito.`when`(mockRestConsumer!!.hentPeriode(ArgumentMatchers.any())).thenReturn(
+            hentJsonResponse("gyldigPeriodeResponse", MedlemskapsunntakForGet::class.java)
+        )
+        Mockito.`when`(mockRestConsumer!!.oppdaterPeriode(ArgumentMatchers.any())).thenReturn(
+            hentJsonResponse("gyldigPeriodeResponse", MedlemskapsunntakForGet::class.java)
+        )
+        val lovvalgsperiode = lagLovvalgsPeriode()
+        lovvalgsperiode.medlPeriodeID = 123456L
+        medlService!!.oppdaterPeriodeForeløpig(lovvalgsperiode, KildedokumenttypeMedl.HENV_SOKNAD)
+        val captor = ArgumentCaptor.forClass(
+            MedlemskapsunntakForPut::class.java
+        )
+        Mockito.verify(mockRestConsumer).oppdaterPeriode(captor.capture())
+        val (unntakId, fraOgMed, tilOgMed, status, _, dekning, lovvalgsland, lovvalg, grunnlag, sporingsinformasjon) = captor.value
+        Assertions.assertThat(unntakId).isEqualTo(123456L)
+        Assertions.assertThat(fraOgMed).isEqualTo(lovvalgsperiode.fom)
+        Assertions.assertThat(tilOgMed).isEqualTo(lovvalgsperiode.tom)
+        Assertions.assertThat(status).isEqualTo(LovvalgMedl.UAVK.kode)
+        Assertions.assertThat(dekning).isEqualTo(DekningMedl.FULL.kode)
+        Assertions.assertThat(lovvalgsland).isEqualTo("BEL")
+        Assertions.assertThat(lovvalg).isEqualTo(LovvalgMedl.FORL.kode)
+        Assertions.assertThat(grunnlag).isEqualTo("FO_11_4_1")
+        Assertions.assertThat(sporingsinformasjon!!.kildedokument)
+            .isEqualTo(KildedokumenttypeMedl.HENV_SOKNAD.getKode())
     }
 
     @Test
-    void oppdaterePeriodeFeilerMedManglendePeriodeId() {
-        assertThatExceptionOfType(TekniskException.class)
-            .isThrownBy(() -> medlService.oppdaterPeriodeForeløpig(lagLovvalgsPeriode(), KildedokumenttypeMedl.HENV_SOKNAD))
-            .withMessageContaining("Det er ikke lagret noen medlPeriodeID på lovvalgsperiode som skal oppdateres i MEDL");
+    fun oppdaterePeriodeFeilerMedManglendePeriodeId() {
+        Assertions.assertThatExceptionOfType(TekniskException::class.java)
+            .isThrownBy {
+                medlService!!.oppdaterPeriodeForeløpig(
+                    lagLovvalgsPeriode(),
+                    KildedokumenttypeMedl.HENV_SOKNAD
+                )
+            }
+            .withMessageContaining("Det er ikke lagret noen medlPeriodeID på lovvalgsperiode som skal oppdateres i MEDL")
     }
 
     @Test
-    void skalAvvisePeriode() throws Exception {
-        when(mockRestConsumer.hentPeriode(any())).thenReturn(
-            hentJsonResponse("gyldigPeriodeResponse", MedlemskapsunntakForGet.class)
-        );
-        when(mockRestConsumer.oppdaterPeriode(any())).thenReturn(
-            hentJsonResponse("gyldigPeriodeResponse", MedlemskapsunntakForGet.class)
-        );
-
-        Lovvalgsperiode lovvalgsperiode = lagLovvalgsPeriode();
-        lovvalgsperiode.setMedlPeriodeID(123456L);
-        medlService.avvisPeriode(123456L, AVVIST);
-
-        ArgumentCaptor<MedlemskapsunntakForPut> captor = ArgumentCaptor.forClass(MedlemskapsunntakForPut.class);
-
-        verify(mockRestConsumer).oppdaterPeriode(captor.capture());
-
-        MedlemskapsunntakForPut request = captor.getValue();
-
-        assertThat(request.getUnntakId()).isEqualTo(123456L);
-        assertThat(request.getStatus()).isEqualTo(AVST.getKode());
-        assertThat(request.getStatusaarsak()).isEqualTo(AVVIST.getKode());
+    @Throws(Exception::class)
+    fun skalAvvisePeriode() {
+        Mockito.`when`(mockRestConsumer!!.hentPeriode(ArgumentMatchers.any())).thenReturn(
+            hentJsonResponse("gyldigPeriodeResponse", MedlemskapsunntakForGet::class.java)
+        )
+        Mockito.`when`(mockRestConsumer!!.oppdaterPeriode(ArgumentMatchers.any())).thenReturn(
+            hentJsonResponse("gyldigPeriodeResponse", MedlemskapsunntakForGet::class.java)
+        )
+        val lovvalgsperiode = lagLovvalgsPeriode()
+        lovvalgsperiode.medlPeriodeID = 123456L
+        medlService!!.avvisPeriode(123456L, StatusaarsakMedl.AVVIST)
+        val captor = ArgumentCaptor.forClass(
+            MedlemskapsunntakForPut::class.java
+        )
+        Mockito.verify(mockRestConsumer).oppdaterPeriode(captor.capture())
+        val (unntakId, _, _, status, statusaarsak) = captor.value
+        Assertions.assertThat(unntakId).isEqualTo(123456L)
+        Assertions.assertThat(status).isEqualTo(PeriodestatusMedl.AVST.kode)
+        Assertions.assertThat(statusaarsak).isEqualTo(StatusaarsakMedl.AVVIST.kode)
     }
 
-    private Lovvalgsperiode lagLovvalgsPeriode() {
-        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setFom(LocalDate.now());
-        lovvalgsperiode.setTom(LocalDate.now().plusYears(1));
-        lovvalgsperiode.setDekning(Trygdedekninger.FULL_DEKNING_EOSFO);
-        lovvalgsperiode.setLovvalgsland(Landkoder.BE);
-        lovvalgsperiode.setTilleggsbestemmelse(FO_883_2004_ART11_4_1);
-        return lovvalgsperiode;
+    private fun lagLovvalgsPeriode(): Lovvalgsperiode {
+        val lovvalgsperiode = Lovvalgsperiode()
+        lovvalgsperiode.fom = LocalDate.now()
+        lovvalgsperiode.tom = LocalDate.now().plusYears(1)
+        lovvalgsperiode.dekning = Trygdedekninger.FULL_DEKNING_EOSFO
+        lovvalgsperiode.lovvalgsland = Landkoder.BE
+        lovvalgsperiode.tilleggsbestemmelse = Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1
+        return lovvalgsperiode
     }
 
-    private Medlemskapsperiode lagMedlemskapsPeriode() {
-        Medlemskapsperiode medlemskapsperiode = new Medlemskapsperiode();
-        medlemskapsperiode.setMedlemskapstype(Medlemskapstyper.FRIVILLIG);
-        medlemskapsperiode.setArbeidsland(Landkoder.BE.getKode());
-        medlemskapsperiode.setBestemmelse(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8);
-        medlemskapsperiode.setTrygdedekning(Trygdedekninger.HELSEDEL);
-        medlemskapsperiode.setFom(LocalDate.now());
-        medlemskapsperiode.setTom(LocalDate.now().plusYears(1));
-
-        return medlemskapsperiode;
+    private fun lagMedlemskapsPeriode(): Medlemskapsperiode {
+        val medlemskapsperiode = Medlemskapsperiode()
+        medlemskapsperiode.medlemskapstype = Medlemskapstyper.FRIVILLIG
+        medlemskapsperiode.arbeidsland = Landkoder.BE.kode
+        medlemskapsperiode.bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
+        medlemskapsperiode.setTrygdedekning(Trygdedekninger.HELSEDEL)
+        medlemskapsperiode.fom = LocalDate.now()
+        medlemskapsperiode.tom = LocalDate.now().plusYears(1)
+        return medlemskapsperiode
     }
 
-    private <T> T hentJsonResponse(String filnavn, Class<T> clazz) throws java.io.IOException {
+    @Throws(IOException::class)
+    private fun <T> hentJsonResponse(filnavn: String, clazz: Class<T>): T {
         return objectMapper.readValue(
-            getClass().getClassLoader().getResource("mock/medlemskap/" + filnavn + ".json"),
-            clazz);
+            javaClass.classLoader.getResource("mock/medlemskap/$filnavn.json"),
+            clazz
+        )
     }
 }
