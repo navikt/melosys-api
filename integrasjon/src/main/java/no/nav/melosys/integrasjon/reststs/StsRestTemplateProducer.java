@@ -17,10 +17,10 @@ public class StsRestTemplateProducer {
     }
 
     @Primary
-    @Bean(name = "stsRestTemplate")
+    @Bean
     public RestTemplate restTemplate(RestTemplateBuilder restTemplateBuilder) {
         return restTemplateBuilder
-                .rootUri(uri)
-                .build();
+            .rootUri(uri)
+            .build();
     }
 }
