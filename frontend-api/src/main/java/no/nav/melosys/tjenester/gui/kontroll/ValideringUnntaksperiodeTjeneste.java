@@ -38,7 +38,7 @@ public class ValideringUnntaksperiodeTjeneste {
     @PostMapping("/{behandlingID}/unntaksperiode")
     public ResponseEntity<Void> kanBehandlingGodkjennesMedPeriode(@PathVariable Long behandlingID,
                                                                   @RequestBody UnntaksperiodeRequestDto requestDto) {
-        log.debug("/{}/kontroll-periode med data: {}", behandlingID, requestDto);
+        log.debug("/{}/unntaksperiode med data: {}", behandlingID, requestDto);
         aksesskontroll.autoriser(behandlingID, Aksesstype.LES);
         unntaksperiodeKontrollService.kontrollPeriode(behandlingID, requestDto.tilPeriode());
         return ResponseEntity.noContent().build();
