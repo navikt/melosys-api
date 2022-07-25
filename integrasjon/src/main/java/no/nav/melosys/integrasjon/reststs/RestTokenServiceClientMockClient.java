@@ -8,7 +8,6 @@ import java.util.Objects;
 import no.nav.melosys.integrasjon.felles.ExceptionMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
@@ -31,7 +30,7 @@ public class RestTokenServiceClientMockClient implements RestStsClient {
     private String token;
     private final RestTemplate restTemplate;
 
-    public RestTokenServiceClientMockClient(@Qualifier("stsRestTemplate") RestTemplate restTemplate) {
+    public RestTokenServiceClientMockClient(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
 
