@@ -1,4 +1,4 @@
-package no.nav.melosys.service.kontroll.feature.godkjennunntak;
+package no.nav.melosys.service.kontroll.feature.unntaksperiode;
 
 import java.util.List;
 import java.util.Objects;
@@ -8,8 +8,8 @@ import no.nav.melosys.domain.ErPeriode;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.kontroll.feature.godkjennunntak.data.UnntaksperiodeKontrollData;
-import no.nav.melosys.service.kontroll.feature.godkjennunntak.kontroll.UnntaksperiodeKontrollsett;
+import no.nav.melosys.service.kontroll.feature.unntaksperiode.data.UnntaksperiodeKontrollData;
+import no.nav.melosys.service.kontroll.feature.unntaksperiode.kontroll.UnntaksperiodeKontrollsett;
 import no.nav.melosys.service.validering.Kontrollfeil;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;

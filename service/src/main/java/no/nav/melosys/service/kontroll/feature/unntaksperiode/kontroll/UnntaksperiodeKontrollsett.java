@@ -1,4 +1,4 @@
-package no.nav.melosys.service.kontroll.feature.godkjennunntak.kontroll;
+package no.nav.melosys.service.kontroll.feature.unntaksperiode.kontroll;
 
 import java.util.Collections;
 import java.util.Set;
@@ -8,7 +8,7 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
-import no.nav.melosys.service.kontroll.feature.godkjennunntak.data.UnntaksperiodeKontrollData;
+import no.nav.melosys.service.kontroll.feature.unntaksperiode.data.UnntaksperiodeKontrollData;
 import no.nav.melosys.service.validering.Kontrollfeil;
 
 import static java.util.Objects.nonNull;

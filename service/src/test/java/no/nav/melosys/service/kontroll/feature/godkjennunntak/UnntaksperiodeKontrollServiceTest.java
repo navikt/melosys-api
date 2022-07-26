@@ -12,6 +12,7 @@ import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.kontroll.feature.unntaksperiode.UnntaksperiodeKontrollService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

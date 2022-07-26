@@ -1,4 +1,4 @@
-package no.nav.melosys.service.kontroll.feature.godkjennunntak.data;
+package no.nav.melosys.service.kontroll.feature.unntaksperiode.data;
 
 import java.time.LocalDate;
 

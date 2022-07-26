@@ -8,7 +8,7 @@ import io.swagger.annotations.Api;
 import no.nav.melosys.domain.ErPeriode;
 import no.nav.melosys.domain.dokument.medlemskap.Periode;
 import no.nav.melosys.domain.serializer.MultiDateDeserializer;
-import no.nav.melosys.service.kontroll.feature.godkjennunntak.UnntaksperiodeKontrollService;
+import no.nav.melosys.service.kontroll.feature.unntaksperiode.UnntaksperiodeKontrollService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.tilgang.Aksesstype;
 import no.nav.security.token.support.core.api.Protected;

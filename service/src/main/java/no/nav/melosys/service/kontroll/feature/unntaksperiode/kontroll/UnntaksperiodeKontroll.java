@@ -1,7 +1,7 @@
-package no.nav.melosys.service.kontroll.feature.godkjennunntak.kontroll;
+package no.nav.melosys.service.kontroll.feature.unntaksperiode.kontroll;
 
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
-import no.nav.melosys.service.kontroll.feature.godkjennunntak.data.UnntaksperiodeKontrollData;
+import no.nav.melosys.service.kontroll.feature.unntaksperiode.data.UnntaksperiodeKontrollData;
 import no.nav.melosys.service.kontroll.regler.PeriodeRegler;
 import no.nav.melosys.service.validering.Kontrollfeil;
 
