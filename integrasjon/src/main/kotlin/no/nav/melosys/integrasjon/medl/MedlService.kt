@@ -27,23 +27,23 @@ class MedlService(
 
     fun hentPeriodeListe(fnr: String, fom: LocalDate, tom: LocalDate): Saksopplysning {
         val periodeListeResponse = medlemskapRestConsumer.hentPeriodeListe(fnr, fom, tom)
-        val medlemskapDokument = MedlemskapDokument()
-        val medlemsperioder: MutableList<Medlemsperiode> = ArrayList()
-        for (m in periodeListeResponse) {
-            val medlemsperiode = Medlemsperiode()
-            medlemsperiode.id = m.unntakId
-            medlemsperiode.periode = Periode(m.fraOgMed, m.tilOgMed)
-            medlemsperiode.type = if (m.medlem!!) "PMMEDSKP" else "PUMEDSKP"
-            medlemsperiode.status = m.status
-            medlemsperiode.grunnlagstype = m.grunnlag
-            medlemsperiode.land = m.lovvalgsland
-            medlemsperiode.lovvalg = m.lovvalg
-            medlemsperiode.trygdedekning = m.dekning
-            val sporingsinformasjon = m.sporingsinformasjon
-            medlemsperiode.kildedokumenttype = sporingsinformasjon!!.kildedokument
-            medlemsperiode.kilde = sporingsinformasjon.kilde
-            medlemsperioder.add(medlemsperiode)
+
+        val medlemsperioder = periodeListeResponse.map {
+            Medlemsperiode().apply {
+                id = it.unntakId
+                periode = Periode(it.fraOgMed, it.tilOgMed)
+                type = if (it.medlem!!) "PMMEDSKP" else "PUMEDSKP"
+                status = it.status
+                grunnlagstype = it.grunnlag
+                land = it.lovvalgsland
+                lovvalg = it.lovvalg
+                trygdedekning = it.dekning
+                kildedokumenttype = it.sporingsinformasjon!!.kildedokument
+                kilde = it.sporingsinformasjon!!.kilde
+            }
         }
+
+        val medlemskapDokument = MedlemskapDokument()
         medlemskapDokument.medlemsperiode = medlemsperioder
         val saksopplysning = Saksopplysning()
         saksopplysning.type = SaksopplysningType.MEDL
@@ -113,7 +113,7 @@ class MedlService(
             lovvalg = LovvalgMedl.ENDL.kode,
             grunnlag = eksisterendePeriode.grunnlag,
             sporingsinformasjon = MedlemskapsunntakForPut.SporingsinformasjonForPut(
-                kildedokument = eksisterendePeriode!!.sporingsinformasjon!!.kildedokument,
+                kildedokument = eksisterendePeriode.sporingsinformasjon!!.kildedokument,
                 versjon = eksisterendePeriode.sporingsinformasjon!!.versjon
             )
         )
@@ -187,17 +187,17 @@ class MedlService(
         val eksisterendePeriode = hentEksisterendePeriode(medlPeriodeID)
         val bestemmelse = MedlPeriodeKonverter.hentLovvalgBestemmelse(lovvalgsperiode)
         val request = MedlemskapsunntakForPut().apply {
-            unntakId=medlPeriodeID
-            fraOgMed=lovvalgsperiode.fom
-            tilOgMed=lovvalgsperiode.tom
-            status=periodestatusMedl.kode
-            dekning=MedlPeriodeKonverter.tilMedlTrygdeDekningEos(lovvalgsperiode.dekning).kode
-            lovvalgsland=LandkoderUtils.tilIso3(lovvalgsperiode.lovvalgsland.kode)
-            lovvalg=lovvalgMedl.kode
-            grunnlag=MedlPeriodeKonverter.tilGrunnlagMedltype(bestemmelse).kode
-            sporingsinformasjon= MedlemskapsunntakForPut.SporingsinformasjonForPut().apply {
-                kildedokument=kildedokumenttypeMedl.getKode()
-                versjon=eksisterendePeriode!!.sporingsinformasjon!!.versjon
+            unntakId = medlPeriodeID
+            fraOgMed = lovvalgsperiode.fom
+            tilOgMed = lovvalgsperiode.tom
+            status = periodestatusMedl.kode
+            dekning = MedlPeriodeKonverter.tilMedlTrygdeDekningEos(lovvalgsperiode.dekning).kode
+            lovvalgsland = LandkoderUtils.tilIso3(lovvalgsperiode.lovvalgsland.kode)
+            lovvalg = lovvalgMedl.kode
+            grunnlag = MedlPeriodeKonverter.tilGrunnlagMedltype(bestemmelse).kode
+            sporingsinformasjon = MedlemskapsunntakForPut.SporingsinformasjonForPut().apply {
+                kildedokument = kildedokumenttypeMedl.getKode()
+                versjon = eksisterendePeriode!!.sporingsinformasjon!!.versjon
             }
         }
         medlemskapRestConsumer.oppdaterPeriode(request)
