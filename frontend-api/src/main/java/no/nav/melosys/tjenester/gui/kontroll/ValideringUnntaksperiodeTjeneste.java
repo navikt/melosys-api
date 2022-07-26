@@ -10,7 +10,7 @@ import no.nav.melosys.domain.dokument.medlemskap.Periode;
 import no.nav.melosys.service.kontroll.feature.godkjennunntak.UnntaksperiodeKontrollService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.tilgang.Aksesstype;
-import no.nav.security.token.support.core.api.Unprotected;
+import no.nav.security.token.support.core.api.Protected;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.WebApplicationContext;
 
-@Unprotected // TODO: Change me!
+@Protected
 @RestController
 @RequestMapping("/kontroll")
 @Api(tags = "kontroll")
