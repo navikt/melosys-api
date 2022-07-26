@@ -30,28 +30,26 @@ class MedlemskapConsumerTokenTest(
     @Autowired private val medlemskapRestConsumer: MedlemskapRestConsumer,
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,
     @Value("\${mockserver.security.port}") mockSecurityPort: Int
-) : ConsumerWireMockTestBase<String>(mockServiceUnderTestPort, mockSecurityPort) {
+) : ConsumerWireMockTestBase<String, Unit>(mockServiceUnderTestPort, mockSecurityPort) {
 
     @Test
     fun authorizationSkalKommeFraSystem() {
-        executeFromSystem {
-            verifyHeaders(
-                mapOf<String, StringValuePattern>(
-                    Pair("Authorization", WireMock.equalTo("Bearer --token-from-system--")),
-                )
+        verifyHeaders(
+            mapOf<String, StringValuePattern>(
+                Pair("Authorization", WireMock.equalTo("Bearer --token-from-system--")),
             )
-        }
+        )
+        executeFromSystem()
     }
 
     @Test
     fun authorizationSkalKommeFraBruker() {
-        executeFromController {
-            verifyHeaders(
-                mapOf<String, StringValuePattern>(
-                    Pair("Authorization", WireMock.equalTo("Bearer --token-from-user--")),
-                )
+        verifyHeaders(
+            mapOf<String, StringValuePattern>(
+                Pair("Authorization", WireMock.equalTo("Bearer --token-from-user--")),
             )
-        }
+        )
+        executeFromController()
     }
 
     @Test
@@ -70,7 +68,6 @@ class MedlemskapConsumerTokenTest(
             Assertions.assertThat(error).startsWith("Kall mot Medl feilet.")
         }
     }
-
     override fun getMockData(): String {
         return "[]"
     }

@@ -3,6 +3,7 @@ package no.nav.melosys.integrasjon.sak
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.matching.StringValuePattern
 import no.nav.melosys.integrasjon.ConsumerWireMockTestBase
+import no.nav.melosys.integrasjon.sak.dto.SakDto
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -19,28 +20,26 @@ class SakConsumerTokenTest(
     @Autowired private val sakConsumer: SakConsumer,
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,
     @Value("\${mockserver.security.port}") mockSecurityPort: Int
-) : ConsumerWireMockTestBase<String>(mockServiceUnderTestPort, mockSecurityPort) {
+) : ConsumerWireMockTestBase<String, SakDto>(mockServiceUnderTestPort, mockSecurityPort) {
 
     @Test
     fun authorizationSkalKommeFraSystem() {
-        executeFromSystem {
-            verifyHeaders(
-                mapOf<String, StringValuePattern>(
-                    Pair("Authorization", WireMock.equalTo("Basic dGVzdDp0ZXN0")),
-                )
+        verifyHeaders(
+            mapOf<String, StringValuePattern>(
+                Pair("Authorization", WireMock.equalTo("Basic dGVzdDp0ZXN0")),
             )
-        }
+        )
+        executeFromSystem()
     }
 
     @Test
     fun authorizationSkalKommeFraBruker() {
-        executeFromController {
-            verifyHeaders(
-                mapOf<String, StringValuePattern>(
-                    Pair("Authorization", WireMock.equalTo("Bearer --token-from-user--")),
-                )
+        verifyHeaders(
+            mapOf<String, StringValuePattern>(
+                Pair("Authorization", WireMock.equalTo("Bearer --token-from-user--")),
             )
-        }
+        )
+        executeFromController()
     }
 
     @Test
@@ -57,7 +56,6 @@ class SakConsumerTokenTest(
         return "{}"
     }
 
-    override fun executeRequest() {
+    override fun executeRequest() =
         sakConsumer.hentSak(1L)
-    }
 }

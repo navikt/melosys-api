@@ -17,7 +17,7 @@ import org.springframework.mock.env.MockEnvironment
 import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-abstract class ConsumerWireMockTestBase<T>(
+abstract class ConsumerWireMockTestBase<T, R>(
     mockPort: Int,
     stsMockPort: Int
 ) {
@@ -31,7 +31,7 @@ abstract class ConsumerWireMockTestBase<T>(
 
     abstract fun getMockData(): T
 
-    abstract fun executeRequest()
+    abstract fun executeRequest(): R
 
     @BeforeAll
     fun beforeAll() {
@@ -99,30 +99,21 @@ abstract class ConsumerWireMockTestBase<T>(
         )
     }
 
-    fun executeFromSystemWithoutExecuteRequest(action: () -> Unit) {
+    fun executeFromSystem(action: (R) -> Unit = {})  {
         val uuid = UUID.randomUUID()
         try {
             ThreadLocalAccessInfo.beforeExecuteProcess(uuid, "prossesSteg")
-            action()
+            action(executeRequest())
         } finally {
             ThreadLocalAccessInfo.afterExecuteProcess(uuid)
         }
     }
 
-    fun executeFromSystem(verify: () -> Unit) {
-        executeFromSystemWithoutExecuteRequest {
-            verify()
-            executeRequest()
-        }
-    }
-
-    fun executeFromController(verify: () -> Unit) {
+    fun executeFromController(action: (R) -> Unit = {}) {
         SpringSubjectHandler.set(TestSubjectHandler())
         try {
             ThreadLocalAccessInfo.beforeControllerRequest("request", false)
-            verify()
-            executeRequest()
-
+            action(executeRequest())
         } finally {
             ThreadLocalAccessInfo.afterControllerRequest("request")
         }
@@ -131,7 +122,7 @@ abstract class ConsumerWireMockTestBase<T>(
     fun executeErrorFromServer(verify: (String) -> Unit) {
         stubError()
         try {
-            executeFromSystem { }
+            executeFromSystem()
         } catch (exception: Exception) {
             Assertions.assertThat(exception.message)
                 .endsWith(errorFromServerMessage())

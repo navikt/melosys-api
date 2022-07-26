@@ -41,7 +41,7 @@ class MedlServiceMvcTest(
     @Autowired private val medlemskapRestConsumer: MedlemskapRestConsumer,
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,
     @Value("\${mockserver.security.port}") mockSecurityPort: Int
-) : ConsumerWireMockTestBase<String>(mockServiceUnderTestPort, mockSecurityPort) {
+) : ConsumerWireMockTestBase<String, Saksopplysning>(mockServiceUnderTestPort, mockSecurityPort) {
 
     private val objectMapper = ObjectMapper().apply { registerModule(JavaTimeModule()) }
 
@@ -49,17 +49,15 @@ class MedlServiceMvcTest(
 
     @Test
     fun hentPeriodeListe() {
-        executeFromSystemWithoutExecuteRequest {
-            setupWireMock()
-            val hentPeriodeListe: Saksopplysning = medlService.hentPeriodeListe(FNR, FOM, TOM)
+        setupWireMock()
+        executeFromSystem { saksopplysning ->
+            saksopplysning.type.shouldBe(SaksopplysningType.MEDL)
 
-            hentPeriodeListe.type.shouldBe(SaksopplysningType.MEDL)
-
-            extracting(hentPeriodeListe.kilder) { kilde }
+            extracting(saksopplysning.kilder) { kilde }
                 .shouldHaveSize(1)
                 .shouldContainExactly(SaksopplysningKildesystem.MEDL)
 
-            val medlemskapDokument = hentPeriodeListe.dokument as MedlemskapDokument
+            val medlemskapDokument = saksopplysning.dokument as MedlemskapDokument
             medlemskapDokument.medlemsperiode
                 .shouldHaveSize(1)
                 .first()
@@ -115,8 +113,7 @@ class MedlServiceMvcTest(
               }]"""
     }
 
-    override fun executeRequest() {
-    }
+    override fun executeRequest() = medlService.hentPeriodeListe(FNR, FOM, TOM)
 
     companion object {
         private const val FNR = "12345678990"

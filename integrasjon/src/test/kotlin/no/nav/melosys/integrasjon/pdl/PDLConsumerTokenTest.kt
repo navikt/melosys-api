@@ -4,6 +4,7 @@ import com.github.tomakehurst.wiremock.client.MappingBuilder
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.matching.StringValuePattern
 import no.nav.melosys.integrasjon.ConsumerWireMockTestBase
+import no.nav.melosys.integrasjon.pdl.dto.identer.Identliste
 import no.nav.melosys.integrasjon.reststs.RestTokenServiceClient
 import no.nav.melosys.integrasjon.reststs.StsRestTemplateProducer
 import org.assertj.core.api.Assertions
@@ -30,30 +31,28 @@ class PDLConsumerTokenTest(
     @Autowired private val pdlConsumer: PDLConsumer,
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,
     @Value("\${mockserver.security.port}") mockSecurityPort: Int
-) : ConsumerWireMockTestBase<String>(mockServiceUnderTestPort, mockSecurityPort) {
+) : ConsumerWireMockTestBase<String, Identliste>(mockServiceUnderTestPort, mockSecurityPort) {
 
     @Test
     fun authorizationSkalKommeFraSystem() {
-        executeFromSystem {
-            verifyHeaders(
-                mapOf<String, StringValuePattern>(
-                    Pair("Authorization", WireMock.equalTo("Bearer --token-from-system--")),
-                    Pair("Nav-Consumer-Token", WireMock.equalTo("Bearer --token-from-system--"))
-                )
+        verifyHeaders(
+            mapOf<String, StringValuePattern>(
+                Pair("Authorization", WireMock.equalTo("Bearer --token-from-system--")),
+                Pair("Nav-Consumer-Token", WireMock.equalTo("Bearer --token-from-system--"))
             )
-        }
+        )
+        executeFromSystem()
     }
 
     @Test
     fun authorizationSkalKommeFraBruker() {
-        executeFromController {
-            verifyHeaders(
-                mapOf<String, StringValuePattern>(
-                    Pair("Authorization", WireMock.equalTo("Bearer --token-from-user--")),
-                    Pair("Nav-Consumer-Token", WireMock.equalTo("Bearer --token-from-system--"))
-                )
+        verifyHeaders(
+            mapOf<String, StringValuePattern>(
+                Pair("Authorization", WireMock.equalTo("Bearer --token-from-user--")),
+                Pair("Nav-Consumer-Token", WireMock.equalTo("Bearer --token-from-system--"))
             )
-        }
+        )
+        executeFromController()
     }
 
     @Test
@@ -98,7 +97,6 @@ class PDLConsumerTokenTest(
         """
     }
 
-    override fun executeRequest() {
+    override fun executeRequest() =
         pdlConsumer.hentIdenter("0")
-    }
 }
