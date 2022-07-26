@@ -34,10 +34,10 @@ internal class MedlServiceTest {
     fun skalHentPeriodeliste() {
         every {
             mockRestConsumer.hentPeriodeListe(
-                FNR, null, null
+                FNR, LocalDate.now(), LocalDate.now()
             )
         } returns hentMedlemskapsunntakListe()
-        val saksopplysning = medlService.hentPeriodeListe(FNR, null, null)
+        val saksopplysning = medlService.hentPeriodeListe(FNR, LocalDate.now(), LocalDate.now())
 
         Assertions.assertThat(saksopplysning).isNotNull
         Assertions.assertThat(saksopplysning.kilder).isNotEmpty

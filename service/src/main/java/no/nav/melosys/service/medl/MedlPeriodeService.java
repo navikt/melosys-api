@@ -1,6 +1,7 @@
 package no.nav.melosys.service.medl;
 
 import java.time.LocalDate;
+import java.util.Objects;
 import java.util.Optional;
 
 import no.nav.melosys.domain.*;
@@ -51,6 +52,9 @@ public class MedlPeriodeService {
     }
 
     public Saksopplysning hentPeriodeListe(String fnr, LocalDate fom, LocalDate tom) {
+        Objects.requireNonNull(fnr, "fnr kan ikke være null");
+        Objects.requireNonNull(fom, "fraOgMed dato kan ikke være null");
+        Objects.requireNonNull(tom, "tilOgMed dato kan ikke være null");
         return medlService.hentPeriodeListe(fnr, fom, tom);
     }
 

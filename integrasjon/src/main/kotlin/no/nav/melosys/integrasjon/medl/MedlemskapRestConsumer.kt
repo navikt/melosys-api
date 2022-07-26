@@ -13,14 +13,14 @@ import java.time.LocalDate
 
 @Retryable
 class MedlemskapRestConsumer(private val webClient: WebClient) : RestConsumer {
-    fun hentPeriodeListe(fnr: String, fom: LocalDate?, tom: LocalDate?): List<MedlemskapsunntakForGet> {
+    fun hentPeriodeListe(fnr: String, fom: LocalDate, tom: LocalDate): List<MedlemskapsunntakForGet> {
         return hentPeriodeListe(fnr, fom, tom, "")!!.toList()
     }
 
     private fun hentPeriodeListe(
         fnr: String,
-        fom: LocalDate?,
-        tom: LocalDate?,
+        fom: LocalDate,
+        tom: LocalDate,
         eksluderteKilder: String
     ): Array<MedlemskapsunntakForGet>? {
         return webClient.get().uri("") { uriBuilder: UriBuilder ->

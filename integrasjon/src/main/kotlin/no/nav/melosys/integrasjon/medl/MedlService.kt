@@ -12,8 +12,10 @@ import no.nav.melosys.integrasjon.medl.api.v1.MedlemskapsunntakForGet
 import no.nav.melosys.integrasjon.medl.api.v1.MedlemskapsunntakForPost
 import no.nav.melosys.integrasjon.medl.api.v1.MedlemskapsunntakForPut
 import no.nav.melosys.exception.TekniskException
+import org.springframework.stereotype.Service
 import java.time.LocalDate
 
+@Service
 class MedlService(
     private val medlemskapRestConsumer: MedlemskapRestConsumer,
     private val objectMapper: ObjectMapper
@@ -23,7 +25,7 @@ class MedlService(
         objectMapper.registerModule(JavaTimeModule())
     }
 
-    fun hentPeriodeListe(fnr: String, fom: LocalDate?, tom: LocalDate?): Saksopplysning {
+    fun hentPeriodeListe(fnr: String, fom: LocalDate, tom: LocalDate): Saksopplysning {
         val periodeListeResponse = medlemskapRestConsumer.hentPeriodeListe(fnr, fom, tom)
         val medlemskapDokument = MedlemskapDokument()
         val medlemsperioder: MutableList<Medlemsperiode> = ArrayList()
