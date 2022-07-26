@@ -1,5 +1,8 @@
 package no.nav.melosys.itest
 
+import io.kotest.assertions.extracting
+import io.kotest.matchers.sequences.singleElement
+import io.kotest.matchers.should
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.avklartefakta.Avklartefakta
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering
@@ -72,6 +75,7 @@ internal class BehandlingsresultatServiceIT(
             saksnummer = "MEL-1001"
             type = Sakstyper.TRYGDEAVTALE
             status = Saksstatuser.LOVVALG_AVKLART
+            tema = Sakstemaer.MEDLEMSKAP_LOVVALG
             leggTilRegisteringInfo()
         }.also { fsak ->
             fagsakRepository.save(fsak)

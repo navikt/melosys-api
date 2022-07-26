@@ -1,6 +1,9 @@
 package no.nav.melosys.itest
 
-import no.finn.unleash.Unleash
+import io.kotest.assertions.extracting
+import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.collections.shouldHaveSize
+import no.nav.melosys.domain.FellesKodeverk
 import no.nav.melosys.domain.arkiv.*
 import no.nav.melosys.domain.eessi.BucType
 import no.nav.melosys.domain.eessi.Periode
@@ -10,30 +13,32 @@ import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
 import no.nav.melosys.domain.saksflyt.ProsessStatus
 import no.nav.melosys.domain.saksflyt.Prosessinstans
 import no.nav.melosys.integrasjon.joark.JoarkFasade
+import no.nav.melosys.integrasjon.kodeverk.Kode
+import no.nav.melosys.integrasjon.kodeverk.KodeOppslag
+import no.nav.melosys.integrasjon.kodeverk.Kodeverk
+import no.nav.melosys.integrasjon.kodeverk.KodeverkRegister
 import no.nav.melosys.repository.ProsessinstansRepository
-import org.assertj.core.api.Assertions
+import no.nav.melosys.service.kodeverk.KodeverkService
 import org.awaitility.Awaitility
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.boot.test.context.TestConfiguration
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Import
+import org.springframework.context.annotation.Primary
 import org.springframework.kafka.core.KafkaTemplate
 import java.time.Duration
 import java.time.LocalDate
 import java.util.*
-import java.util.List
 import java.util.stream.Collectors
 
-internal class SedMottakTestIT : ComponentTestBase() {
-    @Autowired
-    private val joarkFasade: JoarkFasade? = null
-
-    @Autowired
-    @Qualifier("melosysEessiMelding")
-    private val melosysEessiMeldingKafkaTemplate: KafkaTemplate<String, MelosysEessiMelding>? = null
-
-    @Autowired
-    private val prosessinstansRepository: ProsessinstansRepository? = null
+@Import(SedMottakTestIT.TestConfig::class)
+class SedMottakTestIT(
+    @Autowired private val joarkFasade: JoarkFasade,
+    @Autowired @Qualifier("melosysEessiMelding") private val melosysEessiMeldingKafkaTemplate: KafkaTemplate<String, MelosysEessiMelding>,
+    @Autowired private val prosessinstansRepository: ProsessinstansRepository,
+) : ComponentTestBase() {
 
     lateinit var rinaSaksnummer: String
     private val kafkaTopic = "teammelosys.eessi.v1-local"
@@ -56,33 +61,37 @@ internal class SedMottakTestIT : ComponentTestBase() {
         val eessiMeldingX007 = melosysEessiMelding(
             BucType.LA_BUC_04, SedType.X007, null, null, opprettEessiJournalpost(SedType.X007)
         )
-        melosysEessiMeldingKafkaTemplate!!.send(kafkaTopic, eessiMeldingA009)
+
+
+        melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingA009)
         melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingX001)
         melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingX007)
-        Awaitility.await().timeout(Duration.ofSeconds(20)).pollInterval(Duration.ofSeconds(3))
+
+        Awaitility.await().timeout(Duration.ofMinutes(10)).pollInterval(Duration.ofSeconds(3))
             .until {
-                prosessinstansRepository!!.findAllByStatusNotInAndLåsReferanseStartingWith(
-                    List.of(ProsessStatus.FERDIG),
+                prosessinstansRepository.findAllByStatusNotInAndLåsReferanseStartingWith(
+                    listOf(ProsessStatus.FERDIG),
                     rinaSaksnummer
                 ).isEmpty()
             }
-        val prosessinstanserSortert = prosessinstansRepository!!.findAllByLåsReferanseStartingWith(rinaSaksnummer)
+
+
+        val prosessinstanserSortert = prosessinstansRepository.findAllByLåsReferanseStartingWith(rinaSaksnummer)
             .stream()
             .sorted(Comparator.comparing { obj: Prosessinstans -> obj.endretDato })
             .collect(Collectors.toList())
 
 //        Hver SED blir til en mottaksprosess + en behandlingsprosess
-//        Assertions.assertThat(prosessinstanserSortert)
-//            .extracting<String, RuntimeException> { obj: Prosessinstans -> obj.låsReferanse }
-//            .hasSize(6)
-//            .containsExactly(
-//                eessiMeldingA009.lagUnikIdentifikator(),
-//                eessiMeldingA009.lagUnikIdentifikator(),
-//                eessiMeldingX001.lagUnikIdentifikator(),
-//                eessiMeldingX001.lagUnikIdentifikator(),
-//                eessiMeldingX007.lagUnikIdentifikator(),
-//                eessiMeldingX007.lagUnikIdentifikator()
-//            )
+        extracting(prosessinstanserSortert) { låsReferanse }
+            .shouldHaveSize(6)
+            .shouldContainExactly(
+                eessiMeldingA009.lagUnikIdentifikator(),
+                eessiMeldingA009.lagUnikIdentifikator(),
+                eessiMeldingX001.lagUnikIdentifikator(),
+                eessiMeldingX001.lagUnikIdentifikator(),
+                eessiMeldingX007.lagUnikIdentifikator(),
+                eessiMeldingX007.lagUnikIdentifikator()
+            )
     }
 
     private fun melosysEessiMelding(
@@ -95,7 +104,7 @@ internal class SedMottakTestIT : ComponentTestBase() {
         val eessiMelding = MelosysEessiMelding()
         eessiMelding.aktoerId = "1111111111111"
         eessiMelding.anmodningUnntak = null
-        eessiMelding.arbeidssteder = List.of()
+        eessiMelding.arbeidssteder = emptyList()
         eessiMelding.bucType = bucType.name
         eessiMelding.gsakSaksnummer = null
         eessiMelding.artikkel = artikkel
@@ -107,7 +116,7 @@ internal class SedMottakTestIT : ComponentTestBase() {
         eessiMelding.sedType = sedType.name
         eessiMelding.sedId = sedType.name
         eessiMelding.rinaSaksnummer = rinaSaksnummer
-        eessiMelding.statsborgerskap = List.of()
+        eessiMelding.statsborgerskap = emptyList()
         eessiMelding.sedVersjon = "1"
         return eessiMelding
     }
@@ -136,6 +145,48 @@ internal class SedMottakTestIT : ComponentTestBase() {
         request.mottaksKanal = "EESSI"
         request.journalposttype = Journalposttype.INN
         request.innhold = "$sedType-tittel"
-        return joarkFasade!!.opprettJournalpost(request, false)
+        return joarkFasade.opprettJournalpost(request, false)
+    }
+
+    @TestConfiguration
+    class TestConfig {
+        @Bean
+        @Primary
+        fun kodeverkRegisterStub(): KodeverkRegister? = KodeverkRegister {
+            Kodeverk(
+                "DUMMY", mapOf(
+                    Pair(
+                        "DUMMY",
+                        listOf(Kode("DUMMY", "DUMMY", LocalDate.now().minusYears(1), LocalDate.now().plusYears(1)))
+                    )
+                )
+            )
+        }
+
+        @Bean
+        @Primary
+        fun kodeOppslagStub(): KodeOppslag? {
+            open class KodeOppslagImpl : KodeOppslag {
+                override fun getTermFraKodeverk(kodeverk: FellesKodeverk, kode: String): String = "DUMMY"
+
+                override fun getTermFraKodeverk(kodeverk: FellesKodeverk, kode: String, dato: LocalDate): String =
+                    "DUMMY"
+
+                override fun getTermFraKodeverk(
+                    kodeverk: FellesKodeverk,
+                    kode: String,
+                    dato: LocalDate,
+                    kodeperioder: List<Kode>?
+                ): String = "DUMMY"
+            }
+
+            return KodeOppslagImpl()
+        }
+
+        @Bean
+        @Primary
+        fun kodeverkServiceStub(kodeverkRegister: KodeverkRegister?, kodeOppslag: KodeOppslag?): KodeverkService? {
+            return KodeverkService(kodeverkRegister, kodeOppslag)
+        }
     }
 }

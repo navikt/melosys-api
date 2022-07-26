@@ -4,7 +4,7 @@ import java.time.LocalDate;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.tjenester.medlemskapsunntak.api.v1.MedlemskapsunntakForPut;
+import no.nav.melosys.ekstern.tjenester.medlemskapsunntak.api.v1.MedlemskapsunntakForPut;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;

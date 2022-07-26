@@ -47,12 +47,6 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>no.nav.melosys</groupId>
-            <artifactId>melosys-config</artifactId>
-            <scope>test</scope>
-        </dependency>
-
     </dependencies>
 
 

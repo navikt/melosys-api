@@ -2,10 +2,10 @@ package no.nav.melosys.melosysmock.medl
 
 import no.nav.melosys.melosysmock.person.PersonRepo
 import no.nav.melosys.melosysmock.utils.lagRandomLongId
-import no.nav.tjenester.medlemskapsunntak.api.v1.MedlemskapsunntakForGet
-import no.nav.tjenester.medlemskapsunntak.api.v1.MedlemskapsunntakForPost
-import no.nav.tjenester.medlemskapsunntak.api.v1.MedlemskapsunntakForPut
-import no.nav.tjenester.medlemskapsunntak.api.v1.Sporingsinformasjon
+import no.nav.melosys.ekstern.tjenester.medlemskapsunntak.api.v1.MedlemskapsunntakForGet
+import no.nav.melosys.ekstern.tjenester.medlemskapsunntak.api.v1.MedlemskapsunntakForPost
+import no.nav.melosys.ekstern.tjenester.medlemskapsunntak.api.v1.MedlemskapsunntakForPut
+import no.nav.melosys.ekstern.tjenester.medlemskapsunntak.api.v1.Sporingsinformasjon
 import java.time.LocalDate
 import java.time.LocalDateTime
 

@@ -1,11 +1,14 @@
 package no.nav.melosys.saksflyt.steg.brev;
 
+import java.util.List;
+
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.brev.Brevbestilling;
+import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
-import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
@@ -14,11 +17,12 @@ import no.nav.melosys.service.behandling.BehandlingService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.ORIENTERING_ANMODNING_UNNTAK;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -27,10 +31,10 @@ class SendOrienteringAnmodningUnntakTest {
 
     @Mock
     private BrevBestiller brevBestiller;
-
     @Mock
     private BehandlingService behandlingService;
 
+    private Behandling behandling;
     private Prosessinstans prosessinstans;
     private SendOrienteringAnmodningUnntak sendOrienteringAnmodningUnntak;
 
@@ -38,11 +42,11 @@ class SendOrienteringAnmodningUnntakTest {
 
     @BeforeEach
     public void setUp() {
-        Behandling behandling = new Behandling();
+        behandling = new Behandling();
         behandling.setType(Behandlingstyper.SOEKNAD);
         behandling.setId(1L);
 
-        when(behandlingService.hentBehandlingMedSaksopplysninger(eq(behandling.getId()))).thenReturn(behandling);
+        when(behandlingService.hentBehandlingMedSaksopplysninger(behandling.getId())).thenReturn(behandling);
 
         prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
@@ -55,7 +59,22 @@ class SendOrienteringAnmodningUnntakTest {
 
     @Test
     void utfoerSteg() {
+        ArgumentCaptor<DoksysBrevbestilling> captor = ArgumentCaptor.forClass(DoksysBrevbestilling.class);
+
         sendOrienteringAnmodningUnntak.utfør(prosessinstans);
-        verify(brevBestiller).bestill(eq(Produserbaredokumenter.ORIENTERING_ANMODNING_UNNTAK), eq(SAKSBEHANDLER), eq(Mottaker.av(Aktoersroller.BRUKER)), any(Behandling.class));
+
+        verify(brevBestiller).bestill(captor.capture());
+        assertThat(captor.getValue())
+            .extracting(
+                Brevbestilling::getProduserbartdokument,
+                Brevbestilling::getBehandling,
+                Brevbestilling::getAvsenderID,
+                DoksysBrevbestilling::getMottakere)
+            .containsExactly(
+                ORIENTERING_ANMODNING_UNNTAK,
+                behandling,
+                SAKSBEHANDLER,
+                List.of(Mottaker.av(Aktoersroller.BRUKER))
+            );
     }
 }

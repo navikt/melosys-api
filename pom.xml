@@ -42,12 +42,12 @@
 
         <!-- Melosys -->
         <melosys.jsonschema.version>1.35.172</melosys.jsonschema.version>
-        <melosys.internt.kodeverk.version>5.15.120</melosys.internt.kodeverk.version>
+        <melosys.internt.kodeverk.version>5.15.121</melosys.internt.kodeverk.version>
         <melosys.brev.version>1.2.124</melosys.brev.version>
 
         <!-- NAV -->
         <nav.tjenestespesifikasjoner.version>1.2021.02.22-10.45-4201aaea72fb</nav.tjenestespesifikasjoner.version>
-        <abac.spring.version>1.6.0</abac.spring.version>
+        <abac.spring.version>3.0.7</abac.spring.version>
         <behandlingstatus.version>1.1.0</behandlingstatus.version>
         <doksys.dokumentproduksjon.version>3.3.4</doksys.dokumentproduksjon.version>
         <token-support.version>2.0.20</token-support.version>
@@ -63,7 +63,7 @@
         <commons-text.version>1.9</commons-text.version>
         <findbugs.jsr305.version>3.0.2</findbugs.jsr305.version>
         <guava.version>31.1-jre</guava.version>
-        <graphql-java.version>18.2</graphql-java.version>
+        <graphql-java.version>17.3</graphql-java.version>
         <logback.version>1.2.11</logback.version>
         <logstash.version>7.1</logstash.version>
         <hikaricp.version>5.0.1</hikaricp.version>
@@ -71,6 +71,8 @@
         <javax.ws.rs-api.version>2.1.1</javax.ws.rs-api.version>
         <json-smart.version>2.4.8</json-smart.version>
         <jms-api.version>2.0.1</jms-api.version>
+        <kotest.version>5.3.2</kotest.version>
+        <mockito-kotlin.version>4.0.0</mockito-kotlin.version>
         <micrometer-jvm-extras.version>0.2.2</micrometer-jvm-extras.version>
         <networknt.json-schema-validator.version>1.0.68</networknt.json-schema-validator.version>
         <ojdbc.version>21.5.0.0</ojdbc.version>
@@ -87,7 +89,6 @@
         <bcpkix-jdk15on.version>1.70</bcpkix-jdk15on.version>
         <nimbus-jose-jwt.version>9.22</nimbus-jose-jwt.version>
         <neethi.version>3.1.1</neethi.version>
-        <mockito-kotlin.version>4.0.0</mockito-kotlin.version>
 
         <!-- Transitive avhengigheter -->
         <asm.version>9.3</asm.version>
@@ -460,11 +461,6 @@
 
             <!-- NAV felleskomponenter -->
             <dependency>
-                <groupId>no.nav.freg</groupId>
-                <artifactId>abac-spring</artifactId>
-                <version>${abac.spring.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>no.nav.security</groupId>
                 <artifactId>token-validation-spring</artifactId>
                 <version>${token-support.version}</version>
@@ -509,7 +505,7 @@
             </dependency>
             <!--MEDL2 -->
             <dependency>
-                <groupId>no.nav.tjenester</groupId>
+                <groupId>no.nav.melosys.ekstern.tjenester</groupId>
                 <artifactId>medlemskapsunntak-api-v1</artifactId>
                 <version>${medlemskapsunntak-api-v1.version}</version>
             </dependency>
@@ -644,19 +640,22 @@
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.vaadin.external.google</groupId>
-                    <artifactId>android-json</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
     </dependencies>
+
+    <repositories>
+        <!-- Skal brukes hvis bygget kjøres fra en Github Action -->
+        <repository>
+            <id>github-package-registry-navikt</id>
+            <url>https://maven.pkg.github.com/navikt/maven-release</url>
+        </repository>
+        <repository>
+            <id>freg-abac</id>
+            <name>freg-abac on Github Packages</name>
+            <url>https://maven.pkg.github.com/navikt/freg-abac</url>
+        </repository>
+    </repositories>
 
     <build>
         <pluginManagement>
