@@ -76,7 +76,7 @@ public class ProsessinstansBehandler {
             prosess -> prosess.getEndretDato().isBefore(
                 LocalDateTime.now().minusHours(ANTALL_TIMER_FØR_GJENOPPRETTELSE))).toList();
         if (!prosessinstansSomHenger.isEmpty()) {
-            log.info("Funnet {} prosessinstanser som har hengt", prosessinstansSomHenger.size());
+            log.info("Funnet {} prosessinstanse(r) som har hengt", prosessinstansSomHenger.size());
             prosessinstansSomHenger.forEach(this::gjenopprett);
         }
     }
