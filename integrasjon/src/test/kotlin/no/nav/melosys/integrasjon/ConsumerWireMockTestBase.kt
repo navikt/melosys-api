@@ -74,10 +74,17 @@ abstract class ConsumerWireMockTestBase<T>(
     }
 
     fun verifyHeaders(headers: Map<String, StringValuePattern>) {
-        val wireMock = createWireMock()
-        headers.forEach {
-            wireMock.withHeader(it.key, it.value)
+        setupWireMock { wireMock ->
+            headers.forEach {
+                wireMock.withHeader(it.key, it.value)
+            }
         }
+    }
+
+    fun setupWireMock(action: (MappingBuilder) -> Unit = {}) {
+        val wireMock = createWireMock()
+
+        action(wireMock)
 
         val response = WireMock.aResponse()
             .withStatus(200)
@@ -92,14 +99,20 @@ abstract class ConsumerWireMockTestBase<T>(
         )
     }
 
-    fun executeFromSystem(verify: () -> Unit) {
+    fun executeFromSystemWithoutExecuteRequest(action: () -> Unit) {
         val uuid = UUID.randomUUID()
         try {
             ThreadLocalAccessInfo.beforeExecuteProcess(uuid, "prossesSteg")
-            verify()
-            executeRequest()
+            action()
         } finally {
             ThreadLocalAccessInfo.afterExecuteProcess(uuid)
+        }
+    }
+
+    fun executeFromSystem(verify: () -> Unit) {
+        executeFromSystemWithoutExecuteRequest {
+            verify()
+            executeRequest()
         }
     }
 
