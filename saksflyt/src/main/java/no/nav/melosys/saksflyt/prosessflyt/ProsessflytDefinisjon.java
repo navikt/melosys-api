@@ -36,8 +36,7 @@ public final class ProsessflytDefinisjon {
         PROSESS_FLYT_MAP.put(
             ProsessType.HENLEGG_SAK,
             new ProsessFlyt(ProsessType.HENLEGG_SAK,
-                SEND_HENLEGGELSESBREV,
-                SOB_BEHANDLING_AVSLUTTET
+                SEND_HENLEGGELSESBREV
             )
         );
 
@@ -46,8 +45,7 @@ public final class ProsessflytDefinisjon {
                 AVKLAR_MYNDIGHET,
                 SEND_ORIENTERINGSBREV_VIDERESENDING_SØKNAD,
                 VIDERESEND_SØKNAD,
-                DISTRIBUER_JOURNALPOST_UTLAND,
-                SOB_BEHANDLING_AVSLUTTET
+                DISTRIBUER_JOURNALPOST_UTLAND
             )
         );
 
@@ -67,7 +65,6 @@ public final class ProsessflytDefinisjon {
                 OPPRETT_SAK_OG_BEH,
                 OPPRETT_SØKNAD,
                 OPPRETT_ARKIVSAK,
-                SOB_BEHANDLING_OPPRETTET,
                 OPPDATER_SAKSRELASJON,
                 OPPDATER_OG_FERDIGSTILL_JOURNALPOST,
                 HENT_REGISTEROPPLYSNINGER,
@@ -110,7 +107,6 @@ public final class ProsessflytDefinisjon {
                 OPPRETT_SØKNAD,
                 OPPRETT_ARKIVSAK,
                 OPPDATER_SAKSRELASJON,
-                SOB_BEHANDLING_OPPRETTET,
                 HENT_REGISTEROPPLYSNINGER,
                 VURDER_INNGANGSVILKÅR,
                 GJENBRUK_OPPGAVE
@@ -122,7 +118,6 @@ public final class ProsessflytDefinisjon {
                 OPPRETT_SAK_OG_BEH,
                 OPPRETT_SØKNAD,
                 OPPRETT_ARKIVSAK,
-                SOB_BEHANDLING_OPPRETTET,
                 GJENBRUK_OPPGAVE
             )
         );
@@ -136,8 +131,7 @@ public final class ProsessflytDefinisjon {
                 SEND_VEDTAK_UTLAND,
                 DISTRIBUER_JOURNALPOST_UTLAND,
                 OPPRETT_AVGIFTSOPPGAVE,
-                AVSLUTT_SAK_OG_BEHANDLING,
-                SOB_BEHANDLING_AVSLUTTET
+                AVSLUTT_SAK_OG_BEHANDLING
             )
         );
 
@@ -149,8 +143,7 @@ public final class ProsessflytDefinisjon {
                 SEND_VEDTAK_UTLAND,
                 DISTRIBUER_JOURNALPOST_UTLAND,
                 OPPRETT_AVGIFTSOPPGAVE,
-                AVSLUTT_SAK_OG_BEHANDLING,
-                SOB_BEHANDLING_AVSLUTTET
+                AVSLUTT_SAK_OG_BEHANDLING
             )
         );
 
@@ -158,8 +151,7 @@ public final class ProsessflytDefinisjon {
             new ProsessFlyt(ProsessType.IVERKSETT_VEDTAK_FTRL,
                 LAGRE_MEDLEMSKAPSPERIODE_MEDL,
                 OPPRETT_AVGIFTSOPPGAVE,
-                AVSLUTT_SAK_OG_BEHANDLING,
-                SOB_BEHANDLING_AVSLUTTET
+                AVSLUTT_SAK_OG_BEHANDLING
             )
         );
 
@@ -169,8 +161,7 @@ public final class ProsessflytDefinisjon {
                 AVKLAR_ARBEIDSGIVER,
                 LAGRE_LOVVALGSPERIODE_MEDL,
                 OPPRETT_AVGIFTSOPPGAVE,
-                AVSLUTT_SAK_OG_BEHANDLING,
-                SOB_BEHANDLING_AVSLUTTET
+                AVSLUTT_SAK_OG_BEHANDLING
             )
         );
 
@@ -192,7 +183,6 @@ public final class ProsessflytDefinisjon {
                 OPPRETT_ARKIVSAK,
                 OPPDATER_SAKSRELASJON,
                 SED_MOTTAK_FERDIGSTILL_JOURNALPOST,
-                SOB_BEHANDLING_OPPRETTET,
                 OPPRETT_SEDDOKUMENT,
                 HENT_REGISTEROPPLYSNINGER,
                 REGISTERKONTROLL,
@@ -204,7 +194,6 @@ public final class ProsessflytDefinisjon {
             new ProsessFlyt(ProsessType.REGISTRERING_UNNTAK_NY_BEHANDLING,
                 SED_MOTTAK_OPPRETT_NY_BEHANDLING,
                 SED_MOTTAK_FERDIGSTILL_JOURNALPOST,
-                SOB_BEHANDLING_OPPRETTET,
                 AVSLUTT_TIDLIGERE_MEDL_PERIODE,
                 OPPRETT_SEDDOKUMENT,
                 HENT_REGISTEROPPLYSNINGER,
@@ -219,7 +208,6 @@ public final class ProsessflytDefinisjon {
                 OPPRETT_ARKIVSAK,
                 OPPDATER_SAKSRELASJON,
                 SED_MOTTAK_FERDIGSTILL_JOURNALPOST,
-                SOB_BEHANDLING_OPPRETTET,
                 OPPRETT_SEDDOKUMENT,
                 OPPRETT_SED_GRUNNLAG,
                 HENT_REGISTEROPPLYSNINGER,
@@ -233,7 +221,6 @@ public final class ProsessflytDefinisjon {
             new ProsessFlyt(ProsessType.ARBEID_FLERE_LAND_NY_BEHANDLING,
                 SED_MOTTAK_OPPRETT_NY_BEHANDLING,
                 SED_MOTTAK_FERDIGSTILL_JOURNALPOST,
-                SOB_BEHANDLING_OPPRETTET,
                 AVSLUTT_TIDLIGERE_MEDL_PERIODE,
                 OPPRETT_SEDDOKUMENT,
                 OPPRETT_SED_GRUNNLAG,
@@ -261,7 +248,6 @@ public final class ProsessflytDefinisjon {
                 OPPRETT_SEDDOKUMENT,
                 OPPRETT_SED_GRUNNLAG,
                 OPPRETT_ANMODNINGSPERIODE_FRA_SED,
-                SOB_BEHANDLING_OPPRETTET,
                 HENT_REGISTEROPPLYSNINGER,
                 REGISTERKONTROLL,
                 LAGRE_ANMODNINGSPERIODE_MEDL,
@@ -276,7 +262,6 @@ public final class ProsessflytDefinisjon {
                 OPPRETT_SEDDOKUMENT,
                 OPPRETT_SED_GRUNNLAG,
                 OPPRETT_ANMODNINGSPERIODE_FRA_SED,
-                SOB_BEHANDLING_OPPRETTET,
                 AVSLUTT_TIDLIGERE_MEDL_PERIODE,
                 HENT_REGISTEROPPLYSNINGER,
                 REGISTERKONTROLL,
@@ -289,23 +274,20 @@ public final class ProsessflytDefinisjon {
             new ProsessFlyt(ProsessType.REGISTRERING_UNNTAK_GODKJENN,
                 LAGRE_LOVVALGSPERIODE_MEDL,
                 SEND_GODKJENNING_REGISTRERING_UNNTAK,
-                AVSLUTT_SAK_OG_BEHANDLING,
-                SOB_BEHANDLING_AVSLUTTET
+                AVSLUTT_SAK_OG_BEHANDLING
             )
         );
 
         PROSESS_FLYT_MAP.put(ProsessType.REGISTRERING_UNNTAK_AVVIS,
             new ProsessFlyt(ProsessType.REGISTRERING_UNNTAK_AVVIS,
-                AVSLUTT_SAK_OG_BEHANDLING,
-                SOB_BEHANDLING_AVSLUTTET
+                AVSLUTT_SAK_OG_BEHANDLING
             )
         );
 
         PROSESS_FLYT_MAP.put(ProsessType.UTPEKING_AVVIS,
             new ProsessFlyt(ProsessType.UTPEKING_AVVIS,
                 UTPEKING_SEND_AVSLAG,
-                AVSLUTT_SAK_OG_BEHANDLING,
-                SOB_BEHANDLING_AVSLUTTET
+                AVSLUTT_SAK_OG_BEHANDLING
             )
         );
 
@@ -313,8 +295,7 @@ public final class ProsessflytDefinisjon {
             new ProsessFlyt(ProsessType.ANMODNING_OM_UNNTAK_MOTTAK_SVAR,
                 LAGRE_LOVVALGSPERIODE_MEDL,
                 SEND_SVAR_ANMODNING_UNNTAK,
-                AVSLUTT_SAK_OG_BEHANDLING,
-                SOB_BEHANDLING_AVSLUTTET
+                AVSLUTT_SAK_OG_BEHANDLING
             )
         );
 
@@ -323,7 +304,6 @@ public final class ProsessflytDefinisjon {
                 OPPRETT_SAK_OG_BEHANDLING_FRA_ALTINN_SØKNAD,
                 OPPRETT_ARKIVSAK,
                 OPPRETT_OG_FERDIGSTILL_JOURNALPOST_FRA_ALTINN,
-                SOB_BEHANDLING_OPPRETTET,
                 HENT_REGISTEROPPLYSNINGER,
                 VURDER_INNGANGSVILKÅR,
                 OPPRETT_OPPGAVE,
