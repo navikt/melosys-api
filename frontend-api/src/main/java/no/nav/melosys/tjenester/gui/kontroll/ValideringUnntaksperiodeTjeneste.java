@@ -3,10 +3,11 @@ package no.nav.melosys.tjenester.gui.kontroll;
 import java.time.LocalDate;
 import javax.validation.Valid;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import io.swagger.annotations.Api;
 import no.nav.melosys.domain.ErPeriode;
 import no.nav.melosys.domain.dokument.medlemskap.Periode;
+import no.nav.melosys.domain.serializer.MultiDateDeserializer;
 import no.nav.melosys.service.kontroll.feature.godkjennunntak.UnntaksperiodeKontrollService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.tilgang.Aksesstype;
@@ -47,11 +48,11 @@ public class ValideringUnntaksperiodeTjeneste {
     @Valid
     record UnntaksperiodeRequestDto(
         @NotNull
-        @JsonFormat(pattern = "dd.MM.yyyy")
+        @JsonDeserialize(using = MultiDateDeserializer.class)
         LocalDate periodeFom,
 
         @NotNull
-        @JsonFormat(pattern = "dd.MM.yyyy")
+        @JsonDeserialize(using = MultiDateDeserializer.class)
         LocalDate periodeTom) {
 
         public ErPeriode tilPeriode() {
