@@ -1,232 +1,287 @@
-package no.nav.melosys.service.medl;
+package no.nav.melosys.service.medl
 
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Set;
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
+import io.mockk.verify
+import no.nav.melosys.domain.*
+import no.nav.melosys.domain.kodeverk.Aktoersroller
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
+import no.nav.melosys.exception.FunksjonellException
+import no.nav.melosys.integrasjon.medl.KildedokumenttypeMedl
+import no.nav.melosys.integrasjon.medl.MedlService
+import no.nav.melosys.integrasjon.medl.StatusaarsakMedl
+import no.nav.melosys.repository.AnmodningsperiodeRepository
+import no.nav.melosys.repository.LovvalgsperiodeRepository
+import no.nav.melosys.repository.MedlemskapsperiodeRepository
+import no.nav.melosys.repository.UtpekingsperiodeRepository
+import no.nav.melosys.service.behandling.BehandlingsresultatService
+import no.nav.melosys.service.persondata.PersondataFasade
+import org.assertj.core.api.Assertions
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
+import org.mockito.ArgumentMatchers
+import org.mockito.Mockito
+import java.time.LocalDate
+import java.util.List
+import java.util.Set
 
-import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.integrasjon.medl.KildedokumenttypeMedl;
-import no.nav.melosys.integrasjon.medl.MedlService;
-import no.nav.melosys.integrasjon.medl.StatusaarsakMedl;
-import no.nav.melosys.repository.AnmodningsperiodeRepository;
-import no.nav.melosys.repository.LovvalgsperiodeRepository;
-import no.nav.melosys.repository.MedlemskapsperiodeRepository;
-import no.nav.melosys.repository.UtpekingsperiodeRepository;
-import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.persondata.PersondataFasade;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
-
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(MockKExtension::class)
 class MedlPeriodeServiceTest {
+    @MockK
+    lateinit var persondataFasade: PersondataFasade
 
-    @Mock
-    private PersondataFasade persondataFasade;
-    @Mock
-    private MedlService medlService;
-    @Mock
-    private BehandlingsresultatService behandlingsresultatService;
-    @Mock
-    private LovvalgsperiodeRepository lovvalgsperiodeRepository;
-    @Mock
-    private AnmodningsperiodeRepository anmodningsperiodeRepository;
-    @Mock
-    private UtpekingsperiodeRepository utpekingsperiodeRepository;
-    @Mock
-    private MedlemskapsperiodeRepository medlemskapsperiodeRepository;
+    @MockK
+    lateinit var medlService: MedlService
 
-    private MedlPeriodeService medlPeriodeService;
+    @MockK
+    lateinit var behandlingsresultatService: BehandlingsresultatService
 
-    private static final String FNR = "12345678901";
-    private static final Long MEDL_PERIODE_ID = 99L;
+    @MockK
+    lateinit var lovvalgsperiodeRepository: LovvalgsperiodeRepository
+
+    @MockK
+    lateinit var anmodningsperiodeRepository: AnmodningsperiodeRepository
+
+    @MockK
+    lateinit var utpekingsperiodeRepository: UtpekingsperiodeRepository
+
+    @MockK
+    lateinit var medlemskapsperiodeRepository: MedlemskapsperiodeRepository
+
+    lateinit var medlPeriodeService: MedlPeriodeService
 
     @BeforeEach
-    public void setUp() throws Exception {
-        medlPeriodeService = new MedlPeriodeService(persondataFasade, medlService, behandlingsresultatService,
-            lovvalgsperiodeRepository, anmodningsperiodeRepository, utpekingsperiodeRepository, medlemskapsperiodeRepository);
+    fun setUp() {
+        medlPeriodeService = MedlPeriodeService(
+            persondataFasade,
+            medlService,
+            behandlingsresultatService,
+            lovvalgsperiodeRepository,
+            anmodningsperiodeRepository,
+            utpekingsperiodeRepository,
+            medlemskapsperiodeRepository
+        )
     }
 
     @Test
-    void hentPeriodeListe() {
-        medlPeriodeService.hentPeriodeListe(FNR, LocalDate.now(), LocalDate.now().plusMonths(2));
-
-        verify(medlService).hentPeriodeListe(eq(FNR), any(LocalDate.class), any(LocalDate.class));
+    fun hentPeriodeListe() {
+        medlPeriodeService.hentPeriodeListe(FNR, LocalDate.now(), LocalDate.now().plusMonths(2))
+        verify { medlService.hentPeriodeListe(any(), any(), any()) }
     }
 
     @Test
-    void opprettPeriodeForeløpig() {
-        setupPeriodeForeløpig();
-
-        medlPeriodeService.opprettPeriodeForeløpig(new Utpekingsperiode(), 1L, true);
-
-        verify(medlService).opprettPeriodeForeløpig(eq(FNR), any(Utpekingsperiode.class), eq(KildedokumenttypeMedl.SED));
-        verify(utpekingsperiodeRepository).save(any(Utpekingsperiode.class));
+    fun opprettPeriodeForeløpig() {
+        setupPeriodeForeløpig()
+        medlPeriodeService.opprettPeriodeForeløpig(Utpekingsperiode(), 1L, true)
+        Mockito.verify(medlService).opprettPeriodeForeløpig(
+            ArgumentMatchers.eq(FNR), ArgumentMatchers.any(
+                Utpekingsperiode::class.java
+            ), ArgumentMatchers.eq(KildedokumenttypeMedl.SED)
+        )
+        Mockito.verify(utpekingsperiodeRepository).save(
+            ArgumentMatchers.any(
+                Utpekingsperiode::class.java
+            )
+        )
     }
 
     @Test
-    void opprettPeriodeUnderAvklaring() {
-        setupPeriodeUnderAvklaring();
-
-        medlPeriodeService.opprettPeriodeUnderAvklaring(new Anmodningsperiode(), 1L, false);
-
-        verify(medlService).opprettPeriodeUnderAvklaring(eq(FNR), any(Anmodningsperiode.class), eq(KildedokumenttypeMedl.HENV_SOKNAD));
-        verify(anmodningsperiodeRepository).save(any(Anmodningsperiode.class));
+    fun opprettPeriodeUnderAvklaring() {
+        setupPeriodeUnderAvklaring()
+        medlPeriodeService.opprettPeriodeUnderAvklaring(Anmodningsperiode(), 1L, false)
+        Mockito.verify(medlService).opprettPeriodeUnderAvklaring(
+            ArgumentMatchers.eq(FNR), ArgumentMatchers.any(
+                Anmodningsperiode::class.java
+            ), ArgumentMatchers.eq(KildedokumenttypeMedl.HENV_SOKNAD)
+        )
+        Mockito.verify(anmodningsperiodeRepository).save(
+            ArgumentMatchers.any(
+                Anmodningsperiode::class.java
+            )
+        )
     }
 
     @Test
-    void opprettPeriodeEndelig() {
-        setupPeriodeEndelig();
-
-        medlPeriodeService.opprettPeriodeEndelig(new Lovvalgsperiode(), 1L, true);
-
-        verify(medlService).opprettPeriodeEndelig(eq(FNR), any(Lovvalgsperiode.class), eq(KildedokumenttypeMedl.SED));
-        verify(lovvalgsperiodeRepository).save(any(Lovvalgsperiode.class));
+    fun opprettPeriodeEndelig() {
+        setupPeriodeEndelig()
+        medlPeriodeService.opprettPeriodeEndelig(Lovvalgsperiode(), 1L, true)
+        Mockito.verify(medlService).opprettPeriodeEndelig(
+            ArgumentMatchers.eq(FNR), ArgumentMatchers.any(
+                Lovvalgsperiode::class.java
+            ), ArgumentMatchers.eq(KildedokumenttypeMedl.SED)
+        )
+        Mockito.verify(lovvalgsperiodeRepository).save(
+            ArgumentMatchers.any(
+                Lovvalgsperiode::class.java
+            )
+        )
     }
 
     @Test
-    void opprettPeriodeEndeligFtrl_feiler() throws Exception {
-        setupHappyPathBehandling();
-        when(medlService.opprettPeriodeEndelig(eq(FNR), any(Medlemskapsperiode.class), any(KildedokumenttypeMedl.class)))
-            .thenReturn(null);
-
-        assertThatThrownBy(() -> medlPeriodeService.opprettPeriodeEndelig(1L, new Medlemskapsperiode()))
-            .isInstanceOf(FunksjonellException.class)
-            .hasMessageContaining("Opprettelse av periode i MEDL feilet med retur av null medlPeriodeID");
-
-        verifyNoInteractions(medlemskapsperiodeRepository);
+    @Throws(Exception::class)
+    fun opprettPeriodeEndeligFtrl_feiler() {
+        setupHappyPathBehandling()
+        Mockito.`when`(
+            medlService!!.opprettPeriodeEndelig(
+                ArgumentMatchers.eq(FNR), ArgumentMatchers.any(
+                    Medlemskapsperiode::class.java
+                ), ArgumentMatchers.any(KildedokumenttypeMedl::class.java)
+            )
+        )
+            .thenReturn(null)
+        Assertions.assertThatThrownBy { medlPeriodeService.opprettPeriodeEndelig(1L, Medlemskapsperiode()) }
+            .isInstanceOf(FunksjonellException::class.java)
+            .hasMessageContaining("Opprettelse av periode i MEDL feilet med retur av null medlPeriodeID")
+        Mockito.verifyNoInteractions(medlemskapsperiodeRepository)
     }
 
     @Test
-    void opprettPeriodeEndeligFtrl() throws Exception {
-        setupHappyPathBehandling();
-
-        medlPeriodeService.opprettPeriodeEndelig(1L, new Medlemskapsperiode());
-
-        verify(medlService).opprettPeriodeEndelig(eq(FNR), any(Medlemskapsperiode.class), any(KildedokumenttypeMedl.class));
-        verify(medlemskapsperiodeRepository).save(any(Medlemskapsperiode.class));
+    @Throws(Exception::class)
+    fun opprettPeriodeEndeligFtrl() {
+        setupHappyPathBehandling()
+        medlPeriodeService.opprettPeriodeEndelig(1L, Medlemskapsperiode())
+        Mockito.verify(medlService).opprettPeriodeEndelig(
+            ArgumentMatchers.eq(FNR), ArgumentMatchers.any(
+                Medlemskapsperiode::class.java
+            ), ArgumentMatchers.any(KildedokumenttypeMedl::class.java)
+        )
+        Mockito.verify(medlemskapsperiodeRepository).save(
+            ArgumentMatchers.any(
+                Medlemskapsperiode::class.java
+            )
+        )
     }
 
     @Test
-    void oppdaterPeriodeEndelig() {
-        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setMedlPeriodeID(MEDL_PERIODE_ID);
-        medlPeriodeService.oppdaterPeriodeEndelig(lovvalgsperiode, false);
-
-        verify(medlService).oppdaterPeriodeEndelig(lovvalgsperiode, KildedokumenttypeMedl.HENV_SOKNAD);
+    fun oppdaterPeriodeEndelig() {
+        val lovvalgsperiode = Lovvalgsperiode()
+        lovvalgsperiode.medlPeriodeID = MEDL_PERIODE_ID
+        medlPeriodeService.oppdaterPeriodeEndelig(lovvalgsperiode, false)
+        Mockito.verify(medlService).oppdaterPeriodeEndelig(lovvalgsperiode, KildedokumenttypeMedl.HENV_SOKNAD)
     }
 
     @Test
-    void oppdaterPeriodeForeløpig() {
-        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setMedlPeriodeID(MEDL_PERIODE_ID);
-        medlPeriodeService.oppdaterPeriodeForeløpig(lovvalgsperiode, false);
-
-        verify(medlService).oppdaterPeriodeForeløpig(lovvalgsperiode, KildedokumenttypeMedl.HENV_SOKNAD);
+    fun oppdaterPeriodeForeløpig() {
+        val lovvalgsperiode = Lovvalgsperiode()
+        lovvalgsperiode.medlPeriodeID = MEDL_PERIODE_ID
+        medlPeriodeService.oppdaterPeriodeForeløpig(lovvalgsperiode, false)
+        Mockito.verify(medlService).oppdaterPeriodeForeløpig(lovvalgsperiode, KildedokumenttypeMedl.HENV_SOKNAD)
     }
 
     @Test
-    void avvisPeriode() {
-        medlPeriodeService.avvisPeriode(MEDL_PERIODE_ID);
-        verify(medlService).avvisPeriode(MEDL_PERIODE_ID, StatusaarsakMedl.AVVIST);
+    fun avvisPeriode() {
+        medlPeriodeService.avvisPeriode(MEDL_PERIODE_ID)
+        Mockito.verify(medlService).avvisPeriode(MEDL_PERIODE_ID, StatusaarsakMedl.AVVIST)
     }
 
     @Test
-    void avvisPeriodeFeilregistrert() {
-        medlPeriodeService.avvisPeriodeFeilregistrert(MEDL_PERIODE_ID);
-        verify(medlService).avvisPeriode(MEDL_PERIODE_ID, StatusaarsakMedl.FEILREGISTRERT);
+    fun avvisPeriodeFeilregistrert() {
+        medlPeriodeService.avvisPeriodeFeilregistrert(MEDL_PERIODE_ID)
+        Mockito.verify(medlService).avvisPeriode(MEDL_PERIODE_ID, StatusaarsakMedl.FEILREGISTRERT)
     }
 
     @Test
-    void avvisPeriodeOpphørt() {
-        medlPeriodeService.avvisPeriodeOpphørt(MEDL_PERIODE_ID);
-        verify(medlService).avvisPeriode(MEDL_PERIODE_ID, StatusaarsakMedl.OPPHORT);
+    fun avvisPeriodeOpphørt() {
+        medlPeriodeService.avvisPeriodeOpphørt(MEDL_PERIODE_ID)
+        Mockito.verify(medlService).avvisPeriode(MEDL_PERIODE_ID, StatusaarsakMedl.OPPHORT)
     }
 
     @Test
-    void avsluttTidligereMedlPeriode_behandlingOgPeriodeFinnes_avviserPeriode() {
-        Behandling behandling = new Behandling();
-        behandling.setStatus(Behandlingsstatus.AVSLUTTET);
-        behandling.setId(1L);
-
-        Fagsak fagsak = new Fagsak();
-        fagsak.setBehandlinger(List.of(behandling));
-
-        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setMedlPeriodeID(MEDL_PERIODE_ID);
-        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-        behandlingsresultat.setLovvalgsperioder(Set.of(lovvalgsperiode));
-        when(behandlingsresultatService.hentBehandlingsresultat(1L)).thenReturn(behandlingsresultat);
-
-        medlPeriodeService.avsluttTidligerMedlPeriode(fagsak);
-
-        verify(behandlingsresultatService).hentBehandlingsresultat(1L);
-        verify(medlService).avvisPeriode(MEDL_PERIODE_ID, StatusaarsakMedl.AVVIST);
+    fun avsluttTidligereMedlPeriode_behandlingOgPeriodeFinnes_avviserPeriode() {
+        val behandling = Behandling()
+        behandling.status = Behandlingsstatus.AVSLUTTET
+        behandling.id = 1L
+        val fagsak = Fagsak()
+        fagsak.behandlinger = List.of(behandling)
+        val lovvalgsperiode = Lovvalgsperiode()
+        lovvalgsperiode.medlPeriodeID = MEDL_PERIODE_ID
+        val behandlingsresultat = Behandlingsresultat()
+        behandlingsresultat.lovvalgsperioder = Set.of(lovvalgsperiode)
+        Mockito.`when`(behandlingsresultatService!!.hentBehandlingsresultat(1L)).thenReturn(behandlingsresultat)
+        medlPeriodeService.avsluttTidligerMedlPeriode(fagsak)
+        Mockito.verify(behandlingsresultatService).hentBehandlingsresultat(1L)
+        Mockito.verify(medlService).avvisPeriode(MEDL_PERIODE_ID, StatusaarsakMedl.AVVIST)
     }
 
     @Test
-    void avsluttTidligereMedlPeriode_ingenEksisterendePeriode_ingenPeriodeBlirAvvist() {
-        Behandling behandling = new Behandling();
-        behandling.setStatus(Behandlingsstatus.AVSLUTTET);
-        behandling.setId(1L);
-
-        Fagsak fagsak = new Fagsak();
-        fagsak.setBehandlinger(List.of(behandling));
-
-        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-        behandlingsresultat.setLovvalgsperioder(Set.of());
-        when(behandlingsresultatService.hentBehandlingsresultat(1L)).thenReturn(behandlingsresultat);
-
-        medlPeriodeService.avsluttTidligerMedlPeriode(fagsak);
-
-        verify(behandlingsresultatService).hentBehandlingsresultat(1L);
-        verify(medlService, never()).avvisPeriode(anyLong(), any(StatusaarsakMedl.class));
+    fun avsluttTidligereMedlPeriode_ingenEksisterendePeriode_ingenPeriodeBlirAvvist() {
+        val behandling = Behandling()
+        behandling.status = Behandlingsstatus.AVSLUTTET
+        behandling.id = 1L
+        val fagsak = Fagsak()
+        fagsak.behandlinger = List.of(behandling)
+        val behandlingsresultat = Behandlingsresultat()
+        behandlingsresultat.lovvalgsperioder = Set.of()
+        Mockito.`when`(behandlingsresultatService!!.hentBehandlingsresultat(1L)).thenReturn(behandlingsresultat)
+        medlPeriodeService.avsluttTidligerMedlPeriode(fagsak)
+        Mockito.verify(behandlingsresultatService).hentBehandlingsresultat(1L)
+        Mockito.verify(medlService, Mockito.never()).avvisPeriode(
+            ArgumentMatchers.anyLong(), ArgumentMatchers.any(
+                StatusaarsakMedl::class.java
+            )
+        )
     }
 
-    private void setupPeriodeForeløpig() {
-        when(medlService.opprettPeriodeForeløpig(anyString(), any(PeriodeOmLovvalg.class), any(KildedokumenttypeMedl.class)))
-            .thenReturn(MEDL_PERIODE_ID);
-        setupHappyPathBehandling();
+    private fun setupPeriodeForeløpig() {
+        Mockito.`when`(
+            medlService!!.opprettPeriodeForeløpig(
+                ArgumentMatchers.anyString(), ArgumentMatchers.any(
+                    PeriodeOmLovvalg::class.java
+                ), ArgumentMatchers.any(KildedokumenttypeMedl::class.java)
+            )
+        )
+            .thenReturn(MEDL_PERIODE_ID)
+        setupHappyPathBehandling()
     }
 
-    private void setupPeriodeUnderAvklaring() {
-        when(medlService.opprettPeriodeUnderAvklaring(anyString(), any(PeriodeOmLovvalg.class), any(KildedokumenttypeMedl.class)))
-            .thenReturn(MEDL_PERIODE_ID);
-        setupHappyPathBehandling();
+    private fun setupPeriodeUnderAvklaring() {
+        Mockito.`when`(
+            medlService!!.opprettPeriodeUnderAvklaring(
+                ArgumentMatchers.anyString(), ArgumentMatchers.any(
+                    PeriodeOmLovvalg::class.java
+                ), ArgumentMatchers.any(KildedokumenttypeMedl::class.java)
+            )
+        )
+            .thenReturn(MEDL_PERIODE_ID)
+        setupHappyPathBehandling()
     }
 
-    private void setupPeriodeEndelig() {
-        when(medlService.opprettPeriodeEndelig(anyString(), any(Lovvalgsperiode.class), any(KildedokumenttypeMedl.class)))
-            .thenReturn(MEDL_PERIODE_ID);
-        setupHappyPathBehandling();
+    private fun setupPeriodeEndelig() {
+        Mockito.`when`(
+            medlService!!.opprettPeriodeEndelig(
+                ArgumentMatchers.anyString(), ArgumentMatchers.any(
+                    Lovvalgsperiode::class.java
+                ), ArgumentMatchers.any(
+                    KildedokumenttypeMedl::class.java
+                )
+            )
+        )
+            .thenReturn(MEDL_PERIODE_ID)
+        setupHappyPathBehandling()
     }
 
-    private void setupHappyPathBehandling() {
-        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(lagBehandlingsResultat());
-        when(persondataFasade.hentFolkeregisterident(anyString())).thenReturn(FNR);
+    private fun setupHappyPathBehandling() {
+        Mockito.`when`(behandlingsresultatService!!.hentBehandlingsresultat(ArgumentMatchers.anyLong()))
+            .thenReturn(lagBehandlingsResultat())
+        Mockito.`when`(persondataFasade!!.hentFolkeregisterident(ArgumentMatchers.anyString())).thenReturn(FNR)
     }
 
-    private Behandlingsresultat lagBehandlingsResultat() {
-        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-        Behandling behandling = new Behandling();
-        Fagsak fagsak = new Fagsak();
+    private fun lagBehandlingsResultat(): Behandlingsresultat {
+        val behandlingsresultat = Behandlingsresultat()
+        val behandling = Behandling()
+        val fagsak = Fagsak()
+        val aktoer = Aktoer()
+        aktoer.rolle = Aktoersroller.BRUKER
+        aktoer.aktørId = "456"
+        fagsak.aktører.add(aktoer)
+        behandling.fagsak = fagsak
+        behandlingsresultat.behandling = behandling
+        return behandlingsresultat
+    }
 
-        Aktoer aktoer = new Aktoer();
-        aktoer.setRolle(Aktoersroller.BRUKER);
-        aktoer.setAktørId("456");
-        fagsak.getAktører().add(aktoer);
-
-        behandling.setFagsak(fagsak);
-        behandlingsresultat.setBehandling(behandling);
-        return behandlingsresultat;
+    companion object {
+        private const val FNR = "12345678901"
+        private const val MEDL_PERIODE_ID = 99L
     }
 }
