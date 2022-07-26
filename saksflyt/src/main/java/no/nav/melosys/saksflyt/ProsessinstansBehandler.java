@@ -24,12 +24,14 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import static no.nav.melosys.domain.saksflyt.ProsessStatus.UNDER_BEHANDLING;
 
 @Component
 public class ProsessinstansBehandler {
 
+    public static final long ANTALL_TIMER_FØR_GJENOPPRETTELSE = 24;
     private static final Logger log = LoggerFactory.getLogger(ProsessinstansBehandler.class);
 
     private final Map<ProsessSteg, StegBehandler> stegbehandlerMap = new EnumMap<>(ProsessSteg.class);
@@ -66,20 +68,25 @@ public class ProsessinstansBehandler {
     }
 
     @EventListener
+    @Transactional
     public void gjenopprettProsesserSomHengerVedOppstart(ApplicationReadyEvent applicationReady) {
-        final long ANTALL_TIMER_FØR_GJENOPPRETTELSE = 24;
         Collection<Prosessinstans> prosesser = prosessinstansRepository.findAllByStatusIn(
             ProsessStatus.hentAktiveStatuser());
-        LocalDateTime nå = LocalDateTime.now();
-        prosesser.stream().filter(prosess -> prosess.getEndretDato().isBefore(
-                LocalDateTime.now().minusHours(ANTALL_TIMER_FØR_GJENOPPRETTELSE)))
-            .forEach(prosess -> {
-                log.warn("Prosessinstans {} gjenopprettet etter {} timer", prosess.getId(), ANTALL_TIMER_FØR_GJENOPPRETTELSE);
-                prosess.setStatus(ProsessStatus.RESTARTET);
-                prosess.setEndretDato(nå);
-                prosessinstansRepository.save(prosess);
-                applicationEventPublisher.publishEvent(new ProsessinstansOpprettetEvent(prosess));
-            });
+        List<Prosessinstans> prosessinstansSomHenger = prosesser.stream().filter(
+            prosess -> prosess.getEndretDato().isBefore(
+                LocalDateTime.now().minusHours(ANTALL_TIMER_FØR_GJENOPPRETTELSE))).toList();
+        if (!prosessinstansSomHenger.isEmpty()) {
+            log.info("Funnet {} prosessinstanser som har hengt", prosessinstansSomHenger.size());
+            prosessinstansSomHenger.forEach(this::gjenopprett);
+        }
+    }
+
+    public void gjenopprett(Prosessinstans prosessinstans) {
+        prosessinstans.setStatus(ProsessStatus.RESTARTET);
+        prosessinstans.setEndretDato(LocalDateTime.now());
+        prosessinstansRepository.save(prosessinstans);
+        applicationEventPublisher.publishEvent(new ProsessinstansOpprettetEvent(prosessinstans));
+        log.warn("Prosessinstans {} gjenopprettet etter {} timer", prosessinstans.getId(), ANTALL_TIMER_FØR_GJENOPPRETTELSE);
     }
 
     private void utførFlyt(Prosessinstans prosessinstans, ProsessFlyt prosessFlyt) {
