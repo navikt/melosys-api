@@ -23,8 +23,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
-import java.util.List
-import java.util.Set
 
 @ExtendWith(MockKExtension::class)
 class MedlPeriodeServiceTest {
@@ -76,8 +74,9 @@ class MedlPeriodeServiceTest {
 
     @Test
     fun opprettPeriodeForeløpig() {
-        setupPeriodeForeløpig()
+        setupHappyPathBehandling()
         val utpekingsperiode = Utpekingsperiode()
+        every { medlService.opprettPeriodeForeløpig(any(), any(), any()) } returns MEDL_PERIODE_ID
         every { utpekingsperiodeRepository.save(any()) } returns utpekingsperiode
 
         medlPeriodeService.opprettPeriodeForeløpig(utpekingsperiode, 1L, true)
@@ -88,7 +87,8 @@ class MedlPeriodeServiceTest {
 
     @Test
     fun opprettPeriodeUnderAvklaring() {
-        setupPeriodeUnderAvklaring()
+        setupHappyPathBehandling()
+        every { medlService.opprettPeriodeUnderAvklaring(any(), any(), any()) } returns MEDL_PERIODE_ID
         every { anmodningsperiodeRepository.save(any()) } returns Anmodningsperiode()
 
         medlPeriodeService.opprettPeriodeUnderAvklaring(Anmodningsperiode(), 1L, false)
@@ -113,9 +113,11 @@ class MedlPeriodeServiceTest {
     fun opprettPeriodeEndeligFtrl_feiler() {
         setupHappyPathBehandling()
         every { medlService.opprettPeriodeEndelig(FNR, any(), any()) } returns null
+
         Assertions.assertThatThrownBy { medlPeriodeService.opprettPeriodeEndelig(1L, Medlemskapsperiode()) }
             .isInstanceOf(FunksjonellException::class.java)
             .hasMessageContaining("Opprettelse av periode i MEDL feilet med retur av null medlPeriodeID")
+
         verify(exactly = 0) { medlemskapsperiodeRepository.save(any()) }
     }
 
@@ -133,8 +135,7 @@ class MedlPeriodeServiceTest {
 
     @Test
     fun oppdaterPeriodeEndelig() {
-        val lovvalgsperiode = Lovvalgsperiode()
-        lovvalgsperiode.medlPeriodeID = MEDL_PERIODE_ID
+        val lovvalgsperiode = Lovvalgsperiode().apply { medlPeriodeID = MEDL_PERIODE_ID }
 
         medlPeriodeService.oppdaterPeriodeEndelig(lovvalgsperiode, false)
 
@@ -143,8 +144,7 @@ class MedlPeriodeServiceTest {
 
     @Test
     fun oppdaterPeriodeForeløpig() {
-        val lovvalgsperiode = Lovvalgsperiode()
-        lovvalgsperiode.medlPeriodeID = MEDL_PERIODE_ID
+        val lovvalgsperiode = Lovvalgsperiode().apply { medlPeriodeID = MEDL_PERIODE_ID }
 
         medlPeriodeService.oppdaterPeriodeForeløpig(lovvalgsperiode, false)
 
@@ -174,16 +174,17 @@ class MedlPeriodeServiceTest {
 
     @Test
     fun avsluttTidligereMedlPeriode_behandlingOgPeriodeFinnes_avviserPeriode() {
-        val behandling = Behandling()
-        behandling.status = Behandlingsstatus.AVSLUTTET
-        behandling.id = 1L
-        val fagsak = Fagsak()
-        fagsak.behandlinger = List.of(behandling)
-        val lovvalgsperiode = Lovvalgsperiode()
-        lovvalgsperiode.medlPeriodeID = MEDL_PERIODE_ID
-        val behandlingsresultat = Behandlingsresultat()
-        behandlingsresultat.lovvalgsperioder = Set.of(lovvalgsperiode)
-        every { behandlingsresultatService.hentBehandlingsresultat(1L)  } returns behandlingsresultat
+        val fagsak = Fagsak().apply {
+            behandlinger = listOf(Behandling().apply {
+                status = Behandlingsstatus.AVSLUTTET
+                id = 1L
+            })
+        }
+        val behandlingsresultat = Behandlingsresultat().apply {
+            lovvalgsperioder =
+                setOf(Lovvalgsperiode().apply { medlPeriodeID = MEDL_PERIODE_ID })
+        }
+        every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
 
         medlPeriodeService.avsluttTidligerMedlPeriode(fagsak)
 
@@ -193,14 +194,13 @@ class MedlPeriodeServiceTest {
 
     @Test
     fun avsluttTidligereMedlPeriode_ingenEksisterendePeriode_ingenPeriodeBlirAvvist() {
-        val behandling = Behandling()
-        behandling.status = Behandlingsstatus.AVSLUTTET
-        behandling.id = 1L
-        val fagsak = Fagsak()
-        fagsak.behandlinger = List.of(behandling)
-        val behandlingsresultat = Behandlingsresultat()
-        behandlingsresultat.lovvalgsperioder = Set.of()
-
+        val fagsak = Fagsak().apply {
+            behandlinger = listOf(Behandling().apply {
+                status = Behandlingsstatus.AVSLUTTET
+                id = 1L
+            })
+        }
+        val behandlingsresultat = Behandlingsresultat().apply { lovvalgsperioder = setOf() }
         every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
 
         medlPeriodeService.avsluttTidligerMedlPeriode(fagsak)
@@ -209,37 +209,20 @@ class MedlPeriodeServiceTest {
         verify(exactly = 0) { medlService.avvisPeriode(any(), any()) }
     }
 
-    private fun setupPeriodeForeløpig() {
-        every { medlService.opprettPeriodeForeløpig(any(), any(), any()) } returns MEDL_PERIODE_ID
-        setupHappyPathBehandling()
-    }
-
-    private fun setupPeriodeUnderAvklaring() {
-        every { medlService.opprettPeriodeUnderAvklaring(any(), any(), any()) } returns MEDL_PERIODE_ID
-        setupHappyPathBehandling()
-    }
-
-    private fun setupPeriodeEndelig() {
-        every { medlService.opprettPeriodeEndelig(any(), any(), any()) } returns MEDL_PERIODE_ID
-        setupHappyPathBehandling()
-    }
-
     private fun setupHappyPathBehandling() {
         every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns lagBehandlingsResultat()
         every { persondataFasade.hentFolkeregisterident(any()) } returns FNR
     }
 
-    private fun lagBehandlingsResultat(): Behandlingsresultat {
-        val behandlingsresultat = Behandlingsresultat()
-        val behandling = Behandling()
-        val fagsak = Fagsak()
-        val aktoer = Aktoer()
-        aktoer.rolle = Aktoersroller.BRUKER
-        aktoer.aktørId = "456"
-        fagsak.aktører.add(aktoer)
-        behandling.fagsak = fagsak
-        behandlingsresultat.behandling = behandling
-        return behandlingsresultat
+    private fun lagBehandlingsResultat(): Behandlingsresultat = Behandlingsresultat().apply {
+        behandling = Behandling().apply {
+            fagsak = Fagsak().apply {
+                aktører.add(Aktoer().apply {
+                    rolle = Aktoersroller.BRUKER
+                    aktørId = "456"
+                })
+            }
+        }
     }
 
     companion object {
