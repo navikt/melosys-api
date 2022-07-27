@@ -19,8 +19,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -63,7 +63,8 @@ class UnntaksperiodeKontrollServiceTest {
         sedDokument.setLovvalgsperiode(gyldigPeriode);
 
 
-        assertDoesNotThrow(() -> unntaksperiodeKontrollService.kontrollPeriode(1L, gyldigPeriode));
+        assertThatCode(() -> unntaksperiodeKontrollService.kontrollPeriode(1L, gyldigPeriode))
+            .doesNotThrowAnyException();
     }
 
 
@@ -85,7 +86,8 @@ class UnntaksperiodeKontrollServiceTest {
             LocalDate.of(2050, 1, 1),
             LocalDate.of(2052, 1, 1));
 
-        assertDoesNotThrow(() -> unntaksperiodeKontrollService.kontrollPeriode(1L, gyldigPeriode));
+        assertThatCode(() -> unntaksperiodeKontrollService.kontrollPeriode(1L, gyldigPeriode))
+            .doesNotThrowAnyException();
     }
 
     @Test
@@ -106,6 +108,7 @@ class UnntaksperiodeKontrollServiceTest {
             LocalDate.of(2052, 1, 5));
         sedDokument.setSedType(SedType.A003);
 
-        assertDoesNotThrow(() -> unntaksperiodeKontrollService.kontrollPeriode(1L, gyldigPeriode));
+        assertThatCode(() -> unntaksperiodeKontrollService.kontrollPeriode(1L, gyldigPeriode))
+            .doesNotThrowAnyException();
     }
 }

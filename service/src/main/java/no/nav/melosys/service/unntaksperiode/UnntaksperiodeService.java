@@ -41,7 +41,8 @@ public class UnntaksperiodeService {
                                  BehandlingsresultatService behandlingsresultatService,
                                  LovvalgsperiodeService lovvalgsperiodeService,
                                  OppgaveService oppgaveService,
-                                 ProsessinstansService prosessinstansService, UnntaksperiodeKontrollService unntaksperiodeKontrollService) {
+                                 ProsessinstansService prosessinstansService,
+                                 UnntaksperiodeKontrollService unntaksperiodeKontrollService) {
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.lovvalgsperiodeService = lovvalgsperiodeService;

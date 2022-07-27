@@ -12,15 +12,11 @@ import no.nav.melosys.service.kontroll.feature.unntaksperiode.data.Unntaksperiod
 import no.nav.melosys.service.kontroll.feature.unntaksperiode.kontroll.UnntaksperiodeKontrollsett;
 import no.nav.melosys.service.validering.Kontrollfeil;
 import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class UnntaksperiodeKontrollService {
-
-    private static final Logger log = LoggerFactory.getLogger(UnntaksperiodeKontrollService.class);
     private final BehandlingService behandlingService;
 
     public UnntaksperiodeKontrollService(BehandlingService behandlingService) {
