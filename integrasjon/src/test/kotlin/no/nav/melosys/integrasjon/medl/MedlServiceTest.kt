@@ -2,6 +2,7 @@ package no.nav.melosys.integrasjon.medl
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import io.kotest.assertions.throwables.shouldThrow
 import no.nav.melosys.domain.Lovvalgsperiode
 import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument
@@ -14,7 +15,6 @@ import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.integrasjon.medl.api.v1.MedlemskapsunntakForGet
 import no.nav.melosys.integrasjon.medl.api.v1.MedlemskapsunntakForPost
 import no.nav.melosys.integrasjon.medl.api.v1.MedlemskapsunntakForPut
-import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.time.LocalDate
@@ -27,6 +27,7 @@ import io.kotest.matchers.equality.FieldsEqualityCheckConfig
 import io.kotest.matchers.equality.shouldBeEqualToComparingFields
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.types.shouldBeInstanceOf
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode
 import no.nav.melosys.domain.dokument.medlemskap.Periode
@@ -83,19 +84,19 @@ internal class MedlServiceTest {
             mockRestConsumer.opprettPeriode(capture(medlemskapsunntakForPostCapturingSlot))
         }.answers {
             medlemskapsunntakForPostCapturingSlot.captured.shouldBeEqualToComparingFields(
-                MedlemskapsunntakForPost().apply {
-                    ident = FNR
-                    fraOgMed = lovvalgsperiode.fom
-                    tilOgMed = lovvalgsperiode.tom
-                    status = PeriodestatusMedl.GYLD.kode
-                    dekning = DekningMedl.FULL.kode
-                    lovvalgsland = "BEL"
-                    lovvalg = LovvalgMedl.ENDL.kode
-                    grunnlag = GrunnlagMedl.FO_11_4_1.kode
+                MedlemskapsunntakForPost(
+                    ident = FNR,
+                    fraOgMed = lovvalgsperiode.fom,
+                    tilOgMed = lovvalgsperiode.tom,
+                    status = PeriodestatusMedl.GYLD.kode,
+                    dekning = DekningMedl.FULL.kode,
+                    lovvalgsland = "BEL",
+                    lovvalg = LovvalgMedl.ENDL.kode,
+                    grunnlag = GrunnlagMedl.FO_11_4_1.kode,
                     sporingsinformasjon = MedlemskapsunntakForPost.SporingsinformasjonForPost(
                         kildedokument = KildedokumenttypeMedl.HENV_SOKNAD.getKode()
                     )
-                }
+                )
             )
             hentMedlemskapsunntak()
         }
@@ -106,72 +107,83 @@ internal class MedlServiceTest {
     @Test
     fun skalOpprettPeriodeUnderAvklaring() {
         val lovvalgsperiode = lagLovvalgsPeriode()
-        val slot = slot<MedlemskapsunntakForPost>()
+        val medlemskapsunntakForPostCapturingSlot = slot<MedlemskapsunntakForPost>()
         every {
-            mockRestConsumer.opprettPeriode(capture(slot))
+            mockRestConsumer.opprettPeriode(capture(medlemskapsunntakForPostCapturingSlot))
         } answers {
-            val request: MedlemskapsunntakForPost = slot.captured
-            Assertions.assertThat(request.ident).isEqualTo(FNR)
-            Assertions.assertThat(request.fraOgMed).isEqualTo(lovvalgsperiode.fom)
-            Assertions.assertThat(request.tilOgMed).isEqualTo(lovvalgsperiode.tom)
-            Assertions.assertThat(request.status).isEqualTo(LovvalgMedl.UAVK.kode)
-            Assertions.assertThat(request.dekning).isEqualTo(DekningMedl.FULL.kode)
-            Assertions.assertThat(request.lovvalgsland).isEqualTo("BEL")
-            Assertions.assertThat(request.lovvalg).isEqualTo(LovvalgMedl.UAVK.kode)
-            Assertions.assertThat(request.grunnlag).isEqualTo("FO_11_4_1")
-            Assertions.assertThat(request.sporingsinformasjon!!.kildedokument)
-                .isEqualTo(KildedokumenttypeMedl.HENV_SOKNAD.getKode())
+            medlemskapsunntakForPostCapturingSlot.captured.shouldBeEqualToComparingFields(
+                MedlemskapsunntakForPost(
+                    ident = FNR,
+                    fraOgMed = lovvalgsperiode.fom,
+                    tilOgMed = lovvalgsperiode.tom,
+                    status = LovvalgMedl.UAVK.kode,
+                    dekning = DekningMedl.FULL.kode,
+                    lovvalgsland = "BEL",
+                    lovvalg = LovvalgMedl.UAVK.kode,
+                    grunnlag = GrunnlagMedl.FO_11_4_1.kode,
+                    sporingsinformasjon = MedlemskapsunntakForPost.SporingsinformasjonForPost(
+                        kildedokument = KildedokumenttypeMedl.HENV_SOKNAD.getKode()
+                    )
+                )
+            )
             hentMedlemskapsunntak()
         }
-        medlService.opprettPeriodeUnderAvklaring(FNR, lovvalgsperiode, KildedokumenttypeMedl.HENV_SOKNAD).let {
-            Assertions.assertThat(it).isEqualTo(123456)
-        }
+        medlService.opprettPeriodeUnderAvklaring(FNR, lovvalgsperiode, KildedokumenttypeMedl.HENV_SOKNAD)
+            .shouldBe(123456)
     }
 
     @Test
     fun skalOpprettPeriodeForeløpig() {
         val lovvalgsperiode = lagLovvalgsPeriode()
-        val slot = slot<MedlemskapsunntakForPost>()
+        val medlemskapsunntakForPostCapturingSlot = slot<MedlemskapsunntakForPost>()
         every {
-            mockRestConsumer.opprettPeriode(capture(slot))
+            mockRestConsumer.opprettPeriode(capture(medlemskapsunntakForPostCapturingSlot))
         } answers {
-            val request: MedlemskapsunntakForPost = slot.captured
-            Assertions.assertThat(request.ident).isEqualTo(FNR)
-            Assertions.assertThat(request.fraOgMed).isEqualTo(lovvalgsperiode.fom)
-            Assertions.assertThat(request.tilOgMed).isEqualTo(lovvalgsperiode.tom)
-            Assertions.assertThat(request.status).isEqualTo(LovvalgMedl.UAVK.kode)
-            Assertions.assertThat(request.dekning).isEqualTo(DekningMedl.FULL.kode)
-            Assertions.assertThat(request.lovvalgsland).isEqualTo("BEL")
-            Assertions.assertThat(request.lovvalg).isEqualTo(LovvalgMedl.FORL.kode)
-            Assertions.assertThat(request.grunnlag).isEqualTo("FO_11_4_1")
-            Assertions.assertThat(request.sporingsinformasjon!!.kildedokument)
-                .isEqualTo(KildedokumenttypeMedl.HENV_SOKNAD.getKode())
+            medlemskapsunntakForPostCapturingSlot.captured.shouldBeEqualToComparingFields(
+                MedlemskapsunntakForPost(
+                    ident = FNR,
+                    fraOgMed = lovvalgsperiode.fom,
+                    tilOgMed = lovvalgsperiode.tom,
+                    status = LovvalgMedl.UAVK.kode,
+                    dekning = DekningMedl.FULL.kode,
+                    lovvalgsland = "BEL",
+                    lovvalg = LovvalgMedl.FORL.kode,
+                    grunnlag = GrunnlagMedl.FO_11_4_1.kode,
+                    sporingsinformasjon = MedlemskapsunntakForPost.SporingsinformasjonForPost(
+                        kildedokument = KildedokumenttypeMedl.HENV_SOKNAD.getKode()
+                    )
+                )
+            )
             hentMedlemskapsunntak()
         }
-        medlService.opprettPeriodeForeløpig(FNR, lovvalgsperiode, KildedokumenttypeMedl.HENV_SOKNAD).let {
-            Assertions.assertThat(it).isEqualTo(123456)
-        }
+        medlService.opprettPeriodeForeløpig(FNR, lovvalgsperiode, KildedokumenttypeMedl.HENV_SOKNAD)
+            .shouldBe(123456)
     }
 
     @Test
     fun skalOppdaterePeriodeEndelig() {
         every { mockRestConsumer.hentPeriode(any()) } returns hentMedlemskapsunntak()
         val lovvalgsperiode = lagLovvalgsPeriode().apply { medlPeriodeID = 123456L }
-        val slot = slot<MedlemskapsunntakForPut>()
+        val medlemskapsunntakForPutCapturingSlot = slot<MedlemskapsunntakForPut>()
         every {
-            mockRestConsumer.oppdaterPeriode(capture(slot))
+            mockRestConsumer.oppdaterPeriode(capture(medlemskapsunntakForPutCapturingSlot))
         }.answers {
-            val request: MedlemskapsunntakForPut = slot.captured
-            Assertions.assertThat(request.unntakId).isEqualTo(123456L)
-            Assertions.assertThat(request.fraOgMed).isEqualTo(lovvalgsperiode.fom)
-            Assertions.assertThat(request.tilOgMed).isEqualTo(lovvalgsperiode.tom)
-            Assertions.assertThat(request.status).isEqualTo(PeriodestatusMedl.GYLD.kode)
-            Assertions.assertThat(request.dekning).isEqualTo(DekningMedl.FULL.kode)
-            Assertions.assertThat(request.lovvalgsland).isEqualTo("BEL")
-            Assertions.assertThat(request.lovvalg).isEqualTo(LovvalgMedl.ENDL.kode)
-            Assertions.assertThat(request.grunnlag).isEqualTo("FO_11_4_1")
-            Assertions.assertThat(request.sporingsinformasjon!!.kildedokument)
-                .isEqualTo(KildedokumenttypeMedl.HENV_SOKNAD.getKode())
+            medlemskapsunntakForPutCapturingSlot.captured.shouldBeEqualToComparingFields(
+                MedlemskapsunntakForPut(
+                    unntakId = 123456,
+                    fraOgMed = lovvalgsperiode.fom,
+                    tilOgMed = lovvalgsperiode.tom,
+                    status = PeriodestatusMedl.GYLD.kode,
+                    dekning = DekningMedl.FULL.kode,
+                    lovvalgsland = "BEL",
+                    lovvalg = LovvalgMedl.ENDL.kode,
+                    grunnlag = GrunnlagMedl.FO_11_4_1.kode,
+                    sporingsinformasjon = MedlemskapsunntakForPut.SporingsinformasjonForPut(
+                        versjon = 1,
+                        kildedokument = KildedokumenttypeMedl.HENV_SOKNAD.getKode()
+                    )
+                )
+            )
             hentMedlemskapsunntak()
         }
         medlService.oppdaterPeriodeEndelig(lovvalgsperiode, KildedokumenttypeMedl.HENV_SOKNAD)
@@ -180,20 +192,25 @@ internal class MedlServiceTest {
     @Test
     fun skalOpprettePeriodeEndeligFtrl() {
         val medlemskapsperiode = lagMedlemskapsPeriode()
-        val slot = slot<MedlemskapsunntakForPost>()
+        val medlemskapsunntakForPostCapturingSlot = slot<MedlemskapsunntakForPost>()
         every {
-            mockRestConsumer.opprettPeriode(capture(slot))
+            mockRestConsumer.opprettPeriode(capture(medlemskapsunntakForPostCapturingSlot))
         }.answers {
-            val request: MedlemskapsunntakForPost = slot.captured
-            Assertions.assertThat(request.fraOgMed).isEqualTo(medlemskapsperiode.fom)
-            Assertions.assertThat(request.tilOgMed).isEqualTo(medlemskapsperiode.tom)
-            Assertions.assertThat(request.status).isEqualTo(PeriodestatusMedl.GYLD.kode)
-            Assertions.assertThat(request.dekning).isEqualTo(DekningMedl.FTRL_2_9_1_LEDD_A.kode)
-            Assertions.assertThat(request.lovvalgsland).isEqualTo("BEL")
-            Assertions.assertThat(request.lovvalg).isEqualTo(LovvalgMedl.ENDL.kode)
-            Assertions.assertThat(request.grunnlag).isEqualTo(GrunnlagMedl.FTL_2_8.kode)
-            Assertions.assertThat(request.sporingsinformasjon!!.kildedokument)
-                .isEqualTo(KildedokumenttypeMedl.HENV_SOKNAD.getKode())
+            medlemskapsunntakForPostCapturingSlot.captured.shouldBeEqualToComparingFields(
+                MedlemskapsunntakForPost(
+                    ident = FNR,
+                    fraOgMed = medlemskapsperiode.fom,
+                    tilOgMed = medlemskapsperiode.tom,
+                    status = PeriodestatusMedl.GYLD.kode,
+                    dekning = DekningMedl.FTRL_2_9_1_LEDD_A.kode,
+                    lovvalgsland = "BEL",
+                    lovvalg = LovvalgMedl.ENDL.kode,
+                    grunnlag = GrunnlagMedl.FTL_2_8.kode,
+                    sporingsinformasjon = MedlemskapsunntakForPost.SporingsinformasjonForPost(
+                        kildedokument = KildedokumenttypeMedl.HENV_SOKNAD.getKode()
+                    )
+                )
+            )
             hentMedlemskapsunntak()
         }
         medlService.opprettPeriodeEndelig(FNR, medlemskapsperiode, KildedokumenttypeMedl.HENV_SOKNAD)
@@ -203,21 +220,26 @@ internal class MedlServiceTest {
     fun skalOppdaterePeriodeForeløpig() {
         every { mockRestConsumer.hentPeriode(any()) } returns hentMedlemskapsunntak()
         val lovvalgsperiode = lagLovvalgsPeriode().apply { medlPeriodeID = 123456L }
-        val slot = slot<MedlemskapsunntakForPut>()
+        val medlemskapsunntakForPutCapturingSlot = slot<MedlemskapsunntakForPut>()
         every {
-            mockRestConsumer.oppdaterPeriode(capture(slot))
+            mockRestConsumer.oppdaterPeriode(capture(medlemskapsunntakForPutCapturingSlot))
         }.answers {
-            val request: MedlemskapsunntakForPut = slot.captured
-            Assertions.assertThat(request.unntakId).isEqualTo(123456L)
-            Assertions.assertThat(request.fraOgMed).isEqualTo(lovvalgsperiode.fom)
-            Assertions.assertThat(request.tilOgMed).isEqualTo(lovvalgsperiode.tom)
-            Assertions.assertThat(request.status).isEqualTo(LovvalgMedl.UAVK.kode)
-            Assertions.assertThat(request.dekning).isEqualTo(DekningMedl.FULL.kode)
-            Assertions.assertThat(request.lovvalgsland).isEqualTo("BEL")
-            Assertions.assertThat(request.lovvalg).isEqualTo(LovvalgMedl.FORL.kode)
-            Assertions.assertThat(request.grunnlag).isEqualTo("FO_11_4_1")
-            Assertions.assertThat(request.sporingsinformasjon!!.kildedokument)
-                .isEqualTo(KildedokumenttypeMedl.HENV_SOKNAD.getKode())
+            medlemskapsunntakForPutCapturingSlot.captured.shouldBeEqualToComparingFields(
+                MedlemskapsunntakForPut(
+                    unntakId = 123456,
+                    fraOgMed = lovvalgsperiode.fom,
+                    tilOgMed = lovvalgsperiode.tom,
+                    status = PeriodestatusMedl.UAVK.kode,
+                    dekning = DekningMedl.FULL.kode,
+                    lovvalgsland = "BEL",
+                    lovvalg = LovvalgMedl.FORL.kode,
+                    grunnlag = GrunnlagMedl.FO_11_4_1.kode,
+                    sporingsinformasjon = MedlemskapsunntakForPut.SporingsinformasjonForPut(
+                        versjon = 1,
+                        kildedokument = KildedokumenttypeMedl.HENV_SOKNAD.getKode()
+                    )
+                )
+            )
             hentMedlemskapsunntak()
         }
         medlService.oppdaterPeriodeForeløpig(lovvalgsperiode, KildedokumenttypeMedl.HENV_SOKNAD)
@@ -225,27 +247,35 @@ internal class MedlServiceTest {
 
     @Test
     fun oppdaterePeriodeFeilerMedManglendePeriodeId() {
-        Assertions.assertThatExceptionOfType(TekniskException::class.java)
-            .isThrownBy {
-                medlService.oppdaterPeriodeForeløpig(
-                    lagLovvalgsPeriode(),
-                    KildedokumenttypeMedl.HENV_SOKNAD
-                )
-            }
-            .withMessageContaining("Det er ikke lagret noen medlPeriodeID på lovvalgsperiode som skal oppdateres i MEDL")
+        shouldThrow<TekniskException> {
+            medlService.oppdaterPeriodeForeløpig(lagLovvalgsPeriode(), KildedokumenttypeMedl.HENV_SOKNAD)
+        }.message.shouldContain("Det er ikke lagret noen medlPeriodeID på lovvalgsperiode som skal oppdateres i MEDL")
     }
 
     @Test
     fun skalAvvisePeriode() {
         every { mockRestConsumer.hentPeriode(any()) } returns hentMedlemskapsunntak()
-        val slot = slot<MedlemskapsunntakForPut>()
+        val medlemskapsunntakForPutCapturingSlot = slot<MedlemskapsunntakForPut>()
         every {
-            mockRestConsumer.oppdaterPeriode(capture(slot))
+            mockRestConsumer.oppdaterPeriode(capture(medlemskapsunntakForPutCapturingSlot))
         }.answers {
-            val request: MedlemskapsunntakForPut = slot.captured
-            Assertions.assertThat(request.unntakId).isEqualTo(123456L)
-            Assertions.assertThat(request.status).isEqualTo(PeriodestatusMedl.AVST.kode)
-            Assertions.assertThat(request.statusaarsak).isEqualTo(StatusaarsakMedl.AVVIST.kode)
+            medlemskapsunntakForPutCapturingSlot.captured.shouldBeEqualToComparingFields(
+                MedlemskapsunntakForPut(
+                    unntakId = 123456,
+                    fraOgMed = LocalDate.of(2021,9,1),
+                    tilOgMed = LocalDate.of(2021,10,1),
+                    status = PeriodestatusMedl.AVST.kode,
+                    statusaarsak = StatusaarsakMedl.AVVIST.kode,
+                    dekning = DekningMedl.UNNTATT.kode,
+                    lovvalgsland = "NOR",
+                    lovvalg = LovvalgMedl.ENDL.kode,
+                    grunnlag = "IMEDEOS",
+                    sporingsinformasjon = MedlemskapsunntakForPut.SporingsinformasjonForPut(
+                        versjon = 1,
+                        kildedokument = "Dokument"
+                    )
+                )
+            )
             hentMedlemskapsunntak()
         }
         medlService.avvisPeriode(123456L, StatusaarsakMedl.AVVIST)
