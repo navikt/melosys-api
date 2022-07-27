@@ -6,25 +6,30 @@ import com.github.tomakehurst.wiremock.matching.StringValuePattern
 import no.nav.melosys.integrasjon.ConsumerWireMockTestBase
 import no.nav.melosys.sikkerhet.sts.StsLoginConfig
 import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.meldinger.ProduserIkkeredigerbartDokumentRequest
+import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.meldinger.ProduserIkkeredigerbartDokumentResponse
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.context.annotation.Import
+import org.springframework.test.context.ActiveProfiles
 
 @WebMvcTest(
     value = [
         DokumentproduksjonConsumerConfig::class,
-        DokumentproduksjonConsumerProducer::class,
-    ],
-    properties = ["spring.profiles.active:token-test"]
+        DokumentproduksjonConsumerProducer::class
+    ]
 )
 @Import(StsLoginConfig::class)
+@ActiveProfiles("wiremock-test")
 class DokumentproduksjonConsumerTokenTest(
     @Autowired private val dokumentproduksjonConsumer: DokumentproduksjonConsumer,
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,
     @Value("\${mockserver.security.port}") mockSecurityPort: Int
-) : ConsumerWireMockTestBase<String>(mockServiceUnderTestPort, mockSecurityPort) {
+) : ConsumerWireMockTestBase<String, ProduserIkkeredigerbartDokumentResponse>(
+    mockServiceUnderTestPort,
+    mockSecurityPort
+) {
 
     override fun createWireMock(): MappingBuilder = post("/soap/services/dokumentproduksjon/v3")
 
@@ -39,11 +44,10 @@ class DokumentproduksjonConsumerTokenTest(
 
                 )
         )
-        executeFromSystem {
-            verifyHeaders(
-                soapActionHeader()
-            )
-        }
+        verifyHeaders(
+            soapActionHeader()
+        )
+        executeFromSystem()
     }
 
     @Test
@@ -65,11 +69,10 @@ class DokumentproduksjonConsumerTokenTest(
                     )
                 )
         )
-        executeFromController {
-            verifyHeaders(
-                soapActionHeader()
-            )
-        }
+        verifyHeaders(
+            soapActionHeader()
+        )
+        executeFromController()
     }
 
     @Test
@@ -108,9 +111,8 @@ class DokumentproduksjonConsumerTokenTest(
         </SOAP-ENV:Envelope>
     """.trimIndent()
 
-    override fun executeRequest() {
+    override fun executeRequest() =
         dokumentproduksjonConsumer.produserIkkeredigerbartDokument(ProduserIkkeredigerbartDokumentRequest())
-    }
 
     private fun defaultSecurityServiceWireMockMappings(): MappingBuilder =
         post("/SecurityTokenServiceProvider/")

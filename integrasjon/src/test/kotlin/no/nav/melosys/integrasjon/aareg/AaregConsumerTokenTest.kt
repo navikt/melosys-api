@@ -3,10 +3,7 @@ package no.nav.melosys.integrasjon.aareg
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.matching.StringValuePattern
 import no.nav.melosys.integrasjon.ConsumerWireMockTestBase
-import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdContextExchangeFilter
-import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdQuery
-import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdRestConsumer
-import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdRestConsumerConfig
+import no.nav.melosys.integrasjon.aareg.arbeidsforhold.*
 import no.nav.melosys.integrasjon.reststs.RestTokenServiceClient
 import no.nav.melosys.integrasjon.reststs.StsRestTemplateProducer
 import org.assertj.core.api.Assertions.assertThat
@@ -15,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebClient
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.test.context.ActiveProfiles
 
 @WebMvcTest(
     value = [
@@ -23,39 +21,37 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 
         ArbeidsforholdRestConsumer::class,
         ArbeidsforholdRestConsumerConfig::class,
-        ArbeidsforholdContextExchangeFilter::class,
-    ],
-    properties = ["spring.profiles.active:token-test"]
+        ArbeidsforholdContextExchangeFilter::class
+    ]
 )
+@ActiveProfiles("wiremock-test")
 @AutoConfigureWebClient
 class AaregConsumerTokenTest(
     @Autowired private val arbeidsforholdRestConsumer: ArbeidsforholdRestConsumer,
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,
     @Value("\${mockserver.security.port}") mockSecurityPort: Int
-) : ConsumerWireMockTestBase<String>(mockServiceUnderTestPort, mockSecurityPort) {
+) : ConsumerWireMockTestBase<String, ArbeidsforholdResponse>(mockServiceUnderTestPort, mockSecurityPort) {
 
     @Test
     fun authorizationSkalKommeFraBruker() {
-        executeFromController {
-            verifyHeaders(
-                mapOf<String, StringValuePattern>(
-                    Pair("Authorization", WireMock.equalTo("Bearer --token-from-system--")),
-                    Pair("Nav-Consumer-Token", WireMock.equalTo("Bearer --token-from-system--"))
-                )
+        verifyHeaders(
+            mapOf<String, StringValuePattern>(
+                Pair("Authorization", WireMock.equalTo("Bearer --token-from-system--")),
+                Pair("Nav-Consumer-Token", WireMock.equalTo("Bearer --token-from-system--"))
             )
-        }
+        )
+        executeFromController()
     }
 
     @Test
     fun authorizationSkalKommeFraSystem() {
-        executeFromSystem {
-            verifyHeaders(
-                mapOf<String, StringValuePattern>(
-                    Pair("Authorization", WireMock.equalTo("Bearer --token-from-system--")),
-                    Pair("Nav-Consumer-Token", WireMock.equalTo("Bearer --token-from-system--"))
-                )
+        verifyHeaders(
+            mapOf<String, StringValuePattern>(
+                Pair("Authorization", WireMock.equalTo("Bearer --token-from-system--")),
+                Pair("Nav-Consumer-Token", WireMock.equalTo("Bearer --token-from-system--"))
             )
-        }
+        )
+        executeFromSystem()
     }
 
     @Test
@@ -80,8 +76,6 @@ class AaregConsumerTokenTest(
         return "[]"
     }
 
-    override fun executeRequest() {
-        val build = ArbeidsforholdQuery.Builder().build()
-        arbeidsforholdRestConsumer.finnArbeidsforholdPrArbeidstaker("121", build)
-    }
+    override fun executeRequest() =
+        arbeidsforholdRestConsumer.finnArbeidsforholdPrArbeidstaker("121", ArbeidsforholdQuery.Builder().build())
 }
