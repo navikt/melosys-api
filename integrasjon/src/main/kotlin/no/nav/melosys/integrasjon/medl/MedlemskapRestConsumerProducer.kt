@@ -13,36 +13,31 @@ import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Mono
 
 @Configuration
-class MedlemskapRestConsumerProducer(@param:Value("\${medlemskap.rest.url}") private val url: String) : RestConsumer,
+class MedlemskapRestConsumerProducer(@Value("\${medlemskap.rest.url}") private val url: String) : RestConsumer,
     WebClientConfig {
     @Bean
     @Primary
     fun medlemskapRestConsumer(
         webClientBuilder: WebClient.Builder,
-        genericContextExchangeFilter: GenericContextExchangeFilter?
-    ): MedlemskapRestConsumer {
-        return MedlemskapRestConsumer(
-            webClientBuilder
-                .baseUrl(url)
-                .filter(genericContextExchangeFilter!!)
-                .filter(headerFilter())
-                .filter(errorFilter("Kall mot Medl feilet."))
-                .build()
-        )
-    }
+        genericContextExchangeFilter: GenericContextExchangeFilter
+    ) = MedlemskapRestConsumer(
+        webClientBuilder
+            .baseUrl(url)
+            .filter(genericContextExchangeFilter)
+            .filter(headerFilter())
+            .filter(errorFilter("Kall mot Medl feilet."))
+            .build()
+    )
 
-    private fun headerFilter(): ExchangeFilterFunction {
-        return ExchangeFilterFunction.ofRequestProcessor { request: ClientRequest? ->
+    private fun headerFilter(): ExchangeFilterFunction =
+        ExchangeFilterFunction.ofRequestProcessor { request: ClientRequest? ->
             Mono.just(
-                ClientRequest.from(
-                    request!!
-                )
+                ClientRequest.from(request!!)
                     .header("Nav-Call-Id", callID)
                     .header("Nav-Consumer-Id", CONSUMER_ID)
                     .build()
             )
         }
-    }
 
     companion object {
         private const val CONSUMER_ID = "srvmelosys"
