@@ -59,32 +59,24 @@ class MedlService(
     }
 
     fun opprettPeriodeEndelig(
-        fnr: String?,
-        bestemmelse: HarBestemmelse<*>?,
-        kildedokumenttypeMedl: KildedokumenttypeMedl?
+        fnr: String?, bestemmelse: HarBestemmelse<*>?, kildedokumenttypeMedl: KildedokumenttypeMedl?
     ): Long? {
         return opprettPeriode(fnr!!, bestemmelse!!, PeriodestatusMedl.GYLD, LovvalgMedl.ENDL, kildedokumenttypeMedl!!)
     }
 
     fun opprettPeriodeUnderAvklaring(
-        fnr: String?,
-        periodeOmLovvalg: PeriodeOmLovvalg?,
-        kildedokumenttypeMedl: KildedokumenttypeMedl?
+        fnr: String?, periodeOmLovvalg: PeriodeOmLovvalg?, kildedokumenttypeMedl: KildedokumenttypeMedl?
     ): Long? {
         return opprettPeriode(
-            fnr!!, periodeOmLovvalg!!, PeriodestatusMedl.UAVK, LovvalgMedl.UAVK,
-            kildedokumenttypeMedl!!
+            fnr!!, periodeOmLovvalg!!, PeriodestatusMedl.UAVK, LovvalgMedl.UAVK, kildedokumenttypeMedl!!
         )
     }
 
     fun opprettPeriodeForeløpig(
-        fnr: String?,
-        periodeOmLovvalg: PeriodeOmLovvalg?,
-        kildedokumenttypeMedl: KildedokumenttypeMedl?
+        fnr: String?, periodeOmLovvalg: PeriodeOmLovvalg?, kildedokumenttypeMedl: KildedokumenttypeMedl?
     ): Long? {
         return opprettPeriode(
-            fnr!!, periodeOmLovvalg!!, PeriodestatusMedl.UAVK, LovvalgMedl.FORL,
-            kildedokumenttypeMedl!!
+            fnr!!, periodeOmLovvalg!!, PeriodestatusMedl.UAVK, LovvalgMedl.FORL, kildedokumenttypeMedl!!
         )
     }
 
@@ -97,11 +89,9 @@ class MedlService(
     }
 
     fun avvisPeriode(medlPeriodeID: Long?, årsak: StatusaarsakMedl) {
-        val eksisterendePeriode = hentEksisterendePeriode(
-            medlPeriodeID!!
-        )
+        val eksisterendePeriode = hentEksisterendePeriode(medlPeriodeID!!)
         val request = MedlemskapsunntakForPut(
-            unntakId = eksisterendePeriode!!.unntakId,
+            unntakId = eksisterendePeriode.unntakId,
             fraOgMed = eksisterendePeriode.fraOgMed,
             tilOgMed = eksisterendePeriode.tilOgMed,
             status = PeriodestatusMedl.AVST.kode,
@@ -123,19 +113,7 @@ class MedlService(
         fnr: String, bestemmelse: HarBestemmelse<*>, periodestatusMedl: PeriodestatusMedl,
         lovvalgMedl: LovvalgMedl, kildedokumenttypeMedl: KildedokumenttypeMedl
     ): Long? {
-
-        var request: MedlemskapsunntakForPost? = null
-        if (bestemmelse is PeriodeOmLovvalg) {
-            request = lovvalgRequest(bestemmelse)
-        } else if (bestemmelse is Medlemskapsperiode) {
-            request = medlemskapsperiodeRequest(bestemmelse)
-        }
-
-        if (request == null) {
-            throw TekniskException("Oppretting av periode i MEDL feilet")
-        }
-
-        request.apply {
+        val request = requestFraBestemmelse(bestemmelse).apply {
             sporingsinformasjon = MedlemskapsunntakForPost.SporingsinformasjonForPost().apply {
                 kildedokument = kildedokumenttypeMedl.getKode()
             }
@@ -143,8 +121,15 @@ class MedlService(
             status = periodestatusMedl.kode
             lovvalg = lovvalgMedl.kode
         }
+        return medlemskapRestConsumer.opprettPeriode(request).unntakId
+    }
 
-        return medlemskapRestConsumer.opprettPeriode(request)!!.unntakId
+    private fun requestFraBestemmelse(bestemmelse: HarBestemmelse<*>): MedlemskapsunntakForPost {
+        return when (bestemmelse) {
+            is PeriodeOmLovvalg -> lovvalgRequest(bestemmelse)
+            is Medlemskapsperiode -> medlemskapsperiodeRequest(bestemmelse)
+            else -> throw TekniskException("Oppretting av periode i MEDL feilet")
+        }
     }
 
     private fun lovvalgRequest(periodeOmLovvalg: PeriodeOmLovvalg): MedlemskapsunntakForPost {
@@ -166,11 +151,10 @@ class MedlService(
         return MedlemskapsunntakForPost().apply {
             fraOgMed = medlemskapsperiode.fom
             tilOgMed = medlemskapsperiode.tom
-            dekning =
-                MedlPeriodeKonverter.tilMedlTrygdeDekningFtrl(
-                    medlemskapsperiode.dekning,
-                    medlemskapsperiode.bestemmelse
-                ).kode
+            dekning = MedlPeriodeKonverter.tilMedlTrygdeDekningFtrl(
+                medlemskapsperiode.dekning,
+                medlemskapsperiode.bestemmelse
+            ).kode
             lovvalgsland = LandkoderUtils.tilIso3(medlemskapsperiode.arbeidsland)
             grunnlag = MedlPeriodeKonverter.tilGrunnlagMedltype(medlemskapsperiode.bestemmelse).kode
         }
@@ -183,7 +167,7 @@ class MedlService(
         val medlPeriodeID = lovvalgsperiode.medlPeriodeID
             ?: throw TekniskException("Det er ikke lagret noen medlPeriodeID på lovvalgsperiode som skal oppdateres i MEDL")
         val eksisterendePeriode = hentEksisterendePeriode(medlPeriodeID)
-        val bestemmelse = MedlPeriodeKonverter.hentLovvalgBestemmelse(lovvalgsperiode)
+
         val request = MedlemskapsunntakForPut().apply {
             unntakId = medlPeriodeID
             fraOgMed = lovvalgsperiode.fom
@@ -192,16 +176,20 @@ class MedlService(
             dekning = MedlPeriodeKonverter.tilMedlTrygdeDekningEos(lovvalgsperiode.dekning).kode
             lovvalgsland = LandkoderUtils.tilIso3(lovvalgsperiode.lovvalgsland.kode)
             lovvalg = lovvalgMedl.kode
-            grunnlag = MedlPeriodeKonverter.tilGrunnlagMedltype(bestemmelse).kode
+            grunnlag = MedlPeriodeKonverter.tilGrunnlagMedltype(
+                MedlPeriodeKonverter.hentLovvalgBestemmelse(
+                    lovvalgsperiode
+                )
+            ).kode
             sporingsinformasjon = MedlemskapsunntakForPut.SporingsinformasjonForPut().apply {
                 kildedokument = kildedokumenttypeMedl.getKode()
-                versjon = eksisterendePeriode!!.sporingsinformasjon!!.versjon
+                versjon = eksisterendePeriode.sporingsinformasjon!!.versjon
             }
         }
         medlemskapRestConsumer.oppdaterPeriode(request)
     }
 
-    private fun hentEksisterendePeriode(medlPeriodeID: Long): MedlemskapsunntakForGet? {
+    private fun hentEksisterendePeriode(medlPeriodeID: Long): MedlemskapsunntakForGet {
         return medlemskapRestConsumer.hentPeriode(medlPeriodeID.toString())
     }
 
