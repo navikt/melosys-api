@@ -5,9 +5,5 @@ import no.nav.melosys.integrasjon.sakogbehandling.behandlingstatus.BehandlingSta
 
 public interface SakOgBehandlingFasade {
 
-    void sendBehandlingOpprettet(BehandlingStatusMapper mapper);
-
-    void sendBehandlingAvsluttet(BehandlingStatusMapper mapper);
-
     Saksopplysning finnSakOgBehandlingskjedeListe(String aktørId);
 }

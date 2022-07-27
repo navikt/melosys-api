@@ -11,40 +11,14 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class SobService {
-    private final BehandlingService behandlingService;
     private final SakOgBehandlingFasade sakOgBehandlingFasade;
 
-    public SobService(BehandlingService behandlingService, SakOgBehandlingFasade sakOgBehandlingFasade) {
-        this.behandlingService = behandlingService;
+    public SobService(SakOgBehandlingFasade sakOgBehandlingFasade) {
         this.sakOgBehandlingFasade = sakOgBehandlingFasade;
-    }
-
-    private static BehandlingStatusMapper lagBehandlingStatusMapper(String saksnummer, Behandling behandling, String aktørID) {
-        return new BehandlingStatusMapper.Builder()
-            .medBehandlingsId(behandling.getId())
-            .medSaksnummer(saksnummer)
-            .medArkivtema(TemaFactory.fraBehandlingstema(behandling.getTema()).getKode())
-            .medAktørID(aktørID)
-            .build();
     }
 
     public Saksopplysning finnSakOgBehandlingskjedeListe(String aktørID) {
         return sakOgBehandlingFasade.finnSakOgBehandlingskjedeListe(aktørID);
     }
 
-    public void sakOgBehandlingOpprettet(long behandlingID) {
-        Behandling behandling = behandlingService.hentBehandling(behandlingID);
-        Fagsak fagsak = behandling.getFagsak();
-        sakOgBehandlingFasade.sendBehandlingOpprettet(
-            lagBehandlingStatusMapper(fagsak.getSaksnummer(), behandling, fagsak.hentBrukersAktørID())
-        );
-    }
-
-    public void sakOgBehandlingAvsluttet(long behandlingID) {
-        Behandling behandling = behandlingService.hentBehandling(behandlingID);
-        Fagsak fagsak = behandling.getFagsak();
-        sakOgBehandlingFasade.sendBehandlingAvsluttet(
-            lagBehandlingStatusMapper(fagsak.getSaksnummer(), behandling, fagsak.hentBrukersAktørID())
-        );
-    }
 }

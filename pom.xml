@@ -67,7 +67,6 @@
         <logback.version>1.2.11</logback.version>
         <logstash.version>7.1</logstash.version>
         <hikaricp.version>5.0.1</hikaricp.version>
-        <ibmmq.version>9.2.5.0</ibmmq.version>
         <jackson.version>2.13.2.20220328</jackson.version>
         <javax.ws.rs-api.version>2.1.1</javax.ws.rs-api.version>
         <json-smart.version>2.4.8</json-smart.version>
@@ -223,11 +222,6 @@
                 <version>${graphql-java.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.ibm.mq</groupId>
-                <artifactId>com.ibm.mq.allclient</artifactId>
-                <version>${ibmmq.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>com.oracle.database.jdbc</groupId>
                 <artifactId>ojdbc8</artifactId>
                 <version>${ojdbc.version}</version>
@@ -251,11 +245,6 @@
                 <groupId>io.springfox</groupId>
                 <artifactId>springfox-boot-starter</artifactId>
                 <version>${springfox.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>javax.jms</groupId>
-                <artifactId>javax.jms-api</artifactId>
-                <version>${jms-api.version}</version>
             </dependency>
             <dependency>
                 <groupId>javax.servlet</groupId>
