@@ -262,8 +262,8 @@ internal class MedlServiceTest {
             medlemskapsunntakForPutCapturingSlot.captured.shouldBeEqualToComparingFields(
                 MedlemskapsunntakForPut(
                     unntakId = 123456,
-                    fraOgMed = LocalDate.of(2021,9,1),
-                    tilOgMed = LocalDate.of(2021,10,1),
+                    fraOgMed = LocalDate.of(2021, 9, 1),
+                    tilOgMed = LocalDate.of(2021, 10, 1),
                     status = PeriodestatusMedl.AVST.kode,
                     statusaarsak = StatusaarsakMedl.AVVIST.kode,
                     dekning = DekningMedl.UNNTATT.kode,
@@ -281,38 +281,30 @@ internal class MedlServiceTest {
         medlService.avvisPeriode(123456L, StatusaarsakMedl.AVVIST)
     }
 
-    private fun lagLovvalgsPeriode(): Lovvalgsperiode {
-        val lovvalgsperiode = Lovvalgsperiode()
-        lovvalgsperiode.fom = LocalDate.now()
-        lovvalgsperiode.tom = LocalDate.now().plusYears(1)
-        lovvalgsperiode.dekning = Trygdedekninger.FULL_DEKNING_EOSFO
-        lovvalgsperiode.lovvalgsland = Landkoder.BE
-        lovvalgsperiode.tilleggsbestemmelse = Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1
-        return lovvalgsperiode
+    private fun lagLovvalgsPeriode() = Lovvalgsperiode().apply {
+        fom = LocalDate.now()
+        tom = LocalDate.now().plusYears(1)
+        dekning = Trygdedekninger.FULL_DEKNING_EOSFO
+        lovvalgsland = Landkoder.BE
+        tilleggsbestemmelse = Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1
     }
 
-    private fun lagMedlemskapsPeriode(): Medlemskapsperiode {
-        val medlemskapsperiode = Medlemskapsperiode()
-        medlemskapsperiode.medlemskapstype = Medlemskapstyper.FRIVILLIG
-        medlemskapsperiode.arbeidsland = Landkoder.BE.kode
-        medlemskapsperiode.bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
-        medlemskapsperiode.setTrygdedekning(Trygdedekninger.HELSEDEL)
-        medlemskapsperiode.fom = LocalDate.now()
-        medlemskapsperiode.tom = LocalDate.now().plusYears(1)
-        return medlemskapsperiode
+    private fun lagMedlemskapsPeriode() = Medlemskapsperiode().apply {
+        medlemskapstype = Medlemskapstyper.FRIVILLIG
+        arbeidsland = Landkoder.BE.kode
+        bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
+        setTrygdedekning(Trygdedekninger.HELSEDEL)
+        fom = LocalDate.now()
+        tom = LocalDate.now().plusYears(1)
     }
 
-    private fun hentMedlemskapsunntakListe(): List<MedlemskapsunntakForGet> {
-        return objectMapper.readValue(
-            javaClass.classLoader.getResource("mock/medlemskap/gyldigPeriodelisteResponse.json"),
-            Array<MedlemskapsunntakForGet>::class.java
-        ).toList()
-    }
+    private fun hentMedlemskapsunntakListe() = objectMapper.readValue(
+        javaClass.classLoader.getResource("mock/medlemskap/gyldigPeriodelisteResponse.json"),
+        Array<MedlemskapsunntakForGet>::class.java
+    ).toList()
 
-    private fun hentMedlemskapsunntak(): MedlemskapsunntakForGet {
-        return objectMapper.readValue(
-            javaClass.classLoader.getResource("mock/medlemskap/gyldigPeriodeResponse.json"),
-            MedlemskapsunntakForGet::class.java
-        )
-    }
+    private fun hentMedlemskapsunntak() = objectMapper.readValue(
+        javaClass.classLoader.getResource("mock/medlemskap/gyldigPeriodeResponse.json"),
+        MedlemskapsunntakForGet::class.java
+    )
 }
