@@ -1,5 +1,7 @@
 package no.nav.melosys.service.medl
 
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.string.shouldContain
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.impl.annotations.RelaxedMockK
@@ -18,7 +20,6 @@ import no.nav.melosys.repository.MedlemskapsperiodeRepository
 import no.nav.melosys.repository.UtpekingsperiodeRepository
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.persondata.PersondataFasade
-import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -114,9 +115,9 @@ class MedlPeriodeServiceTest {
         setupHappyPathBehandling()
         every { medlService.opprettPeriodeEndelig(FNR, any(), any()) } returns null
 
-        Assertions.assertThatThrownBy { medlPeriodeService.opprettPeriodeEndelig(1L, Medlemskapsperiode()) }
-            .isInstanceOf(FunksjonellException::class.java)
-            .hasMessageContaining("Opprettelse av periode i MEDL feilet med retur av null medlPeriodeID")
+        shouldThrow<FunksjonellException> {
+            medlPeriodeService.opprettPeriodeEndelig(1L, Medlemskapsperiode())
+        }.message.shouldContain("Opprettelse av periode i MEDL feilet med retur av null medlPeriodeID")
 
         verify(exactly = 0) { medlemskapsperiodeRepository.save(any()) }
     }
