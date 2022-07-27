@@ -16,7 +16,6 @@ import no.nav.melosys.service.kontroll.feature.unntaksperiode.UnntaksperiodeKont
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -30,7 +29,6 @@ class UnntaksperiodeKontrollServiceTest {
     @Mock
     private BehandlingService behandlingService;
 
-    @InjectMocks
     private UnntaksperiodeKontrollService unntaksperiodeKontrollService;
 
     private Behandling behandling;
@@ -39,6 +37,8 @@ class UnntaksperiodeKontrollServiceTest {
 
     @BeforeEach
     void setupA009Behandling() {
+        unntaksperiodeKontrollService = new UnntaksperiodeKontrollService(behandlingService);
+
         this.behandling = new Behandling();
         behandling.setTema(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING);
 
