@@ -45,7 +45,6 @@ public class UnntaksperiodeKontrollService {
         if (behandling.hentSedDokument() == null) {
             String feilmelding = "Ugyldig bruk av API for behandling" +
                 " med behandlingID '%s'. Mangler SED Dokument.".formatted(behandling.getId());
-            log.warn(feilmelding);
             throw new FunksjonellException(feilmelding);
         }
         return behandling;
