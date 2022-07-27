@@ -34,32 +34,24 @@ class MedlemskapRestConsumer(private val webClient: WebClient) : RestConsumer {
             .accept(MediaType.APPLICATION_JSON)
             .retrieve()
             .bodyToMono(Array<MedlemskapsunntakForGet>::class.java)
-            .block()
-    }
-
-    fun hentPeriode(periodeId: String?): MedlemskapsunntakForGet {
-        return webClient.get()
-            .uri("/{periodeId}?inkluderSporingsinfo={inkluderSporingsinfo}", periodeId, true)
-            .accept(MediaType.APPLICATION_JSON)
-            .retrieve()
-            .bodyToMono(MedlemskapsunntakForGet::class.java)
             .block()!!
     }
 
-    fun opprettPeriode(request: MedlemskapsunntakForPost): MedlemskapsunntakForGet {
-        return utfør(request, HttpMethod.POST)
-    }
+    fun hentPeriode(periodeId: String?) = webClient.get()
+        .uri("/{periodeId}?inkluderSporingsinfo={inkluderSporingsinfo}", periodeId, true)
+        .accept(MediaType.APPLICATION_JSON)
+        .retrieve()
+        .bodyToMono(MedlemskapsunntakForGet::class.java)
+        .block()!!
 
-    fun oppdaterPeriode(request: MedlemskapsunntakForPut): MedlemskapsunntakForGet {
-        return utfør(request, HttpMethod.PUT)
-    }
+    fun opprettPeriode(request: MedlemskapsunntakForPost) = utfør(request, HttpMethod.POST)
 
-    private fun utfør(request: Any, method: HttpMethod): MedlemskapsunntakForGet {
-        return webClient.method(method)
-            .accept(MediaType.APPLICATION_JSON)
-            .bodyValue(request)
-            .retrieve()
-            .bodyToMono(MedlemskapsunntakForGet::class.java)
-            .block()!!
-    }
+    fun oppdaterPeriode(request: MedlemskapsunntakForPut) = utfør(request, HttpMethod.PUT)
+
+    private fun utfør(request: Any, method: HttpMethod) = webClient.method(method)
+        .accept(MediaType.APPLICATION_JSON)
+        .bodyValue(request)
+        .retrieve()
+        .bodyToMono(MedlemskapsunntakForGet::class.java)
+        .block()!!
 }
