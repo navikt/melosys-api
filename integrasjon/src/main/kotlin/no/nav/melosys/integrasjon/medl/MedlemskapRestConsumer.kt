@@ -12,7 +12,6 @@ import org.springframework.web.util.UriBuilder
 import java.time.LocalDate
 
 open class MedlemskapRestConsumer(private val webClient: WebClient) : RestConsumer {
-    var i: Int = 0
     @Retryable
     open fun hentPeriodeListe(fnr: String, fom: LocalDate, tom: LocalDate): List<MedlemskapsunntakForGet> {
         return hentMedlemskapsunntakForPeriode(fnr, fom, tom)!!.toList()
