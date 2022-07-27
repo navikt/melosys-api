@@ -81,10 +81,10 @@ abstract class ConsumerWireMockTestBase<T, R>(
         }
     }
 
-    fun setupWireMock(action: (MappingBuilder) -> Unit = {}) {
+    fun setupWireMock(consumer: (MappingBuilder) -> Unit = {}) {
         val wireMock = createWireMock()
 
-        action(wireMock)
+        consumer(wireMock)
 
         val response = WireMock.aResponse()
             .withStatus(200)
@@ -99,21 +99,21 @@ abstract class ConsumerWireMockTestBase<T, R>(
         )
     }
 
-    fun executeFromSystem(action: (R) -> Unit = {})  {
+    fun executeFromSystem(consumer: (R) -> Unit = {})  {
         val uuid = UUID.randomUUID()
         try {
             ThreadLocalAccessInfo.beforeExecuteProcess(uuid, "prossesSteg")
-            action(executeRequest())
+            consumer(executeRequest())
         } finally {
             ThreadLocalAccessInfo.afterExecuteProcess(uuid)
         }
     }
 
-    fun executeFromController(action: (R) -> Unit = {}) {
+    fun executeFromController(consumer: (R) -> Unit = {}) {
         SpringSubjectHandler.set(TestSubjectHandler())
         try {
             ThreadLocalAccessInfo.beforeControllerRequest("request", false)
-            action(executeRequest())
+            consumer(executeRequest())
         } finally {
             ThreadLocalAccessInfo.afterControllerRequest("request")
         }
