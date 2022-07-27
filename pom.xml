@@ -634,6 +634,12 @@
                 <artifactId>xmlunit-matchers</artifactId>
                 <version>${xmlunit.version}</version>
             </dependency>
+            <dependency>
+                <groupId>io.kotest</groupId>
+                <artifactId>kotest-assertions-core-jvm</artifactId>
+                <version>${kotest.version}</version>
+                <scope>test</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
