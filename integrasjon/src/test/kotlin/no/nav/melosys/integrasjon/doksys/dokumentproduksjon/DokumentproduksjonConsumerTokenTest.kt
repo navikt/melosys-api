@@ -12,15 +12,16 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.context.annotation.Import
+import org.springframework.test.context.ActiveProfiles
 
 @WebMvcTest(
     value = [
         DokumentproduksjonConsumerConfig::class,
-        DokumentproduksjonConsumerProducer::class,
-    ],
-    properties = ["spring.profiles.active:token-test"]
+        DokumentproduksjonConsumerProducer::class
+    ]
 )
 @Import(StsLoginConfig::class)
+@ActiveProfiles("wiremock-test")
 class DokumentproduksjonConsumerTokenTest(
     @Autowired private val dokumentproduksjonConsumer: DokumentproduksjonConsumer,
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,

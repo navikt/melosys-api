@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebClient
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.test.context.ActiveProfiles
 
 @WebMvcTest(
     value = [
@@ -20,9 +21,9 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
         EessiConsumerImpl::class,
         EessiConsumerProducer::class,
         GenericContextClientRequestInterceptor::class
-    ],
-    properties = ["spring.profiles.active:token-test"]
+    ]
 )
+@ActiveProfiles("wiremock-test")
 @AutoConfigureWebClient
 class EessiConsumerTokenTest(
     @Autowired private val eessiConsumer: EessiConsumer,

@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebClient
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.test.context.ActiveProfiles
 
 @WebMvcTest(
     value = [
@@ -25,9 +26,9 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
         SafConsumerImpl::class,
         SafConsumerProducer::class,
         GenericContextExchangeFilter::class
-    ],
-    properties = ["spring.profiles.active:token-test"]
+    ]
 )
+@ActiveProfiles("wiremock-test")
 @AutoConfigureWebClient
 class SafConsumerTokenTest(
     @Autowired private val safConsumer: SafConsumer,

@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebClient
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.test.context.ActiveProfiles
 
 @WebMvcTest(
     value = [
@@ -20,10 +21,10 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 
         ArbeidsforholdRestConsumer::class,
         ArbeidsforholdRestConsumerConfig::class,
-        ArbeidsforholdContextExchangeFilter::class,
-    ],
-    properties = ["spring.profiles.active:token-test"]
+        ArbeidsforholdContextExchangeFilter::class
+    ]
 )
+@ActiveProfiles("wiremock-test")
 @AutoConfigureWebClient
 class AaregConsumerTokenTest(
     @Autowired private val arbeidsforholdRestConsumer: ArbeidsforholdRestConsumer,

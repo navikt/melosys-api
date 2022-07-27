@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebClient
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.test.context.ActiveProfiles
 
 @WebMvcTest(
     value = [
@@ -22,10 +23,10 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
         PDLConsumerImpl::class,
         PDLConsumerProducer::class,
         PDLAuthFilter::class,
-        PDLAuthFilterProducer::class,
-    ],
-    properties = ["spring.profiles.active:token-test"]
+        PDLAuthFilterProducer::class
+    ]
 )
+@ActiveProfiles("wiremock-test")
 @AutoConfigureWebClient
 class PDLConsumerTokenTest(
     @Autowired private val pdlConsumer: PDLConsumer,

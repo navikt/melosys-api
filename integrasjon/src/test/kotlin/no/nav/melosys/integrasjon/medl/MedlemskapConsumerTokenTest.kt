@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebClient
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.test.context.ActiveProfiles
 import java.time.LocalDate
 
 @WebMvcTest(
@@ -22,9 +23,9 @@ import java.time.LocalDate
         MedlemskapRestConsumer::class,
         MedlemskapRestConsumerProducer::class,
         GenericContextExchangeFilter::class
-    ],
-    properties = ["spring.profiles.active:token-test"]
+    ]
 )
+@ActiveProfiles("wiremock-test")
 @AutoConfigureWebClient
 class MedlemskapConsumerTokenTest(
     @Autowired private val medlemskapRestConsumer: MedlemskapRestConsumer,

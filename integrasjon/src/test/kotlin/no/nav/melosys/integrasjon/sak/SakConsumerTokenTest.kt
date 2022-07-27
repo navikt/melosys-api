@@ -8,14 +8,15 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.test.context.ActiveProfiles
 
 @WebMvcTest(
     value = [
         SakConsumerImpl::class,
-        SakConsumerProducer::class,
-    ],
-    properties = ["spring.profiles.active:token-test"]
+        SakConsumerProducer::class
+    ]
 )
+@ActiveProfiles("wiremock-test")
 class SakConsumerTokenTest(
     @Autowired private val sakConsumer: SakConsumer,
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,
