@@ -152,11 +152,6 @@
             <artifactId>person-v3-tjenestespesifikasjon</artifactId>
         </dependency>
 
-        <!--MEDL2-->
-        <dependency>
-            <groupId>no.nav.melosys.ekstern.tjenester</groupId>
-            <artifactId>medlemskapsunntak-api-v1</artifactId>
-        </dependency>
         <!-- Utbetaling -->
         <dependency>
             <groupId>no.nav.tjenestespesifikasjoner</groupId>
