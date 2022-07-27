@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebClient
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.test.context.ActiveProfiles
 
 @WebMvcTest(
     value = [
@@ -25,38 +26,36 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
         SafConsumerImpl::class,
         SafConsumerProducer::class,
         GenericContextExchangeFilter::class
-    ],
-    properties = ["spring.profiles.active:token-test"]
+    ]
 )
+@ActiveProfiles("wiremock-test")
 @AutoConfigureWebClient
 class SafConsumerTokenTest(
     @Autowired private val safConsumer: SafConsumer,
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,
     @Value("\${mockserver.security.port}") mockSecurityPort: Int
-) : ConsumerWireMockTestBase<ByteArray>(mockServiceUnderTestPort, mockSecurityPort) {
+) : ConsumerWireMockTestBase<ByteArray,ByteArray>(mockServiceUnderTestPort, mockSecurityPort) {
 
     @Test
     fun authorizationSkalKommeFraSystem() {
-        executeFromSystem {
-            verifyHeaders(
-                mapOf<String, StringValuePattern>(
-                    Pair("Authorization", WireMock.equalTo("Bearer --token-from-system--")),
-                    Pair("Nav-Consumer-Id", WireMock.equalTo("melosys"))
-                )
+        verifyHeaders(
+            mapOf<String, StringValuePattern>(
+                Pair("Authorization", WireMock.equalTo("Bearer --token-from-system--")),
+                Pair("Nav-Consumer-Id", WireMock.equalTo("melosys"))
             )
-        }
+        )
+        executeFromSystem()
     }
 
     @Test
     fun authorizationSkalKommeFraBruker() {
-        executeFromController {
-            verifyHeaders(
-                mapOf<String, StringValuePattern>(
-                    Pair("Authorization", WireMock.equalTo("Bearer --token-from-user--")),
-                    Pair("Nav-Consumer-Id", WireMock.equalTo("melosys"))
-                )
+        verifyHeaders(
+            mapOf<String, StringValuePattern>(
+                Pair("Authorization", WireMock.equalTo("Bearer --token-from-user--")),
+                Pair("Nav-Consumer-Id", WireMock.equalTo("melosys"))
             )
-        }
+        )
+        executeFromController()
     }
 
     @Test
@@ -93,7 +92,5 @@ class SafConsumerTokenTest(
         return ByteArray(0)
     }
 
-    override fun executeRequest() {
-        safConsumer.hentDokument("1", "1")
-    }
+    override fun executeRequest() = safConsumer.hentDokument("1", "1")
 }

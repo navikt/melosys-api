@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebClient
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.test.context.ActiveProfiles
 
 @WebMvcTest(
     value = [
@@ -20,36 +21,34 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
         EessiConsumerImpl::class,
         EessiConsumerProducer::class,
         GenericContextClientRequestInterceptor::class
-    ],
-    properties = ["spring.profiles.active:token-test"]
+    ]
 )
+@ActiveProfiles("wiremock-test")
 @AutoConfigureWebClient
 class EessiConsumerTokenTest(
     @Autowired private val eessiConsumer: EessiConsumer,
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,
     @Value("\${mockserver.security.port}") mockSecurityPort: Int
-) : ConsumerWireMockTestBase<String>(mockServiceUnderTestPort, mockSecurityPort) {
+) : ConsumerWireMockTestBase<String, List<String>>(mockServiceUnderTestPort, mockSecurityPort) {
 
     @Test
     fun authorizationSkalKommeFraSystem() {
-        executeFromSystem {
-            verifyHeaders(
-                mapOf(
-                    Pair("Authorization", WireMock.equalTo("Bearer --token-from-system--")),
-                )
+        verifyHeaders(
+            mapOf(
+                Pair("Authorization", WireMock.equalTo("Bearer --token-from-system--")),
             )
-        }
+        )
+        executeFromSystem()
     }
 
     @Test
     fun authorizationSkalKommeFraBruker() {
-        executeFromController {
-            verifyHeaders(
-                mapOf(
-                    Pair("Authorization", WireMock.equalTo("Bearer --token-from-user--")),
-                )
+        verifyHeaders(
+            mapOf(
+                Pair("Authorization", WireMock.equalTo("Bearer --token-from-user--")),
             )
-        }
+        )
+        executeFromController()
     }
 
     @Test
@@ -72,7 +71,6 @@ class EessiConsumerTokenTest(
     override fun errorFromServerMessage() = "500 Server Error: \"{\"melding\": \"Internal Server Error\"}\""
     override fun getMockData(): String = "[]"
 
-    override fun executeRequest() {
+    override fun executeRequest() =
         eessiConsumer.hentMuligeAksjoner("123")
-    }
 }
