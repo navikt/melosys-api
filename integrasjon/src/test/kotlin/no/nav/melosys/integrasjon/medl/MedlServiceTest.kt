@@ -34,7 +34,7 @@ import no.nav.melosys.domain.dokument.medlemskap.Periode
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class MedlServiceTest {
-    private val FNR = "77777777773"
+
     private var mockRestConsumer = mockk<MedlemskapRestConsumer>()
     private val objectMapper = ObjectMapper().apply { registerModule(JavaTimeModule()) }
     private val medlService: MedlService = MedlService(mockRestConsumer, objectMapper)
@@ -307,4 +307,8 @@ internal class MedlServiceTest {
         javaClass.classLoader.getResource("mock/medlemskap/gyldigPeriodeResponse.json"),
         MedlemskapsunntakForGet::class.java
     )
+
+    companion object {
+        private const val FNR = "77777777773"
+    }
 }
