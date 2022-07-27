@@ -26,6 +26,7 @@ import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.equality.FieldsEqualityCheckConfig
 import io.kotest.matchers.equality.shouldBeEqualToComparingFields
 import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode
 import no.nav.melosys.domain.dokument.medlemskap.Periode
@@ -62,10 +63,10 @@ internal class MedlServiceTest {
                 Medlemsperiode().apply {
                     id = 123456L
                     type = "PUMEDSKP"
-                    status = "GYLD"
+                    status = PeriodestatusMedl.GYLD.kode
                     grunnlagstype = "IMEDEOS"
                     land = "NOR"
-                    lovvalg = "ENDL"
+                    lovvalg = LovvalgMedl.ENDL.kode
                     trygdedekning = "Unntatt"
                     kildedokumenttype = "Dokument"
                     kilde = "INFOTR"
@@ -76,28 +77,30 @@ internal class MedlServiceTest {
 
     @Test
     fun skalOpprettPeriodeEndelig() {
-        val slot = slot<MedlemskapsunntakForPost>()
+        val medlemskapsunntakForPostCapturingSlot = slot<MedlemskapsunntakForPost>()
         val lovvalgsperiode = lagLovvalgsPeriode()
         every {
-            mockRestConsumer.opprettPeriode(capture(slot))
+            mockRestConsumer.opprettPeriode(capture(medlemskapsunntakForPostCapturingSlot))
         }.answers {
-            val request: MedlemskapsunntakForPost = slot.captured
-            Assertions.assertThat(request.ident).isEqualTo(FNR)
-            Assertions.assertThat(request.fraOgMed).isEqualTo(lovvalgsperiode.fom)
-            Assertions.assertThat(request.tilOgMed).isEqualTo(lovvalgsperiode.tom)
-            Assertions.assertThat(request.status).isEqualTo(PeriodestatusMedl.GYLD.kode)
-            Assertions.assertThat(request.dekning).isEqualTo(DekningMedl.FULL.kode)
-            Assertions.assertThat(request.lovvalgsland).isEqualTo("BEL")
-            Assertions.assertThat(request.lovvalg).isEqualTo(LovvalgMedl.ENDL.kode)
-            Assertions.assertThat(request.grunnlag).isEqualTo("FO_11_4_1")
-            Assertions.assertThat(request.sporingsinformasjon!!.kildedokument)
-                .isEqualTo(KildedokumenttypeMedl.HENV_SOKNAD.getKode())
+            medlemskapsunntakForPostCapturingSlot.captured.shouldBeEqualToComparingFields(
+                MedlemskapsunntakForPost().apply {
+                    ident = FNR
+                    fraOgMed = lovvalgsperiode.fom
+                    tilOgMed = lovvalgsperiode.tom
+                    status = PeriodestatusMedl.GYLD.kode
+                    dekning = DekningMedl.FULL.kode
+                    lovvalgsland = "BEL"
+                    lovvalg = LovvalgMedl.ENDL.kode
+                    grunnlag = GrunnlagMedl.FO_11_4_1.kode
+                    sporingsinformasjon = MedlemskapsunntakForPost.SporingsinformasjonForPost(
+                        kildedokument = KildedokumenttypeMedl.HENV_SOKNAD.getKode()
+                    )
+                }
+            )
             hentMedlemskapsunntak()
         }
-        val opprettPeriodeEndelig =
-            medlService.opprettPeriodeEndelig(FNR, lovvalgsperiode, KildedokumenttypeMedl.HENV_SOKNAD)
-        Assertions.assertThat(opprettPeriodeEndelig).isEqualTo(123456)
-
+        medlService.opprettPeriodeEndelig(FNR, lovvalgsperiode, KildedokumenttypeMedl.HENV_SOKNAD)
+            .shouldBe(123456)
     }
 
     @Test
