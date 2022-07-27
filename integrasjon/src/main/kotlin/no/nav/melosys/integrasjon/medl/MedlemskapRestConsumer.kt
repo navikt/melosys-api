@@ -6,13 +6,11 @@ import no.nav.melosys.integrasjon.medl.api.v1.MedlemskapsunntakForPut
 import no.nav.melosys.integrasjon.felles.RestConsumer
 import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
-import org.springframework.retry.annotation.Retryable
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.util.UriBuilder
 import java.time.LocalDate
 
-@Retryable
-class MedlemskapRestConsumer(private val webClient: WebClient) : RestConsumer {
+open class MedlemskapRestConsumer(private val webClient: WebClient) : RestConsumer {
     fun hentPeriodeListe(fnr: String, fom: LocalDate, tom: LocalDate): List<MedlemskapsunntakForGet> {
         return hentMedlemskapsunntakForPeriode(fnr, fom, tom)!!.toList()
     }
