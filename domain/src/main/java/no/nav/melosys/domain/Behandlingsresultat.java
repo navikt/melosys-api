@@ -436,6 +436,10 @@ public class Behandlingsresultat extends RegistreringsInfo {
         return vedtakMetadata != null;
     }
 
+    public boolean erUtpekingNorgeAvvist() {
+        return type == Behandlingsresultattyper.UTPEKING_NORGE_AVVIST;
+    }
+
     @Override
     public String toString() {
         return "Behandlingsresultat{" +

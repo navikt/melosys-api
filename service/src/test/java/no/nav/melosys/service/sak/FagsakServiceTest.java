@@ -26,6 +26,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper.REGISTRERT_UNNTAK;
+import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper.UTPEKING_NORGE_AVVIST;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.*;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -509,6 +510,27 @@ class FagsakServiceTest {
         long behandlingID = fagsakService.opprettNyVurderingBehandling(saksnummer);
         verify(behandlingService).replikerBehandlingMedNyttBehandlingsresultat(behandling, Behandlingstyper.NY_VURDERING);
 
+        assertThat(behandlingID).isEqualTo(replikertBehandling.getId());
+    }
+
+    @Test
+    void opprettNyVurderingBehandling_kanRevurdereSEDEtterAvsluttetStatus_erUtpekingNorgeAvvist() {
+        final String saksnummer = "MEL-1";
+        Fagsak fagsak = lagFagsakMedBruker();
+        Instant idag = Instant.now();
+        Behandling behandlingSomBleRegistrert = lagBehandling(2L, SED, AVSLUTTET, idag);
+        behandlingSomBleRegistrert.setTema(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
+        Behandlingsresultat behandlingsresultatRegistrert = lagBehandlingsresultat(behandlingSomBleRegistrert, idag, null, UTPEKING_NORGE_AVVIST);
+        fagsak.setBehandlinger(List.of(behandlingSomBleRegistrert));
+        Behandling replikertBehandling = new Behandling();
+        replikertBehandling.setId(3L);
+
+        when(fagsakRepo.findBySaksnummer(saksnummer)).thenReturn(Optional.of(fagsak));
+        when(behandlingService.replikerBehandlingOgBehandlingsresultat(any(), any())).thenReturn(replikertBehandling);
+        when(behandlingsresultatService.hentBehandlingsresultat(behandlingSomBleRegistrert.getId())).thenReturn(behandlingsresultatRegistrert);
+        long behandlingID = fagsakService.opprettNyVurderingBehandling(saksnummer);
+
+        verify(behandlingService).replikerBehandlingOgBehandlingsresultat(behandlingSomBleRegistrert, Behandlingstyper.NY_VURDERING);
         assertThat(behandlingID).isEqualTo(replikertBehandling.getId());
     }
 
