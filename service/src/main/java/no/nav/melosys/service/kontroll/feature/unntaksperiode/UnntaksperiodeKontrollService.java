@@ -5,6 +5,7 @@ import java.util.Objects;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.ErPeriode;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -14,6 +15,8 @@ import no.nav.melosys.service.validering.Kontrollfeil;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import static java.util.Objects.nonNull;
 
 @Service
 public class UnntaksperiodeKontrollService {
@@ -31,8 +34,10 @@ public class UnntaksperiodeKontrollService {
 
     @Transactional(readOnly = true)
     public void kontrollPeriode(Behandling behandling, ErPeriode periode) {
-        List<Kontrollfeil> feilmeldinger = utførKontroll(behandling, periode);
-        sjekkFeilmeldinger(feilmeldinger);
+        if (nonNull(behandling.hentSedDokument())) {
+            List<Kontrollfeil> feilmeldinger = utførKontroll(behandling.getTema(), periode);
+            sjekkFeilmeldinger(feilmeldinger);
+        }
     }
 
     @NotNull
@@ -46,9 +51,9 @@ public class UnntaksperiodeKontrollService {
         return behandling;
     }
 
-    private List<Kontrollfeil> utførKontroll(Behandling behandling, ErPeriode periode) {
+    private List<Kontrollfeil> utførKontroll(Behandlingstema behandlingstema, ErPeriode periode) {
         UnntaksperiodeKontrollData kontrollData = new UnntaksperiodeKontrollData(periode.getFom(), periode.getTom());
-        return UnntaksperiodeKontrollsett.hentRegelsett(behandling)
+        return UnntaksperiodeKontrollsett.hentRegelsett(behandlingstema)
             .stream()
             .map(f -> f.apply(kontrollData))
             .filter(Objects::nonNull)
