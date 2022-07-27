@@ -4,7 +4,7 @@ import java.util.Collection;
 
 import no.nav.melosys.exception.validering.KontrollfeilDto;
 
-public class ValideringException extends Exception {
+public class ValideringException extends RuntimeException {
 
     private final Collection<KontrollfeilDto> feilkoder;
 

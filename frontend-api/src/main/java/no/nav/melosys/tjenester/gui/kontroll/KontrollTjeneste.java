@@ -1,4 +1,4 @@
-package no.nav.melosys.tjenester.gui;
+package no.nav.melosys.tjenester.gui.kontroll;
 
 import io.swagger.annotations.Api;
 import no.nav.melosys.exception.FunksjonellException;
@@ -31,7 +31,7 @@ public class KontrollTjeneste {
         this.aksesskontroll = aksesskontroll;
     }
 
-    @PostMapping("ferdigbehandling")
+    @PostMapping("/ferdigbehandling")
     public ResponseEntity<Void> kontrollerFerdigbehandling(@RequestBody FerdigbehandlingKontrollerDto ferdigbehandlingKontrollerDto) throws ValideringException {
 
         if (ferdigbehandlingKontrollerDto.vedtakstype() == null) {
