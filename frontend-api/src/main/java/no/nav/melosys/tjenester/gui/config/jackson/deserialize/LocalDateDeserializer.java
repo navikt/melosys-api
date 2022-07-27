@@ -1,4 +1,4 @@
-package no.nav.melosys.domain.serializer;
+package no.nav.melosys.tjenester.gui.config.jackson.deserialize;
 
 import java.io.IOException;
 import java.io.Serial;
@@ -13,21 +13,17 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 
-public class MultiDateDeserializer extends StdDeserializer<LocalDate> {
+public class LocalDateDeserializer extends StdDeserializer<LocalDate> {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    private static final String[] DATE_FORMATS = new String[]{
+    private static final String[] SUPPORTED_DATE_FORMATS = new String[]{
         "dd.MM.yyyy",
         "yyyy-MM-dd",
     };
 
-    public MultiDateDeserializer() { // Prevents InvalidDefinitionException
-        this(null);
-    }
-
-    public MultiDateDeserializer(Class<?> vc) {
-        super(vc);
+    public LocalDateDeserializer() {
+        super(LocalDate.class);
     }
 
     @Override
@@ -35,13 +31,13 @@ public class MultiDateDeserializer extends StdDeserializer<LocalDate> {
         JsonNode jsonNode = jsonParser.getCodec().readTree(jsonParser);
         String dateString = jsonNode.textValue();
 
-        for (String dateFormat : DATE_FORMATS) {
+        for (String dateFormat : SUPPORTED_DATE_FORMATS) {
             try {
                 return LocalDate.parse(dateString, DateTimeFormatter.ofPattern(dateFormat));
             } catch (DateTimeParseException ignore) {
             }
         }
         throw new JsonParseException(jsonParser, "Cannot parse date '%s'. Supported formats: %s"
-            .formatted(dateString, Arrays.toString(DATE_FORMATS)));
+            .formatted(dateString, Arrays.toString(SUPPORTED_DATE_FORMATS)));
     }
 }
