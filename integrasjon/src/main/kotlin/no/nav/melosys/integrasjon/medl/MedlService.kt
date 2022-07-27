@@ -28,36 +28,34 @@ class MedlService(
     fun hentPeriodeListe(fnr: String, fom: LocalDate, tom: LocalDate): Saksopplysning {
         val periodeListeResponse = medlemskapRestConsumer.hentPeriodeListe(fnr, fom, tom)
 
-        val medlemsperioder = periodeListeResponse.map {
-            Medlemsperiode().apply {
-                id = it.unntakId
-                periode = Periode(it.fraOgMed, it.tilOgMed)
-                type = if (it.medlem!!) "PMMEDSKP" else "PUMEDSKP"
-                status = it.status
-                grunnlagstype = it.grunnlag
-                land = it.lovvalgsland
-                lovvalg = it.lovvalg
-                trygdedekning = it.dekning
-                kildedokumenttype = it.sporingsinformasjon!!.kildedokument
-                kilde = it.sporingsinformasjon!!.kilde
+        return Saksopplysning().apply {
+            type = SaksopplysningType.MEDL
+            versjon = MEDLEMSKAP_VERSJON
+            dokument = MedlemskapDokument().apply {
+                medlemsperiode = periodeListeResponse.map {
+                    Medlemsperiode().apply {
+                        id = it.unntakId
+                        periode = Periode(it.fraOgMed, it.tilOgMed)
+                        type = if (it.medlem!!) "PMMEDSKP" else "PUMEDSKP"
+                        status = it.status
+                        grunnlagstype = it.grunnlag
+                        land = it.lovvalgsland
+                        lovvalg = it.lovvalg
+                        trygdedekning = it.dekning
+                        kildedokumenttype = it.sporingsinformasjon!!.kildedokument
+                        kilde = it.sporingsinformasjon!!.kilde
+                    }
+                }
+            }
+            try {
+                leggTilKildesystemOgMottattDokument(
+                    SaksopplysningKildesystem.MEDL,
+                    objectMapper.writeValueAsString(periodeListeResponse)
+                )
+            } catch (e: JsonProcessingException) {
+                throw TekniskException("Kunne ikke lagre kildedokument fra MEDL")
             }
         }
-
-        val medlemskapDokument = MedlemskapDokument()
-        medlemskapDokument.medlemsperiode = medlemsperioder
-        val saksopplysning = Saksopplysning()
-        saksopplysning.type = SaksopplysningType.MEDL
-        saksopplysning.versjon = MEDLEMSKAP_VERSJON
-        saksopplysning.dokument = medlemskapDokument
-        try {
-            saksopplysning.leggTilKildesystemOgMottattDokument(
-                SaksopplysningKildesystem.MEDL,
-                objectMapper.writeValueAsString(periodeListeResponse)
-            )
-        } catch (e: JsonProcessingException) {
-            throw TekniskException("Kunne ikke lagre kildedokument fra MEDL")
-        }
-        return saksopplysning
     }
 
     fun opprettPeriodeEndelig(
