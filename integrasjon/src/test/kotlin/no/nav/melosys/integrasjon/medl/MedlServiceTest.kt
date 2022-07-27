@@ -2,7 +2,6 @@ package no.nav.melosys.integrasjon.medl
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import io.mockk.every
 import no.nav.melosys.domain.Lovvalgsperiode
 import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument
@@ -20,8 +19,16 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.time.LocalDate
 import java.util.*
+import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.equality.FieldsEqualityCheckConfig
+import io.kotest.matchers.equality.shouldBeEqualToComparingFields
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.types.shouldBeInstanceOf
+import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode
+import no.nav.melosys.domain.dokument.medlemskap.Periode
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class MedlServiceTest {
@@ -37,20 +44,34 @@ internal class MedlServiceTest {
                 FNR, LocalDate.now(), LocalDate.now()
             )
         } returns hentMedlemskapsunntakListe()
+
         val saksopplysning = medlService.hentPeriodeListe(FNR, LocalDate.now(), LocalDate.now())
 
-        Assertions.assertThat(saksopplysning).isNotNull
-        Assertions.assertThat(saksopplysning.kilder).isNotEmpty
-        Assertions.assertThat(saksopplysning.kilder.iterator().next().mottattDokument).isNotNull
-        val medlemskapDokument = saksopplysning.dokument as MedlemskapDokument
-        Assertions.assertThat(medlemskapDokument).isNotNull
-        Assertions.assertThat(medlemskapDokument.getMedlemsperiode()).hasSize(1)
-        val medlemsperiode = medlemskapDokument.getMedlemsperiode()[0]
-        Assertions.assertThat(medlemsperiode.getType()).isEqualTo("PUMEDSKP")
-        Assertions.assertThat(medlemsperiode.getStatus()).isEqualTo(PeriodestatusMedl.GYLD.kode)
-        Assertions.assertThat(medlemsperiode.getLovvalg()).isEqualTo(LovvalgMedl.ENDL.kode)
-        Assertions.assertThat(medlemsperiode.getKilde()).isEqualTo("INFOTR")
-        Assertions.assertThat(medlemsperiode.getGrunnlagstype()).isEqualTo("IMEDEOS")
+        saksopplysning
+            .shouldNotBeNull()
+            .kilder
+            .shouldHaveSize(1)
+            .first()
+            .mottattDokument.isNullOrEmpty()
+
+        saksopplysning.dokument
+            .shouldBeInstanceOf<MedlemskapDokument>()
+            .medlemsperiode.shouldHaveSize(1)
+            .first()
+            .shouldBeEqualToComparingFields(
+                Medlemsperiode().apply {
+                    id = 123456L
+                    type = "PUMEDSKP"
+                    status = "GYLD"
+                    grunnlagstype = "IMEDEOS"
+                    land = "NOR"
+                    lovvalg = "ENDL"
+                    trygdedekning = "Unntatt"
+                    kildedokumenttype = "Dokument"
+                    kilde = "INFOTR"
+                    periode = Periode(LocalDate.of(2021, 9, 1), LocalDate.of(2021, 10, 1))
+                }, FieldsEqualityCheckConfig(ignorePrivateFields = false)
+            )
     }
 
     @Test
@@ -255,7 +276,7 @@ internal class MedlServiceTest {
         ).toList()
     }
 
-    private fun hentMedlemskapsunntak(): MedlemskapsunntakForGet? {
+    private fun hentMedlemskapsunntak(): MedlemskapsunntakForGet {
         return objectMapper.readValue(
             javaClass.classLoader.getResource("mock/medlemskap/gyldigPeriodeResponse.json"),
             MedlemskapsunntakForGet::class.java
