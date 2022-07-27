@@ -129,7 +129,8 @@ class UnntaksperiodeServiceTest {
         verify(lovvalgsperiodeService).lagreLovvalgsperioder(1L, forventedeLovvalgsperioder);
         verify(prosessinstansService).opprettProsessinstansGodkjennUnntaksperiode(any(), eq(false), eq(null));
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
-        verify(unntaksperiodeKontrollService).kontrollPeriode(behandling, new Periode(unntaksperiode.fom(), unntaksperiode.tom()));
+        verify(unntaksperiodeKontrollService).kontrollPeriode(sedDokument, new Periode(unntaksperiode.fom(),
+            unntaksperiode.tom()));
     }
 
     @Test

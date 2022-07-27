@@ -3,57 +3,48 @@ package no.nav.melosys.service.kontroll.feature.unntaksperiode;
 import java.util.List;
 import java.util.Objects;
 
-import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.ErPeriode;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
+import no.nav.melosys.domain.dokument.sed.SedDokument;
+import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.ValideringException;
-import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.kontroll.feature.unntaksperiode.data.UnntaksperiodeKontrollData;
 import no.nav.melosys.service.kontroll.feature.unntaksperiode.kontroll.UnntaksperiodeKontrollsett;
+import no.nav.melosys.service.saksopplysninger.SaksopplysningerService;
 import no.nav.melosys.service.validering.Kontrollfeil;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import static java.util.Objects.nonNull;
 
 @Service
 public class UnntaksperiodeKontrollService {
-    private final BehandlingService behandlingService;
+    private final SaksopplysningerService saksopplysningerService;
 
-    public UnntaksperiodeKontrollService(BehandlingService behandlingService) {
-        this.behandlingService = behandlingService;
+    public UnntaksperiodeKontrollService(SaksopplysningerService saksopplysningerService) {
+        this.saksopplysningerService = saksopplysningerService;
     }
 
-    @Transactional(readOnly = true)
     public void kontrollPeriode(Long behandlingID, ErPeriode periode) {
-        Behandling behandling = hentBehandling(behandlingID);
-        kontrollPeriode(behandling, periode);
+        SedDokument sedDokument = hentSedDokument(behandlingID);
+        kontrollPeriode(sedDokument, periode);
     }
 
-    @Transactional(readOnly = true)
-    public void kontrollPeriode(Behandling behandling, ErPeriode periode) {
-        if (nonNull(behandling.hentSedDokument())) {
-            List<Kontrollfeil> feilmeldinger = utførKontroll(behandling.getTema(), periode);
-            sjekkFeilmeldinger(feilmeldinger);
-        }
+    public void kontrollPeriode(SedDokument sedDokument, ErPeriode periode) {
+        List<Kontrollfeil> feilmeldinger = utførKontroll(sedDokument.getSedType(), periode);
+        sjekkFeilmeldinger(feilmeldinger);
     }
 
     @NotNull
-    private Behandling hentBehandling(Long behandlingID) {
-        Behandling behandling = behandlingService.hentBehandling(behandlingID);
-        if (behandling.hentSedDokument() == null) {
+    private SedDokument hentSedDokument(Long behandlingID) {
+        return saksopplysningerService.finnSedOpplysninger(behandlingID).orElseThrow(() -> {
             String feilmelding = "Ugyldig bruk av API for behandling" +
-                " med behandlingID '%s'. Mangler SED Dokument.".formatted(behandling.getId());
+                " med behandlingID '%s'. Mangler SED Dokument.".formatted(behandlingID);
             throw new FunksjonellException(feilmelding);
-        }
-        return behandling;
+        });
     }
 
-    private List<Kontrollfeil> utførKontroll(Behandlingstema behandlingstema, ErPeriode periode) {
+    private List<Kontrollfeil> utførKontroll(SedType sedType, ErPeriode periode) {
         UnntaksperiodeKontrollData kontrollData = new UnntaksperiodeKontrollData(periode.getFom(), periode.getTom());
-        return UnntaksperiodeKontrollsett.hentRegelsett(behandlingstema)
+        return UnntaksperiodeKontrollsett.hentRegelsett(sedType)
             .stream()
             .map(f -> f.apply(kontrollData))
             .filter(Objects::nonNull)

@@ -74,7 +74,8 @@ public class UnntaksperiodeService {
             throw new FunksjonellException("Behandling %s har feil i perioden med periode %s til %s"
                 .formatted(behandling.getId(), periode.getFom(), periode.getTom()));
         }
-        unntaksperiodeKontrollService.kontrollPeriode(behandling, periode);
+        behandling.finnSedDokument()
+            .ifPresent(sedDokument -> unntaksperiodeKontrollService.kontrollPeriode(sedDokument, periode));
     }
 
     private ErPeriode hentPeriode(Behandling behandling, UnntaksperiodeGodkjenning unntaksperiodeGodkjenning) {
