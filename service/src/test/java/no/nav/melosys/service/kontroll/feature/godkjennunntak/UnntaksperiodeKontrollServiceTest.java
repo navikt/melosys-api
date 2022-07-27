@@ -107,7 +107,7 @@ class UnntaksperiodeKontrollServiceTest {
             LocalDate.of(2050, 1, 1),
             LocalDate.of(2052, 1, 5));
         sedDokument.setSedType(SedType.A003);
-
+        behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
         assertThatCode(() -> unntaksperiodeKontrollService.kontrollPeriode(1L, gyldigPeriode))
             .doesNotThrowAnyException();
     }
