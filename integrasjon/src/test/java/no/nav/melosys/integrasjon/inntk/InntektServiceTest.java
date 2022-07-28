@@ -26,7 +26,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
-public class InntektServiceTest {
+class InntektServiceTest {
 
     @Spy
     private InntektMock inntektMock = new InntektMock();
@@ -37,20 +37,20 @@ public class InntektServiceTest {
     private ArgumentCaptor<HentInntektListeBolkRequest> captor;
 
     @BeforeEach
-    public void setUp() {
-        DokumentFactory dokumentFactory = new DokumentFactory(JaxbConfig.jaxb2Marshaller(), new XsltTemplatesFactory());
+    void setUp() {
+        DokumentFactory dokumentFactory = new DokumentFactory(JaxbConfig.getJaxb2Marshaller(), new XsltTemplatesFactory());
         inntektService = new InntektService(inntektMock, dokumentFactory);
     }
 
     @Test
-    public void hentInntektListe_periodeEtterJan2015_henterInntekt() {
+    void hentInntektListe_periodeEtterJan2015_henterInntekt() {
         Saksopplysning saksopplysning = inntektService.hentInntektListe("99999999992", YearMonth.of(2017, 6), YearMonth.of(2017, 8));
         InntektDokument dokument = (InntektDokument) saksopplysning.getDokument();
         assertThat(dokument).isNotNull();
     }
 
     @Test
-    public void hentInntektListe_fomFørJan2015_henterInntektMedFomJan2015() throws Exception {
+    void hentInntektListe_fomFørJan2015_henterInntektMedFomJan2015() throws Exception {
         Saksopplysning saksopplysning = inntektService.hentInntektListe("99999999992", YearMonth.of(2014, 6), YearMonth.of(2017, 8));
         InntektDokument dokument = (InntektDokument) saksopplysning.getDokument();
         assertThat(dokument).isNotNull();
@@ -65,7 +65,7 @@ public class InntektServiceTest {
     }
 
     @Test
-    public void hentInntektListe_helePeriodeFørJan2015_returnererTomInntektListe() throws HentInntektListeBolkUgyldigInput, HentInntektListeBolkHarIkkeTilgangTilOensketAInntektsfilter {
+    void hentInntektListe_helePeriodeFørJan2015_returnererTomInntektListe() throws HentInntektListeBolkUgyldigInput, HentInntektListeBolkHarIkkeTilgangTilOensketAInntektsfilter {
         Saksopplysning saksopplysning = inntektService.hentInntektListe("99999999992", YearMonth.of(2012, 1), YearMonth.of(2014, 12));
 
         verify(inntektMock, never()).hentInntektListeBolk(any());

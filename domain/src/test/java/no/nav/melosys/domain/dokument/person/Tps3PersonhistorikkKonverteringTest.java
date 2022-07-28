@@ -24,7 +24,7 @@ class Tps3PersonhistorikkKonverteringTest implements KonverteringTest {
 
     @BeforeEach
     void setUp() {
-        Jaxb2Marshaller marshaller = JaxbConfig.jaxb2Marshaller();
+        Jaxb2Marshaller marshaller = JaxbConfig.getJaxb2Marshaller();
         XsltTemplatesFactory xsltTemplatesFactory = new XsltTemplatesFactory();
         factory = new DokumentFactory(marshaller, xsltTemplatesFactory);
     }
