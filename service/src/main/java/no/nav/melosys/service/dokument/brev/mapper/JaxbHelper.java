@@ -8,22 +8,43 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
+import javax.xml.bind.helpers.DefaultValidationEventHandler;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 
-import no.nav.melosys.domain.dokument.jaxb.JaxbConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.xml.sax.SAXException;
 
 public final class JaxbHelper {
+
+    private static final Logger log = LoggerFactory.getLogger(JaxbHelper.class);
     private static final Map<String, Schema> SCHEMAS = new ConcurrentHashMap<>();
 
     private JaxbHelper() {
         // Utility class
     }
 
+    private static class Singleton {
+        private static final Jaxb2Marshaller INSTANCE = createMarshaller();
+
+        private static Jaxb2Marshaller createMarshaller() {
+            Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
+            marshaller.setPackagesToScan("no.nav.melosys.domain.dokument", "no.nav.dok.melosysbrev");
+            marshaller.setValidationEventHandler(new DefaultValidationEventHandler());
+            try {
+                marshaller.afterPropertiesSet();
+            } catch (Exception e) {
+                log.error("Initialsering av Jaxb2Marshaller feilet: ", e);
+            }
+            return marshaller;
+        }
+    }
+
     public static String marshalAndValidate(Object jaxbObject, String xsdLocation) throws JAXBException, SAXException {
-        Marshaller marshaller = JaxbConfig.jaxb2Marshaller().createMarshaller();
+        Marshaller marshaller = Singleton.INSTANCE.createMarshaller();
 
         marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
         Schema schema = getSchema(xsdLocation);
