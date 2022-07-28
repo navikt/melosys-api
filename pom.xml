@@ -54,7 +54,7 @@
         <token-validation-test-support.version>2.0.5</token-validation-test-support.version>
 
         <!-- Versjoner av eksterne biblioteker -->
-        <archunit.version>0.23.1</archunit.version>
+        <archunit.version>1.0.0-rc1</archunit.version>
         <apache-httpclients.version>4.5.13</apache-httpclients.version>
         <caffeine.version>3.0.6</caffeine.version>
         <cxf.version>3.5.3</cxf.version>
@@ -73,6 +73,7 @@
         <jms-api.version>2.0.1</jms-api.version>
         <kotest.version>5.3.2</kotest.version>
         <mockito-kotlin.version>4.0.0</mockito-kotlin.version>
+        <mockk.version>1.12.5</mockk.version>
         <micrometer-jvm-extras.version>0.2.2</micrometer-jvm-extras.version>
         <networknt.json-schema-validator.version>1.0.68</networknt.json-schema-validator.version>
         <ojdbc.version>21.5.0.0</ojdbc.version>
@@ -240,6 +241,11 @@
                 <groupId>io.github.mweirauch</groupId>
                 <artifactId>micrometer-jvm-extras</artifactId>
                 <version>${micrometer-jvm-extras.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.mockk</groupId>
+                <artifactId>mockk</artifactId>
+                <version>${mockk.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.springfox</groupId>

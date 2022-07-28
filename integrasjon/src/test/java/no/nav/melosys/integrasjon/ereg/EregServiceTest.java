@@ -12,18 +12,18 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-public class EregServiceTest {
+class EregServiceTest {
     private EregService eregService;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         OrganisasjonConsumer organisasjonMock = new OrganisasjonMock();
-        DokumentFactory dokumentFactory = new DokumentFactory(JaxbConfig.jaxb2Marshaller(), new XsltTemplatesFactory());
+        DokumentFactory dokumentFactory = new DokumentFactory(JaxbConfig.getJaxb2Marshaller(), new XsltTemplatesFactory());
         eregService = new EregService(organisasjonMock, dokumentFactory);
     }
 
     @Test
-    public void getOrganisasjon() throws Exception {
+    void getOrganisasjon() {
         Saksopplysning saksopplysning = eregService.hentOrganisasjon("873102322");
         OrganisasjonDokument organisasjonDokument = (OrganisasjonDokument) saksopplysning.getDokument();
         assertThat(organisasjonDokument.getOrganisasjonDetaljer().getNavn().get(0).getRedigertNavn()).isEqualTo("MULTICONSULT ASA");

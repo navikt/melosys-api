@@ -5,6 +5,7 @@ import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
+import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
 
 @ActiveProfiles("test")
@@ -16,5 +17,6 @@ import org.springframework.test.context.ActiveProfiles
 @Import(
     ComponentTestConfig::class
 )
+@DirtiesContext
 @EnableMockOAuth2Server
 class ComponentTestBase : OracleTestContainerBase()

@@ -22,19 +22,19 @@ import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class Aareg3KonverteringTest {
+class Aareg3KonverteringTest {
 
     private DokumentFactory factory;
 
     @BeforeEach
-    public void setUp() {
-        Jaxb2Marshaller marshaller = JaxbConfig.jaxb2Marshaller();
+    void setUp() {
+        Jaxb2Marshaller marshaller = JaxbConfig.getJaxb2Marshaller();
         XsltTemplatesFactory xsltTemplatesFactory = new XsltTemplatesFactory();
         factory = new DokumentFactory(marshaller, xsltTemplatesFactory);
     }
 
     @Test
-    public void transform() throws TransformerFactoryConfigurationError, TransformerException, IOException, JAXBException {
+    void transform() throws TransformerFactoryConfigurationError, TransformerException, IOException, JAXBException {
         InputStream xslt = getClass().getClassLoader().getResourceAsStream("aareg/arbeidsforhold_3.0.xslt");
         InputStream kilde = getClass().getClassLoader().getResourceAsStream("arbeidsforhold/99999999999_med_mock.xml");
 
@@ -68,7 +68,7 @@ public class Aareg3KonverteringTest {
     }
 
     @Test
-    public void maritimArbeidsavtale() throws IOException {
+    void maritimArbeidsavtale() throws IOException {
         final String ressurs = "arbeidsforhold/99999999999_med_mock.xml";
         final InputStream kilde = getClass().getClassLoader().getResourceAsStream(ressurs);
 
