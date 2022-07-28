@@ -20,7 +20,7 @@ import org.springframework.test.context.ActiveProfiles
         DokumentproduksjonConsumerProducer::class
     ]
 )
-@Import(StsLoginConfig::class, StsProdConfig::class)
+@Import(StsLoginConfig::class, StsProdConfig::class, StsProdConfig::class)
 @ActiveProfiles("wiremock-test")
 class DokumentproduksjonConsumerTokenTest(
     @Autowired private val dokumentproduksjonConsumer: DokumentproduksjonConsumer,
