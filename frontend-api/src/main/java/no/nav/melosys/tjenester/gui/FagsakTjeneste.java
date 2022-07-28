@@ -72,7 +72,7 @@ public class FagsakTjeneste {
         this.organisasjonOppslagService = organisasjonOppslagService;
     }
 
-    @GetMapping("{saksnr}")
+    @GetMapping("/{saksnr}")
     @ApiOperation(value = "Henter en sak med et gitt saksnummer", notes = ("Spesifikke saker kan hentes via saksnummer."))
     public ResponseEntity<FagsakDto> hentFagsak(@PathVariable("saksnr") String saksnummer) {
         Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
