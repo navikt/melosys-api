@@ -11,8 +11,10 @@ import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.util.UriBuilder
 import java.time.LocalDate
 
+@Retryable
 open class MedlemskapRestConsumer(private val webClient: WebClient) : RestConsumer {
-    @Retryable
+    // Metoder må være open for at retry skal funke og at webClient ikke skal bli null
+    // https://github.com/spring-projects/spring-framework/issues/26729
     open fun hentPeriodeListe(fnr: String, fom: LocalDate, tom: LocalDate): List<MedlemskapsunntakForGet> {
         return hentMedlemskapsunntakForPeriode(fnr, fom, tom)!!.toList()
     }
@@ -37,7 +39,6 @@ open class MedlemskapRestConsumer(private val webClient: WebClient) : RestConsum
             .block()!!
     }
 
-    @Retryable
     open fun hentPeriode(periodeId: String?) = webClient.get()
         .uri("/{periodeId}?inkluderSporingsinfo={inkluderSporingsinfo}", periodeId, true)
         .accept(MediaType.APPLICATION_JSON)
@@ -45,10 +46,8 @@ open class MedlemskapRestConsumer(private val webClient: WebClient) : RestConsum
         .bodyToMono(MedlemskapsunntakForGet::class.java)
         .block()!!
 
-    @Retryable
     open fun opprettPeriode(request: MedlemskapsunntakForPost) = utfør(request, HttpMethod.POST)
 
-    @Retryable
     open fun oppdaterPeriode(request: MedlemskapsunntakForPut) = utfør(request, HttpMethod.PUT)
 
     private fun utfør(request: Any, method: HttpMethod) = webClient.method(method)
