@@ -2,8 +2,7 @@ package no.nav.melosys.integrasjon.inntk.inntekt;
 
 
 import no.nav.melosys.sikkerhet.sts.NAVSTSClient;
-import no.nav.melosys.sikkerhet.sts.StsConfigurationUtil;
-import no.nav.melosys.sikkerhet.sts.StsLoginConfig;
+import no.nav.melosys.sikkerhet.sts.StsConfig;
 import no.nav.tjeneste.virksomhet.inntekt.v3.binding.InntektV3;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,11 +12,11 @@ import org.springframework.context.annotation.Configuration;
 public class InntektConsumerProducer {
 
     private final InntektConsumerConfig config;
-    private final StsLoginConfig stsLoginConfig;
+    private final StsConfig stsConfig;
 
-    public InntektConsumerProducer(InntektConsumerConfig config, StsLoginConfig stsLoginConfig) {
+    public InntektConsumerProducer(InntektConsumerConfig config, StsConfig stsConfig) {
         this.config = config;
-        this.stsLoginConfig = stsLoginConfig;
+        this.stsConfig = stsConfig;
     }
 
     @Bean
@@ -33,7 +32,7 @@ public class InntektConsumerProducer {
     }
 
     private InntektV3 wrapWithSts(InntektV3 port) {
-        return StsConfigurationUtil.wrapWithSts(port, NAVSTSClient.StsClientType.SYSTEM_SAML, stsLoginConfig);
+        return stsConfig.wrapWithSts(port, NAVSTSClient.StsClientType.SYSTEM_SAML);
     }
 
 }

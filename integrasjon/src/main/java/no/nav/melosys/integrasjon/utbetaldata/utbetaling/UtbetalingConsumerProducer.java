@@ -1,8 +1,7 @@
 package no.nav.melosys.integrasjon.utbetaldata.utbetaling;
 
 import no.nav.melosys.sikkerhet.sts.NAVSTSClient;
-import no.nav.melosys.sikkerhet.sts.StsConfigurationUtil;
-import no.nav.melosys.sikkerhet.sts.StsLoginConfig;
+import no.nav.melosys.sikkerhet.sts.StsConfig;
 import no.nav.tjeneste.virksomhet.utbetaling.v1.UtbetalingV1;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,11 +9,11 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class UtbetalingConsumerProducer {
     private final UtbetalingConsumerConfig consumerConfig;
-    private final StsLoginConfig stsLoginConfig;
+    private final StsConfig stsConfig;
 
-    public UtbetalingConsumerProducer(UtbetalingConsumerConfig consumerConfig, StsLoginConfig stsLoginConfig) {
+    public UtbetalingConsumerProducer(UtbetalingConsumerConfig consumerConfig, StsConfig stsConfig) {
         this.consumerConfig = consumerConfig;
-        this.stsLoginConfig = stsLoginConfig;
+        this.stsConfig = stsConfig;
     }
 
     @Bean
@@ -30,6 +29,6 @@ public class UtbetalingConsumerProducer {
     }
 
     UtbetalingV1 wrapWithSts(UtbetalingV1 port) {
-        return StsConfigurationUtil.wrapWithSts(port, NAVSTSClient.StsClientType.SYSTEM_SAML, stsLoginConfig);
+        return stsConfig.wrapWithSts(port, NAVSTSClient.StsClientType.SYSTEM_SAML);
     }
 }
