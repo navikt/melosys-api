@@ -6,7 +6,7 @@ import java.time.LocalDateTime
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class Sporingsinformasjon(
-    var versjon: Int? = 0,
+    var versjon: Int? = null,
     var registrert: LocalDate? = null,
     var besluttet: LocalDate? = null,
     var kilde: String? = null,
