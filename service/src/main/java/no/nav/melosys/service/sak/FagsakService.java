@@ -310,19 +310,19 @@ public class FagsakService {
         var førsteBehandling = fagsak.hentTidligstRegistrertBehandling();
 
         if (førsteBehandling.getType() == Behandlingstyper.SOEKNAD || førsteBehandling.erBeslutningLovvalgNorge()) {
-            return hentBehandlingMedSistRegistrertVedtak(fagsak);
+            return hentBehandlingMedSistRegistrertVedtakEllerAvvisning(fagsak);
         } else if (førsteBehandling.getType() == Behandlingstyper.SED) {
             return hentBehandlingMedSistRegistrertUnntak(fagsak);
         }
         return Optional.empty();
     }
 
-    public Optional<Behandling> hentBehandlingMedSistRegistrertVedtak(Fagsak fagsak) {
+    public Optional<Behandling> hentBehandlingMedSistRegistrertVedtakEllerAvvisning(Fagsak fagsak) {
         return fagsak.getBehandlinger().stream()
             .map(behandling -> behandlingsresultatService.hentBehandlingsresultat(behandling.getId()))
             .filter(Objects::nonNull)
-            .filter(Behandlingsresultat::harVedtak)
-            .max(Comparator.comparing(behandlingsresultat -> behandlingsresultat.getVedtakMetadata().getRegistrertDato()))
+            .filter(behandlingsresultat -> behandlingsresultat.harVedtak() || behandlingsresultat.erUtpekingNorgeAvvist())
+            .max(Comparator.comparing(Behandlingsresultat::getRegistrertDato))
             .map(Behandlingsresultat::getBehandling);
     }
 

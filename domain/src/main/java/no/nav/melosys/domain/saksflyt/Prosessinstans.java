@@ -276,15 +276,8 @@ public class Prosessinstans {
 
     @Override
     public String toString() {
-        return "Prosessinstans{" +
-            "id=" + id +
-            ", type=" + type +
-            ", behandling=" + behandling +
-            ", data=" + data +
-            ", sistFullførtSteg=" + sistFullførtSteg +
-            ", registrertDato=" + registrertDato +
-            ", endretDato=" + endretDato +
-            ", hendelser=" + hendelser +
-            '}';
+        return "Prosessinstans{" + "id=" + id + ", type=" + type + ", status=" + status + ", behandling=" + behandling
+            + ", sistFullførtSteg=" + sistFullførtSteg + ", registrertDato=" + registrertDato
+            + ", endretDato=" + endretDato + ", hendelser=" + hendelser + ", låsReferanse='" + låsReferanse + '\'' + '}';
     }
 }

@@ -9,6 +9,7 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.BehandlingsresultatBegrunnelse;
 import no.nav.melosys.domain.ErPeriode;
 import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.dokument.medlemskap.Periode;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak;
@@ -17,6 +18,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
+import no.nav.melosys.service.kontroll.feature.unntaksperiode.UnntaksperiodeKontrollService;
 import no.nav.melosys.service.kontroll.regler.PeriodeRegler;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
@@ -33,30 +35,26 @@ public class UnntaksperiodeService {
     private final LovvalgsperiodeService lovvalgsperiodeService;
     private final OppgaveService oppgaveService;
     private final ProsessinstansService prosessinstansService;
+    private final UnntaksperiodeKontrollService unntaksperiodeKontrollService;
 
     public UnntaksperiodeService(BehandlingService behandlingService,
                                  BehandlingsresultatService behandlingsresultatService,
                                  LovvalgsperiodeService lovvalgsperiodeService,
                                  OppgaveService oppgaveService,
-                                 ProsessinstansService prosessinstansService) {
+                                 ProsessinstansService prosessinstansService,
+                                 UnntaksperiodeKontrollService unntaksperiodeKontrollService) {
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
         this.oppgaveService = oppgaveService;
         this.prosessinstansService = prosessinstansService;
+        this.unntaksperiodeKontrollService = unntaksperiodeKontrollService;
     }
 
     @Transactional
     public void godkjennPeriode(long behandlingID, UnntaksperiodeGodkjenning unntaksperiodeGodkjenning) {
         Behandling behandling = hentOgValiderBehandling(behandlingID);
-
-        final var endretPeriode = unntaksperiodeGodkjenning.endretPeriode();
-        if (endretPeriode == null) {
-            validerPeriodeFraBehandling(behandling);
-        } else {
-            validerEndretPeriode(endretPeriode);
-        }
-
+        validerPeriode(behandling, unntaksperiodeGodkjenning);
         opprettLovvalgsperiode(behandlingID, behandling.hentSedDokument(), unntaksperiodeGodkjenning);
         behandlingsresultatService.oppdaterUtfallRegistreringUnntak(behandlingID, Utfallregistreringunntak.GODKJENT);
         prosessinstansService.opprettProsessinstansGodkjennUnntaksperiode(
@@ -67,22 +65,27 @@ public class UnntaksperiodeService {
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 
-    private void validerEndretPeriode(Unntaksperiode endretPeriode) {
-        if (endretPeriode.fom() == null || endretPeriode.tom() == null) {
-            throw new FunksjonellException("Oppgi både startdato og sluttdato ved endring av periode");
+    private void validerPeriode(Behandling behandling, UnntaksperiodeGodkjenning unntaksperiodeGodkjenning) {
+        ErPeriode periode = hentPeriode(behandling, unntaksperiodeGodkjenning);
+        if (periode.getFom() == null || periode.getTom() == null) {
+            throw new FunksjonellException("Oppgi både startdato og sluttdato på perioden");
         }
-        if (PeriodeRegler.feilIPeriode(endretPeriode.fom(), endretPeriode.tom())) {
-            throw new FunksjonellException(
-                String.format("Feil i perioden %s - %s som det forsøkes å endre til", endretPeriode.fom(), endretPeriode.tom()));
+        if (PeriodeRegler.feilIPeriode(periode.getFom(), periode.getTom())) {
+            throw new FunksjonellException("Behandling %s har feil i perioden med periode %s til %s"
+                .formatted(behandling.getId(), periode.getFom(), periode.getTom()));
         }
+        behandling.finnSedDokument()
+            .ifPresent(sedDokument -> unntaksperiodeKontrollService.kontrollPeriode(sedDokument, periode));
     }
 
-    private void validerPeriodeFraBehandling(Behandling behandling) {
-        ErPeriode periode = behandling.hentPeriode();
-        if (PeriodeRegler.feilIPeriode(periode.getFom(), periode.getTom())) {
-            throw new FunksjonellException(String.format("Behandling %s har feil i perioden", behandling.getId()));
+    private ErPeriode hentPeriode(Behandling behandling, UnntaksperiodeGodkjenning unntaksperiodeGodkjenning) {
+        Unntaksperiode endretPeriode = unntaksperiodeGodkjenning.endretPeriode();
+        if (endretPeriode != null) {
+            return new Periode(endretPeriode.fom(), endretPeriode.tom());
         }
+        return behandling.hentPeriode();
     }
+
 
     private void opprettLovvalgsperiode(long behandlingID, SedDokument sedDokument, UnntaksperiodeGodkjenning unntaksperiodeGodkjenning) {
         Lovvalgsperiode lovvalgsperiode = sedDokument.opprettInnvilgetLovvalgsperiode();
@@ -130,11 +133,10 @@ public class UnntaksperiodeService {
 
     private void validerBehandling(Behandling behandling) {
         if (!behandling.erRegisteringAvUnntak()) {
-            throw new FunksjonellException(
-                String.format("Behandling %s er ikke av tema registrering-unntak, men %s", behandling.getId(), behandling.getTema())
-            );
+            throw new FunksjonellException("Behandling %s er ikke av tema registrering-unntak, men %s"
+                .formatted(behandling.getId(), behandling.getTema()));
         } else if (behandling.erInaktiv()) {
-            throw new FunksjonellException(String.format("Behandling %s er inaktiv", behandling.getId()));
+            throw new FunksjonellException("Behandling %s er inaktiv".formatted(behandling.getId()));
         }
     }
 

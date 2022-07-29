@@ -17,21 +17,21 @@ import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class Inntekt3KonverteringTest implements KonverteringTest {
+class Inntekt3KonverteringTest implements KonverteringTest {
     private static final String INNTEKT_3_2_MOCK_BOLK = "inntekt/99999999992_mock_bolk.xml";
     private static final String INNTEKT_3_2_MOCK_TILLEGGSINFO = "inntekt/99999999992_mock_tilleggsinformasjon.xml";
 
     private DokumentFactory factory;
 
     @BeforeEach
-    public void setUp() {
-        Jaxb2Marshaller marshaller = JaxbConfig.jaxb2Marshaller();
+    void setUp() {
+        Jaxb2Marshaller marshaller = JaxbConfig.getJaxb2Marshaller();
         XsltTemplatesFactory xsltTemplatesFactory = new XsltTemplatesFactory();
         factory = new DokumentFactory(marshaller, xsltTemplatesFactory);
     }
 
     @Test
-    public void testKonvertering() throws Exception {
+    void testKonvertering() throws Exception {
         Saksopplysning saksopplysning = getSaksopplysning(INNTEKT_3_2_MOCK_BOLK);
 
         assertThat(saksopplysning.getDokument()).isInstanceOf(InntektDokument.class);
@@ -53,7 +53,7 @@ public class Inntekt3KonverteringTest implements KonverteringTest {
     }
 
     @Test
-    public void testKonverteringTilleggsinformasjon() throws Exception {
+    void testKonverteringTilleggsinformasjon() throws Exception {
         Saksopplysning saksopplysning = getSaksopplysning(INNTEKT_3_2_MOCK_TILLEGGSINFO);
         InntektDokument dokument = (InntektDokument) saksopplysning.getDokument();
 

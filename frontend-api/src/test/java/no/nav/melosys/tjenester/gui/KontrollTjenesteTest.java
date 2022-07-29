@@ -8,6 +8,7 @@ import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.FerdigbehandlingKontrollService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.tjenester.gui.dto.kontroller.FerdigbehandlingKontrollerDto;
+import no.nav.melosys.tjenester.gui.kontroll.KontrollTjeneste;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

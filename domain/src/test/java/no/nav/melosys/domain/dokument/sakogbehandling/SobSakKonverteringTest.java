@@ -17,7 +17,7 @@ import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class SobSakKonverteringTest {
+class SobSakKonverteringTest {
 
     private static final String EØS_BARNETRYGD = "sakogbehandling/eos_barnetrygd.xml";
     private static final String INGEN_SAKER = "sakogbehandling/ingen_saker.xml";
@@ -25,14 +25,14 @@ public class SobSakKonverteringTest {
     DokumentFactory factory;
 
     @BeforeEach
-    public void setUp() {
-        Jaxb2Marshaller marshaller = JaxbConfig.jaxb2Marshaller();
+    void setUp() {
+        Jaxb2Marshaller marshaller = JaxbConfig.getJaxb2Marshaller();
         XsltTemplatesFactory xsltTemplatesFactory = new XsltTemplatesFactory();
         factory = new DokumentFactory(marshaller, xsltTemplatesFactory);
     }
 
     @Test
-    public void testKonverteringBarnetrygd() throws Exception {
+    void testKonverteringBarnetrygd() throws Exception {
         final InputStream kilde = getClass().getClassLoader().getResourceAsStream(EØS_BARNETRYGD);
 
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(kilde, StandardCharsets.UTF_8))) {
@@ -62,7 +62,7 @@ public class SobSakKonverteringTest {
     }
 
     @Test
-    public void testKonverteringIngenSaker() throws Exception {
+    void testKonverteringIngenSaker() throws Exception {
         final InputStream kilde = getClass().getClassLoader().getResourceAsStream(INGEN_SAKER);
 
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(kilde, StandardCharsets.UTF_8))) {
