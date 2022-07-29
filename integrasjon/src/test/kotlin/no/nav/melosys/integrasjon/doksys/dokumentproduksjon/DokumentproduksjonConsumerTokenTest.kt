@@ -4,7 +4,7 @@ import com.github.tomakehurst.wiremock.client.MappingBuilder
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.matching.StringValuePattern
 import no.nav.melosys.integrasjon.ConsumerWireMockTestBase
-import no.nav.melosys.sikkerhet.sts.StsLoginConfig
+import no.nav.melosys.sikkerhet.sts.*
 import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.meldinger.ProduserIkkeredigerbartDokumentRequest
 import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.meldinger.ProduserIkkeredigerbartDokumentResponse
 import org.junit.jupiter.api.Test
@@ -20,7 +20,7 @@ import org.springframework.test.context.ActiveProfiles
         DokumentproduksjonConsumerProducer::class
     ]
 )
-@Import(StsLoginConfig::class)
+@Import(StsLoginConfig::class, StsProdWrapper::class, StsTestWrapper::class)
 @ActiveProfiles("wiremock-test")
 class DokumentproduksjonConsumerTokenTest(
     @Autowired private val dokumentproduksjonConsumer: DokumentproduksjonConsumer,
