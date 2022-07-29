@@ -105,7 +105,6 @@
         <osgi.version>6.0.0</osgi.version>
         <woodstox.version>6.2.8</woodstox.version>
         <xmlsec.version>2.3.0</xmlsec.version>
-        <medlemskapsunntak-api-v1.version>1.1</medlemskapsunntak-api-v1.version>
         <wiremock-standalone.version>2.27.2</wiremock-standalone.version>
         <nav-foedselsnummer.core.version>1.0-SNAPSHOT.6</nav-foedselsnummer.core.version>
         <xmlunit.version>2.9.0</xmlunit.version>
@@ -509,12 +508,6 @@
                 <artifactId>sakogbehandling-tjenestespesifikasjon</artifactId>
                 <version>${nav.tjenestespesifikasjoner.version}</version>
             </dependency>
-            <!--MEDL2 -->
-            <dependency>
-                <groupId>no.nav.melosys.ekstern.tjenester</groupId>
-                <artifactId>medlemskapsunntak-api-v1</artifactId>
-                <version>${medlemskapsunntak-api-v1.version}</version>
-            </dependency>
             <!-- Dokumenthåndtering (DOKPROD) -->
             <dependency>
                 <groupId>no.nav.dok.metaforcemal</groupId>
@@ -639,6 +632,18 @@
                 <groupId>org.xmlunit</groupId>
                 <artifactId>xmlunit-matchers</artifactId>
                 <version>${xmlunit.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.kotest</groupId>
+                <artifactId>kotest-assertions-core-jvm</artifactId>
+                <version>${kotest.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>io.mockk</groupId>
+                <artifactId>mockk</artifactId>
+                <version>${mockk.version}</version>
+                <scope>test</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>
