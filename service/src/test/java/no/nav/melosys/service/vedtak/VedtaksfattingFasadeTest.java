@@ -82,6 +82,16 @@ class VedtaksfattingFasadeTest {
     }
 
     @Test
+    void fattVedtak_delvisAutomatisert_skalKalleEosVedtakSystemService() {
+        when(mockBehandlingService.hentBehandling(behandlingID)).thenReturn(behandling);
+
+        vedtaksfattingFasade.fattVedtak(behandlingID, FASTSATT_LOVVALGSLAND);
+
+        verify(mockEosVedtakService).fattVedtak(behandling, FASTSATT_LOVVALGSLAND, FØRSTEGANGSVEDTAK);
+        verifyNoInteractions(mockFtrlVedtakService);
+    }
+
+    @Test
     void fattVedtak_FTRL_skalKalleFtrlVedtakService() {
         setFagsakPåBehandling(Sakstyper.FTRL);
         when(mockBehandlingService.hentBehandling(behandlingID)).thenReturn(behandling);
