@@ -30,11 +30,11 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Profile({"!test & !local-mock"})
-public class StsProdConfig implements StsConfig {
+public class StsProdWrapper implements StsWrapper {
 
     private final StsLoginConfig login;
 
-    public StsProdConfig(StsLoginConfig stsLoginConfig) {
+    public StsProdWrapper(StsLoginConfig stsLoginConfig) {
         this.login = stsLoginConfig;
     }
 

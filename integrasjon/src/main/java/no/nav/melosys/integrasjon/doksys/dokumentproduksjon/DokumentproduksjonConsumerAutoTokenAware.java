@@ -2,7 +2,7 @@ package no.nav.melosys.integrasjon.doksys.dokumentproduksjon;
 
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo;
 import no.nav.melosys.sikkerhet.sts.NAVSTSClient;
-import no.nav.melosys.sikkerhet.sts.StsConfig;
+import no.nav.melosys.sikkerhet.sts.StsWrapper;
 import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.*;
 import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.meldinger.ProduserDokumentutkastRequest;
 import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.meldinger.ProduserDokumentutkastResponse;
@@ -11,12 +11,12 @@ import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.meldinger.ProduserIkkere
 
 public class DokumentproduksjonConsumerAutoTokenAware implements DokumentproduksjonConsumer {
 
-    private final StsConfig stsConfig;
+    private final StsWrapper stsWrapper;
     private final DokumentproduksjonV3 systemPort;
     private final DokumentproduksjonV3 saksbehandlerPort;
 
-    public DokumentproduksjonConsumerAutoTokenAware(DokumentproduksjonConsumerConfig config, StsConfig stsConfig) {
-        this.stsConfig = stsConfig;
+    public DokumentproduksjonConsumerAutoTokenAware(DokumentproduksjonConsumerConfig config, StsWrapper stsWrapper) {
+        this.stsWrapper = stsWrapper;
         saksbehandlerPort = wrapWithSts(config.getPort(), NAVSTSClient.StsClientType.SECURITYCONTEXT_TIL_SAML);
         systemPort = wrapWithSts(config.getPort(), NAVSTSClient.StsClientType.SYSTEM_SAML);
     }
@@ -38,7 +38,7 @@ public class DokumentproduksjonConsumerAutoTokenAware implements Dokumentproduks
     }
 
     private DokumentproduksjonV3 wrapWithSts(DokumentproduksjonV3 port, NAVSTSClient.StsClientType oidcTilSaml) {
-        return stsConfig.wrapWithSts(port, oidcTilSaml);
+        return stsWrapper.wrapWithSts(port, oidcTilSaml);
     }
 
 }

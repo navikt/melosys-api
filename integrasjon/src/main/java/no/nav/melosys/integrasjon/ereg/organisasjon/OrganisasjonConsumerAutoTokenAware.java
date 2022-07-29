@@ -2,7 +2,7 @@ package no.nav.melosys.integrasjon.ereg.organisasjon;
 
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo;
 import no.nav.melosys.sikkerhet.sts.NAVSTSClient;
-import no.nav.melosys.sikkerhet.sts.StsConfig;
+import no.nav.melosys.sikkerhet.sts.StsWrapper;
 import no.nav.tjeneste.virksomhet.organisasjon.v4.binding.HentOrganisasjonOrganisasjonIkkeFunnet;
 import no.nav.tjeneste.virksomhet.organisasjon.v4.binding.HentOrganisasjonUgyldigInput;
 import no.nav.tjeneste.virksomhet.organisasjon.v4.binding.OrganisasjonV4;
@@ -11,12 +11,12 @@ import no.nav.tjeneste.virksomhet.organisasjon.v4.meldinger.HentOrganisasjonResp
 
 public class OrganisasjonConsumerAutoTokenAware implements OrganisasjonConsumer {
 
-    private final StsConfig stsConfig;
+    private final StsWrapper stsWrapper;
     private final OrganisasjonV4 systemPort;
     private final OrganisasjonV4 saksbehandlerPort;
 
-    public OrganisasjonConsumerAutoTokenAware(OrganisasjonConsumerConfig config, StsConfig stsConfig) {
-        this.stsConfig = stsConfig;
+    public OrganisasjonConsumerAutoTokenAware(OrganisasjonConsumerConfig config, StsWrapper stsWrapper) {
+        this.stsWrapper = stsWrapper;
         saksbehandlerPort = wrapWithSts(config.getPort(), NAVSTSClient.StsClientType.SECURITYCONTEXT_TIL_SAML);
         systemPort = wrapWithSts(config.getPort(), NAVSTSClient.StsClientType.SYSTEM_SAML);
     }
@@ -30,6 +30,6 @@ public class OrganisasjonConsumerAutoTokenAware implements OrganisasjonConsumer 
     }
 
     private OrganisasjonV4 wrapWithSts(OrganisasjonV4 port, NAVSTSClient.StsClientType oidcTilSaml) {
-        return stsConfig.wrapWithSts(port, oidcTilSaml);
+        return stsWrapper.wrapWithSts(port, oidcTilSaml);
     }
 }

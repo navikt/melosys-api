@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Profile({"local-mock", "test"})
-public class StsTestConfig implements StsConfig {
+public class StsTestWrapper implements StsWrapper {
 
     @Override
     public <T> T wrapWithSts(T port, NAVSTSClient.StsClientType samlTokenType) {
