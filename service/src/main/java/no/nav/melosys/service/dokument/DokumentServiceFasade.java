@@ -15,17 +15,15 @@ import org.springframework.transaction.annotation.Transactional;
 public class DokumentServiceFasade {
 
     private final DokumentService dokumentService;
-    private final DokumentSystemService dokumentSystemService;
     private final DokgenService dokgenService;
     private final BehandlingService behandlingService;
     private final ApplicationEventPublisher applicationEventPublisher;
 
 
-    public DokumentServiceFasade(DokumentService dokumentService, DokumentSystemService dokumentSystemService,
+    public DokumentServiceFasade(DokumentService dokumentService,
                                  DokgenService dokgenService, BehandlingService behandlingService,
                                  ApplicationEventPublisher applicationEventPublisher) {
         this.dokumentService = dokumentService;
-        this.dokumentSystemService = dokumentSystemService;
         this.dokgenService = dokgenService;
         this.behandlingService = behandlingService;
         this.applicationEventPublisher = applicationEventPublisher;
@@ -94,7 +92,7 @@ public class DokumentServiceFasade {
         if (dokgenService.erTilgjengeligDokgenmal(produserbartDokument)) {
             dokgenService.produserOgDistribuerBrev(behandlingID, brevbestillingRequest);
         } else {
-            dokumentSystemService.produserDokument(produserbartDokument, mottaker, behandlingID, brevbestilling);
+            dokumentService.produserDokument(produserbartDokument, mottaker, behandlingID, brevbestilling);
         }
 
         applicationEventPublisher.publishEvent(new DokumentBestiltEvent(behandlingID, produserbartDokument));
