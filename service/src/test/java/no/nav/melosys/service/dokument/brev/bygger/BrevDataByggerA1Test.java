@@ -42,7 +42,7 @@ class BrevDataByggerA1Test {
     @Mock
     private LandvelgerService landvelgerService;
     @Mock
-    OrganisasjonOppslagService registerOppslagService;
+    OrganisasjonOppslagService organisasjonOppslagService;
 
     private Set<String> avklarteOrganisasjoner;
     private Soeknad søknad;
@@ -95,7 +95,7 @@ class BrevDataByggerA1Test {
         when(kodeverkService.dekod(any(), any())).thenReturn("Oslo");
 
         AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService,
-            registerOppslagService,
+            organisasjonOppslagService,
             mock(BehandlingService.class),
             kodeverkService);
         DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medBehandling(behandling).build();
@@ -113,7 +113,7 @@ class BrevDataByggerA1Test {
             organisasjonDokumenter.add(leggTilTestorganisasjon("navn" + orgnr, orgnr, detaljer));
         }
 
-        when(registerOppslagService.hentOrganisasjoner(any()))
+        when(organisasjonOppslagService.hentOrganisasjoner(any()))
             .thenReturn(organisasjonDokumenter);
     }
 
