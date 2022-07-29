@@ -63,7 +63,7 @@ import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.ldap.SaksbehandlerService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory;
-import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagSystemService;
+import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService;
 import no.nav.melosys.service.saksopplysninger.SaksopplysningerService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import no.nav.melosys.service.utpeking.UtpekingService;
@@ -238,15 +238,15 @@ final class DokumentServiceTest {
             behandlingsresultatService,
             mock(TrygdeavgiftsberegningService.class),
             mock(LovvalgsperiodeService.class), behandlingService);
-        return new DokumentService(behandlingService, brevDataService, dokSysFasade, brevmottakerService, brevdatabyggervelger, lagBrevinput(persondataFasade, avklartefaktaService));
+        return new DokumentService(behandlingService, brevDataService, dokSysFasade, brevmottakerService, brevdatabyggervelger, lagBrevinput(avklartefaktaService));
     }
 
-    private BrevdataGrunnlagFactory lagBrevinput(PersondataFasade persondataFasade, AvklartefaktaService avklartefaktaService) {
+    private BrevdataGrunnlagFactory lagBrevinput(AvklartefaktaService avklartefaktaService) {
         KodeverkRegister kodeverkRegister = mockKodeverkRegister();
         KodeOppslag kodeOppslag = mock(KodeOppslag.class);
         KodeverkService kodeverkService = new KodeverkService(kodeverkRegister, kodeOppslag);
         EregFasade eregFasade = mockEregFasade();
-        OrganisasjonOppslagSystemService registerOppslagService = new OrganisasjonOppslagSystemService(eregFasade);
+        OrganisasjonOppslagService registerOppslagService = new OrganisasjonOppslagService(eregFasade);
         AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService, mock(BehandlingService.class), mock(KodeverkService.class));
         DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medBehandling(lagBehandling()).build();
         Persondata persondata = PersonopplysningerObjectFactory.lagPersonopplysninger();
