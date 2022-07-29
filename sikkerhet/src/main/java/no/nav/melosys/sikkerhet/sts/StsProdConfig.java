@@ -3,6 +3,7 @@ package no.nav.melosys.sikkerhet.sts;
 import java.util.HashMap;
 import javax.xml.namespace.QName;
 
+import no.nav.melosys.sikkerhet.sts.NAVSTSClient.StsClientType;
 import org.apache.cxf.Bus;
 import org.apache.cxf.BusException;
 import org.apache.cxf.binding.soap.Soap12;
@@ -38,7 +39,7 @@ public class StsProdConfig implements StsConfig {
     }
 
     @Override
-    public <T> T wrapWithSts(T port, NAVSTSClient.StsClientType samlTokenType) {
+    public <T> T wrapWithSts(T port, StsClientType samlTokenType) {
         Client client = ClientProxy.getClient(port);
         switch (samlTokenType) {
             case SECURITYCONTEXT_TIL_SAML -> configureStsForOnBehalfOfWithOidc(client);
@@ -49,7 +50,7 @@ public class StsProdConfig implements StsConfig {
     }
 
     private void configureStsForOnBehalfOfWithOidc(Client client) {
-        STSClient stsClient = createBasicSTSClient(NAVSTSClient.StsClientType.SECURITYCONTEXT_TIL_SAML, client.getBus());
+        STSClient stsClient = createBasicSTSClient(StsClientType.SECURITYCONTEXT_TIL_SAML, client.getBus());
         stsClient.setOnBehalfOf(new OnBehalfOfWithOidcCallbackHandler());
         client.getRequestContext().put(SecurityConstants.STS_CLIENT, stsClient);
         client.getRequestContext().put(SecurityConstants.CACHE_ISSUED_TOKEN_IN_ENDPOINT, false);
@@ -59,12 +60,12 @@ public class StsProdConfig implements StsConfig {
     private void configureStsForSystemUser(Client client) {
         new WSAddressingFeature().initialize(client, client.getBus());
 
-        STSClient stsClient = createBasicSTSClient(NAVSTSClient.StsClientType.SYSTEM_SAML, client.getBus());
+        STSClient stsClient = createBasicSTSClient(StsClientType.SYSTEM_SAML, client.getBus());
         client.getRequestContext().put(SecurityConstants.STS_CLIENT, stsClient);
         setEndpointPolicyReference(client, login.getStsPolicy());
     }
 
-    private STSClient createBasicSTSClient(NAVSTSClient.StsClientType type, Bus bus) {
+    private STSClient createBasicSTSClient(StsClientType type, Bus bus) {
         STSClient stsClient = new NAVSTSClient(bus, type);
         stsClient.setWsdlLocation("wsdl/ws-trust-1.4-service.wsdl");
         stsClient.setServiceQName(new QName("http://docs.oasis-open.org/ws-sx/ws-trust/200512/wsdl", "SecurityTokenServiceProvider"));
