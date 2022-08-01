@@ -22,7 +22,7 @@ import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
 import no.nav.melosys.service.kodeverk.KodeverkService;
-import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagSystemService;
+import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -42,7 +42,7 @@ class BrevDataByggerA1Test {
     @Mock
     private LandvelgerService landvelgerService;
     @Mock
-    OrganisasjonOppslagSystemService registerOppslagService;
+    OrganisasjonOppslagService organisasjonOppslagService;
 
     private Set<String> avklarteOrganisasjoner;
     private Soeknad søknad;
@@ -95,7 +95,7 @@ class BrevDataByggerA1Test {
         when(kodeverkService.dekod(any(), any())).thenReturn("Oslo");
 
         AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService,
-            registerOppslagService,
+            organisasjonOppslagService,
             mock(BehandlingService.class),
             kodeverkService);
         DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medBehandling(behandling).build();
@@ -113,7 +113,7 @@ class BrevDataByggerA1Test {
             organisasjonDokumenter.add(leggTilTestorganisasjon("navn" + orgnr, orgnr, detaljer));
         }
 
-        when(registerOppslagService.hentOrganisasjoner(any()))
+        when(organisasjonOppslagService.hentOrganisasjoner(any()))
             .thenReturn(organisasjonDokumenter);
     }
 
