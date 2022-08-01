@@ -3,6 +3,7 @@ package no.nav.melosys.itest
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.melosys.Application
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.RegistreringsInfo
@@ -23,23 +24,36 @@ import no.nav.melosys.integrasjon.joark.saf.dto.journalpost.*
 import no.nav.melosys.repository.BehandlingRepository
 import no.nav.melosys.repository.FagsakRepository
 import no.nav.melosys.repository.ProsessinstansRepository
+import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import org.assertj.core.api.Assertions.assertThat
 import org.awaitility.Awaitility
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.context.event.ApplicationReadyEvent
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
+import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.ApplicationEventPublisher
+import org.springframework.test.annotation.DirtiesContext
+import org.springframework.test.context.ActiveProfiles
 import java.time.Duration
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 
+@ActiveProfiles("test")
+@SpringBootTest(
+    classes = [Application::class, SaksflytTestConfig::class],
+    webEnvironment = SpringBootTest.WebEnvironment.NONE
+)
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@EnableMockOAuth2Server
+@DirtiesContext
 internal class SaksflytOppstartIT(
     @Autowired private val fagsakRepository: FagsakRepository,
     @Autowired private val behandlingRepository: BehandlingRepository,
     @Autowired private val prosessinstansRepository: ProsessinstansRepository,
     @Autowired private val applicationEventPublisher: ApplicationEventPublisher,
-) : ComponentTestBase() {
+) : OracleTestContainerBase() {
 
     @MockkBean
     lateinit var safConsumer: SafConsumer
