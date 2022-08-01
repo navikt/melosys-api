@@ -1,21 +1,24 @@
 package no.nav.melosys.sikkerhet.context;
 
-import ch.qos.logback.classic.LoggerContext;
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.read.ListAppender;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
+import no.nav.melosys.exception.TekniskException;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.slf4j.LoggerFactory;
-
-import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ThreadLocalAccessInfoTest {
@@ -94,4 +97,33 @@ class ThreadLocalAccessInfoTest {
 
         ThreadLocalAccessInfo.afterExecuteProcess(uuid);
     }
+
+    @Test
+    void executeProcess_executesLambda() {
+        List<String> commands = new ArrayList<>();
+        ThreadLocalAccessInfo.executeProcess("Test", () -> {
+            commands.add("executed");
+            assertTrue(ThreadLocalAccessInfo.shouldUseSystemToken());
+            assertThat(listAppender.list).isEmpty();
+        });
+        assertThat(commands).singleElement().isEqualTo("executed");
+    }
+
+    @Test
+    void executeProcess_handlesError() {
+        UUID processId = UUID.randomUUID();
+        assertThatThrownBy(() ->
+            ThreadLocalAccessInfo.executeProcess(processId, "Test", () -> {
+                throw new TekniskException("Some Error");
+            }))
+            .isInstanceOf(TekniskException.class)
+            .hasMessageContaining("Some Error");
+
+
+        // Om ikke exception blir korrekt håntert over vil denne feile
+        ThreadLocalAccessInfo.executeProcess(processId, "Test", () -> {
+        });
+    }
+
+
 }

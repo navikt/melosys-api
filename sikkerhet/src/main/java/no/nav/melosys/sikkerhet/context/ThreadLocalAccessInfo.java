@@ -1,12 +1,12 @@
 package no.nav.melosys.sikkerhet.context;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.Arrays;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ThreadLocalAccessInfo {
     private static final Logger log = LoggerFactory.getLogger(ThreadLocalAccessInfo.class);
@@ -49,6 +49,20 @@ public class ThreadLocalAccessInfo {
                 + threadLocalStorage.get().requestUri + " != " + requestUri);
         }
         threadLocalStorage.remove();
+    }
+
+    public static void executeProcess(String prosessSteg, Runnable runnable) {
+        UUID processId = UUID.randomUUID();
+        executeProcess(processId, prosessSteg, runnable);
+    }
+
+    public static void executeProcess(UUID processId, String prosessSteg, Runnable runnable) {
+        beforeExecuteProcess(processId, prosessSteg);
+        try {
+            runnable.run();
+        } finally {
+            afterExecuteProcess(processId);
+        }
     }
 
     public static void beforeExecuteProcess(UUID processId, String prosessSteg) {
