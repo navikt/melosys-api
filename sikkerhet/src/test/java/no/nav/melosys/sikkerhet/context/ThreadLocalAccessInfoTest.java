@@ -101,24 +101,28 @@ class ThreadLocalAccessInfoTest {
     @Test
     void executeProcess_executesLambda() {
         List<String> commands = new ArrayList<>();
-        ThreadLocalAccessInfo.executeProcess("Test", () -> {
+        Runnable processToBeExecuted = () -> {
             commands.add("executed");
             assertTrue(ThreadLocalAccessInfo.shouldUseSystemToken());
-            assertThat(listAppender.list).isEmpty();
-        });
+        };
+
+        ThreadLocalAccessInfo.executeProcess("Test", processToBeExecuted);
+
+        assertThat(listAppender.list).isEmpty();
         assertThat(commands).singleElement().isEqualTo("executed");
     }
 
     @Test
     void executeProcess_handlesError() {
         UUID processId = UUID.randomUUID();
+        Runnable processToBeExecuted = () -> {
+            throw new TekniskException("Some Error");
+        };
+
         assertThatThrownBy(() ->
-            ThreadLocalAccessInfo.executeProcess(processId, "Test", () -> {
-                throw new TekniskException("Some Error");
-            }))
+            ThreadLocalAccessInfo.executeProcess(processId, "Test", processToBeExecuted))
             .isInstanceOf(TekniskException.class)
             .hasMessageContaining("Some Error");
-
 
         // Om ikke exception blir korrekt håntert over vil denne feile
         ThreadLocalAccessInfo.executeProcess(processId, "Test", () -> {
