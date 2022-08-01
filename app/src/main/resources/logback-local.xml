@@ -3,7 +3,7 @@
 
     <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%d{HH:mm:ss.SSS} %highlight(%-5level) %logger{10} - %msg%n</pattern>
+            <pattern>%d{HH:mm:ss.SSS} %highlight(%-5level) %logger{10} - %msg %mdc%n</pattern>
         </encoder>
     </appender>
 
@@ -22,4 +22,5 @@
     <logger name="org.springframework.transaction" level="WARN" />
     <logger name="org.springframework.transaction.interceptor" level="WARN" />
     <logger name="org.hibernate.SQL" level="WARN" />
+    <logger name="no.nav.melosys.integrasjon.felles.mdc.MDCFilter" level="DEBUG"/>
 </included>
