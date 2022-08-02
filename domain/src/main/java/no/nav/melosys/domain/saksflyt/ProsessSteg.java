@@ -10,6 +10,7 @@ public enum ProsessSteg implements Kodeverk {
     AVSLUTT_TIDLIGERE_MEDL_PERIODE("AVSLUTT_TIDLIGERE_MEDL_PERIODE", "Avslutter tidligere periode i Medl"),
     BESTEM_BEHANDLINGMÅTE_SED("BESTEM_BEHANDLINGMÅTE_SED", "Bestemmer videre behandlingsmåte for en mottatt SED etter registerkontroll"),
     BESTEM_BEHANDLINGSMÅTE_SVAR_ANMODNING_UNNTAK("BESTEM_BEHANDLINGSMÅTE_SVAR_ANMODNING_UNNTAK", "Oppdaterer behandling eller fatter vedtak etter mottak av svar på anmodning om unntak"),
+    BESTILL_BREV("BESTILL_BREV", "Bestill brev til én mottaker via doksys"),
     DISTRIBUER_JOURNALPOST("DISTRIBUER_JOURNALPOST", "Distribuer journalpost"),
     DISTRIBUER_JOURNALPOST_UTLAND("DISTRIBUER_JOURNALPOST_UTLAND", "Distribuerer (sender) en journalpost til utlanlandsk myndighet"),
     GJENBRUK_OPPGAVE("GJENBRUK_OPPGAVE", "Gjenbruker eksisterende oppgave"),
@@ -51,8 +52,11 @@ public enum ProsessSteg implements Kodeverk {
     SEND_SVAR_ANMODNING_UNNTAK("SEND_SVAR_ANMODNING_UNNTAK", "Sender svar på anmodning om unntak"),
     SEND_VEDTAKSBREV_INNLAND("SEND_VEDTAKSBREV_INNLAND", "Sender vedtaksbrev innland"),
     SEND_VEDTAK_UTLAND("SEND_VEDTAK_UTLAND", "Sender vedtaket til utland"),
+    @Deprecated
     SOB_BEHANDLING_AVSLUTTET("SOB_BEHANDLING_AVSLUTTET", "Oppdaterer SOB (Sak Og Behandling) om avsluttet behandling"),
+    @Deprecated
     SOB_BEHANDLING_OPPRETTET("SOB_BEHANDLING_OPPRETTET", "Oppdaterer SOB (Sak Og Behandling) om opprettet behandling"),
+    @Deprecated
     UKJENT("UKJENT", "Ukjent steg"),
     UTPEKING_SEND_AVSLAG("UTPEKING_SEND_AVSLAG", "Send SED A004 til alle arbeidsland"),
     VIDERESEND_SØKNAD("VIDERESEND_SØKNAD", "Oppretter journalpost eller sender SED med søknad som vedlegg"),

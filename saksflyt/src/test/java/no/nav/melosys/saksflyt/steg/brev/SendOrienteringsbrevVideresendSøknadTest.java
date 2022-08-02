@@ -54,7 +54,7 @@ public class SendOrienteringsbrevVideresendSøknadTest {
         verify(brevBestiller).bestill(captor.capture());
         DoksysBrevbestilling brevbestilling = captor.getValue();
         assertThat(brevbestilling.getProduserbartdokument()).isEqualTo(Produserbaredokumenter.ORIENTERING_VIDERESENDT_SOEKNAD);
-        assertThat(brevbestilling.getMottakere().stream().map(Mottaker::getRolle)).containsExactly(Aktoersroller.BRUKER);
+        assertThat(brevbestilling.getMottakere().stream().map(Mottaker::hentAktørsRolle)).containsExactly(Aktoersroller.BRUKER);
         assertThat(brevbestilling.getBehandling()).isEqualTo(behandling);
     }
 }

@@ -8,7 +8,7 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.saksflyt.*;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.repository.ProsessinstansRepository;
-import no.nav.melosys.saksflyt.impl.BehandleProsessinstansDelegate;
+import no.nav.melosys.saksflyt.ProsessinstansBehandlerDelegate;
 import no.nav.melosys.saksflyt.kontroll.dto.HentProsessinstansDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -38,13 +38,13 @@ class ProsessinstansAdminServiceTest {
     @Mock
     private ProsessinstansRepository prosessinstansRepository;
     @Mock
-    private BehandleProsessinstansDelegate behandleProsessinstansDelegate;
+    private ProsessinstansBehandlerDelegate prosessinstansBehandlerDelegate;
 
     private ProsessinstansAdminService prosessinstansAdminService;
 
     @BeforeEach
     public void setup() {
-        prosessinstansAdminService = new ProsessinstansAdminService(behandleProsessinstansDelegate, prosessinstansRepository);
+        prosessinstansAdminService = new ProsessinstansAdminService(prosessinstansBehandlerDelegate, prosessinstansRepository);
     }
 
     @Test
@@ -95,16 +95,16 @@ class ProsessinstansAdminServiceTest {
 
         prosessinstansAdminService.restartAlleFeiledeProsessinstanser();
 
-        InOrder inOrder = Mockito.inOrder(behandleProsessinstansDelegate);
-        inOrder.verify(behandleProsessinstansDelegate).behandleProsessinstans(tidligstFeilet);
-        inOrder.verify(behandleProsessinstansDelegate).behandleProsessinstans(nestTidligstFeilet);
-        inOrder.verify(behandleProsessinstansDelegate).behandleProsessinstans(senestFeilet);
+        InOrder inOrder = Mockito.inOrder(prosessinstansBehandlerDelegate);
+        inOrder.verify(prosessinstansBehandlerDelegate).behandleProsessinstans(tidligstFeilet);
+        inOrder.verify(prosessinstansBehandlerDelegate).behandleProsessinstans(nestTidligstFeilet);
+        inOrder.verify(prosessinstansBehandlerDelegate).behandleProsessinstans(senestFeilet);
     }
 
     @Test
-    void restartProsessinstans_prosessinstansHarStatusKlar_kasterFeil() {
+    void restartProsessinstans_prosessinstansHarStatusFerdig_kanIkkeGjenstartes() {
         Prosessinstans prosessinstans = lagProsessinstans();
-        prosessinstans.setStatus(ProsessStatus.KLAR);
+        prosessinstans.setStatus(ProsessStatus.FERDIG);
         UUID uuid = prosessinstans.getId();
 
         when(prosessinstansRepository.findAllById(anyList()))
@@ -113,6 +113,32 @@ class ProsessinstansAdminServiceTest {
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> prosessinstansAdminService.restartProsessinstanser(singletonList(uuid)))
             .withMessageContaining("har status");
+    }
+    @Test
+    void restartProsessinstans_prosessinstansErNyOgHarStatusKlar_kasterFeil() {
+        Prosessinstans prosessinstans = lagProsessinstans(LocalDateTime.now());
+        prosessinstans.setStatus(ProsessStatus.KLAR);
+        UUID uuid = prosessinstans.getId();
+
+        when(prosessinstansRepository.findAllById(anyList()))
+            .thenReturn(singletonList(prosessinstans));
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> prosessinstansAdminService.restartProsessinstanser(singletonList(uuid)))
+            .withMessageContaining("for mindre enn");
+    }
+
+    @Test
+    void restartProsessinstans_prosessinstansErGammelOgHarStatusKlar_blirRestartet() {
+        Prosessinstans prosessinstans = lagProsessinstans(LocalDateTime.now().minusDays(2));
+        prosessinstans.setStatus(ProsessStatus.KLAR);
+        when(prosessinstansRepository.findAllById(Set.of(prosessinstans.getId()))).thenReturn(List.of(prosessinstans));
+
+        prosessinstansAdminService.restartProsessinstanser(Set.of(prosessinstans.getId()));
+
+        assertThat(prosessinstans.getStatus()).isEqualTo(ProsessStatus.RESTARTET);
+        verify(prosessinstansRepository).saveAll(singletonList(prosessinstans));
+        verify(prosessinstansBehandlerDelegate).behandleProsessinstans(prosessinstans);
     }
 
     @Test
@@ -128,7 +154,7 @@ class ProsessinstansAdminServiceTest {
 
         assertThat(prosessinstans.getStatus()).isEqualTo(ProsessStatus.RESTARTET);
         verify(prosessinstansRepository).saveAll(singletonList(prosessinstans));
-        verify(behandleProsessinstansDelegate).behandleProsessinstans(prosessinstans);
+        verify(prosessinstansBehandlerDelegate).behandleProsessinstans(prosessinstans);
     }
 
     @Test

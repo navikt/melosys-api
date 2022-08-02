@@ -22,9 +22,9 @@ public final class SakstypeBehandlingstemaKobling {
                 Behandlingstema.UTSENDT_ARBEIDSTAKER,
                 Behandlingstema.UTSENDT_SELVSTENDIG,
                 Behandlingstema.ARBEID_ETT_LAND_ØVRIG,
+                Behandlingstema.ARBEID_FLERE_LAND,
                 Behandlingstema.TRYGDETID,
                 Behandlingstema.IKKE_YRKESAKTIV,
-                Behandlingstema.ARBEID_FLERE_LAND,
                 Behandlingstema.ARBEID_NORGE_BOSATT_ANNET_LAND,
                 Behandlingstema.ØVRIGE_SED_MED,
                 Behandlingstema.ØVRIGE_SED_UFM,
@@ -32,13 +32,23 @@ public final class SakstypeBehandlingstemaKobling {
                 Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND,
                 Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING,
                 Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE,
-                Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL
+                Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL,
+                Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET,
+                Behandlingstema.PENSJONIST
             ),
             Sakstyper.FTRL, Set.of(
-                Behandlingstema.ARBEID_I_UTLANDET
+                Behandlingstema.ARBEID_I_UTLANDET,
+                Behandlingstema.YRKESAKTIV,
+                Behandlingstema.IKKE_YRKESAKTIV,
+                Behandlingstema.UNNTAK_MEDLEMSKAP,
+                Behandlingstema.PENSJONIST
             ),
             Sakstyper.TRYGDEAVTALE, Set.of(
-                Behandlingstema.YRKESAKTIV
+                Behandlingstema.YRKESAKTIV,
+                Behandlingstema.IKKE_YRKESAKTIV,
+                Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL,
+                Behandlingstema.REGISTRERING_UNNTAK,
+                Behandlingstema.PENSJONIST
             )
         );
     }

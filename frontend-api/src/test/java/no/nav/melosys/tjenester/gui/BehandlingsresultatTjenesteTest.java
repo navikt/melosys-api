@@ -10,6 +10,7 @@ import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Nyvurderingbakgrunner;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
+import no.nav.melosys.service.behandling.AngiBehandlingsresultatService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.tjenester.gui.dto.BehandlingsresultatDto;
@@ -21,8 +22,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -32,17 +31,17 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class BehandlingsresultatTjenesteTest extends JsonSchemaTestParent {
-    private static final Logger log = LoggerFactory.getLogger(BehandlingsresultatTjenesteTest.class);
-    private static final String BEHANDLINGSRESULTAT_SCHEMA = "behandlinger-resultat-schema.json";
 
     private BehandlingsresultatTjeneste behandlingsresultatTjeneste;
 
     @Mock
     private BehandlingsresultatService behandlingsresultatService;
+    @Mock
+    private AngiBehandlingsresultatService angiBehandlingsresultatService;
 
     @BeforeEach
     public void setUp() {
-        behandlingsresultatTjeneste = new BehandlingsresultatTjeneste(behandlingsresultatService, mock(Aksesskontroll.class));
+        behandlingsresultatTjeneste = new BehandlingsresultatTjeneste(behandlingsresultatService, angiBehandlingsresultatService, mock(Aksesskontroll.class));
     }
 
     @Test
@@ -53,7 +52,6 @@ class BehandlingsresultatTjenesteTest extends JsonSchemaTestParent {
         BehandlingsresultatDto behandlingsresultat = new EasyRandom(easyRandomParameters).nextObject(BehandlingsresultatDto.class);
         String jsonString = objectMapper().writeValueAsString(behandlingsresultat);
         assertThat(jsonString).isNotEmpty();
-        valider(jsonString, BEHANDLINGSRESULTAT_SCHEMA, log);
     }
 
     @Test
@@ -74,6 +72,5 @@ class BehandlingsresultatTjenesteTest extends JsonSchemaTestParent {
         ResponseEntity response = behandlingsresultatTjeneste.hentBehandlingsresultat(4L);
         String jsonString = objectMapper().writeValueAsString(response.getBody());
         assertThat(jsonString).isNotEmpty();
-        valider(jsonString, BEHANDLINGSRESULTAT_SCHEMA, log);
     }
 }

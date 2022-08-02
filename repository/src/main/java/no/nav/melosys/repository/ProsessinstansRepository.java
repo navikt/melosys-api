@@ -2,6 +2,7 @@ package no.nav.melosys.repository;
 
 import java.util.Collection;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import no.nav.melosys.domain.metrikker.ProsessinstansAntall;
@@ -29,6 +30,8 @@ public interface ProsessinstansRepository extends JpaRepository<Prosessinstans, 
     Optional<Prosessinstans> findByBehandling_IdAndTypeIn(long id, ProsessType... prosessTypes);
 
     Collection<Prosessinstans> findAllByStatus(ProsessStatus status);
+
+    Collection<Prosessinstans> findAllByStatusIn(Set<ProsessStatus> statuses);
 
     @Query("""
         SELECT NEW no.nav.melosys.domain.saksflyt.ProsessinstansInfo(p.id, p.status, p.registrertDato, p.låsReferanse) FROM Prosessinstans p

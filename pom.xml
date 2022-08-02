@@ -26,7 +26,6 @@
         <module>integrasjon</module>
         <module>repository</module>
         <module>saksflyt</module>
-        <module>saksflyt-api</module>
         <module>service</module>
         <module>sikkerhet</module>
         <module>statistikk</module>
@@ -38,21 +37,24 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>17</java.version>
 
+        <kotlin.version>1.7.0</kotlin.version>
+        <kotlin.compiler.jvmTarget>${java.version}</kotlin.compiler.jvmTarget>
+
         <!-- Melosys -->
         <melosys.jsonschema.version>1.35.172</melosys.jsonschema.version>
-        <melosys.internt.kodeverk.version>5.15.115</melosys.internt.kodeverk.version>
+        <melosys.internt.kodeverk.version>5.15.121</melosys.internt.kodeverk.version>
         <melosys.brev.version>1.2.124</melosys.brev.version>
 
         <!-- NAV -->
         <nav.tjenestespesifikasjoner.version>1.2021.02.22-10.45-4201aaea72fb</nav.tjenestespesifikasjoner.version>
-        <abac.spring.version>1.6.0</abac.spring.version>
+        <abac.spring.version>3.0.7</abac.spring.version>
         <behandlingstatus.version>1.1.0</behandlingstatus.version>
         <doksys.dokumentproduksjon.version>3.3.4</doksys.dokumentproduksjon.version>
         <token-support.version>2.0.20</token-support.version>
         <token-validation-test-support.version>2.0.5</token-validation-test-support.version>
 
         <!-- Versjoner av eksterne biblioteker -->
-        <archunit.version>0.23.1</archunit.version>
+        <archunit.version>1.0.0-rc1</archunit.version>
         <apache-httpclients.version>4.5.13</apache-httpclients.version>
         <caffeine.version>3.0.6</caffeine.version>
         <cxf.version>3.5.3</cxf.version>
@@ -65,11 +67,13 @@
         <logback.version>1.2.11</logback.version>
         <logstash.version>7.1</logstash.version>
         <hikaricp.version>5.0.1</hikaricp.version>
-        <ibmmq.version>9.2.5.0</ibmmq.version>
         <jackson.version>2.13.2.20220328</jackson.version>
         <javax.ws.rs-api.version>2.1.1</javax.ws.rs-api.version>
         <json-smart.version>2.4.8</json-smart.version>
         <jms-api.version>2.0.1</jms-api.version>
+        <kotest.version>5.3.2</kotest.version>
+        <mockito-kotlin.version>4.0.0</mockito-kotlin.version>
+        <mockk.version>1.12.5</mockk.version>
         <micrometer-jvm-extras.version>0.2.2</micrometer-jvm-extras.version>
         <networknt.json-schema-validator.version>1.0.68</networknt.json-schema-validator.version>
         <ojdbc.version>21.5.0.0</ojdbc.version>
@@ -101,7 +105,6 @@
         <osgi.version>6.0.0</osgi.version>
         <woodstox.version>6.2.8</woodstox.version>
         <xmlsec.version>2.3.0</xmlsec.version>
-        <medlemskapsunntak-api-v1.version>1.1</medlemskapsunntak-api-v1.version>
         <wiremock-standalone.version>2.27.2</wiremock-standalone.version>
         <nav-foedselsnummer.core.version>1.0-SNAPSHOT.6</nav-foedselsnummer.core.version>
         <xmlunit.version>2.9.0</xmlunit.version>
@@ -171,11 +174,6 @@
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>saksflyt-api</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
                 <artifactId>sikkerhet</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -224,11 +222,6 @@
                 <version>${graphql-java.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.ibm.mq</groupId>
-                <artifactId>com.ibm.mq.allclient</artifactId>
-                <version>${ibmmq.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>com.oracle.database.jdbc</groupId>
                 <artifactId>ojdbc8</artifactId>
                 <version>${ojdbc.version}</version>
@@ -252,11 +245,6 @@
                 <groupId>io.springfox</groupId>
                 <artifactId>springfox-boot-starter</artifactId>
                 <version>${springfox.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>javax.jms</groupId>
-                <artifactId>javax.jms-api</artifactId>
-                <version>${jms-api.version}</version>
             </dependency>
             <dependency>
                 <groupId>javax.servlet</groupId>
@@ -473,11 +461,6 @@
 
             <!-- NAV felleskomponenter -->
             <dependency>
-                <groupId>no.nav.freg</groupId>
-                <artifactId>abac-spring</artifactId>
-                <version>${abac.spring.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>no.nav.security</groupId>
                 <artifactId>token-validation-spring</artifactId>
                 <version>${token-support.version}</version>
@@ -518,14 +501,7 @@
             <dependency>
                 <groupId>no.nav.tjenestespesifikasjoner</groupId>
                 <artifactId>sakogbehandling-tjenestespesifikasjon</artifactId>
-                <!--<artifactId>nav-fim-sakogbehandling-v1-tjenestespesifikasjon</artifactId>-->
                 <version>${nav.tjenestespesifikasjoner.version}</version>
-            </dependency>
-            <!--MEDL2 -->
-            <dependency>
-                <groupId>no.nav.tjenester</groupId>
-                <artifactId>medlemskapsunntak-api-v1</artifactId>
-                <version>${medlemskapsunntak-api-v1.version}</version>
             </dependency>
             <!-- Dokumenthåndtering (DOKPROD) -->
             <dependency>
@@ -579,6 +555,18 @@
                 <groupId>com.squareup.okhttp3</groupId>
                 <artifactId>mockwebserver</artifactId>
                 <version>${okhttp.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.jetbrains.kotlin</groupId>
+                <artifactId>kotlin-test-junit5</artifactId>
+                <version>${kotlin.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.mockito.kotlin</groupId>
+                <artifactId>mockito-kotlin</artifactId>
+                <version>${mockito-kotlin.version}</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
@@ -640,25 +628,40 @@
                 <artifactId>xmlunit-matchers</artifactId>
                 <version>${xmlunit.version}</version>
             </dependency>
+            <dependency>
+                <groupId>io.kotest</groupId>
+                <artifactId>kotest-assertions-core-jvm</artifactId>
+                <version>${kotest.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>io.mockk</groupId>
+                <artifactId>mockk</artifactId>
+                <version>${mockk.version}</version>
+                <scope>test</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.vaadin.external.google</groupId>
-                    <artifactId>android-json</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
     </dependencies>
+
+    <repositories>
+        <!-- Skal brukes hvis bygget kjøres fra en Github Action -->
+        <repository>
+            <id>github-package-registry-navikt</id>
+            <url>https://maven.pkg.github.com/navikt/maven-release</url>
+        </repository>
+        <repository>
+            <id>freg-abac</id>
+            <name>freg-abac on Github Packages</name>
+            <url>https://maven.pkg.github.com/navikt/freg-abac</url>
+        </repository>
+    </repositories>
 
     <build>
         <pluginManagement>

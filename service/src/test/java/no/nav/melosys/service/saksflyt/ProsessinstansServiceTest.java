@@ -12,15 +12,11 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.arkiv.DokumentReferanse;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
-import no.nav.melosys.domain.brev.DokgenBrevbestilling;
-import no.nav.melosys.domain.brev.MangelbrevBrevbestilling;
+import no.nav.melosys.domain.brev.*;
 import no.nav.melosys.domain.eessi.Periode;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.eessi.melding.Statsborgerskap;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Avsendertyper;
-import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Ikke_godkjent_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
@@ -51,13 +47,14 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 
-import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MANGELBREV_ARBEIDSGIVER;
-import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MANGELBREV_BRUKER;
+import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ProsessinstansServiceTest {
+    private static final String AKTØR_ID = "aktørId";
+
     @Mock
     private ApplicationEventPublisher applicationEventPublisher;
     @Mock
@@ -455,13 +452,17 @@ class ProsessinstansServiceTest {
     @Test
     void opprettProsessinstansNySak_behandlingstypeSøknadTemaIkkeYrkesaktiv() {
         OpprettSakDto opprettSakDto = new EasyRandom().nextObject(OpprettSakDto.class);
+        opprettSakDto.setSakstype(Sakstyper.EU_EOS);
         opprettSakDto.setBehandlingstema(Behandlingstema.IKKE_YRKESAKTIV);
         String journalpostID = "journalpostID";
+
         prosessinstansService.opprettProsessinstansNySakEØS(journalpostID, opprettSakDto, Behandlingstyper.SOEKNAD);
+
         verify(prosessinstansRepo).save(piCaptor.capture());
         Prosessinstans prosessinstans = piCaptor.getValue();
         assertThat(prosessinstans.getType()).isEqualTo(ProsessType.OPPRETT_NY_SAK_EOS);
-        assertThat(prosessinstans.getData(ProsessDataKey.SAKSTYPE, Sakstyper.class)).isNotNull();
+        assertThat(prosessinstans.getData(ProsessDataKey.SAKSTYPE, Sakstyper.class)).isEqualTo(Sakstyper.EU_EOS);
+        assertThat(prosessinstans.getData(ProsessDataKey.SAKSTEMA, Sakstemaer.class)).isEqualTo(Sakstemaer.MEDLEMSKAP_LOVVALG);
         assertThat(prosessinstans.getData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.class)).isEqualTo(Behandlingstyper.SOEKNAD);
         assertThat(prosessinstans.getData(ProsessDataKey.BEHANDLINGSTEMA, Behandlingstema.class)).isEqualTo(Behandlingstema.IKKE_YRKESAKTIV);
         assertThat(prosessinstans.getData(ProsessDataKey.BRUKER_ID)).isEqualTo(opprettSakDto.getBrukerID());
@@ -475,13 +476,17 @@ class ProsessinstansServiceTest {
     @Test
     void opprettProsessinstansNySak_behandlingstypeSedTemaTrygdetid() {
         OpprettSakDto opprettSakDto = new EasyRandom().nextObject(OpprettSakDto.class);
+        opprettSakDto.setSakstype(Sakstyper.EU_EOS);
         opprettSakDto.setBehandlingstema(Behandlingstema.TRYGDETID);
         String journalpostID = "journalpostID";
+
         prosessinstansService.opprettProsessinstansNySakEØS(journalpostID, opprettSakDto, Behandlingstyper.SED);
+
         verify(prosessinstansRepo).save(piCaptor.capture());
         Prosessinstans prosessinstans = piCaptor.getValue();
         assertThat(prosessinstans.getType()).isEqualTo(ProsessType.OPPRETT_NY_SAK_EOS);
-        assertThat(prosessinstans.getData(ProsessDataKey.SAKSTYPE, Sakstyper.class)).isNotNull();
+        assertThat(prosessinstans.getData(ProsessDataKey.SAKSTYPE, Sakstyper.class)).isEqualTo(Sakstyper.EU_EOS);
+        assertThat(prosessinstans.getData(ProsessDataKey.SAKSTEMA, Sakstemaer.class)).isEqualTo(Sakstemaer.MEDLEMSKAP_LOVVALG);
         assertThat(prosessinstans.getData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.class)).isEqualTo(Behandlingstyper.SED);
         assertThat(prosessinstans.getData(ProsessDataKey.BEHANDLINGSTEMA, Behandlingstema.class)).isEqualTo(Behandlingstema.TRYGDETID);
         assertThat(prosessinstans.getData(ProsessDataKey.BRUKER_ID)).isEqualTo(opprettSakDto.getBrukerID());
@@ -493,16 +498,60 @@ class ProsessinstansServiceTest {
     }
 
     @Test
+    void opprettProsessinstansNySak_mottattAnmodningOmUnntak() {
+        prosessinstansService.opprettProsessinstansNySakMottattAnmodningOmUnntak(lagMelosysEessiMelding(), AKTØR_ID);
+
+        verify(prosessinstansRepo).save(piCaptor.capture());
+        Prosessinstans prosessinstans = piCaptor.getValue();
+        assertThat(prosessinstans.getType()).isEqualTo(ProsessType.ANMODNING_OM_UNNTAK_MOTTAK_NY_SAK);
+        assertThat(prosessinstans.getData(ProsessDataKey.SAKSTEMA, Sakstemaer.class)).isEqualTo(Sakstemaer.UNNTAK);
+        assertThat(prosessinstans.getData(ProsessDataKey.BEHANDLINGSTEMA, Behandlingstema.class)).isEqualTo(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL);
+        assertThat(prosessinstans.getData(ProsessDataKey.AKTØR_ID)).isEqualTo(AKTØR_ID);
+    }
+
+    @Test
+    void opprettProsessinstansNySak_unntaksregistrering() {
+        prosessinstansService.opprettProsessinstansNySakUnntaksregistrering(lagMelosysEessiMelding(),
+            Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING,
+            AKTØR_ID);
+
+        verify(prosessinstansRepo).save(piCaptor.capture());
+        Prosessinstans prosessinstans = piCaptor.getValue();
+        assertThat(prosessinstans.getType()).isEqualTo(ProsessType.REGISTRERING_UNNTAK_NY_SAK);
+        assertThat(prosessinstans.getData(ProsessDataKey.SAKSTEMA, Sakstemaer.class)).isEqualTo(Sakstemaer.UNNTAK);
+        assertThat(prosessinstans.getData(ProsessDataKey.BEHANDLINGSTEMA, Behandlingstema.class)).isEqualTo(
+            Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING);
+        assertThat(prosessinstans.getData(ProsessDataKey.AKTØR_ID)).isEqualTo(AKTØR_ID);
+    }
+
+    @Test
+    void opprettProsessinstansNySak_arbeidFlereLand() {
+        prosessinstansService.opprettProsessinstansNySakArbeidFlereLand(lagMelosysEessiMelding(),
+            Sakstemaer.MEDLEMSKAP_LOVVALG,
+            Behandlingstema.BESLUTNING_LOVVALG_NORGE, AKTØR_ID);
+        verify(prosessinstansRepo).save(piCaptor.capture());
+        Prosessinstans prosessinstans = piCaptor.getValue();
+        assertThat(prosessinstans.getType()).isEqualTo(ProsessType.ARBEID_FLERE_LAND_NY_SAK);
+        assertThat(prosessinstans.getData(ProsessDataKey.SAKSTEMA, Sakstemaer.class)).isEqualTo(Sakstemaer.MEDLEMSKAP_LOVVALG);
+        assertThat(prosessinstans.getData(ProsessDataKey.BEHANDLINGSTEMA, Behandlingstema.class)).isEqualTo(
+            Behandlingstema.BESLUTNING_LOVVALG_NORGE);
+        assertThat(prosessinstans.getData(ProsessDataKey.AKTØR_ID)).isEqualTo(AKTØR_ID);
+    }
+
+    @Test
     void opprettProsessinstansNySakFTRLTrygdeavtale_altOk_setterProsessInstansKorrekt() {
         OpprettSakDto opprettSakDto = new EasyRandom().nextObject(OpprettSakDto.class);
         opprettSakDto.setSakstype(Sakstyper.FTRL);
         opprettSakDto.setBehandlingstema(Behandlingstema.ARBEID_I_UTLANDET);
         String journalpostID = "journalpostID";
+
         prosessinstansService.opprettProsessinstansNySakFTRLTrygdeavtale(journalpostID, opprettSakDto);
+
         verify(prosessinstansRepo).save(piCaptor.capture());
         Prosessinstans prosessinstans = piCaptor.getValue();
         assertThat(prosessinstans.getType()).isEqualTo(ProsessType.OPPRETT_NY_SAK_FTRL_TRYGDEAVTALE);
         assertThat(prosessinstans.getData(ProsessDataKey.SAKSTYPE, Sakstyper.class)).isEqualTo(Sakstyper.FTRL);
+        assertThat(prosessinstans.getData(ProsessDataKey.SAKSTEMA, Sakstemaer.class)).isEqualTo(Sakstemaer.MEDLEMSKAP_LOVVALG);
         assertThat(prosessinstans.getData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.class)).isEqualTo(Behandlingstyper.SOEKNAD);
         assertThat(prosessinstans.getData(ProsessDataKey.BEHANDLINGSTEMA, Behandlingstema.class)).isEqualTo(Behandlingstema.ARBEID_I_UTLANDET);
         assertThat(prosessinstans.getData(ProsessDataKey.BRUKER_ID)).isEqualTo(opprettSakDto.getBrukerID());
@@ -515,7 +564,7 @@ class ProsessinstansServiceTest {
 
     @Test
     void behandleMottattMelding() {
-        MelosysEessiMelding eessiMelding = hentMelosysEessiMelding(LocalDate.now(), LocalDate.now().plusYears(1));
+        MelosysEessiMelding eessiMelding = lagMelosysEessiMelding();
         prosessinstansService.opprettProsessinstansSedMottak(eessiMelding);
 
         verify(prosessinstansRepo).save(piCaptor.capture());
@@ -551,7 +600,39 @@ class ProsessinstansServiceTest {
         verify(prosessinstansRepo, never()).save(any(Prosessinstans.class));
     }
 
-    private MelosysEessiMelding hentMelosysEessiMelding(LocalDate fom, LocalDate tom) {
+    @Test
+    void opprettProsessinstansSendBrev_oppretterNyProsessinstans() {
+        var behandling = new Behandling();
+        var doksysbrevbestilling = new DoksysBrevbestilling.Builder().medProduserbartDokument(INNVILGELSE_YRKESAKTIV).build();
+        var mottaker = Mottaker.av(Aktoersroller.BRUKER);
+
+        prosessinstansService.opprettProsessinstansSendBrev(behandling, doksysbrevbestilling, mottaker);
+
+        verify(prosessinstansRepo).save(piCaptor.capture());
+        assertThat(piCaptor.getValue().getBehandling()).isEqualTo(behandling);
+        assertThat(piCaptor.getValue().getData(ProsessDataKey.BREVBESTILLING, DoksysBrevbestilling.class))
+            .extracting(Brevbestilling::getProduserbartdokument, DoksysBrevbestilling::getMottakere)
+            .containsExactly(INNVILGELSE_YRKESAKTIV, List.of(mottaker));
+    }
+
+    @Test
+    void opprettProsessinstanserSendBrev_flereMottakere_oppretterNyProsessinstansPerMottaker() {
+        var behandling = new Behandling();
+        var doksysbrevbestilling = new DoksysBrevbestilling.Builder().medProduserbartDokument(INNVILGELSE_YRKESAKTIV).build();
+        var mottakere = List.of(Mottaker.av(Aktoersroller.BRUKER), Mottaker.av(Aktoersroller.ARBEIDSGIVER), Mottaker.av(Aktoersroller.TRYGDEMYNDIGHET));
+
+        prosessinstansService.opprettProsessinstanserSendBrev(behandling, doksysbrevbestilling, mottakere);
+
+        verify(prosessinstansRepo, times(3)).save(piCaptor.capture());
+        assertThat(piCaptor.getAllValues().get(0).getData(ProsessDataKey.BREVBESTILLING, DoksysBrevbestilling.class).getMottakere())
+            .isEqualTo(List.of(Mottaker.av(Aktoersroller.BRUKER)));
+        assertThat(piCaptor.getAllValues().get(1).getData(ProsessDataKey.BREVBESTILLING, DoksysBrevbestilling.class).getMottakere())
+            .isEqualTo(List.of(Mottaker.av(Aktoersroller.ARBEIDSGIVER)));
+        assertThat(piCaptor.getAllValues().get(2).getData(ProsessDataKey.BREVBESTILLING, DoksysBrevbestilling.class).getMottakere())
+            .isEqualTo(List.of(Mottaker.av(Aktoersroller.TRYGDEMYNDIGHET)));
+    }
+
+    private MelosysEessiMelding lagMelosysEessiMelding() {
         MelosysEessiMelding melding = new MelosysEessiMelding();
         melding.setAktoerId("123");
         melding.setArtikkel("12_1");
@@ -561,8 +642,8 @@ class ProsessinstansServiceTest {
         melding.setLovvalgsland("SE");
 
         Periode periode = new Periode();
-        periode.setFom(fom);
-        periode.setTom(tom);
+        periode.setFom(LocalDate.EPOCH);
+        periode.setTom(LocalDate.EPOCH.plusYears(1));
         melding.setPeriode(periode);
 
         Statsborgerskap statsborgerskap = new Statsborgerskap();

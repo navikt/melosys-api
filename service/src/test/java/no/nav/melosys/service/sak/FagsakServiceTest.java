@@ -6,10 +6,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Representerer;
-import no.nav.melosys.domain.kodeverk.Saksstatuser;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
@@ -29,6 +26,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper.REGISTRERT_UNNTAK;
+import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper.UTPEKING_NORGE_AVVIST;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.*;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -94,6 +92,7 @@ class FagsakServiceTest {
         OpprettSakRequest opprettSakRequest = new OpprettSakRequest.Builder()
             .medAktørID("123456789")
             .medSakstype(Sakstyper.EU_EOS)
+            .medSakstema(Sakstemaer.MEDLEMSKAP_LOVVALG)
             .medBehandlingstype(SOEKNAD)
             .medBehandlingstema(Behandlingstema.UTSENDT_ARBEIDSTAKER)
             .medInitierendeJournalpostId(initierendeJournalpostId)
@@ -108,6 +107,7 @@ class FagsakServiceTest {
             eq(Behandlingstema.UTSENDT_ARBEIDSTAKER), eq(initierendeJournalpostId), eq(initierendeDokumentId));
         assertThat(fagsak.getBehandlinger()).isNotEmpty();
         assertThat(fagsak.getType()).isEqualTo(Sakstyper.EU_EOS);
+        assertThat(fagsak.getTema()).isEqualTo(Sakstemaer.MEDLEMSKAP_LOVVALG);
         Aktoer forventetFullmektig = new Aktoer();
         forventetFullmektig.setFagsak(fagsak);
         forventetFullmektig.setRolle(Aktoersroller.REPRESENTANT);
@@ -510,6 +510,27 @@ class FagsakServiceTest {
         long behandlingID = fagsakService.opprettNyVurderingBehandling(saksnummer);
         verify(behandlingService).replikerBehandlingMedNyttBehandlingsresultat(behandling, Behandlingstyper.NY_VURDERING);
 
+        assertThat(behandlingID).isEqualTo(replikertBehandling.getId());
+    }
+
+    @Test
+    void opprettNyVurderingBehandling_kanRevurdereSEDEtterAvsluttetStatus_erUtpekingNorgeAvvist() {
+        final String saksnummer = "MEL-1";
+        Fagsak fagsak = lagFagsakMedBruker();
+        Instant idag = Instant.now();
+        Behandling behandlingSomBleRegistrert = lagBehandling(2L, SED, AVSLUTTET, idag);
+        behandlingSomBleRegistrert.setTema(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
+        Behandlingsresultat behandlingsresultatRegistrert = lagBehandlingsresultat(behandlingSomBleRegistrert, idag, null, UTPEKING_NORGE_AVVIST);
+        fagsak.setBehandlinger(List.of(behandlingSomBleRegistrert));
+        Behandling replikertBehandling = new Behandling();
+        replikertBehandling.setId(3L);
+
+        when(fagsakRepo.findBySaksnummer(saksnummer)).thenReturn(Optional.of(fagsak));
+        when(behandlingService.replikerBehandlingOgBehandlingsresultat(any(), any())).thenReturn(replikertBehandling);
+        when(behandlingsresultatService.hentBehandlingsresultat(behandlingSomBleRegistrert.getId())).thenReturn(behandlingsresultatRegistrert);
+        long behandlingID = fagsakService.opprettNyVurderingBehandling(saksnummer);
+
+        verify(behandlingService).replikerBehandlingOgBehandlingsresultat(behandlingSomBleRegistrert, Behandlingstyper.NY_VURDERING);
         assertThat(behandlingID).isEqualTo(replikertBehandling.getId());
     }
 

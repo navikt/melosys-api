@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.Collections;
@@ -28,26 +27,26 @@ import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class DokumentFactoryTest {
+class DokumentFactoryTest {
 
     DokumentFactory factory;
 
     @BeforeEach
-    public void setUp() {
-        Jaxb2Marshaller marshaller = JaxbConfig.jaxb2Marshaller();
+    void setUp() {
+        Jaxb2Marshaller marshaller = JaxbConfig.getJaxb2Marshaller();
 
         XsltTemplatesFactory xsltTemplatesFactory = new XsltTemplatesFactory();
         factory = new DokumentFactory(marshaller, xsltTemplatesFactory);
     }
 
     @Test
-    public void lagDokument() throws Exception {
+    void lagDokument() throws Exception {
         Saksopplysning test = new Saksopplysning();
 
         InputStream kilde = getClass().getClassLoader().getResourceAsStream("arbeidsforhold/99999999995.xml");
         StringBuilder stringBuilder = new StringBuilder();
         try (Reader reader = new BufferedReader(new InputStreamReader
-                (kilde, Charset.forName(StandardCharsets.UTF_8.name())))) {
+                (kilde, StandardCharsets.UTF_8))) {
             int c;
             while ((c = reader.read()) != -1) {
                 stringBuilder.append((char) c);
@@ -67,13 +66,13 @@ public class DokumentFactoryTest {
     }
 
     @Test
-    public void lagOrganisasjonDokument() throws Exception {
+    void lagOrganisasjonDokument() throws Exception {
         Saksopplysning test = new Saksopplysning();
 
         InputStream kilde = getClass().getClassLoader().getResourceAsStream("organisasjon/974652366.xml");
         StringBuilder stringBuilder = new StringBuilder();
         try (Reader reader = new BufferedReader(new InputStreamReader
-                (kilde, Charset.forName(StandardCharsets.UTF_8.name())))) {
+                (kilde, StandardCharsets.UTF_8))) {
             int c;
             while ((c = reader.read()) != -1) {
                 stringBuilder.append((char) c);
@@ -105,7 +104,7 @@ public class DokumentFactoryTest {
     }
 
     @Test
-    public void lagSedDokument_xmlBlirProdusert() {
+    void lagSedDokument_xmlBlirProdusert() {
         SedDokument sedDokument = new SedDokument();
         sedDokument.setStatsborgerskapKoder(Collections.singletonList("NO"));
         sedDokument.setLovvalgsperiode(new Periode(LocalDate.now(), LocalDate.now()));

@@ -3,8 +3,7 @@ package no.nav.melosys.integrasjon.medl;
 import java.time.LocalDate;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
-import no.nav.melosys.exception.TekniskException;
-import no.nav.tjenester.medlemskapsunntak.api.v1.MedlemskapsunntakForPut;
+import no.nav.melosys.integrasjon.medl.api.v1.MedlemskapsunntakForPut;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -15,7 +14,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @ExtendWith(MockitoExtension.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -87,7 +87,7 @@ class MedlemskapRestConsumerTest {
             )
         );
 
-        assertThatThrownBy(() -> restConsumer.oppdaterPeriode(MedlemskapsunntakForPut.builder().build()))
+        assertThatThrownBy(() -> restConsumer.oppdaterPeriode(new MedlemskapsunntakForPut()))
             .isInstanceOf(RuntimeException.class)
             .hasMessageContaining("400 Bad Request from PUT");
     }

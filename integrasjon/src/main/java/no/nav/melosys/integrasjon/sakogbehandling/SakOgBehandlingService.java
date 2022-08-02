@@ -10,7 +10,6 @@ import no.nav.melosys.domain.dokument.DokumentFactory;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.integrasjon.sakogbehandling.behandlingskjede.BehandlingskjedeConsumer;
 import no.nav.melosys.integrasjon.sakogbehandling.behandlingstatus.BehandlingStatusMapper;
-import no.nav.melosys.integrasjon.sakogbehandling.behandlingstatus.BehandlingstatusClient;
 import no.nav.tjeneste.virksomhet.sakogbehandling.v1.meldinger.FinnSakOgBehandlingskjedeListeRequest;
 import no.nav.tjeneste.virksomhet.sakogbehandling.v1.meldinger.FinnSakOgBehandlingskjedeListeResponse;
 import org.springframework.stereotype.Service;
@@ -20,25 +19,11 @@ public class SakOgBehandlingService implements SakOgBehandlingFasade {
     private static final String SOB_VERSJON = "1.0";
 
     private final BehandlingskjedeConsumer behandlingskjedeConsumer;
-    private final BehandlingstatusClient behandlingstatusClient;
     private final DokumentFactory dokumentFactory;
 
-    public SakOgBehandlingService(BehandlingskjedeConsumer behandlingskjedeConsumer, BehandlingstatusClient behandlingstatusClient, DokumentFactory dokumentFactory) {
+    public SakOgBehandlingService(BehandlingskjedeConsumer behandlingskjedeConsumer, DokumentFactory dokumentFactory) {
         this.behandlingskjedeConsumer = behandlingskjedeConsumer;
-        this.behandlingstatusClient = behandlingstatusClient;
         this.dokumentFactory = dokumentFactory;
-    }
-
-    @Override
-    public void sendBehandlingOpprettet(BehandlingStatusMapper mapper) {
-        //FIXME: MELOSYS-4655
-        //behandlingstatusClient.sendBehandlingOpprettet(mapper);
-    }
-
-    @Override
-    public void sendBehandlingAvsluttet(BehandlingStatusMapper mapper) {
-        //FIXME: MELOSYS-4655
-        //behandlingstatusClient.sendBehandlingAvsluttet(mapper);
     }
 
     @Override

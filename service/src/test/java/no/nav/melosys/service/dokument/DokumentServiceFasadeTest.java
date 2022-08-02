@@ -1,5 +1,7 @@
 package no.nav.melosys.service.dokument;
 
+import java.util.List;
+
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
@@ -16,9 +18,6 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 
-import java.util.Collections;
-import java.util.List;
-
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -32,8 +31,6 @@ class DokumentServiceFasadeTest {
     @Mock
     private DokumentService mockDokumentService;
     @Mock
-    private DokumentSystemService mockDokumentSystemService;
-    @Mock
     private DokgenService mockDokgenService;
     @Mock
     private BehandlingService mockBehandlingService;
@@ -46,12 +43,11 @@ class DokumentServiceFasadeTest {
 
     @BeforeEach
     void init() {
-        dokumentServiceFasade = new DokumentServiceFasade(mockDokumentService, mockDokumentSystemService,
+        dokumentServiceFasade = new DokumentServiceFasade(mockDokumentService,
             mockDokgenService, mockBehandlingService, applicationEventPublisher);
         Mockito.reset(
             mockDokgenService,
             mockDokumentService,
-            mockDokumentSystemService,
             mockBehandlingService
         );
     }
@@ -89,7 +85,7 @@ class DokumentServiceFasadeTest {
 
         dokumentServiceFasade.produserDokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID, Mottaker.av(Aktoersroller.BRUKER), 123L, new DoksysBrevbestilling.Builder().build());
 
-        verify(mockDokumentSystemService).produserDokument(any(), any(), anyLong(), any());
+        verify(mockDokumentService).produserDokument(any(), any(), anyLong(), any());
     }
 
     @Test
@@ -114,7 +110,7 @@ class DokumentServiceFasadeTest {
 
     @Test
     void skal_lageRiktigDokgenBrevRequest_ved_avslagManglendeOpplysninger_() {
-        when(mockDokgenService.erTilgjengeligDokgenmal(eq(Produserbaredokumenter.AVSLAG_MANGLENDE_OPPLYSNINGER))).thenReturn(true);
+        when(mockDokgenService.erTilgjengeligDokgenmal(Produserbaredokumenter.AVSLAG_MANGLENDE_OPPLYSNINGER)).thenReturn(true);
 
         DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder()
             .medProduserbartDokument(Produserbaredokumenter.AVSLAG_MANGLENDE_OPPLYSNINGER)

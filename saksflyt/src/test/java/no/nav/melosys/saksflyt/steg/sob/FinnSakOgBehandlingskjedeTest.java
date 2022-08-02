@@ -11,7 +11,6 @@ import no.nav.melosys.domain.dokument.jaxb.JaxbConfig;
 import no.nav.melosys.domain.dokument.sakogbehandling.SobSakDokument;
 import no.nav.melosys.integrasjon.sakogbehandling.SakOgBehandlingService;
 import no.nav.melosys.integrasjon.sakogbehandling.behandlingskjede.BehandlingskjedeConsumer;
-import no.nav.melosys.integrasjon.sakogbehandling.behandlingstatus.BehandlingstatusClient;
 import no.nav.tjeneste.virksomhet.sakogbehandling.v1.FinnSakOgBehandlingskjedeListeResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,23 +24,20 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class FinnSakOgBehandlingskjedeTest {
+class FinnSakOgBehandlingskjedeTest {
 
     @Mock
     private BehandlingskjedeConsumer behandlingskjedeConsumer;
 
-    @Mock
-    private BehandlingstatusClient behandlingstatusClient;
-
     private SakOgBehandlingService sakOgBehandlingService;
 
     @BeforeEach
-    public void setup() throws Exception {
+    void setup() throws Exception {
         DokumentFactory dokumentFactory = new DokumentFactory(
-            JaxbConfig.jaxb2Marshaller(), new XsltTemplatesFactory());
+                JaxbConfig.getJaxb2Marshaller(), new XsltTemplatesFactory());
 
         sakOgBehandlingService = new SakOgBehandlingService(
-            behandlingskjedeConsumer, behandlingstatusClient, dokumentFactory);
+            behandlingskjedeConsumer, dokumentFactory);
 
         // Lag respons fra xml
         URL xmlSource = getClass().getClassLoader().getResource("sakogbehandling/eos_barnetrygd.xml");
@@ -55,7 +51,7 @@ public class FinnSakOgBehandlingskjedeTest {
     }
 
     @Test
-    public void finnSakOgBehandlingskjedeList_expectCorrectlyFormattedDocument() throws Exception {
+    void finnSakOgBehandlingskjedeList_expectCorrectlyFormattedDocument() {
         Saksopplysning saksopplysning = sakOgBehandlingService.finnSakOgBehandlingskjedeListe("123123123");
 
         assertThat(saksopplysning).isInstanceOf(Saksopplysning.class);

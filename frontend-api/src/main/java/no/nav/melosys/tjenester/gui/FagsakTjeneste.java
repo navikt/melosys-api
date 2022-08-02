@@ -198,6 +198,7 @@ public class FagsakTjeneste {
         FagsakDto fagsakDto = new FagsakDto();
         fagsakDto.setSaksnummer(fagsak.getSaksnummer());
         fagsakDto.setGsakSaksnummer(fagsak.getGsakSaksnummer());
+        fagsakDto.setSakstema(fagsak.getTema());
         fagsakDto.setSakstype(fagsak.getType());
         fagsakDto.setSaksstatus(fagsak.getStatus());
         fagsakDto.setRegistrertDato(fagsak.getRegistrertDato());
@@ -212,6 +213,7 @@ public class FagsakTjeneste {
         for (Fagsak fagsak : saker) {
             FagsakOppsummeringDto fagsakOppsummeringDto = new FagsakOppsummeringDto();
             fagsakOppsummeringDto.setSaksnummer(fagsak.getSaksnummer());
+            fagsakOppsummeringDto.setSakstema(fagsak.getTema());
             fagsakOppsummeringDto.setSakstype(fagsak.getType());
             fagsakOppsummeringDto.setSaksstatus(fagsak.getStatus());
             fagsakOppsummeringDto.setOpprettetDato(fagsak.getRegistrertDato());

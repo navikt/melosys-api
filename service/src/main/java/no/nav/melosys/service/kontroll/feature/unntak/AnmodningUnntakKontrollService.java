@@ -12,9 +12,9 @@ import no.nav.melosys.service.kontroll.feature.unntak.kontroll.AnmodningUnntakKo
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import no.nav.melosys.service.validering.Kontrollfeil;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
-@Component
+@Service
 public class AnmodningUnntakKontrollService {
 
     private final AnmodningsperiodeService anmodningsperiodeService;
