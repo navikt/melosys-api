@@ -8,10 +8,10 @@ import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode
 import no.nav.melosys.domain.dokument.medlemskap.Periode
 import no.nav.melosys.domain.util.LandkoderUtils
+import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.integrasjon.medl.api.v1.MedlemskapsunntakForGet
 import no.nav.melosys.integrasjon.medl.api.v1.MedlemskapsunntakForPost
 import no.nav.melosys.integrasjon.medl.api.v1.MedlemskapsunntakForPut
-import no.nav.melosys.exception.TekniskException
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 
@@ -126,6 +126,15 @@ class MedlService(
             lovvalg = lovvalgMedl.kode
         }
         return medlemskapRestConsumer.opprettPeriode(medlemskapsunntakForPost).unntakId
+    }
+
+    fun oppdaterDatoForPeriode(medlPeriodeID: Long?, fom: LocalDate?, tom: LocalDate?) {
+        val request = MedlemskapsunntakForPut(
+            unntakId = medlPeriodeID,
+            fraOgMed = fom,
+            tilOgMed = tom // TODO: Antar flere av feltene her er obligatoriske. Kopiere fra forrige periode? Bruke standardverdier?
+        )
+        medlemskapRestConsumer.oppdaterPeriode(request)
     }
 
     private fun lovvalgRequest(periodeOmLovvalg: PeriodeOmLovvalg) =
