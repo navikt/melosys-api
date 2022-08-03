@@ -1,11 +1,13 @@
 package no.nav.melosys.integrasjon.oppgave;
 
+import no.nav.melosys.domain.oppgave.Oppgave;
+
 import java.util.List;
 import java.util.Set;
 
-import no.nav.melosys.domain.oppgave.Oppgave;
-
 public interface OppgaveFasade {
+
+    void feilregistrerOppgave(String oppgaveId);
 
     /**
      * Ferdigstiller en opprettet oppgave i Oppgave
@@ -37,6 +39,8 @@ public interface OppgaveFasade {
      * Oppgaver sorteres stigende etter frist.
      */
     List<Oppgave> finnOppgaverMedOrgnr(String orgnr);
+
+    List<Oppgave> finnÅpneOppgaverMedJournalpostID(String journalpostID);
 
     /**
      * Finner alle åpne oppgaver med gitt saksnummer.

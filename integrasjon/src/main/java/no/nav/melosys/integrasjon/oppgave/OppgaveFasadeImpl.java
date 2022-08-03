@@ -35,6 +35,7 @@ import static no.nav.melosys.integrasjon.Konstanter.NAV_VIKEN_ENHET_ID;
 public class OppgaveFasadeImpl implements OppgaveFasade {
     private static final Logger log = LoggerFactory.getLogger(OppgaveFasadeImpl.class);
 
+    private static final String OPPGAVE_STATUS_FEILREGISTRERT = "FEILREGISTRERT";
     private static final String OPPGAVE_STATUS_FERDIGSTILT = "FERDIGSTILT";
     private static final String SORTERINGSFELT = "FRIST";
     private static final String SORTERINGSREKKEFOLGE_DESC = "DESC";
@@ -45,6 +46,13 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
 
     public OppgaveFasadeImpl(OppgaveConsumer oppgaveConsumer) {
         this.oppgaveConsumer = oppgaveConsumer;
+    }
+
+    @Override
+    public void feilregistrerOppgave(String oppgaveID) {
+        OppgaveDto oppgave = hentOppgaveDto(oppgaveID);
+        oppgave.setStatus(OPPGAVE_STATUS_FEILREGISTRERT);
+        oppgaveConsumer.oppdaterOppgave(oppgave);
     }
 
     @Override
@@ -240,6 +248,20 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
             .medTema(new String[]{Tema.MED.getKode(), Tema.UFM.getKode()})
             .medOppgaveTyper(hentGyldigeOppgavetyper())
             .medSorteringsfelt(SORTERINGSFELT)
+            .medStatusKategori(OPPGAVE_STATUSKATEGORI_AAPEN)
+            .build();
+
+        return oppgaveConsumer.hentOppgaveListe(oppgaveSearchRequest).stream()
+            .map(OppgaveFasadeImpl::oppgaveMappingDtoTilDomain)
+            .toList();
+    }
+
+    @Override
+    public List<Oppgave> finnÅpneOppgaverMedJournalpostID(String journalpostID) {
+        OppgaveSearchRequest oppgaveSearchRequest = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
+            .medJournalpostID(new String[]{journalpostID})
+            .medTema(new String[]{Tema.MED.getKode(), Tema.UFM.getKode()})
+            .medOppgaveTyper(new String[]{Oppgavetyper.BEH_SAK_MK.getKode(), Oppgavetyper.VUR.getKode(), Oppgavetyper.BEH_SED.getKode()})
             .medStatusKategori(OPPGAVE_STATUSKATEGORI_AAPEN)
             .build();
 

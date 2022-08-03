@@ -7,6 +7,7 @@ public class OppgaveSearchRequest {
     private final Boolean tildeltRessurs;
     @JsonProperty("aktoerId")
     private final String aktørId;
+    private final String[] journalpostId;
     private final String orgnr;
     private final String[] oppgavetype;
     private final String behandlingstype;
@@ -23,6 +24,7 @@ public class OppgaveSearchRequest {
         this.tildeltEnhetsnr = builder.enhetId;
         this.tildeltRessurs = builder.tildeltRessurs;
         this.aktørId = builder.aktørId;
+        this.journalpostId = builder.journalpostId;
         this.orgnr = builder.orgnr;
         this.oppgavetype = builder.oppgavetype;
         this.behandlingstype = builder.behandlingstype;
@@ -68,6 +70,10 @@ public class OppgaveSearchRequest {
         return aktørId;
     }
 
+    public String[] getJournalpostId() {
+        return journalpostId;
+    }
+
     public String getOrgnr() {
         return orgnr;
     }
@@ -96,6 +102,7 @@ public class OppgaveSearchRequest {
 
         private final String enhetId;
         private String aktørId;
+        private String[] journalpostId;
         private String orgnr;
         private String[] oppgavetype;
         private String behandlingstype;
@@ -115,6 +122,11 @@ public class OppgaveSearchRequest {
 
         public Builder medAktørId(String aktørId) {
             this.aktørId = aktørId;
+            return this;
+        }
+
+        public Builder medJournalpostID(String[] journalpostId) {
+            this.journalpostId = journalpostId;
             return this;
         }
 
