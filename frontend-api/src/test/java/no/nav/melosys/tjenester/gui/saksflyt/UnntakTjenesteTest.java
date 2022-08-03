@@ -1,51 +1,58 @@
 package no.nav.melosys.tjenester.gui.saksflyt;
 
 import java.time.LocalDate;
+import java.util.Collections;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
-import no.nav.melosys.service.unntaksperiode.Unntaksperiode;
-import no.nav.melosys.service.unntaksperiode.UnntaksperiodeGodkjenning;
 import no.nav.melosys.service.unntaksperiode.UnntaksperiodeService;
 import no.nav.melosys.tjenester.gui.dto.GodkjennUnntaksperiodeDto;
+import no.nav.melosys.tjenester.gui.dto.IkkeGodkjennUnntaksperiodeDto;
 import no.nav.melosys.tjenester.gui.dto.periode.PeriodeDto;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
 
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@ExtendWith(MockitoExtension.class)
+@WebMvcTest(controllers = {UnntakTjeneste.class})
 class UnntakTjenesteTest {
 
-    @Mock
+    @MockBean
     private UnntaksperiodeService unntaksperiodeService;
-    @Mock
+    @MockBean
     private Aksesskontroll aksesskontroll;
 
-    private UnntakTjeneste unntakTjeneste;
+    @Autowired
+    private MockMvc mockMvc;
+    @Autowired
+    private ObjectMapper objectMapper;
 
-    @BeforeEach
-    public void setUp() {
-        unntakTjeneste = new UnntakTjeneste(unntaksperiodeService, aksesskontroll);
+    private static final String BASE_URL = "/api/saksflyt/unntaksperioder";
+
+    @Test
+    public void godkjennUnntaksPeriode_godkjennerPeriode() throws Exception {
+        var periodeDto = new PeriodeDto(LocalDate.of(2001,1,1),LocalDate.of(2002, 1,1));
+        var dto = new GodkjennUnntaksperiodeDto(true, "tekst", periodeDto, Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1.toString());
+
+        mockMvc.perform(post(BASE_URL + "/{behandlingID}/godkjenn", 1L)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(dto)))
+            .andExpect(status().isNoContent());
     }
 
     @Test
-    public void godkjennUnntaksPeriode_godkjennerPeriode() {
-        PeriodeDto periodeDto = new PeriodeDto(LocalDate.of(2001,1,1),LocalDate.of(2002, 1,1));
-        GodkjennUnntaksperiodeDto dto = new GodkjennUnntaksperiodeDto(true, "tekst", periodeDto, Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1.toString());
+    public void ikkeGodkjennUnntaksPeriode() throws Exception {
+        IkkeGodkjennUnntaksperiodeDto dto = new IkkeGodkjennUnntaksperiodeDto(Collections.emptySet(), "fritekst");
 
-        unntakTjeneste.godkjennUnntaksperiode(1L, dto);
-
-        UnntaksperiodeGodkjenning forventetUnntaksperiodeGodkjenning = UnntaksperiodeGodkjenning.builder()
-            .varsleUtland(true)
-            .fritekst("tekst")
-            .endretPeriode(new Unntaksperiode(LocalDate.of(2001,1,1), LocalDate.of(2002,1,1)))
-            .lovvalgsbestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1)
-            .build();
-        verify(unntaksperiodeService).godkjennPeriode(eq(1L), eq(forventetUnntaksperiodeGodkjenning));
+        mockMvc.perform(post(BASE_URL + "/{behandlingID}/ikkegodkjenn", 1L)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(dto)))
+            .andExpect(status().isNoContent());
     }
 }

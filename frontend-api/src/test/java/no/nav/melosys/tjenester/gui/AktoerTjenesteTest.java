@@ -30,7 +30,6 @@ class AktoerTjenesteTest {
 
     @MockBean
     private Aksesskontroll aksesskontroll;
-
     @MockBean
     private AktoerService aktoerService;
     @MockBean
