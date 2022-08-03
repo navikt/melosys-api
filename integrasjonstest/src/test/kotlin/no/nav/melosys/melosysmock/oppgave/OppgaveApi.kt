@@ -7,19 +7,15 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZonedDateTime
 
-import no.nav.melosys.melosysmock.oppgave.OppgaveRepo.repo as oppgaveRepo
-
 @RestController
 @RequestMapping("/api/v1/oppgaver")
 @Unprotected
-class OppgaveApi {
-
-    companion object OppgaveIdTeller {
-        var oppgaveIdTeller: Int = 1
-    }
+class OppgaveApi(private val oppgaveRepo: OppgaveRepo) {
 
     @GetMapping
     fun hentOppgaveliste(
+        @RequestParam("aktoerId", required = false) aktoerId: String? = null,
+        @RequestParam("orgnr", required = false) orgnr: String? = null,
         @RequestParam("tildeltEnhetsnr", required = false) tildeltEnhetsnr: String? = null,
         @RequestParam("tildeltRessurs", required = false) tildeltRessurs: Boolean? = null,
         @RequestParam("tilordnetRessurs", required = false) tilordnetRessurs: String? = null,
@@ -29,37 +25,45 @@ class OppgaveApi {
         @RequestParam("behandlingstema", required = false) behandlingstema: String? = null,
         @RequestParam("saksreferanse", required = false) saksreferanse: String? = null
     ): OppgavelisteRespons {
-        val oppgaver = oppgaveRepo.values
+        val oppgaver = oppgaveRepo.repo.values
             .filter {
                 (tildeltEnhetsnr == null || tildeltEnhetsnr == it.tildeltEnhetsnr) &&
-                (tildeltRessurs == null || !tildeltRessurs && it.tilordnetRessurs == null || tildeltRessurs && it.tilordnetRessurs != null) &&
-                (tilordnetRessurs == null || tilordnetRessurs == it.tilordnetRessurs) &&
-                (statuskategori == null || harStatuskategori(statuskategori, it)) &&
-                (behandlesAvApplikasjon == null || behandlesAvApplikasjon == it.behandlesAvApplikasjon) &&
-                (behandlingstype == null || behandlingstype == it.behandlingstype) &&
-                (behandlingstema == null || behandlingstema == it.behandlingstema) &&
-                (saksreferanse == null || saksreferanse == it.saksreferanse)
+                    (tildeltRessurs == null || !tildeltRessurs && it.tilordnetRessurs == null || tildeltRessurs && it.tilordnetRessurs != null) &&
+                    (tilordnetRessurs == null || tilordnetRessurs == it.tilordnetRessurs) &&
+                    (statuskategori == null || harStatuskategori(statuskategori, it)) &&
+                    (behandlesAvApplikasjon == null || behandlesAvApplikasjon == it.behandlesAvApplikasjon) &&
+                    (behandlingstype == null || behandlingstype == it.behandlingstype) &&
+                    (behandlingstema == null || behandlingstema == it.behandlingstema) &&
+                    (saksreferanse == null || saksreferanse == it.saksreferanse)
+            }
+            .filter {
+                (orgnr == null && aktoerId == null) ||
+                    (orgnr != null && orgnr == it.orgnr) ||
+                    (aktoerId != null && aktoerId == it.aktoerId)
             }
 
         return OppgavelisteRespons(oppgaver.size, oppgaver)
     }
 
     private fun harStatuskategori(statuskategori: String, oppgave: Oppgave) = when (statuskategori) {
-            "AAPEN" -> oppgave.status != "FERDIGSTILT"
-            else -> true
+        "AAPEN" -> oppgave.status != "FERDIGSTILT"
+        else -> true
     }
 
     @GetMapping("/{oppgaveID}")
     fun hentOppgave(@PathVariable("oppgaveID") oppgaveID: Int): ResponseEntity<Oppgave> {
-        return if (oppgaveRepo.containsKey(oppgaveID)) ResponseEntity.ok(oppgaveRepo[oppgaveID]!!)
+        return if (oppgaveRepo.repo.containsKey(oppgaveID)) ResponseEntity.ok(oppgaveRepo.repo[oppgaveID]!!)
         else ResponseEntity.notFound().build()
     }
 
     @PutMapping("/{oppgaveID}")
-    fun oppdaterOppgave(@PathVariable("oppgaveID") oppgaveID: Int, @RequestBody oppgave: Oppgave): ResponseEntity<Oppgave> {
-        if (!oppgaveRepo.containsKey(oppgaveID)) return ResponseEntity.notFound().build()
+    fun oppdaterOppgave(
+        @PathVariable("oppgaveID") oppgaveID: Int,
+        @RequestBody oppgave: Oppgave
+    ): ResponseEntity<Oppgave> {
+        if (!oppgaveRepo.repo.containsKey(oppgaveID)) return ResponseEntity.notFound().build()
 
-        oppgaveRepo[oppgaveID] = oppgave
+        oppgaveRepo.repo[oppgaveID] = oppgave
         oppgave.id = oppgaveID
         oppgave.versjon++
         oppgave.endretTidspunkt = LocalDateTime.now()
@@ -68,10 +72,10 @@ class OppgaveApi {
 
     @PostMapping
     fun opprettOppgave(@RequestBody oppgave: Oppgave): ResponseEntity<Oppgave> {
-        val oppgaveID = oppgaveIdTeller++
+        val oppgaveID = oppgaveRepo.finnSistOppgaveId() + 1
         oppgave.id = oppgaveID
         oppgave.versjon = 1
-        oppgaveRepo[oppgaveID] = oppgave
+        oppgaveRepo.repo[oppgaveID] = oppgave
         oppgave.endretTidspunkt = LocalDateTime.now()
         oppgave.opprettetTidspunkt = ZonedDateTime.now()
         return ResponseEntity.ok(oppgave)
@@ -110,8 +114,13 @@ data class Oppgave(
     val temagruppe: String? = null,
     val tildeltEnhetsnr: String? = null,
     val tilordnetRessurs: String? = null,
-    var versjon: Int = 1
+    var versjon: Int = 1,
+    var metadata: Map<OppgaveMetadataKey, String>? = null
 )
+
+enum class OppgaveMetadataKey {
+    NORM_DATO, SOKNAD_ID, REVURDERINGSTYPE, KRAV_ID, MOTTATT_DATO, EKSTERN_HENVENDELSE_ID, SKANNET_DATO, RINA_SAKID, HJEMMEL
+}
 
 data class OppgavelisteRespons(
     val antallTreffTotalt: Int,

@@ -1,18 +1,19 @@
 package no.nav.melosys.melosysmock.journalpost.saf
 
 import no.nav.melosys.melosysmock.journalpost.JournalpostRepo
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/rest")
-class SafRestApi {
+class SafRestApi(@Autowired private val journalpostRepo: JournalpostRepo) {
     @GetMapping("hentdokument/{journalpostId}/{dokumentInfoId}/{variantFormat}")
     fun hentDokument(
         @PathVariable journalpostId: String,
         @PathVariable dokumentInfoId: String,
         @PathVariable variantFormat: String
     ): ByteArray =
-        JournalpostRepo.repo[journalpostId]
+        journalpostRepo.repo[journalpostId]
             ?.let { journalpost ->
                 journalpost.dokumentModellList
                     .find { it.dokumentId == dokumentInfoId }
