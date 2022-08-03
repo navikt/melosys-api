@@ -21,9 +21,9 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.jeasy.random.FieldPredicates.ofType;
 
-public class SedDokumentTest {
+class SedDokumentTest {
     @Test
-    public void testXmlSerialisering() {
+    void testXmlSerialisering() {
         EasyRandomParameters easyRandomParameters = new EasyRandomParameters().collectionSizeRange(1, 2).stringLengthRange(1,4)
             .randomize(ofType(LovvalgBestemmelse.class), () -> new EnumRandomizer<>(Lovvalgbestemmelser_883_2004.class).getRandomValue());
         final EasyRandom easyRandom = new EasyRandom(easyRandomParameters);
@@ -31,7 +31,7 @@ public class SedDokumentTest {
         sedDokument.setArbeidssteder(easyRandom.objects(Arbeidssted.class, 2).collect(Collectors.toList()));
         sedDokument.setStatsborgerskapKoder(easyRandom.objects(String.class, 2).collect(Collectors.toList()));
 
-        DokumentFactory dokumentFactory = new DokumentFactory(JaxbConfig.jaxb2Marshaller(), new XsltTemplatesFactory());
+        DokumentFactory dokumentFactory = new DokumentFactory(JaxbConfig.getJaxb2Marshaller(), new XsltTemplatesFactory());
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setDokument(sedDokument);
         saksopplysning.setType(SaksopplysningType.SEDOPPL);

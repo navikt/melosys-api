@@ -2,32 +2,60 @@ package no.nav.melosys.domain.brev;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 
-public final class DoksysBrevbestilling extends Brevbestilling {
-    private final Aktoersroller mottakerRolle;
-    private final Collection<Mottaker> mottaker; //NOTE Flytt opp til Brevbestilling
-    private final String begrunnelseKode;
-    private final String fritekst;
-    private final String ytterligereInformasjon;
+public class DoksysBrevbestilling extends Brevbestilling {
+    private Aktoersroller mottakerRolle;
+    private Collection<Mottaker> mottakere;
+    private String begrunnelseKode;
+    private String fritekst;
+    private String ytterligereInformasjon;
 
-    private DoksysBrevbestilling(Produserbaredokumenter produserbartdokument,
-                                 String avsenderID,
-                                 Aktoersroller mottakerRolle,
-                                 Collection<Mottaker> mottaker,
-                                 Behandling behandling,
-                                 String begrunnelseKode,
-                                 String fritekst,
-                                 String ytterligereInformasjon) {
+    public DoksysBrevbestilling() {
+    }
+
+    protected DoksysBrevbestilling(Produserbaredokumenter produserbartdokument,
+                                   String avsenderID,
+                                   Aktoersroller mottakerRolle,
+                                   Collection<Mottaker> mottakere,
+                                   Behandling behandling,
+                                   String begrunnelseKode,
+                                   String fritekst,
+                                   String ytterligereInformasjon) {
         super(produserbartdokument, behandling, avsenderID);
         this.mottakerRolle = mottakerRolle;
-        this.mottaker = mottaker;
+        this.mottakere = mottakere;
         this.begrunnelseKode = begrunnelseKode;
         this.fritekst = fritekst;
         this.ytterligereInformasjon = ytterligereInformasjon;
+    }
+
+    public Aktoersroller getMottakerRolle() {
+        return mottakerRolle;
+    }
+
+    public Collection<Mottaker> getMottakere() {
+        return mottakere;
+    }
+
+    public String getBegrunnelseKode() {
+        return begrunnelseKode;
+    }
+
+    public String getFritekst() {
+        return fritekst;
+    }
+
+    public String getYtterligereInformasjon() {
+        return ytterligereInformasjon;
+    }
+
+    public void settMottaker(Mottaker mottaker) {
+        mottakere = List.of(mottaker);
     }
 
     public static class Builder {
@@ -100,23 +128,4 @@ public final class DoksysBrevbestilling extends Brevbestilling {
         }
     }
 
-    public Aktoersroller getMottakerRolle() {
-        return mottakerRolle;
-    }
-
-    public Collection<Mottaker> getMottakere() {
-        return mottaker;
-    }
-
-    public String getBegrunnelseKode() {
-        return begrunnelseKode;
-    }
-
-    public String getFritekst() {
-        return fritekst;
-    }
-
-    public String getYtterligereInformasjon() {
-        return ytterligereInformasjon;
-    }
 }

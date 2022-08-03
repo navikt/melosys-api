@@ -26,7 +26,7 @@ class Ereg4KonverteringTest implements KonverteringTest {
 
     @BeforeAll
     public static void setUp() {
-        Jaxb2Marshaller marshaller = JaxbConfig.jaxb2Marshaller();
+        Jaxb2Marshaller marshaller = JaxbConfig.getJaxb2Marshaller();
         XsltTemplatesFactory xsltTemplatesFactory = new XsltTemplatesFactory();
         factory = new DokumentFactory(marshaller, xsltTemplatesFactory);
     }
@@ -64,7 +64,7 @@ class Ereg4KonverteringTest implements KonverteringTest {
         OrganisasjonDokument dokument = (OrganisasjonDokument) saksopplysning.getDokument();
 
         assertThat(dokument.getSektorkode()).isNotBlank();
-        assertThat(dokument.getOrganisasjonDetaljer().getNaering().isEmpty()).isFalse();
+        assertThat(dokument.getOrganisasjonDetaljer().getNaering()).isNotEmpty();
         assertThat(dokument.getOppstartsdato()).isNull();
         assertThat(dokument.getEnhetstype()).isNotBlank();
     }

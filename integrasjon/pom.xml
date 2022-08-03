@@ -61,14 +61,6 @@
         </dependency>
 
         <dependency>
-            <groupId>com.ibm.mq</groupId>
-            <artifactId>com.ibm.mq.allclient</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>javax.jms</groupId>
-            <artifactId>javax.jms-api</artifactId>
-        </dependency>
-        <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
             <scope>provided</scope>
@@ -160,11 +152,6 @@
             <artifactId>person-v3-tjenestespesifikasjon</artifactId>
         </dependency>
 
-        <!--MEDL2-->
-        <dependency>
-            <groupId>no.nav.tjenester</groupId>
-            <artifactId>medlemskapsunntak-api-v1</artifactId>
-        </dependency>
         <!-- Utbetaling -->
         <dependency>
             <groupId>no.nav.tjenestespesifikasjoner</groupId>
@@ -209,13 +196,21 @@
             <artifactId>kotlin-test-junit5</artifactId>
             <scope>test</scope>
         </dependency>
-
+        <dependency>
+            <groupId>io.mockk</groupId>
+            <artifactId>mockk</artifactId>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>org.mockito.kotlin</groupId>
             <artifactId>mockito-kotlin</artifactId>
             <scope>test</scope>
         </dependency>
-
+        <dependency>
+            <groupId>io.kotest</groupId>
+            <artifactId>kotest-assertions-core-jvm</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>

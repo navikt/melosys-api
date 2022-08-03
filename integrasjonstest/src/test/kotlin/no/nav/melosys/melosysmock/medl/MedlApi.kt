@@ -2,9 +2,10 @@ package no.nav.melosys.melosysmock.medl
 
 import no.nav.melosys.melosysmock.medl.MedlRepo.repo
 import no.nav.security.token.support.core.api.Unprotected
-import no.nav.tjenester.medlemskapsunntak.api.v1.MedlemskapsunntakForGet
-import no.nav.tjenester.medlemskapsunntak.api.v1.MedlemskapsunntakForPost
-import no.nav.tjenester.medlemskapsunntak.api.v1.MedlemskapsunntakForPut
+import no.nav.melosys.integrasjon.medl.api.v1.MedlemskapsunntakForGet
+import no.nav.melosys.integrasjon.medl.api.v1.MedlemskapsunntakForPost
+import no.nav.melosys.integrasjon.medl.api.v1.MedlemskapsunntakForPut
+
 import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.web.bind.annotation.*
 import java.time.LocalDate

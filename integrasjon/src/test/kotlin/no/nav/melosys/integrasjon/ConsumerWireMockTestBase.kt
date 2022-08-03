@@ -6,18 +6,18 @@ import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.github.tomakehurst.wiremock.matching.StringValuePattern
 import com.github.tomakehurst.wiremock.matching.UrlPattern
+import io.mockk.spyk
 import no.nav.melosys.integrasjon.felles.EnvironmentHandler
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
 import no.nav.melosys.sikkerhet.context.SubjectHandler
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.*
-import org.mockito.Mockito
 import org.springframework.mock.env.MockEnvironment
 import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-abstract class ConsumerWireMockTestBase<T>(
+abstract class ConsumerWireMockTestBase<T, R>(
     mockPort: Int,
     stsMockPort: Int
 ) {
@@ -31,14 +31,14 @@ abstract class ConsumerWireMockTestBase<T>(
 
     abstract fun getMockData(): T
 
-    abstract fun executeRequest()
+    abstract fun executeRequest(): R
 
     @BeforeAll
     fun beforeAll() {
         serviceUnderTestMockServer.start()
         stsMockServer.start()
 
-        val environment = Mockito.spy(MockEnvironment())
+        val environment = spyk(MockEnvironment())
         environment.setProperty("systemuser.username", "test")
         environment.setProperty("systemuser.password", "test")
         EnvironmentHandler(environment)
@@ -74,10 +74,17 @@ abstract class ConsumerWireMockTestBase<T>(
     }
 
     fun verifyHeaders(headers: Map<String, StringValuePattern>) {
-        val wireMock = createWireMock()
-        headers.forEach {
-            wireMock.withHeader(it.key, it.value)
+        setupWireMock { wireMock ->
+            headers.forEach {
+                wireMock.withHeader(it.key, it.value)
+            }
         }
+    }
+
+    fun setupWireMock(consumer: (MappingBuilder) -> Unit = {}) {
+        val wireMock = createWireMock()
+
+        consumer(wireMock)
 
         val response = WireMock.aResponse()
             .withStatus(200)
@@ -92,24 +99,21 @@ abstract class ConsumerWireMockTestBase<T>(
         )
     }
 
-    fun executeFromSystem(verify: () -> Unit) {
+    fun executeFromSystem(consumer: (R) -> Unit = {})  {
         val uuid = UUID.randomUUID()
         try {
             ThreadLocalAccessInfo.beforeExecuteProcess(uuid, "prossesSteg")
-            verify()
-            executeRequest()
+            consumer(executeRequest())
         } finally {
             ThreadLocalAccessInfo.afterExecuteProcess(uuid)
         }
     }
 
-    fun executeFromController(verify: () -> Unit) {
+    fun executeFromController(consumer: (R) -> Unit = {}) {
         SpringSubjectHandler.set(TestSubjectHandler())
         try {
             ThreadLocalAccessInfo.beforeControllerRequest("request", false)
-            verify()
-            executeRequest()
-
+            consumer(executeRequest())
         } finally {
             ThreadLocalAccessInfo.afterControllerRequest("request")
         }
@@ -118,7 +122,7 @@ abstract class ConsumerWireMockTestBase<T>(
     fun executeErrorFromServer(verify: (String) -> Unit) {
         stubError()
         try {
-            executeFromSystem { }
+            executeFromSystem()
         } catch (exception: Exception) {
             Assertions.assertThat(exception.message)
                 .endsWith(errorFromServerMessage())

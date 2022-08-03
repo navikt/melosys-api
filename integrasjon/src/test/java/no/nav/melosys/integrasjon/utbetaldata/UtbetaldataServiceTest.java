@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
-import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.ws.WebServiceException;
 
 import no.nav.melosys.domain.Saksopplysning;
@@ -33,8 +32,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -50,9 +49,9 @@ class UtbetaldataServiceTest {
 
 
     @BeforeEach
-    public void setup() throws TransformerConfigurationException {
+    void setup() {
         xsltTemplatesFactory = mock(XsltTemplatesFactory.class);
-        DokumentFactory dokumentFactory = new DokumentFactory(JaxbConfig.jaxb2Marshaller(), xsltTemplatesFactory);
+        DokumentFactory dokumentFactory = new DokumentFactory(JaxbConfig.getJaxb2Marshaller(), xsltTemplatesFactory);
 
         utbetaldataService = new UtbetaldataService(utbetalingConsumer, dokumentFactory);
     }
@@ -75,8 +74,8 @@ class UtbetaldataServiceTest {
 
         UtbetalingDokument utbetalingDokument = (UtbetalingDokument) saksopplysning.getDokument();
         assertThat(utbetalingDokument).isNotNull();
-        assertThat(utbetalingDokument.utbetalinger.size()).isEqualTo(1);
-        assertThat(utbetalingDokument.utbetalinger.iterator().next().ytelser.size()).isEqualTo(1);
+        assertThat(utbetalingDokument.utbetalinger).hasSize(1);
+        assertThat(utbetalingDokument.utbetalinger.iterator().next().ytelser).hasSize(1);
         assertThat(utbetalingDokument.utbetalinger.iterator().next().ytelser.iterator().next().type).isEqualToIgnoringCase("Barnetrygd");
     }
 
@@ -98,10 +97,10 @@ class UtbetaldataServiceTest {
 
         UtbetalingDokument utbetalingDokument = (UtbetalingDokument) saksopplysning.getDokument();
         assertThat(utbetalingDokument).isNotNull();
-        assertThat(utbetalingDokument.utbetalinger.size()).isEqualTo(2);
-        assertThat(utbetalingDokument.utbetalinger.get(0).ytelser.size()).isEqualTo(1);
+        assertThat(utbetalingDokument.utbetalinger).hasSize(2);
+        assertThat(utbetalingDokument.utbetalinger.get(0).ytelser).hasSize(1);
         assertThat(utbetalingDokument.utbetalinger.get(0).ytelser.iterator().next().type).isEqualToIgnoringCase("Barnetrygd");
-        assertThat(utbetalingDokument.utbetalinger.get(1).ytelser.size()).isEqualTo(1);
+        assertThat(utbetalingDokument.utbetalinger.get(1).ytelser).hasSize(1);
         assertThat(utbetalingDokument.utbetalinger.get(1).ytelser.iterator().next().type).isEqualToIgnoringCase("Barnetrygd");
     }
 

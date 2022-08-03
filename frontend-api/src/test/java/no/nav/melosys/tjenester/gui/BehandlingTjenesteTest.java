@@ -48,8 +48,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.jeasy.random.FieldPredicates.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = {BehandlingTjeneste.class})
@@ -187,7 +186,7 @@ class BehandlingTjenesteTest {
 
     @Test
     void avsluttNyVurderingMedFerdigbehandlet() throws Exception {
-        mockMvc.perform(post(BASE_URL + "/{behandlingID}/sett-til-ferdigbehandlet", BEHANDLING_ID)
+        mockMvc.perform(put(BASE_URL + "/{behandlingID}/sett-til-ferdigbehandlet", BEHANDLING_ID)
                 .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isNoContent());
     }

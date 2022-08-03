@@ -11,6 +11,7 @@ class ArkitekturTestIT {
 
     @ArchTest
     static final ArchRule melosys_has_layered_architecture = layeredArchitecture()
+        .consideringOnlyDependenciesInAnyPackage("no.nav.melosys")
         .layer("Controller").definedBy("..tjenester.gui..")
         .layer("Service").definedBy("..service..")
         .layer("Integrations").definedBy("..integrasjon..")

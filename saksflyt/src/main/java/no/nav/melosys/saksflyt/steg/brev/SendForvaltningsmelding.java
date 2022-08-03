@@ -1,5 +1,7 @@
 package no.nav.melosys.saksflyt.steg.brev;
 
+import java.util.List;
+
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
@@ -43,7 +45,7 @@ public class SendForvaltningsmelding implements StegBehandler {
         if (prosessinstans.getBehandling().erBehandlingAvSøknad() && skalSendesForvaltningsmelding) {
             Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(prosessinstans.getBehandling().getId());
             String saksbehandler = prosessinstans.getData(SAKSBEHANDLER);
-            brevBestiller.bestill(MELDING_FORVENTET_SAKSBEHANDLINGSTID, saksbehandler, Mottaker.av(BRUKER), behandling);
+            brevBestiller.bestill(MELDING_FORVENTET_SAKSBEHANDLINGSTID, List.of(Mottaker.av(BRUKER)), null, saksbehandler, null, behandling);
             log.info("Sendt forvaltningsmelding for behandling {}", prosessinstans.getBehandling().getId());
         } else {
             log.info("Ikke sendt forvaltningsmelding for behandling {}", prosessinstans.getBehandling().getId());

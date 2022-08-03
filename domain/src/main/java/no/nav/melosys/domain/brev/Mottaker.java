@@ -6,7 +6,10 @@ import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 
 public final class Mottaker {
-    private final Aktoer aktør;
+    private Aktoer aktør;
+
+    private Mottaker() {
+    }
 
     private Mottaker(Aktoer aktør) {
         this.aktør = aktør;
@@ -26,7 +29,7 @@ public final class Mottaker {
         return aktør;
     }
 
-    public Aktoersroller getRolle() {
+    public Aktoersroller hentAktørsRolle() {
         return aktør.getRolle();
     }
 

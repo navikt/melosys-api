@@ -371,6 +371,7 @@ class FagsakTjenesteTest {
         resultat.setGsakSaksnummer(fagsak.getGsakSaksnummer());
         resultat.setRegistrertDato(fagsak.getRegistrertDato());
         resultat.setSaksnummer(fagsak.getSaksnummer());
+        resultat.setSakstema(fagsak.getTema());
         resultat.setSakstype(fagsak.getType());
         resultat.setSaksstatus(fagsak.getStatus());
         resultat.setHovedpartRolle(fagsak.getHovedpartRolle());

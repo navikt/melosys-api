@@ -8,6 +8,7 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.FerdigbehandlingKontrollService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
+import no.nav.melosys.service.tilgang.Aksesstype;
 import no.nav.melosys.service.vedtak.FattVedtakRequest;
 import no.nav.melosys.service.vedtak.VedtaksfattingFasade;
 import no.nav.melosys.tjenester.gui.dto.EndreVedtakDto;
@@ -138,5 +139,21 @@ class VedtakTjenesteTest {
                 .content(objectMapper.writeValueAsString(new EndreVedtakDto())))
             .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.message", containsString("BegrunnelseKode mangler.")));
+    }
+
+    @Test
+    void kontrollerVedtak() throws Exception {
+        var dto = new FattVedtakDto();
+        dto.setBehandlingsresultatTypeKode(Behandlingsresultattyper.HENLEGGELSE);
+        dto.setVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK);
+        dto.setBegrunnelseFritekst("Begrunnelse");
+
+
+        mockMvc.perform(post(BASE_URL + "/{behandlingID}/kontroller", BEHANDLING_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(dto)))
+            .andExpect(status().isNoContent());
+
+        verify(aksesskontroll).autoriser(BEHANDLING_ID, Aksesstype.LES);
     }
 }

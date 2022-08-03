@@ -1,8 +1,7 @@
 package no.nav.melosys.integrasjon.sakogbehandling.behandlingskjede;
 
 import no.nav.melosys.sikkerhet.sts.NAVSTSClient;
-import no.nav.melosys.sikkerhet.sts.StsConfigurationUtil;
-import no.nav.melosys.sikkerhet.sts.StsLoginConfig;
+import no.nav.melosys.sikkerhet.sts.StsWrapper;
 import no.nav.tjeneste.virksomhet.sakogbehandling.v1.binding.SakOgBehandlingV1;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,11 +10,11 @@ import org.springframework.context.annotation.Configuration;
 public class BehandlingskjedeConsumerProducer {
 
     private final BehandlingskjedeConsumerConfig config;
-    private final StsLoginConfig stsLoginConfig;
+    private final StsWrapper stsWrapper;
 
-    public BehandlingskjedeConsumerProducer(BehandlingskjedeConsumerConfig config, StsLoginConfig stsLoginConfig) {
+    public BehandlingskjedeConsumerProducer(BehandlingskjedeConsumerConfig config, StsWrapper stsWrapper) {
         this.config = config;
-        this.stsLoginConfig = stsLoginConfig;
+        this.stsWrapper = stsWrapper;
     }
 
     @Bean
@@ -31,6 +30,6 @@ public class BehandlingskjedeConsumerProducer {
     }
 
     SakOgBehandlingV1 wrapWithSts(SakOgBehandlingV1 port) {
-        return StsConfigurationUtil.wrapWithSts(port, NAVSTSClient.StsClientType.SYSTEM_SAML, stsLoginConfig);
+        return stsWrapper.wrapWithSts(port, NAVSTSClient.StsClientType.SYSTEM_SAML);
     }
 }

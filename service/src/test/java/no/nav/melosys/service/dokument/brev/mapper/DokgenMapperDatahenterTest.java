@@ -78,11 +78,13 @@ class DokgenMapperDatahenterTest {
 
         List<Instant> mangelbrevDatoer = dokgenMapperDatahenter.hentMangelbrevDatoer(brevbestilling);
 
+        ZoneId zoneId = ZoneId.of("Europe/Paris");
+
         assertThat(mangelbrevDatoer)
             .hasSize(2)
             .containsExactly(
-                datoOktober.atStartOfDay(ZoneId.systemDefault()).toInstant(),
-                datoDesember.atStartOfDay(ZoneId.systemDefault()).toInstant()
+                datoOktober.atStartOfDay(zoneId).toInstant(),
+                datoDesember.atStartOfDay(zoneId).toInstant()
             );
     }
 

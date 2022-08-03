@@ -248,9 +248,8 @@ public class Behandlingsresultat extends RegistreringsInfo {
     }
 
     public boolean erAvslag() {
-        return erAvslagManglendeOpplysninger() ||
-            (type == Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
-                && hentValidertLovvalgsperiode().erAvslått());
+        return erAvslagManglendeOpplysninger() || (type == Behandlingsresultattyper.AVSLAG_SØKNAD)
+            || (type == Behandlingsresultattyper.FASTSATT_LOVVALGSLAND && hentValidertLovvalgsperiode().erAvslått());
     }
 
     public boolean erAvslagManglendeOpplysninger() {
@@ -435,6 +434,10 @@ public class Behandlingsresultat extends RegistreringsInfo {
 
     public boolean harVedtak() {
         return vedtakMetadata != null;
+    }
+
+    public boolean erUtpekingNorgeAvvist() {
+        return type == Behandlingsresultattyper.UTPEKING_NORGE_AVVIST;
     }
 
     @Override

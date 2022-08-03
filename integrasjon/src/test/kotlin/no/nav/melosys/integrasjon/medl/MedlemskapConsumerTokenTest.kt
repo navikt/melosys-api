@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebClient
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.test.context.ActiveProfiles
 import java.time.LocalDate
 
 @WebMvcTest(
@@ -22,36 +23,34 @@ import java.time.LocalDate
         MedlemskapRestConsumer::class,
         MedlemskapRestConsumerProducer::class,
         GenericContextExchangeFilter::class
-    ],
-    properties = ["spring.profiles.active:token-test"]
+    ]
 )
+@ActiveProfiles("wiremock-test")
 @AutoConfigureWebClient
 class MedlemskapConsumerTokenTest(
     @Autowired private val medlemskapRestConsumer: MedlemskapRestConsumer,
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,
     @Value("\${mockserver.security.port}") mockSecurityPort: Int
-) : ConsumerWireMockTestBase<String>(mockServiceUnderTestPort, mockSecurityPort) {
+) : ConsumerWireMockTestBase<String, Unit>(mockServiceUnderTestPort, mockSecurityPort) {
 
     @Test
     fun authorizationSkalKommeFraSystem() {
-        executeFromSystem {
-            verifyHeaders(
-                mapOf<String, StringValuePattern>(
-                    Pair("Authorization", WireMock.equalTo("Bearer --token-from-system--")),
-                )
+        verifyHeaders(
+            mapOf<String, StringValuePattern>(
+                Pair("Authorization", WireMock.equalTo("Bearer --token-from-system--")),
             )
-        }
+        )
+        executeFromSystem()
     }
 
     @Test
     fun authorizationSkalKommeFraBruker() {
-        executeFromController {
-            verifyHeaders(
-                mapOf<String, StringValuePattern>(
-                    Pair("Authorization", WireMock.equalTo("Bearer --token-from-user--")),
-                )
+        verifyHeaders(
+            mapOf<String, StringValuePattern>(
+                Pair("Authorization", WireMock.equalTo("Bearer --token-from-user--")),
             )
-        }
+        )
+        executeFromController()
     }
 
     @Test
@@ -70,7 +69,6 @@ class MedlemskapConsumerTokenTest(
             Assertions.assertThat(error).startsWith("Kall mot Medl feilet.")
         }
     }
-
     override fun getMockData(): String {
         return "[]"
     }

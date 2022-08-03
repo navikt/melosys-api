@@ -1,5 +1,6 @@
 package no.nav.melosys.integrasjon.inngangsvilkar;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
@@ -11,6 +12,7 @@ import org.springframework.web.util.DefaultUriBuilderFactory;
 public class InngangsvilkarConfig {
 
     @Bean
+    @Qualifier("inngangsvilkår")
     public RestTemplate inngangsVilkaarRestTemplate(@Value("${Inngangsvilkaar.url}") String url,
                                                     RestTemplateBuilder restTemplateBuilder) {
         return restTemplateBuilder

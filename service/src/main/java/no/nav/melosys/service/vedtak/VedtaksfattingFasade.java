@@ -18,7 +18,6 @@ public class VedtaksfattingFasade {
 
     private final BehandlingService behandlingService;
     private final EosVedtakService eosVedtakService;
-    private final EosVedtakSystemService eosVedtakSystemService;
     private final FtrlVedtakService ftrlVedtakService;
     private final TrygdeavtaleVedtakService trygdeavtaleVedtakService;
 
@@ -26,13 +25,11 @@ public class VedtaksfattingFasade {
 
     public VedtaksfattingFasade(BehandlingService behandlingService,
                                 EosVedtakService eosVedtakService,
-                                EosVedtakSystemService eosVedtakSystemService,
                                 FtrlVedtakService ftrlVedtakService,
                                 TrygdeavtaleVedtakService trygdeavtaleVedtakService
     ) {
         this.behandlingService = behandlingService;
         this.eosVedtakService = eosVedtakService;
-        this.eosVedtakSystemService = eosVedtakSystemService;
         this.ftrlVedtakService = ftrlVedtakService;
         this.trygdeavtaleVedtakService = trygdeavtaleVedtakService;
     }
@@ -41,7 +38,7 @@ public class VedtaksfattingFasade {
     public void fattVedtak(long behandlingID, Behandlingsresultattyper behandlingsresultattype) throws ValideringException {
         var behandling = behandlingService.hentBehandling(behandlingID);
 
-        eosVedtakSystemService.fattVedtak(behandling, behandlingsresultattype, Vedtakstyper.FØRSTEGANGSVEDTAK);
+        eosVedtakService.fattVedtak(behandling, behandlingsresultattype, Vedtakstyper.FØRSTEGANGSVEDTAK);
     }
 
     @Transactional(noRollbackFor = {ValideringException.class})
