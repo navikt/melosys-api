@@ -35,7 +35,7 @@ public class KodeverkConsumerImpl implements RestConsumer {
             .queryParam("spraak", BOKMÅL)
             .request()
             .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON)
-            .header("Nav-Call-Id", getCorrelationId())
+            .header("Nav-Call-Id", getCallID())
             .header("Nav-Consumer-Id", CONSUMER_ID)
             .get(KodeDto.class);
     }
