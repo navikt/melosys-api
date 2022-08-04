@@ -13,6 +13,10 @@ class MDCOperations {
         val MDC_USER_ID = "userId"
         @JvmField
         val MDC_CONSUMER_ID = "consumerId"
+        @JvmField
+        val CORRELATION_ID = "correlation-id"
+        @JvmField
+        val X_CORRELATION_ID = "X-Correlation-ID";
 
         // QName for the callId header
         @JvmField

@@ -66,7 +66,8 @@ public enum ProsessDataKey {
     VARSLE_UTLAND("varsleUtland"),
     VEDLEGG_SED("vedleggTilSed"),
     VIRKSOMHET_ORGNR("virksomhetOrgnr"),
-    YTTERLIGERE_INFO_SED("ytterligereInformasjonSed");
+    YTTERLIGERE_INFO_SED("ytterligereInformasjonSed"),
+    CORRELATION_ID_PROCESS("correlation id");
 
     private final String kode;
 

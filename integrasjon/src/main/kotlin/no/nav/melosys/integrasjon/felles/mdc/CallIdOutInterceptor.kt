@@ -21,8 +21,7 @@ class CallIdOutInterceptor() : AbstractPhaseInterceptor<Message>(Phase.PRE_STREA
             callId = MDCOperations.generateCallId()
             MDCOperations.putToMDC(MDCOperations.MDC_CALL_ID, callId)
         }
-        val soapMessage: SoapMessage
-        soapMessage = if (message is SoapMessage) {
+        val soapMessage: SoapMessage = if (message is SoapMessage) {
             message
         } else {
             throw IllegalStateException("message har uventet type")

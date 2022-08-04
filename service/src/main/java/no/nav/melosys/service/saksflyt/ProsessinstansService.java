@@ -41,12 +41,14 @@ import no.nav.melosys.service.vedtak.FattVedtakRequest;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.*;
+import static no.nav.melosys.integrasjon.felles.mdc.MDCOperations.CORRELATION_ID;
 import static org.springframework.util.StringUtils.hasText;
 
 @Service
@@ -146,6 +148,9 @@ public class ProsessinstansService {
         prosessinstans.setStatus(ProsessStatus.KLAR);
         if (saksbehandler != null) {
             prosessinstans.setData(ProsessDataKey.SAKSBEHANDLER, saksbehandler);
+        }
+        if(MDC.get(CORRELATION_ID) != null ){
+            prosessinstans.setData(CORRELATION_ID_PROCESS, MDC.get(CORRELATION_ID));
         }
 
         prosessinstansRepo.save(prosessinstans);
