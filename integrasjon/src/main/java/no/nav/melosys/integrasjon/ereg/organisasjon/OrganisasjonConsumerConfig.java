@@ -11,7 +11,7 @@ import org.apache.cxf.ws.addressing.WSAddressingFeature;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import no.nav.melosys.integrasjon.felles.mdc.CallIdOutInterceptor;
+import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingSOAPInterceptor;
 import no.nav.tjeneste.virksomhet.organisasjon.v4.binding.OrganisasjonV4;
 
 @Component
@@ -26,7 +26,7 @@ public class OrganisasjonConsumerConfig {
     public OrganisasjonConsumerConfig(@Value("${Organisasjon_v4.url}") String endpointUrl) {
         this.endpointUrl = endpointUrl;
     }
-    
+
     OrganisasjonV4 getPort() {
         Map<String, Object> properties = new HashMap<>();
 
@@ -39,7 +39,7 @@ public class OrganisasjonConsumerConfig {
         factoryBean.setAddress(endpointUrl);
         factoryBean.getFeatures().add(new WSAddressingFeature());
         factoryBean.getFeatures().add(new LoggingFeature());
-        factoryBean.getOutInterceptors().add(new CallIdOutInterceptor());
+        factoryBean.getOutInterceptors().add(new CorrelationIdOutgoingSOAPInterceptor());
         return factoryBean.create(OrganisasjonV4.class);
     }
 

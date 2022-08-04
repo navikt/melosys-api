@@ -9,7 +9,7 @@ import org.apache.cxf.phase.AbstractPhaseInterceptor
 import org.apache.cxf.phase.Phase
 import javax.xml.bind.JAXBException
 
-class CallIdOutInterceptor() : AbstractPhaseInterceptor<Message>(Phase.PRE_STREAM) {
+class CorrelationIdOutgoingSOAPInterceptor() : AbstractPhaseInterceptor<Message>(Phase.PRE_STREAM) {
 
     override fun handleMessage(message: Message?) {
         /* Call Id settes normalt i MDCFilter etter en forespørsel fra frontend-api.

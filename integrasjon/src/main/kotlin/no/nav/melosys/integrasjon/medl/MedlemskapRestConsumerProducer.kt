@@ -3,6 +3,8 @@ package no.nav.melosys.integrasjon.medl
 import no.nav.melosys.integrasjon.felles.GenericContextExchangeFilter
 import no.nav.melosys.integrasjon.felles.RestConsumer
 import no.nav.melosys.integrasjon.felles.WebClientConfig
+import no.nav.melosys.integrasjon.felles.mdc.MDCOperations.Companion.X_CORRELATION_ID
+import no.nav.melosys.integrasjon.felles.mdc.MDCOperations.Companion.getCorrelationId
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -33,6 +35,7 @@ class MedlemskapRestConsumerProducer(@Value("\${medlemskap.rest.url}") private v
                 ClientRequest.from(request!!)
                     .header("Nav-Call-Id", callID)
                     .header("Nav-Consumer-Id", CONSUMER_ID)
+                    .header(X_CORRELATION_ID, getCorrelationId())
                     .build()
             )
         }

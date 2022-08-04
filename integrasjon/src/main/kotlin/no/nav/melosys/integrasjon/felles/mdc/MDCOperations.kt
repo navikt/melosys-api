@@ -2,6 +2,7 @@ package no.nav.melosys.integrasjon.felles.mdc
 
 import org.slf4j.MDC
 import java.security.SecureRandom
+import java.util.*
 import javax.xml.namespace.QName
 
 class MDCOperations {
@@ -9,14 +10,18 @@ class MDCOperations {
     companion object {
         @JvmField
         val MDC_CALL_ID = "callId"
+
         @JvmField
         val MDC_USER_ID = "userId"
+
         @JvmField
         val MDC_CONSUMER_ID = "consumerId"
+
         @JvmField
         val CORRELATION_ID = "correlation-id"
+
         @JvmField
-        val X_CORRELATION_ID = "X-Correlation-ID";
+        val X_CORRELATION_ID = "X-Correlation-ID"
 
         // QName for the callId header
         @JvmField
@@ -47,6 +52,15 @@ class MDCOperations {
             callId.append('_')
             callId.append(randomNr)
             return callId.toString()
+        }
+
+        @JvmStatic
+        fun getCorrelationId(): String {
+            var correlationId = getFromMDC(CORRELATION_ID)
+            if (correlationId == null) {
+                correlationId = UUID.randomUUID().toString()
+            }
+            return correlationId
         }
     }
 

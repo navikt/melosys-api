@@ -23,6 +23,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import static java.util.Objects.requireNonNull;
+import static no.nav.melosys.integrasjon.felles.mdc.MDCOperations.X_CORRELATION_ID;
+import static no.nav.melosys.integrasjon.felles.mdc.MDCOperations.getCorrelationId;
 
 public class SafConsumerImpl implements SafConsumer {
     private static final String CALL_ID = "Nav-Callid";
@@ -40,6 +42,7 @@ public class SafConsumerImpl implements SafConsumer {
         return webClient.get()
             .uri(HENT_DOKUMENT_ROOT, journalpostID, dokumentID, Variantformat.ARKIV)
             .header(CALL_ID, getCallID())
+            .header(X_CORRELATION_ID, getCorrelationId())
             .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_PDF_VALUE)
             .retrieve()
             .onStatus(HttpStatus::isError, this::håndterHttpFeil)
