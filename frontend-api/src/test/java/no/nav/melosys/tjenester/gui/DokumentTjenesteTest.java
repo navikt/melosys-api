@@ -1,13 +1,13 @@
 package no.nav.melosys.tjenester.gui;
 
+import java.util.Collections;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
-import no.nav.melosys.service.aktoer.AktoerDto;
 import no.nav.melosys.service.dokument.DokumentHentingService;
 import no.nav.melosys.service.dokument.DokumentServiceFasade;
-import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
 import no.nav.melosys.service.dokument.brev.SedPdfData;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
@@ -19,9 +19,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.Collections;
-
-import static no.nav.melosys.tjenester.gui.util.ResponseBodyMatchers.responseBody;
 import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
