@@ -26,13 +26,13 @@ import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static no.nav.melosys.integrasjon.felles.mdc.MDCOperations.X_CORRELATION_ID;
+
 public class SakConsumerImpl implements RestConsumer, SakConsumer {
     private static final Logger log = LoggerFactory.getLogger(SakConsumerImpl.class);
 
     private static final GenericType<List<SakDto>> sakDtoListType = new GenericType<>() {
     };
-    private static final String X_CORRELATION_ID = "X-Correlation-ID";
-
     private final WebTarget target;
 
     SakConsumerImpl(String endpointUrl) {
@@ -60,7 +60,7 @@ public class SakConsumerImpl implements RestConsumer, SakConsumer {
                 .path(Long.toString(id))
                 .request()
                 .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON)
-                .header(X_CORRELATION_ID, getCallID())
+                .header(X_CORRELATION_ID, getCorrelationId())
                 .header(HttpHeaders.AUTHORIZATION, getAuth())
                 .get(SakDto.class);
         } catch (RuntimeException e) {
@@ -80,7 +80,7 @@ public class SakConsumerImpl implements RestConsumer, SakConsumer {
                 .queryParam("fagsakNr", sakSearchRequest.getFagsakNr())
                 .request()
                 .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON)
-                .header(X_CORRELATION_ID, getCallID())
+                .header(X_CORRELATION_ID, getCorrelationId())
                 .header(HttpHeaders.AUTHORIZATION, getAuth())
                 .get(sakDtoListType);
         } catch (RuntimeException e) {
@@ -95,7 +95,7 @@ public class SakConsumerImpl implements RestConsumer, SakConsumer {
         try (Response response = target
             .request()
             .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON)
-            .header(X_CORRELATION_ID, getCallID())
+            .header(X_CORRELATION_ID, getCorrelationId())
             .header(HttpHeaders.AUTHORIZATION, getAuth())
             .post(Entity.json(sakDto))) {
             håndterEvFeil(response);

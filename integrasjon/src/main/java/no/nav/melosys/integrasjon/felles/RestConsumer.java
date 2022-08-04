@@ -2,6 +2,7 @@ package no.nav.melosys.integrasjon.felles;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import java.util.UUID;
 
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -28,12 +29,12 @@ public interface RestConsumer {
         }
     }
 
-    default String getCallID() {
-        String callID = MDCOperations.getFromMDC(MDCOperations.MDC_CALL_ID);
-        if (callID == null) {
-            callID = MDCOperations.generateCallId();
+    default String getCorrelationId() {
+        String correlationId = MDCOperations.getFromMDC(MDCOperations.CORRELATION_ID);
+        if (correlationId == null) {
+            correlationId = UUID.randomUUID().toString();
         }
-        return callID;
+        return correlationId;
     }
 
     default Environment getEnv() {

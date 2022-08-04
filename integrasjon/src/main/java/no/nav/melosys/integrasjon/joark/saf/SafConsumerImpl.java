@@ -39,7 +39,7 @@ public class SafConsumerImpl implements SafConsumer {
     public byte[] hentDokument(String journalpostID, String dokumentID) {
         return webClient.get()
             .uri(HENT_DOKUMENT_ROOT, journalpostID, dokumentID, Variantformat.ARKIV)
-            .header(CALL_ID, getCallID())
+            .header(CALL_ID, getCorrelationId())
             .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_PDF_VALUE)
             .retrieve()
             .onStatus(HttpStatus::isError, this::håndterHttpFeil)

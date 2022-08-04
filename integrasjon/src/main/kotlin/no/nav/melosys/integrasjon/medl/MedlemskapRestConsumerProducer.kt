@@ -31,7 +31,7 @@ class MedlemskapRestConsumerProducer(@Value("\${medlemskap.rest.url}") private v
         ExchangeFilterFunction.ofRequestProcessor { request: ClientRequest? ->
             Mono.just(
                 ClientRequest.from(request!!)
-                    .header("Nav-Call-Id", callID)
+                    .header("Nav-Call-Id", correlationId)
                     .header("Nav-Consumer-Id", CONSUMER_ID)
                     .build()
             )
