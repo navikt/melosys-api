@@ -24,34 +24,42 @@ class TestDataGenerator(
     @PostMapping("/jfr-oppgave")
     fun lagJournalføringsoppgave(@RequestBody request: OpprettJfrOppgaveRequest) {
         for (i in 0 until request.antall) {
-            journalPostService.lagJournalPost(request.forVirksomhet)
-                .let {
-                    val journalpostMap = journalpostApi.opprettJournalpost(it, false)
-                    opprettJfrOppgave(it, journalpostMap["journalpostId"] as String, request.tilordnetRessurs)
-                }
+            opprettJfrOppgave(request.tilordnetRessurs, request.forVirksomhet)
         }
     }
 
-    private fun opprettJfrOppgave(request: OpprettJournalpostRequest, journalpostID: String, tilordnetRessurs: String) {
-        oppgaveApi.opprettOppgave(
-            Oppgave(
-                aktoerId = if (request.bruker?.idType === BrukerIdType.FNR) PersonRepo.finnVedIdent(
-                    request.bruker.id ?: ""
-                )?.aktørId else null,
-                orgnr = if (request.bruker?.idType === BrukerIdType.ORGNR) request.bruker.id else null,
-                behandlesAvApplikasjon = "FS38",
-                tildeltEnhetsnr = "4530",
-                journalpostId = journalpostID,
-                beskrivelse = "test",
-                oppgavetype = "JFR",
-                tema = "MED",
-                prioritet = "NORM",
-                tilordnetRessurs = tilordnetRessurs,
-                aktivDato = LocalDate.now(),
-                fristFerdigstillelse = LocalDate.now()
-            )
-        )
+    fun opprettJfrOppgave(tilordnetRessurs: String, forVirksomhet: Boolean): Oppgave {
+        val opprettJournalpostRequest = journalPostService.lagJournalPost(forVirksomhet)
+        val journalpostMap = journalpostApi.opprettJournalpost(opprettJournalpostRequest, false)
+        return opprettJfrOppgave(
+            opprettJournalpostRequest = opprettJournalpostRequest,
+            journalpostID = journalpostMap["journalpostId"] as String,
+            tilordnetRessurs = tilordnetRessurs
+        ).body!!
     }
+
+    private fun opprettJfrOppgave(
+        opprettJournalpostRequest: OpprettJournalpostRequest,
+        journalpostID: String,
+        tilordnetRessurs: String
+    ) = oppgaveApi.opprettOppgave(
+        Oppgave(
+            aktoerId = if (opprettJournalpostRequest.bruker?.idType === BrukerIdType.FNR) PersonRepo.finnVedIdent(
+                opprettJournalpostRequest.bruker.id ?: ""
+            )?.aktørId else null,
+            orgnr = if (opprettJournalpostRequest.bruker?.idType === BrukerIdType.ORGNR) opprettJournalpostRequest.bruker.id else null,
+            behandlesAvApplikasjon = "FS38",
+            tildeltEnhetsnr = "4530",
+            journalpostId = journalpostID,
+            beskrivelse = "test",
+            oppgavetype = "JFR",
+            tema = "MED",
+            prioritet = "NORM",
+            tilordnetRessurs = tilordnetRessurs,
+            aktivDato = LocalDate.now(),
+            fristFerdigstillelse = LocalDate.now()
+        )
+    )
 
     data class OpprettJfrOppgaveRequest(
         val antall: Int,
