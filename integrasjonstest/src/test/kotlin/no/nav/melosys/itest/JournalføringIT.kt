@@ -21,17 +21,17 @@ import no.nav.melosys.service.journalforing.dto.PeriodeDto
 import no.nav.melosys.service.kodeverk.KodeverkService
 import no.nav.melosys.service.oppgave.OppgaveService
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
-import org.awaitility.Awaitility
+import org.awaitility.kotlin.await
+import org.awaitility.kotlin.untilNotNull
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
 import org.springframework.context.annotation.Primary
-import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 import kotlin.jvm.optionals.getOrNull
 
 @Import(JournalføringIT.TestConfig::class)
@@ -71,24 +71,17 @@ class JournalføringIT(
     }
 
     @OptIn(ExperimentalStdlibApi::class)
-    private fun sjekkAtProssessHarStatusFerdig(idJornalførProsess: UUID) {
-        Awaitility.await().timeout(Duration.ofSeconds(10)).pollInterval(Duration.ofSeconds(1))
-            .until {
-                prosessinstansRepository.findById(idJornalførProsess)
-                    .getOrNull()?.status == ProsessStatus.FERDIG
-            }
-    }
+    private fun sjekkAtProssessHarStatusFerdig(idJornalførProsess: UUID) =
+        await.until {
+            prosessinstansRepository.findById(idJornalførProsess)
+                .getOrNull()?.status == ProsessStatus.FERDIG
+        }
 
-    private fun finnProssesID(prosessType: ProsessType, now: LocalDateTime): UUID {
-        var prosessID: UUID? = null
-        Awaitility.await().timeout(Duration.ofSeconds(10)).pollInterval(Duration.ofSeconds(1))
-            .until {
-                prosessID = prosessinstansRepository.findAll()
-                    .find { it.registrertDato > now && it.type == prosessType }?.id
-                prosessID != null
-            }
-        return prosessID!!
-    }
+    private fun finnProssesID(prosessType: ProsessType, now: LocalDateTime): UUID =
+        await.untilNotNull {
+            prosessinstansRepository.findAll()
+                .find { it.registrertDato > now && it.type == prosessType }?.id
+        }
 
     private fun lagJfrOppgave(): Oppgave =
         testDataGenerator.opprettJfrOppgave(tilordnetRessurs = "Z123456", forVirksomhet = false)
