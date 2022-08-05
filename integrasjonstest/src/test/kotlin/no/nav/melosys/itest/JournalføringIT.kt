@@ -47,13 +47,13 @@ class JournalføringIT(
     @Autowired private val prosessinstansRepository: ProsessinstansRepository,
 ) : ComponentTestBase() {
 
-    private val inngangsvilkaarServiceMockServer: WireMockServer =
+    private val mockServer: WireMockServer =
         WireMockServer(WireMockConfiguration.wireMockConfig().port(8094))
 
     @BeforeEach
     fun before() {
-        inngangsvilkaarServiceMockServer.start()
-        inngangsvilkaarServiceMockServer.stubFor(
+        mockServer.start()
+        mockServer.stubFor(
             WireMock.post("/api/inngangsvilkaar").willReturn(
                 WireMock.aResponse()
                     .withStatus(200)
@@ -61,11 +61,19 @@ class JournalføringIT(
                     .withBody("{ \"kvalifisererForEf883_2004\" : false, \"feilmeldinger\" : [] }")
             )
         )
+        mockServer.stubFor(
+            WireMock.post("/api/v1/mal/saksbehandlingstid_soknad/lag-pdf?somKopi=false&utkast=false").willReturn(
+                WireMock.aResponse()
+                    .withStatus(200)
+                    .withHeader("Content-Type", "application/json")
+                    .withBody(ByteArray(0))
+            )
+        )
     }
 
     @AfterEach
     fun after() {
-        inngangsvilkaarServiceMockServer.stop()
+        mockServer.stop()
     }
 
     @Test
