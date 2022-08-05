@@ -1,5 +1,8 @@
 package no.nav.melosys.itest
 
+import com.github.tomakehurst.wiremock.WireMockServer
+import com.github.tomakehurst.wiremock.client.WireMock
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import no.nav.melosys.domain.FellesKodeverk
 import no.nav.melosys.domain.arkiv.ArkivDokument
 import no.nav.melosys.domain.kodeverk.Avsendertyper
@@ -23,6 +26,8 @@ import no.nav.melosys.service.oppgave.OppgaveService
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import org.awaitility.kotlin.await
 import org.awaitility.kotlin.untilNotNull
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.TestConfiguration
@@ -42,8 +47,29 @@ class JournalføringIT(
     @Autowired private val prosessinstansRepository: ProsessinstansRepository,
 ) : ComponentTestBase() {
 
+    private val inngangsvilkaarServiceMockServer: WireMockServer =
+        WireMockServer(WireMockConfiguration.wireMockConfig().port(8094))
+
+    @BeforeEach
+    fun before() {
+        inngangsvilkaarServiceMockServer.start()
+        inngangsvilkaarServiceMockServer.stubFor(
+            WireMock.post("/api/inngangsvilkaar").willReturn(
+                WireMock.aResponse()
+                    .withStatus(200)
+                    .withHeader("Content-Type", "application/json")
+                    .withBody("{ \"kvalifisererForEf883_2004\" : false, \"feilmeldinger\" : [] }")
+            )
+        )
+    }
+
+    @AfterEach
+    fun after() {
+        inngangsvilkaarServiceMockServer.stop()
+    }
+
     @Test
-    fun test() {
+    fun journalførOgOpprettSak_EU_EOS_prosesserKjørerAlleSteg() {
         val jfrOppgave: Oppgave = lagJfrOppgave()
         val now = LocalDateTime.now()
         val journalfoeringOpprettDto = lagJournalfoeringOpprettDto(jfrOppgave)
