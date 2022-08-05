@@ -13,6 +13,7 @@ import no.nav.melosys.integrasjon.kodeverk.KodeOppslag
 import no.nav.melosys.integrasjon.kodeverk.Kodeverk
 import no.nav.melosys.integrasjon.kodeverk.KodeverkRegister
 import no.nav.melosys.melosysmock.oppgave.Oppgave
+import no.nav.melosys.melosysmock.sak.SakRepo
 import no.nav.melosys.melosysmock.testdata.TestDataGenerator
 import no.nav.melosys.repository.ProsessinstansRepository
 import no.nav.melosys.service.felles.dto.SoeknadslandDto
@@ -52,6 +53,7 @@ class JournalføringIT(
 
     @BeforeEach
     fun before() {
+        SakRepo.clear()
         mockServer.start()
         mockServer.stubFor(
             WireMock.post("/api/inngangsvilkaar").willReturn(

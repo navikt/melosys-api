@@ -17,6 +17,7 @@ import no.nav.melosys.integrasjon.kodeverk.Kode
 import no.nav.melosys.integrasjon.kodeverk.KodeOppslag
 import no.nav.melosys.integrasjon.kodeverk.Kodeverk
 import no.nav.melosys.integrasjon.kodeverk.KodeverkRegister
+import no.nav.melosys.melosysmock.sak.SakRepo
 import no.nav.melosys.repository.ProsessinstansRepository
 import no.nav.melosys.service.kodeverk.KodeverkService
 import org.awaitility.Awaitility
@@ -45,6 +46,7 @@ class SedMottakTestIT(
 
     @BeforeEach
     fun setup() {
+        SakRepo.clear()
         rinaSaksnummer = Random().nextInt(100000).toString()
     }
 
