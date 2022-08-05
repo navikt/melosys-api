@@ -3,6 +3,8 @@ package no.nav.melosys.itest
 import no.nav.melosys.domain.FellesKodeverk
 import no.nav.melosys.domain.arkiv.ArkivDokument
 import no.nav.melosys.domain.kodeverk.Avsendertyper
+import no.nav.melosys.domain.saksflyt.ProsessStatus
+import no.nav.melosys.domain.saksflyt.ProsessType
 import no.nav.melosys.integrasjon.kodeverk.Kode
 import no.nav.melosys.integrasjon.kodeverk.KodeOppslag
 import no.nav.melosys.integrasjon.kodeverk.Kodeverk
@@ -19,14 +21,18 @@ import no.nav.melosys.service.journalforing.dto.PeriodeDto
 import no.nav.melosys.service.kodeverk.KodeverkService
 import no.nav.melosys.service.oppgave.OppgaveService
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
-import org.junit.jupiter.api.BeforeEach
+import org.awaitility.Awaitility
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
 import org.springframework.context.annotation.Primary
+import java.time.Duration
 import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
+import kotlin.jvm.optionals.getOrNull
 
 @Import(JournalføringIT.TestConfig::class)
 class JournalføringIT(
@@ -36,33 +42,56 @@ class JournalføringIT(
     @Autowired private val prosessinstansRepository: ProsessinstansRepository,
 ) : ComponentTestBase() {
 
-    @BeforeEach
-    fun setup() {
+    @Test
+    fun test() {
+        val jfrOppgave: Oppgave = lagJfrOppgave()
+        val now = LocalDateTime.now()
+        val journalfoeringOpprettDto = lagJournalfoeringOpprettDto(jfrOppgave)
+
+        ThreadLocalAccessInfo.executeProcess("journalførOgOpprettSak") {
+            journalføringService.journalførOgOpprettSak(journalfoeringOpprettDto)
+            oppgaveService.ferdigstillOppgave(journalfoeringOpprettDto.oppgaveID)
+        }
+
+        listOf(
+            finnProssesID(ProsessType.JFR_NY_SAK_BRUKER, now),
+            finnProssesID(ProsessType.OPPRETT_OG_DISTRIBUER_BREV, now)
+        ).forEach {
+            sjekkAtProssessHarStatusFerdig(it)
+        }
+    }
+
+    private fun lagJournalfoeringOpprettDto(jfrOppgave: Oppgave): JournalfoeringOpprettDto {
+        var journalføringDto: JournalfoeringOpprettDto? = null
+        ThreadLocalAccessInfo.executeProcess("journalførOgOpprettSak") {
+            val hentJournalpost = journalføringService.hentJournalpost(jfrOppgave.journalpostId)
+            journalføringDto = createJournalføringDto(jfrOppgave.journalpostId, hentJournalpost.hoveddokument)
+        }
+        return journalføringDto!!
+    }
+
+    @OptIn(ExperimentalStdlibApi::class)
+    private fun sjekkAtProssessHarStatusFerdig(idJornalførProsess: UUID) {
+        Awaitility.await().timeout(Duration.ofSeconds(10)).pollInterval(Duration.ofSeconds(1))
+            .until {
+                prosessinstansRepository.findById(idJornalførProsess)
+                    .getOrNull()?.status == ProsessStatus.FERDIG
+            }
+    }
+
+    private fun finnProssesID(prosessType: ProsessType, now: LocalDateTime): UUID {
+        var prosessID: UUID? = null
+        Awaitility.await().timeout(Duration.ofSeconds(10)).pollInterval(Duration.ofSeconds(1))
+            .until {
+                prosessID = prosessinstansRepository.findAll()
+                    .find { it.registrertDato > now && it.type == prosessType }?.id
+                prosessID != null
+            }
+        return prosessID!!
     }
 
     private fun lagJfrOppgave(): Oppgave =
         testDataGenerator.opprettJfrOppgave(tilordnetRessurs = "Z123456", forVirksomhet = false)
-
-    @Test
-    fun test() {
-        val jfrOppgave: Oppgave = lagJfrOppgave()
-
-        ThreadLocalAccessInfo.executeProcess("journalførOgOpprettSak") {
-            val hentJournalpost = journalføringService.hentJournalpost(jfrOppgave.journalpostId)
-            val journalføringDto = createJournalføringDto(jfrOppgave.journalpostId, hentJournalpost.hoveddokument)
-            journalføringService.journalførOgOpprettSak(journalføringDto)
-            oppgaveService.ferdigstillOppgave(journalføringDto.oppgaveID)
-        }
-
-        Thread.sleep(10000)
-        // TODO: finn ut hvilke prosesser vi skal vente på
-
-//        Awaitility.await().timeout(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(2))
-//            .until {
-//                prosessinstansRepository.findByBehandling_IdAndStatusIs(1, ProsessStatus.KLAR).isPresent
-//            }
-
-    }
 
     private fun createJournalføringDto(journalpostID: String?, dokument: ArkivDokument) =
         JournalfoeringOpprettDto().apply {
