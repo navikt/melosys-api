@@ -23,9 +23,10 @@ public class EessiConsumerProducer {
     @Bean
     public EessiConsumer melosysEessiConsumer(ObjectMapper objectMapper,
                                               GenericContextClientRequestInterceptor interceptor,
+                                              CorrelationIdOutgoingInterceptor correlationIdOutgoingInterceptor,
                                               RestTemplateBuilder restTemplateBuilder) {
         RestTemplate restTemplate = restTemplateBuilder.rootUri(url).build();
-        restTemplate.setInterceptors(Arrays.asList(interceptor, new CorrelationIdOutgoingInterceptor()));
+        restTemplate.setInterceptors(Arrays.asList(interceptor, correlationIdOutgoingInterceptor));
         return new EessiConsumerImpl(restTemplate, objectMapper);
     }
 }

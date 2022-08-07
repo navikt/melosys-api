@@ -13,8 +13,6 @@ import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
-import static no.nav.melosys.integrasjon.felles.mdc.MDCOperations.*;
-
 public class OppgaveConsumerImpl implements OppgaveConsumer {
     // Oppgave (/Abac) kaster feil om svaret på et søk inneholder oppgaver med 50+ unike personer
     private static final int OPPGAVE_ANTALL_ABAC_LIMIT = 40;
@@ -31,7 +29,6 @@ public class OppgaveConsumerImpl implements OppgaveConsumer {
     public OppgaveDto hentOppgave(String oppgaveId) {
         return webClient.get()
             .uri(OPPGAVE_URI_MED_ID, oppgaveId)
-            .header(CORRELATION_ID, getCorrelationId())
             .retrieve()
             .onStatus(HttpStatus::isError, this::håndterFeil)
             .bodyToMono(OppgaveDto.class)
@@ -76,7 +73,7 @@ public class OppgaveConsumerImpl implements OppgaveConsumer {
                     .queryParamIfPresent("saksreferanse", tilOptionalListe(oppgaveSearchRequest.getSaksreferanse()))
                     .queryParamIfPresent("tema", tilOptionalListe(oppgaveSearchRequest.getTema()))
                     .build()
-            ).header(X_CORRELATION_ID, getCorrelationId())
+            )
             .retrieve()
             .onStatus(HttpStatus::isError, this::håndterFeil)
             .bodyToMono(OppgaveSvar.class)
@@ -91,7 +88,6 @@ public class OppgaveConsumerImpl implements OppgaveConsumer {
     public OppgaveDto oppdaterOppgave(OppgaveDto request) {
         return webClient.put()
             .uri(OPPGAVE_URI_MED_ID, request.getId())
-            .header(X_CORRELATION_ID, getCorrelationId())
             .bodyValue(request)
             .retrieve()
             .onStatus(HttpStatus::isError, this::håndterFeil)
@@ -103,7 +99,6 @@ public class OppgaveConsumerImpl implements OppgaveConsumer {
     public String opprettOppgave(OpprettOppgaveDto request) {
         return webClient.post()
             .uri(OPPGAVE_BASE_URI)
-            .header(X_CORRELATION_ID, getCorrelationId())
             .bodyValue(request)
             .retrieve()
             .onStatus(HttpStatus::isError, this::håndterFeil)

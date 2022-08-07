@@ -56,11 +56,10 @@ class MDCOperations {
 
         @JvmStatic
         fun getCorrelationId(): String {
-            var correlationId = getFromMDC(CORRELATION_ID)
-            if (correlationId == null) {
-                correlationId = UUID.randomUUID().toString()
-            }
-            return correlationId
+            val correlationId = MDC.get(CORRELATION_ID)
+            return if (correlationId.isNullOrBlank()) {
+                UUID.randomUUID().toString()
+            } else correlationId
         }
     }
 

@@ -2,6 +2,7 @@ package no.nav.melosys.integrasjon.aareg.arbeidsforhold;
 
 
 import no.nav.melosys.integrasjon.felles.WebClientConfig;
+import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,10 +18,12 @@ public class ArbeidsforholdRestConsumerConfig implements WebClientConfig {
 
     @Bean
     ArbeidsforholdRestConsumer arbeidsforholdRestConsumer(WebClient.Builder webClientBuilder,
-                                                          ArbeidsforholdContextExchangeFilter systemContextExchangeFilter) {
+                                                          ArbeidsforholdContextExchangeFilter systemContextExchangeFilter,
+                                                          CorrelationIdOutgoingFilter correlationIdOutgoingFilter) {
         return new ArbeidsforholdRestConsumer(webClientBuilder
             .baseUrl(url)
             .filter(systemContextExchangeFilter)
+            .filter(correlationIdOutgoingFilter)
             .filter(errorFilter("Henting av arbeidsforhold fra Aareg feilet"))
             .build());
     }

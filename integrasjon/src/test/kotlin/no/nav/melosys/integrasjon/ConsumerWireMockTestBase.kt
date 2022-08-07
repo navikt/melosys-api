@@ -8,19 +8,32 @@ import com.github.tomakehurst.wiremock.matching.StringValuePattern
 import com.github.tomakehurst.wiremock.matching.UrlPattern
 import io.mockk.spyk
 import no.nav.melosys.integrasjon.felles.EnvironmentHandler
+import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter
+import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingInterceptor
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
 import no.nav.melosys.sikkerhet.context.SubjectHandler
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.*
+import org.springframework.context.annotation.Import
 import org.springframework.mock.env.MockEnvironment
 import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@Import(
+    value = [
+        CorrelationIdOutgoingInterceptor::class,
+        CorrelationIdOutgoingFilter::class
+    ]
+)
 abstract class ConsumerWireMockTestBase<T, R>(
     mockPort: Int,
     stsMockPort: Int
 ) {
+    companion object {
+        const val UUID_REGEX = "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}"
+    }
+
     private val serviceUnderTestMockServer: WireMockServer =
         WireMockServer(WireMockConfiguration.wireMockConfig().port(mockPort))
 
@@ -99,7 +112,7 @@ abstract class ConsumerWireMockTestBase<T, R>(
         )
     }
 
-    fun executeFromSystem(consumer: (R) -> Unit = {})  {
+    fun executeFromSystem(consumer: (R) -> Unit = {}) {
         val uuid = UUID.randomUUID()
         try {
             ThreadLocalAccessInfo.beforeExecuteProcess(uuid, "prossesSteg")

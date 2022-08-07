@@ -1,12 +1,15 @@
 package no.nav.melosys.integrasjon.eessi
 
 import com.github.tomakehurst.wiremock.client.WireMock
+import com.github.tomakehurst.wiremock.matching.AnythingPattern
+import com.github.tomakehurst.wiremock.matching.UrlPattern
 import no.nav.melosys.integrasjon.ConsumerWireMockTestBase
 import no.nav.melosys.integrasjon.felles.GenericContextClientRequestInterceptor
 import no.nav.melosys.integrasjon.reststs.RestStsClient
 import no.nav.melosys.integrasjon.reststs.StsRestTemplateProducer
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.isNotNull
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebClient
@@ -56,6 +59,16 @@ class EessiConsumerTokenTest(
         verifyHeaders(
             mapOf(
                 Pair("Authorization", WireMock.equalTo("Bearer --token-from-system--")),
+            )
+        )
+        executeRequest()
+    }
+
+    @Test
+    fun correlationIdLeggesPåRequest() {
+        verifyHeaders(
+            mapOf(
+                Pair("X-Correlation-ID", WireMock.matching(UUID_REGEX)),
             )
         )
         executeRequest()
