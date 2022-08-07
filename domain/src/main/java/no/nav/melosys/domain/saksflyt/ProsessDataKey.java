@@ -21,6 +21,7 @@ public enum ProsessDataKey {
     BREVBESTILLING("brevbestilling"),
     BREVDATA("brevData"),
     BRUKER_ID("brukerID"),
+    CORRELATION_ID_SAKSFLYT("correlation id"),
     DISTRIBUERBAR_JOURNALPOST_ID("distribuerbarJournalpostID"),
     DISTRIBUER_MOTTAKER_LAND("distribuerMottakerLand"),
     DISTRIBUSJONSTYPE("distribusjonsType"),
@@ -66,8 +67,7 @@ public enum ProsessDataKey {
     VARSLE_UTLAND("varsleUtland"),
     VEDLEGG_SED("vedleggTilSed"),
     VIRKSOMHET_ORGNR("virksomhetOrgnr"),
-    YTTERLIGERE_INFO_SED("ytterligereInformasjonSed"),
-    CORRELATION_ID_PROCESS("correlation id");
+    YTTERLIGERE_INFO_SED("ytterligereInformasjonSed");
 
     private final String kode;
 

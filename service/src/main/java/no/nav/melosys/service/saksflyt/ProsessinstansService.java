@@ -150,7 +150,7 @@ public class ProsessinstansService {
             prosessinstans.setData(ProsessDataKey.SAKSBEHANDLER, saksbehandler);
         }
         if(MDC.get(CORRELATION_ID) != null ){
-            prosessinstans.setData(CORRELATION_ID_PROCESS, MDC.get(CORRELATION_ID));
+            prosessinstans.setData(CORRELATION_ID_SAKSFLYT, MDC.get(CORRELATION_ID));
         }
 
         prosessinstansRepo.save(prosessinstans);
