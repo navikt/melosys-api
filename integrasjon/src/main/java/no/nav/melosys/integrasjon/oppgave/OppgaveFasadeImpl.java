@@ -18,9 +18,7 @@ import no.nav.melosys.domain.util.KodeverkUtils;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.oppgave.konsument.OppgaveConsumer;
-import no.nav.melosys.integrasjon.oppgave.konsument.dto.OppgaveDto;
-import no.nav.melosys.integrasjon.oppgave.konsument.dto.OppgaveSearchRequest;
-import no.nav.melosys.integrasjon.oppgave.konsument.dto.OpprettOppgaveDto;
+import no.nav.melosys.integrasjon.oppgave.konsument.dto.*;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,10 +47,16 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
     }
 
     @Override
-    public void feilregistrerOppgave(String oppgaveID) {
-        OppgaveDto oppgave = hentOppgaveDto(oppgaveID);
-        oppgave.setStatus(OPPGAVE_STATUS_FEILREGISTRERT);
-        oppgaveConsumer.oppdaterOppgave(oppgave);
+    public void feilregistrerOppgaver(Set<String> oppgaveIdSet) {
+        List<PatchOppgaveDto> patchOppgaveDtos = oppgaveIdSet.stream()
+            .map(s -> new PatchOppgaveDto(Long.parseLong(s))).toList();
+        PatchOppgaverRequestDto patchOppgaverRequest = new PatchOppgaverRequestDto(OPPGAVE_STATUS_FEILREGISTRERT,
+                                                                                   patchOppgaveDtos);
+        PatchOppgaverResponseDto patchOppgaverResponse = oppgaveConsumer.patchOppgaver(patchOppgaverRequest);
+        if (patchOppgaverResponse.feilet() != null && patchOppgaverResponse.feilet() > 0) {
+            log.error("Patching av {} oppgave(r) feilet: \\n {}", patchOppgaverResponse.feilet(),
+                      patchOppgaverResponse);
+        }
     }
 
     @Override

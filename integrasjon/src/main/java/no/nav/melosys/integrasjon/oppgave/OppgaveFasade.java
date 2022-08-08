@@ -1,13 +1,13 @@
 package no.nav.melosys.integrasjon.oppgave;
 
-import no.nav.melosys.domain.oppgave.Oppgave;
-
 import java.util.List;
 import java.util.Set;
 
+import no.nav.melosys.domain.oppgave.Oppgave;
+
 public interface OppgaveFasade {
 
-    void feilregistrerOppgave(String oppgaveId);
+    void feilregistrerOppgaver(Set<String> oppgaveIdSet);
 
     /**
      * Ferdigstiller en opprettet oppgave i Oppgave

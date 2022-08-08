@@ -1,13 +1,9 @@
 package no.nav.melosys.integrasjon.oppgave.konsument;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import no.nav.melosys.integrasjon.felles.FeilResponseDto;
-import no.nav.melosys.integrasjon.oppgave.konsument.dto.OppgaveDto;
-import no.nav.melosys.integrasjon.oppgave.konsument.dto.OppgaveSearchRequest;
-import no.nav.melosys.integrasjon.oppgave.konsument.dto.OppgaveSvar;
-import no.nav.melosys.integrasjon.oppgave.konsument.dto.OpprettOppgaveDto;
+import no.nav.melosys.integrasjon.oppgave.konsument.dto.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -84,7 +80,7 @@ public class OppgaveConsumerImpl implements OppgaveConsumer {
     }
 
     private Optional<Collection<String>> tilOptionalListe(String[] array) {
-        return array != null ? Optional.of(Arrays.stream(array).collect(Collectors.toList())) : Optional.empty();
+        return array != null ? Optional.of(Arrays.stream(array).toList()) : Optional.empty();
     }
 
     @Override
@@ -109,6 +105,18 @@ public class OppgaveConsumerImpl implements OppgaveConsumer {
             .onStatus(HttpStatus::isError, this::håndterFeil)
             .bodyToMono(OppgaveDto.class)
             .map(OppgaveDto::getId)
+            .block();
+    }
+
+    @Override
+    public PatchOppgaverResponseDto patchOppgaver(PatchOppgaverRequestDto patchOppgaverRequest) {
+        return webClient.patch()
+            .uri(OPPGAVE_BASE_URI)
+            .header(CORRELATION_ID, getCallID())
+            .bodyValue(patchOppgaverRequest)
+            .retrieve()
+            .onStatus(HttpStatus::isError, this::håndterFeil)
+            .bodyToMono(PatchOppgaverResponseDto.class)
             .block();
     }
 

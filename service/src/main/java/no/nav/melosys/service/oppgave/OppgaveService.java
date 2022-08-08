@@ -81,9 +81,9 @@ public class OppgaveService {
         return oppgaveFasade.finnÅpneOppgaverMedJournalpostID(journalpostID);
     }
 
-    public void feilregistrerOppgave(String oppgaveID) {
-        log.info("Feilregistrer oppgave {}", oppgaveID);
-        oppgaveFasade.feilregistrerOppgave(oppgaveID);
+    public void feilregistrerOppgave(Set<String> oppgaveIdSet) {
+        log.info("Feilregistrer oppgave(r) {}", oppgaveIdSet);
+        oppgaveFasade.feilregistrerOppgaver(oppgaveIdSet);
     }
 
     public void ferdigstillOppgave(String oppgaveID) {

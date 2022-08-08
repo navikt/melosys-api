@@ -19,15 +19,14 @@ class FeilregistrerX100OppgaverJobb(
         log.info("{} prosesser opprettet for X100 SED-er funnet.", prosesserFraX100.size)
 
         val journalpostIdList =
-            prosesserFraX100.stream().map { p: Prosessinstans -> p.getData(ProsessDataKey.JOURNALPOST_ID) }.toList()
-        log.info("{} journalposter for X100 SED-er.", journalpostIdList.size)
-        val oppgaverFraX100 = journalpostIdList.stream()
-            .map { journalpostID: String? -> oppgaveService.finnÅpneOppgaverMedJournalpostID(journalpostID) }
-            .flatMap { obj: List<Oppgave> -> obj.stream() }.toList()
-        log.info("{} oppgaver for X100 SED-er skal feilregistreres.", oppgaverFraX100.size)
+            prosesserFraX100.map { p: Prosessinstans -> p.getData(ProsessDataKey.JOURNALPOST_ID) }.toList()
+        log.info("Det er {} journalposter for X100 SED-er.", journalpostIdList.size)
+        val oppgaveIdSet = journalpostIdList.map { journalpostID: String? ->
+            oppgaveService.finnÅpneOppgaverMedJournalpostID(journalpostID)
+        }.flatten().map { obj: Oppgave -> obj.oppgaveId }.toSet()
+        log.info("{} oppgaver for X100 SED-er skal feilregistreres.", oppgaveIdSet.size)
 
-        oppgaverFraX100.stream().map { obj: Oppgave -> obj.oppgaveId }
-            .forEach { oppgaveID: String? -> oppgaveService.feilregistrerOppgave(oppgaveID) }
+        oppgaveService.feilregistrerOppgave(oppgaveIdSet)
         log.info("Feilregistrering av oppgaver opprettet for X100 SED-er er ferdig.")
     }
 
