@@ -40,10 +40,13 @@ jobs:
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
             ${{ runner.os }}-maven-
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
       - name: Build
-        run: |
-          JAVA_HOME=/usr/local/openjdk-17
-          mvn clean package -B -e -U
+        run: mvn clean package -B -e -U
       - uses: actions/upload-artifact@v3
         with:
           name: melosys-app
