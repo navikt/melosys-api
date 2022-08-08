@@ -1,28 +1,19 @@
 package no.nav.melosys.service.eessi.jobb
 
-import net.javacrumbs.shedlock.spring.annotation.SchedulerLock
-import no.finn.unleash.Unleash
 import no.nav.melosys.domain.oppgave.Oppgave
 import no.nav.melosys.domain.saksflyt.ProsessDataKey
 import no.nav.melosys.domain.saksflyt.Prosessinstans
 import no.nav.melosys.repository.ProsessinstansRepository
 import no.nav.melosys.service.oppgave.OppgaveService
 import org.slf4j.LoggerFactory
-import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 
 @Component
 class FeilregistrerX100OppgaverJobb(
     private val prosessinstansRepository: ProsessinstansRepository,
-    private val oppgaveService: OppgaveService,
-    private val unleash: Unleash
+    private val oppgaveService: OppgaveService
 ) {
-    @Scheduled(fixedDelay = Long.MAX_VALUE)
-    @SchedulerLock(name = "feilregistrerX100Oppgaver", lockAtLeastFor = "10m")
     fun feilregistrerX100Oppgaver() {
-        if (!unleash.isEnabled("melosys.api.x100.feilregistrer")) {
-            return
-        }
         log.info("Begynner automatisk feilregistrering av oppgaver opprettet for X100 SED-er.")
         val prosesserFraX100 = prosessinstansRepository.findAllWithSedX100()
         log.info("{} prosesser opprettet for X100 SED-er funnet.", prosesserFraX100.size)

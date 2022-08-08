@@ -1,6 +1,5 @@
 package no.nav.melosys.service.eessi.jobb
 
-import no.finn.unleash.FakeUnleash
 import no.nav.melosys.domain.oppgave.Oppgave
 import no.nav.melosys.domain.saksflyt.ProsessDataKey
 import no.nav.melosys.domain.saksflyt.Prosessinstans
@@ -20,21 +19,18 @@ internal class FeilregistrerX100OppgaverJobbTest {
     private val prosessinstansRepository: ProsessinstansRepository? = null
     @Mock
     private val oppgaveService: OppgaveService? = null
-    private val unleash = FakeUnleash()
 
     private var feilregistrerX100OppgaverJobb: FeilregistrerX100OppgaverJobb? = null
 
     @BeforeEach
     fun setup() {
         feilregistrerX100OppgaverJobb = FeilregistrerX100OppgaverJobb(
-            prosessinstansRepository!!, oppgaveService!!,
-            unleash
+            prosessinstansRepository!!, oppgaveService!!
         )
     }
 
     @Test
     fun feilregistrerX100Oppgaver() {
-        unleash.enable("melosys.api.x100.feilregistrer")
         val prosessMedX100 = lagProsessinstansMedEessiMelding()
         Mockito.`when`(prosessinstansRepository!!.findAllWithSedX100()).thenReturn(setOf(prosessMedX100))
         val oppgave = Oppgave.Builder().setOppgaveId(OPPGAVE_ID_X100).build()
