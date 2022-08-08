@@ -33,8 +33,10 @@ jobs:
     needs: check_docker_image_exists
     if: needs.check_docker_image_exists.outputs.exists != 'true'
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/cache@v3
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Setup Maven
+        uses: actions/cache@v3
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
@@ -45,8 +47,14 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-      - name: Build
-        run: mvn clean package -B -e -U
+      - name: Log in to the Container registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.READER_TOKEN }}
+      - name: Build and test
+        run: mvn clean verify -B -e -U --settings .github/settings.xml
       - uses: actions/upload-artifact@v3
         with:
           name: melosys-app
