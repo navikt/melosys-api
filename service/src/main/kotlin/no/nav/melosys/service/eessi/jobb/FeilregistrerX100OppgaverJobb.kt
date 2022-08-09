@@ -24,9 +24,15 @@ class FeilregistrerX100OppgaverJobb(
         val oppgaveIdSet = journalpostIdList.map { journalpostID: String? ->
             oppgaveService.finnÅpneOppgaverMedJournalpostID(journalpostID)
         }.flatten().map { obj: Oppgave -> obj.oppgaveId }.toSet()
-        log.info("{} oppgaver for X100 SED-er skal feilregistreres.", oppgaveIdSet.size)
 
-        oppgaveService.feilregistrerOppgave(oppgaveIdSet)
+        when {
+            oppgaveIdSet.isEmpty() -> log.info("Ingen åpne oppgaver for X100 SED-er finnes.")
+
+            else -> {
+                log.info("{} oppgaver for X100 SED-er skal feilregistreres.", oppgaveIdSet.size)
+                oppgaveService.feilregistrerOppgave(oppgaveIdSet)
+            }
+        }
         log.info("Feilregistrering av oppgaver opprettet for X100 SED-er er ferdig.")
     }
 
