@@ -56,6 +56,7 @@ public class OppgaveConsumerImpl implements OppgaveConsumer {
             .uri(OPPGAVE_BASE_URI, uriBuilder ->
                 uriBuilder
                     .queryParamIfPresent("aktoerId", Optional.ofNullable(oppgaveSearchRequest.getAktørId()))
+                    .queryParamIfPresent("journalpostId", Optional.ofNullable(oppgaveSearchRequest.getJournalpostId()))
                     .queryParamIfPresent("orgnr", Optional.ofNullable(oppgaveSearchRequest.getOrgnr()))
                     .queryParamIfPresent("tildeltEnhetsnr", Optional.ofNullable(oppgaveSearchRequest.getTildeltEnhetsnr()))
                     .queryParamIfPresent("tildeltRessurs", Optional.ofNullable(oppgaveSearchRequest.getTildeltRessurs()))
