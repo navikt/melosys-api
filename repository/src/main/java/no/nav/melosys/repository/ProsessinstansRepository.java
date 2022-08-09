@@ -43,5 +43,9 @@ public interface ProsessinstansRepository extends JpaRepository<Prosessinstans, 
 
     Collection<Prosessinstans> findAllByLåsReferanseStartingWith(String låsReferanse);
 
+    @Query(value = "SELECT * FROM PROSESSINSTANS p WHERE p.PROSESS_TYPE = 'MOTTAK_SED' AND p.\"DATA\" LIKE '%X100%'",
+        nativeQuery = true)
+    Set<Prosessinstans> findAllWithSedX100();
+
     boolean existsByStatusNotInAndLåsReferanse(Collection<ProsessStatus> prosessStatus, String låsreferanse);
 }
