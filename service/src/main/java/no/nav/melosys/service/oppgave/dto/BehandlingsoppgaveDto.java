@@ -1,5 +1,6 @@
 package no.nav.melosys.service.oppgave.dto;
 
+import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.service.felles.dto.SoeknadslandDto;
 
@@ -8,6 +9,7 @@ public class BehandlingsoppgaveDto extends OppgaveDto {
     private SoeknadslandDto land;
     private String saksnummer;
     private Sakstyper sakstype;
+    private Sakstemaer sakstema;
     private PeriodeDto periode;
 
     public BehandlingsoppgaveDto() {
@@ -45,6 +47,14 @@ public class BehandlingsoppgaveDto extends OppgaveDto {
 
     public void setSakstype(Sakstyper sakstype) {
         this.sakstype = sakstype;
+    }
+
+    public Sakstemaer getSakstema() {
+        return sakstema;
+    }
+
+    public void setSakstema(Sakstemaer sakstema) {
+        this.sakstema = sakstema;
     }
 
     public PeriodeDto getPeriode() {

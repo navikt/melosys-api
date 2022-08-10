@@ -38,10 +38,9 @@ public interface JoarkFasade {
     String opprettJournalpost(OpprettJournalpost opprettJournalpost, boolean forsøkEndeligJfr);
 
     /**
-     * Oppdaterer en journalpost og forsøker å ferdigstille hvis forsøkFerdigstill er satt
+     * Oppdaterer en journalpost og forsøker å ferdigstille
      */
-    void oppdaterJournalpost(String journalpostID, JournalpostOppdatering journalpostOppdatering, boolean forsøkFerdigstill)
-    ;
+    void oppdaterOgFerdigstillJournalpost(String journalpostID, JournalpostOppdatering journalpostOppdatering);
 
     void validerDokumenterTilhørerSakOgHarTilgang(HentJournalposterTilknyttetSakRequest hentJournalposterTilknyttetSakRequest,
                                                   Collection<DokumentReferanse> dokumentReferanser);

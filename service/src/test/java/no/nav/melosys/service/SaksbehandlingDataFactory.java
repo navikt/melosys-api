@@ -21,6 +21,20 @@ public final class SaksbehandlingDataFactory {
         return lagBehandling(new BehandlingsgrunnlagData());
     }
 
+    public static Behandling lagBehandling(Fagsak fagsak) {
+        Behandling behandling = new Behandling();
+        behandling.setId(1L);
+        behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
+        behandling.setType(Behandlingstyper.SOEKNAD);
+        behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
+        behandling.setFagsak(fagsak);
+        behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
+        final Instant nå = Instant.now();
+        behandling.setRegistrertDato(nå.minus(30, ChronoUnit.DAYS));
+        behandling.setEndretDato(nå);
+        return behandling;
+    }
+
     public static Behandling lagBehandling(BehandlingsgrunnlagData behandlingsgrunnlagData) {
         Behandling behandling = new Behandling();
         behandling.setId(1L);

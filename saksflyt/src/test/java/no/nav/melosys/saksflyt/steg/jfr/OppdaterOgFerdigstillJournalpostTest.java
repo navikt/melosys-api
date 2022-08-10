@@ -22,7 +22,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class OppdaterOgFerdigstillJournalpostTest {
@@ -44,7 +45,7 @@ class OppdaterOgFerdigstillJournalpostTest {
         var prosessinstans = prosessinstans(false);
         oppdaterOgFerdigstillJournalpost.utfør(prosessinstans);
 
-        verify(joarkFasade).oppdaterJournalpost(any(), oppdateringArgumentCaptor.capture(), eq(true));
+        verify(joarkFasade).oppdaterOgFerdigstillJournalpost(any(), oppdateringArgumentCaptor.capture());
 
         assertOppdatering(oppdateringArgumentCaptor.getValue(), false);
     }
@@ -54,7 +55,7 @@ class OppdaterOgFerdigstillJournalpostTest {
         var prosessinstans = prosessinstans(true);
         oppdaterOgFerdigstillJournalpost.utfør(prosessinstans);
 
-        verify(joarkFasade).oppdaterJournalpost(any(), oppdateringArgumentCaptor.capture(), eq(true));
+        verify(joarkFasade).oppdaterOgFerdigstillJournalpost(any(), oppdateringArgumentCaptor.capture());
 
         assertOppdatering(oppdateringArgumentCaptor.getValue(), true);
     }

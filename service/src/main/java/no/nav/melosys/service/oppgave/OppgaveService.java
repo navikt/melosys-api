@@ -26,14 +26,12 @@ import no.nav.melosys.service.saksopplysninger.SaksopplysningerService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
 import static no.nav.melosys.domain.util.BehandlingsgrunnlagUtils.hentPeriode;
 import static no.nav.melosys.domain.util.BehandlingsgrunnlagUtils.hentSøknadsland;
 
 @Service
-@Primary
 public class OppgaveService {
     private static final Logger log = LoggerFactory.getLogger(OppgaveService.class);
 
@@ -77,6 +75,19 @@ public class OppgaveService {
     public List<OppgaveDto> hentOppgaverMedAnsvarlig(String ansvarligID) {
         Collection<Oppgave> oppgaverFraDomain = oppgaveFasade.finnOppgaverMedAnsvarlig(ansvarligID);
         return oppgaverTilDtoer(oppgaverFraDomain);
+    }
+
+    public List<Oppgave> finnÅpneOppgaverMedJournalpostID(String journalpostID) {
+        return oppgaveFasade.finnÅpneOppgaverMedJournalpostID(journalpostID);
+    }
+
+    public void feilregistrerOppgave(Set<String> oppgaveIdSet) {
+        if (oppgaveIdSet.isEmpty()) {
+            log.debug("Ingen oppgaver skal feilregistreres.");
+            return;
+        }
+        log.info("Feilregistrer oppgave(r) {}", oppgaveIdSet);
+        oppgaveFasade.feilregistrerOppgaver(oppgaveIdSet);
     }
 
     public void ferdigstillOppgave(String oppgaveID) {
@@ -281,6 +292,7 @@ public class OppgaveService {
         Fagsak fagsak = fagsakService.hentFagsak(oppgave.getSaksnummer());
         behOppgaveDto.setSaksnummer(fagsak.getSaksnummer());
         behOppgaveDto.setSakstype(fagsak.getType());
+        behOppgaveDto.setSakstema(fagsak.getTema());
 
         Behandling behandling = fagsak.hentSistAktivBehandling();
         behandling = behandlingService.hentBehandling(behandling.getId());
@@ -334,9 +346,8 @@ public class OppgaveService {
 
     private boolean harBeskyttelsesbehov(long behandlingID) {
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
-        // TODO TPS krever fnr. Kall til hentFolkeregisterident fjernes etter overgang til PDL.
-        final String brukersFnr = persondataFasade.hentFolkeregisterident(behandling.getFagsak().hentBrukersAktørID());
-        if (persondataFasade.harStrengtFortroligAdresse(brukersFnr)) {
+        final String brukersAktørID = behandling.getFagsak().hentBrukersAktørID();
+        if (persondataFasade.harStrengtFortroligAdresse(brukersAktørID)) {
             return true;
         } else if (behandling.getBehandlingsgrunnlag() == null) {
             return false;

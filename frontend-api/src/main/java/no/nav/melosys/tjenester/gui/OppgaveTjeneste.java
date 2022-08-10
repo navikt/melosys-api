@@ -90,10 +90,10 @@ public class OppgaveTjeneste {
         List<BehandlingsoppgaveDto> saksbehandling = new ArrayList<>();
 
         for (OppgaveDto oppgaveDto : oppgaveDtoListe) {
-            if (oppgaveDto instanceof JournalfoeringsoppgaveDto) {
-                journalføring.add((JournalfoeringsoppgaveDto) oppgaveDto);
-            } else if (oppgaveDto instanceof BehandlingsoppgaveDto) {
-                saksbehandling.add((BehandlingsoppgaveDto) oppgaveDto);
+            if (oppgaveDto instanceof JournalfoeringsoppgaveDto journalfoeringsoppgaveDto) {
+                journalføring.add(journalfoeringsoppgaveDto);
+            } else if (oppgaveDto instanceof BehandlingsoppgaveDto behandlingsoppgaveDto) {
+                saksbehandling.add(behandlingsoppgaveDto);
             } else {
                 log.warn("Ukjent oppgavetype {}: ", oppgaveDto.getClass().getSimpleName());
             }

@@ -308,10 +308,10 @@ class OppgaveServiceTest {
         behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
         behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(new BehandlingsgrunnlagData());
         when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
-        when(persondataFasade.hentFolkeregisterident("aktørID")).thenReturn("fnrBruker");
-        when(persondataFasade.harStrengtFortroligAdresse("fnrBruker")).thenReturn(true);
+        when(persondataFasade.harStrengtFortroligAdresse("aktørID")).thenReturn(true);
 
         oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", "Z99999");
+
         verify(oppgaveFasade, never()).opprettOppgave(any(Oppgave.class));
         verify(oppgaveFasade).opprettSensitivOppgave(any(Oppgave.class));
     }
@@ -323,12 +323,12 @@ class OppgaveServiceTest {
         behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(new BehandlingsgrunnlagData());
         behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().personOpplysninger.medfolgendeFamilie
             = List.of(MedfolgendeFamilie.tilBarnFraFnrOgNavn("fnrBarn", null));
-        when(persondataFasade.hentFolkeregisterident("aktørID")).thenReturn("fnrBruker");
-        when(persondataFasade.harStrengtFortroligAdresse("fnrBruker")).thenReturn(false);
+        when(persondataFasade.harStrengtFortroligAdresse("aktørID")).thenReturn(false);
         when(persondataFasade.harStrengtFortroligAdresse("fnrBarn")).thenReturn(true);
         when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
 
         oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", "Z99999");
+
         verify(oppgaveFasade, never()).opprettOppgave(any(Oppgave.class));
         verify(oppgaveFasade).opprettSensitivOppgave(any(Oppgave.class));
     }
@@ -343,8 +343,7 @@ class OppgaveServiceTest {
         var oppgave2 = new Oppgave.Builder()
             .setTilordnetRessurs("tilordnet ressurs 2").setOpprettetTidspunkt(LocalDate.now().minusDays(2).atStartOfDay(ZoneId.systemDefault())).setStatus("FERDIGSTILT").build();
 
-        when(persondataFasade.hentFolkeregisterident("aktørID")).thenReturn("fnrBruker");
-        when(persondataFasade.harStrengtFortroligAdresse("fnrBruker")).thenReturn(false);
+        when(persondataFasade.harStrengtFortroligAdresse("aktørID")).thenReturn(false);
         when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
         when(oppgaveFasade.finnAvsluttetOppgaverMedSaksnummer(SAKSNUMMER)).thenReturn(List.of(oppgave1, oppgave2));
         when(fagsakService.hentFagsak(SAKSNUMMER)).thenReturn(fagsak);
