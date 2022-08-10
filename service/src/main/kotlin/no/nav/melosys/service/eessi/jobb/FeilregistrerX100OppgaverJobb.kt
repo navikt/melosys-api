@@ -16,22 +16,20 @@ class FeilregistrerX100OppgaverJobb(
     fun feilregistrerX100Oppgaver() {
         log.info("Begynner automatisk feilregistrering av oppgaver opprettet for X100 SED-er.")
         val prosesserFraX100 = prosessinstansRepository.findAllWithSedX100()
-        log.info("{} prosesser opprettet for X100 SED-er funnet.", prosesserFraX100.size)
+        log.info("${prosesserFraX100.size} prosesser opprettet for X100 SED-er funnet.")
 
         val journalpostIdList =
             prosesserFraX100.map { p: Prosessinstans -> p.getData(ProsessDataKey.JOURNALPOST_ID) }.toList()
-        log.info("Det er {} journalposter for X100 SED-er.", journalpostIdList.size)
+        log.info("Det er ${journalpostIdList.size} journalposter for X100 SED-er.")
         val oppgaveIdSet = journalpostIdList.map { journalpostID: String? ->
             oppgaveService.finnÅpneOppgaverMedJournalpostID(journalpostID)
         }.flatten().map { obj: Oppgave -> obj.oppgaveId }.toSet()
 
-        when {
-            oppgaveIdSet.isEmpty() -> log.info("Ingen åpne oppgaver for X100 SED-er finnes.")
-
-            else -> {
-                log.info("{} oppgaver for X100 SED-er skal feilregistreres.", oppgaveIdSet.size)
-                oppgaveService.feilregistrerOppgave(oppgaveIdSet)
-            }
+        if (oppgaveIdSet.isEmpty()) {
+            log.info("Ingen åpne oppgaver for X100 SED-er finnes.")
+        } else {
+            log.info("${oppgaveIdSet.size} oppgaver for X100 SED-er skal feilregistreres.")
+            oppgaveService.feilregistrerOppgave(oppgaveIdSet)
         }
         log.info("Feilregistrering av oppgaver opprettet for X100 SED-er er ferdig.")
     }
