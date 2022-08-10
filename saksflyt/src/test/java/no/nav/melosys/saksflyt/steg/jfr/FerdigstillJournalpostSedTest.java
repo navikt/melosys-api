@@ -55,7 +55,7 @@ class FerdigstillJournalpostSedTest {
 
         JournalpostOppdatering forventetOppdatering = new JournalpostOppdatering.Builder()
             .medBrukerID(BRUKER_ID).medSaksnummer(SAKSNUMMER).medTittel(TITTEL).build();
-        verify(joarkFasade).oppdaterJournalpost(JOURNALPOST_ID, forventetOppdatering, true);
+        verify(joarkFasade).oppdaterOgFerdigstillJournalpost(JOURNALPOST_ID, forventetOppdatering);
     }
 
     @Test

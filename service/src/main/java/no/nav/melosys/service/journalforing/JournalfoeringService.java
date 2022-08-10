@@ -191,7 +191,7 @@ public class JournalfoeringService {
         JournalpostOppdatering journalpostOppdatering = new JournalpostOppdatering.Builder()
             .medSaksnummer(saksnummer)
             .build();
-        joarkFasade.oppdaterJournalpost(journalpost.getJournalpostId(), journalpostOppdatering, true);
+        joarkFasade.oppdaterOgFerdigstillJournalpost(journalpost.getJournalpostId(), journalpostOppdatering);
     }
 
     @Transactional
