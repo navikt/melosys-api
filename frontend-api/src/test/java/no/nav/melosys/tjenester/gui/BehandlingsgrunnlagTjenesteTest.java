@@ -31,6 +31,7 @@ import static org.jeasy.random.FieldPredicates.named;
 import static org.jeasy.random.FieldPredicates.ofType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -77,6 +78,8 @@ public class BehandlingsgrunnlagTjenesteTest {
         mockMvc.perform(get(BASE_URL + "/{behandlingID}", 1L)
                 .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
+
+        verify(behandlingsgrunnlagService).hentBehandlingsgrunnlag(anyLong());
     }
 
     @Test
@@ -91,6 +94,8 @@ public class BehandlingsgrunnlagTjenesteTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(soeknad)))
             .andExpect(status().isOk());
+
+        verify(behandlingsgrunnlagService).oppdaterBehandlingsgrunnlag(anyLong(), any());
     }
 
     @Test
@@ -101,6 +106,8 @@ public class BehandlingsgrunnlagTjenesteTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(periodeOgLandPostDto)))
             .andExpect(status().isNoContent());
+
+        verify(behandlingsgrunnlagService).oppdaterBehandlingsgrunnlagPeriodeOgLand(anyLong(), any(), any());
     }
 
 }

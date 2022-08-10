@@ -25,7 +25,7 @@ class FeatureToggleTjenesteTest {
     private static final String BASE_URL = "/api/featuretoggle";
 
     @Test
-    void hentFeatureToggle_alleEnabled_verifiserAlleErEnablet() throws Exception {
+    void hentFeatureToggle() throws Exception {
         String featureEn = "melosys.feature.en";
         String featureTo = "melosys.feature.to";
 

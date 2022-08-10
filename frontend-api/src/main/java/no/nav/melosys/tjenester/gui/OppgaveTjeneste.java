@@ -71,7 +71,7 @@ public class OppgaveTjeneste {
 
     @PostMapping("/tilbakelegg")
     @ApiOperation(value = "Legger tilbake oppgave knyttet til gitt behandlingID i GSAK.")
-    public ResponseEntity<PlukketOppgaveDto> leggTilbakeOppgave(@RequestBody TilbakeleggingDto tilbakelegging) {
+    public ResponseEntity<Void> leggTilbakeOppgave(@RequestBody TilbakeleggingDto tilbakelegging) {
         String ident = SubjectHandler.getInstance().getUserID();
         oppgaveplukker.leggTilbakeOppgave(ident, tilbakelegging);
         return ResponseEntity.noContent().build();

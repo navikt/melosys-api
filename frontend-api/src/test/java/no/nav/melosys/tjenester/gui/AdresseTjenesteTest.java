@@ -5,7 +5,6 @@ import java.util.Arrays;
 import no.nav.melosys.domain.UtenlandskMyndighet;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
-import no.nav.melosys.service.tilgang.Aksesskontroll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,8 +22,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(controllers = {AdresseTjeneste.class})
 class AdresseTjenesteTest {
 
-    @MockBean
-    private Aksesskontroll aksesskontroll;
     @MockBean
     private UtenlandskMyndighetService utenlandskMyndighetService;
 
@@ -49,7 +46,7 @@ class AdresseTjenesteTest {
     }
 
     @Test
-    public void hentMyndighet_gyldigLandkode() throws Exception {
+    void hentUtenlandskMyndighet_gyldigLandkode() throws Exception {
         mockMvc.perform(get(BASE_URL + "/{landkode}", Landkoder.DK)
                 .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
@@ -57,7 +54,7 @@ class AdresseTjenesteTest {
     }
 
     @Test
-    public void hentMyndighet_ikkeGyldigLandkode() throws Exception {
+    void hentUtenlandskMyndighet_ikkeGyldigLandkode() throws Exception {
         mockMvc.perform(get(BASE_URL + "/{landkode}", Landkoder.NO)
                 .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
@@ -65,7 +62,7 @@ class AdresseTjenesteTest {
     }
 
     @Test
-    public void hentMyndigheter() throws Exception {
+    void hentMyndigheter() throws Exception {
         mockMvc.perform(get(BASE_URL)
                 .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
