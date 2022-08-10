@@ -146,13 +146,16 @@ public class ProsessinstansService {
         prosessinstans.setStatus(ProsessStatus.KLAR);
         if (saksbehandler != null) {
             prosessinstans.setData(ProsessDataKey.SAKSBEHANDLER, saksbehandler);
+            logger.info("Saksbehandler={} har opprettet prosessinstans {} av type {}.", saksbehandler,
+                        prosessinstans.getId(), prosessinstans.getType());
+        } else {
+            logger.info("Melosys har opprettet prosessinstans {} av type {}.", prosessinstans.getId(),
+                        prosessinstans.getType());
         }
 
         prosessinstansRepo.save(prosessinstans);
         applicationEventPublisher.publishEvent(new ProsessinstansOpprettetEvent(prosessinstans));
         prosessinstanserOpprettet.increment();
-
-        logger.info("Saksbehandler={} har opprettet prosessinstans {} av type {}.", saksbehandler, prosessinstans.getId(), prosessinstans.getType());
     }
 
     public void opprettProsessinstansAnmodningOmUnntak(Behandling behandling, Set<String> mottakerInstitusjon,

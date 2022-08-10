@@ -82,6 +82,10 @@ public class OppgaveService {
     }
 
     public void feilregistrerOppgave(Set<String> oppgaveIdSet) {
+        if (oppgaveIdSet.isEmpty()) {
+            log.debug("Ingen oppgaver skal feilregistreres.");
+            return;
+        }
         log.info("Feilregistrer oppgave(r) {}", oppgaveIdSet);
         oppgaveFasade.feilregistrerOppgaver(oppgaveIdSet);
     }

@@ -87,7 +87,7 @@ class JoarkServiceTest {
             .medLogiskeVedleggTitler(Arrays.asList("dok1", "dok2")).build();
 
         when(safConsumer.hentJournalpost(anyString())).thenReturn(safJournalpost(journalpostID));
-        joarkService.oppdaterJournalpost("123", journalpostOppdatering, false);
+        joarkService.oppdaterOgFerdigstillJournalpost("123", journalpostOppdatering);
 
         verify(journalpostapiConsumer).fjernLogiskeVedlegg(anyString(), anyString());
         verify(journalpostapiConsumer).oppdaterJournalpost(oppdaterJournalpostRequestCaptor.capture(), anyString());
@@ -108,16 +108,16 @@ class JoarkServiceTest {
         assertThat(request.sak.getSakstype()).isEqualTo("FAGSAK");
         assertThat(request.sak.getFagsaksystem()).isNotNull();
 
-        assertThat(request.dokumenter.size()).isEqualTo(2);
+        assertThat(request.dokumenter).hasSize(2);
         assertThat(request.dokumenter.get(0).tittel).isEqualTo(tittel);
         assertThat(request.dokumenter.get(0).dokumentInfoId).isEqualTo(hovedDokumentID);
         assertThat(request.dokumenter.get(1).tittel).isEqualTo(fysiskVedleggTittel);
         assertThat(request.dokumenter.get(1).dokumentInfoId).isEqualTo(fysiskVedleggID);
 
         verify(journalpostapiConsumer, times(2)).leggTilLogiskVedlegg(anyString(), logiskVedleggTittelCaptor.capture());
-        verify(journalpostapiConsumer, never()).ferdigstillJournalpost(any(), any());
+        verify(journalpostapiConsumer).ferdigstillJournalpost(any(), any());
         List<String> logiskVedleggRequest = logiskVedleggTittelCaptor.getAllValues();
-        assertThat(logiskVedleggRequest.size()).isEqualTo(2);
+        assertThat(logiskVedleggRequest).hasSize(2);
         assertThat(logiskVedleggRequest.get(0)).isEqualTo("dok1");
         assertThat(logiskVedleggRequest.get(1)).isEqualTo("dok2");
     }
@@ -136,7 +136,7 @@ class JoarkServiceTest {
         var safJournalpost = safJournalpost("123", false);
 
         when(safConsumer.hentJournalpost(anyString())).thenReturn(safJournalpost);
-        joarkService.oppdaterJournalpost("123", journalpostOppdatering, false);
+        joarkService.oppdaterOgFerdigstillJournalpost("123", journalpostOppdatering);
 
         verify(journalpostapiConsumer, never()).fjernLogiskeVedlegg(any(), any());
         verify(journalpostapiConsumer).oppdaterJournalpost(oppdaterJournalpostRequestCaptor.capture(), anyString());
@@ -173,7 +173,7 @@ class JoarkServiceTest {
             .medBrukerID("12345").build();
 
         when(safConsumer.hentJournalpost(anyString())).thenReturn(safJournalpost(journalpostID, false));
-        joarkService.oppdaterJournalpost(journalpostID, journalpostOppdatering, true);
+        joarkService.oppdaterOgFerdigstillJournalpost(journalpostID, journalpostOppdatering);
 
         verify(journalpostapiConsumer, never()).fjernLogiskeVedlegg(any(), any());
         verify(journalpostapiConsumer).oppdaterJournalpost(any(OppdaterJournalpostRequest.class), anyString());
@@ -247,7 +247,7 @@ class JoarkServiceTest {
         final var journalpostId = "11122233";
         final var saksnummer = "191919";
         final var arkivsakID = 12345L;
-        final var safJournalpost = safJournalpostUtenVedlegg(journalpostId);
+        final var safJournalpost = safJournalpostUtenVedlegg();
         when(safConsumer.hentDokumentoversikt(saksnummer)).thenReturn(List.of(safJournalpost));
 
         Collection<DokumentReferanse> dokumentReferanser = Collections.singletonList(new DokumentReferanse(journalpostId, VEDLEGG_MED_TILGANG_ID));
@@ -474,9 +474,8 @@ class JoarkServiceTest {
         );
     }
 
-    private no.nav.melosys.integrasjon.joark.saf.dto.journalpost.Journalpost safJournalpostUtenVedlegg(String journalpostID) {
-        return new no.nav.melosys.integrasjon.joark.saf.dto.journalpost.Journalpost(
-            journalpostID,
+    private no.nav.melosys.integrasjon.joark.saf.dto.journalpost.Journalpost safJournalpostUtenVedlegg() {
+        return new no.nav.melosys.integrasjon.joark.saf.dto.journalpost.Journalpost("11122233",
             "Tittel",
             Journalstatus.MOTTATT,
             Tema.MED.getKode(),

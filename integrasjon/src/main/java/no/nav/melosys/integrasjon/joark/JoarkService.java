@@ -112,7 +112,7 @@ public class JoarkService implements JoarkFasade {
     }
 
     @Override
-    public void oppdaterJournalpost(String journalpostID, JournalpostOppdatering journalpostOppdatering, boolean forsøkFerdigstill) {
+    public void oppdaterOgFerdigstillJournalpost(String journalpostID, JournalpostOppdatering journalpostOppdatering) {
 
         fjernEksisterendeLogiskeVedleggPåHovddokument(journalpostID);
 
@@ -155,10 +155,7 @@ public class JoarkService implements JoarkFasade {
             request.medAvsender(avsender);
         }
         journalpostapiConsumer.oppdaterJournalpost(request.build(), journalpostID);
-
-        if (forsøkFerdigstill) {
-            journalpostapiConsumer.ferdigstillJournalpost(new FerdigstillJournalpostRequest(), journalpostID);
-        }
+        journalpostapiConsumer.ferdigstillJournalpost(new FerdigstillJournalpostRequest(), journalpostID);
     }
 
     private void fjernEksisterendeLogiskeVedleggPåHovddokument(String journalpostID) {
