@@ -292,6 +292,7 @@ public class OppgaveService {
         Fagsak fagsak = fagsakService.hentFagsak(oppgave.getSaksnummer());
         behOppgaveDto.setSaksnummer(fagsak.getSaksnummer());
         behOppgaveDto.setSakstype(fagsak.getType());
+        behOppgaveDto.setSakstema(fagsak.getTema());
 
         Behandling behandling = fagsak.hentSistAktivBehandling();
         behandling = behandlingService.hentBehandling(behandling.getId());
