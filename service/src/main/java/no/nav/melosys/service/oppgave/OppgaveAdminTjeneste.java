@@ -38,11 +38,20 @@ public class OppgaveAdminTjeneste implements AdminTjeneste {
         return ResponseEntity.noContent().build();
     }
 
-    @PutMapping("/feilregistrer/x100")
-    public ResponseEntity<Void> feilregistrerX100Oppgaver(@RequestHeader(API_KEY_HEADER) String apiKey) {
+    @PutMapping("/behandling/feilregistrer/x100")
+    public ResponseEntity<Void> feilregistrerX100Behandlingsoppgaver(@RequestHeader(API_KEY_HEADER) String apiKey) {
         validerApikey(apiKey);
 
-        feilregistrerX100OppgaverJobb.feilregistrerX100Oppgaver();
+        feilregistrerX100OppgaverJobb.feilregistrerX100Behandlingsoppgaver();
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/journalfoering/feilregistrer/x100")
+    public ResponseEntity<Void> feilregistrerX100Journalføringsoppgaver(@RequestHeader(API_KEY_HEADER) String apiKey) {
+        validerApikey(apiKey);
+
+        feilregistrerX100OppgaverJobb.feilregistrerX100Journalføringsoppgaver();
 
         return ResponseEntity.noContent().build();
     }
