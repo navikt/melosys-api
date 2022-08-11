@@ -13,8 +13,8 @@ class FeilregistrerX100OppgaverJobb(
     private val prosessinstansRepository: ProsessinstansRepository,
     private val oppgaveService: OppgaveService
 ) {
-    fun feilregistrerX100Oppgaver() {
-        log.info("Begynner automatisk feilregistrering av oppgaver opprettet for X100 SED-er.")
+    fun feilregistrerX100Journalføringsoppgaver() {
+        log.info("Begynner feilregistrering av journalføringsoppgaver opprettet for X100 SED-er.")
         val prosesserFraX100 = prosessinstansRepository.findAllWithSedX100()
         log.info("${prosesserFraX100.size} prosesser opprettet for X100 SED-er funnet.")
 
@@ -31,7 +31,28 @@ class FeilregistrerX100OppgaverJobb(
             log.info("${oppgaveIdSet.size} oppgaver for X100 SED-er skal feilregistreres.")
             oppgaveService.feilregistrerOppgave(oppgaveIdSet)
         }
-        log.info("Feilregistrering av oppgaver opprettet for X100 SED-er er ferdig.")
+        log.info("Feilregistrering av journalføringsoppgaver opprettet for X100 SED-er er ferdig.")
+    }
+
+
+    fun feilregistrerX100Behandlingsoppgaver() {
+        log.info("Begynner feilregistrering av behandlingoppgaver opprettet for X100 SED-er.")
+        val oppgaveIdSet = prosessinstansRepository.findAllWithSedX100()
+            .filter { it.behandling != null }
+            .map { it.behandling }
+            .filter { it.erInaktiv() }
+            .map { oppgaveService.finnÅpenOppgaveMedFagsaksnummer(it.fagsak.saksnummer) }
+            .filter { it.isPresent }
+            .map { it.get().oppgaveId }
+            .toSet()
+
+        if (oppgaveIdSet.isEmpty()) {
+            log.info("Ingen åpne behandlingoppgaver for inaktive X100 SED-behandlinger finnes.")
+        } else {
+            log.info("${oppgaveIdSet.size} åpne behandlingoppgaver for X100 SED-er skal feilregistreres.")
+            oppgaveService.feilregistrerOppgave(oppgaveIdSet)
+        }
+        log.info("Feilregistrering av behandlingsoppgaver opprettet for X100 SED-er er ferdig.")
     }
 
     companion object {

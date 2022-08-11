@@ -49,7 +49,7 @@ internal class JournalfoerX100JournalposterJobbTest {
             val prosessMedX100 = Prosessinstans()
             prosessMedX100.setData(ProsessDataKey.JOURNALPOST_ID, JOURNALPOST_ID_X_100)
             prosessMedX100.setData(ProsessDataKey.EESSI_MELDING, lagEessiMeldingMedX100())
-            prosessMedX100.behandling = SaksbehandlingDataFactory.lagBehandling(
+            prosessMedX100.behandling = SaksbehandlingDataFactory.lagInaktivBehandling(
                 SaksbehandlingDataFactory.lagFagsak("MEL-1")
             )
             return prosessMedX100
