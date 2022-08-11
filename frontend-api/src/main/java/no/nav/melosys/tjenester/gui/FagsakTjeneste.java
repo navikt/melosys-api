@@ -6,12 +6,14 @@ import java.util.stream.Collectors;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.arkiv.DokumentReferanse;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService;
@@ -48,6 +50,7 @@ public class FagsakTjeneste {
     private final OpprettNySakFraOppgave opprettNySakFraOppgave;
     private final Aksesskontroll aksesskontroll;
     private final BehandlingsgrunnlagService behandlingsgrunnlagService;
+    private final BehandlingsresultatService behandlingsresultatService;
     private final HenleggFagsakService henleggFagsakService;
     private final PersondataFasade persondataFasade;
     private final SaksopplysningerService saksopplysningerService;
@@ -56,8 +59,8 @@ public class FagsakTjeneste {
     private final OrganisasjonOppslagService organisasjonOppslagService;
 
     public FagsakTjeneste(FagsakService fagsakService, Aksesskontroll aksesskontroll, BehandlingsgrunnlagService behandlingsgrunnlagService,
-                          HenleggFagsakService henleggFagsakService,
-                          OpprettNySakFraOppgave opprettNySakFraOppgave, PersondataFasade persondataFasade,
+                          HenleggFagsakService henleggFagsakService, OpprettNySakFraOppgave opprettNySakFraOppgave,
+                          BehandlingsresultatService behandlingsresultatService, PersondataFasade persondataFasade,
                           SaksopplysningerService saksopplysningerService, UtpekingService utpekingService,
                           VideresendSoknadService videresendSoknadService, OrganisasjonOppslagService organisasjonOppslagService) {
         this.fagsakService = fagsakService;
@@ -65,6 +68,7 @@ public class FagsakTjeneste {
         this.behandlingsgrunnlagService = behandlingsgrunnlagService;
         this.henleggFagsakService = henleggFagsakService;
         this.opprettNySakFraOppgave = opprettNySakFraOppgave;
+        this.behandlingsresultatService = behandlingsresultatService;
         this.persondataFasade = persondataFasade;
         this.saksopplysningerService = saksopplysningerService;
         this.utpekingService = utpekingService;
@@ -235,11 +239,14 @@ public class FagsakTjeneste {
     private BehandlingOversiktDto tilBehandlingOversiktDto(Behandling behandling) {
         BehandlingOversiktDto behandlingOversiktDto = new BehandlingOversiktDto();
         if (behandling != null) {
+            Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
+
             behandlingOversiktDto.setBehandlingID(behandling.getId());
             behandlingOversiktDto.setBehandlingsstatus(behandling.getStatus());
             behandlingOversiktDto.setBehandlingstype(behandling.getType());
             behandlingOversiktDto.setBehandlingstema(behandling.getTema());
             behandlingOversiktDto.setOpprettetDato(behandling.getRegistrertDato());
+            behandlingOversiktDto.setBehandlingsresultattype(behandlingsresultat.getType());
 
             setPeriodeOpplysninger(behandling, behandlingOversiktDto);
         }

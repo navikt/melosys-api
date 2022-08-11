@@ -7,7 +7,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -15,6 +14,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
@@ -26,8 +26,10 @@ import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresseNorge
 import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresseUtland;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService;
@@ -42,7 +44,6 @@ import no.nav.melosys.tjenester.gui.util.SaksbehandlingDataFactory;
 import org.jeasy.random.EasyRandom;
 import org.jeasy.random.EasyRandomParameters;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -246,6 +247,8 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
 
         FagsakTjeneste instans = lagFagsakTjeneste(fagsak);
         List<FagsakOppsummeringDto> fagsakOppsummeringDtoer = instans.hentFagsaker(new FagsakSokDto(FNR, null, null));
+
+
         assertThat(fagsakOppsummeringDtoer).hasSize(1);
         FagsakOppsummeringDto fagsakOppsummeringDto = fagsakOppsummeringDtoer.get(0);
         assertThat(fagsakOppsummeringDto.getBehandlingOversikter()).hasSize(3);
@@ -258,6 +261,7 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
         assertThat(behandlingFørst.getBehandlingID()).isEqualTo(1L);
         assertThat(behandlingFørst.getBehandlingsstatus().getKode()).isEqualTo("UNDER_BEHANDLING");
         assertThat(behandlingFørst.getBehandlingstype().getKode()).isEqualTo("SOEKNAD");
+        assertThat(behandlingFørst.getBehandlingsresultattype().getKode()).isEqualTo("FASTSATT_LOVVALGSLAND");
         assertThat(behandlingFørst.getOpprettetDato()).isEqualTo(Instant.parse("2019-01-10T10:37:30.00Z"));
         assertThat(behandlingFørst.getLand().landkoder.get(0)).isEqualTo("DK");
         assertThat(behandlingFørst.getLand().erUkjenteEllerAlleEosLand).isFalse();
@@ -346,6 +350,10 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
         Soeknad søknadDokument = SaksbehandlingDataFactory.lagSøknadDokument();
         Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
         behandlingsgrunnlag.setBehandlingsgrunnlagdata(søknadDokument);
+        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+        behandlingsresultat.setType(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
+        BehandlingsresultatService behandlingsresultatService = mock(BehandlingsresultatService.class);
+        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
         when(behandlingsgrunnlagService.finnBehandlingsgrunnlag(1L)).thenReturn(Optional.of(behandlingsgrunnlag));
         when(fagsakService.hentFagsak("123")).thenReturn(fagsak);
         when(persondataFasade.hentSammensattNavn(any())).thenReturn("Joe Moe");
@@ -354,7 +362,7 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
             doReturn(List.of(fagsak)).when(fagsakService).hentFagsakerMedOrgnr(Aktoersroller.VIRKSOMHET, ORGNR);
         }
         return new FagsakTjeneste(fagsakService, aksesskontroll, behandlingsgrunnlagService, henleggFagsakService, opprettNySakFraOppgave,
-            persondataFasade, saksopplysningerService, utpekingService, videresendSoknadService, organisasjonOppslagService);
+            behandlingsresultatService, persondataFasade, saksopplysningerService, utpekingService, videresendSoknadService, organisasjonOppslagService);
     }
 
     private static FagsakOppsummeringDto lagFagsakOppsummeringDto(Behandling behandling) {
@@ -368,6 +376,7 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
 
         BehandlingOversiktDto behandlingOversiktDto = new BehandlingOversiktDto();
         behandlingOversiktDto.setBehandlingID(behandling.getId());
+        behandlingOversiktDto.setBehandlingsresultattype(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
         result.setBehandlingOversikter(Collections.singletonList(behandlingOversiktDto));
         return result;
     }
