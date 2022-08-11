@@ -38,7 +38,7 @@ public class OppgaveAdminTjeneste implements AdminTjeneste {
         return ResponseEntity.noContent().build();
     }
 
-    @PutMapping("behandling/feilregistrer/x100")
+    @PutMapping("/behandling/feilregistrer/x100")
     public ResponseEntity<Void> feilregistrerX100Behandlingsoppgaver(@RequestHeader(API_KEY_HEADER) String apiKey) {
         validerApikey(apiKey);
 
@@ -47,7 +47,7 @@ public class OppgaveAdminTjeneste implements AdminTjeneste {
         return ResponseEntity.noContent().build();
     }
 
-    @PutMapping("journalfoering/feilregistrer/x100")
+    @PutMapping("/journalfoering/feilregistrer/x100")
     public ResponseEntity<Void> feilregistrerX100Journalføringsoppgaver(@RequestHeader(API_KEY_HEADER) String apiKey) {
         validerApikey(apiKey);
 
