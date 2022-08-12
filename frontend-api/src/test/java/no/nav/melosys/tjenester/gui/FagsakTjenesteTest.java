@@ -265,6 +265,7 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
         assertThat(behandlingFørst.getOpprettetDato()).isEqualTo(Instant.parse("2019-01-10T10:37:30.00Z"));
         assertThat(behandlingFørst.getLand().landkoder.get(0)).isEqualTo("DK");
         assertThat(behandlingFørst.getLand().erUkjenteEllerAlleEosLand).isFalse();
+        assertThat(behandlingFørst.getSvarFrist()).isEqualTo(Instant.parse("2019-01-12T10:37:30.00Z"));
 
         assertThat(behandlingFørst.getPeriode().getFom()).isEqualTo(LocalDate.of(2019, 1, 1));
         assertThat(behandlingFørst.getPeriode().getTom()).isEqualTo(LocalDate.of(2019, 2, 1));

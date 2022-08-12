@@ -18,6 +18,7 @@ public class BehandlingOversiktDto {
     private SoeknadslandDto land;
     private Instant opprettetDato;
     private Behandlingsresultattyper behandlingsresultattype;
+    private Instant svarFrist;
 
     public Long getBehandlingID() {
         return behandlingID;
@@ -81,5 +82,13 @@ public class BehandlingOversiktDto {
 
     public void setBehandlingsresultattype(Behandlingsresultattyper behandlingsresultattype) {
         this.behandlingsresultattype = behandlingsresultattype;
+    }
+
+    public Instant getSvarFrist() {
+        return svarFrist;
+    }
+
+    public void setSvarFrist(Instant svarFrist) {
+        this.svarFrist = svarFrist;
     }
 }

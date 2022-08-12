@@ -52,6 +52,7 @@ public final class SaksbehandlingDataFactory {
         b1.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         b1.setRegistrertDato(Instant.parse("2019-01-10T10:37:30.00Z"));
         b1.setEndretDato(Instant.parse("2019-01-12T10:37:30.00Z"));
+        b1.setDokumentasjonSvarfristDato(Instant.parse("2019-01-12T10:37:30.00Z"));
         b1.setStatus(behandlingsstatusFørst);
 
         HashSet<Saksopplysning> saksopplysninger = new HashSet<>();
