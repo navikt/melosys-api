@@ -1,7 +1,6 @@
 package no.nav.melosys.integrasjon.oppgave;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -20,7 +19,10 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.oppgave.konsument.OppgaveConsumer;
-import no.nav.melosys.integrasjon.oppgave.konsument.dto.*;
+import no.nav.melosys.integrasjon.oppgave.konsument.dto.OppgaveDto;
+import no.nav.melosys.integrasjon.oppgave.konsument.dto.OppgaveSearchRequest;
+import no.nav.melosys.integrasjon.oppgave.konsument.dto.OpprettOppgaveDto;
+import no.nav.melosys.integrasjon.oppgave.konsument.dto.PatchOppgaveDto;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
