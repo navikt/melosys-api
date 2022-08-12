@@ -1,6 +1,7 @@
 package no.nav.melosys.integrasjon.oppgave;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -17,12 +18,14 @@ import no.nav.melosys.domain.oppgave.PrioritetType;
 import no.nav.melosys.domain.util.KodeverkUtils;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.oppgave.konsument.OppgaveConsumer;
 import no.nav.melosys.integrasjon.oppgave.konsument.dto.*;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Primary;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import static no.nav.melosys.integrasjon.Konstanter.MELOSYS_ENHET_ID;
@@ -48,14 +51,8 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
 
     @Override
     public void feilregistrerOppgaver(Set<String> oppgaveIdSet) {
-        List<PatchOppgaveDto> patchOppgaveDtos = oppgaveIdSet.stream()
-            .map(s -> new PatchOppgaveDto(Long.parseLong(s))).toList();
-        PatchOppgaverRequestDto patchOppgaverRequest = new PatchOppgaverRequestDto(OPPGAVE_STATUS_FEILREGISTRERT,
-                                                                                   patchOppgaveDtos);
-        PatchOppgaverResponseDto patchOppgaverResponse = oppgaveConsumer.patchOppgaver(patchOppgaverRequest);
-        if (patchOppgaverResponse.feilet() != null && patchOppgaverResponse.feilet() > 0) {
-            log.error("Patching av {} oppgave(r) feilet: \\n {}", patchOppgaverResponse.feilet(),
-                      patchOppgaverResponse);
+        for (String oppgaveID : oppgaveIdSet) {
+            feilregistrerOppgave(oppgaveID);
         }
     }
 
@@ -99,6 +96,15 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
     @Override
     public String opprettSensitivOppgave(Oppgave oppgave) {
         return opprettOppgave(oppgave, true);
+    }
+
+    @Async
+    public void feilregistrerOppgave(String oppgaveID) {
+        try {
+            oppgaveConsumer.patchOppgave(new PatchOppgaveDto(Long.parseLong(oppgaveID), OPPGAVE_STATUS_FEILREGISTRERT));
+        } catch (TekniskException e) {
+            log.error("Patching av oppgave {} feilet", oppgaveID);
+        }
     }
 
     private String opprettOppgave(Oppgave oppgave, boolean erSensitiv) {
