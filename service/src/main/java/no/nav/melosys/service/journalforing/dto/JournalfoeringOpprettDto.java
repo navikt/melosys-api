@@ -4,7 +4,6 @@ import no.nav.melosys.domain.Behandling;
 
 public class JournalfoeringOpprettDto extends JournalfoeringDto {
     private String behandlingstemaKode;
-    private String behandlingstypeKode;
     private FagsakDto fagsak;
     private String arbeidsgiverID;
     private String representantID;
@@ -17,14 +16,6 @@ public class JournalfoeringOpprettDto extends JournalfoeringDto {
 
     public void setBehandlingstemaKode(String behandlingstemaKode) {
         this.behandlingstemaKode = behandlingstemaKode;
-    }
-
-    public String getBehandlingstypeKode() {
-        return behandlingstypeKode;
-    }
-
-    public void setBehandlingstypeKode(String behandlingstypeKode) {
-        this.behandlingstypeKode = behandlingstypeKode;
     }
 
     public FagsakDto getFagsak() {

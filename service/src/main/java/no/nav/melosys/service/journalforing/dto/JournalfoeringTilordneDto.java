@@ -1,17 +1,8 @@
 package no.nav.melosys.service.journalforing.dto;
 
 public class JournalfoeringTilordneDto extends JournalfoeringDto {
-    private String behandlingstypeKode;
     private String saksnummer; // Melosys saksnummer
     private boolean ingenVurdering;
-
-    public String getBehandlingstypeKode() {
-        return behandlingstypeKode;
-    }
-
-    public void setBehandlingstypeKode(String behandlingstypeKode) {
-        this.behandlingstypeKode = behandlingstypeKode;
-    }
 
     public String getSaksnummer() {
         return saksnummer;

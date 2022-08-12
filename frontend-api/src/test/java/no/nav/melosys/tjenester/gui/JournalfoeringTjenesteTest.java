@@ -14,6 +14,7 @@ import no.nav.melosys.tjenester.gui.dto.journalforing.JournalpostDto;
 import org.jeasy.random.EasyRandom;
 import org.jeasy.random.EasyRandomParameters;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -85,6 +86,7 @@ class JournalfoeringTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
+    @Disabled("Frem til fjerning av skjema")
     void journalføringOpprett_validerKallOgSchema() throws IOException {
         JournalfoeringOpprettDto journalføringDto = random.nextObject(JournalfoeringOpprettDto.class);
         journalføringDto.setVirksomhetOrgnr(null);
@@ -101,6 +103,7 @@ class JournalfoeringTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
+    @Disabled("Frem til fjerning av skjema")
     void journalføringOpprett_validerKallOgSchemaMedRepresentantIDNull() throws IOException {
         JournalfoeringOpprettDto journalføringDto = random.nextObject(JournalfoeringOpprettDto.class);
         journalføringDto.setVirksomhetOrgnr(null);
@@ -117,6 +120,7 @@ class JournalfoeringTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
+    @Disabled("Frem til fjerning av skjema")
     void journalføringOpprett_validerKallOgSchemaMedBrukerIDNull() throws IOException {
         JournalfoeringOpprettDto journalføringDto = random.nextObject(JournalfoeringOpprettDto.class);
         journalføringDto.setVirksomhetOrgnr(SAMPLE_ORGNR);
