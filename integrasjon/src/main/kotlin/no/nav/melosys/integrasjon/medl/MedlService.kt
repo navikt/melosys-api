@@ -25,7 +25,7 @@ class MedlService(
         objectMapper.registerModule(JavaTimeModule())
     }
 
-    fun hentPeriodeListe(fnr: String, fom: LocalDate, tom: LocalDate?): Saksopplysning {
+    fun hentPeriodeListe(fnr: String, fom: LocalDate?, tom: LocalDate?): Saksopplysning {
         val periodeListeResponse = medlemskapRestConsumer.hentPeriodeListe(fnr, fom, tom)
 
         return Saksopplysning().apply {
