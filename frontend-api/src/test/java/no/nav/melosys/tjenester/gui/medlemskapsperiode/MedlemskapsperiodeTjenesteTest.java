@@ -1,21 +1,17 @@
 package no.nav.melosys.tjenester.gui.medlemskapsperiode;
 
-import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Collections;
 
-import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
 import no.nav.melosys.domain.Medlemskapsperiode;
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser;
+import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
-import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.service.medlemskapsperiode.MedlemskapsperiodeService;
 import no.nav.melosys.service.medlemskapsperiode.OpprettMedlemskapsperiodeService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
-import no.nav.melosys.tjenester.gui.JsonSchemaTestParent;
 import no.nav.melosys.tjenester.gui.dto.MedlemskapsperiodeDto;
-import no.nav.melosys.tjenester.gui.dto.MedlemskapsperiodeOppdatering;
 import no.nav.melosys.tjenester.gui.dto.UtledMedlemskapsperiodeDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,17 +21,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class MedlemskapsperiodeTjenesteTest extends JsonSchemaTestParent {
-
-    private static final String MEDLEMSKAPSPERIODER_SCHEMA = "medlemskapsperioder-schema.json";
-    private static final String MEDLEMSKAPSPERIODER_POST_SCHEMA = "medlemskapsperioder-post-schema.json";
-    private static final String MEDLEMSKAPSPERIODER_PUT_SCHEMA = "medlemskapsperioder-put-schema.json";
-    private static final String MEDLEMSKAPSPERIODER_BESTEMMELSE_SCHEMA = "medlemskapsperioder-bestemmelse-schema.json";
-    private static final String MEDLEMSKAPSPERIODER_BESTEMMELSE_POST_SCHEMA = "medlemskapsperioder-bestemmelse-post-schema.json";
+class MedlemskapsperiodeTjenesteTest {
 
     @Mock
     private MedlemskapsperiodeService medlemskapsperiodeService;
@@ -54,7 +45,7 @@ class MedlemskapsperiodeTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    void hentMedlemskapsperioder_validerSchema() throws IOException {
+    void hentMedlemskapsperioder_validerSchema() {
         final var medlemskapsperiode = lagMedlemskapsperiode();
         when(medlemskapsperiodeService.hentMedlemskapsperioder(eq(behandlingID)))
             .thenReturn(Collections.singleton(medlemskapsperiode));
@@ -72,55 +63,19 @@ class MedlemskapsperiodeTjenesteTest extends JsonSchemaTestParent {
                 medlemskapsperiode.getFom(), medlemskapsperiode.getTom(), medlemskapsperiode.getDekning(),
                 medlemskapsperiode.getInnvilgelsesresultat(), medlemskapsperiode.getMedlemskapstype()
             );
-
-        validerArray(res.getBody(), MEDLEMSKAPSPERIODER_SCHEMA);
-
     }
 
     @Test
-    void opprettMedlemskapsperioder_validerSchema() throws IOException {
-        var opprettMedlemskapsperiodeRequest = new MedlemskapsperiodeOppdatering(LocalDate.now(), LocalDate.now(),
-            Trygdedekninger.HELSE_OG_PENSJONSDEL, InnvilgelsesResultat.DELVIS_INNVILGET);
-
-        when(medlemskapsperiodeService.opprettMedlemskapsperiode(eq(behandlingID), any(), any(), any(), any()))
-            .thenReturn(lagMedlemskapsperiode());
-
-        valider(opprettMedlemskapsperiodeRequest, MEDLEMSKAPSPERIODER_POST_SCHEMA);
-        medlemskapsperiodeTjeneste.opprettMedlemskapsperiode(behandlingID, opprettMedlemskapsperiodeRequest);
-    }
-
-    @Test
-    void oppdaterMedlemskapsperioder_validerSchema() throws IOException {
-        var oppdaterMedlemskapsperiodeRequest = new MedlemskapsperiodeOppdatering(LocalDate.now(), LocalDate.now(),
-            Trygdedekninger.HELSE_OG_PENSJONSDEL, InnvilgelsesResultat.DELVIS_INNVILGET);
-
-        when(medlemskapsperiodeService.oppdaterMedlemskapsperiode(eq(behandlingID), anyLong(), any(), any(), any(), any()))
-            .thenReturn(lagMedlemskapsperiode());
-
-        valider(oppdaterMedlemskapsperiodeRequest, MEDLEMSKAPSPERIODER_PUT_SCHEMA);
-        medlemskapsperiodeTjeneste.oppdaterMedlemskapsperiode(behandlingID, 1, oppdaterMedlemskapsperiodeRequest);
-    }
-
-    @Test
-    void opprettMedlemskapsperioderFraBestemmelse() throws IOException {
+    void opprettMedlemskapsperioderFraBestemmelse() {
 
         when(opprettMedlemskapsperiodeService.utledMedlemskapsperioderFraSøknad(eq(behandlingID), any(Folketrygdloven_kap2_bestemmelser.class)))
             .thenReturn(Collections.singleton(lagMedlemskapsperiode()));
 
         var request = new UtledMedlemskapsperiodeDto(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_ANDRE_LEDD);
-        valider(request, MEDLEMSKAPSPERIODER_BESTEMMELSE_POST_SCHEMA);
         var res = medlemskapsperiodeTjeneste.opprettMedlemskapsperioderFraBestemmelse(
             behandlingID, request);
 
         assertThat(res.getStatusCode()).isEqualTo(HttpStatus.OK);
-        validerArray(res.getBody(), MEDLEMSKAPSPERIODER_SCHEMA);
-    }
-
-    @Test
-    void hentBestemmelserMedVilkår_validerSchema() throws Exception {
-        when(opprettMedlemskapsperiodeService.hentBestemmelserMedVilkaar()).thenCallRealMethod();
-        when(opprettMedlemskapsperiodeService.hentMuligeBegrunnelser(any(Vilkaar.class))).thenCallRealMethod();
-        validerArray(medlemskapsperiodeTjeneste.hentBestemmelserMedVilkaar().getBody(), MEDLEMSKAPSPERIODER_BESTEMMELSE_SCHEMA);
     }
 
     private Medlemskapsperiode lagMedlemskapsperiode() {

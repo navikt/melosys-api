@@ -15,7 +15,6 @@ import no.nav.melosys.service.kodeverk.KodeDto;
 
 /**
  * Alle klasser som implementerer {@code Kodeverk} serialiseres enten som kode og term, eller som string,
- * i henhold til https://github.com/navikt/melosys-schema
  */
 public class KodeSerializer extends StdSerializer<Kodeverk> {
     private static final Collection<Class<? extends Kodeverk>> IKKE_MAPPES_TIL_KODE_DTO = Set.of(

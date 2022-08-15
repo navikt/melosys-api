@@ -2,53 +2,73 @@ package no.nav.melosys.tjenester.gui.saksflyt;
 
 import java.util.Set;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.arkiv.DokumentReferanse;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.unntak.AnmodningUnntakService;
-import no.nav.melosys.tjenester.gui.JsonSchemaTestParent;
 import no.nav.melosys.tjenester.gui.dto.dokumentarkiv.VedleggDto;
 import no.nav.melosys.tjenester.gui.dto.saksflyt.anmodningunntak.AnmodningUnntakDto;
-import org.junit.jupiter.api.BeforeEach;
+import no.nav.melosys.tjenester.gui.dto.saksflyt.anmodningunntak.AnmodningUnntakSvarDto;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
 
 import static org.mockito.Mockito.verify;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@ExtendWith(MockitoExtension.class)
-class AnmodningUnntakTjenesteTest extends JsonSchemaTestParent {
-    private static final String ANMODNING_UNNTAK_POST_SCHEMA = "saksflyt-anmodningsperioder-bestill-post-schema.json";
+@WebMvcTest(controllers = {AnmodningUnntakTjeneste.class})
+class AnmodningUnntakTjenesteTest {
 
-    @Mock
+    @MockBean
     private AnmodningUnntakService anmodningUnntakService;
-    @Mock
+    @MockBean
     private Aksesskontroll aksesskontroll;
 
-    private AnmodningUnntakTjeneste anmodningUnntakTjeneste;
+    @Autowired
+    private MockMvc mockMvc;
+    @Autowired
+    private ObjectMapper objectMapper;
 
-    @BeforeEach
-    public void setUp() {
-        anmodningUnntakTjeneste = new AnmodningUnntakTjeneste(anmodningUnntakService, aksesskontroll);
-    }
+    private static final String BASE_URL = "/api/saksflyt/anmodningsperioder";
+    private static final long BEHANDLING_ID = 3;
 
     @Test
-    void anmodningOmUnntak_fungerer() throws Exception {
-        final long behandlingID = 3;
+    void anmodningOmUnntak() throws Exception {
+
         final String mottakerInstitusjon = "SE:321";
         final String fritekstSed = "hei hei";
 
-        AnmodningUnntakDto dto = new AnmodningUnntakDto();
-        dto.setMottakerinstitusjon(mottakerInstitusjon);
-        dto.setFritekstSed(fritekstSed);
+        var anmodningUnntakDto = new AnmodningUnntakDto();
+        anmodningUnntakDto.setMottakerinstitusjon(mottakerInstitusjon);
+        anmodningUnntakDto.setFritekstSed(fritekstSed);
         final var vedleggDto = new VedleggDto("jpID", "dokID");
-        dto.setVedlegg(Set.of(vedleggDto));
-        anmodningUnntakTjeneste.anmodningOmUnntak(behandlingID, dto);
+        anmodningUnntakDto.setVedlegg(Set.of(vedleggDto));
 
-        verify(aksesskontroll).autoriserSkriv(behandlingID);
-        verify(anmodningUnntakService).anmodningOmUnntak(behandlingID, mottakerInstitusjon,
+        mockMvc.perform(post(BASE_URL + "/{behandlingID}/bestill", BEHANDLING_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(anmodningUnntakDto)))
+            .andExpect(status().isNoContent());
+
+        verify(aksesskontroll).autoriserSkriv(BEHANDLING_ID);
+        verify(anmodningUnntakService).anmodningOmUnntak(BEHANDLING_ID, mottakerInstitusjon,
             Set.of(new DokumentReferanse(vedleggDto.journalpostID(), vedleggDto.dokumentID())), fritekstSed);
 
-        valider(dto, ANMODNING_UNNTAK_POST_SCHEMA);
+    }
+
+    @Test
+    void svar() throws Exception {
+        var anmodningUnntakSvarDto = new AnmodningUnntakSvarDto("test");
+
+        mockMvc.perform(post(BASE_URL + "/{behandlingID}/svar", BEHANDLING_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(anmodningUnntakSvarDto)))
+            .andExpect(status().isNoContent());
+
+        verify(aksesskontroll).autoriserSkriv(BEHANDLING_ID);
+        verify(anmodningUnntakService).anmodningOmUnntakSvar(BEHANDLING_ID, "test");
     }
 }
