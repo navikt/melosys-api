@@ -1,12 +1,13 @@
 package no.nav.melosys.tjenester.gui;
 
-import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
-import no.nav.melosys.domain.dokument.DokumentView;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.Tilleggsinformasjon;
 import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.TilleggsinformasjonDetaljer;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.GeografiskAdresse;
@@ -30,45 +31,57 @@ import org.jeasy.random.EasyRandom;
 import org.jeasy.random.EasyRandomParameters;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.*;
+import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.UTSENDT_ARBEIDSTAKER;
+import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.UTSENDT_SELVSTENDIG;
+import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.NY_VURDERING;
+import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.SOEKNAD;
+import static no.nav.melosys.tjenester.gui.util.ResponseBodyMatchers.responseBody;
+import static org.hamcrest.Matchers.equalTo;
 import static org.jeasy.random.FieldPredicates.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@ExtendWith(MockitoExtension.class)
-class BehandlingTjenesteTest extends JsonSchemaTestParent {
-    private static final Logger log = LoggerFactory.getLogger(BehandlingTjenesteTest.class);
-    private static final String TIDLIGERE_MEDLEMSPERIODER_SCHEMA = "behandlinger-tidligeremedlemsperioder-post-schema.json";
-    private static final String BEHANDLINGER_SCHEMA = "behandlinger-behandling-schema.json";
-    private static final String ENDRE_BEHANDLINGSTEMA_SCHEMA = "behandlinger-endrebehandlingstema-schema.json";
-    private static final String ENDRE_BEHANDLINGSTEMA_POST_SCHEMA = "behandlinger-endrebehandlingstema-post-schema.json";
-    private static final String ENDRE_BEHANDLINGSSTATUS_SCHEMA = "behandlinger-status-schema.json";
-    private static final String ENDRE_BEHANDLINGSTYPE_SCHEMA = "behandlinger-type-schema.json";
-    private static final String ENDRE_BEHANDLINGSSTATUS_POST_SCHEMA = "behandlinger-status-post-schema.json";
+@WebMvcTest(controllers = {BehandlingTjeneste.class})
+class BehandlingTjenesteTest {
+
+    @MockBean
+    private BehandlingService behandlingService;
+    @MockBean
+    private SaksopplysningerTilDto saksopplysningerTilDto;
+    @MockBean
+    private SaksbehandlerService saksbehandlerService;
+    @MockBean
+    private BehandlingsresultatService behandlingsresultatService;
+    @MockBean
+    private Aksesskontroll aksesskontroll;
+
+    @Autowired
+    private MockMvc mockMvc;
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    private EasyRandom random;
+
     private static final long BEHANDLING_ID = 11L;
     private static final List<Long> PERIODE_IDER = Arrays.asList(2L, 3L, 5L);
-
-    private BehandlingTjeneste behandlingTjeneste;
-
-    @Mock
-    private BehandlingService behandlingService;
-    @Mock
-    private SaksopplysningerTilDto saksopplysningerTilDto;
-    @Mock
-    private SaksbehandlerService saksbehandlerService;
-    @Mock
-    private BehandlingsresultatService behandlingsresultatService;
-    private EasyRandom random;
+    private static final String BASE_URL = "/api/behandlinger";
+    private final Behandlingsresultat BEHANDLINGSRESULTAT = new Behandlingsresultat();
+    private static final Set<Behandlingsstatus> MULIGE_STATUSER = Set.of(AVVENT_DOK_PART, AVVENT_DOK_UTL, UNDER_BEHANDLING, AVVENT_FAGLIG_AVKLARING);
+    private static final Set<Behandlingstema> MULIGE_BEHANDLINGSTEMA = Set.of(UTSENDT_ARBEIDSTAKER, UTSENDT_SELVSTENDIG);
+    private static final Set<Behandlingstyper> MULIGE_TYPER = Set.of(NY_VURDERING);
 
     @BeforeEach
     void setUp() {
-        behandlingTjeneste = new BehandlingTjeneste(behandlingService, saksopplysningerTilDto, saksbehandlerService, mock(Aksesskontroll.class), behandlingsresultatService);
 
         random = new EasyRandom(new EasyRandomParameters()
             .overrideDefaultInitialization(true)
@@ -87,95 +100,130 @@ class BehandlingTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    void behandlingerPerioderValidering() throws Exception {
-        TidligereMedlemsperioderDto tidligereMedlemsperioderDto = new TidligereMedlemsperioderDto();
-        tidligereMedlemsperioderDto.periodeIder = PERIODE_IDER;
-        valider(tidligereMedlemsperioderDto, TIDLIGERE_MEDLEMSPERIODER_SCHEMA, log);
-    }
-
-    @Test
-    void hentBehandling_erSchemaValidert() throws Exception {
-        BehandlingDto behandlingDto = random.nextObject(BehandlingDto.class);
-        behandlingDto.getSaksopplysninger().setSed(null);
-        String jsonString = objectMapperMedKodeverkServiceStub()
-            .writerWithView(DokumentView.FrontendApi.class)
-            .writeValueAsString(behandlingDto);
-        valider(jsonString, BEHANDLINGER_SCHEMA, log);
-    }
-
-    @Test
-    void endreBehandlingstemaValidering() throws Exception {
-        EndreBehandlingstemaDto endreBehandlingstemaDto = new EndreBehandlingstemaDto(Behandlingstema.ARBEID_NORGE_BOSATT_ANNET_LAND.getKode());
-        valider(endreBehandlingstemaDto, ENDRE_BEHANDLINGSTEMA_POST_SCHEMA, log);
-    }
-
-    @Test
-    void endreBehandlinsstatusValidering() throws Exception {
-        EndreBehandlingsstatusDto behandlingsstatusDto = new EndreBehandlingsstatusDto(Behandlingsstatus.AVVENT_FAGLIG_AVKLARING.getKode());
-        valider(behandlingsstatusDto, ENDRE_BEHANDLINGSSTATUS_POST_SCHEMA, log);
-    }
-
-    @Test
-    void hentMuligeBehandlingstemaValidering() throws IOException {
-        Collection<Behandlingstema> muligeBehandlingstema = behandlingTjeneste.hentMuligeBehandlingstema(BEHANDLING_ID).getBody();
-        validerArray(muligeBehandlingstema, ENDRE_BEHANDLINGSTEMA_SCHEMA, log);
-    }
-
-    @Test
-    void hentMuligeBehandlinsstatuserValidering() throws IOException {
-        Collection<Behandlingsstatus> muligeStatuser = behandlingTjeneste.hentMuligeStatuser(BEHANDLING_ID).getBody();
-        validerArray(muligeStatuser, ENDRE_BEHANDLINGSSTATUS_SCHEMA, log);
-    }
-
-    @Test
-    void hentMuligeBehandlingstyperValidering() throws IOException {
-        Collection<Behandlingstyper> muligeTyper = behandlingTjeneste.hentMuligeTyper(BEHANDLING_ID).getBody();
-        validerArray(muligeTyper, ENDRE_BEHANDLINGSTYPE_SCHEMA, log);
-    }
-
-    @Test
-    void endreBehandling() {
+    void endreBehandling() throws Exception {
         final var sakstype = Sakstyper.EU_EOS;
-        final var behandlingstype = Behandlingstyper.SOEKNAD;
+        final var behandlingstype = SOEKNAD;
         final var behandlingstema = Behandlingstema.ARBEID_I_UTLANDET;
         final var behandlingsstatus = Behandlingsstatus.UNDER_BEHANDLING;
         final var behandlingsfrist = LocalDate.now();
 
         var endreBehandlingDto = new EndreBehandlingDto(sakstype, behandlingstype, behandlingstema, behandlingsstatus, behandlingsfrist);
-        behandlingTjeneste.endreBehandling(BEHANDLING_ID, endreBehandlingDto);
+        mockMvc.perform(post(BASE_URL + "/{behandlingID}/endre", BEHANDLING_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(endreBehandlingDto)))
+            .andExpect(status().isNoContent());
 
         verify(behandlingService).endreBehandling(BEHANDLING_ID, sakstype, behandlingstype, behandlingstema, behandlingsstatus, behandlingsfrist);
     }
 
     @Test
-    void knyttMedlemsperioder() {
+    void endreStatus() throws Exception {
+        var endreBehandlingsstatusDto = new EndreBehandlingsstatusDto("UNDER_BEHANDLING");
+        mockMvc.perform(post(BASE_URL + "/{behandlingID}/status", BEHANDLING_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(endreBehandlingsstatusDto)))
+            .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void knyttMedlemsperioder() throws Exception {
         TidligereMedlemsperioderDto tidligereMedlemsperioderDto = new TidligereMedlemsperioderDto();
         tidligereMedlemsperioderDto.periodeIder = PERIODE_IDER;
 
-        behandlingTjeneste.knyttMedlemsperioder(BEHANDLING_ID, tidligereMedlemsperioderDto);
+        mockMvc.perform(post(BASE_URL + "/{behandlingID}/tidligere-medlemsperioder", BEHANDLING_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(tidligereMedlemsperioderDto)))
+            .andExpect(status().isOk());
         verify(behandlingService).knyttMedlemsperioder(BEHANDLING_ID, PERIODE_IDER);
     }
 
     @Test
-    void hentMedlemsperioder() {
+    void hentMedlemsperioder() throws Exception {
         when(behandlingService.hentMedlemsperioder(BEHANDLING_ID)).thenReturn(PERIODE_IDER);
+        var dto = new TidligereMedlemsperioderDto();
+        dto.periodeIder = PERIODE_IDER;
 
-        ResponseEntity<TidligereMedlemsperioderDto> response = behandlingTjeneste.hentMedlemsperioder(BEHANDLING_ID);
-        assertThat(response.getBody()).isNotNull();
-        assertThat(response.getBody()).isInstanceOf(TidligereMedlemsperioderDto.class);
-
-        TidligereMedlemsperioderDto tidligereMedlemsperioderDto = response.getBody();
-        assertThat(tidligereMedlemsperioderDto.periodeIder).containsAll(PERIODE_IDER);
+        mockMvc.perform(get(BASE_URL + "/{behandlingID}/tidligere-medlemsperioder", BEHANDLING_ID)
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(responseBody(objectMapper).containsObjectAsJson(dto, TidligereMedlemsperioderDto.class));
 
         verify(behandlingService).hentMedlemsperioder(BEHANDLING_ID);
     }
 
     @Test
-    void endreBehandlingsfrist() {
+    void hentBehandling() throws Exception {
+        when(behandlingService.hentBehandlingMedSaksopplysninger(BEHANDLING_ID)).thenReturn(opprettTomBehandlingMedId());
+        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(BEHANDLINGSRESULTAT);
+
+        mockMvc.perform(get(BASE_URL + "/{behandlingID}", BEHANDLING_ID)
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    void endreBehandlingstema() throws Exception {
+        EndreBehandlingstemaDto dto = new EndreBehandlingstemaDto("ARBEID_FLERE_LAND");
+
+        mockMvc.perform(post(BASE_URL + "/{behandlingID}/endreBehandlingstema", BEHANDLING_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(dto)))
+            .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void endreBehandlingsfrist() throws Exception {
         LocalDate frist = LocalDate.now().plusWeeks(1);
         EndreBehandlingsfristDto endreBehandlingsfristDto = new EndreBehandlingsfristDto(frist);
 
-        behandlingTjeneste.endreBehandlingsfrist(BEHANDLING_ID, endreBehandlingsfristDto);
+        mockMvc.perform(post(BASE_URL + "/{behandlingID}/behandlingsfrist", BEHANDLING_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(endreBehandlingsfristDto)))
+            .andExpect(status().isNoContent());
+
         verify(behandlingService).endreBehandlingsfrist(BEHANDLING_ID, frist);
+    }
+
+    @Test
+    void avsluttNyVurderingMedFerdigbehandlet() throws Exception {
+        mockMvc.perform(put(BASE_URL + "/{behandlingID}/sett-til-ferdigbehandlet", BEHANDLING_ID)
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void hentMuligeStatuser() throws Exception {
+        when(behandlingService.hentMuligeStatuser(BEHANDLING_ID)).thenReturn(MULIGE_STATUSER);
+
+        mockMvc.perform(get(BASE_URL + "/{behandlingID}/mulige-statuser", BEHANDLING_ID)
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(MockMvcResultMatchers.jsonPath("$.length()", equalTo(MULIGE_STATUSER.size())));
+    }
+
+    @Test
+    void hentMuligeBehandlingstema() throws Exception {
+        when(behandlingService.hentMuligeBehandlingstema(BEHANDLING_ID)).thenReturn(MULIGE_BEHANDLINGSTEMA);
+
+        mockMvc.perform(get(BASE_URL + "/{behandlingID}/mulige-behandlingstema", BEHANDLING_ID)
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(MockMvcResultMatchers.jsonPath("$.length()", equalTo(MULIGE_BEHANDLINGSTEMA.size())));
+    }
+
+    @Test
+    void hentMuligeTyper() throws Exception {
+        when(behandlingService.hentMuligeTyper(BEHANDLING_ID)).thenReturn(MULIGE_TYPER);
+
+        mockMvc.perform(get(BASE_URL + "/{behandlingID}/mulige-typer", BEHANDLING_ID)
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(MockMvcResultMatchers.jsonPath("$.length()", equalTo(MULIGE_TYPER.size())));
+    }
+
+    private Behandling opprettTomBehandlingMedId() {
+        Behandling behandling = new Behandling();
+        behandling.setId(BEHANDLING_ID);
+        return behandling;
     }
 }

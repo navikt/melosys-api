@@ -1,68 +1,72 @@
 package no.nav.melosys.tjenester.gui;
 
 import java.util.Arrays;
-import java.util.List;
 
 import no.nav.melosys.domain.UtenlandskMyndighet;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.mockito.Mockito.mock;
+import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@WebMvcTest(controllers = {AdresseTjeneste.class})
 class AdresseTjenesteTest {
-    private AdresseTjeneste adresseTjeneste;
+
+    @MockBean
+    private UtenlandskMyndighetService utenlandskMyndighetService;
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    private static final String BASE_URL = "/api/adresser/myndigheter";
 
     @BeforeEach
-    void setUp() {
-        UtenlandskMyndighetService utenlandskMyndighetRepo = mock(UtenlandskMyndighetService.class);
-        adresseTjeneste = new AdresseTjeneste(utenlandskMyndighetRepo);
+    void setup() {
+        UtenlandskMyndighet utenlandskMyndighetDanmark = new UtenlandskMyndighet();
+        utenlandskMyndighetDanmark.land = "Denmark";
+        utenlandskMyndighetDanmark.landkode = Landkoder.DK;
 
-        UtenlandskMyndighet danmark = new UtenlandskMyndighet();
-        danmark.land = "Denmark";
-        danmark.landkode = Landkoder.DK;
+        UtenlandskMyndighet utenlandskMyndighetSverige = new UtenlandskMyndighet();
+        utenlandskMyndighetSverige.land = "Sweden";
+        utenlandskMyndighetSverige.landkode = Landkoder.SE;
 
-        UtenlandskMyndighet sverige = new UtenlandskMyndighet();
-        sverige.land = "Sweden";
-        sverige.landkode = Landkoder.SE;
-
-        when(utenlandskMyndighetRepo.hentUtenlandskMyndighet(Landkoder.DK)).thenReturn(danmark);
-        when(utenlandskMyndighetRepo.hentUtenlandskMyndighet(Landkoder.SE)).thenReturn(sverige);
-        when(utenlandskMyndighetRepo.hentAlleUtenlandskMyndigheter()).thenReturn(Arrays.asList(sverige, danmark));
+        when(utenlandskMyndighetService.hentUtenlandskMyndighet(Landkoder.DK)).thenReturn(utenlandskMyndighetDanmark);
+        when(utenlandskMyndighetService.hentUtenlandskMyndighet(Landkoder.SE)).thenReturn(utenlandskMyndighetSverige);
+        when(utenlandskMyndighetService.hentAlleUtenlandskMyndigheter()).thenReturn(Arrays.asList(utenlandskMyndighetSverige, utenlandskMyndighetDanmark));
     }
 
     @Test
-    public void hentMyndighet_gyldigLandkode() {
-        ResponseEntity response = adresseTjeneste.hentMyndighet(Landkoder.DK);
-        assertThat(response).isNotNull();
-        assertThat(response.getBody()).isNotNull();
-        assertThat(response.getBody()).isInstanceOf(UtenlandskMyndighet.class);
-
-        UtenlandskMyndighet myndighet = (UtenlandskMyndighet) response.getBody();
-        assertThat(myndighet.landkode).isEqualTo(Landkoder.DK);
-        assertThat(myndighet.land).isEqualTo("Denmark");
+    void hentUtenlandskMyndighet_gyldigLandkode() throws Exception {
+        mockMvc.perform(get(BASE_URL + "/{landkode}", Landkoder.DK)
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.land", equalTo("Denmark")));
     }
 
     @Test
-    public void hentMyndighet_ikkeGyldigLandkode() {
-        ResponseEntity response = adresseTjeneste.hentMyndighet(Landkoder.NO);
-        assertThat(response).isNotNull();
-        assertThat(response.getBody()).isNull();
+    void hentUtenlandskMyndighet_ikkeGyldigLandkode() throws Exception {
+        mockMvc.perform(get(BASE_URL + "/{landkode}", Landkoder.NO)
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$").doesNotExist());
     }
 
     @Test
-    public void hentMyndigheter() {
-        ResponseEntity response = adresseTjeneste.hentMyndigheter();
-        assertThat(response).isNotNull();
-        assertThat(response.getBody()).isNotNull();
-        assertThat(response.getBody()).isInstanceOf(List.class);
-
-        List myndigheter = (List) response.getBody();
-        assertThat(myndigheter.size()).isEqualTo(2);
-        assertThat(myndigheter.get(0)).isInstanceOf(UtenlandskMyndighet.class);
+    void hentMyndigheter() throws Exception {
+        mockMvc.perform(get(BASE_URL)
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[0].land", equalTo("Sweden")))
+            .andExpect(jsonPath("$[1].land", equalTo("Denmark")));
     }
 }

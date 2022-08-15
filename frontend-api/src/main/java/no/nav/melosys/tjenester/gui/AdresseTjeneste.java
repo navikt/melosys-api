@@ -32,7 +32,7 @@ public class AdresseTjeneste {
     @ApiOperation(
         value = "Henter adressen til en gitt utenlandsk myndighet",
         response = UtenlandskMyndighet.class)
-    public ResponseEntity<UtenlandskMyndighet> hentMyndighet(@PathVariable("landkode") Landkoder landkode) {
+    public ResponseEntity<UtenlandskMyndighet> hentUtenlandskMyndighet(@PathVariable("landkode") Landkoder landkode) {
         return ResponseEntity.ok(utenlandskMyndighetService.hentUtenlandskMyndighet(landkode));
     }
 

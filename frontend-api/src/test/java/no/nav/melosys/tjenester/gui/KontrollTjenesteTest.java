@@ -1,54 +1,59 @@
 package no.nav.melosys.tjenester.gui;
 
-import java.util.Collections;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
-import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.FerdigbehandlingKontrollService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.tjenester.gui.dto.kontroller.FerdigbehandlingKontrollerDto;
 import no.nav.melosys.tjenester.gui.kontroll.KontrollTjeneste;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.doThrow;
+import static org.hamcrest.Matchers.containsString;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@ExtendWith(MockitoExtension.class)
-class KontrollTjenesteTest extends JsonSchemaTestParent {
+@WebMvcTest(controllers = {KontrollTjeneste.class})
+public class KontrollTjenesteTest {
 
-    private final long BEHANDLING_ID = 4;
+    @MockBean
+    private FerdigbehandlingKontrollService ferdigbehandlingKontrollService;
+    @MockBean
+    private Aksesskontroll aksesskontroll;
 
-    @Mock
-    private FerdigbehandlingKontrollService mockFerdigbehandlingKontrollService;
-    @Mock
-    private Aksesskontroll mockAksesskontroll;
+    @Autowired
+    private MockMvc mockMvc;
+    @Autowired
+    private ObjectMapper objectMapper;
 
-    private KontrollTjeneste kontrollTjeneste;
+    private static final String BASE_URL = "/api/kontroll";
 
-    @BeforeEach
-    public void setUp() {
-        kontrollTjeneste = new KontrollTjeneste(mockFerdigbehandlingKontrollService, mockAksesskontroll);
+    @Test
+    void kontrollerFerdigbehandling() throws Exception {
+        var dto = new FerdigbehandlingKontrollerDto(1L, Vedtakstyper.FØRSTEGANGSVEDTAK,
+            Behandlingsresultattyper.HENLEGGELSE, false);
+
+        mockMvc.perform(post(BASE_URL + "/ferdigbehandling")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(dto)))
+            .andExpect(status().isNoContent());
     }
 
     @Test
-    void kontrollerFerdigbehandling_ingenFeilmeldinger_ingentingSkjer() throws ValideringException {
-        kontrollTjeneste.kontrollerFerdigbehandling(lagFerdigbehandlingKontrollerDto());
-    }
+    void kontrollerFerdigbehandlingUtenVedtakstypeGirBadRequest() throws Exception {
+        var dto = new FerdigbehandlingKontrollerDto(1L, null, Behandlingsresultattyper.HENLEGGELSE,
+            false);
 
-    @Test
-    void kontrollerFerdigbehandling_feilmeldinger_kasterExceptions() throws ValideringException {
-        doThrow(new ValideringException("melding", Collections.emptyList())).when(mockFerdigbehandlingKontrollService).kontroller(BEHANDLING_ID, true, Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN);
-
-        assertThatThrownBy(() -> kontrollTjeneste.kontrollerFerdigbehandling(lagFerdigbehandlingKontrollerDto())).isInstanceOf(ValideringException.class).hasMessage("melding");
-    }
-
-    private FerdigbehandlingKontrollerDto lagFerdigbehandlingKontrollerDto() {
-        return new FerdigbehandlingKontrollerDto(BEHANDLING_ID, Vedtakstyper.FØRSTEGANGSVEDTAK, Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN, true);
+        mockMvc.perform(post(BASE_URL + "/ferdigbehandling")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(dto)))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.message", containsString("Vedtakstype mangler.")));
     }
 }
-
