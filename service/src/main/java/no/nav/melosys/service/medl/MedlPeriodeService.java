@@ -130,6 +130,22 @@ public class MedlPeriodeService {
         }
     }
 
+    public void avsluttTidligereAnmodningsperiode(Behandling behandling) {
+        Anmodningsperiode forrigeAnmodningsPeriode = finnAnmodningsperiodeForForrigeA001(behandling);
+        log.info("Avslutter tidligere anmodningsperiode med MedlPeriodeID: {}", forrigeAnmodningsPeriode.getMedlPeriodeID());
+        avvisPeriode(forrigeAnmodningsPeriode.getMedlPeriodeID());
+    }
+
+    private Anmodningsperiode finnAnmodningsperiodeForForrigeA001(Behandling behandling) {
+        var fagsak = behandling.getFagsak();
+        var a001Behandling = fagsak.hentBehandlingerSortertSynkendePåRegistrertDato().stream()
+            .filter(Behandling::erAnmodningOmUnntak)
+            .filter(b -> !b.getId().equals(behandling.getId()))
+            .findFirst()
+            .orElseThrow(() -> new FunksjonellException("Fant ingen tidligere A001 behandling for fagsak %s".format(fagsak.getSaksnummer())));
+        return behandlingsresultatService.hentBehandlingsresultat(a001Behandling.getId()).hentValidertAnmodningsperiode();
+    }
+
     private void avvisPeriode(long medlPeriodeId, StatusaarsakMedl statusaarsakMedl) {
         medlService.avvisPeriode(medlPeriodeId, statusaarsakMedl);
     }
