@@ -53,11 +53,11 @@ public final class ProsessflytDefinisjon {
             ProsessType.ANMODNING_OM_UNNTAK,
             new ProsessFlyt(ProsessType.ANMODNING_OM_UNNTAK,
                 AVKLAR_MYNDIGHET,
+                AVSLUTT_TIDLIGERE_MEDL_PERIODE,
                 LAGRE_ANMODNINGSPERIODE_MEDL,
                 SEND_ORIENTERING_ANMODNING_UNNTAK,
                 SEND_ANMODNING_OM_UNNTAK,
-                OPPDATER_OPPGAVE_ANMODNING_UNNTAK_SENDT,
-                AVSLUTT_TIDLIGERE_MEDL_PERIODE
+                OPPDATER_OPPGAVE_ANMODNING_UNNTAK_SENDT
             )
         );
 
