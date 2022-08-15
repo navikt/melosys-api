@@ -164,6 +164,7 @@ public class BrevmalListeBygger {
                     .build(),
                 new BrevmalFeltDto.Builder()
                     .medKodeOgBeskrivelse(BrevmalFeltKode.FRITEKST)
+                    .medHjelpetekst("Teksten du skriver inn her vil være hovedteksten i brevet du lager.")
                     .medFeltType(FeltType.FRITEKST)
                     .erPåkrevd()
                     .build(),
