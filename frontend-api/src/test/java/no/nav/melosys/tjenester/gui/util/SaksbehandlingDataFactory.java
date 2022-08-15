@@ -39,52 +39,6 @@ public final class SaksbehandlingDataFactory {
         return aktoer;
     }
 
-    public static Fagsak fagsakMedBehandlinger(Behandlingsstatus behandlingsstatusFørst,
-                                         Behandlingsstatus BehandlingsstatusAndre,
-                                         Behandlingsstatus BehandlingsstatusTredje
-    ) {
-        ArrayList<Behandling> behandlinger = new ArrayList<>();
-        Fagsak fagsak = lagFagsak("TEST-1");
-        Behandling b1 = new Behandling();
-        b1.setFagsak(fagsak);
-        b1.setId(1L);
-        b1.setType(Behandlingstyper.SOEKNAD);
-        b1.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
-        b1.setRegistrertDato(Instant.parse("2019-01-10T10:37:30.00Z"));
-        b1.setEndretDato(Instant.parse("2019-01-12T10:37:30.00Z"));
-        b1.setDokumentasjonSvarfristDato(Instant.parse("2019-01-12T10:37:30.00Z"));
-        b1.setStatus(behandlingsstatusFørst);
-
-        HashSet<Saksopplysning> saksopplysninger = new HashSet<>();
-        saksopplysninger.add(lagPersonSaksopplysning());
-
-        Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
-        behandlingsgrunnlag.setBehandlingsgrunnlagdata(lagSøknadDokument());
-        b1.setBehandlingsgrunnlag(behandlingsgrunnlag);
-
-        b1.setSaksopplysninger(saksopplysninger);
-
-        Behandling b2 = new Behandling();
-        b2.setFagsak(fagsak);
-        b2.setId(2L);
-        b2.setStatus(BehandlingsstatusAndre);
-        b2.setEndretDato(Instant.parse("2018-11-11T10:37:30.00Z"));
-        b2.setRegistrertDato(Instant.parse("2018-11-12T10:37:30.00Z"));
-
-        Behandling b3 = new Behandling();
-        b3.setFagsak(fagsak);
-        b3.setId(3L);
-        b3.setStatus(BehandlingsstatusTredje);
-        b3.setRegistrertDato(Instant.parse("2018-09-11T10:37:30.00Z"));
-        b3.setEndretDato(Instant.parse("2018-09-12T10:37:30.00Z"));
-
-        behandlinger.add(b1);
-        behandlinger.add(b2);
-        behandlinger.add(b3);
-        fagsak.setBehandlinger(behandlinger);
-        return fagsak;
-    }
-
     public static Saksopplysning lagPersonSaksopplysning() {
         Saksopplysning saksopplysningPerson = new Saksopplysning();
         saksopplysningPerson.setType(SaksopplysningType.PERSOPL);

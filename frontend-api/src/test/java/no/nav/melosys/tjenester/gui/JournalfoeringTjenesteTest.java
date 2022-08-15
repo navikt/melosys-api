@@ -1,48 +1,45 @@
 package no.nav.melosys.tjenester.gui;
 
-import java.io.IOException;
-import java.util.Optional;
-
-import no.nav.melosys.domain.arkiv.Journalpost;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.service.journalforing.JournalfoeringService;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringOpprettDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringSedDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringTilordneDto;
 import no.nav.melosys.service.oppgave.OppgaveService;
-import no.nav.melosys.tjenester.gui.dto.journalforing.JournalpostDto;
 import org.jeasy.random.EasyRandom;
 import org.jeasy.random.EasyRandomParameters;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@ExtendWith(MockitoExtension.class)
-class JournalfoeringTjenesteTest extends JsonSchemaTestParent {
-    private static final Logger log = LoggerFactory.getLogger(JournalfoeringTjenesteTest.class);
-    private static final String JOURNALFOERING_SCHEMA = "journalforing-schema.json";
-    private static final String JOURNALFOERING_OPPRETT_SCHEMA = "journalforing-opprett-post-schema.json";
-    private static final String JOURNALFOERING_SED_SCHEMA = "journalforing-sed-post-schema.json";
+@WebMvcTest(controllers = {JournalfoeringTjeneste.class})
+class JournalfoeringTjenesteTest {
     private static final String SAMPLE_ORGNR = "899655123";
     private static final String SAMPLE_FNR = "77777777772";
 
     private EasyRandom random;
 
-    @Mock
+    @MockBean
     private JournalfoeringService journalføringService;
-    @Mock
+    @MockBean
     private OppgaveService oppgaveService;
 
+    @Autowired
+    private MockMvc mockMvc;
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    private static final String BASE_URL = "/api/journalforing";
     private JournalfoeringTjeneste tjeneste;
 
     @BeforeEach
@@ -53,41 +50,35 @@ class JournalfoeringTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    void hentJournalpost_validerKallOgSchema() throws IOException {
-        Journalpost journalpost = random.nextObject(Journalpost.class);
-        journalpost.setAvsenderId(SAMPLE_ORGNR);
-        when(journalføringService.hentJournalpost(anyString())).thenReturn(journalpost);
-        when(journalføringService.finnHovedpartIdent(journalpost)).thenReturn(Optional.of(SAMPLE_FNR));
-
-        JournalpostDto journalpostDto = tjeneste.hentJournalpostOpplysninger(anyString()).getBody();
-
-        verify(journalføringService).hentJournalpost(any());
-        valider(journalpostDto, JOURNALFOERING_SCHEMA, log);
-    }
-
-    @Test
-    void journalførOgKnyttTilSak_validerKall() {
+    void journalførOgKnyttTilSak_validerKall() throws Exception {
         JournalfoeringTilordneDto journalføringDto = random.nextObject(JournalfoeringTilordneDto.class);
 
-        tjeneste.journalførOgKnyttTilSak(journalføringDto);
+        mockMvc.perform(post(BASE_URL + "/knytt")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(journalføringDto))
+            )
+            .andExpect(status().isNoContent());
 
-        verify(journalføringService).journalførOgKnyttTilEksisterendeSak(journalføringDto);
+        verify(journalføringService).journalførOgKnyttTilEksisterendeSak(any(JournalfoeringTilordneDto.class));
         verify(oppgaveService).ferdigstillOppgave(journalføringDto.getOppgaveID());
     }
 
     @Test
-    void journalførOgOpprettNyVurdering_validerKall() {
+    void journalførOgOpprettNyVurdering_validerKall() throws Exception {
         JournalfoeringTilordneDto journalføringDto = random.nextObject(JournalfoeringTilordneDto.class);
 
-        tjeneste.journalførOgOpprettNyVurdering(journalføringDto);
+        mockMvc.perform(post(BASE_URL + "/nyvurdering")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(journalføringDto))
+            )
+            .andExpect(status().isNoContent());
 
-        verify(journalføringService).journalførOgOpprettNyVurdering(journalføringDto);
+        verify(journalføringService).journalførOgOpprettNyVurdering(any(JournalfoeringTilordneDto.class));
         verify(oppgaveService).ferdigstillOppgave(journalføringDto.getOppgaveID());
     }
 
     @Test
-    @Disabled("Frem til fjerning av skjema")
-    void journalføringOpprett_validerKallOgSchema() throws IOException {
+    void journalføringOpprett_validerKallOgSchema() throws Exception {
         JournalfoeringOpprettDto journalføringDto = random.nextObject(JournalfoeringOpprettDto.class);
         journalføringDto.setVirksomhetOrgnr(null);
         journalføringDto.setBrukerID(SAMPLE_FNR);
@@ -95,16 +86,18 @@ class JournalfoeringTjenesteTest extends JsonSchemaTestParent {
         journalføringDto.setArbeidsgiverID(SAMPLE_ORGNR);
         journalføringDto.setRepresentantID(SAMPLE_ORGNR);
 
-        tjeneste.journalførOgOpprettSak(journalføringDto);
+        mockMvc.perform(post(BASE_URL + "/opprett")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(journalføringDto))
+            )
+            .andExpect(status().isNoContent());
 
-        verify(journalføringService).journalførOgOpprettSak(journalføringDto);
+        verify(journalføringService).journalførOgOpprettSak(any(JournalfoeringOpprettDto.class));
         verify(oppgaveService).ferdigstillOppgave(journalføringDto.getOppgaveID());
-        valider(journalføringDto, JOURNALFOERING_OPPRETT_SCHEMA, log);
     }
 
     @Test
-    @Disabled("Frem til fjerning av skjema")
-    void journalføringOpprett_validerKallOgSchemaMedRepresentantIDNull() throws IOException {
+    void journalføringOpprett_validerKallOgSchemaMedRepresentantIDNull() throws Exception {
         JournalfoeringOpprettDto journalføringDto = random.nextObject(JournalfoeringOpprettDto.class);
         journalføringDto.setVirksomhetOrgnr(null);
         journalføringDto.setBrukerID(SAMPLE_FNR);
@@ -112,16 +105,18 @@ class JournalfoeringTjenesteTest extends JsonSchemaTestParent {
         journalføringDto.setArbeidsgiverID(SAMPLE_ORGNR);
         journalføringDto.setRepresentantID(null);
 
-        tjeneste.journalførOgOpprettSak(journalføringDto);
+        mockMvc.perform(post(BASE_URL + "/opprett")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(journalføringDto))
+            )
+            .andExpect(status().isNoContent());
 
-        verify(journalføringService).journalførOgOpprettSak(journalføringDto);
+        verify(journalføringService).journalførOgOpprettSak(any(JournalfoeringOpprettDto.class));
         verify(oppgaveService).ferdigstillOppgave(journalføringDto.getOppgaveID());
-        valider(journalføringDto, JOURNALFOERING_OPPRETT_SCHEMA, log);
     }
 
     @Test
-    @Disabled("Frem til fjerning av skjema")
-    void journalføringOpprett_validerKallOgSchemaMedBrukerIDNull() throws IOException {
+    void journalføringOpprett_validerKallOgSchemaMedBrukerIDNull() throws Exception {
         JournalfoeringOpprettDto journalføringDto = random.nextObject(JournalfoeringOpprettDto.class);
         journalføringDto.setVirksomhetOrgnr(SAMPLE_ORGNR);
         journalføringDto.setBrukerID(null);
@@ -129,25 +124,31 @@ class JournalfoeringTjenesteTest extends JsonSchemaTestParent {
         journalføringDto.setArbeidsgiverID(SAMPLE_ORGNR);
         journalføringDto.setRepresentantID(SAMPLE_ORGNR);
 
-        tjeneste.journalførOgOpprettSak(journalføringDto);
+        mockMvc.perform(post(BASE_URL + "/opprett")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(journalføringDto))
+            )
+            .andExpect(status().isNoContent());
 
-        verify(journalføringService).journalførOgOpprettSak(journalføringDto);
+        verify(journalføringService).journalførOgOpprettSak(any(JournalfoeringOpprettDto.class));
         verify(oppgaveService).ferdigstillOppgave(journalføringDto.getOppgaveID());
-        valider(journalføringDto, JOURNALFOERING_OPPRETT_SCHEMA, log);
     }
 
     @Test
-    void journalførSed_validerSchema() throws IOException {
+    void journalførSed_validerSchema() throws Exception {
         JournalfoeringSedDto journalføringSedDto = new JournalfoeringSedDto();
         journalføringSedDto.setOppgaveID("123123");
         journalføringSedDto.setBrukerID(SAMPLE_FNR);
         journalføringSedDto.setJournalpostID("1231231232");
 
-        tjeneste.journalførSed(journalføringSedDto);
+        mockMvc.perform(post(BASE_URL + "/sed")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(journalføringSedDto))
+            )
+            .andExpect(status().isNoContent());
 
-        verify(journalføringService).journalførSed(journalføringSedDto);
+        verify(journalføringService).journalførSed(any(JournalfoeringSedDto.class));
         verify(oppgaveService).ferdigstillOppgave(journalføringSedDto.getOppgaveID());
-        valider(journalføringSedDto, JOURNALFOERING_SED_SCHEMA, log);
     }
 }
 

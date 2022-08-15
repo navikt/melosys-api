@@ -10,12 +10,9 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.service.aktoer.AktoerDto;
 import no.nav.melosys.service.aktoer.AktoerService;
-import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -29,10 +26,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = {AktoerTjeneste.class})
-class AktoerTjenesteTest extends JsonSchemaTestParent {
-    private static final Logger log = LoggerFactory.getLogger(AktoerTjenesteTest.class);
-    private static final String AKTOER_SCHEMA = "fagsaker-aktoerer-schema.json";
-    private static final String AKTOER_POST_SCHEMA = "fagsaker-aktoerer-post-schema.json";
+class AktoerTjenesteTest {
 
     @MockBean
     private Aksesskontroll aksesskontroll;
@@ -45,21 +39,6 @@ class AktoerTjenesteTest extends JsonSchemaTestParent {
     private MockMvc mockMvc;
     @Autowired
     private ObjectMapper objectMapper;
-
-    @Test
-    void aktoerSchemaValidering() throws Exception {
-        AktoerDto aktoerDto = new AktoerDto();
-        aktoerDto.setAktoerID("1234");
-        aktoerDto.setRolleKode("BRUKER");
-        aktoerDto.setRepresentererKode("BRUKER");
-        aktoerDto.setOrgnr("123456789");
-        aktoerDto.setDatabaseID(2L);
-        aktoerDto.setPersonIdent("30056928150");
-
-
-        validerArray(Collections.singletonList(aktoerDto), AKTOER_SCHEMA, log);
-        valider(aktoerDto, AKTOER_POST_SCHEMA, log);
-    }
 
     @Test
     void lagOppdaterAktoer() throws Exception {

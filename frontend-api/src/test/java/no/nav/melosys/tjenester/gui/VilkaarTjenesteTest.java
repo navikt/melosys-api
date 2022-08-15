@@ -1,51 +1,82 @@
 package no.nav.melosys.tjenester.gui;
 
+import java.util.HashSet;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Set;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Art12_1_begrunnelser;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.vilkaar.InngangsvilkaarService;
 import no.nav.melosys.service.vilkaar.VilkaarDto;
 import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
 
+import static org.hamcrest.Matchers.equalTo;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@ExtendWith(MockitoExtension.class)
-class VilkaarTjenesteTest extends JsonSchemaTestParent {
-    private static final Logger log = LoggerFactory.getLogger(VilkaarTjenesteTest.class);
+@WebMvcTest(controllers = {VilkaarTjeneste.class})
+public class VilkaarTjenesteTest {
 
-    private static final String VILKÅR_SCHEMA = "vilkaar-schema.json";
-
-    @Mock
+    @MockBean
     private VilkaarsresultatService vilkaarsresultatService;
-    @Mock
+    @MockBean
     private InngangsvilkaarService inngangsvilkaarService;
-    @Mock
+    @MockBean
     private Aksesskontroll aksesskontroll;
 
-    private VilkaarTjeneste vilkaarTjeneste;
+    @Autowired
+    private MockMvc mockMvc;
+    @Autowired
+    private ObjectMapper objectMapper;
 
-    @BeforeEach
-    public void setUp() {
-        vilkaarTjeneste = new VilkaarTjeneste(vilkaarsresultatService, inngangsvilkaarService, aksesskontroll);
+    private static final String BASE_URL = "/api/vilkaar";
+
+    @Test
+    void hentVilkår() throws Exception {
+        when(vilkaarsresultatService.hentVilkaar(anyLong())).thenReturn(lagVilkaarDTOList());
+
+        mockMvc.perform(get(BASE_URL + "/{behandlingID}", 1L)
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.[0].vilkaar", equalTo(Vilkaar.FO_883_2004_ART12_1.getKode())));
     }
 
     @Test
-    void hentVilkår_validerSchema() throws Exception {
-        List<VilkaarDto> mockListe = defaultEasyRandom().objects(VilkaarDto.class, 4).collect(Collectors.toList());
-        mockListe.forEach(v -> v.setVilkaar(Vilkaar.FTRL_2_8_FORUTGÅENDE_TRYGDETID.getKode()));
-        when(vilkaarsresultatService.hentVilkaar(1L)).thenReturn(mockListe);
+    void registrerVilkår() throws Exception {
+        var dto = lagVilkaarDTOList();
+        when(vilkaarsresultatService.hentVilkaar(anyLong())).thenReturn(lagVilkaarDTOList());
 
-        List<VilkaarDto> vilkaarDtoListe = vilkaarTjeneste.hentVilkår(1L);
+        mockMvc.perform(post(BASE_URL + "/{behandlingID}", 1L)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(dto)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.[0].vilkaar", equalTo(Vilkaar.FO_883_2004_ART12_1.getKode())));
+    }
 
-        validerArray(vilkaarDtoListe, VILKÅR_SCHEMA, log);
+    @Test
+    void overstyrInngangsvilkårTilOppfylt() throws Exception {
+        mockMvc.perform(put(BASE_URL + "/{behandlingID}/inngangsvilkaar/overstyr", 1L)
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isNoContent());
+    }
+
+    private static List<VilkaarDto> lagVilkaarDTOList() {
+        var dto = new VilkaarDto();
+        dto.setVilkaar(Vilkaar.FO_883_2004_ART12_1.getKode());
+        Set<String> koder = new HashSet<>();
+        koder.add(Art12_1_begrunnelser.ERSTATTER_ANNEN.getKode());
+        dto.setBegrunnelseKoder(koder);
+        return List.of(dto);
     }
 }

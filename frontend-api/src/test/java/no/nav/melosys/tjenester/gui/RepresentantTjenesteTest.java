@@ -1,101 +1,68 @@
 package no.nav.melosys.tjenester.gui;
 
-import java.io.IOException;
-import java.util.List;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.folketrygden.ValgtRepresentant;
 import no.nav.melosys.service.representant.RepresentantService;
-import no.nav.melosys.service.representant.dto.RepresentantDataDto;
-import no.nav.melosys.service.representant.dto.RepresentantDto;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.tjenester.gui.dto.ValgtRepresentantDto;
-import org.junit.jupiter.api.BeforeEach;
+import no.nav.melosys.tjenester.gui.dto.utpeking.UtpekingsperioderDto;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static no.nav.melosys.tjenester.gui.util.ResponseBodyMatchers.responseBody;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@ExtendWith(MockitoExtension.class)
-class RepresentantTjenesteTest extends JsonSchemaTestParent {
+@WebMvcTest(controllers = {RepresentantTjeneste.class})
+class RepresentantTjenesteTest {
     private static final Logger log = LoggerFactory.getLogger(RepresentantTjenesteTest.class);
 
-    private static final String REPRESENTANT_LISTE_SCHEMA="representant-liste-schema.json";
-    private static final String REPRESENTANT_SCHEMA="representant-representant-schema.json";
-    private static final String VALGTREPRESENTANT_SCHEMA="representant-valgt-schema.json";
-    private static final String VALGTREPRESENTANT_POST_SCHEMA="representant-valgt-post-schema.json";
-
-    @Mock
+    @MockBean
     private RepresentantService representantService;
-    @Mock
+    @MockBean
     private Aksesskontroll aksesskontroll;
 
-    private RepresentantTjeneste representantTjeneste;
+    @Autowired
+    private MockMvc mockMvc;
+    @Autowired
+    private ObjectMapper objectMapper;
 
-    @BeforeEach
-    public void setup() {
-        representantTjeneste = new RepresentantTjeneste(representantService, aksesskontroll);
-    }
-
-    @Test
-    void hentRepresentantListe_validerSchema() throws IOException {
-        when(representantService.hentRepresentantListe())
-            .thenReturn(List.of(
-                new RepresentantDto("id1", "navn1"),
-                new RepresentantDto("id2", "navn2")));
-
-        var response = representantTjeneste.hentRepresentantListe().getBody();
-
-        validerArray(response, REPRESENTANT_LISTE_SCHEMA, log);
-    }
+    private static final String BASE_URL = "/api/representant";
 
     @Test
-    void hentRepresentant_validerSchema() throws IOException {
-        when(representantService.hentRepresentant("id")).thenReturn(
-            new RepresentantDataDto("id", "navn", List.of("adresselinje1", "adresselinje2"), "postnummer", "123456789"));
-
-        var response = representantTjeneste.hentRepresentant("id").getBody();
-
-        valider(response, REPRESENTANT_SCHEMA, log);
-    }
-
-    @Test
-    void oppdaterValgtRepresentant_validerResponse() throws IOException {
+    void lagreValgtRepresentant_validerResponse() throws Exception {
         var request = new ValgtRepresentantDto("repnr", true, "123456789", "kontaktperson");
+        when(representantService.oppdaterValgtRepresentant(eq(1L), any(ValgtRepresentant.class))).thenReturn(request.til());
 
-        valider(request, VALGTREPRESENTANT_POST_SCHEMA, log);
-
-        when(representantService.oppdaterValgtRepresentant(anyLong(), any(ValgtRepresentant.class))).thenReturn(request.til());
-
-        var response = representantTjeneste.lagreValgtRepresentant(1L, request).getBody();
-
-        assertThat(response).isNotNull();
-        assertThat(response.representantnummer()).isEqualTo(request.representantnummer());
-        assertThat(response.selvbetalende()).isEqualTo(request.selvbetalende());
-        assertThat(response.organisasjonsnummer()).isEqualTo(request.organisasjonsnummer());
-        assertThat(response.kontaktperson()).isEqualTo(request.kontaktperson());
-        valider(response, VALGTREPRESENTANT_SCHEMA, log);
+        mockMvc.perform(post(BASE_URL + "/valgt/{behandlingID}", 1L)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request))
+            )
+            .andExpect(status().isOk())
+            .andExpect(responseBody(objectMapper).containsObjectAsJson(request, ValgtRepresentantDto.class));
     }
 
     @Test
-    void hentValgtRepresentant_validerResponse() throws IOException {
+    void hentValgtRepresentant_validerResponse() throws Exception {
         var forventetResponse = new ValgtRepresentantDto("repnr", true, "123456789", "kontaktperson");
 
-        when(representantService.hentValgtRepresentant(anyLong())).thenReturn(forventetResponse.til());
+        when(representantService.hentValgtRepresentant(1L)).thenReturn(forventetResponse.til());
 
-        var response = representantTjeneste.hentValgtRepresentant(1L).getBody();
+        mockMvc.perform(get(BASE_URL + "/valgt/{behandlingID}", 1L)
+                .contentType(MediaType.APPLICATION_JSON)
+            )
+            .andExpect(status().isOk())
+            .andExpect(responseBody(objectMapper).containsObjectAsJson(forventetResponse, ValgtRepresentantDto.class));
 
-        assertThat(response).isNotNull();
-        assertThat(response.representantnummer()).isEqualTo(forventetResponse.representantnummer());
-        assertThat(response.selvbetalende()).isEqualTo(forventetResponse.selvbetalende());
-        assertThat(response.organisasjonsnummer()).isEqualTo(forventetResponse.organisasjonsnummer());
-        assertThat(response.kontaktperson()).isEqualTo(forventetResponse.kontaktperson());
-        valider(response, VALGTREPRESENTANT_SCHEMA, log);
     }
 }

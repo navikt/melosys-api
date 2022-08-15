@@ -1,125 +1,125 @@
 package no.nav.melosys.tjenester.gui;
 
-import java.io.IOException;
-import java.util.Comparator;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.Collections;
 
-import com.google.common.collect.Comparators;
-import no.nav.melosys.domain.arkiv.ArkivDokument;
-import no.nav.melosys.domain.arkiv.Journalpost;
-import no.nav.melosys.domain.arkiv.Journalposttype;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
-import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.dokument.DokumentHentingService;
 import no.nav.melosys.service.dokument.DokumentServiceFasade;
 import no.nav.melosys.service.dokument.brev.SedPdfData;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.tjenester.gui.dto.brev.BrevbestillingDto;
-import no.nav.melosys.tjenester.gui.dto.dokumentarkiv.JournalpostInfoDto;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.hamcrest.Matchers.containsString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@ExtendWith(MockitoExtension.class)
-class DokumentTjenesteTest extends JsonSchemaTestParent {
-    private static final Logger log = LoggerFactory.getLogger(DokumentTjenesteTest.class);
+@WebMvcTest(controllers = {DokumentTjeneste.class})
+class DokumentTjenesteTest {
 
-    private DokumentTjeneste dokumentTjeneste;
-
-    @Mock
+    @MockBean
     private DokumentServiceFasade dokumentServiceFasade;
-    @Mock
+    @MockBean
     private DokumentHentingService dokumentHentingService;
-    @Mock
+    @MockBean
     private EessiService eessiService;
-    @Mock
+    @MockBean
     private Aksesskontroll aksesskontroll;
 
-    @BeforeEach
-    public void setUp() {
-        dokumentTjeneste = new DokumentTjeneste(dokumentServiceFasade, dokumentHentingService, eessiService, aksesskontroll);
+    @Autowired
+    private MockMvc mockMvc;
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    private static final String BASE_URL = "/api/dokumenter";
+
+
+    @Test
+    void hentDokument() throws Exception {
+        var dokument = new byte[1];
+        when(dokumentHentingService.hentDokument(anyString(), anyString())).thenReturn(dokument);
+
+        mockMvc.perform(get(BASE_URL + "/pdf/{journalpostID}/{dokumentID}", "1", "2")
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
     }
 
     @Test
     void hentDokumenter() throws Exception {
-        List<Journalpost> journalposter = lagJournalposter();
-        given(dokumentHentingService.hentJournalposter(anyString())).willReturn(journalposter);
+        when(dokumentHentingService.hentJournalposter(anyString())).thenReturn(Collections.emptyList());
 
-        ResponseEntity<List<JournalpostInfoDto>> response = dokumentTjeneste.hentDokumenter("MEL-1873");
-        List<JournalpostInfoDto> dtos = response.getBody();
-        assertThat(dtos).isNotNull();
-        boolean inOrder = Comparators.isInOrder(dtos, Comparator.comparing(JournalpostInfoDto::hentGjeldendeTidspunkt, Comparator.nullsFirst(Comparator.reverseOrder())));
-        assertThat(inOrder).isTrue();
-
-        validerArray(dtos, "dokumenter-oversikt-schema.json", log);
+        mockMvc.perform(get(BASE_URL + "/oversikt/{saksnummer}", "1")
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
     }
 
     @Test
-    void hentSedForhåndsvisning() throws IOException {
-        final byte[] MOCK_PDF = "bytes fra en pdf".getBytes();
-        when(eessiService.genererSedPdf(anyLong(), any(), any())).thenReturn(MOCK_PDF);
-        SedPdfData sedPdfData = new SedPdfData("tada", null, "DK", "neida");
+    void produserUtkastBrev() throws Exception {
+        var brevBestillingDto = new BrevbestillingDto.Builder()
+            .medMottaker(Aktoersroller.BRUKER)
+            .build();
+        when(dokumentServiceFasade.produserUtkast(anyLong(), any())).thenReturn(new byte[1]);
 
-        ResponseEntity response = dokumentTjeneste.produserUtkastSed(1L, SedType.A001, sedPdfData);
-        assertThat(response.getBody()).isEqualTo(MOCK_PDF);
-        valider(sedPdfData, "dokumenter-pdf-utkast-sed-post-schema.json");
+        mockMvc.perform(post(BASE_URL + "/pdf/brev/utkast/{behandlingID}/{produserbartDokument}", 1L, Produserbaredokumenter.MELDING_HENLAGT_SAK)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(brevBestillingDto)))
+            .andExpect(status().isOk());
+
+        verify(dokumentServiceFasade).produserUtkast(anyLong(), any());
     }
 
     @Test
-    void produserDokument() {
-        BrevbestillingDto brevBestillingDto = new BrevbestillingDto.Builder()
+    void produserUtkastSed() throws Exception {
+        var sedPdfData = new SedPdfData();
+        when(eessiService.genererSedPdf(anyLong(), any(SedType.class), any(SedPdfData.class))).thenReturn(new byte[1]);
+
+        mockMvc.perform(post(BASE_URL + "/pdf/sed/utkast/{behandlingID}/{sedType}", 1L, SedType.A003)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(sedPdfData)))
+            .andExpect(status().isOk());
+
+        verify(eessiService).genererSedPdf(anyLong(), any(SedType.class), any(SedPdfData.class));
+    }
+
+    @Test
+    void produserDokument() throws Exception {
+        var brevBestillingDto = new BrevbestillingDto.Builder()
             .medMottaker(Aktoersroller.BRUKER)
             .build();
 
-        dokumentTjeneste.produserDokument(1L,
-            Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID, brevBestillingDto);
+        mockMvc.perform(post(BASE_URL + "/opprett/{behandlingID}/{produserbartDokument}", 1L, Produserbaredokumenter.MELDING_HENLAGT_SAK)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(brevBestillingDto)))
+            .andExpect(status().isNoContent());
 
         verify(dokumentServiceFasade).produserUtkast(anyLong(), any());
         verify(dokumentServiceFasade).produserDokument(anyLong(), any());
     }
 
     @Test
-    void produserDokumentFeilerMedManglendeMottaker() {
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> dokumentTjeneste.produserDokument(1L,
-                Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID, new BrevbestillingDto()))
-            .withMessageContaining("Mottaker trengs for å bestille");
-    }
+    void produserDokumentFeilerMedManglendeMottaker() throws Exception {
+        var brevBestillingDto = new BrevbestillingDto.Builder()
+            .build();
 
-    private static List<Journalpost> lagJournalposter() {
-        return Stream.generate(DokumentTjenesteTest::lagJournalpost).limit(3).collect(Collectors.toList());
-    }
-
-    private static Journalpost lagJournalpost() {
-        Journalpost journalpost = new Journalpost("jpID");
-        journalpost.setJournalposttype(Journalposttype.UT);
-        journalpost.setAvsenderId("nav");
-        journalpost.setAvsenderId("NAVAT:07");
-        journalpost.setKorrespondansepartNavn("Test12345");
-        ArkivDokument arkivDokument = new ArkivDokument();
-        arkivDokument.setDokumentId("2456");
-        arkivDokument.setTittel("Tittel 234");
-
-        journalpost.setHoveddokument(arkivDokument);
-
-        return journalpost;
+        mockMvc.perform(post(BASE_URL + "/opprett/{behandlingID}/{produserbartDokument}", 1L, Produserbaredokumenter.MELDING_HENLAGT_SAK)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(brevBestillingDto)))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.message", containsString("Mottaker trengs for å bestille")));
     }
 
 }

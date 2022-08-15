@@ -1,10 +1,10 @@
 package no.nav.melosys.tjenester.gui.avklartefakta;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collections;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.avgift.*;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
@@ -13,72 +13,97 @@ import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService;
 import no.nav.melosys.service.avgift.TrygdeavgiftsgrunnlagService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
-import no.nav.melosys.tjenester.gui.JsonSchemaTestParent;
-import no.nav.melosys.tjenester.gui.dto.trygdeavgift.AvgiftsgrunnlagInfoDto;
-import no.nav.melosys.tjenester.gui.dto.trygdeavgift.OppdaterAvgiftsgrunnlagDto;
-import no.nav.melosys.tjenester.gui.dto.trygdeavgift.OppdaterBeregningsgrunnlagDto;
-import org.junit.jupiter.api.BeforeEach;
+import no.nav.melosys.tjenester.gui.dto.trygdeavgift.*;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
 
 import static no.nav.melosys.domain.kodeverk.Vurderingsutfall_trygdeavgift_norsk_inntekt.NORSK_INNTEKT_INGEN_TRYGDEAVGIFT_NAV;
 import static no.nav.melosys.domain.kodeverk.Vurderingsutfall_trygdeavgift_utenlandsk_inntekt.UTENLANDSK_INNTEKT_INGEN_TRYGDEAVGIFT_NAV;
+import static no.nav.melosys.tjenester.gui.util.ResponseBodyMatchers.responseBody;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@ExtendWith(MockitoExtension.class)
-class TrygdeavgiftTjenesteTest extends JsonSchemaTestParent {
+@WebMvcTest(controllers = {TrygdeavgiftTjeneste.class})
+public class TrygdeavgiftTjenesteTest {
 
-    private static final String TRYGDEAVGIFT_GRUNNLAG_SCHEMA = "trygdeavgift-grunnlag-schema.json";
-    private static final String TRYGDEAVGIFT_GRUNNLAG_PUT_SCHEMA = "trygdeavgift-grunnlag-put-schema.json";
-    private static final String TRYGDEAVGIFT_BEREGNING_SCHEMA = "trygdeavgift-beregning-schema.json";
-    private static final String TRYGDEAVGIFT_BEREGNING_PUT_SCHEMA = "trygdeavgift-beregning-put-schema.json";
-
-    @Mock
-    private TrygdeavgiftsberegningService trygdeavgiftsberegningService;
-    @Mock
-    private TrygdeavgiftsgrunnlagService trygdeavgiftsgrunnlagService;
-    @Mock
+    @MockBean
     private Aksesskontroll aksesskontroll;
+    @MockBean
+    private TrygdeavgiftsgrunnlagService trygdeavgiftsgrunnlagService;
+    @MockBean
+    private TrygdeavgiftsberegningService trygdeavgiftsberegningService;
 
-    private TrygdeavgiftTjeneste trygdeavgiftTjeneste;
+    @Autowired
+    private MockMvc mockMvc;
+    @Autowired
+    private ObjectMapper objectMapper;
 
-    private final long behandlingsresultatID = 1;
-
-    @BeforeEach
-    public void setup() {
-        trygdeavgiftTjeneste = new TrygdeavgiftTjeneste(trygdeavgiftsgrunnlagService, trygdeavgiftsberegningService, aksesskontroll);
-    }
+    private static final String BASE_URL = "/api/behandlinger/{behandlingID}/trygdeavgift";
+    private static final long BEHANDLINGSRESULTAT_ID = 1;
+    private static final Trygdeavgiftsgrunnlag trygdeavgiftsgrunnlag = lagTrygdeavgiftsgrunnlag();
+    private static final Trygdeavgiftsberegningsresultat trygdeavgiftsberegningsresultat = lagTrygdeavgiftsberegningresultat();
 
     @Test
-    void oppdaterAvgiftsgrunnlag_validerSchema() throws IOException {
-        when(trygdeavgiftsgrunnlagService.oppdaterAvgiftsgrunnlag(eq(behandlingsresultatID), any()))
-            .thenReturn(lagTrygdeavgiftsgrunnlag());
-
-        OppdaterAvgiftsgrunnlagDto avgiftsgrunnlagDto = new OppdaterAvgiftsgrunnlagDto(
+    void oppdaterAvgiftsgrunnlag() throws Exception {
+        var dto = new OppdaterAvgiftsgrunnlagDto(
             Loenn_forhold.DELT_LØNN,
             new AvgiftsgrunnlagInfoDto(true, true, null),
             new AvgiftsgrunnlagInfoDto(true, true, null)
         );
+        when(trygdeavgiftsgrunnlagService.oppdaterAvgiftsgrunnlag(eq(BEHANDLINGSRESULTAT_ID), any()))
+            .thenReturn(trygdeavgiftsgrunnlag);
 
-        valider(avgiftsgrunnlagDto, TRYGDEAVGIFT_GRUNNLAG_PUT_SCHEMA);
-        valider(trygdeavgiftTjeneste.oppdaterAvgiftsgrunnlag(behandlingsresultatID, avgiftsgrunnlagDto).getBody(), TRYGDEAVGIFT_GRUNNLAG_SCHEMA);
+        mockMvc.perform(put(BASE_URL + "/grunnlag", 1L)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(dto)))
+            .andExpect(status().isOk())
+            .andExpect(responseBody(objectMapper).containsObjectAsJson(AvgiftsgrunnlagDto.av(trygdeavgiftsgrunnlag), AvgiftsgrunnlagDto.class));
     }
 
     @Test
-    void oppdaterBeregningsgrunnlag_validerSchema() throws IOException {
-        when(trygdeavgiftsberegningService.hentBeregningsresultat(eq(behandlingsresultatID)))
-            .thenReturn(lagTrygdeavgiftsberegningresultat());
+    void hentAvgiftsgrunnlag() throws Exception {
+        when(trygdeavgiftsgrunnlagService.hentAvgiftsgrunnlag(eq(BEHANDLINGSRESULTAT_ID)))
+            .thenReturn(trygdeavgiftsgrunnlag);
 
-        OppdaterBeregningsgrunnlagDto oppdaterBeregningsgrunnlagDto = new OppdaterBeregningsgrunnlagDto(100L, null);
-        valider(oppdaterBeregningsgrunnlagDto, TRYGDEAVGIFT_BEREGNING_PUT_SCHEMA);
-        valider(trygdeavgiftTjeneste.oppdaterBeregningsgrunnlag(behandlingsresultatID, oppdaterBeregningsgrunnlagDto).getBody(), TRYGDEAVGIFT_BEREGNING_SCHEMA);
+        mockMvc.perform(get(BASE_URL + "/grunnlag", 1L)
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(responseBody(objectMapper).containsObjectAsJson(AvgiftsgrunnlagDto.av(trygdeavgiftsgrunnlag), AvgiftsgrunnlagDto.class));
     }
 
-    private Trygdeavgiftsberegningsresultat lagTrygdeavgiftsberegningresultat() {
+    @Test
+    void oppdaterBeregningsgrunnlag() throws Exception {
+        var dto = new OppdaterBeregningsgrunnlagDto(100L, null);
+        when(trygdeavgiftsberegningService.hentBeregningsresultat(eq(BEHANDLINGSRESULTAT_ID)))
+            .thenReturn(lagTrygdeavgiftsberegningresultat());
+
+        mockMvc.perform(put(BASE_URL + "/beregning", 1L)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(dto)))
+            .andExpect(status().isOk())
+            .andExpect(responseBody(objectMapper).containsObjectAsJson(BeregningsresultatDto.av(trygdeavgiftsberegningsresultat), BeregningsresultatDto.class));
+    }
+
+    @Test
+    void hentBeregningsresultat() throws Exception {
+        when(trygdeavgiftsberegningService.hentBeregningsresultat(eq(BEHANDLINGSRESULTAT_ID)))
+            .thenReturn(lagTrygdeavgiftsberegningresultat());
+
+        mockMvc.perform(get(BASE_URL + "/beregning", 1L)
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(responseBody(objectMapper).containsObjectAsJson(BeregningsresultatDto.av(trygdeavgiftsberegningsresultat), BeregningsresultatDto.class));
+    }
+
+    private static Trygdeavgiftsberegningsresultat lagTrygdeavgiftsberegningresultat() {
         Aktoer aktoer = new Aktoer();
         aktoer.setRolle(Aktoersroller.BRUKER);
         return new Trygdeavgiftsberegningsresultat(
@@ -90,11 +115,13 @@ class TrygdeavgiftTjenesteTest extends JsonSchemaTestParent {
             ));
     }
 
-    private Trygdeavgiftsgrunnlag lagTrygdeavgiftsgrunnlag() {
+    private static Trygdeavgiftsgrunnlag lagTrygdeavgiftsgrunnlag() {
         return new Trygdeavgiftsgrunnlag(
             Loenn_forhold.DELT_LØNN,
             new AvgiftsgrunnlagInfoNorge(true, true, null, NORSK_INNTEKT_INGEN_TRYGDEAVGIFT_NAV),
             new AvgiftsgrunnlagInfoUtland(true, true, null, UTENLANDSK_INNTEKT_INGEN_TRYGDEAVGIFT_NAV)
         );
     }
+
 }
+
