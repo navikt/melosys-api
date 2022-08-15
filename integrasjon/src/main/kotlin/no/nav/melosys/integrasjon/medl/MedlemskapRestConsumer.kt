@@ -15,14 +15,14 @@ import java.time.LocalDate
 open class MedlemskapRestConsumer(private val webClient: WebClient) : RestConsumer {
     // Metoder må være open for at retry skal funke og at webClient ikke skal bli null
     // https://github.com/spring-projects/spring-framework/issues/26729
-    open fun hentPeriodeListe(fnr: String, fom: LocalDate, tom: LocalDate): List<MedlemskapsunntakForGet> {
+    open fun hentPeriodeListe(fnr: String, fom: LocalDate, tom: LocalDate?): List<MedlemskapsunntakForGet> {
         return hentMedlemskapsunntakForPeriode(fnr, fom, tom)!!.toList()
     }
 
     private fun hentMedlemskapsunntakForPeriode(
         fnr: String,
         fom: LocalDate,
-        tom: LocalDate
+        tom: LocalDate?
     ): Array<MedlemskapsunntakForGet>? {
         return webClient.get().uri("") { uriBuilder: UriBuilder ->
             uriBuilder
