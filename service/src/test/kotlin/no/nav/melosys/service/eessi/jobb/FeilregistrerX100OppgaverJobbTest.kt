@@ -12,6 +12,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.junit.jupiter.MockitoExtension
+import java.util.*
 
 @ExtendWith(MockitoExtension::class)
 internal class FeilregistrerX100OppgaverJobbTest {
@@ -30,14 +31,27 @@ internal class FeilregistrerX100OppgaverJobbTest {
     }
 
     @Test
-    fun feilregistrerX100Oppgaver() {
+    fun feilregistrerX100Behandlingsoppgaver() {
+        val prosessMedX100 = lagProsessinstansMedEessiMelding()
+        Mockito.`when`(prosessinstansRepository!!.findAllWithSedX100()).thenReturn(setOf(prosessMedX100))
+        val oppgave = Oppgave.Builder().setOppgaveId(OPPGAVE_ID_X100).build()
+        Mockito.`when`(oppgaveService!!.finnÅpenOppgaveMedFagsaksnummer("MEL-1"))
+            .thenReturn(Optional.of(oppgave))
+
+        feilregistrerX100OppgaverJobb!!.feilregistrerX100Behandlingsoppgaver()
+
+        Mockito.verify(oppgaveService).feilregistrerOppgave(setOf(oppgave.oppgaveId))
+    }
+
+    @Test
+    fun feilregistrerX100Journalføringsoppgaver() {
         val prosessMedX100 = lagProsessinstansMedEessiMelding()
         Mockito.`when`(prosessinstansRepository!!.findAllWithSedX100()).thenReturn(setOf(prosessMedX100))
         val oppgave = Oppgave.Builder().setOppgaveId(OPPGAVE_ID_X100).build()
         Mockito.`when`(oppgaveService!!.finnÅpneOppgaverMedJournalpostID(JOURNALPOST_ID_X_100))
             .thenReturn(listOf(oppgave))
 
-        feilregistrerX100OppgaverJobb!!.feilregistrerX100Oppgaver()
+        feilregistrerX100OppgaverJobb!!.feilregistrerX100Journalføringsoppgaver()
 
         Mockito.verify(oppgaveService).feilregistrerOppgave(setOf(oppgave.oppgaveId))
     }
@@ -49,7 +63,7 @@ internal class FeilregistrerX100OppgaverJobbTest {
             val prosessMedX100 = Prosessinstans()
             prosessMedX100.setData(ProsessDataKey.JOURNALPOST_ID, JOURNALPOST_ID_X_100)
             prosessMedX100.setData(ProsessDataKey.EESSI_MELDING, lagEessiMeldingMedX100())
-            prosessMedX100.behandling = SaksbehandlingDataFactory.lagBehandling(
+            prosessMedX100.behandling = SaksbehandlingDataFactory.lagInaktivBehandling(
                 SaksbehandlingDataFactory.lagFagsak("MEL-1")
             )
             return prosessMedX100

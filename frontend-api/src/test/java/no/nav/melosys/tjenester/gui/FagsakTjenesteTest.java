@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
@@ -21,6 +22,8 @@ import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresseNorge
 import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresseUtland;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
+import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService;
@@ -75,6 +78,8 @@ class FagsakTjenesteTest {
     @MockBean
     private static BehandlingsgrunnlagService behandlingsgrunnlagService;
     @MockBean
+    private static BehandlingsresultatService behandlingsresultatService;
+    @MockBean
     private static Unleash unleash;
 
     @Autowired
@@ -109,7 +114,7 @@ class FagsakTjenesteTest {
         bruker.setRolle(Aktoersroller.BRUKER);
         fagsak.setAktører(Set.of(bruker));
 
-        lagFagsakTjeneste(fagsak);
+        mockFagsakTjeneste(fagsak);
 
         mockMvc.perform(get(BASE_URL + "/{saksnr}", "123")
                 .contentType(MediaType.APPLICATION_JSON))
@@ -131,7 +136,7 @@ class FagsakTjenesteTest {
 
     @Test
     void opprettSak_utenFnr_badRequestException() throws Exception {
-        lagFagsakTjeneste(null);
+        mockFagsakTjeneste(null);
         var opprettSakDto = new OpprettSakDto();
 
         mockMvc.perform(post(BASE_URL + "/opprett")
@@ -148,7 +153,7 @@ class FagsakTjenesteTest {
         behandling.setFagsak(fagsak);
         behandling.setId(123L);
         fagsak.setBehandlinger(Collections.singletonList(behandling));
-        lagFagsakTjeneste(fagsak);
+        mockFagsakTjeneste(fagsak);
         var fagsakSokDto = new FagsakSokDto(FNR, null, null);
 
         mockMvc.perform(post(BASE_URL + "/sok")
@@ -169,7 +174,7 @@ class FagsakTjenesteTest {
         Aktoer aktoer = new Aktoer();
         aktoer.setRolle(Aktoersroller.BRUKER);
         fagsak.setAktører(Set.of(aktoer));
-        lagFagsakTjeneste(fagsak);
+        mockFagsakTjeneste(fagsak);
         var fagsakSokDto = new FagsakSokDto(FNR, null, null);
 
         mockMvc.perform(post(BASE_URL + "/sok")
@@ -192,7 +197,7 @@ class FagsakTjenesteTest {
         aktoer.setOrgnr(ORGNR);
         aktoer.setRolle(Aktoersroller.VIRKSOMHET);
         fagsak.setAktører(Set.of(aktoer));
-        lagFagsakTjeneste(fagsak);
+        mockFagsakTjeneste(fagsak);
         var organisajonsdokument = new OrganisasjonDokument();
         organisajonsdokument.setNavn("Moe Organisasjon");
         when(organisasjonOppslagService.hentOrganisasjon(ORGNR)).thenReturn(organisajonsdokument);
@@ -216,7 +221,7 @@ class FagsakTjenesteTest {
         var aktoer = new Aktoer();
         aktoer.setRolle(Aktoersroller.VIRKSOMHET);
         fagsak.setAktører(Set.of(aktoer));
-        lagFagsakTjeneste(fagsak);
+        mockFagsakTjeneste(fagsak);
         var fagsakSokDto = new FagsakSokDto(null, null, ORGNR);
 
         mockMvc.perform(post(BASE_URL + "/sok")
@@ -230,7 +235,7 @@ class FagsakTjenesteTest {
     @Test
     void hentFagsaker_medSaksnummer_finnerIkkeSakMottarTomListe() throws Exception {
         Fagsak fagsak = lagFagsak();
-        lagFagsakTjeneste(fagsak);
+        mockFagsakTjeneste(fagsak);
         var fagsakSokDto = new FagsakSokDto(null, "NEI-123", null);
 
         mockMvc.perform(post(BASE_URL + "/sok")
@@ -246,7 +251,7 @@ class FagsakTjenesteTest {
         String fritekst = "Dette er fritekst";
         var henleggelseDto = new HenleggelseDto(fritekst, begrunnelseKode);
         Fagsak fagsak = lagFagsak();
-        lagFagsakTjeneste(fagsak);
+        mockFagsakTjeneste(fagsak);
         String saksnummer = "123";
 
         mockMvc.perform(post(BASE_URL + "/{saksnr}/henlegg", saksnummer)
@@ -264,7 +269,7 @@ class FagsakTjenesteTest {
         videresendDto.setMottakerinstitusjon("Denmark");
         videresendDto.setFritekst("Dette er fritekst");
         Fagsak fagsak = lagFagsak();
-        lagFagsakTjeneste(fagsak);
+        mockFagsakTjeneste(fagsak);
 
         mockMvc.perform(post(BASE_URL + "/{saksnr}/henlegg-videresend", "123")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -275,7 +280,7 @@ class FagsakTjenesteTest {
     @Test
     void videresend_utenVedlegg_feiler() throws Exception {
         Fagsak fagsak = lagFagsak();
-        lagFagsakTjeneste(fagsak);
+        mockFagsakTjeneste(fagsak);
         var videresendDto = new VideresendDto();
 
         mockMvc.perform(post(BASE_URL + "/{saksnr}/henlegg-videresend", "123")
@@ -288,7 +293,7 @@ class FagsakTjenesteTest {
     @Test
     void henleggSakSomBortfalt() throws Exception {
         Fagsak fagsak = lagFagsak();
-        lagFagsakTjeneste(fagsak);
+        mockFagsakTjeneste(fagsak);
         String saksnummer = "123";
         when(fagsakService.hentFagsak(saksnummer)).thenReturn(fagsak);
 
@@ -303,7 +308,7 @@ class FagsakTjenesteTest {
     @Test
     void avsluttSakManuelt() throws Exception {
         Fagsak fagsak = lagFagsak();
-        lagFagsakTjeneste(fagsak);
+        mockFagsakTjeneste(fagsak);
 
         mockMvc.perform(put(BASE_URL + "/{saksnr}/avslutt", "123")
                 .contentType(MediaType.TEXT_PLAIN)
@@ -316,7 +321,7 @@ class FagsakTjenesteTest {
     @Test
     void utpekLovvalgsland() throws Exception {
         Fagsak fagsak = lagFagsak();
-        lagFagsakTjeneste(fagsak);
+        mockFagsakTjeneste(fagsak);
         UtpekDto utpekDto = new UtpekDto(Set.of("SE:123"), "Fri SED", "Fri brev");
         when(fagsakService.hentFagsak(any())).thenReturn(fagsak);
 
@@ -332,7 +337,7 @@ class FagsakTjenesteTest {
     @Test
     void revurderSisteBehandling() throws Exception {
         Fagsak fagsak = lagFagsak();
-        lagFagsakTjeneste(fagsak);
+        mockFagsakTjeneste(fagsak);
         when(fagsakService.opprettNyVurderingBehandling("123")).thenReturn(1L);
 
         mockMvc.perform(post(BASE_URL + "/{saksnr}/revurder", "123")
@@ -343,10 +348,13 @@ class FagsakTjenesteTest {
         verify(aksesskontroll).autoriserSakstilgang("123");
     }
 
-    private static FagsakTjeneste lagFagsakTjeneste(Fagsak fagsak) {
+    private static void mockFagsakTjeneste(Fagsak fagsak) {
         Soeknad søknadDokument = SaksbehandlingDataFactory.lagSøknadDokument();
         Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
         behandlingsgrunnlag.setBehandlingsgrunnlagdata(søknadDokument);
+        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+        behandlingsresultat.setType(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
+        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
         when(behandlingsgrunnlagService.finnBehandlingsgrunnlag(1L)).thenReturn(Optional.of(behandlingsgrunnlag));
         when(fagsakService.hentFagsak("123")).thenReturn(fagsak);
         when(persondataFasade.hentSammensattNavn(any())).thenReturn("Joe Moe");
@@ -354,8 +362,6 @@ class FagsakTjenesteTest {
             doReturn(List.of(fagsak)).when(fagsakService).hentFagsakerMedAktør(Aktoersroller.BRUKER, FNR);
             doReturn(List.of(fagsak)).when(fagsakService).hentFagsakerMedOrgnr(Aktoersroller.VIRKSOMHET, ORGNR);
         }
-        return new FagsakTjeneste(fagsakService, aksesskontroll, behandlingsgrunnlagService, henleggFagsakService, opprettNySakFraOppgave,
-            persondataFasade, saksopplysningerService, utpekingService, videresendSoknadService, organisasjonOppslagService);
     }
 
     private static Fagsak lagFagsak() {

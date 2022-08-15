@@ -110,14 +110,14 @@ public class OppgaveConsumerImpl implements OppgaveConsumer {
     }
 
     @Override
-    public PatchOppgaverResponseDto patchOppgaver(PatchOppgaverRequestDto patchOppgaverRequest) {
+    public OppgaveDto patchOppgave(PatchOppgaveRequestDto patchOppgaveRequest) {
         return webClient.patch()
-            .uri(OPPGAVE_BASE_URI)
+            .uri(OPPGAVE_URI_MED_ID, patchOppgaveRequest.id())
             .header(CORRELATION_ID, getCallID())
-            .bodyValue(patchOppgaverRequest)
+            .bodyValue(patchOppgaveRequest)
             .retrieve()
             .onStatus(HttpStatus::isError, this::håndterFeil)
-            .bodyToMono(PatchOppgaverResponseDto.class)
+            .bodyToMono(OppgaveDto.class)
             .block();
     }
 
