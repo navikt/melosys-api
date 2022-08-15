@@ -7,7 +7,7 @@ import no.nav.melosys.domain.oppgave.Oppgave;
 
 public interface OppgaveFasade {
 
-    void feilregistrerOppgaver(Set<String> oppgaveIdSet);
+    void feilregistrerOppgaver(Set<Oppgave> oppgaveSet);
 
     void ferdigstillOppgave(String oppgaveId);
 

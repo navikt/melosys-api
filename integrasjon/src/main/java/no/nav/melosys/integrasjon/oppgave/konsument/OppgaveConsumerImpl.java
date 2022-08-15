@@ -110,9 +110,9 @@ public class OppgaveConsumerImpl implements OppgaveConsumer {
     }
 
     @Override
-    public OppgaveDto patchOppgave(PatchOppgaveRequestDto patchOppgaveRequest) {
+    public OppgaveDto patchOppgave(OppgaveDto patchOppgaveRequest) {
         return webClient.patch()
-            .uri(OPPGAVE_URI_MED_ID, patchOppgaveRequest.id())
+            .uri(OPPGAVE_URI_MED_ID, patchOppgaveRequest.getId())
             .header(CORRELATION_ID, getCallID())
             .bodyValue(patchOppgaveRequest)
             .retrieve()

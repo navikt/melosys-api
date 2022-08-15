@@ -52,9 +52,9 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
     }
 
     @Override
-    public void feilregistrerOppgaver(Set<String> oppgaveIdSet) {
-        for (String oppgaveID : oppgaveIdSet) {
-            feilregistrerOppgave(oppgaveID);
+    public void feilregistrerOppgaver(Set<Oppgave> oppgaveSet) {
+        for (var oppgave : oppgaveSet) {
+            feilregistrerOppgave(oppgave);
         }
     }
 
@@ -101,12 +101,14 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
     }
 
     @Async
-    public void feilregistrerOppgave(String oppgaveID) {
+    public void feilregistrerOppgave(Oppgave oppgave) {
         try {
-            oppgaveConsumer.patchOppgave(new PatchOppgaveRequestDto(Long.parseLong(oppgaveID), OPPGAVE_STATUS_FEILREGISTRERT));
-            log.info("Oppgave {} er feilregistrert", oppgaveID);
+            var oppgaveDto = OppgaveDto.av(oppgave);
+            oppgaveDto.setStatus(OPPGAVE_STATUS_FEILREGISTRERT);
+            oppgaveConsumer.patchOppgave(oppgaveDto);
+            log.info("Oppgave {} er feilregistrert", oppgaveDto.getId());
         } catch (TekniskException e) {
-            log.error("Patching av oppgave {} feilet", oppgaveID, e);
+            log.error("Feilregistrering av oppgave {} feilet", oppgave.getOppgaveId(), e);
         }
     }
 

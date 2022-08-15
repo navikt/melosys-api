@@ -1,6 +1,5 @@
 package no.nav.melosys.service.eessi.jobb
 
-import no.nav.melosys.domain.oppgave.Oppgave
 import no.nav.melosys.domain.saksflyt.ProsessDataKey
 import no.nav.melosys.domain.saksflyt.Prosessinstans
 import no.nav.melosys.repository.ProsessinstansRepository
@@ -21,15 +20,15 @@ class FeilregistrerX100OppgaverJobb(
         val journalpostIdList =
             prosesserFraX100.map { p: Prosessinstans -> p.getData(ProsessDataKey.JOURNALPOST_ID) }.toList()
         log.info("Det er ${journalpostIdList.size} journalposter for X100 SED-er.")
-        val oppgaveIdSet = journalpostIdList.map { journalpostID: String? ->
+        val oppgaveSet = journalpostIdList.map { journalpostID: String? ->
             oppgaveService.finnÅpneOppgaverMedJournalpostID(journalpostID)
-        }.flatten().map { obj: Oppgave -> obj.oppgaveId }.toSet()
+        }.flatten().toSet()
 
-        if (oppgaveIdSet.isEmpty()) {
+        if (oppgaveSet.isEmpty()) {
             log.info("Ingen åpne oppgaver for X100 SED-er finnes.")
         } else {
-            log.info("${oppgaveIdSet.size} oppgaver for X100 SED-er skal feilregistreres.")
-            oppgaveService.feilregistrerOppgave(oppgaveIdSet)
+            log.info("${oppgaveSet.size} oppgaver for X100 SED-er skal feilregistreres.")
+            oppgaveService.feilregistrerOppgaver(oppgaveSet)
         }
         log.info("Feilregistrering av journalføringsoppgaver opprettet for X100 SED-er er ferdig.")
     }
@@ -37,20 +36,20 @@ class FeilregistrerX100OppgaverJobb(
 
     fun feilregistrerX100Behandlingsoppgaver() {
         log.info("Begynner feilregistrering av behandlingoppgaver opprettet for X100 SED-er.")
-        val oppgaveIdSet = prosessinstansRepository.findAllWithSedX100()
+        val oppgaveSet = prosessinstansRepository.findAllWithSedX100()
             .filter { it.behandling != null }
             .map { it.behandling }
             .filter { it.erInaktiv() }
             .map { oppgaveService.finnÅpenOppgaveMedFagsaksnummer(it.fagsak.saksnummer) }
             .filter { it.isPresent }
-            .map { it.get().oppgaveId }
+            .map { it.get() }
             .toSet()
 
-        if (oppgaveIdSet.isEmpty()) {
+        if (oppgaveSet.isEmpty()) {
             log.info("Ingen åpne behandlingoppgaver for inaktive X100 SED-behandlinger finnes.")
         } else {
-            log.info("${oppgaveIdSet.size} åpne behandlingoppgaver for X100 SED-er skal feilregistreres.")
-            oppgaveService.feilregistrerOppgave(oppgaveIdSet)
+            log.info("${oppgaveSet.size} åpne behandlingoppgaver for X100 SED-er skal feilregistreres.")
+            oppgaveService.feilregistrerOppgaver(oppgaveSet)
         }
         log.info("Feilregistrering av behandlingsoppgaver opprettet for X100 SED-er er ferdig.")
     }

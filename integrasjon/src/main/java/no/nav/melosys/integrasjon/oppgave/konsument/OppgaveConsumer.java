@@ -20,6 +20,6 @@ public interface OppgaveConsumer extends RestConsumer {
 
     String opprettOppgave(OpprettOppgaveDto request);
 
-    OppgaveDto patchOppgave(PatchOppgaveRequestDto request);
+    OppgaveDto patchOppgave(OppgaveDto request);
 }
 
