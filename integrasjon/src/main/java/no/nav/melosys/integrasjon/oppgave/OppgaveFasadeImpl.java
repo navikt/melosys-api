@@ -104,7 +104,7 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
         try {
             var oppgaveDto = OppgaveDto.av(oppgave);
             oppgaveDto.setStatus(OPPGAVE_STATUS_FEILREGISTRERT);
-            oppgaveConsumer.patchOppgave(oppgaveDto);
+            oppgaveConsumer.oppdaterOppgave(oppgaveDto);
             log.info("Oppgave {} er feilregistrert", oppgaveDto.getId());
         } catch (TekniskException e) {
             log.error("Feilregistrering av oppgave {} feilet", oppgave.getOppgaveId(), e);

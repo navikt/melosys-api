@@ -109,18 +109,6 @@ public class OppgaveConsumerImpl implements OppgaveConsumer {
             .block();
     }
 
-    @Override
-    public OppgaveDto patchOppgave(OppgaveDto patchOppgaveRequest) {
-        return webClient.patch()
-            .uri(OPPGAVE_URI_MED_ID, patchOppgaveRequest.getId())
-            .header(CORRELATION_ID, getCallID())
-            .bodyValue(patchOppgaveRequest)
-            .retrieve()
-            .onStatus(HttpStatus::isError, this::håndterFeil)
-            .bodyToMono(OppgaveDto.class)
-            .block();
-    }
-
     private Mono<Exception> håndterFeil(ClientResponse clientResponse) {
         final HttpStatus status = clientResponse.statusCode();
         return clientResponse.bodyToMono(FeilResponseDto.class)
