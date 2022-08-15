@@ -22,7 +22,6 @@ import no.nav.melosys.integrasjon.oppgave.konsument.OppgaveConsumer;
 import no.nav.melosys.integrasjon.oppgave.konsument.dto.OppgaveDto;
 import no.nav.melosys.integrasjon.oppgave.konsument.dto.OppgaveSearchRequest;
 import no.nav.melosys.integrasjon.oppgave.konsument.dto.OpprettOppgaveDto;
-import no.nav.melosys.integrasjon.oppgave.konsument.dto.PatchOppgaveRequestDto;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

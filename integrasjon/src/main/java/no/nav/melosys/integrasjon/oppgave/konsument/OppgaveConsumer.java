@@ -6,7 +6,6 @@ import no.nav.melosys.integrasjon.felles.RestConsumer;
 import no.nav.melosys.integrasjon.oppgave.konsument.dto.OppgaveDto;
 import no.nav.melosys.integrasjon.oppgave.konsument.dto.OppgaveSearchRequest;
 import no.nav.melosys.integrasjon.oppgave.konsument.dto.OpprettOppgaveDto;
-import no.nav.melosys.integrasjon.oppgave.konsument.dto.PatchOppgaveRequestDto;
 import org.springframework.retry.annotation.Retryable;
 
 @Retryable
