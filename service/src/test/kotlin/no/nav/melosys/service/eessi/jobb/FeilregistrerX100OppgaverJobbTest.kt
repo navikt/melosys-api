@@ -40,7 +40,7 @@ internal class FeilregistrerX100OppgaverJobbTest {
 
         feilregistrerX100OppgaverJobb!!.feilregistrerX100Behandlingsoppgaver()
 
-        Mockito.verify(oppgaveService).feilregistrerOppgave(setOf(oppgave.oppgaveId))
+        Mockito.verify(oppgaveService).feilregistrerOppgaver(setOf(oppgave))
     }
 
     @Test
@@ -53,7 +53,7 @@ internal class FeilregistrerX100OppgaverJobbTest {
 
         feilregistrerX100OppgaverJobb!!.feilregistrerX100Journalføringsoppgaver()
 
-        Mockito.verify(oppgaveService).feilregistrerOppgave(setOf(oppgave.oppgaveId))
+        Mockito.verify(oppgaveService).feilregistrerOppgaver(setOf(oppgave))
     }
 
     companion object {

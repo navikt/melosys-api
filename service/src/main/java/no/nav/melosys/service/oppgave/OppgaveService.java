@@ -81,13 +81,13 @@ public class OppgaveService {
         return oppgaveFasade.finnÅpneOppgaverMedJournalpostID(journalpostID);
     }
 
-    public void feilregistrerOppgave(Set<String> oppgaveIdSet) {
-        if (oppgaveIdSet.isEmpty()) {
+    public void feilregistrerOppgaver(Set<Oppgave> oppgaveSet) {
+        if (oppgaveSet.isEmpty()) {
             log.debug("Ingen oppgaver skal feilregistreres.");
             return;
         }
-        log.info("Feilregistrer oppgave(r) {}", oppgaveIdSet);
-        oppgaveFasade.feilregistrerOppgaver(oppgaveIdSet);
+        log.info("Feilregistrer oppgave(r) {}", oppgaveSet.stream().map(Oppgave::getOppgaveId));
+        oppgaveFasade.feilregistrerOppgaver(oppgaveSet);
     }
 
     public void ferdigstillOppgave(String oppgaveID) {
