@@ -29,10 +29,10 @@ public class AvsluttTidligereAnmodningUnntaksperiode implements StegBehandler {
     @Override
     public void utfør(Prosessinstans prosessinstans) {
         log.info("AvsluttTidligereAnmodningUnntaksperiode: start");
-        Behandling behandling = prosessinstans.getBehandling();
-        if (erOppdatertA001(behandling, prosessinstans)) {
-            medlPeriodeService.avsluttTidligereAnmodningsperiode(behandling);
-            log.info("Avsluttet tidligere periode for behandlingID {}", behandling.getId());
+        Behandling nyBehandling = prosessinstans.getBehandling();
+        if (erOppdatertA001(nyBehandling, prosessinstans)) {
+            medlPeriodeService.avsluttTidligereAnmodningsperiode(nyBehandling);
+            log.info("Avsluttet tidligere periode for behandlingID {}", nyBehandling.getId());
         }
         log.info("AvsluttTidligereAnmodningUnntaksperiode: slutt");
     }

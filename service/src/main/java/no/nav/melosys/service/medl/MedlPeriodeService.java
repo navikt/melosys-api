@@ -140,7 +140,7 @@ public class MedlPeriodeService {
         var fagsak = behandling.getFagsak();
         var a001Behandling = fagsak.hentBehandlingerSortertSynkendePåRegistrertDato().stream()
             .filter(Behandling::erAnmodningOmUnntak)
-            .filter(b -> !b.getId().equals(behandling.getId()))
+            .filter(beh -> !beh.getId().equals(behandling.getId()))
             .findFirst()
             .orElseThrow(() -> new FunksjonellException("Fant ingen tidligere A001 behandling for fagsak %s".format(fagsak.getSaksnummer())));
         return behandlingsresultatService.hentBehandlingsresultat(a001Behandling.getId()).hentValidertAnmodningsperiode();
