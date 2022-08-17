@@ -46,6 +46,7 @@ class MedlAnmodningsperiodeServiceTest {
         );
 
         nyBehandling = new Behandling();
+        nyBehandling.setRegistrertDato(Instant.now());
         fagsak = new Fagsak();
         behandlingsresultat = lagBehandlingsresultatMedAnmodningsperiode();
     }
@@ -53,7 +54,8 @@ class MedlAnmodningsperiodeServiceTest {
     @Test
     void avsluttTidligereAnmodningsperiode_avslutterTidligereAnmodningsperiode() {
         fagsak.setBehandlinger(List.of(
-            lagA001Behandling(1L, Instant.now())
+            lagA001Behandling(1L, Instant.now()),
+            nyBehandling
         ));
         nyBehandling.setId(2L);
         nyBehandling.setFagsak(fagsak);
@@ -71,7 +73,8 @@ class MedlAnmodningsperiodeServiceTest {
         fagsak.setBehandlinger(List.of(
             lagA001Behandling(1L, Instant.now().minusSeconds(10)),
             lagA001Behandling(2L, Instant.now().minusSeconds(5)),
-            lagA001Behandling(3L, Instant.now())
+            lagA001Behandling(3L, Instant.now()),
+            nyBehandling
         ));
         nyBehandling.setId(4L);
         nyBehandling.setFagsak(fagsak);
