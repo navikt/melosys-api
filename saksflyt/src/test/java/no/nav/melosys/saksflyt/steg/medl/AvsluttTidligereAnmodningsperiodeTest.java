@@ -4,7 +4,7 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.service.medl.MedlPeriodeService;
+import no.nav.melosys.service.medl.MedlAnmodningsperiodeService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,7 +17,7 @@ import static org.mockito.Mockito.verify;
 @ExtendWith(MockitoExtension.class)
 class AvsluttTidligereAnmodningsperiodeTest {
     @Mock
-    private MedlPeriodeService medlPeriodeService;
+    private MedlAnmodningsperiodeService medlAnmodningsperiodeService;
 
     private AvsluttTidligereAnmodningsperiode avsluttTidligereAnmodningsperiode;
     private Behandling behandling;
@@ -25,7 +25,7 @@ class AvsluttTidligereAnmodningsperiodeTest {
 
     @BeforeEach
     public void setUp() {
-        avsluttTidligereAnmodningsperiode = new AvsluttTidligereAnmodningsperiode(medlPeriodeService);
+        avsluttTidligereAnmodningsperiode = new AvsluttTidligereAnmodningsperiode(medlAnmodningsperiodeService);
         behandling = new Behandling();
         prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
@@ -38,7 +38,7 @@ class AvsluttTidligereAnmodningsperiodeTest {
 
         avsluttTidligereAnmodningsperiode.utfør(prosessinstans);
 
-        verify(medlPeriodeService).avsluttTidligereAnmodningsperiode(behandling);
+        verify(medlAnmodningsperiodeService).avsluttTidligereAnmodningsperiode(behandling);
     }
 
     @Test
@@ -48,7 +48,7 @@ class AvsluttTidligereAnmodningsperiodeTest {
 
         avsluttTidligereAnmodningsperiode.utfør(prosessinstans);
 
-        verify(medlPeriodeService, never()).avsluttTidligereAnmodningsperiode(behandling);
+        verify(medlAnmodningsperiodeService, never()).avsluttTidligereAnmodningsperiode(behandling);
     }
 
     @Test
@@ -58,6 +58,6 @@ class AvsluttTidligereAnmodningsperiodeTest {
 
         avsluttTidligereAnmodningsperiode.utfør(prosessinstans);
 
-        verify(medlPeriodeService, never()).avsluttTidligereAnmodningsperiode(behandling);
+        verify(medlAnmodningsperiodeService, never()).avsluttTidligereAnmodningsperiode(behandling);
     }
 }

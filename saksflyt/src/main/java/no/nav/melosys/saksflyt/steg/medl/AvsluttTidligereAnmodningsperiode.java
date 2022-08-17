@@ -5,15 +5,15 @@ import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
-import no.nav.melosys.service.medl.MedlPeriodeService;
+import no.nav.melosys.service.medl.MedlAnmodningsperiodeService;
 import org.springframework.stereotype.Component;
 
 @Component
 public class AvsluttTidligereAnmodningsperiode implements StegBehandler {
-    private final MedlPeriodeService medlPeriodeService;
+    private final MedlAnmodningsperiodeService medlAnmodningsperiodeService;
 
-    public AvsluttTidligereAnmodningsperiode(MedlPeriodeService medlPeriodeService) {
-        this.medlPeriodeService = medlPeriodeService;
+    public AvsluttTidligereAnmodningsperiode(MedlAnmodningsperiodeService medlAnmodningsperiodeService) {
+        this.medlAnmodningsperiodeService = medlAnmodningsperiodeService;
     }
 
     @Override
@@ -25,7 +25,7 @@ public class AvsluttTidligereAnmodningsperiode implements StegBehandler {
     public void utfør(Prosessinstans prosessinstans) {
         Behandling nyBehandling = prosessinstans.getBehandling();
         if (erOppdatertA001(nyBehandling, prosessinstans)) {
-            medlPeriodeService.avsluttTidligereAnmodningsperiode(nyBehandling);
+            medlAnmodningsperiodeService.avsluttTidligereAnmodningsperiode(nyBehandling);
         }
     }
 

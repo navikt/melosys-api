@@ -12,6 +12,7 @@ import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
+import no.nav.melosys.exception.FunksjonellException;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import static java.util.Optional.ofNullable;
@@ -289,7 +290,7 @@ public class Behandlingsresultat extends RegistreringsInfo {
     }
 
     public boolean erArt16EtterUtlandMedRegistrertSvar() {
-        return finnValidertAnmodningsperiode()
+        return finnAnmodningsperiode()
             .filter(Anmodningsperiode::harRegistrertSvar)
             .isPresent();
     }
@@ -313,7 +314,7 @@ public class Behandlingsresultat extends RegistreringsInfo {
         if (!lovvalgsperioder.isEmpty()) {
             return hentValidertLovvalgsperiode();
         } else if (!anmodningsperioder.isEmpty()) {
-            return hentValidertAnmodningsperiode();
+            return hentAnmodningsperiode();
         } else if (!utpekingsperioder.isEmpty()) {
             return hentValidertUtpekingsperiode();
         }
@@ -324,7 +325,7 @@ public class Behandlingsresultat extends RegistreringsInfo {
     public Optional<PeriodeOmLovvalg> finnValidertPeriodeOmLovvalg() {
         var lovvalgsperiodeOptional = finnValidertLovvalgsperiode();
         Optional<? extends PeriodeOmLovvalg> periodeOmLovvalgOptional = lovvalgsperiodeOptional.isPresent() ?
-            lovvalgsperiodeOptional : finnValidertAnmodningsperiode();
+            lovvalgsperiodeOptional : finnAnmodningsperiode();
         return periodeOmLovvalgOptional.map(PeriodeOmLovvalg.class::cast);
     }
 
@@ -340,14 +341,14 @@ public class Behandlingsresultat extends RegistreringsInfo {
         return lovvalgsperioder.stream().findFirst();
     }
 
-    public Anmodningsperiode hentValidertAnmodningsperiode() {
-        return finnValidertAnmodningsperiode()
+    public Anmodningsperiode hentAnmodningsperiode() {
+        return finnAnmodningsperiode()
             .orElseThrow(() -> new NoSuchElementException("Ingen anmodningsperioder finnes for behandlingsresultat " + id));
     }
 
-    public Optional<Anmodningsperiode> finnValidertAnmodningsperiode() {
+    public Optional<Anmodningsperiode> finnAnmodningsperiode() {
         if (anmodningsperioder.size() > 1) {
-            throw new UnsupportedOperationException("Flere enn en anmodningsperiode er ikke støttet");
+            throw new FunksjonellException("Flere enn en anmodningsperiode er ikke støttet");
         }
         return anmodningsperioder.stream().findFirst();
     }
@@ -411,8 +412,8 @@ public class Behandlingsresultat extends RegistreringsInfo {
     public boolean utlandSkalVarslesOmVedtak() {
         return harVedtak()
             && ((erInnvilgelse() && !harLovvalgsperiodeMedBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1))
-                    || erInnvilgelseFlereLand()
-                    || erUtpeking());
+            || erInnvilgelseFlereLand()
+            || erUtpeking());
     }
 
     public void settVedtakMetadata(Vedtakstyper vedtakstype,
