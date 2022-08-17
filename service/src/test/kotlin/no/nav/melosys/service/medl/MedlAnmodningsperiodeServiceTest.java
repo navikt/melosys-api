@@ -46,6 +46,7 @@ class MedlAnmodningsperiodeServiceTest {
         );
 
         nyBehandling = new Behandling();
+        nyBehandling.setTema(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL);
         nyBehandling.setRegistrertDato(Instant.now());
         fagsak = new Fagsak();
         behandlingsresultat = lagBehandlingsresultatMedAnmodningsperiode();
