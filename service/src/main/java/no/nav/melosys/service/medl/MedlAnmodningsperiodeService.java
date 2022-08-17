@@ -44,7 +44,9 @@ public class MedlAnmodningsperiodeService {
             .filter(Behandling::erAnmodningOmUnntak)
             .filter(beh -> !beh.getId().equals(behandling.getId()))
             .findFirst()
-            .orElseThrow(() -> new FunksjonellException(String.format(fagsak.getSaksnummer())));
+            .orElseThrow(() -> new FunksjonellException("Fant ikke tidligere periode på en oppdatert sed med saksnummer: %s"
+                .formatted(fagsak.getSaksnummer()))
+            );
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(a001Behandling.getId());
         return behandlingsresultat.hentAnmodningsperiode();
     }

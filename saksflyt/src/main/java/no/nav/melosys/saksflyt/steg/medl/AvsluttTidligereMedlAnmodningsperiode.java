@@ -9,10 +9,10 @@ import no.nav.melosys.service.medl.MedlAnmodningsperiodeService;
 import org.springframework.stereotype.Component;
 
 @Component
-public class AvsluttTidligereAnmodningsperiode implements StegBehandler {
+public class AvsluttTidligereMedlAnmodningsperiode implements StegBehandler {
     private final MedlAnmodningsperiodeService medlAnmodningsperiodeService;
 
-    public AvsluttTidligereAnmodningsperiode(MedlAnmodningsperiodeService medlAnmodningsperiodeService) {
+    public AvsluttTidligereMedlAnmodningsperiode(MedlAnmodningsperiodeService medlAnmodningsperiodeService) {
         this.medlAnmodningsperiodeService = medlAnmodningsperiodeService;
     }
 

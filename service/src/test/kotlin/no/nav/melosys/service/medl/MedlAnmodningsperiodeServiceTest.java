@@ -25,17 +25,14 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class MedlAnmodningsperiodeServiceTest {
 
+    private static final long MOCKED_FORRIGE_BEHANDLING_MEDL_PERIODE_ID = 123456780L;
     @Mock
     private MedlService medlService;
-
     @Mock
     private BehandlingsresultatService behandlingsresultatService;
-
     @Mock
     private AnmodningsperiodeRepository anmodningsperiodeRepository;
-
     private MedlAnmodningsperiodeService medlAnmodningsperiodeService;
-
     private Behandling nyBehandling;
     private Behandlingsresultat behandlingsresultat;
     private Fagsak fagsak;
@@ -66,7 +63,7 @@ class MedlAnmodningsperiodeServiceTest {
         medlAnmodningsperiodeService.avsluttTidligereAnmodningsperiode(nyBehandling);
 
 
-        verify(medlService).avvisPeriode(123456780L, StatusaarsakMedl.AVVIST);
+        verify(medlService).avvisPeriode(MOCKED_FORRIGE_BEHANDLING_MEDL_PERIODE_ID, StatusaarsakMedl.AVVIST);
     }
 
     @Test
@@ -84,14 +81,14 @@ class MedlAnmodningsperiodeServiceTest {
         medlAnmodningsperiodeService.avsluttTidligereAnmodningsperiode(nyBehandling);
 
 
-        verify(medlService).avvisPeriode(123456780L, StatusaarsakMedl.AVVIST);
+        verify(medlService).avvisPeriode(MOCKED_FORRIGE_BEHANDLING_MEDL_PERIODE_ID, StatusaarsakMedl.AVVIST);
     }
 
 
     private Behandlingsresultat lagBehandlingsresultatMedAnmodningsperiode() {
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         Anmodningsperiode anmodningsperiode = new Anmodningsperiode();
-        anmodningsperiode.setMedlPeriodeID(123456780L);
+        anmodningsperiode.setMedlPeriodeID(MOCKED_FORRIGE_BEHANDLING_MEDL_PERIODE_ID);
         behandlingsresultat.setAnmodningsperioder(Set.of(anmodningsperiode));
         return behandlingsresultat;
     }
