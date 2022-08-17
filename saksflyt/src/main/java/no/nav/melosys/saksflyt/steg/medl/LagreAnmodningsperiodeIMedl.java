@@ -36,7 +36,7 @@ public class LagreAnmodningsperiodeIMedl implements StegBehandler {
     public void utfør(Prosessinstans prosessinstans) {
         final Behandling behandling = prosessinstans.getBehandling();
         final long behandlingID = behandling.getId();
-        Anmodningsperiode anmodningsperiode = behandlingsresultatService.hentBehandlingsresultat(behandlingID).hentValidertAnmodningsperiode();
+        Anmodningsperiode anmodningsperiode = behandlingsresultatService.hentBehandlingsresultat(behandlingID).hentAnmodningsperiode();
         if (PeriodeRegler.feilIPeriode(anmodningsperiode.getFom(), anmodningsperiode.getTom())) {
             log.info("Lagrer ikke anmodningsperiode i MEDL pga ulogisk periode. BehID={}", behandlingID);
         } else {

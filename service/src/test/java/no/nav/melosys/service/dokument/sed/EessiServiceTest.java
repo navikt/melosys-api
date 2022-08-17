@@ -468,7 +468,7 @@ class EessiServiceTest {
     @Test
     void hentSedTypeForAnmodningUnntakSvar_forventA002() {
         Behandlingsresultat behandlingsresultat = lagBehandlingsresultat();
-        behandlingsresultat.hentValidertAnmodningsperiode()
+        behandlingsresultat.hentAnmodningsperiode()
             .getAnmodningsperiodeSvar().setAnmodningsperiodeSvarType(Anmodningsperiodesvartyper.AVSLAG);
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
 
@@ -480,7 +480,7 @@ class EessiServiceTest {
     @Test
     void hentSedTypeForAnmodningUnntakSvar_forventA011() {
         Behandlingsresultat behandlingsresultat = lagBehandlingsresultat();
-        behandlingsresultat.hentValidertAnmodningsperiode()
+        behandlingsresultat.hentAnmodningsperiode()
             .getAnmodningsperiodeSvar().setAnmodningsperiodeSvarType(Anmodningsperiodesvartyper.INNVILGELSE);
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
 

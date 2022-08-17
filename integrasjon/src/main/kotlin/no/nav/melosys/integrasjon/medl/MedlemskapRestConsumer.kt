@@ -1,9 +1,9 @@
 package no.nav.melosys.integrasjon.medl
 
+import no.nav.melosys.integrasjon.felles.RestConsumer
 import no.nav.melosys.integrasjon.medl.api.v1.MedlemskapsunntakForGet
 import no.nav.melosys.integrasjon.medl.api.v1.MedlemskapsunntakForPost
 import no.nav.melosys.integrasjon.medl.api.v1.MedlemskapsunntakForPut
-import no.nav.melosys.integrasjon.felles.RestConsumer
 import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
 import org.springframework.retry.annotation.Retryable

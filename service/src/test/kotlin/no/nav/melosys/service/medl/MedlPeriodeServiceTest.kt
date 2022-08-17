@@ -42,6 +42,9 @@ class MedlPeriodeServiceTest {
     @MockK
     lateinit var anmodningsperiodeRepository: AnmodningsperiodeRepository
 
+    @RelaxedMockK
+    lateinit var medlAnmodningsperiodeService: MedlAnmodningsperiodeService
+
     @MockK
     lateinit var utpekingsperiodeRepository: UtpekingsperiodeRepository
 
@@ -57,7 +60,7 @@ class MedlPeriodeServiceTest {
             medlService,
             behandlingsresultatService,
             lovvalgsperiodeRepository,
-            anmodningsperiodeRepository,
+            medlAnmodningsperiodeService,
             utpekingsperiodeRepository,
             medlemskapsperiodeRepository
         )
@@ -93,9 +96,8 @@ class MedlPeriodeServiceTest {
         every { anmodningsperiodeRepository.save(any()) } returns Anmodningsperiode()
 
         medlPeriodeService.opprettPeriodeUnderAvklaring(Anmodningsperiode(), 1L, false)
-
         verify { medlService.opprettPeriodeUnderAvklaring(FNR, any(), KildedokumenttypeMedl.HENV_SOKNAD) }
-        verify { anmodningsperiodeRepository.save(any()) }
+        verify { medlAnmodningsperiodeService.lagreAnmodningsperiode(any()) }
     }
 
     @Test

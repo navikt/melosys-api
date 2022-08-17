@@ -262,6 +262,7 @@ public final class ProsessflytDefinisjon {
                 OPPRETT_SEDDOKUMENT,
                 OPPRETT_SED_GRUNNLAG,
                 OPPRETT_ANMODNINGSPERIODE_FRA_SED,
+                AVSLUTT_TIDLIGERE_MEDL_ANMODNINGSPERIODE,
                 AVSLUTT_TIDLIGERE_MEDL_PERIODE,
                 HENT_REGISTEROPPLYSNINGER,
                 REGISTERKONTROLL,

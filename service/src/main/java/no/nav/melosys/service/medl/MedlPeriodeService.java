@@ -9,7 +9,6 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.medl.KildedokumenttypeMedl;
 import no.nav.melosys.integrasjon.medl.MedlService;
 import no.nav.melosys.integrasjon.medl.StatusaarsakMedl;
-import no.nav.melosys.repository.AnmodningsperiodeRepository;
 import no.nav.melosys.repository.LovvalgsperiodeRepository;
 import no.nav.melosys.repository.MedlemskapsperiodeRepository;
 import no.nav.melosys.repository.UtpekingsperiodeRepository;
@@ -29,7 +28,7 @@ public class MedlPeriodeService {
     private final MedlService medlService;
     private final BehandlingsresultatService behandlingsresultatService;
     private final LovvalgsperiodeRepository lovvalgsperiodeRepository;
-    private final AnmodningsperiodeRepository anmodningsperiodeRepository;
+    private final MedlAnmodningsperiodeService medlAnmodningsperiodeService;
     private final UtpekingsperiodeRepository utpekingsperiodeRepository;
     private final MedlemskapsperiodeRepository medlemskapsperiodeRepository;
 
@@ -39,14 +38,14 @@ public class MedlPeriodeService {
                               MedlService medlService,
                               BehandlingsresultatService behandlingsresultatService,
                               LovvalgsperiodeRepository lovvalgsperiodeRepository,
-                              AnmodningsperiodeRepository anmodningsperiodeRepository,
+                              MedlAnmodningsperiodeService medlAnmodningsperiodeService,
                               UtpekingsperiodeRepository utpekingsperiodeRepository,
                               MedlemskapsperiodeRepository medlemskapsperiodeRepository) {
         this.persondataFasade = persondataFasade;
         this.medlService = medlService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.lovvalgsperiodeRepository = lovvalgsperiodeRepository;
-        this.anmodningsperiodeRepository = anmodningsperiodeRepository;
+        this.medlAnmodningsperiodeService = medlAnmodningsperiodeService;
         this.utpekingsperiodeRepository = utpekingsperiodeRepository;
         this.medlemskapsperiodeRepository = medlemskapsperiodeRepository;
     }
@@ -117,7 +116,6 @@ public class MedlPeriodeService {
 
     public void avsluttTidligerMedlPeriode(Fagsak fagsak) {
         Optional<Behandling> optionalBehandling = fagsak.finnTidligstInaktivBehandling();
-
         if (optionalBehandling.isPresent()) {
             Optional<Lovvalgsperiode> lovvalgsperiode = finnLovvalgsperiode(optionalBehandling.get());
             if (lovvalgsperiode.isPresent() && lovvalgsperiode.get().getMedlPeriodeID() != null) {
@@ -154,7 +152,8 @@ public class MedlPeriodeService {
         if (periodeOmLovvalg instanceof Lovvalgsperiode lovvalgsperiode) {
             lagreMedlPeriodeId(medlPeriodeID, lovvalgsperiode);
         } else if (periodeOmLovvalg instanceof Anmodningsperiode anmodningsperiode) {
-            lagreMedlPeriodeId(medlPeriodeID, anmodningsperiode);
+            anmodningsperiode.setMedlPeriodeID(medlPeriodeID);
+            medlAnmodningsperiodeService.lagreAnmodningsperiode(anmodningsperiode);
         } else if (periodeOmLovvalg instanceof Utpekingsperiode utpekingsperiode) {
             lagreMedlPeriodeId(medlPeriodeID, utpekingsperiode);
         } else {
@@ -167,10 +166,6 @@ public class MedlPeriodeService {
         lovvalgsperiodeRepository.save(lovvalgsperiode);
     }
 
-    private void lagreMedlPeriodeId(Long medlPeriodeID, Anmodningsperiode anmodningsperiode) {
-        anmodningsperiode.setMedlPeriodeID(medlPeriodeID);
-        anmodningsperiodeRepository.save(anmodningsperiode);
-    }
 
     private void lagreMedlPeriodeId(Long medlPeriodeID, Utpekingsperiode utpekingsperiode) {
         utpekingsperiode.setMedlPeriodeID(medlPeriodeID);
