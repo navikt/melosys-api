@@ -18,7 +18,7 @@ public class AvsluttTidligereAnmodningsperiode implements StegBehandler {
 
     @Override
     public ProsessSteg inngangsSteg() {
-        return ProsessSteg.AVSLUTT_TIDLIGERE_ANMODNINGSPERIODE;
+        return ProsessSteg.AVSLUTT_TIDLIGERE_MEDL_ANMODNINGSPERIODE;
     }
 
     @Override

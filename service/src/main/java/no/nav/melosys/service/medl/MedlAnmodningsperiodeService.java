@@ -33,11 +33,8 @@ public class MedlAnmodningsperiodeService {
 
     public void avsluttTidligereAnmodningsperiode(Behandling behandling) {
         Anmodningsperiode forrigeAnmodningsPeriode = finnAnmodningsperiodeForForrigeA001(behandling);
-        log.info("Avslutter tidligere anmodningsperiode med MedlPeriodeID: {}", forrigeAnmodningsPeriode.getMedlPeriodeID());
-        avsluttPeriode(forrigeAnmodningsPeriode.getMedlPeriodeID());
-    }
-
-    private void avsluttPeriode(long medlPeriodeID) {
+        Long medlPeriodeID = forrigeAnmodningsPeriode.getMedlPeriodeID();
+        log.info("Avslutter tidligere anmodningsperiode med MedlPeriodeID: {}", medlPeriodeID);
         medlService.avvisPeriode(medlPeriodeID, StatusaarsakMedl.AVVIST);
     }
 
