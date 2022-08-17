@@ -7,7 +7,7 @@ public enum ProsessSteg implements Kodeverk {
     AVKLAR_ARBEIDSGIVER("AVKLAR_ARBEIDSGIVER", "Avklaring av norsk arbeidsgiver"),
     AVKLAR_MYNDIGHET("AVKLAR_MYNDIGHET", "Avklaring av utenlandsk trygdemyndighet"),
     AVSLUTT_SAK_OG_BEHANDLING("AVSLUTT_SAK_OG_BEHANDLING", "Avslutt fagsak og aktiv behandling"),
-    AVSLUTT_TIDLIGERE_MEDL_PERIODE("AVSLUTT_TIDLIGERE_MEDL_PERIODE", "Avslutter tidligere periode i Medl"),
+    AVSLUTT_TIDLIGERE_MEDL_PERIODE("AVSLUTT_TIDLIGERE_MEDL_PERIODE", "Avslutter tidligere periode i Medl"), // Gjelder Lovvalgperiode
     AVSLUTT_TIDLIGERE_ANMODNINGSPERIODE("AVSLUTT_TIDLIGERE_ANMODNINGSPERIODE", "Avslutter tidligere anmodningsperiode i Medl"),
     BESTEM_BEHANDLINGMÅTE_SED("BESTEM_BEHANDLINGMÅTE_SED", "Bestemmer videre behandlingsmåte for en mottatt SED etter registerkontroll"),
     BESTEM_BEHANDLINGSMÅTE_SVAR_ANMODNING_UNNTAK("BESTEM_BEHANDLINGSMÅTE_SVAR_ANMODNING_UNNTAK", "Oppdaterer behandling eller fatter vedtak etter mottak av svar på anmodning om unntak"),

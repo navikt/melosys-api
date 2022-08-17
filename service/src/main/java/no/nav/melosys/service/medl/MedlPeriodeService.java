@@ -117,11 +117,8 @@ public class MedlPeriodeService {
 
     public void avsluttTidligerMedlPeriode(Fagsak fagsak) {
         Optional<Behandling> optionalBehandling = fagsak.finnTidligstInaktivBehandling();
-        log.info("Tidligst inaktiv behandling: {}", optionalBehandling.orElse(null));
         if (optionalBehandling.isPresent()) {
             Optional<Lovvalgsperiode> lovvalgsperiode = finnLovvalgsperiode(optionalBehandling.get());
-            log.info("Henter lovvalgsperiode fra behandlingID {}", optionalBehandling.get().getId());
-            log.info("Lovvalgsperiode: {}", lovvalgsperiode.orElse(null));
             if (lovvalgsperiode.isPresent() && lovvalgsperiode.get().getMedlPeriodeID() != null) {
                 log.info("Avslutter tidligere periode for fagsak {}", fagsak.getSaksnummer());
                 avvisPeriode(lovvalgsperiode.get().getMedlPeriodeID());
