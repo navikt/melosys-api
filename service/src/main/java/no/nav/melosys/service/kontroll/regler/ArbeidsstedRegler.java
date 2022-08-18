@@ -19,7 +19,7 @@ public final class ArbeidsstedRegler {
             "(\\bHopen)";
 
     private static final Pattern BYER_FRA_SVALBARD_PATTERN = Pattern.compile(BYER_FRA_SVALBARD_REGEX,
-                                                                             Pattern.CASE_INSENSITIVE + Pattern.CANON_EQ + Pattern.UNICODE_CASE);
+                                                                             Pattern.CASE_INSENSITIVE | Pattern.CANON_EQ | Pattern.UNICODE_CASE);
 
     private static final Predicate<Arbeidssted> ARBEIDSSTED_SVALBARD_JAN_MAIEN =
         arbeidssted -> StringUtils.equals(arbeidssted.adresse.land, Landkoder.SJ.getKode())

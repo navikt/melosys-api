@@ -48,6 +48,11 @@ class ArbeidsstedReglerTest {
     }
 
     @Test
+    void arbeidstedSvalbardOgJanMayen_caseInsensitive_true() {
+        assertThat(ArbeidsstedRegler.erArbeidsstedFraSvalbardOgJanMayen(lagSedDokument("NO", " NY-ÅLESUND "))).isTrue();
+    }
+
+    @Test
     void arbeidstedSvalbardOgJanMayen_byIkkeFraSvalbard_false() {
         assertThat(ArbeidsstedRegler.erArbeidsstedFraSvalbardOgJanMayen(lagSedDokument("JS", "New-Holesound"))).isFalse();
     }
