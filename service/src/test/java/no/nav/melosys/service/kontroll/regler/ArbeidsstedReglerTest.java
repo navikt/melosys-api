@@ -58,7 +58,7 @@ class ArbeidsstedReglerTest {
     }
 
     @Test
-    void arbeidstedSvalbardOgJanMayen_tekstInneholderHopen_false() {
+    void arbeidstedSvalbardOgJanMayen_tekstInneholderSenjahopen_false() {
         assertThat(ArbeidsstedRegler.erArbeidsstedFraSvalbardOgJanMayen(lagSedDokument("NO", "Senjahopen"))).isFalse();
     }
 
@@ -66,6 +66,12 @@ class ArbeidsstedReglerTest {
     void arbeidstedSvalbardOgJanMayen_tekstInneholderByFraSvalbardIkkeHopen_true() {
         assertThat(ArbeidsstedRegler.erArbeidsstedFraSvalbardOgJanMayen(lagSedDokument("NO", "Longyearbyen, Svalbard, " +
             "Norway"))).isTrue();
+    }
+
+    @Test
+    void arbeidstedSvalbardOgJanMayen_tekstInneholderHopenMenIkkeHopen_false() {
+        assertThat(ArbeidsstedRegler.erArbeidsstedFraSvalbardOgJanMayen(lagSedDokument("NO", "Hopener Mühlenbach, " +
+            "Germany"))).isFalse();
     }
 
     private RepresentantIUtlandet lagRepresentantIUtlandet(String navn) {
