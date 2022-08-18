@@ -55,7 +55,7 @@ class MedlAnmodningsperiodeServiceTest {
     @Test
     void avsluttTidligereAnmodningsperiode_avslutterTidligereAnmodningsperiode() {
         fagsak.setBehandlinger(List.of(
-            lagA001Behandling(1L, Instant.now()),
+            lagA001Behandling(1L, Instant.now().minusSeconds(5)),
             nyBehandling
         ));
         nyBehandling.setId(2L);
@@ -72,9 +72,9 @@ class MedlAnmodningsperiodeServiceTest {
     @Test
     void avsluttTidligereAnmodningsperiode_avslutterTidligereAnmodningsperiode_medFlereTidligereBehandlinger() {
         fagsak.setBehandlinger(List.of(
-            lagA001Behandling(1L, Instant.now().minusSeconds(10)),
-            lagA001Behandling(2L, Instant.now().minusSeconds(5)),
-            lagA001Behandling(3L, Instant.now()),
+            lagA001Behandling(1L, Instant.now().minusSeconds(15)),
+            lagA001Behandling(2L, Instant.now().minusSeconds(10)),
+            lagA001Behandling(3L, Instant.now().minusSeconds(5)),
             nyBehandling
         ));
         nyBehandling.setId(4L);
