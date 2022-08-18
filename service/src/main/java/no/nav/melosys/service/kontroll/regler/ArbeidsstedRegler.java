@@ -27,7 +27,7 @@ public final class ArbeidsstedRegler {
         return representantIUtlandet == null || representantIUtlandet.representantNavn == null;
     }
 
-    public static boolean arbeidstedSvalbardOgJanMayen(SedDokument sedDokument) {
+    public static boolean erArbeidsstedFraSvalbardOgJanMayen(SedDokument sedDokument) {
         return sedDokument.getArbeidssteder().stream().anyMatch(ARBEIDSSTED_SVALBARD_JAN_MAIEN);
     }
 
