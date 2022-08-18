@@ -15,8 +15,8 @@ public final class ArbeidsstedRegler {
     }
 
     private static final String BYER_FRA_SVALBARD_REGEX =
-        "(Ny-Ålesund)|(Ny-Aalesund)|(Ny-Alesund)|(Svalbard)|(Sveagruva)|(Bjørnøya)|(Bjoernoya)|(Bjornoya)|" +
-            "(Spitsbergen)|(Longyearbyen)|(\\bHopen\\b)";
+        "(Ny-Ålesund)|(Ny-Aalesund)|(Ny-Alesund)|(Ny Ålesund)|(Ny Aalesund)|(Ny Alesund)|(Svalbard)|(Sveagruva)|" +
+            "(Bjørnøya)|(Bjoernoya)|(Bjornoya)|(Spitsbergen)|(Longyearbyen)|(\\bHopen\\b)";
 
     private static final Pattern BYER_FRA_SVALBARD_PATTERN = Pattern.compile(BYER_FRA_SVALBARD_REGEX,
                                                                              Pattern.CASE_INSENSITIVE | Pattern.CANON_EQ | Pattern.UNICODE_CASE);
