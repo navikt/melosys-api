@@ -38,11 +38,6 @@ class ArbeidsstedReglerTest {
     }
 
     @Test
-    void arbeidstedSvalbardOgJanMayen_tekstInneholderHopen_false() {
-        assertThat(ArbeidsstedRegler.erArbeidsstedFraSvalbardOgJanMayen(lagSedDokument("NO", "Senjahopen"))).isFalse();
-    }
-
-    @Test
     void arbeidstedSvalbardOgJanMayen_likByFraSvalbard_true() {
         assertThat(ArbeidsstedRegler.erArbeidsstedFraSvalbardOgJanMayen(lagSedDokument("NO", "Hopen"))).isTrue();
     }
@@ -55,6 +50,17 @@ class ArbeidsstedReglerTest {
     @Test
     void arbeidstedSvalbardOgJanMayen_byIkkeFraSvalbard_false() {
         assertThat(ArbeidsstedRegler.erArbeidsstedFraSvalbardOgJanMayen(lagSedDokument("JS", "New-Holesound"))).isFalse();
+    }
+
+    @Test
+    void arbeidstedSvalbardOgJanMayen_tekstInneholderHopen_false() {
+        assertThat(ArbeidsstedRegler.erArbeidsstedFraSvalbardOgJanMayen(lagSedDokument("NO", "Senjahopen"))).isFalse();
+    }
+
+    @Test
+    void arbeidstedSvalbardOgJanMayen_tekstInneholderByFraSvalbardIkkeHopen_true() {
+        assertThat(ArbeidsstedRegler.erArbeidsstedFraSvalbardOgJanMayen(lagSedDokument("NO", "Longyearbyen, Svalbard, " +
+            "Norway"))).isTrue();
     }
 
     private RepresentantIUtlandet lagRepresentantIUtlandet(String navn) {
