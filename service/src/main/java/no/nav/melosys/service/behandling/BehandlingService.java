@@ -12,6 +12,7 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagKonverterer;
 import no.nav.melosys.domain.brev.DokumentasjonSvarfrist;
+import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
@@ -34,7 +35,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.*;
-import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.ARBEID_FLERE_LAND;
+import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*;
 import static no.nav.melosys.metrics.MetrikkerNavn.*;
 
 @Service
@@ -88,6 +89,18 @@ public class BehandlingService {
             .orElseThrow(() -> new IkkeFunnetException(FINNER_IKKE_BEHANDLING + behandlingId));
     }
 
+    public boolean behandlingErLåstForEndring(Behandlingstema behandlingstema) {
+        Set<Behandlingstema> behandlingstemaerSomIkkeKanEndre = Set.of(
+            REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING,
+            REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE,
+            BESLUTNING_LOVVALG_NORGE,
+            BESLUTNING_LOVVALG_ANNET_LAND,
+            ANMODNING_OM_UNNTAK_HOVEDREGEL
+        );
+
+        return behandlingstemaerSomIkkeKanEndre.contains(behandlingstema);
+    }
+
     @Transactional
     public Behandling nyBehandling(Fagsak fagsak,
                                    Behandlingsstatus behandlingsstatus,
@@ -118,24 +131,33 @@ public class BehandlingService {
     }
 
     @Transactional
-    public void endreBehandling(long behandlingID, Sakstyper ignoredSakstype, Behandlingstyper type, Behandlingstema tema, Behandlingsstatus status, LocalDate behandlingsfrist) {
+    public void endreBehandling(long behandlingID, Sakstyper ignoredSakstype, Behandlingstyper type, Behandlingstema tema, Behandlingsstatus status, LocalDate behandlingsfrist, Sakstemaer sakstema) {
         // TODO: Endre sakstype (MELOSYS-4899 for EØS <-> trygdeavtale)
         var behandling = hentBehandling(behandlingID);
+        boolean behandlingErLåst = behandlingErLåstForEndring(behandling.getTema());
+
         if (!behandling.erAktiv()) {
             throw new FunksjonellException("Behandlingen må være aktiv for å kunne endres");
         }
 
-        if (status != null && status != behandling.getStatus() && saksbehandlerKanEndreStatus(behandling, status)) {
-            endreStatus(behandling, status);
+        if (sakstema != null && sakstema != behandling.getFagsak().getTema() && saksbehandlerKanEndreSakstema(behandling, sakstema) && !behandlingErLåst) {
+            endreSakstema(behandling, sakstema);
         }
-        if (type != null && type != behandling.getType() && saksbehandlerKanEndreType(behandling, type)) {
+
+        if (type != null && type != behandling.getType() && saksbehandlerKanEndreType(behandling, type) && !behandlingErLåst) {
             endreType(behandling, type);
         }
-        if (tema != null && tema != behandling.getTema() && saksbehandlerKanEndreTema(behandling, tema)) {
+
+        if (tema != null && tema != behandling.getTema() && saksbehandlerKanEndreTema(behandling, tema) && !behandlingErLåst) {
             endreTema(behandling, tema);
         }
+
         if (behandlingsfrist != null && !behandlingsfrist.equals(behandling.getBehandlingsfrist())) {
             endreBehandlingsfrist(behandling, behandlingsfrist);
+        }
+
+        if (status != null && status != behandling.getStatus() && saksbehandlerKanEndreStatus(behandling, status)) {
+            endreStatus(behandling, status);
         }
     }
 
@@ -216,6 +238,14 @@ public class BehandlingService {
     public void endreType(Behandling behandling, Behandlingstyper type) {
         log.info("Endrer behandlingstypen for behandling {} fra {} til {}", behandling.getId(), behandling.getType(), type);
         behandling.setType(type);
+        behandlingRepository.save(behandling);
+        tilbakestillBehandlingsgrunnlag(behandling);
+        applicationEventPublisher.publishEvent(new BehandlingEndretAvSaksbehandlerEvent(behandling.getId(), behandling));
+    }
+
+    public void endreSakstema(Behandling behandling, Sakstemaer sakstema) {
+        log.info("Endrer behandlings saktema for behandling {} fra {} til {}", behandling.getId(), behandling.getFagsak().getTema(), sakstema);
+        behandling.getFagsak().setTema(sakstema);
         behandlingRepository.save(behandling);
         tilbakestillBehandlingsgrunnlag(behandling);
         applicationEventPublisher.publishEvent(new BehandlingEndretAvSaksbehandlerEvent(behandling.getId(), behandling));
@@ -411,6 +441,11 @@ public class BehandlingService {
         return MuligeManuelleBehandlingsendringer.hentMuligeStatuser(behandling);
     }
 
+    public Set<Sakstemaer> hentMuligeSakstema(long behandlingID) {
+        var behandling = hentBehandling(behandlingID);
+        return MuligeManuelleBehandlingsendringer.hentMuligeSakstema(behandling);
+    }
+
     @Transactional
     public Set<Behandlingstema> hentMuligeBehandlingstema(long behandlingID) {
         var behandling = hentBehandling(behandlingID);
@@ -445,6 +480,11 @@ public class BehandlingService {
         return true;
     }
 
+    private boolean saksbehandlerKanEndreSakstema(Behandling behandling, Sakstemaer sakstema) {
+        MuligeManuelleBehandlingsendringer.validerNySakstemaMulig(behandling, sakstema);
+        return true;
+    }
+
     private boolean saksbehandlerKanEndreTema(Behandling behandling, Behandlingstema tema) {
         var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
         MuligeManuelleBehandlingsendringer.validerNyttTemaMulig(behandling, behandlingsresultat, tema);
@@ -455,8 +495,7 @@ public class BehandlingService {
         return switch (behandlingstema) {
             case UTSENDT_ARBEIDSTAKER, UTSENDT_SELVSTENDIG, ARBEID_FLERE_LAND, ARBEID_ETT_LAND_ØVRIG,
                 ARBEID_TJENESTEPERSON_ELLER_FLY, ARBEID_KUN_NORGE, IKKE_YRKESAKTIV, ARBEID_I_UTLANDET, ARBEID_NORGE_BOSATT_ANNET_LAND,
-                YRKESAKTIV, UNNTAK_MEDLEMSKAP, REGISTRERING_UNNTAK, PENSJONIST ->
-                LocalDate.now().plusDays(30);
+                YRKESAKTIV, UNNTAK_MEDLEMSKAP, REGISTRERING_UNNTAK, PENSJONIST -> LocalDate.now().plusDays(30);
             case REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING, REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE ->
                 LocalDate.now().plusWeeks(2);
             case BESLUTNING_LOVVALG_NORGE, BESLUTNING_LOVVALG_ANNET_LAND -> LocalDate.now().plusWeeks(4);

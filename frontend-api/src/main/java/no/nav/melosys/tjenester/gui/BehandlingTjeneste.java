@@ -8,6 +8,7 @@ import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.dokument.DokumentView;
+import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -61,7 +62,7 @@ public class BehandlingTjeneste {
         aksesskontroll.autoriser(behandlingID);
 
         behandlingService.endreBehandling(behandlingID, endreBehandling.sakstype(), endreBehandling.behandlingstype(),
-            endreBehandling.behandlingstema(), endreBehandling.behandlingsstatus(), endreBehandling.behandlingsfrist());
+            endreBehandling.behandlingstema(), endreBehandling.behandlingsstatus(), endreBehandling.behandlingsfrist(), endreBehandling.sakstema());
         return ResponseEntity.noContent().build();
     }
 
@@ -166,6 +167,15 @@ public class BehandlingTjeneste {
         return ResponseEntity.ok(behandlingService.hentMuligeStatuser(behandlingID));
     }
 
+    @GetMapping("{behandlingID}/mulige-sakstema")
+    @ApiOperation(value = "Hent mulige nye sakstema for en behandling")
+    public ResponseEntity<Collection<Sakstemaer>> hentMuligeSakstema(@PathVariable("behandlingID") long behandlingsID) {
+        log.debug("Saksbehandler {} ber om å hente mulige nye sakstema for behandling {}.", SubjectHandler.getInstance().getUserID(), behandlingsID);
+        aksesskontroll.autoriser(behandlingsID);
+
+        return ResponseEntity.ok(behandlingService.hentMuligeSakstema(behandlingsID));
+    }
+
     @GetMapping("{behandlingID}/mulige-behandlingstema")
     @ApiOperation(value = "Hent mulige nye behandlingstema for en behandling")
     public ResponseEntity<Collection<Behandlingstema>> hentMuligeBehandlingstema(@PathVariable("behandlingID") long behandlingsID) {
@@ -184,7 +194,6 @@ public class BehandlingTjeneste {
         return ResponseEntity.ok(behandlingService.hentMuligeTyper(behandlingID));
     }
 
-
     private BehandlingDto tilBehandlingDto(Behandling behandling, String saksbehandler) {
         var behandlingDto = new BehandlingDto();
         behandlingDto.setBehandlingID(behandling.getId());
@@ -199,6 +208,7 @@ public class BehandlingTjeneste {
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
 
         var behandlingOppsummeringDto = new BehandlingOppsummeringDto();
+        behandlingOppsummeringDto.setSakstema(behandling.getFagsak().getTema());
         behandlingOppsummeringDto.setBehandlingsstatus(behandling.getStatus());
         behandlingOppsummeringDto.setBehandlingstype(behandling.getType());
         behandlingOppsummeringDto.setBehandlingstema(behandling.getTema());

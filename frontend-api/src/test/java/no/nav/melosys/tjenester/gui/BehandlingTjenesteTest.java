@@ -16,6 +16,7 @@ import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresse;
 import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresseNorge;
 import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresseUtland;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
+import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
@@ -106,14 +107,15 @@ class BehandlingTjenesteTest {
         final var behandlingstema = Behandlingstema.ARBEID_I_UTLANDET;
         final var behandlingsstatus = Behandlingsstatus.UNDER_BEHANDLING;
         final var behandlingsfrist = LocalDate.now();
+        final var sakstema = Sakstemaer.MEDLEMSKAP_LOVVALG;
 
-        var endreBehandlingDto = new EndreBehandlingDto(sakstype, behandlingstype, behandlingstema, behandlingsstatus, behandlingsfrist);
+        var endreBehandlingDto = new EndreBehandlingDto(sakstype, behandlingstype, behandlingstema, behandlingsstatus, behandlingsfrist, sakstema);
         mockMvc.perform(post(BASE_URL + "/{behandlingID}/endre", BEHANDLING_ID)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(endreBehandlingDto)))
             .andExpect(status().isNoContent());
 
-        verify(behandlingService).endreBehandling(BEHANDLING_ID, sakstype, behandlingstype, behandlingstema, behandlingsstatus, behandlingsfrist);
+        verify(behandlingService).endreBehandling(BEHANDLING_ID, sakstype, behandlingstype, behandlingstema, behandlingsstatus, behandlingsfrist, sakstema);
     }
 
     @Test

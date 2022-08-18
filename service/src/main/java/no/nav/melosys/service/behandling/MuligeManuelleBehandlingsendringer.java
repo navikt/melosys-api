@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -14,6 +15,7 @@ import no.nav.melosys.exception.FunksjonellException;
 
 import static no.nav.melosys.domain.Behandling.BEHANDLINGSTEMA_SED_FORESPØRSEL;
 import static no.nav.melosys.domain.Behandling.erBehandlingAvSedForespørsler;
+import static no.nav.melosys.domain.kodeverk.Sakstemaer.*;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.*;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.ENDRET_PERIODE;
@@ -21,9 +23,9 @@ import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.NY_VU
 
 public class MuligeManuelleBehandlingsendringer {
     static final Set<Behandlingstema> BEHANDLINGSTEMA_SØKNAD = Set.of(UTSENDT_ARBEIDSTAKER, UTSENDT_SELVSTENDIG,
-                                                                      ARBEID_ETT_LAND_ØVRIG,
-                                                                      ARBEID_TJENESTEPERSON_ELLER_FLY, ARBEID_KUN_NORGE,
-                                                                      IKKE_YRKESAKTIV, ARBEID_FLERE_LAND);
+        ARBEID_ETT_LAND_ØVRIG,
+        ARBEID_TJENESTEPERSON_ELLER_FLY, ARBEID_KUN_NORGE,
+        IKKE_YRKESAKTIV, ARBEID_FLERE_LAND);
 
     private MuligeManuelleBehandlingsendringer() {
     }
@@ -31,6 +33,13 @@ public class MuligeManuelleBehandlingsendringer {
     private static final Set<Behandlingsstatus> MULIGE_STATUSER = Set.of(AVVENT_DOK_PART, AVVENT_DOK_UTL, UNDER_BEHANDLING, AVVENT_FAGLIG_AVKLARING);
     private static final Set<Behandlingstema> TEMAER_SOM_KAN_AVSLUTTES = Set.of(ØVRIGE_SED_MED, ØVRIGE_SED_UFM, FORESPØRSEL_TRYGDEMYNDIGHET, TRYGDETID, IKKE_YRKESAKTIV);
     private static final Set<Behandlingstema> TEMAER_SOM_KAN_ENDRE_TYPE = Set.of(UTSENDT_ARBEIDSTAKER, UTSENDT_SELVSTENDIG);
+    private static final Set<Behandlingstema> TEMAER_SOM_LÅSER_ENDRING = Set.of(
+        REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING,
+        REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE,
+        BESLUTNING_LOVVALG_NORGE,
+        BESLUTNING_LOVVALG_ANNET_LAND,
+        ANMODNING_OM_UNNTAK_HOVEDREGEL
+    );
 
     public static Set<Behandlingsstatus> hentMuligeStatuser(Behandling behandling) {
         if (behandling.erInaktiv()) return Collections.emptySet();
@@ -45,7 +54,7 @@ public class MuligeManuelleBehandlingsendringer {
     }
 
     public static Set<Behandlingstyper> hentMuligeTyper(Behandling behandling) {
-        if (behandling.erInaktiv() || !TEMAER_SOM_KAN_ENDRE_TYPE.contains(behandling.getTema())) {
+        if (behandling.erInaktiv() || !TEMAER_SOM_KAN_ENDRE_TYPE.contains(behandling.getTema()) || TEMAER_SOM_LÅSER_ENDRING.contains(behandling.getTema())) {
             return Collections.emptySet();
         }
 
@@ -56,8 +65,26 @@ public class MuligeManuelleBehandlingsendringer {
         };
     }
 
+    public static Set<Sakstemaer> hentMuligeSakstema(Behandling behandling) {
+        if (behandling.erInaktiv() || TEMAER_SOM_LÅSER_ENDRING.contains(behandling.getTema())) {
+            return Collections.emptySet();
+        }
+
+        return switch (behandling.getFagsak().getTema()) {
+            case MEDLEMSKAP_LOVVALG -> Set.of(UNNTAK, TRYGDEAVGIFT);
+            case UNNTAK -> Set.of(MEDLEMSKAP_LOVVALG, TRYGDEAVGIFT);
+            case TRYGDEAVGIFT -> Set.of(UNNTAK, MEDLEMSKAP_LOVVALG);
+            default -> Collections.emptySet();
+        };
+    }
+
     public static Set<Behandlingstema> hentMuligeBehandlingstema(Behandling behandling, Behandlingsresultat behandlingsresultat) {
+        if (TEMAER_SOM_LÅSER_ENDRING.contains(behandling.getTema())) {
+            return Collections.emptySet();
+        }
+
         boolean kanOppdatereBehandlingstema = kanOppdatereBehandlingstema(behandling, behandlingsresultat);
+
         if (behandling.erEndretPeriode()) {
             return switch (behandling.getTema()) {
                 case UTSENDT_ARBEIDSTAKER -> Collections.singleton(UTSENDT_SELVSTENDIG);
@@ -88,6 +115,13 @@ public class MuligeManuelleBehandlingsendringer {
         if (!hentMuligeTyper(behandling).contains(type)) {
             throw new FunksjonellException(String.format("Behandlingen kan ikke endres til type %s. Gyldige typer for behandling %s er %s",
                 type, behandling.getId(), hentMuligeTyper(behandling)));
+        }
+    }
+
+    public static void validerNySakstemaMulig(Behandling behandling, Sakstemaer sakstemaer) {
+        if (!hentMuligeSakstema(behandling).contains(sakstemaer)) {
+            throw new FunksjonellException(String.format("Behandlingen kan ikke endres til sakstema %s. Gyldige sakstema for behandling %s er %s",
+                sakstemaer, behandling.getId(), hentMuligeSakstema(behandling)));
         }
     }
 

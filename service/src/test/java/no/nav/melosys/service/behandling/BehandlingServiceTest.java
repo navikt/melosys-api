@@ -12,6 +12,7 @@ import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
 import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
@@ -24,6 +25,7 @@ import no.nav.melosys.repository.BehandlingsgrunnlagRepository;
 import no.nav.melosys.repository.TidligereMedlemsperiodeRepository;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -46,6 +48,7 @@ class BehandlingServiceTest {
     private static final long BEHANDLING_ID = 11L;
     private static final Behandlingstyper BEHANDLING_TYPE = Behandlingstyper.NY_VURDERING;
     private static final Behandlingstema BEHANDLING_TEMA = Behandlingstema.ARBEID_FLERE_LAND;
+    private static final Sakstemaer SAKSTEMA = Sakstemaer.MEDLEMSKAP_LOVVALG;
     private static final Behandlingsstatus BEHANDLING_STATUS = UNDER_BEHANDLING;
     private static final LocalDate BEHANDLING_FRIST = LocalDate.now().plusMonths(1);
     private final Behandlingsresultat BEHANDLINGSRESULTAT = new Behandlingsresultat();
@@ -105,7 +108,7 @@ class BehandlingServiceTest {
         when(behandlingRepository.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(BEHANDLINGSRESULTAT);
 
-        behandlingService.endreBehandling(BEHANDLING_ID, Sakstyper.EU_EOS, BEHANDLING_TYPE, BEHANDLING_TEMA, BEHANDLING_STATUS, BEHANDLING_FRIST);
+        behandlingService.endreBehandling(BEHANDLING_ID, Sakstyper.EU_EOS, BEHANDLING_TYPE, BEHANDLING_TEMA, BEHANDLING_STATUS, BEHANDLING_FRIST, SAKSTEMA);
 
         verify(behandlingRepository, times(4)).save(behandlingCaptor.capture());
         verify(applicationEventPublisher, times(4)).publishEvent(behandlingEventCaptor.capture());
@@ -141,7 +144,7 @@ class BehandlingServiceTest {
         behandling.setBehandlingsgrunnlag(opprettBehandlingsgrunnlag());
         when(behandlingRepository.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
 
-        behandlingService.endreBehandling(BEHANDLING_ID, Sakstyper.EU_EOS, BEHANDLING_TYPE, null, null, BEHANDLING_FRIST);
+        behandlingService.endreBehandling(BEHANDLING_ID, Sakstyper.EU_EOS, BEHANDLING_TYPE, null, null, BEHANDLING_FRIST, SAKSTEMA);
 
         verify(behandlingRepository, never()).save(any());
         verify(applicationEventPublisher, never()).publishEvent(any());
@@ -421,6 +424,17 @@ class BehandlingServiceTest {
     }
 
     @Test
+    @Disabled
+    void endreBehandling_kasterFunksjonellException_dersomBehandlingstemaErLåst() {
+        behandling.setTema(REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING);
+        when(behandlingRepository.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> behandlingService.endreBehandling(BEHANDLING_ID, Sakstyper.EU_EOS, BEHANDLING_TYPE, BEHANDLING_TEMA, BEHANDLING_STATUS, BEHANDLING_FRIST, SAKSTEMA))
+            .withMessageContaining("Behandlingen har et låst behandlingstema, kan ikke endre");
+    }
+
+    @Test
     void avsluttNyVurdering_avslutterBehandlingOgOppdatererBehandlingsresultattype() {
         Behandling behandling = new Behandling();
         behandling.setId(BEHANDLING_ID);
@@ -453,9 +467,7 @@ class BehandlingServiceTest {
     void endreStatus_setterSvarFristPåToUker_nårNyStatusErAnmodningUnntakSendt() {
         Behandling behandling = opprettBehandlingUnderBehandling();
 
-
         behandlingService.endreStatus(behandling, ANMODNING_UNNTAK_SENDT);
-
 
         verify(behandlingRepository).save(behandlingCaptor.capture());
         Behandling lagretBehandling = behandlingCaptor.getValue();
@@ -470,9 +482,7 @@ class BehandlingServiceTest {
     void endreStatus_setterSvarFristPåToUker_nårNyStatusErAvventDokPart() {
         Behandling behandling = opprettBehandlingUnderBehandling();
 
-
         behandlingService.endreStatus(behandling, AVVENT_DOK_PART);
-
 
         verify(behandlingRepository).save(behandlingCaptor.capture());
         Behandling lagretBehandling = behandlingCaptor.getValue();
@@ -487,9 +497,7 @@ class BehandlingServiceTest {
     void endreStatus_setterSvarFristPåToUker_nårNyStatusErAvventDokUtl() {
         Behandling behandling = opprettBehandlingUnderBehandling();
 
-
         behandlingService.endreStatus(behandling, AVVENT_DOK_UTL);
-
 
         verify(behandlingRepository).save(behandlingCaptor.capture());
         Behandling lagretBehandling = behandlingCaptor.getValue();
@@ -507,9 +515,7 @@ class BehandlingServiceTest {
         behandling.setId(BEHANDLING_ID);
         behandling.setStatus(AVVENT_DOK_UTL);
 
-
         behandlingService.endreStatus(behandling, UNDER_BEHANDLING);
-
 
         verify(behandlingRepository).save(behandlingCaptor.capture());
         Behandling lagretBehandling = behandlingCaptor.getValue();
