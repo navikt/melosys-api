@@ -3,40 +3,28 @@ package no.nav.melosys.service.registeropplysninger;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.exception.TekniskException;
 
-/**
- * Setter saksopplysningtyper per behandlingstema, iht. https://confluence.adeo.no/display/TEESSI/Saksopplysninger+per+behandlingstema
- */
+
+// Setter saksopplysningtyper per behandlingstema,
+// iht. https://confluence.adeo.no/display/TEESSI/Saksopplysninger+per+behandlingstema
 public final class RegisteropplysningerFactory {
 
     private RegisteropplysningerFactory() {
     }
 
     public static RegisteropplysningerRequest.SaksopplysningTyper utledSaksopplysningTyper(Behandlingstema behandlingstema) {
-        switch (behandlingstema) {
-            case UTSENDT_ARBEIDSTAKER:
-            case UTSENDT_SELVSTENDIG:
-            case ARBEID_FLERE_LAND:
-            case IKKE_YRKESAKTIV:
-            case ARBEID_ETT_LAND_ØVRIG:
-            case ARBEID_NORGE_BOSATT_ANNET_LAND:
-            case ARBEID_I_UTLANDET:
-            case YRKESAKTIV:
-                return hentSaksopplysningTyperForBehandlingAvSøknad();
-            case REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING:
-            case REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE:
-                return hentSaksopplysningTyperForRegistreringAvUnntak();
-            case ANMODNING_OM_UNNTAK_HOVEDREGEL:
-                return hentSaksopplysningTyperForAnmodningOmUnntak();
-            case BESLUTNING_LOVVALG_NORGE:
-            case BESLUTNING_LOVVALG_ANNET_LAND:
-                return hentSaksopplysningTyperForBeslutningOmLovvalg();
-            case ØVRIGE_SED_MED:
-            case ØVRIGE_SED_UFM:
-            case TRYGDETID:
-                return hentSaksopplysningTyperForBehandlingAvØvrigeSedOgTrygdetid();
-            default:
-                throw new TekniskException("Kan ikke utlede relevante saksopplysninger fra behandlingstema " + behandlingstema);
-        }
+        return switch (behandlingstema) {
+            case UTSENDT_ARBEIDSTAKER, UTSENDT_SELVSTENDIG, ARBEID_FLERE_LAND, IKKE_YRKESAKTIV, ARBEID_ETT_LAND_ØVRIG, ARBEID_TJENESTEPERSON_ELLER_FLY, ARBEID_NORGE_BOSATT_ANNET_LAND, ARBEID_I_UTLANDET, YRKESAKTIV ->
+                hentSaksopplysningTyperForBehandlingAvSøknad();
+            case REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING, REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE ->
+                hentSaksopplysningTyperForRegistreringAvUnntak();
+            case ANMODNING_OM_UNNTAK_HOVEDREGEL -> hentSaksopplysningTyperForAnmodningOmUnntak();
+            case BESLUTNING_LOVVALG_NORGE, BESLUTNING_LOVVALG_ANNET_LAND ->
+                hentSaksopplysningTyperForBeslutningOmLovvalg();
+            case ØVRIGE_SED_MED, ØVRIGE_SED_UFM, TRYGDETID ->
+                hentSaksopplysningTyperForBehandlingAvØvrigeSedOgTrygdetid();
+            default -> throw new TekniskException(
+                "Kan ikke utlede relevante saksopplysninger fra behandlingstema " + behandlingstema);
+        };
     }
 
     private static RegisteropplysningerRequest.SaksopplysningTyper hentSaksopplysningTyperForBehandlingAvSøknad() {

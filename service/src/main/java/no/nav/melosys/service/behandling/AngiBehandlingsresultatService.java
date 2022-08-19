@@ -78,10 +78,10 @@ public class AngiBehandlingsresultatService {
         ) {
             return;
         }
-        if (behandlingsresultattype == AVSLAG_SØKNAD &&
-            Set.of(ARBEID_ETT_LAND_ØVRIG, YRKESAKTIV, IKKE_YRKESAKTIV, PENSJONIST, UNNTAK_MEDLEMSKAP).contains(behandlingstema) &&
-            Set.of(FØRSTEGANG, NY_VURDERING).contains(behandlingstype)
-        ) {
+        if (behandlingsresultattype == AVSLAG_SØKNAD && Set.of(ARBEID_ETT_LAND_ØVRIG, ARBEID_TJENESTEPERSON_ELLER_FLY,
+                                                               YRKESAKTIV, IKKE_YRKESAKTIV, PENSJONIST,
+                                                               UNNTAK_MEDLEMSKAP).contains(behandlingstema) && Set.of(
+            FØRSTEGANG, NY_VURDERING).contains(behandlingstype)) {
             return;
         }
 
