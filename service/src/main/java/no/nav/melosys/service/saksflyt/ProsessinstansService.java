@@ -49,6 +49,7 @@ import org.springframework.util.CollectionUtils;
 
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.*;
 import static no.nav.melosys.integrasjon.felles.mdc.MDCOperations.CORRELATION_ID;
+import static no.nav.melosys.integrasjon.felles.mdc.MDCOperations.getCorrelationId;
 import static org.springframework.util.StringUtils.hasText;
 
 @Service
@@ -149,9 +150,7 @@ public class ProsessinstansService {
         if (saksbehandler != null) {
             prosessinstans.setData(ProsessDataKey.SAKSBEHANDLER, saksbehandler);
         }
-        if(MDC.get(CORRELATION_ID) != null ){
-            prosessinstans.setData(CORRELATION_ID_SAKSFLYT, MDC.get(CORRELATION_ID));
-        }
+        prosessinstans.setData(CORRELATION_ID_SAKSFLYT, getCorrelationId());
 
         prosessinstansRepo.save(prosessinstans);
         applicationEventPublisher.publishEvent(new ProsessinstansOpprettetEvent(prosessinstans));

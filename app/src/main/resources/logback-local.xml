@@ -22,5 +22,4 @@
     <logger name="org.springframework.transaction" level="WARN" />
     <logger name="org.springframework.transaction.interceptor" level="WARN" />
     <logger name="org.hibernate.SQL" level="WARN" />
-    <logger name="no.nav.melosys.integrasjon.felles.mdc.MDCFilter" level="DEBUG"/>
 </included>

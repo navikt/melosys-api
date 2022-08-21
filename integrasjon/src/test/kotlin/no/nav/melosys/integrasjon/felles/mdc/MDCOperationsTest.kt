@@ -15,8 +15,7 @@ class MDCOperationsTest {
     @Test
     fun test_generateCallId() {
         val callId1 = generateCallId()
-        callId1
-            .shouldNotBeNull()
+        callId1.shouldNotBeNull()
         val callId2 = generateCallId()
         callId2.shouldNotBeNull()
             .shouldNotBeEqualIgnoringCase(callId1)
@@ -29,8 +28,7 @@ class MDCOperationsTest {
             .shouldNotBeNull()
             .shouldBeEqualIgnoringCase("myValue")
         remove("myKey")
-        getFromMDC("myKey")
-            .shouldBeNull()
+        getFromMDC("myKey").shouldBeNull()
     }
 
 }

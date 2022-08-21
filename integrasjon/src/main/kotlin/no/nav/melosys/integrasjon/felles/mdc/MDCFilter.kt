@@ -1,6 +1,7 @@
 package no.nav.melosys.integrasjon.felles.mdc
 
 import no.nav.melosys.integrasjon.felles.mdc.MDCOperations.Companion.CORRELATION_ID
+import no.nav.melosys.integrasjon.felles.mdc.MDCOperations.Companion.getCorrelationId
 import no.nav.melosys.sikkerhet.context.SubjectHandler
 import org.slf4j.LoggerFactory
 import org.springframework.web.filter.OncePerRequestFilter
@@ -29,7 +30,7 @@ class MDCFilter : OncePerRequestFilter() {
                 MDCOperations.MDC_USER_ID,
                 userId ?: ""
             )
-            MDCOperations.putToMDC(CORRELATION_ID, UUID.randomUUID().toString())
+            MDCOperations.putToMDC(CORRELATION_ID, getCorrelationId())
             MDCOperations.putToMDC(MDCOperations.MDC_CONSUMER_ID, SYSTEMBRUKER)
             LOGGER.debug("Set MDC values")
             filterChain.doFilter(servletRequest, servletResponse)
