@@ -3,6 +3,7 @@ package no.nav.melosys.melosysmock.aareg
 import com.fasterxml.jackson.annotation.JsonInclude
 import no.nav.melosys.melosysmock.organisasjon.OrganisasjonRepo
 import no.nav.melosys.melosysmock.person.PersonRepoStorage
+import no.nav.security.token.support.core.api.Unprotected
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
@@ -12,8 +13,8 @@ import java.time.LocalDate
 
 @RestController
 @RequestMapping("/aareg-services/api/v1/arbeidstaker/arbeidsforhold")
+@Unprotected
 class AaregRestApi(private val personRepoStorage: PersonRepoStorage) {
-
     @GetMapping
     fun finnArbeidsforholdPrArbeidstaker(
             @RequestParam("regelverk", required = false) regelverk: String? = null,
