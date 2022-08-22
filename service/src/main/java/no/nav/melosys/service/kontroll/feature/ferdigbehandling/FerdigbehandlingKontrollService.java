@@ -8,6 +8,7 @@ import java.util.function.Function;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.PeriodeOmLovvalg;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
@@ -69,7 +70,7 @@ public class FerdigbehandlingKontrollService {
     }
 
     private void hentNyeRegisteropplysninger(Behandlingsresultat behandlingsresultat, Behandling behandling) {
-        Lovvalgsperiode lovvalgsperiode = behandlingsresultat.hentValidertLovvalgsperiode();
+        PeriodeOmLovvalg lovvalgsperiode = behandlingsresultat.hentValidertPeriodeOmLovvalg();
         String fnr = persondataFasade.hentFolkeregisterident(behandling.getFagsak().hentBrukersAktørID());
 
         registeropplysningerService.hentOgLagreOpplysninger(
@@ -84,7 +85,7 @@ public class FerdigbehandlingKontrollService {
     }
 
     public void kontrollerVedtak(long behandlingID, Sakstyper sakstype, Behandlingsresultattyper behandlingsresultattype) throws ValideringException {
-        Collection<Kontrollfeil> kontrollfeil =  utførKontroller(behandlingID, sakstype, behandlingsresultattype);
+        Collection<Kontrollfeil> kontrollfeil = utførKontroller(behandlingID, sakstype, behandlingsresultattype);
 
         if (!kontrollfeil.isEmpty()) {
             throw new ValideringException("Feil i validering. Kan ikke fatte vedtak.",
@@ -95,7 +96,7 @@ public class FerdigbehandlingKontrollService {
     public Collection<Kontrollfeil> utførKontroller(long behandlingID, Sakstyper sakstype, Behandlingsresultattyper behandlingsresultattype) {
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
 
-        return  switch (behandlingsresultattype) {
+        return switch (behandlingsresultattype) {
             case AVSLAG_MANGLENDE_OPPL, HENLEGGELSE -> utførKontrollerForAvslagOgHenleggelse(behandling);
             default -> utførKontroller(behandling, sakstype);
         };
