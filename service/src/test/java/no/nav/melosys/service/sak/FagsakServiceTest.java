@@ -25,9 +25,13 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static no.nav.melosys.domain.kodeverk.Sakstemaer.*;
+import static no.nav.melosys.domain.kodeverk.Sakstyper.*;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper.REGISTRERT_UNNTAK;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper.UTPEKING_NORGE_AVVIST;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.*;
+import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING;
+import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.UTSENDT_ARBEIDSTAKER;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -54,7 +58,12 @@ class FagsakServiceTest {
 
     @BeforeEach
     public void setUp() {
-        fagsakService = new FagsakService(fagsakRepo, behandlingService, kontaktopplysningService, oppgaveService, persondataFasade,
+        fagsakService = new FagsakService(
+            fagsakRepo,
+            behandlingService,
+            kontaktopplysningService,
+            oppgaveService,
+            persondataFasade,
             behandlingsresultatService);
     }
 
@@ -91,10 +100,10 @@ class FagsakServiceTest {
 
         OpprettSakRequest opprettSakRequest = new OpprettSakRequest.Builder()
             .medAktørID("123456789")
-            .medSakstype(Sakstyper.EU_EOS)
-            .medSakstema(Sakstemaer.MEDLEMSKAP_LOVVALG)
+            .medSakstype(EU_EOS)
+            .medSakstema(MEDLEMSKAP_LOVVALG)
             .medBehandlingstype(SOEKNAD)
-            .medBehandlingstema(Behandlingstema.UTSENDT_ARBEIDSTAKER)
+            .medBehandlingstema(UTSENDT_ARBEIDSTAKER)
             .medInitierendeJournalpostId(initierendeJournalpostId)
             .medInitierendeDokumentId(initierendeDokumentId)
             .medArbeidsgiver("arbeidsgiver")
@@ -104,10 +113,10 @@ class FagsakServiceTest {
         Fagsak fagsak = fagsakService.nyFagsakOgBehandling(opprettSakRequest);
         verify(fagsakRepo).save(any(Fagsak.class));
         verify(behandlingService).nyBehandling(any(), eq(Behandlingsstatus.OPPRETTET), eq(SOEKNAD),
-            eq(Behandlingstema.UTSENDT_ARBEIDSTAKER), eq(initierendeJournalpostId), eq(initierendeDokumentId));
+            eq(UTSENDT_ARBEIDSTAKER), eq(initierendeJournalpostId), eq(initierendeDokumentId));
         assertThat(fagsak.getBehandlinger()).isNotEmpty();
-        assertThat(fagsak.getType()).isEqualTo(Sakstyper.EU_EOS);
-        assertThat(fagsak.getTema()).isEqualTo(Sakstemaer.MEDLEMSKAP_LOVVALG);
+        assertThat(fagsak.getType()).isEqualTo(EU_EOS);
+        assertThat(fagsak.getTema()).isEqualTo(MEDLEMSKAP_LOVVALG);
         Aktoer forventetFullmektig = new Aktoer();
         forventetFullmektig.setFagsak(fagsak);
         forventetFullmektig.setRolle(Aktoersroller.REPRESENTANT);
@@ -165,12 +174,104 @@ class FagsakServiceTest {
     }
 
     @Test
+    void hentMuligeSakstema_med_behandlingstema_med_behandlingstema_lovlig() {
+        final String saksnummer = "MEL-1";
+        Fagsak fagsak = lagFagsakMedBruker();
+        Behandling behandling = lagBehandling(1L, SOEKNAD, UNDER_BEHANDLING, Instant.now());
+        behandling.setTema(UTSENDT_ARBEIDSTAKER);
+        fagsak.setBehandlinger(List.of(behandling));
+        fagsak.setTema(MEDLEMSKAP_LOVVALG);
+        behandling.setFagsak(fagsak);
+
+        when(fagsakRepo.findBySaksnummer(saksnummer)).thenReturn(Optional.of(fagsak));
+
+        Set<Sakstemaer> muligeSakstemaer = fagsakService.hentMuligeSakstema(saksnummer);
+
+        assertThat(muligeSakstemaer).isNotEmpty();
+        assertThat(muligeSakstemaer).contains(UNNTAK, TRYGDEAVGIFT);
+        assertThat(muligeSakstemaer).doesNotContain(MEDLEMSKAP_LOVVALG);
+    }
+
+    @Test
+    void hentMuligeSakstyper_med_behandlingstema_med_behandlingstema_lovlig() {
+        final String saksnummer = "MEL-1";
+        Fagsak fagsak = lagFagsakMedBruker();
+        Behandling behandling = lagBehandling(1L, SOEKNAD, UNDER_BEHANDLING, Instant.now());
+        behandling.setTema(UTSENDT_ARBEIDSTAKER);
+        fagsak.setBehandlinger(List.of(behandling));
+        fagsak.setType(EU_EOS);
+        behandling.setFagsak(fagsak);
+
+        when(fagsakRepo.findBySaksnummer(saksnummer)).thenReturn(Optional.of(fagsak));
+
+        Set<Sakstyper> muligeSakstyper = fagsakService.hentMuligeSakstype(saksnummer);
+
+        assertThat(muligeSakstyper).isNotEmpty();
+        assertThat(muligeSakstyper).contains(TRYGDEAVTALE, FTRL);
+        assertThat(muligeSakstyper).doesNotContain(EU_EOS);
+    }
+
+    @Test
+    void endreFagsakTypeOgTemaMedMuligeVerdier_med_behandlingstema_lovlig() {
+        final String saksnummer = "MEL-1";
+        Fagsak fagsak = lagFagsakMedBruker();
+        Behandling behandling = lagBehandling(1L, SOEKNAD, UNDER_BEHANDLING, Instant.now());
+        behandling.setTema(UTSENDT_ARBEIDSTAKER);
+        fagsak.setBehandlinger(List.of(behandling));
+        fagsak.setType(EU_EOS);
+        fagsak.setTema(MEDLEMSKAP_LOVVALG);
+        behandling.setFagsak(fagsak);
+
+        when(fagsakRepo.findBySaksnummer(saksnummer)).thenReturn(Optional.of(fagsak));
+
+        Set<Sakstyper> muligeSakstyper = fagsakService.hentMuligeSakstype(saksnummer);
+        Set<Sakstemaer> muligeSakstemaer = fagsakService.hentMuligeSakstema(saksnummer);
+
+        Optional<Sakstemaer> valgtSakstema = muligeSakstemaer.stream().findFirst();
+        Optional<Sakstyper> valgtSakstype = muligeSakstyper.stream().findFirst();
+
+        assertThat(valgtSakstema).isNotNull();
+        assertThat(valgtSakstype).isNotNull();
+
+        fagsakService.endreSakstema(fagsak, valgtSakstema.get());
+        fagsakService.endreSakstype(fagsak, valgtSakstype.get());
+
+        assertThat(fagsak.getTema()).isEqualTo(valgtSakstema.get());
+        assertThat(fagsak.getType()).isEqualTo(valgtSakstype.get());
+    }
+
+    @Test
+    void hentFagsakTypeOgTemaMedMuligeVerdier_med_behandlingstema_ikke_lovlig() {
+        final String saksnummer = "MEL-1";
+        Fagsak fagsak = lagFagsakMedBruker();
+        Behandling behandling = lagBehandling(1L, SOEKNAD, UNDER_BEHANDLING, Instant.now());
+        behandling.setTema(REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING);
+        fagsak.setBehandlinger(List.of(behandling));
+        Sakstemaer initiellSakstema = MEDLEMSKAP_LOVVALG;
+        Sakstyper initiellSakstype = EU_EOS;
+        fagsak.setType(initiellSakstype);
+        fagsak.setTema(initiellSakstema);
+        behandling.setFagsak(fagsak);
+
+        when(fagsakRepo.findBySaksnummer(saksnummer)).thenReturn(Optional.of(fagsak));
+
+        Set<Sakstyper> muligeSakstyper = fagsakService.hentMuligeSakstype(saksnummer);
+        Set<Sakstemaer> muligeSakstemaer = fagsakService.hentMuligeSakstema(saksnummer);
+
+        Optional<Sakstemaer> valgtSakstema = muligeSakstemaer.stream().findFirst();
+        Optional<Sakstyper> valgtSakstype = muligeSakstyper.stream().findFirst();
+
+        assertThat(valgtSakstype).isEmpty();
+        assertThat(valgtSakstema).isEmpty();
+    }
+
+    @Test
     void avsluttFagsakOgBehandlingValiderBehandlingstype_behtemaUtsendtArbeidstaker_kasterException() {
         Fagsak fagsak = new Fagsak();
         Behandling behandling = new Behandling();
         behandling.setId(123L);
         behandling.setType(SOEKNAD);
-        behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
+        behandling.setTema(UTSENDT_ARBEIDSTAKER);
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> fagsakService.avsluttFagsakOgBehandlingValiderBehandlingstype(fagsak, behandling))
@@ -342,9 +443,7 @@ class FagsakServiceTest {
         when(behandlingsresultatService.hentBehandlingsresultat(behandling.getId())).thenReturn(behandlingsresultat);
         when(behandlingService.replikerBehandlingOgBehandlingsresultat(any(), any())).thenReturn(replikertBehandling);
 
-
         long replikertBehandlingID = fagsakService.opprettNyVurderingBehandling(saksnummer);
-
 
         verify(behandlingService).replikerBehandlingOgBehandlingsresultat(behandling, Behandlingstyper.NY_VURDERING);
         assertThat(replikertBehandlingID).isEqualTo(replikertBehandling.getId());
@@ -467,7 +566,6 @@ class FagsakServiceTest {
         var idag = Instant.now();
         var igår = idag.minus(1, ChronoUnit.DAYS);
 
-
         var behandlingSomBleRegistrertIgår = lagBehandling(1L, SED, AVSLUTTET, igår);
         var behandlingsresultatRegistrertIgår = lagBehandlingsresultat(behandlingSomBleRegistrertIgår, igår, null, REGISTRERT_UNNTAK);
 
@@ -583,7 +681,7 @@ class FagsakServiceTest {
         fagsak.setGsakSaksnummer(123L);
         fagsak.setSaksnummer(saksnummer);
         fagsak.setStatus(Saksstatuser.OPPRETTET);
-        fagsak.setType(Sakstyper.EU_EOS);
+        fagsak.setType(EU_EOS);
         fagsak.setRegistrertDato(Instant.now());
         fagsak.setEndretDato(Instant.now());
         return fagsak;

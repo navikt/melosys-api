@@ -12,8 +12,6 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagKonverterer;
 import no.nav.melosys.domain.brev.DokumentasjonSvarfrist;
-import no.nav.melosys.domain.kodeverk.Sakstemaer;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
@@ -35,14 +33,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.*;
-import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*;
+import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.ARBEID_FLERE_LAND;
 import static no.nav.melosys.metrics.MetrikkerNavn.*;
 
 @Service
 public class BehandlingService {
-
     private static final Logger log = LoggerFactory.getLogger(BehandlingService.class);
-
     private final BehandlingRepository behandlingRepository;
     private final TidligereMedlemsperiodeRepository tidligereMedlemsperiodeRepository;
     private final BehandlingsresultatService behandlingsresultatService;
@@ -50,7 +46,6 @@ public class BehandlingService {
     private final OppgaveService oppgaveService;
     private final ApplicationEventPublisher applicationEventPublisher;
     private final Unleash unleash;
-
     private final Counter behandlingerAvsluttet = Metrics.counter(BEHANDLINGER_AVSLUTTET);
     private static final String FINNER_IKKE_BEHANDLING = "Finner ikke behandling med id ";
 
@@ -89,18 +84,6 @@ public class BehandlingService {
             .orElseThrow(() -> new IkkeFunnetException(FINNER_IKKE_BEHANDLING + behandlingId));
     }
 
-    public boolean behandlingErLåstForEndring(Behandlingstema behandlingstema) {
-        Set<Behandlingstema> behandlingstemaerSomIkkeKanEndre = Set.of(
-            REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING,
-            REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE,
-            BESLUTNING_LOVVALG_NORGE,
-            BESLUTNING_LOVVALG_ANNET_LAND,
-            ANMODNING_OM_UNNTAK_HOVEDREGEL
-        );
-
-        return behandlingstemaerSomIkkeKanEndre.contains(behandlingstema);
-    }
-
     @Transactional
     public Behandling nyBehandling(Fagsak fagsak,
                                    Behandlingsstatus behandlingsstatus,
@@ -131,33 +114,24 @@ public class BehandlingService {
     }
 
     @Transactional
-    public void endreBehandling(long behandlingID, Sakstyper ignoredSakstype, Behandlingstyper type, Behandlingstema tema, Behandlingsstatus status, LocalDate behandlingsfrist, Sakstemaer sakstema) {
-        // TODO: Endre sakstype (MELOSYS-4899 for EØS <-> trygdeavtale)
+    public void endreBehandling(long behandlingID, Behandlingstyper type, Behandlingstema tema, Behandlingsstatus status, LocalDate behandlingsfrist) {
         var behandling = hentBehandling(behandlingID);
-        boolean behandlingErLåst = behandlingErLåstForEndring(behandling.getTema());
+        boolean behandlingErLåst = GyldigBehandlingstema.kanIkkeEndreBehandling(behandling.getTema());
 
         if (!behandling.erAktiv()) {
             throw new FunksjonellException("Behandlingen må være aktiv for å kunne endres");
         }
-
-        if (sakstema != null && sakstema != behandling.getFagsak().getTema() && saksbehandlerKanEndreSakstema(behandling, sakstema) && !behandlingErLåst) {
-            endreSakstema(behandling, sakstema);
+        if (status != null && status != behandling.getStatus() && saksbehandlerKanEndreStatus(behandling, status)) {
+            endreStatus(behandling, status);
         }
-
         if (type != null && type != behandling.getType() && saksbehandlerKanEndreType(behandling, type) && !behandlingErLåst) {
             endreType(behandling, type);
         }
-
         if (tema != null && tema != behandling.getTema() && saksbehandlerKanEndreTema(behandling, tema) && !behandlingErLåst) {
             endreTema(behandling, tema);
         }
-
         if (behandlingsfrist != null && !behandlingsfrist.equals(behandling.getBehandlingsfrist())) {
             endreBehandlingsfrist(behandling, behandlingsfrist);
-        }
-
-        if (status != null && status != behandling.getStatus() && saksbehandlerKanEndreStatus(behandling, status)) {
-            endreStatus(behandling, status);
         }
     }
 
@@ -238,14 +212,6 @@ public class BehandlingService {
     public void endreType(Behandling behandling, Behandlingstyper type) {
         log.info("Endrer behandlingstypen for behandling {} fra {} til {}", behandling.getId(), behandling.getType(), type);
         behandling.setType(type);
-        behandlingRepository.save(behandling);
-        tilbakestillBehandlingsgrunnlag(behandling);
-        applicationEventPublisher.publishEvent(new BehandlingEndretAvSaksbehandlerEvent(behandling.getId(), behandling));
-    }
-
-    public void endreSakstema(Behandling behandling, Sakstemaer sakstema) {
-        log.info("Endrer behandlings saktema for behandling {} fra {} til {}", behandling.getId(), behandling.getFagsak().getTema(), sakstema);
-        behandling.getFagsak().setTema(sakstema);
         behandlingRepository.save(behandling);
         tilbakestillBehandlingsgrunnlag(behandling);
         applicationEventPublisher.publishEvent(new BehandlingEndretAvSaksbehandlerEvent(behandling.getId(), behandling));
@@ -441,11 +407,6 @@ public class BehandlingService {
         return MuligeManuelleBehandlingsendringer.hentMuligeStatuser(behandling);
     }
 
-    public Set<Sakstemaer> hentMuligeSakstema(long behandlingID) {
-        var behandling = hentBehandling(behandlingID);
-        return MuligeManuelleBehandlingsendringer.hentMuligeSakstema(behandling);
-    }
-
     @Transactional
     public Set<Behandlingstema> hentMuligeBehandlingstema(long behandlingID) {
         var behandling = hentBehandling(behandlingID);
@@ -477,11 +438,6 @@ public class BehandlingService {
 
     private boolean saksbehandlerKanEndreType(Behandling behandling, Behandlingstyper type) {
         MuligeManuelleBehandlingsendringer.validerNyTypeMulig(behandling, type);
-        return true;
-    }
-
-    private boolean saksbehandlerKanEndreSakstema(Behandling behandling, Sakstemaer sakstema) {
-        MuligeManuelleBehandlingsendringer.validerNySakstemaMulig(behandling, sakstema);
         return true;
     }
 

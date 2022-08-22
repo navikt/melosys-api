@@ -13,7 +13,6 @@ import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
@@ -25,7 +24,6 @@ import no.nav.melosys.repository.BehandlingsgrunnlagRepository;
 import no.nav.melosys.repository.TidligereMedlemsperiodeRepository;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -36,8 +34,7 @@ import org.springframework.context.ApplicationEventPublisher;
 
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.*;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*;
-import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.ENDRET_PERIODE;
-import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.NY_VURDERING;
+import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.*;
@@ -48,7 +45,6 @@ class BehandlingServiceTest {
     private static final long BEHANDLING_ID = 11L;
     private static final Behandlingstyper BEHANDLING_TYPE = Behandlingstyper.NY_VURDERING;
     private static final Behandlingstema BEHANDLING_TEMA = Behandlingstema.ARBEID_FLERE_LAND;
-    private static final Sakstemaer SAKSTEMA = Sakstemaer.MEDLEMSKAP_LOVVALG;
     private static final Behandlingsstatus BEHANDLING_STATUS = UNDER_BEHANDLING;
     private static final LocalDate BEHANDLING_FRIST = LocalDate.now().plusMonths(1);
     private final Behandlingsresultat BEHANDLINGSRESULTAT = new Behandlingsresultat();
@@ -101,14 +97,18 @@ class BehandlingServiceTest {
 
     @Test
     void endreBehandling() {
+        Fagsak fagsak = new Fagsak();
+        fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
+
         behandling.setTema(UTSENDT_ARBEIDSTAKER);
         behandling.setType(ENDRET_PERIODE);
-        behandling.setFagsak(new Fagsak());
+        behandling.setFagsak(fagsak);
         behandling.setBehandlingsgrunnlag(opprettBehandlingsgrunnlag());
+
         when(behandlingRepository.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(BEHANDLINGSRESULTAT);
 
-        behandlingService.endreBehandling(BEHANDLING_ID, Sakstyper.EU_EOS, BEHANDLING_TYPE, BEHANDLING_TEMA, BEHANDLING_STATUS, BEHANDLING_FRIST, SAKSTEMA);
+        behandlingService.endreBehandling(BEHANDLING_ID, BEHANDLING_TYPE, BEHANDLING_TEMA, BEHANDLING_STATUS, BEHANDLING_FRIST);
 
         verify(behandlingRepository, times(4)).save(behandlingCaptor.capture());
         verify(applicationEventPublisher, times(4)).publishEvent(behandlingEventCaptor.capture());
@@ -124,6 +124,7 @@ class BehandlingServiceTest {
         assertThat(lagredeBehandlinger.get(3).getTema()).isEqualTo(BEHANDLING_TEMA);
 
         var behandlingEndretEvents = behandlingEventCaptor.getAllValues();
+
         assertThat(behandlingEndretEvents.get(0).getBehandlingID()).isEqualTo(BEHANDLING_ID);
         assertThat(((BehandlingEndretStatusEvent) behandlingEndretEvents.get(0)).getBehandlingsstatus()).isEqualTo(BEHANDLING_STATUS);
         assertThat(behandlingEndretEvents.get(1).getBehandlingID()).isEqualTo(BEHANDLING_ID);
@@ -135,16 +136,34 @@ class BehandlingServiceTest {
     }
 
     @Test
+    void endreBehandling_med_ikke_godtatt_behandlingstema() {
+        Fagsak fagsak = new Fagsak();
+        fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
+
+        Behandlingstema initiellBehandlingsstema = REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING;
+        Behandlingstyper initiellBehandlingstype = SOEKNAD;
+
+        behandling.setTema(initiellBehandlingsstema);
+        behandling.setType(initiellBehandlingstype);
+        behandling.setFagsak(fagsak);
+        behandling.setBehandlingsgrunnlag(opprettBehandlingsgrunnlag());
+
+        when(behandlingRepository.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> behandlingService.endreBehandling(BEHANDLING_ID, BEHANDLING_TYPE, BEHANDLING_TEMA, BEHANDLING_STATUS, BEHANDLING_FRIST));
+    }
+
+    @Test
     void endreBehandling_nullEllerSammeVerdi_ingenEndring() {
         behandling.setTema(BEHANDLING_TEMA);
         behandling.setType(BEHANDLING_TYPE);
         behandling.setStatus(BEHANDLING_STATUS);
         behandling.setBehandlingsfrist(BEHANDLING_FRIST);
-        behandling.setFagsak(new Fagsak());
         behandling.setBehandlingsgrunnlag(opprettBehandlingsgrunnlag());
         when(behandlingRepository.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
 
-        behandlingService.endreBehandling(BEHANDLING_ID, Sakstyper.EU_EOS, BEHANDLING_TYPE, null, null, BEHANDLING_FRIST, SAKSTEMA);
+        behandlingService.endreBehandling(BEHANDLING_ID, BEHANDLING_TYPE, null, null, BEHANDLING_FRIST);
 
         verify(behandlingRepository, never()).save(any());
         verify(applicationEventPublisher, never()).publishEvent(any());
@@ -335,10 +354,10 @@ class BehandlingServiceTest {
     void nyBehandling() {
         String initierendeJournalpostId = "234";
         String initierendeDokumentId = "221234";
-        Behandling behandling = behandlingService.nyBehandling(new Fagsak(), Behandlingsstatus.OPPRETTET, Behandlingstyper.SOEKNAD, Behandlingstema.UTSENDT_ARBEIDSTAKER, initierendeJournalpostId, initierendeDokumentId);
+        Behandling behandling = behandlingService.nyBehandling(new Fagsak(), Behandlingsstatus.OPPRETTET, SOEKNAD, Behandlingstema.UTSENDT_ARBEIDSTAKER, initierendeJournalpostId, initierendeDokumentId);
         verify(behandlingRepository).save(behandling);
         verify(behandlingsresultatService).lagreNyttBehandlingsresultat(behandling);
-        assertThat(behandling.getType()).isEqualTo(Behandlingstyper.SOEKNAD);
+        assertThat(behandling.getType()).isEqualTo(SOEKNAD);
         assertThat(behandling.getStatus()).isEqualTo(Behandlingsstatus.OPPRETTET);
         assertThat(behandling.getInitierendeJournalpostId()).isEqualTo(initierendeJournalpostId);
         assertThat(behandling.getInitierendeDokumentId()).isEqualTo(initierendeDokumentId);
@@ -421,17 +440,6 @@ class BehandlingServiceTest {
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> behandlingService.avsluttBehandling(BEHANDLING_ID))
             .withMessageContaining("Behandling " + BEHANDLING_ID + " er allerede avsluttet!");
-    }
-
-    @Test
-    @Disabled
-    void endreBehandling_kasterFunksjonellException_dersomBehandlingstemaErLåst() {
-        behandling.setTema(REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING);
-        when(behandlingRepository.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
-
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> behandlingService.endreBehandling(BEHANDLING_ID, Sakstyper.EU_EOS, BEHANDLING_TYPE, BEHANDLING_TEMA, BEHANDLING_STATUS, BEHANDLING_FRIST, SAKSTEMA))
-            .withMessageContaining("Behandlingen har et låst behandlingstema, kan ikke endre");
     }
 
     @Test

@@ -8,6 +8,7 @@ import java.util.Set;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.Tilleggsinformasjon;
 import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.TilleggsinformasjonDetaljer;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.GeografiskAdresse;
@@ -16,8 +17,6 @@ import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresse;
 import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresseNorge;
 import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresseUtland;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
-import no.nav.melosys.domain.kodeverk.Sakstemaer;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -102,20 +101,18 @@ class BehandlingTjenesteTest {
 
     @Test
     void endreBehandling() throws Exception {
-        final var sakstype = Sakstyper.EU_EOS;
         final var behandlingstype = SOEKNAD;
         final var behandlingstema = Behandlingstema.ARBEID_I_UTLANDET;
         final var behandlingsstatus = Behandlingsstatus.UNDER_BEHANDLING;
         final var behandlingsfrist = LocalDate.now();
-        final var sakstema = Sakstemaer.MEDLEMSKAP_LOVVALG;
 
-        var endreBehandlingDto = new EndreBehandlingDto(sakstype, behandlingstype, behandlingstema, behandlingsstatus, behandlingsfrist, sakstema);
+        var endreBehandlingDto = new EndreBehandlingDto(behandlingstype, behandlingstema, behandlingsstatus, behandlingsfrist);
         mockMvc.perform(post(BASE_URL + "/{behandlingID}/endre", BEHANDLING_ID)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(endreBehandlingDto)))
             .andExpect(status().isNoContent());
 
-        verify(behandlingService).endreBehandling(BEHANDLING_ID, sakstype, behandlingstype, behandlingstema, behandlingsstatus, behandlingsfrist, sakstema);
+        verify(behandlingService).endreBehandling(BEHANDLING_ID, behandlingstype, behandlingstema, behandlingsstatus, behandlingsfrist);
     }
 
     @Test
@@ -224,8 +221,11 @@ class BehandlingTjenesteTest {
     }
 
     private Behandling opprettTomBehandlingMedId() {
+        Fagsak fagsak = new Fagsak();
         Behandling behandling = new Behandling();
         behandling.setId(BEHANDLING_ID);
+        behandling.setFagsak(fagsak);
+
         return behandling;
     }
 }

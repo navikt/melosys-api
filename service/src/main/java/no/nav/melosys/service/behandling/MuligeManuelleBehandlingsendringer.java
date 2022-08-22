@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -33,13 +34,6 @@ public class MuligeManuelleBehandlingsendringer {
     private static final Set<Behandlingsstatus> MULIGE_STATUSER = Set.of(AVVENT_DOK_PART, AVVENT_DOK_UTL, UNDER_BEHANDLING, AVVENT_FAGLIG_AVKLARING);
     private static final Set<Behandlingstema> TEMAER_SOM_KAN_AVSLUTTES = Set.of(ØVRIGE_SED_MED, ØVRIGE_SED_UFM, FORESPØRSEL_TRYGDEMYNDIGHET, TRYGDETID, IKKE_YRKESAKTIV);
     private static final Set<Behandlingstema> TEMAER_SOM_KAN_ENDRE_TYPE = Set.of(UTSENDT_ARBEIDSTAKER, UTSENDT_SELVSTENDIG);
-    private static final Set<Behandlingstema> TEMAER_SOM_LÅSER_ENDRING = Set.of(
-        REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING,
-        REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE,
-        BESLUTNING_LOVVALG_NORGE,
-        BESLUTNING_LOVVALG_ANNET_LAND,
-        ANMODNING_OM_UNNTAK_HOVEDREGEL
-    );
 
     public static Set<Behandlingsstatus> hentMuligeStatuser(Behandling behandling) {
         if (behandling.erInaktiv()) return Collections.emptySet();
@@ -54,7 +48,7 @@ public class MuligeManuelleBehandlingsendringer {
     }
 
     public static Set<Behandlingstyper> hentMuligeTyper(Behandling behandling) {
-        if (behandling.erInaktiv() || !TEMAER_SOM_KAN_ENDRE_TYPE.contains(behandling.getTema()) || TEMAER_SOM_LÅSER_ENDRING.contains(behandling.getTema())) {
+        if (behandling.erInaktiv() || !TEMAER_SOM_KAN_ENDRE_TYPE.contains(behandling.getTema()) || GyldigBehandlingstema.kanIkkeEndreBehandling(behandling.getTema())) {
             return Collections.emptySet();
         }
 
@@ -66,7 +60,7 @@ public class MuligeManuelleBehandlingsendringer {
     }
 
     public static Set<Sakstemaer> hentMuligeSakstema(Behandling behandling) {
-        if (behandling.erInaktiv() || TEMAER_SOM_LÅSER_ENDRING.contains(behandling.getTema())) {
+        if (behandling.erInaktiv() || GyldigBehandlingstema.kanIkkeEndreBehandling(behandling.getTema())) {
             return Collections.emptySet();
         }
 
@@ -78,8 +72,21 @@ public class MuligeManuelleBehandlingsendringer {
         };
     }
 
+    public static Set<Sakstyper> hentMuligeSakstype(Behandling behandling) {
+        if (behandling.erInaktiv() || GyldigBehandlingstema.kanIkkeEndreBehandling(behandling.getTema())) {
+            return Collections.emptySet();
+        }
+
+        return switch (behandling.getFagsak().getType()) {
+            case EU_EOS -> Set.of(Sakstyper.TRYGDEAVTALE, Sakstyper.FTRL);
+            case TRYGDEAVTALE -> Set.of(Sakstyper.EU_EOS, Sakstyper.FTRL);
+            case FTRL -> Set.of(Sakstyper.EU_EOS, Sakstyper.TRYGDEAVTALE);
+            default -> Collections.emptySet();
+        };
+    }
+
     public static Set<Behandlingstema> hentMuligeBehandlingstema(Behandling behandling, Behandlingsresultat behandlingsresultat) {
-        if (TEMAER_SOM_LÅSER_ENDRING.contains(behandling.getTema())) {
+        if (GyldigBehandlingstema.kanIkkeEndreBehandling(behandling.getTema())) {
             return Collections.emptySet();
         }
 
@@ -122,6 +129,13 @@ public class MuligeManuelleBehandlingsendringer {
         if (!hentMuligeSakstema(behandling).contains(sakstemaer)) {
             throw new FunksjonellException(String.format("Behandlingen kan ikke endres til sakstema %s. Gyldige sakstema for behandling %s er %s",
                 sakstemaer, behandling.getId(), hentMuligeSakstema(behandling)));
+        }
+    }
+
+    public static void validerNySakstypeMulig(Behandling behandling, Sakstyper sakstype) {
+        if (!hentMuligeSakstype(behandling).contains(sakstype)) {
+            throw new FunksjonellException(String.format("Behandlingen kan ikke endres til sakstema %s. Gyldige sakstema for behandling %s er %s",
+                sakstype, behandling.getId(), hentMuligeSakstema(behandling)));
         }
     }
 
