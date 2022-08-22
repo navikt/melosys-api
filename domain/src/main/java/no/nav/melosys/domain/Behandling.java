@@ -30,11 +30,6 @@ import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*;
 @EntityListeners(AuditingEntityListener.class)
 public class Behandling extends RegistreringsInfo {
 
-    public static final Set<Behandlingstema> BEHANDLINGSTEMA_SØKNAD = Set.of(UTSENDT_ARBEIDSTAKER, UTSENDT_SELVSTENDIG,
-                                                                             ARBEID_ETT_LAND_ØVRIG,
-                                                                             ARBEID_TJENESTEPERSON_ELLER_FLY,
-                                                                             IKKE_YRKESAKTIV, ARBEID_FLERE_LAND);
-
     public static final Set<Behandlingstema> BEHANDLINGSTEMA_SED_FORESPØRSEL = Set.of(ØVRIGE_SED_MED, ØVRIGE_SED_UFM, TRYGDETID);
 
     @Id

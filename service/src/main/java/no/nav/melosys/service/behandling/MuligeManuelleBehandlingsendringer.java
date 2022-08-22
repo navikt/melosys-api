@@ -12,13 +12,21 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 
-import static no.nav.melosys.domain.Behandling.*;
+import static no.nav.melosys.domain.Behandling.BEHANDLINGSTEMA_SED_FORESPØRSEL;
+import static no.nav.melosys.domain.Behandling.erBehandlingAvSedForespørsler;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.*;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.ENDRET_PERIODE;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.NY_VURDERING;
 
 public class MuligeManuelleBehandlingsendringer {
+    static final Set<Behandlingstema> BEHANDLINGSTEMA_SØKNAD = Set.of(UTSENDT_ARBEIDSTAKER, UTSENDT_SELVSTENDIG,
+                                                                             ARBEID_ETT_LAND_ØVRIG,
+                                                                             ARBEID_TJENESTEPERSON_ELLER_FLY,
+                                                                             IKKE_YRKESAKTIV, ARBEID_FLERE_LAND);
+
+    private MuligeManuelleBehandlingsendringer() {
+    }
 
     private static final Set<Behandlingsstatus> MULIGE_STATUSER = Set.of(AVVENT_DOK_PART, AVVENT_DOK_UTL, UNDER_BEHANDLING, AVVENT_FAGLIG_AVKLARING);
     private static final Set<Behandlingstema> TEMAER_SOM_KAN_AVSLUTTES = Set.of(ØVRIGE_SED_MED, ØVRIGE_SED_UFM, TRYGDETID, IKKE_YRKESAKTIV);
@@ -88,5 +96,9 @@ public class MuligeManuelleBehandlingsendringer {
             throw new FunksjonellException(String.format("Behandlingen kan ikke endres til tema %s. Gyldige temaer for behandling %s er %s",
                 tema, behandling.getId(), hentMuligeBehandlingstema(behandling, behandlingsresultat)));
         }
+    }
+
+    private static boolean erGyldigBehandlingAvSøknad(Behandlingstema behandlingstema) {
+        return BEHANDLINGSTEMA_SØKNAD.contains(behandlingstema);
     }
 }

@@ -11,10 +11,10 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import org.junit.jupiter.api.Test;
 
 import static no.nav.melosys.domain.Behandling.BEHANDLINGSTEMA_SED_FORESPØRSEL;
-import static no.nav.melosys.domain.Behandling.BEHANDLINGSTEMA_SØKNAD;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.*;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.*;
+import static no.nav.melosys.service.behandling.MuligeManuelleBehandlingsendringer.BEHANDLINGSTEMA_SØKNAD;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class MuligeManuelleBehandlingsendringerTest {
