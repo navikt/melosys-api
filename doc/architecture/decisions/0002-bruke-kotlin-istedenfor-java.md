@@ -13,7 +13,7 @@ funksjoner som kan gjøre hverdagen [lettere](https://www.imaginarycloud.com/blo
 bytecode, kjører på JVM og er kompatibelt med bibliotek/rammeverk som er skrevet i Java. Vi har allerede skrevet nye moduler (Trygdeavtale)
 i Kotlin og det er et generelt ønske fra utviklere om å gå i denne retningen.
 
-Det vil i midlertidig ikke bli satt av tid til å konvertere hele kodebasen til Kotlin eller egne dedikerte oppgaver for å konvertere
+Det vil ikke bli satt av tid til å konvertere hele kodebasen til Kotlin eller egne dedikerte oppgaver for å konvertere
 modul for modul. En evt endring av dette kaliberet vil måtte skje organisk gjennom funksjonelle oppgaver hvor berørte klasser
 konverteres løpende. Vi har allerede gjort en vellykket PoC for integrasjonslaget, samt brukt Kotlin i integrasjonstestene våre.
 
@@ -28,7 +28,8 @@ Vi kommer til å skrive nye klasser/moduler i Kotlin.
 
 ## Consequences
 
-Ved hjelp av Kotlin kan vi få mindre syntaktisk sukker, noe som vil mer lesbar kode og mindre feil.
+Ved hjelp av Kotlin kan vi få mindre syntaktisk sukker, noe som vil gi mer lesbar kode og mindre feil. Det er mange utviklere som ønsker å
+bruke lombok, men dette er omstridt i NAV. Med Kotlin vil ikke dette lenger være et poeng.
 
 Det vil alltid være fare for at konvertert kode ikke er helt lik eksisterende. Dette vil vi mitigere ved å skrive tester før vi konverterer
 kode. I tillegg har vi fått implementert integrasjonstester som vil redusere risikoen for feil.
