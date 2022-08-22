@@ -15,7 +15,6 @@ import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
 import no.nav.melosys.sikkerhet.context.TestSubjectHandler;
 import no.nav.melosys.tjenester.gui.dto.oppgave.PlukketOppgaveDto;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -50,7 +49,6 @@ class OppgaveTjenesteTest {
         SpringSubjectHandler.set(new TestSubjectHandler());
     }
 
-    @Disabled("Frem til skjema-fiks")
     @Test
     void plukkOppgave() throws Exception {
         Oppgave.Builder oppgaveBuilder = new Oppgave.Builder();
