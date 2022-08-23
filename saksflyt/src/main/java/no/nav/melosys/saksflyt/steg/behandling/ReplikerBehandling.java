@@ -2,6 +2,7 @@ package no.nav.melosys.saksflyt.steg.behandling;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
@@ -42,6 +43,7 @@ public class ReplikerBehandling implements StegBehandler {
         String saksnummer = prosessinstans.getData(ProsessDataKey.SAKSNUMMER);
         Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
         var behandlingstype = prosessinstans.getData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.class);
+        var behandlingstema = prosessinstans.getData(ProsessDataKey.BEHANDLINGSTEMA, Behandlingstema.class);
 
         Optional<Behandling> behandlingBruktForReplikering = fagsakService.hentBehandlingSomErUtgangspunktForRevurdering(fagsak);
         Behandling nyBehandling;
@@ -55,6 +57,9 @@ public class ReplikerBehandling implements StegBehandler {
 
         if (behandlingBruktForReplikering.get().erAktiv()) {
             throw new FunksjonellException("Støtter ikke opprettelse av ny behandling når behandling som er utgangspunkt for revurdering er aktiv");
+        }
+        if (behandlingstema != null) {
+            nyBehandling.setTema(behandlingstema);
         }
 
         prosessinstans.setBehandling(nyBehandling);
