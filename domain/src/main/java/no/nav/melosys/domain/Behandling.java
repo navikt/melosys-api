@@ -30,7 +30,9 @@ import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*;
 @EntityListeners(AuditingEntityListener.class)
 public class Behandling extends RegistreringsInfo {
 
-    public static final Set<Behandlingstema> BEHANDLINGSTEMA_SED_FORESPØRSEL = Set.of(ØVRIGE_SED_MED, ØVRIGE_SED_UFM, TRYGDETID);
+    public static final Set<Behandlingstema> BEHANDLINGSTEMA_SED_FORESPØRSEL = Set.of(ØVRIGE_SED_MED, ØVRIGE_SED_UFM,
+                                                                                      FORESPØRSEL_TRYGDEMYNDIGHET,
+                                                                                      TRYGDETID);
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -307,6 +309,7 @@ public class Behandling extends RegistreringsInfo {
         return (tema == IKKE_YRKESAKTIV
             || tema == ØVRIGE_SED_MED
             || tema == ØVRIGE_SED_UFM
+            || tema == FORESPØRSEL_TRYGDEMYNDIGHET
             || tema == TRYGDETID);
     }
 

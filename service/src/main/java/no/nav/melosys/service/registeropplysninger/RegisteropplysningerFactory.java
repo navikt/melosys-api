@@ -22,7 +22,7 @@ public final class RegisteropplysningerFactory {
             case ANMODNING_OM_UNNTAK_HOVEDREGEL -> hentSaksopplysningTyperForAnmodningOmUnntak();
             case BESLUTNING_LOVVALG_NORGE, BESLUTNING_LOVVALG_ANNET_LAND ->
                 hentSaksopplysningTyperForBeslutningOmLovvalg();
-            case ØVRIGE_SED_MED, ØVRIGE_SED_UFM, TRYGDETID ->
+            case ØVRIGE_SED_MED, ØVRIGE_SED_UFM, FORESPØRSEL_TRYGDEMYNDIGHET, TRYGDETID ->
                 hentSaksopplysningTyperForBehandlingAvØvrigeSedOgTrygdetid();
             default -> throw new TekniskException(
                 "Kan ikke utlede relevante saksopplysninger fra behandlingstema " + behandlingstema);

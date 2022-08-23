@@ -21,6 +21,7 @@ public class TemaFactory {
                                                                                            ARBEID_NORGE_BOSATT_ANNET_LAND,
                                                                                            BESLUTNING_LOVVALG_NORGE,
                                                                                            TRYGDETID, ØVRIGE_SED_MED,
+                                                                                           FORESPØRSEL_TRYGDEMYNDIGHET,
                                                                                            ARBEID_I_UTLANDET,
                                                                                            ARBEID_KUN_NORGE,
                                                                                            YRKESAKTIV);
