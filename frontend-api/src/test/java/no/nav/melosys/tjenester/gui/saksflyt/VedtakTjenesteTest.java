@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
-import no.nav.melosys.service.kontroll.feature.ferdigbehandling.FerdigbehandlingKontrollService;
+import no.nav.melosys.service.kontroll.feature.ferdigbehandling.FerdigbehandlingKontrollFacade;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.tilgang.Aksesstype;
 import no.nav.melosys.service.vedtak.FattVedtakRequest;
@@ -36,7 +36,7 @@ class VedtakTjenesteTest {
     @MockBean
     private Aksesskontroll aksesskontroll;
     @MockBean
-    private FerdigbehandlingKontrollService ferdigbehandlingKontrollService;
+    private FerdigbehandlingKontrollFacade ferdigbehandlingKontrollFacade;
 
     @Autowired
     private MockMvc mockMvc;
@@ -133,7 +133,7 @@ class VedtakTjenesteTest {
     }
 
     @Test
-    void endreVedtak_dtoManglerBehandlingresultat_girException() throws Exception{
+    void endreVedtak_dtoManglerBehandlingresultat_girException() throws Exception {
         mockMvc.perform(post(BASE_URL + "/{behandlingID}/endre", BEHANDLING_ID)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(new EndreVedtakDto())))

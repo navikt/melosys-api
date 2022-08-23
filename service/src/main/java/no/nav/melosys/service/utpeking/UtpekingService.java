@@ -1,7 +1,10 @@
 package no.nav.melosys.service.utpeking;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 
 import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.*;
@@ -56,7 +59,8 @@ public class UtpekingService {
                            EessiService eessiService, LandvelgerService landvelgerService,
                            LovvalgsperiodeService lovvalgsperiodeService, OppgaveService oppgaveService,
                            ProsessinstansService prosessinstansService,
-                           Unleash unleash, UtpekingsperiodeRepository utpekingsperiodeRepository, FerdigbehandlingKontrollService ferdigbehandlingKontrollService,
+                           Unleash unleash, UtpekingsperiodeRepository utpekingsperiodeRepository,
+                           FerdigbehandlingKontrollService ferdigbehandlingKontrollService,
                            ApplicationEventMulticaster melosysEventMulticaster) {
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
@@ -120,7 +124,7 @@ public class UtpekingService {
         validerUtpekingsperiode(utpekingsperiode);
 
         opprettLovvalgsperiode(behandlingID, utpekingsperiode);
-        ferdigbehandlingKontrollService.utførKontroller(behandlingID, fagsak.getType(), behandlingsresultat.getType());
+        ferdigbehandlingKontrollService.kontroller(behandlingID, behandlingsresultat.getType());
         oppdaterBehandlingsresultat(behandlingsresultat);
         prosessinstansService.opprettProsessinstansUtpekAnnetLand(
             behandling, utpekingsperiode.getLovvalgsland(), mottakerinstitusjoner, ytterligereInformasjonSed, fritekstBrev

@@ -18,7 +18,7 @@ import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.DokgenService;
 import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
-import no.nav.melosys.service.kontroll.feature.ferdigbehandling.FerdigbehandlingKontrollService;
+import no.nav.melosys.service.kontroll.feature.ferdigbehandling.MedRegisterOpplysningService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.slf4j.Logger;
@@ -36,7 +36,7 @@ public class TrygdeavtaleVedtakService {
     private final ProsessinstansService prosessinstansService;
     private final OppgaveService oppgaveService;
     private final DokgenService dokgenService;
-    private final FerdigbehandlingKontrollService ferdigbehandlingKontrollService;
+    private final MedRegisterOpplysningService medRegisterOpplysningService;
 
 
     public TrygdeavtaleVedtakService(BehandlingsresultatService behandlingsresultatService,
@@ -44,13 +44,13 @@ public class TrygdeavtaleVedtakService {
                                      ProsessinstansService prosessinstansService,
                                      OppgaveService oppgaveService,
                                      DokgenService dokgenService,
-                                     FerdigbehandlingKontrollService ferdigbehandlingKontrollService) {
+                                     MedRegisterOpplysningService medRegisterOpplysningService) {
         this.behandlingsresultatService = behandlingsresultatService;
         this.behandlingService = behandlingService;
         this.prosessinstansService = prosessinstansService;
         this.oppgaveService = oppgaveService;
         this.dokgenService = dokgenService;
-        this.ferdigbehandlingKontrollService = ferdigbehandlingKontrollService;
+        this.medRegisterOpplysningService = medRegisterOpplysningService;
     }
 
     public void fattVedtak(Behandling behandling, FattVedtakRequest request) throws ValideringException {
@@ -63,7 +63,7 @@ public class TrygdeavtaleVedtakService {
         behandlingsresultat.setType(request.getBehandlingsresultatTypeKode());
 
         if (behandlingsresultat.erInnvilgelse()) {
-            ferdigbehandlingKontrollService.kontrollerVedtakMedNyeRegisteropplysninger(behandling, behandlingsresultat, Sakstyper.TRYGDEAVTALE, Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN);
+            medRegisterOpplysningService.kontrollerVedtak(behandling, behandlingsresultat, Sakstyper.TRYGDEAVTALE, Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN);
         }
 
         oppdaterBehandlingsresultat(behandlingsresultat, request);
