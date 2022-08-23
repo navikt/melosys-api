@@ -9,6 +9,7 @@ object SakRepo {
 
     fun clear() {
         repo.clear()
+        fagsakNrSakRepo.clear()
     }
 
     fun leggTilSak(sak: Sak) {
