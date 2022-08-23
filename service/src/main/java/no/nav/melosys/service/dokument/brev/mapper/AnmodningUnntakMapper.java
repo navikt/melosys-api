@@ -39,23 +39,23 @@ public class AnmodningUnntakMapper implements BrevDataMapper {
 
     static final BiMap<LovvalgBestemmelse, BestemmelseDetSoekesUnntakFraKode> BESTEMMELSE_DET_SOEKES_UNNTAK_FRA_KODE_MAP =
         HashBiMap.create(ImmutableMap.<LovvalgBestemmelse, BestemmelseDetSoekesUnntakFraKode>builder()
-                             .put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A, BestemmelseDetSoekesUnntakFraKode.FO_883_2004_ART_11_3_A)
-                             .put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3B, BestemmelseDetSoekesUnntakFraKode.FO_883_2004_ART_11_3_B)
-                             .put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3C, BestemmelseDetSoekesUnntakFraKode.FO_883_2004_ART_11_3_C)
-                             .put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3D, BestemmelseDetSoekesUnntakFraKode.FO_883_2004_ART_11_3_D)
-                             .put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3E, BestemmelseDetSoekesUnntakFraKode.FO_883_2004_ART_11_3_E)
-                             .put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_4, BestemmelseDetSoekesUnntakFraKode.FO_883_2004_ART_11_4)
-                             .put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_4_2, BestemmelseDetSoekesUnntakFraKode.FO_883_2004_ART_11_4_2)
-                             .put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A, BestemmelseDetSoekesUnntakFraKode.FO_883_2004_ART_13_1_A)
-                             .put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B1, BestemmelseDetSoekesUnntakFraKode.FO_883_2004_ART_13_1_B_1)
-                             .put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B2, BestemmelseDetSoekesUnntakFraKode.FO_883_2004_ART_13_1_B_2)
-                             .put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B3, BestemmelseDetSoekesUnntakFraKode.FO_883_2004_ART_13_1_B_3)
-                             .put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B4, BestemmelseDetSoekesUnntakFraKode.FO_883_2004_ART_13_1_B_4)
-                             .put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_2A, BestemmelseDetSoekesUnntakFraKode.FO_883_2004_ART_13_2_A)
-                             .put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_2B, BestemmelseDetSoekesUnntakFraKode.FO_883_2004_ART_13_2_B)
-                             .put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_3, BestemmelseDetSoekesUnntakFraKode.FO_883_2004_ART_13_3)
-                             .put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_4, BestemmelseDetSoekesUnntakFraKode.FO_883_2004_ART_13_4)
-                             .build());
+            .put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A, BestemmelseDetSoekesUnntakFraKode.FO_883_2004_ART_11_3_A)
+            .put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3B, BestemmelseDetSoekesUnntakFraKode.FO_883_2004_ART_11_3_B)
+            .put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3C, BestemmelseDetSoekesUnntakFraKode.FO_883_2004_ART_11_3_C)
+            .put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3D, BestemmelseDetSoekesUnntakFraKode.FO_883_2004_ART_11_3_D)
+            .put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3E, BestemmelseDetSoekesUnntakFraKode.FO_883_2004_ART_11_3_E)
+            .put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_4, BestemmelseDetSoekesUnntakFraKode.FO_883_2004_ART_11_4)
+            .put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_4_2, BestemmelseDetSoekesUnntakFraKode.FO_883_2004_ART_11_4_2)
+            .put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A, BestemmelseDetSoekesUnntakFraKode.FO_883_2004_ART_13_1_A)
+            .put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B1, BestemmelseDetSoekesUnntakFraKode.FO_883_2004_ART_13_1_B_1)
+            .put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B2, BestemmelseDetSoekesUnntakFraKode.FO_883_2004_ART_13_1_B_2)
+            .put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B3, BestemmelseDetSoekesUnntakFraKode.FO_883_2004_ART_13_1_B_3)
+            .put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B4, BestemmelseDetSoekesUnntakFraKode.FO_883_2004_ART_13_1_B_4)
+            .put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_2A, BestemmelseDetSoekesUnntakFraKode.FO_883_2004_ART_13_2_A)
+            .put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_2B, BestemmelseDetSoekesUnntakFraKode.FO_883_2004_ART_13_2_B)
+            .put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_3, BestemmelseDetSoekesUnntakFraKode.FO_883_2004_ART_13_3)
+            .put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_4, BestemmelseDetSoekesUnntakFraKode.FO_883_2004_ART_13_4)
+            .build());
 
     @Override
     public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat,
@@ -78,7 +78,7 @@ public class AnmodningUnntakMapper implements BrevDataMapper {
         fag.setForetakNavn(brevData.hovedvirksomhet.navn);
         fag.setYrkesaktivitet(YrkesaktivitetsKode.fromValue(brevData.yrkesaktivitet.getKode()));
 
-        Anmodningsperiode anmodningsperiode = resultat.hentValidertAnmodningsperiode();
+        Anmodningsperiode anmodningsperiode = resultat.hentAnmodningsperiode();
         fag.setArbeidsland(brevData.arbeidsland);
         fag.setLovvalgsperiode(lagLovvalgsperiodeType(anmodningsperiode));
 

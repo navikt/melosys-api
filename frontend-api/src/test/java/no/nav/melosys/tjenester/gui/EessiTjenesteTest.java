@@ -1,169 +1,90 @@
 package no.nav.melosys.tjenester.gui;
 
-import java.io.IOException;
-import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.arkiv.ArkivDokument;
-import no.nav.melosys.domain.arkiv.Journalpost;
-import no.nav.melosys.domain.eessi.BucInformasjon;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.Institusjon;
-import no.nav.melosys.domain.eessi.SedInformasjon;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
-import no.nav.melosys.tjenester.gui.dto.dokumentarkiv.VedleggDto;
 import no.nav.melosys.tjenester.gui.dto.eessi.BucBestillingDto;
-import no.nav.melosys.tjenester.gui.dto.eessi.BucerTilknyttetBehandlingDto;
-import no.nav.melosys.tjenester.gui.dto.eessi.OpprettBucSvarDto;
-import org.assertj.core.api.InstanceOfAssertFactories;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
 
-import static org.assertj.core.api.Assertions.as;
-import static org.assertj.core.api.Assertions.assertThat;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
+import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@ExtendWith(MockitoExtension.class)
-class EessiTjenesteTest extends JsonSchemaTestParent {
-    private static final Logger log = LoggerFactory.getLogger(EessiTjenesteTest.class);
+@WebMvcTest(controllers = {EessiTjeneste.class})
+public class EessiTjenesteTest {
 
-    private static final String MOTTAKERINSTITUSJONER_SCHEMA = "eessi-mottakerinstitusjoner-schema.json";
-    private static final String OPPRETT_BUC_SCHEMA = "eessi-bucer-post-schema.json";
-    private static final String BUCER_UNDER_ARBEID_SCHEMA = "eessi-bucer-schema.json";
-
-    private static final String MOCK_RINA_URL = "http://rina-url.local/";
-
-    @Mock
+    @MockBean
     private EessiService eessiService;
-    @Mock
+    @MockBean
     private BehandlingService behandlingService;
-    @Mock
+    @MockBean
     private Aksesskontroll aksesskontroll;
 
-    private EessiTjeneste eessiTjeneste;
+    @Autowired
+    private MockMvc mockMvc;
+    @Autowired
+    private ObjectMapper objectMapper;
 
-    @BeforeEach
-    void setup() {
-        eessiTjeneste = new EessiTjeneste(eessiService, behandlingService, aksesskontroll);
+    private static final String BASE_URL = "/api/eessi";
+    private final String mottakerBelgia = "BE:12222";
+    private final Institusjon institusjonBelgia = new Institusjon(mottakerBelgia, null, Landkoder.BE.getKode());
+
+    @Test
+    void hentMottakerinstitusjoner() throws Exception {
+        when(eessiService.hentEessiMottakerinstitusjoner(anyString(), anyCollection())).thenReturn(singletonList(institusjonBelgia));
+
+        mockMvc.perform(get(BASE_URL + "/mottakerinstitusjoner/{bucType}", BucType.LA_BUC_01)
+                .contentType(MediaType.APPLICATION_JSON)
+                .param("landkoder", Landkoder.BE.getKode()))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[0].landkode", equalTo(Landkoder.BE.getKode())));
     }
 
     @Test
-    void hentMottakerInstitusjoner() throws IOException {
-        when(eessiService.hentEessiMottakerinstitusjoner(anyString(), anyList()))
-            .thenReturn(Arrays.asList(
-                new Institusjon("1","Test1","NO"),
-                new Institusjon("2","Test2","NO"),
-                new Institusjon("3","Test3","NO")
-            ));
+    void opprettBuc() throws Exception {
+        var dto = new BucBestillingDto(BucType.LA_BUC_01, singletonList(Landkoder.BE.getKode()), emptyList());
+        when(eessiService.opprettBucOgSed(anyLong(), any(), anyList(), anyCollection())).thenReturn("url");
 
-        ResponseEntity<List<Institusjon>> response = eessiTjeneste.hentMottakerinstitusjoner("LA_BUC_01", List.of("SE"));
-        assertThat(response.getBody()).hasOnlyElementsOfType(Institusjon.class);
-
-        List<Institusjon> institusjoner = response.getBody();
-        assertThat(institusjoner).isNotEmpty();
-        validerArray(institusjoner, MOTTAKERINSTITUSJONER_SCHEMA, log);
+        mockMvc.perform(post(BASE_URL + "/bucer/{behandlingID}/opprett", 1L)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(dto)))
+            .andExpect(status().isOk());
     }
 
     @Test
-    void opprettBuc() throws IOException {
-        when(eessiService.opprettBucOgSed(anyLong(), any(BucType.class), anyList(), anyCollection())).thenReturn(MOCK_RINA_URL);
+    void hentBucer() throws Exception {
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling());
 
-        BucBestillingDto nyBucDto = new BucBestillingDto(
-            BucType.LA_BUC_01,
-            List.of("NAVT002"),
-            Set.of(new VedleggDto("1", "1"), new VedleggDto("2", "2"))
-        );
-        ResponseEntity<OpprettBucSvarDto> response = eessiTjeneste.opprettBuc(nyBucDto, 123L);
-        OpprettBucSvarDto opprettBucSvarDto = response.getBody();
-
-        valider(nyBucDto, OPPRETT_BUC_SCHEMA, log);
-        assertThat(opprettBucSvarDto).isNotNull()
-            .extracting(OpprettBucSvarDto::rinaUrl).isEqualTo(MOCK_RINA_URL);
-        verify(eessiService).opprettBucOgSed(anyLong(), eq(BucType.LA_BUC_01), anyList(), anyCollection());
+        mockMvc.perform(get(BASE_URL + "/bucer/{behandlingID}", 1L)
+                .contentType(MediaType.APPLICATION_JSON)
+                .param("statuser", "A"))
+            .andExpect(status().isOk());
     }
 
-    @Test
-    void hentBucer() throws IOException {
-        when(behandlingService.hentBehandling(123L)).thenReturn(lagBehandling());
-        when(eessiService.hentTilknyttedeBucer(anyLong(), anyList()))
-            .thenReturn(Arrays.asList(
-                bucInformasjon(),
-                bucInformasjon(),
-                bucInformasjon()
-            ));
-
-        ResponseEntity<BucerTilknyttetBehandlingDto> response = eessiTjeneste.hentBucer(123L, Arrays.asList("utkast", "sendt"));
-
-        BucerTilknyttetBehandlingDto dto = response.getBody();
-        assertThat(dto).extracting(BucerTilknyttetBehandlingDto::bucer, as(InstanceOfAssertFactories.LIST))
-            .allSatisfy(x -> assertThat(x).hasNoNullFieldsOrProperties());
-
-        valider(dto, BUCER_UNDER_ARBEID_SCHEMA, log);
-    }
-
-
-    private Behandling lagBehandling() {
-        Behandling behandling = new Behandling();
-        Fagsak fagsak = new Fagsak();
-        fagsak.setSaksnummer("321");
-        fagsak.setGsakSaksnummer(123L);
+    private static Behandling lagBehandling() {
+        var behandling = new Behandling();
+        behandling.setId(1L);
+        var fagsak = new Fagsak();
+        fagsak.setGsakSaksnummer(2L);
         behandling.setFagsak(fagsak);
         return behandling;
     }
-
-    private BucInformasjon bucInformasjon() {
-        return new BucInformasjon(
-            defaultEasyRandom().nextObject(String.class),
-            true,
-            defaultEasyRandom().nextObject(String.class),
-            defaultEasyRandom().nextObject(LocalDate.class),
-            Collections.singleton(defaultEasyRandom().toString()),
-            Arrays.asList(
-                sedInformasjonMedGyldigUrl(),
-                sedInformasjonMedGyldigUrl()
-            )
-        );
-    }
-
-    private SedInformasjon sedInformasjonMedGyldigUrl() {
-        return new SedInformasjon(
-            defaultEasyRandom().nextObject(String.class),
-            defaultEasyRandom().nextObject(String.class),
-            defaultEasyRandom().nextObject(LocalDate.class),
-            defaultEasyRandom().nextObject(LocalDate.class),
-            defaultEasyRandom().nextObject(String.class),
-            defaultEasyRandom().nextObject(String.class),
-            MOCK_RINA_URL
-        );
-    }
-
-    private static Journalpost lagJournalpost(String journalpostID, List<ArkivDokument> dokumenter) {
-        Journalpost journalpost = new Journalpost(journalpostID);
-        journalpost.setHoveddokument(dokumenter.get(0));
-        journalpost.getVedleggListe().clear();
-        journalpost.getVedleggListe().addAll(dokumenter.subList(1, dokumenter.size()));
-        return journalpost;
-    }
-
-    private static ArkivDokument lagArkivDokument(String dokumentID) {
-        ArkivDokument arkivDokument = new ArkivDokument();
-        arkivDokument.setDokumentId(dokumentID);
-        arkivDokument.setTittel(dokumentID);
-        return arkivDokument;
-    }
 }
+

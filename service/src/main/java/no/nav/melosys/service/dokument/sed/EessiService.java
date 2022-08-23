@@ -283,7 +283,7 @@ public class EessiService {
 
     private SedType hentSedTypeForAnmodningUnntakSvar(Behandlingsresultat behandlingsresultat) {
         Anmodningsperiodesvartyper anmodningsperiodeSvarType =
-            behandlingsresultat.hentValidertAnmodningsperiode().getAnmodningsperiodeSvar().getAnmodningsperiodeSvarType();
+            behandlingsresultat.hentAnmodningsperiode().getAnmodningsperiodeSvar().getAnmodningsperiodeSvarType();
 
         if (anmodningsperiodeSvarType == Anmodningsperiodesvartyper.INNVILGELSE) {
             return SedType.A011;
@@ -318,7 +318,7 @@ public class EessiService {
      * senere skal utvides bør vi ta inn Aksjoner enum fra Eessi.
      *
      * @param rinaSaksnummer nummer på buc.
-     * @param sedType hvilke SedTyper vi ønsker å sjekke Create mot
+     * @param sedType        hvilke SedTyper vi ønsker å sjekke Create mot
      * @return true hvis vi kan opprette sed på buc.
      */
     public boolean kanOppretteSedTyperPåBuc(String rinaSaksnummer, SedType sedType) {

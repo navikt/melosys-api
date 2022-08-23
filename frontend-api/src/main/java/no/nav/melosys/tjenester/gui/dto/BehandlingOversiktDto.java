@@ -1,8 +1,8 @@
 package no.nav.melosys.tjenester.gui.dto;
 
 import java.time.Instant;
-import java.util.List;
 
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -17,6 +17,7 @@ public class BehandlingOversiktDto {
     private PeriodeDto periode;
     private SoeknadslandDto land;
     private Instant opprettetDato;
+    private Behandlingsresultattyper behandlingsresultattype;
 
     public Long getBehandlingID() {
         return behandlingID;
@@ -74,5 +75,11 @@ public class BehandlingOversiktDto {
         this.opprettetDato = opprettetDato;
     }
 
+    public Behandlingsresultattyper getBehandlingsresultattype() {
+        return behandlingsresultattype;
+    }
 
+    public void setBehandlingsresultattype(Behandlingsresultattyper behandlingsresultattype) {
+        this.behandlingsresultattype = behandlingsresultattype;
+    }
 }

@@ -96,7 +96,7 @@ final class UfmKontroll {
     }
 
     static Kontroll_begrunnelser arbeidssted(UfmKontrollData kontrollData) {
-        return ArbeidsstedRegler.arbeidstedSvalbardOgJanMayen(kontrollData.sedDokument()) ?
+        return ArbeidsstedRegler.erArbeidsstedFraSvalbardOgJanMayen(kontrollData.sedDokument()) ?
             Kontroll_begrunnelser.ARBEIDSSTED_UTENFOR_EOS : null;
     }
 }

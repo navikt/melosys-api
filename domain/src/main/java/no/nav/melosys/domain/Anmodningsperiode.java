@@ -62,7 +62,6 @@ public class Anmodningsperiode implements PeriodeOmLovvalg {
     @OneToOne(cascade = CascadeType.ALL, mappedBy = "anmodningsperiode")
     private AnmodningsperiodeSvar anmodningsperiodeSvar;
 
-    @SuppressWarnings("unused") // Trengs av Hibernate
     public Anmodningsperiode() {
     }
 
@@ -209,8 +208,8 @@ public class Anmodningsperiode implements PeriodeOmLovvalg {
     @Override
     public int hashCode() {
         return Objects.hash(behandlingsresultat, fom, tom, lovvalgsland, bestemmelse, tilleggsbestemmelse,
-                            unntakFraLovvalgsland, unntakFraBestemmelse, dekning, medlPeriodeID, sendtUtland,
-                            anmodetAv);
+            unntakFraLovvalgsland, unntakFraBestemmelse, dekning, medlPeriodeID, sendtUtland,
+            anmodetAv);
     }
 
     @Override
@@ -225,7 +224,6 @@ public class Anmodningsperiode implements PeriodeOmLovvalg {
     public void setAnmodetAv(String anmodetAv) {
         this.anmodetAv = anmodetAv;
     }
-
 
 
     public boolean gjelderSammeLandOgUnntakSom(Anmodningsperiode periode2) {

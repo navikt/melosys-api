@@ -41,7 +41,6 @@
         <kotlin.compiler.jvmTarget>${java.version}</kotlin.compiler.jvmTarget>
 
         <!-- Melosys -->
-        <melosys.jsonschema.version>1.35.172</melosys.jsonschema.version>
         <melosys.internt.kodeverk.version>5.15.121</melosys.internt.kodeverk.version>
         <melosys.brev.version>1.2.124</melosys.brev.version>
 
@@ -535,11 +534,6 @@
             </dependency>
 
             <!-- Test -->
-            <dependency>
-                <groupId>no.nav.melosys</groupId>
-                <artifactId>melosys-schema</artifactId>
-                <version>${melosys.jsonschema.version}</version>
-            </dependency>
             <dependency>
                 <groupId>com.networknt</groupId>
                 <artifactId>json-schema-validator</artifactId>

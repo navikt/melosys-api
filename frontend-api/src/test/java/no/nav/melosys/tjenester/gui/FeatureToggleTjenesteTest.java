@@ -1,39 +1,44 @@
 package no.nav.melosys.tjenester.gui;
 
-import java.util.Map;
-import java.util.Set;
-
-import no.finn.unleash.FakeUnleash;
-import org.junit.jupiter.api.BeforeEach;
+import no.finn.unleash.Unleash;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.entry;
+import static org.hamcrest.Matchers.equalTo;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@WebMvcTest(controllers = {FeatureToggleTjeneste.class})
 class FeatureToggleTjenesteTest {
 
-    private FeatureToggleTjeneste featureToggleTjeneste;
+    @MockBean
+    private Unleash unleash;
+    @Autowired
+    private MockMvc mockMvc;
 
-    @BeforeEach
-    public void setup() {
-        FakeUnleash fakeUnleash = new FakeUnleash();
-        fakeUnleash.enableAll();
-
-        featureToggleTjeneste = new FeatureToggleTjeneste(fakeUnleash);
-    }
+    private static final String BASE_URL = "/api/featuretoggle";
 
     @Test
-    void hentFeatureToggle_alleEnabled_verifiserAlleErEnablet() {
+    void hentFeatureToggle() throws Exception {
         String featureEn = "melosys.feature.en";
         String featureTo = "melosys.feature.to";
 
-        Map<String, Boolean> res = featureToggleTjeneste.hentFeatureToggles(Set.of(featureEn, featureTo)).getBody();
+        when(unleash.isEnabled(featureEn)).thenReturn(true);
+        when(unleash.isEnabled(featureTo)).thenReturn(false);
 
-        assertThat(res)
-            .containsOnly(
-                entry(featureEn, Boolean.TRUE),
-                entry(featureTo, Boolean.TRUE)
-            );
+        mockMvc.perform(get(BASE_URL)
+                .contentType(MediaType.APPLICATION_JSON)
+                .param("features", "melosys.feature.en, melosys.feature.to")
+            )
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$['melosys.feature.en']", equalTo(true)))
+            .andExpect(jsonPath("$['melosys.feature.to']", equalTo(false)));
     }
 
 }

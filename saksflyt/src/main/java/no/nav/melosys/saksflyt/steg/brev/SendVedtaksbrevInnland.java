@@ -201,7 +201,7 @@ public class SendVedtaksbrevInnland implements StegBehandler {
     private String hentSaksbehandler(Prosessinstans prosessinstans, Behandlingsresultat behandlingsresultat) {
         String saksbehandler = prosessinstans.getData(SAKSBEHANDLER);
         if (StringUtils.isEmpty(saksbehandler) && behandlingsresultat.erArt16EtterUtlandMedRegistrertSvar()) {
-            saksbehandler = behandlingsresultat.finnValidertAnmodningsperiode().map(Anmodningsperiode::getAnmodetAv)
+            saksbehandler = behandlingsresultat.finnAnmodningsperiode().map(Anmodningsperiode::getAnmodetAv)
                 .orElse(prosessinstans.getBehandling().getFagsak().getRegistrertAv());
         }
         return saksbehandler;

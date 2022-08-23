@@ -1,5 +1,6 @@
 package no.nav.melosys.service.journalforing;
 
+import java.util.List;
 import java.util.Optional;
 
 import no.finn.unleash.Unleash;
@@ -16,6 +17,7 @@ import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
+import no.nav.melosys.integrasjon.joark.JournalpostOppdatering;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.journalforing.dto.*;
 import no.nav.melosys.service.persondata.PersondataFasade;
@@ -26,6 +28,7 @@ import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -176,6 +179,19 @@ public class JournalfoeringService {
         }
 
         prosessinstansService.lagre(prosessinstans);
+    }
+
+    @Transactional
+    public void journalførOgKnyttTilEksisterendeSak(List<Pair<Behandling, Journalpost>> pairs) {
+        pairs.forEach(
+            pair -> oppdaterOgFerdigstillJournalpost(pair.getFirst().getFagsak().getSaksnummer(), pair.getSecond()));
+    }
+
+    private void oppdaterOgFerdigstillJournalpost(String saksnummer, Journalpost journalpost) {
+        JournalpostOppdatering journalpostOppdatering = new JournalpostOppdatering.Builder()
+            .medSaksnummer(saksnummer)
+            .build();
+        joarkFasade.oppdaterOgFerdigstillJournalpost(journalpost.getJournalpostId(), journalpostOppdatering);
     }
 
     @Transactional

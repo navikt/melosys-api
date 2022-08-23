@@ -17,6 +17,7 @@ import no.nav.melosys.domain.oppgave.PrioritetType;
 import no.nav.melosys.domain.util.KodeverkUtils;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.oppgave.konsument.OppgaveConsumer;
 import no.nav.melosys.integrasjon.oppgave.konsument.dto.OppgaveDto;
 import no.nav.melosys.integrasjon.oppgave.konsument.dto.OppgaveSearchRequest;
@@ -25,6 +26,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Primary;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import static no.nav.melosys.integrasjon.Konstanter.MELOSYS_ENHET_ID;
@@ -35,6 +37,7 @@ import static no.nav.melosys.integrasjon.Konstanter.NAV_VIKEN_ENHET_ID;
 public class OppgaveFasadeImpl implements OppgaveFasade {
     private static final Logger log = LoggerFactory.getLogger(OppgaveFasadeImpl.class);
 
+    private static final String OPPGAVE_STATUS_FEILREGISTRERT = "FEILREGISTRERT";
     private static final String OPPGAVE_STATUS_FERDIGSTILT = "FERDIGSTILT";
     private static final String SORTERINGSFELT = "FRIST";
     private static final String SORTERINGSREKKEFOLGE_DESC = "DESC";
@@ -45,6 +48,13 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
 
     public OppgaveFasadeImpl(OppgaveConsumer oppgaveConsumer) {
         this.oppgaveConsumer = oppgaveConsumer;
+    }
+
+    @Override
+    public void feilregistrerOppgaver(Set<Oppgave> oppgaveSet) {
+        for (var oppgave : oppgaveSet) {
+            feilregistrerOppgave(oppgave);
+        }
     }
 
     @Override
@@ -87,6 +97,18 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
     @Override
     public String opprettSensitivOppgave(Oppgave oppgave) {
         return opprettOppgave(oppgave, true);
+    }
+
+    @Async
+    public void feilregistrerOppgave(Oppgave oppgave) {
+        try {
+            var oppgaveDto = OppgaveDto.av(oppgave);
+            oppgaveDto.setStatus(OPPGAVE_STATUS_FEILREGISTRERT);
+            oppgaveConsumer.oppdaterOppgave(oppgaveDto);
+            log.info("Oppgave {} er feilregistrert", oppgaveDto.getId());
+        } catch (TekniskException e) {
+            log.error("Feilregistrering av oppgave {} feilet", oppgave.getOppgaveId(), e);
+        }
     }
 
     private String opprettOppgave(Oppgave oppgave, boolean erSensitiv) {
@@ -240,6 +262,20 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
             .medTema(new String[]{Tema.MED.getKode(), Tema.UFM.getKode()})
             .medOppgaveTyper(hentGyldigeOppgavetyper())
             .medSorteringsfelt(SORTERINGSFELT)
+            .medStatusKategori(OPPGAVE_STATUSKATEGORI_AAPEN)
+            .build();
+
+        return oppgaveConsumer.hentOppgaveListe(oppgaveSearchRequest).stream()
+            .map(OppgaveFasadeImpl::oppgaveMappingDtoTilDomain)
+            .toList();
+    }
+
+    @Override
+    public List<Oppgave> finnÅpneOppgaverMedJournalpostID(String journalpostID) {
+        OppgaveSearchRequest oppgaveSearchRequest = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
+            .medJournalpostID(new String[]{journalpostID})
+            .medTema(new String[]{Tema.MED.getKode(), Tema.UFM.getKode()})
+            .medOppgaveTyper(new String[]{Oppgavetyper.BEH_SAK_MK.getKode(), Oppgavetyper.VUR.getKode(), Oppgavetyper.BEH_SED.getKode()})
             .medStatusKategori(OPPGAVE_STATUSKATEGORI_AAPEN)
             .build();
 

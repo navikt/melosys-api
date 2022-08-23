@@ -43,7 +43,7 @@ public class OppgaveTjeneste {
 
     @PostMapping("/plukk")
     @ApiOperation(value = "Plukker neste oppgave fra Oppgave som saksbehandler skal arbeide med.", response = PlukketOppgaveDto.class)
-    public ResponseEntity plukkOppgave(@RequestBody PlukkOppgaveInnDto plukkDto) {
+    public ResponseEntity<PlukketOppgaveDto> plukkOppgave(@RequestBody PlukkOppgaveInnDto plukkDto) {
         String ident = SubjectHandler.getInstance().getUserID();
 
         Optional<Oppgave> plukket = oppgaveplukker.plukkOppgave(ident, plukkDto);
@@ -71,7 +71,7 @@ public class OppgaveTjeneste {
 
     @PostMapping("/tilbakelegg")
     @ApiOperation(value = "Legger tilbake oppgave knyttet til gitt behandlingID i GSAK.")
-    public ResponseEntity leggTilbakeOppgave(@RequestBody TilbakeleggingDto tilbakelegging) {
+    public ResponseEntity<Void> leggTilbakeOppgave(@RequestBody TilbakeleggingDto tilbakelegging) {
         String ident = SubjectHandler.getInstance().getUserID();
         oppgaveplukker.leggTilbakeOppgave(ident, tilbakelegging);
         return ResponseEntity.noContent().build();
@@ -81,7 +81,7 @@ public class OppgaveTjeneste {
     @ApiOperation(
         value = "Henter alle oppgaver som er tildelt innlogget saksbehandler.",
         response = OppgaveOversiktDto.class)
-    public ResponseEntity mineOppgaver() {
+    public ResponseEntity<OppgaveOversiktDto> mineOppgaver() {
         String ident = SubjectHandler.getInstance().getUserID();
         List<OppgaveDto> oppgaveDtoListe;
         oppgaveDtoListe = oppgaveService.hentOppgaverMedAnsvarlig(ident);
@@ -90,10 +90,10 @@ public class OppgaveTjeneste {
         List<BehandlingsoppgaveDto> saksbehandling = new ArrayList<>();
 
         for (OppgaveDto oppgaveDto : oppgaveDtoListe) {
-            if (oppgaveDto instanceof JournalfoeringsoppgaveDto) {
-                journalføring.add((JournalfoeringsoppgaveDto) oppgaveDto);
-            } else if (oppgaveDto instanceof BehandlingsoppgaveDto) {
-                saksbehandling.add((BehandlingsoppgaveDto) oppgaveDto);
+            if (oppgaveDto instanceof JournalfoeringsoppgaveDto journalfoeringsoppgaveDto) {
+                journalføring.add(journalfoeringsoppgaveDto);
+            } else if (oppgaveDto instanceof BehandlingsoppgaveDto behandlingsoppgaveDto) {
+                saksbehandling.add(behandlingsoppgaveDto);
             } else {
                 log.warn("Ukjent oppgavetype {}: ", oppgaveDto.getClass().getSimpleName());
             }

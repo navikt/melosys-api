@@ -1,85 +1,58 @@
 package no.nav.melosys.tjenester.gui;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
-import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.oppgave.Oppgaveplukker;
-import no.nav.melosys.service.oppgave.dto.*;
+import no.nav.melosys.service.oppgave.dto.PlukkOppgaveInnDto;
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
 import no.nav.melosys.sikkerhet.context.TestSubjectHandler;
-import no.nav.melosys.tjenester.gui.dto.oppgave.OppgaveOversiktDto;
 import no.nav.melosys.tjenester.gui.dto.oppgave.PlukketOppgaveDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static no.nav.melosys.tjenester.gui.util.ResponseBodyMatchers.responseBody;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@ExtendWith(MockitoExtension.class)
-class OppgaveTjenesteTest extends JsonSchemaTestParent {
-    private static final Logger logger = LoggerFactory.getLogger(OppgaveTjenesteTest.class);
+@WebMvcTest(controllers = {OppgaveTjeneste.class})
+class OppgaveTjenesteTest {
 
-    private static final String OPPGAVER_OVERSIKT_SCHEMA = "oppgaver-oversikt-schema.json";
-    private static final String OPPGAVER_TILBAKELEGGE_SCHEMA = "oppgaver-tilbakelegg-post-schema.json";
-    private static final String OPPGAVER_SOK_SCHEMA = "oppgaver-sok-schema.json";
-    private static final String OPPGAVER_PLUKK_SCHEMA = "oppgaver-plukk-schema.json";
-
-    private OppgaveTjeneste oppgaveTjeneste;
-    @Mock
+    @MockBean
     private Oppgaveplukker oppgaveplukker;
-    @Mock
+    @MockBean
     private OppgaveService oppgaveService;
+
+    @Autowired
+    private MockMvc mockMvc;
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    private static final String BASE_URL = "/api/oppgaver";
 
     @BeforeEach
     public void setUp() {
-        oppgaveTjeneste = new OppgaveTjeneste(oppgaveplukker, oppgaveService);
         SpringSubjectHandler.set(new TestSubjectHandler());
     }
 
+    @Disabled("Frem til skjema-fiks")
     @Test
-    void mineOppgaver() throws IOException {
-        List<OppgaveDto> oppgaver = new ArrayList<>();
-        int oppgaveNr = 1 + defaultEasyRandom().nextInt(2);
-        for (int i = 0; i < oppgaveNr; i++) {
-            oppgaver.add(defaultEasyRandom().nextObject(BehandlingsoppgaveDto.class));
-            oppgaver.add(defaultEasyRandom().nextObject(JournalfoeringsoppgaveDto.class));
-        }
-        when(oppgaveService.hentOppgaverMedAnsvarlig(anyString())).thenReturn(oppgaver);
-
-        ResponseEntity<?> response = oppgaveTjeneste.mineOppgaver();
-
-        OppgaveOversiktDto oppgaveOversikt = (OppgaveOversiktDto) response.getBody();
-        valider(oppgaveOversikt, OPPGAVER_OVERSIKT_SCHEMA, logger);
-    }
-
-    @Test
-    void plukkOppgave() throws IOException {
-        Behandling behandling = new Behandling();
-        behandling.setType(Behandlingstyper.SOEKNAD);
-        behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
-        behandling.setId(1L);
-        when(oppgaveService.hentSistAktiveBehandling(anyString())).thenReturn(behandling);
-
+    void plukkOppgave() throws Exception {
         Oppgave.Builder oppgaveBuilder = new Oppgave.Builder();
         oppgaveBuilder.setOppgaveId("1");
         oppgaveBuilder.setOppgavetype(Oppgavetyper.BEH_SAK_MK);
@@ -87,64 +60,77 @@ class OppgaveTjenesteTest extends JsonSchemaTestParent {
         oppgaveBuilder.setJournalpostId("123");
         oppgaveBuilder.setOppgavetype(Oppgavetyper.BEH_SAK_MK);
         Optional<Oppgave> plukket = Optional.of(oppgaveBuilder.build());
+
         PlukkOppgaveInnDto innData = new PlukkOppgaveInnDto();
         innData.setBehandlingstema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
-        when(oppgaveplukker.plukkOppgave(anyString(), eq(innData))).thenReturn(plukket);
 
+        Behandling behandling = new Behandling();
+        behandling.setType(Behandlingstyper.SOEKNAD);
+        behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
+        behandling.setId(1L);
 
-        ResponseEntity<?> response = oppgaveTjeneste.plukkOppgave(innData);
+        when(oppgaveplukker.plukkOppgave(any(), any())).thenReturn(plukket);
+        when(oppgaveService.hentSistAktiveBehandling(anyString())).thenReturn(behandling);
 
-        assertThat(response.getBody()).isExactlyInstanceOf(PlukketOppgaveDto.class);
-        PlukketOppgaveDto entity = (PlukketOppgaveDto) response.getBody();
-        valider(entity, OPPGAVER_PLUKK_SCHEMA, logger);
-        assertThat(entity.getOppgaveID()).isEqualTo("1");
+        PlukketOppgaveDto response = new PlukketOppgaveDto();
+        response.setBehandlingID(behandling.getId());
+        response.setBehandlingstype(behandling.getType().getKode());
+        response.setBehandlingstema(behandling.getTema().getKode());
+        response.setJournalpostID(plukket.get().getJournalpostId());
+        response.setOppgaveID(plukket.get().getOppgaveId());
+        response.setSaksnummer(plukket.get().getSaksnummer());
+
+        mockMvc.perform(post(BASE_URL + "/plukk")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(innData)))
+            .andExpect(status().isOk())
+            .andExpect(responseBody(objectMapper).containsObjectAsJson(response, PlukketOppgaveDto.class));
     }
 
-    @Disabled("Frem til skjema-fiks")
     @Test
-    void søkOppgaverMedPersonIdentEllerOrgnr() throws IOException {
-        List<Oppgave> oppgaver = defaultEasyRandom().objects(Oppgave.class, 3).collect(Collectors.toList());
-        when(oppgaveService.finnOppgaverMedPersonIdent(anyString())).thenReturn(oppgaver);
+    void søkOppgaverMedPersonIdentEllerOrgnr_fnrSendesInn_kallerRettFunksjon() throws Exception {
+        mockMvc.perform(get(BASE_URL + "/sok")
+                .contentType(MediaType.APPLICATION_JSON)
+                .param("personIdent", "fnr")
+            )
+            .andExpect(status().isOk());
 
-        validerArray(oppgaveTjeneste.søkOppgaverMedPersonIdentEllerOrgnr("", null).getBody(), OPPGAVER_SOK_SCHEMA, logger);
-    }
-
-    @Test
-    void søkOppgaverMedPersonIdentEllerOrgnr_fnrSendesInn_kallerRettFunksjon() {
-        oppgaveTjeneste.søkOppgaverMedPersonIdentEllerOrgnr("fnr", "");
 
         verify(oppgaveService).finnOppgaverMedPersonIdent("fnr");
         verify(oppgaveService, never()).finnOppgaverMedOrgnr(anyString());
     }
 
     @Test
-    void søkOppgaverMedPersonIdentEllerOrgnr_orgnrSendesInn_kallerRettFunksjon() {
-        oppgaveTjeneste.søkOppgaverMedPersonIdentEllerOrgnr("", "orgnr");
+    void søkOppgaverMedPersonIdentEllerOrgnr_orgnrSendesInn_kallerRettFunksjon() throws Exception {
+        mockMvc.perform(get(BASE_URL + "/sok")
+                .contentType(MediaType.APPLICATION_JSON)
+                .param("orgnr", "orgnr")
+            )
+            .andExpect(status().isOk());
 
         verify(oppgaveService).finnOppgaverMedOrgnr("orgnr");
         verify(oppgaveService, never()).finnOppgaverMedPersonIdent(anyString());
     }
 
     @Test
-    void søkOppgaverMedPersonIdentEllerOrgnr_fnrOgOrgnrSendesInn_kasterFeil() {
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> oppgaveTjeneste.søkOppgaverMedPersonIdentEllerOrgnr("fnr", "orgnr"))
-            .withMessageContaining("Fant både personIdent og orgnr. API støtter kun én.");
+    void søkOppgaverMedPersonIdentEllerOrgnr_fnrOgOrgnrSendesInn_kasterFeil() throws Exception {
+        mockMvc.perform(get(BASE_URL + "/sok")
+                .contentType(MediaType.APPLICATION_JSON)
+                .param("personIdent", "fnr")
+                .param("orgnr", "orgnr")
+            )
+            .andExpect(status().is4xxClientError())
+            .andExpect(responseBody(objectMapper)
+                .containsError("message", "Fant både personIdent og orgnr. API støtter kun én."));
     }
 
     @Test
-    void søkOppgaverMedPersonIdentEllerOrgnr_ingentingSendesInn_kasterFeil() {
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> oppgaveTjeneste.søkOppgaverMedPersonIdentEllerOrgnr("", ""))
-            .withMessageContaining("Finner ingen søkekriteria");
-    }
-
-
-    @Test
-    void tilbakeleggOppgave() throws Exception {
-        TilbakeleggingDto tilbakelegging = defaultEasyRandom().nextObject(TilbakeleggingDto.class);
-
-        assertThat(tilbakelegging).isNotNull();
-        valider(tilbakelegging, OPPGAVER_TILBAKELEGGE_SCHEMA, logger);
+    void søkOppgaverMedPersonIdentEllerOrgnr_ingentingSendesInn_kasterFeil() throws Exception {
+        mockMvc.perform(get(BASE_URL + "/sok")
+                .contentType(MediaType.APPLICATION_JSON)
+            )
+            .andExpect(status().is4xxClientError())
+            .andExpect(responseBody(objectMapper)
+                .containsError("message", "Finner ingen søkekriteria. API støtter personIdent(fnr eller dnr) og orgnr"));
     }
 }

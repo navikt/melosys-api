@@ -42,6 +42,13 @@ public final class SaksbehandlingDataFactory {
         return behandling;
     }
 
+    public static Behandling lagInaktivBehandling(Fagsak fagsak) {
+        var behandling = lagBehandling();
+        behandling.setFagsak(fagsak);
+        behandling.setStatus(Behandlingsstatus.AVSLUTTET);
+        return behandling;
+    }
+
     public static Behandling lagInaktivBehandlingSomIkkeResulterIVedtak() {
         Behandling behandling = new Behandling();
         behandling.setId(1L);

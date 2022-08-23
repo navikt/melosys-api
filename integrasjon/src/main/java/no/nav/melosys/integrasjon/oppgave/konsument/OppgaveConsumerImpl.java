@@ -1,13 +1,9 @@
 package no.nav.melosys.integrasjon.oppgave.konsument;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import no.nav.melosys.integrasjon.felles.FeilResponseDto;
-import no.nav.melosys.integrasjon.oppgave.konsument.dto.OppgaveDto;
-import no.nav.melosys.integrasjon.oppgave.konsument.dto.OppgaveSearchRequest;
-import no.nav.melosys.integrasjon.oppgave.konsument.dto.OppgaveSvar;
-import no.nav.melosys.integrasjon.oppgave.konsument.dto.OpprettOppgaveDto;
+import no.nav.melosys.integrasjon.oppgave.konsument.dto.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -60,6 +56,7 @@ public class OppgaveConsumerImpl implements OppgaveConsumer {
             .uri(OPPGAVE_BASE_URI, uriBuilder ->
                 uriBuilder
                     .queryParamIfPresent("aktoerId", Optional.ofNullable(oppgaveSearchRequest.getAktørId()))
+                    .queryParamIfPresent("journalpostId", Optional.ofNullable(oppgaveSearchRequest.getJournalpostId()))
                     .queryParamIfPresent("orgnr", Optional.ofNullable(oppgaveSearchRequest.getOrgnr()))
                     .queryParamIfPresent("tildeltEnhetsnr", Optional.ofNullable(oppgaveSearchRequest.getTildeltEnhetsnr()))
                     .queryParamIfPresent("tildeltRessurs", Optional.ofNullable(oppgaveSearchRequest.getTildeltRessurs()))
@@ -84,7 +81,7 @@ public class OppgaveConsumerImpl implements OppgaveConsumer {
     }
 
     private Optional<Collection<String>> tilOptionalListe(String[] array) {
-        return array != null ? Optional.of(Arrays.stream(array).collect(Collectors.toList())) : Optional.empty();
+        return array != null ? Optional.of(Arrays.stream(array).toList()) : Optional.empty();
     }
 
     @Override

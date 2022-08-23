@@ -1,10 +1,12 @@
 package no.nav.melosys.tjenester.gui;
 
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
@@ -26,22 +28,30 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.trygdeavtale.TrygdeavtaleResultat;
 import no.nav.melosys.service.trygdeavtale.TrygdeavtaleService;
+import no.nav.melosys.tjenester.gui.dto.trygdeavtale.TrygdeavtaleInfoDto;
 import no.nav.melosys.tjenester.gui.dto.trygdeavtale.TrygdeavtaleResultatDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 
 import static no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie.Relasjonsrolle;
 import static no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie.tilMedfolgendeFamilie;
+import static no.nav.melosys.tjenester.gui.util.ResponseBodyMatchers.responseBody;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@ExtendWith(MockitoExtension.class)
+@WebMvcTest(controllers = {TrygdeavtaleTjeneste.class})
 class TrygdeavtaleTjenesteTest {
     private final static String ORGNR_1 = "11111111111";
     private final static String UUID_BARN_1 = UUID.randomUUID().toString();
@@ -56,34 +66,44 @@ class TrygdeavtaleTjenesteTest {
     private static final String BARN_NAVN_2 = "Dole Duck";
     private static final String EKTEFELLE_NAVN = "Dolly Duck";
 
-    @Mock
+    @MockBean
     private TrygdeavtaleService trygdeavtaleService;
-    @Mock
+    @MockBean
     private BehandlingService behandlingService;
-    @Mock
+    @MockBean
     private BehandlingsresultatService behandlingsresultatService;
-    @Mock
+    @MockBean
     private Aksesskontroll aksesskontroll;
+
+    @Autowired
+    private MockMvc mockMvc;
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @Captor
     private ArgumentCaptor<TrygdeavtaleResultat> trygdeavtaleResultatArgumentCaptor;
 
-    private TrygdeavtaleTjeneste trygdeavtaleTjeneste;
-
     private static Behandling behandling;
     private static Behandlingsresultat behandlingsresultat;
 
+    private static final String BASE_URL = "/api/trygdeavtale";
+
     @BeforeEach
-    void init() {
-        trygdeavtaleTjeneste = new TrygdeavtaleTjeneste(trygdeavtaleService, behandlingService, behandlingsresultatService, aksesskontroll);
+    void setup() {
         behandling = lagBehandling();
         behandlingsresultat = lagBehandlingsresultat();
     }
 
     @Test
-    void overførResultat_medTrygdeavtaleResultatDto_mappesKorrekt() {
+    void overførResultat_medTrygdeavtaleResultatDto_mappesKorrekt() throws Exception {
         var trygdeavtaleResultatDto = lagTrygdeavtaleResultatDto();
-        trygdeavtaleTjeneste.overførTrygdeavtaleResultat(1L, trygdeavtaleResultatDto);
+
+        mockMvc.perform(post(BASE_URL + "/resultat/{behandlingID}", 1L)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(trygdeavtaleResultatDto))
+            )
+            .andExpect(status().isNoContent());
+
 
         verify(trygdeavtaleService).overførResultat(eq(1L), trygdeavtaleResultatArgumentCaptor.capture());
         var trygdeavtaleResultat = trygdeavtaleResultatArgumentCaptor.getValue();
@@ -119,11 +139,21 @@ class TrygdeavtaleTjenesteTest {
     }
 
     @Test
-    void hentTrygdeavtaleInfo_utenVirksomhetOgBarnEktefelle_returnererKorrekt() {
+    void hentTrygdeavtaleInfo_utenVirksomhetOgBarnEktefelle_returnererKorrekt() throws Exception {
         when(behandlingService.hentBehandlingMedSaksopplysninger(1L)).thenReturn(behandling);
         when(behandlingsresultatService.hentBehandlingsresultat(1L)).thenReturn(behandlingsresultat);
 
-        var response = trygdeavtaleTjeneste.hentTrygdeavtaleBehandlingsgrunnlag(1L, false, false).getBody();
+        MvcResult mvcResult = mockMvc.perform(get(BASE_URL + "/behandlingsgrunnlag/{behandlingID}", 1L)
+                .contentType(MediaType.APPLICATION_JSON)
+                .requestAttr("virksomheter", false)
+                .requestAttr("barnEktefeller", false)
+            )
+            .andExpect(status().isOk())
+            .andReturn();
+
+
+        String body = mvcResult.getResponse().getContentAsString(StandardCharsets.UTF_8);
+        var response = objectMapper.readValue(body, TrygdeavtaleInfoDto.class);
 
         verify(trygdeavtaleService, never()).hentVirksomheter(any());
         verify(trygdeavtaleService, never()).hentFamiliemedlemmer(any());
@@ -143,11 +173,21 @@ class TrygdeavtaleTjenesteTest {
     }
 
     @Test
-    void hentTrygdeavtaleInfo_medVirksomhetOgBarnEktefelle_returnererKorrekt() {
+    void hentTrygdeavtaleInfo_medVirksomhetOgBarnEktefelle_returnererKorrekt() throws Exception {
         when(behandlingService.hentBehandlingMedSaksopplysninger(1L)).thenReturn(behandling);
         when(behandlingsresultatService.hentBehandlingsresultat(1L)).thenReturn(behandlingsresultat);
 
-        var response = trygdeavtaleTjeneste.hentTrygdeavtaleBehandlingsgrunnlag(1L, true, true).getBody();
+        MvcResult mvcResult = mockMvc.perform(get(BASE_URL + "/behandlingsgrunnlag/{behandlingID}", 1L)
+                .contentType(MediaType.APPLICATION_JSON)
+                .param("virksomheter", "true")
+                .param("barnEktefeller", "true")
+            )
+            .andExpect(status().isOk())
+            .andReturn();
+
+
+        String body = mvcResult.getResponse().getContentAsString(StandardCharsets.UTF_8);
+        var response = objectMapper.readValue(body, TrygdeavtaleInfoDto.class);
 
         verify(trygdeavtaleService).hentVirksomheter(any());
         verify(trygdeavtaleService).hentFamiliemedlemmer(any());
@@ -167,7 +207,7 @@ class TrygdeavtaleTjenesteTest {
     }
 
     @Test
-    void hentTrygdeavtaleInfo_somNyVurdering_returnererKorrekt() {
+    void hentTrygdeavtaleInfo_somNyVurdering_returnererKorrekt() throws Exception {
         var vedtakMetadata = new VedtakMetadata();
         vedtakMetadata.setNyVurderingBakgrunn(Nyvurderingbakgrunner.NYE_OPPLYSNINGER.getKode());
         behandlingsresultat.setVedtakMetadata(vedtakMetadata);
@@ -176,7 +216,17 @@ class TrygdeavtaleTjenesteTest {
         when(behandlingService.hentBehandlingMedSaksopplysninger(1L)).thenReturn(behandling);
         when(behandlingsresultatService.hentBehandlingsresultat(1L)).thenReturn(behandlingsresultat);
 
-        var response = trygdeavtaleTjeneste.hentTrygdeavtaleBehandlingsgrunnlag(1L, true, true).getBody();
+        MvcResult mvcResult = mockMvc.perform(get(BASE_URL + "/behandlingsgrunnlag/{behandlingID}", 1L)
+                .contentType(MediaType.APPLICATION_JSON)
+                .requestAttr("virksomheter", true)
+                .requestAttr("barnEktefeller", true)
+            )
+            .andExpect(status().isOk())
+            .andReturn();
+
+
+        String body = mvcResult.getResponse().getContentAsString();
+        var response = objectMapper.readValue(body, TrygdeavtaleInfoDto.class);
 
         assertThat(response).isNotNull();
         assertThat(response.behandlingstype()).isEqualTo(Behandlingstyper.NY_VURDERING.getKode());
@@ -184,19 +234,29 @@ class TrygdeavtaleTjenesteTest {
     }
 
     @Test
-    void hentTrygdeavtaleInfo_saksbehandlerHarTillatelseTilÅRedigere_returnererKorrekt() {
+    void hentTrygdeavtaleInfo_saksbehandlerHarTillatelseTilÅRedigere_returnererKorrekt() throws Exception {
         when(behandlingService.hentBehandlingMedSaksopplysninger(1L)).thenReturn(behandling);
         when(behandlingsresultatService.hentBehandlingsresultat(1L)).thenReturn(behandlingsresultat);
         when(aksesskontroll.behandlingKanRedigeresAvSaksbehandler(eq(behandling), any())).thenReturn(true);
 
-        var response = trygdeavtaleTjeneste.hentTrygdeavtaleBehandlingsgrunnlag(1L, true, true).getBody();
+        MvcResult mvcResult = mockMvc.perform(get(BASE_URL + "/behandlingsgrunnlag/{behandlingID}", 1L)
+                .contentType(MediaType.APPLICATION_JSON)
+                .requestAttr("virksomheter", true)
+                .requestAttr("barnEktefeller", true)
+            )
+            .andExpect(status().isOk())
+            .andReturn();
+
+
+        String body = mvcResult.getResponse().getContentAsString();
+        var response = objectMapper.readValue(body, TrygdeavtaleInfoDto.class);
 
         assertThat(response).isNotNull();
         assertThat(response.redigerbart()).isTrue();
     }
 
     @Test
-    void hentResultat_byggOppResultat_returnererKorrekt() {
+    void hentResultat_byggOppResultat_returnererKorrekt() throws Exception {
         Behandling behandling = lagBehandling();
         behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().personOpplysninger.medfolgendeFamilie =
             List.of(
@@ -208,13 +268,15 @@ class TrygdeavtaleTjenesteTest {
         when(behandlingService.hentBehandlingMedSaksopplysninger(1L)).thenReturn(behandling);
         when(trygdeavtaleService.hentResultat(1L)).thenReturn(lagTrygdeavtaleResultat());
 
-        var response = trygdeavtaleTjeneste.hentResultat(1L).getBody();
-
-        assertThat(response).usingRecursiveComparison().isEqualTo(lagTrygdeavtaleResultatDto());
+        mockMvc.perform(get(BASE_URL + "/resultat/{behandlingID}", 1L)
+                .contentType(MediaType.APPLICATION_JSON)
+            )
+            .andExpect(status().isOk())
+            .andExpect(responseBody(objectMapper).containsObjectAsJson(lagTrygdeavtaleResultatDto(), TrygdeavtaleResultatDto.class));
     }
 
     @Test
-    void hentResultat_tomtResultat_returnererKorrekt() {
+    void hentResultat_tomtResultat_returnererKorrekt() throws Exception {
         Behandling behandling = lagBehandling();
         behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().personOpplysninger.medfolgendeFamilie =
             List.of();
@@ -225,10 +287,11 @@ class TrygdeavtaleTjenesteTest {
         when(behandlingService.hentBehandlingMedSaksopplysninger(1L)).thenReturn(behandling);
         when(trygdeavtaleService.hentResultat(1L)).thenReturn(tomtTrygdeavtaleResultat);
 
-        var response = trygdeavtaleTjeneste.hentResultat(1L).getBody();
-
-        TrygdeavtaleResultatDto tomTrygdeavtaleResultatDto = new TrygdeavtaleResultatDto.Builder().build();
-        assertThat(response).usingRecursiveComparison().isEqualTo(tomTrygdeavtaleResultatDto);
+        mockMvc.perform(get(BASE_URL + "/resultat/{behandlingID}", 1L)
+                .contentType(MediaType.APPLICATION_JSON)
+            )
+            .andExpect(status().isOk())
+            .andExpect(responseBody(objectMapper).containsObjectAsJson(new TrygdeavtaleResultatDto.Builder().build(), TrygdeavtaleResultatDto.class));
     }
 
     private static Behandlingsgrunnlag lagBehandlingsgrunnlag() {

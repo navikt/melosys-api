@@ -8,10 +8,10 @@ import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode
 import no.nav.melosys.domain.dokument.medlemskap.Periode
 import no.nav.melosys.domain.util.LandkoderUtils
+import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.integrasjon.medl.api.v1.MedlemskapsunntakForGet
 import no.nav.melosys.integrasjon.medl.api.v1.MedlemskapsunntakForPost
 import no.nav.melosys.integrasjon.medl.api.v1.MedlemskapsunntakForPut
-import no.nav.melosys.exception.TekniskException
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 
@@ -25,7 +25,7 @@ class MedlService(
         objectMapper.registerModule(JavaTimeModule())
     }
 
-    fun hentPeriodeListe(fnr: String, fom: LocalDate, tom: LocalDate): Saksopplysning {
+    fun hentPeriodeListe(fnr: String, fom: LocalDate?, tom: LocalDate?): Saksopplysning {
         val periodeListeResponse = medlemskapRestConsumer.hentPeriodeListe(fnr, fom, tom)
 
         return Saksopplysning().apply {
@@ -88,8 +88,8 @@ class MedlService(
         oppdaterPeriode(lovvalgsperiode!!, PeriodestatusMedl.UAVK, LovvalgMedl.FORL, kildedokumenttypeMedl!!)
     }
 
-    fun avvisPeriode(medlPeriodeID: Long?, årsak: StatusaarsakMedl) {
-        val eksisterendePeriode = hentEksisterendePeriode(medlPeriodeID!!)
+    fun avvisPeriode(medlPeriodeID: Long, årsak: StatusaarsakMedl) {
+        val eksisterendePeriode = hentEksisterendePeriode(medlPeriodeID)
         val request = MedlemskapsunntakForPut(
             unntakId = eksisterendePeriode.unntakId,
             fraOgMed = eksisterendePeriode.fraOgMed,

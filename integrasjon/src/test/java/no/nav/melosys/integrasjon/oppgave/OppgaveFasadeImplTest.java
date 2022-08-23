@@ -29,7 +29,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public final class OppgaveFasadeImplTest {
+final class OppgaveFasadeImplTest {
     @Mock
     private OppgaveConsumer oppgaveConsumer;
     @Captor
@@ -40,7 +40,7 @@ public final class OppgaveFasadeImplTest {
     private OppgaveFasadeImpl oppgaveFasadeImpl;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         oppgaveFasadeImpl = new OppgaveFasadeImpl(oppgaveConsumer);
     }
 
@@ -96,7 +96,7 @@ public final class OppgaveFasadeImplTest {
         verify(oppgaveConsumer, times(2)).hentOppgaveListe(oppgaveSearchRequestCaptor.capture());
 
         List<OppgaveSearchRequest> requests = oppgaveSearchRequestCaptor.getAllValues();
-        assertThat(requests.size()).isEqualTo(2);
+        assertThat(requests).hasSize(2);
         assertThat(requests.get(0).getBehandlesAvApplikasjon()).isEqualTo(Fagsystem.MELOSYS.getKode());
         assertThat(requests.get(1).getBehandlesAvApplikasjon()).isNullOrEmpty();
         assertThat(requests.get(1).getOppgavetype()[0]).isEqualTo(Oppgavetyper.JFR.getKode());
@@ -115,7 +115,7 @@ public final class OppgaveFasadeImplTest {
 
         Set<Oppgave> oppgaver = oppgaveFasadeImpl.finnOppgaverMedAnsvarlig("123");
 
-        assertThat(oppgaver.size()).isEqualTo(1);
+        assertThat(oppgaver).hasSize(1);
         assertThat(oppgaver.iterator().next().getOppgaveId()).isEqualTo(oppgaveID);
     }
 
@@ -149,7 +149,7 @@ public final class OppgaveFasadeImplTest {
         List<Oppgave> oppgaver =
             oppgaveFasadeImpl.finnUtildelteOppgaverEtterFrist("abbehandlingstema1234", null);
 
-        assertThat(oppgaver.size()).isEqualTo(1);
+        assertThat(oppgaver).hasSize(1);
         assertThat(oppgaver.get(0).getSaksnummer()).isEqualTo("MEL-123");
     }
 

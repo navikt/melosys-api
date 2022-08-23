@@ -225,7 +225,7 @@ public class SedDataBygger {
         if (periodeType == PeriodeType.LOVVALGSPERIODE) {
             return Collections.singletonList(lagLovvalgsperiodeDto(behandlingsresultat.hentValidertLovvalgsperiode()));
         } else if (periodeType == PeriodeType.ANMODNINGSPERIODE) {
-            return Collections.singletonList(lagLovvalgsperiodeDto(behandlingsresultat.hentValidertAnmodningsperiode(),
+            return Collections.singletonList(lagLovvalgsperiodeDto(behandlingsresultat.hentAnmodningsperiode(),
                 hentUnntaksBegrunnelse(behandlingsresultat)));
         } else if (periodeType == PeriodeType.UTPEKINGSPERIODE) {
             return Collections.singletonList(lagLovvalgsperiodeDto(behandlingsresultat.hentValidertUtpekingsperiode()));
@@ -238,8 +238,8 @@ public class SedDataBygger {
 
         if (periodeType == PeriodeType.LOVVALGSPERIODE && behandlingsresultat.finnValidertLovvalgsperiode().isPresent()) {
             return Collections.singletonList(lagLovvalgsperiodeDto(behandlingsresultat.hentValidertLovvalgsperiode()));
-        } else if (periodeType == PeriodeType.ANMODNINGSPERIODE && behandlingsresultat.finnValidertAnmodningsperiode().isPresent()) {
-            return Collections.singletonList(lagLovvalgsperiodeDto(behandlingsresultat.hentValidertAnmodningsperiode(), hentUnntaksBegrunnelse(behandlingsresultat)));
+        } else if (periodeType == PeriodeType.ANMODNINGSPERIODE && behandlingsresultat.finnAnmodningsperiode().isPresent()) {
+            return Collections.singletonList(lagLovvalgsperiodeDto(behandlingsresultat.hentAnmodningsperiode(), hentUnntaksBegrunnelse(behandlingsresultat)));
         } else if (periodeType == PeriodeType.UTPEKINGSPERIODE && behandlingsresultat.finnValidertUtpekingsperiode().isPresent()) {
             return Collections.singletonList(lagLovvalgsperiodeDto(behandlingsresultat.hentValidertUtpekingsperiode()));
         }

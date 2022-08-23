@@ -74,7 +74,7 @@ public class OppdaterOgFerdigstillJournalpost implements StegBehandler {
             .medLogiskeVedleggTitler(logiskeVedleggTitler)
             .medTema(fraBehandlingstema(behandling.getTema()).getKode())
             .build();
-        joarkFasade.oppdaterJournalpost(journalpostID, journalpostOppdatering, true);
+        joarkFasade.oppdaterOgFerdigstillJournalpost(journalpostID, journalpostOppdatering);
         log.info("Oppdatert og ferdigstilt journalpost {} for fagsak: {}", journalpostID, behandling.getFagsak().getSaksnummer());
     }
 }

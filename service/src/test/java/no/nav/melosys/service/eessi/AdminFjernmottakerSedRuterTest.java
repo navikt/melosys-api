@@ -124,7 +124,7 @@ class AdminFjernmottakerSedRuterTest {
         adminFjernmottakerSedRuter.rutSedTilBehandling(prosessinstans, arkivsakID);
 
         verify(fagsakService).avsluttFagsakOgBehandling(fagsak, Saksstatuser.ANNULLERT);
-        verify(medlPeriodeService).avvisPeriodeOpphørt(behandlingsresultat.hentValidertAnmodningsperiode().getMedlPeriodeID());
+        verify(medlPeriodeService).avvisPeriodeOpphørt(behandlingsresultat.hentAnmodningsperiode().getMedlPeriodeID());
         verify(prosessinstansService).opprettProsessinstansSedJournalføring(sistAktiveBehandling, melosysEessiMelding);
     }
 

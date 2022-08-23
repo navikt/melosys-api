@@ -1,11 +1,5 @@
 package no.nav.melosys.saksflyt.steg.sed;
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Set;
-
 import com.fasterxml.jackson.core.type.TypeReference;
 import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.Behandling;
@@ -27,6 +21,12 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import org.springframework.stereotype.Component;
+
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Set;
 
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.TRYGDEMYNDIGHET;
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.YTTERLIGERE_INFO_SED;
@@ -94,7 +94,7 @@ public class SendAnmodningOmUnntak extends AbstraktSendUtland {
 
     @Override
     protected boolean skalSendesUtland(Behandlingsresultat behandlingsresultat) {
-        Anmodningsperiode anmodningsperiode = behandlingsresultat.hentValidertAnmodningsperiode();
+        Anmodningsperiode anmodningsperiode = behandlingsresultat.hentAnmodningsperiode();
         return behandlingsresultat.erAnmodningOmUnntak()
             && (anmodningsperiode.getBestemmelse() == Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1
             || anmodningsperiode.getBestemmelse() == Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_2);
