@@ -6,6 +6,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 
+import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Kontaktopplysning;
@@ -48,6 +49,7 @@ class AltinnSoeknadServiceTest {
     private PersondataFasade persondataFasade;
     @Mock
     private AvklarteVirksomheterService avklarteVirksomheterService;
+    private final FakeUnleash unleash = new FakeUnleash();
 
     private AltinnSoeknadService altinnSoeknadService;
 
@@ -60,7 +62,7 @@ class AltinnSoeknadServiceTest {
     @BeforeEach
     void setup() {
         altinnSoeknadService = new AltinnSoeknadService(soknadMottakConsumer, fagsakService,
-            behandlingsgrunnlagService, persondataFasade, avklarteVirksomheterService);
+            behandlingsgrunnlagService, persondataFasade, avklarteVirksomheterService, unleash);
     }
 
     @Test
@@ -88,6 +90,7 @@ class AltinnSoeknadServiceTest {
 
     @Test
     void opprettFagsakOgBehandlingFraAltinnSøknad_soeknadEksistererArbeidsgiverOffentlig_verifiserBehandlingstemaArbeidsEttLandØvrig() {
+        unleash.enable("melosys.behandle_alle_saker");
         final Fagsak fagsak = lagFagsak();
         final MedlemskapArbeidEOSM søknad = lagMedlemskapArbeidEOSM();
 
@@ -97,10 +100,11 @@ class AltinnSoeknadServiceTest {
         when(fagsakService.nyFagsakOgBehandling(captor.capture())).thenReturn(fagsak);
         when(persondataFasade.hentAktørIdForIdent(anyString())).thenReturn(aktørID);
 
+
         assertThat(altinnSoeknadService.opprettFagsakOgBehandlingFraAltinnSøknad(soknadID)).isEqualTo(fagsak.hentAktivBehandling());
 
         OpprettSakRequest req = captor.getValue();
-        assertThat(req.getBehandlingstema()).isEqualTo(Behandlingstema.ARBEID_ETT_LAND_ØVRIG);
+        assertThat(req.getBehandlingstema()).isEqualTo(Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY);
         assertThat(req.getBehandlingstype()).isEqualTo(Behandlingstyper.SOEKNAD);
         assertThat(req.getArbeidsgiver()).isEqualTo(søknad.getInnhold().getArbeidsgiver().getVirksomhetsnummer());
         assertThat(req.getAktørID()).isEqualTo(aktørID);
