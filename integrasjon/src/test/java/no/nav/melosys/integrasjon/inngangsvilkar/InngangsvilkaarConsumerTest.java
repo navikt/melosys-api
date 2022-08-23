@@ -6,6 +6,7 @@ import java.util.Set;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.inngangsvilkar.InngangsvilkarResponse;
+import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingInterceptor;
 import org.hamcrest.core.StringContains;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,7 +28,7 @@ class InngangsvilkaarConsumerTest {
 
     @BeforeEach
     void setup() {
-        RestTemplate restTemplate = new InngangsvilkarConfig().inngangsVilkaarRestTemplate(url, new RestTemplateBuilder());
+        RestTemplate restTemplate = new InngangsvilkarConfig().inngangsVilkaarRestTemplate(url, new RestTemplateBuilder(), new CorrelationIdOutgoingInterceptor());
         server = MockRestServiceServer.createServer(restTemplate);
         inngangsvilkaarConsumer = new InngangsvilkaarConsumerImpl(restTemplate);
     }
