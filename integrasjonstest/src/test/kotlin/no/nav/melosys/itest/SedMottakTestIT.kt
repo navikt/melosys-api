@@ -20,7 +20,7 @@ import no.nav.melosys.integrasjon.kodeverk.KodeverkRegister
 import no.nav.melosys.melosysmock.sak.SakRepo
 import no.nav.melosys.repository.ProsessinstansRepository
 import no.nav.melosys.service.kodeverk.KodeverkService
-import org.awaitility.Awaitility
+import org.awaitility.kotlin.await
 import org.junit.jupiter.api.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
@@ -69,7 +69,7 @@ class SedMottakTestIT(
         melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingX001)
         melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingX007)
 
-        Awaitility.await().timeout(Duration.ofMinutes(10)).pollInterval(Duration.ofSeconds(3))
+        await.timeout(Duration.ofSeconds(30)).pollInterval(Duration.ofSeconds(3))
             .until {
                 prosessinstansRepository.findAllByStatusNotInAndLåsReferanseStartingWith(
                     listOf(ProsessStatus.FERDIG),
