@@ -21,9 +21,9 @@ import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.NY_VU
 
 public class MuligeManuelleBehandlingsendringer {
     static final Set<Behandlingstema> BEHANDLINGSTEMA_SØKNAD = Set.of(UTSENDT_ARBEIDSTAKER, UTSENDT_SELVSTENDIG,
-                                                                             ARBEID_ETT_LAND_ØVRIG,
-                                                                             ARBEID_TJENESTEPERSON_ELLER_FLY,
-                                                                             IKKE_YRKESAKTIV, ARBEID_FLERE_LAND);
+                                                                      ARBEID_ETT_LAND_ØVRIG,
+                                                                      ARBEID_TJENESTEPERSON_ELLER_FLY, ARBEID_KUN_NORGE,
+                                                                      IKKE_YRKESAKTIV, ARBEID_FLERE_LAND);
 
     private MuligeManuelleBehandlingsendringer() {
     }

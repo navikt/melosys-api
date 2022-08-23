@@ -23,6 +23,7 @@ public final class SakstypeBehandlingstemaKobling {
                 Behandlingstema.UTSENDT_SELVSTENDIG,
                 Behandlingstema.ARBEID_ETT_LAND_ØVRIG,
                 Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY,
+                Behandlingstema.ARBEID_KUN_NORGE,
                 Behandlingstema.ARBEID_FLERE_LAND,
                 Behandlingstema.TRYGDETID,
                 Behandlingstema.IKKE_YRKESAKTIV,

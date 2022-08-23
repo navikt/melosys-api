@@ -22,6 +22,7 @@ public class TemaFactory {
                                                                                            BESLUTNING_LOVVALG_NORGE,
                                                                                            TRYGDETID, ØVRIGE_SED_MED,
                                                                                            ARBEID_I_UTLANDET,
+                                                                                           ARBEID_KUN_NORGE,
                                                                                            YRKESAKTIV);
 
     private static final EnumSet<Behandlingstema> GYLDIGE_BEHANDLINGSTEMA_UFM = EnumSet.of(

@@ -404,6 +404,7 @@ public class Behandling extends RegistreringsInfo {
             || IKKE_YRKESAKTIV.getKode().equalsIgnoreCase(behandlingstemaKode)
             || ARBEID_NORGE_BOSATT_ANNET_LAND.getKode().equalsIgnoreCase(behandlingstemaKode)
             || ARBEID_I_UTLANDET.getKode().equalsIgnoreCase(behandlingstemaKode)
+            || ARBEID_KUN_NORGE.getKode().equalsIgnoreCase(behandlingstemaKode)
             || YRKESAKTIV.getKode().equalsIgnoreCase(behandlingstemaKode);
     }
 

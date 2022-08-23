@@ -72,7 +72,7 @@ public final class OppgaveFactory {
             case TRYGDETID -> new OppgaveParametere(EU_EOS, "ae0236", Tema.MED, Oppgavetyper.BEH_SED, fristUker(8));
             case ARBEID_I_UTLANDET ->
                 new OppgaveParametere("ab0388", null, Tema.MED, Oppgavetyper.BEH_SAK_MK, fristDager(30));
-            case YRKESAKTIV -> new OppgaveParametere("ab0387", null, Tema.MED, Oppgavetyper.BEH_SAK_MK, fristDager(30));
+            case ARBEID_KUN_NORGE, YRKESAKTIV -> new OppgaveParametere("ab0387", null, Tema.MED, Oppgavetyper.BEH_SAK_MK, fristDager(30));
             default -> throw new IllegalArgumentException(
                 "Melosys støtter ikke mapping for behandlingstema  " + behandlingstema);
         };
