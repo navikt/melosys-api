@@ -38,6 +38,7 @@ import org.springframework.context.annotation.Primary
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
+import java.util.concurrent.TimeUnit
 import kotlin.jvm.optionals.getOrNull
 
 @Import(JournalføringIT.TestConfig::class)
@@ -114,7 +115,7 @@ class JournalføringIT(
         }
 
     private fun finnProssesID(prosessType: ProsessType, now: LocalDateTime): UUID =
-        await.untilNotNull {
+        await.timeout(30, TimeUnit.SECONDS).untilNotNull {
             prosessinstansRepository.findAll()
                 .find { it.registrertDato > now && it.type == prosessType }?.id
         }
