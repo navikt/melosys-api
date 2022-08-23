@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class MedRegisterOpplysningService {
+public class KontrollMedRegisterOpplysningService {
 
     private final BehandlingService behandlingService;
     private final BehandlingsresultatService behandlingsresultatService;
@@ -24,11 +24,11 @@ public class MedRegisterOpplysningService {
 
     private final FerdigbehandlingKontrollService ferdigbehandlingKontrollService;
 
-    public MedRegisterOpplysningService(BehandlingService behandlingService,
-                                        BehandlingsresultatService behandlingsresultatService,
-                                        PersondataFasade persondataFasade,
-                                        RegisteropplysningerService registeropplysningerService,
-                                        FerdigbehandlingKontrollService ferdigbehandlingKontrollService) {
+    public KontrollMedRegisterOpplysningService(BehandlingService behandlingService,
+                                                BehandlingsresultatService behandlingsresultatService,
+                                                PersondataFasade persondataFasade,
+                                                RegisteropplysningerService registeropplysningerService,
+                                                FerdigbehandlingKontrollService ferdigbehandlingKontrollService) {
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.persondataFasade = persondataFasade;

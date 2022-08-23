@@ -16,7 +16,7 @@ import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.FerdigbehandlingKontrollService;
-import no.nav.melosys.service.kontroll.feature.ferdigbehandling.MedRegisterOpplysningService;
+import no.nav.melosys.service.kontroll.feature.ferdigbehandling.KontrollMedRegisterOpplysningService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
@@ -34,7 +34,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class MedRegisterOpplysningServiceTest {
+class KontrollMedRegisterOpplysningServiceTest {
 
     @Mock
     private BehandlingService behandlingService;
@@ -46,7 +46,7 @@ class MedRegisterOpplysningServiceTest {
     private PersondataFasade persondataFasade;
     @Mock
     private RegisteropplysningerService registeropplysningerService;
-    private MedRegisterOpplysningService medRegisterOpplysningService;
+    private KontrollMedRegisterOpplysningService kontrollMedRegisterOpplysningService;
 
     private final long behandlingID = 1L;
     private final Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
@@ -68,7 +68,7 @@ class MedRegisterOpplysningServiceTest {
         lenient().when(lovvalgsperiodeService.hentValidertLovvalgsperiode(behandlingID)).thenReturn(lovvalgsperiode);
 
         FerdigbehandlingKontrollService ferdigbehandlingKontrollService = new FerdigbehandlingKontrollService(behandlingService, lovvalgsperiodeService, persondataFasade);
-        medRegisterOpplysningService = new MedRegisterOpplysningService(behandlingService, behandlingsresultatService, persondataFasade,
+        kontrollMedRegisterOpplysningService = new KontrollMedRegisterOpplysningService(behandlingService, behandlingsresultatService, persondataFasade,
             registeropplysningerService, ferdigbehandlingKontrollService);
     }
 
@@ -80,7 +80,7 @@ class MedRegisterOpplysningServiceTest {
         Consumer<ValideringException> medFeilkode = v -> assertThat(v.getFeilkoder())
             .extracting(KontrollfeilDto::getKode).containsExactly(Kontroll_begrunnelser.INGEN_SLUTTDATO.getKode());
 
-        assertThatThrownBy(() -> medRegisterOpplysningService.kontrollerVedtak(behandling, behandlingsresultat, Sakstyper.EU_EOS, Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN))
+        assertThatThrownBy(() -> kontrollMedRegisterOpplysningService.kontrollerVedtak(behandling, behandlingsresultat, Sakstyper.EU_EOS, Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN))
             .isInstanceOfSatisfying(ValideringException.class, medFeilkode)
             .hasMessage("Feil i validering. Kan ikke fatte vedtak.");
     }
@@ -92,7 +92,7 @@ class MedRegisterOpplysningServiceTest {
         when(behandlingsresultatService.hentBehandlingsresultat(behandlingID)).thenReturn(behandlingsresultat);
         when(persondataFasade.hentFolkeregisterident(behandling.getFagsak().hentBrukersAktørID())).thenReturn("fnr");
 
-        medRegisterOpplysningService.kontroller(behandling.getId(), Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN);
+        kontrollMedRegisterOpplysningService.kontroller(behandling.getId(), Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN);
         verify(registeropplysningerService).hentOgLagreOpplysninger(any());
     }
 

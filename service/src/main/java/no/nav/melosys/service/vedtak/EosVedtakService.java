@@ -24,7 +24,7 @@ import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
-import no.nav.melosys.service.kontroll.feature.ferdigbehandling.MedRegisterOpplysningService;
+import no.nav.melosys.service.kontroll.feature.ferdigbehandling.KontrollMedRegisterOpplysningService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.slf4j.Logger;
@@ -47,13 +47,13 @@ public class EosVedtakService {
     private final LandvelgerService landvelgerService;
     private final AvklartefaktaService avklartefaktaService;
     private final ApplicationEventMulticaster melosysEventMulticaster;
-    private final MedRegisterOpplysningService kontrollMedRegisterOpplysningService;
+    private final KontrollMedRegisterOpplysningService kontrollMedRegisterOpplysningService;
 
     public EosVedtakService(BehandlingService behandlingService, BehandlingsresultatService behandlingsresultatService,
                             OppgaveService oppgaveService, ProsessinstansService prosessinstansService,
                             EessiService eessiService, LandvelgerService landvelgerService,
                             AvklartefaktaService avklartefaktaService, ApplicationEventMulticaster melosysEventMulticaster,
-                            MedRegisterOpplysningService kontrollMedRegisterOpplysningService) {
+                            KontrollMedRegisterOpplysningService kontrollMedRegisterOpplysningService) {
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.oppgaveService = oppgaveService;

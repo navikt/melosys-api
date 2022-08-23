@@ -1,5 +1,10 @@
 package no.nav.melosys.service.vedtak;
 
+import java.time.LocalDate;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.Institusjon;
@@ -16,7 +21,7 @@ import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
-import no.nav.melosys.service.kontroll.feature.ferdigbehandling.MedRegisterOpplysningService;
+import no.nav.melosys.service.kontroll.feature.ferdigbehandling.KontrollMedRegisterOpplysningService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
@@ -27,11 +32,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.event.ApplicationEventMulticaster;
-
-import java.time.LocalDate;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
 
 import static no.nav.melosys.domain.kodeverk.Vedtakstyper.FØRSTEGANGSVEDTAK;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper.AVSLAG_SØKNAD;
@@ -62,7 +62,7 @@ class EosVedtakServiceTest {
     @Mock
     private ApplicationEventMulticaster melosysEventMulticaster;
     @Mock
-    private MedRegisterOpplysningService medRegisterOpplysningService;
+    private KontrollMedRegisterOpplysningService kontrollMedRegisterOpplysningService;
     private EosVedtakService vedtakService;
     private final long behandlingID = 1L;
     private final Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
@@ -72,7 +72,7 @@ class EosVedtakServiceTest {
     @BeforeEach
     void setUp() {
         vedtakService = new EosVedtakService(behandlingService, behandlingsresultatService, oppgaveService, prosessinstansService,
-            eessiService, landvelgerService, avklartefaktaService, melosysEventMulticaster, medRegisterOpplysningService);
+            eessiService, landvelgerService, avklartefaktaService, melosysEventMulticaster, kontrollMedRegisterOpplysningService);
 
         SpringSubjectHandler.set(new TestSubjectHandler());
 
@@ -114,7 +114,7 @@ class EosVedtakServiceTest {
             eq(mottakerinstitusjoner)
         );
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(any());
-        verify(medRegisterOpplysningService).kontrollerVedtak(any(Behandling.class), any(Behandlingsresultat.class), eq(Sakstyper.EU_EOS), any(Behandlingsresultattyper.class));
+        verify(kontrollMedRegisterOpplysningService).kontrollerVedtak(any(Behandling.class), any(Behandlingsresultat.class), eq(Sakstyper.EU_EOS), any(Behandlingsresultattyper.class));
     }
 
     @Test

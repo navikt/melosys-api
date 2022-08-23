@@ -8,19 +8,19 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class FerdigbehandlingKontrollFacade {
 
-    private final MedRegisterOpplysningService kontrollerMedRegisterOpplysningService;
+    private final KontrollMedRegisterOpplysningService kontrollerKontrollMedRegisterOpplysningService;
     private final FerdigbehandlingKontrollService ferdigbehandlingKontrollService;
 
-    public FerdigbehandlingKontrollFacade(MedRegisterOpplysningService KontrollerMedRegisterOpplysningService,
+    public FerdigbehandlingKontrollFacade(KontrollMedRegisterOpplysningService kontrollerKontrollMedRegisterOpplysningService,
                                           FerdigbehandlingKontrollService ferdigbehandlingKontrollService) {
-        this.kontrollerMedRegisterOpplysningService = KontrollerMedRegisterOpplysningService;
+        this.kontrollerKontrollMedRegisterOpplysningService = kontrollerKontrollMedRegisterOpplysningService;
         this.ferdigbehandlingKontrollService = ferdigbehandlingKontrollService;
     }
 
     @Transactional
     public void kontroller(long behandlingId, boolean skalRegisteropplysningerOppdateres, Behandlingsresultattyper behandlingsresultattype) throws ValideringException {
         if (skalRegisteropplysningerOppdateres) {
-            kontrollerMedRegisterOpplysningService.kontroller(behandlingId, behandlingsresultattype);
+            kontrollerKontrollMedRegisterOpplysningService.kontroller(behandlingId, behandlingsresultattype);
         } else {
             ferdigbehandlingKontrollService.kontroller(behandlingId, behandlingsresultattype);
         }
