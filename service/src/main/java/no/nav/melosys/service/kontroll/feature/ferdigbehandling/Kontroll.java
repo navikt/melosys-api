@@ -21,10 +21,13 @@ import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.Ferdigbehan
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.kontroll.FerdigbehandlingKontrollsett;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.validering.Kontrollfeil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @Component
 class Kontroll {
+    private static final Logger log = LoggerFactory.getLogger(Kontroll.class);
     private final BehandlingService behandlingService;
     private final BehandlingsresultatService behandlingsresultatService;
     private final LovvalgsperiodeService lovvalgsperiodeService;
@@ -45,7 +48,7 @@ class Kontroll {
 
     public void kontrollerVedtak(long behandlingID, Sakstyper sakstype, Behandlingsresultattyper behandlingsresultattype) throws ValideringException {
         Collection<Kontrollfeil> kontrollfeil = utførKontroller(behandlingID, sakstype, behandlingsresultattype);
-
+        log.info("[kontrollerVedtak] kontrollfeil: {}", kontrollfeil);
         if (!kontrollfeil.isEmpty()) {
             throw new ValideringException("Feil i validering. Kan ikke fatte vedtak.",
                 kontrollfeil.stream().map(Kontrollfeil::tilDto).toList());
@@ -73,7 +76,12 @@ class Kontroll {
     private Collection<Kontrollfeil> utførKontroller(Behandling behandling, Sakstyper sakstype) {
         Set<Function<FerdigbehandlingKontrollData, Kontrollfeil>> vedtakKontroller =
             FerdigbehandlingKontrollsett.hentRegelsettForVedtak(sakstype);
-        var vedtakKontrollData = hentVedtakKontrollData(behandling);
+        FerdigbehandlingKontrollData vedtakKontrollData = hentVedtakKontrollData(behandling);
+        try {
+            log.info("[utførKontroller] Hentet vedtakKontrollData: {}", vedtakKontrollData);
+        } catch (Exception ex) {
+            log.error("[utførKontroller] Exception når vi forstøkte toString: {}", ex.getMessage(), ex);
+        }
         return vedtakKontroller.stream()
             .map(f -> f.apply(vedtakKontrollData))
             .filter(Objects::nonNull)

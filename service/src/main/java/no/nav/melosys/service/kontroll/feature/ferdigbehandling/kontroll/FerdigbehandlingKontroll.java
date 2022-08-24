@@ -28,7 +28,7 @@ final class FerdigbehandlingKontroll {
         PeriodeOmLovvalg lovvalgsperiode = kontrollData.lovvalgsperiode();
         PeriodeOmLovvalg opprinneligLovvalgsperiode = kontrollData.opprinneligLovvalgsperiode();
 
-        log.info("Sjekker overlappende medlemsperioder - lovvalgsperiode: {}, og opprinneligLovvalgsperiode: {}", lovvalgsperiode, opprinneligLovvalgsperiode);
+        log.info("Sjekker overlappende medlemsperioder - lovvalgsperiode: (fom: {}, tom: {}), og opprinneligLovvalgsperiode: {}", lovvalgsperiode.getFom(), lovvalgsperiode.getTom(), opprinneligLovvalgsperiode);
 
         return OverlappendeMedlemskapsperioderRegler.harOverlappendeMedlemsperiode(medlemskapDokument,
             lovvalgsperiode, opprinneligLovvalgsperiode) ? new Kontrollfeil(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER) : null;
