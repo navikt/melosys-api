@@ -35,9 +35,9 @@ class KontrollMedRegisteropplysning {
     }
 
     public void kontroller(long behandlingId, Behandlingsresultattyper behandlingsresultattype) throws ValideringException {
-        var behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingId);
-        var sakstype = behandling.getFagsak().getType();
-        var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingId);
+        Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingId);
+        Sakstyper sakstype = behandling.getFagsak().getType();
+        Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingId);
         kontrollerVedtak(behandling, behandlingsresultat, sakstype, behandlingsresultattype);
     }
 
