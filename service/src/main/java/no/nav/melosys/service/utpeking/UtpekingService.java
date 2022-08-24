@@ -124,7 +124,7 @@ public class UtpekingService {
         validerUtpekingsperiode(utpekingsperiode);
 
         opprettLovvalgsperiode(behandlingID, utpekingsperiode);
-        ferdigbehandlingKontrollFacade.utførKontroller(behandlingID, fagsak.getType(), behandlingsresultat.getType());
+        ferdigbehandlingKontrollFacade.kontroller(behandlingID, behandlingsresultat.getType());
         oppdaterBehandlingsresultat(behandlingsresultat);
         prosessinstansService.opprettProsessinstansUtpekAnnetLand(
             behandling, utpekingsperiode.getLovvalgsland(), mottakerinstitusjoner, ytterligereInformasjonSed, fritekstBrev
