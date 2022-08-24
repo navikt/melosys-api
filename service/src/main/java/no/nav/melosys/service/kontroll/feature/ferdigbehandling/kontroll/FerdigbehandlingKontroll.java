@@ -1,6 +1,6 @@
 package no.nav.melosys.service.kontroll.feature.ferdigbehandling.kontroll;
 
-import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.PeriodeOmLovvalg;
 import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadTrygdeavtale;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
@@ -21,15 +21,15 @@ final class FerdigbehandlingKontroll {
 
     static Kontrollfeil overlappendeMedlemsperiode(FerdigbehandlingKontrollData kontrollData) {
         MedlemskapDokument medlemskapDokument = kontrollData.medlemskapDokument();
-        Lovvalgsperiode lovvalgsperiode = kontrollData.lovvalgsperiode();
-        Lovvalgsperiode opprinneligLovvalgsperiode = kontrollData.opprinneligLovvalgsperiode();
+        PeriodeOmLovvalg lovvalgsperiode = kontrollData.lovvalgsperiode();
+        PeriodeOmLovvalg opprinneligLovvalgsperiode = kontrollData.opprinneligLovvalgsperiode();
 
         return OverlappendeMedlemskapsperioderRegler.harOverlappendeMedlemsperiode(medlemskapDokument,
             lovvalgsperiode, opprinneligLovvalgsperiode) ? new Kontrollfeil(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER) : null;
     }
 
     static Kontrollfeil periodeOver24Mnd(FerdigbehandlingKontrollData kontrollData) {
-        Lovvalgsperiode lovvalgsperiode = kontrollData.lovvalgsperiode();
+        PeriodeOmLovvalg lovvalgsperiode = kontrollData.lovvalgsperiode();
 
         return lovvalgsperiode.erArtikkel12()
             && PeriodeRegler.periodeOver24Måneder(lovvalgsperiode.getFom(), lovvalgsperiode.getTom())
@@ -37,13 +37,13 @@ final class FerdigbehandlingKontroll {
     }
 
     static Kontrollfeil periodeManglerSluttdato(FerdigbehandlingKontrollData kontrollData) {
-        Lovvalgsperiode lovvalgsperiode = kontrollData.lovvalgsperiode();
+        PeriodeOmLovvalg lovvalgsperiode = kontrollData.lovvalgsperiode();
 
         return lovvalgsperiode.getTom() == null ? new Kontrollfeil(Kontroll_begrunnelser.INGEN_SLUTTDATO) : null;
     }
 
     static Kontrollfeil periodeOverTreÅr(FerdigbehandlingKontrollData kontrollData) {
-        Lovvalgsperiode lovvalgsperiode = kontrollData.lovvalgsperiode();
+        PeriodeOmLovvalg lovvalgsperiode = kontrollData.lovvalgsperiode();
 
         return lovvalgsperiode.getBestemmelse() == Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1
             && PeriodeRegler.periodeOver3År(lovvalgsperiode.getFom(), lovvalgsperiode.getTom())

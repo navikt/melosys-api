@@ -6,7 +6,9 @@ import java.util.Set;
 import java.util.function.Function;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.PeriodeOmLovvalg;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
@@ -14,6 +16,7 @@ import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.FerdigbehandlingKontrollData;
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.kontroll.FerdigbehandlingKontrollsett;
 import no.nav.melosys.service.persondata.PersondataFasade;
@@ -23,11 +26,13 @@ import org.springframework.stereotype.Component;
 @Component
 class Kontroll {
     private final BehandlingService behandlingService;
+    private final BehandlingsresultatService behandlingsresultatService;
     private final LovvalgsperiodeService lovvalgsperiodeService;
     private final PersondataFasade persondataFasade;
 
-    public Kontroll(BehandlingService behandlingService, LovvalgsperiodeService lovvalgsperiodeService, PersondataFasade persondataFasade) {
+    public Kontroll(BehandlingService behandlingService, BehandlingsresultatService behandlingsresultatService, LovvalgsperiodeService lovvalgsperiodeService, PersondataFasade persondataFasade) {
         this.behandlingService = behandlingService;
+        this.behandlingsresultatService = behandlingsresultatService;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
         this.persondataFasade = persondataFasade;
     }
@@ -83,7 +88,8 @@ class Kontroll {
     }
 
     private FerdigbehandlingKontrollData hentVedtakKontrollData(Behandling behandling) {
-        Lovvalgsperiode lovvalgsperiode = lovvalgsperiodeService.hentValidertLovvalgsperiode(behandling.getId());
+        Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
+        PeriodeOmLovvalg periodeOmLovvalg = behandlingsresultat.hentValidertPeriodeOmLovvalg();
         Lovvalgsperiode opprinneligLovvalgsperiode =
             lovvalgsperiodeService.finnOpprinneligLovvalgsperiode(behandling.getId()).orElse(null);
         var behandlingsgrunnlagData = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
@@ -91,7 +97,7 @@ class Kontroll {
         var persondata = hentPersondata(behandling);
 
         return new FerdigbehandlingKontrollData(medlemskapDokument, persondata, behandlingsgrunnlagData,
-            lovvalgsperiode, opprinneligLovvalgsperiode);
+            periodeOmLovvalg, opprinneligLovvalgsperiode);
     }
 
     private Persondata hentPersondata(Behandling behandling) {
