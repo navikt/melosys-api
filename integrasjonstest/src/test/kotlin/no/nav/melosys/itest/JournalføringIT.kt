@@ -3,14 +3,19 @@ package no.nav.melosys.itest
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
+import io.kotest.matchers.equality.shouldBeEqualToComparingFields
+import io.kotest.matchers.types.shouldBeInstanceOf
 import no.nav.melosys.domain.arkiv.ArkivDokument
 import no.nav.melosys.domain.arkiv.Journalpost
+import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad
+import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode
 import no.nav.melosys.domain.kodeverk.Avsendertyper
 import no.nav.melosys.domain.saksflyt.ProsessStatus
 import no.nav.melosys.domain.saksflyt.ProsessType
 import no.nav.melosys.melosysmock.oppgave.Oppgave
 import no.nav.melosys.melosysmock.sak.SakRepo
 import no.nav.melosys.melosysmock.testdata.TestDataGenerator
+import no.nav.melosys.repository.BehandlingRepository
 import no.nav.melosys.repository.ProsessinstansRepository
 import no.nav.melosys.service.felles.dto.SoeknadslandDto
 import no.nav.melosys.service.journalforing.JournalfoeringService
@@ -38,7 +43,7 @@ class JournalføringIT(
     @Autowired private val testDataGenerator: TestDataGenerator,
     @Autowired private val journalføringService: JournalfoeringService,
     @Autowired private val oppgaveService: OppgaveService,
-    @Autowired private val prosessinstansRepository: ProsessinstansRepository,
+    @Autowired private val prosessinstansRepository: ProsessinstansRepository
 ) : ComponentTestBase() {
 
     private val mockServer: WireMockServer =
@@ -81,13 +86,27 @@ class JournalføringIT(
             journalføringService.journalførOgOpprettSak(journalfoeringOpprettDto)
             oppgaveService.ferdigstillOppgave(journalfoeringOpprettDto.oppgaveID)
         }
-
+        val prossesId = finnProssesID(ProsessType.JFR_NY_SAK_BRUKER, now)
         listOf(
-            finnProssesID(ProsessType.JFR_NY_SAK_BRUKER, now),
+            prossesId,
             finnProssesID(ProsessType.OPPRETT_OG_DISTRIBUER_BREV, now)
         ).forEach {
             sjekkAtProssessHarStatusFerdig(it)
         }
+        val prosessinstans = prosessinstansRepository.findById(prossesId).get()
+        val behandlingsgrunnlagdata = prosessinstans.behandling.behandlingsgrunnlag.behandlingsgrunnlagdata
+
+        behandlingsgrunnlagdata.shouldBeInstanceOf<Soeknad>()
+            .shouldBeEqualToComparingFields(Soeknad().apply {
+            soeknadsland.apply {
+                landkoder = listOf(søknadsLand)
+                erUkjenteEllerAlleEosLand = false
+            }
+            periode = Periode(
+                periodeFOM,
+                periodeFOM
+            )
+        })
     }
 
     private fun lagJournalfoeringOpprettDto(jfrOppgave: Oppgave): JournalfoeringOpprettDto {
@@ -135,15 +154,21 @@ class JournalføringIT(
             fagsak = FagsakDto().apply {
                 sakstype = "EU_EOS"
                 soknadsperiode = PeriodeDto(
-                    LocalDate.of(2001, 1, 1),
-                    LocalDate.of(2001, 1, 2),
+                    periodeFOM,
+                    periodeTOM,
                 )
                 land = SoeknadslandDto(
-                    listOf("IE"), false
+                    listOf(søknadsLand), false
                 )
             }
             hoveddokument = DokumentDto(dokument.dokumentId, dokument.tittel).apply {
                 logiskeVedlegg = emptyList()
             }
         }
+
+    companion object {
+        val periodeFOM = LocalDate.of(2001, 1, 1)
+        val periodeTOM = LocalDate.of(2001, 1, 2)
+        const val søknadsLand = "IE"
+    }
 }
