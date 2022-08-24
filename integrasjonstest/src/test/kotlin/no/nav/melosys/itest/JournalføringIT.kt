@@ -3,15 +3,10 @@ package no.nav.melosys.itest
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
-import no.nav.melosys.domain.FellesKodeverk
 import no.nav.melosys.domain.arkiv.ArkivDokument
 import no.nav.melosys.domain.kodeverk.Avsendertyper
 import no.nav.melosys.domain.saksflyt.ProsessStatus
 import no.nav.melosys.domain.saksflyt.ProsessType
-import no.nav.melosys.integrasjon.kodeverk.Kode
-import no.nav.melosys.integrasjon.kodeverk.KodeOppslag
-import no.nav.melosys.integrasjon.kodeverk.Kodeverk
-import no.nav.melosys.integrasjon.kodeverk.KodeverkRegister
 import no.nav.melosys.melosysmock.oppgave.Oppgave
 import no.nav.melosys.melosysmock.sak.SakRepo
 import no.nav.melosys.melosysmock.testdata.TestDataGenerator
@@ -22,7 +17,6 @@ import no.nav.melosys.service.journalforing.dto.DokumentDto
 import no.nav.melosys.service.journalforing.dto.FagsakDto
 import no.nav.melosys.service.journalforing.dto.JournalfoeringOpprettDto
 import no.nav.melosys.service.journalforing.dto.PeriodeDto
-import no.nav.melosys.service.kodeverk.KodeverkService
 import no.nav.melosys.service.oppgave.OppgaveService
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import org.awaitility.kotlin.await
@@ -31,17 +25,14 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.TestConfiguration
-import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
-import org.springframework.context.annotation.Primary
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.jvm.optionals.getOrNull
 
-@Import(JournalføringIT.TestConfig::class)
+@Import(KodeverkStub::class)
 class JournalføringIT(
     @Autowired private val testDataGenerator: TestDataGenerator,
     @Autowired private val journalføringService: JournalfoeringService,
@@ -155,46 +146,4 @@ class JournalføringIT(
                 logiskeVedlegg = emptyList()
             }
         }
-
-    @TestConfiguration
-    class TestConfig {
-        @Bean
-        @Primary
-        fun kodeverkRegisterStub(): KodeverkRegister? = KodeverkRegister {
-            Kodeverk(
-                "DUMMY", mapOf(
-                    Pair(
-                        "DUMMY",
-                        listOf(Kode("DUMMY", "DUMMY", LocalDate.now().minusYears(1), LocalDate.now().plusYears(1)))
-                    )
-                )
-            )
-        }
-
-        @Bean
-        @Primary
-        fun kodeOppslagStub(): KodeOppslag? {
-            open class KodeOppslagImpl : KodeOppslag {
-                override fun getTermFraKodeverk(kodeverk: FellesKodeverk, kode: String): String = "DUMMY"
-
-                override fun getTermFraKodeverk(kodeverk: FellesKodeverk, kode: String, dato: LocalDate): String =
-                    "DUMMY"
-
-                override fun getTermFraKodeverk(
-                    kodeverk: FellesKodeverk,
-                    kode: String,
-                    dato: LocalDate,
-                    kodeperioder: List<Kode>?
-                ): String = "DUMMY"
-            }
-
-            return KodeOppslagImpl()
-        }
-
-        @Bean
-        @Primary
-        fun kodeverkServiceStub(kodeverkRegister: KodeverkRegister?, kodeOppslag: KodeOppslag?): KodeverkService? {
-            return KodeverkService(kodeverkRegister, kodeOppslag)
-        }
-    }
 }
