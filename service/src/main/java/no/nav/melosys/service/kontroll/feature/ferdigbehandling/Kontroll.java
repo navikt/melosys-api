@@ -74,14 +74,10 @@ class Kontroll {
     }
 
     private Collection<Kontrollfeil> utførKontroller(Behandling behandling, Sakstyper sakstype) {
+        log.info("[utførKontroller] Starter med å utføre kontroller!");
         Set<Function<FerdigbehandlingKontrollData, Kontrollfeil>> vedtakKontroller =
             FerdigbehandlingKontrollsett.hentRegelsettForVedtak(sakstype);
         FerdigbehandlingKontrollData vedtakKontrollData = hentVedtakKontrollData(behandling);
-        try {
-            log.info("[utførKontroller] Hentet vedtakKontrollData: {}", vedtakKontrollData);
-        } catch (Exception ex) {
-            log.error("[utførKontroller] Exception når vi forstøkte toString: {}", ex.getMessage(), ex);
-        }
         return vedtakKontroller.stream()
             .map(f -> f.apply(vedtakKontrollData))
             .filter(Objects::nonNull)
