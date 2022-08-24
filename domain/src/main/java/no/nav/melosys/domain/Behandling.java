@@ -34,6 +34,13 @@ public class Behandling extends RegistreringsInfo {
                                                                                       FORESPØRSEL_TRYGDEMYNDIGHET,
                                                                                       TRYGDETID);
 
+    public static final Set<Behandlingstema> IKKE_GYLDIGE_BEHANDLINGS_TEMAER = Set.of(
+        REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING,
+        REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE,
+        BESLUTNING_LOVVALG_NORGE,
+        BESLUTNING_LOVVALG_ANNET_LAND,
+        ANMODNING_OM_UNNTAK_HOVEDREGEL
+    );
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -225,6 +232,10 @@ public class Behandling extends RegistreringsInfo {
             .map(Saksopplysning::getDokument)
             .map(OrganisasjonDokument.class::cast)
             .toList();
+    }
+
+    public boolean kanIkkeEndreBehandling(Behandlingstema behandlingstema) {
+        return IKKE_GYLDIGE_BEHANDLINGS_TEMAER.contains(behandlingstema);
     }
 
     public SedDokument hentSedDokument() {

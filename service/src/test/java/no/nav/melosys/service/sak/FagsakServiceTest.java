@@ -175,7 +175,7 @@ class FagsakServiceTest {
 
     @Test
     void hentMuligeSakstema_med_behandlingstema_med_behandlingstema_lovlig() {
-        final String saksnummer = "MEL-1";
+        String saksnummer = "MEL-1";
         Fagsak fagsak = lagFagsakMedBruker();
         Behandling behandling = lagBehandling(1L, SOEKNAD, UNDER_BEHANDLING, Instant.now());
         behandling.setTema(UTSENDT_ARBEIDSTAKER);
@@ -185,7 +185,7 @@ class FagsakServiceTest {
 
         when(fagsakRepo.findBySaksnummer(saksnummer)).thenReturn(Optional.of(fagsak));
 
-        Set<Sakstemaer> muligeSakstemaer = fagsakService.hentMuligeSakstema(saksnummer);
+        Set<Sakstemaer> muligeSakstemaer = fagsakService.hentMuligeSakstemaer(saksnummer);
 
         assertThat(muligeSakstemaer).isNotEmpty();
         assertThat(muligeSakstemaer).contains(UNNTAK, TRYGDEAVGIFT);
@@ -204,7 +204,7 @@ class FagsakServiceTest {
 
         when(fagsakRepo.findBySaksnummer(saksnummer)).thenReturn(Optional.of(fagsak));
 
-        Set<Sakstyper> muligeSakstyper = fagsakService.hentMuligeSakstype(saksnummer);
+        Set<Sakstyper> muligeSakstyper = fagsakService.hentMuligeSakstyper(saksnummer);
 
         assertThat(muligeSakstyper).isNotEmpty();
         assertThat(muligeSakstyper).contains(TRYGDEAVTALE, FTRL);
@@ -212,8 +212,8 @@ class FagsakServiceTest {
     }
 
     @Test
-    void endreFagsakTypeOgTemaMedMuligeVerdier_med_behandlingstema_lovlig() {
-        final String saksnummer = "MEL-1";
+    void endreFagsakTypeMedMuligeVerdier_med_behandlingstema_lovlig() {
+        String saksnummer = "MEL-1";
         Fagsak fagsak = lagFagsakMedBruker();
         Behandling behandling = lagBehandling(1L, SOEKNAD, UNDER_BEHANDLING, Instant.now());
         behandling.setTema(UTSENDT_ARBEIDSTAKER);
@@ -224,20 +224,37 @@ class FagsakServiceTest {
 
         when(fagsakRepo.findBySaksnummer(saksnummer)).thenReturn(Optional.of(fagsak));
 
-        Set<Sakstyper> muligeSakstyper = fagsakService.hentMuligeSakstype(saksnummer);
-        Set<Sakstemaer> muligeSakstemaer = fagsakService.hentMuligeSakstema(saksnummer);
-
-        Optional<Sakstemaer> valgtSakstema = muligeSakstemaer.stream().findFirst();
+        Set<Sakstyper> muligeSakstyper = fagsakService.hentMuligeSakstyper(saksnummer);
         Optional<Sakstyper> valgtSakstype = muligeSakstyper.stream().findFirst();
 
-        assertThat(valgtSakstema).isNotNull();
         assertThat(valgtSakstype).isNotNull();
 
-        fagsakService.endreSakstema(fagsak, valgtSakstema.get());
         fagsakService.endreSakstype(fagsak, valgtSakstype.get());
 
-        assertThat(fagsak.getTema()).isEqualTo(valgtSakstema.get());
         assertThat(fagsak.getType()).isEqualTo(valgtSakstype.get());
+    }
+
+    @Test
+    void endreFagsakTemaMedMuligeVerdier_med_behandlingstema_lovlig() {
+        String saksnummer = "MEL-1";
+        Fagsak fagsak = lagFagsakMedBruker();
+        Behandling behandling = lagBehandling(1L, SOEKNAD, UNDER_BEHANDLING, Instant.now());
+        behandling.setTema(UTSENDT_ARBEIDSTAKER);
+        fagsak.setBehandlinger(List.of(behandling));
+        fagsak.setType(EU_EOS);
+        fagsak.setTema(MEDLEMSKAP_LOVVALG);
+        behandling.setFagsak(fagsak);
+
+        when(fagsakRepo.findBySaksnummer(saksnummer)).thenReturn(Optional.of(fagsak));
+
+        Set<Sakstemaer> muligeSakstemaer = fagsakService.hentMuligeSakstemaer(saksnummer);
+        Optional<Sakstemaer> valgtSakstema = muligeSakstemaer.stream().findFirst();
+
+        assertThat(valgtSakstema).isNotNull();
+
+        fagsakService.endreSakstema(fagsak, valgtSakstema.get());
+
+        assertThat(fagsak.getTema()).isEqualTo(valgtSakstema.get());
     }
 
     @Test
@@ -255,8 +272,8 @@ class FagsakServiceTest {
 
         when(fagsakRepo.findBySaksnummer(saksnummer)).thenReturn(Optional.of(fagsak));
 
-        Set<Sakstyper> muligeSakstyper = fagsakService.hentMuligeSakstype(saksnummer);
-        Set<Sakstemaer> muligeSakstemaer = fagsakService.hentMuligeSakstema(saksnummer);
+        Set<Sakstyper> muligeSakstyper = fagsakService.hentMuligeSakstyper(saksnummer);
+        Set<Sakstemaer> muligeSakstemaer = fagsakService.hentMuligeSakstemaer(saksnummer);
 
         Optional<Sakstemaer> valgtSakstema = muligeSakstemaer.stream().findFirst();
         Optional<Sakstyper> valgtSakstype = muligeSakstyper.stream().findFirst();

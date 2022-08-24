@@ -7,6 +7,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.dokument.DokumentView;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
@@ -201,10 +202,11 @@ public class BehandlingTjeneste {
     private BehandlingOppsummeringDto tilOppsummeringDto(Behandling behandling) {
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
 
-        var behandlingOppsummeringDto = new BehandlingOppsummeringDto();
+        BehandlingOppsummeringDto behandlingOppsummeringDto = new BehandlingOppsummeringDto();
+        Fagsak fagsak = behandling.getFagsak();
 
-        behandlingOppsummeringDto.setSakstype(behandling.getFagsak().getType());
-        behandlingOppsummeringDto.setSakstema(behandling.getFagsak().getTema());
+        behandlingOppsummeringDto.setSakstype(fagsak.getType());
+        behandlingOppsummeringDto.setSakstema(fagsak.getTema());
         behandlingOppsummeringDto.setBehandlingsstatus(behandling.getStatus());
         behandlingOppsummeringDto.setBehandlingstype(behandling.getType());
         behandlingOppsummeringDto.setBehandlingstema(behandling.getTema());

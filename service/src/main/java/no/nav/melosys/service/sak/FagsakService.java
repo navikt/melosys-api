@@ -16,7 +16,6 @@ import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.behandling.GyldigBehandlingstema;
 import no.nav.melosys.service.behandling.MuligeManuelleBehandlingsendringer;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.persondata.PersondataFasade;
@@ -94,9 +93,10 @@ public class FagsakService {
     @Transactional
     public void oppdaterSakstype(String saksnummer, Sakstyper sakstype) {
         Behandling behandling = hentFagsak(saksnummer).hentAktivBehandling();
-        boolean behandlingErLåst = GyldigBehandlingstema.kanIkkeEndreBehandling(behandling.getTema());
+        boolean behandlingErLåst = behandling.kanIkkeEndreBehandling(behandling.getTema());
+        boolean kanSakstypeEndres = sakstype != null && sakstype != behandling.getFagsak().getType() && saksbehandlerKanEndreSakstype(behandling, sakstype) && !behandlingErLåst;
 
-        if (sakstype != null && sakstype != behandling.getFagsak().getType() && saksbehandlerKanEndreSakstype(behandling, sakstype) && !behandlingErLåst) {
+        if (kanSakstypeEndres) {
             endreSakstype(behandling.getFagsak(), sakstype);
         }
     }
@@ -104,9 +104,10 @@ public class FagsakService {
     @Transactional
     public void oppdaterSakstema(String saksnummer, Sakstemaer sakstema) {
         Behandling behandling = hentFagsak(saksnummer).hentAktivBehandling();
-        boolean behandlingErLåst = GyldigBehandlingstema.kanIkkeEndreBehandling(behandling.getTema());
+        boolean behandlingErLåst = behandling.kanIkkeEndreBehandling(behandling.getTema());
+        boolean kanSakstemaEndres = sakstema != null && sakstema != behandling.getFagsak().getTema() && saksbehandlerKanEndreSakstema(behandling, sakstema) && !behandlingErLåst;
 
-        if (sakstema != null && sakstema != behandling.getFagsak().getTema() && saksbehandlerKanEndreSakstema(behandling, sakstema) && !behandlingErLåst) {
+        if (kanSakstemaEndres) {
             endreSakstema(behandling.getFagsak(), sakstema);
         }
     }
@@ -386,12 +387,12 @@ public class FagsakService {
         fagsakRepository.save(fagsak);
     }
 
-    public Set<Sakstemaer> hentMuligeSakstema(String saksnummer) {
+    public Set<Sakstemaer> hentMuligeSakstemaer(String saksnummer) {
         Behandling behandling = hentFagsak(saksnummer).hentAktivBehandling();
         return MuligeManuelleBehandlingsendringer.hentMuligeSakstema(behandling);
     }
 
-    public Set<Sakstyper> hentMuligeSakstype(String saksnummer) {
+    public Set<Sakstyper> hentMuligeSakstyper(String saksnummer) {
         Behandling behandling = hentFagsak(saksnummer).hentAktivBehandling();
         return MuligeManuelleBehandlingsendringer.hentMuligeSakstype(behandling);
     }

@@ -48,7 +48,7 @@ public class MuligeManuelleBehandlingsendringer {
     }
 
     public static Set<Behandlingstyper> hentMuligeTyper(Behandling behandling) {
-        if (behandling.erInaktiv() || !TEMAER_SOM_KAN_ENDRE_TYPE.contains(behandling.getTema()) || GyldigBehandlingstema.kanIkkeEndreBehandling(behandling.getTema())) {
+        if (behandling.erInaktiv() || !TEMAER_SOM_KAN_ENDRE_TYPE.contains(behandling.getTema()) || behandling.kanIkkeEndreBehandling(behandling.getTema())) {
             return Collections.emptySet();
         }
 
@@ -60,7 +60,7 @@ public class MuligeManuelleBehandlingsendringer {
     }
 
     public static Set<Sakstemaer> hentMuligeSakstema(Behandling behandling) {
-        if (behandling.erInaktiv() || GyldigBehandlingstema.kanIkkeEndreBehandling(behandling.getTema())) {
+        if (behandling.erInaktiv() || behandling.kanIkkeEndreBehandling(behandling.getTema())) {
             return Collections.emptySet();
         }
 
@@ -73,7 +73,7 @@ public class MuligeManuelleBehandlingsendringer {
     }
 
     public static Set<Sakstyper> hentMuligeSakstype(Behandling behandling) {
-        if (behandling.erInaktiv() || GyldigBehandlingstema.kanIkkeEndreBehandling(behandling.getTema())) {
+        if (behandling.erInaktiv() || behandling.kanIkkeEndreBehandling(behandling.getTema())) {
             return Collections.emptySet();
         }
 
@@ -86,7 +86,7 @@ public class MuligeManuelleBehandlingsendringer {
     }
 
     public static Set<Behandlingstema> hentMuligeBehandlingstema(Behandling behandling, Behandlingsresultat behandlingsresultat) {
-        if (GyldigBehandlingstema.kanIkkeEndreBehandling(behandling.getTema())) {
+        if (behandling.kanIkkeEndreBehandling(behandling.getTema())) {
             return Collections.emptySet();
         }
 
@@ -134,8 +134,8 @@ public class MuligeManuelleBehandlingsendringer {
 
     public static void validerNySakstypeMulig(Behandling behandling, Sakstyper sakstype) {
         if (!hentMuligeSakstype(behandling).contains(sakstype)) {
-            throw new FunksjonellException(String.format("Behandlingen kan ikke endres til sakstema %s. Gyldige sakstema for behandling %s er %s",
-                sakstype, behandling.getId(), hentMuligeSakstema(behandling)));
+            throw new FunksjonellException(String.format("Behandlingen kan ikke endres til sakstype %s. Gyldige sakstype for behandling %s er %s",
+                sakstype, behandling.getId(), hentMuligeSakstype(behandling)));
         }
     }
 

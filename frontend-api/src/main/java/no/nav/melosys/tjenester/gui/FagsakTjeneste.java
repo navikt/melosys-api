@@ -111,20 +111,20 @@ public class FagsakTjeneste {
 
     @GetMapping("{saksnr}/mulige-sakstemaer")
     @ApiOperation(value = "Hent mulige nye sakstema for en behandling")
-    public ResponseEntity<Collection<Sakstemaer>> hentMuligeSakstema(@PathVariable("saksnr") String saksnummer) {
+    public ResponseEntity<Collection<Sakstemaer>> hentMuligeSakstemaer(@PathVariable("saksnr") String saksnummer) {
         log.debug("Saksbehandler {} ber om å hente mulige nye sakstema for fagsak {}.", SubjectHandler.getInstance().getUserID(), saksnummer);
         aksesskontroll.autoriserSakstilgang(saksnummer);
 
-        return ResponseEntity.ok(fagsakService.hentMuligeSakstema(saksnummer));
+        return ResponseEntity.ok(fagsakService.hentMuligeSakstemaer(saksnummer));
     }
 
     @GetMapping("{saksnr}/mulige-sakstyper")
     @ApiOperation(value = "Hent mulige nye sakstype for en behandling")
-    public ResponseEntity<Collection<Sakstyper>> hentMuligeSakstype(@PathVariable("saksnr") String saksnummer) {
+    public ResponseEntity<Collection<Sakstyper>> hentMuligeSakstyper(@PathVariable("saksnr") String saksnummer) {
         log.debug("Saksbehandler {} ber om å hente mulige nye sakstema for fagsak {}.", SubjectHandler.getInstance().getUserID(), saksnummer);
         aksesskontroll.autoriserSakstilgang(saksnummer);
 
-        return ResponseEntity.ok(fagsakService.hentMuligeSakstype(saksnummer));
+        return ResponseEntity.ok(fagsakService.hentMuligeSakstyper(saksnummer));
     }
 
     @PostMapping("/sok")
