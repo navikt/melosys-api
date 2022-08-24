@@ -4,6 +4,7 @@ import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import no.nav.melosys.domain.arkiv.ArkivDokument
+import no.nav.melosys.domain.arkiv.Journalpost
 import no.nav.melosys.domain.kodeverk.Avsendertyper
 import no.nav.melosys.domain.saksflyt.ProsessStatus
 import no.nav.melosys.domain.saksflyt.ProsessType
@@ -90,12 +91,11 @@ class JournalføringIT(
     }
 
     private fun lagJournalfoeringOpprettDto(jfrOppgave: Oppgave): JournalfoeringOpprettDto {
-        var journalføringDto: JournalfoeringOpprettDto? = null
+        var hentJournalpost: Journalpost? = null
         ThreadLocalAccessInfo.executeProcess("journalførOgOpprettSak") {
-            val hentJournalpost = journalføringService.hentJournalpost(jfrOppgave.journalpostId)
-            journalføringDto = createJournalføringDto(jfrOppgave.journalpostId, hentJournalpost.hoveddokument)
+            hentJournalpost = journalføringService.hentJournalpost(jfrOppgave.journalpostId)
         }
-        return journalføringDto!!
+        return createJournalføringDto(jfrOppgave.journalpostId, hentJournalpost!!.hoveddokument)
     }
 
     @OptIn(ExperimentalStdlibApi::class)
