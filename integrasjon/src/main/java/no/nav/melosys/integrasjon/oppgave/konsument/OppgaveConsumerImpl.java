@@ -12,8 +12,6 @@ import reactor.core.publisher.Mono;
 public class OppgaveConsumerImpl implements OppgaveConsumer {
     // Oppgave (/Abac) kaster feil om svaret på et søk inneholder oppgaver med 50+ unike personer
     private static final int OPPGAVE_ANTALL_ABAC_LIMIT = 40;
-    private static final String CORRELATION_ID = "X-Correlation-ID";
-
     private static final String OPPGAVE_BASE_URI = "/oppgaver";
     private static final String OPPGAVE_URI_MED_ID = OPPGAVE_BASE_URI + "/{oppgaveID}";
 
@@ -27,7 +25,6 @@ public class OppgaveConsumerImpl implements OppgaveConsumer {
     public OppgaveDto hentOppgave(String oppgaveId) {
         return webClient.get()
             .uri(OPPGAVE_URI_MED_ID, oppgaveId)
-            .header(CORRELATION_ID, getCallID())
             .retrieve()
             .onStatus(HttpStatus::isError, this::håndterFeil)
             .bodyToMono(OppgaveDto.class)
@@ -73,7 +70,7 @@ public class OppgaveConsumerImpl implements OppgaveConsumer {
                     .queryParamIfPresent("saksreferanse", tilOptionalListe(oppgaveSearchRequest.getSaksreferanse()))
                     .queryParamIfPresent("tema", tilOptionalListe(oppgaveSearchRequest.getTema()))
                     .build()
-            ).header(CORRELATION_ID, getCallID())
+            )
             .retrieve()
             .onStatus(HttpStatus::isError, this::håndterFeil)
             .bodyToMono(OppgaveSvar.class)
@@ -88,7 +85,6 @@ public class OppgaveConsumerImpl implements OppgaveConsumer {
     public OppgaveDto oppdaterOppgave(OppgaveDto request) {
         return webClient.put()
             .uri(OPPGAVE_URI_MED_ID, request.getId())
-            .header(CORRELATION_ID, getCallID())
             .bodyValue(request)
             .retrieve()
             .onStatus(HttpStatus::isError, this::håndterFeil)
@@ -100,7 +96,6 @@ public class OppgaveConsumerImpl implements OppgaveConsumer {
     public String opprettOppgave(OpprettOppgaveDto request) {
         return webClient.post()
             .uri(OPPGAVE_BASE_URI)
-            .header(CORRELATION_ID, getCallID())
             .bodyValue(request)
             .retrieve()
             .onStatus(HttpStatus::isError, this::håndterFeil)

@@ -1,5 +1,9 @@
 package no.nav.melosys.service.kontroll.feature.unntak;
 
+import java.time.LocalDate;
+import java.util.Collection;
+import java.util.List;
+
 import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.ForetakUtland;
@@ -17,10 +21,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDate;
-import java.util.Collection;
-import java.util.List;
-
 import static no.nav.melosys.service.SaksbehandlingDataFactory.lagBehandling;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -28,7 +28,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class AnmodningUnntakKontrollServiceTest {
+class AnmodningUnntakKontrollTest {
     @Mock
     private AnmodningsperiodeService anmodningsperiodeService;
     @Mock

@@ -21,6 +21,7 @@ public enum ProsessDataKey {
     BREVBESTILLING("brevbestilling"),
     BREVDATA("brevData"),
     BRUKER_ID("brukerID"),
+    CORRELATION_ID_SAKSFLYT("correlationId"),
     DISTRIBUERBAR_JOURNALPOST_ID("distribuerbarJournalpostID"),
     DISTRIBUER_MOTTAKER_LAND("distribuerMottakerLand"),
     DISTRIBUSJONSTYPE("distribusjonsType"),

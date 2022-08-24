@@ -88,6 +88,16 @@ class SafConsumerTokenTest(
         }
     }
 
+    @Test
+    fun correlationIdLeggesPåRequest() {
+        verifyHeaders(
+            mapOf(
+                Pair("X-Correlation-ID", WireMock.matching(UUID_REGEX)),
+            )
+        )
+        executeRequest()
+    }
+
     override fun getMockData(): ByteArray {
         return ByteArray(0)
     }

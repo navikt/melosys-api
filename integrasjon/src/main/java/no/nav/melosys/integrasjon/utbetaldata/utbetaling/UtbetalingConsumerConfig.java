@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.xml.namespace.QName;
 
-import no.nav.melosys.integrasjon.felles.mdc.CallIdOutInterceptor;
+import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingSOAPInterceptor;
 import no.nav.tjeneste.virksomhet.utbetaling.v1.UtbetalingV1;
 import org.apache.cxf.ext.logging.LoggingFeature;
 import org.apache.cxf.jaxws.JaxWsProxyFactoryBean;
@@ -37,7 +37,7 @@ public class UtbetalingConsumerConfig {
         factoryBean.setAddress(endpointUrl);
         factoryBean.getFeatures().add(new WSAddressingFeature());
         factoryBean.getFeatures().add(new LoggingFeature());
-        factoryBean.getOutInterceptors().add(new CallIdOutInterceptor());
+        factoryBean.getOutInterceptors().add(new CorrelationIdOutgoingSOAPInterceptor());
         return factoryBean.create(UtbetalingV1.class);
     }
 

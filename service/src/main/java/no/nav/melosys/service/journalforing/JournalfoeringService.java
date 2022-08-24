@@ -203,9 +203,8 @@ public class JournalfoeringService {
         if (journalpost.mottaksKanalErEessi()) {
             validerKanTilknytteJournalpostForSedTilSak(journalpost, saksnummer);
         }
-        if (unleash.isEnabled("melosys.api.journalfoering.alltid.opprett.ny.behandling")) {
-            validerKnyttTilEksisterendeSak(fagsak);
-        }
+
+        validerKnyttTilEksisterendeSak(fagsak);
         valider(journalfoeringDto);
 
         log.info("{} knytter journalpost {} til eksisterende sak {}", SubjectHandler.getInstance().getUserID(), journalfoeringDto.getJournalpostID(), saksnummer);
@@ -277,10 +276,7 @@ public class JournalfoeringService {
     }
 
     private boolean erUgyldigBehandlingstypeForEuEøs(Behandlingstyper behandlingstype) {
-        if (unleash.isEnabled("melosys.api.journalfoering.alltid.opprett.ny.behandling")) {
-            return behandlingstype != Behandlingstyper.ENDRET_PERIODE && behandlingstype != Behandlingstyper.NY_VURDERING;
-        }
-        return behandlingstype != Behandlingstyper.ENDRET_PERIODE;
+        return behandlingstype != Behandlingstyper.ENDRET_PERIODE && behandlingstype != Behandlingstyper.NY_VURDERING;
     }
 
     private void valider(JournalfoeringDto journalfoeringDto) {

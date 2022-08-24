@@ -1,6 +1,7 @@
 package no.nav.melosys.integrasjon.joark.journalpostapi;
 
 import no.nav.melosys.integrasjon.felles.SystemContextClientRequestInterceptor;
+import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingInterceptor;
 import org.apache.http.impl.client.HttpClients;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -25,7 +26,7 @@ public class JournalpostapiConsumerProducer {
         RestTemplateBuilder restTemplateBuilder) {
         RestTemplate restTemplate = restTemplateBuilder
             .uriTemplateHandler(new DefaultUriBuilderFactory(url))
-            .interceptors(systemContextClientRequestInterceptor)
+            .interceptors(systemContextClientRequestInterceptor, new CorrelationIdOutgoingInterceptor())
             .requestFactory(() -> new HttpComponentsClientHttpRequestFactory(HttpClients.createDefault()))
             .build();
 

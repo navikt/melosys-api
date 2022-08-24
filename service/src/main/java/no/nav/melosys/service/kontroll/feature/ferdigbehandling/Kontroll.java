@@ -6,9 +6,7 @@ import java.util.Set;
 import java.util.function.Function;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
-import no.nav.melosys.domain.PeriodeOmLovvalg;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
@@ -16,72 +14,28 @@ import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.FerdigbehandlingKontrollData;
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.kontroll.FerdigbehandlingKontrollsett;
 import no.nav.melosys.service.persondata.PersondataFasade;
-import no.nav.melosys.service.registeropplysninger.RegisteropplysningerRequest;
-import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
 import no.nav.melosys.service.validering.Kontrollfeil;
-import org.springframework.context.annotation.Primary;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.stereotype.Component;
 
-@Service
-@Primary
-public class FerdigbehandlingKontrollService {
-
+@Component
+class Kontroll {
     private final BehandlingService behandlingService;
-    private final BehandlingsresultatService behandlingsresultatService;
     private final LovvalgsperiodeService lovvalgsperiodeService;
     private final PersondataFasade persondataFasade;
-    private final RegisteropplysningerService registeropplysningerService;
 
-    public FerdigbehandlingKontrollService(BehandlingService behandlingService,
-                                           BehandlingsresultatService behandlingsresultatService,
-                                           LovvalgsperiodeService lovvalgsperiodeService, PersondataFasade persondataFasade,
-                                           RegisteropplysningerService registeropplysningerService) {
+    public Kontroll(BehandlingService behandlingService, LovvalgsperiodeService lovvalgsperiodeService, PersondataFasade persondataFasade) {
         this.behandlingService = behandlingService;
-        this.behandlingsresultatService = behandlingsresultatService;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
         this.persondataFasade = persondataFasade;
-        this.registeropplysningerService = registeropplysningerService;
     }
 
-    @Transactional
-    public void kontroller(long behandlingId, boolean skalRegisteropplysningerOppdateres,
-                           Behandlingsresultattyper behandlingsresultattype) throws ValideringException {
+    public void kontroller(long behandlingId, Behandlingsresultattyper behandlingsresultattype) throws ValideringException {
         var behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingId);
         var sakstype = behandling.getFagsak().getType();
-
-        if (skalRegisteropplysningerOppdateres) {
-            var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingId);
-            kontrollerVedtakMedNyeRegisteropplysninger(behandling, behandlingsresultat, sakstype, behandlingsresultattype);
-        } else {
-            kontrollerVedtak(behandlingId, sakstype, behandlingsresultattype);
-        }
-    }
-
-    public void kontrollerVedtakMedNyeRegisteropplysninger(Behandling behandling,
-                                                           Behandlingsresultat behandlingsresultat, Sakstyper sakstype,
-                                                           Behandlingsresultattyper behandlingsresultattype) throws ValideringException {
-        hentNyeRegisteropplysninger(behandlingsresultat, behandling);
-        kontrollerVedtak(behandling.getId(), sakstype, behandlingsresultattype);
-    }
-
-    private void hentNyeRegisteropplysninger(Behandlingsresultat behandlingsresultat, Behandling behandling) {
-        PeriodeOmLovvalg lovvalgsperiode = behandlingsresultat.hentValidertPeriodeOmLovvalg();
-        String fnr = persondataFasade.hentFolkeregisterident(behandling.getFagsak().hentBrukersAktørID());
-
-        registeropplysningerService.hentOgLagreOpplysninger(
-            RegisteropplysningerRequest.builder()
-                .behandlingID(behandling.getId())
-                .fnr(fnr)
-                .fom(lovvalgsperiode.getFom())
-                .tom(lovvalgsperiode.getTom())
-                .saksopplysningTyper(RegisteropplysningerRequest.SaksopplysningTyper.builder()
-                    .medlemskapsopplysninger().build())
-                .build());
+        kontrollerVedtak(behandlingId, sakstype, behandlingsresultattype);
     }
 
     public void kontrollerVedtak(long behandlingID, Sakstyper sakstype, Behandlingsresultattyper behandlingsresultattype) throws ValideringException {
@@ -103,8 +57,7 @@ public class FerdigbehandlingKontrollService {
     }
 
     private Collection<Kontrollfeil> utførKontrollerForAvslagOgHenleggelse(Behandling behandling) {
-        Set<Function<FerdigbehandlingKontrollData, Kontrollfeil>> vedtakKontroller =
-            FerdigbehandlingKontrollsett.hentRegelsettForAvslagOgHenleggelse();
+        Set<Function<FerdigbehandlingKontrollData, Kontrollfeil>> vedtakKontroller = FerdigbehandlingKontrollsett.hentRegelsettForAvslagOgHenleggelse();
         var kontrollData = hentKontrollDataForAvslagOgHenleggelse(behandling);
         return vedtakKontroller.stream()
             .map(f -> f.apply(kontrollData))

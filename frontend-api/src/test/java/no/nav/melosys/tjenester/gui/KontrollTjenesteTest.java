@@ -3,7 +3,7 @@ package no.nav.melosys.tjenester.gui;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
-import no.nav.melosys.service.kontroll.feature.ferdigbehandling.FerdigbehandlingKontrollService;
+import no.nav.melosys.service.kontroll.feature.ferdigbehandling.FerdigbehandlingKontrollFacade;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.tjenester.gui.dto.kontroller.FerdigbehandlingKontrollerDto;
 import no.nav.melosys.tjenester.gui.kontroll.KontrollTjeneste;
@@ -23,7 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class KontrollTjenesteTest {
 
     @MockBean
-    private FerdigbehandlingKontrollService ferdigbehandlingKontrollService;
+    private FerdigbehandlingKontrollFacade ferdigbehandlingKontrollFacade;
     @MockBean
     private Aksesskontroll aksesskontroll;
 
