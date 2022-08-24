@@ -4,7 +4,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.ValideringException;
-import no.nav.melosys.service.kontroll.feature.ferdigbehandling.FerdigbehandlingKontrollService;
+import no.nav.melosys.service.kontroll.feature.ferdigbehandling.FerdigbehandlingKontrollFacade;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.tilgang.Aksesstype;
 import no.nav.melosys.service.vedtak.FattVedtakRequest;
@@ -26,12 +26,12 @@ import org.springframework.web.context.WebApplicationContext;
 public class VedtakTjeneste {
     private final VedtaksfattingFasade vedtaksfattingFasade;
     private final Aksesskontroll aksesskontroll;
-    private final FerdigbehandlingKontrollService ferdigbehandlingKontrollService;
+    private final FerdigbehandlingKontrollFacade ferdigbehandlingKontrollFacade;
 
-    public VedtakTjeneste(VedtaksfattingFasade vedtaksfattingFasade, Aksesskontroll aksesskontroll, FerdigbehandlingKontrollService ferdigbehandlingKontrollService) {
+    public VedtakTjeneste(VedtaksfattingFasade vedtaksfattingFasade, Aksesskontroll aksesskontroll, FerdigbehandlingKontrollFacade ferdigbehandlingKontrollFacade) {
         this.vedtaksfattingFasade = vedtaksfattingFasade;
         this.aksesskontroll = aksesskontroll;
-        this.ferdigbehandlingKontrollService = ferdigbehandlingKontrollService;
+        this.ferdigbehandlingKontrollFacade = ferdigbehandlingKontrollFacade;
     }
 
     @PostMapping("{behandlingID}/fatt")
@@ -72,7 +72,7 @@ public class VedtakTjeneste {
             throw new FunksjonellException("Vedtakstype mangler.");
         }
         aksesskontroll.autoriser(behandlingID, skalRegisteropplysningerOppdateres ? Aksesstype.SKRIV : Aksesstype.LES);
-        ferdigbehandlingKontrollService.kontroller(behandlingID, skalRegisteropplysningerOppdateres, fattVedtakDto.getBehandlingsresultatTypeKode());
+        ferdigbehandlingKontrollFacade.kontroller(behandlingID, skalRegisteropplysningerOppdateres, fattVedtakDto.getBehandlingsresultatTypeKode());
         return ResponseEntity.noContent().build();
     }
 

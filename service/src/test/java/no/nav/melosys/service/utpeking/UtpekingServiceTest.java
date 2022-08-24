@@ -25,7 +25,7 @@ import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
-import no.nav.melosys.service.kontroll.feature.ferdigbehandling.FerdigbehandlingKontrollService;
+import no.nav.melosys.service.kontroll.feature.ferdigbehandling.FerdigbehandlingKontrollFacade;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.junit.jupiter.api.BeforeEach;
@@ -66,7 +66,7 @@ class UtpekingServiceTest {
     @Mock
     private UtpekingsperiodeRepository utpekingsperiodeRepository;
     @Mock
-    private FerdigbehandlingKontrollService ferdigbehandlingKontrollService;
+    private FerdigbehandlingKontrollFacade ferdigbehandlingKontrollFacade;
     @Mock
     private ApplicationEventMulticaster melosysEventMulticaster;
 
@@ -87,7 +87,7 @@ class UtpekingServiceTest {
     @BeforeEach
     public void setup() {
         utpekingService = new UtpekingService(behandlingService, behandlingsresultatService, eessiService, landvelgerService,
-            lovvalgsperiodeService, oppgaveService, prosessinstansService, unleash, utpekingsperiodeRepository, ferdigbehandlingKontrollService, melosysEventMulticaster);
+            lovvalgsperiodeService, oppgaveService, prosessinstansService, unleash, utpekingsperiodeRepository, ferdigbehandlingKontrollFacade, melosysEventMulticaster);
 
         fagsak.setBehandlinger(List.of(behandling));
         fagsak.setType(Sakstyper.EU_EOS);
@@ -122,7 +122,6 @@ class UtpekingServiceTest {
         verify(lovvalgsperiodeService).lagreLovvalgsperioder(eq(behandlingID), lovvalgsperiodeCaptor.capture());
         verify(prosessinstansService).opprettProsessinstansUtpekAnnetLand(eq(behandling), eq(Landkoder.SE), eq(mottakerInstitusjoner), isNull(), isNull());
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(eq(fagsak.getSaksnummer()));
-        verify(ferdigbehandlingKontrollService).utførKontroller(behandlingID, Sakstyper.EU_EOS, behandlingsresultat.getType());
 
         assertThat(behandlingsresultat)
             .extracting(Behandlingsresultat::getType, Behandlingsresultat::getBegrunnelseFritekst, Behandlingsresultat::getFastsattAvLand)

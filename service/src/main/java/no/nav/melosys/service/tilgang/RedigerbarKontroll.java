@@ -14,8 +14,8 @@ import org.springframework.stereotype.Service;
 public class RedigerbarKontroll {
 
     private static final Map<Ressurs, Predicate<Behandlingsresultat>> RESSURS_REDIGERBAR_MAP = Map.of(
-        Ressurs.AVKLARTE_FAKTA, b -> !b.erArtikkel16MedSendtAnmodningOmUnntak(),
-        Ressurs.VILKÅR, b -> !b.erArtikkel16MedSendtAnmodningOmUnntak()
+        Ressurs.AVKLARTE_FAKTA, Behandlingsresultat::erIkkeArtikkel16MedSendtAnmodningOmUnntak,
+        Ressurs.VILKÅR, Behandlingsresultat::erIkkeArtikkel16MedSendtAnmodningOmUnntak
     );
 
     private final BehandlingsresultatService behandlingsresultatService;
@@ -42,7 +42,7 @@ public class RedigerbarKontroll {
     }
 
     private void validerBehandlingRedigerbar(Behandling behandling) {
-        if(!behandling.erRedigerbar()) {
+        if (!behandling.erRedigerbar()) {
             throw new FunksjonellException("Forsøk på å endre en ikke-redigerbar behandling med id %s".formatted(behandling.getId()));
         }
     }
