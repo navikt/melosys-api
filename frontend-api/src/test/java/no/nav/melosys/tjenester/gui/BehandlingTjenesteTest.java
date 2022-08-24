@@ -8,7 +8,6 @@ import java.util.Set;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.Tilleggsinformasjon;
 import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.TilleggsinformasjonDetaljer;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.GeografiskAdresse;
@@ -221,10 +220,8 @@ class BehandlingTjenesteTest {
     }
 
     private Behandling opprettTomBehandlingMedId() {
-        Fagsak fagsak = new Fagsak();
         Behandling behandling = new Behandling();
         behandling.setId(BEHANDLING_ID);
-        behandling.setFagsak(fagsak);
 
         return behandling;
     }

@@ -3,8 +3,6 @@ package no.nav.melosys.tjenester.gui.dto;
 import java.time.Instant;
 import java.time.LocalDate;
 
-import no.nav.melosys.domain.kodeverk.Sakstemaer;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
@@ -15,8 +13,6 @@ public class BehandlingOppsummeringDto {
     private Behandlingsstatus behandlingsstatus;
     private Behandlingstyper behandlingstype;
     private Behandlingstema behandlingstema;
-    private Sakstemaer sakstema;
-    private Sakstyper sakstype;
     private Instant registrertDato;
     private Instant endretDato;
     private String endretAvNavn;
@@ -47,22 +43,6 @@ public class BehandlingOppsummeringDto {
 
     public void setBehandlingstema(Behandlingstema behandlingstema) {
         this.behandlingstema = behandlingstema;
-    }
-
-    public Sakstemaer getSakstema() {
-        return sakstema;
-    }
-
-    public Sakstyper getSakstype() {
-        return sakstype;
-    }
-
-    public void setSakstype(Sakstyper sakstype) {
-        this.sakstype = sakstype;
-    }
-
-    public void setSakstema(Sakstemaer sakstema) {
-        this.sakstema = sakstema;
     }
 
     public Instant getRegistrertDato() {
