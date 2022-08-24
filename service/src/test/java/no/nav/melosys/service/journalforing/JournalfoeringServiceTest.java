@@ -76,7 +76,7 @@ class JournalfoeringServiceTest {
 
     @BeforeEach
     public void setup() {
-        unleash.enable("melosys.api.journalfoering.alltid.opprett.ny.behandling", "melosys.folketrygden.mvp");
+        unleash.enable("melosys.folketrygden.mvp");
         journalpost = new Journalpost("123");
         journalpost.setHoveddokument(new ArkivDokument());
 
