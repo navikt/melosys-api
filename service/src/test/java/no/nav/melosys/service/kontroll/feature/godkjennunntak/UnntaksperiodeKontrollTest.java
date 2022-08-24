@@ -23,7 +23,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class UnntaksperiodeKontrollServiceTest {
+class UnntaksperiodeKontrollTest {
 
     @Mock
     private SaksopplysningerService saksopplysningerService;

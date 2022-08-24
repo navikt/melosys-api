@@ -11,29 +11,28 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerRequest;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-@Service
-public class KontrollMedRegisterOpplysningService {
+@Component
+class KontrollMedRegisteropplysning {
 
     private final BehandlingService behandlingService;
     private final BehandlingsresultatService behandlingsresultatService;
     private final PersondataFasade persondataFasade;
     private final RegisteropplysningerService registeropplysningerService;
+    private final Kontroll kontroll;
 
-    private final FerdigbehandlingKontrollService ferdigbehandlingKontrollService;
-
-    public KontrollMedRegisterOpplysningService(BehandlingService behandlingService,
-                                                BehandlingsresultatService behandlingsresultatService,
-                                                PersondataFasade persondataFasade,
-                                                RegisteropplysningerService registeropplysningerService,
-                                                FerdigbehandlingKontrollService ferdigbehandlingKontrollService) {
+    public KontrollMedRegisteropplysning(BehandlingService behandlingService,
+                                         BehandlingsresultatService behandlingsresultatService,
+                                         PersondataFasade persondataFasade,
+                                         RegisteropplysningerService registeropplysningerService,
+                                         Kontroll kontroll) {
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.persondataFasade = persondataFasade;
         this.registeropplysningerService = registeropplysningerService;
-        this.ferdigbehandlingKontrollService = ferdigbehandlingKontrollService;
+        this.kontroll = kontroll;
     }
 
     @Transactional
@@ -48,7 +47,7 @@ public class KontrollMedRegisterOpplysningService {
                                  Behandlingsresultat behandlingsresultat, Sakstyper sakstype,
                                  Behandlingsresultattyper behandlingsresultattype) throws ValideringException {
         hentNyeRegisteropplysninger(behandlingsresultat, behandling);
-        ferdigbehandlingKontrollService.kontrollerVedtak(behandling.getId(), sakstype, behandlingsresultattype);
+        kontroll.kontrollerVedtak(behandling.getId(), sakstype, behandlingsresultattype);
     }
 
     private void hentNyeRegisteropplysninger(Behandlingsresultat behandlingsresultat, Behandling behandling) {

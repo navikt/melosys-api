@@ -18,16 +18,16 @@ import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.Ferdigbehan
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.kontroll.FerdigbehandlingKontrollsett;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.validering.Kontrollfeil;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-@Service
-public class FerdigbehandlingKontrollService {
+@Component
+public class Kontroll {
     private final BehandlingService behandlingService;
     private final LovvalgsperiodeService lovvalgsperiodeService;
     private final PersondataFasade persondataFasade;
 
-    public FerdigbehandlingKontrollService(BehandlingService behandlingService, LovvalgsperiodeService lovvalgsperiodeService, PersondataFasade persondataFasade) {
+    public Kontroll(BehandlingService behandlingService, LovvalgsperiodeService lovvalgsperiodeService, PersondataFasade persondataFasade) {
         this.behandlingService = behandlingService;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
         this.persondataFasade = persondataFasade;

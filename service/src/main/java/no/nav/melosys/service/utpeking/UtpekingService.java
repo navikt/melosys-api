@@ -25,7 +25,7 @@ import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
-import no.nav.melosys.service.kontroll.feature.ferdigbehandling.FerdigbehandlingKontrollService;
+import no.nav.melosys.service.kontroll.feature.ferdigbehandling.Kontroll;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import no.nav.melosys.service.vedtak.VedtaksfattingFasade;
@@ -52,7 +52,7 @@ public class UtpekingService {
     private final ProsessinstansService prosessinstansService;
     private final Unleash unleash;
     private final UtpekingsperiodeRepository utpekingsperiodeRepository;
-    private final FerdigbehandlingKontrollService ferdigbehandlingKontrollService;
+    private final Kontroll kontroll;
     private final ApplicationEventMulticaster melosysEventMulticaster;
 
     public UtpekingService(BehandlingService behandlingService, BehandlingsresultatService behandlingsresultatService,
@@ -60,7 +60,7 @@ public class UtpekingService {
                            LovvalgsperiodeService lovvalgsperiodeService, OppgaveService oppgaveService,
                            ProsessinstansService prosessinstansService,
                            Unleash unleash, UtpekingsperiodeRepository utpekingsperiodeRepository,
-                           FerdigbehandlingKontrollService ferdigbehandlingKontrollService,
+                           Kontroll kontroll,
                            ApplicationEventMulticaster melosysEventMulticaster) {
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
@@ -71,7 +71,7 @@ public class UtpekingService {
         this.prosessinstansService = prosessinstansService;
         this.unleash = unleash;
         this.utpekingsperiodeRepository = utpekingsperiodeRepository;
-        this.ferdigbehandlingKontrollService = ferdigbehandlingKontrollService;
+        this.kontroll = kontroll;
         this.melosysEventMulticaster = melosysEventMulticaster;
     }
 
@@ -124,7 +124,7 @@ public class UtpekingService {
         validerUtpekingsperiode(utpekingsperiode);
 
         opprettLovvalgsperiode(behandlingID, utpekingsperiode);
-        ferdigbehandlingKontrollService.utførKontroller(behandlingID, fagsak.getType(), behandlingsresultat.getType());
+        kontroll.utførKontroller(behandlingID, fagsak.getType(), behandlingsresultat.getType());
         oppdaterBehandlingsresultat(behandlingsresultat);
         prosessinstansService.opprettProsessinstansUtpekAnnetLand(
             behandling, utpekingsperiode.getLovvalgsland(), mottakerinstitusjoner, ytterligereInformasjonSed, fritekstBrev

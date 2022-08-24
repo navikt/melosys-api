@@ -19,7 +19,7 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.DokgenService;
 import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
 import no.nav.melosys.service.dokument.brev.KopiMottaker;
-import no.nav.melosys.service.kontroll.feature.ferdigbehandling.KontrollMedRegisterOpplysningService;
+import no.nav.melosys.service.kontroll.feature.ferdigbehandling.FerdigbehandlingKontrollFacade;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
@@ -63,8 +63,7 @@ class TrygdeavtaleVedtakServiceTest {
     @Mock
     private DokgenService dokgenService;
     @Mock
-    private KontrollMedRegisterOpplysningService kontrollMedRegisterOpplysningService;
-
+    private FerdigbehandlingKontrollFacade ferdigbehandlingKontrollFacade;
     @Captor
     private ArgumentCaptor<Behandlingsresultat> behandlingsresultatCaptor;
     @Captor
@@ -76,7 +75,7 @@ class TrygdeavtaleVedtakServiceTest {
 
     @BeforeEach
     void setup() {
-        trygdeavtaleVedtakService = new TrygdeavtaleVedtakService(behandlingsresultatService, behandlingService, prosessinstansService, oppgaveService, dokgenService, kontrollMedRegisterOpplysningService);
+        trygdeavtaleVedtakService = new TrygdeavtaleVedtakService(behandlingsresultatService, behandlingService, prosessinstansService, oppgaveService, dokgenService, ferdigbehandlingKontrollFacade);
 
         SpringSubjectHandler.set(new TestSubjectHandler());
     }
@@ -94,7 +93,7 @@ class TrygdeavtaleVedtakServiceTest {
         verify(prosessinstansService).opprettProsessinstansIverksettVedtakTrygdeavtale(any(Behandling.class), eq(request));
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(SAKSNUMMER);
         verify(dokgenService).produserOgDistribuerBrev(anyLong(), brevbestillingRequestCaptor.capture());
-        verify(kontrollMedRegisterOpplysningService).kontrollerVedtak(any(Behandling.class), any(Behandlingsresultat.class), eq(Sakstyper.TRYGDEAVTALE), any(Behandlingsresultattyper.class));
+        verify(ferdigbehandlingKontrollFacade).kontrollerVedtakMedRegisteropplysninger(any(Behandling.class), any(Behandlingsresultat.class), eq(Sakstyper.TRYGDEAVTALE), any(Behandlingsresultattyper.class));
 
         Behandlingsresultat lagretBehandlingsresultat = behandlingsresultatCaptor.getValue();
         assertThat(lagretBehandlingsresultat)
@@ -140,7 +139,7 @@ class TrygdeavtaleVedtakServiceTest {
         verify(prosessinstansService).opprettProsessinstansIverksettVedtakTrygdeavtale(any(Behandling.class), eq(request));
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(SAKSNUMMER);
         verify(dokgenService).produserOgDistribuerBrev(anyLong(), brevbestillingRequestCaptor.capture());
-        verify(kontrollMedRegisterOpplysningService).kontrollerVedtak(any(Behandling.class), any(Behandlingsresultat.class), eq(Sakstyper.TRYGDEAVTALE), any(Behandlingsresultattyper.class));
+        verify(ferdigbehandlingKontrollFacade).kontrollerVedtakMedRegisteropplysninger(any(Behandling.class), any(Behandlingsresultat.class), eq(Sakstyper.TRYGDEAVTALE), any(Behandlingsresultattyper.class));
 
         Behandlingsresultat lagretBehandlingsresultat = behandlingsresultatCaptor.getValue();
         assertThat(lagretBehandlingsresultat)
@@ -186,7 +185,7 @@ class TrygdeavtaleVedtakServiceTest {
         verify(prosessinstansService).opprettProsessinstansIverksettVedtakTrygdeavtale(any(Behandling.class), eq(request));
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(SAKSNUMMER);
         verify(dokgenService).produserOgDistribuerBrev(anyLong(), brevbestillingRequestCaptor.capture());
-        verify(kontrollMedRegisterOpplysningService).kontrollerVedtak(any(Behandling.class), any(Behandlingsresultat.class), eq(Sakstyper.TRYGDEAVTALE), any(Behandlingsresultattyper.class));
+        verify(ferdigbehandlingKontrollFacade).kontrollerVedtakMedRegisteropplysninger(any(Behandling.class), any(Behandlingsresultat.class), eq(Sakstyper.TRYGDEAVTALE), any(Behandlingsresultattyper.class));
 
         Behandlingsresultat lagretBehandlingsresultat = behandlingsresultatCaptor.getValue();
         assertThat(lagretBehandlingsresultat)

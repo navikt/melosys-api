@@ -25,7 +25,7 @@ import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
-import no.nav.melosys.service.kontroll.feature.ferdigbehandling.FerdigbehandlingKontrollService;
+import no.nav.melosys.service.kontroll.feature.ferdigbehandling.Kontroll;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.junit.jupiter.api.BeforeEach;
@@ -66,7 +66,7 @@ class UtpekingServiceTest {
     @Mock
     private UtpekingsperiodeRepository utpekingsperiodeRepository;
     @Mock
-    private FerdigbehandlingKontrollService ferdigbehandlingKontrollService;
+    private Kontroll kontroll;
     @Mock
     private ApplicationEventMulticaster melosysEventMulticaster;
 
@@ -87,7 +87,7 @@ class UtpekingServiceTest {
     @BeforeEach
     public void setup() {
         utpekingService = new UtpekingService(behandlingService, behandlingsresultatService, eessiService, landvelgerService,
-            lovvalgsperiodeService, oppgaveService, prosessinstansService, unleash, utpekingsperiodeRepository, ferdigbehandlingKontrollService, melosysEventMulticaster);
+            lovvalgsperiodeService, oppgaveService, prosessinstansService, unleash, utpekingsperiodeRepository, kontroll, melosysEventMulticaster);
 
         fagsak.setBehandlinger(List.of(behandling));
         fagsak.setType(Sakstyper.EU_EOS);

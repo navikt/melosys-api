@@ -1,4 +1,4 @@
-package no.nav.melosys.service.kontroll.feature.ferdigbehandling.service;
+package no.nav.melosys.service.kontroll.feature.ferdigbehandling;
 
 import java.time.LocalDate;
 import java.util.Collection;
@@ -23,7 +23,6 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_t
 import no.nav.melosys.integrasjon.medl.PeriodestatusMedl;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.kontroll.feature.ferdigbehandling.FerdigbehandlingKontrollService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory;
 import no.nav.melosys.service.validering.Kontrollfeil;
@@ -40,7 +39,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class FerdigbehandlingKontrollServiceTest {
+class KontrollTest {
 
     @Mock
     private BehandlingService behandlingService;
@@ -53,7 +52,7 @@ class FerdigbehandlingKontrollServiceTest {
     private final MedlemskapDokument medlemskapDokument = new MedlemskapDokument();
     private final BehandlingsgrunnlagData behandlingsgrunnlagData = new BehandlingsgrunnlagData();
     private final Behandling behandling = lagBehandling(behandlingsgrunnlagData);
-    private FerdigbehandlingKontrollService ferdigbehandlingKontrollService;
+    private Kontroll kontroll;
 
 
     @BeforeEach
@@ -67,19 +66,19 @@ class FerdigbehandlingKontrollServiceTest {
         when(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling);
 
 
-        ferdigbehandlingKontrollService = new FerdigbehandlingKontrollService(behandlingService, lovvalgsperiodeService, persondataFasade);
+        kontroll = new Kontroll(behandlingService, lovvalgsperiodeService, persondataFasade);
     }
 
     @Test
     void utførKontroller_HenleggelsePersonMedRegistrertAdresse__returnererTomCollection() {
-        Collection<Kontrollfeil> resultat = ferdigbehandlingKontrollService.utførKontroller(behandlingID, Sakstyper.EU_EOS, Behandlingsresultattyper.HENLEGGELSE);
+        Collection<Kontrollfeil> resultat = kontroll.utførKontroller(behandlingID, Sakstyper.EU_EOS, Behandlingsresultattyper.HENLEGGELSE);
 
         assertThat(resultat).isEmpty();
     }
 
     @Test
     void utførKontroller_AvslagPersonMedRegistrertAdresse__returnererTomCollection() {
-        Collection<Kontrollfeil> resultat = ferdigbehandlingKontrollService.utførKontroller(behandlingID, Sakstyper.EU_EOS, Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL);
+        Collection<Kontrollfeil> resultat = kontroll.utførKontroller(behandlingID, Sakstyper.EU_EOS, Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL);
 
         assertThat(resultat).isEmpty();
     }
@@ -91,7 +90,7 @@ class FerdigbehandlingKontrollServiceTest {
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
         when(lovvalgsperiodeService.hentValidertLovvalgsperiode(behandlingID)).thenReturn(lovvalgsperiode);
 
-        assertDoesNotThrow(() -> ferdigbehandlingKontrollService.utførKontroller(behandlingID, Sakstyper.EU_EOS, Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN));
+        assertDoesNotThrow(() -> kontroll.utførKontroller(behandlingID, Sakstyper.EU_EOS, Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN));
     }
 
     @Test
@@ -99,7 +98,7 @@ class FerdigbehandlingKontrollServiceTest {
         when(persondataFasade.hentPerson(anyString())).thenReturn(PersonopplysningerObjectFactory.lagPersonopplysningerUtenAdresser());
 
 
-        Collection<Kontrollfeil> resultat = ferdigbehandlingKontrollService.utførKontroller(behandlingID, Sakstyper.EU_EOS, Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL);
+        Collection<Kontrollfeil> resultat = kontroll.utførKontroller(behandlingID, Sakstyper.EU_EOS, Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL);
 
 
         assertThat(resultat)
@@ -112,7 +111,7 @@ class FerdigbehandlingKontrollServiceTest {
         when(persondataFasade.hentPerson(anyString())).thenReturn(PersonopplysningerObjectFactory.lagPersonopplysningerUtenAdresser());
 
 
-        Collection<Kontrollfeil> resultat = ferdigbehandlingKontrollService.utførKontroller(behandlingID, Sakstyper.EU_EOS, Behandlingsresultattyper.HENLEGGELSE);
+        Collection<Kontrollfeil> resultat = kontroll.utførKontroller(behandlingID, Sakstyper.EU_EOS, Behandlingsresultattyper.HENLEGGELSE);
 
 
         assertThat(resultat)
@@ -128,7 +127,7 @@ class FerdigbehandlingKontrollServiceTest {
         when(lovvalgsperiodeService.hentValidertLovvalgsperiode(behandlingID)).thenReturn(lovvalgsperiode);
 
 
-        Collection<Kontrollfeil> resultat = ferdigbehandlingKontrollService.utførKontroller(behandlingID, Sakstyper.EU_EOS, Behandlingsresultattyper.ANMODNING_OM_UNNTAK);
+        Collection<Kontrollfeil> resultat = kontroll.utførKontroller(behandlingID, Sakstyper.EU_EOS, Behandlingsresultattyper.ANMODNING_OM_UNNTAK);
 
 
         assertThat(resultat).isEmpty();
@@ -148,7 +147,7 @@ class FerdigbehandlingKontrollServiceTest {
         medlemskapDokument.getMedlemsperiode().add(medlemsperiode);
 
 
-        Collection<Kontrollfeil> resultat = ferdigbehandlingKontrollService.utførKontroller(behandlingID, Sakstyper.EU_EOS, Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
+        Collection<Kontrollfeil> resultat = kontroll.utførKontroller(behandlingID, Sakstyper.EU_EOS, Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
 
 
         assertThat(resultat).extracting(Kontrollfeil::getKode).containsExactlyInAnyOrder(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER, Kontroll_begrunnelser.PERIODEN_OVER_24_MD);
@@ -164,7 +163,7 @@ class FerdigbehandlingKontrollServiceTest {
         behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(new SoeknadTrygdeavtale());
 
 
-        Collection<Kontrollfeil> resultat = ferdigbehandlingKontrollService.utførKontroller(behandlingID, Sakstyper.TRYGDEAVTALE, Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN);
+        Collection<Kontrollfeil> resultat = kontroll.utførKontroller(behandlingID, Sakstyper.TRYGDEAVTALE, Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN);
 
 
         assertThat(resultat).extracting(Kontrollfeil::getKode).contains(Kontroll_begrunnelser.MER_ENN_TRE_ÅR);
@@ -180,7 +179,7 @@ class FerdigbehandlingKontrollServiceTest {
         when(persondataFasade.hentPerson(anyString())).thenReturn(PersonopplysningerObjectFactory.lagPersonopplysningerUtenAdresser());
 
 
-        Collection<Kontrollfeil> resultat = ferdigbehandlingKontrollService.utførKontroller(behandlingID, Sakstyper.EU_EOS, Behandlingsresultattyper.IKKE_FASTSATT);
+        Collection<Kontrollfeil> resultat = kontroll.utførKontroller(behandlingID, Sakstyper.EU_EOS, Behandlingsresultattyper.IKKE_FASTSATT);
 
 
         assertThat(resultat).extracting(Kontrollfeil::getKode).contains(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE);
@@ -195,7 +194,7 @@ class FerdigbehandlingKontrollServiceTest {
         when(lovvalgsperiodeService.hentValidertLovvalgsperiode(behandlingID)).thenReturn(lovvalgsperiode);
 
 
-        Collection<Kontrollfeil> resultat = ferdigbehandlingKontrollService.utførKontroller(behandlingID, Sakstyper.EU_EOS, Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND);
+        Collection<Kontrollfeil> resultat = kontroll.utførKontroller(behandlingID, Sakstyper.EU_EOS, Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND);
 
 
         assertThat(resultat).extracting(Kontrollfeil::getKode).contains(Kontroll_begrunnelser.INGEN_SLUTTDATO);
@@ -210,7 +209,7 @@ class FerdigbehandlingKontrollServiceTest {
         behandlingsgrunnlagData.arbeidPaaLand.fysiskeArbeidssteder = List.of(new FysiskArbeidssted());
 
 
-        Collection<Kontrollfeil> resultat = ferdigbehandlingKontrollService.utførKontroller(behandlingID, Sakstyper.EU_EOS, Behandlingsresultattyper.ANMODNING_OM_UNNTAK);
+        Collection<Kontrollfeil> resultat = kontroll.utførKontroller(behandlingID, Sakstyper.EU_EOS, Behandlingsresultattyper.ANMODNING_OM_UNNTAK);
 
 
         assertThat(resultat)
@@ -227,7 +226,7 @@ class FerdigbehandlingKontrollServiceTest {
         behandlingsgrunnlagData.foretakUtland = List.of(new ForetakUtland());
 
 
-        Collection<Kontrollfeil> resultat = ferdigbehandlingKontrollService.utførKontroller(behandlingID, Sakstyper.EU_EOS, Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
+        Collection<Kontrollfeil> resultat = kontroll.utførKontroller(behandlingID, Sakstyper.EU_EOS, Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
 
 
         assertThat(resultat)
@@ -243,7 +242,7 @@ class FerdigbehandlingKontrollServiceTest {
         behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(new SoeknadTrygdeavtale());
 
 
-        Collection<Kontrollfeil> resultat = ferdigbehandlingKontrollService.utførKontroller(behandlingID, Sakstyper.TRYGDEAVTALE, Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN);
+        Collection<Kontrollfeil> resultat = kontroll.utførKontroller(behandlingID, Sakstyper.TRYGDEAVTALE, Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN);
 
 
         assertThat(resultat)
