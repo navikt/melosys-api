@@ -13,8 +13,12 @@ import no.nav.melosys.service.kontroll.regler.OverlappendeMedlemskapsperioderReg
 import no.nav.melosys.service.kontroll.regler.PeriodeRegler;
 import no.nav.melosys.service.kontroll.regler.PersonRegler;
 import no.nav.melosys.service.validering.Kontrollfeil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 final class FerdigbehandlingKontroll {
+
+    private static final Logger log = LoggerFactory.getLogger(FerdigbehandlingKontroll.class);
 
     private FerdigbehandlingKontroll() {
     }
@@ -23,6 +27,8 @@ final class FerdigbehandlingKontroll {
         MedlemskapDokument medlemskapDokument = kontrollData.medlemskapDokument();
         PeriodeOmLovvalg lovvalgsperiode = kontrollData.lovvalgsperiode();
         PeriodeOmLovvalg opprinneligLovvalgsperiode = kontrollData.opprinneligLovvalgsperiode();
+
+        log.info("Sjekker overlappende medlemsperioder - lovvalgsperiode: {}, og opprinneligLovvalgsperiode: {}", lovvalgsperiode, opprinneligLovvalgsperiode);
 
         return OverlappendeMedlemskapsperioderRegler.harOverlappendeMedlemsperiode(medlemskapDokument,
             lovvalgsperiode, opprinneligLovvalgsperiode) ? new Kontrollfeil(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER) : null;
