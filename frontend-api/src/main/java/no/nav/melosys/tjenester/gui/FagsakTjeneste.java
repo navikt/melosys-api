@@ -48,12 +48,12 @@ import static no.nav.melosys.domain.util.BehandlingsgrunnlagUtils.hentSøknadsla
 public class FagsakTjeneste {
     private static final Logger log = LoggerFactory.getLogger(FagsakTjeneste.class);
     private static final String UKJENT_NAVN = "UKJENT";
+
     private final FagsakService fagsakService;
     private final OpprettNySakFraOppgave opprettNySakFraOppgave;
     private final Aksesskontroll aksesskontroll;
     private final BehandlingsgrunnlagService behandlingsgrunnlagService;
     private final BehandlingsresultatService behandlingsresultatService;
-
     private final HenleggFagsakService henleggFagsakService;
     private final PersondataFasade persondataFasade;
     private final SaksopplysningerService saksopplysningerService;

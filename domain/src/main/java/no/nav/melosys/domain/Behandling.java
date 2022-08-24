@@ -34,7 +34,7 @@ public class Behandling extends RegistreringsInfo {
                                                                                       FORESPØRSEL_TRYGDEMYNDIGHET,
                                                                                       TRYGDETID);
 
-    public static final Set<Behandlingstema> IKKE_GYLDIGE_BEHANDLINGS_TEMAER = Set.of(
+    private static final Set<Behandlingstema> BEHANDLINGSTEMA_SOM_IKKE_KAND_ENDRES = Set.of(
         REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING,
         REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE,
         BESLUTNING_LOVVALG_NORGE,
@@ -235,7 +235,7 @@ public class Behandling extends RegistreringsInfo {
     }
 
     public boolean kanIkkeEndreBehandling(Behandlingstema behandlingstema) {
-        return IKKE_GYLDIGE_BEHANDLINGS_TEMAER.contains(behandlingstema);
+        return BEHANDLINGSTEMA_SOM_IKKE_KAND_ENDRES.contains(behandlingstema);
     }
 
     public SedDokument hentSedDokument() {
