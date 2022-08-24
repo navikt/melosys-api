@@ -12,7 +12,6 @@ import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerRequest;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 @Component
 class KontrollMedRegisteropplysning {
@@ -35,7 +34,6 @@ class KontrollMedRegisteropplysning {
         this.kontroll = kontroll;
     }
 
-    @Transactional
     public void kontroller(long behandlingId, Behandlingsresultattyper behandlingsresultattype) throws ValideringException {
         var behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingId);
         var sakstype = behandling.getFagsak().getType();

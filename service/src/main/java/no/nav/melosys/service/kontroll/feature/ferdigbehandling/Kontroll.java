@@ -19,10 +19,9 @@ import no.nav.melosys.service.kontroll.feature.ferdigbehandling.kontroll.Ferdigb
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.validering.Kontrollfeil;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 @Component
-public class Kontroll {
+class Kontroll {
     private final BehandlingService behandlingService;
     private final LovvalgsperiodeService lovvalgsperiodeService;
     private final PersondataFasade persondataFasade;
@@ -33,7 +32,6 @@ public class Kontroll {
         this.persondataFasade = persondataFasade;
     }
 
-    @Transactional
     public void kontroller(long behandlingId, Behandlingsresultattyper behandlingsresultattype) throws ValideringException {
         var behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingId);
         var sakstype = behandling.getFagsak().getType();
