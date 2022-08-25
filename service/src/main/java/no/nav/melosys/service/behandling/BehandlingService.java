@@ -116,7 +116,7 @@ public class BehandlingService {
     @Transactional
     public void endreBehandling(long behandlingID, Behandlingstyper type, Behandlingstema tema, Behandlingsstatus status, LocalDate behandlingsfrist) {
         var behandling = hentBehandling(behandlingID);
-        boolean behandlingErLåst = behandling.kanIkkeEndreBehandling(behandling.getTema());
+        boolean behandlingErLåst = behandling.kanIkkeEndres();
 
         if (!behandling.erAktiv()) {
             throw new FunksjonellException("Behandlingen må være aktiv for å kunne endres");

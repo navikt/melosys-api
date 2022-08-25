@@ -103,8 +103,14 @@ public class FagsakTjeneste {
     @PostMapping("/{saksnr}/endre")
     @ApiOperation(value = "Endre en sak.")
     public ResponseEntity<Void> endreFagsak(@PathVariable("saksnr") String saksnummer, @RequestBody EndreSakDto endreSakDto) {
-        fagsakService.oppdaterSakstema(saksnummer, endreSakDto.getSakstema());
-        fagsakService.oppdaterSakstype(saksnummer, endreSakDto.getSakstype());
+        log.debug("Saksbehandler {} ber om å endre fagsak {} med sakstype {}, sakstema {}", saksnummer, endreSakDto.sakstype(), endreSakDto.sakstema());
+        aksesskontroll.autoriserSakstilgang(saksnummer);
+
+        fagsakService.oppdaterSakstema(saksnummer, endreSakDto.sakstema());
+        /*
+        TODO: Endre sakstype fikses i MELOSYS-5285
+        fagsakService.oppdaterSakstype(saksnummer, endreSakDto.sakstype());
+        */
 
         return ResponseEntity.noContent().build();
     }

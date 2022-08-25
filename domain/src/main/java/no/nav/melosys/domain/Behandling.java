@@ -23,6 +23,7 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import static no.nav.melosys.domain.kodeverk.Sakstyper.EU_EOS;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*;
 
 @Entity
@@ -31,10 +32,16 @@ import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*;
 public class Behandling extends RegistreringsInfo {
 
     public static final Set<Behandlingstema> BEHANDLINGSTEMA_SED_FORESPØRSEL = Set.of(ØVRIGE_SED_MED, ØVRIGE_SED_UFM,
-                                                                                      FORESPØRSEL_TRYGDEMYNDIGHET,
-                                                                                      TRYGDETID);
+        FORESPØRSEL_TRYGDEMYNDIGHET,
+        TRYGDETID);
 
-    private static final Set<Behandlingstema> BEHANDLINGSTEMA_SOM_IKKE_KAND_ENDRES = Set.of(
+    private static final Set<Behandlingstema> STANDARD_BEHANDLINGSTEMA_SOM_IKKE_KAN_ENDRES = Set.of(
+        REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING,
+        REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE,
+        BESLUTNING_LOVVALG_NORGE,
+        BESLUTNING_LOVVALG_ANNET_LAND
+    );
+    private static final Set<Behandlingstema> UTVIDET_BEHANDLINGSTEMA_SOM_IKKE_KAN_ENDRES = Set.of(
         REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING,
         REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE,
         BESLUTNING_LOVVALG_NORGE,
@@ -234,8 +241,15 @@ public class Behandling extends RegistreringsInfo {
             .toList();
     }
 
-    public boolean kanIkkeEndreBehandling(Behandlingstema behandlingstema) {
-        return BEHANDLINGSTEMA_SOM_IKKE_KAND_ENDRES.contains(behandlingstema);
+    public boolean kanIkkeEndres() {
+        boolean erEOS = fagsak.getType() == EU_EOS;
+        Set<Behandlingstema> BEHANDLINGSTEMA_SOM_IKKE_KAN_ENDRES_SET = STANDARD_BEHANDLINGSTEMA_SOM_IKKE_KAN_ENDRES;
+
+        if (erEOS) {
+            BEHANDLINGSTEMA_SOM_IKKE_KAN_ENDRES_SET = UTVIDET_BEHANDLINGSTEMA_SOM_IKKE_KAN_ENDRES;
+        }
+        
+        return erInaktiv() || BEHANDLINGSTEMA_SOM_IKKE_KAN_ENDRES_SET.contains(tema);
     }
 
     public SedDokument hentSedDokument() {
