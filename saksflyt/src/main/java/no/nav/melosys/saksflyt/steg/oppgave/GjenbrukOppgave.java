@@ -1,5 +1,6 @@
 package no.nav.melosys.saksflyt.steg.oppgave;
 
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.oppgave.Oppgave;
@@ -20,9 +21,11 @@ public class GjenbrukOppgave implements StegBehandler {
     private static final Logger log = LoggerFactory.getLogger(GjenbrukOppgave.class);
 
     private final OppgaveService oppgaveService;
+    private final Unleash unleash;
 
-    public GjenbrukOppgave(OppgaveService oppgaveService) {
+    public GjenbrukOppgave(OppgaveService oppgaveService, Unleash unleash) {
         this.oppgaveService = oppgaveService;
+        this.unleash = unleash;
     }
 
     @Override
@@ -39,7 +42,10 @@ public class GjenbrukOppgave implements StegBehandler {
 
         final Oppgave gjenbruktOppgave = oppgaveService.hentOppgaveMedOppgaveID(oppgaveID);
 
-        final Oppgave nyOppgave = OppgaveFactory.lagBehandlingsOppgaveForType(behandling.getTema(), behandling.getType())
+        final Oppgave nyOppgave = (
+            unleash.isEnabled("melosys.oppgave.oppretting")
+                ? OppgaveFactory.lagBehandlingsoppgave(fagsak, behandling)
+                : OppgaveFactory.lagBehandlingsOppgaveForType(behandling.getTema(), behandling.getType()))
             .setSaksnummer(fagsak.getSaksnummer())
             .setTilordnetRessurs(prosessinstans.hentSaksbehandlerHvisTilordnes())
             .setAktørId(fagsak.hentBrukersAktørID())

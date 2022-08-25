@@ -2,6 +2,7 @@ package no.nav.melosys.service.eessi.ruting;
 
 import java.util.Optional;
 
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.eessi.SedType;
@@ -30,14 +31,17 @@ public class DefaultSedRuter implements SedRuter {
     private final FagsakService fagsakService;
     private final BehandlingService behandlingService;
     private final OppgaveService oppgaveService;
+    private final Unleash unleash;
 
     public DefaultSedRuter(ProsessinstansService prosessinstansService, FagsakService fagsakService,
                            BehandlingService behandlingService,
-                           OppgaveService oppgaveService) {
+                           OppgaveService oppgaveService,
+                           Unleash unleash) {
         this.prosessinstansService = prosessinstansService;
         this.fagsakService = fagsakService;
         this.behandlingService = behandlingService;
         this.oppgaveService = oppgaveService;
+        this.unleash = unleash;
     }
 
     @Override
@@ -100,7 +104,10 @@ public class DefaultSedRuter implements SedRuter {
     }
 
     private String opprettBehandlingsoppgave(Behandling behandling, String aktørID) {
-        var oppgave = OppgaveFactory.lagBehandlingsOppgaveForType(behandling.getTema(), behandling.getType())
+        var oppgave = (
+            unleash.isEnabled("melosys.oppgave.oppretting")
+                ? OppgaveFactory.lagBehandlingsoppgave(behandling)
+                : OppgaveFactory.lagBehandlingsOppgaveForType(behandling.getTema(), behandling.getType()))
             .setAktørId(aktørID)
             .setSaksnummer(behandling.getFagsak().getSaksnummer())
             .build();

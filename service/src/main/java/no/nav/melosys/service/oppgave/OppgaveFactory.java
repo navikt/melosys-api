@@ -2,6 +2,8 @@ package no.nav.melosys.service.oppgave;
 
 import java.time.LocalDate;
 
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Fagsystem;
 import no.nav.melosys.domain.Tema;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
@@ -28,6 +30,10 @@ public final class OppgaveFactory {
             .setFristFerdigstillelse(LocalDate.now().plusDays(FRIST_FERDIGSTILLELSE_JFR_OPPG));
     }
 
+    /**
+     * @deprecated Fjernes med toggle melosys.oppgave.oppretting
+     */
+    @Deprecated
     public static Oppgave.Builder lagBehandlingsOppgaveForType(Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
         final OppgaveParametere parametere = hentOppgaveParametere(behandlingstema);
 
@@ -58,6 +64,18 @@ public final class OppgaveFactory {
             .setFristFerdigstillelse(utledFristFerdigstillelse(behandlingstype, behandlingstema));
     }
 
+    public static Oppgave.Builder lagBehandlingsoppgave(Fagsak fagsak, Behandling behandling) {
+        return lagBehandlingsoppgave(fagsak.getTema(), fagsak.getType(), behandling.getTema(), behandling.getType());
+    }
+
+    public static Oppgave.Builder lagBehandlingsoppgave(Behandling behandling) {
+        return lagBehandlingsoppgave(behandling.getFagsak(), behandling);
+    }
+
+    /**
+     * @deprecated Fjernes med toggle melosys.oppgave.oppretting
+     */
+    @Deprecated
     static OppgaveParametere hentOppgaveParametere(Behandlingstema behandlingstema) {
 
         OppgaveParametere oppgaveParametere;
@@ -115,7 +133,7 @@ public final class OppgaveFactory {
         return oppgaveParametere;
     }
 
-    private static String utledBehandlingstema(Behandlingstema behandlingstema, Sakstyper sakstype) {
+    public static String utledBehandlingstema(Behandlingstema behandlingstema, Sakstyper sakstype) {
         return switch (behandlingstema) {
             case PENSJONIST -> "ab0355";
             case YRKESAKTIV -> "ab0462";
@@ -196,6 +214,10 @@ public final class OppgaveFactory {
         return LocalDate.now().plusDays(dager);
     }
 
+    /**
+     * @deprecated Fjernes med toggle melosys.oppgave.oppretting
+     */
+    @Deprecated
     static class OppgaveParametere {
         final String behandlingstema;
         final String behandlingstype;

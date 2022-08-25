@@ -462,6 +462,8 @@ public class BehandlingService {
             case BESLUTNING_LOVVALG_NORGE, BESLUTNING_LOVVALG_ANNET_LAND -> LocalDate.now().plusWeeks(4);
             case ANMODNING_OM_UNNTAK_HOVEDREGEL, ØVRIGE_SED_UFM, ØVRIGE_SED_MED, FORESPØRSEL_TRYGDEMYNDIGHET, TRYGDETID ->
                 LocalDate.now().plusWeeks(8);
+            default ->
+                throw new IllegalArgumentException("Melosys støtter ikke mapping for behandlingstema  " + behandlingstema);
         };
     }
 }

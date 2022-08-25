@@ -4,11 +4,14 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Optional;
 
+import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.BehandlingEndretAvSaksbehandlerEvent;
 import no.nav.melosys.domain.BehandlingsfristEndretEvent;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.dokument.DokumentBestiltEvent;
+import no.nav.melosys.domain.kodeverk.Sakstemaer;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -36,6 +39,8 @@ class BehandlingEventListenerTest {
     @Mock
     private OppgaveService oppgaveService;
 
+    private static FakeUnleash unleash = new FakeUnleash();
+
     @Captor
     private ArgumentCaptor<OppgaveOppdatering> oppgaveOppdateringCaptor;
 
@@ -50,7 +55,7 @@ class BehandlingEventListenerTest {
     @BeforeEach
     public void setup() {
         behandling.setId(BEHANDLING_ID);
-        behandlingEventListener = new BehandlingEventListener(behandlingService, oppgaveService);
+        behandlingEventListener = new BehandlingEventListener(behandlingService, oppgaveService, unleash);
     }
 
     @Test
@@ -113,8 +118,12 @@ class BehandlingEventListenerTest {
 
     @Test
     void behandlingEndret_oppdatererOppgave_medRiktigData() {
+        unleash.enableAll();
+
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer(FAGSAKSNUMMER);
+        fagsak.setType(Sakstyper.EU_EOS);
+        fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
         behandling.setType(Behandlingstyper.NY_VURDERING);
         behandling.setTema(Behandlingstema.IKKE_YRKESAKTIV);
         behandling.setBehandlingsfrist(LocalDate.of(2022, 3, 7));
@@ -129,7 +138,7 @@ class BehandlingEventListenerTest {
 
         behandlingEventListener.behandlingEndret(behandlingEndretAvSaksbehandlerEvent);
 
-        Oppgave behandlingsOppgaveForType = OppgaveFactory.lagBehandlingsOppgaveForType(behandling.getTema(), behandling.getType()).build();
+        Oppgave behandlingsOppgaveForType = OppgaveFactory.lagBehandlingsoppgave(fagsak, behandling).build();
         verify(oppgaveService).oppdaterOppgave(eq(OPPGAVE_ID), oppgaveOppdateringCaptor.capture());
         OppgaveOppdatering capturedOppgaveOppdatering = oppgaveOppdateringCaptor.getValue();
         assertThat(capturedOppgaveOppdatering.getBehandlingstema()).isEqualTo(behandlingsOppgaveForType.getBehandlingstema());

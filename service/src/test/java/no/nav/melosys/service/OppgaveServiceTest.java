@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
 
+import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
@@ -62,6 +63,8 @@ class OppgaveServiceTest {
     @Mock
     private BehandlingsgrunnlagService behandlingsgrunnlagService;
 
+    private FakeUnleash unleash = new FakeUnleash();
+
     private OppgaveService oppgaveService;
 
     @Captor
@@ -82,8 +85,10 @@ class OppgaveServiceTest {
             saksopplysningerService,
             behandlingsgrunnlagService,
             persondataFasade,
-            eregFasade);
+            eregFasade,
+            unleash);
 
+        unleash.enableAll();
         oppgave = new Oppgave.Builder()
             .setOppgavetype(Oppgavetyper.BEH_SAK_MK)
             .setTilordnetRessurs("Z998877")
@@ -245,8 +250,7 @@ class OppgaveServiceTest {
     }
 
     @Test
-    void opprettEllerGjenbrukBehandlingsoppgave_oppgaveOpprettElektroniskSøknad_oppgaveBlirOpprettetMedBeskrvielse() {
-        final String mottattString = "Mottatt elektronisk søknad";
+    void opprettEllerGjenbrukBehandlingsoppgave_oppgaveOpprettElektroniskSøknad_oppgaveBlirOpprettetMedBeskrivelse() {
         Behandling behandling = lagBehandling();
         behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
         behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(new BehandlingsgrunnlagData());
@@ -256,12 +260,11 @@ class OppgaveServiceTest {
         oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", "Z99999");
 
         verify(oppgaveFasade).opprettOppgave(oppgaveCaptor.capture());
-        assertThat(oppgaveCaptor.getValue().getBeskrivelse()).isEqualTo(mottattString);
+        assertThat(oppgaveCaptor.getValue().getBeskrivelse()).isEqualTo(behandling.getTema().getBeskrivelse());
     }
 
     @Test
-    void opprettEllerGjenbrukBehandlingsoppgave_oppgaveNyVurdering_oppgaveBlirOpprettetMedBeskrvielse() {
-        final String mottattString = "Ny vurdering";
+    void opprettEllerGjenbrukBehandlingsoppgave_oppgaveNyVurdering_oppgaveBlirOpprettetMedBeskrivelse() {
         Behandling behandling = lagBehandling();
         behandling.setType(Behandlingstyper.NY_VURDERING);
         when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
@@ -269,7 +272,7 @@ class OppgaveServiceTest {
         oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", "Z99999");
 
         verify(oppgaveFasade).opprettOppgave(oppgaveCaptor.capture());
-        assertThat(oppgaveCaptor.getValue().getBeskrivelse()).isEqualTo(mottattString);
+        assertThat(oppgaveCaptor.getValue().getBeskrivelse()).isEqualTo(behandling.getTema().getBeskrivelse());
     }
 
     @Test

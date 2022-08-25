@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.BehandlingEndretAvSaksbehandlerEvent;
 import no.nav.melosys.domain.BehandlingsfristEndretEvent;
 import no.nav.melosys.domain.brev.DokumentasjonSvarfrist;
@@ -31,10 +32,12 @@ public class BehandlingEventListener {
 
     private final BehandlingService behandlingService;
     private final OppgaveService oppgaveService;
+    private final Unleash unleash;
 
-    public BehandlingEventListener(BehandlingService behandlingService, OppgaveService oppgaveService) {
+    public BehandlingEventListener(BehandlingService behandlingService, OppgaveService oppgaveService, Unleash unleash) {
         this.behandlingService = behandlingService;
         this.oppgaveService = oppgaveService;
+        this.unleash = unleash;
     }
 
     @EventListener
@@ -76,7 +79,11 @@ public class BehandlingEventListener {
                     final Behandlingstyper type = behandlingEndretAvSaksbehandlerEvent.getBehandlingstype();
                     final Behandlingstema tema = behandlingEndretAvSaksbehandlerEvent.getBehandlingstema();
 
-                    final Oppgave behandlingsOppgaveForType = OppgaveFactory.lagBehandlingsOppgaveForType(tema, type).build();
+                    final Oppgave behandlingsOppgaveForType = (
+                        unleash.isEnabled("melosys.oppgave.oppretting")
+                            ? OppgaveFactory.lagBehandlingsoppgave(behandling.getFagsak().getTema(), behandling.getFagsak().getType(), tema, type)
+                            : OppgaveFactory.lagBehandlingsOppgaveForType(tema, type))
+                        .build();
 
                     final LocalDate frist = behandlingEndretAvSaksbehandlerEvent.getBehandlingsfrist();
 
@@ -87,7 +94,7 @@ public class BehandlingEventListener {
                         value.getOppgaveId(),
                         OppgaveOppdatering.builder()
                             .behandlingstema(behandlingsOppgaveForType.getBehandlingstema())
-                            .behandlingstype(behandlingsOppgaveForType.getBehandlingstype())
+                            .behandlingstype(unleash.isEnabled("melosys.oppgave.oppretting") ? null : behandlingsOppgaveForType.getBehandlingstype())
                             .tema(behandlingsOppgaveForType.getTema())
                             .fristFerdigstillelse(frist)
                             .build());

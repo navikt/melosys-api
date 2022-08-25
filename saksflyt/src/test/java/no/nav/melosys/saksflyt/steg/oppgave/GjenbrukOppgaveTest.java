@@ -1,5 +1,6 @@
 package no.nav.melosys.saksflyt.steg.oppgave;
 
+import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
@@ -33,11 +34,14 @@ class GjenbrukOppgaveTest {
     @Captor
     private ArgumentCaptor<Oppgave> oppgaveCaptor;
 
+    private FakeUnleash unleash = new FakeUnleash();
+
     private GjenbrukOppgave gjenbrukOppgave;
 
     @BeforeEach
     public void setUp() {
-        gjenbrukOppgave = new GjenbrukOppgave(oppgaveService);
+        gjenbrukOppgave = new GjenbrukOppgave(oppgaveService, unleash);
+        unleash.enableAll();
     }
 
     @Test

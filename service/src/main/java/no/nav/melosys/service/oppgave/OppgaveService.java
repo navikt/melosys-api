@@ -4,6 +4,7 @@ package no.nav.melosys.service.oppgave;
 import java.util.*;
 import javax.annotation.Nullable;
 
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
@@ -42,6 +43,8 @@ public class OppgaveService {
     private final BehandlingsgrunnlagService behandlingsgrunnlagService;
     private final PersondataFasade persondataFasade;
     private final EregFasade eregFasade;
+    private final Unleash unleash;
+
     private static final String UKJENT = "UKJENT";
 
     public OppgaveService(BehandlingService behandlingService,
@@ -50,7 +53,8 @@ public class OppgaveService {
                           SaksopplysningerService saksopplysningerService,
                           BehandlingsgrunnlagService behandlingsgrunnlagService,
                           PersondataFasade persondataFasade,
-                          EregFasade eregFasade) {
+                          EregFasade eregFasade,
+                          Unleash unleash) {
         this.behandlingService = behandlingService;
         this.fagsakService = fagsakService;
         this.oppgaveFasade = oppgaveFasade;
@@ -58,6 +62,7 @@ public class OppgaveService {
         this.behandlingsgrunnlagService = behandlingsgrunnlagService;
         this.persondataFasade = persondataFasade;
         this.eregFasade = eregFasade;
+        this.unleash = unleash;
     }
 
     public List<Oppgave> finnOppgaverMedPersonIdent(String personIdent) {
@@ -144,8 +149,10 @@ public class OppgaveService {
         Optional<Oppgave> eksisterendeOppgave = finnÅpenOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer());
 
         if (eksisterendeOppgave.isEmpty()) {
-            Oppgave oppgave = OppgaveFactory
-                .lagBehandlingsoppgave(behandling.getFagsak().getTema(), behandling.getFagsak().getType(), behandling.getTema(), behandling.getType())
+            Oppgave oppgave = (
+                unleash.isEnabled("melosys.oppgave.oppretting")
+                    ? OppgaveFactory.lagBehandlingsoppgave(behandling)
+                    : OppgaveFactory.lagBehandlingsOppgaveForType(behandling.getTema(), behandling.getType()))
                 .setTilordnetRessurs(tilordnetRessurs)
                 .setJournalpostId(journalpostID)
                 .setAktørId(aktørID)
