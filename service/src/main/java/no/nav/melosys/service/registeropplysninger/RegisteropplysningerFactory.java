@@ -14,8 +14,16 @@ public final class RegisteropplysningerFactory {
     public static RegisteropplysningerRequest.SaksopplysningTyper utledSaksopplysningTyper(
         Behandlingstema behandlingstema) {
         return switch (behandlingstema) {
-            case UTSENDT_ARBEIDSTAKER, UTSENDT_SELVSTENDIG, ARBEID_FLERE_LAND, IKKE_YRKESAKTIV, ARBEID_ETT_LAND_ØVRIG,
-                ARBEID_TJENESTEPERSON_ELLER_FLY, ARBEID_NORGE_BOSATT_ANNET_LAND, ARBEID_I_UTLANDET, ARBEID_KUN_NORGE, YRKESAKTIV ->
+            case UTSENDT_ARBEIDSTAKER,
+                UTSENDT_SELVSTENDIG,
+                ARBEID_FLERE_LAND,
+                IKKE_YRKESAKTIV,
+                ARBEID_ETT_LAND_ØVRIG,
+                ARBEID_TJENESTEPERSON_ELLER_FLY,
+                ARBEID_NORGE_BOSATT_ANNET_LAND,
+                ARBEID_I_UTLANDET,
+                ARBEID_KUN_NORGE,
+                YRKESAKTIV ->
                 hentSaksopplysningTyperForBehandlingAvSøknad();
             case REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING, REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE ->
                 hentSaksopplysningTyperForRegistreringAvUnntak();
