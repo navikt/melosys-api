@@ -11,6 +11,7 @@ import no.nav.melosys.domain.arkiv.Journalpost
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode
 import no.nav.melosys.domain.kodeverk.Avsendertyper
+import no.nav.melosys.domain.kodeverk.Landkoder
 import no.nav.melosys.domain.kodeverk.Saksstatuser
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
@@ -116,7 +117,7 @@ class JournalføringIT(
         behandling.behandlingsgrunnlag.behandlingsgrunnlagdata.shouldBeInstanceOf<Soeknad>()
             .shouldBeEqualToComparingFields(Soeknad().apply {
                 soeknadsland.apply {
-                    landkoder = listOf(søknadsLand)
+                    landkoder = listOf(Landkoder.IE.kode)
                     erUkjenteEllerAlleEosLand = false
                 }
                 periode = Periode(
@@ -131,7 +132,7 @@ class JournalføringIT(
         ThreadLocalAccessInfo.executeProcess("journalførOgOpprettSak") {
             hentJournalpost = journalføringService.hentJournalpost(jfrOppgave.journalpostId)
         }
-        return createJournalføringDto(jfrOppgave.journalpostId, hentJournalpost!!.hoveddokument)
+        return createJournalføringDto(jfrOppgave.journalpostId, jfrOppgave.id, hentJournalpost!!.hoveddokument)
     }
 
     @OptIn(ExperimentalStdlibApi::class)
@@ -150,18 +151,18 @@ class JournalføringIT(
     private fun lagJfrOppgave(): Oppgave =
         testDataGenerator.opprettJfrOppgave(tilordnetRessurs = "Z123456", forVirksomhet = false)
 
-    private fun createJournalføringDto(journalpostID: String?, dokument: ArkivDokument) =
+    private fun createJournalføringDto(journalpostID: String?, oppgaveId: Int?, dokument: ArkivDokument) =
         JournalfoeringOpprettDto().apply {
             this.journalpostID = journalpostID
             avsenderID = "30056928150"
             avsenderNavn = "KARAFFEL TRIVIELL"
             brukerID = "30056928150"
             virksomhetOrgnr = null
-            oppgaveID = "2"
+            oppgaveID = oppgaveId.toString()
             vedlegg = emptyList()
             mottattDato = LocalDate.now()
             arbeidsgiverID = null
-            behandlingstemaKode = "UTSENDT_ARBEIDSTAKER"
+            behandlingstemaKode = Behandlingstema.UTSENDT_ARBEIDSTAKER.kode
             representantID = null
             representantKontaktPerson = null
             representererKode = null
@@ -169,13 +170,13 @@ class JournalføringIT(
             avsenderType = Avsendertyper.PERSON
             isSkalTilordnes = true
             fagsak = FagsakDto().apply {
-                sakstype = "EU_EOS"
+                sakstype = Sakstyper.EU_EOS.kode
                 soknadsperiode = PeriodeDto(
                     periodeFOM,
                     periodeTOM,
                 )
                 land = SoeknadslandDto(
-                    listOf(søknadsLand), false
+                    listOf(Landkoder.IE.kode), false
                 )
             }
             hoveddokument = DokumentDto(dokument.dokumentId, dokument.tittel).apply {
@@ -186,6 +187,5 @@ class JournalføringIT(
     companion object {
         val periodeFOM = LocalDate.of(2001, 1, 1)
         val periodeTOM = LocalDate.of(2001, 1, 2)
-        const val søknadsLand = "IE"
-    }
+   }
 }
