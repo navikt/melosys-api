@@ -4,18 +4,24 @@ import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import io.kotest.matchers.equality.shouldBeEqualToComparingFields
+import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import no.nav.melosys.domain.arkiv.ArkivDokument
 import no.nav.melosys.domain.arkiv.Journalpost
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode
 import no.nav.melosys.domain.kodeverk.Avsendertyper
+import no.nav.melosys.domain.kodeverk.Saksstatuser
+import no.nav.melosys.domain.kodeverk.Sakstemaer
+import no.nav.melosys.domain.kodeverk.Sakstyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.saksflyt.ProsessStatus
 import no.nav.melosys.domain.saksflyt.ProsessType
 import no.nav.melosys.melosysmock.oppgave.Oppgave
 import no.nav.melosys.melosysmock.sak.SakRepo
 import no.nav.melosys.melosysmock.testdata.TestDataGenerator
-import no.nav.melosys.repository.BehandlingRepository
 import no.nav.melosys.repository.ProsessinstansRepository
 import no.nav.melosys.service.felles.dto.SoeknadslandDto
 import no.nav.melosys.service.journalforing.JournalfoeringService
@@ -94,19 +100,30 @@ class JournalføringIT(
             sjekkAtProssessHarStatusFerdig(it)
         }
         val prosessinstans = prosessinstansRepository.findById(prossesId).get()
-        val behandlingsgrunnlagdata = prosessinstans.behandling.behandlingsgrunnlag.behandlingsgrunnlagdata
+        val behandling = prosessinstans.behandling
 
-        behandlingsgrunnlagdata.shouldBeInstanceOf<Soeknad>()
+        behandling.apply {
+            status.shouldBe(Behandlingsstatus.OPPRETTET)
+            type.shouldBe(Behandlingstyper.SOEKNAD)
+            tema.shouldBe(Behandlingstema.UTSENDT_ARBEIDSTAKER)
+        }
+        behandling.fagsak.apply {
+            type.shouldBe(Sakstyper.EU_EOS)
+            status.shouldBe(Saksstatuser.OPPRETTET)
+            registrertAv.shouldBe("MELOSYS")
+            tema.shouldBe(Sakstemaer.MEDLEMSKAP_LOVVALG)
+        }
+        behandling.behandlingsgrunnlag.behandlingsgrunnlagdata.shouldBeInstanceOf<Soeknad>()
             .shouldBeEqualToComparingFields(Soeknad().apply {
-            soeknadsland.apply {
-                landkoder = listOf(søknadsLand)
-                erUkjenteEllerAlleEosLand = false
-            }
-            periode = Periode(
-                periodeFOM,
-                periodeFOM
-            )
-        })
+                soeknadsland.apply {
+                    landkoder = listOf(søknadsLand)
+                    erUkjenteEllerAlleEosLand = false
+                }
+                periode = Periode(
+                    periodeFOM,
+                    periodeFOM
+                )
+            })
     }
 
     private fun lagJournalfoeringOpprettDto(jfrOppgave: Oppgave): JournalfoeringOpprettDto {
