@@ -13,6 +13,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.PrioritetType;
+import no.nav.melosys.service.felles.Frist;
 
 public final class OppgaveFactory {
 
@@ -61,7 +62,7 @@ public final class OppgaveFactory {
             .setTema(utledTema(sakstema))
             .setOppgavetype(utledOppgavetype(sakstype, behandlingstema, behandlingstype))
             .setBeskrivelse(utledBeskrivelse(behandlingstema, sakstema, sakstype))
-            .setFristFerdigstillelse(utledFristFerdigstillelse(behandlingstype, behandlingstema));
+            .setFristFerdigstillelse(Frist.utledFristFerdigstillelse(behandlingstema));
     }
 
     public static Oppgave.Builder lagBehandlingsoppgave(Fagsak fagsak, Behandling behandling) {
@@ -187,22 +188,6 @@ public final class OppgaveFactory {
                 case FTRL -> "";
             };
             default -> behandlingstema.getBeskrivelse();
-        };
-    }
-
-    private static LocalDate utledFristFerdigstillelse(Behandlingstyper behandlingstype, Behandlingstema behandlingstema) {
-        if (behandlingstype == Behandlingstyper.ENDRET_PERIODE) {
-            return fristDager(1);
-        }
-
-        return switch (behandlingstema) {
-            case UTSENDT_ARBEIDSTAKER, UTSENDT_SELVSTENDIG, ARBEID_FLERE_LAND, ARBEID_ETT_LAND_ØVRIG, ARBEID_I_UTLANDET, YRKESAKTIV, IKKE_YRKESAKTIV ->
-                fristDager(30);
-            case REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING, REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE -> fristUker(2);
-            case BESLUTNING_LOVVALG_NORGE, BESLUTNING_LOVVALG_ANNET_LAND -> fristUker(4);
-            case ANMODNING_OM_UNNTAK_HOVEDREGEL, ØVRIGE_SED_UFM, ØVRIGE_SED_MED, TRYGDETID -> fristUker(8);
-            default ->
-                throw new IllegalArgumentException("Melosys støtter ikke mapping for behandlingstema  " + behandlingstema);
         };
     }
 
