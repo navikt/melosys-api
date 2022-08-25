@@ -394,6 +394,8 @@ class OppgaveServiceTest {
         Behandling behandling = new Behandling();
         final var fagsak = new Fagsak();
         fagsak.setSaksnummer(SAKSNUMMER);
+        fagsak.setType(Sakstyper.EU_EOS);
+        fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
         Aktoer bruker = new Aktoer();
         bruker.setRolle(BRUKER);
         bruker.setAktørId("aktørID");

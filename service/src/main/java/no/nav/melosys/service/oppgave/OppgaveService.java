@@ -144,7 +144,8 @@ public class OppgaveService {
         Optional<Oppgave> eksisterendeOppgave = finnÅpenOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer());
 
         if (eksisterendeOppgave.isEmpty()) {
-            Oppgave oppgave = OppgaveFactory.lagBehandlingsOppgaveForType(behandling.getTema(), behandling.getType())
+            Oppgave oppgave = OppgaveFactory
+                .lagBehandlingsoppgave(behandling.getFagsak().getTema(), behandling.getFagsak().getType(), behandling.getTema(), behandling.getType())
                 .setTilordnetRessurs(tilordnetRessurs)
                 .setJournalpostId(journalpostID)
                 .setBeskrivelse(beskrivelse)
