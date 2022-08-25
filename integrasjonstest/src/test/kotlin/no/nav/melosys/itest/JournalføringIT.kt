@@ -132,7 +132,7 @@ class JournalføringIT(
         ThreadLocalAccessInfo.executeProcess("journalførOgOpprettSak") {
             hentJournalpost = journalføringService.hentJournalpost(jfrOppgave.journalpostId)
         }
-        return createJournalføringDto(jfrOppgave.journalpostId, jfrOppgave.id, hentJournalpost!!.hoveddokument)
+        return lagJournalføringDto(jfrOppgave, hentJournalpost!!.hoveddokument)
     }
 
     @OptIn(ExperimentalStdlibApi::class)
@@ -151,14 +151,14 @@ class JournalføringIT(
     private fun lagJfrOppgave(): Oppgave =
         testDataGenerator.opprettJfrOppgave(tilordnetRessurs = "Z123456", forVirksomhet = false)
 
-    private fun createJournalføringDto(journalpostID: String?, oppgaveId: Int?, dokument: ArkivDokument) =
+    private fun lagJournalføringDto(oppgave: Oppgave, dokument: ArkivDokument) =
         JournalfoeringOpprettDto().apply {
-            this.journalpostID = journalpostID
+            this.journalpostID = oppgave.journalpostId
             avsenderID = "30056928150"
             avsenderNavn = "KARAFFEL TRIVIELL"
             brukerID = "30056928150"
             virksomhetOrgnr = null
-            oppgaveID = oppgaveId.toString()
+            oppgaveID = oppgave.id.toString()
             vedlegg = emptyList()
             mottattDato = LocalDate.now()
             arbeidsgiverID = null
@@ -187,5 +187,5 @@ class JournalføringIT(
     companion object {
         val periodeFOM = LocalDate.of(2001, 1, 1)
         val periodeTOM = LocalDate.of(2001, 1, 2)
-   }
+    }
 }
