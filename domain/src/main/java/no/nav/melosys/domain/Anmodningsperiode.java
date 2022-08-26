@@ -62,6 +62,7 @@ public class Anmodningsperiode implements PeriodeOmLovvalg {
     @OneToOne(cascade = CascadeType.ALL, mappedBy = "anmodningsperiode")
     private AnmodningsperiodeSvar anmodningsperiodeSvar;
 
+    @SuppressWarnings("unused") // Trengs av Hibernate
     public Anmodningsperiode() {
     }
 
