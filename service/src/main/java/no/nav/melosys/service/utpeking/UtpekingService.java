@@ -1,7 +1,10 @@
 package no.nav.melosys.service.utpeking;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 
 import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.*;
@@ -22,7 +25,7 @@ import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
-import no.nav.melosys.service.kontroll.feature.ferdigbehandling.FerdigbehandlingKontrollService;
+import no.nav.melosys.service.kontroll.feature.ferdigbehandling.FerdigbehandlingKontrollFacade;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import no.nav.melosys.service.vedtak.VedtaksfattingFasade;
@@ -49,14 +52,15 @@ public class UtpekingService {
     private final ProsessinstansService prosessinstansService;
     private final Unleash unleash;
     private final UtpekingsperiodeRepository utpekingsperiodeRepository;
-    private final FerdigbehandlingKontrollService ferdigbehandlingKontrollService;
+    private final FerdigbehandlingKontrollFacade ferdigbehandlingKontrollFacade;
     private final ApplicationEventMulticaster melosysEventMulticaster;
 
     public UtpekingService(BehandlingService behandlingService, BehandlingsresultatService behandlingsresultatService,
                            EessiService eessiService, LandvelgerService landvelgerService,
                            LovvalgsperiodeService lovvalgsperiodeService, OppgaveService oppgaveService,
                            ProsessinstansService prosessinstansService,
-                           Unleash unleash, UtpekingsperiodeRepository utpekingsperiodeRepository, FerdigbehandlingKontrollService ferdigbehandlingKontrollService,
+                           Unleash unleash, UtpekingsperiodeRepository utpekingsperiodeRepository,
+                           FerdigbehandlingKontrollFacade ferdigbehandlingKontrollFacade,
                            ApplicationEventMulticaster melosysEventMulticaster) {
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
@@ -67,7 +71,7 @@ public class UtpekingService {
         this.prosessinstansService = prosessinstansService;
         this.unleash = unleash;
         this.utpekingsperiodeRepository = utpekingsperiodeRepository;
-        this.ferdigbehandlingKontrollService = ferdigbehandlingKontrollService;
+        this.ferdigbehandlingKontrollFacade = ferdigbehandlingKontrollFacade;
         this.melosysEventMulticaster = melosysEventMulticaster;
     }
 
@@ -120,7 +124,7 @@ public class UtpekingService {
         validerUtpekingsperiode(utpekingsperiode);
 
         opprettLovvalgsperiode(behandlingID, utpekingsperiode);
-        ferdigbehandlingKontrollService.utførKontroller(behandlingID, fagsak.getType(), behandlingsresultat.getType());
+        ferdigbehandlingKontrollFacade.utførKontroller(behandlingID, fagsak.getType(), behandlingsresultat.getType());
         oppdaterBehandlingsresultat(behandlingsresultat);
         prosessinstansService.opprettProsessinstansUtpekAnnetLand(
             behandling, utpekingsperiode.getLovvalgsland(), mottakerinstitusjoner, ytterligereInformasjonSed, fritekstBrev

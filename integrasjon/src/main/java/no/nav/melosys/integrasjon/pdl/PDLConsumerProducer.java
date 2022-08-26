@@ -3,6 +3,7 @@ package no.nav.melosys.integrasjon.pdl;
 import java.util.Collections;
 
 import no.nav.melosys.integrasjon.felles.WebClientConfig;
+import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,10 +19,12 @@ public class PDLConsumerProducer implements WebClientConfig {
     @Bean
     public PDLConsumer pdlConsumerForSaksbehandler(WebClient.Builder webclientBuilder,
                                                    @Value("${PDL.url}") String pdlUrl,
-                                                   PDLAuthFilter pdlSaksbehandlerAuthFilter) {
+                                                   PDLAuthFilter pdlSaksbehandlerAuthFilter,
+                                                   CorrelationIdOutgoingFilter correlationIdOutgoingFilter) {
         return new PDLConsumerImpl(
             webclientBuilder(webclientBuilder, pdlUrl)
                 .filter(pdlSaksbehandlerAuthFilter)
+                .filter(correlationIdOutgoingFilter)
                 .filter(errorFilter("Kall mot PDL feilet."))
                 .build());
     }

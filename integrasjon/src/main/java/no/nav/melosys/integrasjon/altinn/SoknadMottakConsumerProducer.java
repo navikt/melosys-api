@@ -1,8 +1,10 @@
 package no.nav.melosys.integrasjon.altinn;
 
+import java.util.Arrays;
 import java.util.Collections;
 
 import no.nav.melosys.integrasjon.felles.SystemContextClientRequestInterceptor;
+import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingInterceptor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
@@ -21,11 +23,12 @@ public class SoknadMottakConsumerProducer {
     }
 
     @Bean
-    public SoknadMottakConsumer soknadMottakConsumer(SystemContextClientRequestInterceptor interceptor) {
+    public SoknadMottakConsumer soknadMottakConsumer(SystemContextClientRequestInterceptor interceptor,
+                                                     CorrelationIdOutgoingInterceptor correlationIdOutgoingInterceptor) {
         RestTemplate restTemplate = new RestTemplateBuilder().rootUri(url)
             .additionalMessageConverters(new Jaxb2RootElementHttpMessageConverter(), new MappingJackson2HttpMessageConverter())
             .build();
-        restTemplate.setInterceptors(Collections.singletonList(interceptor));
+        restTemplate.setInterceptors(Arrays.asList(interceptor, correlationIdOutgoingInterceptor));
         return new SoknadMottakConsumerImpl(restTemplate);
     }
 }

@@ -3,7 +3,7 @@ package no.nav.melosys.tjenester.gui.kontroll;
 import io.swagger.annotations.Api;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.ValideringException;
-import no.nav.melosys.service.kontroll.feature.ferdigbehandling.FerdigbehandlingKontrollService;
+import no.nav.melosys.service.kontroll.feature.ferdigbehandling.FerdigbehandlingKontrollFacade;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.tilgang.Aksesstype;
 import no.nav.melosys.tjenester.gui.dto.kontroller.FerdigbehandlingKontrollerDto;
@@ -23,11 +23,11 @@ import org.springframework.web.context.WebApplicationContext;
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class KontrollTjeneste {
 
-    private final FerdigbehandlingKontrollService ferdigbehandlingKontrollService;
+    private final FerdigbehandlingKontrollFacade ferdigbehandlingKontrollFacade;
     private final Aksesskontroll aksesskontroll;
 
-    public KontrollTjeneste(FerdigbehandlingKontrollService ferdigbehandlingKontrollService, Aksesskontroll aksesskontroll) {
-        this.ferdigbehandlingKontrollService = ferdigbehandlingKontrollService;
+    public KontrollTjeneste(FerdigbehandlingKontrollFacade ferdigbehandlingKontrollFacade, Aksesskontroll aksesskontroll) {
+        this.ferdigbehandlingKontrollFacade = ferdigbehandlingKontrollFacade;
         this.aksesskontroll = aksesskontroll;
     }
 
@@ -38,7 +38,7 @@ public class KontrollTjeneste {
             throw new FunksjonellException("Vedtakstype mangler.");
         }
         aksesskontroll.autoriser(ferdigbehandlingKontrollerDto.behandlingID(), ferdigbehandlingKontrollerDto.skalRegisteropplysningerOppdateres() ? Aksesstype.SKRIV : Aksesstype.LES);
-        ferdigbehandlingKontrollService.kontroller(ferdigbehandlingKontrollerDto.behandlingID(), ferdigbehandlingKontrollerDto.skalRegisteropplysningerOppdateres(), ferdigbehandlingKontrollerDto.behandlingsresultattype());
+        ferdigbehandlingKontrollFacade.kontroller(ferdigbehandlingKontrollerDto.behandlingID(), ferdigbehandlingKontrollerDto.skalRegisteropplysningerOppdateres(), ferdigbehandlingKontrollerDto.behandlingsresultattype());
         return ResponseEntity.noContent().build();
     }
 }

@@ -11,6 +11,8 @@ import no.nav.melosys.integrasjon.felles.JacksonObjectMapperProvider;
 import no.nav.melosys.integrasjon.felles.RestConsumer;
 import no.nav.melosys.integrasjon.kodeverk.impl.dto.KodeDto;
 
+import static no.nav.melosys.integrasjon.felles.mdc.MDCOperations.X_CORRELATION_ID;
+import static no.nav.melosys.integrasjon.felles.mdc.MDCOperations.getCorrelationId;
 import static no.nav.melosys.integrasjon.kodeverk.impl.KodeverkRegisterImpl.BOKMÅL;
 
 
@@ -37,6 +39,7 @@ public class KodeverkConsumerImpl implements RestConsumer {
             .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON)
             .header("Nav-Call-Id", getCallID())
             .header("Nav-Consumer-Id", CONSUMER_ID)
+            .header(X_CORRELATION_ID, getCorrelationId())
             .get(KodeDto.class);
     }
 }

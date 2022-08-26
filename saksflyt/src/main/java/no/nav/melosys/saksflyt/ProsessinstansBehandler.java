@@ -27,6 +27,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import static no.nav.melosys.domain.saksflyt.ProsessStatus.UNDER_BEHANDLING;
+import static no.nav.melosys.integrasjon.felles.mdc.MDCOperations.*;
+import static no.nav.melosys.integrasjon.felles.mdc.MDCOperations.CORRELATION_ID;
 
 @Component
 public class ProsessinstansBehandler {
@@ -94,6 +96,7 @@ public class ProsessinstansBehandler {
 
         try {
             MDC.put("pid", prosessinstans.getId().toString());
+            putToMDC(CORRELATION_ID, prosessinstans.getData(ProsessDataKey.CORRELATION_ID_SAKSFLYT));
             SaksflytSubjektHolder.set(prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER));
             while ((nesteSteg = prosessFlyt.nesteSteg(prosessinstans.getSistFullførtSteg())) != null) {
                 prosessinstans = utførSteg(hentStegBehandler(nesteSteg), prosessinstans);
@@ -104,6 +107,7 @@ public class ProsessinstansBehandler {
             behandleFeil(prosessinstans, nesteSteg, e);
         } finally {
             MDC.remove("pid");
+            MDC.remove(CORRELATION_ID);
             SaksflytSubjektHolder.reset();
         }
     }

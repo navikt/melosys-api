@@ -2,6 +2,7 @@ package no.nav.melosys.integrasjon.oppgave.konsument;
 
 import no.nav.melosys.integrasjon.felles.GenericContextExchangeFilter;
 import no.nav.melosys.integrasjon.felles.WebClientConfig;
+import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,11 +21,14 @@ public class OppgaveConsumerProducer implements WebClientConfig {
 
     @Bean
     @Primary
-    public OppgaveConsumer oppgaveConsumer(WebClient.Builder webClientBuilder, GenericContextExchangeFilter genericContextExchangeFilter) {
+    public OppgaveConsumer oppgaveConsumer(WebClient.Builder webClientBuilder,
+                                           GenericContextExchangeFilter genericContextExchangeFilter,
+                                           CorrelationIdOutgoingFilter correlationIdOutgoingFilter) {
         return new OppgaveConsumerImpl(
             webClientBuilder
                 .defaultHeaders(this::defaultHeaders)
                 .filter(genericContextExchangeFilter)
+                .filter(correlationIdOutgoingFilter)
                 .filter(errorFilter("Kall mot Oppgave feilet."))
                 .baseUrl(url)
                 .build()

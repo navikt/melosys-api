@@ -73,15 +73,15 @@ public class AngiBehandlingsresultatService {
         }
         if (behandlingsresultattype == FASTSATT_LOVVALGSLAND &&
             Set.of(EU_EOS, TRYGDEAVTALE).contains(sakstype) &&
-            Set.of(YRKESAKTIV, IKKE_YRKESAKTIV, PENSJONIST).contains(behandlingstema) &&
+            Set.of(ARBEID_KUN_NORGE, YRKESAKTIV, IKKE_YRKESAKTIV, PENSJONIST).contains(behandlingstema) &&
             Set.of(FØRSTEGANG, NY_VURDERING).contains(behandlingstype)
         ) {
             return;
         }
-        if (behandlingsresultattype == AVSLAG_SØKNAD &&
-            Set.of(ARBEID_ETT_LAND_ØVRIG, YRKESAKTIV, IKKE_YRKESAKTIV, PENSJONIST, UNNTAK_MEDLEMSKAP).contains(behandlingstema) &&
-            Set.of(FØRSTEGANG, NY_VURDERING).contains(behandlingstype)
-        ) {
+        if (behandlingsresultattype == AVSLAG_SØKNAD && Set.of(ARBEID_ETT_LAND_ØVRIG, ARBEID_TJENESTEPERSON_ELLER_FLY,
+                                                               ARBEID_KUN_NORGE, YRKESAKTIV, IKKE_YRKESAKTIV,
+                                                               PENSJONIST, UNNTAK_MEDLEMSKAP).contains(
+            behandlingstema) && Set.of(FØRSTEGANG, NY_VURDERING).contains(behandlingstype)) {
             return;
         }
 

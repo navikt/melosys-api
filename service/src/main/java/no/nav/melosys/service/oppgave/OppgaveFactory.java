@@ -17,6 +17,7 @@ import no.nav.melosys.domain.oppgave.PrioritetType;
 public final class OppgaveFactory {
 
     private static final long FRIST_FERDIGSTILLELSE_JFR_OPPG = 7;
+    private static final String EU_EOS = "ab0424";
 
     private OppgaveFactory() {
     }
@@ -77,60 +78,37 @@ public final class OppgaveFactory {
      */
     @Deprecated
     static OppgaveParametere hentOppgaveParametere(Behandlingstema behandlingstema) {
-
-        OppgaveParametere oppgaveParametere;
-
-        switch (behandlingstema) {
-            case UTSENDT_ARBEIDSTAKER:
-            case UTSENDT_SELVSTENDIG:
-                oppgaveParametere = new OppgaveParametere("ab0424", "ae0034", Tema.MED, Oppgavetyper.BEH_SAK_MK, fristDager(30));
-                break;
-            case ARBEID_FLERE_LAND:
-                oppgaveParametere = new OppgaveParametere("ab0424", "ae0242", Tema.MED, Oppgavetyper.BEH_SAK_MK, fristDager(30));
-                break;
-            //case ARBEID_NORGE_BOSATT_ANNET_LAND: FIXME: behandlingstema ikke i bruk i Melosys
-            //    oppgaveParametere = new OppgaveParametere(behandlingstema, behandlingstype, Tema.MED, Oppgavetyper.BEH_SAK_MK, fristDager(30));
-            //    break;
-            case ARBEID_ETT_LAND_ØVRIG:
-                oppgaveParametere = new OppgaveParametere("ab0424", "ae0243", Tema.MED, Oppgavetyper.BEH_SAK_MK, fristDager(30));
-                break;
-            case IKKE_YRKESAKTIV:
-                oppgaveParametere = new OppgaveParametere("ab0424", "ae0238", Tema.MED, Oppgavetyper.BEH_SAK_MK, fristDager(30));
-                break;
-            case REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING:
-                oppgaveParametere = new OppgaveParametere("ab0424", "ae0111", Tema.UFM, Oppgavetyper.BEH_SED, fristUker(2));
-                break;
-            case REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE:
-                oppgaveParametere = new OppgaveParametere("ab0424", "ae0235", Tema.UFM, Oppgavetyper.BEH_SED, fristUker(2));
-                break;
-            case BESLUTNING_LOVVALG_NORGE:
-                oppgaveParametere = new OppgaveParametere("ab0424", "ae0112", Tema.MED, Oppgavetyper.BEH_SED, fristUker(4));
-                break;
-            case BESLUTNING_LOVVALG_ANNET_LAND:
-                oppgaveParametere = new OppgaveParametere("ab0424", "ae0113", Tema.UFM, Oppgavetyper.BEH_SED, fristUker(4));
-                break;
-            case ANMODNING_OM_UNNTAK_HOVEDREGEL:
-                oppgaveParametere = new OppgaveParametere("ab0424", "ae0110", Tema.UFM, Oppgavetyper.BEH_SED, fristUker(8));
-                break;
-            case ØVRIGE_SED_UFM:
-                oppgaveParametere = new OppgaveParametere("ab0424", "ae0254", Tema.UFM, Oppgavetyper.BEH_SED, fristUker(8));
-                break;
-            case ØVRIGE_SED_MED:
-                oppgaveParametere = new OppgaveParametere("ab0424", "ae0254", Tema.MED, Oppgavetyper.BEH_SED, fristUker(8));
-                break;
-            case TRYGDETID:
-                oppgaveParametere = new OppgaveParametere("ab0424", "ae0236", Tema.MED, Oppgavetyper.BEH_SED, fristUker(8));
-                break;
-            case ARBEID_I_UTLANDET:
-                oppgaveParametere = new OppgaveParametere("ab0388", null, Tema.MED, Oppgavetyper.BEH_SAK_MK, fristDager(30));
-                break;
-            case YRKESAKTIV:
-                oppgaveParametere = new OppgaveParametere("ab0387", null, Tema.MED, Oppgavetyper.BEH_SAK_MK, fristDager(30));
-                break;
-            default:
-                throw new IllegalArgumentException("Melosys støtter ikke mapping for behandlingstema  " + behandlingstema);
-        }
-        return oppgaveParametere;
+        return switch (behandlingstema) {
+            case UTSENDT_ARBEIDSTAKER, UTSENDT_SELVSTENDIG ->
+                new OppgaveParametere(EU_EOS, "ae0034", Tema.MED, Oppgavetyper.BEH_SAK_MK, fristDager(30));
+            case ARBEID_FLERE_LAND ->
+                new OppgaveParametere(EU_EOS, "ae0242", Tema.MED, Oppgavetyper.BEH_SAK_MK, fristDager(30));
+            case ARBEID_ETT_LAND_ØVRIG, ARBEID_TJENESTEPERSON_ELLER_FLY ->
+                new OppgaveParametere(EU_EOS, "ae0243", Tema.MED, Oppgavetyper.BEH_SAK_MK, fristDager(30));
+            case IKKE_YRKESAKTIV ->
+                new OppgaveParametere(EU_EOS, "ae0238", Tema.MED, Oppgavetyper.BEH_SAK_MK, fristDager(30));
+            case REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING ->
+                new OppgaveParametere(EU_EOS, "ae0111", Tema.UFM, Oppgavetyper.BEH_SED, fristUker(2));
+            case REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE ->
+                new OppgaveParametere(EU_EOS, "ae0235", Tema.UFM, Oppgavetyper.BEH_SED, fristUker(2));
+            case BESLUTNING_LOVVALG_NORGE ->
+                new OppgaveParametere(EU_EOS, "ae0112", Tema.MED, Oppgavetyper.BEH_SED, fristUker(4));
+            case BESLUTNING_LOVVALG_ANNET_LAND ->
+                new OppgaveParametere(EU_EOS, "ae0113", Tema.UFM, Oppgavetyper.BEH_SED, fristUker(4));
+            case ANMODNING_OM_UNNTAK_HOVEDREGEL ->
+                new OppgaveParametere(EU_EOS, "ae0110", Tema.UFM, Oppgavetyper.BEH_SED, fristUker(8));
+            case ØVRIGE_SED_UFM ->
+                new OppgaveParametere(EU_EOS, "ae0254", Tema.UFM, Oppgavetyper.BEH_SED, fristUker(8));
+            case ØVRIGE_SED_MED ->
+                new OppgaveParametere(EU_EOS, "ae0254", Tema.MED, Oppgavetyper.BEH_SED, fristUker(8));
+            case TRYGDETID -> new OppgaveParametere(EU_EOS, "ae0236", Tema.MED, Oppgavetyper.BEH_SED, fristUker(8));
+            case ARBEID_I_UTLANDET ->
+                new OppgaveParametere("ab0388", null, Tema.MED, Oppgavetyper.BEH_SAK_MK, fristDager(30));
+            case ARBEID_KUN_NORGE, YRKESAKTIV ->
+                new OppgaveParametere("ab0387", null, Tema.MED, Oppgavetyper.BEH_SAK_MK, fristDager(30));
+            default -> throw new IllegalArgumentException(
+                "Melosys støtter ikke mapping for behandlingstema  " + behandlingstema);
+        };
     }
 
     public static String utledBehandlingstema(Behandlingstema behandlingstema, Sakstyper sakstype) {

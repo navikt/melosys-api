@@ -34,7 +34,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class UfmKontrollServiceTest {
+class UfmKontrollTest {
 
     @Mock
     private KontrollresultatRepository kontrollresultatRepository;

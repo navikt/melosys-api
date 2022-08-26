@@ -3,6 +3,10 @@ package no.nav.melosys.integrasjon.medl
 import no.nav.melosys.integrasjon.felles.GenericContextExchangeFilter
 import no.nav.melosys.integrasjon.felles.RestConsumer
 import no.nav.melosys.integrasjon.felles.WebClientConfig
+import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter
+import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingInterceptor
+import no.nav.melosys.integrasjon.felles.mdc.MDCOperations.Companion.X_CORRELATION_ID
+import no.nav.melosys.integrasjon.felles.mdc.MDCOperations.Companion.getCorrelationId
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -17,12 +21,14 @@ class MedlemskapRestConsumerProducer(@Value("\${medlemskap.rest.url}") private v
     @Bean
     fun medlemskapRestConsumer(
         webClientBuilder: WebClient.Builder,
-        genericContextExchangeFilter: GenericContextExchangeFilter
+        genericContextExchangeFilter: GenericContextExchangeFilter,
+        correlationIdOutgoingFilter: CorrelationIdOutgoingFilter
     ) = MedlemskapRestConsumer(
         webClientBuilder
             .baseUrl(url)
             .filter(genericContextExchangeFilter)
             .filter(headerFilter())
+            .filter(correlationIdOutgoingFilter)
             .filter(errorFilter("Kall mot Medl feilet."))
             .build()
     )

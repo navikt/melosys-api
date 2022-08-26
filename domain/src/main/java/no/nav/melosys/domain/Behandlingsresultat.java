@@ -297,7 +297,7 @@ public class Behandlingsresultat extends RegistreringsInfo {
 
     public boolean harLovvalgsperiodeMedBestemmelse(LovvalgBestemmelse lovvalgBestemmelse) {
         return finnValidertLovvalgsperiode()
-            .filter(l -> l.getBestemmelse() == lovvalgBestemmelse)
+            .filter(lovvalgsperiode -> lovvalgsperiode.getBestemmelse() == lovvalgBestemmelse)
             .isPresent();
     }
 
