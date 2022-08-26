@@ -13,7 +13,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.PrioritetType;
-import no.nav.melosys.service.felles.Frist;
 
 public final class OppgaveFactory {
 
@@ -62,7 +61,7 @@ public final class OppgaveFactory {
             .setTema(utledTema(sakstema))
             .setOppgavetype(utledOppgavetype(sakstype, behandlingstema, behandlingstype))
             .setBeskrivelse(utledBeskrivelse(behandlingstema, sakstema, sakstype))
-            .setFristFerdigstillelse(Frist.utledFristFerdigstillelse(behandlingstema));
+            .setFristFerdigstillelse(Behandling.utledFristForBehandlingstema(behandlingstema));
     }
 
     public static Oppgave.Builder lagBehandlingsoppgave(Fagsak fagsak, Behandling behandling) {
