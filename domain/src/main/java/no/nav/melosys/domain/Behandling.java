@@ -242,13 +242,16 @@ public class Behandling extends RegistreringsInfo {
     }
 
     public boolean kanIkkeEndres() {
+        if (fagsak == null) {
+            return erInaktiv() || UTVIDET_BEHANDLINGSTEMA_SOM_IKKE_KAN_ENDRES.contains(tema);
+        }
         boolean erEOS = fagsak.getType() == EU_EOS;
         Set<Behandlingstema> BEHANDLINGSTEMA_SOM_IKKE_KAN_ENDRES_SET = STANDARD_BEHANDLINGSTEMA_SOM_IKKE_KAN_ENDRES;
 
         if (erEOS) {
             BEHANDLINGSTEMA_SOM_IKKE_KAN_ENDRES_SET = UTVIDET_BEHANDLINGSTEMA_SOM_IKKE_KAN_ENDRES;
         }
-        
+
         return erInaktiv() || BEHANDLINGSTEMA_SOM_IKKE_KAN_ENDRES_SET.contains(tema);
     }
 
