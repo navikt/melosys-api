@@ -101,6 +101,9 @@ jobs:
           echo "KAFKA_POOL=nav-prod" >> $GITHUB_ENV
           echo "VAULT_CLUSTER=prod" >> $GITHUB_ENV
           echo "APP_NAME=melosys" >> $GITHUB_ENV
+          echo "APP_NAME_FRONTEND=melosys-web" >> $GITHUB_ENV
+          echo "TENANT_URL=nav.no" >> $GITHUB_ENV
+          echo "GROUP_MELOSYS_INNLOGGING=bytt-ut-med-prod-sin" >> $GITHUB_ENV
       - name: Deploy to q1
         if: github.event.inputs.environment == 'q1'
         run: |
@@ -110,6 +113,9 @@ jobs:
           echo "KAFKA_POOL=nav-dev" >> $GITHUB_ENV
           echo "VAULT_CLUSTER=dev" >> $GITHUB_ENV
           echo "APP_NAME=melosys-q1" >> $GITHUB_ENV
+          echo "TENANT_URL=trygdeetaten.no" >> $GITHUB_ENV
+          echo "APP_NAME_FRONTEND=melosys-web-q1" >> $GITHUB_ENV
+          echo "GROUP_MELOSYS_INNLOGGING=52981246-8032-40f0-863a-2bd2844f2d57" >> $GITHUB_ENV
       - name: Deploy to dev
         if: github.event.inputs.environment == 'dev'
         run: |
@@ -118,6 +124,9 @@ jobs:
           echo "KAFKA_POOL=nav-dev" >> $GITHUB_ENV
           echo "VAULT_CLUSTER=dev" >> $GITHUB_ENV
           echo "APP_NAME=melosys" >> $GITHUB_ENV
+          echo "TENANT_URL=trygdeetaten.no" >> $GITHUB_ENV
+          echo "APP_NAME_FRONTEND=melosys-web" >> $GITHUB_ENV
+          echo "GROUP_MELOSYS_INNLOGGING=52981246-8032-40f0-863a-2bd2844f2d57" >> $GITHUB_ENV
       - uses: nais/deploy/actions/deploy@v1
         if: ${{ env.CLUSTER != '' }}
         env:
