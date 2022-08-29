@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.AnmodningsperiodeSvar;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
@@ -52,7 +51,6 @@ public class AnmodningUnntakService {
     private final EessiService eessiService;
     private final AnmodningUnntakKontrollService anmodningUnntakKontrollService;
     private final JoarkFasade joarkFasade;
-    private final Unleash unleash;
 
     public AnmodningUnntakService(BehandlingService behandlingService,
                                   BehandlingsresultatService behandlingsresultatService, OppgaveService oppgaveService,
@@ -61,7 +59,7 @@ public class AnmodningUnntakService {
                                   LovvalgsperiodeService lovvalgsperiodeService,
                                   LandvelgerService landvelgerService,
                                   EessiService eessiService,
-                                  AnmodningUnntakKontrollService anmodningUnntakKontrollService, JoarkFasade joarkFasade, Unleash unleash) {
+                                  AnmodningUnntakKontrollService anmodningUnntakKontrollService, JoarkFasade joarkFasade) {
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.oppgaveService = oppgaveService;
@@ -72,7 +70,6 @@ public class AnmodningUnntakService {
         this.eessiService = eessiService;
         this.anmodningUnntakKontrollService = anmodningUnntakKontrollService;
         this.joarkFasade = joarkFasade;
-        this.unleash = unleash;
     }
 
     @Transactional
@@ -113,12 +110,10 @@ public class AnmodningUnntakService {
             anmodningsperiodeService.hentAnmodningsperiodeSvarForBehandling(behandlingID);
         validerSvar(anmodningsperiodeSvar);
 
-        if (unleash.isEnabled("melosys.eessi.handlingssjekk_sed")) {
-            String rinaSaksnummer = behandling.hentSedDokument().getRinaSaksnummer();
-            SedType sedType = anmodningsperiodeSvar.erInnvilgelse() ? SedType.A011 : SedType.A002;
-            if (!eessiService.kanOppretteSedTyperPåBuc(rinaSaksnummer, sedType)) {
-                throw new FunksjonellException("Kan ikke opprette SedType " + sedType + " på rinaSaknummer: " + rinaSaksnummer);
-            }
+        String rinaSaksnummer = behandling.hentSedDokument().getRinaSaksnummer();
+        SedType sedType = anmodningsperiodeSvar.erInnvilgelse() ? SedType.A011 : SedType.A002;
+        if (!eessiService.kanOppretteSedTyperPåBuc(rinaSaksnummer, sedType)) {
+            throw new FunksjonellException("Kan ikke opprette SedType " + sedType + " på rinaSaknummer: " + rinaSaksnummer);
         }
 
         Lovvalgsperiode lovvalgsperiode = Lovvalgsperiode.av(anmodningsperiodeSvar, Medlemskapstyper.PLIKTIG);
