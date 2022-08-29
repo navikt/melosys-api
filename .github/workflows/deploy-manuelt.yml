@@ -133,7 +133,7 @@ jobs:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: ${{ env.CLUSTER }}
           RESOURCE: nais.yml
-          VAR: IMAGE=${{ env.IMAGE }},URL=${{ env.URL }},KAFKA_POOL=${{ env.KAFKA_POOL }},VAULT_CLUSTER=${{ env.VAULT_CLUSTER }},APP_NAME=${{ env.APP_NAME }}
+          VAR: IMAGE=${{ env.IMAGE }},URL=${{ env.URL }},KAFKA_POOL=${{ env.KAFKA_POOL }},VAULT_CLUSTER=${{ env.VAULT_CLUSTER }},APP_NAME=${{ env.APP_NAME }},TENANT_URL=${{ env.TENANT_URL }},GROUP_MELOSYS_INNLOGGING=${{ env.GROUP_MELOSYS_INNLOGGING }},APP_NAME_FRONTEND=${{ env.APP_NAME_FRONTEND }}
       - name: Get commit message
         run: echo "COMMIT_MSG=$(git log --format=%s -n 1)" >> $GITHUB_ENV
       - name: Slack Notification
