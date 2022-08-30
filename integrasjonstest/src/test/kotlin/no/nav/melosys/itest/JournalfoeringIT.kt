@@ -93,14 +93,14 @@ class JournalfoeringIT(
             journalføringService.journalførOgOpprettSak(journalfoeringOpprettDto)
             oppgaveService.ferdigstillOppgave(journalfoeringOpprettDto.oppgaveID)
         }
-        val prosessId = finnprosessID(ProsessType.JFR_NY_SAK_BRUKER, now)
+        val journalføringProsessID = finnprosessID(ProsessType.JFR_NY_SAK_BRUKER, now)
         listOf(
-            prosessId,
+            journalføringProsessID,
             finnprosessID(ProsessType.OPPRETT_OG_DISTRIBUER_BREV, now)
         ).forEach {
             sjekkAtprosesssHarStatusFerdig(it)
         }
-        val prosessinstans = prosessinstansRepository.findById(prosessId).get()
+        val prosessinstans = prosessinstansRepository.findById(journalføringProsessID).get()
         val behandling = prosessinstans.behandling
 
         behandling.apply {
