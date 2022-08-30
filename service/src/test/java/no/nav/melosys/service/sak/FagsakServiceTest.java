@@ -254,6 +254,18 @@ class FagsakServiceTest {
     }
 
     @Test
+    void avsluttFagsakOgBehandling_manglerBehandling_avslutterFagsak() {
+        var fagsak = new Fagsak();
+        fagsak.setSaksnummer("MEL-89");
+
+        fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.AVSLUTTET);
+
+        assertThat(fagsak.getStatus()).isEqualTo(Saksstatuser.AVSLUTTET);
+        verify(fagsakRepo).save(fagsak);
+        verify(behandlingService, never()).avsluttBehandling(anyLong());
+    }
+
+    @Test
     void opprettNyVurderingBehandling_behandlingstypeEndretPeriode_kastException() {
         final String saksnummer = "MEL-1";
         Fagsak fagsak = lagFagsakMedBruker();
