@@ -1,0 +1,1 @@
+create index fk_saksopplysning_kilde_saksopplysning on saksopplysning_kilde(saksopplysning_id);
