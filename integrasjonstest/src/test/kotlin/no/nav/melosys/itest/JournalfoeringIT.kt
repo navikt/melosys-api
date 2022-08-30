@@ -129,7 +129,7 @@ class JournalfoeringIT(
 
     private fun lagJournalfoeringOpprettDto(jfrOppgave: Oppgave): JournalfoeringOpprettDto {
         var hentJournalpost: Journalpost? = null
-        ThreadLocalAccessInfo.executeProcess("journalførOgOpprettSak") {
+        ThreadLocalAccessInfo.executeProcess("hentJournalpost") {
             hentJournalpost = journalføringService.hentJournalpost(jfrOppgave.journalpostId)
         }
         return lagJournalføringDto(jfrOppgave, hentJournalpost!!.hoveddokument)
