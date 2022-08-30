@@ -1,8 +1,11 @@
 package no.nav.melosys.service.eessi.jobb
 
+import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.saksflyt.ProsessDataKey
 import no.nav.melosys.domain.saksflyt.Prosessinstans
 import no.nav.melosys.repository.ProsessinstansRepository
+import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.oppgave.OppgaveService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -10,7 +13,8 @@ import org.springframework.stereotype.Component
 @Component
 class FeilregistrerX100OppgaverJobb(
     private val prosessinstansRepository: ProsessinstansRepository,
-    private val oppgaveService: OppgaveService
+    private val oppgaveService: OppgaveService,
+    private val behandlingService: BehandlingService
 ) {
     fun feilregistrerX100Journalføringsoppgaver() {
         log.info("Begynner feilregistrering av journalføringsoppgaver opprettet for X100 SED-er.")
@@ -36,22 +40,26 @@ class FeilregistrerX100OppgaverJobb(
 
     fun feilregistrerX100Behandlingsoppgaver() {
         log.info("Begynner feilregistrering av behandlingoppgaver opprettet for X100 SED-er.")
-        val oppgaveSet = prosessinstansRepository.findAllWithSedX100()
-            .filter { it.behandling != null }
-            .map { it.behandling }
-            .filter { it.erInaktiv() }
-            .map { oppgaveService.finnÅpenOppgaveMedFagsaksnummer(it.fagsak.saksnummer) }
-            .filter { it.isPresent }
-            .map { it.get() }
-            .toSet()
 
-        if (oppgaveSet.isEmpty()) {
+        val behandlingsoppgaver = prosessinstansRepository.findAllWithSedX100()
+            .map { it.behandling }
+            .filter { it != null && it.erRegisteringAvUnntak() && it.harStatus(Behandlingsstatus.VURDER_DOKUMENT) }
+            .map { Pair(it.id, oppgaveService.finnÅpenOppgaveMedFagsaksnummer(it.fagsak.saksnummer)) }
+            .filter { it.second.isPresent }
+            .map { Pair(it.first, it.second.get()) }
+
+        if (behandlingsoppgaver.isEmpty()) {
             log.info("Ingen åpne behandlingoppgaver for inaktive X100 SED-behandlinger finnes.")
         } else {
-            log.info("${oppgaveSet.size} åpne behandlingoppgaver for X100 SED-er skal feilregistreres.")
-            oppgaveService.feilregistrerOppgaver(oppgaveSet)
+            log.info("${behandlingsoppgaver.size} åpne behandlingoppgaver for X100 SED-er skal feilregistreres.")
+            avsluttbehandlinger(behandlingsoppgaver.map{it.first}.toSet())
+            oppgaveService.feilregistrerOppgaver(behandlingsoppgaver.map{it.second}.toSet())
         }
         log.info("Feilregistrering av behandlingsoppgaver opprettet for X100 SED-er er ferdig.")
+    }
+
+    private fun avsluttbehandlinger(behandlingIDs: Set<Long>) {
+        behandlingIDs.forEach{behandlingService.avsluttBehandling(it)}
     }
 
     companion object {
