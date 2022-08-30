@@ -93,14 +93,14 @@ class JournalfoeringIT(
             journalføringService.journalførOgOpprettSak(journalfoeringOpprettDto)
             oppgaveService.ferdigstillOppgave(journalfoeringOpprettDto.oppgaveID)
         }
-        val prossesId = finnProssesID(ProsessType.JFR_NY_SAK_BRUKER, now)
+        val prosessId = finnprosessID(ProsessType.JFR_NY_SAK_BRUKER, now)
         listOf(
-            prossesId,
-            finnProssesID(ProsessType.OPPRETT_OG_DISTRIBUER_BREV, now)
+            prosessId,
+            finnprosessID(ProsessType.OPPRETT_OG_DISTRIBUER_BREV, now)
         ).forEach {
-            sjekkAtProssessHarStatusFerdig(it)
+            sjekkAtprosesssHarStatusFerdig(it)
         }
-        val prosessinstans = prosessinstansRepository.findById(prossesId).get()
+        val prosessinstans = prosessinstansRepository.findById(prosessId).get()
         val behandling = prosessinstans.behandling
 
         behandling.apply {
@@ -136,13 +136,13 @@ class JournalfoeringIT(
     }
 
     @OptIn(ExperimentalStdlibApi::class)
-    private fun sjekkAtProssessHarStatusFerdig(prosessID: UUID) =
+    private fun sjekkAtprosesssHarStatusFerdig(prosessID: UUID) =
         await.until {
             prosessinstansRepository.findById(prosessID)
                 .getOrNull()?.status == ProsessStatus.FERDIG
         }
 
-    private fun finnProssesID(prosessType: ProsessType, now: LocalDateTime): UUID =
+    private fun finnprosessID(prosessType: ProsessType, now: LocalDateTime): UUID =
         await.timeout(30, TimeUnit.SECONDS).untilNotNull {
             prosessinstansRepository.findAll()
                 .find { it.registrertDato > now && it.type == prosessType }?.id
