@@ -46,7 +46,7 @@ import java.util.concurrent.TimeUnit
 import kotlin.jvm.optionals.getOrNull
 
 @Import(KodeverkStub::class)
-class JournalføringIT(
+class JournalfoeringIT(
     @Autowired private val testDataGenerator: TestDataGenerator,
     @Autowired private val journalføringService: JournalfoeringService,
     @Autowired private val oppgaveService: OppgaveService,
