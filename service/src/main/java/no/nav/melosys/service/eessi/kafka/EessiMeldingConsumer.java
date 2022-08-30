@@ -27,8 +27,6 @@ public class EessiMeldingConsumer {
         this.prosessinstansService = prosessinstansService;
     }
 
-    @KafkaListener(clientIdPrefix = "aiven-melosys-eessi-consumer", topics = "${kafka.aiven.eessi.topic}",
-        containerFactory = "aivenEessiMeldingListenerContainerFactory")
     public void mottaMeldingAiven(ConsumerRecord<String, MelosysEessiMelding> consumerRecord, @Headers Map<String, byte[]> header) {
         putToMDC(CORRELATION_ID, getCorrelationId(header));
         MelosysEessiMelding melding = consumerRecord.value();

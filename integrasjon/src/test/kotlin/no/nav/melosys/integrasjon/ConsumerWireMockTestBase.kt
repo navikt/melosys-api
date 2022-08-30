@@ -18,6 +18,7 @@ import org.junit.jupiter.api.*
 import org.springframework.context.annotation.Import
 import org.springframework.mock.env.MockEnvironment
 import java.util.*
+import kotlin.collections.ArrayList
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Import(
@@ -161,9 +162,15 @@ abstract class ConsumerWireMockTestBase<T, R>(
         override fun getOidcTokenString(): String? = "--token-from-user--"
 
         override fun getUserID(): String? = "Z123"
+        override fun getName(): String? {
+            return "Testy test"
+        }
+        override fun getGroups(): MutableList<String>? = ArrayList<String>()
     }
 
     class NullSubjectHandler : TestSubjectHandler() {
         override fun getOidcTokenString(): String? = null
+        override fun getName(): String? = null
+        override fun getGroups(): MutableList<String>? = null
     }
 }

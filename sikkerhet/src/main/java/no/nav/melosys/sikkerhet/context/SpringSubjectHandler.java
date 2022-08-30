@@ -1,14 +1,20 @@
 package no.nav.melosys.sikkerhet.context;
 
+import com.nimbusds.jose.shaded.json.JSONArray;
 import no.nav.security.token.support.core.context.TokenValidationContext;
 import no.nav.security.token.support.core.jwt.JwtToken;
 import no.nav.security.token.support.spring.SpringTokenValidationContextHolder;
 import org.springframework.web.context.request.RequestContextHolder;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class SpringSubjectHandler extends SubjectHandler {
 
     private static final String AAD = "aad";
-    private static final String JWT_TOKEN_CLAIM_NAVIDENT = "NAVident";
+    private static final String JWT_TOKEN_CLAIM_NAVIDENT = "name"; //TODO: Fiks
+    private static final String JWT_TOKEN_CLAIM_NAME = "name";
+    private static final String JWT_TOKEN_CLAIM_GROUPS = "groups";
 
     private final SpringTokenValidationContextHolder contextHolder;
 
@@ -24,6 +30,24 @@ public class SpringSubjectHandler extends SubjectHandler {
     @Override
     public String getUserID() {
         return hasValidToken() ? aadToken().getJwtTokenClaims().get(JWT_TOKEN_CLAIM_NAVIDENT).toString() : null;
+    }
+
+    @Override
+    public String getName() {
+        return hasValidToken() ? aadToken().getJwtTokenClaims().get(JWT_TOKEN_CLAIM_NAME).toString() : null;
+    }
+
+    @Override
+    public List<String> getGroups() {
+        ArrayList<String> groups = new ArrayList<String>();
+        JSONArray jArray = (JSONArray) aadToken().getJwtTokenClaims().get(JWT_TOKEN_CLAIM_GROUPS);
+
+        if (jArray != null) {
+            for (int i = 0; i < jArray.size(); i++) {
+                groups.add(jArray.get(i).toString());
+            }
+        }
+        return groups;
     }
 
     private boolean hasValidToken() {

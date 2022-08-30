@@ -6,7 +6,7 @@ import no.nav.freg.abac.core.annotation.Abac;
 import no.nav.freg.abac.core.dto.response.Decision;
 import no.nav.melosys.domain.Saksbehandler;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.service.ldap.SaksbehandlerService;
+import no.nav.melosys.service.bruker.SaksbehandlerService;
 import no.nav.melosys.sikkerhet.abac.PepImpl;
 import no.nav.melosys.tjenester.gui.dto.InnloggetBrukerDto;
 import no.nav.security.token.support.core.api.Protected;
