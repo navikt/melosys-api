@@ -89,7 +89,7 @@ class JournalfoeringIT(
         val now = LocalDateTime.now()
         val journalfoeringOpprettDto = lagJournalfoeringOpprettDto(jfrOppgave)
 
-        ThreadLocalAccessInfo.executeProcess("journalførOgOpprettSak") {
+        ThreadLocalAccessInfo.executeProcess("Journalfør dokument og opprett ny sak. Ferdigstill oppgave.") {
             journalføringService.journalførOgOpprettSak(journalfoeringOpprettDto)
             oppgaveService.ferdigstillOppgave(journalfoeringOpprettDto.oppgaveID)
         }
