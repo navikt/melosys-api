@@ -72,7 +72,7 @@ class OppgaveApi(private val oppgaveRepo: OppgaveRepo) {
 
     @PostMapping
     fun opprettOppgave(@RequestBody oppgave: Oppgave): ResponseEntity<Oppgave> {
-        val oppgaveID = oppgaveRepo.finnSistOppgaveId() + 1
+        val oppgaveID = oppgaveRepo.finnSisteOppgaveId() + 1
         oppgave.id = oppgaveID
         oppgave.versjon = 1
         oppgaveRepo.repo[oppgaveID] = oppgave

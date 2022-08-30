@@ -18,7 +18,7 @@ class OppgaveRepo(@Value("\${persist.repo.oppgave}") private val persist: Boolea
 
     val repo: MutableMap<Int, Oppgave> = load()
 
-    fun finnSistOppgaveId(): Int {
+    fun finnSisteOppgaveId(): Int {
         return repo.keys.maxOrNull() ?: 1
     }
 
