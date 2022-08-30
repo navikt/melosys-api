@@ -39,6 +39,7 @@ import static no.nav.melosys.metrics.MetrikkerNavn.*;
 @Service
 public class BehandlingService {
     private static final Logger log = LoggerFactory.getLogger(BehandlingService.class);
+    
     private final BehandlingRepository behandlingRepository;
     private final TidligereMedlemsperiodeRepository tidligereMedlemsperiodeRepository;
     private final BehandlingsresultatService behandlingsresultatService;

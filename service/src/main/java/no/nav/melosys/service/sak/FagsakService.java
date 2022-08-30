@@ -51,7 +51,6 @@ public class FagsakService {
         this.oppgaveService = oppgaveService;
         this.persondataFasade = persondataFasade;
         this.behandlingsresultatService = behandlingsresultatService;
-
     }
 
     public Fagsak hentFagsak(String saksnummer) {
