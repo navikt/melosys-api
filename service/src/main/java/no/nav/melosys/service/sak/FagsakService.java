@@ -241,8 +241,8 @@ public class FagsakService {
     public void avsluttFagsakOgBehandling(Fagsak fagsak, Saksstatuser saksstatus) {
         Behandling aktivBehandling = fagsak.hentAktivBehandling();
         if (aktivBehandling == null) {
-            oppdaterStatus(fagsak, saksstatus);
             log.warn("Forsøker å lukke behandling for fagsak {} som ikke har noen aktiv behandling", fagsak.getSaksnummer());
+            oppdaterStatus(fagsak, saksstatus);
         } else {
             avsluttFagsakOgBehandling(fagsak, aktivBehandling, saksstatus);
         }
