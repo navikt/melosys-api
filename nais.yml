@@ -6,7 +6,7 @@ metadata:
   labels:
     team: teammelosys
 spec:
-  image: { { IMAGE } }
+  image: {{ IMAGE }}
   port: 8080
   replicas:
     min: 2
@@ -40,11 +40,11 @@ spec:
   accessPolicy:
     inbound:
       rules:
-        - application: {{APP_NAME_OPPGAVE}}
-        - application: {{APP_NAME_PDL}}
+        - application: {{APP_NAME_FRONTEND}}
     outbound:
       rules:
-        - application:
+        - application: {{APP_NAME_OPPGAVE}}
+        - application: {{APP_NAME_PDL}}
   vault:
     enabled: true
     paths:
