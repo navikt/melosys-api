@@ -7,10 +7,17 @@ import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Sakstemaer;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.integrasjon.sak.SakConsumerImpl;
+import no.nav.melosys.service.sak.LovligeKombinasjoner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static no.nav.melosys.domain.Behandling.BEHANDLINGSTEMA_SED_FORESPØRSEL;
 import static no.nav.melosys.domain.Behandling.erBehandlingAvSedForespørsler;
@@ -20,6 +27,8 @@ import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.ENDRE
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.NY_VURDERING;
 
 public class MuligeManuelleBehandlingsendringer {
+    private static final Logger log = LoggerFactory.getLogger(SakConsumerImpl.class);
+
     static final Set<Behandlingstema> BEHANDLINGSTEMA_SØKNAD = Set.of(UTSENDT_ARBEIDSTAKER, UTSENDT_SELVSTENDIG,
         ARBEID_ETT_LAND_ØVRIG,
         ARBEID_TJENESTEPERSON_ELLER_FLY, ARBEID_KUN_NORGE,
@@ -45,23 +54,37 @@ public class MuligeManuelleBehandlingsendringer {
     }
 
     public static Set<Behandlingstyper> hentMuligeTyper(Behandling behandling) {
-        if (behandling.kanIkkeEndres() || !TEMAER_SOM_KAN_ENDRE_TYPE.contains(behandling.getTema())) {
+        if (behandling.kanIkkeEndres() || behandling == null) {
             return Collections.emptySet();
         }
+        if (behandling.getFagsak() != null && behandling.getFagsak().getType() != null && behandling.getFagsak().getTema() != null) {
+            Sakstyper sakstype = behandling.getFagsak().getType();
+            Sakstemaer sakstema = behandling.getFagsak().getTema();
+            Behandlingstema behandlingstema = behandling.getTema();
 
-        return switch (behandling.getType()) {
-            case ENDRET_PERIODE -> Collections.singleton(NY_VURDERING);
-            case NY_VURDERING -> Collections.singleton(ENDRET_PERIODE);
-            default -> Collections.emptySet();
-        };
+            return LovligeKombinasjoner.hentAlleMuligeBehandlingstyper(Aktoersroller.BRUKER, sakstype, sakstema, behandlingstema, null, null, null);
+        } else {
+            if (behandling.getType() == null) return Collections.emptySet();
+            return switch (behandling.getType()) {
+                case ENDRET_PERIODE -> Collections.singleton(NY_VURDERING);
+                case NY_VURDERING -> Collections.singleton(ENDRET_PERIODE);
+                default -> Collections.emptySet();
+            };
+        }
     }
 
     public static Set<Behandlingstema> hentMuligeBehandlingstema(Behandling behandling, Behandlingsresultat behandlingsresultat, boolean visNyeBehandlingstema) {
         if (behandling.kanIkkeEndres()) {
             return Collections.emptySet();
         }
-
         boolean kanOppdatereBehandlingstema = kanOppdatereBehandlingstema(behandling, behandlingsresultat);
+
+        if (behandling.getFagsak() != null && behandling.getFagsak().getType() != null && behandling.getFagsak().getTema() != null && visNyeBehandlingstema) {
+            Sakstyper sakstype = behandling.getFagsak().getType();
+            Sakstemaer sakstema = behandling.getFagsak().getTema();
+
+            return LovligeKombinasjoner.hentAlleMuligeBehandlingstemaer(Aktoersroller.BRUKER, sakstype, sakstema, null);
+        }
 
         if (behandling.erEndretPeriode()) {
             return switch (behandling.getTema()) {
