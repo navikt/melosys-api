@@ -22,8 +22,9 @@ public class PDLAuthFilter implements ExchangeFilterFunction {
 
     private AzureADConsumerImpl azureADConsumer;
 
-    public PDLAuthFilter(RestStsClient restStsClient) {
+    public PDLAuthFilter(RestStsClient restStsClient, AzureADConsumerImpl azureADConsumer) {
         this.restStsClient = restStsClient;
+        this.azureADConsumer = azureADConsumer;
     }
 
     @Nonnull
