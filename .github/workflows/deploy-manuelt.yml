@@ -118,6 +118,8 @@ jobs:
           echo "APP_NAME_FRONTEND=melosys-web-q1" >> $GITHUB_ENV
           echo "GROUP_MELOSYS_INNLOGGING=52981246-8032-40f0-863a-2bd2844f2d57" >> $GITHUB_ENV
           echo "AZURE_APP_ACCEPTED_AUDIENCE=b838073f-c847-4ca7-a7ae-0532f3e9f4be" >> $GITHUB_ENV
+          echo "APP_NAME_PDL=pdl-api" >> $GITHUB_ENV
+          echo "APP_NAME_OPPGAVE=oppgave-q1" >> $GITHUB_ENV
       - name: Deploy to dev
         if: github.event.inputs.environment == 'dev'
         run: |
@@ -136,7 +138,7 @@ jobs:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: ${{ env.CLUSTER }}
           RESOURCE: nais.yml
-          VAR: IMAGE=${{ env.IMAGE }},URL=${{ env.URL }},KAFKA_POOL=${{ env.KAFKA_POOL }},VAULT_CLUSTER=${{ env.VAULT_CLUSTER }},APP_NAME=${{ env.APP_NAME }},TENANT_URL=${{ env.TENANT_URL }},GROUP_MELOSYS_INNLOGGING=${{ env.GROUP_MELOSYS_INNLOGGING }},APP_NAME_FRONTEND=${{ env.APP_NAME_FRONTEND }},AZURE_APP_ACCEPTED_AUDIENCE=${{ env.AZURE_APP_ACCEPTED_AUDIENCE }}
+          VAR: IMAGE=${{ env.IMAGE }},URL=${{ env.URL }},KAFKA_POOL=${{ env.KAFKA_POOL }},VAULT_CLUSTER=${{ env.VAULT_CLUSTER }},APP_NAME=${{ env.APP_NAME }},TENANT_URL=${{ env.TENANT_URL }},GROUP_MELOSYS_INNLOGGING=${{ env.GROUP_MELOSYS_INNLOGGING }},APP_NAME_FRONTEND=${{ env.APP_NAME_FRONTEND }},APP_NAME_PDL=${{ env.APP_NAME_PDL }},APP_NAME_OPPGAVE=${{ env.APP_NAME_OPPGAVE }},AZURE_APP_ACCEPTED_AUDIENCE=${{ env.AZURE_APP_ACCEPTED_AUDIENCE }}
       - name: Get commit message
         run: echo "COMMIT_MSG=$(git log --format=%s -n 1)" >> $GITHUB_ENV
       - name: Slack Notification
