@@ -58,7 +58,7 @@ jobs:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.READER_TOKEN }}
-      - name: Build without
+      - name: Build without tests
         run: mvn clean verify -DskipTests -B -e -U --settings .github/settings.xml
       - uses: actions/upload-artifact@v3
         with:
