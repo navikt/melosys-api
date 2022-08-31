@@ -5,6 +5,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.oppgave.Oppgave
 import no.nav.melosys.domain.saksflyt.ProsessDataKey
 import no.nav.melosys.domain.saksflyt.Prosessinstans
+import no.nav.melosys.repository.KontrollresultatRepository
 import no.nav.melosys.repository.ProsessinstansRepository
 import no.nav.melosys.service.SaksbehandlingDataFactory
 import no.nav.melosys.service.behandling.BehandlingService
@@ -24,6 +25,8 @@ internal class FeilregistrerX100OppgaverJobbTest {
     @Mock
     private val prosessinstansRepository: ProsessinstansRepository? = null
     @Mock
+    private val kontrollresultatRepository: KontrollresultatRepository? = null
+    @Mock
     private val oppgaveService: OppgaveService? = null
     @Mock
     private val behandlingService: BehandlingService? = null
@@ -33,7 +36,7 @@ internal class FeilregistrerX100OppgaverJobbTest {
     @BeforeEach
     fun setup() {
         feilregistrerX100OppgaverJobb = FeilregistrerX100OppgaverJobb(
-            prosessinstansRepository!!, oppgaveService!!, behandlingService!!
+            prosessinstansRepository!!, kontrollresultatRepository!!, oppgaveService!!, behandlingService!!
         )
     }
 
