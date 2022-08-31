@@ -1,7 +1,5 @@
 package no.nav.melosys.integrasjon.aad;
 
-import no.nav.melosys.integrasjon.felles.GenericContextExchangeFilter;
-import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
