@@ -4,6 +4,7 @@ import java.util.function.Supplier;
 import javax.annotation.Nonnull;
 
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.integrasjon.aad.AzureADConsumerImpl;
 import no.nav.melosys.integrasjon.reststs.RestStsClient;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo;
@@ -18,6 +19,8 @@ public class PDLAuthFilter implements ExchangeFilterFunction {
     private static final String NAV_CONSUMER_TOKEN = "Nav-Consumer-Token";
 
     private final RestStsClient restStsClient;
+
+    private AzureADConsumerImpl azureADConsumer;
 
     public PDLAuthFilter(RestStsClient restStsClient) {
         this.restStsClient = restStsClient;
@@ -40,7 +43,7 @@ public class PDLAuthFilter implements ExchangeFilterFunction {
             return restStsClient::bearerToken;
         }
         if (ThreadLocalAccessInfo.shouldUseOidcToken()) {
-            return () -> "Bearer " + SubjectHandler.getInstance().getOidcTokenString();
+            return () -> "Bearer " + azureADConsumer.hentToken(SubjectHandler.getInstance().getOidcTokenString(), "api://dev-fss.pdl.pdl-api/.default");
         }
         throw new TekniskException("Uregistert kall prøver å registrere token provider");
     }

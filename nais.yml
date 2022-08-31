@@ -6,7 +6,7 @@ metadata:
   labels:
     team: teammelosys
 spec:
-  image: {{ IMAGE }}
+  image: { { IMAGE } }
   port: 8080
   replicas:
     min: 2
@@ -32,13 +32,19 @@ spec:
       enabled: true
       tenant: {{TENANT_URL}}
       claims:
+        extra:
+          - "NAVident"
         groups:
           - id: {{GROUP_MELOSYS_INNLOGGING}}
         allowAllUsers: false
   accessPolicy:
     inbound:
       rules:
-        - application: {{APP_NAME_FRONTEND}}
+        - application: {{APP_NAME_OPPGAVE}}
+        - application: {{APP_NAME_PDL}}
+    outbound:
+      rules:
+        - application:
   vault:
     enabled: true
     paths:
