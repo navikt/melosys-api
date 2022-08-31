@@ -41,8 +41,15 @@ public class GenericContextExchangeFilter implements ExchangeFilterFunction {
             throw new TekniskException("Token mangler fra bruker! " + ThreadLocalAccessInfo.getInfo());
         }
 
+        String scope = "";
         // Vi skal nå hente ny token fra Azure AD for å legge på den i vår nye kall
-        String issuedToken = azureADConsumer.hentToken(oidcTokenString, "api://dev-fss.oppgavehandtering.oppgave-q1/.default");
+        if (clientRequest.url().getHost().toString().contains("oppgave")) {
+            scope = "api://dev-fss.oppgavehandtering.oppgave-q1/.default";
+        } else if (clientRequest.url().getHost().toString().contains("saf")) {
+            scope = "api://dev-fss.teamdokumenthandtering.saf/.default";
+        }
+
+        String issuedToken = scope == "" ? oidcTokenString : azureADConsumer.hentToken(oidcTokenString, scope);
 
         return exchangeFunction.exchange(
             ClientRequest.from(clientRequest)
