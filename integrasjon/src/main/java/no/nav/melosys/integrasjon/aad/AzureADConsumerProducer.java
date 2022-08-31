@@ -19,7 +19,8 @@ public class AzureADConsumerProducer {
     public AzureADConsumerImpl azureADConsumer(WebClient.Builder webClientBuilder, Environment environment) {
         return new AzureADConsumerImpl(
             webClientBuilder
-                .baseUrl("https://login.microsoftonline.com/966ac572-f5b7-4bbe-aa88-c76419c0f851")
+                .baseUrl(environment.getProperty("AZURE_APP_WELL_KNOWN_URL"))
+                .clientConnector(WebClientProxyConfig.INSTANCE.clientHttpConnector(environment.getProperty("HTTP_PROXY")))
                 .defaultHeader("Content-Type", "application/x-www-form-urlencoded")
                 .build(),
             environment
