@@ -21,6 +21,7 @@ public enum ProsessType implements Kodeverk {
     JFR_KNYTT("JFR_KNYTT", "Journalføring på eksisterende sak"),
     JFR_NY_VURDERING("JFR_NY_VURDERING", "Journalføring på eksisterende sak og oppretter en ny behandling (ny vurdering)"),
     JFR_NY_SAK_BRUKER("JFR_NY_SAK_BRUKER", "Journalføring med ny sak og søknad for bruker"),
+    JFR_ANDRE_GANGS_BEHANDLING("JFR_ANDRE_GANGS_BEHANDLING", "Journalføring på eksisterende sak og opprett ny behandling, men ikke repliker tidligere behandling"),
     JFR_NY_SAK_VIRKSOMHET("JFR_NY_SAK_VIRKSOMHET", "Journalføring med ny sak for virksomhet"),
     MOTTAK_SED("MOTTAK_SED", "Mottak av SED for journalføring og videre ruting"),
     MOTTAK_SED_JOURNALFØRING("MOTTAK_SED_JOURNALFØRING", "Mottak av SED som kun skal journalføres"),

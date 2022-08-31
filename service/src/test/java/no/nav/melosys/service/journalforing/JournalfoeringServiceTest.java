@@ -489,11 +489,13 @@ class JournalfoeringServiceTest {
         var behandling = new Behandling();
         behandling.setStatus(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
         var fagsak = new Fagsak();
+        fagsak.setType(Sakstyper.EU_EOS);
+        behandling.setFagsak(fagsak);
         fagsak.getBehandlinger().add(behandling);
 
         when(joarkFasade.hentJournalpost(tilordneDto.getJournalpostID())).thenReturn(journalpost);
         when(fagsakService.hentFagsak(MELOSYS_SAKSNUMMER)).thenReturn(fagsak);
-        when(prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_NY_VURDERING, tilordneDto))
+        when(prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_ANDRE_GANGS_BEHANDLING, tilordneDto))
             .thenReturn(new Prosessinstans());
 
         journalfoeringService.journalførOgOpprettNyVurdering(tilordneDto);

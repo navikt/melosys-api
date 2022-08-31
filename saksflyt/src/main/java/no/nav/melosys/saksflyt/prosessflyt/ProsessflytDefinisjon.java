@@ -92,6 +92,15 @@ public final class ProsessflytDefinisjon {
             )
         );
 
+        PROSESS_FLYT_MAP.put(ProsessType.JFR_ANDRE_GANGS_BEHANDLING,
+            new ProsessFlyt(ProsessType.JFR_NY_VURDERING,
+                OPPRETT_NY_BEHANDLING,
+                OPPDATER_OG_FERDIGSTILL_JOURNALPOST,
+                OPPDATER_SAKSRELASJON,
+                OPPRETT_OPPGAVE
+            )
+        );
+
         PROSESS_FLYT_MAP.put(ProsessType.JFR_KNYTT,
             new ProsessFlyt(ProsessType.JFR_KNYTT,
                 OPPDATER_OG_FERDIGSTILL_JOURNALPOST,

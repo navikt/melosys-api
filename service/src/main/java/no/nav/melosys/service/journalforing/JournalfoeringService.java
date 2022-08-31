@@ -256,7 +256,10 @@ public class JournalfoeringService {
 
         log.info("{} knytter journalpost {} til sak {} og lager ny vurdering", SubjectHandler.getInstance().getUserID(), journalfoeringDto.getJournalpostID(), saksnummer);
 
-        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_NY_VURDERING, journalfoeringDto);
+        Behandling behandling = fagsak.hentSistRegistrertBehandling();
+        ProsessType prosessTypeForNyVurdering = finnProsessTypeForNyVurdering(behandling);
+
+        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(prosessTypeForNyVurdering, journalfoeringDto);
         if (unleash.isEnabled("melosys.sakstema")) {
             var behandlingstema = Behandlingstema.valueOf(journalfoeringDto.getBehandlingstemaKode());
             prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, behandlingstema);
@@ -266,6 +269,35 @@ public class JournalfoeringService {
         prosessinstans.setData(ProsessDataKey.JFR_INGEN_VURDERING, journalfoeringDto.isIngenVurdering());
 
         prosessinstansService.lagre(prosessinstans);
+    }
+
+    private ProsessType finnProsessTypeForNyVurdering(Behandling behandling) {
+        if (sjekkOmTidligereBehandlingSkalKopieres(behandling)) {
+            return ProsessType.JFR_NY_VURDERING;
+        }
+        return ProsessType.JFR_ANDRE_GANGS_BEHANDLING;
+    }
+
+    private boolean sjekkOmTidligereBehandlingSkalKopieres(Behandling behandling) {
+        Sakstyper sakstype = behandling.getFagsak().getType();
+        if (sakstype == Sakstyper.EU_EOS || sakstype == Sakstyper.FTRL) return false;
+
+        Behandlingstyper behandlingType = behandling.getType();
+        if (behandlingType == Behandlingstyper.HENVENDELSE || behandlingType == Behandlingstyper.KLAGE) return false;
+
+        return switch (behandling.getTema()) {
+            case ARBEID_KUN_NORGE,
+                IKKE_YRKESAKTIV,
+                PENSJONIST,
+                ANMODNING_OM_UNNTAK_HOVEDREGEL,
+                REGISTRERING_UNNTAK,
+                UNNTAK_MEDLEMSKAP,
+                FORESPØRSEL_TRYGDEMYNDIGHET,
+                TRYGDETID,
+                ØVRIGE_SED_MED,
+                ØVRIGE_SED_UFM -> false;
+            default -> true;
+        };
     }
 
     private void validerKanTilknytteJournalpostForSedTilSak(Journalpost journalpost, String tilknyttTilSaksnummer) {
