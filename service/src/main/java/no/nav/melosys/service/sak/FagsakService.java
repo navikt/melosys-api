@@ -6,9 +6,7 @@ import java.util.*;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.Saksstatuser;
+import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -88,6 +86,28 @@ public class FagsakService {
             sak.setSaksnummer(hentNesteSaksnummer());
         }
         fagsakRepository.save(sak);
+    }
+
+    @Transactional
+    public void oppdaterSakstype(String saksnummer, Sakstyper sakstype) {
+        Behandling behandling = hentFagsak(saksnummer).hentAktivBehandling();
+        boolean behandlingErLåst = behandling.kanIkkeEndres();
+        boolean kanSakstypeEndres = sakstype != null && sakstype != behandling.getFagsak().getType() && validerNySakstypeMulig(behandling, sakstype) && !behandlingErLåst;
+
+        if (kanSakstypeEndres) {
+            endreSakstype(behandling.getFagsak(), sakstype);
+        }
+    }
+
+    @Transactional
+    public void oppdaterSakstema(String saksnummer, Sakstemaer sakstema) {
+        Behandling behandling = hentFagsak(saksnummer).hentAktivBehandling();
+        boolean behandlingErLåst = behandling.kanIkkeEndres();
+        boolean kanSakstemaEndres = sakstema != null && sakstema != behandling.getFagsak().getTema() && validerNySakstemaMulig(behandling, sakstema) && !behandlingErLåst;
+
+        if (kanSakstemaEndres) {
+            endreSakstema(behandling.getFagsak(), sakstema);
+        }
     }
 
     @Transactional
@@ -341,5 +361,37 @@ public class FagsakService {
             return fagsak.hentSistAktivBehandling().getType();
         }
         return Behandlingstyper.NY_VURDERING;
+    }
+
+    private boolean validerNySakstypeMulig(Behandling behandling, Sakstyper sakstype) {
+        MuligeManuelleFagsakEndringer.validerNySakstypeMulig(behandling, sakstype);
+        return true;
+    }
+
+    private boolean validerNySakstemaMulig(Behandling behandling, Sakstemaer sakstema) {
+        MuligeManuelleFagsakEndringer.validerNySakstemaMulig(behandling, sakstema);
+        return true;
+    }
+
+    public void endreSakstema(Fagsak fagsak, Sakstemaer sakstema) {
+        log.info("Endrer saktema for fagsak {} fra {} til {}", fagsak.getSaksnummer(), fagsak.getTema(), sakstema);
+        fagsak.setTema(sakstema);
+        fagsakRepository.save(fagsak);
+    }
+
+    public void endreSakstype(Fagsak fagsak, Sakstyper sakstype) {
+        log.info("Endrer sakstype for fagsak {} fra {} til {}", fagsak.getSaksnummer(), fagsak.getType(), sakstype);
+        fagsak.setType(sakstype);
+        fagsakRepository.save(fagsak);
+    }
+
+    public Set<Sakstemaer> hentMuligeSakstemaer(String saksnummer) {
+        Behandling behandling = hentFagsak(saksnummer).hentAktivBehandling();
+        return MuligeManuelleFagsakEndringer.hentMuligeSakstema(behandling);
+    }
+
+    public Set<Sakstyper> hentMuligeSakstyper(String saksnummer) {
+        Behandling behandling = hentFagsak(saksnummer).hentAktivBehandling();
+        return MuligeManuelleFagsakEndringer.hentMuligeSakstype(behandling);
     }
 }
