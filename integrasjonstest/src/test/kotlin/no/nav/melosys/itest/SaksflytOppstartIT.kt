@@ -21,12 +21,14 @@ import no.nav.melosys.domain.saksflyt.ProsessType
 import no.nav.melosys.domain.saksflyt.Prosessinstans
 import no.nav.melosys.integrasjon.joark.saf.SafConsumer
 import no.nav.melosys.integrasjon.joark.saf.dto.journalpost.*
+import no.nav.melosys.melosysmock.sak.SakRepo
 import no.nav.melosys.repository.BehandlingRepository
 import no.nav.melosys.repository.FagsakRepository
 import no.nav.melosys.repository.ProsessinstansRepository
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import org.assertj.core.api.Assertions.assertThat
 import org.awaitility.Awaitility
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.context.event.ApplicationReadyEvent
@@ -57,6 +59,11 @@ internal class SaksflytOppstartIT(
 
     @MockkBean
     lateinit var safConsumer: SafConsumer
+
+    @BeforeEach
+    fun before() {
+        SakRepo.clear()
+    }
 
     @Test
     fun `prosessinstansBehandler laster og publiserer prosesser som har hengt ved oppstart`() {

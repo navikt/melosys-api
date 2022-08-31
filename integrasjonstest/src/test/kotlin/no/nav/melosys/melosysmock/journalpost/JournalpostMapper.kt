@@ -28,10 +28,10 @@ class JournalpostMapper {
             mottattDato = request.datoMottatt ?: LocalDate.now(),
             arkivtema = request.tema?.let { Tema.valueOf(it) },
             journalposttype = request.journalpostType!!.let { Journalposttype.valueOf(it.name) },
-            bruker = JournalpostBruker(
-                ident = request.bruker?.id,
-                brukerType = request.bruker?.idType?.let { IdType.valueOf(it.name) }
-            ),
+            bruker = request.bruker?.let { JournalpostBruker(
+                ident = request.bruker.id,
+                brukerType = request.bruker.idType?.let { IdType.valueOf(it.name) }
+            )},
             kanal = request.kanal,
             tittel = request.tittel,
             eksternReferanseId = request.eksternReferanseId,
@@ -51,7 +51,7 @@ class JournalpostMapper {
                     brevkode = dok.brevkode,
                     dokumentTilknyttetJournalpost = dokumentTilknyttetJournalpost,
                     dokumentVarianter = lagDokumentvarianter(dok.dokumentvarianter)
-                )
+            )
             )
         }
         return dokumentListe
