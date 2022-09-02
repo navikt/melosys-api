@@ -24,7 +24,7 @@ public class AzureADConsumerImpl implements AzureADConsumer {
 
     @Override
     public String hentToken(String tidligereToken, String scope) {
-
+        System.out.println("Henter token for scope " + scope);
         MultiValueMap<String, String> bodyValues = new LinkedMultiValueMap<>();
         bodyValues.add("grant_type", "urn:ietf:params:oauth:grant-type:jwt-bearer");
         bodyValues.add("client_id", environment.getProperty("AZURE_APP_CLIENT_ID"));
