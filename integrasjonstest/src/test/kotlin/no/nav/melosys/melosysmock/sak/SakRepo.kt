@@ -7,6 +7,11 @@ object SakRepo {
     val repo: MutableMap<Number, Sak> = mutableMapOf()
     val fagsakNrSakRepo: MutableMap<String, Sak> = mutableMapOf()
 
+    fun clear() {
+        repo.clear()
+        fagsakNrSakRepo.clear()
+    }
+
     fun leggTilSak(sak: Sak) {
         if (repo[sak.id] != null || fagsakNrSakRepo[sak.fagsakNr] != null) {
             throw IllegalArgumentException("Saksnummer er allerede tilknyttet en arkivsak")

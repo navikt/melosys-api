@@ -21,9 +21,9 @@ import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.NY_VU
 
 public class MuligeManuelleBehandlingsendringer {
     static final Set<Behandlingstema> BEHANDLINGSTEMA_SØKNAD = Set.of(UTSENDT_ARBEIDSTAKER, UTSENDT_SELVSTENDIG,
-                                                                      ARBEID_ETT_LAND_ØVRIG,
-                                                                      ARBEID_TJENESTEPERSON_ELLER_FLY, ARBEID_KUN_NORGE,
-                                                                      IKKE_YRKESAKTIV, ARBEID_FLERE_LAND);
+        ARBEID_ETT_LAND_ØVRIG,
+        ARBEID_TJENESTEPERSON_ELLER_FLY, ARBEID_KUN_NORGE,
+        IKKE_YRKESAKTIV, ARBEID_FLERE_LAND);
 
     private MuligeManuelleBehandlingsendringer() {
     }
@@ -45,7 +45,7 @@ public class MuligeManuelleBehandlingsendringer {
     }
 
     public static Set<Behandlingstyper> hentMuligeTyper(Behandling behandling) {
-        if (behandling.erInaktiv() || !TEMAER_SOM_KAN_ENDRE_TYPE.contains(behandling.getTema())) {
+        if (behandling.kanIkkeEndres() || !TEMAER_SOM_KAN_ENDRE_TYPE.contains(behandling.getTema())) {
             return Collections.emptySet();
         }
 
@@ -57,7 +57,12 @@ public class MuligeManuelleBehandlingsendringer {
     }
 
     public static Set<Behandlingstema> hentMuligeBehandlingstema(Behandling behandling, Behandlingsresultat behandlingsresultat) {
+        if (behandling.kanIkkeEndres()) {
+            return Collections.emptySet();
+        }
+
         boolean kanOppdatereBehandlingstema = kanOppdatereBehandlingstema(behandling, behandlingsresultat);
+
         if (behandling.erEndretPeriode()) {
             return switch (behandling.getTema()) {
                 case UTSENDT_ARBEIDSTAKER -> Collections.singleton(UTSENDT_SELVSTENDIG);

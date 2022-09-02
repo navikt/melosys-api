@@ -12,6 +12,8 @@ import no.nav.melosys.domain.arkiv.DokumentReferanse;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Sakstemaer;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
@@ -21,6 +23,7 @@ import no.nav.melosys.service.sak.*;
 import no.nav.melosys.service.saksopplysninger.SaksopplysningerService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.utpeking.UtpekingService;
+import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.tjenester.gui.dto.*;
 import no.nav.melosys.tjenester.gui.dto.periode.PeriodeDto;
 import no.nav.security.token.support.core.api.Protected;
@@ -95,6 +98,39 @@ public class FagsakTjeneste {
         aksesskontroll.autoriserFolkeregisterIdent(opprettSakDto.getBrukerID());
         opprettNySakFraOppgave.bestillNySakOgBehandling(opprettSakDto);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{saksnr}/endre")
+    @ApiOperation(value = "Endre en sak.")
+    public ResponseEntity<Void> endreFagsak(@PathVariable("saksnr") String saksnummer, @RequestBody EndreSakDto endreSakDto) {
+        log.debug("Saksbehandler {} ber om å endre fagsak {} med sakstype {}, sakstema {}", saksnummer, endreSakDto.sakstype(), endreSakDto.sakstema());
+        aksesskontroll.autoriserSakstilgang(saksnummer);
+
+        fagsakService.oppdaterSakstema(saksnummer, endreSakDto.sakstema());
+        /*
+        TODO: Endre sakstype fikses i MELOSYS-5285
+        fagsakService.oppdaterSakstype(saksnummer, endreSakDto.sakstype());
+        */
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("{saksnr}/mulige-sakstemaer")
+    @ApiOperation(value = "Hent mulige nye sakstema for en behandling")
+    public ResponseEntity<Collection<Sakstemaer>> hentMuligeSakstemaer(@PathVariable("saksnr") String saksnummer) {
+        log.debug("Saksbehandler {} ber om å hente mulige nye sakstema for fagsak {}.", SubjectHandler.getInstance().getUserID(), saksnummer);
+        aksesskontroll.autoriserSakstilgang(saksnummer);
+
+        return ResponseEntity.ok(fagsakService.hentMuligeSakstemaer(saksnummer));
+    }
+
+    @GetMapping("{saksnr}/mulige-sakstyper")
+    @ApiOperation(value = "Hent mulige nye sakstype for en behandling")
+    public ResponseEntity<Collection<Sakstyper>> hentMuligeSakstyper(@PathVariable("saksnr") String saksnummer) {
+        log.debug("Saksbehandler {} ber om å hente mulige nye sakstema for fagsak {}.", SubjectHandler.getInstance().getUserID(), saksnummer);
+        aksesskontroll.autoriserSakstilgang(saksnummer);
+
+        return ResponseEntity.ok(fagsakService.hentMuligeSakstyper(saksnummer));
     }
 
     @PostMapping("/sok")
