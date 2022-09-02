@@ -41,14 +41,12 @@ import no.nav.melosys.service.vedtak.FattVedtakRequest;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.*;
-import static no.nav.melosys.integrasjon.felles.mdc.MDCOperations.CORRELATION_ID;
 import static no.nav.melosys.integrasjon.felles.mdc.MDCOperations.getCorrelationId;
 import static org.springframework.util.StringUtils.hasText;
 
@@ -402,7 +400,7 @@ public class ProsessinstansService {
                 .medType(ProsessType.MOTTAK_SOKNAD_ALTINN)
                 .build();
             prosessinstans.setData(ProsessDataKey.MOTTATT_SOKNAD_ID, søknadMottatt.getSoknadID());
-            prosessinstans.setData(ProsessDataKey.SKAL_SENDES_FORVALTNINGSMELDING, true);
+            prosessinstans.setData(ProsessDataKey.SKAL_SENDES_FORVALTNINGSMELDING, !søknadMottatt.erGammel());
 
             lagre(prosessinstans);
         }
