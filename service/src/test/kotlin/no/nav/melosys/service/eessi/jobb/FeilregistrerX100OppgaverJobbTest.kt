@@ -4,6 +4,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.oppgave.Oppgave
 import no.nav.melosys.domain.saksflyt.ProsessDataKey
+import no.nav.melosys.domain.saksflyt.ProsessType
 import no.nav.melosys.domain.saksflyt.Prosessinstans
 import no.nav.melosys.repository.KontrollresultatRepository
 import no.nav.melosys.repository.ProsessinstansRepository
@@ -14,6 +15,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.ArgumentMatchers.anyLong
+import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.Mockito.times
@@ -44,6 +46,7 @@ internal class FeilregistrerX100OppgaverJobbTest {
     fun feilregistrerX100Behandlingsoppgaver() {
         val prosessMedX100 = lagProsessinstansMedEessiMelding()
         Mockito.`when`(prosessinstansRepository!!.findAllWithSedX100()).thenReturn(setOf(prosessMedX100))
+        Mockito.`when`(prosessinstansRepository!!.findAllByBehandling_IdAndTypeIn(anyLong(), eq(ProsessType.MOTTAK_SED))).thenReturn(setOf(prosessMedX100))
         val oppgave = Oppgave.Builder().setOppgaveId(OPPGAVE_ID_X100).build()
         Mockito.`when`(oppgaveService!!.finnÅpenOppgaveMedFagsaksnummer("MEL-1"))
             .thenReturn(Optional.of(oppgave))

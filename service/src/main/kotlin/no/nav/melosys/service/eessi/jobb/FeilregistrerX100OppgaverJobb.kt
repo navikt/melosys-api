@@ -70,9 +70,8 @@ class FeilregistrerX100OppgaverJobb(
 
     private fun erMottattAndreSeder(behandlingID: Long) : Boolean {
         val ignorerteSEDer = Pattern.compile("${X006}|${X008}|${X012}|${X013}|${S040}|${S041}|${X100}")
-        return prosessinstansRepository.findByBehandling_IdAndTypeIn(behandlingID, ProsessType.MOTTAK_SED)
-            .filter {!ignorerteSEDer.matcher(it.getData(ProsessDataKey.EESSI_MELDING)).find()}
-            .isPresent
+        return prosessinstansRepository.findAllByBehandling_IdAndTypeIn(behandlingID, ProsessType.MOTTAK_SED)
+            .any {!ignorerteSEDer.matcher(it.getData(ProsessDataKey.EESSI_MELDING)).find()}
     }
 
     private fun avsluttbehandlinger(behandlingIDs: Set<Long>) {

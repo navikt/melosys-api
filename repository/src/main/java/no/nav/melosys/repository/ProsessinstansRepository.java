@@ -29,6 +29,8 @@ public interface ProsessinstansRepository extends JpaRepository<Prosessinstans, 
 
     Optional<Prosessinstans> findByBehandling_IdAndTypeIn(long id, ProsessType... prosessTypes);
 
+    Collection<Prosessinstans> findAllByBehandling_IdAndTypeIn(long id, ProsessType... prosessTypes);
+
     Collection<Prosessinstans> findAllByStatus(ProsessStatus status);
 
     Collection<Prosessinstans> findAllByStatusIn(Set<ProsessStatus> statuses);
