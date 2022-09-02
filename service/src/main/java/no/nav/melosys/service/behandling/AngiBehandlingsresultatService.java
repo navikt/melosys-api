@@ -17,8 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import static no.nav.melosys.domain.kodeverk.Sakstyper.*;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper.*;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*;
-import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.FØRSTEGANG;
-import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.NY_VURDERING;
+import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.*;
 
 @Service
 public class AngiBehandlingsresultatService {
@@ -84,6 +83,13 @@ public class AngiBehandlingsresultatService {
             behandlingstema) && Set.of(FØRSTEGANG, NY_VURDERING).contains(behandlingstype)) {
             return;
         }
+        if (Set.of(MEDHOLD, KLAGEINNSTILLING, AVVIST_KLAGE).contains(behandlingsresultattype) && behandlingstype == KLAGE) {
+            return;
+        }
+        if (behandlingsresultattype == OMGJORT && behandlingstype == NY_VURDERING) {
+            return;
+        }
+
 
         throw new FunksjonellException(String.format("Kan ikke endre behandlingsresultattype til %s på sak %s", behandlingsresultattype, fagsak.getSaksnummer()));
     }
