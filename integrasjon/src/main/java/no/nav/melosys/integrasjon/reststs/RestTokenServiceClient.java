@@ -80,7 +80,7 @@ public class RestTokenServiceClient implements RestStsClient {
     private HttpEntity<?> createHttpEntity() {
         HttpHeaders headers = new HttpHeaders();
         headers.add(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE);
-        headers.add(HttpHeaders.AUTHORIZATION, getAuth());
+        headers.add(HttpHeaders.AUTHORIZATION, getAuth(null));
 
         return new HttpEntity<>(headers);
     }

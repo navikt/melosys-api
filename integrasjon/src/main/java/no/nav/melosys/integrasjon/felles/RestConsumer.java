@@ -7,10 +7,14 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.integrasjon.aad.AzureADConsumerImpl;
 import no.nav.melosys.integrasjon.felles.mdc.MDCOperations;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
+import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
+
+import javax.ws.rs.NotSupportedException;
 
 public interface RestConsumer {
 
@@ -20,12 +24,15 @@ public interface RestConsumer {
                 .getBytes(StandardCharsets.UTF_8));
     }
 
-    default String getAuth() {
+    default String getAuth(String scope) {
         if (isSystem()) {
             return basicAuth();
-        } else {
-            return "Bearer " + SubjectHandler.getInstance().getOidcTokenString();
         }
+        if (scope == null) {
+            throw new NotSupportedException("Prøver å hente autoriseringstoken for bruker, men ingen scope har blitt angitt.");
+        }
+        // Prøver å få token fra STS.. HER MÅ VI ALTSÅ FÅ NY TOKEN FRA AZURE AD
+        return "Bearer " + SubjectHandler.getInstance().getOidcTokenString();
     }
 
     default String getCallID() {
@@ -45,7 +52,7 @@ public interface RestConsumer {
     }
 
     default boolean isSystem() {
-        return false;
+        return ThreadLocalAccessInfo.shouldUseSystemToken();
     }
 
     default RuntimeException tilException(String feilmelding, HttpStatus status) {

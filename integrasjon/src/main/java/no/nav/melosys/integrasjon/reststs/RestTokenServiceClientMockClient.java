@@ -55,7 +55,7 @@ public class RestTokenServiceClientMockClient implements RestStsClient {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
         headers.add(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE);
-        headers.add(HttpHeaders.AUTHORIZATION, getAuth());
+        headers.add(HttpHeaders.AUTHORIZATION, getAuth(null));
 
         HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(params, headers);
 
