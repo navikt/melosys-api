@@ -29,6 +29,7 @@ import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import org.assertj.core.api.Assertions.assertThat
 import org.awaitility.Awaitility
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.context.event.ApplicationReadyEvent
@@ -42,6 +43,7 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 
+@Disabled
 @ActiveProfiles("test")
 @SpringBootTest(
     classes = [Application::class, SaksflytTestConfig::class],
