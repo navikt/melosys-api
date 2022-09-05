@@ -2,6 +2,7 @@ package no.nav.melosys.service.kontroll.regler;
 
 import no.nav.melosys.domain.ErPeriode;
 import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.PeriodeOmLovvalg;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.integrasjon.medl.PeriodestatusMedl;
 
@@ -22,7 +23,7 @@ public final class OverlappendeMedlemskapsperioderRegler {
     }
 
     public static boolean harOverlappendeMedlemsperiode(MedlemskapDokument medlemskapDokument,
-                                                        Lovvalgsperiode kontrollperiode,
+                                                        PeriodeOmLovvalg kontrollperiode,
                                                         Lovvalgsperiode opprinneligPeriodeTilKontrollperiode) {
         return medlemskapDokument.hentMedlemsperioderHvorKildeIkkeLånekassen().stream().anyMatch(
             medlemsperiode -> !PeriodestatusMedl.AVST.getKode().equals(medlemsperiode.status)

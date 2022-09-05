@@ -23,6 +23,7 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_t
 import no.nav.melosys.integrasjon.medl.PeriodestatusMedl;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory;
 import no.nav.melosys.service.validering.Kontrollfeil;
@@ -47,6 +48,8 @@ class KontrollTest {
     private LovvalgsperiodeService lovvalgsperiodeService;
     @Mock
     private PersondataFasade persondataFasade;
+    @Mock
+    private BehandlingsresultatService behandlingsresultatService;
     private final long behandlingID = 1L;
     private final Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
     private final MedlemskapDokument medlemskapDokument = new MedlemskapDokument();
@@ -66,7 +69,7 @@ class KontrollTest {
         when(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling);
 
 
-        kontroll = new Kontroll(behandlingService, lovvalgsperiodeService, persondataFasade);
+        kontroll = new Kontroll(behandlingService, lovvalgsperiodeService, persondataFasade, behandlingsresultatService);
     }
 
     @Test

@@ -20,8 +20,7 @@ class BehandlingsgrunnlagTjeneste(private val behandlingsgrunnlagService: Behand
                                   private val aksesskontroll: Aksesskontroll) {
     @GetMapping("/{behandlingID}")
     fun hentBehandlingsgrunnlag(
-            @PathVariable(value = "behandlingID") behandlingID: Long
-    ): ResponseEntity<BehandlingsgrunnlagGetDto> {
+        @PathVariable(value = "behandlingID") behandlingID: Long): ResponseEntity<BehandlingsgrunnlagGetDto> {
         aksesskontroll.autoriser(behandlingID)
         val behandlingsgrunnlag = behandlingsgrunnlagService.hentBehandlingsgrunnlag(behandlingID)
         return ResponseEntity.ok(BehandlingsgrunnlagGetDto(behandlingsgrunnlag))
@@ -29,9 +28,8 @@ class BehandlingsgrunnlagTjeneste(private val behandlingsgrunnlagService: Behand
 
     @PostMapping("/{behandlingID}")
     fun oppdaterBehandlingsgrunnlag(
-            @PathVariable(value = "behandlingID") behandlingID: Long,
-            @RequestBody behandlingsgrunnlagPostDto: BehandlingsgrunnlagPostDto
-    ): ResponseEntity<BehandlingsgrunnlagGetDto> {
+        @PathVariable(value = "behandlingID") behandlingID: Long,
+        @RequestBody behandlingsgrunnlagPostDto: BehandlingsgrunnlagPostDto): ResponseEntity<BehandlingsgrunnlagGetDto> {
         aksesskontroll.autoriserSkriv(behandlingID)
         val behandlingsgrunnlag = behandlingsgrunnlagService.oppdaterBehandlingsgrunnlag(behandlingID, behandlingsgrunnlagPostDto.data)
         return ResponseEntity.ok(BehandlingsgrunnlagGetDto(behandlingsgrunnlag))
@@ -39,13 +37,12 @@ class BehandlingsgrunnlagTjeneste(private val behandlingsgrunnlagService: Behand
 
     @PostMapping("/{behandlingID}/periodeOgLand")
     fun oppdaterBehandlingsgrunnlagPeriodeOgLand(
-            @PathVariable(value = "behandlingID") behandlingID: Long,
-            @RequestBody periodeOgLandPostDto: PeriodeOgLandPostDto
-    ): ResponseEntity<Void> {
+        @PathVariable(value = "behandlingID") behandlingID: Long,
+        @RequestBody periodeOgLandPostDto: PeriodeOgLandPostDto): ResponseEntity<Void> {
         aksesskontroll.autoriserSkriv(behandlingID)
         behandlingsgrunnlagService.oppdaterBehandlingsgrunnlagPeriodeOgLand(behandlingID,
-                Periode(periodeOgLandPostDto.fom(), periodeOgLandPostDto.tom()),
-                Soeknadsland(periodeOgLandPostDto.land(), false))
+            Periode(periodeOgLandPostDto.fom(), periodeOgLandPostDto.tom()),
+            Soeknadsland(periodeOgLandPostDto.land(), false))
         return ResponseEntity.noContent().build()
     }
 }
