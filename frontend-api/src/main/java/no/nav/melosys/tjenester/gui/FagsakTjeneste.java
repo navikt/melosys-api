@@ -283,6 +283,7 @@ public class FagsakTjeneste {
             behandlingOversiktDto.setBehandlingstema(behandling.getTema());
             behandlingOversiktDto.setOpprettetDato(behandling.getRegistrertDato());
             behandlingOversiktDto.setBehandlingsresultattype(behandlingsresultat.getType());
+            behandlingOversiktDto.setSvarFrist(behandling.getDokumentasjonSvarfristDato());
 
             setPeriodeOpplysninger(behandling, behandlingOversiktDto);
         }
