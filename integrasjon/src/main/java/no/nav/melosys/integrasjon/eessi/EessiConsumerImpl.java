@@ -1,6 +1,7 @@
 package no.nav.melosys.integrasjon.eessi;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -18,7 +19,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 
@@ -146,5 +149,13 @@ public class EessiConsumerImpl implements EessiConsumer, JsonRestIntegrasjon {
             log.warn("Kunne ikke hente ut feilmelding etter kall mot melosys-eessi");
             return ex.getMessage();
         }
+    }
+
+    @Override
+    public HttpHeaders getDefaultHeaders() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        return headers;
     }
 }

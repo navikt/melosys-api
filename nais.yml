@@ -46,6 +46,7 @@ spec:
         - application: {{APP_NAME_OPPGAVE}}
         - application: {{APP_NAME_PDL}}
         - application: {{APP_NAME_SAF}}
+        - application: {{APP_NAME_EESSI}}
   webproxy: true
   vault:
     enabled: true

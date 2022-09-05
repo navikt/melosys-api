@@ -3,6 +3,7 @@ package no.nav.melosys.integrasjon.felles;
 import java.io.IOException;
 import javax.annotation.Nonnull;
 
+import no.nav.melosys.integrasjon.aad.AzureADConsumerImpl;
 import no.nav.melosys.integrasjon.reststs.RestStsClient;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo;
@@ -18,8 +19,13 @@ import org.springframework.util.ObjectUtils;
 public class GenericContextClientRequestInterceptor implements ClientHttpRequestInterceptor {
     private final RestStsClient restStsClient;
 
-    public GenericContextClientRequestInterceptor(RestStsClient restStsClient) {
+    private final AzureADConsumerImpl azureADConsumer;
+
+
+    public GenericContextClientRequestInterceptor(RestStsClient restStsClient,
+                                                  AzureADConsumerImpl azureADConsumer) {
         this.restStsClient = restStsClient;
+        this.azureADConsumer = azureADConsumer;
     }
 
     @Override
@@ -33,8 +39,15 @@ public class GenericContextClientRequestInterceptor implements ClientHttpRequest
             request.getHeaders().add(HttpHeaders.AUTHORIZATION, "Bearer " + restStsClient.collectToken());
             return execution.execute(request, body);
         }
+        //TODO: SER UT SOM DET BARE ER EESSI SOM BRUKER DETTE
 
         String oidcToken = SubjectHandler.getInstance().getOidcTokenString();
+
+        String scope = "api://dev-fss.teammelosys.melosys-eessi-q1/.default";
+        String issuedToken = azureADConsumer.hentToken(oidcToken, scope);
+
+        System.out.println("Kaller på eessi (?). Scope for dette er: \"" + scope + "\"");
+
         if (ObjectUtils.isEmpty(oidcToken)) {
             throw new IllegalStateException("Finner ingen bruker-kontekst");
         }
