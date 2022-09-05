@@ -45,6 +45,7 @@ spec:
       rules:
         - application: {{APP_NAME_OPPGAVE}}
         - application: {{APP_NAME_PDL}}
+        - application: {{APP_NAME_SAF}}
   webproxy: true
   vault:
     enabled: true
