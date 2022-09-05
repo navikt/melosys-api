@@ -46,7 +46,7 @@ public class GenericContextExchangeFilter implements ExchangeFilterFunction {
         if (clientRequest.url().getHost().toString().contains("oppgave")) {
             scope = "api://dev-fss.oppgavehandtering.oppgave-q1/.default";
         } else if (clientRequest.url().getHost().toString().contains("saf")) {
-            scope = "api://dev-fss.teamdokumenthandtering.saf-q1/.default";
+            scope = "q1api://dev-fss.teamdokumenthandtering.saf/.default";
         }
 
         System.out.println("Kaller på " + clientRequest.url().toString() + ". Scope for dette er: \""+scope+"\"");
