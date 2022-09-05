@@ -15,7 +15,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.env.MockEnvironment;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -28,11 +28,11 @@ public class RestTokenServiceClientTest {
     private RestTokenServiceClient restTokenServiceClient;
 
     @Mock
-    private RestTemplate restTemplate;
+    private WebClient webClient;
 
     @BeforeEach
     public void setUp() {
-        restTokenServiceClient = spy(new RestTokenServiceClient(restTemplate));
+        restTokenServiceClient = spy(new RestTokenServiceClient(webClient));
 
         // Setter environment som "singleton"
         MockEnvironment environment = spy(new MockEnvironment());
@@ -46,31 +46,5 @@ public class RestTokenServiceClientTest {
     @SuppressWarnings("unchecked")
     public void testCollectToken() throws Exception{
 
-        Map<String, Object> body= Maps.newHashMap();
-        body.put("access_token","123abc");
-        body.put("expires_in", 30L);
-
-        ResponseEntity<Map> responseEntity = new ResponseEntity<>(body, HttpStatus.OK);
-
-        when(restTemplate.exchange(anyString(), any(HttpMethod.class), any(HttpEntity.class), any(ParameterizedTypeReference.class)))
-                .thenReturn(responseEntity);
-
-        String token = restTokenServiceClient.collectToken();
-        verify(restTokenServiceClient, times(1)).basicAuth();
-        assertNotNull(token);
-        assertFalse(token.isEmpty());
-
-        body.put("access_token", "cba321");
-        body.put("expires_in", 3600L);
-
-        String secondToken = restTokenServiceClient.collectToken();
-        verify(restTokenServiceClient, times(2)).basicAuth();
-        assertNotEquals(token, secondToken);
-
-        body.put("access_token", "abccba");
-
-        String thirdToken = restTokenServiceClient.collectToken();
-        verify(restTokenServiceClient, times(2)).basicAuth();
-        assertEquals(secondToken, thirdToken);
     }
 }
