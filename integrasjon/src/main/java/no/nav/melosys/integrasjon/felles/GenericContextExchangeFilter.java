@@ -49,10 +49,11 @@ public class GenericContextExchangeFilter implements ExchangeFilterFunction {
             scope = "api://dev-fss.teamdokumenthandtering.saf/.default";
         }
 
-        System.out.println("Kaller på " + clientRequest.url().toString() + ". Scope for dette er: \""+scope+"\"");
 
         String issuedToken = scope.isEmpty() ? oidcTokenString : azureADConsumer.hentToken(oidcTokenString, scope);
 
+        System.out.println("Kaller på " + clientRequest.url().toString() + ". Scope for dette er: \"" + scope + "\"");
+        
         return exchangeFunction.exchange(
             ClientRequest.from(clientRequest)
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + issuedToken)

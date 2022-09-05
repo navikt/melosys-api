@@ -31,12 +31,13 @@ public class PDLAuthFilter implements ExchangeFilterFunction {
     @Override
     public Mono<ClientResponse> filter(@Nonnull ClientRequest clientRequest,
                                        @Nonnull ExchangeFunction exchangeFunction) {
-        return exchangeFunction.exchange(
-            ClientRequest.from(clientRequest)
-                .header(HttpHeaders.AUTHORIZATION, getTokenSupplier(restStsClient).get())
-                .header(NAV_CONSUMER_TOKEN, restStsClient.bearerToken())
-                .build()
-        );
+        ClientRequest.Builder requestBuilder = ClientRequest.from(clientRequest).header(HttpHeaders.AUTHORIZATION, getTokenSupplier(restStsClient).get());
+
+        if (ThreadLocalAccessInfo.shouldUseSystemToken()) {
+            requestBuilder = requestBuilder.header(NAV_CONSUMER_TOKEN, restStsClient.bearerToken());
+        }
+
+        return exchangeFunction.exchange(requestBuilder.build());
     }
 
     private Supplier<String> getTokenSupplier(RestStsClient restStsClient) {
