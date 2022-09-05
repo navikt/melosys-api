@@ -52,7 +52,7 @@ public class GenericContextClientRequestInterceptor implements ClientHttpRequest
             throw new IllegalStateException("Finner ingen bruker-kontekst");
         }
 
-        request.getHeaders().add(HttpHeaders.AUTHORIZATION, "Bearer " + oidcToken);
+        request.getHeaders().add(HttpHeaders.AUTHORIZATION, "Bearer " + issuedToken);
         return execution.execute(request, body);
     }
 }
