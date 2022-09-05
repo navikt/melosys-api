@@ -17,7 +17,7 @@ public class OrganisasjonConsumerAutoTokenAware implements OrganisasjonConsumer 
 
     public OrganisasjonConsumerAutoTokenAware(OrganisasjonConsumerConfig config, StsWrapper stsWrapper) {
         this.stsWrapper = stsWrapper;
-        saksbehandlerPort = wrapWithSts(config.getPort(), NAVSTSClient.StsClientType.SECURITYCONTEXT_TIL_SAML);
+        saksbehandlerPort = config.getPort();
         systemPort = wrapWithSts(config.getPort(), NAVSTSClient.StsClientType.SYSTEM_SAML);
     }
 
