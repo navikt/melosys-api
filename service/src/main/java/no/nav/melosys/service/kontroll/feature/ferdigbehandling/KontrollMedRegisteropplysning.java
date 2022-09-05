@@ -2,7 +2,7 @@ package no.nav.melosys.service.kontroll.feature.ferdigbehandling;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.PeriodeOmLovvalg;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.exception.ValideringException;
@@ -35,9 +35,9 @@ class KontrollMedRegisteropplysning {
     }
 
     public void kontroller(long behandlingId, Behandlingsresultattyper behandlingsresultattype) throws ValideringException {
-        var behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingId);
-        var sakstype = behandling.getFagsak().getType();
-        var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingId);
+        Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingId);
+        Sakstyper sakstype = behandling.getFagsak().getType();
+        Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingId);
         kontrollerVedtak(behandling, behandlingsresultat, sakstype, behandlingsresultattype);
     }
 
@@ -49,7 +49,7 @@ class KontrollMedRegisteropplysning {
     }
 
     private void hentNyeRegisteropplysninger(Behandlingsresultat behandlingsresultat, Behandling behandling) {
-        Lovvalgsperiode lovvalgsperiode = behandlingsresultat.hentValidertLovvalgsperiode();
+        PeriodeOmLovvalg lovvalgsperiode = behandlingsresultat.hentValidertPeriodeOmLovvalg();
         String fnr = persondataFasade.hentFolkeregisterident(behandling.getFagsak().hentBrukersAktørID());
 
         registeropplysningerService.hentOgLagreOpplysninger(

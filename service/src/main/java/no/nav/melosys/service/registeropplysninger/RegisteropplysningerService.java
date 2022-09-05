@@ -91,7 +91,6 @@ public class RegisteropplysningerService {
             log.info("Var ingen registeropplysninger å hente for behandling {}", registeropplysningerRequest.getBehandlingID());
             return;
         }
-        ;
 
         Behandling behandling = behandlingService.hentBehandling(registeropplysningerRequest.getBehandlingID());
 

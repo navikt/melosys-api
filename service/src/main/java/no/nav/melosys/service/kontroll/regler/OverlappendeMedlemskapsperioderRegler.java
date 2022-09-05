@@ -27,8 +27,8 @@ public final class OverlappendeMedlemskapsperioderRegler {
         return medlemskapDokument.hentMedlemsperioderHvorKildeIkkeLånekassen().stream().anyMatch(
             medlemsperiode -> !PeriodestatusMedl.AVST.getKode().equals(medlemsperiode.status)
                 && PeriodeRegler.periodeOverlapper(kontrollperiode, medlemsperiode.getPeriode())
-                && (kontrollperiode.erNyPeriodeForMedl() || !kontrollperiode.harSammeMedlID(medlemsperiode.id))
-                && (opprinneligPeriodeTilKontrollperiode == null || !opprinneligPeriodeTilKontrollperiode.harSammeMedlID(medlemsperiode.id)
+                && (kontrollperiode.erNyPeriodeForMedl() || kontrollperiode.harForskjelligMedlID(medlemsperiode.id))
+                && (opprinneligPeriodeTilKontrollperiode == null || opprinneligPeriodeTilKontrollperiode.harForskjelligMedlID(medlemsperiode.id)
             ));
     }
 }
