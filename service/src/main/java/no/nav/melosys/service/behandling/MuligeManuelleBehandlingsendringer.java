@@ -103,7 +103,7 @@ public class MuligeManuelleBehandlingsendringer {
         }
     }
 
-    public static void validerNyttTemaMulig(Behandling behandling, Behandlingsresultat behandlingsresultat, Behandlingstema tema, Boolean visNyeBehandlingstema) {
+    public static void validerNyttTemaMulig(Behandling behandling, Behandlingsresultat behandlingsresultat, Behandlingstema tema, boolean visNyeBehandlingstema) {
         if (!hentMuligeBehandlingstema(behandling, behandlingsresultat, visNyeBehandlingstema).contains(tema)) {
             throw new FunksjonellException(String.format("Behandlingen kan ikke endres til tema %s. Gyldige temaer for behandling %s er %s",
                 tema, behandling.getId(), hentMuligeBehandlingstema(behandling, behandlingsresultat, visNyeBehandlingstema)));
