@@ -489,6 +489,36 @@ class JournalfoeringServiceTest {
         var behandling = new Behandling();
         behandling.setStatus(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
         var fagsak = new Fagsak();
+        fagsak.setType(Sakstyper.FTRL);
+        behandling.setFagsak(fagsak);
+        behandling.setType(Behandlingstyper.SOEKNAD);
+        behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
+        fagsak.getBehandlinger().add(behandling);
+
+        when(joarkFasade.hentJournalpost(tilordneDto.getJournalpostID())).thenReturn(journalpost);
+        when(fagsakService.hentFagsak(MELOSYS_SAKSNUMMER)).thenReturn(fagsak);
+        when(prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_NY_VURDERING, tilordneDto))
+            .thenReturn(new Prosessinstans());
+
+        journalfoeringService.journalførOgOpprettNyVurdering(tilordneDto);
+
+        verify(prosessinstansService).lagre(prosessinstansArgumentCaptor.capture());
+        var lagretProsessinstans = prosessinstansArgumentCaptor.getValue();
+        assertThat(lagretProsessinstans.getBehandling()).isNull();
+        assertThat(lagretProsessinstans.getData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.class).getKode())
+            .isEqualTo(tilordneDto.getBehandlingstypeKode());
+        assertThat(lagretProsessinstans.getData(ProsessDataKey.SAKSNUMMER)).isEqualTo(tilordneDto.getSaksnummer());
+        assertThat(lagretProsessinstans.getData(ProsessDataKey.JFR_INGEN_VURDERING, Boolean.class))
+            .isEqualTo(tilordneDto.isIngenVurdering());
+    }
+
+    @Test
+    void journalførOgOpprettNyVurderingIkkeKopierBehandling_altOK_prosessinstansOpprettet() {
+        tilordneDto.setSaksnummer(MELOSYS_SAKSNUMMER);
+
+        var behandling = new Behandling();
+        behandling.setStatus(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
+        var fagsak = new Fagsak();
         fagsak.setType(Sakstyper.EU_EOS);
         behandling.setFagsak(fagsak);
         fagsak.getBehandlinger().add(behandling);
