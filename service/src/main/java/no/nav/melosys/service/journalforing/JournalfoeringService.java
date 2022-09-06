@@ -279,13 +279,16 @@ public class JournalfoeringService {
     }
 
     private boolean sjekkOmTidligereBehandlingSkalKopieres(Behandling behandling) {
-        Sakstyper sakstype = behandling.getFagsak().getType();
-        if (sakstype == Sakstyper.EU_EOS || sakstype == Sakstyper.FTRL) return false;
-
         Behandlingstyper behandlingType = behandling.getType();
+        Sakstyper sakstype = behandling.getFagsak().getType();
+        Behandlingstema behandlingstema = behandling.getTema();
+
         if (behandlingType == Behandlingstyper.HENVENDELSE || behandlingType == Behandlingstyper.KLAGE) return false;
 
-        return switch (behandling.getTema()) {
+        if (sakstype == Sakstyper.EU_EOS) return false;
+        if (sakstype == Sakstyper.FTRL && behandlingstema == Behandlingstema.YRKESAKTIV) return false;
+
+        return switch (behandlingstema) {
             case ARBEID_KUN_NORGE,
                 IKKE_YRKESAKTIV,
                 PENSJONIST,
