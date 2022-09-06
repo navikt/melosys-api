@@ -36,7 +36,7 @@ public class OpprettNyBehandling implements StegBehandler {
 
     @Override
     public void utfør(Prosessinstans prosessinstans) {
-        String saksnummer = prosessinstans.getData(SAKSNUMMER, String.class);
+        String saksnummer = prosessinstans.getData(SAKSNUMMER);
         String initierendeJournalpostId = prosessinstans.getData(JOURNALPOST_ID);
         String initierendeDokumentId = prosessinstans.getData(DOKUMENT_ID);
         Behandlingstyper behandlingstype = prosessinstans.getData(BEHANDLINGSTYPE, Behandlingstyper.class);
