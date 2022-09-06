@@ -39,7 +39,7 @@ import static no.nav.melosys.metrics.MetrikkerNavn.*;
 @Service
 public class BehandlingService {
     private static final Logger log = LoggerFactory.getLogger(BehandlingService.class);
-    
+
     private final BehandlingRepository behandlingRepository;
     private final TidligereMedlemsperiodeRepository tidligereMedlemsperiodeRepository;
     private final BehandlingsresultatService behandlingsresultatService;
@@ -144,7 +144,7 @@ public class BehandlingService {
     public void endreBehandlingstemaTilBehandling(long behandlingID, Behandlingstema nyttTema) {
         Behandling behandling = hentBehandling(behandlingID);
         var behandlingsgrunnlag = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
-        if (MuligeManuelleBehandlingsendringer.hentMuligeBehandlingstema(behandling, behandlingsgrunnlag).contains(nyttTema)) {
+        if (MuligeManuelleBehandlingsendringer.hentMuligeBehandlingstema(behandling, behandlingsgrunnlag, unleash.isEnabled("melosys.behandle_alle_saker")).contains(nyttTema)) {
             behandling.setTema(nyttTema);
 
             tilbakestillBehandlingsgrunnlag(behandling);
@@ -412,7 +412,7 @@ public class BehandlingService {
     public Set<Behandlingstema> hentMuligeBehandlingstema(long behandlingID) {
         var behandling = hentBehandling(behandlingID);
         var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
-        return MuligeManuelleBehandlingsendringer.hentMuligeBehandlingstema(behandling, behandlingsresultat);
+        return MuligeManuelleBehandlingsendringer.hentMuligeBehandlingstema(behandling, behandlingsresultat, unleash.isEnabled("melosys.behandle_alle_saker"));
     }
 
     public Set<Behandlingstyper> hentMuligeTyper(long behandlingID) {
@@ -444,7 +444,7 @@ public class BehandlingService {
 
     private boolean saksbehandlerKanEndreTema(Behandling behandling, Behandlingstema tema) {
         var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
-        MuligeManuelleBehandlingsendringer.validerNyttTemaMulig(behandling, behandlingsresultat, tema);
+        MuligeManuelleBehandlingsendringer.validerNyttTemaMulig(behandling, behandlingsresultat, tema, unleash.isEnabled("melosys.behandle_alle_saker"));
         return behandlingsresultat.erIkkeArtikkel16MedSendtAnmodningOmUnntak();
     }
 

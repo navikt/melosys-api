@@ -56,7 +56,7 @@ public class MuligeManuelleBehandlingsendringer {
         };
     }
 
-    public static Set<Behandlingstema> hentMuligeBehandlingstema(Behandling behandling, Behandlingsresultat behandlingsresultat) {
+    public static Set<Behandlingstema> hentMuligeBehandlingstema(Behandling behandling, Behandlingsresultat behandlingsresultat, Boolean visNyeBehandlingstema) {
         if (behandling.kanIkkeEndres()) {
             return Collections.emptySet();
         }
@@ -70,7 +70,14 @@ public class MuligeManuelleBehandlingsendringer {
                 default -> Collections.emptySet();
             };
         } else if (kanOppdatereBehandlingstema && erGyldigBehandlingAvSøknad(behandling.getTema())) {
-            return BEHANDLINGSTEMA_SØKNAD.stream().filter(tema -> tema != behandling.getTema()).collect(Collectors.toSet());
+            if (Boolean.TRUE.equals(visNyeBehandlingstema)) {
+                return BEHANDLINGSTEMA_SØKNAD.stream().filter(tema -> tema != behandling.getTema()).collect(Collectors.toSet());
+            }
+            return BEHANDLINGSTEMA_SØKNAD.stream()
+                .filter(tema -> tema != behandling.getTema())
+                .filter(tema -> tema != ARBEID_KUN_NORGE) // Filtrering på nye tema kan fjernes når melosus.sakstema og melosys.behandle_alle_saker skal prodsettes
+                .filter(tema -> tema != ARBEID_TJENESTEPERSON_ELLER_FLY)
+                .collect(Collectors.toSet());
         } else if (kanOppdatereBehandlingstema && erBehandlingAvSedForespørsler(behandling.getTema())) {
             return BEHANDLINGSTEMA_SED_FORESPØRSEL.stream().filter(tema -> tema != behandling.getTema()).collect(Collectors.toSet());
         } else {
@@ -96,10 +103,10 @@ public class MuligeManuelleBehandlingsendringer {
         }
     }
 
-    public static void validerNyttTemaMulig(Behandling behandling, Behandlingsresultat behandlingsresultat, Behandlingstema tema) {
-        if (!hentMuligeBehandlingstema(behandling, behandlingsresultat).contains(tema)) {
+    public static void validerNyttTemaMulig(Behandling behandling, Behandlingsresultat behandlingsresultat, Behandlingstema tema, Boolean visNyeBehandlingstema) {
+        if (!hentMuligeBehandlingstema(behandling, behandlingsresultat, visNyeBehandlingstema).contains(tema)) {
             throw new FunksjonellException(String.format("Behandlingen kan ikke endres til tema %s. Gyldige temaer for behandling %s er %s",
-                tema, behandling.getId(), hentMuligeBehandlingstema(behandling, behandlingsresultat)));
+                tema, behandling.getId(), hentMuligeBehandlingstema(behandling, behandlingsresultat, visNyeBehandlingstema)));
         }
     }
 
