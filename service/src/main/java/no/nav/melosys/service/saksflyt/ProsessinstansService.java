@@ -400,7 +400,7 @@ public class ProsessinstansService {
                 .medType(ProsessType.MOTTAK_SOKNAD_ALTINN)
                 .build();
             prosessinstans.setData(ProsessDataKey.MOTTATT_SOKNAD_ID, søknadMottatt.getSoknadID());
-            prosessinstans.setData(ProsessDataKey.SKAL_SENDES_FORVALTNINGSMELDING, !søknadMottatt.erGammel());
+            prosessinstans.setData(ProsessDataKey.SKAL_SENDES_FORVALTNINGSMELDING, !søknadMottatt.erForGammelTilForvaltningsmelding());
 
             lagre(prosessinstans);
         }

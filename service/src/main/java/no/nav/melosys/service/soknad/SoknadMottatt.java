@@ -31,7 +31,7 @@ public class SoknadMottatt {
             '}';
     }
 
-    public boolean erGammel() {
+    public boolean erForGammelTilForvaltningsmelding() {
         return ChronoUnit.DAYS.between(occuredOn, ZonedDateTime.now()) >= 7;
     }
 }

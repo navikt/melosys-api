@@ -12,13 +12,13 @@ class SoknadMottattTest {
     void mindreEnn7dagerSidenMottak_erIkkeGammel() {
         SoknadMottatt soknadMottatt = new SoknadMottatt("ID", ZonedDateTime.now().minusDays(6).minusHours(23));
 
-        assertThat(soknadMottatt.erGammel()).isFalse();
+        assertThat(soknadMottatt.erForGammelTilForvaltningsmelding()).isFalse();
     }
 
     @Test
     void merEnn7dagerSidenMottak_erGammel() {
         SoknadMottatt soknadMottatt = new SoknadMottatt("ID", ZonedDateTime.now().minusDays(7).minusHours(1));
 
-        assertThat(soknadMottatt.erGammel()).isTrue();
+        assertThat(soknadMottatt.erForGammelTilForvaltningsmelding()).isTrue();
     }
 }
