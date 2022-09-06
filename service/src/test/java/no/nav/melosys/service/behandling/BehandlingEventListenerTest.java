@@ -54,6 +54,7 @@ class BehandlingEventListenerTest {
 
     @BeforeEach
     public void setup() {
+        unleash.enableAll();
         behandling.setId(BEHANDLING_ID);
         behandlingEventListener = new BehandlingEventListener(behandlingService, oppgaveService, unleash);
     }
@@ -118,8 +119,6 @@ class BehandlingEventListenerTest {
 
     @Test
     void behandlingEndret_oppdatererOppgave_medRiktigData() {
-        unleash.enableAll();
-
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer(FAGSAKSNUMMER);
         fagsak.setType(Sakstyper.EU_EOS);
@@ -139,6 +138,36 @@ class BehandlingEventListenerTest {
         behandlingEventListener.behandlingEndret(behandlingEndretAvSaksbehandlerEvent);
 
         Oppgave behandlingsOppgaveForType = OppgaveFactory.lagBehandlingsoppgave(fagsak, behandling).build();
+        verify(oppgaveService).oppdaterOppgave(eq(OPPGAVE_ID), oppgaveOppdateringCaptor.capture());
+        OppgaveOppdatering capturedOppgaveOppdatering = oppgaveOppdateringCaptor.getValue();
+        assertThat(capturedOppgaveOppdatering.getBehandlingstema()).isEqualTo(behandlingsOppgaveForType.getBehandlingstema());
+        assertThat(capturedOppgaveOppdatering.getBehandlingstype()).isEqualTo(behandlingsOppgaveForType.getBehandlingstype());
+        assertThat(capturedOppgaveOppdatering.getTema()).isEqualTo(behandlingsOppgaveForType.getTema());
+        assertThat(capturedOppgaveOppdatering.getFristFerdigstillelse()).isEqualTo(LocalDate.of(2022, 3, 7));
+    }
+
+    @Test
+    void behandlingEndret_oppdatererOppgave_medRiktigData_toggle() {
+        unleash.disableAll();
+
+        Fagsak fagsak = new Fagsak();
+        fagsak.setSaksnummer(FAGSAKSNUMMER);
+        behandling.setType(Behandlingstyper.NY_VURDERING);
+        behandling.setTema(Behandlingstema.IKKE_YRKESAKTIV);
+        behandling.setBehandlingsfrist(LocalDate.of(2022, 3, 7));
+        behandling.setFagsak(fagsak);
+        when(behandlingService.hentBehandling(BEHANDLING_ID)).thenReturn(behandling);
+
+        BehandlingEndretAvSaksbehandlerEvent behandlingEndretAvSaksbehandlerEvent = new BehandlingEndretAvSaksbehandlerEvent(
+            BEHANDLING_ID,
+            behandling
+        );
+        Oppgave oppgave = new Oppgave.Builder().setOppgaveId(OPPGAVE_ID).build();
+        when(oppgaveService.finnÅpenOppgaveMedFagsaksnummer(FAGSAKSNUMMER)).thenReturn(Optional.of(oppgave));
+
+        behandlingEventListener.behandlingEndret(behandlingEndretAvSaksbehandlerEvent);
+
+        Oppgave behandlingsOppgaveForType = OppgaveFactory.lagBehandlingsOppgaveForType(behandling.getTema(), behandling.getType()).build();
         verify(oppgaveService).oppdaterOppgave(eq(OPPGAVE_ID), oppgaveOppdateringCaptor.capture());
         OppgaveOppdatering capturedOppgaveOppdatering = oppgaveOppdateringCaptor.getValue();
         assertThat(capturedOppgaveOppdatering.getBehandlingstema()).isEqualTo(behandlingsOppgaveForType.getBehandlingstema());

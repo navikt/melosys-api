@@ -144,25 +144,29 @@ public class OppgaveService {
         return fagsakService.hentFagsak(saksnummer).hentSistAktivBehandling();
     }
 
-    public void opprettEllerGjenbrukBehandlingsoppgave(Behandling behandling, String journalpostID, @Nullable String aktørID, @Nullable String tilordnetRessurs, @Nullable String orgnr) {
+    public void opprettEllerGjenbrukBehandlingsoppgave(Behandling behandling, String journalpostID, @Nullable String aktørID, @Nullable String tilordnetRessurs, @Nullable @Deprecated String beskrivelse, @Nullable String orgnr) {
 
         Optional<Oppgave> eksisterendeOppgave = finnÅpenOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer());
 
         if (eksisterendeOppgave.isEmpty()) {
-            Oppgave oppgave = (
-                unleash.isEnabled("melosys.oppgave.oppretting")
+            var oppgaveToggle = unleash.isEnabled("melosys.oppgave.oppretting");
+            var oppgaveBuilder = (
+                oppgaveToggle
                     ? OppgaveFactory.lagBehandlingsoppgave(behandling)
                     : OppgaveFactory.lagBehandlingsOppgaveForType(behandling.getTema(), behandling.getType()))
                 .setTilordnetRessurs(tilordnetRessurs)
                 .setJournalpostId(journalpostID)
                 .setAktørId(aktørID)
                 .setOrgnr(orgnr)
-                .setSaksnummer(behandling.getFagsak().getSaksnummer())
-                .build();
+                .setSaksnummer(behandling.getFagsak().getSaksnummer());
+
+            if (!oppgaveToggle) {
+                oppgaveBuilder.setBeskrivelse(beskrivelse);
+            }
 
             String oppgaveID = StringUtils.isNotEmpty(aktørID) && harBeskyttelsesbehov(behandling.getId())
-                ? oppgaveFasade.opprettSensitivOppgave(oppgave)
-                : oppgaveFasade.opprettOppgave(oppgave);
+                ? oppgaveFasade.opprettSensitivOppgave(oppgaveBuilder.build())
+                : oppgaveFasade.opprettOppgave(oppgaveBuilder.build());
             log.info("Opprettet oppgave {} for behandling {}", oppgaveID, behandling.getId());
         } else if (tilordnetRessurs != null && !tilordnetRessurs.equals(eksisterendeOppgave.get().getTilordnetRessurs())) {
             log.info("Oppgave eksisterer, oppdaterer tilordnetRessurs for oppgave tilknyttet behandling {}", behandling.getId());
@@ -171,7 +175,21 @@ public class OppgaveService {
     }
 
     public void opprettEllerGjenbrukBehandlingsoppgave(Behandling behandling, String journalpostID, String aktørID, @Nullable String tilordnetRessurs) {
-        opprettEllerGjenbrukBehandlingsoppgave(behandling, journalpostID, aktørID, tilordnetRessurs, null);
+        opprettEllerGjenbrukBehandlingsoppgave(behandling, journalpostID, aktørID, tilordnetRessurs, lagOppgaveBeskrivelse(behandling), null);
+    }
+
+    /**
+     * @deprecated Forsvinner med toggle melosys.oppgave.oppretting
+     */
+    @Deprecated
+    private String lagOppgaveBeskrivelse(Behandling behandling) {
+        if (behandling.erElektroniskSøknad()) {
+            return "Mottatt elektronisk søknad";
+        }
+        if (behandling.erNyVurdering()) {
+            return "Ny vurdering";
+        }
+        return null;
     }
 
     public void opprettJournalføringsoppgave(String journalpostID, String aktørID) {
@@ -204,8 +222,9 @@ public class OppgaveService {
         Behandling behandling = fagsak.hentSistAktivBehandling();
         Optional<Oppgave> oppgave = finnSisteAvsluttetOppgaveMedFagsaksnummer(saksnummer);
         String tilordnetRessurs = oppgave.map(Oppgave::getTilordnetRessurs).orElse(null);
+        String beskrivelse = oppgave.map(Oppgave::getBeskrivelse).orElse(null);
 
-        opprettEllerGjenbrukBehandlingsoppgave(behandling, behandling.getInitierendeJournalpostId(), fagsak.hentBrukersAktørID(), tilordnetRessurs, null);
+        opprettEllerGjenbrukBehandlingsoppgave(behandling, behandling.getInitierendeJournalpostId(), fagsak.hentBrukersAktørID(), tilordnetRessurs, beskrivelse, null);
     }
 
     public boolean saksbehandlerErTilordnetOppgaveForSaksnummer(String saksbehandler, String saksnummer) {

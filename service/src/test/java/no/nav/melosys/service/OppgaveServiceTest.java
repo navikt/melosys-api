@@ -264,6 +264,23 @@ class OppgaveServiceTest {
     }
 
     @Test
+    void opprettEllerGjenbrukBehandlingsoppgave_oppgaveOpprettElektroniskSøknad_oppgaveBlirOpprettetMedBeskrvielse() {
+        unleash.disableAll();
+
+        final String mottattString = "Mottatt elektronisk søknad";
+        Behandling behandling = lagBehandling();
+        behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
+        behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(new BehandlingsgrunnlagData());
+        behandling.getBehandlingsgrunnlag().setType(Behandlingsgrunnlagtyper.SØKNAD_A1_UTSENDTE_ARBEIDSTAKERE_EØS);
+        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
+
+        oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", "Z99999");
+
+        verify(oppgaveFasade).opprettOppgave(oppgaveCaptor.capture());
+        assertThat(oppgaveCaptor.getValue().getBeskrivelse()).isEqualTo(mottattString);
+    }
+
+    @Test
     void opprettEllerGjenbrukBehandlingsoppgave_oppgaveNyVurdering_oppgaveBlirOpprettetMedBeskrivelse() {
         Behandling behandling = lagBehandling();
         behandling.setType(Behandlingstyper.NY_VURDERING);
@@ -273,6 +290,21 @@ class OppgaveServiceTest {
 
         verify(oppgaveFasade).opprettOppgave(oppgaveCaptor.capture());
         assertThat(oppgaveCaptor.getValue().getBeskrivelse()).isEqualTo(behandling.getTema().getBeskrivelse());
+    }
+
+    @Test
+    void opprettEllerGjenbrukBehandlingsoppgave_oppgaveNyVurdering_oppgaveBlirOpprettetMedBeskrvielse() {
+        unleash.disableAll();
+
+        final String mottattString = "Ny vurdering";
+        Behandling behandling = lagBehandling();
+        behandling.setType(Behandlingstyper.NY_VURDERING);
+        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
+
+        oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", "Z99999");
+
+        verify(oppgaveFasade).opprettOppgave(oppgaveCaptor.capture());
+        assertThat(oppgaveCaptor.getValue().getBeskrivelse()).isEqualTo(mottattString);
     }
 
     @Test

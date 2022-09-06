@@ -66,6 +66,28 @@ class GjenbrukOppgaveTest {
             .hasFieldOrPropertyWithValue("aktørId", "123321");
     }
 
+    @Test
+    void gjenbrukOppgave_utfør_oppdatererOppgave_toggle() {
+        unleash.disableAll();
+        final String oppgaveID = "1234";
+        final String saksnummer = "MEL-123";
+        final String oppgaveBeskrivelse = "jeg beskriver oppgave";
+
+        Oppgave eksisterendeOppgave = new Oppgave.Builder().setBeskrivelse(oppgaveBeskrivelse).build();
+        when(oppgaveService.hentOppgaveMedOppgaveID(eq(oppgaveID))).thenReturn(eksisterendeOppgave);
+
+        gjenbrukOppgave.utfør(lagProsessinstans(oppgaveID, saksnummer));
+        verify(oppgaveService).opprettOppgave(oppgaveCaptor.capture());
+        assertThat(oppgaveCaptor.getValue())
+            .hasFieldOrPropertyWithValue("saksnummer", saksnummer)
+            .hasFieldOrPropertyWithValue("behandlesAvApplikasjon", Fagsystem.MELOSYS)
+            .hasFieldOrPropertyWithValue("oppgavetype", Oppgavetyper.BEH_SAK_MK)
+            .hasFieldOrPropertyWithValue("behandlingstema", "ab0424")
+            .hasFieldOrPropertyWithValue("behandlingstype", "ae0034")
+            .hasFieldOrPropertyWithValue("tilordnetRessurs", "Deg321")
+            .hasFieldOrPropertyWithValue("aktørId", "123321");
+    }
+
     private static Prosessinstans lagProsessinstans(String oppgaveID, String saksnummer) {
 
         Aktoer bruker = new Aktoer();
