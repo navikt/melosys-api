@@ -31,9 +31,16 @@ import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*;
 public class Behandling extends RegistreringsInfo {
 
     public static final Set<Behandlingstema> BEHANDLINGSTEMA_SED_FORESPØRSEL = Set.of(ØVRIGE_SED_MED, ØVRIGE_SED_UFM,
-                                                                                      FORESPØRSEL_TRYGDEMYNDIGHET,
-                                                                                      TRYGDETID);
+        FORESPØRSEL_TRYGDEMYNDIGHET,
+        TRYGDETID);
 
+    private static final Set<Behandlingstema> BEHANDLINGSTEMA_SOM_IKKE_KAN_ENDRES = Set.of(
+        REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING,
+        REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE,
+        BESLUTNING_LOVVALG_NORGE,
+        BESLUTNING_LOVVALG_ANNET_LAND,
+        ANMODNING_OM_UNNTAK_HOVEDREGEL
+    );
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -225,6 +232,10 @@ public class Behandling extends RegistreringsInfo {
             .map(Saksopplysning::getDokument)
             .map(OrganisasjonDokument.class::cast)
             .toList();
+    }
+
+    public boolean kanIkkeEndres() {
+        return erInaktiv() || BEHANDLINGSTEMA_SOM_IKKE_KAN_ENDRES.contains(tema);
     }
 
     public SedDokument hentSedDokument() {

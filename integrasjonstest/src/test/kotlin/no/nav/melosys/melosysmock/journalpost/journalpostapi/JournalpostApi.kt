@@ -1,7 +1,7 @@
 package no.nav.melosys.melosysmock.journalpost.journalpostapi
 
+import no.nav.melosys.melosysmock.journalpost.JournalpostRepo
 import no.nav.melosys.melosysmock.journalpost.JournalpostMapper
-import no.nav.melosys.melosysmock.journalpost.JournalpostRepo.repo
 import no.nav.melosys.melosysmock.journalpost.intern_modell.JournalStatus
 import no.nav.security.token.support.core.api.Unprotected
 import org.springframework.web.bind.annotation.*
@@ -10,7 +10,7 @@ import java.time.LocalDateTime
 @RestController
 @RequestMapping("/rest/journalpostapi/v1")
 @Unprotected
-class JournalpostApi {
+class JournalpostApi(private val journalpostRepo: JournalpostRepo) {
 
     @PostMapping("journalpost")
     fun opprettJournalpost(
@@ -18,7 +18,7 @@ class JournalpostApi {
         @RequestParam("forsoekFerdigstill", required = false) forsoekFerdigstill: Boolean = false
     ): Map<String, Any> {
         return JournalpostMapper().tilModell(request, forsoekFerdigstill)
-            .also { repo[it.journalpostId] = it }
+            .also { journalpostRepo.add(it) }
             .let {
                 mapOf(
                     "journalpostId" to it.journalpostId,
@@ -33,18 +33,17 @@ class JournalpostApi {
         @PathVariable("journalpostID") journalpostID: String,
         @RequestBody request: OppdaterJournalpostRequest
     ) {
-        return (repo[journalpostID] ?: throw NoSuchElementException(""))
+        return (journalpostRepo.repo[journalpostID] ?: throw NoSuchElementException(""))
             .let { JournalpostMapper().oppdaterModell(request, it) }
-            .also { repo[journalpostID] = it }
+            .also { journalpostRepo.repo[journalpostID] = it }
             .let { mapOf("journalpostId" to it.journalpostId) }
     }
 
     @PatchMapping("/journalpost/{journalpostID}/ferdigstill")
     fun ferdigstillJournalpost(
         @PathVariable("journalpostID") journalpostID: String,
-        @RequestBody request: FerdigstillJournalpostRequest
-    ) {
-        val journalpost = repo[journalpostID] ?: throw NoSuchElementException("Ingen journalpost med id $journalpostID")
+        @RequestBody request: FerdigstillJournalpostRequest) {
+        val journalpost = journalpostRepo.repo[journalpostID] ?: throw NoSuchElementException("Ingen journalpost med id $journalpostID")
         journalpost.validerKanFerdigstilles()
         journalpost.journalfoertDato = LocalDateTime.now()
         journalpost.journalStatus = JournalStatus.J

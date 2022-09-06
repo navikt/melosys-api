@@ -9,6 +9,7 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.Representerer;
+import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -151,9 +152,16 @@ public class JournalfoeringService {
 
         Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(prosessType, journalfoeringDto);
         prosessinstans.setData(ProsessDataKey.SAKSTYPE, sakstype);
-        prosessinstans.setData(ProsessDataKey.SAKSTEMA, SakstypeSakstemaKobling.sakstema(sakstype, behandlingstema));
+        if (unleash.isEnabled("melosys.sakstema")) {
+            var sakstema = Sakstemaer.valueOf(journalfoeringDto.getFagsak().getSakstema());
+            var behandlingstype = Behandlingstyper.valueOf(journalfoeringDto.getBehandlingstypeKode());
+            prosessinstans.setData(ProsessDataKey.SAKSTEMA, sakstema);
+            prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, behandlingstype);
+        } else {
+            prosessinstans.setData(ProsessDataKey.SAKSTEMA, SakstypeSakstemaKobling.sakstema(sakstype, behandlingstema));
+            prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, erBehandlingAvSøknad(behandlingstema) ? Behandlingstyper.SOEKNAD : Behandlingstyper.SED);
+        }
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, behandlingstema);
-        prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, erBehandlingAvSøknad(behandlingstema) ? Behandlingstyper.SOEKNAD : Behandlingstyper.SED);
 
         if (erSakstypeEøs(sakstype) && erBehandlingAvSøknad(behandlingstema)) {
             validerOpprettSakForSøknadBehandlingFelter(journalfoeringDto);
@@ -249,6 +257,10 @@ public class JournalfoeringService {
         log.info("{} knytter journalpost {} til sak {} og lager ny vurdering", SubjectHandler.getInstance().getUserID(), journalfoeringDto.getJournalpostID(), saksnummer);
 
         Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_NY_VURDERING, journalfoeringDto);
+        if (unleash.isEnabled("melosys.sakstema")) {
+            var behandlingstema = Behandlingstema.valueOf(journalfoeringDto.getBehandlingstemaKode());
+            prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, behandlingstema);
+        }
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, behandlingstype);
         prosessinstans.setData(ProsessDataKey.SAKSNUMMER, saksnummer);
         prosessinstans.setData(ProsessDataKey.JFR_INGEN_VURDERING, journalfoeringDto.isIngenVurdering());

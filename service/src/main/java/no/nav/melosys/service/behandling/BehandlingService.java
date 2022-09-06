@@ -12,7 +12,6 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagKonverterer;
 import no.nav.melosys.domain.brev.DokumentasjonSvarfrist;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
@@ -39,7 +38,6 @@ import static no.nav.melosys.metrics.MetrikkerNavn.*;
 
 @Service
 public class BehandlingService {
-
     private static final Logger log = LoggerFactory.getLogger(BehandlingService.class);
 
     private final BehandlingRepository behandlingRepository;
@@ -49,7 +47,6 @@ public class BehandlingService {
     private final OppgaveService oppgaveService;
     private final ApplicationEventPublisher applicationEventPublisher;
     private final Unleash unleash;
-
     private final Counter behandlingerAvsluttet = Metrics.counter(BEHANDLINGER_AVSLUTTET);
     private static final String FINNER_IKKE_BEHANDLING = "Finner ikke behandling med id ";
 
@@ -118,20 +115,20 @@ public class BehandlingService {
     }
 
     @Transactional
-    public void endreBehandling(long behandlingID, Sakstyper ignoredSakstype, Behandlingstyper type, Behandlingstema tema, Behandlingsstatus status, LocalDate behandlingsfrist) {
-        // TODO: Endre sakstype (MELOSYS-4899 for EØS <-> trygdeavtale)
+    public void endreBehandling(long behandlingID, Behandlingstyper type, Behandlingstema tema, Behandlingsstatus status, LocalDate behandlingsfrist) {
         var behandling = hentBehandling(behandlingID);
+        boolean behandlingErLåst = behandling.kanIkkeEndres();
+
         if (!behandling.erAktiv()) {
             throw new FunksjonellException("Behandlingen må være aktiv for å kunne endres");
         }
-
         if (status != null && status != behandling.getStatus() && saksbehandlerKanEndreStatus(behandling, status)) {
             endreStatus(behandling, status);
         }
-        if (type != null && type != behandling.getType() && saksbehandlerKanEndreType(behandling, type)) {
+        if (type != null && type != behandling.getType() && saksbehandlerKanEndreType(behandling, type) && !behandlingErLåst) {
             endreType(behandling, type);
         }
-        if (tema != null && tema != behandling.getTema() && saksbehandlerKanEndreTema(behandling, tema)) {
+        if (tema != null && tema != behandling.getTema() && saksbehandlerKanEndreTema(behandling, tema) && !behandlingErLåst) {
             endreTema(behandling, tema);
         }
         if (behandlingsfrist != null && !behandlingsfrist.equals(behandling.getBehandlingsfrist())) {

@@ -6,13 +6,15 @@ import no.nav.melosys.generated.graphql.model.*
 import no.nav.melosys.melosysmock.journalpost.JournalpostRepo
 import no.nav.melosys.melosysmock.journalpost.intern_modell.*
 import no.nav.melosys.melosysmock.sak.SakRepo
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime
 
 @Component
-class SafGraphqlResolver : JournalpostQueryResolver, DokumentoversiktFagsakQueryResolver {
+class SafGraphqlResolver(@Autowired private val journalpostRepo: JournalpostRepo)
+    : JournalpostQueryResolver, DokumentoversiktFagsakQueryResolver {
 
-    override fun journalpost(journalpostId: String): JournalpostDto? = JournalpostRepo.repo[journalpostId]
+    override fun journalpost(journalpostId: String): JournalpostDto? = journalpostRepo.repo[journalpostId]
         ?.let (::tilJournalpostDto) ?: throw NoSuchElementException("Finner ikke journalpost med id $journalpostId")
 
     override fun dokumentoversiktFagsak(
@@ -24,7 +26,7 @@ class SafGraphqlResolver : JournalpostQueryResolver, DokumentoversiktFagsakQuery
         foerste: Int?,
         etter: String?
     ) = DokumentoversiktDto(
-            journalposter = JournalpostRepo.finnVedSaksnummer(fagsak.fagsakId).map(::tilJournalpostDto),
+            journalposter = journalpostRepo.finnVedSaksnummer(fagsak.fagsakId).map(::tilJournalpostDto),
             sideInfo = SideInfoDto(sluttpeker = "blabla", finnesNesteSide = false)
     )
 
@@ -82,11 +84,13 @@ class SafGraphqlResolver : JournalpostQueryResolver, DokumentoversiktFagsakQuery
             }
         }
 
-    private fun mapBruker(bruker: JournalpostBruker?): BrukerDto =
-        BrukerDto.builder()
-            .setId(bruker?.ident)
-            .setType(mapBrukertype(bruker?.brukerType))
-            .build()
+    private fun mapBruker(bruker: JournalpostBruker?): BrukerDto? =
+        bruker?.let {
+            BrukerDto.builder()
+                .setId(bruker.ident)
+                .setType(mapBrukertype(bruker.brukerType))
+                .build()
+        }
 
     private fun mapBrukertype(brukerType: IdType?): BrukerIdTypeDto? =
         when (brukerType) {

@@ -4,17 +4,16 @@ import no.nav.melosys.generated.graphql.api.HentIdenterQueryResolver
 import no.nav.melosys.generated.graphql.model.IdentGruppeDto
 import no.nav.melosys.generated.graphql.model.IdentInformasjonDto
 import no.nav.melosys.generated.graphql.model.IdentlisteDto
-import no.nav.melosys.melosysmock.person.PersonRepo
+import no.nav.melosys.melosysmock.person.PersonRepoStorage
 import org.springframework.stereotype.Component
 import org.springframework.web.context.annotation.RequestScope
-import org.springframework.web.context.annotation.SessionScope
 
 @Component
 @RequestScope
-class HentIdenterQuery : HentIdenterQueryResolver {
+class HentIdenterQuery(private val personRepoStorage: PersonRepoStorage) : HentIdenterQueryResolver {
 
     override fun hentIdenter(ident: String, grupper: List<IdentGruppeDto>?, historikk: Boolean?) =
-        PersonRepo.finnVedIdent(ident)?.let {
+        personRepoStorage.finnVedIdent(ident)?.let {
             IdentlisteDto(
                 listOf(
                     IdentInformasjonDto(
