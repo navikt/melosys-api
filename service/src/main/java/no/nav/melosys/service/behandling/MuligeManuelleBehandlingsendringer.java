@@ -56,7 +56,7 @@ public class MuligeManuelleBehandlingsendringer {
         };
     }
 
-    public static Set<Behandlingstema> hentMuligeBehandlingstema(Behandling behandling, Behandlingsresultat behandlingsresultat, Boolean visNyeBehandlingstema) {
+    public static Set<Behandlingstema> hentMuligeBehandlingstema(Behandling behandling, Behandlingsresultat behandlingsresultat, boolean visNyeBehandlingstema) {
         if (behandling.kanIkkeEndres()) {
             return Collections.emptySet();
         }
@@ -70,7 +70,7 @@ public class MuligeManuelleBehandlingsendringer {
                 default -> Collections.emptySet();
             };
         } else if (kanOppdatereBehandlingstema && erGyldigBehandlingAvSøknad(behandling.getTema())) {
-            if (Boolean.TRUE.equals(visNyeBehandlingstema)) {
+            if (visNyeBehandlingstema) {
                 return BEHANDLINGSTEMA_SØKNAD.stream().filter(tema -> tema != behandling.getTema()).collect(Collectors.toSet());
             }
             return BEHANDLINGSTEMA_SØKNAD.stream()
