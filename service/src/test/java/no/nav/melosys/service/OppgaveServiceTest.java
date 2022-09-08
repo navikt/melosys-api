@@ -436,7 +436,7 @@ class OppgaveServiceTest {
         bruker.setAktørId("aktørID");
         fagsak.getAktører().add(bruker);
         behandling.setFagsak(fagsak);
-        behandling.setType(Behandlingstyper.SOEKNAD);
+        behandling.setType(Behandlingstyper.FØRSTEGANG);
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         behandling.setId(1L);
         behandling.setRegistrertDato(Instant.ofEpochMilli(111L));
