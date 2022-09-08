@@ -50,7 +50,7 @@ public class Oppgaveplukker {
             OppgaveFactory.hentOppgaveParametere(plukkDto.getBehandlingstema());
 
         List<Oppgave> utildelteOppgaverEtterFrist = unleash.isEnabled("melosys.oppgave.oppretting")
-            ? oppgaveFasade.finnUtildelteOppgaverEtterFrist(OppgaveFactory.utledBehandlingstema(plukkDto.getBehandlingstema(), plukkDto.getSakstype()), null)
+            ? oppgaveFasade.finnUtildelteOppgaverEtterFrist(OppgaveFactory.utledBehandlingstema(plukkDto.getSakstema(), plukkDto.getSakstype(), plukkDto.getBehandlingstema(), plukkDto.getBehandlingstype()), null)
             : oppgaveFasade.finnUtildelteOppgaverEtterFrist(parametere.behandlingstype, parametere.behandlingstema);
 
         List<Oppgave> filtrerteOppgaver = utildelteOppgaverEtterFrist.stream()

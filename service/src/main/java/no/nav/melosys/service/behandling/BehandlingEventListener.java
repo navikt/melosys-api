@@ -76,26 +76,26 @@ public class BehandlingEventListener {
             final var behandling = behandlingService.hentBehandling(behandlingEndretAvSaksbehandlerEvent.getBehandlingID());
             Optional<Oppgave> oppgave = oppgaveService.finnÅpenOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer());
             oppgave.ifPresent(value -> {
-                    final Behandlingstyper type = behandlingEndretAvSaksbehandlerEvent.getBehandlingstype();
-                    final Behandlingstema tema = behandlingEndretAvSaksbehandlerEvent.getBehandlingstema();
+                    final var behandlingstype = behandlingEndretAvSaksbehandlerEvent.getBehandlingstype();
+                    final var behandlingstema = behandlingEndretAvSaksbehandlerEvent.getBehandlingstema();
 
-                    final Oppgave behandlingsOppgaveForType = (
+                    final Oppgave behandlingsoppgave = (
                         unleash.isEnabled("melosys.oppgave.oppretting")
-                            ? OppgaveFactory.lagBehandlingsoppgave(behandling.getFagsak().getTema(), behandling.getFagsak().getType(), tema, type)
-                            : OppgaveFactory.lagBehandlingsOppgaveForType(tema, type))
+                            ? OppgaveFactory.lagBehandlingsoppgave(behandling.getFagsak().getTema(), behandling.getFagsak().getType(), behandlingstema, behandlingstype)
+                            : OppgaveFactory.lagBehandlingsOppgaveForType(behandlingstema, behandlingstype))
                         .build();
 
                     final LocalDate frist = behandlingEndretAvSaksbehandlerEvent.getBehandlingsfrist();
 
                     log.info("Oppdaterer oppgave {} med behandlingstype {}, behandlingstema {} og fristFerdigstillelse {}",
-                        value.getOppgaveId(), type.getKode(), tema.getKode(), frist);
+                        value.getOppgaveId(), behandlingstype.getKode(), behandlingstema.getKode(), frist);
 
                     oppgaveService.oppdaterOppgave(
                         value.getOppgaveId(),
                         OppgaveOppdatering.builder()
-                            .behandlingstema(behandlingsOppgaveForType.getBehandlingstema())
-                            .behandlingstype(unleash.isEnabled("melosys.oppgave.oppretting") ? null : behandlingsOppgaveForType.getBehandlingstype())
-                            .tema(behandlingsOppgaveForType.getTema())
+                            .behandlingstema(behandlingsoppgave.getBehandlingstema())
+                            .behandlingstype(unleash.isEnabled("melosys.oppgave.oppretting") ? null : behandlingsoppgave.getBehandlingstype())
+                            .tema(behandlingsoppgave.getTema())
                             .fristFerdigstillelse(frist)
                             .build());
                 }
