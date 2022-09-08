@@ -178,6 +178,10 @@ public class OppgaveService {
         opprettEllerGjenbrukBehandlingsoppgave(behandling, journalpostID, aktørID, tilordnetRessurs, lagOppgaveBeskrivelse(behandling), null);
     }
 
+    public void opprettEllerGjenbrukBehandlingsoppgave(Behandling behandling, String journalpostID, String aktørID, @Nullable String tilordnetRessurs, @Nullable String orgnr) {
+        opprettEllerGjenbrukBehandlingsoppgave(behandling, journalpostID, aktørID, tilordnetRessurs, lagOppgaveBeskrivelse(behandling), orgnr);
+    }
+
     /**
      * @deprecated Forsvinner med toggle melosys.oppgave.oppretting
      */
