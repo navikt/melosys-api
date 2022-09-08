@@ -11,6 +11,7 @@ public class BehandlingsoppgaveDto extends OppgaveDto {
     private Sakstyper sakstype;
     private Sakstemaer sakstema;
     private PeriodeDto periode;
+    private String beskrivelse;
 
     public BehandlingsoppgaveDto() {
         this.behandling = new BehandlingDto();
@@ -63,5 +64,13 @@ public class BehandlingsoppgaveDto extends OppgaveDto {
 
     public void setPeriode(PeriodeDto periode) {
         this.periode = periode;
+    }
+
+    public String getBeskrivelse() {
+        return beskrivelse;
+    }
+
+    public void setBeskrivelse(String beskrivelse) {
+        this.beskrivelse = beskrivelse;
     }
 }

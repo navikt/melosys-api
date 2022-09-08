@@ -312,6 +312,8 @@ public class OppgaveService {
         behOppgaveDto.setSaksnummer(fagsak.getSaksnummer());
         behOppgaveDto.setSakstype(fagsak.getType());
         behOppgaveDto.setSakstema(fagsak.getTema());
+        behOppgaveDto.setBeskrivelse(oppgave.getBeskrivelse());
+        //TODO hent siste notat
 
         Behandling behandling = fagsak.hentSistAktivBehandling();
         behandling = behandlingService.hentBehandling(behandling.getId());
