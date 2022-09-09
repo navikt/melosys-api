@@ -17,7 +17,7 @@ import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.*;
 import static no.nav.melosys.service.behandling.MuligeManuelleBehandlingsendringer.BEHANDLINGSTEMA_SØKNAD;
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class MuligeManuelleBehandlingsendringerTest {
+class MuligeManuelleBehandlingsendringerTest {
 
 
     @Test
@@ -34,39 +34,50 @@ public class MuligeManuelleBehandlingsendringerTest {
 
     @Test
     void hentMuligeBehandlingstema_typeEndretPeriode_returnererUtsendt() {
-        var muligeBehandlingstema = MuligeManuelleBehandlingsendringer.hentMuligeBehandlingstema(behandlingMedTemaOgType(UTSENDT_ARBEIDSTAKER, ENDRET_PERIODE), behandlingsresultatSendtUtland(false));
+        var muligeBehandlingstema = MuligeManuelleBehandlingsendringer.hentMuligeBehandlingstema(behandlingMedTemaOgType(UTSENDT_ARBEIDSTAKER, ENDRET_PERIODE), behandlingsresultatSendtUtland(false), false);
         assertThat(muligeBehandlingstema).containsExactly(UTSENDT_SELVSTENDIG);
     }
 
     @Test
-    void hentMuligeBehandlingstema_gyldigSøknadBehandlingstema_returnererSøknadBehandlingstema() {
-        var muligeBehandlingstema = MuligeManuelleBehandlingsendringer.hentMuligeBehandlingstema(behandlingMedTema(ARBEID_FLERE_LAND), behandlingsresultatSendtUtland(false));
+    void hentMuligeBehandlingstema_gyldigSøknadBehandlingstemaToggleAv_returnererSøknadBehandlingstema() {
+        var muligeBehandlingstema = MuligeManuelleBehandlingsendringer.hentMuligeBehandlingstema(behandlingMedTema(ARBEID_FLERE_LAND), behandlingsresultatSendtUtland(false), false);
+        var behandlingstemaSøknadUtenValgtTema = BEHANDLINGSTEMA_SØKNAD.stream()
+            .filter(tema -> tema != ARBEID_FLERE_LAND)
+            .filter(tema -> tema != ARBEID_KUN_NORGE)
+            .filter(tema -> tema != ARBEID_TJENESTEPERSON_ELLER_FLY)
+            .collect(Collectors.toSet());
+        assertThat(muligeBehandlingstema).isEqualTo(behandlingstemaSøknadUtenValgtTema);
+    }
+
+    @Test
+    void hentMuligeBehandlingstema_gyldigSøknadBehandlingstemaTogglePå_returnererSøknadBehandlingstema() {
+        var muligeBehandlingstema = MuligeManuelleBehandlingsendringer.hentMuligeBehandlingstema(behandlingMedTema(ARBEID_FLERE_LAND), behandlingsresultatSendtUtland(false), true);
         var behandlingstemaSøknadUtenValgtTema = BEHANDLINGSTEMA_SØKNAD.stream().filter(tema -> tema != ARBEID_FLERE_LAND).collect(Collectors.toSet());
         assertThat(muligeBehandlingstema).isEqualTo(behandlingstemaSøknadUtenValgtTema);
     }
 
     @Test
     void hentMuligeBehandlingstema_gyldigSEDForespørselBehandlingstema_returnererSEDForespørselBehandlingstema() {
-        var muligeBehandlingstema = MuligeManuelleBehandlingsendringer.hentMuligeBehandlingstema(behandlingMedTema(ØVRIGE_SED_MED), behandlingsresultatSendtUtland(false));
+        var muligeBehandlingstema = MuligeManuelleBehandlingsendringer.hentMuligeBehandlingstema(behandlingMedTema(ØVRIGE_SED_MED), behandlingsresultatSendtUtland(false), false);
         var behandlingstemaSedForespørselUtenValgtTema = BEHANDLINGSTEMA_SED_FORESPØRSEL.stream().filter(tema -> tema != ØVRIGE_SED_MED).collect(Collectors.toSet());
         assertThat(muligeBehandlingstema).isEqualTo(behandlingstemaSedForespørselUtenValgtTema);
     }
 
     @Test
     void hentMuligeBehandlingstema_ugyldigBehandlingstema_returnererTomListe() {
-        var muligeBehandlingstema = MuligeManuelleBehandlingsendringer.hentMuligeBehandlingstema(behandlingMedTema(REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING), behandlingsresultatSendtUtland(false));
+        var muligeBehandlingstema = MuligeManuelleBehandlingsendringer.hentMuligeBehandlingstema(behandlingMedTema(REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING), behandlingsresultatSendtUtland(false), false);
         assertThat(muligeBehandlingstema).isEmpty();
     }
 
     @Test
     void hentMuligeBehandlingstema_inaktivBehandling_returnererTomListe() {
-        var muligeBehandlingstema = MuligeManuelleBehandlingsendringer.hentMuligeBehandlingstema(avsluttetBehandlingMedTema(ARBEID_FLERE_LAND), behandlingsresultatSendtUtland(false));
+        var muligeBehandlingstema = MuligeManuelleBehandlingsendringer.hentMuligeBehandlingstema(avsluttetBehandlingMedTema(ARBEID_FLERE_LAND), behandlingsresultatSendtUtland(false), false);
         assertThat(muligeBehandlingstema).isEmpty();
     }
 
     @Test
     void hentMuligeBehandlingstema_erArtikkel16MedSendtAnmodningOmUnntak_returnererTomListe() {
-        var muligeBehandlingstema = MuligeManuelleBehandlingsendringer.hentMuligeBehandlingstema(behandlingMedTema(ARBEID_FLERE_LAND), behandlingsresultatSendtUtland(true));
+        var muligeBehandlingstema = MuligeManuelleBehandlingsendringer.hentMuligeBehandlingstema(behandlingMedTema(ARBEID_FLERE_LAND), behandlingsresultatSendtUtland(true), false);
         assertThat(muligeBehandlingstema).isEmpty();
     }
 
