@@ -3,7 +3,7 @@ package no.nav.melosys.service.sak;
 import java.util.Set;
 
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
-import no.nav.melosys.service.behandling.BehandlingsKombinasjon;
+import no.nav.melosys.service.lovligeKombinasjoner.BehandlingsKombinasjon;
 
 public class SakKombinasjon {
     Sakstemaer sakstema;

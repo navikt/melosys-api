@@ -23,8 +23,8 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.BehandlingsgrunnlagRepository;
 import no.nav.melosys.repository.TidligereMedlemsperiodeRepository;
+import no.nav.melosys.service.lovligeKombinasjoner.LovligeKombinasjoner;
 import no.nav.melosys.service.oppgave.OppgaveService;
-import no.nav.melosys.service.sak.LovligeKombinasjoner;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -98,6 +98,7 @@ class BehandlingServiceTest {
 
     @Test
     void endreBehandling() {
+        fakeUnleash.enableAll();
         Fagsak fagsak = new Fagsak();
         fagsak.setType(Sakstyper.EU_EOS);
         fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);

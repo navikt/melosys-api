@@ -3,6 +3,7 @@ package no.nav.melosys.service.behandling;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
@@ -11,7 +12,8 @@ import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
-import no.nav.melosys.service.sak.LovligeKombinasjoner;
+import no.nav.melosys.service.lovligeKombinasjoner.LovligeKombinasjoner;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static no.nav.melosys.domain.Behandling.BEHANDLINGSTEMA_SED_FORESPØRSEL;
@@ -25,6 +27,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class MuligeManuelleBehandlingsendringerTest {
     private final LovligeKombinasjoner lovligeKombinasjoner = new LovligeKombinasjoner();
+    private final FakeUnleash unleash = new FakeUnleash();
+
+    @BeforeEach
+    void init() {
+        unleash.enableAll();
+    }
 
     @Test
     void hentMuligeStatuser_temaOvrigeSedMed_avsluttetErMulig() {
@@ -92,7 +100,7 @@ class MuligeManuelleBehandlingsendringerTest {
         Fagsak fagsak = fagsakMedSakstypeOgSakstema(EU_EOS, UNNTAK);
         Behandling behandling = behandlingMedTemaOgType(FORESPØRSEL_TRYGDEMYNDIGHET, HENVENDELSE);
         behandling.setFagsak(fagsak);
-        var muligeTyper = MuligeManuelleBehandlingsendringer.hentMuligeTyper(behandling);
+        var muligeTyper = MuligeManuelleBehandlingsendringer.hentMuligeTyper_NY(behandling);
         assertThat(muligeTyper).containsExactly(HENVENDELSE);
     }
 
@@ -101,7 +109,7 @@ class MuligeManuelleBehandlingsendringerTest {
         Fagsak fagsak = fagsakMedSakstypeOgSakstema(EU_EOS, MEDLEMSKAP_LOVVALG);
         Behandling behandling = behandlingMedTemaOgType(ARBEID_TJENESTEPERSON_ELLER_FLY, NY_VURDERING);
         behandling.setFagsak(fagsak);
-        var muligeTyper = MuligeManuelleBehandlingsendringer.hentMuligeTyper(behandling);
+        var muligeTyper = MuligeManuelleBehandlingsendringer.hentMuligeTyper_NY(behandling);
         assertThat(muligeTyper).contains(NY_VURDERING, FØRSTEGANG, HENVENDELSE, KLAGE);
     }
 
@@ -110,7 +118,7 @@ class MuligeManuelleBehandlingsendringerTest {
         Fagsak fagsak = fagsakMedSakstypeOgSakstema(EU_EOS, MEDLEMSKAP_LOVVALG);
         Behandling behandling = behandlingMedTemaOgType(IKKE_YRKESAKTIV, NY_VURDERING);
         behandling.setFagsak(fagsak);
-        var muligeTyper = MuligeManuelleBehandlingsendringer.hentMuligeTyper(behandling);
+        var muligeTyper = MuligeManuelleBehandlingsendringer.hentMuligeTyper_NY(behandling);
         assertThat(muligeTyper).contains(NY_VURDERING, FØRSTEGANG, HENVENDELSE, KLAGE);
     }
 
@@ -119,7 +127,7 @@ class MuligeManuelleBehandlingsendringerTest {
         Fagsak fagsak = fagsakMedSakstypeOgSakstema(EU_EOS, UNNTAK);
         Behandling behandling = behandlingMedTemaOgType(FORESPØRSEL_TRYGDEMYNDIGHET, HENVENDELSE);
         behandling.setFagsak(fagsak);
-        var muligeTyper = MuligeManuelleBehandlingsendringer.hentMuligeTyper(behandling);
+        var muligeTyper = MuligeManuelleBehandlingsendringer.hentMuligeTyper_NY(behandling);
         assertThat(muligeTyper).contains(HENVENDELSE);
     }
 
@@ -128,7 +136,7 @@ class MuligeManuelleBehandlingsendringerTest {
         Fagsak fagsak = fagsakMedSakstypeOgSakstema(EU_EOS, TRYGDEAVGIFT);
         Behandling behandling = behandlingMedTemaOgType(YRKESAKTIV, KLAGE);
         behandling.setFagsak(fagsak);
-        var muligeTyper = MuligeManuelleBehandlingsendringer.hentMuligeTyper(behandling);
+        var muligeTyper = MuligeManuelleBehandlingsendringer.hentMuligeTyper_NY(behandling);
         assertThat(muligeTyper).contains(NY_VURDERING, FØRSTEGANG, HENVENDELSE, KLAGE);
     }
 
@@ -137,7 +145,7 @@ class MuligeManuelleBehandlingsendringerTest {
         Fagsak fagsak = fagsakMedSakstypeOgSakstema(FTRL, MEDLEMSKAP_LOVVALG);
         Behandling behandling = behandlingMedTemaOgType(YRKESAKTIV, KLAGE);
         behandling.setFagsak(fagsak);
-        var muligeTyper = MuligeManuelleBehandlingsendringer.hentMuligeTyper(behandling);
+        var muligeTyper = MuligeManuelleBehandlingsendringer.hentMuligeTyper_NY(behandling);
         assertThat(muligeTyper).contains(NY_VURDERING, FØRSTEGANG, HENVENDELSE, KLAGE);
     }
 
@@ -146,7 +154,7 @@ class MuligeManuelleBehandlingsendringerTest {
         Fagsak fagsak = fagsakMedSakstypeOgSakstema(FTRL, MEDLEMSKAP_LOVVALG);
         Behandling behandling = behandlingMedTemaOgType(PENSJONIST, KLAGE);
         behandling.setFagsak(fagsak);
-        var muligeTyper = MuligeManuelleBehandlingsendringer.hentMuligeTyper(behandling);
+        var muligeTyper = MuligeManuelleBehandlingsendringer.hentMuligeTyper_NY(behandling);
         assertThat(muligeTyper).contains(NY_VURDERING, FØRSTEGANG, HENVENDELSE, KLAGE);
     }
 
@@ -155,7 +163,7 @@ class MuligeManuelleBehandlingsendringerTest {
         Fagsak fagsak = fagsakMedSakstypeOgSakstema(FTRL, TRYGDEAVGIFT);
         Behandling behandling = behandlingMedTemaOgType(PENSJONIST, KLAGE);
         behandling.setFagsak(fagsak);
-        var muligeTyper = MuligeManuelleBehandlingsendringer.hentMuligeTyper(behandling);
+        var muligeTyper = MuligeManuelleBehandlingsendringer.hentMuligeTyper_NY(behandling);
         assertThat(muligeTyper).contains(NY_VURDERING, FØRSTEGANG, HENVENDELSE, KLAGE);
     }
 
@@ -164,7 +172,7 @@ class MuligeManuelleBehandlingsendringerTest {
         Fagsak fagsak = fagsakMedSakstypeOgSakstema(FTRL, TRYGDEAVGIFT);
         Behandling behandling = behandlingMedTemaOgType(YRKESAKTIV, KLAGE);
         behandling.setFagsak(fagsak);
-        var muligeTyper = MuligeManuelleBehandlingsendringer.hentMuligeTyper(behandling);
+        var muligeTyper = MuligeManuelleBehandlingsendringer.hentMuligeTyper_NY(behandling);
         assertThat(muligeTyper).contains(NY_VURDERING, FØRSTEGANG, HENVENDELSE, KLAGE);
     }
 
@@ -173,7 +181,7 @@ class MuligeManuelleBehandlingsendringerTest {
         Fagsak fagsak = fagsakMedSakstypeOgSakstema(TRYGDEAVTALE, MEDLEMSKAP_LOVVALG);
         Behandling behandling = behandlingMedTemaOgType(YRKESAKTIV, KLAGE);
         behandling.setFagsak(fagsak);
-        var muligeTyper = MuligeManuelleBehandlingsendringer.hentMuligeTyper(behandling);
+        var muligeTyper = MuligeManuelleBehandlingsendringer.hentMuligeTyper_NY(behandling);
         assertThat(muligeTyper).contains(NY_VURDERING, FØRSTEGANG, HENVENDELSE, KLAGE);
     }
 
@@ -182,7 +190,7 @@ class MuligeManuelleBehandlingsendringerTest {
         Fagsak fagsak = fagsakMedSakstypeOgSakstema(TRYGDEAVTALE, MEDLEMSKAP_LOVVALG);
         Behandling behandling = behandlingMedTemaOgType(PENSJONIST, KLAGE);
         behandling.setFagsak(fagsak);
-        var muligeTyper = MuligeManuelleBehandlingsendringer.hentMuligeTyper(behandling);
+        var muligeTyper = MuligeManuelleBehandlingsendringer.hentMuligeTyper_NY(behandling);
         assertThat(muligeTyper).contains(NY_VURDERING, FØRSTEGANG, HENVENDELSE, KLAGE);
     }
 
@@ -191,7 +199,7 @@ class MuligeManuelleBehandlingsendringerTest {
         Fagsak fagsak = fagsakMedSakstypeOgSakstema(TRYGDEAVTALE, UNNTAK);
         Behandling behandling = behandlingMedTemaOgType(FORESPØRSEL_TRYGDEMYNDIGHET, HENVENDELSE);
         behandling.setFagsak(fagsak);
-        var muligeTyper = MuligeManuelleBehandlingsendringer.hentMuligeTyper(behandling);
+        var muligeTyper = MuligeManuelleBehandlingsendringer.hentMuligeTyper_NY(behandling);
         assertThat(muligeTyper).contains(HENVENDELSE);
     }
 
@@ -200,7 +208,7 @@ class MuligeManuelleBehandlingsendringerTest {
         Fagsak fagsak = fagsakMedSakstypeOgSakstema(TRYGDEAVTALE, TRYGDEAVGIFT);
         Behandling behandling = behandlingMedTemaOgType(YRKESAKTIV, KLAGE);
         behandling.setFagsak(fagsak);
-        var muligeTyper = MuligeManuelleBehandlingsendringer.hentMuligeTyper(behandling);
+        var muligeTyper = MuligeManuelleBehandlingsendringer.hentMuligeTyper_NY(behandling);
         assertThat(muligeTyper).contains(NY_VURDERING, FØRSTEGANG, HENVENDELSE, KLAGE);
     }
 
@@ -209,7 +217,7 @@ class MuligeManuelleBehandlingsendringerTest {
         Fagsak fagsak = fagsakMedSakstypeOgSakstema(TRYGDEAVTALE, TRYGDEAVGIFT);
         Behandling behandling = behandlingMedTemaOgType(PENSJONIST, KLAGE);
         behandling.setFagsak(fagsak);
-        var muligeTyper = MuligeManuelleBehandlingsendringer.hentMuligeTyper(behandling);
+        var muligeTyper = MuligeManuelleBehandlingsendringer.hentMuligeTyper_NY(behandling);
         assertThat(muligeTyper).contains(NY_VURDERING, FØRSTEGANG, HENVENDELSE, KLAGE);
     }
 

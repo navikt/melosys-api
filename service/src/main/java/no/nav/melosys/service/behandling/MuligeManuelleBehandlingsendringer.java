@@ -15,7 +15,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.sak.SakConsumerImpl;
-import no.nav.melosys.service.sak.LovligeKombinasjoner;
+import no.nav.melosys.service.lovligeKombinasjoner.LovligeKombinasjoner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,6 +54,18 @@ public class MuligeManuelleBehandlingsendringer {
     }
 
     public static Set<Behandlingstyper> hentMuligeTyper(Behandling behandling) {
+        if (behandling.kanIkkeEndres() || behandling.getType() == null) {
+            return Collections.emptySet();
+        }
+
+        return switch (behandling.getType()) {
+            case ENDRET_PERIODE -> Collections.singleton(NY_VURDERING);
+            case NY_VURDERING -> Collections.singleton(ENDRET_PERIODE);
+            default -> Collections.emptySet();
+        };
+    }
+
+    public static Set<Behandlingstyper> hentMuligeTyper_NY(Behandling behandling) {
         if (behandling.kanIkkeEndres() || behandling == null) {
             return Collections.emptySet();
         }
@@ -63,14 +75,8 @@ public class MuligeManuelleBehandlingsendringer {
             Behandlingstema behandlingstema = behandling.getTema();
 
             return LovligeKombinasjoner.hentAlleMuligeBehandlingstyper(Aktoersroller.BRUKER, sakstype, sakstema, behandlingstema, null, null, null);
-        } else {
-            if (behandling.getType() == null) return Collections.emptySet();
-            return switch (behandling.getType()) {
-                case ENDRET_PERIODE -> Collections.singleton(NY_VURDERING);
-                case NY_VURDERING -> Collections.singleton(ENDRET_PERIODE);
-                default -> Collections.emptySet();
-            };
         }
+        return Collections.emptySet();
     }
 
     public static Set<Behandlingstema> hentMuligeBehandlingstema(Behandling behandling, Behandlingsresultat behandlingsresultat, boolean visNyeBehandlingstema) {
@@ -78,13 +84,6 @@ public class MuligeManuelleBehandlingsendringer {
             return Collections.emptySet();
         }
         boolean kanOppdatereBehandlingstema = kanOppdatereBehandlingstema(behandling, behandlingsresultat);
-
-        if (behandling.getFagsak() != null && behandling.getFagsak().getType() != null && behandling.getFagsak().getTema() != null && visNyeBehandlingstema) {
-            Sakstyper sakstype = behandling.getFagsak().getType();
-            Sakstemaer sakstema = behandling.getFagsak().getTema();
-
-            return LovligeKombinasjoner.hentAlleMuligeBehandlingstemaer(Aktoersroller.BRUKER, sakstype, sakstema, null);
-        }
 
         if (behandling.erEndretPeriode()) {
             return switch (behandling.getTema()) {
@@ -108,6 +107,20 @@ public class MuligeManuelleBehandlingsendringer {
         }
     }
 
+    public static Set<Behandlingstema> hentMuligeBehandlingstema_NY(Behandling behandling, Behandlingsresultat behandlingsresultat) {
+        if (behandling.kanIkkeEndres()) {
+            return Collections.emptySet();
+        }
+
+        if (behandling.getFagsak() != null && behandling.getFagsak().getType() != null && behandling.getFagsak().getTema() != null) {
+            Sakstyper sakstype = behandling.getFagsak().getType();
+            Sakstemaer sakstema = behandling.getFagsak().getTema();
+
+            return LovligeKombinasjoner.hentAlleMuligeBehandlingstemaer(Aktoersroller.BRUKER, sakstype, sakstema, null);
+        }
+        return Collections.emptySet();
+    }
+
     private static boolean kanOppdatereBehandlingstema(Behandling behandling, Behandlingsresultat behandlingsresultat) {
         return behandling.erAktiv() && behandlingsresultat.erIkkeArtikkel16MedSendtAnmodningOmUnntak();
     }
@@ -126,10 +139,24 @@ public class MuligeManuelleBehandlingsendringer {
         }
     }
 
+    public static void validerNyTypeMulig_NY(Behandling behandling, Behandlingstyper type) {
+        if (!hentMuligeTyper_NY(behandling).contains(type)) {
+            throw new FunksjonellException(String.format("Behandlingen kan ikke endres til type %s. Gyldige typer for behandling %s er %s",
+                type, behandling.getId(), hentMuligeTyper_NY(behandling)));
+        }
+    }
+
     public static void validerNyttTemaMulig(Behandling behandling, Behandlingsresultat behandlingsresultat, Behandlingstema tema, boolean visNyeBehandlingstema) {
         if (!hentMuligeBehandlingstema(behandling, behandlingsresultat, visNyeBehandlingstema).contains(tema)) {
             throw new FunksjonellException(String.format("Behandlingen kan ikke endres til tema %s. Gyldige temaer for behandling %s er %s",
                 tema, behandling.getId(), hentMuligeBehandlingstema(behandling, behandlingsresultat, visNyeBehandlingstema)));
+        }
+    }
+
+    public static void validerNyttTemaMulig_NY(Behandling behandling, Behandlingsresultat behandlingsresultat, Behandlingstema tema) {
+        if (!hentMuligeBehandlingstema_NY(behandling, behandlingsresultat).contains(tema)) {
+            throw new FunksjonellException(String.format("Behandlingen kan ikke endres til tema %s. Gyldige temaer for behandling %s er %s",
+                tema, behandling.getId(), hentMuligeBehandlingstema_NY(behandling, behandlingsresultat)));
         }
     }
 

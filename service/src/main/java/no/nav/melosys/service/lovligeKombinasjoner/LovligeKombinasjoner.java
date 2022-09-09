@@ -1,4 +1,4 @@
-package no.nav.melosys.service.sak;
+package no.nav.melosys.service.lovligeKombinasjoner;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -13,6 +13,7 @@ import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.service.sak.SakKombinasjon;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.kodeverk.Saksstatuser.*;
@@ -20,7 +21,7 @@ import static no.nav.melosys.domain.kodeverk.Sakstemaer.*;
 import static no.nav.melosys.domain.kodeverk.Sakstyper.*;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.*;
-import static no.nav.melosys.service.behandling.LovligeBehandlingsKombinasjoner.*;
+import static no.nav.melosys.service.lovligeKombinasjoner.LovligeBehandlingsKombinasjoner.*;
 
 @Component
 public class LovligeKombinasjoner {
@@ -29,8 +30,8 @@ public class LovligeKombinasjoner {
     private static final SakKombinasjon EU_EOS_LOVVALG_MEDLEMSKAP_SAK = new SakKombinasjon(MEDLEMSKAP_LOVVALG, Set.of(EU_EOS_LOVVALG_MEDLEMSKAP_BEHANDLINGS_KOMBINASJON_1, EU_EOS_LOVVALG_MEDLEMSKAP_BEHANDLINGS_KOMBINASJON_2));
     private static final SakKombinasjon EU_EOS_UNNTAK_SAK = new SakKombinasjon(UNNTAK, Set.of(EU_EOS_UNNTAK_BEHANDLINGS_KOMBINASJON));
     private static final SakKombinasjon EU_EOS_TRYGDEAVGIFT_SAK = new SakKombinasjon(TRYGDEAVGIFT, Set.of(EU_EOS_TRYGDEAVGIFT_BEHANDLINGS_KOMBINASJON));
-    private static final SakKombinasjon FOLKETRYGDLOVEL_LOVVALG_MEDLEMSKAP_SAK = new SakKombinasjon(MEDLEMSKAP_LOVVALG, Set.of(FOLKETRYGDLOVEN_LOVVALG_MEDLEMSKAP_BEHANDLINGS_KOMBINASJON));
-    private static final SakKombinasjon FOLKETRYGDLOVEL_TRYGDEAVGIFT_SAK = new SakKombinasjon(TRYGDEAVGIFT, Set.of(FOLKETRYGDLOVEN_TRYGDEAVGIFT_BEHANDLINGS_KOMBINASJON));
+    private static final SakKombinasjon FOLKETRYGDLOVEL_LOVVALG_MEDLEMSKAP_SAK = new SakKombinasjon(MEDLEMSKAP_LOVVALG, Set.of(FTRL_LOVVALG_MEDLEMSKAP_BEHANDLINGS_KOMBINASJON));
+    private static final SakKombinasjon FOLKETRYGDLOVEL_TRYGDEAVGIFT_SAK = new SakKombinasjon(TRYGDEAVGIFT, Set.of(FTRL_TRYGDEAVGIFT_BEHANDLINGS_KOMBINASJON));
     private static final SakKombinasjon TRYGDEAVTALE_LOVVALG_MEDLEMSKAP_SAK = new SakKombinasjon(MEDLEMSKAP_LOVVALG, Set.of(TRYGDEAVTALE_LOVVALG_MEDLEMSKAP_BEHANDLINGS_KOMBINASJON_1, TRYGDEAVTALE_LOVVALG_MEDLEMSKAP_BEHANDLINGS_KOMBINASJON_2));
     private static final SakKombinasjon TRYGDEAVTALE_UNNTAK_SAK = new SakKombinasjon(UNNTAK, Set.of(TRYGDEAVTALE_UNNTAK_BEHANDLINGS_KOMBINASJON_1, TRYGDEAVTALE_UNNTAK_BEHANDLINGS_KOMBINASJON_2));
     private static final SakKombinasjon TRYGDEAVTALE_TRYGDEAVGIFT_SAK = new SakKombinasjon(TRYGDEAVGIFT, Set.of(TRYGDEAVTALE_TRYGDEAVGIFT_BEHANDLINGS_KOMBINASJON));
@@ -64,9 +65,9 @@ public class LovligeKombinasjoner {
         switch (hovedpart) {
             case BRUKER:
                 Set<Behandlingstema> behandlingstemaer = alleMuligeSaksKombinasjonerBruker.get(sakstype).stream()
-                    .filter(sakKombinasjon -> sakKombinasjon.sakstema == sakstema)
-                    .flatMap(sakKombinasjon -> sakKombinasjon.behandlingsKombinasjoner.stream())
-                    .flatMap(behandlingsKombinasjon -> behandlingsKombinasjon.getBehandlingsTemaer().stream())
+                    .filter(sakKombinasjon -> sakKombinasjon.getSakstema() == sakstema)
+                    .flatMap(sakKombinasjon -> sakKombinasjon.getBehandlingsKombinasjoner().stream())
+                    .flatMap(behandlingsKombinasjon -> behandlingsKombinasjon.behandlingsTemaer().stream())
                     .collect(Collectors.toSet());
 
                 if (sistBehandlingstema != null && Set.of(REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING,
@@ -97,10 +98,10 @@ public class LovligeKombinasjoner {
         switch (hovedpart) {
             case BRUKER:
                 Set<Behandlingstyper> behandlingstyper = alleMuligeSaksKombinasjonerBruker.get(sakstype).stream()
-                    .filter(sakKombinasjon -> sakKombinasjon.sakstema == sakstema)
-                    .flatMap(sakKombinasjon -> sakKombinasjon.behandlingsKombinasjoner.stream())
-                    .filter(behandlingsKombinasjon -> behandlingsKombinasjon.getBehandlingsTemaer().contains(behandlingstema))
-                    .flatMap(behandlingsKombinasjon -> behandlingsKombinasjon.getBehandlingsTyper().stream())
+                    .filter(sakKombinasjon -> sakKombinasjon.getSakstema() == sakstema)
+                    .flatMap(sakKombinasjon -> sakKombinasjon.getBehandlingsKombinasjoner().stream())
+                    .filter(behandlingsKombinasjon -> behandlingsKombinasjon.behandlingsTemaer().contains(behandlingstema))
+                    .flatMap(behandlingsKombinasjon -> behandlingsKombinasjon.behandlingsTyper().stream())
                     .collect(Collectors.toSet());
 
                 if (sistBehandlingstema != null && Set.of(REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING,
