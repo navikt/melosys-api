@@ -22,8 +22,8 @@ import org.springframework.web.context.WebApplicationContext;
 
 @Protected
 @RestController
-@RequestMapping("/lovligekombinasjoner")
-@Api(tags = {"lovligekombinasjoner"})
+@RequestMapping("/lovligeKombinasjoner")
+@Api(tags = {"lovligeKombinasjoner"})
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class LovligeKombinasjonerTjeneste {
     private static final Logger log = LoggerFactory.getLogger(LovligeKombinasjonerTjeneste.class);
