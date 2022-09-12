@@ -21,7 +21,6 @@ import reactor.core.publisher.Mono;
 public class GenericContextExchangeFilter implements ExchangeFilterFunction {
     private final RestStsClient restStsClient;
 
-    private ClientConfigurationProperties clientConfigurationProperties;
     private OAuth2AccessTokenService oAuth2AccessTokenService;
 
     private ClientProperties clientProperties;
@@ -31,7 +30,6 @@ public class GenericContextExchangeFilter implements ExchangeFilterFunction {
                                         OAuth2AccessTokenService oAuth2AccessTokenService,
                                         String clientName) {
         this.restStsClient = restStsClient;
-        this.clientConfigurationProperties = clientConfigurationProperties;
         this.oAuth2AccessTokenService = oAuth2AccessTokenService;
         this.clientProperties = Optional.ofNullable(clientConfigurationProperties.getRegistration().get(clientName))
             .orElseThrow(() -> new RuntimeException("Fant ikke OAuth2-config for " + clientName));
