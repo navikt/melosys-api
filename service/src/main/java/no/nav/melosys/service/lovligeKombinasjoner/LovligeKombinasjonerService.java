@@ -9,7 +9,9 @@ import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.service.behandling.BehandlingService;
+import org.springframework.stereotype.Service;
 
+@Service
 public class LovligeKombinasjonerService {
     private BehandlingService behandlingService;
     private LovligeKombinasjoner lovligeKombinasjoner;
