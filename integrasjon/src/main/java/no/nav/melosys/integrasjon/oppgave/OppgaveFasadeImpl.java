@@ -69,10 +69,10 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
 
     @Override
     public List<Oppgave> finnUtildelteOppgaverEtterFrist(String behandlingstype, String behandlingstema) {
-        // Behandlingstema fjernes sammen med toggle melosys.oppgave.oppretting
+        // Behandlingstype fjernes sammen med toggle melosys.oppgave.oppretting
         OppgaveSearchRequest.Builder searchRequestBuilder = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
-            .medBehandlingsType(behandlingstype)
-            .medBehandlingstema(unleash.isEnabled("melosys.oppgave.oppretting") ? null : behandlingstema)
+            .medBehandlingsType(unleash.isEnabled("melosys.oppgave.oppretting") ? null : behandlingstype)
+            .medBehandlingstema(behandlingstema)
             .medOppgaveTyper(hentGyldigeOppgavetyper())
             .medSorteringsfelt(SORTERINGSFELT)
             .medStatusKategori(OPPGAVE_STATUSKATEGORI_AAPEN)

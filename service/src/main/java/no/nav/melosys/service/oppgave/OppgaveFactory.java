@@ -134,33 +134,32 @@ public final class OppgaveFactory {
     }
 
     private static boolean skalBrukeMelosysBehandlingstemaForBehandlingstema(Sakstemaer sakstema, Sakstyper sakstype, Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
-        var behandlingstyperFgNvKlHv = List.of(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING, Behandlingstyper.KLAGE, Behandlingstyper.HENVENDELSE);
-        var behandlingstyperFgNvKl = List.of(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING, Behandlingstyper.KLAGE);
-        var behandlingstyperFgNv = List.of(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING);
-
         return switch (behandlingstema) {
             case PENSJONIST -> switch (sakstema) {
-                case MEDLEMSKAP_LOVVALG -> behandlingstyperFgNvKl.contains(behandlingstype);
-                case TRYGDEAVGIFT -> behandlingstyperFgNvKlHv.contains(behandlingstype);
+                case MEDLEMSKAP_LOVVALG ->
+                    List.of(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING, Behandlingstyper.KLAGE).contains(behandlingstype);
+                case TRYGDEAVGIFT ->
+                    List.of(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING, Behandlingstyper.KLAGE, Behandlingstyper.HENVENDELSE).contains(behandlingstype);
                 case UNNTAK -> false;
             };
             case YRKESAKTIV ->
-                sakstema == Sakstemaer.TRYGDEAVGIFT && behandlingstyperFgNvKlHv.contains(behandlingstype);
+                sakstema == Sakstemaer.TRYGDEAVGIFT && List.of(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING, Behandlingstyper.KLAGE, Behandlingstyper.HENVENDELSE).contains(behandlingstype);
             case ANMODNING_OM_UNNTAK_HOVEDREGEL -> switch (sakstype) {
-                case EU_EOS -> sakstema == Sakstemaer.UNNTAK && behandlingstyperFgNv.contains(behandlingstype);
+                case EU_EOS ->
+                    sakstema == Sakstemaer.UNNTAK && List.of(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING).contains(behandlingstype);
                 case TRYGDEAVTALE ->
                     sakstema == Sakstemaer.UNNTAK && List.of(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING, Behandlingstyper.HENVENDELSE).contains(behandlingstype);
                 default -> false;
             };
             case REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING, REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE, BESLUTNING_LOVVALG_ANNET_LAND ->
-                sakstype == Sakstyper.EU_EOS && sakstema == Sakstemaer.UNNTAK && behandlingstyperFgNv.contains(behandlingstype);
+                sakstype == Sakstyper.EU_EOS && sakstema == Sakstemaer.UNNTAK && List.of(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING).contains(behandlingstype);
             case REGISTRERING_UNNTAK ->
-                sakstype == Sakstyper.TRYGDEAVTALE && sakstema == Sakstemaer.UNNTAK && behandlingstyperFgNvKl.contains(behandlingstype);
+                sakstype == Sakstyper.TRYGDEAVTALE && sakstema == Sakstemaer.UNNTAK && List.of(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING, Behandlingstyper.KLAGE).contains(behandlingstype);
             default -> false;
         };
     }
 
-    private static Tema utledTema(Sakstemaer sakstema) {
+    public static Tema utledTema(Sakstemaer sakstema) {
         return switch (sakstema) {
             case MEDLEMSKAP_LOVVALG -> Tema.MED;
             case TRYGDEAVGIFT -> Tema.TRY;

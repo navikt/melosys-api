@@ -46,12 +46,13 @@ public class Oppgaveplukker {
 
     @Transactional
     public synchronized Optional<Oppgave> plukkOppgave(String saksbehandlerID, PlukkOppgaveInnDto plukkDto) {
-        var parametere =
-            OppgaveFactory.hentOppgaveParametere(plukkDto.getBehandlingstema());
-
-        List<Oppgave> utildelteOppgaverEtterFrist = unleash.isEnabled("melosys.oppgave.oppretting")
-            ? oppgaveFasade.finnUtildelteOppgaverEtterFrist(OppgaveFactory.utledBehandlingstema(plukkDto.getSakstema(), plukkDto.getSakstype(), plukkDto.getBehandlingstema(), plukkDto.getBehandlingstype()), null)
-            : oppgaveFasade.finnUtildelteOppgaverEtterFrist(parametere.behandlingstype, parametere.behandlingstema);
+        List<Oppgave> utildelteOppgaverEtterFrist = null;
+        if (unleash.isEnabled("melosys.oppgave.oppretting")) {
+            utildelteOppgaverEtterFrist = oppgaveFasade.finnUtildelteOppgaverEtterFrist(null, OppgaveFactory.utledBehandlingstema(plukkDto.getSakstema(), plukkDto.getSakstype(), plukkDto.getBehandlingstema(), plukkDto.getBehandlingstype()));
+        } else {
+            var parametere = OppgaveFactory.hentOppgaveParametere(plukkDto.getBehandlingstema());
+            oppgaveFasade.finnUtildelteOppgaverEtterFrist(parametere.behandlingstype, parametere.behandlingstema);
+        }
 
         List<Oppgave> filtrerteOppgaver = utildelteOppgaverEtterFrist.stream()
             .filter(oppgave -> {

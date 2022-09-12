@@ -149,9 +149,9 @@ public class OppgaveService {
         Optional<Oppgave> eksisterendeOppgave = finnÅpenOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer());
 
         if (eksisterendeOppgave.isEmpty()) {
-            var oppgaveToggle = unleash.isEnabled("melosys.oppgave.oppretting");
+            var oppgaveToggleEnabled = unleash.isEnabled("melosys.oppgave.oppretting");
             var oppgaveBuilder = (
-                oppgaveToggle
+                oppgaveToggleEnabled
                     ? OppgaveFactory.lagBehandlingsoppgave(behandling)
                     : OppgaveFactory.lagBehandlingsOppgaveForType(behandling.getTema(), behandling.getType()))
                 .setTilordnetRessurs(tilordnetRessurs)
@@ -160,7 +160,7 @@ public class OppgaveService {
                 .setOrgnr(orgnr)
                 .setSaksnummer(behandling.getFagsak().getSaksnummer());
 
-            if (!oppgaveToggle) {
+            if (!oppgaveToggleEnabled) {
                 oppgaveBuilder.setBeskrivelse(beskrivelse);
             }
 
@@ -174,12 +174,12 @@ public class OppgaveService {
         }
     }
 
-    public void opprettEllerGjenbrukBehandlingsoppgave(Behandling behandling, String journalpostID, String aktørID, @Nullable String tilordnetRessurs) {
-        opprettEllerGjenbrukBehandlingsoppgave(behandling, journalpostID, aktørID, tilordnetRessurs, lagOppgaveBeskrivelse(behandling), null);
-    }
-
     public void opprettEllerGjenbrukBehandlingsoppgave(Behandling behandling, String journalpostID, String aktørID, @Nullable String tilordnetRessurs, @Nullable String orgnr) {
         opprettEllerGjenbrukBehandlingsoppgave(behandling, journalpostID, aktørID, tilordnetRessurs, lagOppgaveBeskrivelse(behandling), orgnr);
+    }
+
+    public void opprettEllerGjenbrukBehandlingsoppgave(Behandling behandling, String journalpostID, String aktørID, @Nullable String tilordnetRessurs) {
+        opprettEllerGjenbrukBehandlingsoppgave(behandling, journalpostID, aktørID, tilordnetRessurs, lagOppgaveBeskrivelse(behandling), null);
     }
 
     /**

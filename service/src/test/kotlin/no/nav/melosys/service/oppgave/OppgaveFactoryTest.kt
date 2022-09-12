@@ -14,6 +14,10 @@ import java.util.*
 import java.util.List
 
 internal class OppgaveFactoryTest {
+
+    // Testene er på format hva som er input i lagBehandlingsoppgave:
+    // sakstype_sakstema_behandlignstype_behandlingstema_radIConfluenceTabell
+
     @Test
     fun eueos_medlemskapLovvalg_standardEndretPeriode_flere_1() {
         val sakstyper = List.of(Sakstyper.EU_EOS)
