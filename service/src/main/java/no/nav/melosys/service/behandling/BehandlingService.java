@@ -144,9 +144,7 @@ public class BehandlingService {
     public void endreBehandlingstemaTilBehandling(long behandlingID, Behandlingstema nyttTema) {
         Behandling behandling = hentBehandling(behandlingID);
         var behandlingsgrunnlag = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
-        Set<Behandlingstema> behandlingstemaer = unleash.isEnabled("melosys.behandle_alle_saker")
-            ? MuligeManuelleBehandlingsendringer.hentMuligeBehandlingstema_NY(behandling, behandlingsgrunnlag)
-            : MuligeManuelleBehandlingsendringer.hentMuligeBehandlingstema(behandling, behandlingsgrunnlag, unleash.isEnabled("melosys.behandle_alle_saker"));
+        Set<Behandlingstema> behandlingstemaer = MuligeManuelleBehandlingsendringer.hentMuligeBehandlingstema(behandling, behandlingsgrunnlag, unleash.isEnabled("melosys.behandle_alle_saker"));
 
         if (behandlingstemaer.contains(nyttTema)) {
             behandling.setTema(nyttTema);
@@ -416,9 +414,7 @@ public class BehandlingService {
     public Set<Behandlingstema> hentMuligeBehandlingstema(long behandlingID) {
         var behandling = hentBehandling(behandlingID);
         var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
-        Set<Behandlingstema> behandlingstemaer = unleash.isEnabled("melosys.behandle_alle_saker")
-            ? MuligeManuelleBehandlingsendringer.hentMuligeBehandlingstema_NY(behandling, behandlingsresultat)
-            : MuligeManuelleBehandlingsendringer.hentMuligeBehandlingstema(behandling, behandlingsresultat, unleash.isEnabled("melosys.behandle_alle_saker"));
+        Set<Behandlingstema> behandlingstemaer = MuligeManuelleBehandlingsendringer.hentMuligeBehandlingstema(behandling, behandlingsresultat, unleash.isEnabled("melosys.behandle_alle_saker"));
 
         return behandlingstemaer;
     }
@@ -426,9 +422,7 @@ public class BehandlingService {
     public Set<Behandlingstyper> hentMuligeTyper(long behandlingID) {
         if (unleash.isEnabled("melosys.api.endretype")) {
             var behandling = hentBehandling(behandlingID);
-            if (unleash.isEnabled("melosys.behandle_alle_saker")) {
-                return MuligeManuelleBehandlingsendringer.hentMuligeTyper_NY(behandling);
-            }
+
             return MuligeManuelleBehandlingsendringer.hentMuligeTyper(behandling);
         }
         return Collections.emptySet();

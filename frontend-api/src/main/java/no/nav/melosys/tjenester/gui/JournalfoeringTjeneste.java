@@ -1,21 +1,13 @@
 package no.nav.melosys.tjenester.gui;
 
-import java.util.Set;
-
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.domain.arkiv.Journalpost;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Saksstatuser;
-import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.service.journalforing.JournalfoeringService;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringOpprettDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringSedDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringTilordneDto;
-import no.nav.melosys.service.lovligeKombinasjoner.LovligeKombinasjoner;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.tjenester.gui.dto.journalforing.BehandlingsInformasjon;
 import no.nav.melosys.tjenester.gui.dto.journalforing.JournalpostDto;
@@ -88,42 +80,4 @@ public class JournalfoeringTjeneste {
         oppgaveService.ferdigstillOppgave(journalføringDto.getOppgaveID());
         return ResponseEntity.noContent().build();
     }
-
-    @GetMapping("/sakstyper")
-    @ApiOperation(value = "Henter alle mulige sakstyper", notes = ("Henter alle mulige sakstyper"))
-    public ResponseEntity<Set<Sakstyper>> hentAlleMuligeSakstyper() {
-        return ResponseEntity.ok(LovligeKombinasjoner.hentAlleMuligeSakstyper());
-    }
-
-    @GetMapping("/sakstemaer/{hovedpart}/{sakstype}")
-    @ApiOperation(value = "Henter alle mulige sakstemaer basert på sakstypen", notes = ("Henter alle mulige sakstemaer basert på sakstypen"))
-    public ResponseEntity<Set<Sakstemaer>> hentAlleMuligeSakstemaer(@PathVariable("hovedpart") Aktoersroller hovedpartRolle, @PathVariable("sakstype") Sakstyper sakstype) {
-        return ResponseEntity.ok(LovligeKombinasjoner.hentAlleSakstemaer(hovedpartRolle, sakstype));
-    }
-
-    @GetMapping("/behandlingstemaer/{hovedpart}/{sakstype}/{sakstema}")
-    @ApiOperation(value = "Henter alle mulige behandlingstemaer basert på sakstype og sakstema", notes = ("Henter alle mulige behandlingstemaer basert på sakstype og sakstema"))
-    public ResponseEntity<Set<Behandlingstema>> hentAllemuligeBehandlingstemaer(
-        @PathVariable("hovedpart") Aktoersroller hovedpart,
-        @PathVariable("sakstype") Sakstyper sakstype,
-        @PathVariable("sakstema") Sakstemaer sakstema,
-        @RequestParam(value = "sistBehandlingstema", required = false) Behandlingstema sistBehandlingstema
-    ) {
-        return ResponseEntity.ok(LovligeKombinasjoner.hentAlleMuligeBehandlingstemaer(hovedpart, sakstype, sakstema, sistBehandlingstema));
-    }
-
-    @GetMapping("/behandlingstyper/{hovedpart}/{sakstype}/{sakstema}")
-    @ApiOperation(value = "Henter alle mulige behandlingstyper basert på sakstype, sakstema og behandlingstema", notes = ("Henter alle mulige behandlingstyper basert på sakstype, sakstema og behandlingstema"))
-    public ResponseEntity<Set<Behandlingstyper>> hentAllemuligeBehandlingstyper(
-        @PathVariable("hovedpart") Aktoersroller hovedpart,
-        @PathVariable("sakstype") Sakstyper sakstype,
-        @PathVariable("sakstema") Sakstemaer sakstema,
-        @RequestParam(value = "behandlingstema", required = false) Behandlingstema behandlingstema,
-        @RequestParam(value = "sistBehandlingstema", required = false) Behandlingstema sistBehandlingstema,
-        @RequestParam(value = "sistBehandlingstype", required = false) Behandlingstyper sistBehandlingstype,
-        @RequestParam(value = "saksstatus", required = false) Saksstatuser saksstatus
-    ) {
-        return ResponseEntity.ok(LovligeKombinasjoner.hentAlleMuligeBehandlingstyper(hovedpart, sakstype, sakstema, behandlingstema, sistBehandlingstema, sistBehandlingstype, saksstatus));
-    }
-
 }

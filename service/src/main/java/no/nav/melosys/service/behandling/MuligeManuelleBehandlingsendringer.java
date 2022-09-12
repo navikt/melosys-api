@@ -54,7 +54,7 @@ public class MuligeManuelleBehandlingsendringer {
     }
 
     public static Set<Behandlingstyper> hentMuligeTyper(Behandling behandling) {
-        if (behandling.kanIkkeEndres() || behandling.getType() == null) {
+        if (behandling.kanIkkeEndres() || !TEMAER_SOM_KAN_ENDRE_TYPE.contains(behandling.getTema())) {
             return Collections.emptySet();
         }
 
@@ -66,15 +66,16 @@ public class MuligeManuelleBehandlingsendringer {
     }
 
     public static Set<Behandlingstyper> hentMuligeTyper_NY(Behandling behandling) {
-        if (behandling.kanIkkeEndres() || behandling == null) {
+        if (behandling == null || behandling.kanIkkeEndres()) {
             return Collections.emptySet();
         }
         if (behandling.getFagsak() != null && behandling.getFagsak().getType() != null && behandling.getFagsak().getTema() != null) {
             Sakstyper sakstype = behandling.getFagsak().getType();
             Sakstemaer sakstema = behandling.getFagsak().getTema();
+            Aktoersroller hovedpart = behandling.getFagsak().getHovedpartRolle();
             Behandlingstema behandlingstema = behandling.getTema();
 
-            return LovligeKombinasjoner.hentAlleMuligeBehandlingstyper(Aktoersroller.BRUKER, sakstype, sakstema, behandlingstema, null, null, null);
+            return LovligeKombinasjoner.hentAlleMuligeBehandlingstyper(hovedpart, sakstype, sakstema, behandlingstema, null, null, null);
         }
         return Collections.emptySet();
     }
@@ -114,9 +115,10 @@ public class MuligeManuelleBehandlingsendringer {
 
         if (behandling.getFagsak() != null && behandling.getFagsak().getType() != null && behandling.getFagsak().getTema() != null) {
             Sakstyper sakstype = behandling.getFagsak().getType();
+            Aktoersroller hovedpart = behandling.getFagsak().getHovedpartRolle();
             Sakstemaer sakstema = behandling.getFagsak().getTema();
 
-            return LovligeKombinasjoner.hentAlleMuligeBehandlingstemaer(Aktoersroller.BRUKER, sakstype, sakstema, null);
+            return LovligeKombinasjoner.hentAlleMuligeBehandlingstemaer(hovedpart, sakstype, sakstema, null);
         }
         return Collections.emptySet();
     }

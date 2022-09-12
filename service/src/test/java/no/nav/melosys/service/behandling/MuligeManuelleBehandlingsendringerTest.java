@@ -4,15 +4,14 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import no.finn.unleash.FakeUnleash;
-import no.nav.melosys.domain.Anmodningsperiode;
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.service.lovligeKombinasjoner.LovligeKombinasjoner;
+import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -261,6 +260,9 @@ class MuligeManuelleBehandlingsendringerTest {
         Fagsak fagsak = new Fagsak();
         fagsak.setType(sakstype);
         fagsak.setTema(sakstema);
+        Aktoer a1 = new Aktoer();
+        a1.setRolle(Aktoersroller.BRUKER);
+        fagsak.setAktører(Sets.newLinkedHashSet(a1));
         return fagsak;
     }
 
