@@ -9,29 +9,25 @@ import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
-import no.nav.melosys.service.journalforing.JournalfoeringService;
-import no.nav.melosys.service.lovligeKombinasjoner.LovligeKombinasjoner;
 import no.nav.melosys.service.lovligeKombinasjoner.LovligeKombinasjonerService;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.WebApplicationContext;
 
 @Protected
 @RestController
-@RequestMapping("/lovligeKombinasjoner")
-@Api(tags = {"lovligeKombinasjoner"})
+@RequestMapping("/lovligekombinasjoner")
+@Api(tags = {"lovligekombinasjoner"})
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class LovligeKombinasjonerTjeneste {
-    private final JournalfoeringService journalføringService;
     private final LovligeKombinasjonerService lovligeKombinasjonerService;
 
-    private LovligeKombinasjoner lovligeKombinasjoner;
-
-    public LovligeKombinasjonerTjeneste(JournalfoeringService journalføringService, LovligeKombinasjoner lovligeKombinasjoner, LovligeKombinasjonerService lovligeKombinasjonerService) {
-        this.journalføringService = journalføringService;
-        this.lovligeKombinasjoner = lovligeKombinasjoner;
+    public LovligeKombinasjonerTjeneste(LovligeKombinasjonerService lovligeKombinasjonerService) {
         this.lovligeKombinasjonerService = lovligeKombinasjonerService;
     }
 
@@ -41,29 +37,31 @@ public class LovligeKombinasjonerTjeneste {
         return ResponseEntity.ok(lovligeKombinasjonerService.hentAlleMuligeSakstyper());
     }
 
-    @GetMapping("/sakstemaer/{hovedpart}/{sakstype}")
+    @GetMapping("/sakstemaer")
     @ApiOperation(value = "Henter alle mulige sakstemaer basert på sakstypen", notes = ("Henter alle mulige sakstemaer basert på sakstypen"))
-    public ResponseEntity<Set<Sakstemaer>> hentAlleMuligeSakstemaer(@PathVariable("hovedpart") Aktoersroller hovedpart, @PathVariable("sakstype") Sakstyper sakstype) {
+    public ResponseEntity<Set<Sakstemaer>> hentAlleMuligeSakstemaer(
+        @RequestParam("hovedpart") Aktoersroller hovedpart,
+        @RequestParam("sakstype") Sakstyper sakstype) {
         return ResponseEntity.ok(lovligeKombinasjonerService.hentAlleSakstemaer(hovedpart, sakstype));
     }
 
-    @GetMapping("/behandlingstemaer/{hovedpart}/{sakstype}/{sakstema}")
+    @GetMapping("/behandlingstemaer")
     @ApiOperation(value = "Henter alle mulige behandlingstemaer basert på sakstype og sakstema", notes = ("Henter alle mulige behandlingstemaer basert på sakstype og sakstema"))
     public ResponseEntity<Set<Behandlingstema>> hentAlleMuligeBehandlingstemaer(
-        @PathVariable("hovedpart") Aktoersroller hovedpart,
-        @PathVariable("sakstype") Sakstyper sakstype,
-        @PathVariable("sakstema") Sakstemaer sakstema,
+        @RequestParam("hovedpart") Aktoersroller hovedpart,
+        @RequestParam("sakstype") Sakstyper sakstype,
+        @RequestParam("sakstema") Sakstemaer sakstema,
         @RequestParam(value = "sistBehandlingstema", required = false) Behandlingstema sistBehandlingstema
     ) {
         return ResponseEntity.ok(lovligeKombinasjonerService.hentAlleMuligeBehandlingstemaer(hovedpart, sakstype, sakstema, sistBehandlingstema));
     }
 
-    @GetMapping("/behandlingstyper/{hovedpart}/{sakstype}/{sakstema}")
+    @GetMapping("/behandlingstyper")
     @ApiOperation(value = "Henter alle mulige behandlingstyper basert på sakstype, sakstema og behandlingstema", notes = ("Henter alle mulige behandlingstyper basert på sakstype, sakstema og behandlingstema"))
     public ResponseEntity<Set<Behandlingstyper>> hentAlleMuligeBehandlingstyper(
-        @PathVariable("hovedpart") Aktoersroller hovedpart,
-        @PathVariable("sakstype") Sakstyper sakstype,
-        @PathVariable("sakstema") Sakstemaer sakstema,
+        @RequestParam("hovedpart") Aktoersroller hovedpart,
+        @RequestParam("sakstype") Sakstyper sakstype,
+        @RequestParam("sakstema") Sakstemaer sakstema,
         @RequestParam(value = "behandlingstema", required = false) Behandlingstema behandlingstema,
         @RequestParam(value = "sisteBehandlingsID", required = false) Long sisteBehandlingsID
     ) {

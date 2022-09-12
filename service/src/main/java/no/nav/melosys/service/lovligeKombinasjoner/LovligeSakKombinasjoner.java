@@ -24,10 +24,10 @@ import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.*;
 import static no.nav.melosys.service.lovligeKombinasjoner.LovligeBehandlingsKombinasjoner.*;
 
 @Component
-public class LovligeKombinasjoner {
+public class LovligeSakKombinasjoner {
     private static final Set<Sakstyper> ALLE_MULIGE_SAKSTYPER = Set.of(EU_EOS, FTRL, TRYGDEAVTALE);
     private static final Set<Sakstemaer> ALLE_MULIGE_SAKSTEMAER = Set.of(MEDLEMSKAP_LOVVALG, UNNTAK, TRYGDEAVGIFT);
-    private static final SakKombinasjon EU_EOS_LOVVALG_MEDLEMSKAP_SAK = new SakKombinasjon(MEDLEMSKAP_LOVVALG, Set.of(EU_EOS_LOVVALG_MEDLEMSKAP_BEHANDLINGS_KOMBINASJON_SØKNADSTEMAER, EU_EOS_LOVVALG_MEDLEMSKAP_BEHANDLINGS_KOMBINASJON_UTENLANDSK_TRYGDEMYNDIGHET));
+    private static final SakKombinasjon EU_EOS_LOVVALG_MEDLEMSKAP_SAK = new SakKombinasjon(MEDLEMSKAP_LOVVALG, Set.of(EU_EOS_LOVVALG_MEDLEMSKAP_BEHANDLINGS_KOMBINASJON_SØKNAD, EU_EOS_LOVVALG_MEDLEMSKAP_BEHANDLINGS_KOMBINASJON_HENVENDELSER));
     private static final SakKombinasjon EU_EOS_UNNTAK_SAK = new SakKombinasjon(UNNTAK, Set.of(EU_EOS_UNNTAK_BEHANDLINGS_KOMBINASJON));
     private static final SakKombinasjon EU_EOS_TRYGDEAVGIFT_SAK = new SakKombinasjon(TRYGDEAVGIFT, Set.of(EU_EOS_TRYGDEAVGIFT_BEHANDLINGS_KOMBINASJON));
     private static final SakKombinasjon FOLKETRYGDLOVEL_LOVVALG_MEDLEMSKAP_SAK = new SakKombinasjon(MEDLEMSKAP_LOVVALG, Set.of(FTRL_LOVVALG_MEDLEMSKAP_BEHANDLINGS_KOMBINASJON));
@@ -37,7 +37,7 @@ public class LovligeKombinasjoner {
     private static final SakKombinasjon TRYGDEAVTALE_TRYGDEAVGIFT_SAK = new SakKombinasjon(TRYGDEAVGIFT, Set.of(TRYGDEAVTALE_TRYGDEAVGIFT_BEHANDLINGS_KOMBINASJON));
     private static final Map<Sakstyper, Set<SakKombinasjon>> alleMuligeSaksKombinasjonerBruker = new HashMap<>();
 
-    public LovligeKombinasjoner() {
+    public LovligeSakKombinasjoner() {
         alleMuligeSaksKombinasjonerBruker.put(EU_EOS, Set.of(EU_EOS_LOVVALG_MEDLEMSKAP_SAK, EU_EOS_UNNTAK_SAK, EU_EOS_TRYGDEAVGIFT_SAK));
         alleMuligeSaksKombinasjonerBruker.put(FTRL, Set.of(FOLKETRYGDLOVEL_LOVVALG_MEDLEMSKAP_SAK, FOLKETRYGDLOVEL_TRYGDEAVGIFT_SAK));
         alleMuligeSaksKombinasjonerBruker.put(TRYGDEAVTALE, Set.of(TRYGDEAVTALE_LOVVALG_MEDLEMSKAP_SAK, TRYGDEAVTALE_UNNTAK_SAK, TRYGDEAVTALE_TRYGDEAVGIFT_SAK));
@@ -47,7 +47,7 @@ public class LovligeKombinasjoner {
         switch (hovedpart) {
             case BRUKER:
                 return alleMuligeSaksKombinasjonerBruker.get(sakstype).stream()
-                    .map(sak -> sak.getSakstema())
+                    .map(SakKombinasjon::getSakstema)
                     .collect(Collectors.toSet());
             case VIRKSOMHET:
                 return ALLE_MULIGE_SAKSTEMAER;

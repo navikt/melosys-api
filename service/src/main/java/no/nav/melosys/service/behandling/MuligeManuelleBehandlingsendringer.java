@@ -14,7 +14,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.service.lovligeKombinasjoner.LovligeKombinasjoner;
+import no.nav.melosys.service.lovligeKombinasjoner.LovligeSakKombinasjoner;
 
 import static no.nav.melosys.domain.Behandling.BEHANDLINGSTEMA_SED_FORESPØRSEL;
 import static no.nav.melosys.domain.Behandling.erBehandlingAvSedForespørsler;
@@ -71,7 +71,7 @@ public class MuligeManuelleBehandlingsendringer {
             Aktoersroller hovedpart = behandling.getFagsak().getHovedpartRolle();
             Behandlingstema behandlingstema = behandling.getTema();
 
-            return LovligeKombinasjoner.hentAlleMuligeBehandlingstyper(hovedpart, sakstype, sakstema, behandlingstema, null, null, null);
+            return LovligeSakKombinasjoner.hentAlleMuligeBehandlingstyper(hovedpart, sakstype, sakstema, behandlingstema, null, null, null);
         }
         return Collections.emptySet();
     }
@@ -114,7 +114,7 @@ public class MuligeManuelleBehandlingsendringer {
             Aktoersroller hovedpart = behandling.getFagsak().getHovedpartRolle();
             Sakstemaer sakstema = behandling.getFagsak().getTema();
 
-            return LovligeKombinasjoner.hentAlleMuligeBehandlingstemaer(hovedpart, sakstype, sakstema, null);
+            return LovligeSakKombinasjoner.hentAlleMuligeBehandlingstemaer(hovedpart, sakstype, sakstema, null);
         }
         return Collections.emptySet();
     }
@@ -151,7 +151,7 @@ public class MuligeManuelleBehandlingsendringer {
         }
     }
 
-    public static void validerNyttTemaMulig_NY(Behandling behandling, Behandlingsresultat behandlingsresultat, Behandlingstema tema) {
+    public static void validerNyttTemaMulig_NY(Behandling behandling, Behandlingstema tema) {
         if (!hentMuligeBehandlingstema_NY(behandling).contains(tema)) {
             throw new FunksjonellException(String.format("Behandlingen kan ikke endres til tema %s. Gyldige temaer for behandling %s er %s",
                 tema, behandling.getId(), hentMuligeBehandlingstema_NY(behandling)));

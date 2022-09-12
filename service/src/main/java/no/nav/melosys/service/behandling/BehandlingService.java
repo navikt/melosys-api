@@ -454,7 +454,7 @@ public class BehandlingService {
     private boolean saksbehandlerKanEndreTema(Behandling behandling, Behandlingstema tema) {
         var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
         if (unleash.isEnabled("melosys.behandle_alle_saker")) {
-            MuligeManuelleBehandlingsendringer.validerNyttTemaMulig_NY(behandling, behandlingsresultat, tema);
+            MuligeManuelleBehandlingsendringer.validerNyttTemaMulig_NY(behandling, tema);
         } else {
             MuligeManuelleBehandlingsendringer.validerNyttTemaMulig(behandling, behandlingsresultat, tema, unleash.isEnabled("melosys.behandle_alle_saker"));
         }

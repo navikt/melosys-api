@@ -24,7 +24,7 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.BehandlingsgrunnlagRepository;
 import no.nav.melosys.repository.TidligereMedlemsperiodeRepository;
-import no.nav.melosys.service.lovligeKombinasjoner.LovligeKombinasjoner;
+import no.nav.melosys.service.lovligeKombinasjoner.LovligeSakKombinasjoner;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.BeforeEach;
@@ -68,7 +68,7 @@ class BehandlingServiceTest {
     @Mock
     private ApplicationEventPublisher applicationEventPublisher;
     private final FakeUnleash fakeUnleash = new FakeUnleash();
-    private final LovligeKombinasjoner lovligeKombinasjoner = new LovligeKombinasjoner();
+    private final LovligeSakKombinasjoner lovligeSakKombinasjoner = new LovligeSakKombinasjoner();
     private BehandlingService behandlingService;
     @Captor
     private ArgumentCaptor<Behandling> behandlingCaptor;

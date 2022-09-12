@@ -10,7 +10,7 @@ import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
-import no.nav.melosys.service.lovligeKombinasjoner.LovligeKombinasjoner;
+import no.nav.melosys.service.lovligeKombinasjoner.LovligeSakKombinasjoner;
 import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,7 +25,7 @@ import static no.nav.melosys.service.behandling.MuligeManuelleBehandlingsendring
 import static org.assertj.core.api.Assertions.assertThat;
 
 class MuligeManuelleBehandlingsendringerTest {
-    private final LovligeKombinasjoner lovligeKombinasjoner = new LovligeKombinasjoner();
+    private final LovligeSakKombinasjoner lovligeSakKombinasjoner = new LovligeSakKombinasjoner();
     private final FakeUnleash unleash = new FakeUnleash();
 
     @BeforeEach

@@ -1,7 +1,5 @@
 package no.nav.melosys.service.lovligeKombinasjoner;
 
-import java.util.Set;
-
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
@@ -11,25 +9,25 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.service.behandling.BehandlingService;
 import org.springframework.stereotype.Service;
 
+import java.util.Set;
+
 @Service
 public class LovligeKombinasjonerService {
     private BehandlingService behandlingService;
-    private LovligeKombinasjoner lovligeKombinasjoner;
 
-    public LovligeKombinasjonerService(BehandlingService behandlingService, LovligeKombinasjoner lovligeKombinasjoner) {
+    public LovligeKombinasjonerService(BehandlingService behandlingService) {
         this.behandlingService = behandlingService;
-        this.lovligeKombinasjoner = lovligeKombinasjoner;
     }
 
     public Set<Sakstyper> hentAlleMuligeSakstyper() {
-        return LovligeKombinasjoner.hentAlleMuligeSakstyper();
+        return LovligeSakKombinasjoner.hentAlleMuligeSakstyper();
     }
 
     public Set<Sakstemaer> hentAlleSakstemaer(
         Aktoersroller hovedpart,
         Sakstyper sakstype
     ) {
-        return LovligeKombinasjoner.hentAlleSakstemaer(hovedpart, sakstype);
+        return LovligeSakKombinasjoner.hentAlleSakstemaer(hovedpart, sakstype);
     }
 
     public Set<Behandlingstema> hentAlleMuligeBehandlingstemaer(
@@ -38,7 +36,7 @@ public class LovligeKombinasjonerService {
         Sakstemaer sakstema,
         Behandlingstema sistBehandlingstema
     ) {
-        return LovligeKombinasjoner.hentAlleMuligeBehandlingstemaer(hovedpart, sakstype, sakstema, sistBehandlingstema);
+        return LovligeSakKombinasjoner.hentAlleMuligeBehandlingstemaer(hovedpart, sakstype, sakstema, sistBehandlingstema);
     }
 
     public Set<Behandlingstyper> hentAlleMuligeBehandlingstyper(
@@ -52,7 +50,7 @@ public class LovligeKombinasjonerService {
         if (sisteBehandlingsID != null) {
             sisteBehandling = behandlingService.hentBehandling(sisteBehandlingsID);
         }
-        return lovligeKombinasjoner.hentAlleMuligeBehandlingstyper(
+        return LovligeSakKombinasjoner.hentAlleMuligeBehandlingstyper(
             hovedpart,
             sakstype,
             sakstema,
