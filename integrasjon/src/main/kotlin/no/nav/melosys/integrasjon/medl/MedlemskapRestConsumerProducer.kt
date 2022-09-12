@@ -1,6 +1,7 @@
 package no.nav.melosys.integrasjon.medl
 
 import no.nav.melosys.integrasjon.felles.GenericContextExchangeFilter
+import no.nav.melosys.integrasjon.felles.MedlGenericContextExchangeFilter
 import no.nav.melosys.integrasjon.felles.RestConsumer
 import no.nav.melosys.integrasjon.felles.WebClientConfig
 import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter
@@ -21,12 +22,12 @@ class MedlemskapRestConsumerProducer(@Value("\${medlemskap.rest.url}") private v
     @Bean
     fun medlemskapRestConsumer(
         webClientBuilder: WebClient.Builder,
-        genericContextExchangeFilter: GenericContextExchangeFilter,
+        medlGenericContextExchangeFilter: MedlGenericContextExchangeFilter,
         correlationIdOutgoingFilter: CorrelationIdOutgoingFilter
     ) = MedlemskapRestConsumer(
         webClientBuilder
             .baseUrl(url)
-            .filter(genericContextExchangeFilter)
+            .filter(medlGenericContextExchangeFilter)
             .filter(headerFilter())
             .filter(correlationIdOutgoingFilter)
             .filter(errorFilter("Kall mot Medl feilet."))

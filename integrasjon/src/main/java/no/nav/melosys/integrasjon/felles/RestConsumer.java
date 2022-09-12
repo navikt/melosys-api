@@ -2,19 +2,17 @@ package no.nav.melosys.integrasjon.felles;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import javax.ws.rs.NotSupportedException;
 
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.aad.AzureADConsumerImpl;
 import no.nav.melosys.integrasjon.felles.mdc.MDCOperations;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
-
-import javax.ws.rs.NotSupportedException;
 
 public interface RestConsumer {
 
@@ -25,7 +23,7 @@ public interface RestConsumer {
     }
 
     default String getAuth(String scope) {
-        if (isSystem()) {
+        if (ThreadLocalAccessInfo.shouldUseSystemToken()) {
             return basicAuth();
         }
         if (scope == null) {

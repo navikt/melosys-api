@@ -1,31 +1,37 @@
 package no.nav.melosys.integrasjon.felles;
 
 import java.io.IOException;
+import java.util.Optional;
 import javax.annotation.Nonnull;
 
-import no.nav.melosys.integrasjon.aad.AzureADConsumerImpl;
 import no.nav.melosys.integrasjon.reststs.RestStsClient;
-import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo;
+import no.nav.security.token.support.client.core.ClientProperties;
+import no.nav.security.token.support.client.core.oauth2.OAuth2AccessTokenResponse;
+import no.nav.security.token.support.client.core.oauth2.OAuth2AccessTokenService;
+import no.nav.security.token.support.client.spring.ClientConfigurationProperties;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.stereotype.Component;
-import org.springframework.util.ObjectUtils;
 
+//TODO: Fjern dette og erstatt med GenericContextExchangeFilter
 @Component
 public class GenericContextClientRequestInterceptor implements ClientHttpRequestInterceptor {
     private final RestStsClient restStsClient;
-
-    private final AzureADConsumerImpl azureADConsumer;
-
+    private OAuth2AccessTokenService oAuth2AccessTokenService;
+    private ClientProperties clientProperties;
 
     public GenericContextClientRequestInterceptor(RestStsClient restStsClient,
-                                                  AzureADConsumerImpl azureADConsumer) {
+                                                  ClientConfigurationProperties clientConfigurationProperties,
+                                                  OAuth2AccessTokenService oAuth2AccessTokenService) {
+        this.clientProperties = Optional.ofNullable(clientConfigurationProperties.getRegistration().get("melosys-eessi"))
+            .orElseThrow(() -> new RuntimeException("Fant ikke OAuth2-config for melosys-eessi"));
+
         this.restStsClient = restStsClient;
-        this.azureADConsumer = azureADConsumer;
+        this.oAuth2AccessTokenService = oAuth2AccessTokenService;
     }
 
     @Override
@@ -39,20 +45,12 @@ public class GenericContextClientRequestInterceptor implements ClientHttpRequest
             request.getHeaders().add(HttpHeaders.AUTHORIZATION, "Bearer " + restStsClient.collectToken());
             return execution.execute(request, body);
         }
-        //TODO: SER UT SOM DET BARE ER EESSI SOM BRUKER DETTE
 
-        String oidcToken = SubjectHandler.getInstance().getOidcTokenString();
+        OAuth2AccessTokenResponse response = oAuth2AccessTokenService.getAccessToken(clientProperties);
+        String accessToken = response.getAccessToken();
 
-        String scope = "api://dev-fss.teammelosys.melosys-eessi-q1/.default";
-        String issuedToken = azureADConsumer.hentToken(oidcToken, scope);
-
-        System.out.println("Kaller på eessi (?). Scope for dette er: \"" + scope + "\"");
-
-        if (ObjectUtils.isEmpty(oidcToken)) {
-            throw new IllegalStateException("Finner ingen bruker-kontekst");
-        }
-
-        request.getHeaders().add(HttpHeaders.AUTHORIZATION, "Bearer " + issuedToken);
+        request.getHeaders().add(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
         return execution.execute(request, body);
     }
+
 }

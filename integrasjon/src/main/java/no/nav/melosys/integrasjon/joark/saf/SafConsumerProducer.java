@@ -1,6 +1,6 @@
 package no.nav.melosys.integrasjon.joark.saf;
 
-import no.nav.melosys.integrasjon.felles.GenericContextExchangeFilter;
+import no.nav.melosys.integrasjon.felles.SafGenericContextExchangeFilter;
 import no.nav.melosys.integrasjon.felles.WebClientConfig;
 import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,11 +22,11 @@ public class SafConsumerProducer implements WebClientConfig {
 
     @Bean
     public SafConsumer safConsumer(WebClient.Builder webClientBuilder,
-                                   GenericContextExchangeFilter genericContextExchangeFilter,
+                                   SafGenericContextExchangeFilter safGenericContextExchangeFilter,
                                    CorrelationIdOutgoingFilter correlationIdOutgoingFilter) {
         return new SafConsumerImpl(
             webClientBuilder
-                .filter(genericContextExchangeFilter)
+                .filter(safGenericContextExchangeFilter)
                 .filter(correlationIdOutgoingFilter)
                 .filter(errorFilter("Kall mot SAF feilet."))
                 .defaultHeaders(this::defaultHeaders)
