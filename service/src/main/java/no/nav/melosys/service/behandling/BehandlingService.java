@@ -98,7 +98,7 @@ public class BehandlingService {
         behandling.setFagsak(fagsak);
         behandling.setRegistrertDato(nå);
         behandling.setEndretDato(nå);
-        behandling.setBehandlingsfrist(hentBehandlingsfristForBehandlingstema(behandlingstema));
+        behandling.setBehandlingsfrist(Behandling.utledFristForBehandlingstema(behandlingstema));
 
         behandling.setStatus(behandlingsstatus);
         behandling.setType(behandlingstype);
@@ -264,7 +264,7 @@ public class BehandlingService {
         behandlingsreplika.setOpprinneligBehandling(tidligsteInaktiveBehandling);
         behandlingsreplika.setBehandlingsgrunnlag(null);
         behandlingsreplika.setBehandlingsnotater(Collections.emptySet());
-        behandlingsreplika.setBehandlingsfrist(hentBehandlingsfristForBehandlingstema(tidligsteInaktiveBehandling.getTema()));
+        behandlingsreplika.setBehandlingsfrist(Behandling.utledFristForBehandlingstema(tidligsteInaktiveBehandling.getTema()));
         behandlingsreplika.setSaksopplysninger(new HashSet<>());
         behandlingRepository.save(behandlingsreplika);
 
@@ -296,7 +296,7 @@ public class BehandlingService {
         behandlingsreplika.setOpprinneligBehandling(tidligsteInaktiveBehandling);
         behandlingsreplika.setBehandlingsgrunnlag(replikerBehandlingsgrunnlag(behandlingsreplika, tidligsteInaktiveBehandling.getBehandlingsgrunnlag()));
         behandlingsreplika.setBehandlingsnotater(Collections.emptySet());
-        behandlingsreplika.setBehandlingsfrist(hentBehandlingsfristForBehandlingstema(tidligsteInaktiveBehandling.getTema()));
+        behandlingsreplika.setBehandlingsfrist(Behandling.utledFristForBehandlingstema(tidligsteInaktiveBehandling.getTema()));
 
         behandlingsreplika.setSaksopplysninger(new HashSet<>());
         for (Saksopplysning saksopplysning : tidligsteInaktiveBehandling.getSaksopplysninger()) {
@@ -446,18 +446,5 @@ public class BehandlingService {
         var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
         MuligeManuelleBehandlingsendringer.validerNyttTemaMulig(behandling, behandlingsresultat, tema, unleash.isEnabled("melosys.behandle_alle_saker"));
         return behandlingsresultat.erIkkeArtikkel16MedSendtAnmodningOmUnntak();
-    }
-
-    private LocalDate hentBehandlingsfristForBehandlingstema(Behandlingstema behandlingstema) {
-        return switch (behandlingstema) {
-            case UTSENDT_ARBEIDSTAKER, UTSENDT_SELVSTENDIG, ARBEID_FLERE_LAND, ARBEID_ETT_LAND_ØVRIG,
-                ARBEID_TJENESTEPERSON_ELLER_FLY, ARBEID_KUN_NORGE, IKKE_YRKESAKTIV, ARBEID_I_UTLANDET, ARBEID_NORGE_BOSATT_ANNET_LAND,
-                YRKESAKTIV, UNNTAK_MEDLEMSKAP, REGISTRERING_UNNTAK, PENSJONIST -> LocalDate.now().plusDays(30);
-            case REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING, REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE ->
-                LocalDate.now().plusWeeks(2);
-            case BESLUTNING_LOVVALG_NORGE, BESLUTNING_LOVVALG_ANNET_LAND -> LocalDate.now().plusWeeks(4);
-            case ANMODNING_OM_UNNTAK_HOVEDREGEL, ØVRIGE_SED_UFM, ØVRIGE_SED_MED, FORESPØRSEL_TRYGDEMYNDIGHET, TRYGDETID ->
-                LocalDate.now().plusWeeks(8);
-        };
     }
 }

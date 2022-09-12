@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
 
+import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
@@ -62,6 +63,8 @@ class OppgaveServiceTest {
     @Mock
     private BehandlingsgrunnlagService behandlingsgrunnlagService;
 
+    private FakeUnleash unleash = new FakeUnleash();
+
     private OppgaveService oppgaveService;
 
     @Captor
@@ -82,8 +85,10 @@ class OppgaveServiceTest {
             saksopplysningerService,
             behandlingsgrunnlagService,
             persondataFasade,
-            eregFasade);
+            eregFasade,
+            unleash);
 
+        unleash.enableAll();
         oppgave = new Oppgave.Builder()
             .setOppgavetype(Oppgavetyper.BEH_SAK_MK)
             .setTilordnetRessurs("Z998877")
@@ -245,7 +250,23 @@ class OppgaveServiceTest {
     }
 
     @Test
+    void opprettEllerGjenbrukBehandlingsoppgave_oppgaveOpprettElektroniskSøknad_oppgaveBlirOpprettetMedBeskrivelse() {
+        Behandling behandling = lagBehandling();
+        behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
+        behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(new BehandlingsgrunnlagData());
+        behandling.getBehandlingsgrunnlag().setType(Behandlingsgrunnlagtyper.SØKNAD_A1_UTSENDTE_ARBEIDSTAKERE_EØS);
+        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
+
+        oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", "Z99999");
+
+        verify(oppgaveFasade).opprettOppgave(oppgaveCaptor.capture());
+        assertThat(oppgaveCaptor.getValue().getBeskrivelse()).isEqualTo(behandling.getTema().getBeskrivelse());
+    }
+
+    @Test
     void opprettEllerGjenbrukBehandlingsoppgave_oppgaveOpprettElektroniskSøknad_oppgaveBlirOpprettetMedBeskrvielse() {
+        unleash.disableAll();
+
         final String mottattString = "Mottatt elektronisk søknad";
         Behandling behandling = lagBehandling();
         behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
@@ -260,7 +281,21 @@ class OppgaveServiceTest {
     }
 
     @Test
+    void opprettEllerGjenbrukBehandlingsoppgave_oppgaveNyVurdering_oppgaveBlirOpprettetMedBeskrivelse() {
+        Behandling behandling = lagBehandling();
+        behandling.setType(Behandlingstyper.NY_VURDERING);
+        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
+
+        oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", "Z99999");
+
+        verify(oppgaveFasade).opprettOppgave(oppgaveCaptor.capture());
+        assertThat(oppgaveCaptor.getValue().getBeskrivelse()).isEqualTo(behandling.getTema().getBeskrivelse());
+    }
+
+    @Test
     void opprettEllerGjenbrukBehandlingsoppgave_oppgaveNyVurdering_oppgaveBlirOpprettetMedBeskrvielse() {
+        unleash.disableAll();
+
         final String mottattString = "Ny vurdering";
         Behandling behandling = lagBehandling();
         behandling.setType(Behandlingstyper.NY_VURDERING);
@@ -394,12 +429,14 @@ class OppgaveServiceTest {
         Behandling behandling = new Behandling();
         final var fagsak = new Fagsak();
         fagsak.setSaksnummer(SAKSNUMMER);
+        fagsak.setType(Sakstyper.EU_EOS);
+        fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
         Aktoer bruker = new Aktoer();
         bruker.setRolle(BRUKER);
         bruker.setAktørId("aktørID");
         fagsak.getAktører().add(bruker);
         behandling.setFagsak(fagsak);
-        behandling.setType(Behandlingstyper.SOEKNAD);
+        behandling.setType(Behandlingstyper.FØRSTEGANG);
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         behandling.setId(1L);
         behandling.setRegistrertDato(Instant.ofEpochMilli(111L));

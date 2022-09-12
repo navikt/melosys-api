@@ -1,11 +1,14 @@
 package no.nav.melosys.saksflyt.steg.oppgave;
 
+import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Fagsystem;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
+import no.nav.melosys.domain.kodeverk.Sakstemaer;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
@@ -33,15 +36,39 @@ class GjenbrukOppgaveTest {
     @Captor
     private ArgumentCaptor<Oppgave> oppgaveCaptor;
 
+    private FakeUnleash unleash = new FakeUnleash();
+
     private GjenbrukOppgave gjenbrukOppgave;
 
     @BeforeEach
     public void setUp() {
-        gjenbrukOppgave = new GjenbrukOppgave(oppgaveService);
+        gjenbrukOppgave = new GjenbrukOppgave(oppgaveService, unleash);
+        unleash.enableAll();
     }
 
     @Test
     void gjenbrukOppgave_utfør_oppdatererOppgave() {
+        final String oppgaveID = "1234";
+        final String saksnummer = "MEL-123";
+        final String oppgaveBeskrivelse = "jeg beskriver oppgave";
+
+        Oppgave eksisterendeOppgave = new Oppgave.Builder().setBeskrivelse(oppgaveBeskrivelse).build();
+        when(oppgaveService.hentOppgaveMedOppgaveID(eq(oppgaveID))).thenReturn(eksisterendeOppgave);
+
+        gjenbrukOppgave.utfør(lagProsessinstans(oppgaveID, saksnummer));
+        verify(oppgaveService).opprettOppgave(oppgaveCaptor.capture());
+        assertThat(oppgaveCaptor.getValue())
+            .hasFieldOrPropertyWithValue("saksnummer", saksnummer)
+            .hasFieldOrPropertyWithValue("behandlesAvApplikasjon", Fagsystem.MELOSYS)
+            .hasFieldOrPropertyWithValue("oppgavetype", Oppgavetyper.BEH_SAK_MK)
+            .hasFieldOrPropertyWithValue("behandlingstema", "ab0424")
+            .hasFieldOrPropertyWithValue("tilordnetRessurs", "Deg321")
+            .hasFieldOrPropertyWithValue("aktørId", "123321");
+    }
+
+    @Test
+    void gjenbrukOppgave_utfør_oppdatererOppgave_toggle() {
+        unleash.disableAll();
         final String oppgaveID = "1234";
         final String saksnummer = "MEL-123";
         final String oppgaveBeskrivelse = "jeg beskriver oppgave";
@@ -69,6 +96,8 @@ class GjenbrukOppgaveTest {
 
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer(saksnummer);
+        fagsak.setType(Sakstyper.EU_EOS);
+        fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
         fagsak.getAktører().add(bruker);
 
         Behandling behandling = new Behandling();
