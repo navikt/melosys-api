@@ -27,7 +27,7 @@ import static no.nav.melosys.service.lovligeKombinasjoner.LovligeBehandlingsKomb
 public class LovligeKombinasjoner {
     private static final Set<Sakstyper> ALLE_MULIGE_SAKSTYPER = Set.of(EU_EOS, FTRL, TRYGDEAVTALE);
     private static final Set<Sakstemaer> ALLE_MULIGE_SAKSTEMAER = Set.of(MEDLEMSKAP_LOVVALG, UNNTAK, TRYGDEAVGIFT);
-    private static final SakKombinasjon EU_EOS_LOVVALG_MEDLEMSKAP_SAK = new SakKombinasjon(MEDLEMSKAP_LOVVALG, Set.of(EU_EOS_LOVVALG_MEDLEMSKAP_BEHANDLINGS_KOMBINASJON_1, EU_EOS_LOVVALG_MEDLEMSKAP_BEHANDLINGS_KOMBINASJON_2));
+    private static final SakKombinasjon EU_EOS_LOVVALG_MEDLEMSKAP_SAK = new SakKombinasjon(MEDLEMSKAP_LOVVALG, Set.of(EU_EOS_LOVVALG_MEDLEMSKAP_BEHANDLINGS_KOMBINASJON_SØKNADSTEMAER, EU_EOS_LOVVALG_MEDLEMSKAP_BEHANDLINGS_KOMBINASJON_UTENLANDSK_TRYGDEMYNDIGHET));
     private static final SakKombinasjon EU_EOS_UNNTAK_SAK = new SakKombinasjon(UNNTAK, Set.of(EU_EOS_UNNTAK_BEHANDLINGS_KOMBINASJON));
     private static final SakKombinasjon EU_EOS_TRYGDEAVGIFT_SAK = new SakKombinasjon(TRYGDEAVGIFT, Set.of(EU_EOS_TRYGDEAVGIFT_BEHANDLINGS_KOMBINASJON));
     private static final SakKombinasjon FOLKETRYGDLOVEL_LOVVALG_MEDLEMSKAP_SAK = new SakKombinasjon(MEDLEMSKAP_LOVVALG, Set.of(FTRL_LOVVALG_MEDLEMSKAP_BEHANDLINGS_KOMBINASJON));
