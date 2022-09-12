@@ -14,10 +14,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.integrasjon.sak.SakConsumerImpl;
 import no.nav.melosys.service.lovligeKombinasjoner.LovligeKombinasjoner;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static no.nav.melosys.domain.Behandling.BEHANDLINGSTEMA_SED_FORESPØRSEL;
 import static no.nav.melosys.domain.Behandling.erBehandlingAvSedForespørsler;
@@ -27,7 +24,6 @@ import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.ENDRE
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.NY_VURDERING;
 
 public class MuligeManuelleBehandlingsendringer {
-    private static final Logger log = LoggerFactory.getLogger(SakConsumerImpl.class);
 
     static final Set<Behandlingstema> BEHANDLINGSTEMA_SØKNAD = Set.of(UTSENDT_ARBEIDSTAKER, UTSENDT_SELVSTENDIG,
         ARBEID_ETT_LAND_ØVRIG,
@@ -108,7 +104,7 @@ public class MuligeManuelleBehandlingsendringer {
         }
     }
 
-    public static Set<Behandlingstema> hentMuligeBehandlingstema_NY(Behandling behandling, Behandlingsresultat behandlingsresultat) {
+    public static Set<Behandlingstema> hentMuligeBehandlingstema_NY(Behandling behandling) {
         if (behandling.kanIkkeEndres()) {
             return Collections.emptySet();
         }
@@ -156,9 +152,9 @@ public class MuligeManuelleBehandlingsendringer {
     }
 
     public static void validerNyttTemaMulig_NY(Behandling behandling, Behandlingsresultat behandlingsresultat, Behandlingstema tema) {
-        if (!hentMuligeBehandlingstema_NY(behandling, behandlingsresultat).contains(tema)) {
+        if (!hentMuligeBehandlingstema_NY(behandling).contains(tema)) {
             throw new FunksjonellException(String.format("Behandlingen kan ikke endres til tema %s. Gyldige temaer for behandling %s er %s",
-                tema, behandling.getId(), hentMuligeBehandlingstema_NY(behandling, behandlingsresultat)));
+                tema, behandling.getId(), hentMuligeBehandlingstema_NY(behandling)));
         }
     }
 

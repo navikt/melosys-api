@@ -13,8 +13,6 @@ import no.nav.melosys.service.journalforing.JournalfoeringService;
 import no.nav.melosys.service.lovligeKombinasjoner.LovligeKombinasjoner;
 import no.nav.melosys.service.lovligeKombinasjoner.LovligeKombinasjonerService;
 import no.nav.security.token.support.core.api.Protected;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,8 +24,6 @@ import org.springframework.web.context.WebApplicationContext;
 @Api(tags = {"lovligeKombinasjoner"})
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class LovligeKombinasjonerTjeneste {
-    private static final Logger log = LoggerFactory.getLogger(LovligeKombinasjonerTjeneste.class);
-
     private final JournalfoeringService journalføringService;
     private final LovligeKombinasjonerService lovligeKombinasjonerService;
 
