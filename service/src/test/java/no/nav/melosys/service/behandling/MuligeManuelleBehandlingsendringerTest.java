@@ -3,30 +3,22 @@ package no.nav.melosys.service.behandling;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static no.nav.melosys.domain.Behandling.BEHANDLINGSTEMA_SED_FORESPØRSEL;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.*;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*;
-import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.ENDRET_PERIODE;
-import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.SOEKNAD;
+import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.*;
 import static no.nav.melosys.service.behandling.MuligeManuelleBehandlingsendringer.BEHANDLINGSTEMA_SØKNAD;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class MuligeManuelleBehandlingsendringerTest {
-    private final FakeUnleash unleash = new FakeUnleash();
 
-    @BeforeEach
-    void init() {
-        unleash.enableAll();
-    }
 
     @Test
     void hentMuligeStatuser_temaOvrigeSedMed_avsluttetErMulig() {
@@ -87,6 +79,18 @@ class MuligeManuelleBehandlingsendringerTest {
     void hentMuligeBehandlingstema_erArtikkel16MedSendtAnmodningOmUnntak_returnererTomListe() {
         var muligeBehandlingstema = MuligeManuelleBehandlingsendringer.hentMuligeBehandlingstema(behandlingMedTema(ARBEID_FLERE_LAND), behandlingsresultatSendtUtland(true), false);
         assertThat(muligeBehandlingstema).isEmpty();
+    }
+
+    @Test
+    void hentMuligeTyper_temaEndretPeriode_returnererNyVurdering() {
+        var muligeTyper = MuligeManuelleBehandlingsendringer.hentMuligeTyper(behandlingMedTemaOgType(UTSENDT_ARBEIDSTAKER, ENDRET_PERIODE));
+        assertThat(muligeTyper).containsExactly(NY_VURDERING);
+    }
+
+    @Test
+    void hentMuligeTyper_temaNyVurdering_returnererEndretPeriode() {
+        var muligeTyper = MuligeManuelleBehandlingsendringer.hentMuligeTyper(behandlingMedTemaOgType(UTSENDT_SELVSTENDIG, NY_VURDERING));
+        assertThat(muligeTyper).containsExactly(ENDRET_PERIODE);
     }
 
     @Test

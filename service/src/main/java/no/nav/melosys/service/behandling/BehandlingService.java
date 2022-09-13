@@ -66,7 +66,8 @@ public class BehandlingService {
                              BehandlingsgrunnlagRepository behandlingsgrunnlagRepository,
                              BehandlingsresultatService behandlingsresultatService,
                              @Lazy OppgaveService oppgaveService,
-                             LovligeKombinasjonerService lovligeKombinasjonerService, ApplicationEventPublisher applicationEventPublisher,
+                             LovligeKombinasjonerService lovligeKombinasjonerService,
+                             ApplicationEventPublisher applicationEventPublisher,
                              Unleash unleash) {
         this.behandlingRepository = behandlingRepository;
         this.tidligereMedlemsperiodeRepository = tidligereMedlemsperiodeRepository;
@@ -147,9 +148,7 @@ public class BehandlingService {
     public void endreBehandlingstemaTilBehandling(long behandlingID, Behandlingstema nyttTema) {
         Behandling behandling = hentBehandling(behandlingID);
         var behandlingsgrunnlag = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
-        Set<Behandlingstema> behandlingstemaer = MuligeManuelleBehandlingsendringer.hentMuligeBehandlingstema(behandling, behandlingsgrunnlag, unleash.isEnabled("melosys.behandle_alle_saker"));
-
-        if (behandlingstemaer.contains(nyttTema)) {
+        if (MuligeManuelleBehandlingsendringer.hentMuligeBehandlingstema(behandling, behandlingsgrunnlag, unleash.isEnabled("melosys.behandle_alle_saker")).contains(nyttTema)) {
             behandling.setTema(nyttTema);
 
             tilbakestillBehandlingsgrunnlag(behandling);
