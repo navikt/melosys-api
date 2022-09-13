@@ -129,11 +129,11 @@ public class BehandlingService {
         if (status != null && status != behandling.getStatus() && saksbehandlerKanEndreStatus(behandling, status)) {
             endreStatus(behandling, status);
         }
-        if (tema != null && tema != behandling.getTema() && saksbehandlerKanEndreTema(behandling, tema) && !behandlingErLåst) {
-            endreTema(behandling, tema);
-        }
         if (type != null && type != behandling.getType() && saksbehandlerKanEndreType(behandling, type) && !behandlingErLåst) {
             endreType(behandling, type);
+        }
+        if (tema != null && tema != behandling.getTema() && saksbehandlerKanEndreTema(behandling, tema) && !behandlingErLåst) {
+            endreTema(behandling, tema);
         }
         if (behandlingsfrist != null && !behandlingsfrist.equals(behandling.getBehandlingsfrist())) {
             endreBehandlingsfrist(behandling, behandlingsfrist);

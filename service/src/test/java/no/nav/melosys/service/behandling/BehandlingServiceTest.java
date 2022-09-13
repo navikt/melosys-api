@@ -100,7 +100,7 @@ class BehandlingServiceTest {
     }
 
     @Test
-    void endreBehandling() {
+    void endreBehandling_toggleEnabled() {
         fakeUnleash.enableAll();
         Fagsak fagsak = new Fagsak();
         fagsak.setType(Sakstyper.EU_EOS);
@@ -137,9 +137,50 @@ class BehandlingServiceTest {
         assertThat(behandlingEndretEvents.get(0).getBehandlingID()).isEqualTo(BEHANDLING_ID);
         assertThat(((BehandlingEndretStatusEvent) behandlingEndretEvents.get(0)).getBehandlingsstatus()).isEqualTo(BEHANDLING_STATUS);
         assertThat(behandlingEndretEvents.get(1).getBehandlingID()).isEqualTo(BEHANDLING_ID);
-        assertThat(((BehandlingEndretAvSaksbehandlerEvent) behandlingEndretEvents.get(1)).getBehandlingstema()).isEqualTo(BEHANDLING_TEMA);
+        assertThat(((BehandlingEndretAvSaksbehandlerEvent) behandlingEndretEvents.get(1)).getBehandlingstype()).isEqualTo(BEHANDLING_TYPE);
         assertThat(behandlingEndretEvents.get(2).getBehandlingID()).isEqualTo(BEHANDLING_ID);
-        assertThat(((BehandlingEndretAvSaksbehandlerEvent) behandlingEndretEvents.get(2)).getBehandlingstype()).isEqualTo(BEHANDLING_TYPE);
+        assertThat(((BehandlingEndretAvSaksbehandlerEvent) behandlingEndretEvents.get(2)).getBehandlingstema()).isEqualTo(BEHANDLING_TEMA);
+        assertThat(behandlingEndretEvents.get(3).getBehandlingID()).isEqualTo(BEHANDLING_ID);
+        assertThat(((BehandlingEndretAvSaksbehandlerEvent) behandlingEndretEvents.get(3)).getBehandlingsfrist()).isEqualTo(BEHANDLING_FRIST);
+    }
+
+    @Test
+    void endreBehandling_toggleDisabled() {
+        fakeUnleash.disableAll();
+        Fagsak fagsak = new Fagsak();
+        fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
+
+        behandling.setTema(UTSENDT_ARBEIDSTAKER);
+        behandling.setType(ENDRET_PERIODE);
+        behandling.setFagsak(fagsak);
+        behandling.setBehandlingsgrunnlag(opprettBehandlingsgrunnlag());
+
+        when(behandlingRepository.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
+        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(BEHANDLINGSRESULTAT);
+
+        behandlingService.endreBehandling(BEHANDLING_ID, BEHANDLING_TYPE, BEHANDLING_TEMA, BEHANDLING_STATUS, BEHANDLING_FRIST);
+
+        verify(behandlingRepository, times(4)).save(behandlingCaptor.capture());
+        verify(applicationEventPublisher, times(4)).publishEvent(behandlingEventCaptor.capture());
+
+        var lagredeBehandlinger = behandlingCaptor.getAllValues();
+        assertThat(lagredeBehandlinger.get(0).getId()).isEqualTo(BEHANDLING_ID);
+        assertThat(lagredeBehandlinger.get(0).getStatus()).isEqualTo(BEHANDLING_STATUS);
+        assertThat(lagredeBehandlinger.get(1).getId()).isEqualTo(BEHANDLING_ID);
+        assertThat(lagredeBehandlinger.get(1).getType()).isEqualTo(BEHANDLING_TYPE);
+        assertThat(lagredeBehandlinger.get(2).getId()).isEqualTo(BEHANDLING_ID);
+        assertThat(lagredeBehandlinger.get(2).getBehandlingsfrist()).isEqualTo(BEHANDLING_FRIST);
+        assertThat(lagredeBehandlinger.get(3).getId()).isEqualTo(BEHANDLING_ID);
+        assertThat(lagredeBehandlinger.get(3).getTema()).isEqualTo(BEHANDLING_TEMA);
+
+        var behandlingEndretEvents = behandlingEventCaptor.getAllValues();
+
+        assertThat(behandlingEndretEvents.get(0).getBehandlingID()).isEqualTo(BEHANDLING_ID);
+        assertThat(((BehandlingEndretStatusEvent) behandlingEndretEvents.get(0)).getBehandlingsstatus()).isEqualTo(BEHANDLING_STATUS);
+        assertThat(behandlingEndretEvents.get(1).getBehandlingID()).isEqualTo(BEHANDLING_ID);
+        assertThat(((BehandlingEndretAvSaksbehandlerEvent) behandlingEndretEvents.get(1)).getBehandlingstype()).isEqualTo(BEHANDLING_TYPE);
+        assertThat(behandlingEndretEvents.get(2).getBehandlingID()).isEqualTo(BEHANDLING_ID);
+        assertThat(((BehandlingEndretAvSaksbehandlerEvent) behandlingEndretEvents.get(2)).getBehandlingstema()).isEqualTo(BEHANDLING_TEMA);
         assertThat(behandlingEndretEvents.get(3).getBehandlingID()).isEqualTo(BEHANDLING_ID);
         assertThat(((BehandlingEndretAvSaksbehandlerEvent) behandlingEndretEvents.get(3)).getBehandlingsfrist()).isEqualTo(BEHANDLING_FRIST);
     }
