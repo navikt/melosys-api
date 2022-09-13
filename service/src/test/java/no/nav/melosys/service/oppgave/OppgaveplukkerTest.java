@@ -366,10 +366,7 @@ class OppgaveplukkerTest {
     }
 
     private PlukkOppgaveInnDto opprettPlukkOppgaveInnDto() {
-        PlukkOppgaveInnDto plukkOppgaveInnDto = new PlukkOppgaveInnDto();
-        plukkOppgaveInnDto.setBehandlingstema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
-        plukkOppgaveInnDto.setSakstema(Sakstemaer.MEDLEMSKAP_LOVVALG);
-        plukkOppgaveInnDto.setSakstype(Sakstyper.EU_EOS);
+        PlukkOppgaveInnDto plukkOppgaveInnDto = new PlukkOppgaveInnDto(Behandlingstema.UTSENDT_ARBEIDSTAKER, Sakstemaer.MEDLEMSKAP_LOVVALG, Sakstyper.EU_EOS);
         return plukkOppgaveInnDto;
     }
 }

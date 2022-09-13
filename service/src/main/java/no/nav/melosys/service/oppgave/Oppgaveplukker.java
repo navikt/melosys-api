@@ -48,9 +48,9 @@ public class Oppgaveplukker {
     public synchronized Optional<Oppgave> plukkOppgave(String saksbehandlerID, PlukkOppgaveInnDto plukkDto) {
         List<Oppgave> utildelteOppgaverEtterFrist;
         if (unleash.isEnabled("melosys.oppgave.oppretting")) {
-            utildelteOppgaverEtterFrist = oppgaveFasade.finnUtildelteOppgaverEtterFrist(OppgaveFactory.utledBehandlingstema(plukkDto.getSakstema(), plukkDto.getSakstype(), plukkDto.getBehandlingstema(), null));
+            utildelteOppgaverEtterFrist = oppgaveFasade.finnUtildelteOppgaverEtterFrist(OppgaveFactory.utledBehandlingstema(plukkDto.sakstema(), plukkDto.sakstype(), plukkDto.behandlingstema(), null));
         } else {
-            var parametere = OppgaveFactory.hentOppgaveParametere(plukkDto.getBehandlingstema());
+            var parametere = OppgaveFactory.hentOppgaveParametere(plukkDto.behandlingstema());
             utildelteOppgaverEtterFrist = oppgaveFasade.finnUtildelteOppgaverEtterFrist(parametere.behandlingstype, parametere.behandlingstema);
         }
 
