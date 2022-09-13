@@ -11,8 +11,10 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
@@ -22,7 +24,9 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.BehandlingsgrunnlagRepository;
 import no.nav.melosys.repository.TidligereMedlemsperiodeRepository;
+import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerService;
 import no.nav.melosys.service.oppgave.OppgaveService;
+import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -62,11 +66,11 @@ class BehandlingServiceTest {
     @Mock
     private OppgaveService oppgaveService;
     @Mock
+    private LovligeKombinasjonerService lovligeKombinasjonerService;
+    @Mock
     private ApplicationEventPublisher applicationEventPublisher;
     private final FakeUnleash fakeUnleash = new FakeUnleash();
-
     private BehandlingService behandlingService;
-
     @Captor
     private ArgumentCaptor<Behandling> behandlingCaptor;
     @Captor
@@ -80,7 +84,7 @@ class BehandlingServiceTest {
 
     @BeforeEach
     public void setUp() {
-        behandlingService = new BehandlingService(behandlingRepository, tidligereMedlemsperiodeRepo, behandlingsgrunnlagRepo, behandlingsresultatService, oppgaveService, applicationEventPublisher, fakeUnleash);
+        behandlingService = new BehandlingService(behandlingRepository, tidligereMedlemsperiodeRepo, behandlingsgrunnlagRepo, behandlingsresultatService, oppgaveService, lovligeKombinasjonerService, applicationEventPublisher, fakeUnleash);
 
         behandling = new Behandling();
         behandling.setId(BEHANDLING_ID);
@@ -96,7 +100,53 @@ class BehandlingServiceTest {
     }
 
     @Test
-    void endreBehandling() {
+    void endreBehandling_toggleEnabled() {
+        fakeUnleash.enableAll();
+        Fagsak fagsak = new Fagsak();
+        fagsak.setType(Sakstyper.EU_EOS);
+        fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
+        Aktoer a1 = new Aktoer();
+        a1.setRolle(Aktoersroller.BRUKER);
+        fagsak.setAktører(Sets.newLinkedHashSet(a1));
+
+        behandling.setTema(ARBEID_TJENESTEPERSON_ELLER_FLY);
+        behandling.setType(HENVENDELSE);
+        behandling.setFagsak(fagsak);
+        behandling.setBehandlingsgrunnlag(opprettBehandlingsgrunnlag());
+
+        when(behandlingRepository.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
+        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(BEHANDLINGSRESULTAT);
+
+        behandlingService.endreBehandling(BEHANDLING_ID, BEHANDLING_TYPE, BEHANDLING_TEMA, BEHANDLING_STATUS, BEHANDLING_FRIST);
+
+        verify(behandlingRepository, times(4)).save(behandlingCaptor.capture());
+        verify(applicationEventPublisher, times(4)).publishEvent(behandlingEventCaptor.capture());
+
+        var lagredeBehandlinger = behandlingCaptor.getAllValues();
+        assertThat(lagredeBehandlinger.get(0).getId()).isEqualTo(BEHANDLING_ID);
+        assertThat(lagredeBehandlinger.get(0).getStatus()).isEqualTo(BEHANDLING_STATUS);
+        assertThat(lagredeBehandlinger.get(1).getId()).isEqualTo(BEHANDLING_ID);
+        assertThat(lagredeBehandlinger.get(1).getType()).isEqualTo(BEHANDLING_TYPE);
+        assertThat(lagredeBehandlinger.get(2).getId()).isEqualTo(BEHANDLING_ID);
+        assertThat(lagredeBehandlinger.get(2).getBehandlingsfrist()).isEqualTo(BEHANDLING_FRIST);
+        assertThat(lagredeBehandlinger.get(3).getId()).isEqualTo(BEHANDLING_ID);
+        assertThat(lagredeBehandlinger.get(3).getTema()).isEqualTo(BEHANDLING_TEMA);
+
+        var behandlingEndretEvents = behandlingEventCaptor.getAllValues();
+
+        assertThat(behandlingEndretEvents.get(0).getBehandlingID()).isEqualTo(BEHANDLING_ID);
+        assertThat(((BehandlingEndretStatusEvent) behandlingEndretEvents.get(0)).getBehandlingsstatus()).isEqualTo(BEHANDLING_STATUS);
+        assertThat(behandlingEndretEvents.get(1).getBehandlingID()).isEqualTo(BEHANDLING_ID);
+        assertThat(((BehandlingEndretAvSaksbehandlerEvent) behandlingEndretEvents.get(1)).getBehandlingstype()).isEqualTo(BEHANDLING_TYPE);
+        assertThat(behandlingEndretEvents.get(2).getBehandlingID()).isEqualTo(BEHANDLING_ID);
+        assertThat(((BehandlingEndretAvSaksbehandlerEvent) behandlingEndretEvents.get(2)).getBehandlingstema()).isEqualTo(BEHANDLING_TEMA);
+        assertThat(behandlingEndretEvents.get(3).getBehandlingID()).isEqualTo(BEHANDLING_ID);
+        assertThat(((BehandlingEndretAvSaksbehandlerEvent) behandlingEndretEvents.get(3)).getBehandlingsfrist()).isEqualTo(BEHANDLING_FRIST);
+    }
+
+    @Test
+    void endreBehandling_toggleDisabled() {
+        fakeUnleash.disableAll();
         Fagsak fagsak = new Fagsak();
         fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
 
@@ -140,11 +190,8 @@ class BehandlingServiceTest {
         Fagsak fagsak = new Fagsak();
         fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
 
-        Behandlingstema initiellBehandlingsstema = REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING;
-        Behandlingstyper initiellBehandlingstype = SOEKNAD;
-
-        behandling.setTema(initiellBehandlingsstema);
-        behandling.setType(initiellBehandlingstype);
+        behandling.setTema(REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING);
+        behandling.setType(SOEKNAD);
         behandling.setFagsak(fagsak);
         behandling.setBehandlingsgrunnlag(opprettBehandlingsgrunnlag());
 
