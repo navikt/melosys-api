@@ -1,18 +1,25 @@
 package no.nav.melosys.service.oppgave;
 
 import java.time.LocalDate;
+import java.util.List;
 
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Fagsystem;
 import no.nav.melosys.domain.Tema;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
+import no.nav.melosys.domain.kodeverk.Sakstemaer;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.PrioritetType;
+import no.nav.melosys.exception.FunksjonellException;
 
 public final class OppgaveFactory {
 
     private static final long FRIST_FERDIGSTILLELSE_JFR_OPPG = 7;
+    private static final String EU_EOS = "ab0424";
 
     private OppgaveFactory() {
     }
@@ -26,6 +33,10 @@ public final class OppgaveFactory {
             .setFristFerdigstillelse(LocalDate.now().plusDays(FRIST_FERDIGSTILLELSE_JFR_OPPG));
     }
 
+    /**
+     * @deprecated Fjernes med toggle melosys.oppgave.oppretting
+     */
+    @Deprecated
     public static Oppgave.Builder lagBehandlingsOppgaveForType(Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
         final OppgaveParametere parametere = hentOppgaveParametere(behandlingstema);
 
@@ -44,63 +55,200 @@ public final class OppgaveFactory {
             .setBehandlesAvApplikasjon(Fagsystem.MELOSYS);
     }
 
+    public static Oppgave.Builder lagBehandlingsoppgave(Sakstemaer sakstema, Sakstyper sakstype, Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
+        // Dokumentasjon for regler: https://confluence.adeo.no/display/TEESSI/Oppgaver+i+Gosys
+        return new Oppgave.Builder()
+            .setBehandlesAvApplikasjon(Fagsystem.MELOSYS)
+            .setPrioritet(PrioritetType.NORM)
+            .setBehandlingstema(utledBehandlingstema(sakstema, sakstype, behandlingstema, behandlingstype))
+            .setTema(utledTema(sakstema))
+            .setOppgavetype(utledOppgavetype(sakstype, behandlingstema, behandlingstype))
+            .setBeskrivelse(utledBeskrivelse(sakstema, sakstype, behandlingstema, behandlingstype))
+            .setFristFerdigstillelse(Behandling.utledFristForBehandlingstema(behandlingstema));
+    }
+
+    public static Oppgave.Builder lagBehandlingsoppgave(Fagsak fagsak, Behandling behandling) {
+        return lagBehandlingsoppgave(fagsak.getTema(), fagsak.getType(), behandling.getTema(), behandling.getType());
+    }
+
+    public static Oppgave.Builder lagBehandlingsoppgave(Behandling behandling) {
+        return lagBehandlingsoppgave(behandling.getFagsak(), behandling);
+    }
+
+    /**
+     * @deprecated Fjernes med toggle melosys.oppgave.oppretting
+     */
+    @Deprecated
     static OppgaveParametere hentOppgaveParametere(Behandlingstema behandlingstema) {
+        return switch (behandlingstema) {
+            case UTSENDT_ARBEIDSTAKER, UTSENDT_SELVSTENDIG ->
+                new OppgaveParametere(EU_EOS, "ae0034", Tema.MED, Oppgavetyper.BEH_SAK_MK, fristDager(30));
+            case ARBEID_FLERE_LAND ->
+                new OppgaveParametere(EU_EOS, "ae0242", Tema.MED, Oppgavetyper.BEH_SAK_MK, fristDager(30));
+            case ARBEID_ETT_LAND_ØVRIG, ARBEID_TJENESTEPERSON_ELLER_FLY ->
+                new OppgaveParametere(EU_EOS, "ae0243", Tema.MED, Oppgavetyper.BEH_SAK_MK, fristDager(30));
+            case IKKE_YRKESAKTIV ->
+                new OppgaveParametere(EU_EOS, "ae0238", Tema.MED, Oppgavetyper.BEH_SAK_MK, fristDager(30));
+            case REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING ->
+                new OppgaveParametere(EU_EOS, "ae0111", Tema.UFM, Oppgavetyper.BEH_SED, fristUker(2));
+            case REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE ->
+                new OppgaveParametere(EU_EOS, "ae0235", Tema.UFM, Oppgavetyper.BEH_SED, fristUker(2));
+            case BESLUTNING_LOVVALG_NORGE ->
+                new OppgaveParametere(EU_EOS, "ae0112", Tema.MED, Oppgavetyper.BEH_SED, fristUker(4));
+            case BESLUTNING_LOVVALG_ANNET_LAND ->
+                new OppgaveParametere(EU_EOS, "ae0113", Tema.UFM, Oppgavetyper.BEH_SED, fristUker(4));
+            case ANMODNING_OM_UNNTAK_HOVEDREGEL ->
+                new OppgaveParametere(EU_EOS, "ae0110", Tema.UFM, Oppgavetyper.BEH_SED, fristUker(8));
+            case ØVRIGE_SED_UFM ->
+                new OppgaveParametere(EU_EOS, "ae0254", Tema.UFM, Oppgavetyper.BEH_SED, fristUker(8));
+            case ØVRIGE_SED_MED ->
+                new OppgaveParametere(EU_EOS, "ae0254", Tema.MED, Oppgavetyper.BEH_SED, fristUker(8));
+            case TRYGDETID -> new OppgaveParametere(EU_EOS, "ae0236", Tema.MED, Oppgavetyper.BEH_SED, fristUker(8));
+            case ARBEID_I_UTLANDET ->
+                new OppgaveParametere("ab0388", null, Tema.MED, Oppgavetyper.BEH_SAK_MK, fristDager(30));
+            case ARBEID_KUN_NORGE, YRKESAKTIV ->
+                new OppgaveParametere("ab0387", null, Tema.MED, Oppgavetyper.BEH_SAK_MK, fristDager(30));
+            default -> throw new IllegalArgumentException(
+                "Melosys støtter ikke mapping for behandlingstema  " + behandlingstema);
+        };
+    }
 
-        OppgaveParametere oppgaveParametere;
-
-        switch (behandlingstema) {
-            case UTSENDT_ARBEIDSTAKER:
-            case UTSENDT_SELVSTENDIG:
-                oppgaveParametere = new OppgaveParametere("ab0424", "ae0034", Tema.MED, Oppgavetyper.BEH_SAK_MK, fristDager(30));
-                break;
-            case ARBEID_FLERE_LAND:
-                oppgaveParametere = new OppgaveParametere("ab0424", "ae0242", Tema.MED, Oppgavetyper.BEH_SAK_MK, fristDager(30));
-                break;
-            //case ARBEID_NORGE_BOSATT_ANNET_LAND: FIXME: behandlingstema ikke i bruk i Melosys
-            //    oppgaveParametere = new OppgaveParametere(behandlingstema, behandlingstype, Tema.MED, Oppgavetyper.BEH_SAK_MK, fristDager(30));
-            //    break;
-            case ARBEID_ETT_LAND_ØVRIG:
-                oppgaveParametere = new OppgaveParametere("ab0424", "ae0243", Tema.MED, Oppgavetyper.BEH_SAK_MK, fristDager(30));
-                break;
-            case IKKE_YRKESAKTIV:
-                oppgaveParametere = new OppgaveParametere("ab0424", "ae0238", Tema.MED, Oppgavetyper.BEH_SAK_MK, fristDager(30));
-                break;
-            case REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING:
-                oppgaveParametere = new OppgaveParametere("ab0424", "ae0111", Tema.UFM, Oppgavetyper.BEH_SED, fristUker(2));
-                break;
-            case REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE:
-                oppgaveParametere = new OppgaveParametere("ab0424", "ae0235", Tema.UFM, Oppgavetyper.BEH_SED, fristUker(2));
-                break;
-            case BESLUTNING_LOVVALG_NORGE:
-                oppgaveParametere = new OppgaveParametere("ab0424", "ae0112", Tema.MED, Oppgavetyper.BEH_SED, fristUker(4));
-                break;
-            case BESLUTNING_LOVVALG_ANNET_LAND:
-                oppgaveParametere = new OppgaveParametere("ab0424", "ae0113", Tema.UFM, Oppgavetyper.BEH_SED, fristUker(4));
-                break;
-            case ANMODNING_OM_UNNTAK_HOVEDREGEL:
-                oppgaveParametere = new OppgaveParametere("ab0424", "ae0110", Tema.UFM, Oppgavetyper.BEH_SED, fristUker(8));
-                break;
-            case ØVRIGE_SED_UFM:
-                oppgaveParametere = new OppgaveParametere("ab0424", "ae0254", Tema.UFM, Oppgavetyper.BEH_SED, fristUker(8));
-                break;
-            case ØVRIGE_SED_MED:
-                oppgaveParametere = new OppgaveParametere("ab0424", "ae0254", Tema.MED, Oppgavetyper.BEH_SED, fristUker(8));
-                break;
-            case TRYGDETID:
-                oppgaveParametere = new OppgaveParametere("ab0424", "ae0236", Tema.MED, Oppgavetyper.BEH_SED, fristUker(8));
-                break;
-            case ARBEID_I_UTLANDET:
-                oppgaveParametere = new OppgaveParametere("ab0388", null, Tema.MED, Oppgavetyper.BEH_SAK_MK, fristDager(30));
-                break;
-            case YRKESAKTIV:
-                oppgaveParametere = new OppgaveParametere("ab0387", null, Tema.MED, Oppgavetyper.BEH_SAK_MK, fristDager(30));
-                break;
-            default:
-                throw new IllegalArgumentException("Melosys støtter ikke mapping for behandlingstema  " + behandlingstema);
+    public static String utledBehandlingstema(Sakstemaer sakstema, Sakstyper sakstype, Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
+        if (skalBrukeMelosysBehandlingstemaForBehandlingstema(sakstema, sakstype, behandlingstema, behandlingstype)) {
+            return switch (behandlingstema) {
+                case PENSJONIST -> "ab0355";
+                case YRKESAKTIV -> "ab0462";
+                case REGISTRERING_UNNTAK, REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING, REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE, BESLUTNING_LOVVALG_ANNET_LAND ->
+                    "ab0461";
+                case ANMODNING_OM_UNNTAK_HOVEDREGEL -> "ab0460";
+                default ->
+                    throw new FunksjonellException("Mangler mapping av behandlingstema %s".formatted(behandlingstema));
+            };
         }
 
+        return switch (sakstype) {
+            case EU_EOS -> "ab0424";
+            case TRYGDEAVTALE -> "ab0387";
+            case FTRL -> "ab0388";
+        };
+    }
 
-        return oppgaveParametere;
+    private static boolean skalBrukeMelosysBehandlingstemaForBehandlingstema(Sakstemaer sakstema, Sakstyper sakstype, Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
+        return switch (behandlingstema) {
+            case PENSJONIST -> switch (sakstema) {
+                case MEDLEMSKAP_LOVVALG ->
+                    List.of(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING, Behandlingstyper.KLAGE).contains(behandlingstype);
+                case TRYGDEAVGIFT ->
+                    List.of(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING, Behandlingstyper.KLAGE, Behandlingstyper.HENVENDELSE).contains(behandlingstype);
+                case UNNTAK -> false;
+            };
+            case YRKESAKTIV ->
+                sakstema == Sakstemaer.TRYGDEAVGIFT && List.of(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING, Behandlingstyper.KLAGE, Behandlingstyper.HENVENDELSE).contains(behandlingstype);
+            case ANMODNING_OM_UNNTAK_HOVEDREGEL -> switch (sakstype) {
+                case EU_EOS ->
+                    sakstema == Sakstemaer.UNNTAK && List.of(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING).contains(behandlingstype);
+                case TRYGDEAVTALE ->
+                    sakstema == Sakstemaer.UNNTAK && List.of(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING, Behandlingstyper.HENVENDELSE).contains(behandlingstype);
+                default -> false;
+            };
+            case REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING, REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE, BESLUTNING_LOVVALG_ANNET_LAND ->
+                sakstype == Sakstyper.EU_EOS && sakstema == Sakstemaer.UNNTAK && List.of(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING).contains(behandlingstype);
+            case REGISTRERING_UNNTAK ->
+                sakstype == Sakstyper.TRYGDEAVTALE && sakstema == Sakstemaer.UNNTAK && List.of(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING, Behandlingstyper.KLAGE).contains(behandlingstype);
+            default -> false;
+        };
+    }
+
+    public static Tema utledTema(Sakstemaer sakstema) {
+        return switch (sakstema) {
+            case MEDLEMSKAP_LOVVALG -> Tema.MED;
+            case TRYGDEAVGIFT -> Tema.TRY;
+            case UNNTAK -> Tema.UFM;
+        };
+    }
+
+    private static Oppgavetyper utledOppgavetype(Sakstyper sakstype, Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
+        if (behandlingstype == Behandlingstyper.HENVENDELSE) {
+            return Oppgavetyper.VURD_HENV;
+        }
+
+        if (sakstype == Sakstyper.EU_EOS) {
+            return switch (behandlingstema) {
+                case ANMODNING_OM_UNNTAK_HOVEDREGEL, REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING, REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE, BESLUTNING_LOVVALG_ANNET_LAND ->
+                    Oppgavetyper.BEH_SED;
+                default -> Oppgavetyper.BEH_SAK_MK;
+            };
+        }
+
+        return Oppgavetyper.BEH_SAK_MK;
+    }
+
+    private static String utledBeskrivelse(Sakstemaer sakstema, Sakstyper sakstype, Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
+        return switch (sakstema) {
+            case MEDLEMSKAP_LOVVALG -> utledBeskrivelseForMedlemskapLovvalg(sakstype, behandlingstema, behandlingstype);
+            case TRYGDEAVGIFT -> "";
+            case UNNTAK -> utledBeskrivelseForUnntak(sakstype, behandlingstema, behandlingstype);
+        };
+    }
+
+    private static String utledBeskrivelseForMedlemskapLovvalg(Sakstyper sakstype, Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
+        return switch (sakstype) {
+            case EU_EOS -> switch (behandlingstype) {
+                case FØRSTEGANG, NY_VURDERING, KLAGE -> switch (behandlingstema) {
+                    case UTSENDT_ARBEIDSTAKER, UTSENDT_SELVSTENDIG, ARBEID_TJENESTEPERSON_ELLER_FLY, ARBEID_FLERE_LAND, ARBEID_KUN_NORGE, BESLUTNING_LOVVALG_NORGE ->
+                        behandlingstema.getBeskrivelse();
+                    case PENSJONIST -> sakstype.getBeskrivelse();
+                    default -> "";
+                };
+                case ENDRET_PERIODE -> switch (behandlingstema) {
+                    case UTSENDT_ARBEIDSTAKER, UTSENDT_SELVSTENDIG, ARBEID_TJENESTEPERSON_ELLER_FLY, ARBEID_FLERE_LAND, ARBEID_KUN_NORGE, BESLUTNING_LOVVALG_NORGE ->
+                        behandlingstema.getBeskrivelse();
+                    default -> "";
+                };
+                case HENVENDELSE -> switch (behandlingstema) {
+                    case FORESPØRSEL_TRYGDEMYNDIGHET -> "SEDA005";
+                    case TRYGDETID -> behandlingstema.getBeskrivelse();
+                    default -> "";
+                };
+                default -> "";
+            };
+            case TRYGDEAVTALE -> switch (behandlingstype) {
+                case FØRSTEGANG, NY_VURDERING, KLAGE -> switch (behandlingstema) {
+                    case YRKESAKTIV, IKKE_YRKESAKTIV -> behandlingstema.getBeskrivelse();
+                    case PENSJONIST -> sakstype.getBeskrivelse();
+                    default -> "";
+                };
+                case HENVENDELSE -> behandlingstema == Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET ? "SEDA008" : "";
+                default -> "";
+            };
+            case FTRL -> switch (behandlingstype) {
+                case FØRSTEGANG, NY_VURDERING, KLAGE -> switch (behandlingstema) {
+                    case YRKESAKTIV, IKKE_YRKESAKTIV, UNNTAK_MEDLEMSKAP -> behandlingstema.getBeskrivelse();
+                    case PENSJONIST -> sakstype.getBeskrivelse();
+                    default -> "";
+                };
+                default -> "";
+            };
+        };
+    }
+
+    private static String utledBeskrivelseForUnntak(Sakstyper sakstype, Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
+        return switch (sakstype) {
+            case EU_EOS -> switch (behandlingstype) {
+                case FØRSTEGANG, NY_VURDERING -> switch (behandlingstema) {
+                    case ANMODNING_OM_UNNTAK_HOVEDREGEL -> "SEDA001";
+                    case BESLUTNING_LOVVALG_ANNET_LAND -> "SEDA003";
+                    case REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING -> "SEDA009";
+                    case REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE -> "SEDA010";
+                    default -> "";
+                };
+                case HENVENDELSE -> behandlingstema == Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET ? "SEDA005" : "";
+                default -> "";
+            };
+            case TRYGDEAVTALE ->
+                (behandlingstype == Behandlingstyper.HENVENDELSE && behandlingstema == Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET) ? "SEDA008" : "";
+            case FTRL -> "";
+        };
     }
 
     private static LocalDate fristUker(int uker) {
@@ -111,6 +259,10 @@ public final class OppgaveFactory {
         return LocalDate.now().plusDays(dager);
     }
 
+    /**
+     * @deprecated Fjernes med toggle melosys.oppgave.oppretting
+     */
+    @Deprecated
     static class OppgaveParametere {
         final String behandlingstema;
         final String behandlingstype;

@@ -44,7 +44,7 @@ class AngiBehandlingsresultatServiceTest {
     }
 
     @Test
-    void oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling_gyldigScenario_kallerKorrekt() {
+    void oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling_gyldigScenarioMEDLEM_I_FOLKETRYGDEN_kallerKorrekt() {
         var behandlingsresultat = lagBehandlingsresultat(Sakstemaer.MEDLEMSKAP_LOVVALG, Sakstyper.FTRL, Behandlingstyper.FØRSTEGANG, Behandlingstema.YRKESAKTIV);
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
 
@@ -56,6 +56,81 @@ class AngiBehandlingsresultatServiceTest {
         verify(fagsakService).avsluttFagsakOgBehandling(behandlingsresultat.getBehandling().getFagsak(), Saksstatuser.LOVVALG_AVKLART);
         verify(behandlingsresultatService).lagre(behandlingsresultatArgumentCaptor.capture());
         assertThat(behandlingsresultatArgumentCaptor.getValue().getType()).isEqualTo(Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN);
+    }
+
+    @Test
+    void oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling_gyldigScenarioUNNTATT_MEDLEMSKAP_kallerKorrekt() {
+        var behandlingsresultat = lagBehandlingsresultat(Sakstemaer.MEDLEMSKAP_LOVVALG, Sakstyper.FTRL, Behandlingstyper.FØRSTEGANG, Behandlingstema.UNNTAK_MEDLEMSKAP);
+        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
+
+
+        angiBehandlingsresultatService
+            .oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling(BEHANDLING_ID, Behandlingsresultattyper.UNNTATT_MEDLEMSKAP);
+
+
+        verify(fagsakService).avsluttFagsakOgBehandling(behandlingsresultat.getBehandling().getFagsak(), Saksstatuser.LOVVALG_AVKLART);
+        verify(behandlingsresultatService).lagre(behandlingsresultatArgumentCaptor.capture());
+        assertThat(behandlingsresultatArgumentCaptor.getValue().getType()).isEqualTo(Behandlingsresultattyper.UNNTATT_MEDLEMSKAP);
+    }
+
+    @Test
+    void oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling_gyldigScenarioFASTSATT_LOVVALGSLAND_kallerKorrekt() {
+        var behandlingsresultat = lagBehandlingsresultat(Sakstemaer.MEDLEMSKAP_LOVVALG, Sakstyper.TRYGDEAVTALE, Behandlingstyper.FØRSTEGANG, Behandlingstema.ARBEID_KUN_NORGE);
+        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
+
+
+        angiBehandlingsresultatService
+            .oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling(BEHANDLING_ID, Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
+
+
+        verify(fagsakService).avsluttFagsakOgBehandling(behandlingsresultat.getBehandling().getFagsak(), Saksstatuser.LOVVALG_AVKLART);
+        verify(behandlingsresultatService).lagre(behandlingsresultatArgumentCaptor.capture());
+        assertThat(behandlingsresultatArgumentCaptor.getValue().getType()).isEqualTo(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
+    }
+
+    @Test
+    void oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling_gyldigScenarioAVSLAG_SØKNAD_kallerKorrekt() {
+        var behandlingsresultat = lagBehandlingsresultat(Sakstemaer.MEDLEMSKAP_LOVVALG, null, Behandlingstyper.FØRSTEGANG, Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY);
+        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
+
+
+        angiBehandlingsresultatService
+            .oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling(BEHANDLING_ID, Behandlingsresultattyper.AVSLAG_SØKNAD);
+
+
+        verify(fagsakService).avsluttFagsakOgBehandling(behandlingsresultat.getBehandling().getFagsak(), Saksstatuser.LOVVALG_AVKLART);
+        verify(behandlingsresultatService).lagre(behandlingsresultatArgumentCaptor.capture());
+        assertThat(behandlingsresultatArgumentCaptor.getValue().getType()).isEqualTo(Behandlingsresultattyper.AVSLAG_SØKNAD);
+    }
+
+    @Test
+    void oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling_gyldigScenarioKLAGE_kallerKorrekt() {
+        var behandlingsresultat = lagBehandlingsresultat(null, null, Behandlingstyper.KLAGE, null);
+        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
+
+
+        angiBehandlingsresultatService
+            .oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling(BEHANDLING_ID, Behandlingsresultattyper.KLAGEINNSTILLING);
+
+
+        verify(fagsakService).avsluttFagsakOgBehandling(behandlingsresultat.getBehandling().getFagsak(), Saksstatuser.LOVVALG_AVKLART);
+        verify(behandlingsresultatService).lagre(behandlingsresultatArgumentCaptor.capture());
+        assertThat(behandlingsresultatArgumentCaptor.getValue().getType()).isEqualTo(Behandlingsresultattyper.KLAGEINNSTILLING);
+    }
+
+    @Test
+    void oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling_gyldigScenarioNY_VURDERING_kallerKorrekt() {
+        var behandlingsresultat = lagBehandlingsresultat(null, null, Behandlingstyper.NY_VURDERING, null);
+        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
+
+
+        angiBehandlingsresultatService
+            .oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling(BEHANDLING_ID, Behandlingsresultattyper.OMGJORT);
+
+
+        verify(fagsakService).avsluttFagsakOgBehandling(behandlingsresultat.getBehandling().getFagsak(), Saksstatuser.LOVVALG_AVKLART);
+        verify(behandlingsresultatService).lagre(behandlingsresultatArgumentCaptor.capture());
+        assertThat(behandlingsresultatArgumentCaptor.getValue().getType()).isEqualTo(Behandlingsresultattyper.OMGJORT);
     }
 
     @Test

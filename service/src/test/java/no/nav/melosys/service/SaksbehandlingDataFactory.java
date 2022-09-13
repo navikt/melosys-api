@@ -18,16 +18,24 @@ import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
 
 public final class SaksbehandlingDataFactory {
     public static Behandling lagBehandling() {
-        return lagBehandling(new BehandlingsgrunnlagData());
+        return lagBehandling(lagFagsak(), new BehandlingsgrunnlagData());
     }
 
     public static Behandling lagBehandling(BehandlingsgrunnlagData behandlingsgrunnlagData) {
+        return lagBehandling(lagFagsak(), behandlingsgrunnlagData);
+    }
+
+    public static Behandling lagBehandling(Fagsak fagsak) {
+        return lagBehandling(fagsak, new BehandlingsgrunnlagData());
+    }
+
+    public static Behandling lagBehandling(Fagsak fagsak, BehandlingsgrunnlagData behandlingsgrunnlagData) {
         Behandling behandling = new Behandling();
         behandling.setId(1L);
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
         behandling.setType(Behandlingstyper.SOEKNAD);
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
-        behandling.setFagsak(lagFagsak());
+        behandling.setFagsak(fagsak);
         behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
         behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(behandlingsgrunnlagData);
         final Instant nå = Instant.now();
