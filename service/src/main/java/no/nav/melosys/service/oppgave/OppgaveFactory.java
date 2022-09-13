@@ -60,7 +60,7 @@ public final class OppgaveFactory {
         return new Oppgave.Builder()
             .setBehandlesAvApplikasjon(Fagsystem.MELOSYS)
             .setPrioritet(PrioritetType.NORM)
-            .setBehandlingstema(utledBehandlingstema(sakstema, sakstype, behandlingstema, behandlingstype))
+            .setBehandlingstema(utledBehandlingstema(sakstema, sakstype, behandlingstema, behandlingstype).getBehandlingstema())
             .setTema(utledTema(sakstema))
             .setOppgavetype(utledOppgavetype(sakstype, behandlingstema, behandlingstype))
             .setBeskrivelse(utledBeskrivelse(sakstema, sakstype, behandlingstema, behandlingstype))
@@ -113,23 +113,23 @@ public final class OppgaveFactory {
         };
     }
 
-    public static String utledBehandlingstema(Sakstemaer sakstema, Sakstyper sakstype, Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
+    public static OppgaveBehandlingstema utledBehandlingstema(Sakstemaer sakstema, Sakstyper sakstype, Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
         if (skalBrukeMelosysBehandlingstemaForBehandlingstema(sakstema, sakstype, behandlingstema, behandlingstype)) {
             return switch (behandlingstema) {
-                case PENSJONIST -> "ab0355";
-                case YRKESAKTIV -> "ab0462";
+                case PENSJONIST -> OppgaveBehandlingstema.PENSJONIST_ELLER_UFORETRYGDET;
+                case YRKESAKTIV -> OppgaveBehandlingstema.YRKESAKTIV;
                 case REGISTRERING_UNNTAK, REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING, REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE, BESLUTNING_LOVVALG_ANNET_LAND ->
-                    "ab0461";
-                case ANMODNING_OM_UNNTAK_HOVEDREGEL -> "ab0460";
+                    OppgaveBehandlingstema.REGISTRERING_UNNTAK;
+                case ANMODNING_OM_UNNTAK_HOVEDREGEL -> OppgaveBehandlingstema.ANMODNING_UNNTAK;
                 default ->
                     throw new FunksjonellException("Mangler mapping av behandlingstema %s".formatted(behandlingstema));
             };
         }
 
         return switch (sakstype) {
-            case EU_EOS -> "ab0424";
-            case TRYGDEAVTALE -> "ab0387";
-            case FTRL -> "ab0388";
+            case EU_EOS -> OppgaveBehandlingstema.EU_EOS_LAND;
+            case TRYGDEAVTALE -> OppgaveBehandlingstema.AVTALELAND;
+            case FTRL -> OppgaveBehandlingstema.UTENFOR_AVTALELAND;
         };
     }
 
