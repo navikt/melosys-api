@@ -1,4 +1,4 @@
-package no.nav.melosys.tjenester.gui;
+package no.nav.melosys.tjenester.gui.saksbehandling;
 
 import java.util.Set;
 
@@ -23,8 +23,8 @@ import org.springframework.web.context.WebApplicationContext;
 
 @Protected
 @RestController
-@RequestMapping("/lovligekombinasjoner")
-@Api(tags = {"lovligekombinasjoner"})
+@RequestMapping("/saksbehandling")
+@Api(tags = {"saksbehandling"})
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class LovligeKombinasjonerTjeneste {
     private final LovligeKombinasjonerService lovligeKombinasjonerService;
@@ -35,13 +35,13 @@ public class LovligeKombinasjonerTjeneste {
         this.behandlingService = behandlingService;
     }
 
-    @GetMapping("/sakstyper")
+    @GetMapping("/sakstyper/hent-lovlige-kombinasjoner")
     @ApiOperation(value = "Henter alle mulige sakstyper", notes = ("Henter alle mulige sakstyper"))
     public ResponseEntity<Set<Sakstyper>> hentAlleMuligeSakstyper() {
         return ResponseEntity.ok(lovligeKombinasjonerService.hentMuligeSakstyper());
     }
 
-    @GetMapping("/sakstemaer")
+    @GetMapping("/sakstemaer/hent-lovlige-kombinasjoner")
     @ApiOperation(value = "Henter alle mulige sakstemaer basert på sakstypen", notes = ("Henter alle mulige sakstemaer basert på sakstypen"))
     public ResponseEntity<Set<Sakstemaer>> hentAlleMuligeSakstemaer(
         @RequestParam("hovedpart") Aktoersroller hovedpart,
@@ -49,7 +49,7 @@ public class LovligeKombinasjonerTjeneste {
         return ResponseEntity.ok(lovligeKombinasjonerService.hentMuligeSakstemaer(hovedpart, sakstype));
     }
 
-    @GetMapping("/behandlingstemaer")
+    @GetMapping("/behandlingstemaer/hent-lovlige-kombinasjoner")
     @ApiOperation(value = "Henter alle mulige behandlingstemaer basert på sakstype og sakstema", notes = ("Henter alle mulige behandlingstemaer basert på sakstype og sakstema"))
     public ResponseEntity<Set<Behandlingstema>> hentAlleMuligeBehandlingstemaer(
         @RequestParam("hovedpart") Aktoersroller hovedpart,
@@ -60,7 +60,7 @@ public class LovligeKombinasjonerTjeneste {
         return ResponseEntity.ok(lovligeKombinasjonerService.hentMuligeBehandlingstemaer(hovedpart, sakstype, sakstema, sistBehandlingstema));
     }
 
-    @GetMapping("/behandlingstyper")
+    @GetMapping("/behandlingstyper/hent-lovlige-kombinasjoner")
     @ApiOperation(value = "Henter alle mulige behandlingstyper basert på sakstype, sakstema og behandlingstema", notes = ("Henter alle mulige behandlingstyper basert på sakstype, sakstema og behandlingstema"))
     public ResponseEntity<Set<Behandlingstyper>> hentAlleMuligeBehandlingstyper(
         @RequestParam("hovedpart") Aktoersroller hovedpart,
