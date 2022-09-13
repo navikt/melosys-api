@@ -9,6 +9,8 @@ import com.github.tomakehurst.wiremock.matching.UrlPattern
 import com.nimbusds.jwt.JWT
 import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.PlainJWT
+import com.ninjasquad.springmockk.MockkBean
+import io.mockk.every
 import io.mockk.spyk
 import no.nav.melosys.integrasjon.felles.EnvironmentHandler
 import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter
@@ -21,14 +23,11 @@ import no.nav.security.token.support.core.context.TokenValidationContextHolder
 import no.nav.security.token.support.core.jwt.JwtToken
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.*
-import org.mockito.Mockito
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.context.annotation.Import
 import org.springframework.mock.env.MockEnvironment
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.util.*
-import kotlin.collections.ArrayList
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Import(
@@ -41,8 +40,8 @@ abstract class ConsumerWireMockTestBase<T, R>(
     mockPort: Int,
     stsMockPort: Int
 ) {
-    @MockBean
-    private val tokenValidationContextHolder: TokenValidationContextHolder? = null
+    @MockkBean
+    private lateinit var tokenValidationContextHolder: TokenValidationContextHolder
 
     private val serviceUnderTestMockServer: WireMockServer =
         WireMockServer(WireMockConfiguration.wireMockConfig().port(mockPort))
@@ -61,8 +60,7 @@ abstract class ConsumerWireMockTestBase<T, R>(
 
     @BeforeAll
     fun beforeAll() {
-        Mockito.`when`(tokenValidationContextHolder!!.tokenValidationContext)
-            .thenReturn(tokenValidationContext("sub1"))
+        every { tokenValidationContextHolder.tokenValidationContext } returns tokenValidationContext("sub1")
 
         serviceUnderTestMockServer.start()
         stsMockServer.start()
