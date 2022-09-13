@@ -89,8 +89,6 @@ class DokgenServiceTest {
     private DokumentHentingService mockDokumentHentingService;
     @Captor
     private ArgumentCaptor<DokgenBrevbestilling> brevbestillingCaptor;
-    @Captor
-    private ArgumentCaptor<List<byte[]>> listArgumentCaptor;
 
     private final FakeUnleash unleash = new FakeUnleash();
 
@@ -119,7 +117,7 @@ class DokgenServiceTest {
             .medProduserbartdokument(ATTEST_A1)
             .build();
 
-        assertThatThrownBy(() -> dokgenService.produserBrev(new Aktoer(), brevbestilling, false))
+        assertThatThrownBy(() -> dokgenService.produserBrev(new Aktoer(), brevbestilling))
             .isInstanceOf(FunksjonellException.class)
             .hasMessage("ProduserbartDokument ATTEST_A1 er ikke støttet");
     }
@@ -141,7 +139,7 @@ class DokgenServiceTest {
             .build();
 
 
-        byte[] pdfResponse = dokgenService.produserBrev(mottaker, brevbestilling, false);
+        byte[] pdfResponse = dokgenService.produserBrev(mottaker, brevbestilling);
 
 
         assertThat(pdfResponse).isNotNull();
@@ -169,7 +167,7 @@ class DokgenServiceTest {
             .build();
 
 
-        byte[] pdfResponse = dokgenService.produserBrev(mottaker, brevbestilling, false);
+        byte[] pdfResponse = dokgenService.produserBrev(mottaker, brevbestilling);
 
 
         assertThat(pdfResponse).isNotNull();
@@ -197,7 +195,7 @@ class DokgenServiceTest {
             .build();
 
 
-        dokgenService.produserBrev(lagBruker(), brevbestilling, false);
+        dokgenService.produserBrev(lagBruker(), brevbestilling);
 
 
         verify(mockDokgenConsumer).lagPdf(any(), any(), eq(false), eq(false));
@@ -217,7 +215,7 @@ class DokgenServiceTest {
             .medBehandlingId(123)
             .build();
 
-        byte[] pdfResponse = dokgenService.produserBrev(lagRepresentant(FNR, Representerer.BRUKER), brevbestilling, false);
+        byte[] pdfResponse = dokgenService.produserBrev(lagRepresentant(FNR, Representerer.BRUKER), brevbestilling);
 
         assertThat(pdfResponse).isNotNull();
         assertThat(pdfResponse).isEqualTo(expectedPdf);
@@ -315,44 +313,6 @@ class DokgenServiceTest {
         verify(mockDokgenConsumer).lagPdf(any(), any(), eq(false), eq(true));
         verify(mockEregFasade).hentOrganisasjon(ORGNR);
         verify(mockKontaktOpplysningService).hentKontaktopplysning(any(), any());
-    }
-
-    @Test
-    void produserUtkast_skalProdusereUtkastMedVedlegg_nårBrevbestillingInneholderVedlegg() {
-        when(mockDokgenConsumer.lagPdfMedVedlegg(anyString(), any(), eq(false), eq(true), any())).thenReturn(expectedPdf);
-        when(mockJoarkFasade.hentJournalpost(any())).thenReturn(lagJournalpost());
-        when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(lagBehandling());
-        when(mockPersondataFasade.hentPerson(anyString())).thenReturn(lagPersonopplysninger());
-        when(mockKodeverkService.dekod(FellesKodeverk.POSTNUMMER, "0123")).thenReturn("Aker");
-        when(mockKodeverkService.dekod(FellesKodeverk.LANDKODER_ISO2, "NO")).thenReturn("Norge");
-        Aktoer mottaker = lagBruker();
-        when(mockBrevMottakerService.avklarMottakere(any(), any(), any(), eq(true), eq(false))).thenReturn(
-            List.of(mottaker));
-
-        byte[] vedlegg1 = new byte[]{1, 2, 3};
-        byte[] vedlegg2 = new byte[]{4, 5, 6};
-        var saksvedleggDto = Arrays.asList(new SaksvedleggDto("100", "200"),
-            new SaksvedleggDto("300", "400"));
-        when(mockDokumentHentingService.hentDokument("100", "200")).thenReturn(vedlegg1);
-        when(mockDokumentHentingService.hentDokument("300", "400")).thenReturn(vedlegg2);
-
-        BrevbestillingRequest brevbestillingRequest = new BrevbestillingRequest.Builder()
-            .medProduserbardokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD)
-            .medMottaker(Aktoersroller.BRUKER)
-            .medBestillersId("Z123456")
-            .medSaksvedlegg(saksvedleggDto)
-            .build();
-
-
-        byte[] pdfResponse = dokgenService.produserUtkast(123L, brevbestillingRequest);
-
-
-        assertThat(pdfResponse).isNotNull();
-        assertThat(pdfResponse).isEqualTo(expectedPdf);
-
-        verify(mockDokgenConsumer).lagPdfMedVedlegg(any(), any(), eq(false), eq(true), listArgumentCaptor.capture());
-        List<byte[]> sendteVedlegg = listArgumentCaptor.getValue();
-        assertThat(sendteVedlegg).hasSize(2).contains(vedlegg1, vedlegg2);
     }
 
     @Test

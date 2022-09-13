@@ -109,7 +109,7 @@ class OpprettOgJournalforBrevTest {
 
         verify(mockPersondataFasade, times(2)).hentFolkeregisterident(any());
         verify(mockBehandlingService).hentBehandling(anyLong());
-        verify(mockDokgenService).produserBrev(any(Aktoer.class), any(DokgenBrevbestilling.class), eq(false));
+        verify(mockDokgenService).produserBrev(any(Aktoer.class), any(DokgenBrevbestilling.class));
         verify(mockJoarkFasade).opprettJournalpost(any(), anyBoolean());
     }
 
@@ -138,7 +138,7 @@ class OpprettOgJournalforBrevTest {
 
         verify(mockPersondataFasade, never()).hentFolkeregisterident(any());
         verify(mockBehandlingService).hentBehandling(anyLong());
-        verify(mockDokgenService).produserBrev(any(Aktoer.class), any(DokgenBrevbestilling.class), eq(false));
+        verify(mockDokgenService).produserBrev(any(Aktoer.class), any(DokgenBrevbestilling.class));
         verify(mockJoarkFasade).opprettJournalpost(opprettJournalpostCaptor.capture(), anyBoolean());
 
         OpprettJournalpost opprettJournalpost = opprettJournalpostCaptor.getValue();
@@ -180,7 +180,7 @@ class OpprettOgJournalforBrevTest {
         opprettJournalforBrev.utfør(prosessinstans);
 
         verify(mockBehandlingService).hentBehandling(anyLong());
-        verify(mockDokgenService).produserBrev(any(Aktoer.class), any(DokgenBrevbestilling.class), eq(false));
+        verify(mockDokgenService).produserBrev(any(Aktoer.class), any(DokgenBrevbestilling.class));
         verify(mockJoarkFasade).opprettJournalpost(any(), anyBoolean());
     }
 
@@ -226,7 +226,7 @@ class OpprettOgJournalforBrevTest {
         opprettJournalforBrev.utfør(prosessinstans);
 
         verify(mockBehandlingService).hentBehandling(anyLong());
-        verify(mockDokgenService).produserBrev(any(Aktoer.class), any(MangelbrevBrevbestilling.class), eq(false));
+        verify(mockDokgenService).produserBrev(any(Aktoer.class), any(MangelbrevBrevbestilling.class));
         verify(mockJoarkFasade).opprettJournalpost(any(), anyBoolean());
     }
 
@@ -249,7 +249,7 @@ class OpprettOgJournalforBrevTest {
 
         verify(mockBehandlingService).hentBehandling(anyLong());
         //noinspection ConstantConditions - brevbestilling er ikke null
-        verify(mockDokgenService).produserBrev(any(Aktoer.class), refEq(brevbestilling), eq(false));
+        verify(mockDokgenService).produserBrev(any(Aktoer.class), refEq(brevbestilling));
         verify(mockJoarkFasade).opprettJournalpost(any(), anyBoolean());
     }
 
@@ -288,7 +288,7 @@ class OpprettOgJournalforBrevTest {
 
         verify(mockBehandlingService).hentBehandling(anyLong());
         //noinspection ConstantConditions - brevbestilling er ikke null
-        verify(mockDokgenService).produserBrev(any(Aktoer.class), refEq(brevbestilling), eq(false));
+        verify(mockDokgenService).produserBrev(any(Aktoer.class), refEq(brevbestilling));
         verify(mockJoarkFasade).opprettJournalpost(any(), anyBoolean());
     }
 

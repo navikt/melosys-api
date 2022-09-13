@@ -1,12 +1,16 @@
 package no.nav.melosys.saksflyt.steg.brev;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.arkiv.*;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.brev.FritekstbrevBrevbestilling;
+import no.nav.melosys.domain.brev.FritekstvedleggBestilling;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
@@ -81,7 +85,8 @@ public class OpprettOgJournalforBrev implements StegBehandler {
         Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
         Produserbaredokumenter produserbartDokument = brevbestilling.getProduserbartdokument();
 
-        byte[] pdf = dokgenService.produserBrev(mottaker, brevbestilling, false);
+        byte[] pdf = dokgenService.produserBrev(mottaker, brevbestilling);
+        List<Vedlegg> vedlegg = hentVedlegg(brevbestilling, behandling.getFagsak().getSaksnummer(), mottaker);
         log.info("Produserbartdokument {} for behandling {} produsert", produserbartDokument, behandling.getId());
 
         DokumentproduksjonsInfo dokumentproduksjonsInfo = dokgenService.hentDokumentInfo(produserbartDokument);
@@ -95,7 +100,7 @@ public class OpprettOgJournalforBrev implements StegBehandler {
             .medMottakerIdType(utledMottakerIdType(mottakerType))
             .medSaksnummer(behandling.getFagsak().getSaksnummer())
             .medPdf(pdf)
-            .medVedlegg(hentVedleggDokumenterFraJoark(brevbestilling, behandling.getFagsak().getSaksnummer()));
+            .medVedlegg(vedlegg);
 
         settHovedpart(behandling, bestilling);
 
@@ -168,9 +173,33 @@ public class OpprettOgJournalforBrev implements StegBehandler {
         };
     }
 
+    private List<Vedlegg> hentVedlegg(DokgenBrevbestilling brevbestilling, String saksnummer, Aktoer mottaker) {
+        List<Vedlegg> fritekstvedlegg = produserFritekstvedlegg(brevbestilling, mottaker);
+        List<Vedlegg> vedleggFraJoark = hentVedleggDokumenterFraJoark(brevbestilling, saksnummer);
+        return Stream.concat(fritekstvedlegg.stream(), vedleggFraJoark.stream()).toList();
+    }
+
+    private List<Vedlegg> produserFritekstvedlegg(DokgenBrevbestilling brevbestilling, Aktoer mottaker) {
+        List<FritekstvedleggBestilling> fritekstvedleggBestilling = brevbestilling.getFritekstvedleggBestilling();
+        if (fritekstvedleggBestilling == null || !(brevbestilling instanceof FritekstbrevBrevbestilling fritekstbrevBrevbestilling)) {
+            return Collections.emptyList();
+        }
+        return fritekstvedleggBestilling.stream().map(vedlegg -> {
+            var vedleggBestilling = new FritekstbrevBrevbestilling.Builder()
+                .medBehandlingId(fritekstbrevBrevbestilling.getBehandlingId())
+                .medProduserbartdokument(fritekstbrevBrevbestilling.getProduserbartdokument())
+                .medFritekstTittel(vedlegg.tittel())
+                .medFritekst(vedlegg.fritekst())
+                .medSaksbehandlerNavn(fritekstbrevBrevbestilling.getSaksbehandlerNavn())
+                .medKontaktopplysninger(fritekstbrevBrevbestilling.isKontaktopplysninger())
+                .build();
+            return new Vedlegg(dokgenService.produserBrev(mottaker, vedleggBestilling), vedlegg.tittel());
+        }).toList();
+    }
+
     private List<Vedlegg> hentVedleggDokumenterFraJoark(DokgenBrevbestilling brevbestilling, String fagsaknummer) {
         if (brevbestilling.getSaksvedleggBestilling() == null) {
-            return null;
+            return Collections.emptyList();
         }
         List<Journalpost> journalposterForSaken = dokumentHentingService.hentJournalposter(fagsaknummer);
         List<SaksvedleggBestilling> saksvedleggbestillingListe = brevbestilling.getSaksvedleggBestilling();

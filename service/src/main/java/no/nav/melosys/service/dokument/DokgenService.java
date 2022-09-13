@@ -21,6 +21,7 @@ import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
+import no.nav.melosys.service.dokument.brev.FritekstvedleggDto;
 import no.nav.melosys.service.dokument.brev.KopiMottaker;
 import no.nav.melosys.service.dokument.brev.SaksvedleggDto;
 import no.nav.melosys.service.dokument.brev.mapper.DokgenMalMapper;
@@ -29,7 +30,6 @@ import no.nav.melosys.service.ldap.SaksbehandlerService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 
 import static org.springframework.util.StringUtils.hasText;
 
@@ -94,14 +94,13 @@ public class DokgenService {
             .medProduserbartdokument(produserbartdokument)
             .medBehandlingId(behandlingId)
             .medSaksbehandlerNavn(hentSaksbehandlerNavn(brevbestillingRequest.getBestillersId()))
-            .medSaksvedleggBestilling(lagSaksvedleggBestilling(brevbestillingRequest.getSaksVedlegg()))
             .medBestillUtkast(true);
 
-        return produserBrev(mottaker, brevbestilling.build(), true);
+        return produserBrev(mottaker, brevbestilling.build());
     }
 
     @Transactional
-    public byte[] produserBrev(Aktoer mottaker, DokgenBrevbestilling brevbestilling, boolean skalFletteVedlegg) {
+    public byte[] produserBrev(Aktoer mottaker, DokgenBrevbestilling brevbestilling) {
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(brevbestilling.getBehandlingId());
         String malnavn = dokumentproduksjonsInfoMapper.hentMalnavn(brevbestilling.getProduserbartdokument());
         String orgnr = mottaker != null ? mottaker.getOrgnr() : null;
@@ -119,10 +118,6 @@ public class DokgenService {
         settJournalpostOpplysninger(behandling, builder);
 
         var dokgenDto = dokgenMalMapper.mapBehandling(builder.build(), mottaker);
-        if (!CollectionUtils.isEmpty(brevbestilling.getSaksvedleggBestilling()) && skalFletteVedlegg) {
-            return dokgenConsumer.lagPdfMedVedlegg(malnavn, dokgenDto, brevbestilling.isBestillKopi(),
-                brevbestilling.isBestillUtkast(), hentVedleggDokumenterFraJoark(brevbestilling.getSaksvedleggBestilling()));
-        }
         return dokgenConsumer.lagPdf(malnavn, dokgenDto, brevbestilling.isBestillKopi(), brevbestilling.isBestillUtkast());
     }
 
@@ -137,7 +132,8 @@ public class DokgenService {
             .medProduserbartdokument(produserbartDokument)
             .medBehandlingId(behandlingId)
             .medSaksvedleggBestilling(lagSaksvedleggBestilling(brevbestillingRequest.getSaksVedlegg()))
-            .medSaksbehandlerNavn(hentSaksbehandlerNavn(brevbestillingRequest.getBestillersId()));
+            .medSaksbehandlerNavn(hentSaksbehandlerNavn(brevbestillingRequest.getBestillersId()))
+            .medFritekstvedleggBestilling(lagFritekstvedleggBestilling(brevbestillingRequest.getFritekstvedlegg()));
 
         List<Aktoer> mottakere = new ArrayList<>();
         if (hasText(brevbestillingRequest.getOrgNr())) {
@@ -217,6 +213,16 @@ public class DokgenService {
 
         return saksvedleggDtoer.stream()
             .map(saksvedlegg -> new SaksvedleggBestilling(saksvedlegg.journalpostID(), saksvedlegg.dokumentID()))
+            .toList();
+    }
+
+    private List<FritekstvedleggBestilling> lagFritekstvedleggBestilling(List<FritekstvedleggDto> fritekstvedleggDtoer) {
+        if (fritekstvedleggDtoer == null) {
+            return null;
+        }
+
+        return fritekstvedleggDtoer.stream()
+            .map(fritekstVedlegg -> new FritekstvedleggBestilling(fritekstVedlegg.tittel(), fritekstVedlegg.fritekst()))
             .toList();
     }
 

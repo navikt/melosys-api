@@ -42,6 +42,7 @@ public class DokgenBrevbestilling extends Brevbestilling {
     private Persondata personMottaker;
     private List<SaksvedleggBestilling> saksvedleggBestilling;
     private Distribusjonstype distribusjonstype;
+    private List<FritekstvedleggBestilling> fritekstvedleggBestilling;
 
     public DokgenBrevbestilling() {
         super();
@@ -66,6 +67,7 @@ public class DokgenBrevbestilling extends Brevbestilling {
         this.personMottaker = builder.personMottaker;
         this.saksvedleggBestilling = builder.saksvedleggBestilling;
         this.distribusjonstype = builder.distribusjonstype;
+        this.fritekstvedleggBestilling = builder.fritekstvedleggBestilling;
     }
 
     public OrganisasjonDokument getOrg() {
@@ -128,6 +130,10 @@ public class DokgenBrevbestilling extends Brevbestilling {
         return saksvedleggBestilling;
     }
 
+    public List<FritekstvedleggBestilling> getFritekstvedleggBestilling() {
+        return fritekstvedleggBestilling;
+    }
+
     public Distribusjonstype getDistribusjonstype() {
         return distribusjonstype;
     }
@@ -156,6 +162,7 @@ public class DokgenBrevbestilling extends Brevbestilling {
         private Persondata personMottaker;
         private List<SaksvedleggBestilling> saksvedleggBestilling;
         private Distribusjonstype distribusjonstype;
+        private List<FritekstvedleggBestilling> fritekstvedleggBestilling;
 
 
         public Builder() {
@@ -181,6 +188,7 @@ public class DokgenBrevbestilling extends Brevbestilling {
             this.personMottaker = brevbestilling.personMottaker;
             this.saksvedleggBestilling = brevbestilling.saksvedleggBestilling;
             this.distribusjonstype = brevbestilling.distribusjonstype;
+            this.fritekstvedleggBestilling = brevbestilling.fritekstvedleggBestilling;
         }
 
         public T medProduserbartdokument(Produserbaredokumenter produserbartdokument) {
@@ -275,6 +283,11 @@ public class DokgenBrevbestilling extends Brevbestilling {
 
         public T medDistribusjonstype(Distribusjonstype distribusjonstype) {
             this.distribusjonstype = distribusjonstype;
+            return (T) this;
+        }
+
+        public T medFritekstvedleggBestilling(List<FritekstvedleggBestilling> fritekstvedleggBestilling) {
+            this.fritekstvedleggBestilling = fritekstvedleggBestilling;
             return (T) this;
         }
 
