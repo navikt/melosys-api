@@ -9,7 +9,7 @@ import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
-import no.nav.melosys.service.lovligeKombinasjoner.LovligeKombinasjonerService;
+import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerService;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.ResponseEntity;
@@ -34,7 +34,7 @@ public class LovligeKombinasjonerTjeneste {
     @GetMapping("/sakstyper")
     @ApiOperation(value = "Henter alle mulige sakstyper", notes = ("Henter alle mulige sakstyper"))
     public ResponseEntity<Set<Sakstyper>> hentAlleMuligeSakstyper() {
-        return ResponseEntity.ok(lovligeKombinasjonerService.hentAlleMuligeSakstyper());
+        return ResponseEntity.ok(lovligeKombinasjonerService.hentMuligeSakstyper());
     }
 
     @GetMapping("/sakstemaer")
@@ -42,7 +42,7 @@ public class LovligeKombinasjonerTjeneste {
     public ResponseEntity<Set<Sakstemaer>> hentAlleMuligeSakstemaer(
         @RequestParam("hovedpart") Aktoersroller hovedpart,
         @RequestParam("sakstype") Sakstyper sakstype) {
-        return ResponseEntity.ok(lovligeKombinasjonerService.hentAlleSakstemaer(hovedpart, sakstype));
+        return ResponseEntity.ok(lovligeKombinasjonerService.hentMuligeSakstemaer(hovedpart, sakstype));
     }
 
     @GetMapping("/behandlingstemaer")
@@ -53,7 +53,7 @@ public class LovligeKombinasjonerTjeneste {
         @RequestParam("sakstema") Sakstemaer sakstema,
         @RequestParam(value = "sistBehandlingstema", required = false) Behandlingstema sistBehandlingstema
     ) {
-        return ResponseEntity.ok(lovligeKombinasjonerService.hentAlleMuligeBehandlingstemaer(hovedpart, sakstype, sakstema, sistBehandlingstema));
+        return ResponseEntity.ok(lovligeKombinasjonerService.hentMuligeBehandlingstemaer(hovedpart, sakstype, sakstema, sistBehandlingstema));
     }
 
     @GetMapping("/behandlingstyper")
@@ -65,6 +65,6 @@ public class LovligeKombinasjonerTjeneste {
         @RequestParam(value = "behandlingstema", required = false) Behandlingstema behandlingstema,
         @RequestParam(value = "sisteBehandlingsID", required = false) Long sisteBehandlingsID
     ) {
-        return ResponseEntity.ok(lovligeKombinasjonerService.hentAlleMuligeBehandlingstyper(hovedpart, sakstype, sakstema, behandlingstema, sisteBehandlingsID));
+        return ResponseEntity.ok(lovligeKombinasjonerService.hentMuligeBehandlingstyper(hovedpart, sakstype, sakstema, behandlingstema, sisteBehandlingsID));
     }
 }

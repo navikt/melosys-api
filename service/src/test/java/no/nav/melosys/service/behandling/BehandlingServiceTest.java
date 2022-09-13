@@ -24,7 +24,7 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.BehandlingsgrunnlagRepository;
 import no.nav.melosys.repository.TidligereMedlemsperiodeRepository;
-import no.nav.melosys.service.lovligeKombinasjoner.LovligeSakKombinasjoner;
+import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.BeforeEach;
@@ -66,9 +66,10 @@ class BehandlingServiceTest {
     @Mock
     private OppgaveService oppgaveService;
     @Mock
+    private LovligeKombinasjonerService lovligeKombinasjonerService;
+    @Mock
     private ApplicationEventPublisher applicationEventPublisher;
     private final FakeUnleash fakeUnleash = new FakeUnleash();
-    private final LovligeSakKombinasjoner lovligeSakKombinasjoner = new LovligeSakKombinasjoner();
     private BehandlingService behandlingService;
     @Captor
     private ArgumentCaptor<Behandling> behandlingCaptor;
@@ -83,7 +84,7 @@ class BehandlingServiceTest {
 
     @BeforeEach
     public void setUp() {
-        behandlingService = new BehandlingService(behandlingRepository, tidligereMedlemsperiodeRepo, behandlingsgrunnlagRepo, behandlingsresultatService, oppgaveService, applicationEventPublisher, fakeUnleash);
+        behandlingService = new BehandlingService(behandlingRepository, tidligereMedlemsperiodeRepo, behandlingsgrunnlagRepo, behandlingsresultatService, oppgaveService, lovligeKombinasjonerService, applicationEventPublisher, fakeUnleash);
 
         behandling = new Behandling();
         behandling.setId(BEHANDLING_ID);
@@ -148,11 +149,8 @@ class BehandlingServiceTest {
         Fagsak fagsak = new Fagsak();
         fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
 
-        Behandlingstema initiellBehandlingsstema = REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING;
-        Behandlingstyper initiellBehandlingstype = SOEKNAD;
-
-        behandling.setTema(initiellBehandlingsstema);
-        behandling.setType(initiellBehandlingstype);
+        behandling.setTema(REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING);
+        behandling.setType(SOEKNAD);
         behandling.setFagsak(fagsak);
         behandling.setBehandlingsgrunnlag(opprettBehandlingsgrunnlag());
 

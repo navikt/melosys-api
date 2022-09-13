@@ -23,6 +23,7 @@ import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.BehandlingsgrunnlagRepository;
 import no.nav.melosys.repository.TidligereMedlemsperiodeRepository;
+import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import org.apache.commons.beanutils.BeanUtils;
 import org.slf4j.Logger;
@@ -45,6 +46,7 @@ public class BehandlingService {
     private final BehandlingsresultatService behandlingsresultatService;
     private final BehandlingsgrunnlagRepository behandlingsgrunnlagRepository;
     private final OppgaveService oppgaveService;
+    private final LovligeKombinasjonerService lovligeKombinasjonerService;
     private final ApplicationEventPublisher applicationEventPublisher;
     private final Unleash unleash;
     private final Counter behandlingerAvsluttet = Metrics.counter(BEHANDLINGER_AVSLUTTET);
@@ -64,13 +66,14 @@ public class BehandlingService {
                              BehandlingsgrunnlagRepository behandlingsgrunnlagRepository,
                              BehandlingsresultatService behandlingsresultatService,
                              @Lazy OppgaveService oppgaveService,
-                             ApplicationEventPublisher applicationEventPublisher,
+                             LovligeKombinasjonerService lovligeKombinasjonerService, ApplicationEventPublisher applicationEventPublisher,
                              Unleash unleash) {
         this.behandlingRepository = behandlingRepository;
         this.tidligereMedlemsperiodeRepository = tidligereMedlemsperiodeRepository;
         this.behandlingsgrunnlagRepository = behandlingsgrunnlagRepository;
         this.behandlingsresultatService = behandlingsresultatService;
         this.oppgaveService = oppgaveService;
+        this.lovligeKombinasjonerService = lovligeKombinasjonerService;
         this.applicationEventPublisher = applicationEventPublisher;
         this.unleash = unleash;
     }
@@ -414,9 +417,8 @@ public class BehandlingService {
     public Set<Behandlingstema> hentMuligeBehandlingstema(long behandlingID) {
         var behandling = hentBehandling(behandlingID);
         var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
-        Set<Behandlingstema> behandlingstemaer = MuligeManuelleBehandlingsendringer.hentMuligeBehandlingstema(behandling, behandlingsresultat, unleash.isEnabled("melosys.behandle_alle_saker"));
 
-        return behandlingstemaer;
+        return MuligeManuelleBehandlingsendringer.hentMuligeBehandlingstema(behandling, behandlingsresultat, unleash.isEnabled("melosys.behandle_alle_saker"));
     }
 
     public Set<Behandlingstyper> hentMuligeTyper(long behandlingID) {
@@ -444,7 +446,7 @@ public class BehandlingService {
 
     private boolean saksbehandlerKanEndreType(Behandling behandling, Behandlingstyper type) {
         if (unleash.isEnabled("melosys.behandle_alle_saker")) {
-            MuligeManuelleBehandlingsendringer.validerNyTypeMulig_NY(behandling, type);
+            lovligeKombinasjonerService.validerOmNyTypeKanEndresTil(behandling, type);
         } else {
             MuligeManuelleBehandlingsendringer.validerNyTypeMulig(behandling, type);
         }
@@ -454,7 +456,7 @@ public class BehandlingService {
     private boolean saksbehandlerKanEndreTema(Behandling behandling, Behandlingstema tema) {
         var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
         if (unleash.isEnabled("melosys.behandle_alle_saker")) {
-            MuligeManuelleBehandlingsendringer.validerNyttTemaMulig_NY(behandling, tema);
+            lovligeKombinasjonerService.validerOmNyttTemaKanEndresTil(behandling, tema);
         } else {
             MuligeManuelleBehandlingsendringer.validerNyttTemaMulig(behandling, behandlingsresultat, tema, unleash.isEnabled("melosys.behandle_alle_saker"));
         }
