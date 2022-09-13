@@ -13,7 +13,6 @@ import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.service.behandling.BehandlingService;
 import org.springframework.stereotype.Service;
 
 import static no.nav.melosys.domain.kodeverk.Saksstatuser.*;
@@ -23,11 +22,6 @@ import static no.nav.melosys.service.lovligekombinasjoner.LovligeBehandlingsKomb
 
 @Service
 public class LovligeKombinasjonerService {
-    private final BehandlingService behandlingService;
-
-    public LovligeKombinasjonerService(BehandlingService behandlingService) {
-        this.behandlingService = behandlingService;
-    }
 
     public Set<Sakstyper> hentMuligeSakstyper() {
         return LovligeSaksKombinasjoner.ALLE_MULIGE_SAKSTYPER;
@@ -76,14 +70,13 @@ public class LovligeKombinasjonerService {
         Sakstyper sakstype,
         Sakstemaer sakstema,
         @Nullable Behandlingstema behandlingstema,
-        @Nullable Long sisteBehandlingsID
+        @Nullable Behandling sisteBehandling
     ) {
         Behandlingstema sistBehandlingstema = null;
         Behandlingstyper sistBehandlingstype = null;
         Saksstatuser sistSaksstatus = null;
 
-        if (sisteBehandlingsID != null) {
-            Behandling sisteBehandling = behandlingService.hentBehandling(sisteBehandlingsID);
+        if (sisteBehandling != null) {
             sistBehandlingstema = sisteBehandling.getTema();
             sistBehandlingstype = sisteBehandling.getType();
             sistSaksstatus = sisteBehandling.getFagsak().getStatus();

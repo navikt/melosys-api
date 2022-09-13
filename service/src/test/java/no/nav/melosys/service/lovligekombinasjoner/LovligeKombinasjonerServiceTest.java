@@ -8,12 +8,10 @@ import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
-import no.nav.melosys.service.behandling.BehandlingService;
 import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static no.nav.melosys.domain.kodeverk.Sakstemaer.*;
@@ -25,14 +23,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ExtendWith(MockitoExtension.class)
 class LovligeKombinasjonerServiceTest {
 
-    @Mock
-    private BehandlingService behandlingService;
-
     private LovligeKombinasjonerService lovligeKombinasjonerService;
 
     @BeforeEach
     void setup() {
-        lovligeKombinasjonerService = new LovligeKombinasjonerService(behandlingService);
+        lovligeKombinasjonerService = new LovligeKombinasjonerService();
     }
 
     @Test
