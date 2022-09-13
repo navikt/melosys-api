@@ -134,6 +134,8 @@ public final class OppgaveFactory {
     }
 
     private static boolean skalBrukeMelosysBehandlingstemaForBehandlingstema(Sakstemaer sakstema, Sakstyper sakstype, Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
+        if (behandlingstype == null) return false;
+
         return switch (behandlingstema) {
             case PENSJONIST -> switch (sakstema) {
                 case MEDLEMSKAP_LOVVALG ->

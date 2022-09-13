@@ -11,6 +11,12 @@ public interface OppgaveFasade {
 
     void ferdigstillOppgave(String oppgaveId);
 
+    List<Oppgave> finnUtildelteOppgaverEtterFrist(String behandlingstema);
+
+    /**
+     * @deprecated Fjernes med toggle melosys.oppgave.oppretting
+     */
+    @Deprecated
     List<Oppgave> finnUtildelteOppgaverEtterFrist(String behandlingstype, String behandlingstema);
 
     void oppdaterOppgave(String oppgaveID, OppgaveOppdatering oppgaveOppdatering);

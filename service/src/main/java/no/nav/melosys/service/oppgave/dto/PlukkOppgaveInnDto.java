@@ -8,7 +8,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 public class PlukkOppgaveInnDto {
 
     private Behandlingstema behandlingstema;
-    private Behandlingstyper behandlingstype;
     private Sakstemaer sakstema;
     private Sakstyper sakstype;
 
@@ -18,14 +17,6 @@ public class PlukkOppgaveInnDto {
 
     public void setBehandlingstema(Behandlingstema behandlingstema) {
         this.behandlingstema = behandlingstema;
-    }
-
-    public Behandlingstyper getBehandlingstype() {
-        return behandlingstype;
-    }
-
-    public void setBehandlingstype(Behandlingstyper behandlingstype) {
-        this.behandlingstype = behandlingstype;
     }
 
     public Sakstemaer getSakstema() {
