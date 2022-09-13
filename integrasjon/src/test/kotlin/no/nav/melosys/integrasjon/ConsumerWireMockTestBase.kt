@@ -109,7 +109,16 @@ abstract class ConsumerWireMockTestBase<T, R>(
                 WireMock.aResponse()
                     .withStatus(200)
                     .withHeader("Content-Type", "application/json")
-                    .withBody(tokenServerResponse)
+                    .withBody(
+                        """ {
+                        "token_type": "Bearer",
+                        "scope": "scope1 scope2",
+                        "expires_in": 3952,
+                        "ext_expires_in": 3952,
+                        "access_token": "-- access_token -- "
+                        }
+                    """
+                    )
             )
         )
     }
@@ -221,15 +230,6 @@ abstract class ConsumerWireMockTestBase<T, R>(
     companion object {
         const val UUID_REGEX = "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}"
 
-        const val tokenServerResponse = """ {
-        "token_type": "Bearer",
-        "scope": "api://dev-fss.team-rocket.medlemskap-medl-api-q1/defaultaccess api://dev-fss.team-rocket.medlemskap-medl-api-q1/.default",
-        "expires_in": 3952,
-        "ext_expires_in": 3952,
-        "access_token": "-- access_token -- ",
-        "refresh_token": "-- refresh_token --"
-        }
-    """
     }
 
 }
