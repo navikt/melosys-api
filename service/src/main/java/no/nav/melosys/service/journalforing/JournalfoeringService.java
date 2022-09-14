@@ -267,7 +267,7 @@ public class JournalfoeringService {
 
         log.info("{} knytter journalpost {} til sak {} og lager ny vurdering", SubjectHandler.getInstance().getUserID(), journalfoeringDto.getJournalpostID(), saksnummer);
 
-        ProsessType prosessTypeForNyVurdering = finnProsessTypeForNyVurdering(sisteBehandling);
+        ProsessType prosessTypeForNyVurdering = finnProsessTypeForAndregangsbehandling(sisteBehandling);
 
         Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(prosessTypeForNyVurdering, journalfoeringDto);
         if (unleash.isEnabled("melosys.sakstema")) {
@@ -281,7 +281,7 @@ public class JournalfoeringService {
         prosessinstansService.lagre(prosessinstans);
     }
 
-    private ProsessType finnProsessTypeForNyVurdering(Behandling behandling) {
+    private ProsessType finnProsessTypeForAndregangsbehandling(Behandling behandling) {
         if (sjekkOmTidligereBehandlingSkalKopieres(behandling)) {
             return ProsessType.JFR_NY_VURDERING;
         }
