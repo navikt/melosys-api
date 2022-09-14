@@ -40,12 +40,9 @@ class JournalfoeringTjenesteTest {
     private ObjectMapper objectMapper;
 
     private static final String BASE_URL = "/api/journalforing";
-    private JournalfoeringTjeneste tjeneste;
 
     @BeforeEach
     public void setUp() {
-        tjeneste = new JournalfoeringTjeneste(journalføringService, oppgaveService);
-
         random = new EasyRandom(new EasyRandomParameters().collectionSizeRange(1, 4));
     }
 
