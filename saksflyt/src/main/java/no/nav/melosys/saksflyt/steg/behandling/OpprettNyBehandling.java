@@ -47,6 +47,6 @@ public class OpprettNyBehandling implements StegBehandler {
             Behandlingsstatus.OPPRETTET, behandlingstype, behandlingstema,
             initierendeJournalpostId, initierendeDokumentId);
         prosessinstans.setBehandling(behandling);
-        log.info("Opprettet med behandling {} på eksiterende fagsak {}", behandling.getId(), fagsak.getSaksnummer());
+        log.info("Opprettet ny behandling {} på eksiterende fagsak {}", behandling.getId(), fagsak.getSaksnummer());
     }
 }
