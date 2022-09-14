@@ -528,7 +528,7 @@ class JournalfoeringServiceTest {
 
         when(joarkFasade.hentJournalpost(tilordneDto.getJournalpostID())).thenReturn(journalpost);
         when(fagsakService.hentFagsak(MELOSYS_SAKSNUMMER)).thenReturn(fagsak);
-        when(prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_ANDRE_GANGS_BEHANDLING, tilordneDto))
+        when(prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_ANDREGANGS_BEHANDLING, tilordneDto))
             .thenReturn(new Prosessinstans());
 
         journalfoeringService.journalførOgOpprettNyVurdering(tilordneDto);

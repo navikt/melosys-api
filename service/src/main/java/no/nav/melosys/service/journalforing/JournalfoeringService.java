@@ -285,7 +285,7 @@ public class JournalfoeringService {
         if (skalTidligereBehandlingReplikeres(behandling)) {
             return ProsessType.JFR_NY_VURDERING;
         }
-        return ProsessType.JFR_ANDRE_GANGS_BEHANDLING;
+        return ProsessType.JFR_ANDREGANGS_BEHANDLING;
     }
 
     private boolean skalTidligereBehandlingReplikeres(Behandling behandling) {
