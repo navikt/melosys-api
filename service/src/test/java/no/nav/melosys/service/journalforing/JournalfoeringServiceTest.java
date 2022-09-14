@@ -547,6 +547,9 @@ class JournalfoeringServiceTest {
     void journalførOgOpprettNyVurdering_behandlingstypeIkkeTillattForSakstype_kasterException() {
         tilordneDto.setSaksnummer(MELOSYS_SAKSNUMMER);
         var fagsak = new Fagsak();
+        var behandling = new Behandling();
+        behandling.setStatus(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
+        fagsak.setBehandlinger(List.of(behandling));
 
         when(joarkFasade.hentJournalpost(tilordneDto.getJournalpostID())).thenReturn(journalpost);
         when(fagsakService.hentFagsak(MELOSYS_SAKSNUMMER)).thenReturn(fagsak);
