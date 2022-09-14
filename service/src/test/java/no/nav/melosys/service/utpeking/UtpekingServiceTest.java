@@ -76,9 +76,7 @@ class UtpekingServiceTest {
     @Captor
     private ArgumentCaptor<Collection<Landkoder>> landkoderCaptor;
 
-    private FakeUnleash unleash = new FakeUnleash();
     private UtpekingService utpekingService;
-
     private final long behandlingID = 431;
     private final Behandling behandling = new Behandling();
     private final Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
@@ -87,7 +85,7 @@ class UtpekingServiceTest {
     @BeforeEach
     public void setup() {
         utpekingService = new UtpekingService(behandlingService, behandlingsresultatService, eessiService, landvelgerService,
-            lovvalgsperiodeService, oppgaveService, prosessinstansService, unleash, utpekingsperiodeRepository, ferdigbehandlingKontrollFacade, melosysEventMulticaster);
+            lovvalgsperiodeService, oppgaveService, prosessinstansService, utpekingsperiodeRepository, ferdigbehandlingKontrollFacade, melosysEventMulticaster);
 
         fagsak.setBehandlinger(List.of(behandling));
         fagsak.setType(Sakstyper.EU_EOS);
@@ -243,6 +241,14 @@ class UtpekingServiceTest {
 
     @Test
     void avvisUtpeking_utsendtArbeidtaker_ikkeStøttetKasterException() {
+        Saksopplysning saksopplysning = new Saksopplysning();
+        saksopplysning.setType(SaksopplysningType.SEDOPPL);
+        SedDokument sedDokument = new SedDokument();
+        sedDokument.setRinaSaksnummer("123");
+        sedDokument.setSedType(SedType.A003);
+        sedDokument.setLovvalgslandKode(Landkoder.NO);
+        saksopplysning.setDokument(sedDokument);
+        behandling.setSaksopplysninger(Set.of(saksopplysning));
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
 
         assertThatExceptionOfType(FunksjonellException.class)
@@ -278,7 +284,6 @@ class UtpekingServiceTest {
 
     @Test
     void avvisUtpeking_bucKanIkkeOppretteSed_kasterException() {
-        unleash.enable("melosys.eessi.handlingssjekk_sed");
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setType(SaksopplysningType.SEDOPPL);
         SedDokument sedDokument = new SedDokument();

@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Fagsystem;
 import no.nav.melosys.domain.Tema;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
@@ -37,11 +38,14 @@ final class OppgaveFasadeImplTest {
     @Captor
     private ArgumentCaptor<OppgaveSearchRequest> oppgaveSearchRequestCaptor;
 
+    private FakeUnleash unleash = new FakeUnleash();
+
     private OppgaveFasadeImpl oppgaveFasadeImpl;
 
     @BeforeEach
     void setup() {
-        oppgaveFasadeImpl = new OppgaveFasadeImpl(oppgaveConsumer);
+        oppgaveFasadeImpl = new OppgaveFasadeImpl(oppgaveConsumer, unleash);
+        unleash.enableAll();
     }
 
     @Test
