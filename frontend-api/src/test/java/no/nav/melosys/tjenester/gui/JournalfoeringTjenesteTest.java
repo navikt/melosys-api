@@ -64,7 +64,7 @@ class JournalfoeringTjenesteTest {
     }
 
     @Test
-    void journalførOgOpprettNyVurdering_validerKall() throws Exception {
+    void journalførOgOpprettAndregangsBehandling_validerKall() throws Exception {
         JournalfoeringTilordneDto journalføringDto = random.nextObject(JournalfoeringTilordneDto.class);
 
         mockMvc.perform(post(BASE_URL + "/nyvurdering")
@@ -73,7 +73,7 @@ class JournalfoeringTjenesteTest {
             )
             .andExpect(status().isNoContent());
 
-        verify(journalføringService).journalførOgOpprettNyVurdering(any(JournalfoeringTilordneDto.class));
+        verify(journalføringService).journalførOgOpprettAndregangsBehandling(any(JournalfoeringTilordneDto.class));
         verify(oppgaveService).ferdigstillOppgave(journalføringDto.getOppgaveID());
     }
 

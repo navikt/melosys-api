@@ -242,7 +242,7 @@ public class JournalfoeringService {
     }
 
     @Transactional
-    public void journalførOgOpprettNyVurdering(JournalfoeringTilordneDto journalfoeringDto) {
+    public void journalførOgOpprettAndregangsBehandling(JournalfoeringTilordneDto journalfoeringDto) {
         var journalpost = joarkFasade.hentJournalpost(journalfoeringDto.getJournalpostID());
         var saksnummer = journalfoeringDto.getSaksnummer();
         var fagsak = fagsakService.hentFagsak(saksnummer);

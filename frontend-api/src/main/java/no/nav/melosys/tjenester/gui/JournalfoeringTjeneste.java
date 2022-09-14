@@ -75,8 +75,8 @@ public class JournalfoeringTjeneste {
 
     @PostMapping("nyvurdering")
     @ApiOperation(value = "Journalfør og opprett ny vurdering asynkront")
-    public ResponseEntity<Void> journalførOgOpprettNyVurdering(@RequestBody JournalfoeringTilordneDto journalføringDto) {
-        journalføringService.journalførOgOpprettNyVurdering(journalføringDto);
+    public ResponseEntity<Void> journalførOgOpprettAndregangsBehandling(@RequestBody JournalfoeringTilordneDto journalføringDto) {
+        journalføringService.journalførOgOpprettAndregangsBehandling(journalføringDto);
         oppgaveService.ferdigstillOppgave(journalføringDto.getOppgaveID());
         return ResponseEntity.noContent().build();
     }

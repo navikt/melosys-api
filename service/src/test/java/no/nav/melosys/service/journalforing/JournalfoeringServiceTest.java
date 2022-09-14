@@ -486,7 +486,7 @@ class JournalfoeringServiceTest {
     }
 
     @Test
-    void journalførOgOpprettNyVurdering_altOK_prosessinstansOpprettet() {
+    void journalførOgOpprettAndregangsBehandling_altOK_prosessinstansOpprettet() {
         tilordneDto.setSaksnummer(MELOSYS_SAKSNUMMER);
 
         var behandling = new Behandling();
@@ -503,7 +503,7 @@ class JournalfoeringServiceTest {
         when(prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_NY_VURDERING, tilordneDto))
             .thenReturn(new Prosessinstans());
 
-        journalfoeringService.journalførOgOpprettNyVurdering(tilordneDto);
+        journalfoeringService.journalførOgOpprettAndregangsBehandling(tilordneDto);
 
         verify(prosessinstansService).lagre(prosessinstansArgumentCaptor.capture());
         var lagretProsessinstans = prosessinstansArgumentCaptor.getValue();
@@ -516,7 +516,7 @@ class JournalfoeringServiceTest {
     }
 
     @Test
-    void journalførOgOpprettNyVurderingIkkeKopierBehandling_altOK_prosessinstansOpprettet() {
+    void journalførOgOpprettAndregangsBehandlingIkkeKopierBehandling_altOK_prosessinstansOpprettet() {
         tilordneDto.setSaksnummer(MELOSYS_SAKSNUMMER);
 
         var behandling = new Behandling();
@@ -531,7 +531,7 @@ class JournalfoeringServiceTest {
         when(prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_ANDREGANGS_BEHANDLING, tilordneDto))
             .thenReturn(new Prosessinstans());
 
-        journalfoeringService.journalførOgOpprettNyVurdering(tilordneDto);
+        journalfoeringService.journalførOgOpprettAndregangsBehandling(tilordneDto);
 
         verify(prosessinstansService).lagre(prosessinstansArgumentCaptor.capture());
         var lagretProsessinstans = prosessinstansArgumentCaptor.getValue();
@@ -544,7 +544,7 @@ class JournalfoeringServiceTest {
     }
 
     @Test
-    void journalførOgOpprettNyVurdering_behandlingstypeIkkeTillattForSakstype_kasterException() {
+    void journalførOgOpprettAndregangsBehandling_behandlingstypeIkkeTillattForSakstype_kasterException() {
         tilordneDto.setSaksnummer(MELOSYS_SAKSNUMMER);
         var fagsak = new Fagsak();
         var behandling = new Behandling();
@@ -558,19 +558,19 @@ class JournalfoeringServiceTest {
         tilordneDto.setBehandlingstypeKode(Behandlingstyper.ENDRET_PERIODE.getKode());
         fagsak.setType(Sakstyper.TRYGDEAVTALE);
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> journalfoeringService.journalførOgOpprettNyVurdering(tilordneDto))
+            .isThrownBy(() -> journalfoeringService.journalførOgOpprettAndregangsBehandling(tilordneDto))
             .withMessageContaining(" er ikke en lovlig behandlingstype ved knytting av dokument til sak");
 
 
         tilordneDto.setBehandlingstypeKode(Behandlingstyper.KLAGE.getKode());
         fagsak.setType(Sakstyper.EU_EOS);
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> journalfoeringService.journalførOgOpprettNyVurdering(tilordneDto))
+            .isThrownBy(() -> journalfoeringService.journalførOgOpprettAndregangsBehandling(tilordneDto))
             .withMessageContaining(" er ikke en lovlig behandlingstype ved knytting av dokument til sak");
     }
 
     @Test
-    void journalførOgOpprettNyVurdering_fagsakHarAktivBehandling_feilKastes() {
+    void journalførOgOpprettAndregangsBehandling_fagsakHarAktivBehandling_feilKastes() {
         tilordneDto.setSaksnummer(MELOSYS_SAKSNUMMER);
 
         var behandling = new Behandling();
@@ -582,12 +582,12 @@ class JournalfoeringServiceTest {
         when(fagsakService.hentFagsak(MELOSYS_SAKSNUMMER)).thenReturn(fagsak);
 
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> journalfoeringService.journalførOgOpprettNyVurdering(tilordneDto))
+            .isThrownBy(() -> journalfoeringService.journalførOgOpprettAndregangsBehandling(tilordneDto))
             .withMessageContaining("Det finnes allerede en aktiv behandling på fagsak " + MELOSYS_SAKSNUMMER);
     }
 
     @Test
-    void journalførOgOpprettNyVurdering_sedSakTilknyttetAnnenFagsak_kasterException() {
+    void journalførOgOpprettAndregangsBehandling_sedSakTilknyttetAnnenFagsak_kasterException() {
         journalpost.setMottaksKanal("EESSI");
         var melosysEessiMelding = new MelosysEessiMelding();
         melosysEessiMelding.setRinaSaksnummer(RINA_SAKSNUMMER);
@@ -610,12 +610,12 @@ class JournalfoeringServiceTest {
 
 
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> journalfoeringService.journalførOgOpprettNyVurdering(tilordneDto))
+            .isThrownBy(() -> journalfoeringService.journalførOgOpprettAndregangsBehandling(tilordneDto))
             .withMessageContaining("er allerede tilknyttet");
     }
 
     @Test
-    void journalførOgOpprettNyVurdering_fagsakFinnesIkke_kasterFeil() {
+    void journalførOgOpprettAndregangsBehandling_fagsakFinnesIkke_kasterFeil() {
         tilordneDto.setSaksnummer(null);
 
         when(joarkFasade.hentJournalpost(tilordneDto.getJournalpostID())).thenReturn(journalpost);
@@ -623,7 +623,7 @@ class JournalfoeringServiceTest {
             .thenThrow(new IkkeFunnetException("Det finnes ingen fagsak med saksnummer: " + null));
 
         assertThatExceptionOfType(IkkeFunnetException.class)
-            .isThrownBy(() -> journalfoeringService.journalførOgOpprettNyVurdering(tilordneDto))
+            .isThrownBy(() -> journalfoeringService.journalførOgOpprettAndregangsBehandling(tilordneDto))
             .withMessageContaining("Det finnes ingen fagsak med saksnummer: null");
     }
 
