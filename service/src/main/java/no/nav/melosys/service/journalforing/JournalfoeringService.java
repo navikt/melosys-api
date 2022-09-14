@@ -282,13 +282,13 @@ public class JournalfoeringService {
     }
 
     private ProsessType finnProsessTypeForAndregangsbehandling(Behandling behandling) {
-        if (sjekkOmTidligereBehandlingSkalKopieres(behandling)) {
+        if (skalTidligereBehandlingReplikeres(behandling)) {
             return ProsessType.JFR_NY_VURDERING;
         }
         return ProsessType.JFR_ANDRE_GANGS_BEHANDLING;
     }
 
-    private boolean sjekkOmTidligereBehandlingSkalKopieres(Behandling behandling) {
+    private boolean skalTidligereBehandlingReplikeres(Behandling behandling) {
         Behandlingstyper behandlingType = behandling.getType();
         Sakstyper sakstype = behandling.getFagsak().getType();
         Behandlingstema behandlingstema = behandling.getTema();
