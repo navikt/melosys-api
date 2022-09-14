@@ -520,8 +520,7 @@ internal class OppgaveFactoryTest {
             behandlingstemaer,
             expectedBehandlingstema,
             expectedTema,
-            expectedOppgavetype,
-            ""
+            expectedOppgavetype
         )
     }
 
@@ -543,8 +542,7 @@ internal class OppgaveFactoryTest {
             behandlingstemaer,
             expectedBehandlingstema,
             expectedTema,
-            expectedOppgavetype,
-            ""
+            expectedOppgavetype
         )
     }
 
@@ -566,8 +564,7 @@ internal class OppgaveFactoryTest {
             behandlingstemaer,
             expectedBehandlingstema,
             expectedTema,
-            expectedOppgavetype,
-            ""
+            expectedOppgavetype
         )
     }
 
@@ -589,8 +586,7 @@ internal class OppgaveFactoryTest {
             behandlingstemaer,
             expectedBehandlingstema,
             expectedTema,
-            expectedOppgavetype,
-            ""
+            expectedOppgavetype
         )
     }
 
@@ -615,8 +611,7 @@ internal class OppgaveFactoryTest {
             behandlingstemaer,
             expectedBehandlingstema,
             expectedTema,
-            expectedOppgavetype,
-            ""
+            expectedOppgavetype
         )
     }
 
@@ -638,8 +633,7 @@ internal class OppgaveFactoryTest {
             behandlingstemaer,
             expectedBehandlingstema,
             expectedTema,
-            expectedOppgavetype,
-            ""
+            expectedOppgavetype
         )
     }
 
@@ -686,6 +680,34 @@ internal class OppgaveFactoryTest {
             expectedTema,
             expectedOppgavetype,
             ""
+        )
+    }
+
+    @Test
+    fun eueos_medlemskapLovvalg_soeknad_foresporselTrygdemyndighet_xx() {
+        test(
+            Sakstyper.EU_EOS,
+            Sakstemaer.MEDLEMSKAP_LOVVALG,
+            Behandlingstyper.SOEKNAD,
+            Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET,
+            OppgaveBehandlingstema.EU_EOS_LAND,
+            Tema.MED,
+            Oppgavetyper.BEH_SAK_MK,
+            Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET.beskrivelse
+        )
+    }
+
+    @Test
+    fun ftrl_trygdeavgift_soeknad_arbeidFlereLand_xx() {
+        test(
+            Sakstyper.FTRL,
+            Sakstemaer.TRYGDEAVGIFT,
+            Behandlingstyper.SOEKNAD,
+            Behandlingstema.ARBEID_FLERE_LAND,
+            OppgaveBehandlingstema.UTENFOR_AVTALELAND,
+            Tema.TRY,
+            Oppgavetyper.BEH_SAK_MK,
+            Behandlingstema.ARBEID_FLERE_LAND.beskrivelse
         )
     }
 
