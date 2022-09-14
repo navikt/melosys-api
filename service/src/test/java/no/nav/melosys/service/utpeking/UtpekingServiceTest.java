@@ -117,11 +117,14 @@ class UtpekingServiceTest {
         when(landvelgerService.hentUtenlandskTrygdemyndighetsland(eq(behandlingID)))
             .thenReturn(Set.of(Landkoder.SE));
 
+
         utpekingService.utpekLovvalgsland(fagsak, mottakerInstitusjoner, null, null);
+
 
         verify(lovvalgsperiodeService).lagreLovvalgsperioder(eq(behandlingID), lovvalgsperiodeCaptor.capture());
         verify(prosessinstansService).opprettProsessinstansUtpekAnnetLand(eq(behandling), eq(Landkoder.SE), eq(mottakerInstitusjoner), isNull(), isNull());
-        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(eq(fagsak.getSaksnummer()));
+        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(fagsak.getSaksnummer());
+        verify(ferdigbehandlingKontrollFacade).kontroller(behandlingID, behandlingsresultat.getType());
 
         assertThat(behandlingsresultat)
             .extracting(Behandlingsresultat::getType, Behandlingsresultat::getBegrunnelseFritekst, Behandlingsresultat::getFastsattAvLand)
@@ -129,7 +132,6 @@ class UtpekingServiceTest {
         assertThat(behandlingsresultat.getVedtakMetadata()).isNotNull()
             .extracting(VedtakMetadata::getVedtakstype, VedtakMetadata::getNyVurderingBakgrunn, VedtakMetadata::getVedtakKlagefrist)
             .containsExactly(Vedtakstyper.FØRSTEGANGSVEDTAK, null, LocalDate.now().plusWeeks(FRIST_KLAGE_UKER));
-
 
         Collection<Lovvalgsperiode> lagretLovvalgsperioder = lovvalgsperiodeCaptor.getValue();
         assertThat(lagretLovvalgsperioder).isNotEmpty().hasSize(1);
@@ -171,7 +173,9 @@ class UtpekingServiceTest {
         when(landvelgerService.hentUtenlandskTrygdemyndighetsland(eq(behandlingID)))
             .thenReturn(List.of(Landkoder.SE, Landkoder.DK, Landkoder.FI));
 
+
         utpekingService.utpekLovvalgsland(fagsak, mottakerInstitusjoner, null, null);
+
 
         verify(eessiService).validerOgAvklarMottakerInstitusjonerForBuc(eq(mottakerInstitusjoner), landkoderCaptor.capture(), eq(BucType.LA_BUC_02));
         assertThat(landkoderCaptor.getValue()).containsExactlyInAnyOrder(Landkoder.SE, Landkoder.DK, Landkoder.FI);
@@ -197,7 +201,9 @@ class UtpekingServiceTest {
 
         behandling.setSaksopplysninger(Set.of(saksopplysning));
 
+
         utpekingService.avvisUtpeking(behandlingID, lagUtpekingAvvis());
+
 
         verify(behandlingsresultatService).oppdaterUtfallRegistreringUnntak(eq(behandlingID), eq(Utfallregistreringunntak.IKKE_GODKJENT));
         verify(prosessinstansService).opprettProsessinstansAvvisUtpeking(eq(behandling), any(UtpekingAvvis.class));
@@ -217,7 +223,9 @@ class UtpekingServiceTest {
 
         behandling.setSaksopplysninger(Set.of(saksopplysning));
 
+
         utpekingService.avvisUtpeking(behandlingID, lagUtpekingAvvis());
+
 
         verify(behandlingsresultatService).oppdaterUtfallUtpeking(eq(behandlingID), eq(Utfallregistreringunntak.IKKE_GODKJENT));
         verify(prosessinstansService).opprettProsessinstansAvvisUtpeking(eq(behandling), any(UtpekingAvvis.class));
@@ -236,7 +244,9 @@ class UtpekingServiceTest {
         behandling.setSaksopplysninger(Set.of(saksopplysning));
         behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
 
+
         utpekingService.avvisUtpeking(behandlingID, lagUtpekingAvvis());
+
 
         verify(behandlingsresultatService).oppdaterBehandlingsresultattype(behandlingID, Behandlingsresultattyper.UTPEKING_NORGE_AVVIST);
     }
@@ -297,7 +307,10 @@ class UtpekingServiceTest {
         Utpekingsperiode utpekingsperiode = new Utpekingsperiode();
         utpekingsperiode.setId(1L);
 
+
         utpekingService.oppdaterSendtUtland(utpekingsperiode);
+
+
         verify(utpekingsperiodeRepository).save(utpekingsperiode);
         assertThat(utpekingsperiode.getSendtUtland()).isNotNull();
     }
