@@ -5,10 +5,10 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.OppgaveTilbakelegging;
 import no.nav.melosys.exception.TekniskException;
@@ -32,23 +32,29 @@ public class Oppgaveplukker {
     private final FagsakService fagsakService;
     private final BehandlingService behandlingService;
     private final OppgaveService oppgaveService;
+    private final Unleash unleash;
 
     public Oppgaveplukker(OppgaveFasade oppgaveFasade, OppgaveTilbakeleggingRepository oppgaveTilbakeleggingRepo,
-                          FagsakService fagsakService, BehandlingService behandlingService, OppgaveService oppgaveService) {
+                          FagsakService fagsakService, BehandlingService behandlingService, OppgaveService oppgaveService, Unleash unleash) {
         this.oppgaveFasade = oppgaveFasade;
         this.oppgaveTilbakkeleggingRepo = oppgaveTilbakeleggingRepo;
         this.fagsakService = fagsakService;
         this.behandlingService = behandlingService;
         this.oppgaveService = oppgaveService;
+        this.unleash = unleash;
     }
 
     @Transactional
     public synchronized Optional<Oppgave> plukkOppgave(String saksbehandlerID, PlukkOppgaveInnDto plukkDto) {
-        var parametere =
-            OppgaveFactory.hentOppgaveParametere(plukkDto.getBehandlingstema());
-        List<Oppgave> utildelteOppgaverEtterFrist =
-            oppgaveFasade.finnUtildelteOppgaverEtterFrist(parametere.behandlingstype, parametere.behandlingstema);
-        var filtrerteOppgaver = utildelteOppgaverEtterFrist.stream()
+        List<Oppgave> utildelteOppgaverEtterFrist;
+        if (unleash.isEnabled("melosys.oppgave.oppretting")) {
+            utildelteOppgaverEtterFrist = oppgaveFasade.finnUtildelteOppgaverEtterFrist(null, OppgaveFactory.utledBehandlingstema(plukkDto.getSakstema(), plukkDto.getSakstype(), plukkDto.getBehandlingstema(), plukkDto.getBehandlingstype()));
+        } else {
+            var parametere = OppgaveFactory.hentOppgaveParametere(plukkDto.getBehandlingstema());
+            utildelteOppgaverEtterFrist = oppgaveFasade.finnUtildelteOppgaverEtterFrist(parametere.behandlingstype, parametere.behandlingstema);
+        }
+
+        List<Oppgave> filtrerteOppgaver = utildelteOppgaverEtterFrist.stream()
             .filter(oppgave -> {
                 String saksnummer = oppgave.getSaksnummer();
                 Fagsak fagsak = fagsakService.hentFagsak(saksnummer);

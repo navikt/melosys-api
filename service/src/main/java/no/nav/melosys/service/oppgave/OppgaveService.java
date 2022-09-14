@@ -4,6 +4,7 @@ package no.nav.melosys.service.oppgave;
 import java.util.*;
 import javax.annotation.Nullable;
 
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
@@ -42,6 +43,8 @@ public class OppgaveService {
     private final BehandlingsgrunnlagService behandlingsgrunnlagService;
     private final PersondataFasade persondataFasade;
     private final EregFasade eregFasade;
+    private final Unleash unleash;
+
     private static final String UKJENT = "UKJENT";
 
     public OppgaveService(BehandlingService behandlingService,
@@ -50,7 +53,8 @@ public class OppgaveService {
                           SaksopplysningerService saksopplysningerService,
                           BehandlingsgrunnlagService behandlingsgrunnlagService,
                           PersondataFasade persondataFasade,
-                          EregFasade eregFasade) {
+                          EregFasade eregFasade,
+                          Unleash unleash) {
         this.behandlingService = behandlingService;
         this.fagsakService = fagsakService;
         this.oppgaveFasade = oppgaveFasade;
@@ -58,6 +62,7 @@ public class OppgaveService {
         this.behandlingsgrunnlagService = behandlingsgrunnlagService;
         this.persondataFasade = persondataFasade;
         this.eregFasade = eregFasade;
+        this.unleash = unleash;
     }
 
     public List<Oppgave> finnOppgaverMedPersonIdent(String personIdent) {
@@ -139,23 +144,29 @@ public class OppgaveService {
         return fagsakService.hentFagsak(saksnummer).hentSistAktivBehandling();
     }
 
-    public void opprettEllerGjenbrukBehandlingsoppgave(Behandling behandling, String journalpostID, @Nullable String aktørID, @Nullable String tilordnetRessurs, @Nullable String beskrivelse, @Nullable String orgnr) {
+    public void opprettEllerGjenbrukBehandlingsoppgave(Behandling behandling, String journalpostID, @Nullable String aktørID, @Nullable String tilordnetRessurs, @Nullable @Deprecated String beskrivelse, @Nullable String orgnr) {
 
         Optional<Oppgave> eksisterendeOppgave = finnÅpenOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer());
 
         if (eksisterendeOppgave.isEmpty()) {
-            Oppgave oppgave = OppgaveFactory.lagBehandlingsOppgaveForType(behandling.getTema(), behandling.getType())
+            var oppgaveToggleEnabled = unleash.isEnabled("melosys.oppgave.oppretting");
+            var oppgaveBuilder = (
+                oppgaveToggleEnabled
+                    ? OppgaveFactory.lagBehandlingsoppgave(behandling)
+                    : OppgaveFactory.lagBehandlingsOppgaveForType(behandling.getTema(), behandling.getType()))
                 .setTilordnetRessurs(tilordnetRessurs)
                 .setJournalpostId(journalpostID)
-                .setBeskrivelse(beskrivelse)
                 .setAktørId(aktørID)
                 .setOrgnr(orgnr)
-                .setSaksnummer(behandling.getFagsak().getSaksnummer())
-                .build();
+                .setSaksnummer(behandling.getFagsak().getSaksnummer());
+
+            if (!oppgaveToggleEnabled) {
+                oppgaveBuilder.setBeskrivelse(beskrivelse);
+            }
 
             String oppgaveID = StringUtils.isNotEmpty(aktørID) && harBeskyttelsesbehov(behandling.getId())
-                ? oppgaveFasade.opprettSensitivOppgave(oppgave)
-                : oppgaveFasade.opprettOppgave(oppgave);
+                ? oppgaveFasade.opprettSensitivOppgave(oppgaveBuilder.build())
+                : oppgaveFasade.opprettOppgave(oppgaveBuilder.build());
             log.info("Opprettet oppgave {} for behandling {}", oppgaveID, behandling.getId());
         } else if (tilordnetRessurs != null && !tilordnetRessurs.equals(eksisterendeOppgave.get().getTilordnetRessurs())) {
             log.info("Oppgave eksisterer, oppdaterer tilordnetRessurs for oppgave tilknyttet behandling {}", behandling.getId());
@@ -168,9 +179,13 @@ public class OppgaveService {
     }
 
     public void opprettEllerGjenbrukBehandlingsoppgave(Behandling behandling, String journalpostID, String aktørID, @Nullable String tilordnetRessurs) {
-        opprettEllerGjenbrukBehandlingsoppgave(behandling, journalpostID, aktørID, tilordnetRessurs, null);
+        opprettEllerGjenbrukBehandlingsoppgave(behandling, journalpostID, aktørID, tilordnetRessurs, lagOppgaveBeskrivelse(behandling), null);
     }
 
+    /**
+     * @deprecated Forsvinner med toggle melosys.oppgave.oppretting
+     */
+    @Deprecated
     private String lagOppgaveBeskrivelse(Behandling behandling) {
         if (behandling.erElektroniskSøknad()) {
             return "Mottatt elektronisk søknad";

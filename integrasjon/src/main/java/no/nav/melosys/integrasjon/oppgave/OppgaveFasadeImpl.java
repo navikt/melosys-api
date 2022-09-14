@@ -8,6 +8,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Fagsystem;
 import no.nav.melosys.domain.Tema;
 import no.nav.melosys.domain.kodeverk.Kodeverk;
@@ -45,9 +46,11 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
     private static final String OPPGAVE_STATUSKATEGORI_AVSLUTTET = "AVSLUTTET";
 
     private final OppgaveConsumer oppgaveConsumer;
+    private final Unleash unleash;
 
-    public OppgaveFasadeImpl(OppgaveConsumer oppgaveConsumer) {
+    public OppgaveFasadeImpl(OppgaveConsumer oppgaveConsumer, Unleash unleash) {
         this.oppgaveConsumer = oppgaveConsumer;
+        this.unleash = unleash;
     }
 
     @Override
@@ -66,9 +69,9 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
 
     @Override
     public List<Oppgave> finnUtildelteOppgaverEtterFrist(String behandlingstype, String behandlingstema) {
-
+        // Behandlingstype fjernes sammen med toggle melosys.oppgave.oppretting
         OppgaveSearchRequest.Builder searchRequestBuilder = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
-            .medBehandlingsType(behandlingstype)
+            .medBehandlingsType(unleash.isEnabled("melosys.oppgave.oppretting") ? null : behandlingstype)
             .medBehandlingstema(behandlingstema)
             .medOppgaveTyper(hentGyldigeOppgavetyper())
             .medSorteringsfelt(SORTERINGSFELT)

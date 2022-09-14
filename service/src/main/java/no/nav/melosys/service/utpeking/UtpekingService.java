@@ -50,7 +50,6 @@ public class UtpekingService {
     private final LovvalgsperiodeService lovvalgsperiodeService;
     private final OppgaveService oppgaveService;
     private final ProsessinstansService prosessinstansService;
-    private final Unleash unleash;
     private final UtpekingsperiodeRepository utpekingsperiodeRepository;
     private final FerdigbehandlingKontrollFacade ferdigbehandlingKontrollFacade;
     private final ApplicationEventMulticaster melosysEventMulticaster;
@@ -59,7 +58,7 @@ public class UtpekingService {
                            EessiService eessiService, LandvelgerService landvelgerService,
                            LovvalgsperiodeService lovvalgsperiodeService, OppgaveService oppgaveService,
                            ProsessinstansService prosessinstansService,
-                           Unleash unleash, UtpekingsperiodeRepository utpekingsperiodeRepository,
+                           UtpekingsperiodeRepository utpekingsperiodeRepository,
                            FerdigbehandlingKontrollFacade ferdigbehandlingKontrollFacade,
                            ApplicationEventMulticaster melosysEventMulticaster) {
         this.behandlingService = behandlingService;
@@ -69,7 +68,6 @@ public class UtpekingService {
         this.lovvalgsperiodeService = lovvalgsperiodeService;
         this.oppgaveService = oppgaveService;
         this.prosessinstansService = prosessinstansService;
-        this.unleash = unleash;
         this.utpekingsperiodeRepository = utpekingsperiodeRepository;
         this.ferdigbehandlingKontrollFacade = ferdigbehandlingKontrollFacade;
         this.melosysEventMulticaster = melosysEventMulticaster;
@@ -156,20 +154,16 @@ public class UtpekingService {
             throw new FunksjonellException("Behandling " + behandlingID + " er ikke aktiv!");
         }
 
-        if (unleash.isEnabled("melosys.eessi.handlingssjekk_sed")) {
-            SedDokument sedDokument = behandling.hentSedDokument();
-            String rinaSaksnummer = sedDokument.getRinaSaksnummer();
+        SedDokument sedDokument = behandling.hentSedDokument();
+        String rinaSaksnummer = sedDokument.getRinaSaksnummer();
 
-            if (sedDokument.getSedType().equals(SedType.A004) && !eessiService.kanOppretteSedTyperPåBuc(rinaSaksnummer, SedType.A004)) {
-                throw new FunksjonellException("Kan ikke opprette SedType A004 på rinaSaknummer: " + rinaSaksnummer);
-            }
+        if (sedDokument.getSedType().equals(SedType.A004) && !eessiService.kanOppretteSedTyperPåBuc(rinaSaksnummer, SedType.A004)) {
+            throw new FunksjonellException("Kan ikke opprette SedType A004 på rinaSaknummer: " + rinaSaksnummer);
         }
 
         if (behandling.erBeslutningLovvalgAnnetLand()) {
             behandlingsresultatService.oppdaterUtfallRegistreringUnntak(behandlingID, Utfallregistreringunntak.IKKE_GODKJENT);
         } else if (behandling.erNorgeUtpekt()) {
-            SedDokument sedDokument = behandling.hentSedDokument();
-
             if (sedDokument.getSedType().equals(SedType.A003) && sedDokument.getLovvalgslandKode().equals(Landkoder.NO)) {
                 behandlingsresultatService.oppdaterBehandlingsresultattype(behandlingID, Behandlingsresultattyper.UTPEKING_NORGE_AVVIST);
             }
