@@ -28,6 +28,7 @@ import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.felles.dto.SoeknadslandDto;
 import no.nav.melosys.service.journalforing.dto.*;
+import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
@@ -61,6 +62,8 @@ class JournalfoeringServiceTest {
     private FagsakService fagsakService;
     @Mock
     private PersondataFasade persondataFasade;
+    @Mock
+    private LovligeKombinasjonerService lovligeKombinasjonerService;
 
     private final FakeUnleash unleash = new FakeUnleash();
 
@@ -80,7 +83,7 @@ class JournalfoeringServiceTest {
         journalpost = new Journalpost("123");
         journalpost.setHoveddokument(new ArkivDokument());
 
-        this.journalfoeringService = new JournalfoeringService(joarkFasade, prosessinstansService, eessiService, fagsakService, persondataFasade, unleash);
+        this.journalfoeringService = new JournalfoeringService(joarkFasade, prosessinstansService, eessiService, fagsakService, persondataFasade, lovligeKombinasjonerService, unleash);
         opprettDto = new JournalfoeringOpprettDto();
         opprettDto.setJournalpostID("setJournalpostID");
         opprettDto.setOppgaveID("setOppgaveID");

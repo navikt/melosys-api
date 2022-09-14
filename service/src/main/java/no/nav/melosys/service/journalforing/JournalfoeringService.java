@@ -21,6 +21,7 @@ import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.integrasjon.joark.JournalpostOppdatering;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.journalforing.dto.*;
+import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.sak.SakstypeSakstemaKobling;
@@ -47,6 +48,7 @@ public class JournalfoeringService {
     private final EessiService eessiService;
     private final FagsakService fagsakService;
     private final PersondataFasade persondataFasade;
+    private final LovligeKombinasjonerService lovligeKombinasjonerService;
     private final Unleash unleash;
 
     public JournalfoeringService(JoarkFasade joarkFasade,
@@ -54,12 +56,14 @@ public class JournalfoeringService {
                                  EessiService eessiService,
                                  FagsakService fagsakService,
                                  PersondataFasade persondataFasade,
+                                 LovligeKombinasjonerService lovligeKombinasjonerService,
                                  Unleash unleash) {
         this.joarkFasade = joarkFasade;
         this.prosessinstansService = prosessinstansService;
         this.eessiService = eessiService;
         this.fagsakService = fagsakService;
         this.persondataFasade = persondataFasade;
+        this.lovligeKombinasjonerService = lovligeKombinasjonerService;
         this.unleash = unleash;
     }
 
@@ -251,13 +255,19 @@ public class JournalfoeringService {
             validerKanTilknytteJournalpostForSedTilSak(journalpost, saksnummer);
         }
 
+        Behandling sisteBehandling = fagsak.hentSistRegistrertBehandling();
+
         valider(journalfoeringDto);
-        validerBehandlingstype(fagsak.getType(), behandlingstype);
+        if (unleash.isEnabled("melosys.behandle_alle_saker")) {
+            var behandlingstema = Behandlingstema.valueOf(journalfoeringDto.getBehandlingstemaKode());
+            validerBehandlingstype(sisteBehandling, behandlingstema, behandlingstype);
+        } else {
+            validerBehandlingstype(fagsak.getType(), behandlingstype);
+        }
 
         log.info("{} knytter journalpost {} til sak {} og lager ny vurdering", SubjectHandler.getInstance().getUserID(), journalfoeringDto.getJournalpostID(), saksnummer);
 
-        Behandling behandling = fagsak.hentSistRegistrertBehandling();
-        ProsessType prosessTypeForNyVurdering = finnProsessTypeForNyVurdering(behandling);
+        ProsessType prosessTypeForNyVurdering = finnProsessTypeForNyVurdering(sisteBehandling);
 
         Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(prosessTypeForNyVurdering, journalfoeringDto);
         if (unleash.isEnabled("melosys.sakstema")) {
@@ -310,6 +320,14 @@ public class JournalfoeringService {
         Optional<Fagsak> tilknyttetFagsak = finnSakTilknyttetSed(melosysEessiMelding);
         if (tilknyttetFagsak.isPresent() && !tilknyttetFagsak.get().getSaksnummer().equals(tilknyttTilSaksnummer)) {
             throw new FunksjonellException(String.format("RINA-sak %s er allerede tilknyttet %s", melosysEessiMelding.getRinaSaksnummer(), tilknyttetFagsak.get().getSaksnummer()));
+        }
+    }
+
+    private void validerBehandlingstype(Behandling sistBehandling, Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
+        var fagsak = sistBehandling.getFagsak();
+        if (!lovligeKombinasjonerService.hentMuligeBehandlingstyper(fagsak.getHovedpartRolle(), fagsak.getType(),
+            fagsak.getTema(), behandlingstema, sistBehandling).contains(behandlingstype)) {
+            throw new FunksjonellException(behandlingstype + " er ikke en lovlig behandlingstype ved knytting av dokument til sak");
         }
     }
 
