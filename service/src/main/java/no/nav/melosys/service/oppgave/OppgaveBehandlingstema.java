@@ -9,13 +9,13 @@ public enum OppgaveBehandlingstema {
     ANMODNING_UNNTAK("ab0460"),
     REGISTRERING_UNNTAK("ab0461");
 
-    private final String behandlingstema;
+    private final String kode;
 
-    OppgaveBehandlingstema(String behandlingstema) {
-        this.behandlingstema = behandlingstema;
+    OppgaveBehandlingstema(String kode) {
+        this.kode = kode;
     }
 
-    public String getBehandlingstema() {
-        return behandlingstema;
+    public String getKode() {
+        return kode;
     }
 }

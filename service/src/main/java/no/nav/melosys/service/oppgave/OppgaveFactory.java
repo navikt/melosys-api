@@ -61,7 +61,7 @@ public final class OppgaveFactory {
         return new Oppgave.Builder()
             .setBehandlesAvApplikasjon(Fagsystem.MELOSYS)
             .setPrioritet(PrioritetType.NORM)
-            .setBehandlingstema(oppgaveBehandlingstema.getBehandlingstema())
+            .setBehandlingstema(oppgaveBehandlingstema.getKode())
             .setTema(utledTema(sakstema))
             .setOppgavetype(utledOppgavetype(sakstype, behandlingstema, behandlingstype))
             .setBeskrivelse(utledBeskrivelse(oppgaveBehandlingstema, sakstema, sakstype, behandlingstema, behandlingstype))

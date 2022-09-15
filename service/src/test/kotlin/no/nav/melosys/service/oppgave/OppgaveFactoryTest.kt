@@ -763,7 +763,7 @@ internal class OppgaveFactoryTest {
 
         Assertions.assertThat(oppgave.behandlingstema)
             .`as`("Behandlingstema (${sakstype}, ${sakstema}, ${behandlingstype}, ${melosysBehandlingstema})")
-            .isEqualTo(expectedBehandlingstema.behandlingstema)
+            .isEqualTo(expectedBehandlingstema.kode)
         Assertions.assertThat(oppgave.tema)
             .`as`("Tema (${sakstype}, ${sakstema}, ${behandlingstype}, ${melosysBehandlingstema})")
             .isEqualTo(expectedTema)
