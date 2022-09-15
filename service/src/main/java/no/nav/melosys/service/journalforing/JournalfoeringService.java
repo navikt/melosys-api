@@ -152,7 +152,7 @@ public class JournalfoeringService {
 
         Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(prosessType, journalfoeringDto);
         prosessinstans.setData(ProsessDataKey.SAKSTYPE, sakstype);
-        if (unleash.isEnabled("melosys.sakstema")) {
+        if (unleash.isEnabled("melosys.behandle_alle_saker")) {
             var sakstema = Sakstemaer.valueOf(journalfoeringDto.getFagsak().getSakstema());
             var behandlingstype = Behandlingstyper.valueOf(journalfoeringDto.getBehandlingstypeKode());
             prosessinstans.setData(ProsessDataKey.SAKSTEMA, sakstema);
@@ -257,7 +257,7 @@ public class JournalfoeringService {
         log.info("{} knytter journalpost {} til sak {} og lager ny vurdering", SubjectHandler.getInstance().getUserID(), journalfoeringDto.getJournalpostID(), saksnummer);
 
         Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_NY_VURDERING, journalfoeringDto);
-        if (unleash.isEnabled("melosys.sakstema")) {
+        if (unleash.isEnabled("melosys.behandle_alle_saker")) {
             var behandlingstema = Behandlingstema.valueOf(journalfoeringDto.getBehandlingstemaKode());
             prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, behandlingstema);
         }
