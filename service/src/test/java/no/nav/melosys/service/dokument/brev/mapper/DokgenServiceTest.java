@@ -12,6 +12,8 @@ import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.arkiv.SaksvedleggBestilling;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
+import no.nav.melosys.domain.brev.FritekstbrevBrevbestilling;
+import no.nav.melosys.domain.brev.FritekstvedleggBestilling;
 import no.nav.melosys.domain.brev.MangelbrevBrevbestilling;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Representerer;
@@ -28,6 +30,7 @@ import no.nav.melosys.service.dokument.DokgenService;
 import no.nav.melosys.service.dokument.DokumentHentingService;
 import no.nav.melosys.service.dokument.DokumentproduksjonsInfo;
 import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
+import no.nav.melosys.service.dokument.brev.FritekstvedleggDto;
 import no.nav.melosys.service.dokument.brev.KopiMottaker;
 import no.nav.melosys.service.dokument.brev.SaksvedleggDto;
 import no.nav.melosys.service.kodeverk.KodeverkService;
@@ -176,29 +179,6 @@ class DokgenServiceTest {
         verify(mockDokgenConsumer).lagPdf(any(), any(), eq(false), eq(false));
         verify(mockEregFasade).hentOrganisasjon(any());
         verify(mockKontaktOpplysningService).hentKontaktopplysning(any(), any());
-    }
-
-    @Test
-    void produserBrev_skalIkkeProdusereUtkastMedVedlegg_nårDetIkkeBesOmÅFletteVedlegg() {
-        when(mockJoarkFasade.hentJournalpost(any())).thenReturn(lagJournalpost());
-        when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(lagBehandling());
-        when(mockPersondataFasade.hentPerson(anyString())).thenReturn(lagPersonopplysninger());
-        when(mockKodeverkService.dekod(FellesKodeverk.POSTNUMMER, "0123")).thenReturn("Aker");
-        when(mockKodeverkService.dekod(FellesKodeverk.LANDKODER_ISO2, "NO")).thenReturn("Norge");
-        var saksvedleggBestilling = Arrays.asList(new SaksvedleggBestilling("100", "200"),
-            new SaksvedleggBestilling("300", "400"));
-
-        MangelbrevBrevbestilling brevbestilling = new MangelbrevBrevbestilling.Builder()
-            .medProduserbartdokument(MANGELBREV_BRUKER)
-            .medBehandlingId(123)
-            .medSaksvedleggBestilling(saksvedleggBestilling)
-            .build();
-
-
-        dokgenService.produserBrev(lagBruker(), brevbestilling);
-
-
-        verify(mockDokgenConsumer).lagPdf(any(), any(), eq(false), eq(false));
     }
 
     @Test
@@ -403,7 +383,7 @@ class DokgenServiceTest {
     }
 
     @Test
-    void produserOgDistribuerBrev_skalProdusereOgDistributereBrevMedVedlegg_nårBrevbestillingInneholderVedlegg() {
+    void produserOgDistribuerBrev_skalDistribuereBrevMedVedlegg_nårBrevbestillingInneholderVedlegg() {
         Aktoer bruker = new Aktoer();
         bruker.setRolle(Aktoersroller.BRUKER);
 
@@ -412,10 +392,14 @@ class DokgenServiceTest {
         when(mockBrevMottakerService.avklarMottakere(any(), any(), any(), eq(false), eq(false))).thenReturn(List.of(bruker));
         var saksvedleggDto = Arrays.asList(new SaksvedleggDto("100", "200"),
             new SaksvedleggDto("300", "400"));
+        var fritekstvedleggDto = Arrays.asList(
+            new FritekstvedleggDto("tittel1", "fritekst1"),
+            new FritekstvedleggDto("tittel2", "fritekst2"));
         BrevbestillingRequest brevbestillingRequest = new BrevbestillingRequest.Builder()
-            .medProduserbardokument(MANGELBREV_BRUKER)
+            .medProduserbardokument(GENERELT_FRITEKSTBREV_BRUKER)
             .medBestillersId("Z123456")
             .medSaksvedlegg(saksvedleggDto)
+            .medFritekstvedlegg(fritekstvedleggDto)
             .build();
 
 
@@ -426,11 +410,15 @@ class DokgenServiceTest {
         verify(mockBrevMottakerService).avklarMottakere(any(), any(), any(), eq(false), eq(false));
         verify(mockSaksbehandlerService).hentNavnForIdent(anyString());
 
-        MangelbrevBrevbestilling brevbestilling = (MangelbrevBrevbestilling) brevbestillingCaptor.getValue();
+        FritekstbrevBrevbestilling brevbestilling = (FritekstbrevBrevbestilling) brevbestillingCaptor.getValue();
         assertThat(brevbestilling.getSaksvedleggBestilling())
             .hasSize(2)
             .extracting(SaksvedleggBestilling::journalpostID, SaksvedleggBestilling::dokumentID)
             .containsExactlyInAnyOrder(Tuple.tuple("100", "200"), Tuple.tuple("300", "400"));
+        assertThat(brevbestilling.getFritekstvedleggBestilling())
+            .hasSize(2)
+            .extracting(FritekstvedleggBestilling::tittel, FritekstvedleggBestilling::fritekst)
+            .containsExactlyInAnyOrder(Tuple.tuple("tittel1", "fritekst1"), Tuple.tuple("tittel2", "fritekst2"));
     }
 
     @Test
