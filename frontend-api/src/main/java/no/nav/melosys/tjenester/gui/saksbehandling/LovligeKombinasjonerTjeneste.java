@@ -89,16 +89,4 @@ public class LovligeKombinasjonerTjeneste {
     ) {
         return ResponseEntity.ok(lovligeKombinasjonerService.hentMuligeBehandlingstemaerForOppgaveplukker(sakstype, sakstema, sistBehandlingstema));
     }
-
-    @GetMapping("/behandlingstyper/oppgaveplukker/hent-lovlige-kombinasjoner")
-    @ApiOperation(value = "Henter alle mulige behandlingstyper basert på sakstype, sakstema og behandlingstema", notes = ("Henter alle mulige behandlingstyper basert på sakstype, sakstema og behandlingstema"))
-    public ResponseEntity<Set<Behandlingstyper>> hentAlleMuligeBehandlingstyperForOppgaveplukker(
-        @RequestParam("sakstype") Sakstyper sakstype,
-        @RequestParam("sakstema") Sakstemaer sakstema,
-        @RequestParam(value = "behandlingstema", required = false) Behandlingstema behandlingstema,
-        @RequestParam(value = "sisteBehandlingsID", required = false) Long sisteBehandlingsID
-    ) {
-        Behandling sisteBehandling = sisteBehandlingsID != null ? behandlingService.hentBehandling(sisteBehandlingsID) : null;
-        return ResponseEntity.ok(lovligeKombinasjonerService.hentMuligeBehandlingstyperForOppgaveplukker(sakstype, sakstema, behandlingstema, sisteBehandling));
-    }
 }

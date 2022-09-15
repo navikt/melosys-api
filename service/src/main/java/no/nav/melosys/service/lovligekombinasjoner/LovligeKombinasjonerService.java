@@ -135,14 +135,6 @@ public class LovligeKombinasjonerService {
                 ? Set.of(BESLUTNING_LOVVALG_NORGE)
                 : Collections.emptySet()
         );
-
-    }
-
-    public Set<Behandlingstyper> hentMuligeBehandlingstyperForOppgaveplukker(Sakstyper sakstype, Sakstemaer sakstema, Behandlingstema behandlingstema, Behandling sisteBehandling) {
-        return combineSets(
-            hentMuligeBehandlingstyper(Aktoersroller.BRUKER, sakstype, sakstema, behandlingstema, sisteBehandling),
-            hentMuligeBehandlingstyper(Aktoersroller.VIRKSOMHET, sakstype, sakstema, behandlingstema, sisteBehandling)
-        );
     }
 
     public void validerOmNyttTemaKanEndresTil(Behandling behandling, Behandlingstema tema) {
