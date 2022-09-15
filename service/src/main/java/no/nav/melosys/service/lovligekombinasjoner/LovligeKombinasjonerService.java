@@ -29,7 +29,14 @@ public class LovligeKombinasjonerService {
         return LovligeSakskombinasjoner.ALLE_MULIGE_SAKSTYPER;
     }
 
-    public Set<Sakstemaer> hentMuligeSakstemaer(Aktoersroller hovedpart, Sakstyper sakstype) {
+    public Set<Sakstemaer> hentMuligeSakstemaer(@Nullable Aktoersroller hovedpart, Sakstyper sakstype) {
+        if (hovedpart == null) {
+            return combineSets(
+                hentMuligeSakstemaer(Aktoersroller.BRUKER, sakstype),
+                hentMuligeSakstemaer(Aktoersroller.VIRKSOMHET, sakstype)
+            );
+        }
+
         return switch (hovedpart) {
             case BRUKER -> LovligeSakskombinasjoner.muligeSaksKombinasjonerBruker.get(sakstype).stream()
                 .map(SakstemaBehandlingsKombinasjon::sakstema)
@@ -40,11 +47,22 @@ public class LovligeKombinasjonerService {
     }
 
     public Set<Behandlingstema> hentMuligeBehandlingstemaer(
-        Aktoersroller hovedpart,
+        @Nullable Aktoersroller hovedpart,
         Sakstyper sakstype,
         Sakstemaer sakstema,
         @Nullable Behandlingstema sistBehandlingstema
     ) {
+        if (hovedpart == null) {
+            return combineSets(
+                hentMuligeBehandlingstemaer(Aktoersroller.BRUKER, sakstype, sakstema, sistBehandlingstema),
+                hentMuligeBehandlingstemaer(Aktoersroller.VIRKSOMHET, sakstype, sakstema, sistBehandlingstema),
+                LovligeSakskombinasjoner.SED_BEHANDLINGSTEMA,
+                (sakstype == Sakstyper.EU_EOS && sakstema == Sakstemaer.MEDLEMSKAP_LOVVALG)
+                    ? Set.of(BESLUTNING_LOVVALG_NORGE)
+                    : Collections.emptySet()
+            );
+        }
+
         switch (hovedpart) {
             case BRUKER:
                 Set<Behandlingstema> behandlingstemaer = LovligeSakskombinasjoner.muligeSaksKombinasjonerBruker.get(sakstype).stream()
@@ -117,24 +135,6 @@ public class LovligeKombinasjonerService {
             default:
                 return Collections.emptySet();
         }
-    }
-
-    public Set<Sakstemaer> hentMuligeSakstemaerForOppgaveplukker(Sakstyper sakstype) {
-        return combineSets(
-            hentMuligeSakstemaer(Aktoersroller.BRUKER, sakstype),
-            hentMuligeSakstemaer(Aktoersroller.VIRKSOMHET, sakstype)
-        );
-    }
-
-    public Set<Behandlingstema> hentMuligeBehandlingstemaerForOppgaveplukker(Sakstyper sakstype, Sakstemaer sakstema, Behandlingstema sistBehandlingstema) {
-        return combineSets(
-            hentMuligeBehandlingstemaer(Aktoersroller.BRUKER, sakstype, sakstema, sistBehandlingstema),
-            hentMuligeBehandlingstemaer(Aktoersroller.VIRKSOMHET, sakstype, sakstema, sistBehandlingstema),
-            LovligeSakskombinasjoner.SED_BEHANDLINGSTEMA,
-            (sakstype == Sakstyper.EU_EOS && sakstema == Sakstemaer.MEDLEMSKAP_LOVVALG)
-                ? Set.of(BESLUTNING_LOVVALG_NORGE)
-                : Collections.emptySet()
-        );
     }
 
     public void validerOmNyttTemaKanEndresTil(Behandling behandling, Behandlingstema tema) {
