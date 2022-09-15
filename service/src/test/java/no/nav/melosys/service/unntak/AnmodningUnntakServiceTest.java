@@ -69,8 +69,6 @@ class AnmodningUnntakServiceTest {
     private AnmodningUnntakKontrollService anmodningUnntakKontrollService;
     @Mock
     private JoarkFasade joarkFasade;
-    private FakeUnleash unleash = new FakeUnleash();
-
     private AnmodningUnntakService anmodningUnntakService;
 
     private static final long BEHANDLING_ID = 1L;
@@ -85,7 +83,7 @@ class AnmodningUnntakServiceTest {
     public void setUp() {
         anmodningUnntakService = new AnmodningUnntakService(
             behandlingService, behandlingsresultatService, oppgaveService, prosessinstansService, anmodningsperiodeService,
-            lovvalgsperiodeService, landvelgerService, eessiService, anmodningUnntakKontrollService, joarkFasade, unleash);
+            lovvalgsperiodeService, landvelgerService, eessiService, anmodningUnntakKontrollService, joarkFasade);
 
         TestSubjectHandler.set(new TestSubjectHandler());
     }
@@ -137,9 +135,19 @@ class AnmodningUnntakServiceTest {
     void anmodningOmUnntakSvar_validert_forventMetodekall() {
         Behandling behandling = lagBehandling();
         behandling.setTema(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL);
+        behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
+        Saksopplysning saksopplysning = new Saksopplysning();
+        saksopplysning.setType(SEDOPPL);
+
+        SedDokument sedDokument = new SedDokument();
+        sedDokument.setRinaSaksnummer("55667788");
+        saksopplysning.setDokument(sedDokument);
+
+        behandling.setSaksopplysninger(Set.of(saksopplysning));
 
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
         when(anmodningsperiodeService.hentAnmodningsperiodeSvarForBehandling(anyLong())).thenReturn(lagAnmodningsperiodeSvar());
+        when(eessiService.kanOppretteSedTyperPåBuc(anyString(), any(SedType.class))).thenReturn(true);
 
         anmodningUnntakService.anmodningOmUnntakSvar(BEHANDLING_ID, FRITEKST_SED);
 
@@ -194,8 +202,6 @@ class AnmodningUnntakServiceTest {
 
     @Test
     void anmodningOmUnntakSvar_kanIkkeOppretteSedPåBuc_forventException() {
-        unleash.enable("melosys.eessi.handlingssjekk_sed");
-
         Behandling behandling = lagBehandling();
         behandling.setTema(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL);
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);

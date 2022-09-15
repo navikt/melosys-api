@@ -20,6 +20,7 @@ import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.ENDRE
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.NY_VURDERING;
 
 public class MuligeManuelleBehandlingsendringer {
+
     static final Set<Behandlingstema> BEHANDLINGSTEMA_SØKNAD = Set.of(UTSENDT_ARBEIDSTAKER, UTSENDT_SELVSTENDIG,
         ARBEID_ETT_LAND_ØVRIG,
         ARBEID_TJENESTEPERSON_ELLER_FLY, ARBEID_KUN_NORGE,
@@ -60,7 +61,6 @@ public class MuligeManuelleBehandlingsendringer {
         if (behandling.kanIkkeEndres()) {
             return Collections.emptySet();
         }
-
         boolean kanOppdatereBehandlingstema = kanOppdatereBehandlingstema(behandling, behandlingsresultat);
 
         if (behandling.erEndretPeriode()) {

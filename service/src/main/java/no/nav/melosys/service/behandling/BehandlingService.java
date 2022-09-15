@@ -23,6 +23,7 @@ import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.BehandlingsgrunnlagRepository;
 import no.nav.melosys.repository.TidligereMedlemsperiodeRepository;
+import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import org.apache.commons.beanutils.BeanUtils;
 import org.slf4j.Logger;
@@ -45,6 +46,7 @@ public class BehandlingService {
     private final BehandlingsresultatService behandlingsresultatService;
     private final BehandlingsgrunnlagRepository behandlingsgrunnlagRepository;
     private final OppgaveService oppgaveService;
+    private final LovligeKombinasjonerService lovligeKombinasjonerService;
     private final ApplicationEventPublisher applicationEventPublisher;
     private final Unleash unleash;
     private final Counter behandlingerAvsluttet = Metrics.counter(BEHANDLINGER_AVSLUTTET);
@@ -64,6 +66,7 @@ public class BehandlingService {
                              BehandlingsgrunnlagRepository behandlingsgrunnlagRepository,
                              BehandlingsresultatService behandlingsresultatService,
                              @Lazy OppgaveService oppgaveService,
+                             LovligeKombinasjonerService lovligeKombinasjonerService,
                              ApplicationEventPublisher applicationEventPublisher,
                              Unleash unleash) {
         this.behandlingRepository = behandlingRepository;
@@ -71,6 +74,7 @@ public class BehandlingService {
         this.behandlingsgrunnlagRepository = behandlingsgrunnlagRepository;
         this.behandlingsresultatService = behandlingsresultatService;
         this.oppgaveService = oppgaveService;
+        this.lovligeKombinasjonerService = lovligeKombinasjonerService;
         this.applicationEventPublisher = applicationEventPublisher;
         this.unleash = unleash;
     }
@@ -412,12 +416,14 @@ public class BehandlingService {
     public Set<Behandlingstema> hentMuligeBehandlingstema(long behandlingID) {
         var behandling = hentBehandling(behandlingID);
         var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
+
         return MuligeManuelleBehandlingsendringer.hentMuligeBehandlingstema(behandling, behandlingsresultat, unleash.isEnabled("melosys.behandle_alle_saker"));
     }
 
     public Set<Behandlingstyper> hentMuligeTyper(long behandlingID) {
         if (unleash.isEnabled("melosys.api.endretype")) {
             var behandling = hentBehandling(behandlingID);
+
             return MuligeManuelleBehandlingsendringer.hentMuligeTyper(behandling);
         }
         return Collections.emptySet();
@@ -438,13 +444,21 @@ public class BehandlingService {
     }
 
     private boolean saksbehandlerKanEndreType(Behandling behandling, Behandlingstyper type) {
-        MuligeManuelleBehandlingsendringer.validerNyTypeMulig(behandling, type);
+        if (unleash.isEnabled("melosys.behandle_alle_saker")) {
+            lovligeKombinasjonerService.validerOmNyTypeKanEndresTil(behandling, type);
+        } else {
+            MuligeManuelleBehandlingsendringer.validerNyTypeMulig(behandling, type);
+        }
         return true;
     }
 
     private boolean saksbehandlerKanEndreTema(Behandling behandling, Behandlingstema tema) {
         var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
-        MuligeManuelleBehandlingsendringer.validerNyttTemaMulig(behandling, behandlingsresultat, tema, unleash.isEnabled("melosys.behandle_alle_saker"));
+        if (unleash.isEnabled("melosys.behandle_alle_saker")) {
+            lovligeKombinasjonerService.validerOmNyttTemaKanEndresTil(behandling, tema);
+        } else {
+            MuligeManuelleBehandlingsendringer.validerNyttTemaMulig(behandling, behandlingsresultat, tema, unleash.isEnabled("melosys.behandle_alle_saker"));
+        }
         return behandlingsresultat.erIkkeArtikkel16MedSendtAnmodningOmUnntak();
     }
 }
