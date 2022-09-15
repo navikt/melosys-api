@@ -57,7 +57,8 @@ public class AngiBehandlingsresultatService {
 
         switch (behandlingsresultattype) {
             case MEDLEM_I_FOLKETRYGDEN -> {
-                if (erGyldigEndringForMEDLEM_I_FOLKETRYGDEN(sakstype, sakstema, behandlingstema, behandlingstype))
+                if (erGyldigEndringForMEDLEM_I_FOLKETRYGDEN(sakstype, sakstema, behandlingstema, behandlingstype) ||
+                    erGyldigEndringForUNNTAK_OG_MEDLEM_I_FOLKETRYGDEN(sakstype, behandlingstema))
                     return;
             }
             case UNNTATT_MEDLEMSKAP -> {
@@ -78,7 +79,12 @@ public class AngiBehandlingsresultatService {
             case OMGJORT -> {
                 if (behandlingstype == NY_VURDERING) return;
             }
-            default -> throw new FunksjonellException("Kan ikke endre til behandlingsresultattype: " + behandlingsresultattype.getBeskrivelse());
+            case REGISTRERT_UNNTAK, DELVIS_GODKJENT_UNNTAK -> {
+                if (erGyldigEndringForUNNTAK_OG_MEDLEM_I_FOLKETRYGDEN(sakstype, behandlingstema))
+                    return;
+            }
+            default ->
+                throw new FunksjonellException("Kan ikke endre til behandlingsresultattype: " + behandlingsresultattype.getBeskrivelse());
         }
 
         throw new FunksjonellException(String.format("Kan ikke endre behandlingsresultattype til %s på sak %s", behandlingsresultattype, fagsak.getSaksnummer()));
@@ -89,6 +95,7 @@ public class AngiBehandlingsresultatService {
             sakstema == MEDLEMSKAP_LOVVALG &&
             Set.of(YRKESAKTIV, IKKE_YRKESAKTIV, PENSJONIST).contains(behandlingstema) &&
             Set.of(FØRSTEGANG, NY_VURDERING).contains(behandlingstype);
+
     }
 
     private boolean erGyldigEndringForUNTATT_MEDLEMSKAP(Sakstyper sakstype, Sakstemaer sakstema, Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
@@ -111,4 +118,8 @@ public class AngiBehandlingsresultatService {
             Set.of(FØRSTEGANG, NY_VURDERING).contains(behandlingstype);
     }
 
+    private boolean erGyldigEndringForUNNTAK_OG_MEDLEM_I_FOLKETRYGDEN(Sakstyper sakstype, Behandlingstema behandlingstema) {
+        return sakstype == TRYGDEAVTALE &&
+            Set.of(ANMODNING_OM_UNNTAK_HOVEDREGEL, REGISTRERING_UNNTAK).contains(behandlingstema);
+    }
 }
