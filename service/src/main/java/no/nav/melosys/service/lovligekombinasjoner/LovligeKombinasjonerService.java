@@ -26,15 +26,15 @@ import static no.nav.melosys.service.lovligekombinasjoner.LovligeBehandlingsKomb
 public class LovligeKombinasjonerService {
 
     public Set<Sakstyper> hentMuligeSakstyper() {
-        return LovligeSaksKombinasjoner.ALLE_MULIGE_SAKSTYPER;
+        return LovligeSakskombinasjoner.ALLE_MULIGE_SAKSTYPER;
     }
 
     public Set<Sakstemaer> hentMuligeSakstemaer(Aktoersroller hovedpart, Sakstyper sakstype) {
         return switch (hovedpart) {
-            case BRUKER -> LovligeSaksKombinasjoner.muligeSaksKombinasjonerBruker.get(sakstype).stream()
+            case BRUKER -> LovligeSakskombinasjoner.muligeSaksKombinasjonerBruker.get(sakstype).stream()
                 .map(SakstemaBehandlingsKombinasjon::sakstema)
                 .collect(Collectors.toSet());
-            case VIRKSOMHET -> LovligeSaksKombinasjoner.ALLE_MULIGE_SAKSTEMAER;
+            case VIRKSOMHET -> LovligeSakskombinasjoner.ALLE_MULIGE_SAKSTEMAER;
             default -> Collections.emptySet();
         };
     }
@@ -47,7 +47,7 @@ public class LovligeKombinasjonerService {
     ) {
         switch (hovedpart) {
             case BRUKER:
-                Set<Behandlingstema> behandlingstemaer = LovligeSaksKombinasjoner.muligeSaksKombinasjonerBruker.get(sakstype).stream()
+                Set<Behandlingstema> behandlingstemaer = LovligeSakskombinasjoner.muligeSaksKombinasjonerBruker.get(sakstype).stream()
                     .filter(sakstemaBehandlingsKombinasjon -> sakstemaBehandlingsKombinasjon.sakstema() == sakstema)
                     .flatMap(sakstemaBehandlingsKombinasjon -> sakstemaBehandlingsKombinasjon.behandlingstemaBehandlingstyperKombinasjoner().stream())
                     .flatMap(behandlingsKombinasjon -> behandlingsKombinasjon.behandlingsTemaer().stream())
@@ -86,7 +86,7 @@ public class LovligeKombinasjonerService {
 
         switch (hovedpart) {
             case BRUKER:
-                Set<Behandlingstyper> behandlingstyper = LovligeSaksKombinasjoner.muligeSaksKombinasjonerBruker.get(sakstype).stream()
+                Set<Behandlingstyper> behandlingstyper = LovligeSakskombinasjoner.muligeSaksKombinasjonerBruker.get(sakstype).stream()
                     .filter(sakstemaBehandlingsKombinasjon -> sakstemaBehandlingsKombinasjon.sakstema() == sakstema)
                     .flatMap(sakstemaBehandlingsKombinasjon -> sakstemaBehandlingsKombinasjon.behandlingstemaBehandlingstyperKombinasjoner().stream())
                     .filter(behandlingsKombinasjon -> behandlingsKombinasjon.behandlingsTemaer().contains(behandlingstema))
@@ -130,7 +130,7 @@ public class LovligeKombinasjonerService {
         return combineSets(
             hentMuligeBehandlingstemaer(Aktoersroller.BRUKER, sakstype, sakstema, sistBehandlingstema),
             hentMuligeBehandlingstemaer(Aktoersroller.VIRKSOMHET, sakstype, sakstema, sistBehandlingstema),
-            LovligeSaksKombinasjoner.SED_BEHANDLINGSTEMA
+            LovligeSakskombinasjoner.SED_BEHANDLINGSTEMA
         );
     }
 
