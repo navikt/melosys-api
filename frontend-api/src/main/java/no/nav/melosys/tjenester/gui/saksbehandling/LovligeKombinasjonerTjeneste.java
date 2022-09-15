@@ -72,4 +72,33 @@ public class LovligeKombinasjonerTjeneste {
         Behandling sisteBehandling = sisteBehandlingsID != null ? behandlingService.hentBehandling(sisteBehandlingsID) : null;
         return ResponseEntity.ok(lovligeKombinasjonerService.hentMuligeBehandlingstyper(hovedpart, sakstype, sakstema, behandlingstema, sisteBehandling));
     }
+
+    @GetMapping("/sakstemaer/oppgaveplukker/hent-lovlige-kombinasjoner")
+    @ApiOperation(value = "Henter alle mulige sakstemaer basert på sakstypen", notes = ("Henter alle mulige sakstemaer basert på sakstypen"))
+    public ResponseEntity<Set<Sakstemaer>> hentAlleMuligeSakstemaerForOppgaveplukker(
+        @RequestParam("sakstype") Sakstyper sakstype) {
+        return ResponseEntity.ok(lovligeKombinasjonerService.hentMuligeSakstemaerForOppgaveplukker(sakstype));
+    }
+
+    @GetMapping("/behandlingstemaer/oppgaveplukker/hent-lovlige-kombinasjoner")
+    @ApiOperation(value = "Henter alle mulige behandlingstemaer basert på sakstype og sakstema", notes = ("Henter alle mulige behandlingstemaer basert på sakstype og sakstema"))
+    public ResponseEntity<Set<Behandlingstema>> hentAlleMuligeBehandlingstemaerForOppgaveplukker(
+        @RequestParam("sakstype") Sakstyper sakstype,
+        @RequestParam("sakstema") Sakstemaer sakstema,
+        @RequestParam(value = "sistBehandlingstema", required = false) Behandlingstema sistBehandlingstema
+    ) {
+        return ResponseEntity.ok(lovligeKombinasjonerService.hentMuligeBehandlingstemaerForOppgaveplukker(sakstype, sakstema, sistBehandlingstema));
+    }
+
+    @GetMapping("/behandlingstyper/oppgaveplukker/hent-lovlige-kombinasjoner")
+    @ApiOperation(value = "Henter alle mulige behandlingstyper basert på sakstype, sakstema og behandlingstema", notes = ("Henter alle mulige behandlingstyper basert på sakstype, sakstema og behandlingstema"))
+    public ResponseEntity<Set<Behandlingstyper>> hentAlleMuligeBehandlingstyperForOppgaveplukker(
+        @RequestParam("sakstype") Sakstyper sakstype,
+        @RequestParam("sakstema") Sakstemaer sakstema,
+        @RequestParam(value = "behandlingstema", required = false) Behandlingstema behandlingstema,
+        @RequestParam(value = "sisteBehandlingsID", required = false) Long sisteBehandlingsID
+    ) {
+        Behandling sisteBehandling = sisteBehandlingsID != null ? behandlingService.hentBehandling(sisteBehandlingsID) : null;
+        return ResponseEntity.ok(lovligeKombinasjonerService.hentMuligeBehandlingstyperForOppgaveplukker(sakstype, sakstema, behandlingstema, sisteBehandling));
+    }
 }

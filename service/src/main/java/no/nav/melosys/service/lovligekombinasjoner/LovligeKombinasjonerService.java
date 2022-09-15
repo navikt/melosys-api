@@ -1,8 +1,10 @@
 package no.nav.melosys.service.lovligekombinasjoner;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.annotation.Nullable;
 
 import no.nav.melosys.domain.Behandling;
@@ -117,6 +119,28 @@ public class LovligeKombinasjonerService {
         }
     }
 
+    public Set<Sakstemaer> hentMuligeSakstemaerForOppgaveplukker(Sakstyper sakstype) {
+        return combineSets(
+            hentMuligeSakstemaer(Aktoersroller.BRUKER, sakstype),
+            hentMuligeSakstemaer(Aktoersroller.VIRKSOMHET, sakstype)
+        );
+    }
+
+    public Set<Behandlingstema> hentMuligeBehandlingstemaerForOppgaveplukker(Sakstyper sakstype, Sakstemaer sakstema, Behandlingstema sistBehandlingstema) {
+        return combineSets(
+            hentMuligeBehandlingstemaer(Aktoersroller.BRUKER, sakstype, sakstema, sistBehandlingstema),
+            hentMuligeBehandlingstemaer(Aktoersroller.VIRKSOMHET, sakstype, sakstema, sistBehandlingstema),
+            LovligeSaksKombinasjoner.SED_BEHANDLINGSTEMA
+        );
+    }
+
+    public Set<Behandlingstyper> hentMuligeBehandlingstyperForOppgaveplukker(Sakstyper sakstype, Sakstemaer sakstema, Behandlingstema behandlingstema, Behandling sisteBehandling) {
+        return combineSets(
+            hentMuligeBehandlingstyper(Aktoersroller.BRUKER, sakstype, sakstema, behandlingstema, sisteBehandling),
+            hentMuligeBehandlingstyper(Aktoersroller.VIRKSOMHET, sakstype, sakstema, behandlingstema, sisteBehandling)
+        );
+    }
+
     public void validerOmNyttTemaKanEndresTil(Behandling behandling, Behandlingstema tema) {
         var muligeBehandlingstema = behandlingstemaSomKanEndresTil(behandling);
         if (!muligeBehandlingstema.contains(tema)) {
@@ -161,5 +185,11 @@ public class LovligeKombinasjonerService {
             return hentMuligeBehandlingstyper(hovedpart, sakstype, sakstema, behandlingstema, null);
         }
         return Collections.emptySet();
+    }
+
+    private static <T> Set<T> combineSets(Set<T>... t) {
+        return Stream.of(t)
+            .flatMap(Collection::stream)
+            .collect(Collectors.toSet());
     }
 }
