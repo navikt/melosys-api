@@ -130,8 +130,12 @@ public class LovligeKombinasjonerService {
         return combineSets(
             hentMuligeBehandlingstemaer(Aktoersroller.BRUKER, sakstype, sakstema, sistBehandlingstema),
             hentMuligeBehandlingstemaer(Aktoersroller.VIRKSOMHET, sakstype, sakstema, sistBehandlingstema),
-            LovligeSakskombinasjoner.SED_BEHANDLINGSTEMA
+            LovligeSakskombinasjoner.SED_BEHANDLINGSTEMA,
+            (sakstype == Sakstyper.EU_EOS && sakstema == Sakstemaer.MEDLEMSKAP_LOVVALG)
+                ? Set.of(BESLUTNING_LOVVALG_NORGE)
+                : Collections.emptySet()
         );
+
     }
 
     public Set<Behandlingstyper> hentMuligeBehandlingstyperForOppgaveplukker(Sakstyper sakstype, Sakstemaer sakstema, Behandlingstema behandlingstema, Behandling sisteBehandling) {
@@ -187,6 +191,7 @@ public class LovligeKombinasjonerService {
         return Collections.emptySet();
     }
 
+    @SafeVarargs
     private static <T> Set<T> combineSets(Set<T>... t) {
         return Stream.of(t)
             .flatMap(Collection::stream)
