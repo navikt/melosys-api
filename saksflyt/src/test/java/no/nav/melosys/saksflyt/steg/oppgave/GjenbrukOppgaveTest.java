@@ -62,7 +62,7 @@ class GjenbrukOppgaveTest {
             .hasFieldOrPropertyWithValue("saksnummer", saksnummer)
             .hasFieldOrPropertyWithValue("behandlesAvApplikasjon", Fagsystem.MELOSYS)
             .hasFieldOrPropertyWithValue("oppgavetype", Oppgavetyper.BEH_SAK_MK)
-            .hasFieldOrPropertyWithValue("behandlingstema", OppgaveBehandlingstema.EU_EOS_LAND)
+            .hasFieldOrPropertyWithValue("behandlingstema", OppgaveBehandlingstema.EU_EOS_LAND.getBehandlingstema())
             .hasFieldOrPropertyWithValue("tilordnetRessurs", "Deg321")
             .hasFieldOrPropertyWithValue("aktørId", "123321");
     }
