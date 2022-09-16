@@ -260,7 +260,7 @@ public class OppgaveService {
 
         if (oppgave.erJournalFøring()) {
             resultat = lagJournalføringsoppgaveDto(oppgave);
-        } else if (oppgave.erBehandling() || oppgave.erVurderDokument() || oppgave.erSedBehandling()) {
+        } else if (oppgave.erBehandling() || oppgave.erVurderDokument() || oppgave.erSedBehandling() || oppgave.erVurderHenvendelse()) {
             resultat = lagBehandlingsoppgaveDto(oppgave);
         } else {
             throw new TekniskException("Oppgavetype " + oppgave.getOppgavetype() + " støttes ikke");
