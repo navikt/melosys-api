@@ -56,7 +56,7 @@ public class LovligeKombinasjonerService {
             return combineSets(
                 hentMuligeBehandlingstemaer(Aktoersroller.BRUKER, sakstype, sakstema, sistBehandlingstema),
                 hentMuligeBehandlingstemaer(Aktoersroller.VIRKSOMHET, sakstype, sakstema, sistBehandlingstema),
-                LovligeSakskombinasjoner.getSedBehandlingstema(sakstype, sakstema)
+                getSedBehandlingstema(sakstype, sakstema)
             );
         }
 
@@ -178,6 +178,14 @@ public class LovligeKombinasjonerService {
             return hentMuligeBehandlingstyper(hovedpart, sakstype, sakstema, behandlingstema, null);
         }
         return Collections.emptySet();
+    }
+
+    private Set<Behandlingstema> getSedBehandlingstema(Sakstyper sakstype, Sakstemaer sakstema) {
+        var sedBehandlingstema = new java.util.HashSet<>(LovligeSakskombinasjoner.SED_BEHANDLINGSTEMA);
+        if (sakstype == Sakstyper.EU_EOS && sakstema == Sakstemaer.MEDLEMSKAP_LOVVALG) {
+            sedBehandlingstema.add(BESLUTNING_LOVVALG_NORGE);
+        }
+        return sedBehandlingstema;
     }
 
     @SafeVarargs
