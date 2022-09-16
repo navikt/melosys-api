@@ -1,8 +1,8 @@
 package no.nav.melosys.service.lovligekombinasjoner;
 
-import java.util.EnumMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
@@ -17,7 +17,6 @@ import static no.nav.melosys.service.lovligekombinasjoner.LovligeBehandlingsKomb
 public class LovligeSakskombinasjoner {
     static final Set<Sakstyper> ALLE_MULIGE_SAKSTYPER = Set.of(EU_EOS, FTRL, TRYGDEAVTALE);
     static final Set<Sakstemaer> ALLE_MULIGE_SAKSTEMAER = Set.of(MEDLEMSKAP_LOVVALG, UNNTAK, TRYGDEAVGIFT);
-    static final Set<Behandlingstema> SED_BEHANDLINGSTEMA = Set.of(REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING, REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE, BESLUTNING_LOVVALG_ANNET_LAND, ANMODNING_OM_UNNTAK_HOVEDREGEL, FORESPØRSEL_TRYGDEMYNDIGHET);
 
     private static final SakstemaBehandlingsKombinasjon EU_EOS_LOVVALG_MEDLEMSKAP_SAK = new SakstemaBehandlingsKombinasjon(MEDLEMSKAP_LOVVALG, Set.of(EU_EOS_LOVVALG_MEDLEMSKAP_BEHANDLINGS_KOMBINASJON_SØKNAD, EU_EOS_LOVVALG_MEDLEMSKAP_BEHANDLINGS_KOMBINASJON_HENVENDELSER));
     private static final SakstemaBehandlingsKombinasjon EU_EOS_UNNTAK_SAK = new SakstemaBehandlingsKombinasjon(UNNTAK, Set.of(EU_EOS_UNNTAK_BEHANDLINGS_KOMBINASJON));
@@ -37,6 +36,14 @@ public class LovligeSakskombinasjoner {
     }
 
     private LovligeSakskombinasjoner() {
+    }
+
+    public static Set<Behandlingstema> getSedBehandlingstema(Sakstyper sakstype, Sakstemaer sakstema) {
+        var sedBehandlingstema = Set.of(REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING, REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE, BESLUTNING_LOVVALG_ANNET_LAND, ANMODNING_OM_UNNTAK_HOVEDREGEL, FORESPØRSEL_TRYGDEMYNDIGHET);
+        if (sakstype == Sakstyper.EU_EOS && sakstema == Sakstemaer.MEDLEMSKAP_LOVVALG) {
+            sedBehandlingstema.add(BESLUTNING_LOVVALG_NORGE);
+        }
+        return sedBehandlingstema;
     }
 }
 

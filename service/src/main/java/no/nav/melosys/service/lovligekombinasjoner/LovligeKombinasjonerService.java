@@ -56,10 +56,7 @@ public class LovligeKombinasjonerService {
             return combineSets(
                 hentMuligeBehandlingstemaer(Aktoersroller.BRUKER, sakstype, sakstema, sistBehandlingstema),
                 hentMuligeBehandlingstemaer(Aktoersroller.VIRKSOMHET, sakstype, sakstema, sistBehandlingstema),
-                LovligeSakskombinasjoner.SED_BEHANDLINGSTEMA,
-                (sakstype == Sakstyper.EU_EOS && sakstema == Sakstemaer.MEDLEMSKAP_LOVVALG)
-                    ? Set.of(BESLUTNING_LOVVALG_NORGE)
-                    : Collections.emptySet()
+                LovligeSakskombinasjoner.getSedBehandlingstema(sakstype, sakstema)
             );
         }
 
