@@ -74,6 +74,63 @@ class AngiBehandlingsresultatServiceTest {
     }
 
     @Test
+    void oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling_gyldigScenarioREGISTRERT_UNNTAK_kallerKorrekt() {
+        var behandlingsresultat = lagBehandlingsresultat(Sakstemaer.MEDLEMSKAP_LOVVALG, Sakstyper.TRYGDEAVTALE, Behandlingstyper.FØRSTEGANG, Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL);
+        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
+
+
+        angiBehandlingsresultatService
+            .oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling(BEHANDLING_ID, Behandlingsresultattyper.REGISTRERT_UNNTAK);
+
+
+        verify(fagsakService).avsluttFagsakOgBehandling(behandlingsresultat.getBehandling().getFagsak(), Saksstatuser.LOVVALG_AVKLART);
+        verify(behandlingsresultatService).lagre(behandlingsresultatArgumentCaptor.capture());
+        assertThat(behandlingsresultatArgumentCaptor.getValue().getType()).isEqualTo(Behandlingsresultattyper.REGISTRERT_UNNTAK);
+    }
+
+    @Test
+    void oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling_gyldigScenarioDELVIS_GODKJENT_UNNTAK_kallerKorrekt() {
+        var behandlingsresultat = lagBehandlingsresultat(Sakstemaer.MEDLEMSKAP_LOVVALG, Sakstyper.TRYGDEAVTALE, Behandlingstyper.FØRSTEGANG, Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL);
+        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
+
+
+        angiBehandlingsresultatService
+            .oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling(BEHANDLING_ID, Behandlingsresultattyper.DELVIS_GODKJENT_UNNTAK);
+
+
+        verify(fagsakService).avsluttFagsakOgBehandling(behandlingsresultat.getBehandling().getFagsak(), Saksstatuser.LOVVALG_AVKLART);
+        verify(behandlingsresultatService).lagre(behandlingsresultatArgumentCaptor.capture());
+        assertThat(behandlingsresultatArgumentCaptor.getValue().getType()).isEqualTo(Behandlingsresultattyper.DELVIS_GODKJENT_UNNTAK);
+    }
+
+    @Test
+    void oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling_ugyldigScenario_DELVIS_GODKJENT_UNNTAK_kasterFeilmelding() {
+        var behandlingsresultat = lagBehandlingsresultat(Sakstemaer.MEDLEMSKAP_LOVVALG, Sakstyper.TRYGDEAVTALE, Behandlingstyper.FØRSTEGANG, Behandlingstema.ARBEID_KUN_NORGE);
+        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
+
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> angiBehandlingsresultatService
+                .oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling(BEHANDLING_ID, Behandlingsresultattyper.DELVIS_GODKJENT_UNNTAK))
+            .withMessageContaining("Kan ikke endre behandlingsresultattype");
+    }
+
+    @Test
+    void oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling_gyldigScenarioMEDLEM_I_FOLKETRYGDEN_utvidet_kallerKorrekt() {
+        var behandlingsresultat = lagBehandlingsresultat(Sakstemaer.MEDLEMSKAP_LOVVALG, Sakstyper.TRYGDEAVTALE, Behandlingstyper.FØRSTEGANG, Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL);
+        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
+
+
+        angiBehandlingsresultatService
+            .oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling(BEHANDLING_ID, Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN);
+
+
+        verify(fagsakService).avsluttFagsakOgBehandling(behandlingsresultat.getBehandling().getFagsak(), Saksstatuser.LOVVALG_AVKLART);
+        verify(behandlingsresultatService).lagre(behandlingsresultatArgumentCaptor.capture());
+        assertThat(behandlingsresultatArgumentCaptor.getValue().getType()).isEqualTo(Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN);
+    }
+
+    @Test
     void oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling_gyldigScenarioFASTSATT_LOVVALGSLAND_kallerKorrekt() {
         var behandlingsresultat = lagBehandlingsresultat(Sakstemaer.MEDLEMSKAP_LOVVALG, Sakstyper.TRYGDEAVTALE, Behandlingstyper.FØRSTEGANG, Behandlingstema.ARBEID_KUN_NORGE);
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
