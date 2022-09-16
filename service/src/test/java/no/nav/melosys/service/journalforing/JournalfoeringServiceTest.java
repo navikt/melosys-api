@@ -177,7 +177,7 @@ class JournalfoeringServiceTest {
 
     @Test
     void opprettSakOgJournalfør_sakstemaEnabled_oppretterKorrektProsessinstans() {
-        unleash.enable("melosys.sakstema");
+        unleash.enable("melosys.behandle_alle_saker");
         FagsakDto fagsakDto = lagFagsakDto(LocalDate.MIN, LocalDate.MAX, "DK", Sakstyper.EU_EOS);
         fagsakDto.setSakstema(Sakstemaer.UNNTAK.getKode());
         opprettDto.setFagsak(fagsakDto);

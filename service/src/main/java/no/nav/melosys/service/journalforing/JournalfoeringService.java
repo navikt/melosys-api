@@ -156,7 +156,7 @@ public class JournalfoeringService {
 
         Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(prosessType, journalfoeringDto);
         prosessinstans.setData(ProsessDataKey.SAKSTYPE, sakstype);
-        if (unleash.isEnabled("melosys.sakstema")) {
+        if (unleash.isEnabled("melosys.behandle_alle_saker")) {
             var sakstema = Sakstemaer.valueOf(journalfoeringDto.getFagsak().getSakstema());
             var behandlingstype = Behandlingstyper.valueOf(journalfoeringDto.getBehandlingstypeKode());
             prosessinstans.setData(ProsessDataKey.SAKSTEMA, sakstema);
@@ -270,7 +270,7 @@ public class JournalfoeringService {
         ProsessType prosessTypeForNyVurdering = finnProsessTypeForAndregangsbehandling(sisteBehandling);
 
         Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(prosessTypeForNyVurdering, journalfoeringDto);
-        if (unleash.isEnabled("melosys.sakstema")) {
+        if (unleash.isEnabled("melosys.behandle_alle_saker")) {
             var behandlingstema = Behandlingstema.valueOf(journalfoeringDto.getBehandlingstemaKode());
             prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, behandlingstema);
         }
