@@ -48,8 +48,10 @@ class AngiBehandlingsresultatServiceTest {
         var behandlingsresultat = lagBehandlingsresultat(Sakstemaer.MEDLEMSKAP_LOVVALG, Sakstyper.FTRL, Behandlingstyper.FØRSTEGANG, Behandlingstema.YRKESAKTIV);
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
 
+
         angiBehandlingsresultatService
             .oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling(BEHANDLING_ID, Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN);
+
 
         verify(fagsakService).avsluttFagsakOgBehandling(behandlingsresultat.getBehandling().getFagsak(), Saksstatuser.LOVVALG_AVKLART);
         verify(behandlingsresultatService).lagre(behandlingsresultatArgumentCaptor.capture());
@@ -61,8 +63,10 @@ class AngiBehandlingsresultatServiceTest {
         var behandlingsresultat = lagBehandlingsresultat(Sakstemaer.MEDLEMSKAP_LOVVALG, Sakstyper.FTRL, Behandlingstyper.FØRSTEGANG, Behandlingstema.UNNTAK_MEDLEMSKAP);
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
 
+
         angiBehandlingsresultatService
             .oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling(BEHANDLING_ID, Behandlingsresultattyper.UNNTATT_MEDLEMSKAP);
+
 
         verify(fagsakService).avsluttFagsakOgBehandling(behandlingsresultat.getBehandling().getFagsak(), Saksstatuser.LOVVALG_AVKLART);
         verify(behandlingsresultatService).lagre(behandlingsresultatArgumentCaptor.capture());
@@ -74,8 +78,10 @@ class AngiBehandlingsresultatServiceTest {
         var behandlingsresultat = lagBehandlingsresultat(Sakstemaer.MEDLEMSKAP_LOVVALG, Sakstyper.TRYGDEAVTALE, Behandlingstyper.FØRSTEGANG, Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL);
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
 
+
         angiBehandlingsresultatService
             .oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling(BEHANDLING_ID, Behandlingsresultattyper.REGISTRERT_UNNTAK);
+
 
         verify(fagsakService).avsluttFagsakOgBehandling(behandlingsresultat.getBehandling().getFagsak(), Saksstatuser.LOVVALG_AVKLART);
         verify(behandlingsresultatService).lagre(behandlingsresultatArgumentCaptor.capture());
@@ -87,8 +93,10 @@ class AngiBehandlingsresultatServiceTest {
         var behandlingsresultat = lagBehandlingsresultat(Sakstemaer.MEDLEMSKAP_LOVVALG, Sakstyper.TRYGDEAVTALE, Behandlingstyper.FØRSTEGANG, Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL);
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
 
+
         angiBehandlingsresultatService
             .oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling(BEHANDLING_ID, Behandlingsresultattyper.DELVIS_GODKJENT_UNNTAK);
+
 
         verify(fagsakService).avsluttFagsakOgBehandling(behandlingsresultat.getBehandling().getFagsak(), Saksstatuser.LOVVALG_AVKLART);
         verify(behandlingsresultatService).lagre(behandlingsresultatArgumentCaptor.capture());
@@ -96,12 +104,26 @@ class AngiBehandlingsresultatServiceTest {
     }
 
     @Test
+    void oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling_ugyldigScenario_DELVIS_GODKJENT_UNNTAK_kasterFeilmelding() {
+        var behandlingsresultat = lagBehandlingsresultat(Sakstemaer.MEDLEMSKAP_LOVVALG, Sakstyper.TRYGDEAVTALE, Behandlingstyper.FØRSTEGANG, Behandlingstema.ARBEID_KUN_NORGE);
+        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
+
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> angiBehandlingsresultatService
+                .oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling(BEHANDLING_ID, Behandlingsresultattyper.DELVIS_GODKJENT_UNNTAK))
+            .withMessageContaining("Kan ikke endre behandlingsresultattype");
+    }
+
+    @Test
     void oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling_gyldigScenarioMEDLEM_I_FOLKETRYGDEN_utvidet_kallerKorrekt() {
         var behandlingsresultat = lagBehandlingsresultat(Sakstemaer.MEDLEMSKAP_LOVVALG, Sakstyper.TRYGDEAVTALE, Behandlingstyper.FØRSTEGANG, Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL);
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
 
+
         angiBehandlingsresultatService
             .oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling(BEHANDLING_ID, Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN);
+
 
         verify(fagsakService).avsluttFagsakOgBehandling(behandlingsresultat.getBehandling().getFagsak(), Saksstatuser.LOVVALG_AVKLART);
         verify(behandlingsresultatService).lagre(behandlingsresultatArgumentCaptor.capture());
@@ -113,8 +135,10 @@ class AngiBehandlingsresultatServiceTest {
         var behandlingsresultat = lagBehandlingsresultat(Sakstemaer.MEDLEMSKAP_LOVVALG, Sakstyper.TRYGDEAVTALE, Behandlingstyper.FØRSTEGANG, Behandlingstema.ARBEID_KUN_NORGE);
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
 
+
         angiBehandlingsresultatService
             .oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling(BEHANDLING_ID, Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
+
 
         verify(fagsakService).avsluttFagsakOgBehandling(behandlingsresultat.getBehandling().getFagsak(), Saksstatuser.LOVVALG_AVKLART);
         verify(behandlingsresultatService).lagre(behandlingsresultatArgumentCaptor.capture());
@@ -126,8 +150,10 @@ class AngiBehandlingsresultatServiceTest {
         var behandlingsresultat = lagBehandlingsresultat(Sakstemaer.MEDLEMSKAP_LOVVALG, null, Behandlingstyper.FØRSTEGANG, Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY);
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
 
+
         angiBehandlingsresultatService
             .oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling(BEHANDLING_ID, Behandlingsresultattyper.AVSLAG_SØKNAD);
+
 
         verify(fagsakService).avsluttFagsakOgBehandling(behandlingsresultat.getBehandling().getFagsak(), Saksstatuser.LOVVALG_AVKLART);
         verify(behandlingsresultatService).lagre(behandlingsresultatArgumentCaptor.capture());
@@ -139,8 +165,10 @@ class AngiBehandlingsresultatServiceTest {
         var behandlingsresultat = lagBehandlingsresultat(null, null, Behandlingstyper.KLAGE, null);
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
 
+
         angiBehandlingsresultatService
             .oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling(BEHANDLING_ID, Behandlingsresultattyper.KLAGEINNSTILLING);
+
 
         verify(fagsakService).avsluttFagsakOgBehandling(behandlingsresultat.getBehandling().getFagsak(), Saksstatuser.LOVVALG_AVKLART);
         verify(behandlingsresultatService).lagre(behandlingsresultatArgumentCaptor.capture());
@@ -152,8 +180,10 @@ class AngiBehandlingsresultatServiceTest {
         var behandlingsresultat = lagBehandlingsresultat(null, null, Behandlingstyper.NY_VURDERING, null);
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
 
+
         angiBehandlingsresultatService
             .oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling(BEHANDLING_ID, Behandlingsresultattyper.OMGJORT);
+
 
         verify(fagsakService).avsluttFagsakOgBehandling(behandlingsresultat.getBehandling().getFagsak(), Saksstatuser.LOVVALG_AVKLART);
         verify(behandlingsresultatService).lagre(behandlingsresultatArgumentCaptor.capture());
@@ -164,6 +194,7 @@ class AngiBehandlingsresultatServiceTest {
     void oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling_ugyldigScenario_kasterFeilmelding() {
         var behandlingsresultat = lagBehandlingsresultat(Sakstemaer.UNNTAK, Sakstyper.EU_EOS, Behandlingstyper.HENVENDELSE, Behandlingstema.ARBEID_ETT_LAND_ØVRIG);
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
+
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> angiBehandlingsresultatService

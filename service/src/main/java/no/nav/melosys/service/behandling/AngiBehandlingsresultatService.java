@@ -57,8 +57,7 @@ public class AngiBehandlingsresultatService {
 
         switch (behandlingsresultattype) {
             case MEDLEM_I_FOLKETRYGDEN -> {
-                if (erGyldigEndringForMEDLEM_I_FOLKETRYGDEN(sakstype, sakstema, behandlingstema, behandlingstype) ||
-                    erGyldigEndringForUNNTAK_OG_MEDLEM_I_FOLKETRYGDEN(sakstype, behandlingstema))
+                if (erGyldigEndringForMEDLEM_I_FOLKETRYGDEN(sakstype, sakstema, behandlingstema, behandlingstype))
                     return;
             }
             case UNNTATT_MEDLEMSKAP -> {
@@ -80,7 +79,7 @@ public class AngiBehandlingsresultatService {
                 if (behandlingstype == NY_VURDERING) return;
             }
             case REGISTRERT_UNNTAK, DELVIS_GODKJENT_UNNTAK -> {
-                if (erGyldigEndringForUNNTAK_OG_MEDLEM_I_FOLKETRYGDEN(sakstype, behandlingstema))
+                if (erGyldigEndringForUNNTAK(sakstype, behandlingstema))
                     return;
             }
             default ->
@@ -91,10 +90,10 @@ public class AngiBehandlingsresultatService {
     }
 
     private boolean erGyldigEndringForMEDLEM_I_FOLKETRYGDEN(Sakstyper sakstype, Sakstemaer sakstema, Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
-        return sakstype == FTRL &&
+        return (sakstype == FTRL &&
             sakstema == MEDLEMSKAP_LOVVALG &&
             Set.of(YRKESAKTIV, IKKE_YRKESAKTIV, PENSJONIST).contains(behandlingstema) &&
-            Set.of(FØRSTEGANG, NY_VURDERING).contains(behandlingstype);
+            Set.of(FØRSTEGANG, NY_VURDERING).contains(behandlingstype)) || erGyldigEndringForUNNTAK(sakstype, behandlingstema);
 
     }
 
@@ -118,7 +117,7 @@ public class AngiBehandlingsresultatService {
             Set.of(FØRSTEGANG, NY_VURDERING).contains(behandlingstype);
     }
 
-    private boolean erGyldigEndringForUNNTAK_OG_MEDLEM_I_FOLKETRYGDEN(Sakstyper sakstype, Behandlingstema behandlingstema) {
+    private boolean erGyldigEndringForUNNTAK(Sakstyper sakstype, Behandlingstema behandlingstema) {
         return sakstype == TRYGDEAVTALE &&
             Set.of(ANMODNING_OM_UNNTAK_HOVEDREGEL, REGISTRERING_UNNTAK).contains(behandlingstema);
     }
