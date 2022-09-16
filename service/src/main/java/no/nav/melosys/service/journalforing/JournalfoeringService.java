@@ -20,6 +20,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.integrasjon.joark.JournalpostOppdatering;
 import no.nav.melosys.service.dokument.sed.EessiService;
+import no.nav.melosys.service.journalfoering.BehandlingReplikeringsRegler;
 import no.nav.melosys.service.journalforing.dto.*;
 import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerService;
 import no.nav.melosys.service.persondata.PersondataFasade;
@@ -50,6 +51,7 @@ public class JournalfoeringService {
     private final PersondataFasade persondataFasade;
     private final LovligeKombinasjonerService lovligeKombinasjonerService;
     private final Unleash unleash;
+    private final BehandlingReplikeringsRegler behandlingReplikeringsRegler;
 
     public JournalfoeringService(JoarkFasade joarkFasade,
                                  ProsessinstansService prosessinstansService,
@@ -57,7 +59,8 @@ public class JournalfoeringService {
                                  FagsakService fagsakService,
                                  PersondataFasade persondataFasade,
                                  LovligeKombinasjonerService lovligeKombinasjonerService,
-                                 Unleash unleash) {
+                                 Unleash unleash,
+                                 BehandlingReplikeringsRegler behandlingReplikeringsRegler) {
         this.joarkFasade = joarkFasade;
         this.prosessinstansService = prosessinstansService;
         this.eessiService = eessiService;
@@ -65,6 +68,7 @@ public class JournalfoeringService {
         this.persondataFasade = persondataFasade;
         this.lovligeKombinasjonerService = lovligeKombinasjonerService;
         this.unleash = unleash;
+        this.behandlingReplikeringsRegler = behandlingReplikeringsRegler;
     }
 
     public Journalpost hentJournalpost(String journalpostID) {
@@ -267,7 +271,7 @@ public class JournalfoeringService {
 
         log.info("{} knytter journalpost {} til sak {} og lager ny vurdering", SubjectHandler.getInstance().getUserID(), journalfoeringDto.getJournalpostID(), saksnummer);
 
-        ProsessType prosessTypeForNyVurdering = finnProsessTypeForAndregangsbehandling(sisteBehandling);
+        ProsessType prosessTypeForNyVurdering = finnProsessTypeForAndregangsbehandling(fagsak);
 
         Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(prosessTypeForNyVurdering, journalfoeringDto);
         if (unleash.isEnabled("melosys.behandle_alle_saker")) {
@@ -281,36 +285,15 @@ public class JournalfoeringService {
         prosessinstansService.lagre(prosessinstans);
     }
 
-    private ProsessType finnProsessTypeForAndregangsbehandling(Behandling behandling) {
-        if (skalTidligereBehandlingReplikeres(behandling)) {
+    private ProsessType finnProsessTypeForAndregangsbehandling(Fagsak fagsak) {
+        if (skalTidligereBehandlingReplikeres(fagsak)) {
             return ProsessType.JFR_NY_VURDERING;
         }
         return ProsessType.JFR_ANDREGANGS_BEHANDLING;
     }
 
-    private boolean skalTidligereBehandlingReplikeres(Behandling behandling) {
-        Behandlingstyper behandlingType = behandling.getType();
-        Sakstyper sakstype = behandling.getFagsak().getType();
-        Behandlingstema behandlingstema = behandling.getTema();
-
-        if (behandlingType == Behandlingstyper.HENVENDELSE || behandlingType == Behandlingstyper.KLAGE) return false;
-
-        if (sakstype == Sakstyper.EU_EOS) return false;
-        if (sakstype == Sakstyper.FTRL && behandlingstema == Behandlingstema.YRKESAKTIV) return false;
-
-        return switch (behandlingstema) {
-            case ARBEID_KUN_NORGE,
-                IKKE_YRKESAKTIV,
-                PENSJONIST,
-                ANMODNING_OM_UNNTAK_HOVEDREGEL,
-                REGISTRERING_UNNTAK,
-                UNNTAK_MEDLEMSKAP,
-                FORESPØRSEL_TRYGDEMYNDIGHET,
-                TRYGDETID,
-                ØVRIGE_SED_MED,
-                ØVRIGE_SED_UFM -> false;
-            default -> true;
-        };
+    private boolean skalTidligereBehandlingReplikeres(Fagsak fagsak) {
+        return behandlingReplikeringsRegler.skalTidligereBehandlingReplikeres(fagsak);
     }
 
     private void validerKanTilknytteJournalpostForSedTilSak(Journalpost journalpost, String tilknyttTilSaksnummer) {

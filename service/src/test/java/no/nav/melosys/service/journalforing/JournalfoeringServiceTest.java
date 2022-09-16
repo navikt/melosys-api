@@ -27,6 +27,7 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.felles.dto.SoeknadslandDto;
+import no.nav.melosys.service.journalfoering.BehandlingReplikeringsRegler;
 import no.nav.melosys.service.journalforing.dto.*;
 import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerService;
 import no.nav.melosys.service.persondata.PersondataFasade;
@@ -64,6 +65,8 @@ class JournalfoeringServiceTest {
     private PersondataFasade persondataFasade;
     @Mock
     private LovligeKombinasjonerService lovligeKombinasjonerService;
+    @Mock
+    private BehandlingReplikeringsRegler behandlingReplikeringsRegler;
 
     private final FakeUnleash unleash = new FakeUnleash();
 
@@ -83,7 +86,7 @@ class JournalfoeringServiceTest {
         journalpost = new Journalpost("123");
         journalpost.setHoveddokument(new ArkivDokument());
 
-        this.journalfoeringService = new JournalfoeringService(joarkFasade, prosessinstansService, eessiService, fagsakService, persondataFasade, lovligeKombinasjonerService, unleash);
+        this.journalfoeringService = new JournalfoeringService(joarkFasade, prosessinstansService, eessiService, fagsakService, persondataFasade, lovligeKombinasjonerService, unleash, behandlingReplikeringsRegler);
         opprettDto = new JournalfoeringOpprettDto();
         opprettDto.setJournalpostID("setJournalpostID");
         opprettDto.setOppgaveID("setOppgaveID");
@@ -502,6 +505,7 @@ class JournalfoeringServiceTest {
         when(fagsakService.hentFagsak(MELOSYS_SAKSNUMMER)).thenReturn(fagsak);
         when(prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_NY_VURDERING, tilordneDto))
             .thenReturn(new Prosessinstans());
+        when(behandlingReplikeringsRegler.skalTidligereBehandlingReplikeres(any())).thenReturn(true);
 
         journalfoeringService.journalførOgOpprettAndregangsBehandling(tilordneDto);
 
