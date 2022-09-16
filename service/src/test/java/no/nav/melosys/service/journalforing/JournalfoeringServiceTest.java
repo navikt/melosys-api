@@ -28,6 +28,7 @@ import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.felles.dto.SoeknadslandDto;
 import no.nav.melosys.service.journalforing.dto.*;
+import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
@@ -62,6 +63,7 @@ class JournalfoeringServiceTest {
     @Mock
     private PersondataFasade persondataFasade;
 
+    private LovligeKombinasjonerService lovligeKombinasjonerService = new LovligeKombinasjonerService();
     private final FakeUnleash unleash = new FakeUnleash();
 
     @Captor
@@ -80,7 +82,7 @@ class JournalfoeringServiceTest {
         journalpost = new Journalpost("123");
         journalpost.setHoveddokument(new ArkivDokument());
 
-        this.journalfoeringService = new JournalfoeringService(joarkFasade, prosessinstansService, eessiService, fagsakService, persondataFasade, unleash);
+        this.journalfoeringService = new JournalfoeringService(joarkFasade, prosessinstansService, eessiService, fagsakService, persondataFasade, lovligeKombinasjonerService, unleash);
         opprettDto = new JournalfoeringOpprettDto();
         opprettDto.setJournalpostID("setJournalpostID");
         opprettDto.setOppgaveID("setOppgaveID");
@@ -173,12 +175,14 @@ class JournalfoeringServiceTest {
     }
 
     @Test
-    void opprettSakOgJournalfør_sakstemaEnabled_oppretterKorrektProsessinstans() {
+    void opprettSakOgJournalfør_toggleEnabled_oppretterKorrektProsessinstans() {
         unleash.enable("melosys.behandle_alle_saker");
         FagsakDto fagsakDto = lagFagsakDto(LocalDate.MIN, LocalDate.MAX, "DK", Sakstyper.EU_EOS);
         fagsakDto.setSakstema(Sakstemaer.UNNTAK.getKode());
         opprettDto.setFagsak(fagsakDto);
-        opprettDto.setBehandlingstypeKode(Behandlingstyper.KLAGE.getKode());
+        opprettDto.setBehandlingstypeKode(Behandlingstyper.HENVENDELSE.getKode());
+        opprettDto.setBehandlingstemaKode(Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET.getKode());
+        opprettDto.setBrukerID("1234");
         when(prosessinstansService.lagJournalføringProsessinstans(eq(ProsessType.JFR_NY_SAK_BRUKER), any())).thenReturn(new Prosessinstans());
         when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
 
