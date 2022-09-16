@@ -79,7 +79,7 @@ public class AngiBehandlingsresultatService {
                 if (behandlingstype == NY_VURDERING) return;
             }
             case REGISTRERT_UNNTAK, DELVIS_GODKJENT_UNNTAK -> {
-                if (erGyldigEndringForUNNTAK(sakstype, behandlingstema))
+                if (erGyldigEndringForUnntak(sakstype, behandlingstema))
                     return;
             }
             default ->
@@ -93,7 +93,7 @@ public class AngiBehandlingsresultatService {
         return (sakstype == FTRL &&
             sakstema == MEDLEMSKAP_LOVVALG &&
             Set.of(YRKESAKTIV, IKKE_YRKESAKTIV, PENSJONIST).contains(behandlingstema) &&
-            Set.of(FØRSTEGANG, NY_VURDERING).contains(behandlingstype)) || erGyldigEndringForUNNTAK(sakstype, behandlingstema);
+            Set.of(FØRSTEGANG, NY_VURDERING).contains(behandlingstype)) || erGyldigEndringForUnntak(sakstype, behandlingstema);
 
     }
 
@@ -117,7 +117,7 @@ public class AngiBehandlingsresultatService {
             Set.of(FØRSTEGANG, NY_VURDERING).contains(behandlingstype);
     }
 
-    private boolean erGyldigEndringForUNNTAK(Sakstyper sakstype, Behandlingstema behandlingstema) {
+    private boolean erGyldigEndringForUnntak(Sakstyper sakstype, Behandlingstema behandlingstema) {
         return sakstype == TRYGDEAVTALE &&
             Set.of(ANMODNING_OM_UNNTAK_HOVEDREGEL, REGISTRERING_UNNTAK).contains(behandlingstema);
     }
