@@ -78,17 +78,23 @@ public class AngiBehandlingsresultatService {
             case OMGJORT -> {
                 if (behandlingstype == NY_VURDERING) return;
             }
-            default -> throw new FunksjonellException("Kan ikke endre til behandlingsresultattype: " + behandlingsresultattype.getBeskrivelse());
+            case REGISTRERT_UNNTAK, DELVIS_GODKJENT_UNNTAK -> {
+                if (erGyldigEndringForUnntak(sakstype, behandlingstema))
+                    return;
+            }
+            default ->
+                throw new FunksjonellException("Kan ikke endre til behandlingsresultattype: " + behandlingsresultattype.getBeskrivelse());
         }
 
         throw new FunksjonellException(String.format("Kan ikke endre behandlingsresultattype til %s på sak %s", behandlingsresultattype, fagsak.getSaksnummer()));
     }
 
     private boolean erGyldigEndringForMEDLEM_I_FOLKETRYGDEN(Sakstyper sakstype, Sakstemaer sakstema, Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
-        return sakstype == FTRL &&
+        return (sakstype == FTRL &&
             sakstema == MEDLEMSKAP_LOVVALG &&
             Set.of(YRKESAKTIV, IKKE_YRKESAKTIV, PENSJONIST).contains(behandlingstema) &&
-            Set.of(FØRSTEGANG, NY_VURDERING).contains(behandlingstype);
+            Set.of(FØRSTEGANG, NY_VURDERING).contains(behandlingstype)) || erGyldigEndringForUnntak(sakstype, behandlingstema);
+
     }
 
     private boolean erGyldigEndringForUNTATT_MEDLEMSKAP(Sakstyper sakstype, Sakstemaer sakstema, Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
@@ -111,4 +117,8 @@ public class AngiBehandlingsresultatService {
             Set.of(FØRSTEGANG, NY_VURDERING).contains(behandlingstype);
     }
 
+    private boolean erGyldigEndringForUnntak(Sakstyper sakstype, Behandlingstema behandlingstema) {
+        return sakstype == TRYGDEAVTALE &&
+            Set.of(ANMODNING_OM_UNNTAK_HOVEDREGEL, REGISTRERING_UNNTAK).contains(behandlingstema);
+    }
 }
