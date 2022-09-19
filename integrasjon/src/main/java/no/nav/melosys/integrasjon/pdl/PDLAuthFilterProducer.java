@@ -9,7 +9,8 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class PDLAuthFilterProducer {
     @Bean
-    public PDLAuthFilter pdlSystemAuthFilter(RestStsClient restStsClient, ClientConfigurationProperties clientConfigurationProperties,
+    public PDLAuthFilter pdlSystemAuthFilter(RestStsClient restStsClient,
+                                             ClientConfigurationProperties clientConfigurationProperties,
                                              OAuth2AccessTokenService oAuth2AccessTokenService) {
         return new PDLAuthFilter(restStsClient, clientConfigurationProperties, oAuth2AccessTokenService);
     }

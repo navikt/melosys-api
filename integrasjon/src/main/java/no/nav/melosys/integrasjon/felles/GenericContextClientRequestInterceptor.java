@@ -52,5 +52,4 @@ public class GenericContextClientRequestInterceptor implements ClientHttpRequest
         request.getHeaders().add(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
         return execution.execute(request, body);
     }
-
 }

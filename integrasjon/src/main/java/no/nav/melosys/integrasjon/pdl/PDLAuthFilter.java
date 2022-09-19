@@ -56,7 +56,7 @@ public class PDLAuthFilter implements ExchangeFilterFunction {
         }
         if (ThreadLocalAccessInfo.shouldUseOidcToken()) {
             OAuth2AccessTokenResponse response = oAuth2AccessTokenService.getAccessToken(clientProperties);
-            return () -> "Bearer " + response.getAccessToken(); // SubjectHandler.getInstance().getOidcTokenString(); // azureADConsumer.hentToken(SubjectHandler.getInstance().getOidcTokenString(), "api://dev-fss.pdl.pdl-api/.default");
+            return () -> "Bearer " + response.getAccessToken();
         }
         throw new TekniskException("Uregistert kall prøver å registrere token provider");
     }

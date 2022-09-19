@@ -48,7 +48,6 @@ spec:
         - application: {{APP_NAME_PDL}}
         - application: {{APP_NAME_SAF}}
         - application: {{APP_NAME_EESSI}}
-        - application: {{APP_NAME_TRYGDEAVTALE}}
   webproxy: true
   vault:
     enabled: true
