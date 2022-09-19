@@ -5,14 +5,17 @@ import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import no.finn.unleash.FakeUnleash;
+import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.arkiv.ArkivDokument;
 import no.nav.melosys.domain.arkiv.BrukerIdType;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
@@ -64,10 +67,9 @@ class JournalfoeringServiceTest {
     @Mock
     private PersondataFasade persondataFasade;
     @Mock
-    private LovligeKombinasjonerService lovligeKombinasjonerService;
-    @Mock
     private BehandlingReplikeringsRegler behandlingReplikeringsRegler;
 
+    private final LovligeKombinasjonerService lovligeKombinasjonerService = new LovligeKombinasjonerService();
     private final FakeUnleash unleash = new FakeUnleash();
 
     @Captor
@@ -179,12 +181,14 @@ class JournalfoeringServiceTest {
     }
 
     @Test
-    void opprettSakOgJournalfør_sakstemaEnabled_oppretterKorrektProsessinstans() {
+    void opprettSakOgJournalfør_toggleEnabled_oppretterKorrektProsessinstans() {
         unleash.enable("melosys.behandle_alle_saker");
         FagsakDto fagsakDto = lagFagsakDto(LocalDate.MIN, LocalDate.MAX, "DK", Sakstyper.EU_EOS);
         fagsakDto.setSakstema(Sakstemaer.UNNTAK.getKode());
         opprettDto.setFagsak(fagsakDto);
-        opprettDto.setBehandlingstypeKode(Behandlingstyper.KLAGE.getKode());
+        opprettDto.setBehandlingstypeKode(Behandlingstyper.HENVENDELSE.getKode());
+        opprettDto.setBehandlingstemaKode(Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET.getKode());
+        opprettDto.setBrukerID("1234");
         when(prosessinstansService.lagJournalføringProsessinstans(eq(ProsessType.JFR_NY_SAK_BRUKER), any())).thenReturn(new Prosessinstans());
         when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
 
@@ -505,7 +509,6 @@ class JournalfoeringServiceTest {
         when(fagsakService.hentFagsak(MELOSYS_SAKSNUMMER)).thenReturn(fagsak);
         when(prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_NY_VURDERING, tilordneDto))
             .thenReturn(new Prosessinstans());
-        when(behandlingReplikeringsRegler.skalTidligereBehandlingReplikeres(any())).thenReturn(true);
 
         journalfoeringService.journalførOgOpprettAndregangsBehandling(tilordneDto);
 
@@ -521,12 +524,19 @@ class JournalfoeringServiceTest {
 
     @Test
     void journalførOgOpprettAndregangsBehandlingIkkeKopierBehandling_altOK_prosessinstansOpprettet() {
+        unleash.enable("melosys.behandle_alle_saker");
         tilordneDto.setSaksnummer(MELOSYS_SAKSNUMMER);
+        tilordneDto.setBehandlingstemaKode(Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET.getKode());
+        tilordneDto.setBehandlingstypeKode(Behandlingstyper.HENVENDELSE.getKode());
 
         var behandling = new Behandling();
         behandling.setStatus(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
         var fagsak = new Fagsak();
         fagsak.setType(Sakstyper.EU_EOS);
+        fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
+        Aktoer aktoer = new Aktoer();
+        aktoer.setRolle(Aktoersroller.BRUKER);
+        fagsak.setAktører(Set.of(aktoer));
         behandling.setFagsak(fagsak);
         fagsak.getBehandlinger().add(behandling);
 
@@ -551,9 +561,6 @@ class JournalfoeringServiceTest {
     void journalførOgOpprettAndregangsBehandling_behandlingstypeIkkeTillattForSakstype_kasterException() {
         tilordneDto.setSaksnummer(MELOSYS_SAKSNUMMER);
         var fagsak = new Fagsak();
-        var behandling = new Behandling();
-        behandling.setStatus(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
-        fagsak.setBehandlinger(List.of(behandling));
 
         when(joarkFasade.hentJournalpost(tilordneDto.getJournalpostID())).thenReturn(journalpost);
         when(fagsakService.hentFagsak(MELOSYS_SAKSNUMMER)).thenReturn(fagsak);

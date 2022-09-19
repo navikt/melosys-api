@@ -67,6 +67,7 @@ public class JournalfoeringService {
         this.eessiService = eessiService;
         this.fagsakService = fagsakService;
         this.persondataFasade = persondataFasade;
+        this.lovligeKombinasjonerService = lovligeKombinasjonerService;
         this.unleash = unleash;
         this.behandlingReplikeringsRegler = behandlingReplikeringsRegler;
     }
@@ -269,7 +270,6 @@ public class JournalfoeringService {
             validerKanTilknytteJournalpostForSedTilSak(journalpost, saksnummer);
         }
 
-        Behandling sisteBehandling = fagsak.hentSistRegistrertBehandling();
 
         valider(journalfoeringDto);
         if (behandleAlleSakerToggleEnabled) {
@@ -285,10 +285,6 @@ public class JournalfoeringService {
 
         Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(prosessTypeForNyVurdering, journalfoeringDto);
         if (behandleAlleSakerToggleEnabled) {
-
-        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(prosessTypeForNyVurdering, journalfoeringDto);
-        if (unleash.isEnabled("melosys.behandle_alle_saker")) {
-            var behandlingstema = Behandlingstema.valueOf(journalfoeringDto.getBehandlingstemaKode());
             prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, behandlingstema);
         }
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, behandlingstype);
@@ -299,6 +295,9 @@ public class JournalfoeringService {
     }
 
     private ProsessType finnProsessTypeForAndregangsbehandling(Fagsak fagsak) {
+        if(!unleash.isEnabled("melosys.behandle_alle_saker")) {
+            return ProsessType.JFR_NY_VURDERING;
+        }
         if (skalTidligereBehandlingReplikeres(fagsak)) {
             return ProsessType.JFR_NY_VURDERING;
         }
