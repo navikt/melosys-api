@@ -35,20 +35,22 @@ class BehandlingReplikeringsReglerTest {
     fun skalTidligereBehandlingReplikeres(
         sakstype: Sakstyper,
         behandlingHolder: BehandlingHolder,
-        result: Boolean
+        expected: Boolean
     ) {
         behandlingHolder.setupMock { id: Long, behandlingsresultattype: Behandlingsresultattyper? ->
             every { behandlingsresultatRepository.findById(id) } returns lagBehandlingsresultat(behandlingsresultattype)
         }
         val behandlingReplikeringsRegler = BehandlingReplikeringsRegler(behandlingsresultatRepository)
-
         val fagsak = Fagsak().apply {
             type = sakstype
             this.behandlinger = behandlingHolder.behandlinger(this).map { it.first }
         }
 
-        behandlingReplikeringsRegler.skalTidligereBehandlingReplikeres(fagsak)
-            .shouldBe(result)
+
+        val result = behandlingReplikeringsRegler.skalTidligereBehandlingReplikeres(fagsak)
+
+
+        result.shouldBe(expected)
     }
 
     private fun skalTidligereBehandlingReplikeresData(): List<Arguments> {
@@ -130,14 +132,19 @@ class BehandlingReplikeringsReglerTest {
         behandlinger: List<Behandling>,
         typer: List<Behandlingstyper>,
         resultatTyper: List<Behandlingsresultattyper>,
-        result: Boolean
+        expected: Boolean
     ) {
         every { behandlingsresultatRepository.findById(any()) } returns lagBehandlingsresultat(resultatTypeFraRepo)
-
         val behandlingReplikeringsRegler = BehandlingReplikeringsRegler(behandlingsresultatRepository)
-        behandlingReplikeringsRegler.finnesBehandlingMedBehandlingTyperOgIkkeBehandlingsresultatTyper(
-            behandlinger, typer, resultatTyper
-        ).shouldBe(result)
+
+
+        val resultat =
+            behandlingReplikeringsRegler.finnesBehandlingMedBehandlingTyperOgIkkeBehandlingsresultatTyper(
+                behandlinger, typer, resultatTyper
+            )
+
+
+        resultat.shouldBe(expected)
     }
 
     private fun lagBehandlingsresultat(resultatTypeFraRepo: Behandlingsresultattyper?): Optional<Behandlingsresultat> {
