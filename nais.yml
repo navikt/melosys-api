@@ -47,7 +47,7 @@ spec:
         - application: {{APP_NAME_OPPGAVE}}
         - application: {{APP_NAME_PDL}}
         - application: {{APP_NAME_SAF}}
-        - application: {{APP_NAME_EESSI}}
+        - application: {{APP_NAME_MELOSYS_EESSI}}
   webproxy: true
   vault:
     enabled: true
@@ -64,5 +64,13 @@ spec:
     value: nais
   - name: GROUP_MELOSYS_INNLOGGING
     value: {{GROUP_MELOSYS_INNLOGGING}}
+  - name: APP_NAME_OPPGAVE
+    value: {{APP_NAME_OPPGAVE}}
+  - name: APP_NAME_PDL
+    value: {{APP_NAME_PDL}}
+  - name: APP_NAME_SAF
+    value: {{APP_NAME_SAF}}
+  - name: APP_NAME_MELOSYS_EESSI
+    value: {{APP_NAME_MELOSYS_EESSI}}
   kafka:
     pool: {{ KAFKA_POOL }}
