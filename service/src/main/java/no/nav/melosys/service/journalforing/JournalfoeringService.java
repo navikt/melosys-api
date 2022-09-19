@@ -94,12 +94,16 @@ public class JournalfoeringService {
             validerKanOppretteSakFraSed(journalpost);
         }
 
-        if (erBehandlingAvSedForespørsler(journalfoeringDto.getBehandlingstemaKode()) || erBehandlingAvSøknad(journalfoeringDto.getBehandlingstemaKode())) {
+        if (unleash.isEnabled("melosys.behandle_alle_saker")) {
             opprettSakOgJournalfør(journalfoeringDto);
         } else {
-            throw new FunksjonellException(
-                String.format("Manuell journalføring av behandlingstema %s støttes ikke", journalfoeringDto.getBehandlingstemaKode())
-            );
+            if (erBehandlingAvSedForespørsler(journalfoeringDto.getBehandlingstemaKode()) || erBehandlingAvSøknad(journalfoeringDto.getBehandlingstemaKode())) {
+                opprettSakOgJournalfør(journalfoeringDto);
+            } else {
+                throw new FunksjonellException(
+                    String.format("Manuell journalføring av behandlingstema %s støttes ikke", journalfoeringDto.getBehandlingstemaKode())
+                );
+            }
         }
     }
 
@@ -134,17 +138,16 @@ public class JournalfoeringService {
     private void opprettSakOgJournalfør(JournalfoeringOpprettDto journalfoeringDto) {
         log.info("{} oppretter ny sak etter journalføring av journalpost {}", SubjectHandler.getInstance().getUserID(), journalfoeringDto.getJournalpostID());
         var behandleAlleSakerToggleEnabled = unleash.isEnabled("melosys.behandle_alle_saker");
+        Aktoersroller hovedpart = journalfoeringDto.getBrukerID() != null ? Aktoersroller.BRUKER : Aktoersroller.VIRKSOMHET;
 
         valider(journalfoeringDto);
 
         final var sakstype = Sakstyper.valueOf(journalfoeringDto.getFagsak().getSakstype());
         final var sakstema = behandleAlleSakerToggleEnabled ? Sakstemaer.valueOf(journalfoeringDto.getFagsak().getSakstema()) : null;
-        final var behandlingstema = Behandlingstema.valueOf(journalfoeringDto.getBehandlingstemaKode());
+        final var behandlingstema = behandleAlleSakerToggleEnabled ? (hovedpart == Aktoersroller.BRUKER ? Behandlingstema.valueOf(journalfoeringDto.getBehandlingstemaKode()) : null) : Behandlingstema.valueOf(journalfoeringDto.getBehandlingstemaKode());
         final var behandlingstype = behandleAlleSakerToggleEnabled ? Behandlingstyper.valueOf(journalfoeringDto.getBehandlingstypeKode()) : null;
 
         if (behandleAlleSakerToggleEnabled) {
-            Aktoersroller hovedpart = journalfoeringDto.getBrukerID() != null ? Aktoersroller.BRUKER : Aktoersroller.VIRKSOMHET;
-
             validerBehandlingstema(hovedpart, sakstype, sakstema, behandlingstema, null);
             validerBehandlingstype(hovedpart, sakstype, sakstema, behandlingstema, behandlingstype, null);
         } else {
@@ -176,7 +179,7 @@ public class JournalfoeringService {
         }
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, behandlingstema);
 
-        if (erSakstypeEøs(sakstype) && erBehandlingAvSøknad(behandlingstema)) {
+        if (erSakstypeEøs(sakstype) && behandlingstema != null && erBehandlingAvSøknad(behandlingstema)) {
             validerOpprettSakForSøknadBehandlingFelter(journalfoeringDto);
             prosessinstans.setData(ProsessDataKey.SØKNADSLAND, journalfoeringDto.getFagsak().getLand());
             prosessinstans.setData(ProsessDataKey.SØKNADSPERIODE, journalfoeringDto.getFagsak().getSoknadsperiode());
@@ -304,7 +307,8 @@ public class JournalfoeringService {
     }
 
     private void validerBehandlingstema(Aktoersroller hovedpart, Sakstyper sakstype, Sakstemaer sakstema, Behandlingstema behandlingstema, Behandlingstema sistBehandlingstema) {
-        if (!lovligeKombinasjonerService.hentMuligeBehandlingstemaer(hovedpart, sakstype, sakstema, sistBehandlingstema).contains(behandlingstema)) {
+        var lovligeBehandlingstema = lovligeKombinasjonerService.hentMuligeBehandlingstemaer(hovedpart, sakstype, sakstema, sistBehandlingstema);
+        if (lovligeBehandlingstema.isEmpty() ? behandlingstema != null : !lovligeBehandlingstema.contains(behandlingstema)) {
             throw new FunksjonellException(behandlingstema + " er ikke et lovlig behandlingstema med de andre valgte verdiene");
         }
     }
