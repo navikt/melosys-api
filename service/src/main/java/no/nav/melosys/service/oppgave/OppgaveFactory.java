@@ -57,13 +57,14 @@ public final class OppgaveFactory {
 
     public static Oppgave.Builder lagBehandlingsoppgave(Sakstemaer sakstema, Sakstyper sakstype, Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
         // Dokumentasjon for regler: https://confluence.adeo.no/display/TEESSI/Oppgaver+i+Gosys
+        var oppgaveBehandlingstema = utledBehandlingstema(sakstema, sakstype, behandlingstema, behandlingstype);
         return new Oppgave.Builder()
             .setBehandlesAvApplikasjon(Fagsystem.MELOSYS)
             .setPrioritet(PrioritetType.NORM)
-            .setBehandlingstema(utledBehandlingstema(sakstema, sakstype, behandlingstema, behandlingstype))
+            .setBehandlingstema(oppgaveBehandlingstema.getKode())
             .setTema(utledTema(sakstema))
             .setOppgavetype(utledOppgavetype(sakstype, behandlingstema, behandlingstype))
-            .setBeskrivelse(utledBeskrivelse(sakstema, sakstype, behandlingstema, behandlingstype))
+            .setBeskrivelse(utledBeskrivelse(oppgaveBehandlingstema, sakstema, sakstype, behandlingstema, behandlingstype))
             .setFristFerdigstillelse(Behandling.utledFristForBehandlingstema(behandlingstema));
     }
 
@@ -113,23 +114,23 @@ public final class OppgaveFactory {
         };
     }
 
-    public static String utledBehandlingstema(Sakstemaer sakstema, Sakstyper sakstype, Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
+    public static OppgaveBehandlingstema utledBehandlingstema(Sakstemaer sakstema, Sakstyper sakstype, Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
         if (skalBrukeMelosysBehandlingstemaForBehandlingstema(sakstema, sakstype, behandlingstema, behandlingstype)) {
             return switch (behandlingstema) {
-                case PENSJONIST -> "ab0355";
-                case YRKESAKTIV -> "ab0462";
+                case PENSJONIST -> OppgaveBehandlingstema.PENSJONIST_ELLER_UFORETRYGDET;
+                case YRKESAKTIV -> OppgaveBehandlingstema.YRKESAKTIV;
                 case REGISTRERING_UNNTAK, REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING, REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE, BESLUTNING_LOVVALG_ANNET_LAND ->
-                    "ab0461";
-                case ANMODNING_OM_UNNTAK_HOVEDREGEL -> "ab0460";
+                    OppgaveBehandlingstema.REGISTRERING_UNNTAK;
+                case ANMODNING_OM_UNNTAK_HOVEDREGEL -> OppgaveBehandlingstema.ANMODNING_UNNTAK;
                 default ->
                     throw new FunksjonellException("Mangler mapping av behandlingstema %s".formatted(behandlingstema));
             };
         }
 
         return switch (sakstype) {
-            case EU_EOS -> "ab0424";
-            case TRYGDEAVTALE -> "ab0387";
-            case FTRL -> "ab0388";
+            case EU_EOS -> OppgaveBehandlingstema.EU_EOS_LAND;
+            case TRYGDEAVTALE -> OppgaveBehandlingstema.AVTALELAND;
+            case FTRL -> OppgaveBehandlingstema.UTENFOR_AVTALELAND;
         };
     }
 
@@ -183,71 +184,31 @@ public final class OppgaveFactory {
         return Oppgavetyper.BEH_SAK_MK;
     }
 
-    private static String utledBeskrivelse(Sakstemaer sakstema, Sakstyper sakstype, Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
-        return switch (sakstema) {
-            case MEDLEMSKAP_LOVVALG -> utledBeskrivelseForMedlemskapLovvalg(sakstype, behandlingstema, behandlingstype);
-            case TRYGDEAVGIFT -> "";
-            case UNNTAK -> utledBeskrivelseForUnntak(sakstype, behandlingstema, behandlingstype);
-        };
-    }
-
-    private static String utledBeskrivelseForMedlemskapLovvalg(Sakstyper sakstype, Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
-        return switch (sakstype) {
-            case EU_EOS -> switch (behandlingstype) {
-                case FØRSTEGANG, NY_VURDERING, KLAGE -> switch (behandlingstema) {
-                    case UTSENDT_ARBEIDSTAKER, UTSENDT_SELVSTENDIG, ARBEID_TJENESTEPERSON_ELLER_FLY, ARBEID_FLERE_LAND, ARBEID_KUN_NORGE, BESLUTNING_LOVVALG_NORGE ->
-                        behandlingstema.getBeskrivelse();
-                    case PENSJONIST -> sakstype.getBeskrivelse();
-                    default -> "";
-                };
-                case ENDRET_PERIODE -> switch (behandlingstema) {
-                    case UTSENDT_ARBEIDSTAKER, UTSENDT_SELVSTENDIG, ARBEID_TJENESTEPERSON_ELLER_FLY, ARBEID_FLERE_LAND, ARBEID_KUN_NORGE, BESLUTNING_LOVVALG_NORGE ->
-                        behandlingstema.getBeskrivelse();
-                    default -> "";
-                };
-                case HENVENDELSE -> switch (behandlingstema) {
-                    case FORESPØRSEL_TRYGDEMYNDIGHET -> "SEDA005";
-                    case TRYGDETID -> behandlingstema.getBeskrivelse();
-                    default -> "";
-                };
-                default -> "";
+    private static String utledBeskrivelse(OppgaveBehandlingstema oppgaveBehandlingstema, Sakstemaer sakstema, Sakstyper sakstype, Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
+        return switch (oppgaveBehandlingstema) {
+            case PENSJONIST_ELLER_UFORETRYGDET -> switch (sakstema) {
+                case MEDLEMSKAP_LOVVALG -> sakstype.getBeskrivelse();
+                case TRYGDEAVGIFT -> "";
+                case UNNTAK -> behandlingstema.getBeskrivelse();
             };
-            case TRYGDEAVTALE -> switch (behandlingstype) {
-                case FØRSTEGANG, NY_VURDERING, KLAGE -> switch (behandlingstema) {
-                    case YRKESAKTIV, IKKE_YRKESAKTIV -> behandlingstema.getBeskrivelse();
-                    case PENSJONIST -> sakstype.getBeskrivelse();
-                    default -> "";
-                };
-                case HENVENDELSE -> behandlingstema == Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET ? "SEDA008" : "";
-                default -> "";
+            case YRKESAKTIV -> "";
+            case ANMODNING_UNNTAK -> switch (sakstype) {
+                case EU_EOS -> "SEDA001";
+                case TRYGDEAVTALE -> "";
+                case FTRL -> behandlingstema.getBeskrivelse();
             };
-            case FTRL -> switch (behandlingstype) {
-                case FØRSTEGANG, NY_VURDERING, KLAGE -> switch (behandlingstema) {
-                    case YRKESAKTIV, IKKE_YRKESAKTIV, UNNTAK_MEDLEMSKAP -> behandlingstema.getBeskrivelse();
-                    case PENSJONIST -> sakstype.getBeskrivelse();
-                    default -> "";
-                };
-                default -> "";
+            case REGISTRERING_UNNTAK -> switch (behandlingstema) {
+                case BESLUTNING_LOVVALG_ANNET_LAND -> "SEDA003";
+                case REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING -> "SEDA009";
+                case REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE -> "SEDA010";
+                case REGISTRERING_UNNTAK -> "";
+                default -> behandlingstema.getBeskrivelse();
             };
-        };
-    }
-
-    private static String utledBeskrivelseForUnntak(Sakstyper sakstype, Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
-        return switch (sakstype) {
-            case EU_EOS -> switch (behandlingstype) {
-                case FØRSTEGANG, NY_VURDERING -> switch (behandlingstema) {
-                    case ANMODNING_OM_UNNTAK_HOVEDREGEL -> "SEDA001";
-                    case BESLUTNING_LOVVALG_ANNET_LAND -> "SEDA003";
-                    case REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING -> "SEDA009";
-                    case REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE -> "SEDA010";
-                    default -> "";
-                };
-                case HENVENDELSE -> behandlingstema == Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET ? "SEDA005" : "";
-                default -> "";
-            };
-            case TRYGDEAVTALE ->
-                (behandlingstype == Behandlingstyper.HENVENDELSE && behandlingstema == Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET) ? "SEDA008" : "";
-            case FTRL -> "";
+            case EU_EOS_LAND ->
+                (behandlingstype == Behandlingstyper.HENVENDELSE && behandlingstema == Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET) ? "SEDA005" : behandlingstema.getBeskrivelse();
+            case AVTALELAND ->
+                (behandlingstype == Behandlingstyper.HENVENDELSE && behandlingstema == Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET) ? "SEDA008" : behandlingstema.getBeskrivelse();
+            default -> behandlingstema.getBeskrivelse();
         };
     }
 

@@ -53,7 +53,7 @@ public class OppgaveTjeneste {
             PlukketOppgaveDto dto = new PlukketOppgaveDto();
 
             dto.setOppgaveID(oppgave.getOppgaveId());
-            if (oppgave.erBehandling() || oppgave.erVurderDokument() || oppgave.erSedBehandling()) {
+            if (oppgave.erBehandling() || oppgave.erVurderDokument() || oppgave.erSedBehandling() || oppgave.erVurderHenvendelse()) {
                 dto.setSaksnummer(oppgave.getSaksnummer());
             }
 

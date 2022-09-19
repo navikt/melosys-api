@@ -31,7 +31,7 @@ internal class OppgaveFactoryTest {
             Behandlingstema.ARBEID_KUN_NORGE
         )
 
-        val expectedBehandlingstema = "ab0424"
+        val expectedBehandlingstema = OppgaveBehandlingstema.EU_EOS_LAND
         val expectedTema = Tema.MED
         val expectedOppgavetype = Oppgavetyper.BEH_SAK_MK
 
@@ -53,7 +53,7 @@ internal class OppgaveFactoryTest {
         val behandlingstyper = BEHANDLINGSTYPE_STANDARD_MED_ENDRET_PERIODE
         val behandlingstemaer = List.of(Behandlingstema.BESLUTNING_LOVVALG_NORGE)
 
-        val expectedBehandlingstema = "ab0424"
+        val expectedBehandlingstema = OppgaveBehandlingstema.EU_EOS_LAND
         val expectedTema = Tema.MED
         val expectedOppgavetype = Oppgavetyper.BEH_SAK_MK
 
@@ -75,7 +75,7 @@ internal class OppgaveFactoryTest {
         val behandlingstyper = List.of(Behandlingstyper.HENVENDELSE)
         val behandlingstemaer = List.of(Behandlingstema.TRYGDETID)
 
-        val expectedBehandlingstema = "ab0424"
+        val expectedBehandlingstema = OppgaveBehandlingstema.EU_EOS_LAND
         val expectedTema = Tema.MED
         val expectedOppgavetype = Oppgavetyper.VURD_HENV
 
@@ -97,7 +97,7 @@ internal class OppgaveFactoryTest {
         val behandlingstyper = BEHANDLINGSTYPE_STANDARD
         val behandlingstemaer = List.of(Behandlingstema.YRKESAKTIV, Behandlingstema.IKKE_YRKESAKTIV)
 
-        val expectedBehandlingstema = "ab0388"
+        val expectedBehandlingstema = OppgaveBehandlingstema.UTENFOR_AVTALELAND
         val expectedTema = Tema.MED
         val expectedOppgavetype = Oppgavetyper.BEH_SAK_MK
 
@@ -119,7 +119,7 @@ internal class OppgaveFactoryTest {
         val behandlingstyper = BEHANDLINGSTYPE_STANDARD
         val behandlingstemaer = List.of(Behandlingstema.YRKESAKTIV, Behandlingstema.IKKE_YRKESAKTIV)
 
-        val expectedBehandlingstema = "ab0387"
+        val expectedBehandlingstema = OppgaveBehandlingstema.AVTALELAND
         val expectedTema = Tema.MED
         val expectedOppgavetype = Oppgavetyper.BEH_SAK_MK
 
@@ -141,7 +141,7 @@ internal class OppgaveFactoryTest {
         val behandlingstyper = BEHANDLINGSTYPE_STANDARD
         val behandlingstemaer = List.of(Behandlingstema.UNNTAK_MEDLEMSKAP)
 
-        val expectedBehandlingstema = "ab0388"
+        val expectedBehandlingstema = OppgaveBehandlingstema.UTENFOR_AVTALELAND
         val expectedTema = Tema.MED
         val expectedOppgavetype = Oppgavetyper.BEH_SAK_MK
 
@@ -163,7 +163,7 @@ internal class OppgaveFactoryTest {
         val behandlingstyper = BEHANDLINGSTYPE_STANDARD
         val behandlingstemaer = List.of(Behandlingstema.PENSJONIST)
 
-        val expectedBehandlingstema = "ab0355"
+        val expectedBehandlingstema = OppgaveBehandlingstema.PENSJONIST_ELLER_UFORETRYGDET
         val expectedTema = Tema.MED
         val expectedOppgavetype = Oppgavetyper.BEH_SAK_MK
 
@@ -186,7 +186,7 @@ internal class OppgaveFactoryTest {
         val behandlingstyper = BEHANDLINGSTYPE_STANDARD
         val behandlingstemaer = List.of(Behandlingstema.PENSJONIST)
 
-        val expectedBehandlingstema = "ab0355"
+        val expectedBehandlingstema = OppgaveBehandlingstema.PENSJONIST_ELLER_UFORETRYGDET
         val expectedTema = Tema.MED
         val expectedOppgavetype = Oppgavetyper.BEH_SAK_MK
 
@@ -209,7 +209,7 @@ internal class OppgaveFactoryTest {
         val behandlingstyper = BEHANDLINGSTYPE_STANDARD
         val behandlingstemaer = List.of(Behandlingstema.PENSJONIST)
 
-        val expectedBehandlingstema = "ab0355"
+        val expectedBehandlingstema = OppgaveBehandlingstema.PENSJONIST_ELLER_UFORETRYGDET
         val expectedTema = Tema.MED
         val expectedOppgavetype = Oppgavetyper.BEH_SAK_MK
 
@@ -232,7 +232,7 @@ internal class OppgaveFactoryTest {
         val behandlingstyper = BEHANDLINGSTYPE_STANDARD
         val behandlingstemaer = List.of(Behandlingstema.PENSJONIST)
 
-        val expectedBehandlingstema = "ab0355"
+        val expectedBehandlingstema = OppgaveBehandlingstema.PENSJONIST_ELLER_UFORETRYGDET
         val expectedTema = Tema.TRY
         val expectedOppgavetype = Oppgavetyper.BEH_SAK_MK
 
@@ -255,7 +255,7 @@ internal class OppgaveFactoryTest {
         val behandlingstyper = BEHANDLINGSTYPE_STANDARD
         val behandlingstemaer = List.of(Behandlingstema.YRKESAKTIV)
 
-        val expectedBehandlingstema = "ab0462"
+        val expectedBehandlingstema = OppgaveBehandlingstema.YRKESAKTIV
         val expectedTema = Tema.TRY
         val expectedOppgavetype = Oppgavetyper.BEH_SAK_MK
 
@@ -278,7 +278,7 @@ internal class OppgaveFactoryTest {
         val behandlingstyper = List.of(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING)
         val behandlingstemaer = List.of(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL)
 
-        val expectedBehandlingstema = "ab0460"
+        val expectedBehandlingstema = OppgaveBehandlingstema.ANMODNING_UNNTAK
         val expectedTema = Tema.UFM
         val expectedOppgavetype = Oppgavetyper.BEH_SED
 
@@ -301,7 +301,7 @@ internal class OppgaveFactoryTest {
         val behandlingstyper = List.of(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING)
         val behandlingstemaer = List.of(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING)
 
-        val expectedBehandlingstema = "ab0461"
+        val expectedBehandlingstema = OppgaveBehandlingstema.REGISTRERING_UNNTAK
         val expectedTema = Tema.UFM
         val expectedOppgavetype = Oppgavetyper.BEH_SED
 
@@ -324,7 +324,7 @@ internal class OppgaveFactoryTest {
         val behandlingstyper = List.of(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING)
         val behandlingstemaer = List.of(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE)
 
-        val expectedBehandlingstema = "ab0461"
+        val expectedBehandlingstema = OppgaveBehandlingstema.REGISTRERING_UNNTAK
         val expectedTema = Tema.UFM
         val expectedOppgavetype = Oppgavetyper.BEH_SED
 
@@ -347,7 +347,7 @@ internal class OppgaveFactoryTest {
         val behandlingstyper = List.of(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING)
         val behandlingstemaer = List.of(Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND)
 
-        val expectedBehandlingstema = "ab0461"
+        val expectedBehandlingstema = OppgaveBehandlingstema.REGISTRERING_UNNTAK
         val expectedTema = Tema.UFM
         val expectedOppgavetype = Oppgavetyper.BEH_SED
 
@@ -370,7 +370,7 @@ internal class OppgaveFactoryTest {
         val behandlingstyper = List.of(Behandlingstyper.HENVENDELSE)
         val behandlingstemaer = List.of(Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET)
 
-        val expectedBehandlingstema = "ab0424"
+        val expectedBehandlingstema = OppgaveBehandlingstema.EU_EOS_LAND
         val expectedTema = Tema.MED
         val expectedOppgavetype = Oppgavetyper.VURD_HENV
 
@@ -393,7 +393,7 @@ internal class OppgaveFactoryTest {
         val behandlingstyper = List.of(Behandlingstyper.HENVENDELSE)
         val behandlingstemaer = List.of(Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET)
 
-        val expectedBehandlingstema = "ab0387"
+        val expectedBehandlingstema = OppgaveBehandlingstema.AVTALELAND
         val expectedTema = Tema.MED
         val expectedOppgavetype = Oppgavetyper.VURD_HENV
 
@@ -416,7 +416,7 @@ internal class OppgaveFactoryTest {
         val behandlingstyper = List.of(Behandlingstyper.HENVENDELSE)
         val behandlingstemaer = List.of(Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET)
 
-        val expectedBehandlingstema = "ab0424"
+        val expectedBehandlingstema = OppgaveBehandlingstema.EU_EOS_LAND
         val expectedTema = Tema.UFM
         val expectedOppgavetype = Oppgavetyper.VURD_HENV
 
@@ -439,7 +439,7 @@ internal class OppgaveFactoryTest {
         val behandlingstyper = List.of(Behandlingstyper.HENVENDELSE)
         val behandlingstemaer = List.of(Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET)
 
-        val expectedBehandlingstema = "ab0387"
+        val expectedBehandlingstema = OppgaveBehandlingstema.AVTALELAND
         val expectedTema = Tema.UFM
         val expectedOppgavetype = Oppgavetyper.VURD_HENV
 
@@ -462,7 +462,7 @@ internal class OppgaveFactoryTest {
         val behandlingstyper = List.of(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING)
         val behandlingstemaer = List.of(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL)
 
-        val expectedBehandlingstema = "ab0460"
+        val expectedBehandlingstema = OppgaveBehandlingstema.ANMODNING_UNNTAK
         val expectedTema = Tema.UFM
         val expectedOppgavetype = Oppgavetyper.BEH_SAK_MK
 
@@ -485,7 +485,7 @@ internal class OppgaveFactoryTest {
         val behandlingstyper = BEHANDLINGSTYPE_STANDARD
         val behandlingstemaer = List.of(Behandlingstema.REGISTRERING_UNNTAK)
 
-        val expectedBehandlingstema = "ab0461"
+        val expectedBehandlingstema = OppgaveBehandlingstema.REGISTRERING_UNNTAK
         val expectedTema = Tema.UFM
         val expectedOppgavetype = Oppgavetyper.BEH_SAK_MK
 
@@ -509,7 +509,7 @@ internal class OppgaveFactoryTest {
         val behandlingstemaer =
             getAlleBehandlingstemaUnntatt(Behandlingstema.TRYGDETID, Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET)
 
-        val expectedBehandlingstema = "ab0424"
+        val expectedBehandlingstema = OppgaveBehandlingstema.EU_EOS_LAND
         val expectedTema = Tema.MED
         val expectedOppgavetype = Oppgavetyper.VURD_HENV
 
@@ -520,8 +520,7 @@ internal class OppgaveFactoryTest {
             behandlingstemaer,
             expectedBehandlingstema,
             expectedTema,
-            expectedOppgavetype,
-            ""
+            expectedOppgavetype
         )
     }
 
@@ -532,7 +531,7 @@ internal class OppgaveFactoryTest {
         val behandlingstyper = List.of(Behandlingstyper.HENVENDELSE)
         val behandlingstemaer = getAlleBehandlingstemaUnntatt(Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET)
 
-        val expectedBehandlingstema = "ab0387"
+        val expectedBehandlingstema = OppgaveBehandlingstema.AVTALELAND
         val expectedTema = Tema.MED
         val expectedOppgavetype = Oppgavetyper.VURD_HENV
 
@@ -543,8 +542,7 @@ internal class OppgaveFactoryTest {
             behandlingstemaer,
             expectedBehandlingstema,
             expectedTema,
-            expectedOppgavetype,
-            ""
+            expectedOppgavetype
         )
     }
 
@@ -555,7 +553,7 @@ internal class OppgaveFactoryTest {
         val behandlingstyper = List.of(Behandlingstyper.HENVENDELSE)
         val behandlingstemaer = BEHANDLINGSTEMA_ALLE
 
-        val expectedBehandlingstema = "ab0388"
+        val expectedBehandlingstema = OppgaveBehandlingstema.UTENFOR_AVTALELAND
         val expectedTema = Tema.MED
         val expectedOppgavetype = Oppgavetyper.VURD_HENV
 
@@ -566,8 +564,7 @@ internal class OppgaveFactoryTest {
             behandlingstemaer,
             expectedBehandlingstema,
             expectedTema,
-            expectedOppgavetype,
-            ""
+            expectedOppgavetype
         )
     }
 
@@ -578,7 +575,7 @@ internal class OppgaveFactoryTest {
         val behandlingstyper = List.of(Behandlingstyper.HENVENDELSE)
         val behandlingstemaer = getAlleBehandlingstemaUnntatt(Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET)
 
-        val expectedBehandlingstema = "ab0424"
+        val expectedBehandlingstema = OppgaveBehandlingstema.EU_EOS_LAND
         val expectedTema = Tema.UFM
         val expectedOppgavetype = Oppgavetyper.VURD_HENV
 
@@ -589,8 +586,7 @@ internal class OppgaveFactoryTest {
             behandlingstemaer,
             expectedBehandlingstema,
             expectedTema,
-            expectedOppgavetype,
-            ""
+            expectedOppgavetype
         )
     }
 
@@ -604,7 +600,7 @@ internal class OppgaveFactoryTest {
             Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL
         )
 
-        val expectedBehandlingstema = "ab0387"
+        val expectedBehandlingstema = OppgaveBehandlingstema.AVTALELAND
         val expectedTema = Tema.UFM
         val expectedOppgavetype = Oppgavetyper.VURD_HENV
 
@@ -615,8 +611,7 @@ internal class OppgaveFactoryTest {
             behandlingstemaer,
             expectedBehandlingstema,
             expectedTema,
-            expectedOppgavetype,
-            ""
+            expectedOppgavetype
         )
     }
 
@@ -627,7 +622,7 @@ internal class OppgaveFactoryTest {
         val behandlingstyper = List.of(Behandlingstyper.HENVENDELSE)
         val behandlingstemaer = BEHANDLINGSTEMA_ALLE
 
-        val expectedBehandlingstema = "ab0388"
+        val expectedBehandlingstema = OppgaveBehandlingstema.UTENFOR_AVTALELAND
         val expectedTema = Tema.UFM
         val expectedOppgavetype = Oppgavetyper.VURD_HENV
 
@@ -638,8 +633,7 @@ internal class OppgaveFactoryTest {
             behandlingstemaer,
             expectedBehandlingstema,
             expectedTema,
-            expectedOppgavetype,
-            ""
+            expectedOppgavetype
         )
     }
 
@@ -650,7 +644,7 @@ internal class OppgaveFactoryTest {
         val behandlingstyper = List.of(Behandlingstyper.HENVENDELSE)
         val behandlingstemaer = List.of(Behandlingstema.PENSJONIST)
 
-        val expectedBehandlingstema = "ab0355"
+        val expectedBehandlingstema = OppgaveBehandlingstema.PENSJONIST_ELLER_UFORETRYGDET
         val expectedTema = Tema.TRY
         val expectedOppgavetype = Oppgavetyper.VURD_HENV
 
@@ -673,7 +667,7 @@ internal class OppgaveFactoryTest {
         val behandlingstyper = List.of(Behandlingstyper.HENVENDELSE)
         val behandlingstemaer = List.of(Behandlingstema.YRKESAKTIV)
 
-        val expectedBehandlingstema = "ab0462"
+        val expectedBehandlingstema = OppgaveBehandlingstema.YRKESAKTIV
         val expectedTema = Tema.TRY
         val expectedOppgavetype = Oppgavetyper.VURD_HENV
 
@@ -689,12 +683,40 @@ internal class OppgaveFactoryTest {
         )
     }
 
+    @Test
+    fun eueos_medlemskapLovvalg_soeknad_foresporselTrygdemyndighet_xx() {
+        test(
+            Sakstyper.EU_EOS,
+            Sakstemaer.MEDLEMSKAP_LOVVALG,
+            Behandlingstyper.SOEKNAD,
+            Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET,
+            OppgaveBehandlingstema.EU_EOS_LAND,
+            Tema.MED,
+            Oppgavetyper.BEH_SAK_MK,
+            Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET.beskrivelse
+        )
+    }
+
+    @Test
+    fun ftrl_trygdeavgift_soeknad_arbeidFlereLand_xx() {
+        test(
+            Sakstyper.FTRL,
+            Sakstemaer.TRYGDEAVGIFT,
+            Behandlingstyper.SOEKNAD,
+            Behandlingstema.ARBEID_FLERE_LAND,
+            OppgaveBehandlingstema.UTENFOR_AVTALELAND,
+            Tema.TRY,
+            Oppgavetyper.BEH_SAK_MK,
+            Behandlingstema.ARBEID_FLERE_LAND.beskrivelse
+        )
+    }
+
     private fun test(
         sakstyper: Collection<Sakstyper>,
         sakstemaer: Collection<Sakstemaer>,
         behandlingstyper: Collection<Behandlingstyper>,
         melosysBehandlingstemaer: Collection<Behandlingstema>,
-        expectedBehandlingstema: String,
+        expectedBehandlingstema: OppgaveBehandlingstema,
         expectedTema: Tema,
         expectedOppgavetype: Oppgavetyper,
         forventetBegrunnelse: String? = null
@@ -724,7 +746,7 @@ internal class OppgaveFactoryTest {
         sakstema: Sakstemaer,
         behandlingstype: Behandlingstyper,
         melosysBehandlingstema: Behandlingstema,
-        expectedBehandlingstema: String,
+        expectedBehandlingstema: OppgaveBehandlingstema,
         expectedTema: Tema,
         expectedOppgavetype: Oppgavetyper,
         forventetBegrunnelse: String
@@ -741,7 +763,7 @@ internal class OppgaveFactoryTest {
 
         Assertions.assertThat(oppgave.behandlingstema)
             .`as`("Behandlingstema (${sakstype}, ${sakstema}, ${behandlingstype}, ${melosysBehandlingstema})")
-            .isEqualTo(expectedBehandlingstema)
+            .isEqualTo(expectedBehandlingstema.kode)
         Assertions.assertThat(oppgave.tema)
             .`as`("Tema (${sakstype}, ${sakstema}, ${behandlingstype}, ${melosysBehandlingstema})")
             .isEqualTo(expectedTema)

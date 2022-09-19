@@ -274,6 +274,10 @@ public final class Oppgave {
         return oppgavetype == Oppgavetyper.VUR;
     }
 
+    public boolean erVurderHenvendelse() {
+        return oppgavetype == Oppgavetyper.VURD_HENV;
+    }
+
     public boolean erSedBehandling() {
         return oppgavetype == Oppgavetyper.BEH_SED;
     }
