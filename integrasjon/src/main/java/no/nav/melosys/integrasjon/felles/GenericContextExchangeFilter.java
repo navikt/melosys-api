@@ -21,9 +21,9 @@ import reactor.core.publisher.Mono;
 public class GenericContextExchangeFilter implements ExchangeFilterFunction {
     private final RestStsClient restStsClient;
 
-    private OAuth2AccessTokenService oAuth2AccessTokenService;
+    private final OAuth2AccessTokenService oAuth2AccessTokenService;
 
-    private ClientProperties clientProperties;
+    private final ClientProperties clientProperties;
 
     public GenericContextExchangeFilter(RestStsClient restStsClient,
                                         ClientConfigurationProperties clientConfigurationProperties,
@@ -47,11 +47,6 @@ public class GenericContextExchangeFilter implements ExchangeFilterFunction {
             return exchangeFunction.exchange(clientRequestWithBearerAuth);
         }
 
-        String oidcTokenString = SubjectHandler.getInstance().getOidcTokenString();
-        if (oidcTokenString == null) {
-            throw new TekniskException("Token mangler fra bruker! " + ThreadLocalAccessInfo.getInfo());
-        }
-        //TODO: MÅL tid.
         OAuth2AccessTokenResponse response = oAuth2AccessTokenService.getAccessToken(clientProperties);
         String issuedToken = response.getAccessToken();
 

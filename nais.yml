@@ -61,5 +61,7 @@ spec:
   env:
   - name: SPRING_PROFILES_ACTIVE
     value: nais
+  - name: GROUP_MELOSYS_INNLOGGING
+    value: {{GROUP_MELOSYS_INNLOGGING}}
   kafka:
     pool: {{ KAFKA_POOL }}

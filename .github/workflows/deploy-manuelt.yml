@@ -103,7 +103,7 @@ jobs:
           echo "APP_NAME=melosys" >> $GITHUB_ENV
           echo "APP_NAME_FRONTEND=melosys-web" >> $GITHUB_ENV
           echo "TENANT_URL=nav.no" >> $GITHUB_ENV
-          echo "GROUP_MELOSYS_INNLOGGING=bytt-ut-med-prod-sin" >> $GITHUB_ENV
+          echo "GROUP_MELOSYS_INNLOGGING=4a0c7611-a7b6-4ea5-ade7-1ea29e122620" >> $GITHUB_ENV
           echo "AZURE_APP_ACCEPTED_AUDIENCE=bytt-ut-med-prod-sin" >> $GITHUB_ENV
       - name: Deploy to q1
         if: github.event.inputs.environment == 'q1'
@@ -131,7 +131,7 @@ jobs:
           echo "VAULT_CLUSTER=dev" >> $GITHUB_ENV
           echo "APP_NAME=melosys" >> $GITHUB_ENV
           echo "TENANT_URL=trygdeetaten.no" >> $GITHUB_ENV
-          echo "APP_NAME_FRONTEND=melosys-web" >> $GITHUB_ENV
+          echo "APP_NAME_FRONTEND=melosys-w eb" >> $GITHUB_ENV
           echo "GROUP_MELOSYS_INNLOGGING=52981246-8032-40f0-863a-2bd2844f2d57" >> $GITHUB_ENV
           echo "AZURE_APP_ACCEPTED_AUDIENCE=b838073f-c847-4ca7-a7ae-0532f3e9f4be" >> $GITHUB_ENV
       - uses: nais/deploy/actions/deploy@v1
