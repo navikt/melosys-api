@@ -61,8 +61,8 @@ public interface PeriodeOmLovvalg extends ErPeriode, HarBestemmelse<LovvalgBeste
     default boolean erNyPeriodeForMedl() {
         return getMedlPeriodeID() == null;
     }
-    
+
     default boolean harForskjelligMedlID(Long medlPeriodeIdSomSjekkes) {
-        return !(getMedlPeriodeID() != null && getMedlPeriodeID().equals(medlPeriodeIdSomSjekkes));
+        return getMedlPeriodeID() == null || !getMedlPeriodeID().equals(medlPeriodeIdSomSjekkes);
     }
 }

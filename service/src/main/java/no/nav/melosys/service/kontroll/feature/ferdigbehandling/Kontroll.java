@@ -2,8 +2,6 @@ package no.nav.melosys.service.kontroll.feature.ferdigbehandling;
 
 import java.util.Collection;
 import java.util.Objects;
-import java.util.Set;
-import java.util.function.Function;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
@@ -63,20 +61,19 @@ class Kontroll {
     }
 
     private Collection<Kontrollfeil> utførKontrollerForAvslagOgHenleggelse(Behandling behandling) {
-        Set<Function<FerdigbehandlingKontrollData, Kontrollfeil>> vedtakKontroller = FerdigbehandlingKontrollsett.hentRegelsettForAvslagOgHenleggelse();
-        FerdigbehandlingKontrollData kontrollData = hentKontrollDataForAvslagOgHenleggelse(behandling);
-        return vedtakKontroller.stream()
-            .map(f -> f.apply(kontrollData))
+        var regelsettForAvslagOgHenleggelse = FerdigbehandlingKontrollsett.hentRegelsettForAvslagOgHenleggelse();
+        var ferdigbehandlingKontrollData = hentKontrollDataForAvslagOgHenleggelse(behandling);
+        return regelsettForAvslagOgHenleggelse.stream()
+            .map(f -> f.apply(ferdigbehandlingKontrollData))
             .filter(Objects::nonNull)
             .toList();
     }
 
     private Collection<Kontrollfeil> utførKontroller(Behandling behandling, Sakstyper sakstype) {
-        Set<Function<FerdigbehandlingKontrollData, Kontrollfeil>> vedtakKontroller =
-            FerdigbehandlingKontrollsett.hentRegelsettForVedtak(sakstype);
-        FerdigbehandlingKontrollData vedtakKontrollData = hentVedtakKontrollData(behandling);
-        return vedtakKontroller.stream()
-            .map(f -> f.apply(vedtakKontrollData))
+        var regelsettForVedtak = FerdigbehandlingKontrollsett.hentRegelsettForVedtak(sakstype);
+        var ferdigbehandlingKontrollData = hentVedtakKontrollData(behandling);
+        return regelsettForVedtak.stream()
+            .map(f -> f.apply(ferdigbehandlingKontrollData))
             .filter(Objects::nonNull)
             .toList();
     }
@@ -94,7 +91,7 @@ class Kontroll {
         BehandlingsgrunnlagData behandlingsgrunnlagData = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
         MedlemskapDokument medlemskapDokument = behandling.hentMedlemskapDokument();
         Persondata persondata = hentPersondata(behandling);
-        
+
         return new FerdigbehandlingKontrollData(medlemskapDokument, persondata, behandlingsgrunnlagData,
             periodeOmLovvalg, opprinneligLovvalgsperiode);
     }
