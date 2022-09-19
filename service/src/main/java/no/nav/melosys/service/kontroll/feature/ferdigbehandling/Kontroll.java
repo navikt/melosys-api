@@ -51,7 +51,7 @@ class Kontroll {
         }
     }
 
-    public Collection<Kontrollfeil> utførKontroller(long behandlingID, Sakstyper sakstype, Behandlingsresultattyper behandlingsresultattype) {
+    Collection<Kontrollfeil> utførKontroller(long behandlingID, Sakstyper sakstype, Behandlingsresultattyper behandlingsresultattype) {
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
 
         return switch (behandlingsresultattype) {
