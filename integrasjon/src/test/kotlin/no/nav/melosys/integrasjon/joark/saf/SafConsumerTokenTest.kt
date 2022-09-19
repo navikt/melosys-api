@@ -6,7 +6,7 @@ import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.integrasjon.ConsumerWireMockTestBase
 import no.nav.melosys.integrasjon.felles.GenericContextExchangeFilter
 import no.nav.melosys.integrasjon.reststs.RestTokenServiceClient
-import no.nav.melosys.integrasjon.reststs.StsRestTemplateProducer
+import no.nav.melosys.integrasjon.reststs.StsWebClientProducer
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import org.assertj.core.api.Assertions
@@ -20,7 +20,7 @@ import org.springframework.test.context.ActiveProfiles
 
 @WebMvcTest(
     value = [
-        StsRestTemplateProducer::class,
+        StsWebClientProducer::class,
         RestTokenServiceClient::class,
 
         SafConsumerImpl::class,

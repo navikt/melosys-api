@@ -6,7 +6,7 @@ import com.github.tomakehurst.wiremock.matching.StringValuePattern
 import no.nav.melosys.integrasjon.ConsumerWireMockTestBase
 import no.nav.melosys.integrasjon.pdl.dto.identer.Identliste
 import no.nav.melosys.integrasjon.reststs.RestTokenServiceClient
-import no.nav.melosys.integrasjon.reststs.StsRestTemplateProducer
+import no.nav.melosys.integrasjon.reststs.StsWebClientProducer
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -17,7 +17,7 @@ import org.springframework.test.context.ActiveProfiles
 
 @WebMvcTest(
     value = [
-        StsRestTemplateProducer::class,
+        StsWebClientProducer::class,
         RestTokenServiceClient::class,
 
         PDLConsumerImpl::class,

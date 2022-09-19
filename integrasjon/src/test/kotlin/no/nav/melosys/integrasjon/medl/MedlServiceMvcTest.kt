@@ -16,7 +16,7 @@ import no.nav.melosys.domain.dokument.medlemskap.Periode
 import no.nav.melosys.integrasjon.ConsumerWireMockTestBase
 import no.nav.melosys.integrasjon.felles.GenericContextExchangeFilter
 import no.nav.melosys.integrasjon.reststs.RestTokenServiceClient
-import no.nav.melosys.integrasjon.reststs.StsRestTemplateProducer
+import no.nav.melosys.integrasjon.reststs.StsWebClientProducer
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -27,7 +27,7 @@ import java.time.LocalDate
 
 @WebMvcTest(
     value = [
-        StsRestTemplateProducer::class,
+        StsWebClientProducer::class,
         RestTokenServiceClient::class,
 
         MedlemskapRestConsumer::class,

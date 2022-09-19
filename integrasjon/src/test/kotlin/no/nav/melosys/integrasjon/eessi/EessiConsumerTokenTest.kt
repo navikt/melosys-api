@@ -6,7 +6,7 @@ import com.github.tomakehurst.wiremock.matching.UrlPattern
 import no.nav.melosys.integrasjon.ConsumerWireMockTestBase
 import no.nav.melosys.integrasjon.felles.GenericContextClientRequestInterceptor
 import no.nav.melosys.integrasjon.reststs.RestStsClient
-import no.nav.melosys.integrasjon.reststs.StsRestTemplateProducer
+import no.nav.melosys.integrasjon.reststs.StsWebClientProducer
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.isNotNull
@@ -18,7 +18,7 @@ import org.springframework.test.context.ActiveProfiles
 
 @WebMvcTest(
     value = [
-        StsRestTemplateProducer::class,
+        StsWebClientProducer::class,
         RestStsClient::class,
 
         EessiConsumerImpl::class,
