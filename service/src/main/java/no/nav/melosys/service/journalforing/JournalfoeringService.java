@@ -8,6 +8,7 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
@@ -66,7 +67,6 @@ public class JournalfoeringService {
         this.eessiService = eessiService;
         this.fagsakService = fagsakService;
         this.persondataFasade = persondataFasade;
-        this.lovligeKombinasjonerService = lovligeKombinasjonerService;
         this.unleash = unleash;
         this.behandlingReplikeringsRegler = behandlingReplikeringsRegler;
     }
@@ -136,19 +136,29 @@ public class JournalfoeringService {
 
     private void opprettSakOgJournalfør(JournalfoeringOpprettDto journalfoeringDto) {
         log.info("{} oppretter ny sak etter journalføring av journalpost {}", SubjectHandler.getInstance().getUserID(), journalfoeringDto.getJournalpostID());
+        var behandleAlleSakerToggleEnabled = unleash.isEnabled("melosys.behandle_alle_saker");
 
         valider(journalfoeringDto);
 
-        final Sakstyper sakstype = Sakstyper.valueOf(journalfoeringDto.getFagsak().getSakstype());
-        final Behandlingstema behandlingstema = Behandlingstema.valueOf(journalfoeringDto.getBehandlingstemaKode());
+        final var sakstype = Sakstyper.valueOf(journalfoeringDto.getFagsak().getSakstype());
+        final var sakstema = behandleAlleSakerToggleEnabled ? Sakstemaer.valueOf(journalfoeringDto.getFagsak().getSakstema()) : null;
+        final var behandlingstema = Behandlingstema.valueOf(journalfoeringDto.getBehandlingstemaKode());
+        final var behandlingstype = behandleAlleSakerToggleEnabled ? Behandlingstyper.valueOf(journalfoeringDto.getBehandlingstypeKode()) : null;
 
-        if (!erGyldigBehandlingstemaForSakstype(sakstype, behandlingstema)) {
-            throw new FunksjonellException("Behandlingstema " + behandlingstema + " er ikke gyldig for sakstype " + sakstype);
-        }
+        if (behandleAlleSakerToggleEnabled) {
+            Aktoersroller hovedpart = journalfoeringDto.getBrukerID() != null ? Aktoersroller.BRUKER : Aktoersroller.VIRKSOMHET;
 
-        if (behandlingstema == Behandlingstema.ARBEID_I_UTLANDET && !unleash.isEnabled("melosys.folketrygden.mvp")) {
-            throw new FunksjonellException("Kan ikke opprette ny sak med behandlingstema " + behandlingstema +
-                "siden 'melosys.folketrygden.mvp' ikke er aktivert i unleash");
+            validerBehandlingstema(hovedpart, sakstype, sakstema, behandlingstema, null);
+            validerBehandlingstype(hovedpart, sakstype, sakstema, behandlingstema, behandlingstype, null);
+        } else {
+            if (!erGyldigBehandlingstemaForSakstype(sakstype, behandlingstema)) {
+                throw new FunksjonellException("Behandlingstema " + behandlingstema + " er ikke gyldig for sakstype " + sakstype);
+            }
+
+            if (behandlingstema == Behandlingstema.ARBEID_I_UTLANDET && !unleash.isEnabled("melosys.folketrygden.mvp")) {
+                throw new FunksjonellException("Kan ikke opprette ny sak med behandlingstema " + behandlingstema +
+                    "siden 'melosys.folketrygden.mvp' ikke er aktivert i unleash");
+            }
         }
 
         ProsessType prosessType;
@@ -160,9 +170,7 @@ public class JournalfoeringService {
 
         Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(prosessType, journalfoeringDto);
         prosessinstans.setData(ProsessDataKey.SAKSTYPE, sakstype);
-        if (unleash.isEnabled("melosys.behandle_alle_saker")) {
-            var sakstema = Sakstemaer.valueOf(journalfoeringDto.getFagsak().getSakstema());
-            var behandlingstype = Behandlingstyper.valueOf(journalfoeringDto.getBehandlingstypeKode());
+        if (behandleAlleSakerToggleEnabled) {
             prosessinstans.setData(ProsessDataKey.SAKSTEMA, sakstema);
             prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, behandlingstype);
         } else {
@@ -247,9 +255,11 @@ public class JournalfoeringService {
 
     @Transactional
     public void journalførOgOpprettAndregangsBehandling(JournalfoeringTilordneDto journalfoeringDto) {
+        var behandleAlleSakerToggleEnabled = unleash.isEnabled("melosys.behandle_alle_saker");
         var journalpost = joarkFasade.hentJournalpost(journalfoeringDto.getJournalpostID());
         var saksnummer = journalfoeringDto.getSaksnummer();
         var fagsak = fagsakService.hentFagsak(saksnummer);
+        var behandlingstema = behandleAlleSakerToggleEnabled ? Behandlingstema.valueOf(journalfoeringDto.getBehandlingstemaKode()) : null;
         var behandlingstype = Behandlingstyper.valueOf(journalfoeringDto.getBehandlingstypeKode());
 
         if (fagsak.hentAktivBehandling() != null) {
@@ -262,9 +272,9 @@ public class JournalfoeringService {
         Behandling sisteBehandling = fagsak.hentSistRegistrertBehandling();
 
         valider(journalfoeringDto);
-        if (unleash.isEnabled("melosys.behandle_alle_saker")) {
-            var behandlingstema = Behandlingstema.valueOf(journalfoeringDto.getBehandlingstemaKode());
-            validerBehandlingstype(sisteBehandling, behandlingstema, behandlingstype);
+        if (behandleAlleSakerToggleEnabled) {
+            Behandling sisteBehandling = fagsak.hentSistRegistrertBehandling();
+            validerBehandlingstemaOgBehandlingstype(sisteBehandling, behandlingstema, behandlingstype);
         } else {
             validerBehandlingstype(fagsak.getType(), behandlingstype);
         }
@@ -272,6 +282,9 @@ public class JournalfoeringService {
         log.info("{} knytter journalpost {} til sak {} og lager ny vurdering", SubjectHandler.getInstance().getUserID(), journalfoeringDto.getJournalpostID(), saksnummer);
 
         ProsessType prosessTypeForNyVurdering = finnProsessTypeForAndregangsbehandling(fagsak);
+
+        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(prosessTypeForNyVurdering, journalfoeringDto);
+        if (behandleAlleSakerToggleEnabled) {
 
         Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(prosessTypeForNyVurdering, journalfoeringDto);
         if (unleash.isEnabled("melosys.behandle_alle_saker")) {
@@ -306,11 +319,21 @@ public class JournalfoeringService {
         }
     }
 
-    private void validerBehandlingstype(Behandling sistBehandling, Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
+    private void validerBehandlingstemaOgBehandlingstype(Behandling sistBehandling, Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
         var fagsak = sistBehandling.getFagsak();
-        if (!lovligeKombinasjonerService.hentMuligeBehandlingstyper(fagsak.getHovedpartRolle(), fagsak.getType(),
-            fagsak.getTema(), behandlingstema, sistBehandling).contains(behandlingstype)) {
-            throw new FunksjonellException(behandlingstype + " er ikke en lovlig behandlingstype ved knytting av dokument til sak");
+        validerBehandlingstema(fagsak.getHovedpartRolle(), fagsak.getType(), fagsak.getTema(), behandlingstema, sistBehandling.getTema());
+        validerBehandlingstype(fagsak.getHovedpartRolle(), fagsak.getType(), fagsak.getTema(), behandlingstema, behandlingstype, sistBehandling);
+    }
+
+    private void validerBehandlingstema(Aktoersroller hovedpart, Sakstyper sakstype, Sakstemaer sakstema, Behandlingstema behandlingstema, Behandlingstema sistBehandlingstema) {
+        if (!lovligeKombinasjonerService.hentMuligeBehandlingstemaer(hovedpart, sakstype, sakstema, sistBehandlingstema).contains(behandlingstema)) {
+            throw new FunksjonellException(behandlingstema + " er ikke et lovlig behandlingstema med de andre valgte verdiene");
+        }
+    }
+
+    private void validerBehandlingstype(Aktoersroller hovedpart, Sakstyper sakstype, Sakstemaer sakstema, Behandlingstema behandlingstema, Behandlingstyper behandlingstype, Behandling sistBehandling) {
+        if (!lovligeKombinasjonerService.hentMuligeBehandlingstyper(hovedpart, sakstype, sakstema, behandlingstema, sistBehandling).contains(behandlingstype)) {
+            throw new FunksjonellException(behandlingstype + " er ikke en lovlig behandlingstype med de andre valgte verdiene");
         }
     }
 
