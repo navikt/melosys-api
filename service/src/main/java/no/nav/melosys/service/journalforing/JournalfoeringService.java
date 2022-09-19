@@ -270,7 +270,6 @@ public class JournalfoeringService {
             validerKanTilknytteJournalpostForSedTilSak(journalpost, saksnummer);
         }
 
-
         valider(journalfoeringDto);
         if (behandleAlleSakerToggleEnabled) {
             Behandling sisteBehandling = fagsak.hentSistRegistrertBehandling();
@@ -298,14 +297,10 @@ public class JournalfoeringService {
         if(!unleash.isEnabled("melosys.behandle_alle_saker")) {
             return ProsessType.JFR_NY_VURDERING;
         }
-        if (skalTidligereBehandlingReplikeres(fagsak)) {
+        if (behandlingReplikeringsRegler.skalTidligereBehandlingReplikeres(fagsak)) {
             return ProsessType.JFR_NY_VURDERING;
         }
         return ProsessType.JFR_ANDREGANGS_BEHANDLING;
-    }
-
-    private boolean skalTidligereBehandlingReplikeres(Fagsak fagsak) {
-        return behandlingReplikeringsRegler.skalTidligereBehandlingReplikeres(fagsak);
     }
 
     private void validerKanTilknytteJournalpostForSedTilSak(Journalpost journalpost, String tilknyttTilSaksnummer) {
