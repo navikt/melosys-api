@@ -30,70 +30,51 @@ class BehandlingReplikeringsReglerTest {
     @MockK
     lateinit var behandlingsresultatRepository: BehandlingsresultatRepository
 
-    @ParameterizedTest(name = "{0} - {1} - {2}")
-    @MethodSource("skalTidligereBehandlingReplikeresData")
-    fun skalTidligereBehandlingReplikeres(
+    @ParameterizedTest(name = "{0} - {1}")
+    @MethodSource("tidligereBehandlingSkalIkkeReplikeresData")
+    fun tidligereBehandlingSkalIkkeReplikeres(
         sakstype: Sakstyper,
-        behandlingHolder: BehandlingHolder,
-        expected: Boolean
+        behandlingHolder: BehandlingHolder
     ) {
-        behandlingHolder.setupMock { id: Long, behandlingsresultattype: Behandlingsresultattyper? ->
-            every { behandlingsresultatRepository.findById(id) } returns lagBehandlingsresultat(behandlingsresultattype)
-        }
-        val behandlingReplikeringsRegler = BehandlingReplikeringsRegler(behandlingsresultatRepository)
-        val fagsak = Fagsak().apply {
-            type = sakstype
-            this.behandlinger = behandlingHolder.behandlinger(this).map { it.first }
-        }
+        val (behandlingReplikeringsRegler, fagsak) = setup(behandlingHolder, sakstype)
 
 
         val result = behandlingReplikeringsRegler.skalTidligereBehandlingReplikeres(fagsak)
 
 
-        result.shouldBe(expected)
+        result.shouldBe(false)
     }
 
-    private fun skalTidligereBehandlingReplikeresData(): List<Arguments> = listOf(
-        arguments(
-            Sakstyper.TRYGDEAVTALE,
-            BehandlingHolder().apply {
-                add(Behandlingstyper.FØRSTEGANG, Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL)
-            },
-            false
-        ),
-        arguments(
-            Sakstyper.EU_EOS,
-            BehandlingHolder().apply {
-                add(Behandlingstyper.FØRSTEGANG, Behandlingstema.ARBEID_KUN_NORGE)
-            },
-            false
-        ),
-        arguments(
-            Sakstyper.EU_EOS,
-            BehandlingHolder().apply {
-                add(Behandlingstyper.HENVENDELSE, Behandlingstema.UTSENDT_ARBEIDSTAKER)
-            },
-            false
-        ),
-        arguments(
-            Sakstyper.EU_EOS,
-            BehandlingHolder().apply {
-                add(Behandlingstyper.ENDRET_PERIODE, Behandlingstema.UTSENDT_ARBEIDSTAKER)
-            },
-            false
-        ),
-        arguments(
-            Sakstyper.EU_EOS,
-            BehandlingHolder().apply {
-                add(
-                    Behandlingstyper.ENDRET_PERIODE,
-                    Behandlingstema.UTSENDT_ARBEIDSTAKER,
-                    Behandlingsresultattyper.HENLEGGELSE
-                )
-            },
+    @ParameterizedTest(name = "{0} - {1}")
+    @MethodSource("tidligereBehandlingSkalReplikeresData")
+    fun tidligereBehandlingSkalReplikeres(
+        sakstype: Sakstyper,
+        behandlingHolder: BehandlingHolder
+    ) {
+        val (behandlingReplikeringsRegler, fagsak) = setup(behandlingHolder, sakstype)
 
-            false
-        ),
+
+        val result = behandlingReplikeringsRegler.skalTidligereBehandlingReplikeres(fagsak)
+
+
+        result.shouldBe(true)
+    }
+
+    private fun setup(
+        behandlingHolder: BehandlingHolder,
+        sakstype: Sakstyper
+    ): Pair<BehandlingReplikeringsRegler, Fagsak> {
+        behandlingHolder.setupMock { id: Long, behandlingsresultattype: Behandlingsresultattyper? ->
+            every { behandlingsresultatRepository.findById(id) } returns lagBehandlingsresultat(behandlingsresultattype)
+        }
+        val fagsak = Fagsak().apply {
+            type = sakstype
+            this.behandlinger = behandlingHolder.behandlinger(this).map { it.first }
+        }
+        return Pair(BehandlingReplikeringsRegler(behandlingsresultatRepository), fagsak)
+    }
+
+    private fun tidligereBehandlingSkalReplikeresData() = listOf(
         arguments(
             Sakstyper.EU_EOS,
             BehandlingHolder().apply {
@@ -102,8 +83,7 @@ class BehandlingReplikeringsReglerTest {
                     Behandlingstema.UTSENDT_ARBEIDSTAKER,
                     Behandlingsresultattyper.AVVIST_KLAGE
                 )
-            },
-            true
+            }
         ),
         arguments(
             Sakstyper.EU_EOS,
@@ -118,9 +98,45 @@ class BehandlingReplikeringsReglerTest {
                     Behandlingstema.UTSENDT_ARBEIDSTAKER,
                     Behandlingsresultattyper.AVVIST_KLAGE
                 )
-            },
-            true
+            }
         ),
+    )
+
+    private fun tidligereBehandlingSkalIkkeReplikeresData() = listOf(
+        arguments(
+            Sakstyper.TRYGDEAVTALE,
+            BehandlingHolder().apply {
+                add(Behandlingstyper.FØRSTEGANG, Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL)
+            }
+        ),
+        arguments(
+            Sakstyper.EU_EOS,
+            BehandlingHolder().apply {
+                add(Behandlingstyper.FØRSTEGANG, Behandlingstema.ARBEID_KUN_NORGE)
+            }
+        ),
+        arguments(
+            Sakstyper.EU_EOS,
+            BehandlingHolder().apply {
+                add(Behandlingstyper.HENVENDELSE, Behandlingstema.UTSENDT_ARBEIDSTAKER)
+            }
+        ),
+        arguments(
+            Sakstyper.EU_EOS,
+            BehandlingHolder().apply {
+                add(Behandlingstyper.ENDRET_PERIODE, Behandlingstema.UTSENDT_ARBEIDSTAKER)
+            }
+        ),
+        arguments(
+            Sakstyper.EU_EOS,
+            BehandlingHolder().apply {
+                add(
+                    Behandlingstyper.ENDRET_PERIODE,
+                    Behandlingstema.UTSENDT_ARBEIDSTAKER,
+                    Behandlingsresultattyper.HENLEGGELSE
+                )
+            }
+        )
     )
 
     @ParameterizedTest(name = "{0} - {2} - {3} - {4}")
@@ -208,7 +224,9 @@ class BehandlingReplikeringsReglerTest {
         }
 
         override fun toString(): String {
-            return behandlingerMedType.map { "(${it.first.type}, ${it.first.tema}) - ${it.second}" }.toString()
+            return behandlingerMedType.map { (behandling, behandlingsresultattyper) ->
+                "(${behandling.type}, ${behandling.tema}) - ${behandlingsresultattyper ?: "ikke i db"}"
+            }.toString()
         }
 
         fun setupMock(function: (Long, Behandlingsresultattyper?) -> MockKAdditionalAnswerScope<Optional<Behandlingsresultat>, Optional<Behandlingsresultat>>) {
