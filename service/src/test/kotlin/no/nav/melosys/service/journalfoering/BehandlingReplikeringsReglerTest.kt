@@ -53,77 +53,75 @@ class BehandlingReplikeringsReglerTest {
         result.shouldBe(expected)
     }
 
-    private fun skalTidligereBehandlingReplikeresData(): List<Arguments> {
-        return listOf(
-            arguments(
-                Sakstyper.TRYGDEAVTALE,
-                BehandlingHolder().apply {
-                    add(Behandlingstyper.FØRSTEGANG, Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL)
-                },
-                false
-            ),
-            arguments(
-                Sakstyper.EU_EOS,
-                BehandlingHolder().apply {
-                    add(Behandlingstyper.FØRSTEGANG, Behandlingstema.ARBEID_KUN_NORGE)
-                },
-                false
-            ),
-            arguments(
-                Sakstyper.EU_EOS,
-                BehandlingHolder().apply {
-                    add(Behandlingstyper.HENVENDELSE, Behandlingstema.UTSENDT_ARBEIDSTAKER)
-                },
-                false
-            ),
-            arguments(
-                Sakstyper.EU_EOS,
-                BehandlingHolder().apply {
-                    add(Behandlingstyper.ENDRET_PERIODE, Behandlingstema.UTSENDT_ARBEIDSTAKER)
-                },
-                false
-            ),
-            arguments(
-                Sakstyper.EU_EOS,
-                BehandlingHolder().apply {
-                    add(
-                        Behandlingstyper.ENDRET_PERIODE,
-                        Behandlingstema.UTSENDT_ARBEIDSTAKER,
-                        Behandlingsresultattyper.HENLEGGELSE
-                    )
-                },
+    private fun skalTidligereBehandlingReplikeresData(): List<Arguments> = listOf(
+        arguments(
+            Sakstyper.TRYGDEAVTALE,
+            BehandlingHolder().apply {
+                add(Behandlingstyper.FØRSTEGANG, Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL)
+            },
+            false
+        ),
+        arguments(
+            Sakstyper.EU_EOS,
+            BehandlingHolder().apply {
+                add(Behandlingstyper.FØRSTEGANG, Behandlingstema.ARBEID_KUN_NORGE)
+            },
+            false
+        ),
+        arguments(
+            Sakstyper.EU_EOS,
+            BehandlingHolder().apply {
+                add(Behandlingstyper.HENVENDELSE, Behandlingstema.UTSENDT_ARBEIDSTAKER)
+            },
+            false
+        ),
+        arguments(
+            Sakstyper.EU_EOS,
+            BehandlingHolder().apply {
+                add(Behandlingstyper.ENDRET_PERIODE, Behandlingstema.UTSENDT_ARBEIDSTAKER)
+            },
+            false
+        ),
+        arguments(
+            Sakstyper.EU_EOS,
+            BehandlingHolder().apply {
+                add(
+                    Behandlingstyper.ENDRET_PERIODE,
+                    Behandlingstema.UTSENDT_ARBEIDSTAKER,
+                    Behandlingsresultattyper.HENLEGGELSE
+                )
+            },
 
-                false
-            ),
-            arguments(
-                Sakstyper.EU_EOS,
-                BehandlingHolder().apply {
-                    add(
-                        Behandlingstyper.ENDRET_PERIODE,
-                        Behandlingstema.UTSENDT_ARBEIDSTAKER,
-                        Behandlingsresultattyper.AVVIST_KLAGE
-                    )
-                },
-                true
-            ),
-            arguments(
-                Sakstyper.EU_EOS,
-                BehandlingHolder().apply {
-                    add(
-                        Behandlingstyper.ENDRET_PERIODE,
-                        Behandlingstema.UTSENDT_ARBEIDSTAKER,
-                        Behandlingsresultattyper.HENLEGGELSE
-                    )
-                    add(
-                        Behandlingstyper.NY_VURDERING,
-                        Behandlingstema.UTSENDT_ARBEIDSTAKER,
-                        Behandlingsresultattyper.AVVIST_KLAGE
-                    )
-                },
-                true
-            ),
-        )
-    }
+            false
+        ),
+        arguments(
+            Sakstyper.EU_EOS,
+            BehandlingHolder().apply {
+                add(
+                    Behandlingstyper.ENDRET_PERIODE,
+                    Behandlingstema.UTSENDT_ARBEIDSTAKER,
+                    Behandlingsresultattyper.AVVIST_KLAGE
+                )
+            },
+            true
+        ),
+        arguments(
+            Sakstyper.EU_EOS,
+            BehandlingHolder().apply {
+                add(
+                    Behandlingstyper.ENDRET_PERIODE,
+                    Behandlingstema.UTSENDT_ARBEIDSTAKER,
+                    Behandlingsresultattyper.HENLEGGELSE
+                )
+                add(
+                    Behandlingstyper.NY_VURDERING,
+                    Behandlingstema.UTSENDT_ARBEIDSTAKER,
+                    Behandlingsresultattyper.AVVIST_KLAGE
+                )
+            },
+            true
+        ),
+    )
 
     @ParameterizedTest(name = "{0} - {2} - {3} - {4}")
     @MethodSource("behandlingMedBehandlingTyperOgIkkeBehandlingsresultatTyperData")
@@ -155,30 +153,29 @@ class BehandlingReplikeringsReglerTest {
     }
 
     private fun behandlingMedBehandlingTyperOgIkkeBehandlingsresultatTyperData(): List<Arguments> {
+        fun createBehandlinger(behandlingstyper: List<Behandlingstyper>) =
+            behandlingstyper.map { Behandling().apply { type = it } }
+
+        fun createBehandling(behandlingstype: Behandlingstyper) = createBehandlinger(listOf(behandlingstype))
+
         return listOf(
             arguments(
                 Behandlingsresultattyper.ANMODNING_OM_UNNTAK,
-                listOf(Behandling().apply {
-                    type = Behandlingstyper.FØRSTEGANG
-                }),
+                createBehandling(Behandlingstyper.FØRSTEGANG),
                 listOf(Behandlingstyper.FØRSTEGANG),
                 listOf(Behandlingsresultattyper.ANMODNING_OM_UNNTAK),
                 false
             ),
             arguments(
                 null,
-                listOf(Behandling().apply {
-                    type = Behandlingstyper.FØRSTEGANG
-                }),
+                createBehandling(Behandlingstyper.FØRSTEGANG),
                 listOf(Behandlingstyper.FØRSTEGANG),
                 listOf(Behandlingsresultattyper.ANMODNING_OM_UNNTAK),
                 false
             ),
             arguments(
                 Behandlingsresultattyper.IKKE_FASTSATT,
-                listOf(Behandling().apply {
-                    type = Behandlingstyper.FØRSTEGANG
-                }),
+                createBehandling(Behandlingstyper.FØRSTEGANG),
                 listOf(Behandlingstyper.FØRSTEGANG),
                 listOf(Behandlingsresultattyper.ANMODNING_OM_UNNTAK),
                 true
@@ -187,13 +184,13 @@ class BehandlingReplikeringsReglerTest {
     }
 
     class BehandlingHolder {
-        private val behandling: ArrayList<Pair<Behandling, Behandlingsresultattyper?>> = ArrayList()
+        private val behandlingerMedType: ArrayList<Pair<Behandling, Behandlingsresultattyper?>> = ArrayList()
         fun add(
             type: Behandlingstyper,
             tema: Behandlingstema,
             behandlingsresultattype: Behandlingsresultattyper? = null
         ) {
-            behandling.add(Pair(Behandling().apply {
+            behandlingerMedType.add(Pair(Behandling().apply {
                 this.tema = tema
                 this.type = type
             }, behandlingsresultattype))
@@ -202,7 +199,7 @@ class BehandlingReplikeringsReglerTest {
         fun behandlinger(fagsak: Fagsak): List<Pair<Behandling, Behandlingsresultattyper?>> {
             var i: Long = 0
             val date = LocalDate.of(2000, 1, 1).atStartOfDay()
-            return behandling.map {
+            return behandlingerMedType.map {
                 it.first.id = i++
                 it.first.registrertDato = date.plusDays(i).toInstant(ZoneOffset.UTC)
                 it.first.fagsak = fagsak
@@ -211,12 +208,12 @@ class BehandlingReplikeringsReglerTest {
         }
 
         override fun toString(): String {
-            return behandling.map { "(${it.first.type}, ${it.first.tema}) - ${it.second}" }.toString()
+            return behandlingerMedType.map { "(${it.first.type}, ${it.first.tema}) - ${it.second}" }.toString()
         }
 
         fun setupMock(function: (Long, Behandlingsresultattyper?) -> MockKAdditionalAnswerScope<Optional<Behandlingsresultat>, Optional<Behandlingsresultat>>) {
             var i: Long = 0
-            behandling.forEach {
+            behandlingerMedType.forEach {
                 function(i++, it.second)
             }
 
