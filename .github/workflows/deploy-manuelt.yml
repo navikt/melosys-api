@@ -102,9 +102,9 @@ jobs:
           echo "VAULT_CLUSTER=prod" >> $GITHUB_ENV
           echo "APP_NAME=melosys" >> $GITHUB_ENV
           echo "APP_NAME_FRONTEND=melosys-web" >> $GITHUB_ENV
+          echo "APP_NAME_TRYGDEAVTALE=melosys-trygdeavtale" >> $GITHUB_ENV
           echo "TENANT_URL=nav.no" >> $GITHUB_ENV
           echo "GROUP_MELOSYS_INNLOGGING=4a0c7611-a7b6-4ea5-ade7-1ea29e122620" >> $GITHUB_ENV
-          echo "AZURE_APP_ACCEPTED_AUDIENCE=bytt-ut-med-prod-sin" >> $GITHUB_ENV
       - name: Deploy to q1
         if: github.event.inputs.environment == 'q1'
         run: |
@@ -116,12 +116,12 @@ jobs:
           echo "APP_NAME=melosys-q1" >> $GITHUB_ENV
           echo "TENANT_URL=trygdeetaten.no" >> $GITHUB_ENV
           echo "APP_NAME_FRONTEND=melosys-web-q1" >> $GITHUB_ENV
-          echo "GROUP_MELOSYS_INNLOGGING=52981246-8032-40f0-863a-2bd2844f2d57" >> $GITHUB_ENV
-          echo "AZURE_APP_ACCEPTED_AUDIENCE=b838073f-c847-4ca7-a7ae-0532f3e9f4be" >> $GITHUB_ENV
+          echo "APP_NAME_TRYGDEAVTALE=melosys-trygdeavtale-q1" >> $GITHUB_ENV
           echo "APP_NAME_PDL=pdl-api" >> $GITHUB_ENV
           echo "APP_NAME_SAF=saf" >> $GITHUB_ENV
           echo "APP_NAME_OPPGAVE=oppgave-q1" >> $GITHUB_ENV
           echo "APP_NAME_EESSI=melosys-eessi-q1" >> $GITHUB_ENV
+          echo "GROUP_MELOSYS_INNLOGGING=52981246-8032-40f0-863a-2bd2844f2d57" >> $GITHUB_ENV
       - name: Deploy to dev
         if: github.event.inputs.environment == 'dev'
         run: |
@@ -131,16 +131,16 @@ jobs:
           echo "VAULT_CLUSTER=dev" >> $GITHUB_ENV
           echo "APP_NAME=melosys" >> $GITHUB_ENV
           echo "TENANT_URL=trygdeetaten.no" >> $GITHUB_ENV
-          echo "APP_NAME_FRONTEND=melosys-w eb" >> $GITHUB_ENV
+          echo "APP_NAME_FRONTEND=melosys-web" >> $GITHUB_ENV
+          echo "APP_NAME_TRYGDEAVTALE=melosys-trygdeavtale" >> $GITHUB_ENV
           echo "GROUP_MELOSYS_INNLOGGING=52981246-8032-40f0-863a-2bd2844f2d57" >> $GITHUB_ENV
-          echo "AZURE_APP_ACCEPTED_AUDIENCE=b838073f-c847-4ca7-a7ae-0532f3e9f4be" >> $GITHUB_ENV
       - uses: nais/deploy/actions/deploy@v1
         if: ${{ env.CLUSTER != '' }}
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: ${{ env.CLUSTER }}
           RESOURCE: nais.yml
-          VAR: IMAGE=${{ env.IMAGE }},URL=${{ env.URL }},KAFKA_POOL=${{ env.KAFKA_POOL }},VAULT_CLUSTER=${{ env.VAULT_CLUSTER }},APP_NAME=${{ env.APP_NAME }},TENANT_URL=${{ env.TENANT_URL }},GROUP_MELOSYS_INNLOGGING=${{ env.GROUP_MELOSYS_INNLOGGING }},APP_NAME_FRONTEND=${{ env.APP_NAME_FRONTEND }},APP_NAME_PDL=${{ env.APP_NAME_PDL }},APP_NAME_OPPGAVE=${{ env.APP_NAME_OPPGAVE }},APP_NAME_SAF=${{ env.APP_NAME_SAF }},APP_NAME_EESSI=${{ env.APP_NAME_EESSI }},AZURE_APP_ACCEPTED_AUDIENCE=${{ env.AZURE_APP_ACCEPTED_AUDIENCE }}
+          VAR: IMAGE=${{ env.IMAGE }},URL=${{ env.URL }},KAFKA_POOL=${{ env.KAFKA_POOL }},VAULT_CLUSTER=${{ env.VAULT_CLUSTER }},APP_NAME=${{ env.APP_NAME }},TENANT_URL=${{ env.TENANT_URL }},GROUP_MELOSYS_INNLOGGING=${{ env.GROUP_MELOSYS_INNLOGGING }},APP_NAME_FRONTEND=${{ env.APP_NAME_FRONTEND }},APP_NAME_TRYGDEAVTALE=${{ env.APP_NAME_TRYGDEAVTALE }},APP_NAME_PDL=${{ env.APP_NAME_PDL }},APP_NAME_OPPGAVE=${{ env.APP_NAME_OPPGAVE }},APP_NAME_SAF=${{ env.APP_NAME_SAF }},APP_NAME_EESSI=${{ env.APP_NAME_EESSI }}
       - name: Get commit message
         run: echo "COMMIT_MSG=$(git log --format=%s -n 1)" >> $GITHUB_ENV
       - name: Slack Notification

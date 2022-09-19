@@ -12,7 +12,7 @@ import java.util.List;
 public class SpringSubjectHandler extends SubjectHandler {
 
     private static final String AAD = "aad";
-    private static final String JWT_TOKEN_CLAIM_NAVIDENT = "NAVident"; //TODO: Fiks
+    private static final String JWT_TOKEN_CLAIM_NAVIDENT = "NAVident";
     private static final String JWT_TOKEN_CLAIM_NAME = "name";
     private static final String JWT_TOKEN_CLAIM_GROUPS = "groups";
 

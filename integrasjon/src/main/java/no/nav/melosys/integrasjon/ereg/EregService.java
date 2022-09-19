@@ -44,8 +44,6 @@ public class EregService implements EregFasade {
             throw new IntegrasjonException(e);
         }
 
-
-
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.leggTilKildesystemOgMottattDokument(
             SaksopplysningKildesystem.EREG, xmlWriter.toString());

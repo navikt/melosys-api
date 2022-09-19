@@ -22,15 +22,12 @@ public interface RestConsumer {
                 .getBytes(StandardCharsets.UTF_8));
     }
 
-    default String getAuth(String scope) {
+    default String getAuth() {
         if (ThreadLocalAccessInfo.shouldUseSystemToken()) {
             return basicAuth();
         }
-        if (scope == null) {
-            throw new NotSupportedException("Prøver å hente autoriseringstoken for bruker, men ingen scope har blitt angitt.");
-        }
-        // Prøver å få token fra STS.. HER MÅ VI ALTSÅ FÅ NY TOKEN FRA AZURE AD
-        return "Bearer " + SubjectHandler.getInstance().getOidcTokenString();
+
+        throw new NotSupportedException("Prøver å hente autoriseringstoken for bruker, men ingen scope har blitt angitt.");
     }
 
     default String getCallID() {

@@ -52,7 +52,7 @@ public class RestTokenServiceClient implements RestStsClient {
             Map<String, Object> responseBody = webClient.get()
                 .uri(createUriString())
                 .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
-                .header(HttpHeaders.AUTHORIZATION, getAuth(null))
+                .header(HttpHeaders.AUTHORIZATION, getAuth())
                 .retrieve()
                 .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {
                 })
@@ -80,12 +80,6 @@ public class RestTokenServiceClient implements RestStsClient {
         return UriComponentsBuilder.fromPath("/")
             .queryParam("grant_type", "client_credentials")
             .queryParam("scope", "openid").toUriString();
-    }
-
-    private HttpEntity<?> createHttpEntity() {
-        HttpHeaders headers = new HttpHeaders();
-
-        return new HttpEntity<>(headers);
     }
 
     @Override

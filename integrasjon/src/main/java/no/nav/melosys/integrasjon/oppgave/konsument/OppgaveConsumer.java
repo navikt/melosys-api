@@ -8,6 +8,7 @@ import no.nav.melosys.integrasjon.oppgave.konsument.dto.OppgaveSearchRequest;
 import no.nav.melosys.integrasjon.oppgave.konsument.dto.OpprettOppgaveDto;
 import org.springframework.retry.annotation.Retryable;
 
+@Retryable
 public interface OppgaveConsumer extends RestConsumer {
 
     OppgaveDto hentOppgave(String oppgaveId);
