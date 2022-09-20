@@ -18,7 +18,6 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -96,7 +95,6 @@ class KontrollMedRegisterOpplysningServiceTest {
         verify(registeropplysningerService).hentOgLagreOpplysninger(any());
     }
 
-    @NotNull
     private Behandlingsresultat lagBehandlingsresultat() {
         var behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setLovvalgsperioder(Set.of(lovvalgsperiode));
