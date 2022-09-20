@@ -38,14 +38,11 @@ final class OppgaveFasadeImplTest {
     @Captor
     private ArgumentCaptor<OppgaveSearchRequest> oppgaveSearchRequestCaptor;
 
-    private FakeUnleash unleash = new FakeUnleash();
-
     private OppgaveFasadeImpl oppgaveFasadeImpl;
 
     @BeforeEach
     void setup() {
-        oppgaveFasadeImpl = new OppgaveFasadeImpl(oppgaveConsumer, unleash);
-        unleash.enableAll();
+        oppgaveFasadeImpl = new OppgaveFasadeImpl(oppgaveConsumer);
     }
 
     @Test
@@ -151,7 +148,7 @@ final class OppgaveFasadeImplTest {
             .thenReturn(List.of(jfrOppgave, behOppgave));
 
         List<Oppgave> oppgaver =
-            oppgaveFasadeImpl.finnUtildelteOppgaverEtterFrist("abbehandlingstema1234", null);
+            oppgaveFasadeImpl.finnUtildelteOppgaverEtterFrist(null);
 
         assertThat(oppgaver).hasSize(1);
         assertThat(oppgaver.get(0).getSaksnummer()).isEqualTo("MEL-123");

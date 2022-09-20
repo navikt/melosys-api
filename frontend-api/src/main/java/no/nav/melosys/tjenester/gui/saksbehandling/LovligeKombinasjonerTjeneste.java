@@ -44,7 +44,7 @@ public class LovligeKombinasjonerTjeneste {
     @GetMapping("/sakstemaer/hent-lovlige-kombinasjoner")
     @ApiOperation(value = "Henter alle mulige sakstemaer basert på sakstypen", notes = ("Henter alle mulige sakstemaer basert på sakstypen"))
     public ResponseEntity<Set<Sakstemaer>> hentAlleMuligeSakstemaer(
-        @RequestParam("hovedpart") Aktoersroller hovedpart,
+        @RequestParam(value = "hovedpart", required = false) Aktoersroller hovedpart,
         @RequestParam("sakstype") Sakstyper sakstype) {
         return ResponseEntity.ok(lovligeKombinasjonerService.hentMuligeSakstemaer(hovedpart, sakstype));
     }
@@ -52,7 +52,7 @@ public class LovligeKombinasjonerTjeneste {
     @GetMapping("/behandlingstemaer/hent-lovlige-kombinasjoner")
     @ApiOperation(value = "Henter alle mulige behandlingstemaer basert på sakstype og sakstema", notes = ("Henter alle mulige behandlingstemaer basert på sakstype og sakstema"))
     public ResponseEntity<Set<Behandlingstema>> hentAlleMuligeBehandlingstemaer(
-        @RequestParam("hovedpart") Aktoersroller hovedpart,
+        @RequestParam(value = "hovedpart", required = false) Aktoersroller hovedpart,
         @RequestParam("sakstype") Sakstyper sakstype,
         @RequestParam("sakstema") Sakstemaer sakstema,
         @RequestParam(value = "sistBehandlingstema", required = false) Behandlingstema sistBehandlingstema

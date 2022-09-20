@@ -34,7 +34,7 @@ public final class OppgaveFactory {
     }
 
     /**
-     * @deprecated Fjernes med toggle melosys.oppgave.oppretting
+     * @deprecated Fjernes med toggle melosys.behandle_alle_saker
      */
     @Deprecated
     public static Oppgave.Builder lagBehandlingsOppgaveForType(Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
@@ -77,7 +77,7 @@ public final class OppgaveFactory {
     }
 
     /**
-     * @deprecated Fjernes med toggle melosys.oppgave.oppretting
+     * @deprecated Fjernes med toggle melosys.behandle_alle_saker
      */
     @Deprecated
     static OppgaveParametere hentOppgaveParametere(Behandlingstema behandlingstema) {
@@ -135,6 +135,8 @@ public final class OppgaveFactory {
     }
 
     private static boolean skalBrukeMelosysBehandlingstemaForBehandlingstema(Sakstemaer sakstema, Sakstyper sakstype, Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
+        if (behandlingstype == null) return false;
+
         return switch (behandlingstema) {
             case PENSJONIST -> switch (sakstema) {
                 case MEDLEMSKAP_LOVVALG ->
@@ -221,7 +223,7 @@ public final class OppgaveFactory {
     }
 
     /**
-     * @deprecated Fjernes med toggle melosys.oppgave.oppretting
+     * @deprecated Fjernes med toggle melosys.behandle_alle_saker
      */
     @Deprecated
     static class OppgaveParametere {
