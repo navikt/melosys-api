@@ -94,13 +94,7 @@ public class JournalfoeringService {
             validerKanOppretteSakFraSed(journalpost);
         }
 
-        if (erBehandlingAvSedForespørsler(journalfoeringDto.getBehandlingstemaKode()) || erBehandlingAvSøknad(journalfoeringDto.getBehandlingstemaKode())) {
-            opprettSakOgJournalfør(journalfoeringDto);
-        } else {
-            throw new FunksjonellException(
-                String.format("Manuell journalføring av behandlingstema %s støttes ikke", journalfoeringDto.getBehandlingstemaKode())
-            );
-        }
+        opprettSakOgJournalfør(journalfoeringDto);
     }
 
     private void validerKanOppretteSakFraSed(Journalpost journalpost) {
@@ -134,7 +128,11 @@ public class JournalfoeringService {
     private void opprettSakOgJournalfør(JournalfoeringOpprettDto journalfoeringDto) {
         log.info("{} oppretter ny sak etter journalføring av journalpost {}", SubjectHandler.getInstance().getUserID(), journalfoeringDto.getJournalpostID());
         var behandleAlleSakerToggleEnabled = unleash.isEnabled("melosys.behandle_alle_saker");
-
+        if (!behandleAlleSakerToggleEnabled && !erBehandlingAvSedForespørsler(journalfoeringDto.getBehandlingstemaKode()) && !erBehandlingAvSøknad(journalfoeringDto.getBehandlingstemaKode())) {
+            throw new FunksjonellException(
+                String.format("Manuell journalføring av behandlingstema %s støttes ikke", journalfoeringDto.getBehandlingstemaKode())
+            );
+        }
         valider(journalfoeringDto);
 
         final var sakstype = Sakstyper.valueOf(journalfoeringDto.getFagsak().getSakstype());
