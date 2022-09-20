@@ -280,7 +280,7 @@ public class JournalfoeringService {
 
         log.info("{} knytter journalpost {} til sak {} og lager ny vurdering", SubjectHandler.getInstance().getUserID(), journalfoeringDto.getJournalpostID(), saksnummer);
 
-        ProsessType prosessTypeForNyVurdering = finnProsessTypeForAndregangsbehandling(fagsak);
+        ProsessType prosessTypeForNyVurdering = finnProsessTypeForAndregangsbehandling(behandlingstype, behandlingstema, fagsak);
 
         Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(prosessTypeForNyVurdering, journalfoeringDto);
         if (behandleAlleSakerToggleEnabled) {
@@ -293,11 +293,11 @@ public class JournalfoeringService {
         prosessinstansService.lagre(prosessinstans);
     }
 
-    private ProsessType finnProsessTypeForAndregangsbehandling(Fagsak fagsak) {
+    private ProsessType finnProsessTypeForAndregangsbehandling(Behandlingstyper behandlingstype, Behandlingstema behandlingstema, Fagsak fagsak) {
         if(!unleash.isEnabled("melosys.behandle_alle_saker")) {
             return ProsessType.JFR_NY_VURDERING;
         }
-        if (behandlingReplikeringsRegler.skalTidligereBehandlingReplikeres(fagsak)) {
+        if (behandlingReplikeringsRegler.skalTidligereBehandlingReplikeres(fagsak, behandlingstype, behandlingstema)) {
             return ProsessType.JFR_NY_VURDERING;
         }
         return ProsessType.JFR_ANDREGANGS_BEHANDLING;

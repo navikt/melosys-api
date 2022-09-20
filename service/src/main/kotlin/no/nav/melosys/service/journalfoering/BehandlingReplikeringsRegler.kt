@@ -4,6 +4,7 @@ import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.repository.BehandlingsresultatRepository
@@ -12,11 +13,13 @@ import org.springframework.stereotype.Component
 @Component
 class BehandlingReplikeringsRegler(private val behandlingsresultatRepository: BehandlingsresultatRepository) {
 
-    fun skalTidligereBehandlingReplikeres(fagsak: Fagsak): Boolean {
+    fun skalTidligereBehandlingReplikeres(
+        fagsak: Fagsak,
+        behandlingstype: Behandlingstyper,
+        behandlingstema: Behandlingstema
+    ): Boolean {
         val sistRegistrertBehandling = fagsak.hentSistRegistrertBehandling()
-        val behandlingType = sistRegistrertBehandling.type
         val sakstype = sistRegistrertBehandling.fagsak.type
-        val behandlingstema = sistRegistrertBehandling.tema
 
         when (behandlingstema) {
             ARBEID_KUN_NORGE,
@@ -32,7 +35,7 @@ class BehandlingReplikeringsRegler(private val behandlingsresultatRepository: Be
             ANMODNING_OM_UNNTAK_HOVEDREGEL -> if (sakstype == Sakstyper.TRYGDEAVTALE) return false
             YRKESAKTIV -> if (sakstype == Sakstyper.FTRL) return false
             else ->
-                if (behandlingType == Behandlingstyper.HENVENDELSE || behandlingType == Behandlingstyper.KLAGE) return false
+                if (behandlingstype == Behandlingstyper.HENVENDELSE || behandlingstype == Behandlingstyper.KLAGE) return false
         }
 
         return finnesBehandlingMedBehandlingTyperOgIkkeBehandlingsresultatTyper(
