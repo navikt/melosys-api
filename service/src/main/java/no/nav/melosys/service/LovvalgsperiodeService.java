@@ -47,7 +47,12 @@ public class LovvalgsperiodeService {
     public Lovvalgsperiode hentValidertLovvalgsperiode(long behandlingsid) {
         Collection<Lovvalgsperiode> lovvalgsperioder = hentLovvalgsperioder(behandlingsid);
         if (lovvalgsperioder.size() != 1) {
-            throw new FunksjonellException("Forventer minst én og kun én lovvalgsperiode!");
+            if (lovvalgsperioder.size() > 1) {
+                throw new FunksjonellException("Fant %s lovvalgsperioder. Forventer kun én lovvalgsperiode"
+                    .formatted(lovvalgsperioder.size()));
+            } else {
+                throw new FunksjonellException("Fant ingen lovvalgsperiode. Forventer én lovvalgsperiode");
+            }
         }
         Lovvalgsperiode lovvalgsperiode = lovvalgsperioder.iterator().next();
         if (lovvalgsperiode.harUgyldigTilstand()) {
@@ -73,7 +78,8 @@ public class LovvalgsperiodeService {
         Lovvalgsperiode kopi;
         try {
             kopi = (Lovvalgsperiode) BeanUtils.cloneBean(periode);
-        } catch (IllegalAccessException | NoSuchMethodException | InvocationTargetException | InstantiationException e) {
+        } catch (IllegalAccessException | NoSuchMethodException | InvocationTargetException |
+                 InstantiationException e) {
             throw new IllegalStateException(e);
         }
         kopi.setBehandlingsresultat(behandlingsresultat);

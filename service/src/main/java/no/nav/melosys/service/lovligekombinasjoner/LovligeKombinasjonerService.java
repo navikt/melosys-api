@@ -1,8 +1,10 @@
 package no.nav.melosys.service.lovligekombinasjoner;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.annotation.Nullable;
 
 import no.nav.melosys.domain.Behandling;
@@ -24,28 +26,43 @@ import static no.nav.melosys.service.lovligekombinasjoner.LovligeBehandlingsKomb
 public class LovligeKombinasjonerService {
 
     public Set<Sakstyper> hentMuligeSakstyper() {
-        return LovligeSaksKombinasjoner.ALLE_MULIGE_SAKSTYPER;
+        return LovligeSakskombinasjoner.ALLE_MULIGE_SAKSTYPER;
     }
 
-    public Set<Sakstemaer> hentMuligeSakstemaer(Aktoersroller hovedpart, Sakstyper sakstype) {
+    public Set<Sakstemaer> hentMuligeSakstemaer(@Nullable Aktoersroller hovedpart, Sakstyper sakstype) {
+        if (hovedpart == null) {
+            return combineSets(
+                hentMuligeSakstemaer(Aktoersroller.BRUKER, sakstype),
+                hentMuligeSakstemaer(Aktoersroller.VIRKSOMHET, sakstype)
+            );
+        }
+
         return switch (hovedpart) {
-            case BRUKER -> LovligeSaksKombinasjoner.muligeSaksKombinasjonerBruker.get(sakstype).stream()
+            case BRUKER -> LovligeSakskombinasjoner.muligeSaksKombinasjonerBruker.get(sakstype).stream()
                 .map(SakstemaBehandlingsKombinasjon::sakstema)
                 .collect(Collectors.toSet());
-            case VIRKSOMHET -> LovligeSaksKombinasjoner.ALLE_MULIGE_SAKSTEMAER;
+            case VIRKSOMHET -> LovligeSakskombinasjoner.ALLE_MULIGE_SAKSTEMAER;
             default -> Collections.emptySet();
         };
     }
 
     public Set<Behandlingstema> hentMuligeBehandlingstemaer(
-        Aktoersroller hovedpart,
+        @Nullable Aktoersroller hovedpart,
         Sakstyper sakstype,
         Sakstemaer sakstema,
         @Nullable Behandlingstema sistBehandlingstema
     ) {
+        if (hovedpart == null) {
+            return combineSets(
+                hentMuligeBehandlingstemaer(Aktoersroller.BRUKER, sakstype, sakstema, sistBehandlingstema),
+                hentMuligeBehandlingstemaer(Aktoersroller.VIRKSOMHET, sakstype, sakstema, sistBehandlingstema),
+                getSedBehandlingstema(sakstype, sakstema)
+            );
+        }
+
         switch (hovedpart) {
             case BRUKER:
-                Set<Behandlingstema> behandlingstemaer = LovligeSaksKombinasjoner.muligeSaksKombinasjonerBruker.get(sakstype).stream()
+                Set<Behandlingstema> behandlingstemaer = LovligeSakskombinasjoner.muligeSaksKombinasjonerBruker.get(sakstype).stream()
                     .filter(sakstemaBehandlingsKombinasjon -> sakstemaBehandlingsKombinasjon.sakstema() == sakstema)
                     .flatMap(sakstemaBehandlingsKombinasjon -> sakstemaBehandlingsKombinasjon.behandlingstemaBehandlingstyperKombinasjoner().stream())
                     .flatMap(behandlingsKombinasjon -> behandlingsKombinasjon.behandlingsTemaer().stream())
@@ -84,7 +101,7 @@ public class LovligeKombinasjonerService {
 
         switch (hovedpart) {
             case BRUKER:
-                Set<Behandlingstyper> behandlingstyper = LovligeSaksKombinasjoner.muligeSaksKombinasjonerBruker.get(sakstype).stream()
+                Set<Behandlingstyper> behandlingstyper = LovligeSakskombinasjoner.muligeSaksKombinasjonerBruker.get(sakstype).stream()
                     .filter(sakstemaBehandlingsKombinasjon -> sakstemaBehandlingsKombinasjon.sakstema() == sakstema)
                     .flatMap(sakstemaBehandlingsKombinasjon -> sakstemaBehandlingsKombinasjon.behandlingstemaBehandlingstyperKombinasjoner().stream())
                     .filter(behandlingsKombinasjon -> behandlingsKombinasjon.behandlingsTemaer().contains(behandlingstema))
@@ -161,5 +178,20 @@ public class LovligeKombinasjonerService {
             return hentMuligeBehandlingstyper(hovedpart, sakstype, sakstema, behandlingstema, null);
         }
         return Collections.emptySet();
+    }
+
+    private Set<Behandlingstema> getSedBehandlingstema(Sakstyper sakstype, Sakstemaer sakstema) {
+        var sedBehandlingstema = new java.util.HashSet<>(LovligeSakskombinasjoner.SED_BEHANDLINGSTEMA);
+        if (sakstype == Sakstyper.EU_EOS && sakstema == Sakstemaer.MEDLEMSKAP_LOVVALG) {
+            sedBehandlingstema.add(BESLUTNING_LOVVALG_NORGE);
+        }
+        return sedBehandlingstema;
+    }
+
+    @SafeVarargs
+    private static <T> Set<T> combineSets(Set<T>... t) {
+        return Stream.of(t)
+            .flatMap(Collection::stream)
+            .collect(Collectors.toSet());
     }
 }

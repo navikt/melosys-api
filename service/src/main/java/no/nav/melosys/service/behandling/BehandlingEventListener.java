@@ -80,7 +80,7 @@ public class BehandlingEventListener {
                     final var behandlingstema = behandlingEndretAvSaksbehandlerEvent.getBehandlingstema();
 
                     final Oppgave behandlingsoppgave = (
-                        unleash.isEnabled("melosys.oppgave.oppretting")
+                        unleash.isEnabled("melosys.behandle_alle_saker")
                             ? OppgaveFactory.lagBehandlingsoppgave(behandling.getFagsak().getTema(), behandling.getFagsak().getType(), behandlingstema, behandlingstype)
                             : OppgaveFactory.lagBehandlingsOppgaveForType(behandlingstema, behandlingstype))
                         .build();
@@ -94,7 +94,7 @@ public class BehandlingEventListener {
                         value.getOppgaveId(),
                         OppgaveOppdatering.builder()
                             .behandlingstema(behandlingsoppgave.getBehandlingstema())
-                            .behandlingstype(unleash.isEnabled("melosys.oppgave.oppretting") ? null : behandlingsoppgave.getBehandlingstype())
+                            .behandlingstype(unleash.isEnabled("melosys.behandle_alle_saker") ? null : behandlingsoppgave.getBehandlingstype())
                             .tema(behandlingsoppgave.getTema())
                             .fristFerdigstillelse(frist)
                             .build());
