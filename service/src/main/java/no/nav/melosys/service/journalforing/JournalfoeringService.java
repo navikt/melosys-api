@@ -293,12 +293,12 @@ public class JournalfoeringService {
 
     private ProsessType finnProsessTypeForAndregangsbehandling(Behandlingstyper behandlingstype, Behandlingstema behandlingstema, Fagsak fagsak) {
         if(!unleash.isEnabled("melosys.behandle_alle_saker")) {
-            return ProsessType.JFR_NY_VURDERING;
+            return ProsessType.JFR_ANDREGANG_REPLIKER_BEHANDLING;
         }
         if (behandlingReplikeringsRegler.skalTidligereBehandlingReplikeres(fagsak, behandlingstype, behandlingstema)) {
-            return ProsessType.JFR_NY_VURDERING;
+            return ProsessType.JFR_ANDREGANG_REPLIKER_BEHANDLING;
         }
-        return ProsessType.JFR_ANDREGANGS_BEHANDLING;
+        return ProsessType.JFR_ANDREGANG_NY_BEHANDLING;
     }
 
     private void validerKanTilknytteJournalpostForSedTilSak(Journalpost journalpost, String tilknyttTilSaksnummer) {

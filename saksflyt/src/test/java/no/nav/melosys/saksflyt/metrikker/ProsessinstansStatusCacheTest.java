@@ -19,7 +19,7 @@ import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class ProsessinstansStatusCacheTest {
+class ProsessinstansStatusCacheTest {
     @Mock
     private ProsessinstansRepository prosessinstansRepository;
 
@@ -27,19 +27,19 @@ public class ProsessinstansStatusCacheTest {
     private List<ProsessinstansAntall> prosessinstansMetrikkerList;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         cache = new ProsessinstansStatusCache(prosessinstansRepository, 100);
-        ProsessinstansAntall prosessinstansAntall_1 = new ProsessinstansAntall(JFR_NY_VURDERING, FERDIG, 2);
+        ProsessinstansAntall prosessinstansAntall_1 = new ProsessinstansAntall(JFR_ANDREGANG_REPLIKER_BEHANDLING, FERDIG, 2);
         ProsessinstansAntall prosessinstansAntall_2 = new ProsessinstansAntall(JFR_KNYTT, FEILET, 1);
         ProsessinstansAntall prosessinstansAntall_3 = new ProsessinstansAntall(IVERKSETT_VEDTAK_EOS, FEILET, 2);
         prosessinstansMetrikkerList = Arrays.asList(prosessinstansAntall_1, prosessinstansAntall_2, prosessinstansAntall_3);
     }
 
     @Test
-    public void antallProsessinstanserFeilet() {
+    void antallProsessinstanserFeilet() {
         when(prosessinstansRepository.antallAktiveOgFeiletPerTypeOgStatus(anyCollection()))
             .thenReturn(prosessinstansMetrikkerList);
-        assertThat(cache.antallProsessinstanserFeiletPåType(JFR_NY_VURDERING)).isEqualTo(0.0);
+        assertThat(cache.antallProsessinstanserFeiletPåType(JFR_ANDREGANG_REPLIKER_BEHANDLING)).isEqualTo(0.0);
         assertThat(cache.antallProsessinstanserFeiletPåType(JFR_KNYTT)).isEqualTo(1.0);
         assertThat(cache.antallProsessinstanserFeiletPåType(IVERKSETT_VEDTAK_EOS)).isEqualTo(2.0);
     }

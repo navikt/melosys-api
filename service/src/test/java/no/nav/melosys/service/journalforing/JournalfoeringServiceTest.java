@@ -507,7 +507,7 @@ class JournalfoeringServiceTest {
 
         when(joarkFasade.hentJournalpost(tilordneDto.getJournalpostID())).thenReturn(journalpost);
         when(fagsakService.hentFagsak(MELOSYS_SAKSNUMMER)).thenReturn(fagsak);
-        when(prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_NY_VURDERING, tilordneDto))
+        when(prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_ANDREGANG_REPLIKER_BEHANDLING, tilordneDto))
             .thenReturn(new Prosessinstans());
 
         journalfoeringService.journalførOgOpprettAndregangsBehandling(tilordneDto);
@@ -542,7 +542,7 @@ class JournalfoeringServiceTest {
 
         when(joarkFasade.hentJournalpost(tilordneDto.getJournalpostID())).thenReturn(journalpost);
         when(fagsakService.hentFagsak(MELOSYS_SAKSNUMMER)).thenReturn(fagsak);
-        when(prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_ANDREGANGS_BEHANDLING, tilordneDto))
+        when(prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_ANDREGANG_NY_BEHANDLING, tilordneDto))
             .thenReturn(new Prosessinstans());
 
         journalfoeringService.journalførOgOpprettAndregangsBehandling(tilordneDto);
