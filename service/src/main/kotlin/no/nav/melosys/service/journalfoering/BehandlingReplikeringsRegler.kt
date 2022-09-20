@@ -61,12 +61,10 @@ class BehandlingReplikeringsRegler(private val behandlingsresultatRepository: Be
         behandlingsresultattyper: List<Behandlingsresultattyper>
     ): Boolean {
         return behandlinger.firstOrNull {
+            val behandlingsresultat = behandlingsresultatRepository.findById(it.id)
             behandlingstyper.contains(it.type)
-                && getBehandlingsresultat(it).isPresent
-                && !behandlingsresultattyper.contains(getBehandlingsresultat(it).get().type)
+                && behandlingsresultat.isPresent
+                && !behandlingsresultattyper.contains(behandlingsresultat.get().type)
         } != null
     }
-
-    private fun getBehandlingsresultat(førstegansbehandling: Behandling) =
-        behandlingsresultatRepository.findById(førstegansbehandling.id)
 }
