@@ -3,9 +3,11 @@ package no.nav.melosys.service.kontroll.feature.ferdigbehandling;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.Saksopplysning;
+import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadTrygdeavtale;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.ForetakUtland;
@@ -86,7 +88,7 @@ class KontrollTest {
 
     @Test
     void utførKontroller_periodeUnder24MndArt12IkkeOverlappendePeriode_returnererTomCollection() {
-        mockBehandlingsresultatReturnererLovvalgsperiode();
+        mockReturnertLovvalgsperiode();
 
         lovvalgsperiode.setFom(LocalDate.now());
         lovvalgsperiode.setTom(LocalDate.now().plusYears(1));
@@ -124,7 +126,7 @@ class KontrollTest {
 
     @Test
     void utførKontroller_periodeOver24MndArt16IkkeOverlappendePeriode_returnererTomCollection() {
-        mockBehandlingsresultatReturnererLovvalgsperiode();
+        mockReturnertLovvalgsperiode();
 
         lovvalgsperiode.setFom(LocalDate.now());
         lovvalgsperiode.setTom(LocalDate.now().plusYears(3));
@@ -140,7 +142,7 @@ class KontrollTest {
 
     @Test
     void utførKontroller_periodeOver24MndArt12MedOverlappendePeriode_returnererCollectionMedToKoder() {
-        mockBehandlingsresultatReturnererLovvalgsperiode();
+        mockReturnertLovvalgsperiode();
 
         lovvalgsperiode.setFom(LocalDate.now());
         lovvalgsperiode.setTom(LocalDate.now().plusYears(3));
@@ -160,7 +162,7 @@ class KontrollTest {
 
     @Test
     void utførKontroller_periodeOver3År_returnererKode() {
-        mockBehandlingsresultatReturnererLovvalgsperiode();
+        mockReturnertLovvalgsperiode();
 
         lovvalgsperiode.setFom(LocalDate.now());
         lovvalgsperiode.setTom(LocalDate.now().plusYears(3).plusDays(1));
@@ -177,7 +179,7 @@ class KontrollTest {
 
     @Test
     void utførKontroller_manglerAdresse_returnererKode() {
-        mockBehandlingsresultatReturnererLovvalgsperiode();
+        mockReturnertLovvalgsperiode();
 
         lovvalgsperiode.setFom(LocalDate.now());
         lovvalgsperiode.setTom(LocalDate.now().plusYears(1));
@@ -195,7 +197,7 @@ class KontrollTest {
 
     @Test
     void utførKontroller_periodeManglerSluttdato_returnererKode() {
-        mockBehandlingsresultatReturnererLovvalgsperiode();
+        mockReturnertLovvalgsperiode();
 
         lovvalgsperiode.setFom(LocalDate.now());
         lovvalgsperiode.setTom(null);
@@ -210,7 +212,7 @@ class KontrollTest {
 
     @Test
     void utførKontroller_arbeidsstedManglerFelter_returnererKode() {
-        mockBehandlingsresultatReturnererLovvalgsperiode();
+        mockReturnertLovvalgsperiode();
 
         lovvalgsperiode.setFom(LocalDate.now());
         lovvalgsperiode.setTom(LocalDate.now().plusYears(1));
@@ -227,7 +229,7 @@ class KontrollTest {
 
     @Test
     void utførKontroller_foretakUtlandManglerFelter_returnererKode() {
-        mockBehandlingsresultatReturnererLovvalgsperiode();
+        mockReturnertLovvalgsperiode();
 
         lovvalgsperiode.setFom(LocalDate.now());
         lovvalgsperiode.setTom(LocalDate.now().plusYears(1));
@@ -245,7 +247,7 @@ class KontrollTest {
 
     @Test
     void utførKontroller_representantIUtlandetMangler_returnererKode() {
-        mockBehandlingsresultatReturnererLovvalgsperiode();
+        mockReturnertLovvalgsperiode();
 
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1);
 
@@ -260,9 +262,7 @@ class KontrollTest {
             .contains(Kontroll_begrunnelser.ATTEST_MANGLER_ARBEIDSSTED);
     }
 
-    private void mockBehandlingsresultatReturnererLovvalgsperiode() {
-        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-        behandlingsresultat.setLovvalgsperioder(Set.of(lovvalgsperiode));
-        when(behandlingsresultatService.hentBehandlingsresultat(behandlingID)).thenReturn(behandlingsresultat);
+    private void mockReturnertLovvalgsperiode() {
+        when(lovvalgsperiodeService.hentValidertLovvalgsperiode(behandlingID)).thenReturn(lovvalgsperiode);
     }
 }
