@@ -31,7 +31,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class UfmKontrollTest {
 
-    private final LocalDate DATE = LocalDate.of(2022, 6, 20);
+    private final LocalDate DATE = LocalDate.now();
 
     @Test
     void feilIPeriode_erFeil_verifiserBegrunnelse() {
