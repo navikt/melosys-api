@@ -1,9 +1,6 @@
 package no.nav.melosys.service.dokument;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
@@ -208,7 +205,7 @@ public class DokgenService {
 
     private List<SaksvedleggBestilling> lagSaksvedleggBestilling(List<SaksvedleggDto> saksvedleggDtoer) {
         if (saksvedleggDtoer == null) {
-            return null;
+            return Collections.emptyList();
         }
 
         return saksvedleggDtoer.stream()
@@ -218,21 +215,11 @@ public class DokgenService {
 
     private List<FritekstvedleggBestilling> lagFritekstvedleggBestilling(List<FritekstvedleggDto> fritekstvedleggDtoer) {
         if (fritekstvedleggDtoer == null) {
-            return null;
+            return Collections.emptyList();
         }
 
         return fritekstvedleggDtoer.stream()
             .map(fritekstVedlegg -> new FritekstvedleggBestilling(fritekstVedlegg.tittel(), fritekstVedlegg.fritekst()))
-            .toList();
-    }
-
-    private List<byte[]> hentVedleggDokumenterFraJoark(List<SaksvedleggBestilling> saksvedleggBestillingListe) {
-        if (saksvedleggBestillingListe == null) {
-            return null;
-        }
-        return saksvedleggBestillingListe.stream()
-            .map(vedleggBestilling ->
-                dokumentHentingService.hentDokument(vedleggBestilling.journalpostID(), vedleggBestilling.dokumentID()))
             .toList();
     }
 

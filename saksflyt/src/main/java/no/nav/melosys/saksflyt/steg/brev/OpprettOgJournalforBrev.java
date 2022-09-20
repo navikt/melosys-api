@@ -181,7 +181,11 @@ public class OpprettOgJournalforBrev implements StegBehandler {
 
     private List<Vedlegg> produserFritekstvedlegg(DokgenBrevbestilling brevbestilling, Aktoer mottaker) {
         List<FritekstvedleggBestilling> fritekstvedleggBestilling = brevbestilling.getFritekstvedleggBestilling();
-        if (fritekstvedleggBestilling == null || !(brevbestilling instanceof FritekstbrevBrevbestilling fritekstbrevBrevbestilling)) {
+        if (fritekstvedleggBestilling == null) {
+            return Collections.emptyList();
+        }
+        if(!(brevbestilling instanceof FritekstbrevBrevbestilling fritekstbrevBrevbestilling)) {
+            log.warn("Forsøkte å produsere brev %s med fritekstvedlegg for behandling %d".formatted(brevbestilling.getProduserbartdokument(), brevbestilling.getBehandlingId()));
             return Collections.emptyList();
         }
         return fritekstvedleggBestilling.stream().map(vedlegg -> {
