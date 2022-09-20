@@ -213,11 +213,10 @@ class BehandlingReplikeringsReglerTest {
         }
 
         fun behandlinger(fagsak: Fagsak): List<Pair<Behandling, Behandlingsresultattyper?>> {
-            var i: Long = 0
             val date = LocalDate.of(2000, 1, 1).atStartOfDay()
-            return behandlingerMedType.map {
-                it.first.id = i++
-                it.first.registrertDato = date.plusDays(i).toInstant(ZoneOffset.UTC)
+            return behandlingerMedType.mapIndexed { index, it ->
+                it.first.id = index.toLong()
+                it.first.registrertDato = date.plusDays(index.toLong()).toInstant(ZoneOffset.UTC)
                 it.first.fagsak = fagsak
                 it
             }
