@@ -278,9 +278,9 @@ public class JournalfoeringService {
 
         log.info("{} knytter journalpost {} til sak {} og lager ny vurdering", SubjectHandler.getInstance().getUserID(), journalfoeringDto.getJournalpostID(), saksnummer);
 
-        ProsessType prosessTypeForNyVurdering = finnProsessTypeForAndregangsbehandling(behandlingstype, behandlingstema, fagsak);
+        ProsessType prosessTypeForAndregangsbehandling = finnProsessTypeForAndregangsbehandling(behandlingstype, behandlingstema, fagsak);
 
-        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(prosessTypeForNyVurdering, journalfoeringDto);
+        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(prosessTypeForAndregangsbehandling, journalfoeringDto);
         if (behandleAlleSakerToggleEnabled) {
             prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, behandlingstema);
         }
