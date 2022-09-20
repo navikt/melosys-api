@@ -149,7 +149,7 @@ public class OppgaveService {
         Optional<Oppgave> eksisterendeOppgave = finnÅpenOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer());
 
         if (eksisterendeOppgave.isEmpty()) {
-            var oppgaveToggleEnabled = unleash.isEnabled("melosys.oppgave.oppretting");
+            var oppgaveToggleEnabled = unleash.isEnabled("melosys.behandle_alle_saker");
             var oppgaveBuilder = (
                 oppgaveToggleEnabled
                     ? OppgaveFactory.lagBehandlingsoppgave(behandling)
@@ -183,7 +183,7 @@ public class OppgaveService {
     }
 
     /**
-     * @deprecated Forsvinner med toggle melosys.oppgave.oppretting
+     * @deprecated Forsvinner med toggle melosys.behandle_alle_saker
      */
     @Deprecated
     private String lagOppgaveBeskrivelse(Behandling behandling) {

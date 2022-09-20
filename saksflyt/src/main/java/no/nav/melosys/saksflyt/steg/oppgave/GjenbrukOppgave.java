@@ -43,7 +43,7 @@ public class GjenbrukOppgave implements StegBehandler {
         final Oppgave gjenbruktOppgave = oppgaveService.hentOppgaveMedOppgaveID(oppgaveID);
 
         final Oppgave nyOppgave = (
-            unleash.isEnabled("melosys.oppgave.oppretting")
+            unleash.isEnabled("melosys.behandle_alle_saker")
                 ? OppgaveFactory.lagBehandlingsoppgave(fagsak, behandling)
                 : OppgaveFactory.lagBehandlingsOppgaveForType(behandling.getTema(), behandling.getType()))
             .setSaksnummer(fagsak.getSaksnummer())

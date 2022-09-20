@@ -34,7 +34,7 @@ public final class OppgaveFactory {
     }
 
     /**
-     * @deprecated Fjernes med toggle melosys.oppgave.oppretting
+     * @deprecated Fjernes med toggle melosys.behandle_alle_saker
      */
     @Deprecated
     public static Oppgave.Builder lagBehandlingsOppgaveForType(Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
@@ -77,7 +77,7 @@ public final class OppgaveFactory {
     }
 
     /**
-     * @deprecated Fjernes med toggle melosys.oppgave.oppretting
+     * @deprecated Fjernes med toggle melosys.behandle_alle_saker
      */
     @Deprecated
     static OppgaveParametere hentOppgaveParametere(Behandlingstema behandlingstema) {
@@ -223,7 +223,7 @@ public final class OppgaveFactory {
     }
 
     /**
-     * @deprecated Fjernes med toggle melosys.oppgave.oppretting
+     * @deprecated Fjernes med toggle melosys.behandle_alle_saker
      */
     @Deprecated
     static class OppgaveParametere {

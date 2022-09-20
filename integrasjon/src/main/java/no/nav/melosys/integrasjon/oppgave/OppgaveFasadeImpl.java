@@ -83,7 +83,7 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
     }
 
     /**
-     * @deprecated Fjernes med toggle melosys.oppgave.oppretting
+     * @deprecated Fjernes med toggle melosys.behandle_alle_saker
      */
     @Deprecated
     @Override

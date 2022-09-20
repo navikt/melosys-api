@@ -14,7 +14,7 @@ public interface OppgaveFasade {
     List<Oppgave> finnUtildelteOppgaverEtterFrist(String behandlingstema);
 
     /**
-     * @deprecated Fjernes med toggle melosys.oppgave.oppretting
+     * @deprecated Fjernes med toggle melosys.behandle_alle_saker
      */
     @Deprecated
     List<Oppgave> finnUtildelteOppgaverEtterFrist(String behandlingstype, String behandlingstema);
