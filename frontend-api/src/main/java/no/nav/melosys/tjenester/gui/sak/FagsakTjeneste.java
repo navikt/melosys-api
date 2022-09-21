@@ -54,7 +54,6 @@ public class FagsakTjeneste {
     private final Aksesskontroll aksesskontroll;
     private final BehandlingsgrunnlagService behandlingsgrunnlagService;
     private final BehandlingsresultatService behandlingsresultatService;
-    private final HenleggFagsakService henleggFagsakService;
     private final PersondataFasade persondataFasade;
     private final SaksopplysningerService saksopplysningerService;
     private final UtpekingService utpekingService;
@@ -62,14 +61,13 @@ public class FagsakTjeneste {
     private final OrganisasjonOppslagService organisasjonOppslagService;
 
     public FagsakTjeneste(FagsakService fagsakService, Aksesskontroll aksesskontroll, BehandlingsgrunnlagService behandlingsgrunnlagService,
-                          HenleggFagsakService henleggFagsakService, OpprettNySakFraOppgave opprettNySakFraOppgave,
+                          OpprettNySakFraOppgave opprettNySakFraOppgave,
                           BehandlingsresultatService behandlingsresultatService, PersondataFasade persondataFasade,
                           SaksopplysningerService saksopplysningerService, UtpekingService utpekingService,
                           VideresendSoknadService videresendSoknadService, OrganisasjonOppslagService organisasjonOppslagService) {
         this.fagsakService = fagsakService;
         this.aksesskontroll = aksesskontroll;
         this.behandlingsgrunnlagService = behandlingsgrunnlagService;
-        this.henleggFagsakService = henleggFagsakService;
         this.opprettNySakFraOppgave = opprettNySakFraOppgave;
         this.behandlingsresultatService = behandlingsresultatService;
         this.persondataFasade = persondataFasade;
@@ -103,7 +101,8 @@ public class FagsakTjeneste {
     @PostMapping("/{saksnr}/endre")
     @ApiOperation(value = "Endre en sak.")
     public ResponseEntity<Void> endreFagsak(@PathVariable("saksnr") String saksnummer, @RequestBody EndreSakDto endreSakDto) {
-        log.debug("Saksbehandler {} ber om å endre fagsak {} med sakstype {}, sakstema {}", saksnummer, endreSakDto.sakstype(), endreSakDto.sakstema());
+        log.debug("Saksbehandler {} ber om å endre fagsak {} med sakstype {}, sakstema {}",
+                  SubjectHandler.getInstance().getUserID(), saksnummer, endreSakDto.sakstype(), endreSakDto.sakstema());
         aksesskontroll.autoriserSakstilgang(saksnummer);
 
         fagsakService.oppdaterSakstema(saksnummer, endreSakDto.sakstema());
@@ -157,14 +156,6 @@ public class FagsakTjeneste {
         return Collections.emptyList();
     }
 
-    @PostMapping("/{saksnr}/henlegg")
-    @ApiOperation(value = "Henlegger en fagsak. Avslutter kun behandling uten endring av saksstatus dersom behandlingtype er NY_VURDERING.")
-    public ResponseEntity<Void> henleggFagsak(@PathVariable("saksnr") String saksnummer, @RequestBody HenleggelseDto henleggelseDto) {
-        aksesskontroll.autoriserSakstilgang(saksnummer);
-        henleggFagsakService.henleggFagsakEllerBehandling(saksnummer, henleggelseDto.begrunnelseKode(), henleggelseDto.fritekst());
-        return ResponseEntity.noContent().build();
-    }
-
     @PostMapping("/{saksnr}/henlegg-videresend")
     @ApiOperation(value = "Videresender søknad for en gitt behandling")
     public ResponseEntity<Void> videresend(@PathVariable("saksnr") String saksnummer,
@@ -183,16 +174,6 @@ public class FagsakTjeneste {
                 v -> new DokumentReferanse(v.journalpostID(), v.dokumentID())).collect(
                 Collectors.toUnmodifiableSet())
         );
-        return ResponseEntity.noContent().build();
-    }
-
-    @PutMapping(value = "/{saksnr}/henlegg-som-bortfalt", consumes = MediaType.TEXT_PLAIN_VALUE, produces = MediaType.TEXT_PLAIN_VALUE)
-    @ApiOperation(value = "Henlegger en fagsak i Melosys som bortfalt, fordi den ikke skal behandles i Melosys. " +
-        "Henlegger kun den aktive behandlingen uten endring av saksstatus dersom behandlingtype er NY_VURDERING.")
-    public ResponseEntity<Void> henleggSakSomBortfalt(@PathVariable("saksnr") String saksnummer) {
-        aksesskontroll.autoriserSakstilgang(saksnummer);
-
-        henleggFagsakService.henleggSakEllerBehandlingSomBortfalt(saksnummer);
         return ResponseEntity.noContent().build();
     }
 

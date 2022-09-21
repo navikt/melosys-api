@@ -1,22 +1,16 @@
 package no.nav.melosys.tjenester.gui.util;
 
-import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.HashSet;
 
-import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
+import no.nav.melosys.domain.Aktoer;
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.FysiskArbeidssted;
-import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
 
@@ -37,15 +31,6 @@ public final class SaksbehandlingDataFactory {
         aktoer.setRolle(BRUKER);
         aktoer.setAktørId("aktørID");
         return aktoer;
-    }
-
-    public static Saksopplysning lagPersonSaksopplysning() {
-        Saksopplysning saksopplysningPerson = new Saksopplysning();
-        saksopplysningPerson.setType(SaksopplysningType.PERSOPL);
-        PersonDokument personDokument = new PersonDokument();
-        personDokument.setSammensattNavn("Joe Moe");
-        saksopplysningPerson.setDokument(personDokument);
-        return saksopplysningPerson;
     }
 
     public static Soeknad lagSøknadDokument() {
