@@ -19,7 +19,7 @@ public enum ProsessType implements Kodeverk {
     IVERKSETT_VEDTAK_EOS("IVERKSETT_VEDTAK_EOS", "Iverksett vedtak EOS"),
     IVERKSETT_VEDTAK_EOS_FORKORT_PERIODE("IVERKSETT_VEDTAK_EOS_FORKORT_PERIODE", "Iverksett nytt vedtak etter lovvalgsperioden har blitt forkortet"),
     JFR_KNYTT("JFR_KNYTT", "Journalføring på eksisterende sak"),
-    JFR_ANDREGANG_REPLIKER_BEHANDLING("JFR_ANDREGANG_REPLIKER_BEHANDLING", "Journalføring på eksisterende sak og oppretter en ny behandling (ny vurdering)"),
+    JFR_ANDREGANG_REPLIKER_BEHANDLING("JFR_ANDREGANG_REPLIKER_BEHANDLING", "Journalføring på eksisterende sak og repliker tidligere behandling"),
     JFR_NY_SAK_BRUKER("JFR_NY_SAK_BRUKER", "Journalføring med ny sak og søknad for bruker"),
     JFR_ANDREGANG_NY_BEHANDLING("JFR_ANDREGANG_NY_BEHANDLING", "Journalføring på eksisterende sak og opprett ny behandling"),
     JFR_NY_SAK_VIRKSOMHET("JFR_NY_SAK_VIRKSOMHET", "Journalføring med ny sak for virksomhet"),
