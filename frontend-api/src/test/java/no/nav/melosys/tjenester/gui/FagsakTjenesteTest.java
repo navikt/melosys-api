@@ -348,6 +348,19 @@ class FagsakTjenesteTest {
         verify(aksesskontroll).autoriserSakstilgang("123");
     }
 
+    @Test
+    void ferdigbehandleSak() throws Exception {
+        Fagsak fagsak = lagFagsak();
+        mockFagsakTjeneste(fagsak);
+
+        mockMvc.perform(put(BASE_URL + "/{saksnr}/ferdigbehandle/{behandlingID}", "123", 1L)
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isNoContent());
+
+        verify(aksesskontroll).autoriserSkrivOgTilordnet(1L);
+        verify(fagsakService).ferdigbehandleBehandlingOgOppdaterSaksstatus("123", 1L);
+    }
+
     private static void mockFagsakTjeneste(Fagsak fagsak) {
         Soeknad søknadDokument = SaksbehandlingDataFactory.lagSøknadDokument();
         Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();

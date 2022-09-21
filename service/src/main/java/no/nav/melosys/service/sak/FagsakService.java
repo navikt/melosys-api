@@ -7,6 +7,7 @@ import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.*;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -153,6 +154,23 @@ public class FagsakService {
         aktør.setRolle(Aktoersroller.TRYGDEMYNDIGHET);
         aktør.setTrygdemyndighetLand(landkode);
         return aktør;
+    }
+
+    @Transactional
+    public void ferdigbehandleBehandlingOgOppdaterSaksstatus(String saksnummer, long behandlingsID) {
+        var fagsak = hentFagsak(saksnummer);
+        var behandling = behandlingService.hentBehandling(behandlingsID);
+        var behandlingsresultattype = behandlingsresultatService.hentBehandlingsresultat(behandlingsID).getType();
+        var saksstatus = nySaksstatusTilFerdigbehandleSak(fagsak.getStatus(), behandling.getStatus(), behandlingsresultattype);
+
+        avsluttFagsakOgBehandling(fagsak, behandling, saksstatus);
+        behandlingsresultatService.oppdaterBehandlingsresultattype(behandlingsID, Behandlingsresultattyper.FERDIGBEHANDLET);
+        oppgaveService.ferdigstillOppgaveMedSaksnummer(fagsak.getSaksnummer());
+    }
+
+    private Saksstatuser nySaksstatusTilFerdigbehandleSak(Saksstatuser nåværendeSaksstatus, Behandlingsstatus behandlingsstatus, Behandlingsresultattyper behandlingsresultattype) {
+        return nåværendeSaksstatus == Saksstatuser.OPPRETTET || behandlingsstatus == Behandlingsstatus.OPPRETTET || behandlingsresultattype == Behandlingsresultattyper.IKKE_FASTSATT
+            ? Saksstatuser.AVSLUTTET : nåværendeSaksstatus;
     }
 
     @Transactional
