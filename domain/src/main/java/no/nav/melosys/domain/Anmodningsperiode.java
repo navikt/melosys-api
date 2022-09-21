@@ -9,9 +9,15 @@ import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 
+import static java.util.Objects.isNull;
+
 @Entity
 @Table(name = "anmodningsperiode")
 public class Anmodningsperiode implements PeriodeOmLovvalg {
+
+    public static final String FEIL_VED_HENT_BEHANDLINGSRESULTAT_ID = "Anmodningsperiode skal alltid ha " +
+        "behandlingsresultat. Kunne ikke hente beh_resultat_id på anmodningsperiode id %s";
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -187,6 +193,10 @@ public class Anmodningsperiode implements PeriodeOmLovvalg {
         return anmodetAv;
     }
 
+    public void setAnmodetAv(String anmodetAv) {
+        this.anmodetAv = anmodetAv;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -221,11 +231,6 @@ public class Anmodningsperiode implements PeriodeOmLovvalg {
             + ", anmodetAv='" + anmodetAv + '\'' + ", anmodningsperiodeSvar=" + anmodningsperiodeSvar + '}';
     }
 
-    public void setAnmodetAv(String anmodetAv) {
-        this.anmodetAv = anmodetAv;
-    }
-
-
     public boolean gjelderSammeLandOgUnntakSom(Anmodningsperiode periode2) {
         return lovvalgsland == periode2.getLovvalgsland() &&
             unntakFraBestemmelse == periode2.getUnntakFraBestemmelse() &&
@@ -234,5 +239,12 @@ public class Anmodningsperiode implements PeriodeOmLovvalg {
 
     public boolean harRegistrertSvar() {
         return anmodningsperiodeSvar != null && anmodningsperiodeSvar.getAnmodningsperiodeSvarType() != null;
+    }
+
+    public Long hentBehandlingsresultatId() {
+        if (isNull(getBehandlingsresultat())) {
+            throw new IllegalStateException(FEIL_VED_HENT_BEHANDLINGSRESULTAT_ID.formatted(id));
+        }
+        return getBehandlingsresultat().getId();
     }
 }
