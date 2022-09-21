@@ -8,6 +8,7 @@ import java.util.Optional;
 import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.AnmodningsperiodeSvar;
 import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.LovvalgsperiodeLagreEvent;
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
@@ -15,13 +16,13 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_8
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.repository.AnmodningsperiodeRepository;
 import no.nav.melosys.repository.AnmodningsperiodeSvarRepository;
-import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -36,15 +37,15 @@ class AnmodningsperiodeServiceTest {
     @Mock
     private BehandlingsresultatService behandlingsresultatService;
     @Mock
-    private LovvalgsperiodeService lovvalgsperiodeService;
+    private ApplicationEventPublisher applicationEventPublisher;
     @Mock
     private AnmodningsperiodeSvarRepository anmodningsperiodeSvarRepository;
     private AnmodningsperiodeService anmodningsperiodeService;
 
     @BeforeEach
     public void setUp() {
-        anmodningsperiodeService = new AnmodningsperiodeService(anmodningsperiodeRepository, lovvalgsperiodeService,
-            anmodningsperiodeSvarRepository, behandlingsresultatService);
+        anmodningsperiodeService = new AnmodningsperiodeService(anmodningsperiodeRepository,
+            anmodningsperiodeSvarRepository, behandlingsresultatService, applicationEventPublisher);
     }
 
     @Test
@@ -100,7 +101,7 @@ class AnmodningsperiodeServiceTest {
 
 
         verify(anmodningsperiodeSvarRepository).save(any(AnmodningsperiodeSvar.class));
-        verify(lovvalgsperiodeService).lagreLovvalgsperioder(eq(BEHANDLINGS_ID), any());
+        verify(applicationEventPublisher).publishEvent(any(LovvalgsperiodeLagreEvent.class));
     }
 
     @Test
@@ -116,7 +117,7 @@ class AnmodningsperiodeServiceTest {
 
 
         verify(anmodningsperiodeSvarRepository).save(svar);
-        verify(lovvalgsperiodeService).lagreLovvalgsperioder(eq(BEHANDLINGS_ID), any());
+        verify(applicationEventPublisher).publishEvent(any(LovvalgsperiodeLagreEvent.class));
     }
 
     @Test

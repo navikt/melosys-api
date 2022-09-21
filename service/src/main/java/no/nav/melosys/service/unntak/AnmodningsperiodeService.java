@@ -6,19 +6,16 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import no.nav.melosys.domain.Anmodningsperiode;
-import no.nav.melosys.domain.AnmodningsperiodeSvar;
-import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.AnmodningsperiodeRepository;
 import no.nav.melosys.repository.AnmodningsperiodeSvarRepository;
-import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.kontroll.regler.PeriodeRegler;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,17 +24,17 @@ import static org.springframework.util.StringUtils.hasText;
 @Service
 public class AnmodningsperiodeService {
     private final AnmodningsperiodeRepository anmodningsperiodeRepository;
-    private final LovvalgsperiodeService lovvalgsperiodeService;
     private final AnmodningsperiodeSvarRepository anmodningsperiodeSvarRepository;
     private final BehandlingsresultatService behandlingsresultatService;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     public AnmodningsperiodeService(AnmodningsperiodeRepository anmodningsperiodeRepository,
-                                    LovvalgsperiodeService lovvalgsperiodeService, AnmodningsperiodeSvarRepository anmodningsperiodeSvarRepository,
-                                    BehandlingsresultatService behandlingsresultatService) {
+                                    AnmodningsperiodeSvarRepository anmodningsperiodeSvarRepository,
+                                    BehandlingsresultatService behandlingsresultatService, ApplicationEventPublisher applicationEventPublisher) {
         this.anmodningsperiodeRepository = anmodningsperiodeRepository;
-        this.lovvalgsperiodeService = lovvalgsperiodeService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.anmodningsperiodeSvarRepository = anmodningsperiodeSvarRepository;
+        this.applicationEventPublisher = applicationEventPublisher;
     }
 
     public Optional<Anmodningsperiode> finnAnmodningsperiode(long anmodningsperiodeID) {
@@ -126,7 +123,7 @@ public class AnmodningsperiodeService {
         anmodningsperiodeSvarRepository.save(anmodningsperiodeSvar);
 
         Lovvalgsperiode lovvalgsperiode = Lovvalgsperiode.av(anmodningsperiodeSvar, Medlemskapstyper.PLIKTIG);
-        lovvalgsperiodeService.lagreLovvalgsperioder(anmodningsperiode.hentBehandlingsresultatId(), Collections.singleton(lovvalgsperiode));
+        applicationEventPublisher.publishEvent(new LovvalgsperiodeLagreEvent(anmodningsperiode.hentBehandlingsresultatId(), Collections.singleton(lovvalgsperiode)));
 
         return anmodningsperiodeSvar;
     }
