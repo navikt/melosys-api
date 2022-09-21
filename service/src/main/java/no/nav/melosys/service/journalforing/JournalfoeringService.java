@@ -21,6 +21,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.integrasjon.joark.JournalpostOppdatering;
 import no.nav.melosys.service.dokument.sed.EessiService;
+import no.nav.melosys.service.journalfoering.BehandlingReplikeringsRegler;
 import no.nav.melosys.service.journalforing.dto.*;
 import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerService;
 import no.nav.melosys.service.persondata.PersondataFasade;
@@ -51,6 +52,7 @@ public class JournalfoeringService {
     private final PersondataFasade persondataFasade;
     private final LovligeKombinasjonerService lovligeKombinasjonerService;
     private final Unleash unleash;
+    private final BehandlingReplikeringsRegler behandlingReplikeringsRegler;
 
     public JournalfoeringService(JoarkFasade joarkFasade,
                                  ProsessinstansService prosessinstansService,
@@ -58,7 +60,8 @@ public class JournalfoeringService {
                                  FagsakService fagsakService,
                                  PersondataFasade persondataFasade,
                                  LovligeKombinasjonerService lovligeKombinasjonerService,
-                                 Unleash unleash) {
+                                 Unleash unleash,
+                                 BehandlingReplikeringsRegler behandlingReplikeringsRegler) {
         this.joarkFasade = joarkFasade;
         this.prosessinstansService = prosessinstansService;
         this.eessiService = eessiService;
@@ -66,6 +69,7 @@ public class JournalfoeringService {
         this.persondataFasade = persondataFasade;
         this.lovligeKombinasjonerService = lovligeKombinasjonerService;
         this.unleash = unleash;
+        this.behandlingReplikeringsRegler = behandlingReplikeringsRegler;
     }
 
     public Journalpost hentJournalpost(String journalpostID) {
@@ -249,7 +253,7 @@ public class JournalfoeringService {
     }
 
     @Transactional
-    public void journalførOgOpprettNyVurdering(JournalfoeringTilordneDto journalfoeringDto) {
+    public void journalførOgOpprettAndregangsBehandling(JournalfoeringTilordneDto journalfoeringDto) {
         var behandleAlleSakerToggleEnabled = unleash.isEnabled("melosys.behandle_alle_saker");
         var journalpost = joarkFasade.hentJournalpost(journalfoeringDto.getJournalpostID());
         var saksnummer = journalfoeringDto.getSaksnummer();
@@ -274,7 +278,9 @@ public class JournalfoeringService {
 
         log.info("{} knytter journalpost {} til sak {} og lager ny vurdering", SubjectHandler.getInstance().getUserID(), journalfoeringDto.getJournalpostID(), saksnummer);
 
-        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_NY_VURDERING, journalfoeringDto);
+        ProsessType prosessTypeForAndregangsbehandling = finnProsessTypeForAndregangsbehandling(behandlingstype, behandlingstema, fagsak);
+
+        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(prosessTypeForAndregangsbehandling, journalfoeringDto);
         if (behandleAlleSakerToggleEnabled) {
             prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, behandlingstema);
         }
@@ -283,6 +289,16 @@ public class JournalfoeringService {
         prosessinstans.setData(ProsessDataKey.JFR_INGEN_VURDERING, journalfoeringDto.isIngenVurdering());
 
         prosessinstansService.lagre(prosessinstans);
+    }
+
+    private ProsessType finnProsessTypeForAndregangsbehandling(Behandlingstyper behandlingstype, Behandlingstema behandlingstema, Fagsak fagsak) {
+        if(!unleash.isEnabled("melosys.behandle_alle_saker")) {
+            return ProsessType.JFR_ANDREGANG_REPLIKER_BEHANDLING;
+        }
+        if (behandlingReplikeringsRegler.skalTidligereBehandlingReplikeres(fagsak, behandlingstype, behandlingstema)) {
+            return ProsessType.JFR_ANDREGANG_REPLIKER_BEHANDLING;
+        }
+        return ProsessType.JFR_ANDREGANG_NY_BEHANDLING;
     }
 
     private void validerKanTilknytteJournalpostForSedTilSak(Journalpost journalpost, String tilknyttTilSaksnummer) {

@@ -83,9 +83,18 @@ public final class ProsessflytDefinisjon {
             )
         );
 
-        PROSESS_FLYT_MAP.put(ProsessType.JFR_NY_VURDERING,
-            new ProsessFlyt(ProsessType.JFR_NY_VURDERING,
+        PROSESS_FLYT_MAP.put(ProsessType.JFR_ANDREGANG_REPLIKER_BEHANDLING,
+            new ProsessFlyt(ProsessType.JFR_ANDREGANG_REPLIKER_BEHANDLING,
                 REPLIKER_BEHANDLING,
+                OPPDATER_OG_FERDIGSTILL_JOURNALPOST,
+                OPPDATER_SAKSRELASJON,
+                OPPRETT_OPPGAVE
+            )
+        );
+
+        PROSESS_FLYT_MAP.put(ProsessType.JFR_ANDREGANG_NY_BEHANDLING,
+            new ProsessFlyt(ProsessType.JFR_ANDREGANG_NY_BEHANDLING,
+                OPPRETT_NY_BEHANDLING,
                 OPPDATER_OG_FERDIGSTILL_JOURNALPOST,
                 OPPDATER_SAKSRELASJON,
                 OPPRETT_OPPGAVE
