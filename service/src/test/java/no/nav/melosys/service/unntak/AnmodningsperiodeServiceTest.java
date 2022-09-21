@@ -89,7 +89,7 @@ class AnmodningsperiodeServiceTest {
     }
 
     @Test
-    void lagreAnmodningsperiodeSvar_svarErInnvilgelse_lagrerAnmodningsperiodeSvarOgLovvalgsperiode() {
+    void lagreAnmodningsperiodeSvar_svarErInnvilgelse_lagrerAnmodningsperiodeSvarMedLovvalgsperiode() {
         Anmodningsperiode anmodningsperiode = mockAnmodningsperiodeIdPåFindById();
 
         AnmodningsperiodeSvar svar = new AnmodningsperiodeSvar();
@@ -105,7 +105,7 @@ class AnmodningsperiodeServiceTest {
     }
 
     @Test
-    void lagreAnmodningsperiodeSvar_svarErAvslag_lagrerAnmodningsperiodeSvarOgLovvalgsperiode() {
+    void lagreAnmodningsperiodeSvar_svarErAvslag_lagrerAnmodningsperiodeSvarMedLovvalgsperiode() {
         Anmodningsperiode anmodningsperiode = mockAnmodningsperiodeIdPåFindById();
 
         AnmodningsperiodeSvar svar = new AnmodningsperiodeSvar();
