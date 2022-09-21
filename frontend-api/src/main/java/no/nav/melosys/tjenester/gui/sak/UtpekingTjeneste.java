@@ -15,7 +15,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 @Protected
 @RestController
-@RequestMapping("/fagsaker")
+@RequestMapping("/fagsaker/{saksnummer}/utpek")
 @Api(tags = {"fagsaker", "utpeking"})
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class UtpekingTjeneste {
@@ -30,7 +30,7 @@ public class UtpekingTjeneste {
         this.utpekingService = utpekingService;
     }
 
-    @PostMapping("/{saksnummer}/utpek")
+    @PostMapping
     @ApiOperation(value = "Utpeker lovvalgsland for gitt fagsak")
     public ResponseEntity<Void> utpekLovvalgsland(@PathVariable("saksnummer") String saksnummer,
                                                   @RequestBody UtpekDto utpekDto) {

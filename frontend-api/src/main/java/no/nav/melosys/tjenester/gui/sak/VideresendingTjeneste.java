@@ -20,7 +20,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 @Protected
 @RestController
-@RequestMapping("/fagsaker")
+@RequestMapping("/fagsaker/{saksnr}/henlegg-videresend")
 @Api(tags = {"fagsaker", "videresending"})
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class VideresendingTjeneste {
@@ -35,7 +35,7 @@ public class VideresendingTjeneste {
         this.videresendSoknadService = videresendSoknadService;
     }
 
-    @PostMapping("/{saksnr}/henlegg-videresend")
+    @PostMapping
     @ApiOperation(value = "Videresender søknad for en gitt behandling")
     public ResponseEntity<Void> videresend(@PathVariable("saksnr") String saksnummer,
                                            @RequestBody VideresendDto videresendDto) {

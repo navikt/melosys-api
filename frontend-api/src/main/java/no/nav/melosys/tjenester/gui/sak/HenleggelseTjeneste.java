@@ -14,7 +14,6 @@ import org.springframework.web.context.WebApplicationContext;
 
 @Protected
 @RestController
-@RequestMapping("/fagsaker")
 @Api(tags = {"fagsaker", "henleggelse"})
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class HenleggelseTjeneste {
@@ -26,7 +25,7 @@ public class HenleggelseTjeneste {
         this.henleggFagsakService = henleggFagsakService;
     }
 
-    @PostMapping("/{saksnr}/henlegg")
+    @PostMapping("/fagsaker/{saksnr}/henlegg")
     @ApiOperation(value = "Henlegger en fagsak. Avslutter kun behandling uten endring av saksstatus dersom behandlingtype er NY_VURDERING.")
     public ResponseEntity<Void> henleggFagsak(@PathVariable("saksnr") String saksnummer, @RequestBody HenleggelseDto henleggelseDto) {
         aksesskontroll.autoriserSakstilgang(saksnummer);
@@ -34,7 +33,7 @@ public class HenleggelseTjeneste {
         return ResponseEntity.noContent().build();
     }
 
-    @PutMapping(value = "/{saksnr}/henlegg-som-bortfalt", consumes = MediaType.TEXT_PLAIN_VALUE, produces = MediaType.TEXT_PLAIN_VALUE)
+    @PutMapping(value = "/fagsaker/{saksnr}/henlegg-som-bortfalt", consumes = MediaType.TEXT_PLAIN_VALUE, produces = MediaType.TEXT_PLAIN_VALUE)
     @ApiOperation(value = "Henlegger en fagsak i Melosys som bortfalt, fordi den ikke skal behandles i Melosys. " +
         "Henlegger kun den aktive behandlingen uten endring av saksstatus dersom behandlingtype er NY_VURDERING.")
     public ResponseEntity<Void> henleggSakSomBortfalt(@PathVariable("saksnr") String saksnummer) {
