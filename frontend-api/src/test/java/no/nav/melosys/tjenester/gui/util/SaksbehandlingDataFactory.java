@@ -15,6 +15,11 @@ import no.nav.melosys.domain.kodeverk.Sakstyper;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
 
 public final class SaksbehandlingDataFactory {
+
+    public static Fagsak lagFagsak() {
+        return lagFagsak("MEL-1");
+    }
+
     public static Fagsak lagFagsak(String saksnummer) {
         var fagsak = new Fagsak();
         fagsak.setSaksnummer(saksnummer);

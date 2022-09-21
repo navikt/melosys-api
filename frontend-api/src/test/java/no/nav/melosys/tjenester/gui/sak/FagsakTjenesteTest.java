@@ -30,10 +30,8 @@ import no.nav.melosys.service.sak.OpprettNySakFraOppgave;
 import no.nav.melosys.service.sak.OpprettSakDto;
 import no.nav.melosys.service.saksopplysninger.SaksopplysningerService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
-import no.nav.melosys.service.utpeking.UtpekingService;
 import no.nav.melosys.tjenester.gui.dto.FagsakDto;
 import no.nav.melosys.tjenester.gui.dto.FagsakSokDto;
-import no.nav.melosys.tjenester.gui.dto.UtpekDto;
 import no.nav.melosys.tjenester.gui.util.NumericStringRandomizer;
 import no.nav.melosys.tjenester.gui.util.SaksbehandlingDataFactory;
 import org.jeasy.random.EasyRandom;
@@ -63,8 +61,6 @@ class FagsakTjenesteTest {
     private static OpprettNySakFraOppgave opprettNySakFraOppgave;
     @MockBean
     private static Aksesskontroll aksesskontroll;
-    @MockBean
-    private static UtpekingService utpekingService;
     @MockBean
     private static OrganisasjonOppslagService organisasjonOppslagService;
     @MockBean
@@ -250,22 +246,6 @@ class FagsakTjenesteTest {
             .andExpect(status().isNoContent());
 
         verify(fagsakService).avsluttFagsakOgBehandlingValiderBehandlingstype(fagsak, fagsak.hentAktivBehandling());
-    }
-
-    @Test
-    void utpekLovvalgsland() throws Exception {
-        Fagsak fagsak = lagFagsak();
-        mockFagsakTjeneste(fagsak);
-        UtpekDto utpekDto = new UtpekDto(Set.of("SE:123"), "Fri SED", "Fri brev");
-        when(fagsakService.hentFagsak(any())).thenReturn(fagsak);
-
-        mockMvc.perform(post(BASE_URL + "/{saksnr}/utpek", "123")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(utpekDto)))
-            .andExpect(status().isNoContent());
-
-        verify(aksesskontroll).autoriserSakstilgang(fagsak);
-        verify(utpekingService).utpekLovvalgsland(fagsak, utpekDto.mottakerinstitusjoner(), utpekDto.fritekstSed(), utpekDto.fritekstBrev());
     }
 
     @Test

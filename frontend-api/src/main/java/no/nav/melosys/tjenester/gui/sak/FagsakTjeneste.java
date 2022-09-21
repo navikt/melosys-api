@@ -23,7 +23,6 @@ import no.nav.melosys.service.sak.OpprettNySakFraOppgave;
 import no.nav.melosys.service.sak.OpprettSakDto;
 import no.nav.melosys.service.saksopplysninger.SaksopplysningerService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
-import no.nav.melosys.service.utpeking.UtpekingService;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.tjenester.gui.dto.*;
 import no.nav.melosys.tjenester.gui.dto.periode.PeriodeDto;
@@ -56,14 +55,12 @@ public class FagsakTjeneste {
     private final BehandlingsresultatService behandlingsresultatService;
     private final PersondataFasade persondataFasade;
     private final SaksopplysningerService saksopplysningerService;
-    private final UtpekingService utpekingService;
     private final OrganisasjonOppslagService organisasjonOppslagService;
 
     public FagsakTjeneste(FagsakService fagsakService, Aksesskontroll aksesskontroll, BehandlingsgrunnlagService behandlingsgrunnlagService,
                           OpprettNySakFraOppgave opprettNySakFraOppgave,
                           BehandlingsresultatService behandlingsresultatService, PersondataFasade persondataFasade,
-                          SaksopplysningerService saksopplysningerService, UtpekingService utpekingService,
-                          OrganisasjonOppslagService organisasjonOppslagService) {
+                          SaksopplysningerService saksopplysningerService, OrganisasjonOppslagService organisasjonOppslagService) {
         this.fagsakService = fagsakService;
         this.aksesskontroll = aksesskontroll;
         this.behandlingsgrunnlagService = behandlingsgrunnlagService;
@@ -71,7 +68,6 @@ public class FagsakTjeneste {
         this.behandlingsresultatService = behandlingsresultatService;
         this.persondataFasade = persondataFasade;
         this.saksopplysningerService = saksopplysningerService;
-        this.utpekingService = utpekingService;
         this.organisasjonOppslagService = organisasjonOppslagService;
     }
 
@@ -161,23 +157,6 @@ public class FagsakTjeneste {
         Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
         aksesskontroll.autoriserSakstilgang(fagsak);
         fagsakService.avsluttFagsakOgBehandlingValiderBehandlingstype(fagsak, fagsak.hentAktivBehandling());
-
-        return ResponseEntity.noContent().build();
-    }
-
-    @PostMapping("/{saksnummer}/utpek")
-    @ApiOperation(value = "Utpeker lovvalgsland for gitt fagsak")
-    public ResponseEntity<Void> utpekLovvalgsland(@PathVariable("saksnummer") String saksnummer,
-                                                  @RequestBody UtpekDto utpekDto) {
-        Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
-        aksesskontroll.autoriserSakstilgang(fagsak);
-
-        utpekingService.utpekLovvalgsland(
-            fagsak,
-            utpekDto.mottakerinstitusjoner(),
-            utpekDto.fritekstSed(),
-            utpekDto.fritekstBrev()
-        );
 
         return ResponseEntity.noContent().build();
     }
