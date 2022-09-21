@@ -1,4 +1,4 @@
-package no.nav.melosys.tjenester.gui;
+package no.nav.melosys.tjenester.gui.sak;
 
 import java.time.LocalDate;
 import java.util.Collections;
