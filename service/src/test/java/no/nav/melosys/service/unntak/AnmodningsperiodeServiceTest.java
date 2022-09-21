@@ -143,7 +143,7 @@ class AnmodningsperiodeServiceTest {
         svar.setAnmodningsperiode(anmodningsperiode);
 
 
-        assertThatExceptionOfType(FunksjonellException.class)
+        assertThatExceptionOfType(IllegalStateException.class)
             .isThrownBy(() -> anmodningsperiodeService.lagreAnmodningsperiodeSvarMedLovvalgsperiode(ANMODNINGSPERIODE_ID, svar))
             .withMessageContaining(Anmodningsperiode.FEIL_VED_HENT_BEHANDLINGSRESULTAT_ID.formatted(ANMODNINGSPERIODE_ID));
     }

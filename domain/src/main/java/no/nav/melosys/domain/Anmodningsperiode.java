@@ -8,7 +8,6 @@ import no.nav.melosys.domain.jpa.LovvalgBestemmelsekonverterer;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
-import no.nav.melosys.exception.FunksjonellException;
 
 import static java.util.Objects.isNull;
 
@@ -16,8 +15,8 @@ import static java.util.Objects.isNull;
 @Table(name = "anmodningsperiode")
 public class Anmodningsperiode implements PeriodeOmLovvalg {
 
-    public static final String FEIL_VED_HENT_BEHANDLINGSRESULTAT_ID = "Forventet behandlingsresultat. Kunne ikke " +
-        "hente beh_resultat_id på anmodningsperiode id %s";
+    public static final String FEIL_VED_HENT_BEHANDLINGSRESULTAT_ID = "Anmodningsperiode skal alltid ha " +
+        "behandlingsresultat. Kunne ikke hente beh_resultat_id på anmodningsperiode id %s";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -244,7 +243,7 @@ public class Anmodningsperiode implements PeriodeOmLovvalg {
 
     public Long hentBehandlingsresultatId() {
         if (isNull(getBehandlingsresultat())) {
-            throw new FunksjonellException(FEIL_VED_HENT_BEHANDLINGSRESULTAT_ID.formatted(id));
+            throw new IllegalStateException(FEIL_VED_HENT_BEHANDLINGSRESULTAT_ID.formatted(id));
         }
         return getBehandlingsresultat().getId();
     }
