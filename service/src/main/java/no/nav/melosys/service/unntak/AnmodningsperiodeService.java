@@ -2,17 +2,21 @@ package no.nav.melosys.service.unntak;
 
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.AnmodningsperiodeSvar;
 import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
+import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.AnmodningsperiodeRepository;
 import no.nav.melosys.repository.AnmodningsperiodeSvarRepository;
+import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.kontroll.regler.PeriodeRegler;
 import org.springframework.stereotype.Service;
@@ -23,13 +27,15 @@ import static org.springframework.util.StringUtils.hasText;
 @Service
 public class AnmodningsperiodeService {
     private final AnmodningsperiodeRepository anmodningsperiodeRepository;
+    private final LovvalgsperiodeService lovvalgsperiodeService;
     private final AnmodningsperiodeSvarRepository anmodningsperiodeSvarRepository;
     private final BehandlingsresultatService behandlingsresultatService;
 
     public AnmodningsperiodeService(AnmodningsperiodeRepository anmodningsperiodeRepository,
-                                    AnmodningsperiodeSvarRepository anmodningsperiodeSvarRepository,
+                                    LovvalgsperiodeService lovvalgsperiodeService, AnmodningsperiodeSvarRepository anmodningsperiodeSvarRepository,
                                     BehandlingsresultatService behandlingsresultatService) {
         this.anmodningsperiodeRepository = anmodningsperiodeRepository;
+        this.lovvalgsperiodeService = lovvalgsperiodeService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.anmodningsperiodeSvarRepository = anmodningsperiodeSvarRepository;
     }
@@ -81,15 +87,15 @@ public class AnmodningsperiodeService {
     }
 
     @Transactional
-    public AnmodningsperiodeSvar lagreAnmodningsperiodeSvar(long anmodningsperiodeId, AnmodningsperiodeSvar anmodningsperiodeSvar) {
+    public AnmodningsperiodeSvar lagreAnmodningsperiodeSvarMedLovvalgsperiode(long anmodningsperiodeId, AnmodningsperiodeSvar anmodningsperiodeSvar) {
         Anmodningsperiode anmodningsperiode = anmodningsperiodeRepository.findById(anmodningsperiodeId)
             .orElseThrow(() -> new IkkeFunnetException("Anmodningsperiode med id " + anmodningsperiodeId + " finnes ikke"));
 
-        return lagreAnmodningsperiodeSvar(anmodningsperiode, anmodningsperiodeSvar);
+        return lagreAnmodningsperiodeSvarMedLovvalgsperiode(anmodningsperiode, anmodningsperiodeSvar);
     }
 
     public void lagreAnmodningsperiodeSvarForBehandling(long behandlingID, AnmodningsperiodeSvar anmodningsperiodeSvar) {
-        lagreAnmodningsperiodeSvar(hentFørsteAnmodningsperiode(behandlingID), anmodningsperiodeSvar);
+        lagreAnmodningsperiodeSvarMedLovvalgsperiode(hentFørsteAnmodningsperiode(behandlingID), anmodningsperiodeSvar);
     }
 
     public void oppdaterAnmodningsperiodeSendtForBehandling(long behandlingID) {
@@ -108,7 +114,7 @@ public class AnmodningsperiodeService {
         return anmodningsperioder.iterator().next();
     }
 
-    private AnmodningsperiodeSvar lagreAnmodningsperiodeSvar(Anmodningsperiode anmodningsperiode, AnmodningsperiodeSvar anmodningsperiodeSvar) {
+    private AnmodningsperiodeSvar lagreAnmodningsperiodeSvarMedLovvalgsperiode(Anmodningsperiode anmodningsperiode, AnmodningsperiodeSvar anmodningsperiodeSvar) {
         validerSvar(anmodningsperiodeSvar);
 
         if (anmodningsperiode.getAnmodningsperiodeSvar() != null) {
@@ -117,7 +123,12 @@ public class AnmodningsperiodeService {
 
         anmodningsperiodeSvar.setAnmodningsperiode(anmodningsperiode);
         anmodningsperiode.setAnmodningsperiodeSvar(anmodningsperiodeSvar);
-        return anmodningsperiodeSvarRepository.save(anmodningsperiodeSvar);
+        anmodningsperiodeSvarRepository.save(anmodningsperiodeSvar);
+
+        Lovvalgsperiode lovvalgsperiode = Lovvalgsperiode.av(anmodningsperiodeSvar, Medlemskapstyper.PLIKTIG);
+        lovvalgsperiodeService.lagreLovvalgsperioder(anmodningsperiode.hentBehandlingsresultatId(), Collections.singleton(lovvalgsperiode));
+
+        return anmodningsperiodeSvar;
     }
 
     private AnmodningsperiodeSvar oppdaterOpprinneligSvar(AnmodningsperiodeSvar opprinnelig, AnmodningsperiodeSvar oppdatert) {
