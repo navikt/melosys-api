@@ -73,6 +73,36 @@ public class ProsessinstansService {
         this.behandlingsgrunnlagService = behandlingsgrunnlagService;
     }
 
+    public void lagNySak(OpprettSakDto opprettSakDto) {
+        Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setType(ProsessType.OPPRETT_SAK);
+        prosessinstans.setData(BRUKER_ID, opprettSakDto.getBrukerID());
+        prosessinstans.setData(BEHANDLINGSTEMA, opprettSakDto.getBehandlingstema());
+        prosessinstans.setData(BEHANDLINGSTYPE, opprettSakDto.getBehandlingstype());
+        prosessinstans.setData(SAKSTYPE, opprettSakDto.getSakstype());
+        prosessinstans.setData(SAKSTEMA, opprettSakDto.getSakstema());
+        prosessinstans.setData(OPPGAVE_ID, opprettSakDto.getOppgaveID());
+        prosessinstans.setData(SKAL_TILORDNES, opprettSakDto.isSkalTilordnes());
+        prosessinstans.setData(SØKNADSLAND, opprettSakDto.getSoknadDto().getLand());
+        prosessinstans.setData(SØKNADSPERIODE, opprettSakDto.getSoknadDto().getPeriode());
+
+        lagre(prosessinstans);
+    }
+
+    public void lagNyBehandlingForSak(String saksnummer, OpprettSakDto opprettSakDto) {
+        Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setType(ProsessType.OPPRETT_BEHANDLING_FOR_SAK);
+        prosessinstans.setData(BRUKER_ID, opprettSakDto.getBrukerID());
+        prosessinstans.setData(SAKSNUMMER, saksnummer);
+        prosessinstans.setData(BEHANDLINGSTYPE, opprettSakDto.getBehandlingstype());
+        prosessinstans.setData(BEHANDLINGSTEMA, opprettSakDto.getBehandlingstema());
+        prosessinstans.setData(SAKSTYPE, opprettSakDto.getSakstype());
+        prosessinstans.setData(SAKSTEMA, opprettSakDto.getSakstema());
+        prosessinstans.setData(SKAL_TILORDNES, opprettSakDto.isSkalTilordnes());
+
+        lagre(prosessinstans);
+    }
+
     public Prosessinstans lagJournalføringProsessinstans(ProsessType type, JournalfoeringDto journalfoeringDto) {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(type);
@@ -239,7 +269,7 @@ public class ProsessinstansService {
                                               Behandlingstyper behandlingstype) {
         Prosessinstans prosessinstans = new Prosessinstans();
 
-        prosessinstans.setType(ProsessType.OPPRETT_NY_SAK_EOS);
+        prosessinstans.setType(ProsessType.OPPRETT_NY_SAK_EOS_FRA_OPPGAVE);
         prosessinstans.setData(ProsessDataKey.SAKSTYPE, opprettSakDto.getSakstype());
         prosessinstans.setData(SAKSTEMA,
             SakstypeSakstemaKobling.sakstema(Sakstyper.EU_EOS, opprettSakDto.getBehandlingstema()));
@@ -262,7 +292,7 @@ public class ProsessinstansService {
     public void opprettProsessinstansNySakFTRLTrygdeavtale(String journalpostID, OpprettSakDto opprettSakDto) {
         Prosessinstans prosessinstans = new Prosessinstans();
 
-        prosessinstans.setType(ProsessType.OPPRETT_NY_SAK_FTRL_TRYGDEAVTALE);
+        prosessinstans.setType(ProsessType.OPPRETT_NY_SAK_FTRL_TRYGDEAVTALE_FRA_OPPGAVE);
         prosessinstans.setData(ProsessDataKey.SAKSTYPE, opprettSakDto.getSakstype());
         prosessinstans.setData(SAKSTEMA, SakstypeSakstemaKobling.sakstema(opprettSakDto.getSakstype(),
             opprettSakDto.getBehandlingstema()));

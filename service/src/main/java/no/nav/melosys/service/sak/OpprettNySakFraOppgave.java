@@ -35,12 +35,15 @@ public class OpprettNySakFraOppgave {
     private final ProsessinstansService prosessinstansService;
     private final Unleash unleash;
 
+    private final FagsakService fagsakService;
+
     public OpprettNySakFraOppgave(JournalfoeringService journalfoeringService, OppgaveService oppgaveService,
-                                  @Lazy ProsessinstansService prosessinstansService, Unleash unleash) {
+                                  @Lazy ProsessinstansService prosessinstansService, Unleash unleash, FagsakService fagsakService) {
         this.journalfoeringService = journalfoeringService;
         this.oppgaveService = oppgaveService;
         this.prosessinstansService = prosessinstansService;
         this.unleash = unleash;
+        this.fagsakService = fagsakService;
     }
 
     @Transactional
@@ -61,18 +64,43 @@ public class OpprettNySakFraOppgave {
         }
     }
 
+    @Transactional
+    public void lagNyBehandlingForSak(String saksnummer, OpprettSakDto opprettSakDto) {
+        Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
+
+        if (fagsak.hentAktivBehandling() != null) {
+            throw new FunksjonellException("Det finnes allerede en aktiv behandling på fagsak " + saksnummer);
+        }
+
+        prosessinstansService.lagNyBehandlingForSak(saksnummer, opprettSakDto);
+    }
+
+    @Transactional
+    public void lagNySak(OpprettSakDto opprettSakDto) {
+        validerOpprettSakDto(opprettSakDto);
+        prosessinstansService.lagNySak(opprettSakDto);
+    }
+
     void validerOpprettSakDto(OpprettSakDto opprettSakDto) {
         final var sakstype = opprettSakDto.getSakstype();
         final var behandlingstema = opprettSakDto.getBehandlingstema();
+        final var sakstema = opprettSakDto.getSakstema();
         final var behandlingstype = opprettSakDto.getBehandlingstype();
+        final var hovedpart = opprettSakDto.getHovedpart();
 
-        validerBehandlingstema(behandlingstema, sakstype);
+        if (unleash.isEnabled("melosys.behandle_alle_saker")) {
+            journalfoeringService.validerBehandlingstema(hovedpart, sakstype, sakstema, behandlingstema, null);
+            journalfoeringService.validerBehandlingstype(hovedpart, sakstype, sakstema, behandlingstema, behandlingstype, null);
 
-        if (unleash.isEnabled("melosys.behandle_alle_saker")
-            ? erSakstypeEøs(sakstype) && !SaksbehandlingRegler.harTomFlyt(sakstype, behandlingstype, behandlingstema)
-            : erBehandlingAvSøknadGammel(behandlingstema) && erSakstypeEøs(sakstype)
-        ) {
-            validerSøknadData(opprettSakDto.getSoknadDto());
+            if (erSakstypeEøs(sakstype) && !SaksbehandlingRegler.harTomFlyt(sakstype, behandlingstype, behandlingstema)) {
+                validerSøknadData(opprettSakDto.getSoknadDto());
+            }
+        } else {
+            validerBehandlingstema(behandlingstema, sakstype);
+
+            if (erBehandlingAvSøknadGammel(behandlingstema) && erSakstypeEøs(sakstype)) {
+                validerSøknadData(opprettSakDto.getSoknadDto());
+            }
         }
     }
 

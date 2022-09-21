@@ -1,15 +1,19 @@
 package no.nav.melosys.service.sak;
 
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 import no.finn.unleash.FakeUnleash;
+import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.arkiv.Journalposttype;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
+import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -29,6 +33,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -42,6 +47,8 @@ class OpprettNySakFraOppgaveTest {
     private OppgaveService oppgaveService;
     @Mock
     private ProsessinstansService prosessinstansService;
+    @Mock
+    private FagsakService fagsakService;
 
     private final FakeUnleash unleash = new FakeUnleash();
 
@@ -57,7 +64,7 @@ class OpprettNySakFraOppgaveTest {
 
     @BeforeEach
     public void setUp() {
-        opprettNySakFraOppgave = new OpprettNySakFraOppgave(journalfoeringService, oppgaveService, prosessinstansService, unleash);
+        opprettNySakFraOppgave = new OpprettNySakFraOppgave(journalfoeringService, oppgaveService, prosessinstansService, unleash, fagsakService);
         unleash.enableAll();
     }
 
@@ -73,6 +80,92 @@ class OpprettNySakFraOppgaveTest {
         opprettNySakFraOppgave.bestillNySakOgBehandling(opprettSakDto);
 
         verify(prosessinstansService).opprettProsessinstansNySakEØS(oppgave.getJournalpostId(), opprettSakDto, Behandlingstyper.SED);
+    }
+
+    @Test
+    void lagNySak_EU_EOS_oppretterProsess() {
+        OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
+        opprettSakDto.setHovedpart(Aktoersroller.BRUKER);
+        opprettSakDto.setSakstype(Sakstyper.EU_EOS);
+        opprettSakDto.setSakstema(Sakstemaer.MEDLEMSKAP_LOVVALG);
+        opprettSakDto.setBehandlingstema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
+        opprettSakDto.setBehandlingstype(Behandlingstyper.HENVENDELSE);
+        Oppgave oppgave = new Oppgave.Builder().setOppgavetype(Oppgavetyper.BEH_SAK_MK).setJournalpostId("1234").build();
+
+        opprettNySakFraOppgave.lagNySak(opprettSakDto);
+
+        verify(prosessinstansService).lagNySak(opprettSakDto);
+    }
+
+    @Test
+    void lagNySak_TRYGDEAVTALE_oppretterProsess() {
+        OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
+        opprettSakDto.setHovedpart(Aktoersroller.BRUKER);
+        opprettSakDto.setSakstype(Sakstyper.TRYGDEAVTALE);
+        opprettSakDto.setSakstema(Sakstemaer.MEDLEMSKAP_LOVVALG);
+        opprettSakDto.setBehandlingstema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
+        opprettSakDto.setBehandlingstype(Behandlingstyper.HENVENDELSE);
+        Oppgave oppgave = new Oppgave.Builder().setOppgavetype(Oppgavetyper.BEH_SAK_MK).setJournalpostId("1234").build();
+
+        opprettNySakFraOppgave.lagNySak(opprettSakDto);
+
+        verify(prosessinstansService).lagNySak(opprettSakDto);
+    }
+
+    @Test
+    void lagNySak_FTRL_oppretterProsess() {
+        OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
+        opprettSakDto.setHovedpart(Aktoersroller.BRUKER);
+        opprettSakDto.setSakstype(Sakstyper.FTRL);
+        opprettSakDto.setSakstema(Sakstemaer.MEDLEMSKAP_LOVVALG);
+        opprettSakDto.setBehandlingstema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
+        opprettSakDto.setBehandlingstype(Behandlingstyper.HENVENDELSE);
+        Oppgave oppgave = new Oppgave.Builder().setOppgavetype(Oppgavetyper.BEH_SAK_MK).setJournalpostId("1234").build();
+
+        opprettNySakFraOppgave.lagNySak(opprettSakDto);
+
+        verify(prosessinstansService).lagNySak(opprettSakDto);
+    }
+
+    @Test
+    void lagNySakForBehandling_oppretterProsess() {
+        OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
+        opprettSakDto.setHovedpart(Aktoersroller.BRUKER);
+        opprettSakDto.setSakstype(Sakstyper.FTRL);
+        opprettSakDto.setSakstema(Sakstemaer.MEDLEMSKAP_LOVVALG);
+        opprettSakDto.setBehandlingstema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
+        opprettSakDto.setBehandlingstype(Behandlingstyper.HENVENDELSE);
+        Oppgave oppgave = new Oppgave.Builder().setOppgavetype(Oppgavetyper.BEH_SAK_MK).setJournalpostId("1234").build();
+        Fagsak fagsak = new Fagsak();
+        fagsak.setSaksnummer("MEL-1");
+
+        when(fagsakService.hentFagsak(fagsak.getSaksnummer())).thenReturn(fagsak);
+
+        opprettNySakFraOppgave.lagNyBehandlingForSak(fagsak.getSaksnummer(), opprettSakDto);
+
+        verify(prosessinstansService).lagNyBehandlingForSak(fagsak.getSaksnummer(), opprettSakDto);
+    }
+
+    @Test
+    void lagNySakForBehandling_oppretterProsess_feiler() {
+        OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
+        opprettSakDto.setHovedpart(Aktoersroller.BRUKER);
+        opprettSakDto.setSakstype(Sakstyper.FTRL);
+        opprettSakDto.setSakstema(Sakstemaer.MEDLEMSKAP_LOVVALG);
+        opprettSakDto.setBehandlingstema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
+        opprettSakDto.setBehandlingstype(Behandlingstyper.HENVENDELSE);
+        Oppgave oppgave = new Oppgave.Builder().setOppgavetype(Oppgavetyper.BEH_SAK_MK).setJournalpostId("1234").build();
+        Fagsak fagsak = new Fagsak();
+        Behandling behandling = new Behandling();
+
+        fagsak.setSaksnummer("MEL-1");
+        fagsak.setBehandlinger(Arrays.asList(behandling));
+
+        when(fagsakService.hentFagsak(fagsak.getSaksnummer())).thenReturn(fagsak);
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> opprettNySakFraOppgave.lagNyBehandlingForSak(fagsak.getSaksnummer(), opprettSakDto))
+            .withMessageContaining("Det finnes allerede en aktiv behandling på fagsak");
     }
 
     @Test
@@ -241,9 +334,21 @@ class OpprettNySakFraOppgaveTest {
         opprettSakDto.setSakstype(Sakstyper.EU_EOS);
         opprettSakDto.setBehandlingstema(null);
 
+        when(journalfoeringService.validerBehandlingstema(any(), any(), any(), any(), any())).thenThrow(new FunksjonellException("Behandlingstema"));
+
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> opprettNySakFraOppgave.bestillNySakOgBehandling(opprettSakDto))
             .withMessageContaining("Behandlingstema");
+    }
+
+    @Test
+    void lagNySak_validerOpprettSakDto_manglerBehandlingstema_feiler() {
+        OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
+        opprettSakDto.setSakstype(Sakstyper.EU_EOS);
+        opprettSakDto.setBehandlingstema(null);
+
+        assertThatExceptionOfType(NullPointerException.class)
+            .isThrownBy(() -> opprettNySakFraOppgave.lagNySak(opprettSakDto));
     }
 
     @Test

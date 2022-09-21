@@ -11,6 +11,7 @@ import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.vilkaar.InngangsvilkaarService;
@@ -51,6 +52,7 @@ class VurderInngangsvilkaarTest {
         behandlingsgrunnlagData.periode = new Periode(LocalDate.now(), LocalDate.now().plusYears(1L));
         behandlingsgrunnlagData.soeknadsland.landkoder = List.of(Landkoder.NO.getKode(), Landkoder.SE.getKode());
 
+        behandling.setType(Behandlingstyper.NY_VURDERING);
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(behandlingsgrunnlagData);
 
@@ -78,9 +80,11 @@ class VurderInngangsvilkaarTest {
     void utfør_behandlingstemaBeslutningLovvalgAnnetLand_vurdererIkkeInngangsvilkår() {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
+        behandling.setType(Behandlingstyper.NY_VURDERING);
         behandling.setTema(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING);
         behandling.setFagsak(new Fagsak());
         behandling.getFagsak().setType(Sakstyper.EU_EOS);
+
 
         vurderInngangsvilkaar.utfør(prosessinstans);
         verify(inngangsvilkaarService, never()).vurderOgLagreInngangsvilkår(anyLong(), any(), anyBoolean(), any());
@@ -92,6 +96,7 @@ class VurderInngangsvilkaarTest {
         prosessinstans.setBehandling(behandling);
         behandling.setFagsak(new Fagsak());
         behandling.getFagsak().setType(Sakstyper.FTRL);
+        behandling.setType(Behandlingstyper.NY_VURDERING);
 
         vurderInngangsvilkaar.utfør(prosessinstans);
         verify(inngangsvilkaarService, never()).vurderOgLagreInngangsvilkår(anyLong(), any(), anyBoolean(), any());

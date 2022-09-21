@@ -125,6 +125,61 @@ class FagsakTjenesteTest {
     }
 
     @Test
+    void lagNySak() throws Exception {
+        var opprettSakDto = new OpprettSakDto();
+        opprettSakDto.setBrukerID(FNR);
+
+        mockMvc.perform(post(BASE_URL + "/lag-ny-sak")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(opprettSakDto)))
+            .andExpect(status().isNoContent());
+        verify(aksesskontroll).autoriserFolkeregisterIdent(opprettSakDto.getBrukerID());
+    }
+
+    @Test
+    void lagNySak_utenFnr_badRequestException() throws Exception {
+        mockFagsakTjeneste(null);
+        var opprettSakDto = new OpprettSakDto();
+        opprettSakDto.setHovedpart(Aktoersroller.BRUKER);
+
+        mockMvc.perform(post(BASE_URL + "/lag-ny-sak")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(opprettSakDto)))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.message", equalTo("BrukerID trengs for å opprette en sak.")));
+    }
+
+    @Test
+    void lagNyBehandling() throws Exception {
+        Fagsak fagsak = SaksbehandlingDataFactory.lagFagsak("MEL-1");
+        var behandling = new Behandling();
+        behandling.setFagsak(fagsak);
+        behandling.setId(123L);
+        fagsak.setBehandlinger(Collections.singletonList(behandling));
+        var opprettSakDto = new OpprettSakDto();
+        opprettSakDto.setBrukerID(FNR);
+
+        mockMvc.perform(post(BASE_URL + "/{saksnr}/lag-ny-behandling", fagsak.getSaksnummer())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(opprettSakDto)))
+            .andExpect(status().isNoContent());
+        verify(aksesskontroll).autoriserFolkeregisterIdent(opprettSakDto.getBrukerID());
+    }
+
+    @Test
+    void lagNyBehandling_utenFnr_badRequestException() throws Exception {
+        mockFagsakTjeneste(null);
+        var opprettSakDto = new OpprettSakDto();
+        opprettSakDto.setHovedpart(Aktoersroller.BRUKER);
+
+        mockMvc.perform(post(BASE_URL + "/{saksnr}/lag-ny-behandling", "123")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(opprettSakDto)))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.message", equalTo("BrukerID trengs for å opprette en sak.")));
+    }
+
+    @Test
     void opprettSak_utenFnr_badRequestException() throws Exception {
         mockFagsakTjeneste(null);
         var opprettSakDto = new OpprettSakDto();

@@ -11,10 +11,12 @@ import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerRequest;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
+import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import static no.nav.melosys.domain.saksflyt.ProsessDataKey.OPPGAVE_ID;
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.HENT_REGISTEROPPLYSNINGER;
 import static no.nav.melosys.service.registeropplysninger.RegisteropplysningerFactory.utledSaksopplysningTyper;
 
@@ -45,8 +47,18 @@ public class HentRegisteropplysninger implements StegBehandler {
 
     @Override
     public void utfør(Prosessinstans prosessinstans) {
-
         Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
+        boolean harTomFlyt = SaksbehandlingRegler.harTomFlyt(behandling.getFagsak().getType(), behandling.getType(), behandling.getTema());
+
+        if (harTomFlyt) {
+            log.info("Hopper over steg {} fordi saken har tom flyt", HENT_REGISTEROPPLYSNINGER.getKode());
+            return;
+        }
+
+        if (behandling.getFagsak().getType() != Sakstyper.EU_EOS && prosessinstans.getData(OPPGAVE_ID) == null) {
+            log.info("Hopper over steg {} fordi sakstype er {} og oppgaveID er {}", HENT_REGISTEROPPLYSNINGER.getKode(), behandling.getFagsak().getType(), prosessinstans.getData(OPPGAVE_ID));
+            return;
+        }
 
         if (behandling.getFagsak().getType() == Sakstyper.EU_EOS) {
             var aktørId = behandling.getFagsak().finnBrukersAktørID().orElseThrow(

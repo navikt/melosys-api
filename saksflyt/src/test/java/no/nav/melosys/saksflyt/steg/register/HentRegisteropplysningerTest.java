@@ -12,6 +12,7 @@ import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadFtrl;
 import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadTrygdeavtale;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -68,6 +69,20 @@ class HentRegisteropplysningerTest {
         behandling.setType(Behandlingstyper.FØRSTEGANG);
 
         when(behandlingService.hentBehandling(behandling.getId())).thenReturn(behandling);
+    }
+
+    @Test
+    void utfør_hoppOverSteg() {
+        Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setBehandling(behandling);
+        Fagsak fagsak = new Fagsak();
+        fagsak.setType(Sakstyper.FTRL);
+        behandling.setFagsak(fagsak);
+        behandling.setTema(Behandlingstema.ARBEID_KUN_NORGE);
+
+        hentRegisteropplysninger.utfør(prosessinstans);
+
+        verify(registeropplysningerService, never()).hentOgLagreOpplysninger(any());
     }
 
     @Test
@@ -132,14 +147,15 @@ class HentRegisteropplysningerTest {
 
     @Test
     void utfør_behandlingstypeTrygdetid_henterIngenting() {
-        behandling.setTema(Behandlingstema.TRYGDETID);
         behandling.getFagsak().setType(Sakstyper.EU_EOS);
+        behandling.getFagsak().setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
+        behandling.setTema(Behandlingstema.TRYGDETID);
+        behandling.setType(Behandlingstyper.NY_VURDERING);
         var prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
 
         hentRegisteropplysninger.utfør(prosessinstans);
 
-        verify(registeropplysningerService).hentOgLagreOpplysninger(requestCaptor.capture());
-        assertThat(requestCaptor.getValue().getOpplysningstyper()).isEmpty();
+        verify(registeropplysningerService, never()).hentOgLagreOpplysninger(any());
     }
 }
