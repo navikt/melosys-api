@@ -30,7 +30,7 @@ class HenleggelseTjenesteTest {
     private ObjectMapper objectMapper;
 
     @MockBean
-    private static Aksesskontroll aksesskontroll;
+    private Aksesskontroll aksesskontroll;
     @MockBean
     private FagsakService fagsakService;
     @MockBean

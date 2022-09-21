@@ -28,15 +28,12 @@ import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.sak.OpprettNySakFraOppgave;
 import no.nav.melosys.service.sak.OpprettSakDto;
-import no.nav.melosys.service.sak.VideresendSoknadService;
 import no.nav.melosys.service.saksopplysninger.SaksopplysningerService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.utpeking.UtpekingService;
 import no.nav.melosys.tjenester.gui.dto.FagsakDto;
 import no.nav.melosys.tjenester.gui.dto.FagsakSokDto;
 import no.nav.melosys.tjenester.gui.dto.UtpekDto;
-import no.nav.melosys.tjenester.gui.dto.VideresendDto;
-import no.nav.melosys.tjenester.gui.dto.dokumentarkiv.VedleggDto;
 import no.nav.melosys.tjenester.gui.util.NumericStringRandomizer;
 import no.nav.melosys.tjenester.gui.util.SaksbehandlingDataFactory;
 import org.jeasy.random.EasyRandom;
@@ -50,7 +47,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static no.nav.melosys.tjenester.gui.util.ResponseBodyMatchers.responseBody;
-import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.jeasy.random.FieldPredicates.*;
 import static org.mockito.Mockito.*;
@@ -73,8 +69,6 @@ class FagsakTjenesteTest {
     private static OrganisasjonOppslagService organisasjonOppslagService;
     @MockBean
     private static PersondataFasade persondataFasade;
-    @MockBean
-    private static VideresendSoknadService videresendSoknadService;
     @MockBean
     private static SaksopplysningerService saksopplysningerService;
     @MockBean
@@ -243,34 +237,6 @@ class FagsakTjenesteTest {
                 .content(objectMapper.writeValueAsString(fagsakSokDto)))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.length()", equalTo(0)));
-    }
-
-    @Test
-    void videresend() throws Exception {
-        var videresendDto = new VideresendDto();
-        videresendDto.setVedlegg(Collections.singletonList(new VedleggDto("1", "2")));
-        videresendDto.setMottakerinstitusjon("Denmark");
-        videresendDto.setFritekst("Dette er fritekst");
-        Fagsak fagsak = lagFagsak();
-        mockFagsakTjeneste(fagsak);
-
-        mockMvc.perform(post(BASE_URL + "/{saksnr}/henlegg-videresend", "123")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(videresendDto)))
-            .andExpect(status().isNoContent());
-    }
-
-    @Test
-    void videresend_utenVedlegg_feiler() throws Exception {
-        Fagsak fagsak = lagFagsak();
-        mockFagsakTjeneste(fagsak);
-        var videresendDto = new VideresendDto();
-
-        mockMvc.perform(post(BASE_URL + "/{saksnr}/henlegg-videresend", "123")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(videresendDto)))
-            .andExpect(status().isBadRequest())
-            .andExpect(jsonPath("$.message", containsString("uten vedlegg")));
     }
 
     @Test

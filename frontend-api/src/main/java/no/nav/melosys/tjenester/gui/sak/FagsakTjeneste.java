@@ -1,14 +1,12 @@
 package no.nav.melosys.tjenester.gui.sak;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.arkiv.DokumentReferanse;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
@@ -19,7 +17,10 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService;
-import no.nav.melosys.service.sak.*;
+import no.nav.melosys.service.sak.EndreSakDto;
+import no.nav.melosys.service.sak.FagsakService;
+import no.nav.melosys.service.sak.OpprettNySakFraOppgave;
+import no.nav.melosys.service.sak.OpprettSakDto;
 import no.nav.melosys.service.saksopplysninger.SaksopplysningerService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.utpeking.UtpekingService;
@@ -27,7 +28,6 @@ import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.tjenester.gui.dto.*;
 import no.nav.melosys.tjenester.gui.dto.periode.PeriodeDto;
 import no.nav.security.token.support.core.api.Protected;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,14 +57,13 @@ public class FagsakTjeneste {
     private final PersondataFasade persondataFasade;
     private final SaksopplysningerService saksopplysningerService;
     private final UtpekingService utpekingService;
-    private final VideresendSoknadService videresendSoknadService;
     private final OrganisasjonOppslagService organisasjonOppslagService;
 
     public FagsakTjeneste(FagsakService fagsakService, Aksesskontroll aksesskontroll, BehandlingsgrunnlagService behandlingsgrunnlagService,
                           OpprettNySakFraOppgave opprettNySakFraOppgave,
                           BehandlingsresultatService behandlingsresultatService, PersondataFasade persondataFasade,
                           SaksopplysningerService saksopplysningerService, UtpekingService utpekingService,
-                          VideresendSoknadService videresendSoknadService, OrganisasjonOppslagService organisasjonOppslagService) {
+                          OrganisasjonOppslagService organisasjonOppslagService) {
         this.fagsakService = fagsakService;
         this.aksesskontroll = aksesskontroll;
         this.behandlingsgrunnlagService = behandlingsgrunnlagService;
@@ -73,7 +72,6 @@ public class FagsakTjeneste {
         this.persondataFasade = persondataFasade;
         this.saksopplysningerService = saksopplysningerService;
         this.utpekingService = utpekingService;
-        this.videresendSoknadService = videresendSoknadService;
         this.organisasjonOppslagService = organisasjonOppslagService;
     }
 
@@ -154,27 +152,6 @@ public class FagsakTjeneste {
         }
 
         return Collections.emptyList();
-    }
-
-    @PostMapping("/{saksnr}/henlegg-videresend")
-    @ApiOperation(value = "Videresender søknad for en gitt behandling")
-    public ResponseEntity<Void> videresend(@PathVariable("saksnr") String saksnummer,
-                                           @RequestBody VideresendDto videresendDto) {
-        Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
-        aksesskontroll.autoriserSakstilgang(fagsak);
-
-        if (CollectionUtils.isEmpty(videresendDto.getVedlegg())) {
-            throw new FunksjonellException("Kan ikke videresende søknad uten vedlegg!");
-        }
-
-        videresendSoknadService.videresend(saksnummer,
-            videresendDto.getMottakerinstitusjon(),
-            videresendDto.getFritekst(),
-            videresendDto.getVedlegg().stream().map(
-                v -> new DokumentReferanse(v.journalpostID(), v.dokumentID())).collect(
-                Collectors.toUnmodifiableSet())
-        );
-        return ResponseEntity.noContent().build();
     }
 
     @PutMapping(value = "/{saksnr}/avslutt", consumes = MediaType.TEXT_PLAIN_VALUE, produces = {MediaType.TEXT_PLAIN_VALUE, MediaType.APPLICATION_JSON_VALUE})
