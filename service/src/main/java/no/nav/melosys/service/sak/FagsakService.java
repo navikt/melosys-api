@@ -285,6 +285,10 @@ public class FagsakService {
         fagsakRepository.save(fagsak);
     }
 
+    /**
+     * @deprecated Fjernes med toggle melosys.behandle_alle_saker
+     */
+    @Deprecated
     @Transactional
     public long opprettNyVurderingBehandling(String saksnummer) {
         Fagsak fagsak = hentFagsak(saksnummer);
