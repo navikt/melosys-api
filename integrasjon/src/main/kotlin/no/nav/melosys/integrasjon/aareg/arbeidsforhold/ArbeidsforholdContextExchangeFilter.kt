@@ -10,14 +10,12 @@ import org.springframework.web.reactive.function.client.ClientRequest
 class ArbeidsforholdContextExchangeFilter(restStsClient: RestStsClient) :
     GenericContextExchangeFilter(restStsClient) {
 
-    override fun createClientRequest(clientRequest: ClientRequest): ClientRequest {
-        return ClientRequest.from(clientRequest)
+    override fun withClientRequestBuilder(clientRequestBuilder: ClientRequest.Builder): ClientRequest.Builder =
+        clientRequestBuilder
             // Om vi får lagt inn "0000-ga-aa-register-konsument" i sakbehandler token kan vi benytte dette når tilgjengelig
             // https://nav-it.slack.com/archives/C01BSCJM127/p1649411252534409
             .header(HttpHeaders.AUTHORIZATION, systemToken)
             .header(NAV_CONSUMER_TOKEN, systemToken)
-            .build()
-    }
 
     companion object {
         private const val NAV_CONSUMER_TOKEN = "Nav-Consumer-Token"

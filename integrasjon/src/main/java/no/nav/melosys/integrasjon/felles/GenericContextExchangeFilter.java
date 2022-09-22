@@ -27,15 +27,12 @@ public class GenericContextExchangeFilter implements ExchangeFilterFunction {
     public Mono<ClientResponse> filter(@Nonnull final ClientRequest clientRequest,
                                        @Nonnull final ExchangeFunction exchangeFunction) {
         return exchangeFunction.exchange(
-            createClientRequest(clientRequest)
+            withClientRequestBuilder(ClientRequest.from(clientRequest)).build()
         );
     }
 
-    @Nonnull
-    protected ClientRequest createClientRequest(@Nonnull ClientRequest clientRequest) {
-        return ClientRequest.from(clientRequest)
-            .header(HttpHeaders.AUTHORIZATION, getAutoToken())
-            .build();
+    protected ClientRequest.Builder withClientRequestBuilder(ClientRequest.Builder clientRequestBuilder) {
+        return clientRequestBuilder.header(HttpHeaders.AUTHORIZATION, getAutoToken());
     }
 
     protected String getAutoToken() {
