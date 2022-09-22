@@ -244,6 +244,8 @@ public class JournalfoeringService {
         Behandling sisteBehandling = fagsak.hentSistRegistrertBehandling();
         if (sisteBehandling.erAktiv()) return;
 
+        if (unleash.isEnabled("melosys.behandle_alle_saker")) return;
+
         if (!fagsak.harMinstEnBehandlingAvType(Behandlingstyper.SOEKNAD)) return;
 
         throw new FunksjonellException(
@@ -292,7 +294,7 @@ public class JournalfoeringService {
     }
 
     private ProsessType finnProsessTypeForAndregangsbehandling(Behandlingstyper behandlingstype, Behandlingstema behandlingstema, Fagsak fagsak) {
-        if(!unleash.isEnabled("melosys.behandle_alle_saker")) {
+        if (!unleash.isEnabled("melosys.behandle_alle_saker")) {
             return ProsessType.JFR_ANDREGANG_REPLIKER_BEHANDLING;
         }
         if (behandlingReplikeringsRegler.skalTidligereBehandlingReplikeres(fagsak, behandlingstype, behandlingstema)) {
