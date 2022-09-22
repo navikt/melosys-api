@@ -1,6 +1,7 @@
 package no.nav.melosys.tjenester.gui.dto;
 
 import java.time.Instant;
+import java.util.List;
 
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
@@ -17,6 +18,15 @@ public class FagsakDto {
     private Instant registrertDato;
     private Instant endretDato;
     private Aktoersroller hovedpartRolle;
+    private List<Long> behandlingsIDer;
+
+    public List<Long> getBehandlingsIDer() {
+        return behandlingsIDer;
+    }
+
+    public void setBehandlingsIDer(List<Long> behandlingsIDer) {
+        this.behandlingsIDer = behandlingsIDer;
+    }
 
     public String getSaksnummer() {
         return saksnummer;

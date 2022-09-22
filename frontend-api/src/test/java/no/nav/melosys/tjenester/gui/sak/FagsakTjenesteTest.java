@@ -1,10 +1,7 @@
 package no.nav.melosys.tjenester.gui.sak;
 
 import java.time.LocalDate;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.Aktoer;
@@ -295,6 +292,12 @@ class FagsakTjenesteTest {
         resultat.setSakstype(fagsak.getType());
         resultat.setSaksstatus(fagsak.getStatus());
         resultat.setHovedpartRolle(fagsak.getHovedpartRolle());
+        resultat.setBehandlingsIDer(
+            fagsak.getBehandlinger()
+                .stream()
+                .sorted(Comparator.comparing(Behandling::getRegistrertDato))
+                .map(Behandling::getId)
+                .toList());
         return resultat;
     }
 }

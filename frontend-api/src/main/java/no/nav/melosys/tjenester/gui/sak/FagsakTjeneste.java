@@ -187,7 +187,12 @@ public class FagsakTjeneste {
         fagsakDto.setRegistrertDato(fagsak.getRegistrertDato());
         fagsakDto.setEndretDato(fagsak.getEndretDato());
         fagsakDto.setHovedpartRolle(fagsak.getHovedpartRolle());
-
+        fagsakDto.setBehandlingsIDer(
+            fagsak.getBehandlinger()
+                .stream()
+                .sorted(Comparator.comparing(Behandling::getRegistrertDato))
+                .map(Behandling::getId)
+                .toList());
         return fagsakDto;
     }
 
