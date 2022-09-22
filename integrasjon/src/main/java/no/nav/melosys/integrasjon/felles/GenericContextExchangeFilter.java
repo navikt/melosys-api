@@ -26,22 +26,34 @@ public class GenericContextExchangeFilter implements ExchangeFilterFunction {
     @Override
     public Mono<ClientResponse> filter(@Nonnull final ClientRequest clientRequest,
                                        @Nonnull final ExchangeFunction exchangeFunction) {
+        return exchangeFunction.exchange(
+            createClientRequest(clientRequest)
+        );
+    }
 
+    @Nonnull
+    protected ClientRequest createClientRequest(@Nonnull ClientRequest clientRequest) {
+        return ClientRequest.from(clientRequest)
+            .header(HttpHeaders.AUTHORIZATION, getAutoToken())
+            .build();
+    }
+
+    protected String getAutoToken() {
         if (ThreadLocalAccessInfo.shouldUseSystemToken()) {
-            ClientRequest clientRequestWithBearerAuth = ClientRequest.from(clientRequest)
-                .header(HttpHeaders.AUTHORIZATION, restStsClient.bearerToken())
-                .build();
-            return exchangeFunction.exchange(clientRequestWithBearerAuth);
+            return getSystemToken();
         }
+        return "Bearer " + getUserToken();
+    }
 
+    protected String getSystemToken() {
+        return restStsClient.bearerToken();
+    }
+
+    private String getUserToken() {
         String oidcTokenString = SubjectHandler.getInstance().getOidcTokenString();
         if (oidcTokenString == null) {
             throw new TekniskException("Token mangler fra bruker! " + ThreadLocalAccessInfo.getInfo());
         }
-        return exchangeFunction.exchange(
-            ClientRequest.from(clientRequest)
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + oidcTokenString)
-                .build()
-        );
+        return oidcTokenString;
     }
 }
