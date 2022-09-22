@@ -1,47 +1,27 @@
 package no.nav.melosys.integrasjon.pdl;
 
-import java.util.function.Supplier;
 import javax.annotation.Nonnull;
 
-import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.integrasjon.felles.GenericContextExchangeFilter;
 import no.nav.melosys.integrasjon.reststs.RestStsClient;
-import no.nav.melosys.sikkerhet.context.SubjectHandler;
-import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo;
 import org.springframework.http.HttpHeaders;
+import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.ClientRequest;
-import org.springframework.web.reactive.function.client.ClientResponse;
-import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
-import org.springframework.web.reactive.function.client.ExchangeFunction;
-import reactor.core.publisher.Mono;
 
-public class PDLAuthFilter implements ExchangeFilterFunction {
+@Component
+public class PDLAuthFilter extends GenericContextExchangeFilter {
     private static final String NAV_CONSUMER_TOKEN = "Nav-Consumer-Token";
 
-    private final RestStsClient restStsClient;
-
     public PDLAuthFilter(RestStsClient restStsClient) {
-        this.restStsClient = restStsClient;
+        super(restStsClient);
     }
 
     @Nonnull
     @Override
-    public Mono<ClientResponse> filter(@Nonnull ClientRequest clientRequest,
-                                       @Nonnull ExchangeFunction exchangeFunction) {
-        return exchangeFunction.exchange(
-            ClientRequest.from(clientRequest)
-                .header(HttpHeaders.AUTHORIZATION, getTokenSupplier(restStsClient).get())
-                .header(NAV_CONSUMER_TOKEN, restStsClient.bearerToken())
-                .build()
-        );
-    }
-
-    private Supplier<String> getTokenSupplier(RestStsClient restStsClient) {
-        if (ThreadLocalAccessInfo.shouldUseSystemToken()) {
-            return restStsClient::bearerToken;
-        }
-        if (ThreadLocalAccessInfo.shouldUseOidcToken()) {
-            return () -> "Bearer " + SubjectHandler.getInstance().getOidcTokenString();
-        }
-        throw new TekniskException("Uregistert kall prøver å registrere token provider");
+    protected ClientRequest createClientRequest(@Nonnull ClientRequest clientRequest) {
+        return ClientRequest.from(clientRequest)
+            .header(HttpHeaders.AUTHORIZATION, getAutoToken())
+            .header(NAV_CONSUMER_TOKEN, getSystemToken())
+            .build();
     }
 }
