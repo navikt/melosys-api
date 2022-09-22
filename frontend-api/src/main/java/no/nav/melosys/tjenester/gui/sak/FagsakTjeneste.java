@@ -1,14 +1,12 @@
-package no.nav.melosys.tjenester.gui;
+package no.nav.melosys.tjenester.gui.sak;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.arkiv.DokumentReferanse;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
@@ -19,15 +17,16 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService;
-import no.nav.melosys.service.sak.*;
+import no.nav.melosys.service.sak.EndreSakDto;
+import no.nav.melosys.service.sak.FagsakService;
+import no.nav.melosys.service.sak.OpprettNySakFraOppgave;
+import no.nav.melosys.service.sak.OpprettSakDto;
 import no.nav.melosys.service.saksopplysninger.SaksopplysningerService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
-import no.nav.melosys.service.utpeking.UtpekingService;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.tjenester.gui.dto.*;
 import no.nav.melosys.tjenester.gui.dto.periode.PeriodeDto;
 import no.nav.security.token.support.core.api.Protected;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,28 +53,21 @@ public class FagsakTjeneste {
     private final Aksesskontroll aksesskontroll;
     private final BehandlingsgrunnlagService behandlingsgrunnlagService;
     private final BehandlingsresultatService behandlingsresultatService;
-    private final HenleggFagsakService henleggFagsakService;
     private final PersondataFasade persondataFasade;
     private final SaksopplysningerService saksopplysningerService;
-    private final UtpekingService utpekingService;
-    private final VideresendSoknadService videresendSoknadService;
     private final OrganisasjonOppslagService organisasjonOppslagService;
 
     public FagsakTjeneste(FagsakService fagsakService, Aksesskontroll aksesskontroll, BehandlingsgrunnlagService behandlingsgrunnlagService,
-                          HenleggFagsakService henleggFagsakService, OpprettNySakFraOppgave opprettNySakFraOppgave,
+                          OpprettNySakFraOppgave opprettNySakFraOppgave,
                           BehandlingsresultatService behandlingsresultatService, PersondataFasade persondataFasade,
-                          SaksopplysningerService saksopplysningerService, UtpekingService utpekingService,
-                          VideresendSoknadService videresendSoknadService, OrganisasjonOppslagService organisasjonOppslagService) {
+                          SaksopplysningerService saksopplysningerService, OrganisasjonOppslagService organisasjonOppslagService) {
         this.fagsakService = fagsakService;
         this.aksesskontroll = aksesskontroll;
         this.behandlingsgrunnlagService = behandlingsgrunnlagService;
-        this.henleggFagsakService = henleggFagsakService;
         this.opprettNySakFraOppgave = opprettNySakFraOppgave;
         this.behandlingsresultatService = behandlingsresultatService;
         this.persondataFasade = persondataFasade;
         this.saksopplysningerService = saksopplysningerService;
-        this.utpekingService = utpekingService;
-        this.videresendSoknadService = videresendSoknadService;
         this.organisasjonOppslagService = organisasjonOppslagService;
     }
 
@@ -103,7 +95,8 @@ public class FagsakTjeneste {
     @PostMapping("/{saksnr}/endre")
     @ApiOperation(value = "Endre en sak.")
     public ResponseEntity<Void> endreFagsak(@PathVariable("saksnr") String saksnummer, @RequestBody EndreSakDto endreSakDto) {
-        log.debug("Saksbehandler {} ber om å endre fagsak {} med sakstype {}, sakstema {}", saksnummer, endreSakDto.sakstype(), endreSakDto.sakstema());
+        log.debug("Saksbehandler {} ber om å endre fagsak {} med sakstype {}, sakstema {}",
+                  SubjectHandler.getInstance().getUserID(), saksnummer, endreSakDto.sakstype(), endreSakDto.sakstema());
         aksesskontroll.autoriserSakstilgang(saksnummer);
 
         fagsakService.oppdaterSakstema(saksnummer, endreSakDto.sakstema());
@@ -157,45 +150,6 @@ public class FagsakTjeneste {
         return Collections.emptyList();
     }
 
-    @PostMapping("/{saksnr}/henlegg")
-    @ApiOperation(value = "Henlegger en fagsak. Avslutter kun behandling uten endring av saksstatus dersom behandlingtype er NY_VURDERING.")
-    public ResponseEntity<Void> henleggFagsak(@PathVariable("saksnr") String saksnummer, @RequestBody HenleggelseDto henleggelseDto) {
-        aksesskontroll.autoriserSakstilgang(saksnummer);
-        henleggFagsakService.henleggFagsakEllerBehandling(saksnummer, henleggelseDto.begrunnelseKode(), henleggelseDto.fritekst());
-        return ResponseEntity.noContent().build();
-    }
-
-    @PostMapping("/{saksnr}/henlegg-videresend")
-    @ApiOperation(value = "Videresender søknad for en gitt behandling")
-    public ResponseEntity<Void> videresend(@PathVariable("saksnr") String saksnummer,
-                                           @RequestBody VideresendDto videresendDto) {
-        Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
-        aksesskontroll.autoriserSakstilgang(fagsak);
-
-        if (CollectionUtils.isEmpty(videresendDto.getVedlegg())) {
-            throw new FunksjonellException("Kan ikke videresende søknad uten vedlegg!");
-        }
-
-        videresendSoknadService.videresend(saksnummer,
-            videresendDto.getMottakerinstitusjon(),
-            videresendDto.getFritekst(),
-            videresendDto.getVedlegg().stream().map(
-                v -> new DokumentReferanse(v.journalpostID(), v.dokumentID())).collect(
-                Collectors.toUnmodifiableSet())
-        );
-        return ResponseEntity.noContent().build();
-    }
-
-    @PutMapping(value = "/{saksnr}/henlegg-som-bortfalt", consumes = MediaType.TEXT_PLAIN_VALUE, produces = MediaType.TEXT_PLAIN_VALUE)
-    @ApiOperation(value = "Henlegger en fagsak i Melosys som bortfalt, fordi den ikke skal behandles i Melosys. " +
-        "Henlegger kun den aktive behandlingen uten endring av saksstatus dersom behandlingtype er NY_VURDERING.")
-    public ResponseEntity<Void> henleggSakSomBortfalt(@PathVariable("saksnr") String saksnummer) {
-        aksesskontroll.autoriserSakstilgang(saksnummer);
-
-        henleggFagsakService.henleggSakEllerBehandlingSomBortfalt(saksnummer);
-        return ResponseEntity.noContent().build();
-    }
-
     @PutMapping(value = "/{saksnr}/avslutt", consumes = MediaType.TEXT_PLAIN_VALUE, produces = {MediaType.TEXT_PLAIN_VALUE, MediaType.APPLICATION_JSON_VALUE})
     @ApiOperation(value = "Brukes for å avslutte manuelle behandlinger. " +
         "Gyldige behandlingstyper er VURDER_TRYGDETID, ØVRIGE_SED og SOEKNAD_IKKE_YRKESAKTIVE", produces = MediaType.TEXT_PLAIN_VALUE, consumes = MediaType.TEXT_PLAIN_VALUE)
@@ -207,22 +161,7 @@ public class FagsakTjeneste {
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/{saksnummer}/utpek")
-    @ApiOperation(value = "Utpeker lovvalgsland for gitt fagsak")
-    public ResponseEntity<Void> utpekLovvalgsland(@PathVariable("saksnummer") String saksnummer,
-                                                  @RequestBody UtpekDto utpekDto) {
-        Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
-        aksesskontroll.autoriserSakstilgang(fagsak);
 
-        utpekingService.utpekLovvalgsland(
-            fagsak,
-            utpekDto.mottakerinstitusjoner(),
-            utpekDto.fritekstSed(),
-            utpekDto.fritekstBrev()
-        );
-
-        return ResponseEntity.noContent().build();
-    }
 
     /**
      * @deprecated Fjernes med toggle melosys.behandle_alle_saker
