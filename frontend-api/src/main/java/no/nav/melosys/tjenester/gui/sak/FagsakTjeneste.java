@@ -161,6 +161,12 @@ public class FagsakTjeneste {
         return ResponseEntity.noContent().build();
     }
 
+
+
+    /**
+     * @deprecated Fjernes med toggle melosys.behandle_alle_saker
+     */
+    @Deprecated
     @ApiOperation(value = "Korrigerer eller omgjør et vedtak eller en anmodning til utenlandsk myndighet " +
         "for en sak ved å opprette en ny behandling basert på den siste endrede behandling")
     @PostMapping("/{saksnummer}/revurder")
