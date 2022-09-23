@@ -25,6 +25,7 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService;
+import no.nav.melosys.service.sak.EndreSakService;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.sak.OpprettNySakFraOppgave;
 import no.nav.melosys.service.sak.OpprettSakDto;
@@ -58,15 +59,17 @@ class FagsakTjenesteTest {
     @MockBean
     private static FagsakService fagsakService;
     @MockBean
-    private static OpprettNySakFraOppgave opprettNySakFraOppgave;
+    private OpprettNySakFraOppgave opprettNySakFraOppgave;
     @MockBean
-    private static Aksesskontroll aksesskontroll;
+    private EndreSakService endreSakService;
     @MockBean
-    private static OrganisasjonOppslagService organisasjonOppslagService;
+    private Aksesskontroll aksesskontroll;
+    @MockBean
+    private OrganisasjonOppslagService organisasjonOppslagService;
     @MockBean
     private static PersondataFasade persondataFasade;
     @MockBean
-    private static SaksopplysningerService saksopplysningerService;
+    private SaksopplysningerService saksopplysningerService;
     @MockBean
     private static BehandlingsgrunnlagService behandlingsgrunnlagService;
     @MockBean
@@ -103,8 +106,7 @@ class FagsakTjenesteTest {
         var bruker = new Aktoer();
         bruker.setRolle(Aktoersroller.BRUKER);
         fagsak.setAktører(Set.of(bruker));
-
-        mockFagsakTjeneste(fagsak);
+        when(fagsakService.hentFagsak("123")).thenReturn(fagsak);
 
         mockMvc.perform(get(BASE_URL + "/{saksnr}", "123")
                 .contentType(MediaType.APPLICATION_JSON))
@@ -122,11 +124,11 @@ class FagsakTjenesteTest {
                 .content(objectMapper.writeValueAsString(opprettSakDto)))
             .andExpect(status().isNoContent());
         verify(aksesskontroll).autoriserFolkeregisterIdent(opprettSakDto.getBrukerID());
+        verify(opprettNySakFraOppgave).bestillNySakOgBehandling(any(OpprettSakDto.class));
     }
 
     @Test
     void opprettSak_utenFnr_badRequestException() throws Exception {
-        mockFagsakTjeneste(null);
         var opprettSakDto = new OpprettSakDto();
 
         mockMvc.perform(post(BASE_URL + "/opprett")
@@ -224,8 +226,6 @@ class FagsakTjenesteTest {
 
     @Test
     void hentFagsaker_medSaksnummer_finnerIkkeSakMottarTomListe() throws Exception {
-        Fagsak fagsak = lagFagsak();
-        mockFagsakTjeneste(fagsak);
         var fagsakSokDto = new FagsakSokDto(null, "NEI-123", null);
 
         mockMvc.perform(post(BASE_URL + "/sok")

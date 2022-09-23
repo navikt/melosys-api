@@ -17,10 +17,7 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService;
-import no.nav.melosys.service.sak.EndreSakDto;
-import no.nav.melosys.service.sak.FagsakService;
-import no.nav.melosys.service.sak.OpprettNySakFraOppgave;
-import no.nav.melosys.service.sak.OpprettSakDto;
+import no.nav.melosys.service.sak.*;
 import no.nav.melosys.service.saksopplysninger.SaksopplysningerService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
@@ -49,6 +46,7 @@ public class FagsakTjeneste {
 
     private final FagsakService fagsakService;
     private final OpprettNySakFraOppgave opprettNySakFraOppgave;
+    private final EndreSakService endreSakService;
     private final Aksesskontroll aksesskontroll;
     private final BehandlingsgrunnlagService behandlingsgrunnlagService;
     private final BehandlingsresultatService behandlingsresultatService;
@@ -57,13 +55,14 @@ public class FagsakTjeneste {
     private final OrganisasjonOppslagService organisasjonOppslagService;
 
     public FagsakTjeneste(FagsakService fagsakService, Aksesskontroll aksesskontroll, BehandlingsgrunnlagService behandlingsgrunnlagService,
-                          OpprettNySakFraOppgave opprettNySakFraOppgave,
+                          OpprettNySakFraOppgave opprettNySakFraOppgave, EndreSakService endreSakService,
                           BehandlingsresultatService behandlingsresultatService, PersondataFasade persondataFasade,
                           SaksopplysningerService saksopplysningerService, OrganisasjonOppslagService organisasjonOppslagService) {
         this.fagsakService = fagsakService;
         this.aksesskontroll = aksesskontroll;
         this.behandlingsgrunnlagService = behandlingsgrunnlagService;
         this.opprettNySakFraOppgave = opprettNySakFraOppgave;
+        this.endreSakService = endreSakService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.persondataFasade = persondataFasade;
         this.saksopplysningerService = saksopplysningerService;
@@ -97,13 +96,7 @@ public class FagsakTjeneste {
         log.debug("Saksbehandler {} ber om å endre fagsak {} med sakstype {}, sakstema {}",
             SubjectHandler.getInstance().getUserID(), saksnummer, endreSakDto.sakstype(), endreSakDto.sakstema());
         aksesskontroll.autoriserSakstilgang(saksnummer);
-
-        fagsakService.oppdaterSakstema(saksnummer, endreSakDto.sakstema());
-        /*
-        TODO: Endre sakstype fikses i MELOSYS-5285
-        fagsakService.oppdaterSakstype(saksnummer, endreSakDto.sakstype());
-        */
-
+        endreSakService.endre(saksnummer, endreSakDto.sakstype(), endreSakDto.sakstema());
         return ResponseEntity.noContent().build();
     }
 
