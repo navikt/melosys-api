@@ -4,6 +4,7 @@ import java.time.*;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
+import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.arkiv.ArkivDokument;
@@ -60,14 +61,18 @@ class DokgenMalMapperTest {
     @Mock
     private StorbritanniaMapper mockStorbritanniaMapper;
 
+    private final FakeUnleash unleash = new FakeUnleash();
+
     private DokgenMalMapper dokgenMalMapper;
 
     @BeforeEach
     void init() {
+        unleash.enableAll();
         dokgenMalMapper = new DokgenMalMapper(
             mockDokgenMapperDatahenter,
             mockInnvilgelseFtrlMapper,
-            mockStorbritanniaMapper);
+            mockStorbritanniaMapper,
+            unleash);
     }
 
     @Test
@@ -325,10 +330,12 @@ class DokgenMalMapperTest {
         assertThat((MangelbrevBruker) dokgenDto)
             .extracting(
                 MangelbrevBruker::getInnledningFritekst,
-                MangelbrevBruker::getManglerInfoFritekst
+                MangelbrevBruker::getManglerInfoFritekst,
+                Mangelbrev::isToggleEnabled
             ).containsExactly(
                 "Dummy",
-                "Dummy"
+                "Dummy",
+                true
             );
         assertThat(((MangelbrevBruker) dokgenDto).getDatoInnsendingsfrist().truncatedTo(ChronoUnit.DAYS))
             .isEqualTo(Instant.now().plus(Period.ofWeeks(4)).truncatedTo(ChronoUnit.DAYS));
@@ -362,11 +369,13 @@ class DokgenMalMapperTest {
             .extracting(
                 MangelbrevArbeidsgiver::getInnledningFritekst,
                 MangelbrevArbeidsgiver::getManglerInfoFritekst,
-                MangelbrevArbeidsgiver::getNavnFullmektig
+                MangelbrevArbeidsgiver::getNavnFullmektig,
+                Mangelbrev::isToggleEnabled
             ).containsExactly(
                 "Dummy",
                 "Dummy",
-                "Fullmektig AS"
+                "Fullmektig AS",
+                true
             );
         assertThat(((MangelbrevArbeidsgiver) dokgenDto).getDatoInnsendingsfrist().truncatedTo(ChronoUnit.DAYS))
             .isEqualTo(Instant.now().plus(Period.ofWeeks(4)).truncatedTo(ChronoUnit.DAYS));
@@ -600,6 +609,7 @@ class DokgenMalMapperTest {
             datoDesember);
         assertThat(avslagbrev.getMangelbrevDatoer()).isSorted();
         assertThat(avslagbrev.getFritekst()).isEqualTo("Hei");
+        assertThat(avslagbrev.isToggleEnabled()).isTrue();
     }
 
     @Test

@@ -14,6 +14,7 @@ import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.brev.MangelbrevBrevbestilling;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
+import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.person.Persondata;
@@ -158,7 +159,7 @@ class DokgenConsumerTest {
             .medPersonDokument((Persondata) lagPersondokument().getDokument())
             .medPersonMottaker((Persondata) lagPersondokument().getDokument())
             .build();
-        return MangelbrevBruker.av(mangelbrevBrevbestilling, Instant.now());
+        return MangelbrevBruker.av(mangelbrevBrevbestilling, Instant.now(), true);
     }
 
     private Behandling lagBehandling() {
@@ -172,6 +173,7 @@ class DokgenConsumerTest {
     private Fagsak lagFagsak(Behandling behandling) {
         Fagsak fagsak = new Fagsak();
         fagsak.setType(Sakstyper.EU_EOS);
+        fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
         behandling.setType(Behandlingstyper.SOEKNAD);
         fagsak.setBehandlinger(List.of(behandling));
         return fagsak;

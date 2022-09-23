@@ -3,6 +3,7 @@ package no.nav.melosys.service.dokument.brev.mapper;
 import java.time.Instant;
 import java.util.List;
 
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.brev.*;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
@@ -22,13 +23,16 @@ public class DokgenMalMapper {
     private final DokgenMapperDatahenter dokgenMapperDatahenter;
     private final InnvilgelseFtrlMapper innvilgelseFtrlMapper;
     private final StorbritanniaMapper storbritanniaMapper;
+    private final Unleash unleash;
 
     public DokgenMalMapper(DokgenMapperDatahenter dokgenMapperDatahenter,
                            InnvilgelseFtrlMapper innvilgelseFtrlMapper,
-                           StorbritanniaMapper storbritanniaMapper) {
+                           StorbritanniaMapper storbritanniaMapper,
+                           Unleash unleash) {
         this.dokgenMapperDatahenter = dokgenMapperDatahenter;
         this.innvilgelseFtrlMapper = innvilgelseFtrlMapper;
         this.storbritanniaMapper = storbritanniaMapper;
+        this.unleash = unleash;
     }
 
     public DokgenDto mapBehandling(DokgenBrevbestilling mottattBrevbestilling, Aktoer aktoerMottaker) {
@@ -61,13 +65,14 @@ public class DokgenMalMapper {
             .build();
     }
 
-    private Avslagbrev hentAvslagsbrev(DokgenBrevbestilling brevbestilling) {
+    private Avslagbrev hentAvslagsbrev(DokgenBrevbestilling brevbestilling, boolean toggleEnabled) {
         List<Instant> mangelbrevDatoer = dokgenMapperDatahenter.hentMangelbrevDatoer(brevbestilling);
 
-        return Avslagbrev.av(((AvslagBrevbestilling) brevbestilling).toBuilder().build(), mangelbrevDatoer);
+        return Avslagbrev.av(((AvslagBrevbestilling) brevbestilling).toBuilder().build(), mangelbrevDatoer, toggleEnabled);
     }
 
     private DokgenDto lagDokgenDtoFraBestilling(DokgenBrevbestilling brevbestilling) {
+        var toggleEnabled = unleash.isEnabled("melosys.behandle_alle_saker");
         return switch (brevbestilling.getProduserbartdokument()) {
             case MELDING_FORVENTET_SAKSBEHANDLINGSTID, MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD -> SaksbehandlingstidSoknad.av(
                 brevbestilling.toBuilder()
@@ -81,14 +86,16 @@ public class DokgenMalMapper {
                 ((MangelbrevBrevbestilling) brevbestilling).toBuilder()
                     .medVedtaksdato(dokgenMapperDatahenter.hentVedtaksdato(brevbestilling.getBehandling().getId()))
                     .build(),
-                DokumentasjonSvarfrist.beregnFristPaaMangelbrevFraDagensDato()
+                DokumentasjonSvarfrist.beregnFristPaaMangelbrevFraDagensDato(),
+                toggleEnabled
             );
             case MANGELBREV_ARBEIDSGIVER -> MangelbrevArbeidsgiver.av(
                 ((MangelbrevBrevbestilling) brevbestilling).toBuilder()
                     .medVedtaksdato(dokgenMapperDatahenter.hentVedtaksdato(brevbestilling.getBehandling().getId()))
                     .medFullmektigNavn(dokgenMapperDatahenter.hentFullmektigNavn(brevbestilling.getBehandling().getFagsak(), Representerer.BRUKER))
                     .build(),
-                DokumentasjonSvarfrist.beregnFristPaaMangelbrevFraDagensDato()
+                DokumentasjonSvarfrist.beregnFristPaaMangelbrevFraDagensDato(),
+                toggleEnabled
             );
             case INNVILGELSE_FOLKETRYGDLOVEN_2_8 -> innvilgelseFtrlMapper.map((InnvilgelseBrevbestilling) brevbestilling);
             case STORBRITANNIA -> storbritanniaMapper.map((InnvilgelseBrevbestilling) brevbestilling.toBuilder()
@@ -104,7 +111,7 @@ public class DokgenMalMapper {
                     .medNavnFullmektig(dokgenMapperDatahenter.hentFullmektigNavn(brevbestilling.getBehandling().getFagsak(), Representerer.ARBEIDSGIVER)).build(),
                 Aktoersroller.ARBEIDSGIVER
             );
-            case AVSLAG_MANGLENDE_OPPLYSNINGER -> hentAvslagsbrev(brevbestilling);
+            case AVSLAG_MANGLENDE_OPPLYSNINGER -> hentAvslagsbrev(brevbestilling, toggleEnabled);
             case MELDING_HENLAGT_SAK -> Henleggelsesbrev.av(((HenleggelseBrevbestilling) brevbestilling).toBuilder().build());
             default -> throw new FunksjonellException(
                 format("ProduserbartDokument %s er ikke støttet av melosys-dokgen",

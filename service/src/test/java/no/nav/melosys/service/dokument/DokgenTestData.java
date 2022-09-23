@@ -70,6 +70,7 @@ public final class DokgenTestData {
         fagsak.setRegistrertDato(Instant.now());
         fagsak.setBehandlinger(lagBehandlinger());
         fagsak.setType(Sakstyper.FTRL);
+        fagsak.setTema(Sakstemaer.UNNTAK);
         fagsak.setEndretAv("L12345");
         fagsak.setSaksnummer(SAKSNUMMER);
         Aktoer bruker = new Aktoer();

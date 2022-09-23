@@ -8,8 +8,8 @@ public class MangelbrevArbeidsgiver extends Mangelbrev {
 
     private final String navnFullmektig;
 
-    private MangelbrevArbeidsgiver(MangelbrevBrevbestilling brevbestilling, Instant datoInnsendingsfrist) {
-        super(brevbestilling, datoInnsendingsfrist);
+    private MangelbrevArbeidsgiver(MangelbrevBrevbestilling brevbestilling, Instant datoInnsendingsfrist, boolean toggleEnabled) {
+        super(brevbestilling, datoInnsendingsfrist, toggleEnabled);
         this.navnFullmektig = brevbestilling.getFullmektigNavn();
     }
 
@@ -17,7 +17,7 @@ public class MangelbrevArbeidsgiver extends Mangelbrev {
         return navnFullmektig;
     }
 
-    public static MangelbrevArbeidsgiver av(MangelbrevBrevbestilling brevbestilling, Instant datoInnsendingsfrist) {
-        return new MangelbrevArbeidsgiver(brevbestilling, datoInnsendingsfrist);
+    public static MangelbrevArbeidsgiver av(MangelbrevBrevbestilling brevbestilling, Instant datoInnsendingsfrist, boolean toggleEnabled) {
+        return new MangelbrevArbeidsgiver(brevbestilling, datoInnsendingsfrist, toggleEnabled);
     }
 }

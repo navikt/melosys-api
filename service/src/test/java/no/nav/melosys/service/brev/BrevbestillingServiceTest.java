@@ -4,6 +4,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.List;
 
+import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.brev.FastMottakerMedOrgnr;
@@ -16,6 +17,7 @@ import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
@@ -68,14 +70,16 @@ class BrevbestillingServiceTest {
     @Mock
     private DokumentNavnService mockDokumentNavnService;
 
+    private final FakeUnleash unleash = new FakeUnleash();
     private final Behandling behandling = lagBehandling();
 
     private BrevbestillingService brevbestillingService;
 
     @BeforeEach
     void init() {
+        unleash.enable("melosys.behandle_alle_saker");
         brevbestillingService = new BrevbestillingService(mockBrevmottakerService, mockDokServiceFasade, mockBehandlingService, mockEregFasade,
-            mockKontaktopplysningService, mockPersondataFasade, mockDokumentNavnService);
+            mockKontaktopplysningService, mockPersondataFasade, mockDokumentNavnService, unleash);
     }
 
     @Test
@@ -411,7 +415,24 @@ class BrevbestillingServiceTest {
 
     @Test
     void hentBrevMaler_behandlingErSoeknad_returnererSoeknadMalITillegg() {
+        unleash.disable("melosys.behandle_alle_saker");
         behandling.setType(Behandlingstyper.SOEKNAD);
+        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(321L)).thenReturn(behandling);
+        List<Produserbaredokumenter> brevMaler = brevbestillingService.hentMuligeProduserbaredokumenter(321L, BRUKER);
+
+        assertThat(brevMaler)
+            .hasSize(3)
+            .containsExactlyInAnyOrder(
+                MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD,
+                MANGELBREV_BRUKER,
+                GENERELT_FRITEKSTBREV_BRUKER
+            );
+    }
+
+    @Test
+    void hentBrevMaler_behandlingErFørstegangMedSakstemaMedlemskapLovvalg_returnererForventetSaksbehandlingstidMalITillegg() {
+        behandling.setType(Behandlingstyper.FØRSTEGANG);
+        behandling.getFagsak().setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
         when(mockBehandlingService.hentBehandlingMedSaksopplysninger(321L)).thenReturn(behandling);
         List<Produserbaredokumenter> brevMaler = brevbestillingService.hentMuligeProduserbaredokumenter(321L, BRUKER);
 
