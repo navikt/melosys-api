@@ -1,4 +1,4 @@
-package no.nav.melosys.tjenester.gui;
+package no.nav.melosys.tjenester.gui.sak;
 
 import java.time.LocalDate;
 import java.util.Collections;
@@ -7,7 +7,6 @@ import java.util.Optional;
 import java.util.Set;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
@@ -21,18 +20,18 @@ import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresse;
 import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresseNorge;
 import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresseUtland;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService;
-import no.nav.melosys.service.sak.*;
+import no.nav.melosys.service.sak.FagsakService;
+import no.nav.melosys.service.sak.OpprettNySakFraOppgave;
+import no.nav.melosys.service.sak.OpprettSakDto;
 import no.nav.melosys.service.saksopplysninger.SaksopplysningerService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
-import no.nav.melosys.service.utpeking.UtpekingService;
-import no.nav.melosys.tjenester.gui.dto.*;
-import no.nav.melosys.tjenester.gui.dto.dokumentarkiv.VedleggDto;
+import no.nav.melosys.tjenester.gui.dto.FagsakDto;
+import no.nav.melosys.tjenester.gui.dto.FagsakSokDto;
 import no.nav.melosys.tjenester.gui.util.NumericStringRandomizer;
 import no.nav.melosys.tjenester.gui.util.SaksbehandlingDataFactory;
 import org.jeasy.random.EasyRandom;
@@ -46,7 +45,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static no.nav.melosys.tjenester.gui.util.ResponseBodyMatchers.responseBody;
-import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.jeasy.random.FieldPredicates.*;
 import static org.mockito.Mockito.*;
@@ -64,23 +62,15 @@ class FagsakTjenesteTest {
     @MockBean
     private static Aksesskontroll aksesskontroll;
     @MockBean
-    private static HenleggFagsakService henleggFagsakService;
-    @MockBean
-    private static UtpekingService utpekingService;
-    @MockBean
     private static OrganisasjonOppslagService organisasjonOppslagService;
     @MockBean
     private static PersondataFasade persondataFasade;
-    @MockBean
-    private static VideresendSoknadService videresendSoknadService;
     @MockBean
     private static SaksopplysningerService saksopplysningerService;
     @MockBean
     private static BehandlingsgrunnlagService behandlingsgrunnlagService;
     @MockBean
     private static BehandlingsresultatService behandlingsresultatService;
-    @MockBean
-    private static Unleash unleash;
 
     @Autowired
     private MockMvc mockMvc;
@@ -246,66 +236,6 @@ class FagsakTjenesteTest {
     }
 
     @Test
-    void henleggFagsak() throws Exception {
-        String begrunnelseKode = Henleggelsesgrunner.OPPHOLD_UTL_AVLYST.getKode();
-        String fritekst = "Dette er fritekst";
-        var henleggelseDto = new HenleggelseDto(fritekst, begrunnelseKode);
-        Fagsak fagsak = lagFagsak();
-        mockFagsakTjeneste(fagsak);
-        String saksnummer = "123";
-
-        mockMvc.perform(post(BASE_URL + "/{saksnr}/henlegg", saksnummer)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(henleggelseDto)))
-            .andExpect(status().isNoContent());
-
-        verify(henleggFagsakService).henleggFagsakEllerBehandling(saksnummer, begrunnelseKode, fritekst);
-    }
-
-    @Test
-    void videresend() throws Exception {
-        var videresendDto = new VideresendDto();
-        videresendDto.setVedlegg(Collections.singletonList(new VedleggDto("1", "2")));
-        videresendDto.setMottakerinstitusjon("Denmark");
-        videresendDto.setFritekst("Dette er fritekst");
-        Fagsak fagsak = lagFagsak();
-        mockFagsakTjeneste(fagsak);
-
-        mockMvc.perform(post(BASE_URL + "/{saksnr}/henlegg-videresend", "123")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(videresendDto)))
-            .andExpect(status().isNoContent());
-    }
-
-    @Test
-    void videresend_utenVedlegg_feiler() throws Exception {
-        Fagsak fagsak = lagFagsak();
-        mockFagsakTjeneste(fagsak);
-        var videresendDto = new VideresendDto();
-
-        mockMvc.perform(post(BASE_URL + "/{saksnr}/henlegg-videresend", "123")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(videresendDto)))
-            .andExpect(status().isBadRequest())
-            .andExpect(jsonPath("$.message", containsString("uten vedlegg")));
-    }
-
-    @Test
-    void henleggSakSomBortfalt() throws Exception {
-        Fagsak fagsak = lagFagsak();
-        mockFagsakTjeneste(fagsak);
-        String saksnummer = "123";
-        when(fagsakService.hentFagsak(saksnummer)).thenReturn(fagsak);
-
-        mockMvc.perform(put(BASE_URL + "/{saksnr}/henlegg-som-bortfalt", saksnummer)
-                .contentType(MediaType.TEXT_PLAIN)
-                .accept(MediaType.TEXT_PLAIN))
-            .andExpect(status().isNoContent());
-
-        verify(henleggFagsakService).henleggSakEllerBehandlingSomBortfalt(saksnummer);
-    }
-
-    @Test
     void avsluttSakManuelt() throws Exception {
         Fagsak fagsak = lagFagsak();
         mockFagsakTjeneste(fagsak);
@@ -316,22 +246,6 @@ class FagsakTjenesteTest {
             .andExpect(status().isNoContent());
 
         verify(fagsakService).avsluttFagsakOgBehandlingValiderBehandlingstype(fagsak, fagsak.hentAktivBehandling());
-    }
-
-    @Test
-    void utpekLovvalgsland() throws Exception {
-        Fagsak fagsak = lagFagsak();
-        mockFagsakTjeneste(fagsak);
-        UtpekDto utpekDto = new UtpekDto(Set.of("SE:123"), "Fri SED", "Fri brev");
-        when(fagsakService.hentFagsak(any())).thenReturn(fagsak);
-
-        mockMvc.perform(post(BASE_URL + "/{saksnr}/utpek", "123")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(utpekDto)))
-            .andExpect(status().isNoContent());
-
-        verify(aksesskontroll).autoriserSakstilgang(fagsak);
-        verify(utpekingService).utpekLovvalgsland(fagsak, utpekDto.mottakerinstitusjoner(), utpekDto.fritekstSed(), utpekDto.fritekstBrev());
     }
 
     @Test

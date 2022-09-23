@@ -5,11 +5,7 @@ import no.nav.melosys.domain.eessi.melding.UtpekingAvvis;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.utpeking.UtpekingService;
 import no.nav.melosys.tjenester.gui.dto.utpeking.UtpekingAvvisDto;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -22,8 +18,8 @@ import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(controllers = {UtpekingTjeneste.class})
-class UtpekingTjenesteTest {
+@WebMvcTest(controllers = {AvvisUtpekingTjeneste.class})
+class AvvisUtpekingTjenesteTest {
 
     @MockBean
     private UtpekingService utpekingService;
