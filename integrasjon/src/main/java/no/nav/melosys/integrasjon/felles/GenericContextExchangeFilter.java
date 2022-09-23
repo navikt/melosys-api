@@ -32,10 +32,10 @@ public class GenericContextExchangeFilter implements ExchangeFilterFunction {
     }
 
     protected ClientRequest.Builder withClientRequestBuilder(ClientRequest.Builder clientRequestBuilder) {
-        return clientRequestBuilder.header(HttpHeaders.AUTHORIZATION, getAutoToken());
+        return clientRequestBuilder.header(HttpHeaders.AUTHORIZATION, getCorrectToken());
     }
 
-    protected String getAutoToken() {
+    protected String getCorrectToken() {
         if (ThreadLocalAccessInfo.shouldUseSystemToken()) {
             return getSystemToken();
         }
