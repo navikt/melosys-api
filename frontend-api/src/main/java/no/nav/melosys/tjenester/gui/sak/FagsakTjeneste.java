@@ -49,6 +49,7 @@ public class FagsakTjeneste {
 
     private final FagsakService fagsakService;
     private final OpprettSak opprettSak;
+    private final EndreSakService endreSakService;
     private final Aksesskontroll aksesskontroll;
     private final MottatteOpplysningerService mottatteOpplysningerService;
     private final BehandlingsresultatService behandlingsresultatService;
@@ -59,7 +60,7 @@ public class FagsakTjeneste {
     private final Unleash unleash;
 
     public FagsakTjeneste(FagsakService fagsakService, Aksesskontroll aksesskontroll, MottatteOpplysningerService mottatteOpplysningerService,
-                          OpprettSak opprettSak,
+                          OpprettSak opprettSak, EndreSakService endreSakService,
                           BehandlingsresultatService behandlingsresultatService, PersondataFasade persondataFasade,
                           Unleash unleash,
                           SaksopplysningerService saksopplysningerService, OrganisasjonOppslagService organisasjonOppslagService,
@@ -68,6 +69,7 @@ public class FagsakTjeneste {
         this.aksesskontroll = aksesskontroll;
         this.mottatteOpplysningerService = mottatteOpplysningerService;
         this.opprettSak = opprettSak;
+        this.endreSakService = endreSakService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.persondataFasade = persondataFasade;
         this.saksopplysningerService = saksopplysningerService;
@@ -125,15 +127,9 @@ public class FagsakTjeneste {
     @ApiOperation(value = "Endre en sak.")
     public ResponseEntity<Void> endreFagsak(@PathVariable("saksnr") String saksnummer, @RequestBody EndreSakDto endreSakDto) {
         log.debug("Saksbehandler {} ber om å endre fagsak {} med sakstype {}, sakstema {}",
-            SubjectHandler.getInstance().getUserID(), saksnummer, endreSakDto.sakstype(), endreSakDto.sakstema());
+            SubjectHandler.getInstance().getUserID(), saksnummer, endreSakDto.getSakstype(), endreSakDto.getSakstema());
         aksesskontroll.autoriserSakstilgang(saksnummer);
-
-        fagsakService.oppdaterSakstema(saksnummer, endreSakDto.sakstema());
-        /*
-        TODO: Endre sakstype fikses i MELOSYS-5285
-        fagsakService.oppdaterSakstype(saksnummer, endreSakDto.sakstype());
-        */
-
+        endreSakService.endre(saksnummer, endreSakDto.getSakstype(), endreSakDto.getSakstema());
         return ResponseEntity.noContent().build();
     }
 

@@ -33,10 +33,7 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService;
-import no.nav.melosys.service.sak.FagsakService;
-import no.nav.melosys.service.sak.OpprettBehandlingForSak;
-import no.nav.melosys.service.sak.OpprettSak;
-import no.nav.melosys.service.sak.OpprettSakDto;
+import no.nav.melosys.service.sak.*;
 import no.nav.melosys.service.saksopplysninger.SaksopplysningerService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.tjenester.gui.dto.FagsakDto;
@@ -85,6 +82,8 @@ class FagsakTjenesteTest {
     @MockBean
     private static OpprettSak opprettSak;
     @MockBean
+    private static EndreSakService endreSakService;
+    @MockBean
     private static Aksesskontroll aksesskontroll;
     @MockBean
     private static OrganisasjonOppslagService organisasjonOppslagService;
@@ -129,8 +128,7 @@ class FagsakTjenesteTest {
         var bruker = new Aktoer();
         bruker.setRolle(Aktoersroller.BRUKER);
         fagsak.setAktører(Set.of(bruker));
-
-        mockFagsakTjeneste(fagsak);
+        when(fagsakService.hentFagsak("123")).thenReturn(fagsak);
 
         mockMvc.perform(get(BASE_URL + "/{saksnr}", "123")
                 .contentType(MediaType.APPLICATION_JSON))
@@ -148,11 +146,11 @@ class FagsakTjenesteTest {
                 .content(objectMapper.writeValueAsString(opprettSakDto)))
             .andExpect(status().isNoContent());
         verify(aksesskontroll).autoriserFolkeregisterIdent(opprettSakDto.getBrukerID());
+        verify(opprettSak).opprettNySakOgBehandlingFraOppgave(any(OpprettSakDto.class));
     }
 
     @Test
     void opprettSak_utenFnrEllerOrgnr_badRequestException() throws Exception {
-        mockFagsakTjeneste(null);
         var opprettSakDto = new OpprettSakDto();
         opprettSakDto.setHovedpart(Aktoersroller.BRUKER);
 
@@ -346,8 +344,6 @@ class FagsakTjenesteTest {
 
     @Test
     void hentFagsaker_medSaksnummer_finnerIkkeSakMottarTomListe() throws Exception {
-        Fagsak fagsak = lagFagsak();
-        mockFagsakTjeneste(fagsak);
         var fagsakSokDto = new FagsakSokDto(null, "NEI-123", null);
 
         mockMvc.perform(post(BASE_URL + "/sok")
@@ -359,8 +355,6 @@ class FagsakTjenesteTest {
 
     @Test
     void revurderSisteBehandling() throws Exception {
-        Fagsak fagsak = lagFagsak();
-        mockFagsakTjeneste(fagsak);
         when(fagsakService.opprettNyVurderingBehandling("123")).thenReturn(1L);
 
         mockMvc.perform(post(BASE_URL + "/{saksnr}/revurder", "123")
@@ -373,9 +367,6 @@ class FagsakTjenesteTest {
 
     @Test
     void ferdigbehandleSak() throws Exception {
-        Fagsak fagsak = lagFagsak();
-        mockFagsakTjeneste(fagsak);
-
         mockMvc.perform(put(BASE_URL + "/{saksnr}/ferdigbehandle", "123")
                 .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isNoContent());
