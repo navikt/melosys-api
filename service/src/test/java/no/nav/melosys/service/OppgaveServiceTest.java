@@ -124,7 +124,7 @@ class OppgaveServiceTest {
         fagsak.setBehandlinger(List.of(behandling));
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
         when(fagsakService.hentFagsak(any(String.class))).thenReturn(fagsak);
-        when(behandlingsgrunnlagService.hentBehandlingsgrunnlag(behandling.getId())).thenReturn(lagBehandlingsgrunnlag());
+        when(behandlingsgrunnlagService.finnBehandlingsgrunnlag(behandling.getId())).thenReturn(Optional.of(lagBehandlingsgrunnlag()));
 
         List<OppgaveDto> mineSaker = oppgaveService.hentOppgaverMedAnsvarlig(tilordnetRessurs);
 
@@ -136,12 +136,49 @@ class OppgaveServiceTest {
 
         assertThat(behOppgOpt).isPresent().get().isInstanceOf(BehandlingsoppgaveDto.class);
         assertThat(((BehandlingsoppgaveDto) behOppgOpt.get()).getBehandling().getBehandlingID()).isEqualTo(behandling.getId());
+        assertThat(((BehandlingsoppgaveDto) behOppgOpt.get()).getLand()).isNotNull();
 
         Optional<OppgaveDto> jfrOppgOpt = mineSaker.stream()
             .filter(o -> o.getOppgaveID().equals(jfrOppgID))
             .findFirst();
 
         assertThat(jfrOppgOpt).isPresent().get().isInstanceOf(JournalfoeringsoppgaveDto.class);
+    }
+
+    @Test
+    void hentOppgaverMedAnsvarlig_behandlingsgrunnlagFinnesIkke_mappesKorrekt() {
+        final String behOppgID = "1";
+        final String tilordnetRessurs = "Z2222";
+        Oppgave.Builder oppgave = new Oppgave.Builder();
+        oppgave.setOppgaveId(behOppgID);
+        oppgave.setOppgavetype(Oppgavetyper.BEH_SAK_MK);
+        oppgave.setSaksnummer(SAKSNUMMER);
+
+        Set<Oppgave> oppgaver = Set.of(oppgave.build());
+
+        when(oppgaveFasade.finnOppgaverMedAnsvarlig(tilordnetRessurs)).thenReturn(oppgaver);
+
+        Fagsak fagsak = new Fagsak();
+        fagsak.setSaksnummer(SAKSNUMMER);
+        fagsak.setType(Sakstyper.EU_EOS);
+        fagsak.setStatus(Saksstatuser.OPPRETTET);
+        Behandling behandling = lagBehandling();
+        fagsak.setBehandlinger(List.of(behandling));
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        when(fagsakService.hentFagsak(any(String.class))).thenReturn(fagsak);
+        when(behandlingsgrunnlagService.finnBehandlingsgrunnlag(behandling.getId())).thenReturn(Optional.empty());
+
+        List<OppgaveDto> mineSaker = oppgaveService.hentOppgaverMedAnsvarlig(tilordnetRessurs);
+
+        assertThat(mineSaker).hasSize(1);
+
+        Optional<OppgaveDto> behOppgOpt = mineSaker.stream()
+            .filter(o -> o.getOppgaveID().equals(behOppgID))
+            .findFirst();
+
+        assertThat(behOppgOpt).isPresent().get().isInstanceOf(BehandlingsoppgaveDto.class);
+        assertThat(((BehandlingsoppgaveDto) behOppgOpt.get()).getBehandling().getBehandlingID()).isEqualTo(behandling.getId());
+        assertThat(((BehandlingsoppgaveDto) behOppgOpt.get()).getLand()).isNull();
     }
 
     @Test

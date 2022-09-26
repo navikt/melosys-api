@@ -323,22 +323,23 @@ public class OppgaveService {
             return behOppgaveDto;
         }
 
-        if (behandling.erBehandlingAvSøknad()) {
-            Soeknad søknadDokument = (Soeknad) behandlingsgrunnlagService
-                .hentBehandlingsgrunnlag(behandling.getId()).getBehandlingsgrunnlagdata();
+        var behandlingsgrunnlag = behandlingsgrunnlagService.finnBehandlingsgrunnlag(behandling.getId());
+
+        if (behandlingsgrunnlag.isPresent()) {
+            Soeknad søknadDokument = (Soeknad) behandlingsgrunnlag.get().getBehandlingsgrunnlagdata();
             Soeknadsland søknadsland = hentSøknadsland(søknadDokument);
             behOppgaveDto.setLand(SoeknadslandDto.av(søknadsland));
             behOppgaveDto.setPeriode(mapPeriode(søknadDokument));
-        } else {
-            saksopplysningerService.finnSedOpplysninger(behandling.getId()).ifPresent(
-                sedDokument -> {
-                    Landkoder lovvalgslandKode = sedDokument.getLovvalgslandKode();
-                    behOppgaveDto.setLand(SoeknadslandDto.av(lovvalgslandKode));
-                    behOppgaveDto.setPeriode(new PeriodeDto(
-                        sedDokument.getLovvalgsperiode().getFom(), sedDokument.getLovvalgsperiode().getTom())
-                    );
-                });
         }
+
+        saksopplysningerService.finnSedOpplysninger(behandling.getId()).ifPresent(
+            sedDokument -> {
+                Landkoder lovvalgslandKode = sedDokument.getLovvalgslandKode();
+                behOppgaveDto.setLand(SoeknadslandDto.av(lovvalgslandKode));
+                behOppgaveDto.setPeriode(new PeriodeDto(
+                    sedDokument.getLovvalgsperiode().getFom(), sedDokument.getLovvalgsperiode().getTom())
+                );
+            });
         return behOppgaveDto;
     }
 
