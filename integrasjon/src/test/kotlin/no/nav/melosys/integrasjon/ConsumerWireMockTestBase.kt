@@ -87,29 +87,34 @@ abstract class ConsumerWireMockTestBase<T, R>(
     }
 
     fun verifyHeaders(headers: Map<String, StringValuePattern>) {
-        setupWireMock { wireMock ->
-            headers.forEach {
-                wireMock.withHeader(it.key, it.value)
-            }
+        val wireMock = setupWireMock()
+        headers.forEach {
+            wireMock.withHeader(it.key, it.value)
         }
     }
 
-    fun setupWireMock(consumer: (MappingBuilder) -> Unit = {}) {
-        val wireMock = createWireMock()
-
-        consumer(wireMock)
-
+    fun setupWireMock(wireMock: MappingBuilder = createWireMock(), data: T = getMockData()): MappingBuilder {
         val response = WireMock.aResponse()
             .withStatus(200)
             .withHeader("Content-Type", "application/json")
 
-        val data = getMockData()
         if (data is String) response.withBody(data)
         if (data is ByteArray) response.withBody(data)
 
         serviceUnderTestMockServer.stubFor(
             wireMock.willReturn(response)
         )
+        return wireMock
+    }
+
+    fun executeFromSystemFunc(func: () -> Unit) {
+        val uuid = UUID.randomUUID()
+        try {
+            ThreadLocalAccessInfo.beforeExecuteProcess(uuid, "prossesSteg")
+            func()
+        } finally {
+            ThreadLocalAccessInfo.afterExecuteProcess(uuid)
+        }
     }
 
     fun executeFromSystem(consumer: (R) -> Unit = {}) {
