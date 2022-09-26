@@ -50,8 +50,10 @@ public class BehandlingsgrunnlagService {
         opprettBehandlingsgrunnlag(behandlingID, sedGrunnlag, Behandlingsgrunnlagtyper.SED, VERSJON_SED_GRUNNLAG);
     }
 
-    public void opprettSøknadYrkesaktiveEøs(long behandlingID,
-                                            Soeknad soeknad) {
+    public void opprettSøknadYrkesaktiveEøs(long behandlingID, Periode periode, Soeknadsland soeknadsland) {
+        Soeknad soeknad = new Soeknad();
+        soeknad.periode = periode;
+        soeknad.soeknadsland = soeknadsland;
         opprettBehandlingsgrunnlag(behandlingID, soeknad, Behandlingsgrunnlagtyper.SØKNAD_A1_YRKESAKTIVE_EØS,
             VERSJON_SOEKNAD_GRUNNLAG);
     }
