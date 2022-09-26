@@ -4,8 +4,14 @@ import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
+import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData
+import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode
+import no.nav.melosys.domain.behandlingsgrunnlag.data.Soeknadsland
+import no.nav.melosys.domain.kodeverk.Sakstemaer.MEDLEMSKAP_LOVVALG
 import no.nav.melosys.domain.kodeverk.Sakstemaer.TRYGDEAVGIFT
 import no.nav.melosys.domain.kodeverk.Sakstyper.EU_EOS
+import no.nav.melosys.domain.kodeverk.Sakstyper.FTRL
+import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.service.SaksbehandlingDataFactory
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService
 import no.nav.melosys.service.saksopplysninger.OppfriskSaksopplysningerService
@@ -14,6 +20,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.context.ApplicationEventPublisher
+import kotlin.test.assertFailsWith
 
 @ExtendWith(MockKExtension::class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -41,15 +48,33 @@ internal class EndreSakServiceTest {
     fun `endring av sak - oppdater type og tema, opprett ny søknad og oppfrisk saksopplysninger`() {
         val saksnummer = "MEL-123"
         val fagsak = SaksbehandlingDataFactory.lagFagsak(saksnummer)
-        fagsak.behandlinger.add(SaksbehandlingDataFactory.lagBehandling(fagsak))
+        val behandlingsgrunnlagData = BehandlingsgrunnlagData().apply {
+            periode = Periode()
+            soeknadsland = Soeknadsland()
+        }
+        fagsak.behandlinger.add(SaksbehandlingDataFactory.lagBehandling(fagsak, behandlingsgrunnlagData))
         every { fagsakService.hentFagsak(saksnummer) } returns fagsak
 
-        endreSakService.endre(saksnummer, EU_EOS, TRYGDEAVGIFT)
+        endreSakService.endre(saksnummer, FTRL, MEDLEMSKAP_LOVVALG)
 
-        verify { fagsakService.oppdaterSakstype(saksnummer, EU_EOS) }
-        verify { fagsakService.oppdaterSakstema(saksnummer, TRYGDEAVGIFT) }
+        verify { behandlingsgrunnlagService.opprettSøknad(fagsak.hentAktivBehandling(), any(), any()) }
+        verify { fagsakService.oppdaterSakstype(saksnummer, FTRL) }
+        verify { fagsakService.oppdaterSakstema(saksnummer, MEDLEMSKAP_LOVVALG) }
         verify { oppfriskSaksopplysningerService.oppfriskSaksopplysning(fagsak.behandlinger[0].id, false) }
         // event for å oppdatere oppgave
         verify { applicationEventPublisher.publishEvent(any()) }
+    }
+
+    @Test
+    fun `endring av sak til sakstype EØS - sak mangler periode og land - feiler`() {
+        val saksnummer = "MEL-123"
+        val fagsak = SaksbehandlingDataFactory.lagFagsak(saksnummer)
+        fagsak.behandlinger.add(SaksbehandlingDataFactory.lagBehandling(fagsak))
+        every { fagsakService.hentFagsak(saksnummer) } returns fagsak
+
+        assertFailsWith<FunksjonellException>(
+            block = { endreSakService.endre(saksnummer, EU_EOS, TRYGDEAVGIFT) },
+            message = "Du må legge inn periode og land i flyten for å kunne bytte til sakstype EU/EØS"
+        )
     }
 }
