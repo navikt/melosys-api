@@ -11,6 +11,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.sak.FagsakService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,11 +29,14 @@ public class AngiBehandlingsresultatService {
     private static final Logger log = LoggerFactory.getLogger(AngiBehandlingsresultatService.class);
 
     private final BehandlingsresultatService behandlingsresultatService;
+    private final OppgaveService oppgaveService;
     private final FagsakService fagsakService;
 
     public AngiBehandlingsresultatService(BehandlingsresultatService behandlingsresultatService,
+                                          OppgaveService oppgaveService,
                                           FagsakService fagsakService) {
         this.behandlingsresultatService = behandlingsresultatService;
+        this.oppgaveService = oppgaveService;
         this.fagsakService = fagsakService;
     }
 
@@ -47,6 +51,7 @@ public class AngiBehandlingsresultatService {
         behandlingsresultat.setType(behandlingsresultattype);
         behandlingsresultatService.lagre(behandlingsresultat);
         fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.LOVVALG_AVKLART);
+        oppgaveService.ferdigstillOppgaveMedSaksnummer(fagsak.getSaksnummer());
     }
 
     private void validerBehandlingsresultattype(Behandlingsresultattyper behandlingsresultattype, Behandling behandling, Fagsak fagsak) {

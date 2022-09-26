@@ -171,6 +171,8 @@ public class OppgaveService {
         } else if (tilordnetRessurs != null && !tilordnetRessurs.equals(eksisterendeOppgave.get().getTilordnetRessurs())) {
             log.info("Oppgave eksisterer, oppdaterer tilordnetRessurs for oppgave tilknyttet behandling {}", behandling.getId());
             tildelOppgave(eksisterendeOppgave.get().getOppgaveId(), tilordnetRessurs);
+        } else {
+            log.info("Oppgave tilknyttet behandling {} eksisterer og er allerede tilordnet ressurs {}.", behandling.getId(), tilordnetRessurs);
         }
     }
 
