@@ -5,7 +5,6 @@ import java.util.List;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
-import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadFtrl;
 import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadTrygdeavtale;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
@@ -46,7 +45,7 @@ class OpprettSoeknadTest {
     @Test
     void utfør_behandlingstemaArbeidIUtlandet_oppretterSøknadFtrl() {
         opprettSoeknad.utfør(lagProsessinstans(Sakstyper.FTRL, Behandlingstema.ARBEID_I_UTLANDET));
-        verify(behandlingsgrunnlagService).opprettSøknadFolketrygden(eq(behandlingID), any(SoeknadFtrl.class));
+        verify(behandlingsgrunnlagService).opprettSøknadFolketrygden(behandlingID);
     }
 
     @Test
