@@ -272,7 +272,7 @@ class FagsakTjenesteTest {
             .andExpect(status().isNoContent());
 
         verify(aksesskontroll).autoriserSakstilgang("123");
-        verify(fagsakService).ferdigbehandleBehandlingOgOppdaterSaksstatus("123");
+        verify(fagsakService).ferdigbehandleSak("123");
     }
 
     private static void mockFagsakTjeneste(Fagsak fagsak) {

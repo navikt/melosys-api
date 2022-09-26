@@ -157,7 +157,7 @@ public class FagsakService {
     }
 
     @Transactional
-    public void ferdigbehandleBehandlingOgOppdaterSaksstatus(String saksnummer) {
+    public void ferdigbehandleSak(String saksnummer) {
         var fagsak = hentFagsak(saksnummer);
         var behandling = fagsak.hentAktivBehandling();
         var behandlingsresultattype = behandlingsresultatService.hentBehandlingsresultat(behandling.getId()).getType();

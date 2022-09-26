@@ -663,7 +663,7 @@ class FagsakServiceTest {
 
 
     @Test
-    void ferdigbehandleBehandlingOgOppdaterSaksstatus_nySakUtenVedtakOgEndring_lagrerKorrekt() {
+    void ferdigbehandleSak_nySakUtenVedtakOgEndring_lagrerKorrekt() {
         var fagsak = lagFagsak();
         var behandling = lagBehandling(1L, Behandlingstyper.HENVENDELSE, OPPRETTET, null);
         behandling.setFagsak(fagsak);
@@ -675,7 +675,7 @@ class FagsakServiceTest {
         ArgumentCaptor<Fagsak> fagsakArgumentCaptor = ArgumentCaptor.forClass(Fagsak.class);
 
 
-        fagsakService.ferdigbehandleBehandlingOgOppdaterSaksstatus(SAKSNUMMER);
+        fagsakService.ferdigbehandleSak(SAKSNUMMER);
 
 
         verify(behandlingService).avsluttBehandling(behandling.getId());
@@ -686,7 +686,7 @@ class FagsakServiceTest {
     }
 
     @Test
-    void ferdigbehandleBehandlingOgOppdaterSaksstatus_sakMedEndring_lagrerKorrekt() {
+    void ferdigbehandleSak_sakMedEndring_lagrerKorrekt() {
         var fagsak = lagFagsak();
         fagsak.setStatus(Saksstatuser.LOVVALG_AVKLART);
         var behandling = lagBehandling(1L, NY_VURDERING, UNDER_BEHANDLING, null);
@@ -699,7 +699,7 @@ class FagsakServiceTest {
         ArgumentCaptor<Fagsak> fagsakArgumentCaptor = ArgumentCaptor.forClass(Fagsak.class);
 
 
-        fagsakService.ferdigbehandleBehandlingOgOppdaterSaksstatus(SAKSNUMMER);
+        fagsakService.ferdigbehandleSak(SAKSNUMMER);
 
 
         verify(behandlingService).avsluttBehandling(behandling.getId());

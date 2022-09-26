@@ -183,7 +183,7 @@ public class FagsakTjeneste {
         log.info("Saksbehandler {} ber om å avslutte aktiv behandling og oppdatere saksstatus på {}", SubjectHandler.getInstance().getUserID(), saksnummer);
         aksesskontroll.autoriserSakstilgang(saksnummer);
 
-        fagsakService.ferdigbehandleBehandlingOgOppdaterSaksstatus(saksnummer);
+        fagsakService.ferdigbehandleSak(saksnummer);
 
         return ResponseEntity.noContent().build();
     }
