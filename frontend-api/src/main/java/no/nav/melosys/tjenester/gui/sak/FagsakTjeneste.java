@@ -31,7 +31,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.WebApplicationContext;
@@ -96,7 +95,7 @@ public class FagsakTjeneste {
     @ApiOperation(value = "Endre en sak.")
     public ResponseEntity<Void> endreFagsak(@PathVariable("saksnr") String saksnummer, @RequestBody EndreSakDto endreSakDto) {
         log.debug("Saksbehandler {} ber om å endre fagsak {} med sakstype {}, sakstema {}",
-                  SubjectHandler.getInstance().getUserID(), saksnummer, endreSakDto.sakstype(), endreSakDto.sakstema());
+            SubjectHandler.getInstance().getUserID(), saksnummer, endreSakDto.sakstype(), endreSakDto.sakstema());
         aksesskontroll.autoriserSakstilgang(saksnummer);
 
         fagsakService.oppdaterSakstema(saksnummer, endreSakDto.sakstema());
@@ -149,19 +148,6 @@ public class FagsakTjeneste {
 
         return Collections.emptyList();
     }
-
-    @PutMapping(value = "/{saksnr}/avslutt", consumes = MediaType.TEXT_PLAIN_VALUE, produces = {MediaType.TEXT_PLAIN_VALUE, MediaType.APPLICATION_JSON_VALUE})
-    @ApiOperation(value = "Brukes for å avslutte manuelle behandlinger. " +
-        "Gyldige behandlingstyper er VURDER_TRYGDETID, ØVRIGE_SED og SOEKNAD_IKKE_YRKESAKTIVE", produces = MediaType.TEXT_PLAIN_VALUE, consumes = MediaType.TEXT_PLAIN_VALUE)
-    public ResponseEntity<Void> avsluttSakManuelt(@PathVariable("saksnr") String saksnummer) {
-        Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
-        aksesskontroll.autoriserSakstilgang(fagsak);
-        fagsakService.avsluttFagsakOgBehandlingValiderBehandlingstype(fagsak, fagsak.hentAktivBehandling());
-
-        return ResponseEntity.noContent().build();
-    }
-
-
 
     /**
      * @deprecated Fjernes med toggle melosys.behandle_alle_saker

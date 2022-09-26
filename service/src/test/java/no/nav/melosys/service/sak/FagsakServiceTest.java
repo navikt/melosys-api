@@ -141,39 +141,6 @@ class FagsakServiceTest {
     }
 
     @Test
-    void avsluttFagsakOgBehandlingValiderBehandlingstema_behtemaIkkeYrkesaktiv_blirAvsluttet() {
-        Fagsak fagsak = new Fagsak();
-        fagsak.setSaksnummer(SAKSNUMMER);
-        Behandling behandling = new Behandling();
-        behandling.setId(123L);
-        behandling.setType(SOEKNAD);
-        behandling.setTema(Behandlingstema.IKKE_YRKESAKTIV);
-        behandling.setFagsak(fagsak);
-        fagsak.setBehandlinger(List.of(behandling));
-        fagsakService.avsluttFagsakOgBehandlingValiderBehandlingstype(fagsak, behandling);
-
-        assertThat(fagsak.getStatus()).isEqualTo(Saksstatuser.LOVVALG_AVKLART);
-        verify(behandlingService).avsluttBehandling(behandling.getId());
-    }
-
-    @Test
-    void avsluttFagsakOgBehandlingValiderBehandlingstype_behtemaTrygdetid_blirAvsluttet() {
-        Fagsak fagsak = new Fagsak();
-        fagsak.setSaksnummer(SAKSNUMMER);
-        Behandling behandling = new Behandling();
-        behandling.setId(123L);
-        behandling.setType(SED);
-        behandling.setTema(Behandlingstema.TRYGDETID);
-        behandling.setStatus(UNDER_BEHANDLING);
-        behandling.setFagsak(fagsak);
-        fagsak.setBehandlinger(List.of(behandling));
-        fagsakService.avsluttFagsakOgBehandlingValiderBehandlingstype(fagsak, behandling);
-
-        assertThat(fagsak.getStatus()).isEqualTo(Saksstatuser.AVSLUTTET);
-        verify(behandlingService).avsluttBehandling(behandling.getId());
-    }
-
-    @Test
     void hentMuligeSakstema_med_behandlingstema_med_behandlingstema_lovlig() {
         Fagsak fagsak = lagFagsakMedBruker();
         Behandling behandling = lagBehandling(1L, SOEKNAD, UNDER_BEHANDLING, Instant.now());
@@ -277,19 +244,6 @@ class FagsakServiceTest {
 
         assertThat(valgtSakstype).isEmpty();
         assertThat(valgtSakstema).isEmpty();
-    }
-
-    @Test
-    void avsluttFagsakOgBehandlingValiderBehandlingstype_behtemaUtsendtArbeidstaker_kasterException() {
-        Fagsak fagsak = new Fagsak();
-        Behandling behandling = new Behandling();
-        behandling.setId(123L);
-        behandling.setType(SOEKNAD);
-        behandling.setTema(UTSENDT_ARBEIDSTAKER);
-
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> fagsakService.avsluttFagsakOgBehandlingValiderBehandlingstype(fagsak, behandling))
-            .withMessageContaining("kan ikke avsluttes manuelt");
     }
 
     @Test

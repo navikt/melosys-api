@@ -263,19 +263,6 @@ public class FagsakService {
         return FAGSAKID_PREFIX + fagsakRepository.hentNesteSekvensVerdi();
     }
 
-    @Transactional
-    public void avsluttFagsakOgBehandlingValiderBehandlingstype(Fagsak fagsak, Behandling behandling) {
-        Behandlingstema behandlingstema = behandling.getTema();
-        if (!behandling.kanAvsluttesManuelt()) {
-            throw new FunksjonellException("Behandlingstema " + behandlingstema + " kan ikke avsluttes manuelt");
-        }
-
-        Saksstatuser saksstatus = behandlingstema == Behandlingstema.IKKE_YRKESAKTIV
-            ? Saksstatuser.LOVVALG_AVKLART : Saksstatuser.AVSLUTTET;
-        avsluttFagsakOgBehandling(fagsak, saksstatus);
-        oppgaveService.ferdigstillOppgaveMedSaksnummer(fagsak.getSaksnummer());
-    }
-
     public void avsluttFagsakOgBehandling(Fagsak fagsak, Saksstatuser saksstatus) {
         Behandling aktivBehandling = fagsak.hentAktivBehandling();
         if (aktivBehandling == null) {
