@@ -177,13 +177,13 @@ public class FagsakTjeneste {
         return ResponseEntity.ok(new RevurderingOpprettetDto(behandlingID));
     }
 
-    @PutMapping("/{saksnummer}/ferdigbehandle/{behandlingID}")
+    @PutMapping("/{saksnummer}/ferdigbehandle")
     @ApiOperation("Avslutt behandling med Ferdigbehandlet som resultat og oppdatere saksstatus")
-    public ResponseEntity<Void> ferdigbehandleSak(@PathVariable("saksnummer") String saksnummer, @PathVariable("behandlingID") long behandlingID) {
-        log.debug("Saksbehandler {} ber om å avslutte behandling {} og oppdatere saksstatus på {}", SubjectHandler.getInstance().getUserID(), behandlingID, saksnummer);
-        aksesskontroll.autoriserSkrivOgTilordnet(behandlingID);
+    public ResponseEntity<Void> ferdigbehandleSak(@PathVariable("saksnummer") String saksnummer) {
+        log.info("Saksbehandler {} ber om å avslutte aktiv behandling og oppdatere saksstatus på {}", SubjectHandler.getInstance().getUserID(), saksnummer);
+        aksesskontroll.autoriserSakstilgang(saksnummer);
 
-        fagsakService.ferdigbehandleBehandlingOgOppdaterSaksstatus(saksnummer, behandlingID);
+        fagsakService.ferdigbehandleBehandlingOgOppdaterSaksstatus(saksnummer);
 
         return ResponseEntity.noContent().build();
     }

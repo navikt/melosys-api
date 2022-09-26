@@ -267,12 +267,12 @@ class FagsakTjenesteTest {
         Fagsak fagsak = lagFagsak();
         mockFagsakTjeneste(fagsak);
 
-        mockMvc.perform(put(BASE_URL + "/{saksnr}/ferdigbehandle/{behandlingID}", "123", 1L)
+        mockMvc.perform(put(BASE_URL + "/{saksnr}/ferdigbehandle", "123")
                 .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isNoContent());
 
-        verify(aksesskontroll).autoriserSkrivOgTilordnet(1L);
-        verify(fagsakService).ferdigbehandleBehandlingOgOppdaterSaksstatus("123", 1L);
+        verify(aksesskontroll).autoriserSakstilgang("123");
+        verify(fagsakService).ferdigbehandleBehandlingOgOppdaterSaksstatus("123");
     }
 
     private static void mockFagsakTjeneste(Fagsak fagsak) {

@@ -157,14 +157,14 @@ public class FagsakService {
     }
 
     @Transactional
-    public void ferdigbehandleBehandlingOgOppdaterSaksstatus(String saksnummer, long behandlingsID) {
+    public void ferdigbehandleBehandlingOgOppdaterSaksstatus(String saksnummer) {
         var fagsak = hentFagsak(saksnummer);
-        var behandling = behandlingService.hentBehandling(behandlingsID);
-        var behandlingsresultattype = behandlingsresultatService.hentBehandlingsresultat(behandlingsID).getType();
+        var behandling = fagsak.hentAktivBehandling();
+        var behandlingsresultattype = behandlingsresultatService.hentBehandlingsresultat(behandling.getId()).getType();
         var saksstatus = nySaksstatusTilFerdigbehandleSak(fagsak.getStatus(), behandling.getStatus(), behandlingsresultattype);
 
         avsluttFagsakOgBehandling(fagsak, behandling, saksstatus);
-        behandlingsresultatService.oppdaterBehandlingsresultattype(behandlingsID, Behandlingsresultattyper.FERDIGBEHANDLET);
+        behandlingsresultatService.oppdaterBehandlingsresultattype(behandling.getId(), Behandlingsresultattyper.FERDIGBEHANDLET);
         oppgaveService.ferdigstillOppgaveMedSaksnummer(fagsak.getSaksnummer());
     }
 

@@ -667,15 +667,15 @@ class FagsakServiceTest {
         var fagsak = lagFagsak();
         var behandling = lagBehandling(1L, Behandlingstyper.HENVENDELSE, OPPRETTET, null);
         behandling.setFagsak(fagsak);
+        fagsak.getBehandlinger().add(behandling);
         var behandlingsresultat = lagBehandlingsresultat(behandling, null, null, IKKE_FASTSATT);
 
         when(fagsakRepo.findBySaksnummer(SAKSNUMMER)).thenReturn(Optional.of(fagsak));
-        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
         when(behandlingsresultatService.hentBehandlingsresultat(behandling.getId())).thenReturn(behandlingsresultat);
         ArgumentCaptor<Fagsak> fagsakArgumentCaptor = ArgumentCaptor.forClass(Fagsak.class);
 
 
-        fagsakService.ferdigbehandleBehandlingOgOppdaterSaksstatus(SAKSNUMMER, 1L);
+        fagsakService.ferdigbehandleBehandlingOgOppdaterSaksstatus(SAKSNUMMER);
 
 
         verify(behandlingService).avsluttBehandling(behandling.getId());
@@ -691,15 +691,15 @@ class FagsakServiceTest {
         fagsak.setStatus(Saksstatuser.LOVVALG_AVKLART);
         var behandling = lagBehandling(1L, NY_VURDERING, UNDER_BEHANDLING, null);
         behandling.setFagsak(fagsak);
+        fagsak.getBehandlinger().add(behandling);
         var behandlingsresultat = lagBehandlingsresultat(behandling, null, null, FASTSATT_LOVVALGSLAND);
 
         when(fagsakRepo.findBySaksnummer(SAKSNUMMER)).thenReturn(Optional.of(fagsak));
-        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
         when(behandlingsresultatService.hentBehandlingsresultat(behandling.getId())).thenReturn(behandlingsresultat);
         ArgumentCaptor<Fagsak> fagsakArgumentCaptor = ArgumentCaptor.forClass(Fagsak.class);
 
 
-        fagsakService.ferdigbehandleBehandlingOgOppdaterSaksstatus(SAKSNUMMER, 1L);
+        fagsakService.ferdigbehandleBehandlingOgOppdaterSaksstatus(SAKSNUMMER);
 
 
         verify(behandlingService).avsluttBehandling(behandling.getId());
