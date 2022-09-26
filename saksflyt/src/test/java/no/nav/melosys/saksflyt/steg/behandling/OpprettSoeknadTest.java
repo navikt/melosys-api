@@ -5,7 +5,6 @@ import java.util.List;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
-import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadTrygdeavtale;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
@@ -51,7 +50,7 @@ class OpprettSoeknadTest {
     @Test
     void utfør_behandlingstemaTrygdeavtaleUK_oppretterSøknadTrygdeavtale() {
         opprettSoeknad.utfør(lagProsessinstans(Sakstyper.TRYGDEAVTALE, Behandlingstema.YRKESAKTIV));
-        verify(behandlingsgrunnlagService).opprettSøknadTrygdeavtale(eq(behandlingID), any(SoeknadTrygdeavtale.class));
+        verify(behandlingsgrunnlagService).opprettSøknadTrygdeavtale(behandlingID);
     }
 
     @Test

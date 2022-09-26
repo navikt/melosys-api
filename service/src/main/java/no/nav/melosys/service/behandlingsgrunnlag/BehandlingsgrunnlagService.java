@@ -70,9 +70,8 @@ public class BehandlingsgrunnlagService {
             VERSJON_SOEKNAD_GRUNNLAG);
     }
 
-    public void opprettSøknadTrygdeavtale(long behandlingID,
-                                          SoeknadTrygdeavtale soeknad) {
-        opprettBehandlingsgrunnlag(behandlingID, soeknad, SØKNAD_TRYGDEAVTALE,
+    public void opprettSøknadTrygdeavtale(long behandlingID) {
+        opprettBehandlingsgrunnlag(behandlingID, new SoeknadTrygdeavtale(), SØKNAD_TRYGDEAVTALE,
             VERSJON_SOEKNAD_GRUNNLAG);
     }
 

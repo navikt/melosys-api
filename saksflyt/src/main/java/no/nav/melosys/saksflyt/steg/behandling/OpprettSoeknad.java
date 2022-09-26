@@ -2,7 +2,6 @@ package no.nav.melosys.saksflyt.steg.behandling;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
-import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadTrygdeavtale;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
@@ -47,7 +46,7 @@ public class OpprettSoeknad implements StegBehandler {
                     behandlingsgrunnlagService.opprettSøknadYrkesaktiveEøs(behandlingID, soeknad);
                 }
                 case FTRL -> behandlingsgrunnlagService.opprettSøknadFolketrygden(behandlingID);
-                case TRYGDEAVTALE -> behandlingsgrunnlagService.opprettSøknadTrygdeavtale(behandlingID, new SoeknadTrygdeavtale());
+                case TRYGDEAVTALE -> behandlingsgrunnlagService.opprettSøknadTrygdeavtale(behandlingID);
             }
             log.info("Opprettet søknad for behandling {}.", behandlingID);
         } else {
