@@ -39,10 +39,15 @@ import org.springframework.transaction.annotation.Transactional;
 import static no.nav.melosys.domain.Behandling.erBehandlingAvSedForespørsler;
 import static no.nav.melosys.domain.Behandling.erBehandlingAvSøknad;
 import static no.nav.melosys.domain.Fagsak.erSakstypeEøs;
+import static no.nav.melosys.domain.kodeverk.Sakstemaer.MEDLEMSKAP_LOVVALG;
+import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.FØRSTEGANG;
 import static no.nav.melosys.service.sak.SakstypeBehandlingstemaKobling.erGyldigBehandlingstemaForSakstype;
 
 @Service
 public class JournalfoeringService {
+    public static final String KAN_IKKE_SENDE_FORVALTNINGSMELDING = "Mottok melding om at vi ønsker å sende forvaltningsmelding. Vi kan ikke " +
+        "sende forvaltningsmelding, fordi vi bare kan sende når behandlingstype er FØRSTEGANG og sakstema er " +
+        "MEDLEMSKAP_LOVVALG";
     private static final Logger log = LoggerFactory.getLogger(JournalfoeringService.class);
 
     private final JoarkFasade joarkFasade;
@@ -94,11 +99,24 @@ public class JournalfoeringService {
             throw new FunksjonellException("Journalposten er allerede ferdigstilt!");
         }
 
+        if (journalfoeringDto.skalSendeForvaltningsmelding()) {
+            validerKanSendeForvaltningsmelding(journalfoeringDto);
+        }
+
         if (journalpost.mottaksKanalErEessi()) {
             validerKanOppretteSakFraSed(journalpost);
         }
 
         opprettSakOgJournalfør(journalfoeringDto);
+    }
+
+    private void validerKanSendeForvaltningsmelding(JournalfoeringOpprettDto journalfoeringDto) {
+        boolean manglerForventetTypeEllerTema = !FØRSTEGANG.name().equals(journalfoeringDto.getBehandlingstypeKode())
+            || !MEDLEMSKAP_LOVVALG.name().equals(journalfoeringDto.getFagsak().getSakstema());
+
+        if (manglerForventetTypeEllerTema) {
+            throw new FunksjonellException(KAN_IKKE_SENDE_FORVALTNINGSMELDING);
+        }
     }
 
     private void validerKanOppretteSakFraSed(Journalpost journalpost) {
