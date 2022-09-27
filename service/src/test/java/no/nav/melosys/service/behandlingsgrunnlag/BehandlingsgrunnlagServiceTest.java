@@ -166,8 +166,7 @@ class BehandlingsgrunnlagServiceTest {
         Behandling behandling = lagBehandling();
         when(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling);
         when(joarkFasade.hentMottaksDatoForJournalpost(behandling.getInitierendeJournalpostId())).thenReturn(LocalDate.now());
-        SoeknadFtrl soeknadFtrl = new SoeknadFtrl();
-        behandlingsgrunnlagService.opprettSøknadFolketrygden(behandlingID, soeknadFtrl);
+        behandlingsgrunnlagService.opprettSøknadFolketrygden(behandlingID);
 
         verify(behandlingsgrunnlagRepository).save(behandlingsgrunnlagArgumentCaptor.capture());
         Behandlingsgrunnlag opprettet = behandlingsgrunnlagArgumentCaptor.getValue();
@@ -184,8 +183,7 @@ class BehandlingsgrunnlagServiceTest {
         Behandling behandling = lagBehandling();
         when(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling);
         when(joarkFasade.hentMottaksDatoForJournalpost(behandling.getInitierendeJournalpostId())).thenReturn(LocalDate.now());
-        SoeknadTrygdeavtale soeknadTrygdeavtale = new SoeknadTrygdeavtale();
-        behandlingsgrunnlagService.opprettSøknadTrygdeavtale(behandlingID, soeknadTrygdeavtale);
+        behandlingsgrunnlagService.opprettSøknadTrygdeavtale(behandlingID);
 
         verify(behandlingsgrunnlagRepository).save(behandlingsgrunnlagArgumentCaptor.capture());
         Behandlingsgrunnlag opprettet = behandlingsgrunnlagArgumentCaptor.getValue();
