@@ -38,10 +38,13 @@ class BehandlingReplikeringsRegler(private val behandlingsresultatRepository: Be
                 if (behandlingstype == Behandlingstyper.HENVENDELSE || behandlingstype == Behandlingstyper.KLAGE) return false
         }
 
-        return finnBehandlingSomKanReplikeres(fagsak.hentBehandlingerSortertSynkendePåRegistrertDato()) != null
+        return finnBehandlingSomKanReplikeres(fagsak) != null
     }
 
-    fun finnBehandlingSomKanReplikeres(behandlinger: List<Behandling>) =
+    fun finnBehandlingSomKanReplikeres(fagsak: Fagsak) =
+        finnBehandlingSomKanReplikeres(fagsak.hentBehandlingerSortertSynkendePåRegistrertDato())
+
+    internal fun finnBehandlingSomKanReplikeres(behandlinger: List<Behandling>) =
         behandlinger.firstOrNull {
             val behandlingsresultat = behandlingsresultatRepository.findById(it.id)
             behandlingstyperForInkludering.contains(it.type)
