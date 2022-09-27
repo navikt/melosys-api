@@ -479,6 +479,7 @@ public class Behandling extends RegistreringsInfo {
                 ØVRIGE_SED_MED,
                 FORESPØRSEL_TRYGDEMYNDIGHET,
                 TRYGDETID -> LocalDate.now().plusWeeks(8);
+            case VIRKSOMHET -> null;
         };
     }
 
