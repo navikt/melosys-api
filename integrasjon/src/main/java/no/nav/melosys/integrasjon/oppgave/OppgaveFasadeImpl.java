@@ -296,7 +296,7 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
         OppgaveSearchRequest oppgaveSearchRequest = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
             .medJournalpostID(new String[]{journalpostID})
             .medTema(new String[]{Tema.MED.getKode(), Tema.UFM.getKode()})
-            .medOppgaveTyper(new String[]{Oppgavetyper.BEH_SAK_MK.getKode(), Oppgavetyper.VUR.getKode(), Oppgavetyper.BEH_SED.getKode()})
+            .medOppgaveTyper(new String[]{Oppgavetyper.BEH_SAK_MK.getKode(), Oppgavetyper.VUR.getKode(), Oppgavetyper.BEH_SED.getKode(), Oppgavetyper.VURD_HENV.getKode()})
             .medStatusKategori(OPPGAVE_STATUSKATEGORI_AAPEN)
             .build();
 
@@ -310,7 +310,7 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
         OppgaveSearchRequest oppgaveSearchRequest = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
             .medSaksreferanse(new String[]{saksnummer})
             .medTema(new String[]{Tema.MED.getKode(), Tema.UFM.getKode()})
-            .medOppgaveTyper(new String[]{Oppgavetyper.BEH_SAK_MK.getKode(), Oppgavetyper.VUR.getKode(), Oppgavetyper.BEH_SED.getKode()})
+            .medOppgaveTyper(new String[]{Oppgavetyper.BEH_SAK_MK.getKode(), Oppgavetyper.VUR.getKode(), Oppgavetyper.BEH_SED.getKode(), Oppgavetyper.VURD_HENV.getKode()})
             .medStatusKategori(OPPGAVE_STATUSKATEGORI_AAPEN)
             .build();
 
@@ -324,7 +324,7 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
         OppgaveSearchRequest oppgaveSearchRequest = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
             .medSaksreferanse(new String[]{saksnummer})
             .medTema(new String[]{Tema.MED.getKode(), Tema.UFM.getKode()})
-            .medOppgaveTyper(new String[]{Oppgavetyper.BEH_SAK_MK.getKode(), Oppgavetyper.VUR.getKode(), Oppgavetyper.BEH_SED.getKode()})
+            .medOppgaveTyper(new String[]{Oppgavetyper.BEH_SAK_MK.getKode(), Oppgavetyper.VUR.getKode(), Oppgavetyper.BEH_SED.getKode(), Oppgavetyper.VURD_HENV.getKode()})
             .medSorteringsfelt(SORTERINGSFELT)
             .medSorteringsrekkefolge(SORTERINGSREKKEFOLGE_DESC)
             .medStatusKategori(OPPGAVE_STATUSKATEGORI_AVSLUTTET)
