@@ -99,7 +99,7 @@ public class JournalfoeringService {
             throw new FunksjonellException("Journalposten er allerede ferdigstilt!");
         }
 
-        if (journalfoeringDto.skalSendeForvaltningsmelding()) {
+        if (unleash.isEnabled("melosys.behandle_alle_saker") && journalfoeringDto.skalSendeForvaltningsmelding()) {
             validerKanSendeForvaltningsmelding(journalfoeringDto);
         }
 

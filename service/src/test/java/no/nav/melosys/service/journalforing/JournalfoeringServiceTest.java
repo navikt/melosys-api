@@ -192,6 +192,7 @@ class JournalfoeringServiceTest {
 
     @Test
     void journalførOgOpprettSak_skalIkkeKunneMottaUgyldigSkalSendeForvaltningsmelding_kasterException() {
+        unleash.enable("melosys.behandle_alle_saker");
         opprettDto.setIkkeSendForvaltingsmelding(false);
         when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
 
@@ -202,6 +203,7 @@ class JournalfoeringServiceTest {
 
     @Test
     void journalførOgOpprettSak_gyldigSkalSendeForvaltningsmeldingKasterIkkeFeilenUnderValidering_kasterAnnenUrelevantExceptionForTesten() {
+        unleash.enable("melosys.behandle_alle_saker");
         opprettDto.setBehandlingstypeKode(FØRSTEGANG.getKode());
         opprettDto.getFagsak().setSakstema(MEDLEMSKAP_LOVVALG.getKode());
         opprettDto.setIkkeSendForvaltingsmelding(false);
