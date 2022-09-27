@@ -77,7 +77,7 @@ public class BehandlingsgrunnlagService {
             }
             log.info("Opprettet søknad for behandling {}.", behandlingID);
         } else {
-            log.info("Ikke opprettet søknad for behandling {} med tema {}", behandlingID,
+            log.info("Søknad trengs ikke og opprettes ikke for behandling {} med tema {}", behandlingID,
                      behandling.getTema());
         }
     }
