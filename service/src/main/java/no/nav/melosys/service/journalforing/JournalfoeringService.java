@@ -45,9 +45,8 @@ import static no.nav.melosys.service.sak.SakstypeBehandlingstemaKobling.erGyldig
 
 @Service
 public class JournalfoeringService {
-    public static final String KAN_IKKE_SENDE_FORVALTNINGSMELDING = "Mottok melding om at vi ønsker å sende forvaltningsmelding. Vi kan ikke " +
-        "sende forvaltningsmelding, fordi vi bare kan sende når behandlingstype er FØRSTEGANG og sakstema er " +
-        "MEDLEMSKAP_LOVVALG";
+    static final String KAN_IKKE_SENDE_FORVALTNINGSMELDING = "Kan kun sende forvaltningsmelding for behandlingtype: " +
+        "FØRSTEGANG og sakstema: MEDLEMSKAP_LOVVALG";
     private static final Logger log = LoggerFactory.getLogger(JournalfoeringService.class);
 
     private final JoarkFasade joarkFasade;

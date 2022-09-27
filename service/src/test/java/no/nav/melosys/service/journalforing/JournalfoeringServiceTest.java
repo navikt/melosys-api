@@ -202,16 +202,25 @@ class JournalfoeringServiceTest {
     }
 
     @Test
-    void journalførOgOpprettSak_gyldigSkalSendeForvaltningsmeldingKasterIkkeFeilenUnderValidering_kasterAnnenUrelevantExceptionForTesten() {
+    void journalførOgOpprettSak_gyldigSkalSendeForvaltningsmeldingKasterIkkeFeilenUnderValidering_ingenFeil() {
         unleash.enable("melosys.behandle_alle_saker");
+        FagsakDto fagsakDto = lagFagsakDto(LocalDate.MIN, LocalDate.MAX, "DK", Sakstyper.EU_EOS);
+        fagsakDto.setSakstema(MEDLEMSKAP_LOVVALG.getKode());
+        opprettDto.setFagsak(fagsakDto);
         opprettDto.setBehandlingstypeKode(FØRSTEGANG.getKode());
-        opprettDto.getFagsak().setSakstema(MEDLEMSKAP_LOVVALG.getKode());
+        opprettDto.setBehandlingstemaKode(Behandlingstema.UTSENDT_SELVSTENDIG.getKode());
         opprettDto.setIkkeSendForvaltingsmelding(false);
+        when(prosessinstansService.lagJournalføringProsessinstans(eq(ProsessType.JFR_NY_SAK_BRUKER), any())).thenReturn(new Prosessinstans());
         when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
 
-        assertThatExceptionOfType(Exception.class)
-            .isThrownBy(() -> journalfoeringService.journalførOgOpprettSak(opprettDto))
-            .withMessageNotContaining(JournalfoeringService.KAN_IKKE_SENDE_FORVALTNINGSMELDING);
+
+        journalfoeringService.journalførOgOpprettSak(opprettDto);
+
+        
+        verify(prosessinstansService).lagre(prosessinstansArgumentCaptor.capture());
+        var processInstans = prosessinstansArgumentCaptor.getValue();
+        assertThat(processInstans.getData(ProsessDataKey.SAKSTEMA, Sakstemaer.class).getKode()).isEqualTo(fagsakDto.getSakstema());
+        assertThat(processInstans.getData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.class).getKode()).isEqualTo(opprettDto.getBehandlingstypeKode());
     }
 
     @Test
