@@ -160,17 +160,11 @@ public class FagsakService {
     public void ferdigbehandleSak(String saksnummer) {
         var fagsak = hentFagsak(saksnummer);
         var behandling = fagsak.hentAktivBehandling();
-        var behandlingsresultattype = behandlingsresultatService.hentBehandlingsresultat(behandling.getId()).getType();
-        var saksstatus = nySaksstatusTilFerdigbehandleSak(fagsak.getStatus(), behandling.getStatus(), behandlingsresultattype);
+        var nyStatus = fagsak.getStatus() == Saksstatuser.OPPRETTET ? Saksstatuser.AVSLUTTET : fagsak.getStatus();
 
-        avsluttFagsakOgBehandling(fagsak, behandling, saksstatus);
+        avsluttFagsakOgBehandling(fagsak, behandling, nyStatus);
         behandlingsresultatService.oppdaterBehandlingsresultattype(behandling.getId(), Behandlingsresultattyper.FERDIGBEHANDLET);
         oppgaveService.ferdigstillOppgaveMedSaksnummer(fagsak.getSaksnummer());
-    }
-
-    private Saksstatuser nySaksstatusTilFerdigbehandleSak(Saksstatuser nåværendeSaksstatus, Behandlingsstatus behandlingsstatus, Behandlingsresultattyper behandlingsresultattype) {
-        return nåværendeSaksstatus == Saksstatuser.OPPRETTET || behandlingsstatus == Behandlingsstatus.OPPRETTET || behandlingsresultattype == Behandlingsresultattyper.IKKE_FASTSATT
-            ? Saksstatuser.AVSLUTTET : nåværendeSaksstatus;
     }
 
     @Transactional

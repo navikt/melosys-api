@@ -617,15 +617,14 @@ class FagsakServiceTest {
 
 
     @Test
-    void ferdigbehandleSak_nySakUtenVedtakOgEndring_lagrerKorrekt() {
+    void ferdigbehandleSak_saksstatusOPPRETTET_lagrerKorrekt() {
         var fagsak = lagFagsak();
-        var behandling = lagBehandling(1L, Behandlingstyper.HENVENDELSE, OPPRETTET, null);
+        var behandling = lagBehandling(1L, null, null, null);
         behandling.setFagsak(fagsak);
         fagsak.getBehandlinger().add(behandling);
-        var behandlingsresultat = lagBehandlingsresultat(behandling, null, null, IKKE_FASTSATT);
+        assertThat(fagsak.getStatus()).isEqualTo(Saksstatuser.OPPRETTET);
 
         when(fagsakRepo.findBySaksnummer(SAKSNUMMER)).thenReturn(Optional.of(fagsak));
-        when(behandlingsresultatService.hentBehandlingsresultat(behandling.getId())).thenReturn(behandlingsresultat);
         ArgumentCaptor<Fagsak> fagsakArgumentCaptor = ArgumentCaptor.forClass(Fagsak.class);
 
 
@@ -640,16 +639,15 @@ class FagsakServiceTest {
     }
 
     @Test
-    void ferdigbehandleSak_sakMedEndring_lagrerKorrekt() {
+    void ferdigbehandleSak_saksstatusAnnetEnnOPPRETTET_lagrerKorrekt() {
         var fagsak = lagFagsak();
         fagsak.setStatus(Saksstatuser.LOVVALG_AVKLART);
-        var behandling = lagBehandling(1L, NY_VURDERING, UNDER_BEHANDLING, null);
+        var behandling = lagBehandling(1L, null, null, null);
         behandling.setFagsak(fagsak);
         fagsak.getBehandlinger().add(behandling);
-        var behandlingsresultat = lagBehandlingsresultat(behandling, null, null, FASTSATT_LOVVALGSLAND);
+        assertThat(fagsak.getStatus()).isNotEqualTo(Saksstatuser.OPPRETTET);
 
         when(fagsakRepo.findBySaksnummer(SAKSNUMMER)).thenReturn(Optional.of(fagsak));
-        when(behandlingsresultatService.hentBehandlingsresultat(behandling.getId())).thenReturn(behandlingsresultat);
         ArgumentCaptor<Fagsak> fagsakArgumentCaptor = ArgumentCaptor.forClass(Fagsak.class);
 
 
