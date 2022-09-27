@@ -479,7 +479,6 @@ public class Behandling extends RegistreringsInfo {
                 ØVRIGE_SED_MED,
                 FORESPØRSEL_TRYGDEMYNDIGHET,
                 TRYGDETID -> LocalDate.now().plusWeeks(8);
-            default -> throw new IllegalStateException("Uforventet verdi: " + behandlingstema);
         };
     }
 
