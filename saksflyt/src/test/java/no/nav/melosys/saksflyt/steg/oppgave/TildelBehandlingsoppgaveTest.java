@@ -40,7 +40,7 @@ class TildelBehandlingsoppgaveTest {
         oppgaveBuilder.setOppgaveId(OPPGAVE_ID);
         Oppgave oppgave = oppgaveBuilder.build();
 
-        when(oppgaveService.finnÅpenOppgaveMedFagsaksnummer(SAKSNUMMER)).thenReturn(Optional.of(oppgave));
+        when(oppgaveService.finnÅpenBehandlingsoppgaveMedFagsaksnummer(SAKSNUMMER)).thenReturn(Optional.of(oppgave));
     }
 
     @Test

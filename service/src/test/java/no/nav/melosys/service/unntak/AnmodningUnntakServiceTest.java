@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
 
-import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.arkiv.DokumentReferanse;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
@@ -106,7 +105,7 @@ class AnmodningUnntakServiceTest {
         verify(anmodningsperiodeService).oppdaterAnmodetAvForBehandling(BEHANDLING_ID, "Z990007");
         verify(prosessinstansService).opprettProsessinstansAnmodningOmUnntak(any(Behandling.class),
             anySet(), eq(Set.of(dokumentReferanse)), eq(FRITEKST_SED));
-        verify(oppgaveService).leggTilbakeOppgaveMedSaksnummer(any());
+        verify(oppgaveService).leggTilbakeBehandlingsoppgaveMedSaksnummer(any());
         verify(behandlingsresultatService).oppdaterBehandlingsresultattype(BEHANDLING_ID, Behandlingsresultattyper.ANMODNING_OM_UNNTAK);
     }
 
@@ -127,7 +126,7 @@ class AnmodningUnntakServiceTest {
         verify(anmodningsperiodeService).oppdaterAnmodetAvForBehandling(BEHANDLING_ID, "Z990007");
         verify(prosessinstansService).opprettProsessinstansAnmodningOmUnntak(any(Behandling.class), anySet(),
             anySet(), eq(FRITEKST_SED));
-        verify(oppgaveService).leggTilbakeOppgaveMedSaksnummer(any());
+        verify(oppgaveService).leggTilbakeBehandlingsoppgaveMedSaksnummer(any());
         verify(behandlingsresultatService).oppdaterBehandlingsresultattype(BEHANDLING_ID, Behandlingsresultattyper.ANMODNING_OM_UNNTAK);
     }
 
