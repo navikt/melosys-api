@@ -6,6 +6,7 @@ import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import io.kotest.matchers.equality.shouldBeEqualToComparingFields
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
+import no.finn.unleash.FakeUnleash
 import no.nav.melosys.domain.arkiv.ArkivDokument
 import no.nav.melosys.domain.arkiv.Journalpost
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad
@@ -50,7 +51,8 @@ class JournalfoeringIT(
     @Autowired private val testDataGenerator: TestDataGenerator,
     @Autowired private val journalføringService: JournalfoeringService,
     @Autowired private val oppgaveService: OppgaveService,
-    @Autowired private val prosessinstansRepository: ProsessinstansRepository
+    @Autowired private val prosessinstansRepository: ProsessinstansRepository,
+    @Autowired private val unleash: FakeUnleash
 ) : ComponentTestBase() {
 
     private val mockServer: WireMockServer =
@@ -84,6 +86,52 @@ class JournalfoeringIT(
     }
 
     @Test
+    fun journalførOgOpprettSakMedToggleBehandleAlleSaker_EU_EOS_prosesserKjørerAlleSteg() {
+        unleash.enable("melosys.behandle_alle_saker")
+
+        val jfrOppgave: Oppgave = lagJfrOppgave()
+        val now = LocalDateTime.now()
+        val journalfoeringOpprettDto = lagJournalfoeringOpprettDto(jfrOppgave)
+
+        ThreadLocalAccessInfo.executeProcess("Journalfør dokument og opprett ny sak. Ferdigstill oppgave.") {
+            journalføringService.journalførOgOpprettSak(journalfoeringOpprettDto)
+            oppgaveService.ferdigstillOppgave(journalfoeringOpprettDto.oppgaveID)
+        }
+        val journalføringProsessID = finnprosessID(ProsessType.JFR_NY_SAK_BRUKER, now)
+        listOf(
+            journalføringProsessID,
+            finnprosessID(ProsessType.OPPRETT_OG_DISTRIBUER_BREV, now)
+        ).forEach {
+            sjekkAtprosesssHarStatusFerdig(it)
+        }
+        val prosessinstans = prosessinstansRepository.findById(journalføringProsessID).get()
+        val behandling = prosessinstans.behandling
+
+        behandling.apply {
+            status.shouldBe(Behandlingsstatus.OPPRETTET)
+            type.shouldBe(Behandlingstyper.FØRSTEGANG)
+            tema.shouldBe(Behandlingstema.UTSENDT_ARBEIDSTAKER)
+        }
+        behandling.fagsak.apply {
+            type.shouldBe(Sakstyper.EU_EOS)
+            status.shouldBe(Saksstatuser.OPPRETTET)
+            registrertAv.shouldBe("MELOSYS")
+            tema.shouldBe(Sakstemaer.MEDLEMSKAP_LOVVALG)
+        }
+        behandling.behandlingsgrunnlag.behandlingsgrunnlagdata.shouldBeInstanceOf<Soeknad>()
+            .shouldBeEqualToComparingFields(Soeknad().apply {
+                soeknadsland.apply {
+                    landkoder = listOf(Landkoder.IE.kode)
+                    erUkjenteEllerAlleEosLand = false
+                }
+                periode = Periode(
+                    periodeFOM,
+                    periodeFOM
+                )
+            })
+    }
+
+    @Test
     fun journalførOgOpprettSak_EU_EOS_prosesserKjørerAlleSteg() {
         val jfrOppgave: Oppgave = lagJfrOppgave()
         val now = LocalDateTime.now()
@@ -105,7 +153,7 @@ class JournalfoeringIT(
 
         behandling.apply {
             status.shouldBe(Behandlingsstatus.OPPRETTET)
-            type.shouldBe(Behandlingstyper.SOEKNAD)
+            type.shouldBe(Behandlingstyper.FØRSTEGANG)
             tema.shouldBe(Behandlingstema.UTSENDT_ARBEIDSTAKER)
         }
         behandling.fagsak.apply {
@@ -153,6 +201,8 @@ class JournalfoeringIT(
 
     private fun lagJournalføringDto(oppgave: Oppgave, dokument: ArkivDokument) =
         JournalfoeringOpprettDto().apply {
+            behandlingstemaKode = Behandlingstema.YRKESAKTIV.kode
+            behandlingstypeKode = Behandlingstyper.FØRSTEGANG.kode
             this.journalpostID = oppgave.journalpostId
             avsenderID = "30056928150"
             avsenderNavn = "KARAFFEL TRIVIELL"
@@ -171,6 +221,7 @@ class JournalfoeringIT(
             isSkalTilordnes = true
             fagsak = FagsakDto().apply {
                 sakstype = Sakstyper.EU_EOS.kode
+                sakstema = Sakstemaer.MEDLEMSKAP_LOVVALG.kode
                 soknadsperiode = PeriodeDto(
                     periodeFOM,
                     periodeTOM,
