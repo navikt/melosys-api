@@ -1,5 +1,8 @@
 package no.nav.melosys.saksflyt.steg.behandling;
 
+import java.util.Optional;
+
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
@@ -10,12 +13,11 @@ import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.journalfoering.BehandlingReplikeringsRegler;
 import no.nav.melosys.service.sak.FagsakService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-
-import java.util.Optional;
 
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.REPLIKER_BEHANDLING;
 
@@ -27,10 +29,15 @@ public class ReplikerBehandling implements StegBehandler {
 
     private final FagsakService fagsakService;
     private final BehandlingService behandlingService;
+    private final BehandlingReplikeringsRegler behandlingReplikeringsRegler;
 
-    public ReplikerBehandling(FagsakService fagsakService, BehandlingService behandlingService) {
+    private final Unleash unleash;
+
+    public ReplikerBehandling(FagsakService fagsakService, BehandlingService behandlingService, BehandlingReplikeringsRegler behandlingReplikeringsRegler, Unleash unleash) {
         this.fagsakService = fagsakService;
         this.behandlingService = behandlingService;
+        this.behandlingReplikeringsRegler = behandlingReplikeringsRegler;
+        this.unleash = unleash;
     }
 
     @Override
@@ -45,8 +52,17 @@ public class ReplikerBehandling implements StegBehandler {
         var behandlingstype = prosessinstans.getData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.class);
         var behandlingstema = prosessinstans.getData(ProsessDataKey.BEHANDLINGSTEMA, Behandlingstema.class);
 
-        Optional<Behandling> behandlingBruktForReplikering = fagsakService.hentBehandlingSomErUtgangspunktForRevurdering(fagsak);
         Behandling nyBehandling;
+        Optional<Behandling> behandlingBruktForReplikering;
+
+        if (unleash.isEnabled("melosys.behandle_alle_saker")) {
+            behandlingBruktForReplikering = Optional.ofNullable(behandlingReplikeringsRegler.finnBehandlingSomKanReplikeres(fagsak));
+            if (behandlingBruktForReplikering.isEmpty()) {
+                throw new FunksjonellException("Replikerings regler må være like som når journalførOgOpprettAndregangsBehandling ble kjørt");
+            }
+        } else {
+            behandlingBruktForReplikering = fagsakService.hentBehandlingSomErUtgangspunktForRevurdering(fagsak);
+        }
 
         if (behandlingBruktForReplikering.isPresent()) {
             nyBehandling = behandlingService.replikerBehandlingOgBehandlingsresultat(behandlingBruktForReplikering.get(), behandlingstype);
