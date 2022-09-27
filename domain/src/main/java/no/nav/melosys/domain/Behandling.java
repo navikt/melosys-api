@@ -477,7 +477,6 @@ public class Behandling extends RegistreringsInfo {
                 YRKESAKTIV,
                 UNNTAK_MEDLEMSKAP,
                 REGISTRERING_UNNTAK,
-                VIRKSOMHET, //FIXME PLIX
                 PENSJONIST -> LocalDate.now().plusDays(30);
             case REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING,
                 REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE -> LocalDate.now().plusWeeks(2);
@@ -488,6 +487,7 @@ public class Behandling extends RegistreringsInfo {
                 ØVRIGE_SED_MED,
                 FORESPØRSEL_TRYGDEMYNDIGHET,
                 TRYGDETID -> LocalDate.now().plusWeeks(8);
+            case VIRKSOMHET -> LocalDate.now().plusDays(90);
         };
     }
 
