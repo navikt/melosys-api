@@ -45,12 +45,14 @@ class BehandlingReplikeringsRegler(private val behandlingsresultatRepository: Be
         finnBehandlingSomKanReplikeres(fagsak.hentBehandlingerSortertSynkendePåRegistrertDato())
 
     internal fun finnBehandlingSomKanReplikeres(behandlinger: List<Behandling>) =
-        behandlinger.firstOrNull {
-            val behandlingsresultat = behandlingsresultatRepository.findById(it.id)
-            behandlingstyperForInkludering.contains(it.type)
-                && behandlingsresultat.isPresent
-                && !behandlingsresultattyperForEksludering.contains(behandlingsresultat.get().type)
-        }
+        behandlinger
+            .filter { it.erInaktiv() }
+            .firstOrNull {
+                val behandlingsresultat = behandlingsresultatRepository.findById(it.id)
+                behandlingstyperForInkludering.contains(it.type)
+                    && behandlingsresultat.isPresent
+                    && !behandlingsresultattyperForEksludering.contains(behandlingsresultat.get().type)
+            }
 
     companion object {
         val behandlingstyperForInkludering = listOf(

@@ -10,6 +10,7 @@ import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.repository.BehandlingsresultatRepository
@@ -169,7 +170,12 @@ class BehandlingReplikeringsReglerTest {
 
     private fun behandlingMedBehandlingTyperOgIkkeBehandlingsresultatTyperData(): List<Arguments> {
         fun createBehandlinger(behandlingstyper: List<Behandlingstyper>) =
-            behandlingstyper.map { Behandling().apply { type = it } }
+            behandlingstyper.map {
+                Behandling().apply {
+                    type = it
+                    status = Behandlingsstatus.AVSLUTTET
+                }
+            }
 
         fun createBehandling(behandlingstype: Behandlingstyper) = createBehandlinger(listOf(behandlingstype))
 
@@ -212,6 +218,7 @@ class BehandlingReplikeringsReglerTest {
             behandlingerMedType.add(Pair(Behandling().apply {
                 this.tema = tema
                 this.type = type
+                this.status = Behandlingsstatus.AVSLUTTET
             }, behandlingsresultattype))
         }
 
