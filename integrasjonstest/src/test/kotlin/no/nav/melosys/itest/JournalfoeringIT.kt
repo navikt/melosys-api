@@ -90,57 +90,32 @@ class JournalfoeringIT(
         unleash.enable("melosys.behandle_alle_saker")
 
         val jfrOppgave: Oppgave = lagJfrOppgave()
-        val now = LocalDateTime.now()
+        val startTime = LocalDateTime.now()
         val journalfoeringOpprettDto = lagJournalfoeringOpprettDto(jfrOppgave)
 
         ThreadLocalAccessInfo.executeProcess("Journalfør dokument og opprett ny sak. Ferdigstill oppgave.") {
             journalføringService.journalførOgOpprettSak(journalfoeringOpprettDto)
             oppgaveService.ferdigstillOppgave(journalfoeringOpprettDto.oppgaveID)
         }
-        val journalføringProsessID = finnprosessID(ProsessType.JFR_NY_SAK_BRUKER, now)
-        listOf(
-            journalføringProsessID,
-            finnprosessID(ProsessType.OPPRETT_OG_DISTRIBUER_BREV, now)
-        ).forEach {
-            sjekkAtprosesssHarStatusFerdig(it)
-        }
-        val prosessinstans = prosessinstansRepository.findById(journalføringProsessID).get()
-        val behandling = prosessinstans.behandling
 
-        behandling.apply {
-            status.shouldBe(Behandlingsstatus.OPPRETTET)
-            type.shouldBe(Behandlingstyper.FØRSTEGANG)
-            tema.shouldBe(Behandlingstema.UTSENDT_ARBEIDSTAKER)
-        }
-        behandling.fagsak.apply {
-            type.shouldBe(Sakstyper.EU_EOS)
-            status.shouldBe(Saksstatuser.OPPRETTET)
-            registrertAv.shouldBe("MELOSYS")
-            tema.shouldBe(Sakstemaer.MEDLEMSKAP_LOVVALG)
-        }
-        behandling.behandlingsgrunnlag.behandlingsgrunnlagdata.shouldBeInstanceOf<Soeknad>()
-            .shouldBeEqualToComparingFields(Soeknad().apply {
-                soeknadsland.apply {
-                    landkoder = listOf(Landkoder.IE.kode)
-                    erUkjenteEllerAlleEosLand = false
-                }
-                periode = Periode(
-                    periodeFOM,
-                    periodeFOM
-                )
-            })
+        verify(startTime)
     }
 
     @Test
     fun journalførOgOpprettSak_EU_EOS_prosesserKjørerAlleSteg() {
         val jfrOppgave: Oppgave = lagJfrOppgave()
-        val now = LocalDateTime.now()
+        val startTime = LocalDateTime.now()
         val journalfoeringOpprettDto = lagJournalfoeringOpprettDto(jfrOppgave)
 
         ThreadLocalAccessInfo.executeProcess("Journalfør dokument og opprett ny sak. Ferdigstill oppgave.") {
             journalføringService.journalførOgOpprettSak(journalfoeringOpprettDto)
             oppgaveService.ferdigstillOppgave(journalfoeringOpprettDto.oppgaveID)
         }
+
+        verify(startTime)
+    }
+
+    private fun verify(now: LocalDateTime) {
         val journalføringProsessID = finnprosessID(ProsessType.JFR_NY_SAK_BRUKER, now)
         listOf(
             journalføringProsessID,
