@@ -38,33 +38,29 @@ class BehandlingReplikeringsRegler(private val behandlingsresultatRepository: Be
                 if (behandlingstype == Behandlingstyper.HENVENDELSE || behandlingstype == Behandlingstyper.KLAGE) return false
         }
 
-        return finnesBehandlingMedBehandlingTyperOgIkkeBehandlingsresultatTyper(
-            fagsak.hentBehandlingerSortertSynkendePåRegistrertDato(),
-            listOf(
-                Behandlingstyper.NY_VURDERING,
-                Behandlingstyper.ENDRET_PERIODE,
-                Behandlingstyper.FØRSTEGANG
-            ),
-            listOf(
-                Behandlingsresultattyper.HENLEGGELSE,
-                Behandlingsresultattyper.ANMODNING_OM_UNNTAK,
-                Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL,
-                Behandlingsresultattyper.FERDIGBEHANDLET,
-                Behandlingsresultattyper.HENLEGGELSE_BORTFALT
-            )
-        )
+        return finnBehandlingSomKanReplikeres(fagsak.hentBehandlingerSortertSynkendePåRegistrertDato()) != null
     }
 
-    internal fun finnesBehandlingMedBehandlingTyperOgIkkeBehandlingsresultatTyper(
-        behandlinger: List<Behandling>,
-        behandlingstyper: List<Behandlingstyper>,
-        behandlingsresultattyper: List<Behandlingsresultattyper>
-    ): Boolean {
-        return behandlinger.firstOrNull {
+    fun finnBehandlingSomKanReplikeres(behandlinger: List<Behandling>) =
+        behandlinger.firstOrNull {
             val behandlingsresultat = behandlingsresultatRepository.findById(it.id)
-            behandlingstyper.contains(it.type)
+            behandlingstyperForInkludering.contains(it.type)
                 && behandlingsresultat.isPresent
-                && !behandlingsresultattyper.contains(behandlingsresultat.get().type)
-        } != null
+                && !behandlingsresultattyperForEksludering.contains(behandlingsresultat.get().type)
+        }
+
+    companion object {
+        val behandlingstyperForInkludering = listOf(
+            Behandlingstyper.NY_VURDERING,
+            Behandlingstyper.ENDRET_PERIODE,
+            Behandlingstyper.FØRSTEGANG
+        )
+        val behandlingsresultattyperForEksludering = listOf(
+            Behandlingsresultattyper.HENLEGGELSE,
+            Behandlingsresultattyper.ANMODNING_OM_UNNTAK,
+            Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL,
+            Behandlingsresultattyper.FERDIGBEHANDLET,
+            Behandlingsresultattyper.HENLEGGELSE_BORTFALT
+        )
     }
 }

@@ -152,21 +152,19 @@ class BehandlingReplikeringsReglerTest {
     fun finnesBehandlingMedBehandlingTyperOgIkkeBehandlingsresultatTyper(
         resultatTypeFraRepo: Behandlingsresultattyper?,
         behandlinger: List<Behandling>,
-        typer: List<Behandlingstyper>,
-        resultatTyper: List<Behandlingsresultattyper>,
         expected: Boolean
     ) {
         every { behandlingsresultatRepository.findById(any()) } returns lagBehandlingsresultat(resultatTypeFraRepo)
         val behandlingReplikeringsRegler = BehandlingReplikeringsRegler(behandlingsresultatRepository)
 
 
-        val resultat =
-            behandlingReplikeringsRegler.finnesBehandlingMedBehandlingTyperOgIkkeBehandlingsresultatTyper(
-                behandlinger, typer, resultatTyper
-            )
+        val kanReplikeres =
+            behandlingReplikeringsRegler.finnBehandlingSomKanReplikeres(
+                behandlinger
+            ) != null
 
 
-        resultat.shouldBe(expected)
+        kanReplikeres.shouldBe(expected)
     }
 
     private fun behandlingMedBehandlingTyperOgIkkeBehandlingsresultatTyperData(): List<Arguments> {
@@ -179,22 +177,16 @@ class BehandlingReplikeringsReglerTest {
             arguments(
                 Behandlingsresultattyper.ANMODNING_OM_UNNTAK,
                 createBehandling(Behandlingstyper.FØRSTEGANG),
-                listOf(Behandlingstyper.FØRSTEGANG),
-                listOf(Behandlingsresultattyper.ANMODNING_OM_UNNTAK),
                 false
             ),
             arguments(
                 null,
                 createBehandling(Behandlingstyper.FØRSTEGANG),
-                listOf(Behandlingstyper.FØRSTEGANG),
-                listOf(Behandlingsresultattyper.ANMODNING_OM_UNNTAK),
                 false
             ),
             arguments(
                 Behandlingsresultattyper.IKKE_FASTSATT,
                 createBehandling(Behandlingstyper.FØRSTEGANG),
-                listOf(Behandlingstyper.FØRSTEGANG),
-                listOf(Behandlingsresultattyper.ANMODNING_OM_UNNTAK),
                 true
             )
         )
