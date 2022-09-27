@@ -1,8 +1,8 @@
 package no.nav.melosys.saksflyt.steg.behandling;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.Soeknadsland;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
@@ -39,18 +39,19 @@ public class OpprettSoeknad implements StegBehandler {
             Sakstyper sakstype = prosessinstans.getBehandling().getFagsak().getType();
             switch (sakstype) {
                 case EU_EOS -> {
-                    Soeknad soeknad = new Soeknad();
-                    soeknad.periode = prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, Periode.class);
-                    soeknad.soeknadsland = prosessinstans.getData(ProsessDataKey.SØKNADSLAND, new TypeReference<>() {
-                    });
-                    behandlingsgrunnlagService.opprettSøknadYrkesaktiveEøs(behandlingID, soeknad);
+                    Periode periode = prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, Periode.class);
+                    Soeknadsland soeknadsland = prosessinstans.getData(ProsessDataKey.SØKNADSLAND,
+                                                                       new TypeReference<>() {
+                                                                       });
+                    behandlingsgrunnlagService.opprettSøknadYrkesaktiveEøs(behandlingID, periode, soeknadsland);
                 }
                 case FTRL -> behandlingsgrunnlagService.opprettSøknadFolketrygden(behandlingID);
                 case TRYGDEAVTALE -> behandlingsgrunnlagService.opprettSøknadTrygdeavtale(behandlingID);
             }
             log.info("Opprettet søknad for behandling {}.", behandlingID);
         } else {
-            log.info("Ikke opprettet søknad for behandling {} med tema {}", behandlingID, prosessinstans.getBehandling().getTema());
+            log.info("Ikke opprettet søknad for behandling {} med tema {}", behandlingID,
+                     prosessinstans.getBehandling().getTema());
         }
     }
 }

@@ -4,7 +4,6 @@ import java.util.List;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
@@ -38,7 +37,8 @@ class OpprettSoeknadTest {
     @Test
     void utfør_behandlingstemaUtsendtArbeidstaker_oppretterSøknadYrkesaktiveEøs() {
         opprettSoeknad.utfør(lagProsessinstans(Sakstyper.EU_EOS, Behandlingstema.UTSENDT_ARBEIDSTAKER));
-        verify(behandlingsgrunnlagService).opprettSøknadYrkesaktiveEøs(eq(behandlingID), any(Soeknad.class));
+        verify(behandlingsgrunnlagService).opprettSøknadYrkesaktiveEøs(eq(behandlingID), any(),
+                                                                       any());
     }
 
     @Test
@@ -56,7 +56,7 @@ class OpprettSoeknadTest {
     @Test
     void utfør_behandlingsTemaØvrigeSed_oppretterIkkeSøknad() {
         opprettSoeknad.utfør(lagProsessinstans(Sakstyper.EU_EOS, Behandlingstema.ØVRIGE_SED_MED));
-        verify(behandlingsgrunnlagService, never()).opprettSøknadYrkesaktiveEøs(eq(behandlingID), any(Soeknad.class));
+        verify(behandlingsgrunnlagService, never()).opprettSøknadYrkesaktiveEøs(eq(behandlingID), any(), any());
     }
 
     private Prosessinstans lagProsessinstans(Sakstyper sakstype, Behandlingstema behandlingstema) {
@@ -67,7 +67,7 @@ class OpprettSoeknadTest {
         behandling.getFagsak().setType(sakstype);
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
-        prosessinstans.setData(ProsessDataKey.SØKNADSLAND, new SoeknadslandDto(List.of("DK","SE"), true));
+        prosessinstans.setData(ProsessDataKey.SØKNADSLAND, new SoeknadslandDto(List.of("DK", "SE"), true));
         return prosessinstans;
     }
 }

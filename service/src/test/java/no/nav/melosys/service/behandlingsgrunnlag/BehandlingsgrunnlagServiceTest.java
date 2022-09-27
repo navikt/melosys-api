@@ -70,14 +70,20 @@ class BehandlingsgrunnlagServiceTest {
         Behandling behandling = lagBehandling();
         when(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling);
         when(joarkFasade.hentMottaksDatoForJournalpost(behandling.getInitierendeJournalpostId())).thenReturn(LocalDate.now());
-        Soeknad soeknad = new Soeknad();
-        behandlingsgrunnlagService.opprettSøknadYrkesaktiveEøs(behandlingID, soeknad);
+        Periode periode = new Periode();
+        Soeknadsland soeknadsland = new Soeknadsland();
+
+
+        behandlingsgrunnlagService.opprettSøknadYrkesaktiveEøs(behandlingID, periode, soeknadsland);
+
 
         verify(behandlingsgrunnlagRepository).save(behandlingsgrunnlagArgumentCaptor.capture());
         Behandlingsgrunnlag opprettet = behandlingsgrunnlagArgumentCaptor.getValue();
 
         assertThat(opprettet).isNotNull();
         assertThat(opprettet.getBehandlingsgrunnlagdata()).isInstanceOf(Soeknad.class);
+        assertThat(opprettet.getBehandlingsgrunnlagdata().periode).isEqualTo(periode);
+        assertThat(opprettet.getBehandlingsgrunnlagdata().soeknadsland).isEqualTo(soeknadsland);
         assertThat(opprettet.getType()).isEqualTo(Behandlingsgrunnlagtyper.SØKNAD_A1_YRKESAKTIVE_EØS);
         assertThat(opprettet.getBehandling()).isEqualTo(behandling);
         assertThat(opprettet.getMottaksdato()).isNotNull();
