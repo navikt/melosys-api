@@ -1,25 +1,15 @@
 package no.nav.melosys.saksflyt.steg.behandling;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.Soeknadsland;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
-import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.OPPRETT_SØKNAD;
 
 @Component
 public class OpprettSoeknad implements StegBehandler {
-
-    private static final Logger log = LoggerFactory.getLogger(OpprettSoeknad.class);
-
     private final BehandlingsgrunnlagService behandlingsgrunnlagService;
 
     public OpprettSoeknad(BehandlingsgrunnlagService behandlingsgrunnlagService) {
@@ -33,25 +23,6 @@ public class OpprettSoeknad implements StegBehandler {
 
     @Override
     public void utfør(Prosessinstans prosessinstans) {
-        long behandlingID = prosessinstans.getBehandling().getId();
-
-        if (prosessinstans.getBehandling().erBehandlingAvSøknad()) {
-            Sakstyper sakstype = prosessinstans.getBehandling().getFagsak().getType();
-            switch (sakstype) {
-                case EU_EOS -> {
-                    Periode periode = prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, Periode.class);
-                    Soeknadsland soeknadsland = prosessinstans.getData(ProsessDataKey.SØKNADSLAND,
-                                                                       new TypeReference<>() {
-                                                                       });
-                    behandlingsgrunnlagService.opprettSøknadYrkesaktiveEøs(behandlingID, periode, soeknadsland);
-                }
-                case FTRL -> behandlingsgrunnlagService.opprettSøknadFolketrygden(behandlingID);
-                case TRYGDEAVTALE -> behandlingsgrunnlagService.opprettSøknadTrygdeavtale(behandlingID);
-            }
-            log.info("Opprettet søknad for behandling {}.", behandlingID);
-        } else {
-            log.info("Ikke opprettet søknad for behandling {} med tema {}", behandlingID,
-                     prosessinstans.getBehandling().getTema());
-        }
+        behandlingsgrunnlagService.opprettSøknad(prosessinstans);
     }
 }
