@@ -198,7 +198,8 @@ class JournalfoeringServiceTest {
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> journalfoeringService.journalførOgOpprettSak(opprettDto))
-            .withMessageContaining(JournalfoeringService.KAN_IKKE_SENDE_FORVALTNINGSMELDING);
+            .withMessageContaining("Kan kun sende forvaltningsmelding for behandlingtype: " +
+                "FØRSTEGANG og sakstema: MEDLEMSKAP_LOVVALG");
     }
 
     @Test
@@ -216,7 +217,7 @@ class JournalfoeringServiceTest {
 
         journalfoeringService.journalførOgOpprettSak(opprettDto);
 
-        
+
         verify(prosessinstansService).lagre(prosessinstansArgumentCaptor.capture());
         var processInstans = prosessinstansArgumentCaptor.getValue();
         assertThat(processInstans.getData(ProsessDataKey.SAKSTEMA, Sakstemaer.class).getKode()).isEqualTo(fagsakDto.getSakstema());

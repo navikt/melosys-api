@@ -45,8 +45,6 @@ import static no.nav.melosys.service.sak.SakstypeBehandlingstemaKobling.erGyldig
 
 @Service
 public class JournalfoeringService {
-    static final String KAN_IKKE_SENDE_FORVALTNINGSMELDING = "Kan kun sende forvaltningsmelding for behandlingtype: " +
-        "FØRSTEGANG og sakstema: MEDLEMSKAP_LOVVALG";
     private static final Logger log = LoggerFactory.getLogger(JournalfoeringService.class);
 
     private final JoarkFasade joarkFasade;
@@ -114,7 +112,8 @@ public class JournalfoeringService {
             || !MEDLEMSKAP_LOVVALG.name().equals(journalfoeringDto.getFagsak().getSakstema());
 
         if (manglerForventetTypeEllerTema) {
-            throw new FunksjonellException(KAN_IKKE_SENDE_FORVALTNINGSMELDING);
+            throw new FunksjonellException("Kan kun sende forvaltningsmelding for behandlingtype: " +
+                "FØRSTEGANG og sakstema: MEDLEMSKAP_LOVVALG");
         }
     }
 
