@@ -99,7 +99,7 @@ class SvarAnmodningUnntakSedRuterTest {
         MelosysEessiMelding eessiMelding = melosysEessiMelding();
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, eessiMelding);
 
-        when(oppgaveService.finnÅpenOppgaveMedFagsaksnummer(eq(fagsak.getSaksnummer())))
+        when(oppgaveService.finnÅpenBehandlingsoppgaveMedFagsaksnummer(eq(fagsak.getSaksnummer())))
             .thenReturn(Optional.of(new Oppgave.Builder().build()));
 
         svarAnmodningUnntakSedRuter.rutSedTilBehandling(prosessinstans, 1L);
