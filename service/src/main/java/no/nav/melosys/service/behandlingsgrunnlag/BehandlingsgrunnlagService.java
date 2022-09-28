@@ -48,7 +48,7 @@ public class BehandlingsgrunnlagService {
 
     @Transactional(readOnly = true)
     public Behandlingsgrunnlag hentBehandlingsgrunnlag(long behandlingID) {
-        return behandlingsgrunnlagRepository.findByBehandling_Id(behandlingID)
+        return finnBehandlingsgrunnlag(behandlingID)
             .orElseThrow(() -> new IkkeFunnetException("Finner ikke behandlingsgrunnlag for behandling " + behandlingID));
     }
 
