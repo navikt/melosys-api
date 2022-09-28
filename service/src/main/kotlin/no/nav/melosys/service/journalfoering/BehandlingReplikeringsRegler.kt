@@ -49,18 +49,18 @@ class BehandlingReplikeringsRegler(private val behandlingsresultatRepository: Be
             .filter { it.erInaktiv() }
             .firstOrNull {
                 val behandlingsresultat = behandlingsresultatRepository.findById(it.id)
-                behandlingstyperForInkludering.contains(it.type)
+                behandlingstyperSomKanReplikeres.contains(it.type)
                     && behandlingsresultat.isPresent
-                    && !behandlingsresultattyperForEksludering.contains(behandlingsresultat.get().type)
+                    && !behandlingsresultattyperSomIkkeKanReplikeres.contains(behandlingsresultat.get().type)
             }
 
     companion object {
-        val behandlingstyperForInkludering = listOf(
+        val behandlingstyperSomKanReplikeres = listOf(
             Behandlingstyper.NY_VURDERING,
             Behandlingstyper.ENDRET_PERIODE,
             Behandlingstyper.FØRSTEGANG
         )
-        val behandlingsresultattyperForEksludering = listOf(
+        val behandlingsresultattyperSomIkkeKanReplikeres = listOf(
             Behandlingsresultattyper.HENLEGGELSE,
             Behandlingsresultattyper.ANMODNING_OM_UNNTAK,
             Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL,
