@@ -116,7 +116,7 @@ public class JournalfoeringService {
                 "FØRSTEGANG og sakstema: MEDLEMSKAP_LOVVALG");
         }
 
-        if (!hovedpartErBruker(journalfoeringDto)) {
+        if (!journalføringGjelderBruker(journalfoeringDto)) {
             throw new FunksjonellException("Kan kun sende forvaltningsmelding for Aktoersroller: " +
                 "BRUKER");
         }
@@ -466,7 +466,7 @@ public class JournalfoeringService {
         return eessiService.finnBehandlingstemaForSedTilknyttetJournalpost(journalpostID);
     }
 
-    private boolean hovedpartErBruker(JournalfoeringOpprettDto journalfoeringDto) {
+    private boolean journalføringGjelderBruker(JournalfoeringOpprettDto journalfoeringDto) {
         return Aktoersroller.BRUKER.equals(journalføringGjelder(journalfoeringDto));
     }
 
