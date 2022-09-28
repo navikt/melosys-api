@@ -13,7 +13,7 @@ import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.journalfoering.BehandlingReplikeringsRegler;
+import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import no.nav.melosys.service.sak.FagsakService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,11 +29,11 @@ public class ReplikerBehandling implements StegBehandler {
 
     private final FagsakService fagsakService;
     private final BehandlingService behandlingService;
-    private final BehandlingReplikeringsRegler behandlingReplikeringsRegler;
+    private final SaksbehandlingRegler behandlingReplikeringsRegler;
 
     private final Unleash unleash;
 
-    public ReplikerBehandling(FagsakService fagsakService, BehandlingService behandlingService, BehandlingReplikeringsRegler behandlingReplikeringsRegler, Unleash unleash) {
+    public ReplikerBehandling(FagsakService fagsakService, BehandlingService behandlingService, SaksbehandlingRegler behandlingReplikeringsRegler, Unleash unleash) {
         this.fagsakService = fagsakService;
         this.behandlingService = behandlingService;
         this.behandlingReplikeringsRegler = behandlingReplikeringsRegler;

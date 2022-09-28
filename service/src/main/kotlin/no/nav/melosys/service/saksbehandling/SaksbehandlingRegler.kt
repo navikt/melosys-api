@@ -52,9 +52,7 @@ class SaksbehandlingRegler(private val behandlingsresultatRepository: Behandling
             Behandlingsresultattyper.FERDIGBEHANDLET,
             Behandlingsresultattyper.HENLEGGELSE_BORTFALT
         )
-    }
 
-    companion object {
         @JvmStatic
         fun harTomFlyt(
             sakstype: Sakstyper,

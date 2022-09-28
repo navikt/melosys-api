@@ -1,4 +1,4 @@
-package no.nav.melosys.service.journalfoering
+package no.nav.melosys.service.saksbehandling
 
 import io.kotest.matchers.shouldBe
 import io.mockk.MockKAdditionalAnswerScope
@@ -159,9 +159,9 @@ class SaksbehandlingReglerTest {
         val saksbehandlingRegler = SaksbehandlingRegler(behandlingsresultatRepository)
 
 
-        val resultat =
-            saksbehandlingRegler.finnesBehandlingMedBehandlingTyperOgIkkeBehandlingsresultatTyper(
-                behandlinger, typer, resultatTyper
+        val kanReplikeres =
+            saksbehandlingRegler.finnBehandlingSomKanReplikeres(
+                behandlinger
             ) != null
 
 
