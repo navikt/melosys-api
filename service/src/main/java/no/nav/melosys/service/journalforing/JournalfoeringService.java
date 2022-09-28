@@ -384,6 +384,9 @@ public class JournalfoeringService {
         if (journalfoeringDto.getFagsak() == null) {
             throw new FunksjonellException("Opplysninger for å opprette en søknad mangler");
         }
+
+        if (journalfoeringDto.erTomFlyt()) return;
+
         final PeriodeDto søknadsperiode = journalfoeringDto.getFagsak().getSoknadsperiode();
         if (søknadsperiode == null) {
             throw new FunksjonellException("Søknadsperiode mangler");
