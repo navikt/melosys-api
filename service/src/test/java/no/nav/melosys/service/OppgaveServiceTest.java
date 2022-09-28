@@ -63,7 +63,7 @@ class OppgaveServiceTest {
     @Mock
     private BehandlingsgrunnlagService behandlingsgrunnlagService;
 
-    private FakeUnleash unleash = new FakeUnleash();
+    private final FakeUnleash unleash = new FakeUnleash();
 
     private OppgaveService oppgaveService;
 

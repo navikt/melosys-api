@@ -7,9 +7,11 @@ import javax.annotation.Nullable;
 import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Soeknadsland;
+import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -323,23 +325,23 @@ public class OppgaveService {
             return behOppgaveDto;
         }
 
-        var behandlingsgrunnlag = behandlingsgrunnlagService.finnBehandlingsgrunnlag(behandling.getId());
+        Optional<SedDokument> sedopplysninger = saksopplysningerService.finnSedOpplysninger(behandling.getId());
+        if (sedopplysninger.isPresent()) {
+            Landkoder lovvalgslandKode = sedopplysninger.get().getLovvalgslandKode();
+            behOppgaveDto.setLand(SoeknadslandDto.av(lovvalgslandKode));
+            behOppgaveDto.setPeriode(new PeriodeDto(
+                sedopplysninger.get().getLovvalgsperiode().getFom(), sedopplysninger.get().getLovvalgsperiode().getTom())
+            );
+            return behOppgaveDto;
+        }
 
+        Optional<Behandlingsgrunnlag> behandlingsgrunnlag = behandlingsgrunnlagService.finnBehandlingsgrunnlag(behandling.getId());
         if (behandlingsgrunnlag.isPresent()) {
             Soeknad søknadDokument = (Soeknad) behandlingsgrunnlag.get().getBehandlingsgrunnlagdata();
             Soeknadsland søknadsland = hentSøknadsland(søknadDokument);
             behOppgaveDto.setLand(SoeknadslandDto.av(søknadsland));
             behOppgaveDto.setPeriode(mapPeriode(søknadDokument));
         }
-
-        saksopplysningerService.finnSedOpplysninger(behandling.getId()).ifPresent(
-            sedDokument -> {
-                Landkoder lovvalgslandKode = sedDokument.getLovvalgslandKode();
-                behOppgaveDto.setLand(SoeknadslandDto.av(lovvalgslandKode));
-                behOppgaveDto.setPeriode(new PeriodeDto(
-                    sedDokument.getLovvalgsperiode().getFom(), sedDokument.getLovvalgsperiode().getTom())
-                );
-            });
         return behOppgaveDto;
     }
 
