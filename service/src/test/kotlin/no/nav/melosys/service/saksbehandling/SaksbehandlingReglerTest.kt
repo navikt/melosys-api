@@ -148,53 +148,94 @@ class SaksbehandlingReglerTest {
         ),
     )
 
-    @ParameterizedTest(name = "{0} - {2} - {3} - {4}")
+    @ParameterizedTest(name = "behandlingsresultatType:{0} - FunnetBehandlingID:{2}")
     @MethodSource("behandlingMedBehandlingTyperOgIkkeBehandlingsresultatTyperData")
     fun finnesBehandlingMedBehandlingTyperOgIkkeBehandlingsresultatTyper(
         resultatTypeFraRepo: Behandlingsresultattyper?,
         behandlinger: List<Behandling>,
-        expected: Boolean
+        expectedBehandlingID: Long?
     ) {
         every { behandlingsresultatRepository.findById(any()) } returns lagBehandlingsresultat(resultatTypeFraRepo)
         val saksbehandlingRegler = SaksbehandlingRegler(behandlingsresultatRepository)
 
 
-        val kanReplikeres =
-            saksbehandlingRegler.finnBehandlingSomKanReplikeres(
-                behandlinger
-            ) != null
+        val behandling = saksbehandlingRegler.finnBehandlingSomKanReplikeres(behandlinger)
 
 
-        kanReplikeres.shouldBe(expected)
+        behandling?.id.shouldBe(expectedBehandlingID)
     }
 
     private fun behandlingMedBehandlingTyperOgIkkeBehandlingsresultatTyperData(): List<Arguments> {
-        fun createBehandlinger(behandlingstyper: List<Behandlingstyper>) =
-            behandlingstyper.map {
-                Behandling().apply {
-                    type = it
-                    status = Behandlingsstatus.AVSLUTTET
-                }
-            }
-
-        fun createBehandling(behandlingstype: Behandlingstyper) = createBehandlinger(listOf(behandlingstype))
+        val behandlingFørstegangAvsluttet = Behandling().apply {
+            id = 0
+            type = Behandlingstyper.FØRSTEGANG
+            status = Behandlingsstatus.AVSLUTTET
+        }
 
         return listOf(
             arguments(
                 Behandlingsresultattyper.ANMODNING_OM_UNNTAK,
-                createBehandling(Behandlingstyper.FØRSTEGANG),
-                false
+                listOf(behandlingFørstegangAvsluttet),
+                null
             ),
             arguments(
                 null,
-                createBehandling(Behandlingstyper.FØRSTEGANG),
-                false
+                listOf(behandlingFørstegangAvsluttet),
+                null
             ),
             arguments(
                 Behandlingsresultattyper.IKKE_FASTSATT,
-                createBehandling(Behandlingstyper.FØRSTEGANG),
-                true
-            )
+                listOf(
+                    Behandling().apply {
+                        id = 0
+                        type = Behandlingstyper.ANKE
+                        status = Behandlingsstatus.AVSLUTTET
+                    }
+                ),
+                null
+            ),
+            arguments(
+                Behandlingsresultattyper.IKKE_FASTSATT,
+                listOf(behandlingFørstegangAvsluttet),
+                0L
+            ),
+            arguments(
+                Behandlingsresultattyper.IKKE_FASTSATT,
+                listOf(
+                    Behandling().apply {
+                        id = 0
+                        type = Behandlingstyper.ANKE
+                        status = Behandlingsstatus.AVSLUTTET
+                    },
+                    Behandling().apply {
+                        id = 1
+                        type = Behandlingstyper.FØRSTEGANG
+                        status = Behandlingsstatus.AVSLUTTET
+                    }
+                ),
+                1L
+            ),
+            arguments(
+                Behandlingsresultattyper.IKKE_FASTSATT,
+                listOf(
+                    Behandling().apply {
+                        id = 0
+                        type = Behandlingstyper.FØRSTEGANG
+                        status = Behandlingsstatus.UNDER_BEHANDLING
+                    },
+                    Behandling().apply {
+                        id = 1
+                        type = Behandlingstyper.ANKE
+                        status = Behandlingsstatus.AVSLUTTET
+                    },
+                    Behandling().apply {
+                        id = 2
+                        type = Behandlingstyper.NY_VURDERING
+                        status = Behandlingsstatus.AVSLUTTET
+                    }
+                ),
+                2L
+            ),
         )
     }
 
