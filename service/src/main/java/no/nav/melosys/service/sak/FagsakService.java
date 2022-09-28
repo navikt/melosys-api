@@ -7,6 +7,7 @@ import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.*;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -153,6 +154,17 @@ public class FagsakService {
         aktør.setRolle(Aktoersroller.TRYGDEMYNDIGHET);
         aktør.setTrygdemyndighetLand(landkode);
         return aktør;
+    }
+
+    @Transactional
+    public void ferdigbehandleSak(String saksnummer) {
+        var fagsak = hentFagsak(saksnummer);
+        var behandling = fagsak.hentAktivBehandling();
+        var nyStatus = fagsak.getStatus() == Saksstatuser.OPPRETTET ? Saksstatuser.AVSLUTTET : fagsak.getStatus();
+
+        avsluttFagsakOgBehandling(fagsak, behandling, nyStatus);
+        behandlingsresultatService.oppdaterBehandlingsresultattype(behandling.getId(), Behandlingsresultattyper.FERDIGBEHANDLET);
+        oppgaveService.ferdigstillOppgaveMedSaksnummer(fagsak.getSaksnummer());
     }
 
     @Transactional

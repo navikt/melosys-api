@@ -48,8 +48,7 @@ import static no.nav.melosys.tjenester.gui.util.ResponseBodyMatchers.responseBod
 import static org.hamcrest.Matchers.equalTo;
 import static org.jeasy.random.FieldPredicates.*;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -248,6 +247,19 @@ class FagsakTjenesteTest {
             .andExpect(jsonPath("$.behandlingID", equalTo(1)));
 
         verify(aksesskontroll).autoriserSakstilgang("123");
+    }
+
+    @Test
+    void ferdigbehandleSak() throws Exception {
+        Fagsak fagsak = lagFagsak();
+        mockFagsakTjeneste(fagsak);
+
+        mockMvc.perform(put(BASE_URL + "/{saksnr}/ferdigbehandle", "123")
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isNoContent());
+
+        verify(aksesskontroll).autoriserSakstilgang("123");
+        verify(fagsakService).ferdigbehandleSak("123");
     }
 
     private static void mockFagsakTjeneste(Fagsak fagsak) {
