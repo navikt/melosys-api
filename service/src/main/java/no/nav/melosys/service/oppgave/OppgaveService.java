@@ -7,9 +7,11 @@ import javax.annotation.Nullable;
 import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Soeknadsland;
+import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -82,8 +84,8 @@ public class OppgaveService {
         return oppgaverTilDtoer(oppgaverFraDomain);
     }
 
-    public List<Oppgave> finnÅpneOppgaverMedJournalpostID(String journalpostID) {
-        return oppgaveFasade.finnÅpneOppgaverMedJournalpostID(journalpostID);
+    public List<Oppgave> finnÅpneBehandlingsoppgaverMedJournalpostID(String journalpostID) {
+        return oppgaveFasade.finnÅpneBehandlingsoppgaverMedJournalpostID(journalpostID);
     }
 
     public void feilregistrerOppgaver(Set<Oppgave> oppgaveSet) {
@@ -101,25 +103,25 @@ public class OppgaveService {
     }
 
     public void ferdigstillOppgaveMedSaksnummer(String fagSaksnummer) {
-        finnÅpenOppgaveMedFagsaksnummer(fagSaksnummer).ifPresentOrElse(
+        finnÅpenBehandlingsoppgaveMedFagsaksnummer(fagSaksnummer).ifPresentOrElse(
             oppgave -> ferdigstillOppgave(oppgave.getOppgaveId()),
             () -> log.warn("Sak {} har ingen oppgaver å ferdigstille.", fagSaksnummer)
         );
     }
 
-    public void leggTilbakeOppgaveMedSaksnummer(String fagSaksnummer) {
-        Oppgave oppgave = hentÅpenOppgaveMedFagsaksnummer(fagSaksnummer);
+    public void leggTilbakeBehandlingsoppgaveMedSaksnummer(String fagSaksnummer) {
+        Oppgave oppgave = hentÅpenBehandlingsoppgaveMedFagsaksnummer(fagSaksnummer);
         oppgaveFasade.leggTilbakeOppgave(oppgave.getOppgaveId());
     }
 
-    public Optional<Oppgave> finnSisteAvsluttetOppgaveMedFagsaksnummer(String saksnummer) {
-        return oppgaveFasade.finnAvsluttetOppgaverMedSaksnummer(saksnummer)
+    public Optional<Oppgave> finnSisteAvsluttetBehandlingsoppgaveMedFagsaksnummer(String saksnummer) {
+        return oppgaveFasade.finnAvsluttetBehandlingsoppgaverMedSaksnummer(saksnummer)
             .stream()
             .max(Comparator.comparing(Oppgave::getOpprettetTidspunkt));
     }
 
-    public Optional<Oppgave> finnÅpenOppgaveMedFagsaksnummer(String saksnummer) {
-        List<Oppgave> oppgaver = oppgaveFasade.finnÅpneOppgaverMedSaksnummer(saksnummer);
+    public Optional<Oppgave> finnÅpenBehandlingsoppgaveMedFagsaksnummer(String saksnummer) {
+        List<Oppgave> oppgaver = oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(saksnummer);
 
         if (!oppgaver.isEmpty()) {
             if (oppgaver.size() > 1) {
@@ -131,8 +133,8 @@ public class OppgaveService {
         }
     }
 
-    public Oppgave hentÅpenOppgaveMedFagsaksnummer(String saksnummer) {
-        return finnÅpenOppgaveMedFagsaksnummer(saksnummer)
+    public Oppgave hentÅpenBehandlingsoppgaveMedFagsaksnummer(String saksnummer) {
+        return finnÅpenBehandlingsoppgaveMedFagsaksnummer(saksnummer)
             .orElseThrow(() -> new IkkeFunnetException("Finner ingen åpen oppgave med saksnummer " + saksnummer));
     }
 
@@ -146,7 +148,7 @@ public class OppgaveService {
 
     public void opprettEllerGjenbrukBehandlingsoppgave(Behandling behandling, String journalpostID, @Nullable String aktørID, @Nullable String tilordnetRessurs, @Nullable @Deprecated String beskrivelse, @Nullable String orgnr) {
 
-        Optional<Oppgave> eksisterendeOppgave = finnÅpenOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer());
+        Optional<Oppgave> eksisterendeOppgave = finnÅpenBehandlingsoppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer());
 
         if (eksisterendeOppgave.isEmpty()) {
             var oppgaveToggleEnabled = unleash.isEnabled("melosys.behandle_alle_saker");
@@ -212,7 +214,7 @@ public class OppgaveService {
     }
 
     public void oppdaterOppgaveMedSaksnummer(String fagSaksnummer, OppgaveOppdatering oppgaveOppdatering) {
-        finnÅpenOppgaveMedFagsaksnummer(fagSaksnummer).ifPresentOrElse(
+        finnÅpenBehandlingsoppgaveMedFagsaksnummer(fagSaksnummer).ifPresentOrElse(
             oppg -> oppdaterOppgave(oppg.getOppgaveId(), oppgaveOppdatering),
             () -> log.warn("Sak {} har ingen åpne oppgaver å oppdatere.", fagSaksnummer)
         );
@@ -226,7 +228,7 @@ public class OppgaveService {
         log.info("Oppretter ny oppgave for saksnummer {}", saksnummer);
         Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
         Behandling behandling = fagsak.hentSistAktivBehandling();
-        Optional<Oppgave> oppgave = finnSisteAvsluttetOppgaveMedFagsaksnummer(saksnummer);
+        Optional<Oppgave> oppgave = finnSisteAvsluttetBehandlingsoppgaveMedFagsaksnummer(saksnummer);
         String tilordnetRessurs = oppgave.map(Oppgave::getTilordnetRessurs).orElse(null);
         String beskrivelse = oppgave.map(Oppgave::getBeskrivelse).orElse(null);
 
@@ -234,7 +236,7 @@ public class OppgaveService {
     }
 
     public boolean saksbehandlerErTilordnetOppgaveForSaksnummer(String saksbehandler, String saksnummer) {
-        return finnÅpenOppgaveMedFagsaksnummer(saksnummer)
+        return finnÅpenBehandlingsoppgaveMedFagsaksnummer(saksnummer)
             .map(Oppgave::getTilordnetRessurs)
             .filter(saksbehandler::equals)
             .isPresent();
@@ -323,22 +325,43 @@ public class OppgaveService {
             return behOppgaveDto;
         }
 
-        if (behandling.erBehandlingAvSøknad()) {
-            Soeknad søknadDokument = (Soeknad) behandlingsgrunnlagService
-                .hentBehandlingsgrunnlag(behandling.getId()).getBehandlingsgrunnlagdata();
-            Soeknadsland søknadsland = hentSøknadsland(søknadDokument);
-            behOppgaveDto.setLand(SoeknadslandDto.av(søknadsland));
-            behOppgaveDto.setPeriode(mapPeriode(søknadDokument));
+        if (unleash.isEnabled("melosys.behandle_alle_saker")) {
+            Optional<SedDokument> sedopplysninger = saksopplysningerService.finnSedOpplysninger(behandling.getId());
+            if (sedopplysninger.isPresent()) {
+                SedDokument sedDokument = sedopplysninger.get();
+                behOppgaveDto.setLand(SoeknadslandDto.av(sedDokument.getLovvalgslandKode()));
+                behOppgaveDto.setPeriode(new PeriodeDto(
+                    sedDokument.getLovvalgsperiode().getFom(),
+                    sedDokument.getLovvalgsperiode().getTom()));
+                return behOppgaveDto;
+            }
+
+            Optional<Behandlingsgrunnlag> behandlingsgrunnlag = behandlingsgrunnlagService.finnBehandlingsgrunnlag(behandling.getId());
+            if (behandlingsgrunnlag.isPresent()) {
+                Soeknad søknadDokument = (Soeknad) behandlingsgrunnlag.get().getBehandlingsgrunnlagdata();
+                Soeknadsland søknadsland = hentSøknadsland(søknadDokument);
+                behOppgaveDto.setLand(SoeknadslandDto.av(søknadsland));
+                behOppgaveDto.setPeriode(mapPeriode(søknadDokument));
+            }
         } else {
-            saksopplysningerService.finnSedOpplysninger(behandling.getId()).ifPresent(
-                sedDokument -> {
-                    Landkoder lovvalgslandKode = sedDokument.getLovvalgslandKode();
-                    behOppgaveDto.setLand(SoeknadslandDto.av(lovvalgslandKode));
-                    behOppgaveDto.setPeriode(new PeriodeDto(
-                        sedDokument.getLovvalgsperiode().getFom(), sedDokument.getLovvalgsperiode().getTom())
-                    );
-                });
+            if (behandling.erBehandlingAvSøknad()) {
+                Soeknad søknadDokument = (Soeknad) behandlingsgrunnlagService
+                    .hentBehandlingsgrunnlag(behandling.getId()).getBehandlingsgrunnlagdata();
+                Soeknadsland søknadsland = hentSøknadsland(søknadDokument);
+                behOppgaveDto.setLand(SoeknadslandDto.av(søknadsland));
+                behOppgaveDto.setPeriode(mapPeriode(søknadDokument));
+            } else {
+                saksopplysningerService.finnSedOpplysninger(behandling.getId()).ifPresent(
+                    sedDokument -> {
+                        Landkoder lovvalgslandKode = sedDokument.getLovvalgslandKode();
+                        behOppgaveDto.setLand(SoeknadslandDto.av(lovvalgslandKode));
+                        behOppgaveDto.setPeriode(new PeriodeDto(
+                            sedDokument.getLovvalgsperiode().getFom(), sedDokument.getLovvalgsperiode().getTom())
+                        );
+                    });
+            }
         }
+
         return behOppgaveDto;
     }
 

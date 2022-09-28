@@ -88,7 +88,7 @@ public class AnmodningUnntakService {
         anmodningsperiodeService.oppdaterAnmodetAvForBehandling(behandlingID, SubjectHandler.getInstance().getUserID());
         prosessinstansService.opprettProsessinstansAnmodningOmUnntak(behandling, mottakerinstitusjoner,
             vedleggReferanser, ytterligereInformasjonSed);
-        oppgaveService.leggTilbakeOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
+        oppgaveService.leggTilbakeBehandlingsoppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 
     private Set<String> validerMottakerInstitusjon(long behandlingID, String mottakerinstitusjon) {

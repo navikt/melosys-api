@@ -27,7 +27,7 @@ import kotlin.collections.ArrayList
 
 @ExtendWith(MockKExtension::class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class BehandlingReplikeringsReglerTest {
+class SaksbehandlingReglerTest {
     @MockK
     lateinit var behandlingsresultatRepository: BehandlingsresultatRepository
 
@@ -156,12 +156,12 @@ class BehandlingReplikeringsReglerTest {
         expected: Boolean
     ) {
         every { behandlingsresultatRepository.findById(any()) } returns lagBehandlingsresultat(resultatTypeFraRepo)
-        val behandlingReplikeringsRegler = BehandlingReplikeringsRegler(behandlingsresultatRepository)
+        val saksbehandlingRegler = SaksbehandlingRegler(behandlingsresultatRepository)
 
 
-        val kanReplikeres =
-            behandlingReplikeringsRegler.finnBehandlingSomKanReplikeres(
-                behandlinger
+        val resultat =
+            saksbehandlingRegler.finnesBehandlingMedBehandlingTyperOgIkkeBehandlingsresultatTyper(
+                behandlinger, typer, resultatTyper
             ) != null
 
 
@@ -201,13 +201,13 @@ class BehandlingReplikeringsReglerTest {
     class BehandlingHolder {
         private val behandlingerMedType: ArrayList<Pair<Behandling, Behandlingsresultattyper?>> = ArrayList()
 
-        fun setup(behandlingsresultatRepository: BehandlingsresultatRepository): BehandlingReplikeringsRegler {
+        fun setup(behandlingsresultatRepository: BehandlingsresultatRepository): SaksbehandlingRegler {
             setupMock { id: Long, behandlingsresultattype: Behandlingsresultattyper? ->
                 every { behandlingsresultatRepository.findById(id) } returns lagBehandlingsresultat(
                     behandlingsresultattype
                 )
             }
-            return BehandlingReplikeringsRegler(behandlingsresultatRepository)
+            return SaksbehandlingRegler(behandlingsresultatRepository)
         }
 
         fun add(

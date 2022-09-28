@@ -169,7 +169,7 @@ class ArbeidFlereLandSedRuterTest {
         melosysEessiMelding.setLovvalgsland(Landkoder.NO.getKode());
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
 
-        when(oppgaveService.finnÅpenOppgaveMedFagsaksnummer(fagsak.getSaksnummer()))
+        when(oppgaveService.finnÅpenBehandlingsoppgaveMedFagsaksnummer(fagsak.getSaksnummer()))
             .thenReturn(Optional.of(new Oppgave.Builder().setOppgaveId(oppgaveID).build()));
         when(behandlingsresultatService.hentBehandlingsresultat(behandlingID)).thenReturn(behandlingsresultat);
         when(fagsakService.finnFagsakFraArkivsakID(gsakSaksnummer)).thenReturn(Optional.of(fagsak));

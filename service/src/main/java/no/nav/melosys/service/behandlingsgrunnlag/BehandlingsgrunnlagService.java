@@ -4,17 +4,23 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Optional;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.behandlingsgrunnlag.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Soeknadsland;
 import no.nav.melosys.domain.kodeverk.Behandlingsgrunnlagtyper;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.saksflyt.ProsessDataKey;
+import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.repository.BehandlingsgrunnlagRepository;
 import no.nav.melosys.service.behandling.BehandlingService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +29,7 @@ import static no.nav.melosys.domain.kodeverk.Behandlingsgrunnlagtyper.SØKNAD_TR
 
 @Service
 public class BehandlingsgrunnlagService {
+    private static final Logger log = LoggerFactory.getLogger(BehandlingsgrunnlagService.class);
 
     private static final String VERSJON_SED_GRUNNLAG = "1";
     private static final String VERSJON_SOEKNAD_GRUNNLAG = "1.2";
@@ -41,7 +48,7 @@ public class BehandlingsgrunnlagService {
 
     @Transactional(readOnly = true)
     public Behandlingsgrunnlag hentBehandlingsgrunnlag(long behandlingID) {
-        return behandlingsgrunnlagRepository.findByBehandling_Id(behandlingID)
+        return finnBehandlingsgrunnlag(behandlingID)
             .orElseThrow(() -> new IkkeFunnetException("Finner ikke behandlingsgrunnlag for behandling " + behandlingID));
     }
 
@@ -50,8 +57,35 @@ public class BehandlingsgrunnlagService {
         opprettBehandlingsgrunnlag(behandlingID, sedGrunnlag, Behandlingsgrunnlagtyper.SED, VERSJON_SED_GRUNNLAG);
     }
 
-    public void opprettSøknadYrkesaktiveEøs(long behandlingID,
-                                            Soeknad soeknad) {
+    public void opprettSøknad(Prosessinstans prosessinstans) {
+        Behandling behandling = prosessinstans.getBehandling();
+        Soeknadsland soeknadsland = prosessinstans.getData(ProsessDataKey.SØKNADSLAND,
+                                                           new TypeReference<>() {
+                                                           });
+        Periode periode = prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, Periode.class);
+        opprettSøknad(behandling, periode, soeknadsland);
+    }
+
+    public void opprettSøknad(Behandling behandling, Periode periode, Soeknadsland soeknadsland) {
+        long behandlingID = behandling.getId();
+        if (behandling.erBehandlingAvSøknad()) {
+            Sakstyper sakstype = behandling.getFagsak().getType();
+            switch (sakstype) {
+                case EU_EOS -> opprettSøknadYrkesaktiveEøs(behandlingID, periode, soeknadsland);
+                case FTRL -> opprettSøknadFolketrygden(behandlingID);
+                case TRYGDEAVTALE -> opprettSøknadTrygdeavtale(behandlingID);
+            }
+            log.info("Opprettet søknad for behandling {}.", behandlingID);
+        } else {
+            log.info("Søknad trengs ikke og opprettes ikke for behandling {} med tema {}", behandlingID,
+                     behandling.getTema());
+        }
+    }
+
+    private void opprettSøknadYrkesaktiveEøs(long behandlingID, Periode periode, Soeknadsland soeknadsland) {
+        Soeknad soeknad = new Soeknad();
+        soeknad.periode = periode;
+        soeknad.soeknadsland = soeknadsland;
         opprettBehandlingsgrunnlag(behandlingID, soeknad, Behandlingsgrunnlagtyper.SØKNAD_A1_YRKESAKTIVE_EØS,
             VERSJON_SOEKNAD_GRUNNLAG);
     }
@@ -65,15 +99,13 @@ public class BehandlingsgrunnlagService {
             eksternReferanseID);
     }
 
-    public void opprettSøknadFolketrygden(long behandlingID,
-                                          SoeknadFtrl soeknad) {
-        opprettBehandlingsgrunnlag(behandlingID, soeknad, SØKNAD_FOLKETRYGDEN,
+    private void opprettSøknadFolketrygden(long behandlingID) {
+        opprettBehandlingsgrunnlag(behandlingID, new SoeknadFtrl(), SØKNAD_FOLKETRYGDEN,
             VERSJON_SOEKNAD_GRUNNLAG);
     }
 
-    public void opprettSøknadTrygdeavtale(long behandlingID,
-                                          SoeknadTrygdeavtale soeknad) {
-        opprettBehandlingsgrunnlag(behandlingID, soeknad, SØKNAD_TRYGDEAVTALE,
+    private void opprettSøknadTrygdeavtale(long behandlingID) {
+        opprettBehandlingsgrunnlag(behandlingID, new SoeknadTrygdeavtale(), SØKNAD_TRYGDEAVTALE,
             VERSJON_SOEKNAD_GRUNNLAG);
     }
 

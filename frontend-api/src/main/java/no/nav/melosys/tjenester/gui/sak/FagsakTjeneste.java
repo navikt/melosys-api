@@ -163,6 +163,17 @@ public class FagsakTjeneste {
         return ResponseEntity.ok(new RevurderingOpprettetDto(behandlingID));
     }
 
+    @PutMapping("/{saksnummer}/ferdigbehandle")
+    @ApiOperation("Avslutt behandling med Ferdigbehandlet som resultat og oppdatere saksstatus")
+    public ResponseEntity<Void> ferdigbehandleSak(@PathVariable("saksnummer") String saksnummer) {
+        log.info("Saksbehandler {} ber om å avslutte aktiv behandling og oppdatere saksstatus på {}", SubjectHandler.getInstance().getUserID(), saksnummer);
+        aksesskontroll.autoriserSakstilgang(saksnummer);
+
+        fagsakService.ferdigbehandleSak(saksnummer);
+
+        return ResponseEntity.noContent().build();
+    }
+
     private FagsakDto tilFagsakDto(Fagsak fagsak) {
         FagsakDto fagsakDto = new FagsakDto();
         fagsakDto.setSaksnummer(fagsak.getSaksnummer());

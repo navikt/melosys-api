@@ -21,7 +21,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.integrasjon.joark.JournalpostOppdatering;
 import no.nav.melosys.service.dokument.sed.EessiService;
-import no.nav.melosys.service.journalfoering.BehandlingReplikeringsRegler;
+import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import no.nav.melosys.service.journalforing.dto.*;
 import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerService;
 import no.nav.melosys.service.persondata.PersondataFasade;
@@ -39,6 +39,8 @@ import org.springframework.transaction.annotation.Transactional;
 import static no.nav.melosys.domain.Behandling.erBehandlingAvSedForespørsler;
 import static no.nav.melosys.domain.Behandling.erBehandlingAvSøknad;
 import static no.nav.melosys.domain.Fagsak.erSakstypeEøs;
+import static no.nav.melosys.domain.kodeverk.Sakstemaer.MEDLEMSKAP_LOVVALG;
+import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.FØRSTEGANG;
 import static no.nav.melosys.service.sak.SakstypeBehandlingstemaKobling.erGyldigBehandlingstemaForSakstype;
 
 @Service
@@ -52,7 +54,7 @@ public class JournalfoeringService {
     private final PersondataFasade persondataFasade;
     private final LovligeKombinasjonerService lovligeKombinasjonerService;
     private final Unleash unleash;
-    private final BehandlingReplikeringsRegler behandlingReplikeringsRegler;
+    private final SaksbehandlingRegler saksbehandlingRegler;
 
     public JournalfoeringService(JoarkFasade joarkFasade,
                                  ProsessinstansService prosessinstansService,
@@ -61,7 +63,7 @@ public class JournalfoeringService {
                                  PersondataFasade persondataFasade,
                                  LovligeKombinasjonerService lovligeKombinasjonerService,
                                  Unleash unleash,
-                                 BehandlingReplikeringsRegler behandlingReplikeringsRegler) {
+                                 SaksbehandlingRegler saksbehandlingRegler) {
         this.joarkFasade = joarkFasade;
         this.prosessinstansService = prosessinstansService;
         this.eessiService = eessiService;
@@ -69,7 +71,7 @@ public class JournalfoeringService {
         this.persondataFasade = persondataFasade;
         this.lovligeKombinasjonerService = lovligeKombinasjonerService;
         this.unleash = unleash;
-        this.behandlingReplikeringsRegler = behandlingReplikeringsRegler;
+        this.saksbehandlingRegler = saksbehandlingRegler;
     }
 
     public Journalpost hentJournalpost(String journalpostID) {
@@ -94,11 +96,30 @@ public class JournalfoeringService {
             throw new FunksjonellException("Journalposten er allerede ferdigstilt!");
         }
 
+        if (unleash.isEnabled("melosys.behandle_alle_saker") && journalfoeringDto.skalSendeForvaltningsmelding()) {
+            validerKanSendeForvaltningsmelding(journalfoeringDto);
+        }
+
         if (journalpost.mottaksKanalErEessi()) {
             validerKanOppretteSakFraSed(journalpost);
         }
 
         opprettSakOgJournalfør(journalfoeringDto);
+    }
+
+    private void validerKanSendeForvaltningsmelding(JournalfoeringOpprettDto journalfoeringDto) {
+        boolean manglerForventetTypeEllerTema = !FØRSTEGANG.name().equals(journalfoeringDto.getBehandlingstypeKode())
+            || !MEDLEMSKAP_LOVVALG.name().equals(journalfoeringDto.getFagsak().getSakstema());
+
+        if (manglerForventetTypeEllerTema) {
+            throw new FunksjonellException("Kan kun sende forvaltningsmelding for behandlingtype: " +
+                "FØRSTEGANG og sakstema: MEDLEMSKAP_LOVVALG");
+        }
+
+        if (!journalføringGjelderBruker(journalfoeringDto)) {
+            throw new FunksjonellException("Kan kun sende forvaltningsmelding for Aktoersroller: " +
+                "BRUKER");
+        }
     }
 
     private void validerKanOppretteSakFraSed(Journalpost journalpost) {
@@ -145,7 +166,7 @@ public class JournalfoeringService {
         final var behandlingstype = behandleAlleSakerToggleEnabled ? Behandlingstyper.valueOf(journalfoeringDto.getBehandlingstypeKode()) : null;
 
         if (behandleAlleSakerToggleEnabled) {
-            Aktoersroller hovedpart = journalfoeringDto.getBrukerID() != null ? Aktoersroller.BRUKER : Aktoersroller.VIRKSOMHET;
+            Aktoersroller hovedpart = journalføringGjelder(journalfoeringDto);
 
             validerBehandlingstema(hovedpart, sakstype, sakstema, behandlingstema, null);
             validerBehandlingstype(hovedpart, sakstype, sakstema, behandlingstema, behandlingstype, null);
@@ -297,7 +318,7 @@ public class JournalfoeringService {
         if (!unleash.isEnabled("melosys.behandle_alle_saker")) {
             return ProsessType.JFR_ANDREGANG_REPLIKER_BEHANDLING;
         }
-        if (behandlingReplikeringsRegler.skalTidligereBehandlingReplikeres(fagsak, behandlingstype, behandlingstema)) {
+        if (saksbehandlingRegler.skalTidligereBehandlingReplikeres(fagsak, behandlingstype, behandlingstema)) {
             return ProsessType.JFR_ANDREGANG_REPLIKER_BEHANDLING;
         }
         return ProsessType.JFR_ANDREGANG_NY_BEHANDLING;
@@ -443,5 +464,13 @@ public class JournalfoeringService {
 
     public Optional<Behandlingstema> finnBehandlingstemaForSedTilknyttetJournalpost(String journalpostID) {
         return eessiService.finnBehandlingstemaForSedTilknyttetJournalpost(journalpostID);
+    }
+
+    private boolean journalføringGjelderBruker(JournalfoeringOpprettDto journalfoeringDto) {
+        return Aktoersroller.BRUKER.equals(journalføringGjelder(journalfoeringDto));
+    }
+
+    private Aktoersroller journalføringGjelder(JournalfoeringOpprettDto journalfoeringDto) {
+        return journalfoeringDto.getBrukerID() != null ? Aktoersroller.BRUKER : Aktoersroller.VIRKSOMHET;
     }
 }
