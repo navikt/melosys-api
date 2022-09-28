@@ -82,7 +82,7 @@ class JournalfoeringBase(
         mockServer.stop()
     }
 
-    protected fun journalførOgOpprettSak(journalfoeringOpprettDto :JournalfoeringOpprettDto) {
+    protected fun journalførOgOpprettSak(journalfoeringOpprettDto: JournalfoeringOpprettDto) {
         ThreadLocalAccessInfo.executeProcess("Journalfør dokument og opprett ny sak. Ferdigstill oppgave.") {
             journalføringService.journalførOgOpprettSak(journalfoeringOpprettDto)
             oppgaveService.ferdigstillOppgave(journalfoeringOpprettDto.oppgaveID)
@@ -153,7 +153,7 @@ class JournalfoeringBase(
     protected fun finnprosessID(prosessType: ProsessType, now: LocalDateTime): UUID =
         await.timeout(30, TimeUnit.SECONDS).untilNotNull {
             prosessinstansRepository.findAll()
-                .find { it.registrertDato > now && it.type == prosessType }?.id
+                .find { it.registrertDato > now && it.type == prosessType && it.status == ProsessStatus.FERDIG }?.id
         }
 
     protected fun lagJfrOppgave(): Oppgave =
