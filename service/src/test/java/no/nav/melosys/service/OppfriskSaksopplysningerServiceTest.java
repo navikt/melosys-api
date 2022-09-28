@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
+import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
@@ -16,6 +17,7 @@ import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -57,19 +59,24 @@ class OppfriskSaksopplysningerServiceTest {
     @Mock
     private PersondataFasade persondataFasade;
 
+    private final FakeUnleash unleash = new FakeUnleash();
+
     private OppfriskSaksopplysningerService oppfriskSaksopplysningerService;
 
     private static final long BEHANDLING_ID = 11L;
 
     @BeforeEach
     public void setUp() {
-        oppfriskSaksopplysningerService = new OppfriskSaksopplysningerService(anmodningsperiodeService,
+        oppfriskSaksopplysningerService = new OppfriskSaksopplysningerService(
+            anmodningsperiodeService,
             behandlingService,
             behandlingsresultatService,
             ufmKontrollService,
             inngangsvilkaarService,
             registeropplysningerService,
-            persondataFasade);
+            persondataFasade,
+            unleash);
+        unleash.enableAll();
     }
 
     @Test
@@ -179,6 +186,7 @@ class OppfriskSaksopplysningerServiceTest {
         fagsak.setAktører(aktører);
         behandling.setFagsak(fagsak);
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
+        behandling.setType(Behandlingstyper.FØRSTEGANG);
 
         HashSet<Saksopplysning> saksopplysninger = new HashSet<>();
 

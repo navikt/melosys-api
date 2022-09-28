@@ -33,7 +33,7 @@ import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.felles.dto.SoeknadslandDto;
-import no.nav.melosys.service.journalfoering.BehandlingReplikeringsRegler;
+import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import no.nav.melosys.service.journalforing.dto.*;
 import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerService;
 import no.nav.melosys.service.persondata.PersondataFasade;
@@ -75,7 +75,7 @@ class JournalfoeringServiceTest {
     @Mock
     private BehandlingsresultatRepository behandlingsresultatRepository;
     @Mock
-    private BehandlingReplikeringsRegler behandlingReplikeringsRegler;
+    private SaksbehandlingRegler saksbehandlingRegler;
 
     private final LovligeKombinasjonerService lovligeKombinasjonerService = new LovligeKombinasjonerService();
     private final FakeUnleash unleash = new FakeUnleash();
@@ -92,13 +92,13 @@ class JournalfoeringServiceTest {
 
     @BeforeEach
     public void setup() {
-        behandlingReplikeringsRegler = new BehandlingReplikeringsRegler(behandlingsresultatRepository);
+        saksbehandlingRegler = new SaksbehandlingRegler(behandlingsresultatRepository);
 
         unleash.enable("melosys.folketrygden.mvp");
         journalpost = new Journalpost("123");
         journalpost.setHoveddokument(new ArkivDokument());
 
-        this.journalfoeringService = new JournalfoeringService(joarkFasade, prosessinstansService, eessiService, fagsakService, persondataFasade, lovligeKombinasjonerService, unleash, behandlingReplikeringsRegler);
+        this.journalfoeringService = new JournalfoeringService(joarkFasade, prosessinstansService, eessiService, fagsakService, persondataFasade, lovligeKombinasjonerService, unleash, saksbehandlingRegler);
         opprettDto = new JournalfoeringOpprettDto();
         opprettDto.setJournalpostID("setJournalpostID");
         opprettDto.setOppgaveID("setOppgaveID");
