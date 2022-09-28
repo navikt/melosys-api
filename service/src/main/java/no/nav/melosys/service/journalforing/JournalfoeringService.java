@@ -21,7 +21,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.integrasjon.joark.JournalpostOppdatering;
 import no.nav.melosys.service.dokument.sed.EessiService;
-import no.nav.melosys.service.journalfoering.BehandlingReplikeringsRegler;
+import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import no.nav.melosys.service.journalforing.dto.*;
 import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerService;
 import no.nav.melosys.service.persondata.PersondataFasade;
@@ -54,7 +54,7 @@ public class JournalfoeringService {
     private final PersondataFasade persondataFasade;
     private final LovligeKombinasjonerService lovligeKombinasjonerService;
     private final Unleash unleash;
-    private final BehandlingReplikeringsRegler behandlingReplikeringsRegler;
+    private final SaksbehandlingRegler saksbehandlingRegler;
 
     public JournalfoeringService(JoarkFasade joarkFasade,
                                  ProsessinstansService prosessinstansService,
@@ -63,7 +63,7 @@ public class JournalfoeringService {
                                  PersondataFasade persondataFasade,
                                  LovligeKombinasjonerService lovligeKombinasjonerService,
                                  Unleash unleash,
-                                 BehandlingReplikeringsRegler behandlingReplikeringsRegler) {
+                                 SaksbehandlingRegler saksbehandlingRegler) {
         this.joarkFasade = joarkFasade;
         this.prosessinstansService = prosessinstansService;
         this.eessiService = eessiService;
@@ -71,7 +71,7 @@ public class JournalfoeringService {
         this.persondataFasade = persondataFasade;
         this.lovligeKombinasjonerService = lovligeKombinasjonerService;
         this.unleash = unleash;
-        this.behandlingReplikeringsRegler = behandlingReplikeringsRegler;
+        this.saksbehandlingRegler = saksbehandlingRegler;
     }
 
     public Journalpost hentJournalpost(String journalpostID) {
@@ -318,7 +318,7 @@ public class JournalfoeringService {
         if (!unleash.isEnabled("melosys.behandle_alle_saker")) {
             return ProsessType.JFR_ANDREGANG_REPLIKER_BEHANDLING;
         }
-        if (behandlingReplikeringsRegler.skalTidligereBehandlingReplikeres(fagsak, behandlingstype, behandlingstema)) {
+        if (saksbehandlingRegler.skalTidligereBehandlingReplikeres(fagsak, behandlingstype, behandlingstema)) {
             return ProsessType.JFR_ANDREGANG_REPLIKER_BEHANDLING;
         }
         return ProsessType.JFR_ANDREGANG_NY_BEHANDLING;

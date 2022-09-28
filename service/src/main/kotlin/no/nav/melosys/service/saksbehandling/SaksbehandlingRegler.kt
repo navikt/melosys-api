@@ -1,4 +1,4 @@
-package no.nav.melosys.service.journalfoering
+package no.nav.melosys.service.saksbehandling
 
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
@@ -11,7 +11,7 @@ import no.nav.melosys.repository.BehandlingsresultatRepository
 import org.springframework.stereotype.Component
 
 @Component
-class BehandlingReplikeringsRegler(private val behandlingsresultatRepository: BehandlingsresultatRepository) {
+class SaksbehandlingRegler(private val behandlingsresultatRepository: BehandlingsresultatRepository) {
 
     fun skalTidligereBehandlingReplikeres(
         fagsak: Fagsak,
@@ -21,22 +21,7 @@ class BehandlingReplikeringsRegler(private val behandlingsresultatRepository: Be
         val sistRegistrertBehandling = fagsak.hentSistRegistrertBehandling()
         val sakstype = sistRegistrertBehandling.fagsak.type
 
-        when (behandlingstema) {
-            ARBEID_KUN_NORGE,
-            IKKE_YRKESAKTIV,
-            PENSJONIST,
-            REGISTRERING_UNNTAK,
-            UNNTAK_MEDLEMSKAP,
-            FORESPØRSEL_TRYGDEMYNDIGHET,
-            TRYGDETID,
-            ØVRIGE_SED_MED,
-            ØVRIGE_SED_UFM -> return false
-
-            ANMODNING_OM_UNNTAK_HOVEDREGEL -> if (sakstype == Sakstyper.TRYGDEAVTALE) return false
-            YRKESAKTIV -> if (sakstype == Sakstyper.FTRL) return false
-            else ->
-                if (behandlingstype == Behandlingstyper.HENVENDELSE || behandlingstype == Behandlingstyper.KLAGE) return false
-        }
+        if (harTomFlyt(sakstype, behandlingstype, behandlingstema)) return false
 
         return finnesBehandlingMedBehandlingTyperOgIkkeBehandlingsresultatTyper(
             fagsak.hentBehandlingerSortertSynkendePåRegistrertDato(),
@@ -66,5 +51,32 @@ class BehandlingReplikeringsRegler(private val behandlingsresultatRepository: Be
                 && behandlingsresultat.isPresent
                 && !behandlingsresultattyper.contains(behandlingsresultat.get().type)
         } != null
+    }
+
+    companion object {
+        fun harTomFlyt(
+            sakstype: Sakstyper,
+            behandlingstype: Behandlingstyper,
+            behandlingstema: Behandlingstema
+        ): Boolean {
+            if (behandlingstype == Behandlingstyper.HENVENDELSE || behandlingstype == Behandlingstyper.KLAGE) return true
+
+            return when (behandlingstema) {
+                ARBEID_KUN_NORGE,
+                IKKE_YRKESAKTIV,
+                PENSJONIST,
+                REGISTRERING_UNNTAK,
+                UNNTAK_MEDLEMSKAP,
+                FORESPØRSEL_TRYGDEMYNDIGHET,
+                TRYGDETID,
+                ØVRIGE_SED_MED,
+                ØVRIGE_SED_UFM -> true
+
+                ANMODNING_OM_UNNTAK_HOVEDREGEL -> sakstype == Sakstyper.TRYGDEAVTALE
+                YRKESAKTIV -> sakstype == Sakstyper.FTRL
+
+                else -> return false
+            }
+        }
     }
 }
