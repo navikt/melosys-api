@@ -328,11 +328,11 @@ public class OppgaveService {
         if (unleash.isEnabled("melosys.behandle_alle_saker")) {
             Optional<SedDokument> sedopplysninger = saksopplysningerService.finnSedOpplysninger(behandling.getId());
             if (sedopplysninger.isPresent()) {
-                Landkoder lovvalgslandKode = sedopplysninger.get().getLovvalgslandKode();
-                behOppgaveDto.setLand(SoeknadslandDto.av(lovvalgslandKode));
+                SedDokument sedDokument = sedopplysninger.get();
+                behOppgaveDto.setLand(SoeknadslandDto.av(sedDokument.getLovvalgslandKode()));
                 behOppgaveDto.setPeriode(new PeriodeDto(
-                    sedopplysninger.get().getLovvalgsperiode().getFom(), sedopplysninger.get().getLovvalgsperiode().getTom())
-                );
+                    sedDokument.getLovvalgsperiode().getFom(),
+                    sedDokument.getLovvalgsperiode().getTom()));
                 return behOppgaveDto;
             }
 
