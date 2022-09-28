@@ -82,7 +82,7 @@ class JournalfoeringReplikeringIT(
         val startTime = LocalDateTime.now()
         journalførOgOpprettSak()
         val journalføringProsessID = waitForProsesses(startTime)
-        val behandling = verify(journalføringProsessID)
+        val behandling = sjekkBehandlingOgBehandlingsgrunnlag(journalføringProsessID)
 
         behandling.status = Behandlingsstatus.AVSLUTTET
         behandlingRepository.save(behandling)
@@ -157,7 +157,7 @@ class JournalfoeringReplikeringIT(
         return journalføringProsessID
     }
 
-    private fun verify(journalføringProsessID: UUID): Behandling {
+    private fun sjekkBehandlingOgBehandlingsgrunnlag(journalføringProsessID: UUID): Behandling {
         val prosessinstans = prosessinstansRepository.findById(journalføringProsessID).get()
         val behandling = prosessinstans.behandling
 

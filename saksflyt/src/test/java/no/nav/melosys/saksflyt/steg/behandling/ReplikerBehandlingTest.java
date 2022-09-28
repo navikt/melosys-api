@@ -130,6 +130,6 @@ class ReplikerBehandlingTest {
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> replikerBehandling.utfør(prosessinstans))
-            .withMessageContaining("Replikerings regler må være like som når journalførOgOpprettAndregangsBehandling ble kjørt");
+            .withMessageContaining("Finner ikke behandling som kan replikeres. Denne fantes ved opprettelse av prosesse");
     }
 }

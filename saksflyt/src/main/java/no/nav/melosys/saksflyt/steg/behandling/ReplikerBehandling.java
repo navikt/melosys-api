@@ -58,7 +58,7 @@ public class ReplikerBehandling implements StegBehandler {
         if (unleash.isEnabled("melosys.behandle_alle_saker")) {
             behandlingBruktForReplikering = Optional.ofNullable(behandlingReplikeringsRegler.finnBehandlingSomKanReplikeres(fagsak));
             if (behandlingBruktForReplikering.isEmpty()) {
-                throw new FunksjonellException("Replikerings regler må være like som når journalførOgOpprettAndregangsBehandling ble kjørt");
+                throw new FunksjonellException("Finner ikke behandling som kan replikeres. Denne fantes ved opprettelse av prosessen");
             }
         } else {
             behandlingBruktForReplikering = fagsakService.hentBehandlingSomErUtgangspunktForRevurdering(fagsak);

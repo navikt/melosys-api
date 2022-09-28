@@ -93,12 +93,12 @@ class JournalfoeringIT(
         val startTime = LocalDateTime.now()
         val journalfoeringOpprettDto = lagJournalfoeringOpprettDto(jfrOppgave)
 
-        ThreadLocalAccessInfo.executeProcess("Journalfør dokument og opprett ny sak. Ferdigstill oppgave.") {
+        ThreadLocalAccessInfo.executeProcess("Journalfør dokument og opprett ny sak. Ferdigstill journalføringsoppgave.") {
             journalføringService.journalførOgOpprettSak(journalfoeringOpprettDto)
             oppgaveService.ferdigstillOppgave(journalfoeringOpprettDto.oppgaveID)
         }
 
-        verify(startTime)
+        sjekkBehandlingOgBehandlingsgrunnlag(startTime)
     }
 
     @Test
@@ -112,10 +112,10 @@ class JournalfoeringIT(
             oppgaveService.ferdigstillOppgave(journalfoeringOpprettDto.oppgaveID)
         }
 
-        verify(startTime)
+        sjekkBehandlingOgBehandlingsgrunnlag(startTime)
     }
 
-    private fun verify(now: LocalDateTime) {
+    private fun sjekkBehandlingOgBehandlingsgrunnlag(now: LocalDateTime) {
         val journalføringProsessID = finnprosessID(ProsessType.JFR_NY_SAK_BRUKER, now)
         listOf(
             journalføringProsessID,
