@@ -4,9 +4,6 @@ import java.util.List;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
-import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadFtrl;
-import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadTrygdeavtale;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
@@ -19,8 +16,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class OpprettSoeknadTest {
@@ -30,8 +26,6 @@ class OpprettSoeknadTest {
 
     private OpprettSoeknad opprettSoeknad;
 
-    private final long behandlingID = 12321L;
-
     @BeforeEach
     public void setUp() {
         opprettSoeknad = new OpprettSoeknad(behandlingsgrunnlagService);
@@ -39,37 +33,23 @@ class OpprettSoeknadTest {
 
     @Test
     void utfør_behandlingstemaUtsendtArbeidstaker_oppretterSøknadYrkesaktiveEøs() {
-        opprettSoeknad.utfør(lagProsessinstans(Sakstyper.EU_EOS, Behandlingstema.UTSENDT_ARBEIDSTAKER));
-        verify(behandlingsgrunnlagService).opprettSøknadYrkesaktiveEøs(eq(behandlingID), any(Soeknad.class));
+        Prosessinstans prosessinstans = lagProsessinstans();
+
+        opprettSoeknad.utfør(prosessinstans);
+
+        verify(behandlingsgrunnlagService).opprettSøknad(prosessinstans);
     }
 
-    @Test
-    void utfør_behandlingstemaArbeidIUtlandet_oppretterSøknadFtrl() {
-        opprettSoeknad.utfør(lagProsessinstans(Sakstyper.FTRL, Behandlingstema.ARBEID_I_UTLANDET));
-        verify(behandlingsgrunnlagService).opprettSøknadFolketrygden(eq(behandlingID), any(SoeknadFtrl.class));
-    }
-
-    @Test
-    void utfør_behandlingstemaTrygdeavtaleUK_oppretterSøknadTrygdeavtale() {
-        opprettSoeknad.utfør(lagProsessinstans(Sakstyper.TRYGDEAVTALE, Behandlingstema.YRKESAKTIV));
-        verify(behandlingsgrunnlagService).opprettSøknadTrygdeavtale(eq(behandlingID), any(SoeknadTrygdeavtale.class));
-    }
-
-    @Test
-    void utfør_behandlingsTemaØvrigeSed_oppretterIkkeSøknad() {
-        opprettSoeknad.utfør(lagProsessinstans(Sakstyper.EU_EOS, Behandlingstema.ØVRIGE_SED_MED));
-        verify(behandlingsgrunnlagService, never()).opprettSøknadYrkesaktiveEøs(eq(behandlingID), any(Soeknad.class));
-    }
-
-    private Prosessinstans lagProsessinstans(Sakstyper sakstype, Behandlingstema behandlingstema) {
+    private Prosessinstans lagProsessinstans() {
         Behandling behandling = new Behandling();
+        long behandlingID = 12321L;
         behandling.setId(behandlingID);
-        behandling.setTema(behandlingstema);
+        behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         behandling.setFagsak(new Fagsak());
-        behandling.getFagsak().setType(sakstype);
+        behandling.getFagsak().setType(Sakstyper.EU_EOS);
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
-        prosessinstans.setData(ProsessDataKey.SØKNADSLAND, new SoeknadslandDto(List.of("DK","SE"), true));
+        prosessinstans.setData(ProsessDataKey.SØKNADSLAND, new SoeknadslandDto(List.of("DK", "SE"), true));
         return prosessinstans;
     }
 }

@@ -316,14 +316,6 @@ public class Behandling extends RegistreringsInfo {
         return Objects.hash(getRegistrertDato(), fagsak);
     }
 
-    public boolean kanAvsluttesManuelt() {
-        return (tema == IKKE_YRKESAKTIV
-            || tema == ØVRIGE_SED_MED
-            || tema == ØVRIGE_SED_UFM
-            || tema == FORESPØRSEL_TRYGDEMYNDIGHET
-            || tema == TRYGDETID);
-    }
-
     public boolean kanResultereIVedtak() {
         return erBehandlingAvSøknad() || erNorgeUtpekt();
     }

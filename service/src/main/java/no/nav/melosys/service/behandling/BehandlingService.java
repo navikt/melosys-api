@@ -361,12 +361,6 @@ public class BehandlingService {
         avsluttNyVurdering(behandling, nyBehandlingsResultatType);
     }
 
-    public void settNyVurderingTilFerdigbehandlet(long behandlingId) {
-        Behandling behandling = hentBehandling(behandlingId);
-        avsluttNyVurdering(behandling, Behandlingsresultattyper.FERDIGBEHANDLET);
-        oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
-    }
-
     @Transactional(readOnly = true)
     public Collection<Behandling> hentBehandlingerMedstatus(Behandlingsstatus behandlingsstatus) {
         return behandlingRepository.findAllByStatus(behandlingsstatus);

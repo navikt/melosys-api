@@ -230,9 +230,9 @@ class OppgaveServiceTest {
 
     @Test
     void hentOppgaveForFagsaksnummer_oppgaveEksisterer_forventOppgave() {
-        when(oppgaveFasade.finnÅpneOppgaverMedSaksnummer(SAKSNUMMER)).thenReturn(List.of(oppgave));
+        when(oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(SAKSNUMMER)).thenReturn(List.of(oppgave));
 
-        Oppgave oppgave = oppgaveService.hentÅpenOppgaveMedFagsaksnummer(SAKSNUMMER);
+        Oppgave oppgave = oppgaveService.hentÅpenBehandlingsoppgaveMedFagsaksnummer(SAKSNUMMER);
         assertThat(oppgave.erBehandling()).isTrue();
     }
 
@@ -314,7 +314,7 @@ class OppgaveServiceTest {
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         behandling.setFagsak(new Fagsak());
         behandling.getFagsak().setSaksnummer(SAKSNUMMER);
-        when(oppgaveFasade.finnÅpneOppgaverMedSaksnummer(SAKSNUMMER)).thenReturn(List.of(oppgave));
+        when(oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(SAKSNUMMER)).thenReturn(List.of(oppgave));
 
         oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", oppgave.getTilordnetRessurs());
         verify(oppgaveFasade, never()).opprettOppgave(any());
@@ -329,7 +329,7 @@ class OppgaveServiceTest {
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         behandling.setFagsak(new Fagsak());
         behandling.getFagsak().setSaksnummer(SAKSNUMMER);
-        when(oppgaveFasade.finnÅpneOppgaverMedSaksnummer(SAKSNUMMER)).thenReturn(List.of(oppgave));
+        when(oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(SAKSNUMMER)).thenReturn(List.of(oppgave));
 
         oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", tilordnetRessurs);
         verify(oppgaveFasade, never()).opprettOppgave(any());
@@ -380,7 +380,7 @@ class OppgaveServiceTest {
 
         when(persondataFasade.harStrengtFortroligAdresse("aktørID")).thenReturn(false);
         when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
-        when(oppgaveFasade.finnAvsluttetOppgaverMedSaksnummer(SAKSNUMMER)).thenReturn(List.of(oppgave1, oppgave2));
+        when(oppgaveFasade.finnAvsluttetBehandlingsoppgaverMedSaksnummer(SAKSNUMMER)).thenReturn(List.of(oppgave1, oppgave2));
         when(fagsakService.hentFagsak(SAKSNUMMER)).thenReturn(fagsak);
 
         oppgaveService.opprettOppgaveForSak(SAKSNUMMER);
@@ -396,7 +396,7 @@ class OppgaveServiceTest {
         final var saksbehandler = "Z12111";
         final var oppgave = new Oppgave.Builder().setTilordnetRessurs(saksbehandler).build();
 
-        when(oppgaveFasade.finnÅpneOppgaverMedSaksnummer(saksnummer)).thenReturn(List.of(oppgave));
+        when(oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(saksnummer)).thenReturn(List.of(oppgave));
         assertThat(oppgaveService.saksbehandlerErTilordnetOppgaveForSaksnummer(saksbehandler, saksnummer)).isTrue();
     }
 
@@ -406,7 +406,7 @@ class OppgaveServiceTest {
         final var saksbehandler = "Z12111";
         final var oppgave = new Oppgave.Builder().build();
 
-        when(oppgaveFasade.finnÅpneOppgaverMedSaksnummer(saksnummer)).thenReturn(List.of(oppgave));
+        when(oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(saksnummer)).thenReturn(List.of(oppgave));
         assertThat(oppgaveService.saksbehandlerErTilordnetOppgaveForSaksnummer(saksbehandler, saksnummer)).isFalse();
     }
 
@@ -414,7 +414,7 @@ class OppgaveServiceTest {
     void saksbehandlerErTilordnetOppgaveForSaksnummer_finnesIngenOppgaver_erIkkeSann() {
         final var saksnummer = "MEL-0";
 
-        when(oppgaveFasade.finnÅpneOppgaverMedSaksnummer(saksnummer)).thenReturn(Collections.emptyList());
+        when(oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(saksnummer)).thenReturn(Collections.emptyList());
         assertThat(oppgaveService.saksbehandlerErTilordnetOppgaveForSaksnummer("Z12111", saksnummer)).isFalse();
     }
 
