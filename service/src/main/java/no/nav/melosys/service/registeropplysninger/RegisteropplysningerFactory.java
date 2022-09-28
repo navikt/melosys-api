@@ -16,7 +16,7 @@ public final class RegisteropplysningerFactory {
 
     public static RegisteropplysningerRequest.SaksopplysningTyper utledSaksopplysningTyper(
         Sakstyper sakstype, Behandlingstema behandlingstema, Behandlingstyper behandlingstype, boolean behandleAlleSakerToggleEnabled) {
-        if (behandleAlleSakerToggleEnabled && SaksbehandlingRegler.Companion.harTomFlyt(sakstype, behandlingstype, behandlingstema)) {
+        if (behandleAlleSakerToggleEnabled && SaksbehandlingRegler.harTomFlyt(sakstype, behandlingstype, behandlingstema)) {
             return ingenSaksopplysningTyper();
         }
 

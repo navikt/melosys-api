@@ -54,6 +54,7 @@ class SaksbehandlingRegler(private val behandlingsresultatRepository: Behandling
     }
 
     companion object {
+        @JvmStatic
         fun harTomFlyt(
             sakstype: Sakstyper,
             behandlingstype: Behandlingstyper,
