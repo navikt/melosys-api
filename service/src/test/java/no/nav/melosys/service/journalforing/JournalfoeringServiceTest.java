@@ -191,10 +191,12 @@ class JournalfoeringServiceTest {
     }
 
     @Test
-    void journalførOgOpprettSak_skalIkkeKunneMottaUgyldigSkalSendeForvaltningsmelding_kasterException() {
+    void journalførOgOpprettSak_ugyldigBehandlingstypeOgSakstema_nårSenderForvaltningsmelding_kasterException() {
         unleash.enable("melosys.behandle_alle_saker");
-        opprettDto.setIkkeSendForvaltingsmelding(false);
         when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
+
+        opprettDto.setIkkeSendForvaltingsmelding(false);
+
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> journalfoeringService.journalførOgOpprettSak(opprettDto))
@@ -203,16 +205,35 @@ class JournalfoeringServiceTest {
     }
 
     @Test
-    void journalførOgOpprettSak_gyldigSkalSendeForvaltningsmeldingKasterIkkeFeilenUnderValidering_ingenFeil() {
+    void journalførOgOpprettSak_ugyldigAktoersrolle_nårSenderForvaltningsmelding_kasterException() {
         unleash.enable("melosys.behandle_alle_saker");
+        when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
+
+        FagsakDto fagsakDto = lagFagsakDto(LocalDate.MIN, LocalDate.MAX, "DK", Sakstyper.EU_EOS);
+        fagsakDto.setSakstema(MEDLEMSKAP_LOVVALG.getKode());
+        opprettDto.setFagsak(fagsakDto);
+        opprettDto.setBrukerID(null);
+        opprettDto.setBehandlingstypeKode(FØRSTEGANG.getKode());
+        opprettDto.setIkkeSendForvaltingsmelding(false);
+
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> journalfoeringService.journalførOgOpprettSak(opprettDto))
+            .withMessageContaining("Kan kun sende forvaltningsmelding for Aktoersroller: BRUKER");
+    }
+
+    @Test
+    void journalførOgOpprettSak_gyldigSkalSendeForvaltningsmeldingKasterIkkeFeilUnderValidering_ingenFeil() {
+        unleash.enable("melosys.behandle_alle_saker");
+        when(prosessinstansService.lagJournalføringProsessinstans(eq(ProsessType.JFR_NY_SAK_BRUKER), any())).thenReturn(new Prosessinstans());
+        when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
+
         FagsakDto fagsakDto = lagFagsakDto(LocalDate.MIN, LocalDate.MAX, "DK", Sakstyper.EU_EOS);
         fagsakDto.setSakstema(MEDLEMSKAP_LOVVALG.getKode());
         opprettDto.setFagsak(fagsakDto);
         opprettDto.setBehandlingstypeKode(FØRSTEGANG.getKode());
         opprettDto.setBehandlingstemaKode(Behandlingstema.UTSENDT_SELVSTENDIG.getKode());
         opprettDto.setIkkeSendForvaltingsmelding(false);
-        when(prosessinstansService.lagJournalføringProsessinstans(eq(ProsessType.JFR_NY_SAK_BRUKER), any())).thenReturn(new Prosessinstans());
-        when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
 
 
         journalfoeringService.journalførOgOpprettSak(opprettDto);
