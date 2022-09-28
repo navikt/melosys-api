@@ -150,7 +150,7 @@ class JournalfoeringBase(
                 .getOrNull()?.status == ProsessStatus.FERDIG
         }
 
-    private fun finnprosessID(prosessType: ProsessType, now: LocalDateTime): UUID =
+    protected fun finnprosessID(prosessType: ProsessType, now: LocalDateTime): UUID =
         await.timeout(30, TimeUnit.SECONDS).untilNotNull {
             prosessinstansRepository.findAll()
                 .find { it.registrertDato > now && it.type == prosessType }?.id

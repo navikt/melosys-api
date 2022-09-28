@@ -1,16 +1,25 @@
 package no.nav.melosys.itest
 
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.equality.shouldBeEqualToComparingFields
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import no.finn.unleash.FakeUnleash
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.arkiv.ArkivDokument
 import no.nav.melosys.domain.arkiv.Journalpost
+import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad
+import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode
 import no.nav.melosys.domain.kodeverk.Avsendertyper
+import no.nav.melosys.domain.kodeverk.Landkoder
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
+import no.nav.melosys.domain.saksflyt.ProsessType
 import no.nav.melosys.melosysmock.oppgave.Oppgave
 import no.nav.melosys.melosysmock.testdata.TestDataGenerator
 import no.nav.melosys.repository.BehandlingRepository
+import no.nav.melosys.repository.FagsakRepository
 import no.nav.melosys.repository.ProsessinstansRepository
 import no.nav.melosys.service.journalforing.JournalfoeringService
 import no.nav.melosys.service.journalforing.dto.DokumentDto
@@ -30,24 +39,49 @@ class JournalfoeringReplikeringIT(
     @Autowired oppgaveService: OppgaveService,
     @Autowired prosessinstansRepository: ProsessinstansRepository,
     @Autowired private val behandlingRepository: BehandlingRepository,
+    @Autowired private val fagsakRepository: FagsakRepository,
     @Autowired private val unleash: FakeUnleash
 ) : JournalfoeringBase(testDataGenerator, journalføringService, oppgaveService, prosessinstansRepository) {
 
     @Test
     fun journalførOgOpprettAndregangsBehandling_replikerBehandling_replikerBehandlingProsessStegBlirKjørt() {
         unleash.enable("melosys.behandle_alle_saker")
-        val behandling = setupForReplikeringAvBehandling()
+        val (journalpostID, behandling) = setupForReplikeringAvBehandling()
         val jfrOppgave: Oppgave = lagJfrOppgave()
         val journalfoeringTilordneDto = lagJournalfoeringTilordneDto(jfrOppgave, behandling.fagsak.saksnummer)
+        behandling.fagsak.behandlinger.shouldHaveSize(1)
 
+
+        val startTime = LocalDateTime.now()
         ThreadLocalAccessInfo.executeProcess("journalførOgOpprettAndregangsBehandling") {
             journalføringService.journalførOgOpprettAndregangsBehandling(journalfoeringTilordneDto)
         }
+        finnprosessID(ProsessType.JFR_ANDREGANG_REPLIKER_BEHANDLING, startTime)
 
-        //TODO: verify (Debugget og ser at steg blir kjørt så langt)
+
+        val fagsak = fagsakRepository.findBySaksnummer(behandling.fagsak.saksnummer).get()
+        fagsak.behandlinger
+            .shouldHaveSize(2)
+            .maxBy { it.id }
+            .apply {
+                type.shouldBe(Behandlingstyper.NY_VURDERING)
+                opprinneligBehandling.id.shouldBe(behandling.id)
+                initierendeJournalpostId.shouldBe(journalpostID)
+            }
+            .behandlingsgrunnlag.behandlingsgrunnlagdata.shouldBeInstanceOf<Soeknad>()
+            .shouldBeEqualToComparingFields(Soeknad().apply {
+                soeknadsland.apply {
+                    landkoder = listOf(Landkoder.IE.kode)
+                    erUkjenteEllerAlleEosLand = false
+                }
+                periode = Periode(
+                    periodeFOM,
+                    periodeTOM
+                )
+            })
     }
 
-    private fun setupForReplikeringAvBehandling(): Behandling {
+    private fun setupForReplikeringAvBehandling(): Pair<String, Behandling> {
         val startTime = LocalDateTime.now()
         val journalfoeringOpprettDto = lagJournalfoeringOpprettDto()
 
@@ -58,7 +92,7 @@ class JournalfoeringReplikeringIT(
 
         behandling.status = Behandlingsstatus.AVSLUTTET
         behandlingRepository.save(behandling)
-        return behandling
+        return Pair(journalfoeringOpprettDto.journalpostID, behandling)
     }
 
     private fun lagJournalfoeringTilordneDto(jfrOppgave: Oppgave, saksnummer: String): JournalfoeringTilordneDto {
