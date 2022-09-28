@@ -57,10 +57,11 @@ internal class EndreSakServiceTest {
 
         endreSakService.endre(saksnummer, FTRL, MEDLEMSKAP_LOVVALG)
 
+        verify { behandlingsgrunnlagService.slettGrunnlag(fagsak.hentAktivBehandling().id) }
         verify { behandlingsgrunnlagService.opprettSøknad(fagsak.hentAktivBehandling(), any(), any()) }
         verify { fagsakService.oppdaterSakstype(saksnummer, FTRL) }
         verify { fagsakService.oppdaterSakstema(saksnummer, MEDLEMSKAP_LOVVALG) }
-        verify { oppfriskSaksopplysningerService.oppfriskSaksopplysning(fagsak.behandlinger[0].id, false) }
+        verify { oppfriskSaksopplysningerService.oppfriskSaksopplysning(fagsak.hentAktivBehandling().id, false) }
         // event for å oppdatere oppgave
         verify { applicationEventPublisher.publishEvent(any()) }
     }

@@ -22,8 +22,8 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.BehandlingRepository;
-import no.nav.melosys.repository.BehandlingsgrunnlagRepository;
 import no.nav.melosys.repository.TidligereMedlemsperiodeRepository;
+import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import org.assertj.core.util.Sets;
@@ -60,7 +60,7 @@ class BehandlingServiceTest {
     @Mock
     private TidligereMedlemsperiodeRepository tidligereMedlemsperiodeRepo;
     @Mock
-    private BehandlingsgrunnlagRepository behandlingsgrunnlagRepo;
+    private BehandlingsgrunnlagService behandlingsgrunnlagService;
     @Mock
     private BehandlingsresultatService behandlingsresultatService;
     @Mock
@@ -84,7 +84,8 @@ class BehandlingServiceTest {
 
     @BeforeEach
     public void setUp() {
-        behandlingService = new BehandlingService(behandlingRepository, tidligereMedlemsperiodeRepo, behandlingsgrunnlagRepo, behandlingsresultatService, oppgaveService, lovligeKombinasjonerService, applicationEventPublisher, fakeUnleash);
+        behandlingService = new BehandlingService(behandlingRepository, tidligereMedlemsperiodeRepo, behandlingsgrunnlagService,
+                                                  behandlingsresultatService, oppgaveService, lovligeKombinasjonerService, applicationEventPublisher, fakeUnleash);
 
         behandling = new Behandling();
         behandling.setId(BEHANDLING_ID);
@@ -516,6 +517,8 @@ class BehandlingServiceTest {
         when(behandlingRepository.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
 
         behandlingService.avsluttNyVurdering(BEHANDLING_ID, Behandlingsresultattyper.FERDIGBEHANDLET);
+
+        verify(behandlingsresultatService).oppdaterBehandlingsresultattype(BEHANDLING_ID, Behandlingsresultattyper.FERDIGBEHANDLET);
     }
 
     @Test

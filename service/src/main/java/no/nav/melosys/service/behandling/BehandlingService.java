@@ -10,7 +10,6 @@ import io.micrometer.core.instrument.Metrics;
 import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
-import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagKonverterer;
 import no.nav.melosys.domain.brev.DokumentasjonSvarfrist;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
@@ -21,8 +20,8 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
 import no.nav.melosys.repository.BehandlingRepository;
-import no.nav.melosys.repository.BehandlingsgrunnlagRepository;
 import no.nav.melosys.repository.TidligereMedlemsperiodeRepository;
+import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import org.apache.commons.beanutils.BeanUtils;
@@ -44,7 +43,7 @@ public class BehandlingService {
     private final BehandlingRepository behandlingRepository;
     private final TidligereMedlemsperiodeRepository tidligereMedlemsperiodeRepository;
     private final BehandlingsresultatService behandlingsresultatService;
-    private final BehandlingsgrunnlagRepository behandlingsgrunnlagRepository;
+    private final BehandlingsgrunnlagService behandlingsgrunnlagService;
     private final OppgaveService oppgaveService;
     private final LovligeKombinasjonerService lovligeKombinasjonerService;
     private final ApplicationEventPublisher applicationEventPublisher;
@@ -63,7 +62,7 @@ public class BehandlingService {
 
     public BehandlingService(BehandlingRepository behandlingRepository,
                              TidligereMedlemsperiodeRepository tidligereMedlemsperiodeRepository,
-                             BehandlingsgrunnlagRepository behandlingsgrunnlagRepository,
+                             @Lazy BehandlingsgrunnlagService behandlingsgrunnlagService,
                              BehandlingsresultatService behandlingsresultatService,
                              @Lazy OppgaveService oppgaveService,
                              LovligeKombinasjonerService lovligeKombinasjonerService,
@@ -71,7 +70,7 @@ public class BehandlingService {
                              Unleash unleash) {
         this.behandlingRepository = behandlingRepository;
         this.tidligereMedlemsperiodeRepository = tidligereMedlemsperiodeRepository;
-        this.behandlingsgrunnlagRepository = behandlingsgrunnlagRepository;
+        this.behandlingsgrunnlagService = behandlingsgrunnlagService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.oppgaveService = oppgaveService;
         this.lovligeKombinasjonerService = lovligeKombinasjonerService;
@@ -155,8 +154,7 @@ public class BehandlingService {
             applicationEventPublisher.publishEvent(new BehandlingEndretAvSaksbehandlerEvent(behandling.getId(), behandling));
             if (nyttTema != ARBEID_FLERE_LAND) {
                 behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().soeknadsland.erUkjenteEllerAlleEosLand = false;
-                BehandlingsgrunnlagKonverterer.oppdaterBehandlingsgrunnlag(behandling.getBehandlingsgrunnlag());
-                behandlingsgrunnlagRepository.saveAndFlush(behandling.getBehandlingsgrunnlag());
+                behandlingsgrunnlagService.oppdaterBehandlingsgrunnlag(behandling.getBehandlingsgrunnlag());
             }
         } else {
             throw new FunksjonellException("Ikke mulig å endre behandlingstema");
@@ -396,8 +394,7 @@ public class BehandlingService {
         behandlingsresultatService.tømBehandlingsresultat(behandling.getId());
         if (behandling.getTema() != ARBEID_FLERE_LAND && behandling.getBehandlingsgrunnlag() != null) {
             behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().soeknadsland.erUkjenteEllerAlleEosLand = false;
-            BehandlingsgrunnlagKonverterer.oppdaterBehandlingsgrunnlag(behandling.getBehandlingsgrunnlag());
-            behandlingsgrunnlagRepository.saveAndFlush(behandling.getBehandlingsgrunnlag());
+            behandlingsgrunnlagService.oppdaterBehandlingsgrunnlag(behandling.getBehandlingsgrunnlag());
         }
     }
 

@@ -44,7 +44,7 @@ class EndreSakService(
         if (sakstype == Sakstyper.EU_EOS) {
             validerBehandlingsgrunnlag(behandlingsgrunnlag)
         }
-        //behandlingsgrunnlagService.slettGrunnlag(behandling.id)
+        behandlingsgrunnlagService.slettGrunnlag(behandling.id)
         behandlingsgrunnlagService.opprettSøknad(
             behandling,
             behandlingsgrunnlag.behandlingsgrunnlagdata.periode,

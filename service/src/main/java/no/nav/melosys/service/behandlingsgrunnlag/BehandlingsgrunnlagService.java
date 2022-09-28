@@ -170,18 +170,23 @@ public class BehandlingsgrunnlagService {
     }
 
     @Transactional
-    public Behandlingsgrunnlag oppdaterBehandlingsgrunnlag(Behandlingsgrunnlag behandlingsgrunnlag) {
+    public void oppdaterBehandlingsgrunnlag(Behandlingsgrunnlag behandlingsgrunnlag) {
         BehandlingsgrunnlagKonverterer.oppdaterBehandlingsgrunnlag(behandlingsgrunnlag);
-        return behandlingsgrunnlagRepository.saveAndFlush(behandlingsgrunnlag);
+        behandlingsgrunnlagRepository.saveAndFlush(behandlingsgrunnlag);
     }
 
     @Transactional
-    public Behandlingsgrunnlag oppdaterBehandlingsgrunnlagPeriodeOgLand(long behandlingID, Periode periode, Soeknadsland soeknadsland) {
+    public void oppdaterBehandlingsgrunnlagPeriodeOgLand(long behandlingID, Periode periode, Soeknadsland soeknadsland) {
         Behandlingsgrunnlag behandlingsgrunnlag = hentBehandlingsgrunnlag(behandlingID);
         behandlingsgrunnlag.getBehandlingsgrunnlagdata().periode = periode;
         behandlingsgrunnlag.getBehandlingsgrunnlagdata().soeknadsland = soeknadsland;
         BehandlingsgrunnlagKonverterer.oppdaterBehandlingsgrunnlag(behandlingsgrunnlag);
-        return behandlingsgrunnlagRepository.saveAndFlush(behandlingsgrunnlag);
+        behandlingsgrunnlagRepository.saveAndFlush(behandlingsgrunnlag);
+    }
+
+    @Transactional
+    public void slettGrunnlag(long behandlingID) {
+        behandlingsgrunnlagRepository.deleteByBehandling_Id(behandlingID);
     }
 
     public Optional<Behandlingsgrunnlag> finnBehandlingsgrunnlag(Long behandlingID) {
