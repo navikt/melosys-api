@@ -126,7 +126,9 @@ class OppgaveServiceTest {
         when(fagsakService.hentFagsak(any(String.class))).thenReturn(fagsak);
         when(behandlingsgrunnlagService.finnBehandlingsgrunnlag(behandling.getId())).thenReturn(Optional.of(lagBehandlingsgrunnlag()));
 
+
         List<OppgaveDto> mineSaker = oppgaveService.hentOppgaverMedAnsvarlig(tilordnetRessurs);
+
 
         assertThat(mineSaker).hasSize(2);
 
@@ -168,7 +170,9 @@ class OppgaveServiceTest {
         when(fagsakService.hentFagsak(any(String.class))).thenReturn(fagsak);
         when(behandlingsgrunnlagService.finnBehandlingsgrunnlag(behandling.getId())).thenReturn(Optional.empty());
 
+
         List<OppgaveDto> mineSaker = oppgaveService.hentOppgaverMedAnsvarlig(tilordnetRessurs);
+
 
         assertThat(mineSaker).hasSize(1);
 
@@ -195,7 +199,9 @@ class OppgaveServiceTest {
 
         when(oppgaveFasade.finnOppgaverMedAnsvarlig(tilordnetRessurs)).thenReturn(oppgaver);
 
+
         List<OppgaveDto> mineSaker = oppgaveService.hentOppgaverMedAnsvarlig(tilordnetRessurs);
+
 
         assertThat(mineSaker).hasSize(1);
 
@@ -224,7 +230,9 @@ class OppgaveServiceTest {
         when(persondataFasade.finnFolkeregisterident("1111")).thenReturn(Optional.of("fnr"));
         when(persondataFasade.hentSammensattNavn("fnr")).thenReturn("sammensatt navn");
 
+
         List<OppgaveDto> mineSaker = oppgaveService.hentOppgaverMedAnsvarlig(tilordnetRessurs);
+
 
         assertThat(mineSaker).hasSize(1);
 
@@ -252,7 +260,9 @@ class OppgaveServiceTest {
         when(oppgaveFasade.finnOppgaverMedAnsvarlig(tilordnetRessurs)).thenReturn(oppgaver);
         when(eregFasade.hentOrganisasjonNavn("2222")).thenReturn("organisasjonsnavn");
 
+
         List<OppgaveDto> mineSaker = oppgaveService.hentOppgaverMedAnsvarlig(tilordnetRessurs);
+
 
         assertThat(mineSaker).hasSize(1);
 
