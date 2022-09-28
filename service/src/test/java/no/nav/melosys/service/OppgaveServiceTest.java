@@ -218,7 +218,6 @@ class OppgaveServiceTest {
         fagsak.setBehandlinger(List.of(behandling));
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
         when(fagsakService.hentFagsak(any(String.class))).thenReturn(fagsak);
-        when(behandlingsgrunnlagService.hentBehandlingsgrunnlag(behandling.getId())).thenReturn(lagBehandlingsgrunnlag());
 
         List<OppgaveDto> mineSaker = oppgaveService.hentOppgaverMedAnsvarlig(tilordnetRessurs);
 
