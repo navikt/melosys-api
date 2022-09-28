@@ -116,7 +116,7 @@ public class JournalfoeringService {
                 "FØRSTEGANG og sakstema: MEDLEMSKAP_LOVVALG");
         }
 
-        if (!erBruker(journalfoeringDto)) {
+        if (!hovedpartErBruker(journalfoeringDto)) {
             throw new FunksjonellException("Kan kun sende forvaltningsmelding for Aktoersroller: " +
                 "BRUKER");
         }
@@ -166,7 +166,7 @@ public class JournalfoeringService {
         final var behandlingstype = behandleAlleSakerToggleEnabled ? Behandlingstyper.valueOf(journalfoeringDto.getBehandlingstypeKode()) : null;
 
         if (behandleAlleSakerToggleEnabled) {
-            Aktoersroller hovedpart = hentAktoersroller(journalfoeringDto);
+            Aktoersroller hovedpart = journalføringGjelder(journalfoeringDto);
 
             validerBehandlingstema(hovedpart, sakstype, sakstema, behandlingstema, null);
             validerBehandlingstype(hovedpart, sakstype, sakstema, behandlingstema, behandlingstype, null);
@@ -466,11 +466,11 @@ public class JournalfoeringService {
         return eessiService.finnBehandlingstemaForSedTilknyttetJournalpost(journalpostID);
     }
 
-    private boolean erBruker(JournalfoeringOpprettDto journalfoeringDto) {
-        return Aktoersroller.BRUKER.equals(hentAktoersroller(journalfoeringDto));
+    private boolean hovedpartErBruker(JournalfoeringOpprettDto journalfoeringDto) {
+        return Aktoersroller.BRUKER.equals(journalføringGjelder(journalfoeringDto));
     }
 
-    private Aktoersroller hentAktoersroller(JournalfoeringOpprettDto journalfoeringDto) {
+    private Aktoersroller journalføringGjelder(JournalfoeringOpprettDto journalfoeringDto) {
         return journalfoeringDto.getBrukerID() != null ? Aktoersroller.BRUKER : Aktoersroller.VIRKSOMHET;
     }
 }
