@@ -2,6 +2,7 @@ package no.nav.melosys.saksflyt.steg.brev;
 
 import java.util.List;
 
+import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
@@ -27,16 +28,39 @@ class SendForvaltningsmeldingTest {
     private BrevBestiller brevBestiller;
     @Mock
     private BehandlingService behandlingService;
+    private static FakeUnleash unleash = new FakeUnleash();
 
     private SendForvaltningsmelding sendForvaltningsmelding;
 
     @BeforeEach
     public void setUp() {
-        sendForvaltningsmelding = new SendForvaltningsmelding(brevBestiller, behandlingService);
+        unleash.enable("melosys.behandle_alle_saker");
+        sendForvaltningsmelding = new SendForvaltningsmelding(brevBestiller, behandlingService, unleash);
     }
 
     @Test
     void utfør_skalSendesForvaltningsmelding_bestillerForvaltningsmelding() {
+        final long behandlingID = 21432L;
+        var behandling = new Behandling();
+        behandling.setTema(null);
+        behandling.setId(behandlingID);
+        when(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling);
+        var prosessinstans = new Prosessinstans();
+        prosessinstans.setBehandling(behandling);
+        prosessinstans.setData(ProsessDataKey.SKAL_SENDES_FORVALTNINGSMELDING, true);
+        prosessinstans.setData(ProsessDataKey.SAKSBEHANDLER, "TEST");
+
+
+        sendForvaltningsmelding.utfør(prosessinstans);
+
+
+        verify(behandlingService).hentBehandlingMedSaksopplysninger(behandlingID);
+        verify(brevBestiller).bestill(MELDING_FORVENTET_SAKSBEHANDLINGSTID, List.of(Mottaker.av(BRUKER)), null, "TEST", null, behandling);
+    }
+
+    @Test
+    void utfør_gammelFørToggle_skalSendesForvaltningsmelding_bestillerForvaltningsmelding() {
+        unleash.disable("melosys.behandle_alle_saker");
         final long behandlingID = 21432L;
         var behandling = new Behandling();
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
