@@ -77,6 +77,7 @@ public class LovligeKombinasjonerService {
                 }
                 return behandlingstemaer;
             case VIRKSOMHET:
+                return Set.of(VIRKSOMHET);
             default:
                 return Collections.emptySet();
         }

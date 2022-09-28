@@ -183,13 +183,6 @@ class BehandlingTjenesteTest {
     }
 
     @Test
-    void avsluttNyVurderingMedFerdigbehandlet() throws Exception {
-        mockMvc.perform(put(BASE_URL + "/{behandlingID}/sett-til-ferdigbehandlet", BEHANDLING_ID)
-                .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isNoContent());
-    }
-
-    @Test
     void hentMuligeStatuser() throws Exception {
         when(behandlingService.hentMuligeStatuser(BEHANDLING_ID)).thenReturn(MULIGE_STATUSER);
 

@@ -28,7 +28,8 @@ public class TemaFactory {
         YRKESAKTIV,
         PENSJONIST,
         FORESPØRSEL_TRYGDEMYNDIGHET,
-        UNNTAK_MEDLEMSKAP
+        UNNTAK_MEDLEMSKAP,
+        VIRKSOMHET
     );
 
     private static final EnumSet<Behandlingstema> GYLDIGE_BEHANDLINGSTEMA_UNNTAK_FRA_MEDLEMSKAP = EnumSet.of(
