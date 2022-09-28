@@ -325,23 +325,43 @@ public class OppgaveService {
             return behOppgaveDto;
         }
 
-        Optional<SedDokument> sedopplysninger = saksopplysningerService.finnSedOpplysninger(behandling.getId());
-        if (sedopplysninger.isPresent()) {
-            Landkoder lovvalgslandKode = sedopplysninger.get().getLovvalgslandKode();
-            behOppgaveDto.setLand(SoeknadslandDto.av(lovvalgslandKode));
-            behOppgaveDto.setPeriode(new PeriodeDto(
-                sedopplysninger.get().getLovvalgsperiode().getFom(), sedopplysninger.get().getLovvalgsperiode().getTom())
-            );
-            return behOppgaveDto;
+        if (unleash.isEnabled("melosys.behandle_alle_saker")) {
+            Optional<SedDokument> sedopplysninger = saksopplysningerService.finnSedOpplysninger(behandling.getId());
+            if (sedopplysninger.isPresent()) {
+                Landkoder lovvalgslandKode = sedopplysninger.get().getLovvalgslandKode();
+                behOppgaveDto.setLand(SoeknadslandDto.av(lovvalgslandKode));
+                behOppgaveDto.setPeriode(new PeriodeDto(
+                    sedopplysninger.get().getLovvalgsperiode().getFom(), sedopplysninger.get().getLovvalgsperiode().getTom())
+                );
+                return behOppgaveDto;
+            }
+
+            Optional<Behandlingsgrunnlag> behandlingsgrunnlag = behandlingsgrunnlagService.finnBehandlingsgrunnlag(behandling.getId());
+            if (behandlingsgrunnlag.isPresent()) {
+                Soeknad søknadDokument = (Soeknad) behandlingsgrunnlag.get().getBehandlingsgrunnlagdata();
+                Soeknadsland søknadsland = hentSøknadsland(søknadDokument);
+                behOppgaveDto.setLand(SoeknadslandDto.av(søknadsland));
+                behOppgaveDto.setPeriode(mapPeriode(søknadDokument));
+            }
+        } else {
+            if (behandling.erBehandlingAvSøknad()) {
+                Soeknad søknadDokument = (Soeknad) behandlingsgrunnlagService
+                    .hentBehandlingsgrunnlag(behandling.getId()).getBehandlingsgrunnlagdata();
+                Soeknadsland søknadsland = hentSøknadsland(søknadDokument);
+                behOppgaveDto.setLand(SoeknadslandDto.av(søknadsland));
+                behOppgaveDto.setPeriode(mapPeriode(søknadDokument));
+            } else {
+                saksopplysningerService.finnSedOpplysninger(behandling.getId()).ifPresent(
+                    sedDokument -> {
+                        Landkoder lovvalgslandKode = sedDokument.getLovvalgslandKode();
+                        behOppgaveDto.setLand(SoeknadslandDto.av(lovvalgslandKode));
+                        behOppgaveDto.setPeriode(new PeriodeDto(
+                            sedDokument.getLovvalgsperiode().getFom(), sedDokument.getLovvalgsperiode().getTom())
+                        );
+                    });
+            }
         }
 
-        Optional<Behandlingsgrunnlag> behandlingsgrunnlag = behandlingsgrunnlagService.finnBehandlingsgrunnlag(behandling.getId());
-        if (behandlingsgrunnlag.isPresent()) {
-            Soeknad søknadDokument = (Soeknad) behandlingsgrunnlag.get().getBehandlingsgrunnlagdata();
-            Soeknadsland søknadsland = hentSøknadsland(søknadDokument);
-            behOppgaveDto.setLand(SoeknadslandDto.av(søknadsland));
-            behOppgaveDto.setPeriode(mapPeriode(søknadDokument));
-        }
         return behOppgaveDto;
     }
 
