@@ -1,5 +1,6 @@
 package no.nav.melosys.service.sak
 
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
@@ -23,7 +24,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.context.ApplicationEventPublisher
-import kotlin.test.assertFailsWith
 
 @ExtendWith(MockKExtension::class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -40,7 +40,7 @@ internal class EndreSakServiceTest {
     @RelaxedMockK
     lateinit var applicationEventPublisher: ApplicationEventPublisher
 
-    lateinit var endreSakService: EndreSakService
+    private lateinit var endreSakService: EndreSakService
 
     @BeforeEach
     fun setUp() {
@@ -60,7 +60,7 @@ internal class EndreSakServiceTest {
 
         endreSakService.endre(saksnummer, FTRL, MEDLEMSKAP_LOVVALG)
 
-        verify { behandlingsgrunnlagService.slettGrunnlag(fagsak.hentAktivBehandling().id) }
+        verify { behandlingsgrunnlagService.slettBehandlingsgrunnlag(fagsak.hentAktivBehandling().id) }
         verify { behandlingsgrunnlagService.opprettSøknad(fagsak.hentAktivBehandling(), any(), any()) }
         verify { fagsakService.oppdaterSakstype(saksnummer, FTRL) }
         verify { fagsakService.oppdaterSakstema(saksnummer, MEDLEMSKAP_LOVVALG) }
@@ -78,9 +78,9 @@ internal class EndreSakServiceTest {
         fagsak.behandlinger.add(SaksbehandlingDataFactory.lagBehandling(fagsak))
         every { fagsakService.hentFagsak(saksnummer) } returns fagsak
 
-        assertFailsWith<FunksjonellException>(
-            block = { endreSakService.endre(saksnummer, EU_EOS, TRYGDEAVGIFT) },
-            message = "Du må legge inn periode og land i flyten for å kunne bytte til sakstype EU/EØS"
-        )
+        shouldThrow<FunksjonellException>
+        {
+            endreSakService.endre(saksnummer, EU_EOS, TRYGDEAVGIFT)
+        }.message.shouldBe("Du må legge inn periode og land i flyten for å kunne bytte til sakstype EU/EØS")
     }
 }

@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service
 import javax.transaction.Transactional
 
 private val log = KotlinLogging.logger { }
+
 @Service
 class EndreSakService(
     private val fagsakService: FagsakService,
@@ -24,29 +25,29 @@ class EndreSakService(
     private val applicationEventPublisher: ApplicationEventPublisher
 ) {
     @Transactional
-    fun endre(saksnummer: String, sakstype: Sakstyper, sakstema: Sakstemaer) {
+    fun endre(saksnummer: String, nySakstype: Sakstyper, nySakstema: Sakstemaer) {
         val fagsak = fagsakService.hentFagsak(saksnummer)
-        validerSak(fagsak, sakstype, sakstema)
+        validerSak(fagsak, nySakstype, nySakstema)
 
         val behandling = fagsak.hentAktivBehandling()
-        gjenopprettBehandlingsgrunnlag(sakstype, behandling)
+        gjenopprettBehandlingsgrunnlag(nySakstype, behandling)
 
-        fagsakService.oppdaterSakstype(saksnummer, sakstype)
-        fagsakService.oppdaterSakstema(saksnummer, sakstema)
+        fagsakService.oppdaterSakstype(saksnummer, nySakstype)
+        fagsakService.oppdaterSakstema(saksnummer, nySakstema)
 
         oppfriskSaksopplysningerService.oppfriskSaksopplysning(behandling.id, false)
         applicationEventPublisher.publishEvent(FagsakEndretAvSaksbehandler(fagsak))
-        log.debug { "Ferdig med endring av sak $saksnummer (type: $sakstype, tema: $sakstema)" }
+        log.debug { "Ferdig med endring av sak $saksnummer (type: $nySakstype, tema: $nySakstema)" }
     }
 
     private fun gjenopprettBehandlingsgrunnlag(
-        sakstype: Sakstyper, behandling: Behandling
+        nySakstype: Sakstyper, behandling: Behandling
     ) {
         val behandlingsgrunnlag = behandlingsgrunnlagService.hentBehandlingsgrunnlag(behandling.id)
-        if (sakstype == Sakstyper.EU_EOS) {
+        if (nySakstype == Sakstyper.EU_EOS) {
             validerBehandlingsgrunnlag(behandlingsgrunnlag)
         }
-        behandlingsgrunnlagService.slettGrunnlag(behandling.id)
+        behandlingsgrunnlagService.slettBehandlingsgrunnlag(behandling.id)
         behandlingsgrunnlagService.opprettSøknad(
             behandling,
             behandlingsgrunnlag.behandlingsgrunnlagdata.periode,
@@ -60,7 +61,7 @@ class EndreSakService(
         if (fagsak.type == sakstype && fagsak.tema == sakstema) {
             throw FunksjonellException("Sak ${fagsak.saksnummer} har allerede type ${fagsak.type} og tema ${fagsak.tema}")
         }
-        if (!fagsak.kanEndres()) {
+        if (!fagsak.kanEndreTypeOgTema()) {
             throw FunksjonellException("Sak ${fagsak.saksnummer} kan ikke endres")
         }
     }
@@ -73,8 +74,8 @@ class EndreSakService(
     }
 
     private fun manglerPeriode(behandlingsgrunnlagdata: BehandlingsgrunnlagData) =
-        (behandlingsgrunnlagdata.periode == null || behandlingsgrunnlagdata.periode.fom == null)
+        behandlingsgrunnlagdata.periode == null || behandlingsgrunnlagdata.periode.fom == null
 
     private fun manglerSøknadsland(behandlingsgrunnlagdata: BehandlingsgrunnlagData) =
-        (behandlingsgrunnlagdata.soeknadsland == null || behandlingsgrunnlagdata.soeknadsland.erUkjenteEllerAlleEosLand)
+        behandlingsgrunnlagdata.soeknadsland == null || behandlingsgrunnlagdata.soeknadsland.erUkjenteEllerAlleEosLand
 }

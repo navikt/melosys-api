@@ -244,7 +244,7 @@ public class Fagsak extends RegistreringsInfo {
             .findFirst();
     }
 
-    public boolean kanEndres() {
+    public boolean kanEndreTypeOgTema() {
         return harAktivBehandling() && getBehandlinger().size() == 1;
     }
 

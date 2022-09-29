@@ -20,15 +20,14 @@ import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresse;
 import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresseNorge;
 import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresseUtland;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Sakstemaer;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService;
-import no.nav.melosys.service.sak.EndreSakService;
-import no.nav.melosys.service.sak.FagsakService;
-import no.nav.melosys.service.sak.OpprettNySakFraOppgave;
-import no.nav.melosys.service.sak.OpprettSakDto;
+import no.nav.melosys.service.sak.*;
 import no.nav.melosys.service.saksopplysninger.SaksopplysningerService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.tjenester.gui.dto.FagsakDto;
@@ -69,6 +68,7 @@ class FagsakTjenesteTest {
     @MockBean
     private static PersondataFasade persondataFasade;
     @MockBean
+    @SuppressWarnings("unused")
     private SaksopplysningerService saksopplysningerService;
     @MockBean
     private static BehandlingsgrunnlagService behandlingsgrunnlagService;
@@ -247,6 +247,19 @@ class FagsakTjenesteTest {
             .andExpect(jsonPath("$.behandlingID", equalTo(1)));
 
         verify(aksesskontroll).autoriserSakstilgang("123");
+    }
+
+    @Test
+    void endreSak() throws Exception {
+        EndreSakDto endreSakDto = new EndreSakDto(Sakstyper.TRYGDEAVTALE, Sakstemaer.UNNTAK);
+
+        mockMvc.perform(post(BASE_URL + "/{saksnr}/endre", "123")
+                            .content(objectMapper.writeValueAsString(endreSakDto))
+                            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isNoContent());
+
+        verify(aksesskontroll).autoriserSakstilgang("123");
+        verify(endreSakService).endre("123", Sakstyper.TRYGDEAVTALE, Sakstemaer.UNNTAK);
     }
 
     @Test

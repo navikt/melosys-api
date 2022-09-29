@@ -185,7 +185,7 @@ public class BehandlingsgrunnlagService {
     }
 
     @Transactional
-    public void slettGrunnlag(long behandlingID) {
+    public void slettBehandlingsgrunnlag(long behandlingID) {
         behandlingsgrunnlagRepository.deleteByBehandling_Id(behandlingID);
     }
 

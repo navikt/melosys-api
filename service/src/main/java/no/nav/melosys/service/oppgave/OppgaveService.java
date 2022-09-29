@@ -379,6 +379,7 @@ public class OppgaveService {
         behandlingDto.setRegistrertDato(behandling.getRegistrertDato());
         behandlingDto.setEndretDato(behandling.getEndretDato());
         behandlingDto.setSvarFrist(behandling.getDokumentasjonSvarfristDato());
+        behandlingDto.setErUnderOppdatering(false); // TODO feltet brukes i frontend men har ingen verdi og kan fjernes
         return behandlingDto;
     }
 
