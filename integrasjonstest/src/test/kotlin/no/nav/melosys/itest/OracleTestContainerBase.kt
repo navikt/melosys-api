@@ -16,7 +16,7 @@ open class OracleTestContainerBase {
         @JvmStatic
         fun oracleProperties(registry: DynamicPropertyRegistry) {
             // Det finnes ikke Oracle container som støtter ARM arkitektur
-            val m1Mac: String? = System.getenv("M1-MAC")
+            val m1Mac: String? = System.getenv("M1_MAC")
             if (m1Mac?.lowercase() == "true") return
 
             registry.add("spring.datasource.url") { oracleContainer.jdbcUrl }
