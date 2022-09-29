@@ -4,10 +4,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.saksflyt.ProsessStatus;
-import no.nav.melosys.domain.saksflyt.ProsessSteg;
-import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.domain.saksflyt.ProsessinstansHendelse;
+import no.nav.melosys.domain.saksflyt.*;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
@@ -118,7 +115,8 @@ public class ProsessinstansAdminService {
                 .stream()
                 .max(Comparator.comparing(ProsessinstansHendelse::getDato))
                 .map(ProsessinstansHendelse::getMelding)
-                .orElse(null));
+                .orElse(null),
+            prosessinstans.getData(ProsessDataKey.CORRELATION_ID_SAKSFLYT));
     }
 
     private void setStatusRestartet(Collection<Prosessinstans> prosessinstanser) {

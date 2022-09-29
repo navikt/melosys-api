@@ -10,6 +10,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.sak.FagsakService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,6 +22,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -34,13 +36,15 @@ class AngiBehandlingsresultatServiceTest {
     @Mock
     private BehandlingsresultatService behandlingsresultatService;
     @Mock
+    private OppgaveService oppgaveService;
+    @Mock
     private FagsakService fagsakService;
 
     private AngiBehandlingsresultatService angiBehandlingsresultatService;
 
     @BeforeEach
     public void setup() {
-        angiBehandlingsresultatService = new AngiBehandlingsresultatService(behandlingsresultatService, fagsakService);
+        angiBehandlingsresultatService = new AngiBehandlingsresultatService(behandlingsresultatService, oppgaveService, fagsakService);
     }
 
     @Test
@@ -54,6 +58,7 @@ class AngiBehandlingsresultatServiceTest {
 
 
         verify(fagsakService).avsluttFagsakOgBehandling(behandlingsresultat.getBehandling().getFagsak(), Saksstatuser.LOVVALG_AVKLART);
+        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(anyString());
         verify(behandlingsresultatService).lagre(behandlingsresultatArgumentCaptor.capture());
         assertThat(behandlingsresultatArgumentCaptor.getValue().getType()).isEqualTo(Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN);
     }
@@ -69,6 +74,7 @@ class AngiBehandlingsresultatServiceTest {
 
 
         verify(fagsakService).avsluttFagsakOgBehandling(behandlingsresultat.getBehandling().getFagsak(), Saksstatuser.LOVVALG_AVKLART);
+        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(anyString());
         verify(behandlingsresultatService).lagre(behandlingsresultatArgumentCaptor.capture());
         assertThat(behandlingsresultatArgumentCaptor.getValue().getType()).isEqualTo(Behandlingsresultattyper.UNNTATT_MEDLEMSKAP);
     }
@@ -84,6 +90,7 @@ class AngiBehandlingsresultatServiceTest {
 
 
         verify(fagsakService).avsluttFagsakOgBehandling(behandlingsresultat.getBehandling().getFagsak(), Saksstatuser.LOVVALG_AVKLART);
+        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(anyString());
         verify(behandlingsresultatService).lagre(behandlingsresultatArgumentCaptor.capture());
         assertThat(behandlingsresultatArgumentCaptor.getValue().getType()).isEqualTo(Behandlingsresultattyper.REGISTRERT_UNNTAK);
     }
@@ -99,6 +106,7 @@ class AngiBehandlingsresultatServiceTest {
 
 
         verify(fagsakService).avsluttFagsakOgBehandling(behandlingsresultat.getBehandling().getFagsak(), Saksstatuser.LOVVALG_AVKLART);
+        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(anyString());
         verify(behandlingsresultatService).lagre(behandlingsresultatArgumentCaptor.capture());
         assertThat(behandlingsresultatArgumentCaptor.getValue().getType()).isEqualTo(Behandlingsresultattyper.DELVIS_GODKJENT_UNNTAK);
     }
@@ -126,6 +134,7 @@ class AngiBehandlingsresultatServiceTest {
 
 
         verify(fagsakService).avsluttFagsakOgBehandling(behandlingsresultat.getBehandling().getFagsak(), Saksstatuser.LOVVALG_AVKLART);
+        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(anyString());
         verify(behandlingsresultatService).lagre(behandlingsresultatArgumentCaptor.capture());
         assertThat(behandlingsresultatArgumentCaptor.getValue().getType()).isEqualTo(Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN);
     }
@@ -141,6 +150,7 @@ class AngiBehandlingsresultatServiceTest {
 
 
         verify(fagsakService).avsluttFagsakOgBehandling(behandlingsresultat.getBehandling().getFagsak(), Saksstatuser.LOVVALG_AVKLART);
+        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(anyString());
         verify(behandlingsresultatService).lagre(behandlingsresultatArgumentCaptor.capture());
         assertThat(behandlingsresultatArgumentCaptor.getValue().getType()).isEqualTo(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
     }
@@ -156,6 +166,7 @@ class AngiBehandlingsresultatServiceTest {
 
 
         verify(fagsakService).avsluttFagsakOgBehandling(behandlingsresultat.getBehandling().getFagsak(), Saksstatuser.LOVVALG_AVKLART);
+        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(anyString());
         verify(behandlingsresultatService).lagre(behandlingsresultatArgumentCaptor.capture());
         assertThat(behandlingsresultatArgumentCaptor.getValue().getType()).isEqualTo(Behandlingsresultattyper.AVSLAG_SØKNAD);
     }
@@ -171,6 +182,7 @@ class AngiBehandlingsresultatServiceTest {
 
 
         verify(fagsakService).avsluttFagsakOgBehandling(behandlingsresultat.getBehandling().getFagsak(), Saksstatuser.LOVVALG_AVKLART);
+        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(anyString());
         verify(behandlingsresultatService).lagre(behandlingsresultatArgumentCaptor.capture());
         assertThat(behandlingsresultatArgumentCaptor.getValue().getType()).isEqualTo(Behandlingsresultattyper.KLAGEINNSTILLING);
     }
@@ -204,6 +216,7 @@ class AngiBehandlingsresultatServiceTest {
 
     private Behandlingsresultat lagBehandlingsresultat(Sakstemaer sakstema, Sakstyper sakstype, Behandlingstyper behandlingstype, Behandlingstema behandlingstema) {
         var fagsak = new Fagsak();
+        fagsak.setSaksnummer("MEL-1234");
         fagsak.setTema(sakstema);
         fagsak.setType(sakstype);
         var behandling = new Behandling();

@@ -1,0 +1,7 @@
+UPDATE BEHANDLING_TEMA
+SET NAVN='Henvendelse eller forespørsel'
+WHERE KODE = 'ØVRIGE_SED_MED';
+
+UPDATE BEHANDLING_TEMA
+SET NAVN='Henvendelse eller forespørsel'
+WHERE KODE = 'ØVRIGE_SED_UFM';

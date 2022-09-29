@@ -1,4 +1,4 @@
-package no.nav.melosys.service.journalfoering
+package no.nav.melosys.service.saksbehandling
 
 import io.kotest.matchers.shouldBe
 import io.mockk.MockKAdditionalAnswerScope
@@ -10,6 +10,7 @@ import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.repository.BehandlingsresultatRepository
@@ -26,7 +27,7 @@ import kotlin.collections.ArrayList
 
 @ExtendWith(MockKExtension::class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class BehandlingReplikeringsReglerTest {
+class SaksbehandlingReglerTest {
     @MockK
     lateinit var behandlingsresultatRepository: BehandlingsresultatRepository
 
@@ -147,69 +148,107 @@ class BehandlingReplikeringsReglerTest {
         ),
     )
 
-    @ParameterizedTest(name = "{0} - {2} - {3} - {4}")
+    @ParameterizedTest(name = "behandlingsresultatType:{0} - FunnetBehandlingID:{2}")
     @MethodSource("behandlingMedBehandlingTyperOgIkkeBehandlingsresultatTyperData")
     fun finnesBehandlingMedBehandlingTyperOgIkkeBehandlingsresultatTyper(
         resultatTypeFraRepo: Behandlingsresultattyper?,
         behandlinger: List<Behandling>,
-        typer: List<Behandlingstyper>,
-        resultatTyper: List<Behandlingsresultattyper>,
-        expected: Boolean
+        expectedBehandlingID: Long?
     ) {
         every { behandlingsresultatRepository.findById(any()) } returns lagBehandlingsresultat(resultatTypeFraRepo)
-        val behandlingReplikeringsRegler = BehandlingReplikeringsRegler(behandlingsresultatRepository)
+        val saksbehandlingRegler = SaksbehandlingRegler(behandlingsresultatRepository)
 
 
-        val resultat =
-            behandlingReplikeringsRegler.finnesBehandlingMedBehandlingTyperOgIkkeBehandlingsresultatTyper(
-                behandlinger, typer, resultatTyper
-            )
+        val behandling = saksbehandlingRegler.finnBehandlingSomKanReplikeres(behandlinger)
 
 
-        resultat.shouldBe(expected)
+        behandling?.id.shouldBe(expectedBehandlingID)
     }
 
     private fun behandlingMedBehandlingTyperOgIkkeBehandlingsresultatTyperData(): List<Arguments> {
-        fun createBehandlinger(behandlingstyper: List<Behandlingstyper>) =
-            behandlingstyper.map { Behandling().apply { type = it } }
-
-        fun createBehandling(behandlingstype: Behandlingstyper) = createBehandlinger(listOf(behandlingstype))
+        val behandlingFørstegangAvsluttet = Behandling().apply {
+            id = 0
+            type = Behandlingstyper.FØRSTEGANG
+            status = Behandlingsstatus.AVSLUTTET
+        }
 
         return listOf(
             arguments(
                 Behandlingsresultattyper.ANMODNING_OM_UNNTAK,
-                createBehandling(Behandlingstyper.FØRSTEGANG),
-                listOf(Behandlingstyper.FØRSTEGANG),
-                listOf(Behandlingsresultattyper.ANMODNING_OM_UNNTAK),
-                false
+                listOf(behandlingFørstegangAvsluttet),
+                null
             ),
             arguments(
                 null,
-                createBehandling(Behandlingstyper.FØRSTEGANG),
-                listOf(Behandlingstyper.FØRSTEGANG),
-                listOf(Behandlingsresultattyper.ANMODNING_OM_UNNTAK),
-                false
+                listOf(behandlingFørstegangAvsluttet),
+                null
             ),
             arguments(
                 Behandlingsresultattyper.IKKE_FASTSATT,
-                createBehandling(Behandlingstyper.FØRSTEGANG),
-                listOf(Behandlingstyper.FØRSTEGANG),
-                listOf(Behandlingsresultattyper.ANMODNING_OM_UNNTAK),
-                true
-            )
+                listOf(
+                    Behandling().apply {
+                        id = 0
+                        type = Behandlingstyper.ANKE
+                        status = Behandlingsstatus.AVSLUTTET
+                    }
+                ),
+                null
+            ),
+            arguments(
+                Behandlingsresultattyper.IKKE_FASTSATT,
+                listOf(behandlingFørstegangAvsluttet),
+                0L
+            ),
+            arguments(
+                Behandlingsresultattyper.IKKE_FASTSATT,
+                listOf(
+                    Behandling().apply {
+                        id = 0
+                        type = Behandlingstyper.ANKE
+                        status = Behandlingsstatus.AVSLUTTET
+                    },
+                    Behandling().apply {
+                        id = 1
+                        type = Behandlingstyper.FØRSTEGANG
+                        status = Behandlingsstatus.AVSLUTTET
+                    }
+                ),
+                1L
+            ),
+            arguments(
+                Behandlingsresultattyper.IKKE_FASTSATT,
+                listOf(
+                    Behandling().apply {
+                        id = 0
+                        type = Behandlingstyper.FØRSTEGANG
+                        status = Behandlingsstatus.UNDER_BEHANDLING
+                    },
+                    Behandling().apply {
+                        id = 1
+                        type = Behandlingstyper.ANKE
+                        status = Behandlingsstatus.AVSLUTTET
+                    },
+                    Behandling().apply {
+                        id = 2
+                        type = Behandlingstyper.NY_VURDERING
+                        status = Behandlingsstatus.AVSLUTTET
+                    }
+                ),
+                2L
+            ),
         )
     }
 
     class BehandlingHolder {
         private val behandlingerMedType: ArrayList<Pair<Behandling, Behandlingsresultattyper?>> = ArrayList()
 
-        fun setup(behandlingsresultatRepository: BehandlingsresultatRepository): BehandlingReplikeringsRegler {
+        fun setup(behandlingsresultatRepository: BehandlingsresultatRepository): SaksbehandlingRegler {
             setupMock { id: Long, behandlingsresultattype: Behandlingsresultattyper? ->
                 every { behandlingsresultatRepository.findById(id) } returns lagBehandlingsresultat(
                     behandlingsresultattype
                 )
             }
-            return BehandlingReplikeringsRegler(behandlingsresultatRepository)
+            return SaksbehandlingRegler(behandlingsresultatRepository)
         }
 
         fun add(
@@ -220,6 +259,7 @@ class BehandlingReplikeringsReglerTest {
             behandlingerMedType.add(Pair(Behandling().apply {
                 this.tema = tema
                 this.type = type
+                this.status = Behandlingsstatus.AVSLUTTET
             }, behandlingsresultattype))
         }
 

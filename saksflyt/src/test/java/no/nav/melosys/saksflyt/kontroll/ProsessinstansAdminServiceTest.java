@@ -63,11 +63,12 @@ class ProsessinstansAdminServiceTest {
             .flatExtracting(HentProsessinstansDto::id,
                 HentProsessinstansDto::behandlingId, HentProsessinstansDto::saksnummer,
                 HentProsessinstansDto::endretDato, HentProsessinstansDto::prosessType,
-                HentProsessinstansDto::feiletSteg, HentProsessinstansDto::sisteFeilmelding)
+                HentProsessinstansDto::feiletSteg, HentProsessinstansDto::sisteFeilmelding,
+                HentProsessinstansDto::correlationId)
             .containsExactly(prosessinstans.getId(),
                 prosessinstans.getBehandling().getId(), prosessinstans.getBehandling().getFagsak().getSaksnummer(),
                 prosessinstans.getEndretDato(), prosessinstans.getType().getKode(),
-                CURRENT_PROSESS_STEG.getKode(), sisteFeilmelding);
+                CURRENT_PROSESS_STEG.getKode(), sisteFeilmelding, prosessinstans.getData(ProsessDataKey.CORRELATION_ID_SAKSFLYT));
     }
 
     @Test
@@ -114,6 +115,7 @@ class ProsessinstansAdminServiceTest {
             .isThrownBy(() -> prosessinstansAdminService.restartProsessinstanser(singletonList(uuid)))
             .withMessageContaining("har status");
     }
+
     @Test
     void restartProsessinstans_prosessinstansErNyOgHarStatusKlar_kasterFeil() {
         Prosessinstans prosessinstans = lagProsessinstans(LocalDateTime.now());
@@ -183,6 +185,7 @@ class ProsessinstansAdminServiceTest {
         prosessinstans.setSistFullførtSteg(FORRIGE_PROSSESS_STEG);
         prosessinstans.setRegistrertDato(registrertDato);
         prosessinstans.setEndretDato(registrertDato);
+        prosessinstans.setData(ProsessDataKey.CORRELATION_ID_SAKSFLYT, "correlation-id");
         return prosessinstans;
     }
 

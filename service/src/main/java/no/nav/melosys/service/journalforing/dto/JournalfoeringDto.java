@@ -6,6 +6,8 @@ import java.util.List;
 
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
 
+import static java.lang.Boolean.FALSE;
+
 public abstract class JournalfoeringDto {
     private String journalpostID;
     private String oppgaveID;
@@ -132,5 +134,9 @@ public abstract class JournalfoeringDto {
 
     public void setBehandlingstypeKode(String behandlingstypeKode) {
         this.behandlingstypeKode = behandlingstypeKode;
+    }
+
+    public Boolean skalSendeForvaltningsmelding() {
+        return FALSE.equals(ikkeSendForvaltingsmelding);
     }
 }

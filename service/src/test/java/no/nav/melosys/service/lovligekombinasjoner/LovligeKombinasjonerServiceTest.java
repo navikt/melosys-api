@@ -14,6 +14,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Set;
+
 import static no.nav.melosys.domain.kodeverk.Sakstemaer.*;
 import static no.nav.melosys.domain.kodeverk.Sakstyper.*;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*;
@@ -154,6 +156,14 @@ class LovligeKombinasjonerServiceTest {
         behandling.setFagsak(fagsak);
         var muligeTyper = lovligeKombinasjonerService.behandlinstyperSomKanEndresTil(behandling);
         assertThat(muligeTyper).contains(NY_VURDERING, FØRSTEGANG, HENVENDELSE, KLAGE);
+    }
+
+    @Test
+    void hentMuligeBehandlingstemaer_hovedpartVIRKSOMHET_skalReturnereBehandlingsTemaVIRKSOMHET() {
+        Set<Behandlingstema> behandlingstemas = lovligeKombinasjonerService.hentMuligeBehandlingstemaer(Aktoersroller.VIRKSOMHET, TRYGDEAVTALE, TRYGDEAVGIFT, null);
+        assertThat(behandlingstemas)
+            .hasSize(1)
+            .contains(VIRKSOMHET);
     }
 
     private Fagsak fagsakMedSakstypeOgSakstema(Sakstyper sakstype, Sakstemaer sakstema) {

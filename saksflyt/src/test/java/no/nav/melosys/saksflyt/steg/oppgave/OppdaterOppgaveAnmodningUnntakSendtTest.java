@@ -56,12 +56,12 @@ class OppdaterOppgaveAnmodningUnntakSendtTest {
         LocalDate enMånedFremITid = LocalDate.now().plusMonths(1L);
 
         Oppgave oppgave = lagOppgave(enMånedFremITid, null);
-        when(oppgaveService.hentÅpenOppgaveMedFagsaksnummer(anyString())).thenReturn(oppgave);
+        when(oppgaveService.hentÅpenBehandlingsoppgaveMedFagsaksnummer(anyString())).thenReturn(oppgave);
 
         LocalDate toMånederFremITid = LocalDate.now().plusMonths(2L);
 
         oppdaterOppgaveAnmodningUnntakSendt.utfør(prosessinstans);
-        verify(oppgaveService).hentÅpenOppgaveMedFagsaksnummer(SAKSNUMMER);
+        verify(oppgaveService).hentÅpenBehandlingsoppgaveMedFagsaksnummer(SAKSNUMMER);
         verify(oppgaveService).oppdaterOppgave(eq(oppgave.getOppgaveId()), oppgaveCaptor.capture());
         assertThat(oppgaveCaptor.getValue().getFristFerdigstillelse()).isEqualTo(toMånederFremITid);
         assertThat(oppgaveCaptor.getValue().getBeskrivelse()).isEqualTo(ANMODNING_UNNTAK_BESKRIVELSE);
@@ -73,10 +73,10 @@ class OppdaterOppgaveAnmodningUnntakSendtTest {
         LocalDate treMånederFremITid = LocalDate.now().plusMonths(3L);
 
         Oppgave oppgave = lagOppgave(treMånederFremITid, eksisterendeBeskrivelse);
-        when(oppgaveService.hentÅpenOppgaveMedFagsaksnummer(anyString())).thenReturn(oppgave);
+        when(oppgaveService.hentÅpenBehandlingsoppgaveMedFagsaksnummer(anyString())).thenReturn(oppgave);
 
         oppdaterOppgaveAnmodningUnntakSendt.utfør(prosessinstans);
-        verify(oppgaveService).hentÅpenOppgaveMedFagsaksnummer(SAKSNUMMER);
+        verify(oppgaveService).hentÅpenBehandlingsoppgaveMedFagsaksnummer(SAKSNUMMER);
         verify(oppgaveService).oppdaterOppgave(eq(oppgave.getOppgaveId()), oppgaveCaptor.capture());
         assertThat(oppgaveCaptor.getValue().getFristFerdigstillelse()).isNull();
         assertThat(oppgaveCaptor.getValue().getBeskrivelse()).isEqualTo(ANMODNING_UNNTAK_BESKRIVELSE);

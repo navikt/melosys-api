@@ -8,10 +8,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.behandlingsgrunnlag.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Soeknadsland;
 import no.nav.melosys.domain.kodeverk.Behandlingsgrunnlagtyper;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.repository.BehandlingsgrunnlagRepository;
@@ -66,18 +69,24 @@ class BehandlingsgrunnlagServiceTest {
     }
 
     @Test
-    void opprettSøknadGrunnlag_finnesIkkeFraFør_blirOpprettet() {
-        Behandling behandling = lagBehandling();
+    void opprettEøsSøknadGrunnlag_finnesIkkeFraFør_blirOpprettet() {
+        Behandling behandling = lagBehandling(Sakstyper.EU_EOS, Behandlingstema.UTSENDT_ARBEIDSTAKER);
         when(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling);
         when(joarkFasade.hentMottaksDatoForJournalpost(behandling.getInitierendeJournalpostId())).thenReturn(LocalDate.now());
-        Soeknad soeknad = new Soeknad();
-        behandlingsgrunnlagService.opprettSøknadYrkesaktiveEøs(behandlingID, soeknad);
+        Periode periode = new Periode();
+        Soeknadsland soeknadsland = new Soeknadsland();
+
+
+        behandlingsgrunnlagService.opprettSøknad(behandling, periode, soeknadsland);
+
 
         verify(behandlingsgrunnlagRepository).save(behandlingsgrunnlagArgumentCaptor.capture());
         Behandlingsgrunnlag opprettet = behandlingsgrunnlagArgumentCaptor.getValue();
 
         assertThat(opprettet).isNotNull();
         assertThat(opprettet.getBehandlingsgrunnlagdata()).isInstanceOf(Soeknad.class);
+        assertThat(opprettet.getBehandlingsgrunnlagdata().periode).isEqualTo(periode);
+        assertThat(opprettet.getBehandlingsgrunnlagdata().soeknadsland).isEqualTo(soeknadsland);
         assertThat(opprettet.getType()).isEqualTo(Behandlingsgrunnlagtyper.SØKNAD_A1_YRKESAKTIVE_EØS);
         assertThat(opprettet.getBehandling()).isEqualTo(behandling);
         assertThat(opprettet.getMottaksdato()).isNotNull();
@@ -145,11 +154,14 @@ class BehandlingsgrunnlagServiceTest {
 
     @Test
     void opprettSedGrunnlag_harRettType() {
-        Behandling behandling = lagBehandling();
+        Behandling behandling = lagBehandling(Sakstyper.EU_EOS, Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL);
         when(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling);
         when(joarkFasade.hentMottaksDatoForJournalpost(behandling.getInitierendeJournalpostId())).thenReturn(LocalDate.now());
         SedGrunnlag sedGrunnlag = new SedGrunnlag();
+
+
         behandlingsgrunnlagService.opprettSedGrunnlag(behandlingID, sedGrunnlag);
+
 
         verify(behandlingsgrunnlagRepository).save(behandlingsgrunnlagArgumentCaptor.capture());
         Behandlingsgrunnlag opprettet = behandlingsgrunnlagArgumentCaptor.getValue();
@@ -163,11 +175,13 @@ class BehandlingsgrunnlagServiceTest {
 
     @Test
     void opprettSøknadFolketrygden_harRettType() {
-        Behandling behandling = lagBehandling();
+        Behandling behandling = lagBehandling(Sakstyper.FTRL, Behandlingstema.YRKESAKTIV);
         when(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling);
         when(joarkFasade.hentMottaksDatoForJournalpost(behandling.getInitierendeJournalpostId())).thenReturn(LocalDate.now());
-        SoeknadFtrl soeknadFtrl = new SoeknadFtrl();
-        behandlingsgrunnlagService.opprettSøknadFolketrygden(behandlingID, soeknadFtrl);
+
+
+        behandlingsgrunnlagService.opprettSøknad(behandling, null, null);
+
 
         verify(behandlingsgrunnlagRepository).save(behandlingsgrunnlagArgumentCaptor.capture());
         Behandlingsgrunnlag opprettet = behandlingsgrunnlagArgumentCaptor.getValue();
@@ -181,11 +195,12 @@ class BehandlingsgrunnlagServiceTest {
 
     @Test
     void opprettSøknadTrygdeavtale_harRettType() {
-        Behandling behandling = lagBehandling();
+        Behandling behandling = lagBehandling(Sakstyper.TRYGDEAVTALE, Behandlingstema.YRKESAKTIV);
         when(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling);
         when(joarkFasade.hentMottaksDatoForJournalpost(behandling.getInitierendeJournalpostId())).thenReturn(LocalDate.now());
-        SoeknadTrygdeavtale soeknadTrygdeavtale = new SoeknadTrygdeavtale();
-        behandlingsgrunnlagService.opprettSøknadTrygdeavtale(behandlingID, soeknadTrygdeavtale);
+
+
+        behandlingsgrunnlagService.opprettSøknad(behandling, null, null);
 
         verify(behandlingsgrunnlagRepository).save(behandlingsgrunnlagArgumentCaptor.capture());
         Behandlingsgrunnlag opprettet = behandlingsgrunnlagArgumentCaptor.getValue();
@@ -197,11 +212,18 @@ class BehandlingsgrunnlagServiceTest {
         assertThat(opprettet.getMottaksdato()).isNotNull();
     }
 
-    private Behandling lagBehandling() {
+    private Behandling lagBehandling(Sakstyper sakstype, Behandlingstema tema) {
         Behandling behandling = new Behandling();
+        behandling.setFagsak(lagFagsak(sakstype));
         behandling.setId(behandlingID);
-        String journalpostID = "123321";
-        behandling.setInitierendeJournalpostId(journalpostID);
+        behandling.setInitierendeJournalpostId("123321");
+        behandling.setTema(tema);
         return behandling;
+    }
+
+    private Fagsak lagFagsak(Sakstyper sakstype) {
+        Fagsak fagsak = new Fagsak();
+        fagsak.setType(sakstype);
+        return fagsak;
     }
 }
