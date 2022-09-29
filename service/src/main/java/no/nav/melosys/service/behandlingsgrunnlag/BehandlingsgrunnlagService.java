@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.behandlingsgrunnlag.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
@@ -19,6 +20,7 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.repository.BehandlingsgrunnlagRepository;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -38,12 +40,16 @@ public class BehandlingsgrunnlagService {
     private final BehandlingService behandlingService;
     private final JoarkFasade joarkFasade;
 
+    private final Unleash unleash;
+
     public BehandlingsgrunnlagService(BehandlingsgrunnlagRepository behandlingsgrunnlagRepository,
                                       BehandlingService behandlingService,
-                                      JoarkFasade joarkFasade) {
+                                      JoarkFasade joarkFasade,
+                                      Unleash unleash) {
         this.behandlingsgrunnlagRepository = behandlingsgrunnlagRepository;
         this.behandlingService = behandlingService;
         this.joarkFasade = joarkFasade;
+        this.unleash = unleash;
     }
 
     @Transactional(readOnly = true)
@@ -68,7 +74,8 @@ public class BehandlingsgrunnlagService {
 
     public void opprettSøknad(Behandling behandling, Periode periode, Soeknadsland soeknadsland) {
         long behandlingID = behandling.getId();
-        if (behandling.erBehandlingAvSøknad()) {
+        boolean behandleAlleSakerEnabled = unleash.isEnabled("melosys.behandle_alle_saker");
+        if (behandleAlleSakerEnabled ? !SaksbehandlingRegler.harTomFlyt(behandling.getFagsak().getType(), behandling.getType(), behandling.getTema()) : behandling.erBehandlingAvSøknad()) {
             Sakstyper sakstype = behandling.getFagsak().getType();
             switch (sakstype) {
                 case EU_EOS -> opprettSøknadYrkesaktiveEøs(behandlingID, periode, soeknadsland);
@@ -78,7 +85,7 @@ public class BehandlingsgrunnlagService {
             log.info("Opprettet søknad for behandling {}.", behandlingID);
         } else {
             log.info("Søknad trengs ikke og opprettes ikke for behandling {} med tema {}", behandlingID,
-                     behandling.getTema());
+                behandling.getTema());
         }
     }
 
