@@ -93,6 +93,14 @@ public class Fagsak extends RegistreringsInfo {
         this.behandlinger = behandlinger;
     }
 
+    public String getSaksnummer() {
+        return saksnummer;
+    }
+
+    public void setSaksnummer(String saksnummer) {
+        this.saksnummer = saksnummer;
+    }
+
     public boolean harAktivBehandling() {
         return hentAktivBehandling() != null;
     }
@@ -236,12 +244,8 @@ public class Fagsak extends RegistreringsInfo {
             .findFirst();
     }
 
-    public String getSaksnummer() {
-        return saksnummer;
-    }
-
-    public void setSaksnummer(String saksnummer) {
-        this.saksnummer = saksnummer;
+    public boolean kanEndres() {
+        return harAktivBehandling() && getBehandlinger().size() == 1;
     }
 
     public boolean erSakstypeEøs() {

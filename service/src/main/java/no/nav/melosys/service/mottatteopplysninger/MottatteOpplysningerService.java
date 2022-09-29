@@ -200,18 +200,23 @@ public class MottatteOpplysningerService {
     }
 
     @Transactional
-    public MottatteOpplysninger oppdaterMottatteOpplysninger(MottatteOpplysninger mottatteOpplysninger) {
+    public void oppdaterMottatteOpplysninger(MottatteOpplysninger mottatteOpplysninger) {
         MottatteOpplysningerKonverterer.oppdaterMottatteOpplysninger(mottatteOpplysninger);
-        return mottatteOpplysningerRepository.saveAndFlush(mottatteOpplysninger);
+        mottatteOpplysningerRepository.saveAndFlush(mottatteOpplysninger);
     }
 
     @Transactional
-    public MottatteOpplysninger oppdaterMottatteOpplysningerPeriodeOgLand(long behandlingID, Periode periode, Soeknadsland soeknadsland) {
+    public void oppdaterMottatteOpplysningerPeriodeOgLand(long behandlingID, Periode periode, Soeknadsland soeknadsland) {
         MottatteOpplysninger mottatteOpplysninger = hentMottatteOpplysninger(behandlingID);
         mottatteOpplysninger.getMottatteOpplysningerData().periode = periode;
         mottatteOpplysninger.getMottatteOpplysningerData().soeknadsland = soeknadsland;
         MottatteOpplysningerKonverterer.oppdaterMottatteOpplysninger(mottatteOpplysninger);
-        return mottatteOpplysningerRepository.saveAndFlush(mottatteOpplysninger);
+        mottatteOpplysningerRepository.saveAndFlush(mottatteOpplysninger);
+    }
+
+    @Transactional
+    public void slettOpplysninger(long behandlingID) {
+        mottatteOpplysningerRepository.deleteByBehandling_Id(behandlingID);
     }
 
     public Optional<MottatteOpplysninger> finnMottatteOpplysninger(Long behandlingID) {

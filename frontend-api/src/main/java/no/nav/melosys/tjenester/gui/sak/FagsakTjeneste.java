@@ -125,11 +125,12 @@ public class FagsakTjeneste {
 
     @PostMapping("/{saksnr}/endre")
     @ApiOperation(value = "Endre en sak.")
-    public ResponseEntity<Void> endreFagsak(@PathVariable("saksnr") String saksnummer, @RequestBody EndreSakDto endreSakDto) {
+    public ResponseEntity<Void> endreFagsak(@PathVariable("saksnr") String saksnummer, @RequestBody EndreSakDto endreDto) {
         log.debug("Saksbehandler {} ber om å endre fagsak {} med sakstype {}, sakstema {}",
-            SubjectHandler.getInstance().getUserID(), saksnummer, endreSakDto.getSakstype(), endreSakDto.getSakstema());
+            SubjectHandler.getInstance().getUserID(), saksnummer, endreDto.getSakstype(), endreDto.getSakstema());
         aksesskontroll.autoriserSakstilgang(saksnummer);
-        endreSakService.endre(saksnummer, endreSakDto.getSakstype(), endreSakDto.getSakstema());
+        endreSakService.endre(saksnummer, endreDto.getSakstype(), endreDto.getSakstema(), endreDto.getBehandlingstema(),
+            endreDto.getBehandlingstype(), endreDto.getBehandlingsstatus(), endreDto.getBehandlingsfrist());
         return ResponseEntity.noContent().build();
     }
 

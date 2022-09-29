@@ -9,12 +9,6 @@ import java.util.Set;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.Aktoer;
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
-import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
 import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.Tilleggsinformasjon;
 import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.TilleggsinformasjonDetaljer;
 import no.nav.melosys.domain.dokument.medlemskap.Periode;
@@ -25,10 +19,13 @@ import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresseUtlan
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
+import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
 import no.nav.melosys.service.persondata.PersondataFasade;
@@ -90,12 +87,14 @@ class FagsakTjenesteTest {
     @MockBean
     private static PersondataFasade persondataFasade;
     @MockBean
+    @SuppressWarnings("unused")
     private static SaksopplysningerService saksopplysningerService;
     @MockBean
     private static MottatteOpplysningerService mottatteOpplysningerService;
     @MockBean
     private static BehandlingsresultatService behandlingsresultatService;
     @MockBean
+    @SuppressWarnings("unused")
     private static OpprettBehandlingForSak opprettBehandlingForSak;
 
     @Autowired
@@ -363,6 +362,21 @@ class FagsakTjenesteTest {
             .andExpect(jsonPath("$.behandlingID", equalTo(1)));
 
         verify(aksesskontroll).autoriserSakstilgang("123");
+    }
+
+    @Test
+    void endreSak() throws Exception {
+        EndreSakDto endreSakDto = new EndreSakDto(Sakstyper.TRYGDEAVTALE, Sakstemaer.UNNTAK,
+            Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET, Behandlingstyper.NY_VURDERING, Behandlingsstatus.OPPRETTET, null);
+
+        mockMvc.perform(post(BASE_URL + "/{saksnr}/endre", "123")
+                            .content(objectMapper.writeValueAsString(endreSakDto))
+                            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isNoContent());
+
+        verify(aksesskontroll).autoriserSakstilgang("123");
+        verify(endreSakService).endre("123", Sakstyper.TRYGDEAVTALE, Sakstemaer.UNNTAK,
+            Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET, Behandlingstyper.NY_VURDERING, Behandlingsstatus.OPPRETTET, null);
     }
 
     @Test
