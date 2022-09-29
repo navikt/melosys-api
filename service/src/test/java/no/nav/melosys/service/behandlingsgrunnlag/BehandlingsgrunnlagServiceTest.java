@@ -218,13 +218,30 @@ class BehandlingsgrunnlagServiceTest {
     @Test
     void opprettSøknad_behandleAlleSakerTrueTomFlytSkalIkkeLageBehGrunnlag_behGrunnlagBlirIkkeOpprettet() {
         fakeUnleash.enable("melosys.behandle_alle_saker");
-        Behandling behandling = lagBehandling(Sakstyper.EU_EOS, Behandlingstema.VIRKSOMHET, Behandlingstyper.HENVENDELSE);
+        Behandling behandling = lagBehandling(Sakstyper.FTRL, Behandlingstema.YRKESAKTIV, Behandlingstyper.FØRSTEGANG);
 
         behandlingsgrunnlagService.opprettSøknad(behandling, null, null);
 
         verifyNoInteractions(behandlingService);
         verifyNoInteractions(behandlingsgrunnlagRepository);
+    }
 
+    @Test
+    void opprettSøknad_behandleAlleSakerFalse_behGrunnlagBlirOpprettet() {
+        Behandling behandling = lagBehandling(Sakstyper.FTRL, Behandlingstema.YRKESAKTIV, Behandlingstyper.FØRSTEGANG);
+        when(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling);
+        when(joarkFasade.hentMottaksDatoForJournalpost(behandling.getInitierendeJournalpostId())).thenReturn(LocalDate.now());
+
+        behandlingsgrunnlagService.opprettSøknad(behandling, null, null);
+
+        verify(behandlingsgrunnlagRepository).save(behandlingsgrunnlagArgumentCaptor.capture());
+        Behandlingsgrunnlag opprettet = behandlingsgrunnlagArgumentCaptor.getValue();
+
+        assertThat(opprettet).isNotNull();
+        assertThat(opprettet.getBehandlingsgrunnlagdata()).isInstanceOf(SoeknadFtrl.class);
+        assertThat(opprettet.getType()).isEqualTo(Behandlingsgrunnlagtyper.SØKNAD_FOLKETRYGDEN);
+        assertThat(opprettet.getBehandling()).isEqualTo(behandling);
+        assertThat(opprettet.getMottaksdato()).isNotNull();
     }
 
     private Behandling lagBehandling(Sakstyper sakstype, Behandlingstema tema) {
