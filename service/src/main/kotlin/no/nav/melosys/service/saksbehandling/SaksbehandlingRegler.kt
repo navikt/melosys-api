@@ -23,46 +23,43 @@ class SaksbehandlingRegler(private val behandlingsresultatRepository: Behandling
 
         if (harTomFlyt(sakstype, behandlingstype, behandlingstema)) return false
 
-        return finnesBehandlingMedBehandlingTyperOgIkkeBehandlingsresultatTyper(
-            fagsak.hentBehandlingerSortertSynkendePåRegistrertDato(),
-            listOf(
-                Behandlingstyper.NY_VURDERING,
-                Behandlingstyper.ENDRET_PERIODE,
-                Behandlingstyper.FØRSTEGANG
-            ),
-            listOf(
-                Behandlingsresultattyper.HENLEGGELSE,
-                Behandlingsresultattyper.ANMODNING_OM_UNNTAK,
-                Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL,
-                Behandlingsresultattyper.FERDIGBEHANDLET,
-                Behandlingsresultattyper.HENLEGGELSE_BORTFALT
-            )
-        )
+        return finnBehandlingSomKanReplikeres(fagsak) != null
     }
 
-    internal fun finnesBehandlingMedBehandlingTyperOgIkkeBehandlingsresultatTyper(
-        behandlinger: List<Behandling>,
-        behandlingstyper: List<Behandlingstyper>,
-        behandlingsresultattyper: List<Behandlingsresultattyper>
-    ): Boolean {
-        return behandlinger.firstOrNull {
-            val behandlingsresultat = behandlingsresultatRepository.findById(it.id)
-            behandlingstyper.contains(it.type)
-                && behandlingsresultat.isPresent
-                && !behandlingsresultattyper.contains(behandlingsresultat.get().type)
-        } != null
-    }
+    fun finnBehandlingSomKanReplikeres(fagsak: Fagsak) =
+        finnBehandlingSomKanReplikeres(fagsak.hentBehandlingerSortertSynkendePåRegistrertDato())
+
+    internal fun finnBehandlingSomKanReplikeres(behandlinger: List<Behandling>) =
+        behandlinger
+            .filter { it.erInaktiv() }
+            .firstOrNull {
+                val behandlingsresultat = behandlingsresultatRepository.findById(it.id)
+                behandlingstyperSomKanReplikeres.contains(it.type)
+                    && behandlingsresultat.isPresent
+                    && !behandlingsresultattyperSomIkkeKanReplikeres.contains(behandlingsresultat.get().type)
+            }
 
     companion object {
+        val behandlingstyperSomKanReplikeres = listOf(
+            Behandlingstyper.NY_VURDERING,
+            Behandlingstyper.ENDRET_PERIODE,
+            Behandlingstyper.FØRSTEGANG
+        )
+        val behandlingsresultattyperSomIkkeKanReplikeres = listOf(
+            Behandlingsresultattyper.HENLEGGELSE,
+            Behandlingsresultattyper.ANMODNING_OM_UNNTAK,
+            Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL,
+            Behandlingsresultattyper.FERDIGBEHANDLET,
+            Behandlingsresultattyper.HENLEGGELSE_BORTFALT
+        )
+
         @JvmStatic
         fun harTomFlyt(
             sakstype: Sakstyper,
             behandlingstype: Behandlingstyper,
             behandlingstema: Behandlingstema
-        ): Boolean {
-            if (behandlingstype == Behandlingstyper.HENVENDELSE || behandlingstype == Behandlingstyper.KLAGE) return true
-
-            return when (behandlingstema) {
+        ): Boolean =
+            when (behandlingstema) {
                 ARBEID_KUN_NORGE,
                 IKKE_YRKESAKTIV,
                 PENSJONIST,
@@ -76,8 +73,7 @@ class SaksbehandlingRegler(private val behandlingsresultatRepository: Behandling
                 ANMODNING_OM_UNNTAK_HOVEDREGEL -> sakstype == Sakstyper.TRYGDEAVTALE
                 YRKESAKTIV -> sakstype == Sakstyper.FTRL
 
-                else -> return false
+                else -> behandlingstype == Behandlingstyper.HENVENDELSE || behandlingstype == Behandlingstyper.KLAGE
             }
-        }
     }
 }
