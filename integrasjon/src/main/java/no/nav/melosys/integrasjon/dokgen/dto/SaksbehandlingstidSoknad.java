@@ -28,8 +28,8 @@ public class SaksbehandlingstidSoknad extends DokgenDto {
     private final String avsenderSoknad;
     private final String avsenderLand;
 
-    public SaksbehandlingstidSoknad(DokgenBrevbestilling brevbestilling, Instant datoBehandlingstid) {
-        super(brevbestilling, Aktoersroller.BRUKER);
+    public SaksbehandlingstidSoknad(DokgenBrevbestilling brevbestilling, Instant datoBehandlingstid, boolean toggleEnabled) {
+        super(brevbestilling, Aktoersroller.BRUKER, toggleEnabled);
         this.datoMottatt = brevbestilling.getForsendelseMottatt();
         this.datoBehandlingstid = datoBehandlingstid;
         this.typeSoknad = brevbestilling.getBehandling().getFagsak().getType().getKode();
@@ -38,8 +38,8 @@ public class SaksbehandlingstidSoknad extends DokgenDto {
         this.avsenderLand = brevbestilling.getAvsenderLand();
     }
 
-    public static SaksbehandlingstidSoknad av(DokgenBrevbestilling brevbestilling, Instant datoBehandlingstid) {
-        return new SaksbehandlingstidSoknad(brevbestilling, datoBehandlingstid);
+    public static SaksbehandlingstidSoknad av(DokgenBrevbestilling brevbestilling, Instant datoBehandlingstid, boolean toggleEnabled) {
+        return new SaksbehandlingstidSoknad(brevbestilling, datoBehandlingstid, toggleEnabled);
     }
 
     public Instant getDatoMottatt() {
