@@ -218,7 +218,7 @@ class BehandlingsgrunnlagServiceTest {
     @Test
     void opprettSøknad_behandleAlleSakerTrueTomFlytSkalIkkeLageBehGrunnlag_behGrunnlagBlirIkkeOpprettet() {
         fakeUnleash.enable("melosys.behandle_alle_saker");
-        Behandling behandling = lagBehandling(Sakstyper.EU_EOS, Behandlingstema.YRKESAKTIV, Behandlingstyper.HENVENDELSE);
+        Behandling behandling = lagBehandling(Sakstyper.EU_EOS, Behandlingstema.VIRKSOMHET, Behandlingstyper.HENVENDELSE);
 
         behandlingsgrunnlagService.opprettSøknad(behandling, null, null);
 

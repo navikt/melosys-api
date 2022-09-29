@@ -74,8 +74,8 @@ public class BehandlingsgrunnlagService {
 
     public void opprettSøknad(Behandling behandling, Periode periode, Soeknadsland soeknadsland) {
         long behandlingID = behandling.getId();
-        boolean behandleAlleSakerToggle = unleash.isEnabled("melosys.behandle_alle_saker");
-        if ((!behandleAlleSakerToggle && behandling.erBehandlingAvSøknad()) || (behandleAlleSakerToggle && !SaksbehandlingRegler.harTomFlyt(behandling.getFagsak().getType(), behandling.getType(), behandling.getTema()))) {
+        boolean behandleAlleSakerEnabled = unleash.isEnabled("melosys.behandle_alle_saker");
+        if (behandleAlleSakerEnabled ? !SaksbehandlingRegler.harTomFlyt(behandling.getFagsak().getType(), behandling.getType(), behandling.getTema()) : behandling.erBehandlingAvSøknad()) {
             Sakstyper sakstype = behandling.getFagsak().getType();
             switch (sakstype) {
                 case EU_EOS -> opprettSøknadYrkesaktiveEøs(behandlingID, periode, soeknadsland);
@@ -85,7 +85,7 @@ public class BehandlingsgrunnlagService {
             log.info("Opprettet søknad for behandling {}.", behandlingID);
         } else {
             log.info("Søknad trengs ikke og opprettes ikke for behandling {} med tema {}", behandlingID,
-                     behandling.getTema());
+                behandling.getTema());
         }
     }
 
