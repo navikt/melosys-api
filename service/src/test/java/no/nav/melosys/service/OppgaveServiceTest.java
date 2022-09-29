@@ -26,6 +26,7 @@ import no.nav.melosys.integrasjon.oppgave.OppgaveFasade;
 import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
+import no.nav.melosys.service.oppgave.OppgaveFactory;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.oppgave.dto.BehandlingsoppgaveDto;
 import no.nav.melosys.service.oppgave.dto.JournalfoeringsoppgaveDto;
@@ -463,6 +464,51 @@ class OppgaveServiceTest {
 
         when(oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(saksnummer)).thenReturn(Collections.emptyList());
         assertThat(oppgaveService.saksbehandlerErTilordnetOppgaveForSaksnummer("Z12111", saksnummer)).isFalse();
+    }
+
+    @Test
+    void oppdaterOppgave() {
+        String oppgaveID = "1";
+        Sakstyper sakstype = Sakstyper.EU_EOS;
+        Sakstemaer sakstema = Sakstemaer.MEDLEMSKAP_LOVVALG;
+        Behandlingstema behandlingstema = Behandlingstema.IKKE_YRKESAKTIV;
+        Behandlingstyper behandlingstype = Behandlingstyper.NY_VURDERING;
+
+
+        oppgaveService.oppdaterOppgave(oppgaveID, sakstype, sakstema, behandlingstema, behandlingstype, LocalDate.of(2022, 3, 7));
+
+
+        verify(oppgaveFasade).oppdaterOppgave(eq(oppgaveID), oppgaveOppdateringCaptor.capture());
+        Oppgave behandlingsoppgave = OppgaveFactory.lagBehandlingsoppgave(sakstema, sakstype, behandlingstema,
+                                                                          behandlingstype).build();
+        OppgaveOppdatering oppgaveOppdatering = oppgaveOppdateringCaptor.getValue();
+        assertThat(oppgaveOppdatering.getTema()).isEqualTo(behandlingsoppgave.getTema());
+        assertThat(oppgaveOppdatering.getBehandlingstema()).isEqualTo(behandlingsoppgave.getBehandlingstema()) ;
+        assertThat(oppgaveOppdatering.getBehandlingstype()).isEqualTo(behandlingsoppgave.getBehandlingstype());
+        assertThat(oppgaveOppdatering.getOppgavetype()).isEqualTo(behandlingsoppgave.getOppgavetype());
+    }
+
+    @Test
+    void oppdaterOppgave_utenToggle() {
+        unleash.disableAll();
+        String oppgaveID = "1";
+        Sakstyper sakstype = Sakstyper.EU_EOS;
+        Sakstemaer sakstema = Sakstemaer.MEDLEMSKAP_LOVVALG;
+        Behandlingstema behandlingstema = Behandlingstema.IKKE_YRKESAKTIV;
+        Behandlingstyper behandlingstype = Behandlingstyper.NY_VURDERING;
+
+
+        oppgaveService.oppdaterOppgave(oppgaveID, sakstype, sakstema, behandlingstema, behandlingstype, LocalDate.of(2022, 3, 7));
+
+
+        verify(oppgaveFasade).oppdaterOppgave(eq(oppgaveID), oppgaveOppdateringCaptor.capture());
+        Oppgave behandlingsoppgaveForType = (OppgaveFactory.lagBehandlingsOppgaveForType(behandlingstema, behandlingstype))
+            .build();
+        OppgaveOppdatering oppgaveOppdatering = oppgaveOppdateringCaptor.getValue();
+        assertThat(oppgaveOppdatering.getTema()).isEqualTo(behandlingsoppgaveForType.getTema());
+        assertThat(oppgaveOppdatering.getBehandlingstema()).isEqualTo(behandlingsoppgaveForType.getBehandlingstema()) ;
+        assertThat(oppgaveOppdatering.getBehandlingstype()).isEqualTo(behandlingsoppgaveForType.getBehandlingstype());
+        assertThat(oppgaveOppdatering.getOppgavetype()).isEqualTo(behandlingsoppgaveForType.getOppgavetype());
     }
 
     private static Behandling lagBehandling() {

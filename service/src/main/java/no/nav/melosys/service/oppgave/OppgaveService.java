@@ -1,6 +1,7 @@
 package no.nav.melosys.service.oppgave;
 
 
+import java.time.LocalDate;
 import java.util.*;
 import javax.annotation.Nullable;
 
@@ -402,12 +403,27 @@ public class OppgaveService {
         return false;
     }
 
-    public void oppdaterOppgave(@org.jetbrains.annotations.Nullable String oppgaveId,
-                                @org.jetbrains.annotations.Nullable Sakstyper sakstype,
-                                @org.jetbrains.annotations.Nullable Sakstemaer sakstema,
-                                @org.jetbrains.annotations.Nullable Behandlingstema behandlingstema,
-                                @org.jetbrains.annotations.Nullable Behandlingstyper behandlingstype) {
-        var behandlingsoppgave = OppgaveFactory.lagBehandlingsoppgave(sakstema, sakstype, behandlingstema,
-                                                                      behandlingstype);
+    public void oppdaterOppgave(String oppgaveID, Sakstyper sakstype, Sakstemaer sakstema, Behandlingstema behandlingstema,
+                                 Behandlingstyper behandlingstype, LocalDate frist) {
+        Oppgave behandlingsoppgave = (
+            unleash.isEnabled("melosys.behandle_alle_saker")
+                ? OppgaveFactory.lagBehandlingsoppgave(sakstema, sakstype, behandlingstema, behandlingstype)
+                : OppgaveFactory.lagBehandlingsOppgaveForType(behandlingstema, behandlingstype))
+            .build();
+        oppdaterOppgave(
+            oppgaveID,
+            OppgaveOppdatering.builder()
+                .behandlingstema(behandlingsoppgave.getBehandlingstema())
+                .behandlingstype(unleash.isEnabled("melosys.behandle_alle_saker") ? null : behandlingsoppgave.getBehandlingstype())
+                .tema(behandlingsoppgave.getTema())
+                .oppgavetype(behandlingsoppgave.getOppgavetype())
+                .fristFerdigstillelse(frist)
+                .build()
+        );
+    }
+
+    public void oppdaterOppgave(String oppgaveID, Sakstyper sakstype, Sakstemaer sakstema,
+                                Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
+        oppdaterOppgave(oppgaveID, sakstype, sakstema, behandlingstema, behandlingstype, null);
     }
 }

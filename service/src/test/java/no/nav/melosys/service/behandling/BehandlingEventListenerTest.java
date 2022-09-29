@@ -4,7 +4,6 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Optional;
 
-import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.BehandlingEndretAvSaksbehandlerEvent;
 import no.nav.melosys.domain.BehandlingsfristEndretEvent;
@@ -18,7 +17,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
-import no.nav.melosys.service.oppgave.OppgaveFactory;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -39,8 +37,6 @@ class BehandlingEventListenerTest {
     @Mock
     private OppgaveService oppgaveService;
 
-    private static FakeUnleash unleash = new FakeUnleash();
-
     @Captor
     private ArgumentCaptor<OppgaveOppdatering> oppgaveOppdateringCaptor;
 
@@ -54,9 +50,8 @@ class BehandlingEventListenerTest {
 
     @BeforeEach
     public void setup() {
-        unleash.enableAll();
         behandling.setId(BEHANDLING_ID);
-        behandlingEventListener = new BehandlingEventListener(behandlingService, oppgaveService, unleash);
+        behandlingEventListener = new BehandlingEventListener(behandlingService, oppgaveService);
     }
 
     @Test
@@ -137,42 +132,7 @@ class BehandlingEventListenerTest {
 
         behandlingEventListener.behandlingEndret(behandlingEndretAvSaksbehandlerEvent);
 
-        Oppgave behandlingsOppgaveForType = OppgaveFactory.lagBehandlingsoppgave(fagsak, behandling).build();
-        verify(oppgaveService).oppdaterOppgave(eq(OPPGAVE_ID), oppgaveOppdateringCaptor.capture());
-        OppgaveOppdatering capturedOppgaveOppdatering = oppgaveOppdateringCaptor.getValue();
-        assertThat(capturedOppgaveOppdatering.getBehandlingstema()).isEqualTo(behandlingsOppgaveForType.getBehandlingstema());
-        assertThat(capturedOppgaveOppdatering.getBehandlingstype()).isEqualTo(behandlingsOppgaveForType.getBehandlingstype());
-        assertThat(capturedOppgaveOppdatering.getTema()).isEqualTo(behandlingsOppgaveForType.getTema());
-        assertThat(capturedOppgaveOppdatering.getFristFerdigstillelse()).isEqualTo(LocalDate.of(2022, 3, 7));
-    }
-
-    @Test
-    void behandlingEndret_oppdatererOppgave_medRiktigData_toggle() {
-        unleash.disableAll();
-
-        Fagsak fagsak = new Fagsak();
-        fagsak.setSaksnummer(FAGSAKSNUMMER);
-        behandling.setType(Behandlingstyper.NY_VURDERING);
-        behandling.setTema(Behandlingstema.IKKE_YRKESAKTIV);
-        behandling.setBehandlingsfrist(LocalDate.of(2022, 3, 7));
-        behandling.setFagsak(fagsak);
-        when(behandlingService.hentBehandling(BEHANDLING_ID)).thenReturn(behandling);
-
-        BehandlingEndretAvSaksbehandlerEvent behandlingEndretAvSaksbehandlerEvent = new BehandlingEndretAvSaksbehandlerEvent(
-            BEHANDLING_ID,
-            behandling
-        );
-        Oppgave oppgave = new Oppgave.Builder().setOppgaveId(OPPGAVE_ID).build();
-        when(oppgaveService.finnÅpenBehandlingsoppgaveMedFagsaksnummer(FAGSAKSNUMMER)).thenReturn(Optional.of(oppgave));
-
-        behandlingEventListener.behandlingEndret(behandlingEndretAvSaksbehandlerEvent);
-
-        Oppgave behandlingsOppgaveForType = OppgaveFactory.lagBehandlingsOppgaveForType(behandling.getTema(), behandling.getType()).build();
-        verify(oppgaveService).oppdaterOppgave(eq(OPPGAVE_ID), oppgaveOppdateringCaptor.capture());
-        OppgaveOppdatering capturedOppgaveOppdatering = oppgaveOppdateringCaptor.getValue();
-        assertThat(capturedOppgaveOppdatering.getBehandlingstema()).isEqualTo(behandlingsOppgaveForType.getBehandlingstema());
-        assertThat(capturedOppgaveOppdatering.getBehandlingstype()).isEqualTo(behandlingsOppgaveForType.getBehandlingstype());
-        assertThat(capturedOppgaveOppdatering.getTema()).isEqualTo(behandlingsOppgaveForType.getTema());
-        assertThat(capturedOppgaveOppdatering.getFristFerdigstillelse()).isEqualTo(LocalDate.of(2022, 3, 7));
+        verify(oppgaveService).oppdaterOppgave(OPPGAVE_ID, fagsak.getType(), fagsak.getTema(), behandling.getTema(),
+                                              behandling.getType(), LocalDate.of(2022, 3, 7));
     }
 }

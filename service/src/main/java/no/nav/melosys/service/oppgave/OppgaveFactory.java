@@ -24,7 +24,7 @@ public final class OppgaveFactory {
     private OppgaveFactory() {
     }
 
-    public static Oppgave.Builder lagJournalføringsoppgave(String journalpostID) {
+    static Oppgave.Builder lagJournalføringsoppgave(String journalpostID) {
         return new Oppgave.Builder()
             .setOppgavetype(Oppgavetyper.JFR)
             .setTema(Tema.MED)
@@ -114,7 +114,9 @@ public final class OppgaveFactory {
         };
     }
 
-    public static OppgaveBehandlingstema utledBehandlingstema(Sakstemaer sakstema, Sakstyper sakstype, Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
+    static OppgaveBehandlingstema utledBehandlingstema(Sakstemaer sakstema, Sakstyper sakstype,
+                                                       Behandlingstema behandlingstema,
+                                                       Behandlingstyper behandlingstype) {
         if (skalBrukeMelosysBehandlingstemaForBehandlingstema(sakstema, sakstype, behandlingstema, behandlingstype)) {
             return switch (behandlingstema) {
                 case PENSJONIST -> OppgaveBehandlingstema.PENSJONIST_ELLER_UFORETRYGDET;
@@ -162,7 +164,7 @@ public final class OppgaveFactory {
         };
     }
 
-    public static Tema utledTema(Sakstemaer sakstema) {
+    private static Tema utledTema(Sakstemaer sakstema) {
         return switch (sakstema) {
             case MEDLEMSKAP_LOVVALG -> Tema.MED;
             case TRYGDEAVGIFT -> Tema.TRY;
