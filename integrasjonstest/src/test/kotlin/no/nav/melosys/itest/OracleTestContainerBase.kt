@@ -15,6 +15,7 @@ open class OracleTestContainerBase {
         @DynamicPropertySource
         @JvmStatic
         fun oracleProperties(registry: DynamicPropertyRegistry) {
+            // Det finnes ikke Oracle container som støtter ARM arkitektur
             val m1Mac: String? = System.getenv("M1-MAC")
             if (m1Mac?.lowercase() == "true") return
 
