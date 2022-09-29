@@ -13,6 +13,10 @@ import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Soeknadsland;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Sakstemaer;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
@@ -374,8 +378,6 @@ public class OppgaveService {
         behandlingDto.setRegistrertDato(behandling.getRegistrertDato());
         behandlingDto.setEndretDato(behandling.getEndretDato());
         behandlingDto.setSvarFrist(behandling.getDokumentasjonSvarfristDato());
-        // FIXME: Feltet og endepunktet fjernes fra JSON-schema
-        behandlingDto.setErUnderOppdatering(false);
         return behandlingDto;
     }
 
@@ -398,5 +400,14 @@ public class OppgaveService {
             }
         }
         return false;
+    }
+
+    public void oppdaterOppgave(@org.jetbrains.annotations.Nullable String oppgaveId,
+                                @org.jetbrains.annotations.Nullable Sakstyper sakstype,
+                                @org.jetbrains.annotations.Nullable Sakstemaer sakstema,
+                                @org.jetbrains.annotations.Nullable Behandlingstema behandlingstema,
+                                @org.jetbrains.annotations.Nullable Behandlingstyper behandlingstype) {
+        var behandlingsoppgave = OppgaveFactory.lagBehandlingsoppgave(sakstema, sakstype, behandlingstema,
+                                                                      behandlingstype);
     }
 }

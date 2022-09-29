@@ -1,8 +1,9 @@
 package no.nav.melosys.service.sak
 
+import mu.KotlinLogging
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
-import no.nav.melosys.domain.VedtakMetadataLagretEvent
+import no.nav.melosys.domain.FagsakEndretAvSaksbehandler
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData
 import no.nav.melosys.domain.kodeverk.Sakstemaer
@@ -14,6 +15,7 @@ import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 import javax.transaction.Transactional
 
+private val log = KotlinLogging.logger { }
 @Service
 class EndreSakService(
     private val fagsakService: FagsakService,
@@ -33,8 +35,8 @@ class EndreSakService(
         fagsakService.oppdaterSakstema(saksnummer, sakstema)
 
         oppfriskSaksopplysningerService.oppfriskSaksopplysning(behandling.id, false)
-        // TODO oppdater oppgave
-        applicationEventPublisher.publishEvent(VedtakMetadataLagretEvent(1L))
+        applicationEventPublisher.publishEvent(FagsakEndretAvSaksbehandler(fagsak))
+        log.debug { "Ferdig med endring av sak $saksnummer (type: $sakstype, tema: $sakstema)" }
     }
 
     private fun gjenopprettBehandlingsgrunnlag(

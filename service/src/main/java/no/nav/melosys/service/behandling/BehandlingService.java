@@ -212,7 +212,7 @@ public class BehandlingService {
         applicationEventPublisher.publishEvent(new BehandlingEndretStatusEvent(status, behandling));
     }
 
-    public void endreType(Behandling behandling, Behandlingstyper type) {
+    private void endreType(Behandling behandling, Behandlingstyper type) {
         log.info("Endrer behandlingstypen for behandling {} fra {} til {}", behandling.getId(), behandling.getType(), type);
         behandling.setType(type);
         behandlingRepository.save(behandling);
@@ -220,7 +220,7 @@ public class BehandlingService {
         applicationEventPublisher.publishEvent(new BehandlingEndretAvSaksbehandlerEvent(behandling.getId(), behandling));
     }
 
-    public void endreTema(Behandling behandling, Behandlingstema tema) {
+    void endreTema(Behandling behandling, Behandlingstema tema) {
         log.info("Endrer behandlingstema for behandling {} fra {} til {}", behandling.getId(), behandling.getTema(), tema);
         behandling.setTema(tema);
         behandlingRepository.save(behandling);

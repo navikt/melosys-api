@@ -1,9 +1,12 @@
 package no.nav.melosys.service.sak
 
+import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
+import io.mockk.slot
 import io.mockk.verify
+import no.nav.melosys.domain.FagsakEndretAvSaksbehandler
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Soeknadsland
@@ -63,7 +66,9 @@ internal class EndreSakServiceTest {
         verify { fagsakService.oppdaterSakstema(saksnummer, MEDLEMSKAP_LOVVALG) }
         verify { oppfriskSaksopplysningerService.oppfriskSaksopplysning(fagsak.hentAktivBehandling().id, false) }
         // event for å oppdatere oppgave
-        verify { applicationEventPublisher.publishEvent(any()) }
+        val eventCapturingSlot = slot<FagsakEndretAvSaksbehandler>()
+        verify { applicationEventPublisher.publishEvent(capture(eventCapturingSlot)) }
+        eventCapturingSlot.captured.source shouldBe fagsak
     }
 
     @Test
