@@ -186,6 +186,49 @@ class OppgaveServiceTest {
     }
 
     @Test
+    void hentOppgaverMedAnsvarlig_notaterEksisterer_forventSisteNotat() {
+        final String behOppgID = "1";
+
+        final String tilordnetRessurs = "Z2222";
+        Oppgave.Builder oppgave1 = new Oppgave.Builder();
+        oppgave1.setOppgaveId(behOppgID);
+        oppgave1.setOppgavetype(Oppgavetyper.BEH_SAK_MK);
+        oppgave1.setSaksnummer(SAKSNUMMER);
+
+        Set<Oppgave> oppgaver = Set.of(oppgave1.build());
+        when(oppgaveFasade.finnOppgaverMedAnsvarlig(tilordnetRessurs)).thenReturn(oppgaver);
+
+        Fagsak fagsak = new Fagsak();
+        fagsak.setSaksnummer(SAKSNUMMER);
+        fagsak.setType(Sakstyper.EU_EOS);
+        fagsak.setStatus(Saksstatuser.OPPRETTET);
+
+        Behandling behandling = lagBehandling();
+        Set<Behandlingsnotat> behandlingsnotater = new HashSet<>();
+        Behandlingsnotat behandlingsnotat = new Behandlingsnotat();
+        Behandlingsnotat behandlingsnotat2 = new Behandlingsnotat();
+        behandlingsnotat.setRegistrertDato(Instant.now());
+        behandlingsnotat2.setRegistrertDato(Instant.now().plusMillis(2000));
+        behandlingsnotat.setTekst("Test1");
+        behandlingsnotat2.setTekst("Test2");
+        behandlingsnotater.add(behandlingsnotat);
+        behandlingsnotater.add(behandlingsnotat2);
+        behandling.setBehandlingsnotater(behandlingsnotater);
+
+        fagsak.setBehandlinger(List.of(behandling));
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        when(fagsakService.hentFagsak(any(String.class))).thenReturn(fagsak);
+
+        List<OppgaveDto> mineSaker = oppgaveService.hentOppgaverMedAnsvarlig(tilordnetRessurs);
+
+        BehandlingsoppgaveDto behandlingsOppgave = (BehandlingsoppgaveDto) mineSaker.get(0);
+        assertThat(behandlingsOppgave.getSisteNotat().equals(behandlingsnotat2.getTekst()));
+
+    }
+
+
+
+    @Test
     void hentOppgaverMedAnsvarlig_aktøridOgOrgnrErNull_forventUkjentIdOgNavn() {
         final String jfrOppgID = "2";
         final String tilordnetRessurs = "Z2222";

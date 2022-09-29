@@ -8,6 +8,7 @@ import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
+import no.nav.melosys.domain.RegistreringsInfo;
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Soeknadsland;
@@ -308,6 +309,8 @@ public class OppgaveService {
 
     private OppgaveDto lagBehandlingsoppgaveDto(Oppgave oppgave) {
         BehandlingsoppgaveDto behOppgaveDto = new BehandlingsoppgaveDto();
+        behOppgaveDto.setOppgaveBeskrivelse(oppgave.getBeskrivelse());
+
         Fagsak fagsak = fagsakService.hentFagsak(oppgave.getSaksnummer());
         behOppgaveDto.setSaksnummer(fagsak.getSaksnummer());
         behOppgaveDto.setSakstype(fagsak.getType());
@@ -316,6 +319,7 @@ public class OppgaveService {
         Behandling behandling = fagsak.hentSistAktivBehandling();
         behandling = behandlingService.hentBehandling(behandling.getId());
         behOppgaveDto.setBehandling(mapBehandling(behandling));
+        behOppgaveDto.setSisteNotat(hentSisteBehandlingsNotat(behandling));
 
         var aktørID = fagsak.finnBrukersAktørID().orElse(null);
         var orgnr = fagsak.finnVirksomhetsOrgnr().orElse(null);
@@ -363,6 +367,15 @@ public class OppgaveService {
         }
 
         return behOppgaveDto;
+    }
+
+    private String hentSisteBehandlingsNotat(Behandling behandling){
+        if (!behandling.getBehandlingsnotater().isEmpty()) {
+            return Collections.max(behandling.getBehandlingsnotater(),
+                Comparator.comparing(RegistreringsInfo::getRegistrertDato)).getTekst();
+        } else {
+            return null;
+        }
     }
 
     private BehandlingDto mapBehandling(Behandling behandling) {
