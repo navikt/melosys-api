@@ -67,7 +67,8 @@ public class BrevbestillingService {
                                  EregFasade eregFasade,
                                  KontaktopplysningService kontaktopplysningService,
                                  PersondataFasade persondataFasade,
-                                 DokumentNavnService dokumentNavnService, Unleash unleash) {
+                                 DokumentNavnService dokumentNavnService,
+                                 Unleash unleash) {
         this.brevmottakerService = brevmottakerService;
         this.dokumentServiceFasade = dokumentServiceFasade;
         this.behandlingService = behandlingService;

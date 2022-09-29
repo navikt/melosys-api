@@ -330,10 +330,68 @@ class BrevmalListeByggerTest {
     }
 
     @Test
+    void byggBrevmalDtoListe_mangelbrevToggleDisabled_lagerRiktigeValg() {
+        unleash.disable("melosys.behandle_alle_saker");
+        var behandling = lagBehandling(Behandlingstyper.SOEKNAD);
+        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
+        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
+
+
+        List<BrevmalDto> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
+
+
+        var mangelbrevMal = tilgjengeligeMaler.get(0).getBrevTyper().get(1);
+        assertThat(mangelbrevMal.getType()).isEqualTo(Produserbaredokumenter.MANGELBREV_BRUKER);
+        assertThat(mangelbrevMal.getFelter()).hasSize(2);
+
+        var innledningFritekstFelt = mangelbrevMal.getFelter().get(0);
+        assertThat(innledningFritekstFelt)
+            .extracting(
+                BrevmalFeltDto::getKode,
+                BrevmalFeltDto::getFeltType,
+                BrevmalFeltDto::isPaakrevd,
+                BrevmalFeltDto::getHjelpetekst,
+                BrevmalFeltDto::getTegnBegrensning)
+            .containsExactly(
+                BrevmalFeltKode.INNLEDNING_FRITEKST.getKode(),
+                FeltType.FRITEKST,
+                true,
+                null,
+                null);
+        assertThat(innledningFritekstFelt.getValg().getValgType()).isEqualTo(FeltValgType.RADIO);
+        assertThat(innledningFritekstFelt.getValg().getValgAlternativer())
+            .hasSize(2)
+            .flatExtracting(
+                FeltvalgAlternativDto::getKode,
+                FeltvalgAlternativDto::isVisFelt)
+            .containsExactlyInAnyOrder(
+                FRITEKST.getKode(),
+                false,
+                STANDARD.getKode(),
+                true);
+
+        assertThat(mangelbrevMal.getFelter().get(1))
+            .extracting(
+                BrevmalFeltDto::getKode,
+                BrevmalFeltDto::getFeltType,
+                BrevmalFeltDto::isPaakrevd,
+                BrevmalFeltDto::getValg,
+                BrevmalFeltDto::getHjelpetekst,
+                BrevmalFeltDto::getTegnBegrensning)
+            .containsExactly(
+                BrevmalFeltKode.MANGLER_FRITEKST.getKode(),
+                FeltType.FRITEKST,
+                true,
+                null,
+                null,
+                null);
+    }
+
+    @Test
     void byggBrevmalDtoListe_EUEØS_lagerRiktigeTittelValgForFritekstbrev() {
         Behandling behandlingEUEOS = lagBehandling(Behandlingstyper.FØRSTEGANG);
         behandlingEUEOS.getFagsak().setType(Sakstyper.EU_EOS);
-        behandlingEUEOS.getFagsak().setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
         when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandlingEUEOS);
         when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandlingEUEOS);
         when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
@@ -359,7 +417,6 @@ class BrevmalListeByggerTest {
     void byggBrevmalDtoListe_FTRL_lagerRiktigeTittelValgForFritekstbrev() {
         Behandling behandlingFTRL = lagBehandling(Behandlingstyper.FØRSTEGANG);
         behandlingFTRL.getFagsak().setType(Sakstyper.FTRL);
-        behandlingFTRL.getFagsak().setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
         when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandlingFTRL);
         when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandlingFTRL);
         when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
@@ -386,10 +443,91 @@ class BrevmalListeByggerTest {
     }
 
     @Test
-    void byggBrevmalDtoListe_lagerRiktigeTittelValgForFritekstbrevForTrygdeavtale() {
+    void byggBrevmalDtoListe_trygdeavtale_lagerRiktigeTittelValgForFritekstbrev() {
         Behandling behandlingTrygdeavtale = lagBehandling(Behandlingstyper.FØRSTEGANG);
         behandlingTrygdeavtale.getFagsak().setType(Sakstyper.TRYGDEAVTALE);
-        behandlingTrygdeavtale.getFagsak().setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
+        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandlingTrygdeavtale);
+        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandlingTrygdeavtale);
+        when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
+
+
+        List<BrevmalDto> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
+
+
+        assertThat(tilgjengeligeMaler).hasSize(3);
+        assertThat(tilgjengeligeMaler.get(0).getBrevTyper().get(2).getFelter().get(0).getValg().getValgAlternativer())
+            .hasSize(2)
+            .flatExtracting(
+                FeltvalgAlternativDto::getKode,
+                FeltvalgAlternativDto::isVisFelt)
+            .containsExactly(
+                HENVENDELSE_OM_MEDLEMSKAP.getKode(),
+                false,
+                FRITEKST.getKode(),
+                true);
+    }
+
+    @Test
+    void byggBrevmalDtoListe_EUEØSToggleDisabled_lagerRiktigeTittelValgForFritekstbrev() {
+        unleash.disable("melosys.behandle_alle_saker");
+        Behandling behandlingEUEOS = lagBehandling(Behandlingstyper.SOEKNAD);
+        behandlingEUEOS.getFagsak().setType(Sakstyper.EU_EOS);
+        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandlingEUEOS);
+        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandlingEUEOS);
+        when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
+
+
+        List<BrevmalDto> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
+
+
+        assertThat(tilgjengeligeMaler).hasSize(3);
+        assertThat(tilgjengeligeMaler.get(0).getBrevTyper().get(2).getFelter().get(0).getValg().getValgAlternativer())
+            .hasSize(2)
+            .flatExtracting(
+                FeltvalgAlternativDto::getKode,
+                FeltvalgAlternativDto::isVisFelt)
+            .containsExactly(
+                HENVENDELSE_OM_TRYGDETILHØRLIGHET.getKode(),
+                false,
+                FRITEKST.getKode(),
+                true);
+    }
+
+    @Test
+    void byggBrevmalDtoListe_FTRLToggleDisabled_lagerRiktigeTittelValgForFritekstbrev() {
+        unleash.disable("melosys.behandle_alle_saker");
+        Behandling behandlingFTRL = lagBehandling(Behandlingstyper.SOEKNAD);
+        behandlingFTRL.getFagsak().setType(Sakstyper.FTRL);
+        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandlingFTRL);
+        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandlingFTRL);
+        when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
+
+
+        List<BrevmalDto> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
+
+
+        assertThat(tilgjengeligeMaler).hasSize(3);
+        assertThat(tilgjengeligeMaler.get(0).getBrevTyper().get(2).getFelter().get(0).getValg().getValgAlternativer())
+            .hasSize(4)
+            .flatExtracting(
+                FeltvalgAlternativDto::getKode,
+                FeltvalgAlternativDto::isVisFelt)
+            .containsExactly(
+                CONFIRMATION_OF_MEMBERSHIP.getKode(),
+                false,
+                BEKREFTELSE_PÅ_MEDLEMSKAP.getKode(),
+                false,
+                HENVENDELSE_OM_MEDLEMSKAP.getKode(),
+                false,
+                FRITEKST.getKode(),
+                true);
+    }
+
+    @Test
+    void byggBrevmalDtoListe_trygdeavtaleToggleDisabled_lagerRiktigeTittelValgForFritekstbrev() {
+        unleash.disable("melosys.behandle_alle_saker");
+        Behandling behandlingTrygdeavtale = lagBehandling(Behandlingstyper.SOEKNAD);
+        behandlingTrygdeavtale.getFagsak().setType(Sakstyper.TRYGDEAVTALE);
         when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandlingTrygdeavtale);
         when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandlingTrygdeavtale);
         when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());

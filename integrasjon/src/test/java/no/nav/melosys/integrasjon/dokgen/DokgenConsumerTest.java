@@ -96,7 +96,6 @@ class DokgenConsumerTest {
     void lagPdfMedVedlegg_skalBestilleBrevMedVedlegg() {
         byte[] vedleggHeihei = "heihei".getBytes(StandardCharsets.UTF_8);
         byte[] vedleggTeit = "teit".getBytes(StandardCharsets.UTF_8);
-        MangelbrevBruker mangelbrevBruker = getMangelbrevBruker();
 
         wireMockServer.stubFor(post(urlPathEqualTo("/mal/mangelbrev_bruker/lag-pdf"))
             .withHeader("content-type", containing("multipart/form-data"))
