@@ -406,7 +406,7 @@ public class JournalfoeringService {
             throw new FunksjonellException("Opplysninger for å opprette en søknad mangler");
         }
 
-        if (SaksbehandlingRegler.harTomFlyt(
+        if (unleash.isEnabled("melosys.behandle_alle_saker") && SaksbehandlingRegler.harTomFlyt(
             Sakstyper.valueOf(journalfoeringDto.getFagsak().getSakstype()), Behandlingstyper.valueOf(journalfoeringDto.getBehandlingstypeKode()), Behandlingstema.valueOf(journalfoeringDto.getBehandlingstemaKode()))
         ) {
             log.info("Sak for journalpost {} vil få tom flyt og trenger dermed ikke søknadsperiode eller land", journalfoeringDto.getJournalpostID());

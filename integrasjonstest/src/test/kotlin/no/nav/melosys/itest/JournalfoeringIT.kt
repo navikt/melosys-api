@@ -163,6 +163,7 @@ class JournalfoeringIT(
             mottattDato = LocalDate.now()
             arbeidsgiverID = null
             behandlingstemaKode = Behandlingstema.UTSENDT_ARBEIDSTAKER.kode
+            behandlingstypeKode = Behandlingstyper.FØRSTEGANG.kode
             representantID = null
             representantKontaktPerson = null
             representererKode = null
