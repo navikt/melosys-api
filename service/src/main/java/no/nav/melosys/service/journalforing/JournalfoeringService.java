@@ -200,7 +200,7 @@ public class JournalfoeringService {
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, behandlingstema);
 
         if (behandleAlleSakerToggleEnabled
-            ? !SaksbehandlingRegler.harTomFlyt(Sakstyper.valueOf(journalfoeringDto.getFagsak().getSakstype()), Behandlingstyper.valueOf(journalfoeringDto.getBehandlingstypeKode()), Behandlingstema.valueOf(journalfoeringDto.getBehandlingstemaKode()))
+            ? !SaksbehandlingRegler.harTomFlyt(sakstype, behandlingstype, behandlingstema)
             : erSakstypeEøs(sakstype) && erBehandlingAvSøknad(behandlingstema)
         ) {
             validerOpprettSakForSøknadBehandlingFelter(journalfoeringDto);
@@ -369,8 +369,8 @@ public class JournalfoeringService {
     }
 
     private void valider(JournalfoeringDto journalfoeringDto) {
-        if (journalfoeringDto instanceof JournalfoeringOpprettDto) {
-            if (((JournalfoeringOpprettDto) journalfoeringDto).getFagsak() == null) {
+        if (journalfoeringDto instanceof JournalfoeringOpprettDto journalfoeringOpprettDto) {
+            if (journalfoeringOpprettDto.getFagsak() == null) {
                 throw new FunksjonellException("Opplysninger for å opprette en søknad mangler");
             }
         }
