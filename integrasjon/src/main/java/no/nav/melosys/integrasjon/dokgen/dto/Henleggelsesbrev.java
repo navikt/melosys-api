@@ -17,8 +17,8 @@ public class Henleggelsesbrev extends DokgenDto {
     @JsonFormat(shape = STRING)
     private final LocalDate datoMottatt;
 
-    private Henleggelsesbrev(HenleggelseBrevbestilling brevbestilling, Aktoersroller mottakerType) {
-        super(brevbestilling, mottakerType);
+    private Henleggelsesbrev(HenleggelseBrevbestilling brevbestilling, Aktoersroller mottakerType, boolean toggleEnabled) {
+        super(brevbestilling, mottakerType, toggleEnabled);
         this.fritekst = brevbestilling.getFritekst();
         this.begrunnelseKode = brevbestilling.getBegrunnelseKode();
         this.behandlingstype = brevbestilling.getBehandling().getType().getKode();
@@ -41,8 +41,8 @@ public class Henleggelsesbrev extends DokgenDto {
         return datoMottatt;
     }
 
-    public static Henleggelsesbrev av(HenleggelseBrevbestilling brevbestilling) {
-        return new Henleggelsesbrev(brevbestilling, Aktoersroller.BRUKER);
+    public static Henleggelsesbrev av(HenleggelseBrevbestilling brevbestilling, boolean toggleEnabled) {
+        return new Henleggelsesbrev(brevbestilling, Aktoersroller.BRUKER, toggleEnabled);
     }
 
     @Override
