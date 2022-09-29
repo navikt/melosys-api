@@ -199,7 +199,10 @@ public class JournalfoeringService {
         }
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, behandlingstema);
 
-        if (erSakstypeEøs(sakstype) && erBehandlingAvSøknad(behandlingstema)) {
+        if (behandleAlleSakerToggleEnabled
+            ? !SaksbehandlingRegler.harTomFlyt(Sakstyper.valueOf(journalfoeringDto.getFagsak().getSakstype()), Behandlingstyper.valueOf(journalfoeringDto.getBehandlingstypeKode()), Behandlingstema.valueOf(journalfoeringDto.getBehandlingstemaKode()))
+            : erSakstypeEøs(sakstype) && erBehandlingAvSøknad(behandlingstema)
+        ) {
             validerOpprettSakForSøknadBehandlingFelter(journalfoeringDto);
             prosessinstans.setData(ProsessDataKey.SØKNADSLAND, journalfoeringDto.getFagsak().getLand());
             prosessinstans.setData(ProsessDataKey.SØKNADSPERIODE, journalfoeringDto.getFagsak().getSoknadsperiode());
@@ -366,6 +369,12 @@ public class JournalfoeringService {
     }
 
     private void valider(JournalfoeringDto journalfoeringDto) {
+        if (journalfoeringDto instanceof JournalfoeringOpprettDto) {
+            if (((JournalfoeringOpprettDto) journalfoeringDto).getFagsak() == null) {
+                throw new FunksjonellException("Opplysninger for å opprette en søknad mangler");
+            }
+        }
+
         if (StringUtils.isEmpty(journalfoeringDto.getJournalpostID())) {
             throw new FunksjonellException("JournalpostID mangler");
         }
@@ -402,17 +411,6 @@ public class JournalfoeringService {
     }
 
     private void validerOpprettSakForSøknadBehandlingFelter(JournalfoeringOpprettDto journalfoeringDto) {
-        if (journalfoeringDto.getFagsak() == null) {
-            throw new FunksjonellException("Opplysninger for å opprette en søknad mangler");
-        }
-
-        if (unleash.isEnabled("melosys.behandle_alle_saker") && SaksbehandlingRegler.harTomFlyt(
-            Sakstyper.valueOf(journalfoeringDto.getFagsak().getSakstype()), Behandlingstyper.valueOf(journalfoeringDto.getBehandlingstypeKode()), Behandlingstema.valueOf(journalfoeringDto.getBehandlingstemaKode()))
-        ) {
-            log.info("Sak for journalpost {} vil få tom flyt og trenger dermed ikke søknadsperiode eller land", journalfoeringDto.getJournalpostID());
-            return;
-        }
-
         final PeriodeDto søknadsperiode = journalfoeringDto.getFagsak().getSoknadsperiode();
         if (søknadsperiode == null) {
             throw new FunksjonellException("Søknadsperiode mangler");
