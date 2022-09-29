@@ -54,7 +54,7 @@ class JournalfoeringReplikeringIT(
         ThreadLocalAccessInfo.executeProcess("journalførOgOpprettAndregangsBehandling") {
             journalføringService.journalførOgOpprettAndregangsBehandling(journalfoeringTilordneDto)
         }
-        finnprosessID(ProsessType.JFR_ANDREGANG_REPLIKER_BEHANDLING, startTime)
+        finnProsessID(ProsessType.JFR_ANDREGANG_REPLIKER_BEHANDLING, startTime)
 
 
         val fagsak = fagsakRepository.findBySaksnummer(behandling.fagsak.saksnummer).get()

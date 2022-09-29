@@ -83,7 +83,7 @@ class JournalfoeringBase(
     }
 
     protected fun journalførOgOpprettSak(journalfoeringOpprettDto: JournalfoeringOpprettDto) {
-        ThreadLocalAccessInfo.executeProcess("Journalfør dokument og opprett ny sak. Ferdigstill oppgave.") {
+        ThreadLocalAccessInfo.executeProcess("Journalfør dokument og opprett ny sak. Ferdigstill journalføringsoppgave.") {
             journalføringService.journalførOgOpprettSak(journalfoeringOpprettDto)
             oppgaveService.ferdigstillOppgave(journalfoeringOpprettDto.oppgaveID)
         }
@@ -95,10 +95,10 @@ class JournalfoeringBase(
     }
 
     protected fun waitForProsesses(startTime: LocalDateTime): UUID {
-        val journalføringProsessID = finnprosessID(ProsessType.JFR_NY_SAK_BRUKER, startTime)
+        val journalføringProsessID = finnProsessID(ProsessType.JFR_NY_SAK_BRUKER, startTime)
         listOf(
             journalføringProsessID,
-            finnprosessID(ProsessType.OPPRETT_OG_DISTRIBUER_BREV, startTime)
+            finnProsessID(ProsessType.OPPRETT_OG_DISTRIBUER_BREV, startTime)
         ).forEach {
             sjekkAtprosesssHarStatusFerdig(it)
         }
@@ -150,7 +150,7 @@ class JournalfoeringBase(
                 .getOrNull()?.status == ProsessStatus.FERDIG
         }
 
-    protected fun finnprosessID(prosessType: ProsessType, now: LocalDateTime): UUID =
+    protected fun finnProsessID(prosessType: ProsessType, now: LocalDateTime): UUID =
         await.timeout(30, TimeUnit.SECONDS).untilNotNull {
             prosessinstansRepository.findAll()
                 .find { it.registrertDato > now && it.type == prosessType && it.status == ProsessStatus.FERDIG }?.id
