@@ -228,7 +228,8 @@ class BehandlingsgrunnlagServiceTest {
 
     @Test
     void opprettSøknad_behandleAlleSakerFalse_behGrunnlagBlirOpprettet() {
-        Behandling behandling = lagBehandling(Sakstyper.FTRL, Behandlingstema.YRKESAKTIV, Behandlingstyper.FØRSTEGANG);
+        fakeUnleash.enable("melosys.behandle_alle_saker");
+        Behandling behandling = lagBehandling(Sakstyper.EU_EOS, Behandlingstema.YRKESAKTIV, Behandlingstyper.FØRSTEGANG);
         when(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling);
         when(joarkFasade.hentMottaksDatoForJournalpost(behandling.getInitierendeJournalpostId())).thenReturn(LocalDate.now());
 
@@ -238,8 +239,8 @@ class BehandlingsgrunnlagServiceTest {
         Behandlingsgrunnlag opprettet = behandlingsgrunnlagArgumentCaptor.getValue();
 
         assertThat(opprettet).isNotNull();
-        assertThat(opprettet.getBehandlingsgrunnlagdata()).isInstanceOf(SoeknadFtrl.class);
-        assertThat(opprettet.getType()).isEqualTo(Behandlingsgrunnlagtyper.SØKNAD_FOLKETRYGDEN);
+        assertThat(opprettet.getBehandlingsgrunnlagdata()).isInstanceOf(Soeknad.class);
+        assertThat(opprettet.getType()).isEqualTo(Behandlingsgrunnlagtyper.SØKNAD_A1_YRKESAKTIVE_EØS);
         assertThat(opprettet.getBehandling()).isEqualTo(behandling);
         assertThat(opprettet.getMottaksdato()).isNotNull();
     }
