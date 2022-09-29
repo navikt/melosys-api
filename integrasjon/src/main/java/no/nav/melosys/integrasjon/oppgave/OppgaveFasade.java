@@ -27,11 +27,11 @@ public interface OppgaveFasade {
 
     List<Oppgave> finnOppgaverMedOrgnr(String orgnr);
 
-    List<Oppgave> finnÅpneOppgaverMedJournalpostID(String journalpostID);
+    List<Oppgave> finnÅpneBehandlingsoppgaverMedJournalpostID(String journalpostID);
 
-    List<Oppgave> finnÅpneOppgaverMedSaksnummer(String saksnummer);
+    List<Oppgave> finnÅpneBehandlingsoppgaverMedSaksnummer(String saksnummer);
 
-    List<Oppgave> finnAvsluttetOppgaverMedSaksnummer(String saksnummer);
+    List<Oppgave> finnAvsluttetBehandlingsoppgaverMedSaksnummer(String saksnummer);
 
     Oppgave hentOppgave(String oppgaveId);
 

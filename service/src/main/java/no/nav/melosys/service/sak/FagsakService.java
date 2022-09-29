@@ -7,6 +7,7 @@ import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.*;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -156,6 +157,17 @@ public class FagsakService {
     }
 
     @Transactional
+    public void ferdigbehandleSak(String saksnummer) {
+        var fagsak = hentFagsak(saksnummer);
+        var behandling = fagsak.hentAktivBehandling();
+        var nyStatus = fagsak.getStatus() == Saksstatuser.OPPRETTET ? Saksstatuser.AVSLUTTET : fagsak.getStatus();
+
+        avsluttFagsakOgBehandling(fagsak, behandling, nyStatus);
+        behandlingsresultatService.oppdaterBehandlingsresultattype(behandling.getId(), Behandlingsresultattyper.FERDIGBEHANDLET);
+        oppgaveService.ferdigstillOppgaveMedSaksnummer(fagsak.getSaksnummer());
+    }
+
+    @Transactional
     public Fagsak nyFagsakOgBehandling(OpprettSakRequest opprettSakRequest) {
         Fagsak fagsak = new Fagsak();
         String saksnummer = hentNesteSaksnummer();
@@ -243,19 +255,6 @@ public class FagsakService {
 
     private String hentNesteSaksnummer() {
         return FAGSAKID_PREFIX + fagsakRepository.hentNesteSekvensVerdi();
-    }
-
-    @Transactional
-    public void avsluttFagsakOgBehandlingValiderBehandlingstype(Fagsak fagsak, Behandling behandling) {
-        Behandlingstema behandlingstema = behandling.getTema();
-        if (!behandling.kanAvsluttesManuelt()) {
-            throw new FunksjonellException("Behandlingstema " + behandlingstema + " kan ikke avsluttes manuelt");
-        }
-
-        Saksstatuser saksstatus = behandlingstema == Behandlingstema.IKKE_YRKESAKTIV
-            ? Saksstatuser.LOVVALG_AVKLART : Saksstatuser.AVSLUTTET;
-        avsluttFagsakOgBehandling(fagsak, saksstatus);
-        oppgaveService.ferdigstillOppgaveMedSaksnummer(fagsak.getSaksnummer());
     }
 
     public void avsluttFagsakOgBehandling(Fagsak fagsak, Saksstatuser saksstatus) {

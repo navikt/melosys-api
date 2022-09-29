@@ -29,7 +29,7 @@ class FeilregistrerX100OppgaverJobb(
             prosesserFraX100.map { p: Prosessinstans -> p.getData(ProsessDataKey.JOURNALPOST_ID) }.toList()
         log.info("Det er ${journalpostIdList.size} journalposter for X100 SED-er.")
         val oppgaveSet = journalpostIdList.map { journalpostID: String? ->
-            oppgaveService.finnÅpneOppgaverMedJournalpostID(journalpostID)
+            oppgaveService.finnÅpneBehandlingsoppgaverMedJournalpostID(journalpostID)
         }.flatten().toSet()
 
         if (oppgaveSet.isEmpty()) {
@@ -48,7 +48,7 @@ class FeilregistrerX100OppgaverJobb(
         val behandlingsoppgaver = prosessinstansRepository.findAllWithSedX100()
             .map { it.behandling }
             .filter { it != null && it.erRegisteringAvUnntak() && it.harStatus(Behandlingsstatus.VURDER_DOKUMENT) }
-            .map { Pair(it.id, oppgaveService.finnÅpenOppgaveMedFagsaksnummer(it.fagsak.saksnummer)) }
+            .map { Pair(it.id, oppgaveService.finnÅpenBehandlingsoppgaveMedFagsaksnummer(it.fagsak.saksnummer)) }
             .filter { it.second.isPresent }
             .filter { !erMottattAndreSeder(it.first)}
             .filter { harIngenKontrollfeil(it.first) }

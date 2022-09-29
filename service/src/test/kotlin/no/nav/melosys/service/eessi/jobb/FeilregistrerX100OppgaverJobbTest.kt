@@ -18,7 +18,6 @@ import org.mockito.ArgumentMatchers.anyLong
 import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mock
 import org.mockito.Mockito
-import org.mockito.Mockito.times
 import org.mockito.junit.jupiter.MockitoExtension
 import java.util.*
 
@@ -48,7 +47,7 @@ internal class FeilregistrerX100OppgaverJobbTest {
         Mockito.`when`(prosessinstansRepository!!.findAllWithSedX100()).thenReturn(setOf(prosessMedX100))
         Mockito.`when`(prosessinstansRepository!!.findAllByBehandling_IdAndTypeIn(anyLong(), eq(ProsessType.MOTTAK_SED))).thenReturn(setOf(prosessMedX100))
         val oppgave = Oppgave.Builder().setOppgaveId(OPPGAVE_ID_X100).build()
-        Mockito.`when`(oppgaveService!!.finnÅpenOppgaveMedFagsaksnummer("MEL-1"))
+        Mockito.`when`(oppgaveService!!.finnÅpenBehandlingsoppgaveMedFagsaksnummer("MEL-1"))
             .thenReturn(Optional.of(oppgave))
 
         feilregistrerX100OppgaverJobb!!.feilregistrerX100Behandlingsoppgaver()
@@ -62,7 +61,7 @@ internal class FeilregistrerX100OppgaverJobbTest {
         val prosessMedX100 = lagProsessinstansMedEessiMelding()
         Mockito.`when`(prosessinstansRepository!!.findAllWithSedX100()).thenReturn(setOf(prosessMedX100))
         val oppgave = Oppgave.Builder().setOppgaveId(OPPGAVE_ID_X100).build()
-        Mockito.`when`(oppgaveService!!.finnÅpneOppgaverMedJournalpostID(JOURNALPOST_ID_X_100))
+        Mockito.`when`(oppgaveService!!.finnÅpneBehandlingsoppgaverMedJournalpostID(JOURNALPOST_ID_X_100))
             .thenReturn(listOf(oppgave))
 
         feilregistrerX100OppgaverJobb!!.feilregistrerX100Journalføringsoppgaver()

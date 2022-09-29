@@ -236,19 +236,6 @@ class FagsakTjenesteTest {
     }
 
     @Test
-    void avsluttSakManuelt() throws Exception {
-        Fagsak fagsak = lagFagsak();
-        mockFagsakTjeneste(fagsak);
-
-        mockMvc.perform(put(BASE_URL + "/{saksnr}/avslutt", "123")
-                .contentType(MediaType.TEXT_PLAIN)
-                .accept(MediaType.TEXT_PLAIN))
-            .andExpect(status().isNoContent());
-
-        verify(fagsakService).avsluttFagsakOgBehandlingValiderBehandlingstype(fagsak, fagsak.hentAktivBehandling());
-    }
-
-    @Test
     void revurderSisteBehandling() throws Exception {
         Fagsak fagsak = lagFagsak();
         mockFagsakTjeneste(fagsak);
@@ -260,6 +247,19 @@ class FagsakTjenesteTest {
             .andExpect(jsonPath("$.behandlingID", equalTo(1)));
 
         verify(aksesskontroll).autoriserSakstilgang("123");
+    }
+
+    @Test
+    void ferdigbehandleSak() throws Exception {
+        Fagsak fagsak = lagFagsak();
+        mockFagsakTjeneste(fagsak);
+
+        mockMvc.perform(put(BASE_URL + "/{saksnr}/ferdigbehandle", "123")
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isNoContent());
+
+        verify(aksesskontroll).autoriserSakstilgang("123");
+        verify(fagsakService).ferdigbehandleSak("123");
     }
 
     private static void mockFagsakTjeneste(Fagsak fagsak) {

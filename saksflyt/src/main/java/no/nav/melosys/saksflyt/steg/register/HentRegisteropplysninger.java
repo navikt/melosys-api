@@ -1,5 +1,6 @@
 package no.nav.melosys.saksflyt.steg.register;
 
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
@@ -25,13 +26,16 @@ public class HentRegisteropplysninger implements StegBehandler {
     private final RegisteropplysningerService registeropplysningerService;
     private final BehandlingService behandlingService;
     private final PersondataFasade persondataFasade;
+    private final Unleash unleash;
 
     public HentRegisteropplysninger(RegisteropplysningerService registeropplysningerService,
                                     BehandlingService behandlingService,
-                                    PersondataFasade persondataFasade) {
+                                    PersondataFasade persondataFasade,
+                                    Unleash unleash) {
         this.registeropplysningerService = registeropplysningerService;
         this.behandlingService = behandlingService;
         this.persondataFasade = persondataFasade;
+        this.unleash = unleash;
     }
 
     @Override
@@ -52,7 +56,11 @@ public class HentRegisteropplysninger implements StegBehandler {
             var registeropplysningerRequestBuilder = RegisteropplysningerRequest.builder()
                 .behandlingID(prosessinstans.getBehandling().getId())
                 .fnr(persondataFasade.hentFolkeregisterident(aktørId))
-                .saksopplysningTyper(utledSaksopplysningTyper(prosessinstans.getBehandling().getTema()));
+                .saksopplysningTyper(utledSaksopplysningTyper(
+                    behandling.getFagsak().getType(),
+                    behandling.getTema(),
+                    behandling.getType(),
+                    unleash.isEnabled("melosys.behandle_alle_saker")));
 
             behandling.finnPeriode().ifPresent(periode -> {
                 registeropplysningerRequestBuilder.fom(periode.getFom());

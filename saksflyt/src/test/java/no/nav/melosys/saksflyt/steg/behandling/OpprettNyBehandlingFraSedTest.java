@@ -94,7 +94,7 @@ class OpprettNyBehandlingFraSedTest {
 
         when(fagsakService.hentFagsakFraArkivsakID(gsakSaksnummer)).thenReturn(fagsak);
         when(behandlingService.nyBehandling(any(), any(), any(), any(), any(), any())).thenReturn(new Behandling());
-        when(oppgaveFasade.finnÅpenOppgaveMedFagsaksnummer(fagsak.getSaksnummer()))
+        when(oppgaveFasade.finnÅpenBehandlingsoppgaveMedFagsaksnummer(fagsak.getSaksnummer()))
             .thenReturn(Optional.of(oppgave));
 
         opprettNyBehandlingFraSed.utfør(prosessinstans);

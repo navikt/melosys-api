@@ -91,7 +91,7 @@ public class SvarAnmodningUnntakSedRuter implements SedRuterForSedTyper {
 
     private void oppdaterBehandlingOgOppgave(Behandling behandling, String sedType) {
         behandling.setStatus(Behandlingsstatus.VURDER_DOKUMENT);
-        Optional<Oppgave> oppgave = oppgaveService.finnÅpenOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer());
+        Optional<Oppgave> oppgave = oppgaveService.finnÅpenBehandlingsoppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer());
         if (oppgave.isEmpty()) {
             opprettOppgave(behandling, sedType);
         } else {
