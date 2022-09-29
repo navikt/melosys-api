@@ -7,6 +7,7 @@ import io.kotest.matchers.equality.shouldBeEqualToComparingFields
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.Fagsystem
 import no.nav.melosys.domain.arkiv.ArkivDokument
 import no.nav.melosys.domain.arkiv.Journalpost
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad
@@ -117,7 +118,7 @@ class JournalfoeringBase(
         behandling.fagsak.apply {
             type.shouldBe(Sakstyper.EU_EOS)
             status.shouldBe(Saksstatuser.OPPRETTET)
-            registrertAv.shouldBe("MELOSYS")
+            registrertAv.shouldBe(Fagsystem.MELOSYS.toString())
             tema.shouldBe(Sakstemaer.MEDLEMSKAP_LOVVALG)
         }
         behandling.behandlingsgrunnlag.behandlingsgrunnlagdata.shouldBeInstanceOf<Soeknad>()
