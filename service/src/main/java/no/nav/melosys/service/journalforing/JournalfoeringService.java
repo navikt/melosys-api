@@ -406,9 +406,10 @@ public class JournalfoeringService {
             throw new FunksjonellException("Opplysninger for å opprette en søknad mangler");
         }
 
-        if (journalfoeringDto.erTomFlyt()) {
-            log.info("Sak for journalpost {} vil få tom flyt og trenger dermed ikke søknadsperiode eller land",
-                journalfoeringDto.getJournalpostID());
+        if (SaksbehandlingRegler.harTomFlyt(
+            Sakstyper.valueOf(journalfoeringDto.getFagsak().getSakstype()), Behandlingstyper.valueOf(journalfoeringDto.getBehandlingstypeKode()), Behandlingstema.valueOf(journalfoeringDto.getBehandlingstemaKode()))
+        ) {
+            log.info("Sak for journalpost {} vil få tom flyt og trenger dermed ikke søknadsperiode eller land", journalfoeringDto.getJournalpostID());
             return;
         }
 
