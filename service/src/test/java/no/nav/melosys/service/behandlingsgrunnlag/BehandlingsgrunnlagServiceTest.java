@@ -7,6 +7,7 @@ import java.util.Optional;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.behandlingsgrunnlag.*;
@@ -15,6 +16,7 @@ import no.nav.melosys.domain.behandlingsgrunnlag.data.Soeknadsland;
 import no.nav.melosys.domain.kodeverk.Behandlingsgrunnlagtyper;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.repository.BehandlingsgrunnlagRepository;
@@ -30,8 +32,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class BehandlingsgrunnlagServiceTest {
@@ -49,9 +50,11 @@ class BehandlingsgrunnlagServiceTest {
 
     private final long behandlingID = 123332211;
 
+    FakeUnleash fakeUnleash = new FakeUnleash();
+
     @BeforeEach
     public void setup() {
-        behandlingsgrunnlagService = new BehandlingsgrunnlagService(behandlingsgrunnlagRepository, behandlingService, joarkFasade);
+        behandlingsgrunnlagService = new BehandlingsgrunnlagService(behandlingsgrunnlagRepository, behandlingService, joarkFasade, fakeUnleash);
     }
 
     @Test
@@ -212,12 +215,30 @@ class BehandlingsgrunnlagServiceTest {
         assertThat(opprettet.getMottaksdato()).isNotNull();
     }
 
+    @Test
+    void opprettSøknad_behandleAlleSakerTrueTomFlytSkalIkkeLageBehGrunnlag_behGrunnlagBlirIkkeOpprettet() {
+        fakeUnleash.enable("melosys.behandle_alle_saker");
+        Behandling behandling = lagBehandling(Sakstyper.EU_EOS, Behandlingstema.YRKESAKTIV, Behandlingstyper.HENVENDELSE);
+
+        behandlingsgrunnlagService.opprettSøknad(behandling, null, null);
+
+        verifyNoInteractions(behandlingService);
+        verifyNoInteractions(behandlingsgrunnlagRepository);
+
+    }
+
     private Behandling lagBehandling(Sakstyper sakstype, Behandlingstema tema) {
         Behandling behandling = new Behandling();
         behandling.setFagsak(lagFagsak(sakstype));
         behandling.setId(behandlingID);
         behandling.setInitierendeJournalpostId("123321");
         behandling.setTema(tema);
+        return behandling;
+    }
+
+    private Behandling lagBehandling(Sakstyper sakstyper, Behandlingstema tema, Behandlingstyper behandlingstyper){
+        Behandling behandling = lagBehandling(sakstyper, tema);
+        behandling.setType(behandlingstyper);
         return behandling;
     }
 
