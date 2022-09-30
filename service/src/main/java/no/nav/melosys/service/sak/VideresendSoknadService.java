@@ -12,6 +12,7 @@ import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.joark.HentJournalposterTilknyttetSakRequest;
@@ -85,7 +86,7 @@ public class VideresendSoknadService {
     }
 
     private void valider(Behandling behandling, Bostedsland bostedsland) {
-        validerErBehandlingAvSøknad(behandling);
+        validerBehandlingstemaErArbeidFlereLand(behandling);
         validerBostedsland(behandling, bostedsland);
         validerAdresse(behandling);
     }
@@ -95,9 +96,9 @@ public class VideresendSoknadService {
             fagsak.getSaksnummer()), vedleggReferanser);
     }
 
-    private void validerErBehandlingAvSøknad(Behandling behandling) {
-        if (!behandling.erBehandlingAvSøknad()) {
-            throw new FunksjonellException("Behandling " + behandling.getId() + " er ikke behandling av en søknad!");
+    private void validerBehandlingstemaErArbeidFlereLand(Behandling behandling) {
+        if(!Behandlingstema.ARBEID_FLERE_LAND.equals(behandling.getTema())){
+            throw new FunksjonellException("Behandling " + behandling.getId() + " har ikke behandlingstema 'ARBEID_FLERE_LAND' og kan ikke videresendes");
         }
     }
 
