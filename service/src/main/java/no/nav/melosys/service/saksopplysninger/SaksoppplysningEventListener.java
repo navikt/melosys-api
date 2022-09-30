@@ -39,11 +39,10 @@ public class SaksoppplysningEventListener {
     @EventListener
     @Transactional
     public void lagrePersonopplysninger(BehandlingEndretStatusEvent event) {
+        Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(event.getBehandling().getId());
         if (List.of(Behandlingsstatus.AVSLUTTET, Behandlingsstatus.IVERKSETTER_VEDTAK, Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING).contains(event.getBehandlingsstatus())
-            && event.getBehandling().getFagsak().getHovedpartRolle() == Aktoersroller.BRUKER
+            && behandling.getFagsak().getHovedpartRolle() == Aktoersroller.BRUKER
         ) {
-            Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(event.getBehandling().getId());
-
             if (behandling.manglerSaksopplysningerAvType(List.of(SaksopplysningType.PDL_PERSOPL))) {
                 saksopplysningerService.lagrePersonopplysninger(behandling, hentPersondata(behandling));
             }

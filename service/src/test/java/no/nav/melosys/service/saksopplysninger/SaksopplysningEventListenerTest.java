@@ -107,6 +107,7 @@ class SaksopplysningEventListenerTest {
         virksomhet.setRolle(Aktoersroller.VIRKSOMHET);
         behandling.getFagsak().setAktører(Set.of(virksomhet));
         BehandlingEndretStatusEvent event = new BehandlingEndretStatusEvent(Behandlingsstatus.IVERKSETTER_VEDTAK, behandling);
+        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
 
         saksoppplysningEventListener.lagrePersonopplysninger(event);
 
