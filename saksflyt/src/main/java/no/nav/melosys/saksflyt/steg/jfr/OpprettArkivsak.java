@@ -2,6 +2,7 @@ package no.nav.melosys.saksflyt.steg.jfr;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
@@ -49,12 +50,13 @@ public class OpprettArkivsak implements StegBehandler {
         Optional<String> aktørId = fagsak.finnBrukersAktørID();
         String saksnummer = fagsak.getSaksnummer();
         Behandlingstema behandlingstema = behandling.getTema();
+        Sakstemaer sakstemaer = fagsak.getTema();
 
         Long arkivsakID;
         if (aktørId.isPresent()) {
-            arkivsakID = arkivsakService.opprettSakForBruker(saksnummer, behandlingstema, aktørId.get());
+            arkivsakID = arkivsakService.opprettSakForBruker(saksnummer, behandlingstema, sakstemaer, aktørId.get());
         } else {
-            arkivsakID = arkivsakService.opprettSakForVirksomhet(saksnummer, behandlingstema, prosessinstans.getData(ProsessDataKey.VIRKSOMHET_ORGNR));
+            arkivsakID = arkivsakService.opprettSakForVirksomhet(saksnummer, behandlingstema, sakstemaer, prosessinstans.getData(ProsessDataKey.VIRKSOMHET_ORGNR));
         }
         fagsak.setGsakSaksnummer(arkivsakID);
         fagsakService.lagre(fagsak);

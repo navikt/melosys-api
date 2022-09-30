@@ -1,11 +1,14 @@
 package no.nav.melosys.service.sak;
 
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Fagsystem;
 import no.nav.melosys.domain.Tema;
 import no.nav.melosys.domain.TemaFactory;
+import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.integrasjon.sak.SakConsumer;
 import no.nav.melosys.integrasjon.sak.dto.SakDto;
+import no.nav.melosys.service.oppgave.OppgaveFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -16,15 +19,18 @@ public class ArkivsakService {
     private static final Logger log = LoggerFactory.getLogger(ArkivsakService.class);
 
     private final SakConsumer sakConsumer;
+    private final Unleash unleash;
 
-    public ArkivsakService(SakConsumer sakConsumer) {
+    public ArkivsakService(SakConsumer sakConsumer, Unleash unleash) {
         this.sakConsumer = sakConsumer;
+        this.unleash = unleash;
     }
 
-    public Long opprettSakForBruker(String saksnummer, Behandlingstema behandlingstema, String aktørId) {
-        SakDto sakDto = new SakDto();
+    public Long opprettSakForBruker(String saksnummer, Behandlingstema behandlingstema, Sakstemaer sakstemaer, String aktørId) {
+        boolean behandleAlleSakerEnabled = unleash.isEnabled("melosys.behandle_alle_saker");
 
-        sakDto.setTema(TemaFactory.fraBehandlingstema(behandlingstema).getKode());
+        SakDto sakDto = new SakDto();
+        sakDto.setTema(behandleAlleSakerEnabled ? OppgaveFactory.utledTema(sakstemaer).getKode() : TemaFactory.fraBehandlingstema(behandlingstema).getKode());
         sakDto.setAktørId(aktørId);
         sakDto.setApplikasjon(Fagsystem.MELOSYS.getKode());
         sakDto.setSaksnummer(saksnummer);
@@ -33,10 +39,11 @@ public class ArkivsakService {
         return sakDto.getId();
     }
 
-    public Long opprettSakForVirksomhet(String saksnummer, Behandlingstema behandlingstema, String orgnr) {
-        SakDto sakDto = new SakDto();
+    public Long opprettSakForVirksomhet(String saksnummer, Behandlingstema behandlingstema, Sakstemaer sakstemaer, String orgnr) {
 
-        sakDto.setTema(TemaFactory.fraBehandlingstema(behandlingstema).getKode());
+        boolean behandleAlleSakerEnabled = unleash.isEnabled("melosys.behandle_alle_saker");
+        SakDto sakDto = new SakDto();
+        sakDto.setTema(behandleAlleSakerEnabled ? OppgaveFactory.utledTema(sakstemaer).getKode() : TemaFactory.fraBehandlingstema(behandlingstema).getKode());
         sakDto.setOrgnr(orgnr);
         sakDto.setApplikasjon(Fagsystem.MELOSYS.getKode());
         sakDto.setSaksnummer(saksnummer);

@@ -12,6 +12,7 @@ import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.dokument.sed.EessiService;
+import no.nav.melosys.service.oppgave.OppgaveFactory;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import org.springframework.stereotype.Service;
 
@@ -48,7 +49,8 @@ public class SedSomBrevService {
         String institusjonID = utenlandskMyndighetService.lagInstitusjonsId(utenlandskMyndighet);
         String brukerFnr = persondataFasade.hentFolkeregisterident(fagsak.hentBrukersAktørID());
         byte[] sedPdf = eessiService.genererSedPdf(behandling.getId(), sedType);
-        var tema = TemaFactory.fraBehandlingstema(behandling.getTema());
+//        var tema = TemaFactory.fraBehandlingstema(behandling.getTema());
+        var tema = OppgaveFactory.utledTema(behandling.getFagsak().getTema());
 
         OpprettJournalpost opprettJournalpost = OpprettJournalpost.lagJournalpostForSendingAvSedSomBrev(
             fagsak.getSaksnummer(), brukerFnr, sedType, sedPdf, institusjonID,

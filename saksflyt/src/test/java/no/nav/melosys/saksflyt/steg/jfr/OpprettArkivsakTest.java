@@ -4,6 +4,7 @@ import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
@@ -42,6 +43,7 @@ class OpprettArkivsakTest {
         String aktørID = "4214323324";
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer("MEL-4321");
+        fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
 
         Aktoer bruker = new Aktoer();
         bruker.setAktørId(aktørID);
@@ -55,7 +57,7 @@ class OpprettArkivsakTest {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
 
-        when(arkivsakService.opprettSakForBruker(fagsak.getSaksnummer(), behandling.getTema(), aktørID)).thenReturn(forventetArkivsakID);
+        when(arkivsakService.opprettSakForBruker(fagsak.getSaksnummer(), behandling.getTema(), behandling.getFagsak().getTema(), aktørID)).thenReturn(forventetArkivsakID);
         opprettArkivsak.utfør(prosessinstans);
 
         assertThat(fagsak.getGsakSaksnummer()).isEqualTo(forventetArkivsakID);
