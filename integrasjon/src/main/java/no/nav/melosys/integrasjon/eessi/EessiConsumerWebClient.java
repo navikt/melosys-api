@@ -97,23 +97,42 @@ public class EessiConsumerWebClient implements EessiConsumer, JsonRestIntegrasjo
 
     @Override
     public MelosysEessiMelding hentMelosysEessiMeldingFraJournalpostID(String journalpostID) {
-        return exchange("/journalpost/{journalpostID}/eessimelding", HttpMethod.GET,
-            new HttpEntity<>(getDefaultHeaders()), new ParameterizedTypeReference<MelosysEessiMelding>() {
-            }, journalpostID);
+        return webClient.get()
+            .uri("", uriBuilder ->
+                uriBuilder
+                    .pathSegment("journalpost", journalpostID, "eessimelding")
+                    .build())
+            .accept(MediaType.APPLICATION_JSON)
+            .retrieve()
+            .bodyToMono(new ParameterizedTypeReference<MelosysEessiMelding>() {
+            })
+            .block();
     }
 
     @Override
     public void lagreSaksrelasjon(SaksrelasjonDto saksrelasjonDto) {
-        exchange("/sak", HttpMethod.POST, new HttpEntity<>(saksrelasjonDto, getDefaultHeaders()),
-            new ParameterizedTypeReference<Void>() {
-            });
+        webClient.post()
+            .uri("/sak")
+            .accept(MediaType.APPLICATION_JSON)
+            .bodyValue(saksrelasjonDto)
+            .retrieve()
+            .bodyToMono(Void.class)
+            .block();
     }
 
     @Override
     public List<SaksrelasjonDto> hentSakForRinasaksnummer(String rinaSaksnummer) {
-        return exchange("/sak?rinaSaksnummer={rinaSaksnummer}", HttpMethod.GET,
-            new HttpEntity<>(getDefaultHeaders()), new ParameterizedTypeReference<List<SaksrelasjonDto>>() {
-            }, rinaSaksnummer);
+        return webClient.get()
+            .uri("", uriBuilder ->
+                uriBuilder
+                    .pathSegment("sak")
+                    .queryParam("rinaSaksnummer", rinaSaksnummer)
+                    .build())
+            .accept(MediaType.APPLICATION_JSON)
+            .retrieve()
+            .bodyToMono(new ParameterizedTypeReference<List<SaksrelasjonDto>>() {
+            })
+            .block();
     }
 
     @Override
@@ -149,14 +168,16 @@ public class EessiConsumerWebClient implements EessiConsumer, JsonRestIntegrasjo
 
     @Override
     public List<String> hentMuligeAksjoner(String rinaSaksnummer) {
-        return exchange("/buc/{rinaSaksnummer}/aksjoner", HttpMethod.GET,
-            new HttpEntity<>(getDefaultHeaders()), new ParameterizedTypeReference<List<String>>() {
-            }, rinaSaksnummer);
-    }
-
-    private <T> T exchangeGet(String uri, HttpEntity<?> entity, ParameterizedTypeReference<T> responseType, Object... variabler) {
-        webClient.get().uri(uri);
-        return null;
+        return webClient.get()
+            .uri("", uriBuilder ->
+                uriBuilder
+                    .pathSegment("buc", rinaSaksnummer, "aksjoner")
+                    .build())
+            .accept(MediaType.APPLICATION_JSON)
+            .retrieve()
+            .bodyToMono(new ParameterizedTypeReference<List<String>>() {
+            })
+            .block();
     }
 
 

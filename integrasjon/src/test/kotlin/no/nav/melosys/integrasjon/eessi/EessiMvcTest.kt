@@ -1,15 +1,20 @@
 package no.nav.melosys.integrasjon.eessi
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.matching.UrlPattern
 import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.equality.FieldsEqualityCheckConfig
+import io.kotest.matchers.equality.shouldBeEqualToComparingFields
 import io.kotest.matchers.shouldBe
 import no.nav.melosys.domain.arkiv.Vedlegg
 import no.nav.melosys.domain.eessi.BucType
 import no.nav.melosys.domain.eessi.SedType
+import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
 import no.nav.melosys.domain.eessi.sed.SedDataDto
 import no.nav.melosys.integrasjon.ConsumerWireMockTestBase
 import no.nav.melosys.integrasjon.eessi.dto.OpprettSedDto
+import no.nav.melosys.integrasjon.eessi.dto.SaksrelasjonDto
 import no.nav.melosys.integrasjon.felles.GenericContextClientRequestInterceptor
 import no.nav.melosys.integrasjon.felles.GenericContextExchangeFilter
 import no.nav.melosys.integrasjon.reststs.RestStsClient
@@ -20,10 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebClient
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
-import org.springframework.http.HttpHeaders
-import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
-import java.util.List
 
 @WebMvcTest(
     value = [
@@ -43,14 +45,10 @@ class EessiMvcTest(
     @Value("\${mockserver.security.port}") mockSecurityPort: Int
 ) : ConsumerWireMockTestBase<String, OpprettSedDto>(mockServiceUnderTestPort, mockSecurityPort) {
 
-
     @Test
     fun opprettBucOgSed() {
         setupWireMock(
             WireMock.post("/api/buc/LA_BUC_01?sendAutomatisk=true&oppdaterEksisterende=true")
-                .withHeader("Authorization", WireMock.equalTo("Bearer --token-from-system--"))
-                .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
-                .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
         )
         executeFromSystem { opprettSedDto ->
             opprettSedDto.rinaSaksnummer.shouldBe("12345")
@@ -61,9 +59,6 @@ class EessiMvcTest(
     fun sendSedPåEksisterendeBuc() {
         setupWireMock(
             WireMock.post("/api/buc/12345/sed/A001")
-                .withHeader("Authorization", WireMock.equalTo("Bearer --token-from-system--"))
-                .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
-                .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
         )
         executeFromSystemFunc {
             eessiConsumer.sendSedPåEksisterendeBuc(
@@ -76,12 +71,9 @@ class EessiMvcTest(
 
     @Test
     fun hentMottakerinstitusjoner() {
-        val data = "[{\"id\":\"NO:NAVT002\",\"navn\":\"NAVT002\",\"landkode\":\"NO\"}]"
         setupWireMock(
-            WireMock.get("/api/buc/LA_BUC_01/institusjoner?land=DE,PL")
-                .withHeader("Authorization", WireMock.equalTo("Bearer --token-from-system--"))
-                .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE)),
-            data
+            WireMock.get("/api/buc/LA_BUC_01/institusjoner?land=DE,PL"),
+            data = "[{\"id\":\"NO:NAVT002\",\"navn\":\"NAVT002\",\"landkode\":\"NO\"}]"
         )
         executeFromSystemFunc {
             val institusjoner = eessiConsumer.hentMottakerinstitusjoner("LA_BUC_01", listOf("DE", "PL"))
@@ -92,6 +84,64 @@ class EessiMvcTest(
                     navn.shouldBe("NAVT002")
                     landkode.shouldBe("NO")
                 }
+        }
+    }
+
+    @Test
+    fun hentMelosysEessiMeldingFraJournalpostID() {
+        val journalpostID = "115314"
+        val melosysEessiMelding = MelosysEessiMelding().apply {
+            sedType = "A009"
+            journalpostId = journalpostID
+        }
+
+        setupWireMock(
+            WireMock.get("/api/journalpost/$journalpostID/eessimelding"),
+            data = ObjectMapper().writeValueAsString(melosysEessiMelding)
+        )
+
+        executeFromSystemFunc {
+            val response = eessiConsumer.hentMelosysEessiMeldingFraJournalpostID(journalpostID)
+            response.apply {
+                sedType.shouldBe(melosysEessiMelding.sedType)
+                journalpostId.shouldBe(melosysEessiMelding.journalpostId)
+            }
+        }
+    }
+
+    @Test
+    fun lagreSaksrelasjon() {
+        val saksrelasjonDto = SaksrelasjonDto(123L, "123", "123")
+
+        setupWireMock(
+            WireMock.post("/api/sak")
+                .withRequestBody(WireMock.equalToJson(ObjectMapper().writeValueAsString(saksrelasjonDto))),
+        )
+
+        executeFromSystemFunc {
+            eessiConsumer.lagreSaksrelasjon(saksrelasjonDto)
+        }
+    }
+
+    @Test
+    fun hentSakForRinasaksnummer() {
+        val saksrelasjon = SaksrelasjonDto().apply {
+            rinaSaksnummer = "114422"
+            gsakSaksnummer = 123L
+            bucType = "LA_BUC_04"
+        }
+        setupWireMock(
+            WireMock.get("/api/sak?rinaSaksnummer=${saksrelasjon.rinaSaksnummer}"),
+            data = ObjectMapper().writeValueAsString(listOf(saksrelasjon))
+        )
+
+        executeFromSystemFunc {
+            val saksRelasjoner: MutableList<SaksrelasjonDto> =
+                eessiConsumer.hentSakForRinasaksnummer(saksrelasjon.rinaSaksnummer)
+            saksRelasjoner
+                .shouldHaveSize(1)
+                .first()
+                .shouldBeEqualToComparingFields(saksrelasjon, FieldsEqualityCheckConfig(ignorePrivateFields = false))
         }
     }
 
