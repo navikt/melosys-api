@@ -199,7 +199,10 @@ public class JournalfoeringService {
         }
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, behandlingstema);
 
-        if (erSakstypeEøs(sakstype) && erBehandlingAvSøknad(behandlingstema)) {
+        if (behandleAlleSakerToggleEnabled
+            ? !SaksbehandlingRegler.harTomFlyt(sakstype, behandlingstype, behandlingstema)
+            : erSakstypeEøs(sakstype) && erBehandlingAvSøknad(behandlingstema)
+        ) {
             validerOpprettSakForSøknadBehandlingFelter(journalfoeringDto);
             prosessinstans.setData(ProsessDataKey.SØKNADSLAND, journalfoeringDto.getFagsak().getLand());
             prosessinstans.setData(ProsessDataKey.SØKNADSPERIODE, journalfoeringDto.getFagsak().getSoknadsperiode());
@@ -366,6 +369,12 @@ public class JournalfoeringService {
     }
 
     private void valider(JournalfoeringDto journalfoeringDto) {
+        if (journalfoeringDto instanceof JournalfoeringOpprettDto journalfoeringOpprettDto) {
+            if (journalfoeringOpprettDto.getFagsak() == null) {
+                throw new FunksjonellException("Opplysninger for å opprette en søknad mangler");
+            }
+        }
+
         if (StringUtils.isEmpty(journalfoeringDto.getJournalpostID())) {
             throw new FunksjonellException("JournalpostID mangler");
         }
@@ -402,9 +411,6 @@ public class JournalfoeringService {
     }
 
     private void validerOpprettSakForSøknadBehandlingFelter(JournalfoeringOpprettDto journalfoeringDto) {
-        if (journalfoeringDto.getFagsak() == null) {
-            throw new FunksjonellException("Opplysninger for å opprette en søknad mangler");
-        }
         final PeriodeDto søknadsperiode = journalfoeringDto.getFagsak().getSoknadsperiode();
         if (søknadsperiode == null) {
             throw new FunksjonellException("Søknadsperiode mangler");
