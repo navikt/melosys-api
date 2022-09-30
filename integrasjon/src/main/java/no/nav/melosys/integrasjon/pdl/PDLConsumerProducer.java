@@ -19,11 +19,11 @@ public class PDLConsumerProducer implements WebClientConfig {
     @Bean
     public PDLConsumer pdlConsumerForSaksbehandler(WebClient.Builder webclientBuilder,
                                                    @Value("${PDL.url}") String pdlUrl,
-                                                   PDLAuthFilter pdlSaksbehandlerAuthFilter,
+                                                   PDLAuthFilter pdlAuthFilter,
                                                    CorrelationIdOutgoingFilter correlationIdOutgoingFilter) {
         return new PDLConsumerImpl(
             webclientBuilder(webclientBuilder, pdlUrl)
-                .filter(pdlSaksbehandlerAuthFilter)
+                .filter(pdlAuthFilter)
                 .filter(correlationIdOutgoingFilter)
                 .filter(errorFilter("Kall mot PDL feilet."))
                 .build());
