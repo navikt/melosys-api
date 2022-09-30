@@ -12,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebClient
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.http.HttpHeaders
+import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
 
 @WebMvcTest(
@@ -38,7 +40,9 @@ class EessiConsumerTokenTest(
         verifyHeaders(
             mapOf(
                 Pair("Authorization", WireMock.equalTo("Bearer --token-from-system--")),
-            )
+                Pair(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE)),
+                Pair(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
+        )
         )
         executeFromSystem()
     }
@@ -48,6 +52,8 @@ class EessiConsumerTokenTest(
         verifyHeaders(
             mapOf(
                 Pair("Authorization", WireMock.equalTo("Bearer --token-from-user--")),
+                Pair(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE)),
+                Pair(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
             )
         )
         executeFromController()
@@ -58,6 +64,8 @@ class EessiConsumerTokenTest(
         verifyHeaders(
             mapOf(
                 Pair("Authorization", WireMock.equalTo("Bearer --token-from-system--")),
+                Pair(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE)),
+                Pair(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
             )
         )
         executeRequest()
@@ -80,7 +88,6 @@ class EessiConsumerTokenTest(
         }
     }
 
-    override fun errorFromServerMessage() = "500 Server Error: \"{\"melding\": \"Internal Server Error\"}\""
     override fun getMockData(): String = "[]"
 
     override fun executeRequest() =
