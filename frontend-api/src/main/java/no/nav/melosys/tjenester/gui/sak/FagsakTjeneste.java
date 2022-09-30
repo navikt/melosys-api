@@ -233,7 +233,7 @@ public class FagsakTjeneste {
         return behandlingOversiktDto;
     }
 
-    void setPeriodeOpplysninger(Behandling behandling, BehandlingOversiktDto behandlingOversiktDto) {
+    private void setPeriodeOpplysninger(Behandling behandling, BehandlingOversiktDto behandlingOversiktDto) {
         if (unleash.isEnabled("melosys.behandle_alle_saker")) {
             var optionalSedDokument = saksopplysningerService.finnSedOpplysninger(behandling.getId());
 
