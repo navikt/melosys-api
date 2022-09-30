@@ -1,7 +1,9 @@
 package no.nav.melosys.integrasjon.eessi;
 
+import java.net.URI;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -25,6 +27,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.util.UriBuilder;
 
 public class EessiConsumerWebClient implements EessiConsumer, JsonRestIntegrasjon {
 
@@ -43,51 +46,35 @@ public class EessiConsumerWebClient implements EessiConsumer, JsonRestIntegrasjo
                                          BucType bucType,
                                          boolean sendAutomatisk,
                                          boolean oppdaterEksisterendeOmFinnes) {
-        return webClient.post()
-            .uri("", uriBuilder ->
+        return httpPost(uriBuilder ->
                 uriBuilder
                     .pathSegment("buc", bucType.toString())
                     .queryParam("sendAutomatisk", sendAutomatisk)
                     .queryParam("oppdaterEksisterende", oppdaterEksisterendeOmFinnes)
-                    .build())
-            .accept(MediaType.APPLICATION_JSON)
-            .bodyValue(new OpprettBucOgSedDto(sedDataDto, vedlegg))
-            .retrieve()
-            .bodyToMono(new ParameterizedTypeReference<OpprettSedDto>() {
-            })
-            .block();
+                    .build(),
+            sedDataDto, new ParameterizedTypeReference<>() {
+            });
     }
 
     @Override
     public void sendSedPåEksisterendeBuc(SedDataDto sedDataDto, String rinaSaksnummer, SedType sedType) {
-        webClient.post()
-            .uri("", uriBuilder ->
+        httpPost(uriBuilder ->
                 uriBuilder
                     .pathSegment("buc", rinaSaksnummer)
-                    .pathSegment("sed", sedType.toString())
-                    .build())
-            .accept(MediaType.APPLICATION_JSON)
-            .bodyValue(sedDataDto)
-            .retrieve()
-            .bodyToMono(new ParameterizedTypeReference<OpprettSedDto>() {
-            })
-            .block();
+                    .pathSegment("sed", sedType.toString()).build(),
+            sedDataDto, new ParameterizedTypeReference<OpprettSedDto>() {
+            });
     }
 
     @Override
     public List<Institusjon> hentMottakerinstitusjoner(String bucType, Collection<String> landkoder) {
-        List<InstitusjonDto> institusjonDtoList = webClient.get()
-            .uri("", uriBuilder ->
-                uriBuilder
-                    .pathSegment("buc", bucType)
-                    .pathSegment("institusjoner")
-                    .queryParam("land", String.join(",", landkoder))
-                    .build())
-            .accept(MediaType.APPLICATION_JSON)
-            .retrieve()
-            .bodyToMono(new ParameterizedTypeReference<List<InstitusjonDto>>() {
-            })
-            .block();
+        List<InstitusjonDto> institusjonDtoList = httpGet(uriBuilder ->
+            uriBuilder
+                .pathSegment("buc", bucType)
+                .pathSegment("institusjoner")
+                .queryParam("land", String.join(",", landkoder))
+                .build(), new ParameterizedTypeReference<>() {
+        });
 
         return institusjonDtoList.stream()
             .map(institusjonDto -> new Institusjon(
@@ -97,17 +84,13 @@ public class EessiConsumerWebClient implements EessiConsumer, JsonRestIntegrasjo
 
     @Override
     public MelosysEessiMelding hentMelosysEessiMeldingFraJournalpostID(String journalpostID) {
-        return webClient.get()
-            .uri("", uriBuilder ->
-                uriBuilder
-                    .pathSegment("journalpost", journalpostID, "eessimelding")
-                    .build())
-            .accept(MediaType.APPLICATION_JSON)
-            .retrieve()
-            .bodyToMono(new ParameterizedTypeReference<MelosysEessiMelding>() {
-            })
-            .block();
+        return httpGet(uriBuilder ->
+            uriBuilder
+                .pathSegment("journalpost", journalpostID, "eessimelding")
+                .build(), new ParameterizedTypeReference<>() {
+        });
     }
+
 
     @Override
     public void lagreSaksrelasjon(SaksrelasjonDto saksrelasjonDto) {
@@ -122,16 +105,34 @@ public class EessiConsumerWebClient implements EessiConsumer, JsonRestIntegrasjo
 
     @Override
     public List<SaksrelasjonDto> hentSakForRinasaksnummer(String rinaSaksnummer) {
+        return httpGet(uriBuilder ->
+            uriBuilder
+                .pathSegment("sak")
+                .queryParam("rinaSaksnummer", rinaSaksnummer)
+                .build(), new ParameterizedTypeReference<>() {
+        });
+    }
+
+    private <T> T httpGet(Function<UriBuilder, URI> uriFunction, ParameterizedTypeReference<T> responseType) {
         return webClient.get()
-            .uri("", uriBuilder ->
-                uriBuilder
-                    .pathSegment("sak")
-                    .queryParam("rinaSaksnummer", rinaSaksnummer)
-                    .build())
+            .uri("", uriFunction)
             .accept(MediaType.APPLICATION_JSON)
             .retrieve()
-            .bodyToMono(new ParameterizedTypeReference<List<SaksrelasjonDto>>() {
-            })
+            .bodyToMono(responseType)
+            .block();
+    }
+
+    private <T> T httpPost(
+        Function<UriBuilder, URI> uriFunction,
+        Object bodyValue,
+        ParameterizedTypeReference<T> responseType
+    ) {
+        return webClient.post()
+            .uri("", uriFunction)
+            .accept(MediaType.APPLICATION_JSON)
+            .bodyValue(bodyValue)
+            .retrieve()
+            .bodyToMono(responseType)
             .block();
     }
 
@@ -181,7 +182,9 @@ public class EessiConsumerWebClient implements EessiConsumer, JsonRestIntegrasjo
     }
 
 
-    private <T> T exchange(String uri, HttpMethod method, HttpEntity<?> entity, ParameterizedTypeReference<T> responseType, Object... variabler) {
+    private <T> T
+    exchange(String uri, HttpMethod method, HttpEntity<?> entity, ParameterizedTypeReference<T> responseType, Object...
+        variabler) {
         try {
             return null;
         } catch (RestClientResponseException e) {
