@@ -1,7 +1,10 @@
 package no.nav.melosys.service.registeropplysninger;
 
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 
 
 // Setter saksopplysningtyper per behandlingstema,
@@ -12,17 +15,21 @@ public final class RegisteropplysningerFactory {
     }
 
     public static RegisteropplysningerRequest.SaksopplysningTyper utledSaksopplysningTyper(
-        Behandlingstema behandlingstema) {
+        Sakstyper sakstype, Behandlingstema behandlingstema, Behandlingstyper behandlingstype, boolean behandleAlleSakerToggleEnabled) {
+        if (behandleAlleSakerToggleEnabled && SaksbehandlingRegler.harTomFlyt(sakstype, behandlingstype, behandlingstema)) {
+            return ingenSaksopplysningTyper();
+        }
+
         return switch (behandlingstema) {
             case UTSENDT_ARBEIDSTAKER,
                 UTSENDT_SELVSTENDIG,
                 ARBEID_FLERE_LAND,
-                IKKE_YRKESAKTIV,
+                IKKE_YRKESAKTIV, // Etter fjerning av melosys.behandle_alle_saker toggle kan denne fjernes siden den alltid vil ha tom flyt.
                 ARBEID_ETT_LAND_ØVRIG,
                 ARBEID_TJENESTEPERSON_ELLER_FLY,
                 ARBEID_NORGE_BOSATT_ANNET_LAND,
                 ARBEID_I_UTLANDET,
-                ARBEID_KUN_NORGE,
+                ARBEID_KUN_NORGE, // Etter fjerning av melosys.behandle_alle_saker toggle kan denne fjernes siden den alltid vil ha tom flyt.
                 YRKESAKTIV ->
                 hentSaksopplysningTyperForBehandlingAvSøknad();
             case REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING, REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE ->
@@ -30,8 +37,8 @@ public final class RegisteropplysningerFactory {
             case ANMODNING_OM_UNNTAK_HOVEDREGEL -> hentSaksopplysningTyperForAnmodningOmUnntak();
             case BESLUTNING_LOVVALG_NORGE, BESLUTNING_LOVVALG_ANNET_LAND ->
                 hentSaksopplysningTyperForBeslutningOmLovvalg();
-            case ØVRIGE_SED_MED, ØVRIGE_SED_UFM, FORESPØRSEL_TRYGDEMYNDIGHET, TRYGDETID ->
-                hentSaksopplysningTyperForBehandlingAvØvrigeSedOgTrygdetid();
+            case ØVRIGE_SED_MED, ØVRIGE_SED_UFM, FORESPØRSEL_TRYGDEMYNDIGHET, TRYGDETID -> // Etter fjerning av melosys.behandle_alle_saker toggle kan denne fjernes siden den alltid vil ha tom flyt.
+                ingenSaksopplysningTyper();
             default -> throw new TekniskException(
                 "Kan ikke utlede relevante saksopplysninger fra behandlingstema " + behandlingstema);
         };
@@ -76,7 +83,7 @@ public final class RegisteropplysningerFactory {
             .build();
     }
 
-    private static RegisteropplysningerRequest.SaksopplysningTyper hentSaksopplysningTyperForBehandlingAvØvrigeSedOgTrygdetid() {
+    private static RegisteropplysningerRequest.SaksopplysningTyper ingenSaksopplysningTyper() {
         return RegisteropplysningerRequest.SaksopplysningTyper.builder()
             .build();
     }

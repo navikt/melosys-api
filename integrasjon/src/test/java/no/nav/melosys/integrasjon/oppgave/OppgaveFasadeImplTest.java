@@ -38,11 +38,13 @@ final class OppgaveFasadeImplTest {
     @Captor
     private ArgumentCaptor<OppgaveSearchRequest> oppgaveSearchRequestCaptor;
 
+    private final FakeUnleash unleash = new FakeUnleash();
+
     private OppgaveFasadeImpl oppgaveFasadeImpl;
 
     @BeforeEach
     void setup() {
-        oppgaveFasadeImpl = new OppgaveFasadeImpl(oppgaveConsumer);
+        oppgaveFasadeImpl = new OppgaveFasadeImpl(oppgaveConsumer, unleash);
     }
 
     @Test

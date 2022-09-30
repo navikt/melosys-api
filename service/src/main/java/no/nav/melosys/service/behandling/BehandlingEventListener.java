@@ -10,8 +10,6 @@ import no.nav.melosys.domain.BehandlingsfristEndretEvent;
 import no.nav.melosys.domain.brev.DokumentasjonSvarfrist;
 import no.nav.melosys.domain.dokument.DokumentBestiltEvent;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
 import no.nav.melosys.service.oppgave.OppgaveFactory;
@@ -59,7 +57,7 @@ public class BehandlingEventListener {
     public void behandlingsfristEndret(BehandlingsfristEndretEvent behandlingsfristEndretEvent) {
         ThreadLocalAccessInfo.executeProcess("behandlingsfristEndret", () -> {
             var behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingsfristEndretEvent.getBehandlingId());
-            Optional<Oppgave> oppgave = oppgaveService.finnÅpenOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer());
+            Optional<Oppgave> oppgave = oppgaveService.finnÅpenBehandlingsoppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer());
             oppgave.ifPresent(value -> oppgaveService.oppdaterOppgave(
                 value.getOppgaveId(),
                 OppgaveOppdatering.builder()
@@ -74,7 +72,7 @@ public class BehandlingEventListener {
     public void behandlingEndret(BehandlingEndretAvSaksbehandlerEvent behandlingEndretAvSaksbehandlerEvent) {
         ThreadLocalAccessInfo.executeProcess("behandlingEndret", () -> {
             final var behandling = behandlingService.hentBehandling(behandlingEndretAvSaksbehandlerEvent.getBehandlingID());
-            Optional<Oppgave> oppgave = oppgaveService.finnÅpenOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer());
+            Optional<Oppgave> oppgave = oppgaveService.finnÅpenBehandlingsoppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer());
             oppgave.ifPresent(value -> {
                     final var behandlingstype = behandlingEndretAvSaksbehandlerEvent.getBehandlingstype();
                     final var behandlingstema = behandlingEndretAvSaksbehandlerEvent.getBehandlingstema();
