@@ -3,8 +3,10 @@ package no.nav.melosys.service.saksopplysninger;
 import java.util.Collections;
 import java.util.Set;
 
+import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.BehandlingEndretStatusEvent;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.domain.person.PersonMedHistorikk;
@@ -91,6 +93,20 @@ class SaksopplysningEventListenerTest {
         Behandling behandling = SaksbehandlingDataFactory.lagBehandling();
         behandling.setStatus(Behandlingsstatus.TIDSFRIST_UTLOEPT);
         BehandlingEndretStatusEvent event = new BehandlingEndretStatusEvent(Behandlingsstatus.TIDSFRIST_UTLOEPT, behandling);
+
+        saksoppplysningEventListener.lagrePersonopplysninger(event);
+
+        verifyNoInteractions(saksopplysningerService, persondataFasade);
+    }
+
+    @Test
+    void lagrePersonopplysning_hovedpartErVirksomhet_opplysningerBlirIkkeLagret() {
+        Behandling behandling = SaksbehandlingDataFactory.lagBehandling();
+        behandling.setStatus(Behandlingsstatus.IVERKSETTER_VEDTAK);
+        Aktoer virksomhet = new Aktoer();
+        virksomhet.setRolle(Aktoersroller.VIRKSOMHET);
+        behandling.getFagsak().setAktører(Set.of(virksomhet));
+        BehandlingEndretStatusEvent event = new BehandlingEndretStatusEvent(Behandlingsstatus.IVERKSETTER_VEDTAK, behandling);
 
         saksoppplysningEventListener.lagrePersonopplysninger(event);
 

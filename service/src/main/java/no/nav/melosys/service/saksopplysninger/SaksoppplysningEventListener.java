@@ -6,6 +6,7 @@ import java.util.List;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.BehandlingEndretStatusEvent;
 import no.nav.melosys.domain.SaksopplysningType;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.domain.person.PersonMedHistorikk;
@@ -38,7 +39,9 @@ public class SaksoppplysningEventListener {
     @EventListener
     @Transactional
     public void lagrePersonopplysninger(BehandlingEndretStatusEvent event) {
-        if (List.of(Behandlingsstatus.AVSLUTTET, Behandlingsstatus.IVERKSETTER_VEDTAK, Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING).contains(event.getBehandlingsstatus())) {
+        if (List.of(Behandlingsstatus.AVSLUTTET, Behandlingsstatus.IVERKSETTER_VEDTAK, Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING).contains(event.getBehandlingsstatus())
+            && event.getBehandling().getFagsak().getHovedpartRolle() == Aktoersroller.BRUKER
+        ) {
             Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(event.getBehandling().getId());
 
             if (behandling.manglerSaksopplysningerAvType(List.of(SaksopplysningType.PDL_PERSOPL))) {
