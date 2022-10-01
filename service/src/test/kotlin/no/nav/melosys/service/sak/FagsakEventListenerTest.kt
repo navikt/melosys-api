@@ -23,22 +23,25 @@ private const val SAKSNUMMER = "MEL-0"
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class FagsakEventListenerTest {
     @MockK
+    lateinit var fagsakService: FagsakService
+    @MockK
     lateinit var oppgaveService: OppgaveService
 
-    lateinit var fagsakEventListener: FagsakEventListener
+    private lateinit var fagsakEventListener: FagsakEventListener
 
     @BeforeEach
     fun setUp() {
-        fagsakEventListener = FagsakEventListener(oppgaveService)
+        fagsakEventListener = FagsakEventListener(fagsakService, oppgaveService)
     }
 
     @Test
     fun `fagsakEndret - oppgave finnes, oppgave oppdateres`() {
         val fagsak = lagFagsak(SAKSNUMMER)
         fagsak.behandlinger.add(lagBehandling(fagsak))
-        val fagsakEndretAvSaksbehandler = FagsakEndretAvSaksbehandler(fagsak)
+        val fagsakEndretAvSaksbehandler = FagsakEndretAvSaksbehandler(fagsak.saksnummer)
         val oppgaveID = "oppgaveID"
         val oppgave = Oppgave.Builder().setOppgaveId(oppgaveID).build()
+        every { fagsakService.hentFagsak(SAKSNUMMER) } returns fagsak
         every { oppgaveService.finnÅpenBehandlingsoppgaveMedFagsaksnummer(SAKSNUMMER) } returns Optional.of(oppgave)
         justRun { oppgaveService.oppdaterOppgave(oppgaveID, fagsak.type, fagsak.tema, any(), any()) }
 
@@ -50,7 +53,8 @@ internal class FagsakEventListenerTest {
     @Test
     fun `fagsakEndret - oppgave finnes ikke, oppgave opprettes`() {
         val fagsak = Fagsak().apply { saksnummer = SAKSNUMMER }
-        val fagsakEndretAvSaksbehandler = FagsakEndretAvSaksbehandler(fagsak)
+        val fagsakEndretAvSaksbehandler = FagsakEndretAvSaksbehandler(fagsak.saksnummer)
+        every { fagsakService.hentFagsak(SAKSNUMMER) } returns fagsak
         every { oppgaveService.finnÅpenBehandlingsoppgaveMedFagsaksnummer(SAKSNUMMER) } returns Optional.empty()
         justRun { oppgaveService.opprettOppgaveForSak(SAKSNUMMER) }
 

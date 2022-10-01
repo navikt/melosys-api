@@ -36,7 +36,7 @@ class EndreSakService(
         fagsakService.oppdaterSakstema(saksnummer, nySakstema)
 
         oppfriskSaksopplysningerService.oppfriskSaksopplysning(behandling.id, false)
-        applicationEventPublisher.publishEvent(FagsakEndretAvSaksbehandler(fagsak))
+        applicationEventPublisher.publishEvent(FagsakEndretAvSaksbehandler(fagsak.saksnummer))
         log.debug { "Ferdig med endring av sak $saksnummer (type: $nySakstype, tema: $nySakstema)" }
     }
 

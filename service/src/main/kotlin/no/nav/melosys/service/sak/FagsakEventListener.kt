@@ -13,24 +13,23 @@ private val log = KotlinLogging.logger { }
 
 @Component
 class FagsakEventListener(
+    private val fagsakService: FagsakService,
     private val oppgaveService: OppgaveService
 ) {
 
     @EventListener
     fun fagsakEndret(fagsakEndretAvSaksbehandler: FagsakEndretAvSaksbehandler) {
         ThreadLocalAccessInfo.executeProcess("fagsakEndret") {
-            val fagsak = fagsakEndretAvSaksbehandler.fagsak
+            val fagsak = fagsakService.hentFagsak(fagsakEndretAvSaksbehandler.saksnummer)
             val oppgave: Optional<Oppgave> =
                 oppgaveService.finnÅpenBehandlingsoppgaveMedFagsaksnummer(fagsak.saksnummer)
             oppgave.ifPresentOrElse({
                 val behandling = fagsak.hentAktivBehandling()
-                val behandlingstype = behandling.type
-                val behandlingstema = behandling.tema
                 log.info(
                     "Oppdaterer oppgave {} med sakstype {} og sakstema {}", it.oppgaveId, fagsak.type, fagsak.tema
                 )
                 oppgaveService.oppdaterOppgave(
-                    it.oppgaveId, fagsak.type, fagsak.tema, behandlingstema, behandlingstype
+                    it.oppgaveId, fagsak.type, fagsak.tema, behandling.tema, behandling.type
                 )
             }, {
                 log.info("Fagsak ${fagsak.saksnummer} ble endret uten aktiv oppgave")

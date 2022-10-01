@@ -68,7 +68,7 @@ internal class EndreSakServiceTest {
         // event for å oppdatere oppgave
         val eventCapturingSlot = slot<FagsakEndretAvSaksbehandler>()
         verify { applicationEventPublisher.publishEvent(capture(eventCapturingSlot)) }
-        eventCapturingSlot.captured.source shouldBe fagsak
+        eventCapturingSlot.captured.source shouldBe saksnummer
     }
 
     @Test
