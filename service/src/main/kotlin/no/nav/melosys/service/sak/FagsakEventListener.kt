@@ -6,7 +6,6 @@ import no.nav.melosys.domain.oppgave.Oppgave
 import no.nav.melosys.service.oppgave.OppgaveService
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import org.springframework.context.event.EventListener
-import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Component
 import java.util.*
 
@@ -18,7 +17,6 @@ class FagsakEventListener(
 ) {
 
     @EventListener
-    @Async
     fun fagsakEndret(fagsakEndretAvSaksbehandler: FagsakEndretAvSaksbehandler) {
         ThreadLocalAccessInfo.executeProcess("fagsakEndret") {
             val fagsak = fagsakEndretAvSaksbehandler.fagsak

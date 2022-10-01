@@ -64,7 +64,6 @@ public class BehandlingEventListener {
     }
 
     @EventListener
-    @Async
     public void behandlingEndret(BehandlingEndretAvSaksbehandlerEvent behandlingEndretAvSaksbehandlerEvent) {
         ThreadLocalAccessInfo.executeProcess("behandlingEndret", () -> {
             final var behandling = behandlingService.hentBehandling(behandlingEndretAvSaksbehandlerEvent.getBehandlingID());
