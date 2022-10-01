@@ -2,6 +2,7 @@ package no.nav.melosys.integrasjon
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.MappingBuilder
+import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.github.tomakehurst.wiremock.matching.StringValuePattern
@@ -93,10 +94,13 @@ abstract class ConsumerWireMockTestBase<T, R>(
         }
     }
 
-    fun setupWireMock(wireMock: MappingBuilder = createWireMock(), data: T = getMockData()): MappingBuilder {
-        val response = WireMock.aResponse()
+    fun setupWireMock(
+        wireMock: MappingBuilder = createWireMock(),
+        data: T = getMockData(),
+        response: ResponseDefinitionBuilder = WireMock.aResponse()
             .withStatus(200)
             .withHeader("Content-Type", "application/json")
+    ): MappingBuilder {
 
         if (data is String) response.withBody(data)
         if (data is ByteArray) response.withBody(data)
@@ -108,6 +112,16 @@ abstract class ConsumerWireMockTestBase<T, R>(
     }
 
     fun executeFromSystemFunc(func: () -> Unit) {
+        val uuid = UUID.randomUUID()
+        try {
+            ThreadLocalAccessInfo.beforeExecuteProcess(uuid, "prossesSteg")
+            func()
+        } finally {
+            ThreadLocalAccessInfo.afterExecuteProcess(uuid)
+        }
+    }
+
+    fun executeFromSystemFuncType(func: () -> Unit) {
         val uuid = UUID.randomUUID()
         try {
             ThreadLocalAccessInfo.beforeExecuteProcess(uuid, "prossesSteg")

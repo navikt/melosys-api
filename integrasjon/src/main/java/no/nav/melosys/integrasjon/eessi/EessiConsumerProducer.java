@@ -1,6 +1,5 @@
 package no.nav.melosys.integrasjon.eessi;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.integrasjon.felles.GenericContextExchangeFilter;
 import no.nav.melosys.integrasjon.felles.WebClientConfig;
 import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter;
@@ -18,19 +17,8 @@ public class EessiConsumerProducer implements WebClientConfig {
         this.url = url;
     }
 
-//    @Bean
-//    public EessiConsumer melosysEessiConsumer(ObjectMapper objectMapper,
-//                                              GenericContextClientRequestInterceptor interceptor,
-//                                              CorrelationIdOutgoingInterceptor correlationIdOutgoingInterceptor,
-//                                              RestTemplateBuilder restTemplateBuilder) {
-//        RestTemplate restTemplate = restTemplateBuilder.rootUri(url).build();
-//        restTemplate.setInterceptors(Arrays.asList(interceptor, correlationIdOutgoingInterceptor));
-//        return new EessiConsumerImpl(restTemplate, objectMapper);
-//    }
-
     @Bean
-    public EessiConsumer melosysEessiConsumer(ObjectMapper objectMapper,
-                                              GenericContextExchangeFilter genericContextExchangeFilter,
+    public EessiConsumer melosysEessiConsumer(GenericContextExchangeFilter genericContextExchangeFilter,
                                               CorrelationIdOutgoingFilter correlationIdOutgoingFilter,
                                               WebClient.Builder webClientBuilder
     ) {
@@ -39,6 +27,6 @@ public class EessiConsumerProducer implements WebClientConfig {
             .filter(genericContextExchangeFilter)
             .filter(correlationIdOutgoingFilter)
             .filter(errorFilter("kall til eessi feilet"))
-            .build(), objectMapper);
+            .build());
     }
 }
