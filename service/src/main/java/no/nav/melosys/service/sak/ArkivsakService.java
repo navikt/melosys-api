@@ -21,7 +21,7 @@ public class ArkivsakService {
         this.sakConsumer = sakConsumer;
     }
 
-    public Long opprettSakForBruker(String saksnummer, Behandlingstema behandlingstema, String aktørId) {
+    public Long opprettSakForBruker(String saksnummer, Behandlingstema behandlingstema, String aktørId) { //TODO fiks behandlingstema
         SakDto sakDto = new SakDto();
 
         sakDto.setTema(TemaFactory.fraBehandlingstema(behandlingstema).getKode());

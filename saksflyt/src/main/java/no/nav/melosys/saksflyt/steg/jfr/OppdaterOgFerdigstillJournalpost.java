@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
@@ -16,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.TemaFactory.fraBehandlingstema;
+import static no.nav.melosys.domain.TemaFactory.utledTema;
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.*;
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.OPPDATER_OG_FERDIGSTILL_JOURNALPOST;
 
@@ -24,10 +26,13 @@ public class OppdaterOgFerdigstillJournalpost implements StegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(OppdaterOgFerdigstillJournalpost.class);
 
+    private final Unleash unleash;
+
     private final JoarkFasade joarkFasade;
 
-    public OppdaterOgFerdigstillJournalpost(JoarkFasade joarkFasade) {
+    public OppdaterOgFerdigstillJournalpost(JoarkFasade joarkFasade, Unleash unleash) {
         this.joarkFasade = joarkFasade;
+        this.unleash = unleash;
     }
 
     @Override
@@ -38,6 +43,8 @@ public class OppdaterOgFerdigstillJournalpost implements StegBehandler {
     @Override
     @SuppressWarnings("unchecked")
     public void utfør(Prosessinstans prosessinstans) {
+        var behandleAlleSakerToggleEnabled = unleash.isEnabled("melosys.behandle_alle_saker");
+
         String journalpostID = prosessinstans.getData(JOURNALPOST_ID);
 
         var behandling = prosessinstans.getBehandling();
@@ -72,7 +79,9 @@ public class OppdaterOgFerdigstillJournalpost implements StegBehandler {
             .medMottattDato(mottattDato)
             .medFysiskeVedlegg(fysiskeVedleggMedTitler)
             .medLogiskeVedleggTitler(logiskeVedleggTitler)
-            .medTema(fraBehandlingstema(behandling.getTema()).getKode())
+            .medTema(behandleAlleSakerToggleEnabled
+                ? utledTema(behandling.getFagsak().getTema()).getKode()
+                : fraBehandlingstema(behandling.getTema()).getKode())
             .build();
         joarkFasade.oppdaterOgFerdigstillJournalpost(journalpostID, journalpostOppdatering);
         log.info("Oppdatert og ferdigstilt journalpost {} for fagsak: {}", journalpostID, behandling.getFagsak().getSaksnummer());

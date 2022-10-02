@@ -2,6 +2,7 @@ package no.nav.melosys.domain;
 
 import java.util.EnumSet;
 
+import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.exception.FunksjonellException;
 
@@ -41,6 +42,7 @@ public class TemaFactory {
         REGISTRERING_UNNTAK
     );
 
+    @Deprecated
     public static Tema fraBehandlingstema(Behandlingstema behandlingstema) {
         if (GYLDIGE_BEHANDLINGSTEMA_MEDLEMSKAP.contains(behandlingstema)) {
             return Tema.MED;
@@ -50,4 +52,14 @@ public class TemaFactory {
             throw new FunksjonellException("Behandlingstema " + behandlingstema.getBeskrivelse() + " er ikke støttet.");
         }
     }
+
+    //TODO generaliser
+    public static Tema utledTema(Sakstemaer sakstema) {
+        return switch (sakstema) {
+            case MEDLEMSKAP_LOVVALG -> Tema.MED;
+            case TRYGDEAVGIFT -> Tema.TRY;
+            case UNNTAK -> Tema.UFM;
+        };
+    }
+
 }

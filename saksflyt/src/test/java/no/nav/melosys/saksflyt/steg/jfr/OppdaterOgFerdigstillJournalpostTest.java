@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
+import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
@@ -32,12 +33,16 @@ class OppdaterOgFerdigstillJournalpostTest {
 
     private OppdaterOgFerdigstillJournalpost oppdaterOgFerdigstillJournalpost;
 
+    private final FakeUnleash unleash = new FakeUnleash();
+
     @Captor
     private ArgumentCaptor<JournalpostOppdatering> oppdateringArgumentCaptor;
 
     @BeforeEach
     public void setUp() {
-        oppdaterOgFerdigstillJournalpost = new OppdaterOgFerdigstillJournalpost(joarkFasade);
+        oppdaterOgFerdigstillJournalpost = new OppdaterOgFerdigstillJournalpost(joarkFasade, unleash);
+
+        unleash.enableAll();
     }
 
     @Test
