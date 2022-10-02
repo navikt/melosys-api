@@ -22,7 +22,7 @@ public class EessiConsumerProducer implements WebClientConfig {
                                               CorrelationIdOutgoingFilter correlationIdOutgoingFilter,
                                               WebClient.Builder webClientBuilder
     ) {
-        return new EessiConsumerWebClient(webClientBuilder
+        return new EessiConsumer(webClientBuilder
             .baseUrl(url)
             .filter(genericContextExchangeFilter)
             .filter(correlationIdOutgoingFilter)
