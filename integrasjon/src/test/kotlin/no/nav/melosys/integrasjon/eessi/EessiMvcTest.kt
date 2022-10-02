@@ -74,8 +74,17 @@ class EessiMvcTest(
 
     @Test
     fun opprettBucOgSed() {
+        val sedDataDto = SedDataDto()
+        val vedlegg = setOf(Vedlegg("pdf".toByteArray(), "tittel"))
+        val json = ObjectMapper().writeValueAsString(
+            mapOf(
+                "sedDataDto" to sedDataDto,
+                "vedlegg" to vedlegg
+            )
+        )
         serviceUnderTestMockServer.stubFor(
             post("/api/buc/LA_BUC_01?sendAutomatisk=true&oppdaterEksisterende=true")
+                .withRequestBody(WireMock.equalToJson(json))
                 .willReturn(
                     WireMock.aResponse()
                         .withStatus(200)
@@ -86,8 +95,8 @@ class EessiMvcTest(
 
 
         val opprettSedDto = eessiConsumer.opprettBucOgSed(
-            SedDataDto(),
-            setOf(Vedlegg("pdf".toByteArray(), "tittel")),
+            sedDataDto,
+            vedlegg,
             BucType.LA_BUC_01,
             true,
             true
