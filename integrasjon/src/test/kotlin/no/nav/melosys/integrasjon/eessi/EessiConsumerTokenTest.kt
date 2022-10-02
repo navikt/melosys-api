@@ -21,7 +21,7 @@ import org.springframework.test.context.ActiveProfiles
         StsRestTemplateProducer::class,
         RestStsClient::class,
 
-        EessiConsumer::class,
+        EessiConsumerWebClient::class,
         GenericContextExchangeFilter::class,
         EessiConsumerProducer::class,
         GenericContextClientRequestInterceptor::class
@@ -91,5 +91,5 @@ class EessiConsumerTokenTest(
     override fun getMockData(): String = "[]"
 
     override fun executeRequest() =
-        eessiConsumer.hentMuligeAksjoner("123")!!
+        eessiConsumer.hentMuligeAksjoner("123")
 }

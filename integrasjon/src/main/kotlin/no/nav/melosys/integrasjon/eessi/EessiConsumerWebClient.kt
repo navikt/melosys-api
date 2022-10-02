@@ -13,10 +13,9 @@ import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.client.WebClient
 
+class EessiConsumerWebClient(private val webClient: WebClient) : EessiConsumer, JsonRestIntegrasjon {
 
-class EessiConsumer(private val webClient: WebClient) : JsonRestIntegrasjon {
-
-    fun opprettBucOgSed(
+    override fun opprettBucOgSed(
         sedDataDto: SedDataDto,
         vedlegg: Collection<Vedlegg>,
         bucType: BucType,
@@ -29,9 +28,9 @@ class EessiConsumer(private val webClient: WebClient) : JsonRestIntegrasjon {
             .bodyValue(OpprettBucOgSedDto(sedDataDto, vedlegg))
             .retrieve()
             .bodyToMono(typeReference<OpprettSedDto>())
-            .block()!!
+            .block()
 
-    fun sendSedPåEksisterendeBuc(sedDataDto: SedDataDto, rinaSaksnummer: String, sedType: SedType) {
+    override fun sendSedPåEksisterendeBuc(sedDataDto: SedDataDto, rinaSaksnummer: String, sedType: SedType) {
         webClient.post()
             .uri("/buc/$rinaSaksnummer/sed/$sedType")
             .accept(MediaType.APPLICATION_JSON)
@@ -41,24 +40,24 @@ class EessiConsumer(private val webClient: WebClient) : JsonRestIntegrasjon {
             .block()
     }
 
-    fun hentMottakerinstitusjoner(bucType: String, landkoder: Collection<String>): List<Institusjon> {
+    override fun hentMottakerinstitusjoner(bucType: String, landkoder: Collection<String>): List<Institusjon>? {
         return webClient.get()
             .uri("/buc/$bucType/institusjoner?land=${landkoder.joinToString(",")}")
             .accept(MediaType.APPLICATION_JSON)
             .retrieve()
             .bodyToMono(typeReference<List<InstitusjonDto>>())
-            .block()!!.map { Institusjon(it.id, it.navn, it.landkode) }.toList()
+            .block()?.map { Institusjon(it.id, it.navn, it.landkode) }?.toList()
     }
 
-    fun hentMelosysEessiMeldingFraJournalpostID(journalpostID: String) =
+    override fun hentMelosysEessiMeldingFraJournalpostID(journalpostID: String) =
         webClient.get()
             .uri("/journalpost/$journalpostID/eessimelding")
             .accept(MediaType.APPLICATION_JSON)
             .retrieve()
             .bodyToMono(typeReference<MelosysEessiMelding>())
-            .block()!!
+            .block()
 
-    fun lagreSaksrelasjon(saksrelasjonDto: SaksrelasjonDto) {
+    override fun lagreSaksrelasjon(saksrelasjonDto: SaksrelasjonDto) {
         webClient.post()
             .uri("/sak")
             .accept(MediaType.APPLICATION_JSON)
@@ -68,40 +67,40 @@ class EessiConsumer(private val webClient: WebClient) : JsonRestIntegrasjon {
             .block()
     }
 
-    fun hentSakForRinasaksnummer(rinaSaksnummer: String) =
+    override fun hentSakForRinasaksnummer(rinaSaksnummer: String) =
         webClient.get()
             .uri("/sak?rinaSaksnummer=$rinaSaksnummer")
             .accept(MediaType.APPLICATION_JSON)
             .retrieve()
             .bodyToMono(typeReference<List<SaksrelasjonDto>>())
-            .block()!!
+            .block()
 
-    fun genererSedPdf(sedDataDto: SedDataDto, sedType: SedType) =
+    override fun genererSedPdf(sedDataDto: SedDataDto, sedType: SedType) =
         webClient.post()
             .uri("/sed/$sedType/pdf")
             .accept(MediaType.APPLICATION_JSON)
             .bodyValue(sedDataDto)
             .retrieve()
             .bodyToMono(typeReference<ByteArray>())
-            .block()!!
+            .block()
 
-    fun hentTilknyttedeBucer(gsakSaksnummer: Long, statuser: List<String>) =
+    override fun hentTilknyttedeBucer(gsakSaksnummer: Long, statuser: List<String>) =
         webClient.get()
             .uri("/sak/$gsakSaksnummer/bucer?statuser=${statuser.joinToString(",")}")
             .accept(MediaType.APPLICATION_JSON)
             .retrieve()
             .bodyToMono(typeReference<List<BucinfoDto>>())
-            .block()!!.map { it.tilDomene() }.toList()
+            .block()?.map { it.tilDomene() }?.toList()
 
-    fun hentSedGrunnlag(rinaSaksnummer: String, rinaDokumentID: String) =
+    override fun hentSedGrunnlag(rinaSaksnummer: String, rinaDokumentID: String) =
         webClient.get()
             .uri("/buc/$rinaSaksnummer/sed/$rinaDokumentID/grunnlag")
             .accept(MediaType.APPLICATION_JSON)
             .retrieve()
             .bodyToMono(typeReference<SedGrunnlagDto>())
-            .block()!!
+            .block()
 
-    fun lukkBuc(rinaSaksnummer: String) {
+    override fun lukkBuc(rinaSaksnummer: String) {
         webClient.post()
             .uri("/buc/$rinaSaksnummer/lukk")
             .accept(MediaType.APPLICATION_JSON)
@@ -110,7 +109,7 @@ class EessiConsumer(private val webClient: WebClient) : JsonRestIntegrasjon {
             .block()
     }
 
-    fun hentMuligeAksjoner(rinaSaksnummer: String) =
+    override fun hentMuligeAksjoner(rinaSaksnummer: String) =
         webClient.get()
             .uri("/buc/$rinaSaksnummer/aksjoner")
             .accept(MediaType.APPLICATION_JSON)
