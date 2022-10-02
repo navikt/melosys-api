@@ -1,8 +1,8 @@
 package no.nav.melosys.integrasjon.eessi
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.github.tomakehurst.wiremock.client.MappingBuilder
 import com.github.tomakehurst.wiremock.client.WireMock
-import com.github.tomakehurst.wiremock.matching.UrlPattern
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldBeSingleton
 import io.kotest.matchers.collections.shouldHaveSize
@@ -17,6 +17,7 @@ import no.nav.melosys.domain.eessi.SedType
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
 import no.nav.melosys.domain.eessi.sed.SedDataDto
 import no.nav.melosys.domain.eessi.sed.SedGrunnlagA003Dto
+import no.nav.melosys.domain.eessi.sed.SedGrunnlagDto
 import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.integrasjon.ConsumerWireMockTestBase
 import no.nav.melosys.integrasjon.eessi.dto.OpprettSedDto
@@ -25,12 +26,16 @@ import no.nav.melosys.integrasjon.felles.GenericContextClientRequestInterceptor
 import no.nav.melosys.integrasjon.felles.GenericContextExchangeFilter
 import no.nav.melosys.integrasjon.reststs.RestStsClient
 import no.nav.melosys.integrasjon.reststs.StsRestTemplateProducer
-import org.assertj.core.api.Assertions
+import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebClient
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.http.HttpHeaders
+import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
 import java.nio.file.Files
 import java.nio.file.Paths
@@ -55,68 +60,104 @@ class EessiMvcTest(
     @Value("\${mockserver.security.port}") mockSecurityPort: Int
 ) : ConsumerWireMockTestBase<String, OpprettSedDto>(mockServiceUnderTestPort, mockSecurityPort) {
 
+    private val prossesUUID = UUID.randomUUID()
+
+    @BeforeEach
+    fun before() {
+        ThreadLocalAccessInfo.beforeExecuteProcess(prossesUUID, "prossesSteg")
+    }
+
+    @AfterEach
+    fun after() {
+        ThreadLocalAccessInfo.afterExecuteProcess(prossesUUID)
+    }
+
     @Test
     fun opprettBucOgSed() {
-        setupWireMock(
-            WireMock.post("/api/buc/LA_BUC_01?sendAutomatisk=true&oppdaterEksisterende=true")
+        serviceUnderTestMockServer.stubFor(
+            post("/api/buc/LA_BUC_01?sendAutomatisk=true&oppdaterEksisterende=true")
+                .willReturn(
+                    WireMock.aResponse()
+                        .withStatus(200)
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withBody("{\"rinaSaksnummer\":\"12345\",\"rinaUrl\":\"localhost:3000\"}")
+                )
         )
-        executeFromSystemFunc {
-            val opprettSedDto = eessiConsumer.opprettBucOgSed(
-                SedDataDto(),
-                setOf(Vedlegg("pdf".toByteArray(), "tittel")),
-                BucType.LA_BUC_01,
-                true,
-                true
-            )
-            opprettSedDto.rinaSaksnummer.shouldBe("12345")
-        }
+
+
+        val opprettSedDto = eessiConsumer.opprettBucOgSed(
+            SedDataDto(),
+            setOf(Vedlegg("pdf".toByteArray(), "tittel")),
+            BucType.LA_BUC_01,
+            true,
+            true
+        )
+
+
+        opprettSedDto.rinaSaksnummer.shouldBe("12345")
     }
 
     @Test
     fun opprettBucOgSed_forventException() {
-        setupWireMock(
-            WireMock.post("/api/buc/LA_BUC_01?sendAutomatisk=true&oppdaterEksisterende=true"),
-            response = WireMock.aResponse().withStatus(500)
-        )
-        executeFromSystemFunc {
-            shouldThrow<TekniskException> {
-                eessiConsumer.opprettBucOgSed(
-                    SedDataDto(), null, BucType.LA_BUC_01, true, true
+        serviceUnderTestMockServer.stubFor(
+            post("/api/buc/LA_BUC_01?sendAutomatisk=true&oppdaterEksisterende=true")
+                .willReturn(
+                    WireMock.aResponse()
+                        .withStatus(500)
                 )
-            }.message.shouldContain("kall til eessi feilet")
-        }
+        )
+
+
+        shouldThrow<TekniskException> {
+            eessiConsumer.opprettBucOgSed(
+                SedDataDto(), listOf(), BucType.LA_BUC_01, true, true
+            )
+        }.message.shouldContain("kall til eessi feilet")
     }
 
     @Test
     fun sendSedPåEksisterendeBuc() {
-        setupWireMock(
-            WireMock.post("/api/buc/12345/sed/A001")
+        val sedDataDto = SedDataDto()
+        serviceUnderTestMockServer.stubFor(
+            post("/api/buc/12345/sed/A001")
+                .withRequestBody(WireMock.equalToJson((ObjectMapper().writeValueAsString(sedDataDto))))
+                .willReturn(
+                    WireMock.aResponse()
+                        .withStatus(204)
+                )
         )
-        executeFromSystemFunc {
-            eessiConsumer.sendSedPåEksisterendeBuc(
-                SedDataDto(),
-                "12345",
-                SedType.A001
-            )
-        }
+
+
+        eessiConsumer.sendSedPåEksisterendeBuc(
+            sedDataDto,
+            "12345",
+            SedType.A001
+        )
     }
 
     @Test
     fun hentMottakerinstitusjoner() {
-        setupWireMock(
-            WireMock.get("/api/buc/LA_BUC_01/institusjoner?land=DE,PL"),
-            data = "[{\"id\":\"NO:NAVT002\",\"navn\":\"NAVT002\",\"landkode\":\"NO\"}]"
+        serviceUnderTestMockServer.stubFor(
+            get("/api/buc/LA_BUC_01/institusjoner?land=DE,PL")
+                .willReturn(
+                    WireMock.aResponse()
+                        .withStatus(200)
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withBody("[{\"id\":\"NO:NAVT002\",\"navn\":\"NAVT002\",\"landkode\":\"NO\"}]")
+                )
         )
-        executeFromSystemFunc {
-            val institusjoner = eessiConsumer.hentMottakerinstitusjoner("LA_BUC_01", listOf("DE", "PL"))
-            institusjoner
-                .shouldHaveSize(1)
-                .first().apply {
-                    id.shouldBe("NO:NAVT002")
-                    navn.shouldBe("NAVT002")
-                    landkode.shouldBe("NO")
-                }
-        }
+
+
+        val institusjoner = eessiConsumer.hentMottakerinstitusjoner("LA_BUC_01", listOf("DE", "PL"))
+
+
+        institusjoner
+            .shouldHaveSize(1)
+            .first().apply {
+                id.shouldBe("NO:NAVT002")
+                navn.shouldBe("NAVT002")
+                landkode.shouldBe("NO")
+            }
     }
 
     @Test
@@ -126,33 +167,40 @@ class EessiMvcTest(
             sedType = "A009"
             journalpostId = journalpostID
         }
-
-        setupWireMock(
-            WireMock.get("/api/journalpost/$journalpostID/eessimelding"),
-            data = ObjectMapper().writeValueAsString(melosysEessiMelding)
+        serviceUnderTestMockServer.stubFor(
+            get("/api/journalpost/$journalpostID/eessimelding")
+                .willReturn(
+                    WireMock.aResponse()
+                        .withStatus(200)
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withBody(ObjectMapper().writeValueAsString(melosysEessiMelding))
+                )
         )
 
-        executeFromSystemFunc {
-            val response = eessiConsumer.hentMelosysEessiMeldingFraJournalpostID(journalpostID)
-            response.apply {
-                sedType.shouldBe(melosysEessiMelding.sedType)
-                journalpostId.shouldBe(melosysEessiMelding.journalpostId)
-            }
+
+        val response = eessiConsumer.hentMelosysEessiMeldingFraJournalpostID(journalpostID)
+
+
+        response.apply {
+            sedType.shouldBe(melosysEessiMelding.sedType)
+            journalpostId.shouldBe(melosysEessiMelding.journalpostId)
         }
     }
 
     @Test
     fun lagreSaksrelasjon() {
         val saksrelasjonDto = SaksrelasjonDto(123L, "123", "123")
-
-        setupWireMock(
-            WireMock.post("/api/sak")
-                .withRequestBody(WireMock.equalToJson(ObjectMapper().writeValueAsString(saksrelasjonDto))),
+        serviceUnderTestMockServer.stubFor(
+            post("/api/sak")
+                .withRequestBody(WireMock.equalToJson(ObjectMapper().writeValueAsString(saksrelasjonDto)))
+                .willReturn(
+                    WireMock.aResponse()
+                        .withStatus(200)
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                )
         )
 
-        executeFromSystemFunc {
-            eessiConsumer.lagreSaksrelasjon(saksrelasjonDto)
-        }
+        eessiConsumer.lagreSaksrelasjon(saksrelasjonDto)
     }
 
     @Test
@@ -162,152 +210,181 @@ class EessiMvcTest(
             gsakSaksnummer = 123L
             bucType = "LA_BUC_04"
         }
-        setupWireMock(
-            WireMock.get("/api/sak?rinaSaksnummer=${saksrelasjon.rinaSaksnummer}"),
-            data = ObjectMapper().writeValueAsString(listOf(saksrelasjon))
+        serviceUnderTestMockServer.stubFor(
+            get("/api/sak?rinaSaksnummer=${saksrelasjon.rinaSaksnummer}")
+                .willReturn(
+                    WireMock.aResponse()
+                        .withStatus(200)
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withBody(ObjectMapper().writeValueAsString(listOf(saksrelasjon)))
+                )
         )
 
-        executeFromSystemFunc {
-            val saksRelasjoner: MutableList<SaksrelasjonDto> =
-                eessiConsumer.hentSakForRinasaksnummer(saksrelasjon.rinaSaksnummer)
-            saksRelasjoner
-                .shouldHaveSize(1)
-                .first()
-                .shouldBeEqualToComparingFields(saksrelasjon, FieldsEqualityCheckConfig(ignorePrivateFields = false))
-        }
+
+        val saksRelasjoner: List<SaksrelasjonDto> =
+            eessiConsumer.hentSakForRinasaksnummer(saksrelasjon.rinaSaksnummer)
+
+
+        saksRelasjoner
+            .shouldHaveSize(1)
+            .first()
+            .shouldBeEqualToComparingFields(saksrelasjon, FieldsEqualityCheckConfig(ignorePrivateFields = false))
     }
 
     @Test
     fun genererSedPdf() {
-        val PDF = "pdf"
-
-        setupWireMock(
-            WireMock.post("/api/sed/A001/pdf"),
-            data = PDF
+        val pdf = "pdf".toByteArray()
+        serviceUnderTestMockServer.stubFor(
+            post("/api/sed/A001/pdf")
+                .willReturn(
+                    WireMock.aResponse()
+                        .withStatus(200)
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withBody(pdf)
+                )
         )
 
-        executeFromSystemFunc {
-            val pdf: ByteArray = eessiConsumer.genererSedPdf(SedDataDto(), SedType.A001)
-            pdf.shouldBe(PDF.toByteArray())
-        }
+
+        val resultPDF: ByteArray = eessiConsumer.genererSedPdf(SedDataDto(), SedType.A001)
+
+
+        resultPDF.shouldBe(pdf)
     }
 
     @Test
     fun hentTilknyttedeBucer_medEnStatus_forventBucer() {
         val uri = Objects.requireNonNull(javaClass.classLoader.getResource("mock/eux/bucer.json")).toURI()
         val json = String(Files.readAllBytes(Paths.get(uri)))
-        setupWireMock(
-            WireMock.get("/api/sak/1/bucer?statuser=UTKAST"),
-            data = json
+        serviceUnderTestMockServer.stubFor(
+            get("/api/sak/1/bucer?statuser=UTKAST")
+                .willReturn(
+                    WireMock.aResponse()
+                        .withStatus(200)
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withBody(json)
+                )
         )
-        executeFromSystemFunc {
-            val hentTilknyttedeBucer = eessiConsumer.hentTilknyttedeBucer(1L, listOf("UTKAST"))
 
-            hentTilknyttedeBucer
-                .shouldHaveSize(2)
-                .apply {
-                    first().apply {
-                        id.shouldBe("111111")
-                        bucType.shouldBe("LA_BUC_03")
-                        erÅpen().shouldBe(true)
-                        opprettetDato.shouldBe(LocalDate.of(2019, 4, 4))
-                        seder.shouldBeSingleton {
-                            it.sedId.shouldBe("22223333")
-                            it.sedType.shouldBe("A008")
-                            it.status.shouldBe("UTKAST")
-                        }
+
+        val hentTilknyttedeBucer = eessiConsumer.hentTilknyttedeBucer(1L, listOf("UTKAST"))
+
+
+        hentTilknyttedeBucer
+            .shouldHaveSize(2)
+            .apply {
+                first().apply {
+                    id.shouldBe("111111")
+                    bucType.shouldBe("LA_BUC_03")
+                    erÅpen().shouldBe(true)
+                    opprettetDato.shouldBe(LocalDate.of(2019, 4, 4))
+                    seder.shouldBeSingleton {
+                        it.sedId.shouldBe("22223333")
+                        it.sedType.shouldBe("A008")
+                        it.status.shouldBe("UTKAST")
                     }
-                    last().apply {
-                        id.shouldBe("222222")
-                        bucType.shouldBe("LA_BUC_01")
-                        erÅpen().shouldBe(false)
-                        opprettetDato.shouldBe(LocalDate.of(2019, 4, 4))
-                        seder.shouldHaveSize(2).apply {
-                            first().apply {
-                                sedId.shouldBe("11221122")
-                                sedType.shouldBe("A002")
-                                status.shouldBe("UTKAST")
-                            }
-                            last().apply {
-                                sedId shouldBe ("11332233")
-                                sedType.shouldBe("A001")
-                                status.shouldBe("UTKAST")
-                            }
+                }
+                last().apply {
+                    id.shouldBe("222222")
+                    bucType.shouldBe("LA_BUC_01")
+                    erÅpen().shouldBe(false)
+                    opprettetDato.shouldBe(LocalDate.of(2019, 4, 4))
+                    seder.shouldHaveSize(2).apply {
+                        first().apply {
+                            sedId.shouldBe("11221122")
+                            sedType.shouldBe("A002")
+                            status.shouldBe("UTKAST")
+                        }
+                        last().apply {
+                            sedId shouldBe ("11332233")
+                            sedType.shouldBe("A001")
+                            status.shouldBe("UTKAST")
                         }
                     }
                 }
-        }
+            }
     }
 
     @Test
     fun hentTilknyttedeBucer_medFlereStatuser_forventRettSti() {
-        setupWireMock(
-            WireMock.get("/api/sak/1/bucer?statuser=UTKAST,MOTTATT,SENDT"),
-            data = "[]"
+        serviceUnderTestMockServer.stubFor(
+            get("/api/sak/1/bucer?statuser=UTKAST,MOTTATT,SENDT")
+                .willReturn(
+                    WireMock.aResponse()
+                        .withStatus(200)
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withBody("[]")
+                )
         )
-        executeFromSystemFunc {
-            eessiConsumer.hentTilknyttedeBucer(1L, listOf("UTKAST", "MOTTATT", "SENDT"))
-        }
+
+        eessiConsumer.hentTilknyttedeBucer(1L, listOf("UTKAST", "MOTTATT", "SENDT"))
     }
 
     @Test
     fun hentTilknyttedeBucer_medToStatuser_forventRettSti() {
-        setupWireMock(
-            WireMock.get("/api/sak/1/bucer?statuser=SENDT,UTKAST"),
-            data = "[]"
+        serviceUnderTestMockServer.stubFor(
+            get("/api/sak/1/bucer?statuser=SENDT,UTKAST")
+                .willReturn(
+                    WireMock.aResponse()
+                        .withStatus(200)
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withBody("[]")
+                )
         )
-        executeFromSystemFunc {
-            eessiConsumer.hentTilknyttedeBucer(1L, listOf("SENDT", "UTKAST"))
-        }
+        eessiConsumer.hentTilknyttedeBucer(1L, listOf("SENDT", "UTKAST"))
     }
 
     @Test
     fun hentSedGrunnlag() {
-        setupWireMock(
-            WireMock.get("/api/buc/1234/sed/abcdef/grunnlag"),
-            data = "{\"sedType\": \"A003\"}"
+        serviceUnderTestMockServer.stubFor(
+            get("/api/buc/1234/sed/abcdef/grunnlag")
+                .willReturn(
+                    WireMock.aResponse()
+                        .withStatus(200)
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withBody("{\"sedType\": \"A003\"}")
+                )
         )
-        executeFromSystemFunc {
-            val rinaSaksnummer = "1234"
-            val rinaDokumentID = "abcdef"
-            val response = eessiConsumer.hentSedGrunnlag(rinaSaksnummer, rinaDokumentID)
-            response.shouldBeInstanceOf<SedGrunnlagA003Dto>()
-        }
+
+        val response: SedGrunnlagDto =
+            eessiConsumer.hentSedGrunnlag("1234", "abcdef")
+
+
+        response.shouldBeInstanceOf<SedGrunnlagA003Dto>()
     }
 
     @Test
     fun lukkBuc() {
         val rinaSaksnummer = "1424"
-        setupWireMock(
+        serviceUnderTestMockServer.stubFor(
             WireMock.post("/api/buc/$rinaSaksnummer/lukk")
+                .withRequestBody(WireMock.absent())
+                .willReturn(
+                    WireMock.aResponse()
+                        .withStatus(200)
+                )
         )
-        executeFromSystemFunc {
-            eessiConsumer.lukkBuc(rinaSaksnummer)
-        }
-    }
 
-
-    @Test
-    fun skalBrukeErrorFilterOgGiRiktigFeilmelding() {
-        setupWireMock(
-            WireMock.post(UrlPattern.ANY)
-        )
-        executeErrorFromServer { error ->
-            Assertions.assertThat(error).startsWith("kall til eessi feilet")
-        }
+        eessiConsumer.lukkBuc(rinaSaksnummer)
     }
 
     override fun getMockData(): String {
-        return "{\"rinaSaksnummer\":\"12345\",\"rinaUrl\":\"localhost:3000\"}"
+        throw NotImplementedError("not used")
     }
 
+
     override fun executeRequest(): OpprettSedDto {
-        return eessiConsumer.opprettBucOgSed(
-            SedDataDto(),
-            setOf(Vedlegg("pdf".toByteArray(), "tittel")),
-            BucType.LA_BUC_01,
-            true,
-            true
-        )
+        throw NotImplementedError("not used")
     }
+
+    fun get(url: String): MappingBuilder =
+        WireMock.get(url)
+            .withHeader("Authorization", WireMock.equalTo("Bearer --token-from-system--"))
+            .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
+
+    fun post(url: String): MappingBuilder =
+        WireMock.post(url)
+            .withHeader("Authorization", WireMock.equalTo("Bearer --token-from-system--"))
+            .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
+            .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
+
 }

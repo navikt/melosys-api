@@ -35,7 +35,7 @@ abstract class ConsumerWireMockTestBase<T, R>(
         const val UUID_REGEX = "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}"
     }
 
-    private val serviceUnderTestMockServer: WireMockServer =
+    protected val serviceUnderTestMockServer: WireMockServer =
         WireMockServer(WireMockConfiguration.wireMockConfig().port(mockPort))
 
     protected val stsMockServer: WireMockServer =
@@ -110,27 +110,7 @@ abstract class ConsumerWireMockTestBase<T, R>(
         )
         return wireMock
     }
-
-    fun executeFromSystemFunc(func: () -> Unit) {
-        val uuid = UUID.randomUUID()
-        try {
-            ThreadLocalAccessInfo.beforeExecuteProcess(uuid, "prossesSteg")
-            func()
-        } finally {
-            ThreadLocalAccessInfo.afterExecuteProcess(uuid)
-        }
-    }
-
-    fun executeFromSystemFuncType(func: () -> Unit) {
-        val uuid = UUID.randomUUID()
-        try {
-            ThreadLocalAccessInfo.beforeExecuteProcess(uuid, "prossesSteg")
-            func()
-        } finally {
-            ThreadLocalAccessInfo.afterExecuteProcess(uuid)
-        }
-    }
-
+    
     fun executeFromSystem(consumer: (R) -> Unit = {}) {
         val uuid = UUID.randomUUID()
         try {
