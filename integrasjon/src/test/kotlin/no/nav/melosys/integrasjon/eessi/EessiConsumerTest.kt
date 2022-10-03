@@ -36,8 +36,6 @@ import org.springframework.context.annotation.Import
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
-import java.nio.file.Files
-import java.nio.file.Paths
 import java.time.LocalDate
 import java.util.*
 
@@ -294,15 +292,13 @@ class EessiConsumerTest(
 
     @Test
     fun hentTilknyttedeBucer_medEnStatus_forventBucer() {
-        val uri = Objects.requireNonNull(javaClass.classLoader.getResource("mock/eux/bucer.json")).toURI()
-        val json = String(Files.readAllBytes(Paths.get(uri)))
         serviceUnderTestMockServer.stubFor(
             get("/api/sak/1/bucer?statuser=UTKAST")
                 .willReturn(
                     WireMock.aResponse()
                         .withStatus(200)
                         .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                        .withBody(json)
+                        .withBody(javaClass.classLoader.getResource("mock/eux/bucer.json")!!.readText())
                 )
         )
 
