@@ -54,7 +54,7 @@ import java.util.*
 )
 @ActiveProfiles("wiremock-test")
 @AutoConfigureWebClient
-class EessiMvcTest(
+class EessiConsumerTest(
     @Autowired private val eessiConsumer: EessiConsumer,
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,
     @Value("\${mockserver.security.port}") mockSecurityPort: Int
