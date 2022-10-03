@@ -7,53 +7,42 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerService;
+import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.kodeverk.Sakstemaer.*;
+@Component
+class MuligeManuelleFagsakEndringer {
+    private final LovligeKombinasjonerService lovligeKombinasjonerService;
 
-public class MuligeManuelleFagsakEndringer {
-    public static Set<Sakstemaer> hentMuligeSakstema(Behandling behandling) {
+    public MuligeManuelleFagsakEndringer(LovligeKombinasjonerService lovligeKombinasjonerService) {
+        this.lovligeKombinasjonerService = lovligeKombinasjonerService;
+    }
 
-        if (behandling.kanIkkeEndres()) {
+    Set<Sakstyper> hentMuligeSakstype(Behandling behandling) {
+        if (behandling.kanIkkeEndres() && !behandling.getFagsak().kanEndreTypeOgTema()) {
             return Collections.emptySet();
         }
-
-        return switch (behandling.getFagsak().getTema()) {
-            case MEDLEMSKAP_LOVVALG -> Set.of(UNNTAK, TRYGDEAVGIFT);
-            case UNNTAK -> Set.of(MEDLEMSKAP_LOVVALG, TRYGDEAVGIFT);
-            case TRYGDEAVGIFT -> Set.of(UNNTAK, MEDLEMSKAP_LOVVALG);
-            default -> Collections.emptySet();
-        };
+        return lovligeKombinasjonerService.hentMuligeSakstyper();
     }
 
-    public static Set<Sakstyper> hentMuligeSakstype(Behandling behandling) {
-        return Collections.emptySet();
-
-        /*
-        TODO: Endre sakstype fikses i MELOSYS-5285
-        if (behandling.kanIkkeEndres()) {
+    Set<Sakstemaer> hentMuligeSakstema(Behandling behandling, Sakstyper sakstype) {
+        if (behandling.kanIkkeEndres() && !behandling.getFagsak().kanEndreTypeOgTema()) {
             return Collections.emptySet();
         }
-
-        return switch (behandling.getFagsak().getType()) {
-            case EU_EOS -> Set.of(Sakstyper.TRYGDEAVTALE, Sakstyper.FTRL);
-            case TRYGDEAVTALE -> Set.of(Sakstyper.EU_EOS, Sakstyper.FTRL);
-            case FTRL -> Set.of(Sakstyper.EU_EOS, Sakstyper.TRYGDEAVTALE);
-            default -> Collections.emptySet();
-        };
-        */
+        return lovligeKombinasjonerService.hentMuligeSakstemaer(behandling.getFagsak().getHovedpartRolle(), sakstype);
     }
 
-    public static void validerNySakstemaMulig(Behandling behandling, Sakstemaer sakstemaer) {
-        if (!hentMuligeSakstema(behandling).contains(sakstemaer)) {
-            throw new FunksjonellException(String.format("Behandlingen kan ikke endres til sakstema %s. Gyldige sakstema for behandling %s er %s",
-                sakstemaer, behandling.getId(), hentMuligeSakstema(behandling)));
-        }
-    }
-
-    public static void validerNySakstypeMulig(Behandling behandling, Sakstyper sakstype) {
+    void validerNySakstypeMulig(Behandling behandling, Sakstyper sakstype) {
         if (!hentMuligeSakstype(behandling).contains(sakstype)) {
             throw new FunksjonellException(String.format("Behandlingen kan ikke endres til sakstype %s. Gyldige sakstype for behandling %s er %s",
-                sakstype, behandling.getId(), hentMuligeSakstype(behandling)));
+                                                         sakstype, behandling.getId(), hentMuligeSakstype(behandling)));
+        }
+    }
+
+    void validerNySakstemaMulig(Behandling behandling, Sakstyper sakstype, Sakstemaer sakstemaer) {
+        if (!hentMuligeSakstema(behandling, sakstype).contains(sakstemaer)) {
+            throw new FunksjonellException(String.format("Behandlingen kan ikke endres til sakstema %s. Gyldige sakstema for behandling %s er %s",
+                sakstemaer, behandling.getId(), hentMuligeSakstema(behandling, sakstype)));
         }
     }
 }
