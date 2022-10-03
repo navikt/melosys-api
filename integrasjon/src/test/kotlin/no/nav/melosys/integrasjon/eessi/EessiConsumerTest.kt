@@ -58,7 +58,7 @@ class EessiConsumerTest(
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int
 ) {
 
-    private val prossesUUID = UUID.randomUUID()
+    private val processUUID = UUID.randomUUID()
     private val serviceUnderTestMockServer: WireMockServer =
         WireMockServer(WireMockConfiguration.wireMockConfig().port(mockServiceUnderTestPort))
 
@@ -77,12 +77,12 @@ class EessiConsumerTest(
     @BeforeEach
     fun before() {
         serviceUnderTestMockServer.resetAll()
-        ThreadLocalAccessInfo.beforeExecuteProcess(prossesUUID, "prossesSteg")
+        ThreadLocalAccessInfo.beforeExecuteProcess(processUUID, "prossesSteg")
     }
 
     @AfterEach
     fun after() {
-        ThreadLocalAccessInfo.afterExecuteProcess(prossesUUID)
+        ThreadLocalAccessInfo.afterExecuteProcess(processUUID)
     }
 
     @Test
