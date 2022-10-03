@@ -1,5 +1,6 @@
 package no.nav.melosys.service.sak;
 
+import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Tema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.integrasjon.sak.SakConsumer;
@@ -28,15 +29,17 @@ public class ArkivsakServiceTest {
     @Captor
     private ArgumentCaptor<SakDto> captor;
 
+    private final FakeUnleash unleash = new FakeUnleash();
+
     @BeforeEach
     public void setup() {
-        arkivsakService = new ArkivsakService(sakConsumer);
+        arkivsakService = new ArkivsakService(sakConsumer, unleash);
     }
 
     @Test
     public void opprettSak_behandlingstypeSøknad_temaMed() {
         final String saksnummer = "MEL-123";
-        final Behandlingstema behandlingstema = Behandlingstema.UTSENDT_ARBEIDSTAKER;
+        final Tema tema = Tema.MED;
         final String aktørID = "123123123";
         final Long sakID = 1111L;
 
@@ -44,7 +47,7 @@ public class ArkivsakServiceTest {
         sakDto.setId(sakID);
         when(sakConsumer.opprettSak(any())).thenReturn(sakDto);
 
-        Long opprettetSakID = arkivsakService.opprettSakForBruker(saksnummer, behandlingstema, aktørID);
+        Long opprettetSakID = arkivsakService.opprettSakForBruker(saksnummer, tema, aktørID);
 
         assertThat(opprettetSakID).isEqualTo(sakID);
         verify(sakConsumer).opprettSak(captor.capture());
@@ -56,7 +59,7 @@ public class ArkivsakServiceTest {
     @Test
     public void opprettSak_behandlingstypeRegistreringUnntak_temaUfm() {
         final String saksnummer = "MEL-123";
-        final Behandlingstema behandlingstema = Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING;
+        final Tema tema = Tema.UFM;
         final String aktørID = "123123123";
         final Long sakID = 1111L;
 
@@ -64,7 +67,7 @@ public class ArkivsakServiceTest {
         sakDto.setId(sakID);
         when(sakConsumer.opprettSak(any())).thenReturn(sakDto);
 
-        Long opprettetSakID = arkivsakService.opprettSakForBruker(saksnummer, behandlingstema, aktørID);
+        Long opprettetSakID = arkivsakService.opprettSakForBruker(saksnummer, tema, aktørID);
 
         assertThat(opprettetSakID).isEqualTo(sakID);
         verify(sakConsumer).opprettSak(captor.capture());

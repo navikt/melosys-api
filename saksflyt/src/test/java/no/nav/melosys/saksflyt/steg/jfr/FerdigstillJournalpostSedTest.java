@@ -8,6 +8,7 @@ import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.arkiv.Journalposttype;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
@@ -87,6 +88,7 @@ class FerdigstillJournalpostSedTest {
         fagsak.setGsakSaksnummer(123L);
         fagsak.setSaksnummer(SAKSNUMMER);
         fagsak.getAktører().add(bruker);
+        fagsak.setTema(Sakstemaer.TRYGDEAVGIFT);
 
         Behandling behandling = new Behandling();
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);

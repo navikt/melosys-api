@@ -8,6 +8,7 @@ import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
+import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessType;
@@ -72,6 +73,7 @@ class OppdaterOgFerdigstillJournalpostTest {
         prosessinstans.getBehandling().setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         prosessinstans.getBehandling().setFagsak(new Fagsak());
         prosessinstans.getBehandling().getFagsak().setSaksnummer("MEL-123");
+        prosessinstans.getBehandling().getFagsak().setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
 
         if (medAvsenderNavn) {
             prosessinstans.setData(ProsessDataKey.AVSENDER_NAVN, avsenderNavn);
