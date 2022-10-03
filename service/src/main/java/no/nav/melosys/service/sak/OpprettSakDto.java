@@ -2,11 +2,13 @@ package no.nav.melosys.service.sak;
 
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 
 public class OpprettSakDto {
     private String brukerID;
     private Sakstyper sakstype;
     private Behandlingstema behandlingstema;
+    private Behandlingstyper behandlingstype;
     private String oppgaveID;
     private SøknadDto soknadDto;
     private boolean skalTilordnes;
@@ -33,6 +35,14 @@ public class OpprettSakDto {
 
     public void setBehandlingstema(Behandlingstema behandlingstema) {
         this.behandlingstema = behandlingstema;
+    }
+
+    public Behandlingstyper getBehandlingstype() {
+        return behandlingstype;
+    }
+
+    public void setBehandlingstype(Behandlingstyper behandlingstype) {
+        this.behandlingstype = behandlingstype;
     }
 
     public String getOppgaveID() {
