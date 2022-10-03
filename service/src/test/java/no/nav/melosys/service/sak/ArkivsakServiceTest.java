@@ -87,25 +87,4 @@ public class ArkivsakServiceTest {
         Tema tema = arkivsakService.hentTemaFraSak(sakID);
         assertThat(tema).isEqualTo(Tema.UFM);
     }
-
-    @Test
-    void opprettSak_sakstemaerMEDLEMSKAP_forventMED() {
-        unleash.enable("melosys.behandle_alle_saker");
-        final String saksnummer = "MEL-123";
-        final Tema tema = Tema.MED;
-        final String aktørID = "123123123";
-        final Long sakID = 1111L;
-
-        SakDto sakDto = new SakDto();
-        sakDto.setId(sakID);
-        when(sakConsumer.opprettSak(any())).thenReturn(sakDto);
-
-        Long opprettetSakID = arkivsakService.opprettSakForBruker(saksnummer, tema, aktørID);
-
-        assertThat(opprettetSakID).isEqualTo(sakID);
-        verify(sakConsumer).opprettSak(captor.capture());
-
-        SakDto opprettetSakDto = captor.getValue();
-        assertThat(opprettetSakDto.getTema()).isEqualTo(Tema.MED.getKode());
-    }
 }
