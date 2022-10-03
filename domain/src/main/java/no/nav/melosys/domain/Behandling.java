@@ -272,7 +272,7 @@ public class Behandling extends RegistreringsInfo {
     public Optional<ErPeriode> finnPeriode() {
         if (kanResultereIVedtak()) {
             return Optional.of(behandlingsgrunnlag.getBehandlingsgrunnlagdata().periode);
-        } else if (erBehandlingAvSed()) {
+        } else if (erBehandlingAvSedGammel()) {
             return finnSedDokument().map(SedDokument::getLovvalgsperiode);
         }
 
@@ -347,9 +347,7 @@ public class Behandling extends RegistreringsInfo {
             || status == Behandlingsstatus.ANMODNING_UNNTAK_SENDT;
     }
 
-    public boolean erBehandlingAvSed() {
-        return tema != null && erBehandlingAvSed(tema.getKode());
-    }
+
 
     public boolean erNyVurdering() {
         return type == Behandlingstyper.NY_VURDERING;
@@ -435,7 +433,19 @@ public class Behandling extends RegistreringsInfo {
         return ARBEID_FLERE_LAND.getKode().equalsIgnoreCase(behandlingstemaKode);
     }
 
-    private static boolean erBehandlingAvSed(String behandlingstemaKode) {
+    /**
+     * @deprecated Fjernes med toggle melosys.behandle_alle_saker. Skal erstattes alle steder den er brukt
+     */
+    @Deprecated
+    public boolean erBehandlingAvSedGammel() {
+        return tema != null && erBehandlingAvSedGammel(tema.getKode());
+    }
+
+    /**
+     * @deprecated Fjernes med toggle melosys.behandle_alle_saker. Skal erstattes alle steder den er brukt
+     */
+    @Deprecated
+    private static boolean erBehandlingAvSedGammel(String behandlingstemaKode) {
         return erRegistreringAvUnntak(behandlingstemaKode)
             || erAnmodningOmUnntak(behandlingstemaKode)
             || BESLUTNING_LOVVALG_NORGE.getKode().equalsIgnoreCase(behandlingstemaKode);

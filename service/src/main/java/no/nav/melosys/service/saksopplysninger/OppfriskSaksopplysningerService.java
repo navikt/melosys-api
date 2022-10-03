@@ -92,7 +92,7 @@ public class OppfriskSaksopplysningerService {
         registeropplysningerService.hentOgLagreOpplysninger(registeropplysningerRequest);
         behandlingsresultatService.tømBehandlingsresultat(behandlingID);
 
-        if (behandling.erBehandlingAvSed()) {
+        if (behandling.erBehandlingAvSedGammel()) {
             ufmKontrollService.utførKontrollerOgRegistrerFeil(behandlingID);
         }
 
