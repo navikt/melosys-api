@@ -16,11 +16,12 @@ public class ArkivsakService {
 
     private final SakConsumer sakConsumer;
 
-    public ArkivsakService(SakConsumer sakConsumer, Unleash unleash) {
+    public ArkivsakService(SakConsumer sakConsumer) {
         this.sakConsumer = sakConsumer;
     }
 
-    public Long opprettSakForBruker(String saksnummer, Tema tema, String aktørId) { //TODO fiks behandlingstema
+    //TODO Reduser til en metode for begge? Vi kan basere oss på lengden av orgnr.
+    public Long opprettSakForBruker(String saksnummer, Tema tema, String aktørId) {
         SakDto sakDto = new SakDto();
 
         sakDto.setTema(tema.getKode());
@@ -42,9 +43,5 @@ public class ArkivsakService {
         sakDto = sakConsumer.opprettSak(sakDto);
         log.info("Sak opprettet med sakID: {} for virksomhet: {}", sakDto.getId(), sakDto.getOrgnr());
         return sakDto.getId();
-    }
-
-    public Tema hentTemaFraSak(Long gsakSaksnummer) {
-        return Tema.valueOf(sakConsumer.hentSak(gsakSaksnummer).getTema());
     }
 }

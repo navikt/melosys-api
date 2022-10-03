@@ -34,11 +34,11 @@ public class ArkivsakServiceTest {
 
     @BeforeEach
     public void setup() {
-        arkivsakService = new ArkivsakService(sakConsumer, unleash);
+        arkivsakService = new ArkivsakService(sakConsumer);
     }
 
     @Test
-    public void opprettSak_behandlingstypeSøknad_temaMed() {
+    public void opprettSakForBruker_behandlingstypeSøknad_temaMed() {
         final String saksnummer = "MEL-123";
         final Tema tema = Tema.MED;
         final String aktørID = "123123123";
@@ -58,7 +58,7 @@ public class ArkivsakServiceTest {
     }
 
     @Test
-    public void opprettSak_behandlingstypeRegistreringUnntak_temaUfm() {
+    public void opprettSakForBruker_behandlingstypeRegistreringUnntak_temaUfm() {
         final String saksnummer = "MEL-123";
         final Tema tema = Tema.UFM;
         final String aktørID = "123123123";
@@ -78,13 +78,42 @@ public class ArkivsakServiceTest {
     }
 
     @Test
-    public void hentTemaFraSak_temaErUfm_forventUfm() {
-        final Long sakID = 11111L;
-        SakDto sakDto = new SakDto();
-        sakDto.setTema(Tema.UFM.getKode());
-        when(sakConsumer.hentSak(sakID)).thenReturn(sakDto);
+    public void opprettSakForVirksomhet_behandlingstypeSøknad_temaMed() {
+        final String saksnummer = "MEL-123";
+        final Tema tema = Tema.MED;
+        final String orgId = "123123123";
+        final Long sakID = 1111L;
 
-        Tema tema = arkivsakService.hentTemaFraSak(sakID);
-        assertThat(tema).isEqualTo(Tema.UFM);
+        SakDto sakDto = new SakDto();
+        sakDto.setId(sakID);
+        when(sakConsumer.opprettSak(any())).thenReturn(sakDto);
+
+        Long opprettetSakID = arkivsakService.opprettSakForVirksomhet(saksnummer, tema, orgId);
+
+        assertThat(opprettetSakID).isEqualTo(sakID);
+        verify(sakConsumer).opprettSak(captor.capture());
+
+        SakDto opprettetSakDto = captor.getValue();
+        assertThat(opprettetSakDto.getTema()).isEqualTo(Tema.MED.getKode());
+    }
+
+    @Test
+    public void opprettSakForVirksomhet_behandlingstypeRegistreringUnntak_temaUfm() {
+        final String saksnummer = "MEL-123";
+        final Tema tema = Tema.UFM;
+        final String orgId = "123123123";
+        final Long sakID = 1111L;
+
+        SakDto sakDto = new SakDto();
+        sakDto.setId(sakID);
+        when(sakConsumer.opprettSak(any())).thenReturn(sakDto);
+
+        Long opprettetSakID = arkivsakService.opprettSakForVirksomhet(saksnummer, tema, orgId);
+
+        assertThat(opprettetSakID).isEqualTo(sakID);
+        verify(sakConsumer).opprettSak(captor.capture());
+
+        SakDto opprettetSakDto = captor.getValue();
+        assertThat(opprettetSakDto.getTema()).isEqualTo(Tema.UFM.getKode());
     }
 }
