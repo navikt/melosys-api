@@ -40,7 +40,7 @@ public class LagreAnmodningsperiodeIMedl implements StegBehandler {
         if (PeriodeRegler.feilIPeriode(anmodningsperiode.getFom(), anmodningsperiode.getTom())) {
             log.info("Lagrer ikke anmodningsperiode i MEDL pga ulogisk periode. BehID={}", behandlingID);
         } else {
-            medlPeriodeService.opprettPeriodeUnderAvklaring(anmodningsperiode, behandlingID, behandling.erBehandlingAvSed());
+            medlPeriodeService.opprettPeriodeUnderAvklaring(anmodningsperiode, behandlingID, behandling.erBehandlingAvSedGammel());
         }
     }
 }

@@ -1,6 +1,5 @@
 package no.nav.melosys.service.journalforing.dto;
 
-import no.nav.melosys.domain.Behandling;
 
 public class JournalfoeringOpprettDto extends JournalfoeringDto {
     private FagsakDto fagsak;
@@ -47,9 +46,5 @@ public class JournalfoeringOpprettDto extends JournalfoeringDto {
 
     public void setRepresentererKode(String representererKode) {
         this.representererKode = representererKode;
-    }
-
-    public boolean erBehandlingAvSøknad() {
-        return Behandling.erBehandlingAvSøknad(getBehandlingstemaKode());
     }
 }
