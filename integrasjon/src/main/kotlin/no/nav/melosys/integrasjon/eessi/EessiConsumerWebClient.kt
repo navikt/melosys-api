@@ -13,7 +13,7 @@ import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.client.WebClient
 
-class EessiConsumerWebClient(private val webClient: WebClient) : EessiConsumer, JsonRestIntegrasjon {
+open class EessiConsumerWebClient(private val webClient: WebClient) : EessiConsumer, JsonRestIntegrasjon {
 
     override fun opprettBucOgSed(
         sedDataDto: SedDataDto,
