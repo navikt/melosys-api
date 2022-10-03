@@ -45,6 +45,7 @@ final class OppgaveFasadeImplTest {
     @BeforeEach
     void setup() {
         oppgaveFasadeImpl = new OppgaveFasadeImpl(oppgaveConsumer, unleash);
+        unleash.enable("melosys.behandle_alle_saker");
     }
 
     @Test
