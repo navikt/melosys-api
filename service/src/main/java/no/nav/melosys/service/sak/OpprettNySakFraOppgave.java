@@ -67,8 +67,8 @@ public class OpprettNySakFraOppgave {
 
         validerBehandlingstema(behandlingstema, sakstype);
 
-        if (unleash.isEnabled("melosys.behandle_alle_saker") ?
-            !SaksbehandlingRegler.harTomFlyt(sakstype, behandlingstype, behandlingstema)
+        if (unleash.isEnabled("melosys.behandle_alle_saker")
+            ? erSakstypeEøs(sakstype) && !SaksbehandlingRegler.harTomFlyt(sakstype, behandlingstype, behandlingstema)
             : erBehandlingAvSøknad(behandlingstema) && erSakstypeEøs(sakstype)
         ) {
             validerSøknadData(opprettSakDto.getSoknadDto());
