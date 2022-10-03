@@ -37,7 +37,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static no.nav.melosys.domain.Behandling.erBehandlingAvSedForespørsler;
-import static no.nav.melosys.domain.Behandling.erBehandlingAvSøknad;
+import static no.nav.melosys.domain.Behandling.erBehandlingAvSøknadGammel;
 import static no.nav.melosys.domain.Fagsak.erSakstypeEøs;
 import static no.nav.melosys.domain.kodeverk.Sakstemaer.MEDLEMSKAP_LOVVALG;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.FØRSTEGANG;
@@ -153,7 +153,7 @@ public class JournalfoeringService {
     private void opprettSakOgJournalfør(JournalfoeringOpprettDto journalfoeringDto) {
         log.info("{} oppretter ny sak etter journalføring av journalpost {}", SubjectHandler.getInstance().getUserID(), journalfoeringDto.getJournalpostID());
         var behandleAlleSakerToggleEnabled = unleash.isEnabled("melosys.behandle_alle_saker");
-        if (!behandleAlleSakerToggleEnabled && !erBehandlingAvSedForespørsler(journalfoeringDto.getBehandlingstemaKode()) && !erBehandlingAvSøknad(journalfoeringDto.getBehandlingstemaKode())) {
+        if (!behandleAlleSakerToggleEnabled && !erBehandlingAvSedForespørsler(journalfoeringDto.getBehandlingstemaKode()) && !erBehandlingAvSøknadGammel(journalfoeringDto.getBehandlingstemaKode())) {
             throw new FunksjonellException(
                 String.format("Manuell journalføring av behandlingstema %s støttes ikke", journalfoeringDto.getBehandlingstemaKode())
             );
@@ -195,13 +195,13 @@ public class JournalfoeringService {
             prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, behandlingstype);
         } else {
             prosessinstans.setData(ProsessDataKey.SAKSTEMA, SakstypeSakstemaKobling.sakstema(sakstype, behandlingstema));
-            prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, erBehandlingAvSøknad(behandlingstema) ? Behandlingstyper.SOEKNAD : Behandlingstyper.SED);
+            prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandling.erBehandlingAvSøknadGammel(behandlingstema) ? Behandlingstyper.SOEKNAD : Behandlingstyper.SED);
         }
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, behandlingstema);
 
         if (behandleAlleSakerToggleEnabled
             ? !SaksbehandlingRegler.harTomFlyt(sakstype, behandlingstype, behandlingstema)
-            : erSakstypeEøs(sakstype) && erBehandlingAvSøknad(behandlingstema)
+            : erSakstypeEøs(sakstype) && Behandling.erBehandlingAvSøknadGammel(behandlingstema)
         ) {
             validerOpprettSakForSøknadBehandlingFelter(journalfoeringDto);
             prosessinstans.setData(ProsessDataKey.SØKNADSLAND, journalfoeringDto.getFagsak().getLand());

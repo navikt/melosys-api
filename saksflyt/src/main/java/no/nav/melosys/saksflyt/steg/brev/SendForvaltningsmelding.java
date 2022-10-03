@@ -57,6 +57,6 @@ public class SendForvaltningsmelding implements StegBehandler {
         if (unleash.isEnabled("melosys.behandle_alle_saker")) {
             return skalSendesForvaltningsmelding;
         }
-        return prosessinstans.getBehandling().erBehandlingAvSøknad() && skalSendesForvaltningsmelding;
+        return prosessinstans.getBehandling().erBehandlingAvSøknadGammel() && skalSendesForvaltningsmelding;
     }
 }

@@ -22,19 +22,19 @@ public class RegisteropplysningerPeriodeFactory {
     }
 
     DatoPeriode hentPeriodeForArbeidsforhold(LocalDate fom, LocalDate tom, Behandling behandling) {
-        return behandling.erBehandlingAvSøknad()
+        return behandling.erBehandlingAvSøknadGammel()
             ? hentPeriodeForArbeidsforholdBehandlingSøknad(fom, tom)
             : hentPeriodeForArbeidsforholdMottakSed(fom, tom);
     }
 
     DatoPeriode hentPeriodeForMedlemskap(LocalDate fom, LocalDate tom, Behandling behandling) {
-        return behandling.erBehandlingAvSøknad()
+        return behandling.erBehandlingAvSøknadGammel()
             ? hentPeriodeForMedlemskapBehandlingSøknad(fom, tom)
             : hentPeriodeForMedlemskapMottakSed(fom, tom);
     }
 
     Periode hentPeriodeForInntekt(LocalDate fom, LocalDate tom, Behandling behandling) {
-        return behandling.erBehandlingAvSøknad()
+        return behandling.erBehandlingAvSøknadGammel()
             ? hentPeriodeForInntektBehandlingSøknad(fom, tom)
             : hentPeriodeForInntektMottakSed(fom, tom);
     }
