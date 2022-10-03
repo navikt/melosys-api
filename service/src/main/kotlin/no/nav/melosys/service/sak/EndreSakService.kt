@@ -70,8 +70,8 @@ class EndreSakService(
     }
 
     private fun validerSak(fagsak: Fagsak) {
-        if (!fagsak.kanEndres()) {
-            throw FunksjonellException("Sak ${fagsak.saksnummer} kan ikke endres")
+        if (!fagsak.kanEndreTypeOgTema()) {
+            throw FunksjonellException("Sakstype eller tema kan ikke endres for ${fagsak.saksnummer}")
         }
     }
 
@@ -118,8 +118,8 @@ class EndreSakService(
     }
 
     private fun manglerPeriode(mottatteOpplysningerdata: MottatteOpplysningerData) =
-        (mottatteOpplysningerdata.periode == null || mottatteOpplysningerdata.periode.fom == null)
+        mottatteOpplysningerdata.periode == null || mottatteOpplysningerdata.periode.fom == null
 
     private fun manglerSøknadsland(mottatteOpplysningerdata: MottatteOpplysningerData) =
-        (mottatteOpplysningerdata.soeknadsland == null || mottatteOpplysningerdata.soeknadsland.erUkjenteEllerAlleEosLand)
+        mottatteOpplysningerdata.soeknadsland == null || mottatteOpplysningerdata.soeknadsland.erUkjenteEllerAlleEosLand
 }

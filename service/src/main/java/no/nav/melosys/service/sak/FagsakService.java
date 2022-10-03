@@ -15,6 +15,7 @@ import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
+import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
@@ -38,18 +39,21 @@ public class FagsakService {
     private final OppgaveService oppgaveService;
     private final PersondataFasade persondataFasade;
     private final BehandlingsresultatService behandlingsresultatService;
+    private final LovligeKombinasjonerService lovligeKombinasjonerService;
 
     private final Counter sakerOpprettet = Metrics.counter(SAKER_OPPRETTET);
 
     public FagsakService(FagsakRepository fagsakRepository, BehandlingService behandlingService,
                          KontaktopplysningService kontaktopplysningService, @Lazy OppgaveService oppgaveService,
-                         PersondataFasade persondataFasade, BehandlingsresultatService behandlingsresultatService) {
+                         PersondataFasade persondataFasade, BehandlingsresultatService behandlingsresultatService,
+                         LovligeKombinasjonerService lovligeKombinasjonerService) {
         this.fagsakRepository = fagsakRepository;
         this.behandlingService = behandlingService;
         this.kontaktopplysningService = kontaktopplysningService;
         this.oppgaveService = oppgaveService;
         this.persondataFasade = persondataFasade;
         this.behandlingsresultatService = behandlingsresultatService;
+        this.lovligeKombinasjonerService = lovligeKombinasjonerService;
     }
 
     public Fagsak hentFagsak(String saksnummer) {
@@ -89,23 +93,37 @@ public class FagsakService {
 
     @Transactional
     public void oppdaterSakstype(String saksnummer, Sakstyper sakstype) {
-        Behandling behandling = hentFagsak(saksnummer).hentAktivBehandling();
-        boolean behandlingErLåst = behandling.kanIkkeEndres();
-        boolean kanSakstypeEndres = sakstype != null && sakstype != behandling.getFagsak().getType() && validerNySakstypeMulig(behandling, sakstype) && !behandlingErLåst;
+        Fagsak fagsak = hentFagsak(saksnummer);
+        validerSakstypeOppdatering(fagsak, sakstype);
+        log.info("Endrer sakstype for fagsak {} fra {} til {}", fagsak.getSaksnummer(), fagsak.getType(), sakstype);
+        fagsak.setType(sakstype);
+        fagsakRepository.save(fagsak);
+    }
 
-        if (kanSakstypeEndres) {
-            endreSakstype(behandling.getFagsak(), sakstype);
+    private void validerSakstypeOppdatering(Fagsak sak, Sakstyper sakstype) {
+        if (!sak.kanEndreTypeOgTema()) {
+            throw new FunksjonellException("Sakstype kan ikke endres for" + sak.getSaksnummer());
+        }
+        if (sakstype == null) {
+            throw new FunksjonellException("Ny sakstype " + sakstype + " er ugyldig for sak " + sak.getSaksnummer());
         }
     }
 
     @Transactional
     public void oppdaterSakstema(String saksnummer, Sakstemaer sakstema) {
-        Behandling behandling = hentFagsak(saksnummer).hentAktivBehandling();
-        boolean behandlingErLåst = behandling.kanIkkeEndres();
-        boolean kanSakstemaEndres = sakstema != null && sakstema != behandling.getFagsak().getTema() && validerNySakstemaMulig(behandling, sakstema) && !behandlingErLåst;
+        Fagsak fagsak = hentFagsak(saksnummer);
+        validerSakstemaOppdatering(fagsak, sakstema);
+        log.info("Endrer saktema for fagsak {} fra {} til {}", fagsak.getSaksnummer(), fagsak.getTema(), sakstema);
+        fagsak.setTema(sakstema);
+        fagsakRepository.save(fagsak);
+    }
 
-        if (kanSakstemaEndres) {
-            endreSakstema(behandling.getFagsak(), sakstema);
+    private void validerSakstemaOppdatering(Fagsak sak, Sakstemaer sakstema) {
+        if (!sak.kanEndreTypeOgTema()) {
+            throw new FunksjonellException("Sakstype kan ikke endres for" + sak.getSaksnummer());
+        }
+        if (sakstema == null) {
+            throw new FunksjonellException("Ny sakstema " + sakstema + " er ugyldig for sak " + sak.getSaksnummer());
         }
     }
 
@@ -368,35 +386,19 @@ public class FagsakService {
         return Behandlingstyper.NY_VURDERING;
     }
 
-    private boolean validerNySakstypeMulig(Behandling behandling, Sakstyper sakstype) {
-        MuligeManuelleFagsakEndringer.validerNySakstypeMulig(behandling, sakstype);
-        return true;
-    }
-
-    private boolean validerNySakstemaMulig(Behandling behandling, Sakstemaer sakstema) {
-        MuligeManuelleFagsakEndringer.validerNySakstemaMulig(behandling, sakstema);
-        return true;
-    }
-
-    public void endreSakstema(Fagsak fagsak, Sakstemaer sakstema) {
-        log.info("Endrer saktema for fagsak {} fra {} til {}", fagsak.getSaksnummer(), fagsak.getTema(), sakstema);
-        fagsak.setTema(sakstema);
-        fagsakRepository.save(fagsak);
-    }
-
-    public void endreSakstype(Fagsak fagsak, Sakstyper sakstype) {
-        log.info("Endrer sakstype for fagsak {} fra {} til {}", fagsak.getSaksnummer(), fagsak.getType(), sakstype);
-        fagsak.setType(sakstype);
-        fagsakRepository.save(fagsak);
-    }
-
-    public Set<Sakstemaer> hentMuligeSakstemaer(String saksnummer) {
-        Behandling behandling = hentFagsak(saksnummer).hentAktivBehandling();
-        return MuligeManuelleFagsakEndringer.hentMuligeSakstema(behandling);
-    }
-
     public Set<Sakstyper> hentMuligeSakstyper(String saksnummer) {
         Behandling behandling = hentFagsak(saksnummer).hentAktivBehandling();
-        return MuligeManuelleFagsakEndringer.hentMuligeSakstype(behandling);
+        if (behandling.kanIkkeEndres() && !behandling.getFagsak().kanEndreTypeOgTema()) {
+            return Collections.emptySet();
+        }
+        return lovligeKombinasjonerService.hentMuligeSakstyper();
+    }
+
+    public Set<Sakstemaer> hentMuligeSakstemaer(String saksnummer, Sakstyper sakstype) {
+        Behandling behandling = hentFagsak(saksnummer).hentAktivBehandling();
+        if (behandling.kanIkkeEndres() && !behandling.getFagsak().kanEndreTypeOgTema()) {
+            return Collections.emptySet();
+        }
+        return lovligeKombinasjonerService.hentMuligeSakstemaer(behandling.getFagsak().getHovedpartRolle(), sakstype);
     }
 }
