@@ -15,6 +15,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.journalforing.JournalfoeringService;
 import no.nav.melosys.service.journalforing.dto.PeriodeDto;
 import no.nav.melosys.service.oppgave.OppgaveService;
+import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Lazy;
@@ -62,10 +63,14 @@ public class OpprettNySakFraOppgave {
     void validerOpprettSakDto(OpprettSakDto opprettSakDto) {
         final var sakstype = opprettSakDto.getSakstype();
         final var behandlingstema = opprettSakDto.getBehandlingstema();
+        final var behandlingstype = opprettSakDto.getBehandlingstype();
 
         validerBehandlingstema(behandlingstema, sakstype);
 
-        if (erBehandlingAvSøknad(behandlingstema) && erSakstypeEøs(sakstype)) {
+        if (unleash.isEnabled("melosys.behandle_alle_saker")
+            ? erSakstypeEøs(sakstype) && !SaksbehandlingRegler.harTomFlyt(sakstype, behandlingstype, behandlingstema)
+            : erBehandlingAvSøknad(behandlingstema) && erSakstypeEøs(sakstype)
+        ) {
             validerSøknadData(opprettSakDto.getSoknadDto());
         }
     }

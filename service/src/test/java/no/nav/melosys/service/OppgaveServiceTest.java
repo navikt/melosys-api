@@ -227,7 +227,6 @@ class OppgaveServiceTest {
     }
 
 
-
     @Test
     void hentOppgaverMedAnsvarlig_aktøridOgOrgnrErNull_forventUkjentIdOgNavn() {
         final String jfrOppgID = "2";
@@ -324,6 +323,46 @@ class OppgaveServiceTest {
 
         Oppgave oppgave = oppgaveService.hentÅpenBehandlingsoppgaveMedFagsaksnummer(SAKSNUMMER);
         assertThat(oppgave.erBehandling()).isTrue();
+    }
+
+    @Test
+    void finnÅpenBehandlingsoppgaveMedFagsaksnummer_returnererOppgaveViStøtter_filtrererIkkeUtOppgave() {
+        when(oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(SAKSNUMMER)).thenReturn(List.of(
+            new Oppgave.Builder()
+                .setTema(Tema.MED)
+                .setOppgavetype(Oppgavetyper.BEH_SAK)
+                .build()));
+
+        var oppgave = oppgaveService.finnÅpenBehandlingsoppgaveMedFagsaksnummer(SAKSNUMMER);
+
+        assertThat(oppgave).isPresent();
+    }
+
+    @Test
+    void finnÅpenBehandlingsoppgaveMedFagsaksnummer_returnererTrygdeavgiftOppgave_filtrererUtOppgave() {
+        when(oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(SAKSNUMMER)).thenReturn(List.of(
+            new Oppgave.Builder()
+                .setTema(Tema.TRY)
+                .setOppgavetype(Oppgavetyper.VUR)
+                .build()));
+
+        var oppgave = oppgaveService.finnÅpenBehandlingsoppgaveMedFagsaksnummer(SAKSNUMMER);
+
+        assertThat(oppgave).isNotPresent();
+    }
+
+    @Test
+    void finnÅpenBehandlingsoppgaveMedFagsaksnummer_returnererTrygdeavgiftOppgaveToggleAv_filtrererIkkeUtOppgave() {
+        unleash.disableAll();
+        when(oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(SAKSNUMMER)).thenReturn(List.of(
+            new Oppgave.Builder()
+                .setTema(Tema.TRY)
+                .setOppgavetype(Oppgavetyper.VUR)
+                .build()));
+
+        var oppgave = oppgaveService.finnÅpenBehandlingsoppgaveMedFagsaksnummer(SAKSNUMMER);
+
+        assertThat(oppgave).isPresent();
     }
 
     @Test
