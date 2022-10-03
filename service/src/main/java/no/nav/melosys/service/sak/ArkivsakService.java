@@ -20,7 +20,6 @@ public class ArkivsakService {
         this.sakConsumer = sakConsumer;
     }
 
-    //TODO Reduser til en metode for begge? Vi kan basere oss på lengden av orgnr.
     public Long opprettSakForBruker(String saksnummer, Tema tema, String aktørId) {
         SakDto sakDto = new SakDto();
 

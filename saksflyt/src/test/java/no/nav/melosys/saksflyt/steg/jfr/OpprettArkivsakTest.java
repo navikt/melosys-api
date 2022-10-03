@@ -37,6 +37,7 @@ class OpprettArkivsakTest {
 
     @BeforeEach
     public void setUp() {
+        unleash.enableAll();
         opprettArkivsak = new OpprettArkivsak(fagsakService, arkivsakService, unleash);
     }
 

@@ -42,7 +42,6 @@ class OppdaterOgFerdigstillJournalpostTest {
     @BeforeEach
     public void setUp() {
         oppdaterOgFerdigstillJournalpost = new OppdaterOgFerdigstillJournalpost(joarkFasade, unleash);
-
         unleash.enableAll();
     }
 

@@ -43,8 +43,6 @@ public class OppdaterOgFerdigstillJournalpost implements StegBehandler {
     @Override
     @SuppressWarnings("unchecked")
     public void utfør(Prosessinstans prosessinstans) {
-        var behandleAlleSakerToggleEnabled = unleash.isEnabled("melosys.behandle_alle_saker");
-
         String journalpostID = prosessinstans.getData(JOURNALPOST_ID);
 
         var behandling = prosessinstans.getBehandling();
@@ -79,7 +77,7 @@ public class OppdaterOgFerdigstillJournalpost implements StegBehandler {
             .medMottattDato(mottattDato)
             .medFysiskeVedlegg(fysiskeVedleggMedTitler)
             .medLogiskeVedleggTitler(logiskeVedleggTitler)
-            .medTema(behandleAlleSakerToggleEnabled
+            .medTema(unleash.isEnabled("melosys.behandle_alle_saker")
                 ? utledTema(behandling.getFagsak().getTema()).getKode()
                 : fraBehandlingstema(behandling.getTema()).getKode())
             .build();
