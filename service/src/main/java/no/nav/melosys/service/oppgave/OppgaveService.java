@@ -348,7 +348,7 @@ public class OppgaveService {
                 behOppgaveDto.setPeriode(mapPeriode(søknadDokument));
             }
         } else {
-            if (behandling.erBehandlingAvSøknad()) {
+            if (behandling.erBehandlingAvSøknadGammel()) {
                 Soeknad søknadDokument = (Soeknad) behandlingsgrunnlagService
                     .hentBehandlingsgrunnlag(behandling.getId()).getBehandlingsgrunnlagdata();
                 Soeknadsland søknadsland = hentSøknadsland(søknadDokument);

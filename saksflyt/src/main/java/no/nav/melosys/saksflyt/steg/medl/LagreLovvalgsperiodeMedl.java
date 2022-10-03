@@ -72,17 +72,17 @@ public class LagreLovvalgsperiodeMedl implements StegBehandler {
 
     private void opprettMedlPeriode(Behandling behandling, Lovvalgsperiode lovvalgsperiode) {
         if (lovvalgsperiode.erArtikkel13()) {
-            medlPeriodeService.opprettPeriodeForeløpig(lovvalgsperiode, behandling.getId(), !behandling.erBehandlingAvSøknad());
+            medlPeriodeService.opprettPeriodeForeløpig(lovvalgsperiode, behandling.getId(), !behandling.erBehandlingAvSøknadGammel());
         } else {
-            medlPeriodeService.opprettPeriodeEndelig(lovvalgsperiode, behandling.getId(), !behandling.erBehandlingAvSøknad());
+            medlPeriodeService.opprettPeriodeEndelig(lovvalgsperiode, behandling.getId(), !behandling.erBehandlingAvSøknadGammel());
         }
     }
 
     private void oppdaterMedlPeriode(Behandling behandling, Lovvalgsperiode lovvalgsperiode) {
         if (lovvalgsperiode.erArtikkel13()) {
-            medlPeriodeService.oppdaterPeriodeForeløpig(lovvalgsperiode, !behandling.erBehandlingAvSøknad());
+            medlPeriodeService.oppdaterPeriodeForeløpig(lovvalgsperiode, !behandling.erBehandlingAvSøknadGammel());
         } else {
-            medlPeriodeService.oppdaterPeriodeEndelig(lovvalgsperiode, !behandling.erBehandlingAvSøknad());
+            medlPeriodeService.oppdaterPeriodeEndelig(lovvalgsperiode, !behandling.erBehandlingAvSøknadGammel());
         }
     }
 }

@@ -317,7 +317,7 @@ public class Behandling extends RegistreringsInfo {
     }
 
     public boolean kanResultereIVedtak() {
-        return erBehandlingAvSøknad() || erNorgeUtpekt();
+        return erBehandlingAvSøknadGammel() || erNorgeUtpekt();
     }
 
     public boolean erAktiv() {
@@ -345,10 +345,6 @@ public class Behandling extends RegistreringsInfo {
         return status == Behandlingsstatus.AVVENT_DOK_PART
             || status == Behandlingsstatus.AVVENT_DOK_UTL
             || status == Behandlingsstatus.ANMODNING_UNNTAK_SENDT;
-    }
-
-    public boolean erBehandlingAvSøknad() {
-        return tema != null && erBehandlingAvSøknad(tema.getKode());
     }
 
     public boolean erBehandlingAvSed() {
@@ -391,10 +387,6 @@ public class Behandling extends RegistreringsInfo {
         return erAnmodningOmUnntak(tema.getKode());
     }
 
-    public static boolean erBehandlingAvSøknad(Behandlingstema behandlingstema) {
-        return erBehandlingAvSøknad(behandlingstema.getKode());
-    }
-
     public boolean erElektroniskSøknad() {
         if (behandlingsgrunnlag != null) {
             return behandlingsgrunnlag.getType() == Behandlingsgrunnlagtyper.SØKNAD_A1_UTSENDTE_ARBEIDSTAKERE_EØS;
@@ -402,7 +394,27 @@ public class Behandling extends RegistreringsInfo {
         return false;
     }
 
-    public static boolean erBehandlingAvSøknad(String behandlingstemaKode) {
+    /**
+     * @deprecated Fjernes med toggle melosys.behandle_alle_saker. Skal erstattes alle steder den er brukt
+     */
+    @Deprecated
+    public boolean erBehandlingAvSøknadGammel() {
+        return tema != null && erBehandlingAvSøknadGammel(tema.getKode());
+    }
+
+    /**
+     * @deprecated Fjernes med toggle melosys.behandle_alle_saker. Skal erstattes alle steder den er brukt
+     */
+    @Deprecated
+    public static boolean erBehandlingAvSøknadGammel(Behandlingstema behandlingstema) {
+        return erBehandlingAvSøknadGammel(behandlingstema.getKode());
+    }
+
+    /**
+     * @deprecated Fjernes med toggle melosys.behandle_alle_saker. Skal erstattes alle steder den er brukt
+     */
+    @Deprecated
+    public static boolean erBehandlingAvSøknadGammel(String behandlingstemaKode) {
         return erBehandlingAvSøknadUtsendtArbeidstaker(behandlingstemaKode)
             || erBehandlingAvSøknadArbeidIFlereLand(behandlingstemaKode)
             || ARBEID_ETT_LAND_ØVRIG.getKode().equalsIgnoreCase(behandlingstemaKode)

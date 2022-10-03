@@ -231,7 +231,7 @@ public class FagsakTjeneste {
     }
 
     private void setPeriodeOpplysninger(Behandling behandling, BehandlingOversiktDto behandlingOversiktDto) {
-        if (behandling.erBehandlingAvSøknad()) {
+        if (behandling.erBehandlingAvSøknadGammel()) {
             behandlingsgrunnlagService.finnBehandlingsgrunnlag(behandling.getId())
                 .map(Behandlingsgrunnlag::getBehandlingsgrunnlagdata).ifPresent(grunnlagData -> {
                     SoeknadslandDto land = SoeknadslandDto.av(hentSøknadsland((grunnlagData)));
