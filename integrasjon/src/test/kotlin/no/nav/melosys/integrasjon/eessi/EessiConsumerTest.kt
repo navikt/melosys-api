@@ -1,8 +1,10 @@
 package no.nav.melosys.integrasjon.eessi
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.MappingBuilder
 import com.github.tomakehurst.wiremock.client.WireMock
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldBeSingleton
 import io.kotest.matchers.collections.shouldHaveSize
@@ -19,21 +21,18 @@ import no.nav.melosys.domain.eessi.sed.SedDataDto
 import no.nav.melosys.domain.eessi.sed.SedGrunnlagA003Dto
 import no.nav.melosys.domain.eessi.sed.SedGrunnlagDto
 import no.nav.melosys.exception.TekniskException
-import no.nav.melosys.integrasjon.ConsumerWireMockTestBase
-import no.nav.melosys.integrasjon.eessi.dto.OpprettSedDto
+import no.nav.melosys.integrasjon.StsMockServer
 import no.nav.melosys.integrasjon.eessi.dto.SaksrelasjonDto
-import no.nav.melosys.integrasjon.felles.GenericContextClientRequestInterceptor
 import no.nav.melosys.integrasjon.felles.GenericContextExchangeFilter
-import no.nav.melosys.integrasjon.reststs.RestStsClient
+import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter
 import no.nav.melosys.integrasjon.reststs.StsRestTemplateProducer
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebClient
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.context.annotation.Import
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
@@ -45,25 +44,41 @@ import java.util.*
 @WebMvcTest(
     value = [
         StsRestTemplateProducer::class,
-        RestStsClient::class,
 
         GenericContextExchangeFilter::class,
         EessiConsumerProducer::class,
-        GenericContextClientRequestInterceptor::class
+        CorrelationIdOutgoingFilter::class
     ]
 )
 @ActiveProfiles("wiremock-test")
 @AutoConfigureWebClient
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@Import(StsMockServer::class)
 class EessiConsumerTest(
     @Autowired private val eessiConsumer: EessiConsumer,
-    @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,
-    @Value("\${mockserver.security.port}") mockSecurityPort: Int
-) : ConsumerWireMockTestBase<String, OpprettSedDto>(mockServiceUnderTestPort, mockSecurityPort) {
+    @Autowired private val stsMockServer: StsMockServer,
+    @Value("\${mockserver.port}") mockServiceUnderTestPort: Int
+) {
 
     private val prossesUUID = UUID.randomUUID()
+    private val serviceUnderTestMockServer: WireMockServer =
+        WireMockServer(WireMockConfiguration.wireMockConfig().port(mockServiceUnderTestPort))
+
+    @BeforeAll
+    fun beforeAll() {
+        serviceUnderTestMockServer.start()
+        stsMockServer.start()
+    }
+
+    @AfterAll
+    fun afterAll() {
+        serviceUnderTestMockServer.stop()
+        stsMockServer.stop()
+    }
 
     @BeforeEach
     fun before() {
+        serviceUnderTestMockServer.resetAll()
         ThreadLocalAccessInfo.beforeExecuteProcess(prossesUUID, "prossesSteg")
     }
 
@@ -374,15 +389,6 @@ class EessiConsumerTest(
         )
 
         eessiConsumer.lukkBuc(rinaSaksnummer)
-    }
-
-    override fun getMockData(): String {
-        throw NotImplementedError("not used")
-    }
-
-
-    override fun executeRequest(): OpprettSedDto {
-        throw NotImplementedError("not used")
     }
 
     fun get(url: String): MappingBuilder =
