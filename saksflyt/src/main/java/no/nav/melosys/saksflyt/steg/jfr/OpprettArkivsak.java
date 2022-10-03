@@ -19,8 +19,8 @@ import org.springframework.stereotype.Component;
 import java.util.Optional;
 
 import static no.nav.melosys.domain.TemaFactory.fraBehandlingstema;
-import static no.nav.melosys.domain.TemaFactory.utledTema;
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.OPPRETT_ARKIVSAK;
+import static no.nav.melosys.service.oppgave.OppgaveFactory.utledTema;
 
 @Component
 public class OpprettArkivsak implements StegBehandler {

@@ -17,9 +17,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.TemaFactory.fraBehandlingstema;
-import static no.nav.melosys.domain.TemaFactory.utledTema;
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.*;
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.OPPDATER_OG_FERDIGSTILL_JOURNALPOST;
+import static no.nav.melosys.service.oppgave.OppgaveFactory.utledTema;
 
 @Component
 public class OppdaterOgFerdigstillJournalpost implements StegBehandler {

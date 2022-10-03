@@ -17,7 +17,7 @@ import no.nav.melosys.service.persondata.PersondataFasade;
 import org.springframework.stereotype.Service;
 
 import static no.nav.melosys.domain.TemaFactory.fraBehandlingstema;
-import static no.nav.melosys.domain.TemaFactory.utledTema;
+import static no.nav.melosys.service.oppgave.OppgaveFactory.utledTema;
 
 @Service
 public class SedSomBrevService {

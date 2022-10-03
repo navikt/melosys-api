@@ -53,13 +53,4 @@ public class TemaFactory {
         }
     }
 
-    //TODO generaliser
-    public static Tema utledTema(Sakstemaer sakstema) {
-        return switch (sakstema) {
-            case MEDLEMSKAP_LOVVALG -> Tema.MED;
-            case TRYGDEAVGIFT -> Tema.TRY;
-            case UNNTAK -> Tema.UFM;
-        };
-    }
-
 }

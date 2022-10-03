@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.TemaFactory.fraBehandlingstema;
-import static no.nav.melosys.domain.TemaFactory.utledTema;
+import static no.nav.melosys.service.oppgave.OppgaveFactory.utledTema;
 
 @Component
 public class FerdigstillJournalpostSed implements StegBehandler {
