@@ -56,7 +56,7 @@ public class LovligeKombinasjonerService {
             return combineSets(
                 hentMuligeBehandlingstemaer(Aktoersroller.BRUKER, sakstype, sakstema, sistBehandlingstema),
                 hentMuligeBehandlingstemaer(Aktoersroller.VIRKSOMHET, sakstype, sakstema, sistBehandlingstema),
-                hentMuligeBehandlignstemaerSED(sakstype, sakstema)
+                hentMuligeBehandlingstemaerSED(sakstype, sakstema)
             );
         }
 
@@ -181,9 +181,9 @@ public class LovligeKombinasjonerService {
         return Collections.emptySet();
     }
 
-    private Set<Behandlingstema> hentMuligeBehandlignstemaerSED(Sakstyper sakstype, Sakstemaer sakstema) {
+    private Set<Behandlingstema> hentMuligeBehandlingstemaerSED(Sakstyper sakstype, Sakstemaer sakstema) {
         if (sakstype == Sakstyper.EU_EOS && sakstema == Sakstemaer.UNNTAK) {
-            return Set.of(REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING);
+            return Set.of(REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING, REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE, BESLUTNING_LOVVALG_ANNET_LAND);
         }
         if (sakstype == Sakstyper.EU_EOS && sakstema == Sakstemaer.MEDLEMSKAP_LOVVALG) {
             return Set.of(BESLUTNING_LOVVALG_NORGE);
