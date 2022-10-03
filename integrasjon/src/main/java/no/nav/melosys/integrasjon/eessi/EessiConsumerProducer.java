@@ -26,7 +26,7 @@ public class EessiConsumerProducer implements WebClientConfig {
             .baseUrl(url)
             .filter(genericContextExchangeFilter)
             .filter(correlationIdOutgoingFilter)
-            .filter(errorFilter("kall til eessi feilet"))
+            .filter(errorFilter("Kall mot eessi feilet"))
             .build());
     }
 }

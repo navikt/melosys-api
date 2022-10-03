@@ -136,7 +136,7 @@ class EessiConsumerTest(
             eessiConsumer.opprettBucOgSed(
                 SedDataDto(), listOf(), BucType.LA_BUC_01, true, true
             )
-        }.message.shouldContain("kall til eessi feilet")
+        }.message.shouldContain("Kall mot eessi feilet")
     }
 
     @Test
@@ -185,6 +185,24 @@ class EessiConsumerTest(
     }
 
     @Test
+    fun hentMottakerinstitusjoner_bodyFraServerMangler() {
+        serviceUnderTestMockServer.stubFor(
+            get("/api/buc/LA_BUC_01/institusjoner?land=DE")
+                .willReturn(
+                    WireMock.aResponse()
+                        .withStatus(200)
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                )
+        )
+
+
+        shouldThrow<NullPointerException> {
+            eessiConsumer.hentMottakerinstitusjoner("LA_BUC_01", listOf("DE"))
+        }
+    }
+
+
+    @Test
     fun hentMelosysEessiMeldingFraJournalpostID() {
         val journalpostID = "115314"
         val melosysEessiMelding = MelosysEessiMelding().apply {
@@ -219,8 +237,7 @@ class EessiConsumerTest(
                 .withRequestBody(WireMock.equalToJson(ObjectMapper().writeValueAsString(saksrelasjonDto)))
                 .willReturn(
                     WireMock.aResponse()
-                        .withStatus(200)
-                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withStatus(204)
                 )
         )
 
@@ -384,7 +401,7 @@ class EessiConsumerTest(
                 .withRequestBody(WireMock.absent())
                 .willReturn(
                     WireMock.aResponse()
-                        .withStatus(200)
+                        .withStatus(204)
                 )
         )
 
