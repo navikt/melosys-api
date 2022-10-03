@@ -305,6 +305,7 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
             .build();
 
         return oppgaveConsumer.hentOppgaveListe(oppgaveSearchRequest).stream()
+            .filter(this::filtrerUtAvgiftsoppgaver)
             .map(OppgaveFasadeImpl::oppgaveMappingDtoTilDomain)
             .toList();
     }
