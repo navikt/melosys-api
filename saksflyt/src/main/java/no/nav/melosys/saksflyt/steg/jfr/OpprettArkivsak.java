@@ -1,7 +1,9 @@
 package no.nav.melosys.saksflyt.steg.jfr;
 
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.Tema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
@@ -16,6 +18,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 
+import static no.nav.melosys.domain.TemaFactory.fraBehandlingstema;
+import static no.nav.melosys.domain.TemaFactory.utledTema;
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.OPPRETT_ARKIVSAK;
 
 @Component
@@ -25,10 +29,12 @@ public class OpprettArkivsak implements StegBehandler {
 
     private final FagsakService fagsakService;
     private final ArkivsakService arkivsakService;
+    private final Unleash unleash;
 
-    public OpprettArkivsak(FagsakService fagsakService, ArkivsakService arkivsakService) {
+    public OpprettArkivsak(FagsakService fagsakService, ArkivsakService arkivsakService, Unleash unleash) {
         this.fagsakService = fagsakService;
         this.arkivsakService = arkivsakService;
+        this.unleash = unleash;
     }
 
     @Override
@@ -38,9 +44,9 @@ public class OpprettArkivsak implements StegBehandler {
 
     @Override
     public void utfør(Prosessinstans prosessinstans) {
-
         Behandling behandling = prosessinstans.getBehandling();
         Fagsak fagsak = behandling.getFagsak();
+        var behandleAlleSakerToggleEnabled = unleash.isEnabled("melosys.behandle_alle_saker");
 
         if (fagsak.getGsakSaksnummer() != null) {
             throw new FunksjonellException("Kan ikke knytte fagsak " + fagsak.getSaksnummer() + " til ny arkivsak: allerede knyttet til " + fagsak.getGsakSaksnummer());
@@ -48,13 +54,16 @@ public class OpprettArkivsak implements StegBehandler {
 
         Optional<String> aktørId = fagsak.finnBrukersAktørID();
         String saksnummer = fagsak.getSaksnummer();
-        Behandlingstema behandlingstema = behandling.getTema();
+
+        var tema = behandleAlleSakerToggleEnabled
+            ? utledTema(behandling.getFagsak().getTema())
+            : fraBehandlingstema(behandling.getTema());
 
         Long arkivsakID;
         if (aktørId.isPresent()) {
-            arkivsakID = arkivsakService.opprettSakForBruker(saksnummer, behandlingstema, aktørId.get());
+            arkivsakID = arkivsakService.opprettSakForBruker(saksnummer, tema, aktørId.get());
         } else {
-            arkivsakID = arkivsakService.opprettSakForVirksomhet(saksnummer, behandlingstema, prosessinstans.getData(ProsessDataKey.VIRKSOMHET_ORGNR));
+            arkivsakID = arkivsakService.opprettSakForVirksomhet(saksnummer, tema, prosessinstans.getData(ProsessDataKey.VIRKSOMHET_ORGNR));
         }
         fagsak.setGsakSaksnummer(arkivsakID);
         fagsakService.lagre(fagsak);

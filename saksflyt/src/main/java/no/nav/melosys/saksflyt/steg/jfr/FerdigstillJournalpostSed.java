@@ -42,7 +42,6 @@ public class FerdigstillJournalpostSed implements StegBehandler {
     @Override
     public void utfør(Prosessinstans prosessinstans) {
         final MelosysEessiMelding eessiMelding = prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class);
-        var behandleAlleSakerToggleEnabled = unleash.isEnabled("melosys.behandle_alle_saker");
 
         if (erJournalpostFerdigstilt(eessiMelding.getJournalpostId())) {
             log.warn("Journalpost {} for sed {} i RINA-sak {} er allerede ferdigstilt. Behandler ikke videre",
@@ -58,7 +57,7 @@ public class FerdigstillJournalpostSed implements StegBehandler {
                 .medBrukerID(brukerID)
                 .medSaksnummer(saksnummer)
                 .medTittel(tittel)
-                .medTema(behandleAlleSakerToggleEnabled
+                .medTema(unleash.isEnabled("melosys.behandle_alle_saker")
                     ? utledTema(behandling.getFagsak().getTema()).getKode()
                     : fraBehandlingstema(behandling.getTema()).getKode())
                 .build();
