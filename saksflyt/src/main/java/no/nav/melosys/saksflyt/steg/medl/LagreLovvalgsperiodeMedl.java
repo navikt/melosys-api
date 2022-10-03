@@ -2,6 +2,7 @@ package no.nav.melosys.saksflyt.steg.medl;
 
 import java.util.Optional;
 
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
@@ -16,10 +17,15 @@ import org.springframework.stereotype.Component;
 public class LagreLovvalgsperiodeMedl implements StegBehandler {
     private final BehandlingsresultatService behandlingsresultatService;
     private final MedlPeriodeService medlPeriodeService;
+    private final Unleash unleash;
 
-    public LagreLovvalgsperiodeMedl(BehandlingsresultatService behandlingsresultatService, MedlPeriodeService medlPeriodeService) {
+
+    public LagreLovvalgsperiodeMedl(BehandlingsresultatService behandlingsresultatService,
+                                    MedlPeriodeService medlPeriodeService,
+                                    Unleash unleash) {
         this.behandlingsresultatService = behandlingsresultatService;
         this.medlPeriodeService = medlPeriodeService;
+        this.unleash = unleash;
     }
 
     @Override
@@ -72,17 +78,21 @@ public class LagreLovvalgsperiodeMedl implements StegBehandler {
 
     private void opprettMedlPeriode(Behandling behandling, Lovvalgsperiode lovvalgsperiode) {
         if (lovvalgsperiode.erArtikkel13()) {
-            medlPeriodeService.opprettPeriodeForeløpig(lovvalgsperiode, behandling.getId(), !behandling.erBehandlingAvSøknadGammel());
+            medlPeriodeService.opprettPeriodeForeløpig(lovvalgsperiode, behandling.getId(),
+                unleash.isEnabled("melosys.behandle_alle_saker") ? behandling.erBehandlingAvSed() : !behandling.erBehandlingAvSøknadGammel());
         } else {
-            medlPeriodeService.opprettPeriodeEndelig(lovvalgsperiode, behandling.getId(), !behandling.erBehandlingAvSøknadGammel());
+            medlPeriodeService.opprettPeriodeEndelig(lovvalgsperiode, behandling.getId(),
+                unleash.isEnabled("melosys.behandle_alle_saker") ? behandling.erBehandlingAvSed() : !behandling.erBehandlingAvSøknadGammel());
         }
     }
 
     private void oppdaterMedlPeriode(Behandling behandling, Lovvalgsperiode lovvalgsperiode) {
         if (lovvalgsperiode.erArtikkel13()) {
-            medlPeriodeService.oppdaterPeriodeForeløpig(lovvalgsperiode, !behandling.erBehandlingAvSøknadGammel());
+            medlPeriodeService.oppdaterPeriodeForeløpig(lovvalgsperiode,
+                unleash.isEnabled("melosys.behandle_alle_saker") ? behandling.erBehandlingAvSed() : !behandling.erBehandlingAvSøknadGammel());
         } else {
-            medlPeriodeService.oppdaterPeriodeEndelig(lovvalgsperiode, !behandling.erBehandlingAvSøknadGammel());
+            medlPeriodeService.oppdaterPeriodeEndelig(lovvalgsperiode,
+                unleash.isEnabled("melosys.behandle_alle_saker") ? behandling.erBehandlingAvSed() : !behandling.erBehandlingAvSøknadGammel());
         }
     }
 }
