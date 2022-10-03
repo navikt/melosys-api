@@ -2,7 +2,6 @@ package no.nav.melosys.domain;
 
 import java.util.EnumSet;
 
-import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.exception.FunksjonellException;
 
@@ -52,5 +51,4 @@ public class TemaFactory {
             throw new FunksjonellException("Behandlingstema " + behandlingstema.getBeskrivelse() + " er ikke støttet.");
         }
     }
-
 }
