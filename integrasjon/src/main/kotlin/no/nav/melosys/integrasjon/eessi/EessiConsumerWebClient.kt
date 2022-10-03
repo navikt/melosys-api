@@ -9,9 +9,9 @@ import no.nav.melosys.domain.eessi.sed.SedDataDto
 import no.nav.melosys.domain.eessi.sed.SedGrunnlagDto
 import no.nav.melosys.integrasjon.eessi.dto.*
 import no.nav.melosys.integrasjon.felles.JsonRestIntegrasjon
-import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.reactive.function.client.bodyToMono
 
 open class EessiConsumerWebClient(private val webClient: WebClient) : EessiConsumer, JsonRestIntegrasjon {
 
@@ -27,7 +27,7 @@ open class EessiConsumerWebClient(private val webClient: WebClient) : EessiConsu
             .accept(MediaType.APPLICATION_JSON)
             .bodyValue(OpprettBucOgSedDto(sedDataDto, vedlegg))
             .retrieve()
-            .bodyToMono(OpprettSedDto::class.java)
+            .bodyToMono<OpprettSedDto>()
             .block()!!
 
     override fun sendSedPåEksisterendeBuc(sedDataDto: SedDataDto, rinaSaksnummer: String, sedType: SedType) {
@@ -36,7 +36,7 @@ open class EessiConsumerWebClient(private val webClient: WebClient) : EessiConsu
             .accept(MediaType.APPLICATION_JSON)
             .bodyValue(sedDataDto)
             .retrieve()
-            .bodyToMono(Void::class.java)
+            .bodyToMono<Void>()
             .block()
     }
 
@@ -45,7 +45,7 @@ open class EessiConsumerWebClient(private val webClient: WebClient) : EessiConsu
             .uri("/buc/$bucType/institusjoner?land=${landkoder.joinToString(",")}")
             .accept(MediaType.APPLICATION_JSON)
             .retrieve()
-            .bodyToMono(typeReference<List<InstitusjonDto>>())
+            .bodyToMono<List<InstitusjonDto>>()
             .block()!!.map { Institusjon(it.id, it.navn, it.landkode) }.toList()
 
     override fun hentMelosysEessiMeldingFraJournalpostID(journalpostID: String) =
@@ -53,7 +53,7 @@ open class EessiConsumerWebClient(private val webClient: WebClient) : EessiConsu
             .uri("/journalpost/$journalpostID/eessimelding")
             .accept(MediaType.APPLICATION_JSON)
             .retrieve()
-            .bodyToMono(MelosysEessiMelding::class.java)
+            .bodyToMono<MelosysEessiMelding>()
             .block()!!
 
     override fun lagreSaksrelasjon(saksrelasjonDto: SaksrelasjonDto) {
@@ -62,7 +62,7 @@ open class EessiConsumerWebClient(private val webClient: WebClient) : EessiConsu
             .accept(MediaType.APPLICATION_JSON)
             .bodyValue(saksrelasjonDto)
             .retrieve()
-            .bodyToMono(Void::class.java)
+            .bodyToMono<Void>()
             .block()
     }
 
@@ -71,7 +71,7 @@ open class EessiConsumerWebClient(private val webClient: WebClient) : EessiConsu
             .uri("/sak?rinaSaksnummer=$rinaSaksnummer")
             .accept(MediaType.APPLICATION_JSON)
             .retrieve()
-            .bodyToMono(typeReference<List<SaksrelasjonDto>>())
+            .bodyToMono<List<SaksrelasjonDto>>()
             .block()!!
 
     override fun genererSedPdf(sedDataDto: SedDataDto, sedType: SedType) =
@@ -80,7 +80,7 @@ open class EessiConsumerWebClient(private val webClient: WebClient) : EessiConsu
             .accept(MediaType.APPLICATION_JSON)
             .bodyValue(sedDataDto)
             .retrieve()
-            .bodyToMono(ByteArray::class.java)
+            .bodyToMono<ByteArray>()
             .block()!!
 
     override fun hentTilknyttedeBucer(gsakSaksnummer: Long, statuser: List<String>) =
@@ -88,7 +88,7 @@ open class EessiConsumerWebClient(private val webClient: WebClient) : EessiConsu
             .uri("/sak/$gsakSaksnummer/bucer?statuser=${statuser.joinToString(",")}")
             .accept(MediaType.APPLICATION_JSON)
             .retrieve()
-            .bodyToMono(typeReference<List<BucinfoDto>>())
+            .bodyToMono<List<BucinfoDto>>()
             .block()!!.map { it.tilDomene() }.toList()
 
     override fun hentSedGrunnlag(rinaSaksnummer: String, rinaDokumentID: String) =
@@ -96,7 +96,7 @@ open class EessiConsumerWebClient(private val webClient: WebClient) : EessiConsu
             .uri("/buc/$rinaSaksnummer/sed/$rinaDokumentID/grunnlag")
             .accept(MediaType.APPLICATION_JSON)
             .retrieve()
-            .bodyToMono(SedGrunnlagDto::class.java)
+            .bodyToMono<SedGrunnlagDto>()
             .block()!!
 
     override fun lukkBuc(rinaSaksnummer: String) {
@@ -104,7 +104,7 @@ open class EessiConsumerWebClient(private val webClient: WebClient) : EessiConsu
             .uri("/buc/$rinaSaksnummer/lukk")
             .accept(MediaType.APPLICATION_JSON)
             .retrieve()
-            .bodyToMono(Void::class.java)
+            .bodyToMono<Void>()
             .block()
     }
 
@@ -113,8 +113,6 @@ open class EessiConsumerWebClient(private val webClient: WebClient) : EessiConsu
             .uri("/buc/$rinaSaksnummer/aksjoner")
             .accept(MediaType.APPLICATION_JSON)
             .retrieve()
-            .bodyToMono(typeReference<List<String>>())
+            .bodyToMono<List<String>>()
             .block()!!
-
-    private inline fun <reified T> typeReference() = object : ParameterizedTypeReference<T>() {}
 }
