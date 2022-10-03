@@ -125,7 +125,7 @@ public class BrevmalListeBygger {
         List<FeltvalgAlternativDto> feltvalgAlternativDtos = new ArrayList<>();
         Behandling behandling = behandlingService.hentBehandling(behandlingId);
 
-        if (harStandardTekstIMangelBrev(behandling.getFagsak().getTema(), behandling.getType())) {
+        if (harStandardTekstIMangelbrev(behandling.getFagsak().getTema(), behandling.getType())) {
             feltvalgAlternativDtos.add(new FeltvalgAlternativDto(FeltvalgAlternativKode.STANDARD));
         }
         feltvalgAlternativDtos.add(new FeltvalgAlternativDto(FeltvalgAlternativKode.FRITEKST.getKode(), "Fritekst (erstatter standardtekst)", true));
@@ -150,7 +150,7 @@ public class BrevmalListeBygger {
             .build();
     }
 
-    private boolean harStandardTekstIMangelBrev(Sakstemaer sakstema, Behandlingstyper behandlingstype) {
+    private boolean harStandardTekstIMangelbrev(Sakstemaer sakstema, Behandlingstyper behandlingstype) {
         if (unleash.isEnabled("melosys.behandle_alle_saker")) {
             return sakstema == Sakstemaer.MEDLEMSKAP_LOVVALG && (behandlingstype == Behandlingstyper.FØRSTEGANG || behandlingstype == Behandlingstyper.KLAGE);
         }
