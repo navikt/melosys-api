@@ -305,7 +305,6 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
             .build();
 
         return oppgaveConsumer.hentOppgaveListe(oppgaveSearchRequest).stream()
-            .filter(this::filtrerUtAvgiftsoppgaver)
             .map(OppgaveFasadeImpl::oppgaveMappingDtoTilDomain)
             .toList();
     }
@@ -320,7 +319,6 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
             .build();
 
         return oppgaveConsumer.hentOppgaveListe(oppgaveSearchRequest).stream()
-            .filter(this::filtrerUtAvgiftsoppgaver)
             .map(OppgaveFasadeImpl::oppgaveMappingDtoTilDomain)
             .toList();
     }
@@ -337,16 +335,8 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
             .build();
 
         return oppgaveConsumer.hentOppgaveListe(oppgaveSearchRequest).stream()
-            .filter(this::filtrerUtAvgiftsoppgaver)
             .map(OppgaveFasadeImpl::oppgaveMappingDtoTilDomain)
             .toList();
-    }
-
-    private boolean filtrerUtAvgiftsoppgaver(OppgaveDto oppgaveDto) {
-        if (unleash.isEnabled("melosys.behandle_alle_saker")) {
-            return !(Tema.TRY.getKode().equals(oppgaveDto.getTema()) && Oppgavetyper.VUR.getKode().equals(oppgaveDto.getOppgavetype()));
-        }
-        return true;
     }
 
     static Oppgave oppgaveMappingDtoTilDomain(OppgaveDto oppgaveDto) {

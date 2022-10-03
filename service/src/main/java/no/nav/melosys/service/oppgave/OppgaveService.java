@@ -7,13 +7,15 @@ import javax.annotation.Nullable;
 import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.RegistreringsInfo;
+import no.nav.melosys.domain.Tema;
+import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Soeknadsland;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Oppgavetyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
@@ -86,7 +88,8 @@ public class OppgaveService {
     }
 
     public List<Oppgave> finnÅpneBehandlingsoppgaverMedJournalpostID(String journalpostID) {
-        return oppgaveFasade.finnÅpneBehandlingsoppgaverMedJournalpostID(journalpostID);
+        return oppgaveFasade.finnÅpneBehandlingsoppgaverMedJournalpostID(journalpostID)
+            .stream().filter(this::filtrerUtAvgiftsoppgaver).toList();
     }
 
     public void feilregistrerOppgaver(Set<Oppgave> oppgaveSet) {
@@ -118,11 +121,13 @@ public class OppgaveService {
     public Optional<Oppgave> finnSisteAvsluttetBehandlingsoppgaveMedFagsaksnummer(String saksnummer) {
         return oppgaveFasade.finnAvsluttetBehandlingsoppgaverMedSaksnummer(saksnummer)
             .stream()
+            .filter(this::filtrerUtAvgiftsoppgaver)
             .max(Comparator.comparing(Oppgave::getOpprettetTidspunkt));
     }
 
     public Optional<Oppgave> finnÅpenBehandlingsoppgaveMedFagsaksnummer(String saksnummer) {
-        List<Oppgave> oppgaver = oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(saksnummer);
+        List<Oppgave> oppgaver = oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(saksnummer)
+            .stream().filter(this::filtrerUtAvgiftsoppgaver).toList();
 
         if (!oppgaver.isEmpty()) {
             if (oppgaver.size() > 1) {
@@ -132,6 +137,13 @@ public class OppgaveService {
         } else {
             return Optional.empty();
         }
+    }
+
+    private boolean filtrerUtAvgiftsoppgaver(Oppgave oppgave) {
+        if (unleash.isEnabled("melosys.behandle_alle_saker")) {
+            return !(Tema.TRY.equals(oppgave.getTema()) && Oppgavetyper.VUR.equals(oppgave.getOppgavetype()));
+        }
+        return true;
     }
 
     public Oppgave hentÅpenBehandlingsoppgaveMedFagsaksnummer(String saksnummer) {
@@ -369,7 +381,7 @@ public class OppgaveService {
         return behOppgaveDto;
     }
 
-    private String hentSisteBehandlingsNotat(Behandling behandling){
+    private String hentSisteBehandlingsNotat(Behandling behandling) {
         if (!behandling.getBehandlingsnotater().isEmpty()) {
             return Collections.max(behandling.getBehandlingsnotater(),
                 Comparator.comparing(RegistreringsInfo::getRegistrertDato)).getTekst();

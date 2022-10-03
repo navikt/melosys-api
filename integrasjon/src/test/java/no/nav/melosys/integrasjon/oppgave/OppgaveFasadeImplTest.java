@@ -123,47 +123,6 @@ final class OppgaveFasadeImplTest {
         assertThat(oppgaver.iterator().next().getOppgaveId()).isEqualTo(oppgaveID);
     }
 
-
-    @Test
-    void finnÅpneBehandlingsoppgaverMedSaksnummer_returnererOppgaveViStøtter_filtrererIkkeUtOppgave() {
-        OppgaveDto oppgaveDto = new OppgaveDto();
-        oppgaveDto.setTema(Tema.MED.getKode());
-        oppgaveDto.setOppgavetype(Oppgavetyper.BEH_SAK.getKode());
-
-        when(oppgaveConsumer.hentOppgaveListe(any(OppgaveSearchRequest.class))).thenReturn(List.of(oppgaveDto));
-
-        List<Oppgave> oppgaver = oppgaveFasadeImpl.finnÅpneBehandlingsoppgaverMedSaksnummer("123");
-
-        assertThat(oppgaver).hasSize(1);
-    }
-
-    @Test
-    void finnÅpneBehandlingsoppgaverMedSaksnummer_returnererTrygdeavgiftOppgave_filtrererUtOppgave() {
-        OppgaveDto oppgaveDto = new OppgaveDto();
-        oppgaveDto.setTema(Tema.TRY.getKode());
-        oppgaveDto.setOppgavetype(Oppgavetyper.VUR.getKode());
-
-        when(oppgaveConsumer.hentOppgaveListe(any(OppgaveSearchRequest.class))).thenReturn(List.of(oppgaveDto));
-
-        List<Oppgave> oppgaver = oppgaveFasadeImpl.finnÅpneBehandlingsoppgaverMedSaksnummer("123");
-
-        assertThat(oppgaver).isEmpty();
-    }
-
-    @Test
-    void finnÅpneBehandlingsoppgaverMedSaksnummer_returnererTrygdeavgiftOppgaveToggleAv_filtrererIkkeUtOppgave() {
-        unleash.disable("melosys.behandle_alle_saker");
-        OppgaveDto oppgaveDto = new OppgaveDto();
-        oppgaveDto.setTema(Tema.TRY.getKode());
-        oppgaveDto.setOppgavetype(Oppgavetyper.VUR.getKode());
-
-        when(oppgaveConsumer.hentOppgaveListe(any(OppgaveSearchRequest.class))).thenReturn(List.of(oppgaveDto));
-
-        List<Oppgave> oppgaver = oppgaveFasadeImpl.finnÅpneBehandlingsoppgaverMedSaksnummer("123");
-
-        assertThat(oppgaver).hasSize(1);
-    }
-
     @Test
     void testMappingMellomDTOogDomainForOppgave() {
         OppgaveDto oppgaveDto = new OppgaveDto();
