@@ -3,6 +3,7 @@ package no.nav.melosys.service.dokument.brev;
 import java.util.Collections;
 import java.util.List;
 
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.TemaFactory;
 import no.nav.melosys.domain.arkiv.FysiskDokument;
@@ -22,21 +23,23 @@ public class SedSomBrevService {
     private final JoarkFasade joarkFasade;
     private final PersondataFasade persondataFasade;
     private final UtenlandskMyndighetService utenlandskMyndighetService;
+    private final Unleash unleash;
 
     public SedSomBrevService(EessiService eessiService,
                              JoarkFasade joarkFasade,
                              PersondataFasade persondataFasade,
-                             UtenlandskMyndighetService utenlandskMyndighetService) {
+                             UtenlandskMyndighetService utenlandskMyndighetService,
+                             Unleash unleash) {
         this.eessiService = eessiService;
         this.joarkFasade = joarkFasade;
         this.persondataFasade = persondataFasade;
         this.utenlandskMyndighetService = utenlandskMyndighetService;
+        this.unleash = unleash;
     }
 
     public String lagJournalpostForSendingAvSedSomBrev(SedType sedType,
                                                        Landkoder mottakerland,
-                                                       Behandling behandling)
-        {
+                                                       Behandling behandling) {
         return lagJournalpostForSendingAvSedSomBrev(sedType, mottakerland, behandling, Collections.emptyList());
     }
 
@@ -49,8 +52,9 @@ public class SedSomBrevService {
         String institusjonID = utenlandskMyndighetService.lagInstitusjonsId(utenlandskMyndighet);
         String brukerFnr = persondataFasade.hentFolkeregisterident(fagsak.hentBrukersAktørID());
         byte[] sedPdf = eessiService.genererSedPdf(behandling.getId(), sedType);
-//        var tema = TemaFactory.fraBehandlingstema(behandling.getTema());
-        var tema = OppgaveFactory.utledTema(behandling.getFagsak().getTema());
+
+        boolean behandleAlleSakerEnabled = unleash.isEnabled("melosys.behandle_alle_saker");
+        var tema = behandleAlleSakerEnabled ? OppgaveFactory.utledTema(fagsak.getTema()) : TemaFactory.fraBehandlingstema(behandling.getTema());
 
         OpprettJournalpost opprettJournalpost = OpprettJournalpost.lagJournalpostForSendingAvSedSomBrev(
             fagsak.getSaksnummer(), brukerFnr, sedType, sedPdf, institusjonID,
