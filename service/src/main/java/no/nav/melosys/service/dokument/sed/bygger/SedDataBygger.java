@@ -114,7 +114,7 @@ public class SedDataBygger {
         sedDataDto.setUtenlandskIdent(grunnlagMedSøknad.getBehandlingsgrunnlagData().personOpplysninger.utenlandskIdent.stream()
             .map(SedDataBygger::tilUtenlandskIdentDto).toList());
 
-        if (grunnlagMedSøknad.getBehandling().erBehandlingAvSøknad()) {
+        if (grunnlagMedSøknad.getBehandling().erBehandlingAvSøknadGammel()) {
             sedDataDto.setSøknadsperiode(new Periode(
                 grunnlagMedSøknad.getBehandlingsgrunnlagData().periode.getFom(),
                 grunnlagMedSøknad.getBehandlingsgrunnlagData().periode.getTom()

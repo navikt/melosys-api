@@ -61,7 +61,7 @@ public class FagsakTjeneste {
     public FagsakTjeneste(FagsakService fagsakService, Aksesskontroll aksesskontroll, BehandlingsgrunnlagService behandlingsgrunnlagService,
                           OpprettNySakFraOppgave opprettNySakFraOppgave,
                           BehandlingsresultatService behandlingsresultatService, PersondataFasade persondataFasade,
-                          SaksopplysningerService saksopplysningerService, OrganisasjonOppslagService organisasjonOppslagService, Unleash unleash) {
+                          SaksopplysningerService saksopplysningerService, OrganisasjonOppslagService organisasjonOppslagService) {
         this.fagsakService = fagsakService;
         this.aksesskontroll = aksesskontroll;
         this.behandlingsgrunnlagService = behandlingsgrunnlagService;
