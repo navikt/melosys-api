@@ -7,6 +7,7 @@ import no.finn.unleash.strategy.Strategy;
 class IsTestStrategy implements Strategy {
 
     private static final String DEV_ENVIRONMENT = "dev";
+    private static final String Q1_ENVIRONMENT = "q1";
 
     private final String currentEnvironment;
 
@@ -21,6 +22,6 @@ class IsTestStrategy implements Strategy {
 
     @Override
     public boolean isEnabled(Map<String, String> parameters) {
-        return DEV_ENVIRONMENT.equalsIgnoreCase(currentEnvironment);
+        return DEV_ENVIRONMENT.equalsIgnoreCase(currentEnvironment) || Q1_ENVIRONMENT.equalsIgnoreCase(currentEnvironment);
     }
 }
