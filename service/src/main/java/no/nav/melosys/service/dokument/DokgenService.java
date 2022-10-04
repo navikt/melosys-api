@@ -251,6 +251,9 @@ public class DokgenService {
                 .medDistribusjonstype(Distribusjonstype.VIKTIG)
                 .medFritekst(brevbestillingRequest.getFritekst())
                 .medBegrunnelseKode(brevbestillingRequest.getBegrunnelseKode());
+            case GENERELT_FRITEKSTVEDLEGG -> new FritekstvedleggBrevbestilling.Builder()
+                .medFritekstTittel(brevbestillingRequest.getFritekstTittel())
+                .medFritekst(brevbestillingRequest.getFritekst());
             default -> new DokgenBrevbestilling.Builder<>().medDistribusjonstype(Distribusjonstype.VIKTIG);
         };
     }

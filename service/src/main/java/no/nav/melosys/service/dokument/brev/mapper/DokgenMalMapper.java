@@ -107,6 +107,7 @@ public class DokgenMalMapper {
             case AVSLAG_MANGLENDE_OPPLYSNINGER -> hentAvslagsbrev(brevbestilling);
             case MELDING_HENLAGT_SAK -> Henleggelsesbrev.av(((HenleggelseBrevbestilling) brevbestilling).toBuilder().build());
             case GENERELT_FRITEKSTVEDLEGG -> Fritekstvedlegg.av(((FritekstvedleggBrevbestilling) brevbestilling).toBuilder().build(), Aktoersroller.BRUKER);
+            // Aktoersrolle for GENERELT_FRITEKSTVEDLEGG er likegyldig da brevet kun journalføres og distribueres sammen med fritekstbrevet
             default -> throw new FunksjonellException(
                 format("ProduserbartDokument %s er ikke støttet av melosys-dokgen",
                     brevbestilling.getProduserbartdokument()));

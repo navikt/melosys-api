@@ -1,8 +1,13 @@
 package no.nav.melosys.domain.brev;
 
 public class FritekstvedleggBrevbestilling extends DokgenBrevbestilling {
-    private final String fritekstTittel;
-    private final String fritekst;
+    private String fritekstTittel;
+    private String fritekst;
+
+    public FritekstvedleggBrevbestilling() {
+        super();
+        //Tom constructor på grunn av deserialsering i prosessinstans
+    }
 
     public FritekstvedleggBrevbestilling(FritekstvedleggBrevbestilling.Builder builder) {
         super(builder);
