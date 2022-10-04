@@ -343,18 +343,16 @@ public class JournalfoeringService {
         validerBehandlingstype(fagsak.getHovedpartRolle(), fagsak.getType(), fagsak.getTema(), behandlingstema, behandlingstype, sistBehandling);
     }
 
-    public boolean validerBehandlingstema(Aktoersroller hovedpart, Sakstyper sakstype, Sakstemaer sakstema, Behandlingstema behandlingstema, Behandlingstema sistBehandlingstema) {
+    public void validerBehandlingstema(Aktoersroller hovedpart, Sakstyper sakstype, Sakstemaer sakstema, Behandlingstema behandlingstema, Behandlingstema sistBehandlingstema) {
         if (!lovligeKombinasjonerService.hentMuligeBehandlingstemaer(hovedpart, sakstype, sakstema, sistBehandlingstema).contains(behandlingstema)) {
             throw new FunksjonellException(behandlingstema + " er ikke et lovlig behandlingstema med de andre valgte verdiene");
         }
-        return true;
     }
 
-    public boolean validerBehandlingstype(Aktoersroller hovedpart, Sakstyper sakstype, Sakstemaer sakstema, Behandlingstema behandlingstema, Behandlingstyper behandlingstype, Behandling sistBehandling) {
+    public void validerBehandlingstype(Aktoersroller hovedpart, Sakstyper sakstype, Sakstemaer sakstema, Behandlingstema behandlingstema, Behandlingstyper behandlingstype, Behandling sistBehandling) {
         if (!lovligeKombinasjonerService.hentMuligeBehandlingstyper(hovedpart, sakstype, sakstema, behandlingstema, sistBehandling).contains(behandlingstype)) {
             throw new FunksjonellException(behandlingstype + " er ikke en lovlig behandlingstype med de andre valgte verdiene");
         }
-        return true;
     }
 
     private void validerBehandlingstype(Sakstyper sakstype, Behandlingstyper behandlingstype) {

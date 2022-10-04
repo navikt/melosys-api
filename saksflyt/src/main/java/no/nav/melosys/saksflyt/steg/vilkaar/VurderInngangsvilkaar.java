@@ -44,7 +44,7 @@ public class VurderInngangsvilkaar implements StegBehandler {
         }
 
         if (behandling.getFagsak().getType() != Sakstyper.EU_EOS && prosessinstans.getData(OPPGAVE_ID) == null) {
-            log.info("Hopper over steg {} fordi sakstype er {} og oppgaveID er {}", VURDER_INNGANGSVILKÅR.getKode(), behandling.getFagsak().getType(), prosessinstans.getData(OPPGAVE_ID));
+            log.info("Hopper over steg {} fordi sakstype er {} og oppgaveID er {}", VURDER_INNGANGSVILKÅR.getKode(), behandling.getFagsak().getType(), null);
             return;
         }
 

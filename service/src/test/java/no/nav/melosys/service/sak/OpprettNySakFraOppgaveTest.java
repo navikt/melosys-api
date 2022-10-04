@@ -34,8 +34,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class OpprettNySakFraOppgaveTest {
@@ -334,7 +333,7 @@ class OpprettNySakFraOppgaveTest {
         opprettSakDto.setSakstype(Sakstyper.EU_EOS);
         opprettSakDto.setBehandlingstema(null);
 
-        when(journalfoeringService.validerBehandlingstema(any(), any(), any(), any(), any())).thenThrow(new FunksjonellException("Behandlingstema"));
+        doThrow(new FunksjonellException("Behandlingstema")).when(journalfoeringService).validerBehandlingstema(any(), any(), any(), any(), any());
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> opprettNySakFraOppgave.bestillNySakOgBehandling(opprettSakDto))
@@ -347,8 +346,58 @@ class OpprettNySakFraOppgaveTest {
         opprettSakDto.setSakstype(Sakstyper.EU_EOS);
         opprettSakDto.setBehandlingstema(null);
 
-        assertThatExceptionOfType(NullPointerException.class)
-            .isThrownBy(() -> opprettNySakFraOppgave.lagNySak(opprettSakDto));
+        doThrow(new FunksjonellException("Behandlingstema")).when(journalfoeringService).validerBehandlingstema(any(), any(), any(), any(), any());
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> opprettNySakFraOppgave.lagNySak(opprettSakDto))
+            .withMessageContaining("Behandlingstema");
+    }
+
+    @Test
+    void lagNySak_validerOpprettSakDto_manglerBehandlingstype_feiler() {
+        OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
+        opprettSakDto.setSakstype(Sakstyper.EU_EOS);
+        opprettSakDto.setBehandlingstype(null);
+
+        doThrow(new FunksjonellException("Behandlingstype")).when(journalfoeringService).validerBehandlingstype(any(), any(), any(), any(), any(), any());
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> opprettNySakFraOppgave.lagNySak(opprettSakDto))
+            .withMessageContaining("Behandlingstype");
+    }
+
+    @Test
+    void lagNyBehandlingForSak_validerOpprettSakDto_manglerBehandlingstema_feiler() {
+        OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
+        opprettSakDto.setSakstype(Sakstyper.EU_EOS);
+        opprettSakDto.setBehandlingstema(null);
+        Fagsak fagsak = new Fagsak();
+        fagsak.setSaksnummer("MEL-1");
+
+        when(fagsakService.hentFagsak(fagsak.getSaksnummer())).thenReturn(fagsak);
+
+        doThrow(new FunksjonellException("Behandlingstema")).when(journalfoeringService).validerBehandlingstema(any(), any(), any(), any(), any());
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> opprettNySakFraOppgave.lagNyBehandlingForSak(fagsak.getSaksnummer(), opprettSakDto))
+            .withMessageContaining("Behandlingstema");
+    }
+
+    @Test
+    void lagNyBehandlingForSak_validerOpprettSakDto_manglerBehandlingstype_feiler() {
+        OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
+        opprettSakDto.setSakstype(Sakstyper.EU_EOS);
+        opprettSakDto.setBehandlingstype(null);
+        Fagsak fagsak = new Fagsak();
+        fagsak.setSaksnummer("MEL-1");
+
+        when(fagsakService.hentFagsak(fagsak.getSaksnummer())).thenReturn(fagsak);
+
+        doThrow(new FunksjonellException("Behandlingstype")).when(journalfoeringService).validerBehandlingstype(any(), any(), any(), any(), any(), any());
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> opprettNySakFraOppgave.lagNyBehandlingForSak(fagsak.getSaksnummer(), opprettSakDto))
+            .withMessageContaining("Behandlingstype");
     }
 
     @Test
