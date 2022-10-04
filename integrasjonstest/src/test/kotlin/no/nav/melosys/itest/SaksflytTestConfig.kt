@@ -5,5 +5,5 @@ import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Import
 
 @TestConfiguration
-@Import(GraphqlConfig::class, KafkaTestConfig::class)
+@Import(GraphqlConfig::class)
 class SaksflytTestConfig

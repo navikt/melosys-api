@@ -16,8 +16,7 @@ object PersonRepo {
                 foedselsdato = LocalDate.of(1969, 5, 30),
                 statsborgerskap = listOf("NOR"),
                 kjønn = "M",
-                aktørId = "1111111111111",
-                bostedsadresse = Bostedsadresse()
+                aktørId = "1111111111111"
             )
         )
         leggTilPerson(
@@ -28,8 +27,7 @@ object PersonRepo {
                 foedselsdato = LocalDate.of(1975, 7, 21),
                 statsborgerskap = listOf("NOR"),
                 kjønn = "M",
-                aktørId = "2222222222222",
-                bostedsadresse = Bostedsadresse()
+                aktørId = "2222222222222"
             )
         )
         leggTilPerson(
@@ -40,8 +38,18 @@ object PersonRepo {
                 foedselsdato = LocalDate.of(1979, 6, 23),
                 statsborgerskap = listOf("NOR"),
                 kjønn = "M",
-                aktørId = "3333333333333",
-                bostedsadresse = Bostedsadresse()
+                aktørId = "3333333333333"
+            )
+        )
+        leggTilPerson(
+            Person(
+                ident = "12028536819",
+                fornavn = "ROTAT",
+                etternavn = "KAFFE",
+                foedselsdato = LocalDate.of(1974, 2, 13),
+                statsborgerskap = listOf("NOR"),
+                kjønn = "F",
+                aktørId = "4444444444444"
             )
         )
     }
@@ -62,12 +70,15 @@ data class Person(
     val statsborgerskap: List<String>,
     val kjønn: String,
     val aktørId: String,
-    val bostedsadresse: Bostedsadresse
+    val bostedsadresse: Adresse? = Adresse(gatenavn = "bosted gata 3", landkode = "GBR"),
+    val oppholdsadresse: Adresse? = Adresse(gatenavn = "opphold gata 1", landkode = "NOR"),
+    val kontaktadresse: Adresse? = Adresse(gatenavn = "kontakt gata 1", landkode = "SWE"),
 )
 
-data class Bostedsadresse(
+data class Adresse(
     val gatenavn: String = "Gate 1",
     val husnummer: String = "42",
     val husbokstav: String = "B",
-    val postnummer: String = "0001"
+    val postnummer: String = "0001",
+    val landkode: String = "NOR",
 )

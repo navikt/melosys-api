@@ -1,0 +1,2 @@
+INSERT INTO BEHANDLINGSRESULTAT_TYPE(KODE, NAVN)
+VALUES ('UNNTATT_MEDLEMSKAP', 'Unntatt fra medlemskap i folketrygden');

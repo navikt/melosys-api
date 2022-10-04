@@ -1,6 +1,8 @@
 package no.nav.melosys.service.saksflyt;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.*;
 
@@ -580,24 +582,37 @@ class ProsessinstansServiceTest {
     }
 
     @Test
-    void opprettProsessinstansSøknadMottatt_finnesIkkeFraFør_oppretterNyProsessinstans() {
+    void opprettProsessinstansSøknadMottatt_finnesIkkeFraFør_oppretterProsessinstans() {
         SoknadMottatt søknadMottatt = new SoknadMottatt("søknadID", ZonedDateTime.now());
 
         prosessinstansService.opprettProsessinstansSøknadMottatt(søknadMottatt);
-        verify(prosessinstansRepo).save(piCaptor.capture());
 
+        verify(prosessinstansRepo).save(piCaptor.capture());
         Prosessinstans prosessinstans = piCaptor.getValue();
         assertThat(prosessinstans.getType()).isEqualTo(ProsessType.MOTTAK_SOKNAD_ALTINN);
         assertThat(prosessinstans.getData(ProsessDataKey.MOTTATT_SOKNAD_ID)).isEqualTo(søknadMottatt.getSoknadID());
+        assertThat(prosessinstans.getData(ProsessDataKey.SKAL_SENDES_FORVALTNINGSMELDING, Boolean.class)).isTrue();
     }
 
     @Test
-    void opprettProsessinstansSøknadMottatt_finnesFraFør_oppretterIkkeNyProsessinstans() {
+    void opprettProsessinstansSøknadMottatt_finnesFraFør_oppretterIkkeProsessinstans() {
         SoknadMottatt søknadMottatt = new SoknadMottatt("søknadID", ZonedDateTime.now());
         when(behandlingsgrunnlagService.harMottattSøknadMedEksternReferanseID(søknadMottatt.getSoknadID())).thenReturn(true);
 
         prosessinstansService.opprettProsessinstansSøknadMottatt(søknadMottatt);
+
         verify(prosessinstansRepo, never()).save(any(Prosessinstans.class));
+    }
+
+    @Test
+    void opprettProsessinstansSøknadMottatt_mottakEldreEnnNoenDager_ikkeSendForvaltningsmelding() {
+        SoknadMottatt søknadMottatt = new SoknadMottatt("søknadID", ZonedDateTime.of(LocalDateTime.MIN, ZoneId.systemDefault()));
+
+        prosessinstansService.opprettProsessinstansSøknadMottatt(søknadMottatt);
+
+        verify(prosessinstansRepo).save(piCaptor.capture());
+        Prosessinstans prosessinstans = piCaptor.getValue();
+        assertThat(prosessinstans.getData(ProsessDataKey.SKAL_SENDES_FORVALTNINGSMELDING, Boolean.class)).isFalse();
     }
 
     @Test

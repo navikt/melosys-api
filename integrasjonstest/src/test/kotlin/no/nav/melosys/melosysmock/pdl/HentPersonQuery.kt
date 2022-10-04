@@ -3,12 +3,14 @@ package no.nav.melosys.melosysmock.pdl
 import no.nav.melosys.generated.graphql.api.HentPersonQueryResolver
 import no.nav.melosys.generated.graphql.api.PersonResolver
 import no.nav.melosys.generated.graphql.model.*
+import no.nav.melosys.melosysmock.person.Adresse
 import no.nav.melosys.melosysmock.person.Person
 import no.nav.melosys.melosysmock.person.PersonRepo
 import org.springframework.stereotype.Component
 import org.springframework.web.context.annotation.RequestScope
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 @Component
 @RequestScope
@@ -32,7 +34,7 @@ class HentPersonQuery(private val querySession: PDLQuerySession) : HentPersonQue
         }
     }
 
-    private fun lagFoedselDto(person: Person) = FoedselDto(
+    fun lagFoedselDto(person: Person) = FoedselDto(
         foedselsaar = person.foedselsdato.year,
         foedselsdato = person.foedselsdato.toString(),
         foedeland = "NOR",
@@ -42,7 +44,7 @@ class HentPersonQuery(private val querySession: PDLQuerySession) : HentPersonQue
         metadata = metadata()
     )
 
-    private fun lagForelderRelasjon() = listOf(
+    fun lagForelderRelasjon() = listOf(
         ForelderBarnRelasjonDto(
             relatertPersonsIdent = "77777777777",
             relatertPersonsRolle = FamilierelasjonsrolleDto.BARN,
@@ -69,7 +71,7 @@ class HentPersonQuery(private val querySession: PDLQuerySession) : HentPersonQue
 
 fun metadata(historisk: Boolean = false) = MetadataDto(
     opplysningsId = "123",
-    master = "PDL",
+    master = "Freg",
     endringer = listOf(endring()),
     historisk = historisk
 )
@@ -108,28 +110,34 @@ class PersonResolverImpl(private val querySession: PDLQuerySession) : PersonReso
                         angittFlyttedato = null,
                         gyldigFraOgMed = LocalDateTime.now().minusYears(10),
                         gyldigTilOgMed = null,
-                        coAdressenavn = "Co Yo",
-                        vegadresse = VegadresseDto(
-                            matrikkelId = "123",
-                            husnummer = it.husnummer,
-                            husbokstav = it.husbokstav,
-                            bruksenhetsnummer = null,
-                            adressenavn = it.gatenavn,
-                            kommunenummer = null,
-                            bydelsnummer = null,
-                            tilleggsnavn = null,
-                            postnummer = it.postnummer,
-                            koordinater = null
-                        ),
+                        coAdressenavn = "Co Yo 1",
                         matrikkeladresse = null,
-                        utenlandskAdresse = null,
+                        vegadresse = if (it.landkode == "NOR") lagVegadresse(it) else null,
+                        utenlandskAdresse = if (it.landkode != "NOR") lagUtenlandskAdresse(it) else null,
                         ukjentBosted = null,
                         folkeregistermetadata = null,
                         metadata = metadata()
                     )
                 )
             } ?: emptyList()
+
     }
+
+    private fun lagUtenlandskAdresse(it: Adresse) =
+        UtenlandskAdresseDto.builder()
+            .setLandkode(it.landkode)
+            .setAdressenavnNummer(it.gatenavn)
+            .setPostkode(it.postnummer)
+            .setBygningEtasjeLeilighet(it.husnummer)
+            .build()
+
+    private fun lagVegadresse(it: Adresse) =
+        VegadresseDto.builder()
+            .setHusnummer(it.husnummer)
+            .setHusbokstav(it.husbokstav)
+            .setAdressenavn(it.gatenavn)
+            .setPostnummer(it.postnummer)
+            .build()
 
     override fun deltBosted(personDto: PersonDto, historikk: Boolean?): List<DeltBostedDto> {
         return emptyList()
@@ -210,28 +218,17 @@ class PersonResolverImpl(private val querySession: PDLQuerySession) : PersonReso
 
     override fun kontaktadresse(personDto: PersonDto, historikk: Boolean?): List<KontaktadresseDto> {
         return querySession.hentIdent()
-            ?.let { PersonRepo.finnVedIdent(it) }
+            ?.let { PersonRepo.finnVedIdent(it)?.kontaktadresse }
             ?.let {
                 listOf(
                     KontaktadresseDto(
                         gyldigFraOgMed = LocalDateTime.now().minusYears(10),
                         gyldigTilOgMed = null,
-                        coAdressenavn = null,
-                        vegadresse = VegadresseDto(
-                            matrikkelId = "456",
-                            husnummer = "1",
-                            husbokstav = "A",
-                            bruksenhetsnummer = null,
-                            adressenavn = "kontaktAdresse",
-                            kommunenummer = null,
-                            bydelsnummer = null,
-                            tilleggsnavn = null,
-                            postnummer = "0010",
-                            koordinater = null
-                        ),
+                        coAdressenavn = "CO 2",
+                        vegadresse = if (it.landkode == "NOR") lagVegadresse(it) else null,
+                        utenlandskAdresse = if (it.landkode != "NOR") lagUtenlandskAdresse(it) else null,
                         postboksadresse = null,
                         postadresseIFrittFormat = null,
-                        utenlandskAdresse = null,
                         utenlandskAdresseIFrittFormat = null,
                         type = KontaktadresseTypeDto.Innland,
                         folkeregistermetadata = null,
@@ -273,26 +270,15 @@ class PersonResolverImpl(private val querySession: PDLQuerySession) : PersonReso
 
     override fun oppholdsadresse(personDto: PersonDto, historikk: Boolean?): List<OppholdsadresseDto> {
         return querySession.hentIdent()
-            ?.let { PersonRepo.finnVedIdent(it) }
+            ?.let { PersonRepo.finnVedIdent(it)?.oppholdsadresse }
             ?.let {
                 listOf(
                     OppholdsadresseDto(
                         gyldigFraOgMed = LocalDateTime.now().minusYears(10),
                         gyldigTilOgMed = null,
-                        coAdressenavn = null,
-                        vegadresse = VegadresseDto(
-                            matrikkelId = null,
-                            husnummer = "3",
-                            husbokstav = "C",
-                            bruksenhetsnummer = null,
-                            adressenavn = "opphold her",
-                            kommunenummer = null,
-                            bydelsnummer = null,
-                            tilleggsnavn = null,
-                            postnummer = "0030",
-                            koordinater = null
-                        ),
-                        utenlandskAdresse = null,
+                        coAdressenavn = "CO 3",
+                        vegadresse = if (it.landkode == "NOR") lagVegadresse(it) else null,
+                        utenlandskAdresse = if (it.landkode != "NOR") lagUtenlandskAdresse(it) else null,
                         folkeregistermetadata = null,
                         matrikkeladresse = null,
                         oppholdAnnetSted = null,
@@ -314,26 +300,245 @@ class PersonResolverImpl(private val querySession: PDLQuerySession) : PersonReso
             "1111111111111" -> return listOf(
                 SivilstandDto(
                     type = SivilstandstypeDto.GIFT,
+                    gyldigFraOgMed = LocalDate.of(2019, 8, 3).toString(),
                     relatertVedSivilstand = "21075114491",
-                    gyldigFraOgMed = LocalDate.of(1999, 2, 3).toString(),
                     bekreftelsesdato = null,
                     folkeregistermetadata = null,
-                    metadata = metadata()
-                )
-            )
-            "2222222222222" -> return listOf(
+                    metadata = MetadataDto(
+                        endringer = listOf(
+                            EndringDto(
+                                type = EndringstypeDto.OPPRETT,
+                                registrert = toLocalDateTime("2020-01-25T17:55:42"),
+                                registrertAv = "Folkeregisteret",
+                                systemkilde = "FREG",
+                                kilde = "FREG",
+                            ),
+                            EndringDto(
+                                type = EndringstypeDto.KORRIGER,
+                                registrert = toLocalDateTime("2020-12-05T08:32:21"),
+                                registrertAv = "Folkeregisteret",
+                                systemkilde = "FREG",
+                                kilde = "FREG",
+                            )
+                        ),
+                        master = "Freg",
+                        opplysningsId = "4d25bb7f-202c-48da-ace1-764a95cd8e80",
+                        historisk = false
+                    )
+                ),
+
                 SivilstandDto(
                     type = SivilstandstypeDto.GIFT,
-                    relatertVedSivilstand = "30056928150",
-                    gyldigFraOgMed = LocalDate.of(1999, 2, 3).toString(),
+                    gyldigFraOgMed = LocalDate.of(2011, 2, 2).toString(),
+                    relatertVedSivilstand = "12028536819",
                     bekreftelsesdato = null,
                     folkeregistermetadata = null,
-                    metadata = metadata()
+                    metadata = MetadataDto(
+                        endringer = listOf(
+                            EndringDto(
+                                type = EndringstypeDto.OPPRETT,
+                                registrert = toLocalDateTime("2020-01-25T17:55:42"),
+                                registrertAv = "Folkeregisteret",
+                                systemkilde = "FREG",
+                                kilde = "KILDE_DSF",
+                            ),
+                            EndringDto(
+                                type = EndringstypeDto.KORRIGER,
+                                registrert = toLocalDateTime("2022-04-27T14:57:56"),
+                                registrertAv = "Folkeregisteret",
+                                systemkilde = "FREG",
+                                kilde = "KILDE_DSF",
+                            )
+                        ),
+                        master = "Freg",
+                        opplysningsId = "4d25bb7f-202c-48da-ace1-764a95cd8e3d",
+                        historisk = false
+                    )
+                ),
+
+                SivilstandDto(
+                    type = SivilstandstypeDto.SEPARERT,
+                    gyldigFraOgMed = LocalDate.of(2013, 1, 3).toString(),
+                    relatertVedSivilstand = "12028536819",
+                    bekreftelsesdato = null,
+                    folkeregistermetadata = null,
+                    metadata = MetadataDto(
+                        endringer = listOf(
+                            EndringDto(
+                                type = EndringstypeDto.OPPRETT,
+                                registrert = toLocalDateTime("2020-01-25T17:55:42"),
+                                registrertAv = "Folkeregisteret",
+                                systemkilde = "FREG",
+                                kilde = "KILDE_DSF",
+                            ),
+                            EndringDto(
+                                type = EndringstypeDto.KORRIGER,
+                                registrert = toLocalDateTime("2022-04-28T13:28:43"),
+                                registrertAv = "Folkeregisteret",
+                                systemkilde = "pdl-web",
+                                kilde = "Tyske trygdemyndigheter, TYSKLAND",
+                            )
+                        ),
+                        master = "PDL",
+                        opplysningsId = "4d25bb7f-202c-48da-ace1-764a95cd8e3f",
+                        historisk = true
+                    )
+                ),
+
+                SivilstandDto(
+                    type = SivilstandstypeDto.SKILT,
+                    gyldigFraOgMed = LocalDate.of(2014, 4, 9).toString(),
+                    relatertVedSivilstand = null, // SKILT har ikke verdi her
+                    bekreftelsesdato = null,
+                    folkeregistermetadata = null,
+                    metadata = MetadataDto(
+                        endringer = listOf(
+                            EndringDto(
+                                type = EndringstypeDto.OPPRETT,
+                                registrert = toLocalDateTime("2020-01-25T17:55:42"),
+                                registrertAv = "Folkeregisteret",
+                                systemkilde = "FREG",
+                                kilde = "KILDE_DSF",
+                            ),
+                            EndringDto(
+                                type = EndringstypeDto.KORRIGER,
+                                registrert = toLocalDateTime("2022-05-04T12:20:45"),
+                                registrertAv = "Folkeregisteret",
+                                systemkilde = "pdl-web",
+                                kilde = "Tyske trygdemyndigheter, TYSKLAND",
+                            )
+                        ),
+                        master = "PDL",
+                        opplysningsId = "4d25bb7f-202c-48da-ace1-764a95cd8e3e",
+                        historisk = true
+                    )
+                ),
+            )
+            "2222222222222"
+            -> return listOf(
+                SivilstandDto(
+                    type = SivilstandstypeDto.GIFT,
+                    gyldigFraOgMed = LocalDate.of(2019, 8, 3).toString(),
+                    relatertVedSivilstand = "30056928150",
+                    bekreftelsesdato = null,
+                    folkeregistermetadata = null,
+                    metadata = MetadataDto(
+                        endringer = listOf(
+                            EndringDto(
+                                type = EndringstypeDto.OPPRETT,
+                                registrert = toLocalDateTime("2020-01-25T17:55:42"),
+                                registrertAv = "Folkeregisteret",
+                                systemkilde = "FREG",
+                                kilde = "FREG",
+                            ),
+                            EndringDto(
+                                type = EndringstypeDto.KORRIGER,
+                                registrert = toLocalDateTime("2020-12-05T08:32:21"),
+                                registrertAv = "Folkeregisteret",
+                                systemkilde = "FREG",
+                                kilde = "FREG",
+                            )
+                        ),
+                        master = "Freg",
+                        opplysningsId = "4d25bb7f-202c-48da-ace1-764a95cd8e80",
+                        historisk = false
+                    )
+                ),
+            )
+            "4444444444444" -> return listOf(
+
+                SivilstandDto(
+                    type = SivilstandstypeDto.GIFT,
+                    gyldigFraOgMed = LocalDate.of(2011, 2, 2).toString(),
+                    relatertVedSivilstand = "30056928150",
+                    bekreftelsesdato = null,
+                    folkeregistermetadata = null,
+                    metadata = MetadataDto(
+                        endringer = listOf(
+                            EndringDto(
+                                type = EndringstypeDto.OPPRETT,
+                                registrert = toLocalDateTime("2020-01-25T17:55:42"),
+                                registrertAv = "Folkeregisteret",
+                                systemkilde = "FREG",
+                                kilde = "KILDE_DSF",
+                            ),
+                            EndringDto(
+                                type = EndringstypeDto.KORRIGER,
+                                registrert = toLocalDateTime("2022-04-27T14:57:56"),
+                                registrertAv = "Folkeregisteret",
+                                systemkilde = "FREG",
+                                kilde = "KILDE_DSF",
+                            )
+                        ),
+                        master = "Freg",
+                        opplysningsId = "4d25bb7f-202c-48da-ace1-764a95cd8e3d",
+                        historisk = false
+                    )
+                ),
+
+                SivilstandDto(
+                    type = SivilstandstypeDto.SEPARERT,
+                    gyldigFraOgMed = LocalDate.of(2013, 1, 3).toString(),
+                    relatertVedSivilstand = "30056928150",
+                    bekreftelsesdato = null,
+                    folkeregistermetadata = null,
+                    metadata = MetadataDto(
+                        endringer = listOf(
+                            EndringDto(
+                                type = EndringstypeDto.OPPRETT,
+                                registrert = toLocalDateTime("2020-01-25T17:55:42"),
+                                registrertAv = "Folkeregisteret",
+                                systemkilde = "FREG",
+                                kilde = "KILDE_DSF",
+                            ),
+                            EndringDto(
+                                type = EndringstypeDto.KORRIGER,
+                                registrert = toLocalDateTime("2022-04-28T13:28:43"),
+                                registrertAv = "Folkeregisteret",
+                                systemkilde = "pdl-web",
+                                kilde = "Tyske trygdemyndigheter, TYSKLAND",
+                            )
+                        ),
+                        master = "PDL",
+                        opplysningsId = "4d25bb7f-202c-48da-ace1-764a95cd8e3f",
+                        historisk = true
+                    )
+                ),
+                SivilstandDto(
+                    type = SivilstandstypeDto.SKILT,
+                    gyldigFraOgMed = LocalDate.of(2014, 4, 9).toString(),
+                    relatertVedSivilstand = null, // SKILT har ikke verdi her
+                    bekreftelsesdato = null,
+                    folkeregistermetadata = null,
+                    metadata = MetadataDto(
+                        endringer = listOf(
+                            EndringDto(
+                                type = EndringstypeDto.OPPRETT,
+                                registrert = toLocalDateTime("2020-01-25T17:55:42"),
+                                registrertAv = "Folkeregisteret",
+                                systemkilde = "FREG",
+                                kilde = "KILDE_DSF",
+                            ),
+                            EndringDto(
+                                type = EndringstypeDto.KORRIGER,
+                                registrert = toLocalDateTime("2022-05-04T12:20:45"),
+                                registrertAv = "Folkeregisteret",
+                                systemkilde = "pdl-web",
+                                kilde = "Tyske trygdemyndigheter, TYSKLAND",
+                            )
+                        ),
+                        master = "PDL",
+                        opplysningsId = "4d25bb7f-202c-48da-ace1-764a95cd8e3e",
+                        historisk = true
+                    )
                 )
             )
             else -> return listOf()
         }
     }
+
+    private fun toLocalDateTime(localDateTime: String) =
+        LocalDateTime.parse(localDateTime, DateTimeFormatter.ISO_LOCAL_DATE_TIME)
 
     override fun statsborgerskap(personDto: PersonDto, historikk: Boolean?): List<StatsborgerskapDto> {
         return querySession.hentIdent()

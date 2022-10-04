@@ -59,7 +59,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.READER_TOKEN }}
       - name: Build and test
-        run: mvn clean verify -B -e -U --settings .github/settings.xml
+        run: mvn clean verify ${{github.event.inputs.environment != 'prod' && '-DskipTests'}} -B -e -U --settings .github/settings.xml
       - uses: actions/upload-artifact@v3
         with:
           name: melosys-app

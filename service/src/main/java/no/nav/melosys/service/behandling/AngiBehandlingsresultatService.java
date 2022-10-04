@@ -6,19 +6,22 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.sak.FagsakService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import static no.nav.melosys.domain.kodeverk.Sakstemaer.MEDLEMSKAP_LOVVALG;
 import static no.nav.melosys.domain.kodeverk.Sakstyper.*;
-import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper.*;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*;
-import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.FØRSTEGANG;
-import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.NY_VURDERING;
+import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.*;
 
 @Service
 public class AngiBehandlingsresultatService {
@@ -26,11 +29,14 @@ public class AngiBehandlingsresultatService {
     private static final Logger log = LoggerFactory.getLogger(AngiBehandlingsresultatService.class);
 
     private final BehandlingsresultatService behandlingsresultatService;
+    private final OppgaveService oppgaveService;
     private final FagsakService fagsakService;
 
     public AngiBehandlingsresultatService(BehandlingsresultatService behandlingsresultatService,
+                                          OppgaveService oppgaveService,
                                           FagsakService fagsakService) {
         this.behandlingsresultatService = behandlingsresultatService;
+        this.oppgaveService = oppgaveService;
         this.fagsakService = fagsakService;
     }
 
@@ -45,6 +51,7 @@ public class AngiBehandlingsresultatService {
         behandlingsresultat.setType(behandlingsresultattype);
         behandlingsresultatService.lagre(behandlingsresultat);
         fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.LOVVALG_AVKLART);
+        oppgaveService.ferdigstillOppgaveMedSaksnummer(fagsak.getSaksnummer());
     }
 
     private void validerBehandlingsresultattype(Behandlingsresultattyper behandlingsresultattype, Behandling behandling, Fagsak fagsak) {
@@ -53,39 +60,70 @@ public class AngiBehandlingsresultatService {
         var behandlingstema = behandling.getTema();
         var behandlingstype = behandling.getType();
 
-        if (sakstema != Sakstemaer.MEDLEMSKAP_LOVVALG) {
-            throw new FunksjonellException(String.format("Kan ikke endre behandlingsresultattype på sak %s siden den har sakstema %s", fagsak.getSaksnummer(), sakstema));
-        }
-
-        if (behandlingsresultattype == MEDLEM_I_FOLKETRYGDEN &&
-            sakstype == FTRL &&
-            Set.of(YRKESAKTIV, IKKE_YRKESAKTIV, PENSJONIST).contains(behandlingstema) &&
-            Set.of(FØRSTEGANG, NY_VURDERING).contains(behandlingstype)
-        ) {
-            return;
-        }
-        if (behandlingsresultattype == UNNTATT_MEDLEMSKAP &&
-            sakstype == FTRL &&
-            behandlingstema == UNNTAK_MEDLEMSKAP &&
-            Set.of(FØRSTEGANG, NY_VURDERING).contains(behandlingstype)
-        ) {
-            return;
-        }
-        if (behandlingsresultattype == FASTSATT_LOVVALGSLAND &&
-            Set.of(EU_EOS, TRYGDEAVTALE).contains(sakstype) &&
-            Set.of(ARBEID_KUN_NORGE, YRKESAKTIV, IKKE_YRKESAKTIV, PENSJONIST).contains(behandlingstema) &&
-            Set.of(FØRSTEGANG, NY_VURDERING).contains(behandlingstype)
-        ) {
-            return;
-        }
-        if (behandlingsresultattype == AVSLAG_SØKNAD && Set.of(ARBEID_ETT_LAND_ØVRIG, ARBEID_TJENESTEPERSON_ELLER_FLY,
-                                                               ARBEID_KUN_NORGE, YRKESAKTIV, IKKE_YRKESAKTIV,
-                                                               PENSJONIST, UNNTAK_MEDLEMSKAP).contains(
-            behandlingstema) && Set.of(FØRSTEGANG, NY_VURDERING).contains(behandlingstype)) {
-            return;
+        switch (behandlingsresultattype) {
+            case MEDLEM_I_FOLKETRYGDEN -> {
+                if (erGyldigEndringForMEDLEM_I_FOLKETRYGDEN(sakstype, sakstema, behandlingstema, behandlingstype))
+                    return;
+            }
+            case UNNTATT_MEDLEMSKAP -> {
+                if (erGyldigEndringForUNTATT_MEDLEMSKAP(sakstype, sakstema, behandlingstema, behandlingstype))
+                    return;
+            }
+            case FASTSATT_LOVVALGSLAND -> {
+                if (erGyldigEndringForFASTSATT_LOVVALGSLAND(sakstype, sakstema, behandlingstema, behandlingstype))
+                    return;
+            }
+            case AVSLAG_SØKNAD -> {
+                if (erGyldigEndringForAVSLAG_SØKNAD(sakstema, behandlingstema, behandlingstype))
+                    return;
+            }
+            case MEDHOLD, KLAGEINNSTILLING, AVVIST_KLAGE -> {
+                if (behandlingstype == KLAGE) return;
+            }
+            case OMGJORT -> {
+                if (behandlingstype == NY_VURDERING) return;
+            }
+            case REGISTRERT_UNNTAK, DELVIS_GODKJENT_UNNTAK -> {
+                if (erGyldigEndringForUnntak(sakstype, behandlingstema))
+                    return;
+            }
+            default ->
+                throw new FunksjonellException("Kan ikke endre til behandlingsresultattype: " + behandlingsresultattype.getBeskrivelse());
         }
 
         throw new FunksjonellException(String.format("Kan ikke endre behandlingsresultattype til %s på sak %s", behandlingsresultattype, fagsak.getSaksnummer()));
     }
 
+    private boolean erGyldigEndringForMEDLEM_I_FOLKETRYGDEN(Sakstyper sakstype, Sakstemaer sakstema, Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
+        return (sakstype == FTRL &&
+            sakstema == MEDLEMSKAP_LOVVALG &&
+            Set.of(YRKESAKTIV, IKKE_YRKESAKTIV, PENSJONIST).contains(behandlingstema) &&
+            Set.of(FØRSTEGANG, NY_VURDERING).contains(behandlingstype)) || erGyldigEndringForUnntak(sakstype, behandlingstema);
+
+    }
+
+    private boolean erGyldigEndringForUNTATT_MEDLEMSKAP(Sakstyper sakstype, Sakstemaer sakstema, Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
+        return sakstype == FTRL &&
+            sakstema == MEDLEMSKAP_LOVVALG &&
+            behandlingstema == UNNTAK_MEDLEMSKAP &&
+            Set.of(FØRSTEGANG, NY_VURDERING).contains(behandlingstype);
+    }
+
+    private boolean erGyldigEndringForFASTSATT_LOVVALGSLAND(Sakstyper sakstype, Sakstemaer sakstema, Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
+        return Set.of(EU_EOS, TRYGDEAVTALE).contains(sakstype) &&
+            sakstema == MEDLEMSKAP_LOVVALG &&
+            Set.of(ARBEID_KUN_NORGE, YRKESAKTIV, IKKE_YRKESAKTIV, PENSJONIST).contains(behandlingstema) &&
+            Set.of(FØRSTEGANG, NY_VURDERING).contains(behandlingstype);
+    }
+
+    private boolean erGyldigEndringForAVSLAG_SØKNAD(Sakstemaer sakstema, Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
+        return sakstema == MEDLEMSKAP_LOVVALG &&
+            Set.of(ARBEID_ETT_LAND_ØVRIG, ARBEID_TJENESTEPERSON_ELLER_FLY, ARBEID_KUN_NORGE, YRKESAKTIV, IKKE_YRKESAKTIV, PENSJONIST, UNNTAK_MEDLEMSKAP).contains(behandlingstema) &&
+            Set.of(FØRSTEGANG, NY_VURDERING).contains(behandlingstype);
+    }
+
+    private boolean erGyldigEndringForUnntak(Sakstyper sakstype, Behandlingstema behandlingstema) {
+        return sakstype == TRYGDEAVTALE &&
+            Set.of(ANMODNING_OM_UNNTAK_HOVEDREGEL, REGISTRERING_UNNTAK).contains(behandlingstema);
+    }
 }

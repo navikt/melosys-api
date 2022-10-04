@@ -40,12 +40,9 @@ class JournalfoeringTjenesteTest {
     private ObjectMapper objectMapper;
 
     private static final String BASE_URL = "/api/journalforing";
-    private JournalfoeringTjeneste tjeneste;
 
     @BeforeEach
     public void setUp() {
-        tjeneste = new JournalfoeringTjeneste(journalføringService, oppgaveService);
-
         random = new EasyRandom(new EasyRandomParameters().collectionSizeRange(1, 4));
     }
 
@@ -64,7 +61,7 @@ class JournalfoeringTjenesteTest {
     }
 
     @Test
-    void journalførOgOpprettNyVurdering_validerKall() throws Exception {
+    void journalførOgOpprettAndregangsBehandling_validerKall() throws Exception {
         JournalfoeringTilordneDto journalføringDto = random.nextObject(JournalfoeringTilordneDto.class);
 
         mockMvc.perform(post(BASE_URL + "/nyvurdering")
@@ -73,12 +70,12 @@ class JournalfoeringTjenesteTest {
             )
             .andExpect(status().isNoContent());
 
-        verify(journalføringService).journalførOgOpprettNyVurdering(any(JournalfoeringTilordneDto.class));
+        verify(journalføringService).journalførOgOpprettAndregangsBehandling(any(JournalfoeringTilordneDto.class));
         verify(oppgaveService).ferdigstillOppgave(journalføringDto.getOppgaveID());
     }
 
     @Test
-    void journalføringOpprett_validerKallOgSchema() throws Exception {
+    void journalføringOpprett_validerKall() throws Exception {
         JournalfoeringOpprettDto journalføringDto = random.nextObject(JournalfoeringOpprettDto.class);
         journalføringDto.setVirksomhetOrgnr(null);
         journalføringDto.setBrukerID(SAMPLE_FNR);
@@ -97,7 +94,7 @@ class JournalfoeringTjenesteTest {
     }
 
     @Test
-    void journalføringOpprett_validerKallOgSchemaMedRepresentantIDNull() throws Exception {
+    void journalføringOpprett_validerKallMedRepresentantIDNull() throws Exception {
         JournalfoeringOpprettDto journalføringDto = random.nextObject(JournalfoeringOpprettDto.class);
         journalføringDto.setVirksomhetOrgnr(null);
         journalføringDto.setBrukerID(SAMPLE_FNR);
@@ -116,7 +113,7 @@ class JournalfoeringTjenesteTest {
     }
 
     @Test
-    void journalføringOpprett_validerKallOgSchemaMedBrukerIDNull() throws Exception {
+    void journalføringOpprett_validerKallMedBrukerIDNull() throws Exception {
         JournalfoeringOpprettDto journalføringDto = random.nextObject(JournalfoeringOpprettDto.class);
         journalføringDto.setVirksomhetOrgnr(SAMPLE_ORGNR);
         journalføringDto.setBrukerID(null);
@@ -135,7 +132,7 @@ class JournalfoeringTjenesteTest {
     }
 
     @Test
-    void journalførSed_validerSchema() throws Exception {
+    void journalførSed_validerKall() throws Exception {
         JournalfoeringSedDto journalføringSedDto = new JournalfoeringSedDto();
         journalføringSedDto.setOppgaveID("123123");
         journalføringSedDto.setBrukerID(SAMPLE_FNR);

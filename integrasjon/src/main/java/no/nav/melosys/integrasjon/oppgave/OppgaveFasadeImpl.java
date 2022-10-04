@@ -8,6 +8,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Fagsystem;
 import no.nav.melosys.domain.Tema;
 import no.nav.melosys.domain.kodeverk.Kodeverk;
@@ -43,11 +44,14 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
     private static final String SORTERINGSREKKEFOLGE_DESC = "DESC";
     private static final String OPPGAVE_STATUSKATEGORI_AAPEN = "AAPEN";
     private static final String OPPGAVE_STATUSKATEGORI_AVSLUTTET = "AVSLUTTET";
+    private static final String[] OPPGAVETYPER_BEHANDLINGSOPPGAVE = new String[]{Oppgavetyper.BEH_SAK_MK.getKode(), Oppgavetyper.VUR.getKode(), Oppgavetyper.BEH_SED.getKode(), Oppgavetyper.VURD_HENV.getKode()};
 
     private final OppgaveConsumer oppgaveConsumer;
+    private final Unleash unleash;
 
-    public OppgaveFasadeImpl(OppgaveConsumer oppgaveConsumer) {
+    public OppgaveFasadeImpl(OppgaveConsumer oppgaveConsumer, Unleash unleash) {
         this.oppgaveConsumer = oppgaveConsumer;
+        this.unleash = unleash;
     }
 
     @Override
@@ -65,8 +69,29 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
     }
 
     @Override
-    public List<Oppgave> finnUtildelteOppgaverEtterFrist(String behandlingstype, String behandlingstema) {
+    public List<Oppgave> finnUtildelteOppgaverEtterFrist(String behandlingstema) {
+        OppgaveSearchRequest.Builder searchRequestBuilder = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
+            .medBehandlingstema(behandlingstema)
+            .medOppgaveTyper(hentGyldigeOppgavetyper())
+            .medSorteringsfelt(SORTERINGSFELT)
+            .medStatusKategori(OPPGAVE_STATUSKATEGORI_AAPEN)
+            .medTema(hentGyldigeTemaer())
+            .medTildeltRessurs(false)
+            .medBehandlesAvApplikasjon(Fagsystem.MELOSYS.getKode());
 
+        List<OppgaveDto> oppgaver = oppgaveConsumer.hentOppgaveListe(searchRequestBuilder.build());
+
+        return oppgaver.stream().map(OppgaveFasadeImpl::oppgaveMappingDtoTilDomain)
+            .filter(erGyldigBehandlingsoppgave)
+            .toList();
+    }
+
+    /**
+     * @deprecated Fjernes med toggle melosys.behandle_alle_saker
+     */
+    @Deprecated
+    @Override
+    public List<Oppgave> finnUtildelteOppgaverEtterFrist(String behandlingstype, String behandlingstema) {
         OppgaveSearchRequest.Builder searchRequestBuilder = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
             .medBehandlingsType(behandlingstype)
             .medBehandlingstema(behandlingstema)
@@ -214,7 +239,7 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
     public Set<Oppgave> finnOppgaverMedAnsvarlig(String tilordnetRessurs) {
         OppgaveSearchRequest.Builder oppgaveSearchRequestBuilder = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
             .medTilordnetRessurs(tilordnetRessurs)
-            .medTema(new String[]{Tema.MED.getKode(), Tema.UFM.getKode()})
+            .medTema(hentGyldigeTemaer())
             .medOppgaveTyper(hentGyldigeOppgavetyper())
             .medSorteringsfelt(SORTERINGSFELT)
             .medStatusKategori(OPPGAVE_STATUSKATEGORI_AAPEN);
@@ -244,7 +269,7 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
     public List<Oppgave> finnOppgaverMedAktørId(String aktørId) {
         OppgaveSearchRequest oppgaveSearchRequest = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
             .medAktørId(aktørId)
-            .medTema(new String[]{Tema.MED.getKode(), Tema.UFM.getKode()})
+            .medTema(hentGyldigeTemaer())
             .medOppgaveTyper(hentGyldigeOppgavetyper())
             .medSorteringsfelt(SORTERINGSFELT)
             .medStatusKategori(OPPGAVE_STATUSKATEGORI_AAPEN)
@@ -259,7 +284,7 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
     public List<Oppgave> finnOppgaverMedOrgnr(String orgnr) {
         OppgaveSearchRequest oppgaveSearchRequest = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
             .medOrgnr(orgnr)
-            .medTema(new String[]{Tema.MED.getKode(), Tema.UFM.getKode()})
+            .medTema(hentGyldigeTemaer())
             .medOppgaveTyper(hentGyldigeOppgavetyper())
             .medSorteringsfelt(SORTERINGSFELT)
             .medStatusKategori(OPPGAVE_STATUSKATEGORI_AAPEN)
@@ -271,11 +296,11 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
     }
 
     @Override
-    public List<Oppgave> finnÅpneOppgaverMedJournalpostID(String journalpostID) {
+    public List<Oppgave> finnÅpneBehandlingsoppgaverMedJournalpostID(String journalpostID) {
         OppgaveSearchRequest oppgaveSearchRequest = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
             .medJournalpostID(new String[]{journalpostID})
-            .medTema(new String[]{Tema.MED.getKode(), Tema.UFM.getKode()})
-            .medOppgaveTyper(new String[]{Oppgavetyper.BEH_SAK_MK.getKode(), Oppgavetyper.VUR.getKode(), Oppgavetyper.BEH_SED.getKode()})
+            .medTema(hentGyldigeTemaer())
+            .medOppgaveTyper(OPPGAVETYPER_BEHANDLINGSOPPGAVE)
             .medStatusKategori(OPPGAVE_STATUSKATEGORI_AAPEN)
             .build();
 
@@ -285,11 +310,11 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
     }
 
     @Override
-    public List<Oppgave> finnÅpneOppgaverMedSaksnummer(String saksnummer) {
+    public List<Oppgave> finnÅpneBehandlingsoppgaverMedSaksnummer(String saksnummer) {
         OppgaveSearchRequest oppgaveSearchRequest = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
             .medSaksreferanse(new String[]{saksnummer})
-            .medTema(new String[]{Tema.MED.getKode(), Tema.UFM.getKode()})
-            .medOppgaveTyper(new String[]{Oppgavetyper.BEH_SAK_MK.getKode(), Oppgavetyper.VUR.getKode(), Oppgavetyper.BEH_SED.getKode()})
+            .medTema(hentGyldigeTemaer())
+            .medOppgaveTyper(OPPGAVETYPER_BEHANDLINGSOPPGAVE)
             .medStatusKategori(OPPGAVE_STATUSKATEGORI_AAPEN)
             .build();
 
@@ -299,11 +324,11 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
     }
 
     @Override
-    public List<Oppgave> finnAvsluttetOppgaverMedSaksnummer(String saksnummer) {
+    public List<Oppgave> finnAvsluttetBehandlingsoppgaverMedSaksnummer(String saksnummer) {
         OppgaveSearchRequest oppgaveSearchRequest = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
             .medSaksreferanse(new String[]{saksnummer})
-            .medTema(new String[]{Tema.MED.getKode(), Tema.UFM.getKode()})
-            .medOppgaveTyper(new String[]{Oppgavetyper.BEH_SAK_MK.getKode(), Oppgavetyper.VUR.getKode(), Oppgavetyper.BEH_SED.getKode()})
+            .medTema(hentGyldigeTemaer())
+            .medOppgaveTyper(OPPGAVETYPER_BEHANDLINGSOPPGAVE)
             .medSorteringsfelt(SORTERINGSFELT)
             .medSorteringsrekkefolge(SORTERINGSREKKEFOLGE_DESC)
             .medStatusKategori(OPPGAVE_STATUSKATEGORI_AVSLUTTET)
@@ -359,5 +384,12 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
         return Stream.of(Oppgavetyper.values())
             .map(Oppgavetyper::getKode)
             .toArray(String[]::new);
+    }
+
+    private String[] hentGyldigeTemaer() {
+        if (unleash.isEnabled("melosys.behandle_alle_saker")) {
+            return new String[]{Tema.MED.getKode(), Tema.UFM.getKode(), Tema.TRY.getKode()};
+        }
+        return new String[]{Tema.MED.getKode(), Tema.UFM.getKode()};
     }
 }

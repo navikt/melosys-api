@@ -34,7 +34,6 @@ import org.springframework.web.context.WebApplicationContext;
 public class BehandlingTjeneste {
 
     private static final Logger log = LoggerFactory.getLogger(BehandlingTjeneste.class);
-
     private final BehandlingService behandlingService;
     private final SaksopplysningerTilDto saksopplysningerTilDto;
     private final SaksbehandlerService saksbehandlerService;
@@ -59,9 +58,14 @@ public class BehandlingTjeneste {
                                                 @RequestBody EndreBehandlingDto endreBehandling) {
         log.debug("Saksbehandler {} ber om å endre behandling {} med {}", SubjectHandler.getInstance().getUserID(), behandlingID, endreBehandling);
         aksesskontroll.autoriser(behandlingID);
+        behandlingService.endreBehandling(
+            behandlingID,
+            endreBehandling.behandlingstype(),
+            endreBehandling.behandlingstema(),
+            endreBehandling.behandlingsstatus(),
+            endreBehandling.behandlingsfrist()
+        );
 
-        behandlingService.endreBehandling(behandlingID, endreBehandling.sakstype(), endreBehandling.behandlingstype(),
-            endreBehandling.behandlingstema(), endreBehandling.behandlingsstatus(), endreBehandling.behandlingsfrist());
         return ResponseEntity.noContent().build();
     }
 
@@ -146,17 +150,6 @@ public class BehandlingTjeneste {
         return ResponseEntity.noContent().build();
     }
 
-    @PutMapping("{behandlingID}/sett-til-ferdigbehandlet")
-    @ApiOperation("Avslutt en gitt behandling med Ferdigbehandlet som resultat uten endring av saksstatus")
-    public ResponseEntity<Void> avsluttNyVurderingMedFerdigbehandlet(@PathVariable("behandlingID") long behandlingID) {
-        log.debug("Saksbehandler {} ber om å avslutte behandling {} uten endring av saksstatus", SubjectHandler.getInstance().getUserID(), behandlingID);
-        aksesskontroll.autoriserSkrivOgTilordnet(behandlingID);
-
-        behandlingService.settNyVurderingTilFerdigbehandlet(behandlingID);
-
-        return ResponseEntity.noContent().build();
-    }
-
     @GetMapping("{behandlingID}/mulige-statuser")
     @ApiOperation("Hent mulige nye behandlingsstatuser for en behandling")
     public ResponseEntity<Collection<Behandlingsstatus>> hentMuligeStatuser(@PathVariable("behandlingID") long behandlingID) {
@@ -184,7 +177,6 @@ public class BehandlingTjeneste {
         return ResponseEntity.ok(behandlingService.hentMuligeTyper(behandlingID));
     }
 
-
     private BehandlingDto tilBehandlingDto(Behandling behandling, String saksbehandler) {
         var behandlingDto = new BehandlingDto();
         behandlingDto.setBehandlingID(behandling.getId());
@@ -197,8 +189,8 @@ public class BehandlingTjeneste {
 
     private BehandlingOppsummeringDto tilOppsummeringDto(Behandling behandling) {
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
+        BehandlingOppsummeringDto behandlingOppsummeringDto = new BehandlingOppsummeringDto();
 
-        var behandlingOppsummeringDto = new BehandlingOppsummeringDto();
         behandlingOppsummeringDto.setBehandlingsstatus(behandling.getStatus());
         behandlingOppsummeringDto.setBehandlingstype(behandling.getType());
         behandlingOppsummeringDto.setBehandlingstema(behandling.getTema());

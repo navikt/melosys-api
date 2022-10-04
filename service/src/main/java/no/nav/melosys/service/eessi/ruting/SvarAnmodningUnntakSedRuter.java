@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
 
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.eessi.SedType;
@@ -34,14 +35,17 @@ public class SvarAnmodningUnntakSedRuter implements SedRuterForSedTyper {
     private final FagsakService fagsakService;
     private final AnmodningsperiodeService anmodningsperiodeService;
     private final OppgaveService oppgaveService;
+    private final Unleash unleash;
 
     public SvarAnmodningUnntakSedRuter(ProsessinstansService prosessinstansService, FagsakService fagsakService,
                                        AnmodningsperiodeService anmodningsperiodeService,
-                                       OppgaveService oppgaveService) {
+                                       OppgaveService oppgaveService,
+                                       Unleash unleash) {
         this.prosessinstansService = prosessinstansService;
         this.fagsakService = fagsakService;
         this.anmodningsperiodeService = anmodningsperiodeService;
         this.oppgaveService = oppgaveService;
+        this.unleash = unleash;
     }
 
     @Override
@@ -87,7 +91,7 @@ public class SvarAnmodningUnntakSedRuter implements SedRuterForSedTyper {
 
     private void oppdaterBehandlingOgOppgave(Behandling behandling, String sedType) {
         behandling.setStatus(Behandlingsstatus.VURDER_DOKUMENT);
-        Optional<Oppgave> oppgave = oppgaveService.finnÅpenOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer());
+        Optional<Oppgave> oppgave = oppgaveService.finnÅpenBehandlingsoppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer());
         if (oppgave.isEmpty()) {
             opprettOppgave(behandling, sedType);
         } else {
@@ -98,7 +102,10 @@ public class SvarAnmodningUnntakSedRuter implements SedRuterForSedTyper {
     private void opprettOppgave(Behandling behandling, String sedType) {
         String aktørID = behandling.getFagsak().hentBrukersAktørID();
 
-        Oppgave.Builder oppgaveBuilder = OppgaveFactory.lagBehandlingsOppgaveForType(behandling.getTema(), behandling.getType())
+        Oppgave.Builder oppgaveBuilder = (
+            unleash.isEnabled("melosys.behandle_alle_saker")
+                ? OppgaveFactory.lagBehandlingsoppgave(behandling)
+                : OppgaveFactory.lagBehandlingsOppgaveForType(behandling.getTema(), behandling.getType()))
             .setAktørId(aktørID)
             .setJournalpostId(behandling.getInitierendeJournalpostId())
             .setSaksnummer(behandling.getFagsak().getSaksnummer())

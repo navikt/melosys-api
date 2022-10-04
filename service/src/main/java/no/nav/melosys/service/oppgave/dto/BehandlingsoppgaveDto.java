@@ -11,6 +11,8 @@ public class BehandlingsoppgaveDto extends OppgaveDto {
     private Sakstyper sakstype;
     private Sakstemaer sakstema;
     private PeriodeDto periode;
+    private String oppgaveBeskrivelse;
+    private String sisteNotat;
 
     public BehandlingsoppgaveDto() {
         this.behandling = new BehandlingDto();
@@ -63,5 +65,21 @@ public class BehandlingsoppgaveDto extends OppgaveDto {
 
     public void setPeriode(PeriodeDto periode) {
         this.periode = periode;
+    }
+
+    public String getOppgaveBeskrivelse() {
+        return oppgaveBeskrivelse;
+    }
+
+    public void setOppgaveBeskrivelse(String oppgaveBeskrivelse) {
+        this.oppgaveBeskrivelse = oppgaveBeskrivelse;
+    }
+
+    public String getSisteNotat() {
+        return sisteNotat;
+    }
+
+    public void setSisteNotat(String sisteNotat) {
+        this.sisteNotat = sisteNotat;
     }
 }

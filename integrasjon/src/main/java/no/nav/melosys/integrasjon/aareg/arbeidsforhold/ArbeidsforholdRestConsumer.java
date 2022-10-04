@@ -2,14 +2,14 @@ package no.nav.melosys.integrasjon.aareg.arbeidsforhold;
 
 import java.util.List;
 
-import no.nav.melosys.integrasjon.felles.RestConsumer;
+import no.nav.melosys.integrasjon.felles.WebClientConfig;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.web.reactive.function.client.WebClient;
 
 @Retryable
-public class ArbeidsforholdRestConsumer implements RestConsumer {
+public class ArbeidsforholdRestConsumer implements WebClientConfig {
 
     private final WebClient webClient;
 

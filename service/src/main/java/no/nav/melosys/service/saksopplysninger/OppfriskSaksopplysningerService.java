@@ -2,6 +2,7 @@ package no.nav.melosys.service.saksopplysninger;
 
 import java.time.LocalDate;
 
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.ErPeriode;
 import no.nav.melosys.domain.dokument.felles.Periode;
@@ -34,6 +35,7 @@ public class OppfriskSaksopplysningerService {
     private final InngangsvilkaarService inngangsvilkaarService;
     private final RegisteropplysningerService registeropplysningerService;
     private final PersondataFasade persondataFasade;
+    private final Unleash unleash;
 
     public OppfriskSaksopplysningerService(AnmodningsperiodeService anmodningsperiodeService,
                                            BehandlingService behandlingService,
@@ -41,7 +43,8 @@ public class OppfriskSaksopplysningerService {
                                            UfmKontrollService ufmKontrollService,
                                            InngangsvilkaarService inngangsvilkaarService,
                                            RegisteropplysningerService registeropplysningerService,
-                                           PersondataFasade persondataFasade) {
+                                           PersondataFasade persondataFasade,
+                                           Unleash unleash) {
         this.anmodningsperiodeService = anmodningsperiodeService;
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
@@ -49,6 +52,7 @@ public class OppfriskSaksopplysningerService {
         this.inngangsvilkaarService = inngangsvilkaarService;
         this.registeropplysningerService = registeropplysningerService;
         this.persondataFasade = persondataFasade;
+        this.unleash = unleash;
     }
 
     @Transactional
@@ -71,7 +75,11 @@ public class OppfriskSaksopplysningerService {
 
         RegisteropplysningerRequest registeropplysningerRequest = RegisteropplysningerRequest.builder()
             .behandlingID(behandlingID)
-            .saksopplysningTyper(utledSaksopplysningTyper(behandling.getTema()))
+            .saksopplysningTyper(utledSaksopplysningTyper(
+                behandling.getFagsak().getType(),
+                behandling.getTema(),
+                behandling.getType(),
+                unleash.isEnabled("melosys.behandle_alle_saker")))
             .fnr(brukerID)
             .fom(fom)
             .tom(tom)
@@ -84,7 +92,7 @@ public class OppfriskSaksopplysningerService {
         registeropplysningerService.hentOgLagreOpplysninger(registeropplysningerRequest);
         behandlingsresultatService.tømBehandlingsresultat(behandlingID);
 
-        if (behandling.erBehandlingAvSed()) {
+        if (behandling.erBehandlingAvSedGammel()) {
             ufmKontrollService.utførKontrollerOgRegistrerFeil(behandlingID);
         }
 

@@ -23,6 +23,7 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_t
 import no.nav.melosys.integrasjon.medl.PeriodestatusMedl;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory;
 import no.nav.melosys.service.validering.Kontrollfeil;
@@ -47,6 +48,8 @@ class KontrollTest {
     private LovvalgsperiodeService lovvalgsperiodeService;
     @Mock
     private PersondataFasade persondataFasade;
+    @Mock
+    private BehandlingsresultatService behandlingsresultatService;
     private final long behandlingID = 1L;
     private final Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
     private final MedlemskapDokument medlemskapDokument = new MedlemskapDokument();
@@ -66,7 +69,7 @@ class KontrollTest {
         when(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling);
 
 
-        kontroll = new Kontroll(behandlingService, lovvalgsperiodeService, persondataFasade);
+        kontroll = new Kontroll(behandlingService, lovvalgsperiodeService, persondataFasade, behandlingsresultatService);
     }
 
     @Test
@@ -85,10 +88,12 @@ class KontrollTest {
 
     @Test
     void utførKontroller_periodeUnder24MndArt12IkkeOverlappendePeriode_returnererTomCollection() {
+        mockReturnertLovvalgsperiode();
+
         lovvalgsperiode.setFom(LocalDate.now());
         lovvalgsperiode.setTom(LocalDate.now().plusYears(1));
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
-        when(lovvalgsperiodeService.hentValidertLovvalgsperiode(behandlingID)).thenReturn(lovvalgsperiode);
+
 
         assertDoesNotThrow(() -> kontroll.utførKontroller(behandlingID, Sakstyper.EU_EOS, Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN));
     }
@@ -121,10 +126,11 @@ class KontrollTest {
 
     @Test
     void utførKontroller_periodeOver24MndArt16IkkeOverlappendePeriode_returnererTomCollection() {
+        mockReturnertLovvalgsperiode();
+
         lovvalgsperiode.setFom(LocalDate.now());
         lovvalgsperiode.setTom(LocalDate.now().plusYears(3));
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1);
-        when(lovvalgsperiodeService.hentValidertLovvalgsperiode(behandlingID)).thenReturn(lovvalgsperiode);
 
 
         Collection<Kontrollfeil> resultat = kontroll.utførKontroller(behandlingID, Sakstyper.EU_EOS, Behandlingsresultattyper.ANMODNING_OM_UNNTAK);
@@ -136,10 +142,11 @@ class KontrollTest {
 
     @Test
     void utførKontroller_periodeOver24MndArt12MedOverlappendePeriode_returnererCollectionMedToKoder() {
+        mockReturnertLovvalgsperiode();
+
         lovvalgsperiode.setFom(LocalDate.now());
         lovvalgsperiode.setTom(LocalDate.now().plusYears(3));
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_2);
-        when(lovvalgsperiodeService.hentValidertLovvalgsperiode(behandlingID)).thenReturn(lovvalgsperiode);
 
         Medlemsperiode medlemsperiode = new Medlemsperiode();
         medlemsperiode.periode = new Periode(LocalDate.now().plusMonths(2), LocalDate.now().plusYears(2));
@@ -155,10 +162,11 @@ class KontrollTest {
 
     @Test
     void utførKontroller_periodeOver3År_returnererKode() {
+        mockReturnertLovvalgsperiode();
+
         lovvalgsperiode.setFom(LocalDate.now());
         lovvalgsperiode.setTom(LocalDate.now().plusYears(3).plusDays(1));
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1);
-        when(lovvalgsperiodeService.hentValidertLovvalgsperiode(behandlingID)).thenReturn(lovvalgsperiode);
 
         behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(new SoeknadTrygdeavtale());
 
@@ -171,10 +179,11 @@ class KontrollTest {
 
     @Test
     void utførKontroller_manglerAdresse_returnererKode() {
+        mockReturnertLovvalgsperiode();
+
         lovvalgsperiode.setFom(LocalDate.now());
         lovvalgsperiode.setTom(LocalDate.now().plusYears(1));
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
-        when(lovvalgsperiodeService.hentValidertLovvalgsperiode(behandlingID)).thenReturn(lovvalgsperiode);
 
         when(persondataFasade.hentPerson(anyString())).thenReturn(PersonopplysningerObjectFactory.lagPersonopplysningerUtenAdresser());
 
@@ -188,10 +197,11 @@ class KontrollTest {
 
     @Test
     void utførKontroller_periodeManglerSluttdato_returnererKode() {
+        mockReturnertLovvalgsperiode();
+
         lovvalgsperiode.setFom(LocalDate.now());
         lovvalgsperiode.setTom(null);
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
-        when(lovvalgsperiodeService.hentValidertLovvalgsperiode(behandlingID)).thenReturn(lovvalgsperiode);
 
 
         Collection<Kontrollfeil> resultat = kontroll.utførKontroller(behandlingID, Sakstyper.EU_EOS, Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND);
@@ -202,10 +212,10 @@ class KontrollTest {
 
     @Test
     void utførKontroller_arbeidsstedManglerFelter_returnererKode() {
+        mockReturnertLovvalgsperiode();
+
         lovvalgsperiode.setFom(LocalDate.now());
         lovvalgsperiode.setTom(LocalDate.now().plusYears(1));
-        when(lovvalgsperiodeService.hentValidertLovvalgsperiode(behandlingID)).thenReturn(lovvalgsperiode);
-
         behandlingsgrunnlagData.arbeidPaaLand.fysiskeArbeidssteder = List.of(new FysiskArbeidssted());
 
 
@@ -219,9 +229,10 @@ class KontrollTest {
 
     @Test
     void utførKontroller_foretakUtlandManglerFelter_returnererKode() {
+        mockReturnertLovvalgsperiode();
+
         lovvalgsperiode.setFom(LocalDate.now());
         lovvalgsperiode.setTom(LocalDate.now().plusYears(1));
-        when(lovvalgsperiodeService.hentValidertLovvalgsperiode(behandlingID)).thenReturn(lovvalgsperiode);
 
         behandlingsgrunnlagData.foretakUtland = List.of(new ForetakUtland());
 
@@ -236,8 +247,9 @@ class KontrollTest {
 
     @Test
     void utførKontroller_representantIUtlandetMangler_returnererKode() {
+        mockReturnertLovvalgsperiode();
+
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1);
-        when(lovvalgsperiodeService.hentValidertLovvalgsperiode(behandlingID)).thenReturn(lovvalgsperiode);
 
         behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(new SoeknadTrygdeavtale());
 
@@ -248,5 +260,9 @@ class KontrollTest {
         assertThat(resultat)
             .extracting(Kontrollfeil::getKode)
             .contains(Kontroll_begrunnelser.ATTEST_MANGLER_ARBEIDSSTED);
+    }
+
+    private void mockReturnertLovvalgsperiode() {
+        when(lovvalgsperiodeService.hentValidertLovvalgsperiode(behandlingID)).thenReturn(lovvalgsperiode);
     }
 }

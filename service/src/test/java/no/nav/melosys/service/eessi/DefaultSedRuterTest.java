@@ -2,10 +2,13 @@ package no.nav.melosys.service.eessi;
 
 import java.util.Optional;
 
+import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
+import no.nav.melosys.domain.kodeverk.Sakstemaer;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -42,6 +45,8 @@ class DefaultSedRuterTest {
     @Mock
     private OppgaveService oppgaveService;
 
+    private FakeUnleash unleash = new FakeUnleash();
+
     private DefaultSedRuter defaultSedRuter;
 
     private static final String SAKSNUMMER = "MEL-!!!";
@@ -49,7 +54,8 @@ class DefaultSedRuterTest {
 
     @BeforeEach
     public void setup() {
-        defaultSedRuter = new DefaultSedRuter(prosessinstansService, fagsakService, behandlingService, oppgaveService);
+        defaultSedRuter = new DefaultSedRuter(prosessinstansService, fagsakService, behandlingService, oppgaveService, unleash);
+        unleash.enableAll();
     }
 
     @Test
@@ -74,14 +80,14 @@ class DefaultSedRuterTest {
         Fagsak fagsak = hentFagsak();
 
         when(fagsakService.finnFagsakFraArkivsakID(GSAK_SAKSNUMMER)).thenReturn(Optional.of(fagsak));
-        when(oppgaveService.finnÅpenOppgaveMedFagsaksnummer(SAKSNUMMER)).thenReturn(Optional.of(oppgave));
+        when(oppgaveService.finnÅpenBehandlingsoppgaveMedFagsaksnummer(SAKSNUMMER)).thenReturn(Optional.of(oppgave));
 
         defaultSedRuter.rutSedTilBehandling(prosessinstans, GSAK_SAKSNUMMER);
 
         assertThat(prosessinstans.getBehandling()).isNotNull();
         verify(prosessinstansService).opprettProsessinstansSedJournalføring(fagsak.hentAktivBehandling(), melosysEessiMelding);
         verify(behandlingService).endreStatus(anyLong(), eq(Behandlingsstatus.VURDER_DOKUMENT));
-        verify(oppgaveService).finnÅpenOppgaveMedFagsaksnummer(SAKSNUMMER);
+        verify(oppgaveService).finnÅpenBehandlingsoppgaveMedFagsaksnummer(SAKSNUMMER);
         verify(oppgaveService).oppdaterOppgave(eq(oppgaveId), any(OppgaveOppdatering.class));
     }
 
@@ -101,7 +107,7 @@ class DefaultSedRuterTest {
         assertThat(prosessinstans.getBehandling()).isNotNull();
         verify(prosessinstansService).opprettProsessinstansSedJournalføring(fagsak.hentSistAktivBehandling(), melosysEessiMelding);
         verify(behandlingService, never()).endreStatus(anyLong(), any());
-        verify(oppgaveService, never()).finnÅpenOppgaveMedFagsaksnummer(any());
+        verify(oppgaveService, never()).finnÅpenBehandlingsoppgaveMedFagsaksnummer(any());
         verify(oppgaveService, never()).oppdaterOppgave(any(), any());
     }
 
@@ -113,6 +119,8 @@ class DefaultSedRuterTest {
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
 
         Fagsak fagsak = hentFagsak();
+        fagsak.setType(Sakstyper.EU_EOS);
+        fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
         fagsak.hentAktivBehandling().setStatus(Behandlingsstatus.AVSLUTTET);
         when(fagsakService.finnFagsakFraArkivsakID(GSAK_SAKSNUMMER)).thenReturn(Optional.of(fagsak));
 

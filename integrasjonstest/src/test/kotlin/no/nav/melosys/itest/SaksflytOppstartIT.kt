@@ -21,18 +21,21 @@ import no.nav.melosys.domain.saksflyt.ProsessType
 import no.nav.melosys.domain.saksflyt.Prosessinstans
 import no.nav.melosys.integrasjon.joark.saf.SafConsumer
 import no.nav.melosys.integrasjon.joark.saf.dto.journalpost.*
+import no.nav.melosys.melosysmock.sak.SakRepo
 import no.nav.melosys.repository.BehandlingRepository
 import no.nav.melosys.repository.FagsakRepository
 import no.nav.melosys.repository.ProsessinstansRepository
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import org.assertj.core.api.Assertions.assertThat
 import org.awaitility.Awaitility
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.ApplicationEventPublisher
+import org.springframework.kafka.test.context.EmbeddedKafka
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
 import java.time.Duration
@@ -44,6 +47,10 @@ import java.time.LocalDateTime
 @SpringBootTest(
     classes = [Application::class, SaksflytTestConfig::class],
     webEnvironment = SpringBootTest.WebEnvironment.NONE
+)
+@EmbeddedKafka(count = 1, controlledShutdown = true, partitions = 1,
+    topics = ["teammelosys.eessi.v1-local", "teammelosys.soknad-mottak.v1-local", "teammelosys.melosys-utstedt-a1.v1-local", "teammelosys.fattetvedtak.v1-local"],
+    brokerProperties = ["offsets.topic.replication.factor=1", "transaction.state.log.replication.factor=1", "transaction.state.log.min.isr=1"]
 )
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @EnableMockOAuth2Server
@@ -57,6 +64,11 @@ internal class SaksflytOppstartIT(
 
     @MockkBean
     lateinit var safConsumer: SafConsumer
+
+    @BeforeEach
+    fun before() {
+        SakRepo.clear()
+    }
 
     @Test
     fun `prosessinstansBehandler laster og publiserer prosesser som har hengt ved oppstart`() {

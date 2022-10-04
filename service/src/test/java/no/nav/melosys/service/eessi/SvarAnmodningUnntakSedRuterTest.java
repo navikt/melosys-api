@@ -3,6 +3,7 @@ package no.nav.melosys.service.eessi;
 import java.util.Collections;
 import java.util.Optional;
 
+import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
@@ -43,13 +44,16 @@ class SvarAnmodningUnntakSedRuterTest {
     @Mock
     private OppgaveService oppgaveService;
 
+    private FakeUnleash unleash = new FakeUnleash();
+
     private SvarAnmodningUnntakSedRuter svarAnmodningUnntakSedRuter;
 
     private final String aktørID = "223345325342";
 
     @BeforeEach
     public void setUp() {
-        svarAnmodningUnntakSedRuter = new SvarAnmodningUnntakSedRuter(prosessinstansService, fagsakService, anmodningsperiodeService, oppgaveService);
+        svarAnmodningUnntakSedRuter = new SvarAnmodningUnntakSedRuter(prosessinstansService, fagsakService, anmodningsperiodeService, oppgaveService, unleash);
+        unleash.enableAll();
     }
 
     @Test
@@ -95,7 +99,7 @@ class SvarAnmodningUnntakSedRuterTest {
         MelosysEessiMelding eessiMelding = melosysEessiMelding();
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, eessiMelding);
 
-        when(oppgaveService.finnÅpenOppgaveMedFagsaksnummer(eq(fagsak.getSaksnummer())))
+        when(oppgaveService.finnÅpenBehandlingsoppgaveMedFagsaksnummer(eq(fagsak.getSaksnummer())))
             .thenReturn(Optional.of(new Oppgave.Builder().build()));
 
         svarAnmodningUnntakSedRuter.rutSedTilBehandling(prosessinstans, 1L);

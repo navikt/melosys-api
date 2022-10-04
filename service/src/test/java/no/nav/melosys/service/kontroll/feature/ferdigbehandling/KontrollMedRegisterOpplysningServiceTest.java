@@ -29,7 +29,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class KontrollMedRegisterOpplysningServiceTest {
@@ -63,9 +64,9 @@ class KontrollMedRegisterOpplysningServiceTest {
 
         behandling.getSaksopplysninger().add(medlSaksopplysning);
         when(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling);
-        lenient().when(lovvalgsperiodeService.hentValidertLovvalgsperiode(behandlingID)).thenReturn(lovvalgsperiode);
+        when(lovvalgsperiodeService.hentValidertLovvalgsperiode(behandlingID)).thenReturn(lovvalgsperiode);
 
-        Kontroll kontroll = new Kontroll(behandlingService, lovvalgsperiodeService, persondataFasade);
+        Kontroll kontroll = new Kontroll(behandlingService, lovvalgsperiodeService, persondataFasade, behandlingsresultatService);
         kontrollMedRegisterOpplysning = new KontrollMedRegisteropplysning(behandlingService, behandlingsresultatService, persondataFasade,
             registeropplysningerService, kontroll);
     }

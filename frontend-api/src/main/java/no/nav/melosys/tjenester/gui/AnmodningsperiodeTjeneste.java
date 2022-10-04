@@ -84,7 +84,7 @@ public class AnmodningsperiodeTjeneste {
             .orElseThrow(() -> new IkkeFunnetException("Finner ikke anmodningsperiode med id " + anmodningsperiodeID)).getId();
         aksesskontroll.autoriserSkriv(behandlingID);
 
-        AnmodningsperiodeSvar svar = anmodningsperiodeService.lagreAnmodningsperiodeSvar(anmodningsperiodeID, anmodningsperiodeSvarDto.til());
+        AnmodningsperiodeSvar svar = anmodningsperiodeService.lagreAnmodningsperiodeSvarMedLovvalgsperiode(anmodningsperiodeID, anmodningsperiodeSvarDto.til());
         return AnmodningsperiodeSvarDto.av(svar);
     }
 }
