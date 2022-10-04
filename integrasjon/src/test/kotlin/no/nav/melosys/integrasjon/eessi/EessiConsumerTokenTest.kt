@@ -21,7 +21,7 @@ import org.springframework.test.context.ActiveProfiles
         StsRestTemplateProducer::class,
         RestStsClient::class,
 
-        EessiConsumerWebClient::class,
+        EessiConsumerImpl::class,
         GenericContextExchangeFilter::class,
         EessiConsumerProducer::class,
         GenericContextClientRequestInterceptor::class

@@ -12,7 +12,7 @@ import no.nav.melosys.integrasjon.felles.JsonRestIntegrasjon
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.bodyToMono
 
-open class EessiConsumerWebClient(private val webClient: WebClient) : EessiConsumer, JsonRestIntegrasjon {
+open class EessiConsumerImpl(private val webClient: WebClient) : EessiConsumer, JsonRestIntegrasjon {
 
     override fun opprettBucOgSed(
         sedDataDto: SedDataDto,
