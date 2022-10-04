@@ -202,6 +202,7 @@ class BrevmalListeByggerTest {
 
     @Test
     void byggBrevmalDtoListe_behandlingErKlage_returnererKlageMal() {
+        unleash.disableAll();
         when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(lagBehandling(Behandlingstyper.KLAGE));
         when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling(Behandlingstyper.KLAGE));
         when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
@@ -340,7 +341,7 @@ class BrevmalListeByggerTest {
         List<BrevmalDto> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
 
 
-        var mangelbrevMal = tilgjengeligeMaler.get(0).getBrevTyper().get(1);
+        var mangelbrevMal = tilgjengeligeMaler.get(0).getBrevTyper().get(0);
         assertThat(mangelbrevMal.getType()).isEqualTo(Produserbaredokumenter.MANGELBREV_BRUKER);
         assertThat(mangelbrevMal.getFelter()).hasSize(2);
 
