@@ -152,7 +152,7 @@ public class BrevmalListeBygger {
 
     private boolean harStandardTekstIMangelbrev(Sakstemaer sakstema, Behandlingstyper behandlingstype) {
         if (unleash.isEnabled("melosys.behandle_alle_saker")) {
-            return sakstema == Sakstemaer.MEDLEMSKAP_LOVVALG && (behandlingstype == Behandlingstyper.FØRSTEGANG || behandlingstype == Behandlingstyper.KLAGE);
+            return sakstema == Sakstemaer.MEDLEMSKAP_LOVVALG && behandlingstype == Behandlingstyper.FØRSTEGANG;
         }
         return behandlingstype == Behandlingstyper.SOEKNAD || behandlingstype == Behandlingstyper.KLAGE;
     }

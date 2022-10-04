@@ -306,10 +306,66 @@ class BrevmalListeByggerTest {
             .flatExtracting(
                 FeltvalgAlternativDto::getKode,
                 FeltvalgAlternativDto::isVisFelt)
-            .containsExactlyInAnyOrder(
-                FRITEKST.getKode(),
-                false,
+            .containsExactly(
                 STANDARD.getKode(),
+                false,
+                FRITEKST.getKode(),
+                true);
+
+        assertThat(mangelbrevMal.getFelter().get(1))
+            .extracting(
+                BrevmalFeltDto::getKode,
+                BrevmalFeltDto::getFeltType,
+                BrevmalFeltDto::isPaakrevd,
+                BrevmalFeltDto::getValg,
+                BrevmalFeltDto::getHjelpetekst,
+                BrevmalFeltDto::getTegnBegrensning)
+            .containsExactly(
+                BrevmalFeltKode.MANGLER_FRITEKST.getKode(),
+                FeltType.FRITEKST,
+                true,
+                null,
+                null,
+                null);
+    }
+
+    @Test
+    void byggBrevmalDtoListe_mangelbrevKlage_lagerRiktigeValg() {
+        var behandling = lagBehandling(Behandlingstyper.KLAGE);
+        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
+        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
+
+
+        List<BrevmalDto> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
+
+
+        var mangelbrevMal = tilgjengeligeMaler.get(0).getBrevTyper().get(1);
+        assertThat(mangelbrevMal.getType()).isEqualTo(Produserbaredokumenter.MANGELBREV_BRUKER);
+        assertThat(mangelbrevMal.getFelter()).hasSize(2);
+
+        var innledningFritekstFelt = mangelbrevMal.getFelter().get(0);
+        assertThat(innledningFritekstFelt)
+            .extracting(
+                BrevmalFeltDto::getKode,
+                BrevmalFeltDto::getFeltType,
+                BrevmalFeltDto::isPaakrevd,
+                BrevmalFeltDto::getHjelpetekst,
+                BrevmalFeltDto::getTegnBegrensning)
+            .containsExactly(
+                BrevmalFeltKode.INNLEDNING_FRITEKST.getKode(),
+                FeltType.FRITEKST,
+                true,
+                null,
+                null);
+        assertThat(innledningFritekstFelt.getValg().getValgType()).isEqualTo(FeltValgType.RADIO);
+        assertThat(innledningFritekstFelt.getValg().getValgAlternativer())
+            .hasSize(1)
+            .flatExtracting(
+                FeltvalgAlternativDto::getKode,
+                FeltvalgAlternativDto::isVisFelt)
+            .containsExactly(
+                FRITEKST.getKode(),
                 true);
 
         assertThat(mangelbrevMal.getFelter().get(1))
@@ -365,10 +421,10 @@ class BrevmalListeByggerTest {
             .flatExtracting(
                 FeltvalgAlternativDto::getKode,
                 FeltvalgAlternativDto::isVisFelt)
-            .containsExactlyInAnyOrder(
-                FRITEKST.getKode(),
-                false,
+            .containsExactly(
                 STANDARD.getKode(),
+                false,
+                FRITEKST.getKode(),
                 true);
 
         assertThat(mangelbrevMal.getFelter().get(1))
