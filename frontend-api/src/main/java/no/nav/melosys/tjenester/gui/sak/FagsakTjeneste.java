@@ -61,7 +61,9 @@ public class FagsakTjeneste {
     public FagsakTjeneste(FagsakService fagsakService, Aksesskontroll aksesskontroll, BehandlingsgrunnlagService behandlingsgrunnlagService,
                           OpprettNySakFraOppgave opprettNySakFraOppgave,
                           BehandlingsresultatService behandlingsresultatService, PersondataFasade persondataFasade,
-                          SaksopplysningerService saksopplysningerService, OrganisasjonOppslagService organisasjonOppslagService) {
+                          SaksopplysningerService saksopplysningerService,
+                          OrganisasjonOppslagService organisasjonOppslagService,
+                          Unleash unleash) {
         this.fagsakService = fagsakService;
         this.aksesskontroll = aksesskontroll;
         this.behandlingsgrunnlagService = behandlingsgrunnlagService;
@@ -258,7 +260,7 @@ public class FagsakTjeneste {
                 }
             });
         } else {
-            if (behandling.erBehandlingAvSøknad()) {
+            if (behandling.erBehandlingAvSøknadGammel()) {
                 behandlingsgrunnlagService.finnBehandlingsgrunnlag(behandling.getId())
                     .map(Behandlingsgrunnlag::getBehandlingsgrunnlagdata).ifPresent(grunnlagData -> {
                         SoeknadslandDto land = SoeknadslandDto.av(hentSøknadsland((grunnlagData)));
