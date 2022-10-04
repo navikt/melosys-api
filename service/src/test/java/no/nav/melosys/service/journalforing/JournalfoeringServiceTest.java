@@ -109,8 +109,11 @@ class JournalfoeringServiceTest {
         opprettDto.setHoveddokument(new DokumentDto("3333", "setDokumenttittel"));
         opprettDto.setArbeidsgiverID("123456789");
         opprettDto.setBehandlingstemaKode(Behandlingstema.UTSENDT_ARBEIDSTAKER.getKode());
+        opprettDto.setBehandlingstypeKode(Behandlingstyper.FØRSTEGANG.getKode());
 
-        opprettDto.setFagsak(new FagsakDto());
+        var fagsak = new FagsakDto();
+        fagsak.setSakstype(Sakstyper.EU_EOS.getKode());
+        opprettDto.setFagsak(fagsak);
 
         tilordneDto = new JournalfoeringTilordneDto();
         tilordneDto.setBehandlingstypeKode(Behandlingstyper.ENDRET_PERIODE.getKode());

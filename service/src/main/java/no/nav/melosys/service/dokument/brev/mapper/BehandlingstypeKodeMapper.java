@@ -11,7 +11,7 @@ final class BehandlingstypeKodeMapper {
 
     static BehandlingstypeKode hentBehandlingstypeKode(Behandling behandling) {
 
-        if (behandling.erBehandlingAvSøknad()) {
+        if (behandling.erBehandlingAvSøknadGammel()) {
             if (behandling.erNyVurdering()) {
                 return BehandlingstypeKode.NY_VURDERING;
             } else if (behandling.erEndretPeriode()) {

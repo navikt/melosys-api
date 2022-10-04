@@ -66,7 +66,7 @@ public class AvsluttArt13BehandlingService {
 
         fagsakService.avsluttFagsakOgBehandling(behandling.getFagsak(), behandling, Saksstatuser.LOVVALG_AVKLART);
 
-        medlPeriodeService.oppdaterPeriodeEndelig(lovvalgsperiode, !behandling.erBehandlingAvSøknad());
+        medlPeriodeService.oppdaterPeriodeEndelig(lovvalgsperiode, !behandling.erBehandlingAvSøknadGammel());
         log.info("Behandling {} avsluttet og satt til endelig i Medl", behandling.getId());
     }
 
