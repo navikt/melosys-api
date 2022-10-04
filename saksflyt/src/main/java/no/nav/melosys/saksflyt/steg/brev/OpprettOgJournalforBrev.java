@@ -11,6 +11,7 @@ import no.nav.melosys.domain.arkiv.*;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.brev.FritekstbrevBrevbestilling;
 import no.nav.melosys.domain.brev.FritekstvedleggBestilling;
+import no.nav.melosys.domain.brev.FritekstvedleggBrevbestilling;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
@@ -189,13 +190,11 @@ public class OpprettOgJournalforBrev implements StegBehandler {
             return Collections.emptyList();
         }
         return fritekstvedleggBestilling.stream().map(vedlegg -> {
-            var vedleggBestilling = new FritekstbrevBrevbestilling.Builder()
+            var vedleggBestilling = new FritekstvedleggBrevbestilling.Builder()
                 .medBehandlingId(fritekstbrevBrevbestilling.getBehandlingId())
-                .medProduserbartdokument(fritekstbrevBrevbestilling.getProduserbartdokument())
+                .medProduserbartdokument(Produserbaredokumenter.GENERELT_FRITEKSTVEDLEGG)
                 .medFritekstTittel(vedlegg.tittel())
                 .medFritekst(vedlegg.fritekst())
-                .medSaksbehandlerNavn(fritekstbrevBrevbestilling.getSaksbehandlerNavn())
-                .medKontaktopplysninger(fritekstbrevBrevbestilling.isKontaktopplysninger())
                 .build();
             return new Vedlegg(dokgenService.produserBrev(mottaker, vedleggBestilling), vedlegg.tittel());
         }).toList();
