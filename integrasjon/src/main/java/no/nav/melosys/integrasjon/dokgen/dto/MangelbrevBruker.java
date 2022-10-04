@@ -6,11 +6,11 @@ import java.time.Instant;
 
 public class MangelbrevBruker extends Mangelbrev {
 
-    private MangelbrevBruker(MangelbrevBrevbestilling brevbestilling, Instant datoInnsendingsfrist, boolean toggleEnabled) {
-        super(brevbestilling, datoInnsendingsfrist, toggleEnabled);
+    private MangelbrevBruker(MangelbrevBrevbestilling brevbestilling, Instant datoInnsendingsfrist) {
+        super(brevbestilling, datoInnsendingsfrist);
     }
 
-    public static MangelbrevBruker av(MangelbrevBrevbestilling brevbestilling, Instant datoInnsendingsfrist, boolean toggleEnabled) {
-        return new MangelbrevBruker(brevbestilling, datoInnsendingsfrist, toggleEnabled);
+    public static MangelbrevBruker av(MangelbrevBrevbestilling brevbestilling, Instant datoInnsendingsfrist) {
+        return new MangelbrevBruker(brevbestilling, datoInnsendingsfrist);
     }
 }

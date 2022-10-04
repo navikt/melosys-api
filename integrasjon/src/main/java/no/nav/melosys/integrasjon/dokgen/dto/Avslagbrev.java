@@ -3,6 +3,7 @@ package no.nav.melosys.integrasjon.dokgen.dto;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -29,9 +30,8 @@ public class Avslagbrev extends DokgenDto {
 
     private Avslagbrev(AvslagBrevbestilling brevbestilling,
                        Aktoersroller mottakerType,
-                       List<Instant> mangelbrevDatoer,
-                       boolean toggleEnabled) {
-        super(brevbestilling, mottakerType, toggleEnabled);
+                       List<Instant> mangelbrevDatoer) {
+        super(brevbestilling, mottakerType);
 
         this.fritekst = brevbestilling.getAvslagFritekst();
         this.mangelbrevDatoer = mangelbrevDatoer.stream().map(this::instantTilLocalDate).toList();
@@ -44,8 +44,8 @@ public class Avslagbrev extends DokgenDto {
         return fritekst;
     }
 
-    public static Avslagbrev av(AvslagBrevbestilling brevbestilling, List<Instant> mangelbrevDatoer, boolean toggleEnabled) {
-        return new Avslagbrev(brevbestilling, Aktoersroller.BRUKER, mangelbrevDatoer, toggleEnabled);
+    public static Avslagbrev av(AvslagBrevbestilling brevbestilling, List<Instant> mangelbrevDatoer) {
+        return new Avslagbrev(brevbestilling, Aktoersroller.BRUKER, mangelbrevDatoer);
     }
 
     public String getSakstype() {

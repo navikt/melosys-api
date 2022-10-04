@@ -42,6 +42,7 @@ public class DokgenBrevbestilling extends Brevbestilling {
     private Persondata personMottaker;
     private List<SaksvedleggBestilling> saksvedleggBestilling;
     private Distribusjonstype distribusjonstype;
+    private boolean toggleEnabled;
 
     public DokgenBrevbestilling() {
         super();
@@ -66,6 +67,7 @@ public class DokgenBrevbestilling extends Brevbestilling {
         this.personMottaker = builder.personMottaker;
         this.saksvedleggBestilling = builder.saksvedleggBestilling;
         this.distribusjonstype = builder.distribusjonstype;
+        this.toggleEnabled = builder.toggleEnabled;
     }
 
     public OrganisasjonDokument getOrg() {
@@ -132,6 +134,10 @@ public class DokgenBrevbestilling extends Brevbestilling {
         return distribusjonstype;
     }
 
+    public boolean isToggleEnabled() {
+        return toggleEnabled;
+    }
+
     public Builder toBuilder() {
         return new Builder(this);
     }
@@ -156,6 +162,7 @@ public class DokgenBrevbestilling extends Brevbestilling {
         private Persondata personMottaker;
         private List<SaksvedleggBestilling> saksvedleggBestilling;
         private Distribusjonstype distribusjonstype;
+        private boolean toggleEnabled;
 
 
         public Builder() {
@@ -275,6 +282,11 @@ public class DokgenBrevbestilling extends Brevbestilling {
 
         public T medDistribusjonstype(Distribusjonstype distribusjonstype) {
             this.distribusjonstype = distribusjonstype;
+            return (T) this;
+        }
+
+        public T medToggleEnabled(boolean toggleEnabled) {
+            this.toggleEnabled = toggleEnabled;
             return (T) this;
         }
 

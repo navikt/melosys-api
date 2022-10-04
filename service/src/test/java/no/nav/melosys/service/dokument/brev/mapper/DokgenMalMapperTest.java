@@ -330,12 +330,10 @@ class DokgenMalMapperTest {
         assertThat((MangelbrevBruker) dokgenDto)
             .extracting(
                 MangelbrevBruker::getInnledningFritekst,
-                MangelbrevBruker::getManglerInfoFritekst,
-                Mangelbrev::isToggleEnabled
+                MangelbrevBruker::getManglerInfoFritekst
             ).containsExactly(
                 "Dummy",
-                "Dummy",
-                true
+                "Dummy"
             );
         assertThat(((MangelbrevBruker) dokgenDto).getDatoInnsendingsfrist().truncatedTo(ChronoUnit.DAYS))
             .isEqualTo(Instant.now().plus(Period.ofWeeks(4)).truncatedTo(ChronoUnit.DAYS));
@@ -369,13 +367,11 @@ class DokgenMalMapperTest {
             .extracting(
                 MangelbrevArbeidsgiver::getInnledningFritekst,
                 MangelbrevArbeidsgiver::getManglerInfoFritekst,
-                MangelbrevArbeidsgiver::getNavnFullmektig,
-                Mangelbrev::isToggleEnabled
+                MangelbrevArbeidsgiver::getNavnFullmektig
             ).containsExactly(
                 "Dummy",
                 "Dummy",
-                "Fullmektig AS",
-                true
+                "Fullmektig AS"
             );
         assertThat(((MangelbrevArbeidsgiver) dokgenDto).getDatoInnsendingsfrist().truncatedTo(ChronoUnit.DAYS))
             .isEqualTo(Instant.now().plus(Period.ofWeeks(4)).truncatedTo(ChronoUnit.DAYS));
@@ -609,7 +605,6 @@ class DokgenMalMapperTest {
             datoDesember);
         assertThat(avslagbrev.getMangelbrevDatoer()).isSorted();
         assertThat(avslagbrev.getFritekst()).isEqualTo("Hei");
-        assertThat(avslagbrev.isToggleEnabled()).isTrue();
     }
 
     @Test

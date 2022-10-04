@@ -30,20 +30,12 @@ public abstract class DokgenDto {
     private Mottaker mottaker;
     private final boolean toggleEnabled;
 
-    protected DokgenDto(DokgenBrevbestilling brevbestilling, Aktoersroller mottakerType, Saksinfo saksinfo, boolean toggleEnabled) {
+    protected DokgenDto(DokgenBrevbestilling brevbestilling, Aktoersroller mottakerType, Saksinfo saksinfo) {
         this.saksinfo = saksinfo;
         this.dagensDato = Instant.now();
         this.saksbehandlerNavn = brevbestilling.getSaksbehandlerNavn();
         this.mottaker = mapMottaker(brevbestilling, mottakerType);
-        this.toggleEnabled = toggleEnabled;
-    }
-
-    protected DokgenDto(DokgenBrevbestilling brevbestilling, Aktoersroller mottakerType, Saksinfo saksinfo) {
-        this(brevbestilling, mottakerType, saksinfo, false);
-    }
-
-    protected DokgenDto(DokgenBrevbestilling brevbestilling, Aktoersroller mottakerType, boolean toggleEnabled) {
-        this(brevbestilling, mottakerType, SaksinfoBruker.av(brevbestilling), toggleEnabled);
+        this.toggleEnabled = brevbestilling.isToggleEnabled();
     }
 
     protected DokgenDto(DokgenBrevbestilling brevbestilling, Aktoersroller mottakerType) {

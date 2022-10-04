@@ -158,7 +158,7 @@ class DokgenConsumerTest {
             .medPersonDokument((Persondata) lagPersondokument().getDokument())
             .medPersonMottaker((Persondata) lagPersondokument().getDokument())
             .build();
-        return MangelbrevBruker.av(mangelbrevBrevbestilling, Instant.now(), true);
+        return MangelbrevBruker.av(mangelbrevBrevbestilling, Instant.now());
     }
 
     private Behandling lagBehandling() {

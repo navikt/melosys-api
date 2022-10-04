@@ -5,6 +5,7 @@ import java.util.List;
 
 import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Aktoer;
+import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.brev.*;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
@@ -37,8 +38,11 @@ public class DokgenMalMapper {
 
     public DokgenDto mapBehandling(DokgenBrevbestilling mottattBrevbestilling, Aktoer aktoerMottaker) {
         // Henter opplysninger på nytt for å sikre at korrekt adresse benyttes (med mindre myndighet)
-        DokgenBrevbestilling brevbestilling = berikBestillingMedPersondata(mottattBrevbestilling, aktoerMottaker);
-        DokgenDto dto = lagDokgenDtoFraBestilling(brevbestilling);
+        var brevbestillingBuilder = mottattBrevbestilling.toBuilder();
+        berikBestillingMedPersondata(brevbestillingBuilder, mottattBrevbestilling.getBehandling(), aktoerMottaker);
+
+        berikBestillingMedToggleEnabled(brevbestillingBuilder);
+        DokgenDto dto = lagDokgenDtoFraBestilling(brevbestillingBuilder.build());
 
         Mottaker mottaker = dto.getMottaker();
         if (Aktoersroller.TRYGDEMYNDIGHET.getKode().equals(mottaker.type())) {
@@ -58,28 +62,30 @@ public class DokgenMalMapper {
         return new Mottaker(mottakerMedKoder.navn(), mottakerMedKoder.adresselinjer(), mottakerMedKoder.postnr(), poststed, land, mottakerMedKoder.type(), mottakerMedKoder.region());
     }
 
-    private DokgenBrevbestilling berikBestillingMedPersondata(DokgenBrevbestilling mottattBrevbestilling, Aktoer mottaker) {
-        return mottattBrevbestilling.toBuilder()
-            .medPersonDokument(dokgenMapperDatahenter.hentPersondata(mottattBrevbestilling, mottaker))
-            .medPersonMottaker(dokgenMapperDatahenter.hentPersonMottaker(mottaker))
-            .build();
+    private void berikBestillingMedPersondata(DokgenBrevbestilling.Builder<?> mottattBrevbestilling, Behandling behandling, Aktoer mottaker) {
+        mottattBrevbestilling
+            .medPersonDokument(dokgenMapperDatahenter.hentPersondata(behandling, mottaker))
+            .medPersonMottaker(dokgenMapperDatahenter.hentPersonMottaker(mottaker));
     }
 
-    private Avslagbrev hentAvslagsbrev(DokgenBrevbestilling brevbestilling, boolean toggleEnabled) {
+    private void berikBestillingMedToggleEnabled(DokgenBrevbestilling.Builder<?> mottatBrevbestilling) {
+        mottatBrevbestilling
+            .medToggleEnabled(unleash.isEnabled("melosys.behandle_alle_saker"));
+    }
+
+    private Avslagbrev hentAvslagsbrev(DokgenBrevbestilling brevbestilling) {
         List<Instant> mangelbrevDatoer = dokgenMapperDatahenter.hentMangelbrevDatoer(brevbestilling);
 
-        return Avslagbrev.av(((AvslagBrevbestilling) brevbestilling).toBuilder().build(), mangelbrevDatoer, toggleEnabled);
+        return Avslagbrev.av(((AvslagBrevbestilling) brevbestilling).toBuilder().build(), mangelbrevDatoer);
     }
 
     private DokgenDto lagDokgenDtoFraBestilling(DokgenBrevbestilling brevbestilling) {
-        var toggleEnabled = unleash.isEnabled("melosys.behandle_alle_saker");
         return switch (brevbestilling.getProduserbartdokument()) {
             case MELDING_FORVENTET_SAKSBEHANDLINGSTID, MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD -> SaksbehandlingstidSoknad.av(
                 brevbestilling.toBuilder()
                     .medAvsenderLand(dokgenMapperDatahenter.hentLandnavnFraLandkode(brevbestilling.getAvsenderLand()))
                     .build(),
-                Saksbehandlingstid.beregnSaksbehandlingsfrist(brevbestilling.getForsendelseMottatt()),
-                toggleEnabled
+                Saksbehandlingstid.beregnSaksbehandlingsfrist(brevbestilling.getForsendelseMottatt())
             );
             case MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE -> SaksbehandlingstidKlage.av(brevbestilling,
                 Saksbehandlingstid.beregnSaksbehandlingsfrist(brevbestilling.getForsendelseMottatt()));
@@ -87,16 +93,14 @@ public class DokgenMalMapper {
                 ((MangelbrevBrevbestilling) brevbestilling).toBuilder()
                     .medVedtaksdato(dokgenMapperDatahenter.hentVedtaksdato(brevbestilling.getBehandling().getId()))
                     .build(),
-                DokumentasjonSvarfrist.beregnFristPaaMangelbrevFraDagensDato(),
-                toggleEnabled
+                DokumentasjonSvarfrist.beregnFristPaaMangelbrevFraDagensDato()
             );
             case MANGELBREV_ARBEIDSGIVER -> MangelbrevArbeidsgiver.av(
                 ((MangelbrevBrevbestilling) brevbestilling).toBuilder()
                     .medVedtaksdato(dokgenMapperDatahenter.hentVedtaksdato(brevbestilling.getBehandling().getId()))
                     .medFullmektigNavn(dokgenMapperDatahenter.hentFullmektigNavn(brevbestilling.getBehandling().getFagsak(), Representerer.BRUKER))
                     .build(),
-                DokumentasjonSvarfrist.beregnFristPaaMangelbrevFraDagensDato(),
-                toggleEnabled
+                DokumentasjonSvarfrist.beregnFristPaaMangelbrevFraDagensDato()
             );
             case INNVILGELSE_FOLKETRYGDLOVEN_2_8 -> innvilgelseFtrlMapper.map((InnvilgelseBrevbestilling) brevbestilling);
             case STORBRITANNIA -> storbritanniaMapper.map((InnvilgelseBrevbestilling) brevbestilling.toBuilder()
@@ -112,8 +116,8 @@ public class DokgenMalMapper {
                     .medNavnFullmektig(dokgenMapperDatahenter.hentFullmektigNavn(brevbestilling.getBehandling().getFagsak(), Representerer.ARBEIDSGIVER)).build(),
                 Aktoersroller.ARBEIDSGIVER
             );
-            case AVSLAG_MANGLENDE_OPPLYSNINGER -> hentAvslagsbrev(brevbestilling, toggleEnabled);
-            case MELDING_HENLAGT_SAK -> Henleggelsesbrev.av(((HenleggelseBrevbestilling) brevbestilling).toBuilder().build(), toggleEnabled);
+            case AVSLAG_MANGLENDE_OPPLYSNINGER -> hentAvslagsbrev(brevbestilling);
+            case MELDING_HENLAGT_SAK -> Henleggelsesbrev.av(((HenleggelseBrevbestilling) brevbestilling).toBuilder().build());
             default -> throw new FunksjonellException(
                 format("ProduserbartDokument %s er ikke støttet av melosys-dokgen",
                     brevbestilling.getProduserbartdokument()));
