@@ -2,6 +2,7 @@ package no.nav.melosys.saksflyt.steg.sed;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Set;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -32,7 +33,7 @@ public abstract class AbstraktSendUtland implements StegBehandler {
     }
 
     protected SendUtlandStatus sendUtland(BucType bucType, Prosessinstans prosessinstans) {
-        return sendUtland(bucType, prosessinstans, null);
+        return sendUtland(bucType, prosessinstans, Collections.emptySet());
     }
 
     protected SendUtlandStatus sendUtland(BucType bucType, Prosessinstans prosessinstans, Collection<Vedlegg> vedlegg) {
