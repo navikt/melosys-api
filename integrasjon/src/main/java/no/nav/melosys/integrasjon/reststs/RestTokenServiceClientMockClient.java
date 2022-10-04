@@ -48,7 +48,7 @@ public class RestTokenServiceClientMockClient implements RestStsClient {
 
     private String generateToken() {
         log.info("Henter oidc-token fra security-token-service");
-        MultiValueMap<String, String> params = new LinkedMultiValueMap<String, String>();
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.add("grant_type", "client_credentials");
         params.add("scope", "openid");
 
@@ -82,10 +82,5 @@ public class RestTokenServiceClientMockClient implements RestStsClient {
 
     private void setExpiryTime(long expiryTime) {
         this.expiryTime = LocalDateTime.now().plus(Duration.ofSeconds(expiryTime - EXPIRE_TIME_TO_REFRESH));
-    }
-
-    @Override
-    public boolean isSystem() {
-        return true;
     }
 }

@@ -10,7 +10,7 @@ public class PDLAuthFilter extends GenericContextExchangeFilter {
     private static final String NAV_CONSUMER_TOKEN = "Nav-Consumer-Token";
 
     public PDLAuthFilter(RestStsClient restStsClient) {
-        super(restStsClient);
+        super(restStsClient, null, null, "");
     }
 
     @Override

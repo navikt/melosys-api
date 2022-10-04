@@ -2,13 +2,18 @@ package no.nav.melosys.integrasjon.aareg.arbeidsforhold
 
 import no.nav.melosys.integrasjon.felles.GenericContextExchangeFilter
 import no.nav.melosys.integrasjon.reststs.RestStsClient
+import no.nav.security.token.support.client.core.oauth2.OAuth2AccessTokenService
+import no.nav.security.token.support.client.spring.ClientConfigurationProperties
 import org.springframework.http.HttpHeaders
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.ClientRequest
 
 @Component
-class ArbeidsforholdContextExchangeFilter(restStsClient: RestStsClient) :
-    GenericContextExchangeFilter(restStsClient) {
+class ArbeidsforholdContextExchangeFilter(restStsClient: RestStsClient,
+                                          clientConfigurationProperties: ClientConfigurationProperties,
+                                          oAuth2AccessTokenService: OAuth2AccessTokenService
+) :
+    GenericContextExchangeFilter(restStsClient, clientConfigurationProperties, oAuth2AccessTokenService, "") {
 
     override fun withClientRequestBuilder(clientRequestBuilder: ClientRequest.Builder): ClientRequest.Builder =
         clientRequestBuilder
