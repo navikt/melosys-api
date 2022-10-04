@@ -3,6 +3,8 @@ package no.nav.melosys.service.dokument;
 import java.time.LocalDate;
 import java.util.*;
 
+import no.finn.unleash.FakeUnleash;
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
@@ -89,6 +91,8 @@ final class DokumentServiceTest {
     private final DoksysFasade dokSysFasade;
     private final DokumentService dokumentService;
     private final BehandlingsresultatService behandlingsresultatService;
+
+    private final Unleash unleash = new FakeUnleash();
 
     public DokumentServiceTest() {
         avklarteVirksomheterService = mock(AvklarteVirksomheterService.class);
@@ -231,7 +235,7 @@ final class DokumentServiceTest {
         when(saksbehandlerService.hentNavnForIdent(anyString())).thenReturn("Bob Lastname");
         UtenlandskMyndighetRepository utenlandskMyndighetRepository = mock(UtenlandskMyndighetRepository.class);
         BrevDataService brevDataService = new BrevDataService(behandlingsresultatRepository, persondataFasade,
-            saksbehandlerService, utenlandskMyndighetRepository);
+            saksbehandlerService, utenlandskMyndighetRepository, unleash);
         BrevmottakerService brevmottakerService = new BrevmottakerService(mock(KontaktopplysningService.class),
             avklarteVirksomheterService,
             mock(UtenlandskMyndighetService.class),

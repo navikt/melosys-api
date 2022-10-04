@@ -4,6 +4,8 @@ import java.time.Instant;
 import java.util.HashSet;
 import java.util.Optional;
 
+import no.finn.unleash.FakeUnleash;
+import no.finn.unleash.Unleash;
 import no.nav.dok.brevdata.felles.v1.navfelles.*;
 import no.nav.dok.brevdata.felles.v1.simpletypes.AktoerType;
 import no.nav.dok.brevdata.felles.v1.simpletypes.Spraakkode;
@@ -65,11 +67,12 @@ class BrevDataServiceTest {
     private static final String INSTITUSJON_ID = "HR:Zxcd";
 
     private static final String sammensattNavn = "ALTFOR SAMMENSATT";
+    private final Unleash unleash = new FakeUnleash();
 
     @BeforeEach
     public void setUp() {
         service = spy(new BrevDataService(behandlingsresultatRepository, persondataFasade, saksbehandlerService,
-            utenlandskMyndighetRepository));
+            utenlandskMyndighetRepository, unleash));
 
         when(behandlingsresultatRepository.findById(anyLong())).thenReturn(Optional.of(new Behandlingsresultat()));
         when(saksbehandlerService.hentNavnForIdent(anyString())).thenReturn("Joe Moe");

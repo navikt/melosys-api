@@ -24,7 +24,7 @@ public class AttestMapper implements BrevDataMapper {
     private static final String XSD_LOCATION = "melosysbrev/melosys_000116.xsd";
 
     @Override
-    public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat, BrevData brevData) throws JAXBException, SAXException {
+    public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat, BrevData brevData, boolean enableBehandleAlleSaker) throws JAXBException, SAXException {
         BrevDataVedlegg brevDataVedlegg = (BrevDataVedlegg) brevData;
         Objects.requireNonNull(brevDataVedlegg, "Attestmapper trenger brevdata av type BrevDataVedlegg");
 
