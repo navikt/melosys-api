@@ -222,7 +222,7 @@ public class BrevbestillingService {
                 List<Produserbaredokumenter> brevmaler = new ArrayList<>();
                 if (skalKunneSendeMeldingForventetSaksbehanlingstidSoknad(behandling.getFagsak().getTema(), behandling.getType())) {
                     brevmaler.add(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD);
-                } else if (behandling.erKlage()) {
+                } else if (skalKunneSendeMeldingForventetSaksbehanlingstidKlage(behandling.getType())) {
                     brevmaler.add(MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE);
                 }
                 brevmaler.addAll(asList(MANGELBREV_BRUKER, GENERELT_FRITEKSTBREV_BRUKER));
@@ -242,6 +242,14 @@ public class BrevbestillingService {
             return sakstema == Sakstemaer.MEDLEMSKAP_LOVVALG && behandlingstype == Behandlingstyper.FØRSTEGANG;
         }
         return behandlingstype == Behandlingstyper.SOEKNAD;
+    }
+
+    // Denne kan slettes når melosys.behandle_alle_saker fjernes. Burde MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE fjernes også?
+    private boolean skalKunneSendeMeldingForventetSaksbehanlingstidKlage(Behandlingstyper behandlingstype) {
+        if (unleash.isEnabled("melosys.behandle_alle_saker")) {
+            return false;
+        }
+        return behandlingstype == Behandlingstyper.KLAGE;
     }
 
     @Transactional
