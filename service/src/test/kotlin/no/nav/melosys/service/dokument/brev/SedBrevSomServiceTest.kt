@@ -57,7 +57,7 @@ class SedSomBrevServiceTest {
     }
 
     @Test
-    fun name() {
+    fun lagJournalpostForSendingAvSedSomBrevTest() {
         unleash.enable("melosys.behandle_alle_saker")
         val fagsak: Fagsak = mockk<Fagsak>()
         val behandling = Behandling()

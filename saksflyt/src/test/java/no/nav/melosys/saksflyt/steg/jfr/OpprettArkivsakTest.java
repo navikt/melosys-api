@@ -17,10 +17,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static no.nav.melosys.domain.TemaFactory.fraBehandlingstema;
 import static no.nav.melosys.service.oppgave.OppgaveFactory.utledTema;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -37,7 +37,6 @@ class OpprettArkivsakTest {
 
     @BeforeEach
     public void setUp() {
-        unleash.enableAll();
         opprettArkivsak = new OpprettArkivsak(fagsakService, arkivsakService, unleash);
     }
 
@@ -48,7 +47,6 @@ class OpprettArkivsakTest {
         String aktørID = "4214323324";
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer("MEL-4321");
-        fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
 
         Aktoer bruker = new Aktoer();
         bruker.setAktørId(aktørID);
@@ -62,7 +60,35 @@ class OpprettArkivsakTest {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
 
-        when(arkivsakService.opprettSakForBruker(fagsak.getSaksnummer(), utledTema(behandling.getFagsak().getTema()),
+        when(arkivsakService.opprettSakForBruker(fagsak.getSaksnummer(), fraBehandlingstema(behandling.getTema()),
+            aktørID)).thenReturn(forventetArkivsakID);
+        opprettArkivsak.utfør(prosessinstans);
+
+        assertThat(fagsak.getGsakSaksnummer()).isEqualTo(forventetArkivsakID);
+    }
+
+    @Test
+    void utfør_arkivsakIDEksistererIkkeFraFør_arkivsakBlirOpprettet_brukFagsakTema() {
+        unleash.enable("melosys.behandle_alle_saker");
+        final long forventetArkivsakID = 1234432;
+
+        String aktørID = "4214323324";
+        Fagsak fagsak = new Fagsak();
+        fagsak.setSaksnummer("MEL-4321");
+        fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
+
+        Aktoer bruker = new Aktoer();
+        bruker.setAktørId(aktørID);
+        bruker.setRolle(Aktoersroller.BRUKER);
+        fagsak.getAktører().add(bruker);
+
+        Behandling behandling = new Behandling();
+        behandling.setFagsak(fagsak);
+
+        Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setBehandling(behandling);
+
+        when(arkivsakService.opprettSakForBruker(fagsak.getSaksnummer(), utledTema(fagsak.getTema()),
             aktørID)).thenReturn(forventetArkivsakID);
         opprettArkivsak.utfør(prosessinstans);
 

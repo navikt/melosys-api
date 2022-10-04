@@ -42,12 +42,28 @@ class FerdigstillJournalpostSedTest {
     @BeforeEach
     public void setUp() {
         ferdigstillJournalpostSed = new FerdigstillJournalpostSed(joarkFasade, persondataFasade, unleash);
-
-        unleash.enableAll();
     }
 
     @Test
     void utfør_oppdatererJournalpost_nårJournalpostIkkeErFerdigstilt() {
+        when(persondataFasade.hentFolkeregisterident(AKTØR_ID)).thenReturn(BRUKER_ID);
+        Journalpost journalpost = new Journalpost(JOURNALPOST_ID);
+        journalpost.setErFerdigstilt(false);
+        journalpost.setJournalposttype(Journalposttype.INN);
+        when(joarkFasade.hentJournalpost(JOURNALPOST_ID)).thenReturn(journalpost);
+
+        Prosessinstans prosessinstans = hentProsessinstans();
+        ferdigstillJournalpostSed.utfør(prosessinstans);
+
+
+        JournalpostOppdatering forventetOppdatering = new JournalpostOppdatering.Builder()
+            .medBrukerID(BRUKER_ID).medSaksnummer(SAKSNUMMER).medTittel(TITTEL).build();
+        verify(joarkFasade).oppdaterOgFerdigstillJournalpost(JOURNALPOST_ID, forventetOppdatering);
+    }
+
+    @Test
+    void utfør_oppdatererJournalpost_nårJournalpostIkkeErFerdigstilt_brukFagsakTema() {
+        unleash.enable("melosys.behandle_alle_saker");
         when(persondataFasade.hentFolkeregisterident(AKTØR_ID)).thenReturn(BRUKER_ID);
         Journalpost journalpost = new Journalpost(JOURNALPOST_ID);
         journalpost.setErFerdigstilt(false);

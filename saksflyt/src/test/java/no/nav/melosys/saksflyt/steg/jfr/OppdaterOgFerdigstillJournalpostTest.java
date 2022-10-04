@@ -42,7 +42,6 @@ class OppdaterOgFerdigstillJournalpostTest {
     @BeforeEach
     public void setUp() {
         oppdaterOgFerdigstillJournalpost = new OppdaterOgFerdigstillJournalpost(joarkFasade, unleash);
-        unleash.enableAll();
     }
 
     @Test
@@ -57,6 +56,17 @@ class OppdaterOgFerdigstillJournalpostTest {
 
     @Test
     void utfør_avsenderNavnErSatt_brukerAvsenderNavn() {
+        var prosessinstans = prosessinstans(true);
+        oppdaterOgFerdigstillJournalpost.utfør(prosessinstans);
+
+        verify(joarkFasade).oppdaterOgFerdigstillJournalpost(any(), oppdateringArgumentCaptor.capture());
+
+        assertOppdatering(oppdateringArgumentCaptor.getValue(), true);
+    }
+
+    @Test
+    void utfør_avsenderNavnErSatt_brukerAvsenderNavn_brukFagsakTema() {
+        unleash.enable("melosys.behandle_alle_saker");
         var prosessinstans = prosessinstans(true);
         oppdaterOgFerdigstillJournalpost.utfør(prosessinstans);
 

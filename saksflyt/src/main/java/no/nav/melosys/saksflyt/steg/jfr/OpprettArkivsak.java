@@ -46,7 +46,6 @@ public class OpprettArkivsak implements StegBehandler {
     public void utfør(Prosessinstans prosessinstans) {
         Behandling behandling = prosessinstans.getBehandling();
         Fagsak fagsak = behandling.getFagsak();
-        var behandleAlleSakerToggleEnabled = unleash.isEnabled("melosys.behandle_alle_saker");
 
         if (fagsak.getGsakSaksnummer() != null) {
             throw new FunksjonellException("Kan ikke knytte fagsak " + fagsak.getSaksnummer() + " til ny arkivsak: allerede knyttet til " + fagsak.getGsakSaksnummer());
@@ -55,7 +54,7 @@ public class OpprettArkivsak implements StegBehandler {
         Optional<String> aktørId = fagsak.finnBrukersAktørID();
         String saksnummer = fagsak.getSaksnummer();
 
-        var tema = behandleAlleSakerToggleEnabled
+        var tema = unleash.isEnabled("melosys.behandle_alle_saker")
             ? utledTema(behandling.getFagsak().getTema())
             : fraBehandlingstema(behandling.getTema());
 

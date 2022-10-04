@@ -30,8 +30,6 @@ public class ArkivsakServiceTest {
     @Captor
     private ArgumentCaptor<SakDto> captor;
 
-    private final FakeUnleash unleash = new FakeUnleash();
-
     @BeforeEach
     public void setup() {
         arkivsakService = new ArkivsakService(sakConsumer);

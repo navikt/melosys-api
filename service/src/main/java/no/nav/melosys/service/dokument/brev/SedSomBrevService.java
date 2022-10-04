@@ -50,14 +50,12 @@ public class SedSomBrevService {
                                                        Landkoder mottakerland,
                                                        Behandling behandling,
                                                        List<FysiskDokument> vedlegg) {
-        var behandleAlleSakerToggleEnabled = unleash.isEnabled("melosys.behandle_alle_saker");
-
         var fagsak = behandling.getFagsak();
         var utenlandskMyndighet = utenlandskMyndighetService.hentUtenlandskMyndighet(mottakerland);
         String institusjonID = utenlandskMyndighetService.lagInstitusjonsId(utenlandskMyndighet);
         String brukerFnr = persondataFasade.hentFolkeregisterident(fagsak.hentBrukersAktørID());
         byte[] sedPdf = eessiService.genererSedPdf(behandling.getId(), sedType);
-        var tema = behandleAlleSakerToggleEnabled
+        var tema = unleash.isEnabled("melosys.behandle_alle_saker")
             ? utledTema(behandling.getFagsak().getTema())
             : fraBehandlingstema(behandling.getTema());
 
