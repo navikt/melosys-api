@@ -131,7 +131,7 @@ class HentRegisteropplysningerTest {
     }
 
     @Test
-    void utfør_behandlingstypeTrygdetid_henterIngenting() {
+    void utfør_harTomFlyt_henterIngenting() {
         behandling.setTema(Behandlingstema.TRYGDETID);
         behandling.getFagsak().setType(Sakstyper.EU_EOS);
         var prosessinstans = new Prosessinstans();

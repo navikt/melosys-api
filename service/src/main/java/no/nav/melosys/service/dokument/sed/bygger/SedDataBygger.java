@@ -120,10 +120,9 @@ public class SedDataBygger {
 
         if (unleash.isEnabled("melosys.behandle_alle_saker")) {
             var behandling = grunnlagMedSøknad.getBehandling();
-            var fagsak = behandling.getFagsak();
-            if (fagsak.erSakstypeEøs() &&
+            if (behandling.getFagsak().erSakstypeEøs() &&
                 !behandling.erBehandlingAvSed() &&
-                !SaksbehandlingRegler.harTomFlyt(fagsak.getType(), behandling.getType(), behandling.getTema())
+                !SaksbehandlingRegler.harTomFlyt(behandling)
             ) {
                 sedDataDto.setSøknadsperiode(new Periode(
                     grunnlagMedSøknad.getBehandlingsgrunnlagData().periode.getFom(),

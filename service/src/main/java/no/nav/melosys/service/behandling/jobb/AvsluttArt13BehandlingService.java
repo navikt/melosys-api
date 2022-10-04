@@ -77,7 +77,10 @@ public class AvsluttArt13BehandlingService {
 
 
     private boolean toMndHarPassertSidenSaksbehandling(Behandling behandling, Behandlingsresultat behandlingsresultat) {
-        if (behandling.kanResultereIVedtak() && !erUtpekingUtenVedtak(behandlingsresultat)) {
+        var behandlingKanResultereIVedtak = unleash.isEnabled("melosys.behandle_alle_saker")
+            ? behandling.kanResultereIVedtak()
+            : behandling.kanResultereIVedtakGammel();
+        if (behandlingKanResultereIVedtak && !erUtpekingUtenVedtak(behandlingsresultat)) {
 
             if (!behandlingsresultat.harVedtak()) {
                 throw new FunksjonellException("Behandling " + behandling.getId() +

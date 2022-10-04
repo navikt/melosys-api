@@ -75,7 +75,7 @@ public class BehandlingsgrunnlagService {
     public void opprettSøknad(Behandling behandling, Periode periode, Soeknadsland soeknadsland) {
         long behandlingID = behandling.getId();
         boolean behandleAlleSakerEnabled = unleash.isEnabled("melosys.behandle_alle_saker");
-        if (behandleAlleSakerEnabled ? !SaksbehandlingRegler.harTomFlyt(behandling.getFagsak().getType(), behandling.getType(), behandling.getTema()) : behandling.erBehandlingAvSøknadGammel()) {
+        if (behandleAlleSakerEnabled ? !SaksbehandlingRegler.harTomFlyt(behandling) : behandling.erBehandlingAvSøknadGammel()) {
             Sakstyper sakstype = behandling.getFagsak().getType();
             switch (sakstype) {
                 case EU_EOS -> opprettSøknadYrkesaktiveEøs(behandlingID, periode, soeknadsland);
