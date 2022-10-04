@@ -2,12 +2,11 @@ package no.nav.melosys.service.sak
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
-import io.mockk.every
+import io.mockk.*
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
-import io.mockk.slot
-import io.mockk.verify
 import no.nav.melosys.domain.FagsakEndretAvSaksbehandler
+import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Soeknadsland
@@ -24,6 +23,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.context.ApplicationEventPublisher
+import java.util.*
 
 @ExtendWith(MockKExtension::class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -45,6 +45,7 @@ internal class EndreSakServiceTest {
     @BeforeEach
     fun setUp() {
         endreSakService = EndreSakService(fagsakService, behandlingsgrunnlagService, oppfriskSaksopplysningerService, applicationEventPublisher)
+        clearMocks(behandlingsgrunnlagService)
     }
 
     @Test
@@ -57,6 +58,7 @@ internal class EndreSakServiceTest {
         }
         fagsak.behandlinger.add(SaksbehandlingDataFactory.lagBehandling(fagsak, behandlingsgrunnlagData))
         every { fagsakService.hentFagsak(saksnummer) } returns fagsak
+        every { behandlingsgrunnlagService.finnBehandlingsgrunnlag(any()) } returns Optional.of(Behandlingsgrunnlag())
 
         endreSakService.endre(saksnummer, FTRL, MEDLEMSKAP_LOVVALG)
 
@@ -72,11 +74,25 @@ internal class EndreSakServiceTest {
     }
 
     @Test
+    fun `endring av sak - opprett kun nytt behandlingsgrunnlag dersom behandlingsgrunnlag finnes`() {
+        val saksnummer = "MEL-123"
+        val fagsak = SaksbehandlingDataFactory.lagFagsak(saksnummer)
+        fagsak.behandlinger.add(SaksbehandlingDataFactory.lagBehandling(fagsak))
+        every { fagsakService.hentFagsak(saksnummer) } returns fagsak
+        every { behandlingsgrunnlagService.finnBehandlingsgrunnlag(any()) } returns Optional.empty()
+
+        endreSakService.endre(saksnummer, FTRL, MEDLEMSKAP_LOVVALG)
+
+        verify(exactly = 0) { behandlingsgrunnlagService.slettBehandlingsgrunnlag(fagsak.hentAktivBehandling().id) }
+        verify(exactly = 0) { behandlingsgrunnlagService.opprettSøknad(fagsak.hentAktivBehandling(), any(), any()) }
+    }
+    @Test
     fun `endring av sak til sakstype EØS - sak mangler periode og land - feiler`() {
         val saksnummer = "MEL-123"
         val fagsak = SaksbehandlingDataFactory.lagFagsak(saksnummer)
         fagsak.behandlinger.add(SaksbehandlingDataFactory.lagBehandling(fagsak))
         every { fagsakService.hentFagsak(saksnummer) } returns fagsak
+        every { behandlingsgrunnlagService.finnBehandlingsgrunnlag(any()) } returns Optional.of(Behandlingsgrunnlag())
 
         shouldThrow<FunksjonellException>
         {

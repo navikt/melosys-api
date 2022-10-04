@@ -30,7 +30,9 @@ class EndreSakService(
         validerSak(fagsak, nySakstype, nySakstema)
 
         val behandling = fagsak.hentAktivBehandling()
-        gjenopprettBehandlingsgrunnlag(nySakstype, behandling)
+        if (behandlingsgrunnlagService.finnBehandlingsgrunnlag(behandling.id).isPresent) {
+            gjenopprettBehandlingsgrunnlag(nySakstype, behandling)
+        }
 
         fagsakService.oppdaterSakstype(saksnummer, nySakstype)
         fagsakService.oppdaterSakstema(saksnummer, nySakstema)
