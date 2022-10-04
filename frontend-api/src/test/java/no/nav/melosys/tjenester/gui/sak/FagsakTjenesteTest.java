@@ -7,6 +7,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
@@ -15,11 +16,14 @@ import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.Tilleggsinformasjon;
 import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.TilleggsinformasjonDetaljer;
+import no.nav.melosys.domain.dokument.medlemskap.Periode;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresse;
 import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresseNorge;
 import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresseUtland;
+import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
@@ -55,6 +59,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(controllers = {FagsakTjeneste.class})
 class FagsakTjenesteTest {
 
+    private static final String FNR = "12345678901";
+    private static final String ORGNR = "111111111";
+    private static final String BASE_URL = "/api/fagsaker";
     @MockBean
     private static FagsakService fagsakService;
     @MockBean
@@ -71,20 +78,18 @@ class FagsakTjenesteTest {
     private static BehandlingsgrunnlagService behandlingsgrunnlagService;
     @MockBean
     private static BehandlingsresultatService behandlingsresultatService;
-
     @Autowired
     private MockMvc mockMvc;
     @Autowired
     private ObjectMapper objectMapper;
-
+    @MockBean
+    private Unleash unleash;
     private EasyRandom random;
-
-    private static final String FNR = "12345678901";
-    private static final String ORGNR = "111111111";
-    private static final String BASE_URL = "/api/fagsaker";
 
     @BeforeEach
     void setUp() {
+        when(unleash.isEnabled("melosys.behandle_alle_saker")).thenReturn(true);
+
         random = new EasyRandom(new EasyRandomParameters()
             .overrideDefaultInitialization(true)
             .collectionSizeRange(1, 4)
@@ -152,6 +157,159 @@ class FagsakTjenesteTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$[0].hovedpartRolle", equalTo(Aktoersroller.BRUKER.toString())))
             .andExpect(jsonPath("$[0].saksnummer", equalTo("MEL-1")));
+    }
+
+    @Test
+    void hentFagsaker_medSedDokument_verifiserErMappetKorrekt() throws Exception {
+        var sedDokument = new SedDokument();
+        sedDokument.setLovvalgslandKode(Landkoder.NO);
+
+        var periode = new Periode(LocalDate.of(2022, 1, 1), LocalDate.of(2022, 2, 1));
+        sedDokument.setLovvalgsperiode(periode);
+
+        when(saksopplysningerService.finnSedOpplysninger(123L)).thenReturn(Optional.of(sedDokument));
+
+        Fagsak fagsak = SaksbehandlingDataFactory.lagFagsak("MEL-1");
+        var behandling = new Behandling();
+        behandling.setFagsak(fagsak);
+        behandling.setId(123L);
+        fagsak.setBehandlinger(Collections.singletonList(behandling));
+        mockFagsakTjeneste(fagsak);
+        var fagsakSokDto = new FagsakSokDto(FNR, null, null);
+
+
+        mockMvc.perform(post(BASE_URL + "/sok")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(fagsakSokDto)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[0].hovedpartRolle", equalTo(Aktoersroller.BRUKER.toString())))
+            .andExpect(jsonPath("$[0].saksnummer", equalTo("MEL-1")))
+            .andExpect(jsonPath("$[0].behandlingOversikter[0].land.landkoder[0]", equalTo("NO")))
+            .andExpect(jsonPath("$[0].behandlingOversikter[0].periode.fom", equalTo("2022-01-01")))
+            .andExpect(jsonPath("$[0].behandlingOversikter[0].periode.tom", equalTo("2022-02-01")));
+
+        verify(saksopplysningerService).finnSedOpplysninger(123L);
+    }
+
+    @Test
+    void hentFagsaker_medBehandlingsgrunnlag_verifiserBehandlingsgrunnlagPeriodeErMappetKorrekt() throws Exception {
+        long behandlingID = 123L;
+
+        var sedDokument = new SedDokument();
+        sedDokument.setLovvalgslandKode(Landkoder.NO);
+        var periode = new Periode(LocalDate.of(2022, 1, 1), LocalDate.of(2022, 2, 1));
+        sedDokument.setLovvalgsperiode(periode);
+        when(saksopplysningerService.finnSedOpplysninger(123L)).thenReturn(Optional.of(sedDokument));
+
+
+        var søknadDokument = SaksbehandlingDataFactory.lagSøknadDokument();
+        søknadDokument.periode = new no.nav.melosys.domain.behandlingsgrunnlag.data.Periode(LocalDate.of(2023, 1, 1),
+            LocalDate.of(2023, 2, 1));
+
+        Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
+        behandlingsgrunnlag.setBehandlingsgrunnlagdata(søknadDokument);
+        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+        behandlingsresultat.setType(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
+        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
+        when(behandlingsgrunnlagService.finnBehandlingsgrunnlag(behandlingID)).thenReturn(Optional.of(behandlingsgrunnlag));
+
+
+        Fagsak fagsak = SaksbehandlingDataFactory.lagFagsak("MEL-1");
+        var behandling = new Behandling();
+        behandling.setFagsak(fagsak);
+        behandling.setId(behandlingID);
+        fagsak.setBehandlinger(Collections.singletonList(behandling));
+
+        when(fagsakService.hentFagsak("123")).thenReturn(fagsak);
+        when(persondataFasade.hentSammensattNavn(any())).thenReturn("Joe Moe");
+        if (fagsak != null) {
+            doReturn(List.of(fagsak)).when(fagsakService).hentFagsakerMedAktør(Aktoersroller.BRUKER, FNR);
+            doReturn(List.of(fagsak)).when(fagsakService).hentFagsakerMedOrgnr(Aktoersroller.VIRKSOMHET, ORGNR);
+        }
+
+        var fagsakSokDto = new FagsakSokDto(FNR, null, null);
+
+
+        mockMvc.perform(post(BASE_URL + "/sok")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(fagsakSokDto)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[0].behandlingOversikter[0].periode.fom", equalTo("2022-01-01")))
+            .andExpect(jsonPath("$[0].behandlingOversikter[0].periode.tom", equalTo("2022-02-01")));
+    }
+
+    @Test
+    void hentFagsaker_medSedDokumentOgBehandlingsgrunnlag_verifiserSedDokumentPeriodeErMappetKorrekt() throws Exception {
+        long behandlingID = 123L;
+        when(saksopplysningerService.finnSedOpplysninger(behandlingID)).thenReturn(Optional.empty());
+
+        var søknadDokument = SaksbehandlingDataFactory.lagSøknadDokument();
+        søknadDokument.periode = new no.nav.melosys.domain.behandlingsgrunnlag.data.Periode(LocalDate.of(2023, 1, 1),
+            LocalDate.of(2023, 2, 1));
+
+        Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
+        behandlingsgrunnlag.setBehandlingsgrunnlagdata(søknadDokument);
+        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+        behandlingsresultat.setType(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
+        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
+        when(behandlingsgrunnlagService.finnBehandlingsgrunnlag(behandlingID)).thenReturn(Optional.of(behandlingsgrunnlag));
+
+
+        Fagsak fagsak = SaksbehandlingDataFactory.lagFagsak("MEL-1");
+        var behandling = new Behandling();
+        behandling.setFagsak(fagsak);
+        behandling.setId(behandlingID);
+        fagsak.setBehandlinger(Collections.singletonList(behandling));
+
+        when(fagsakService.hentFagsak("123")).thenReturn(fagsak);
+        when(persondataFasade.hentSammensattNavn(any())).thenReturn("Joe Moe");
+        if (fagsak != null) {
+            doReturn(List.of(fagsak)).when(fagsakService).hentFagsakerMedAktør(Aktoersroller.BRUKER, FNR);
+            doReturn(List.of(fagsak)).when(fagsakService).hentFagsakerMedOrgnr(Aktoersroller.VIRKSOMHET, ORGNR);
+        }
+
+        var fagsakSokDto = new FagsakSokDto(FNR, null, null);
+
+
+        mockMvc.perform(post(BASE_URL + "/sok")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(fagsakSokDto)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[0].behandlingOversikter[0].periode.fom", equalTo("2023-01-01")))
+            .andExpect(jsonPath("$[0].behandlingOversikter[0].periode.tom", equalTo("2023-02-01")));
+    }
+
+    @Test
+    void hentFagsaker_medSedDokument_unleashFalse_verifiserMappetKorrektMedGammelLogikk() throws Exception {
+        when(unleash.isEnabled("melosys.behandle_alle_saker")).thenReturn(false);
+        var sedDokument = new SedDokument();
+        sedDokument.setLovvalgslandKode(Landkoder.NO);
+
+        var periode = new Periode(LocalDate.of(2022, 1, 1), LocalDate.of(2022, 2, 1));
+        sedDokument.setLovvalgsperiode(periode);
+
+        when(saksopplysningerService.finnSedOpplysninger(123L)).thenReturn(Optional.of(sedDokument));
+
+        Fagsak fagsak = SaksbehandlingDataFactory.lagFagsak("MEL-1");
+        var behandling = new Behandling();
+        behandling.setFagsak(fagsak);
+        behandling.setId(123L);
+        fagsak.setBehandlinger(Collections.singletonList(behandling));
+        mockFagsakTjeneste(fagsak);
+        var fagsakSokDto = new FagsakSokDto(FNR, null, null);
+
+
+        mockMvc.perform(post(BASE_URL + "/sok")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(fagsakSokDto)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[0].hovedpartRolle", equalTo(Aktoersroller.BRUKER.toString())))
+            .andExpect(jsonPath("$[0].saksnummer", equalTo("MEL-1")))
+            .andExpect(jsonPath("$[0].behandlingOversikter[0].land.landkoder[0]", equalTo("NO")))
+            .andExpect(jsonPath("$[0].behandlingOversikter[0].periode.fom", equalTo("2022-01-01")))
+            .andExpect(jsonPath("$[0].behandlingOversikter[0].periode.tom", equalTo("2022-02-01")));
+
+        verify(saksopplysningerService).finnSedOpplysninger(123L);
     }
 
     @Test
@@ -262,7 +420,7 @@ class FagsakTjenesteTest {
         verify(fagsakService).ferdigbehandleSak("123");
     }
 
-    private static void mockFagsakTjeneste(Fagsak fagsak) {
+    private void mockFagsakTjeneste(Fagsak fagsak) {
         Soeknad søknadDokument = SaksbehandlingDataFactory.lagSøknadDokument();
         Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
         behandlingsgrunnlag.setBehandlingsgrunnlagdata(søknadDokument);
@@ -278,14 +436,14 @@ class FagsakTjenesteTest {
         }
     }
 
-    private static Fagsak lagFagsak() {
+    private Fagsak lagFagsak() {
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer("MEL-1");
         fagsak.setBehandlinger(Collections.emptyList());
         return fagsak;
     }
 
-    private static FagsakDto lagFagsakDto(Fagsak fagsak) {
+    private FagsakDto lagFagsakDto(Fagsak fagsak) {
         FagsakDto resultat = new FagsakDto();
         resultat.setEndretDato(fagsak.getEndretDato());
         resultat.setGsakSaksnummer(fagsak.getGsakSaksnummer());

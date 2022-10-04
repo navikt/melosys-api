@@ -4,6 +4,7 @@ import java.util.*;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
@@ -55,11 +56,14 @@ public class FagsakTjeneste {
     private final PersondataFasade persondataFasade;
     private final SaksopplysningerService saksopplysningerService;
     private final OrganisasjonOppslagService organisasjonOppslagService;
+    private final Unleash unleash;
 
     public FagsakTjeneste(FagsakService fagsakService, Aksesskontroll aksesskontroll, BehandlingsgrunnlagService behandlingsgrunnlagService,
                           OpprettNySakFraOppgave opprettNySakFraOppgave,
                           BehandlingsresultatService behandlingsresultatService, PersondataFasade persondataFasade,
-                          SaksopplysningerService saksopplysningerService, OrganisasjonOppslagService organisasjonOppslagService) {
+                          SaksopplysningerService saksopplysningerService,
+                          OrganisasjonOppslagService organisasjonOppslagService,
+                          Unleash unleash) {
         this.fagsakService = fagsakService;
         this.aksesskontroll = aksesskontroll;
         this.behandlingsgrunnlagService = behandlingsgrunnlagService;
@@ -68,6 +72,7 @@ public class FagsakTjeneste {
         this.persondataFasade = persondataFasade;
         this.saksopplysningerService = saksopplysningerService;
         this.organisasjonOppslagService = organisasjonOppslagService;
+        this.unleash = unleash;
     }
 
     @GetMapping("/{saksnr}")
@@ -231,24 +236,49 @@ public class FagsakTjeneste {
     }
 
     private void setPeriodeOpplysninger(Behandling behandling, BehandlingOversiktDto behandlingOversiktDto) {
-        if (behandling.erBehandlingAvSøknadGammel()) {
-            behandlingsgrunnlagService.finnBehandlingsgrunnlag(behandling.getId())
-                .map(Behandlingsgrunnlag::getBehandlingsgrunnlagdata).ifPresent(grunnlagData -> {
-                    SoeknadslandDto land = SoeknadslandDto.av(hentSøknadsland((grunnlagData)));
+        if (unleash.isEnabled("melosys.behandle_alle_saker")) {
+            var optionalSedDokument = saksopplysningerService.finnSedOpplysninger(behandling.getId());
+
+            optionalSedDokument.ifPresentOrElse(sedDokument -> {
+                var søknadslandDto = SoeknadslandDto.av(sedDokument.getLovvalgslandKode());
+                behandlingOversiktDto.setLand(søknadslandDto);
+
+                var lovvalgsperiode = sedDokument.getLovvalgsperiode();
+                var søknadsperiodeDto = new PeriodeDto(lovvalgsperiode.getFom(), lovvalgsperiode.getTom());
+                behandlingOversiktDto.setPeriode(søknadsperiodeDto);
+            }, () -> {
+                var behandlingsgrunnlag = behandlingsgrunnlagService.finnBehandlingsgrunnlag(behandling.getId());
+                if (behandlingsgrunnlag.isPresent()) {
+                    var behandlingsgrunnlagData = behandlingsgrunnlag.get().getBehandlingsgrunnlagdata();
+
+                    var land = SoeknadslandDto.av(hentSøknadsland((behandlingsgrunnlagData)));
                     behandlingOversiktDto.setLand(land);
-                    Periode periode = hentPeriode(grunnlagData);
-                    if (periode != null) {
-                        behandlingOversiktDto.setPeriode(new PeriodeDto(periode.getFom(), periode.getTom()));
-                    }
-                });
-        } else {
-            saksopplysningerService.finnSedOpplysninger(behandling.getId()).ifPresent(sedDokument -> {
-                SoeknadslandDto land = SoeknadslandDto.av(sedDokument.getLovvalgslandKode());
-                behandlingOversiktDto.setLand(land);
-                behandlingOversiktDto.setPeriode(new PeriodeDto(
-                    sedDokument.getLovvalgsperiode().getFom(), sedDokument.getLovvalgsperiode().getTom())
-                );
+
+                    var periode = hentPeriode(behandlingsgrunnlagData);
+                    var søknadsperiodeDto = new PeriodeDto(periode.getFom(), periode.getTom());
+                    behandlingOversiktDto.setPeriode(søknadsperiodeDto);
+                }
             });
+        } else {
+            if (behandling.erBehandlingAvSøknadGammel()) {
+                behandlingsgrunnlagService.finnBehandlingsgrunnlag(behandling.getId())
+                    .map(Behandlingsgrunnlag::getBehandlingsgrunnlagdata).ifPresent(grunnlagData -> {
+                        SoeknadslandDto land = SoeknadslandDto.av(hentSøknadsland((grunnlagData)));
+                        behandlingOversiktDto.setLand(land);
+                        Periode periode = hentPeriode(grunnlagData);
+                        if (periode != null) {
+                            behandlingOversiktDto.setPeriode(new PeriodeDto(periode.getFom(), periode.getTom()));
+                        }
+                    });
+            } else {
+                saksopplysningerService.finnSedOpplysninger(behandling.getId()).ifPresent(sedDokument -> {
+                    SoeknadslandDto land = SoeknadslandDto.av(sedDokument.getLovvalgslandKode());
+                    behandlingOversiktDto.setLand(land);
+                    behandlingOversiktDto.setPeriode(new PeriodeDto(
+                        sedDokument.getLovvalgsperiode().getFom(), sedDokument.getLovvalgsperiode().getTom())
+                    );
+                });
+            }
         }
     }
 
