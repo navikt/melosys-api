@@ -32,10 +32,12 @@ final class BehandlingstypeKodeMapper {
             return BehandlingstypeKode.UTL_MYND_UTPEKT_NORGE;
         } else {
             return switch (behandling.getType()) {
-                case SOEKNAD, FØRSTEGANG, HENVENDELSE, ANKE, SED -> BehandlingstypeKode.SOEKNAD;
+                case SOEKNAD, FØRSTEGANG -> BehandlingstypeKode.SOEKNAD;
                 case KLAGE -> BehandlingstypeKode.KLAGE;
                 case NY_VURDERING -> BehandlingstypeKode.NY_VURDERING;
                 case ENDRET_PERIODE -> BehandlingstypeKode.ENDRET_PERIODE;
+                default ->
+                    throw new IllegalArgumentException("Støtter ikke behandling med type : " + behandling.getType());
             };
         }
     }
