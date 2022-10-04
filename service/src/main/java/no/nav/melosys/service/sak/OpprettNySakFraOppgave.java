@@ -3,6 +3,7 @@ package no.nav.melosys.service.sak;
 import java.util.Optional;
 
 import no.finn.unleash.Unleash;
+import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.arkiv.Journalposttype;
@@ -15,6 +16,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.journalforing.JournalfoeringService;
 import no.nav.melosys.service.journalforing.dto.PeriodeDto;
 import no.nav.melosys.service.oppgave.OppgaveService;
+import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Lazy;
@@ -22,7 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static no.nav.melosys.domain.Behandling.erBehandlingAvSedForespørsler;
-import static no.nav.melosys.domain.Behandling.erBehandlingAvSøknad;
+import static no.nav.melosys.domain.Behandling.erBehandlingAvSøknadGammel;
 import static no.nav.melosys.domain.Fagsak.erSakstypeEøs;
 import static no.nav.melosys.service.sak.SakstypeBehandlingstemaKobling.erGyldigBehandlingstemaForSakstype;
 
@@ -50,7 +52,7 @@ public class OpprettNySakFraOppgave {
             case EU_EOS -> prosessinstansService.opprettProsessinstansNySakEØS(
                 oppgave.getJournalpostId(),
                 opprettSakDto,
-                erBehandlingAvSøknad(opprettSakDto.getBehandlingstema()) ? Behandlingstyper.SOEKNAD : Behandlingstyper.SED
+                Behandling.erBehandlingAvSøknadGammel(opprettSakDto.getBehandlingstema()) ? Behandlingstyper.SOEKNAD : Behandlingstyper.SED
             );
             case FTRL, TRYGDEAVTALE -> prosessinstansService.opprettProsessinstansNySakFTRLTrygdeavtale(
                 oppgave.getJournalpostId(),
@@ -62,10 +64,14 @@ public class OpprettNySakFraOppgave {
     void validerOpprettSakDto(OpprettSakDto opprettSakDto) {
         final var sakstype = opprettSakDto.getSakstype();
         final var behandlingstema = opprettSakDto.getBehandlingstema();
+        final var behandlingstype = opprettSakDto.getBehandlingstype();
 
         validerBehandlingstema(behandlingstema, sakstype);
 
-        if (erBehandlingAvSøknad(behandlingstema) && erSakstypeEøs(sakstype)) {
+        if (unleash.isEnabled("melosys.behandle_alle_saker")
+            ? erSakstypeEøs(sakstype) && !SaksbehandlingRegler.harTomFlyt(sakstype, behandlingstype, behandlingstema)
+            : erBehandlingAvSøknadGammel(behandlingstema) && erSakstypeEøs(sakstype)
+        ) {
             validerSøknadData(opprettSakDto.getSoknadDto());
         }
     }
@@ -73,7 +79,7 @@ public class OpprettNySakFraOppgave {
     void validerBehandlingstema(Behandlingstema behandlingstema, Sakstyper sakstype) {
         if (behandlingstema == null) {
             throw new FunksjonellException("Behandlingstema mangler for å opprette ny sak");
-        } else if (!erBehandlingAvSøknad(behandlingstema) && !erBehandlingAvSedForespørsler(behandlingstema)) {
+        } else if (!Behandling.erBehandlingAvSøknadGammel(behandlingstema) && !erBehandlingAvSedForespørsler(behandlingstema)) {
             throw new FunksjonellException("Kan ikke opprette ny sak med behandlingstema " + behandlingstema);
         } else if (!erGyldigBehandlingstemaForSakstype(sakstype, behandlingstema)) {
             throw new FunksjonellException("Behandlingstema " + behandlingstema + " er ikke gyldig for sakstype " + sakstype);

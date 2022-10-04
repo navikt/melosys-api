@@ -36,6 +36,8 @@ import no.nav.melosys.service.journalforing.dto.DokumentDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringDto;
 import no.nav.melosys.service.sak.OpprettSakDto;
 import no.nav.melosys.service.sak.SakstypeSakstemaKobling;
+import no.nav.melosys.service.sak.SøknadDto;
+import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import no.nav.melosys.service.soknad.SoknadMottatt;
 import no.nav.melosys.service.vedtak.FattVedtakRequest;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
@@ -148,10 +150,10 @@ public class ProsessinstansService {
         if (saksbehandler != null) {
             prosessinstans.setData(ProsessDataKey.SAKSBEHANDLER, saksbehandler);
             logger.info("Saksbehandler={} har opprettet prosessinstans {} av type {}.", saksbehandler,
-                        prosessinstans.getId(), prosessinstans.getType());
+                prosessinstans.getId(), prosessinstans.getType());
         } else {
             logger.info("Melosys har opprettet prosessinstans {} av type {}.", prosessinstans.getId(),
-                        prosessinstans.getType());
+                prosessinstans.getType());
         }
         prosessinstans.setData(CORRELATION_ID_SAKSFLYT, getCorrelationId());
 
@@ -246,9 +248,13 @@ public class ProsessinstansService {
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, opprettSakDto.getBehandlingstema());
         prosessinstans.setData(ProsessDataKey.BRUKER_ID, opprettSakDto.getBrukerID());
         prosessinstans.setData(ProsessDataKey.OPPGAVE_ID, opprettSakDto.getOppgaveID());
-        prosessinstans.setData(ProsessDataKey.SØKNADSPERIODE, opprettSakDto.getSoknadDto().getPeriode());
-        prosessinstans.setData(ProsessDataKey.SØKNADSLAND, opprettSakDto.getSoknadDto().getLand());
         prosessinstans.setData(ProsessDataKey.SKAL_TILORDNES, opprettSakDto.isSkalTilordnes());
+        if (opprettSakDto.getSoknadDto().getPeriode() != null) {
+            prosessinstans.setData(ProsessDataKey.SØKNADSPERIODE, opprettSakDto.getSoknadDto().getPeriode());
+        }
+        if (opprettSakDto.getSoknadDto().getLand() != null) {
+            prosessinstans.setData(ProsessDataKey.SØKNADSLAND, opprettSakDto.getSoknadDto().getLand());
+        }
 
         lagre(prosessinstans);
     }

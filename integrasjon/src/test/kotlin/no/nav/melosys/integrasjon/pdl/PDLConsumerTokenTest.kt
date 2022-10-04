@@ -22,8 +22,7 @@ import org.springframework.test.context.ActiveProfiles
 
         PDLConsumerImpl::class,
         PDLConsumerProducer::class,
-        PDLAuthFilter::class,
-        PDLAuthFilterProducer::class
+        PDLAuthFilter::class
     ]
 )
 @ActiveProfiles("wiremock-test")

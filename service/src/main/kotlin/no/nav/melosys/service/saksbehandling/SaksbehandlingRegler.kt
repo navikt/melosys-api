@@ -58,8 +58,10 @@ class SaksbehandlingRegler(private val behandlingsresultatRepository: Behandling
             sakstype: Sakstyper,
             behandlingstype: Behandlingstyper,
             behandlingstema: Behandlingstema
-        ): Boolean =
-            when (behandlingstema) {
+        ): Boolean {
+            if (behandlingstype == Behandlingstyper.HENVENDELSE || behandlingstype == Behandlingstyper.KLAGE) return true
+
+            return when (behandlingstema) {
                 ARBEID_KUN_NORGE,
                 IKKE_YRKESAKTIV,
                 PENSJONIST,
@@ -73,7 +75,8 @@ class SaksbehandlingRegler(private val behandlingsresultatRepository: Behandling
                 ANMODNING_OM_UNNTAK_HOVEDREGEL -> sakstype == Sakstyper.TRYGDEAVTALE
                 YRKESAKTIV -> sakstype == Sakstyper.FTRL
 
-                else -> behandlingstype == Behandlingstyper.HENVENDELSE || behandlingstype == Behandlingstyper.KLAGE
+                else -> return false
             }
+        }
     }
 }
