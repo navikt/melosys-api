@@ -188,6 +188,7 @@ public class DokgenBrevbestilling extends Brevbestilling {
             this.personMottaker = brevbestilling.personMottaker;
             this.saksvedleggBestilling = brevbestilling.saksvedleggBestilling;
             this.distribusjonstype = brevbestilling.distribusjonstype;
+            this.toggleEnabled = brevbestilling.toggleEnabled;
         }
 
         public T medProduserbartdokument(Produserbaredokumenter produserbartdokument) {
