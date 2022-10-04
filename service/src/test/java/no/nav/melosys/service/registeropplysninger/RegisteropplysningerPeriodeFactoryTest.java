@@ -3,7 +3,10 @@ package no.nav.melosys.service.registeropplysninger;
 import java.time.LocalDate;
 import java.time.YearMonth;
 
+import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,6 +20,7 @@ class RegisteropplysningerPeriodeFactoryTest {
     private final Integer inntektshistorikkAntallMåneder = 6;
     private final Behandling behandlingAvSøknad = lagBehandling(true);
     private final Behandling mottakAvSed = lagBehandling(false);
+    private final FakeUnleash unleash = new FakeUnleash();
 
     private RegisteropplysningerPeriodeFactory factory;
 
@@ -25,7 +29,9 @@ class RegisteropplysningerPeriodeFactoryTest {
         factory = new RegisteropplysningerPeriodeFactory(
             arbeidsforholdhistorikkAntallMåneder,
             medlemskaphistorikkAntallÅr,
-            inntektshistorikkAntallMåneder);
+            inntektshistorikkAntallMåneder,
+            unleash);
+        unleash.enable("melosys.behandle_alle_saker");
     }
 
     @Test
@@ -33,7 +39,7 @@ class RegisteropplysningerPeriodeFactoryTest {
         LocalDate fom = LocalDate.now().minusMonths(1);
         LocalDate tom = LocalDate.now();
 
-        RegisteropplysningerPeriodeFactory.DatoPeriode periode = factory.hentPeriodeForArbeidsforhold(fom, tom, mottakAvSed);
+        RegisteropplysningerPeriodeFactory.DatoPeriode periode = factory.hentPeriodeForArbeidsforhold(fom, tom);
 
         assertThat(periode.fom).isEqualTo(fom.minusMonths(arbeidsforholdhistorikkAntallMåneder));
         assertThat(periode.tom).isEqualTo(LocalDate.now());
@@ -44,7 +50,7 @@ class RegisteropplysningerPeriodeFactoryTest {
         LocalDate fom = LocalDate.now().plusYears(1);
         LocalDate tom = LocalDate.now().plusYears(2);
 
-        RegisteropplysningerPeriodeFactory.DatoPeriode periode = factory.hentPeriodeForArbeidsforhold(fom, tom, mottakAvSed);
+        RegisteropplysningerPeriodeFactory.DatoPeriode periode = factory.hentPeriodeForArbeidsforhold(fom, tom);
 
         assertThat(periode.fom).isEqualTo(LocalDate.now().minusMonths(arbeidsforholdhistorikkAntallMåneder));
         assertThat(periode.tom).isEqualTo(LocalDate.now());
@@ -55,7 +61,7 @@ class RegisteropplysningerPeriodeFactoryTest {
         LocalDate fom = LocalDate.now().minusYears(2);
         LocalDate tom = null;
 
-        RegisteropplysningerPeriodeFactory.DatoPeriode periode = factory.hentPeriodeForArbeidsforhold(fom, tom, mottakAvSed);
+        RegisteropplysningerPeriodeFactory.DatoPeriode periode = factory.hentPeriodeForArbeidsforhold(fom, tom);
 
         assertThat(periode.fom).isEqualTo(fom.minusMonths(arbeidsforholdhistorikkAntallMåneder));
         assertThat(periode.tom).isEqualTo(LocalDate.now());
@@ -67,7 +73,7 @@ class RegisteropplysningerPeriodeFactoryTest {
         LocalDate fom = idag.minusYears(2);
         LocalDate tom = null;
 
-        RegisteropplysningerPeriodeFactory.DatoPeriode periode = factory.hentPeriodeForArbeidsforhold(fom, tom, behandlingAvSøknad);
+        RegisteropplysningerPeriodeFactory.DatoPeriode periode = factory.hentPeriodeForArbeidsforhold(fom, tom);
 
         assertThat(periode.fom).isEqualTo(fom.minusMonths(arbeidsforholdhistorikkAntallMåneder));
         assertThat(periode.tom).isEqualTo(idag);
@@ -181,7 +187,9 @@ class RegisteropplysningerPeriodeFactoryTest {
         behandling.setTema(erBehandlingAvSøknad
             ? Behandlingstema.UTSENDT_ARBEIDSTAKER
             : Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL);
-
+        Fagsak fagsak = new Fagsak();
+        fagsak.setType(Sakstyper.EU_EOS);
+        behandling.setFagsak(fagsak);
         return behandling;
     }
 }

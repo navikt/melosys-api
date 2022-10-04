@@ -141,7 +141,7 @@ public class RegisteropplysningerService {
         LocalDate fom = registeropplysningerRequest.getFom();
         LocalDate tom = registeropplysningerRequest.getTom();
 
-        RegisteropplysningerPeriodeFactory.DatoPeriode periodeForArbeidsforhold = registeropplysningerPeriodeFactory.hentPeriodeForArbeidsforhold(fom, tom, behandling);
+        RegisteropplysningerPeriodeFactory.DatoPeriode periodeForArbeidsforhold = registeropplysningerPeriodeFactory.hentPeriodeForArbeidsforhold(fom, tom);
         Saksopplysning saksopplysning = aaregFasade.finnArbeidsforholdPrArbeidstaker(registeropplysningerRequest.getFnr(), periodeForArbeidsforhold.fom, periodeForArbeidsforhold.tom);
 
         return List.of(saksopplysning);

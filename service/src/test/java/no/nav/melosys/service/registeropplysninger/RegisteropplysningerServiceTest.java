@@ -81,7 +81,7 @@ class RegisteropplysningerServiceTest {
         when(saksopplysningerService.finnArbeidsforholdsopplysninger(anyLong())).thenReturn(Optional.of(lagArbeidsforholdDokument()));
         when(saksopplysningerService.finnInntektsopplysninger(anyLong())).thenReturn(Optional.empty());
 
-        when(registeropplysningerPeriodeFactory.hentPeriodeForArbeidsforhold(anyLocalDate(), anyLocalDate(), anyBehandling())).thenReturn(hentDatoPeriode());
+        when(registeropplysningerPeriodeFactory.hentPeriodeForArbeidsforhold(anyLocalDate(), anyLocalDate())).thenReturn(hentDatoPeriode());
         when(registeropplysningerPeriodeFactory.hentPeriodeForMedlemskap(anyLocalDate(), anyLocalDate(), anyBehandling())).thenReturn(hentDatoPeriode());
         when(registeropplysningerPeriodeFactory.hentPeriodeForInntekt(anyLocalDate(), anyLocalDate(), anyBehandling())).thenReturn(hentPeriode());
     }
