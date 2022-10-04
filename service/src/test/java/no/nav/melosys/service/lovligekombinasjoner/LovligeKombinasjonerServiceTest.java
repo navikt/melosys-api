@@ -166,6 +166,27 @@ class LovligeKombinasjonerServiceTest {
             .contains(VIRKSOMHET);
     }
 
+    @Test
+    void hentMuligeBehandlingstemaer_ingenHovedpart_skalReturnereSammeSomHovedpartPERSONOgBRUKER() {
+        Set<Behandlingstema> behandlingstemaer = lovligeKombinasjonerService.hentMuligeBehandlingstemaer(null, TRYGDEAVTALE, TRYGDEAVGIFT, null);
+
+        Set<Behandlingstema> behandlingstemaerVirksomhet = lovligeKombinasjonerService.hentMuligeBehandlingstemaer(Aktoersroller.VIRKSOMHET, TRYGDEAVTALE, TRYGDEAVGIFT, null);
+        Set<Behandlingstema> behandlingstemaerBruker = lovligeKombinasjonerService.hentMuligeBehandlingstemaer(Aktoersroller.BRUKER, TRYGDEAVTALE, TRYGDEAVGIFT, null);
+
+        assertThat(behandlingstemaer)
+            .containsAll(behandlingstemaerVirksomhet)
+            .containsAll(behandlingstemaerBruker);
+    }
+
+    @Test
+    void hentMuligeBehandlingstemaer_ingenHovedpartUnntak_skalReturnereSedBehandlingstema() {
+        Set<Behandlingstema> behandlingstemaer = lovligeKombinasjonerService.hentMuligeBehandlingstemaer(null, EU_EOS, UNNTAK, null);
+
+        assertThat(behandlingstemaer)
+            .contains(REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING, REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE, BESLUTNING_LOVVALG_ANNET_LAND);
+    }
+
+
     private Fagsak fagsakMedSakstypeOgSakstema(Sakstyper sakstype, Sakstemaer sakstema) {
         Fagsak fagsak = new Fagsak();
         fagsak.setType(sakstype);
