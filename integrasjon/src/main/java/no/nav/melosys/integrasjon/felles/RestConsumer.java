@@ -2,6 +2,7 @@ package no.nav.melosys.integrasjon.felles;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import javax.ws.rs.NotSupportedException;
 
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -9,6 +10,7 @@ import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.felles.mdc.MDCOperations;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
+import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 
@@ -21,11 +23,11 @@ public interface RestConsumer {
     }
 
     default String getAuth() {
-        if (isSystem()) {
+        if (ThreadLocalAccessInfo.shouldUseSystemToken()) {
             return basicAuth();
-        } else {
-            return "Bearer " + SubjectHandler.getInstance().getOidcTokenString();
         }
+
+        throw new NotSupportedException("Prøver å hente autoriseringstoken for bruker, men ingen scope har blitt angitt.");
     }
 
     default String getCallID() {
@@ -44,9 +46,6 @@ public interface RestConsumer {
         return SubjectHandler.getInstance().getUserID();
     }
 
-    default boolean isSystem() {
-        return false;
-    }
 
     default RuntimeException tilException(String feilmelding, HttpStatus status) {
         if (status == HttpStatus.UNAUTHORIZED || status == HttpStatus.FORBIDDEN) {

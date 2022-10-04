@@ -15,14 +15,12 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status.Family;
 
 import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.felles.ExceptionMapper;
 import no.nav.melosys.integrasjon.felles.FeilResponseDto;
 import no.nav.melosys.integrasjon.felles.JacksonObjectMapperProvider;
 import no.nav.melosys.integrasjon.felles.RestConsumer;
 import no.nav.melosys.integrasjon.sak.dto.SakDto;
 import no.nav.melosys.integrasjon.sak.dto.SakSearchRequest;
-import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,13 +44,6 @@ public class SakConsumerImpl implements RestConsumer, SakConsumer {
             log.error("Feilet under oppsett av integrasjon mot Sak API", e);
             throw new IntegrasjonException("Feilet under oppsett av integrasjon mot Sak API");
         }
-    }
-
-    @Override
-    public boolean isSystem() {
-        if (ThreadLocalAccessInfo.shouldUseSystemToken()) return true;
-        if (ThreadLocalAccessInfo.shouldUseOidcToken()) return false;
-        throw new TekniskException("Uregistert kall prøver å registrere token provider");
     }
 
     @Override

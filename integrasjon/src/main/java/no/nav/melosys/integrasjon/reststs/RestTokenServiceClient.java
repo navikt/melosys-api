@@ -82,8 +82,4 @@ public class RestTokenServiceClient implements RestStsClient {
             .queryParam("scope", "openid").toUriString();
     }
 
-    @Override
-    public boolean isSystem() {
-        return true;
-    }
 }
