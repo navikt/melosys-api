@@ -88,8 +88,8 @@ public class FagsakTjeneste {
     @PostMapping
     @ApiOperation(value = "Oppretter en ny sak.")
     public ResponseEntity<Void> opprettNySak(@RequestBody OpprettSakDto opprettSakDto) {
-        if (opprettSakDto.getBrukerID() == null) {
-            throw new FunksjonellException("BrukerID trengs for å opprette behandling");
+        if (opprettSakDto.getBrukerID() == null && opprettSakDto.getVirksomhetOrgnr() == null) {
+            throw new FunksjonellException("BrukerID eller organisasjonsnummer trengs for å opprette en sak.");
         }
         aksesskontroll.autoriserFolkeregisterIdent(opprettSakDto.getBrukerID());
 
@@ -105,8 +105,8 @@ public class FagsakTjeneste {
     @PostMapping("/{saksnr}/behandlinger")
     @ApiOperation(value = "Oppretter en ny behandling for sak.")
     public ResponseEntity<Void> opprettNyBehandlingForSak(@PathVariable("saksnr") String saksnummer, @RequestBody OpprettSakDto opprettSakDto) {
-        if (opprettSakDto.getBrukerID() == null) {
-            throw new FunksjonellException("BrukerID trengs for å opprette behandling");
+        if (opprettSakDto.getBrukerID() == null && opprettSakDto.getVirksomhetOrgnr() == null) {
+            throw new FunksjonellException("BrukerID eller organisasjonsnummer trengs for å opprette en behandling.");
         }
         if (opprettSakDto.getBehandlingstema() == null) {
             throw new FunksjonellException("Behandlingstema mangler");

@@ -78,14 +78,16 @@ public class ProsessinstansService {
     public void opprettNySakOgBehandling(OpprettSakDto opprettSakDto) {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.OPPRETT_SAK);
-        prosessinstans.setData(BRUKER_ID, opprettSakDto.getBrukerID());
-        prosessinstans.setData(BEHANDLINGSTEMA, opprettSakDto.getBehandlingstema());
-        prosessinstans.setData(BEHANDLINGSTYPE, opprettSakDto.getBehandlingstype());
+
         prosessinstans.setData(SAKSTYPE, opprettSakDto.getSakstype());
         prosessinstans.setData(SAKSTEMA, opprettSakDto.getSakstema());
-        prosessinstans.setData(SKAL_TILORDNES, opprettSakDto.isSkalTilordnes());
+        prosessinstans.setData(BEHANDLINGSTEMA, opprettSakDto.getBehandlingstema());
+        prosessinstans.setData(BEHANDLINGSTYPE, opprettSakDto.getBehandlingstype());
+        prosessinstans.setData(BRUKER_ID, opprettSakDto.getBrukerID());
+        prosessinstans.setData(VIRKSOMHET_ORGNR, opprettSakDto.getVirksomhetOrgnr());
         prosessinstans.setData(SØKNADSLAND, opprettSakDto.getSoknadDto().getLand());
         prosessinstans.setData(SØKNADSPERIODE, opprettSakDto.getSoknadDto().getPeriode());
+        prosessinstans.setData(SKAL_TILORDNES, opprettSakDto.isSkalTilordnes());
 
         lagre(prosessinstans);
     }
@@ -93,12 +95,14 @@ public class ProsessinstansService {
     public void opprettNyBehandlingForSak(String saksnummer, OpprettSakDto opprettSakDto) {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.OPPRETT_BEHANDLING_FOR_SAK);
-        prosessinstans.setData(BRUKER_ID, opprettSakDto.getBrukerID());
+
         prosessinstans.setData(SAKSNUMMER, saksnummer);
-        prosessinstans.setData(BEHANDLINGSTYPE, opprettSakDto.getBehandlingstype());
-        prosessinstans.setData(BEHANDLINGSTEMA, opprettSakDto.getBehandlingstema());
         prosessinstans.setData(SAKSTYPE, opprettSakDto.getSakstype());
         prosessinstans.setData(SAKSTEMA, opprettSakDto.getSakstema());
+        prosessinstans.setData(BEHANDLINGSTEMA, opprettSakDto.getBehandlingstema());
+        prosessinstans.setData(BEHANDLINGSTYPE, opprettSakDto.getBehandlingstype());
+        prosessinstans.setData(BRUKER_ID, opprettSakDto.getBrukerID());
+        prosessinstans.setData(VIRKSOMHET_ORGNR, opprettSakDto.getVirksomhetOrgnr());
         prosessinstans.setData(SKAL_TILORDNES, opprettSakDto.isSkalTilordnes());
 
         lagre(prosessinstans);
