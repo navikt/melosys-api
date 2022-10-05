@@ -27,7 +27,7 @@ public class InnvilgelseArbeidsgiverMapper implements BrevDataMapper {
                                 MelosysNAVFelles navFelles,
                                 Behandling behandling,
                                 Behandlingsresultat resultat,
-                                BrevData brevdata) throws JAXBException, SAXException {
+                                BrevData brevdata, boolean enableBehandleAlleSaker) throws JAXBException, SAXException {
 
         BrevDataInnvilgelse brevDataInnvilgelse = (BrevDataInnvilgelse) brevdata;
         Fag fag = mapFag(brevDataInnvilgelse);
