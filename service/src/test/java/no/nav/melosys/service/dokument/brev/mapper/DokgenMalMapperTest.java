@@ -4,6 +4,7 @@ import java.time.*;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
+import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.arkiv.ArkivDokument;
@@ -60,14 +61,18 @@ class DokgenMalMapperTest {
     @Mock
     private StorbritanniaMapper mockStorbritanniaMapper;
 
+    private final FakeUnleash unleash = new FakeUnleash();
+
     private DokgenMalMapper dokgenMalMapper;
 
     @BeforeEach
     void init() {
+        unleash.enableAll();
         dokgenMalMapper = new DokgenMalMapper(
             mockDokgenMapperDatahenter,
             mockInnvilgelseFtrlMapper,
-            mockStorbritanniaMapper);
+            mockStorbritanniaMapper,
+            unleash);
     }
 
     @Test

@@ -14,6 +14,7 @@ import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.brev.MangelbrevBrevbestilling;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
+import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.person.Persondata;
@@ -95,7 +96,6 @@ class DokgenConsumerTest {
     void lagPdfMedVedlegg_skalBestilleBrevMedVedlegg() {
         byte[] vedleggHeihei = "heihei".getBytes(StandardCharsets.UTF_8);
         byte[] vedleggTeit = "teit".getBytes(StandardCharsets.UTF_8);
-        MangelbrevBruker mangelbrevBruker = getMangelbrevBruker();
 
         wireMockServer.stubFor(post(urlPathEqualTo("/mal/mangelbrev_bruker/lag-pdf"))
             .withHeader("content-type", containing("multipart/form-data"))
@@ -172,6 +172,7 @@ class DokgenConsumerTest {
     private Fagsak lagFagsak(Behandling behandling) {
         Fagsak fagsak = new Fagsak();
         fagsak.setType(Sakstyper.EU_EOS);
+        fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
         behandling.setType(Behandlingstyper.SOEKNAD);
         fagsak.setBehandlinger(List.of(behandling));
         return fagsak;
