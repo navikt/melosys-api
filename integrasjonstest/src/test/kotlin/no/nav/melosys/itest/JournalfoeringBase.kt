@@ -4,6 +4,7 @@ import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import io.kotest.matchers.equality.shouldBeEqualToComparingFields
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import no.nav.melosys.domain.Behandling
@@ -83,16 +84,18 @@ class JournalfoeringBase(
         mockServer.stop()
     }
 
-    protected fun journalførOgOpprettSak(journalfoeringOpprettDto: JournalfoeringOpprettDto) {
-        ThreadLocalAccessInfo.executeProcess("Journalfør dokument og opprett ny sak. Ferdigstill journalføringsoppgave.") {
-            journalføringService.journalførOgOpprettSak(journalfoeringOpprettDto)
-            oppgaveService.ferdigstillOppgave(journalfoeringOpprettDto.oppgaveID)
-        }
-    }
+    protected fun journalførOgVentTilProsesserErFerdige(journalfoeringOpprettDto: JournalfoeringOpprettDto): UUID {
+        val startTime = LocalDateTime.now()
 
-    protected fun lagJournalfoeringOpprettDto(): JournalfoeringOpprettDto {
         val jfrOppgave: Oppgave = lagJfrOppgave()
-        return lagJournalfoeringOpprettDto(jfrOppgave)
+        val lagJournalfoeringOpprettDto = lagJournalfoeringOpprettDto(jfrOppgave, journalfoeringOpprettDto)
+
+        ThreadLocalAccessInfo.executeProcess("Journalfør dokument og opprett ny sak. Ferdigstill journalføringsoppgave.") {
+            journalføringService.journalførOgOpprettSak(lagJournalfoeringOpprettDto)
+            oppgaveService.ferdigstillOppgave(lagJournalfoeringOpprettDto.oppgaveID)
+        }
+
+        return waitForProsesses(startTime)
     }
 
     protected fun waitForProsesses(startTime: LocalDateTime): UUID {
@@ -136,14 +139,6 @@ class JournalfoeringBase(
     }
 
 
-    protected fun lagJournalfoeringOpprettDto(jfrOppgave: Oppgave): JournalfoeringOpprettDto {
-        var hentJournalpost: Journalpost? = null
-        ThreadLocalAccessInfo.executeProcess("hentJournalpost") {
-            hentJournalpost = journalføringService.hentJournalpost(jfrOppgave.journalpostId)
-        }
-        return lagJournalføringDto(jfrOppgave, hentJournalpost!!.hoveddokument)
-    }
-
     @OptIn(ExperimentalStdlibApi::class)
     private fun sjekkAtprosesssHarStatusFerdig(prosessID: UUID) =
         await.until {
@@ -160,20 +155,44 @@ class JournalfoeringBase(
     protected fun lagJfrOppgave(): Oppgave =
         testDataGenerator.opprettJfrOppgave(tilordnetRessurs = "Z123456", forVirksomhet = false)
 
-    private fun lagJournalføringDto(oppgave: Oppgave, dokument: ArkivDokument) =
-        JournalfoeringOpprettDto().apply {
-            behandlingstemaKode = Behandlingstema.YRKESAKTIV.kode
-            behandlingstypeKode = Behandlingstyper.FØRSTEGANG.kode
+    protected fun lagJournalfoeringOpprettDto(
+        jfrOppgave: Oppgave,
+        journalfoeringOpprettDto: JournalfoeringOpprettDto
+    ): JournalfoeringOpprettDto {
+        var hentJournalpost: Journalpost? = null
+        ThreadLocalAccessInfo.executeProcess("hentJournalpost") {
+            hentJournalpost = journalføringService.hentJournalpost(jfrOppgave.journalpostId)
+        }
+        return lagJournalføringDto(jfrOppgave, hentJournalpost!!.hoveddokument, journalfoeringOpprettDto)
+    }
+
+    private fun lagJournalføringDto(
+        oppgave: Oppgave, dokument: ArkivDokument,
+        journalfoeringOpprettDto: JournalfoeringOpprettDto
+    ): JournalfoeringOpprettDto {
+        return journalfoeringOpprettDto.apply {
             this.journalpostID = oppgave.journalpostId
+            oppgaveID = oppgave.id.toString()
+            hoveddokument = DokumentDto(dokument.dokumentId, dokument.tittel).apply {
+                logiskeVedlegg = emptyList()
+            }
+        }.apply {
+            behandlingstemaKode.shouldNotBeNull()
+            behandlingstypeKode.shouldNotBeNull()
+            fagsak.sakstype.shouldNotBeNull()
+            fagsak.sakstema.shouldNotBeNull()
+        }
+    }
+
+    protected fun defaultJournalføringDto() =
+        JournalfoeringOpprettDto().apply {
             avsenderID = "30056928150"
             avsenderNavn = "KARAFFEL TRIVIELL"
             brukerID = "30056928150"
             virksomhetOrgnr = null
-            oppgaveID = oppgave.id.toString()
             vedlegg = emptyList()
             mottattDato = LocalDate.now()
             arbeidsgiverID = null
-            behandlingstemaKode = Behandlingstema.UTSENDT_ARBEIDSTAKER.kode
             representantID = null
             representantKontaktPerson = null
             representererKode = null
@@ -181,8 +200,6 @@ class JournalfoeringBase(
             avsenderType = Avsendertyper.PERSON
             isSkalTilordnes = true
             fagsak = FagsakDto().apply {
-                sakstype = Sakstyper.EU_EOS.kode
-                sakstema = Sakstemaer.MEDLEMSKAP_LOVVALG.kode
                 soknadsperiode = PeriodeDto(
                     periodeFOM,
                     periodeTOM,
@@ -190,9 +207,6 @@ class JournalfoeringBase(
                 land = SoeknadslandDto(
                     listOf(Landkoder.IE.kode), false
                 )
-            }
-            hoveddokument = DokumentDto(dokument.dokumentId, dokument.tittel).apply {
-                logiskeVedlegg = emptyList()
             }
         }
 

@@ -12,6 +12,8 @@ import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode
 import no.nav.melosys.domain.kodeverk.Avsendertyper
 import no.nav.melosys.domain.kodeverk.Landkoder
+import no.nav.melosys.domain.kodeverk.Sakstemaer
+import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
@@ -23,6 +25,7 @@ import no.nav.melosys.repository.FagsakRepository
 import no.nav.melosys.repository.ProsessinstansRepository
 import no.nav.melosys.service.journalforing.JournalfoeringService
 import no.nav.melosys.service.journalforing.dto.DokumentDto
+import no.nav.melosys.service.journalforing.dto.JournalfoeringOpprettDto
 import no.nav.melosys.service.journalforing.dto.JournalfoeringTilordneDto
 import no.nav.melosys.service.oppgave.OppgaveService
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
@@ -44,7 +47,14 @@ class JournalfoeringReplikeringIT(
     @Test
     fun journalførOgOpprettAndregangsBehandling_replikerBehandling_replikerBehandlingProsessStegBlirKjørt() {
         unleash.enable("melosys.behandle_alle_saker")
-        val (journalpostID, behandling) = setupForReplikeringAvBehandling()
+        val (journalpostID, behandling) = setupFørsteGangsBehandling(
+            defaultJournalføringDto().apply {
+                fagsak.sakstype = Sakstyper.EU_EOS.kode
+                fagsak.sakstema = Sakstemaer.MEDLEMSKAP_LOVVALG.kode
+                behandlingstypeKode = Behandlingstyper.FØRSTEGANG.kode
+                behandlingstemaKode = Behandlingstema.UTSENDT_ARBEIDSTAKER.kode
+            }
+        )
         val jfrOppgave: Oppgave = lagJfrOppgave()
         val journalfoeringTilordneDto = lagJournalfoeringTilordneDto(jfrOppgave, behandling.fagsak.saksnummer)
         behandling.fagsak.behandlinger.shouldHaveSize(1)
@@ -79,13 +89,12 @@ class JournalfoeringReplikeringIT(
             })
     }
 
-    private fun setupForReplikeringAvBehandling(): Pair<String, Behandling> {
-        val startTime = LocalDateTime.now()
-        val journalfoeringOpprettDto = lagJournalfoeringOpprettDto()
+    private fun setupFørsteGangsBehandling(
+        journalfoeringOpprettDto: JournalfoeringOpprettDto
+    ): Pair<String, Behandling> {
 
-        journalførOgOpprettSak(journalfoeringOpprettDto)
+        val journalføringProsessID = journalførOgVentTilProsesserErFerdige(journalfoeringOpprettDto)
 
-        val journalføringProsessID = waitForProsesses(startTime)
         val behandling = sjekkBehandlingOgBehandlingsgrunnlag(journalføringProsessID)
 
         behandling.status = Behandlingsstatus.AVSLUTTET
@@ -93,23 +102,41 @@ class JournalfoeringReplikeringIT(
         return Pair(journalfoeringOpprettDto.journalpostID, behandling)
     }
 
-    private fun lagJournalfoeringTilordneDto(jfrOppgave: Oppgave, saksnummer: String): JournalfoeringTilordneDto {
+    private fun lagJournalfoeringTilordneDto(
+        jfrOppgave: Oppgave,
+        saksnummer: String,
+        journalfoeringTilordneDto: JournalfoeringTilordneDto = defaultJournalfoeringTilordneDto()
+    ): JournalfoeringTilordneDto {
         var hentJournalpost: Journalpost? = null
         ThreadLocalAccessInfo.executeProcess("hentJournalpost") {
             hentJournalpost = journalføringService.hentJournalpost(jfrOppgave.journalpostId)
         }
-        return lagJournalfoeringTilordneDto(jfrOppgave, hentJournalpost!!.hoveddokument, saksnummer)
+        return lagJournalfoeringTilordneDto(
+            jfrOppgave, hentJournalpost!!.hoveddokument, saksnummer, journalfoeringTilordneDto
+        )
     }
 
-    private fun lagJournalfoeringTilordneDto(oppgave: Oppgave, dokument: ArkivDokument, saksnummer: String) =
-        JournalfoeringTilordneDto().apply {
+    private fun lagJournalfoeringTilordneDto(
+        oppgave: Oppgave,
+        dokument: ArkivDokument,
+        saksnummer: String,
+        journalfoeringTilordneDto: JournalfoeringTilordneDto
+    ) =
+        journalfoeringTilordneDto.apply {
             this.saksnummer = saksnummer
             this.journalpostID = oppgave.journalpostId
+            oppgaveID = oppgave.id.toString()
+            hoveddokument = DokumentDto(dokument.dokumentId, dokument.tittel).apply {
+                logiskeVedlegg = emptyList()
+            }
+        }
+
+    private fun defaultJournalfoeringTilordneDto() =
+        JournalfoeringTilordneDto().apply {
             avsenderID = "30056928150"
             avsenderNavn = "KARAFFEL TRIVIELL"
             brukerID = "30056928150"
             virksomhetOrgnr = null
-            oppgaveID = oppgave.id.toString()
             vedlegg = emptyList()
             mottattDato = LocalDate.now()
             behandlingstemaKode = Behandlingstema.UTSENDT_ARBEIDSTAKER.kode
@@ -117,8 +144,5 @@ class JournalfoeringReplikeringIT(
             isIkkeSendForvaltingsmelding = false
             avsenderType = Avsendertyper.PERSON
             isSkalTilordnes = true
-            hoveddokument = DokumentDto(dokument.dokumentId, dokument.tittel).apply {
-                logiskeVedlegg = emptyList()
-            }
         }
 }
