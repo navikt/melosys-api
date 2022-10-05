@@ -95,8 +95,11 @@ public final class ProsessflytDefinisjon {
         PROSESS_FLYT_MAP.put(ProsessType.JFR_ANDREGANG_NY_BEHANDLING,
             new ProsessFlyt(ProsessType.JFR_ANDREGANG_NY_BEHANDLING,
                 OPPRETT_NY_BEHANDLING,
+                OPPRETT_SØKNAD,
                 OPPDATER_OG_FERDIGSTILL_JOURNALPOST,
                 OPPDATER_SAKSRELASJON,
+                HENT_REGISTEROPPLYSNINGER,
+                VURDER_INNGANGSVILKÅR,
                 OPPRETT_OPPGAVE
             )
         );

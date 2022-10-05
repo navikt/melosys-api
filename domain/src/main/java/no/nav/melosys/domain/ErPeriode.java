@@ -14,7 +14,11 @@ public interface ErPeriode {
     default boolean erGyldig() {
         return inkluderer(LocalDate.now());
     }
-    
+
+    default boolean erTom() {
+        return getFom() == null && getTom() == null;
+    }
+
     default boolean inkluderer (LocalDate kandidat) {
         if (getFom() != null && kandidat.isBefore(getFom())) {
             return false;

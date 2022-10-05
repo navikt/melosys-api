@@ -37,7 +37,13 @@ public class VurderInngangsvilkaar implements StegBehandler {
         final long behandlingID = prosessinstans.getBehandling().getId();
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
         if (unleash.isEnabled("melosys.behandle_alle_saker")) {
-            if (behandling.getFagsak().erSakstypeEøs() && !SaksbehandlingRegler.harTomFlyt(behandling) && behandling.kanResultereIVedtak()) {
+            var finnesPeriodeOgLand = !unleash.isEnabled("melosys.tom_periode_og_land") || behandling.harPeriodeOgLand();
+
+            if (behandling.getFagsak().erSakstypeEøs()
+                && !SaksbehandlingRegler.harTomFlyt(behandling)
+                && behandling.kanResultereIVedtak()
+                && finnesPeriodeOgLand
+            ) {
                 var søknadsland = behandling.hentSøknadsLand();
                 var erUkjenteEllerAlleEosLand = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().soeknadsland.erUkjenteEllerAlleEosLand;
                 var periode = behandling.hentPeriode();

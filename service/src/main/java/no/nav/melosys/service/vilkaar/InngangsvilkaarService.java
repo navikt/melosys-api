@@ -119,6 +119,10 @@ public class InngangsvilkaarService {
         if (inngangsvilkaar.isEmpty()) {
             throw new FunksjonellException("Inngangsvilkår er ikke vurdert for behandling " + behandlingID);
         }
+        var behandling = behandlingService.hentBehandling(behandlingID);
+        if (!behandling.harPeriodeOgLand()) {
+            throw new FunksjonellException("Mangler land eller periode for behandling " + behandlingID);
+        }
         final var inngangsvilkaarBegrunnelseKoder = inngangsvilkaar.get().getBegrunnelser().stream()
             .map(VilkaarBegrunnelse::getKode)
             .map(Inngangsvilkaar::valueOf)

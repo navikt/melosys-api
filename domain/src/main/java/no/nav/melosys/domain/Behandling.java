@@ -265,6 +265,15 @@ public class Behandling extends RegistreringsInfo {
             .findFirst().map(Saksopplysning::getDokument);
     }
 
+    public boolean harPeriodeOgLand() {
+        var optionalPeriode = finnPeriode();
+        var harPeriode = optionalPeriode.isPresent() && !optionalPeriode.get().erTom();
+
+        var harLand = !hentSøknadsLand().isEmpty() || behandlingsgrunnlag.getBehandlingsgrunnlagdata().soeknadsland.erUkjenteEllerAlleEosLand;
+
+        return harPeriode && harLand;
+    }
+
     public ErPeriode hentPeriode() {
         return finnPeriode()
             .orElseThrow(() -> new IkkeFunnetException("Finner ikke periode for behandling " + id));

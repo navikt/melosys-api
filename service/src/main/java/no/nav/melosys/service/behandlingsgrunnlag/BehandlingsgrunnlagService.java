@@ -65,10 +65,20 @@ public class BehandlingsgrunnlagService {
 
     public void opprettSøknad(Prosessinstans prosessinstans) {
         Behandling behandling = prosessinstans.getBehandling();
-        Soeknadsland soeknadsland = prosessinstans.getData(ProsessDataKey.SØKNADSLAND,
-                                                           new TypeReference<>() {
-                                                           });
-        Periode periode = prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, Periode.class);
+        Soeknadsland soeknadsland;
+        Periode periode;
+        if (unleash.isEnabled("melosys.tom_periode_og_land")) {
+            soeknadsland = prosessinstans.getData(
+                ProsessDataKey.SØKNADSLAND,
+                new TypeReference<>() {},
+                new Soeknadsland());
+            periode = prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, Periode.class, new Periode());
+        } else {
+            soeknadsland = prosessinstans.getData(
+                ProsessDataKey.SØKNADSLAND,
+                new TypeReference<>() {});
+            periode = prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, Periode.class);
+        }
         opprettSøknad(behandling, periode, soeknadsland);
     }
 
