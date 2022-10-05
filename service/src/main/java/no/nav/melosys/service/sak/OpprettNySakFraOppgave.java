@@ -81,11 +81,11 @@ public class OpprettNySakFraOppgave {
         prosessinstansService.lagNySak(opprettSakDto);
     }
 
-    void validerBehandling(Behandlingstema behandlingstema, Behandlingstyper behandlingstyper) {
+    void validerBehandling(Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
         if (behandlingstema == null) {
             throw new FunksjonellException("Behandlingstema mangler");
         }
-        if (behandlingstyper == null) {
+        if (behandlingstype == null) {
             throw new FunksjonellException("Behandlingstype mangler");
         }
     }
