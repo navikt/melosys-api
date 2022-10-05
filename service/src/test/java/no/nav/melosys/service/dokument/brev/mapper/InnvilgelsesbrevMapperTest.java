@@ -105,7 +105,7 @@ class InnvilgelsesbrevMapperTest {
         brevdataInnvilgelse.trygdemyndighetsland = "Sverige";
         brevdataInnvilgelse.avklarteMedfolgendeBarn = lagAvklarteMedfølgendeBarn();
 
-        String resultat = instans.mapTilBrevXML(fellesType, navFelles, behandling, behandlingsresultat, brevdataInnvilgelse);
+        String resultat = instans.mapTilBrevXML(fellesType, navFelles, behandling, behandlingsresultat, brevdataInnvilgelse, false);
         return resultat;
     }
 

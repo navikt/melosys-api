@@ -34,7 +34,7 @@ public class Avslagbrev extends DokgenDto {
         super(brevbestilling, mottakerType);
 
         this.fritekst = brevbestilling.getAvslagFritekst();
-        this.mangelbrevDatoer = mangelbrevDatoer.stream().map(this::instantTilLocalDate).collect(Collectors.toList());
+        this.mangelbrevDatoer = mangelbrevDatoer.stream().map(this::instantTilLocalDate).toList();
         this.datoMottatt = instantTilLocalDate(brevbestilling.getForsendelseMottatt());
         this.sakstype = brevbestilling.getBehandling().getFagsak().getType().getKode();
         this.behandlingstype = brevbestilling.getBehandling().getType().getKode();

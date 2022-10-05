@@ -3,10 +3,12 @@ package no.nav.melosys.service.dokument.brev.mapper;
 import java.time.Instant;
 
 import no.nav.dok.melosysbrev._000074.Fag;
+import no.nav.dok.melosysbrev.felles.melosys_felles.BehandlingstypeKode;
 import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.service.dokument.brev.BrevDataMottattDato;
 import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
@@ -48,7 +50,7 @@ class MangelbrevMapperTest {
 
         brevData.fritekst = "Test";
 
-        String xml = mapper.mapTilBrevXML(fellesType, navFelles, behandling, null, brevData);
+        String xml = mapper.mapTilBrevXML(fellesType, navFelles, behandling, null, brevData, false);
 
         assertThat(xml).isNotNull();
     }
@@ -62,11 +64,34 @@ class MangelbrevMapperTest {
         Behandling behandling = new Behandling();
         behandling.setTema(Behandlingstema.ARBEID_FLERE_LAND);
 
-        Fag fag = mapper.mapFag(brevData, behandling);
+        Fag fag = mapper.mapFag(brevData, behandling, false);
 
         assertThat(fag).isNotNull();
         assertThat(fag.getDatoMottatt()).isNotNull();
         assertThat(fag.getAvsender()).isNotNull();
+        assertThat(fag.getBehandlingstype()).isEqualTo(BehandlingstypeKode.SOEKNAD);
+
+        assertThat(fag.getManglendeOpplysninger()).isNotNull();
+        assertThat(fag.getManglendeOpplysninger().getFristDato()).isNotNull();
+        assertThat(fag.getManglendeOpplysninger().getManglendeOpplysningerFritekst()).isNotNull();
+    }
+
+    @Test
+    void mapFag_behandleAlleSaker() {
+        BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingRequest());
+        brevData.initierendeJournalpostForsendelseMottattTidspunkt = Instant.now();
+        brevData.fritekst = "Test";
+
+        Behandling behandling = new Behandling();
+        behandling.setTema(Behandlingstema.ARBEID_FLERE_LAND);
+        behandling.setType(Behandlingstyper.FØRSTEGANG);
+
+        Fag fag = mapper.mapFag(brevData, behandling, true);
+
+        assertThat(fag).isNotNull();
+        assertThat(fag.getDatoMottatt()).isNotNull();
+        assertThat(fag.getAvsender()).isNotNull();
+        assertThat(fag.getBehandlingstype()).isEqualTo(BehandlingstypeKode.SOEKNAD);
 
         assertThat(fag.getManglendeOpplysninger()).isNotNull();
         assertThat(fag.getManglendeOpplysninger().getFristDato()).isNotNull();
@@ -79,7 +104,7 @@ class MangelbrevMapperTest {
         brevData.initierendeJournalpostForsendelseMottattTidspunkt = Instant.now();
 
         assertThatExceptionOfType(IntegrasjonException.class)
-            .isThrownBy(() -> mapper.mapFag(brevData, new Behandling()))
+            .isThrownBy(() -> mapper.mapFag(brevData, new Behandling(), false))
             .withMessageContaining("Mangelbrev mangler informasjon");
     }
 }
