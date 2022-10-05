@@ -71,7 +71,6 @@ public class OpprettNySakFraOppgave {
         if (fagsak.hentAktivBehandling() != null) {
             throw new FunksjonellException("Det finnes allerede en aktiv behandling på fagsak " + saksnummer);
         }
-        validerOpprettSakDto(opprettSakDto);
         prosessinstansService.lagNyBehandlingForSak(saksnummer, opprettSakDto);
     }
 
