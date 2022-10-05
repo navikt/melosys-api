@@ -80,18 +80,6 @@ public class FagsakTjeneste {
         return ResponseEntity.ok(fagsakDto);
     }
 
-    @PostMapping("/opprett")
-    @ApiOperation(value = "Oppretter en sak med tilhørende behandling.")
-    public ResponseEntity<Void> opprettFagsak(@RequestBody OpprettSakDto opprettSakDto) {
-        if (opprettSakDto.getBrukerID() == null) {
-            throw new FunksjonellException("BrukerID trengs for å opprette en sak.");
-        }
-        aksesskontroll.autoriserFolkeregisterIdent(opprettSakDto.getBrukerID());
-
-        opprettNySakFraOppgave.bestillNySakOgBehandling(opprettSakDto);
-        return ResponseEntity.noContent().build();
-    }
-
     @PostMapping
     @ApiOperation(value = "Oppretter en ny sak.")
     public ResponseEntity<Void> lagNySak(@RequestBody OpprettSakDto opprettSakDto) {
@@ -99,7 +87,12 @@ public class FagsakTjeneste {
             throw new FunksjonellException("BrukerID trengs for å opprette en sak.");
         }
         aksesskontroll.autoriserFolkeregisterIdent(opprettSakDto.getBrukerID());
-        opprettNySakFraOppgave.lagNySak(opprettSakDto);
+
+        if (opprettSakDto.getOppgaveID() == null) {
+            opprettNySakFraOppgave.lagNySak(opprettSakDto);
+        } else {
+            opprettNySakFraOppgave.bestillNySakOgBehandling(opprettSakDto);
+        }
 
         return ResponseEntity.noContent().build();
     }

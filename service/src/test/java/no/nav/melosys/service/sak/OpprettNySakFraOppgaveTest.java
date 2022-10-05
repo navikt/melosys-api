@@ -376,8 +376,6 @@ class OpprettNySakFraOppgaveTest {
 
         when(fagsakService.hentFagsak(fagsak.getSaksnummer())).thenReturn(fagsak);
 
-        doThrow(new FunksjonellException("Behandlingstema")).when(journalfoeringService).validerBehandlingstema(any(), any(), any(), any(), any());
-
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> opprettNySakFraOppgave.lagNyBehandlingForSak(fagsak.getSaksnummer(), opprettSakDto))
             .withMessageContaining("Behandlingstema");
@@ -392,8 +390,6 @@ class OpprettNySakFraOppgaveTest {
         fagsak.setSaksnummer("MEL-1");
 
         when(fagsakService.hentFagsak(fagsak.getSaksnummer())).thenReturn(fagsak);
-
-        doThrow(new FunksjonellException("Behandlingstype")).when(journalfoeringService).validerBehandlingstype(any(), any(), any(), any(), any(), any());
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> opprettNySakFraOppgave.lagNyBehandlingForSak(fagsak.getSaksnummer(), opprettSakDto))

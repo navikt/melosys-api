@@ -113,18 +113,6 @@ class FagsakTjenesteTest {
     }
 
     @Test
-    void opprettFagsak() throws Exception {
-        var opprettSakDto = new OpprettSakDto();
-        opprettSakDto.setBrukerID(FNR);
-
-        mockMvc.perform(post(BASE_URL + "/opprett")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(opprettSakDto)))
-            .andExpect(status().isNoContent());
-        verify(aksesskontroll).autoriserFolkeregisterIdent(opprettSakDto.getBrukerID());
-    }
-
-    @Test
     void lagNySak() throws Exception {
         var opprettSakDto = new OpprettSakDto();
         opprettSakDto.setBrukerID(FNR);
@@ -173,18 +161,6 @@ class FagsakTjenesteTest {
         opprettSakDto.setHovedpart(Aktoersroller.BRUKER);
 
         mockMvc.perform(post(BASE_URL + "/{saksnr}/behandlinger", "123")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(opprettSakDto)))
-            .andExpect(status().isBadRequest())
-            .andExpect(jsonPath("$.message", equalTo("BrukerID trengs for å opprette en sak.")));
-    }
-
-    @Test
-    void opprettSak_utenFnr_badRequestException() throws Exception {
-        mockFagsakTjeneste(null);
-        var opprettSakDto = new OpprettSakDto();
-
-        mockMvc.perform(post(BASE_URL + "/opprett")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(opprettSakDto)))
             .andExpect(status().isBadRequest())

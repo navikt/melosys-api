@@ -71,6 +71,7 @@ public class OpprettNySakFraOppgave {
         if (fagsak.hentAktivBehandling() != null) {
             throw new FunksjonellException("Det finnes allerede en aktiv behandling på fagsak " + saksnummer);
         }
+        validerBehandling(opprettSakDto.getBehandlingstema(), opprettSakDto.getBehandlingstype());
         prosessinstansService.lagNyBehandlingForSak(saksnummer, opprettSakDto);
     }
 
@@ -78,6 +79,15 @@ public class OpprettNySakFraOppgave {
     public void lagNySak(OpprettSakDto opprettSakDto) {
         validerOpprettSakDto(opprettSakDto);
         prosessinstansService.lagNySak(opprettSakDto);
+    }
+
+    void validerBehandling(Behandlingstema behandlingstema, Behandlingstyper behandlingstyper) {
+        if (behandlingstema == null) {
+            throw new FunksjonellException("Behandlingstema mangler");
+        }
+        if (behandlingstyper == null) {
+            throw new FunksjonellException("Behandlingstype mangler");
+        }
     }
 
     void validerOpprettSakDto(OpprettSakDto opprettSakDto) {
