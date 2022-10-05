@@ -2,10 +2,10 @@ package no.nav.melosys.itest
 
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.equality.shouldBeEqualToComparingFields
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import no.finn.unleash.FakeUnleash
-import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.arkiv.ArkivDokument
 import no.nav.melosys.domain.arkiv.Journalpost
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad
@@ -25,7 +25,6 @@ import no.nav.melosys.repository.FagsakRepository
 import no.nav.melosys.repository.ProsessinstansRepository
 import no.nav.melosys.service.journalforing.JournalfoeringService
 import no.nav.melosys.service.journalforing.dto.DokumentDto
-import no.nav.melosys.service.journalforing.dto.JournalfoeringOpprettDto
 import no.nav.melosys.service.journalforing.dto.JournalfoeringTilordneDto
 import no.nav.melosys.service.oppgave.OppgaveService
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
@@ -47,18 +46,29 @@ class JournalfoeringReplikeringIT(
     @Test
     fun journalførOgOpprettAndregangsBehandling_replikerBehandling_replikerBehandlingProsessStegBlirKjørt() {
         unleash.enable("melosys.behandle_alle_saker")
-        val (journalpostID, behandling) = setupFørsteGangsBehandling(
-            defaultJournalføringDto().apply {
-                fagsak.sakstype = Sakstyper.EU_EOS.kode
-                fagsak.sakstema = Sakstemaer.MEDLEMSKAP_LOVVALG.kode
-                behandlingstypeKode = Behandlingstyper.FØRSTEGANG.kode
+
+        val journalfoeringOpprettDto = defaultJournalføringDto().apply {
+            fagsak.sakstype = Sakstyper.EU_EOS.kode
+            fagsak.sakstema = Sakstemaer.MEDLEMSKAP_LOVVALG.kode
+            behandlingstypeKode = Behandlingstyper.FØRSTEGANG.kode
+            behandlingstemaKode = Behandlingstema.UTSENDT_ARBEIDSTAKER.kode
+        }
+        val journalføringProsessID = journalførOgVentTilProsesserErFerdige(journalfoeringOpprettDto)
+        val prosessinstans = prosessinstansRepository.findById(journalføringProsessID).get()
+        val behandling = prosessinstans.behandling
+
+        behandling.status = Behandlingsstatus.AVSLUTTET
+        behandlingRepository.save(behandling)
+
+        val journalfoeringTilordneDto = lagJournalfoeringTilordneDto(
+            saksnummer = behandling.fagsak.saksnummer,
+            journalfoeringTilordneDto = defaultJournalfoeringTilordneDto().apply {
                 behandlingstemaKode = Behandlingstema.UTSENDT_ARBEIDSTAKER.kode
+                behandlingstypeKode = Behandlingstyper.NY_VURDERING.kode
             }
         )
-        val jfrOppgave: Oppgave = lagJfrOppgave()
-        val journalfoeringTilordneDto = lagJournalfoeringTilordneDto(jfrOppgave, behandling.fagsak.saksnummer)
-        behandling.fagsak.behandlinger.shouldHaveSize(1)
 
+        behandling.fagsak.behandlinger.shouldHaveSize(1)
 
         val startTime = LocalDateTime.now()
         ThreadLocalAccessInfo.executeProcess("journalførOgOpprettAndregangsBehandling") {
@@ -74,7 +84,7 @@ class JournalfoeringReplikeringIT(
             .apply {
                 type.shouldBe(Behandlingstyper.NY_VURDERING)
                 opprinneligBehandling.id.shouldBe(behandling.id)
-                initierendeJournalpostId.shouldBe(journalpostID)
+                initierendeJournalpostId.shouldBe(journalfoeringOpprettDto.journalpostID)
             }
             .behandlingsgrunnlag.behandlingsgrunnlagdata.shouldBeInstanceOf<Soeknad>()
             .shouldBeEqualToComparingFields(Soeknad().apply {
@@ -89,22 +99,9 @@ class JournalfoeringReplikeringIT(
             })
     }
 
-    private fun setupFørsteGangsBehandling(
-        journalfoeringOpprettDto: JournalfoeringOpprettDto
-    ): Pair<String, Behandling> {
-
-        val journalføringProsessID = journalførOgVentTilProsesserErFerdige(journalfoeringOpprettDto)
-
-        val behandling = sjekkBehandlingOgBehandlingsgrunnlag(journalføringProsessID)
-
-        behandling.status = Behandlingsstatus.AVSLUTTET
-        behandlingRepository.save(behandling)
-        return Pair(journalfoeringOpprettDto.journalpostID, behandling)
-    }
-
     private fun lagJournalfoeringTilordneDto(
-        jfrOppgave: Oppgave,
         saksnummer: String,
+        jfrOppgave: Oppgave = lagJfrOppgave(),
         journalfoeringTilordneDto: JournalfoeringTilordneDto = defaultJournalfoeringTilordneDto()
     ): JournalfoeringTilordneDto {
         var hentJournalpost: Journalpost? = null
@@ -129,6 +126,9 @@ class JournalfoeringReplikeringIT(
             hoveddokument = DokumentDto(dokument.dokumentId, dokument.tittel).apply {
                 logiskeVedlegg = emptyList()
             }
+        }.apply {
+            behandlingstemaKode.shouldNotBeNull()
+            behandlingstypeKode.shouldNotBeNull()
         }
 
     private fun defaultJournalfoeringTilordneDto() =
@@ -139,8 +139,6 @@ class JournalfoeringReplikeringIT(
             virksomhetOrgnr = null
             vedlegg = emptyList()
             mottattDato = LocalDate.now()
-            behandlingstemaKode = Behandlingstema.UTSENDT_ARBEIDSTAKER.kode
-            behandlingstypeKode = Behandlingstyper.NY_VURDERING.kode
             isIkkeSendForvaltingsmelding = false
             avsenderType = Avsendertyper.PERSON
             isSkalTilordnes = true
