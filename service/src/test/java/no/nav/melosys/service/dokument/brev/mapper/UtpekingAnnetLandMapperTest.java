@@ -35,7 +35,7 @@ public class UtpekingAnnetLandMapperTest {
         MelosysNAVFelles navFelles = lagNAVFelles();
         BrevDataUtpekingAnnetLand brevDataUtpekingAnnetLand = lagDataUtpekingAnnetLand();
         final String brevXML = utpekingAnnetLandMapper.mapTilBrevXML(fellesType, navFelles,
-            new Behandling(), new Behandlingsresultat(), brevDataUtpekingAnnetLand);
+            new Behandling(), new Behandlingsresultat(), brevDataUtpekingAnnetLand, false);
         assertThat(brevXML).contains(Landkoder.EE.getBeskrivelse(),
             Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_3.getKode());
     }
