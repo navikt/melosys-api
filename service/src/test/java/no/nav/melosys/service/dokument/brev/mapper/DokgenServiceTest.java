@@ -101,12 +101,13 @@ class DokgenServiceTest {
 
     @BeforeEach
     void init() {
+        unleash.enable("melosys.behandle_alle_saker");
         DokgenMapperDatahenter dokgenMapperDatahenter = new DokgenMapperDatahenter(mockBehandlingsresultatService, mockEregFasade,
             mockPersondataFasade, mockDokumentHentingService, mockKodeverkService);
 
         dokgenService = new DokgenService(mockDokgenConsumer, new DokumentproduksjonsInfoMapper(unleash),
             mockJoarkFasade,
-            new DokgenMalMapper(dokgenMapperDatahenter, mockInnvilgelseFtrlMapper, mockStorbritanniaMapper),
+            new DokgenMalMapper(dokgenMapperDatahenter, mockInnvilgelseFtrlMapper, mockStorbritanniaMapper, unleash),
             mockBehandlingsService, mockEregFasade, mockKontaktOpplysningService,
             mockBrevMottakerService, mockProsessinstansService, mockSaksbehandlerService,
             mockUtenlandskMyndighetService, mockDokumentHentingService);
@@ -145,8 +146,7 @@ class DokgenServiceTest {
         byte[] pdfResponse = dokgenService.produserBrev(mottaker, brevbestilling);
 
 
-        assertThat(pdfResponse).isNotNull();
-        assertThat(pdfResponse).isEqualTo(expectedPdf);
+        assertThat(pdfResponse).isNotNull().isEqualTo(expectedPdf);
 
         verify(mockDokgenConsumer).lagPdf(any(), any(), eq(false), eq(false));
         verifyNoInteractions(mockEregFasade);
@@ -173,8 +173,7 @@ class DokgenServiceTest {
         byte[] pdfResponse = dokgenService.produserBrev(mottaker, brevbestilling);
 
 
-        assertThat(pdfResponse).isNotNull();
-        assertThat(pdfResponse).isEqualTo(expectedPdf);
+        assertThat(pdfResponse).isNotNull().isEqualTo(expectedPdf);
 
         verify(mockDokgenConsumer).lagPdf(any(), any(), eq(false), eq(false));
         verify(mockEregFasade).hentOrganisasjon(any());
@@ -197,8 +196,7 @@ class DokgenServiceTest {
 
         byte[] pdfResponse = dokgenService.produserBrev(lagRepresentant(FNR, Representerer.BRUKER), brevbestilling);
 
-        assertThat(pdfResponse).isNotNull();
-        assertThat(pdfResponse).isEqualTo(expectedPdf);
+        assertThat(pdfResponse).isNotNull().isEqualTo(expectedPdf);
 
         verify(mockDokgenConsumer).lagPdf(any(), any(), eq(false), eq(false));
         verify(mockPersondataFasade, times(2)).hentPerson(any());
@@ -225,8 +223,7 @@ class DokgenServiceTest {
         byte[] pdfResponse = dokgenService.produserUtkast(123L, brevbestillingRequest);
 
 
-        assertThat(pdfResponse).isNotNull();
-        assertThat(pdfResponse).isEqualTo(expectedPdf);
+        assertThat(pdfResponse).isNotNull().isEqualTo(expectedPdf);
 
         verify(mockDokgenConsumer).lagPdf(any(), any(), eq(false), eq(true));
 
@@ -257,8 +254,7 @@ class DokgenServiceTest {
         byte[] pdfResponse = dokgenService.produserUtkast(123L, brevbestillingRequest);
 
 
-        assertThat(pdfResponse).isNotNull();
-        assertThat(pdfResponse).isEqualTo(expectedPdf);
+        assertThat(pdfResponse).isNotNull().isEqualTo(expectedPdf);
 
         verify(mockDokgenConsumer).lagPdf(any(), any(), eq(false), eq(true));
         verify(mockEregFasade).hentOrganisasjon(ORGNR);
@@ -287,8 +283,7 @@ class DokgenServiceTest {
         byte[] pdfResponse = dokgenService.produserUtkast(123L, brevbestillingRequest);
 
 
-        assertThat(pdfResponse).isNotNull();
-        assertThat(pdfResponse).isEqualTo(expectedPdf);
+        assertThat(pdfResponse).isNotNull().isEqualTo(expectedPdf);
 
         verify(mockDokgenConsumer).lagPdf(any(), any(), eq(false), eq(true));
         verify(mockEregFasade).hentOrganisasjon(ORGNR);
