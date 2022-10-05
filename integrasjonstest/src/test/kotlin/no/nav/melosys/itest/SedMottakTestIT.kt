@@ -77,14 +77,12 @@ class SedMottakTestIT(
 
 //        Hver SED blir til en mottaksprosess + en behandlingsprosess
         extracting(prosessinstanserSortert) { låsReferanse }
-            .shouldHaveSize(6)
+            .shouldHaveSize(4)
             .shouldContainExactly(
                 eessiMeldingA009.lagUnikIdentifikator(),
                 eessiMeldingA009.lagUnikIdentifikator(),
                 eessiMeldingX001.lagUnikIdentifikator(),
-                eessiMeldingX001.lagUnikIdentifikator(),
                 eessiMeldingX007.lagUnikIdentifikator(),
-                eessiMeldingX007.lagUnikIdentifikator()
             )
     }
 
