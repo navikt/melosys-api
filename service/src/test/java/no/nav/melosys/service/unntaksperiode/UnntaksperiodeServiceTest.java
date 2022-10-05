@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.medlemskap.Periode;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
@@ -55,14 +56,18 @@ class UnntaksperiodeServiceTest {
     private UnntaksperiodeKontrollService unntaksperiodeKontrollService;
     private UnntaksperiodeService unntaksperiodeService;
 
+    private final FakeUnleash unleash = new FakeUnleash();
+
     @BeforeEach
     public void setUp() {
-        unntaksperiodeService = new UnntaksperiodeService(behandlingService, behandlingsresultatService, lovvalgsperiodeService, oppgaveService, prosessinstansService, unntaksperiodeKontrollService);
+        unntaksperiodeService = new UnntaksperiodeService(behandlingService, behandlingsresultatService, lovvalgsperiodeService, oppgaveService, prosessinstansService, unntaksperiodeKontrollService, unleash);
         behandling.setId(1L);
         behandling.setFagsak(new Fagsak());
         behandling.getFagsak().setSaksnummer("MEL-123hei");
         behandling.setTema(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING);
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+
+        unleash.enableAll();
     }
 
     @Test

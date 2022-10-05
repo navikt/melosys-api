@@ -2,6 +2,7 @@ package no.nav.melosys.saksflyt.steg.medl;
 
 import java.util.NoSuchElementException;
 
+import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
@@ -43,15 +44,18 @@ class LagreLovvalgsperiodeMedlTest {
     private final Prosessinstans prosessinstans = new Prosessinstans();
     private final Behandling behandling = new Behandling();
     private final Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+    private final FakeUnleash unleash = new FakeUnleash();
 
 
     @BeforeEach
     public void setup() {
-        lagreLovvalgsperiodeMedl = new LagreLovvalgsperiodeMedl(behandlingsresultatService, medlPeriodeService);
+        lagreLovvalgsperiodeMedl = new LagreLovvalgsperiodeMedl(behandlingsresultatService, medlPeriodeService, unleash);
 
         behandling.setId(behandlingID);
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         prosessinstans.setBehandling(behandling);
+
+        unleash.enable("melosys.behandle_alle_saker");
     }
 
     @Test
@@ -61,7 +65,10 @@ class LagreLovvalgsperiodeMedlTest {
         behandlingsresultat.setType(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
         when(behandlingsresultatService.hentBehandlingsresultat(behandlingID)).thenReturn(behandlingsresultat);
 
+
         lagreLovvalgsperiodeMedl.utfør(prosessinstans);
+
+
         verify(medlPeriodeService).avvisPeriode(lovvalgsperiode.getMedlPeriodeID());
         verifyNoMoreInteractions(medlPeriodeService);
     }
@@ -72,7 +79,10 @@ class LagreLovvalgsperiodeMedlTest {
         behandlingsresultat.getLovvalgsperioder().add(lovvalgsperiode);
         when(behandlingsresultatService.hentBehandlingsresultat(behandlingID)).thenReturn(behandlingsresultat);
 
+
         lagreLovvalgsperiodeMedl.utfør(prosessinstans);
+
+
         verify(medlPeriodeService).opprettPeriodeForeløpig(lovvalgsperiode, behandlingID, false);
     }
 
@@ -82,7 +92,10 @@ class LagreLovvalgsperiodeMedlTest {
         behandlingsresultat.getLovvalgsperioder().add(lovvalgsperiode);
         when(behandlingsresultatService.hentBehandlingsresultat(behandlingID)).thenReturn(behandlingsresultat);
 
+
         lagreLovvalgsperiodeMedl.utfør(prosessinstans);
+
+
         verify(medlPeriodeService).oppdaterPeriodeForeløpig(lovvalgsperiode, false);
     }
 
@@ -92,7 +105,10 @@ class LagreLovvalgsperiodeMedlTest {
         behandlingsresultat.getLovvalgsperioder().add(lovvalgsperiode);
         when(behandlingsresultatService.hentBehandlingsresultat(behandlingID)).thenReturn(behandlingsresultat);
 
+
         lagreLovvalgsperiodeMedl.utfør(prosessinstans);
+
+
         verify(medlPeriodeService).opprettPeriodeEndelig(lovvalgsperiode, behandlingID, false);
     }
 
@@ -102,7 +118,10 @@ class LagreLovvalgsperiodeMedlTest {
         behandlingsresultat.getLovvalgsperioder().add(lovvalgsperiode);
         when(behandlingsresultatService.hentBehandlingsresultat(behandlingID)).thenReturn(behandlingsresultat);
 
+
         lagreLovvalgsperiodeMedl.utfør(prosessinstans);
+
+
         verify(medlPeriodeService).oppdaterPeriodeEndelig(lovvalgsperiode, false);
     }
 
@@ -114,15 +133,17 @@ class LagreLovvalgsperiodeMedlTest {
         behandling.setOpprinneligBehandling(opprinneligBehandling);
         Behandlingsresultat opprinneligResultat = new Behandlingsresultat();
         Lovvalgsperiode opprinneligLovvalgsperiode = lagLovvalgsperiode(777L, Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1,
-                                                               InnvilgelsesResultat.INNVILGET);
+            InnvilgelsesResultat.INNVILGET);
         opprinneligResultat.getLovvalgsperioder().add(opprinneligLovvalgsperiode);
         when(behandlingsresultatService.hentBehandlingsresultat(opprinneligBehandling.getId())).thenReturn(opprinneligResultat);
         Lovvalgsperiode nyLovvalgsperiode = lagLovvalgsperiode(null, Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1,
-                                                             InnvilgelsesResultat.INNVILGET);
+            InnvilgelsesResultat.INNVILGET);
         behandlingsresultat.getLovvalgsperioder().add(nyLovvalgsperiode);
         when(behandlingsresultatService.hentBehandlingsresultat(behandling.getId())).thenReturn(behandlingsresultat);
 
+
         lagreLovvalgsperiodeMedl.utfør(prosessinstans);
+
 
         verify(medlPeriodeService).oppdaterPeriodeEndelig(lovvalgsperiodeArgumentCaptor.capture(), eq(false));
         assertThat(lovvalgsperiodeArgumentCaptor.getValue().getMedlPeriodeID()).isEqualTo((opprinneligLovvalgsperiode.getMedlPeriodeID()));
@@ -138,11 +159,13 @@ class LagreLovvalgsperiodeMedlTest {
 
         when(behandlingsresultatService.hentBehandlingsresultat(opprinneligBehandling.getId())).thenReturn(opprinneligResultat);
         Lovvalgsperiode nyLovvalgsperiode = lagLovvalgsperiode(null, Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1,
-                                                               InnvilgelsesResultat.INNVILGET);
+            InnvilgelsesResultat.INNVILGET);
         behandlingsresultat.getLovvalgsperioder().add(nyLovvalgsperiode);
         when(behandlingsresultatService.hentBehandlingsresultat(behandling.getId())).thenReturn(behandlingsresultat);
 
+
         lagreLovvalgsperiodeMedl.utfør(prosessinstans);
+
 
         verify(medlPeriodeService).opprettPeriodeEndelig(nyLovvalgsperiode, behandling.getId(), false);
     }
@@ -152,7 +175,10 @@ class LagreLovvalgsperiodeMedlTest {
         behandlingsresultat.setType(Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL);
         when(behandlingsresultatService.hentBehandlingsresultat(behandlingID)).thenReturn(behandlingsresultat);
 
+
         lagreLovvalgsperiodeMedl.utfør(prosessinstans);
+
+
         verifyNoInteractions(medlPeriodeService);
     }
 

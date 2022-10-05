@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
 
+import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
@@ -20,9 +21,11 @@ import no.nav.melosys.domain.eessi.sed.SedDataDto;
 import no.nav.melosys.domain.eessi.sed.Virksomhet;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.exception.FunksjonellException;
@@ -68,6 +71,8 @@ class SedDataByggerTest {
     @Mock
     private BehandlingsresultatService behandlingsresultatService;
 
+    private final FakeUnleash unleash = new FakeUnleash();
+
     private SedDataBygger dataBygger;
     private Behandling behandling;
     private Behandlingsresultat behandlingsresultat;
@@ -107,13 +112,15 @@ class SedDataByggerTest {
 
         behandling = DataByggerStubs.hentBehandlingStub();
         behandlingsresultat.setBehandling(behandling);
-        dataBygger = new SedDataBygger(behandlingsresultatService, landvelgerService, lovvalgsperiodeService);
+        dataBygger = new SedDataBygger(behandlingsresultatService, landvelgerService, lovvalgsperiodeService, unleash);
 
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setFom(LocalDate.now());
         lovvalgsperiode.setTom(LocalDate.now().plusMonths(2L));
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_2);
         when(lovvalgsperiodeService.hentTidligereLovvalgsperioder(any())).thenReturn(List.of(lovvalgsperiode));
+
+        unleash.enable("melosys.behandle_alle_saker");
     }
 
     private SedDataGrunnlagMedSoknad lagGrunnlagMedSøknad() {
@@ -160,7 +167,7 @@ class SedDataByggerTest {
         assertThat(sedLovvalgsperiode.getTom()).isEqualTo(lovvalgsperiode.getTom());
         assertThat(sedLovvalgsperiode.getLovvalgsland()).isEqualTo(lovvalgsperiode.getLovvalgsland().getKode());
 
-        assertThat(sedData.getArbeidsgivendeVirksomheter().isEmpty()).isFalse();
+        assertThat(sedData.getArbeidsgivendeVirksomheter()).isNotEmpty();
     }
 
     @Test
@@ -380,7 +387,7 @@ class SedDataByggerTest {
         SedDataDto sedData = dataBygger.lagUtkast(lagGrunnlagMedSøknad(), behandlingsresultat, PeriodeType.INGEN);
 
         lagUtkastAssertions(sedData, true);
-        assertThat(sedData.getLovvalgsperioder().isEmpty()).isTrue();
+        assertThat(sedData.getLovvalgsperioder()).isEmpty();
     }
 
     @Test
@@ -389,7 +396,7 @@ class SedDataByggerTest {
 
         assertThat(sedData.getBruker()).isNotNull();
         assertThat(sedData.getBostedsadresse()).isNotNull();
-        assertThat(sedData.getLovvalgsperioder().isEmpty()).isTrue();
+        assertThat(sedData.getLovvalgsperioder()).isEmpty();
     }
 
     @Test
@@ -407,7 +414,7 @@ class SedDataByggerTest {
         SedDataGrunnlagMedSoknad dataGrunnlag = lagGrunnlagMedSøknad();
         SedDataDto sedData = dataBygger.lag(dataGrunnlag, behandlingsresultat, PeriodeType.LOVVALGSPERIODE);
 
-        assertThat(sedData.getArbeidssteder().size()).isEqualTo(2);
+        assertThat(sedData.getArbeidssteder()).hasSize(2);
 
         Arbeidssted ikkeOppgittArbeidsstedForLand = sedData.getArbeidssteder().get(1);
 
@@ -425,7 +432,7 @@ class SedDataByggerTest {
         dataGrunnlag.getBehandlingsgrunnlagData().luftfartBaser = List.of(luftfartBase);
         SedDataDto sedData = dataBygger.lag(dataGrunnlag, behandlingsresultat, PeriodeType.LOVVALGSPERIODE);
 
-        assertThat(sedData.getArbeidssteder().size()).isEqualTo(2);
+        assertThat(sedData.getArbeidssteder()).hasSize(2);
 
         Arbeidssted arbeidssted = sedData.getArbeidssteder().get(1);
 
@@ -547,7 +554,8 @@ class SedDataByggerTest {
     }
 
     @Test
-    void lag_erBehandlingAvSøknad_søknadsperiodeBlirSatt() {
+    void lag_erBehandlingAvSøknadToggleAv_søknadsperiodeBlirSatt() {
+        unleash.disable("melosys.behandle_alle_saker");
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         var søknad = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
         var sedData = dataBygger.lag(lagGrunnlagMedSøknad(), behandlingsresultat, PeriodeType.LOVVALGSPERIODE);
@@ -555,6 +563,60 @@ class SedDataByggerTest {
         assertThat(sedData.getSøknadsperiode())
             .extracting(Periode::getFom, Periode::getTom)
             .containsExactly(søknad.periode.getFom(), søknad.periode.getTom());
+    }
+
+    @Test
+    void lag_harFlytErEøsErIkkeSed_søknadsperiodeBlirSatt() {
+        var fagsak = new Fagsak();
+        fagsak.setType(Sakstyper.EU_EOS);
+        behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
+        behandling.setType(Behandlingstyper.FØRSTEGANG);
+        behandling.setFagsak(fagsak);
+        var søknad = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
+        var sedData = dataBygger.lag(lagGrunnlagMedSøknad(), behandlingsresultat, PeriodeType.LOVVALGSPERIODE);
+
+        assertThat(sedData.getSøknadsperiode())
+            .extracting(Periode::getFom, Periode::getTom)
+            .containsExactly(søknad.periode.getFom(), søknad.periode.getTom());
+    }
+
+    @Test
+    void lag_erIkkeEuEøs_søknadsperiodeBlirIkkeSatt() {
+        var fagsak = new Fagsak();
+        fagsak.setType(Sakstyper.TRYGDEAVTALE);
+        behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
+        behandling.setType(Behandlingstyper.FØRSTEGANG);
+        behandling.setFagsak(fagsak);
+        var søknad = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
+        var sedData = dataBygger.lag(lagGrunnlagMedSøknad(), behandlingsresultat, PeriodeType.LOVVALGSPERIODE);
+
+        assertThat(sedData.getSøknadsperiode()).isNull();
+    }
+
+    @Test
+    void lag_erSed_søknadsperiodeBlirIkkeSatt() {
+        var fagsak = new Fagsak();
+        fagsak.setType(Sakstyper.EU_EOS);
+        behandling.setTema(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL);
+        behandling.setType(Behandlingstyper.FØRSTEGANG);
+        behandling.setFagsak(fagsak);
+        var søknad = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
+        var sedData = dataBygger.lag(lagGrunnlagMedSøknad(), behandlingsresultat, PeriodeType.LOVVALGSPERIODE);
+
+        assertThat(sedData.getSøknadsperiode()).isNull();
+    }
+
+    @Test
+    void lag_harIkkeFlyt_søknadsperiodeBlirIkkeSatt() {
+        var fagsak = new Fagsak();
+        fagsak.setType(Sakstyper.EU_EOS);
+        behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
+        behandling.setType(Behandlingstyper.HENVENDELSE);
+        behandling.setFagsak(fagsak);
+        var søknad = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
+        var sedData = dataBygger.lag(lagGrunnlagMedSøknad(), behandlingsresultat, PeriodeType.LOVVALGSPERIODE);
+
+        assertThat(sedData.getSøknadsperiode()).isNull();
     }
 
     @Test
@@ -582,6 +644,6 @@ class SedDataByggerTest {
         assertThat(sedData.getUtenlandskIdent()).isNotEmpty();
         assertThat(sedData.getSelvstendigeVirksomheter()).isNotEmpty();
         assertThat(sedData.getTidligereLovvalgsperioder()).isNotNull();
-        assertThat(sedData.getArbeidsgivendeVirksomheter().isEmpty()).isFalse();
+        assertThat(sedData.getArbeidsgivendeVirksomheter()).isNotEmpty();
     }
 }
