@@ -129,7 +129,7 @@ class FagsakTjenesteTest {
         var opprettSakDto = new OpprettSakDto();
         opprettSakDto.setBrukerID(FNR);
 
-        mockMvc.perform(post(BASE_URL + "/lag-ny-sak")
+        mockMvc.perform(post(BASE_URL)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(opprettSakDto)))
             .andExpect(status().isNoContent());
@@ -142,7 +142,7 @@ class FagsakTjenesteTest {
         var opprettSakDto = new OpprettSakDto();
         opprettSakDto.setHovedpart(Aktoersroller.BRUKER);
 
-        mockMvc.perform(post(BASE_URL + "/lag-ny-sak")
+        mockMvc.perform(post(BASE_URL)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(opprettSakDto)))
             .andExpect(status().isBadRequest())
@@ -159,7 +159,7 @@ class FagsakTjenesteTest {
         var opprettSakDto = new OpprettSakDto();
         opprettSakDto.setBrukerID(FNR);
 
-        mockMvc.perform(post(BASE_URL + "/{saksnr}/lag-ny-behandling", fagsak.getSaksnummer())
+        mockMvc.perform(post(BASE_URL + "/{saksnr}/behandlinger", fagsak.getSaksnummer())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(opprettSakDto)))
             .andExpect(status().isNoContent());
@@ -172,7 +172,7 @@ class FagsakTjenesteTest {
         var opprettSakDto = new OpprettSakDto();
         opprettSakDto.setHovedpart(Aktoersroller.BRUKER);
 
-        mockMvc.perform(post(BASE_URL + "/{saksnr}/lag-ny-behandling", "123")
+        mockMvc.perform(post(BASE_URL + "/{saksnr}/behandlinger", "123")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(opprettSakDto)))
             .andExpect(status().isBadRequest())

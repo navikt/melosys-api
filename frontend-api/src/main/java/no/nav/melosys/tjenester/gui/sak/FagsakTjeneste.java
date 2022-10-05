@@ -92,7 +92,7 @@ public class FagsakTjeneste {
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/lag-ny-sak")
+    @PostMapping
     @ApiOperation(value = "Oppretter en ny sak.")
     public ResponseEntity<Void> lagNySak(@RequestBody OpprettSakDto opprettSakDto) {
         if (opprettSakDto.getBrukerID() == null) {
@@ -104,8 +104,8 @@ public class FagsakTjeneste {
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/{saksnr}/lag-ny-behandling")
-    @ApiOperation(value = "Oppretter en ny behandling med tilhørende sak.")
+    @PostMapping("/{saksnr}/behandlinger")
+    @ApiOperation(value = "Oppretter en ny behandling for sak.")
     public ResponseEntity<Void> lagNyBehandlingForSak(@PathVariable("saksnr") String saksnummer, @RequestBody OpprettSakDto opprettSakDto) {
         if (opprettSakDto.getBrukerID() == null) {
             throw new FunksjonellException("BrukerID trengs for å opprette en sak.");
@@ -250,7 +250,7 @@ public class FagsakTjeneste {
             behandlingOversiktDto.setBehandlingsresultattype(behandlingsresultat.getType());
             behandlingOversiktDto.setSvarFrist(behandling.getDokumentasjonSvarfristDato());
 
-            //setPeriodeOpplysninger(behandling, behandlingOversiktDto);
+            setPeriodeOpplysninger(behandling, behandlingOversiktDto);
         }
         return behandlingOversiktDto;
     }
