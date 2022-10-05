@@ -53,8 +53,7 @@ class JournalfoeringReplikeringIT(
             behandlingstypeKode = Behandlingstyper.FØRSTEGANG.kode
             behandlingstemaKode = Behandlingstema.UTSENDT_ARBEIDSTAKER.kode
         }
-        val journalføringProsessID = journalførOgVentTilProsesserErFerdige(journalfoeringOpprettDto)
-        val prosessinstans = prosessinstansRepository.findById(journalføringProsessID).get()
+        val prosessinstans = journalførOgVentTilProsesserErFerdige(journalfoeringOpprettDto)
         val behandling = prosessinstans.behandling
 
         behandling.status = Behandlingsstatus.AVSLUTTET

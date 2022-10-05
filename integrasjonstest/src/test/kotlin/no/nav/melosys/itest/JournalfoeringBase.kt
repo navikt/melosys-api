@@ -23,6 +23,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.saksflyt.ProsessStatus
 import no.nav.melosys.domain.saksflyt.ProsessType
+import no.nav.melosys.domain.saksflyt.Prosessinstans
 import no.nav.melosys.melosysmock.oppgave.Oppgave
 import no.nav.melosys.melosysmock.sak.SakRepo
 import no.nav.melosys.melosysmock.testdata.TestDataGenerator
@@ -84,7 +85,7 @@ class JournalfoeringBase(
         mockServer.stop()
     }
 
-    protected fun journalførOgVentTilProsesserErFerdige(journalfoeringOpprettDto: JournalfoeringOpprettDto): UUID {
+    protected fun journalførOgVentTilProsesserErFerdige(journalfoeringOpprettDto: JournalfoeringOpprettDto): Prosessinstans {
         val startTime = LocalDateTime.now()
 
         val jfrOppgave: Oppgave = lagJfrOppgave()
@@ -95,7 +96,9 @@ class JournalfoeringBase(
             oppgaveService.ferdigstillOppgave(lagJournalfoeringOpprettDto.oppgaveID)
         }
 
-        return waitForProsesses(startTime)
+        val journalføringProsessID = waitForProsesses(startTime)
+
+        return prosessinstansRepository.findById(journalføringProsessID).get()
     }
 
     protected fun waitForProsesses(startTime: LocalDateTime): UUID {
@@ -109,8 +112,7 @@ class JournalfoeringBase(
         return journalføringProsessID
     }
 
-    protected fun sjekkBehandlingOgBehandlingsgrunnlag(journalføringProsessID: UUID): Behandling {
-        val prosessinstans = prosessinstansRepository.findById(journalføringProsessID).get()
+    protected fun sjekkBehandlingOgBehandlingsgrunnlag(prosessinstans: Prosessinstans): Behandling {
         val behandling = prosessinstans.behandling
 
         behandling.apply {

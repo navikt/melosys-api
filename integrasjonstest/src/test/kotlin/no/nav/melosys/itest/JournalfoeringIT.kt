@@ -31,10 +31,10 @@ class JournalfoeringIT(
         }
 
 
-        val journalføringProsessID = journalførOgVentTilProsesserErFerdige(journalfoeringOpprettDto)
+        val prosessinstans = journalførOgVentTilProsesserErFerdige(journalfoeringOpprettDto)
 
 
-        sjekkBehandlingOgBehandlingsgrunnlag(journalføringProsessID)
+        sjekkBehandlingOgBehandlingsgrunnlag(prosessinstans)
     }
 
     @Test
