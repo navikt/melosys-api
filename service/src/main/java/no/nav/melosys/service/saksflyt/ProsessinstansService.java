@@ -36,8 +36,6 @@ import no.nav.melosys.service.journalforing.dto.DokumentDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringDto;
 import no.nav.melosys.service.sak.OpprettSakDto;
 import no.nav.melosys.service.sak.SakstypeSakstemaKobling;
-import no.nav.melosys.service.sak.SøknadDto;
-import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import no.nav.melosys.service.soknad.SoknadMottatt;
 import no.nav.melosys.service.vedtak.FattVedtakRequest;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
@@ -73,7 +71,7 @@ public class ProsessinstansService {
         this.behandlingsgrunnlagService = behandlingsgrunnlagService;
     }
 
-    public void lagNySak(OpprettSakDto opprettSakDto) {
+    public void opprettNySakOgBehandling(OpprettSakDto opprettSakDto) {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.OPPRETT_SAK);
         prosessinstans.setData(BRUKER_ID, opprettSakDto.getBrukerID());
@@ -89,7 +87,7 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
-    public void lagNyBehandlingForSak(String saksnummer, OpprettSakDto opprettSakDto) {
+    public void opprettNyBehandlingForSak(String saksnummer, OpprettSakDto opprettSakDto) {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.OPPRETT_BEHANDLING_FOR_SAK);
         prosessinstans.setData(BRUKER_ID, opprettSakDto.getBrukerID());

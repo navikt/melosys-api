@@ -29,7 +29,7 @@ import static no.nav.melosys.domain.Fagsak.erSakstypeEøs;
 import static no.nav.melosys.service.sak.SakstypeBehandlingstemaKobling.erGyldigBehandlingstemaForSakstype;
 
 @Service
-public class OpprettNySakFraOppgave {
+public class OpprettSak {
     private final JournalfoeringService journalfoeringService;
     private final OppgaveService oppgaveService;
     private final ProsessinstansService prosessinstansService;
@@ -37,8 +37,8 @@ public class OpprettNySakFraOppgave {
 
     private final FagsakService fagsakService;
 
-    public OpprettNySakFraOppgave(JournalfoeringService journalfoeringService, OppgaveService oppgaveService,
-                                  @Lazy ProsessinstansService prosessinstansService, Unleash unleash, FagsakService fagsakService) {
+    public OpprettSak(JournalfoeringService journalfoeringService, OppgaveService oppgaveService,
+                      @Lazy ProsessinstansService prosessinstansService, Unleash unleash, FagsakService fagsakService) {
         this.journalfoeringService = journalfoeringService;
         this.oppgaveService = oppgaveService;
         this.prosessinstansService = prosessinstansService;
@@ -47,7 +47,7 @@ public class OpprettNySakFraOppgave {
     }
 
     @Transactional
-    public void bestillNySakOgBehandling(OpprettSakDto opprettSakDto) {
+    public void opprettNySakOgBehandlingFraOppgave(OpprettSakDto opprettSakDto) {
         validerOpprettSakDto(opprettSakDto);
         final Oppgave oppgave = validerOppgave(opprettSakDto.getOppgaveID());
         validerJournalpost(journalfoeringService.hentJournalpost(oppgave.getJournalpostId()));
@@ -65,29 +65,9 @@ public class OpprettNySakFraOppgave {
     }
 
     @Transactional
-    public void lagNyBehandlingForSak(String saksnummer, OpprettSakDto opprettSakDto) {
-        Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
-
-        if (fagsak.hentAktivBehandling() != null) {
-            throw new FunksjonellException("Det finnes allerede en aktiv behandling på fagsak " + saksnummer);
-        }
-        validerBehandling(opprettSakDto.getBehandlingstema(), opprettSakDto.getBehandlingstype());
-        prosessinstansService.lagNyBehandlingForSak(saksnummer, opprettSakDto);
-    }
-
-    @Transactional
-    public void lagNySak(OpprettSakDto opprettSakDto) {
+    public void opprettNySakOgBehandling(OpprettSakDto opprettSakDto) {
         validerOpprettSakDto(opprettSakDto);
-        prosessinstansService.lagNySak(opprettSakDto);
-    }
-
-    void validerBehandling(Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
-        if (behandlingstema == null) {
-            throw new FunksjonellException("Behandlingstema mangler");
-        }
-        if (behandlingstype == null) {
-            throw new FunksjonellException("Behandlingstype mangler");
-        }
+        prosessinstansService.opprettNySakOgBehandling(opprettSakDto);
     }
 
     void validerOpprettSakDto(OpprettSakDto opprettSakDto) {

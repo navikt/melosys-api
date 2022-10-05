@@ -1,13 +1,11 @@
 package no.nav.melosys.service.sak;
 
 import java.time.LocalDate;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 import no.finn.unleash.FakeUnleash;
-import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.arkiv.Journalposttype;
@@ -37,7 +35,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class OpprettNySakFraOppgaveTest {
+class OpprettSakTest {
     private static final String JP_ID = "jpID";
 
     @Mock
@@ -59,11 +57,11 @@ class OpprettNySakFraOppgaveTest {
             .stringLengthRange(2, 4);
     }
 
-    private OpprettNySakFraOppgave opprettNySakFraOppgave;
+    private OpprettSak opprettSak;
 
     @BeforeEach
     public void setUp() {
-        opprettNySakFraOppgave = new OpprettNySakFraOppgave(journalfoeringService, oppgaveService, prosessinstansService, unleash, fagsakService);
+        opprettSak = new OpprettSak(journalfoeringService, oppgaveService, prosessinstansService, unleash, fagsakService);
         unleash.enableAll();
     }
 
@@ -76,7 +74,7 @@ class OpprettNySakFraOppgaveTest {
         when(oppgaveService.hentOppgaveMedOppgaveID(opprettSakDto.getOppgaveID())).thenReturn(oppgave);
         when(journalfoeringService.hentJournalpost("1234")).thenReturn(lagJournalpost(Journalposttype.INN, "skanning"));
 
-        opprettNySakFraOppgave.bestillNySakOgBehandling(opprettSakDto);
+        opprettSak.opprettNySakOgBehandlingFraOppgave(opprettSakDto);
 
         verify(prosessinstansService).opprettProsessinstansNySakEØS(oppgave.getJournalpostId(), opprettSakDto, Behandlingstyper.SED);
     }
@@ -91,9 +89,9 @@ class OpprettNySakFraOppgaveTest {
         opprettSakDto.setBehandlingstype(Behandlingstyper.HENVENDELSE);
         Oppgave oppgave = new Oppgave.Builder().setOppgavetype(Oppgavetyper.BEH_SAK_MK).setJournalpostId("1234").build();
 
-        opprettNySakFraOppgave.lagNySak(opprettSakDto);
+        opprettSak.opprettNySakOgBehandling(opprettSakDto);
 
-        verify(prosessinstansService).lagNySak(opprettSakDto);
+        verify(prosessinstansService).opprettNySakOgBehandling(opprettSakDto);
     }
 
     @Test
@@ -106,9 +104,9 @@ class OpprettNySakFraOppgaveTest {
         opprettSakDto.setBehandlingstype(Behandlingstyper.HENVENDELSE);
         Oppgave oppgave = new Oppgave.Builder().setOppgavetype(Oppgavetyper.BEH_SAK_MK).setJournalpostId("1234").build();
 
-        opprettNySakFraOppgave.lagNySak(opprettSakDto);
+        opprettSak.opprettNySakOgBehandling(opprettSakDto);
 
-        verify(prosessinstansService).lagNySak(opprettSakDto);
+        verify(prosessinstansService).opprettNySakOgBehandling(opprettSakDto);
     }
 
     @Test
@@ -121,50 +119,9 @@ class OpprettNySakFraOppgaveTest {
         opprettSakDto.setBehandlingstype(Behandlingstyper.HENVENDELSE);
         Oppgave oppgave = new Oppgave.Builder().setOppgavetype(Oppgavetyper.BEH_SAK_MK).setJournalpostId("1234").build();
 
-        opprettNySakFraOppgave.lagNySak(opprettSakDto);
+        opprettSak.opprettNySakOgBehandling(opprettSakDto);
 
-        verify(prosessinstansService).lagNySak(opprettSakDto);
-    }
-
-    @Test
-    void lagNySakForBehandling_oppretterProsess() {
-        OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
-        opprettSakDto.setHovedpart(Aktoersroller.BRUKER);
-        opprettSakDto.setSakstype(Sakstyper.FTRL);
-        opprettSakDto.setSakstema(Sakstemaer.MEDLEMSKAP_LOVVALG);
-        opprettSakDto.setBehandlingstema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
-        opprettSakDto.setBehandlingstype(Behandlingstyper.HENVENDELSE);
-        Oppgave oppgave = new Oppgave.Builder().setOppgavetype(Oppgavetyper.BEH_SAK_MK).setJournalpostId("1234").build();
-        Fagsak fagsak = new Fagsak();
-        fagsak.setSaksnummer("MEL-1");
-
-        when(fagsakService.hentFagsak(fagsak.getSaksnummer())).thenReturn(fagsak);
-
-        opprettNySakFraOppgave.lagNyBehandlingForSak(fagsak.getSaksnummer(), opprettSakDto);
-
-        verify(prosessinstansService).lagNyBehandlingForSak(fagsak.getSaksnummer(), opprettSakDto);
-    }
-
-    @Test
-    void lagNySakForBehandling_oppretterProsess_feiler() {
-        OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
-        opprettSakDto.setHovedpart(Aktoersroller.BRUKER);
-        opprettSakDto.setSakstype(Sakstyper.FTRL);
-        opprettSakDto.setSakstema(Sakstemaer.MEDLEMSKAP_LOVVALG);
-        opprettSakDto.setBehandlingstema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
-        opprettSakDto.setBehandlingstype(Behandlingstyper.HENVENDELSE);
-        Oppgave oppgave = new Oppgave.Builder().setOppgavetype(Oppgavetyper.BEH_SAK_MK).setJournalpostId("1234").build();
-        Fagsak fagsak = new Fagsak();
-        Behandling behandling = new Behandling();
-
-        fagsak.setSaksnummer("MEL-1");
-        fagsak.setBehandlinger(Arrays.asList(behandling));
-
-        when(fagsakService.hentFagsak(fagsak.getSaksnummer())).thenReturn(fagsak);
-
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> opprettNySakFraOppgave.lagNyBehandlingForSak(fagsak.getSaksnummer(), opprettSakDto))
-            .withMessageContaining("Det finnes allerede en aktiv behandling på fagsak");
+        verify(prosessinstansService).opprettNySakOgBehandling(opprettSakDto);
     }
 
     @Test
@@ -177,7 +134,7 @@ class OpprettNySakFraOppgaveTest {
         when(oppgaveService.hentOppgaveMedOppgaveID(opprettSakDto.getOppgaveID())).thenReturn(oppgave);
         when(journalfoeringService.hentJournalpost("1234")).thenReturn(lagJournalpost(Journalposttype.INN, "skanning"));
 
-        opprettNySakFraOppgave.bestillNySakOgBehandling(opprettSakDto);
+        opprettSak.opprettNySakOgBehandlingFraOppgave(opprettSakDto);
 
         verify(prosessinstansService).opprettProsessinstansNySakFTRLTrygdeavtale(oppgave.getJournalpostId(), opprettSakDto);
     }
@@ -192,7 +149,7 @@ class OpprettNySakFraOppgaveTest {
         when(oppgaveService.hentOppgaveMedOppgaveID(opprettSakDto.getOppgaveID())).thenReturn(oppgave);
         when(journalfoeringService.hentJournalpost("1234")).thenReturn(lagJournalpost(Journalposttype.INN, "skanning"));
 
-        opprettNySakFraOppgave.bestillNySakOgBehandling(opprettSakDto);
+        opprettSak.opprettNySakOgBehandlingFraOppgave(opprettSakDto);
 
         verify(prosessinstansService).opprettProsessinstansNySakFTRLTrygdeavtale(oppgave.getJournalpostId(), opprettSakDto);
     }
@@ -205,7 +162,7 @@ class OpprettNySakFraOppgaveTest {
         unleash.disableAll();
 
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> opprettNySakFraOppgave.bestillNySakOgBehandling(opprettSakDto))
+            .isThrownBy(() -> opprettSak.opprettNySakOgBehandlingFraOppgave(opprettSakDto))
             .withMessageContaining("Kan ikke opprette ny sak med");
     }
 
@@ -218,7 +175,7 @@ class OpprettNySakFraOppgaveTest {
         opprettSakDto.setOppgaveID("");
 
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> opprettNySakFraOppgave.bestillNySakOgBehandling(opprettSakDto))
+            .isThrownBy(() -> opprettSak.opprettNySakOgBehandlingFraOppgave(opprettSakDto))
             .withMessageContaining("OppgaveID mangler.");
     }
 
@@ -231,7 +188,7 @@ class OpprettNySakFraOppgaveTest {
         when(oppgaveService.hentOppgaveMedOppgaveID(opprettSakDto.getOppgaveID())).thenReturn(oppgave);
 
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> opprettNySakFraOppgave.bestillNySakOgBehandling(opprettSakDto))
+            .isThrownBy(() -> opprettSak.opprettNySakOgBehandlingFraOppgave(opprettSakDto))
             .withMessageContaining("mangler journalpost");
     }
 
@@ -245,7 +202,7 @@ class OpprettNySakFraOppgaveTest {
         when(journalfoeringService.hentJournalpost(JP_ID)).thenReturn(lagJournalpost(Journalposttype.UT, "NAV"));
 
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> opprettNySakFraOppgave.bestillNySakOgBehandling(opprettSakDto))
+            .isThrownBy(() -> opprettSak.opprettNySakOgBehandlingFraOppgave(opprettSakDto))
             .withMessageContaining("utgående journalposter");
     }
 
@@ -261,7 +218,7 @@ class OpprettNySakFraOppgaveTest {
         when(journalfoeringService.finnSakTilknyttetSedJournalpost(journalpost)).thenReturn(Optional.of(new Fagsak()));
 
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> opprettNySakFraOppgave.bestillNySakOgBehandling(opprettSakDto))
+            .isThrownBy(() -> opprettSak.opprettNySakOgBehandlingFraOppgave(opprettSakDto))
             .withMessageContaining("SED-en som er tilknyttet Gosys-oppgaven du har valgt er allerede koblet til ");
     }
 
@@ -276,7 +233,7 @@ class OpprettNySakFraOppgaveTest {
         when(journalfoeringService.hentJournalpost(JP_ID)).thenReturn(journalpost);
         when(journalfoeringService.finnSakTilknyttetSedJournalpost(journalpost)).thenReturn(Optional.empty());
 
-        opprettNySakFraOppgave.bestillNySakOgBehandling(opprettSakDto);
+        opprettSak.opprettNySakOgBehandlingFraOppgave(opprettSakDto);
 
         verify(prosessinstansService).opprettProsessinstansNySakEØS(oppgave.getJournalpostId(), opprettSakDto, Behandlingstyper.SED);
     }
@@ -296,7 +253,7 @@ class OpprettNySakFraOppgaveTest {
         when(journalfoeringService.hentJournalpost(JP_ID)).thenReturn(journalpost);
         when(journalfoeringService.finnSakTilknyttetSedJournalpost(journalpost)).thenReturn(Optional.empty());
 
-        opprettNySakFraOppgave.bestillNySakOgBehandling(opprettSakDto);
+        opprettSak.opprettNySakOgBehandlingFraOppgave(opprettSakDto);
 
         verify(prosessinstansService).opprettProsessinstansNySakEØS(oppgave.getJournalpostId(), opprettSakDto, Behandlingstyper.SOEKNAD);
     }
@@ -318,7 +275,7 @@ class OpprettNySakFraOppgaveTest {
         when(oppgaveService.hentOppgaveMedOppgaveID(opprettSakDto.getOppgaveID())).thenReturn(oppgave);
 
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> opprettNySakFraOppgave.bestillNySakOgBehandling(opprettSakDto))
+            .isThrownBy(() -> opprettSak.opprettNySakOgBehandlingFraOppgave(opprettSakDto))
             .withMessageContaining("kan ikke opprettes på bakgrunn av oppgave med type");
     }
 
@@ -336,7 +293,7 @@ class OpprettNySakFraOppgaveTest {
         doThrow(new FunksjonellException("Behandlingstema")).when(journalfoeringService).validerBehandlingstema(any(), any(), any(), any(), any());
 
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> opprettNySakFraOppgave.bestillNySakOgBehandling(opprettSakDto))
+            .isThrownBy(() -> opprettSak.opprettNySakOgBehandlingFraOppgave(opprettSakDto))
             .withMessageContaining("Behandlingstema");
     }
 
@@ -349,7 +306,7 @@ class OpprettNySakFraOppgaveTest {
         doThrow(new FunksjonellException("Behandlingstema")).when(journalfoeringService).validerBehandlingstema(any(), any(), any(), any(), any());
 
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> opprettNySakFraOppgave.lagNySak(opprettSakDto))
+            .isThrownBy(() -> opprettSak.opprettNySakOgBehandling(opprettSakDto))
             .withMessageContaining("Behandlingstema");
     }
 
@@ -362,37 +319,7 @@ class OpprettNySakFraOppgaveTest {
         doThrow(new FunksjonellException("Behandlingstype")).when(journalfoeringService).validerBehandlingstype(any(), any(), any(), any(), any(), any());
 
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> opprettNySakFraOppgave.lagNySak(opprettSakDto))
-            .withMessageContaining("Behandlingstype");
-    }
-
-    @Test
-    void lagNyBehandlingForSak_validerOpprettSakDto_manglerBehandlingstema_feiler() {
-        OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
-        opprettSakDto.setSakstype(Sakstyper.EU_EOS);
-        opprettSakDto.setBehandlingstema(null);
-        Fagsak fagsak = new Fagsak();
-        fagsak.setSaksnummer("MEL-1");
-
-        when(fagsakService.hentFagsak(fagsak.getSaksnummer())).thenReturn(fagsak);
-
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> opprettNySakFraOppgave.lagNyBehandlingForSak(fagsak.getSaksnummer(), opprettSakDto))
-            .withMessageContaining("Behandlingstema");
-    }
-
-    @Test
-    void lagNyBehandlingForSak_validerOpprettSakDto_manglerBehandlingstype_feiler() {
-        OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
-        opprettSakDto.setSakstype(Sakstyper.EU_EOS);
-        opprettSakDto.setBehandlingstype(null);
-        Fagsak fagsak = new Fagsak();
-        fagsak.setSaksnummer("MEL-1");
-
-        when(fagsakService.hentFagsak(fagsak.getSaksnummer())).thenReturn(fagsak);
-
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> opprettNySakFraOppgave.lagNyBehandlingForSak(fagsak.getSaksnummer(), opprettSakDto))
+            .isThrownBy(() -> opprettSak.opprettNySakOgBehandling(opprettSakDto))
             .withMessageContaining("Behandlingstype");
     }
 
@@ -404,7 +331,7 @@ class OpprettNySakFraOppgaveTest {
         opprettSakDto.setSoknadDto(null);
 
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> opprettNySakFraOppgave.bestillNySakOgBehandling(opprettSakDto))
+            .isThrownBy(() -> opprettSak.opprettNySakOgBehandlingFraOppgave(opprettSakDto))
             .withMessageContaining("må ikke være null");
     }
 
@@ -419,7 +346,7 @@ class OpprettNySakFraOppgaveTest {
         when(oppgaveService.hentOppgaveMedOppgaveID(opprettSakDto.getOppgaveID())).thenReturn(oppgave);
         when(journalfoeringService.hentJournalpost("1234")).thenReturn(lagJournalpost(Journalposttype.INN, "skanning"));
 
-        opprettNySakFraOppgave.bestillNySakOgBehandling(opprettSakDto);
+        opprettSak.opprettNySakOgBehandlingFraOppgave(opprettSakDto);
 
         verify(prosessinstansService).opprettProsessinstansNySakFTRLTrygdeavtale(oppgave.getJournalpostId(), opprettSakDto);
     }
@@ -434,7 +361,7 @@ class OpprettNySakFraOppgaveTest {
         when(oppgaveService.hentOppgaveMedOppgaveID(opprettSakDto.getOppgaveID())).thenReturn(oppgave);
         when(journalfoeringService.hentJournalpost("1234")).thenReturn(lagJournalpost(Journalposttype.INN, "skanning"));
 
-        opprettNySakFraOppgave.bestillNySakOgBehandling(opprettSakDto);
+        opprettSak.opprettNySakOgBehandlingFraOppgave(opprettSakDto);
 
         verify(prosessinstansService).opprettProsessinstansNySakFTRLTrygdeavtale(oppgave.getJournalpostId(), opprettSakDto);
     }
@@ -448,7 +375,7 @@ class OpprettNySakFraOppgaveTest {
         opprettSakDto.getSoknadDto().getPeriode().setFom(null);
 
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> opprettNySakFraOppgave.bestillNySakOgBehandling(opprettSakDto))
+            .isThrownBy(() -> opprettSak.opprettNySakOgBehandlingFraOppgave(opprettSakDto))
             .withMessageContaining("fra og med dato");
     }
 
@@ -462,7 +389,7 @@ class OpprettNySakFraOppgaveTest {
         opprettSakDto.getSoknadDto().getLand().getLandkoder().clear();
 
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> opprettNySakFraOppgave.bestillNySakOgBehandling(opprettSakDto))
+            .isThrownBy(() -> opprettSak.opprettNySakOgBehandlingFraOppgave(opprettSakDto))
             .withMessageContaining("land");
     }
 
@@ -475,7 +402,7 @@ class OpprettNySakFraOppgaveTest {
         opprettSakDto.getSoknadDto().getLand().setLandkoder(Collections.singletonList("DK"));
 
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> opprettNySakFraOppgave.bestillNySakOgBehandling(opprettSakDto))
+            .isThrownBy(() -> opprettSak.opprettNySakOgBehandlingFraOppgave(opprettSakDto))
             .withMessageContaining("land");
     }
 }

@@ -26,7 +26,8 @@ import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService;
 import no.nav.melosys.service.sak.FagsakService;
-import no.nav.melosys.service.sak.OpprettNySakFraOppgave;
+import no.nav.melosys.service.sak.OpprettBehandlingForSak;
+import no.nav.melosys.service.sak.OpprettSak;
 import no.nav.melosys.service.sak.OpprettSakDto;
 import no.nav.melosys.service.saksopplysninger.SaksopplysningerService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
@@ -54,11 +55,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(controllers = {FagsakTjeneste.class})
 class FagsakTjenesteTest {
-
     @MockBean
     private static FagsakService fagsakService;
     @MockBean
-    private static OpprettNySakFraOppgave opprettNySakFraOppgave;
+    private static OpprettSak opprettSak;
     @MockBean
     private static Aksesskontroll aksesskontroll;
     @MockBean
@@ -71,6 +71,8 @@ class FagsakTjenesteTest {
     private static BehandlingsgrunnlagService behandlingsgrunnlagService;
     @MockBean
     private static BehandlingsresultatService behandlingsresultatService;
+    @MockBean
+    private static OpprettBehandlingForSak opprettBehandlingForSak;
 
     @Autowired
     private MockMvc mockMvc;

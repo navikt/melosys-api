@@ -17,10 +17,7 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService;
-import no.nav.melosys.service.sak.EndreSakDto;
-import no.nav.melosys.service.sak.FagsakService;
-import no.nav.melosys.service.sak.OpprettNySakFraOppgave;
-import no.nav.melosys.service.sak.OpprettSakDto;
+import no.nav.melosys.service.sak.*;
 import no.nav.melosys.service.saksopplysninger.SaksopplysningerService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
@@ -48,26 +45,30 @@ public class FagsakTjeneste {
     private static final String UKJENT_NAVN = "UKJENT";
 
     private final FagsakService fagsakService;
-    private final OpprettNySakFraOppgave opprettNySakFraOppgave;
+    private final OpprettSak opprettSak;
     private final Aksesskontroll aksesskontroll;
     private final BehandlingsgrunnlagService behandlingsgrunnlagService;
     private final BehandlingsresultatService behandlingsresultatService;
     private final PersondataFasade persondataFasade;
     private final SaksopplysningerService saksopplysningerService;
     private final OrganisasjonOppslagService organisasjonOppslagService;
+    private final OpprettBehandlingForSak opprettBehandlingForSak;
 
     public FagsakTjeneste(FagsakService fagsakService, Aksesskontroll aksesskontroll, BehandlingsgrunnlagService behandlingsgrunnlagService,
-                          OpprettNySakFraOppgave opprettNySakFraOppgave,
+                          OpprettSak opprettSak,
                           BehandlingsresultatService behandlingsresultatService, PersondataFasade persondataFasade,
-                          SaksopplysningerService saksopplysningerService, OrganisasjonOppslagService organisasjonOppslagService) {
+                          SaksopplysningerService saksopplysningerService, OrganisasjonOppslagService organisasjonOppslagService,
+                          OpprettBehandlingForSak opprettBehandlingForSak) {
         this.fagsakService = fagsakService;
         this.aksesskontroll = aksesskontroll;
         this.behandlingsgrunnlagService = behandlingsgrunnlagService;
-        this.opprettNySakFraOppgave = opprettNySakFraOppgave;
+        this.opprettSak = opprettSak;
         this.behandlingsresultatService = behandlingsresultatService;
         this.persondataFasade = persondataFasade;
         this.saksopplysningerService = saksopplysningerService;
         this.organisasjonOppslagService = organisasjonOppslagService;
+        this.opprettBehandlingForSak = opprettBehandlingForSak;
+
     }
 
     @GetMapping("/{saksnr}")
@@ -82,16 +83,16 @@ public class FagsakTjeneste {
 
     @PostMapping
     @ApiOperation(value = "Oppretter en ny sak.")
-    public ResponseEntity<Void> lagNySak(@RequestBody OpprettSakDto opprettSakDto) {
+    public ResponseEntity<Void> opprettNySak(@RequestBody OpprettSakDto opprettSakDto) {
         if (opprettSakDto.getBrukerID() == null) {
             throw new FunksjonellException("BrukerID trengs for å opprette en sak.");
         }
         aksesskontroll.autoriserFolkeregisterIdent(opprettSakDto.getBrukerID());
 
         if (opprettSakDto.getOppgaveID() == null) {
-            opprettNySakFraOppgave.lagNySak(opprettSakDto);
+            opprettSak.opprettNySakOgBehandling(opprettSakDto);
         } else {
-            opprettNySakFraOppgave.bestillNySakOgBehandling(opprettSakDto);
+            opprettSak.opprettNySakOgBehandlingFraOppgave(opprettSakDto);
         }
 
         return ResponseEntity.noContent().build();
@@ -99,12 +100,12 @@ public class FagsakTjeneste {
 
     @PostMapping("/{saksnr}/behandlinger")
     @ApiOperation(value = "Oppretter en ny behandling for sak.")
-    public ResponseEntity<Void> lagNyBehandlingForSak(@PathVariable("saksnr") String saksnummer, @RequestBody OpprettSakDto opprettSakDto) {
+    public ResponseEntity<Void> opprettNyBehandlingForSak(@PathVariable("saksnr") String saksnummer, @RequestBody OpprettSakDto opprettSakDto) {
         if (opprettSakDto.getBrukerID() == null) {
             throw new FunksjonellException("BrukerID trengs for å opprette en sak.");
         }
         aksesskontroll.autoriserFolkeregisterIdent(opprettSakDto.getBrukerID());
-        opprettNySakFraOppgave.lagNyBehandlingForSak(saksnummer, opprettSakDto);
+        opprettBehandlingForSak.opprettBehandling(saksnummer, opprettSakDto);
 
         return ResponseEntity.noContent().build();
     }
