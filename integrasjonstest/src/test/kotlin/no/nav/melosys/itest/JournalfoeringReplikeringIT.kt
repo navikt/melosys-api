@@ -17,7 +17,6 @@ import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
-import no.nav.melosys.domain.saksflyt.ProsessType
 import no.nav.melosys.melosysmock.oppgave.Oppgave
 import no.nav.melosys.melosysmock.testdata.TestDataGenerator
 import no.nav.melosys.repository.BehandlingRepository
@@ -31,7 +30,6 @@ import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
-import java.time.LocalDateTime
 
 class JournalfoeringReplikeringIT(
     @Autowired testDataGenerator: TestDataGenerator,
@@ -67,13 +65,10 @@ class JournalfoeringReplikeringIT(
             }
         )
 
-        behandling.fagsak.behandlinger.shouldHaveSize(1)
 
-        val startTime = LocalDateTime.now()
-        ThreadLocalAccessInfo.executeProcess("journalførOgOpprettAndregangsBehandling") {
+        executeAndWait {
             journalføringService.journalførOgOpprettAndregangsBehandling(journalfoeringTilordneDto)
         }
-        finnProsessID(ProsessType.JFR_ANDREGANG_REPLIKER_BEHANDLING, startTime)
 
 
         val fagsak = fagsakRepository.findBySaksnummer(behandling.fagsak.saksnummer).get()
@@ -100,9 +95,9 @@ class JournalfoeringReplikeringIT(
 
     private fun lagJournalfoeringTilordneDto(
         saksnummer: String,
-        jfrOppgave: Oppgave = lagJfrOppgave(),
         journalfoeringTilordneDto: JournalfoeringTilordneDto = defaultJournalfoeringTilordneDto()
     ): JournalfoeringTilordneDto {
+        val jfrOppgave: Oppgave = lagJfrOppgave()
         var hentJournalpost: Journalpost? = null
         ThreadLocalAccessInfo.executeProcess("hentJournalpost") {
             hentJournalpost = journalføringService.hentJournalpost(jfrOppgave.journalpostId)

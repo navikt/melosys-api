@@ -86,18 +86,21 @@ class JournalfoeringBase(
     }
 
     protected fun journalførOgVentTilProsesserErFerdige(journalfoeringOpprettDto: JournalfoeringOpprettDto): Prosessinstans {
-        val startTime = LocalDateTime.now()
-
         val jfrOppgave: Oppgave = lagJfrOppgave()
         val lagJournalfoeringOpprettDto = lagJournalfoeringOpprettDto(jfrOppgave, journalfoeringOpprettDto)
 
-        ThreadLocalAccessInfo.executeProcess("Journalfør dokument og opprett ny sak. Ferdigstill journalføringsoppgave.") {
+        return executeAndWait {
             journalføringService.journalførOgOpprettSak(lagJournalfoeringOpprettDto)
             oppgaveService.ferdigstillOppgave(lagJournalfoeringOpprettDto.oppgaveID)
         }
+    }
 
+    fun executeAndWait(action: () -> Unit): Prosessinstans {
+        val startTime = LocalDateTime.now()
+        ThreadLocalAccessInfo.executeProcess("steg") {
+            action()
+        }
         val journalføringProsessID = waitForProsesses(startTime)
-
         return prosessinstansRepository.findById(journalføringProsessID).get()
     }
 
