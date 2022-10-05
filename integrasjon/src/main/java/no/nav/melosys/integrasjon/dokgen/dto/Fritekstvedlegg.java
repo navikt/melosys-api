@@ -9,8 +9,8 @@ public class Fritekstvedlegg extends DokgenDto {
 
     protected Fritekstvedlegg(FritekstvedleggBrevbestilling brevbestilling, Aktoersroller mottakerType) {
         super(brevbestilling, mottakerType);
-        this.fritekstTittel = brevbestilling.getFritekstTittel();
-        this.fritekst = brevbestilling.getFritekst();
+        this.fritekstTittel = brevbestilling.getFritekstvedleggTittel();
+        this.fritekst = brevbestilling.getFritekstvedleggTekst();
     }
 
     public static Fritekstvedlegg av(FritekstvedleggBrevbestilling brevbestilling, Aktoersroller mottakerType) {

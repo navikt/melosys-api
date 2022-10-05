@@ -2,7 +2,6 @@ package no.nav.melosys.saksflyt.steg.brev;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import no.nav.melosys.domain.Aktoer;
@@ -193,8 +192,8 @@ public class OpprettOgJournalforBrev implements StegBehandler {
             var vedleggBestilling = new FritekstvedleggBrevbestilling.Builder()
                 .medBehandlingId(fritekstbrevBrevbestilling.getBehandlingId())
                 .medProduserbartdokument(Produserbaredokumenter.GENERELT_FRITEKSTVEDLEGG)
-                .medFritekstTittel(vedlegg.tittel())
-                .medFritekst(vedlegg.fritekst())
+                .medFritekstvedleggTittel(vedlegg.tittel())
+                .medFritekstvedleggTekst(vedlegg.fritekst())
                 .build();
             return new Vedlegg(dokgenService.produserBrev(mottaker, vedleggBestilling), vedlegg.tittel());
         }).toList();

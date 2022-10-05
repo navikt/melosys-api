@@ -1,8 +1,8 @@
 package no.nav.melosys.domain.brev;
 
 public class FritekstvedleggBrevbestilling extends DokgenBrevbestilling {
-    private String fritekstTittel;
-    private String fritekst;
+    private String fritekstvedleggTittel;
+    private String fritekstvedleggTekst;
 
     public FritekstvedleggBrevbestilling() {
         super();
@@ -11,16 +11,16 @@ public class FritekstvedleggBrevbestilling extends DokgenBrevbestilling {
 
     public FritekstvedleggBrevbestilling(FritekstvedleggBrevbestilling.Builder builder) {
         super(builder);
-        this.fritekstTittel = builder.fritekstTittel;
-        this.fritekst = builder.fritekst;
+        this.fritekstvedleggTittel = builder.fritekstvedleggTittel;
+        this.fritekstvedleggTekst = builder.fritekstvedleggTekst;
     }
 
-    public String getFritekstTittel() {
-        return fritekstTittel;
+    public String getFritekstvedleggTittel() {
+        return fritekstvedleggTittel;
     }
 
-    public String getFritekst() {
-        return fritekst;
+    public String getFritekstvedleggTekst() {
+        return fritekstvedleggTekst;
     }
 
     public Builder toBuilder() {
@@ -28,25 +28,25 @@ public class FritekstvedleggBrevbestilling extends DokgenBrevbestilling {
     }
 
     public static final class Builder extends DokgenBrevbestilling.Builder<Builder> {
-        private String fritekstTittel;
-        private String fritekst;
+        private String fritekstvedleggTittel;
+        private String fritekstvedleggTekst;
 
         public Builder() {
         }
 
         public Builder(FritekstvedleggBrevbestilling fritekstvedleggBrevbestilling) {
             super(fritekstvedleggBrevbestilling);
-            this.fritekstTittel = fritekstvedleggBrevbestilling.fritekstTittel;
-            this.fritekst = fritekstvedleggBrevbestilling.fritekst;
+            this.fritekstvedleggTittel = fritekstvedleggBrevbestilling.fritekstvedleggTittel;
+            this.fritekstvedleggTekst = fritekstvedleggBrevbestilling.fritekstvedleggTekst;
         }
 
-        public Builder medFritekstTittel(String fritekstTittel) {
-            this.fritekstTittel = fritekstTittel;
+        public Builder medFritekstvedleggTittel(String fritekstvedleggTittel) {
+            this.fritekstvedleggTittel = fritekstvedleggTittel;
             return this;
         }
 
-        public Builder medFritekst(String fritekst) {
-            this.fritekst = fritekst;
+        public Builder medFritekstvedleggTekst(String fritekstvedleggTekst) {
+            this.fritekstvedleggTekst = fritekstvedleggTekst;
             return this;
         }
 
