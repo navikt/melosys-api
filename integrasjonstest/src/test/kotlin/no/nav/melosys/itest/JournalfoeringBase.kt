@@ -10,7 +10,6 @@ import io.kotest.matchers.types.shouldBeInstanceOf
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsystem
 import no.nav.melosys.domain.arkiv.ArkivDokument
-import no.nav.melosys.domain.arkiv.Journalpost
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode
 import no.nav.melosys.domain.kodeverk.Avsendertyper
@@ -45,7 +44,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 import java.util.concurrent.TimeUnit
-import kotlin.jvm.optionals.getOrNull
 
 @Import(KodeverkStub::class)
 class JournalfoeringBase(
@@ -57,6 +55,8 @@ class JournalfoeringBase(
 
     private val mockServer: WireMockServer =
         WireMockServer(WireMockConfiguration.wireMockConfig().port(8094))
+
+    private val processUUID = UUID.randomUUID()
 
     @BeforeEach
     fun before() {
@@ -78,41 +78,35 @@ class JournalfoeringBase(
                     .withBody(ByteArray(0))
             )
         )
+        ThreadLocalAccessInfo.beforeExecuteProcess(processUUID, "steg")
     }
 
     @AfterEach
     fun after() {
+        ThreadLocalAccessInfo.afterExecuteProcess(processUUID)
         mockServer.stop()
     }
 
     protected fun journalførOgVentTilProsesserErFerdige(journalfoeringOpprettDto: JournalfoeringOpprettDto): Prosessinstans {
-        val jfrOppgave: Oppgave = lagJfrOppgave()
-        val lagJournalfoeringOpprettDto = lagJournalfoeringOpprettDto(jfrOppgave, journalfoeringOpprettDto)
+        return executeAndWait(ProsessType.JFR_NY_SAK_BRUKER, listOf(ProsessType.OPPRETT_OG_DISTRIBUER_BREV)) {
+            val jfrOppgave: Oppgave = lagJfrOppgave()
+            val lagJournalfoeringOpprettDto = lagJournalfoeringOpprettDto(jfrOppgave, journalfoeringOpprettDto)
 
-        return executeAndWait {
             journalføringService.journalførOgOpprettSak(lagJournalfoeringOpprettDto)
             oppgaveService.ferdigstillOppgave(lagJournalfoeringOpprettDto.oppgaveID)
         }
     }
 
-    fun executeAndWait(action: () -> Unit): Prosessinstans {
+    fun executeAndWait(
+        waitForprosessType: ProsessType,
+        alsoWaitForprosessType: List<ProsessType> = listOf(),
+        process: () -> Unit
+    ): Prosessinstans {
         val startTime = LocalDateTime.now()
-        ThreadLocalAccessInfo.executeProcess("steg") {
-            action()
-        }
-        val journalføringProsessID = waitForProsesses(startTime)
+        process()
+        val journalføringProsessID = finnProsessID(waitForprosessType, startTime)
+        alsoWaitForprosessType.forEach { finnProsessID(it, startTime) }
         return prosessinstansRepository.findById(journalføringProsessID).get()
-    }
-
-    protected fun waitForProsesses(startTime: LocalDateTime): UUID {
-        val journalføringProsessID = finnProsessID(ProsessType.JFR_NY_SAK_BRUKER, startTime)
-        listOf(
-            journalføringProsessID,
-            finnProsessID(ProsessType.OPPRETT_OG_DISTRIBUER_BREV, startTime)
-        ).forEach {
-            sjekkAtprosesssHarStatusFerdig(it)
-        }
-        return journalføringProsessID
     }
 
     protected fun sjekkBehandlingOgBehandlingsgrunnlag(prosessinstans: Prosessinstans): Behandling {
@@ -143,14 +137,6 @@ class JournalfoeringBase(
         return behandling
     }
 
-
-    @OptIn(ExperimentalStdlibApi::class)
-    private fun sjekkAtprosesssHarStatusFerdig(prosessID: UUID) =
-        await.until {
-            prosessinstansRepository.findById(prosessID)
-                .getOrNull()?.status == ProsessStatus.FERDIG
-        }
-
     protected fun finnProsessID(prosessType: ProsessType, now: LocalDateTime): UUID =
         await.timeout(30, TimeUnit.SECONDS).untilNotNull {
             prosessinstansRepository.findAll()
@@ -164,10 +150,7 @@ class JournalfoeringBase(
         jfrOppgave: Oppgave,
         journalfoeringOpprettDto: JournalfoeringOpprettDto
     ): JournalfoeringOpprettDto {
-        var hentJournalpost: Journalpost? = null
-        ThreadLocalAccessInfo.executeProcess("hentJournalpost") {
-            hentJournalpost = journalføringService.hentJournalpost(jfrOppgave.journalpostId)
-        }
+        val hentJournalpost = journalføringService.hentJournalpost(jfrOppgave.journalpostId)
         return lagJournalføringDto(jfrOppgave, hentJournalpost!!.hoveddokument, journalfoeringOpprettDto)
     }
 

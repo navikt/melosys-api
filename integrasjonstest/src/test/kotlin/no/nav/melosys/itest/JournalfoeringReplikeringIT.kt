@@ -7,7 +7,6 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import no.finn.unleash.FakeUnleash
 import no.nav.melosys.domain.arkiv.ArkivDokument
-import no.nav.melosys.domain.arkiv.Journalpost
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode
 import no.nav.melosys.domain.kodeverk.Avsendertyper
@@ -17,6 +16,7 @@ import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
+import no.nav.melosys.domain.saksflyt.ProsessType
 import no.nav.melosys.melosysmock.oppgave.Oppgave
 import no.nav.melosys.melosysmock.testdata.TestDataGenerator
 import no.nav.melosys.repository.BehandlingRepository
@@ -26,7 +26,6 @@ import no.nav.melosys.service.journalforing.JournalfoeringService
 import no.nav.melosys.service.journalforing.dto.DokumentDto
 import no.nav.melosys.service.journalforing.dto.JournalfoeringTilordneDto
 import no.nav.melosys.service.oppgave.OppgaveService
-import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
@@ -66,7 +65,7 @@ class JournalfoeringReplikeringIT(
         )
 
 
-        executeAndWait {
+        executeAndWait(ProsessType.JFR_ANDREGANG_REPLIKER_BEHANDLING) {
             journalføringService.journalførOgOpprettAndregangsBehandling(journalfoeringTilordneDto)
         }
 
@@ -95,13 +94,10 @@ class JournalfoeringReplikeringIT(
 
     private fun lagJournalfoeringTilordneDto(
         saksnummer: String,
+        jfrOppgave: Oppgave = lagJfrOppgave(),
         journalfoeringTilordneDto: JournalfoeringTilordneDto = defaultJournalfoeringTilordneDto()
     ): JournalfoeringTilordneDto {
-        val jfrOppgave: Oppgave = lagJfrOppgave()
-        var hentJournalpost: Journalpost? = null
-        ThreadLocalAccessInfo.executeProcess("hentJournalpost") {
-            hentJournalpost = journalføringService.hentJournalpost(jfrOppgave.journalpostId)
-        }
+        val hentJournalpost = journalføringService.hentJournalpost(jfrOppgave.journalpostId)
         return lagJournalfoeringTilordneDto(
             jfrOppgave, hentJournalpost!!.hoveddokument, saksnummer, journalfoeringTilordneDto
         )
