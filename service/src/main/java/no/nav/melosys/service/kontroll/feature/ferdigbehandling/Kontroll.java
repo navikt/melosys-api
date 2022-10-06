@@ -3,6 +3,7 @@ package no.nav.melosys.service.kontroll.feature.ferdigbehandling;
 import java.util.Collection;
 import java.util.Objects;
 
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
@@ -13,10 +14,10 @@ import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.FerdigbehandlingKontrollData;
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.kontroll.FerdigbehandlingKontrollsett;
 import no.nav.melosys.service.persondata.PersondataFasade;
+import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import no.nav.melosys.service.validering.Kontrollfeil;
 import org.springframework.stereotype.Component;
 
@@ -25,13 +26,13 @@ class Kontroll {
     private final BehandlingService behandlingService;
     private final LovvalgsperiodeService lovvalgsperiodeService;
     private final PersondataFasade persondataFasade;
-    private final BehandlingsresultatService behandlingsresultatService;
+    private final Unleash unleash;
 
-    public Kontroll(BehandlingService behandlingService, LovvalgsperiodeService lovvalgsperiodeService, PersondataFasade persondataFasade, BehandlingsresultatService behandlingsresultatService) {
+    public Kontroll(BehandlingService behandlingService, LovvalgsperiodeService lovvalgsperiodeService, PersondataFasade persondataFasade, Unleash unleash) {
         this.behandlingService = behandlingService;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
         this.persondataFasade = persondataFasade;
-        this.behandlingsresultatService = behandlingsresultatService;
+        this.unleash = unleash;
     }
 
     public void kontroller(long behandlingId, Behandlingsresultattyper behandlingsresultattype) throws ValideringException {
@@ -77,9 +78,18 @@ class Kontroll {
     }
 
     private FerdigbehandlingKontrollData hentKontrollDataForAvslagOgHenleggelse(Behandling behandling) {
-        BehandlingsgrunnlagData behandlingsgrunnlagData = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
-        Persondata persondata = hentPersondata(behandling);
-        return FerdigbehandlingKontrollData.lagKontrollDataForAvslag(persondata, behandlingsgrunnlagData);
+        if (unleash.isEnabled("melosys.behandle_alle_saker")) {
+            BehandlingsgrunnlagData behandlingsgrunnlagData = null;
+            if (!SaksbehandlingRegler.harTomFlyt(behandling)) {
+                behandlingsgrunnlagData = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
+            }
+            Persondata persondata = hentPersondata(behandling);
+            return FerdigbehandlingKontrollData.lagKontrollDataForAvslag(persondata, behandlingsgrunnlagData);
+        } else  {
+            BehandlingsgrunnlagData behandlingsgrunnlagData = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
+            Persondata persondata = hentPersondata(behandling);
+            return FerdigbehandlingKontrollData.lagKontrollDataForAvslag(persondata, behandlingsgrunnlagData);
+        }
     }
 
     private FerdigbehandlingKontrollData hentVedtakKontrollData(Behandling behandling) {
