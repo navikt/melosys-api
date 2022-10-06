@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.ErPeriode;
 import no.nav.melosys.domain.VilkaarBegrunnelse;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
@@ -38,15 +39,18 @@ public class InngangsvilkaarService {
     private final InngangsvilkaarConsumer inngangsvilkaarConsumer;
     private final PersondataFasade persondataFasade;
     private final VilkaarsresultatService vilkaarsresultatService;
+    private final Unleash unleash;
 
     public InngangsvilkaarService(BehandlingService behandlingService,
                                   InngangsvilkaarConsumer inngangsvilkaarConsumer,
                                   PersondataFasade persondataFasade,
-                                  VilkaarsresultatService vilkaarsresultatService) {
+                                  VilkaarsresultatService vilkaarsresultatService,
+                                  Unleash unleash) {
         this.behandlingService = behandlingService;
         this.inngangsvilkaarConsumer = inngangsvilkaarConsumer;
         this.persondataFasade = persondataFasade;
         this.vilkaarsresultatService = vilkaarsresultatService;
+        this.unleash = unleash;
     }
 
     public boolean oppfyllervurderingEF_883_2004(long behandlingID) {
@@ -119,9 +123,11 @@ public class InngangsvilkaarService {
         if (inngangsvilkaar.isEmpty()) {
             throw new FunksjonellException("Inngangsvilkår er ikke vurdert for behandling " + behandlingID);
         }
-        var behandling = behandlingService.hentBehandling(behandlingID);
-        if (!behandling.harPeriodeOgLand()) {
-            throw new FunksjonellException("Mangler land eller periode for behandling " + behandlingID);
+        if (unleash.isEnabled("melosys.tom_periode_og_land")) {
+            var behandling = behandlingService.hentBehandling(behandlingID);
+            if (!behandling.harPeriodeOgLand()) {
+                throw new FunksjonellException("Mangler land eller periode for behandling " + behandlingID);
+            }
         }
         final var inngangsvilkaarBegrunnelseKoder = inngangsvilkaar.get().getBegrunnelser().stream()
             .map(VilkaarBegrunnelse::getKode)
