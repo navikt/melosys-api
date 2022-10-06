@@ -169,7 +169,7 @@ public class JournalfoeringService {
             Aktoersroller hovedpart = journalføringGjelder(journalfoeringDto);
 
             lovligeKombinasjonerService.validerBehandlingstema(hovedpart, sakstype, sakstema, behandlingstema, null);
-            lovligeKombinasjonerService.validerBehandlingsType(hovedpart, sakstype, sakstema, behandlingstema, behandlingstype, null);
+            lovligeKombinasjonerService.validerBehandlingstype(hovedpart, sakstype, sakstema, behandlingstema, behandlingstype, null);
         } else {
             if (!erGyldigBehandlingstemaForSakstype(sakstype, behandlingstema)) {
                 throw new FunksjonellException("Behandlingstema " + behandlingstema + " er ikke gyldig for sakstype " + sakstype);
@@ -340,7 +340,7 @@ public class JournalfoeringService {
     private void validerBehandlingstemaOgBehandlingstype(Behandling sistBehandling, Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
         var fagsak = sistBehandling.getFagsak();
         lovligeKombinasjonerService.validerBehandlingstema(fagsak.getHovedpartRolle(), fagsak.getType(), fagsak.getTema(), behandlingstema, sistBehandling.getTema());
-        lovligeKombinasjonerService.validerBehandlingsType(fagsak.getHovedpartRolle(), fagsak.getType(), fagsak.getTema(), behandlingstema, behandlingstype, null);
+        lovligeKombinasjonerService.validerBehandlingstype(fagsak.getHovedpartRolle(), fagsak.getType(), fagsak.getTema(), behandlingstema, behandlingstype, null);
     }
 
     private void validerBehandlingstype(Sakstyper sakstype, Behandlingstyper behandlingstype) {

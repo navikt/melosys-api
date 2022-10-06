@@ -83,7 +83,7 @@ public class LovligeKombinasjonerService {
         }
     }
 
-    public void validerBehandlingsType(Aktoersroller hovedpart, Sakstyper sakstype, Sakstemaer sakstema, Behandlingstema behandlingstema, Behandlingstyper behandlingstype, Behandling sistBehandling) {
+    public void validerBehandlingstype(Aktoersroller hovedpart, Sakstyper sakstype, Sakstemaer sakstema, Behandlingstema behandlingstema, Behandlingstyper behandlingstype, Behandling sistBehandling) {
         if (!hentMuligeBehandlingstyper(hovedpart, sakstype, sakstema, behandlingstema, sistBehandling).contains(behandlingstype)) {
             throw new FunksjonellException(behandlingstype + " er ikke en lovlig behandlingstype med de andre valgte verdiene");
         }

@@ -86,7 +86,7 @@ public class OpprettSak {
 
         if (unleash.isEnabled("melosys.behandle_alle_saker")) {
             lovligeKombinasjonerService.validerBehandlingstema(hovedpart, sakstype, sakstema, behandlingstema, null);
-            lovligeKombinasjonerService.validerBehandlingsType(hovedpart, sakstype, sakstema, behandlingstema, behandlingstype, null);
+            lovligeKombinasjonerService.validerBehandlingstype(hovedpart, sakstype, sakstema, behandlingstema, behandlingstype, null);
 
             if (erSakstypeEøs(sakstype) && !SaksbehandlingRegler.harTomFlyt(sakstype, behandlingstype, behandlingstema)) {
                 validerSøknadData(opprettSakDto.getSoknadDto());
