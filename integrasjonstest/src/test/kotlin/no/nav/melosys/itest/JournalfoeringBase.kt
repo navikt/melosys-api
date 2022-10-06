@@ -3,6 +3,7 @@ package no.nav.melosys.itest
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
+import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.nulls.shouldNotBeNull
 import no.nav.melosys.domain.arkiv.ArkivDokument
 import no.nav.melosys.domain.kodeverk.Avsendertyper
@@ -88,16 +89,23 @@ class JournalfoeringBase(
     ): Prosessinstans {
         val startTime = LocalDateTime.now()
         process()
-        val journalføringProsessID = finnProsessID(waitForprosessType, startTime)
-        alsoWaitForprosessType.forEach { finnProsessID(it, startTime) }
+        val journalføringProsessID = finnProsess(waitForprosessType, startTime)
+        alsoWaitForprosessType.forEach { finnProsess(it, startTime) }
         return prosessinstansRepository.findById(journalføringProsessID).get()
     }
 
-    protected fun finnProsessID(prosessType: ProsessType, now: LocalDateTime): UUID =
-        await.timeout(30, TimeUnit.SECONDS).untilNotNull {
+    protected fun finnProsess(prosessType: ProsessType, now: LocalDateTime): UUID {
+        await.pollDelay(2, TimeUnit.SECONDS)
+            .timeout(20, TimeUnit.SECONDS)
+            .untilNotNull {
+                prosessinstansRepository.findAll().filter { it.registrertDato > now }.ifEmpty { null }
+            }.map { it.type }.shouldContain(prosessType)
+
+        return await.timeout(30, TimeUnit.SECONDS).untilNotNull {
             prosessinstansRepository.findAll()
                 .find { it.registrertDato > now && it.type == prosessType && it.status == ProsessStatus.FERDIG }?.id
         }
+    }
 
     protected fun lagJfrOppgave(): Oppgave =
         testDataGenerator.opprettJfrOppgave(tilordnetRessurs = "Z123456", forVirksomhet = false)
