@@ -13,9 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.saksflyt.ProsessDataKey.OPPGAVE_ID;
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.VURDER_INNGANGSVILKÅR;
-
 @Component
 public class VurderInngangsvilkaar implements StegBehandler {
     private static final Logger log = LoggerFactory.getLogger(VurderInngangsvilkaar.class);
@@ -40,10 +37,6 @@ public class VurderInngangsvilkaar implements StegBehandler {
         final long behandlingID = prosessinstans.getBehandling().getId();
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
 
-        if (behandling.getFagsak().getType() != Sakstyper.EU_EOS && prosessinstans.getData(OPPGAVE_ID) == null) {
-            log.info("Hopper over steg {} fordi sakstype er {} og oppgaveID er {}", VURDER_INNGANGSVILKÅR.getKode(), behandling.getFagsak().getType(), null);
-            return;
-        }
         if (unleash.isEnabled("melosys.behandle_alle_saker")) {
             if (behandling.getFagsak().erSakstypeEøs() && !SaksbehandlingRegler.harTomFlyt(behandling) && behandling.kanResultereIVedtak()) {
                 var søknadsland = behandling.hentSøknadsLand();
@@ -53,7 +46,7 @@ public class VurderInngangsvilkaar implements StegBehandler {
                 boolean kvalifisererForEF_883_2004 = inngangsvilkaarService.vurderOgLagreInngangsvilkår(behandlingID, søknadsland, erUkjenteEllerAlleEosLand, periode);
                 log.info("Inngangsvilkår vurdert for behandling {}. kvalifisererForEF_883_2004: {}", behandlingID, kvalifisererForEF_883_2004);
             } else {
-                log.info("Inngangsvilkår ikke vurdert for behandling {} med tema {}", behandlingID, behandling.getTema());
+                log.info("Inngangsvilkår ikke vurdert for sak {} og behandling {} med sakstype {} og sakstema {}", behandling.getFagsak().getSaksnummer(), behandlingID, behandling.getFagsak().getType(), behandling.getFagsak().getTema());
             }
         } else {
             if (behandling.getFagsak().getType() == Sakstyper.EU_EOS && behandling.kanResultereIVedtakGammel()) {
