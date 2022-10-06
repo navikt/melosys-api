@@ -1,16 +1,14 @@
 package no.nav.melosys.saksflyt.steg.brev;
 
 import java.util.List;
+import java.util.Set;
 
 import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.arkiv.*;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.brev.DokgenBrevbestilling;
-import no.nav.melosys.domain.brev.FritekstbrevBrevbestilling;
-import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
-import no.nav.melosys.domain.brev.MangelbrevBrevbestilling;
+import no.nav.melosys.domain.arkiv.*;
+import no.nav.melosys.domain.brev.*;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
@@ -34,8 +32,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.Set;
 
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -109,7 +105,7 @@ class OpprettOgJournalforBrevTest {
 
         verify(mockPersondataFasade, times(2)).hentFolkeregisterident(any());
         verify(mockBehandlingService).hentBehandling(anyLong());
-        verify(mockDokgenService).produserBrev(any(Aktoer.class), any(DokgenBrevbestilling.class), eq(false));
+        verify(mockDokgenService).produserBrev(any(Aktoer.class), any(DokgenBrevbestilling.class));
         verify(mockJoarkFasade).opprettJournalpost(any(), anyBoolean());
     }
 
@@ -138,7 +134,7 @@ class OpprettOgJournalforBrevTest {
 
         verify(mockPersondataFasade, never()).hentFolkeregisterident(any());
         verify(mockBehandlingService).hentBehandling(anyLong());
-        verify(mockDokgenService).produserBrev(any(Aktoer.class), any(DokgenBrevbestilling.class), eq(false));
+        verify(mockDokgenService).produserBrev(any(Aktoer.class), any(DokgenBrevbestilling.class));
         verify(mockJoarkFasade).opprettJournalpost(opprettJournalpostCaptor.capture(), anyBoolean());
 
         OpprettJournalpost opprettJournalpost = opprettJournalpostCaptor.getValue();
@@ -180,7 +176,7 @@ class OpprettOgJournalforBrevTest {
         opprettJournalforBrev.utfør(prosessinstans);
 
         verify(mockBehandlingService).hentBehandling(anyLong());
-        verify(mockDokgenService).produserBrev(any(Aktoer.class), any(DokgenBrevbestilling.class), eq(false));
+        verify(mockDokgenService).produserBrev(any(Aktoer.class), any(DokgenBrevbestilling.class));
         verify(mockJoarkFasade).opprettJournalpost(any(), anyBoolean());
     }
 
@@ -226,7 +222,7 @@ class OpprettOgJournalforBrevTest {
         opprettJournalforBrev.utfør(prosessinstans);
 
         verify(mockBehandlingService).hentBehandling(anyLong());
-        verify(mockDokgenService).produserBrev(any(Aktoer.class), any(MangelbrevBrevbestilling.class), eq(false));
+        verify(mockDokgenService).produserBrev(any(Aktoer.class), any(MangelbrevBrevbestilling.class));
         verify(mockJoarkFasade).opprettJournalpost(any(), anyBoolean());
     }
 
@@ -249,7 +245,7 @@ class OpprettOgJournalforBrevTest {
 
         verify(mockBehandlingService).hentBehandling(anyLong());
         //noinspection ConstantConditions - brevbestilling er ikke null
-        verify(mockDokgenService).produserBrev(any(Aktoer.class), refEq(brevbestilling), eq(false));
+        verify(mockDokgenService).produserBrev(any(Aktoer.class), refEq(brevbestilling));
         verify(mockJoarkFasade).opprettJournalpost(any(), anyBoolean());
     }
 
@@ -288,7 +284,7 @@ class OpprettOgJournalforBrevTest {
 
         verify(mockBehandlingService).hentBehandling(anyLong());
         //noinspection ConstantConditions - brevbestilling er ikke null
-        verify(mockDokgenService).produserBrev(any(Aktoer.class), refEq(brevbestilling), eq(false));
+        verify(mockDokgenService).produserBrev(any(Aktoer.class), refEq(brevbestilling));
         verify(mockJoarkFasade).opprettJournalpost(any(), anyBoolean());
     }
 
@@ -296,7 +292,6 @@ class OpprettOgJournalforBrevTest {
     void utfør_feilerMedIkkeFunnetException_NårJournalpostIkkeFinnesForVedleggsdokument() {
         Behandling behandling = TestdataFactory.lagBehandling();
         when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandling);
-        when(mockDokgenService.hentDokumentInfo(any())).thenReturn(TestdataFactory.lagDokumentInfo());
 
         List<SaksvedleggBestilling> saksvedleggBestillingList = List.of(new SaksvedleggBestilling("1", "2"));
         FritekstbrevBrevbestilling brevbestilling = new FritekstbrevBrevbestilling.Builder()
@@ -353,6 +348,38 @@ class OpprettOgJournalforBrevTest {
                 ArkivDokument::getTittel)
             .containsExactly(Tuple.tuple(new byte[]{1, 2}, "tittel 1"),
                 Tuple.tuple(new byte[]{3, 4}, "tittel 2"));
+    }
+
+    @Test
+    void utfør_produserFritekstvedlegg() {
+        Behandling behandling = TestdataFactory.lagBehandling();
+        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        when(mockJoarkFasade.opprettJournalpost(any(), anyBoolean())).thenReturn("12234");
+        when(mockDokgenService.hentDokumentInfo(any())).thenReturn(TestdataFactory.lagDokumentInfo());
+        when(mockDokgenService.produserBrev(any(), any())).thenReturn(null, new byte[]{1, 2}, new byte[]{3, 4});
+
+        var fritekstvedleggBestillingList =
+            List.of(new FritekstvedleggBestilling("x", "<p>s</p>"), new FritekstvedleggBestilling("c", "<p>h</p>"));
+        var brevbestilling = new FritekstbrevBrevbestilling.Builder()
+            .medProduserbartdokument(GENERELT_FRITEKSTBREV_BRUKER)
+            .medFritekstTittel("Tittel")
+            .medFritekstvedleggBestilling(fritekstvedleggBestillingList)
+            .medFritekst("Innhold")
+            .build();
+
+        Prosessinstans prosessinstans = lagProsessinstans(behandling, brevbestilling);
+        opprettJournalforBrev.utfør(prosessinstans);
+
+        verify(mockJoarkFasade).opprettJournalpost(opprettJournalpostCaptor.capture(), anyBoolean());
+
+        OpprettJournalpost captured = opprettJournalpostCaptor.getValue();
+        assertThat(captured.getHoveddokument().getTittel()).isEqualTo("Tittel");
+        assertThat(captured.getVedlegg())
+            .extracting(fysiskDokument -> fysiskDokument.getDokumentVarianter()
+                    .stream().map(DokumentVariant::getData).findFirst().orElse(null),
+                ArkivDokument::getTittel)
+            .containsExactly(Tuple.tuple(new byte[]{1, 2}, "x"),
+                Tuple.tuple(new byte[]{3, 4}, "c"));
     }
 
     private Prosessinstans lagProsessinstans(Behandling behandling, DokgenBrevbestilling brevbestilling) {

@@ -7,6 +7,7 @@ public enum BrevmalFeltKode {
     FRITEKST("Tekst til brev"),
     INNLEDNING_FRITEKST("Innledningstekst"),
     VEDLEGG("Vedlegg"),
+    FRITEKSTVEDLEGG("Legg til fritekstvedlegg"),
     MANGLER_FRITEKST("Hva skal mottakeren sende inn?");
 
     private final String beskrivelse;

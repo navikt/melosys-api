@@ -7,6 +7,7 @@ import java.util.Objects;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
+import no.nav.melosys.service.dokument.brev.FritekstvedleggDto;
 import no.nav.melosys.service.dokument.brev.KopiMottaker;
 import no.nav.melosys.service.dokument.brev.SaksvedleggDto;
 
@@ -28,6 +29,7 @@ public class BrevbestillingDto {
     private boolean kontaktopplysninger;
     private String nyVurderingBakgrunn;
     private List<SaksvedleggDto> saksvedlegg;
+    private List <FritekstvedleggDto> fritekstvedlegg;
 
     /**
      * @deprecated Benyttes i doksys, kommer til å bli erstattet av dokgen-variabel
@@ -63,7 +65,8 @@ public class BrevbestillingDto {
             .medBegrunnelseKode(this.getBegrunnelseKode())
             .medYtterligereInformasjon(this.getYtterligereInformasjon())
             .medNyVurderingBakgrunn(this.getNyVurderingBakgrunn())
-            .medSaksvedlegg(this.getSaksvedlegg());
+            .medSaksvedlegg(this.getSaksvedlegg())
+            .medFritekstvedlegg(this.getFritekstvedlegg());
     }
 
     public BrevbestillingDto(Builder builder) {
@@ -84,6 +87,7 @@ public class BrevbestillingDto {
         this.ytterligereInformasjon = builder.ytterligereInformasjon;
         this.nyVurderingBakgrunn = builder.nyVurderingBakgrunn;
         this.saksvedlegg = builder.saksvedlegg;
+        this.fritekstvedlegg = builder.fritekstvedlegg;
     }
 
     public Produserbaredokumenter getProduserbardokument() {
@@ -161,6 +165,10 @@ public class BrevbestillingDto {
         return saksvedlegg;
     }
 
+    public List<FritekstvedleggDto> getFritekstvedlegg() {
+        return fritekstvedlegg;
+    }
+
     public static class Builder {
         private Produserbaredokumenter produserbardokument;
         private Aktoersroller mottaker;
@@ -179,6 +187,7 @@ public class BrevbestillingDto {
         private String ytterligereInformasjon;
         private String nyVurderingBakgrunn;
         private List<SaksvedleggDto> saksvedlegg;
+        private List<FritekstvedleggDto> fritekstvedlegg;
 
         public Builder medProduserbardokument(Produserbaredokumenter produserbardokument) {
             this.produserbardokument = produserbardokument;
@@ -262,6 +271,11 @@ public class BrevbestillingDto {
 
         public Builder medSaksvedlegg(List<SaksvedleggDto> saksVedlegg) {
             this.saksvedlegg = saksVedlegg;
+            return this;
+        }
+
+        public Builder medFritekstvedlegg(List<FritekstvedleggDto> fritekstvedlegg) {
+            this.fritekstvedlegg = fritekstvedlegg;
             return this;
         }
 
