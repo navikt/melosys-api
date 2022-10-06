@@ -267,9 +267,9 @@ public class Behandling extends RegistreringsInfo {
 
     public boolean harPeriodeOgLand() {
         var optionalPeriode = finnPeriode();
-        var harPeriode = optionalPeriode.isPresent() && !optionalPeriode.get().erFomOgTomNull();
+        var harPeriode = optionalPeriode.isPresent() && optionalPeriode.get().getFom() != null;
 
-        var harLand = !hentSøknadsLand().isEmpty() || behandlingsgrunnlag.getBehandlingsgrunnlagdata().soeknadsland.erUkjenteEllerAlleEosLand;
+        var harLand = behandlingsgrunnlag.getBehandlingsgrunnlagdata().soeknadsland.erGyldig();
 
         return harPeriode && harLand;
     }
