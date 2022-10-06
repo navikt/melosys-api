@@ -100,16 +100,7 @@ class OppdaterSaksrelasjonTest {
             fagsak.getGsakSaksnummer(), eessiMelding.getRinaSaksnummer(), eessiMelding.getBucType()
         );
     }
-
-    @Test
-    void utfør_hoppOverSteg() {
-        Prosessinstans prosessinstans = new Prosessinstans();
-
-        oppdaterSaksrelasjon.utfør(prosessinstans);
-
-        verify(eessiService, never()).lagreSaksrelasjon(any(), any(), any());
-    }
-
+    
     @Test
     void utfør_ingenBehandlingIngenArkivsakIDIProsessinstnas_henterArkivsakIDFraSaksnummerIFagsakServiceOppdatererSaksrelasjon() {
         final Fagsak fagsak = new Fagsak();

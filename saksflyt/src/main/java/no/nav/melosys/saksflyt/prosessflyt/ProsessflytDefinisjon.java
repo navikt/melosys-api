@@ -106,7 +106,6 @@ public final class ProsessflytDefinisjon {
                 OPPRETT_SAK_OG_BEH,
                 OPPRETT_SØKNAD,
                 OPPRETT_ARKIVSAK,
-                OPPDATER_SAKSRELASJON,
                 HENT_REGISTEROPPLYSNINGER,
                 VURDER_INNGANGSVILKÅR,
                 OPPRETT_OPPGAVE

@@ -3,7 +3,6 @@ package no.nav.melosys.saksflyt.steg.sed;
 import java.util.Optional;
 
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
@@ -11,17 +10,10 @@ import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.sak.FagsakService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-
-import static no.nav.melosys.domain.saksflyt.ProsessDataKey.OPPGAVE_ID;
-import static no.nav.melosys.domain.saksflyt.ProsessDataKey.SAKSTYPE;
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.OPPDATER_SAKSRELASJON;
 
 @Component
 public class OppdaterSaksrelasjon implements StegBehandler {
-    private static final Logger log = LoggerFactory.getLogger(OppdaterSaksrelasjon.class);
 
     private final JoarkFasade joarkFasade;
     private final EessiService eessiService;
@@ -40,20 +32,11 @@ public class OppdaterSaksrelasjon implements StegBehandler {
 
     @Override
     public void utfør(Prosessinstans prosessinstans) {
-        String sakstypeKode = prosessinstans.getData(SAKSTYPE);
-        String oppgaveId = prosessinstans.getData(OPPGAVE_ID);
-        String journalpostID = prosessinstans.getData(ProsessDataKey.JOURNALPOST_ID);
-
-        if (!Sakstyper.EU_EOS.getKode().equals(sakstypeKode) && oppgaveId == null && journalpostID == null) {
-            log.info("Hopper over steg {} fordi sakstype er {}, oppgaveID er {}, journalpostID er {}", OPPDATER_SAKSRELASJON.getKode(), sakstypeKode, oppgaveId, journalpostID);
-            return;
-        }
-
         finnEessiMelding(prosessinstans).ifPresent(melosysEessiMelding -> eessiService.lagreSaksrelasjon(
-            hentArkivsakID(prosessinstans),
-            melosysEessiMelding.getRinaSaksnummer(),
-            melosysEessiMelding.getBucType()
-        ));
+                hentArkivsakID(prosessinstans),
+                melosysEessiMelding.getRinaSaksnummer(),
+                melosysEessiMelding.getBucType()
+            ));
     }
 
     private Optional<MelosysEessiMelding> finnEessiMelding(Prosessinstans prosessinstans) {
