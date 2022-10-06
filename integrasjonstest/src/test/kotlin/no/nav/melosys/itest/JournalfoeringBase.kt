@@ -29,10 +29,7 @@ import no.nav.melosys.melosysmock.testdata.TestDataGenerator
 import no.nav.melosys.repository.ProsessinstansRepository
 import no.nav.melosys.service.felles.dto.SoeknadslandDto
 import no.nav.melosys.service.journalforing.JournalfoeringService
-import no.nav.melosys.service.journalforing.dto.DokumentDto
-import no.nav.melosys.service.journalforing.dto.FagsakDto
-import no.nav.melosys.service.journalforing.dto.JournalfoeringOpprettDto
-import no.nav.melosys.service.journalforing.dto.PeriodeDto
+import no.nav.melosys.service.journalforing.dto.*
 import no.nav.melosys.service.oppgave.OppgaveService
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import org.awaitility.kotlin.await
@@ -97,7 +94,7 @@ class JournalfoeringBase(
         }
     }
 
-    fun executeAndWait(
+    protected fun executeAndWait(
         waitForprosessType: ProsessType,
         alsoWaitForprosessType: List<ProsessType> = listOf(),
         process: () -> Unit
@@ -196,6 +193,48 @@ class JournalfoeringBase(
                     listOf(Landkoder.IE.kode), false
                 )
             }
+        }
+
+    protected fun lagJournalfoeringTilordneDto(
+        saksnummer: String,
+        jfrOppgave: Oppgave = lagJfrOppgave(),
+        journalfoeringTilordneDto: JournalfoeringTilordneDto = defaultJournalfoeringTilordneDto()
+    ): JournalfoeringTilordneDto {
+        val hentJournalpost = journalføringService.hentJournalpost(jfrOppgave.journalpostId)
+        return lagJournalfoeringTilordneDto(
+            jfrOppgave, hentJournalpost!!.hoveddokument, saksnummer, journalfoeringTilordneDto
+        )
+    }
+
+    private fun lagJournalfoeringTilordneDto(
+        oppgave: Oppgave,
+        dokument: ArkivDokument,
+        saksnummer: String,
+        journalfoeringTilordneDto: JournalfoeringTilordneDto
+    ) =
+        journalfoeringTilordneDto.apply {
+            this.saksnummer = saksnummer
+            this.journalpostID = oppgave.journalpostId
+            oppgaveID = oppgave.id.toString()
+            hoveddokument = DokumentDto(dokument.dokumentId, dokument.tittel).apply {
+                logiskeVedlegg = emptyList()
+            }
+        }.apply {
+            behandlingstemaKode.shouldNotBeNull()
+            behandlingstypeKode.shouldNotBeNull()
+        }
+
+    protected fun defaultJournalfoeringTilordneDto() =
+        JournalfoeringTilordneDto().apply {
+            avsenderID = "30056928150"
+            avsenderNavn = "KARAFFEL TRIVIELL"
+            brukerID = "30056928150"
+            virksomhetOrgnr = null
+            vedlegg = emptyList()
+            mottattDato = LocalDate.now()
+            isIkkeSendForvaltingsmelding = false
+            avsenderType = Avsendertyper.PERSON
+            isSkalTilordnes = true
         }
 
     companion object {

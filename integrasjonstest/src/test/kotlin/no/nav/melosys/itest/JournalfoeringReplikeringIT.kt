@@ -2,14 +2,11 @@ package no.nav.melosys.itest
 
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.equality.shouldBeEqualToComparingFields
-import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import no.finn.unleash.FakeUnleash
-import no.nav.melosys.domain.arkiv.ArkivDokument
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode
-import no.nav.melosys.domain.kodeverk.Avsendertyper
 import no.nav.melosys.domain.kodeverk.Landkoder
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
@@ -17,18 +14,14 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.saksflyt.ProsessType
-import no.nav.melosys.melosysmock.oppgave.Oppgave
 import no.nav.melosys.melosysmock.testdata.TestDataGenerator
 import no.nav.melosys.repository.BehandlingRepository
 import no.nav.melosys.repository.FagsakRepository
 import no.nav.melosys.repository.ProsessinstansRepository
 import no.nav.melosys.service.journalforing.JournalfoeringService
-import no.nav.melosys.service.journalforing.dto.DokumentDto
-import no.nav.melosys.service.journalforing.dto.JournalfoeringTilordneDto
 import no.nav.melosys.service.oppgave.OppgaveService
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import java.time.LocalDate
 
 class JournalfoeringReplikeringIT(
     @Autowired testDataGenerator: TestDataGenerator,
@@ -91,46 +84,4 @@ class JournalfoeringReplikeringIT(
                 )
             })
     }
-
-    private fun lagJournalfoeringTilordneDto(
-        saksnummer: String,
-        jfrOppgave: Oppgave = lagJfrOppgave(),
-        journalfoeringTilordneDto: JournalfoeringTilordneDto = defaultJournalfoeringTilordneDto()
-    ): JournalfoeringTilordneDto {
-        val hentJournalpost = journalføringService.hentJournalpost(jfrOppgave.journalpostId)
-        return lagJournalfoeringTilordneDto(
-            jfrOppgave, hentJournalpost!!.hoveddokument, saksnummer, journalfoeringTilordneDto
-        )
-    }
-
-    private fun lagJournalfoeringTilordneDto(
-        oppgave: Oppgave,
-        dokument: ArkivDokument,
-        saksnummer: String,
-        journalfoeringTilordneDto: JournalfoeringTilordneDto
-    ) =
-        journalfoeringTilordneDto.apply {
-            this.saksnummer = saksnummer
-            this.journalpostID = oppgave.journalpostId
-            oppgaveID = oppgave.id.toString()
-            hoveddokument = DokumentDto(dokument.dokumentId, dokument.tittel).apply {
-                logiskeVedlegg = emptyList()
-            }
-        }.apply {
-            behandlingstemaKode.shouldNotBeNull()
-            behandlingstypeKode.shouldNotBeNull()
-        }
-
-    private fun defaultJournalfoeringTilordneDto() =
-        JournalfoeringTilordneDto().apply {
-            avsenderID = "30056928150"
-            avsenderNavn = "KARAFFEL TRIVIELL"
-            brukerID = "30056928150"
-            virksomhetOrgnr = null
-            vedlegg = emptyList()
-            mottattDato = LocalDate.now()
-            isIkkeSendForvaltingsmelding = false
-            avsenderType = Avsendertyper.PERSON
-            isSkalTilordnes = true
-        }
 }
