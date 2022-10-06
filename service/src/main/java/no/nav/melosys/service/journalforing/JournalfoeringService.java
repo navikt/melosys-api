@@ -168,8 +168,8 @@ public class JournalfoeringService {
         if (behandleAlleSakerToggleEnabled) {
             Aktoersroller hovedpart = journalføringGjelder(journalfoeringDto);
 
-            validerBehandlingstema(hovedpart, sakstype, sakstema, behandlingstema, null);
-            validerBehandlingstype(hovedpart, sakstype, sakstema, behandlingstema, behandlingstype, null);
+            lovligeKombinasjonerService.validerBehandlingstema(hovedpart, sakstype, sakstema, behandlingstema, null);
+            lovligeKombinasjonerService.validerBehandlingsType(hovedpart, sakstype, sakstema, behandlingstema, behandlingstype, null);
         } else {
             if (!erGyldigBehandlingstemaForSakstype(sakstype, behandlingstema)) {
                 throw new FunksjonellException("Behandlingstema " + behandlingstema + " er ikke gyldig for sakstype " + sakstype);
@@ -339,20 +339,8 @@ public class JournalfoeringService {
 
     private void validerBehandlingstemaOgBehandlingstype(Behandling sistBehandling, Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
         var fagsak = sistBehandling.getFagsak();
-        validerBehandlingstema(fagsak.getHovedpartRolle(), fagsak.getType(), fagsak.getTema(), behandlingstema, sistBehandling.getTema());
-        validerBehandlingstype(fagsak.getHovedpartRolle(), fagsak.getType(), fagsak.getTema(), behandlingstema, behandlingstype, sistBehandling);
-    }
-
-    public void validerBehandlingstema(Aktoersroller hovedpart, Sakstyper sakstype, Sakstemaer sakstema, Behandlingstema behandlingstema, Behandlingstema sistBehandlingstema) {
-        if (!lovligeKombinasjonerService.hentMuligeBehandlingstemaer(hovedpart, sakstype, sakstema, sistBehandlingstema).contains(behandlingstema)) {
-            throw new FunksjonellException(behandlingstema + " er ikke et lovlig behandlingstema med de andre valgte verdiene");
-        }
-    }
-
-    public void validerBehandlingstype(Aktoersroller hovedpart, Sakstyper sakstype, Sakstemaer sakstema, Behandlingstema behandlingstema, Behandlingstyper behandlingstype, Behandling sistBehandling) {
-        if (!lovligeKombinasjonerService.hentMuligeBehandlingstyper(hovedpart, sakstype, sakstema, behandlingstema, sistBehandling).contains(behandlingstype)) {
-            throw new FunksjonellException(behandlingstype + " er ikke en lovlig behandlingstype med de andre valgte verdiene");
-        }
+        lovligeKombinasjonerService.validerBehandlingstema(fagsak.getHovedpartRolle(), fagsak.getType(), fagsak.getTema(), behandlingstema, sistBehandling.getTema());
+        lovligeKombinasjonerService.validerBehandlingsType(fagsak.getHovedpartRolle(), fagsak.getType(), fagsak.getTema(), behandlingstema, behandlingstype, null);
     }
 
     private void validerBehandlingstype(Sakstyper sakstype, Behandlingstyper behandlingstype) {

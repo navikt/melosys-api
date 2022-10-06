@@ -15,6 +15,7 @@ import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.journalforing.JournalfoeringService;
 import no.nav.melosys.service.journalforing.dto.PeriodeDto;
+import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
@@ -35,15 +36,21 @@ public class OpprettSak {
     private final ProsessinstansService prosessinstansService;
     private final Unleash unleash;
 
+    private final LovligeKombinasjonerService lovligeKombinasjonerService;
+
     private final FagsakService fagsakService;
 
     public OpprettSak(JournalfoeringService journalfoeringService, OppgaveService oppgaveService,
-                      @Lazy ProsessinstansService prosessinstansService, Unleash unleash, FagsakService fagsakService) {
+                      @Lazy ProsessinstansService prosessinstansService,
+                      Unleash unleash,
+                      FagsakService fagsakService,
+                      LovligeKombinasjonerService lovligeKombinasjonerService) {
         this.journalfoeringService = journalfoeringService;
         this.oppgaveService = oppgaveService;
         this.prosessinstansService = prosessinstansService;
         this.unleash = unleash;
         this.fagsakService = fagsakService;
+        this.lovligeKombinasjonerService = lovligeKombinasjonerService;
     }
 
     @Transactional
@@ -78,8 +85,8 @@ public class OpprettSak {
         final var hovedpart = opprettSakDto.getHovedpart();
 
         if (unleash.isEnabled("melosys.behandle_alle_saker")) {
-            journalfoeringService.validerBehandlingstema(hovedpart, sakstype, sakstema, behandlingstema, null);
-            journalfoeringService.validerBehandlingstype(hovedpart, sakstype, sakstema, behandlingstema, behandlingstype, null);
+            lovligeKombinasjonerService.validerBehandlingstema(hovedpart, sakstype, sakstema, behandlingstema, null);
+            lovligeKombinasjonerService.validerBehandlingsType(hovedpart, sakstype, sakstema, behandlingstema, behandlingstype, null);
 
             if (erSakstypeEøs(sakstype) && !SaksbehandlingRegler.harTomFlyt(sakstype, behandlingstype, behandlingstema)) {
                 validerSøknadData(opprettSakDto.getSoknadDto());

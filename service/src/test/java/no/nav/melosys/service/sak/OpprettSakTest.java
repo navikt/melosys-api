@@ -20,6 +20,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.felles.dto.SoeknadslandDto;
 import no.nav.melosys.service.journalforing.JournalfoeringService;
 import no.nav.melosys.service.journalforing.dto.PeriodeDto;
+import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.jeasy.random.EasyRandom;
@@ -46,6 +47,8 @@ class OpprettSakTest {
     private ProsessinstansService prosessinstansService;
     @Mock
     private FagsakService fagsakService;
+    @Mock
+    private LovligeKombinasjonerService lovligeKombinasjonerService;
 
     private final FakeUnleash unleash = new FakeUnleash();
 
@@ -61,7 +64,7 @@ class OpprettSakTest {
 
     @BeforeEach
     public void setUp() {
-        opprettSak = new OpprettSak(journalfoeringService, oppgaveService, prosessinstansService, unleash, fagsakService);
+        opprettSak = new OpprettSak(journalfoeringService, oppgaveService, prosessinstansService, unleash, fagsakService, lovligeKombinasjonerService);
         unleash.enableAll();
     }
 
@@ -290,7 +293,7 @@ class OpprettSakTest {
         opprettSakDto.setSakstype(Sakstyper.EU_EOS);
         opprettSakDto.setBehandlingstema(null);
 
-        doThrow(new FunksjonellException("Behandlingstema")).when(journalfoeringService).validerBehandlingstema(any(), any(), any(), any(), any());
+        doThrow(new FunksjonellException("Behandlingstema")).when(lovligeKombinasjonerService).validerBehandlingstema(any(), any(), any(), any(), any());
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> opprettSak.opprettNySakOgBehandlingFraOppgave(opprettSakDto))
