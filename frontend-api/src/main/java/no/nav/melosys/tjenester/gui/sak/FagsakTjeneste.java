@@ -93,7 +93,7 @@ public class FagsakTjeneste {
         }
         aksesskontroll.autoriserFolkeregisterIdent(opprettSakDto.getBrukerID());
 
-        if (opprettSakDto.getOppgaveID() == null) {
+        if (opprettSakDto.getOppgaveID() == null && unleash.isEnabled("melosys.ny_opprett_sak")) {
             opprettSak.opprettNySakOgBehandling(opprettSakDto);
         } else {
             opprettSak.opprettNySakOgBehandlingFraOppgave(opprettSakDto);
