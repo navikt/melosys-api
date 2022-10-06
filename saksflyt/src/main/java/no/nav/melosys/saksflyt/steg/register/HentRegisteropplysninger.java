@@ -2,7 +2,6 @@ package no.nav.melosys.saksflyt.steg.register;
 
 import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
@@ -15,7 +14,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.saksflyt.ProsessDataKey.OPPGAVE_ID;
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.HENT_REGISTEROPPLYSNINGER;
 import static no.nav.melosys.service.registeropplysninger.RegisteropplysningerFactory.utledSaksopplysningTyper;
 
@@ -48,11 +46,6 @@ public class HentRegisteropplysninger implements StegBehandler {
     public void utfør(Prosessinstans prosessinstans) {
         Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
 
-        if (behandling.getFagsak().getType() != Sakstyper.EU_EOS && prosessinstans.getData(OPPGAVE_ID) == null) {
-            log.info("Hopper over steg {} fordi sakstype er {} og oppgaveID er {}", HENT_REGISTEROPPLYSNINGER.getKode(), behandling.getFagsak().getType(), prosessinstans.getData(OPPGAVE_ID));
-            return;
-        }
-
         if (behandling.getFagsak().erSakstypeEøs()) {
             var behandleAlleSakerToggleEnabled = unleash.isEnabled("melosys.behandle_alle_saker");
             var aktørId = behandling.getFagsak().finnBrukersAktørID().orElseThrow(
@@ -78,6 +71,8 @@ public class HentRegisteropplysninger implements StegBehandler {
 
             registeropplysningerService.hentOgLagreOpplysninger(registeropplysningerRequestBuilder.build());
             log.info("Hentet registeropplysninger for behandling {}", behandling.getId());
+        } else {
+            log.debug("Hopper over steg {} fordi sak {} har sakstype {}", HENT_REGISTEROPPLYSNINGER.getKode(), behandling.getFagsak().getSaksnummer(), behandling.getFagsak().getType());
         }
     }
 }

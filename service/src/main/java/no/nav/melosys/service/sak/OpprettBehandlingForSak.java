@@ -21,7 +21,7 @@ public class OpprettBehandlingForSak {
         Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
 
         if (fagsak.hentAktivBehandling() != null) {
-            throw new FunksjonellException("Det finnes allerede en aktiv behandling på fagsak " + saksnummer);
+            throw new FunksjonellException(String.format("Det finnes allerede en aktiv behandling på fagsak %s", saksnummer));
         }
         prosessinstansService.opprettNyBehandlingForSak(saksnummer, opprettSakDto);
     }

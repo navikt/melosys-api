@@ -83,7 +83,6 @@ public class ProsessinstansService {
         prosessinstans.setData(BEHANDLINGSTYPE, opprettSakDto.getBehandlingstype());
         prosessinstans.setData(SAKSTYPE, opprettSakDto.getSakstype());
         prosessinstans.setData(SAKSTEMA, opprettSakDto.getSakstema());
-        prosessinstans.setData(OPPGAVE_ID, opprettSakDto.getOppgaveID());
         prosessinstans.setData(SKAL_TILORDNES, opprettSakDto.isSkalTilordnes());
         prosessinstans.setData(SØKNADSLAND, opprettSakDto.getSoknadDto().getLand());
         prosessinstans.setData(SØKNADSPERIODE, opprettSakDto.getSoknadDto().getPeriode());
@@ -273,7 +272,7 @@ public class ProsessinstansService {
 
         prosessinstans.setType(ProsessType.OPPRETT_NY_SAK_EOS_FRA_OPPGAVE);
         prosessinstans.setData(ProsessDataKey.SAKSTYPE, opprettSakDto.getSakstype());
-        
+
         if (unleash.isEnabled("melosys.behandle_alle_saker")) {
             prosessinstans.setData(SAKSTEMA, opprettSakDto.getSakstema());
         } else {

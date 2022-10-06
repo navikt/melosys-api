@@ -298,32 +298,6 @@ class OpprettSakTest {
     }
 
     @Test
-    void lagNySak_validerOpprettSakDto_manglerBehandlingstema_feiler() {
-        OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
-        opprettSakDto.setSakstype(Sakstyper.EU_EOS);
-        opprettSakDto.setBehandlingstema(null);
-
-        doThrow(new FunksjonellException("Behandlingstema")).when(journalfoeringService).validerBehandlingstema(any(), any(), any(), any(), any());
-
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> opprettSak.opprettNySakOgBehandling(opprettSakDto))
-            .withMessageContaining("Behandlingstema");
-    }
-
-    @Test
-    void lagNySak_validerOpprettSakDto_manglerBehandlingstype_feiler() {
-        OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
-        opprettSakDto.setSakstype(Sakstyper.EU_EOS);
-        opprettSakDto.setBehandlingstype(null);
-
-        doThrow(new FunksjonellException("Behandlingstype")).when(journalfoeringService).validerBehandlingstype(any(), any(), any(), any(), any(), any());
-
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> opprettSak.opprettNySakOgBehandling(opprettSakDto))
-            .withMessageContaining("Behandlingstype");
-    }
-
-    @Test
     void validerOpprettSakDto_nullSøknad_feiler() {
         OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
         opprettSakDto.setSakstype(Sakstyper.EU_EOS);

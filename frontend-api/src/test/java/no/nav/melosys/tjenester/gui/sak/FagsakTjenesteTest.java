@@ -25,6 +25,8 @@ import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.persondata.PersondataFasade;
@@ -143,7 +145,7 @@ class FagsakTjenesteTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(opprettSakDto)))
             .andExpect(status().isBadRequest())
-            .andExpect(jsonPath("$.message", equalTo("BrukerID trengs for å opprette en sak.")));
+            .andExpect(jsonPath("$.message", equalTo("BrukerID trengs for å opprette behandling")));
     }
 
     @Test
@@ -152,15 +154,56 @@ class FagsakTjenesteTest {
         var behandling = new Behandling();
         behandling.setFagsak(fagsak);
         behandling.setId(123L);
+
         fagsak.setBehandlinger(Collections.singletonList(behandling));
         var opprettSakDto = new OpprettSakDto();
         opprettSakDto.setBrukerID(FNR);
+        opprettSakDto.setBehandlingstema(Behandlingstema.ARBEID_ETT_LAND_ØVRIG);
+        opprettSakDto.setBehandlingstype(Behandlingstyper.NY_VURDERING);
 
         mockMvc.perform(post(BASE_URL + "/{saksnr}/behandlinger", fagsak.getSaksnummer())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(opprettSakDto)))
             .andExpect(status().isNoContent());
         verify(aksesskontroll).autoriserFolkeregisterIdent(opprettSakDto.getBrukerID());
+    }
+
+    @Test
+    void lagNyBehandling_feiler_uten_behandlingstema() throws Exception {
+        Fagsak fagsak = SaksbehandlingDataFactory.lagFagsak("MEL-1");
+        var behandling = new Behandling();
+        behandling.setFagsak(fagsak);
+        behandling.setId(123L);
+
+        fagsak.setBehandlinger(Collections.singletonList(behandling));
+        var opprettSakDto = new OpprettSakDto();
+        opprettSakDto.setBrukerID(FNR);
+        opprettSakDto.setBehandlingstype(Behandlingstyper.NY_VURDERING);
+
+        mockMvc.perform(post(BASE_URL + "/{saksnr}/behandlinger", fagsak.getSaksnummer())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(opprettSakDto)))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.message", equalTo("Behandlingstema mangler")));
+    }
+
+    @Test
+    void lagNyBehandling_feiler_uten_behandlingstype() throws Exception {
+        Fagsak fagsak = SaksbehandlingDataFactory.lagFagsak("MEL-1");
+        var behandling = new Behandling();
+        behandling.setFagsak(fagsak);
+        behandling.setId(123L);
+
+        fagsak.setBehandlinger(Collections.singletonList(behandling));
+        var opprettSakDto = new OpprettSakDto();
+        opprettSakDto.setBrukerID(FNR);
+        opprettSakDto.setBehandlingstema(Behandlingstema.ARBEID_I_UTLANDET);
+
+        mockMvc.perform(post(BASE_URL + "/{saksnr}/behandlinger", fagsak.getSaksnummer())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(opprettSakDto)))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.message", equalTo("Behandlingstype mangler")));
     }
 
     @Test
@@ -173,7 +216,7 @@ class FagsakTjenesteTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(opprettSakDto)))
             .andExpect(status().isBadRequest())
-            .andExpect(jsonPath("$.message", equalTo("BrukerID trengs for å opprette en sak.")));
+            .andExpect(jsonPath("$.message", equalTo("BrukerID trengs for å opprette behandling")));
     }
 
     @Test
