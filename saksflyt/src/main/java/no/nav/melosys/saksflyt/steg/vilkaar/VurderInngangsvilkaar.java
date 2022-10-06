@@ -39,12 +39,6 @@ public class VurderInngangsvilkaar implements StegBehandler {
     public void utfør(Prosessinstans prosessinstans) {
         final long behandlingID = prosessinstans.getBehandling().getId();
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
-        boolean harTomFlyt = SaksbehandlingRegler.harTomFlyt(behandling.getFagsak().getType(), behandling.getType(), behandling.getTema());
-
-        if (harTomFlyt) {
-            log.info("Hopper over steg {} fordi saken har tom flyt", VURDER_INNGANGSVILKÅR.getKode());
-            return;
-        }
 
         if (behandling.getFagsak().getType() != Sakstyper.EU_EOS && prosessinstans.getData(OPPGAVE_ID) == null) {
             log.info("Hopper over steg {} fordi sakstype er {} og oppgaveID er {}", VURDER_INNGANGSVILKÅR.getKode(), behandling.getFagsak().getType(), null);
