@@ -14,4 +14,8 @@ public class Soeknadsland {
         this.landkoder = landkoder;
         this.erUkjenteEllerAlleEosLand = erUkjenteEllerAlleEosLand;
     }
+
+    public boolean erGyldig() {
+        return !landkoder.isEmpty() || erUkjenteEllerAlleEosLand;
+    }
 }

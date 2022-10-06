@@ -6,12 +6,19 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import no.finn.unleash.FakeUnleash;
+import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.VilkaarBegrunnelse;
 import no.nav.melosys.domain.Vilkaarsresultat;
+import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
+import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.Soeknadsland;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.inngangsvilkar.Feilmelding;
 import no.nav.melosys.domain.inngangsvilkar.InngangsvilkarResponse;
 import no.nav.melosys.domain.inngangsvilkar.Kategori;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Inngangsvilkaar;
 import no.nav.melosys.domain.person.Statsborgerskap;
@@ -30,8 +37,7 @@ import static no.nav.melosys.domain.dokument.felles.Land.FINLAND;
 import static no.nav.melosys.domain.dokument.felles.Land.SVERIGE;
 import static no.nav.melosys.domain.util.LandkoderUtils.tilIso3;
 import static no.nav.melosys.service.SaksbehandlingDataFactory.lagBehandling;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -47,12 +53,14 @@ class InngangsvilkaarServiceTest {
     @Mock
     private VilkaarsresultatService vilkaarsresultatService;
 
+    private final FakeUnleash unleash = new FakeUnleash();
     private InngangsvilkaarService inngangsvilkaarService;
 
     @BeforeEach
     void setUp() {
         inngangsvilkaarService = new InngangsvilkaarService(behandlingService, inngangsvilkaarConsumer,
-            persondataFasade, vilkaarsresultatService);
+            persondataFasade, vilkaarsresultatService, unleash);
+        unleash.enable("melosys.tom_periode_og_land");
     }
 
     @Test
@@ -200,27 +208,62 @@ class InngangsvilkaarServiceTest {
     }
 
     @Test
+    void overstyrInngangsvilkårTilOppfylt_manglerLandOgPeriode_kasterFunksjonellException() {
+        when(behandlingService.hentBehandling(1L)).thenReturn(lagBehandling());
+        when(vilkaarsresultatService.finnVilkaarsresultat(anyLong(), eq(Vilkaar.FO_883_2004_INNGANGSVILKAAR))).thenReturn(Optional.of(new Vilkaarsresultat()));
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> inngangsvilkaarService.overstyrInngangsvilkårTilOppfylt(1L))
+            .withMessage("Mangler land eller periode for behandling 1");
+    }
+
+    @Test
+    void overstyrInngangsvilkårTilOppfylt_manglerLandOgPeriodeToggleAv_kasterIkkeException() {
+        unleash.disable("melosys.tom_periode_og_land");
+        when(vilkaarsresultatService.finnVilkaarsresultat(anyLong(), eq(Vilkaar.FO_883_2004_INNGANGSVILKAAR))).thenReturn(Optional.of(new Vilkaarsresultat()));
+
+        assertThatNoException()
+            .isThrownBy(() -> inngangsvilkaarService.overstyrInngangsvilkårTilOppfylt(1L));
+    }
+
+    @Test
     void overstyrInngangsvilkårTilOppfylt_inngangsvilkårFunnet_oppfyllerVilkår() {
+        when(behandlingService.hentBehandling(1L)).thenReturn(lagBehandlingMedPeriodeOgLand());
         Vilkaarsresultat vilkaarsresultat = new Vilkaarsresultat();
         when(vilkaarsresultatService.finnVilkaarsresultat(anyLong(), eq(Vilkaar.FO_883_2004_INNGANGSVILKAAR))).thenReturn(Optional.of(vilkaarsresultat));
 
+
         inngangsvilkaarService.overstyrInngangsvilkårTilOppfylt(1L);
+
 
         verify(vilkaarsresultatService).oppdaterVilkaarsresultat(eq(1L), eq(Vilkaar.FO_883_2004_INNGANGSVILKAAR), eq(true), anySet());
     }
 
     @Test
     void overstyrInngangsvilkårTilOppfylt_inngangsvilkårFunnet_beholderGamleBegrunnelserOgLeggerTilOverstyringsbegrunnelse() {
+        when(behandlingService.hentBehandling(1L)).thenReturn(lagBehandlingMedPeriodeOgLand());
         VilkaarBegrunnelse vilkaarBegrunnelse = new VilkaarBegrunnelse();
         vilkaarBegrunnelse.setKode(Inngangsvilkaar.MANGLER_STATSBORGERSKAP.getKode());
         Vilkaarsresultat vilkaarsresultat = new Vilkaarsresultat();
         vilkaarsresultat.setBegrunnelser(Set.of(vilkaarBegrunnelse));
         when(vilkaarsresultatService.finnVilkaarsresultat(anyLong(), eq(Vilkaar.FO_883_2004_INNGANGSVILKAAR))).thenReturn(Optional.of(vilkaarsresultat));
 
+
         inngangsvilkaarService.overstyrInngangsvilkårTilOppfylt(1L);
+
 
         verify(vilkaarsresultatService).oppdaterVilkaarsresultat(eq(1L), eq(Vilkaar.FO_883_2004_INNGANGSVILKAAR), anyBoolean(), eq(Set.of(
             Inngangsvilkaar.OVERSTYRT_AV_SAKSBEHANDLER, Inngangsvilkaar.MANGLER_STATSBORGERSKAP
         )));
+    }
+
+    private Behandling lagBehandlingMedPeriodeOgLand() {
+        var behandlingsgrunnlagData = new BehandlingsgrunnlagData();
+        behandlingsgrunnlagData.periode = new Periode(LocalDate.now(), null);
+        behandlingsgrunnlagData.soeknadsland = new Soeknadsland(List.of(Landkoder.BE.getKode()), false);
+        var behandling = new Behandling();
+        behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
+        behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(behandlingsgrunnlagData);
+        return behandling;
     }
 }
