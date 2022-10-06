@@ -3,23 +3,10 @@ package no.nav.melosys.itest
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
-import io.kotest.matchers.equality.shouldBeEqualToComparingFields
 import io.kotest.matchers.nulls.shouldNotBeNull
-import io.kotest.matchers.shouldBe
-import io.kotest.matchers.types.shouldBeInstanceOf
-import no.nav.melosys.domain.Behandling
-import no.nav.melosys.domain.Fagsystem
 import no.nav.melosys.domain.arkiv.ArkivDokument
-import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad
-import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode
 import no.nav.melosys.domain.kodeverk.Avsendertyper
 import no.nav.melosys.domain.kodeverk.Landkoder
-import no.nav.melosys.domain.kodeverk.Saksstatuser
-import no.nav.melosys.domain.kodeverk.Sakstemaer
-import no.nav.melosys.domain.kodeverk.Sakstyper
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.saksflyt.ProsessStatus
 import no.nav.melosys.domain.saksflyt.ProsessType
 import no.nav.melosys.domain.saksflyt.Prosessinstans
@@ -85,10 +72,10 @@ class JournalfoeringBase(
     }
 
     protected fun journalførOgVentTilProsesserErFerdige(journalfoeringOpprettDto: JournalfoeringOpprettDto): Prosessinstans {
-        return executeAndWait(ProsessType.JFR_NY_SAK_BRUKER, listOf(ProsessType.OPPRETT_OG_DISTRIBUER_BREV)) {
-            val jfrOppgave: Oppgave = lagJfrOppgave()
-            val lagJournalfoeringOpprettDto = lagJournalfoeringOpprettDto(jfrOppgave, journalfoeringOpprettDto)
+        val jfrOppgave: Oppgave = lagJfrOppgave()
+        val lagJournalfoeringOpprettDto = lagJournalfoeringOpprettDto(jfrOppgave, journalfoeringOpprettDto)
 
+        return executeAndWait(ProsessType.JFR_NY_SAK_BRUKER, listOf(ProsessType.OPPRETT_OG_DISTRIBUER_BREV)) {
             journalføringService.journalførOgOpprettSak(lagJournalfoeringOpprettDto)
             oppgaveService.ferdigstillOppgave(lagJournalfoeringOpprettDto.oppgaveID)
         }
@@ -104,34 +91,6 @@ class JournalfoeringBase(
         val journalføringProsessID = finnProsessID(waitForprosessType, startTime)
         alsoWaitForprosessType.forEach { finnProsessID(it, startTime) }
         return prosessinstansRepository.findById(journalføringProsessID).get()
-    }
-
-    protected fun sjekkBehandlingOgBehandlingsgrunnlag(prosessinstans: Prosessinstans): Behandling {
-        val behandling = prosessinstans.behandling
-
-        behandling.apply {
-            status.shouldBe(Behandlingsstatus.OPPRETTET)
-            type.shouldBe(Behandlingstyper.FØRSTEGANG)
-            tema.shouldBe(Behandlingstema.UTSENDT_ARBEIDSTAKER)
-        }
-        behandling.fagsak.apply {
-            type.shouldBe(Sakstyper.EU_EOS)
-            status.shouldBe(Saksstatuser.OPPRETTET)
-            registrertAv.shouldBe(Fagsystem.MELOSYS.toString())
-            tema.shouldBe(Sakstemaer.MEDLEMSKAP_LOVVALG)
-        }
-        behandling.behandlingsgrunnlag.behandlingsgrunnlagdata.shouldBeInstanceOf<Soeknad>()
-            .shouldBeEqualToComparingFields(Soeknad().apply {
-                soeknadsland.apply {
-                    landkoder = listOf(Landkoder.IE.kode)
-                    erUkjenteEllerAlleEosLand = false
-                }
-                periode = Periode(
-                    periodeFOM,
-                    periodeTOM
-                )
-            })
-        return behandling
     }
 
     protected fun finnProsessID(prosessType: ProsessType, now: LocalDateTime): UUID =

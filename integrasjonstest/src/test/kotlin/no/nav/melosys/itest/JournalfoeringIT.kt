@@ -5,9 +5,11 @@ import io.kotest.matchers.equality.shouldBeEqualToComparingFields
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import no.finn.unleash.FakeUnleash
+import no.nav.melosys.domain.Fagsystem
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode
 import no.nav.melosys.domain.kodeverk.Landkoder
+import no.nav.melosys.domain.kodeverk.Saksstatuser
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
@@ -43,10 +45,32 @@ class JournalfoeringIT(
         }
 
 
-        val journalføringProsessID = journalførOgVentTilProsesserErFerdige(journalfoeringOpprettDto)
+        val journalføringProsess = journalførOgVentTilProsesserErFerdige(journalfoeringOpprettDto)
 
 
-        sjekkBehandlingOgBehandlingsgrunnlag(journalføringProsessID)
+        val behandling = journalføringProsess.behandling
+        behandling.apply {
+            status.shouldBe(Behandlingsstatus.OPPRETTET)
+            type.shouldBe(Behandlingstyper.FØRSTEGANG)
+            tema.shouldBe(Behandlingstema.UTSENDT_ARBEIDSTAKER)
+        }
+        behandling.fagsak.apply {
+            type.shouldBe(Sakstyper.EU_EOS)
+            status.shouldBe(Saksstatuser.OPPRETTET)
+            registrertAv.shouldBe(Fagsystem.MELOSYS.toString())
+            tema.shouldBe(Sakstemaer.MEDLEMSKAP_LOVVALG)
+        }
+        behandling.behandlingsgrunnlag.behandlingsgrunnlagdata.shouldBeInstanceOf<Soeknad>()
+            .shouldBeEqualToComparingFields(Soeknad().apply {
+                soeknadsland.apply {
+                    landkoder = listOf(Landkoder.IE.kode)
+                    erUkjenteEllerAlleEosLand = false
+                }
+                periode = Periode(
+                    periodeFOM,
+                    periodeTOM
+                )
+            })
     }
 
     @Test
