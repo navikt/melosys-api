@@ -37,13 +37,7 @@ public class VurderInngangsvilkaar implements StegBehandler {
         final long behandlingID = prosessinstans.getBehandling().getId();
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
         if (unleash.isEnabled("melosys.behandle_alle_saker")) {
-            var finnesPeriodeOgLand = !unleash.isEnabled("melosys.tom_periode_og_land") || behandling.harPeriodeOgLand();
-
-            if (behandling.getFagsak().erSakstypeEøs()
-                && !SaksbehandlingRegler.harTomFlyt(behandling)
-                && behandling.kanResultereIVedtak()
-                && finnesPeriodeOgLand
-            ) {
+            if (skalVurdereInngangsvilkår(behandling)) {
                 var søknadsland = behandling.hentSøknadsLand();
                 var erUkjenteEllerAlleEosLand = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().soeknadsland.erUkjenteEllerAlleEosLand;
                 var periode = behandling.hentPeriode();
@@ -65,5 +59,12 @@ public class VurderInngangsvilkaar implements StegBehandler {
                 log.info("Inngangsvilkår ikke vurdert for behandling {} med tema {}", behandlingID, behandling.getTema());
             }
         }
+    }
+
+    private boolean skalVurdereInngangsvilkår(Behandling behandling) {
+        return behandling.getFagsak().erSakstypeEøs()
+            && !SaksbehandlingRegler.harTomFlyt(behandling)
+            && behandling.kanResultereIVedtak()
+            && (!unleash.isEnabled("melosys.tom_periode_og_land") || behandling.harPeriodeOgLand());
     }
 }

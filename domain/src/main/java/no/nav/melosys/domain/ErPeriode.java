@@ -15,7 +15,7 @@ public interface ErPeriode {
         return inkluderer(LocalDate.now());
     }
 
-    default boolean erTom() {
+    default boolean erFomOgTomNull() {
         return getFom() == null && getTom() == null;
     }
 
