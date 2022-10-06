@@ -222,7 +222,7 @@ public class BrevmottakerService {
 
     private boolean kanReservereMotA1(Behandling behandling) {
         Lovvalgsperiode lovvalgsperiode =
-            behandlingsresultatService.hentBehandlingsresultat(behandling.getId()).hentValidertLovvalgsperiode();
+            behandlingsresultatService.hentBehandlingsresultat(behandling.getId()).hentLovvalgsperiode();
         return lovvalgsperiode.erArtikkel12() || lovvalgsperiode.erArtikkel11_4()
             || lovvalgsperiode.getBestemmelse() == Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3B;
     }
@@ -258,7 +258,7 @@ public class BrevmottakerService {
         }
 
         if (brevkopiRegler.contains(UTENLANDSK_TRYGDEMYNDIGHET_FÅR_KOPI_HVIS_IKKE_ART_8_2)) {
-            Optional.ofNullable(lovvalgsperiodeService.hentValidertLovvalgsperiode(behandling.getId())).ifPresent(lovvalgsperiode -> {
+            Optional.ofNullable(lovvalgsperiodeService.hentLovvalgsperiode(behandling.getId())).ifPresent(lovvalgsperiode -> {
                     if (lovvalgsperiode.getBestemmelse() != Lovvalgbestemmelser_trygdeavtale_uk.UK_ART8_2) {
                         mottakerliste.getKopiMottakere().add(TRYGDEMYNDIGHET);
                     }

@@ -82,7 +82,7 @@ class BrevDataByggerInnvilgelseFlereLandTest {
         when(brevDataByggerA1.lag(any(), any())).thenReturn(new BrevDataA1());
 
         Lovvalgsperiode periode = new Lovvalgsperiode();
-        when(lovvalgsperiodeService.hentValidertLovvalgsperiode(anyLong())).thenReturn(periode);
+        when(lovvalgsperiodeService.hentLovvalgsperiode(anyLong())).thenReturn(periode);
 
         when(landvelgerService.hentAlleArbeidsland(anyLong())).thenReturn(Collections.singleton(Landkoder.AT));
         when(landvelgerService.hentBostedsland(anyLong(), any())).thenReturn(new Bostedsland(Landkoder.DE));

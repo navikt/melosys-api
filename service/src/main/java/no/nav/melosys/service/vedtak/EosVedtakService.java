@@ -103,7 +103,7 @@ public class EosVedtakService {
         if (behandling.getType().equals(Behandlingstyper.ENDRET_PERIODE)) {
             behandlingsresultat.setType(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
         }
-        if (!behandlingsresultat.hentValidertLovvalgsperiode().erArtikkel12()) {
+        if (!behandlingsresultat.hentLovvalgsperiode().erArtikkel12()) {
             throw new FunksjonellException("Behandling av forkortet periode gjelder kun art. 12.");
         }
         if (prosessinstansService.harAktivProsessinstans(behandlingID)) {

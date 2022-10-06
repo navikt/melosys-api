@@ -67,7 +67,7 @@ public class StorbritanniaMapper {
 
         var behandling = brevbestilling.getBehandling();
         var behandlingsgrunnlag = behandling.getBehandlingsgrunnlag();
-        var lovvalgsperiode = lovvalgsperiodeService.hentValidertLovvalgsperiode(behandling.getId());
+        var lovvalgsperiode = lovvalgsperiodeService.hentLovvalgsperiode(behandling.getId());
 
         return new InnvilgelseStorbritannia.Builder()
             .innvilgelse(Innvilgelse.av(brevbestilling))
@@ -288,7 +288,7 @@ public class StorbritanniaMapper {
 
     private boolean skalIkkeHaAttest(DokgenBrevbestilling brevbestilling) {
         // Skatteetaten skal ikke ha attest
-        boolean erArtikkel8_2 = lovvalgsperiodeService.hentValidertLovvalgsperiode(brevbestilling.getBehandlingId()).getBestemmelse() == Lovvalgbestemmelser_trygdeavtale_uk.UK_ART8_2;
+        boolean erArtikkel8_2 = lovvalgsperiodeService.hentLovvalgsperiode(brevbestilling.getBehandlingId()).getBestemmelse() == Lovvalgbestemmelser_trygdeavtale_uk.UK_ART8_2;
         return erSkatteetaten(brevbestilling.getOrg()) || erArtikkel8_2;
     }
 

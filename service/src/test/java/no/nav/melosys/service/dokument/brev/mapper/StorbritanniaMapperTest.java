@@ -252,7 +252,7 @@ class StorbritanniaMapperTest {
     }
 
     private void mockLovvalgsperiode() {
-        when(mockLovvalgsperiodeService.hentValidertLovvalgsperiode(anyLong())).thenReturn(lagLovvalgsperiode());
+        when(mockLovvalgsperiodeService.hentLovvalgsperiode(anyLong())).thenReturn(lagLovvalgsperiode());
     }
 
     private Behandling medPeriode(Behandling behandling) {
@@ -336,7 +336,7 @@ class StorbritanniaMapperTest {
         when(mockAvklarteMedfolgendeFamilieService.hentMedfølgendeBarn(anyLong())).thenReturn(lagMedfølgendeBarn());
         when(mockAvklarteVirksomheterService.hentNorskeArbeidsgivere(any())).thenReturn(lagAvklarteVirksomheter());
         when(mockLovvalgsperiodeService.hentLovvalgsperioder(anyLong())).thenReturn(List.of(lagLovvalgsperiode()));
-        when(mockLovvalgsperiodeService.hentValidertLovvalgsperiode(anyLong())).thenReturn(lagLovvalgsperiode());
+        when(mockLovvalgsperiodeService.hentLovvalgsperiode(anyLong())).thenReturn(lagLovvalgsperiode());
     }
 
     static Lovvalgsperiode lagLovvalgsperiode() {

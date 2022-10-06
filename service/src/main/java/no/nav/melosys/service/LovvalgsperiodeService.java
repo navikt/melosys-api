@@ -44,7 +44,7 @@ public class LovvalgsperiodeService {
         return lovvalgsperiodeRepo.findByBehandlingsresultatId(behandlingsid);
     }
 
-    public Lovvalgsperiode hentValidertLovvalgsperiode(long behandlingsid) {
+    public Lovvalgsperiode hentLovvalgsperiode(long behandlingsid) {
         Collection<Lovvalgsperiode> lovvalgsperioder = hentLovvalgsperioder(behandlingsid);
         if (lovvalgsperioder.size() != 1) {
             if (lovvalgsperioder.size() > 1) {

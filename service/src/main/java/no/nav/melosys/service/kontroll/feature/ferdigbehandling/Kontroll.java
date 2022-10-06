@@ -93,7 +93,7 @@ class Kontroll {
     }
 
     private FerdigbehandlingKontrollData hentVedtakKontrollData(Behandling behandling) {
-        Lovvalgsperiode lovvalgsperiode = lovvalgsperiodeService.hentValidertLovvalgsperiode(behandling.getId());
+        Lovvalgsperiode lovvalgsperiode = lovvalgsperiodeService.hentLovvalgsperiode(behandling.getId());
         Lovvalgsperiode opprinneligLovvalgsperiode = lovvalgsperiodeService.finnOpprinneligLovvalgsperiode(behandling.getId()).orElse(null);
         BehandlingsgrunnlagData behandlingsgrunnlagData = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
         MedlemskapDokument medlemskapDokument = behandling.hentMedlemskapDokument();

@@ -38,7 +38,7 @@ public class BrevDataByggerAvslagArbeidsgiver implements BrevDataBygger {
         brevData.person = dataGrunnlag.getPerson();
 
         brevData.hovedvirksomhet = dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentHovedvirksomhet();
-        brevData.lovvalgsperiode = lovvalgsperiodeService.hentValidertLovvalgsperiode(behandlingID);
+        brevData.lovvalgsperiode = lovvalgsperiodeService.hentLovvalgsperiode(behandlingID);
         brevData.arbeidsland = landvelgerService.hentArbeidsland(behandlingID).getBeskrivelse();
 
         brevData.vilkårbegrunnelser121 = hentVilkaarbegrunnelser(behandlingID, FO_883_2004_ART12_1);

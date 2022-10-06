@@ -66,7 +66,7 @@ class KontrollMedRegisterOpplysningServiceTest {
 
         behandling.getSaksopplysninger().add(medlSaksopplysning);
         when(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling);
-        when(lovvalgsperiodeService.hentValidertLovvalgsperiode(behandlingID)).thenReturn(lovvalgsperiode);
+        when(lovvalgsperiodeService.hentLovvalgsperiode(behandlingID)).thenReturn(lovvalgsperiode);
 
         Kontroll kontroll = new Kontroll(behandlingService, lovvalgsperiodeService, persondataFasade, unleash);
         kontrollMedRegisterOpplysning = new KontrollMedRegisteropplysning(behandlingService, behandlingsresultatService, persondataFasade,
