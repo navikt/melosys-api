@@ -89,7 +89,7 @@ public class FagsakTjeneste {
     @ApiOperation(value = "Oppretter en ny sak.")
     public ResponseEntity<Void> opprettNySak(@RequestBody OpprettSakDto opprettSakDto) {
         if (opprettSakDto.getBrukerID() == null) {
-            throw new FunksjonellException("BrukerID trengs for å opprette en sak.");
+            throw new FunksjonellException("BrukerID trengs for å opprette behandling");
         }
         aksesskontroll.autoriserFolkeregisterIdent(opprettSakDto.getBrukerID());
 
@@ -106,8 +106,15 @@ public class FagsakTjeneste {
     @ApiOperation(value = "Oppretter en ny behandling for sak.")
     public ResponseEntity<Void> opprettNyBehandlingForSak(@PathVariable("saksnr") String saksnummer, @RequestBody OpprettSakDto opprettSakDto) {
         if (opprettSakDto.getBrukerID() == null) {
-            throw new FunksjonellException("BrukerID trengs for å opprette en sak.");
+            throw new FunksjonellException("BrukerID trengs for å opprette behandling");
         }
+        if (opprettSakDto.getBehandlingstema() == null) {
+            throw new FunksjonellException("Behandlingstema mangler");
+        }
+        if (opprettSakDto.getBehandlingstype() == null) {
+            throw new FunksjonellException("Behandlingstype mangler");
+        }
+
         aksesskontroll.autoriserFolkeregisterIdent(opprettSakDto.getBrukerID());
         opprettBehandlingForSak.opprettBehandling(saksnummer, opprettSakDto);
 

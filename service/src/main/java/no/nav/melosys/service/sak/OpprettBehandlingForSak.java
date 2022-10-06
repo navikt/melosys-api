@@ -1,6 +1,5 @@
 package no.nav.melosys.service.sak;
 
-import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
@@ -24,9 +23,6 @@ public class OpprettBehandlingForSak {
         if (fagsak.hentAktivBehandling() != null) {
             throw new FunksjonellException("Det finnes allerede en aktiv behandling på fagsak " + saksnummer);
         }
-        Behandling.validerBehandlingstema(opprettSakDto.getBehandlingstema());
-        Behandling.validerBehandlingstype(opprettSakDto.getBehandlingstype());
-
         prosessinstansService.opprettNyBehandlingForSak(saksnummer, opprettSakDto);
     }
 }
