@@ -18,6 +18,7 @@ import no.nav.melosys.domain.dokument.medlemskap.Periode;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
 import no.nav.melosys.integrasjon.medl.PeriodestatusMedl;
@@ -81,6 +82,15 @@ class KontrollTest {
 
     @Test
     void utførKontroller_AvslagPersonMedRegistrertAdresse__returnererTomCollection() {
+        Collection<Kontrollfeil> resultat = kontroll.utførKontroller(behandlingID, Sakstyper.EU_EOS, Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL);
+
+        assertThat(resultat).isEmpty();
+    }
+
+    @Test
+    void utførKontroller_avslagTomFlyt__returnererTomCollection() {
+        behandling.setType(Behandlingstyper.HENVENDELSE);
+        behandling.setBehandlingsgrunnlag(null);
         Collection<Kontrollfeil> resultat = kontroll.utførKontroller(behandlingID, Sakstyper.EU_EOS, Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL);
 
         assertThat(resultat).isEmpty();

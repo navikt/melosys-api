@@ -17,6 +17,7 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.FerdigbehandlingKontrollData;
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.kontroll.FerdigbehandlingKontrollsett;
 import no.nav.melosys.service.persondata.PersondataFasade;
+import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import no.nav.melosys.service.validering.Kontrollfeil;
 import org.springframework.stereotype.Component;
 
@@ -77,7 +78,10 @@ class Kontroll {
     }
 
     private FerdigbehandlingKontrollData hentKontrollDataForAvslagOgHenleggelse(Behandling behandling) {
-        BehandlingsgrunnlagData behandlingsgrunnlagData = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
+        BehandlingsgrunnlagData behandlingsgrunnlagData = null;
+        if (!SaksbehandlingRegler.harTomFlyt(behandling)) {
+            behandlingsgrunnlagData = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
+        }
         Persondata persondata = hentPersondata(behandling);
         return FerdigbehandlingKontrollData.lagKontrollDataForAvslag(persondata, behandlingsgrunnlagData);
     }
