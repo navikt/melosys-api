@@ -4,7 +4,6 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
@@ -86,7 +85,6 @@ class OppdaterSaksrelasjonTest {
 
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, eessiMelding);
-        prosessinstans.setData(ProsessDataKey.SAKSTYPE, Sakstyper.EU_EOS.getKode());
 
         Fagsak fagsak = new Fagsak();
         fagsak.setGsakSaksnummer(123L);
@@ -100,7 +98,7 @@ class OppdaterSaksrelasjonTest {
             fagsak.getGsakSaksnummer(), eessiMelding.getRinaSaksnummer(), eessiMelding.getBucType()
         );
     }
-    
+
     @Test
     void utfør_ingenBehandlingIngenArkivsakIDIProsessinstnas_henterArkivsakIDFraSaksnummerIFagsakServiceOppdatererSaksrelasjon() {
         final Fagsak fagsak = new Fagsak();
@@ -112,7 +110,6 @@ class OppdaterSaksrelasjonTest {
         eessiMelding.setBucType("LA_BUC_06");
 
         Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setData(ProsessDataKey.SAKSTYPE, Sakstyper.EU_EOS.getKode());
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, eessiMelding);
         prosessinstans.setData(ProsessDataKey.SAKSNUMMER, fagsak.getSaksnummer());
 
