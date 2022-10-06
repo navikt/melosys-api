@@ -3,6 +3,7 @@ package no.nav.melosys.saksflyt.steg.vilkaar;
 import java.time.LocalDate;
 import java.util.List;
 
+import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
@@ -35,15 +36,18 @@ class VurderInngangsvilkaarTest {
 
     private final long behandlingID = 143;
     private final Behandling behandling = new Behandling();
+    private final FakeUnleash unleash = new FakeUnleash();
 
     @BeforeEach
     public void setUp() {
-        vurderInngangsvilkaar = new VurderInngangsvilkaar(inngangsvilkaarService, behandlingService);
+        vurderInngangsvilkaar = new VurderInngangsvilkaar(inngangsvilkaarService, behandlingService, unleash);
 
         behandling.setId(behandlingID);
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
-        when(behandlingService.hentBehandlingMedSaksopplysninger(eq(behandlingID))).thenReturn(behandling);
+        when(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling);
+
+        unleash.enableAll();
     }
 
     @Test
@@ -52,8 +56,8 @@ class VurderInngangsvilkaarTest {
         behandlingsgrunnlagData.periode = new Periode(LocalDate.now(), LocalDate.now().plusYears(1L));
         behandlingsgrunnlagData.soeknadsland.landkoder = List.of(Landkoder.NO.getKode(), Landkoder.SE.getKode());
 
-        behandling.setType(Behandlingstyper.NY_VURDERING);
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
+        behandling.setType(Behandlingstyper.FØRSTEGANG);
         behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(behandlingsgrunnlagData);
 
         Fagsak fagsak = new Fagsak();
@@ -65,19 +69,22 @@ class VurderInngangsvilkaarTest {
         prosessinstans.setBehandling(behandling);
 
         when(inngangsvilkaarService.vurderOgLagreInngangsvilkår(
-            eq(behandlingID),
-            eq(behandlingsgrunnlagData.soeknadsland.landkoder),
-            eq(false),
-            eq(behandlingsgrunnlagData.periode)
+            behandlingID,
+            behandlingsgrunnlagData.soeknadsland.landkoder,
+            false,
+            behandlingsgrunnlagData.periode
         )).thenReturn(true);
 
+
         vurderInngangsvilkaar.utfør(prosessinstans);
+
 
         verify(inngangsvilkaarService).vurderOgLagreInngangsvilkår(anyLong(), any(), anyBoolean(), any());
     }
 
     @Test
-    void utfør_behandlingstemaBeslutningLovvalgAnnetLand_vurdererIkkeInngangsvilkår() {
+    void utfør_behandlingstemaBeslutningLovvalgAnnetLandToggleAv_vurdererIkkeInngangsvilkår() {
+        unleash.disableAll();
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
         behandling.setType(Behandlingstyper.NY_VURDERING);
@@ -85,18 +92,41 @@ class VurderInngangsvilkaarTest {
         behandling.setFagsak(new Fagsak());
         behandling.getFagsak().setType(Sakstyper.EU_EOS);
 
+        vurderInngangsvilkaar.utfør(prosessinstans);
+        verify(inngangsvilkaarService, never()).vurderOgLagreInngangsvilkår(anyLong(), any(), anyBoolean(), any());
+    }
+
+    @Test
+    void utfør_ikkeSakstypeEuEøs_vurdererIkkeInngangsvilkår() {
+        Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setBehandling(behandling);
+        behandling.setFagsak(new Fagsak());
+        behandling.getFagsak().setType(Sakstyper.TRYGDEAVTALE);
 
         vurderInngangsvilkaar.utfør(prosessinstans);
         verify(inngangsvilkaarService, never()).vurderOgLagreInngangsvilkår(anyLong(), any(), anyBoolean(), any());
     }
 
     @Test
-    void utfør_sakstypeFtrl_vurdererIkkeInngangsvilkår() {
+    void utfør_harIkkeFlyt_vurdererIkkeInngangsvilkår() {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
         behandling.setFagsak(new Fagsak());
-        behandling.getFagsak().setType(Sakstyper.FTRL);
-        behandling.setType(Behandlingstyper.NY_VURDERING);
+        behandling.getFagsak().setType(Sakstyper.EU_EOS);
+        behandling.setType(Behandlingstyper.HENVENDELSE);
+
+        vurderInngangsvilkaar.utfør(prosessinstans);
+        verify(inngangsvilkaarService, never()).vurderOgLagreInngangsvilkår(anyLong(), any(), anyBoolean(), any());
+    }
+
+    @Test
+    void utfør_kanIkkeResultereIVedtak_vurdererIkkeInngangsvilkår() {
+        Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setBehandling(behandling);
+        behandling.setFagsak(new Fagsak());
+        behandling.getFagsak().setType(Sakstyper.EU_EOS);
+        behandling.setTema(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE);
+        behandling.setType(Behandlingstyper.FØRSTEGANG);
 
         vurderInngangsvilkaar.utfør(prosessinstans);
         verify(inngangsvilkaarService, never()).vurderOgLagreInngangsvilkår(anyLong(), any(), anyBoolean(), any());

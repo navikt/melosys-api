@@ -15,6 +15,7 @@ import no.nav.melosys.service.kontroll.feature.ufm.UfmKontrollService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerRequest;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
+import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import no.nav.melosys.service.vilkaar.InngangsvilkaarService;
 import org.slf4j.Logger;
@@ -57,6 +58,7 @@ public class OppfriskSaksopplysningerService {
 
     @Transactional
     public void oppfriskSaksopplysning(long behandlingID, boolean medFamilierelasjoner) {
+        var behandleAlleSakerToggleEnabled = unleash.isEnabled("melosys.behandle_alle_saker");
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
 
         if (behandling.erUtsending() && anmodningsperiodeService.harSendtAnmodningsperiode(behandlingID)) {
@@ -69,9 +71,9 @@ public class OppfriskSaksopplysningerService {
 
         //OK om perioden er tom. Ikke alle behandlingstema krever periode.
         //Implisitt at perioden eksisterer om behandling kan resultere i vedtak
-        ErPeriode periode = behandling.finnPeriode().orElse(new Periode());
-        LocalDate fom = periode.getFom();
-        LocalDate tom = periode.getTom();
+        ErPeriode periode = behandleAlleSakerToggleEnabled
+            ? behandling.finnPeriode().orElse(new Periode())
+            : behandling.finnPeriodeGammel().orElse(new Periode());
 
         RegisteropplysningerRequest registeropplysningerRequest = RegisteropplysningerRequest.builder()
             .behandlingID(behandlingID)
@@ -79,10 +81,10 @@ public class OppfriskSaksopplysningerService {
                 behandling.getFagsak().getType(),
                 behandling.getTema(),
                 behandling.getType(),
-                unleash.isEnabled("melosys.behandle_alle_saker")))
+                behandleAlleSakerToggleEnabled))
             .fnr(brukerID)
-            .fom(fom)
-            .tom(tom)
+            .fom(periode.getFom())
+            .tom(periode.getTom())
             .informasjonsbehov(medFamilierelasjoner
                 ? Informasjonsbehov.MED_FAMILIERELASJONER
                 : Informasjonsbehov.STANDARD)
@@ -92,19 +94,33 @@ public class OppfriskSaksopplysningerService {
         registeropplysningerService.hentOgLagreOpplysninger(registeropplysningerRequest);
         behandlingsresultatService.tømBehandlingsresultat(behandlingID);
 
-        if (behandling.erBehandlingAvSedGammel()) {
+        if (behandleAlleSakerToggleEnabled ? behandling.erBehandlingAvSed() : behandling.erBehandlingAvSedGammel()) {
             ufmKontrollService.utførKontrollerOgRegistrerFeil(behandlingID);
         }
 
-        if (behandling.kanResultereIVedtak()
-            && behandling.getFagsak().getType() == Sakstyper.EU_EOS
-            && !inngangsvilkaarService.oppfyllervurderingEF_883_2004(behandlingID)) {
-            inngangsvilkaarService.vurderOgLagreInngangsvilkår(
-                behandlingID,
-                behandling.finnSøknadsLand(),
-                behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().soeknadsland.erUkjenteEllerAlleEosLand,
-                periode
-            );
+        if (behandleAlleSakerToggleEnabled) {
+            if (behandling.getFagsak().erSakstypeEøs()
+                && !SaksbehandlingRegler.harTomFlyt(behandling)
+                && behandling.kanResultereIVedtak()
+                && !inngangsvilkaarService.oppfyllervurderingEF_883_2004(behandlingID)) {
+                inngangsvilkaarService.vurderOgLagreInngangsvilkår(
+                    behandlingID,
+                    behandling.hentSøknadsLand(),
+                    behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().soeknadsland.erUkjenteEllerAlleEosLand,
+                    periode
+                );
+            }
+        } else {
+            if (behandling.kanResultereIVedtakGammel()
+                && behandling.getFagsak().getType() == Sakstyper.EU_EOS
+                && !inngangsvilkaarService.oppfyllervurderingEF_883_2004(behandlingID)) {
+                inngangsvilkaarService.vurderOgLagreInngangsvilkår(
+                    behandlingID,
+                    behandling.finnSøknadsLandGammel(),
+                    behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().soeknadsland.erUkjenteEllerAlleEosLand,
+                    periode
+                );
+            }
         }
     }
 }

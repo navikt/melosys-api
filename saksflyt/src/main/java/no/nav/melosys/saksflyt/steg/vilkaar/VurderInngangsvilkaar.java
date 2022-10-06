@@ -1,5 +1,6 @@
 package no.nav.melosys.saksflyt.steg.vilkaar;
 
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
@@ -21,10 +22,12 @@ public class VurderInngangsvilkaar implements StegBehandler {
 
     private final InngangsvilkaarService inngangsvilkaarService;
     private final BehandlingService behandlingService;
+    private final Unleash unleash;
 
-    public VurderInngangsvilkaar(InngangsvilkaarService inngangsvilkaarService, BehandlingService behandlingService) {
+    public VurderInngangsvilkaar(InngangsvilkaarService inngangsvilkaarService, BehandlingService behandlingService, Unleash unleash) {
         this.inngangsvilkaarService = inngangsvilkaarService;
         this.behandlingService = behandlingService;
+        this.unleash = unleash;
     }
 
     @Override
@@ -47,16 +50,28 @@ public class VurderInngangsvilkaar implements StegBehandler {
             log.info("Hopper over steg {} fordi sakstype er {} og oppgaveID er {}", VURDER_INNGANGSVILKÅR.getKode(), behandling.getFagsak().getType(), null);
             return;
         }
+        if (unleash.isEnabled("melosys.behandle_alle_saker")) {
+            if (behandling.getFagsak().erSakstypeEøs() && !SaksbehandlingRegler.harTomFlyt(behandling) && behandling.kanResultereIVedtak()) {
+                var søknadsland = behandling.hentSøknadsLand();
+                var erUkjenteEllerAlleEosLand = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().soeknadsland.erUkjenteEllerAlleEosLand;
+                var periode = behandling.hentPeriode();
 
-        if (behandling.getFagsak().getType() == Sakstyper.EU_EOS && behandling.kanResultereIVedtak()) {
-            var søknadsland = behandling.finnSøknadsLand();
-            var erUkjenteEllerAlleEosLand = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().soeknadsland.erUkjenteEllerAlleEosLand;
-            var periode = behandling.hentPeriode();
-
-            boolean kvalifisererForEF_883_2004 = inngangsvilkaarService.vurderOgLagreInngangsvilkår(behandlingID, søknadsland, erUkjenteEllerAlleEosLand, periode);
-            log.info("Inngangsvilkår vurdert for behandling {}. kvalifisererForEF_883_2004: {}", behandlingID, kvalifisererForEF_883_2004);
+                boolean kvalifisererForEF_883_2004 = inngangsvilkaarService.vurderOgLagreInngangsvilkår(behandlingID, søknadsland, erUkjenteEllerAlleEosLand, periode);
+                log.info("Inngangsvilkår vurdert for behandling {}. kvalifisererForEF_883_2004: {}", behandlingID, kvalifisererForEF_883_2004);
+            } else {
+                log.info("Inngangsvilkår ikke vurdert for behandling {} med tema {}", behandlingID, behandling.getTema());
+            }
         } else {
-            log.info("Inngangsvilkår ikke vurdert for behandling {} med tema {}", behandlingID, behandling.getTema());
+            if (behandling.getFagsak().getType() == Sakstyper.EU_EOS && behandling.kanResultereIVedtakGammel()) {
+                var søknadsland = behandling.finnSøknadsLandGammel();
+                var erUkjenteEllerAlleEosLand = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().soeknadsland.erUkjenteEllerAlleEosLand;
+                var periode = behandling.hentPeriodeGammel();
+
+                boolean kvalifisererForEF_883_2004 = inngangsvilkaarService.vurderOgLagreInngangsvilkår(behandlingID, søknadsland, erUkjenteEllerAlleEosLand, periode);
+                log.info("Inngangsvilkår vurdert for behandling {}. kvalifisererForEF_883_2004: {}", behandlingID, kvalifisererForEF_883_2004);
+            } else {
+                log.info("Inngangsvilkår ikke vurdert for behandling {} med tema {}", behandlingID, behandling.getTema());
+            }
         }
     }
 }

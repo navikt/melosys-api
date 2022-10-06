@@ -16,6 +16,7 @@ import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.dokument.utbetaling.UtbetalingDokument;
 import no.nav.melosys.domain.kodeverk.Behandlingsgrunnlagtyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -283,7 +284,42 @@ public class Behandling extends RegistreringsInfo {
     }
 
     public Optional<ErPeriode> finnPeriode() {
-        if (kanResultereIVedtak()) {
+        var optionalSeddokument = finnSedDokument();
+        if (optionalSeddokument.isPresent()) {
+            return Optional.of(optionalSeddokument.get().getLovvalgsperiode());
+        }
+
+        if (behandlingsgrunnlag != null && behandlingsgrunnlag.getBehandlingsgrunnlagdata() != null) {
+            return Optional.of(behandlingsgrunnlag.getBehandlingsgrunnlagdata().periode);
+        }
+
+        return Optional.empty();
+    }
+
+    public Collection<String> hentSøknadsLand() {
+        if (erNorgeUtpekt()) {
+            var utenlandskeArbeidsstederLandkoder = behandlingsgrunnlag.getBehandlingsgrunnlagdata().hentUtenlandskeArbeidsstederLandkode();
+            return utenlandskeArbeidsstederLandkoder.isEmpty() ? Collections.singleton(Landkoder.NO.getKode()) : utenlandskeArbeidsstederLandkoder;
+        } else {
+            return behandlingsgrunnlag.getBehandlingsgrunnlagdata().soeknadsland.landkoder;
+        }
+    }
+
+    /**
+     * @deprecated Fjernes med toggle melosys.behandle_alle_saker. Skal erstattes alle steder den er brukt
+     */
+    @Deprecated
+    public ErPeriode hentPeriodeGammel() {
+        return finnPeriodeGammel()
+            .orElseThrow(() -> new IkkeFunnetException("Finner ikke periode for behandling " + id));
+    }
+
+    /**
+     * @deprecated Fjernes med toggle melosys.behandle_alle_saker. Skal erstattes alle steder den er brukt
+     */
+    @Deprecated
+    public Optional<ErPeriode> finnPeriodeGammel() {
+        if (kanResultereIVedtakGammel()) {
             return Optional.of(behandlingsgrunnlag.getBehandlingsgrunnlagdata().periode);
         } else if (erBehandlingAvSedGammel()) {
             return finnSedDokument().map(SedDokument::getLovvalgsperiode);
@@ -292,8 +328,12 @@ public class Behandling extends RegistreringsInfo {
         return Optional.empty();
     }
 
-    public Collection<String> finnSøknadsLand() {
-        if (!kanResultereIVedtak()) {
+    /**
+     * @deprecated Fjernes med toggle melosys.behandle_alle_saker. Skal erstattes alle steder den er brukt
+     */
+    @Deprecated
+    public Collection<String> finnSøknadsLandGammel() {
+        if (!kanResultereIVedtakGammel()) {
             return Collections.emptyList();
         }
 
@@ -329,7 +369,16 @@ public class Behandling extends RegistreringsInfo {
         return Objects.hash(getRegistrertDato(), fagsak);
     }
 
+
     public boolean kanResultereIVedtak() {
+        return erNorgeUtpekt() || !erBehandlingAvSed();
+    }
+
+    /**
+     * @deprecated Fjernes med toggle melosys.behandle_alle_saker. Skal erstattes alle steder den er brukt
+     */
+    @Deprecated
+    public boolean kanResultereIVedtakGammel() {
         return erBehandlingAvSøknadGammel() || erNorgeUtpekt();
     }
 
@@ -359,8 +408,6 @@ public class Behandling extends RegistreringsInfo {
             || status == Behandlingsstatus.AVVENT_DOK_UTL
             || status == Behandlingsstatus.ANMODNING_UNNTAK_SENDT;
     }
-
-
 
     public boolean erNyVurdering() {
         return type == Behandlingstyper.NY_VURDERING;
@@ -403,6 +450,13 @@ public class Behandling extends RegistreringsInfo {
             return behandlingsgrunnlag.getType() == Behandlingsgrunnlagtyper.SØKNAD_A1_UTSENDTE_ARBEIDSTAKERE_EØS;
         }
         return false;
+    }
+
+    public boolean erBehandlingAvSed() {
+        return tema != null && fagsak != null && (
+            erRegistreringAvUnntak(tema) ||
+                erAnmodningOmUnntakOgSakstypeEuEøs(tema, fagsak.getType()) ||
+                BESLUTNING_LOVVALG_NORGE.equals(tema));
     }
 
     /**
@@ -470,6 +524,10 @@ public class Behandling extends RegistreringsInfo {
 
     private static boolean erAnmodningOmUnntak(String behandlingstemaKode) {
         return ANMODNING_OM_UNNTAK_HOVEDREGEL.getKode().equalsIgnoreCase(behandlingstemaKode);
+    }
+
+    private static boolean erAnmodningOmUnntakOgSakstypeEuEøs(Behandlingstema behandlingstema, Sakstyper sakstype) {
+        return ANMODNING_OM_UNNTAK_HOVEDREGEL.equals(behandlingstema) && Sakstyper.EU_EOS.equals(sakstype);
     }
 
     public static boolean erBehandlingAvSedForespørsler(Behandlingstema behandlingstema) {

@@ -146,16 +146,15 @@ class HentRegisteropplysningerTest {
     }
 
     @Test
-    void utfør_behandlingstypeTrygdetid_henterIngenting() {
-        behandling.getFagsak().setType(Sakstyper.EU_EOS);
-        behandling.getFagsak().setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
+    void utfør_harTomFlyt_henterIngenting() {
         behandling.setTema(Behandlingstema.TRYGDETID);
-        behandling.setType(Behandlingstyper.NY_VURDERING);
+        behandling.getFagsak().setType(Sakstyper.EU_EOS);
         var prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
 
         hentRegisteropplysninger.utfør(prosessinstans);
 
-        verify(registeropplysningerService, never()).hentOgLagreOpplysninger(any());
+        verify(registeropplysningerService).hentOgLagreOpplysninger(requestCaptor.capture());
+        assertThat(requestCaptor.getValue().getOpplysningstyper()).isEmpty();
     }
 }
