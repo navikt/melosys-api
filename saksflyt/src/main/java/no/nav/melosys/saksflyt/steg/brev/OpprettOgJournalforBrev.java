@@ -188,6 +188,7 @@ public class OpprettOgJournalforBrev implements StegBehandler {
             log.warn("Forsøkte å produsere brev %s med fritekstvedlegg for behandling %d".formatted(brevbestilling.getProduserbartdokument(), brevbestilling.getBehandlingId()));
             return Collections.emptyList();
         }
+
         return fritekstvedleggBestilling.stream().map(vedlegg -> {
             var vedleggBestilling = new FritekstvedleggBrevbestilling.Builder()
                 .medBehandlingId(fritekstbrevBrevbestilling.getBehandlingId())
