@@ -1,5 +1,6 @@
 package no.nav.melosys.saksflyt.steg.jfr;
 
+import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
@@ -7,6 +8,7 @@ import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.arkiv.Journalposttype;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
@@ -29,6 +31,7 @@ class FerdigstillJournalpostSedTest {
     private PersondataFasade persondataFasade;
 
     private FerdigstillJournalpostSed ferdigstillJournalpostSed;
+    private final FakeUnleash unleash = new FakeUnleash();
 
     private static final String JOURNALPOST_ID = "jp123";
     private static final String BRUKER_ID = "bruker123";
@@ -38,11 +41,29 @@ class FerdigstillJournalpostSedTest {
 
     @BeforeEach
     public void setUp() {
-        ferdigstillJournalpostSed = new FerdigstillJournalpostSed(joarkFasade, persondataFasade);
+        ferdigstillJournalpostSed = new FerdigstillJournalpostSed(joarkFasade, persondataFasade, unleash);
     }
 
     @Test
     void utfør_oppdatererJournalpost_nårJournalpostIkkeErFerdigstilt() {
+        when(persondataFasade.hentFolkeregisterident(AKTØR_ID)).thenReturn(BRUKER_ID);
+        Journalpost journalpost = new Journalpost(JOURNALPOST_ID);
+        journalpost.setErFerdigstilt(false);
+        journalpost.setJournalposttype(Journalposttype.INN);
+        when(joarkFasade.hentJournalpost(JOURNALPOST_ID)).thenReturn(journalpost);
+
+        Prosessinstans prosessinstans = hentProsessinstans();
+        ferdigstillJournalpostSed.utfør(prosessinstans);
+
+
+        JournalpostOppdatering forventetOppdatering = new JournalpostOppdatering.Builder()
+            .medBrukerID(BRUKER_ID).medSaksnummer(SAKSNUMMER).medTittel(TITTEL).build();
+        verify(joarkFasade).oppdaterOgFerdigstillJournalpost(JOURNALPOST_ID, forventetOppdatering);
+    }
+
+    @Test
+    void utfør_oppdatererJournalpost_nårJournalpostIkkeErFerdigstilt_brukFagsakTema() {
+        unleash.enable("melosys.behandle_alle_saker");
         when(persondataFasade.hentFolkeregisterident(AKTØR_ID)).thenReturn(BRUKER_ID);
         Journalpost journalpost = new Journalpost(JOURNALPOST_ID);
         journalpost.setErFerdigstilt(false);
@@ -83,6 +104,7 @@ class FerdigstillJournalpostSedTest {
         fagsak.setGsakSaksnummer(123L);
         fagsak.setSaksnummer(SAKSNUMMER);
         fagsak.getAktører().add(bruker);
+        fagsak.setTema(Sakstemaer.TRYGDEAVGIFT);
 
         Behandling behandling = new Behandling();
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);

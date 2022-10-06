@@ -41,6 +41,7 @@ public class TemaFactory {
         REGISTRERING_UNNTAK
     );
 
+    @Deprecated
     public static Tema fraBehandlingstema(Behandlingstema behandlingstema) {
         if (GYLDIGE_BEHANDLINGSTEMA_MEDLEMSKAP.contains(behandlingstema)) {
             return Tema.MED;
