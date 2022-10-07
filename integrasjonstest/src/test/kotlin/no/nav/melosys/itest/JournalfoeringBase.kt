@@ -98,19 +98,15 @@ class JournalfoeringBase(
         await.pollDelay(1, TimeUnit.SECONDS)
             .timeout(20, TimeUnit.SECONDS)
             .untilNotNull {
-                measureTimeAndPrint("findAllAfterDate $startTid") {
-                    prosessinstansRepository.findAllAfterDate(startTid)
-                }
+                prosessinstansRepository.findAllAfterDate(startTid)
             }.map { it.type }.shouldContain(prosessType)
 
         return await
             .timeout(30, TimeUnit.SECONDS)
             .pollInterval(1, TimeUnit.SECONDS)
             .untilNotNull {
-                measureTimeAndPrint("find ${prosessType} ferdig after date:$startTid") {
-                    prosessinstansRepository.findAllAfterDate(startTid)
-                        .find { it.type == prosessType && it.status == ProsessStatus.FERDIG }?.id
-                }
+                prosessinstansRepository.findAllAfterDate(startTid)
+                    .find { it.type == prosessType && it.status == ProsessStatus.FERDIG }?.id
             }
     }
 
@@ -210,13 +206,6 @@ class JournalfoeringBase(
             avsenderType = Avsendertyper.PERSON
             isSkalTilordnes = true
         }
-
-    private fun <T> measureTimeAndPrint(msg: String = "", measure: () -> T): T {
-        val start = System.currentTimeMillis()
-        return measure().apply {
-//            println("### $msg - time:${System.currentTimeMillis() - start}")
-        }
-    }
 
     companion object {
         val periodeFOM = LocalDate.of(2001, 1, 1)
