@@ -81,7 +81,7 @@ public class AvklarArbeidsgiver implements StegBehandler {
         if (unleash.isEnabled("melosys.behandle_alle_saker")) {
             return !SaksbehandlingRegler.harTomFlyt(behandling) && (
                 resultat.getType() == Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL
-                    || !resultat.hentValidertLovvalgsperiode().erArtikkel13()
+                    || !resultat.hentLovvalgsperiode().erArtikkel13()
             );
         }
         return resultat.getType() == Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL ||
