@@ -171,6 +171,23 @@ class LagreLovvalgsperiodeMedlTest {
     }
 
     @Test
+    void utfør_nyVurderingOgOpprinneligBehandlingFinnesIkke_opprettPeriode() {
+        Behandling behandling = TestdataFactory.lagBehandlingNyVurdering();
+        prosessinstans.setBehandling(behandling);
+        behandling.setOpprinneligBehandling(null);
+
+        Lovvalgsperiode nyLovvalgsperiode = lagLovvalgsperiode(null, Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1, InnvilgelsesResultat.INNVILGET);
+        behandlingsresultat.getLovvalgsperioder().add(nyLovvalgsperiode);
+        when(behandlingsresultatService.hentBehandlingsresultat(behandling.getId())).thenReturn(behandlingsresultat);
+
+
+        lagreLovvalgsperiodeMedl.utfør(prosessinstans);
+
+
+        verify(medlPeriodeService).opprettPeriodeEndelig(nyLovvalgsperiode, behandling.getId(), false);
+    }
+
+    @Test
     void utfør_avslagManglendeOpplysningerIngenLovvalgsperiode_oppretterIkkeLovvalgsperiode() {
         behandlingsresultat.setType(Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL);
         when(behandlingsresultatService.hentBehandlingsresultat(behandlingID)).thenReturn(behandlingsresultat);
