@@ -127,6 +127,10 @@ public class LovligeKombinasjonerService {
                     behandlingstyper = new LinkedHashSet<>(List.of(NY_VURDERING, KLAGE, HENVENDELSE));
                 }
 
+                if (sisteBehandling != null && sisteBehandling.erAvsluttet()) {
+                    behandlingstyper.remove(FØRSTEGANG);
+                }
+
                 if (sistBehandlingstype == FØRSTEGANG &&
                     sistBehandlingstema != null && Set.of(UTSENDT_ARBEIDSTAKER, UTSENDT_SELVSTENDIG).contains(sistBehandlingstema)
                 ) {
