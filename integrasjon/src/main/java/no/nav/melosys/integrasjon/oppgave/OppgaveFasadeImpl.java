@@ -40,7 +40,7 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
 
     private static final String OPPGAVE_STATUS_FEILREGISTRERT = "FEILREGISTRERT";
     private static final String OPPGAVE_STATUS_FERDIGSTILT = "FERDIGSTILT";
-    private static final String SORTERINGSFELT = "FRIST";
+    private static final String SORTERINGSFELT_FRIST = "FRIST";
     private static final String SORTERINGSREKKEFOLGE_DESC = "DESC";
     private static final String OPPGAVE_STATUSKATEGORI_AAPEN = "AAPEN";
     private static final String OPPGAVE_STATUSKATEGORI_AVSLUTTET = "AVSLUTTET";
@@ -73,7 +73,7 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
         OppgaveSearchRequest.Builder searchRequestBuilder = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
             .medBehandlingstema(behandlingstema)
             .medOppgaveTyper(hentGyldigeOppgavetyper())
-            .medSorteringsfelt(SORTERINGSFELT)
+            .medSorteringsfelt(SORTERINGSFELT_FRIST)
             .medStatusKategori(OPPGAVE_STATUSKATEGORI_AAPEN)
             .medTema(hentGyldigeTemaer())
             .medTildeltRessurs(false)
@@ -96,7 +96,7 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
             .medBehandlingsType(behandlingstype)
             .medBehandlingstema(behandlingstema)
             .medOppgaveTyper(hentGyldigeOppgavetyper())
-            .medSorteringsfelt(SORTERINGSFELT)
+            .medSorteringsfelt(SORTERINGSFELT_FRIST)
             .medStatusKategori(OPPGAVE_STATUSKATEGORI_AAPEN)
             .medTema(new String[]{Tema.MED.getKode(), Tema.UFM.getKode()})
             .medTildeltRessurs(false)
@@ -241,7 +241,7 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
             .medTilordnetRessurs(tilordnetRessurs)
             .medTema(hentGyldigeTemaer())
             .medOppgaveTyper(hentGyldigeOppgavetyper())
-            .medSorteringsfelt(SORTERINGSFELT)
+            .medSorteringsfelt(SORTERINGSFELT_FRIST)
             .medStatusKategori(OPPGAVE_STATUSKATEGORI_AAPEN);
 
         return hentOppgaverAlleTyper(oppgaveSearchRequestBuilder);
@@ -271,7 +271,7 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
             .medAktørId(aktørId)
             .medTema(hentGyldigeTemaer())
             .medOppgaveTyper(hentGyldigeOppgavetyper())
-            .medSorteringsfelt(SORTERINGSFELT)
+            .medSorteringsfelt(SORTERINGSFELT_FRIST)
             .medStatusKategori(OPPGAVE_STATUSKATEGORI_AAPEN)
             .build();
 
@@ -286,7 +286,7 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
             .medOrgnr(orgnr)
             .medTema(hentGyldigeTemaer())
             .medOppgaveTyper(hentGyldigeOppgavetyper())
-            .medSorteringsfelt(SORTERINGSFELT)
+            .medSorteringsfelt(SORTERINGSFELT_FRIST)
             .medStatusKategori(OPPGAVE_STATUSKATEGORI_AAPEN)
             .build();
 
@@ -329,7 +329,7 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
             .medSaksreferanse(new String[]{saksnummer})
             .medTema(hentGyldigeTemaer())
             .medOppgaveTyper(OPPGAVETYPER_BEHANDLINGSOPPGAVE)
-            .medSorteringsfelt(SORTERINGSFELT)
+            .medSorteringsfelt(SORTERINGSFELT_FRIST)
             .medSorteringsrekkefolge(SORTERINGSREKKEFOLGE_DESC)
             .medStatusKategori(OPPGAVE_STATUSKATEGORI_AVSLUTTET)
             .build();
