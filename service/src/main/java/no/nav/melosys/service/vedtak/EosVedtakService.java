@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
 
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.VedtakMetadataLagretEvent;
@@ -26,6 +27,7 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.FerdigbehandlingKontrollFacade;
 import no.nav.melosys.service.oppgave.OppgaveService;
+import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,12 +50,13 @@ public class EosVedtakService {
     private final AvklartefaktaService avklartefaktaService;
     private final ApplicationEventMulticaster melosysEventMulticaster;
     private final FerdigbehandlingKontrollFacade ferdigbehandlingKontrollFacade;
+    private final Unleash unleash;
 
     public EosVedtakService(BehandlingService behandlingService, BehandlingsresultatService behandlingsresultatService,
                             OppgaveService oppgaveService, ProsessinstansService prosessinstansService,
                             EessiService eessiService, LandvelgerService landvelgerService,
                             AvklartefaktaService avklartefaktaService, ApplicationEventMulticaster melosysEventMulticaster,
-                            FerdigbehandlingKontrollFacade ferdigbehandlingKontrollFacade) {
+                            FerdigbehandlingKontrollFacade ferdigbehandlingKontrollFacade, Unleash unleash) {
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.oppgaveService = oppgaveService;
@@ -63,6 +66,7 @@ public class EosVedtakService {
         this.avklartefaktaService = avklartefaktaService;
         this.melosysEventMulticaster = melosysEventMulticaster;
         this.ferdigbehandlingKontrollFacade = ferdigbehandlingKontrollFacade;
+        this.unleash = unleash;
     }
 
     public void fattVedtak(Behandling behandling, Behandlingsresultattyper behandlingsresultattype, Vedtakstyper vedtakstype) throws ValideringException {
@@ -141,6 +145,10 @@ public class EosVedtakService {
     private Set<String> avklarMottakerInstitusjoner(Behandling behandling,
                                                     Set<String> mottakerinstitusjoner,
                                                     Behandlingsresultat behandlingsresultat) {
+        if (unleash.isEnabled("melosys.behandle_alle_saker") && SaksbehandlingRegler.harTomFlyt(behandling)) {
+            return Collections.emptySet();
+        }
+
         Collection<Landkoder> landkoder = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandling.getId());
         if (!behandling.erNorgeUtpekt() && skalSedSendes(behandlingsresultat, landkoder)) {
             mottakerinstitusjoner = eessiService.validerOgAvklarMottakerInstitusjonerForBuc(
