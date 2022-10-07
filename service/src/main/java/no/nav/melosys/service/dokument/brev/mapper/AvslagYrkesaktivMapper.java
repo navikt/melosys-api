@@ -140,7 +140,7 @@ public class AvslagYrkesaktivMapper implements BrevDataMapper {
     }
 
     private static LovvalgsperiodeType lagLovvalgsperiodeType(Behandlingsresultat resultat) {
-        Lovvalgsperiode lovvalgsperiode = resultat.hentValidertLovvalgsperiode();
+        Lovvalgsperiode lovvalgsperiode = resultat.hentLovvalgsperiode();
         LovvalgsperiodeType lovvalgsperiodeType = new LovvalgsperiodeType();
 
         try {

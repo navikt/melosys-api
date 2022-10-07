@@ -269,7 +269,7 @@ class BrevmottakerServiceTest {
         when(utenlandskMyndighetService.lagUtenlandskeMyndigheterFraBehandling(behandling)).thenReturn(Collections.singletonMap(lagUtenlandskMyndighet(), lagAktoerUtenlandskMyndighet()));
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
-        behandlingsresultat.hentValidertLovvalgsperiode().setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_4_2);
+        behandlingsresultat.hentLovvalgsperiode().setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_4_2);
         List<Aktoer> myndigheter = brevmottakerService.avklarMottakere(Produserbaredokumenter.ATTEST_A1, Mottaker.av(TRYGDEMYNDIGHET), behandling);
         assertThat(myndigheter).isEmpty();
     }
@@ -451,7 +451,7 @@ class BrevmottakerServiceTest {
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1);
         when(behandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
         when(behandling.getFagsak()).thenReturn(lagFagsakMedRepresentantOrg(null));
-        when(lovvalgsperiodeService.hentValidertLovvalgsperiode(anyLong())).thenReturn(lovvalgsperiode);
+        when(lovvalgsperiodeService.hentLovvalgsperiode(anyLong())).thenReturn(lovvalgsperiode);
 
         assertThat(brevmottakerService.hentMottakerliste(STORBRITANNIA, 123))
             .extracting(
@@ -472,7 +472,7 @@ class BrevmottakerServiceTest {
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_trygdeavtale_uk.UK_ART8_2);
         when(behandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
         when(behandling.getFagsak()).thenReturn(lagFagsakMedRepresentantOrg(null));
-        when(lovvalgsperiodeService.hentValidertLovvalgsperiode(anyLong())).thenReturn(lovvalgsperiode);
+        when(lovvalgsperiodeService.hentLovvalgsperiode(anyLong())).thenReturn(lovvalgsperiode);
 
         assertThat(brevmottakerService.hentMottakerliste(STORBRITANNIA, 123))
             .extracting(

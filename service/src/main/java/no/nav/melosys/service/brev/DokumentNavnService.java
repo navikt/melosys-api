@@ -70,7 +70,7 @@ public class DokumentNavnService {
             return lagKopiTittel(vedtaksbrevTittel);
         }
 
-        boolean erArtikkel8_2 = lovvalgsperiodeService.hentValidertLovvalgsperiode(behandling.getId()).getBestemmelse() == UK_ART8_2;
+        boolean erArtikkel8_2 = lovvalgsperiodeService.hentLovvalgsperiode(behandling.getId()).getBestemmelse() == UK_ART8_2;
 
         if (mottaker.erBruker()) {
             return erArtikkel8_2 ? vedtaksbrevTittel : dokumentproduksjonsInfo.journalføringsTittel();

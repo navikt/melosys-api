@@ -85,6 +85,6 @@ public class AvklarArbeidsgiver implements StegBehandler {
             );
         }
         return resultat.getType() == Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL ||
-            !resultat.hentValidertLovvalgsperiode().erArtikkel13();
+            !resultat.hentLovvalgsperiode().erArtikkel13();
     }
 }

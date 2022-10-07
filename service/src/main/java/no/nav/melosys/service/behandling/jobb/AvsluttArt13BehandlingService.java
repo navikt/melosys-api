@@ -96,7 +96,7 @@ public class AvsluttArt13BehandlingService {
     private Lovvalgsperiode hentLovvalgsperiode(Behandlingsresultat behandlingsresultat) {
         return erUtpekingUtenVedtak(behandlingsresultat)
             ? opprettLovvalgsperiode(behandlingsresultat.getId(), behandlingsresultat.hentValidertUtpekingsperiode())
-            : behandlingsresultat.hentValidertLovvalgsperiode();
+            : behandlingsresultat.hentLovvalgsperiode();
     }
 
     private boolean erUtpekingUtenVedtak(Behandlingsresultat behandlingsresultat) {

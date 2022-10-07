@@ -83,7 +83,7 @@ class A1MapperTest {
         behandlingsresultat = mock(Behandlingsresultat.class);
         when(behandlingsresultat.getRegistrertDato()).thenReturn(Instant.now());
         when(behandlingsresultat.getLovvalgsperioder()).thenReturn(new HashSet<>(Collections.singletonList(lovvalgsperiode)));
-        when(behandlingsresultat.hentValidertLovvalgsperiode()).thenReturn(lovvalgsperiode);
+        when(behandlingsresultat.hentLovvalgsperiode()).thenReturn(lovvalgsperiode);
 
         behandling = mock(Behandling.class);
         when(behandling.getRegistrertDato()).thenReturn(Instant.now());

@@ -250,7 +250,7 @@ public class Behandlingsresultat extends RegistreringsInfo {
 
     public boolean erAvslag() {
         return erAvslagManglendeOpplysninger() || (type == Behandlingsresultattyper.AVSLAG_SØKNAD)
-            || (type == Behandlingsresultattyper.FASTSATT_LOVVALGSLAND && hentValidertLovvalgsperiode().erAvslått());
+            || (type == Behandlingsresultattyper.FASTSATT_LOVVALGSLAND && hentLovvalgsperiode().erAvslått());
     }
 
     public boolean erAvslagManglendeOpplysninger() {
@@ -264,13 +264,13 @@ public class Behandlingsresultat extends RegistreringsInfo {
     public boolean erInnvilgelse() {
         if (type == Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
             || type == Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND) {
-            return finnValidertLovvalgsperiode().filter(Lovvalgsperiode::erInnvilget).isPresent();
+            return finnLovvalgsperiode().filter(Lovvalgsperiode::erInnvilget).isPresent();
         }
         return false;
     }
 
     public boolean erInnvilgelseFlereLand() {
-        return erInnvilgelse() && finnValidertLovvalgsperiode().stream().anyMatch(PeriodeOmLovvalg::erArtikkel13);
+        return erInnvilgelse() && finnLovvalgsperiode().stream().anyMatch(PeriodeOmLovvalg::erArtikkel13);
     }
 
     public boolean erUtpeking() {
@@ -296,14 +296,14 @@ public class Behandlingsresultat extends RegistreringsInfo {
     }
 
     public boolean harLovvalgsperiodeMedBestemmelse(LovvalgBestemmelse lovvalgBestemmelse) {
-        return finnValidertLovvalgsperiode()
+        return finnLovvalgsperiode()
             .filter(lovvalgsperiode -> lovvalgsperiode.getBestemmelse() == lovvalgBestemmelse)
             .isPresent();
     }
 
     public boolean erGodkjenningEllerInnvilgelseArt13() {
         return (erInnvilgelse() || erGodkjenningRegistreringUnntak())
-            && finnValidertLovvalgsperiode().stream().anyMatch(PeriodeOmLovvalg::erArtikkel13);
+            && finnLovvalgsperiode().stream().anyMatch(PeriodeOmLovvalg::erArtikkel13);
     }
 
     public boolean harPeriodeOmLovvalg() {
@@ -312,7 +312,7 @@ public class Behandlingsresultat extends RegistreringsInfo {
 
     public PeriodeOmLovvalg hentValidertPeriodeOmLovvalg() {
         if (!lovvalgsperioder.isEmpty()) {
-            return hentValidertLovvalgsperiode();
+            return hentLovvalgsperiode();
         } else if (!anmodningsperioder.isEmpty()) {
             return hentAnmodningsperiode();
         } else if (!utpekingsperioder.isEmpty()) {
@@ -323,18 +323,18 @@ public class Behandlingsresultat extends RegistreringsInfo {
     }
 
     public Optional<PeriodeOmLovvalg> finnValidertPeriodeOmLovvalg() {
-        var lovvalgsperiodeOptional = finnValidertLovvalgsperiode();
+        var lovvalgsperiodeOptional = finnLovvalgsperiode();
         Optional<? extends PeriodeOmLovvalg> periodeOmLovvalgOptional = lovvalgsperiodeOptional.isPresent() ?
             lovvalgsperiodeOptional : finnAnmodningsperiode();
         return periodeOmLovvalgOptional.map(PeriodeOmLovvalg.class::cast);
     }
 
-    public Lovvalgsperiode hentValidertLovvalgsperiode() {
-        return finnValidertLovvalgsperiode()
+    public Lovvalgsperiode hentLovvalgsperiode() {
+        return finnLovvalgsperiode()
             .orElseThrow(() -> new NoSuchElementException("Ingen lovvalgsperiode finnes for behandlingsresultat " + id));
     }
 
-    public Optional<Lovvalgsperiode> finnValidertLovvalgsperiode() {
+    public Optional<Lovvalgsperiode> finnLovvalgsperiode() {
         if (lovvalgsperioder.size() > 1) {
             throw new UnsupportedOperationException("Flere enn en lovvalgsperiode er ikke støttet");
         }
@@ -391,7 +391,7 @@ public class Behandlingsresultat extends RegistreringsInfo {
     }
 
     public boolean erInnvilgetArbeidPåSkipOmfattetAvArbeidsland() {
-        return finnValidertLovvalgsperiode().stream()
+        return finnLovvalgsperiode().stream()
             .anyMatch(l -> l.erInnvilget()
                 && l.getBestemmelse() == Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A
                 && l.getTilleggsbestemmelse() == Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1);

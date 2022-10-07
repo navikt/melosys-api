@@ -129,7 +129,7 @@ public class SendVedtaksbrevInnland implements StegBehandler {
 
         List<Mottaker> mottakerListe = new ArrayList<>(List.of(Mottaker.av(BRUKER), FastMottakerMedOrgnr.av(SKATT)));
         if (brevSendesTilStatligSkatteoppkreving(
-            resultat.hentValidertLovvalgsperiode(),
+            resultat.hentLovvalgsperiode(),
             behandling.getBehandlingsgrunnlag()
         )) {
             mottakerListe.add(FastMottakerMedOrgnr.av(STATLIG_SKATTEOPPKREVING));
@@ -152,7 +152,7 @@ public class SendVedtaksbrevInnland implements StegBehandler {
     }
 
     private void sendOrienteringTilArbeidsgiver(Behandling behandling, Behandlingsresultat resultat, String saksbehandler) {
-        final Lovvalgsperiode lovvalgsperiode = resultat.hentValidertLovvalgsperiode();
+        final Lovvalgsperiode lovvalgsperiode = resultat.hentLovvalgsperiode();
         // Saker med kun selvstendig næringsdrivende skal ikke sende brevet INNVILGESE_ARBEIDSGIVER
         if (behandling.getFagsak().harAktørMedRolleType(ARBEIDSGIVER)
             && !lovvalgsperiode.erArtikkel13()

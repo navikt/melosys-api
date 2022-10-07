@@ -41,7 +41,7 @@ public class LagreLovvalgsperiodeMedl implements StegBehandler {
             return;
         }
 
-        final var lovvalgsperiode = behandlingsresultat.hentValidertLovvalgsperiode();
+        final var lovvalgsperiode = behandlingsresultat.hentLovvalgsperiode();
         final var behandling = prosessinstans.getBehandling();
         if (behandling.erNyVurdering()) {
             lovvalgsperiode.setMedlPeriodeID(finnOpprinneligMedlPeriodeID(behandling).orElse(null));
@@ -52,7 +52,7 @@ public class LagreLovvalgsperiodeMedl implements StegBehandler {
     private Optional<Long> finnOpprinneligMedlPeriodeID(Behandling behandling) {
         final var opprinnelingResultat = behandlingsresultatService.hentBehandlingsresultat(
             behandling.getOpprinneligBehandling().getId());
-        return opprinnelingResultat.finnValidertLovvalgsperiode().map(Lovvalgsperiode::getMedlPeriodeID);
+        return opprinnelingResultat.finnLovvalgsperiode().map(Lovvalgsperiode::getMedlPeriodeID);
     }
 
     private void oppdaterLovvalgsperiode(Behandling behandling, Lovvalgsperiode lovvalgsperiode) {
