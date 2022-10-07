@@ -2,13 +2,17 @@ package no.nav.melosys.service.oppgave;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.kodeverk.Sakstemaer;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.OppgaveTilbakelegging;
 import no.nav.melosys.exception.TekniskException;
@@ -46,9 +50,11 @@ public class Oppgaveplukker {
 
     @Transactional
     public synchronized Optional<Oppgave> plukkOppgave(String saksbehandlerID, PlukkOppgaveInnDto plukkDto) {
-        List<Oppgave> utildelteOppgaverEtterFrist;
+        List<Oppgave> utildelteOppgaverEtterFrist = new ArrayList<>();
         if (unleash.isEnabled("melosys.behandle_alle_saker")) {
-            utildelteOppgaverEtterFrist = oppgaveFasade.finnUtildelteOppgaverEtterFrist(OppgaveFactory.utledBehandlingstema(plukkDto.sakstema(), plukkDto.sakstype(), plukkDto.behandlingstema(), null).getKode());
+            for (var oppgaveBehandlingstema : hentAlleOppgaveBehandlingstemaTilSøk(plukkDto.sakstype(), plukkDto.sakstema(), plukkDto.behandlingstema())) {
+                utildelteOppgaverEtterFrist.addAll(oppgaveFasade.finnUtildelteOppgaverEtterFrist(oppgaveBehandlingstema));
+            }
         } else {
             var parametere = OppgaveFactory.hentOppgaveParametere(plukkDto.behandlingstema());
             utildelteOppgaverEtterFrist = oppgaveFasade.finnUtildelteOppgaverEtterFrist(parametere.behandlingstype, parametere.behandlingstema);
@@ -102,6 +108,12 @@ public class Oppgaveplukker {
             behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
             behandlingService.lagre(behandling);
         }
+    }
+
+    private Set<String> hentAlleOppgaveBehandlingstemaTilSøk(Sakstyper sakstype, Sakstemaer sakstema, Behandlingstema behandlingstema) {
+        return Arrays.stream(Behandlingstyper.values())
+            .map(behandlingstype -> OppgaveFactory.utledBehandlingstema(sakstype, sakstema, behandlingstema, behandlingstype).getKode())
+            .collect(Collectors.toSet());
     }
 
     @Transactional
