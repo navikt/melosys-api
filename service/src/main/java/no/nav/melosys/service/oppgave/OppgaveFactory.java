@@ -207,9 +207,13 @@ public final class OppgaveFactory {
                 default -> behandlingstema.getBeskrivelse();
             };
             case EU_EOS_LAND ->
-                (behandlingstype == Behandlingstyper.HENVENDELSE && behandlingstema == Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET) ? "SEDA005" : behandlingstema.getBeskrivelse();
+                (sakstype == Sakstyper.EU_EOS && behandlingstype == Behandlingstyper.HENVENDELSE && behandlingstema == Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET)
+                    ? "SEDA005"
+                    : behandlingstema.getBeskrivelse();
             case AVTALELAND ->
-                (behandlingstype == Behandlingstyper.HENVENDELSE && behandlingstema == Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET) ? "SEDA008" : behandlingstema.getBeskrivelse();
+                (sakstype == Sakstyper.EU_EOS && behandlingstype == Behandlingstyper.HENVENDELSE && behandlingstema == Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET)
+                    ? "SEDA008"
+                    : behandlingstema.getBeskrivelse();
             default -> behandlingstema.getBeskrivelse();
         };
     }
