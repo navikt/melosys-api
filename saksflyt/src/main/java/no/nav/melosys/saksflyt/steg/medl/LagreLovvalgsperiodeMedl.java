@@ -57,13 +57,13 @@ public class LagreLovvalgsperiodeMedl implements StegBehandler {
 
     private Optional<Long> finnOpprinneligMedlPeriodeID(Behandling behandling) {
         if (behandling.getOpprinneligBehandling() != null) {
-            final var opprinnelingResultat = behandlingsresultatService.hentBehandlingsresultat(
-                behandling.getOpprinneligBehandling().getId());
-            return opprinnelingResultat.finnLovvalgsperiode().map(Lovvalgsperiode::getMedlPeriodeID);
+            log.warn("opprinneligBehandling er null for behandling {}", behandling.getId());
+            return Optional.empty();
         }
 
-        log.warn("opprinneligBehandling er null for behandling {}", behandling.getId());
-        return Optional.empty();
+        var opprinnelingResultat = behandlingsresultatService.hentBehandlingsresultat(
+            behandling.getOpprinneligBehandling().getId());
+        return opprinnelingResultat.finnLovvalgsperiode().map(Lovvalgsperiode::getMedlPeriodeID);
     }
 
     private void oppdaterLovvalgsperiode(Behandling behandling, Lovvalgsperiode lovvalgsperiode) {
