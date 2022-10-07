@@ -52,7 +52,7 @@ public class Oppgaveplukker {
     public synchronized Optional<Oppgave> plukkOppgave(String saksbehandlerID, PlukkOppgaveInnDto plukkDto) {
         List<Oppgave> utildelteOppgaverEtterFrist = new ArrayList<>();
         if (unleash.isEnabled("melosys.behandle_alle_saker")) {
-            for (var oppgaveBehandlingstema : hentAlleOppgaveBehandlingstemaTilSøk(plukkDto.sakstema(), plukkDto.sakstype(), plukkDto.behandlingstema())) {
+            for (var oppgaveBehandlingstema : hentAlleOppgaveBehandlingstemaTilSøk(plukkDto.sakstype(), plukkDto.sakstema(), plukkDto.behandlingstema())) {
                 utildelteOppgaverEtterFrist.addAll(oppgaveFasade.finnUtildelteOppgaverEtterFrist(oppgaveBehandlingstema));
             }
         } else {
@@ -110,9 +110,9 @@ public class Oppgaveplukker {
         }
     }
 
-    private Set<String> hentAlleOppgaveBehandlingstemaTilSøk(Sakstemaer sakstema, Sakstyper sakstype, Behandlingstema behandlingstema) {
+    private Set<String> hentAlleOppgaveBehandlingstemaTilSøk(Sakstyper sakstype, Sakstemaer sakstema, Behandlingstema behandlingstema) {
         return Arrays.stream(Behandlingstyper.values())
-            .map(behandlingstype -> OppgaveFactory.utledBehandlingstema(sakstema, sakstype, behandlingstema, behandlingstype).getKode())
+            .map(behandlingstype -> OppgaveFactory.utledBehandlingstema(sakstype, sakstema, behandlingstema, behandlingstype).getKode())
             .collect(Collectors.toSet());
     }
 
