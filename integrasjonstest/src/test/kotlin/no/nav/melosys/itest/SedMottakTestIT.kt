@@ -82,7 +82,7 @@ class SedMottakTestIT(
                 eessiMeldingA009.lagUnikIdentifikator(),
                 eessiMeldingA009.lagUnikIdentifikator(),
                 eessiMeldingX001.lagUnikIdentifikator(),
-                eessiMeldingX007.lagUnikIdentifikator(),
+                eessiMeldingX001.lagUnikIdentifikator(),
                 eessiMeldingX007.lagUnikIdentifikator(),
                 eessiMeldingX007.lagUnikIdentifikator(),
             )
