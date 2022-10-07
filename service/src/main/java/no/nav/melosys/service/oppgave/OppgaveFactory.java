@@ -206,12 +206,14 @@ public final class OppgaveFactory {
                 case REGISTRERING_UNNTAK -> "";
                 default -> behandlingstema.getBeskrivelse();
             };
-            case EU_EOS_LAND ->
-                (behandlingstype == Behandlingstyper.HENVENDELSE && behandlingstema == Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET) ? "SEDA005" : behandlingstema.getBeskrivelse();
-            case AVTALELAND ->
-                (behandlingstype == Behandlingstyper.HENVENDELSE && behandlingstema == Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET) ? "SEDA008" : behandlingstema.getBeskrivelse();
+            case EU_EOS_LAND -> sedEllerDefaultBeskrivelse(sakstype, behandlingstema, behandlingstype, "SEDA005");
+            case AVTALELAND -> sedEllerDefaultBeskrivelse(sakstype, behandlingstema, behandlingstype, "SEDA008");
             default -> behandlingstema.getBeskrivelse();
         };
+    }
+
+    private static String sedEllerDefaultBeskrivelse(Sakstyper sakstype, Behandlingstema behandlingstema, Behandlingstyper behandlingstype, String sed) {
+        return sakstype == Sakstyper.EU_EOS && behandlingstype == Behandlingstyper.HENVENDELSE && behandlingstema == Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET ? sed : behandlingstema.getBeskrivelse();
     }
 
     private static LocalDate fristUker(int uker) {
