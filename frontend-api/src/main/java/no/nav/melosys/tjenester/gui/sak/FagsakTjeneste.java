@@ -18,10 +18,7 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService;
-import no.nav.melosys.service.sak.EndreSakDto;
-import no.nav.melosys.service.sak.FagsakService;
-import no.nav.melosys.service.sak.OpprettNySakFraOppgave;
-import no.nav.melosys.service.sak.OpprettSakDto;
+import no.nav.melosys.service.sak.*;
 import no.nav.melosys.service.saksopplysninger.SaksopplysningerService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
@@ -49,30 +46,33 @@ public class FagsakTjeneste {
     private static final String UKJENT_NAVN = "UKJENT";
 
     private final FagsakService fagsakService;
-    private final OpprettNySakFraOppgave opprettNySakFraOppgave;
+    private final OpprettSak opprettSak;
     private final Aksesskontroll aksesskontroll;
     private final BehandlingsgrunnlagService behandlingsgrunnlagService;
     private final BehandlingsresultatService behandlingsresultatService;
     private final PersondataFasade persondataFasade;
     private final SaksopplysningerService saksopplysningerService;
     private final OrganisasjonOppslagService organisasjonOppslagService;
+    private final OpprettBehandlingForSak opprettBehandlingForSak;
     private final Unleash unleash;
 
     public FagsakTjeneste(FagsakService fagsakService, Aksesskontroll aksesskontroll, BehandlingsgrunnlagService behandlingsgrunnlagService,
-                          OpprettNySakFraOppgave opprettNySakFraOppgave,
+                          OpprettSak opprettSak,
                           BehandlingsresultatService behandlingsresultatService, PersondataFasade persondataFasade,
-                          SaksopplysningerService saksopplysningerService,
-                          OrganisasjonOppslagService organisasjonOppslagService,
-                          Unleash unleash) {
+                          Unleash unleash,
+                          SaksopplysningerService saksopplysningerService, OrganisasjonOppslagService organisasjonOppslagService,
+                          OpprettBehandlingForSak opprettBehandlingForSak) {
         this.fagsakService = fagsakService;
         this.aksesskontroll = aksesskontroll;
         this.behandlingsgrunnlagService = behandlingsgrunnlagService;
-        this.opprettNySakFraOppgave = opprettNySakFraOppgave;
+        this.opprettSak = opprettSak;
         this.behandlingsresultatService = behandlingsresultatService;
         this.persondataFasade = persondataFasade;
         this.saksopplysningerService = saksopplysningerService;
         this.organisasjonOppslagService = organisasjonOppslagService;
         this.unleash = unleash;
+        this.opprettBehandlingForSak = opprettBehandlingForSak;
+
     }
 
     @GetMapping("/{saksnr}")
@@ -85,14 +85,39 @@ public class FagsakTjeneste {
         return ResponseEntity.ok(fagsakDto);
     }
 
-    @PostMapping("/opprett")
-    @ApiOperation(value = "Oppretter en sak med tilhørende behandling.")
-    public ResponseEntity<Void> opprettFagsak(@RequestBody OpprettSakDto opprettSakDto) {
+    @PostMapping
+    @ApiOperation(value = "Oppretter en ny sak.")
+    public ResponseEntity<Void> opprettNySak(@RequestBody OpprettSakDto opprettSakDto) {
         if (opprettSakDto.getBrukerID() == null) {
-            throw new FunksjonellException("BrukerID trengs for å opprette en sak.");
+            throw new FunksjonellException("BrukerID trengs for å opprette behandling");
         }
         aksesskontroll.autoriserFolkeregisterIdent(opprettSakDto.getBrukerID());
-        opprettNySakFraOppgave.bestillNySakOgBehandling(opprettSakDto);
+
+        if (opprettSakDto.getOppgaveID() == null && unleash.isEnabled("melosys.ny_opprett_sak")) {
+            opprettSak.opprettNySakOgBehandling(opprettSakDto);
+        } else {
+            opprettSak.opprettNySakOgBehandlingFraOppgave(opprettSakDto);
+        }
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{saksnr}/behandlinger")
+    @ApiOperation(value = "Oppretter en ny behandling for sak.")
+    public ResponseEntity<Void> opprettNyBehandlingForSak(@PathVariable("saksnr") String saksnummer, @RequestBody OpprettSakDto opprettSakDto) {
+        if (opprettSakDto.getBrukerID() == null) {
+            throw new FunksjonellException("BrukerID trengs for å opprette behandling");
+        }
+        if (opprettSakDto.getBehandlingstema() == null) {
+            throw new FunksjonellException("Behandlingstema mangler");
+        }
+        if (opprettSakDto.getBehandlingstype() == null) {
+            throw new FunksjonellException("Behandlingstype mangler");
+        }
+
+        aksesskontroll.autoriserFolkeregisterIdent(opprettSakDto.getBrukerID());
+        opprettBehandlingForSak.opprettBehandling(saksnummer, opprettSakDto);
+
         return ResponseEntity.noContent().build();
     }
 

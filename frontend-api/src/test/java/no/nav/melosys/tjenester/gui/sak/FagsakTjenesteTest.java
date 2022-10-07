@@ -25,12 +25,15 @@ import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService;
 import no.nav.melosys.service.sak.FagsakService;
-import no.nav.melosys.service.sak.OpprettNySakFraOppgave;
+import no.nav.melosys.service.sak.OpprettBehandlingForSak;
+import no.nav.melosys.service.sak.OpprettSak;
 import no.nav.melosys.service.sak.OpprettSakDto;
 import no.nav.melosys.service.saksopplysninger.SaksopplysningerService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
@@ -65,7 +68,7 @@ class FagsakTjenesteTest {
     @MockBean
     private static FagsakService fagsakService;
     @MockBean
-    private static OpprettNySakFraOppgave opprettNySakFraOppgave;
+    private static OpprettSak opprettSak;
     @MockBean
     private static Aksesskontroll aksesskontroll;
     @MockBean
@@ -78,6 +81,9 @@ class FagsakTjenesteTest {
     private static BehandlingsgrunnlagService behandlingsgrunnlagService;
     @MockBean
     private static BehandlingsresultatService behandlingsresultatService;
+    @MockBean
+    private static OpprettBehandlingForSak opprettBehandlingForSak;
+
     @Autowired
     private MockMvc mockMvc;
     @Autowired
@@ -122,7 +128,7 @@ class FagsakTjenesteTest {
         var opprettSakDto = new OpprettSakDto();
         opprettSakDto.setBrukerID(FNR);
 
-        mockMvc.perform(post(BASE_URL + "/opprett")
+        mockMvc.perform(post(BASE_URL)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(opprettSakDto)))
             .andExpect(status().isNoContent());
@@ -133,12 +139,84 @@ class FagsakTjenesteTest {
     void opprettSak_utenFnr_badRequestException() throws Exception {
         mockFagsakTjeneste(null);
         var opprettSakDto = new OpprettSakDto();
+        opprettSakDto.setHovedpart(Aktoersroller.BRUKER);
 
-        mockMvc.perform(post(BASE_URL + "/opprett")
+        mockMvc.perform(post(BASE_URL)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(opprettSakDto)))
             .andExpect(status().isBadRequest())
-            .andExpect(jsonPath("$.message", equalTo("BrukerID trengs for å opprette en sak.")));
+            .andExpect(jsonPath("$.message", equalTo("BrukerID trengs for å opprette behandling")));
+    }
+
+    @Test
+    void lagNyBehandling() throws Exception {
+        Fagsak fagsak = SaksbehandlingDataFactory.lagFagsak("MEL-1");
+        var behandling = new Behandling();
+        behandling.setFagsak(fagsak);
+        behandling.setId(123L);
+
+        fagsak.setBehandlinger(Collections.singletonList(behandling));
+        var opprettSakDto = new OpprettSakDto();
+        opprettSakDto.setBrukerID(FNR);
+        opprettSakDto.setBehandlingstema(Behandlingstema.ARBEID_ETT_LAND_ØVRIG);
+        opprettSakDto.setBehandlingstype(Behandlingstyper.NY_VURDERING);
+
+        mockMvc.perform(post(BASE_URL + "/{saksnr}/behandlinger", fagsak.getSaksnummer())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(opprettSakDto)))
+            .andExpect(status().isNoContent());
+        verify(aksesskontroll).autoriserFolkeregisterIdent(opprettSakDto.getBrukerID());
+    }
+
+    @Test
+    void lagNyBehandling_feiler_uten_behandlingstema() throws Exception {
+        Fagsak fagsak = SaksbehandlingDataFactory.lagFagsak("MEL-1");
+        var behandling = new Behandling();
+        behandling.setFagsak(fagsak);
+        behandling.setId(123L);
+
+        fagsak.setBehandlinger(Collections.singletonList(behandling));
+        var opprettSakDto = new OpprettSakDto();
+        opprettSakDto.setBrukerID(FNR);
+        opprettSakDto.setBehandlingstype(Behandlingstyper.NY_VURDERING);
+
+        mockMvc.perform(post(BASE_URL + "/{saksnr}/behandlinger", fagsak.getSaksnummer())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(opprettSakDto)))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.message", equalTo("Behandlingstema mangler")));
+    }
+
+    @Test
+    void lagNyBehandling_feiler_uten_behandlingstype() throws Exception {
+        Fagsak fagsak = SaksbehandlingDataFactory.lagFagsak("MEL-1");
+        var behandling = new Behandling();
+        behandling.setFagsak(fagsak);
+        behandling.setId(123L);
+
+        fagsak.setBehandlinger(Collections.singletonList(behandling));
+        var opprettSakDto = new OpprettSakDto();
+        opprettSakDto.setBrukerID(FNR);
+        opprettSakDto.setBehandlingstema(Behandlingstema.ARBEID_I_UTLANDET);
+
+        mockMvc.perform(post(BASE_URL + "/{saksnr}/behandlinger", fagsak.getSaksnummer())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(opprettSakDto)))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.message", equalTo("Behandlingstype mangler")));
+    }
+
+    @Test
+    void lagNyBehandling_utenFnr_badRequestException() throws Exception {
+        mockFagsakTjeneste(null);
+        var opprettSakDto = new OpprettSakDto();
+        opprettSakDto.setHovedpart(Aktoersroller.BRUKER);
+
+        mockMvc.perform(post(BASE_URL + "/{saksnr}/behandlinger", "123")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(opprettSakDto)))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.message", equalTo("BrukerID trengs for å opprette behandling")));
     }
 
     @Test

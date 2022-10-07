@@ -39,6 +39,7 @@ public final class SakstypeSakstemaKobling {
         if (behandlingstema == ØVRIGE_SED_UFM) {
             return UNNTAK;
         }
-        throw new FunksjonellException("Vi glemte noe.");
+
+        throw new FunksjonellException(String.format("Finner ikke sakstema for behandlingstema %s", behandlingstema));
     }
 }

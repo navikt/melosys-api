@@ -214,7 +214,7 @@ public class Behandling extends RegistreringsInfo {
         return (PersonDokument) saksopplysning
             .orElseThrow(() -> new TekniskException("Finner ikke persondokument"));
     }
-
+    
     public MedlemskapDokument hentMedlemskapDokument() {
         Optional<SaksopplysningDokument> saksopplysning = finnDokument(SaksopplysningType.MEDL);
         return (MedlemskapDokument) saksopplysning

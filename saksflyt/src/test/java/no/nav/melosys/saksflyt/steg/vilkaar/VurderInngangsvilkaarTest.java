@@ -109,6 +109,7 @@ class VurderInngangsvilkaarTest {
         unleash.disableAll();
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
+        behandling.setType(Behandlingstyper.NY_VURDERING);
         behandling.setTema(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING);
         behandling.setFagsak(new Fagsak());
         behandling.getFagsak().setType(Sakstyper.EU_EOS);

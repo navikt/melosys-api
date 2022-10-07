@@ -36,6 +36,7 @@ public class VurderInngangsvilkaar implements StegBehandler {
     public void utfør(Prosessinstans prosessinstans) {
         final long behandlingID = prosessinstans.getBehandling().getId();
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
+
         if (unleash.isEnabled("melosys.behandle_alle_saker")) {
             if (skalVurdereInngangsvilkår(behandling)) {
                 var søknadsland = behandling.hentSøknadsLand();
@@ -45,7 +46,7 @@ public class VurderInngangsvilkaar implements StegBehandler {
                 boolean kvalifisererForEF_883_2004 = inngangsvilkaarService.vurderOgLagreInngangsvilkår(behandlingID, søknadsland, erUkjenteEllerAlleEosLand, periode);
                 log.info("Inngangsvilkår vurdert for behandling {}. kvalifisererForEF_883_2004: {}", behandlingID, kvalifisererForEF_883_2004);
             } else {
-                log.info("Inngangsvilkår ikke vurdert for behandling {} med tema {}", behandlingID, behandling.getTema());
+                log.info("Inngangsvilkår ikke vurdert for sak {} og behandling {} med sakstype {} og sakstema {}", behandling.getFagsak().getSaksnummer(), behandlingID, behandling.getFagsak().getType(), behandling.getFagsak().getTema());
             }
         } else {
             if (behandling.getFagsak().getType() == Sakstyper.EU_EOS && behandling.kanResultereIVedtakGammel()) {

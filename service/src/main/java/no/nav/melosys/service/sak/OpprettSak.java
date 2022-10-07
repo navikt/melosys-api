@@ -15,6 +15,7 @@ import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.journalforing.JournalfoeringService;
 import no.nav.melosys.service.journalforing.dto.PeriodeDto;
+import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
@@ -29,22 +30,31 @@ import static no.nav.melosys.domain.Fagsak.erSakstypeEøs;
 import static no.nav.melosys.service.sak.SakstypeBehandlingstemaKobling.erGyldigBehandlingstemaForSakstype;
 
 @Service
-public class OpprettNySakFraOppgave {
+public class OpprettSak {
     private final JournalfoeringService journalfoeringService;
     private final OppgaveService oppgaveService;
     private final ProsessinstansService prosessinstansService;
     private final Unleash unleash;
 
-    public OpprettNySakFraOppgave(JournalfoeringService journalfoeringService, OppgaveService oppgaveService,
-                                  @Lazy ProsessinstansService prosessinstansService, Unleash unleash) {
+    private final LovligeKombinasjonerService lovligeKombinasjonerService;
+
+    private final FagsakService fagsakService;
+
+    public OpprettSak(JournalfoeringService journalfoeringService, OppgaveService oppgaveService,
+                      @Lazy ProsessinstansService prosessinstansService,
+                      Unleash unleash,
+                      FagsakService fagsakService,
+                      LovligeKombinasjonerService lovligeKombinasjonerService) {
         this.journalfoeringService = journalfoeringService;
         this.oppgaveService = oppgaveService;
         this.prosessinstansService = prosessinstansService;
         this.unleash = unleash;
+        this.fagsakService = fagsakService;
+        this.lovligeKombinasjonerService = lovligeKombinasjonerService;
     }
 
     @Transactional
-    public void bestillNySakOgBehandling(OpprettSakDto opprettSakDto) {
+    public void opprettNySakOgBehandlingFraOppgave(OpprettSakDto opprettSakDto) {
         validerOpprettSakDto(opprettSakDto);
         final Oppgave oppgave = validerOppgave(opprettSakDto.getOppgaveID());
         validerJournalpost(journalfoeringService.hentJournalpost(oppgave.getJournalpostId()));
@@ -61,18 +71,32 @@ public class OpprettNySakFraOppgave {
         }
     }
 
+    @Transactional
+    public void opprettNySakOgBehandling(OpprettSakDto opprettSakDto) {
+        validerOpprettSakDto(opprettSakDto);
+        prosessinstansService.opprettNySakOgBehandling(opprettSakDto);
+    }
+
     void validerOpprettSakDto(OpprettSakDto opprettSakDto) {
         final var sakstype = opprettSakDto.getSakstype();
         final var behandlingstema = opprettSakDto.getBehandlingstema();
+        final var sakstema = opprettSakDto.getSakstema();
         final var behandlingstype = opprettSakDto.getBehandlingstype();
+        final var hovedpart = opprettSakDto.getHovedpart();
 
-        validerBehandlingstema(behandlingstema, sakstype);
+        if (unleash.isEnabled("melosys.behandle_alle_saker")) {
+            lovligeKombinasjonerService.validerBehandlingstema(hovedpart, sakstype, sakstema, behandlingstema, null);
+            lovligeKombinasjonerService.validerBehandlingstype(hovedpart, sakstype, sakstema, behandlingstema, behandlingstype, null);
 
-        if (unleash.isEnabled("melosys.behandle_alle_saker")
-            ? erSakstypeEøs(sakstype) && !SaksbehandlingRegler.harTomFlyt(sakstype, behandlingstype, behandlingstema)
-            : erBehandlingAvSøknadGammel(behandlingstema) && erSakstypeEøs(sakstype)
-        ) {
-            validerSøknadData(opprettSakDto.getSoknadDto());
+            if (erSakstypeEøs(sakstype) && !SaksbehandlingRegler.harTomFlyt(sakstype, behandlingstype, behandlingstema)) {
+                validerSøknadData(opprettSakDto.getSoknadDto());
+            }
+        } else {
+            validerBehandlingstema(behandlingstema, sakstype);
+
+            if (erBehandlingAvSøknadGammel(behandlingstema) && erSakstypeEøs(sakstype)) {
+                validerSøknadData(opprettSakDto.getSoknadDto());
+            }
         }
     }
 

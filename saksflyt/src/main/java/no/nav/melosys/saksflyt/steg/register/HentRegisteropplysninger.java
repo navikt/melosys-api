@@ -71,6 +71,8 @@ public class HentRegisteropplysninger implements StegBehandler {
 
             registeropplysningerService.hentOgLagreOpplysninger(registeropplysningerRequestBuilder.build());
             log.info("Hentet registeropplysninger for behandling {}", behandling.getId());
+        } else {
+            log.debug("Hopper over steg {} fordi sak {} har sakstype {}", HENT_REGISTEROPPLYSNINGER.getKode(), behandling.getFagsak().getSaksnummer(), behandling.getFagsak().getType());
         }
     }
 }
