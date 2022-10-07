@@ -9,12 +9,18 @@ import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
+import no.nav.melosys.saksflyt.steg.jfr.FerdigstillJournalpostSed;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.medl.MedlPeriodeService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @Component
 public class LagreLovvalgsperiodeMedl implements StegBehandler {
+
+    private static final Logger log = LoggerFactory.getLogger(LagreLovvalgsperiodeMedl.class);
+
     private final BehandlingsresultatService behandlingsresultatService;
     private final MedlPeriodeService medlPeriodeService;
     private final Unleash unleash;
@@ -50,7 +56,12 @@ public class LagreLovvalgsperiodeMedl implements StegBehandler {
     }
 
     private Optional<Long> finnOpprinneligMedlPeriodeID(Behandling behandling) {
-        final var opprinnelingResultat = behandlingsresultatService.hentBehandlingsresultat(
+        if (behandling.getOpprinneligBehandling() == null) {
+            log.warn("opprinneligBehandling er null for behandling {}", behandling.getId());
+            return Optional.empty();
+        }
+
+        var opprinnelingResultat = behandlingsresultatService.hentBehandlingsresultat(
             behandling.getOpprinneligBehandling().getId());
         return opprinnelingResultat.finnLovvalgsperiode().map(Lovvalgsperiode::getMedlPeriodeID);
     }
