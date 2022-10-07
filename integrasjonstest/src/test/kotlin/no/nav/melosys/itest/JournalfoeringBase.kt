@@ -94,17 +94,24 @@ class JournalfoeringBase(
         return prosessinstansRepository.findById(journalføringProsessID).get()
     }
 
-    protected fun finnProsess(prosessType: ProsessType, now: LocalDateTime): UUID {
-        await.pollDelay(2, TimeUnit.SECONDS)
+    protected fun finnProsess(prosessType: ProsessType, startTid: LocalDateTime): UUID {
+        await.pollDelay(1, TimeUnit.SECONDS)
             .timeout(20, TimeUnit.SECONDS)
             .untilNotNull {
-                prosessinstansRepository.findAll().filter { it.registrertDato > now }.ifEmpty { null }
+                measureTimeAndPrint("findAllAfterDate $startTid") {
+                    prosessinstansRepository.findAllAfterDate(startTid)
+                }
             }.map { it.type }.shouldContain(prosessType)
 
-        return await.timeout(30, TimeUnit.SECONDS).untilNotNull {
-            prosessinstansRepository.findAll()
-                .find { it.registrertDato > now && it.type == prosessType && it.status == ProsessStatus.FERDIG }?.id
-        }
+        return await
+            .timeout(30, TimeUnit.SECONDS)
+            .pollInterval(1, TimeUnit.SECONDS)
+            .untilNotNull {
+                measureTimeAndPrint("find ${prosessType} ferdig after date:$startTid") {
+                    prosessinstansRepository.findAllAfterDate(startTid)
+                        .find { it.type == prosessType && it.status == ProsessStatus.FERDIG }?.id
+                }
+            }
     }
 
     protected fun lagJfrOppgave(): Oppgave =
@@ -203,6 +210,13 @@ class JournalfoeringBase(
             avsenderType = Avsendertyper.PERSON
             isSkalTilordnes = true
         }
+
+    private fun <T> measureTimeAndPrint(msg: String = "", measure: () -> T): T {
+        val start = System.currentTimeMillis()
+        return measure().apply {
+//            println("### $msg - time:${System.currentTimeMillis() - start}")
+        }
+    }
 
     companion object {
         val periodeFOM = LocalDate.of(2001, 1, 1)
