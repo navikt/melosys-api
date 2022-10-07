@@ -56,7 +56,7 @@ public class LagreLovvalgsperiodeMedl implements StegBehandler {
     }
 
     private Optional<Long> finnOpprinneligMedlPeriodeID(Behandling behandling) {
-        if (behandling.getOpprinneligBehandling() != null) {
+        if (behandling.getOpprinneligBehandling() == null) {
             log.warn("opprinneligBehandling er null for behandling {}", behandling.getId());
             return Optional.empty();
         }
