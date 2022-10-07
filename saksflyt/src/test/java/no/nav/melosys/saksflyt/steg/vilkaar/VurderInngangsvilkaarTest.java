@@ -9,6 +9,7 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.Soeknadsland;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
@@ -80,6 +81,27 @@ class VurderInngangsvilkaarTest {
 
 
         verify(inngangsvilkaarService).vurderOgLagreInngangsvilkår(anyLong(), any(), anyBoolean(), any());
+    }
+
+    @Test
+    void utfoerSteg_finnerIkkeLandOgPeriode_vurdererIkkeInngangsvilkår() {
+        behandling.setType(Behandlingstyper.FØRSTEGANG);
+        var behandlingsgrunnlagData = new BehandlingsgrunnlagData();
+        behandlingsgrunnlagData.periode = new Periode();
+        behandlingsgrunnlagData.soeknadsland = new Soeknadsland();
+        behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(behandlingsgrunnlagData);
+        var fagsak = new Fagsak();
+        fagsak.setType(Sakstyper.EU_EOS);
+        behandling.setFagsak(fagsak);
+
+        Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setBehandling(behandling);
+
+
+        vurderInngangsvilkaar.utfør(prosessinstans);
+
+
+        verify(inngangsvilkaarService, never()).vurderOgLagreInngangsvilkår(anyLong(), any(), anyBoolean(), any());
     }
 
     @Test
