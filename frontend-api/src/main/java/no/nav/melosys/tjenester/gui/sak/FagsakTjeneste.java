@@ -236,6 +236,9 @@ public class FagsakTjeneste {
                 .map(this::tilBehandlingOversiktDto)
                 .toList();
 
+            fagsakOppsummeringDto.setNavn(hentNavn(behandlinger));
+            fagsakOppsummeringDto.setBehandlingOversikter(behandlingOversiktDtoer);
+
             if (unleash.isEnabled("melosys.ny_opprett_sak")) {
                 if (behandlingOversiktDtoer
                     .stream()
@@ -246,10 +249,6 @@ public class FagsakTjeneste {
             } else {
                 fagsakListe.add(fagsakOppsummeringDto);
             }
-
-            fagsakOppsummeringDto.setNavn(hentNavn(behandlinger));
-            fagsakOppsummeringDto.setBehandlingOversikter(behandlingOversiktDtoer);
-            fagsakListe.add(fagsakOppsummeringDto);
         }
         return fagsakListe;
     }
