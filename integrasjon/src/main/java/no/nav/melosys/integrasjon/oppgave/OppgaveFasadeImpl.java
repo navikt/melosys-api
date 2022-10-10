@@ -83,7 +83,6 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
 
         return oppgaver.stream().map(OppgaveFasadeImpl::oppgaveMappingDtoTilDomain)
             .filter(erGyldigBehandlingsoppgave)
-            .filter(erTrygdeavgiftOgVurder.negate())
             .toList();
     }
 
@@ -380,9 +379,6 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
 
     private final Predicate<Oppgave> erGyldigBehandlingsoppgave
         = oppgave -> oppgave.getSaksnummer() != null;
-
-    private final Predicate<Oppgave> erTrygdeavgiftOgVurder
-        = oppgave -> oppgave.getTema() == Tema.TRY && oppgave.getOppgavetype() == Oppgavetyper.VUR;
 
     private static String[] hentGyldigeOppgavetyper() {
         return Stream.of(Oppgavetyper.values())
