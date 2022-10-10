@@ -94,17 +94,20 @@ class JournalfoeringBase(
         return prosessinstansRepository.findById(journalføringProsessID).get()
     }
 
-    protected fun finnProsess(prosessType: ProsessType, now: LocalDateTime): UUID {
-        await.pollDelay(2, TimeUnit.SECONDS)
+    protected fun finnProsess(prosessType: ProsessType, startTid: LocalDateTime): UUID {
+        await.pollDelay(1, TimeUnit.SECONDS)
             .timeout(20, TimeUnit.SECONDS)
             .untilNotNull {
-                prosessinstansRepository.findAll().filter { it.registrertDato > now }.ifEmpty { null }
+                prosessinstansRepository.findAllAfterDate(startTid)
             }.map { it.type }.shouldContain(prosessType)
 
-        return await.timeout(30, TimeUnit.SECONDS).untilNotNull {
-            prosessinstansRepository.findAll()
-                .find { it.registrertDato > now && it.type == prosessType && it.status == ProsessStatus.FERDIG }?.id
-        }
+        return await
+            .timeout(30, TimeUnit.SECONDS)
+            .pollInterval(1, TimeUnit.SECONDS)
+            .untilNotNull {
+                prosessinstansRepository.findAllAfterDate(startTid)
+                    .find { it.type == prosessType && it.status == ProsessStatus.FERDIG }?.id
+            }
     }
 
     protected fun lagJfrOppgave(): Oppgave =
