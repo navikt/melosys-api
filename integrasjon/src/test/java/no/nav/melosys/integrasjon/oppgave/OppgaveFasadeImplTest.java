@@ -157,6 +157,20 @@ final class OppgaveFasadeImplTest {
         assertThat(oppgaver.get(0).getSaksnummer()).isEqualTo("MEL-123");
     }
 
+    @Test
+    void finnUtildelteOppgaverEtterFrist_oppgaveMedTemaTryOgTypeVurd_blirIgnorert() {
+        var oppgaveDto = new OppgaveDto();
+        oppgaveDto.setSaksreferanse("MEL-123");
+        oppgaveDto.setTema(Tema.TRY.getKode());
+        oppgaveDto.setOppgavetype(Oppgavetyper.VUR.getKode());
+
+        when(oppgaveConsumer.hentOppgaveListe(any())).thenReturn(List.of(oppgaveDto));
+
+        var oppgaver = oppgaveFasadeImpl.finnUtildelteOppgaverEtterFrist(null);
+
+        assertThat(oppgaver).isEmpty();
+    }
+
     private Oppgave lagOppgave() {
         Oppgave.Builder oppgaveBuilder = new Oppgave.Builder();
         oppgaveBuilder.setAktivDato(LocalDate.now());
