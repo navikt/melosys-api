@@ -59,7 +59,8 @@ public class HentRegisteropplysninger implements StegBehandler {
                     behandling.getFagsak().getType(),
                     behandling.getTema(),
                     behandling.getType(),
-                    behandleAlleSakerToggleEnabled));
+                    behandling.getFagsak().getTema(),
+                        behandleAlleSakerToggleEnabled));
 
             (behandleAlleSakerToggleEnabled
                 ? behandling.finnPeriode()

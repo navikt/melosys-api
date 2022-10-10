@@ -1,5 +1,6 @@
 package no.nav.melosys.service.registeropplysninger;
 
+import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -15,8 +16,8 @@ public final class RegisteropplysningerFactory {
     }
 
     public static RegisteropplysningerRequest.SaksopplysningTyper utledSaksopplysningTyper(
-        Sakstyper sakstype, Behandlingstema behandlingstema, Behandlingstyper behandlingstype, boolean behandleAlleSakerToggleEnabled) {
-        if (behandleAlleSakerToggleEnabled && SaksbehandlingRegler.harTomFlyt(sakstype, behandlingstype, behandlingstema)) {
+        Sakstyper sakstype, Behandlingstema behandlingstema, Behandlingstyper behandlingstype, Sakstemaer sakstemaer, boolean behandleAlleSakerToggleEnabled) {
+        if (behandleAlleSakerToggleEnabled && SaksbehandlingRegler.harTomFlyt(sakstype, behandlingstype, behandlingstema, sakstemaer)) {
             return ingenSaksopplysningTyper();
         }
 
