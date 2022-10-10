@@ -1,5 +1,6 @@
 package no.nav.melosys.service.vedtak;
 
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
@@ -20,18 +21,20 @@ public class VedtaksfattingFasade {
     private final EosVedtakService eosVedtakService;
     private final FtrlVedtakService ftrlVedtakService;
     private final TrygdeavtaleVedtakService trygdeavtaleVedtakService;
+    private final Unleash unleash;
 
     public static final int FRIST_KLAGE_UKER = 6;
 
     public VedtaksfattingFasade(BehandlingService behandlingService,
                                 EosVedtakService eosVedtakService,
                                 FtrlVedtakService ftrlVedtakService,
-                                TrygdeavtaleVedtakService trygdeavtaleVedtakService
-    ) {
+                                TrygdeavtaleVedtakService trygdeavtaleVedtakService,
+                                Unleash unleash) {
         this.behandlingService = behandlingService;
         this.eosVedtakService = eosVedtakService;
         this.ftrlVedtakService = ftrlVedtakService;
         this.trygdeavtaleVedtakService = trygdeavtaleVedtakService;
+        this.unleash = unleash;
     }
 
     @Transactional(noRollbackFor = {ValideringException.class})
@@ -45,7 +48,7 @@ public class VedtaksfattingFasade {
     public void fattVedtak(long behandlingID, FattVedtakRequest fattVedtakRequest) throws ValideringException {
         var behandling = behandlingService.hentBehandling(behandlingID);
 
-        validerKanFattesVedtakAvTema(behandling);
+        validerKanFattesVedtak(behandling);
 
         Sakstyper sakstype = behandling.getFagsak().getType();
 
@@ -69,8 +72,11 @@ public class VedtaksfattingFasade {
         }
     }
 
-    private void validerKanFattesVedtakAvTema(Behandling behandling) {
-        if (!behandling.kanResultereIVedtak()) {
+    private void validerKanFattesVedtak(Behandling behandling) {
+        if (unleash.isEnabled("melosys.behandle_alle_saker")
+            ? !behandling.kanResultereIVedtak()
+            : !behandling.kanResultereIVedtakGammel()
+        ) {
             throw new FunksjonellException("Kan ikke fatte vedtak ved behandlingstema " + behandling.getTema().getBeskrivelse());
         }
     }

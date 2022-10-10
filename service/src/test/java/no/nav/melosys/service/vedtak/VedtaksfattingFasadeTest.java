@@ -1,5 +1,6 @@
 package no.nav.melosys.service.vedtak;
 
+import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
@@ -50,10 +51,11 @@ class VedtaksfattingFasadeTest {
     private VedtaksfattingFasade vedtaksfattingFasade;
 
     private Behandling behandling;
+    private final FakeUnleash unleash = new FakeUnleash();
 
     @BeforeEach
     void init() {
-        vedtaksfattingFasade = new VedtaksfattingFasade(mockBehandlingService, mockEosVedtakService, mockFtrlVedtakService, trygdeavtaleVedtakService);
+        vedtaksfattingFasade = new VedtaksfattingFasade(mockBehandlingService, mockEosVedtakService, mockFtrlVedtakService, trygdeavtaleVedtakService, unleash);
         behandling = lagBehandling();
 
         SpringSubjectHandler.set(new TestSubjectHandler());

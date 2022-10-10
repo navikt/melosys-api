@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.Set;
 import java.util.function.Consumer;
 
+import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
@@ -52,6 +53,7 @@ class KontrollMedRegisterOpplysningServiceTest {
     private final MedlemskapDokument medlemskapDokument = new MedlemskapDokument();
     private final BehandlingsgrunnlagData behandlingsgrunnlagData = new BehandlingsgrunnlagData();
     private final Behandling behandling = lagBehandling(behandlingsgrunnlagData);
+    private final FakeUnleash unleash = new FakeUnleash();
 
 
     @BeforeEach
@@ -64,11 +66,13 @@ class KontrollMedRegisterOpplysningServiceTest {
 
         behandling.getSaksopplysninger().add(medlSaksopplysning);
         when(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling);
-        when(lovvalgsperiodeService.hentValidertLovvalgsperiode(behandlingID)).thenReturn(lovvalgsperiode);
+        when(lovvalgsperiodeService.hentLovvalgsperiode(behandlingID)).thenReturn(lovvalgsperiode);
 
-        Kontroll kontroll = new Kontroll(behandlingService, lovvalgsperiodeService, persondataFasade, behandlingsresultatService);
+        Kontroll kontroll = new Kontroll(behandlingService, lovvalgsperiodeService, persondataFasade, unleash);
         kontrollMedRegisterOpplysning = new KontrollMedRegisteropplysning(behandlingService, behandlingsresultatService, persondataFasade,
             registeropplysningerService, kontroll);
+
+        unleash.enableAll();
     }
 
     @Test

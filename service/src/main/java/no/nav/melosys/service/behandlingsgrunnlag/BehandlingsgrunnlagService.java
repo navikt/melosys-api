@@ -65,17 +65,27 @@ public class BehandlingsgrunnlagService {
 
     public void opprettSøknad(Prosessinstans prosessinstans) {
         Behandling behandling = prosessinstans.getBehandling();
-        Soeknadsland soeknadsland = prosessinstans.getData(ProsessDataKey.SØKNADSLAND,
-                                                           new TypeReference<>() {
-                                                           });
-        Periode periode = prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, Periode.class);
+        Soeknadsland soeknadsland;
+        Periode periode;
+        if (unleash.isEnabled("melosys.tom_periode_og_land")) {
+            soeknadsland = prosessinstans.getData(
+                ProsessDataKey.SØKNADSLAND,
+                new TypeReference<>() {},
+                new Soeknadsland());
+            periode = prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, Periode.class, new Periode());
+        } else {
+            soeknadsland = prosessinstans.getData(
+                ProsessDataKey.SØKNADSLAND,
+                new TypeReference<>() {});
+            periode = prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, Periode.class);
+        }
         opprettSøknad(behandling, periode, soeknadsland);
     }
 
     public void opprettSøknad(Behandling behandling, Periode periode, Soeknadsland soeknadsland) {
         long behandlingID = behandling.getId();
         boolean behandleAlleSakerEnabled = unleash.isEnabled("melosys.behandle_alle_saker");
-        if (behandleAlleSakerEnabled ? !SaksbehandlingRegler.harTomFlyt(behandling.getFagsak().getType(), behandling.getType(), behandling.getTema()) : behandling.erBehandlingAvSøknadGammel()) {
+        if (behandleAlleSakerEnabled ? !SaksbehandlingRegler.harTomFlyt(behandling) : behandling.erBehandlingAvSøknadGammel()) {
             Sakstyper sakstype = behandling.getFagsak().getType();
             switch (sakstype) {
                 case EU_EOS -> opprettSøknadYrkesaktiveEøs(behandlingID, periode, soeknadsland);

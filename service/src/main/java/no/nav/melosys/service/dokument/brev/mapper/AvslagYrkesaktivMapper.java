@@ -31,7 +31,7 @@ public class AvslagYrkesaktivMapper implements BrevDataMapper {
 
     @Override
     public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat,
-                                BrevData brevDataFelles) throws JAXBException, SAXException {
+                                BrevData brevDataFelles, boolean enableBehandleAlleSaker) throws JAXBException, SAXException {
         BrevDataAvslagYrkesaktiv brevdata = (BrevDataAvslagYrkesaktiv) brevDataFelles;
         Fag fag = mapFag(behandling, resultat, brevdata);
 
@@ -140,7 +140,7 @@ public class AvslagYrkesaktivMapper implements BrevDataMapper {
     }
 
     private static LovvalgsperiodeType lagLovvalgsperiodeType(Behandlingsresultat resultat) {
-        Lovvalgsperiode lovvalgsperiode = resultat.hentValidertLovvalgsperiode();
+        Lovvalgsperiode lovvalgsperiode = resultat.hentLovvalgsperiode();
         LovvalgsperiodeType lovvalgsperiodeType = new LovvalgsperiodeType();
 
         try {

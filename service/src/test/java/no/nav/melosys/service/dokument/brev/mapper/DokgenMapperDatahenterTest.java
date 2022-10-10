@@ -114,18 +114,14 @@ class DokgenMapperDatahenterTest {
 
     @Test
     void hentPersondata_mottakerErIkkeVirksomhet_kallerPersondataFasade() {
-        DokgenBrevbestilling brevbestilling = new DokgenBrevbestilling.Builder<>().medBehandling(lagBehandling()).build();
-
-        dokgenMapperDatahenter.hentPersondata(brevbestilling, lagMottaker(Aktoersroller.BRUKER));
+        dokgenMapperDatahenter.hentPersondata(lagBehandling(), lagMottaker(Aktoersroller.BRUKER));
 
         verify(persondataFasade).hentPerson(any());
     }
 
     @Test
     void hentPersondata_mottakerErVirksomhet_returnererNull() {
-        DokgenBrevbestilling brevbestilling = new DokgenBrevbestilling.Builder<>().medBehandling(lagBehandling()).build();
-
-        var response = dokgenMapperDatahenter.hentPersondata(brevbestilling, lagMottaker(Aktoersroller.VIRKSOMHET));
+        var response = dokgenMapperDatahenter.hentPersondata(lagBehandling(), lagMottaker(Aktoersroller.VIRKSOMHET));
 
         assertThat(response).isNull();
         verify(persondataFasade, never()).hentPerson(any());

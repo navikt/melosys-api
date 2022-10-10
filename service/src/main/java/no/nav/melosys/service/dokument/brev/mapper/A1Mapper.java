@@ -50,7 +50,7 @@ class A1Mapper {
 
         a1.setPerson(mapPerson(brevData));
 
-        a1.setLovvalgsperiode(mapLovvalgsperiode(resultat.hentValidertLovvalgsperiode()));
+        a1.setLovvalgsperiode(mapLovvalgsperiode(resultat.hentLovvalgsperiode()));
 
         if (brevData.yrkesgruppe != null) {
             a1.setYrkesgruppe(YrkesgruppeKode.valueOf(brevData.yrkesgruppe.name()));

@@ -22,7 +22,8 @@ import no.nav.melosys.domain.person.Persondata;
         @JsonSubTypes.Type(value = InnvilgelseBrevbestilling.class),
         @JsonSubTypes.Type(value = FritekstbrevBrevbestilling.class),
         @JsonSubTypes.Type(value = AvslagBrevbestilling.class),
-        @JsonSubTypes.Type(value = HenleggelseBrevbestilling.class)
+        @JsonSubTypes.Type(value = HenleggelseBrevbestilling.class),
+        @JsonSubTypes.Type(value = FritekstvedleggBrevbestilling.class)
     }
 )
 public class DokgenBrevbestilling extends Brevbestilling {
@@ -42,6 +43,8 @@ public class DokgenBrevbestilling extends Brevbestilling {
     private Persondata personMottaker;
     private List<SaksvedleggBestilling> saksvedleggBestilling;
     private Distribusjonstype distribusjonstype;
+    private boolean toggleEnabled;
+    private List<FritekstvedleggBestilling> fritekstvedleggBestilling;
 
     public DokgenBrevbestilling() {
         super();
@@ -66,6 +69,8 @@ public class DokgenBrevbestilling extends Brevbestilling {
         this.personMottaker = builder.personMottaker;
         this.saksvedleggBestilling = builder.saksvedleggBestilling;
         this.distribusjonstype = builder.distribusjonstype;
+        this.toggleEnabled = builder.toggleEnabled;
+        this.fritekstvedleggBestilling = builder.fritekstvedleggBestilling;
     }
 
     public OrganisasjonDokument getOrg() {
@@ -128,8 +133,16 @@ public class DokgenBrevbestilling extends Brevbestilling {
         return saksvedleggBestilling;
     }
 
+    public List<FritekstvedleggBestilling> getFritekstvedleggBestilling() {
+        return fritekstvedleggBestilling;
+    }
+
     public Distribusjonstype getDistribusjonstype() {
         return distribusjonstype;
+    }
+
+    public boolean isToggleEnabled() {
+        return toggleEnabled;
     }
 
     public Builder toBuilder() {
@@ -156,6 +169,8 @@ public class DokgenBrevbestilling extends Brevbestilling {
         private Persondata personMottaker;
         private List<SaksvedleggBestilling> saksvedleggBestilling;
         private Distribusjonstype distribusjonstype;
+        private boolean toggleEnabled;
+        private List<FritekstvedleggBestilling> fritekstvedleggBestilling;
 
 
         public Builder() {
@@ -181,6 +196,8 @@ public class DokgenBrevbestilling extends Brevbestilling {
             this.personMottaker = brevbestilling.personMottaker;
             this.saksvedleggBestilling = brevbestilling.saksvedleggBestilling;
             this.distribusjonstype = brevbestilling.distribusjonstype;
+            this.toggleEnabled = brevbestilling.toggleEnabled;
+            this.fritekstvedleggBestilling = brevbestilling.fritekstvedleggBestilling;
         }
 
         public T medProduserbartdokument(Produserbaredokumenter produserbartdokument) {
@@ -275,6 +292,16 @@ public class DokgenBrevbestilling extends Brevbestilling {
 
         public T medDistribusjonstype(Distribusjonstype distribusjonstype) {
             this.distribusjonstype = distribusjonstype;
+            return (T) this;
+        }
+
+        public T medToggleEnabled(boolean toggleEnabled) {
+            this.toggleEnabled = toggleEnabled;
+            return (T) this;
+        }
+
+        public T medFritekstvedleggBestilling(List<FritekstvedleggBestilling> fritekstvedleggBestilling) {
+            this.fritekstvedleggBestilling = fritekstvedleggBestilling;
             return (T) this;
         }
 

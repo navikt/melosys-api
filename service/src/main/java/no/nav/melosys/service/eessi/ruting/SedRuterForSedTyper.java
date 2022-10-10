@@ -16,7 +16,7 @@ public interface SedRuterForSedTyper extends SedRuter {
         Periode periode = tilPeriode(melosysEessiMelding.getPeriode());
         String lovvalgsLand = melosysEessiMelding.getLovvalgsland();
 
-        return behandlingsresultat.finnValidertLovvalgsperiode().map(lovvalgsperiode ->
+        return behandlingsresultat.finnLovvalgsperiode().map(lovvalgsperiode ->
                 !PeriodeRegler.periodeErLik(lovvalgsperiode.getFom(), lovvalgsperiode.getTom(), periode.getFom(), periode.getTom())
                     || !lovvalgsLand.equalsIgnoreCase(lovvalgsperiode.getLovvalgsland().getKode()))
             .orElse(true);

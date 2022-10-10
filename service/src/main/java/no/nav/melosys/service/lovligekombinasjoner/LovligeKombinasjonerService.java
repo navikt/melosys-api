@@ -1,8 +1,6 @@
 package no.nav.melosys.service.lovligekombinasjoner;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
@@ -40,7 +38,7 @@ public class LovligeKombinasjonerService {
         return switch (hovedpart) {
             case BRUKER -> LovligeSakskombinasjoner.muligeSaksKombinasjonerBruker.get(sakstype).stream()
                 .map(SakstemaBehandlingsKombinasjon::sakstema)
-                .collect(Collectors.toSet());
+                .collect(Collectors.toCollection( LinkedHashSet::new ));
             case VIRKSOMHET -> LovligeSakskombinasjoner.ALLE_MULIGE_SAKSTEMAER;
             default -> Collections.emptySet();
         };
@@ -56,7 +54,7 @@ public class LovligeKombinasjonerService {
             return combineSets(
                 hentMuligeBehandlingstemaer(Aktoersroller.BRUKER, sakstype, sakstema, sistBehandlingstema),
                 hentMuligeBehandlingstemaer(Aktoersroller.VIRKSOMHET, sakstype, sakstema, sistBehandlingstema),
-                getSedBehandlingstema(sakstype, sakstema)
+                hentMuligeBehandlingstemaerSED(sakstype, sakstema)
             );
         }
 
@@ -66,7 +64,7 @@ public class LovligeKombinasjonerService {
                     .filter(sakstemaBehandlingsKombinasjon -> sakstemaBehandlingsKombinasjon.sakstema() == sakstema)
                     .flatMap(sakstemaBehandlingsKombinasjon -> sakstemaBehandlingsKombinasjon.behandlingstemaBehandlingstyperKombinasjoner().stream())
                     .flatMap(behandlingsKombinasjon -> behandlingsKombinasjon.behandlingsTemaer().stream())
-                    .collect(Collectors.toSet());
+                    .collect(Collectors.toCollection( LinkedHashSet::new ));
 
                 if (sistBehandlingstema != null && Set.of(REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING,
                     REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE,
@@ -80,6 +78,18 @@ public class LovligeKombinasjonerService {
                 return Set.of(VIRKSOMHET);
             default:
                 return Collections.emptySet();
+        }
+    }
+
+    public void validerBehandlingstype(Aktoersroller hovedpart, Sakstyper sakstype, Sakstemaer sakstema, Behandlingstema behandlingstema, Behandlingstyper behandlingstype, Behandling sistBehandling) {
+        if (!hentMuligeBehandlingstyper(hovedpart, sakstype, sakstema, behandlingstema, sistBehandling).contains(behandlingstype)) {
+            throw new FunksjonellException(behandlingstype + " er ikke en lovlig behandlingstype med de andre valgte verdiene");
+        }
+    }
+
+    public void validerBehandlingstema(Aktoersroller hovedpart, Sakstyper sakstype, Sakstemaer sakstema, Behandlingstema behandlingstema, Behandlingstema sistBehandlingstema) {
+        if (!hentMuligeBehandlingstemaer(hovedpart, sakstype, sakstema, sistBehandlingstema).contains(behandlingstema)) {
+            throw new FunksjonellException(behandlingstema + " er ikke et lovlig behandlingstema med de andre valgte verdiene");
         }
     }
 
@@ -107,14 +117,18 @@ public class LovligeKombinasjonerService {
                     .flatMap(sakstemaBehandlingsKombinasjon -> sakstemaBehandlingsKombinasjon.behandlingstemaBehandlingstyperKombinasjoner().stream())
                     .filter(behandlingsKombinasjon -> behandlingsKombinasjon.behandlingsTemaer().contains(behandlingstema))
                     .flatMap(behandlingsKombinasjon -> behandlingsKombinasjon.behandlingsTyper().stream())
-                    .collect(Collectors.toSet());
+                    .collect(Collectors.toCollection( LinkedHashSet::new ));
 
                 if (sistBehandlingstema != null && Set.of(REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING,
                     REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE,
                     BESLUTNING_LOVVALG_NORGE,
                     BESLUTNING_LOVVALG_ANNET_LAND,
                     ANMODNING_OM_UNNTAK_HOVEDREGEL).contains(sistBehandlingstema)) {
-                    behandlingstyper = Set.of(NY_VURDERING, KLAGE, HENVENDELSE);
+                    behandlingstyper = new LinkedHashSet<>(List.of(NY_VURDERING, KLAGE, HENVENDELSE));
+                }
+
+                if (sisteBehandling != null && sisteBehandling.erAvsluttet()) {
+                    behandlingstyper.remove(FØRSTEGANG);
                 }
 
                 if (sistBehandlingstype == FØRSTEGANG &&
@@ -181,12 +195,14 @@ public class LovligeKombinasjonerService {
         return Collections.emptySet();
     }
 
-    private Set<Behandlingstema> getSedBehandlingstema(Sakstyper sakstype, Sakstemaer sakstema) {
-        var sedBehandlingstema = new java.util.HashSet<>(LovligeSakskombinasjoner.SED_BEHANDLINGSTEMA);
-        if (sakstype == Sakstyper.EU_EOS && sakstema == Sakstemaer.MEDLEMSKAP_LOVVALG) {
-            sedBehandlingstema.add(BESLUTNING_LOVVALG_NORGE);
+    private Set<Behandlingstema> hentMuligeBehandlingstemaerSED(Sakstyper sakstype, Sakstemaer sakstema) {
+        if (sakstype == Sakstyper.EU_EOS && sakstema == Sakstemaer.UNNTAK) {
+            return Set.of(REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING, REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE, BESLUTNING_LOVVALG_ANNET_LAND);
         }
-        return sedBehandlingstema;
+        if (sakstype == Sakstyper.EU_EOS && sakstema == Sakstemaer.MEDLEMSKAP_LOVVALG) {
+            return Set.of(BESLUTNING_LOVVALG_NORGE);
+        }
+        return Collections.emptySet();
     }
 
     @SafeVarargs

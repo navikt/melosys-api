@@ -268,7 +268,6 @@ class OppgaveplukkerTest {
         verify(oppgaveTilbakkeleggingRepo, times(0)).save(any(OppgaveTilbakelegging.class));
     }
 
-
     @Test
     void plukkOppgave_brukerBehandlingstema_finnerOppgave() {
         List<Oppgave> oppgaver = new ArrayList<>();
@@ -353,6 +352,29 @@ class OppgaveplukkerTest {
         verify(behandlingService).lagre(behandlingCaptor.capture());
         assertThat(oppgave).isPresent();
         assertThat(behandlingCaptor.getValue().getStatus()).isEqualTo(Behandlingsstatus.UNDER_BEHANDLING);
+    }
+
+    @Test
+    void plukkOppgave_kombinasjonFlereBehandlingstema_sokerOppgaveToGanger() {
+        List<Oppgave> oppgaver = new ArrayList<>();
+        oppgaver.add(opprettOppgave("1", Oppgavetyper.VUR, PrioritetType.LAV, LocalDate.of(2017, 8, 7), LocalDate.now(), "MEL-1"));
+        when(oppgaveFasade.finnUtildelteOppgaverEtterFrist(anyString())).thenReturn(oppgaver);
+
+        Fagsak fagsak = new Fagsak();
+        Behandling behandling = new Behandling();
+        behandling.setType(Behandlingstyper.SOEKNAD);
+        behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
+        behandling.setStatus(Behandlingsstatus.OPPRETTET);
+        behandling.setFagsak(fagsak);
+        fagsak.setBehandlinger(Collections.singletonList(behandling));
+        when(fagsakService.hentFagsak(anyString())).thenReturn(fagsak);
+
+        var plukkOppgaveInnDto = new PlukkOppgaveInnDto(Behandlingstema.PENSJONIST, Sakstemaer.MEDLEMSKAP_LOVVALG, Sakstyper.EU_EOS);
+
+        Optional<Oppgave> oppgave = oppgaveplukker.plukkOppgave("Z01234", plukkOppgaveInnDto);
+
+        verify(oppgaveFasade, times(2)).finnUtildelteOppgaverEtterFrist(anyString());
+        assertThat(oppgave).isPresent();
     }
 
     private Oppgave opprettOppgave(String oppgaveId, Oppgavetyper oppgavetype, PrioritetType prioritet, LocalDate fristFerdigstillelse, LocalDate aktivDato, String saksnummer) {

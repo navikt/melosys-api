@@ -159,7 +159,7 @@ public class OppgaveService {
         return fagsakService.hentFagsak(saksnummer).hentSistAktivBehandling();
     }
 
-    public void opprettEllerGjenbrukBehandlingsoppgave(Behandling behandling, String journalpostID, @Nullable String aktørID, @Nullable String tilordnetRessurs, @Nullable @Deprecated String beskrivelse, @Nullable String orgnr) {
+    public void opprettEllerGjenbrukBehandlingsoppgave(Behandling behandling, @Nullable String journalpostID, @Nullable String aktørID, @Nullable String tilordnetRessurs, @Nullable @Deprecated String beskrivelse, @Nullable String orgnr) {
 
         Optional<Oppgave> eksisterendeOppgave = finnÅpenBehandlingsoppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer());
 
@@ -191,11 +191,11 @@ public class OppgaveService {
         }
     }
 
-    public void opprettEllerGjenbrukBehandlingsoppgave(Behandling behandling, String journalpostID, String aktørID, @Nullable String tilordnetRessurs, @Nullable String orgnr) {
+    public void opprettEllerGjenbrukBehandlingsoppgave(Behandling behandling, @Nullable String journalpostID, String aktørID, @Nullable String tilordnetRessurs, @Nullable String orgnr) {
         opprettEllerGjenbrukBehandlingsoppgave(behandling, journalpostID, aktørID, tilordnetRessurs, lagOppgaveBeskrivelse(behandling), orgnr);
     }
 
-    public void opprettEllerGjenbrukBehandlingsoppgave(Behandling behandling, String journalpostID, String aktørID, @Nullable String tilordnetRessurs) {
+    public void opprettEllerGjenbrukBehandlingsoppgave(Behandling behandling, @Nullable String journalpostID, String aktørID, @Nullable String tilordnetRessurs) {
         opprettEllerGjenbrukBehandlingsoppgave(behandling, journalpostID, aktørID, tilordnetRessurs, lagOppgaveBeskrivelse(behandling), null);
     }
 

@@ -19,4 +19,9 @@ public enum FeltType {
      * VEDLEGG er en vedleggskomponent som tillater saksbehandler å laste opp vedlegg som sendes med brevet
      */
     VEDLEGG,
+    /**
+     * FRITEKSTVEDLEGG er en vedleggskomponent som tillater saksbehandler å lage et fritekstdokument som
+     * journalføres og sendes sammen med hovedbrevet
+     */
+    FRITEKSTVEDLEGG,
 }

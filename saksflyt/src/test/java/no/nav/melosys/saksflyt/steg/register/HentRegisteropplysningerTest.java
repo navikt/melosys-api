@@ -12,6 +12,7 @@ import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadFtrl;
 import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadTrygdeavtale;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -68,6 +69,20 @@ class HentRegisteropplysningerTest {
         behandling.setType(Behandlingstyper.FØRSTEGANG);
 
         when(behandlingService.hentBehandling(behandling.getId())).thenReturn(behandling);
+    }
+
+    @Test
+    void utfør_hoppOverSteg() {
+        Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setBehandling(behandling);
+        Fagsak fagsak = new Fagsak();
+        fagsak.setType(Sakstyper.FTRL);
+        behandling.setFagsak(fagsak);
+        behandling.setTema(Behandlingstema.ARBEID_KUN_NORGE);
+
+        hentRegisteropplysninger.utfør(prosessinstans);
+
+        verify(registeropplysningerService, never()).hentOgLagreOpplysninger(any());
     }
 
     @Test
@@ -131,7 +146,7 @@ class HentRegisteropplysningerTest {
     }
 
     @Test
-    void utfør_behandlingstypeTrygdetid_henterIngenting() {
+    void utfør_harTomFlyt_henterIngenting() {
         behandling.setTema(Behandlingstema.TRYGDETID);
         behandling.getFagsak().setType(Sakstyper.EU_EOS);
         var prosessinstans = new Prosessinstans();

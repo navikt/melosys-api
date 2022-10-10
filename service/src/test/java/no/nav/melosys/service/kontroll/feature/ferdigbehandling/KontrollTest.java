@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 
+import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.Saksopplysning;
@@ -18,12 +19,12 @@ import no.nav.melosys.domain.dokument.medlemskap.Periode;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
 import no.nav.melosys.integrasjon.medl.PeriodestatusMedl;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory;
 import no.nav.melosys.service.validering.Kontrollfeil;
@@ -48,13 +49,13 @@ class KontrollTest {
     private LovvalgsperiodeService lovvalgsperiodeService;
     @Mock
     private PersondataFasade persondataFasade;
-    @Mock
-    private BehandlingsresultatService behandlingsresultatService;
+
     private final long behandlingID = 1L;
     private final Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
     private final MedlemskapDokument medlemskapDokument = new MedlemskapDokument();
     private final BehandlingsgrunnlagData behandlingsgrunnlagData = new BehandlingsgrunnlagData();
     private final Behandling behandling = lagBehandling(behandlingsgrunnlagData);
+    private final FakeUnleash unleash = new FakeUnleash();
     private Kontroll kontroll;
 
 
@@ -68,8 +69,8 @@ class KontrollTest {
         when(persondataFasade.hentPerson(anyString())).thenReturn(PersonopplysningerObjectFactory.lagPersonopplysninger());
         when(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling);
 
-
-        kontroll = new Kontroll(behandlingService, lovvalgsperiodeService, persondataFasade, behandlingsresultatService);
+        unleash.enableAll();
+        kontroll = new Kontroll(behandlingService, lovvalgsperiodeService, persondataFasade, unleash);
     }
 
     @Test
@@ -81,6 +82,15 @@ class KontrollTest {
 
     @Test
     void utførKontroller_AvslagPersonMedRegistrertAdresse__returnererTomCollection() {
+        Collection<Kontrollfeil> resultat = kontroll.utførKontroller(behandlingID, Sakstyper.EU_EOS, Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL);
+
+        assertThat(resultat).isEmpty();
+    }
+
+    @Test
+    void utførKontroller_avslagTomFlyt__returnererTomCollection() {
+        behandling.setType(Behandlingstyper.HENVENDELSE);
+        behandling.setBehandlingsgrunnlag(null);
         Collection<Kontrollfeil> resultat = kontroll.utførKontroller(behandlingID, Sakstyper.EU_EOS, Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL);
 
         assertThat(resultat).isEmpty();
@@ -263,6 +273,6 @@ class KontrollTest {
     }
 
     private void mockReturnertLovvalgsperiode() {
-        when(lovvalgsperiodeService.hentValidertLovvalgsperiode(behandlingID)).thenReturn(lovvalgsperiode);
+        when(lovvalgsperiodeService.hentLovvalgsperiode(behandlingID)).thenReturn(lovvalgsperiode);
     }
 }

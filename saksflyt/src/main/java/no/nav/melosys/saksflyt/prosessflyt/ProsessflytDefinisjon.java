@@ -95,8 +95,29 @@ public final class ProsessflytDefinisjon {
         PROSESS_FLYT_MAP.put(ProsessType.JFR_ANDREGANG_NY_BEHANDLING,
             new ProsessFlyt(ProsessType.JFR_ANDREGANG_NY_BEHANDLING,
                 OPPRETT_NY_BEHANDLING,
+                OPPRETT_SØKNAD,
                 OPPDATER_OG_FERDIGSTILL_JOURNALPOST,
                 OPPDATER_SAKSRELASJON,
+                HENT_REGISTEROPPLYSNINGER,
+                VURDER_INNGANGSVILKÅR,
+                OPPRETT_OPPGAVE
+            )
+        );
+
+        PROSESS_FLYT_MAP.put(ProsessType.OPPRETT_SAK,
+            new ProsessFlyt(ProsessType.OPPRETT_SAK,
+                OPPRETT_SAK_OG_BEH,
+                OPPRETT_SØKNAD,
+                OPPRETT_ARKIVSAK,
+                HENT_REGISTEROPPLYSNINGER,
+                VURDER_INNGANGSVILKÅR,
+                OPPRETT_OPPGAVE
+            )
+        );
+
+        PROSESS_FLYT_MAP.put(ProsessType.OPPRETT_BEHANDLING_FOR_SAK,
+            new ProsessFlyt(ProsessType.OPPRETT_BEHANDLING_FOR_SAK,
+                OPPRETT_NY_BEHANDLING,
                 OPPRETT_OPPGAVE
             )
         );
@@ -110,8 +131,8 @@ public final class ProsessflytDefinisjon {
             )
         );
 
-        PROSESS_FLYT_MAP.put(ProsessType.OPPRETT_NY_SAK_EOS,
-            new ProsessFlyt(ProsessType.OPPRETT_NY_SAK_EOS,
+        PROSESS_FLYT_MAP.put(ProsessType.OPPRETT_NY_SAK_EOS_FRA_OPPGAVE,
+            new ProsessFlyt(ProsessType.OPPRETT_NY_SAK_EOS_FRA_OPPGAVE,
                 OPPRETT_SAK_OG_BEH,
                 OPPRETT_SØKNAD,
                 OPPRETT_ARKIVSAK,
@@ -122,8 +143,8 @@ public final class ProsessflytDefinisjon {
             )
         );
 
-        PROSESS_FLYT_MAP.put(ProsessType.OPPRETT_NY_SAK_FTRL_TRYGDEAVTALE,
-            new ProsessFlyt(ProsessType.OPPRETT_NY_SAK_FTRL_TRYGDEAVTALE,
+        PROSESS_FLYT_MAP.put(ProsessType.OPPRETT_NY_SAK_FTRL_TRYGDEAVTALE_FRA_OPPGAVE,
+            new ProsessFlyt(ProsessType.OPPRETT_NY_SAK_FTRL_TRYGDEAVTALE_FRA_OPPGAVE,
                 OPPRETT_SAK_OG_BEH,
                 OPPRETT_SØKNAD,
                 OPPRETT_ARKIVSAK,

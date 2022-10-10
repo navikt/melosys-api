@@ -103,7 +103,7 @@ class SendVedtakUtlandTest {
     void utfør_artikkel12Suksessfull_statusErOppdaterResultat() {
         prosessinstans.setData(ProsessDataKey.EESSI_MOTTAKERE, List.of(MOTTAKER_INSTITUSJON));
         sendVedtakUtland.utfør(prosessinstans);
-        verify(eessiService).opprettOgSendSed(anyLong(), eq(List.of(MOTTAKER_INSTITUSJON)), eq(BucType.LA_BUC_04), isNull(), isNull());
+        verify(eessiService).opprettOgSendSed(anyLong(), eq(List.of(MOTTAKER_INSTITUSJON)), eq(BucType.LA_BUC_04),eq(Collections.emptySet()), isNull());
     }
 
     @Test
@@ -122,7 +122,7 @@ class SendVedtakUtlandTest {
         prosessinstans.setData(ProsessDataKey.EESSI_MOTTAKERE, List.of(MOTTAKER_INSTITUSJON));
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3B);
         sendVedtakUtland.utfør(prosessinstans);
-        verify(eessiService).opprettOgSendSed(anyLong(), eq(List.of(MOTTAKER_INSTITUSJON)), eq(BucType.LA_BUC_05), isNull(), isNull());
+        verify(eessiService).opprettOgSendSed(anyLong(), eq(List.of(MOTTAKER_INSTITUSJON)), eq(BucType.LA_BUC_05), eq(Collections.emptySet()), isNull());
     }
 
     @Test
@@ -161,7 +161,7 @@ class SendVedtakUtlandTest {
     @Test
     void utfør_vedtakEtterArt16HarTilknyttetLaBuc01_lukkerBuc() {
         final var rinaSaksnummer = "5453";
-        behandlingsresultat.hentValidertLovvalgsperiode().setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1);
+        behandlingsresultat.hentLovvalgsperiode().setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1);
         var anmodningsperiode = new Anmodningsperiode();
         anmodningsperiode.setAnmodningsperiodeSvar(new AnmodningsperiodeSvar());
         anmodningsperiode.getAnmodningsperiodeSvar().setAnmodningsperiodeSvarType(Anmodningsperiodesvartyper.AVSLAG);

@@ -404,8 +404,7 @@ internal class OppgaveFactoryTest {
             behandlingstemaer,
             expectedBehandlingstema,
             expectedTema,
-            expectedOppgavetype,
-            "SEDA008"
+            expectedOppgavetype
         )
     }
 
@@ -450,8 +449,7 @@ internal class OppgaveFactoryTest {
             behandlingstemaer,
             expectedBehandlingstema,
             expectedTema,
-            expectedOppgavetype,
-            "SEDA008"
+            expectedOppgavetype
         )
     }
 

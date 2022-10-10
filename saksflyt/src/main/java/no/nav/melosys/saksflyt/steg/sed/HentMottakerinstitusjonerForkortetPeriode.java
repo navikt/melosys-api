@@ -56,7 +56,7 @@ public class HentMottakerinstitusjonerForkortetPeriode implements StegBehandler 
         Fagsak fagsak = behandling.getFagsak();
 
         Collection<Landkoder> utlMyndighetLand = landvelgerService.hentUtenlandskTrygdemyndighetsland(prosessinstans.getBehandling().getId());
-        BucType bucType = BucType.fraBestemmelse(behandlingsresultatService.hentBehandlingsresultat(behandling.getId()).hentValidertLovvalgsperiode().getBestemmelse());
+        BucType bucType = BucType.fraBestemmelse(behandlingsresultatService.hentBehandlingsresultat(behandling.getId()).hentLovvalgsperiode().getBestemmelse());
 
         if (eessiService.landErEessiReady(bucType.name(), utlMyndighetLand)) {
 

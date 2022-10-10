@@ -54,6 +54,10 @@ class SaksbehandlingRegler(private val behandlingsresultatRepository: Behandling
         )
 
         @JvmStatic
+        fun harTomFlyt(behandling: Behandling): Boolean =
+            harTomFlyt(behandling.fagsak.type, behandling.type, behandling.tema)
+
+        @JvmStatic
         fun harTomFlyt(
             sakstype: Sakstyper,
             behandlingstype: Behandlingstyper,

@@ -59,7 +59,7 @@ public class UtstedtA1Service {
         final Long behandlingID = behandling.getId();
         final String aktørID = fagsak.hentBrukersAktørID();
 
-        final Lovvalgsperiode lovvalgsperiode = behandlingsresultat.hentValidertLovvalgsperiode();
+        final Lovvalgsperiode lovvalgsperiode = behandlingsresultat.hentLovvalgsperiode();
         final Lovvalgsbestemmelse artikkel = Lovvalgsbestemmelse.av(lovvalgsperiode.getBestemmelse());
         final String utsendtTilLand = hentUtsendtTilLand(behandlingID, lovvalgsperiode);
 

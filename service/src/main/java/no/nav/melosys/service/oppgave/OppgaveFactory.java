@@ -55,21 +55,21 @@ public final class OppgaveFactory {
             .setBehandlesAvApplikasjon(Fagsystem.MELOSYS);
     }
 
-    public static Oppgave.Builder lagBehandlingsoppgave(Sakstemaer sakstema, Sakstyper sakstype, Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
+    public static Oppgave.Builder lagBehandlingsoppgave(Sakstyper sakstype, Sakstemaer sakstema, Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
         // Dokumentasjon for regler: https://confluence.adeo.no/display/TEESSI/Oppgaver+i+Gosys
-        var oppgaveBehandlingstema = utledBehandlingstema(sakstema, sakstype, behandlingstema, behandlingstype);
+        var oppgaveBehandlingstema = utledBehandlingstema(sakstype, sakstema, behandlingstema, behandlingstype);
         return new Oppgave.Builder()
             .setBehandlesAvApplikasjon(Fagsystem.MELOSYS)
             .setPrioritet(PrioritetType.NORM)
             .setBehandlingstema(oppgaveBehandlingstema.getKode())
             .setTema(utledTema(sakstema))
             .setOppgavetype(utledOppgavetype(sakstype, behandlingstema, behandlingstype))
-            .setBeskrivelse(utledBeskrivelse(oppgaveBehandlingstema, sakstema, sakstype, behandlingstema, behandlingstype))
+            .setBeskrivelse(utledBeskrivelse(oppgaveBehandlingstema, sakstype, sakstema, behandlingstema, behandlingstype))
             .setFristFerdigstillelse(Behandling.utledFristForBehandlingstema(behandlingstema));
     }
 
     public static Oppgave.Builder lagBehandlingsoppgave(Fagsak fagsak, Behandling behandling) {
-        return lagBehandlingsoppgave(fagsak.getTema(), fagsak.getType(), behandling.getTema(), behandling.getType());
+        return lagBehandlingsoppgave(fagsak.getType(), fagsak.getTema(), behandling.getTema(), behandling.getType());
     }
 
     public static Oppgave.Builder lagBehandlingsoppgave(Behandling behandling) {
@@ -114,8 +114,8 @@ public final class OppgaveFactory {
         };
     }
 
-    public static OppgaveBehandlingstema utledBehandlingstema(Sakstemaer sakstema, Sakstyper sakstype, Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
-        if (skalBrukeMelosysBehandlingstemaForBehandlingstema(sakstema, sakstype, behandlingstema, behandlingstype)) {
+    public static OppgaveBehandlingstema utledBehandlingstema(Sakstyper sakstype, Sakstemaer sakstema, Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
+        if (skalBrukeMelosysBehandlingstemaForBehandlingstema(sakstype, sakstema, behandlingstema, behandlingstype)) {
             return switch (behandlingstema) {
                 case PENSJONIST -> OppgaveBehandlingstema.PENSJONIST_ELLER_UFORETRYGDET;
                 case YRKESAKTIV -> OppgaveBehandlingstema.YRKESAKTIV;
@@ -134,7 +134,7 @@ public final class OppgaveFactory {
         };
     }
 
-    private static boolean skalBrukeMelosysBehandlingstemaForBehandlingstema(Sakstemaer sakstema, Sakstyper sakstype, Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
+    private static boolean skalBrukeMelosysBehandlingstemaForBehandlingstema(Sakstyper sakstype, Sakstemaer sakstema, Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
         if (behandlingstype == null) return false;
 
         return switch (behandlingstema) {
@@ -186,7 +186,7 @@ public final class OppgaveFactory {
         return Oppgavetyper.BEH_SAK_MK;
     }
 
-    private static String utledBeskrivelse(OppgaveBehandlingstema oppgaveBehandlingstema, Sakstemaer sakstema, Sakstyper sakstype, Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
+    private static String utledBeskrivelse(OppgaveBehandlingstema oppgaveBehandlingstema, Sakstyper sakstype, Sakstemaer sakstema, Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
         return switch (oppgaveBehandlingstema) {
             case PENSJONIST_ELLER_UFORETRYGDET -> switch (sakstema) {
                 case MEDLEMSKAP_LOVVALG -> sakstype.getBeskrivelse();
@@ -206,12 +206,14 @@ public final class OppgaveFactory {
                 case REGISTRERING_UNNTAK -> "";
                 default -> behandlingstema.getBeskrivelse();
             };
-            case EU_EOS_LAND ->
-                (behandlingstype == Behandlingstyper.HENVENDELSE && behandlingstema == Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET) ? "SEDA005" : behandlingstema.getBeskrivelse();
-            case AVTALELAND ->
-                (behandlingstype == Behandlingstyper.HENVENDELSE && behandlingstema == Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET) ? "SEDA008" : behandlingstema.getBeskrivelse();
+            case EU_EOS_LAND -> sedEllerDefaultBeskrivelse(sakstype, behandlingstema, behandlingstype, "SEDA005");
+            case AVTALELAND -> sedEllerDefaultBeskrivelse(sakstype, behandlingstema, behandlingstype, "SEDA008");
             default -> behandlingstema.getBeskrivelse();
         };
+    }
+
+    private static String sedEllerDefaultBeskrivelse(Sakstyper sakstype, Behandlingstema behandlingstema, Behandlingstyper behandlingstype, String sed) {
+        return sakstype == Sakstyper.EU_EOS && behandlingstype == Behandlingstyper.HENVENDELSE && behandlingstema == Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET ? sed : behandlingstema.getBeskrivelse();
     }
 
     private static LocalDate fristUker(int uker) {

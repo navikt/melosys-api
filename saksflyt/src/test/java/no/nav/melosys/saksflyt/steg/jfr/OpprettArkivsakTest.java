@@ -1,9 +1,11 @@
 package no.nav.melosys.saksflyt.steg.jfr;
 
+import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
@@ -15,9 +17,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static no.nav.melosys.domain.TemaFactory.fraBehandlingstema;
+import static no.nav.melosys.service.oppgave.OppgaveFactory.utledTema;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -30,9 +33,11 @@ class OpprettArkivsakTest {
 
     private OpprettArkivsak opprettArkivsak;
 
+    private final FakeUnleash unleash = new FakeUnleash();
+
     @BeforeEach
     public void setUp() {
-        opprettArkivsak = new OpprettArkivsak(fagsakService, arkivsakService);
+        opprettArkivsak = new OpprettArkivsak(fagsakService, arkivsakService, unleash);
     }
 
     @Test
@@ -55,7 +60,36 @@ class OpprettArkivsakTest {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
 
-        when(arkivsakService.opprettSakForBruker(fagsak.getSaksnummer(), behandling.getTema(), aktørID)).thenReturn(forventetArkivsakID);
+        when(arkivsakService.opprettSakForBruker(fagsak.getSaksnummer(), fraBehandlingstema(behandling.getTema()),
+            aktørID)).thenReturn(forventetArkivsakID);
+        opprettArkivsak.utfør(prosessinstans);
+
+        assertThat(fagsak.getGsakSaksnummer()).isEqualTo(forventetArkivsakID);
+    }
+
+    @Test
+    void utfør_arkivsakIDEksistererIkkeFraFør_arkivsakBlirOpprettet_brukFagsakTema() {
+        unleash.enable("melosys.behandle_alle_saker");
+        final long forventetArkivsakID = 1234432;
+
+        String aktørID = "4214323324";
+        Fagsak fagsak = new Fagsak();
+        fagsak.setSaksnummer("MEL-4321");
+        fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
+
+        Aktoer bruker = new Aktoer();
+        bruker.setAktørId(aktørID);
+        bruker.setRolle(Aktoersroller.BRUKER);
+        fagsak.getAktører().add(bruker);
+
+        Behandling behandling = new Behandling();
+        behandling.setFagsak(fagsak);
+
+        Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setBehandling(behandling);
+
+        when(arkivsakService.opprettSakForBruker(fagsak.getSaksnummer(), utledTema(fagsak.getTema()),
+            aktørID)).thenReturn(forventetArkivsakID);
         opprettArkivsak.utfør(prosessinstans);
 
         assertThat(fagsak.getGsakSaksnummer()).isEqualTo(forventetArkivsakID);
