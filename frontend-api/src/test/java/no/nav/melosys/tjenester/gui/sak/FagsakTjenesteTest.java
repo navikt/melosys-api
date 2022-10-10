@@ -227,7 +227,7 @@ class FagsakTjenesteTest {
         behandling.setId(123L);
         fagsak.setBehandlinger(Collections.singletonList(behandling));
         mockFagsakTjeneste(fagsak);
-        var fagsakSokDto = new FagsakSokDto(FNR, null, null, false);
+        var fagsakSokDto = new FagsakSokDto(FNR, null, null);
 
         mockMvc.perform(post(BASE_URL + "/sok")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -248,7 +248,7 @@ class FagsakTjenesteTest {
         String saksnummer = "MEL-1";
         mockFagsakMedBehandling(behandlingID, saksnummer);
 
-        var fagsakSokDto = new FagsakSokDto(FNR, null, null, false);
+        var fagsakSokDto = new FagsakSokDto(FNR, null, null);
 
 
         mockMvc.perform(post(BASE_URL + "/sok")
@@ -275,7 +275,7 @@ class FagsakTjenesteTest {
 
         mockFagsakMedBehandling(behandlingID, "MEL-1");
 
-        var fagsakSokDto = new FagsakSokDto(FNR, null, null, false);
+        var fagsakSokDto = new FagsakSokDto(FNR, null, null);
 
 
         mockMvc.perform(post(BASE_URL + "/sok")
@@ -300,7 +300,7 @@ class FagsakTjenesteTest {
 
         mockFagsakMedBehandling(behandlingID, "MEL-1");
 
-        var fagsakSokDto = new FagsakSokDto(FNR, null, null, false);
+        var fagsakSokDto = new FagsakSokDto(FNR, null, null);
 
 
         mockMvc.perform(post(BASE_URL + "/sok")
@@ -324,7 +324,7 @@ class FagsakTjenesteTest {
         behandling.setId(123L);
         fagsak.setBehandlinger(Collections.singletonList(behandling));
         mockFagsakTjeneste(fagsak);
-        var fagsakSokDto = new FagsakSokDto(FNR, null, null, false);
+        var fagsakSokDto = new FagsakSokDto(FNR, null, null);
 
 
         mockMvc.perform(post(BASE_URL + "/sok")
@@ -351,7 +351,7 @@ class FagsakTjenesteTest {
         aktoer.setRolle(Aktoersroller.BRUKER);
         fagsak.setAktører(Set.of(aktoer));
         mockFagsakTjeneste(fagsak);
-        var fagsakSokDto = new FagsakSokDto(FNR, null, null, false);
+        var fagsakSokDto = new FagsakSokDto(FNR, null, null);
 
         mockMvc.perform(post(BASE_URL + "/sok")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -377,7 +377,7 @@ class FagsakTjenesteTest {
         var organisajonsdokument = new OrganisasjonDokument();
         organisajonsdokument.setNavn("Moe Organisasjon");
         when(organisasjonOppslagService.hentOrganisasjon(ORGNR)).thenReturn(organisajonsdokument);
-        var fagsakSokDto = new FagsakSokDto(null, null, ORGNR, false);
+        var fagsakSokDto = new FagsakSokDto(null, null, ORGNR);
 
         mockMvc.perform(post(BASE_URL + "/sok")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -398,7 +398,7 @@ class FagsakTjenesteTest {
         aktoer.setRolle(Aktoersroller.VIRKSOMHET);
         fagsak.setAktører(Set.of(aktoer));
         mockFagsakTjeneste(fagsak);
-        var fagsakSokDto = new FagsakSokDto(null, null, ORGNR, false);
+        var fagsakSokDto = new FagsakSokDto(null, null, ORGNR);
 
         mockMvc.perform(post(BASE_URL + "/sok")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -412,7 +412,7 @@ class FagsakTjenesteTest {
     void hentFagsaker_medSaksnummer_finnerIkkeSakMottarTomListe() throws Exception {
         Fagsak fagsak = lagFagsak();
         mockFagsakTjeneste(fagsak);
-        var fagsakSokDto = new FagsakSokDto(null, "NEI-123", null, false);
+        var fagsakSokDto = new FagsakSokDto(null, "NEI-123", null);
 
         mockMvc.perform(post(BASE_URL + "/sok")
                 .contentType(MediaType.APPLICATION_JSON)

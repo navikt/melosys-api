@@ -166,15 +166,15 @@ public class FagsakTjeneste {
 
         if (StringUtils.isNotEmpty(fagsakSokDto.ident())) {
             aksesskontroll.autoriserFolkeregisterIdent(fagsakSokDto.ident());
-            return tilFagsakOppsummeringDtoer(fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, fagsakSokDto.ident()), fagsakSokDto.utenSED());
+            return tilFagsakOppsummeringDtoer(fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, fagsakSokDto.ident()));
         } else if (StringUtils.isNotEmpty(fagsakSokDto.saksnummer())) {
             Optional<Fagsak> fagsak = fagsakService.finnFagsakFraSaksnummer(fagsakSokDto.saksnummer());
             if (fagsak.isPresent()) {
                 aksesskontroll.autoriserSakstilgang(fagsak.get());
-                return tilFagsakOppsummeringDtoer(Collections.singletonList(fagsak.get()), fagsakSokDto.utenSED());
+                return tilFagsakOppsummeringDtoer(Collections.singletonList(fagsak.get()));
             }
         } else if (StringUtils.isNotEmpty(fagsakSokDto.orgnr())) {
-            return tilFagsakOppsummeringDtoer(fagsakService.hentFagsakerMedOrgnr(Aktoersroller.VIRKSOMHET, fagsakSokDto.orgnr()), fagsakSokDto.utenSED());
+            return tilFagsakOppsummeringDtoer(fagsakService.hentFagsakerMedOrgnr(Aktoersroller.VIRKSOMHET, fagsakSokDto.orgnr()));
         }
 
         return Collections.emptyList();
@@ -219,7 +219,7 @@ public class FagsakTjeneste {
         return fagsakDto;
     }
 
-    private List<FagsakOppsummeringDto> tilFagsakOppsummeringDtoer(Iterable<Fagsak> saker, boolean utenSED) {
+    private List<FagsakOppsummeringDto> tilFagsakOppsummeringDtoer(Iterable<Fagsak> saker) {
         List<FagsakOppsummeringDto> fagsakListe = new ArrayList<>();
         for (Fagsak fagsak : saker) {
             FagsakOppsummeringDto fagsakOppsummeringDto = new FagsakOppsummeringDto();
@@ -236,9 +236,7 @@ public class FagsakTjeneste {
                 .map(this::tilBehandlingOversiktDto)
                 .toList();
 
-            fagsakOppsummeringDto.setNavn(hentNavn(behandlinger));
-            fagsakOppsummeringDto.setBehandlingOversikter(behandlingOversiktDtoer);
-            if (unleash.isEnabled("melosys.ny_opprett_sak") && utenSED) {
+            if (unleash.isEnabled("melosys.ny_opprett_sak")) {
                 if (behandlingOversiktDtoer
                     .stream()
                     .noneMatch(behandlingOversiktDto -> behandlingOversiktDto.getBehandlingstype() == Behandlingstyper.SED)
@@ -248,6 +246,10 @@ public class FagsakTjeneste {
             } else {
                 fagsakListe.add(fagsakOppsummeringDto);
             }
+
+            fagsakOppsummeringDto.setNavn(hentNavn(behandlinger));
+            fagsakOppsummeringDto.setBehandlingOversikter(behandlingOversiktDtoer);
+            fagsakListe.add(fagsakOppsummeringDto);
         }
         return fagsakListe;
     }
