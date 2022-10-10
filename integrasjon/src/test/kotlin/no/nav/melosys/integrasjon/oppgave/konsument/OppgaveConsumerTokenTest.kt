@@ -3,29 +3,34 @@ package no.nav.melosys.integrasjon.oppgave.konsument
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.matching.StringValuePattern
 import no.nav.melosys.integrasjon.ConsumerWireMockTestBase
-import no.nav.melosys.integrasjon.felles.GenericContextExchangeFilter
 import no.nav.melosys.integrasjon.oppgave.konsument.dto.OppgaveDto
 import no.nav.melosys.integrasjon.reststs.RestTokenServiceClient
-import no.nav.melosys.integrasjon.reststs.StsRestTemplateProducer
+import no.nav.melosys.integrasjon.reststs.StsWebClientProducer
+import no.nav.security.token.support.client.spring.oauth2.EnableOAuth2Client
+import no.nav.security.token.support.client.spring.oauth2.OAuth2ClientConfiguration
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.autoconfigure.web.client.RestTemplateAutoConfiguration
 import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebClient
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.context.annotation.Import
 import org.springframework.test.context.ActiveProfiles
 
-@WebMvcTest(
-    value = [
-        StsRestTemplateProducer::class,
-        RestTokenServiceClient::class,
+@Import(
+    StsWebClientProducer::class,
+    RestTokenServiceClient::class,
+    RestTemplateAutoConfiguration::class,
+    OAuth2ClientConfiguration::class,
 
-        OppgaveConsumerImpl::class,
-        OppgaveConsumerProducer::class,
-        GenericContextExchangeFilter::class
-    ]
+    OppgaveConsumerImpl::class,
+    OppgaveConsumerProducer::class,
+    OppgaveGenericContextExchangeFilter::class
 )
+@WebMvcTest
 @ActiveProfiles("wiremock-test")
+@EnableOAuth2Client
 @AutoConfigureWebClient
 class OppgaveConsumerTokenTest(
     @Autowired private val oppgaveConsumer: OppgaveConsumer,
@@ -47,7 +52,7 @@ class OppgaveConsumerTokenTest(
     fun authorizationSkalKommeFraBruker() {
         verifyHeaders(
             mapOf<String, StringValuePattern>(
-                Pair("Authorization", WireMock.equalTo("Bearer --token-from-user--")),
+                Pair("Authorization", WireMock.equalTo("Bearer -- user_access_token --")),
             )
         )
         executeFromController()
