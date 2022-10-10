@@ -57,10 +57,10 @@ public class HentRegisteropplysninger implements StegBehandler {
                 .fnr(persondataFasade.hentFolkeregisterident(aktørId))
                 .saksopplysningTyper(utledSaksopplysningTyper(
                     behandling.getFagsak().getType(),
+                    behandling.getFagsak().getTema(),
                     behandling.getTema(),
                     behandling.getType(),
-                    behandling.getFagsak().getTema(),
-                        behandleAlleSakerToggleEnabled));
+                    behandleAlleSakerToggleEnabled));
 
             (behandleAlleSakerToggleEnabled
                 ? behandling.finnPeriode()

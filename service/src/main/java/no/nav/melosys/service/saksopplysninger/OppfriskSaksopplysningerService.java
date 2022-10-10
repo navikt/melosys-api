@@ -77,9 +77,9 @@ public class OppfriskSaksopplysningerService {
             .behandlingID(behandlingID)
             .saksopplysningTyper(utledSaksopplysningTyper(
                 behandling.getFagsak().getType(),
+                behandling.getFagsak().getTema(),
                 behandling.getTema(),
                 behandling.getType(),
-                behandling.getFagsak().getTema(),
                 behandleAlleSakerToggleEnabled))
             .fnr(brukerID)
             .fom(periode.getFom())

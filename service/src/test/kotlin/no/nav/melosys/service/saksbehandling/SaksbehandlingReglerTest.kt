@@ -114,6 +114,19 @@ class SaksbehandlingReglerTest {
                     Behandlingsresultattyper.AVVIST_KLAGE
                 )
             }
+        ),
+        arguments(
+            Sakstyper.EU_EOS,
+            Sakstemaer.TRYGDEAVGIFT,
+            Behandlingstyper.FØRSTEGANG,
+            Behandlingstema.YRKESAKTIV,
+            BehandlingHolder().apply {
+                add(
+                    Behandlingstyper.ENDRET_PERIODE,
+                    Behandlingstema.UTSENDT_ARBEIDSTAKER,
+                    Behandlingsresultattyper.AVVIST_KLAGE
+                )
+            }
         )
     )
 
