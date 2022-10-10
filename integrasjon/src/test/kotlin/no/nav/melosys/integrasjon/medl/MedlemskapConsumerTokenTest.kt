@@ -22,10 +22,11 @@ import java.time.LocalDate
 @Import(
     StsWebClientProducer::class,
     RestTokenServiceClient::class,
-    MedlemskapRestConsumer::class,
-    MedlGenericContextExchangeFilter::class,
     RestTemplateAutoConfiguration::class,
     OAuth2ClientConfiguration::class,
+
+    MedlemskapRestConsumer::class,
+    MedlGenericContextExchangeFilter::class,
     MedlemskapRestConsumerProducer::class,
 )
 @WebMvcTest
