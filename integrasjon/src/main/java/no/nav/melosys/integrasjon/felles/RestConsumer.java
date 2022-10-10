@@ -2,7 +2,6 @@ package no.nav.melosys.integrasjon.felles;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
-import javax.ws.rs.NotSupportedException;
 
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -10,7 +9,6 @@ import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.felles.mdc.MDCOperations;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
-import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 
@@ -20,14 +18,6 @@ public interface RestConsumer {
         return "Basic " + Base64.getEncoder().encodeToString(
             String.format("%s:%s", getEnv().getRequiredProperty("systemuser.username"), getEnv().getRequiredProperty("systemuser.password"))
                 .getBytes(StandardCharsets.UTF_8));
-    }
-
-    default String getAuth() {
-        if (ThreadLocalAccessInfo.shouldUseSystemToken()) {
-            return basicAuth();
-        }
-
-        throw new NotSupportedException("Prøver å hente autoriseringstoken for bruker, men ingen scope har blitt angitt.");
     }
 
     default String getCallID() {

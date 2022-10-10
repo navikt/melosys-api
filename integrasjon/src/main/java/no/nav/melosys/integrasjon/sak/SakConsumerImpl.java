@@ -54,7 +54,7 @@ public class SakConsumerImpl implements RestConsumer, SakConsumer {
                 .request()
                 .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON)
                 .header(X_CORRELATION_ID, getCorrelationId())
-                .header(HttpHeaders.AUTHORIZATION, getAuth())
+                .header(HttpHeaders.AUTHORIZATION, basicAuth())
                 .get(SakDto.class);
         } catch (RuntimeException e) {
             ExceptionMapper.JaxGetRuntimeExTilMelosysEx(e);
@@ -74,7 +74,7 @@ public class SakConsumerImpl implements RestConsumer, SakConsumer {
                 .request()
                 .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON)
                 .header(X_CORRELATION_ID, getCorrelationId())
-                .header(HttpHeaders.AUTHORIZATION, getAuth())
+                .header(HttpHeaders.AUTHORIZATION, basicAuth())
                 .get(sakDtoListType);
         } catch (RuntimeException e) {
             ExceptionMapper.JaxGetRuntimeExTilMelosysEx(e);
@@ -89,7 +89,7 @@ public class SakConsumerImpl implements RestConsumer, SakConsumer {
             .request()
             .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON)
             .header(X_CORRELATION_ID, getCorrelationId())
-            .header(HttpHeaders.AUTHORIZATION, getAuth())
+            .header(HttpHeaders.AUTHORIZATION, basicAuth())
             .post(Entity.json(sakDto))) {
             håndterEvFeil(response);
             return response.readEntity(SakDto.class);

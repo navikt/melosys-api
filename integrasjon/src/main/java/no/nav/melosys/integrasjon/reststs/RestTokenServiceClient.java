@@ -51,7 +51,7 @@ public class RestTokenServiceClient implements RestStsClient {
             Map<String, Object> responseBody = webClient.get()
                 .uri(createUriString())
                 .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
-                .header(HttpHeaders.AUTHORIZATION, getAuth())
+                .header(HttpHeaders.AUTHORIZATION, basicAuth())
                 .retrieve()
                 .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {
                 })
