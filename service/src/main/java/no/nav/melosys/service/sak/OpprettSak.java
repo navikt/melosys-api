@@ -38,18 +38,14 @@ public class OpprettSak {
 
     private final LovligeKombinasjonerService lovligeKombinasjonerService;
 
-    private final FagsakService fagsakService;
-
     public OpprettSak(JournalfoeringService journalfoeringService, OppgaveService oppgaveService,
                       @Lazy ProsessinstansService prosessinstansService,
                       Unleash unleash,
-                      FagsakService fagsakService,
                       LovligeKombinasjonerService lovligeKombinasjonerService) {
         this.journalfoeringService = journalfoeringService;
         this.oppgaveService = oppgaveService;
         this.prosessinstansService = prosessinstansService;
         this.unleash = unleash;
-        this.fagsakService = fagsakService;
         this.lovligeKombinasjonerService = lovligeKombinasjonerService;
     }
 

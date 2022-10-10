@@ -275,12 +275,13 @@ public class ProsessinstansService {
 
         if (unleash.isEnabled("melosys.behandle_alle_saker")) {
             prosessinstans.setData(SAKSTEMA, opprettSakDto.getSakstema());
+            prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, opprettSakDto.getBehandlingstype());
         } else {
             prosessinstans.setData(SAKSTEMA,
                 SakstypeSakstemaKobling.sakstema(Sakstyper.EU_EOS, opprettSakDto.getBehandlingstema()));
+            prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, behandlingstype);
         }
 
-        prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, behandlingstype);
         prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, journalpostID);
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, opprettSakDto.getBehandlingstema());
         prosessinstans.setData(ProsessDataKey.BRUKER_ID, opprettSakDto.getBrukerID());

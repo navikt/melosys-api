@@ -46,8 +46,6 @@ class OpprettSakTest {
     @Mock
     private ProsessinstansService prosessinstansService;
     @Mock
-    private FagsakService fagsakService;
-    @Mock
     private LovligeKombinasjonerService lovligeKombinasjonerService;
 
     private final FakeUnleash unleash = new FakeUnleash();
@@ -64,7 +62,7 @@ class OpprettSakTest {
 
     @BeforeEach
     public void setUp() {
-        opprettSak = new OpprettSak(journalfoeringService, oppgaveService, prosessinstansService, unleash, fagsakService, lovligeKombinasjonerService);
+        opprettSak = new OpprettSak(journalfoeringService, oppgaveService, prosessinstansService, unleash, lovligeKombinasjonerService);
         unleash.enableAll();
     }
 
