@@ -8,6 +8,7 @@ import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Fagsak
+import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
@@ -35,6 +36,7 @@ class SaksbehandlingReglerTest {
     @MethodSource("tidligereBehandlingSkalIkkeReplikeresData")
     fun tidligereBehandlingSkalIkkeReplikeres(
         sakstype: Sakstyper,
+        sakstema: Sakstemaer,
         behandlingstype: Behandlingstyper,
         behandlingstema: Behandlingstema,
         behandlingHolder: BehandlingHolder
@@ -43,7 +45,7 @@ class SaksbehandlingReglerTest {
 
 
         val result = behandlingReplikeringsRegler.skalTidligereBehandlingReplikeres(
-            behandlingHolder.lagFagsak(sakstype), behandlingstype, behandlingstema
+            behandlingHolder.lagFagsak(sakstype, sakstema), behandlingstype, behandlingstema
         )
 
 
@@ -53,6 +55,7 @@ class SaksbehandlingReglerTest {
     private fun tidligereBehandlingSkalIkkeReplikeresData() = listOf(
         arguments(
             Sakstyper.TRYGDEAVTALE,
+            Sakstemaer.MEDLEMSKAP_LOVVALG,
             Behandlingstyper.FØRSTEGANG,
             Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL,
             BehandlingHolder().apply {
@@ -61,6 +64,7 @@ class SaksbehandlingReglerTest {
         ),
         arguments(
             Sakstyper.EU_EOS,
+            Sakstemaer.MEDLEMSKAP_LOVVALG,
             Behandlingstyper.FØRSTEGANG,
             Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL,
             BehandlingHolder().apply {
@@ -69,6 +73,7 @@ class SaksbehandlingReglerTest {
         ),
         arguments(
             Sakstyper.EU_EOS,
+            Sakstemaer.MEDLEMSKAP_LOVVALG,
             Behandlingstyper.FØRSTEGANG,
             Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL,
             BehandlingHolder().apply {
@@ -77,6 +82,7 @@ class SaksbehandlingReglerTest {
         ),
         arguments(
             Sakstyper.EU_EOS,
+            Sakstemaer.MEDLEMSKAP_LOVVALG,
             Behandlingstyper.FØRSTEGANG,
             Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL,
             BehandlingHolder().apply {
@@ -85,6 +91,7 @@ class SaksbehandlingReglerTest {
         ),
         arguments(
             Sakstyper.EU_EOS,
+            Sakstemaer.MEDLEMSKAP_LOVVALG,
             Behandlingstyper.FØRSTEGANG,
             Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL,
             BehandlingHolder().apply {
@@ -97,6 +104,7 @@ class SaksbehandlingReglerTest {
         ),
         arguments(
             Sakstyper.EU_EOS,
+            Sakstemaer.MEDLEMSKAP_LOVVALG,
             Behandlingstyper.HENVENDELSE,
             Behandlingstema.YRKESAKTIV,
             BehandlingHolder().apply {
@@ -113,6 +121,7 @@ class SaksbehandlingReglerTest {
     @MethodSource("tidligereBehandlingSkalReplikeresData")
     fun tidligereBehandlingSkalReplikeres(
         sakstype: Sakstyper,
+        sakstema: Sakstemaer,
         behandlingstype: Behandlingstyper,
         behandlingstema: Behandlingstema,
         behandlingHolder: BehandlingHolder
@@ -121,7 +130,7 @@ class SaksbehandlingReglerTest {
 
 
         val result = behandlingReplikeringsRegler.skalTidligereBehandlingReplikeres(
-            behandlingHolder.lagFagsak(sakstype), behandlingstype, behandlingstema
+            behandlingHolder.lagFagsak(sakstype, sakstema), behandlingstype, behandlingstema
         )
 
 
@@ -131,6 +140,7 @@ class SaksbehandlingReglerTest {
     private fun tidligereBehandlingSkalReplikeresData() = listOf(
         arguments(
             Sakstyper.EU_EOS,
+            Sakstemaer.MEDLEMSKAP_LOVVALG,
             Behandlingstyper.ENDRET_PERIODE,
             Behandlingstema.UTSENDT_ARBEIDSTAKER,
             BehandlingHolder().apply {
@@ -143,6 +153,7 @@ class SaksbehandlingReglerTest {
         ),
         arguments(
             Sakstyper.EU_EOS,
+            Sakstemaer.MEDLEMSKAP_LOVVALG,
             Behandlingstyper.ENDRET_PERIODE,
             Behandlingstema.UTSENDT_ARBEIDSTAKER,
             BehandlingHolder().apply {
@@ -275,9 +286,10 @@ class SaksbehandlingReglerTest {
             }, behandlingsresultattype))
         }
 
-        fun lagFagsak(type: Sakstyper) =
+        fun lagFagsak(type: Sakstyper, tema: Sakstemaer) =
             Fagsak().apply {
                 this.type = type
+                this.tema = tema
                 this.behandlinger = behandlinger(this).map { it.first }
             }
 

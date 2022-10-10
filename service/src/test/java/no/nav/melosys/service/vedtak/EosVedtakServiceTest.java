@@ -352,6 +352,7 @@ class EosVedtakServiceTest {
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer("MEL-111");
         fagsak.setType(Sakstyper.EU_EOS);
+        fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
         Aktoer aktoer = new Aktoer();
         aktoer.setAktørId("1234567890123");
         aktoer.setRolle(Aktoersroller.BRUKER);

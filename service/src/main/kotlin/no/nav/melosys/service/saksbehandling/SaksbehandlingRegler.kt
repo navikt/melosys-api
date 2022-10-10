@@ -21,9 +21,9 @@ class SaksbehandlingRegler(private val behandlingsresultatRepository: Behandling
     ): Boolean {
         val sistRegistrertBehandling = fagsak.hentSistRegistrertBehandling()
         val sakstype = sistRegistrertBehandling.fagsak.type
-        val saksTema = fagsak.tema
+        val sakstema = sistRegistrertBehandling.fagsak.tema
 
-        if (harTomFlyt(sakstype, behandlingstype, behandlingstema, saksTema)) return false
+        if (harTomFlyt(sakstype, sakstema, behandlingstype, behandlingstema)) return false
 
         return finnBehandlingSomKanReplikeres(fagsak) != null
     }
@@ -57,16 +57,16 @@ class SaksbehandlingRegler(private val behandlingsresultatRepository: Behandling
 
         @JvmStatic
         fun harTomFlyt(behandling: Behandling): Boolean =
-            harTomFlyt(behandling.fagsak.type, behandling.type, behandling.tema, behandling.fagsak.tema)
+            harTomFlyt(behandling.fagsak.type, behandling.fagsak.tema, behandling.type, behandling.tema)
 
         @JvmStatic
         fun harTomFlyt(
             sakstype: Sakstyper,
+            sakstema: Sakstemaer,
             behandlingstype: Behandlingstyper,
-            behandlingstema: Behandlingstema,
-            saksTema: Sakstemaer
+            behandlingstema: Behandlingstema
         ): Boolean {
-            if (saksTema == Sakstemaer.TRYGDEAVGIFT) return true
+            if (sakstema == Sakstemaer.TRYGDEAVGIFT) return true
             if (behandlingstype == Behandlingstyper.HENVENDELSE || behandlingstype == Behandlingstyper.KLAGE) return true
 
             return when (behandlingstema) {
