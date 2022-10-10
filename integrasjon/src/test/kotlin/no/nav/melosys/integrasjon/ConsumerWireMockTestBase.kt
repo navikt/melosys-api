@@ -15,8 +15,6 @@ import io.mockk.spyk
 import no.nav.melosys.integrasjon.felles.EnvironmentHandler
 import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter
 import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingInterceptor
-import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
-import no.nav.melosys.sikkerhet.context.SubjectHandler
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import no.nav.security.token.support.core.context.TokenValidationContext
 import no.nav.security.token.support.core.context.TokenValidationContextHolder
@@ -136,7 +134,6 @@ abstract class ConsumerWireMockTestBase<T, R>(
 
     @AfterEach
     fun afterEach() {
-        SpringSubjectHandler.set(NullSubjectHandler())
     }
 
     fun verifyHeaders(headers: Map<String, StringValuePattern>) {
@@ -176,7 +173,7 @@ abstract class ConsumerWireMockTestBase<T, R>(
     }
 
     fun executeFromController(consumer: (R) -> Unit = {}) {
-        SpringSubjectHandler.set(TestSubjectHandler())
+//        SpringSubjectHandler.set(TestSubjectHandler())
         try {
             ThreadLocalAccessInfo.beforeControllerRequest("request", false)
             consumer(executeRequest())
@@ -209,23 +206,6 @@ abstract class ConsumerWireMockTestBase<T, R>(
     }
 
     open fun errorFromServerMessage() = "500 INTERNAL_SERVER_ERROR - {\"melding\": \"Internal Server Error\"}"
-
-    open class TestSubjectHandler : SubjectHandler() {
-        override fun getOidcTokenString(): String? = "--token-from-user--"
-
-        override fun getUserID(): String? = "Z123"
-        override fun getName(): String? {
-            return "Testy test"
-        }
-
-        override fun getGroups(): MutableList<String>? = ArrayList<String>()
-    }
-
-    class NullSubjectHandler : TestSubjectHandler() {
-        override fun getOidcTokenString(): String? = null
-        override fun getName(): String? = null
-        override fun getGroups(): MutableList<String>? = null
-    }
 
     companion object {
         const val UUID_REGEX = "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}"
