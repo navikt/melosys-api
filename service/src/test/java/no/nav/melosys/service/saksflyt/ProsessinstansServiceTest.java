@@ -503,7 +503,7 @@ class ProsessinstansServiceTest {
         String journalpostID = "journalpostID";
 
 
-        prosessinstansService.opprettProsessinstansNySakEØS(journalpostID, opprettSakDto, Behandlingstyper.SOEKNAD);
+        prosessinstansService.opprettProsessinstansNySakEØS(journalpostID, opprettSakDto);
 
 
         verify(prosessinstansRepo).save(piCaptor.capture());
@@ -529,7 +529,7 @@ class ProsessinstansServiceTest {
         String journalpostID = "journalpostID";
 
 
-        prosessinstansService.opprettProsessinstansNySakEØS(journalpostID, opprettSakDto, Behandlingstyper.SOEKNAD);
+        prosessinstansService.opprettProsessinstansNySakEØS(journalpostID, opprettSakDto);
 
 
         verify(prosessinstansRepo).save(piCaptor.capture());
@@ -556,7 +556,7 @@ class ProsessinstansServiceTest {
         String journalpostID = "journalpostID";
 
 
-        prosessinstansService.opprettProsessinstansNySakEØS(journalpostID, opprettSakDto, Behandlingstyper.SED);
+        prosessinstansService.opprettProsessinstansNySakEØS(journalpostID, opprettSakDto);
 
 
         verify(prosessinstansRepo).save(piCaptor.capture());
@@ -582,7 +582,7 @@ class ProsessinstansServiceTest {
         String journalpostID = "journalpostID";
 
 
-        prosessinstansService.opprettProsessinstansNySakEØS(journalpostID, opprettSakDto, Behandlingstyper.SED);
+        prosessinstansService.opprettProsessinstansNySakEØS(journalpostID, opprettSakDto);
 
 
         verify(prosessinstansRepo).save(piCaptor.capture());

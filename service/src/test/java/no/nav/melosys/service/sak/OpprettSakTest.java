@@ -79,7 +79,7 @@ class OpprettSakTest {
         opprettSak.opprettNySakOgBehandlingFraOppgave(opprettSakDto);
 
 
-        verify(prosessinstansService).opprettProsessinstansNySakEØS(oppgave.getJournalpostId(), opprettSakDto, Behandlingstyper.SED);
+        verify(prosessinstansService).opprettProsessinstansNySakEØS(oppgave.getJournalpostId(), opprettSakDto);
     }
 
     @Test
@@ -247,7 +247,7 @@ class OpprettSakTest {
         opprettSak.opprettNySakOgBehandlingFraOppgave(opprettSakDto);
 
 
-        verify(prosessinstansService).opprettProsessinstansNySakEØS(oppgave.getJournalpostId(), opprettSakDto, Behandlingstyper.SED);
+        verify(prosessinstansService).opprettProsessinstansNySakEØS(oppgave.getJournalpostId(), opprettSakDto);
     }
 
     @Test
@@ -269,7 +269,7 @@ class OpprettSakTest {
         opprettSak.opprettNySakOgBehandlingFraOppgave(opprettSakDto);
 
 
-        verify(prosessinstansService).opprettProsessinstansNySakEØS(oppgave.getJournalpostId(), opprettSakDto, Behandlingstyper.SOEKNAD);
+        verify(prosessinstansService).opprettProsessinstansNySakEØS(oppgave.getJournalpostId(), opprettSakDto);
     }
 
     private Journalpost lagJournalpost(Journalposttype journalposttype, String mottakskanal) {

@@ -57,8 +57,7 @@ public class OpprettSak {
         switch (opprettSakDto.getSakstype()) {
             case EU_EOS -> prosessinstansService.opprettProsessinstansNySakEØS(
                 oppgave.getJournalpostId(),
-                opprettSakDto,
-                Behandling.erBehandlingAvSøknadGammel(opprettSakDto.getBehandlingstema()) ? Behandlingstyper.SOEKNAD : Behandlingstyper.SED
+                opprettSakDto
             );
             case FTRL, TRYGDEAVTALE -> prosessinstansService.opprettProsessinstansNySakFTRLTrygdeavtale(
                 oppgave.getJournalpostId(),

@@ -266,8 +266,7 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
-    public void opprettProsessinstansNySakEØS(String journalpostID, OpprettSakDto opprettSakDto,
-                                              Behandlingstyper behandlingstype) {
+    public void opprettProsessinstansNySakEØS(String journalpostID, OpprettSakDto opprettSakDto) {
         Prosessinstans prosessinstans = new Prosessinstans();
 
         prosessinstans.setType(ProsessType.OPPRETT_NY_SAK_EOS_FRA_OPPGAVE);
@@ -279,7 +278,8 @@ public class ProsessinstansService {
         } else {
             prosessinstans.setData(SAKSTEMA,
                 SakstypeSakstemaKobling.sakstema(Sakstyper.EU_EOS, opprettSakDto.getBehandlingstema()));
-            prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, behandlingstype);
+            prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE,
+                Behandling.erBehandlingAvSøknadGammel(opprettSakDto.getBehandlingstema()) ? Behandlingstyper.SOEKNAD : Behandlingstyper.SED);
         }
 
         prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, journalpostID);
