@@ -1,7 +1,5 @@
 package no.nav.melosys.service.saksopplysninger;
 
-import java.time.LocalDate;
-
 import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.ErPeriode;
@@ -79,6 +77,7 @@ public class OppfriskSaksopplysningerService {
             .behandlingID(behandlingID)
             .saksopplysningTyper(utledSaksopplysningTyper(
                 behandling.getFagsak().getType(),
+                behandling.getFagsak().getTema(),
                 behandling.getTema(),
                 behandling.getType(),
                 behandleAlleSakerToggleEnabled))
@@ -94,7 +93,7 @@ public class OppfriskSaksopplysningerService {
         registeropplysningerService.hentOgLagreOpplysninger(registeropplysningerRequest);
         behandlingsresultatService.tømBehandlingsresultat(behandlingID);
 
-        if (behandleAlleSakerToggleEnabled ? behandling.erBehandlingAvSed() : behandling.erBehandlingAvSedGammel()) {
+        if (behandling.erBehandlingAvSed()) {
             ufmKontrollService.utførKontrollerOgRegistrerFeil(behandlingID);
         }
 

@@ -45,7 +45,7 @@ public class HentRegisteropplysninger implements StegBehandler {
     @Override
     public void utfør(Prosessinstans prosessinstans) {
         Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
-        
+
         if (!behandling.getFagsak().erSakstypeEøs() || behandling.erForVirksomhet()) {
             log.debug("Hopper over steg {} fordi sak {} har sakstype {} og behandlingstema {}", HENT_REGISTEROPPLYSNINGER.getKode(), behandling.getFagsak().getSaksnummer(), behandling.getFagsak().getType(), behandling.getTema());
             return;
@@ -56,14 +56,15 @@ public class HentRegisteropplysninger implements StegBehandler {
             () -> new FunksjonellException("Kan ikke hente registreopplysninger når bruker ikke har aktørID")
         );
 
-        var registeropplysningerRequestBuilder = RegisteropplysningerRequest.builder()
-            .behandlingID(prosessinstans.getBehandling().getId())
-            .fnr(persondataFasade.hentFolkeregisterident(aktørId))
-            .saksopplysningTyper(utledSaksopplysningTyper(
-                behandling.getFagsak().getType(),
-                behandling.getTema(),
-                behandling.getType(),
-                behandleAlleSakerToggleEnabled));
+            var registeropplysningerRequestBuilder = RegisteropplysningerRequest.builder()
+                .behandlingID(prosessinstans.getBehandling().getId())
+                .fnr(persondataFasade.hentFolkeregisterident(aktørId))
+                .saksopplysningTyper(utledSaksopplysningTyper(
+                    behandling.getFagsak().getType(),
+                    behandling.getFagsak().getTema(),
+                    behandling.getTema(),
+                    behandling.getType(),
+                    behandleAlleSakerToggleEnabled));
 
         (behandleAlleSakerToggleEnabled
             ? behandling.finnPeriode()

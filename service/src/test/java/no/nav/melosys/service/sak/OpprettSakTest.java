@@ -46,8 +46,6 @@ class OpprettSakTest {
     @Mock
     private ProsessinstansService prosessinstansService;
     @Mock
-    private FagsakService fagsakService;
-    @Mock
     private LovligeKombinasjonerService lovligeKombinasjonerService;
 
     private final FakeUnleash unleash = new FakeUnleash();
@@ -64,7 +62,7 @@ class OpprettSakTest {
 
     @BeforeEach
     public void setUp() {
-        opprettSak = new OpprettSak(journalfoeringService, oppgaveService, prosessinstansService, unleash, fagsakService, lovligeKombinasjonerService);
+        opprettSak = new OpprettSak(journalfoeringService, oppgaveService, prosessinstansService, unleash, lovligeKombinasjonerService);
         unleash.enableAll();
     }
 
@@ -77,9 +75,11 @@ class OpprettSakTest {
         when(oppgaveService.hentOppgaveMedOppgaveID(opprettSakDto.getOppgaveID())).thenReturn(oppgave);
         when(journalfoeringService.hentJournalpost("1234")).thenReturn(lagJournalpost(Journalposttype.INN, "skanning"));
 
+
         opprettSak.opprettNySakOgBehandlingFraOppgave(opprettSakDto);
 
-        verify(prosessinstansService).opprettProsessinstansNySakEØS(oppgave.getJournalpostId(), opprettSakDto, Behandlingstyper.SED);
+
+        verify(prosessinstansService).opprettProsessinstansNySakEØS(oppgave.getJournalpostId(), opprettSakDto);
     }
 
     @Test
@@ -90,9 +90,10 @@ class OpprettSakTest {
         opprettSakDto.setSakstema(Sakstemaer.MEDLEMSKAP_LOVVALG);
         opprettSakDto.setBehandlingstema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         opprettSakDto.setBehandlingstype(Behandlingstyper.HENVENDELSE);
-        Oppgave oppgave = new Oppgave.Builder().setOppgavetype(Oppgavetyper.BEH_SAK_MK).setJournalpostId("1234").build();
+
 
         opprettSak.opprettNySakOgBehandling(opprettSakDto);
+
 
         verify(prosessinstansService).opprettNySakOgBehandling(opprettSakDto);
     }
@@ -105,9 +106,10 @@ class OpprettSakTest {
         opprettSakDto.setSakstema(Sakstemaer.MEDLEMSKAP_LOVVALG);
         opprettSakDto.setBehandlingstema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         opprettSakDto.setBehandlingstype(Behandlingstyper.HENVENDELSE);
-        Oppgave oppgave = new Oppgave.Builder().setOppgavetype(Oppgavetyper.BEH_SAK_MK).setJournalpostId("1234").build();
+
 
         opprettSak.opprettNySakOgBehandling(opprettSakDto);
+
 
         verify(prosessinstansService).opprettNySakOgBehandling(opprettSakDto);
     }
@@ -120,9 +122,10 @@ class OpprettSakTest {
         opprettSakDto.setSakstema(Sakstemaer.MEDLEMSKAP_LOVVALG);
         opprettSakDto.setBehandlingstema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         opprettSakDto.setBehandlingstype(Behandlingstyper.HENVENDELSE);
-        Oppgave oppgave = new Oppgave.Builder().setOppgavetype(Oppgavetyper.BEH_SAK_MK).setJournalpostId("1234").build();
+
 
         opprettSak.opprettNySakOgBehandling(opprettSakDto);
+
 
         verify(prosessinstansService).opprettNySakOgBehandling(opprettSakDto);
     }
@@ -137,7 +140,9 @@ class OpprettSakTest {
         when(oppgaveService.hentOppgaveMedOppgaveID(opprettSakDto.getOppgaveID())).thenReturn(oppgave);
         when(journalfoeringService.hentJournalpost("1234")).thenReturn(lagJournalpost(Journalposttype.INN, "skanning"));
 
+
         opprettSak.opprettNySakOgBehandlingFraOppgave(opprettSakDto);
+
 
         verify(prosessinstansService).opprettProsessinstansNySakFTRLTrygdeavtale(oppgave.getJournalpostId(), opprettSakDto);
     }
@@ -152,7 +157,9 @@ class OpprettSakTest {
         when(oppgaveService.hentOppgaveMedOppgaveID(opprettSakDto.getOppgaveID())).thenReturn(oppgave);
         when(journalfoeringService.hentJournalpost("1234")).thenReturn(lagJournalpost(Journalposttype.INN, "skanning"));
 
+
         opprettSak.opprettNySakOgBehandlingFraOppgave(opprettSakDto);
+
 
         verify(prosessinstansService).opprettProsessinstansNySakFTRLTrygdeavtale(oppgave.getJournalpostId(), opprettSakDto);
     }
@@ -236,9 +243,11 @@ class OpprettSakTest {
         when(journalfoeringService.hentJournalpost(JP_ID)).thenReturn(journalpost);
         when(journalfoeringService.finnSakTilknyttetSedJournalpost(journalpost)).thenReturn(Optional.empty());
 
+
         opprettSak.opprettNySakOgBehandlingFraOppgave(opprettSakDto);
 
-        verify(prosessinstansService).opprettProsessinstansNySakEØS(oppgave.getJournalpostId(), opprettSakDto, Behandlingstyper.SED);
+
+        verify(prosessinstansService).opprettProsessinstansNySakEØS(oppgave.getJournalpostId(), opprettSakDto);
     }
 
     @Test
@@ -256,9 +265,11 @@ class OpprettSakTest {
         when(journalfoeringService.hentJournalpost(JP_ID)).thenReturn(journalpost);
         when(journalfoeringService.finnSakTilknyttetSedJournalpost(journalpost)).thenReturn(Optional.empty());
 
+
         opprettSak.opprettNySakOgBehandlingFraOppgave(opprettSakDto);
 
-        verify(prosessinstansService).opprettProsessinstansNySakEØS(oppgave.getJournalpostId(), opprettSakDto, Behandlingstyper.SOEKNAD);
+
+        verify(prosessinstansService).opprettProsessinstansNySakEØS(oppgave.getJournalpostId(), opprettSakDto);
     }
 
     private Journalpost lagJournalpost(Journalposttype journalposttype, String mottakskanal) {
@@ -304,7 +315,9 @@ class OpprettSakTest {
     void validerOpprettSakDto_nullSøknad_feiler() {
         OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
         opprettSakDto.setSakstype(Sakstyper.EU_EOS);
+        opprettSakDto.setSakstema(Sakstemaer.MEDLEMSKAP_LOVVALG);
         opprettSakDto.setBehandlingstema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
+        opprettSakDto.setBehandlingstype(Behandlingstyper.FØRSTEGANG);
         opprettSakDto.setSoknadDto(null);
 
         assertThatExceptionOfType(FunksjonellException.class)
@@ -323,7 +336,9 @@ class OpprettSakTest {
         when(oppgaveService.hentOppgaveMedOppgaveID(opprettSakDto.getOppgaveID())).thenReturn(oppgave);
         when(journalfoeringService.hentJournalpost("1234")).thenReturn(lagJournalpost(Journalposttype.INN, "skanning"));
 
+
         opprettSak.opprettNySakOgBehandlingFraOppgave(opprettSakDto);
+
 
         verify(prosessinstansService).opprettProsessinstansNySakFTRLTrygdeavtale(oppgave.getJournalpostId(), opprettSakDto);
     }
@@ -338,7 +353,9 @@ class OpprettSakTest {
         when(oppgaveService.hentOppgaveMedOppgaveID(opprettSakDto.getOppgaveID())).thenReturn(oppgave);
         when(journalfoeringService.hentJournalpost("1234")).thenReturn(lagJournalpost(Journalposttype.INN, "skanning"));
 
+
         opprettSak.opprettNySakOgBehandlingFraOppgave(opprettSakDto);
+
 
         verify(prosessinstansService).opprettProsessinstansNySakFTRLTrygdeavtale(oppgave.getJournalpostId(), opprettSakDto);
     }
@@ -347,6 +364,7 @@ class OpprettSakTest {
     void validerOpprettSakDto_søknadUtenFom_feiler() {
         OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
         opprettSakDto.setSakstype(Sakstyper.EU_EOS);
+        opprettSakDto.setSakstema(Sakstemaer.MEDLEMSKAP_LOVVALG);
         opprettSakDto.setBehandlingstema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         opprettSakDto.setBehandlingstype(Behandlingstyper.FØRSTEGANG);
         opprettSakDto.getSoknadDto().getPeriode().setFom(null);
@@ -374,7 +392,9 @@ class OpprettSakTest {
     void validerOpprettSakDto_søknadMedLandOgAlleLand_feiler() {
         OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
         opprettSakDto.setSakstype(Sakstyper.EU_EOS);
+        opprettSakDto.setSakstema(Sakstemaer.MEDLEMSKAP_LOVVALG);
         opprettSakDto.setBehandlingstema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
+        opprettSakDto.setBehandlingstype(Behandlingstyper.FØRSTEGANG);
         opprettSakDto.getSoknadDto().getLand().setErUkjenteEllerAlleEosLand(true);
         opprettSakDto.getSoknadDto().getLand().setLandkoder(Collections.singletonList("DK"));
 

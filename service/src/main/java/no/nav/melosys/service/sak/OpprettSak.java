@@ -38,18 +38,14 @@ public class OpprettSak {
 
     private final LovligeKombinasjonerService lovligeKombinasjonerService;
 
-    private final FagsakService fagsakService;
-
     public OpprettSak(JournalfoeringService journalfoeringService, OppgaveService oppgaveService,
                       @Lazy ProsessinstansService prosessinstansService,
                       Unleash unleash,
-                      FagsakService fagsakService,
                       LovligeKombinasjonerService lovligeKombinasjonerService) {
         this.journalfoeringService = journalfoeringService;
         this.oppgaveService = oppgaveService;
         this.prosessinstansService = prosessinstansService;
         this.unleash = unleash;
-        this.fagsakService = fagsakService;
         this.lovligeKombinasjonerService = lovligeKombinasjonerService;
     }
 
@@ -61,8 +57,7 @@ public class OpprettSak {
         switch (opprettSakDto.getSakstype()) {
             case EU_EOS -> prosessinstansService.opprettProsessinstansNySakEØS(
                 oppgave.getJournalpostId(),
-                opprettSakDto,
-                Behandling.erBehandlingAvSøknadGammel(opprettSakDto.getBehandlingstema()) ? Behandlingstyper.SOEKNAD : Behandlingstyper.SED
+                opprettSakDto
             );
             case FTRL, TRYGDEAVTALE -> prosessinstansService.opprettProsessinstansNySakFTRLTrygdeavtale(
                 oppgave.getJournalpostId(),
@@ -88,7 +83,7 @@ public class OpprettSak {
             lovligeKombinasjonerService.validerBehandlingstema(hovedpart, sakstype, sakstema, behandlingstema, null);
             lovligeKombinasjonerService.validerBehandlingstype(hovedpart, sakstype, sakstema, behandlingstema, behandlingstype, null);
 
-            if (erSakstypeEøs(sakstype) && !SaksbehandlingRegler.harTomFlyt(sakstype, behandlingstype, behandlingstema)) {
+            if (erSakstypeEøs(sakstype) && !SaksbehandlingRegler.harTomFlyt(sakstype, sakstema, behandlingstype, behandlingstema)) {
                 validerSøknadData(opprettSakDto.getSoknadDto());
             }
         } else {

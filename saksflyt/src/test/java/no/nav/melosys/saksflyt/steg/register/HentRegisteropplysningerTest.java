@@ -64,6 +64,7 @@ class HentRegisteropplysningerTest {
         bruker.setAktørId(aktørID);
 
         Fagsak fagsak = new Fagsak();
+        fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
         fagsak.getAktører().add(bruker);
         behandling.setFagsak(fagsak);
         behandling.setType(Behandlingstyper.FØRSTEGANG);
