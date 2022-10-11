@@ -55,23 +55,26 @@ public class AvklarArbeidsgiver implements StegBehandler {
     public void utfør(Prosessinstans prosessinstans) {
         long behandlingID = prosessinstans.getBehandling().getId();
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
-        Behandlingsresultat resultat = behandlingsresultatService.hentBehandlingsresultat(prosessinstans.getBehandling().getId());
-        if (arbeidsgiverAvklares(behandling, resultat)) {
-            Fagsak fagsak = behandling.getFagsak();
-            String saksnummer = fagsak.getSaksnummer();
+        Behandlingsresultat resultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
+        if (!arbeidsgiverAvklares(behandling, resultat)) {
+            log.debug("Arbeidsgiver avklares ikke for behandling {}", behandling.getId());
+            return;
+        }
 
-            List<AvklartVirksomhet> avklarteNorskeArbeidsgivere = avklarteVirksomheterService.hentNorskeArbeidsgivere(behandling, INGEN_ADRESSE);
-            List<String> norskeOrgnumre = avklarteNorskeArbeidsgivere.stream()
-                .map(avklartVirksomhet -> avklartVirksomhet.orgnr)
-                .toList();
+        Fagsak fagsak = behandling.getFagsak();
+        String saksnummer = fagsak.getSaksnummer();
 
-            aktoerService.erstattEksisterendeArbeidsgiveraktører(fagsak, norskeOrgnumre);
+        List<AvklartVirksomhet> avklarteNorskeArbeidsgivere = avklarteVirksomheterService.hentNorskeArbeidsgivere(behandling, INGEN_ADRESSE);
+        List<String> norskeOrgnumre = avklarteNorskeArbeidsgivere.stream()
+            .map(avklartVirksomhet -> avklartVirksomhet.orgnr)
+            .toList();
 
-            if (avklarteNorskeArbeidsgivere.isEmpty()) {
-                log.info("Eksisterende arbeidsgiveraktør fjernet, og ingen nye lagt til for sak {}.", saksnummer);
-            } else {
-                log.info("Avklart arbeidsgivere lagt til for sak {}.", saksnummer);
-            }
+        aktoerService.erstattEksisterendeArbeidsgiveraktører(fagsak, norskeOrgnumre);
+
+        if (avklarteNorskeArbeidsgivere.isEmpty()) {
+            log.info("Eksisterende arbeidsgiveraktør fjernet, og ingen nye lagt til for sak {}.", saksnummer);
+        } else {
+            log.info("Avklart arbeidsgivere lagt til for sak {}.", saksnummer);
         }
     }
 
