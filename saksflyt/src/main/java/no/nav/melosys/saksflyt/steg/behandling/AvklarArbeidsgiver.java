@@ -10,7 +10,6 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.adresse.Adresse;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
@@ -79,11 +78,13 @@ public class AvklarArbeidsgiver implements StegBehandler {
     private boolean arbeidsgiverAvklares(Behandling behandling, Behandlingsresultat resultat) {
         if (unleash.isEnabled("melosys.behandle_alle_saker")) {
             return !SaksbehandlingRegler.harTomFlyt(behandling) && (
-                resultat.getType() != Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL
-                    && !(behandling.getFagsak().erSakstypeEøs() && resultat.hentLovvalgsperiode().erArtikkel13())
+                !resultat.erAvslagManglendeOpplysninger() && !erEøsMedArtikkel13(behandling, resultat)
             );
         }
-        return resultat.getType() != Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL
-            && !(behandling.getFagsak().erSakstypeEøs() && resultat.hentLovvalgsperiode().erArtikkel13());
+        return !resultat.erAvslagManglendeOpplysninger() && !erEøsMedArtikkel13(behandling, resultat);
+    }
+
+    private static boolean erEøsMedArtikkel13(Behandling behandling, Behandlingsresultat resultat) {
+        return behandling.getFagsak().erSakstypeEøs() && resultat.hentLovvalgsperiode().erArtikkel13();
     }
 }
