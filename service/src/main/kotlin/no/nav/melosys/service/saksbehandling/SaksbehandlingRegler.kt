@@ -32,6 +32,7 @@ class SaksbehandlingRegler(private val behandlingsresultatRepository: Behandling
     internal fun finnBehandlingSomKanReplikeres(behandlinger: List<Behandling>) =
         behandlinger
             .filter { it.erInaktiv() }
+            .filter { !harTomFlyt(it) }
             .firstOrNull {
                 val behandlingsresultat = behandlingsresultatRepository.findById(it.id)
                 behandlingstyperSomKanReplikeres.contains(it.type)
