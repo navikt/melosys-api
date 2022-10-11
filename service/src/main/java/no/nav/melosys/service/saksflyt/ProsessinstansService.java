@@ -277,6 +277,7 @@ public class ProsessinstansService {
         prosessinstans.setData(ProsessDataKey.SAKSTYPE, opprettSakDto.getSakstype());
 
         if (unleash.isEnabled("melosys.behandle_alle_saker")) {
+            prosessinstans.setData(VIRKSOMHET_ORGNR, opprettSakDto.getVirksomhetOrgnr());
             prosessinstans.setData(SAKSTEMA, opprettSakDto.getSakstema());
             prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, opprettSakDto.getBehandlingstype());
         } else {
@@ -304,6 +305,9 @@ public class ProsessinstansService {
     public void opprettProsessinstansNySakFTRLTrygdeavtale(String journalpostID, OpprettSakDto opprettSakDto) {
         Prosessinstans prosessinstans = new Prosessinstans();
 
+        if (unleash.isEnabled("behandle_alle_saker")) {
+            prosessinstans.setData(VIRKSOMHET_ORGNR, opprettSakDto.getVirksomhetOrgnr());
+        }
         prosessinstans.setType(ProsessType.OPPRETT_NY_SAK_FTRL_TRYGDEAVTALE_FRA_OPPGAVE);
         prosessinstans.setData(ProsessDataKey.SAKSTYPE, opprettSakDto.getSakstype());
         prosessinstans.setData(SAKSTEMA, SakstypeSakstemaKobling.sakstema(opprettSakDto.getSakstype(),
