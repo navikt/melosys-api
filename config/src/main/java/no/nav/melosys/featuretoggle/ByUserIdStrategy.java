@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.Optional;
 
 import no.finn.unleash.strategy.Strategy;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo;
 import org.apache.commons.lang3.StringUtils;
@@ -25,7 +24,7 @@ class ByUserIdStrategy implements Strategy {
     public boolean isEnabled(Map<String, String> parameters) {
         String userID = getUserID();
         if (StringUtils.isEmpty(userID)) {
-            throw new TekniskException("Unleash forventer en bruker");
+            log.warn("Har ikke bruker til unleash");
         }
 
         return StringUtils.isNotEmpty(userID) && Optional.ofNullable(parameters.get("user"))
