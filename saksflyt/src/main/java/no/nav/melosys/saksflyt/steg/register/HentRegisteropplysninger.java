@@ -45,11 +45,8 @@ public class HentRegisteropplysninger implements StegBehandler {
     @Override
     public void utfør(Prosessinstans prosessinstans) {
         Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
-        if (behandling.erBehandlingstemaVirksomhet()) {
-            log.debug("Hopper over steg {} fordi behandlingstema er {}", HENT_REGISTEROPPLYSNINGER.getKode(), behandling.getTema());
-            return;
-        }
-        if (behandling.getFagsak().erSakstypeEøs()) {
+        
+        if (behandling.getFagsak().erSakstypeEøs() && !behandling.erVirksomhet()) {
             var behandleAlleSakerToggleEnabled = unleash.isEnabled("melosys.behandle_alle_saker");
             var aktørId = behandling.getFagsak().finnBrukersAktørID().orElseThrow(
                 () -> new FunksjonellException("Kan ikke hente registreopplysninger når bruker ikke har aktørID")
@@ -75,7 +72,7 @@ public class HentRegisteropplysninger implements StegBehandler {
             registeropplysningerService.hentOgLagreOpplysninger(registeropplysningerRequestBuilder.build());
             log.info("Hentet registeropplysninger for behandling {}", behandling.getId());
         } else {
-            log.debug("Hopper over steg {} fordi sak {} har sakstype {}", HENT_REGISTEROPPLYSNINGER.getKode(), behandling.getFagsak().getSaksnummer(), behandling.getFagsak().getType());
+            log.debug("Hopper over steg {} fordi sak {} har sakstype {} og behandlingstema {}", HENT_REGISTEROPPLYSNINGER.getKode(), behandling.getFagsak().getSaksnummer(), behandling.getFagsak().getType(), behandling.getTema());
         }
     }
 }

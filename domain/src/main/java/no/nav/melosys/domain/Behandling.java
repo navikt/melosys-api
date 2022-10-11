@@ -409,7 +409,7 @@ public class Behandling extends RegistreringsInfo {
         return type == Behandlingstyper.NY_VURDERING;
     }
 
-    public boolean erBehandlingstemaVirksomhet() {
+    public boolean erVirksomhet() {
         return tema == VIRKSOMHET;
     }
 
