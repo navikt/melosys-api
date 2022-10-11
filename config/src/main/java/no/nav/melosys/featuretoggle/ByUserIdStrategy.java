@@ -9,8 +9,12 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 class ByUserIdStrategy implements Strategy {
+
+    private static final Logger log = LoggerFactory.getLogger(ByUserIdStrategy.class);
 
     @Override
     public String getName() {
@@ -20,7 +24,7 @@ class ByUserIdStrategy implements Strategy {
     @Override
     public boolean isEnabled(Map<String, String> parameters) {
         String userID = getUserID();
-        if (userID == null) {
+        if (StringUtils.isNotEmpty(userID)) {
             throw new TekniskException("Unleash forventer en bruker");
         }
 
@@ -36,6 +40,7 @@ class ByUserIdStrategy implements Strategy {
             userID = instance.getUserID();
         }
         if (userID == null) {
+            log.warn("instance.getUserID() returnerte null");
             userID = ThreadLocalAccessInfo.getSaksbehandler();
         }
         return userID;
