@@ -11,6 +11,7 @@ import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Soeknadsland;
 import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -64,6 +65,7 @@ class VurderInngangsvilkaarTest {
         Fagsak fagsak = new Fagsak();
         fagsak.setType(Sakstyper.EU_EOS);
         fagsak.setSaksnummer("MEL-432");
+        fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
         behandling.setFagsak(fagsak);
 
         Prosessinstans prosessinstans = new Prosessinstans();
@@ -92,6 +94,7 @@ class VurderInngangsvilkaarTest {
         behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(behandlingsgrunnlagData);
         var fagsak = new Fagsak();
         fagsak.setType(Sakstyper.EU_EOS);
+        fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
         behandling.setFagsak(fagsak);
 
         Prosessinstans prosessinstans = new Prosessinstans();
@@ -135,6 +138,7 @@ class VurderInngangsvilkaarTest {
         prosessinstans.setBehandling(behandling);
         behandling.setFagsak(new Fagsak());
         behandling.getFagsak().setType(Sakstyper.EU_EOS);
+        behandling.getFagsak().setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
         behandling.setType(Behandlingstyper.HENVENDELSE);
 
         vurderInngangsvilkaar.utfør(prosessinstans);
@@ -147,6 +151,7 @@ class VurderInngangsvilkaarTest {
         prosessinstans.setBehandling(behandling);
         behandling.setFagsak(new Fagsak());
         behandling.getFagsak().setType(Sakstyper.EU_EOS);
+        behandling.getFagsak().setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
         behandling.setTema(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE);
         behandling.setType(Behandlingstyper.FØRSTEGANG);
 

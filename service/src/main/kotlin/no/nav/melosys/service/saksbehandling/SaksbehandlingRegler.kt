@@ -2,6 +2,7 @@ package no.nav.melosys.service.saksbehandling
 
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
+import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
@@ -20,8 +21,9 @@ class SaksbehandlingRegler(private val behandlingsresultatRepository: Behandling
     ): Boolean {
         val sistRegistrertBehandling = fagsak.hentSistRegistrertBehandling()
         val sakstype = sistRegistrertBehandling.fagsak.type
+        val sakstema = sistRegistrertBehandling.fagsak.tema
 
-        if (harTomFlyt(sakstype, behandlingstype, behandlingstema)) return false
+        if (harTomFlyt(sakstype, sakstema, behandlingstype, behandlingstema)) return false
 
         return finnBehandlingSomKanReplikeres(fagsak) != null
     }
@@ -55,14 +57,16 @@ class SaksbehandlingRegler(private val behandlingsresultatRepository: Behandling
 
         @JvmStatic
         fun harTomFlyt(behandling: Behandling): Boolean =
-            harTomFlyt(behandling.fagsak.type, behandling.type, behandling.tema)
+            harTomFlyt(behandling.fagsak.type, behandling.fagsak.tema, behandling.type, behandling.tema)
 
         @JvmStatic
         fun harTomFlyt(
             sakstype: Sakstyper,
+            sakstema: Sakstemaer,
             behandlingstype: Behandlingstyper,
             behandlingstema: Behandlingstema
         ): Boolean {
+            if (sakstema == Sakstemaer.TRYGDEAVGIFT) return true
             if (behandlingstype == Behandlingstyper.HENVENDELSE || behandlingstype == Behandlingstyper.KLAGE) return true
 
             return when (behandlingstema) {
@@ -74,7 +78,8 @@ class SaksbehandlingRegler(private val behandlingsresultatRepository: Behandling
                 FORESPØRSEL_TRYGDEMYNDIGHET,
                 TRYGDETID,
                 ØVRIGE_SED_MED,
-                ØVRIGE_SED_UFM -> true
+                ØVRIGE_SED_UFM,
+                -> true
 
                 ANMODNING_OM_UNNTAK_HOVEDREGEL -> sakstype == Sakstyper.TRYGDEAVTALE
                 YRKESAKTIV -> sakstype == Sakstyper.FTRL
