@@ -1,5 +1,6 @@
 package no.nav.melosys.integrasjon.eessi;
 
+import no.nav.melosys.integrasjon.felles.EessiGenericContextExchangeFilter;
 import no.nav.melosys.integrasjon.felles.GenericContextExchangeFilter;
 import no.nav.melosys.integrasjon.felles.WebClientConfig;
 import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter;
@@ -20,13 +21,13 @@ public class EessiConsumerProducer implements WebClientConfig {
     }
 
     @Bean
-    public EessiConsumer melosysEessiConsumer(GenericContextExchangeFilter genericContextExchangeFilter,
+    public EessiConsumer melosysEessiConsumer(EessiGenericContextExchangeFilter eessiGenericContextExchangeFilter,
                                               CorrelationIdOutgoingFilter correlationIdOutgoingFilter,
                                               WebClient.Builder webClientBuilder
     ) {
         return new EessiConsumerImpl(webClientBuilder
             .baseUrl(url)
-            .filter(genericContextExchangeFilter)
+            .filter(eessiGenericContextExchangeFilter)
             .filter(correlationIdOutgoingFilter)
             .filter(errorFilter("Kall mot eessi feilet"))
             .defaultHeaders(this::defaultHeaders)
