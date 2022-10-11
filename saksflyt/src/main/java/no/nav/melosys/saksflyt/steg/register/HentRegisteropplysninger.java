@@ -45,7 +45,10 @@ public class HentRegisteropplysninger implements StegBehandler {
     @Override
     public void utfør(Prosessinstans prosessinstans) {
         Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
-
+        if (behandling.erBehandlingstemaVirksomhet()) {
+            log.debug("Hopper over steg {} fordi behandlingstema er {}", HENT_REGISTEROPPLYSNINGER.getKode(), behandling.getTema());
+            return;
+        }
         if (behandling.getFagsak().erSakstypeEøs()) {
             var behandleAlleSakerToggleEnabled = unleash.isEnabled("melosys.behandle_alle_saker");
             var aktørId = behandling.getFagsak().finnBrukersAktørID().orElseThrow(
