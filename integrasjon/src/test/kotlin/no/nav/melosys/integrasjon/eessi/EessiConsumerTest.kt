@@ -25,7 +25,6 @@ import no.nav.melosys.integrasjon.StsMockServer
 import no.nav.melosys.integrasjon.eessi.dto.SaksrelasjonDto
 import no.nav.melosys.integrasjon.felles.GenericContextExchangeFilter
 import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter
-import no.nav.melosys.integrasjon.reststs.StsRestTemplateProducer
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import org.junit.jupiter.api.*
 import org.springframework.beans.factory.annotation.Autowired
@@ -41,8 +40,6 @@ import java.util.*
 
 @WebMvcTest(
     value = [
-        StsRestTemplateProducer::class,
-
         GenericContextExchangeFilter::class,
         EessiConsumerProducer::class,
         CorrelationIdOutgoingFilter::class

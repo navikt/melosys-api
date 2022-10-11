@@ -23,6 +23,12 @@ public class GenericContextExchangeFilter implements ExchangeFilterFunction {
 
     private final ClientProperties clientProperties;
 
+    public GenericContextExchangeFilter(RestStsClient restStsClient) {
+        this.restStsClient = restStsClient;
+        this.clientProperties = null;
+        this.oAuth2AccessTokenService = null;
+    }
+
     public GenericContextExchangeFilter(RestStsClient restStsClient,
                                         ClientConfigurationProperties clientConfigurationProperties,
                                         OAuth2AccessTokenService oAuth2AccessTokenService,
