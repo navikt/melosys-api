@@ -1,12 +1,14 @@
 package no.nav.melosys.saksflyt.steg.behandling;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 
 import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.adresse.Adresse;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
@@ -56,7 +58,7 @@ public class AvklarArbeidsgiver implements StegBehandler {
         long behandlingID = prosessinstans.getBehandling().getId();
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
         Behandlingsresultat resultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
-        if (!arbeidsgiverAvklares(behandling, resultat)) {
+        if (arbeidsgiverIkkeAvklares(behandling, resultat)) {
             log.debug("Arbeidsgiver avklares ikke for behandling {}", behandling.getId());
             return;
         }
@@ -78,16 +80,19 @@ public class AvklarArbeidsgiver implements StegBehandler {
         }
     }
 
-    private boolean arbeidsgiverAvklares(Behandling behandling, Behandlingsresultat resultat) {
+    private boolean arbeidsgiverIkkeAvklares(Behandling behandling, Behandlingsresultat resultat) {
         if (unleash.isEnabled("melosys.behandle_alle_saker")) {
-            return !SaksbehandlingRegler.harTomFlyt(behandling) && (
-                !resultat.erAvslagManglendeOpplysninger() && !erEøsMedArtikkel13(behandling, resultat)
-            );
+            return SaksbehandlingRegler.harTomFlyt(behandling)
+                || resultat.erAvslagManglendeOpplysninger() || erEøsMedArtikkel13(behandling, resultat);
         }
-        return !resultat.erAvslagManglendeOpplysninger() && !erEøsMedArtikkel13(behandling, resultat);
+        return resultat.erAvslagManglendeOpplysninger() || erEøsMedArtikkel13(behandling, resultat);
     }
 
     private static boolean erEøsMedArtikkel13(Behandling behandling, Behandlingsresultat resultat) {
-        return behandling.getFagsak().erSakstypeEøs() && resultat.hentLovvalgsperiode().erArtikkel13();
+        if (!behandling.getFagsak().erSakstypeEøs()) {
+            return false;
+        }
+        Optional<Lovvalgsperiode> lovvalgsperiodeOptional = resultat.finnLovvalgsperiode();
+        return lovvalgsperiodeOptional.isPresent() && lovvalgsperiodeOptional.get().erArtikkel13();
     }
 }
