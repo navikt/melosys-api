@@ -13,6 +13,8 @@ public class ThreadLocalAccessInfo {
     private String prosessSteg;
     private boolean isAdminRequest;
 
+    private String saksbehandler;
+
     private boolean isFromWebRequest() {
         return requestUri != null;
     }
@@ -23,6 +25,15 @@ public class ThreadLocalAccessInfo {
 
     private boolean isFromAdminRequest() {
         return isAdminRequest;
+    }
+
+    private String getUserID() {
+        return saksbehandler;
+    }
+
+    public static String getSaksbehandler() {
+        ThreadLocalAccessInfo threadLocalAccessInfo = ThreadLocalAccessInfo.threadLocalStorage.get();
+        return threadLocalAccessInfo.getUserID();
     }
 
     private static final ThreadLocal<ThreadLocalAccessInfo> threadLocalStorage =
@@ -60,14 +71,20 @@ public class ThreadLocalAccessInfo {
     }
 
     public static void beforeExecuteProcess(UUID processId, String prosessSteg) {
+        beforeExecuteProcess(processId, prosessSteg, null);
+    }
+
+    public static void beforeExecuteProcess(UUID processId, String prosessSteg, String saksbehandler) {
         ThreadLocalAccessInfo threadLocalAccessInfo = ThreadLocalAccessInfo.threadLocalStorage.get();
         if (threadLocalAccessInfo.processId != null || threadLocalAccessInfo.prosessSteg != null) {
             throw new IllegalStateException("processId and prosessSteg should always be null before execute ");
         }
 
+        threadLocalAccessInfo.saksbehandler = saksbehandler;
         threadLocalAccessInfo.processId = processId;
         threadLocalAccessInfo.prosessSteg = prosessSteg;
     }
+
 
     public static void afterExecuteProcess(UUID processId) {
         ThreadLocalAccessInfo threadLocalAccessInfo = ThreadLocalAccessInfo.threadLocalStorage.get();
