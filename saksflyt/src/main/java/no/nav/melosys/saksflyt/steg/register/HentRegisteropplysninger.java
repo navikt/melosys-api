@@ -45,34 +45,35 @@ public class HentRegisteropplysninger implements StegBehandler {
     @Override
     public void utfør(Prosessinstans prosessinstans) {
         Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
-
-        if (behandling.getFagsak().erSakstypeEøs() && !behandling.erBehandlingstemaVirksomhet()) {
-            var behandleAlleSakerToggleEnabled = unleash.isEnabled("melosys.behandle_alle_saker");
-            var aktørId = behandling.getFagsak().finnBrukersAktørID().orElseThrow(
-                () -> new FunksjonellException("Kan ikke hente registreopplysninger når bruker ikke har aktørID")
-            );
-
-            var registeropplysningerRequestBuilder = RegisteropplysningerRequest.builder()
-                .behandlingID(prosessinstans.getBehandling().getId())
-                .fnr(persondataFasade.hentFolkeregisterident(aktørId))
-                .saksopplysningTyper(utledSaksopplysningTyper(
-                    behandling.getFagsak().getType(),
-                    behandling.getTema(),
-                    behandling.getType(),
-                    behandleAlleSakerToggleEnabled));
-
-            (behandleAlleSakerToggleEnabled
-                ? behandling.finnPeriode()
-                : behandling.finnPeriodeGammel()
-            ).ifPresent(periode -> {
-                registeropplysningerRequestBuilder.fom(periode.getFom());
-                registeropplysningerRequestBuilder.tom(periode.getTom());
-            });
-
-            registeropplysningerService.hentOgLagreOpplysninger(registeropplysningerRequestBuilder.build());
-            log.info("Hentet registeropplysninger for behandling {}", behandling.getId());
-        } else {
+        
+        if (!behandling.getFagsak().erSakstypeEøs() || behandling.erForVirksomhet()) {
             log.debug("Hopper over steg {} fordi sak {} har sakstype {} og behandlingstema {}", HENT_REGISTEROPPLYSNINGER.getKode(), behandling.getFagsak().getSaksnummer(), behandling.getFagsak().getType(), behandling.getTema());
+            return;
         }
+
+        var behandleAlleSakerToggleEnabled = unleash.isEnabled("melosys.behandle_alle_saker");
+        var aktørId = behandling.getFagsak().finnBrukersAktørID().orElseThrow(
+            () -> new FunksjonellException("Kan ikke hente registreopplysninger når bruker ikke har aktørID")
+        );
+
+        var registeropplysningerRequestBuilder = RegisteropplysningerRequest.builder()
+            .behandlingID(prosessinstans.getBehandling().getId())
+            .fnr(persondataFasade.hentFolkeregisterident(aktørId))
+            .saksopplysningTyper(utledSaksopplysningTyper(
+                behandling.getFagsak().getType(),
+                behandling.getTema(),
+                behandling.getType(),
+                behandleAlleSakerToggleEnabled));
+
+        (behandleAlleSakerToggleEnabled
+            ? behandling.finnPeriode()
+            : behandling.finnPeriodeGammel()
+        ).ifPresent(periode -> {
+            registeropplysningerRequestBuilder.fom(periode.getFom());
+            registeropplysningerRequestBuilder.tom(periode.getTom());
+        });
+
+        registeropplysningerService.hentOgLagreOpplysninger(registeropplysningerRequestBuilder.build());
+        log.info("Hentet registeropplysninger for behandling {}", behandling.getId());
     }
 }
