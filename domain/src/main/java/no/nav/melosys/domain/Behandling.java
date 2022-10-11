@@ -409,10 +409,6 @@ public class Behandling extends RegistreringsInfo {
         return type == Behandlingstyper.NY_VURDERING;
     }
 
-    public boolean erForVirksomhet() {
-        return tema == VIRKSOMHET;
-    }
-
     public boolean erEndretPeriode() {
         return type == Behandlingstyper.ENDRET_PERIODE;
     }
