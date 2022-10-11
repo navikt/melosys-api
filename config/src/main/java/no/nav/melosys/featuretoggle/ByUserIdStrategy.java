@@ -24,7 +24,7 @@ class ByUserIdStrategy implements Strategy {
     @Override
     public boolean isEnabled(Map<String, String> parameters) {
         String userID = getUserID();
-        if (StringUtils.isNotEmpty(userID)) {
+        if (StringUtils.isEmpty(userID)) {
             throw new TekniskException("Unleash forventer en bruker");
         }
 
