@@ -19,14 +19,7 @@ class ByUserIdStrategy implements Strategy {
 
     @Override
     public boolean isEnabled(Map<String, String> parameters) {
-        String userID;
-        SubjectHandler instance = SubjectHandler.getInstance();
-        if (instance != null && instance.getUserID() != null) {
-            userID = instance.getUserID();
-        } else {
-            userID = ThreadLocalAccessInfo.getSaksbehandler();
-        }
-
+        String userID = getUserID();
         if (userID == null) {
             throw new TekniskException("Unleash forventer en bruker");
         }
@@ -34,5 +27,17 @@ class ByUserIdStrategy implements Strategy {
         return StringUtils.isNotEmpty(userID) && Optional.ofNullable(parameters.get("user"))
             .map(users -> Arrays.asList(users.split(",")))
             .stream().anyMatch(users -> users.contains(userID));
+    }
+
+    private static String getUserID() {
+        String userID = null;
+        SubjectHandler instance = SubjectHandler.getInstance();
+        if (instance != null) {
+            userID = instance.getUserID();
+        }
+        if (userID == null) {
+            userID = ThreadLocalAccessInfo.getSaksbehandler();
+        }
+        return userID;
     }
 }
