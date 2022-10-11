@@ -1,5 +1,6 @@
 package no.nav.melosys.saksflyt.steg.behandling;
 
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
@@ -23,9 +24,11 @@ public class OpprettFagsakOgBehandlingFraSed implements StegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(OpprettFagsakOgBehandlingFraSed.class);
 
+    private final Unleash unleash;
     private final FagsakService fagsakService;
 
-    public OpprettFagsakOgBehandlingFraSed(FagsakService fagsakService) {
+    public OpprettFagsakOgBehandlingFraSed(Unleash unleash, FagsakService fagsakService) {
+        this.unleash = unleash;
         this.fagsakService = fagsakService;
     }
 
@@ -43,7 +46,9 @@ public class OpprettFagsakOgBehandlingFraSed implements StegBehandler {
 
         OpprettSakRequest opprettSakRequest = new OpprettSakRequest.Builder()
             .medAktørID(prosessinstans.hentAktørIDFraDataEllerSED())
-            .medBehandlingstype(Behandlingstyper.SED)
+            .medBehandlingstype(unleash.isEnabled("melosys.behandle_alle_saker")
+                ? Behandlingstyper.FØRSTEGANG
+                : Behandlingstyper.SED)
             .medBehandlingstema(behandlingstema)
             .medInitierendeJournalpostId(melosysEessiMelding.getJournalpostId())
             .medInitierendeDokumentId(melosysEessiMelding.getDokumentId())

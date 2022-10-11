@@ -1,6 +1,7 @@
 package no.nav.melosys.saksflyt.steg.behandling;
 
 import com.google.common.collect.Lists;
+import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
@@ -8,6 +9,7 @@ import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
@@ -32,6 +34,7 @@ class OpprettFagsakOgBehandlingFraSedTest {
     @Mock
     private FagsakService fagsakService;
 
+    private final FakeUnleash unleash = new FakeUnleash();
     private OpprettFagsakOgBehandlingFraSed opprettFagsakOgBehandlingFraSed;
 
     @Captor
@@ -39,8 +42,9 @@ class OpprettFagsakOgBehandlingFraSedTest {
 
     @BeforeEach
     void setUp() {
-        opprettFagsakOgBehandlingFraSed = new OpprettFagsakOgBehandlingFraSed(fagsakService);
+        opprettFagsakOgBehandlingFraSed = new OpprettFagsakOgBehandlingFraSed(unleash, fagsakService);
         when(fagsakService.nyFagsakOgBehandling(any())).thenReturn(lagFagsak());
+        unleash.enableAll();
     }
 
     @Test
@@ -48,11 +52,30 @@ class OpprettFagsakOgBehandlingFraSedTest {
         Prosessinstans prosessinstans = lagProsessinstans();
         prosessinstans.setType(ProsessType.ANMODNING_OM_UNNTAK);
 
+
         opprettFagsakOgBehandlingFraSed.utfør(prosessinstans);
+
 
         verify(fagsakService).nyFagsakOgBehandling(opprettSakRequestArgumentCaptor.capture());
         assertThat(opprettSakRequestArgumentCaptor.getValue().getSakstype()).isEqualTo(Sakstyper.EU_EOS);
         assertThat(opprettSakRequestArgumentCaptor.getValue().getSakstema()).isEqualTo(Sakstemaer.UNNTAK);
+        assertThat(opprettSakRequestArgumentCaptor.getValue().getBehandlingstype()).isEqualTo(Behandlingstyper.FØRSTEGANG);
+    }
+
+    @Test
+    void utfør_toggleDisabled_verifiserNyFagsakOgBehandlingBlirOpprettet() {
+        unleash.disableAll();
+        Prosessinstans prosessinstans = lagProsessinstans();
+        prosessinstans.setType(ProsessType.ANMODNING_OM_UNNTAK);
+
+
+        opprettFagsakOgBehandlingFraSed.utfør(prosessinstans);
+
+
+        verify(fagsakService).nyFagsakOgBehandling(opprettSakRequestArgumentCaptor.capture());
+        assertThat(opprettSakRequestArgumentCaptor.getValue().getSakstype()).isEqualTo(Sakstyper.EU_EOS);
+        assertThat(opprettSakRequestArgumentCaptor.getValue().getSakstema()).isEqualTo(Sakstemaer.UNNTAK);
+        assertThat(opprettSakRequestArgumentCaptor.getValue().getBehandlingstype()).isEqualTo(Behandlingstyper.SED);
     }
 
     private Prosessinstans lagProsessinstans() {

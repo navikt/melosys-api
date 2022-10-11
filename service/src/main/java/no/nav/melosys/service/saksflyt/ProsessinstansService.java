@@ -302,9 +302,14 @@ public class ProsessinstansService {
 
         prosessinstans.setType(ProsessType.OPPRETT_NY_SAK_FTRL_TRYGDEAVTALE_FRA_OPPGAVE);
         prosessinstans.setData(ProsessDataKey.SAKSTYPE, opprettSakDto.getSakstype());
-        prosessinstans.setData(SAKSTEMA, SakstypeSakstemaKobling.sakstema(opprettSakDto.getSakstype(),
-            opprettSakDto.getBehandlingstema()));
-        prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.SOEKNAD);
+        if (unleash.isEnabled("melosys.behandle_alle_saker")) {
+            prosessinstans.setData(ProsessDataKey.SAKSTEMA, opprettSakDto.getSakstema());
+            prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, opprettSakDto.getBehandlingstype());
+        } else {
+            prosessinstans.setData(ProsessDataKey.SAKSTEMA,
+                SakstypeSakstemaKobling.sakstema(Sakstyper.EU_EOS, opprettSakDto.getBehandlingstema()));
+            prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.SOEKNAD);
+        }
         prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, journalpostID);
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, opprettSakDto.getBehandlingstema());
         prosessinstans.setData(ProsessDataKey.BRUKER_ID, opprettSakDto.getBrukerID());
