@@ -54,7 +54,6 @@ public class AvklarArbeidsgiver implements StegBehandler {
 
     @Override
     public void utfør(Prosessinstans prosessinstans) {
-
         long behandlingID = prosessinstans.getBehandling().getId();
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
         Behandlingsresultat resultat = behandlingsresultatService.hentBehandlingsresultat(prosessinstans.getBehandling().getId());
@@ -80,11 +79,11 @@ public class AvklarArbeidsgiver implements StegBehandler {
     private boolean arbeidsgiverAvklares(Behandling behandling, Behandlingsresultat resultat) {
         if (unleash.isEnabled("melosys.behandle_alle_saker")) {
             return !SaksbehandlingRegler.harTomFlyt(behandling) && (
-                resultat.getType() == Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL
-                    || !resultat.hentLovvalgsperiode().erArtikkel13()
+                resultat.getType() != Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL
+                    && !(behandling.getFagsak().erSakstypeEøs() && resultat.hentLovvalgsperiode().erArtikkel13())
             );
         }
-        return resultat.getType() == Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL ||
-            !resultat.hentLovvalgsperiode().erArtikkel13();
+        return resultat.getType() != Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL
+            && !(behandling.getFagsak().erSakstypeEøs() && resultat.hentLovvalgsperiode().erArtikkel13());
     }
 }

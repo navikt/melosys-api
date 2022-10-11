@@ -159,7 +159,7 @@ class AvklarArbeidsgiverTest {
     }
 
     @Test
-    void utfør_iverksettVedtakAvslagManglendeOppl_arbeidsgiverAktoererSkalIkkeOpprettes() {
+    void utfør_resultatAvslagManglendeOppl_arbeidsgiverAktoererSkalIkkeOpprettes() {
         behandlingsresultat.setType(Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL);
         behandlingsresultat.setLovvalgsperioder(new HashSet<>());
         when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
@@ -168,6 +168,6 @@ class AvklarArbeidsgiverTest {
         avklarArbeidsgiver.utfør(prosessinstans);
 
 
-        verify(aktoerService).erstattEksisterendeArbeidsgiveraktører(any(), any());
+        verify(aktoerService, never()).erstattEksisterendeArbeidsgiveraktører(any(), any());
     }
 }
