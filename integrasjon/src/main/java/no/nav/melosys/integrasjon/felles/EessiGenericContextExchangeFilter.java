@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class EessiGenericContextExchangeFilter extends GenericContextExchangeFilter {
 
-    static String CLIENT_NAME = "eessi";
+    static String CLIENT_NAME = "melosys-eessi";
 
     public EessiGenericContextExchangeFilter(RestStsClient restStsClient,
                                              ClientConfigurationProperties clientConfigurationProperties,
