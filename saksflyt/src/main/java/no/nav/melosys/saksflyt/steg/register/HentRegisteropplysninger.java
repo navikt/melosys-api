@@ -45,8 +45,8 @@ public class HentRegisteropplysninger implements StegBehandler {
     @Override
     public void utfør(Prosessinstans prosessinstans) {
         Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
-        
-        if (behandling.getFagsak().erSakstypeEøs() && !behandling.erVirksomhet()) {
+
+        if (behandling.getFagsak().erSakstypeEøs() && !behandling.erBehandlingstemaVirksomhet()) {
             var behandleAlleSakerToggleEnabled = unleash.isEnabled("melosys.behandle_alle_saker");
             var aktørId = behandling.getFagsak().finnBrukersAktørID().orElseThrow(
                 () -> new FunksjonellException("Kan ikke hente registreopplysninger når bruker ikke har aktørID")
