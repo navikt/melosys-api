@@ -315,7 +315,9 @@ class OpprettSakTest {
     void validerOpprettSakDto_nullSøknad_feiler() {
         OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
         opprettSakDto.setSakstype(Sakstyper.EU_EOS);
+        opprettSakDto.setSakstema(Sakstemaer.MEDLEMSKAP_LOVVALG);
         opprettSakDto.setBehandlingstema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
+        opprettSakDto.setBehandlingstype(Behandlingstyper.FØRSTEGANG);
         opprettSakDto.setSoknadDto(null);
 
         assertThatExceptionOfType(FunksjonellException.class)
@@ -362,6 +364,7 @@ class OpprettSakTest {
     void validerOpprettSakDto_søknadUtenFom_feiler() {
         OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
         opprettSakDto.setSakstype(Sakstyper.EU_EOS);
+        opprettSakDto.setSakstema(Sakstemaer.MEDLEMSKAP_LOVVALG);
         opprettSakDto.setBehandlingstema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         opprettSakDto.setBehandlingstype(Behandlingstyper.FØRSTEGANG);
         opprettSakDto.getSoknadDto().getPeriode().setFom(null);
@@ -389,7 +392,9 @@ class OpprettSakTest {
     void validerOpprettSakDto_søknadMedLandOgAlleLand_feiler() {
         OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
         opprettSakDto.setSakstype(Sakstyper.EU_EOS);
+        opprettSakDto.setSakstema(Sakstemaer.MEDLEMSKAP_LOVVALG);
         opprettSakDto.setBehandlingstema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
+        opprettSakDto.setBehandlingstype(Behandlingstyper.FØRSTEGANG);
         opprettSakDto.getSoknadDto().getLand().setErUkjenteEllerAlleEosLand(true);
         opprettSakDto.getSoknadDto().getLand().setLandkoder(Collections.singletonList("DK"));
 

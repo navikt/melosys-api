@@ -14,6 +14,7 @@ import no.nav.melosys.domain.behandlingsgrunnlag.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Soeknadsland;
 import no.nav.melosys.domain.kodeverk.Behandlingsgrunnlagtyper;
+import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -75,7 +76,7 @@ class BehandlingsgrunnlagServiceTest {
 
     @Test
     void opprettEøsSøknadGrunnlag_finnesIkkeFraFør_blirOpprettet() {
-        Behandling behandling = lagBehandling(Sakstyper.EU_EOS, Behandlingstema.UTSENDT_ARBEIDSTAKER);
+        Behandling behandling = lagBehandling(Sakstyper.EU_EOS, Sakstemaer.MEDLEMSKAP_LOVVALG, Behandlingstema.UTSENDT_ARBEIDSTAKER);
         when(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling);
         when(joarkFasade.hentMottaksDatoForJournalpost(behandling.getInitierendeJournalpostId())).thenReturn(LocalDate.now());
         Periode periode = new Periode();
@@ -159,7 +160,7 @@ class BehandlingsgrunnlagServiceTest {
 
     @Test
     void opprettSedGrunnlag_harRettType() {
-        Behandling behandling = lagBehandling(Sakstyper.EU_EOS, Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL);
+        Behandling behandling = lagBehandling(Sakstyper.EU_EOS, Sakstemaer.MEDLEMSKAP_LOVVALG, Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL);
         when(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling);
         when(joarkFasade.hentMottaksDatoForJournalpost(behandling.getInitierendeJournalpostId())).thenReturn(LocalDate.now());
         SedGrunnlag sedGrunnlag = new SedGrunnlag();
@@ -180,7 +181,7 @@ class BehandlingsgrunnlagServiceTest {
 
     @Test
     void opprettSøknadFolketrygden_harRettType() {
-        Behandling behandling = lagBehandling(Sakstyper.FTRL, Behandlingstema.ARBEID_I_UTLANDET);
+        Behandling behandling = lagBehandling(Sakstyper.FTRL, Sakstemaer.MEDLEMSKAP_LOVVALG, Behandlingstema.ARBEID_I_UTLANDET);
         when(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling);
         when(joarkFasade.hentMottaksDatoForJournalpost(behandling.getInitierendeJournalpostId())).thenReturn(LocalDate.now());
 
@@ -200,7 +201,7 @@ class BehandlingsgrunnlagServiceTest {
 
     @Test
     void opprettSøknadTrygdeavtale_harRettType() {
-        Behandling behandling = lagBehandling(Sakstyper.TRYGDEAVTALE, Behandlingstema.YRKESAKTIV);
+        Behandling behandling = lagBehandling(Sakstyper.TRYGDEAVTALE, Sakstemaer.MEDLEMSKAP_LOVVALG, Behandlingstema.YRKESAKTIV);
         when(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling);
         when(joarkFasade.hentMottaksDatoForJournalpost(behandling.getInitierendeJournalpostId())).thenReturn(LocalDate.now());
 
@@ -219,7 +220,7 @@ class BehandlingsgrunnlagServiceTest {
 
     @Test
     void opprettSøknad_tomFlyt_behGrunnlagBlirIkkeOpprettet() {
-        Behandling behandling = lagBehandling(Sakstyper.FTRL, Behandlingstema.YRKESAKTIV);
+        Behandling behandling = lagBehandling(Sakstyper.FTRL, Sakstemaer.MEDLEMSKAP_LOVVALG, Behandlingstema.YRKESAKTIV);
 
         behandlingsgrunnlagService.opprettSøknad(behandling, null, null);
 
@@ -229,7 +230,7 @@ class BehandlingsgrunnlagServiceTest {
 
     @Test
     void opprettSøknad_behGrunnlagBlirOpprettet() {
-        Behandling behandling = lagBehandling(Sakstyper.EU_EOS, Behandlingstema.YRKESAKTIV);
+        Behandling behandling = lagBehandling(Sakstyper.EU_EOS, Sakstemaer.MEDLEMSKAP_LOVVALG, Behandlingstema.YRKESAKTIV);
         when(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling);
         when(joarkFasade.hentMottaksDatoForJournalpost(behandling.getInitierendeJournalpostId())).thenReturn(LocalDate.now());
 
@@ -245,9 +246,9 @@ class BehandlingsgrunnlagServiceTest {
         assertThat(opprettet.getMottaksdato()).isNotNull();
     }
 
-    private Behandling lagBehandling(Sakstyper sakstype, Behandlingstema tema) {
+    private Behandling lagBehandling(Sakstyper sakstype, Sakstemaer sakstemaer, Behandlingstema tema) {
         Behandling behandling = new Behandling();
-        behandling.setFagsak(lagFagsak(sakstype));
+        behandling.setFagsak(lagFagsak(sakstype, sakstemaer));
         behandling.setId(behandlingID);
         behandling.setInitierendeJournalpostId("123321");
         behandling.setTema(tema);
@@ -255,9 +256,10 @@ class BehandlingsgrunnlagServiceTest {
         return behandling;
     }
 
-    private Fagsak lagFagsak(Sakstyper sakstype) {
+    private Fagsak lagFagsak(Sakstyper sakstype, Sakstemaer sakstemaer) {
         Fagsak fagsak = new Fagsak();
         fagsak.setType(sakstype);
+        fagsak.setTema(sakstemaer);
         return fagsak;
     }
 }
