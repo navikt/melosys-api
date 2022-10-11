@@ -19,12 +19,11 @@ import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
-import org.junit.jupiter.params.provider.Arguments.*
+import org.junit.jupiter.params.provider.Arguments.arguments
 import org.junit.jupiter.params.provider.MethodSource
 import java.time.LocalDate
 import java.time.ZoneOffset
 import java.util.*
-import kotlin.collections.ArrayList
 
 @ExtendWith(MockKExtension::class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -127,7 +126,20 @@ class SaksbehandlingReglerTest {
                     Behandlingsresultattyper.AVVIST_KLAGE
                 )
             }
-        )
+        ),
+        arguments(
+            Sakstyper.EU_EOS,
+            Sakstemaer.MEDLEMSKAP_LOVVALG,
+            Behandlingstyper.NY_VURDERING,
+            Behandlingstema.UTSENDT_ARBEIDSTAKER,
+            BehandlingHolder().apply {
+                add(
+                    Behandlingstyper.FØRSTEGANG,
+                    Behandlingstema.IKKE_YRKESAKTIV,
+                    Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
+                )
+            }
+        ),
     )
 
     @ParameterizedTest(name = "{0} - {1} - {2} - {3}")
@@ -186,7 +198,7 @@ class SaksbehandlingReglerTest {
 
     @ParameterizedTest(name = "behandlingsresultatType:{0} - FunnetBehandlingID:{2}")
     @MethodSource("behandlingMedBehandlingTyperOgIkkeBehandlingsresultatTyperData")
-    fun finnesBehandlingMedBehandlingTyperOgIkkeBehandlingsresultatTyper(
+    fun finnBehandlingSomKanReplikeres_forventetBehandling(
         resultatTypeFraRepo: Behandlingsresultattyper?,
         behandlinger: List<Behandling>,
         expectedBehandlingID: Long?
@@ -205,7 +217,12 @@ class SaksbehandlingReglerTest {
         val behandlingFørstegangAvsluttet = Behandling().apply {
             id = 0
             type = Behandlingstyper.FØRSTEGANG
+            tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
             status = Behandlingsstatus.AVSLUTTET
+            fagsak = Fagsak().apply {
+                type = Sakstyper.EU_EOS
+                tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+            }
         }
 
         return listOf(
@@ -225,7 +242,12 @@ class SaksbehandlingReglerTest {
                     Behandling().apply {
                         id = 0
                         type = Behandlingstyper.ANKE
+                        tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
                         status = Behandlingsstatus.AVSLUTTET
+                        fagsak = Fagsak().apply {
+                            type = Sakstyper.EU_EOS
+                            tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+                        }
                     }
                 ),
                 null
@@ -241,12 +263,22 @@ class SaksbehandlingReglerTest {
                     Behandling().apply {
                         id = 0
                         type = Behandlingstyper.ANKE
+                        tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
                         status = Behandlingsstatus.AVSLUTTET
+                        fagsak = Fagsak().apply {
+                            type = Sakstyper.EU_EOS
+                            tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+                        }
                     },
                     Behandling().apply {
                         id = 1
                         type = Behandlingstyper.FØRSTEGANG
+                        tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
                         status = Behandlingsstatus.AVSLUTTET
+                        fagsak = Fagsak().apply {
+                            type = Sakstyper.EU_EOS
+                            tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+                        }
                     }
                 ),
                 1L
@@ -257,20 +289,49 @@ class SaksbehandlingReglerTest {
                     Behandling().apply {
                         id = 0
                         type = Behandlingstyper.FØRSTEGANG
+                        tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
                         status = Behandlingsstatus.UNDER_BEHANDLING
+                        fagsak = Fagsak().apply {
+                            type = Sakstyper.EU_EOS
+                            tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+                        }
                     },
                     Behandling().apply {
                         id = 1
                         type = Behandlingstyper.ANKE
+                        tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
                         status = Behandlingsstatus.AVSLUTTET
+                        fagsak = Fagsak().apply {
+                            type = Sakstyper.EU_EOS
+                            tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+                        }
                     },
                     Behandling().apply {
                         id = 2
                         type = Behandlingstyper.NY_VURDERING
+                        tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
                         status = Behandlingsstatus.AVSLUTTET
+                        fagsak = Fagsak().apply {
+                            type = Sakstyper.EU_EOS
+                            tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+                        }
                     }
                 ),
                 2L
+            ),
+            arguments(
+                Behandlingsresultattyper.IKKE_FASTSATT,
+                listOf(Behandling().apply {
+                    id = 0
+                    type = Behandlingstyper.HENVENDELSE
+                    tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
+                    status = Behandlingsstatus.AVSLUTTET
+                    fagsak = Fagsak().apply {
+                        type = Sakstyper.EU_EOS
+                        tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+                    }
+                }),
+                null
             ),
         )
     }
