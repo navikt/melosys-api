@@ -638,6 +638,7 @@ class JournalfoeringServiceTest {
         var behandling = new Behandling();
         behandling.setStatus(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
         behandling.setType(Behandlingstyper.NY_VURDERING);
+        behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         var fagsak = new Fagsak();
         fagsak.setType(Sakstyper.EU_EOS);
         fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
