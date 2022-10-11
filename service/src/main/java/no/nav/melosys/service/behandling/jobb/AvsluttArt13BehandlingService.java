@@ -2,6 +2,7 @@ package no.nav.melosys.service.behandling.jobb;
 
 import java.util.Collections;
 
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
@@ -29,16 +30,20 @@ public class AvsluttArt13BehandlingService {
     private final BehandlingsresultatService behandlingsresultatService;
     private final MedlPeriodeService medlPeriodeService;
     private final LovvalgsperiodeService lovvalgsperiodeService;
+    private final Unleash unleash;
 
     public AvsluttArt13BehandlingService(BehandlingService behandlingService,
                                          FagsakService fagsakService,
                                          BehandlingsresultatService behandlingsresultatService,
-                                         MedlPeriodeService medlPeriodeService, LovvalgsperiodeService lovvalgsperiodeService) {
+                                         MedlPeriodeService medlPeriodeService,
+                                         LovvalgsperiodeService lovvalgsperiodeService,
+                                         Unleash unleash) {
         this.behandlingService = behandlingService;
         this.fagsakService = fagsakService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.medlPeriodeService = medlPeriodeService;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
+        this.unleash = unleash;
     }
 
     @Transactional
@@ -66,13 +71,16 @@ public class AvsluttArt13BehandlingService {
 
         fagsakService.avsluttFagsakOgBehandling(behandling.getFagsak(), behandling, Saksstatuser.LOVVALG_AVKLART);
 
-        medlPeriodeService.oppdaterPeriodeEndelig(lovvalgsperiode, !behandling.erBehandlingAvSøknad());
+        medlPeriodeService.oppdaterPeriodeEndelig(lovvalgsperiode, unleash.isEnabled("melosys.behandle_alle_saker") ? behandling.erBehandlingAvSed() : !behandling.erBehandlingAvSøknadGammel());
         log.info("Behandling {} avsluttet og satt til endelig i Medl", behandling.getId());
     }
 
 
     private boolean toMndHarPassertSidenSaksbehandling(Behandling behandling, Behandlingsresultat behandlingsresultat) {
-        if (behandling.kanResultereIVedtak() && !erUtpekingUtenVedtak(behandlingsresultat)) {
+        var behandlingKanResultereIVedtak = unleash.isEnabled("melosys.behandle_alle_saker")
+            ? behandling.kanResultereIVedtak()
+            : behandling.kanResultereIVedtakGammel();
+        if (behandlingKanResultereIVedtak && !erUtpekingUtenVedtak(behandlingsresultat)) {
 
             if (!behandlingsresultat.harVedtak()) {
                 throw new FunksjonellException("Behandling " + behandling.getId() +
@@ -88,7 +96,7 @@ public class AvsluttArt13BehandlingService {
     private Lovvalgsperiode hentLovvalgsperiode(Behandlingsresultat behandlingsresultat) {
         return erUtpekingUtenVedtak(behandlingsresultat)
             ? opprettLovvalgsperiode(behandlingsresultat.getId(), behandlingsresultat.hentValidertUtpekingsperiode())
-            : behandlingsresultat.hentValidertLovvalgsperiode();
+            : behandlingsresultat.hentLovvalgsperiode();
     }
 
     private boolean erUtpekingUtenVedtak(Behandlingsresultat behandlingsresultat) {

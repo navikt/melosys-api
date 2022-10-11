@@ -45,7 +45,7 @@ public class ForvaltningsmeldingMapperTest {
         BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingRequest());
         brevData.initierendeJournalpostForsendelseMottattTidspunkt = Instant.now();
 
-        String xml = mapper.mapTilBrevXML(fellesType, navFelles, behandling, null, brevData);
+        String xml = mapper.mapTilBrevXML(fellesType, navFelles, behandling, null, brevData, false);
 
         assertThat(xml).isNotNull();
     }
@@ -57,7 +57,7 @@ public class ForvaltningsmeldingMapperTest {
         Behandling behandling = new Behandling();
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
 
-        Fag fag = mapper.mapFag(brevData, behandling);
+        Fag fag = mapper.mapFag(brevData, behandling, false);
 
         assertThat(fag).isNotNull();
         assertThat(fag.getDatoMottatt()).isNotNull();

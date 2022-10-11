@@ -1,17 +1,18 @@
-package no.nav.melosys.tjenester.gui;
+package no.nav.melosys.tjenester.gui.sak;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.arkiv.DokumentReferanse;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Sakstemaer;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
@@ -20,16 +21,14 @@ import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService;
 import no.nav.melosys.service.sak.*;
 import no.nav.melosys.service.saksopplysninger.SaksopplysningerService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
-import no.nav.melosys.service.utpeking.UtpekingService;
+import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.tjenester.gui.dto.*;
 import no.nav.melosys.tjenester.gui.dto.periode.PeriodeDto;
 import no.nav.security.token.support.core.api.Protected;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.WebApplicationContext;
@@ -47,33 +46,33 @@ public class FagsakTjeneste {
     private static final String UKJENT_NAVN = "UKJENT";
 
     private final FagsakService fagsakService;
-    private final OpprettNySakFraOppgave opprettNySakFraOppgave;
+    private final OpprettSak opprettSak;
     private final Aksesskontroll aksesskontroll;
     private final BehandlingsgrunnlagService behandlingsgrunnlagService;
     private final BehandlingsresultatService behandlingsresultatService;
-    private final HenleggFagsakService henleggFagsakService;
     private final PersondataFasade persondataFasade;
     private final SaksopplysningerService saksopplysningerService;
-    private final UtpekingService utpekingService;
-    private final VideresendSoknadService videresendSoknadService;
     private final OrganisasjonOppslagService organisasjonOppslagService;
+    private final OpprettBehandlingForSak opprettBehandlingForSak;
+    private final Unleash unleash;
 
     public FagsakTjeneste(FagsakService fagsakService, Aksesskontroll aksesskontroll, BehandlingsgrunnlagService behandlingsgrunnlagService,
-                          HenleggFagsakService henleggFagsakService, OpprettNySakFraOppgave opprettNySakFraOppgave,
+                          OpprettSak opprettSak,
                           BehandlingsresultatService behandlingsresultatService, PersondataFasade persondataFasade,
-                          SaksopplysningerService saksopplysningerService, UtpekingService utpekingService,
-                          VideresendSoknadService videresendSoknadService, OrganisasjonOppslagService organisasjonOppslagService) {
+                          Unleash unleash,
+                          SaksopplysningerService saksopplysningerService, OrganisasjonOppslagService organisasjonOppslagService,
+                          OpprettBehandlingForSak opprettBehandlingForSak) {
         this.fagsakService = fagsakService;
         this.aksesskontroll = aksesskontroll;
         this.behandlingsgrunnlagService = behandlingsgrunnlagService;
-        this.henleggFagsakService = henleggFagsakService;
-        this.opprettNySakFraOppgave = opprettNySakFraOppgave;
+        this.opprettSak = opprettSak;
         this.behandlingsresultatService = behandlingsresultatService;
         this.persondataFasade = persondataFasade;
         this.saksopplysningerService = saksopplysningerService;
-        this.utpekingService = utpekingService;
-        this.videresendSoknadService = videresendSoknadService;
         this.organisasjonOppslagService = organisasjonOppslagService;
+        this.unleash = unleash;
+        this.opprettBehandlingForSak = opprettBehandlingForSak;
+
     }
 
     @GetMapping("/{saksnr}")
@@ -86,15 +85,74 @@ public class FagsakTjeneste {
         return ResponseEntity.ok(fagsakDto);
     }
 
-    @PostMapping("/opprett")
-    @ApiOperation(value = "Oppretter en sak med tilhørende behandling.")
-    public ResponseEntity<Void> opprettFagsak(@RequestBody OpprettSakDto opprettSakDto) {
+    @PostMapping
+    @ApiOperation(value = "Oppretter en ny sak.")
+    public ResponseEntity<Void> opprettNySak(@RequestBody OpprettSakDto opprettSakDto) {
         if (opprettSakDto.getBrukerID() == null) {
-            throw new FunksjonellException("BrukerID trengs for å opprette en sak.");
+            throw new FunksjonellException("BrukerID trengs for å opprette behandling");
         }
         aksesskontroll.autoriserFolkeregisterIdent(opprettSakDto.getBrukerID());
-        opprettNySakFraOppgave.bestillNySakOgBehandling(opprettSakDto);
+
+        if (opprettSakDto.getOppgaveID() == null && unleash.isEnabled("melosys.ny_opprett_sak")) {
+            opprettSak.opprettNySakOgBehandling(opprettSakDto);
+        } else {
+            opprettSak.opprettNySakOgBehandlingFraOppgave(opprettSakDto);
+        }
+
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{saksnr}/behandlinger")
+    @ApiOperation(value = "Oppretter en ny behandling for sak.")
+    public ResponseEntity<Void> opprettNyBehandlingForSak(@PathVariable("saksnr") String saksnummer, @RequestBody OpprettSakDto opprettSakDto) {
+        if (opprettSakDto.getBrukerID() == null) {
+            throw new FunksjonellException("BrukerID trengs for å opprette behandling");
+        }
+        if (opprettSakDto.getBehandlingstema() == null) {
+            throw new FunksjonellException("Behandlingstema mangler");
+        }
+        if (opprettSakDto.getBehandlingstype() == null) {
+            throw new FunksjonellException("Behandlingstype mangler");
+        }
+
+        aksesskontroll.autoriserFolkeregisterIdent(opprettSakDto.getBrukerID());
+        opprettBehandlingForSak.opprettBehandling(saksnummer, opprettSakDto);
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{saksnr}/endre")
+    @ApiOperation(value = "Endre en sak.")
+    public ResponseEntity<Void> endreFagsak(@PathVariable("saksnr") String saksnummer, @RequestBody EndreSakDto endreSakDto) {
+        log.debug("Saksbehandler {} ber om å endre fagsak {} med sakstype {}, sakstema {}",
+            SubjectHandler.getInstance().getUserID(), saksnummer, endreSakDto.sakstype(), endreSakDto.sakstema());
+        aksesskontroll.autoriserSakstilgang(saksnummer);
+
+        fagsakService.oppdaterSakstema(saksnummer, endreSakDto.sakstema());
+        /*
+        TODO: Endre sakstype fikses i MELOSYS-5285
+        fagsakService.oppdaterSakstype(saksnummer, endreSakDto.sakstype());
+        */
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("{saksnr}/mulige-sakstemaer")
+    @ApiOperation(value = "Hent mulige nye sakstema for en behandling")
+    public ResponseEntity<Collection<Sakstemaer>> hentMuligeSakstemaer(@PathVariable("saksnr") String saksnummer) {
+        log.debug("Saksbehandler {} ber om å hente mulige nye sakstema for fagsak {}.", SubjectHandler.getInstance().getUserID(), saksnummer);
+        aksesskontroll.autoriserSakstilgang(saksnummer);
+
+        return ResponseEntity.ok(fagsakService.hentMuligeSakstemaer(saksnummer));
+    }
+
+    @GetMapping("{saksnr}/mulige-sakstyper")
+    @ApiOperation(value = "Hent mulige nye sakstype for en behandling")
+    public ResponseEntity<Collection<Sakstyper>> hentMuligeSakstyper(@PathVariable("saksnr") String saksnummer) {
+        log.debug("Saksbehandler {} ber om å hente mulige nye sakstema for fagsak {}.", SubjectHandler.getInstance().getUserID(), saksnummer);
+        aksesskontroll.autoriserSakstilgang(saksnummer);
+
+        return ResponseEntity.ok(fagsakService.hentMuligeSakstyper(saksnummer));
     }
 
     @PostMapping("/sok")
@@ -121,73 +179,10 @@ public class FagsakTjeneste {
         return Collections.emptyList();
     }
 
-    @PostMapping("/{saksnr}/henlegg")
-    @ApiOperation(value = "Henlegger en fagsak. Avslutter kun behandling uten endring av saksstatus dersom behandlingtype er NY_VURDERING.")
-    public ResponseEntity<Void> henleggFagsak(@PathVariable("saksnr") String saksnummer, @RequestBody HenleggelseDto henleggelseDto) {
-        aksesskontroll.autoriserSakstilgang(saksnummer);
-        henleggFagsakService.henleggFagsakEllerBehandling(saksnummer, henleggelseDto.begrunnelseKode(), henleggelseDto.fritekst());
-        return ResponseEntity.noContent().build();
-    }
-
-    @PostMapping("/{saksnr}/henlegg-videresend")
-    @ApiOperation(value = "Videresender søknad for en gitt behandling")
-    public ResponseEntity<Void> videresend(@PathVariable("saksnr") String saksnummer,
-                                           @RequestBody VideresendDto videresendDto) {
-        Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
-        aksesskontroll.autoriserSakstilgang(fagsak);
-
-        if (CollectionUtils.isEmpty(videresendDto.getVedlegg())) {
-            throw new FunksjonellException("Kan ikke videresende søknad uten vedlegg!");
-        }
-
-        videresendSoknadService.videresend(saksnummer,
-            videresendDto.getMottakerinstitusjon(),
-            videresendDto.getFritekst(),
-            videresendDto.getVedlegg().stream().map(
-                v -> new DokumentReferanse(v.journalpostID(), v.dokumentID())).collect(
-                Collectors.toUnmodifiableSet())
-        );
-        return ResponseEntity.noContent().build();
-    }
-
-    @PutMapping(value = "/{saksnr}/henlegg-som-bortfalt", consumes = MediaType.TEXT_PLAIN_VALUE, produces = MediaType.TEXT_PLAIN_VALUE)
-    @ApiOperation(value = "Henlegger en fagsak i Melosys som bortfalt, fordi den ikke skal behandles i Melosys. " +
-        "Henlegger kun den aktive behandlingen uten endring av saksstatus dersom behandlingtype er NY_VURDERING.")
-    public ResponseEntity<Void> henleggSakSomBortfalt(@PathVariable("saksnr") String saksnummer) {
-        aksesskontroll.autoriserSakstilgang(saksnummer);
-
-        henleggFagsakService.henleggSakEllerBehandlingSomBortfalt(saksnummer);
-        return ResponseEntity.noContent().build();
-    }
-
-    @PutMapping(value = "/{saksnr}/avslutt", consumes = MediaType.TEXT_PLAIN_VALUE, produces = {MediaType.TEXT_PLAIN_VALUE, MediaType.APPLICATION_JSON_VALUE})
-    @ApiOperation(value = "Brukes for å avslutte manuelle behandlinger. " +
-        "Gyldige behandlingstyper er VURDER_TRYGDETID, ØVRIGE_SED og SOEKNAD_IKKE_YRKESAKTIVE", produces = MediaType.TEXT_PLAIN_VALUE, consumes = MediaType.TEXT_PLAIN_VALUE)
-    public ResponseEntity<Void> avsluttSakManuelt(@PathVariable("saksnr") String saksnummer) {
-        Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
-        aksesskontroll.autoriserSakstilgang(fagsak);
-        fagsakService.avsluttFagsakOgBehandlingValiderBehandlingstype(fagsak, fagsak.hentAktivBehandling());
-
-        return ResponseEntity.noContent().build();
-    }
-
-    @PostMapping("/{saksnummer}/utpek")
-    @ApiOperation(value = "Utpeker lovvalgsland for gitt fagsak")
-    public ResponseEntity<Void> utpekLovvalgsland(@PathVariable("saksnummer") String saksnummer,
-                                                  @RequestBody UtpekDto utpekDto) {
-        Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
-        aksesskontroll.autoriserSakstilgang(fagsak);
-
-        utpekingService.utpekLovvalgsland(
-            fagsak,
-            utpekDto.mottakerinstitusjoner(),
-            utpekDto.fritekstSed(),
-            utpekDto.fritekstBrev()
-        );
-
-        return ResponseEntity.noContent().build();
-    }
-
+    /**
+     * @deprecated Fjernes med toggle melosys.behandle_alle_saker
+     */
+    @Deprecated
     @ApiOperation(value = "Korrigerer eller omgjør et vedtak eller en anmodning til utenlandsk myndighet " +
         "for en sak ved å opprette en ny behandling basert på den siste endrede behandling")
     @PostMapping("/{saksnummer}/revurder")
@@ -196,6 +191,17 @@ public class FagsakTjeneste {
 
         long behandlingID = fagsakService.opprettNyVurderingBehandling(saksnummer);
         return ResponseEntity.ok(new RevurderingOpprettetDto(behandlingID));
+    }
+
+    @PutMapping("/{saksnummer}/ferdigbehandle")
+    @ApiOperation("Avslutt behandling med Ferdigbehandlet som resultat og oppdatere saksstatus")
+    public ResponseEntity<Void> ferdigbehandleSak(@PathVariable("saksnummer") String saksnummer) {
+        log.info("Saksbehandler {} ber om å avslutte aktiv behandling og oppdatere saksstatus på {}", SubjectHandler.getInstance().getUserID(), saksnummer);
+        aksesskontroll.autoriserSakstilgang(saksnummer);
+
+        fagsakService.ferdigbehandleSak(saksnummer);
+
+        return ResponseEntity.noContent().build();
     }
 
     private FagsakDto tilFagsakDto(Fagsak fagsak) {
@@ -247,6 +253,7 @@ public class FagsakTjeneste {
             behandlingOversiktDto.setBehandlingstema(behandling.getTema());
             behandlingOversiktDto.setOpprettetDato(behandling.getRegistrertDato());
             behandlingOversiktDto.setBehandlingsresultattype(behandlingsresultat.getType());
+            behandlingOversiktDto.setSvarFrist(behandling.getDokumentasjonSvarfristDato());
 
             setPeriodeOpplysninger(behandling, behandlingOversiktDto);
         }
@@ -254,24 +261,49 @@ public class FagsakTjeneste {
     }
 
     private void setPeriodeOpplysninger(Behandling behandling, BehandlingOversiktDto behandlingOversiktDto) {
-        if (behandling.erBehandlingAvSøknad()) {
-            behandlingsgrunnlagService.finnBehandlingsgrunnlag(behandling.getId())
-                .map(Behandlingsgrunnlag::getBehandlingsgrunnlagdata).ifPresent(grunnlagData -> {
-                    SoeknadslandDto land = SoeknadslandDto.av(hentSøknadsland((grunnlagData)));
+        if (unleash.isEnabled("melosys.behandle_alle_saker")) {
+            var optionalSedDokument = saksopplysningerService.finnSedOpplysninger(behandling.getId());
+
+            optionalSedDokument.ifPresentOrElse(sedDokument -> {
+                var søknadslandDto = SoeknadslandDto.av(sedDokument.getLovvalgslandKode());
+                behandlingOversiktDto.setLand(søknadslandDto);
+
+                var lovvalgsperiode = sedDokument.getLovvalgsperiode();
+                var søknadsperiodeDto = new PeriodeDto(lovvalgsperiode.getFom(), lovvalgsperiode.getTom());
+                behandlingOversiktDto.setPeriode(søknadsperiodeDto);
+            }, () -> {
+                var behandlingsgrunnlag = behandlingsgrunnlagService.finnBehandlingsgrunnlag(behandling.getId());
+                if (behandlingsgrunnlag.isPresent()) {
+                    var behandlingsgrunnlagData = behandlingsgrunnlag.get().getBehandlingsgrunnlagdata();
+
+                    var land = SoeknadslandDto.av(hentSøknadsland((behandlingsgrunnlagData)));
                     behandlingOversiktDto.setLand(land);
-                    Periode periode = hentPeriode(grunnlagData);
-                    if (periode != null) {
-                        behandlingOversiktDto.setPeriode(new PeriodeDto(periode.getFom(), periode.getTom()));
-                    }
-                });
-        } else {
-            saksopplysningerService.finnSedOpplysninger(behandling.getId()).ifPresent(sedDokument -> {
-                SoeknadslandDto land = SoeknadslandDto.av(sedDokument.getLovvalgslandKode());
-                behandlingOversiktDto.setLand(land);
-                behandlingOversiktDto.setPeriode(new PeriodeDto(
-                    sedDokument.getLovvalgsperiode().getFom(), sedDokument.getLovvalgsperiode().getTom())
-                );
+
+                    var periode = hentPeriode(behandlingsgrunnlagData);
+                    var søknadsperiodeDto = new PeriodeDto(periode.getFom(), periode.getTom());
+                    behandlingOversiktDto.setPeriode(søknadsperiodeDto);
+                }
             });
+        } else {
+            if (behandling.erBehandlingAvSøknadGammel()) {
+                behandlingsgrunnlagService.finnBehandlingsgrunnlag(behandling.getId())
+                    .map(Behandlingsgrunnlag::getBehandlingsgrunnlagdata).ifPresent(grunnlagData -> {
+                        SoeknadslandDto land = SoeknadslandDto.av(hentSøknadsland((grunnlagData)));
+                        behandlingOversiktDto.setLand(land);
+                        Periode periode = hentPeriode(grunnlagData);
+                        if (periode != null) {
+                            behandlingOversiktDto.setPeriode(new PeriodeDto(periode.getFom(), periode.getTom()));
+                        }
+                    });
+            } else {
+                saksopplysningerService.finnSedOpplysninger(behandling.getId()).ifPresent(sedDokument -> {
+                    SoeknadslandDto land = SoeknadslandDto.av(sedDokument.getLovvalgslandKode());
+                    behandlingOversiktDto.setLand(land);
+                    behandlingOversiktDto.setPeriode(new PeriodeDto(
+                        sedDokument.getLovvalgsperiode().getFom(), sedDokument.getLovvalgsperiode().getTom())
+                    );
+                });
+            }
         }
     }
 

@@ -80,7 +80,7 @@ class DokumentNavnServiceTest {
         behandling.setType(erNyVurdering ? NY_VURDERING : SOEKNAD);
 
         if (!mottaker.erUtenlandskMyndighet() && !FastMottakerMedOrgnr.SKATT.getOrgnr().equals(mottaker.getOrgnr())) {
-            when(mockLovvalgsperiodeService.hentValidertLovvalgsperiode(anyLong())).thenReturn(lagLovvalsperiode(skalHaAttest ? UK_ART6_1 : UK_ART8_2));
+            when(mockLovvalgsperiodeService.hentLovvalgsperiode(anyLong())).thenReturn(lagLovvalsperiode(skalHaAttest ? UK_ART6_1 : UK_ART8_2));
         }
 
         when(mockBrevmottakerService.avklarMottaker(STORBRITANNIA, Mottaker.av(mottaker.getRolle()), behandling)).thenReturn(mottaker);
@@ -101,7 +101,7 @@ class DokumentNavnServiceTest {
         behandling.setType(erNyVurdering ? NY_VURDERING : SOEKNAD);
 
         if (!mottaker.erUtenlandskMyndighet() && !FastMottakerMedOrgnr.SKATT.getOrgnr().equals(mottaker.getOrgnr())) {
-            when(mockLovvalgsperiodeService.hentValidertLovvalgsperiode(anyLong())).thenReturn(lagLovvalsperiode(skalHaAttest ? UK_ART6_1 : UK_ART8_2));
+            when(mockLovvalgsperiodeService.hentLovvalgsperiode(anyLong())).thenReturn(lagLovvalsperiode(skalHaAttest ? UK_ART6_1 : UK_ART8_2));
         }
 
         DokumentproduksjonsInfoMapper dokumentproduksjonsInfoMapper = new DokumentproduksjonsInfoMapper(new FakeUnleash());
@@ -120,7 +120,7 @@ class DokumentNavnServiceTest {
         behandling.setType(erNyVurdering ? NY_VURDERING : SOEKNAD);
 
         if (!mottaker.erUtenlandskMyndighet() && !FastMottakerMedOrgnr.SKATT.getOrgnr().equals(mottaker.getOrgnr())) {
-            when(mockLovvalgsperiodeService.hentValidertLovvalgsperiode(anyLong())).thenReturn(lagLovvalsperiode(skalHaAttest ? UK_ART6_1 : UK_ART8_2));
+            when(mockLovvalgsperiodeService.hentLovvalgsperiode(anyLong())).thenReturn(lagLovvalsperiode(skalHaAttest ? UK_ART6_1 : UK_ART8_2));
         }
 
         DokumentproduksjonsInfoMapper dokumentproduksjonsInfoMapper = new DokumentproduksjonsInfoMapper(new FakeUnleash());

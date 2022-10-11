@@ -2,6 +2,7 @@ package no.nav.melosys.saksflyt.steg.brev;
 
 import java.util.List;
 
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
@@ -26,10 +27,12 @@ public class SendForvaltningsmelding implements StegBehandler {
 
     private final BrevBestiller brevBestiller;
     private final BehandlingService behandlingService;
+    private final Unleash unleash;
 
-    public SendForvaltningsmelding(BrevBestiller brevBestiller, BehandlingService behandlingService) {
+    public SendForvaltningsmelding(BrevBestiller brevBestiller, BehandlingService behandlingService, Unleash unleash) {
         this.brevBestiller = brevBestiller;
         this.behandlingService = behandlingService;
+        this.unleash = unleash;
     }
 
     @Override
@@ -39,10 +42,7 @@ public class SendForvaltningsmelding implements StegBehandler {
 
     @Override
     public void utfør(Prosessinstans prosessinstans) {
-
-        boolean skalSendesForvaltningsmelding = prosessinstans.getData(SKAL_SENDES_FORVALTNINGSMELDING, Boolean.class, Boolean.FALSE);
-
-        if (prosessinstans.getBehandling().erBehandlingAvSøknad() && skalSendesForvaltningsmelding) {
+        if (skalSendeForvaltningsmelding(prosessinstans)) {
             Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(prosessinstans.getBehandling().getId());
             String saksbehandler = prosessinstans.getData(SAKSBEHANDLER);
             brevBestiller.bestill(MELDING_FORVENTET_SAKSBEHANDLINGSTID, List.of(Mottaker.av(BRUKER)), null, saksbehandler, null, behandling);
@@ -50,5 +50,13 @@ public class SendForvaltningsmelding implements StegBehandler {
         } else {
             log.info("Ikke sendt forvaltningsmelding for behandling {}", prosessinstans.getBehandling().getId());
         }
+    }
+
+    private boolean skalSendeForvaltningsmelding(Prosessinstans prosessinstans) {
+        boolean skalSendesForvaltningsmelding = prosessinstans.getData(SKAL_SENDES_FORVALTNINGSMELDING, Boolean.class, Boolean.FALSE);
+        if (unleash.isEnabled("melosys.behandle_alle_saker")) {
+            return skalSendesForvaltningsmelding;
+        }
+        return prosessinstans.getBehandling().erBehandlingAvSøknadGammel() && skalSendesForvaltningsmelding;
     }
 }

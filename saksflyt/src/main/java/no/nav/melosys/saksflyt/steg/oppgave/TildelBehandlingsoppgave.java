@@ -37,7 +37,7 @@ public class TildelBehandlingsoppgave implements StegBehandler {
             String saksbehandler = prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER);
 
             log.info("Henter behandlingsoppgave for fagsak {}", saksnummer);
-            Optional<Oppgave> oppgave = oppgaveService.finnÅpenOppgaveMedFagsaksnummer(saksnummer);
+            Optional<Oppgave> oppgave = oppgaveService.finnÅpenBehandlingsoppgaveMedFagsaksnummer(saksnummer);
             if (oppgave.isPresent()) {
                 String behandlingsoppgaveId = oppgave.get().getOppgaveId();
                 oppgaveService.tildelOppgave(behandlingsoppgaveId, saksbehandler);

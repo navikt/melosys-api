@@ -7,6 +7,7 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
+import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
@@ -18,16 +19,24 @@ import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
 
 public final class SaksbehandlingDataFactory {
     public static Behandling lagBehandling() {
-        return lagBehandling(new BehandlingsgrunnlagData());
+        return lagBehandling(lagFagsak(), new BehandlingsgrunnlagData());
     }
 
     public static Behandling lagBehandling(BehandlingsgrunnlagData behandlingsgrunnlagData) {
+        return lagBehandling(lagFagsak(), behandlingsgrunnlagData);
+    }
+
+    public static Behandling lagBehandling(Fagsak fagsak) {
+        return lagBehandling(fagsak, new BehandlingsgrunnlagData());
+    }
+
+    public static Behandling lagBehandling(Fagsak fagsak, BehandlingsgrunnlagData behandlingsgrunnlagData) {
         Behandling behandling = new Behandling();
         behandling.setId(1L);
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
         behandling.setType(Behandlingstyper.SOEKNAD);
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
-        behandling.setFagsak(lagFagsak());
+        behandling.setFagsak(fagsak);
         behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
         behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(behandlingsgrunnlagData);
         final Instant nå = Instant.now();
@@ -82,6 +91,7 @@ public final class SaksbehandlingDataFactory {
         fagsak.setSaksnummer(saksnummer);
         fagsak.setStatus(Saksstatuser.OPPRETTET);
         fagsak.setType(Sakstyper.EU_EOS);
+        fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
         fagsak.getAktører().add(lagBruker());
         fagsak.setGsakSaksnummer(123L);
         return fagsak;

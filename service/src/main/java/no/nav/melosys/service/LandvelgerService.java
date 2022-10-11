@@ -90,7 +90,7 @@ public class LandvelgerService {
     }
 
     private boolean erArtikkel11_3aMed11_5Tilleggsbestemmelse(Behandlingsresultat behandlingsresultat) {
-        return behandlingsresultat.finnValidertLovvalgsperiode()
+        return behandlingsresultat.finnLovvalgsperiode()
             .filter(Lovvalgsperiode::erArtikkel11_3aMed11_5Tilleggsbestemmelse)
             .isPresent();
     }

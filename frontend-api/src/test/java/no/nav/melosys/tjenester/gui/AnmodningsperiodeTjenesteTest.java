@@ -115,7 +115,7 @@ class AnmodningsperiodeTjenesteTest {
         anmodningsperiode.setAnmodningsperiodeSvar(svar);
 
         when(anmodningsperiodeService.finnAnmodningsperiode(anyLong())).thenReturn(Optional.of(anmodningsperiode));
-        when(anmodningsperiodeService.lagreAnmodningsperiodeSvar(anyLong(), any()))
+        when(anmodningsperiodeService.lagreAnmodningsperiodeSvarMedLovvalgsperiode(anyLong(), any()))
             .thenReturn(svar);
 
         mockMvc.perform(post(BASE_URL + "/{anmodningsperiodeID}/svar", 1L)

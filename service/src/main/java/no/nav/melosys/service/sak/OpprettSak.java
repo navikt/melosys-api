@@ -3,6 +3,7 @@ package no.nav.melosys.service.sak;
 import java.util.Optional;
 
 import no.finn.unleash.Unleash;
+import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.arkiv.Journalposttype;
@@ -14,7 +15,9 @@ import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.journalforing.JournalfoeringService;
 import no.nav.melosys.service.journalforing.dto.PeriodeDto;
+import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerService;
 import no.nav.melosys.service.oppgave.OppgaveService;
+import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Lazy;
@@ -22,35 +25,39 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static no.nav.melosys.domain.Behandling.erBehandlingAvSedForespørsler;
-import static no.nav.melosys.domain.Behandling.erBehandlingAvSøknad;
+import static no.nav.melosys.domain.Behandling.erBehandlingAvSøknadGammel;
 import static no.nav.melosys.domain.Fagsak.erSakstypeEøs;
 import static no.nav.melosys.service.sak.SakstypeBehandlingstemaKobling.erGyldigBehandlingstemaForSakstype;
 
 @Service
-public class OpprettNySakFraOppgave {
+public class OpprettSak {
     private final JournalfoeringService journalfoeringService;
     private final OppgaveService oppgaveService;
     private final ProsessinstansService prosessinstansService;
     private final Unleash unleash;
 
-    public OpprettNySakFraOppgave(JournalfoeringService journalfoeringService, OppgaveService oppgaveService,
-                                  @Lazy ProsessinstansService prosessinstansService, Unleash unleash) {
+    private final LovligeKombinasjonerService lovligeKombinasjonerService;
+
+    public OpprettSak(JournalfoeringService journalfoeringService, OppgaveService oppgaveService,
+                      @Lazy ProsessinstansService prosessinstansService,
+                      Unleash unleash,
+                      LovligeKombinasjonerService lovligeKombinasjonerService) {
         this.journalfoeringService = journalfoeringService;
         this.oppgaveService = oppgaveService;
         this.prosessinstansService = prosessinstansService;
         this.unleash = unleash;
+        this.lovligeKombinasjonerService = lovligeKombinasjonerService;
     }
 
     @Transactional
-    public void bestillNySakOgBehandling(OpprettSakDto opprettSakDto) {
+    public void opprettNySakOgBehandlingFraOppgave(OpprettSakDto opprettSakDto) {
         validerOpprettSakDto(opprettSakDto);
         final Oppgave oppgave = validerOppgave(opprettSakDto.getOppgaveID());
         validerJournalpost(journalfoeringService.hentJournalpost(oppgave.getJournalpostId()));
         switch (opprettSakDto.getSakstype()) {
             case EU_EOS -> prosessinstansService.opprettProsessinstansNySakEØS(
                 oppgave.getJournalpostId(),
-                opprettSakDto,
-                erBehandlingAvSøknad(opprettSakDto.getBehandlingstema()) ? Behandlingstyper.SOEKNAD : Behandlingstyper.SED
+                opprettSakDto
             );
             case FTRL, TRYGDEAVTALE -> prosessinstansService.opprettProsessinstansNySakFTRLTrygdeavtale(
                 oppgave.getJournalpostId(),
@@ -59,21 +66,39 @@ public class OpprettNySakFraOppgave {
         }
     }
 
+    @Transactional
+    public void opprettNySakOgBehandling(OpprettSakDto opprettSakDto) {
+        validerOpprettSakDto(opprettSakDto);
+        prosessinstansService.opprettNySakOgBehandling(opprettSakDto);
+    }
+
     void validerOpprettSakDto(OpprettSakDto opprettSakDto) {
         final var sakstype = opprettSakDto.getSakstype();
         final var behandlingstema = opprettSakDto.getBehandlingstema();
+        final var sakstema = opprettSakDto.getSakstema();
+        final var behandlingstype = opprettSakDto.getBehandlingstype();
+        final var hovedpart = opprettSakDto.getHovedpart();
 
-        validerBehandlingstema(behandlingstema, sakstype);
+        if (unleash.isEnabled("melosys.behandle_alle_saker")) {
+            lovligeKombinasjonerService.validerBehandlingstema(hovedpart, sakstype, sakstema, behandlingstema, null);
+            lovligeKombinasjonerService.validerBehandlingstype(hovedpart, sakstype, sakstema, behandlingstema, behandlingstype, null);
 
-        if (erBehandlingAvSøknad(behandlingstema) && erSakstypeEøs(sakstype)) {
-            validerSøknadData(opprettSakDto.getSoknadDto());
+            if (erSakstypeEøs(sakstype) && !SaksbehandlingRegler.harTomFlyt(sakstype, sakstema, behandlingstype, behandlingstema)) {
+                validerSøknadData(opprettSakDto.getSoknadDto());
+            }
+        } else {
+            validerBehandlingstema(behandlingstema, sakstype);
+
+            if (erBehandlingAvSøknadGammel(behandlingstema) && erSakstypeEøs(sakstype)) {
+                validerSøknadData(opprettSakDto.getSoknadDto());
+            }
         }
     }
 
     void validerBehandlingstema(Behandlingstema behandlingstema, Sakstyper sakstype) {
         if (behandlingstema == null) {
             throw new FunksjonellException("Behandlingstema mangler for å opprette ny sak");
-        } else if (!erBehandlingAvSøknad(behandlingstema) && !erBehandlingAvSedForespørsler(behandlingstema)) {
+        } else if (!Behandling.erBehandlingAvSøknadGammel(behandlingstema) && !erBehandlingAvSedForespørsler(behandlingstema)) {
             throw new FunksjonellException("Kan ikke opprette ny sak med behandlingstema " + behandlingstema);
         } else if (!erGyldigBehandlingstemaForSakstype(sakstype, behandlingstema)) {
             throw new FunksjonellException("Behandlingstema " + behandlingstema + " er ikke gyldig for sakstype " + sakstype);

@@ -3,9 +3,7 @@ package no.nav.melosys.integrasjon.felles;
 import java.util.Optional;
 import javax.annotation.Nonnull;
 
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.reststs.RestStsClient;
-import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo;
 import no.nav.security.token.support.client.core.ClientProperties;
 import no.nav.security.token.support.client.core.oauth2.OAuth2AccessTokenResponse;
@@ -39,21 +37,28 @@ public class GenericContextExchangeFilter implements ExchangeFilterFunction {
     @Override
     public Mono<ClientResponse> filter(@Nonnull final ClientRequest clientRequest,
                                        @Nonnull final ExchangeFunction exchangeFunction) {
-
-        if (ThreadLocalAccessInfo.shouldUseSystemToken()) {
-            ClientRequest clientRequestWithBearerAuth = ClientRequest.from(clientRequest)
-                .header(HttpHeaders.AUTHORIZATION, restStsClient.bearerToken())
-                .build();
-            return exchangeFunction.exchange(clientRequestWithBearerAuth);
-        }
-
-        OAuth2AccessTokenResponse response = oAuth2AccessTokenService.getAccessToken(clientProperties);
-        String issuedToken = response.getAccessToken();
-
         return exchangeFunction.exchange(
-            ClientRequest.from(clientRequest)
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + issuedToken)
-                .build()
+            withClientRequestBuilder(ClientRequest.from(clientRequest)).build()
         );
+    }
+
+    protected ClientRequest.Builder withClientRequestBuilder(ClientRequest.Builder clientRequestBuilder) {
+        return clientRequestBuilder.header(HttpHeaders.AUTHORIZATION, getCorrectToken());
+    }
+
+    protected String getCorrectToken() {
+        if (ThreadLocalAccessInfo.shouldUseSystemToken()) {
+            return getSystemToken();
+        }
+        return "Bearer " + getUserToken();
+    }
+
+    protected String getSystemToken() {
+        return restStsClient.bearerToken();
+    }
+
+    private String getUserToken() {
+        OAuth2AccessTokenResponse response = oAuth2AccessTokenService.getAccessToken(clientProperties);
+        return response.getAccessToken();
     }
 }

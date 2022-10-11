@@ -2,6 +2,7 @@ package no.nav.melosys.integrasjon
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.MappingBuilder
+import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.github.tomakehurst.wiremock.matching.StringValuePattern
@@ -43,7 +44,7 @@ abstract class ConsumerWireMockTestBase<T, R>(
     @MockkBean
     private lateinit var tokenValidationContextHolder: TokenValidationContextHolder
 
-    private val serviceUnderTestMockServer: WireMockServer =
+    protected val serviceUnderTestMockServer: WireMockServer =
         WireMockServer(WireMockConfiguration.wireMockConfig().port(mockPort))
 
     protected val stsMockServer: WireMockServer =
@@ -140,31 +141,29 @@ abstract class ConsumerWireMockTestBase<T, R>(
     }
 
     fun verifyHeaders(headers: Map<String, StringValuePattern>) {
-        setupWireMock { wireMock ->
-            headers.forEach {
-                wireMock.withHeader(it.key, it.value)
-            }
+        val wireMock = setupWireMock()
+        headers.forEach {
+            wireMock.withHeader(it.key, it.value)
         }
     }
 
-    fun setupWireMock(consumer: (MappingBuilder) -> Unit = {}) {
-        val wireMock = createWireMock()
-
-        consumer(wireMock)
-
-        val response = WireMock.aResponse()
+    fun setupWireMock(
+        wireMock: MappingBuilder = createWireMock(),
+        data: T = getMockData(),
+        response: ResponseDefinitionBuilder = WireMock.aResponse()
             .withStatus(200)
             .withHeader("Content-Type", "application/json")
+    ): MappingBuilder {
 
-        val data = getMockData()
         if (data is String) response.withBody(data)
         if (data is ByteArray) response.withBody(data)
 
         serviceUnderTestMockServer.stubFor(
             wireMock.willReturn(response)
         )
+        return wireMock
     }
-
+    
     fun executeFromSystem(consumer: (R) -> Unit = {}) {
         val uuid = UUID.randomUUID()
         try {

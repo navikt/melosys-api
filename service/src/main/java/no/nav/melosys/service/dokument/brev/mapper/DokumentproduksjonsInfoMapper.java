@@ -33,7 +33,8 @@ public class DokumentproduksjonsInfoMapper {
         MELDING_FORVENTET_SAKSBEHANDLINGSTID,
         MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD,
         STORBRITANNIA,
-        MELDING_HENLAGT_SAK
+        MELDING_HENLAGT_SAK,
+        GENERELT_FRITEKSTVEDLEGG
     );
 
     static {
@@ -91,6 +92,9 @@ public class DokumentproduksjonsInfoMapper {
                 new DokumentproduksjonsInfo("henleggelse",
                     DokumentKategoriKode.IB.getKode(),
                     JournalforingsTittel.MELDING_HENLAGT_SAK.getTittel()))
+            .put(GENERELT_FRITEKSTVEDLEGG,
+                new DokumentproduksjonsInfo("fritekstvedlegg",
+                    DokumentKategoriKode.IB.getKode()))
             .build());
     }
 

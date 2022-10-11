@@ -8,9 +8,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.Tema;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
+import no.nav.melosys.domain.kodeverk.Sakstemaer;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -50,6 +54,8 @@ class OppgaveplukkerTest {
     @Mock
     private OppgaveService oppgaveService;
 
+    private FakeUnleash unleash = new FakeUnleash();
+
 
     private Oppgaveplukker oppgaveplukker;
 
@@ -59,7 +65,9 @@ class OppgaveplukkerTest {
 
     @BeforeEach
     public void setUp() {
-        this.oppgaveplukker = new Oppgaveplukker(oppgaveFasade, oppgaveTilbakkeleggingRepo, fagsakService, behandlingService, oppgaveService);
+        this.oppgaveplukker = new Oppgaveplukker(oppgaveFasade, oppgaveTilbakkeleggingRepo, fagsakService, behandlingService, oppgaveService, unleash);
+
+        unleash.enableAll();
 
         Behandling behandling = new Behandling();
         Fagsak fagsak = new Fagsak();
@@ -73,11 +81,11 @@ class OppgaveplukkerTest {
     @Test
     void plukkOppgave_toOppgaverMedPriHOYForskjelligFrist_plukkoppgaveHøyestFrist() {
         List<Oppgave> oppgaver = new ArrayList<>();
-        oppgaver.add(opprettOppgave("1", Oppgavetyper.VUR, PrioritetType.LAV, LocalDate.of(2017, 8, 7), LocalDate.now(), "MEL-1"));
-        oppgaver.add(opprettOppgave("2", Oppgavetyper.BEH_SAK_MK, PrioritetType.HOY, LocalDate.of(2018, 8, 7), LocalDate.now(), "MEL-12"));
-        oppgaver.add(opprettOppgave("3", Oppgavetyper.JFR, PrioritetType.NORM, LocalDate.of(2018, 8, 10), LocalDate.now(), "MEL-123"));
-        oppgaver.add(opprettOppgave("4", Oppgavetyper.BEH_SAK_MK, PrioritetType.HOY, LocalDate.of(2018, 8, 5), LocalDate.now(), "MEL-1234"));
-        when(oppgaveFasade.finnUtildelteOppgaverEtterFrist(any(String.class), any(String.class))).thenReturn(oppgaver);
+        oppgaver.add(opprettOppgave("1", Oppgavetyper.VUR, PrioritetType.LAV, LocalDate.of(2017, 8, 7), LocalDate.now(), "MEL-1").build());
+        oppgaver.add(opprettOppgave("2", Oppgavetyper.BEH_SAK_MK, PrioritetType.HOY, LocalDate.of(2018, 8, 7), LocalDate.now(), "MEL-12").build());
+        oppgaver.add(opprettOppgave("3", Oppgavetyper.JFR, PrioritetType.NORM, LocalDate.of(2018, 8, 10), LocalDate.now(), "MEL-123").build());
+        oppgaver.add(opprettOppgave("4", Oppgavetyper.BEH_SAK_MK, PrioritetType.HOY, LocalDate.of(2018, 8, 5), LocalDate.now(), "MEL-1234").build());
+        when(oppgaveFasade.finnUtildelteOppgaverEtterFrist(anyString())).thenReturn(oppgaver);
 
         Fagsak fagsak = new Fagsak();
         Behandling behandling = new Behandling();
@@ -97,11 +105,11 @@ class OppgaveplukkerTest {
     @Test
     void plukkOppgave_toOppgaverMedPriHOYSammeFristForskjelligAktivDato_plukkoppgaveOpprettetSenest() {
         List<Oppgave> oppgaver = new ArrayList<>();
-        oppgaver.add(opprettOppgave("1", Oppgavetyper.BEH_SAK_MK, PrioritetType.LAV,  LocalDate.of(2018, 8, 7), LocalDate.now(), "MEL-1"));
-        oppgaver.add(opprettOppgave("2", Oppgavetyper.BEH_SAK_MK, PrioritetType.HOY, LocalDate.of(2018, 8, 7), LocalDate.now(), "MEL-12"));
-        oppgaver.add(opprettOppgave("3", Oppgavetyper.BEH_SAK_MK, PrioritetType.NORM, LocalDate.of(2018, 8, 10), LocalDate.now(), "MEL-123"));
-        oppgaver.add(opprettOppgave("4", Oppgavetyper.BEH_SAK_MK, PrioritetType.HOY, LocalDate.of(2018, 8, 7), LocalDate.now().plusDays(1L), "MEL-1234"));
-        when(oppgaveFasade.finnUtildelteOppgaverEtterFrist(any(String.class), any(String.class))).thenReturn(oppgaver);
+        oppgaver.add(opprettOppgave("1", Oppgavetyper.BEH_SAK_MK, PrioritetType.LAV, LocalDate.of(2018, 8, 7), LocalDate.now(), "MEL-1").build());
+        oppgaver.add(opprettOppgave("2", Oppgavetyper.BEH_SAK_MK, PrioritetType.HOY, LocalDate.of(2018, 8, 7), LocalDate.now(), "MEL-12").build());
+        oppgaver.add(opprettOppgave("3", Oppgavetyper.BEH_SAK_MK, PrioritetType.NORM, LocalDate.of(2018, 8, 10), LocalDate.now(), "MEL-123").build());
+        oppgaver.add(opprettOppgave("4", Oppgavetyper.BEH_SAK_MK, PrioritetType.HOY, LocalDate.of(2018, 8, 7), LocalDate.now().plusDays(1L), "MEL-1234").build());
+        when(oppgaveFasade.finnUtildelteOppgaverEtterFrist(anyString())).thenReturn(oppgaver);
 
         Fagsak fagsak = new Fagsak();
         Behandling behandling = new Behandling();
@@ -121,9 +129,9 @@ class OppgaveplukkerTest {
     @Test
     void plukkOppgave_avventerDokumentast_og_med_utløptsvarfrist() {
         List<Oppgave> oppgaver = new ArrayList<>();
-        oppgaver.add(opprettOppgave("1", Oppgavetyper.VUR, PrioritetType.LAV, LocalDate.of(2019, 8, 7), LocalDate.now(), "MEL-1"));
-        oppgaver.add(opprettOppgave("2", Oppgavetyper.VUR, PrioritetType.LAV, LocalDate.of(2018, 8, 7), LocalDate.now(), "MEL-1"));
-        when(oppgaveFasade.finnUtildelteOppgaverEtterFrist(any(String.class), any(String.class))).thenReturn(oppgaver);
+        oppgaver.add(opprettOppgave("1", Oppgavetyper.VUR, PrioritetType.LAV, LocalDate.of(2019, 8, 7), LocalDate.now(), "MEL-1").build());
+        oppgaver.add(opprettOppgave("2", Oppgavetyper.VUR, PrioritetType.LAV, LocalDate.of(2018, 8, 7), LocalDate.now(), "MEL-1").build());
+        when(oppgaveFasade.finnUtildelteOppgaverEtterFrist(anyString())).thenReturn(oppgaver);
 
         Fagsak fagsak = new Fagsak();
         Behandling behandling = new Behandling();
@@ -148,8 +156,8 @@ class OppgaveplukkerTest {
     @Test
     void oppgaveplukker_velgerIkkeSak_nårStatusErVenterPaaFagligAvklaring() {
         List<Oppgave> oppgaver = new ArrayList<>();
-        oppgaver.add(opprettOppgave("1", Oppgavetyper.VUR, PrioritetType.LAV, LocalDate.of(2019, 8, 7), LocalDate.now(), "MEL-1"));
-        when(oppgaveFasade.finnUtildelteOppgaverEtterFrist(any(String.class), any(String.class))).thenReturn(oppgaver);
+        oppgaver.add(opprettOppgave("1", Oppgavetyper.VUR, PrioritetType.LAV, LocalDate.of(2019, 8, 7), LocalDate.now(), "MEL-1").build());
+        when(oppgaveFasade.finnUtildelteOppgaverEtterFrist(anyString())).thenReturn(oppgaver);
 
         Fagsak fagsak = new Fagsak();
         Behandling behandling = new Behandling();
@@ -166,10 +174,10 @@ class OppgaveplukkerTest {
     @Test
     void plukkOppgave_1_tilbakelagt() {
         List<Oppgave> oppgaver = new ArrayList<>();
-        oppgaver.add(opprettOppgave("1", Oppgavetyper.BEH_SAK_MK, PrioritetType.NORM, LocalDate.of(2018, 8, 7), LocalDate.now(), "MEL-1"));
-        oppgaver.add(opprettOppgave("2", Oppgavetyper.BEH_SAK_MK, PrioritetType.NORM, LocalDate.of(2018, 8, 8), LocalDate.now(), "MEL-2"));
-        oppgaver.add(opprettOppgave("3", Oppgavetyper.VUR, PrioritetType.NORM, LocalDate.of(2018, 8, 9), LocalDate.now(), "MEL-3"));
-        when(oppgaveFasade.finnUtildelteOppgaverEtterFrist(any(String.class), any(String.class))).thenReturn(oppgaver);
+        oppgaver.add(opprettOppgave("1", Oppgavetyper.BEH_SAK_MK, PrioritetType.NORM, LocalDate.of(2018, 8, 7), LocalDate.now(), "MEL-1").build());
+        oppgaver.add(opprettOppgave("2", Oppgavetyper.BEH_SAK_MK, PrioritetType.NORM, LocalDate.of(2018, 8, 8), LocalDate.now(), "MEL-2").build());
+        oppgaver.add(opprettOppgave("3", Oppgavetyper.VUR, PrioritetType.NORM, LocalDate.of(2018, 8, 9), LocalDate.now(), "MEL-3").build());
+        when(oppgaveFasade.finnUtildelteOppgaverEtterFrist(anyString())).thenReturn(oppgaver);
 
         Fagsak fagsak = new Fagsak();
         Behandling behandling = new Behandling();
@@ -193,10 +201,10 @@ class OppgaveplukkerTest {
     @Test
     void plukkOppgave_alle_tilbakelagt() {
         List<Oppgave> oppgaver = new ArrayList<>();
-        oppgaver.add(opprettOppgave("1", Oppgavetyper.BEH_SAK_MK, PrioritetType.LAV, LocalDate.of(2018, 8, 7), LocalDate.now(), "MEL-1"));
-        oppgaver.add(opprettOppgave("2", Oppgavetyper.BEH_SAK_MK, PrioritetType.HOY, LocalDate.of(2018, 8, 7), LocalDate.now(), "MEL-2"));
-        oppgaver.add(opprettOppgave("3", Oppgavetyper.BEH_SAK_MK, PrioritetType.NORM, LocalDate.of(2018, 8, 7), LocalDate.now(), "MEL-3"));
-        when(oppgaveFasade.finnUtildelteOppgaverEtterFrist(any(String.class), any(String.class))).thenReturn(oppgaver);
+        oppgaver.add(opprettOppgave("1", Oppgavetyper.BEH_SAK_MK, PrioritetType.LAV, LocalDate.of(2018, 8, 7), LocalDate.now(), "MEL-1").build());
+        oppgaver.add(opprettOppgave("2", Oppgavetyper.BEH_SAK_MK, PrioritetType.HOY, LocalDate.of(2018, 8, 7), LocalDate.now(), "MEL-2").build());
+        oppgaver.add(opprettOppgave("3", Oppgavetyper.BEH_SAK_MK, PrioritetType.NORM, LocalDate.of(2018, 8, 7), LocalDate.now(), "MEL-3").build());
+        when(oppgaveFasade.finnUtildelteOppgaverEtterFrist(anyString())).thenReturn(oppgaver);
 
         Fagsak fagsak = new Fagsak();
         Behandling behandling = new Behandling();
@@ -224,7 +232,7 @@ class OppgaveplukkerTest {
         oppgaveBuilder.setPrioritet(PrioritetType.valueOf("HOY"));
         final String saksbehandlerID = "test";
         final String begrunnelse = "Oppgaven er kjedelig";
-        when(oppgaveService.hentÅpenOppgaveMedFagsaksnummer(SAKSNUMMER)).thenReturn(oppgaveBuilder.build());
+        when(oppgaveService.hentÅpenBehandlingsoppgaveMedFagsaksnummer(SAKSNUMMER)).thenReturn(oppgaveBuilder.build());
 
         when(oppgaveTilbakkeleggingRepo.save(any(OppgaveTilbakelegging.class))).then(arguments -> {
             OppgaveTilbakelegging oppgaveTilbakelegging = arguments.getArgument(0);
@@ -250,7 +258,7 @@ class OppgaveplukkerTest {
         oppgaveBuilder.setOppgaveId(oppgaveId);
         oppgaveBuilder.setPrioritet(PrioritetType.valueOf("HOY"));
         final String saksbehandlerID = "test";
-        when(oppgaveService.hentÅpenOppgaveMedFagsaksnummer(SAKSNUMMER)).thenReturn(oppgaveBuilder.build());
+        when(oppgaveService.hentÅpenBehandlingsoppgaveMedFagsaksnummer(SAKSNUMMER)).thenReturn(oppgaveBuilder.build());
 
         TilbakeleggingDto tilbakelegging = new TilbakeleggingDto();
         tilbakelegging.setBehandlingID(BEHANDLING_ID);
@@ -261,12 +269,11 @@ class OppgaveplukkerTest {
         verify(oppgaveTilbakkeleggingRepo, times(0)).save(any(OppgaveTilbakelegging.class));
     }
 
-
     @Test
     void plukkOppgave_brukerBehandlingstema_finnerOppgave() {
         List<Oppgave> oppgaver = new ArrayList<>();
-        oppgaver.add(opprettOppgave("1", Oppgavetyper.VUR, PrioritetType.LAV, LocalDate.of(2017, 8, 7), LocalDate.now(), "MEL-1"));
-        when(oppgaveFasade.finnUtildelteOppgaverEtterFrist(any(String.class), any(String.class))).thenReturn(oppgaver);
+        oppgaver.add(opprettOppgave("1", Oppgavetyper.VUR, PrioritetType.LAV, LocalDate.of(2017, 8, 7), LocalDate.now(), "MEL-1").build());
+        when(oppgaveFasade.finnUtildelteOppgaverEtterFrist(anyString())).thenReturn(oppgaver);
 
         Fagsak fagsak = new Fagsak();
         Behandling behandling = new Behandling();
@@ -279,15 +286,15 @@ class OppgaveplukkerTest {
 
         Optional<Oppgave> oppgave = oppgaveplukker.plukkOppgave("Z01234", opprettPlukkOppgaveInnDto());
 
-        verify(oppgaveFasade).finnUtildelteOppgaverEtterFrist(any(String.class), any(String.class));
+        verify(oppgaveFasade).finnUtildelteOppgaverEtterFrist(anyString());
         assertThat(oppgave).isPresent();
     }
 
     @Test
     void plukkOppgave_behandlingSomVenterHarSvarfristSomikkeHarGåttUt_plukkerIkkeBehandlingen() {
         List<Oppgave> oppgaver = new ArrayList<>();
-        oppgaver.add(opprettOppgave("1", Oppgavetyper.BEH_SAK_MK, PrioritetType.LAV, LocalDate.of(2017, 8, 7), LocalDate.now(), "MEL-1"));
-        when(oppgaveFasade.finnUtildelteOppgaverEtterFrist(any(String.class), any(String.class))).thenReturn(oppgaver);
+        oppgaver.add(opprettOppgave("1", Oppgavetyper.BEH_SAK_MK, PrioritetType.LAV, LocalDate.of(2017, 8, 7), LocalDate.now(), "MEL-1").build());
+        when(oppgaveFasade.finnUtildelteOppgaverEtterFrist(anyString())).thenReturn(oppgaver);
 
         Fagsak fagsak = new Fagsak();
         Behandling behandling = new Behandling();
@@ -307,8 +314,8 @@ class OppgaveplukkerTest {
     @Test
     void plukkOppgave_oppgaveSomVenterHarIkkeSvarfrist_plukkerIkkeBehandlingen() {
         List<Oppgave> oppgaver = new ArrayList<>();
-        oppgaver.add(opprettOppgave("1", Oppgavetyper.BEH_SAK_MK, PrioritetType.LAV, LocalDate.of(2017, 8, 7), LocalDate.now(), "MEL-1"));
-        when(oppgaveFasade.finnUtildelteOppgaverEtterFrist(any(String.class), any(String.class))).thenReturn(oppgaver);
+        oppgaver.add(opprettOppgave("1", Oppgavetyper.BEH_SAK_MK, PrioritetType.LAV, LocalDate.of(2017, 8, 7), LocalDate.now(), "MEL-1").build());
+        when(oppgaveFasade.finnUtildelteOppgaverEtterFrist(anyString())).thenReturn(oppgaver);
 
         Fagsak fagsak = new Fagsak();
         Behandling behandling = new Behandling();
@@ -327,8 +334,8 @@ class OppgaveplukkerTest {
     @Test
     void plukkOppgave_søknadStatusSvarAou_oppdaterStatus() {
         List<Oppgave> oppgaver = new ArrayList<>();
-        oppgaver.add(opprettOppgave("1", Oppgavetyper.VUR, PrioritetType.LAV, LocalDate.of(2017, 8, 7), LocalDate.now(), "MEL-1"));
-        when(oppgaveFasade.finnUtildelteOppgaverEtterFrist(any(String.class), any(String.class))).thenReturn(oppgaver);
+        oppgaver.add(opprettOppgave("1", Oppgavetyper.VUR, PrioritetType.LAV, LocalDate.of(2017, 8, 7), LocalDate.now(), "MEL-1").build());
+        when(oppgaveFasade.finnUtildelteOppgaverEtterFrist(anyString())).thenReturn(oppgaver);
 
         Fagsak fagsak = new Fagsak();
         Behandling behandling = new Behandling();
@@ -342,25 +349,58 @@ class OppgaveplukkerTest {
 
         Optional<Oppgave> oppgave = oppgaveplukker.plukkOppgave("Z01234", opprettPlukkOppgaveInnDto());
 
-        verify(oppgaveFasade).finnUtildelteOppgaverEtterFrist(any(String.class), any(String.class));
+        verify(oppgaveFasade).finnUtildelteOppgaverEtterFrist(anyString());
         verify(behandlingService).lagre(behandlingCaptor.capture());
         assertThat(oppgave).isPresent();
         assertThat(behandlingCaptor.getValue().getStatus()).isEqualTo(Behandlingsstatus.UNDER_BEHANDLING);
     }
 
-    private Oppgave opprettOppgave(String oppgaveId, Oppgavetyper oppgavetype, PrioritetType prioritet, LocalDate fristFerdigstillelse, LocalDate aktivDato, String saksnummer) {
-        Oppgave.Builder oppgaveBuilder = new Oppgave.Builder();
-        oppgaveBuilder.setOppgavetype(oppgavetype);
-        oppgaveBuilder.setOppgaveId(oppgaveId);
-        oppgaveBuilder.setPrioritet(prioritet);
-        oppgaveBuilder.setFristFerdigstillelse(fristFerdigstillelse);
-        oppgaveBuilder.setSaksnummer(saksnummer);
-        return oppgaveBuilder.build();
+    @Test
+    void plukkOppgave_kombinasjonFlereBehandlingstema_sokerOppgaveToGanger() {
+        List<Oppgave> oppgaver = new ArrayList<>();
+        oppgaver.add(opprettOppgave("1", Oppgavetyper.VUR, PrioritetType.LAV, LocalDate.of(2017, 8, 7), LocalDate.now(), "MEL-1").build());
+        when(oppgaveFasade.finnUtildelteOppgaverEtterFrist(anyString())).thenReturn(oppgaver);
+
+        Fagsak fagsak = new Fagsak();
+        Behandling behandling = new Behandling();
+        behandling.setType(Behandlingstyper.SOEKNAD);
+        behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
+        behandling.setStatus(Behandlingsstatus.OPPRETTET);
+        behandling.setFagsak(fagsak);
+        fagsak.setBehandlinger(Collections.singletonList(behandling));
+        when(fagsakService.hentFagsak(anyString())).thenReturn(fagsak);
+
+        var plukkOppgaveInnDto = new PlukkOppgaveInnDto(Behandlingstema.PENSJONIST, Sakstemaer.MEDLEMSKAP_LOVVALG, Sakstyper.EU_EOS);
+
+        Optional<Oppgave> oppgave = oppgaveplukker.plukkOppgave("Z01234", plukkOppgaveInnDto);
+
+        verify(oppgaveFasade, times(2)).finnUtildelteOppgaverEtterFrist(anyString());
+        assertThat(oppgave).isPresent();
+    }
+
+    @Test
+    void plukkOppgave_oppgaveMedTemaTryOgTypeVurd_blirIgnorert() {
+        List<Oppgave> oppgaver = List.of(opprettOppgave("1", Oppgavetyper.VUR, PrioritetType.LAV, LocalDate.of(2017, 8, 7), LocalDate.now(), "MEL-1")
+            .setTema(Tema.TRY).build());
+        when(oppgaveFasade.finnUtildelteOppgaverEtterFrist(anyString())).thenReturn(oppgaver);
+
+        var oppgave = oppgaveplukker.plukkOppgave("Z01234", opprettPlukkOppgaveInnDto());
+
+        verify(oppgaveFasade).finnUtildelteOppgaverEtterFrist(anyString());
+        assertThat(oppgave).isEmpty();
+    }
+
+    private Oppgave.Builder opprettOppgave(String oppgaveId, Oppgavetyper oppgavetype, PrioritetType prioritet, LocalDate fristFerdigstillelse, LocalDate aktivDato, String saksnummer) {
+        return new Oppgave.Builder()
+            .setOppgavetype(oppgavetype)
+            .setOppgaveId(oppgaveId)
+            .setPrioritet(prioritet)
+            .setFristFerdigstillelse(fristFerdigstillelse)
+            .setSaksnummer(saksnummer);
     }
 
     private PlukkOppgaveInnDto opprettPlukkOppgaveInnDto() {
-        PlukkOppgaveInnDto plukkOppgaveInnDto = new PlukkOppgaveInnDto();
-        plukkOppgaveInnDto.setBehandlingstema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
+        PlukkOppgaveInnDto plukkOppgaveInnDto = new PlukkOppgaveInnDto(Behandlingstema.UTSENDT_ARBEIDSTAKER, Sakstemaer.MEDLEMSKAP_LOVVALG, Sakstyper.EU_EOS);
         return plukkOppgaveInnDto;
     }
 }

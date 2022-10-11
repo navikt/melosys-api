@@ -4,9 +4,11 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
+import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
+import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessType;
@@ -32,12 +34,14 @@ class OppdaterOgFerdigstillJournalpostTest {
 
     private OppdaterOgFerdigstillJournalpost oppdaterOgFerdigstillJournalpost;
 
+    private final FakeUnleash unleash = new FakeUnleash();
+
     @Captor
     private ArgumentCaptor<JournalpostOppdatering> oppdateringArgumentCaptor;
 
     @BeforeEach
     public void setUp() {
-        oppdaterOgFerdigstillJournalpost = new OppdaterOgFerdigstillJournalpost(joarkFasade);
+        oppdaterOgFerdigstillJournalpost = new OppdaterOgFerdigstillJournalpost(joarkFasade, unleash);
     }
 
     @Test
@@ -60,6 +64,17 @@ class OppdaterOgFerdigstillJournalpostTest {
         assertOppdatering(oppdateringArgumentCaptor.getValue(), true);
     }
 
+    @Test
+    void utfør_avsenderNavnErSatt_brukerAvsenderNavn_brukFagsakTema() {
+        unleash.enable("melosys.behandle_alle_saker");
+        var prosessinstans = prosessinstans(true);
+        oppdaterOgFerdigstillJournalpost.utfør(prosessinstans);
+
+        verify(joarkFasade).oppdaterOgFerdigstillJournalpost(any(), oppdateringArgumentCaptor.capture());
+
+        assertOppdatering(oppdateringArgumentCaptor.getValue(), true);
+    }
+
     private Prosessinstans prosessinstans(boolean medAvsenderNavn) {
         var prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.JFR_NY_SAK_BRUKER);
@@ -67,6 +82,7 @@ class OppdaterOgFerdigstillJournalpostTest {
         prosessinstans.getBehandling().setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         prosessinstans.getBehandling().setFagsak(new Fagsak());
         prosessinstans.getBehandling().getFagsak().setSaksnummer("MEL-123");
+        prosessinstans.getBehandling().getFagsak().setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
 
         if (medAvsenderNavn) {
             prosessinstans.setData(ProsessDataKey.AVSENDER_NAVN, avsenderNavn);

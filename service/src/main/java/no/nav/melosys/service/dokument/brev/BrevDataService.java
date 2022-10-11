@@ -8,6 +8,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import no.finn.unleash.Unleash;
 import no.nav.dok.brevdata.felles.v1.navfelles.Saksbehandler;
 import no.nav.dok.brevdata.felles.v1.navfelles.*;
 import no.nav.dok.brevdata.felles.v1.simpletypes.AktoerType;
@@ -52,15 +53,18 @@ public class BrevDataService {
     private final PersondataFasade persondataFasade;
     private final SaksbehandlerService saksbehandlerService;
     private final UtenlandskMyndighetRepository utenlandskMyndighetRepository;
+    private final Unleash unleash;
 
     public BrevDataService(BehandlingsresultatRepository behandlingsresultatRepository,
                            PersondataFasade persondataFasade,
                            SaksbehandlerService saksbehandlerService,
-                           UtenlandskMyndighetRepository utenlandskMyndighetRepository) {
+                           UtenlandskMyndighetRepository utenlandskMyndighetRepository,
+                           Unleash unleash) {
         this.behandlingsresultatRepository = behandlingsresultatRepository;
         this.persondataFasade = persondataFasade;
         this.saksbehandlerService = saksbehandlerService;
         this.utenlandskMyndighetRepository = utenlandskMyndighetRepository;
+        this.unleash = unleash;
     }
 
     public DokumentbestillingMetadata lagBestillingMetadata(Produserbaredokumenter produserbartDokument, Aktoer mottaker, Kontaktopplysning kontaktopplysning, Behandling behandling, BrevData brevData) {
@@ -127,7 +131,8 @@ public class BrevDataService {
         try {
             FellesType fellesType = mapFellesType(mottaker, kontaktopplysning, behandling);
             MelosysNAVFelles navFelles = mapNAVFelles(mottaker, kontaktopplysning, behandling, brevData);
-            String brevXml = BrevDataMapperRuter.brevDataMapper(produserbartDokument).mapTilBrevXML(fellesType, navFelles, behandling, behandlingsresultat, brevData);
+            boolean enableBehandleAlleSaker = unleash.isEnabled("melosys.behandle_alle_saker");
+            String brevXml = BrevDataMapperRuter.brevDataMapper(produserbartDokument).mapTilBrevXML(fellesType, navFelles, behandling, behandlingsresultat, brevData, enableBehandleAlleSaker);
 
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
             dbf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);

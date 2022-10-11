@@ -244,6 +244,10 @@ public class Fagsak extends RegistreringsInfo {
         this.saksnummer = saksnummer;
     }
 
+    public boolean erSakstypeEøs() {
+        return erSakstypeEøs(type);
+    }
+
     public static boolean erSakstypeEøs(Sakstyper sakstype) {
         return Sakstyper.EU_EOS == sakstype;
     }

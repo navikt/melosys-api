@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 
+import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
 import no.nav.melosys.domain.kodeverk.Landkoder;
@@ -47,13 +48,14 @@ class AvsluttArt13BehandlingServiceTest {
     private final Fagsak fagsak = new Fagsak();
     private final Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
     private final VedtakMetadata vedtakMetadata = new VedtakMetadata();
+    private final FakeUnleash unleash = new FakeUnleash();
 
     private final long behandlingID = 11L;
 
     @BeforeEach
     public void setup() {
         avsluttArt13BehandlingService = new AvsluttArt13BehandlingService(behandlingService, fagsakService,
-            behandlingsresultatService, medlPeriodeService, lovvalgsperiodeService);
+            behandlingsresultatService, medlPeriodeService, lovvalgsperiodeService, unleash);
 
         behandling.setId(behandlingID);
         behandlingsresultat.setId(behandlingID);
@@ -71,6 +73,8 @@ class AvsluttArt13BehandlingServiceTest {
         when(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling);
         when(behandlingsresultatService.hentBehandlingsresultat(behandlingID))
             .thenReturn(behandlingsresultat);
+
+        unleash.enable("melosys.behandle_alle_saker");
     }
 
     @Test
@@ -88,18 +92,24 @@ class AvsluttArt13BehandlingServiceTest {
         behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
         vedtakMetadata.setVedtaksdato(månederOgDagerSiden(1, 0));
 
+
         avsluttArt13BehandlingService.avsluttBehandlingHvisToMndPassert(behandlingID);
+
+
         verify(fagsakService, never()).avsluttFagsakOgBehandling(any(), any());
     }
 
     @Test
-    void avsluttBehandlingArt13_norgeUtpekt2Mnd1DagSidenVedtak_behandlingBlirAvlsuttet() {
+    void avsluttBehandlingArt13_norgeUtpekt2Mnd1DagSidenVedtak_behandlingBlirAvsluttet() {
         behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
         vedtakMetadata.setVedtaksdato(månederOgDagerSiden(2, 1));
 
+
         avsluttArt13BehandlingService.avsluttBehandlingHvisToMndPassert(behandlingID);
-        verify(fagsakService).avsluttFagsakOgBehandling(eq(fagsak), eq(behandling), eq(Saksstatuser.LOVVALG_AVKLART));
-        verify(medlPeriodeService).oppdaterPeriodeEndelig(eq(lovvalgsperiode), eq(true));
+
+
+        verify(fagsakService).avsluttFagsakOgBehandling(fagsak, behandling, Saksstatuser.LOVVALG_AVKLART);
+        verify(medlPeriodeService).oppdaterPeriodeEndelig(lovvalgsperiode, true);
     }
 
     @Test
@@ -117,14 +127,16 @@ class AvsluttArt13BehandlingServiceTest {
         behandlingsresultat.setEndretDato(månederOgDagerSiden(2, 1));
         vedtakMetadata.setVedtaksdato(månederOgDagerSiden(2, 1));
 
+
         avsluttArt13BehandlingService.avsluttBehandlingHvisToMndPassert(behandlingID);
-        verify(fagsakService).avsluttFagsakOgBehandling(eq(fagsak), eq(behandling), eq(Saksstatuser.LOVVALG_AVKLART));
-        verify(medlPeriodeService).oppdaterPeriodeEndelig(eq(lovvalgsperiode), eq(false));
+
+
+        verify(fagsakService).avsluttFagsakOgBehandling(fagsak, behandling, Saksstatuser.LOVVALG_AVKLART);
+        verify(medlPeriodeService).oppdaterPeriodeEndelig(lovvalgsperiode, false);
     }
 
     @Test
     void avsluttBehandlingArt13_søknad3MndSidenEndretDatoUtpekingUtenVedtak_lovvalgsperiodeOpprettetOgBehandlingAvsluttet() {
-
         Utpekingsperiode utpekingsperiode = new Utpekingsperiode(
             LocalDate.now(), LocalDate.now(), Landkoder.SE, Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B1, null);
         utpekingsperiode.setMedlPeriodeID(123L);
@@ -135,10 +147,12 @@ class AvsluttArt13BehandlingServiceTest {
 
         when(lovvalgsperiodeService.lagreLovvalgsperioder(anyLong(), anyCollection())).thenAnswer(a -> a.getArgument(1));
 
+
         avsluttArt13BehandlingService.avsluttBehandlingHvisToMndPassert(behandlingID);
 
+
         verify(lovvalgsperiodeService).lagreLovvalgsperioder(eq(behandlingID), anyCollection());
-        verify(fagsakService).avsluttFagsakOgBehandling(eq(fagsak), eq(behandling), eq(Saksstatuser.LOVVALG_AVKLART));
+        verify(fagsakService).avsluttFagsakOgBehandling(fagsak, behandling, Saksstatuser.LOVVALG_AVKLART);
         verify(medlPeriodeService).oppdaterPeriodeEndelig(any(Lovvalgsperiode.class), eq(false));
     }
 

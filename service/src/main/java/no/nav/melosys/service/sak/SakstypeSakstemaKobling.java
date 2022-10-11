@@ -24,7 +24,7 @@ public final class SakstypeSakstemaKobling {
     }
 
     private static Sakstemaer sakstemaForEøs(Behandlingstema behandlingstema) {
-        if (Behandling.erBehandlingAvSøknad(behandlingstema) || behandlingstema == BESLUTNING_LOVVALG_NORGE) {
+        if (Behandling.erBehandlingAvSøknadGammel(behandlingstema) || behandlingstema == BESLUTNING_LOVVALG_NORGE) {
             return MEDLEMSKAP_LOVVALG;
         }
         if (behandlingstema == TRYGDETID) {
@@ -39,6 +39,7 @@ public final class SakstypeSakstemaKobling {
         if (behandlingstema == ØVRIGE_SED_UFM) {
             return UNNTAK;
         }
-        throw new FunksjonellException("Vi glemte noe.");
+
+        throw new FunksjonellException(String.format("Finner ikke sakstema for behandlingstema %s", behandlingstema));
     }
 }

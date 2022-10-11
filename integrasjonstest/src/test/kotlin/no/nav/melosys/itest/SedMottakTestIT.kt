@@ -3,7 +3,6 @@ package no.nav.melosys.itest
 import io.kotest.assertions.extracting
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldHaveSize
-import no.nav.melosys.domain.FellesKodeverk
 import no.nav.melosys.domain.arkiv.*
 import no.nav.melosys.domain.eessi.BucType
 import no.nav.melosys.domain.eessi.Periode
@@ -13,27 +12,21 @@ import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
 import no.nav.melosys.domain.saksflyt.ProsessStatus
 import no.nav.melosys.domain.saksflyt.Prosessinstans
 import no.nav.melosys.integrasjon.joark.JoarkFasade
-import no.nav.melosys.integrasjon.kodeverk.Kode
-import no.nav.melosys.integrasjon.kodeverk.KodeOppslag
-import no.nav.melosys.integrasjon.kodeverk.Kodeverk
-import no.nav.melosys.integrasjon.kodeverk.KodeverkRegister
+import no.nav.melosys.melosysmock.sak.SakRepo
 import no.nav.melosys.repository.ProsessinstansRepository
-import no.nav.melosys.service.kodeverk.KodeverkService
-import org.awaitility.Awaitility
-import org.junit.jupiter.api.*
+import org.awaitility.kotlin.await
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
-import org.springframework.boot.test.context.TestConfiguration
-import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
-import org.springframework.context.annotation.Primary
 import org.springframework.kafka.core.KafkaTemplate
 import java.time.Duration
 import java.time.LocalDate
 import java.util.*
 import java.util.stream.Collectors
 
-@Import(SedMottakTestIT.TestConfig::class)
+@Import(KodeverkStub::class)
 class SedMottakTestIT(
     @Autowired private val joarkFasade: JoarkFasade,
     @Autowired @Qualifier("melosysEessiMelding") private val melosysEessiMeldingKafkaTemplate: KafkaTemplate<String, MelosysEessiMelding>,
@@ -45,6 +38,7 @@ class SedMottakTestIT(
 
     @BeforeEach
     fun setup() {
+        SakRepo.clear()
         rinaSaksnummer = Random().nextInt(100000).toString()
     }
 
@@ -67,7 +61,7 @@ class SedMottakTestIT(
         melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingX001)
         melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingX007)
 
-        Awaitility.await().timeout(Duration.ofMinutes(10)).pollInterval(Duration.ofSeconds(3))
+        await.timeout(Duration.ofSeconds(30)).pollInterval(Duration.ofSeconds(3))
             .until {
                 prosessinstansRepository.findAllByStatusNotInAndLåsReferanseStartingWith(
                     listOf(ProsessStatus.FERDIG),
@@ -90,7 +84,7 @@ class SedMottakTestIT(
                 eessiMeldingX001.lagUnikIdentifikator(),
                 eessiMeldingX001.lagUnikIdentifikator(),
                 eessiMeldingX007.lagUnikIdentifikator(),
-                eessiMeldingX007.lagUnikIdentifikator()
+                eessiMeldingX007.lagUnikIdentifikator(),
             )
     }
 
@@ -146,47 +140,5 @@ class SedMottakTestIT(
         request.journalposttype = Journalposttype.INN
         request.innhold = "$sedType-tittel"
         return joarkFasade.opprettJournalpost(request, false)
-    }
-
-    @TestConfiguration
-    class TestConfig {
-        @Bean
-        @Primary
-        fun kodeverkRegisterStub(): KodeverkRegister? = KodeverkRegister {
-            Kodeverk(
-                "DUMMY", mapOf(
-                    Pair(
-                        "DUMMY",
-                        listOf(Kode("DUMMY", "DUMMY", LocalDate.now().minusYears(1), LocalDate.now().plusYears(1)))
-                    )
-                )
-            )
-        }
-
-        @Bean
-        @Primary
-        fun kodeOppslagStub(): KodeOppslag? {
-            open class KodeOppslagImpl : KodeOppslag {
-                override fun getTermFraKodeverk(kodeverk: FellesKodeverk, kode: String): String = "DUMMY"
-
-                override fun getTermFraKodeverk(kodeverk: FellesKodeverk, kode: String, dato: LocalDate): String =
-                    "DUMMY"
-
-                override fun getTermFraKodeverk(
-                    kodeverk: FellesKodeverk,
-                    kode: String,
-                    dato: LocalDate,
-                    kodeperioder: List<Kode>?
-                ): String = "DUMMY"
-            }
-
-            return KodeOppslagImpl()
-        }
-
-        @Bean
-        @Primary
-        fun kodeverkServiceStub(kodeverkRegister: KodeverkRegister?, kodeOppslag: KodeOppslag?): KodeverkService? {
-            return KodeverkService(kodeverkRegister, kodeOppslag)
-        }
     }
 }

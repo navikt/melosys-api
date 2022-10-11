@@ -11,6 +11,12 @@ public interface OppgaveFasade {
 
     void ferdigstillOppgave(String oppgaveId);
 
+    List<Oppgave> finnUtildelteOppgaverEtterFrist(String behandlingstema);
+
+    /**
+     * @deprecated Fjernes med toggle melosys.behandle_alle_saker
+     */
+    @Deprecated
     List<Oppgave> finnUtildelteOppgaverEtterFrist(String behandlingstype, String behandlingstema);
 
     void oppdaterOppgave(String oppgaveID, OppgaveOppdatering oppgaveOppdatering);
@@ -21,11 +27,11 @@ public interface OppgaveFasade {
 
     List<Oppgave> finnOppgaverMedOrgnr(String orgnr);
 
-    List<Oppgave> finnÅpneOppgaverMedJournalpostID(String journalpostID);
+    List<Oppgave> finnÅpneBehandlingsoppgaverMedJournalpostID(String journalpostID);
 
-    List<Oppgave> finnÅpneOppgaverMedSaksnummer(String saksnummer);
+    List<Oppgave> finnÅpneBehandlingsoppgaverMedSaksnummer(String saksnummer);
 
-    List<Oppgave> finnAvsluttetOppgaverMedSaksnummer(String saksnummer);
+    List<Oppgave> finnAvsluttetBehandlingsoppgaverMedSaksnummer(String saksnummer);
 
     Oppgave hentOppgave(String oppgaveId);
 

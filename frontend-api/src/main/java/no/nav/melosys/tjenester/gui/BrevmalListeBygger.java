@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
@@ -25,10 +27,12 @@ public class BrevmalListeBygger {
 
     private final BrevbestillingService brevbestillingService;
     private final BehandlingService behandlingService;
+    private final Unleash unleash;
 
-    public BrevmalListeBygger(BrevbestillingService brevbestillingService, BehandlingService behandlingService) {
+    public BrevmalListeBygger(BrevbestillingService brevbestillingService, BehandlingService behandlingService, Unleash unleash) {
         this.brevbestillingService = brevbestillingService;
         this.behandlingService = behandlingService;
+        this.unleash = unleash;
     }
 
     public List<BrevmalDto> byggBrevmalDtoListe(long behandlingId) {
@@ -121,7 +125,7 @@ public class BrevmalListeBygger {
         List<FeltvalgAlternativDto> feltvalgAlternativDtos = new ArrayList<>();
         Behandling behandling = behandlingService.hentBehandling(behandlingId);
 
-        if (behandling.getType() == Behandlingstyper.SOEKNAD || behandling.erKlage()) {
+        if (harStandardTekstIMangelbrev(behandling.getFagsak().getTema(), behandling.getType())) {
             feltvalgAlternativDtos.add(new FeltvalgAlternativDto(FeltvalgAlternativKode.STANDARD));
         }
         feltvalgAlternativDtos.add(new FeltvalgAlternativDto(FeltvalgAlternativKode.FRITEKST.getKode(), "Fritekst (erstatter standardtekst)", true));
@@ -144,6 +148,13 @@ public class BrevmalListeBygger {
                     .build()
             ))
             .build();
+    }
+
+    private boolean harStandardTekstIMangelbrev(Sakstemaer sakstema, Behandlingstyper behandlingstype) {
+        if (unleash.isEnabled("melosys.behandle_alle_saker")) {
+            return sakstema == Sakstemaer.MEDLEMSKAP_LOVVALG && behandlingstype == Behandlingstyper.FØRSTEGANG;
+        }
+        return behandlingstype == Behandlingstyper.SOEKNAD || behandlingstype == Behandlingstyper.KLAGE;
     }
 
     private BrevmalTypeDto lagBrevmalTypeDtoForFritekstbrev(Produserbaredokumenter produserbartdokument, long behandlingId) {
@@ -171,6 +182,10 @@ public class BrevmalListeBygger {
                 new BrevmalFeltDto.Builder()
                     .medKodeOgBeskrivelse(BrevmalFeltKode.VEDLEGG)
                     .medFeltType(FeltType.VEDLEGG)
+                    .build(),
+                new BrevmalFeltDto.Builder()
+                    .medKodeOgBeskrivelse(BrevmalFeltKode.FRITEKSTVEDLEGG)
+                    .medFeltType(FeltType.FRITEKSTVEDLEGG)
                     .build()
             ))
             .build();

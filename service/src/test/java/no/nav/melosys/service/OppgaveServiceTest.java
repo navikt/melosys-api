@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
 
+import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
@@ -62,6 +63,8 @@ class OppgaveServiceTest {
     @Mock
     private BehandlingsgrunnlagService behandlingsgrunnlagService;
 
+    private final FakeUnleash unleash = new FakeUnleash();
+
     private OppgaveService oppgaveService;
 
     @Captor
@@ -82,8 +85,10 @@ class OppgaveServiceTest {
             saksopplysningerService,
             behandlingsgrunnlagService,
             persondataFasade,
-            eregFasade);
+            eregFasade,
+            unleash);
 
+        unleash.enableAll();
         oppgave = new Oppgave.Builder()
             .setOppgavetype(Oppgavetyper.BEH_SAK_MK)
             .setTilordnetRessurs("Z998877")
@@ -119,9 +124,11 @@ class OppgaveServiceTest {
         fagsak.setBehandlinger(List.of(behandling));
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
         when(fagsakService.hentFagsak(any(String.class))).thenReturn(fagsak);
-        when(behandlingsgrunnlagService.hentBehandlingsgrunnlag(behandling.getId())).thenReturn(lagBehandlingsgrunnlag());
+        when(behandlingsgrunnlagService.finnBehandlingsgrunnlag(behandling.getId())).thenReturn(Optional.of(lagBehandlingsgrunnlag()));
+
 
         List<OppgaveDto> mineSaker = oppgaveService.hentOppgaverMedAnsvarlig(tilordnetRessurs);
+
 
         assertThat(mineSaker).hasSize(2);
 
@@ -131,6 +138,7 @@ class OppgaveServiceTest {
 
         assertThat(behOppgOpt).isPresent().get().isInstanceOf(BehandlingsoppgaveDto.class);
         assertThat(((BehandlingsoppgaveDto) behOppgOpt.get()).getBehandling().getBehandlingID()).isEqualTo(behandling.getId());
+        assertThat(((BehandlingsoppgaveDto) behOppgOpt.get()).getLand()).isNotNull();
 
         Optional<OppgaveDto> jfrOppgOpt = mineSaker.stream()
             .filter(o -> o.getOppgaveID().equals(jfrOppgID))
@@ -138,6 +146,86 @@ class OppgaveServiceTest {
 
         assertThat(jfrOppgOpt).isPresent().get().isInstanceOf(JournalfoeringsoppgaveDto.class);
     }
+
+    @Test
+    void hentOppgaverMedAnsvarlig_behandlingsgrunnlagFinnesIkke_mappesKorrekt() {
+        final String behOppgID = "1";
+        final String tilordnetRessurs = "Z2222";
+        Oppgave.Builder oppgave = new Oppgave.Builder();
+        oppgave.setOppgaveId(behOppgID);
+        oppgave.setOppgavetype(Oppgavetyper.BEH_SAK_MK);
+        oppgave.setSaksnummer(SAKSNUMMER);
+
+        Set<Oppgave> oppgaver = Set.of(oppgave.build());
+
+        when(oppgaveFasade.finnOppgaverMedAnsvarlig(tilordnetRessurs)).thenReturn(oppgaver);
+
+        Fagsak fagsak = new Fagsak();
+        fagsak.setSaksnummer(SAKSNUMMER);
+        fagsak.setType(Sakstyper.EU_EOS);
+        fagsak.setStatus(Saksstatuser.OPPRETTET);
+        Behandling behandling = lagBehandling();
+        fagsak.setBehandlinger(List.of(behandling));
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        when(fagsakService.hentFagsak(any(String.class))).thenReturn(fagsak);
+        when(behandlingsgrunnlagService.finnBehandlingsgrunnlag(behandling.getId())).thenReturn(Optional.empty());
+
+
+        List<OppgaveDto> mineSaker = oppgaveService.hentOppgaverMedAnsvarlig(tilordnetRessurs);
+
+
+        assertThat(mineSaker).hasSize(1);
+
+        Optional<OppgaveDto> behOppgOpt = mineSaker.stream()
+            .filter(o -> o.getOppgaveID().equals(behOppgID))
+            .findFirst();
+
+        assertThat(behOppgOpt).isPresent().get().isInstanceOf(BehandlingsoppgaveDto.class);
+        assertThat(((BehandlingsoppgaveDto) behOppgOpt.get()).getBehandling().getBehandlingID()).isEqualTo(behandling.getId());
+        assertThat(((BehandlingsoppgaveDto) behOppgOpt.get()).getLand()).isNull();
+    }
+
+    @Test
+    void hentOppgaverMedAnsvarlig_notaterEksisterer_forventSisteNotat() {
+        final String behOppgID = "1";
+
+        final String tilordnetRessurs = "Z2222";
+        Oppgave.Builder oppgave1 = new Oppgave.Builder();
+        oppgave1.setOppgaveId(behOppgID);
+        oppgave1.setOppgavetype(Oppgavetyper.BEH_SAK_MK);
+        oppgave1.setSaksnummer(SAKSNUMMER);
+
+        Set<Oppgave> oppgaver = Set.of(oppgave1.build());
+        when(oppgaveFasade.finnOppgaverMedAnsvarlig(tilordnetRessurs)).thenReturn(oppgaver);
+
+        Fagsak fagsak = new Fagsak();
+        fagsak.setSaksnummer(SAKSNUMMER);
+        fagsak.setType(Sakstyper.EU_EOS);
+        fagsak.setStatus(Saksstatuser.OPPRETTET);
+
+        Behandling behandling = lagBehandling();
+        Set<Behandlingsnotat> behandlingsnotater = new HashSet<>();
+        Behandlingsnotat behandlingsnotat = new Behandlingsnotat();
+        Behandlingsnotat behandlingsnotat2 = new Behandlingsnotat();
+        behandlingsnotat.setRegistrertDato(Instant.now());
+        behandlingsnotat2.setRegistrertDato(Instant.now().plusMillis(2000));
+        behandlingsnotat.setTekst("Test1");
+        behandlingsnotat2.setTekst("Test2");
+        behandlingsnotater.add(behandlingsnotat);
+        behandlingsnotater.add(behandlingsnotat2);
+        behandling.setBehandlingsnotater(behandlingsnotater);
+
+        fagsak.setBehandlinger(List.of(behandling));
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        when(fagsakService.hentFagsak(any(String.class))).thenReturn(fagsak);
+
+        List<OppgaveDto> mineSaker = oppgaveService.hentOppgaverMedAnsvarlig(tilordnetRessurs);
+
+        BehandlingsoppgaveDto behandlingsOppgave = (BehandlingsoppgaveDto) mineSaker.get(0);
+        assertThat(behandlingsOppgave.getSisteNotat().equals(behandlingsnotat2.getTekst()));
+
+    }
+
 
     @Test
     void hentOppgaverMedAnsvarlig_aktøridOgOrgnrErNull_forventUkjentIdOgNavn() {
@@ -153,7 +241,9 @@ class OppgaveServiceTest {
 
         when(oppgaveFasade.finnOppgaverMedAnsvarlig(tilordnetRessurs)).thenReturn(oppgaver);
 
+
         List<OppgaveDto> mineSaker = oppgaveService.hentOppgaverMedAnsvarlig(tilordnetRessurs);
+
 
         assertThat(mineSaker).hasSize(1);
 
@@ -182,7 +272,9 @@ class OppgaveServiceTest {
         when(persondataFasade.finnFolkeregisterident("1111")).thenReturn(Optional.of("fnr"));
         when(persondataFasade.hentSammensattNavn("fnr")).thenReturn("sammensatt navn");
 
+
         List<OppgaveDto> mineSaker = oppgaveService.hentOppgaverMedAnsvarlig(tilordnetRessurs);
+
 
         assertThat(mineSaker).hasSize(1);
 
@@ -210,7 +302,9 @@ class OppgaveServiceTest {
         when(oppgaveFasade.finnOppgaverMedAnsvarlig(tilordnetRessurs)).thenReturn(oppgaver);
         when(eregFasade.hentOrganisasjonNavn("2222")).thenReturn("organisasjonsnavn");
 
+
         List<OppgaveDto> mineSaker = oppgaveService.hentOppgaverMedAnsvarlig(tilordnetRessurs);
+
 
         assertThat(mineSaker).hasSize(1);
 
@@ -225,10 +319,50 @@ class OppgaveServiceTest {
 
     @Test
     void hentOppgaveForFagsaksnummer_oppgaveEksisterer_forventOppgave() {
-        when(oppgaveFasade.finnÅpneOppgaverMedSaksnummer(SAKSNUMMER)).thenReturn(List.of(oppgave));
+        when(oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(SAKSNUMMER)).thenReturn(List.of(oppgave));
 
-        Oppgave oppgave = oppgaveService.hentÅpenOppgaveMedFagsaksnummer(SAKSNUMMER);
+        Oppgave oppgave = oppgaveService.hentÅpenBehandlingsoppgaveMedFagsaksnummer(SAKSNUMMER);
         assertThat(oppgave.erBehandling()).isTrue();
+    }
+
+    @Test
+    void finnÅpenBehandlingsoppgaveMedFagsaksnummer_returnererOppgaveViStøtter_filtrererIkkeUtOppgave() {
+        when(oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(SAKSNUMMER)).thenReturn(List.of(
+            new Oppgave.Builder()
+                .setTema(Tema.MED)
+                .setOppgavetype(Oppgavetyper.BEH_SAK)
+                .build()));
+
+        var oppgave = oppgaveService.finnÅpenBehandlingsoppgaveMedFagsaksnummer(SAKSNUMMER);
+
+        assertThat(oppgave).isPresent();
+    }
+
+    @Test
+    void finnÅpenBehandlingsoppgaveMedFagsaksnummer_returnererTrygdeavgiftOppgave_filtrererUtOppgave() {
+        when(oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(SAKSNUMMER)).thenReturn(List.of(
+            new Oppgave.Builder()
+                .setTema(Tema.TRY)
+                .setOppgavetype(Oppgavetyper.VUR)
+                .build()));
+
+        var oppgave = oppgaveService.finnÅpenBehandlingsoppgaveMedFagsaksnummer(SAKSNUMMER);
+
+        assertThat(oppgave).isNotPresent();
+    }
+
+    @Test
+    void finnÅpenBehandlingsoppgaveMedFagsaksnummer_returnererTrygdeavgiftOppgaveToggleAv_filtrererIkkeUtOppgave() {
+        unleash.disableAll();
+        when(oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(SAKSNUMMER)).thenReturn(List.of(
+            new Oppgave.Builder()
+                .setTema(Tema.TRY)
+                .setOppgavetype(Oppgavetyper.VUR)
+                .build()));
+
+        var oppgave = oppgaveService.finnÅpenBehandlingsoppgaveMedFagsaksnummer(SAKSNUMMER);
+
+        assertThat(oppgave).isPresent();
     }
 
     @Test
@@ -245,7 +379,23 @@ class OppgaveServiceTest {
     }
 
     @Test
+    void opprettEllerGjenbrukBehandlingsoppgave_oppgaveOpprettElektroniskSøknad_oppgaveBlirOpprettetMedBeskrivelse() {
+        Behandling behandling = lagBehandling();
+        behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
+        behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(new BehandlingsgrunnlagData());
+        behandling.getBehandlingsgrunnlag().setType(Behandlingsgrunnlagtyper.SØKNAD_A1_UTSENDTE_ARBEIDSTAKERE_EØS);
+        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
+
+        oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", "Z99999");
+
+        verify(oppgaveFasade).opprettOppgave(oppgaveCaptor.capture());
+        assertThat(oppgaveCaptor.getValue().getBeskrivelse()).isEqualTo(behandling.getTema().getBeskrivelse());
+    }
+
+    @Test
     void opprettEllerGjenbrukBehandlingsoppgave_oppgaveOpprettElektroniskSøknad_oppgaveBlirOpprettetMedBeskrvielse() {
+        unleash.disableAll();
+
         final String mottattString = "Mottatt elektronisk søknad";
         Behandling behandling = lagBehandling();
         behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
@@ -260,7 +410,21 @@ class OppgaveServiceTest {
     }
 
     @Test
+    void opprettEllerGjenbrukBehandlingsoppgave_oppgaveNyVurdering_oppgaveBlirOpprettetMedBeskrivelse() {
+        Behandling behandling = lagBehandling();
+        behandling.setType(Behandlingstyper.NY_VURDERING);
+        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
+
+        oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", "Z99999");
+
+        verify(oppgaveFasade).opprettOppgave(oppgaveCaptor.capture());
+        assertThat(oppgaveCaptor.getValue().getBeskrivelse()).isEqualTo(behandling.getTema().getBeskrivelse());
+    }
+
+    @Test
     void opprettEllerGjenbrukBehandlingsoppgave_oppgaveNyVurdering_oppgaveBlirOpprettetMedBeskrvielse() {
+        unleash.disableAll();
+
         final String mottattString = "Ny vurdering";
         Behandling behandling = lagBehandling();
         behandling.setType(Behandlingstyper.NY_VURDERING);
@@ -279,7 +443,7 @@ class OppgaveServiceTest {
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         behandling.setFagsak(new Fagsak());
         behandling.getFagsak().setSaksnummer(SAKSNUMMER);
-        when(oppgaveFasade.finnÅpneOppgaverMedSaksnummer(SAKSNUMMER)).thenReturn(List.of(oppgave));
+        when(oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(SAKSNUMMER)).thenReturn(List.of(oppgave));
 
         oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", oppgave.getTilordnetRessurs());
         verify(oppgaveFasade, never()).opprettOppgave(any());
@@ -294,7 +458,7 @@ class OppgaveServiceTest {
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         behandling.setFagsak(new Fagsak());
         behandling.getFagsak().setSaksnummer(SAKSNUMMER);
-        when(oppgaveFasade.finnÅpneOppgaverMedSaksnummer(SAKSNUMMER)).thenReturn(List.of(oppgave));
+        when(oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(SAKSNUMMER)).thenReturn(List.of(oppgave));
 
         oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", tilordnetRessurs);
         verify(oppgaveFasade, never()).opprettOppgave(any());
@@ -345,7 +509,7 @@ class OppgaveServiceTest {
 
         when(persondataFasade.harStrengtFortroligAdresse("aktørID")).thenReturn(false);
         when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
-        when(oppgaveFasade.finnAvsluttetOppgaverMedSaksnummer(SAKSNUMMER)).thenReturn(List.of(oppgave1, oppgave2));
+        when(oppgaveFasade.finnAvsluttetBehandlingsoppgaverMedSaksnummer(SAKSNUMMER)).thenReturn(List.of(oppgave1, oppgave2));
         when(fagsakService.hentFagsak(SAKSNUMMER)).thenReturn(fagsak);
 
         oppgaveService.opprettOppgaveForSak(SAKSNUMMER);
@@ -361,7 +525,7 @@ class OppgaveServiceTest {
         final var saksbehandler = "Z12111";
         final var oppgave = new Oppgave.Builder().setTilordnetRessurs(saksbehandler).build();
 
-        when(oppgaveFasade.finnÅpneOppgaverMedSaksnummer(saksnummer)).thenReturn(List.of(oppgave));
+        when(oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(saksnummer)).thenReturn(List.of(oppgave));
         assertThat(oppgaveService.saksbehandlerErTilordnetOppgaveForSaksnummer(saksbehandler, saksnummer)).isTrue();
     }
 
@@ -371,7 +535,7 @@ class OppgaveServiceTest {
         final var saksbehandler = "Z12111";
         final var oppgave = new Oppgave.Builder().build();
 
-        when(oppgaveFasade.finnÅpneOppgaverMedSaksnummer(saksnummer)).thenReturn(List.of(oppgave));
+        when(oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(saksnummer)).thenReturn(List.of(oppgave));
         assertThat(oppgaveService.saksbehandlerErTilordnetOppgaveForSaksnummer(saksbehandler, saksnummer)).isFalse();
     }
 
@@ -379,7 +543,7 @@ class OppgaveServiceTest {
     void saksbehandlerErTilordnetOppgaveForSaksnummer_finnesIngenOppgaver_erIkkeSann() {
         final var saksnummer = "MEL-0";
 
-        when(oppgaveFasade.finnÅpneOppgaverMedSaksnummer(saksnummer)).thenReturn(Collections.emptyList());
+        when(oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(saksnummer)).thenReturn(Collections.emptyList());
         assertThat(oppgaveService.saksbehandlerErTilordnetOppgaveForSaksnummer("Z12111", saksnummer)).isFalse();
     }
 
@@ -394,12 +558,14 @@ class OppgaveServiceTest {
         Behandling behandling = new Behandling();
         final var fagsak = new Fagsak();
         fagsak.setSaksnummer(SAKSNUMMER);
+        fagsak.setType(Sakstyper.EU_EOS);
+        fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
         Aktoer bruker = new Aktoer();
         bruker.setRolle(BRUKER);
         bruker.setAktørId("aktørID");
         fagsak.getAktører().add(bruker);
         behandling.setFagsak(fagsak);
-        behandling.setType(Behandlingstyper.SOEKNAD);
+        behandling.setType(Behandlingstyper.FØRSTEGANG);
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         behandling.setId(1L);
         behandling.setRegistrertDato(Instant.ofEpochMilli(111L));

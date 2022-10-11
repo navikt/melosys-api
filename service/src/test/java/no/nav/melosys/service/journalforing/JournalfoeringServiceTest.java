@@ -5,17 +5,22 @@ import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import no.finn.unleash.FakeUnleash;
+import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.arkiv.ArkivDokument;
 import no.nav.melosys.domain.arkiv.BrukerIdType;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -25,9 +30,12 @@ import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
+import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.felles.dto.SoeknadslandDto;
+import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import no.nav.melosys.service.journalforing.dto.*;
+import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
@@ -39,6 +47,8 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static no.nav.melosys.domain.kodeverk.Sakstemaer.MEDLEMSKAP_LOVVALG;
+import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.FØRSTEGANG;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.*;
@@ -62,6 +72,12 @@ class JournalfoeringServiceTest {
     @Mock
     private PersondataFasade persondataFasade;
 
+    @Mock
+    private BehandlingsresultatRepository behandlingsresultatRepository;
+    @Mock
+    private SaksbehandlingRegler saksbehandlingRegler;
+
+    private final LovligeKombinasjonerService lovligeKombinasjonerService = new LovligeKombinasjonerService();
     private final FakeUnleash unleash = new FakeUnleash();
 
     @Captor
@@ -76,11 +92,13 @@ class JournalfoeringServiceTest {
 
     @BeforeEach
     public void setup() {
+        saksbehandlingRegler = new SaksbehandlingRegler(behandlingsresultatRepository);
+
         unleash.enable("melosys.folketrygden.mvp");
         journalpost = new Journalpost("123");
         journalpost.setHoveddokument(new ArkivDokument());
 
-        this.journalfoeringService = new JournalfoeringService(joarkFasade, prosessinstansService, eessiService, fagsakService, persondataFasade, unleash);
+        this.journalfoeringService = new JournalfoeringService(joarkFasade, prosessinstansService, eessiService, fagsakService, persondataFasade, lovligeKombinasjonerService, unleash, saksbehandlingRegler);
         opprettDto = new JournalfoeringOpprettDto();
         opprettDto.setJournalpostID("setJournalpostID");
         opprettDto.setOppgaveID("setOppgaveID");
@@ -91,8 +109,11 @@ class JournalfoeringServiceTest {
         opprettDto.setHoveddokument(new DokumentDto("3333", "setDokumenttittel"));
         opprettDto.setArbeidsgiverID("123456789");
         opprettDto.setBehandlingstemaKode(Behandlingstema.UTSENDT_ARBEIDSTAKER.getKode());
+        opprettDto.setBehandlingstypeKode(Behandlingstyper.FØRSTEGANG.getKode());
 
-        opprettDto.setFagsak(new FagsakDto());
+        var fagsak = new FagsakDto();
+        fagsak.setSakstype(Sakstyper.EU_EOS.getKode());
+        opprettDto.setFagsak(fagsak);
 
         tilordneDto = new JournalfoeringTilordneDto();
         tilordneDto.setBehandlingstypeKode(Behandlingstyper.ENDRET_PERIODE.getKode());
@@ -139,7 +160,7 @@ class JournalfoeringServiceTest {
     }
 
     @Test
-    void opprettSakOgJournalfør_ikkeSed_prosessinstansBlirOpprettet() {
+    void journalførOgOpprettSak_ikkeSed_prosessinstansBlirOpprettet() {
         FagsakDto fagsakDto = lagFagsakDto(LocalDate.MIN, LocalDate.MAX, "DK", Sakstyper.EU_EOS);
         opprettDto.setFagsak(fagsakDto);
         when(prosessinstansService.lagJournalføringProsessinstans(eq(ProsessType.JFR_NY_SAK_BRUKER), any()))
@@ -155,7 +176,7 @@ class JournalfoeringServiceTest {
     }
 
     @Test
-    void opprettSakOgJournalfør_medVirksomhetOrgnr_oppretterKorrektProsessinstans() {
+    void journalførOgOpprettSak_medVirksomhetOrgnr_oppretterKorrektProsessinstans() {
         FagsakDto fagsakDto = lagFagsakDto(LocalDate.MIN, LocalDate.MAX, "DK", Sakstyper.EU_EOS);
         opprettDto.setFagsak(fagsakDto);
         opprettDto.setBrukerID(null);
@@ -173,7 +194,82 @@ class JournalfoeringServiceTest {
     }
 
     @Test
-    void opprettSakOgJournalfør_sakstypeFtrlUtenLandOgPeriode_prosessinstansBlirOpprettet() {
+    void journalførOgOpprettSak_ugyldigBehandlingstypeOgSakstema_nårSenderForvaltningsmelding_kasterException() {
+        unleash.enable("melosys.behandle_alle_saker");
+        when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
+
+        opprettDto.setIkkeSendForvaltingsmelding(false);
+
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> journalfoeringService.journalførOgOpprettSak(opprettDto))
+            .withMessageContaining("Kan kun sende forvaltningsmelding for behandlingtype: " +
+                "FØRSTEGANG og sakstema: MEDLEMSKAP_LOVVALG");
+    }
+
+    @Test
+    void journalførOgOpprettSak_ugyldigAktoersrolle_nårSenderForvaltningsmelding_kasterException() {
+        unleash.enable("melosys.behandle_alle_saker");
+        when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
+
+        FagsakDto fagsakDto = lagFagsakDto(LocalDate.MIN, LocalDate.MAX, "DK", Sakstyper.EU_EOS);
+        fagsakDto.setSakstema(MEDLEMSKAP_LOVVALG.getKode());
+        opprettDto.setFagsak(fagsakDto);
+        opprettDto.setBrukerID(null);
+        opprettDto.setBehandlingstypeKode(FØRSTEGANG.getKode());
+        opprettDto.setIkkeSendForvaltingsmelding(false);
+
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> journalfoeringService.journalførOgOpprettSak(opprettDto))
+            .withMessageContaining("Kan kun sende forvaltningsmelding for Aktoersroller: BRUKER");
+    }
+
+    @Test
+    void journalførOgOpprettSak_gyldigSkalSendeForvaltningsmeldingKasterIkkeFeilUnderValidering_ingenFeil() {
+        unleash.enable("melosys.behandle_alle_saker");
+        when(prosessinstansService.lagJournalføringProsessinstans(eq(ProsessType.JFR_NY_SAK_BRUKER), any())).thenReturn(new Prosessinstans());
+        when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
+
+        FagsakDto fagsakDto = lagFagsakDto(LocalDate.MIN, LocalDate.MAX, "DK", Sakstyper.EU_EOS);
+        fagsakDto.setSakstema(MEDLEMSKAP_LOVVALG.getKode());
+        opprettDto.setFagsak(fagsakDto);
+        opprettDto.setBehandlingstypeKode(FØRSTEGANG.getKode());
+        opprettDto.setBehandlingstemaKode(Behandlingstema.UTSENDT_SELVSTENDIG.getKode());
+        opprettDto.setIkkeSendForvaltingsmelding(false);
+
+
+        journalfoeringService.journalførOgOpprettSak(opprettDto);
+
+
+        verify(prosessinstansService).lagre(prosessinstansArgumentCaptor.capture());
+        var processInstans = prosessinstansArgumentCaptor.getValue();
+        assertThat(processInstans.getData(ProsessDataKey.SAKSTEMA, Sakstemaer.class).getKode()).isEqualTo(fagsakDto.getSakstema());
+        assertThat(processInstans.getData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.class).getKode()).isEqualTo(opprettDto.getBehandlingstypeKode());
+    }
+
+    @Test
+    void journalførOgOpprettSak_toggleEnabled_oppretterKorrektProsessinstans() {
+        unleash.enable("melosys.behandle_alle_saker");
+        FagsakDto fagsakDto = lagFagsakDto(LocalDate.MIN, LocalDate.MAX, "DK", Sakstyper.EU_EOS);
+        fagsakDto.setSakstema(Sakstemaer.UNNTAK.getKode());
+        opprettDto.setFagsak(fagsakDto);
+        opprettDto.setBehandlingstypeKode(Behandlingstyper.HENVENDELSE.getKode());
+        opprettDto.setBehandlingstemaKode(Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET.getKode());
+        opprettDto.setBrukerID("1234");
+        when(prosessinstansService.lagJournalføringProsessinstans(eq(ProsessType.JFR_NY_SAK_BRUKER), any())).thenReturn(new Prosessinstans());
+        when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
+
+        journalfoeringService.journalførOgOpprettSak(opprettDto);
+
+        verify(prosessinstansService).lagre(prosessinstansArgumentCaptor.capture());
+        var lagretProsessinstans = prosessinstansArgumentCaptor.getValue();
+        assertThat(lagretProsessinstans.getData(ProsessDataKey.SAKSTEMA, Sakstemaer.class).getKode()).isEqualTo(fagsakDto.getSakstema());
+        assertThat(lagretProsessinstans.getData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.class).getKode()).isEqualTo(opprettDto.getBehandlingstypeKode());
+    }
+
+    @Test
+    void journalførOgOpprettSak_sakstypeFtrlUtenLandOgPeriode_prosessinstansBlirOpprettet() {
         FagsakDto fagsakDto = lagFagsakDto(null, null, null, Sakstyper.FTRL);
         opprettDto.setFagsak(fagsakDto);
         opprettDto.setBehandlingstemaKode(Behandlingstema.ARBEID_I_UTLANDET.getKode());
@@ -187,7 +283,7 @@ class JournalfoeringServiceTest {
     }
 
     @Test
-    void opprettSakOgJournalfør_sakstypeFtrlBehandlingstemaArbeidFlereLand_feilKombinasjonSakstypeBehandlingstemaKasterFeil() {
+    void journalførOgOpprettSak_sakstypeFtrlBehandlingstemaArbeidFlereLand_feilKombinasjonSakstypeBehandlingstemaKasterFeil() {
         FagsakDto fagsakDto = lagFagsakDto(null, null, null, Sakstyper.FTRL);
         opprettDto.setFagsak(fagsakDto);
         opprettDto.setBehandlingstemaKode(Behandlingstema.ARBEID_FLERE_LAND.getKode());
@@ -199,7 +295,7 @@ class JournalfoeringServiceTest {
     }
 
     @Test
-    void opprettSakOgJournalfør_fomEtterTom_feiler() {
+    void journalførOgOpprettSak_fomEtterTom_feiler() {
         FagsakDto fagsakDto = lagFagsakDto(LocalDate.MAX, LocalDate.MIN, "DK", Sakstyper.EU_EOS);
         opprettDto.setFagsak(fagsakDto);
         when(prosessinstansService.lagJournalføringProsessinstans(eq(ProsessType.JFR_NY_SAK_BRUKER), any()))
@@ -211,7 +307,7 @@ class JournalfoeringServiceTest {
     }
 
     @Test
-    void opprettSakOgJournalfør_utenTom_gyldig() {
+    void journalførOgOpprettSak_utenTom_gyldig() {
         FagsakDto fagsakDto = lagFagsakDto(LocalDate.MIN, null, "DK", Sakstyper.EU_EOS);
         opprettDto.setFagsak(fagsakDto);
         when(prosessinstansService.lagJournalføringProsessinstans(eq(ProsessType.JFR_NY_SAK_BRUKER), any()))
@@ -224,7 +320,7 @@ class JournalfoeringServiceTest {
     }
 
     @Test
-    void opprettSakOgJournalfør_sakstypeFtrlFeatureToggleFolketrygdMvpDisabled_kasterException() {
+    void journalførOgOpprettSak_sakstypeFtrlFeatureToggleFolketrygdMvpDisabled_kasterException() {
         FagsakDto fagsakDto = lagFagsakDto(LocalDate.MIN, null, "DK", Sakstyper.FTRL);
         opprettDto.setFagsak(fagsakDto);
         opprettDto.setBehandlingstemaKode(Behandlingstema.ARBEID_I_UTLANDET.getKode());
@@ -237,7 +333,7 @@ class JournalfoeringServiceTest {
     }
 
     @Test
-    void opprettSakOgJournalfør_sakstypeFtrlFeatureToggleFolketrygdMvpEnabled_oppretterSak() {
+    void journalførOgOpprettSak_sakstypeFtrlFeatureToggleFolketrygdMvpEnabled_oppretterSak() {
         FagsakDto fagsakDto = lagFagsakDto(LocalDate.MIN, null, "DK", Sakstyper.FTRL);
         opprettDto.setFagsak(fagsakDto);
         opprettDto.setBehandlingstemaKode(Behandlingstema.ARBEID_I_UTLANDET.getKode());
@@ -246,12 +342,15 @@ class JournalfoeringServiceTest {
             .thenReturn(new Prosessinstans());
         when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
 
+
         journalfoeringService.journalførOgOpprettSak(opprettDto);
+
+
         verify(prosessinstansService).lagre(any(Prosessinstans.class));
     }
 
     @Test
-    void opprettSakOgJournalfør_oppgaveID_mangler() {
+    void journalførOgOpprettSak_oppgaveID_mangler() {
         opprettDto.setOppgaveID(null);
         when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
 
@@ -261,7 +360,7 @@ class JournalfoeringServiceTest {
     }
 
     @Test
-    void opprettOgJournalfør_støtterAutomatiskBehandling_forventException() {
+    void journalførOgOpprettSak_støtterAutomatiskBehandling_forventException() {
         MelosysEessiMelding melosysEessiMelding = new MelosysEessiMelding();
         melosysEessiMelding.setRinaSaksnummer(RINA_SAKSNUMMER);
         when(eessiService.hentSedTilknyttetJournalpost(journalpost.getJournalpostId())).thenReturn(melosysEessiMelding);
@@ -278,7 +377,7 @@ class JournalfoeringServiceTest {
 
 
     @Test
-    void opprettOgJournalfør_støtterIkkeAutomatiskBehandling_feilBehandlingstype() {
+    void journalførOgOpprettSak_støtterIkkeAutomatiskBehandling_feilBehandlingstype() {
         MelosysEessiMelding melosysEessiMelding = new MelosysEessiMelding();
         melosysEessiMelding.setRinaSaksnummer(RINA_SAKSNUMMER);
         when(eessiService.hentSedTilknyttetJournalpost(journalpost.getJournalpostId())).thenReturn(melosysEessiMelding);
@@ -294,7 +393,7 @@ class JournalfoeringServiceTest {
     }
 
     @Test
-    void opprettOgJournalfør_sedAlleredeTilknyttet_kasterException() {
+    void journalførOgOpprettSak_sedAlleredeTilknyttet_kasterException() {
         MelosysEessiMelding melosysEessiMelding = new MelosysEessiMelding();
         melosysEessiMelding.setRinaSaksnummer(RINA_SAKSNUMMER);
         when(eessiService.hentSedTilknyttetJournalpost(journalpost.getJournalpostId())).thenReturn(melosysEessiMelding);
@@ -316,7 +415,7 @@ class JournalfoeringServiceTest {
     }
 
     @Test
-    void opprettOgJournalfør_brukerIDOgVirksomheOrgnrMangler_kasterException() {
+    void journalførOgOpprettSak_brukerIDOgVirksomheOrgnrMangler_kasterException() {
         opprettDto.setBrukerID(null);
         opprettDto.setVirksomhetOrgnr(null);
         when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
@@ -327,7 +426,7 @@ class JournalfoeringServiceTest {
     }
 
     @Test
-    void opprettOgJournalfør_brukerIDOgVirksomhetOrgnrFinnes_kasterException() {
+    void journalførOgOpprettSak_brukerIDOgVirksomhetOrgnrFinnes_kasterException() {
         opprettDto.setBrukerID("fnr");
         opprettDto.setVirksomhetOrgnr("orgnr");
         when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
@@ -338,7 +437,7 @@ class JournalfoeringServiceTest {
     }
 
     @Test
-    void opprettOgJournalfør_journalpostErFerdigstilt_kasterException() {
+    void journalførOgOpprettSak_journalpostErFerdigstilt_kasterException() {
         journalpost.setErFerdigstilt(true);
         when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
 
@@ -465,20 +564,24 @@ class JournalfoeringServiceTest {
     }
 
     @Test
-    void journalførOgOpprettNyVurdering_altOK_prosessinstansOpprettet() {
+    void journalførOgOpprettAndregangsBehandling_altOK_prosessinstansOpprettet() {
         tilordneDto.setSaksnummer(MELOSYS_SAKSNUMMER);
 
         var behandling = new Behandling();
         behandling.setStatus(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
         var fagsak = new Fagsak();
+        fagsak.setType(Sakstyper.FTRL);
+        behandling.setFagsak(fagsak);
+        behandling.setType(Behandlingstyper.SOEKNAD);
+        behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
         fagsak.getBehandlinger().add(behandling);
 
         when(joarkFasade.hentJournalpost(tilordneDto.getJournalpostID())).thenReturn(journalpost);
         when(fagsakService.hentFagsak(MELOSYS_SAKSNUMMER)).thenReturn(fagsak);
-        when(prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_NY_VURDERING, tilordneDto))
+        when(prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_ANDREGANG_REPLIKER_BEHANDLING, tilordneDto))
             .thenReturn(new Prosessinstans());
 
-        journalfoeringService.journalførOgOpprettNyVurdering(tilordneDto);
+        journalfoeringService.journalførOgOpprettAndregangsBehandling(tilordneDto);
 
         verify(prosessinstansService).lagre(prosessinstansArgumentCaptor.capture());
         var lagretProsessinstans = prosessinstansArgumentCaptor.getValue();
@@ -491,7 +594,83 @@ class JournalfoeringServiceTest {
     }
 
     @Test
-    void journalførOgOpprettNyVurdering_behandlingstypeIkkeTillattForSakstype_kasterException() {
+    void journalførOgOpprettAndregangsBehandlingIkkeKopierBehandling_altOK_prosessinstansOpprettet() {
+        unleash.enable("melosys.behandle_alle_saker");
+        tilordneDto.setSaksnummer(MELOSYS_SAKSNUMMER);
+        tilordneDto.setBehandlingstemaKode(Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET.getKode());
+        tilordneDto.setBehandlingstypeKode(Behandlingstyper.HENVENDELSE.getKode());
+
+        var behandling = new Behandling();
+        behandling.setStatus(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
+        var fagsak = new Fagsak();
+        fagsak.setType(Sakstyper.EU_EOS);
+        fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
+        Aktoer aktoer = new Aktoer();
+        aktoer.setRolle(Aktoersroller.BRUKER);
+        fagsak.setAktører(Set.of(aktoer));
+        behandling.setFagsak(fagsak);
+        fagsak.getBehandlinger().add(behandling);
+
+        when(joarkFasade.hentJournalpost(tilordneDto.getJournalpostID())).thenReturn(journalpost);
+        when(fagsakService.hentFagsak(MELOSYS_SAKSNUMMER)).thenReturn(fagsak);
+        when(prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_ANDREGANG_NY_BEHANDLING, tilordneDto))
+            .thenReturn(new Prosessinstans());
+
+        journalfoeringService.journalførOgOpprettAndregangsBehandling(tilordneDto);
+
+        verify(prosessinstansService).lagre(prosessinstansArgumentCaptor.capture());
+        var lagretProsessinstans = prosessinstansArgumentCaptor.getValue();
+        assertThat(lagretProsessinstans.getBehandling()).isNull();
+        assertThat(lagretProsessinstans.getData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.class).getKode())
+            .isEqualTo(tilordneDto.getBehandlingstypeKode());
+        assertThat(lagretProsessinstans.getData(ProsessDataKey.SAKSNUMMER)).isEqualTo(tilordneDto.getSaksnummer());
+        assertThat(lagretProsessinstans.getData(ProsessDataKey.JFR_INGEN_VURDERING, Boolean.class))
+            .isEqualTo(tilordneDto.isIngenVurdering());
+    }
+
+    @Test
+    void journalførOgOpprettAndregangsBehandlingKopierBehandling_altOK_prosessinstansOpprettet() {
+        unleash.enable("melosys.behandle_alle_saker");
+        tilordneDto.setSaksnummer(MELOSYS_SAKSNUMMER);
+        tilordneDto.setBehandlingstemaKode(Behandlingstema.UTSENDT_ARBEIDSTAKER.getKode());
+        tilordneDto.setBehandlingstypeKode(Behandlingstyper.NY_VURDERING.getKode());
+
+        var behandling = new Behandling();
+        behandling.setStatus(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
+        behandling.setType(Behandlingstyper.NY_VURDERING);
+        var fagsak = new Fagsak();
+        fagsak.setType(Sakstyper.EU_EOS);
+        fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
+        Aktoer aktoer = new Aktoer();
+        aktoer.setRolle(Aktoersroller.BRUKER);
+        fagsak.setAktører(Set.of(aktoer));
+        behandling.setFagsak(fagsak);
+        fagsak.getBehandlinger().add(behandling);
+        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+        behandlingsresultat.setType(Behandlingsresultattyper.AVSLAG_SØKNAD);
+
+        when(joarkFasade.hentJournalpost(tilordneDto.getJournalpostID())).thenReturn(journalpost);
+        when(fagsakService.hentFagsak(MELOSYS_SAKSNUMMER)).thenReturn(fagsak);
+        when(prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_ANDREGANG_REPLIKER_BEHANDLING, tilordneDto))
+            .thenReturn(new Prosessinstans());
+        when(behandlingsresultatRepository.findById(any())).thenReturn(Optional.of(behandlingsresultat));
+
+
+        journalfoeringService.journalførOgOpprettAndregangsBehandling(tilordneDto);
+
+
+        verify(prosessinstansService).lagre(prosessinstansArgumentCaptor.capture());
+        var lagretProsessinstans = prosessinstansArgumentCaptor.getValue();
+        assertThat(lagretProsessinstans.getBehandling()).isNull();
+        assertThat(lagretProsessinstans.getData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.class).getKode())
+            .isEqualTo(tilordneDto.getBehandlingstypeKode());
+        assertThat(lagretProsessinstans.getData(ProsessDataKey.SAKSNUMMER)).isEqualTo(tilordneDto.getSaksnummer());
+        assertThat(lagretProsessinstans.getData(ProsessDataKey.JFR_INGEN_VURDERING, Boolean.class))
+            .isEqualTo(tilordneDto.isIngenVurdering());
+    }
+
+    @Test
+    void journalførOgOpprettAndregangsBehandling_behandlingstypeIkkeTillattForSakstype_kasterException() {
         tilordneDto.setSaksnummer(MELOSYS_SAKSNUMMER);
         var fagsak = new Fagsak();
 
@@ -502,19 +681,19 @@ class JournalfoeringServiceTest {
         tilordneDto.setBehandlingstypeKode(Behandlingstyper.ENDRET_PERIODE.getKode());
         fagsak.setType(Sakstyper.TRYGDEAVTALE);
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> journalfoeringService.journalførOgOpprettNyVurdering(tilordneDto))
+            .isThrownBy(() -> journalfoeringService.journalførOgOpprettAndregangsBehandling(tilordneDto))
             .withMessageContaining(" er ikke en lovlig behandlingstype ved knytting av dokument til sak");
 
 
         tilordneDto.setBehandlingstypeKode(Behandlingstyper.KLAGE.getKode());
         fagsak.setType(Sakstyper.EU_EOS);
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> journalfoeringService.journalførOgOpprettNyVurdering(tilordneDto))
+            .isThrownBy(() -> journalfoeringService.journalførOgOpprettAndregangsBehandling(tilordneDto))
             .withMessageContaining(" er ikke en lovlig behandlingstype ved knytting av dokument til sak");
     }
 
     @Test
-    void journalførOgOpprettNyVurdering_fagsakHarAktivBehandling_feilKastes() {
+    void journalførOgOpprettAndregangsBehandling_fagsakHarAktivBehandling_feilKastes() {
         tilordneDto.setSaksnummer(MELOSYS_SAKSNUMMER);
 
         var behandling = new Behandling();
@@ -526,12 +705,12 @@ class JournalfoeringServiceTest {
         when(fagsakService.hentFagsak(MELOSYS_SAKSNUMMER)).thenReturn(fagsak);
 
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> journalfoeringService.journalførOgOpprettNyVurdering(tilordneDto))
+            .isThrownBy(() -> journalfoeringService.journalførOgOpprettAndregangsBehandling(tilordneDto))
             .withMessageContaining("Det finnes allerede en aktiv behandling på fagsak " + MELOSYS_SAKSNUMMER);
     }
 
     @Test
-    void journalførOgOpprettNyVurdering_sedSakTilknyttetAnnenFagsak_kasterException() {
+    void journalførOgOpprettAndregangsBehandling_sedSakTilknyttetAnnenFagsak_kasterException() {
         journalpost.setMottaksKanal("EESSI");
         var melosysEessiMelding = new MelosysEessiMelding();
         melosysEessiMelding.setRinaSaksnummer(RINA_SAKSNUMMER);
@@ -554,12 +733,12 @@ class JournalfoeringServiceTest {
 
 
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> journalfoeringService.journalførOgOpprettNyVurdering(tilordneDto))
+            .isThrownBy(() -> journalfoeringService.journalførOgOpprettAndregangsBehandling(tilordneDto))
             .withMessageContaining("er allerede tilknyttet");
     }
 
     @Test
-    void journalførOgOpprettNyVurdering_fagsakFinnesIkke_kasterFeil() {
+    void journalførOgOpprettAndregangsBehandling_fagsakFinnesIkke_kasterFeil() {
         tilordneDto.setSaksnummer(null);
 
         when(joarkFasade.hentJournalpost(tilordneDto.getJournalpostID())).thenReturn(journalpost);
@@ -567,7 +746,7 @@ class JournalfoeringServiceTest {
             .thenThrow(new IkkeFunnetException("Det finnes ingen fagsak med saksnummer: " + null));
 
         assertThatExceptionOfType(IkkeFunnetException.class)
-            .isThrownBy(() -> journalfoeringService.journalførOgOpprettNyVurdering(tilordneDto))
+            .isThrownBy(() -> journalfoeringService.journalførOgOpprettAndregangsBehandling(tilordneDto))
             .withMessageContaining("Det finnes ingen fagsak med saksnummer: null");
     }
 

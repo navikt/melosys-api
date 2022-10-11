@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.Institusjon;
@@ -64,6 +65,7 @@ class EosVedtakServiceTest {
     @Mock
     private FerdigbehandlingKontrollFacade ferdigbehandlingKontrollFacade;
     private EosVedtakService vedtakService;
+    private final FakeUnleash unleash = new FakeUnleash();
     private final long behandlingID = 1L;
     private final Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
     private final Behandling behandling = new Behandling();
@@ -72,23 +74,25 @@ class EosVedtakServiceTest {
     @BeforeEach
     void setUp() {
         vedtakService = new EosVedtakService(behandlingService, behandlingsresultatService, oppgaveService, prosessinstansService,
-            eessiService, landvelgerService, avklartefaktaService, melosysEventMulticaster, ferdigbehandlingKontrollFacade);
+            eessiService, landvelgerService, avklartefaktaService, melosysEventMulticaster, ferdigbehandlingKontrollFacade, unleash);
 
         SpringSubjectHandler.set(new TestSubjectHandler());
 
         behandling.setId(behandlingID);
         behandling.setStatus(Behandlingsstatus.AVSLUTTET);
-        behandling.setType(Behandlingstyper.SOEKNAD);
+        behandling.setType(Behandlingstyper.FØRSTEGANG);
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
 
         behandlingsresultat.setId(behandlingID);
         behandlingsresultat.setBehandling(behandling);
 
         behandling.setFagsak(lagFagsak());
+
+        unleash.enableAll();
     }
 
     @Test
-    void fattVedtak_erInnvilgelse_fatterVedtakOgKontrollererVedtak() throws Exception {
+    void fattVedtak_erInnvilgelse_fatterVedtakOgKontrollererVedtak() {
         var mottakerinstitusjoner = Set.of("AB:CDEF123");
         mockBehandlingsresultat();
         mockEesiReady();
@@ -118,7 +122,7 @@ class EosVedtakServiceTest {
     }
 
     @Test
-    void fattVedtak_landErEessiReadyInstitusjonErSatt_fatterVedtak() throws Exception {
+    void fattVedtak_landErEessiReadyInstitusjonErSatt_fatterVedtak() {
         var mottakerinstitusjoner = Set.of("AB:CDEF123");
         mockBehandlingsresultat();
         mockEesiReady();
@@ -147,7 +151,7 @@ class EosVedtakServiceTest {
     }
 
     @Test
-    void fattVedtak_utenMottakerLandErIkkeEessiReady_fatterVedtak() throws Exception {
+    void fattVedtak_utenMottakerLandErIkkeEessiReady_fatterVedtak() {
         mockBehandlingsresultat();
         leggTilLovvalgsperiode();
 
@@ -173,7 +177,7 @@ class EosVedtakServiceTest {
     }
 
     @Test
-    void fattVedtak_mottakerErNullOgErAnmodningOmUnntakSvarMottatt_fatterVedtak() throws Exception {
+    void fattVedtak_mottakerErNullOgErAnmodningOmUnntakSvarMottatt_fatterVedtak() {
         mockBehandlingsresultat();
 
         leggTilLovvalgsperiode();
@@ -204,7 +208,7 @@ class EosVedtakServiceTest {
     }
 
     @Test
-    void fattVedtak_erAvslagManglendeOpplysninger_fatterVedtak() throws Exception {
+    void fattVedtak_erAvslagManglendeOpplysninger_fatterVedtak() {
         mockBehandlingsresultat();
 
         final Behandlingsresultattyper resultatType = Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL;
@@ -230,7 +234,7 @@ class EosVedtakServiceTest {
     }
 
     @Test
-    void fattVedtak_erAvslag_fatterVedtakUtenKallTilEessi() throws Exception {
+    void fattVedtak_erAvslag_fatterVedtakUtenKallTilEessi() {
         mockBehandlingsresultat();
         behandlingsresultat.setType(AVSLAG_SØKNAD);
         leggTilLovvalgsperiode(InnvilgelsesResultat.AVSLAATT);
@@ -347,6 +351,8 @@ class EosVedtakServiceTest {
     private Fagsak lagFagsak() {
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer("MEL-111");
+        fagsak.setType(Sakstyper.EU_EOS);
+        fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
         Aktoer aktoer = new Aktoer();
         aktoer.setAktørId("1234567890123");
         aktoer.setRolle(Aktoersroller.BRUKER);

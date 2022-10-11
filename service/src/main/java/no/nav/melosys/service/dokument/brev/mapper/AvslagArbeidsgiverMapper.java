@@ -25,7 +25,7 @@ public class AvslagArbeidsgiverMapper implements BrevDataMapper {
     private static final String XSD_LOCATION = "melosysbrev/melosys_000109.xsd";
 
     @Override
-    public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat, BrevData brevData)
+    public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat, BrevData brevData, boolean enableBehandleAlleSaker)
         throws JAXBException, SAXException {
         BrevDataAvslagArbeidsgiver brevDataAvslagArbeidsgiver = (BrevDataAvslagArbeidsgiver) brevData;
         Fag fag = mapFag(brevDataAvslagArbeidsgiver);

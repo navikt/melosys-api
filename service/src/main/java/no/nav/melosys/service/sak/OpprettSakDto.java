@@ -1,15 +1,37 @@
 package no.nav.melosys.service.sak;
 
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 
 public class OpprettSakDto {
     private String brukerID;
     private Sakstyper sakstype;
     private Behandlingstema behandlingstema;
+    private Behandlingstyper behandlingstype;
     private String oppgaveID;
     private SøknadDto soknadDto;
     private boolean skalTilordnes;
+    private Sakstemaer sakstema;
+    private Aktoersroller hovedpart;
+
+    public Aktoersroller getHovedpart() {
+        return hovedpart;
+    }
+
+    public void setHovedpart(Aktoersroller hovedpart) {
+        this.hovedpart = hovedpart;
+    }
+
+    public Sakstemaer getSakstema() {
+        return sakstema;
+    }
+
+    public void setSakstema(Sakstemaer sakstema) {
+        this.sakstema = sakstema;
+    }
 
     public String getBrukerID() {
         return brukerID;
@@ -33,6 +55,14 @@ public class OpprettSakDto {
 
     public void setBehandlingstema(Behandlingstema behandlingstema) {
         this.behandlingstema = behandlingstema;
+    }
+
+    public Behandlingstyper getBehandlingstype() {
+        return behandlingstype;
+    }
+
+    public void setBehandlingstype(Behandlingstyper behandlingstype) {
+        this.behandlingstype = behandlingstype;
     }
 
     public String getOppgaveID() {

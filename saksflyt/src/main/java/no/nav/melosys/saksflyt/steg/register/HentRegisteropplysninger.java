@@ -1,7 +1,7 @@
 package no.nav.melosys.saksflyt.steg.register;
 
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
@@ -25,13 +25,16 @@ public class HentRegisteropplysninger implements StegBehandler {
     private final RegisteropplysningerService registeropplysningerService;
     private final BehandlingService behandlingService;
     private final PersondataFasade persondataFasade;
+    private final Unleash unleash;
 
     public HentRegisteropplysninger(RegisteropplysningerService registeropplysningerService,
                                     BehandlingService behandlingService,
-                                    PersondataFasade persondataFasade) {
+                                    PersondataFasade persondataFasade,
+                                    Unleash unleash) {
         this.registeropplysningerService = registeropplysningerService;
         this.behandlingService = behandlingService;
         this.persondataFasade = persondataFasade;
+        this.unleash = unleash;
     }
 
     @Override
@@ -41,10 +44,10 @@ public class HentRegisteropplysninger implements StegBehandler {
 
     @Override
     public void utfør(Prosessinstans prosessinstans) {
-
         Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
 
-        if (behandling.getFagsak().getType() == Sakstyper.EU_EOS) {
+        if (behandling.getFagsak().erSakstypeEøs()) {
+            var behandleAlleSakerToggleEnabled = unleash.isEnabled("melosys.behandle_alle_saker");
             var aktørId = behandling.getFagsak().finnBrukersAktørID().orElseThrow(
                 () -> new FunksjonellException("Kan ikke hente registreopplysninger når bruker ikke har aktørID")
             );
@@ -52,15 +55,25 @@ public class HentRegisteropplysninger implements StegBehandler {
             var registeropplysningerRequestBuilder = RegisteropplysningerRequest.builder()
                 .behandlingID(prosessinstans.getBehandling().getId())
                 .fnr(persondataFasade.hentFolkeregisterident(aktørId))
-                .saksopplysningTyper(utledSaksopplysningTyper(prosessinstans.getBehandling().getTema()));
+                .saksopplysningTyper(utledSaksopplysningTyper(
+                    behandling.getFagsak().getType(),
+                    behandling.getFagsak().getTema(),
+                    behandling.getTema(),
+                    behandling.getType(),
+                    behandleAlleSakerToggleEnabled));
 
-            behandling.finnPeriode().ifPresent(periode -> {
+            (behandleAlleSakerToggleEnabled
+                ? behandling.finnPeriode()
+                : behandling.finnPeriodeGammel()
+            ).ifPresent(periode -> {
                 registeropplysningerRequestBuilder.fom(periode.getFom());
                 registeropplysningerRequestBuilder.tom(periode.getTom());
             });
 
             registeropplysningerService.hentOgLagreOpplysninger(registeropplysningerRequestBuilder.build());
             log.info("Hentet registeropplysninger for behandling {}", behandling.getId());
+        } else {
+            log.debug("Hopper over steg {} fordi sak {} har sakstype {}", HENT_REGISTEROPPLYSNINGER.getKode(), behandling.getFagsak().getSaksnummer(), behandling.getFagsak().getType());
         }
     }
 }

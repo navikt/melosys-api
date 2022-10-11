@@ -76,7 +76,7 @@ class VideresendSoknadServiceTest {
 
     @Test
     void henleggOgVideresend_bostedsLandSpaniaErSøknad_prosessinstansBlirOpprettet() {
-        behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
+        behandling.setTema(Behandlingstema.ARBEID_FLERE_LAND);
         final Set<String> validerteMottakere = Set.of("ES:mottakerID123");
         when(landvelgerService.hentBostedsland(behandling)).thenReturn(BOSTEDSLAND);
         when(eessiService.validerOgAvklarMottakerInstitusjonerForBuc(any(), eq(List.of(Landkoder.ES)), eq(BucType.LA_BUC_03)))
@@ -100,13 +100,13 @@ class VideresendSoknadServiceTest {
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> videresendSoknadService.videresend(SAKSNUMMER, "", "", Collections.emptySet()))
-            .withMessageContaining("er ikke behandling av en søknad");
+            .withMessageContaining("har ikke behandlingstema 'ARBEID_FLERE_LAND' og kan ikke videresendes");
     }
 
     @Test
     void henleggOgVideresend_bostedsLandNorgeErSøknad_kasterException() {
         when(landvelgerService.hentBostedsland(behandling)).thenReturn(new Bostedsland(Landkoder.NO));
-        behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
+        behandling.setTema(Behandlingstema.ARBEID_FLERE_LAND);
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> videresendSoknadService.videresend(SAKSNUMMER, "", "", Collections.emptySet()))
@@ -116,7 +116,7 @@ class VideresendSoknadServiceTest {
     @Test
     void henleggOgVideresend_bostedslandIkkeAvklartErSøknad_kasterException() {
         when(landvelgerService.hentBostedsland(behandling)).thenReturn(null);
-        behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
+        behandling.setTema(Behandlingstema.ARBEID_FLERE_LAND);
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> videresendSoknadService.videresend(SAKSNUMMER, "", "", Collections.emptySet()))

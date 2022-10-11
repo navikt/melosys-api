@@ -38,7 +38,7 @@ public class OpprettAvgiftsoppgave implements StegBehandler {
         final long behandlingID = behandling.getId();
         final var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
         if (!behandlingsresultat.erAvslag() && behandling.getFagsak().getType() != Sakstyper.FTRL) {
-            Lovvalgsperiode lovvalgsperiode = behandlingsresultat.hentValidertLovvalgsperiode();
+            Lovvalgsperiode lovvalgsperiode = behandlingsresultat.hentLovvalgsperiode();
             if (!lovvalgsperiode.erArtikkel11() && !lovvalgsperiode.erArtikkel13()) {
                 oppgaveService.opprettOppgave(lagOppgaveTilTrygdeavgift(behandling));
             }

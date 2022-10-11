@@ -15,13 +15,13 @@ import org.springframework.web.context.WebApplicationContext;
 @RequestMapping("/saksflyt/utpeking")
 @Api(tags = {"saksflyt", "utpeking"})
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
-public class UtpekingTjeneste {
+public class AvvisUtpekingTjeneste {
 
     private final UtpekingService utpekingService;
     private final Aksesskontroll aksesskontroll;
 
 
-    public UtpekingTjeneste(UtpekingService utpekingService, Aksesskontroll aksesskontroll) {
+    public AvvisUtpekingTjeneste(UtpekingService utpekingService, Aksesskontroll aksesskontroll) {
         this.utpekingService = utpekingService;
         this.aksesskontroll = aksesskontroll;
     }

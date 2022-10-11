@@ -2,13 +2,19 @@ package no.nav.melosys.service.oppgave;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.Tema;
+import no.nav.melosys.domain.kodeverk.Oppgavetyper;
+import no.nav.melosys.domain.kodeverk.Sakstemaer;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.OppgaveTilbakelegging;
 import no.nav.melosys.exception.TekniskException;
@@ -32,23 +38,32 @@ public class Oppgaveplukker {
     private final FagsakService fagsakService;
     private final BehandlingService behandlingService;
     private final OppgaveService oppgaveService;
+    private final Unleash unleash;
 
     public Oppgaveplukker(OppgaveFasade oppgaveFasade, OppgaveTilbakeleggingRepository oppgaveTilbakeleggingRepo,
-                          FagsakService fagsakService, BehandlingService behandlingService, OppgaveService oppgaveService) {
+                          FagsakService fagsakService, BehandlingService behandlingService, OppgaveService oppgaveService, Unleash unleash) {
         this.oppgaveFasade = oppgaveFasade;
         this.oppgaveTilbakkeleggingRepo = oppgaveTilbakeleggingRepo;
         this.fagsakService = fagsakService;
         this.behandlingService = behandlingService;
         this.oppgaveService = oppgaveService;
+        this.unleash = unleash;
     }
 
     @Transactional
     public synchronized Optional<Oppgave> plukkOppgave(String saksbehandlerID, PlukkOppgaveInnDto plukkDto) {
-        var parametere =
-            OppgaveFactory.hentOppgaveParametere(plukkDto.getBehandlingstema());
-        List<Oppgave> utildelteOppgaverEtterFrist =
-            oppgaveFasade.finnUtildelteOppgaverEtterFrist(parametere.behandlingstype, parametere.behandlingstema);
-        var filtrerteOppgaver = utildelteOppgaverEtterFrist.stream()
+        List<Oppgave> utildelteOppgaverEtterFrist = new ArrayList<>();
+        if (unleash.isEnabled("melosys.behandle_alle_saker")) {
+            for (var oppgaveBehandlingstema : hentAlleOppgaveBehandlingstemaTilSøk(plukkDto.sakstype(), plukkDto.sakstema(), plukkDto.behandlingstema())) {
+                utildelteOppgaverEtterFrist.addAll(oppgaveFasade.finnUtildelteOppgaverEtterFrist(oppgaveBehandlingstema));
+            }
+        } else {
+            var parametere = OppgaveFactory.hentOppgaveParametere(plukkDto.behandlingstema());
+            utildelteOppgaverEtterFrist = oppgaveFasade.finnUtildelteOppgaverEtterFrist(parametere.behandlingstype, parametere.behandlingstema);
+        }
+
+        List<Oppgave> filtrerteOppgaver = utildelteOppgaverEtterFrist.stream()
+            .filter(oppgave -> !(oppgave.getTema() == Tema.TRY && oppgave.getOppgavetype() == Oppgavetyper.VUR))
             .filter(oppgave -> {
                 String saksnummer = oppgave.getSaksnummer();
                 Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
@@ -98,12 +113,18 @@ public class Oppgaveplukker {
         }
     }
 
+    private Set<String> hentAlleOppgaveBehandlingstemaTilSøk(Sakstyper sakstype, Sakstemaer sakstema, Behandlingstema behandlingstema) {
+        return Arrays.stream(Behandlingstyper.values())
+            .map(behandlingstype -> OppgaveFactory.utledBehandlingstema(sakstype, sakstema, behandlingstema, behandlingstype).getKode())
+            .collect(Collectors.toSet());
+    }
+
     @Transactional
     public synchronized void leggTilbakeOppgave(String saksbehandlerID, TilbakeleggingDto tilbakelegging) {
         Behandling behandling = behandlingService.hentBehandling(tilbakelegging.getBehandlingID());
 
         Fagsak fagsak = behandling.getFagsak();
-        Oppgave oppgave = oppgaveService.hentÅpenOppgaveMedFagsaksnummer(fagsak.getSaksnummer());
+        Oppgave oppgave = oppgaveService.hentÅpenBehandlingsoppgaveMedFagsaksnummer(fagsak.getSaksnummer());
 
         String oppgaveId = oppgave.getOppgaveId();
         if (!tilbakelegging.isVenterPåDokumentasjon()) {

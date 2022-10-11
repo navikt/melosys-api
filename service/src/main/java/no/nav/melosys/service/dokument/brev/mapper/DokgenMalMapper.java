@@ -3,7 +3,9 @@ package no.nav.melosys.service.dokument.brev.mapper;
 import java.time.Instant;
 import java.util.List;
 
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Aktoer;
+import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.brev.*;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
@@ -22,19 +24,25 @@ public class DokgenMalMapper {
     private final DokgenMapperDatahenter dokgenMapperDatahenter;
     private final InnvilgelseFtrlMapper innvilgelseFtrlMapper;
     private final StorbritanniaMapper storbritanniaMapper;
+    private final Unleash unleash;
 
     public DokgenMalMapper(DokgenMapperDatahenter dokgenMapperDatahenter,
                            InnvilgelseFtrlMapper innvilgelseFtrlMapper,
-                           StorbritanniaMapper storbritanniaMapper) {
+                           StorbritanniaMapper storbritanniaMapper,
+                           Unleash unleash) {
         this.dokgenMapperDatahenter = dokgenMapperDatahenter;
         this.innvilgelseFtrlMapper = innvilgelseFtrlMapper;
         this.storbritanniaMapper = storbritanniaMapper;
+        this.unleash = unleash;
     }
 
     public DokgenDto mapBehandling(DokgenBrevbestilling mottattBrevbestilling, Aktoer aktoerMottaker) {
         // Henter opplysninger på nytt for å sikre at korrekt adresse benyttes (med mindre myndighet)
-        DokgenBrevbestilling brevbestilling = berikBestillingMedPersondata(mottattBrevbestilling, aktoerMottaker);
-        DokgenDto dto = lagDokgenDtoFraBestilling(brevbestilling);
+        var brevbestillingBuilder = mottattBrevbestilling.toBuilder();
+        berikBestillingMedPersondata(brevbestillingBuilder, mottattBrevbestilling.getBehandling(), aktoerMottaker);
+
+        berikBestillingMedToggleEnabled(brevbestillingBuilder);
+        DokgenDto dto = lagDokgenDtoFraBestilling(brevbestillingBuilder.build());
 
         Mottaker mottaker = dto.getMottaker();
         if (Aktoersroller.TRYGDEMYNDIGHET.getKode().equals(mottaker.type())) {
@@ -54,11 +62,15 @@ public class DokgenMalMapper {
         return new Mottaker(mottakerMedKoder.navn(), mottakerMedKoder.adresselinjer(), mottakerMedKoder.postnr(), poststed, land, mottakerMedKoder.type(), mottakerMedKoder.region());
     }
 
-    private DokgenBrevbestilling berikBestillingMedPersondata(DokgenBrevbestilling mottattBrevbestilling, Aktoer mottaker) {
-        return mottattBrevbestilling.toBuilder()
-            .medPersonDokument(dokgenMapperDatahenter.hentPersondata(mottattBrevbestilling, mottaker))
-            .medPersonMottaker(dokgenMapperDatahenter.hentPersonMottaker(mottaker))
-            .build();
+    private void berikBestillingMedPersondata(DokgenBrevbestilling.Builder<?> mottattBrevbestilling, Behandling behandling, Aktoer mottaker) {
+        mottattBrevbestilling
+            .medPersonDokument(dokgenMapperDatahenter.hentPersondata(behandling, mottaker))
+            .medPersonMottaker(dokgenMapperDatahenter.hentPersonMottaker(mottaker));
+    }
+
+    private void berikBestillingMedToggleEnabled(DokgenBrevbestilling.Builder<?> mottatBrevbestilling) {
+        mottatBrevbestilling
+            .medToggleEnabled(unleash.isEnabled("melosys.behandle_alle_saker"));
     }
 
     private Avslagbrev hentAvslagsbrev(DokgenBrevbestilling brevbestilling) {
@@ -106,6 +118,8 @@ public class DokgenMalMapper {
             );
             case AVSLAG_MANGLENDE_OPPLYSNINGER -> hentAvslagsbrev(brevbestilling);
             case MELDING_HENLAGT_SAK -> Henleggelsesbrev.av(((HenleggelseBrevbestilling) brevbestilling).toBuilder().build());
+            case GENERELT_FRITEKSTVEDLEGG -> Fritekstvedlegg.av(((FritekstvedleggBrevbestilling) brevbestilling).toBuilder().build(), Aktoersroller.BRUKER);
+            // Aktoersrolle for GENERELT_FRITEKSTVEDLEGG er likegyldig da brevet kun journalføres og distribueres sammen med fritekstbrevet
             default -> throw new FunksjonellException(
                 format("ProduserbartDokument %s er ikke støttet av melosys-dokgen",
                     brevbestilling.getProduserbartdokument()));

@@ -59,8 +59,7 @@ class OppgaveTjenesteTest {
         oppgaveBuilder.setOppgavetype(Oppgavetyper.BEH_SAK_MK);
         Optional<Oppgave> plukket = Optional.of(oppgaveBuilder.build());
 
-        PlukkOppgaveInnDto innData = new PlukkOppgaveInnDto();
-        innData.setBehandlingstema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
+        PlukkOppgaveInnDto innData = new PlukkOppgaveInnDto(Behandlingstema.UTSENDT_ARBEIDSTAKER, null, null);
 
         Behandling behandling = new Behandling();
         behandling.setType(Behandlingstyper.SOEKNAD);

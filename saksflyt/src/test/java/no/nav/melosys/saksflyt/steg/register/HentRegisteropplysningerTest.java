@@ -2,6 +2,7 @@ package no.nav.melosys.saksflyt.steg.register;
 
 import java.time.LocalDate;
 
+import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
@@ -11,8 +12,10 @@ import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadFtrl;
 import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadTrygdeavtale;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.persondata.PersondataFasade;
@@ -39,6 +42,7 @@ class HentRegisteropplysningerTest {
     @Mock
     private PersondataFasade persondataFasade;
 
+    private final FakeUnleash unleash = new FakeUnleash();
     private HentRegisteropplysninger hentRegisteropplysninger;
 
     @Captor
@@ -49,7 +53,9 @@ class HentRegisteropplysningerTest {
 
     @BeforeEach
     public void setUp() {
-        hentRegisteropplysninger = new HentRegisteropplysninger(registeropplysningerService, behandlingService, persondataFasade);
+        hentRegisteropplysninger = new HentRegisteropplysninger(registeropplysningerService, behandlingService, persondataFasade, unleash);
+
+        unleash.enableAll();
 
         behandling.setId(222L);
 
@@ -58,10 +64,26 @@ class HentRegisteropplysningerTest {
         bruker.setAktørId(aktørID);
 
         Fagsak fagsak = new Fagsak();
+        fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
         fagsak.getAktører().add(bruker);
         behandling.setFagsak(fagsak);
+        behandling.setType(Behandlingstyper.FØRSTEGANG);
 
         when(behandlingService.hentBehandling(behandling.getId())).thenReturn(behandling);
+    }
+
+    @Test
+    void utfør_hoppOverSteg() {
+        Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setBehandling(behandling);
+        Fagsak fagsak = new Fagsak();
+        fagsak.setType(Sakstyper.FTRL);
+        behandling.setFagsak(fagsak);
+        behandling.setTema(Behandlingstema.ARBEID_KUN_NORGE);
+
+        hentRegisteropplysninger.utfør(prosessinstans);
+
+        verify(registeropplysningerService, never()).hentOgLagreOpplysninger(any());
     }
 
     @Test
@@ -125,7 +147,7 @@ class HentRegisteropplysningerTest {
     }
 
     @Test
-    void utfør_behandlingstypeTrygdetid_henterIngenting() {
+    void utfør_harTomFlyt_henterIngenting() {
         behandling.setTema(Behandlingstema.TRYGDETID);
         behandling.getFagsak().setType(Sakstyper.EU_EOS);
         var prosessinstans = new Prosessinstans();

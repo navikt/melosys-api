@@ -57,4 +57,12 @@ public interface PeriodeOmLovvalg extends ErPeriode, HarBestemmelse<LovvalgBeste
     default boolean erArtikkel11_3aMed11_5Tilleggsbestemmelse() {
         return getBestemmelse() == FO_883_2004_ART11_3A && getTilleggsbestemmelse() == FO_883_2004_ART11_5;
     }
+
+    default boolean erNyPeriodeForMedl() {
+        return getMedlPeriodeID() == null;
+    }
+
+    default boolean harForskjelligMedlID(Long medlPeriodeIdSomSjekkes) {
+        return getMedlPeriodeID() == null || !getMedlPeriodeID().equals(medlPeriodeIdSomSjekkes);
+    }
 }

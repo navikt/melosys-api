@@ -1,5 +1,6 @@
 package no.nav.melosys.repository;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
@@ -29,6 +30,8 @@ public interface ProsessinstansRepository extends JpaRepository<Prosessinstans, 
 
     Optional<Prosessinstans> findByBehandling_IdAndTypeIn(long id, ProsessType... prosessTypes);
 
+    Collection<Prosessinstans> findAllByBehandling_IdAndTypeIn(long id, ProsessType... prosessTypes);
+
     Collection<Prosessinstans> findAllByStatus(ProsessStatus status);
 
     Collection<Prosessinstans> findAllByStatusIn(Set<ProsessStatus> statuses);
@@ -48,4 +51,7 @@ public interface ProsessinstansRepository extends JpaRepository<Prosessinstans, 
     Set<Prosessinstans> findAllWithSedX100();
 
     boolean existsByStatusNotInAndLåsReferanse(Collection<ProsessStatus> prosessStatus, String låsreferanse);
+
+    @Query(value = "SELECT * FROM PROSESSINSTANS p WHERE p.REGISTRERT_DATO > ?1", nativeQuery = true)
+    Collection<Prosessinstans> findAllAfterDate(LocalDateTime localDateTime);
 }

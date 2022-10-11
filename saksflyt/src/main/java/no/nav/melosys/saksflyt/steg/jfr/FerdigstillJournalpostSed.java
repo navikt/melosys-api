@@ -1,5 +1,6 @@
 package no.nav.melosys.saksflyt.steg.jfr;
 
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.arkiv.Journalposttype;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
@@ -15,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.TemaFactory.fraBehandlingstema;
+import static no.nav.melosys.service.oppgave.OppgaveFactory.utledTema;
 
 @Component
 public class FerdigstillJournalpostSed implements StegBehandler {
@@ -23,11 +25,13 @@ public class FerdigstillJournalpostSed implements StegBehandler {
 
     private final JoarkFasade joarkFasade;
     private final PersondataFasade persondataFasade;
+    private final Unleash unleash;
 
     public FerdigstillJournalpostSed(JoarkFasade joarkFasade,
-                                     PersondataFasade persondataFasade) {
+                                     PersondataFasade persondataFasade, Unleash unleash) {
         this.joarkFasade = joarkFasade;
         this.persondataFasade = persondataFasade;
+        this.unleash = unleash;
     }
 
     @Override
@@ -53,7 +57,9 @@ public class FerdigstillJournalpostSed implements StegBehandler {
                 .medBrukerID(brukerID)
                 .medSaksnummer(saksnummer)
                 .medTittel(tittel)
-                .medTema(fraBehandlingstema(behandling.getTema()).getKode())
+                .medTema(unleash.isEnabled("melosys.behandle_alle_saker")
+                    ? utledTema(behandling.getFagsak().getTema()).getKode()
+                    : fraBehandlingstema(behandling.getTema()).getKode())
                 .build();
 
             joarkFasade.oppdaterOgFerdigstillJournalpost(eessiMelding.getJournalpostId(), journalpostOppdatering);
