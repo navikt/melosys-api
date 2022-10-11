@@ -3,6 +3,7 @@ package no.nav.melosys.saksflyt.steg.oppgave;
 import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
@@ -48,7 +49,10 @@ public class GjenbrukOppgave implements StegBehandler {
                 : OppgaveFactory.lagBehandlingsOppgaveForType(behandling.getTema(), behandling.getType()))
             .setSaksnummer(fagsak.getSaksnummer())
             .setTilordnetRessurs(prosessinstans.hentSaksbehandlerHvisTilordnes())
-            .setAktørId(fagsak.hentBrukersAktørID())
+            .setAktørId(
+                unleash.isEnabled("melosys.behandle_alle_saker") && fagsak.getHovedpartRolle() == Aktoersroller.VIRKSOMHET
+                    ? fagsak.hentVirksomhetsAktørID()
+                    : fagsak.hentBrukersAktørID())
             .setBeskrivelse(gjenbruktOppgave.getBeskrivelse())
             .build();
 

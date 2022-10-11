@@ -164,6 +164,13 @@ public class Fagsak extends RegistreringsInfo {
         return hentBruker().getAktørId();
     }
 
+    public String hentVirksomhetsAktørID() {
+        if (hentVirksomhet() == null) {
+            throw new FunksjonellException("Finner ikke virksomhet på fagsak " + saksnummer);
+        }
+        return hentVirksomhet().getAktørId();
+    }
+
     public Optional<String> finnBrukersAktørID() {
         return Optional.ofNullable(hentBruker()).map(Aktoer::getAktørId);
     }
