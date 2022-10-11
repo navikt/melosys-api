@@ -129,6 +129,7 @@ class SaksbehandlingReglerTest {
         ),
         arguments(
             Sakstyper.EU_EOS,
+            Sakstemaer.MEDLEMSKAP_LOVVALG,
             Behandlingstyper.NY_VURDERING,
             Behandlingstema.UTSENDT_ARBEIDSTAKER,
             BehandlingHolder().apply {
@@ -220,6 +221,7 @@ class SaksbehandlingReglerTest {
             status = Behandlingsstatus.AVSLUTTET
             fagsak = Fagsak().apply {
                 type = Sakstyper.EU_EOS
+                tema = Sakstemaer.MEDLEMSKAP_LOVVALG
             }
         }
 
@@ -244,6 +246,7 @@ class SaksbehandlingReglerTest {
                         status = Behandlingsstatus.AVSLUTTET
                         fagsak = Fagsak().apply {
                             type = Sakstyper.EU_EOS
+                            tema = Sakstemaer.MEDLEMSKAP_LOVVALG
                         }
                     }
                 ),
@@ -264,6 +267,7 @@ class SaksbehandlingReglerTest {
                         status = Behandlingsstatus.AVSLUTTET
                         fagsak = Fagsak().apply {
                             type = Sakstyper.EU_EOS
+                            tema = Sakstemaer.MEDLEMSKAP_LOVVALG
                         }
                     },
                     Behandling().apply {
@@ -273,6 +277,7 @@ class SaksbehandlingReglerTest {
                         status = Behandlingsstatus.AVSLUTTET
                         fagsak = Fagsak().apply {
                             type = Sakstyper.EU_EOS
+                            tema = Sakstemaer.MEDLEMSKAP_LOVVALG
                         }
                     }
                 ),
@@ -288,6 +293,7 @@ class SaksbehandlingReglerTest {
                         status = Behandlingsstatus.UNDER_BEHANDLING
                         fagsak = Fagsak().apply {
                             type = Sakstyper.EU_EOS
+                            tema = Sakstemaer.MEDLEMSKAP_LOVVALG
                         }
                     },
                     Behandling().apply {
@@ -297,6 +303,7 @@ class SaksbehandlingReglerTest {
                         status = Behandlingsstatus.AVSLUTTET
                         fagsak = Fagsak().apply {
                             type = Sakstyper.EU_EOS
+                            tema = Sakstemaer.MEDLEMSKAP_LOVVALG
                         }
                     },
                     Behandling().apply {
@@ -306,6 +313,7 @@ class SaksbehandlingReglerTest {
                         status = Behandlingsstatus.AVSLUTTET
                         fagsak = Fagsak().apply {
                             type = Sakstyper.EU_EOS
+                            tema = Sakstemaer.MEDLEMSKAP_LOVVALG
                         }
                     }
                 ),
@@ -320,6 +328,7 @@ class SaksbehandlingReglerTest {
                     status = Behandlingsstatus.AVSLUTTET
                     fagsak = Fagsak().apply {
                         type = Sakstyper.EU_EOS
+                        tema = Sakstemaer.MEDLEMSKAP_LOVVALG
                     }
                 }),
                 null
