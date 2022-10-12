@@ -71,7 +71,7 @@ class OppgaveplukkerTest {
 
         unleash.enableAll();
 
-        Behandling behandling = new Behandling();
+        Behandling behandling = opprettBehandling();
         Fagsak fagsak = opprettFagsak();
         fagsak.setSaksnummer(SAKSNUMMER);
         fagsak.setGsakSaksnummer(GSAK_SAKSNUMMER);
@@ -90,9 +90,7 @@ class OppgaveplukkerTest {
         when(oppgaveFasade.finnUtildelteOppgaverEtterFrist(anyString())).thenReturn(oppgaver);
 
         Fagsak fagsak = opprettFagsak();
-        Behandling behandling = new Behandling();
-        behandling.setType(Behandlingstyper.SOEKNAD);
-        behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
+        Behandling behandling = opprettBehandling();
         behandling.setStatus(Behandlingsstatus.OPPRETTET);
         behandling.setFagsak(fagsak);
         fagsak.setBehandlinger(Collections.singletonList(behandling));
@@ -114,9 +112,7 @@ class OppgaveplukkerTest {
         when(oppgaveFasade.finnUtildelteOppgaverEtterFrist(anyString())).thenReturn(oppgaver);
 
         Fagsak fagsak = opprettFagsak();
-        Behandling behandling = new Behandling();
-        behandling.setType(Behandlingstyper.SOEKNAD);
-        behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
+        Behandling behandling = opprettBehandling();
         behandling.setStatus(Behandlingsstatus.OPPRETTET);
         behandling.setFagsak(fagsak);
         fagsak.setBehandlinger(Collections.singletonList(behandling));
@@ -136,9 +132,7 @@ class OppgaveplukkerTest {
         when(oppgaveFasade.finnUtildelteOppgaverEtterFrist(anyString())).thenReturn(oppgaver);
 
         Fagsak fagsak = opprettFagsak();
-        Behandling behandling = new Behandling();
-        behandling.setType(Behandlingstyper.SOEKNAD);
-        behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
+        Behandling behandling = opprettBehandling();
         behandling.setStatus(Behandlingsstatus.AVVENT_DOK_PART);
         behandling.setDokumentasjonSvarfristDato(Instant.now().minus(Duration.ofDays(1)));
         behandling.setFagsak(fagsak);
@@ -162,7 +156,7 @@ class OppgaveplukkerTest {
         when(oppgaveFasade.finnUtildelteOppgaverEtterFrist(anyString())).thenReturn(oppgaver);
 
         Fagsak fagsak = opprettFagsak();
-        Behandling behandling = new Behandling();
+        Behandling behandling = opprettBehandling();
         behandling.setStatus(Behandlingsstatus.AVVENT_FAGLIG_AVKLARING);
         behandling.setFagsak(fagsak);
         fagsak.setBehandlinger(Collections.singletonList(behandling));
@@ -182,9 +176,7 @@ class OppgaveplukkerTest {
         when(oppgaveFasade.finnUtildelteOppgaverEtterFrist(anyString())).thenReturn(oppgaver);
 
         Fagsak fagsak = opprettFagsak();
-        Behandling behandling = new Behandling();
-        behandling.setType(Behandlingstyper.SOEKNAD);
-        behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
+        Behandling behandling = opprettBehandling();
         behandling.setStatus(Behandlingsstatus.OPPRETTET);
         behandling.setFagsak(fagsak);
         fagsak.setBehandlinger(Collections.singletonList(behandling));
@@ -209,9 +201,7 @@ class OppgaveplukkerTest {
         when(oppgaveFasade.finnUtildelteOppgaverEtterFrist(anyString())).thenReturn(oppgaver);
 
         Fagsak fagsak = opprettFagsak();
-        Behandling behandling = new Behandling();
-        behandling.setType(Behandlingstyper.SOEKNAD);
-        behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
+        Behandling behandling = opprettBehandling();
         behandling.setStatus(Behandlingsstatus.OPPRETTET);
         behandling.setFagsak(fagsak);
         fagsak.setBehandlinger(Collections.singletonList(behandling));
@@ -278,9 +268,7 @@ class OppgaveplukkerTest {
         when(oppgaveFasade.finnUtildelteOppgaverEtterFrist(anyString())).thenReturn(oppgaver);
 
         Fagsak fagsak = opprettFagsak();
-        Behandling behandling = new Behandling();
-        behandling.setType(Behandlingstyper.SOEKNAD);
-        behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
+        Behandling behandling = opprettBehandling();
         behandling.setStatus(Behandlingsstatus.OPPRETTET);
         behandling.setFagsak(fagsak);
         fagsak.setBehandlinger(Collections.singletonList(behandling));
@@ -299,9 +287,7 @@ class OppgaveplukkerTest {
         when(oppgaveFasade.finnUtildelteOppgaverEtterFrist(anyString())).thenReturn(oppgaver);
 
         Fagsak fagsak = opprettFagsak();
-        Behandling behandling = new Behandling();
-        behandling.setType(Behandlingstyper.SOEKNAD);
-        behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
+        Behandling behandling = opprettBehandling();
         behandling.setStatus(Behandlingsstatus.AVVENT_DOK_PART);
         behandling.setDokumentasjonSvarfristDato(Instant.now().plus(Duration.ofDays(1)));
         behandling.setFagsak(fagsak);
@@ -320,9 +306,7 @@ class OppgaveplukkerTest {
         when(oppgaveFasade.finnUtildelteOppgaverEtterFrist(anyString())).thenReturn(oppgaver);
 
         Fagsak fagsak = opprettFagsak();
-        Behandling behandling = new Behandling();
-        behandling.setType(Behandlingstyper.SOEKNAD);
-        behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
+        Behandling behandling = opprettBehandling();
         behandling.setStatus(Behandlingsstatus.AVVENT_DOK_PART);
         behandling.setFagsak(fagsak);
         fagsak.setBehandlinger(Collections.singletonList(behandling));
@@ -340,8 +324,7 @@ class OppgaveplukkerTest {
         when(oppgaveFasade.finnUtildelteOppgaverEtterFrist(anyString())).thenReturn(oppgaver);
 
         Fagsak fagsak = opprettFagsak();
-        Behandling behandling = new Behandling();
-        behandling.setType(Behandlingstyper.SOEKNAD);
+        Behandling behandling = opprettBehandling();
         behandling.setStatus(Behandlingsstatus.SVAR_ANMODNING_MOTTATT);
         behandling.setFagsak(fagsak);
         fagsak.setBehandlinger(Collections.singletonList(behandling));
@@ -364,10 +347,9 @@ class OppgaveplukkerTest {
         when(oppgaveFasade.finnUtildelteOppgaverEtterFrist(anyString())).thenReturn(oppgaver);
 
         Fagsak fagsak = opprettFagsak();
-        Behandling behandling = new Behandling();
-        behandling.setType(Behandlingstyper.SOEKNAD);
-        behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
+        Behandling behandling = opprettBehandling();
         behandling.setStatus(Behandlingsstatus.OPPRETTET);
+        behandling.setTema(Behandlingstema.PENSJONIST);
         behandling.setFagsak(fagsak);
         fagsak.setBehandlinger(Collections.singletonList(behandling));
         when(fagsakService.hentFagsak(anyString())).thenReturn(fagsak);
@@ -409,6 +391,13 @@ class OppgaveplukkerTest {
 
     private PlukkOppgaveInnDto opprettPlukkOppgaveInnDto() {
         return new PlukkOppgaveInnDto(Sakstyper.EU_EOS, Sakstemaer.MEDLEMSKAP_LOVVALG, Behandlingstema.UTSENDT_ARBEIDSTAKER);
+    }
+
+    private Behandling opprettBehandling() {
+        var behandling = new Behandling();
+        behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
+        behandling.setType(Behandlingstyper.SOEKNAD);
+        return behandling;
     }
 
     private Fagsak opprettFagsak() {
