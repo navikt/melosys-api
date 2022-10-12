@@ -72,11 +72,15 @@ class JournalfoeringBase(
         mockServer.stop()
     }
 
-    protected fun journalførOgVentTilProsesserErFerdige(journalfoeringOpprettDto: JournalfoeringOpprettDto): Prosessinstans {
+    protected fun journalførOgVentTilProsesserErFerdige(
+        journalfoeringOpprettDto: JournalfoeringOpprettDto,
+        waitFor: ProsessType = ProsessType.JFR_NY_SAK_BRUKER,
+        alsoWaitForprosessType: List<ProsessType> = listOf()
+    ): Prosessinstans {
         val jfrOppgave: Oppgave = lagJfrOppgave()
         val lagJournalfoeringOpprettDto = lagJournalfoeringOpprettDto(jfrOppgave, journalfoeringOpprettDto)
 
-        return executeAndWait(ProsessType.JFR_NY_SAK_BRUKER, listOf(ProsessType.OPPRETT_OG_DISTRIBUER_BREV)) {
+        return executeAndWait(ProsessType.JFR_NY_SAK_BRUKER, alsoWaitForprosessType) {
             journalføringService.journalførOgOpprettSak(lagJournalfoeringOpprettDto)
             oppgaveService.ferdigstillOppgave(lagJournalfoeringOpprettDto.oppgaveID)
         }
