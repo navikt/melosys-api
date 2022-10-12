@@ -3,11 +3,16 @@ package no.nav.melosys.featuretoggle
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
+import com.google.gson.GsonBuilder
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.mockk.every
 import io.mockk.mockk
+import no.finn.unleash.ActivationStrategy
 import no.finn.unleash.DefaultUnleash
+import no.finn.unleash.FeatureToggle
+import no.finn.unleash.repository.JsonToggleCollectionDeserializer
+import no.finn.unleash.repository.ToggleCollection
 import no.finn.unleash.util.UnleashConfig
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
 import no.nav.melosys.sikkerhet.context.SubjectHandler
@@ -86,7 +91,7 @@ internal class ByUserIdStrategyTest {
                     WireMock.aResponse()
                         .withStatus(200)
                         .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                        .withBody(UNLEASH_RESPONSE)
+                        .withBody(createApiResponseJson())
                 )
         )
         wireMockServer.stubFor(
@@ -107,29 +112,34 @@ internal class ByUserIdStrategyTest {
 
 
         enabled.shouldBeTrue()
+
+
+    }
+
+    fun createApiResponseJson(): String {
+        val toggleCollection =
+            ToggleCollection(
+                listOf(
+                    FeatureToggle(
+                        "melosys.toggle",
+                        true,
+                        mutableListOf(
+                            ActivationStrategy("byUserId", mapOf("user" to "Z123456"))
+                        )
+                    )
+                )
+            )
+
+        val gson = GsonBuilder()
+            .registerTypeAdapter(
+                ToggleCollection::class.java, JsonToggleCollectionDeserializer()
+            )
+            .create()
+        return gson.toJson(toggleCollection)
     }
 
 
     companion object {
         private const val SAKSBEHANDLER = "Z123456"
-
-        private const val UNLEASH_RESPONSE = """
-        {
-        "version": 1,
-          "features": [
-            {
-              "name": "melosys.toggle",
-              "type": "release",
-              "enabled": true,
-              "stale": false,
-              "strategies": [
-                {
-                  "name": "byUserId",
-                  "parameters": { "user":"Z123456" }
-                }
-              ],
-              "strategy": "byUserId",
-              "parameters": { "user":"Z123456" }
-            }]}"""
     }
 }
