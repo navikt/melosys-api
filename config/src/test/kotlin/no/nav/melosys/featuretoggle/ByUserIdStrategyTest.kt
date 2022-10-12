@@ -128,6 +128,8 @@ internal class ByUserIdStrategyTest {
                   "parameters": { "user":"Z123456" }
                 }
               ],
+              "strategy": "byUserId",
+              "parameters": { "user":"Z123456" }
             }]}"""
     }
 }
