@@ -63,7 +63,6 @@ public class Oppgaveplukker {
         }
 
         List<Oppgave> filtrerteOppgaver = utildelteOppgaverEtterFrist.stream()
-            .filter(oppgave -> !(oppgave.getTema() == Tema.TRY && oppgave.getOppgavetype() == Oppgavetyper.VUR))
             .filter(oppgave -> {
                 String saksnummer = oppgave.getSaksnummer();
                 Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
@@ -71,7 +70,11 @@ public class Oppgaveplukker {
                     log.error("Fant ikke fagsak {} for oppgave {}", saksnummer, oppgave.getOppgaveId());
                     throw new TekniskException("Fant ikke fagsak " + saksnummer);
                 }
-                return !venterSakPaaDokumentasjonEllerFagligAvklaring(fagsak);
+                if (unleash.isEnabled("melosys.behandle_alle_saker")) {
+                    return fagsakMatcherSøk(fagsak, plukkDto) && !venterSakPaaDokumentasjonEllerFagligAvklaring(fagsak);
+                } else {
+                    return !venterSakPaaDokumentasjonEllerFagligAvklaring(fagsak);
+                }
             }).toList();
 
         Optional<Oppgave> valg = filtrerteOppgaver.stream()
@@ -117,6 +120,12 @@ public class Oppgaveplukker {
         return Arrays.stream(Behandlingstyper.values())
             .map(behandlingstype -> OppgaveFactory.utledBehandlingstema(sakstype, sakstema, behandlingstema, behandlingstype).getKode())
             .collect(Collectors.toSet());
+    }
+
+    private boolean fagsakMatcherSøk(Fagsak fagsak, PlukkOppgaveInnDto plukkDto) {
+        return fagsak.getType() == plukkDto.sakstype()
+            && fagsak.getTema() == plukkDto.sakstema()
+            && fagsak.getBehandlinger().stream().anyMatch(behandling -> behandling.getTema() == plukkDto.behandlingstema());
     }
 
     @Transactional

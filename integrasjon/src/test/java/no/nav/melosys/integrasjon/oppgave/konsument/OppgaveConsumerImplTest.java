@@ -125,7 +125,7 @@ class OppgaveConsumerImplTest {
                 .medBehandlingstema("ab2344")
                 .medBehandlingsType("ba432?")
                 .medBehandlesAvApplikasjon("FS38")
-                .medTema(new String[]{"MED", "UFM"})
+                .medTema("MED", "UFM")
                 .medStatusKategori("AAPEN")
                 .build()
         )).hasSize(2)
