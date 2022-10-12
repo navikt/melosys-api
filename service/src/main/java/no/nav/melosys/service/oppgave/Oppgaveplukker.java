@@ -124,8 +124,8 @@ public class Oppgaveplukker {
 
     private boolean fagsakMatcherSøk(Fagsak fagsak, PlukkOppgaveInnDto plukkDto) {
         return fagsak.getType() == plukkDto.sakstype()
-            || fagsak.getTema() == plukkDto.sakstema()
-            || fagsak.getBehandlinger().stream().anyMatch(behandling -> behandling.getTema() == plukkDto.behandlingstema());
+            && fagsak.getTema() == plukkDto.sakstema()
+            && fagsak.getBehandlinger().stream().anyMatch(behandling -> behandling.getTema() == plukkDto.behandlingstema());
     }
 
     @Transactional
