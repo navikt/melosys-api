@@ -372,7 +372,7 @@ class OppgaveplukkerTest {
         fagsak.setBehandlinger(Collections.singletonList(behandling));
         when(fagsakService.hentFagsak(anyString())).thenReturn(fagsak);
 
-        var plukkOppgaveInnDto = new PlukkOppgaveInnDto(Behandlingstema.PENSJONIST, Sakstemaer.MEDLEMSKAP_LOVVALG, Sakstyper.EU_EOS);
+        var plukkOppgaveInnDto = new PlukkOppgaveInnDto(Sakstyper.EU_EOS, Sakstemaer.MEDLEMSKAP_LOVVALG, Behandlingstema.PENSJONIST);
 
         Optional<Oppgave> oppgave = oppgaveplukker.plukkOppgave("Z01234", plukkOppgaveInnDto);
 
@@ -408,7 +408,7 @@ class OppgaveplukkerTest {
     }
 
     private PlukkOppgaveInnDto opprettPlukkOppgaveInnDto() {
-        return new PlukkOppgaveInnDto(Behandlingstema.UTSENDT_ARBEIDSTAKER, Sakstemaer.MEDLEMSKAP_LOVVALG, Sakstyper.EU_EOS);
+        return new PlukkOppgaveInnDto(Sakstyper.EU_EOS, Sakstemaer.MEDLEMSKAP_LOVVALG, Behandlingstema.UTSENDT_ARBEIDSTAKER);
     }
 
     private Fagsak opprettFagsak() {
