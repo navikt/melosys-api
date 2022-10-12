@@ -56,7 +56,7 @@ class GjenbrukOppgaveTest {
         Oppgave eksisterendeOppgave = new Oppgave.Builder().setBeskrivelse(oppgaveBeskrivelse).build();
         when(oppgaveService.hentOppgaveMedOppgaveID(eq(oppgaveID))).thenReturn(eksisterendeOppgave);
 
-        gjenbrukOppgave.utfør(lagProsessinstans(oppgaveID, saksnummer));
+        gjenbrukOppgave.utfør(lagProsessinstans(oppgaveID, saksnummer, false));
         verify(oppgaveService).opprettOppgave(oppgaveCaptor.capture());
         assertThat(oppgaveCaptor.getValue())
             .hasFieldOrPropertyWithValue("saksnummer", saksnummer)
@@ -65,6 +65,26 @@ class GjenbrukOppgaveTest {
             .hasFieldOrPropertyWithValue("behandlingstema", OppgaveBehandlingstema.EU_EOS_LAND.getKode())
             .hasFieldOrPropertyWithValue("tilordnetRessurs", "Deg321")
             .hasFieldOrPropertyWithValue("aktørId", "123321");
+    }
+
+    @Test
+    void gjenbrukOppgave_utfør_oppdatererOppgave_virksomhet() {
+        final String oppgaveID = "1234";
+        final String saksnummer = "MEL-123";
+        final String oppgaveBeskrivelse = "jeg beskriver oppgave";
+
+        Oppgave eksisterendeOppgave = new Oppgave.Builder().setBeskrivelse(oppgaveBeskrivelse).build();
+        when(oppgaveService.hentOppgaveMedOppgaveID(eq(oppgaveID))).thenReturn(eksisterendeOppgave);
+
+        gjenbrukOppgave.utfør(lagProsessinstans(oppgaveID, saksnummer, true));
+        verify(oppgaveService).opprettOppgave(oppgaveCaptor.capture());
+        assertThat(oppgaveCaptor.getValue())
+            .hasFieldOrPropertyWithValue("saksnummer", saksnummer)
+            .hasFieldOrPropertyWithValue("behandlesAvApplikasjon", Fagsystem.MELOSYS)
+            .hasFieldOrPropertyWithValue("oppgavetype", Oppgavetyper.BEH_SAK_MK)
+            .hasFieldOrPropertyWithValue("behandlingstema", OppgaveBehandlingstema.EU_EOS_LAND.getKode())
+            .hasFieldOrPropertyWithValue("tilordnetRessurs", "Deg321")
+            .hasFieldOrPropertyWithValue("orgnr", "999999999");
     }
 
     @Test
@@ -77,7 +97,7 @@ class GjenbrukOppgaveTest {
         Oppgave eksisterendeOppgave = new Oppgave.Builder().setBeskrivelse(oppgaveBeskrivelse).build();
         when(oppgaveService.hentOppgaveMedOppgaveID(eq(oppgaveID))).thenReturn(eksisterendeOppgave);
 
-        gjenbrukOppgave.utfør(lagProsessinstans(oppgaveID, saksnummer));
+        gjenbrukOppgave.utfør(lagProsessinstans(oppgaveID, saksnummer, false));
         verify(oppgaveService).opprettOppgave(oppgaveCaptor.capture());
         assertThat(oppgaveCaptor.getValue())
             .hasFieldOrPropertyWithValue("saksnummer", saksnummer)
@@ -89,24 +109,30 @@ class GjenbrukOppgaveTest {
             .hasFieldOrPropertyWithValue("aktørId", "123321");
     }
 
-    private static Prosessinstans lagProsessinstans(String oppgaveID, String saksnummer) {
-
-        Aktoer bruker = new Aktoer();
-        bruker.setAktørId("123321");
-        bruker.setRolle(Aktoersroller.BRUKER);
-
+    private static Prosessinstans lagProsessinstans(String oppgaveID, String saksnummer, Boolean erForVirksomhet) {
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer(saksnummer);
         fagsak.setType(Sakstyper.EU_EOS);
         fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
-        fagsak.getAktører().add(bruker);
+        Prosessinstans prosessinstans = new Prosessinstans();
+
+        Aktoer bruker = new Aktoer();
+        Aktoer virksomhet = new Aktoer();
+        if (erForVirksomhet) {
+            prosessinstans.setData(ProsessDataKey.VIRKSOMHET_ORGNR, "999999999");
+            virksomhet.setRolle(Aktoersroller.VIRKSOMHET);
+            fagsak.getAktører().add(virksomhet);
+        } else {
+            bruker.setAktørId("123321");
+            bruker.setRolle(Aktoersroller.BRUKER);
+            fagsak.getAktører().add(bruker);
+        }
 
         Behandling behandling = new Behandling();
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         behandling.setType(Behandlingstyper.SOEKNAD);
         behandling.setFagsak(fagsak);
 
-        Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
         prosessinstans.setData(ProsessDataKey.OPPGAVE_ID, oppgaveID);
         prosessinstans.setData(ProsessDataKey.SKAL_TILORDNES, true);

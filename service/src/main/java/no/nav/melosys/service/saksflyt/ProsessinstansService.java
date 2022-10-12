@@ -78,14 +78,16 @@ public class ProsessinstansService {
     public void opprettNySakOgBehandling(OpprettSakDto opprettSakDto) {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.OPPRETT_SAK);
-        prosessinstans.setData(BRUKER_ID, opprettSakDto.getBrukerID());
-        prosessinstans.setData(BEHANDLINGSTEMA, opprettSakDto.getBehandlingstema());
-        prosessinstans.setData(BEHANDLINGSTYPE, opprettSakDto.getBehandlingstype());
+
         prosessinstans.setData(SAKSTYPE, opprettSakDto.getSakstype());
         prosessinstans.setData(SAKSTEMA, opprettSakDto.getSakstema());
-        prosessinstans.setData(SKAL_TILORDNES, opprettSakDto.isSkalTilordnes());
+        prosessinstans.setData(BEHANDLINGSTEMA, opprettSakDto.getBehandlingstema());
+        prosessinstans.setData(BEHANDLINGSTYPE, opprettSakDto.getBehandlingstype());
+        prosessinstans.setData(BRUKER_ID, opprettSakDto.getBrukerID());
+        prosessinstans.setData(VIRKSOMHET_ORGNR, opprettSakDto.getVirksomhetOrgnr());
         prosessinstans.setData(SØKNADSLAND, opprettSakDto.getSoknadDto().getLand());
         prosessinstans.setData(SØKNADSPERIODE, opprettSakDto.getSoknadDto().getPeriode());
+        prosessinstans.setData(SKAL_TILORDNES, opprettSakDto.isSkalTilordnes());
 
         lagre(prosessinstans);
     }
@@ -93,12 +95,14 @@ public class ProsessinstansService {
     public void opprettNyBehandlingForSak(String saksnummer, OpprettSakDto opprettSakDto) {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.OPPRETT_BEHANDLING_FOR_SAK);
-        prosessinstans.setData(BRUKER_ID, opprettSakDto.getBrukerID());
+
         prosessinstans.setData(SAKSNUMMER, saksnummer);
-        prosessinstans.setData(BEHANDLINGSTYPE, opprettSakDto.getBehandlingstype());
-        prosessinstans.setData(BEHANDLINGSTEMA, opprettSakDto.getBehandlingstema());
         prosessinstans.setData(SAKSTYPE, opprettSakDto.getSakstype());
         prosessinstans.setData(SAKSTEMA, opprettSakDto.getSakstema());
+        prosessinstans.setData(BEHANDLINGSTEMA, opprettSakDto.getBehandlingstema());
+        prosessinstans.setData(BEHANDLINGSTYPE, opprettSakDto.getBehandlingstype());
+        prosessinstans.setData(BRUKER_ID, opprettSakDto.getBrukerID());
+        prosessinstans.setData(VIRKSOMHET_ORGNR, opprettSakDto.getVirksomhetOrgnr());
         prosessinstans.setData(SKAL_TILORDNES, opprettSakDto.isSkalTilordnes());
 
         lagre(prosessinstans);
@@ -273,6 +277,7 @@ public class ProsessinstansService {
         prosessinstans.setData(ProsessDataKey.SAKSTYPE, opprettSakDto.getSakstype());
 
         if (unleash.isEnabled("melosys.behandle_alle_saker")) {
+            prosessinstans.setData(VIRKSOMHET_ORGNR, opprettSakDto.getVirksomhetOrgnr());
             prosessinstans.setData(SAKSTEMA, opprettSakDto.getSakstema());
             prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, opprettSakDto.getBehandlingstype());
         } else {
@@ -300,6 +305,9 @@ public class ProsessinstansService {
     public void opprettProsessinstansNySakFTRLTrygdeavtale(String journalpostID, OpprettSakDto opprettSakDto) {
         Prosessinstans prosessinstans = new Prosessinstans();
 
+        if (unleash.isEnabled("behandle_alle_saker")) {
+            prosessinstans.setData(VIRKSOMHET_ORGNR, opprettSakDto.getVirksomhetOrgnr());
+        }
         prosessinstans.setType(ProsessType.OPPRETT_NY_SAK_FTRL_TRYGDEAVTALE_FRA_OPPGAVE);
         prosessinstans.setData(ProsessDataKey.SAKSTYPE, opprettSakDto.getSakstype());
         if (unleash.isEnabled("melosys.behandle_alle_saker")) {

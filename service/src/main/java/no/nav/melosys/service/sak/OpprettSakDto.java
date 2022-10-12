@@ -8,6 +8,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 
 public class OpprettSakDto {
     private String brukerID;
+    private String virksomhetOrgnr;
     private Sakstyper sakstype;
     private Behandlingstema behandlingstema;
     private Behandlingstyper behandlingstype;
@@ -16,6 +17,14 @@ public class OpprettSakDto {
     private boolean skalTilordnes;
     private Sakstemaer sakstema;
     private Aktoersroller hovedpart;
+
+    public String getVirksomhetOrgnr() {
+        return virksomhetOrgnr;
+    }
+
+    public void setVirksomhetOrgnr(String virksomhetOrgnr) {
+        this.virksomhetOrgnr = virksomhetOrgnr;
+    }
 
     public Aktoersroller getHovedpart() {
         return hovedpart;
