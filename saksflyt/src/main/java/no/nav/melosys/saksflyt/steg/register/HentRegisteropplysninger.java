@@ -46,9 +46,9 @@ public class HentRegisteropplysninger implements StegBehandler {
     @Override
     public void utfør(Prosessinstans prosessinstans) {
         Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
-        boolean erVirksomhet = unleash.isEnabled("melosys.ny_opprett_sak") ? behandling.getFagsak().getHovedpartRolle() == Aktoersroller.VIRKSOMHET : false;
+        boolean erForVirksomhet = unleash.isEnabled("melosys.ny_opprett_sak") ? behandling.getFagsak().getHovedpartRolle() == Aktoersroller.VIRKSOMHET : false;
 
-        if (!behandling.getFagsak().erSakstypeEøs() || erVirksomhet) {
+        if (!behandling.getFagsak().erSakstypeEøs() || erForVirksomhet) {
             log.debug("Hopper over steg {} fordi sak {} har sakstype {} og behandlingstema {}", HENT_REGISTEROPPLYSNINGER.getKode(), behandling.getFagsak().getSaksnummer(), behandling.getFagsak().getType(), behandling.getTema());
             return;
         }
