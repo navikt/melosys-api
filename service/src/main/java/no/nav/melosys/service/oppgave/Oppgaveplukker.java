@@ -70,7 +70,11 @@ public class Oppgaveplukker {
                     log.error("Fant ikke fagsak {} for oppgave {}", saksnummer, oppgave.getOppgaveId());
                     throw new TekniskException("Fant ikke fagsak " + saksnummer);
                 }
-                return fagsakMatcherSøk(fagsak, plukkDto) && !venterSakPaaDokumentasjonEllerFagligAvklaring(fagsak);
+                if (unleash.isEnabled("melosys.behandle_alle_saker")) {
+                    return fagsakMatcherSøk(fagsak, plukkDto) && !venterSakPaaDokumentasjonEllerFagligAvklaring(fagsak);
+                } else {
+                    return !venterSakPaaDokumentasjonEllerFagligAvklaring(fagsak);
+                }
             }).toList();
 
         Optional<Oppgave> valg = filtrerteOppgaver.stream()
