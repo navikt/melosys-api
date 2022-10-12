@@ -4,18 +4,19 @@ import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.matching.StringValuePattern
 import no.nav.melosys.integrasjon.ConsumerWireMockTestBase
 import no.nav.melosys.integrasjon.sak.dto.SakDto
+import no.nav.security.token.support.client.spring.oauth2.EnableOAuth2Client
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebClient
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.context.annotation.Import
 import org.springframework.test.context.ActiveProfiles
 
-@WebMvcTest(
-    value = [
-        SakConsumerImpl::class,
-        SakConsumerProducer::class
-    ]
-)
+@Import(SakConsumerProducer::class)
+@WebMvcTest
+@AutoConfigureWebClient
+@EnableOAuth2Client
 @ActiveProfiles("wiremock-test")
 class SakConsumerTokenTest(
     @Autowired private val sakConsumer: SakConsumer,
@@ -37,7 +38,7 @@ class SakConsumerTokenTest(
     fun authorizationSkalKommeFraBruker() {
         verifyHeaders(
             mapOf<String, StringValuePattern>(
-                Pair("Authorization", WireMock.equalTo("Bearer --token-from-user--")),
+                Pair("Authorization", WireMock.equalTo("-- user_access_token --")),
             )
         )
         executeFromController()

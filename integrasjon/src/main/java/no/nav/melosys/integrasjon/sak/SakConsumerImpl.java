@@ -21,6 +21,9 @@ import no.nav.melosys.integrasjon.felles.JacksonObjectMapperProvider;
 import no.nav.melosys.integrasjon.felles.RestConsumer;
 import no.nav.melosys.integrasjon.sak.dto.SakDto;
 import no.nav.melosys.integrasjon.sak.dto.SakSearchRequest;
+import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo;
+import no.nav.security.token.support.client.core.ClientProperties;
+import no.nav.security.token.support.client.core.oauth2.OAuth2AccessTokenService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,8 +37,26 @@ public class SakConsumerImpl implements RestConsumer, SakConsumer {
     };
 
     private final WebTarget target;
+    private final ClientProperties clientProperties;
+    private final OAuth2AccessTokenService oAuth2AccessTokenService;
 
-    SakConsumerImpl(String endpointUrl) {
+    private String getAuth() {
+        if (ThreadLocalAccessInfo.shouldUseSystemToken())
+            return basicAuth();
+
+        return getUserToken();
+    }
+
+    private String getUserToken() {
+        return oAuth2AccessTokenService.getAccessToken(clientProperties).getAccessToken();
+    }
+
+    SakConsumerImpl(String endpointUrl,
+                    ClientProperties clientProperties,
+                    OAuth2AccessTokenService oAuth2AccessTokenService
+    ) {
+        this.clientProperties = clientProperties;
+        this.oAuth2AccessTokenService = oAuth2AccessTokenService;
         try {
             SSLContext sslContext = SSLContext.getDefault();
             Client client = ClientBuilder.newBuilder().sslContext(sslContext).build();
@@ -54,7 +75,7 @@ public class SakConsumerImpl implements RestConsumer, SakConsumer {
                 .request()
                 .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON)
                 .header(X_CORRELATION_ID, getCorrelationId())
-                .header(HttpHeaders.AUTHORIZATION, basicAuth())
+                .header(HttpHeaders.AUTHORIZATION, getAuth())
                 .get(SakDto.class);
         } catch (RuntimeException e) {
             ExceptionMapper.JaxGetRuntimeExTilMelosysEx(e);
@@ -74,7 +95,7 @@ public class SakConsumerImpl implements RestConsumer, SakConsumer {
                 .request()
                 .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON)
                 .header(X_CORRELATION_ID, getCorrelationId())
-                .header(HttpHeaders.AUTHORIZATION, basicAuth())
+                .header(HttpHeaders.AUTHORIZATION, getAuth())
                 .get(sakDtoListType);
         } catch (RuntimeException e) {
             ExceptionMapper.JaxGetRuntimeExTilMelosysEx(e);
@@ -89,7 +110,7 @@ public class SakConsumerImpl implements RestConsumer, SakConsumer {
             .request()
             .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON)
             .header(X_CORRELATION_ID, getCorrelationId())
-            .header(HttpHeaders.AUTHORIZATION, basicAuth())
+            .header(HttpHeaders.AUTHORIZATION, getAuth())
             .post(Entity.json(sakDto))) {
             håndterEvFeil(response);
             return response.readEntity(SakDto.class);
