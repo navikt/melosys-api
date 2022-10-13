@@ -5,10 +5,6 @@ import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.MappingBuilder
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
-import com.nimbusds.jwt.JWT
-import com.nimbusds.jwt.JWTClaimsSet
-import com.nimbusds.jwt.PlainJWT
-import com.ninjasquad.springmockk.MockkBean
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldBeSingleton
 import io.kotest.matchers.collections.shouldHaveSize
@@ -17,7 +13,6 @@ import io.kotest.matchers.equality.shouldBeEqualToComparingFields
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.types.shouldBeInstanceOf
-import io.mockk.every
 import no.nav.melosys.domain.arkiv.Vedlegg
 import no.nav.melosys.domain.eessi.BucType
 import no.nav.melosys.domain.eessi.SedType
@@ -26,15 +21,12 @@ import no.nav.melosys.domain.eessi.sed.SedDataDto
 import no.nav.melosys.domain.eessi.sed.SedGrunnlagA003Dto
 import no.nav.melosys.domain.eessi.sed.SedGrunnlagDto
 import no.nav.melosys.exception.TekniskException
+import no.nav.melosys.integrasjon.OAuthMockServer
 import no.nav.melosys.integrasjon.StsMockServer
 import no.nav.melosys.integrasjon.eessi.dto.SaksrelasjonDto
 import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter
 import no.nav.melosys.integrasjon.reststs.StsWebClientProducer
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
-import no.nav.security.token.support.client.spring.oauth2.EnableOAuth2Client
-import no.nav.security.token.support.core.context.TokenValidationContext
-import no.nav.security.token.support.core.context.TokenValidationContextHolder
-import no.nav.security.token.support.core.jwt.JwtToken
 import org.junit.jupiter.api.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -45,13 +37,12 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
 import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.ZoneId
 import java.util.*
 
 @Import(
     StsWebClientProducer::class,
     StsMockServer::class,
+    OAuthMockServer::class,
     CorrelationIdOutgoingFilter::class,
 
     EessiAuthFilter::class,
@@ -59,54 +50,30 @@ import java.util.*
 )
 @WebMvcTest
 @AutoConfigureWebClient
-@EnableOAuth2Client
 @ActiveProfiles("wiremock-test")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class EessiConsumerTest(
     @Autowired private val eessiConsumer: EessiConsumer,
     @Autowired private val stsMockServer: StsMockServer,
+    @Autowired private val oAuthMockServer: OAuthMockServer,
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int
 ) {
-    @MockkBean
-    private lateinit var tokenValidationContextHolder: TokenValidationContextHolder
-    private val azureMockServer: WireMockServer =
-        WireMockServer(WireMockConfiguration.wireMockConfig().port(mockServiceUnderTestPort + 2))
-
     private val processUUID = UUID.randomUUID()
     private val serviceUnderTestMockServer: WireMockServer =
         WireMockServer(WireMockConfiguration.wireMockConfig().port(mockServiceUnderTestPort))
 
     @BeforeAll
     fun beforeAll() {
-        every { tokenValidationContextHolder.tokenValidationContext } returns tokenValidationContext("sub1")
-        azureMockServer.start()
-
         serviceUnderTestMockServer.start()
         stsMockServer.start()
-    }
-
-    fun tokenValidationContext(sub: String): TokenValidationContext {
-        val expiry = LocalDateTime.now().atZone(ZoneId.systemDefault()).plusSeconds(60).toInstant()
-        val jwt: JWT = PlainJWT(
-            JWTClaimsSet.Builder()
-                .subject(sub)
-                .audience("thisapi")
-                .issuer("someIssuer")
-                .expirationTime(Date.from(expiry))
-                .claim("jti", UUID.randomUUID().toString())
-                .build()
-        )
-        val map: MutableMap<String, JwtToken> = HashMap()
-        map["issuer1"] = JwtToken(jwt.serialize())
-        return TokenValidationContext(map)
+        oAuthMockServer.start()
     }
 
     @AfterAll
     fun afterAll() {
         serviceUnderTestMockServer.stop()
         stsMockServer.stop()
-
-        azureMockServer.stop()
+        oAuthMockServer.stop()
     }
 
     @BeforeEach
