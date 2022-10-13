@@ -8,12 +8,10 @@ import no.nav.melosys.integrasjon.pdl.dto.identer.Identliste
 import no.nav.melosys.integrasjon.reststs.RestTokenServiceClient
 import no.nav.melosys.integrasjon.reststs.StsWebClientProducer
 import no.nav.security.token.support.client.spring.oauth2.EnableOAuth2Client
-import no.nav.security.token.support.client.spring.oauth2.OAuth2ClientConfiguration
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.boot.autoconfigure.web.client.RestTemplateAutoConfiguration
 import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebClient
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.context.annotation.Import
@@ -22,10 +20,7 @@ import org.springframework.test.context.ActiveProfiles
 @Import(
     StsWebClientProducer::class,
     RestTokenServiceClient::class,
-    RestTemplateAutoConfiguration::class,
-    OAuth2ClientConfiguration::class,
 
-    PDLConsumerImpl::class,
     PDLConsumerProducer::class,
     PDLAuthFilter::class
 )
@@ -54,7 +49,7 @@ class PDLConsumerTokenTest(
     fun authorizationSkalKommeFraBruker() {
         verifyHeaders(
             mapOf<String, StringValuePattern>(
-                Pair("Authorization", WireMock.equalTo("Bearer --token-from-user--")),
+                Pair("Authorization", WireMock.equalTo("Bearer -- user_access_token --")),
                 Pair("Nav-Consumer-Token", WireMock.equalTo("Bearer --token-from-system--"))
             )
         )
