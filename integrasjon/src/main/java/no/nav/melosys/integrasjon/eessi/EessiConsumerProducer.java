@@ -1,6 +1,5 @@
 package no.nav.melosys.integrasjon.eessi;
 
-import no.nav.melosys.integrasjon.felles.GenericContextExchangeFilter;
 import no.nav.melosys.integrasjon.felles.WebClientConfig;
 import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,13 +19,13 @@ public class EessiConsumerProducer implements WebClientConfig {
     }
 
     @Bean
-    public EessiConsumer melosysEessiConsumer(GenericContextExchangeFilter genericContextExchangeFilter,
+    public EessiConsumer melosysEessiConsumer(EessiAuthFilter eessiAuthFilter,
                                               CorrelationIdOutgoingFilter correlationIdOutgoingFilter,
                                               WebClient.Builder webClientBuilder
     ) {
         return new EessiConsumerImpl(webClientBuilder
             .baseUrl(url)
-            .filter(genericContextExchangeFilter)
+            .filter(eessiAuthFilter)
             .filter(correlationIdOutgoingFilter)
             .filter(errorFilter("Kall mot eessi feilet"))
             .defaultHeaders(this::defaultHeaders)
