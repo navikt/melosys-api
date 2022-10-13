@@ -2,6 +2,9 @@ package no.nav.melosys.integrasjon.sak
 
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.matching.StringValuePattern
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.shouldBe
+import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.integrasjon.ConsumerWireMockTestBase
 import no.nav.melosys.integrasjon.OAuthMockServer
 import no.nav.melosys.integrasjon.sak.dto.SakDto
@@ -40,13 +43,11 @@ class SakConsumerTokenTest(
     }
 
     @Test
-    fun authorizationSkalKommeFraBruker() {
-        verifyHeaders(
-            mapOf<String, StringValuePattern>(
-                Pair("Authorization", WireMock.equalTo("-- user_access_token --")),
-            )
-        )
-        executeFromController()
+    fun authorizationFraBruker_kasterException() {
+        setupWireMock()
+        shouldThrow<TekniskException> {
+            executeFromController()
+        }.message.shouldBe("Sak kan kun bli kalt i fra prosess")
     }
 
     @Test

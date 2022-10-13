@@ -15,6 +15,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status.Family;
 
 import no.nav.melosys.exception.IntegrasjonException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.felles.ExceptionMapper;
 import no.nav.melosys.integrasjon.felles.FeilResponseDto;
 import no.nav.melosys.integrasjon.felles.JacksonObjectMapperProvider;
@@ -22,8 +23,6 @@ import no.nav.melosys.integrasjon.felles.RestConsumer;
 import no.nav.melosys.integrasjon.sak.dto.SakDto;
 import no.nav.melosys.integrasjon.sak.dto.SakSearchRequest;
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo;
-import no.nav.security.token.support.client.core.ClientProperties;
-import no.nav.security.token.support.client.core.oauth2.OAuth2AccessTokenService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,26 +36,8 @@ public class SakConsumerImpl implements RestConsumer, SakConsumer {
     };
 
     private final WebTarget target;
-    private final ClientProperties clientProperties;
-    private final OAuth2AccessTokenService oAuth2AccessTokenService;
 
-    private String getAuth() {
-        if (ThreadLocalAccessInfo.shouldUseSystemToken())
-            return basicAuth();
-
-        return getUserToken();
-    }
-
-    private String getUserToken() {
-        return oAuth2AccessTokenService.getAccessToken(clientProperties).getAccessToken();
-    }
-
-    SakConsumerImpl(String endpointUrl,
-                    ClientProperties clientProperties,
-                    OAuth2AccessTokenService oAuth2AccessTokenService
-    ) {
-        this.clientProperties = clientProperties;
-        this.oAuth2AccessTokenService = oAuth2AccessTokenService;
+    SakConsumerImpl(String endpointUrl) {
         try {
             SSLContext sslContext = SSLContext.getDefault();
             Client client = ClientBuilder.newBuilder().sslContext(sslContext).build();
@@ -123,5 +104,12 @@ public class SakConsumerImpl implements RestConsumer, SakConsumer {
         FeilResponseDto feilResponseDto = response.readEntity(FeilResponseDto.class);
         log.error("Feil oppstod. Uuid={}, Response Kode={}, Feilmelding={}", feilResponseDto.getUuid(), response.getStatus(), feilResponseDto.getFeilmelding());
         httpStatusTilException(response.getStatus(), feilResponseDto.getFeilmelding());
+    }
+
+    private String getAuth() {
+        if (ThreadLocalAccessInfo.shouldUseOidcToken()) {
+            throw new TekniskException("Sak kan kun bli kalt i fra prosess");
+        }
+        return basicAuth();
     }
 }
