@@ -2,6 +2,7 @@ package no.nav.melosys.integrasjon.eessi
 
 import com.github.tomakehurst.wiremock.client.WireMock
 import no.nav.melosys.integrasjon.ConsumerWireMockTestBase
+import no.nav.melosys.integrasjon.OAuthMockServer
 import no.nav.melosys.integrasjon.reststs.RestTokenServiceClient
 import no.nav.melosys.integrasjon.reststs.StsWebClientProducer
 import no.nav.security.token.support.client.spring.oauth2.EnableOAuth2Client
@@ -19,6 +20,7 @@ import org.springframework.test.context.ActiveProfiles
 @Import(
     StsWebClientProducer::class,
     RestTokenServiceClient::class,
+    OAuthMockServer::class,
 
     EessiAuthFilter::class,
     EessiConsumerProducer::class,
@@ -30,8 +32,9 @@ import org.springframework.test.context.ActiveProfiles
 class EessiConsumerTokenTest(
     @Autowired private val eessiConsumer: EessiConsumer,
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,
-    @Value("\${mockserver.security.port}") mockSecurityPort: Int
-) : ConsumerWireMockTestBase<String, List<String>>(mockServiceUnderTestPort, mockSecurityPort) {
+    @Value("\${mockserver.security.port}") mockSecurityPort: Int,
+    @Autowired oAuthMockServer: OAuthMockServer
+) : ConsumerWireMockTestBase<String, List<String>>(mockServiceUnderTestPort, mockSecurityPort, oAuthMockServer) {
 
     @Test
     fun authorizationSkalKommeFraSystem() {

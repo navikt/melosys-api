@@ -8,14 +8,11 @@ import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.PlainJWT
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
-import io.mockk.spyk
-import no.nav.melosys.integrasjon.felles.EnvironmentHandler
 import no.nav.security.token.support.client.spring.oauth2.EnableOAuth2Client
 import no.nav.security.token.support.core.context.TokenValidationContext
 import no.nav.security.token.support.core.context.TokenValidationContextHolder
 import no.nav.security.token.support.core.jwt.JwtToken
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.mock.env.MockEnvironment
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.util.*
@@ -24,7 +21,7 @@ import java.util.*
 class OAuthMockServer(
     @Value("\${mockserver.security.azure.port}") mockSecurityPort: Int
 ) {
-    private val stsMockServer: WireMockServer =
+    private val azureMockServer: WireMockServer =
         WireMockServer(WireMockConfiguration.wireMockConfig().port(mockSecurityPort))
 
     @MockkBean
@@ -32,24 +29,28 @@ class OAuthMockServer(
 
     fun start() {
         every { tokenValidationContextHolder.tokenValidationContext } returns tokenValidationContext("sub1")
-        stsMockServer.start()
+        azureMockServer.start()
 
-        stsMockServer.stubFor(
-            WireMock.get("/?grant_type=client_credentials&scope=openid").willReturn(
+        azureMockServer.stubFor(
+            WireMock.post("/oauth2/v2.0/token").willReturn(
                 WireMock.aResponse()
                     .withStatus(200)
                     .withHeader("Content-Type", "application/json")
-                    .withBody("{ \"access_token\": \"--token-from-system--\", \"expires_in\": \"123\" }")
+                    .withBody(
+                        """ {
+                        "token_type": "Bearer",
+                        "scope": "scope1 scope2",
+                        "expires_in": 3952,
+                        "ext_expires_in": 3952,
+                        "access_token": "-- user_access_token -- "
+                        }
+                    """
+                    )
             )
         )
-
-        val environment = spyk(MockEnvironment())
-        environment.setProperty("systemuser.username", "test")
-        environment.setProperty("systemuser.password", "test")
-        EnvironmentHandler(environment)
     }
 
-    fun tokenValidationContext(sub: String): TokenValidationContext {
+    private fun tokenValidationContext(sub: String): TokenValidationContext {
         val expiry = LocalDateTime.now().atZone(ZoneId.systemDefault()).plusSeconds(60).toInstant()
         val jwt: JWT = PlainJWT(
             JWTClaimsSet.Builder()
@@ -66,7 +67,7 @@ class OAuthMockServer(
     }
 
     fun stop() {
-        stsMockServer.stop()
+        azureMockServer.stop()
     }
 }
 

@@ -6,49 +6,33 @@ import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.github.tomakehurst.wiremock.matching.StringValuePattern
 import com.github.tomakehurst.wiremock.matching.UrlPattern
-import com.nimbusds.jwt.JWT
-import com.nimbusds.jwt.JWTClaimsSet
-import com.nimbusds.jwt.PlainJWT
-import com.ninjasquad.springmockk.MockkBean
-import io.mockk.every
 import io.mockk.spyk
 import no.nav.melosys.integrasjon.felles.EnvironmentHandler
 import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter
 import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingInterceptor
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
-import no.nav.security.token.support.core.context.TokenValidationContext
-import no.nav.security.token.support.core.context.TokenValidationContextHolder
-import no.nav.security.token.support.core.jwt.JwtToken
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.*
 import org.springframework.context.annotation.Import
 import org.springframework.mock.env.MockEnvironment
-import java.time.LocalDateTime
-import java.time.ZoneId
 import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Import(
-    value = [
-        CorrelationIdOutgoingInterceptor::class,
-        CorrelationIdOutgoingFilter::class
-    ]
+    CorrelationIdOutgoingInterceptor::class,
+    CorrelationIdOutgoingFilter::class
 )
 abstract class ConsumerWireMockTestBase<T, R>(
     mockPort: Int,
-    stsMockPort: Int
+    stsMockPort: Int,
+    private val oAuthMockServer: OAuthMockServer
 ) {
-    @MockkBean
-    private lateinit var tokenValidationContextHolder: TokenValidationContextHolder
 
     private val serviceUnderTestMockServer: WireMockServer =
         WireMockServer(WireMockConfiguration.wireMockConfig().port(mockPort))
 
     protected val stsMockServer: WireMockServer =
         WireMockServer(WireMockConfiguration.wireMockConfig().port(stsMockPort))
-
-    protected val azureMockServer: WireMockServer =
-        WireMockServer(WireMockConfiguration.wireMockConfig().port(stsMockPort + 1))
 
     open fun createWireMock(): MappingBuilder = WireMock.get(UrlPattern.ANY)
 
@@ -58,11 +42,10 @@ abstract class ConsumerWireMockTestBase<T, R>(
 
     @BeforeAll
     fun beforeAll() {
-        every { tokenValidationContextHolder.tokenValidationContext } returns tokenValidationContext("sub1")
+        oAuthMockServer.start()
 
         serviceUnderTestMockServer.start()
         stsMockServer.start()
-        azureMockServer.start()
 
         val environment = spyk(MockEnvironment())
         environment.setProperty("systemuser.username", "test")
@@ -74,7 +57,7 @@ abstract class ConsumerWireMockTestBase<T, R>(
     fun afterAll() {
         serviceUnderTestMockServer.stop()
         stsMockServer.stop()
-        azureMockServer.stop()
+        oAuthMockServer.stop()
     }
 
     @BeforeEach
@@ -82,43 +65,6 @@ abstract class ConsumerWireMockTestBase<T, R>(
         serviceUnderTestMockServer.resetAll()
         stsMockServer.resetAll()
         defaultStsWireMockStub()
-        azureWireMockStub()
-    }
-
-    protected fun tokenValidationContext(sub: String): TokenValidationContext {
-        val expiry = LocalDateTime.now().atZone(ZoneId.systemDefault()).plusSeconds(60).toInstant()
-        val jwt: JWT = PlainJWT(
-            JWTClaimsSet.Builder()
-                .subject(sub)
-                .audience("thisapi")
-                .issuer("someIssuer")
-                .expirationTime(Date.from(expiry))
-                .claim("jti", UUID.randomUUID().toString())
-                .build()
-        )
-        val map: MutableMap<String, JwtToken> = HashMap()
-        map["issuer1"] = JwtToken(jwt.serialize())
-        return TokenValidationContext(map)
-    }
-
-    open fun azureWireMockStub() {
-        azureMockServer.stubFor(
-            WireMock.post("/oauth2/v2.0/token").willReturn(
-                WireMock.aResponse()
-                    .withStatus(200)
-                    .withHeader("Content-Type", "application/json")
-                    .withBody(
-                        """ {
-                        "token_type": "Bearer",
-                        "scope": "scope1 scope2",
-                        "expires_in": 3952,
-                        "ext_expires_in": 3952,
-                        "access_token": "-- user_access_token -- "
-                        }
-                    """
-                    )
-            )
-        )
     }
 
     open fun defaultStsWireMockStub() {
@@ -173,7 +119,6 @@ abstract class ConsumerWireMockTestBase<T, R>(
     }
 
     fun executeFromController(consumer: (R) -> Unit = {}) {
-//        SpringSubjectHandler.set(TestSubjectHandler())
         try {
             ThreadLocalAccessInfo.beforeControllerRequest("request", false)
             consumer(executeRequest())

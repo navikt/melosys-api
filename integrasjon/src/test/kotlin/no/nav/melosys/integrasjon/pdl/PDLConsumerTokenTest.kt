@@ -4,6 +4,7 @@ import com.github.tomakehurst.wiremock.client.MappingBuilder
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.matching.StringValuePattern
 import no.nav.melosys.integrasjon.ConsumerWireMockTestBase
+import no.nav.melosys.integrasjon.OAuthMockServer
 import no.nav.melosys.integrasjon.pdl.dto.identer.Identliste
 import no.nav.melosys.integrasjon.reststs.RestTokenServiceClient
 import no.nav.melosys.integrasjon.reststs.StsWebClientProducer
@@ -20,6 +21,7 @@ import org.springframework.test.context.ActiveProfiles
 @Import(
     StsWebClientProducer::class,
     RestTokenServiceClient::class,
+    OAuthMockServer::class,
 
     PDLConsumerProducer::class,
     PDLAuthFilter::class
@@ -31,8 +33,9 @@ import org.springframework.test.context.ActiveProfiles
 class PDLConsumerTokenTest(
     @Autowired private val pdlConsumer: PDLConsumer,
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,
-    @Value("\${mockserver.security.port}") mockSecurityPort: Int
-) : ConsumerWireMockTestBase<String, Identliste>(mockServiceUnderTestPort, mockSecurityPort) {
+    @Value("\${mockserver.security.port}") mockSecurityPort: Int,
+    @Autowired oAuthMockServer: OAuthMockServer
+) : ConsumerWireMockTestBase<String, Identliste>(mockServiceUnderTestPort, mockSecurityPort, oAuthMockServer) {
 
     @Test
     fun authorizationSkalKommeFraSystem() {

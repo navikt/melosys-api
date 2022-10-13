@@ -3,16 +3,15 @@ package no.nav.melosys.integrasjon.oppgave.konsument
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.matching.StringValuePattern
 import no.nav.melosys.integrasjon.ConsumerWireMockTestBase
+import no.nav.melosys.integrasjon.OAuthMockServer
 import no.nav.melosys.integrasjon.oppgave.konsument.dto.OppgaveDto
 import no.nav.melosys.integrasjon.reststs.RestTokenServiceClient
 import no.nav.melosys.integrasjon.reststs.StsWebClientProducer
 import no.nav.security.token.support.client.spring.oauth2.EnableOAuth2Client
-import no.nav.security.token.support.client.spring.oauth2.OAuth2ClientConfiguration
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.boot.autoconfigure.web.client.RestTemplateAutoConfiguration
 import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebClient
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.context.annotation.Import
@@ -21,8 +20,7 @@ import org.springframework.test.context.ActiveProfiles
 @Import(
     StsWebClientProducer::class,
     RestTokenServiceClient::class,
-    RestTemplateAutoConfiguration::class,
-    OAuth2ClientConfiguration::class,
+    OAuthMockServer::class,
 
     OppgaveConsumerImpl::class,
     OppgaveConsumerProducer::class,
@@ -35,8 +33,9 @@ import org.springframework.test.context.ActiveProfiles
 class OppgaveConsumerTokenTest(
     @Autowired private val oppgaveConsumer: OppgaveConsumer,
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,
-    @Value("\${mockserver.security.port}") mockSecurityPort: Int
-) : ConsumerWireMockTestBase<String, OppgaveDto>(mockServiceUnderTestPort, mockSecurityPort) {
+    @Value("\${mockserver.security.port}") mockSecurityPort: Int,
+    @Autowired oAuthMockServer: OAuthMockServer
+) : ConsumerWireMockTestBase<String, OppgaveDto>(mockServiceUnderTestPort, mockSecurityPort, oAuthMockServer) {
 
     @Test
     fun authorizationSkalKommeFraSystem() {

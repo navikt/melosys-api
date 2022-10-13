@@ -3,6 +3,7 @@ package no.nav.melosys.integrasjon.sak
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.matching.StringValuePattern
 import no.nav.melosys.integrasjon.ConsumerWireMockTestBase
+import no.nav.melosys.integrasjon.OAuthMockServer
 import no.nav.melosys.integrasjon.sak.dto.SakDto
 import no.nav.security.token.support.client.spring.oauth2.EnableOAuth2Client
 import org.junit.jupiter.api.Test
@@ -13,7 +14,10 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.context.annotation.Import
 import org.springframework.test.context.ActiveProfiles
 
-@Import(SakConsumerProducer::class)
+@Import(
+    SakConsumerProducer::class,
+    OAuthMockServer::class
+)
 @WebMvcTest
 @AutoConfigureWebClient
 @EnableOAuth2Client
@@ -21,8 +25,9 @@ import org.springframework.test.context.ActiveProfiles
 class SakConsumerTokenTest(
     @Autowired private val sakConsumer: SakConsumer,
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,
-    @Value("\${mockserver.security.port}") mockSecurityPort: Int
-) : ConsumerWireMockTestBase<String, SakDto>(mockServiceUnderTestPort, mockSecurityPort) {
+    @Value("\${mockserver.security.port}") mockSecurityPort: Int,
+    @Autowired oAuthMockServer: OAuthMockServer
+) : ConsumerWireMockTestBase<String, SakDto>(mockServiceUnderTestPort, mockSecurityPort, oAuthMockServer) {
 
     @Test
     fun authorizationSkalKommeFraSystem() {

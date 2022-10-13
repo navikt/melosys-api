@@ -4,33 +4,40 @@ import com.github.tomakehurst.wiremock.client.MappingBuilder
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.matching.StringValuePattern
 import no.nav.melosys.integrasjon.ConsumerWireMockTestBase
+import no.nav.melosys.integrasjon.OAuthMockServer
 import no.nav.melosys.sikkerhet.sts.*
 import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.meldinger.ProduserIkkeredigerbartDokumentRequest
 import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.meldinger.ProduserIkkeredigerbartDokumentResponse
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebClient
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.context.annotation.Import
 import org.springframework.test.context.ActiveProfiles
 
-@WebMvcTest(
-    value = [
-        DokumentproduksjonConsumerConfig::class,
-        DokumentproduksjonConsumerProducer::class
-    ]
+@Import(
+    StsLoginConfig::class,
+    StsProdWrapper::class,
+    StsTestWrapper::class,
+    OAuthMockServer::class,
+
+    DokumentproduksjonConsumerConfig::class,
+    DokumentproduksjonConsumerProducer::class
 )
-@Import(StsLoginConfig::class, StsProdWrapper::class, StsTestWrapper::class)
+@WebMvcTest
+@AutoConfigureWebClient
 @ActiveProfiles("wiremock-test")
+
 class DokumentproduksjonConsumerTokenTest(
     @Autowired private val dokumentproduksjonConsumer: DokumentproduksjonConsumer,
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,
-    @Value("\${mockserver.security.port}") mockSecurityPort: Int
+    @Value("\${mockserver.security.port}") mockSecurityPort: Int,
+    @Autowired oAuthMockServer: OAuthMockServer
 ) : ConsumerWireMockTestBase<String, ProduserIkkeredigerbartDokumentResponse>(
     mockServiceUnderTestPort,
-    mockSecurityPort
+    mockSecurityPort, oAuthMockServer
 ) {
-
     override fun createWireMock(): MappingBuilder = post("/soap/services/dokumentproduksjon/v3")
 
     override fun defaultStsWireMockStub() {}

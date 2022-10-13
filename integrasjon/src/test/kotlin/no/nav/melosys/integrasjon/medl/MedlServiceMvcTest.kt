@@ -14,35 +14,36 @@ import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode
 import no.nav.melosys.domain.dokument.medlemskap.Periode
 import no.nav.melosys.integrasjon.ConsumerWireMockTestBase
-import no.nav.melosys.integrasjon.felles.GenericContextExchangeFilter
+import no.nav.melosys.integrasjon.OAuthMockServer
+import no.nav.melosys.integrasjon.felles.MedlGenericContextExchangeFilter
 import no.nav.melosys.integrasjon.reststs.RestTokenServiceClient
-import no.nav.melosys.integrasjon.reststs.StsRestTemplateProducer
+import no.nav.melosys.integrasjon.reststs.StsWebClientProducer
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebClient
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.context.annotation.Import
 import org.springframework.test.context.ActiveProfiles
 import java.time.LocalDate
 
-@WebMvcTest(
-    value = [
-        StsRestTemplateProducer::class,
-        RestTokenServiceClient::class,
+@Import(
+    StsWebClientProducer::class,
+    RestTokenServiceClient::class,
+    OAuthMockServer::class,
 
-        MedlemskapRestConsumer::class,
-        MedlService::class,
-        MedlemskapRestConsumerProducer::class,
-        GenericContextExchangeFilter::class
-    ]
+    MedlGenericContextExchangeFilter::class,
+    MedlemskapRestConsumerProducer::class,
 )
-@ActiveProfiles("wiremock-test")
+@WebMvcTest
 @AutoConfigureWebClient
+@ActiveProfiles("wiremock-test")
 class MedlServiceMvcTest(
     @Autowired private val medlemskapRestConsumer: MedlemskapRestConsumer,
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,
-    @Value("\${mockserver.security.port}") mockSecurityPort: Int
-) : ConsumerWireMockTestBase<String, Saksopplysning>(mockServiceUnderTestPort, mockSecurityPort) {
+    @Value("\${mockserver.security.port}") mockSecurityPort: Int,
+    @Autowired oAuthMockServer: OAuthMockServer
+) : ConsumerWireMockTestBase<String, Saksopplysning>(mockServiceUnderTestPort, mockSecurityPort, oAuthMockServer) {
 
     private val objectMapper = ObjectMapper().apply { registerModule(JavaTimeModule()) }
 
