@@ -5,9 +5,13 @@ import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.matching.StringValuePattern
 import no.nav.melosys.integrasjon.ConsumerWireMockTestBase
 import no.nav.melosys.integrasjon.OAuthMockServer
+import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
+import no.nav.melosys.sikkerhet.context.SubjectHandler
 import no.nav.melosys.sikkerhet.sts.*
+import no.nav.security.token.support.spring.SpringTokenValidationContextHolder
 import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.meldinger.ProduserIkkeredigerbartDokumentRequest
 import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.meldinger.ProduserIkkeredigerbartDokumentResponse
+import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -28,7 +32,6 @@ import org.springframework.test.context.ActiveProfiles
 @WebMvcTest
 @AutoConfigureWebClient
 @ActiveProfiles("wiremock-test")
-
 class DokumentproduksjonConsumerTokenTest(
     @Autowired private val dokumentproduksjonConsumer: DokumentproduksjonConsumer,
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,
@@ -41,6 +44,11 @@ class DokumentproduksjonConsumerTokenTest(
     override fun createWireMock(): MappingBuilder = post("/soap/services/dokumentproduksjon/v3")
 
     override fun defaultStsWireMockStub() {}
+
+    @AfterAll
+    fun after() {
+        SubjectHandler.set(SpringSubjectHandler(SpringTokenValidationContextHolder()))
+    }
 
     @Test
     fun authorizationSkalKommeFraSystem() {
@@ -59,6 +67,13 @@ class DokumentproduksjonConsumerTokenTest(
 
     @Test
     fun authorizationSkalKommeFraBruker() {
+        SubjectHandler.set(object : SubjectHandler() {
+            override fun getOidcTokenString() = "--token-from-user--"
+            override fun getUserID() = ""
+            override fun getName() = ""
+            override fun getGroups() = mutableListOf<String>()
+        })
+
         val binarySecurityToken = """
                 <wsse:BinarySecurityToken
                         xmlns:wsse="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd"
