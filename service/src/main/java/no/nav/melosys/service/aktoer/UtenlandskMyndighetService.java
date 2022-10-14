@@ -97,14 +97,13 @@ public class UtenlandskMyndighetService {
     }
 
     public String lagInstitusjonsId(UtenlandskMyndighet utenlandskMyndighet) {
-        return utenlandskMyndighet.landkode
-            + (utenlandskMyndighet.institusjonskode == null ? "" : ":" + utenlandskMyndighet.institusjonskode);
+        return utenlandskMyndighet.hentInstitusjonID();
     }
 
     private Landkoder hentLandkodeForTrygdeavtale(Collection<Landkoder> landkoder) {
         if (landkoder.size() != 1) {
             throw new FunksjonellException("Fant ingen eller flere enn ett trygdemyndighetsland for bilaterale trygdeavtaler.");
         }
-        return landkoder.stream().findFirst().get();
+        return landkoder.stream().findFirst().orElse(null);
     }
 }
