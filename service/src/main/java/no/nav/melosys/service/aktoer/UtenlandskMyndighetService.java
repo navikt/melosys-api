@@ -87,17 +87,13 @@ public class UtenlandskMyndighetService {
     private Aktoer lagAktoer(UtenlandskMyndighet utenlandskMyndighet) {
         Aktoer aktoer = new Aktoer();
         aktoer.setRolle(TRYGDEMYNDIGHET);
-        aktoer.setInstitusjonId(lagInstitusjonsId(utenlandskMyndighet));
+        aktoer.setInstitusjonId(utenlandskMyndighet.hentInstitusjonID());
         return aktoer;
     }
 
     public String lagInstitusjonsId(Landkoder landkode) {
         UtenlandskMyndighet myndighet = hentUtenlandskMyndighet(landkode);
-        return lagInstitusjonsId(myndighet);
-    }
-
-    public String lagInstitusjonsId(UtenlandskMyndighet utenlandskMyndighet) {
-        return utenlandskMyndighet.hentInstitusjonID();
+        return myndighet.hentInstitusjonID();
     }
 
     private Landkoder hentLandkodeForTrygdeavtale(Collection<Landkoder> landkoder) {
