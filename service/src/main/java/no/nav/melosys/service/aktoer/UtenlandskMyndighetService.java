@@ -1,11 +1,9 @@
 package no.nav.melosys.service.aktoer;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
+import com.google.common.base.Enums;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.UtenlandskMyndighet;
@@ -43,11 +41,18 @@ public class UtenlandskMyndighetService {
         if (!landkoder.isEmpty()) {
             if (behandling.getFagsak().getType() == Sakstyper.TRYGDEAVTALE) {
                 fagsakService.oppdaterMyndighetForTrygdeavtale(saksnummer, hentLandkodeForTrygdeavtale(landkoder));
-            } else {
-                Collection<String> institusjonsIder = konverterLandkodeTilInstitusjonsId(landkoder);
+            } else if (behandling.getFagsak().getType() == Sakstyper.EU_EOS) {
+                Collection<String> institusjonsIder = landkoder.stream().map(this::hentEøsInstitusjonID).toList();
                 fagsakService.oppdaterMyndigheterForEuEos(saksnummer, institusjonsIder);
+            } else {
+                log.debug("Myndighet lagres ikke for sakstype {}", behandling.getFagsak().getType());
             }
         }
+    }
+
+    private Optional<UtenlandskMyndighet> finnUtenlandskMyndighet(String landkode) {
+        Landkoder eøsLandkode = Enums.getIfPresent(Landkoder.class, landkode).orNull();
+        return eøsLandkode == null ? Optional.empty() : utenlandskMyndighetRepository.findByLandkode(eøsLandkode);
     }
 
     public UtenlandskMyndighet hentUtenlandskMyndighet(Landkoder landkode) {
@@ -61,14 +66,6 @@ public class UtenlandskMyndighetService {
 
     public List<UtenlandskMyndighet> hentAlleUtenlandskMyndigheter() {
         return utenlandskMyndighetRepository.findAll();
-    }
-
-    private Collection<String> konverterLandkodeTilInstitusjonsId(Collection<Landkoder> landkoder) {
-        List<String> institusjonsider = new ArrayList<>();
-        for (Landkoder landkode : landkoder) {
-            institusjonsider.add(lagInstitusjonsId(landkode));
-        }
-        return institusjonsider;
     }
 
     public Map<UtenlandskMyndighet, Aktoer> lagUtenlandskeMyndigheterFraBehandling(Behandling behandling) {
@@ -91,7 +88,11 @@ public class UtenlandskMyndighetService {
         return aktoer;
     }
 
-    public String lagInstitusjonsId(Landkoder landkode) {
+    public Optional<String> finnInstitusjonID(String landkode) {
+        return finnUtenlandskMyndighet(landkode).map(UtenlandskMyndighet::hentInstitusjonID);
+    }
+
+    private String hentEøsInstitusjonID(Landkoder landkode) {
         UtenlandskMyndighet myndighet = hentUtenlandskMyndighet(landkode);
         return myndighet.hentInstitusjonID();
     }
