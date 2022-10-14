@@ -29,6 +29,7 @@ class OAuthMockServer(
 
     fun start() {
         every { tokenValidationContextHolder.tokenValidationContext } returns tokenValidationContext("sub1")
+        every { tokenValidationContextHolder.tokenValidationContext = any() } returns Unit
         azureMockServer.start()
 
         azureMockServer.stubFor(
