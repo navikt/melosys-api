@@ -1,6 +1,5 @@
 package no.nav.melosys.integrasjon.medl
 
-import no.nav.melosys.integrasjon.felles.MedlGenericContextExchangeFilter
 import no.nav.melosys.integrasjon.felles.RestConsumer
 import no.nav.melosys.integrasjon.felles.WebClientConfig
 import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter

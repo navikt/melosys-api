@@ -15,7 +15,6 @@ import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode
 import no.nav.melosys.domain.dokument.medlemskap.Periode
 import no.nav.melosys.integrasjon.ConsumerWireMockTestBase
 import no.nav.melosys.integrasjon.OAuthMockServer
-import no.nav.melosys.integrasjon.felles.MedlGenericContextExchangeFilter
 import no.nav.melosys.integrasjon.reststs.RestTokenServiceClient
 import no.nav.melosys.integrasjon.reststs.StsWebClientProducer
 import org.junit.jupiter.api.Test
