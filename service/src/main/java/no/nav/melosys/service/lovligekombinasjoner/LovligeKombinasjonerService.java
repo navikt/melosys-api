@@ -38,8 +38,13 @@ public class LovligeKombinasjonerService {
         return switch (hovedpart) {
             case BRUKER -> LovligeSakskombinasjoner.muligeSaksKombinasjonerBruker.get(sakstype).stream()
                 .map(SakstemaBehandlingsKombinasjon::sakstema)
-                .collect(Collectors.toCollection( LinkedHashSet::new ));
-            case VIRKSOMHET -> LovligeSakskombinasjoner.ALLE_MULIGE_SAKSTEMAER;
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+            case VIRKSOMHET -> sakstype != Sakstyper.FTRL ?
+                LovligeSakskombinasjoner.ALLE_MULIGE_SAKSTEMAER :
+                LovligeSakskombinasjoner.ALLE_MULIGE_SAKSTEMAER
+                    .stream()
+                    .filter(sakstema -> sakstema != Sakstemaer.UNNTAK)
+                    .collect(Collectors.toCollection(LinkedHashSet::new));
             default -> Collections.emptySet();
         };
     }

@@ -91,7 +91,9 @@ public class FagsakTjeneste {
         if (opprettSakDto.getBrukerID() == null && opprettSakDto.getVirksomhetOrgnr() == null) {
             throw new FunksjonellException("BrukerID eller organisasjonsnummer trengs for å opprette en sak.");
         }
-        aksesskontroll.autoriserFolkeregisterIdent(opprettSakDto.getBrukerID());
+        if (opprettSakDto.getBrukerID() != null) {
+            aksesskontroll.autoriserFolkeregisterIdent(opprettSakDto.getBrukerID());
+        }
 
         if (opprettSakDto.getOppgaveID() == null && unleash.isEnabled("melosys.ny_opprett_sak")) {
             opprettSak.opprettNySakOgBehandling(opprettSakDto);
@@ -114,8 +116,10 @@ public class FagsakTjeneste {
         if (opprettSakDto.getBehandlingstype() == null) {
             throw new FunksjonellException("Behandlingstype mangler");
         }
+        if (opprettSakDto.getBrukerID() != null) {
+            aksesskontroll.autoriserFolkeregisterIdent(opprettSakDto.getBrukerID());
+        }
 
-        aksesskontroll.autoriserFolkeregisterIdent(opprettSakDto.getBrukerID());
         opprettBehandlingForSak.opprettBehandling(saksnummer, opprettSakDto);
 
         return ResponseEntity.noContent().build();
