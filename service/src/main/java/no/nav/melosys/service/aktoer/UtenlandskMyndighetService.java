@@ -39,13 +39,14 @@ public class UtenlandskMyndighetService {
         String saksnummer = behandling.getFagsak().getSaksnummer();
         Collection<Landkoder> landkoder = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandling.getId());
         if (!landkoder.isEmpty()) {
-            if (behandling.getFagsak().getType() == Sakstyper.TRYGDEAVTALE) {
+            Sakstyper sakstype = behandling.getFagsak().getType();
+            if (sakstype == Sakstyper.TRYGDEAVTALE) {
                 fagsakService.oppdaterMyndighetForTrygdeavtale(saksnummer, hentLandkodeForTrygdeavtale(landkoder));
-            } else if (behandling.getFagsak().getType() == Sakstyper.EU_EOS) {
+            } else if (sakstype == Sakstyper.EU_EOS) {
                 Collection<String> institusjonsIder = landkoder.stream().map(this::hentEøsInstitusjonID).toList();
                 fagsakService.oppdaterMyndigheterForEuEos(saksnummer, institusjonsIder);
             } else {
-                log.debug("Myndighet lagres ikke for sakstype {}", behandling.getFagsak().getType());
+                log.debug("Myndighet lagres ikke for sakstype {}", sakstype);
             }
         }
     }

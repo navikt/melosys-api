@@ -62,7 +62,10 @@ public class UtenlandskMyndighet {
     }
 
     public String hentInstitusjonID() {
-        return landkode + (institusjonskode == null ? "" : ":" + institusjonskode);
+        if (institusjonskode == null) {
+            return landkode.getKode();
+        }
+        return landkode + ":" + institusjonskode;
     }
 
     public static Landkoder konverterInstitusjonIdTilLandkode(String institusjonID) {
