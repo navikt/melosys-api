@@ -52,8 +52,8 @@ public class UtenlandskMyndighetService {
     }
 
     private Optional<UtenlandskMyndighet> finnUtenlandskMyndighet(String landkode) {
-        Landkoder eøsLandkode = Enums.getIfPresent(Landkoder.class, landkode).orNull();
-        return eøsLandkode == null ? Optional.empty() : utenlandskMyndighetRepository.findByLandkode(eøsLandkode);
+        Optional<Landkoder> eøsLandkodeOptional = Enums.getIfPresent(Landkoder.class, landkode).toJavaUtil();
+        return eøsLandkodeOptional.flatMap(utenlandskMyndighetRepository::findByLandkode);
     }
 
     public UtenlandskMyndighet hentUtenlandskMyndighet(Landkoder landkode) {
@@ -102,6 +102,7 @@ public class UtenlandskMyndighetService {
         if (landkoder.size() != 1) {
             throw new FunksjonellException("Fant ingen eller flere enn ett trygdemyndighetsland for bilaterale trygdeavtaler.");
         }
-        return landkoder.stream().findFirst().orElse(null);
+        return landkoder.stream().findFirst().orElseThrow(
+            () -> new FunksjonellException("Fant ingen trygdemyndighetsland for bilaterale trygdeavtaler."));
     }
 }
