@@ -28,7 +28,7 @@ class OAuthMockServer(
     private lateinit var tokenValidationContextHolder: TokenValidationContextHolder
 
     fun start() {
-        every { tokenValidationContextHolder.tokenValidationContext } returns tokenValidationContext("sub1")
+        every { tokenValidationContextHolder.tokenValidationContext } returns tokenValidationContext()
         every { tokenValidationContextHolder.tokenValidationContext = any() } returns Unit
         azureMockServer.start()
 
@@ -51,20 +51,18 @@ class OAuthMockServer(
         )
     }
 
-    private fun tokenValidationContext(sub: String): TokenValidationContext {
+    private fun tokenValidationContext(): TokenValidationContext {
         val expiry = LocalDateTime.now().atZone(ZoneId.systemDefault()).plusSeconds(60).toInstant()
         val jwt: JWT = PlainJWT(
             JWTClaimsSet.Builder()
-                .subject(sub)
+                .subject("sub1")
                 .audience("thisapi")
                 .issuer("someIssuer")
                 .expirationTime(Date.from(expiry))
                 .claim("jti", UUID.randomUUID().toString())
                 .build()
         )
-        val map: MutableMap<String, JwtToken> = HashMap()
-        map["issuer1"] = JwtToken(jwt.serialize())
-        return TokenValidationContext(map)
+        return TokenValidationContext(mapOf("issuer1" to JwtToken(jwt.serialize())))
     }
 
     fun stop() {
