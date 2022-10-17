@@ -3,11 +3,11 @@ package no.nav.melosys.service.dokument.brev;
 import java.util.ArrayList;
 import java.util.List;
 
+import no.nav.melosys.domain.arkiv.Distribusjonstype;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 
 public class BrevbestillingRequest {
-
     private Produserbaredokumenter produserbardokument;
     private Aktoersroller mottaker;
     private String orgNr;
@@ -21,6 +21,7 @@ public class BrevbestillingRequest {
     private List<KopiMottaker> kopiMottakere;
     private String bestillersId;
     private String fritekstTittel;
+    private Distribusjonstype distribusjonstype;
     private String fritekst;
     private boolean kontaktopplysninger;
     private String nyVurderingBakgrunn;
@@ -60,6 +61,7 @@ public class BrevbestillingRequest {
         this.kopiMottakere = builder.kopiMottakere;
         this.bestillersId = builder.bestillersId;
         this.fritekstTittel = builder.fritekstTittel;
+        this.distribusjonstype = builder.distribusjonstype;
         this.fritekst = builder.fritekst;
         this.kontaktopplysninger = builder.kontaktopplysninger;
         this.begrunnelseKode = builder.begrunnelseKode;
@@ -108,6 +110,10 @@ public class BrevbestillingRequest {
 
     public String getBarnFritekst() {
         return barnFritekst;
+    }
+
+    public Distribusjonstype getDistribusjonstype() {
+        return distribusjonstype;
     }
 
     public String getKontaktpersonNavn() {
@@ -168,6 +174,7 @@ public class BrevbestillingRequest {
         private String bestillersId;
         private String fritekstTittel;
         private String fritekst;
+        private Distribusjonstype distribusjonstype;
         private boolean kontaktopplysninger;
         private String begrunnelseKode;
         private String ytterligereInformasjon;
@@ -242,6 +249,11 @@ public class BrevbestillingRequest {
 
         public Builder medFritekst(String fritekst) {
             this.fritekst = fritekst;
+            return this;
+        }
+
+        public Builder medDistribusjonsType(Distribusjonstype distribusjonstype) {
+            this.distribusjonstype = distribusjonstype;
             return this;
         }
 
