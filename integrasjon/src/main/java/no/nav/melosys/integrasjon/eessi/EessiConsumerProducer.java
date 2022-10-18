@@ -1,5 +1,6 @@
 package no.nav.melosys.integrasjon.eessi;
 
+import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory;
 import no.nav.melosys.integrasjon.felles.WebClientConfig;
 import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter;
 import org.springframework.beans.factory.annotation.Value;
@@ -11,21 +12,24 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 @Configuration
 public class EessiConsumerProducer implements WebClientConfig {
-
+    private static final String CLIENT_NAME = "eessi";
     private final String url;
+    private final GenericAuthFilterFactory genericAuthFilterFactory;
 
-    public EessiConsumerProducer(@Value("${MelosysEessi.url}") String url) {
+    public EessiConsumerProducer(
+        @Value("${MelosysEessi.url}") String url, GenericAuthFilterFactory genericAuthFilterFactory
+    ) {
         this.url = url;
+        this.genericAuthFilterFactory = genericAuthFilterFactory;
     }
 
     @Bean
-    public EessiConsumer melosysEessiConsumer(EessiAuthFilter eessiAuthFilter,
-                                              CorrelationIdOutgoingFilter correlationIdOutgoingFilter,
-                                              WebClient.Builder webClientBuilder
+    public EessiConsumer melosysEessiConsumer(
+        CorrelationIdOutgoingFilter correlationIdOutgoingFilter, WebClient.Builder webClientBuilder
     ) {
         return new EessiConsumerImpl(webClientBuilder
             .baseUrl(url)
-            .filter(eessiAuthFilter)
+            .filter(genericAuthFilterFactory.getFilter(CLIENT_NAME))
             .filter(correlationIdOutgoingFilter)
             .filter(errorFilter("Kall mot eessi feilet"))
             .defaultHeaders(this::defaultHeaders)

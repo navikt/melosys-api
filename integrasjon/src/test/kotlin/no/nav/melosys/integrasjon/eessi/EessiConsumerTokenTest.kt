@@ -3,6 +3,7 @@ package no.nav.melosys.integrasjon.eessi
 import com.github.tomakehurst.wiremock.client.WireMock
 import no.nav.melosys.integrasjon.ConsumerWireMockTestBase
 import no.nav.melosys.integrasjon.OAuthMockServer
+import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
 import no.nav.melosys.integrasjon.reststs.RestTokenServiceClient
 import no.nav.melosys.integrasjon.reststs.StsWebClientProducer
 import no.nav.security.token.support.client.spring.oauth2.EnableOAuth2Client
@@ -22,7 +23,7 @@ import org.springframework.test.context.ActiveProfiles
     RestTokenServiceClient::class,
     OAuthMockServer::class,
 
-    EessiAuthFilter::class,
+    GenericAuthFilterFactory::class,
     EessiConsumerProducer::class,
 )
 @WebMvcTest

@@ -24,6 +24,7 @@ import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.integrasjon.OAuthMockServer
 import no.nav.melosys.integrasjon.StsMockServer
 import no.nav.melosys.integrasjon.eessi.dto.SaksrelasjonDto
+import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
 import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter
 import no.nav.melosys.integrasjon.reststs.StsWebClientProducer
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
@@ -45,7 +46,7 @@ import java.util.*
     OAuthMockServer::class,
     CorrelationIdOutgoingFilter::class,
 
-    EessiAuthFilter::class,
+    GenericAuthFilterFactory::class,
     EessiConsumerProducer::class,
 )
 @WebMvcTest
