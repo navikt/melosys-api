@@ -3,15 +3,13 @@ package no.nav.melosys.service.journalforing;
 import java.util.List;
 import java.util.Optional;
 
+import com.google.common.base.Enums;
 import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Representerer;
-import no.nav.melosys.domain.kodeverk.Sakstemaer;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
@@ -129,6 +127,9 @@ public class JournalfoeringService {
             lovligeKombinasjonerService.validerBehandlingstema(hovedpart, sakstype, sakstema, behandlingstema, null);
             lovligeKombinasjonerService.validerBehandlingstype(hovedpart, sakstype, sakstema, behandlingstema,
                                                                behandlingstype, null);
+            if (journalfoeringDto.getAvsenderType() == Avsendertyper.UTENLANDSK_TRYGDEMYNDIGHET) {
+                validerSakstypeForTrygdemyndighet(sakstype, journalfoeringDto.getAvsenderID());
+            }
         } else {
             if (!erBehandlingAvSedForespørsler(
                 journalfoeringDto.getBehandlingstemaKode()) && !erBehandlingAvSøknadGammel(
@@ -145,6 +146,21 @@ public class JournalfoeringService {
                 throw new FunksjonellException("Kan ikke opprette ny sak med behandlingstema " + behandlingstema +
                     "siden 'melosys.folketrygden.mvp' ikke er aktivert i unleash");
             }
+        }
+    }
+
+    private static void validerSakstypeForTrygdemyndighet(Sakstyper sakstype,
+                                                          String landkode) {
+        boolean erEuEllerEøsLand = Enums.getIfPresent(Landkoder.class, landkode).isPresent();
+        boolean erAvtaleland = Enums.getIfPresent(Trygdeavtale_myndighetsland.class, landkode).isPresent();
+
+        if (erEuEllerEøsLand && !erAvtaleland && sakstype != Sakstyper.EU_EOS) {
+            throw new FunksjonellException(
+                "Sak for trygdemyndighet fra %s skal være av type %s".formatted(landkode, Sakstyper.EU_EOS));
+        }
+        if (erAvtaleland && !erEuEllerEøsLand && sakstype != Sakstyper.TRYGDEAVTALE) {
+            throw new FunksjonellException(
+                "Sak for trygdemyndighet fra %s skal være av type %s".formatted(landkode, Sakstyper.TRYGDEAVTALE));
         }
     }
 
