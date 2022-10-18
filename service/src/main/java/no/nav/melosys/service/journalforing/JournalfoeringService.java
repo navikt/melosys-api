@@ -104,7 +104,48 @@ public class JournalfoeringService {
             validerKanOppretteSakFraSed(journalpost);
         }
 
-        opprettSakOgJournalfør(journalfoeringDto);
+        fellesValidering(journalfoeringDto);
+
+        var behandleAlleSakerToggleEnabled = unleash.isEnabled("melosys.behandle_alle_saker");
+
+        final var sakstype = Sakstyper.valueOf(journalfoeringDto.getFagsak().getSakstype());
+        final var sakstema = behandleAlleSakerToggleEnabled ? Sakstemaer.valueOf(journalfoeringDto.getFagsak().getSakstema()) : null;
+        final var behandlingstema = Behandlingstema.valueOf(journalfoeringDto.getBehandlingstemaKode());
+        final var behandlingstype = behandleAlleSakerToggleEnabled ? Behandlingstyper.valueOf(journalfoeringDto.getBehandlingstypeKode()) : null;
+
+        validerOpprettelseSak(journalfoeringDto, behandleAlleSakerToggleEnabled, sakstype, sakstema, behandlingstema,
+                              behandlingstype);
+
+        opprettJournalføringNySakProsessinstans(journalfoeringDto, sakstype, sakstema, behandlingstema,
+                                                behandlingstype);
+    }
+
+    private void validerOpprettelseSak(JournalfoeringOpprettDto journalfoeringDto, boolean behandleAlleSakerToggleEnabled,
+                                       Sakstyper sakstype, Sakstemaer sakstema, Behandlingstema behandlingstema,
+                                       Behandlingstyper behandlingstype) {
+        if (behandleAlleSakerToggleEnabled) {
+            Aktoersroller hovedpart = journalføringGjelder(journalfoeringDto);
+
+            lovligeKombinasjonerService.validerBehandlingstema(hovedpart, sakstype, sakstema, behandlingstema, null);
+            lovligeKombinasjonerService.validerBehandlingstype(hovedpart, sakstype, sakstema, behandlingstema,
+                                                               behandlingstype, null);
+        } else {
+            if (!erBehandlingAvSedForespørsler(
+                journalfoeringDto.getBehandlingstemaKode()) && !erBehandlingAvSøknadGammel(
+                journalfoeringDto.getBehandlingstemaKode())) {
+                throw new FunksjonellException(
+                    String.format("Manuell journalføring av behandlingstema %s støttes ikke", journalfoeringDto.getBehandlingstemaKode())
+                );
+            }
+            if (!erGyldigBehandlingstemaForSakstype(sakstype, behandlingstema)) {
+                throw new FunksjonellException("Behandlingstema " + behandlingstema + " er ikke gyldig for sakstype " + sakstype);
+            }
+
+            if (behandlingstema == Behandlingstema.ARBEID_I_UTLANDET && !unleash.isEnabled("melosys.folketrygden.mvp")) {
+                throw new FunksjonellException("Kan ikke opprette ny sak med behandlingstema " + behandlingstema +
+                    "siden 'melosys.folketrygden.mvp' ikke er aktivert i unleash");
+            }
+        }
     }
 
     private void validerKanSendeForvaltningsmelding(JournalfoeringOpprettDto journalfoeringDto) {
@@ -150,37 +191,10 @@ public class JournalfoeringService {
         }
     }
 
-    private void opprettSakOgJournalfør(JournalfoeringOpprettDto journalfoeringDto) {
-        log.info("{} oppretter ny sak etter journalføring av journalpost {}", SubjectHandler.getInstance().getUserID(), journalfoeringDto.getJournalpostID());
+    private void opprettJournalføringNySakProsessinstans(JournalfoeringOpprettDto journalfoeringDto, Sakstyper sakstype,
+                                                         Sakstemaer sakstema, Behandlingstema behandlingstema,
+                                                         Behandlingstyper behandlingstype) {
         var behandleAlleSakerToggleEnabled = unleash.isEnabled("melosys.behandle_alle_saker");
-        if (!behandleAlleSakerToggleEnabled && !erBehandlingAvSedForespørsler(journalfoeringDto.getBehandlingstemaKode()) && !erBehandlingAvSøknadGammel(journalfoeringDto.getBehandlingstemaKode())) {
-            throw new FunksjonellException(
-                String.format("Manuell journalføring av behandlingstema %s støttes ikke", journalfoeringDto.getBehandlingstemaKode())
-            );
-        }
-        fellesValidering(journalfoeringDto);
-
-        final var sakstype = Sakstyper.valueOf(journalfoeringDto.getFagsak().getSakstype());
-        final var sakstema = behandleAlleSakerToggleEnabled ? Sakstemaer.valueOf(journalfoeringDto.getFagsak().getSakstema()) : null;
-        final var behandlingstema = Behandlingstema.valueOf(journalfoeringDto.getBehandlingstemaKode());
-        final var behandlingstype = behandleAlleSakerToggleEnabled ? Behandlingstyper.valueOf(journalfoeringDto.getBehandlingstypeKode()) : null;
-
-        if (behandleAlleSakerToggleEnabled) {
-            Aktoersroller hovedpart = journalføringGjelder(journalfoeringDto);
-
-            lovligeKombinasjonerService.validerBehandlingstema(hovedpart, sakstype, sakstema, behandlingstema, null);
-            lovligeKombinasjonerService.validerBehandlingstype(hovedpart, sakstype, sakstema, behandlingstema, behandlingstype, null);
-        } else {
-            if (!erGyldigBehandlingstemaForSakstype(sakstype, behandlingstema)) {
-                throw new FunksjonellException("Behandlingstema " + behandlingstema + " er ikke gyldig for sakstype " + sakstype);
-            }
-
-            if (behandlingstema == Behandlingstema.ARBEID_I_UTLANDET && !unleash.isEnabled("melosys.folketrygden.mvp")) {
-                throw new FunksjonellException("Kan ikke opprette ny sak med behandlingstema " + behandlingstema +
-                    "siden 'melosys.folketrygden.mvp' ikke er aktivert i unleash");
-            }
-        }
-
         ProsessType prosessType;
         if (StringUtils.isNotEmpty(journalfoeringDto.getBrukerID())) {
             prosessType = ProsessType.JFR_NY_SAK_BRUKER;
@@ -188,22 +202,25 @@ public class JournalfoeringService {
             prosessType = ProsessType.JFR_NY_SAK_VIRKSOMHET;
         }
 
-        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(prosessType, journalfoeringDto);
+        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(prosessType,
+                                                                                             journalfoeringDto);
         prosessinstans.setData(ProsessDataKey.SAKSTYPE, sakstype);
         if (behandleAlleSakerToggleEnabled) {
             prosessinstans.setData(ProsessDataKey.SAKSTEMA, sakstema);
             prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, behandlingstype);
         } else {
             prosessinstans.setData(ProsessDataKey.SAKSTEMA, SakstypeSakstemaKobling.sakstema(sakstype, behandlingstema));
-            prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandling.erBehandlingAvSøknadGammel(behandlingstema) ? Behandlingstyper.SOEKNAD : Behandlingstyper.SED);
+            prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandling.erBehandlingAvSøknadGammel(
+                behandlingstema) ? Behandlingstyper.SOEKNAD : Behandlingstyper.SED);
         }
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, behandlingstema);
 
         if (behandleAlleSakerToggleEnabled
-            ? erSakstypeEøs(sakstype) && !SaksbehandlingRegler.harTomFlyt(sakstype, sakstema, behandlingstype, behandlingstema)
+            ? erSakstypeEøs(sakstype) && !SaksbehandlingRegler.harTomFlyt(sakstype, sakstema, behandlingstype,
+                                                                          behandlingstema)
             : erSakstypeEøs(sakstype) && Behandling.erBehandlingAvSøknadGammel(behandlingstema)
         ) {
-            validerOpprettSakForSøknadBehandlingFelter(journalfoeringDto);
+            validerSøknadFelter(journalfoeringDto);
             prosessinstans.setData(ProsessDataKey.SØKNADSLAND, journalfoeringDto.getFagsak().getLand());
             prosessinstans.setData(ProsessDataKey.SØKNADSPERIODE, journalfoeringDto.getFagsak().getSoknadsperiode());
         }
@@ -226,6 +243,7 @@ public class JournalfoeringService {
         }
 
         prosessinstansService.lagre(prosessinstans);
+        log.info("Ny sak bestilt etter journalføring av journalpost {}", journalfoeringDto.getJournalpostID());
     }
 
     @Transactional
@@ -357,10 +375,9 @@ public class JournalfoeringService {
     }
 
     private void fellesValidering(JournalfoeringDto journalfoeringDto) {
-        if (journalfoeringDto instanceof JournalfoeringOpprettDto journalfoeringOpprettDto) {
-            if (journalfoeringOpprettDto.getFagsak() == null) {
-                throw new FunksjonellException("Opplysninger for å opprette en søknad mangler");
-            }
+        if (journalfoeringDto instanceof JournalfoeringOpprettDto journalfoeringOpprettDto
+            && journalfoeringOpprettDto.getFagsak() == null) {
+            throw new FunksjonellException("Opplysninger for å opprette en søknad mangler");
         }
 
         if (StringUtils.isEmpty(journalfoeringDto.getJournalpostID())) {
@@ -398,7 +415,7 @@ public class JournalfoeringService {
         }
     }
 
-    private void validerOpprettSakForSøknadBehandlingFelter(JournalfoeringOpprettDto journalfoeringDto) {
+    private void validerSøknadFelter(JournalfoeringOpprettDto journalfoeringDto) {
         final PeriodeDto søknadsperiode = journalfoeringDto.getFagsak().getSoknadsperiode();
         if (søknadsperiode == null) {
             throw new FunksjonellException("Søknadsperiode mangler");
