@@ -34,7 +34,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class UfmKontrollTest {
+class UfmKontrollServiceTest {
 
     @Mock
     private KontrollresultatRepository kontrollresultatRepository;
@@ -65,7 +65,7 @@ class UfmKontrollTest {
     }
 
     @Test
-    public void utførKontrollerOgRegistrerFeil() {
+    void utførKontrollerOgRegistrerFeil() {
         final long BEHANDLING_ID = 1L;
         when(persondataFasade.hentPerson(any())).thenReturn(PersonopplysningerObjectFactory.lagPersonopplysninger());
         when(behandlingService.hentBehandlingMedSaksopplysninger(BEHANDLING_ID)).thenReturn(behandling);
