@@ -28,7 +28,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.saksflyt.*;
-import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.metrics.MetrikkerNavn;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
@@ -78,14 +77,16 @@ public class ProsessinstansService {
     public void opprettNySakOgBehandling(OpprettSakDto opprettSakDto) {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.OPPRETT_SAK);
-        prosessinstans.setData(BRUKER_ID, opprettSakDto.getBrukerID());
-        prosessinstans.setData(BEHANDLINGSTEMA, opprettSakDto.getBehandlingstema());
-        prosessinstans.setData(BEHANDLINGSTYPE, opprettSakDto.getBehandlingstype());
+
         prosessinstans.setData(SAKSTYPE, opprettSakDto.getSakstype());
         prosessinstans.setData(SAKSTEMA, opprettSakDto.getSakstema());
-        prosessinstans.setData(SKAL_TILORDNES, opprettSakDto.isSkalTilordnes());
+        prosessinstans.setData(BEHANDLINGSTEMA, opprettSakDto.getBehandlingstema());
+        prosessinstans.setData(BEHANDLINGSTYPE, opprettSakDto.getBehandlingstype());
+        prosessinstans.setData(BRUKER_ID, opprettSakDto.getBrukerID());
+        prosessinstans.setData(VIRKSOMHET_ORGNR, opprettSakDto.getVirksomhetOrgnr());
         prosessinstans.setData(SØKNADSLAND, opprettSakDto.getSoknadDto().getLand());
         prosessinstans.setData(SØKNADSPERIODE, opprettSakDto.getSoknadDto().getPeriode());
+        prosessinstans.setData(SKAL_TILORDNES, opprettSakDto.isSkalTilordnes());
 
         lagre(prosessinstans);
     }
@@ -93,12 +94,14 @@ public class ProsessinstansService {
     public void opprettNyBehandlingForSak(String saksnummer, OpprettSakDto opprettSakDto) {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.OPPRETT_BEHANDLING_FOR_SAK);
-        prosessinstans.setData(BRUKER_ID, opprettSakDto.getBrukerID());
+
         prosessinstans.setData(SAKSNUMMER, saksnummer);
-        prosessinstans.setData(BEHANDLINGSTYPE, opprettSakDto.getBehandlingstype());
-        prosessinstans.setData(BEHANDLINGSTEMA, opprettSakDto.getBehandlingstema());
         prosessinstans.setData(SAKSTYPE, opprettSakDto.getSakstype());
         prosessinstans.setData(SAKSTEMA, opprettSakDto.getSakstema());
+        prosessinstans.setData(BEHANDLINGSTEMA, opprettSakDto.getBehandlingstema());
+        prosessinstans.setData(BEHANDLINGSTYPE, opprettSakDto.getBehandlingstype());
+        prosessinstans.setData(BRUKER_ID, opprettSakDto.getBrukerID());
+        prosessinstans.setData(VIRKSOMHET_ORGNR, opprettSakDto.getVirksomhetOrgnr());
         prosessinstans.setData(SKAL_TILORDNES, opprettSakDto.isSkalTilordnes());
 
         lagre(prosessinstans);
@@ -116,7 +119,7 @@ public class ProsessinstansService {
 
         prosessinstans.setData(ProsessDataKey.AVSENDER_TYPE, journalfoeringDto.getAvsenderType());
         if (journalfoeringDto.getAvsenderType() == Avsendertyper.UTENLANDSK_TRYGDEMYNDIGHET) {
-            prosessinstans.setData(ProsessDataKey.AVSENDER_ID, lagInstitusjonsId(journalfoeringDto.getAvsenderID()));
+            prosessinstans.setData(ProsessDataKey.AVSENDER_ID, finnInstitusjonIdEllerNull(journalfoeringDto.getAvsenderID()));
             prosessinstans.setData(ProsessDataKey.AVSENDER_LAND, journalfoeringDto.getAvsenderID());
         } else {
             prosessinstans.setData(ProsessDataKey.AVSENDER_ID, journalfoeringDto.getAvsenderID());
@@ -142,14 +145,8 @@ public class ProsessinstansService {
         return prosessinstans;
     }
 
-    private String lagInstitusjonsId(String avsenderID) {
-        try {
-            return utenlandskMyndighetService.lagInstitusjonsId(Landkoder.valueOf(avsenderID));
-        } catch (IkkeFunnetException e) {
-            logger.warn(e.getMessage());
-            logger.warn("Utenlandsk myndighet har ikke institusjonsId. Bruker {}: som avsenderID", avsenderID);
-            return avsenderID + ":";
-        }
+    private String finnInstitusjonIdEllerNull(String avsenderID) {
+        return utenlandskMyndighetService.finnInstitusjonID(avsenderID).orElse(null);
     }
 
     private static boolean skalSendesForvaltningsmelding(JournalfoeringDto journalfoeringDto) {
@@ -273,6 +270,7 @@ public class ProsessinstansService {
         prosessinstans.setData(ProsessDataKey.SAKSTYPE, opprettSakDto.getSakstype());
 
         if (unleash.isEnabled("melosys.behandle_alle_saker")) {
+            prosessinstans.setData(VIRKSOMHET_ORGNR, opprettSakDto.getVirksomhetOrgnr());
             prosessinstans.setData(SAKSTEMA, opprettSakDto.getSakstema());
             prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, opprettSakDto.getBehandlingstype());
         } else {
@@ -300,11 +298,19 @@ public class ProsessinstansService {
     public void opprettProsessinstansNySakFTRLTrygdeavtale(String journalpostID, OpprettSakDto opprettSakDto) {
         Prosessinstans prosessinstans = new Prosessinstans();
 
+        if (unleash.isEnabled("behandle_alle_saker")) {
+            prosessinstans.setData(VIRKSOMHET_ORGNR, opprettSakDto.getVirksomhetOrgnr());
+        }
         prosessinstans.setType(ProsessType.OPPRETT_NY_SAK_FTRL_TRYGDEAVTALE_FRA_OPPGAVE);
         prosessinstans.setData(ProsessDataKey.SAKSTYPE, opprettSakDto.getSakstype());
-        prosessinstans.setData(SAKSTEMA, SakstypeSakstemaKobling.sakstema(opprettSakDto.getSakstype(),
-            opprettSakDto.getBehandlingstema()));
-        prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.SOEKNAD);
+        if (unleash.isEnabled("melosys.behandle_alle_saker")) {
+            prosessinstans.setData(ProsessDataKey.SAKSTEMA, opprettSakDto.getSakstema());
+            prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, opprettSakDto.getBehandlingstype());
+        } else {
+            prosessinstans.setData(ProsessDataKey.SAKSTEMA,
+                SakstypeSakstemaKobling.sakstema(Sakstyper.EU_EOS, opprettSakDto.getBehandlingstema()));
+            prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.SOEKNAD);
+        }
         prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, journalpostID);
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, opprettSakDto.getBehandlingstema());
         prosessinstans.setData(ProsessDataKey.BRUKER_ID, opprettSakDto.getBrukerID());

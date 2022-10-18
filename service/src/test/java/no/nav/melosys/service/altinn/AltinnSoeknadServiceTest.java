@@ -63,10 +63,12 @@ class AltinnSoeknadServiceTest {
     void setup() {
         altinnSoeknadService = new AltinnSoeknadService(soknadMottakConsumer, fagsakService,
             behandlingsgrunnlagService, persondataFasade, avklarteVirksomheterService, unleash);
+        unleash.enableAll();
     }
 
     @Test
-    void opprettFagsakOgBehandlingFraAltinnSøknad_soeknadEksisterer_verifiserFagsakBehandlingOgBehandlinggrunnlagOpprettet() {
+    void opprettFagsakOgBehandlingFraAltinnSøknad_soeknadEksistererToggleDisabled_verifiserFagsakBehandlingOgBehandlinggrunnlagOpprettet() {
+        unleash.disableAll();
         final Fagsak fagsak = lagFagsak();
         final MedlemskapArbeidEOSM søknad = lagMedlemskapArbeidEOSM();
 
@@ -74,7 +76,9 @@ class AltinnSoeknadServiceTest {
         when(fagsakService.nyFagsakOgBehandling(captor.capture())).thenReturn(fagsak);
         when(persondataFasade.hentAktørIdForIdent(anyString())).thenReturn(aktørID);
 
+
         assertThat(altinnSoeknadService.opprettFagsakOgBehandlingFraAltinnSøknad(soknadID)).isEqualTo(fagsak.hentAktivBehandling());
+
 
         OpprettSakRequest req = captor.getValue();
         assertThat(req.getSakstype()).isEqualTo(Sakstyper.EU_EOS);
@@ -89,8 +93,34 @@ class AltinnSoeknadServiceTest {
     }
 
     @Test
+    void opprettFagsakOgBehandlingFraAltinnSøknad_soeknadEksisterer_verifiserFagsakBehandlingOgBehandlinggrunnlagOpprettet() {
+        final Fagsak fagsak = lagFagsak();
+        final MedlemskapArbeidEOSM søknad = lagMedlemskapArbeidEOSM();
+
+        when(soknadMottakConsumer.hentSøknad(soknadID)).thenReturn(søknad);
+        when(fagsakService.nyFagsakOgBehandling(captor.capture())).thenReturn(fagsak);
+        when(persondataFasade.hentAktørIdForIdent(anyString())).thenReturn(aktørID);
+
+
+        assertThat(altinnSoeknadService.opprettFagsakOgBehandlingFraAltinnSøknad(soknadID)).isEqualTo(fagsak.hentAktivBehandling());
+
+
+        OpprettSakRequest req = captor.getValue();
+        assertThat(req.getSakstype()).isEqualTo(Sakstyper.EU_EOS);
+        assertThat(req.getSakstema()).isEqualTo(Sakstemaer.MEDLEMSKAP_LOVVALG);
+        assertThat(req.getBehandlingstema()).isEqualTo(Behandlingstema.UTSENDT_ARBEIDSTAKER);
+        assertThat(req.getBehandlingstype()).isEqualTo(Behandlingstyper.FØRSTEGANG);
+        assertThat(req.getArbeidsgiver()).isEqualTo(søknad.getInnhold().getArbeidsgiver().getVirksomhetsnummer());
+        assertThat(req.getAktørID()).isEqualTo(aktørID);
+
+        verify(behandlingsgrunnlagService).opprettSøknadUtsendteArbeidstakereEøs(eq(1L), anyString(), any(),
+            eq(soknadID));
+    }
+
+    @Test
     @Deprecated(forRemoval = true, since = "Fjernes med melosys.behandle_alle_saker")
     void opprettFagsakOgBehandlingFraAltinnSøknad_soeknadEksistererArbeidsgiverOffentlig_verifiserBehandlingstemaArbeidsEttLandØvrig() {
+        unleash.disableAll();
         final Fagsak fagsak = lagFagsak();
         final MedlemskapArbeidEOSM søknad = lagMedlemskapArbeidEOSM();
 
@@ -113,7 +143,6 @@ class AltinnSoeknadServiceTest {
 
     @Test
     void opprettFagsakOgBehandlingFraAltinnSøknad_soeknadEksistererArbeidsgiverOffentlig_verifiserArbeidTjenestepersonEllerFly() {
-        unleash.enable("melosys.behandle_alle_saker");
         final Fagsak fagsak = lagFagsak();
         final MedlemskapArbeidEOSM søknad = lagMedlemskapArbeidEOSM();
 
@@ -129,7 +158,7 @@ class AltinnSoeknadServiceTest {
 
         OpprettSakRequest req = captor.getValue();
         assertThat(req.getBehandlingstema()).isEqualTo(Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY);
-        assertThat(req.getBehandlingstype()).isEqualTo(Behandlingstyper.SOEKNAD);
+        assertThat(req.getBehandlingstype()).isEqualTo(Behandlingstyper.FØRSTEGANG);
         assertThat(req.getArbeidsgiver()).isEqualTo(søknad.getInnhold().getArbeidsgiver().getVirksomhetsnummer());
         assertThat(req.getAktørID()).isEqualTo(aktørID);
     }
@@ -142,7 +171,9 @@ class AltinnSoeknadServiceTest {
         when(fagsakService.nyFagsakOgBehandling(captor.capture())).thenReturn(fagsak);
         when(persondataFasade.hentAktørIdForIdent(anyString())).thenReturn(aktørID);
 
+
         altinnSoeknadService.opprettFagsakOgBehandlingFraAltinnSøknad(soknadID);
+
 
         OpprettSakRequest req = captor.getValue();
         String fullmektigVirksomhetsnummer = søknad.getInnhold().getFullmakt().getFullmektigVirksomhetsnummer();
@@ -161,7 +192,9 @@ class AltinnSoeknadServiceTest {
         when(fagsakService.nyFagsakOgBehandling(captor.capture())).thenReturn(fagsak);
         when(persondataFasade.hentAktørIdForIdent(anyString())).thenReturn(aktørID);
 
+
         altinnSoeknadService.opprettFagsakOgBehandlingFraAltinnSøknad(soknadID);
+
 
         OpprettSakRequest req = captor.getValue();
         String fullmektigVirksomhetsnummer = søknad.getInnhold().getArbeidsgiver().getVirksomhetsnummer();
@@ -179,7 +212,9 @@ class AltinnSoeknadServiceTest {
         when(fagsakService.nyFagsakOgBehandling(captor.capture())).thenReturn(fagsak);
         when(persondataFasade.hentAktørIdForIdent(anyString())).thenReturn(aktørID);
 
+
         altinnSoeknadService.opprettFagsakOgBehandlingFraAltinnSøknad(soknadID);
+
 
         OpprettSakRequest req = captor.getValue();
         assertThat(req.getKontaktopplysninger()).isNotEmpty();
@@ -198,7 +233,9 @@ class AltinnSoeknadServiceTest {
         when(soknadMottakConsumer.hentSøknad(soknadID)).thenReturn(søknad);
         when(fagsakService.nyFagsakOgBehandling(captor.capture())).thenReturn(fagsak);
 
+
         altinnSoeknadService.opprettFagsakOgBehandlingFraAltinnSøknad(soknadID);
+
 
         OpprettSakRequest req = captor.getValue();
         assertThat(req.getUtenlandskPersonId()).isEqualTo(utenlandskPersonId);
@@ -212,7 +249,9 @@ class AltinnSoeknadServiceTest {
         when(soknadMottakConsumer.hentSøknad(soknadID)).thenReturn(søknad);
         when(fagsakService.nyFagsakOgBehandling(any(OpprettSakRequest.class))).thenReturn(fagsak);
 
+
         altinnSoeknadService.opprettFagsakOgBehandlingFraAltinnSøknad(soknadID);
+
 
         verify(avklarteVirksomheterService).lagreVirksomhetSomAvklartfakta(
             søknad.getInnhold().getArbeidsgiver().getVirksomhetsnummer(), fagsak.hentAktivBehandling().getId());

@@ -5,7 +5,6 @@ import java.util.List;
 
 import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.TemaFactory;
 import no.nav.melosys.domain.arkiv.FysiskDokument;
 import no.nav.melosys.domain.arkiv.OpprettJournalpost;
 import no.nav.melosys.domain.eessi.SedType;
@@ -52,7 +51,7 @@ public class SedSomBrevService {
                                                        List<FysiskDokument> vedlegg) {
         var fagsak = behandling.getFagsak();
         var utenlandskMyndighet = utenlandskMyndighetService.hentUtenlandskMyndighet(mottakerland);
-        String institusjonID = utenlandskMyndighetService.lagInstitusjonsId(utenlandskMyndighet);
+        String institusjonID = utenlandskMyndighet.hentInstitusjonID();
         String brukerFnr = persondataFasade.hentFolkeregisterident(fagsak.hentBrukersAktørID());
         byte[] sedPdf = eessiService.genererSedPdf(behandling.getId(), sedType);
         var tema = unleash.isEnabled("melosys.behandle_alle_saker")

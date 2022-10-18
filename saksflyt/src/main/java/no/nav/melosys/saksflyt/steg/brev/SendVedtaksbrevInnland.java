@@ -106,7 +106,6 @@ public class SendVedtaksbrevInnland implements StegBehandler {
         prosessinstansService.opprettProsessinstanserSendBrev(behandling, brevbestilling, mottakerListe);
 
         if (behandling.getFagsak().harAktørMedRolleType(ARBEIDSGIVER)
-            //Temp fiks for https://jira.adeo.no/browse/MELOSYS-5243
             && behandlingsresultatType != Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL) {
 
             DoksysBrevbestilling brevbestillingArbeidsgiver = new DoksysBrevbestilling.Builder()

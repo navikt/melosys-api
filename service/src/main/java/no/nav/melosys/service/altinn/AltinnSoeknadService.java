@@ -64,7 +64,9 @@ public class AltinnSoeknadService {
             .medFullmektig(hentFullmektig(søknad))
             .medKontaktopplysninger(hentKontaktopplysninger(søknad))
             .medBehandlingstema(avklarBehandlingstema(søknad))
-            .medBehandlingstype(Behandlingstyper.SOEKNAD)
+            .medBehandlingstype(unleash.isEnabled("melosys.behandle_alle_saker")
+                ? Behandlingstyper.FØRSTEGANG
+                : Behandlingstyper.SOEKNAD)
             .build();
 
         final Fagsak fagsak = fagsakService.nyFagsakOgBehandling(opprettSakRequest);
@@ -159,7 +161,7 @@ public class AltinnSoeknadService {
             ? Kontaktopplysning.av(hentKontaktVirksomhetsnummer(søknad), kontaktpersonNavn, kontaktpersonTelefon) : null;
     }
 
-    private static String hentKontaktVirksomhetsnummer(MedlemskapArbeidEOSM søknad){
+    private static String hentKontaktVirksomhetsnummer(MedlemskapArbeidEOSM søknad) {
         if (rådgivningsfirmaErFullmektig(søknad)) {
             return søknad.getInnhold().getFullmakt().getFullmektigVirksomhetsnummer();
         }

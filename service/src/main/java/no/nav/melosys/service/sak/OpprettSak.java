@@ -10,7 +10,6 @@ import no.nav.melosys.domain.arkiv.Journalposttype;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.journalforing.JournalfoeringService;
@@ -135,19 +134,34 @@ public class OpprettSak {
             throw new FunksjonellException("OppgaveID mangler.");
         }
         final Oppgave oppgave = oppgaveService.hentOppgaveMedOppgaveID(oppgaveID);
-        if (!nySakKanOpprettesFraOppgavetype(oppgave.getOppgavetype())) {
-            throw new FunksjonellException("Ny sak kan ikke opprettes på bakgrunn av oppgave med type: " + oppgave.getOppgavetype().getBeskrivelse());
+
+        if (unleash.isEnabled("melosys.ny_opprett_sak")) {
+            if (!nySakKanOpprettesFraOppgavetype(oppgave.getOppgavetype())) {
+                throw new FunksjonellException("Ny sak kan ikke opprettes på bakgrunn av oppgave med type: " + oppgave.getOppgavetype().getBeskrivelse());
+            }
+        } else {
+            if (!nySakKanOpprettesFraOppgavetype_gammel(oppgave.getOppgavetype())) {
+                throw new FunksjonellException("Ny sak kan ikke opprettes på bakgrunn av oppgave med type: " + oppgave.getOppgavetype().getBeskrivelse());
+            }
         }
+
         if (StringUtils.isEmpty(oppgave.getJournalpostId())) {
             throw new FunksjonellException("Ny sak kan ikke opprettes fordi oppgave " + oppgaveID + " mangler journalpost.");
         }
         return oppgave;
     }
 
-    private static boolean nySakKanOpprettesFraOppgavetype(Oppgavetyper oppgavetype) {
+    private static boolean nySakKanOpprettesFraOppgavetype_gammel(Oppgavetyper oppgavetype) {
         return oppgavetype == Oppgavetyper.BEH_SAK_MK
             || oppgavetype == Oppgavetyper.BEH_SAK
             || oppgavetype == Oppgavetyper.BEH_SED;
+    }
+
+    private static boolean nySakKanOpprettesFraOppgavetype(Oppgavetyper oppgavetype) {
+        return oppgavetype == Oppgavetyper.BEH_SAK_MK
+            || oppgavetype == Oppgavetyper.BEH_SAK
+            || oppgavetype == Oppgavetyper.BEH_SED
+            || oppgavetype == Oppgavetyper.VURD_HENV;
     }
 
     private void validerJournalpost(Journalpost journalpost) {

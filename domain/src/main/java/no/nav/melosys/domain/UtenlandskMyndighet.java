@@ -42,8 +42,7 @@ public class UtenlandskMyndighet {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof UtenlandskMyndighet)) return false;
-        UtenlandskMyndighet that = (UtenlandskMyndighet) o;
+        if (!(o instanceof UtenlandskMyndighet that)) return false;
         return institusjonskode.equals(that.institusjonskode) &&
             land.equals(that.land);
     }
@@ -60,6 +59,13 @@ public class UtenlandskMyndighet {
         adresse.setPoststed(poststed);
         adresse.setLandkode(landkode.getKode());
         return adresse;
+    }
+
+    public String hentInstitusjonID() {
+        if (institusjonskode == null) {
+            return landkode.getKode();
+        }
+        return landkode + ":" + institusjonskode;
     }
 
     public static Landkoder konverterInstitusjonIdTilLandkode(String institusjonID) {

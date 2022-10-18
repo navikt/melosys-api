@@ -160,7 +160,6 @@ public class OppgaveService {
     }
 
     public void opprettEllerGjenbrukBehandlingsoppgave(Behandling behandling, @Nullable String journalpostID, @Nullable String aktørID, @Nullable String tilordnetRessurs, @Nullable @Deprecated String beskrivelse, @Nullable String orgnr) {
-
         Optional<Oppgave> eksisterendeOppgave = finnÅpenBehandlingsoppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer());
 
         if (eksisterendeOppgave.isEmpty()) {

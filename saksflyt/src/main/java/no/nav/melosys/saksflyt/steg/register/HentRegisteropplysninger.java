@@ -2,6 +2,7 @@ package no.nav.melosys.saksflyt.steg.register;
 
 import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
@@ -45,12 +46,17 @@ public class HentRegisteropplysninger implements StegBehandler {
     @Override
     public void utfør(Prosessinstans prosessinstans) {
         Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
+        boolean erForVirksomhet = unleash.isEnabled("melosys.ny_opprett_sak") ? behandling.getFagsak().getHovedpartRolle() == Aktoersroller.VIRKSOMHET : false;
 
-        if (behandling.getFagsak().erSakstypeEøs()) {
-            var behandleAlleSakerToggleEnabled = unleash.isEnabled("melosys.behandle_alle_saker");
-            var aktørId = behandling.getFagsak().finnBrukersAktørID().orElseThrow(
-                () -> new FunksjonellException("Kan ikke hente registreopplysninger når bruker ikke har aktørID")
-            );
+        if (!behandling.getFagsak().erSakstypeEøs() || erForVirksomhet) {
+            log.debug("Hopper over steg {} fordi sak {} har sakstype {} og behandlingstema {}", HENT_REGISTEROPPLYSNINGER.getKode(), behandling.getFagsak().getSaksnummer(), behandling.getFagsak().getType(), behandling.getTema());
+            return;
+        }
+
+        var behandleAlleSakerToggleEnabled = unleash.isEnabled("melosys.behandle_alle_saker");
+        var aktørId = behandling.getFagsak().finnBrukersAktørID().orElseThrow(
+            () -> new FunksjonellException("Kan ikke hente registreopplysninger når bruker ikke har aktørID")
+        );
 
             var registeropplysningerRequestBuilder = RegisteropplysningerRequest.builder()
                 .behandlingID(prosessinstans.getBehandling().getId())
@@ -62,18 +68,15 @@ public class HentRegisteropplysninger implements StegBehandler {
                     behandling.getType(),
                     behandleAlleSakerToggleEnabled));
 
-            (behandleAlleSakerToggleEnabled
-                ? behandling.finnPeriode()
-                : behandling.finnPeriodeGammel()
-            ).ifPresent(periode -> {
-                registeropplysningerRequestBuilder.fom(periode.getFom());
-                registeropplysningerRequestBuilder.tom(periode.getTom());
-            });
+        (behandleAlleSakerToggleEnabled
+            ? behandling.finnPeriode()
+            : behandling.finnPeriodeGammel()
+        ).ifPresent(periode -> {
+            registeropplysningerRequestBuilder.fom(periode.getFom());
+            registeropplysningerRequestBuilder.tom(periode.getTom());
+        });
 
-            registeropplysningerService.hentOgLagreOpplysninger(registeropplysningerRequestBuilder.build());
-            log.info("Hentet registeropplysninger for behandling {}", behandling.getId());
-        } else {
-            log.debug("Hopper over steg {} fordi sak {} har sakstype {}", HENT_REGISTEROPPLYSNINGER.getKode(), behandling.getFagsak().getSaksnummer(), behandling.getFagsak().getType());
-        }
+        registeropplysningerService.hentOgLagreOpplysninger(registeropplysningerRequestBuilder.build());
+        log.info("Hentet registeropplysninger for behandling {}", behandling.getId());
     }
 }

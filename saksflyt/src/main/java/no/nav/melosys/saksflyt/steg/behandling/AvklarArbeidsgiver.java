@@ -1,16 +1,17 @@
 package no.nav.melosys.saksflyt.steg.behandling;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 
 import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.adresse.Adresse;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
@@ -54,37 +55,44 @@ public class AvklarArbeidsgiver implements StegBehandler {
 
     @Override
     public void utfør(Prosessinstans prosessinstans) {
-
         long behandlingID = prosessinstans.getBehandling().getId();
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
-        Behandlingsresultat resultat = behandlingsresultatService.hentBehandlingsresultat(prosessinstans.getBehandling().getId());
-        if (arbeidsgiverAvklares(behandling, resultat)) {
-            Fagsak fagsak = behandling.getFagsak();
-            String saksnummer = fagsak.getSaksnummer();
+        Behandlingsresultat resultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
+        if (arbeidsgiverIkkeAvklares(behandling, resultat)) {
+            log.debug("Arbeidsgiver avklares ikke for behandling {}", behandling.getId());
+            return;
+        }
 
-            List<AvklartVirksomhet> avklarteNorskeArbeidsgivere = avklarteVirksomheterService.hentNorskeArbeidsgivere(behandling, INGEN_ADRESSE);
-            List<String> norskeOrgnumre = avklarteNorskeArbeidsgivere.stream()
-                .map(avklartVirksomhet -> avklartVirksomhet.orgnr)
-                .toList();
+        Fagsak fagsak = behandling.getFagsak();
+        String saksnummer = fagsak.getSaksnummer();
 
-            aktoerService.erstattEksisterendeArbeidsgiveraktører(fagsak, norskeOrgnumre);
+        List<AvklartVirksomhet> avklarteNorskeArbeidsgivere = avklarteVirksomheterService.hentNorskeArbeidsgivere(behandling, INGEN_ADRESSE);
+        List<String> norskeOrgnumre = avklarteNorskeArbeidsgivere.stream()
+            .map(avklartVirksomhet -> avklartVirksomhet.orgnr)
+            .toList();
 
-            if (avklarteNorskeArbeidsgivere.isEmpty()) {
-                log.info("Eksisterende arbeidsgiveraktør fjernet, og ingen nye lagt til for sak {}.", saksnummer);
-            } else {
-                log.info("Avklart arbeidsgivere lagt til for sak {}.", saksnummer);
-            }
+        aktoerService.erstattEksisterendeArbeidsgiveraktører(fagsak, norskeOrgnumre);
+
+        if (avklarteNorskeArbeidsgivere.isEmpty()) {
+            log.info("Eksisterende arbeidsgiveraktør fjernet, og ingen nye lagt til for sak {}.", saksnummer);
+        } else {
+            log.info("Avklart arbeidsgivere lagt til for sak {}.", saksnummer);
         }
     }
 
-    private boolean arbeidsgiverAvklares(Behandling behandling, Behandlingsresultat resultat) {
+    private boolean arbeidsgiverIkkeAvklares(Behandling behandling, Behandlingsresultat resultat) {
         if (unleash.isEnabled("melosys.behandle_alle_saker")) {
-            return !SaksbehandlingRegler.harTomFlyt(behandling) && (
-                resultat.getType() == Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL
-                    || !resultat.hentLovvalgsperiode().erArtikkel13()
-            );
+            return SaksbehandlingRegler.harTomFlyt(behandling)
+                || resultat.erAvslagManglendeOpplysninger() || erEøsMedArtikkel13(behandling, resultat);
         }
-        return resultat.getType() == Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL ||
-            !resultat.hentLovvalgsperiode().erArtikkel13();
+        return resultat.erAvslagManglendeOpplysninger() || erEøsMedArtikkel13(behandling, resultat);
+    }
+
+    private static boolean erEøsMedArtikkel13(Behandling behandling, Behandlingsresultat resultat) {
+        if (!behandling.getFagsak().erSakstypeEøs()) {
+            return false;
+        }
+        Optional<Lovvalgsperiode> lovvalgsperiodeOptional = resultat.finnLovvalgsperiode();
+        return lovvalgsperiodeOptional.isPresent() && lovvalgsperiodeOptional.get().erArtikkel13();
     }
 }

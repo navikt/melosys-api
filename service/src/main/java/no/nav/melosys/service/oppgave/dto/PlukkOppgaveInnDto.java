@@ -5,9 +5,9 @@ import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 
 public record PlukkOppgaveInnDto(
-    Behandlingstema behandlingstema,
+    Sakstyper sakstype,
     Sakstemaer sakstema,
-    Sakstyper sakstype
+    Behandlingstema behandlingstema
 ) {
 
 }

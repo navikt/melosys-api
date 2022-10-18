@@ -155,7 +155,7 @@ public class OppgaveSearchRequest {
             return this;
         }
 
-        public Builder medTema(String[] tema) {
+        public Builder medTema(String... tema) {
             this.tema = tema;
             return this;
         }
