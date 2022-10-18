@@ -59,6 +59,7 @@ spec:
     path: /internal/prometheus
   ingresses:
   - "https://{{ URL }}"
+  - https://melosys-api-q1.dev-fss-pub.nais.io
   env:
   - name: SPRING_PROFILES_ACTIVE
     value: nais
