@@ -110,7 +110,7 @@ class DokgenServiceTest {
             new DokgenMalMapper(dokgenMapperDatahenter, mockInnvilgelseFtrlMapper, mockStorbritanniaMapper, unleash),
             mockBehandlingsService, mockEregFasade, mockKontaktOpplysningService,
             mockBrevMottakerService, mockProsessinstansService, mockSaksbehandlerService,
-            mockUtenlandskMyndighetService, mockDokumentHentingService);
+            mockUtenlandskMyndighetService);
 
         reset(mockDokgenConsumer);
     }
@@ -414,6 +414,45 @@ class DokgenServiceTest {
             .hasSize(2)
             .extracting(FritekstvedleggBestilling::tittel, FritekstvedleggBestilling::fritekst)
             .containsExactlyInAnyOrder(Tuple.tuple("tittel1", "fritekst1"), Tuple.tuple("tittel2", "fritekst2"));
+    }
+
+    @Test
+    void produserOgDistribuerBrev_brukerSkalHaKopi_setterFeltKorrekt() {
+        Aktoer arbeidsgiver = new Aktoer();
+        arbeidsgiver.setRolle(Aktoersroller.ARBEIDSGIVER);
+        when(mockBrevMottakerService.avklarMottakere(any(), any(), any(), eq(false), eq(false))).thenReturn(List.of(arbeidsgiver));
+        when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(new Behandling());
+        BrevbestillingRequest brevbestillingRequest = new BrevbestillingRequest.Builder()
+            .medProduserbardokument(GENERELT_FRITEKSTBREV_BRUKER)
+            .medKopiMottakere(List.of(new KopiMottaker(Aktoersroller.BRUKER, null, null, null)))
+            .build();
+
+
+        dokgenService.produserOgDistribuerBrev(123L, brevbestillingRequest);
+
+
+        verify(mockProsessinstansService, times(2)).opprettProsessinstansOpprettOgDistribuerBrev(any(Behandling.class), any(Aktoer.class), brevbestillingCaptor.capture());
+        FritekstbrevBrevbestilling brevbestilling = (FritekstbrevBrevbestilling) brevbestillingCaptor.getValue();
+        assertThat(brevbestilling.isBrukerSkalHaKopi()).isTrue();
+    }
+
+    @Test
+    void produserOgDistribuerBrev_brukerSkalIkkeHaKopi_setterFeltKorrekt() {
+        Aktoer arbeidsgiver = new Aktoer();
+        arbeidsgiver.setRolle(Aktoersroller.ARBEIDSGIVER);
+        when(mockBrevMottakerService.avklarMottakere(any(), any(), any(), eq(false), eq(false))).thenReturn(List.of(arbeidsgiver));
+        when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(new Behandling());
+        BrevbestillingRequest brevbestillingRequest = new BrevbestillingRequest.Builder()
+            .medProduserbardokument(MANGELBREV_ARBEIDSGIVER)
+            .build();
+
+
+        dokgenService.produserOgDistribuerBrev(123L, brevbestillingRequest);
+
+
+        verify(mockProsessinstansService).opprettProsessinstansOpprettOgDistribuerBrev(any(Behandling.class), any(Aktoer.class), brevbestillingCaptor.capture());
+        MangelbrevBrevbestilling brevbestilling = (MangelbrevBrevbestilling) brevbestillingCaptor.getValue();
+        assertThat(brevbestilling.isBrukerSkalHaKopi()).isFalse();
     }
 
     @Test

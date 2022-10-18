@@ -9,6 +9,7 @@ public class Fritekstbrev extends DokgenDto {
     private final String fritekst;
     private final boolean medKontaktopplysninger;
     private final String navnFullmektig;
+    private final boolean brukerSkalHaKopi;
 
     protected Fritekstbrev(FritekstbrevBrevbestilling brevbestilling, Aktoersroller mottakerType, Saksinfo saksinfo) {
         super(brevbestilling, mottakerType, saksinfo);
@@ -16,6 +17,7 @@ public class Fritekstbrev extends DokgenDto {
         this.fritekst = brevbestilling.getFritekst();
         this.medKontaktopplysninger = brevbestilling.isKontaktopplysninger();
         this.navnFullmektig = brevbestilling.getNavnFullmektig();
+        this.brukerSkalHaKopi = brevbestilling.isBrukerSkalHaKopi();
     }
 
     public String getFritekstTittel() {
@@ -32,5 +34,9 @@ public class Fritekstbrev extends DokgenDto {
 
     public String getNavnFullmektig() {
         return navnFullmektig;
+    }
+
+    public boolean isBrukerSkalHaKopi() {
+        return brukerSkalHaKopi;
     }
 }
