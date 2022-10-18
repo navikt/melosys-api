@@ -1,9 +1,15 @@
 package no.nav.melosys.service.kontroll.feature.ufm
 
-import no.nav.melosys.domain.Behandlingsresultat
-import no.nav.melosys.domain.Kontrollresultat
-import no.nav.melosys.domain.Saksopplysning
-import no.nav.melosys.domain.SaksopplysningType
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.equality.shouldBeEqualToComparingFields
+import io.kotest.matchers.shouldBe
+import io.mockk.every
+import io.mockk.impl.annotations.MockK
+import io.mockk.impl.annotations.RelaxedMockK
+import io.mockk.junit5.MockKExtension
+import io.mockk.slot
+import io.mockk.verify
+import no.nav.melosys.domain.*
 import no.nav.melosys.domain.dokument.SaksopplysningDokument
 import no.nav.melosys.domain.dokument.inntekt.InntektDokument
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument
@@ -18,33 +24,30 @@ import no.nav.melosys.service.SaksbehandlingDataFactory
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.persondata.PersondataFasade
-import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory
-import org.assertj.core.api.Assertions
+import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.*
-import org.mockito.junit.jupiter.MockitoExtension
 import java.time.LocalDate
 
-@ExtendWith(MockitoExtension::class)
-internal class UfmKontrollServiceTest {
-    @Mock
-    private val kontrollresultatRepository: KontrollresultatRepository? = null
+@ExtendWith(MockKExtension::class)
+class UfmKontrollServiceTest {
+    @RelaxedMockK
+    lateinit var kontrollresultatRepository: KontrollresultatRepository
 
-    @Mock
-    private val behandlingsresultatService: BehandlingsresultatService? = null
+    @MockK
+    lateinit var behandlingsresultatService: BehandlingsresultatService
 
-    @Mock
-    private val behandlingService: BehandlingService? = null
+    @MockK
+    lateinit var behandlingService: BehandlingService
 
-    @Mock
-    private val persondataFasade: PersondataFasade? = null
+    @MockK
+    lateinit var persondataFasade: PersondataFasade
 
-    @Captor
-    private val kontrollresultaterCaptor: ArgumentCaptor<List<Kontrollresultat>>? = null
-    private var ufmKontrollService: UfmKontrollService? = null
-    private val behandling = SaksbehandlingDataFactory.lagBehandling()
+    lateinit var ufmKontrollService: UfmKontrollService
+
+    private val behandling: Behandling = SaksbehandlingDataFactory.lagBehandling()
+
     @BeforeEach
     fun setup() {
         ufmKontrollService = UfmKontrollService(
@@ -53,60 +56,66 @@ internal class UfmKontrollServiceTest {
             behandlingService,
             persondataFasade
         )
+    }
+
+    @Test
+    fun utførKontrollerOgRegistrerFeil_A009_forventKontroll_lovvalgslandNorge() {
         val sedDokument = SedDokument()
         sedDokument.sedType = SedType.A009
         sedDokument.lovvalgslandKode = Landkoder.NO
-        sedDokument.lovvalgsperiode = Periode(
-            LocalDate.now(),
-            LocalDate.now().plusMonths(1)
-        )
+        sedDokument.lovvalgsperiode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))
         behandling.saksopplysninger.add(lagSaksopplysning(sedDokument, SaksopplysningType.SEDOPPL))
         behandling.saksopplysninger.add(lagSaksopplysning(MedlemskapDokument(), SaksopplysningType.MEDL))
         behandling.saksopplysninger.add(lagSaksopplysning(InntektDokument(), SaksopplysningType.INNTK))
         behandling.saksopplysninger.add(lagSaksopplysning(UtbetalingDokument(), SaksopplysningType.UTBETAL))
+
+        val behandlingId = 1L
+        every { persondataFasade.hentPerson(any()) } returns lagPersonopplysninger()
+        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingId) } returns behandling
+        every { behandlingsresultatService.hentBehandlingsresultat(behandlingId) } returns lagBehandlingsresultat()
+
+        val kontrollresultaterSlot = slot<List<Kontrollresultat>>()
+        every { kontrollresultatRepository.saveAll(capture(kontrollresultaterSlot)) }
+            .answers {
+                kontrollresultaterSlot.captured.shouldHaveSize(2)
+                    .sortedBy { it.begrunnelse }
+                    .apply {
+                        first().apply {
+                            begrunnelse.shouldBe(Kontroll_begrunnelser.TREDJELANDSBORGER_IKKE_AVTALELAND)
+                            behandlingsresultat.id.shouldBe(2L)
+                        }
+                        last().apply {
+                            begrunnelse.shouldBe(Kontroll_begrunnelser.LOVVALGSLAND_NORGE)
+                            behandlingsresultat.id.shouldBe(2L)
+                        }
+                    }
+            }
+
+
+        ufmKontrollService.utførKontrollerOgRegistrerFeil(behandlingId)
+
+
+        verify { behandlingService.hentBehandlingMedSaksopplysninger(any()) }
+        verify { kontrollresultatRepository.deleteByBehandlingsresultat(ofType(Behandlingsresultat::class)) }
     }
 
     @Test
-    fun utførKontrollerOgRegistrerFeil() {
-        val BEHANDLING_ID = 1L
-        Mockito.`when`(persondataFasade!!.hentPerson(ArgumentMatchers.any()))
-            .thenReturn(PersonopplysningerObjectFactory.lagPersonopplysninger())
-        Mockito.`when`(behandlingService!!.hentBehandlingMedSaksopplysninger(BEHANDLING_ID)).thenReturn(behandling)
-        Mockito.`when`(behandlingsresultatService!!.hentBehandlingsresultat(BEHANDLING_ID))
-            .thenReturn(lagBehandlingsresultat())
-        ufmKontrollService!!.utførKontrollerOgRegistrerFeil(BEHANDLING_ID)
-        Mockito.verify(behandlingService).hentBehandlingMedSaksopplysninger(ArgumentMatchers.anyLong())
-        Mockito.verify(kontrollresultatRepository).deleteByBehandlingsresultat(
-            ArgumentMatchers.any(
-                Behandlingsresultat::class.java
+    fun utførKontroller_periodeIkkeGyldig_forventFeil_feilIPerioden() {
+        val sedDokument = SedDokument().apply {
+            lovvalgsperiode = Periode(
+                LocalDate.now(),
+                LocalDate.now().minusYears(1)
             )
-        )
-        Mockito.verify(kontrollresultatRepository).saveAll(
-            kontrollresultaterCaptor!!.capture()
-        )
-        val kontrollresultater = kontrollresultaterCaptor.value
-        Assertions.assertThat(kontrollresultater).hasSize(2)
-        Assertions.assertThat(kontrollresultater)
-            .extracting<Kontroll_begrunnelser, RuntimeException> { obj: Kontrollresultat -> obj.begrunnelse }
-            .containsExactlyInAnyOrder(
-                Kontroll_begrunnelser.LOVVALGSLAND_NORGE,
-                Kontroll_begrunnelser.TREDJELANDSBORGER_IKKE_AVTALELAND
-            )
-        Assertions.assertThat(kontrollresultater)
-            .extracting<Behandlingsresultat, RuntimeException> { obj: Kontrollresultat -> obj.behandlingsresultat }
-            .extracting<Long, RuntimeException> { obj: Behandlingsresultat -> obj.id }
-            .containsExactlyInAnyOrder(2L, 2L)
-    }
+        }
+        behandling.saksopplysninger.add(lagSaksopplysning(sedDokument, SaksopplysningType.SEDOPPL))
 
-    @Test
-    fun utførKontroller_periodeIkkeGyldig_forventEttTreff() {
-        val sedDokument = behandling.hentSedDokument()
-        sedDokument.lovvalgsperiode = Periode(
-            LocalDate.now(),
-            LocalDate.now().minusYears(1)
-        )
-        Assertions.assertThat(ufmKontrollService!!.utførKontroller(behandling))
-            .containsExactly(Kontroll_begrunnelser.FEIL_I_PERIODEN)
+
+        val kontrollBegrunnelser = ufmKontrollService.utførKontroller(behandling)
+
+
+        kontrollBegrunnelser
+            .shouldHaveSize(1)
+            .first().shouldBeEqualToComparingFields(Kontroll_begrunnelser.FEIL_I_PERIODEN)
     }
 
     private fun lagSaksopplysning(
