@@ -1,5 +1,6 @@
 package no.nav.melosys.integrasjon.joark.saf;
 
+import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory;
 import no.nav.melosys.integrasjon.felles.WebClientConfig;
 import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,20 +13,25 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Configuration
 public class SafConsumerProducer implements WebClientConfig {
     private static final String NAV_CONSUMER_ID = "Nav-Consumer-Id";
+    private static final String CLIENT_NAME = "saf";
 
     private final String url;
+    private final GenericAuthFilterFactory genericAuthFilterFactory;
 
-    public SafConsumerProducer(@Value("${SAF.url}") String url) {
+    public SafConsumerProducer(
+        @Value("${SAF.url}") String url, GenericAuthFilterFactory genericAuthFilterFactory
+
+    ) {
         this.url = url;
+        this.genericAuthFilterFactory = genericAuthFilterFactory;
     }
 
     @Bean
     public SafConsumer safConsumer(WebClient.Builder webClientBuilder,
-                                   SafGenericContextExchangeFilter safGenericContextExchangeFilter,
                                    CorrelationIdOutgoingFilter correlationIdOutgoingFilter) {
         return new SafConsumerImpl(
             webClientBuilder
-                .filter(safGenericContextExchangeFilter)
+                .filter(genericAuthFilterFactory.getFilter(CLIENT_NAME))
                 .filter(correlationIdOutgoingFilter)
                 .filter(errorFilter("Kall mot SAF feilet."))
                 .defaultHeaders(this::defaultHeaders)
