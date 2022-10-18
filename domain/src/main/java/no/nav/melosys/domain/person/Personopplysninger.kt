@@ -1,124 +1,91 @@
-package no.nav.melosys.domain.person;
+package no.nav.melosys.domain.person
 
-import java.time.LocalDate;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
+import com.fasterxml.jackson.annotation.JsonIgnore
+import no.nav.melosys.domain.brev.Postadresse
+import no.nav.melosys.domain.dokument.felles.Land
+import no.nav.melosys.domain.person.adresse.Adressebeskyttelse
+import no.nav.melosys.domain.person.adresse.Bostedsadresse
+import no.nav.melosys.domain.person.adresse.Kontaktadresse
+import no.nav.melosys.domain.person.adresse.Oppholdsadresse
+import no.nav.melosys.domain.person.familie.Familiemedlem
+import java.time.LocalDate
+import java.util.*
+import java.util.function.Function
+import java.util.function.Predicate
+import java.util.stream.Collectors
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import no.nav.melosys.domain.brev.Postadresse;
-import no.nav.melosys.domain.dokument.felles.Land;
-import no.nav.melosys.domain.person.adresse.Adressebeskyttelse;
-import no.nav.melosys.domain.person.adresse.Bostedsadresse;
-import no.nav.melosys.domain.person.adresse.Kontaktadresse;
-import no.nav.melosys.domain.person.adresse.Oppholdsadresse;
-import no.nav.melosys.domain.person.familie.Familiemedlem;
-
-import static no.nav.melosys.domain.person.Master.FREG;
-import static no.nav.melosys.domain.person.Master.PDL;
-
-public record Personopplysninger(
-    Collection<Adressebeskyttelse> adressebeskyttelser,
-    Bostedsadresse bostedsadresse,
-    Doedsfall dødsfall,
-    Set<Familiemedlem> familiemedlemmer,
-    Foedsel fødsel,
-    Folkeregisteridentifikator folkeregisteridentifikator,
-    KjoennType kjønn,
-    Collection<Kontaktadresse> kontaktadresser,
-    Navn navn,
-    Collection<Oppholdsadresse> oppholdsadresser,
-    Collection<Statsborgerskap> statsborgerskap
-) implements Persondata {
-    @Override
-    public boolean erPersonDød() {
-        return dødsfall != null && dødsfall.dødsdato() != null;
+class Personopplysninger : Persondata {
+    override fun erPersonDød(): Boolean {
+        return dødsfall != null && dødsfall.dødsdato() != null
     }
 
-    @Override
-    public boolean harStrengtAdressebeskyttelse() {
-        return adressebeskyttelser().stream().anyMatch(Adressebeskyttelse::erStrengtFortrolig);
+    override fun harStrengtAdressebeskyttelse(): Boolean {
+        return adressebeskyttelser().stream()
+            .anyMatch(Predicate { obj: Adressebeskyttelse -> obj.erStrengtFortrolig() })
     }
 
-    @Override
-    public boolean manglerRegistrertAdresse() {
-        return bostedsadresse == null && kontaktadresser.isEmpty() && oppholdsadresser.isEmpty();
+    override fun manglerRegistrertAdresse(): Boolean {
+        return bostedsadresse == null && kontaktadresser.isEmpty() && oppholdsadresser.isEmpty()
     }
 
-    @Override
-    public boolean manglerBostedsadresse() {
-        return finnBostedsadresse().isEmpty();
+    override fun manglerBostedsadresse(): Boolean {
+        return finnBostedsadresse().isEmpty
     }
 
-    @Override
-    public String hentFolkeregisterident() {
-        return (folkeregisteridentifikator == null) ? null : folkeregisteridentifikator.identifikasjonsnummer();
+    override fun hentFolkeregisterident(): String {
+        return if (folkeregisteridentifikator == null) null else folkeregisteridentifikator.identifikasjonsnummer()
     }
 
-    @Override
-    public Set<Land> hentAlleStatsborgerskap() {
-        return statsborgerskap().stream().map(s -> Land.av(s.landkode())).collect(Collectors.toUnmodifiableSet());
+    override fun hentAlleStatsborgerskap(): Set<Land> {
+        return statsborgerskap().stream().map<Land>(Function { s: Statsborgerskap -> Land.av(s.landkode()) })
+            .collect<Set<Land>, Any>(Collectors.toUnmodifiableSet<Land>())
     }
 
-    @Override
-    public KjoennType hentKjønnType() {
-        return kjønn;
+    override fun hentKjønnType(): KjoennType {
+        return kjønn
     }
 
     @JsonIgnore
-    @Override
-    public String getFornavn() {
-        return navn.fornavn();
+    override fun getFornavn(): String {
+        return navn.fornavn()
     }
-
-    @Override
-    @JsonIgnore
-    public String getMellomnavn() {
-        return navn.mellomnavn();
-    }
-
-    @Override
-    @JsonIgnore
-    public String getEtternavn() {
-        return navn.etternavn();
-    }
-
-    @Override
 
     @JsonIgnore
-    public String getSammensattNavn() {
-        return navn.tilSammensattNavn();
+    override fun getMellomnavn(): String {
+        return navn.mellomnavn()
     }
 
-    @Override
-    public Set<Familiemedlem> hentFamiliemedlemmer() {
-        return familiemedlemmer;
-    }
-
-    @Override
     @JsonIgnore
-    public LocalDate getFødselsdato() {
-        return fødsel.fødselsdato();
+    override fun getEtternavn(): String {
+        return navn.etternavn()
     }
 
-    @Override
-    public Optional<Bostedsadresse> finnBostedsadresse() {
-        return Optional.ofNullable(bostedsadresse);
+    @JsonIgnore
+    override fun getSammensattNavn(): String {
+        return navn.tilSammensattNavn()
     }
 
-    @Override
-    public Optional<Kontaktadresse> finnKontaktadresse() {
-        return kontaktadresser.stream().max(Comparator.comparing(Kontaktadresse::registrertDato));
+    override fun hentFamiliemedlemmer(): Set<Familiemedlem> {
+        return familiemedlemmer
     }
 
-    @Override
-    public Optional<Oppholdsadresse> finnOppholdsadresse() {
-        return oppholdsadresser.stream().max(Comparator.comparing(Oppholdsadresse::registrertDato));
+    @JsonIgnore
+    override fun getFødselsdato(): LocalDate {
+        return fødsel.fødselsdato()
     }
 
-    @Override
+    override fun finnBostedsadresse(): Optional<Bostedsadresse> {
+        return Optional.ofNullable(bostedsadresse)
+    }
+
+    override fun finnKontaktadresse(): Optional<Kontaktadresse> {
+        return kontaktadresser.stream().max(Comparator.comparing { obj: Kontaktadresse -> obj.registrertDato() })
+    }
+
+    override fun finnOppholdsadresse(): Optional<Oppholdsadresse> {
+        return oppholdsadresser.stream().max(Comparator.comparing { obj: Oppholdsadresse -> obj.registrertDato() })
+    }
+
     /*
      * Vi følger anbefaling fra PDL om følgende prioritering:
      * Kontaktadresse med master PDL
@@ -126,57 +93,62 @@ public record Personopplysninger(
      * Oppholdsadresse med master PDL
      * Oppholdsadresse med master Freg
      * Bostedsadresse
-     */
-    public Postadresse hentGjeldendePostadresse() {
+     */  override fun hentGjeldendePostadresse(): Postadresse? {
         return lagPostadresseFraKontaktadresser()
-            .or(this::lagPostadresseFraOppholdsadresser)
-            .or(this::lagPostadresseFraBostedsadresse)
-            .orElse(null);
+            .or { lagPostadresseFraOppholdsadresser() }
+            .or { lagPostadresseFraBostedsadresse() }
+            .orElse(null)
     }
 
-    private Optional<Postadresse> lagPostadresseFraKontaktadresser() {
-        return hentGjeldendeKontaktadresseFraMaster(PDL)
-            .or(() -> hentGjeldendeKontaktadresseFraMaster(FREG))
-            .map(this::lagPostadresseFraKontaktadresse);
+    private fun lagPostadresseFraKontaktadresser(): Optional<Postadresse?> {
+        return hentGjeldendeKontaktadresseFraMaster(Master.PDL)
+            .or { hentGjeldendeKontaktadresseFraMaster(Master.FREG) }
+            .map { kontaktadresse: Kontaktadresse -> lagPostadresseFraKontaktadresse(kontaktadresse) }
     }
 
-    private Optional<Kontaktadresse> hentGjeldendeKontaktadresseFraMaster(Master master) {
+    private fun hentGjeldendeKontaktadresseFraMaster(master: Master): Optional<Kontaktadresse> {
         return kontaktadresser.stream()
-            .filter(a -> master.name().equalsIgnoreCase(a.master()))
-            .max(Comparator.comparing(Kontaktadresse::registrertDato));
+            .filter(Predicate { a: Kontaktadresse -> master.name.equals(a.master(), ignoreCase = true) })
+            .max(Comparator.comparing { obj: Kontaktadresse -> obj.registrertDato() })
     }
 
-    private Optional<Postadresse> lagPostadresseFraOppholdsadresser() {
-        return hentGjeldendeOppholdsadresseFraMaster(PDL)
-            .or(() -> hentGjeldendeOppholdsadresseFraMaster(FREG))
-            .map(this::lagPostadresseFraOppholdsadresse);
+    private fun lagPostadresseFraOppholdsadresser(): Optional<Postadresse?> {
+        return hentGjeldendeOppholdsadresseFraMaster(Master.PDL)
+            .or { hentGjeldendeOppholdsadresseFraMaster(Master.FREG) }
+            .map { oppholdsadresse: Oppholdsadresse -> lagPostadresseFraOppholdsadresse(oppholdsadresse) }
     }
 
-    private Optional<Oppholdsadresse> hentGjeldendeOppholdsadresseFraMaster(Master master) {
+    private fun hentGjeldendeOppholdsadresseFraMaster(master: Master): Optional<Oppholdsadresse> {
         return oppholdsadresser.stream()
-            .filter(a -> master.name().equalsIgnoreCase(a.master()))
-            .max(Comparator.comparing(Oppholdsadresse::registrertDato));
+            .filter(Predicate { a: Oppholdsadresse -> master.name.equals(a.master(), ignoreCase = true) })
+            .max(Comparator.comparing { obj: Oppholdsadresse -> obj.registrertDato() })
     }
 
-    private Optional<Postadresse> lagPostadresseFraBostedsadresse() {
+    private fun lagPostadresseFraBostedsadresse(): Optional<Postadresse?> {
         return finnBostedsadresse()
-            .map(bostedsadresse ->
-                Postadresse.lagPostadresse(bostedsadresse.coAdressenavn(), bostedsadresse.strukturertAdresse()));
+            .map { bostedsadresse: Bostedsadresse ->
+                Postadresse.lagPostadresse(
+                    bostedsadresse.coAdressenavn(),
+                    bostedsadresse.strukturertAdresse()
+                )
+            }
     }
 
-    private Postadresse lagPostadresseFraKontaktadresse(Kontaktadresse kontaktadresse) {
+    private fun lagPostadresseFraKontaktadresse(kontaktadresse: Kontaktadresse): Postadresse? {
         if (kontaktadresse.strukturertAdresse() != null) {
-            return Postadresse.lagPostadresse(kontaktadresse.coAdressenavn(), kontaktadresse.strukturertAdresse());
+            return Postadresse.lagPostadresse(kontaktadresse.coAdressenavn(), kontaktadresse.strukturertAdresse())
         } else if (kontaktadresse.semistrukturertAdresse() != null) {
-            return Postadresse.lagPostadresse(kontaktadresse.coAdressenavn(), kontaktadresse.semistrukturertAdresse());
+            return Postadresse.lagPostadresse(kontaktadresse.coAdressenavn(), kontaktadresse.semistrukturertAdresse())
         }
-        return null;
+        return null
     }
 
-    private Postadresse lagPostadresseFraOppholdsadresse(Oppholdsadresse oppholdsadresse) {
-        if (oppholdsadresse.strukturertAdresse() != null) {
-            return Postadresse.lagPostadresse(oppholdsadresse.coAdressenavn(), oppholdsadresse.strukturertAdresse());
-        }
-        return null;
+    private fun lagPostadresseFraOppholdsadresse(oppholdsadresse: Oppholdsadresse): Postadresse? {
+        return if (oppholdsadresse.strukturertAdresse() != null) {
+            Postadresse.lagPostadresse(
+                oppholdsadresse.coAdressenavn(),
+                oppholdsadresse.strukturertAdresse()
+            )
+        } else null
     }
 }
