@@ -10,17 +10,29 @@ import no.nav.melosys.domain.person.adresse.Oppholdsadresse
 import no.nav.melosys.domain.person.familie.Familiemedlem
 import java.time.LocalDate
 import java.util.*
-import java.util.function.Function
 import java.util.function.Predicate
-import java.util.stream.Collectors
 
-class Personopplysninger : Persondata {
+@JvmRecord
+data class Personopplysninger(
+    val adressebeskyttelser: Collection<Adressebeskyttelse>,
+    val bostedsadresse: Bostedsadresse?,
+    val dødsfall: Doedsfall?,
+    val familiemedlemmer: Set<Familiemedlem>?,
+    val fødsel: Foedsel?,
+    val folkeregisteridentifikator: Folkeregisteridentifikator?,
+    val kjønn: KjoennType?,
+    val kontaktadresser: Collection<Kontaktadresse>,
+    val navn: Navn?,
+    val oppholdsadresser: Collection<Oppholdsadresse>,
+    val statsborgerskap: Collection<Statsborgerskap>
+) : Persondata {
+
     override fun erPersonDød(): Boolean {
-        return dødsfall != null && dødsfall.dødsdato() != null
+        return dødsfall?.dødsdato() != null
     }
 
     override fun harStrengtAdressebeskyttelse(): Boolean {
-        return adressebeskyttelser().stream()
+        return adressebeskyttelser.stream()
             .anyMatch(Predicate { obj: Adressebeskyttelse -> obj.erStrengtFortrolig() })
     }
 
@@ -32,46 +44,45 @@ class Personopplysninger : Persondata {
         return finnBostedsadresse().isEmpty
     }
 
-    override fun hentFolkeregisterident(): String {
-        return if (folkeregisteridentifikator == null) null else folkeregisteridentifikator.identifikasjonsnummer()
+    override fun hentFolkeregisterident(): String? {
+        return folkeregisteridentifikator?.identifikasjonsnummer()
     }
 
     override fun hentAlleStatsborgerskap(): Set<Land> {
-        return statsborgerskap().stream().map<Land>(Function { s: Statsborgerskap -> Land.av(s.landkode()) })
-            .collect<Set<Land>, Any>(Collectors.toUnmodifiableSet<Land>())
+        return statsborgerskap.map { s: Statsborgerskap -> Land.av(s.landkode()) }.toSet()
     }
 
-    override fun hentKjønnType(): KjoennType {
+    override fun hentKjønnType(): KjoennType? {
         return kjønn
     }
 
     @JsonIgnore
-    override fun getFornavn(): String {
-        return navn.fornavn()
+    override fun getFornavn(): String? {
+        return navn?.fornavn()
     }
 
     @JsonIgnore
-    override fun getMellomnavn(): String {
-        return navn.mellomnavn()
+    override fun getMellomnavn(): String? {
+        return navn?.mellomnavn()
     }
 
     @JsonIgnore
-    override fun getEtternavn(): String {
-        return navn.etternavn()
+    override fun getEtternavn(): String? {
+        return navn?.etternavn()
     }
 
     @JsonIgnore
-    override fun getSammensattNavn(): String {
-        return navn.tilSammensattNavn()
+    override fun getSammensattNavn(): String? {
+        return navn?.tilSammensattNavn();
     }
 
-    override fun hentFamiliemedlemmer(): Set<Familiemedlem> {
+    override fun hentFamiliemedlemmer(): Set<Familiemedlem>? {
         return familiemedlemmer
     }
 
     @JsonIgnore
-    override fun getFødselsdato(): LocalDate {
-        return fødsel.fødselsdato()
+    override fun getFødselsdato(): LocalDate? {
+        return fødsel?.fødselsdato()
     }
 
     override fun finnBostedsadresse(): Optional<Bostedsadresse> {
@@ -108,7 +119,7 @@ class Personopplysninger : Persondata {
 
     private fun hentGjeldendeKontaktadresseFraMaster(master: Master): Optional<Kontaktadresse> {
         return kontaktadresser.stream()
-            .filter(Predicate { a: Kontaktadresse -> master.name.equals(a.master(), ignoreCase = true) })
+            .filter { a: Kontaktadresse -> master.name.equals(a.master(), ignoreCase = true) }
             .max(Comparator.comparing { obj: Kontaktadresse -> obj.registrertDato() })
     }
 
