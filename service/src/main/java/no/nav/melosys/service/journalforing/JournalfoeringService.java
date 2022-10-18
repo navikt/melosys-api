@@ -158,7 +158,7 @@ public class JournalfoeringService {
                 String.format("Manuell journalføring av behandlingstema %s støttes ikke", journalfoeringDto.getBehandlingstemaKode())
             );
         }
-        valider(journalfoeringDto);
+        fellesValidering(journalfoeringDto);
 
         final var sakstype = Sakstyper.valueOf(journalfoeringDto.getFagsak().getSakstype());
         final var sakstema = behandleAlleSakerToggleEnabled ? Sakstemaer.valueOf(journalfoeringDto.getFagsak().getSakstema()) : null;
@@ -252,7 +252,7 @@ public class JournalfoeringService {
         }
 
         validerKnyttTilEksisterendeSak(fagsak);
-        valider(journalfoeringDto);
+        fellesValidering(journalfoeringDto);
 
         log.info("{} knytter journalpost {} til eksisterende sak {}", SubjectHandler.getInstance().getUserID(), journalfoeringDto.getJournalpostID(), saksnummer);
 
@@ -294,7 +294,7 @@ public class JournalfoeringService {
             validerKanTilknytteJournalpostForSedTilSak(journalpost, saksnummer);
         }
 
-        valider(journalfoeringDto);
+        fellesValidering(journalfoeringDto);
         if (behandleAlleSakerToggleEnabled) {
             Behandling sisteBehandling = fagsak.hentSistRegistrertBehandling();
             validerBehandlingstemaOgBehandlingstype(sisteBehandling, behandlingstema, behandlingstype);
@@ -356,7 +356,7 @@ public class JournalfoeringService {
         return behandlingstype != Behandlingstyper.ENDRET_PERIODE && behandlingstype != Behandlingstyper.NY_VURDERING;
     }
 
-    private void valider(JournalfoeringDto journalfoeringDto) {
+    private void fellesValidering(JournalfoeringDto journalfoeringDto) {
         if (journalfoeringDto instanceof JournalfoeringOpprettDto journalfoeringOpprettDto) {
             if (journalfoeringOpprettDto.getFagsak() == null) {
                 throw new FunksjonellException("Opplysninger for å opprette en søknad mangler");
