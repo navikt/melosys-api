@@ -4,6 +4,7 @@ import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.matching.StringValuePattern
 import no.nav.melosys.integrasjon.ConsumerWireMockTestBase
 import no.nav.melosys.integrasjon.OAuthMockServer
+import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
 import no.nav.melosys.integrasjon.oppgave.konsument.dto.OppgaveDto
 import no.nav.melosys.integrasjon.reststs.RestTokenServiceClient
 import no.nav.melosys.integrasjon.reststs.StsWebClientProducer
@@ -24,7 +25,7 @@ import org.springframework.test.context.ActiveProfiles
 
     OppgaveConsumerImpl::class,
     OppgaveConsumerProducer::class,
-    OppgaveGenericContextExchangeFilter::class
+    GenericAuthFilterFactory::class
 )
 @WebMvcTest
 @ActiveProfiles("wiremock-test")
