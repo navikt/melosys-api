@@ -52,14 +52,14 @@ public class SpringSubjectHandler extends SubjectHandler {
 
     private boolean hasValidToken() {
         //contextHolder.getTokenValidationContext() kaster exception om det ikke finnes en request-context
-        return RequestContextHolder.getRequestAttributes() != null && context().hasTokenFor(AZURE_ACTIVE_DIRECTORY);
+        return RequestContextHolder.getRequestAttributes() != null && getValidationContext().hasTokenFor(AZURE_ACTIVE_DIRECTORY);
     }
 
     private JwtToken azureActiveDirectoryToken() {
-        return context().getJwtToken(AZURE_ACTIVE_DIRECTORY);
+        return getValidationContext().getJwtToken(AZURE_ACTIVE_DIRECTORY);
     }
 
-    private TokenValidationContext context() {
+    private TokenValidationContext getValidationContext() {
         return contextHolder.getTokenValidationContext();
     }
 }
