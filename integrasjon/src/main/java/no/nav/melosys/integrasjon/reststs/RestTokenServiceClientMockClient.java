@@ -65,7 +65,8 @@ public class RestTokenServiceClientMockClient implements RestStsClient {
                 });
 
             Map<String, Object> responseBody = Objects.requireNonNull(response.getBody());
-            setExpiryTime(Long.parseLong(responseBody.get(EXPIRES_IN_KEY).toString()));
+
+            expiryTime = calculateExpiryTime(responseBody);
 
             return (String) responseBody.get(ACCESS_TOKEN_KEY);
 
@@ -80,7 +81,8 @@ public class RestTokenServiceClientMockClient implements RestStsClient {
         return LocalDateTime.now().isAfter(expiryTime);
     }
 
-    private void setExpiryTime(long expiryTime) {
-        this.expiryTime = LocalDateTime.now().plus(Duration.ofSeconds(expiryTime - EXPIRE_TIME_TO_REFRESH));
+    private LocalDateTime calculateExpiryTime(Map<String, Object> responseBody) {
+        long expiresIn = Long.parseLong(responseBody.get(EXPIRES_IN_KEY).toString());
+        return LocalDateTime.now().plus(Duration.ofSeconds(expiresIn - EXPIRE_TIME_TO_REFRESH));
     }
 }

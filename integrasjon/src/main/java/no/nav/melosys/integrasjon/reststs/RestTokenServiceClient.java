@@ -48,7 +48,7 @@ public class RestTokenServiceClient implements RestStsClient {
     private String generateToken() {
         log.info("Henter oidc-token fra security-token-service");
         try {
-            Map<String, Object> responseBody = webClient.get()
+            Map<String, Object> response = webClient.get()
                 .uri(createUriString())
                 .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
                 .header(HttpHeaders.AUTHORIZATION, basicAuth())
@@ -56,8 +56,9 @@ public class RestTokenServiceClient implements RestStsClient {
                 .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {
                 })
                 .block();
-            Object expiresIn = Objects.requireNonNull(responseBody).get(EXPIRES_IN_KEY);
-            setExpiryTime(Long.parseLong(expiresIn.toString()));
+            Map<String, Object> responseBody = Objects.requireNonNull(response);
+
+            expiryTime = calculateExpiryTime(responseBody);
 
             return (String) responseBody.get(ACCESS_TOKEN_KEY);
 
@@ -72,8 +73,9 @@ public class RestTokenServiceClient implements RestStsClient {
         return LocalDateTime.now().isAfter(expiryTime);
     }
 
-    private void setExpiryTime(long expiryTime) {
-        this.expiryTime = LocalDateTime.now().plus(Duration.ofSeconds(expiryTime - EXPIRE_TIME_TO_REFRESH));
+    private LocalDateTime calculateExpiryTime(Map<String, Object> responseBody) {
+        long expiresIn = Long.parseLong(responseBody.get(EXPIRES_IN_KEY).toString());
+        return LocalDateTime.now().plus(Duration.ofSeconds(expiresIn - EXPIRE_TIME_TO_REFRESH));
     }
 
     private String createUriString() {
