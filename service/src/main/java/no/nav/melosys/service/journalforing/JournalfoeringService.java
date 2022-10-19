@@ -94,7 +94,8 @@ public class JournalfoeringService {
             throw new FunksjonellException("Journalposten er allerede ferdigstilt!");
         }
 
-        if (unleash.isEnabled("melosys.behandle_alle_saker") && journalfoeringDto.skalSendeForvaltningsmelding()) {
+        var behandleAlleSakerToggleEnabled = unleash.isEnabled("melosys.behandle_alle_saker");
+        if (behandleAlleSakerToggleEnabled && journalfoeringDto.skalSendeForvaltningsmelding()) {
             validerKanSendeForvaltningsmelding(journalfoeringDto);
         }
 
@@ -103,8 +104,6 @@ public class JournalfoeringService {
         }
 
         fellesValidering(journalfoeringDto);
-
-        var behandleAlleSakerToggleEnabled = unleash.isEnabled("melosys.behandle_alle_saker");
 
         final var sakstype = Sakstyper.valueOf(journalfoeringDto.getFagsak().getSakstype());
         final var sakstema = behandleAlleSakerToggleEnabled ? Sakstemaer.valueOf(journalfoeringDto.getFagsak().getSakstema()) : null;
@@ -131,9 +130,7 @@ public class JournalfoeringService {
                 validerSakstypeForTrygdemyndighet(sakstype, journalfoeringDto.getAvsenderID());
             }
         } else {
-            if (!erBehandlingAvSedForespørsler(
-                journalfoeringDto.getBehandlingstemaKode()) && !erBehandlingAvSøknadGammel(
-                journalfoeringDto.getBehandlingstemaKode())) {
+            if (!erBehandlingAvSedForespørsler(behandlingstema) && !erBehandlingAvSøknadGammel(behandlingstema)) {
                 throw new FunksjonellException(
                     String.format("Manuell journalføring av behandlingstema %s støttes ikke", journalfoeringDto.getBehandlingstemaKode())
                 );
