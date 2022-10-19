@@ -11,7 +11,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 
 public class SpringSubjectHandler extends SubjectHandler {
 
-    private static final String AAD = "aad";
+    private static final String AZURE_ACTIVE_DIRECTORY = "aad";
     private static final String JWT_TOKEN_CLAIM_NAVIDENT = "NAVident";
     private static final String JWT_TOKEN_CLAIM_NAME = "name";
     private static final String JWT_TOKEN_CLAIM_GROUPS = "groups";
@@ -24,23 +24,23 @@ public class SpringSubjectHandler extends SubjectHandler {
 
     @Override
     public String getOidcTokenString() {
-        return hasValidToken() ? aadToken().getTokenAsString() : null;
+        return hasValidToken() ? azureActiveDirectoryToken().getTokenAsString() : null;
     }
 
     @Override
     public String getUserID() {
-        return hasValidToken() ? aadToken().getJwtTokenClaims().get(JWT_TOKEN_CLAIM_NAVIDENT).toString() : null;
+        return hasValidToken() ? azureActiveDirectoryToken().getJwtTokenClaims().get(JWT_TOKEN_CLAIM_NAVIDENT).toString() : null;
     }
 
     @Override
     public String getName() {
-        return hasValidToken() ? aadToken().getJwtTokenClaims().get(JWT_TOKEN_CLAIM_NAME).toString() : null;
+        return hasValidToken() ? azureActiveDirectoryToken().getJwtTokenClaims().get(JWT_TOKEN_CLAIM_NAME).toString() : null;
     }
 
     @Override
     public List<String> getGroups() {
         ArrayList<String> groups = new ArrayList<>();
-        JSONArray jArray = (JSONArray) aadToken().getJwtTokenClaims().get(JWT_TOKEN_CLAIM_GROUPS);
+        JSONArray jArray = (JSONArray) azureActiveDirectoryToken().getJwtTokenClaims().get(JWT_TOKEN_CLAIM_GROUPS);
 
         if (jArray != null) {
             for (Object o : jArray) {
@@ -52,11 +52,11 @@ public class SpringSubjectHandler extends SubjectHandler {
 
     private boolean hasValidToken() {
         //contextHolder.getTokenValidationContext() kaster exception om det ikke finnes en request-context
-        return RequestContextHolder.getRequestAttributes() != null && context().hasTokenFor(AAD);
+        return RequestContextHolder.getRequestAttributes() != null && context().hasTokenFor(AZURE_ACTIVE_DIRECTORY);
     }
 
-    private JwtToken aadToken() {
-        return context().getJwtToken(AAD);
+    private JwtToken azureActiveDirectoryToken() {
+        return context().getJwtToken(AZURE_ACTIVE_DIRECTORY);
     }
 
     private TokenValidationContext context() {
