@@ -12,7 +12,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 @Configuration
 public class EessiConsumerProducer implements WebClientConfig {
-    private static final String CLIENT_NAME = "eessi";
+    private static final String CLIENT_NAME = "melosys-eessi";
     private final String url;
     private final GenericAuthFilterFactory genericAuthFilterFactory;
 
