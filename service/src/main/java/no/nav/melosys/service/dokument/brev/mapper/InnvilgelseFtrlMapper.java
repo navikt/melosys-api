@@ -17,9 +17,9 @@ import no.nav.melosys.domain.behandlingsgrunnlag.data.Soeknadsland;
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Avtaleland;
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
 import no.nav.melosys.domain.kodeverk.Representerer;
+import no.nav.melosys.domain.kodeverk.Trygdeavtale_myndighetsland;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Medfolgende_barn_begrunnelser;
 import no.nav.melosys.domain.person.familie.OmfattetFamilie;
 import no.nav.melosys.exception.FunksjonellException;
@@ -184,7 +184,7 @@ public class InnvilgelseFtrlMapper {
     }
 
     private boolean harTrygdeavtaleMedArbeidsland(String arbeidsland) {
-        return Arrays.stream(Avtaleland.values()).anyMatch(a -> a.name().equals(arbeidsland));
+        return Arrays.stream(Trygdeavtale_myndighetsland.values()).anyMatch(a -> a.name().equals(arbeidsland));
     }
 
     private String hentRepresentantNavn(String representantNr) {
