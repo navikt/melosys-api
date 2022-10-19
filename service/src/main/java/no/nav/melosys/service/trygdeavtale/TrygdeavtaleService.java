@@ -1,6 +1,8 @@
 package no.nav.melosys.service.trygdeavtale;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -11,8 +13,8 @@ import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
 import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie;
+import no.nav.melosys.domain.util.LovvalgBestemmelseUtils;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.LovvalgsperiodeService;
@@ -130,7 +132,7 @@ public class TrygdeavtaleService {
         lovvalgsperiode.setMedlemskapstype(PLIKTIG);
         lovvalgsperiode.setDekning(FULL_DEKNING_FTRL);
         lovvalgsperiode.setInnvilgelsesresultat(INNVILGET);
-        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_trygdeavtale_uk.valueOf(trygdeavtaleResultat.bestemmelse()));
+        lovvalgsperiode.setBestemmelse(LovvalgBestemmelseUtils.dbDataTilLovvalgBestemmelse(trygdeavtaleResultat.bestemmelse()));
         lovvalgsperiode.setLovvalgsland(Landkoder.NO);
 
         return lovvalgsperiode;
