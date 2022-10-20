@@ -35,6 +35,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
 
+
 @ExtendWith(MockKExtension::class)
 class UfmKontrollServiceTest {
     @RelaxedMockK
@@ -53,9 +54,13 @@ class UfmKontrollServiceTest {
 
     private val unleash: FakeUnleash = FakeUnleash()
 
-    private val behandling: Behandling = SaksbehandlingDataFactory.lagBehandling()
-
     private val BEHANDLING_ID = 1L
+    private val BEHANDLINGSRESULTAT_ID = 2L
+    private val behandling: Behandling = SaksbehandlingDataFactory.lagBehandling()
+    private val kontrollresultatSlot = slot<List<Kontrollresultat>>()
+    private var sedDokument: SedDokument = SedDokument()
+    private var saksopplysningDokument = MedlemskapDokument()
+    private var personopplysninger: Personopplysninger = lagPersonopplysninger()
 
     @BeforeEach
     fun setup() {
@@ -71,27 +76,24 @@ class UfmKontrollServiceTest {
 
     @Test
     fun utførKontrollerOgRegistrerFeil_A003_forventKontroll_ingenFeil() {
-        val sedDokument = SedDokument().apply {
+        sedDokument.apply {
             sedType = SedType.A003
             lovvalgslandKode = Landkoder.SE
             avsenderLandkode = Landkoder.SE
             lovvalgsperiode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))
         }
-
-        val personopplysninger = lagPersonopplysninger().apply {
+        personopplysninger.apply {
             bostedsadresse = Bostedsadresse(
                 StrukturertAdresse().apply { landkode = "SE" }, null, null, null, null,
                 null,
                 false
             );
         }
-        mockTestData(sedDokument, personopplysninger)
-
-        val kontrollresultatSlot = slot<List<Kontrollresultat>>()
         every { kontrollresultatRepository.saveAll(capture(kontrollresultatSlot)) }
             .answers {
                 kontrollresultatSlot.captured.shouldBeEmpty().toList()
             }
+        setupMockedTestData()
 
 
         ufmKontrollService.utførKontrollerOgRegistrerFeil(BEHANDLING_ID)
@@ -99,28 +101,25 @@ class UfmKontrollServiceTest {
 
     @Test
     fun utførKontrollerOgRegistrerFeil_A003_medOverlappendePeriode_erOpprinnelig_ingenFeil() {
-        val sedDokument = SedDokument().apply {
+        sedDokument.apply {
             sedType = SedType.A003
             lovvalgslandKode = Landkoder.SE
             avsenderLandkode = Landkoder.SE
             lovvalgsperiode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))
             erEndring = true;
         }
-
-        val personopplysninger = lagPersonopplysninger().apply {
+        personopplysninger.apply {
             bostedsadresse = Bostedsadresse(
                 StrukturertAdresse().apply { landkode = "SE" }, null, null, null, null,
                 null,
                 false
             );
         }
-        mockTestData(sedDokument, personopplysninger)
-
-        val kontrollresultatSlot = slot<List<Kontrollresultat>>()
         every { kontrollresultatRepository.saveAll(capture(kontrollresultatSlot)) }
             .answers {
                 kontrollresultatSlot.captured.shouldBeEmpty().toList()
             }
+        setupMockedTestData()
 
 
         ufmKontrollService.utførKontrollerOgRegistrerFeil(BEHANDLING_ID)
@@ -128,30 +127,27 @@ class UfmKontrollServiceTest {
 
     @Test
     fun utførKontrollerOgRegistrerFeil_A003_forventKontroll_bosattINorge() {
-        val sedDokument = SedDokument().apply {
+        sedDokument.apply {
             sedType = SedType.A003
             lovvalgslandKode = Landkoder.NO
             lovvalgsperiode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))
         }
-
-        mockTestData(sedDokument, lagPersonopplysninger())
-
-        val kontrollresultaterSlot = slot<List<Kontrollresultat>>()
-        every { kontrollresultatRepository.saveAll(capture(kontrollresultaterSlot)) }
+        every { kontrollresultatRepository.saveAll(capture(kontrollresultatSlot)) }
             .answers {
-                kontrollresultaterSlot.captured.shouldHaveSize(2)
+                kontrollresultatSlot.captured.shouldHaveSize(2)
                     .sortedBy { it.begrunnelse }
                     .apply {
                         first().apply {
                             begrunnelse.shouldBe(Kontroll_begrunnelser.TREDJELANDSBORGER_IKKE_AVTALELAND)
-                            behandlingsresultat.id.shouldBe(2L)
+                            behandlingsresultat.id.shouldBe(BEHANDLINGSRESULTAT_ID)
                         }
                         last().apply {
                             begrunnelse.shouldBe(Kontroll_begrunnelser.BOSATT_I_NORGE)
-                            behandlingsresultat.id.shouldBe(2L)
+                            behandlingsresultat.id.shouldBe(BEHANDLINGSRESULTAT_ID)
                         }
                     }
             }
+        setupMockedTestData()
 
 
         ufmKontrollService.utførKontrollerOgRegistrerFeil(BEHANDLING_ID)
@@ -163,30 +159,27 @@ class UfmKontrollServiceTest {
 
     @Test
     fun utførKontrollerOgRegistrerFeil_A009_forventKontroll_lovvalgslandNorge() {
-        val sedDokument = SedDokument().apply {
+        sedDokument.apply {
             sedType = SedType.A009
             lovvalgslandKode = Landkoder.NO
             lovvalgsperiode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))
         }
-
-        mockTestData(sedDokument, lagPersonopplysninger())
-
-        val kontrollresultaterSlot = slot<List<Kontrollresultat>>()
-        every { kontrollresultatRepository.saveAll(capture(kontrollresultaterSlot)) }
+        every { kontrollresultatRepository.saveAll(capture(kontrollresultatSlot)) }
             .answers {
-                kontrollresultaterSlot.captured.shouldHaveSize(2)
+                kontrollresultatSlot.captured.shouldHaveSize(2)
                     .sortedBy { it.begrunnelse }
                     .apply {
                         first().apply {
                             begrunnelse.shouldBe(Kontroll_begrunnelser.TREDJELANDSBORGER_IKKE_AVTALELAND)
-                            behandlingsresultat.id.shouldBe(2L)
+                            behandlingsresultat.id.shouldBe(BEHANDLINGSRESULTAT_ID)
                         }
                         last().apply {
                             begrunnelse.shouldBe(Kontroll_begrunnelser.LOVVALGSLAND_NORGE)
-                            behandlingsresultat.id.shouldBe(2L)
+                            behandlingsresultat.id.shouldBe(BEHANDLINGSRESULTAT_ID)
                         }
                     }
             }
+        setupMockedTestData()
 
 
         ufmKontrollService.utførKontrollerOgRegistrerFeil(BEHANDLING_ID)
@@ -194,7 +187,7 @@ class UfmKontrollServiceTest {
 
     @Test
     fun utførKontroller_periodeIkkeGyldig_forventFeil_feilIPerioden() {
-        val sedDokument = SedDokument().apply {
+        sedDokument.apply {
             lovvalgsperiode = Periode(
                 LocalDate.now(),
                 LocalDate.now().minusYears(1)
@@ -211,18 +204,18 @@ class UfmKontrollServiceTest {
             .first().shouldBeEqualToComparingFields(Kontroll_begrunnelser.FEIL_I_PERIODEN)
     }
 
-    private fun mockTestData(
-        sedDokument: SedDokument,
-        personopplysninger: Personopplysninger?
-    ) {
+    private fun setupMockedTestData() {
         behandling.saksopplysninger.add(lagSaksopplysning(sedDokument, SaksopplysningType.SEDOPPL))
-        behandling.saksopplysninger.add(lagSaksopplysning(MedlemskapDokument(), SaksopplysningType.MEDL))
+        behandling.saksopplysninger.add(lagSaksopplysning(saksopplysningDokument, SaksopplysningType.MEDL))
         behandling.saksopplysninger.add(lagSaksopplysning(InntektDokument(), SaksopplysningType.INNTK))
         behandling.saksopplysninger.add(lagSaksopplysning(UtbetalingDokument(), SaksopplysningType.UTBETAL))
 
         every { persondataFasade.hentPerson(any()) } returns personopplysninger
         every { behandlingService.hentBehandlingMedSaksopplysninger(BEHANDLING_ID) } returns behandling
-        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns lagBehandlingsresultat()
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns Behandlingsresultat()
+            .apply {
+                id = BEHANDLINGSRESULTAT_ID
+            }
     }
 
     private fun lagSaksopplysning(
@@ -233,11 +226,5 @@ class UfmKontrollServiceTest {
         saksopplysning.dokument = saksopplysningDokument
         saksopplysning.type = type
         return saksopplysning
-    }
-
-    private fun lagBehandlingsresultat(): Behandlingsresultat {
-        val behandlingsresultat = Behandlingsresultat()
-        behandlingsresultat.id = 2L
-        return behandlingsresultat
     }
 }
