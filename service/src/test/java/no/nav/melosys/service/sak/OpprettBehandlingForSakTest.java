@@ -57,7 +57,7 @@ class OpprettBehandlingForSakTest {
     }
 
     @Test
-    void opprett_behandling_med_aktiv_behandling_feiler() {
+    void opprettBehandling_medAktivBehandling_feiler() {
         Behandling aktivBehandling = lagBehandling();
         OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
 
@@ -67,6 +67,46 @@ class OpprettBehandlingForSakTest {
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> opprettBehandlingForSak.opprettBehandling(SAKSNUMMER, opprettSakDto))
             .withMessageContaining(String.format("Det finnes allerede en aktiv behandling på fagsak %s", SAKSNUMMER));
+    }
+
+    @Test
+    void opprettBehandling_utenFnrOgOrgnr_feiler() {
+        OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
+        opprettSakDto.setBrukerID(null);
+        opprettSakDto.setVirksomhetOrgnr(null);
+
+        when(fagsakService.hentFagsak(SAKSNUMMER)).thenReturn(lagFagsak(null));
+
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> opprettBehandlingForSak.opprettBehandling(SAKSNUMMER, opprettSakDto))
+            .withMessageContaining("BrukerID eller organisasjonsnummer trengs for å opprette en behandling.");
+    }
+
+    @Test
+    void opprettBehandling_utenBehandlingstema_feiler() {
+        OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
+        opprettSakDto.setBehandlingstema(null);
+
+        when(fagsakService.hentFagsak(SAKSNUMMER)).thenReturn(lagFagsak(null));
+
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> opprettBehandlingForSak.opprettBehandling(SAKSNUMMER, opprettSakDto))
+            .withMessageContaining("Behandlingstema mangler");
+    }
+
+    @Test
+    void opprettBehandling_utenBehandlingstype_feiler() {
+        OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
+        opprettSakDto.setBehandlingstype(null);
+
+        when(fagsakService.hentFagsak(SAKSNUMMER)).thenReturn(lagFagsak(null));
+
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> opprettBehandlingForSak.opprettBehandling(SAKSNUMMER, opprettSakDto))
+            .withMessageContaining("Behandlingstype mangler");
     }
 
     @Test
