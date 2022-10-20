@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Objects;
 
 import io.micrometer.core.instrument.Metrics;
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Kontrollresultat;
@@ -38,14 +39,18 @@ public class UfmKontrollService {
     private final BehandlingService behandlingService;
     private final PersondataFasade persondataFasade;
 
+    private final Unleash unleash;
+
     public UfmKontrollService(KontrollresultatRepository kontrollresultatRepository,
                               BehandlingsresultatService behandlingsresultatService,
                               BehandlingService behandlingService,
-                              PersondataFasade persondataFasade) {
+                              PersondataFasade persondataFasade,
+                              Unleash unleash) {
         this.kontrollresultatRepository = kontrollresultatRepository;
         this.behandlingsresultatService = behandlingsresultatService;
         this.behandlingService = behandlingService;
         this.persondataFasade = persondataFasade;
+        this.unleash = unleash;
     }
 
     static {
@@ -81,7 +86,7 @@ public class UfmKontrollService {
     }
 
     private List<Kontroll_begrunnelser> utførKontroller(UfmKontrollData kontrollData, SedType sedType) {
-        return UfmKontrollsett.hentRegelsettForSedType(sedType).stream()
+        return UfmKontrollsett.hentRegelsettForSedType(sedType, unleash).stream()
             .map(f -> f.apply(kontrollData))
             .filter(Objects::nonNull)
             .peek(this::registrerMetrikk) //NOSONAR

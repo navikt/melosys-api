@@ -47,7 +47,8 @@ class BostedGrunnlagTest {
 
     @Test
     void finnBostedsadresse_oppgittAdresseOverstyrerRegister_nårOppgittAdresseISøknad() {
-        bostedGrunnlag = new BostedGrunnlag(soeknad, PersonopplysningerObjectFactory.lagPersonopplysninger().bostedsadresse(), kodeverkService);
+        bostedGrunnlag = new BostedGrunnlag(soeknad,
+            PersonopplysningerObjectFactory.lagPersonopplysninger().getBostedsadresse(), kodeverkService);
         StrukturertAdresse oppgittBosted = new StrukturertAdresse();
         oppgittBosted.setGatenavn("HerBorJegGata");
         oppgittBosted.setHusnummerEtasjeLeilighet("123");
@@ -72,7 +73,8 @@ class BostedGrunnlagTest {
 
     @Test
     void finnBostedsadresse_harBostedsadresseIRegister_forventBostedsadresse() {
-        bostedGrunnlag = new BostedGrunnlag(soeknad, PersonopplysningerObjectFactory.lagPersonopplysninger().bostedsadresse(), kodeverkService);
+        bostedGrunnlag = new BostedGrunnlag(soeknad,
+            PersonopplysningerObjectFactory.lagPersonopplysninger().getBostedsadresse(), kodeverkService);
 
         Optional<StrukturertAdresse> strukturertAdresse = bostedGrunnlag.finnBostedsadresse();
 
@@ -91,7 +93,7 @@ class BostedGrunnlagTest {
     @Test
     void finnBostedsadresse_bostedsadresseFraPersonOpplysninger_forventBostedsadresse() {
         final var personopplysninger = lagPersonopplysninger();
-        final var bostedGrunnlag = new BostedGrunnlag(null, personopplysninger.bostedsadresse(), kodeverkService);
+        final var bostedGrunnlag = new BostedGrunnlag(null, personopplysninger.getBostedsadresse(), kodeverkService);
 
         Optional<StrukturertAdresse> strukturertAdresse = bostedGrunnlag.finnBostedsadresse();
 

@@ -1,5 +1,6 @@
 package no.nav.melosys.service.kontroll.feature.ufm
 
+import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.equality.shouldBeEqualToComparingFields
 import io.kotest.matchers.shouldBe
@@ -9,7 +10,9 @@ import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.slot
 import io.mockk.verify
+import no.finn.unleash.FakeUnleash
 import no.nav.melosys.domain.*
+import no.nav.melosys.domain.adresse.StrukturertAdresse
 import no.nav.melosys.domain.dokument.SaksopplysningDokument
 import no.nav.melosys.domain.dokument.inntekt.InntektDokument
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument
@@ -19,6 +22,7 @@ import no.nav.melosys.domain.dokument.utbetaling.UtbetalingDokument
 import no.nav.melosys.domain.eessi.SedType
 import no.nav.melosys.domain.kodeverk.Landkoder
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser
+import no.nav.melosys.domain.person.adresse.Bostedsadresse
 import no.nav.melosys.repository.KontrollresultatRepository
 import no.nav.melosys.service.SaksbehandlingDataFactory
 import no.nav.melosys.service.behandling.BehandlingService
@@ -44,18 +48,138 @@ class UfmKontrollServiceTest {
     @MockK
     lateinit var persondataFasade: PersondataFasade
 
+    lateinit var unleash: FakeUnleash
+
     lateinit var ufmKontrollService: UfmKontrollService
 
     private val behandling: Behandling = SaksbehandlingDataFactory.lagBehandling()
 
     @BeforeEach
     fun setup() {
+        unleash = FakeUnleash()
+        unleash.enableAll()
+
         ufmKontrollService = UfmKontrollService(
             kontrollresultatRepository,
             behandlingsresultatService,
             behandlingService,
-            persondataFasade
+            persondataFasade,
+            unleash
         )
+    }
+
+    @Test
+    fun utførKontrollerOgRegistrerFeil_A003_forventKontroll_ingenFeil() {
+        val sedDokument = SedDokument()
+        sedDokument.sedType = SedType.A003
+        sedDokument.lovvalgslandKode = Landkoder.SE
+        sedDokument.avsenderLandkode = Landkoder.SE
+        sedDokument.lovvalgsperiode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))
+        behandling.saksopplysninger.add(lagSaksopplysning(sedDokument, SaksopplysningType.SEDOPPL))
+        behandling.saksopplysninger.add(lagSaksopplysning(MedlemskapDokument(), SaksopplysningType.MEDL))
+        behandling.saksopplysninger.add(lagSaksopplysning(InntektDokument(), SaksopplysningType.INNTK))
+        behandling.saksopplysninger.add(lagSaksopplysning(UtbetalingDokument(), SaksopplysningType.UTBETAL))
+
+        val behandlingId = 1L
+        val personopplysninger = lagPersonopplysninger().apply {
+            bostedsadresse = Bostedsadresse(
+                StrukturertAdresse().apply { landkode = "SE" }, null, null, null, null,
+                null,
+                false
+            );
+        }
+        every { persondataFasade.hentPerson(any()) } returns personopplysninger
+        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingId) } returns behandling
+        every { behandlingsresultatService.hentBehandlingsresultat(behandlingId) } returns lagBehandlingsresultat()
+
+        val kontrollresultatSlot = slot<List<Kontrollresultat>>()
+        every { kontrollresultatRepository.saveAll(capture(kontrollresultatSlot)) }
+            .answers {
+                kontrollresultatSlot.captured.shouldBeEmpty().toList()
+            }
+
+
+        ufmKontrollService.utførKontrollerOgRegistrerFeil(behandlingId)
+    }
+
+    @Test
+    fun utførKontrollerOgRegistrerFeil_A003_medOverlappendePeriode_erOpprinnelig_ingenFeil() {
+        val sedDokument = SedDokument()
+        sedDokument.sedType = SedType.A003
+        sedDokument.lovvalgslandKode = Landkoder.SE
+        sedDokument.avsenderLandkode = Landkoder.SE
+        sedDokument.lovvalgsperiode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))
+        sedDokument.erEndring = true;
+        behandling.saksopplysninger.add(lagSaksopplysning(sedDokument, SaksopplysningType.SEDOPPL))
+        behandling.saksopplysninger.add(lagSaksopplysning(MedlemskapDokument(), SaksopplysningType.MEDL))
+        behandling.saksopplysninger.add(lagSaksopplysning(InntektDokument(), SaksopplysningType.INNTK))
+        behandling.saksopplysninger.add(lagSaksopplysning(UtbetalingDokument(), SaksopplysningType.UTBETAL))
+
+        val behandlingId = 1L
+        val personopplysninger = lagPersonopplysninger().apply {
+            bostedsadresse = Bostedsadresse(
+                StrukturertAdresse().apply { landkode = "SE" }, null, null, null, null,
+                null,
+                false
+            );
+        }
+        every { persondataFasade.hentPerson(any()) } returns personopplysninger
+        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingId) } returns behandling
+        every { behandlingsresultatService.hentBehandlingsresultat(behandlingId) } returns lagBehandlingsresultat()
+
+        val kontrollresultatSlot = slot<List<Kontrollresultat>>()
+        every { kontrollresultatRepository.saveAll(capture(kontrollresultatSlot)) }
+            .answers {
+                kontrollresultatSlot.captured.shouldBeEmpty().toList()
+            }
+
+
+        ufmKontrollService.utførKontrollerOgRegistrerFeil(behandlingId)
+
+
+        verify { behandlingService.hentBehandlingMedSaksopplysninger(any()) }
+        verify { kontrollresultatRepository.deleteByBehandlingsresultat(ofType(Behandlingsresultat::class)) }
+    }
+
+    @Test
+    fun utførKontrollerOgRegistrerFeil_A003_forventKontroll_bosattINorge() {
+        val sedDokument = SedDokument()
+        sedDokument.sedType = SedType.A003
+        sedDokument.lovvalgslandKode = Landkoder.NO
+        sedDokument.lovvalgsperiode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))
+        behandling.saksopplysninger.add(lagSaksopplysning(sedDokument, SaksopplysningType.SEDOPPL))
+        behandling.saksopplysninger.add(lagSaksopplysning(MedlemskapDokument(), SaksopplysningType.MEDL))
+        behandling.saksopplysninger.add(lagSaksopplysning(InntektDokument(), SaksopplysningType.INNTK))
+        behandling.saksopplysninger.add(lagSaksopplysning(UtbetalingDokument(), SaksopplysningType.UTBETAL))
+
+        val behandlingId = 1L
+        every { persondataFasade.hentPerson(any()) } returns lagPersonopplysninger()
+        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingId) } returns behandling
+        every { behandlingsresultatService.hentBehandlingsresultat(behandlingId) } returns lagBehandlingsresultat()
+
+        val kontrollresultaterSlot = slot<List<Kontrollresultat>>()
+        every { kontrollresultatRepository.saveAll(capture(kontrollresultaterSlot)) }
+            .answers {
+                kontrollresultaterSlot.captured.shouldHaveSize(2)
+                    .sortedBy { it.begrunnelse }
+                    .apply {
+                        first().apply {
+                            begrunnelse.shouldBe(Kontroll_begrunnelser.TREDJELANDSBORGER_IKKE_AVTALELAND)
+                            behandlingsresultat.id.shouldBe(2L)
+                        }
+                        last().apply {
+                            begrunnelse.shouldBe(Kontroll_begrunnelser.BOSATT_I_NORGE)
+                            behandlingsresultat.id.shouldBe(2L)
+                        }
+                    }
+            }
+
+
+        ufmKontrollService.utførKontrollerOgRegistrerFeil(behandlingId)
+
+
+        verify { behandlingService.hentBehandlingMedSaksopplysninger(any()) }
+        verify { kontrollresultatRepository.deleteByBehandlingsresultat(ofType(Behandlingsresultat::class)) }
     }
 
     @Test

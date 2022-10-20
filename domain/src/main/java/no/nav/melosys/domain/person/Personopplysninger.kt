@@ -12,19 +12,18 @@ import java.time.LocalDate
 import java.util.*
 import java.util.function.Predicate
 
-@JvmRecord
 data class Personopplysninger(
-    val adressebeskyttelser: Collection<Adressebeskyttelse>,
-    val bostedsadresse: Bostedsadresse?,
-    val dødsfall: Doedsfall?,
-    val familiemedlemmer: Set<Familiemedlem>?,
-    val fødsel: Foedsel?,
-    val folkeregisteridentifikator: Folkeregisteridentifikator?,
-    val kjønn: KjoennType?,
-    val kontaktadresser: Collection<Kontaktadresse>,
-    val navn: Navn?,
-    val oppholdsadresser: Collection<Oppholdsadresse>,
-    val statsborgerskap: Collection<Statsborgerskap>
+    var adressebeskyttelser: Collection<Adressebeskyttelse>,
+    var bostedsadresse: Bostedsadresse?,
+    var dødsfall: Doedsfall?,
+    var familiemedlemmer: Set<Familiemedlem>?,
+    var fødsel: Foedsel?,
+    var folkeregisteridentifikator: Folkeregisteridentifikator?,
+    var kjønn: KjoennType?,
+    var kontaktadresser: Collection<Kontaktadresse>,
+    var navn: Navn?,
+    var oppholdsadresser: Collection<Oppholdsadresse>,
+    var statsborgerskap: Collection<Statsborgerskap>
 ) : Persondata {
 
     override fun erPersonDød(): Boolean {

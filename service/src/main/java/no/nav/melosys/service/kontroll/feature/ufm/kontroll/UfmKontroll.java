@@ -72,6 +72,12 @@ final class UfmKontroll {
             Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER : null;
     }
 
+    static Kontroll_begrunnelser overlappendeMedlemsperiodeForA003(UfmKontrollData kontrollData) {
+        return OverlappendeMedlemskapsperioderRegler.harOverlappendeMedlemsperiodeMerEnn1DagFraSed(
+            kontrollData.medlemskapDokument(), kontrollData.sedDokument().getLovvalgsperiode()) ?
+            Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER : null;
+    }
+
     static Kontroll_begrunnelser overlappendeMedlemsperiodeMerEnn1Dag(UfmKontrollData kontrollData) {
         return OverlappendeMedlemskapsperioderRegler.harOverlappendeMedlemsperiodeMerEnn1DagFraSed(
             kontrollData.medlemskapDokument(), kontrollData.sedDokument().getLovvalgsperiode()) ?
