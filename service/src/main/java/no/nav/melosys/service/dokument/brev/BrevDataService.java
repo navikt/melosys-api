@@ -23,6 +23,7 @@ import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
+import no.nav.melosys.domain.util.Land_ISO2;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
@@ -114,7 +115,7 @@ public class BrevDataService {
     }
 
     UtenlandskMyndighet hentMyndighetFraAktoer(Aktoer aktoer) {
-        Landkoder landkode = aktoer.hentMyndighetLandkode();
+        Land_ISO2 landkode = aktoer.hentMyndighetLandkode();
         return utenlandskMyndighetRepository.findByLandkode(landkode)
             .orElseThrow(() -> new TekniskException("Finner ikke utenlandskMyndighet for " + landkode.getKode() + "."));
     }

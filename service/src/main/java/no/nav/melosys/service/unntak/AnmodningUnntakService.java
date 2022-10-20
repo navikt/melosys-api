@@ -17,6 +17,7 @@ import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
+import no.nav.melosys.domain.util.Land_ISO2;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.integrasjon.joark.HentJournalposterTilknyttetSakRequest;
@@ -92,7 +93,7 @@ public class AnmodningUnntakService {
     }
 
     private Set<String> validerMottakerInstitusjon(long behandlingID, String mottakerinstitusjon) {
-        Landkoder landkode = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID).stream().findFirst()
+        Land_ISO2 landkode = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID).stream().findFirst()
             .orElseThrow(() -> new FunksjonellException("Finner ikke utenlandsk myndighet for behandling " + behandlingID));
 
         return eessiService.validerOgAvklarMottakerInstitusjonerForBuc(

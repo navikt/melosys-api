@@ -14,6 +14,7 @@ import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Trygdeavtale_myndighetsland;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Nyvurderingbakgrunner;
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_barn_begrunnelser_ftrl;
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_ektefelle_samboer_begrunnelser_ftrl;
@@ -166,7 +167,7 @@ class TrygdeavtaleTjenesteTest {
         var behandlingsgrunnlagdata = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
         assertThat(response.periodeFom()).isEqualTo(behandlingsgrunnlagdata.periode.getFom());
         assertThat(response.periodeTom()).isEqualTo(behandlingsgrunnlagdata.periode.getTom());
-        assertThat(response.soeknadsland()).isEqualTo(behandlingsgrunnlagdata.soeknadsland.landkoder);
+        assertThat(response.soeknadsland()).isEqualTo(Trygdeavtale_myndighetsland.GB);
         assertThat(response.innledningFritekst()).isEqualTo(behandlingsresultat.getInnledningFritekst());
         assertThat(response.begrunnelseFritekst()).isEqualTo(behandlingsresultat.getBegrunnelseFritekst());
         assertThat(response.nyVurderingBakgrunn()).isNull();
@@ -200,7 +201,7 @@ class TrygdeavtaleTjenesteTest {
         var behandlingsgrunnlagdata = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
         assertThat(response.periodeFom()).isEqualTo(behandlingsgrunnlagdata.periode.getFom());
         assertThat(response.periodeTom()).isEqualTo(behandlingsgrunnlagdata.periode.getTom());
-        assertThat(response.soeknadsland()).isEqualTo(behandlingsgrunnlagdata.soeknadsland.landkoder);
+        assertThat(response.soeknadsland()).isEqualTo(Trygdeavtale_myndighetsland.GB);
         assertThat(response.innledningFritekst()).isEqualTo(behandlingsresultat.getInnledningFritekst());
         assertThat(response.begrunnelseFritekst()).isEqualTo(behandlingsresultat.getBegrunnelseFritekst());
         assertThat(response.nyVurderingBakgrunn()).isNull();

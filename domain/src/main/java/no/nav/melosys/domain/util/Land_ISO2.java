@@ -1,6 +1,6 @@
 package no.nav.melosys.domain.util;
 
-public enum Land {
+public enum Land_ISO2 {
 
     AU("Australia"),
     BA("Bosnia-Hercegovina"),
@@ -55,7 +55,7 @@ public enum Land {
 
     private final String beskrivelse;
 
-    private Land(String beskrivelse) {
+    private Land_ISO2(String beskrivelse) {
         this.beskrivelse = beskrivelse;
     }
 

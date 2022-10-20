@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
+import no.nav.melosys.domain.util.Land_ISO2;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
@@ -55,7 +56,7 @@ public class BrevDataByggerInnvilgelseFlereLand implements BrevDataBygger {
         brevdata.lovvalgsperiode = lovvalgsperiodeService.hentLovvalgsperiode(behandlingID);
         brevdata.erUkjenteEllerAlleEosLand = landvelgerService.erUkjenteEllerAlleEosLand(behandlingID);
         brevdata.alleArbeidsland = landvelgerService.hentAlleArbeidsland(behandlingID).stream()
-            .map(Landkoder::getBeskrivelse)
+            .map(Land_ISO2::getBeskrivelse)
             .collect(Collectors.toList());
 
         brevdata.bostedsland = landvelgerService.hentBostedsland(behandlingID, grunnlagData).getLandkodeobjekt().getBeskrivelse();

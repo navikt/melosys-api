@@ -14,6 +14,7 @@ import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.person.Persondata;
+import no.nav.melosys.domain.util.Land_ISO2;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.joark.HentJournalposterTilknyttetSakRequest;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
@@ -73,7 +74,7 @@ public class VideresendSoknadService {
 
         final Set<String> avklarteEessiMottakere = eessiService.validerOgAvklarMottakerInstitusjonerForBuc(
             mottakerinstitusjon != null ? Set.of(mottakerinstitusjon) : Collections.emptySet(),
-            List.of(bostedsland.getLandkodeobjekt()),
+            List.of(Land_ISO2.valueOf(bostedsland.landkode())),
             BucType.LA_BUC_03
         );
 

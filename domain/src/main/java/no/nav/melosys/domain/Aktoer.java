@@ -6,6 +6,7 @@ import javax.persistence.*;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Representerer;
+import no.nav.melosys.domain.util.Land_ISO2;
 import no.nav.melosys.exception.TekniskException;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -33,7 +34,7 @@ public class Aktoer extends RegistreringsInfo {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "trygdemyndighet_land", updatable = false)
-    private Landkoder trygdemyndighetLand;
+    private Land_ISO2 trygdemyndighetLand;
 
     @Column(name = "orgnr")
     private String orgnr;
@@ -149,15 +150,15 @@ public class Aktoer extends RegistreringsInfo {
         return Aktoersroller.VIRKSOMHET.equals(rolle);
     }
 
-    public Landkoder getTrygdemyndighetLand() {
+    public Land_ISO2 getTrygdemyndighetLand() {
         return trygdemyndighetLand;
     }
 
-    public void setTrygdemyndighetLand(Landkoder trygdemyndighetLandkode) {
+    public void setTrygdemyndighetLand(Land_ISO2 trygdemyndighetLandkode) {
         this.trygdemyndighetLand = trygdemyndighetLandkode;
     }
 
-    public Landkoder hentMyndighetLandkode() {
+    public Land_ISO2 hentMyndighetLandkode() {
         if (erUtenlandskMyndighet()) {
             return institusjonId != null ? UtenlandskMyndighet.konverterInstitusjonIdTilLandkode(institusjonId) : trygdemyndighetLand;
         }

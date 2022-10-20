@@ -11,6 +11,7 @@ import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
+import no.nav.melosys.domain.util.Land_ISO2;
 import no.nav.melosys.integrasjon.dokgen.DokgenConsumer;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
@@ -180,7 +181,7 @@ public class DokgenService {
             .medKontaktopplysning(kontaktopplysning);
     }
 
-    private void settUtenlandskMyndighetOpplysninger(Landkoder landkode,
+    private void settUtenlandskMyndighetOpplysninger(Land_ISO2 landkode,
                                                      DokgenBrevbestilling.Builder<?> brevbestilling) {
         var utenlandskMyndighet = utenlandskMyndighetService.hentUtenlandskMyndighet(landkode);
         brevbestilling.medUtenlandskMyndighet(utenlandskMyndighet);

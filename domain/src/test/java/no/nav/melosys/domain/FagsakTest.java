@@ -7,6 +7,7 @@ import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
+import no.nav.melosys.domain.util.Land_ISO2;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import org.assertj.core.util.Sets;
@@ -274,8 +275,8 @@ class FagsakTest {
         Fagsak fagsak = new Fagsak();
         fagsak.setAktører(Sets.newLinkedHashSet(aktoer));
 
-        Landkoder resultat = fagsak.hentMyndighetLandkode();
-        assertThat(resultat).isEqualByComparingTo(Landkoder.SE);
+        Land_ISO2 resultat = fagsak.hentMyndighetLandkode();
+        assertThat(resultat).isEqualByComparingTo(Land_ISO2.SE);
     }
 
     @Test

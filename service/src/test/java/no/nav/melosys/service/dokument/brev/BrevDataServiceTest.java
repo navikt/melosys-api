@@ -22,6 +22,7 @@ import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
+import no.nav.melosys.domain.util.Land_ISO2;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.doksys.DokumentbestillingMetadata;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
@@ -86,7 +87,7 @@ class BrevDataServiceTest {
         myndighet.navn = "navn";
         myndighet.gateadresse = "gateadresse 123";
         myndighet.land = "HR";
-        when(utenlandskMyndighetRepository.findByLandkode(Landkoder.HR)).thenReturn(Optional.of(myndighet));
+        when(utenlandskMyndighetRepository.findByLandkode(Land_ISO2.HR)).thenReturn(Optional.of(myndighet));
         return myndighet;
     }
 
@@ -124,7 +125,7 @@ class BrevDataServiceTest {
         aktoer.setInstitusjonId("DE:TEST");
         UtenlandskMyndighet tyskMyndighet = new UtenlandskMyndighet();
         tyskMyndighet.institusjonskode = "TEST";
-        when(utenlandskMyndighetRepository.findByLandkode(Landkoder.DE)).thenReturn(Optional.of(tyskMyndighet));
+        when(utenlandskMyndighetRepository.findByLandkode(Land_ISO2.DE)).thenReturn(Optional.of(tyskMyndighet));
 
         UtenlandskMyndighet utenlandskMyndighet = service.hentMyndighetFraAktoer(aktoer);
 

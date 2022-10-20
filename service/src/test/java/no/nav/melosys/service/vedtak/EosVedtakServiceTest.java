@@ -16,6 +16,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
+import no.nav.melosys.domain.util.Land_ISO2;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
@@ -238,7 +239,7 @@ class EosVedtakServiceTest {
         mockBehandlingsresultat();
         behandlingsresultat.setType(AVSLAG_SØKNAD);
         leggTilLovvalgsperiode(InnvilgelsesResultat.AVSLAATT);
-        when(landvelgerService.hentUtenlandskTrygdemyndighetsland(behandling.getId())).thenReturn(Set.of(Landkoder.SE));
+        when(landvelgerService.hentUtenlandskTrygdemyndighetsland(behandling.getId())).thenReturn(Set.of(Land_ISO2.SE));
 
         vedtakService.fattVedtak(behandling, lagRequest(AVSLAG_SØKNAD, FØRSTEGANGSVEDTAK, null, null, null));
 
@@ -328,7 +329,7 @@ class EosVedtakServiceTest {
     }
 
     private void mockEesiReady() {
-        when(landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID)).thenReturn(Collections.singletonList(Landkoder.SE));
+        when(landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID)).thenReturn(Collections.singletonList(Land_ISO2.SE));
         when(eessiService.validerOgAvklarMottakerInstitusjonerForBuc(anySet(), anyCollection(), any(BucType.class))).thenCallRealMethod();
         when(eessiService.hentEessiMottakerinstitusjoner(BucType.LA_BUC_04.name(), Set.of(Landkoder.SE.getKode())))
             .thenReturn(List.of(new Institusjon("AB:CDEF123", "inst", Landkoder.SE.getKode())));

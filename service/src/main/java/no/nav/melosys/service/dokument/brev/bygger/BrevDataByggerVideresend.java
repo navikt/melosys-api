@@ -1,6 +1,7 @@
 package no.nav.melosys.service.dokument.brev.bygger;
 
 import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.util.Land_ISO2;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
@@ -26,8 +27,8 @@ public class BrevDataByggerVideresend implements BrevDataBygger {
     public BrevData lag(BrevDataGrunnlag dataGrunnlag, String saksbehandler) {
         long behandlingID = dataGrunnlag.getBehandling().getId();
 
-        Landkoder bostedsland = landvelgerService.hentBostedsland(behandlingID, dataGrunnlag.getBehandlingsgrunnlagData()).getLandkodeobjekt();
-        if (bostedsland == Landkoder.NO) {
+        Land_ISO2 bostedsland = Land_ISO2.valueOf(landvelgerService.hentBostedsland(behandlingID, dataGrunnlag.getBehandlingsgrunnlagData()).landkode());
+        if (bostedsland == Land_ISO2.NO) {
             throw new FunksjonellException("Bostedslandet kan ikke være Norge ved videresending av søknad");
         }
 

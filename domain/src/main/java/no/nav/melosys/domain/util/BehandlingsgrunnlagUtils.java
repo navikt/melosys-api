@@ -2,14 +2,12 @@ package no.nav.melosys.domain.util;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Bostedsland;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Soeknadsland;
-import no.nav.melosys.domain.kodeverk.Landkoder;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -29,14 +27,14 @@ public final class BehandlingsgrunnlagUtils {
      * Returnerer søknadsland som landkoder,
      * og sjekker at det er minst et søknadsland oppgitt i søknad
      */
-    public static List<Landkoder> hentSøknadslandkoder(BehandlingsgrunnlagData grunnlagdata) {
+    public static List<Land_ISO2> hentSøknadslandkoder(BehandlingsgrunnlagData grunnlagdata) {
         Soeknadsland soeknadsland = hentSøknadsland(grunnlagdata);
         List<String> søknadslandkoder = soeknadsland.landkoder;
         if (søknadslandkoder.isEmpty() && !soeknadsland.erUkjenteEllerAlleEosLand) {
             throw new IllegalStateException("Søknad mangler søknadsland og land er ikke markert som ukjente eller alle Eøs-land.");
         }
         return søknadslandkoder.stream()
-            .map(Landkoder::valueOf)
+            .map(Land_ISO2::valueOf)
             .toList();
     }
 

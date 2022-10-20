@@ -17,6 +17,7 @@ import no.nav.melosys.domain.kodeverk.Landkoder
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
+import no.nav.melosys.domain.util.Land_ISO2
 import no.nav.melosys.integrasjon.joark.JoarkFasade
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService
 import no.nav.melosys.service.dokument.sed.EessiService
@@ -68,14 +69,14 @@ class SedSomBrevServiceTest {
 
         val utenlandskMyndighet: UtenlandskMyndighet = mockk<UtenlandskMyndighet>()
 
-        every { utenlandskMyndighetServiceMock.hentUtenlandskMyndighet(Landkoder.SE) } returns utenlandskMyndighet
+        every { utenlandskMyndighetServiceMock.hentUtenlandskMyndighet(Land_ISO2.SE) } returns utenlandskMyndighet
         every { utenlandskMyndighetServiceMock.lagInstitusjonsId(utenlandskMyndighet) } returns INSTITUSJONS_ID
         every { fagsak.hentBrukersAktørID() } returns AKTØR_ID
         every { persondataFasadeMock.hentFolkeregisterident(any()) } returns BRUKER_FNR
         every { fagsak.getSaksnummer() } returns SAKSNUMMER
         every { fagsak.tema } returns Sakstemaer.MEDLEMSKAP_LOVVALG
 
-        sedSomBrevService.lagJournalpostForSendingAvSedSomBrev(SedType.A002, Landkoder.SE, behandling, null)
+        sedSomBrevService.lagJournalpostForSendingAvSedSomBrev(SedType.A002, Land_ISO2.SE, behandling, null)
 
         verify {
             joarkFasadeMock.opprettJournalpost(withArg {opprettJournalpost ->

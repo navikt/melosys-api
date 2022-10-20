@@ -6,6 +6,7 @@ import java.util.Collection;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.util.Land_ISO2;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
@@ -83,7 +84,7 @@ public class UtstedtA1Service {
             return null;
         }
 
-        Collection<Landkoder> mottakere = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID);
+        Collection<Land_ISO2> mottakere = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID);
         if (mottakere.size() > 1) {
             throw new FunksjonellException("Finner flere enn én mottaker av A1 for behandling " + behandlingID);
         }

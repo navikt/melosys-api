@@ -24,6 +24,7 @@ import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesgrupper;
+import no.nav.melosys.domain.util.Land_ISO2;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.BrevDataVedlegg;
 import org.jeasy.random.EasyRandom;
@@ -117,7 +118,7 @@ public class AttestMapperTest {
         a1Data.yrkesgruppe = Yrkesgrupper.ORDINAER;
         a1Data.bostedsadresse = boAdresse;
         a1Data.arbeidssteder = Arrays.asList(fysiskArbeidssted, ikkeFysiskArbeidssted);
-        a1Data.arbeidsland = Arrays.asList(Landkoder.NO, Landkoder.BG, Landkoder.AT, Landkoder.AX);
+        a1Data.arbeidsland = Arrays.asList(Land_ISO2.NO, Land_ISO2.BG, Land_ISO2.AT, Land_ISO2.AX);
         a1Data.person = lagPersonopplysninger();
         a1Data.hovedvirksomhet = virksomhet;
         a1Data.bivirksomheter = new ArrayList<>(Collections.singletonList(utenlandskVirksomhet));

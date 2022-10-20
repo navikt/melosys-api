@@ -8,6 +8,7 @@ import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
+import no.nav.melosys.domain.util.Land_ISO2;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.doksys.DoksysFasade;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
@@ -42,7 +43,7 @@ public class DistribuerJournalpostUtland implements StegBehandler {
 
         if (StringUtils.isNotEmpty(distribuerbarJournalpost)) {
 
-            Landkoder mottakerLand = Optional.ofNullable(prosessinstans.getData(ProsessDataKey.DISTRIBUER_MOTTAKER_LAND, Landkoder.class))
+            Land_ISO2 mottakerLand = Optional.ofNullable(prosessinstans.getData(ProsessDataKey.DISTRIBUER_MOTTAKER_LAND, Land_ISO2.class))
                 .orElseThrow(() -> new IkkeFunnetException("Kan ikke distribuere journalpost da mottakerland ikke er satt"));
             UtenlandskMyndighet utenlandskMyndighet = utenlandskMyndighetService.hentUtenlandskMyndighet(mottakerLand);
             Distribusjonstype distribusjonstype =  prosessinstans.getData(ProsessDataKey.DISTRIBUSJONSTYPE, Distribusjonstype.class);

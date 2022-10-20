@@ -11,6 +11,7 @@ import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
+import no.nav.melosys.domain.util.Land_ISO2;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LovvalgsperiodeService;
@@ -48,7 +49,7 @@ public class BrevDataByggerA001 implements BrevDataBygger {
         this.behandling = dataGrunnlag.getBehandling();
 
         Collection<Anmodningsperiode> anmodningsperioder = hentAnmodningsperioder();
-        Landkoder landkode = anmodningsperioder.iterator().next().getUnntakFraLovvalgsland();
+        Land_ISO2 landkode = Land_ISO2.valueOf(anmodningsperioder.iterator().next().getUnntakFraLovvalgsland().getKode());
 
         BrevDataA001 brevData = new BrevDataA001();
         brevData.persondata = dataGrunnlag.getPerson();
@@ -104,7 +105,7 @@ public class BrevDataByggerA001 implements BrevDataBygger {
         return resultat;
     }
 
-    private Optional<String> hentUtenlandskIdent(Landkoder landkode) {
+    private Optional<String> hentUtenlandskIdent(Land_ISO2 landkode) {
         return dataGrunnlag.getBehandlingsgrunnlagData().personOpplysninger.utenlandskIdent.stream()
                 .filter(utenlandskIdent -> utenlandskIdent.landkode.equals(landkode.getKode()))
                 .map(utenlandskIdent -> utenlandskIdent.ident)

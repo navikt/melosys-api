@@ -17,6 +17,7 @@ import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Art12_1_begrunnelser;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Art12_1_vesentlig_virksomhet;
 import no.nav.melosys.domain.person.Persondata;
+import no.nav.melosys.domain.util.Land_ISO2;
 import no.nav.melosys.repository.VilkaarsresultatRepository;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.LovvalgsperiodeService;
@@ -65,7 +66,7 @@ class BrevDataByggerAvslagArbeidsgiverTest {
 
     @BeforeEach
     void setUp() {
-        when(landvelgerService.hentArbeidsland(anyLong())).thenReturn(Landkoder.AT);
+        when(landvelgerService.hentArbeidsland(anyLong())).thenReturn(Land_ISO2.AT);
 
         brevDataByggerAvslagArbeidsgiver = new BrevDataByggerAvslagArbeidsgiver(landvelgerService,
             lovvalgsperiodeService,

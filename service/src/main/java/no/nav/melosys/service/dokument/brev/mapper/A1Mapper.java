@@ -19,6 +19,7 @@ import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.domain.person.adresse.Kontaktadresse;
 import no.nav.melosys.domain.person.adresse.Oppholdsadresse;
+import no.nav.melosys.domain.util.Land_ISO2;
 import no.nav.melosys.domain.util.LandkoderUtils;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
@@ -175,7 +176,7 @@ class A1Mapper {
      * Fyller derfor opp med tomme elementer for resterende felter
      */
     private FysiskArbeidsstedAdresseListeType mapFysiskeAdresser(List<Arbeidssted> arbeidssteder,
-                                                                 Collection<Landkoder> arbeidsland) {
+                                                                 Collection<Land_ISO2> arbeidsland) {
         FysiskArbeidsstedAdresseListeType fysiskeAdresserBrev = new FysiskArbeidsstedAdresseListeType();
         Stream.concat(
                 lagAdresserForArbeidsstederOgLandUtenArbeidssted(arbeidssteder, arbeidsland),
@@ -187,14 +188,14 @@ class A1Mapper {
     }
 
     private Stream<AdresseType> lagAdresserForArbeidsstederOgLandUtenArbeidssted(List<Arbeidssted> arbeidssteder,
-                                                                                 Collection<Landkoder> arbeidsland) {
+                                                                                 Collection<Land_ISO2> arbeidsland) {
         if (brevData.erUkjenteEllerAlleEosLand) {
             return lagAdresselinjeForUkjentEllerIkkeOppgittArbeidssted().stream().map(this::tilAdresseType);
         }
 
         String landUtenOppgittArbeidsstedBeskrivelse = hentLandUtenOppgittArbeidssted(arbeidsland, arbeidssteder)
             .stream()
-            .map(Landkoder::getBeskrivelse)
+            .map(Land_ISO2::getBeskrivelse)
             .sorted()
             .collect(Collectors.joining(", "));
 
@@ -243,7 +244,7 @@ class A1Mapper {
             antallArbeidssteder > MAKS_ANTALL_ARBEIDSSTEDER_PLASS_I_BREV;
     }
 
-    private Set<Landkoder> hentLandUtenOppgittArbeidssted(Collection<Landkoder> arbeidsland,
+    private Set<Land_ISO2> hentLandUtenOppgittArbeidssted(Collection<Land_ISO2> arbeidsland,
                                                           List<Arbeidssted> arbeidssteder) {
         final Set<String> arbeidslandMedArbeidsted = arbeidssteder.stream()
             .map(Arbeidssted::getLandkode).collect(Collectors.toSet());

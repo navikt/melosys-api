@@ -29,6 +29,7 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_8
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesgrupper;
+import no.nav.melosys.domain.util.Land_ISO2;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted;
@@ -120,7 +121,7 @@ class A1MapperTest {
         brevData.yrkesgruppe = Yrkesgrupper.ORDINAER;
         brevData.bostedsadresse = boAdresse;
         brevData.arbeidssteder = new ArrayList<>(Arrays.asList(fysiskArbeidssted, maritimtArbeidsstedSkip, maritimtArbeidsstedSokkel));
-        brevData.arbeidsland = List.of(Landkoder.SE);
+        brevData.arbeidsland = List.of(Land_ISO2.SE);
         brevData.person = lagPersonopplysninger();
         brevData.hovedvirksomhet = virksomhet;
         brevData.bivirksomheter = new ArrayList<>(Collections.singletonList(utenlandskVirksomhet));
@@ -147,7 +148,7 @@ class A1MapperTest {
         ForetakUtland utenlandskForetak = lagForetakUtland(false);
         utenlandskForetak.orgnr = null;
         brevData.hovedvirksomhet = new AvklartVirksomhet(utenlandskForetak);
-        brevData.arbeidsland = List.of(Landkoder.values());// List.of(Landkoder.GB, Landkoder.SE);
+        brevData.arbeidsland = List.of(Land_ISO2.values());// List.of(Landkoder.GB, Landkoder.SE);
 
         mapper.mapA1(behandling, behandlingsresultat, brevData);
 
@@ -168,7 +169,7 @@ class A1MapperTest {
 
     @Test
     void mapBrevTilXML_arbeidslandUtenFysiskArbeidssted_fyllerPåMedArbeidsland() throws JAXBException, SAXException {
-        brevData.arbeidsland = List.of(Landkoder.SE, Landkoder.DK, Landkoder.GB);
+        brevData.arbeidsland = List.of(Land_ISO2.SE, Land_ISO2.DK, Land_ISO2.GB);
         A1 a1 = mapper.mapA1(behandling, behandlingsresultat, brevData);
 
         assertThat(a1.getFysiskArbeidsstedAdresseListe().getAdresse())

@@ -17,6 +17,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
+import no.nav.melosys.domain.util.Land_ISO2;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.UtpekingsperiodeRepository;
@@ -74,7 +75,7 @@ class UtpekingServiceTest {
     @Captor
     private ArgumentCaptor<Collection<Lovvalgsperiode>> lovvalgsperiodeCaptor;
     @Captor
-    private ArgumentCaptor<Collection<Landkoder>> landkoderCaptor;
+    private ArgumentCaptor<Collection<Land_ISO2>> landkoderCaptor;
 
     private UtpekingService utpekingService;
     private final long behandlingID = 431;
@@ -108,12 +109,12 @@ class UtpekingServiceTest {
         behandlingsresultat.getUtpekingsperioder().add(utpekingsperiode);
 
         final Set<String> mottakerInstitusjoner = Set.of("SE:123");
-        when(eessiService.validerOgAvklarMottakerInstitusjonerForBuc(eq(mottakerInstitusjoner), eq(Set.of(Landkoder.SE)), eq(BucType.LA_BUC_02)))
+        when(eessiService.validerOgAvklarMottakerInstitusjonerForBuc(eq(mottakerInstitusjoner), eq(Set.of(Land_ISO2.SE)), eq(BucType.LA_BUC_02)))
             .thenReturn(mottakerInstitusjoner);
         when(lovvalgsperiodeService.lagreLovvalgsperioder(eq(behandlingID), anyCollection()))
             .thenReturn(Collections.singletonList(new Lovvalgsperiode()));
         when(landvelgerService.hentUtenlandskTrygdemyndighetsland(eq(behandlingID)))
-            .thenReturn(Set.of(Landkoder.SE));
+            .thenReturn(Set.of(Land_ISO2.SE));
 
 
         utpekingService.utpekLovvalgsland(fagsak, mottakerInstitusjoner, null, null);
@@ -169,14 +170,14 @@ class UtpekingServiceTest {
         when(lovvalgsperiodeService.lagreLovvalgsperioder(eq(behandlingID), anyCollection()))
             .thenReturn(Collections.singletonList(new Lovvalgsperiode()));
         when(landvelgerService.hentUtenlandskTrygdemyndighetsland(eq(behandlingID)))
-            .thenReturn(List.of(Landkoder.SE, Landkoder.DK, Landkoder.FI));
+            .thenReturn(List.of(Land_ISO2.SE, Land_ISO2.DK, Land_ISO2.FI));
 
 
         utpekingService.utpekLovvalgsland(fagsak, mottakerInstitusjoner, null, null);
 
 
         verify(eessiService).validerOgAvklarMottakerInstitusjonerForBuc(eq(mottakerInstitusjoner), landkoderCaptor.capture(), eq(BucType.LA_BUC_02));
-        assertThat(landkoderCaptor.getValue()).containsExactlyInAnyOrder(Landkoder.SE, Landkoder.DK, Landkoder.FI);
+        assertThat(landkoderCaptor.getValue()).containsExactlyInAnyOrder(Land_ISO2.SE, Land_ISO2.DK, Land_ISO2.FI);
         assertThat(behandlingsresultat)
             .extracting(Behandlingsresultat::getType, Behandlingsresultat::getBegrunnelseFritekst, Behandlingsresultat::getFastsattAvLand)
             .containsExactly(Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND, null, Landkoder.NO);

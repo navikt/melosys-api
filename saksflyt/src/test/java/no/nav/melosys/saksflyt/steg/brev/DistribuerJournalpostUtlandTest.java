@@ -6,6 +6,7 @@ import no.nav.melosys.domain.arkiv.Distribusjonstype;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
+import no.nav.melosys.domain.util.Land_ISO2;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.doksys.DoksysFasade;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
@@ -44,7 +45,7 @@ class DistribuerJournalpostUtlandTest {
         prosessinstans.setData(ProsessDataKey.DISTRIBUER_MOTTAKER_LAND, Landkoder.SE);
         prosessinstans.setData(ProsessDataKey.DISTRIBUSJONSTYPE, Distribusjonstype.VEDTAK);
         prosessinstans.setBehandling(new Behandling());
-        when(utenlandskMyndighetService.hentUtenlandskMyndighet(eq(Landkoder.SE))).thenReturn(lagUtenlandskMyndighet());
+        when(utenlandskMyndighetService.hentUtenlandskMyndighet(eq(Land_ISO2.SE))).thenReturn(lagUtenlandskMyndighet());
 
         distribuerJournalpostUtland.utfør(prosessinstans);
 
