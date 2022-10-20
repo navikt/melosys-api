@@ -1,6 +1,7 @@
 package no.nav.melosys.domain.person
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.annotation.JsonProperty
 import no.nav.melosys.domain.brev.Postadresse
 import no.nav.melosys.domain.dokument.felles.Land
 import no.nav.melosys.domain.person.adresse.Adressebeskyttelse
@@ -13,17 +14,17 @@ import java.util.*
 import java.util.function.Predicate
 
 data class Personopplysninger(
-    var adressebeskyttelser: Collection<Adressebeskyttelse>,
-    var bostedsadresse: Bostedsadresse?,
-    var dødsfall: Doedsfall?,
-    var familiemedlemmer: Set<Familiemedlem>?,
-    var fødsel: Foedsel?,
-    var folkeregisteridentifikator: Folkeregisteridentifikator?,
-    var kjønn: KjoennType?,
-    var kontaktadresser: Collection<Kontaktadresse>,
-    var navn: Navn?,
-    var oppholdsadresser: Collection<Oppholdsadresse>,
-    var statsborgerskap: Collection<Statsborgerskap>
+    @JsonProperty("adressebeskyttelser") var adressebeskyttelser: Collection<Adressebeskyttelse>,
+    @JsonProperty("bostedsadresse") var bostedsadresse: Bostedsadresse?,
+    @JsonProperty("dødsfall") var dødsfall: Doedsfall?,
+    @JsonProperty("familiemedlemmer") var familiemedlemmer: Set<Familiemedlem>?,
+    @JsonProperty("fødsel") var fødsel: Foedsel?,
+    @JsonProperty("folkeregisteridentifikator") var folkeregisteridentifikator: Folkeregisteridentifikator?,
+    @JsonProperty("kjønn") var kjønn: KjoennType?,
+    @JsonProperty("kontaktadresser") var kontaktadresser: Collection<Kontaktadresse>,
+    @JsonProperty("navn") var navn: Navn?,
+    @JsonProperty("oppholdsadresser") var oppholdsadresser: Collection<Oppholdsadresse>,
+    @JsonProperty("statsborgerskap") var statsborgerskap: Collection<Statsborgerskap>
 ) : Persondata {
 
     override fun erPersonDød(): Boolean {
