@@ -16,7 +16,6 @@ import static no.nav.melosys.domain.Behandling.BEHANDLINGSTEMA_SED_FORESPØRSEL;
 import static no.nav.melosys.domain.Behandling.erBehandlingAvSedForespørsler;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.*;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*;
-import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.ENDRET_PERIODE;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.NY_VURDERING;
 
 public class MuligeManuelleBehandlingsendringer {
@@ -46,15 +45,10 @@ public class MuligeManuelleBehandlingsendringer {
     }
 
     public static Set<Behandlingstyper> hentMuligeTyper(Behandling behandling) {
-        if (behandling.kanIkkeEndres() || !TEMAER_SOM_KAN_ENDRE_TYPE.contains(behandling.getTema())) {
+        if (behandling.kanIkkeEndres() || !TEMAER_SOM_KAN_ENDRE_TYPE.contains(behandling.getTema()) || !behandling.erEndretPeriode()) {
             return Collections.emptySet();
         }
-
-        return switch (behandling.getType()) {
-            case ENDRET_PERIODE -> Collections.singleton(NY_VURDERING);
-            case NY_VURDERING -> Collections.singleton(ENDRET_PERIODE);
-            default -> Collections.emptySet();
-        };
+        return Collections.singleton(NY_VURDERING);
     }
 
     public static Set<Behandlingstema> hentMuligeBehandlingstema(Behandling behandling, Behandlingsresultat behandlingsresultat, boolean visNyeBehandlingstema) {
