@@ -2,6 +2,7 @@ package no.nav.melosys.service.kontroll.feature.ferdigbehandling;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.Medlemskapsperiode;
 import no.nav.melosys.domain.PeriodeOmLovvalg;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
@@ -12,6 +13,10 @@ import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerRequest;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
 import org.springframework.stereotype.Component;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 class KontrollMedRegisteropplysning {
@@ -49,15 +54,26 @@ class KontrollMedRegisteropplysning {
     }
 
     private void hentNyeRegisteropplysninger(Behandlingsresultat behandlingsresultat, Behandling behandling) {
-        PeriodeOmLovvalg lovvalgsperiode = behandlingsresultat.hentValidertPeriodeOmLovvalg();
+        LocalDate fom;
+        LocalDate tom;
+
+        if (behandling.getFagsak().getType().equals(Sakstyper.FTRL)) {
+            List<Medlemskapsperiode> list = new ArrayList(behandlingsresultat.getMedlemAvFolketrygden().getMedlemskapsperioder());
+            fom = list.get(0).getFom();
+            tom = list.get(0).getTom();
+        } else {
+            PeriodeOmLovvalg lovvalgsperiode = behandlingsresultat.hentValidertPeriodeOmLovvalg();
+            fom = lovvalgsperiode.getFom();
+            tom = lovvalgsperiode.getTom();
+        }
         String fnr = persondataFasade.hentFolkeregisterident(behandling.getFagsak().hentBrukersAktørID());
 
         registeropplysningerService.hentOgLagreOpplysninger(
             RegisteropplysningerRequest.builder()
                 .behandlingID(behandling.getId())
                 .fnr(fnr)
-                .fom(lovvalgsperiode.getFom())
-                .tom(lovvalgsperiode.getTom())
+                .fom(fom)
+                .tom(tom)
                 .saksopplysningTyper(RegisteropplysningerRequest.SaksopplysningTyper.builder()
                     .medlemskapsopplysninger().build())
                 .build());

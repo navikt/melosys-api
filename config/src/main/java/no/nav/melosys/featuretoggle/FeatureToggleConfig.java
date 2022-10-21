@@ -20,6 +20,7 @@ public class FeatureToggleConfig {
         if (!Collections.disjoint(List.of(environment.getActiveProfiles()), List.of("local", "local-mock", "test"))) {
             var fakeUnleash = new FakeUnleash();
             fakeUnleash.enableAll();
+
             return fakeUnleash;
         } else {
             var unleashConfig = UnleashConfig.builder()
