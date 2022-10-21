@@ -10,6 +10,7 @@ import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.brev.Distribusjonstype;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
@@ -157,10 +158,25 @@ public class BrevmalListeBygger {
         return behandlingstype == Behandlingstyper.SOEKNAD || behandlingstype == Behandlingstyper.KLAGE;
     }
 
+    private FeltValgDto hentDistribusjonstyper() {
+        List<FeltvalgAlternativDto> distribusjonstyper = List.of(
+            new FeltvalgAlternativDto(Distribusjonstype.VEDTAK.getKode(), Distribusjonstype.VEDTAK.getBeskrivelse(), false),
+            new FeltvalgAlternativDto(Distribusjonstype.VIKTIG.getKode(), Distribusjonstype.VIKTIG.getBeskrivelse(), false),
+            new FeltvalgAlternativDto(Distribusjonstype.ANNET.getKode(), Distribusjonstype.ANNET.getBeskrivelse(), false)
+        );
+        return new FeltValgDto(distribusjonstyper, FeltValgType.RADIO);
+    }
+
     private BrevmalTypeDto lagBrevmalTypeDtoForFritekstbrev(Produserbaredokumenter produserbartdokument, long behandlingId) {
         return new BrevmalTypeDto.Builder()
             .medType(produserbartdokument)
             .medFelter(asList(
+                new BrevmalFeltDto.Builder()
+                    .medKodeOgBeskrivelse(BrevmalFeltKode.DISTRIBUSJONSTYPE)
+                    .medHjelpetekst("Type brev må angis slik at bruker får riktig varseltekst om brevet som sendes. Gjelder det et vedtak eller en forespørsel, vil bruker få en påminnelse hvis brevet ikke har blitt lest innen 7 dager.")
+                    .medValg(hentDistribusjonstyper())
+                    .erPåkrevd()
+                    .build(),
                 new BrevmalFeltDto.Builder()
                     .medKodeOgBeskrivelse(BrevmalFeltKode.BREV_TITTEL)
                     .medFeltType(FeltType.TEKST)

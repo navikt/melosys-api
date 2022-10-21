@@ -101,6 +101,7 @@ public class DokumentService {
             .medBehandling(behandling)
             .medBegrunnelseKode(brevbestilling.getBegrunnelseKode())
             .medFritekst(brevbestilling.getFritekst())
+            .medDistribusjonsType(brevbestilling.getDistribusjonstype())
             .medYtterligereInformasjon(brevbestilling.getYtterligereInformasjon())
             .build();
         BrevData brevData = lagBrevData(nyBrevbestilling);

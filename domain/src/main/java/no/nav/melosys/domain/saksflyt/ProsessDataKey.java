@@ -24,7 +24,7 @@ public enum ProsessDataKey {
     CORRELATION_ID_SAKSFLYT("correlationId"),
     DISTRIBUERBAR_JOURNALPOST_ID("distribuerbarJournalpostID"),
     DISTRIBUER_MOTTAKER_LAND("distribuerMottakerLand"),
-    DISTRIBUSJONSTYPE("distribusjonsType"),
+    DISTRIBUSJONSTYPE("distribusjonstype"),
     DOKUMENT_ID("dokumentID"),
     EESSI_MELDING("eessiMelding"),
     EESSI_MOTTAKERE("eessiMottakere"),
