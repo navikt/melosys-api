@@ -11,7 +11,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
-import no.nav.melosys.domain.util.Land_ISO2;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.statistikk.utstedt_a1.integrasjon.UtstedtA1AivenProducer;
@@ -55,7 +54,7 @@ class UtstedtA1ServiceTest {
     @Test
     void sendMeldingOmUtstedtA1() {
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(lagBehandlingsresultat());
-        when(landvelgerService.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID)).thenReturn(List.of(Land_ISO2.SE));
+        when(landvelgerService.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID)).thenReturn(List.of(Land_iso2.SE));
         when(utstedtA1AivenProducer.produserMelding(any(UtstedtA1Melding.class))).thenAnswer(returnsFirstArg());
 
         utstedtA1Service.sendMeldingOmUtstedtA1(BEHANDLING_ID);
@@ -75,7 +74,7 @@ class UtstedtA1ServiceTest {
     @Test
     void sendMeldingOmUtstedtA1PåAiven() {
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(lagBehandlingsresultat());
-        when(landvelgerService.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID)).thenReturn(List.of(Land_ISO2.SE));
+        when(landvelgerService.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID)).thenReturn(List.of(Land_iso2.SE));
         when(utstedtA1AivenProducer.produserMelding(any(UtstedtA1Melding.class))).thenAnswer(returnsFirstArg());
 
         utstedtA1Service.sendMeldingOmUtstedtA1(BEHANDLING_ID);
@@ -147,7 +146,7 @@ class UtstedtA1ServiceTest {
         behandlingsresultat.getLovvalgsperioder().iterator().next().setTilleggsbestemmelse(Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_5);
 
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
-        when(landvelgerService.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID)).thenReturn(List.of(Land_ISO2.SE));
+        when(landvelgerService.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID)).thenReturn(List.of(Land_iso2.SE));
         when(utstedtA1AivenProducer.produserMelding(any(UtstedtA1Melding.class))).thenAnswer(returnsFirstArg());
 
         utstedtA1Service.sendMeldingOmUtstedtA1(BEHANDLING_ID);

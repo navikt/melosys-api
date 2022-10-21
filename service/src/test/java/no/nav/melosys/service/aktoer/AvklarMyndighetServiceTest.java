@@ -1,11 +1,14 @@
 package no.nav.melosys.service.aktoer;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
-import no.nav.melosys.domain.util.Land_ISO2;
 import no.nav.melosys.repository.UtenlandskMyndighetRepository;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.sak.FagsakService;
@@ -55,16 +58,16 @@ public class AvklarMyndighetServiceTest {
         behandling.setId(1L);
         behandling.setFagsak(fagsak);
 
-        utenlandskMyndighet = lagUtenlandskMyndighet(Land_ISO2.IT, "IT123", null);
-        utenlandskMyndighetReservert = lagUtenlandskMyndighet(Land_ISO2.CZ, "CZ123", Preferanse.PreferanseEnum.RESERVERT_FRA_A1);
+        utenlandskMyndighet = lagUtenlandskMyndighet(Land_iso2.IT, "IT123", null);
+        utenlandskMyndighetReservert = lagUtenlandskMyndighet(Land_iso2.CZ, "CZ123", Preferanse.PreferanseEnum.RESERVERT_FRA_A1);
 
-        when(landvelgerService.hentUtenlandskTrygdemyndighetsland(anyLong())).thenReturn(Arrays.asList(Land_ISO2.IT, Land_ISO2.CZ));
+        when(landvelgerService.hentUtenlandskTrygdemyndighetsland(anyLong())).thenReturn(Arrays.asList(Land_iso2.IT, Land_iso2.CZ));
 
         forventetInstitusjonIdIT = Landkoder.IT + ":" + utenlandskMyndighet.institusjonskode;
         forventetInstitusjonIdCZ = Landkoder.CZ + ":" + utenlandskMyndighetReservert.institusjonskode;
     }
 
-    private UtenlandskMyndighet lagUtenlandskMyndighet(Land_ISO2 landkode, String institusjonId, Preferanse.PreferanseEnum preferanse) {
+    private UtenlandskMyndighet lagUtenlandskMyndighet(Land_iso2 landkode, String institusjonId, Preferanse.PreferanseEnum preferanse) {
         UtenlandskMyndighet utenlandskMyndighet = new UtenlandskMyndighet();
         utenlandskMyndighet.institusjonskode = institusjonId;
         utenlandskMyndighet.landkode = landkode;
@@ -85,8 +88,8 @@ public class AvklarMyndighetServiceTest {
 
     @Test
     public void avklarMyndighetSomAktørOgLagre_forventkorrektInstitusjonsId() {
-        when(utenlandskMyndighetRepository.findByLandkode(eq(Land_ISO2.IT))).thenReturn(Optional.of(utenlandskMyndighet));
-        when(utenlandskMyndighetRepository.findByLandkode(eq(Land_ISO2.CZ))).thenReturn(Optional.of(utenlandskMyndighetReservert));
+        when(utenlandskMyndighetRepository.findByLandkode(eq(Land_iso2.IT))).thenReturn(Optional.of(utenlandskMyndighet));
+        when(utenlandskMyndighetRepository.findByLandkode(eq(Land_iso2.CZ))).thenReturn(Optional.of(utenlandskMyndighetReservert));
 
         utenlandskMyndighetService.avklarUtenlandskMyndighetSomAktørOgLagre(behandling);
 

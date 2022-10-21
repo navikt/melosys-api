@@ -7,9 +7,8 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.UtenlandskMyndighet;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
-import no.nav.melosys.domain.util.Land_ISO2;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.UtenlandskMyndighetRepository;
@@ -53,21 +52,21 @@ class UtenlandskMyndighetServiceTest {
     @Test
     void avklarUtenlandskMyndighetSomAktørOgLagre_oppdatererMyndighetForTrygdeavtale() {
         behandling.getFagsak().setType(Sakstyper.TRYGDEAVTALE);
-        when(landvelgerServiceMock.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID)).thenReturn(List.of(Land_ISO2.NO));
+        when(landvelgerServiceMock.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID)).thenReturn(List.of(Land_iso2.NO));
 
 
         utenlandskMyndighetService.avklarUtenlandskMyndighetSomAktørOgLagre(behandling);
 
 
-        verify(fagsakServiceMock).oppdaterMyndighetForTrygdeavtale(SAKSNUMMER, Land_ISO2.NO);
+        verify(fagsakServiceMock).oppdaterMyndighetForTrygdeavtale(SAKSNUMMER, Land_iso2.NO);
         verifyNoMoreInteractions(fagsakServiceMock);
     }
 
     @Test
     void avklarUtenlandskMyndighetSomAktørOgLagre_kasterFunksjonellException_nårDetErFlereLandkoder() {
         behandling.getFagsak().setType(Sakstyper.TRYGDEAVTALE);
-        when(landvelgerServiceMock.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID)).thenReturn(List.of(Land_ISO2.NO,
-            Land_ISO2.BE));
+        when(landvelgerServiceMock.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID)).thenReturn(List.of(Land_iso2.NO,
+            Land_iso2.BE));
 
 
         assertThatExceptionOfType(FunksjonellException.class)
@@ -79,8 +78,8 @@ class UtenlandskMyndighetServiceTest {
     @Test
     void avklarUtenlandskMyndighetSomAktørOgLagre_oppdatererMyndigheterForEuEos() {
         behandling.getFagsak().setType(Sakstyper.EU_EOS);
-        when(landvelgerServiceMock.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID)).thenReturn(List.of(Land_ISO2.SE));
-        when(utenlandskMyndighetRepositoryMock.findByLandkode(Land_ISO2.SE))
+        when(landvelgerServiceMock.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID)).thenReturn(List.of(Land_iso2.SE));
+        when(utenlandskMyndighetRepositoryMock.findByLandkode(Land_iso2.SE))
             .thenReturn(Optional.of(new UtenlandskMyndighet()));
 
 
@@ -95,16 +94,16 @@ class UtenlandskMyndighetServiceTest {
     void avklarUtenlandskMyndighetSomAktørOgLagre_oppdatererMyndigheterMedRiktigId() {
         behandling.getFagsak().setType(Sakstyper.EU_EOS);
         when(landvelgerServiceMock.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID))
-            .thenReturn(List.of(Land_ISO2.SE, Land_ISO2.DK));
+            .thenReturn(List.of(Land_iso2.SE, Land_iso2.DK));
 
         UtenlandskMyndighet svenskUtenlandskMyndighet = new UtenlandskMyndighet();
-        svenskUtenlandskMyndighet.landkode = Land_ISO2.SE;
+        svenskUtenlandskMyndighet.landkode = Land_iso2.SE;
         svenskUtenlandskMyndighet.institusjonskode = "INSTITUSJONSKODE";
         UtenlandskMyndighet danskUtenlandskMyndighet = new UtenlandskMyndighet();
-        danskUtenlandskMyndighet.landkode = Land_ISO2.DK;
+        danskUtenlandskMyndighet.landkode = Land_iso2.DK;
         danskUtenlandskMyndighet.institusjonskode = null;
-        when(utenlandskMyndighetRepositoryMock.findByLandkode(Land_ISO2.SE)).thenReturn(Optional.of(svenskUtenlandskMyndighet));
-        when(utenlandskMyndighetRepositoryMock.findByLandkode(Land_ISO2.DK)).thenReturn(Optional.of(danskUtenlandskMyndighet));
+        when(utenlandskMyndighetRepositoryMock.findByLandkode(Land_iso2.SE)).thenReturn(Optional.of(svenskUtenlandskMyndighet));
+        when(utenlandskMyndighetRepositoryMock.findByLandkode(Land_iso2.DK)).thenReturn(Optional.of(danskUtenlandskMyndighet));
 
 
         utenlandskMyndighetService.avklarUtenlandskMyndighetSomAktørOgLagre(behandling);
@@ -117,8 +116,8 @@ class UtenlandskMyndighetServiceTest {
     @Test
     void avklarUtenlandskMyndighetSomAktørOgLagre_kasterIkkeFunnetException_nårUtenlandskmyndighetIkkeErFunnet() {
         behandling.getFagsak().setType(Sakstyper.EU_EOS);
-        when(landvelgerServiceMock.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID)).thenReturn(List.of(Land_ISO2.SE));
-        when(utenlandskMyndighetRepositoryMock.findByLandkode(Land_ISO2.SE)).thenReturn(Optional.empty());
+        when(landvelgerServiceMock.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID)).thenReturn(List.of(Land_iso2.SE));
+        when(utenlandskMyndighetRepositoryMock.findByLandkode(Land_iso2.SE)).thenReturn(Optional.empty());
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> utenlandskMyndighetService.avklarUtenlandskMyndighetSomAktørOgLagre(behandling))
@@ -128,7 +127,7 @@ class UtenlandskMyndighetServiceTest {
     @Test
     void hentUtenlandskMyndighet_kasterIkkeFunnetException_nårUtenlandskmyndighetIkkeErFunnet() {
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> utenlandskMyndighetService.hentUtenlandskMyndighet(Land_ISO2.SE))
+            .isThrownBy(() -> utenlandskMyndighetService.hentUtenlandskMyndighet(Land_iso2.SE))
             .withMessageContaining("Finner ikke utenlandskMyndighet for SE.");
     }
 
@@ -143,15 +142,15 @@ class UtenlandskMyndighetServiceTest {
 
     @Test
     void lagUtenlandskeMyndigheterFraBehandling_mapperUtenlandskmyndighetTilAktør() {
-        Collection<Land_ISO2> utenlandskeMyndigheterLandkoder = List.of(Land_ISO2.SE, Land_ISO2.DK);
+        Collection<Land_iso2> utenlandskeMyndigheterLandkoder = List.of(Land_iso2.SE, Land_iso2.DK);
         when(landvelgerServiceMock.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID))
             .thenReturn(utenlandskeMyndigheterLandkoder);
 
         UtenlandskMyndighet svenskUtenlandskMyndighet = new UtenlandskMyndighet();
-        svenskUtenlandskMyndighet.landkode = Land_ISO2.SE;
+        svenskUtenlandskMyndighet.landkode = Land_iso2.SE;
         svenskUtenlandskMyndighet.institusjonskode = "INSTSE";
         UtenlandskMyndighet danskUtenlandskMyndighet = new UtenlandskMyndighet();
-        danskUtenlandskMyndighet.landkode = Land_ISO2.DK;
+        danskUtenlandskMyndighet.landkode = Land_iso2.DK;
         danskUtenlandskMyndighet.institusjonskode = "INSTDK";
         List<UtenlandskMyndighet> utenlandskMyndighetList = List.of(
             svenskUtenlandskMyndighet, danskUtenlandskMyndighet

@@ -5,12 +5,10 @@ import java.util.List;
 
 import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.TemaFactory;
 import no.nav.melosys.domain.arkiv.FysiskDokument;
 import no.nav.melosys.domain.arkiv.OpprettJournalpost;
 import no.nav.melosys.domain.eessi.SedType;
-import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.util.Land_ISO2;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.dokument.sed.EessiService;
@@ -41,14 +39,14 @@ public class SedSomBrevService {
     }
 
     public String lagJournalpostForSendingAvSedSomBrev(SedType sedType,
-                                                       Land_ISO2 mottakerland,
+                                                       Land_iso2 mottakerland,
                                                        Behandling behandling)
         {
         return lagJournalpostForSendingAvSedSomBrev(sedType, mottakerland, behandling, Collections.emptyList());
     }
 
     public String lagJournalpostForSendingAvSedSomBrev(SedType sedType,
-                                                       Land_ISO2 mottakerland,
+                                                       Land_iso2 mottakerland,
                                                        Behandling behandling,
                                                        List<FysiskDokument> vedlegg) {
         var fagsak = behandling.getFagsak();

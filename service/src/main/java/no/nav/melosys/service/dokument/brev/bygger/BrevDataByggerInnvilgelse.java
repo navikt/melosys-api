@@ -6,13 +6,12 @@ import java.util.Set;
 
 import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
-import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie;
 import no.nav.melosys.domain.person.familie.IkkeOmfattetFamilie;
 import no.nav.melosys.domain.person.familie.OmfattetFamilie;
-import no.nav.melosys.domain.util.Land_ISO2;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.LovvalgsperiodeService;
@@ -94,7 +93,7 @@ public class BrevDataByggerInnvilgelse implements BrevDataBygger {
 
         brevDataInnvilgelse.trygdemyndighetsland = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID).stream()
             .findFirst()
-            .map(Land_ISO2::getBeskrivelse)
+            .map(Land_iso2::getBeskrivelse)
             .orElse(null);
 
         if (dataGrunnlag.getAvklarteVirksomheterGrunnlag().antallVirksomheter() != 1) {

@@ -19,16 +19,12 @@ import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.eessi.melding.UtpekingAvvis;
-import no.nav.melosys.domain.kodeverk.Avsendertyper;
-import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.Sakstemaer;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Ikke_godkjent_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.saksflyt.*;
-import no.nav.melosys.domain.util.Land_ISO2;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.metrics.MetrikkerNavn;
 import no.nav.melosys.repository.ProsessinstansRepository;
@@ -149,7 +145,7 @@ public class ProsessinstansService {
 
     private String lagInstitusjonsId(String avsenderID) {
         try {
-            return utenlandskMyndighetService.lagInstitusjonsId(Land_ISO2.valueOf(avsenderID));
+            return utenlandskMyndighetService.lagInstitusjonsId(Land_iso2.valueOf(avsenderID));
         } catch (IkkeFunnetException e) {
             logger.warn(e.getMessage());
             logger.warn("Utenlandsk myndighet har ikke institusjonsId. Bruker {}: som avsenderID", avsenderID);

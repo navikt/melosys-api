@@ -3,8 +3,8 @@ package no.nav.melosys.service.dokument.brev.bygger;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Bostedsland;
 import no.nav.melosys.domain.UtenlandskMyndighet;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.util.Land_ISO2;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
@@ -52,8 +52,8 @@ public class BrevDataByggerVideresendTest {
         utenlandskMyndighet.postnummer = "SE-621 22";
         utenlandskMyndighet.poststed = "Visby";
         utenlandskMyndighet.land = "Sverige";
-        utenlandskMyndighet.landkode = Land_ISO2.SE;
-        when(utenlandskMyndighetService.hentUtenlandskMyndighet(eq(Land_ISO2.SE))).thenReturn(utenlandskMyndighet);
+        utenlandskMyndighet.landkode = Land_iso2.SE;
+        when(utenlandskMyndighetService.hentUtenlandskMyndighet(eq(Land_iso2.SE))).thenReturn(utenlandskMyndighet);
 
         brevDataByggerVideresend.lag(brevDataGrunnlag, "Saksbehandler");
     }

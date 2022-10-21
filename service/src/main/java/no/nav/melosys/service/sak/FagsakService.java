@@ -11,7 +11,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
-import no.nav.melosys.domain.util.Land_ISO2;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.FagsakRepository;
@@ -127,7 +126,7 @@ public class FagsakService {
     }
 
     @Transactional
-    public void oppdaterMyndighetForTrygdeavtale(String saksnummer, Land_ISO2 landkode) {
+    public void oppdaterMyndighetForTrygdeavtale(String saksnummer, Land_iso2 landkode) {
         Fagsak fagsak = hentFagsak(saksnummer);
 
         fagsak.getAktører().removeIf(aktoer -> !aktoer.getTrygdemyndighetLand().getKode().equals(landkode.getKode())
@@ -149,7 +148,7 @@ public class FagsakService {
         return aktør;
     }
 
-    private Aktoer lagMyndighetAktørForTrygdeavtaler(Fagsak fagsak, Land_ISO2 landkode) {
+    private Aktoer lagMyndighetAktørForTrygdeavtaler(Fagsak fagsak, Land_iso2 landkode) {
         Aktoer aktør = new Aktoer();
         aktør.setFagsak(fagsak);
         aktør.setRolle(Aktoersroller.TRYGDEMYNDIGHET);

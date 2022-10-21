@@ -22,9 +22,8 @@ import no.nav.melosys.domain.eessi.melding.UtpekingAvvis;
 import no.nav.melosys.domain.eessi.sed.SedDataDto;
 import no.nav.melosys.domain.eessi.sed.UtpekingAvvisDto;
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
-import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
-import no.nav.melosys.domain.util.Land_ISO2;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.eessi.EessiConsumer;
@@ -151,8 +150,8 @@ public class EessiService {
         return !hentEessiMottakerinstitusjoner(bucType, Set.of(landkode)).isEmpty();
     }
 
-    public boolean landErEessiReady(String bucType, Collection<Land_ISO2> landkoder) {
-        for (Land_ISO2 landkode : landkoder) {
+    public boolean landErEessiReady(String bucType, Collection<Land_iso2> landkoder) {
+        for (Land_iso2 landkode : landkoder) {
             if (!landErEessiReady(bucType, landkode.getKode())) {
                 return false;
             }
@@ -297,15 +296,15 @@ public class EessiService {
      * Hvis minst et land ikke er påkoblet - returner tom liste. Det skal ikke åpnes BUC med valgte land som mottakere da ikke alle er påkoblet
      * Hvis alle er påkoblet - valider at det er satt nøyaktig èn institusjon for hvert land, returner dermed liste med validerte institusjoner
      */
-    public Set<String> validerOgAvklarMottakerInstitusjonerForBuc(final Set<String> valgteMottakerinstitusjoner, final Collection<Land_ISO2> mottakerland, BucType bucType) {
+    public Set<String> validerOgAvklarMottakerInstitusjonerForBuc(final Set<String> valgteMottakerinstitusjoner, final Collection<Land_iso2> mottakerland, BucType bucType) {
 
-        Set<String> landkoder = mottakerland.stream().map(Land_ISO2::getKode).collect(Collectors.toSet());
-        Map<Land_ISO2, Set<String>> institusjonerPerLand = hentEessiMottakerinstitusjonerPerLand(bucType, landkoder);
+        Set<String> landkoder = mottakerland.stream().map(Land_iso2::getKode).collect(Collectors.toSet());
+        Map<Land_iso2, Set<String>> institusjonerPerLand = hentEessiMottakerinstitusjonerPerLand(bucType, landkoder);
 
         if (institusjonerPerLand.keySet().size() < mottakerland.size()) {
             log.info("{} er ikke EESSI-ready, skal ikke sendes SED", mottakerland.stream()
                 .filter(not(institusjonerPerLand::containsKey))
-                .map(Land_ISO2::getBeskrivelse)
+                .map(Land_iso2::getBeskrivelse)
                 .collect(Collectors.joining(", ")));
             return Collections.emptySet();
         }
@@ -327,16 +326,16 @@ public class EessiService {
             .stream().anyMatch(s -> sedType.name().equals(s.split(" ")[1]) && s.split(" ")[2].equals("Create"));
     }
 
-    private Map<Land_ISO2, Set<String>> hentEessiMottakerinstitusjonerPerLand(BucType bucType, Set<String> landkoder) {
+    private Map<Land_iso2, Set<String>> hentEessiMottakerinstitusjonerPerLand(BucType bucType, Set<String> landkoder) {
         return hentEessiMottakerinstitusjoner(bucType.name(), landkoder).stream()
             .collect(Collectors.groupingBy(
-                institusjon -> Land_ISO2.valueOf(institusjon.landkode()),
+                institusjon -> Land_iso2.valueOf(institusjon.landkode()),
                 Collectors.mapping(Institusjon::id, Collectors.toSet())));
     }
 
-    private void validerMottakerInstitusjonerForLand(Collection<Land_ISO2> mottakerland,
+    private void validerMottakerInstitusjonerForLand(Collection<Land_iso2> mottakerland,
                                                      Collection<String> valgteMottakerinstitusjoner,
-                                                     Map<Land_ISO2, Set<String>> institusjonerPerLand) {
+                                                     Map<Land_iso2, Set<String>> institusjonerPerLand) {
 
         List<String> validerteMottakerinstitusjoner = new ArrayList<>();
         StringBuilder feilmelding = new StringBuilder();

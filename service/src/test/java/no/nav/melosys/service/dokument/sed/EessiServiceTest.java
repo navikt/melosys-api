@@ -17,9 +17,9 @@ import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.eessi.sed.SedDataDto;
 import no.nav.melosys.domain.eessi.sed.UtpekingAvvisDto;
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
-import no.nav.melosys.domain.util.Land_ISO2;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.integrasjon.eessi.EessiConsumer;
@@ -493,11 +493,11 @@ class EessiServiceTest {
     @Test
     void validerOgAvklarMottakerInstitusjonerForBuc_toMottakereToMottakerLandMottakereKorrektSatt_returnererMottakerInstitusjoner() {
         final BucType bucType = BucType.LA_BUC_02;
-        final List<Land_ISO2> mottakerLand = List.of(Land_ISO2.BE, Land_ISO2.DE);
+        final List<Land_iso2> mottakerLand = List.of(Land_iso2.BE, Land_iso2.DE);
 
         final Set<String> valgteMottakerInstitusjoner = Set.of(mottakerBelgia1, mottakerTyskland1);
 
-        when(eessiConsumer.hentMottakerinstitusjoner(bucType.name(), Set.of(Land_ISO2.BE.getKode(), Land_ISO2.DE.getKode())))
+        when(eessiConsumer.hentMottakerinstitusjoner(bucType.name(), Set.of(Land_iso2.BE.getKode(), Land_iso2.DE.getKode())))
             .thenReturn(List.of(institusjonBelgia1, institusjonBelgia2, institusjonTyskland1, institusjonTyskland2));
 
         Set<String> avklarteMottakerInstitusjoner = eessiService.validerOgAvklarMottakerInstitusjonerForBuc(valgteMottakerInstitusjoner, mottakerLand, bucType);
@@ -508,11 +508,11 @@ class EessiServiceTest {
     @Test
     void validerOgAvklarMottakerInstitusjonerForBuc_toMottakereSisteErIkkeEessiReady_returnererTomListe() {
         final BucType bucType = BucType.LA_BUC_02;
-        final List<Land_ISO2> mottakerLand = List.of(Land_ISO2.BE, Land_ISO2.DE);
+        final List<Land_iso2> mottakerLand = List.of(Land_iso2.BE, Land_iso2.DE);
 
         final Set<String> valgteMottakerInstitusjoner = Set.of(mottakerBelgia1, mottakerTyskland1);
 
-        when(eessiConsumer.hentMottakerinstitusjoner(bucType.name(), Set.of(Land_ISO2.BE.getKode(), Land_ISO2.DE.getKode())))
+        when(eessiConsumer.hentMottakerinstitusjoner(bucType.name(), Set.of(Land_iso2.BE.getKode(), Land_iso2.DE.getKode())))
             .thenReturn(List.of(institusjonBelgia1, institusjonBelgia2));
 
         Set<String> avklarteMottakerInstitusjoner = eessiService.validerOgAvklarMottakerInstitusjonerForBuc(valgteMottakerInstitusjoner, mottakerLand, bucType);
@@ -523,7 +523,7 @@ class EessiServiceTest {
     @Test
     void validerOgAvklarMottakerInstitusjonerForBuc_toLandInstitusjonManglerForSiste_kasterException() {
         final BucType bucType = BucType.LA_BUC_02;
-        final List<Land_ISO2> mottakerLand = List.of(Land_ISO2.BE, Land_ISO2.DE);
+        final List<Land_iso2> mottakerLand = List.of(Land_iso2.BE, Land_iso2.DE);
 
         final Set<String> valgteMottakerInstitusjoner = Set.of(mottakerBelgia1);
 
@@ -539,7 +539,7 @@ class EessiServiceTest {
     @Test
     void validerOgAvklarMottakerInstitusjonerForBuc_toLandInstitusjonManglerForSiste2_kasterException() {
         final BucType bucType = BucType.LA_BUC_02;
-        final List<Land_ISO2> mottakerLand = List.of(Land_ISO2.BE, Land_ISO2.DE);
+        final List<Land_iso2> mottakerLand = List.of(Land_iso2.BE, Land_iso2.DE);
 
         final Set<String> valgteMottakerInstitusjoner = Set.of(mottakerBelgia1, mottakerBelgia3, mottakerTyskland1);
 
@@ -554,7 +554,7 @@ class EessiServiceTest {
     @Test
     void validerOgAvklarMottakerInstitusjonerForBuc_toLandErPåkobletIngenInstitusjonValgt_kasterException() {
         final BucType bucType = BucType.LA_BUC_02;
-        final List<Land_ISO2> mottakerLand = List.of(Land_ISO2.BE, Land_ISO2.DE);
+        final List<Land_iso2> mottakerLand = List.of(Land_iso2.BE, Land_iso2.DE);
 
         final Set<String> valgteMottakerInstitusjoner = Collections.emptySet();
 
@@ -572,7 +572,7 @@ class EessiServiceTest {
     @Test
     void validerOgAvklarMottakerInstitusjonerForBuc_toLandEnErIkkePåkobletIngenInstitusjonValgt_returnererTomListe() {
         final BucType bucType = BucType.LA_BUC_02;
-        final List<Land_ISO2> mottakerLand = List.of(Land_ISO2.BE, Land_ISO2.DE);
+        final List<Land_iso2> mottakerLand = List.of(Land_iso2.BE, Land_iso2.DE);
 
         final Set<String> valgteMottakerInstitusjoner = Collections.emptySet();
 
@@ -588,9 +588,9 @@ class EessiServiceTest {
     @Test
     void landErEessiReady_toLandEtErEessiReady_forventFalse() {
         final BucType bucType = BucType.LA_BUC_01;
-        final List<Land_ISO2> land = List.of(Land_ISO2.SE, Land_ISO2.DK);
+        final List<Land_iso2> land = List.of(Land_iso2.SE, Land_iso2.DK);
 
-        when(eessiConsumer.hentMottakerinstitusjoner(bucType.name(), Set.of(Land_ISO2.SE.getKode())))
+        when(eessiConsumer.hentMottakerinstitusjoner(bucType.name(), Set.of(Land_iso2.SE.getKode())))
             .thenReturn(List.of(new Institusjon("2", "", "")));
 
         assertThat(eessiService.landErEessiReady(bucType.name(), land)).isFalse();
@@ -599,7 +599,7 @@ class EessiServiceTest {
     @Test
     void landErEessiReady_toLandAlleErEessiReady_forventTrue() {
         final BucType bucType = BucType.LA_BUC_01;
-        final List<Land_ISO2> land = List.of(Land_ISO2.SE, Land_ISO2.DK);
+        final List<Land_iso2> land = List.of(Land_iso2.SE, Land_iso2.DK);
 
         when(eessiConsumer.hentMottakerinstitusjoner(eq(bucType.name()), any()))
             .thenReturn(List.of(new Institusjon("2", "", "")));

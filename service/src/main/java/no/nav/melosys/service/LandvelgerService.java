@@ -12,9 +12,9 @@ import com.google.common.collect.Streams;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
-import no.nav.melosys.domain.util.Land_ISO2;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
@@ -38,16 +38,16 @@ public class LandvelgerService {
         this.behandlingsgrunnlagService = behandlingsgrunnlagService;
     }
 
-    public Land_ISO2 hentArbeidsland(long behandlingID) {
-        Collection<Land_ISO2> alleArbeidsland = hentAlleArbeidslandUtenMarginaltArbeid(behandlingID);
+    public Land_iso2 hentArbeidsland(long behandlingID) {
+        Collection<Land_iso2> alleArbeidsland = hentAlleArbeidslandUtenMarginaltArbeid(behandlingID);
         if (alleArbeidsland.size() != 1) {
             throw new FunksjonellException("Fant ingen eller flere enn ett arbeidsland");
         }
         return alleArbeidsland.iterator().next();
     }
 
-    public Collection<Land_ISO2> hentAlleArbeidsland(long behandlingID) {
-        Collection<Land_ISO2> alleArbeidsland = avklartefaktaService.hentAlleAvklarteArbeidsland(behandlingID);
+    public Collection<Land_iso2> hentAlleArbeidsland(long behandlingID) {
+        Collection<Land_iso2> alleArbeidsland = avklartefaktaService.hentAlleAvklarteArbeidsland(behandlingID);
         if (alleArbeidsland.isEmpty() || erArtikkel13(behandlingID)) {
             Behandlingsgrunnlag behandlingsgrunnlag =  behandlingsgrunnlagService.hentBehandlingsgrunnlag(behandlingID);
             BehandlingsgrunnlagData grunnlagData = behandlingsgrunnlag.getBehandlingsgrunnlagdata();
@@ -55,7 +55,7 @@ public class LandvelgerService {
             var søknadsland = grunnlagData.soeknadsland;
 
             if (behandling.erAnmodningOmUnntak() && søknadsland.landkoder.isEmpty()) {
-                alleArbeidsland.add(Land_ISO2.valueOf(behandling.hentSedDokument().getUnntakFraLovvalgslandKode().getKode()));
+                alleArbeidsland.add(Land_iso2.valueOf(behandling.hentSedDokument().getUnntakFraLovvalgslandKode().getKode()));
             } else {
                 alleArbeidsland.addAll(hentSøknadslandkoder(grunnlagData));
             }
@@ -69,9 +69,9 @@ public class LandvelgerService {
         return hentSøknadsland(grunnlagData).erUkjenteEllerAlleEosLand;
     }
 
-    public Collection<Land_ISO2> hentAlleArbeidslandUtenMarginaltArbeid(long behandlingID) {
-        Collection<Land_ISO2> alleArbeidsland = hentAlleArbeidsland(behandlingID);
-        Collection<Land_ISO2> landMedMarginaltArbeid = avklartefaktaService.hentLandkoderMedMarginaltArbeid(behandlingID);
+    public Collection<Land_iso2> hentAlleArbeidslandUtenMarginaltArbeid(long behandlingID) {
+        Collection<Land_iso2> alleArbeidsland = hentAlleArbeidsland(behandlingID);
+        Collection<Land_iso2> landMedMarginaltArbeid = avklartefaktaService.hentLandkoderMedMarginaltArbeid(behandlingID);
         alleArbeidsland.removeAll(landMedMarginaltArbeid);
 
         return alleArbeidsland;
@@ -101,48 +101,48 @@ public class LandvelgerService {
         return fagsak.getStatus() == Saksstatuser.VIDERESENDT;
     }
 
-    public Collection<Land_ISO2> hentUtenlandskTrygdemyndighetsland(long behandlingID) {
+    public Collection<Land_iso2> hentUtenlandskTrygdemyndighetsland(long behandlingID) {
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
 
         if (erArtikkel13(behandlingsresultat) && !erVideresendt(behandlingsresultat)) {
             return hentUtenlandskTrygdemyndighetslandArtikkel13(behandlingsresultat);
         } else if (erArtikkel11_3aMed11_5Tilleggsbestemmelse(behandlingsresultat)) {
             return avklartefaktaService.hentInformertMyndighet(behandlingID).stream()
-                .filter(landkode -> landkode != Land_ISO2.NO).collect(Collectors.toSet());
+                .filter(landkode -> landkode != Land_iso2.NO).collect(Collectors.toSet());
         }
 
-        Collection<Land_ISO2> trygdemyndighetsland = hentTrygdemyndighetsland(behandlingsresultat);
-        trygdemyndighetsland.remove(Land_ISO2.NO);
+        Collection<Land_iso2> trygdemyndighetsland = hentTrygdemyndighetsland(behandlingsresultat);
+        trygdemyndighetsland.remove(Land_iso2.NO);
         return trygdemyndighetsland;
     }
 
-    private Collection<Land_ISO2> hentUtenlandskTrygdemyndighetslandArtikkel13(Behandlingsresultat behandlingsresultat) {
+    private Collection<Land_iso2> hentUtenlandskTrygdemyndighetslandArtikkel13(Behandlingsresultat behandlingsresultat) {
         final long behandlingID = behandlingsresultat.getId();
-        Set<Land_ISO2> landkoderMedMarginaltArbeid = avklartefaktaService.hentLandkoderMedMarginaltArbeid(behandlingID);
+        Set<Land_iso2> landkoderMedMarginaltArbeid = avklartefaktaService.hentLandkoderMedMarginaltArbeid(behandlingID);
         Behandlingsgrunnlag behandlingsgrunnlag = behandlingsgrunnlagService.hentBehandlingsgrunnlag(behandlingID);
 
-        Stream<Land_ISO2> marginaleArbeidslandMedUtenlandskArbeid = Stream.concat(
+        Stream<Land_iso2> marginaleArbeidslandMedUtenlandskArbeid = Stream.concat(
             behandlingsgrunnlag.getBehandlingsgrunnlagdata().hentUtenlandskeArbeidsstederLandkode().stream(),
             behandlingsgrunnlag.getBehandlingsgrunnlagdata().hentUtenlandskeArbeidsgivereLandkode().stream()
-        ).map(Land_ISO2::valueOf).filter(landkoderMedMarginaltArbeid::contains);
+        ).map(Land_iso2::valueOf).filter(landkoderMedMarginaltArbeid::contains);
 
-        Stream<Land_ISO2> utpektLovvalgsland = behandlingsresultat.getUtpekingsperioder().stream()
+        Stream<Land_iso2> utpektLovvalgsland = behandlingsresultat.getUtpekingsperioder().stream()
             .map(Utpekingsperiode::getLovvalgsland)
-            .map(landkoder -> Land_ISO2.valueOf(landkoder.getKode()));
+            .map(landkoder -> Land_iso2.valueOf(landkoder.getKode()));
 
         return Streams.concat(
             marginaleArbeidslandMedUtenlandskArbeid,
             utpektLovvalgsland,
             hentTrygdemyndighetsland(behandlingsresultat).stream()
-        ).filter(landkoder -> landkoder != Land_ISO2.NO).collect(Collectors.toSet());
+        ).filter(landkoder -> landkoder != Land_iso2.NO).collect(Collectors.toSet());
     }
 
-    private Collection<Land_ISO2> hentTrygdemyndighetsland(Behandlingsresultat behandlingsresultat) {
+    private Collection<Land_iso2> hentTrygdemyndighetsland(Behandlingsresultat behandlingsresultat) {
         final long behandlingID = behandlingsresultat.getId();
         BehandlingsgrunnlagData grunnlagdata = behandlingsgrunnlagService.hentBehandlingsgrunnlag(behandlingID).getBehandlingsgrunnlagdata();
 
         if (behandlingsresultat.erInnvilgetArbeidPåSkipOmfattetAvArbeidsland() || erVideresendt(behandlingsresultat)) {
-            return Lists.newArrayList(Land_ISO2.valueOf(hentBostedsland(behandlingID, grunnlagdata).landkode()));
+            return Lists.newArrayList(Land_iso2.valueOf(hentBostedsland(behandlingID, grunnlagdata).landkode()));
         } else {
             return new ArrayList<>(hentAlleArbeidslandUtenMarginaltArbeid(behandlingID));
         }

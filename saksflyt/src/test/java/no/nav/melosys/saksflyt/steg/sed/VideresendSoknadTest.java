@@ -10,14 +10,14 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.arkiv.ArkivDokument;
 import no.nav.melosys.domain.arkiv.DokumentReferanse;
 import no.nav.melosys.domain.arkiv.Journalpost;
+import no.nav.melosys.domain.arkiv.Vedlegg;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.SedType;
-import no.nav.melosys.domain.arkiv.Vedlegg;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.domain.util.Land_ISO2;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
@@ -117,7 +117,7 @@ class VideresendSoknadTest {
         when(joarkFasade.hentJournalpost(behandling.getInitierendeJournalpostId())).thenReturn(journalpost);
         when(joarkFasade.hentDokument(behandling.getInitierendeJournalpostId(), journalpost.getHoveddokument().getDokumentId()))
             .thenReturn(vedlegg);
-        when(sedSomBrevService.lagJournalpostForSendingAvSedSomBrev(any(SedType.class), any(Land_ISO2.class), any(), any()))
+        when(sedSomBrevService.lagJournalpostForSendingAvSedSomBrev(any(SedType.class), any(Land_iso2.class), any(), any()))
             .thenReturn(opprettetJournalpostID);
 
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
@@ -130,7 +130,7 @@ class VideresendSoknadTest {
         videresendSoknad.utfør(prosessinstans);
 
         verify(sedSomBrevService)
-            .lagJournalpostForSendingAvSedSomBrev(eq(SedType.A008), any(Land_ISO2.class), eq(behandling), anyList());
+            .lagJournalpostForSendingAvSedSomBrev(eq(SedType.A008), any(Land_iso2.class), eq(behandling), anyList());
         assertThat(prosessinstans.getData(ProsessDataKey.DISTRIBUERBAR_JOURNALPOST_ID)).isEqualTo(opprettetJournalpostID);
         assertThat(prosessinstans.getData(ProsessDataKey.DISTRIBUER_MOTTAKER_LAND, Landkoder.class)).isEqualTo(Landkoder.SE);
     }

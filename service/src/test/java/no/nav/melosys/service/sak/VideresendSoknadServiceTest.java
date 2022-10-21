@@ -11,11 +11,11 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.arkiv.DokumentReferanse;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.eessi.BucType;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
-import no.nav.melosys.domain.util.Land_ISO2;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.service.LandvelgerService;
@@ -80,7 +80,7 @@ class VideresendSoknadServiceTest {
         behandling.setTema(Behandlingstema.ARBEID_FLERE_LAND);
         final Set<String> validerteMottakere = Set.of("ES:mottakerID123");
         when(landvelgerService.hentBostedsland(behandling)).thenReturn(BOSTEDSLAND);
-        when(eessiService.validerOgAvklarMottakerInstitusjonerForBuc(any(), eq(List.of(Land_ISO2.ES)), eq(BucType.LA_BUC_03)))
+        when(eessiService.validerOgAvklarMottakerInstitusjonerForBuc(any(), eq(List.of(Land_iso2.ES)), eq(BucType.LA_BUC_03)))
             .thenReturn(validerteMottakere);
         when(persondataFasade.hentPerson(anyString())).thenReturn(PersonopplysningerObjectFactory.lagPersonopplysninger());
         DokumentReferanse dokumentReferanse = new DokumentReferanse("jpID", "dokID");

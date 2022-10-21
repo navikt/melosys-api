@@ -13,17 +13,13 @@ import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.eessi.BucInformasjon;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.SedType;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
-import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
-import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.domain.util.Land_ISO2;
 import no.nav.melosys.saksflyt.steg.sed.SendVedtakUtland;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.brev.SedSomBrevService;
@@ -156,7 +152,7 @@ class SendVedtakUtlandTest {
             .thenReturn("journalpostID");
         sendVedtakUtland.utfør(prosessinstans);
         verify(sedSomBrevService)
-            .lagJournalpostForSendingAvSedSomBrev(SedType.A003, Land_ISO2.AT, behandling);
+            .lagJournalpostForSendingAvSedSomBrev(SedType.A003, Land_iso2.AT, behandling);
     }
 
     @Test

@@ -6,8 +6,7 @@ import java.util.Set;
 import javax.persistence.*;
 
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
-import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.util.Land_ISO2;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
 
 @Entity
 @Table(name = "utenlandsk_myndighet")
@@ -38,7 +37,7 @@ public class UtenlandskMyndighet {
     public Set<Preferanse> preferanser = new HashSet<>();
 
     @Enumerated(EnumType.STRING)
-    public Land_ISO2 landkode;
+    public Land_iso2 landkode;
 
     @Override
     public boolean equals(Object o) {
@@ -63,7 +62,7 @@ public class UtenlandskMyndighet {
         return adresse;
     }
 
-    public static Land_ISO2 konverterInstitusjonIdTilLandkode(String institusjonID) {
-        return Land_ISO2.valueOf(institusjonID.split(":")[0].replaceAll("[^a-zA-Z]", ""));
+    public static Land_iso2 konverterInstitusjonIdTilLandkode(String institusjonID) {
+        return Land_iso2.valueOf(institusjonID.split(":")[0].replaceAll("[^a-zA-Z]", ""));
     }
 }

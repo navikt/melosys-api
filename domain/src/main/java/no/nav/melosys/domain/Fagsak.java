@@ -5,7 +5,6 @@ import javax.persistence.*;
 
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
-import no.nav.melosys.domain.util.Land_ISO2;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
@@ -212,7 +211,7 @@ public class Fagsak extends RegistreringsInfo {
     /**
      * Henter myndighetens landkode fra institusjonsID som har format landkode:institusjonskode.
      */
-    public Land_ISO2 hentMyndighetLandkode() {
+    public Land_iso2 hentMyndighetLandkode() {
         return hentMyndighet().hentMyndighetLandkode();
     }
 
