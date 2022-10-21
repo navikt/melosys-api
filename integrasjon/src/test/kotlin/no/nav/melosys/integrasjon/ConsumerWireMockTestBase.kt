@@ -2,7 +2,6 @@ package no.nav.melosys.integrasjon
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.MappingBuilder
-import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.github.tomakehurst.wiremock.matching.StringValuePattern
@@ -11,8 +10,6 @@ import io.mockk.spyk
 import no.nav.melosys.integrasjon.felles.EnvironmentHandler
 import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter
 import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingInterceptor
-import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
-import no.nav.melosys.sikkerhet.context.SubjectHandler
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.*
@@ -22,20 +19,16 @@ import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Import(
-    value = [
-        CorrelationIdOutgoingInterceptor::class,
-        CorrelationIdOutgoingFilter::class
-    ]
+    CorrelationIdOutgoingInterceptor::class,
+    CorrelationIdOutgoingFilter::class
 )
 abstract class ConsumerWireMockTestBase<T, R>(
     mockPort: Int,
-    stsMockPort: Int
+    stsMockPort: Int,
+    private val oAuthMockServer: OAuthMockServer
 ) {
-    companion object {
-        const val UUID_REGEX = "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}"
-    }
 
-    protected val serviceUnderTestMockServer: WireMockServer =
+    private val serviceUnderTestMockServer: WireMockServer =
         WireMockServer(WireMockConfiguration.wireMockConfig().port(mockPort))
 
     protected val stsMockServer: WireMockServer =
@@ -49,6 +42,8 @@ abstract class ConsumerWireMockTestBase<T, R>(
 
     @BeforeAll
     fun beforeAll() {
+        oAuthMockServer.start()
+
         serviceUnderTestMockServer.start()
         stsMockServer.start()
 
@@ -62,6 +57,7 @@ abstract class ConsumerWireMockTestBase<T, R>(
     fun afterAll() {
         serviceUnderTestMockServer.stop()
         stsMockServer.stop()
+        oAuthMockServer.stop()
     }
 
     @BeforeEach
@@ -84,33 +80,34 @@ abstract class ConsumerWireMockTestBase<T, R>(
 
     @AfterEach
     fun afterEach() {
-        SpringSubjectHandler.set(NullSubjectHandler())
     }
 
     fun verifyHeaders(headers: Map<String, StringValuePattern>) {
-        val wireMock = setupWireMock()
-        headers.forEach {
-            wireMock.withHeader(it.key, it.value)
+        setupWireMock { wireMock ->
+            headers.forEach {
+                wireMock.withHeader(it.key, it.value)
+            }
         }
     }
 
-    fun setupWireMock(
-        wireMock: MappingBuilder = createWireMock(),
-        data: T = getMockData(),
-        response: ResponseDefinitionBuilder = WireMock.aResponse()
+    fun setupWireMock(consumer: (MappingBuilder) -> Unit = {}) {
+        val wireMock = createWireMock()
+
+        consumer(wireMock)
+
+        val response = WireMock.aResponse()
             .withStatus(200)
             .withHeader("Content-Type", "application/json")
-    ): MappingBuilder {
 
+        val data = getMockData()
         if (data is String) response.withBody(data)
         if (data is ByteArray) response.withBody(data)
 
         serviceUnderTestMockServer.stubFor(
             wireMock.willReturn(response)
         )
-        return wireMock
     }
-    
+
     fun executeFromSystem(consumer: (R) -> Unit = {}) {
         val uuid = UUID.randomUUID()
         try {
@@ -122,7 +119,6 @@ abstract class ConsumerWireMockTestBase<T, R>(
     }
 
     fun executeFromController(consumer: (R) -> Unit = {}) {
-        SpringSubjectHandler.set(TestSubjectHandler())
         try {
             ThreadLocalAccessInfo.beforeControllerRequest("request", false)
             consumer(executeRequest())
@@ -156,13 +152,9 @@ abstract class ConsumerWireMockTestBase<T, R>(
 
     open fun errorFromServerMessage() = "500 INTERNAL_SERVER_ERROR - {\"melding\": \"Internal Server Error\"}"
 
-    open class TestSubjectHandler : SubjectHandler() {
-        override fun getOidcTokenString(): String? = "--token-from-user--"
+    companion object {
+        const val UUID_REGEX = "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}"
 
-        override fun getUserID(): String? = "Z123"
     }
 
-    class NullSubjectHandler : TestSubjectHandler() {
-        override fun getOidcTokenString(): String? = null
-    }
 }

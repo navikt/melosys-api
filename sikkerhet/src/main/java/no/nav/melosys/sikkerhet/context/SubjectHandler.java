@@ -1,5 +1,7 @@
 package no.nav.melosys.sikkerhet.context;
 
+import java.util.List;
+
 import no.nav.security.token.support.spring.SpringTokenValidationContextHolder;
 
 public abstract class SubjectHandler {
@@ -19,5 +21,9 @@ public abstract class SubjectHandler {
     public abstract String getOidcTokenString();
 
     public abstract String getUserID();
+
+    public abstract String getName();
+
+    public abstract List<String> getGroups();
 
 }

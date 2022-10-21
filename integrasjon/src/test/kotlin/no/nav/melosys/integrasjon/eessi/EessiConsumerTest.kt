@@ -21,11 +21,12 @@ import no.nav.melosys.domain.eessi.sed.SedDataDto
 import no.nav.melosys.domain.eessi.sed.SedGrunnlagA003Dto
 import no.nav.melosys.domain.eessi.sed.SedGrunnlagDto
 import no.nav.melosys.exception.TekniskException
+import no.nav.melosys.integrasjon.OAuthMockServer
 import no.nav.melosys.integrasjon.StsMockServer
 import no.nav.melosys.integrasjon.eessi.dto.SaksrelasjonDto
-import no.nav.melosys.integrasjon.felles.GenericContextExchangeFilter
+import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
 import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter
-import no.nav.melosys.integrasjon.reststs.StsRestTemplateProducer
+import no.nav.melosys.integrasjon.reststs.StsWebClientProducer
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import org.junit.jupiter.api.*
 import org.springframework.beans.factory.annotation.Autowired
@@ -39,25 +40,25 @@ import org.springframework.test.context.ActiveProfiles
 import java.time.LocalDate
 import java.util.*
 
-@WebMvcTest(
-    value = [
-        StsRestTemplateProducer::class,
+@Import(
+    StsWebClientProducer::class,
+    StsMockServer::class,
+    OAuthMockServer::class,
+    CorrelationIdOutgoingFilter::class,
 
-        GenericContextExchangeFilter::class,
-        EessiConsumerProducer::class,
-        CorrelationIdOutgoingFilter::class
-    ]
+    GenericAuthFilterFactory::class,
+    EessiConsumerProducer::class,
 )
-@ActiveProfiles("wiremock-test")
+@WebMvcTest
 @AutoConfigureWebClient
+@ActiveProfiles("wiremock-test")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@Import(StsMockServer::class)
 class EessiConsumerTest(
     @Autowired private val eessiConsumer: EessiConsumer,
     @Autowired private val stsMockServer: StsMockServer,
+    @Autowired private val oAuthMockServer: OAuthMockServer,
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int
 ) {
-
     private val processUUID = UUID.randomUUID()
     private val serviceUnderTestMockServer: WireMockServer =
         WireMockServer(WireMockConfiguration.wireMockConfig().port(mockServiceUnderTestPort))
@@ -66,12 +67,14 @@ class EessiConsumerTest(
     fun beforeAll() {
         serviceUnderTestMockServer.start()
         stsMockServer.start()
+        oAuthMockServer.start()
     }
 
     @AfterAll
     fun afterAll() {
         serviceUnderTestMockServer.stop()
         stsMockServer.stop()
+        oAuthMockServer.stop()
     }
 
     @BeforeEach

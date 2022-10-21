@@ -26,10 +26,13 @@ import no.nav.melosys.repository.FagsakRepository
 import no.nav.melosys.repository.ProsessinstansRepository
 import no.nav.melosys.service.journalforing.JournalfoeringService
 import no.nav.melosys.service.oppgave.OppgaveService
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.annotation.Import
 
+@Import(OAuthMockServer::class)
 class JournalfoeringIT(
     @Autowired testDataGenerator: TestDataGenerator,
     @Autowired journalføringService: JournalfoeringService,
@@ -38,13 +41,21 @@ class JournalfoeringIT(
     @Autowired private val behandlingRepository: BehandlingRepository,
     @Autowired private val behandlingsresultatRepository: BehandlingsresultatRepository,
     @Autowired private val fagsakRepository: FagsakRepository,
-    @Autowired private val unleash: FakeUnleash
+    @Autowired private val unleash: FakeUnleash,
+    @Autowired private val oAuthMockServer: OAuthMockServer
 ) : JournalfoeringBase(testDataGenerator, journalføringService, oppgaveService, prosessinstansRepository) {
 
     @BeforeEach
     fun setup() {
+        oAuthMockServer.start()
         unleash.resetAll()
     }
+
+    @AfterEach
+    fun afterEach() {
+        oAuthMockServer.stop()
+    }
+
 
     @Test
     fun journalførOgOpprettSak_EU_EOS_prosesserKjørerAlleSteg() {
