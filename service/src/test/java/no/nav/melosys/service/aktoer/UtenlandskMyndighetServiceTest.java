@@ -79,8 +79,10 @@ class UtenlandskMyndighetServiceTest {
     void avklarUtenlandskMyndighetSomAktørOgLagre_oppdatererMyndigheterForEuEos() {
         behandling.getFagsak().setType(Sakstyper.EU_EOS);
         when(landvelgerServiceMock.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID)).thenReturn(List.of(Land_iso2.SE));
+        UtenlandskMyndighet utenlandskMyndighet = new UtenlandskMyndighet();
+        utenlandskMyndighet.landkode = Land_iso2.SE;
         when(utenlandskMyndighetRepositoryMock.findByLandkode(Land_iso2.SE))
-            .thenReturn(Optional.of(new UtenlandskMyndighet()));
+            .thenReturn(Optional.of(utenlandskMyndighet));
 
 
         utenlandskMyndighetService.avklarUtenlandskMyndighetSomAktørOgLagre(behandling);
@@ -109,7 +111,7 @@ class UtenlandskMyndighetServiceTest {
         utenlandskMyndighetService.avklarUtenlandskMyndighetSomAktørOgLagre(behandling);
 
 
-        verify(fagsakServiceMock).oppdaterMyndigheterForEuEos(eq(SAKSNUMMER), eq(List.of("SE:INSTITUSJONSKODE", "DK")));
+        verify(fagsakServiceMock).oppdaterMyndigheterForEuEos(SAKSNUMMER, List.of("SE:INSTITUSJONSKODE", "DK"));
         verifyNoMoreInteractions(fagsakServiceMock);
     }
 
@@ -137,7 +139,7 @@ class UtenlandskMyndighetServiceTest {
             .thenThrow(new IkkeFunnetException("asd"));
 
         assertThatNoException().isThrownBy(() -> utenlandskMyndighetService.lagUtenlandskeMyndigheterFraBehandling(behandling));
-        verify(utenlandskMyndighetRepositoryMock).findByLandkodeIsIn(eq(Collections.emptyList()));
+        verify(utenlandskMyndighetRepositoryMock).findByLandkodeIsIn(Collections.emptyList());
     }
 
     @Test

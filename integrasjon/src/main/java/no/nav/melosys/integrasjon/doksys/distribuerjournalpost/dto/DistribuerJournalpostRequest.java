@@ -60,10 +60,6 @@ public final class DistribuerJournalpostRequest {
         return distribusjonstype;
     }
 
-    public void setDistribusjonstype(Distribusjonstype distribusjonstype) {
-        this.distribusjonstype = distribusjonstype;
-    }
-
     public Distribusjonstidspunkt getDistribusjonstidspunkt() {
         return distribusjonstidspunkt;
     }

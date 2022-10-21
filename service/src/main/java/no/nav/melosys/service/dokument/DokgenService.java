@@ -44,7 +44,6 @@ public class DokgenService {
     private final ProsessinstansService prosessinstansService;
     private final SaksbehandlerService saksbehandlerService;
     private final UtenlandskMyndighetService utenlandskMyndighetService;
-    private final DokumentHentingService dokumentHentingService;
 
     public DokgenService(DokgenConsumer dokgenConsumer,
                          DokumentproduksjonsInfoMapper dokumentproduksjonsInfoMapper,
@@ -54,8 +53,7 @@ public class DokgenService {
                          KontaktopplysningService kontaktopplysningService,
                          BrevmottakerService brevmottakerService, ProsessinstansService prosessinstansService,
                          SaksbehandlerService saksbehandlerService,
-                         UtenlandskMyndighetService utenlandskMyndighetService,
-                         DokumentHentingService dokumentHentingService) {
+                         UtenlandskMyndighetService utenlandskMyndighetService) {
         this.dokgenConsumer = dokgenConsumer;
         this.dokumentproduksjonsInfoMapper = dokumentproduksjonsInfoMapper;
         this.joarkFasade = joarkFasade;
@@ -67,7 +65,6 @@ public class DokgenService {
         this.prosessinstansService = prosessinstansService;
         this.saksbehandlerService = saksbehandlerService;
         this.utenlandskMyndighetService = utenlandskMyndighetService;
-        this.dokumentHentingService = dokumentHentingService;
     }
 
     @Transactional
@@ -203,6 +200,10 @@ public class DokgenService {
         return kopimottakere.stream().map(KopiMottaker::rolle).anyMatch(kopimottaker -> kopimottaker == Aktoersroller.ARBEIDSGIVER);
     }
 
+    private boolean inneholderBrukerSomKopimottaker(Collection<KopiMottaker> kopimottakere) {
+        return kopimottakere.stream().map(KopiMottaker::rolle).anyMatch(kopimottaker -> kopimottaker == Aktoersroller.BRUKER);
+    }
+
     private List<SaksvedleggBestilling> lagSaksvedleggBestilling(List<SaksvedleggDto> saksvedleggDtoer) {
         if (saksvedleggDtoer == null) {
             return Collections.emptyList();
@@ -229,7 +230,8 @@ public class DokgenService {
                 .medDistribusjonstype(Distribusjonstype.VIKTIG)
                 .medInnledningFritekst(brevbestillingRequest.getInnledningFritekst())
                 .medManglerInfoFritekst(brevbestillingRequest.getManglerFritekst())
-                .medKontaktpersonNavn(brevbestillingRequest.getKontaktpersonNavn());
+                .medKontaktpersonNavn(brevbestillingRequest.getKontaktpersonNavn())
+                .medBrukerSkalHaKopi(inneholderBrukerSomKopimottaker(brevbestillingRequest.getKopiMottakere()));
             case INNVILGELSE_FOLKETRYGDLOVEN_2_8, STORBRITANNIA -> new InnvilgelseBrevbestilling.Builder()
                 .medDistribusjonstype(Distribusjonstype.VEDTAK)
                 .medInnledningFritekst(brevbestillingRequest.getInnledningFritekst())
@@ -239,11 +241,12 @@ public class DokgenService {
                 .medVirksomhetArbeidsgiverSkalHaKopi(inneholderArbeidsgiverSomKopimottaker(brevbestillingRequest.getKopiMottakere()))
                 .medNyVurderingBakgrunn(brevbestillingRequest.getNyVurderingBakgrunn());
             case GENERELT_FRITEKSTBREV_BRUKER, GENERELT_FRITEKSTBREV_ARBEIDSGIVER, GENERELT_FRITEKSTBREV_VIRKSOMHET -> new FritekstbrevBrevbestilling.Builder()
-                .medDistribusjonstype(Distribusjonstype.VIKTIG)
+                .medDistribusjonstype(brevbestillingRequest.getDistribusjonstype())
                 .medFritekstTittel(brevbestillingRequest.getFritekstTittel())
                 .medFritekst(brevbestillingRequest.getFritekst())
                 .medKontaktpersonNavn(brevbestillingRequest.getKontaktpersonNavn())
-                .medKontaktopplysninger(brevbestillingRequest.isKontaktopplysninger());
+                .medKontaktopplysninger(brevbestillingRequest.isKontaktopplysninger())
+                .medBrukerSkalHaKopi(inneholderBrukerSomKopimottaker(brevbestillingRequest.getKopiMottakere()));
             case AVSLAG_MANGLENDE_OPPLYSNINGER -> new AvslagBrevbestilling.Builder()
                 .medDistribusjonstype(Distribusjonstype.VEDTAK)
                 .medFritekst(brevbestillingRequest.getFritekst());

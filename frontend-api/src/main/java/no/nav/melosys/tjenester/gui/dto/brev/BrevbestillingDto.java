@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import no.nav.melosys.domain.arkiv.Distribusjonstype;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
@@ -26,6 +27,7 @@ public class BrevbestillingDto {
     private List<KopiMottaker> kopiMottakere;
     private String fritekstTittel;
     private String fritekst;
+    private Distribusjonstype distribusjonstype;
     private boolean kontaktopplysninger;
     private String nyVurderingBakgrunn;
     private List<SaksvedleggDto> saksvedlegg;
@@ -47,6 +49,8 @@ public class BrevbestillingDto {
     }
 
     public BrevbestillingRequest.Builder tilRequestBuilder() {
+        var a = this.getDistribusjonstype();
+
         return new BrevbestillingRequest.Builder()
             .medProduserbardokument(this.getProduserbardokument())
             .medMottaker(this.getMottaker())
@@ -61,6 +65,7 @@ public class BrevbestillingDto {
             .medBarnFritekst(this.getBarnFritekst())
             .medFritekstTittel(this.getFritekstTittel())
             .medFritekst(this.getFritekst())
+            .medDistribusjonsType(this.getDistribusjonstype())
             .medKontaktopplysninger(this.isKontaktopplysninger())
             .medBegrunnelseKode(this.getBegrunnelseKode())
             .medYtterligereInformasjon(this.getYtterligereInformasjon())
@@ -82,6 +87,7 @@ public class BrevbestillingDto {
         this.kopiMottakere = builder.kopiMottakere;
         this.fritekstTittel = builder.fritekstTittel;
         this.fritekst = builder.fritekst;
+        this.distribusjonstype = builder.distribusjonstype;
         this.kontaktopplysninger = builder.kontaktopplysninger;
         this.begrunnelseKode = builder.begrunnelseKode;
         this.ytterligereInformasjon = builder.ytterligereInformasjon;
@@ -145,6 +151,10 @@ public class BrevbestillingDto {
         return fritekst;
     }
 
+    public Distribusjonstype getDistribusjonstype() {
+        return distribusjonstype;
+    }
+
     public boolean isKontaktopplysninger() {
         return kontaktopplysninger;
     }
@@ -184,6 +194,7 @@ public class BrevbestillingDto {
         private String fritekst;
         public boolean kontaktopplysninger;
         private String begrunnelseKode;
+        private Distribusjonstype distribusjonstype;
         private String ytterligereInformasjon;
         private String nyVurderingBakgrunn;
         private List<SaksvedleggDto> saksvedlegg;
@@ -290,12 +301,19 @@ public class BrevbestillingDto {
         if (o == null || getClass() != o.getClass()) return false;
         BrevbestillingDto that = (BrevbestillingDto) o;
         return kontaktopplysninger == that.kontaktopplysninger && produserbardokument == that.produserbardokument
-            && mottaker == that.mottaker && Objects.equals(orgNr, that.orgNr)
-            && Objects.equals(innledningFritekst, that.innledningFritekst) && Objects.equals(manglerFritekst, that.manglerFritekst)
-            && Objects.equals(begrunnelseFritekst, that.begrunnelseFritekst) && Objects.equals(ektefelleFritekst, that.ektefelleFritekst)
-            && Objects.equals(barnFritekst, that.barnFritekst) && Objects.equals(kontaktpersonNavn, that.kontaktpersonNavn)
-            && Objects.equals(kopiMottakere, that.kopiMottakere) && Objects.equals(fritekstTittel, that.fritekstTittel)
-            && Objects.equals(fritekst, that.fritekst) && Objects.equals(begrunnelseKode, that.begrunnelseKode)
+            && mottaker == that.mottaker
+            && Objects.equals(orgNr, that.orgNr)
+            && Objects.equals(innledningFritekst, that.innledningFritekst)
+            && Objects.equals(manglerFritekst, that.manglerFritekst)
+            && Objects.equals(begrunnelseFritekst, that.begrunnelseFritekst)
+            && Objects.equals(ektefelleFritekst, that.ektefelleFritekst)
+            && Objects.equals(barnFritekst, that.barnFritekst)
+            && Objects.equals(kontaktpersonNavn, that.kontaktpersonNavn)
+            && Objects.equals(kopiMottakere, that.kopiMottakere)
+            && Objects.equals(distribusjonstype, that.distribusjonstype)
+            && Objects.equals(fritekstTittel, that.fritekstTittel)
+            && Objects.equals(fritekst, that.fritekst)
+            && Objects.equals(begrunnelseKode, that.begrunnelseKode)
             && Objects.equals(ytterligereInformasjon, that.ytterligereInformasjon)
             && Objects.equals(nyVurderingBakgrunn, that.nyVurderingBakgrunn)
             && Objects.equals(saksvedlegg, that.saksvedlegg);
@@ -304,7 +322,7 @@ public class BrevbestillingDto {
     @Override
     public int hashCode() {
         return Objects.hash(produserbardokument, mottaker, orgNr, innledningFritekst, manglerFritekst,
-            begrunnelseFritekst, ektefelleFritekst, barnFritekst, kontaktpersonNavn, kopiMottakere, fritekstTittel,
+            begrunnelseFritekst, ektefelleFritekst, barnFritekst, kontaktpersonNavn, kopiMottakere, distribusjonstype, fritekstTittel,
             fritekst, kontaktopplysninger, begrunnelseKode, ytterligereInformasjon, nyVurderingBakgrunn, saksvedlegg);
     }
 
@@ -321,6 +339,7 @@ public class BrevbestillingDto {
             ", barnFritekst='" + barnFritekst + '\'' +
             ", kontaktpersonNavn='" + kontaktpersonNavn + '\'' +
             ", kopiMottakere=" + kopiMottakere +
+            ", distribusjonstype='" + distribusjonstype + '\'' +
             ", fritekstTittel='" + fritekstTittel + '\'' +
             ", fritekst='" + fritekst + '\'' +
             ", kontaktopplysninger=" + kontaktopplysninger +

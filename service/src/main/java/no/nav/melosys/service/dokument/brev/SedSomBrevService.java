@@ -51,7 +51,7 @@ public class SedSomBrevService {
                                                        List<FysiskDokument> vedlegg) {
         var fagsak = behandling.getFagsak();
         var utenlandskMyndighet = utenlandskMyndighetService.hentUtenlandskMyndighet(mottakerland);
-        String institusjonID = utenlandskMyndighetService.lagInstitusjonsId(utenlandskMyndighet);
+        String institusjonID = utenlandskMyndighet.hentInstitusjonID();
         String brukerFnr = persondataFasade.hentFolkeregisterident(fagsak.hentBrukersAktørID());
         byte[] sedPdf = eessiService.genererSedPdf(behandling.getId(), sedType);
         var tema = unleash.isEnabled("melosys.behandle_alle_saker")

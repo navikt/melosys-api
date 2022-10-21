@@ -1,10 +1,10 @@
 package no.nav.melosys.service.journalforing.dto;
 
+import no.nav.melosys.domain.kodeverk.Avsendertyper;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-
-import no.nav.melosys.domain.kodeverk.Avsendertyper;
 
 import static java.lang.Boolean.FALSE;
 
@@ -136,7 +136,7 @@ public abstract class JournalfoeringDto {
         this.behandlingstypeKode = behandlingstypeKode;
     }
 
-    public Boolean skalSendeForvaltningsmelding() {
+    public boolean skalSendeForvaltningsmelding() {
         return FALSE.equals(ikkeSendForvaltingsmelding);
     }
 }
