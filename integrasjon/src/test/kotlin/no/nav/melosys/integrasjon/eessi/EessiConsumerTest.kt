@@ -21,6 +21,7 @@ import no.nav.melosys.domain.eessi.sed.SedDataDto
 import no.nav.melosys.domain.eessi.sed.SedGrunnlagA003Dto
 import no.nav.melosys.domain.eessi.sed.SedGrunnlagDto
 import no.nav.melosys.exception.TekniskException
+import no.nav.melosys.integrasjon.MetricsTestConfig
 import no.nav.melosys.integrasjon.StsMockServer
 import no.nav.melosys.integrasjon.eessi.dto.SaksrelasjonDto
 import no.nav.melosys.integrasjon.felles.GenericContextExchangeFilter
@@ -51,7 +52,7 @@ import java.util.*
 @ActiveProfiles("wiremock-test")
 @AutoConfigureWebClient
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@Import(StsMockServer::class)
+@Import(StsMockServer::class, MetricsTestConfig::class)
 class EessiConsumerTest(
     @Autowired private val eessiConsumer: EessiConsumer,
     @Autowired private val stsMockServer: StsMockServer,
@@ -83,7 +84,9 @@ class EessiConsumerTest(
     @AfterEach
     fun after() {
         ThreadLocalAccessInfo.afterExecuteProcess(processUUID)
+        MetricsTestConfig.clearMeterRegistry()
     }
+
 
     @Test
     fun opprettBucOgSed() {
@@ -115,6 +118,7 @@ class EessiConsumerTest(
             true
         )
 
+        MetricsTestConfig.checkMetricsUri("/buc/{bucType}?sendAutomatisk={sendAutomatisk}&oppdaterEksisterende={oppdaterEksisterendeOmFinnes}")
 
         opprettSedDto.rinaSaksnummer.shouldBe("12345")
     }
@@ -155,12 +159,14 @@ class EessiConsumerTest(
             "12345",
             SedType.A001
         )
+
+        MetricsTestConfig.checkMetricsUri("/buc/{bucID}/sed/{sedType}")
     }
 
     @Test
     fun hentMottakerinstitusjoner() {
         serviceUnderTestMockServer.stubFor(
-            get("/api/buc/LA_BUC_01/institusjoner?land=DE,PL")
+            get("/api/buc/LA_BUC_01/institusjoner?land=DE%2CPL")
                 .willReturn(
                     WireMock.aResponse()
                         .withStatus(200)
@@ -180,6 +186,7 @@ class EessiConsumerTest(
                 navn.shouldBe("NAVT002")
                 landkode.shouldBe("NO")
             }
+        MetricsTestConfig.checkMetricsUri("/buc/{bucType}/institusjoner?land={landkoder}")
     }
 
     @Test
@@ -225,6 +232,8 @@ class EessiConsumerTest(
             sedType.shouldBe(melosysEessiMelding.sedType)
             journalpostId.shouldBe(melosysEessiMelding.journalpostId)
         }
+
+        MetricsTestConfig.checkMetricsUri("/journalpost/{journalpostID}/eessimelding")
     }
 
     @Test
@@ -268,6 +277,8 @@ class EessiConsumerTest(
             .shouldHaveSize(1)
             .first()
             .shouldBeEqualToComparingFields(saksrelasjon, FieldsEqualityCheckConfig(ignorePrivateFields = false))
+
+        MetricsTestConfig.metricsUriShouldContainBrackets()
     }
 
     @Test
@@ -288,6 +299,8 @@ class EessiConsumerTest(
 
 
         resultPDF.shouldBe(pdf)
+
+        MetricsTestConfig.metricsUriShouldContainBrackets()
     }
 
     @Test
@@ -339,12 +352,14 @@ class EessiConsumerTest(
                     }
                 }
             }
+
+        MetricsTestConfig.metricsUriShouldContainBrackets()
     }
 
     @Test
     fun hentTilknyttedeBucer_medFlereStatuser_forventRettSti() {
         serviceUnderTestMockServer.stubFor(
-            get("/api/sak/1/bucer?statuser=UTKAST,MOTTATT,SENDT")
+            get("/api/sak/1/bucer?statuser=UTKAST%2CMOTTATT%2CSENDT")
                 .willReturn(
                     WireMock.aResponse()
                         .withStatus(200)
@@ -354,12 +369,14 @@ class EessiConsumerTest(
         )
 
         eessiConsumer.hentTilknyttedeBucer(1L, listOf("UTKAST", "MOTTATT", "SENDT"))
+
+        MetricsTestConfig.metricsUriShouldContainBrackets()
     }
 
     @Test
     fun hentTilknyttedeBucer_medToStatuser_forventRettSti() {
         serviceUnderTestMockServer.stubFor(
-            get("/api/sak/1/bucer?statuser=SENDT,UTKAST")
+            get("/api/sak/1/bucer?statuser=SENDT%2CUTKAST")
                 .willReturn(
                     WireMock.aResponse()
                         .withStatus(200)
@@ -368,6 +385,8 @@ class EessiConsumerTest(
                 )
         )
         eessiConsumer.hentTilknyttedeBucer(1L, listOf("SENDT", "UTKAST"))
+
+        MetricsTestConfig.metricsUriShouldContainBrackets()
     }
 
     @Test
@@ -387,6 +406,8 @@ class EessiConsumerTest(
 
 
         response.shouldBeInstanceOf<SedGrunnlagA003Dto>()
+
+        MetricsTestConfig.metricsUriShouldContainBrackets()
     }
 
     @Test
@@ -402,6 +423,8 @@ class EessiConsumerTest(
         )
 
         eessiConsumer.lukkBuc(rinaSaksnummer)
+
+        MetricsTestConfig.metricsUriShouldContainBrackets()
     }
 
     fun get(url: String): MappingBuilder =
