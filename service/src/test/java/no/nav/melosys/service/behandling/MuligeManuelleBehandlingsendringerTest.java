@@ -88,9 +88,9 @@ class MuligeManuelleBehandlingsendringerTest {
     }
 
     @Test
-    void hentMuligeTyper_temaNyVurdering_returnererEndretPeriode() {
+    void hentMuligeTyper_temaNyVurdering_returnererTomListe() {
         var muligeTyper = MuligeManuelleBehandlingsendringer.hentMuligeTyper(behandlingMedTemaOgType(UTSENDT_SELVSTENDIG, NY_VURDERING));
-        assertThat(muligeTyper).containsExactly(ENDRET_PERIODE);
+        assertThat(muligeTyper).isEmpty();
     }
 
     @Test

@@ -1,6 +1,7 @@
 package no.nav.melosys.saksflyt.steg.register;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 
 import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Aktoer;
@@ -64,6 +65,7 @@ class HentRegisteropplysningerTest {
         bruker.setAktørId(aktørID);
 
         Fagsak fagsak = new Fagsak();
+        fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
         fagsak.getAktører().add(bruker);
         behandling.setFagsak(fagsak);
         behandling.setType(Behandlingstyper.FØRSTEGANG);
@@ -73,9 +75,31 @@ class HentRegisteropplysningerTest {
 
     @Test
     void utfør_hoppOverSteg() {
+        unleash.disableAll();
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
         Fagsak fagsak = new Fagsak();
+        fagsak.setType(Sakstyper.FTRL);
+        behandling.setFagsak(fagsak);
+        behandling.setTema(Behandlingstema.ARBEID_KUN_NORGE);
+
+        hentRegisteropplysninger.utfør(prosessinstans);
+
+        verify(registeropplysningerService, never()).hentOgLagreOpplysninger(any());
+    }
+
+    @Test
+    void utfør_hoppOverSteg_virksomhet() {
+        Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setBehandling(behandling);
+        Fagsak fagsak = new Fagsak();
+
+        fagsak.setAktører(new HashSet<>());
+        Aktoer a1 = new Aktoer();
+        a1.setRolle(Aktoersroller.VIRKSOMHET);
+        a1.setAktørId("123");
+        fagsak.getAktører().add(a1);
+
         fagsak.setType(Sakstyper.FTRL);
         behandling.setFagsak(fagsak);
         behandling.setTema(Behandlingstema.ARBEID_KUN_NORGE);

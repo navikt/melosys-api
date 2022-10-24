@@ -13,7 +13,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -54,5 +53,34 @@ class OpprettOppgaveTest {
         opprettOppgave.utfør(prosessinstans);
 
         verify(oppgaveService).opprettEllerGjenbrukBehandlingsoppgave(behandling, journalpostID, aktørID, saksbehandler, null);
+    }
+
+    @Test
+    void utfoerSteg_nyOppgave_virksomhet() {
+        final String journalpostID = "142342343";
+        final String orgnr = "999999999";
+        final String saksbehandler = "meg!";
+
+        Aktoer virksomhet = new Aktoer();
+        virksomhet.setOrgnr(orgnr);
+        virksomhet.setRolle(Aktoersroller.VIRKSOMHET);
+        virksomhet.setAktørId(orgnr);
+
+        Fagsak fagsak = new Fagsak();
+        fagsak.getAktører().add(virksomhet);
+
+        Behandling behandling = new Behandling();
+        behandling.setId(243L);
+        behandling.setInitierendeJournalpostId(journalpostID);
+        behandling.setFagsak(fagsak);
+
+        Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setBehandling(behandling);
+        prosessinstans.setData(ProsessDataKey.SKAL_TILORDNES, true);
+        prosessinstans.setData(ProsessDataKey.SAKSBEHANDLER, saksbehandler);
+
+        opprettOppgave.utfør(prosessinstans);
+
+        verify(oppgaveService).opprettEllerGjenbrukBehandlingsoppgave(behandling, journalpostID, null, saksbehandler, orgnr);
     }
 }

@@ -27,8 +27,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import static no.nav.melosys.domain.saksflyt.ProsessStatus.UNDER_BEHANDLING;
-import static no.nav.melosys.integrasjon.felles.mdc.MDCOperations.*;
 import static no.nav.melosys.integrasjon.felles.mdc.MDCOperations.CORRELATION_ID;
+import static no.nav.melosys.integrasjon.felles.mdc.MDCOperations.putToMDC;
 
 @Component
 public class ProsessinstansBehandler {
@@ -120,7 +120,8 @@ public class ProsessinstansBehandler {
 
     private Prosessinstans utførSteg(StegBehandler stegBehandler, Prosessinstans prosessinstans) {
         log.info("Utfører steg {} for prosessinstans {}", stegBehandler.inngangsSteg(), prosessinstans.getId());
-        ThreadLocalAccessInfo.beforeExecuteProcess(prosessinstans.getId(), stegBehandler.inngangsSteg().getKode());
+        String saksbehandler = prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER);
+        ThreadLocalAccessInfo.beforeExecuteProcess(prosessinstans.getId(), stegBehandler.inngangsSteg().getKode(), saksbehandler);
         try {
             stegBehandler.utfør(prosessinstans);
         } finally {

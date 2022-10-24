@@ -67,7 +67,11 @@ class JournalfoeringIT(
         }
 
 
-        val journalføringProsess = journalførOgVentTilProsesserErFerdige(journalfoeringOpprettDto)
+        val journalføringProsess = journalførOgVentTilProsesserErFerdige(
+            journalfoeringOpprettDto,
+            waitFor = ProsessType.JFR_NY_SAK_BRUKER,
+            alsoWaitForprosessType = listOf(ProsessType.OPPRETT_OG_DISTRIBUER_BREV)
+        )
 
 
         val behandling = journalføringProsess.behandling
@@ -106,7 +110,11 @@ class JournalfoeringIT(
         }
 
 
-        val journalføringProsess = journalførOgVentTilProsesserErFerdige(journalfoeringOpprettDto)
+        val journalføringProsess = journalførOgVentTilProsesserErFerdige(
+            journalfoeringOpprettDto,
+            waitFor = ProsessType.JFR_NY_SAK_BRUKER,
+            alsoWaitForprosessType = listOf(ProsessType.OPPRETT_OG_DISTRIBUER_BREV)
+        )
 
 
         val behandling = journalføringProsess.behandling
@@ -144,7 +152,12 @@ class JournalfoeringIT(
             behandlingstypeKode = Behandlingstyper.FØRSTEGANG.kode
             behandlingstemaKode = Behandlingstema.UTSENDT_ARBEIDSTAKER.kode
         }
-        val prosessinstans = journalførOgVentTilProsesserErFerdige(journalfoeringOpprettDto)
+
+        val prosessinstans = journalførOgVentTilProsesserErFerdige(
+            journalfoeringOpprettDto,
+            waitFor = ProsessType.JFR_NY_SAK_BRUKER,
+            alsoWaitForprosessType = listOf(ProsessType.OPPRETT_OG_DISTRIBUER_BREV)
+        )
         val behandling = prosessinstans.behandling
 
         behandling.status = Behandlingsstatus.AVSLUTTET
@@ -187,7 +200,7 @@ class JournalfoeringIT(
     }
 
     @Test
-    fun journalførOgOpprettAndregangsBehandling_fraTomflyt_flytMedPeriodeOgLand() {
+    fun journalførOgOpprettAndregangsBehandling_fraAvslåttFlyt_flytMedPeriodeOgLand() {
         unleash.enable("melosys.behandle_alle_saker")
         unleash.enable("melosys.tom_periode_og_land")
 
@@ -196,8 +209,12 @@ class JournalfoeringIT(
             fagsak.sakstema = Sakstemaer.MEDLEMSKAP_LOVVALG.kode
             behandlingstypeKode = Behandlingstyper.FØRSTEGANG.kode
             behandlingstemaKode = Behandlingstema.UTSENDT_ARBEIDSTAKER.kode
+            isIkkeSendForvaltingsmelding = false
         }
-        val prosessinstans = journalførOgVentTilProsesserErFerdige(journalfoeringOpprettDto)
+        val prosessinstans = journalførOgVentTilProsesserErFerdige(
+            journalfoeringOpprettDto,
+            waitFor = ProsessType.JFR_NY_SAK_BRUKER,
+        )
         val behandling = prosessinstans.behandling
 
         behandling.status = Behandlingsstatus.AVSLUTTET
@@ -205,6 +222,65 @@ class JournalfoeringIT(
 
         val behandlingsresultat = behandlingsresultatRepository.findById(behandling.id).get()
         behandlingsresultat.type = Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL
+        behandlingsresultatRepository.save(behandlingsresultat)
+
+        val journalfoeringTilordneDto = lagJournalfoeringTilordneDto(
+            saksnummer = behandling.fagsak.saksnummer,
+            journalfoeringTilordneDto = defaultJournalfoeringTilordneDto().apply {
+                behandlingstemaKode = Behandlingstema.UTSENDT_ARBEIDSTAKER.kode
+                behandlingstypeKode = Behandlingstyper.NY_VURDERING.kode
+            }
+        )
+
+
+        executeAndWait(ProsessType.JFR_ANDREGANG_NY_BEHANDLING) {
+            journalføringService.journalførOgOpprettAndregangsBehandling(journalfoeringTilordneDto)
+        }
+
+
+        val fagsak = fagsakRepository.findBySaksnummer(behandling.fagsak.saksnummer).get()
+        fagsak.behandlinger
+            .shouldHaveSize(2)
+            .maxBy { it.id }
+            .apply {
+                type.shouldBe(Behandlingstyper.NY_VURDERING)
+                opprinneligBehandling.shouldBeNull()
+                initierendeJournalpostId.shouldBe(journalfoeringTilordneDto.journalpostID)
+            }
+            .behandlingsgrunnlag.behandlingsgrunnlagdata.shouldBeInstanceOf<Soeknad>()
+            .shouldBeEqualToComparingFields(Soeknad().apply {
+                soeknadsland.apply {
+                    landkoder = listOf()
+                    erUkjenteEllerAlleEosLand = false
+                }
+                periode = Periode()
+            }, FieldsEqualityCheckConfig(ignorePrivateFields = false))
+    }
+
+    @Test
+    fun journalførOgOpprettAndregangsBehandling_fraTomflyt_flytMedPeriodeOgLand() {
+        unleash.enable("melosys.behandle_alle_saker")
+        unleash.enable("melosys.tom_periode_og_land")
+
+        val journalfoeringOpprettDto = defaultJournalføringDto().apply {
+            fagsak.sakstype = Sakstyper.EU_EOS.kode
+            fagsak.sakstema = Sakstemaer.MEDLEMSKAP_LOVVALG.kode
+            behandlingstypeKode = Behandlingstyper.HENVENDELSE.kode
+            behandlingstemaKode = Behandlingstema.UTSENDT_ARBEIDSTAKER.kode
+            isIkkeSendForvaltingsmelding = true
+        }
+        val prosessinstans = journalførOgVentTilProsesserErFerdige(
+            journalfoeringOpprettDto,
+            waitFor = ProsessType.JFR_NY_SAK_BRUKER,
+        )
+        val behandling = prosessinstans.behandling
+        behandling.behandlingsgrunnlag.shouldBeNull()
+
+        behandling.status = Behandlingsstatus.AVSLUTTET
+        behandlingRepository.save(behandling)
+
+        val behandlingsresultat = behandlingsresultatRepository.findById(behandling.id).get()
+        behandlingsresultat.type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
         behandlingsresultatRepository.save(behandlingsresultat)
 
         val journalfoeringTilordneDto = lagJournalfoeringTilordneDto(

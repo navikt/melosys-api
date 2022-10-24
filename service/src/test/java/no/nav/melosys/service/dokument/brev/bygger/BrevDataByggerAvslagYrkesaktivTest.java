@@ -92,7 +92,7 @@ class BrevDataByggerAvslagYrkesaktivTest {
         Set<String> orgSet = new HashSet<>(Collections.singletonList("987654321"));
         when(avklartefaktaService.hentAvklarteOrgnrOgUuid(behandling.getId())).thenReturn(orgSet);
 
-        when(landvelgerService.hentArbeidsland(anyLong())).thenReturn(Landkoder.DE);
+        when(landvelgerService.hentArbeidsland(anyLong())).thenReturn(Land_iso2.DE);
         OrganisasjonDokument organisasjonDokument = new OrganisasjonDokument();
         organisasjonDokument.setOrgnummer("999");
         OrganisasjonsDetaljer organisasjonsDetaljer = mock(OrganisasjonsDetaljer.class);

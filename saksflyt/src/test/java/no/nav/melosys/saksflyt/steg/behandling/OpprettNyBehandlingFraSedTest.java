@@ -3,6 +3,7 @@ package no.nav.melosys.saksflyt.steg.behandling;
 import java.util.Optional;
 
 import com.google.common.collect.Lists;
+import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
@@ -38,11 +39,13 @@ class OpprettNyBehandlingFraSedTest {
     @Mock
     private OppgaveService oppgaveFasade;
 
+    private final FakeUnleash unleash = new FakeUnleash();
     private OpprettNyBehandlingFraSed opprettNyBehandlingFraSed;
 
     @BeforeEach
     public void setup() {
-        opprettNyBehandlingFraSed = new OpprettNyBehandlingFraSed(fagsakService, behandlingService, oppgaveFasade);
+        opprettNyBehandlingFraSed = new OpprettNyBehandlingFraSed(fagsakService, behandlingService, oppgaveFasade, unleash);
+        unleash.enableAll();
     }
 
     @Test
@@ -63,6 +66,50 @@ class OpprettNyBehandlingFraSedTest {
             .withMessageContaining("Behandlingstema kan ikke være null");
     }
 
+
+    @Test
+    void utfør_harTidligereBehandlingOgOppgaveToggleDisabled_nyBehandlingOpprettet() {
+        unleash.disableAll();
+        final long gsakSaksnummer = 123L;
+        final Behandlingstema behandlingstema = Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING;
+        final String journalpostID = "jp123";
+        final String dokumentID = "dok123";
+        final var eessiMelding = new MelosysEessiMelding();
+        eessiMelding.setJournalpostId(journalpostID);
+        eessiMelding.setDokumentId(dokumentID);
+
+        Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setData(ProsessDataKey.GSAK_SAK_ID, gsakSaksnummer);
+        prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, behandlingstema);
+        prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, journalpostID);
+        prosessinstans.setData(ProsessDataKey.DOKUMENT_ID, dokumentID);
+        prosessinstans.setData(ProsessDataKey.EESSI_MELDING, eessiMelding);
+
+        Behandling behandling = new Behandling();
+        behandling.setId(123L);
+        behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
+        Fagsak fagsak = new Fagsak();
+        fagsak.setSaksnummer("MEL-199001");
+        fagsak.setBehandlinger(Lists.newArrayList(behandling));
+
+        Oppgave oppgave = new Oppgave.Builder()
+            .setOppgaveId("123oppg")
+            .build();
+
+        when(fagsakService.hentFagsakFraArkivsakID(gsakSaksnummer)).thenReturn(fagsak);
+        when(behandlingService.nyBehandling(any(), any(), any(), any(), any(), any())).thenReturn(new Behandling());
+        when(oppgaveFasade.finnÅpenBehandlingsoppgaveMedFagsaksnummer(fagsak.getSaksnummer()))
+            .thenReturn(Optional.of(oppgave));
+
+        opprettNyBehandlingFraSed.utfør(prosessinstans);
+
+        verify(oppgaveFasade).ferdigstillOppgave(oppgave.getOppgaveId());
+        verify(behandlingService).avsluttBehandling(behandling.getId());
+        verify(behandlingService).nyBehandling(
+            fagsak, Behandlingsstatus.UNDER_BEHANDLING, Behandlingstyper.SED, behandlingstema, journalpostID, dokumentID
+        );
+        assertThat(prosessinstans.getBehandling()).isNotNull();
+    }
 
     @Test
     void utfør_harTidligereBehandlingOgOppgave_nyBehandlingOpprettet() {
@@ -102,7 +149,7 @@ class OpprettNyBehandlingFraSedTest {
         verify(oppgaveFasade).ferdigstillOppgave(oppgave.getOppgaveId());
         verify(behandlingService).avsluttBehandling(behandling.getId());
         verify(behandlingService).nyBehandling(
-            fagsak, Behandlingsstatus.UNDER_BEHANDLING, Behandlingstyper.SED, behandlingstema, journalpostID, dokumentID
+            fagsak, Behandlingsstatus.UNDER_BEHANDLING, Behandlingstyper.FØRSTEGANG, behandlingstema, journalpostID, dokumentID
         );
         assertThat(prosessinstans.getBehandling()).isNotNull();
     }

@@ -10,10 +10,7 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.VedtakMetadataLagretEvent;
 import no.nav.melosys.domain.eessi.BucType;
-import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
-import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
-import no.nav.melosys.domain.kodeverk.Vedtakstyper;
+import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
@@ -149,7 +146,7 @@ public class EosVedtakService {
             return Collections.emptySet();
         }
 
-        Collection<Landkoder> landkoder = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandling.getId());
+        Collection<Land_iso2> landkoder = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandling.getId());
         if (!behandling.erNorgeUtpekt() && skalSedSendes(behandlingsresultat, landkoder)) {
             mottakerinstitusjoner = eessiService.validerOgAvklarMottakerInstitusjonerForBuc(
                 mottakerinstitusjoner,
@@ -162,7 +159,7 @@ public class EosVedtakService {
         return mottakerinstitusjoner;
     }
 
-    private static boolean skalSedSendes(Behandlingsresultat behandlingsresultat, Collection<Landkoder> landkoder) {
+    private static boolean skalSedSendes(Behandlingsresultat behandlingsresultat, Collection<Land_iso2> landkoder) {
         if (behandlingsresultat.erAvslag()) {
             return false;
         }

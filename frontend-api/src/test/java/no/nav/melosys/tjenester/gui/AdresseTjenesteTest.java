@@ -3,6 +3,7 @@ package no.nav.melosys.tjenester.gui;
 import java.util.Arrays;
 
 import no.nav.melosys.domain.UtenlandskMyndighet;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,14 +35,14 @@ class AdresseTjenesteTest {
     void setup() {
         UtenlandskMyndighet utenlandskMyndighetDanmark = new UtenlandskMyndighet();
         utenlandskMyndighetDanmark.land = "Denmark";
-        utenlandskMyndighetDanmark.landkode = Landkoder.DK;
+        utenlandskMyndighetDanmark.landkode = Land_iso2.DK;
 
         UtenlandskMyndighet utenlandskMyndighetSverige = new UtenlandskMyndighet();
         utenlandskMyndighetSverige.land = "Sweden";
-        utenlandskMyndighetSverige.landkode = Landkoder.SE;
+        utenlandskMyndighetSverige.landkode = Land_iso2.SE;
 
-        when(utenlandskMyndighetService.hentUtenlandskMyndighet(Landkoder.DK)).thenReturn(utenlandskMyndighetDanmark);
-        when(utenlandskMyndighetService.hentUtenlandskMyndighet(Landkoder.SE)).thenReturn(utenlandskMyndighetSverige);
+        when(utenlandskMyndighetService.hentUtenlandskMyndighet(Land_iso2.DK)).thenReturn(utenlandskMyndighetDanmark);
+        when(utenlandskMyndighetService.hentUtenlandskMyndighet(Land_iso2.SE)).thenReturn(utenlandskMyndighetSverige);
         when(utenlandskMyndighetService.hentAlleUtenlandskMyndigheter()).thenReturn(Arrays.asList(utenlandskMyndighetSverige, utenlandskMyndighetDanmark));
     }
 

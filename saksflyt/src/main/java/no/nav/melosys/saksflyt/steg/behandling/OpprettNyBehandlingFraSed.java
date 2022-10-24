@@ -1,5 +1,6 @@
 package no.nav.melosys.saksflyt.steg.behandling;
 
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
@@ -26,13 +27,16 @@ public class OpprettNyBehandlingFraSed implements StegBehandler {
     private final FagsakService fagsakService;
     private final BehandlingService behandlingService;
     private final OppgaveService oppgaveService;
+    private final Unleash unleash;
 
     public OpprettNyBehandlingFraSed(FagsakService fagsakService,
                                      BehandlingService behandlingService,
-                                     OppgaveService oppgaveService) {
+                                     OppgaveService oppgaveService,
+                                     Unleash unleash) {
         this.fagsakService = fagsakService;
         this.behandlingService = behandlingService;
         this.oppgaveService = oppgaveService;
+        this.unleash = unleash;
     }
 
     @Override
@@ -57,7 +61,8 @@ public class OpprettNyBehandlingFraSed implements StegBehandler {
         var fagsak = fagsakService.hentFagsakFraArkivsakID(arkivsakID);
 
         avsluttTidligereBehandling(fagsak);
-        var behandling = behandlingService.nyBehandling(fagsak, Behandlingsstatus.UNDER_BEHANDLING, Behandlingstyper.SED,
+        var behandling = behandlingService.nyBehandling(fagsak, Behandlingsstatus.UNDER_BEHANDLING,
+            unleash.isEnabled("melosys.behandle_alle_saker") ? Behandlingstyper.FØRSTEGANG : Behandlingstyper.SED,
             behandlingstema, eessiMelding.getJournalpostId(), eessiMelding.getDokumentId());
 
         fagsak.getBehandlinger().add(behandling);

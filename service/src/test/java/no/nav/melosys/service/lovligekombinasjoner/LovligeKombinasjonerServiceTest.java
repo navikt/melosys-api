@@ -1,5 +1,7 @@
 package no.nav.melosys.service.lovligekombinasjoner;
 
+import java.util.Set;
+
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
@@ -14,8 +16,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.Set;
 
 import static no.nav.melosys.domain.kodeverk.Sakstemaer.*;
 import static no.nav.melosys.domain.kodeverk.Sakstyper.*;
@@ -197,8 +197,8 @@ class LovligeKombinasjonerServiceTest {
 
         Set<Behandlingstyper> muligeBehandlingstyper = lovligeKombinasjonerService.hentMuligeBehandlingstyper(Aktoersroller.BRUKER, EU_EOS, MEDLEMSKAP_LOVVALG, UTSENDT_ARBEIDSTAKER, sisteBehandling);
         assertThat(muligeBehandlingstyper)
-            .hasSize(4)
-            .containsExactly(NY_VURDERING, KLAGE, HENVENDELSE, ENDRET_PERIODE);
+            .hasSize(3)
+            .containsExactly(NY_VURDERING, KLAGE, HENVENDELSE);
     }
 
     private Fagsak fagsakMedSakstypeOgSakstema(Sakstyper sakstype, Sakstemaer sakstema) {

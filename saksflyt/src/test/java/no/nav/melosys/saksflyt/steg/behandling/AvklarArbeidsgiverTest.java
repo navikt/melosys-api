@@ -9,6 +9,7 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
+import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
@@ -63,10 +64,13 @@ class AvklarArbeidsgiverTest {
         fagsak = new Fagsak();
         fagsak.setSaksnummer("saksnr");
         fagsak.setType(Sakstyper.EU_EOS);
+        fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
         behandling.setFagsak(fagsak);
         behandling.setId(1L);
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         behandling.setType(Behandlingstyper.FØRSTEGANG);
+        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
+
         behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setBehandling(behandling);
         behandlingsresultat.setType(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
@@ -90,7 +94,6 @@ class AvklarArbeidsgiverTest {
 
         List<AvklartVirksomhet> avklarteVirksomheter = Collections.singletonList(avklartVirksomhet);
         when(avklarteVirksomheterService.hentNorskeArbeidsgivere(any(), any())).thenReturn(avklarteVirksomheter);
-        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
 
 
         steg.utfør(prosessinstans);
@@ -108,7 +111,6 @@ class AvklarArbeidsgiverTest {
     @Test
     void utfør_medTomFlyt_arbeidsgiverAvklaresIkke() {
         behandling.setType(Behandlingstyper.HENVENDELSE);
-        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
 
 
         avklarArbeidsgiver.utfør(prosessinstans);
@@ -122,7 +124,6 @@ class AvklarArbeidsgiverTest {
         AktoerRepository aktoerRepository = mock(AktoerRepository.class);
         AvklarArbeidsgiver steg = new AvklarArbeidsgiver(new AktoerService(aktoerRepository), avklarteVirksomheterService,
             behandlingService, behandlingsresultatService, unleash);
-        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
 
 
         steg.utfør(prosessinstans);
@@ -135,7 +136,6 @@ class AvklarArbeidsgiverTest {
     @Test
     void utfør_iverksettVedtakArt12_arbeidsgiverAktoererSkalOpprettes() {
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
-        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
 
 
         avklarArbeidsgiver.utfør(prosessinstans);
@@ -147,7 +147,6 @@ class AvklarArbeidsgiverTest {
     @Test
     void utfør_iverksettVedtakArt13_arbeidsgiverAktoererSkalIkkeOpprettes() {
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A);
-        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
 
 
         avklarArbeidsgiver.utfør(prosessinstans);
@@ -157,10 +156,22 @@ class AvklarArbeidsgiverTest {
     }
 
     @Test
-    void utfør_iverksettVedtakAvslagManglendeOppl_arbeidsgiverAktoererSkalIkkeOpprettes() {
+    void utfør_resultatAvslagManglendeOppl_arbeidsgiverAktoererSkalIkkeOpprettes() {
         behandlingsresultat.setType(Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL);
         behandlingsresultat.setLovvalgsperioder(new HashSet<>());
-        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
+
+
+        avklarArbeidsgiver.utfør(prosessinstans);
+
+
+        verify(aktoerService, never()).erstattEksisterendeArbeidsgiveraktører(any(), any());
+    }
+
+    @Test
+    void utfør_trygdeavtaleSamtIkkeAvslagManglendeOpplysning_arbeidsgiverAktoerOpprettes() {
+        fagsak.setType(Sakstyper.TRYGDEAVTALE);
+        behandling.setTema(Behandlingstema.YRKESAKTIV);
+        behandlingsresultat.setLovvalgsperioder(new HashSet<>());
 
 
         avklarArbeidsgiver.utfør(prosessinstans);

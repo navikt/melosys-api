@@ -33,11 +33,11 @@ import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.felles.dto.SoeknadslandDto;
-import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import no.nav.melosys.service.journalforing.dto.*;
 import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.sak.FagsakService;
+import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -113,6 +113,7 @@ class JournalfoeringServiceTest {
 
         var fagsak = new FagsakDto();
         fagsak.setSakstype(Sakstyper.EU_EOS.getKode());
+        fagsak.setSakstema(MEDLEMSKAP_LOVVALG.getKode());
         opprettDto.setFagsak(fagsak);
 
         tilordneDto = new JournalfoeringTilordneDto();
@@ -196,6 +197,7 @@ class JournalfoeringServiceTest {
     @Test
     void journalførOgOpprettSak_ugyldigBehandlingstypeOgSakstema_nårSenderForvaltningsmelding_kasterException() {
         unleash.enable("melosys.behandle_alle_saker");
+        opprettDto.setBehandlingstypeKode(Behandlingstyper.NY_VURDERING.getKode());
         when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
 
         opprettDto.setIkkeSendForvaltingsmelding(false);
@@ -447,6 +449,32 @@ class JournalfoeringServiceTest {
     }
 
     @Test
+    void journalførOgOpprettSak_trygdeMyndighetEøsOgSakstypeIkkeEøs_kasterException() {
+        unleash.enable("melosys.behandle_alle_saker");
+        opprettDto.setAvsenderID("BE");
+        opprettDto.getFagsak().setSakstype(Sakstyper.TRYGDEAVTALE.getKode());
+        opprettDto.setBehandlingstemaKode(Behandlingstema.YRKESAKTIV.getKode());
+        when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> journalfoeringService.journalførOgOpprettSak(opprettDto))
+            .withMessageContaining("type");
+    }
+
+    @Test
+    void journalførOgOpprettSak_trygdeMyndighetlandOgSakstypeIkkeTrygeavtale_kasterException() {
+        unleash.enable("melosys.behandle_alle_saker");
+        opprettDto.setAvsenderID("RS");
+        opprettDto.getFagsak().setSakstype(Sakstyper.EU_EOS.getKode());
+        opprettDto.setBehandlingstemaKode(Behandlingstema.ARBEID_FLERE_LAND.getKode());
+        when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> journalfoeringService.journalførOgOpprettSak(opprettDto))
+            .withMessageContaining("type");
+    }
+
+    @Test
     void journalførOgKnyttTilEksisterendeSak_altOK_prosessinstansOpprettet() {
         tilordneDto.setSaksnummer(MELOSYS_SAKSNUMMER);
 
@@ -638,6 +666,7 @@ class JournalfoeringServiceTest {
         var behandling = new Behandling();
         behandling.setStatus(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
         behandling.setType(Behandlingstyper.NY_VURDERING);
+        behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         var fagsak = new Fagsak();
         fagsak.setType(Sakstyper.EU_EOS);
         fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);

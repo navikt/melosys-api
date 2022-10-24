@@ -19,6 +19,7 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_t
 import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie;
 import no.nav.melosys.domain.person.familie.IkkeOmfattetFamilie;
 import no.nav.melosys.domain.person.familie.OmfattetFamilie;
+import no.nav.melosys.domain.util.LovvalgBestemmelseUtils;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
@@ -129,7 +130,7 @@ class TrygdeavtaleServiceTest {
                 PLIKTIG,
                 FULL_DEKNING_FTRL,
                 INNVILGET,
-                Lovvalgbestemmelser_trygdeavtale_uk.valueOf(trygdeavtaleResultat.bestemmelse()),
+                LovvalgBestemmelseUtils.dbDataTilLovvalgBestemmelse(trygdeavtaleResultat.bestemmelse()),
                 Landkoder.NO,
                 null
             );
@@ -181,7 +182,7 @@ class TrygdeavtaleServiceTest {
                 PLIKTIG,
                 FULL_DEKNING_FTRL,
                 INNVILGET,
-                Lovvalgbestemmelser_trygdeavtale_uk.valueOf(trygdeavtaleResultat.bestemmelse()),
+                LovvalgBestemmelseUtils.dbDataTilLovvalgBestemmelse(trygdeavtaleResultat.bestemmelse()),
                 Landkoder.NO,
                 111L
             );

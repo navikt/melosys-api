@@ -50,10 +50,9 @@ import static no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2
 import static no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_barn_begrunnelser_ftrl.IKKE_SOEKERS_BARN;
 import static no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_ektefelle_samboer_begrunnelser_ftrl.IKKE_TRE_AV_FEM_SISTE_ÅR;
 import static no.nav.melosys.service.dokument.DokgenTestData.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 
 @ExtendWith(MockitoExtension.class)
@@ -131,7 +130,7 @@ class InnvilgelseFtrlMapperTest {
         assertThat(innvilgelseFtrl.getSaksbehandlerNavn()).isEqualTo(SAKSBEHANDLER_NAVN);
         assertThat(innvilgelseFtrl.getArbeidsgiverNavn()).isEqualTo(ARBEIDSGIVER_NAVN);
         assertThat(innvilgelseFtrl.getArbeidsland()).isEqualTo(Landkoder.AT.getBeskrivelse());
-        assertThat(innvilgelseFtrl.isTrygdeavtaleMedArbeidsland()).isFalse();
+        assertThat(innvilgelseFtrl.isTrygdeavtaleMedArbeidsland()).isTrue();
         assertThat(innvilgelseFtrl.getVurderingTrygdeavgift()).isNotNull();
         assertThat(innvilgelseFtrl.getVurderingTrygdeavgift().selvbetalende()).isFalse();
         assertThat(innvilgelseFtrl.getVurderingTrygdeavgift().representantNavn()).isEqualTo(REPRESENTANT_NAVN);
@@ -350,7 +349,7 @@ class InnvilgelseFtrlMapperTest {
         when(mockAvklarteMedfolgendeFamilieService.hentMedfølgendeBarn(anyLong())).thenReturn(lagMedfølgendeBarn());
         when(mockRepresentantService.hentRepresentant(anyString())).thenReturn(new RepresentantDataDto("1234", REPRESENTANT_NAVN, null, null, null));
         when(mockDokgenMapperDatahenter.hentBehandlingsresultat(anyLong())).thenReturn(lagBehandlingsResultat());
-        when(mockDokgenMapperDatahenter.hentLandnavnFraLandkode(anyString())).thenAnswer((Answer<String>) invocationOnMock -> Landkoder.valueOf(invocationOnMock.getArgument(0)).getBeskrivelse());
+        when(mockDokgenMapperDatahenter.hentLandnavnFraLandkode(anyString())).thenAnswer((Answer<String>) invocationOnMock -> Trygdeavtale_myndighetsland.valueOf(invocationOnMock.getArgument(0)).getBeskrivelse());
         when(mockDokgenMapperDatahenter.hentSammensattNavn(anyString())).thenAnswer((Answer<String>) invocationOnMock -> {
             String fnr = invocationOnMock.getArgument(0);
             String navn = null;

@@ -98,7 +98,7 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
             .medOppgaveTyper(hentGyldigeOppgavetyper())
             .medSorteringsfelt(SORTERINGSFELT_FRIST)
             .medStatusKategori(OPPGAVE_STATUSKATEGORI_AAPEN)
-            .medTema(new String[]{Tema.MED.getKode(), Tema.UFM.getKode()})
+            .medTema(Tema.MED.getKode(), Tema.UFM.getKode())
             .medTildeltRessurs(false)
             .medBehandlesAvApplikasjon(Fagsystem.MELOSYS.getKode());
 

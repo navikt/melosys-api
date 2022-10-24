@@ -238,7 +238,7 @@ class EosVedtakServiceTest {
         mockBehandlingsresultat();
         behandlingsresultat.setType(AVSLAG_SØKNAD);
         leggTilLovvalgsperiode(InnvilgelsesResultat.AVSLAATT);
-        when(landvelgerService.hentUtenlandskTrygdemyndighetsland(behandling.getId())).thenReturn(Set.of(Landkoder.SE));
+        when(landvelgerService.hentUtenlandskTrygdemyndighetsland(behandling.getId())).thenReturn(Set.of(Land_iso2.SE));
 
         vedtakService.fattVedtak(behandling, lagRequest(AVSLAG_SØKNAD, FØRSTEGANGSVEDTAK, null, null, null));
 
@@ -328,7 +328,7 @@ class EosVedtakServiceTest {
     }
 
     private void mockEesiReady() {
-        when(landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID)).thenReturn(Collections.singletonList(Landkoder.SE));
+        when(landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID)).thenReturn(Collections.singletonList(Land_iso2.SE));
         when(eessiService.validerOgAvklarMottakerInstitusjonerForBuc(anySet(), anyCollection(), any(BucType.class))).thenCallRealMethod();
         when(eessiService.hentEessiMottakerinstitusjoner(BucType.LA_BUC_04.name(), Set.of(Landkoder.SE.getKode())))
             .thenReturn(List.of(new Institusjon("AB:CDEF123", "inst", Landkoder.SE.getKode())));
@@ -352,6 +352,7 @@ class EosVedtakServiceTest {
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer("MEL-111");
         fagsak.setType(Sakstyper.EU_EOS);
+        fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
         Aktoer aktoer = new Aktoer();
         aktoer.setAktørId("1234567890123");
         aktoer.setRolle(Aktoersroller.BRUKER);

@@ -13,10 +13,7 @@ import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.Maritimtyper;
-import no.nav.melosys.domain.kodeverk.Vilkaar;
+import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie;
@@ -114,9 +111,9 @@ class BrevDataByggerInnvilgelseTest {
         Lovvalgsperiode periode = new Lovvalgsperiode();
         when(lovvalgsperiodeService.hentLovvalgsperiode(anyLong())).thenReturn(periode);
 
-        when(landvelgerService.hentArbeidsland(anyLong())).thenReturn(Landkoder.AT);
+        when(landvelgerService.hentArbeidsland(anyLong())).thenReturn(Land_iso2.AT);
         when(landvelgerService.hentBostedsland(anyLong(), any(BehandlingsgrunnlagData.class))).thenReturn(new Bostedsland(Landkoder.NO));
-        when(landvelgerService.hentUtenlandskTrygdemyndighetsland(anyLong())).thenReturn(Collections.singletonList(Landkoder.DE));
+        when(landvelgerService.hentUtenlandskTrygdemyndighetsland(anyLong())).thenReturn(Collections.singletonList(Land_iso2.DE));
         when(avklartefaktaService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(new AvklarteMedfolgendeFamilie(Collections.emptySet(), Collections.emptySet()));
 
         brevDataByggerInnvilgelse = new BrevDataByggerInnvilgelse(avklartefaktaService,
