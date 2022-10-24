@@ -49,12 +49,13 @@ import java.util.*
 
     GenericAuthFilterFactory::class,
     EessiConsumerProducer::class,
+    StsMockServer::class,
+    MetricsTestConfig::class
 )
 @WebMvcTest
 @AutoConfigureWebClient
 @ActiveProfiles("wiremock-test")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@Import(StsMockServer::class, MetricsTestConfig::class)
 class EessiConsumerTest(
     @Autowired private val eessiConsumer: EessiConsumer,
     @Autowired private val stsMockServer: StsMockServer,
