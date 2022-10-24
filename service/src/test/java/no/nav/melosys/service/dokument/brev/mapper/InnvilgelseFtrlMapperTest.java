@@ -349,7 +349,7 @@ class InnvilgelseFtrlMapperTest {
         when(mockAvklarteMedfolgendeFamilieService.hentMedfølgendeBarn(anyLong())).thenReturn(lagMedfølgendeBarn());
         when(mockRepresentantService.hentRepresentant(anyString())).thenReturn(new RepresentantDataDto("1234", REPRESENTANT_NAVN, null, null, null));
         when(mockDokgenMapperDatahenter.hentBehandlingsresultat(anyLong())).thenReturn(lagBehandlingsResultat());
-        when(mockDokgenMapperDatahenter.hentLandnavnFraLandkode(anyString())).thenAnswer((Answer<String>) invocationOnMock -> Landkoder.valueOf(invocationOnMock.getArgument(0)).getBeskrivelse());
+        when(mockDokgenMapperDatahenter.hentLandnavnFraLandkode(anyString())).thenAnswer((Answer<String>) invocationOnMock -> Trygdeavtale_myndighetsland.valueOf(invocationOnMock.getArgument(0)).getBeskrivelse());
         when(mockDokgenMapperDatahenter.hentSammensattNavn(anyString())).thenAnswer((Answer<String>) invocationOnMock -> {
             String fnr = invocationOnMock.getArgument(0);
             String navn = null;

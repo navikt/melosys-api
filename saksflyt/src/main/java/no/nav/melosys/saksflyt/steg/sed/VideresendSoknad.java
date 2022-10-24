@@ -15,7 +15,7 @@ import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.arkiv.Vedlegg;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.SedType;
-import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
@@ -98,7 +98,7 @@ public class VideresendSoknad extends AbstraktSendUtland {
         Fagsak fagsak = fagsakService.hentFagsak(behandling.getFagsak().getSaksnummer());
         behandling.setFagsak(fagsak);
 
-        Landkoder mottakerLandkode = fagsak.hentMyndighetLandkode();
+        Land_iso2 mottakerLandkode = fagsak.hentMyndighetLandkode();
         String journalpostID = sedSomBrevService
             .lagJournalpostForSendingAvSedSomBrev(SedType.A008, mottakerLandkode, behandling, lagSøknadVedlegg(behandling));
 

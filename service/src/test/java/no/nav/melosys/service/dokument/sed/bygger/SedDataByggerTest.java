@@ -407,7 +407,7 @@ class SedDataByggerTest {
 
     @Test
     void lagUtkast_harIkkeFastArbeidsstedForArbeidsland_arbeidsstedBlirSatt() {
-        when(landvelgerService.hentAlleArbeidslandUtenMarginaltArbeid(anyLong())).thenReturn(List.of(Landkoder.SE));
+        when(landvelgerService.hentAlleArbeidslandUtenMarginaltArbeid(anyLong())).thenReturn(List.of(Land_iso2.SE));
         SedDataGrunnlagMedSoknad dataGrunnlag = lagGrunnlagMedSøknad();
         SedDataDto sedData = dataBygger.lag(dataGrunnlag, behandlingsresultat, PeriodeType.LOVVALGSPERIODE);
 

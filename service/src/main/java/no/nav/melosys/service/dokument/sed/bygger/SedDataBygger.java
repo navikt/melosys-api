@@ -13,7 +13,7 @@ import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.eessi.Periode;
 import no.nav.melosys.domain.eessi.SvarAnmodningUnntak;
 import no.nav.melosys.domain.eessi.sed.*;
-import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.domain.person.familie.Familiemedlem;
@@ -148,7 +148,7 @@ public class SedDataBygger {
         Set<String> arbeidsland = arbeidssteder.stream().map(Arbeidssted::getAdresse).map(Adresse::getLand).collect(Collectors.toSet());
 
         landvelgerService.hentAlleArbeidslandUtenMarginaltArbeid(dataGrunnlag.getBehandling().getId()).stream()
-            .map(Landkoder::getKode)
+            .map(Land_iso2::getKode)
             .distinct()
             .filter(not(arbeidsland::contains))
             .map(Arbeidssted::lagIkkeFastArbeidssted)

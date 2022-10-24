@@ -8,6 +8,7 @@ import no.nav.melosys.domain.Bostedsland;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Medfolgende_barn_begrunnelser;
@@ -92,8 +93,8 @@ class AvklartefaktaServiceTest {
             .thenReturn(Set.of(lagAvklartefakta(Avklartefaktatyper.ARBEIDSLAND, null, "NO"),
                 lagAvklartefakta(Avklartefaktatyper.ARBEIDSLAND, null, "SE")));
 
-        Set<Landkoder> landkoder = avklartefaktaService.hentAlleAvklarteArbeidsland(1L);
-        assertThat(landkoder).containsExactlyInAnyOrder(Landkoder.NO, Landkoder.SE);
+        Set<Land_iso2> landkoder = avklartefaktaService.hentAlleAvklarteArbeidsland(1L);
+        assertThat(landkoder).containsExactlyInAnyOrder(Land_iso2.NO, Land_iso2.SE);
     }
 
     @Test
@@ -203,7 +204,7 @@ class AvklartefaktaServiceTest {
         when(avklarteFaktaRepository.findByBehandlingsresultatIdAndTypeAndFakta(anyLong(), eq(Avklartefaktatyper.INFORMERT_MYNDIGHET), eq("TRUE")))
             .thenReturn(Set.of(valgtMyndighetFakta));
 
-        assertThat(avklartefaktaService.hentInformertMyndighet(1L)).isPresent().hasValue(Landkoder.SE);
+        assertThat(avklartefaktaService.hentInformertMyndighet(1L)).isPresent().hasValue(Land_iso2.SE);
     }
 
     public static Set<Avklartefakta> lagAlleMaritimeAvklartefakta(String navn, String maritimType, String landkode) {

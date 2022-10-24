@@ -11,7 +11,7 @@ import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.eessi.BucInformasjon;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.SedType;
-import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
@@ -85,7 +85,7 @@ public class SendVedtakUtland extends AbstraktSendUtland {
     protected void sendBrev(Prosessinstans prosessinstans) {
         var behandling = prosessinstans.getBehandling();
         if (prosessinstans.getData(ProsessDataKey.UTPEKT_LAND) != null) {
-            Landkoder utpektLand = prosessinstans.getData(ProsessDataKey.UTPEKT_LAND, Landkoder.class);
+            Land_iso2 utpektLand = prosessinstans.getData(ProsessDataKey.UTPEKT_LAND, Land_iso2.class);
             String journalpostID = sedSomBrevService
                 .lagJournalpostForSendingAvSedSomBrev(SedType.A003, utpektLand, behandling);
             prosessinstans.setData(ProsessDataKey.DISTRIBUERBAR_JOURNALPOST_ID, journalpostID);
