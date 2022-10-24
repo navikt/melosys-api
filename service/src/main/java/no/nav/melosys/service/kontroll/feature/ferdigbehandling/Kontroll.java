@@ -1,6 +1,7 @@
 package no.nav.melosys.service.kontroll.feature.ferdigbehandling;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Objects;
 
 import no.finn.unleash.Unleash;
@@ -70,6 +71,7 @@ class Kontroll {
 
     private Collection<Kontrollfeil> utførKontroller(Behandling behandling, Sakstyper sakstype) {
         var regelsettForVedtak = FerdigbehandlingKontrollsett.hentRegelsettForVedtak(sakstype);
+        if (regelsettForVedtak.isEmpty()) return Collections.emptySet();
         var ferdigbehandlingKontrollData = hentVedtakKontrollData(behandling);
         return regelsettForVedtak.stream()
             .map(f -> f.apply(ferdigbehandlingKontrollData))

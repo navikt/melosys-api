@@ -57,6 +57,7 @@ class KontrollMedRegisteropplysning {
         LocalDate fom;
         LocalDate tom;
 
+        // Er det mulig å ikke vere medlem i en periode? Hvorfor bruker vi i det hele tatt lovvalgsperiode her?
         if (behandling.getFagsak().getType().equals(Sakstyper.FTRL)) {
             List<Medlemskapsperiode> list = new ArrayList(behandlingsresultat.getMedlemAvFolketrygden().getMedlemskapsperioder());
             fom = list.get(0).getFom();
