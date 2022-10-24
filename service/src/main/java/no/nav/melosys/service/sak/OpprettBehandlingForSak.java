@@ -38,10 +38,6 @@ public class OpprettBehandlingForSak {
         if (fagsak.hentAktivBehandling() != null) {
             throw new FunksjonellException(String.format("Det finnes allerede en aktiv behandling på fagsak %s", fagsak.getSaksnummer()));
         }
-
-        if (opprettSakDto.getBrukerID() == null && opprettSakDto.getVirksomhetOrgnr() == null) {
-            throw new FunksjonellException("BrukerID eller organisasjonsnummer trengs for å opprette en behandling.");
-        }
         if (opprettSakDto.getBehandlingstema() == null) {
             throw new FunksjonellException("Behandlingstema mangler");
         }

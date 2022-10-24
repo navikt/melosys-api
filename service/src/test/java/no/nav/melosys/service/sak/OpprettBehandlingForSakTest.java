@@ -70,20 +70,6 @@ class OpprettBehandlingForSakTest {
     }
 
     @Test
-    void opprettBehandling_utenFnrOgOrgnr_feiler() {
-        OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
-        opprettSakDto.setBrukerID(null);
-        opprettSakDto.setVirksomhetOrgnr(null);
-
-        when(fagsakService.hentFagsak(SAKSNUMMER)).thenReturn(lagFagsak(null));
-
-
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> opprettBehandlingForSak.opprettBehandling(SAKSNUMMER, opprettSakDto))
-            .withMessageContaining("BrukerID eller organisasjonsnummer trengs for å opprette en behandling.");
-    }
-
-    @Test
     void opprettBehandling_utenBehandlingstema_feiler() {
         OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
         opprettSakDto.setBehandlingstema(null);
