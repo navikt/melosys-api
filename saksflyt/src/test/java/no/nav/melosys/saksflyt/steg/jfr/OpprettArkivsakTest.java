@@ -96,6 +96,38 @@ class OpprettArkivsakTest {
     }
 
     @Test
+    void utfør_virksomhetErHovedpart_oppretterSakForVirksomhet() {
+        unleash.enable("melosys.behandle_alle_saker");
+        final long forventetArkivsakID = 1234432;
+
+        String orgnr = "999999999";
+        Fagsak fagsak = new Fagsak();
+        fagsak.setSaksnummer("MEL-4321");
+        fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
+
+        Aktoer virksomhet = new Aktoer();
+        virksomhet.setOrgnr(orgnr);
+        virksomhet.setRolle(Aktoersroller.VIRKSOMHET);
+        fagsak.getAktører().add(virksomhet);
+
+        Behandling behandling = new Behandling();
+        behandling.setFagsak(fagsak);
+
+        Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setBehandling(behandling);
+
+        when(arkivsakService
+            .opprettSakForVirksomhet(fagsak.getSaksnummer(), utledTema(fagsak.getTema()), orgnr))
+            .thenReturn(forventetArkivsakID);
+
+
+        opprettArkivsak.utfør(prosessinstans);
+
+
+        assertThat(fagsak.getGsakSaksnummer()).isEqualTo(forventetArkivsakID);
+    }
+
+    @Test
     void utfør_arkivsakIDEksisterer_kasterException() {
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer("MEL-4321");
