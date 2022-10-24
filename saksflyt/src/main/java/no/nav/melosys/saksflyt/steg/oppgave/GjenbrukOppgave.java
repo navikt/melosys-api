@@ -54,7 +54,7 @@ public class GjenbrukOppgave implements StegBehandler {
                     : fagsak.hentBrukersAktørID())
             .setOrgnr(
                 unleash.isEnabled("melosys.behandle_alle_saker") && fagsak.getHovedpartRolle() == Aktoersroller.VIRKSOMHET
-                    ? prosessinstans.getData(ProsessDataKey.VIRKSOMHET_ORGNR)
+                    ? fagsak.hentVirksomhet().getOrgnr()
                     : null)
             .setBeskrivelse(gjenbruktOppgave.getBeskrivelse())
             .build();

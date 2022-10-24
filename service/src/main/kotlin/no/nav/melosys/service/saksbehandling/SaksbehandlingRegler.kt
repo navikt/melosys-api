@@ -19,11 +19,7 @@ class SaksbehandlingRegler(private val behandlingsresultatRepository: Behandling
         behandlingstype: Behandlingstyper,
         behandlingstema: Behandlingstema
     ): Boolean {
-        val sistRegistrertBehandling = fagsak.hentSistRegistrertBehandling()
-        val sakstype = sistRegistrertBehandling.fagsak.type
-        val sakstema = sistRegistrertBehandling.fagsak.tema
-
-        if (harTomFlyt(sakstype, sakstema, behandlingstype, behandlingstema)) return false
+        if (harTomFlyt(fagsak.type, fagsak.tema, behandlingstype, behandlingstema)) return false
 
         return finnBehandlingSomKanReplikeres(fagsak) != null
     }

@@ -91,17 +91,25 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
-    public void opprettNyBehandlingForSak(String saksnummer, OpprettSakDto opprettSakDto) {
+    public void opprettOgReplikerBehandlingForSak(String saksnummer, OpprettSakDto opprettSakDto) {
         Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setType(ProsessType.OPPRETT_BEHANDLING_FOR_SAK);
+        prosessinstans.setType(ProsessType.OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK);
 
         prosessinstans.setData(SAKSNUMMER, saksnummer);
-        prosessinstans.setData(SAKSTYPE, opprettSakDto.getSakstype());
-        prosessinstans.setData(SAKSTEMA, opprettSakDto.getSakstema());
         prosessinstans.setData(BEHANDLINGSTEMA, opprettSakDto.getBehandlingstema());
         prosessinstans.setData(BEHANDLINGSTYPE, opprettSakDto.getBehandlingstype());
-        prosessinstans.setData(BRUKER_ID, opprettSakDto.getBrukerID());
-        prosessinstans.setData(VIRKSOMHET_ORGNR, opprettSakDto.getVirksomhetOrgnr());
+        prosessinstans.setData(SKAL_TILORDNES, opprettSakDto.isSkalTilordnes());
+
+        lagre(prosessinstans);
+    }
+
+    public void opprettNyBehandlingForSak(String saksnummer, OpprettSakDto opprettSakDto) {
+        Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setType(ProsessType.OPPRETT_NY_BEHANDLING_FOR_SAK);
+
+        prosessinstans.setData(SAKSNUMMER, saksnummer);
+        prosessinstans.setData(BEHANDLINGSTEMA, opprettSakDto.getBehandlingstema());
+        prosessinstans.setData(BEHANDLINGSTYPE, opprettSakDto.getBehandlingstype());
         prosessinstans.setData(SKAL_TILORDNES, opprettSakDto.isSkalTilordnes());
 
         lagre(prosessinstans);
