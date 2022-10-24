@@ -6,7 +6,7 @@ import no.nav.melosys.domain.UtenlandskMyndighet;
 import no.nav.melosys.domain.VilkaarBegrunnelse;
 import no.nav.melosys.domain.Vilkaarsresultat;
 import no.nav.melosys.domain.kodeverk.Kodeverk;
-import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
 
 public final class SaksflytTestUtils {
@@ -28,7 +28,7 @@ public final class SaksflytTestUtils {
     public static UtenlandskMyndighet lagUtenlandskMyndighet() {
         UtenlandskMyndighet utenlandskMyndighet = new UtenlandskMyndighet();
         utenlandskMyndighet.institusjonskode = "123456";
-        utenlandskMyndighet.landkode = Landkoder.SE;
+        utenlandskMyndighet.landkode = Land_iso2.SE;
         utenlandskMyndighet.navn = "Svenska myndighetan";
         utenlandskMyndighet.gateadresse = "Svenskegatan 38";
         utenlandskMyndighet.poststed = "Svenska stan";

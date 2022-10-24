@@ -69,7 +69,7 @@ public class LovligeKombinasjonerService {
                     .filter(sakstemaBehandlingsKombinasjon -> sakstemaBehandlingsKombinasjon.sakstema() == sakstema)
                     .flatMap(sakstemaBehandlingsKombinasjon -> sakstemaBehandlingsKombinasjon.behandlingstemaBehandlingstyperKombinasjoner().stream())
                     .flatMap(behandlingsKombinasjon -> behandlingsKombinasjon.behandlingsTemaer().stream())
-                    .collect(Collectors.toCollection( LinkedHashSet::new ));
+                    .collect(Collectors.toCollection(LinkedHashSet::new));
 
                 if (sistBehandlingstema != null && Set.of(REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING,
                     REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE,
@@ -106,12 +106,10 @@ public class LovligeKombinasjonerService {
         @Nullable Behandling sisteBehandling
     ) {
         Behandlingstema sistBehandlingstema = null;
-        Behandlingstyper sistBehandlingstype = null;
         Saksstatuser sistSaksstatus = null;
 
         if (sisteBehandling != null) {
             sistBehandlingstema = sisteBehandling.getTema();
-            sistBehandlingstype = sisteBehandling.getType();
             sistSaksstatus = sisteBehandling.getFagsak().getStatus();
         }
 
@@ -122,7 +120,7 @@ public class LovligeKombinasjonerService {
                     .flatMap(sakstemaBehandlingsKombinasjon -> sakstemaBehandlingsKombinasjon.behandlingstemaBehandlingstyperKombinasjoner().stream())
                     .filter(behandlingsKombinasjon -> behandlingsKombinasjon.behandlingsTemaer().contains(behandlingstema))
                     .flatMap(behandlingsKombinasjon -> behandlingsKombinasjon.behandlingsTyper().stream())
-                    .collect(Collectors.toCollection( LinkedHashSet::new ));
+                    .collect(Collectors.toCollection(LinkedHashSet::new));
 
                 if (sistBehandlingstema != null && Set.of(REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING,
                     REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE,
@@ -136,14 +134,8 @@ public class LovligeKombinasjonerService {
                     behandlingstyper.remove(FØRSTEGANG);
                 }
 
-                if (sistBehandlingstype == FØRSTEGANG &&
-                    sistBehandlingstema != null && Set.of(UTSENDT_ARBEIDSTAKER, UTSENDT_SELVSTENDIG).contains(sistBehandlingstema)
-                ) {
-                    behandlingstyper.add(ENDRET_PERIODE);
-                }
-
                 if (sistSaksstatus != null && Set.of(HENLAGT, HENLAGT_BORTFALT, AVSLUTTET).contains(sistSaksstatus)) {
-                    return Set.of(HENVENDELSE);
+                    behandlingstyper = Set.of(HENVENDELSE);
                 }
 
                 return behandlingstyper;

@@ -4,6 +4,7 @@ public class MangelbrevBrevbestilling extends DokgenBrevbestilling {
     private String manglerInfoFritekst;
     private String innledningFritekst;
     private String fullmektigNavn;
+    private boolean brukerSkalHaKopi;
 
     public MangelbrevBrevbestilling() {
         super();
@@ -15,6 +16,7 @@ public class MangelbrevBrevbestilling extends DokgenBrevbestilling {
         this.manglerInfoFritekst = builder.manglerInfoFritekst;
         this.innledningFritekst = builder.innledningFritekst;
         this.fullmektigNavn = builder.fullmektigNavn;
+        this.brukerSkalHaKopi = builder.brukerSkalHaKopi;
     }
 
     public String getManglerInfoFritekst() {
@@ -29,6 +31,10 @@ public class MangelbrevBrevbestilling extends DokgenBrevbestilling {
         return fullmektigNavn;
     }
 
+    public boolean isBrukerSkalHaKopi() {
+        return brukerSkalHaKopi;
+    }
+
     public Builder toBuilder() {
         return new Builder(this);
     }
@@ -37,6 +43,7 @@ public class MangelbrevBrevbestilling extends DokgenBrevbestilling {
         private String manglerInfoFritekst;
         private String innledningFritekst;
         private String fullmektigNavn;
+        private boolean brukerSkalHaKopi;
 
         public Builder() {
         }
@@ -46,6 +53,7 @@ public class MangelbrevBrevbestilling extends DokgenBrevbestilling {
             this.manglerInfoFritekst = mangelbrevBrevbestilling.manglerInfoFritekst;
             this.innledningFritekst = mangelbrevBrevbestilling.innledningFritekst;
             this.fullmektigNavn = mangelbrevBrevbestilling.fullmektigNavn;
+            this.brukerSkalHaKopi = mangelbrevBrevbestilling.brukerSkalHaKopi;
         }
 
         public Builder medManglerInfoFritekst(String manglerInfoFritekst) {
@@ -60,6 +68,11 @@ public class MangelbrevBrevbestilling extends DokgenBrevbestilling {
 
         public Builder medFullmektigNavn(String fullmektigNavn) {
             this.fullmektigNavn = fullmektigNavn;
+            return this;
+        }
+
+        public Builder medBrukerSkalHaKopi(boolean brukerSkalHaKopi) {
+            this.brukerSkalHaKopi = brukerSkalHaKopi;
             return this;
         }
 

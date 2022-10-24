@@ -22,7 +22,10 @@ open class EessiConsumerImpl(private val webClient: WebClient) : EessiConsumer, 
         oppdaterEksisterendeOmFinnes: Boolean
     ) =
         webClient.post()
-            .uri("/buc/$bucType?sendAutomatisk=$sendAutomatisk&oppdaterEksisterende=$oppdaterEksisterendeOmFinnes")
+            .uri(
+                "/buc/{bucType}?sendAutomatisk={sendAutomatisk}&oppdaterEksisterende={oppdaterEksisterendeOmFinnes}",
+                bucType, sendAutomatisk, oppdaterEksisterendeOmFinnes
+            )
             .bodyValue(OpprettBucOgSedDto(sedDataDto, vedlegg))
             .retrieve()
             .bodyToMono<OpprettSedDto>()
@@ -30,7 +33,7 @@ open class EessiConsumerImpl(private val webClient: WebClient) : EessiConsumer, 
 
     override fun sendSedPåEksisterendeBuc(sedDataDto: SedDataDto, rinaSaksnummer: String, sedType: SedType) {
         webClient.post()
-            .uri("/buc/$rinaSaksnummer/sed/$sedType")
+            .uri("/buc/{bucID}/sed/{sedType}", rinaSaksnummer, sedType)
             .bodyValue(sedDataDto)
             .retrieve()
             .bodyToMono<Void>()
@@ -39,14 +42,14 @@ open class EessiConsumerImpl(private val webClient: WebClient) : EessiConsumer, 
 
     override fun hentMottakerinstitusjoner(bucType: String, landkoder: Collection<String>) =
         webClient.get()
-            .uri("/buc/$bucType/institusjoner?land=${landkoder.joinToString(",")}")
+            .uri("/buc/{bucType}/institusjoner?land={landkoder}", bucType, landkoder.toTypedArray())
             .retrieve()
             .bodyToMono<List<InstitusjonDto>>()
             .block()!!.map { Institusjon(it.id, it.navn, it.landkode) }.toList()
 
     override fun hentMelosysEessiMeldingFraJournalpostID(journalpostID: String) =
         webClient.get()
-            .uri("/journalpost/$journalpostID/eessimelding")
+            .uri("/journalpost/{journalpostID}/eessimelding", journalpostID)
             .retrieve()
             .bodyToMono<MelosysEessiMelding>()
             .block()!!
@@ -62,14 +65,14 @@ open class EessiConsumerImpl(private val webClient: WebClient) : EessiConsumer, 
 
     override fun hentSakForRinasaksnummer(rinaSaksnummer: String) =
         webClient.get()
-            .uri("/sak?rinaSaksnummer=$rinaSaksnummer")
+            .uri("/sak?rinaSaksnummer={rinaSaksnummer}", rinaSaksnummer)
             .retrieve()
             .bodyToMono<List<SaksrelasjonDto>>()
             .block()!!
 
     override fun genererSedPdf(sedDataDto: SedDataDto, sedType: SedType) =
         webClient.post()
-            .uri("/sed/$sedType/pdf")
+            .uri("/sed/{sedType}/pdf", sedType)
             .bodyValue(sedDataDto)
             .retrieve()
             .bodyToMono<ByteArray>()
@@ -77,21 +80,21 @@ open class EessiConsumerImpl(private val webClient: WebClient) : EessiConsumer, 
 
     override fun hentTilknyttedeBucer(gsakSaksnummer: Long, statuser: List<String>) =
         webClient.get()
-            .uri("/sak/$gsakSaksnummer/bucer?statuser=${statuser.joinToString(",")}")
+            .uri("/sak/{arkivSakID}/bucer?statuser={statuser}", gsakSaksnummer, statuser.toTypedArray())
             .retrieve()
             .bodyToMono<List<BucinfoDto>>()
             .block()!!.map { it.tilDomene() }.toList()
 
     override fun hentSedGrunnlag(rinaSaksnummer: String, rinaDokumentID: String) =
         webClient.get()
-            .uri("/buc/$rinaSaksnummer/sed/$rinaDokumentID/grunnlag")
+            .uri("/buc/{rinaSaksnummer}/sed/{rinaDokumentID}/grunnlag", rinaSaksnummer, rinaDokumentID)
             .retrieve()
             .bodyToMono<SedGrunnlagDto>()
             .block()!!
 
     override fun lukkBuc(rinaSaksnummer: String) {
         webClient.post()
-            .uri("/buc/$rinaSaksnummer/lukk")
+            .uri("/buc/{rinaSaksnummer}/lukk", rinaSaksnummer)
             .retrieve()
             .bodyToMono<Void>()
             .block()
@@ -99,7 +102,7 @@ open class EessiConsumerImpl(private val webClient: WebClient) : EessiConsumer, 
 
     override fun hentMuligeAksjoner(rinaSaksnummer: String) =
         webClient.get()
-            .uri("/buc/$rinaSaksnummer/aksjoner")
+            .uri("/buc/{rinaSaksnummer}/aksjoner", rinaSaksnummer)
             .retrieve()
             .bodyToMono<List<String>>()
             .block()!!

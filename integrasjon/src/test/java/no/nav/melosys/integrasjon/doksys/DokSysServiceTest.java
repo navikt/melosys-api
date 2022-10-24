@@ -11,7 +11,7 @@ import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.arkiv.Distribusjonstype;
 import no.nav.melosys.domain.dokument.arbeidsforhold.Aktoertype;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.integrasjon.doksys.distribuerjournalpost.DistribuerJournalpostConsumer;
 import no.nav.melosys.integrasjon.doksys.distribuerjournalpost.dto.DistribuerJournalpostRequest;
 import no.nav.melosys.integrasjon.doksys.distribuerjournalpost.dto.DistribuerJournalpostResponse;
@@ -429,7 +429,7 @@ class DokSysServiceTest {
         utenlandskMyndighet.gateadresse = "Stubenstrasse 77";
         utenlandskMyndighet.postnummer = "0101";
         utenlandskMyndighet.poststed = "Berlin";
-        utenlandskMyndighet.landkode = Landkoder.GL;
+        utenlandskMyndighet.landkode = Land_iso2.GL;
         utenlandskMyndighet.institusjonskode = "INST-023%zdf";
         return utenlandskMyndighet;
     }

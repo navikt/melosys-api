@@ -31,4 +31,5 @@ public class FeltValgDto {
     public void setValgType(FeltValgType valgType) {
         this.valgType = valgType;
     }
+
 }

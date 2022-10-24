@@ -10,7 +10,7 @@ import no.nav.melosys.domain.arkiv.Distribusjonstype;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.brev.MangelbrevBrevbestilling;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
@@ -148,7 +148,7 @@ class DistribuerJournalpostTest {
         prosessinstans.setData(ProsessDataKey.INSTITUSJON_ID, institusjonId);
 
         var utenlandskMyndighet = new UtenlandskMyndighet();
-        utenlandskMyndighet.landkode = Landkoder.GB;
+        utenlandskMyndighet.landkode = Land_iso2.GB;
 
         when(mockUtenlandskMyndighetService.hentUtenlandskMyndighetForInstitusjonID(eq(institusjonId))).thenReturn(utenlandskMyndighet);
 

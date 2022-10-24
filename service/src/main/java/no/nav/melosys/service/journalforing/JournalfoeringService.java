@@ -111,10 +111,10 @@ public class JournalfoeringService {
         final var behandlingstype = behandleAlleSakerToggleEnabled ? Behandlingstyper.valueOf(journalfoeringDto.getBehandlingstypeKode()) : null;
 
         validerOpprettelseSak(journalfoeringDto, behandleAlleSakerToggleEnabled, sakstype, sakstema, behandlingstema,
-                              behandlingstype);
+            behandlingstype);
 
         opprettJournalføringNySakProsessinstans(journalfoeringDto, sakstype, sakstema, behandlingstema,
-                                                behandlingstype);
+            behandlingstype);
     }
 
     private void validerOpprettelseSak(JournalfoeringOpprettDto journalfoeringDto, boolean behandleAlleSakerToggleEnabled,
@@ -125,7 +125,7 @@ public class JournalfoeringService {
 
             lovligeKombinasjonerService.validerBehandlingstema(hovedpart, sakstype, sakstema, behandlingstema, null);
             lovligeKombinasjonerService.validerBehandlingstype(hovedpart, sakstype, sakstema, behandlingstema,
-                                                               behandlingstype, null);
+                behandlingstype, null);
             if (journalfoeringDto.getAvsenderType() == Avsendertyper.UTENLANDSK_TRYGDEMYNDIGHET) {
                 validerSakstypeForTrygdemyndighet(sakstype, journalfoeringDto.getAvsenderID());
             }
@@ -216,7 +216,7 @@ public class JournalfoeringService {
         }
 
         Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(prosessType,
-                                                                                             journalfoeringDto);
+            journalfoeringDto);
         prosessinstans.setData(ProsessDataKey.SAKSTYPE, sakstype);
         if (behandleAlleSakerToggleEnabled) {
             prosessinstans.setData(ProsessDataKey.SAKSTEMA, sakstema);
@@ -230,7 +230,7 @@ public class JournalfoeringService {
 
         if (behandleAlleSakerToggleEnabled
             ? erSakstypeEøs(sakstype) && !SaksbehandlingRegler.harTomFlyt(sakstype, sakstema, behandlingstype,
-                                                                          behandlingstema)
+            behandlingstema)
             : erSakstypeEøs(sakstype) && Behandling.erBehandlingAvSøknadGammel(behandlingstema)
         ) {
             validerSøknadFelter(journalfoeringDto);
@@ -375,16 +375,11 @@ public class JournalfoeringService {
     }
 
     private void validerBehandlingstype(Sakstyper sakstype, Behandlingstyper behandlingstype) {
-        if (sakstype == Sakstyper.EU_EOS && erUgyldigBehandlingstypeForEuEøs(behandlingstype)) {
+        if (List.of(Sakstyper.EU_EOS, Sakstyper.TRYGDEAVTALE).contains(sakstype)
+            && behandlingstype != Behandlingstyper.NY_VURDERING
+        ) {
             throw new FunksjonellException(behandlingstype + " er ikke en lovlig behandlingstype ved knytting av dokument til sak");
         }
-        if (sakstype == Sakstyper.TRYGDEAVTALE && behandlingstype != Behandlingstyper.NY_VURDERING) {
-            throw new FunksjonellException(behandlingstype + " er ikke en lovlig behandlingstype ved knytting av dokument til sak");
-        }
-    }
-
-    private boolean erUgyldigBehandlingstypeForEuEøs(Behandlingstyper behandlingstype) {
-        return behandlingstype != Behandlingstyper.ENDRET_PERIODE && behandlingstype != Behandlingstyper.NY_VURDERING;
     }
 
     private void fellesValidering(JournalfoeringDto journalfoeringDto) {
