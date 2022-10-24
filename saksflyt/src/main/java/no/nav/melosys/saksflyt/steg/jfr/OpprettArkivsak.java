@@ -43,13 +43,14 @@ public class OpprettArkivsak implements StegBehandler {
     public void utfør(Prosessinstans prosessinstans) {
         Behandling behandling = prosessinstans.getBehandling();
         Fagsak fagsak = behandling.getFagsak();
+        String saksnummer = fagsak.getSaksnummer();
 
         if (fagsak.getGsakSaksnummer() != null) {
-            throw new FunksjonellException("Kan ikke knytte fagsak " + fagsak.getSaksnummer() + " til ny arkivsak: allerede knyttet til " + fagsak.getGsakSaksnummer());
+            throw new FunksjonellException("Kan ikke knytte fagsak " + saksnummer + " til ny arkivsak: allerede knyttet til " + fagsak.getGsakSaksnummer());
         }
 
         Optional<String> aktørId = fagsak.finnBrukersAktørID();
-        String saksnummer = fagsak.getSaksnummer();
+        Optional<String> virksomhetOrgnr = fagsak.finnVirksomhetsOrgnr();
 
         var tema = unleash.isEnabled("melosys.behandle_alle_saker")
             ? utledTema(behandling.getFagsak().getTema())
@@ -58,9 +59,10 @@ public class OpprettArkivsak implements StegBehandler {
         Long arkivsakID;
         if (aktørId.isPresent()) {
             arkivsakID = arkivsakService.opprettSakForBruker(saksnummer, tema, aktørId.get());
+        } else if (virksomhetOrgnr.isPresent()) {
+            arkivsakID = arkivsakService.opprettSakForVirksomhet(saksnummer, tema, virksomhetOrgnr.get());
         } else {
-            String orgnr = fagsak.finnVirksomhetsOrgnr().orElse(null);
-            arkivsakID = arkivsakService.opprettSakForVirksomhet(saksnummer, tema, orgnr);
+            throw new FunksjonellException("Finner verken bruker eller virksomhet tilknyttet fagsak " + saksnummer);
         }
         fagsak.setGsakSaksnummer(arkivsakID);
         fagsakService.lagre(fagsak);

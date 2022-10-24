@@ -112,4 +112,23 @@ class OpprettArkivsakTest {
             .withMessageContaining("allerede knyttet til");
 
     }
+
+    @Test
+    void utfør_harVerkenBrukerIDEllerVirksomhetOrgnr_kasterException() {
+        unleash.enable("melosys.behandle_alle_saker");
+        Fagsak fagsak = new Fagsak();
+        fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
+        fagsak.setSaksnummer("MEL-4321");
+
+        Behandling behandling = new Behandling();
+        behandling.setFagsak(fagsak);
+
+        Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setBehandling(behandling);
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> opprettArkivsak.utfør(prosessinstans))
+            .withMessageContaining("Finner verken bruker eller virksomhet tilknyttet fagsak MEL-4321");
+
+    }
 }
