@@ -1,11 +1,10 @@
 package no.nav.melosys.saksflyt.steg.jfr;
 
+import java.util.Optional;
+
 import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.Tema;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
-import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
@@ -15,8 +14,6 @@ import no.nav.melosys.service.sak.FagsakService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-
-import java.util.Optional;
 
 import static no.nav.melosys.domain.TemaFactory.fraBehandlingstema;
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.OPPRETT_ARKIVSAK;
@@ -62,7 +59,8 @@ public class OpprettArkivsak implements StegBehandler {
         if (aktørId.isPresent()) {
             arkivsakID = arkivsakService.opprettSakForBruker(saksnummer, tema, aktørId.get());
         } else {
-            arkivsakID = arkivsakService.opprettSakForVirksomhet(saksnummer, tema, prosessinstans.getData(ProsessDataKey.VIRKSOMHET_ORGNR));
+            String orgnr = fagsak.finnVirksomhetsOrgnr().orElse(null);
+            arkivsakID = arkivsakService.opprettSakForVirksomhet(saksnummer, tema, orgnr);
         }
         fagsak.setGsakSaksnummer(arkivsakID);
         fagsakService.lagre(fagsak);

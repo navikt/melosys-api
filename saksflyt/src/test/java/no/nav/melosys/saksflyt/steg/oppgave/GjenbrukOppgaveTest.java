@@ -25,7 +25,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -54,7 +53,7 @@ class GjenbrukOppgaveTest {
         final String oppgaveBeskrivelse = "jeg beskriver oppgave";
 
         Oppgave eksisterendeOppgave = new Oppgave.Builder().setBeskrivelse(oppgaveBeskrivelse).build();
-        when(oppgaveService.hentOppgaveMedOppgaveID(eq(oppgaveID))).thenReturn(eksisterendeOppgave);
+        when(oppgaveService.hentOppgaveMedOppgaveID(oppgaveID)).thenReturn(eksisterendeOppgave);
 
         gjenbrukOppgave.utfør(lagProsessinstans(oppgaveID, saksnummer, false));
         verify(oppgaveService).opprettOppgave(oppgaveCaptor.capture());
@@ -74,7 +73,7 @@ class GjenbrukOppgaveTest {
         final String oppgaveBeskrivelse = "jeg beskriver oppgave";
 
         Oppgave eksisterendeOppgave = new Oppgave.Builder().setBeskrivelse(oppgaveBeskrivelse).build();
-        when(oppgaveService.hentOppgaveMedOppgaveID(eq(oppgaveID))).thenReturn(eksisterendeOppgave);
+        when(oppgaveService.hentOppgaveMedOppgaveID(oppgaveID)).thenReturn(eksisterendeOppgave);
 
         gjenbrukOppgave.utfør(lagProsessinstans(oppgaveID, saksnummer, true));
         verify(oppgaveService).opprettOppgave(oppgaveCaptor.capture());
@@ -95,7 +94,7 @@ class GjenbrukOppgaveTest {
         final String oppgaveBeskrivelse = "jeg beskriver oppgave";
 
         Oppgave eksisterendeOppgave = new Oppgave.Builder().setBeskrivelse(oppgaveBeskrivelse).build();
-        when(oppgaveService.hentOppgaveMedOppgaveID(eq(oppgaveID))).thenReturn(eksisterendeOppgave);
+        when(oppgaveService.hentOppgaveMedOppgaveID(oppgaveID)).thenReturn(eksisterendeOppgave);
 
         gjenbrukOppgave.utfør(lagProsessinstans(oppgaveID, saksnummer, false));
         verify(oppgaveService).opprettOppgave(oppgaveCaptor.capture());
@@ -116,13 +115,13 @@ class GjenbrukOppgaveTest {
         fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
         Prosessinstans prosessinstans = new Prosessinstans();
 
-        Aktoer bruker = new Aktoer();
-        Aktoer virksomhet = new Aktoer();
         if (erForVirksomhet) {
-            prosessinstans.setData(ProsessDataKey.VIRKSOMHET_ORGNR, "999999999");
+            Aktoer virksomhet = new Aktoer();
+            virksomhet.setOrgnr("999999999");
             virksomhet.setRolle(Aktoersroller.VIRKSOMHET);
             fagsak.getAktører().add(virksomhet);
         } else {
+            Aktoer bruker = new Aktoer();
             bruker.setAktørId("123321");
             bruker.setRolle(Aktoersroller.BRUKER);
             fagsak.getAktører().add(bruker);
