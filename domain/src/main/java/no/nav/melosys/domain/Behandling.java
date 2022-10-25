@@ -527,8 +527,48 @@ public class Behandling extends RegistreringsInfo {
             || BESLUTNING_LOVVALG_ANNET_LAND.getKode().equalsIgnoreCase(behandlingstemaKode);
     }
 
-    public static LocalDate utledFristForBehandling(Sakstemaer sakstema, Behandlingstema behandlingstema, Behandlingstyper behandlingstyper) {
-        return BehandlingfristKriterier.hentBehandlingsFrist(sakstema, behandlingstema, behandlingstyper);
+    public static LocalDate utledFristForBehandling(Sakstemaer sakstema, Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
+        Set<Behandlingstyper> gamleBehandlingstyperSomSkalMigreresSenere = Set.of(
+            Behandlingstyper.ANKE,
+            Behandlingstyper.SED,
+            Behandlingstyper.SOEKNAD
+        );
+        if (gamleBehandlingstyperSomSkalMigreresSenere.contains(behandlingstype)) {
+            return utledFristForBehandlingtema(behandlingstema);
+        }
+        return BehandlingfristKriterier.hentBehandlingsFrist(sakstema, behandlingstema, behandlingstype);
+    }
+
+    /**
+     * @deprecated Fjernes etter migreringen av behandlingstyper og toggle melosys.behandle_alle_saker
+     */
+    @Deprecated
+    public static LocalDate utledFristForBehandlingtema(Behandlingstema behandlingstema) {
+        return switch (behandlingstema) {
+            case UTSENDT_ARBEIDSTAKER,
+                UTSENDT_SELVSTENDIG,
+                ARBEID_FLERE_LAND,
+                ARBEID_ETT_LAND_ØVRIG,
+                ARBEID_TJENESTEPERSON_ELLER_FLY,
+                ARBEID_KUN_NORGE,
+                IKKE_YRKESAKTIV,
+                ARBEID_I_UTLANDET,
+                ARBEID_NORGE_BOSATT_ANNET_LAND,
+                YRKESAKTIV,
+                UNNTAK_MEDLEMSKAP,
+                REGISTRERING_UNNTAK,
+                PENSJONIST -> LocalDate.now().plusDays(30);
+            case REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING,
+                REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE -> LocalDate.now().plusWeeks(2);
+            case BESLUTNING_LOVVALG_NORGE,
+                BESLUTNING_LOVVALG_ANNET_LAND -> LocalDate.now().plusWeeks(4);
+            case ANMODNING_OM_UNNTAK_HOVEDREGEL,
+                ØVRIGE_SED_UFM,
+                ØVRIGE_SED_MED,
+                FORESPØRSEL_TRYGDEMYNDIGHET,
+                TRYGDETID -> LocalDate.now().plusWeeks(8);
+            case VIRKSOMHET -> LocalDate.now().plusDays(90);
+        };
     }
 
     public boolean harStatus(Behandlingsstatus status) {

@@ -411,6 +411,82 @@ class BehandlingServiceTest {
     }
 
     @Test
+    void nyBehandling_frist8Uker_toggleEnabled() {
+        fakeUnleash.enableAll();
+        String initierendeJournalpostId = "234";
+        String initierendeDokumentId = "221234";
+        Fagsak fagsak = new Fagsak();
+        fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
+        LocalDate frist8Uker = LocalDate.now().plusWeeks(8);
+        Behandling behandling = behandlingService.nyBehandling(fagsak, Behandlingsstatus.OPPRETTET, FØRSTEGANG, BESLUTNING_LOVVALG_ANNET_LAND, initierendeJournalpostId, initierendeDokumentId);
+
+        verify(behandlingRepository).save(behandling);
+        verify(behandlingsresultatService).lagreNyttBehandlingsresultat(behandling);
+
+        assertThat(behandling.getBehandlingsfrist()).isEqualTo(frist8Uker);
+        assertThat(behandling.getStatus()).isEqualTo(Behandlingsstatus.OPPRETTET);
+        assertThat(behandling.getInitierendeJournalpostId()).isEqualTo(initierendeJournalpostId);
+        assertThat(behandling.getInitierendeDokumentId()).isEqualTo(initierendeDokumentId);
+    }
+
+    @Test
+    void nyBehandling_frist70Dager_toggleEnabled() {
+        fakeUnleash.enableAll();
+        String initierendeJournalpostId = "234";
+        String initierendeDokumentId = "221234";
+        Fagsak fagsak = new Fagsak();
+        fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
+        LocalDate frist8Uker = LocalDate.now().plusDays(70);
+        Behandling behandling = behandlingService.nyBehandling(fagsak, Behandlingsstatus.OPPRETTET, KLAGE, BESLUTNING_LOVVALG_ANNET_LAND, initierendeJournalpostId, initierendeDokumentId);
+
+        verify(behandlingRepository).save(behandling);
+        verify(behandlingsresultatService).lagreNyttBehandlingsresultat(behandling);
+
+        assertThat(behandling.getBehandlingsfrist()).isEqualTo(frist8Uker);
+        assertThat(behandling.getStatus()).isEqualTo(Behandlingsstatus.OPPRETTET);
+        assertThat(behandling.getInitierendeJournalpostId()).isEqualTo(initierendeJournalpostId);
+        assertThat(behandling.getInitierendeDokumentId()).isEqualTo(initierendeDokumentId);
+    }
+
+    @Test
+    void nyBehandling_frist90Dager_toggleEnabled() {
+        fakeUnleash.enableAll();
+        String initierendeJournalpostId = "234";
+        String initierendeDokumentId = "221234";
+        Fagsak fagsak = new Fagsak();
+        fagsak.setTema(Sakstemaer.TRYGDEAVGIFT);
+        LocalDate frist8Uker = LocalDate.now().plusDays(90);
+        Behandling behandling = behandlingService.nyBehandling(fagsak, Behandlingsstatus.OPPRETTET, FØRSTEGANG, ARBEID_KUN_NORGE, initierendeJournalpostId, initierendeDokumentId);
+
+        verify(behandlingRepository).save(behandling);
+        verify(behandlingsresultatService).lagreNyttBehandlingsresultat(behandling);
+
+        assertThat(behandling.getBehandlingsfrist()).isEqualTo(frist8Uker);
+        assertThat(behandling.getStatus()).isEqualTo(Behandlingsstatus.OPPRETTET);
+        assertThat(behandling.getInitierendeJournalpostId()).isEqualTo(initierendeJournalpostId);
+        assertThat(behandling.getInitierendeDokumentId()).isEqualTo(initierendeDokumentId);
+    }
+
+    @Test
+    void nyBehandling_frist180Dager_toggleEnabled() {
+        fakeUnleash.enableAll();
+        String initierendeJournalpostId = "234";
+        String initierendeDokumentId = "221234";
+        Fagsak fagsak = new Fagsak();
+        fagsak.setTema(Sakstemaer.UNNTAK);
+        LocalDate frist8Uker = LocalDate.now().plusDays(180);
+        Behandling behandling = behandlingService.nyBehandling(fagsak, Behandlingsstatus.OPPRETTET, FØRSTEGANG, REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING, initierendeJournalpostId, initierendeDokumentId);
+
+        verify(behandlingRepository).save(behandling);
+        verify(behandlingsresultatService).lagreNyttBehandlingsresultat(behandling);
+
+        assertThat(behandling.getBehandlingsfrist()).isEqualTo(frist8Uker);
+        assertThat(behandling.getStatus()).isEqualTo(Behandlingsstatus.OPPRETTET);
+        assertThat(behandling.getInitierendeJournalpostId()).isEqualTo(initierendeJournalpostId);
+        assertThat(behandling.getInitierendeDokumentId()).isEqualTo(initierendeDokumentId);
+    }
+
+    @Test
     void replikerBehandling_replikererObjekterOgCollections() throws NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
         Behandling tidligsteInaktiveBehandling = opprettBehandlingMedData();
         Behandling replikertBehandling = behandlingService.replikerBehandling(tidligsteInaktiveBehandling, ENDRET_PERIODE);
