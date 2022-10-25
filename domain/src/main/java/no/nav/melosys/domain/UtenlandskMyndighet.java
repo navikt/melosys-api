@@ -6,7 +6,7 @@ import java.util.Set;
 import javax.persistence.*;
 
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
-import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
 
 @Entity
 @Table(name = "utenlandsk_myndighet")
@@ -37,13 +37,12 @@ public class UtenlandskMyndighet {
     public Set<Preferanse> preferanser = new HashSet<>();
 
     @Enumerated(EnumType.STRING)
-    public Landkoder landkode;
+    public Land_iso2 landkode;
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof UtenlandskMyndighet)) return false;
-        UtenlandskMyndighet that = (UtenlandskMyndighet) o;
+        if (!(o instanceof UtenlandskMyndighet that)) return false;
         return institusjonskode.equals(that.institusjonskode) &&
             land.equals(that.land);
     }
@@ -62,7 +61,14 @@ public class UtenlandskMyndighet {
         return adresse;
     }
 
-    public static Landkoder konverterInstitusjonIdTilLandkode(String institusjonID) {
-        return Landkoder.valueOf(institusjonID.split(":")[0].replaceAll("[^a-zA-Z]", ""));
+    public String hentInstitusjonID() {
+        if (institusjonskode == null) {
+            return landkode.getKode();
+        }
+        return landkode + ":" + institusjonskode;
+    }
+
+    public static Land_iso2 konverterInstitusjonIdTilLandkode(String institusjonID) {
+        return Land_iso2.valueOf(institusjonID.split(":")[0].replaceAll("[^a-zA-Z]", ""));
     }
 }

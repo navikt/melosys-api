@@ -46,6 +46,7 @@ public class DokumentServiceFasade {
             .medBegrunnelseKode(brevbestillingRequest.getBegrunnelseKode())
             .medYtterligereInformasjon(brevbestillingRequest.getYtterligereInformasjon())
             .medBehandling(behandling)
+            .medDistribusjonsType(brevbestillingRequest.getDistribusjonstype())
             .medFritekst(brevbestillingRequest.getFritekst()).build();
         produserDokument(behandlingId, brevbestilling, brevbestillingRequest, Mottaker.av(brevbestillingRequest.getMottaker()));
     }

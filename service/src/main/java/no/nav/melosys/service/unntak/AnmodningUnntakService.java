@@ -12,7 +12,7 @@ import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.arkiv.DokumentReferanse;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.SedType;
-import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
@@ -92,7 +92,7 @@ public class AnmodningUnntakService {
     }
 
     private Set<String> validerMottakerInstitusjon(long behandlingID, String mottakerinstitusjon) {
-        Landkoder landkode = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID).stream().findFirst()
+        Land_iso2 landkode = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID).stream().findFirst()
             .orElseThrow(() -> new FunksjonellException("Finner ikke utenlandsk myndighet for behandling " + behandlingID));
 
         return eessiService.validerOgAvklarMottakerInstitusjonerForBuc(

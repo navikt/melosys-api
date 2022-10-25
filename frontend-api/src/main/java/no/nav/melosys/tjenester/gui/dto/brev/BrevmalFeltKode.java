@@ -1,8 +1,8 @@
 package no.nav.melosys.tjenester.gui.dto.brev;
 
 public enum BrevmalFeltKode {
-
     BREV_TITTEL("Tittel"),
+    DISTRIBUSJONSTYPE("Type brev"),
     STANDARDTEKST_KONTAKTINFORMASJON("Legg til standardtekst med kontaktinformasjon nederst i brevet"),
     FRITEKST("Tekst til brev"),
     INNLEDNING_FRITEKST("Innledningstekst"),

@@ -62,6 +62,7 @@ class OpprettOppgaveTest {
         final String saksbehandler = "meg!";
 
         Aktoer virksomhet = new Aktoer();
+        virksomhet.setOrgnr(orgnr);
         virksomhet.setRolle(Aktoersroller.VIRKSOMHET);
         virksomhet.setAktørId(orgnr);
 
@@ -75,7 +76,6 @@ class OpprettOppgaveTest {
 
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
-        prosessinstans.setData(ProsessDataKey.VIRKSOMHET_ORGNR, orgnr);
         prosessinstans.setData(ProsessDataKey.SKAL_TILORDNES, true);
         prosessinstans.setData(ProsessDataKey.SAKSBEHANDLER, saksbehandler);
 

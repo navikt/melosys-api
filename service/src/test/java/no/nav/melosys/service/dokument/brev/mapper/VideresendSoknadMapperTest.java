@@ -7,6 +7,7 @@ import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.UtenlandskMyndighet;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.service.dokument.brev.BrevDataVideresend;
 import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
@@ -45,7 +46,7 @@ public class VideresendSoknadMapperTest {
         utenlandskMyndighet.postnummer = "SE-621 22";
         utenlandskMyndighet.poststed = "Visby";
         utenlandskMyndighet.land = "Sverige";
-        utenlandskMyndighet.landkode = Landkoder.SE;
+        utenlandskMyndighet.landkode = Land_iso2.SE;
         brevDataVideresend.trygdemyndighet = utenlandskMyndighet;
         return brevDataVideresend;
     }

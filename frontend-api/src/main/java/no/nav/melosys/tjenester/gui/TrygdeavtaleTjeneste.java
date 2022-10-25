@@ -3,6 +3,7 @@ package no.nav.melosys.tjenester.gui;
 import java.util.Collections;
 
 import io.swagger.annotations.Api;
+import no.nav.melosys.domain.kodeverk.Trygdeavtale_myndighetsland;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
@@ -77,7 +78,7 @@ public class TrygdeavtaleTjeneste {
             behandling.getType().getKode(),
             aksesskontroll.behandlingKanRedigeresAvSaksbehandler(behandling, saksbehandler),
             behandlingsgrunnlagdata.periode,
-            behandlingsgrunnlagdata.soeknadsland.landkoder,
+            behandlingsgrunnlagdata.soeknadsland.hentSoeknadslandForTrygdeavtale(),
             hentVirksomheter ? trygdeavtaleService.hentVirksomheter(behandling) : Collections.emptyMap(),
             hentBarnEktefeller ? trygdeavtaleService.hentFamiliemedlemmer(behandling) : Collections.emptyList(),
             behandlingsResultat.getInnledningFritekst(),

@@ -168,56 +168,6 @@ class FagsakTjenesteTest {
     }
 
     @Test
-    void lagNyBehandling_feiler_uten_behandlingstema() throws Exception {
-        Fagsak fagsak = SaksbehandlingDataFactory.lagFagsak("MEL-1");
-        var behandling = new Behandling();
-        behandling.setFagsak(fagsak);
-        behandling.setId(123L);
-
-        fagsak.setBehandlinger(Collections.singletonList(behandling));
-        var opprettSakDto = new OpprettSakDto();
-        opprettSakDto.setBrukerID(FNR);
-        opprettSakDto.setBehandlingstype(Behandlingstyper.NY_VURDERING);
-
-        mockMvc.perform(post(BASE_URL + "/{saksnr}/behandlinger", fagsak.getSaksnummer())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(opprettSakDto)))
-            .andExpect(status().isBadRequest())
-            .andExpect(jsonPath("$.message", equalTo("Behandlingstema mangler")));
-    }
-
-    @Test
-    void lagNyBehandling_feiler_uten_behandlingstype() throws Exception {
-        Fagsak fagsak = SaksbehandlingDataFactory.lagFagsak("MEL-1");
-        var behandling = new Behandling();
-        behandling.setFagsak(fagsak);
-        behandling.setId(123L);
-
-        fagsak.setBehandlinger(Collections.singletonList(behandling));
-        var opprettSakDto = new OpprettSakDto();
-        opprettSakDto.setBrukerID(FNR);
-        opprettSakDto.setBehandlingstema(Behandlingstema.ARBEID_I_UTLANDET);
-
-        mockMvc.perform(post(BASE_URL + "/{saksnr}/behandlinger", fagsak.getSaksnummer())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(opprettSakDto)))
-            .andExpect(status().isBadRequest())
-            .andExpect(jsonPath("$.message", equalTo("Behandlingstype mangler")));
-    }
-
-    @Test
-    void lagNyBehandling_utenFnrEllerOrgnr_badRequestException() throws Exception {
-        mockFagsakTjeneste(null);
-        var opprettSakDto = new OpprettSakDto();
-        opprettSakDto.setHovedpart(Aktoersroller.VIRKSOMHET);
-
-        mockMvc.perform(post(BASE_URL + "/{saksnr}/behandlinger", "123")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(opprettSakDto)))
-            .andExpect(status().isBadRequest());
-    }
-
-    @Test
     void hentFagsaker_medFnr_verifiserErMappetKorrekt() throws Exception {
         Fagsak fagsak = SaksbehandlingDataFactory.lagFagsak("MEL-1");
         var behandling = new Behandling();

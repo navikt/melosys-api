@@ -7,6 +7,7 @@ import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_usa;
 import no.nav.melosys.service.kontroll.feature.arbeidutland.kontroll.ArbeidUtlandKontroll;
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.FerdigbehandlingKontrollData;
 import no.nav.melosys.service.kontroll.regler.ArbeidsstedRegler;
@@ -14,6 +15,8 @@ import no.nav.melosys.service.kontroll.regler.OverlappendeMedlemskapsperioderReg
 import no.nav.melosys.service.kontroll.regler.PeriodeRegler;
 import no.nav.melosys.service.kontroll.regler.PersonRegler;
 import no.nav.melosys.service.validering.Kontrollfeil;
+
+import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk.*;
 
 final class FerdigbehandlingKontroll {
 
@@ -46,7 +49,7 @@ final class FerdigbehandlingKontroll {
     static Kontrollfeil periodeOverTreÅr(FerdigbehandlingKontrollData kontrollData) {
         PeriodeOmLovvalg lovvalgsperiode = kontrollData.lovvalgsperiode();
 
-        return lovvalgsperiode.getBestemmelse() == Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1
+        return lovvalgsperiode.getBestemmelse() == UK_ART6_1
             && PeriodeRegler.periodeOver3År(lovvalgsperiode.getFom(), lovvalgsperiode.getTom())
             ? new Kontrollfeil(Kontroll_begrunnelser.MER_ENN_TRE_ÅR) : null;
     }
@@ -74,8 +77,20 @@ final class FerdigbehandlingKontroll {
     }
 
     private static boolean erBestemmelseDerTrygdeavtaleAttestSendes(LovvalgBestemmelse bestemmelse) {
+        return erBestemmelseDerTrygdeavtaleAttestSendesUK(bestemmelse) || erBestemmelseDerTrygdeavtaleAttestSendesUSA(bestemmelse);
+    }
+
+    private static boolean erBestemmelseDerTrygdeavtaleAttestSendesUK(LovvalgBestemmelse bestemmelse) {
         return bestemmelse == Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1
             || bestemmelse == Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_5
             || bestemmelse == Lovvalgbestemmelser_trygdeavtale_uk.UK_ART7_3;
+    }
+
+    private static boolean erBestemmelseDerTrygdeavtaleAttestSendesUSA(LovvalgBestemmelse bestemmelse) {
+        return bestemmelse == Lovvalgbestemmelser_trygdeavtale_usa.USA_ART5_2
+            || bestemmelse == Lovvalgbestemmelser_trygdeavtale_usa.USA_ART5_4
+            || bestemmelse == Lovvalgbestemmelser_trygdeavtale_usa.USA_ART5_5
+            || bestemmelse == Lovvalgbestemmelser_trygdeavtale_usa.USA_ART5_6
+            || bestemmelse == Lovvalgbestemmelser_trygdeavtale_usa.USA_ART5_9;
     }
 }

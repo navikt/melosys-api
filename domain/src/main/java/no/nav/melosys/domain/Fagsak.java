@@ -211,7 +211,7 @@ public class Fagsak extends RegistreringsInfo {
     /**
      * Henter myndighetens landkode fra institusjonsID som har format landkode:institusjonskode.
      */
-    public Landkoder hentMyndighetLandkode() {
+    public Land_iso2 hentMyndighetLandkode() {
         return hentMyndighet().hentMyndighetLandkode();
     }
 

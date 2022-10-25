@@ -5,6 +5,7 @@ public class FritekstbrevBrevbestilling extends DokgenBrevbestilling {
     private String fritekst;
     private boolean kontaktopplysninger;
     private String navnFullmektig;
+    private boolean brukerSkalHaKopi;
 
     public FritekstbrevBrevbestilling() {
         super();
@@ -17,6 +18,7 @@ public class FritekstbrevBrevbestilling extends DokgenBrevbestilling {
         this.fritekst = builder.fritekst;
         this.kontaktopplysninger = builder.kontaktopplysninger;
         this.navnFullmektig = builder.navnFullmektig;
+        this.brukerSkalHaKopi = builder.brukerSkalHaKopi;
     }
 
     public String getFritekstTittel() {
@@ -35,6 +37,10 @@ public class FritekstbrevBrevbestilling extends DokgenBrevbestilling {
         return navnFullmektig;
     }
 
+    public boolean isBrukerSkalHaKopi() {
+        return brukerSkalHaKopi;
+    }
+
     public Builder toBuilder() {
         return new Builder(this);
     }
@@ -44,6 +50,7 @@ public class FritekstbrevBrevbestilling extends DokgenBrevbestilling {
         private String fritekst;
         private boolean kontaktopplysninger;
         private String navnFullmektig;
+        private boolean brukerSkalHaKopi;
 
         public Builder() {
         }
@@ -54,6 +61,7 @@ public class FritekstbrevBrevbestilling extends DokgenBrevbestilling {
             this.fritekst = fritekstbrevBrevbestilling.fritekst;
             this.kontaktopplysninger = fritekstbrevBrevbestilling.kontaktopplysninger;
             this.navnFullmektig = fritekstbrevBrevbestilling.navnFullmektig;
+            this.brukerSkalHaKopi = fritekstbrevBrevbestilling.brukerSkalHaKopi;
         }
 
         public Builder medFritekstTittel(String fritekstTittel) {
@@ -73,6 +81,11 @@ public class FritekstbrevBrevbestilling extends DokgenBrevbestilling {
 
         public Builder medNavnFullmektig(String navnFullmektig) {
             this.navnFullmektig = navnFullmektig;
+            return this;
+        }
+
+        public Builder medBrukerSkalHaKopi(boolean brukerSkalHaKopi) {
+            this.brukerSkalHaKopi = brukerSkalHaKopi;
             return this;
         }
 

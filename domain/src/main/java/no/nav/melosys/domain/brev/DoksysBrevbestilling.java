@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.List;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.arkiv.Distribusjonstype;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 
@@ -13,6 +14,8 @@ public class DoksysBrevbestilling extends Brevbestilling {
     private Collection<Mottaker> mottakere;
     private String begrunnelseKode;
     private String fritekst;
+
+    private Distribusjonstype distribusjonstype;
     private String ytterligereInformasjon;
 
     public DoksysBrevbestilling() {
@@ -25,13 +28,16 @@ public class DoksysBrevbestilling extends Brevbestilling {
                                    Behandling behandling,
                                    String begrunnelseKode,
                                    String fritekst,
-                                   String ytterligereInformasjon) {
+                                   String ytterligereInformasjon,
+                                   Distribusjonstype distribusjonstype
+    ) {
         super(produserbartdokument, behandling, avsenderID);
         this.mottakerRolle = mottakerRolle;
         this.mottakere = mottakere;
         this.begrunnelseKode = begrunnelseKode;
         this.fritekst = fritekst;
         this.ytterligereInformasjon = ytterligereInformasjon;
+        this.distribusjonstype = distribusjonstype;
     }
 
     public Aktoersroller getMottakerRolle() {
@@ -50,6 +56,10 @@ public class DoksysBrevbestilling extends Brevbestilling {
         return fritekst;
     }
 
+    public Distribusjonstype getDistribusjonstype() {
+        return distribusjonstype;
+    }
+
     public String getYtterligereInformasjon() {
         return ytterligereInformasjon;
     }
@@ -66,6 +76,7 @@ public class DoksysBrevbestilling extends Brevbestilling {
         private Behandling behandling;
         private String begrunnelseKode;
         private String fritekst;
+        private Distribusjonstype distribusjonstype;
         private String ytterligereInformasjon;
 
         public Builder medProduserbartDokument(Produserbaredokumenter produserbartdokument) {
@@ -82,7 +93,6 @@ public class DoksysBrevbestilling extends Brevbestilling {
             this.mottakerRolle = mottakerRolle;
             return this;
         }
-
 
         public Builder medMottakere(Mottaker... mottakere) {
             this.mottakere = Arrays.asList(mottakere);
@@ -109,6 +119,11 @@ public class DoksysBrevbestilling extends Brevbestilling {
             return this;
         }
 
+        public Builder medDistribusjonsType(Distribusjonstype distribusjonstype) {
+            this.distribusjonstype = distribusjonstype;
+            return this;
+        }
+
         public Builder medYtterligereInformasjon(String ytterligereInformasjon) {
             this.ytterligereInformasjon = ytterligereInformasjon;
             return this;
@@ -123,7 +138,8 @@ public class DoksysBrevbestilling extends Brevbestilling {
                 behandling,
                 begrunnelseKode,
                 fritekst,
-                ytterligereInformasjon
+                ytterligereInformasjon,
+                distribusjonstype
             );
         }
     }

@@ -13,7 +13,7 @@ import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.Tema
 import no.nav.melosys.domain.UtenlandskMyndighet
 import no.nav.melosys.domain.eessi.SedType
-import no.nav.melosys.domain.kodeverk.Landkoder
+import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
@@ -24,7 +24,6 @@ import no.nav.melosys.service.persondata.PersondataFasade
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import kotlin.test.assertEquals
 
 @ExtendWith(MockKExtension::class)
 class SedSomBrevServiceTest {
@@ -66,16 +65,18 @@ class SedSomBrevServiceTest {
         behandling.status = Behandlingsstatus.UNDER_BEHANDLING
         behandling.fagsak = fagsak
 
-        val utenlandskMyndighet: UtenlandskMyndighet = mockk<UtenlandskMyndighet>()
+        val utenlandskMyndighet: UtenlandskMyndighet =
+            UtenlandskMyndighet().apply { institusjonskode = "X7"; landkode = Land_iso2.AX }
 
-        every { utenlandskMyndighetServiceMock.hentUtenlandskMyndighet(Landkoder.SE) } returns utenlandskMyndighet
-        every { utenlandskMyndighetServiceMock.lagInstitusjonsId(utenlandskMyndighet) } returns INSTITUSJONS_ID
+        every { utenlandskMyndighetServiceMock.hentUtenlandskMyndighet(Land_iso2.SE) } returns utenlandskMyndighet
         every { fagsak.hentBrukersAktørID() } returns AKTØR_ID
         every { persondataFasadeMock.hentFolkeregisterident(any()) } returns BRUKER_FNR
-        every { fagsak.getSaksnummer() } returns SAKSNUMMER
+        every { fagsak.saksnummer } returns SAKSNUMMER
         every { fagsak.tema } returns Sakstemaer.MEDLEMSKAP_LOVVALG
 
-        sedSomBrevService.lagJournalpostForSendingAvSedSomBrev(SedType.A002, Landkoder.SE, behandling, null)
+
+        sedSomBrevService.lagJournalpostForSendingAvSedSomBrev(SedType.A002, Land_iso2.SE, behandling, null)
+
 
         verify {
             joarkFasadeMock.opprettJournalpost(withArg {opprettJournalpost ->
@@ -85,7 +86,6 @@ class SedSomBrevServiceTest {
     }
 
     companion object {
-        val INSTITUSJONS_ID = "5544"
         val BRUKER_FNR = "12345678922"
         val AKTØR_ID = "551122"
         val SAKSNUMMER= "789456"

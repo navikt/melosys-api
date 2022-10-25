@@ -4,7 +4,7 @@ import java.time.Instant;
 import java.util.*;
 
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.exception.FunksjonellException;
@@ -274,8 +274,8 @@ class FagsakTest {
         Fagsak fagsak = new Fagsak();
         fagsak.setAktører(Sets.newLinkedHashSet(aktoer));
 
-        Landkoder resultat = fagsak.hentMyndighetLandkode();
-        assertThat(resultat).isEqualByComparingTo(Landkoder.SE);
+        Land_iso2 resultat = fagsak.hentMyndighetLandkode();
+        assertThat(resultat).isEqualByComparingTo(Land_iso2.SE);
     }
 
     @Test

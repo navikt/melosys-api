@@ -5,7 +5,7 @@ import java.util.List;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.domain.UtenlandskMyndighet;
-import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.context.annotation.Scope;
@@ -32,7 +32,7 @@ public class AdresseTjeneste {
     @ApiOperation(
         value = "Henter adressen til en gitt utenlandsk myndighet",
         response = UtenlandskMyndighet.class)
-    public ResponseEntity<UtenlandskMyndighet> hentUtenlandskMyndighet(@PathVariable("landkode") Landkoder landkode) {
+    public ResponseEntity<UtenlandskMyndighet> hentUtenlandskMyndighet(@PathVariable("landkode") Land_iso2 landkode) {
         return ResponseEntity.ok(utenlandskMyndighetService.hentUtenlandskMyndighet(landkode));
     }
 
