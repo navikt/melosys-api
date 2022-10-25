@@ -26,7 +26,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.doksys.DokumentbestillingMetadata;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.UtenlandskMyndighetRepository;
-import no.nav.melosys.service.ldap.SaksbehandlerService;
+import no.nav.melosys.service.bruker.SaksbehandlerService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory;
 import org.junit.jupiter.api.BeforeEach;
