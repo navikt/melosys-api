@@ -13,9 +13,11 @@ import io.mockk.verify
 import no.finn.unleash.FakeUnleash
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.adresse.StrukturertAdresse
+import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData
 import no.nav.melosys.domain.dokument.SaksopplysningDokument
 import no.nav.melosys.domain.dokument.inntekt.InntektDokument
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument
+import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode
 import no.nav.melosys.domain.dokument.medlemskap.Periode
 import no.nav.melosys.domain.dokument.sed.SedDokument
 import no.nav.melosys.domain.dokument.utbetaling.UtbetalingDokument
@@ -28,6 +30,7 @@ import no.nav.melosys.repository.KontrollresultatRepository
 import no.nav.melosys.service.SaksbehandlingDataFactory
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
+import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService
 import no.nav.melosys.service.persondata.PersondataFasade
 import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory.*
 import org.junit.jupiter.api.BeforeEach
@@ -45,6 +48,9 @@ class UfmKontrollServiceTest {
     lateinit var behandlingsresultatService: BehandlingsresultatService
 
     @MockK
+    lateinit var behandlingsgrunnlagService: BehandlingsgrunnlagService
+
+    @MockK
     lateinit var behandlingService: BehandlingService
 
     @MockK
@@ -59,8 +65,9 @@ class UfmKontrollServiceTest {
     private val behandling: Behandling = SaksbehandlingDataFactory.lagBehandling()
     private val kontrollresultatSlot = slot<List<Kontrollresultat>>()
     private var sedDokument: SedDokument = SedDokument()
-    private var saksopplysningDokument = MedlemskapDokument()
+    private var medlemskapDokument = MedlemskapDokument()
     private var personopplysninger: Personopplysninger = lagPersonopplysninger()
+    private var behandlingsgrunnlagData: BehandlingsgrunnlagData = BehandlingsgrunnlagData()
 
     @BeforeEach
     fun setup() {
@@ -68,6 +75,7 @@ class UfmKontrollServiceTest {
         ufmKontrollService = UfmKontrollService(
             kontrollresultatRepository,
             behandlingsresultatService,
+            behandlingsgrunnlagService,
             behandlingService,
             persondataFasade,
             unleash
@@ -99,14 +107,142 @@ class UfmKontrollServiceTest {
         ufmKontrollService.utførKontrollerOgRegistrerFeil(BEHANDLING_ID)
     }
 
-    @Test
-    fun utførKontrollerOgRegistrerFeil_A003_medOverlappendePeriode_erOpprinnelig_ingenFeil() {
+    @Test // Ta vekk med a003-inn toggle
+    fun utførKontrollerOgRegistrerFeil_A003_medOverlappendePeriode_forventKontroll_overlappendePerioder_gammel() {
+        unleash.disableAll();
         sedDokument.apply {
             sedType = SedType.A003
             lovvalgslandKode = Landkoder.SE
             avsenderLandkode = Landkoder.SE
             lovvalgsperiode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))
-            erEndring = true;
+            setErEndring(false);
+        }
+        medlemskapDokument.apply {
+            medlemsperiode.add(
+                Medlemsperiode().apply {
+                    periode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))
+                }
+            )
+        }
+
+        personopplysninger.apply {
+            bostedsadresse = Bostedsadresse(
+                StrukturertAdresse().apply { landkode = "SE" }, null, null, null, null,
+                null,
+                false
+            );
+        }
+        every { kontrollresultatRepository.saveAll(capture(kontrollresultatSlot)) }
+            .answers {
+                kontrollresultatSlot.captured.shouldHaveSize(1)
+                    .sortedBy { it.begrunnelse }
+                    .apply {
+                        first().apply {
+                            begrunnelse.shouldBe(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER)
+                            behandlingsresultat.id.shouldBe(BEHANDLINGSRESULTAT_ID)
+                        }
+                    }
+            }
+        setupMockedTestData()
+
+
+        ufmKontrollService.utførKontrollerOgRegistrerFeil(BEHANDLING_ID)
+    }
+
+    @Test
+    fun utførKontrollerOgRegistrerFeil_A003_medOverlappendePeriode_erIkkeEndring_ingenFeil() {
+        sedDokument.apply {
+            sedType = SedType.A003
+            lovvalgslandKode = Landkoder.SE
+            avsenderLandkode = Landkoder.SE
+            lovvalgsperiode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))
+            setErEndring(false);
+        }
+        medlemskapDokument.apply {
+            medlemsperiode.add(
+                Medlemsperiode().apply {
+                    periode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))
+                }
+            )
+        }
+
+        personopplysninger.apply {
+            bostedsadresse = Bostedsadresse(
+                StrukturertAdresse().apply { landkode = "SE" }, null, null, null, null,
+                null,
+                false
+            );
+        }
+        every { kontrollresultatRepository.saveAll(capture(kontrollresultatSlot)) }
+            .answers {
+                kontrollresultatSlot.captured.shouldHaveSize(0).toList()
+            }
+        setupMockedTestData()
+
+
+        ufmKontrollService.utførKontrollerOgRegistrerFeil(BEHANDLING_ID)
+    }
+
+    @Test
+    fun utførKontrollerOgRegistrerFeil_A003_medOverlappendePeriode_erEndring_forventKontroll() {
+        sedDokument.apply {
+            sedType = SedType.A003
+            lovvalgslandKode = Landkoder.SE
+            avsenderLandkode = Landkoder.SE
+            lovvalgsperiode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))
+            setErEndring(true)
+        }
+        medlemskapDokument.apply {
+            medlemsperiode.add(
+                Medlemsperiode().apply {
+                    periode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))
+                }
+            )
+        }
+
+        personopplysninger.apply {
+            bostedsadresse = Bostedsadresse(
+                StrukturertAdresse().apply { landkode = "SE" }, null, null, null, null,
+                null,
+                false
+            );
+        }
+        every { kontrollresultatRepository.saveAll(capture(kontrollresultatSlot)) }
+            .answers {
+                kontrollresultatSlot.captured.shouldHaveSize(1)
+                    .sortedBy { it.begrunnelse }
+                    .apply {
+                        first().apply {
+                            begrunnelse.shouldBe(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER)
+                            behandlingsresultat.id.shouldBe(BEHANDLINGSRESULTAT_ID)
+                        }
+                    }
+            }
+        setupMockedTestData()
+
+
+        ufmKontrollService.utførKontrollerOgRegistrerFeil(BEHANDLING_ID)
+    }
+
+    @Test
+    fun utførKontrollerOgRegistrerFeil_A003_medOverlappendePeriode_harOpplysning_forventKontroll() {
+        sedDokument.apply {
+            sedType = SedType.A003
+            lovvalgslandKode = Landkoder.SE
+            avsenderLandkode = Landkoder.SE
+            lovvalgsperiode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))
+
+        }
+        medlemskapDokument.apply {
+            medlemsperiode.add(
+                Medlemsperiode().apply {
+                    periode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))
+                }
+            )
+            personopplysninger
+        }
+        behandlingsgrunnlagData.apply {
+            ytterligereInformasjon = "Vi har ekstra informasjon som en saksbehandler må manuelt behandle!"
         }
         personopplysninger.apply {
             bostedsadresse = Bostedsadresse(
@@ -117,13 +253,58 @@ class UfmKontrollServiceTest {
         }
         every { kontrollresultatRepository.saveAll(capture(kontrollresultatSlot)) }
             .answers {
-                kontrollresultatSlot.captured.shouldBeEmpty().toList()
+                kontrollresultatSlot.captured.shouldHaveSize(1)
+                    .sortedBy { it.begrunnelse }
+                    .apply {
+                        first().apply {
+                            begrunnelse.shouldBe(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER)
+                            behandlingsresultat.id.shouldBe(BEHANDLINGSRESULTAT_ID)
+                        }
+                    }
             }
         setupMockedTestData()
 
 
         ufmKontrollService.utførKontrollerOgRegistrerFeil(BEHANDLING_ID)
     }
+
+    @Test
+    fun utførKontrollerOgRegistrerFeil_A003_medOverlappendePeriode_harIkkeOpplysning_forventIkkeKontroll() {
+        sedDokument.apply {
+            sedType = SedType.A003
+            lovvalgslandKode = Landkoder.SE
+            avsenderLandkode = Landkoder.SE
+            lovvalgsperiode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))
+
+        }
+        medlemskapDokument.apply {
+            medlemsperiode.add(
+                Medlemsperiode().apply {
+                    periode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))
+                }
+            )
+            personopplysninger
+        }
+        behandlingsgrunnlagData.apply {
+            ytterligereInformasjon = null
+        }
+        personopplysninger.apply {
+            bostedsadresse = Bostedsadresse(
+                StrukturertAdresse().apply { landkode = "SE" }, null, null, null, null,
+                null,
+                false
+            );
+        }
+        every { kontrollresultatRepository.saveAll(capture(kontrollresultatSlot)) }
+            .answers {
+                kontrollresultatSlot.captured.shouldHaveSize(0).toList()
+            }
+        setupMockedTestData()
+
+
+        ufmKontrollService.utførKontrollerOgRegistrerFeil(BEHANDLING_ID)
+    }
+
 
     @Test
     fun utførKontrollerOgRegistrerFeil_A003_forventKontroll_bosattINorge() {
@@ -206,7 +387,7 @@ class UfmKontrollServiceTest {
 
     private fun setupMockedTestData() {
         behandling.saksopplysninger.add(lagSaksopplysning(sedDokument, SaksopplysningType.SEDOPPL))
-        behandling.saksopplysninger.add(lagSaksopplysning(saksopplysningDokument, SaksopplysningType.MEDL))
+        behandling.saksopplysninger.add(lagSaksopplysning(medlemskapDokument, SaksopplysningType.MEDL))
         behandling.saksopplysninger.add(lagSaksopplysning(InntektDokument(), SaksopplysningType.INNTK))
         behandling.saksopplysninger.add(lagSaksopplysning(UtbetalingDokument(), SaksopplysningType.UTBETAL))
 
@@ -216,6 +397,7 @@ class UfmKontrollServiceTest {
             .apply {
                 id = BEHANDLINGSRESULTAT_ID
             }
+        every { behandlingsgrunnlagService.hentBehandlingsgrunnlagdata(BEHANDLING_ID) } returns behandlingsgrunnlagData
     }
 
     private fun lagSaksopplysning(

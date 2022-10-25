@@ -58,6 +58,14 @@ public class BehandlingsgrunnlagService {
             .orElseThrow(() -> new IkkeFunnetException("Finner ikke behandlingsgrunnlag for behandling " + behandlingID));
     }
 
+    @Transactional(readOnly = true)
+    public BehandlingsgrunnlagData hentBehandlingsgrunnlagdata(long behandlingID) {
+        var behandlingsgrunnlag = finnBehandlingsgrunnlag(behandlingID)
+            .orElseThrow(() -> new IkkeFunnetException(("Finner ikke behandlingsgrunnlag for behandling " +
+                "%s til å kunne hente behandlingsgrunnlagdata").formatted(behandlingID)));
+        return behandlingsgrunnlag.getBehandlingsgrunnlagdata();
+    }
+
     public void opprettSedGrunnlag(long behandlingID,
                                    SedGrunnlag sedGrunnlag) {
         opprettBehandlingsgrunnlag(behandlingID, sedGrunnlag, Behandlingsgrunnlagtyper.SED, VERSJON_SED_GRUNNLAG);
@@ -70,13 +78,15 @@ public class BehandlingsgrunnlagService {
         if (unleash.isEnabled("melosys.tom_periode_og_land")) {
             soeknadsland = prosessinstans.getData(
                 ProsessDataKey.SØKNADSLAND,
-                new TypeReference<>() {},
+                new TypeReference<>() {
+                },
                 new Soeknadsland());
             periode = prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, Periode.class, new Periode());
         } else {
             soeknadsland = prosessinstans.getData(
                 ProsessDataKey.SØKNADSLAND,
-                new TypeReference<>() {});
+                new TypeReference<>() {
+                });
             periode = prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, Periode.class);
         }
         opprettSøknad(behandling, periode, soeknadsland);

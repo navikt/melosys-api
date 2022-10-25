@@ -37,11 +37,13 @@ public class BehandlingsgrunnlagData {
 
     public List<LuftfartBase> luftfartBaser = new ArrayList<>();
 
+    public String ytterligereInformasjon;
+
     public Bosted bosted = new Bosted();
 
     public Set<String> hentAlleOrganisasjonsnumre() {
         return Stream.of(selvstendigArbeid.hentAlleOrganisasjonsnumre(),
-            juridiskArbeidsgiverNorge.hentManueltRegistrerteArbeidsgiverOrgnumre())
+                juridiskArbeidsgiverNorge.hentManueltRegistrerteArbeidsgiverOrgnumre())
             .flatMap(i -> i)
             .filter(StringUtils::isNotEmpty)
             .collect(Collectors.toSet());
@@ -70,6 +72,7 @@ public class BehandlingsgrunnlagData {
             .distinct()
             .collect(Collectors.toList());
     }
+
     public Map<String, String> hentUtenlandskeArbeidsgivereUuidOgNavn() {
         return foretakUtland.stream()
             .filter(f -> Objects.nonNull(f.uuid))

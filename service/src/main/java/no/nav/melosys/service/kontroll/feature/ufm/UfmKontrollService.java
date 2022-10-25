@@ -16,6 +16,7 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.repository.KontrollresultatRepository;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
+import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.kontroll.feature.ufm.data.UfmKontrollData;
 import no.nav.melosys.service.kontroll.feature.ufm.kontroll.UfmKontrollsett;
 import no.nav.melosys.service.kontroll.regler.PeriodeRegler;
@@ -34,28 +35,29 @@ import static no.nav.melosys.metrics.MetrikkerNavn.UNNTAKSPERIODE_KONTROLL_TREFF
 public class UfmKontrollService {
     private static final Logger log = LoggerFactory.getLogger(UfmKontrollService.class);
 
+    static {
+        Arrays.stream(Kontroll_begrunnelser.values())
+            .forEach(b -> Metrics.counter(UNNTAKSPERIODE_KONTROLL_TREFF, TAG_BEGRUNNELSE, b.getKode()));
+    }
+
     private final KontrollresultatRepository kontrollresultatRepository;
     private final BehandlingsresultatService behandlingsresultatService;
+    private final BehandlingsgrunnlagService behandlingsgrunnlagService;
     private final BehandlingService behandlingService;
     private final PersondataFasade persondataFasade;
-
     private final Unleash unleash;
 
     public UfmKontrollService(KontrollresultatRepository kontrollresultatRepository,
                               BehandlingsresultatService behandlingsresultatService,
-                              BehandlingService behandlingService,
+                              BehandlingsgrunnlagService behandlingsgrunnlagService, BehandlingService behandlingService,
                               PersondataFasade persondataFasade,
                               Unleash unleash) {
         this.kontrollresultatRepository = kontrollresultatRepository;
         this.behandlingsresultatService = behandlingsresultatService;
+        this.behandlingsgrunnlagService = behandlingsgrunnlagService;
         this.behandlingService = behandlingService;
         this.persondataFasade = persondataFasade;
         this.unleash = unleash;
-    }
-
-    static {
-        Arrays.stream(Kontroll_begrunnelser.values())
-            .forEach(b -> Metrics.counter(UNNTAKSPERIODE_KONTROLL_TREFF, TAG_BEGRUNNELSE, b.getKode()));
     }
 
     @Transactional
@@ -82,7 +84,8 @@ public class UfmKontrollService {
         var medlemskapDokument = behandling.hentMedlemskapDokument();
         var inntektDokument = behandling.hentInntektDokument();
         var utbetalingDokument = behandling.finnUtbetalingDokument().orElse(null);
-        return new UfmKontrollData(sedDokument, persondata, medlemskapDokument, inntektDokument, utbetalingDokument);
+        var behandlingsgrunnlagData = behandlingsgrunnlagService.hentBehandlingsgrunnlagdata(behandling.getId());
+        return new UfmKontrollData(sedDokument, persondata, medlemskapDokument, inntektDokument, utbetalingDokument, behandlingsgrunnlagData);
     }
 
     private List<Kontroll_begrunnelser> utførKontroller(UfmKontrollData kontrollData, SedType sedType) {
