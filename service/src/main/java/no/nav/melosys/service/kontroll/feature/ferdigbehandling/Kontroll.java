@@ -72,7 +72,9 @@ class Kontroll {
     private Collection<Kontrollfeil> utførKontroller(Behandling behandling, Sakstyper sakstype) {
         var regelsettForVedtak = FerdigbehandlingKontrollsett.hentRegelsettForVedtak(sakstype);
         //TODO finn ut hva vi skal kontrollere for FTRL
-        if (regelsettForVedtak.isEmpty()) return Collections.emptySet();
+        if (sakstype.equals(Sakstyper.FTRL)) {
+            return Collections.emptySet();
+        }
         var ferdigbehandlingKontrollData = hentVedtakKontrollData(behandling);
         return regelsettForVedtak.stream()
             .map(f -> f.apply(ferdigbehandlingKontrollData))
