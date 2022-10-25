@@ -7,6 +7,9 @@ import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 
 import no.nav.melosys.domain.ErPeriode;
+import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
+import no.nav.melosys.domain.dokument.sed.SedDokument;
+import no.nav.melosys.integrasjon.medl.PeriodestatusMedl;
 import no.nav.melosys.service.kontroll.regler.overlapp.PeriodeOverlappSjekk;
 
 public final class PeriodeRegler {
@@ -107,6 +110,20 @@ public final class PeriodeRegler {
 
     private static boolean åpenPeriodeOverlapper(LocalDate fom, LocalDate tom, LocalDate åpenPeriode) {
         return fom.isAfter(åpenPeriode) && tom.isAfter(åpenPeriode);
+    }
+
+    public static boolean harOverlappendePerioderMedUlikSedLovvalgslandOgMedlLovvalgsland(SedDokument sedDokument,
+                                                                                          MedlemskapDokument medlemskapDokument) {
+        var sedLovvalgslandKode = sedDokument.getLovvalgslandKode();
+        if (sedLovvalgslandKode == null || medlemskapDokument == null) {
+            return true;
+        }
+
+        var sedLovvalgsperiode = sedDokument.getLovvalgsperiode();
+        return medlemskapDokument.hentMedlemsperioderHvorKildeIkkeLånekassen().stream().anyMatch(
+            medlemsperiode -> !PeriodestatusMedl.AVST.getKode().equals(medlemsperiode.status)
+                && PeriodeRegler.perioderOverlapperMerEnn1Dag(sedLovvalgsperiode, medlemsperiode.getPeriode())
+                && !sedLovvalgslandKode.getKode().equals(medlemsperiode.getLand()));
     }
 
     private static LocalDate tilLocalDate(Instant instant) {

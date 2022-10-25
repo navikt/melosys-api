@@ -5,8 +5,12 @@ import java.time.LocalDate;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.service.kontroll.feature.ufm.data.UfmKontrollData;
 import no.nav.melosys.service.kontroll.regler.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 final class UfmKontroll {
+
+    private static final Logger log = LoggerFactory.getLogger(UfmKontroll.class);
 
     private UfmKontroll() {
     }
@@ -73,11 +77,21 @@ final class UfmKontroll {
     }
 
     static Kontroll_begrunnelser overlappendeMedlemsperiodeForA003(UfmKontrollData kontrollData) {
-        if (OverlappendeMedlemskapsperioderRegler.harOverlappendeMedlemsperiodeMerEnn1DagFraSed(kontrollData.medlemskapDokument(), kontrollData.sedDokument().getLovvalgsperiode())) {
-            if (kontrollData.sedDokument().getErEndring()) {
+        var sedDokument = kontrollData.sedDokument();
+        var medlemskapDokument = kontrollData.medlemskapDokument();
+
+        if (OverlappendeMedlemskapsperioderRegler.harOverlappendeMedlemsperiodeMerEnn1DagFraSed(medlemskapDokument, sedDokument.getLovvalgsperiode())) {
+            if (sedDokument.getErEndring()) {
+                log.debug("Mottatt overlappende medlemsperiode for A003 som er en endring");
                 return Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER;
             }
             if (kontrollData.behandlingsgrunnlagData().ytterligereInformasjon != null) {
+                log.debug("Mottatt overlappende medlemsperiode for A003 som har satt ytterligere informasjon");
+                return Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER;
+            }
+            if (PeriodeRegler.harOverlappendePerioderMedUlikSedLovvalgslandOgMedlLovvalgsland(sedDokument, medlemskapDokument)) {
+                log.debug("Mottatt overlappende medlemsperiode for A003 som har ulik lovvalgsperioder mellom SED og " +
+                    "MEDL periode(r)");
                 return Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER;
             }
         }
