@@ -104,7 +104,8 @@ data class Personopplysninger(
      * Oppholdsadresse med master PDL
      * Oppholdsadresse med master Freg
      * Bostedsadresse
-     */  override fun hentGjeldendePostadresse(): Postadresse? {
+     */
+    override fun hentGjeldendePostadresse(): Postadresse? {
         return lagPostadresseFraKontaktadresser()
             .or { lagPostadresseFraOppholdsadresser() }
             .or { lagPostadresseFraBostedsadresse() }

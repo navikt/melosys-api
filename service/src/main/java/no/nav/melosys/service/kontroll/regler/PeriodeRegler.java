@@ -114,16 +114,15 @@ public final class PeriodeRegler {
 
     public static boolean harOverlappendePerioderMedUlikSedLovvalgslandOgMedlLovvalgsland(SedDokument sedDokument,
                                                                                           MedlemskapDokument medlemskapDokument) {
-        var sedLovvalgslandKode = sedDokument.getLovvalgslandKode();
-        if (sedLovvalgslandKode == null || medlemskapDokument == null) {
-            return true;
+        if (medlemskapDokument == null || medlemskapDokument.getMedlemsperiode().isEmpty()) {
+            return false;
         }
 
         var sedLovvalgsperiode = sedDokument.getLovvalgsperiode();
         return medlemskapDokument.hentMedlemsperioderHvorKildeIkkeLånekassen().stream().anyMatch(
             medlemsperiode -> !PeriodestatusMedl.AVST.getKode().equals(medlemsperiode.status)
                 && PeriodeRegler.perioderOverlapperMerEnn1Dag(sedLovvalgsperiode, medlemsperiode.getPeriode())
-                && !sedLovvalgslandKode.getKode().equals(medlemsperiode.getLand()));
+                && !sedDokument.getLovvalgslandKode().getKode().equals(medlemsperiode.getLand()));
     }
 
     private static LocalDate tilLocalDate(Instant instant) {
