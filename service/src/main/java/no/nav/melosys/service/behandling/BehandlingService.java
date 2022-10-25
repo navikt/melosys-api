@@ -102,7 +102,7 @@ public class BehandlingService {
         behandling.setFagsak(fagsak);
         behandling.setRegistrertDato(nå);
         behandling.setEndretDato(nå);
-        behandling.setBehandlingsfrist(Behandling.utledFristForBehandlingstema(behandlingstema));
+        behandling.setBehandlingsfrist(Behandling.utledFristForBehandling(fagsak.getTema(), behandlingstema, behandlingstype));
 
         behandling.setStatus(behandlingsstatus);
         behandling.setType(behandlingstype);
@@ -268,7 +268,11 @@ public class BehandlingService {
         behandlingsreplika.setOpprinneligBehandling(tidligsteInaktiveBehandling);
         behandlingsreplika.setBehandlingsgrunnlag(null);
         behandlingsreplika.setBehandlingsnotater(Collections.emptySet());
-        behandlingsreplika.setBehandlingsfrist(Behandling.utledFristForBehandlingstema(tidligsteInaktiveBehandling.getTema()));
+        behandlingsreplika.setBehandlingsfrist(Behandling.utledFristForBehandling(
+            tidligsteInaktiveBehandling.getFagsak().getTema(),
+            tidligsteInaktiveBehandling.getTema(),
+            tidligsteInaktiveBehandling.getType()
+        ));
         behandlingsreplika.setSaksopplysninger(new HashSet<>());
         behandlingRepository.save(behandlingsreplika);
 
@@ -300,7 +304,11 @@ public class BehandlingService {
         behandlingsreplika.setOpprinneligBehandling(tidligsteInaktiveBehandling);
         behandlingsreplika.setBehandlingsgrunnlag(replikerBehandlingsgrunnlag(behandlingsreplika, tidligsteInaktiveBehandling.getBehandlingsgrunnlag()));
         behandlingsreplika.setBehandlingsnotater(Collections.emptySet());
-        behandlingsreplika.setBehandlingsfrist(Behandling.utledFristForBehandlingstema(tidligsteInaktiveBehandling.getTema()));
+        behandlingsreplika.setBehandlingsfrist(Behandling.utledFristForBehandling(
+            tidligsteInaktiveBehandling.getFagsak().getTema(),
+            tidligsteInaktiveBehandling.getTema(),
+            tidligsteInaktiveBehandling.getType()
+        ));
 
         behandlingsreplika.setSaksopplysninger(new HashSet<>());
         for (Saksopplysning saksopplysning : tidligsteInaktiveBehandling.getSaksopplysninger()) {

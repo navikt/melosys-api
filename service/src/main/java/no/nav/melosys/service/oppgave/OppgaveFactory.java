@@ -1,8 +1,5 @@
 package no.nav.melosys.service.oppgave;
 
-import java.time.LocalDate;
-import java.util.List;
-
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Fagsystem;
@@ -15,6 +12,9 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.PrioritetType;
 import no.nav.melosys.exception.FunksjonellException;
+
+import java.time.LocalDate;
+import java.util.List;
 
 public final class OppgaveFactory {
 
@@ -65,7 +65,7 @@ public final class OppgaveFactory {
             .setTema(utledTema(sakstema))
             .setOppgavetype(utledOppgavetype(sakstype, behandlingstema, behandlingstype))
             .setBeskrivelse(utledBeskrivelse(oppgaveBehandlingstema, sakstype, sakstema, behandlingstema, behandlingstype))
-            .setFristFerdigstillelse(Behandling.utledFristForBehandlingstema(behandlingstema));
+            .setFristFerdigstillelse(Behandling.utledFristForBehandling(sakstema, behandlingstema, behandlingstype));
     }
 
     public static Oppgave.Builder lagBehandlingsoppgave(Fagsak fagsak, Behandling behandling) {
