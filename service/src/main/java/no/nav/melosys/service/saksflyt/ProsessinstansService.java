@@ -306,7 +306,7 @@ public class ProsessinstansService {
     public void opprettProsessinstansNySakFTRLTrygdeavtale(String journalpostID, OpprettSakDto opprettSakDto) {
         Prosessinstans prosessinstans = new Prosessinstans();
 
-        if (unleash.isEnabled("behandle_alle_saker")) {
+        if (unleash.isEnabled("melosys.behandle_alle_saker")) {
             prosessinstans.setData(VIRKSOMHET_ORGNR, opprettSakDto.getVirksomhetOrgnr());
         }
         prosessinstans.setType(ProsessType.OPPRETT_NY_SAK_FTRL_TRYGDEAVTALE_FRA_OPPGAVE);
