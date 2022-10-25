@@ -89,7 +89,8 @@ final class UfmKontroll {
                 log.debug("Mottatt overlappende medlemsperiode for A003 som har satt ytterligere informasjon");
                 return Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER;
             }
-            if (PeriodeRegler.harOverlappendePerioderMedUlikSedLovvalgslandOgMedlLovvalgsland(sedDokument, medlemskapDokument)) {
+            if (OverlappendeMedlemskapsperioderRegler.harOverlappendePerioderMedUlikSedLovvalgslandOgMedlLovvalgsland(
+                sedDokument, medlemskapDokument)) {
                 log.debug("Mottatt overlappende medlemsperiode for A003 som har ulik lovvalgsperioder mellom SED og " +
                     "MEDL periode(r)");
                 return Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER;
