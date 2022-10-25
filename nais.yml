@@ -27,6 +27,28 @@ spec:
     requests:
       cpu: 200m
       memory: 1024Mi
+  azure:
+    application:
+      enabled: true
+      tenant: {{TENANT_URL}}
+      claims:
+        extra:
+          - "NAVident"
+        groups:
+          - id: {{GROUP_MELOSYS_INNLOGGING}}
+        allowAllUsers: false
+  accessPolicy:
+    inbound:
+      rules:
+        - application: {{APP_NAME_FRONTEND}}
+        - application: {{APP_NAME_TRYGDEAVTALE}}
+    outbound:
+      rules:
+        - application: {{APP_NAME_OPPGAVE}}
+        - application: {{APP_NAME_PDL}}
+        - application: {{APP_NAME_SAF}}
+        - application: {{APP_NAME_MELOSYS_EESSI}}
+  webproxy: true
   vault:
     enabled: true
     paths:
@@ -37,8 +59,19 @@ spec:
     path: /internal/prometheus
   ingresses:
   - "https://{{ URL }}"
+  - "https://melosys-api-q1.dev-fss-pub.nais.io"
   env:
   - name: SPRING_PROFILES_ACTIVE
     value: nais
+  - name: GROUP_MELOSYS_INNLOGGING
+    value: {{GROUP_MELOSYS_INNLOGGING}}
+  - name: APP_NAME_OPPGAVE
+    value: {{APP_NAME_OPPGAVE}}
+  - name: APP_NAME_PDL
+    value: {{APP_NAME_PDL}}
+  - name: APP_NAME_SAF
+    value: {{APP_NAME_SAF}}
+  - name: APP_NAME_MELOSYS_EESSI
+    value: {{APP_NAME_MELOSYS_EESSI}}
   kafka:
     pool: {{ KAFKA_POOL }}
