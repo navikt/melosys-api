@@ -18,6 +18,7 @@ import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.brev.FastMottakerMedOrgnr;
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
 import no.nav.melosys.domain.person.Persondata;
@@ -38,21 +39,21 @@ import static no.nav.melosys.domain.behandlingsgrunnlag.data.IdentType.FNR;
 import static org.springframework.util.ObjectUtils.isEmpty;
 
 @Component
-public class StorbritanniaMapper {
+public class TrygdeavtaleMapper {
     private final AvklarteMedfolgendeFamilieService avklarteMedfølgendeFamilieService;
     private final AvklarteVirksomheterService avklarteVirksomheterService;
     private final LovvalgsperiodeService lovvalgsperiodeService;
 
-    public StorbritanniaMapper(AvklarteMedfolgendeFamilieService avklarteMedfølgendeFamilieService,
-                               AvklarteVirksomheterService avklarteVirksomheterService,
-                               LovvalgsperiodeService lovvalgsperiodeService) {
+    public TrygdeavtaleMapper(AvklarteMedfolgendeFamilieService avklarteMedfølgendeFamilieService,
+                              AvklarteVirksomheterService avklarteVirksomheterService,
+                              LovvalgsperiodeService lovvalgsperiodeService) {
         this.avklarteMedfølgendeFamilieService = avklarteMedfølgendeFamilieService;
         this.avklarteVirksomheterService = avklarteVirksomheterService;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
     }
 
     @Transactional
-    public InnvilgelseOgAttestStorbritannia map(InnvilgelseBrevbestilling brevbestilling) {
+    public InnvilgelseOgAttestStorbritannia map(InnvilgelseBrevbestilling brevbestilling, Land_iso2 søknadsland) {
         var innvilgelse = mapInnvilgelse(brevbestilling);
         return new InnvilgelseOgAttestStorbritannia.Builder(brevbestilling)
             .innvilgelse(innvilgelse)
@@ -62,16 +63,16 @@ public class StorbritanniaMapper {
             .build();
     }
 
-    private InnvilgelseStorbritannia mapInnvilgelse(InnvilgelseBrevbestilling brevbestilling) {
+    private InnvilgelseTrygdeavtale mapInnvilgelse(InnvilgelseBrevbestilling brevbestilling) {
         if (skalIkkeHaInnvilgelse(brevbestilling)) return null;
 
         var behandling = brevbestilling.getBehandling();
         var behandlingsgrunnlag = behandling.getBehandlingsgrunnlag();
         var lovvalgsperiode = lovvalgsperiodeService.hentLovvalgsperiode(behandling.getId());
 
-        return new InnvilgelseStorbritannia.Builder()
+        return new InnvilgelseTrygdeavtale.Builder()
             .innvilgelse(Innvilgelse.av(brevbestilling))
-            .artikkel((Lovvalgbestemmelser_trygdeavtale_uk) lovvalgsperiode.getBestemmelse())
+            .artikkel(lovvalgsperiode.getBestemmelse())
             .soknad(lagSøknad(behandlingsgrunnlag, lovvalgsperiode))
             .familie(lagFamile(behandling.getId()))
             .virksomhetArbeidsgiverSkalHaKopi(brevbestilling.isVirksomhetArbeidsgiverSkalHaKopi())
@@ -86,7 +87,7 @@ public class StorbritanniaMapper {
         var persondokument = brevbestilling.getPersondokument();
         var lovvalgsperioder = lovvalgsperiodeService.hentLovvalgsperioder(behandlingID);
 
-        var adresseSjekker = new StorbritanniaAdresseSjekker(persondokument);
+        var adresseSjekker = new TrygdeavtaleAdresseSjekker(persondokument);
 
         return new AttestStorbritannia.Builder(brevbestilling)
             .medfolgendeFamiliemedlemmer(mapMedfolgendeFamiliemedlemmer(behandlingID))
@@ -195,11 +196,11 @@ public class StorbritanniaMapper {
 
         var bestemmelse = lovvalgsperiode.getBestemmelse();
 
-        var adresseSjekker = new StorbritanniaAdresseSjekker(persondata);
+        var adresseSjekker = new TrygdeavtaleAdresseSjekker(persondata);
 
         return new Utsendelse.Builder()
-            .artikkel((Lovvalgbestemmelser_trygdeavtale_uk) bestemmelse)
-            .oppholdsadresseUK(adresseSjekker.finnGyldigStorbritanniaAdresse(lovvalgsperiode))
+            .artikkel(bestemmelse)
+            .oppholdsadresse(adresseSjekker.finnGyldigStorbritanniaAdresse(lovvalgsperiode))
             .startdato(lovvalgsperiode.getFom())
             .sluttdato(lovvalgsperiode.getTom())
             .build();
@@ -292,7 +293,7 @@ public class StorbritanniaMapper {
         return erSkatteetaten(brevbestilling.getOrg()) || erArtikkel8_2;
     }
 
-    private boolean skalHaInfoOmRettigheter(InnvilgelseStorbritannia innvilgelse, DokgenBrevbestilling brevbestilling) {
+    private boolean skalHaInfoOmRettigheter(InnvilgelseTrygdeavtale innvilgelse, DokgenBrevbestilling brevbestilling) {
         // Skal bare ha med vedlegget om innvilgelse er med og mottaker ikke er skatteetaten
         return !(isEmpty(innvilgelse) || erSkatteetaten(brevbestilling.getOrg()));
     }

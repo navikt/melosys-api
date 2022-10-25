@@ -8,6 +8,7 @@ import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.brev.*;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.exception.FunksjonellException;
@@ -23,16 +24,16 @@ public class DokgenMalMapper {
 
     private final DokgenMapperDatahenter dokgenMapperDatahenter;
     private final InnvilgelseFtrlMapper innvilgelseFtrlMapper;
-    private final StorbritanniaMapper storbritanniaMapper;
+    private final TrygdeavtaleMapper trygdeavtaleMapper;
     private final Unleash unleash;
 
     public DokgenMalMapper(DokgenMapperDatahenter dokgenMapperDatahenter,
                            InnvilgelseFtrlMapper innvilgelseFtrlMapper,
-                           StorbritanniaMapper storbritanniaMapper,
+                           TrygdeavtaleMapper trygdeavtaleMapper,
                            Unleash unleash) {
         this.dokgenMapperDatahenter = dokgenMapperDatahenter;
         this.innvilgelseFtrlMapper = innvilgelseFtrlMapper;
-        this.storbritanniaMapper = storbritanniaMapper;
+        this.trygdeavtaleMapper = trygdeavtaleMapper;
         this.unleash = unleash;
     }
 
@@ -103,8 +104,10 @@ public class DokgenMalMapper {
                 DokumentasjonSvarfrist.beregnFristPaaMangelbrevFraDagensDato()
             );
             case INNVILGELSE_FOLKETRYGDLOVEN_2_8 -> innvilgelseFtrlMapper.map((InnvilgelseBrevbestilling) brevbestilling);
-            case STORBRITANNIA -> storbritanniaMapper.map((InnvilgelseBrevbestilling) brevbestilling.toBuilder()
-                .medVedtaksdato(dokgenMapperDatahenter.hentVedtaksdato(brevbestilling.getBehandling().getId())).build());
+            case STORBRITANNIA -> trygdeavtaleMapper.map((InnvilgelseBrevbestilling) brevbestilling.toBuilder()
+                .medVedtaksdato(dokgenMapperDatahenter.hentVedtaksdato(brevbestilling.getBehandling().getId())).build(), Land_iso2.GB);
+            case TRYGDEAVTALE_US -> trygdeavtaleMapper.map((InnvilgelseBrevbestilling) brevbestilling.toBuilder()
+                .medVedtaksdato(dokgenMapperDatahenter.hentVedtaksdato(brevbestilling.getBehandling().getId())).build(), Land_iso2.US);
             case GENERELT_FRITEKSTBREV_BRUKER -> FritekstbrevBruker.av(((FritekstbrevBrevbestilling) brevbestilling).toBuilder()
                     .medNavnFullmektig(dokgenMapperDatahenter.hentFullmektigNavn(brevbestilling.getBehandling().getFagsak(), Representerer.BRUKER)).build(),
                 Aktoersroller.BRUKER
