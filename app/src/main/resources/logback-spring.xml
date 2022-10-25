@@ -2,7 +2,7 @@
     <springProfile name="nais">
         <include resource="logback-nais.xml"/>
     </springProfile>
-    <springProfile name="local,local-mock">
+    <springProfile name="local-q1,local-q2,local-mock">
         <include resource="logback-local.xml"/>
     </springProfile>
 </configuration>
