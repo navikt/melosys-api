@@ -7,7 +7,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
-import java.util.List
 import java.util.Set
 
 internal class BehandlingTest {
@@ -118,7 +117,7 @@ internal class BehandlingTest {
             Behandlingstema.UTSENDT_ARBEIDSTAKER,
             Behandlingstyper.HENVENDELSE
         )
-        
+
         behandlingsfrist_soknadsbehandlinger.shouldBe(LocalDate.now().plusDays(90))
         behandlingsfrist_anmodning_unntak.shouldBe(LocalDate.now().plusDays(90))
         behandlingsfrist_attester_fra_andre_trygdeavtaleland.shouldBe(LocalDate.now().plusDays(90))
@@ -144,14 +143,13 @@ internal class BehandlingTest {
 
     @Test
     fun saksopplysningerEksistererIkke_eksisterer_false() {
-        val saksopplysning1 = Saksopplysning().apply {
-            type = SaksopplysningType.PERSHIST
-        }
-        val saksopplysning2 = Saksopplysning().apply {
-            type = SaksopplysningType.PERSOPL
-        }
         val behandling = Behandling().apply {
-            saksopplysninger = setOf(saksopplysning1, saksopplysning2)
+            saksopplysninger = setOf(
+                Saksopplysning().apply {
+                    type = SaksopplysningType.PERSHIST
+                }, Saksopplysning().apply {
+                    type = SaksopplysningType.PERSOPL
+                })
         }
         behandling.manglerSaksopplysningerAvType(
             listOf(
@@ -163,14 +161,15 @@ internal class BehandlingTest {
 
     @Test
     fun saksopplysningerEksistererIkke_eksistererIkke_true() {
-        val saksopplysning = Saksopplysning().apply {
-            type = SaksopplysningType.PDL_PERSOPL
-        }
         val behandling = Behandling().apply {
-            saksopplysninger = Set.of(saksopplysning)
+            saksopplysninger = Set.of(
+                Saksopplysning().apply {
+                    type = SaksopplysningType.PDL_PERSOPL
+                }
+            )
         }
         behandling.manglerSaksopplysningerAvType(
-            List.of(
+            listOf(
                 SaksopplysningType.PDL_PERS_SAKS,
                 SaksopplysningType.PERSHIST
             )
