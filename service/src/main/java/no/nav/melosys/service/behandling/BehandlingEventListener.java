@@ -79,7 +79,7 @@ public class BehandlingEventListener {
 
                     final Oppgave behandlingsoppgave = (
                         unleash.isEnabled("melosys.behandle_alle_saker")
-                            ? OppgaveFactory.lagBehandlingsoppgave(behandling.getFagsak(), behandling)
+                            ? OppgaveFactory.lagBehandlingsoppgave(behandling)
                             : OppgaveFactory.lagBehandlingsOppgaveForType(behandlingstema, behandlingstype))
                         .build();
 

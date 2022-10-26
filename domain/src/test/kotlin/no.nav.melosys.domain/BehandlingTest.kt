@@ -87,7 +87,6 @@ internal class BehandlingTest {
         }
 
         val behandlingsfrist = Behandling.utledBehandlingsfrist(
-            behandling.fagsak,
             behandling
         )
         behandlingsfrist.shouldBe(LocalDate.now().plusWeeks(8))
@@ -104,7 +103,6 @@ internal class BehandlingTest {
         }
 
         val behandlingsfrist = Behandling.utledBehandlingsfrist(
-            behandling.fagsak,
             behandling
         )
         behandlingsfrist.shouldBe(LocalDate.now().plusDays(70))
@@ -126,7 +124,6 @@ internal class BehandlingTest {
         }
 
         val behandlingsfrist = Behandling.utledBehandlingsfrist(
-            behandling.fagsak,
             behandling
         )
         behandlingsfrist.shouldBe(utgangspunktDato.plusDays(70))
@@ -167,19 +164,15 @@ internal class BehandlingTest {
         }
 
         val behandlingsfrist_soknadsbehandlinger = Behandling.utledBehandlingsfrist(
-            behandling_soknadsbehandlinger.fagsak,
             behandling_soknadsbehandlinger
         )
         val behandlingsfrist_anmodning_unntak = Behandling.utledBehandlingsfrist(
-            behandling_anmodning_unntak.fagsak,
             behandling_anmodning_unntak
         )
         val behandlingsfrist_attester_fra_andre_trygdeavtaleland = Behandling.utledBehandlingsfrist(
-            behandling_attester_fra_andre_trygdeavtaleland.fagsak,
             behandling_attester_fra_andre_trygdeavtaleland
         )
         val behandlingsfrist_henvendelser = Behandling.utledBehandlingsfrist(
-            behandling_henvendelser.fagsak,
             behandling_henvendelser
         )
 
@@ -206,11 +199,9 @@ internal class BehandlingTest {
             type = Behandlingstyper.NY_VURDERING
         }
         val behandlingsfrist = Behandling.utledBehandlingsfrist(
-            behandling_utstasjonering.fagsak,
             behandling_utstasjonering
         )
         val behandlingsfrist_ovrige = Behandling.utledBehandlingsfrist(
-            behandling_ovrige.fagsak,
             behandling_ovrige
         )
 
@@ -243,11 +234,9 @@ internal class BehandlingTest {
             type = Behandlingstyper.NY_VURDERING
         }
         val behandlingsfrist = Behandling.utledBehandlingsfrist(
-            behandling_utstasjonering.fagsak,
             behandling_utstasjonering
         )
         val behandlingsfrist_ovrige = Behandling.utledBehandlingsfrist(
-            behandling_ovrige.fagsak,
             behandling_ovrige
         )
 

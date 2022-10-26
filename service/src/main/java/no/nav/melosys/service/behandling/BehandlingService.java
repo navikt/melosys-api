@@ -108,7 +108,7 @@ public class BehandlingService {
         behandling.setInitierendeDokumentId(initierendeDokumentId);
         behandling.setBehandlingsfrist(
             unleash.isEnabled("melosys.behandle_alle_saker")
-                ? Behandling.utledBehandlingsfrist(behandling.getFagsak(), behandling)
+                ? Behandling.utledBehandlingsfrist(behandling)
                 : Behandling.utledFristForBehandlingtema(behandlingstema));
         behandlingRepository.save(behandling);
 
@@ -270,7 +270,7 @@ public class BehandlingService {
         behandlingsreplika.setBehandlingsgrunnlag(null);
         behandlingsreplika.setBehandlingsnotater(Collections.emptySet());
         behandlingsreplika.setBehandlingsfrist(unleash.isEnabled("melosys.behandle_alle_saker")
-            ? Behandling.utledBehandlingsfrist(tidligsteInaktiveBehandling.getFagsak(), tidligsteInaktiveBehandling)
+            ? Behandling.utledBehandlingsfrist(tidligsteInaktiveBehandling)
             : Behandling.utledFristForBehandlingtema(tidligsteInaktiveBehandling.getTema()));
         behandlingsreplika.setSaksopplysninger(new HashSet<>());
         behandlingRepository.save(behandlingsreplika);
@@ -306,7 +306,7 @@ public class BehandlingService {
         behandlingsreplika.setBehandlingsgrunnlag(replikerBehandlingsgrunnlag(behandlingsreplika, tidligsteInaktiveBehandling.getBehandlingsgrunnlag()));
         behandlingsreplika.setBehandlingsnotater(Collections.emptySet());
         behandlingsreplika.setBehandlingsfrist(unleash.isEnabled("melosys.behandle_alle_saker")
-            ? Behandling.utledBehandlingsfrist(tidligsteInaktiveBehandling.getFagsak(), tidligsteInaktiveBehandling)
+            ? Behandling.utledBehandlingsfrist(tidligsteInaktiveBehandling)
             : Behandling.utledFristForBehandlingtema(tidligsteInaktiveBehandling.getTema())
         );
 

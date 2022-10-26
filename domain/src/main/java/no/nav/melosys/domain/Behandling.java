@@ -527,10 +527,10 @@ public class Behandling extends RegistreringsInfo {
             || BESLUTNING_LOVVALG_ANNET_LAND.getKode().equalsIgnoreCase(behandlingstemaKode);
     }
 
-    public static LocalDate utledBehandlingsfrist(Fagsak fagsak, Behandling behandling) {
+    public static LocalDate utledBehandlingsfrist(Behandling behandling) {
         Behandlingstyper behandlingstype = behandling.getType();
         Behandlingstema behandlingstema = behandling.getTema();
-        Sakstemaer sakstema = fagsak.getTema();
+        Sakstemaer sakstema = behandling.getFagsak().getTema();
         LocalDate utgangspunktDato = LocalDate.now();
         Behandlingsgrunnlag behandlingsgrunnlag = behandling.getBehandlingsgrunnlag();
 
