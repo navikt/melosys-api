@@ -143,10 +143,10 @@ class TrygdeavtaleMapperTest {
 
         AttestStorbritannia attest = innvilgelseOgAttestStorbritannia.getAttest();
         List<String> bostedsadresse = attest.getArbeidstaker().bostedsadresse();
-        List<String> oppholdsadresseUK = attest.getUtsendelse().oppholdsadresse();
+        List<String> oppholdsadresse = attest.getUtsendelse().oppholdsadresse();
 
         assertThat(bostedsadresse).isEqualTo(norskAddresse);
-        assertThat(oppholdsadresseUK).isEqualTo(ukAddresse);
+        assertThat(oppholdsadresse).isEqualTo(ukAddresse);
     }
 
     @Test
@@ -469,7 +469,7 @@ class TrygdeavtaleMapperTest {
               },
               "utsendelse" : {
                 "artikkel" : "UK_ART6_1",
-                "oppholdsadresseUK" : [ "Unknown" ],
+                "oppholdsadresse" : [ "Unknown" ],
                 "startdato" : "%s",
                 "sluttdato" : "%s"
               },
