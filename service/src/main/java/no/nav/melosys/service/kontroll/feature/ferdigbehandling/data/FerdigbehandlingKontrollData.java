@@ -17,4 +17,9 @@ public record FerdigbehandlingKontrollData(MedlemskapDokument medlemskapDokument
                                                                         BehandlingsgrunnlagData behandlingsgrunnlagData) {
         return new FerdigbehandlingKontrollData(null, persondata, behandlingsgrunnlagData, null, null);
     }
+
+    public static FerdigbehandlingKontrollData lagKontrollDataForFTRL(MedlemskapDokument medlemskapDokument,Persondata persondata,
+                                                                        BehandlingsgrunnlagData behandlingsgrunnlagData) {
+        return new FerdigbehandlingKontrollData(medlemskapDokument, persondata, behandlingsgrunnlagData, null, null);
+    }
 }

@@ -71,11 +71,15 @@ class Kontroll {
 
     private Collection<Kontrollfeil> utførKontroller(Behandling behandling, Sakstyper sakstype) {
         var regelsettForVedtak = FerdigbehandlingKontrollsett.hentRegelsettForVedtak(sakstype);
+
         //TODO finn ut hva vi skal kontrollere for FTRL
+        FerdigbehandlingKontrollData ferdigbehandlingKontrollData;
         if (sakstype.equals(Sakstyper.FTRL)) {
-            return Collections.emptySet();
+            ferdigbehandlingKontrollData = hentVedtakKontrollDataFTRL(behandling);
+        } else {
+            ferdigbehandlingKontrollData = hentVedtakKontrollData(behandling);
         }
-        var ferdigbehandlingKontrollData = hentVedtakKontrollData(behandling);
+
         return regelsettForVedtak.stream()
             .map(f -> f.apply(ferdigbehandlingKontrollData))
             .filter(Objects::nonNull)
@@ -106,6 +110,13 @@ class Kontroll {
 
         return new FerdigbehandlingKontrollData(medlemskapDokument, persondata, behandlingsgrunnlagData,
             lovvalgsperiode, opprinneligLovvalgsperiode);
+    }
+
+    private FerdigbehandlingKontrollData hentVedtakKontrollDataFTRL(Behandling behandling) {
+        MedlemskapDokument medlemskapDokument = behandling.hentMedlemskapDokument();
+        BehandlingsgrunnlagData behandlingsgrunnlagData = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
+        Persondata persondata = hentPersondata(behandling);
+        return FerdigbehandlingKontrollData.lagKontrollDataForFTRL(medlemskapDokument,persondata, behandlingsgrunnlagData);
     }
 
     private Persondata hentPersondata(Behandling behandling) {

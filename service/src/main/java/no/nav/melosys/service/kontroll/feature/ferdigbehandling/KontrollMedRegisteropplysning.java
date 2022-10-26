@@ -58,9 +58,9 @@ class KontrollMedRegisteropplysning {
         LocalDate tom;
 
         if (behandling.getFagsak().getType().equals(Sakstyper.FTRL)) {
-            List<Medlemskapsperiode> list = new ArrayList(behandlingsresultat.getMedlemAvFolketrygden().getMedlemskapsperioder());
-            fom = list.get(0).getFom();
-            tom = list.get(0).getTom();
+            Medlemskapsperiode medlemskapsperiode = behandlingsresultat.hentValidertMedlemskapsPeriode();
+            fom = medlemskapsperiode.getFom();
+            tom = medlemskapsperiode.getTom();
         } else {
             PeriodeOmLovvalg lovvalgsperiode = behandlingsresultat.hentValidertPeriodeOmLovvalg();
             fom = lovvalgsperiode.getFom();
