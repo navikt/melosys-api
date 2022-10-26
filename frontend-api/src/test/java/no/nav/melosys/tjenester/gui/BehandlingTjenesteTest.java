@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.Tilleggsinformasjon;
@@ -47,7 +48,8 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.jeasy.random.FieldPredicates.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = {BehandlingTjeneste.class})
@@ -70,6 +72,7 @@ class BehandlingTjenesteTest {
     private ObjectMapper objectMapper;
 
     private EasyRandom random;
+    private FakeUnleash fakeUnleash = new FakeUnleash();
 
     private static final long BEHANDLING_ID = 11L;
     private static final List<Long> PERIODE_IDER = Arrays.asList(2L, 3L, 5L);
@@ -81,7 +84,7 @@ class BehandlingTjenesteTest {
 
     @BeforeEach
     void setUp() {
-
+        fakeUnleash.enableAll();
         random = new EasyRandom(new EasyRandomParameters()
             .overrideDefaultInitialization(true)
             .collectionSizeRange(1, 4)
@@ -184,6 +187,18 @@ class BehandlingTjenesteTest {
 
     @Test
     void hentMuligeStatuser() throws Exception {
+        when(behandlingService.hentMuligeStatuser(BEHANDLING_ID)).thenReturn(MULIGE_STATUSER);
+
+        mockMvc.perform(get(BASE_URL + "/{behandlingID}/mulige-statuser", BEHANDLING_ID)
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(MockMvcResultMatchers.jsonPath("$.length()", equalTo(MULIGE_STATUSER.size())));
+    }
+
+    @Deprecated(since = "Tas vekk samme med toggle melosys.behandle_alle_saker")
+    @Test
+    void hentMuligeStatuserGammelToggle() throws Exception {
+        fakeUnleash.disableAll();
         when(behandlingService.hentMuligeStatuser(BEHANDLING_ID)).thenReturn(MULIGE_STATUSER);
 
         mockMvc.perform(get(BASE_URL + "/{behandlingID}/mulige-statuser", BEHANDLING_ID)

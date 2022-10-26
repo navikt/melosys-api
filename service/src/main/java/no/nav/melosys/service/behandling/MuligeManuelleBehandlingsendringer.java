@@ -24,15 +24,23 @@ public class MuligeManuelleBehandlingsendringer {
         ARBEID_ETT_LAND_ØVRIG,
         ARBEID_TJENESTEPERSON_ELLER_FLY, ARBEID_KUN_NORGE,
         IKKE_YRKESAKTIV, ARBEID_FLERE_LAND);
-
-    private MuligeManuelleBehandlingsendringer() {
-    }
-
     private static final Set<Behandlingsstatus> MULIGE_STATUSER = Set.of(AVVENT_DOK_PART, AVVENT_DOK_UTL, UNDER_BEHANDLING, AVVENT_FAGLIG_AVKLARING);
     private static final Set<Behandlingstema> TEMAER_SOM_KAN_AVSLUTTES = Set.of(ØVRIGE_SED_MED, ØVRIGE_SED_UFM, FORESPØRSEL_TRYGDEMYNDIGHET, TRYGDETID, IKKE_YRKESAKTIV);
     private static final Set<Behandlingstema> TEMAER_SOM_KAN_ENDRE_TYPE = Set.of(UTSENDT_ARBEIDSTAKER, UTSENDT_SELVSTENDIG);
 
+    private MuligeManuelleBehandlingsendringer() {
+    }
+
     public static Set<Behandlingsstatus> hentMuligeStatuser(Behandling behandling) {
+        if (behandling.erInaktiv()) return Collections.emptySet();
+
+        Set<Behandlingsstatus> muligeStatuser = new HashSet<>(MULIGE_STATUSER);
+
+        return muligeStatuser.stream().filter(status -> status != behandling.getStatus()).collect(Collectors.toSet());
+    }
+
+    @Deprecated(since = "Tas vekk sammen med toggle melosys.behandle_alle_saker")
+    public static Set<Behandlingsstatus> hentMuligeStatuserGammel(Behandling behandling) {
         if (behandling.erInaktiv()) return Collections.emptySet();
 
         Set<Behandlingsstatus> muligeStatuser = new HashSet<>(MULIGE_STATUSER);
@@ -79,12 +87,16 @@ public class MuligeManuelleBehandlingsendringer {
         }
     }
 
-    private static boolean kanOppdatereBehandlingstema(Behandling behandling, Behandlingsresultat behandlingsresultat) {
-        return behandling.erAktiv() && behandlingsresultat.erIkkeArtikkel16MedSendtAnmodningOmUnntak();
-    }
-
     public static void validerNyStatusMulig(Behandling behandling, Behandlingsstatus status) {
         if (!hentMuligeStatuser(behandling).contains(status)) {
+            throw new FunksjonellException(String.format("Behandlingen kan ikke endres til status %s. Gyldige statuser for behandling %s er %s",
+                status, behandling.getId(), hentMuligeStatuser(behandling)));
+        }
+    }
+
+    @Deprecated(since = "Tas vekk sammen med toggle melosys.behandle_alle_saker")
+    public static void validerNyStatusMuligGammel(Behandling behandling, Behandlingsstatus status) {
+        if (!hentMuligeStatuserGammel(behandling).contains(status)) {
             throw new FunksjonellException(String.format("Behandlingen kan ikke endres til status %s. Gyldige statuser for behandling %s er %s",
                 status, behandling.getId(), hentMuligeStatuser(behandling)));
         }
@@ -102,6 +114,10 @@ public class MuligeManuelleBehandlingsendringer {
             throw new FunksjonellException(String.format("Behandlingen kan ikke endres til tema %s. Gyldige temaer for behandling %s er %s",
                 tema, behandling.getId(), hentMuligeBehandlingstema(behandling, behandlingsresultat, visNyeBehandlingstema)));
         }
+    }
+
+    private static boolean kanOppdatereBehandlingstema(Behandling behandling, Behandlingsresultat behandlingsresultat) {
+        return behandling.erAktiv() && behandlingsresultat.erIkkeArtikkel16MedSendtAnmodningOmUnntak();
     }
 
     private static boolean erGyldigBehandlingAvSøknad(Behandlingstema behandlingstema) {

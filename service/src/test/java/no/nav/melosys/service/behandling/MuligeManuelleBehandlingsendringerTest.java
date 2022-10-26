@@ -19,11 +19,20 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class MuligeManuelleBehandlingsendringerTest {
 
+    @Deprecated(since = "Tas vekk samtidig som toggle melosys.behandle_alle_saker")
+    @Test
+    void hentMuligeStatuser_temaOvrigeSedMed_avsluttetErMulig_toggleOff() {
+        var muligeStatuser =
+            MuligeManuelleBehandlingsendringer.hentMuligeStatuserGammel(behandlingMedTema(Behandlingstema.ØVRIGE_SED_MED));
+        assertThat(muligeStatuser).containsExactlyInAnyOrder(AVVENT_DOK_PART, AVVENT_DOK_UTL, UNDER_BEHANDLING,
+            AVVENT_FAGLIG_AVKLARING, AVSLUTTET);
+    }
 
     @Test
-    void hentMuligeStatuser_temaOvrigeSedMed_avsluttetErMulig() {
+    void hentMuligeStatuser_temaOvrigeSedMed_avsluttetErIkkeMulig() {
         var muligeStatuser = MuligeManuelleBehandlingsendringer.hentMuligeStatuser(behandlingMedTema(Behandlingstema.ØVRIGE_SED_MED));
-        assertThat(muligeStatuser).containsExactlyInAnyOrder(AVVENT_DOK_PART, AVVENT_DOK_UTL, UNDER_BEHANDLING, AVVENT_FAGLIG_AVKLARING, AVSLUTTET);
+        assertThat(muligeStatuser).containsExactlyInAnyOrder(AVVENT_DOK_PART, AVVENT_DOK_UTL, UNDER_BEHANDLING,
+            AVVENT_FAGLIG_AVKLARING).doesNotContain(AVSLUTTET);
     }
 
     @Test
