@@ -7,10 +7,9 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Lovvalgsperiode;
-import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
-import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
-import no.nav.melosys.domain.kodeverk.Vedtakstyper;
+import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
+import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
+import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Nyvurderingbakgrunner;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.exception.ValideringException;
@@ -277,7 +276,16 @@ class TrygdeavtaleVedtakServiceTest {
         var behandling = new Behandling();
         behandling.setId(BEHANDLING_ID);
         behandling.setFagsak(lagFagsak());
+        behandling.setBehandlingsgrunnlag(lagBehandlingsgrunnlag());
         return behandling;
+    }
+
+    private Behandlingsgrunnlag lagBehandlingsgrunnlag() {
+        BehandlingsgrunnlagData behandlingsgrunnlagData = new BehandlingsgrunnlagData();
+        behandlingsgrunnlagData.soeknadsland.landkoder = List.of(Land_iso2.GB.getKode());
+        Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
+        behandlingsgrunnlag.setBehandlingsgrunnlagdata(behandlingsgrunnlagData);
+        return behandlingsgrunnlag;
     }
 
     private Fagsak lagFagsak() {

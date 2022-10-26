@@ -403,7 +403,7 @@ class DokgenMalMapperTest {
     void skalMappeStorbritanniabrev() {
         when(mockDokgenMapperDatahenter.hentPersondata(any(), any())).thenReturn(lagPersondata());
         when(mockDokgenMapperDatahenter.hentPersonMottaker(any())).thenReturn(lagPersondata());
-        when(mockTrygdeavtaleMapper.map(any(), Land_iso2.GB)).thenReturn(lagInnvilgelseOgAttestStorbritannia());
+        when(mockTrygdeavtaleMapper.map(any(), eq(Land_iso2.GB))).thenReturn(lagInnvilgelseOgAttestStorbritannia());
 
         Behandling behandling = lagBehandling(lagFagsak(true));
 
