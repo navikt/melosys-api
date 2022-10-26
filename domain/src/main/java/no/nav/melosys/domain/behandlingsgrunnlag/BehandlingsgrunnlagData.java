@@ -42,8 +42,11 @@ public class BehandlingsgrunnlagData {
     public Bosted bosted = new Bosted();
 
     public Set<String> hentAlleOrganisasjonsnumre() {
-        return Stream.of(selvstendigArbeid.hentAlleOrganisasjonsnumre(),
-                juridiskArbeidsgiverNorge.hentManueltRegistrerteArbeidsgiverOrgnumre())
+        return Stream
+            .of(
+                selvstendigArbeid.hentAlleOrganisasjonsnumre(),
+                juridiskArbeidsgiverNorge.hentManueltRegistrerteArbeidsgiverOrgnumre()
+            )
             .flatMap(i -> i)
             .filter(StringUtils::isNotEmpty)
             .collect(Collectors.toSet());
