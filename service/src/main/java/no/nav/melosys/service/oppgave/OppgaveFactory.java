@@ -55,10 +55,14 @@ public final class OppgaveFactory {
             .setBehandlesAvApplikasjon(Fagsystem.MELOSYS);
     }
 
-    public static Oppgave.Builder lagBehandlingsoppgave(Sakstyper sakstype, Sakstemaer sakstema, Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
+    public static Oppgave.Builder lagBehandlingsoppgave(Fagsak fagsak, Behandling behandling) {
         // Dokumentasjon for regler: https://confluence.adeo.no/display/TEESSI/Oppgaver+i+Gosys
-        var oppgaveBehandlingstema = utledBehandlingstema(sakstype, sakstema, behandlingstema, behandlingstype);
+        Behandlingstyper behandlingstype = behandling.getType();
+        Behandlingstema behandlingstema = behandling.getTema();
+        Sakstemaer sakstema = fagsak.getTema();
+        Sakstyper sakstype = fagsak.getType();
 
+        var oppgaveBehandlingstema = utledBehandlingstema(sakstype, sakstema, behandlingstema, behandlingstype);
         return new Oppgave.Builder()
             .setBehandlesAvApplikasjon(Fagsystem.MELOSYS)
             .setPrioritet(PrioritetType.NORM)
@@ -66,11 +70,7 @@ public final class OppgaveFactory {
             .setTema(utledTema(sakstema))
             .setOppgavetype(utledOppgavetype(sakstype, behandlingstema, behandlingstype))
             .setBeskrivelse(utledBeskrivelse(oppgaveBehandlingstema, sakstype, sakstema, behandlingstema, behandlingstype))
-            .setFristFerdigstillelse(Behandling.utledFristForBehandling(sakstema, behandlingstema, behandlingstype));
-    }
-
-    public static Oppgave.Builder lagBehandlingsoppgave(Fagsak fagsak, Behandling behandling) {
-        return lagBehandlingsoppgave(fagsak.getType(), fagsak.getTema(), behandling.getTema(), behandling.getType());
+            .setFristFerdigstillelse(Behandling.utledBehandlingsfrist(fagsak, behandling));
     }
 
     public static Oppgave.Builder lagBehandlingsoppgave(Behandling behandling) {

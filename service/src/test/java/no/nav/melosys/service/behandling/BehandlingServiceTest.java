@@ -411,7 +411,7 @@ class BehandlingServiceTest {
     }
 
     @Test
-    void nyBehandling_frist8Uker_toggleEnabled() {
+    void nyBehandling_behandlingsfristKriterier_får8UkerBehandlingsfrist() {
         fakeUnleash.enableAll();
         String initierendeJournalpostId = "234";
         String initierendeDokumentId = "221234";
@@ -430,57 +430,57 @@ class BehandlingServiceTest {
     }
 
     @Test
-    void nyBehandling_frist70Dager_toggleEnabled() {
+    void nyBehandling_behandlingsfristKriterier_får70DagerBehandlingsfrist() {
         fakeUnleash.enableAll();
         String initierendeJournalpostId = "234";
         String initierendeDokumentId = "221234";
         Fagsak fagsak = new Fagsak();
         fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
-        LocalDate frist8Uker = LocalDate.now().plusDays(70);
+        LocalDate frist70Dager = LocalDate.now().plusDays(70);
         Behandling behandling = behandlingService.nyBehandling(fagsak, Behandlingsstatus.OPPRETTET, KLAGE, BESLUTNING_LOVVALG_ANNET_LAND, initierendeJournalpostId, initierendeDokumentId);
 
         verify(behandlingRepository).save(behandling);
         verify(behandlingsresultatService).lagreNyttBehandlingsresultat(behandling);
 
-        assertThat(behandling.getBehandlingsfrist()).isEqualTo(frist8Uker);
+        assertThat(behandling.getBehandlingsfrist()).isEqualTo(frist70Dager);
         assertThat(behandling.getStatus()).isEqualTo(Behandlingsstatus.OPPRETTET);
         assertThat(behandling.getInitierendeJournalpostId()).isEqualTo(initierendeJournalpostId);
         assertThat(behandling.getInitierendeDokumentId()).isEqualTo(initierendeDokumentId);
     }
 
     @Test
-    void nyBehandling_frist90Dager_toggleEnabled() {
+    void nyBehandling_behandlingsfristKriterier_får90DagerBehandlingsfrist() {
         fakeUnleash.enableAll();
         String initierendeJournalpostId = "234";
         String initierendeDokumentId = "221234";
         Fagsak fagsak = new Fagsak();
         fagsak.setTema(Sakstemaer.TRYGDEAVGIFT);
-        LocalDate frist8Uker = LocalDate.now().plusDays(90);
+        LocalDate frist90Dager = LocalDate.now().plusDays(90);
         Behandling behandling = behandlingService.nyBehandling(fagsak, Behandlingsstatus.OPPRETTET, FØRSTEGANG, ARBEID_KUN_NORGE, initierendeJournalpostId, initierendeDokumentId);
 
         verify(behandlingRepository).save(behandling);
         verify(behandlingsresultatService).lagreNyttBehandlingsresultat(behandling);
 
-        assertThat(behandling.getBehandlingsfrist()).isEqualTo(frist8Uker);
+        assertThat(behandling.getBehandlingsfrist()).isEqualTo(frist90Dager);
         assertThat(behandling.getStatus()).isEqualTo(Behandlingsstatus.OPPRETTET);
         assertThat(behandling.getInitierendeJournalpostId()).isEqualTo(initierendeJournalpostId);
         assertThat(behandling.getInitierendeDokumentId()).isEqualTo(initierendeDokumentId);
     }
 
     @Test
-    void nyBehandling_frist180Dager_toggleEnabled() {
+    void nyBehandling_behandlingsfristKriterier_får180DagerBehandlingsfrist() {
         fakeUnleash.enableAll();
         String initierendeJournalpostId = "234";
         String initierendeDokumentId = "221234";
         Fagsak fagsak = new Fagsak();
         fagsak.setTema(Sakstemaer.UNNTAK);
-        LocalDate frist8Uker = LocalDate.now().plusDays(180);
+        LocalDate frist180Dager = LocalDate.now().plusDays(180);
         Behandling behandling = behandlingService.nyBehandling(fagsak, Behandlingsstatus.OPPRETTET, FØRSTEGANG, REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING, initierendeJournalpostId, initierendeDokumentId);
 
         verify(behandlingRepository).save(behandling);
         verify(behandlingsresultatService).lagreNyttBehandlingsresultat(behandling);
 
-        assertThat(behandling.getBehandlingsfrist()).isEqualTo(frist8Uker);
+        assertThat(behandling.getBehandlingsfrist()).isEqualTo(frist180Dager);
         assertThat(behandling.getStatus()).isEqualTo(Behandlingsstatus.OPPRETTET);
         assertThat(behandling.getInitierendeJournalpostId()).isEqualTo(initierendeJournalpostId);
         assertThat(behandling.getInitierendeDokumentId()).isEqualTo(initierendeDokumentId);

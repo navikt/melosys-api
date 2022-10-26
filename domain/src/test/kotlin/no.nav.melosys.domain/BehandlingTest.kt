@@ -1,6 +1,7 @@
 package no.nav.melosys.domain
 
 import io.kotest.matchers.shouldBe
+import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
@@ -76,46 +77,110 @@ internal class BehandlingTest {
     }
 
     @Test
-    fun utledFristForBehandling_8Uker() {
-        val behandlingsfrist = Behandling.utledFristForBehandling(
-            Sakstemaer.MEDLEMSKAP_LOVVALG,
-            Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND,
-            Behandlingstyper.FØRSTEGANG
+    fun utledBehandlingsfrist_8Uker() {
+        val behandling = Behandling().apply {
+            fagsak = Fagsak().apply {
+                tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+            }
+            tema = Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND
+            type = Behandlingstyper.FØRSTEGANG
+        }
+
+        val behandlingsfrist = Behandling.utledBehandlingsfrist(
+            behandling.fagsak,
+            behandling
         )
         behandlingsfrist.shouldBe(LocalDate.now().plusWeeks(8))
     }
 
     @Test
-    fun utledFristForBehandling_70dager() {
-        val behandlingsfrist = Behandling.utledFristForBehandling(
-            Sakstemaer.MEDLEMSKAP_LOVVALG,
-            Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND,
-            Behandlingstyper.KLAGE
+    fun utledBehandlingsfrist_70dager() {
+        val behandling = Behandling().apply {
+            fagsak = Fagsak().apply {
+                tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+            }
+            tema = Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND
+            type = Behandlingstyper.KLAGE
+        }
+
+        val behandlingsfrist = Behandling.utledBehandlingsfrist(
+            behandling.fagsak,
+            behandling
         )
         behandlingsfrist.shouldBe(LocalDate.now().plusDays(70))
     }
 
     @Test
-    fun utledFristForBehandling_90dager() {
-        val behandlingsfrist_soknadsbehandlinger = Behandling.utledFristForBehandling(
-            Sakstemaer.MEDLEMSKAP_LOVVALG,
-            Behandlingstema.UTSENDT_ARBEIDSTAKER,
-            Behandlingstyper.FØRSTEGANG
+    fun utledBehandlingsfrist_70dager_med_mottattDato() {
+        val utgangspunktDato = LocalDate.now().minusDays(5)
+
+        val behandling = Behandling().apply {
+            fagsak = Fagsak().apply {
+                tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+            }
+            behandlingsgrunnlag = Behandlingsgrunnlag().apply {
+                mottaksdato = utgangspunktDato
+            }
+            tema = Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND
+            type = Behandlingstyper.KLAGE
+        }
+
+        val behandlingsfrist = Behandling.utledBehandlingsfrist(
+            behandling.fagsak,
+            behandling
         )
-        val behandlingsfrist_anmodning_unntak = Behandling.utledFristForBehandling(
-            Sakstemaer.MEDLEMSKAP_LOVVALG,
-            Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL,
-            Behandlingstyper.FØRSTEGANG
+        behandlingsfrist.shouldBe(utgangspunktDato.plusDays(70))
+    }
+
+    @Test
+    fun utledBehandlingsfrist_90dager() {
+        val behandling_soknadsbehandlinger = Behandling().apply {
+            fagsak = Fagsak().apply {
+                tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+            }
+            tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
+            type = Behandlingstyper.FØRSTEGANG
+        }
+
+        val behandling_anmodning_unntak = Behandling().apply {
+            fagsak = Fagsak().apply {
+                tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+            }
+            tema = Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL
+            type = Behandlingstyper.FØRSTEGANG
+        }
+
+        val behandling_attester_fra_andre_trygdeavtaleland = Behandling().apply {
+            fagsak = Fagsak().apply {
+                tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+            }
+            tema = Behandlingstema.REGISTRERING_UNNTAK
+            type = Behandlingstyper.FØRSTEGANG
+        }
+
+        val behandling_henvendelser = Behandling().apply {
+            fagsak = Fagsak().apply {
+                tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+            }
+            tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
+            type = Behandlingstyper.HENVENDELSE
+        }
+
+        val behandlingsfrist_soknadsbehandlinger = Behandling.utledBehandlingsfrist(
+            behandling_soknadsbehandlinger.fagsak,
+            behandling_soknadsbehandlinger
         )
-        val behandlingsfrist_attester_fra_andre_trygdeavtaleland = Behandling.utledFristForBehandling(
-            Sakstemaer.MEDLEMSKAP_LOVVALG,
-            Behandlingstema.REGISTRERING_UNNTAK,
-            Behandlingstyper.FØRSTEGANG
+        val behandlingsfrist_anmodning_unntak = Behandling.utledBehandlingsfrist(
+            behandling_anmodning_unntak.fagsak,
+            behandling_anmodning_unntak
         )
-        val behandlingsfrist_henvendelser = Behandling.utledFristForBehandling(
-            Sakstemaer.MEDLEMSKAP_LOVVALG,
-            Behandlingstema.UTSENDT_ARBEIDSTAKER,
-            Behandlingstyper.HENVENDELSE
+        val behandlingsfrist_attester_fra_andre_trygdeavtaleland = Behandling.utledBehandlingsfrist(
+            behandling_attester_fra_andre_trygdeavtaleland.fagsak,
+            behandling_attester_fra_andre_trygdeavtaleland
+        )
+        val behandlingsfrist_henvendelser = Behandling.utledBehandlingsfrist(
+            behandling_henvendelser.fagsak,
+            behandling_henvendelser
         )
 
         behandlingsfrist_soknadsbehandlinger.shouldBe(LocalDate.now().plusDays(90))
@@ -125,20 +190,69 @@ internal class BehandlingTest {
     }
 
     @Test
-    fun utledFristForBehandling_180dager() {
-        val behandlingsfrist = Behandling.utledFristForBehandling(
-            Sakstemaer.UNNTAK,
-            Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING,
-            Behandlingstyper.NY_VURDERING
+    fun utledBehandlingsfrist_180dager() {
+        val behandling_utstasjonering = Behandling().apply {
+            fagsak = Fagsak().apply {
+                tema = Sakstemaer.UNNTAK
+            }
+            tema = Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING
+            type = Behandlingstyper.NY_VURDERING
+        }
+        val behandling_ovrige = Behandling().apply {
+            fagsak = Fagsak().apply {
+                tema = Sakstemaer.UNNTAK
+            }
+            tema = Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE
+            type = Behandlingstyper.NY_VURDERING
+        }
+        val behandlingsfrist = Behandling.utledBehandlingsfrist(
+            behandling_utstasjonering.fagsak,
+            behandling_utstasjonering
         )
-        val behandlingsfrist_ovrige = Behandling.utledFristForBehandling(
-            Sakstemaer.UNNTAK,
-            Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE,
-            Behandlingstyper.NY_VURDERING
+        val behandlingsfrist_ovrige = Behandling.utledBehandlingsfrist(
+            behandling_ovrige.fagsak,
+            behandling_ovrige
         )
 
         behandlingsfrist.shouldBe(LocalDate.now().plusDays(180))
         behandlingsfrist_ovrige.shouldBe(LocalDate.now().plusDays(180))
+    }
+
+    @Test
+    fun utledBehandlingsfrist_180dager_med_mottattDato() {
+        val utgangspunktDato = LocalDate.now().minusDays(5)
+
+        val behandling_utstasjonering = Behandling().apply {
+            fagsak = Fagsak().apply {
+                tema = Sakstemaer.UNNTAK
+            }
+            behandlingsgrunnlag = Behandlingsgrunnlag().apply {
+                mottaksdato = utgangspunktDato
+            }
+            tema = Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING
+            type = Behandlingstyper.NY_VURDERING
+        }
+        val behandling_ovrige = Behandling().apply {
+            fagsak = Fagsak().apply {
+                tema = Sakstemaer.UNNTAK
+            }
+            behandlingsgrunnlag = Behandlingsgrunnlag().apply {
+                mottaksdato = utgangspunktDato
+            }
+            tema = Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE
+            type = Behandlingstyper.NY_VURDERING
+        }
+        val behandlingsfrist = Behandling.utledBehandlingsfrist(
+            behandling_utstasjonering.fagsak,
+            behandling_utstasjonering
+        )
+        val behandlingsfrist_ovrige = Behandling.utledBehandlingsfrist(
+            behandling_ovrige.fagsak,
+            behandling_ovrige
+        )
+
+        behandlingsfrist.shouldBe(utgangspunktDato.plusDays(180))
+        behandlingsfrist_ovrige.shouldBe(utgangspunktDato.plusDays(180))
     }
 
     @Test

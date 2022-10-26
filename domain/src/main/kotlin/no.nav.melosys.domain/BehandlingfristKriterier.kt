@@ -16,12 +16,14 @@ class BehandlingfristKriterier : Behandling() {
         fun hentBehandlingsFrist(
             sakstema: Sakstemaer,
             behandlingstema: Behandlingstema,
-            behandlingstype: Behandlingstyper
+            behandlingstype: Behandlingstyper,
+            utgangspunktDato: LocalDate
         ): LocalDate {
-            val frist8Uker = LocalDate.now().plusWeeks(8)
-            val frist70Dager = LocalDate.now().plusDays(70)
-            val frist90Dager = LocalDate.now().plusDays(90)
-            val frist180Dager = LocalDate.now().plusDays(180)
+            val frist8Uker = utgangspunktDato.plusWeeks(8)
+            val frist70Dager = utgangspunktDato.plusDays(70)
+            val frist90Dager = utgangspunktDato.plusDays(90)
+            val frist180Dager = utgangspunktDato.plusDays(180)
+
             val behandlingfrister = listOf(
                 Pair.of(harFrist8UkerLovvalg(behandlingstema, behandlingstype), frist8Uker),
                 Pair.of(harFrist70DagerKlager(behandlingstype), frist70Dager),
