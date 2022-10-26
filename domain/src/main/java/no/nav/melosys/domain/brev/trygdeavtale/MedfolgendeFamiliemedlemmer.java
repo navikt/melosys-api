@@ -1,4 +1,4 @@
-package no.nav.melosys.domain.brev.storbritannia;
+package no.nav.melosys.domain.brev.trygdeavtale;
 
 import java.util.Set;
 

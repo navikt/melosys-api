@@ -256,6 +256,9 @@ public class BrevmottakerService {
         if (brevkopiRegler.contains(SKATT_FÅR_KOPI)) {
             mottakerliste.getFasteMottakere().add(SKATT);
         }
+        if (brevkopiRegler.contains(UTENLANDSK_TRYGDEMYNDIGHET_FÅR_KOPI)) {
+            mottakerliste.getKopiMottakere().add(TRYGDEMYNDIGHET);
+        }
 
         if (brevkopiRegler.contains(UTENLANDSK_TRYGDEMYNDIGHET_FÅR_KOPI_HVIS_IKKE_ART_8_2)) {
             Optional.ofNullable(lovvalgsperiodeService.hentLovvalgsperiode(behandling.getId())).ifPresent(lovvalgsperiode -> {

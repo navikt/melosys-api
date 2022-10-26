@@ -1,5 +1,9 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Stream;
+
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.kodeverk.Landkoder;
@@ -7,19 +11,15 @@ import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.domain.person.adresse.Kontaktadresse;
 import no.nav.melosys.domain.person.adresse.PersonAdresse;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Stream;
 
-
-public class StorbritanniaAdresseSjekker {
+public class TrygdeavtaleAdresseSjekker {
     static final String INGEN_ADRESSE_I_NORGE = "No address in Norway";
     static final String UKJENT = "Unknown";
     static final String BOSTED_UTENFOR_NORGE = "Resident outside of Norway";
 
     private final Persondata persondata;
 
-    StorbritanniaAdresseSjekker(Persondata persondata) {
+    TrygdeavtaleAdresseSjekker(Persondata persondata) {
         this.persondata = persondata;
     }
 
