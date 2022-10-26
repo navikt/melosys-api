@@ -97,7 +97,6 @@ public class BehandlingsgrunnlagService {
     public void opprettSøknad(Behandling behandling, Periode periode, Soeknadsland soeknadsland) {
         long behandlingID = behandling.getId();
         boolean behandleAlleSakerEnabled = unleash.isEnabled("melosys.behandle_alle_saker");
-        //System.out.println(!SaksbehandlingRegler.harTomFlyt(behandling));
         if (behandleAlleSakerEnabled ? !SaksbehandlingRegler.harTomFlyt(behandling) : behandling.erBehandlingAvSøknadGammel()) {
             Sakstyper sakstype = behandling.getFagsak().getType();
             switch (sakstype) {

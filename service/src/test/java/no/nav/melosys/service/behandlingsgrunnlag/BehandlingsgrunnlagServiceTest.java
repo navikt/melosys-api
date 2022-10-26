@@ -220,7 +220,7 @@ class BehandlingsgrunnlagServiceTest {
 
     @Test
     void opprettSøknad_tomFlyt_behGrunnlagBlirIkkeOpprettet() {
-        Behandling behandling = lagBehandling(Sakstyper.FTRL, Sakstemaer.MEDLEMSKAP_LOVVALG, Behandlingstema.YRKESAKTIV);
+        Behandling behandling = lagBehandling(Sakstyper.TRYGDEAVTALE, Sakstemaer.MEDLEMSKAP_LOVVALG, Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL);
 
         behandlingsgrunnlagService.opprettSøknad(behandling, null, null);
 
