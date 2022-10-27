@@ -137,7 +137,7 @@ class BehandlingEventListenerTest {
 
         behandlingEventListener.behandlingEndret(behandlingEndretAvSaksbehandlerEvent);
 
-        Oppgave behandlingsOppgaveForType = OppgaveFactory.lagBehandlingsoppgave(fagsak, behandling).build();
+        Oppgave behandlingsOppgaveForType = OppgaveFactory.lagBehandlingsoppgave(behandling).build();
         verify(oppgaveService).oppdaterOppgave(eq(OPPGAVE_ID), oppgaveOppdateringCaptor.capture());
         OppgaveOppdatering capturedOppgaveOppdatering = oppgaveOppdateringCaptor.getValue();
         assertThat(capturedOppgaveOppdatering.getBehandlingstema()).isEqualTo(behandlingsOppgaveForType.getBehandlingstema());

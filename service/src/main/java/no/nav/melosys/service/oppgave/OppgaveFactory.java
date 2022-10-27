@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.util.List;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Fagsystem;
 import no.nav.melosys.domain.Tema;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
@@ -55,8 +54,13 @@ public final class OppgaveFactory {
             .setBehandlesAvApplikasjon(Fagsystem.MELOSYS);
     }
 
-    public static Oppgave.Builder lagBehandlingsoppgave(Sakstyper sakstype, Sakstemaer sakstema, Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
+    public static Oppgave.Builder lagBehandlingsoppgave(Behandling behandling) {
         // Dokumentasjon for regler: https://confluence.adeo.no/display/TEESSI/Oppgaver+i+Gosys
+        Behandlingstyper behandlingstype = behandling.getType();
+        Behandlingstema behandlingstema = behandling.getTema();
+        Sakstemaer sakstema = behandling.getFagsak().getTema();
+        Sakstyper sakstype = behandling.getFagsak().getType();
+
         var oppgaveBehandlingstema = utledBehandlingstema(sakstype, sakstema, behandlingstema, behandlingstype);
         return new Oppgave.Builder()
             .setBehandlesAvApplikasjon(Fagsystem.MELOSYS)
@@ -65,15 +69,7 @@ public final class OppgaveFactory {
             .setTema(utledTema(sakstema))
             .setOppgavetype(utledOppgavetype(sakstype, behandlingstema, behandlingstype))
             .setBeskrivelse(utledBeskrivelse(oppgaveBehandlingstema, sakstype, sakstema, behandlingstema, behandlingstype))
-            .setFristFerdigstillelse(Behandling.utledFristForBehandlingstema(behandlingstema));
-    }
-
-    public static Oppgave.Builder lagBehandlingsoppgave(Fagsak fagsak, Behandling behandling) {
-        return lagBehandlingsoppgave(fagsak.getType(), fagsak.getTema(), behandling.getTema(), behandling.getType());
-    }
-
-    public static Oppgave.Builder lagBehandlingsoppgave(Behandling behandling) {
-        return lagBehandlingsoppgave(behandling.getFagsak(), behandling);
+            .setFristFerdigstillelse(Behandling.utledBehandlingsfrist(behandling));
     }
 
     /**

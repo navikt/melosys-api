@@ -7,7 +7,7 @@ import no.nav.melosys.integrasjon.dokgen.dto.felles.Person;
 
 public record MedfolgendeFamiliemedlemmer(Person ektefelle, List<Person> barn) {
 
-    public static MedfolgendeFamiliemedlemmer av(no.nav.melosys.domain.brev.storbritannia.MedfolgendeFamiliemedlemmer familiemedlemmer) {
+    public static MedfolgendeFamiliemedlemmer av(no.nav.melosys.domain.brev.trygdeavtale.MedfolgendeFamiliemedlemmer familiemedlemmer) {
         if (familiemedlemmer == null) return null;
 
         return new MedfolgendeFamiliemedlemmer(

@@ -4,11 +4,11 @@ import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.integrasjon.dokgen.dto.felles.SaksinfoBruker;
 import no.nav.melosys.integrasjon.dokgen.dto.storbritannia.attest.AttestStorbritannia;
-import no.nav.melosys.integrasjon.dokgen.dto.storbritannia.innvilgelse.InnvilgelseStorbritannia;
+import no.nav.melosys.integrasjon.dokgen.dto.storbritannia.innvilgelse.InnvilgelseTrygdeavtale;
 
 public class InnvilgelseOgAttestStorbritannia extends DokgenDto {
 
-    private final InnvilgelseStorbritannia innvilgelse;
+    private final InnvilgelseTrygdeavtale innvilgelse;
     private final AttestStorbritannia attest;
     private final boolean skalHaInfoOmRettigheter;
     private final String nyVurderingBakgrunn;
@@ -22,7 +22,7 @@ public class InnvilgelseOgAttestStorbritannia extends DokgenDto {
     }
 
     public static class Builder {
-        private InnvilgelseStorbritannia innvilgelse;
+        private InnvilgelseTrygdeavtale innvilgelse;
         private AttestStorbritannia attest;
         private boolean skalHaInfoOmRettigheter;
         private final DokgenBrevbestilling brevbestilling;
@@ -32,7 +32,7 @@ public class InnvilgelseOgAttestStorbritannia extends DokgenDto {
             this.brevbestilling = brevbestilling;
         }
 
-        public Builder innvilgelse(InnvilgelseStorbritannia innvilgelse) {
+        public Builder innvilgelse(InnvilgelseTrygdeavtale innvilgelse) {
             this.innvilgelse = innvilgelse;
             return this;
         }
@@ -72,7 +72,7 @@ public class InnvilgelseOgAttestStorbritannia extends DokgenDto {
         return skalHaInfoOmRettigheter;
     }
 
-    public InnvilgelseStorbritannia getInnvilgelse() {
+    public InnvilgelseTrygdeavtale getInnvilgelse() {
         return innvilgelse;
     }
 

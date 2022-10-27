@@ -15,6 +15,7 @@ import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
@@ -30,7 +31,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.dokgen.dto.InnvilgelseOgAttestStorbritannia;
 import no.nav.melosys.integrasjon.dokgen.dto.storbritannia.attest.AttestStorbritannia;
 import no.nav.melosys.integrasjon.dokgen.dto.storbritannia.innvilgelse.Barn;
-import no.nav.melosys.integrasjon.dokgen.dto.storbritannia.innvilgelse.InnvilgelseStorbritannia;
+import no.nav.melosys.integrasjon.dokgen.dto.storbritannia.innvilgelse.InnvilgelseTrygdeavtale;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
@@ -55,7 +56,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class StorbritanniaMapperTest {
+class TrygdeavtaleMapperTest {
     private static final String UUID_EKTEFELLE = "uuidEktefelle";
     private static final String UUID_BARN_1 = "uuidBarn1";
     private static final String UUID_BARN_2 = "uuidBarn2";
@@ -80,11 +81,11 @@ class StorbritanniaMapperTest {
     @Mock
     private AvklarteVirksomheterService mockAvklarteVirksomheterService;
 
-    private StorbritanniaMapper storbritanniaMapper;
+    private TrygdeavtaleMapper trygdeavtaleMapper;
 
     @BeforeEach
     void setup() {
-        storbritanniaMapper = new StorbritanniaMapper(
+        trygdeavtaleMapper = new TrygdeavtaleMapper(
             mockAvklarteMedfolgendeFamilieService,
             mockAvklarteVirksomheterService,
             mockLovvalgsperiodeService);
@@ -98,7 +99,7 @@ class StorbritanniaMapperTest {
 
         InnvilgelseBrevbestilling brevbestilling = lagStorbritanniaBrevbestilling(medPeriode(lagTrygdeavtaleBehandling()));
 
-        InnvilgelseOgAttestStorbritannia innvilgelseOgAttestStorbritannia = storbritanniaMapper.map(brevbestilling);
+        InnvilgelseOgAttestStorbritannia innvilgelseOgAttestStorbritannia = trygdeavtaleMapper.map(brevbestilling, Land_iso2.GB);
 
         String jsonInnvilgelse = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(innvilgelseOgAttestStorbritannia.getInnvilgelse());
         String resultatInnvilgelse = jsonInnvilgelse.replaceAll("(\"dagensDato\" :)(.*)", "$1 \"Fjernet for test\",");
@@ -137,15 +138,15 @@ class StorbritanniaMapperTest {
                 .medPersonDokument(persondata)
                 .build();
 
-        InnvilgelseOgAttestStorbritannia innvilgelseOgAttestStorbritannia = storbritanniaMapper.map(brevbestilling);
+        InnvilgelseOgAttestStorbritannia innvilgelseOgAttestStorbritannia = trygdeavtaleMapper.map(brevbestilling, Land_iso2.GB);
         assertTrue(innvilgelseOgAttestStorbritannia.isSkalHaAttest());
 
         AttestStorbritannia attest = innvilgelseOgAttestStorbritannia.getAttest();
         List<String> bostedsadresse = attest.getArbeidstaker().bostedsadresse();
-        List<String> oppholdsadresseUK = attest.getUtsendelse().oppholdsadresseUK();
+        List<String> oppholdsadresse = attest.getUtsendelse().oppholdsadresse();
 
         assertThat(bostedsadresse).isEqualTo(norskAddresse);
-        assertThat(oppholdsadresseUK).isEqualTo(ukAddresse);
+        assertThat(oppholdsadresse).isEqualTo(ukAddresse);
     }
 
     @Test
@@ -153,7 +154,7 @@ class StorbritanniaMapperTest {
         mockHappyCase();
 
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> storbritanniaMapper.map(lagStorbritanniaBrevbestilling(lagTrygdeavtaleBehandling(null))))
+            .isThrownBy(() -> trygdeavtaleMapper.map(lagStorbritanniaBrevbestilling(lagTrygdeavtaleBehandling(null)), Land_iso2.GB))
             .withMessageContaining(Kontroll_begrunnelser.ATTEST_MANGLER_ARBEIDSSTED.getBeskrivelse());
     }
 
@@ -164,7 +165,7 @@ class StorbritanniaMapperTest {
         when(mockAvklarteVirksomheterService.hentNorskeArbeidsgivere(any())).thenReturn(Collections.emptyList());
 
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> storbritanniaMapper.map(lagStorbritanniaBrevbestilling(lagTrygdeavtaleBehandling())))
+            .isThrownBy(() -> trygdeavtaleMapper.map(lagStorbritanniaBrevbestilling(lagTrygdeavtaleBehandling()), Land_iso2.GB))
             .withMessageContaining("Fant 0 avklarte virksomheter for behandling: null. Må være 1 for trygdeavtale");
     }
 
@@ -177,7 +178,7 @@ class StorbritanniaMapperTest {
         when(mockAvklarteMedfolgendeFamilieService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(lagOmfattetMedfølgendeBarn());
 
         InnvilgelseBrevbestilling brevbestilling = lagStorbritanniaBrevbestilling(lagTrygdeavtaleBehandling());
-        InnvilgelseStorbritannia map = storbritanniaMapper.map(brevbestilling).getInnvilgelse();
+        InnvilgelseTrygdeavtale map = trygdeavtaleMapper.map(brevbestilling, Land_iso2.GB).getInnvilgelse();
         assertThat(map.getFamilie().minstEttOmfattetFamiliemedlem()).isTrue();
     }
 
@@ -190,7 +191,7 @@ class StorbritanniaMapperTest {
         when(mockAvklarteMedfolgendeFamilieService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(lagBarnUtenFnr());
 
         InnvilgelseBrevbestilling brevbestilling = lagStorbritanniaBrevbestilling(lagTrygdeavtaleBehandling());
-        InnvilgelseStorbritannia map = storbritanniaMapper.map(brevbestilling).getInnvilgelse();
+        InnvilgelseTrygdeavtale map = trygdeavtaleMapper.map(brevbestilling, Land_iso2.GB).getInnvilgelse();
         assertThat(map.getFamilie().barn())
             .hasSize(1)
             .element(0)
@@ -208,7 +209,7 @@ class StorbritanniaMapperTest {
         when(mockAvklarteMedfolgendeFamilieService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(lagIkkeOmfattetMedfølgendeBarn());
 
         InnvilgelseBrevbestilling brevbestilling = lagStorbritanniaBrevbestilling(lagTrygdeavtaleBehandling());
-        InnvilgelseStorbritannia map = storbritanniaMapper.map(brevbestilling).getInnvilgelse();
+        InnvilgelseTrygdeavtale map = trygdeavtaleMapper.map(brevbestilling, Land_iso2.GB).getInnvilgelse();
         assertThat(map.getFamilie().minstEttOmfattetFamiliemedlem()).isFalse();
     }
 
@@ -220,7 +221,7 @@ class StorbritanniaMapperTest {
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() ->
-                storbritanniaMapper.map(lagStorbritanniaBrevbestilling(lagTrygdeavtaleBehandling()))
+                trygdeavtaleMapper.map(lagStorbritanniaBrevbestilling(lagTrygdeavtaleBehandling()), Land_iso2.GB)
             ).withMessageContaining("Det kan bare være en lovvalgsperiode for trygdeavtale. Fant 2");
     }
 
@@ -232,11 +233,11 @@ class StorbritanniaMapperTest {
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() ->
-                storbritanniaMapper.map(new InnvilgelseBrevbestilling.Builder()
+                trygdeavtaleMapper.map(new InnvilgelseBrevbestilling.Builder()
                     .medBehandling(lagTrygdeavtaleBehandling())
                     .medPersonDokument(lagPersondata())
                     .medVedtaksdato(VEDTAKS_DATO_INSTANT)
-                    .build()
+                    .build(), Land_iso2.GB
                 )
             ).withMessageContaining("Det kan bare være en lovvalgsperiode for trygdeavtale. Fant 0");
     }
@@ -468,7 +469,7 @@ class StorbritanniaMapperTest {
               },
               "utsendelse" : {
                 "artikkel" : "UK_ART6_1",
-                "oppholdsadresseUK" : [ "Unknown" ],
+                "oppholdsadresse" : [ "Unknown" ],
                 "startdato" : "%s",
                 "sluttdato" : "%s"
               },

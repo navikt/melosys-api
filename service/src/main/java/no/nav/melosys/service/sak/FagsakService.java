@@ -129,7 +129,7 @@ public class FagsakService {
     public void oppdaterMyndighetForTrygdeavtale(String saksnummer, Land_iso2 landkode) {
         Fagsak fagsak = hentFagsak(saksnummer);
 
-        fagsak.getAktører().removeIf(aktoer -> !aktoer.getTrygdemyndighetLand().getKode().equals(landkode.getKode())
+        fagsak.getAktører().removeIf(aktoer -> aktoer.getTrygdemyndighetLand() != landkode
             && aktoer.getRolle() == Aktoersroller.TRYGDEMYNDIGHET);
 
         boolean harIngenTrygdemyndigheter = fagsak.hentMyndigheter().isEmpty();

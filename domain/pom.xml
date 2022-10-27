@@ -21,7 +21,6 @@
             <groupId>no.nav.melosys</groupId>
             <artifactId>melosys-internt-kodeverk</artifactId>
         </dependency>
-
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
@@ -112,7 +111,25 @@
             <artifactId>spring-boot-starter-logging</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <!-- Test: Kotlin Specific -->
+        <dependency>
+            <groupId>org.jetbrains.kotlin</groupId>
+            <artifactId>kotlin-test-junit5</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.mockk</groupId>
+            <artifactId>mockk</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.kotest</groupId>
+            <artifactId>kotest-assertions-core-jvm</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
+
 
     <build>
         <plugins>
@@ -198,4 +215,5 @@
             </plugin>
         </plugins>
     </build>
+
 </project>

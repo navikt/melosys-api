@@ -2,7 +2,7 @@ package no.nav.melosys.integrasjon.dokgen.dto.storbritannia.attest;
 
 import java.util.List;
 
-import no.nav.melosys.domain.brev.storbritannia.Representant;
+import no.nav.melosys.domain.brev.trygdeavtale.Representant;
 
 public record ArbeidsgiverNorge(String virksomhetsnavn, List<String> fullstendigAdresse) {
 

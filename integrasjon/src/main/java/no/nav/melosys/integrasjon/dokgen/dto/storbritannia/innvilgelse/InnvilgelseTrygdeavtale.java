@@ -1,12 +1,12 @@
 package no.nav.melosys.integrasjon.dokgen.dto.storbritannia.innvilgelse;
 
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
+import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.integrasjon.dokgen.dto.felles.Innvilgelse;
 
-public class InnvilgelseStorbritannia {
+public class InnvilgelseTrygdeavtale {
 
     private final Innvilgelse innvilgelse;
-    private final Lovvalgbestemmelser_trygdeavtale_uk artikkel;
+    private final LovvalgBestemmelse artikkel;
     private final Soknad soknad;
     private final Familie familie;
     private final boolean virksomhetArbeidsgiverSkalHaKopi;
@@ -15,7 +15,7 @@ public class InnvilgelseStorbritannia {
         return innvilgelse;
     }
 
-    public Lovvalgbestemmelser_trygdeavtale_uk getArtikkel() {
+    public LovvalgBestemmelse getArtikkel() {
         return artikkel;
     }
 
@@ -31,7 +31,7 @@ public class InnvilgelseStorbritannia {
         return virksomhetArbeidsgiverSkalHaKopi;
     }
 
-    public InnvilgelseStorbritannia(Builder builder) {
+    public InnvilgelseTrygdeavtale(Builder builder) {
         this.innvilgelse = builder.innvilgelse;
         this.artikkel = builder.artikkel;
         this.soknad = builder.soknad;
@@ -41,7 +41,7 @@ public class InnvilgelseStorbritannia {
 
     public static class Builder {
         private Innvilgelse innvilgelse;
-        private Lovvalgbestemmelser_trygdeavtale_uk artikkel;
+        private LovvalgBestemmelse artikkel;
         private Soknad soknad;
         private Familie familie;
         private boolean virksomhetArbeidsgiverSkalHaKopi;
@@ -51,7 +51,7 @@ public class InnvilgelseStorbritannia {
             return this;
         }
 
-        public Builder artikkel(Lovvalgbestemmelser_trygdeavtale_uk artikkel) {
+        public Builder artikkel(LovvalgBestemmelse artikkel) {
             this.artikkel = artikkel;
             return this;
         }
@@ -71,8 +71,8 @@ public class InnvilgelseStorbritannia {
             return this;
         }
 
-        public InnvilgelseStorbritannia build() {
-            return new InnvilgelseStorbritannia(this);
+        public InnvilgelseTrygdeavtale build() {
+            return new InnvilgelseTrygdeavtale(this);
         }
     }
 }

@@ -72,9 +72,15 @@ public class DokumentproduksjonsInfoMapper {
             .put(STORBRITANNIA,
                 new DokumentproduksjonsInfo("uk_innvilgelse_og_attest",
                     DokumentKategoriKode.VB.getKode(),
-                    JournalforingsTittel.STORBRITANNIA.getTittel(),
-                    Map.of(VedleggTyper.VEDTAKSBREV, JournalforingsTittel.STORBRITANNIA_VEDTAKSBREV.getTittel(),
-                        VedleggTyper.ATTEST, JournalforingsTittel.STORBRITANNIA_ATTEST.getTittel())))
+                    JournalforingsTittel.TRYGDEAVTALE.getTittel(),
+                    Map.of(VedleggTyper.VEDTAKSBREV, JournalforingsTittel.TRYGDEAVTALE_VEDTAKSBREV.getTittel(),
+                        VedleggTyper.ATTEST, JournalforingsTittel.TRYGDEAVTALE_ATTEST.getTittel())))
+            .put(TRYGDEAVTALE_US,
+                new DokumentproduksjonsInfo("trygdeavtale_us",
+                    DokumentKategoriKode.VB.getKode(),
+                    JournalforingsTittel.TRYGDEAVTALE.getTittel(),
+                    Map.of(VedleggTyper.VEDTAKSBREV, JournalforingsTittel.TRYGDEAVTALE_VEDTAKSBREV.getTittel(),
+                        VedleggTyper.ATTEST, JournalforingsTittel.TRYGDEAVTALE_ATTEST.getTittel())))
             .put(GENERELT_FRITEKSTBREV_BRUKER,
                 new DokumentproduksjonsInfo("fritekstbrev",
                     DokumentKategoriKode.IB.getKode()))
@@ -135,9 +141,9 @@ public class DokumentproduksjonsInfoMapper {
         FORVALTNINGSMELDING("Melding om forventet saksbehandlingstid"),
         MANGELBREV("Melding om manglende opplysninger"),
         INNVILGELSE_FTRL_2_8("Vedtak om frivillig medlemskap"),
-        STORBRITANNIA("Vedtak om medlemskap, Attest for utsendt arbeidstaker"),
-        STORBRITANNIA_VEDTAKSBREV("Vedtak om medlemskap"),
-        STORBRITANNIA_ATTEST("Attest for utsendt arbeidstaker"),
+        TRYGDEAVTALE("Vedtak om medlemskap, Attest for utsendt arbeidstaker"),
+        TRYGDEAVTALE_VEDTAKSBREV("Vedtak om medlemskap"),
+        TRYGDEAVTALE_ATTEST("Attest for utsendt arbeidstaker"),
         AVSLAG_MANGLENDE_OPPLYSNINGER("Avslag pga manglende opplysninger"),
         MELDING_HENLAGT_SAK("Henleggelse av søknad");
 
