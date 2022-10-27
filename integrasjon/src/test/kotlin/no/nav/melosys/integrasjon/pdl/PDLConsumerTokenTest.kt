@@ -2,7 +2,6 @@ package no.nav.melosys.integrasjon.pdl
 
 import com.github.tomakehurst.wiremock.client.MappingBuilder
 import com.github.tomakehurst.wiremock.client.WireMock
-import com.github.tomakehurst.wiremock.matching.StringValuePattern
 import no.nav.melosys.integrasjon.ConsumerWireMockTestBase
 import no.nav.melosys.integrasjon.OAuthMockServer
 import no.nav.melosys.integrasjon.pdl.dto.identer.Identliste
@@ -39,34 +38,28 @@ class PDLConsumerTokenTest(
 
     @Test
     fun authorizationSkalKommeFraSystem() {
-        verifyHeaders(
-            mapOf<String, StringValuePattern>(
-                Pair("Authorization", WireMock.equalTo("Bearer --token-from-system--")),
-                Pair("Nav-Consumer-Token", WireMock.equalTo("Bearer --token-from-system--"))
-            )
-        )
+        setupWireMock {
+            it.withHeader("Authorization", WireMock.equalTo("Bearer --token-from-system--"))
+            it.withHeader("Nav-Consumer-Token", WireMock.equalTo("Bearer --token-from-system--"))
+        }
         executeFromSystem()
     }
 
     @Test
     fun authorizationSkalKommeFraBruker() {
-        verifyHeaders(
-            mapOf<String, StringValuePattern>(
-                Pair("Authorization", WireMock.equalTo("Bearer -- user_access_token --")),
-                Pair("Nav-Consumer-Token", WireMock.equalTo("Bearer --token-from-system--"))
-            )
-        )
+        setupWireMock {
+            it.withHeader("Authorization", WireMock.equalTo("Bearer -- user_access_token --"))
+            it.withHeader("Nav-Consumer-Token", WireMock.absent())
+        }
         executeFromController()
     }
 
     @Test
     fun authorizationSkalKommeFraSystemNårHverkenSystemEllerBrukerErKilde() {
-        verifyHeaders(
-            mapOf<String, StringValuePattern>(
-                Pair("Authorization", WireMock.equalTo("Bearer --token-from-system--")),
-                Pair("Nav-Consumer-Token", WireMock.equalTo("Bearer --token-from-system--"))
-            )
-        )
+        setupWireMock {
+            it.withHeader("Authorization", WireMock.equalTo("Bearer --token-from-system--"))
+            it.withHeader("Nav-Consumer-Token", WireMock.equalTo("Bearer --token-from-system--"))
+        }
         executeRequest()
     }
 
