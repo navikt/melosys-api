@@ -1,5 +1,6 @@
 package no.nav.melosys.service.kontroll.feature.ferdigbehandling;
 
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Medlemskapsperiode;
@@ -26,17 +27,19 @@ class KontrollMedRegisteropplysning {
     private final PersondataFasade persondataFasade;
     private final RegisteropplysningerService registeropplysningerService;
     private final Kontroll kontroll;
+    private final Unleash unleash;
 
     public KontrollMedRegisteropplysning(BehandlingService behandlingService,
                                          BehandlingsresultatService behandlingsresultatService,
                                          PersondataFasade persondataFasade,
                                          RegisteropplysningerService registeropplysningerService,
-                                         Kontroll kontroll) {
+                                         Kontroll kontroll, Unleash unleash) {
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.persondataFasade = persondataFasade;
         this.registeropplysningerService = registeropplysningerService;
         this.kontroll = kontroll;
+        this.unleash = unleash;
     }
 
     public void kontroller(long behandlingId, Behandlingsresultattyper behandlingsresultattype) throws ValideringException {
@@ -54,10 +57,11 @@ class KontrollMedRegisteropplysning {
     }
 
     private void hentNyeRegisteropplysninger(Behandlingsresultat behandlingsresultat, Behandling behandling) {
+        var ftrlOppdatertFlytToggle = unleash.isEnabled("melosys.FTRL_oppdatert_flyt");
+
         LocalDate fom;
         LocalDate tom;
-
-        if (behandling.getFagsak().getType().equals(Sakstyper.FTRL)) {
+        if (behandling.getFagsak().getType().equals(Sakstyper.FTRL) && ftrlOppdatertFlytToggle) {
             Medlemskapsperiode medlemskapsperiode = behandlingsresultat.hentValidertMedlemskapsPeriode();
             fom = medlemskapsperiode.getFom();
             tom = medlemskapsperiode.getTom();

@@ -70,7 +70,7 @@ class KontrollMedRegisterOpplysningServiceTest {
 
         Kontroll kontroll = new Kontroll(behandlingService, lovvalgsperiodeService, persondataFasade, unleash);
         kontrollMedRegisterOpplysning = new KontrollMedRegisteropplysning(behandlingService, behandlingsresultatService, persondataFasade,
-            registeropplysningerService, kontroll);
+            registeropplysningerService, kontroll, unleash);
 
         unleash.enableAll();
     }
