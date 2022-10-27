@@ -18,7 +18,7 @@ import org.springframework.stereotype.Service;
 
 import static no.nav.melosys.domain.kodeverk.Saksstatuser.HENLAGT;
 import static no.nav.melosys.domain.kodeverk.Saksstatuser.HENLAGT_BORTFALT;
-import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.*;
+import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.AVSLUTTET;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.*;
 import static no.nav.melosys.service.lovligekombinasjoner.LovligeBehandlingsKombinasjoner.BEHANDLINGSTYPER_FOR_VIRKSOMHET;
@@ -28,11 +28,6 @@ public class LovligeKombinasjonerService {
 
     public Set<Sakstyper> hentMuligeSakstyper() {
         return LovligeSakskombinasjoner.ALLE_MULIGE_SAKSTYPER;
-    }
-
-    public Set<Behandlingsstatus> hentMuligeStatuser() {
-        return Set.of(AVVENT_DOK_PART, AVVENT_DOK_UTL,
-            UNDER_BEHANDLING, AVVENT_FAGLIG_AVKLARING);
     }
 
     public Set<Sakstemaer> hentMuligeSakstemaer(@Nullable Aktoersroller hovedpart, Sakstyper sakstype) {
@@ -97,7 +92,7 @@ public class LovligeKombinasjonerService {
     public Set<Behandlingsstatus> hentMuligeStatuser(Behandling behandling) {
         if (behandling.erInaktiv()) return Collections.emptySet();
 
-        Set<Behandlingsstatus> muligeStatuser = new HashSet<>(hentMuligeStatuser());
+        Set<Behandlingsstatus> muligeStatuser = new HashSet<>(LovligeBehandlingstatusKombinasjoner.ALLE_MULIGE_BEHANDLINGSTATUSER);
         return muligeStatuser.stream().filter(status -> status != behandling.getStatus()).collect(Collectors.toSet());
     }
 
