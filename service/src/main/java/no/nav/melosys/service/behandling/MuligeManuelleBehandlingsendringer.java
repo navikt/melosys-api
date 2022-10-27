@@ -28,6 +28,8 @@ public class MuligeManuelleBehandlingsendringer {
     private static final Set<Behandlingstema> TEMAER_SOM_KAN_AVSLUTTES = Set.of(ØVRIGE_SED_MED, ØVRIGE_SED_UFM, FORESPØRSEL_TRYGDEMYNDIGHET, TRYGDETID, IKKE_YRKESAKTIV);
     private static final Set<Behandlingstema> TEMAER_SOM_KAN_ENDRE_TYPE = Set.of(UTSENDT_ARBEIDSTAKER, UTSENDT_SELVSTENDIG);
 
+    @Deprecated(since = "Denne klassen forsvinner når vi tar vekk melosys.behandle_alle_saker toggle, " +
+        "ettersom metodene som er brukt her er gjemt bak toggle")
     private MuligeManuelleBehandlingsendringer() {
     }
 
