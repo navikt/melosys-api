@@ -92,7 +92,7 @@ public class LovligeKombinasjonerService {
     public Set<Behandlingsstatus> hentMuligeStatuser(Behandling behandling) {
         if (behandling.erInaktiv()) return Collections.emptySet();
 
-        Set<Behandlingsstatus> muligeStatuser = new HashSet<>(LovligeBehandlingstatusKombinasjoner.ALLE_MULIGE_BEHANDLINGSTATUSER);
+        Set<Behandlingsstatus> muligeStatuser = LovligeBehandlingstatusKombinasjoner.ALLE_MULIGE_BEHANDLINGSTATUSER;
         return muligeStatuser.stream().filter(status -> status != behandling.getStatus()).collect(Collectors.toSet());
     }
 
