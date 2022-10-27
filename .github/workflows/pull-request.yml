@@ -35,4 +35,4 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.READER_TOKEN }}
       - name: Build and test
-        run: mvn clean verify -T 8 -B -e -U --settings .github/settings.xml
+        run: mvn clean verify --threads=8 -B -e -U --settings .github/settings.xml
