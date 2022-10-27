@@ -11,7 +11,6 @@ import no.nav.melosys.domain.person.adresse.Oppholdsadresse
 import no.nav.melosys.domain.person.familie.Familiemedlem
 import java.time.LocalDate
 import java.util.*
-import java.util.function.Predicate
 
 data class Personopplysninger(
     @JsonProperty("adressebeskyttelser") var adressebeskyttelser: Collection<Adressebeskyttelse>,
@@ -27,10 +26,10 @@ data class Personopplysninger(
     @JsonProperty("statsborgerskap") var statsborgerskap: Collection<Statsborgerskap>
 ) : Persondata {
 
+
     override fun erPersonDød(): Boolean = dødsfall?.dødsdato() != null
 
-    override fun harStrengtAdressebeskyttelse(): Boolean = adressebeskyttelser.stream()
-        .anyMatch(Predicate { obj: Adressebeskyttelse -> obj.erStrengtFortrolig() })
+    override fun harStrengtAdressebeskyttelse(): Boolean = adressebeskyttelser.any { it.erStrengtFortrolig() }
 
     override fun manglerRegistrertAdresse(): Boolean = bostedsadresse == null && kontaktadresser.isEmpty() &&
         oppholdsadresser.isEmpty()
@@ -65,11 +64,14 @@ data class Personopplysninger(
     override fun finnBostedsadresse(): Optional<Bostedsadresse> = Optional.ofNullable(bostedsadresse)
 
     override fun finnKontaktadresse(): Optional<Kontaktadresse> =
-        kontaktadresser.stream().max(Comparator.comparing { obj: Kontaktadresse -> obj.registrertDato() })
-    
-    override fun finnOppholdsadresse(): Optional<Oppholdsadresse> =
-        oppholdsadresser.stream().max(Comparator.comparing { obj: Oppholdsadresse -> obj.registrertDato() })
+        kontaktadresser
+            .maxByOrNull { it.registrertDato() }
+            .let { Optional.ofNullable(it) }
 
+    override fun finnOppholdsadresse(): Optional<Oppholdsadresse> =
+        oppholdsadresser
+            .maxByOrNull { it.registrertDato() }
+            .let { Optional.ofNullable(it) }
 
     /*
      * Vi følger anbefaling fra PDL om følgende prioritering:
@@ -90,24 +92,22 @@ data class Personopplysninger(
             .or { hentGjeldendeKontaktadresseFraMaster(Master.FREG) }
             .map { kontaktadresse: Kontaktadresse -> lagPostadresseFraKontaktadresse(kontaktadresse) }
 
-
     private fun hentGjeldendeKontaktadresseFraMaster(master: Master): Optional<Kontaktadresse> =
-        kontaktadresser.stream()
-            .filter { a: Kontaktadresse -> master.name.equals(a.master(), ignoreCase = true) }
-            .max(Comparator.comparing { obj: Kontaktadresse -> obj.registrertDato() })
-
+        kontaktadresser
+            .filter { master.name.equals(it.master(), ignoreCase = true) }
+            .maxByOrNull { it.registrertDato() }
+            .let { Optional.ofNullable(it) }
 
     private fun lagPostadresseFraOppholdsadresser(): Optional<Postadresse?> =
         hentGjeldendeOppholdsadresseFraMaster(Master.PDL)
             .or { hentGjeldendeOppholdsadresseFraMaster(Master.FREG) }
             .map { oppholdsadresse: Oppholdsadresse -> lagPostadresseFraOppholdsadresse(oppholdsadresse) }
 
-
     private fun hentGjeldendeOppholdsadresseFraMaster(master: Master): Optional<Oppholdsadresse> =
-        oppholdsadresser.stream()
-            .filter(Predicate { a: Oppholdsadresse -> master.name.equals(a.master(), ignoreCase = true) })
-            .max(Comparator.comparing { obj: Oppholdsadresse -> obj.registrertDato() })
-
+        oppholdsadresser
+            .filter { master.name.equals(it.master(), ignoreCase = true) }
+            .maxByOrNull { it.registrertDato() }
+            .let { Optional.ofNullable(it) }
 
     private fun lagPostadresseFraBostedsadresse(): Optional<Postadresse?> = finnBostedsadresse()
         .map { bostedsadresse: Bostedsadresse ->
@@ -116,7 +116,6 @@ data class Personopplysninger(
                 bostedsadresse.strukturertAdresse()
             )
         }
-
 
     private fun lagPostadresseFraKontaktadresse(kontaktadresse: Kontaktadresse): Postadresse? {
         if (kontaktadresse.strukturertAdresse() != null) {
