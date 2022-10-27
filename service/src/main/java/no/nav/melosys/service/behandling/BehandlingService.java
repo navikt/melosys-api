@@ -414,7 +414,7 @@ public class BehandlingService {
         if (!unleash.isEnabled("melosys.behandle_alle_saker")) {
             return MuligeManuelleBehandlingsendringer.hentMuligeStatuserGammel(behandling);
         }
-        return MuligeManuelleBehandlingsendringer.hentMuligeStatuser(behandling);
+        return lovligeKombinasjonerService.hentMuligeStatuser(behandling);
     }
 
     @Transactional
@@ -444,11 +444,12 @@ public class BehandlingService {
     }
 
     private boolean saksbehandlerKanEndreStatus(Behandling behandling, Behandlingsstatus status) {
-        if (unleash.isEnabled("melosys.behandle_alle_saker")) {
-            MuligeManuelleBehandlingsendringer.validerNyStatusMulig(behandling, status);
-        } else {
+        if (!unleash.isEnabled("melosys.behandle_alle_saker")) {
             MuligeManuelleBehandlingsendringer.validerNyStatusMuligGammel(behandling, status);
+            return true;
         }
+
+        lovligeKombinasjonerService.validerNyStatusMulig(behandling, status);
         return true;
     }
 

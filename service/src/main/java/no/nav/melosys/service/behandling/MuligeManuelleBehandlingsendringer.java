@@ -31,14 +31,6 @@ public class MuligeManuelleBehandlingsendringer {
     private MuligeManuelleBehandlingsendringer() {
     }
 
-    public static Set<Behandlingsstatus> hentMuligeStatuser(Behandling behandling) {
-        if (behandling.erInaktiv()) return Collections.emptySet();
-
-        Set<Behandlingsstatus> muligeStatuser = new HashSet<>(MULIGE_STATUSER);
-
-        return muligeStatuser.stream().filter(status -> status != behandling.getStatus()).collect(Collectors.toSet());
-    }
-
     @Deprecated(since = "Tas vekk sammen med toggle melosys.behandle_alle_saker")
     public static Set<Behandlingsstatus> hentMuligeStatuserGammel(Behandling behandling) {
         if (behandling.erInaktiv()) return Collections.emptySet();
@@ -87,18 +79,11 @@ public class MuligeManuelleBehandlingsendringer {
         }
     }
 
-    public static void validerNyStatusMulig(Behandling behandling, Behandlingsstatus status) {
-        if (!hentMuligeStatuser(behandling).contains(status)) {
-            throw new FunksjonellException(String.format("Behandlingen kan ikke endres til status %s. Gyldige statuser for behandling %s er %s",
-                status, behandling.getId(), hentMuligeStatuser(behandling)));
-        }
-    }
-
     @Deprecated(since = "Tas vekk sammen med toggle melosys.behandle_alle_saker")
     public static void validerNyStatusMuligGammel(Behandling behandling, Behandlingsstatus status) {
         if (!hentMuligeStatuserGammel(behandling).contains(status)) {
             throw new FunksjonellException(String.format("Behandlingen kan ikke endres til status %s. Gyldige statuser for behandling %s er %s",
-                status, behandling.getId(), hentMuligeStatuser(behandling)));
+                status, behandling.getId(), hentMuligeStatuserGammel(behandling)));
         }
     }
 

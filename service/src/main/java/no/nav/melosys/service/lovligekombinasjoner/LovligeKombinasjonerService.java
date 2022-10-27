@@ -10,12 +10,15 @@ import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import org.springframework.stereotype.Service;
 
-import static no.nav.melosys.domain.kodeverk.Saksstatuser.*;
+import static no.nav.melosys.domain.kodeverk.Saksstatuser.HENLAGT;
+import static no.nav.melosys.domain.kodeverk.Saksstatuser.HENLAGT_BORTFALT;
+import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.*;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.*;
 import static no.nav.melosys.service.lovligekombinasjoner.LovligeBehandlingsKombinasjoner.BEHANDLINGSTYPER_FOR_VIRKSOMHET;
@@ -25,6 +28,11 @@ public class LovligeKombinasjonerService {
 
     public Set<Sakstyper> hentMuligeSakstyper() {
         return LovligeSakskombinasjoner.ALLE_MULIGE_SAKSTYPER;
+    }
+
+    public Set<Behandlingsstatus> hentMuligeStatuser() {
+        return Set.of(AVVENT_DOK_PART, AVVENT_DOK_UTL,
+            UNDER_BEHANDLING, AVVENT_FAGLIG_AVKLARING);
     }
 
     public Set<Sakstemaer> hentMuligeSakstemaer(@Nullable Aktoersroller hovedpart, Sakstyper sakstype) {
@@ -83,6 +91,20 @@ public class LovligeKombinasjonerService {
                 return Set.of(VIRKSOMHET);
             default:
                 return Collections.emptySet();
+        }
+    }
+
+    public Set<Behandlingsstatus> hentMuligeStatuser(Behandling behandling) {
+        if (behandling.erInaktiv()) return Collections.emptySet();
+
+        Set<Behandlingsstatus> muligeStatuser = new HashSet<>(hentMuligeStatuser());
+        return muligeStatuser.stream().filter(status -> status != behandling.getStatus()).collect(Collectors.toSet());
+    }
+
+    public void validerNyStatusMulig(Behandling behandling, Behandlingsstatus status) {
+        if (!hentMuligeStatuser(behandling).contains(status)) {
+            throw new FunksjonellException(String.format("Behandlingen kan ikke endres til status %s. Gyldige statuser for behandling %s er %s",
+                status, behandling.getId(), hentMuligeStatuser(behandling)));
         }
     }
 

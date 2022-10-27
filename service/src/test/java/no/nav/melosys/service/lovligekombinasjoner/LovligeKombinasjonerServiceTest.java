@@ -19,6 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static no.nav.melosys.domain.kodeverk.Sakstemaer.*;
 import static no.nav.melosys.domain.kodeverk.Sakstyper.*;
+import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.*;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -199,6 +200,25 @@ class LovligeKombinasjonerServiceTest {
         assertThat(muligeBehandlingstyper)
             .hasSize(3)
             .containsExactly(NY_VURDERING, KLAGE, HENVENDELSE);
+    }
+
+    @Test
+    void hentMuligeStatuser_temaOvrigeSedMed_avsluttetErIkkeMulig() {
+        var muligeStatuser = lovligeKombinasjonerService.hentMuligeStatuser(behandlingMedTema(Behandlingstema.ØVRIGE_SED_MED));
+        assertThat(muligeStatuser).containsExactlyInAnyOrder(AVVENT_DOK_PART, AVVENT_DOK_UTL, UNDER_BEHANDLING,
+            AVVENT_FAGLIG_AVKLARING).doesNotContain(AVSLUTTET);
+    }
+
+    @Test
+    void hentMuligeStatuser_temaArbeidUtland_avsluttetErIkkeMulig() {
+        var muligeStatuser = lovligeKombinasjonerService.hentMuligeStatuser(behandlingMedTema(Behandlingstema.ARBEID_I_UTLANDET));
+        assertThat(muligeStatuser).containsExactlyInAnyOrder(AVVENT_DOK_PART, AVVENT_DOK_UTL, UNDER_BEHANDLING, AVVENT_FAGLIG_AVKLARING);
+    }
+
+    private Behandling behandlingMedTema(Behandlingstema tema) {
+        var behandling = new Behandling();
+        behandling.setTema(tema);
+        return behandling;
     }
 
     private Fagsak fagsakMedSakstypeOgSakstema(Sakstyper sakstype, Sakstemaer sakstema) {
