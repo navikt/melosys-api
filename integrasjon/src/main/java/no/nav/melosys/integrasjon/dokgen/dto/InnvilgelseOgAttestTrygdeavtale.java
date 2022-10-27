@@ -3,17 +3,17 @@ package no.nav.melosys.integrasjon.dokgen.dto;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.integrasjon.dokgen.dto.felles.SaksinfoBruker;
-import no.nav.melosys.integrasjon.dokgen.dto.trygdeavtale.attest.AttestStorbritannia;
+import no.nav.melosys.integrasjon.dokgen.dto.trygdeavtale.attest.AttestTrygdeavtale;
 import no.nav.melosys.integrasjon.dokgen.dto.trygdeavtale.innvilgelse.InnvilgelseTrygdeavtale;
 
-public class InnvilgelseOgAttestStorbritannia extends DokgenDto {
+public class InnvilgelseOgAttestTrygdeavtale extends DokgenDto {
 
     private final InnvilgelseTrygdeavtale innvilgelse;
-    private final AttestStorbritannia attest;
+    private final AttestTrygdeavtale attest;
     private final boolean skalHaInfoOmRettigheter;
     private final String nyVurderingBakgrunn;
 
-    public InnvilgelseOgAttestStorbritannia(Builder builder, Aktoersroller mottaker) {
+    public InnvilgelseOgAttestTrygdeavtale(Builder builder, Aktoersroller mottaker) {
         super(builder.brevbestilling, mottaker);
         this.innvilgelse = builder.innvilgelse;
         this.attest = builder.attest;
@@ -23,7 +23,7 @@ public class InnvilgelseOgAttestStorbritannia extends DokgenDto {
 
     public static class Builder {
         private InnvilgelseTrygdeavtale innvilgelse;
-        private AttestStorbritannia attest;
+        private AttestTrygdeavtale attest;
         private boolean skalHaInfoOmRettigheter;
         private final DokgenBrevbestilling brevbestilling;
         private String nyVurderingBakgrunn;
@@ -37,7 +37,7 @@ public class InnvilgelseOgAttestStorbritannia extends DokgenDto {
             return this;
         }
 
-        public Builder attest(AttestStorbritannia attest) {
+        public Builder attest(AttestTrygdeavtale attest) {
             this.attest = attest;
             return this;
         }
@@ -52,11 +52,11 @@ public class InnvilgelseOgAttestStorbritannia extends DokgenDto {
             return this;
         }
 
-        public InnvilgelseOgAttestStorbritannia build() {
+        public InnvilgelseOgAttestTrygdeavtale build() {
             Aktoersroller mottaker = brevbestilling.getUtenlandskMyndighet() == null
                 ? Aktoersroller.BRUKER
                 : Aktoersroller.TRYGDEMYNDIGHET;
-            return new InnvilgelseOgAttestStorbritannia(this, mottaker);
+            return new InnvilgelseOgAttestTrygdeavtale(this, mottaker);
         }
     }
 
@@ -76,7 +76,7 @@ public class InnvilgelseOgAttestStorbritannia extends DokgenDto {
         return innvilgelse;
     }
 
-    public AttestStorbritannia getAttest() {
+    public AttestTrygdeavtale getAttest() {
         return attest;
     }
 

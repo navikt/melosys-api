@@ -28,8 +28,8 @@ import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie;
 import no.nav.melosys.domain.person.familie.IkkeOmfattetFamilie;
 import no.nav.melosys.domain.person.familie.OmfattetFamilie;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.integrasjon.dokgen.dto.InnvilgelseOgAttestStorbritannia;
-import no.nav.melosys.integrasjon.dokgen.dto.trygdeavtale.attest.AttestStorbritannia;
+import no.nav.melosys.integrasjon.dokgen.dto.InnvilgelseOgAttestTrygdeavtale;
+import no.nav.melosys.integrasjon.dokgen.dto.trygdeavtale.attest.AttestTrygdeavtale;
 import no.nav.melosys.integrasjon.dokgen.dto.trygdeavtale.innvilgelse.Barn;
 import no.nav.melosys.integrasjon.dokgen.dto.trygdeavtale.innvilgelse.InnvilgelseTrygdeavtale;
 import no.nav.melosys.service.LovvalgsperiodeService;
@@ -99,22 +99,22 @@ class TrygdeavtaleMapperTest {
 
         InnvilgelseBrevbestilling brevbestilling = lagStorbritanniaBrevbestilling(medPeriode(lagTrygdeavtaleBehandling()));
 
-        InnvilgelseOgAttestStorbritannia innvilgelseOgAttestStorbritannia = trygdeavtaleMapper.map(brevbestilling, Land_iso2.GB);
+        InnvilgelseOgAttestTrygdeavtale innvilgelseOgAttestTrygdeavtale = trygdeavtaleMapper.map(brevbestilling, Land_iso2.GB);
 
-        String jsonInnvilgelse = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(innvilgelseOgAttestStorbritannia.getInnvilgelse());
+        String jsonInnvilgelse = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(innvilgelseOgAttestTrygdeavtale.getInnvilgelse());
         String resultatInnvilgelse = jsonInnvilgelse.replaceAll("(\"dagensDato\" :)(.*)", "$1 \"Fjernet for test\",");
 
-        assertThat(innvilgelseOgAttestStorbritannia.isSkalHaAttest()).isTrue();
+        assertThat(innvilgelseOgAttestTrygdeavtale.isSkalHaAttest()).isTrue();
         assertThat(resultatInnvilgelse).isEqualToIgnoringNewLines(FORVENTEDE_FELTER_FOR_INNVILGELSE_STORBRITANNIA_MAPPING);
 
-        String jsonAttest = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(innvilgelseOgAttestStorbritannia.getAttest());
+        String jsonAttest = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(innvilgelseOgAttestTrygdeavtale.getAttest());
         String resultatAttest = jsonAttest.replaceAll("(\"dagensDato\" :)(.*)", "$1 \"Fjernet for test\",");
 
-        assertThat(innvilgelseOgAttestStorbritannia.isSkalHaInnvilgelse()).isTrue();
+        assertThat(innvilgelseOgAttestTrygdeavtale.isSkalHaInnvilgelse()).isTrue();
         assertThat(resultatAttest).isEqualToIgnoringNewLines(FORVENTEDE_FELTER_FOR_ATTEST_STORBRITANNIA_MAPPING);
 
-        assertThat(innvilgelseOgAttestStorbritannia.isSkalHaInfoOmRettigheter()).isTrue();
-        assertThat(innvilgelseOgAttestStorbritannia.getNyVurderingBakgrunn()).isEqualTo(brevbestilling.getNyVurderingBakgrunn());
+        assertThat(innvilgelseOgAttestTrygdeavtale.isSkalHaInfoOmRettigheter()).isTrue();
+        assertThat(innvilgelseOgAttestTrygdeavtale.getNyVurderingBakgrunn()).isEqualTo(brevbestilling.getNyVurderingBakgrunn());
     }
 
     private static List<Arguments> sjekkAdresser() {
@@ -138,10 +138,10 @@ class TrygdeavtaleMapperTest {
                 .medPersonDokument(persondata)
                 .build();
 
-        InnvilgelseOgAttestStorbritannia innvilgelseOgAttestStorbritannia = trygdeavtaleMapper.map(brevbestilling, Land_iso2.GB);
-        assertTrue(innvilgelseOgAttestStorbritannia.isSkalHaAttest());
+        InnvilgelseOgAttestTrygdeavtale innvilgelseOgAttestTrygdeavtale = trygdeavtaleMapper.map(brevbestilling, Land_iso2.GB);
+        assertTrue(innvilgelseOgAttestTrygdeavtale.isSkalHaAttest());
 
-        AttestStorbritannia attest = innvilgelseOgAttestStorbritannia.getAttest();
+        AttestTrygdeavtale attest = innvilgelseOgAttestTrygdeavtale.getAttest();
         List<String> bostedsadresse = attest.getArbeidstaker().bostedsadresse();
         List<String> oppholdsadresse = attest.getUtsendelse().oppholdsadresse();
 

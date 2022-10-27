@@ -10,13 +10,13 @@ import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 
 import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
 
-public class AttestStorbritannia {
+public class AttestTrygdeavtale {
 
     private final Arbeidstaker arbeidstaker;
     private final MedfolgendeFamiliemedlemmer medfolgendeFamiliemedlemmer;
     private final ArbeidsgiverNorge arbeidsgiverNorge;
     private final Utsendelse utsendelse;
-    private final RepresentantStorbritannia representant;
+    private final RepresentantTrygdeavtale representant;
 
     @JsonSerialize(using = LocalDateSerializer.class)
     @JsonFormat(shape = STRING)
@@ -38,7 +38,7 @@ public class AttestStorbritannia {
         return utsendelse;
     }
 
-    public RepresentantStorbritannia getRepresentant() {
+    public RepresentantTrygdeavtale getRepresentant() {
         return representant;
     }
 
@@ -46,7 +46,7 @@ public class AttestStorbritannia {
         return vedtaksdato;
     }
 
-    public AttestStorbritannia(Builder builder) {
+    public AttestTrygdeavtale(Builder builder) {
         this.vedtaksdato = builder.brevbestilling.getVedtaksdato() != null
             ? LocalDate.ofInstant(builder.brevbestilling.getVedtaksdato(), ZoneId.systemDefault()) : null;
         this.utsendelse = builder.utsendelse;
@@ -61,7 +61,7 @@ public class AttestStorbritannia {
         private MedfolgendeFamiliemedlemmer medfolgendeFamiliemedlemmer;
         private ArbeidsgiverNorge arbeidsgiverNorge;
         private Utsendelse utsendelse;
-        private RepresentantStorbritannia representant;
+        private RepresentantTrygdeavtale representant;
         private final DokgenBrevbestilling brevbestilling;
 
         public Builder(DokgenBrevbestilling brevbestilling) {
@@ -88,13 +88,13 @@ public class AttestStorbritannia {
             return this;
         }
 
-        public Builder representant(RepresentantStorbritannia representant) {
+        public Builder representant(RepresentantTrygdeavtale representant) {
             this.representant = representant;
             return this;
         }
 
-        public AttestStorbritannia build() {
-            return new AttestStorbritannia(this);
+        public AttestTrygdeavtale build() {
+            return new AttestTrygdeavtale(this);
         }
     }
 }
