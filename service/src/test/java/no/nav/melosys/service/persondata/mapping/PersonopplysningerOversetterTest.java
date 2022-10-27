@@ -23,16 +23,16 @@ class PersonopplysningerOversetterTest {
     void oversett() {
         final Personopplysninger personopplysninger = PersonopplysningerOversetter.oversett(lagPerson(), kodeverkService);
 
-        assertThat(personopplysninger.adressebeskyttelser())
+        assertThat(personopplysninger.getAdressebeskyttelser())
             .containsExactly(new Adressebeskyttelse(AdressebeskyttelseGradering.FORTROLIG, "PDL"));
-        assertThat(personopplysninger.bostedsadresse().strukturertAdresse().getGatenavn()).isEqualTo("gata");
-        assertThat(personopplysninger.dødsfall().dødsdato()).isEqualTo(LocalDate.MAX);
-        assertThat(personopplysninger.fødsel()).isEqualTo(new Foedsel(LocalDate.EPOCH, 1970, "NOR", "fødested"));
-        assertThat(personopplysninger.folkeregisteridentifikator()).isEqualTo(new Folkeregisteridentifikator("IdNr"));
-        assertThat(personopplysninger.kjønn()).isEqualTo(KjoennType.UKJENT);
-        assertThat(personopplysninger.navn()).isEqualTo(new Navn("fornavn", "mellomnavn", "etternavn"));
-        assertThat(personopplysninger.statsborgerskap()).containsExactlyInAnyOrder(new Statsborgerskap("AIA", null,
-            LocalDate.parse("1979-11-18"), LocalDate.parse("1980-11-18"), "PDL", "Dolly", false),
+        assertThat(personopplysninger.getBostedsadresse().strukturertAdresse().getGatenavn()).isEqualTo("gata");
+        assertThat(personopplysninger.getDødsfall().dødsdato()).isEqualTo(LocalDate.MAX);
+        assertThat(personopplysninger.getFødsel()).isEqualTo(new Foedsel(LocalDate.EPOCH, 1970, "NOR", "fødested"));
+        assertThat(personopplysninger.getFolkeregisteridentifikator()).isEqualTo(new Folkeregisteridentifikator("IdNr"));
+        assertThat(personopplysninger.getKjønn()).isEqualTo(KjoennType.UKJENT);
+        assertThat(personopplysninger.getNavn()).isEqualTo(new Navn("fornavn", "mellomnavn", "etternavn"));
+        assertThat(personopplysninger.getStatsborgerskap()).containsExactlyInAnyOrder(new Statsborgerskap("AIA", null,
+                LocalDate.parse("1979-11-18"), LocalDate.parse("1980-11-18"), "PDL", "Dolly", false),
             new Statsborgerskap("NOR", LocalDate.parse("2021-05-08"), null, null, "PDL",
                 "Dolly", false));
     }

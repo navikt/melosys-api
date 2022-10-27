@@ -4,9 +4,14 @@ import no.nav.melosys.domain.ErPeriode;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.PeriodeOmLovvalg;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
+import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.integrasjon.medl.PeriodestatusMedl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class OverlappendeMedlemskapsperioderRegler {
+
+    private static final Logger log = LoggerFactory.getLogger(OverlappendeMedlemskapsperioderRegler.class);
 
     public static boolean harOverlappendeMedlemsperiodeFraSed(MedlemskapDokument medlemskapDokument,
                                                               ErPeriode kontrollperiode) {
@@ -31,5 +36,22 @@ public final class OverlappendeMedlemskapsperioderRegler {
                 && (kontrollperiode.erNyPeriodeForMedl() || kontrollperiode.harForskjelligMedlID(medlemsperiode.id))
                 && (opprinneligPeriodeTilKontrollperiode == null || opprinneligPeriodeTilKontrollperiode.harForskjelligMedlID(medlemsperiode.id)
             ));
+    }
+
+    public static boolean harOverlappendePerioderMedUlikSedLovvalgslandOgMedlLovvalgsland(SedDokument sedDokument,
+                                                                                          MedlemskapDokument medlemskapDokument) {
+        if (medlemskapDokument == null || medlemskapDokument.getMedlemsperiode().isEmpty()) {
+            return false;
+        }
+        var sedLovvalgsperiode = sedDokument.getLovvalgsperiode();
+        return medlemskapDokument.hentMedlemsperioderHvorKildeIkkeLånekassen().stream().anyMatch(
+            medlemsperiode -> {
+                log.info("[harOverlappendePerioderMedUlikSedLovvalgslandOgMedlLovvalgsland]: " +
+                        "sammenligner sedDokument lovvalgslandKode: {} med medlemsperiode land: {}",
+                    sedDokument.getLovvalgslandKode().getKode(), medlemsperiode.getLand());
+                return !PeriodestatusMedl.AVST.getKode().equals(medlemsperiode.status)
+                    && PeriodeRegler.perioderOverlapperMerEnn1Dag(sedLovvalgsperiode, medlemsperiode.getPeriode())
+                    && !sedDokument.getLovvalgslandKode().getKode().equals(medlemsperiode.getLand());
+            });
     }
 }
