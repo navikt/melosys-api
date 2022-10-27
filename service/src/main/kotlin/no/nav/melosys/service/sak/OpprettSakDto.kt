@@ -5,8 +5,9 @@ import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
+import java.time.LocalDate
 
-internal class OpprettSakDto {
+class OpprettSakDto {
     var hovedpart: Aktoersroller? = null
     var brukerID: String? = null
     var virksomhetOrgnr: String? = null
@@ -16,6 +17,6 @@ internal class OpprettSakDto {
     var behandlingstype: Behandlingstyper? = null
     var oppgaveID: String? = null
     var soknadDto: SøknadDto? = null
-
+    var mottaksdato: LocalDate? = null
     var isSkalTilordnes = false
 }
