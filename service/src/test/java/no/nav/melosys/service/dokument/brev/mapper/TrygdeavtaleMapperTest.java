@@ -400,7 +400,8 @@ class TrygdeavtaleMapperTest {
                 "soknadsdato" : "%s",
                 "periodeFom" : "%s",
                 "periodeTom" : "%s",
-                "virksomhetsnavn" : "Bang Hansen"
+                "virksomhetsnavn" : "Bang Hansen",
+                "soknadsland" : "Storbritannia"
               },
               "familie" : {
                 "minstEttOmfattetFamiliemedlem" : true,
