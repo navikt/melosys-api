@@ -7,7 +7,6 @@ import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_usa;
 import no.nav.melosys.service.kontroll.feature.arbeidutland.kontroll.ArbeidUtlandKontroll;
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.FerdigbehandlingKontrollData;
 import no.nav.melosys.service.kontroll.regler.ArbeidsstedRegler;
@@ -16,7 +15,8 @@ import no.nav.melosys.service.kontroll.regler.PeriodeRegler;
 import no.nav.melosys.service.kontroll.regler.PersonRegler;
 import no.nav.melosys.service.validering.Kontrollfeil;
 
-import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk.*;
+import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1;
+import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_usa.*;
 
 final class FerdigbehandlingKontroll {
 
@@ -54,6 +54,22 @@ final class FerdigbehandlingKontroll {
             ? new Kontrollfeil(Kontroll_begrunnelser.MER_ENN_TRE_ÅR) : null;
     }
 
+    static Kontrollfeil periodeOverFemÅr(FerdigbehandlingKontrollData kontrollData) {
+        PeriodeOmLovvalg lovvalgsperiode = kontrollData.lovvalgsperiode();
+
+        return lovvalgsperiode.getBestemmelse() == USA_ART5_2
+            && PeriodeRegler.periodeOver5År(lovvalgsperiode.getFom(), lovvalgsperiode.getTom())
+            ? new Kontrollfeil(Kontroll_begrunnelser.MER_ENN_FEM_ÅR) : null;
+    }
+
+    static Kontrollfeil periodeOver12Måneder(FerdigbehandlingKontrollData kontrollData) {
+        PeriodeOmLovvalg lovvalgsperiode = kontrollData.lovvalgsperiode();
+
+        return lovvalgsperiode.getBestemmelse() == USA_ART5_4
+            && PeriodeRegler.periodeOver12Måneder(lovvalgsperiode.getFom(), lovvalgsperiode.getTom())
+            ? new Kontrollfeil(Kontroll_begrunnelser.MER_ENN_12_MD) : null;
+    }
+
     static Kontrollfeil arbeidsstedManglerFelter(FerdigbehandlingKontrollData kontrollData) {
         return ArbeidUtlandKontroll.arbeidsstedManglerFelter(kontrollData.behandlingsgrunnlagData());
     }
@@ -87,10 +103,10 @@ final class FerdigbehandlingKontroll {
     }
 
     private static boolean erBestemmelseDerTrygdeavtaleAttestSendesUSA(LovvalgBestemmelse bestemmelse) {
-        return bestemmelse == Lovvalgbestemmelser_trygdeavtale_usa.USA_ART5_2
-            || bestemmelse == Lovvalgbestemmelser_trygdeavtale_usa.USA_ART5_4
-            || bestemmelse == Lovvalgbestemmelser_trygdeavtale_usa.USA_ART5_5
-            || bestemmelse == Lovvalgbestemmelser_trygdeavtale_usa.USA_ART5_6
-            || bestemmelse == Lovvalgbestemmelser_trygdeavtale_usa.USA_ART5_9;
+        return bestemmelse == USA_ART5_2
+            || bestemmelse == USA_ART5_4
+            || bestemmelse == USA_ART5_5
+            || bestemmelse == USA_ART5_6
+            || bestemmelse == USA_ART5_9;
     }
 }
