@@ -412,7 +412,7 @@ public class BehandlingService {
     public Set<Behandlingsstatus> hentMuligeStatuser(long behandlingID) {
         var behandling = hentBehandling(behandlingID);
         if (!unleash.isEnabled("melosys.behandle_alle_saker")) {
-            return MuligeManuelleBehandlingsendringer.hentMuligeStatuserGammel(behandling);
+            return MuligeManuelleBehandlingsendringer.hentMuligeStatuser(behandling);
         }
         return lovligeKombinasjonerService.hentMuligeStatuser(behandling);
     }
@@ -445,7 +445,7 @@ public class BehandlingService {
 
     private boolean saksbehandlerKanEndreStatus(Behandling behandling, Behandlingsstatus status) {
         if (!unleash.isEnabled("melosys.behandle_alle_saker")) {
-            MuligeManuelleBehandlingsendringer.validerNyStatusMuligGammel(behandling, status);
+            MuligeManuelleBehandlingsendringer.validerNyStatusMulig(behandling, status);
             return true;
         }
 

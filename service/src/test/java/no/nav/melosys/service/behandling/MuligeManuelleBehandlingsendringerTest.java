@@ -23,7 +23,7 @@ class MuligeManuelleBehandlingsendringerTest {
     @Test
     void hentMuligeStatuser_temaOvrigeSedMed_avsluttetErMulig_toggleOff() {
         var muligeStatuser =
-            MuligeManuelleBehandlingsendringer.hentMuligeStatuserGammel(behandlingMedTema(Behandlingstema.ØVRIGE_SED_MED));
+            MuligeManuelleBehandlingsendringer.hentMuligeStatuser(behandlingMedTema(Behandlingstema.ØVRIGE_SED_MED));
         assertThat(muligeStatuser).containsExactlyInAnyOrder(AVVENT_DOK_PART, AVVENT_DOK_UTL, UNDER_BEHANDLING,
             AVVENT_FAGLIG_AVKLARING, AVSLUTTET);
     }

@@ -31,8 +31,8 @@ public class MuligeManuelleBehandlingsendringer {
     private MuligeManuelleBehandlingsendringer() {
     }
 
-    @Deprecated(since = "Tas vekk sammen med toggle melosys.behandle_alle_saker")
-    public static Set<Behandlingsstatus> hentMuligeStatuserGammel(Behandling behandling) {
+    @Deprecated(since = "Tas vekk samme med toggle melosys.behandle_alle_saker")
+    public static Set<Behandlingsstatus> hentMuligeStatuser(Behandling behandling) {
         if (behandling.erInaktiv()) return Collections.emptySet();
 
         Set<Behandlingsstatus> muligeStatuser = new HashSet<>(MULIGE_STATUSER);
@@ -79,11 +79,14 @@ public class MuligeManuelleBehandlingsendringer {
         }
     }
 
-    @Deprecated(since = "Tas vekk sammen med toggle melosys.behandle_alle_saker")
-    public static void validerNyStatusMuligGammel(Behandling behandling, Behandlingsstatus status) {
-        if (!hentMuligeStatuserGammel(behandling).contains(status)) {
+    private static boolean kanOppdatereBehandlingstema(Behandling behandling, Behandlingsresultat behandlingsresultat) {
+        return behandling.erAktiv() && behandlingsresultat.erIkkeArtikkel16MedSendtAnmodningOmUnntak();
+    }
+
+    public static void validerNyStatusMulig(Behandling behandling, Behandlingsstatus status) {
+        if (!hentMuligeStatuser(behandling).contains(status)) {
             throw new FunksjonellException(String.format("Behandlingen kan ikke endres til status %s. Gyldige statuser for behandling %s er %s",
-                status, behandling.getId(), hentMuligeStatuserGammel(behandling)));
+                status, behandling.getId(), hentMuligeStatuser(behandling)));
         }
     }
 
@@ -99,10 +102,6 @@ public class MuligeManuelleBehandlingsendringer {
             throw new FunksjonellException(String.format("Behandlingen kan ikke endres til tema %s. Gyldige temaer for behandling %s er %s",
                 tema, behandling.getId(), hentMuligeBehandlingstema(behandling, behandlingsresultat, visNyeBehandlingstema)));
         }
-    }
-
-    private static boolean kanOppdatereBehandlingstema(Behandling behandling, Behandlingsresultat behandlingsresultat) {
-        return behandling.erAktiv() && behandlingsresultat.erIkkeArtikkel16MedSendtAnmodningOmUnntak();
     }
 
     private static boolean erGyldigBehandlingAvSøknad(Behandlingstema behandlingstema) {
