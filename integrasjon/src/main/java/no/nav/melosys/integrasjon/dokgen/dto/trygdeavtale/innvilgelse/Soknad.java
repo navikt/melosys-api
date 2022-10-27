@@ -21,6 +21,7 @@ public record Soknad(
     @JsonFormat(shape = STRING)
     LocalDate periodeTom,
 
-    String virksomhetsnavn
+    String virksomhetsnavn,
+    String soknadsland
 ) {
 }

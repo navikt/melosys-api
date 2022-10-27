@@ -723,7 +723,8 @@ class DokgenMalMapperTest {
             .soknad(new Soknad(SOKNADSDATO,
                 LOVVALGSPERIODE_FOM,
                 LOVVALGSPERIODE_TOM,
-                "Virksomhetsnavn"
+                "Virksomhetsnavn",
+                Land_iso2.GB.getBeskrivelse()
             ))
             .familie(null)
             .virksomhetArbeidsgiverSkalHaKopi(true)

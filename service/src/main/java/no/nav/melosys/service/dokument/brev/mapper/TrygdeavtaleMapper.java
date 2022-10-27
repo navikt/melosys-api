@@ -53,8 +53,8 @@ public class TrygdeavtaleMapper {
     }
 
     @Transactional
-    public InnvilgelseOgAttestStorbritannia map(InnvilgelseBrevbestilling brevbestilling, Land_iso2 søknadsland) {
-        var innvilgelse = mapInnvilgelse(brevbestilling);
+    public InnvilgelseOgAttestStorbritannia map(InnvilgelseBrevbestilling brevbestilling, Land_iso2 soknadsland) {
+        var innvilgelse = mapInnvilgelse(brevbestilling, soknadsland);
         return new InnvilgelseOgAttestStorbritannia.Builder(brevbestilling)
             .innvilgelse(innvilgelse)
             .attest(mapAttest(brevbestilling))
@@ -63,7 +63,7 @@ public class TrygdeavtaleMapper {
             .build();
     }
 
-    private InnvilgelseTrygdeavtale mapInnvilgelse(InnvilgelseBrevbestilling brevbestilling) {
+    private InnvilgelseTrygdeavtale mapInnvilgelse(InnvilgelseBrevbestilling brevbestilling, Land_iso2 soknadsland) {
         if (skalIkkeHaInnvilgelse(brevbestilling)) return null;
 
         var behandling = brevbestilling.getBehandling();
@@ -73,7 +73,7 @@ public class TrygdeavtaleMapper {
         return new InnvilgelseTrygdeavtale.Builder()
             .innvilgelse(Innvilgelse.av(brevbestilling))
             .artikkel(lovvalgsperiode.getBestemmelse())
-            .soknad(lagSøknad(behandlingsgrunnlag, lovvalgsperiode))
+            .soknad(lagSøknad(behandlingsgrunnlag, lovvalgsperiode, soknadsland))
             .familie(lagFamile(behandling.getId()))
             .virksomhetArbeidsgiverSkalHaKopi(brevbestilling.isVirksomhetArbeidsgiverSkalHaKopi())
             .build();
@@ -175,14 +175,15 @@ public class TrygdeavtaleMapper {
             .build();
     }
 
-    private Soknad lagSøknad(Behandlingsgrunnlag behandlingsgrunnlag, Lovvalgsperiode lovvalgsperiode) {
+    private Soknad lagSøknad(Behandlingsgrunnlag behandlingsgrunnlag, Lovvalgsperiode lovvalgsperiode, Land_iso2 soknadsland) {
         var avklartVirksomhet = hentAvklartVirksomhet(behandlingsgrunnlag.getBehandling());
 
         return new Soknad(
             behandlingsgrunnlag.getMottaksdato(),
             lovvalgsperiode.getFom(),
             lovvalgsperiode.getTom(),
-            avklartVirksomhet.navn
+            avklartVirksomhet.navn,
+            soknadsland.getBeskrivelse()
         );
     }
 
