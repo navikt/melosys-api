@@ -16,6 +16,7 @@ import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.dokument.utbetaling.UtbetalingDokument;
 import no.nav.melosys.domain.kodeverk.Behandlingsgrunnlagtyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
@@ -86,7 +87,7 @@ public class Behandling extends RegistreringsInfo {
     @OneToMany(mappedBy = "behandling", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Set<Behandlingsnotat> behandlingsnotater = new HashSet<>(1);
 
-    @OneToOne(mappedBy = "behandling", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @OneToOne(mappedBy = "behandling", cascade = CascadeType.ALL, orphanRemoval = true)
     private Behandlingsgrunnlag behandlingsgrunnlag;
 
     @ManyToOne()
@@ -526,7 +527,35 @@ public class Behandling extends RegistreringsInfo {
             || BESLUTNING_LOVVALG_ANNET_LAND.getKode().equalsIgnoreCase(behandlingstemaKode);
     }
 
-    public static LocalDate utledFristForBehandlingstema(Behandlingstema behandlingstema) {
+    public static LocalDate utledBehandlingsfrist(Behandling behandling) {
+        Behandlingstyper behandlingstype = behandling.getType();
+        Behandlingstema behandlingstema = behandling.getTema();
+        Sakstemaer sakstema = behandling.getFagsak().getTema();
+        LocalDate utgangspunktDato = LocalDate.now();
+        Behandlingsgrunnlag behandlingsgrunnlag = behandling.getBehandlingsgrunnlag();
+
+        if (behandlingsgrunnlag != null) {
+            utgangspunktDato = behandlingsgrunnlag.getMottaksdato() != null ? behandlingsgrunnlag.getMottaksdato() : LocalDate.now();
+        }
+
+        Set<Behandlingstyper> gamleBehandlingstyperSomSkalMigreresSenere = Set.of(
+            Behandlingstyper.ANKE,
+            Behandlingstyper.SED,
+            Behandlingstyper.SOEKNAD
+        );
+
+        if (gamleBehandlingstyperSomSkalMigreresSenere.contains(behandlingstype)) {
+            return utledFristForBehandlingtema(behandlingstema);
+        }
+
+        return BehandlingfristKriterier.hentBehandlingsFrist(sakstema, behandlingstema, behandlingstype, utgangspunktDato);
+    }
+
+    /**
+     * @deprecated Fjernes etter migreringen av behandlingstyper og toggle melosys.behandle_alle_saker
+     */
+    @Deprecated
+    public static LocalDate utledFristForBehandlingtema(Behandlingstema behandlingstema) {
         return switch (behandlingstema) {
             case UTSENDT_ARBEIDSTAKER,
                 UTSENDT_SELVSTENDIG,

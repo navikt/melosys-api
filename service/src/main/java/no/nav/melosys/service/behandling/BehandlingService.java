@@ -97,18 +97,19 @@ public class BehandlingService {
                                    String initierendeJournalpostId,
                                    String initierendeDokumentId) {
         Instant nå = Instant.now();
-
         Behandling behandling = new Behandling();
         behandling.setFagsak(fagsak);
         behandling.setRegistrertDato(nå);
         behandling.setEndretDato(nå);
-        behandling.setBehandlingsfrist(Behandling.utledFristForBehandlingstema(behandlingstema));
-
         behandling.setStatus(behandlingsstatus);
         behandling.setType(behandlingstype);
         behandling.setTema(behandlingstema);
         behandling.setInitierendeJournalpostId(initierendeJournalpostId);
         behandling.setInitierendeDokumentId(initierendeDokumentId);
+        behandling.setBehandlingsfrist(
+            unleash.isEnabled("melosys.behandle_alle_saker")
+                ? Behandling.utledBehandlingsfrist(behandling)
+                : Behandling.utledFristForBehandlingtema(behandlingstema));
         behandlingRepository.save(behandling);
 
         behandlingsresultatService.lagreNyttBehandlingsresultat(behandling);
@@ -268,7 +269,9 @@ public class BehandlingService {
         behandlingsreplika.setOpprinneligBehandling(tidligsteInaktiveBehandling);
         behandlingsreplika.setBehandlingsgrunnlag(null);
         behandlingsreplika.setBehandlingsnotater(Collections.emptySet());
-        behandlingsreplika.setBehandlingsfrist(Behandling.utledFristForBehandlingstema(tidligsteInaktiveBehandling.getTema()));
+        behandlingsreplika.setBehandlingsfrist(unleash.isEnabled("melosys.behandle_alle_saker")
+            ? Behandling.utledBehandlingsfrist(tidligsteInaktiveBehandling)
+            : Behandling.utledFristForBehandlingtema(tidligsteInaktiveBehandling.getTema()));
         behandlingsreplika.setSaksopplysninger(new HashSet<>());
         behandlingRepository.save(behandlingsreplika);
 
@@ -293,14 +296,19 @@ public class BehandlingService {
 
     Behandling replikerBehandling(Behandling tidligsteInaktiveBehandling, Behandlingstyper behandlingstype)
         throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+
         Behandling behandlingsreplika = (Behandling) BeanUtils.cloneBean(tidligsteInaktiveBehandling);
+
         behandlingsreplika.setId(null);
         behandlingsreplika.setType(behandlingstype);
         behandlingsreplika.setStatus(OPPRETTET);
         behandlingsreplika.setOpprinneligBehandling(tidligsteInaktiveBehandling);
         behandlingsreplika.setBehandlingsgrunnlag(replikerBehandlingsgrunnlag(behandlingsreplika, tidligsteInaktiveBehandling.getBehandlingsgrunnlag()));
         behandlingsreplika.setBehandlingsnotater(Collections.emptySet());
-        behandlingsreplika.setBehandlingsfrist(Behandling.utledFristForBehandlingstema(tidligsteInaktiveBehandling.getTema()));
+        behandlingsreplika.setBehandlingsfrist(unleash.isEnabled("melosys.behandle_alle_saker")
+            ? Behandling.utledBehandlingsfrist(tidligsteInaktiveBehandling)
+            : Behandling.utledFristForBehandlingtema(tidligsteInaktiveBehandling.getTema())
+        );
 
         behandlingsreplika.setSaksopplysninger(new HashSet<>());
         for (Saksopplysning saksopplysning : tidligsteInaktiveBehandling.getSaksopplysninger()) {
