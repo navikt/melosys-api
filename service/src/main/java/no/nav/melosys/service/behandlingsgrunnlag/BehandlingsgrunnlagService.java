@@ -72,7 +72,6 @@ public class BehandlingsgrunnlagService {
         opprettBehandlingsgrunnlag(behandlingID, sedGrunnlag, Behandlingsgrunnlagtyper.SED, VERSJON_SED_GRUNNLAG);
     }
 
-    //EOS går her
     public void opprettSøknad(Prosessinstans prosessinstans) {
         Behandling behandling = prosessinstans.getBehandling();
         Soeknadsland soeknadsland;
