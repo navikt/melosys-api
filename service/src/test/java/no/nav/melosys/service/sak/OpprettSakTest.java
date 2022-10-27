@@ -67,7 +67,7 @@ class OpprettSakTest {
     }
 
     @Test
-    void bestillNySakOgBehandling_oppretterProsess() {
+    void nySakOgBehandlingFraOppgave_oppretterProsess() {
         OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
         opprettSakDto.setSakstype(Sakstyper.EU_EOS);
         opprettSakDto.setBehandlingstema(Behandlingstema.ØVRIGE_SED_MED);
@@ -131,7 +131,23 @@ class OpprettSakTest {
     }
 
     @Test
-    void bestillNySakOgBehandling_sakstypeFtrl_oppretterProsess() {
+    void lagNySak_mottaksdatoMangler_feiler() {
+        OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
+        opprettSakDto.setHovedpart(Aktoersroller.BRUKER);
+        opprettSakDto.setSakstype(Sakstyper.FTRL);
+        opprettSakDto.setSakstema(Sakstemaer.MEDLEMSKAP_LOVVALG);
+        opprettSakDto.setBehandlingstema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
+        opprettSakDto.setBehandlingstype(Behandlingstyper.HENVENDELSE);
+        opprettSakDto.setMottaksdato(null);
+
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> opprettSak.opprettNySakOgBehandling(opprettSakDto))
+            .withMessageContaining("Mottaksdato");
+    }
+
+    @Test
+    void nySakOgBehandlingFraOppgave_sakstypeFtrl_oppretterProsess() {
         OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
         opprettSakDto.setSakstype(Sakstyper.FTRL);
         opprettSakDto.setBehandlingstema(Behandlingstema.ARBEID_I_UTLANDET);
@@ -148,7 +164,7 @@ class OpprettSakTest {
     }
 
     @Test
-    void bestillNySakOgBehandling_sakstypeTrygdeavtaleFeatureToggleEnabled_oppretterProsess() {
+    void nySakOgBehandlingFraOppgave_sakstypeTrygdeavtaleFeatureToggleEnabled_oppretterProsess() {
         OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
         opprettSakDto.setSakstype(Sakstyper.TRYGDEAVTALE);
         opprettSakDto.setBehandlingstema(Behandlingstema.YRKESAKTIV);
@@ -165,7 +181,7 @@ class OpprettSakTest {
     }
 
     @Test
-    void bestillNySakOgBehandling_sakstypeFtrlFeatureToggleDisabled_kasterException() {
+    void nySakOgBehandlingFraOppgave_sakstypeFtrlFeatureToggleDisabled_kasterException() {
         OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
         opprettSakDto.setSakstype(Sakstyper.FTRL);
         opprettSakDto.setBehandlingstema(Behandlingstema.ARBEID_I_UTLANDET);
@@ -177,7 +193,7 @@ class OpprettSakTest {
     }
 
     @Test
-    void bestillNySakOgBehandling_oppgaveIdMangler_feiler() {
+    void nySakOgBehandlingFraOppgave_oppgaveIdMangler_feiler() {
         OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
         opprettSakDto.setSakstype(Sakstyper.EU_EOS);
         opprettSakDto.setBehandlingstema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
@@ -190,7 +206,7 @@ class OpprettSakTest {
     }
 
     @Test
-    void bestillNySakOgBehandling_utenJournalpostID_feiler() {
+    void nySakOgBehandlingFraOppgave_utenJournalpostID_feiler() {
         OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
         opprettSakDto.setSakstype(Sakstyper.EU_EOS);
         opprettSakDto.setBehandlingstema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
@@ -203,7 +219,7 @@ class OpprettSakTest {
     }
 
     @Test
-    void bestillNySakOgBehandling_journalpostUtgående_feiler() {
+    void nySakOgBehandlingFraOppgave_journalpostUtgående_feiler() {
         OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
         opprettSakDto.setSakstype(Sakstyper.EU_EOS);
         opprettSakDto.setBehandlingstema(Behandlingstema.ØVRIGE_SED_MED);
@@ -217,7 +233,7 @@ class OpprettSakTest {
     }
 
     @Test
-    void bestillNySakOgBehandling_journalpostFraSedErKnyttetTilEksisterendeSak_feiler() {
+    void nySakOgBehandlingFraOppgave_journalpostFraSedErKnyttetTilEksisterendeSak_feiler() {
         OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
         opprettSakDto.setSakstype(Sakstyper.EU_EOS);
         opprettSakDto.setBehandlingstema(Behandlingstema.ØVRIGE_SED_MED);
@@ -233,7 +249,7 @@ class OpprettSakTest {
     }
 
     @Test
-    void bestillNySakOgBehandling_journalpostFraSedErIkkeKnyttetTilEksisterendeSak_oppretterProsess() {
+    void nySakOgBehandlingFraOppgave_journalpostFraSedErIkkeKnyttetTilEksisterendeSak_oppretterProsess() {
         OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
         opprettSakDto.setSakstype(Sakstyper.EU_EOS);
         opprettSakDto.setBehandlingstema(Behandlingstema.ØVRIGE_SED_MED);
@@ -280,7 +296,7 @@ class OpprettSakTest {
     }
 
     @Test
-    void bestillNySakOgBehandling_oppgaveTypeUgyldig_feiler() {
+    void nySakOgBehandlingFraOppgave_oppgaveTypeUgyldig_feiler() {
         OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
         opprettSakDto.setSakstype(Sakstyper.EU_EOS);
         opprettSakDto.setBehandlingstema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
@@ -378,6 +394,7 @@ class OpprettSakTest {
     void validerOpprettSakDto_søknadUtenLand_feiler() {
         OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
         opprettSakDto.setSakstype(Sakstyper.EU_EOS);
+        opprettSakDto.setSakstema(Sakstemaer.MEDLEMSKAP_LOVVALG);
         opprettSakDto.setBehandlingstema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         opprettSakDto.setBehandlingstype(Behandlingstyper.FØRSTEGANG);
         opprettSakDto.getSoknadDto().getLand().setErUkjenteEllerAlleEosLand(false);

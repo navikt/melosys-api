@@ -53,30 +53,37 @@ public class OpprettSak {
         validerOpprettSakDto(opprettSakDto);
         final Oppgave oppgave = validerOppgave(opprettSakDto.getOppgaveID());
         validerJournalpost(journalfoeringService.hentJournalpost(oppgave.getJournalpostId()));
-        switch (opprettSakDto.getSakstype()) {
-            case EU_EOS -> prosessinstansService.opprettProsessinstansNySakEØS(
+        Sakstyper sakstype = opprettSakDto.getSakstype();
+        if (sakstype == Sakstyper.EU_EOS) {
+            prosessinstansService.opprettProsessinstansNySakEØS(
                 oppgave.getJournalpostId(),
                 opprettSakDto
             );
-            case FTRL, TRYGDEAVTALE -> prosessinstansService.opprettProsessinstansNySakFTRLTrygdeavtale(
+        } else if (sakstype == Sakstyper.FTRL || sakstype == Sakstyper.TRYGDEAVTALE) {
+            prosessinstansService.opprettProsessinstansNySakFTRLTrygdeavtale(
                 oppgave.getJournalpostId(),
                 opprettSakDto
             );
+        } else {
+            throw new FunksjonellException("Sakstype %s støttes ikke".formatted(sakstype));
         }
     }
 
     @Transactional
     public void opprettNySakOgBehandling(OpprettSakDto opprettSakDto) {
+        if (opprettSakDto.getMottaksdato() == null) {
+            throw new FunksjonellException("Mottaksdato er påkrevd for å opprette sak uten oppgave/journalpost");
+        }
         validerOpprettSakDto(opprettSakDto);
         prosessinstansService.opprettNySakOgBehandling(opprettSakDto);
     }
 
     void validerOpprettSakDto(OpprettSakDto opprettSakDto) {
-        final var sakstype = opprettSakDto.getSakstype();
-        final var behandlingstema = opprettSakDto.getBehandlingstema();
-        final var sakstema = opprettSakDto.getSakstema();
-        final var behandlingstype = opprettSakDto.getBehandlingstype();
-        final var hovedpart = opprettSakDto.getHovedpart();
+        var hovedpart = opprettSakDto.getHovedpart();
+        var sakstype = opprettSakDto.getSakstype();
+        var sakstema = opprettSakDto.getSakstema();
+        var behandlingstema = opprettSakDto.getBehandlingstema();
+        var behandlingstype = opprettSakDto.getBehandlingstype();
 
         if (unleash.isEnabled("melosys.behandle_alle_saker")) {
             lovligeKombinasjonerService.validerBehandlingstema(hovedpart, sakstype, sakstema, behandlingstema, null);

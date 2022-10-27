@@ -35,6 +35,9 @@ public class OpprettBehandlingForSak {
     }
 
     private void valider(Fagsak fagsak, OpprettSakDto opprettSakDto) {
+        if (opprettSakDto.getMottaksdato() == null) {
+            throw new FunksjonellException("Mottaksdato er påkrevd for å opprette behandling");
+        }
         if (fagsak.hentAktivBehandling() != null) {
             throw new FunksjonellException(String.format("Det finnes allerede en aktiv behandling på fagsak %s", fagsak.getSaksnummer()));
         }

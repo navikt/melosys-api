@@ -96,6 +96,19 @@ class OpprettBehandlingForSakTest {
     }
 
     @Test
+    void opprettBehandling_utenMottaksdato_feiler() {
+        OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
+        opprettSakDto.setMottaksdato(null);
+
+        when(fagsakService.hentFagsak(SAKSNUMMER)).thenReturn(lagFagsak(null));
+
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> opprettBehandlingForSak.opprettBehandling(SAKSNUMMER, opprettSakDto))
+            .withMessageContaining("Mottaksdato");
+    }
+
+    @Test
     void opprettBehandling_opprettetBehandlingFårTomFlyt_oppretterProsessSomIkkeReplikerer() {
         OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
         opprettSakDto.setBehandlingstema(Behandlingstema.YRKESAKTIV);
