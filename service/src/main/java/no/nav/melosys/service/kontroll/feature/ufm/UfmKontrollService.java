@@ -84,8 +84,8 @@ public class UfmKontrollService {
         var medlemskapDokument = behandling.hentMedlemskapDokument();
         var inntektDokument = behandling.hentInntektDokument();
         var utbetalingDokument = behandling.finnUtbetalingDokument().orElse(null);
-        var behandlingsgrunnlagData = behandlingsgrunnlagService.hentBehandlingsgrunnlagdata(behandling.getId());
-        return new UfmKontrollData(sedDokument, persondata, medlemskapDokument, inntektDokument, utbetalingDokument, behandlingsgrunnlagData);
+        var optionalBehandlingsgrunnlagData = behandlingsgrunnlagService.finnBehandlingsgrunnlagdata(behandling.getId());
+        return new UfmKontrollData(sedDokument, persondata, medlemskapDokument, inntektDokument, utbetalingDokument, optionalBehandlingsgrunnlagData);
     }
 
     private List<Kontroll_begrunnelser> utførKontroller(UfmKontrollData kontrollData, SedType sedType) {

@@ -59,11 +59,12 @@ public class BehandlingsgrunnlagService {
     }
 
     @Transactional(readOnly = true)
-    public BehandlingsgrunnlagData hentBehandlingsgrunnlagdata(long behandlingID) {
-        var behandlingsgrunnlag = finnBehandlingsgrunnlag(behandlingID)
-            .orElseThrow(() -> new IkkeFunnetException(("Finner ikke behandlingsgrunnlag for behandling " +
-                "%s til å kunne hente behandlingsgrunnlagdata").formatted(behandlingID)));
-        return behandlingsgrunnlag.getBehandlingsgrunnlagdata();
+    public Optional<BehandlingsgrunnlagData> finnBehandlingsgrunnlagdata(long behandlingID) {
+        var behandlingsgrunnlag = finnBehandlingsgrunnlag(behandlingID).orElse(null);
+        if (behandlingsgrunnlag == null) {
+            return Optional.empty();
+        }
+        return Optional.of(behandlingsgrunnlag.getBehandlingsgrunnlagdata());
     }
 
     public void opprettSedGrunnlag(long behandlingID,

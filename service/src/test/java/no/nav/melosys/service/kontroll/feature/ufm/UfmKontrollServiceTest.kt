@@ -37,6 +37,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
+import java.util.*
 
 
 @ExtendWith(MockKExtension::class)
@@ -535,7 +536,8 @@ class UfmKontrollServiceTest {
             .apply {
                 id = BEHANDLINGSRESULTAT_ID
             }
-        every { behandlingsgrunnlagService.hentBehandlingsgrunnlagdata(BEHANDLING_ID) } returns behandlingsgrunnlagData
+        every { behandlingsgrunnlagService.finnBehandlingsgrunnlagdata(BEHANDLING_ID) } returns
+            Optional.of(behandlingsgrunnlagData)
     }
 
     private fun lagSaksopplysning(

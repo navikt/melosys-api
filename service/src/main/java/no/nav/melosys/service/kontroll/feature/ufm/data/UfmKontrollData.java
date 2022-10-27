@@ -1,5 +1,7 @@
 package no.nav.melosys.service.kontroll.feature.ufm.data;
 
+import java.util.Optional;
+
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
@@ -12,5 +14,5 @@ public record UfmKontrollData(SedDokument sedDokument,
                               MedlemskapDokument medlemskapDokument,
                               InntektDokument inntektDokument,
                               UtbetalingDokument utbetalingDokument,
-                              BehandlingsgrunnlagData behandlingsgrunnlagData) {
+                              Optional<BehandlingsgrunnlagData> behandlingsgrunnlagData) {
 }

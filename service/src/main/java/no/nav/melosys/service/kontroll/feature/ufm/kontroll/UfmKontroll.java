@@ -8,6 +8,8 @@ import no.nav.melosys.service.kontroll.regler.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.apache.cxf.common.util.StringUtils.isEmpty;
+
 final class UfmKontroll {
 
     private static final Logger log = LoggerFactory.getLogger(UfmKontroll.class);
@@ -85,7 +87,8 @@ final class UfmKontroll {
                 log.debug("Mottatt overlappende medlemsperiode for A003 som er en endring");
                 return Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER;
             }
-            if (kontrollData.behandlingsgrunnlagData().ytterligereInformasjon != null) {
+            var optionalBehandlingsgrunnlagData = kontrollData.behandlingsgrunnlagData();
+            if (optionalBehandlingsgrunnlagData.isPresent() && !isEmpty(optionalBehandlingsgrunnlagData.get().ytterligereInformasjon)) {
                 log.debug("Mottatt overlappende medlemsperiode for A003 som har satt ytterligere informasjon");
                 return Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER;
             }
