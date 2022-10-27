@@ -1,4 +1,4 @@
-package no.nav.melosys.integrasjon.dokgen.dto.storbritannia.innvilgelse;
+package no.nav.melosys.integrasjon.dokgen.dto.trygdeavtale.innvilgelse;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
