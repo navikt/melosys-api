@@ -16,7 +16,6 @@ import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
-import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Medfolgende_barn_begrunnelser;
@@ -118,21 +117,21 @@ class TrygdeavtaleMapperTest {
     }
 
     private static List<Arguments> sjekkAdresser() {
-        return StorbritaniaAdresseSjekkerTest.sjekkAdresser();
+        return TrygdeavtaleAdresseSjekkerTest.sjekkAdresser();
     }
 
     @ParameterizedTest(name = "{5}")
     @MethodSource("sjekkAdresser")
     void map_brukNorskBostedsAddresse(
-        Landkoder landkodeBosted,
-        Landkoder landkodeOpphold,
-        Landkoder landkodeKontakt,
+        Land_iso2 landkodeBosted,
+        Land_iso2 landkodeOpphold,
+        Land_iso2 landkodeKontakt,
         List<String> norskAddresse,
         List<String> ukAddresse,
         String grunn) {
 
         mockHappyCase();
-        var persondata = StorbritaniaAdresseSjekkerTest.lagPersonopplysninger(landkodeBosted, landkodeOpphold, landkodeKontakt);
+        var persondata = TrygdeavtaleAdresseSjekkerTest.lagPersonopplysninger(landkodeBosted, landkodeOpphold, landkodeKontakt);
         InnvilgelseBrevbestilling brevbestilling =
             lagStorbritanniaBrevbestillingDefaultBuilder(medPeriode(lagTrygdeavtaleBehandling()))
                 .medPersonDokument(persondata)
