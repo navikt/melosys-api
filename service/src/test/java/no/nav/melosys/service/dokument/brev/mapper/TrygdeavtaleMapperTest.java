@@ -120,7 +120,7 @@ class TrygdeavtaleMapperTest {
         return TrygdeavtaleAdresseSjekkerTest.sjekkAdresser();
     }
 
-    @ParameterizedTest(name = "{5}")
+    @ParameterizedTest(name = "{6}")
     @MethodSource("sjekkAdresser")
     void map_brukNorskBostedsAddresse(
         Land_iso2 landkodeBosted,
@@ -128,6 +128,7 @@ class TrygdeavtaleMapperTest {
         Land_iso2 landkodeKontakt,
         List<String> norskAddresse,
         List<String> ukAddresse,
+        Land_iso2 soknadsland,
         String grunn) {
 
         mockHappyCase();
@@ -137,7 +138,7 @@ class TrygdeavtaleMapperTest {
                 .medPersonDokument(persondata)
                 .build();
 
-        InnvilgelseOgAttestTrygdeavtale innvilgelseOgAttestTrygdeavtale = trygdeavtaleMapper.map(brevbestilling, Land_iso2.GB);
+        InnvilgelseOgAttestTrygdeavtale innvilgelseOgAttestTrygdeavtale = trygdeavtaleMapper.map(brevbestilling, soknadsland);
         assertTrue(innvilgelseOgAttestTrygdeavtale.isSkalHaAttest());
 
         AttestTrygdeavtale attest = innvilgelseOgAttestTrygdeavtale.getAttest();
