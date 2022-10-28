@@ -1,4 +1,4 @@
-package no.nav.melosys.integrasjon.dokgen.dto.storbritannia.innvilgelse;
+package no.nav.melosys.integrasjon.dokgen.dto.trygdeavtale.innvilgelse;
 
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.integrasjon.dokgen.dto.felles.Innvilgelse;

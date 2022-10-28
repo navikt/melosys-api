@@ -1,4 +1,4 @@
-package no.nav.melosys.integrasjon.dokgen.dto.storbritannia.innvilgelse;
+package no.nav.melosys.integrasjon.dokgen.dto.trygdeavtale.innvilgelse;
 
 import java.time.LocalDate;
 
@@ -21,6 +21,7 @@ public record Soknad(
     @JsonFormat(shape = STRING)
     LocalDate periodeTom,
 
-    String virksomhetsnavn
+    String virksomhetsnavn,
+    String soknadsland
 ) {
 }

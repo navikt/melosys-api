@@ -1,4 +1,4 @@
-package no.nav.melosys.integrasjon.dokgen.dto.storbritannia.attest;
+package no.nav.melosys.integrasjon.dokgen.dto.trygdeavtale.attest;
 
 import java.time.LocalDate;
 import java.util.List;

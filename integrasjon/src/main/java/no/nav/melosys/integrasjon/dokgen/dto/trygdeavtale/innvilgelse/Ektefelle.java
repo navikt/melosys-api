@@ -1,20 +1,20 @@
-package no.nav.melosys.integrasjon.dokgen.dto.storbritannia.innvilgelse;
+package no.nav.melosys.integrasjon.dokgen.dto.trygdeavtale.innvilgelse;
 
 import java.time.LocalDate;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
-import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_barn_begrunnelser_ftrl;
+import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_ektefelle_samboer_begrunnelser_ftrl;
 
 import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
 
-public record Barn(
+public record Ektefelle(
     String navn,
 
     boolean omfattet,
 
-    Medfolgende_barn_begrunnelser_ftrl begrunnelse,
+    Medfolgende_ektefelle_samboer_begrunnelser_ftrl begrunnelse,
 
     String fnr,
 
@@ -29,7 +29,7 @@ public record Barn(
 
         private boolean omfattet;
 
-        private Medfolgende_barn_begrunnelser_ftrl begrunnelse;
+        private Medfolgende_ektefelle_samboer_begrunnelser_ftrl begrunnelse;
 
         private String fnr;
 
@@ -42,9 +42,16 @@ public record Barn(
             return this;
         }
 
+        public Builder omfattet(boolean omfattet) {
+            this.omfattet = omfattet;
+            return this;
+        }
+
         public Builder begrunnelse(String begrunnelse) {
-            if(begrunnelse!=null) {
-                this.begrunnelse = Medfolgende_barn_begrunnelser_ftrl.valueOf(begrunnelse);
+            if (begrunnelse != null) {
+                this.begrunnelse = Medfolgende_ektefelle_samboer_begrunnelser_ftrl.valueOf(begrunnelse);
+            } else {
+                this.omfattet = true;
             }
             return this;
         }
@@ -59,13 +66,13 @@ public record Barn(
             return this;
         }
 
-        public Builder foedselsdato(LocalDate foedselsdato) {
-            this.foedselsdato = foedselsdato;
+        public Builder fødselsdato(LocalDate fødselsdato) {
+            this.foedselsdato = fødselsdato;
             return this;
         }
 
-        public Barn build() {
-            return new Barn(navn, begrunnelse == null, begrunnelse, fnr, dnr, foedselsdato);
+        public Ektefelle build() {
+            return new Ektefelle(navn, omfattet, begrunnelse, fnr, dnr, foedselsdato);
         }
     }
 
