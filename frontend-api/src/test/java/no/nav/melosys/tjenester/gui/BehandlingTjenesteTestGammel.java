@@ -52,8 +52,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@Deprecated(since = "Ta denne testklassen vekk samtidig som toggle melosys.behandle_alle_saker")
 @WebMvcTest(controllers = {BehandlingTjeneste.class})
-class BehandlingTjenesteTest {
+class BehandlingTjenesteTestGammel {
 
     @MockBean
     private BehandlingService behandlingService;
@@ -84,7 +85,7 @@ class BehandlingTjenesteTest {
 
     @BeforeEach
     void setUp() {
-        fakeUnleash.enableAll();
+        fakeUnleash.disableAll();
         random = new EasyRandom(new EasyRandomParameters()
             .overrideDefaultInitialization(true)
             .collectionSizeRange(1, 4)

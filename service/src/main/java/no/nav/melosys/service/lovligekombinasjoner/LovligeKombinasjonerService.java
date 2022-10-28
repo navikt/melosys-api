@@ -90,7 +90,7 @@ public class LovligeKombinasjonerService {
     }
 
     public Set<Behandlingsstatus> hentMuligeBehandlingStatuser() {
-        return LovligeBehandlingstatusKombinasjoner.ALLE_MULIGE_BEHANDLINGSTATUSER;
+        return LovligeBehandlingstatus.ALLE_MULIGE_BEHANDLINGSTATUSER;
     }
 
     public void validerNyStatusMulig(Behandling behandling, Behandlingsstatus status) {

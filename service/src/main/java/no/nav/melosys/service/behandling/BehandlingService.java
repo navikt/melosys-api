@@ -410,10 +410,12 @@ public class BehandlingService {
     }
 
     public Set<Behandlingsstatus> hentMuligeStatuser(long behandlingID) {
+        var behandling = hentBehandling(behandlingID);
         if (!unleash.isEnabled("melosys.behandle_alle_saker")) {
-            var behandling = hentBehandling(behandlingID);
             return MuligeManuelleBehandlingsendringer.hentMuligeStatuser(behandling);
         }
+        
+        if (behandling.erInaktiv()) return Collections.emptySet();
         return lovligeKombinasjonerService.hentMuligeBehandlingStatuser();
     }
 

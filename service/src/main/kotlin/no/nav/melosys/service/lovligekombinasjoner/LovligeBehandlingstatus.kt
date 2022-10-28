@@ -2,7 +2,7 @@ package no.nav.melosys.service.lovligekombinasjoner
 
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 
-object LovligeBehandlingstatusKombinasjoner {
+object LovligeBehandlingstatus {
     @JvmField
     val ALLE_MULIGE_BEHANDLINGSTATUSER = mutableSetOf(
         Behandlingsstatus.AVVENT_DOK_PART,
