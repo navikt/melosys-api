@@ -410,11 +410,11 @@ public class BehandlingService {
     }
 
     public Set<Behandlingsstatus> hentMuligeStatuser(long behandlingID) {
-        var behandling = hentBehandling(behandlingID);
         if (!unleash.isEnabled("melosys.behandle_alle_saker")) {
+            var behandling = hentBehandling(behandlingID);
             return MuligeManuelleBehandlingsendringer.hentMuligeStatuser(behandling);
         }
-        return lovligeKombinasjonerService.hentMuligeStatuser(behandling);
+        return lovligeKombinasjonerService.hentMuligeBehandlingStatuser();
     }
 
     @Transactional

@@ -89,17 +89,14 @@ public class LovligeKombinasjonerService {
         }
     }
 
-    public Set<Behandlingsstatus> hentMuligeStatuser(Behandling behandling) {
-        if (behandling.erInaktiv()) return Collections.emptySet();
-
-        Set<Behandlingsstatus> muligeStatuser = LovligeBehandlingstatusKombinasjoner.ALLE_MULIGE_BEHANDLINGSTATUSER;
-        return muligeStatuser.stream().filter(status -> status != behandling.getStatus()).collect(Collectors.toSet());
+    public Set<Behandlingsstatus> hentMuligeBehandlingStatuser() {
+        return LovligeBehandlingstatusKombinasjoner.ALLE_MULIGE_BEHANDLINGSTATUSER;
     }
 
     public void validerNyStatusMulig(Behandling behandling, Behandlingsstatus status) {
-        if (!hentMuligeStatuser(behandling).contains(status)) {
+        if (!hentMuligeBehandlingStatuser().contains(status)) {
             throw new FunksjonellException(String.format("Behandlingen kan ikke endres til status %s. Gyldige statuser for behandling %s er %s",
-                status, behandling.getId(), hentMuligeStatuser(behandling)));
+                status, behandling.getId(), hentMuligeBehandlingStatuser()));
         }
     }
 
