@@ -6,7 +6,7 @@ import java.util.stream.Stream;
 
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
-import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.domain.person.adresse.Kontaktadresse;
 import no.nav.melosys.domain.person.adresse.PersonAdresse;
@@ -23,32 +23,32 @@ public class TrygdeavtaleAdresseSjekker {
         this.persondata = persondata;
     }
 
-    List<String> finnGyldigNorskAdresse() {
+    List<String> finnGyldigNorskAdresse(Land_iso2 soknadsland) {
         return getPersonAdresser()
-            .filter(personAdresse -> sjekkAdresseMotLand(personAdresse.strukturertAdresse(), Landkoder.NO))
+            .filter(personAdresse -> sjekkAdresseMotLand(personAdresse.strukturertAdresse(), Land_iso2.NO))
             .findFirst()
             .map(personAdresse -> personAdresse.strukturertAdresse().toList())
-            .orElse(finnAdresseNårIkkeNorskAdresseMenAdresseIUk());
+            .orElse(finnAdresseNårIkkeNorskAdresseMenAdresseISoknadsland(soknadsland));
     }
 
-    List<String> finnGyldigStorbritanniaAdresse(Lovvalgsperiode lovvalgsperiode) {
+    List<String> finnGyldigTrygdeavtaleAdresse(Lovvalgsperiode lovvalgsperiode, Land_iso2 soknadsland) {
         return getPersonAdresser()
-            .filter(personAdresse -> sjekkAdresseMotLand(personAdresse.strukturertAdresse(), Landkoder.GB))
+            .filter(personAdresse -> sjekkAdresseMotLand(personAdresse.strukturertAdresse(), soknadsland))
             .filter(personAdresse -> sjekkOmAdresseGyldighetErInnenforLovalgsperiode(personAdresse, lovvalgsperiode))
             .findFirst()
             .map(personAdresse -> personAdresse.strukturertAdresse().toList())
             .orElse(List.of(UKJENT));
     }
 
-    private List<String> finnAdresseNårIkkeNorskAdresseMenAdresseIUk() {
-        boolean harUkAdresse = getPersonAdresser()
-            .anyMatch(personAdresse -> sjekkAdresseMotLand(personAdresse.strukturertAdresse(), Landkoder.GB));
+    private List<String> finnAdresseNårIkkeNorskAdresseMenAdresseISoknadsland(Land_iso2 soknadsland) {
+        boolean harAdresseISoknadsland = getPersonAdresser()
+            .anyMatch(personAdresse -> sjekkAdresseMotLand(personAdresse.strukturertAdresse(), soknadsland));
 
-        if (harUkAdresse) return List.of(INGEN_ADRESSE_I_NORGE);
-        return findAdresseNårIkkeNorskEllerUkAdresse();
+        if (harAdresseISoknadsland) return List.of(INGEN_ADRESSE_I_NORGE);
+        return findAdresseNårIkkeNorskEllerSoknadslandadresse();
     }
 
-    private List<String> findAdresseNårIkkeNorskEllerUkAdresse() {
+    private List<String> findAdresseNårIkkeNorskEllerSoknadslandadresse() {
         return getPersonAdresser()
             .filter(personAdresse -> hentStrukturertAdresse(personAdresse).getLandkode() != null)
             .findFirst()
@@ -74,7 +74,7 @@ public class TrygdeavtaleAdresseSjekker {
             .map(Optional::get);
     }
 
-    private boolean sjekkAdresseMotLand(StrukturertAdresse adresse, Landkoder landkode) {
+    private boolean sjekkAdresseMotLand(StrukturertAdresse adresse, Land_iso2 landkode) {
         return adresse != null && landkode != null && adresse.getLandkode() != null && adresse.getLandkode().equals(landkode.getKode());
     }
 

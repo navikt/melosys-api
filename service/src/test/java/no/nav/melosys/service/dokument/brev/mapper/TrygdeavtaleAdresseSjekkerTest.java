@@ -6,7 +6,7 @@ import java.util.List;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.adresse.SemistrukturertAdresse;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
-import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.person.Foedsel;
 import no.nav.melosys.domain.person.Navn;
 import no.nav.melosys.domain.person.Persondata;
@@ -26,27 +26,28 @@ import static no.nav.melosys.service.dokument.DokgenTestData.LOVVALGSPERIODE_TOM
 import static no.nav.melosys.service.dokument.brev.mapper.TrygdeavtaleAdresseSjekker.UKJENT;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class StorbritaniaAdresseSjekkerTest {
+class TrygdeavtaleAdresseSjekkerTest {
 
     private final static Lovvalgsperiode LOVVALGSPERIODE = TrygdeavtaleMapperTest.lagLovvalgsperiode();
 
-    @ParameterizedTest(name = "{5}")
+    @ParameterizedTest(name = "{6}")
     @MethodSource("sjekkAdresser")
     void map_brukNorskBostedsAddresse(
-        Landkoder landkodeBosted,
-        Landkoder landkodeOpphold,
-        Landkoder landkodeKontakt,
+        Land_iso2 landkodeBosted,
+        Land_iso2 landkodeOpphold,
+        Land_iso2 landkodeKontakt,
         List<String> norskAddresse,
-        List<String> ukAddresse,
+        List<String> trygdeavtaleAddresse,
+        Land_iso2 soknadsland,
         String grunn) {
 
         var persondata = lagPersonopplysninger(landkodeBosted, landkodeOpphold, landkodeKontakt);
-        var storbritaniaAdresseSjekker = new TrygdeavtaleAdresseSjekker(persondata);
-        var gyldigNorskAdresse = storbritaniaAdresseSjekker.finnGyldigNorskAdresse();
-        var gyldigUkAdresse = storbritaniaAdresseSjekker.finnGyldigStorbritanniaAdresse(LOVVALGSPERIODE);
+        var trygdeavtaleAdresseSjekker = new TrygdeavtaleAdresseSjekker(persondata);
+        var gyldigNorskAdresse = trygdeavtaleAdresseSjekker.finnGyldigNorskAdresse(soknadsland);
+        var gyldigTrygdeavtaleAdresse = trygdeavtaleAdresseSjekker.finnGyldigTrygdeavtaleAdresse(LOVVALGSPERIODE, soknadsland);
 
         assertThat(gyldigNorskAdresse).withFailMessage(grunn).isEqualTo(norskAddresse);
-        assertThat(gyldigUkAdresse).withFailMessage(grunn).isEqualTo(ukAddresse);
+        assertThat(gyldigTrygdeavtaleAdresse).withFailMessage(grunn).isEqualTo(trygdeavtaleAddresse);
     }
 
     @ParameterizedTest(name = "{2}")
@@ -69,7 +70,7 @@ class StorbritaniaAdresseSjekkerTest {
     void finnGyldigNorskAdresse_brukerHarSemistrukturertAdresse_mappesKorrekt() {
         var semistrukturertAdresse = new SemistrukturertAdresse(
             "adresselinje 1", "adresselinje 2", null, null,
-            "postnr", "poststed", Landkoder.SE.getKode());
+            "postnr", "poststed", Land_iso2.SE.getKode());
         var kontaktadresse = new Kontaktadresse(
             null, semistrukturertAdresse, null, null,
             null, "PDL", null, null, false);
@@ -79,7 +80,7 @@ class StorbritaniaAdresseSjekkerTest {
 
 
         var storbritanniaAdresseSjekker = new TrygdeavtaleAdresseSjekker(persondata);
-        var gyldigNorskAdresse = storbritanniaAdresseSjekker.finnGyldigNorskAdresse();
+        var gyldigNorskAdresse = storbritanniaAdresseSjekker.finnGyldigNorskAdresse(Land_iso2.GB);
 
 
         assertThat(gyldigNorskAdresse).isEqualTo(
@@ -88,9 +89,9 @@ class StorbritaniaAdresseSjekkerTest {
     }
 
     static Persondata lagPersonopplysninger(
-        Landkoder landkodeBosted,
-        Landkoder landkodeOpphold,
-        Landkoder landkodeKontakt) {
+        Land_iso2 landkodeBosted,
+        Land_iso2 landkodeOpphold,
+        Land_iso2 landkodeKontakt) {
 
         var gyldigFom = LOVVALGSPERIODE_FOM;
         var gyldigTom = LOVVALGSPERIODE_TOM;
@@ -115,43 +116,52 @@ class StorbritaniaAdresseSjekkerTest {
             List.of(kontaktadresse), new Navn("Ole", "", "Norman"), List.of(oppholdsadresse), emptyList());
     }
 
-    private static String kodeEllerNull(Landkoder landkoder) {
+    private static String kodeEllerNull(Land_iso2 landkoder) {
         return landkoder == null ? null : landkoder.getKode();
     }
 
     static List<Arguments> sjekkAdresser() {
         return List.of(
-            Arguments.of(Landkoder.NO, Landkoder.NO, Landkoder.NO,
+            Arguments.of(Land_iso2.NO, Land_iso2.NO, Land_iso2.NO,
                 List.of("bosted 42 C", "Norge"),
-                List.of(UKJENT),
+                List.of(UKJENT), Land_iso2.GB,
                 "Velg bosted, når alle adresser er norske"),
-            Arguments.of(Landkoder.SE, Landkoder.SE, Landkoder.NO,
+            Arguments.of(Land_iso2.SE, Land_iso2.SE, Land_iso2.NO,
                 List.of("kontakt 1", "Norge"),
-                List.of(UKJENT),
+                List.of(UKJENT), Land_iso2.GB,
                 "Kun kontakt med norsk adresse"),
-            Arguments.of(Landkoder.SE, Landkoder.NO, Landkoder.SE,
+            Arguments.of(Land_iso2.SE, Land_iso2.NO, Land_iso2.SE,
                 List.of("tilleggOpphold", "opphold 1", "Norge"),
-                List.of(UKJENT),
+                List.of(UKJENT), Land_iso2.GB,
                 "Kun opphold med norsk adresse"),
-            Arguments.of(Landkoder.NO, Landkoder.SE, Landkoder.SE,
+            Arguments.of(Land_iso2.NO, Land_iso2.SE, Land_iso2.SE,
                 List.of("bosted 42 C", "Norge"),
                 List.of(UKJENT),
+                Land_iso2.US,
                 "Kun bosted med norsk adresse"),
-            Arguments.of(Landkoder.GB, Landkoder.SE, Landkoder.SE,
+            Arguments.of(Land_iso2.GB, Land_iso2.SE, Land_iso2.SE,
                 List.of("No address in Norway"),
                 List.of("bosted 42 C", "Storbritannia"),
+                Land_iso2.GB,
                 "Ingen norske adresser, men adresse i UK"),
-            Arguments.of(Landkoder.GB, null, null,
+            Arguments.of(Land_iso2.GB, null, null,
                 List.of("No address in Norway"),
                 List.of("bosted 42 C", "Storbritannia"),
+                Land_iso2.GB,
                 "kun adresse i UK"),
-            Arguments.of(Landkoder.SE, Landkoder.SE, Landkoder.SE,
+            Arguments.of(Land_iso2.US, null, null,
+                List.of("No address in Norway"),
+                List.of("bosted 42 C", "USA"),
+                Land_iso2.US,
+                "kun adresse i US"),
+            Arguments.of(Land_iso2.SE, Land_iso2.SE, Land_iso2.SE,
                 List.of("Resident outside of Norway", "bosted 42 C", "Sverige"),
-                List.of(UKJENT),
+                List.of(UKJENT), Land_iso2.GB,
                 "Utenlandsk adresse, men ikke i UK"),
             Arguments.of(null, null, null,
                 List.of(UKJENT),
                 List.of(UKJENT),
+                Land_iso2.US,
                 "ingen adresser")
         );
     }

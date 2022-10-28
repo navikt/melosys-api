@@ -60,7 +60,7 @@ public class TrygdeavtaleMapper {
         var innvilgelse = mapInnvilgelse(brevbestilling, soknadsland);
         return new InnvilgelseOgAttestTrygdeavtale.Builder(brevbestilling)
             .innvilgelse(innvilgelse)
-            .attest(mapAttest(brevbestilling))
+            .attest(mapAttest(brevbestilling, soknadsland))
             .skalHaInfoOmRettigheter(skalHaInfoOmRettigheter(innvilgelse, brevbestilling))
             .nyVurderingBakgrunn(brevbestilling.getNyVurderingBakgrunn())
             .build();
@@ -82,7 +82,7 @@ public class TrygdeavtaleMapper {
             .build();
     }
 
-    private AttestTrygdeavtale mapAttest(DokgenBrevbestilling brevbestilling) {
+    private AttestTrygdeavtale mapAttest(DokgenBrevbestilling brevbestilling, Land_iso2 soknadsland) {
         if (skalIkkeHaAttest(brevbestilling)) return null;
 
         var behandlingID = brevbestilling.getBehandlingId();
@@ -99,9 +99,9 @@ public class TrygdeavtaleMapper {
                 persondokument.getSammensattNavn(),
                 persondokument.getFødselsdato(),
                 persondokument.hentFolkeregisterident(),
-                adresseSjekker.finnGyldigNorskAdresse()))
+                adresseSjekker.finnGyldigNorskAdresse(soknadsland)))
             .representant(lagRepresentant(behandling.getBehandlingsgrunnlag()))
-            .utsendelse(lagUtsendelse(lovvalgsperioder, persondokument))
+            .utsendelse(lagUtsendelse(lovvalgsperioder, persondokument, soknadsland))
             .build();
     }
 
@@ -190,7 +190,7 @@ public class TrygdeavtaleMapper {
         );
     }
 
-    private Utsendelse lagUtsendelse(Collection<Lovvalgsperiode> lovvalgsperioder, Persondata persondata) {
+    private Utsendelse lagUtsendelse(Collection<Lovvalgsperiode> lovvalgsperioder, Persondata persondata, Land_iso2 soknadsland) {
         if (lovvalgsperioder.size() != 1) {
             throw new FunksjonellException("Det kan bare være en lovvalgsperiode for trygdeavtale. Fant "
                 + lovvalgsperioder.size()
@@ -204,7 +204,7 @@ public class TrygdeavtaleMapper {
 
         return new Utsendelse.Builder()
             .artikkel(bestemmelse)
-            .oppholdsadresse(adresseSjekker.finnGyldigStorbritanniaAdresse(lovvalgsperiode))
+            .oppholdsadresse(adresseSjekker.finnGyldigTrygdeavtaleAdresse(lovvalgsperiode, soknadsland))
             .startdato(lovvalgsperiode.getFom())
             .sluttdato(lovvalgsperiode.getTom())
             .build();
