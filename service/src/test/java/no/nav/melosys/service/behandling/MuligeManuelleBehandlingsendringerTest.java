@@ -29,6 +29,12 @@ class MuligeManuelleBehandlingsendringerTest {
     }
 
     @Test
+    void hentMuligeStatuser_temaArbeidUtland_avsluttetErIkkeMulig() {
+        var muligeStatuser = MuligeManuelleBehandlingsendringer.hentMuligeStatuser(behandlingMedTema(Behandlingstema.ARBEID_I_UTLANDET));
+        assertThat(muligeStatuser).containsExactlyInAnyOrder(AVVENT_DOK_PART, AVVENT_DOK_UTL, UNDER_BEHANDLING, AVVENT_FAGLIG_AVKLARING);
+    }
+
+    @Test
     void hentMuligeBehandlingstema_typeEndretPeriode_returnererUtsendt() {
         var muligeBehandlingstema = MuligeManuelleBehandlingsendringer.hentMuligeBehandlingstema(behandlingMedTemaOgType(UTSENDT_ARBEIDSTAKER, ENDRET_PERIODE), behandlingsresultatSendtUtland(false), false);
         assertThat(muligeBehandlingstema).containsExactly(UTSENDT_SELVSTENDIG);
