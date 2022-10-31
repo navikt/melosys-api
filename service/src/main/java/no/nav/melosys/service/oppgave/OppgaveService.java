@@ -1,6 +1,5 @@
 package no.nav.melosys.service.oppgave;
 
-
 import java.util.*;
 import javax.annotation.Nullable;
 
@@ -34,6 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import static no.nav.melosys.domain.kodeverk.Oppgavetyper.*;
 import static no.nav.melosys.domain.util.BehandlingsgrunnlagUtils.hentPeriode;
 import static no.nav.melosys.domain.util.BehandlingsgrunnlagUtils.hentSøknadsland;
 
@@ -49,6 +49,12 @@ public class OppgaveService {
     private final PersondataFasade persondataFasade;
     private final EregFasade eregFasade;
     private final Unleash unleash;
+
+    private final String[] oppgavetyper = new String[]{
+        BEH_SAK_MK.getKode(),
+        BEH_SAK.getKode(),
+        BEH_SED.getKode()
+    };
 
     private static final String UKJENT = "UKJENT";
 
@@ -72,14 +78,21 @@ public class OppgaveService {
 
     public List<Oppgave> finnOppgaverMedPersonIdent(String personIdent) {
         String aktørId = persondataFasade.hentAktørIdForIdent(personIdent);
+
         if (aktørId == null) {
             throw new IkkeFunnetException("Finner ikke aktørId for ident " + personIdent);
         }
-        return oppgaveFasade.finnOppgaverMedAktørId(aktørId);
+        return filtrerOppgaverMedJournalpost(oppgaveFasade.finnBehandlingsoppgaverMedAktørId(aktørId, oppgavetyper));
     }
 
     public List<Oppgave> finnOppgaverMedOrgnr(String orgnr) {
-        return oppgaveFasade.finnOppgaverMedOrgnr(orgnr);
+        return filtrerOppgaverMedJournalpost(oppgaveFasade.finnBehandlingsoppgaverMedOrgnr(orgnr, oppgavetyper));
+    }
+
+    private List<Oppgave> filtrerOppgaverMedJournalpost(List<Oppgave> oppgaveListe) {
+        return oppgaveListe.stream()
+            .filter(oppgave -> oppgave.getJournalpostId() != null)
+            .toList();
     }
 
     public List<OppgaveDto> hentOppgaverMedAnsvarlig(String ansvarligID) {
