@@ -50,10 +50,12 @@ public class OppgaveService {
     private final EregFasade eregFasade;
     private final Unleash unleash;
 
-    private final String[] oppgavetyper = new String[]{
+    private static final String[] OPPGAVE_TYPER = new String[]{
         BEH_SAK_MK.getKode(),
         BEH_SAK.getKode(),
-        BEH_SED.getKode()
+        BEH_SED.getKode(),
+        VUR.getKode(),
+        VURD_HENV.getKode()
     };
 
     private static final String UKJENT = "UKJENT";
@@ -82,11 +84,11 @@ public class OppgaveService {
         if (aktørId == null) {
             throw new IkkeFunnetException("Finner ikke aktørId for ident " + personIdent);
         }
-        return filtrerOppgaverMedJournalpost(oppgaveFasade.finnBehandlingsoppgaverMedAktørId(aktørId, oppgavetyper));
+        return filtrerOppgaverMedJournalpost(oppgaveFasade.finnBehandlingsoppgaverMedAktørId(aktørId, OPPGAVE_TYPER));
     }
 
     public List<Oppgave> finnOppgaverMedOrgnr(String orgnr) {
-        return filtrerOppgaverMedJournalpost(oppgaveFasade.finnBehandlingsoppgaverMedOrgnr(orgnr, oppgavetyper));
+        return filtrerOppgaverMedJournalpost(oppgaveFasade.finnBehandlingsoppgaverMedOrgnr(orgnr, OPPGAVE_TYPER));
     }
 
     private List<Oppgave> filtrerOppgaverMedJournalpost(List<Oppgave> oppgaveListe) {
