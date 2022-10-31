@@ -203,10 +203,16 @@ class LovligeKombinasjonerServiceTest {
     }
 
     @Test
-    void hentMuligeStatuser_temaOvrigeSedMed_avsluttetErIkkeMulig() {
+    void hentMuligeBehandlingStatuser_harNøyaktigRekkefølgePåMuligeStatus() {
         var muligeStatuser = lovligeKombinasjonerService.hentMuligeBehandlingStatuser();
-        assertThat(muligeStatuser).containsExactlyInAnyOrder(AVVENT_DOK_PART, AVVENT_DOK_UTL, UNDER_BEHANDLING,
-            AVVENT_FAGLIG_AVKLARING).doesNotContain(AVSLUTTET);
+        assertThat(muligeStatuser).containsExactly(UNDER_BEHANDLING, AVVENT_DOK_PART, AVVENT_FAGLIG_AVKLARING, AVVENT_DOK_UTL);
+    }
+
+    @Test
+    void hentMuligeBehandlingStatuser_avsluttetErIkkeMulig() {
+        var muligeStatuser = lovligeKombinasjonerService.hentMuligeBehandlingStatuser();
+        assertThat(muligeStatuser).containsExactly(UNDER_BEHANDLING, AVVENT_DOK_PART, AVVENT_FAGLIG_AVKLARING,
+            AVVENT_DOK_UTL).doesNotContain(AVSLUTTET);
     }
 
     private Fagsak fagsakMedSakstypeOgSakstema(Sakstyper sakstype, Sakstemaer sakstema) {
