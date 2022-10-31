@@ -7,7 +7,7 @@ object LovligeBehandlingstatus {
     val ALLE_MULIGE_BEHANDLINGSTATUSER = linkedSetOf(
         Behandlingsstatus.UNDER_BEHANDLING,
         Behandlingsstatus.AVVENT_DOK_PART,
-        Behandlingsstatus.AVVENT_FAGLIG_AVKLARING,
-        Behandlingsstatus.AVVENT_DOK_UTL
+        Behandlingsstatus.AVVENT_DOK_UTL,
+        Behandlingsstatus.AVVENT_FAGLIG_AVKLARING
     )
 }
