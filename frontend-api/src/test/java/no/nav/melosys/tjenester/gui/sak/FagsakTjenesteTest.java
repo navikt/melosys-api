@@ -8,10 +8,7 @@ import java.util.Set;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.finn.unleash.Unleash;
-import no.nav.melosys.domain.Aktoer;
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.Tilleggsinformasjon;
@@ -22,11 +19,12 @@ import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresse;
 import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresseNorge;
 import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresseUtland;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.persondata.PersondataFasade;
@@ -39,6 +37,8 @@ import no.nav.melosys.service.saksopplysninger.SaksopplysningerService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.tjenester.gui.dto.FagsakDto;
 import no.nav.melosys.tjenester.gui.dto.FagsakSokDto;
+import no.nav.melosys.tjenester.gui.dto.periode.LovvalgsperiodeDto;
+import no.nav.melosys.tjenester.gui.dto.periode.PeriodeDto;
 import no.nav.melosys.tjenester.gui.util.NumericStringRandomizer;
 import no.nav.melosys.tjenester.gui.util.SaksbehandlingDataFactory;
 import org.jeasy.random.EasyRandom;
@@ -65,6 +65,17 @@ class FagsakTjenesteTest {
     private static final String FNR = "12345678901";
     private static final String ORGNR = "111111111";
     private static final String BASE_URL = "/api/fagsaker";
+    private static final LocalDate FOM = LocalDate.now();
+    private static final LocalDate TOM = LocalDate.now();
+    private static final LovvalgsperiodeDto FORVENTET_LOVVALGSPERIODE = new LovvalgsperiodeDto(new PeriodeDto(FOM, TOM),
+        Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_2,
+        Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1,
+        Landkoder.SK,
+        InnvilgelsesResultat.AVSLAATT,
+        Trygdedekninger.FULL_DEKNING_EOSFO,
+        Medlemskapstyper.FRIVILLIG,
+        "10");
+
     @MockBean
     private static FagsakService fagsakService;
     @MockBean
@@ -186,18 +197,13 @@ class FagsakTjenesteTest {
     }
 
     @Test
-    void hentFagsaker_medSedDokument_verifiserErMappetKorrekt() throws Exception {
+    void hentFagsaker_lovvalgsperiode_verifiserErMappetKorrekt() throws Exception {
         long behandlingID = 123L;
-
-        var sedDokumentFom = LocalDate.of(2022, 1, 1);
-        var sedDokumentTom = LocalDate.of(2022, 2, 1);
-        mockNorskSedDokumentMedPeriode(behandlingID, sedDokumentFom, sedDokumentTom);
 
         String saksnummer = "MEL-1";
         mockFagsakMedBehandling(behandlingID, saksnummer);
 
         var fagsakSokDto = new FagsakSokDto(FNR, null, null);
-
 
         mockMvc.perform(post(BASE_URL + "/sok")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -205,58 +211,25 @@ class FagsakTjenesteTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$[0].hovedpartRolle", equalTo(Aktoersroller.BRUKER.toString())))
             .andExpect(jsonPath("$[0].saksnummer", equalTo(saksnummer)))
-            .andExpect(jsonPath("$[0].behandlingOversikter[0].land.landkoder[0]", equalTo("NO")))
-            .andExpect(jsonPath("$[0].behandlingOversikter[0].periode.fom", equalTo("2022-01-01")))
-            .andExpect(jsonPath("$[0].behandlingOversikter[0].periode.tom", equalTo("2022-02-01")));
-
-        verify(saksopplysningerService).finnSedOpplysninger(behandlingID);
+            .andExpect(jsonPath("$[0].behandlingOversikter[0].land.landkoder[0]", equalTo(FORVENTET_LOVVALGSPERIODE.lovvalgsland)))
+            .andExpect(jsonPath("$[0].behandlingOversikter[0].periode.fom", equalTo(FORVENTET_LOVVALGSPERIODE.periode.getFom().toString())))
+            .andExpect(jsonPath("$[0].behandlingOversikter[0].periode.tom", equalTo(FORVENTET_LOVVALGSPERIODE.periode.getTom().toString())));
     }
 
     @Test
-    void hentFagsaker_medBehandlingsgrunnlag_verifiserBehandlingsgrunnlagPeriodeErMappetKorrekt() throws Exception {
+    void hentFagsaker_medBehandlingsresultatOgLovvalgsperiode_verifiserPeriodenErSattRiktig() throws Exception {
         var behandlingID = 123L;
-        when(saksopplysningerService.finnSedOpplysninger(behandlingID)).thenReturn(Optional.empty());
-
-        var søknadFom = LocalDate.of(2023, 1, 1);
-        var søknadTom = LocalDate.of(2023, 2, 1);
-        mockBehandlingsgrunnlagMedPeriode(behandlingID, søknadFom, søknadTom);
 
         mockFagsakMedBehandling(behandlingID, "MEL-1");
 
         var fagsakSokDto = new FagsakSokDto(FNR, null, null);
 
-
         mockMvc.perform(post(BASE_URL + "/sok")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(fagsakSokDto)))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$[0].behandlingOversikter[0].periode.fom", equalTo("2023-01-01")))
-            .andExpect(jsonPath("$[0].behandlingOversikter[0].periode.tom", equalTo("2023-02-01")));
-    }
-
-    @Test
-    void hentFagsaker_medSedDokumentOgBehandlingsgrunnlag_verifiserSedDokumentPeriodeBrukes() throws Exception {
-        var behandlingID = 123L;
-
-        var sedDokumentFom = LocalDate.of(2022, 1, 1);
-        var sedDokumentTom = LocalDate.of(2022, 2, 1);
-        mockNorskSedDokumentMedPeriode(behandlingID, sedDokumentFom, sedDokumentTom);
-
-        var søknadFom = LocalDate.of(2066, 1, 1);
-        var søknadTom = LocalDate.of(2067, 2, 1);
-        mockBehandlingsgrunnlagMedPeriode(behandlingID, søknadFom, søknadTom);
-
-        mockFagsakMedBehandling(behandlingID, "MEL-1");
-
-        var fagsakSokDto = new FagsakSokDto(FNR, null, null);
-
-
-        mockMvc.perform(post(BASE_URL + "/sok")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(fagsakSokDto)))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$[0].behandlingOversikter[0].periode.fom", equalTo("2022-01-01")))
-            .andExpect(jsonPath("$[0].behandlingOversikter[0].periode.tom", equalTo("2022-02-01")));
+            .andExpect(jsonPath("$[0].behandlingOversikter[0].periode.fom", equalTo(FORVENTET_LOVVALGSPERIODE.periode.getFom().toString())))
+            .andExpect(jsonPath("$[0].behandlingOversikter[0].periode.tom", equalTo(FORVENTET_LOVVALGSPERIODE.periode.getTom().toString())));
     }
 
     @Test
@@ -402,6 +375,9 @@ class FagsakTjenesteTest {
         behandlingsgrunnlag.setBehandlingsgrunnlagdata(søknadDokument);
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setType(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
+
+        behandlingsresultat.getLovvalgsperioder().add(lagLovvalgsPeriode());
+
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
         when(behandlingsgrunnlagService.finnBehandlingsgrunnlag(1L)).thenReturn(Optional.of(behandlingsgrunnlag));
         when(fagsakService.hentFagsak("123")).thenReturn(fagsak);
@@ -422,19 +398,6 @@ class FagsakTjenesteTest {
         when(saksopplysningerService.finnSedOpplysninger(behandlingID)).thenReturn(Optional.of(sedDokument));
     }
 
-    private void mockBehandlingsgrunnlagMedPeriode(long behandlingID, LocalDate søknadFom, LocalDate søknadTom) {
-        var søknadDokument = SaksbehandlingDataFactory.lagSøknadDokument();
-        søknadDokument.periode = new no.nav.melosys.domain.behandlingsgrunnlag.data.Periode(søknadFom, søknadTom);
-
-        var behandlingsgrunnlag = new Behandlingsgrunnlag();
-        behandlingsgrunnlag.setBehandlingsgrunnlagdata(søknadDokument);
-
-        var behandlingsresultat = new Behandlingsresultat();
-
-        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
-        when(behandlingsgrunnlagService.finnBehandlingsgrunnlag(behandlingID)).thenReturn(Optional.of(behandlingsgrunnlag));
-    }
-
     private void mockFagsakMedBehandling(long behandlingID, String saksnummer) {
         var fagsak = SaksbehandlingDataFactory.lagFagsak(saksnummer);
         var behandling = new Behandling();
@@ -442,8 +405,21 @@ class FagsakTjenesteTest {
         behandling.setId(behandlingID);
         fagsak.setBehandlinger(Collections.singletonList(behandling));
         mockFagsakTjeneste(fagsak);
+    }
 
+    private Lovvalgsperiode lagLovvalgsPeriode() {
+        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
+        lovvalgsperiode.setFom(FORVENTET_LOVVALGSPERIODE.periode.getFom());
+        lovvalgsperiode.setTom(FORVENTET_LOVVALGSPERIODE.periode.getTom());
+        lovvalgsperiode.setDekning(Trygdedekninger.FULL_DEKNING_EOSFO);
+        lovvalgsperiode.setLovvalgsland(Landkoder.valueOf(FORVENTET_LOVVALGSPERIODE.lovvalgsland));
+        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.valueOf(FORVENTET_LOVVALGSPERIODE.lovvalgsbestemmelse));
+        lovvalgsperiode.setTilleggsbestemmelse(Tilleggsbestemmelser_883_2004.valueOf(FORVENTET_LOVVALGSPERIODE.tilleggBestemmelse));
+        lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.valueOf(FORVENTET_LOVVALGSPERIODE.innvilgelsesResultat));
+        lovvalgsperiode.setMedlemskapstype(Medlemskapstyper.valueOf(FORVENTET_LOVVALGSPERIODE.medlemskapstype));
+        lovvalgsperiode.setMedlPeriodeID(Long.valueOf(FORVENTET_LOVVALGSPERIODE.medlemskapsperiodeID));
 
+        return lovvalgsperiode;
     }
 
     private Fagsak lagFagsak() {
