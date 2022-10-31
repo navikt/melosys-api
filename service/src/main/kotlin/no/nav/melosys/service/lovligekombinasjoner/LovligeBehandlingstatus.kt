@@ -4,7 +4,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 
 object LovligeBehandlingstatus {
     @JvmField
-    val ALLE_MULIGE_BEHANDLINGSTATUSER = mutableSetOf(
+    val ALLE_MULIGE_BEHANDLINGSTATUSER = linkedSetOf(
         Behandlingsstatus.AVVENT_DOK_PART,
         Behandlingsstatus.AVVENT_DOK_UTL,
         Behandlingsstatus.UNDER_BEHANDLING,
