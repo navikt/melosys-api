@@ -19,6 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static no.nav.melosys.domain.kodeverk.Sakstemaer.*;
 import static no.nav.melosys.domain.kodeverk.Sakstyper.*;
+import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.*;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -199,6 +200,21 @@ class LovligeKombinasjonerServiceTest {
         assertThat(muligeBehandlingstyper)
             .hasSize(3)
             .containsExactly(NY_VURDERING, KLAGE, HENVENDELSE);
+    }
+
+    @Test
+    void hentMuligeBehandlingStatuser_harNøyaktigRekkefølgePåMuligeStatus() {
+        var muligeStatuser = lovligeKombinasjonerService.hentMuligeBehandlingStatuser();
+        assertThat(muligeStatuser)
+            .containsExactly(UNDER_BEHANDLING, AVVENT_DOK_PART, AVVENT_DOK_UTL, AVVENT_FAGLIG_AVKLARING);
+    }
+
+    @Test
+    void hentMuligeBehandlingStatuser_avsluttetErIkkeMulig() {
+        var muligeStatuser = lovligeKombinasjonerService.hentMuligeBehandlingStatuser();
+        assertThat(muligeStatuser)
+            .containsExactlyInAnyOrder(UNDER_BEHANDLING, AVVENT_DOK_PART, AVVENT_DOK_UTL, AVVENT_FAGLIG_AVKLARING)
+            .doesNotContain(AVSLUTTET);
     }
 
     private Fagsak fagsakMedSakstypeOgSakstema(Sakstyper sakstype, Sakstemaer sakstema) {

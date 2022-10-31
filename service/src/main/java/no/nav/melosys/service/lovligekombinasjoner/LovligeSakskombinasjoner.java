@@ -1,8 +1,6 @@
 package no.nav.melosys.service.lovligekombinasjoner;
 
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
@@ -11,7 +9,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import static no.nav.melosys.domain.kodeverk.Sakstemaer.*;
 import static no.nav.melosys.domain.kodeverk.Sakstyper.*;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*;
-import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL;
 import static no.nav.melosys.service.lovligekombinasjoner.LovligeBehandlingsKombinasjoner.*;
 
 public class LovligeSakskombinasjoner {

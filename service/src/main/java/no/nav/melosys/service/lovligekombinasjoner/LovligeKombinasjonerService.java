@@ -10,12 +10,15 @@ import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import org.springframework.stereotype.Service;
 
-import static no.nav.melosys.domain.kodeverk.Saksstatuser.*;
+import static no.nav.melosys.domain.kodeverk.Saksstatuser.HENLAGT;
+import static no.nav.melosys.domain.kodeverk.Saksstatuser.HENLAGT_BORTFALT;
+import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.AVSLUTTET;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.*;
 import static no.nav.melosys.service.lovligekombinasjoner.LovligeBehandlingsKombinasjoner.BEHANDLINGSTYPER_FOR_VIRKSOMHET;
@@ -83,6 +86,17 @@ public class LovligeKombinasjonerService {
                 return Set.of(VIRKSOMHET);
             default:
                 return Collections.emptySet();
+        }
+    }
+
+    public Set<Behandlingsstatus> hentMuligeBehandlingStatuser() {
+        return LovligeBehandlingstatus.ALLE_MULIGE_BEHANDLINGSTATUSER;
+    }
+
+    public void validerNyStatusMulig(Behandling behandling, Behandlingsstatus status) {
+        if (!hentMuligeBehandlingStatuser().contains(status)) {
+            throw new FunksjonellException(String.format("Behandlingen kan ikke endres til status %s. Gyldige statuser for behandling %s er %s",
+                status, behandling.getId(), hentMuligeBehandlingStatuser()));
         }
     }
 

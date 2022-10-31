@@ -411,7 +411,12 @@ public class BehandlingService {
 
     public Set<Behandlingsstatus> hentMuligeStatuser(long behandlingID) {
         var behandling = hentBehandling(behandlingID);
-        return MuligeManuelleBehandlingsendringer.hentMuligeStatuser(behandling);
+        if (!unleash.isEnabled("melosys.behandle_alle_saker")) {
+            return MuligeManuelleBehandlingsendringer.hentMuligeStatuser(behandling);
+        }
+        
+        if (behandling.erInaktiv()) return Collections.emptySet();
+        return lovligeKombinasjonerService.hentMuligeBehandlingStatuser();
     }
 
     @Transactional
@@ -441,7 +446,12 @@ public class BehandlingService {
     }
 
     private boolean saksbehandlerKanEndreStatus(Behandling behandling, Behandlingsstatus status) {
-        MuligeManuelleBehandlingsendringer.validerNyStatusMulig(behandling, status);
+        if (!unleash.isEnabled("melosys.behandle_alle_saker")) {
+            MuligeManuelleBehandlingsendringer.validerNyStatusMulig(behandling, status);
+            return true;
+        }
+
+        lovligeKombinasjonerService.validerNyStatusMulig(behandling, status);
         return true;
     }
 
