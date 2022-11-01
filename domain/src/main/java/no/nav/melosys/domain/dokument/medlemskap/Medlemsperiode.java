@@ -4,6 +4,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 
 import no.nav.melosys.domain.HarPeriode;
+import no.nav.melosys.domain.util.IsoLandkodeKonverterer;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Medlemsperiode implements HarPeriode {
@@ -20,7 +21,7 @@ public class Medlemsperiode implements HarPeriode {
 
     public String grunnlagstype; // https://kodeverk-web.dev.adeo.no/kodeverksoversikt/kodeverk/GrunnlagMedl
 
-    public String land; // https://kodeverk-web.dev.adeo.no/kodeverksoversikt/kodeverk/Landkoder
+    public String land; // ISO3, https://kodeverk-web.dev.adeo.no/kodeverksoversikt/kodeverk/Landkoder
 
     public String lovvalg; // https://kodeverk-web.dev.adeo.no/kodeverksoversikt/kodeverk/LovvalgMedl
 
@@ -69,5 +70,9 @@ public class Medlemsperiode implements HarPeriode {
 
     public boolean erKildeLånekassen() {
         return KILDE_LÅNEKASSEN.equals(kilde);
+    }
+
+    public String hentLandSomIso2() {
+        return land != null ? IsoLandkodeKonverterer.tilIso2(land) : null;
     }
 }

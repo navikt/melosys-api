@@ -51,7 +51,7 @@ public final class OverlappendeMedlemskapsperioderRegler {
                     sedDokument.getLovvalgslandKode().getKode(), medlemsperiode.getLand());
                 return !PeriodestatusMedl.AVST.getKode().equals(medlemsperiode.status)
                     && PeriodeRegler.perioderOverlapperMerEnn1Dag(sedLovvalgsperiode, medlemsperiode.getPeriode())
-                    && !sedDokument.getLovvalgslandKode().getKode().equals(medlemsperiode.getLandSomIso2());
+                    && !sedDokument.getLovvalgslandKode().getKode().equals(medlemsperiode.hentLandSomIso2());
             });
     }
 }
