@@ -1,9 +1,6 @@
 package no.nav.melosys.domain;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import javax.persistence.*;
 
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
@@ -72,7 +69,10 @@ public class UtenlandskMyndighet {
     }
 
     public List<String> getGateadresseAsList() {
-        var gateadresse = List.of(gateadresse_1);
+        List<String> gateadresse = Collections.emptyList();
+        if (gateadresse_1 != null) {
+            gateadresse.add(gateadresse_1);
+        }
         if (gateadresse_2 != null) {
             gateadresse.add(gateadresse_2);
         }
