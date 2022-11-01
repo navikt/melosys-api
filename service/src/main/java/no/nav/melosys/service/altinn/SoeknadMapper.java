@@ -23,7 +23,7 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Fartsomrader;
 import no.nav.melosys.soknad_altinn.*;
 import org.apache.commons.lang3.StringUtils;
 
-import static no.nav.melosys.domain.util.LandkoderUtils.tilIso2FraEuEosLandnavn;
+import static no.nav.melosys.domain.util.IsoLandkodeKonverterer.tilIso2FraEuEosLandnavn;
 
 public final class SoeknadMapper {
     private SoeknadMapper() {

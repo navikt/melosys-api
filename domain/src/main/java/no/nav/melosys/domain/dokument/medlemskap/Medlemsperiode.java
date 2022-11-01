@@ -14,27 +14,27 @@ public class Medlemsperiode implements HarPeriode {
 
     public Periode periode;
 
-    public String type; //"http://nav.no/kodeverk/Kodeverk/PeriodetypeMedl"
+    public String type; // https://kodeverk-web.dev.adeo.no/kodeverksoversikt/kodeverk/PeriodetypeMedl
 
-    public String status; //"http://nav.no/kodeverk/Kodeverk/PeriodestatusMedl"
+    public String status; // https://kodeverk-web.dev.adeo.no/kodeverksoversikt/kodeverk/PeriodestatusMedl
 
-    public String grunnlagstype; //"http://nav.no/kodeverk/Kodeverk/GrunnlagMedl"
+    public String grunnlagstype; // https://kodeverk-web.dev.adeo.no/kodeverksoversikt/kodeverk/GrunnlagMedl
 
-    public String land; //"http://nav.no/kodeverk/Kodeverk/Landkoder"
+    public String land; // https://kodeverk-web.dev.adeo.no/kodeverksoversikt/kodeverk/Landkoder
 
-    public String lovvalg; //"http://nav.no/kodeverk/Kodeverk/LovvalgMedl"
+    public String lovvalg; // https://kodeverk-web.dev.adeo.no/kodeverksoversikt/kodeverk/LovvalgMedl
 
-    public String trygdedekning; //"http://nav.no/kodeverk/Kodeverk/DekningMedl"
+    public String trygdedekning; // https://kodeverk-web.dev.adeo.no/kodeverksoversikt/kodeverk/DekningMedl
 
-    public String kildedokumenttype; //"http://nav.no/kodeverk/Kodeverk/KildedokumentMedl"
+    public String kildedokumenttype; // https://kodeverk-web.dev.adeo.no/kodeverksoversikt/kodeverk/KildedokumentMedl
 
-    public String kilde; //"http://nav.no/kodeverk/Kodeverk/KildesystemMedl"
+    public String kilde; // https://kodeverk-web.dev.adeo.no/kodeverksoversikt/kodeverk/KildesystemMedl
 
     @Override
     public Periode getPeriode() {
         return periode;
     }
-    
+
     public String getType() {
         return type;
     }

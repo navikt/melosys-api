@@ -9,7 +9,7 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 
-public final class LandkoderUtils {
+public final class IsoLandkodeKonverterer {
     private static final BiMap<String, String> ISO2_ISO3 = HashBiMap.create();
     private static final BiMap<String, String> ISO2_TIL_EU_EOS_LANDNAVN = HashBiMap.create();
 
@@ -20,7 +20,7 @@ public final class LandkoderUtils {
             .forEach(c -> ISO2_TIL_EU_EOS_LANDNAVN.put(c.getKode(), c.getBeskrivelse().toUpperCase()));
     }
 
-    private LandkoderUtils() {
+    private IsoLandkodeKonverterer() {
         throw new IllegalStateException("Utility");
     }
 
@@ -29,7 +29,7 @@ public final class LandkoderUtils {
     }
 
     public static Collection<String> tilIso3(Collection<String> iso2Koder) {
-        return iso2Koder.stream().map(LandkoderUtils::tilIso3).collect(Collectors.toList());
+        return iso2Koder.stream().map(IsoLandkodeKonverterer::tilIso3).collect(Collectors.toList());
     }
 
     public static String tilIso2(String iso3Kode) {
