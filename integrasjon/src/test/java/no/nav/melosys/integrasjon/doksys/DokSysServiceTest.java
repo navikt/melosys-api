@@ -184,7 +184,7 @@ class DokSysServiceTest {
 
 
         UtenlandskPostadresse utenlandskPostadresse = (UtenlandskPostadresse) dokInfo.getAdresse();
-        assertThat(utenlandskPostadresse.getAdresselinje1()).isEqualTo(metadata.utenlandskMyndighet.gateadresse);
+        assertThat(utenlandskPostadresse.getAdresselinje1()).isEqualTo(metadata.utenlandskMyndighet.gateadresse_1);
         assertThat(utenlandskPostadresse.getLand().getValue()).isEqualTo(metadata.utenlandskMyndighet.landkode.getKode());
     }
 
@@ -426,7 +426,7 @@ class DokSysServiceTest {
 
     private UtenlandskMyndighet lagUtenlandskMyndighet() {
         UtenlandskMyndighet utenlandskMyndighet = new UtenlandskMyndighet();
-        utenlandskMyndighet.gateadresse = "Stubenstrasse 77";
+        utenlandskMyndighet.gateadresse_1 = "Stubenstrasse 77";
         utenlandskMyndighet.postnummer = "0101";
         utenlandskMyndighet.poststed = "Berlin";
         utenlandskMyndighet.landkode = Land_iso2.GL;

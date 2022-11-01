@@ -108,7 +108,7 @@ public class A001MapperTest {
         UtenlandskMyndighet myndighet = new UtenlandskMyndighet();
         myndighet.navn = "SAV";
         myndighet.institusjonskode = "23";
-        myndighet.gateadresse = "Adresse";
+        myndighet.gateadresse_1 = "Adresse";
         myndighet.postnummer = "0165";
         myndighet.poststed ="Stockholm";
         myndighet.landkode = Land_iso2.SK;

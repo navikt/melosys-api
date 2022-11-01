@@ -130,7 +130,7 @@ class A001Mapper {
         trygdemyndighet.setTrygdemyndighetsland(hentIso3Landkode(utenlandskMyndighet.landkode.getKode()));
 
         TrygdemyndighetsadresseType adresseBrev = new TrygdemyndighetsadresseType();
-        adresseBrev.setGatenavn(utenlandskMyndighet.gateadresse);
+        adresseBrev.setGatenavn(utenlandskMyndighet.getKombinertGateadresse());
         adresseBrev.setPostnummer(utenlandskMyndighet.postnummer);
         adresseBrev.setPoststed(utenlandskMyndighet.poststed);
         trygdemyndighet.setTrygdemyndighetsadresse(adresseBrev);

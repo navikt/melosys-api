@@ -1,6 +1,7 @@
 package no.nav.melosys.domain;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import javax.persistence.*;
@@ -20,7 +21,9 @@ public class UtenlandskMyndighet {
 
     public String navn;
 
-    public String gateadresse;
+    public String gateadresse_1;
+
+    public String gateadresse_2;
 
     public String postnummer;
 
@@ -54,11 +57,26 @@ public class UtenlandskMyndighet {
 
     public StrukturertAdresse getAdresse() {
         StrukturertAdresse adresse = new StrukturertAdresse();
-        adresse.setGatenavn(gateadresse);
+        adresse.setGatenavn(getKombinertGateadresse());
         adresse.setPostnummer(postnummer);
         adresse.setPoststed(poststed);
         adresse.setLandkode(landkode.getKode());
         return adresse;
+    }
+
+    public String getKombinertGateadresse() {
+        if (gateadresse_2 == null || gateadresse_2.isEmpty()) {
+            return gateadresse_1;
+        }
+        return "%s, %s".formatted(gateadresse_1,gateadresse_2);
+    }
+
+    public List<String> getGateadresseAsList() {
+        var gateadresse = List.of(gateadresse_1);
+        if (gateadresse_2 != null) {
+            gateadresse.add(gateadresse_2);
+        }
+        return gateadresse;
     }
 
     public String hentInstitusjonID() {

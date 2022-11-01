@@ -30,7 +30,7 @@ public final class SaksflytTestUtils {
         utenlandskMyndighet.institusjonskode = "123456";
         utenlandskMyndighet.landkode = Land_iso2.SE;
         utenlandskMyndighet.navn = "Svenska myndighetan";
-        utenlandskMyndighet.gateadresse = "Svenskegatan 38";
+        utenlandskMyndighet.gateadresse_1 = "Svenskegatan 38";
         utenlandskMyndighet.poststed = "Svenska stan";
         utenlandskMyndighet.postnummer = "8080";
         return utenlandskMyndighet;
