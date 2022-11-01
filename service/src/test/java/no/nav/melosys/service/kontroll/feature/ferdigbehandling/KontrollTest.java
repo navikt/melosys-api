@@ -109,6 +109,14 @@ class KontrollTest {
     }
 
     @Test
+    void utførKontroller_FTRL_returnererTomCollection() {
+        when(persondataFasade.hentPerson(anyString())).thenReturn(PersonopplysningerObjectFactory.lagPersonopplysningerUtenAdresser());
+        Collection<Kontrollfeil> resultat = kontroll.utførKontroller(behandlingID, Sakstyper.FTRL, Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN);
+
+        assertThat(resultat).isEmpty();
+    }
+
+    @Test
     void utførKontroller_AvslagPersonUtenRegistrertAdresse_returnererKode() {
         when(persondataFasade.hentPerson(anyString())).thenReturn(PersonopplysningerObjectFactory.lagPersonopplysningerUtenAdresser());
 

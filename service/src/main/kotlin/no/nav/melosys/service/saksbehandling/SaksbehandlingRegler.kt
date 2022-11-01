@@ -79,7 +79,6 @@ class SaksbehandlingRegler(private val behandlingsresultatRepository: Behandling
                 -> true
 
                 ANMODNING_OM_UNNTAK_HOVEDREGEL -> sakstype == Sakstyper.TRYGDEAVTALE
-                YRKESAKTIV -> sakstype == Sakstyper.FTRL
 
                 else -> return false
             }

@@ -1,6 +1,7 @@
 package no.nav.melosys.service.kontroll.feature.ferdigbehandling;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Objects;
 
 import no.finn.unleash.Unleash;
@@ -70,7 +71,16 @@ class Kontroll {
 
     private Collection<Kontrollfeil> utførKontroller(Behandling behandling, Sakstyper sakstype) {
         var regelsettForVedtak = FerdigbehandlingKontrollsett.hentRegelsettForVedtak(sakstype);
-        var ferdigbehandlingKontrollData = hentVedtakKontrollData(behandling);
+
+        var folketrygdenToggle = unleash.isEnabled("melosys.folketrygden.mvp");
+
+        FerdigbehandlingKontrollData ferdigbehandlingKontrollData;
+        if (sakstype.equals(Sakstyper.FTRL) && folketrygdenToggle) {
+            ferdigbehandlingKontrollData = hentVedtakKontrollDataFTRL(behandling);
+        } else {
+            ferdigbehandlingKontrollData = hentVedtakKontrollData(behandling);
+        }
+
         return regelsettForVedtak.stream()
             .map(f -> f.apply(ferdigbehandlingKontrollData))
             .filter(Objects::nonNull)
@@ -101,6 +111,13 @@ class Kontroll {
 
         return new FerdigbehandlingKontrollData(medlemskapDokument, persondata, behandlingsgrunnlagData,
             lovvalgsperiode, opprinneligLovvalgsperiode);
+    }
+
+    private FerdigbehandlingKontrollData hentVedtakKontrollDataFTRL(Behandling behandling) {
+        MedlemskapDokument medlemskapDokument = behandling.hentMedlemskapDokument();
+        BehandlingsgrunnlagData behandlingsgrunnlagData = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
+        Persondata persondata = hentPersondata(behandling);
+        return FerdigbehandlingKontrollData.lagKontrollDataForFTRL(medlemskapDokument,persondata, behandlingsgrunnlagData);
     }
 
     private Persondata hentPersondata(Behandling behandling) {
