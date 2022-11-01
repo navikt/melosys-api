@@ -50,10 +50,18 @@ public class OppgaveService {
     private final EregFasade eregFasade;
     private final Unleash unleash;
 
-    private final String[] oppgavetyper = new String[]{
+    private static final String[] BEHANDLINGSOPPGAVE_TYPER = new String[]{
         BEH_SAK_MK.getKode(),
         BEH_SAK.getKode(),
-        BEH_SED.getKode()
+        BEH_SED.getKode(),
+    };
+
+    private static final String[] BEHANDLINGSOPPGAVE_TYPER_UTVIDET = new String[]{
+        BEH_SAK_MK.getKode(),
+        BEH_SAK.getKode(),
+        BEH_SED.getKode(),
+        VUR.getKode(),
+        VURD_HENV.getKode()
     };
 
     private static final String UKJENT = "UKJENT";
@@ -76,17 +84,25 @@ public class OppgaveService {
         this.unleash = unleash;
     }
 
-    public List<Oppgave> finnOppgaverMedPersonIdent(String personIdent) {
+    public List<Oppgave> finnBehandlingsoppgaverMedPersonIdent(String personIdent) {
         String aktørId = persondataFasade.hentAktørIdForIdent(personIdent);
 
         if (aktørId == null) {
             throw new IkkeFunnetException("Finner ikke aktørId for ident " + personIdent);
         }
-        return filtrerOppgaverMedJournalpost(oppgaveFasade.finnBehandlingsoppgaverMedAktørId(aktørId, oppgavetyper));
+        if (unleash.isEnabled("melosys.behandle_alle_saker")) {
+            return filtrerOppgaverMedJournalpost(oppgaveFasade.finnOppgaverMedAktørId(aktørId, BEHANDLINGSOPPGAVE_TYPER_UTVIDET));
+        } else {
+            return filtrerOppgaverMedJournalpost(oppgaveFasade.finnOppgaverMedAktørId(aktørId, BEHANDLINGSOPPGAVE_TYPER));
+        }
     }
 
-    public List<Oppgave> finnOppgaverMedOrgnr(String orgnr) {
-        return filtrerOppgaverMedJournalpost(oppgaveFasade.finnBehandlingsoppgaverMedOrgnr(orgnr, oppgavetyper));
+    public List<Oppgave> finnBehandlingsoppgaverMedOrgnr(String orgnr) {
+        if (unleash.isEnabled("melosys.behandle_alle_saker")) {
+            return filtrerOppgaverMedJournalpost(oppgaveFasade.finnOppgaverMedOrgnr(orgnr, BEHANDLINGSOPPGAVE_TYPER_UTVIDET));
+        } else {
+            return filtrerOppgaverMedJournalpost(oppgaveFasade.finnOppgaverMedOrgnr(orgnr, BEHANDLINGSOPPGAVE_TYPER));
+        }
     }
 
     private List<Oppgave> filtrerOppgaverMedJournalpost(List<Oppgave> oppgaveListe) {
