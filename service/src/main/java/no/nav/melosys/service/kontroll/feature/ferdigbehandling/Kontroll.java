@@ -72,11 +72,10 @@ class Kontroll {
     private Collection<Kontrollfeil> utførKontroller(Behandling behandling, Sakstyper sakstype) {
         var regelsettForVedtak = FerdigbehandlingKontrollsett.hentRegelsettForVedtak(sakstype);
 
-        var ftrlOppdatertFlytToggle = unleash.isEnabled("melosys.FTRL_oppdatert_flyt");
+        var folketrygdenToggle = unleash.isEnabled("melosys.folketrygden.mvp");
 
-        //TODO finn ut hva som er nøyaktig å kontrollere for FTRL
         FerdigbehandlingKontrollData ferdigbehandlingKontrollData;
-        if (sakstype.equals(Sakstyper.FTRL) && ftrlOppdatertFlytToggle) {
+        if (sakstype.equals(Sakstyper.FTRL) && folketrygdenToggle) {
             ferdigbehandlingKontrollData = hentVedtakKontrollDataFTRL(behandling);
         } else {
             ferdigbehandlingKontrollData = hentVedtakKontrollData(behandling);

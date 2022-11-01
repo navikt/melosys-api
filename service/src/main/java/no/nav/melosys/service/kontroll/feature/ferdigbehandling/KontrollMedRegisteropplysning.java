@@ -57,18 +57,18 @@ class KontrollMedRegisteropplysning {
     }
 
     private void hentNyeRegisteropplysninger(Behandlingsresultat behandlingsresultat, Behandling behandling) {
-        var ftrlOppdatertFlytToggle = unleash.isEnabled("melosys.FTRL_oppdatert_flyt");
+        var folketrygdenToggle = unleash.isEnabled("melosys.melosys.folketrygden.mvp");
 
-        LocalDate fom;
-        LocalDate tom;
-        if (behandling.getFagsak().getType().equals(Sakstyper.FTRL) && ftrlOppdatertFlytToggle) {
+        LocalDate fraOgMed;
+        LocalDate tilOgMed;
+        if (behandling.getFagsak().getType().equals(Sakstyper.FTRL) && folketrygdenToggle) {
             Medlemskapsperiode medlemskapsperiode = behandlingsresultat.hentValidertMedlemskapsPeriode();
-            fom = medlemskapsperiode.getFom();
-            tom = medlemskapsperiode.getTom();
+            fraOgMed = medlemskapsperiode.getFom();
+            tilOgMed = medlemskapsperiode.getTom();
         } else {
             PeriodeOmLovvalg lovvalgsperiode = behandlingsresultat.hentValidertPeriodeOmLovvalg();
-            fom = lovvalgsperiode.getFom();
-            tom = lovvalgsperiode.getTom();
+            fraOgMed = lovvalgsperiode.getFom();
+            tilOgMed = lovvalgsperiode.getTom();
         }
         String fnr = persondataFasade.hentFolkeregisterident(behandling.getFagsak().hentBrukersAktørID());
 
@@ -76,8 +76,8 @@ class KontrollMedRegisteropplysning {
             RegisteropplysningerRequest.builder()
                 .behandlingID(behandling.getId())
                 .fnr(fnr)
-                .fom(fom)
-                .tom(tom)
+                .fom(fraOgMed)
+                .tom(tilOgMed)
                 .saksopplysningTyper(RegisteropplysningerRequest.SaksopplysningTyper.builder()
                     .medlemskapsopplysninger().build())
                 .build());
