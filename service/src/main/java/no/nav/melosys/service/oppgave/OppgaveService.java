@@ -54,6 +54,12 @@ public class OppgaveService {
         BEH_SAK_MK.getKode(),
         BEH_SAK.getKode(),
         BEH_SED.getKode(),
+    };
+
+    private static final String[] BEHANDLINGSOPPGAVE_TYPER_UTVIDET = new String[]{
+        BEH_SAK_MK.getKode(),
+        BEH_SAK.getKode(),
+        BEH_SED.getKode(),
         VUR.getKode(),
         VURD_HENV.getKode()
     };
@@ -84,11 +90,19 @@ public class OppgaveService {
         if (aktørId == null) {
             throw new IkkeFunnetException("Finner ikke aktørId for ident " + personIdent);
         }
-        return filtrerOppgaverMedJournalpost(oppgaveFasade.finnOppgaverMedAktørId(aktørId, BEHANDLINGSOPPGAVE_TYPER));
+        if (unleash.isEnabled("melosys.behandle_alle_saker")) {
+            return filtrerOppgaverMedJournalpost(oppgaveFasade.finnOppgaverMedAktørId(aktørId, BEHANDLINGSOPPGAVE_TYPER_UTVIDET));
+        } else {
+            return filtrerOppgaverMedJournalpost(oppgaveFasade.finnOppgaverMedAktørId(aktørId, BEHANDLINGSOPPGAVE_TYPER));
+        }
     }
 
     public List<Oppgave> finnBehandlingsoppgaverMedOrgnr(String orgnr) {
-        return filtrerOppgaverMedJournalpost(oppgaveFasade.finnOppgaverMedOrgnr(orgnr, BEHANDLINGSOPPGAVE_TYPER));
+        if (unleash.isEnabled("melosys.behandle_alle_saker")) {
+            return filtrerOppgaverMedJournalpost(oppgaveFasade.finnOppgaverMedOrgnr(orgnr, BEHANDLINGSOPPGAVE_TYPER_UTVIDET));
+        } else {
+            return filtrerOppgaverMedJournalpost(oppgaveFasade.finnOppgaverMedOrgnr(orgnr, BEHANDLINGSOPPGAVE_TYPER));
+        }
     }
 
     private List<Oppgave> filtrerOppgaverMedJournalpost(List<Oppgave> oppgaveListe) {
