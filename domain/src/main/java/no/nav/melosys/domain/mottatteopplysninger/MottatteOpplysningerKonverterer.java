@@ -1,0 +1,60 @@
+package no.nav.melosys.domain.mottatteopplysninger;
+
+import java.util.EnumMap;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import no.nav.melosys.domain.kodeverk.Behandlingsgrunnlagtyper;
+
+public final class MottatteOpplysningerKonverterer {
+
+    private static final ObjectMapper objectMapper = new ObjectMapper();
+
+    private static final EnumMap<Behandlingsgrunnlagtyper, Class<? extends MottatteOpplysningerData>> mapper = new EnumMap<>(Behandlingsgrunnlagtyper.class);
+
+    static {
+        mapper.put(Behandlingsgrunnlagtyper.SØKNAD_FOLKETRYGDEN, SoeknadFtrl.class);
+        mapper.put(Behandlingsgrunnlagtyper.SØKNAD_TRYGDEAVTALE, SoeknadTrygdeavtale.class);
+        mapper.put(Behandlingsgrunnlagtyper.SØKNAD_A1_YRKESAKTIVE_EØS, Soeknad.class);
+        mapper.put(Behandlingsgrunnlagtyper.SØKNAD_A1_UTSENDTE_ARBEIDSTAKERE_EØS, Soeknad.class);
+        mapper.put(Behandlingsgrunnlagtyper.SED, SedGrunnlag.class);
+        objectMapper.registerModule(new JavaTimeModule());
+    }
+
+    private MottatteOpplysningerKonverterer() {}
+
+    public static void oppdaterMottatteOpplysninger(MottatteOpplysninger mottatteOpplysninger) {
+        if (mottatteOpplysninger.getMottatteOpplysningerData() != null) {
+            try {
+                mottatteOpplysninger.setJsonData(lagJsonFraType(mottatteOpplysninger.getMottatteOpplysningerData()));
+            } catch (JsonProcessingException e) {
+                throw new IllegalArgumentException("Kan ikke lage json fra datagrunnlag. MottatteOpplysninger id: " + mottatteOpplysninger.getId());
+            }
+        }
+    }
+
+    public static void lastMottatteOpplysninger(MottatteOpplysninger mottatteOpplysninger) {
+        try {
+            mottatteOpplysninger.setMottatteOpplysningerdata(
+                lagDatagrunnlagFraType(mottatteOpplysninger.getJsonData(), klasseForType(mottatteOpplysninger.getType()))
+            );
+        } catch (JsonProcessingException e) {
+            throw new IllegalStateException("Kan ikke laste datagrunnlag med id " + mottatteOpplysninger.getId(), e);
+        }
+    }
+
+    public static Class<? extends MottatteOpplysningerData> klasseForType(Behandlingsgrunnlagtyper type) {
+        return mapper.get(type);
+    }
+
+    private static MottatteOpplysningerData lagDatagrunnlagFraType(String json, Class<? extends MottatteOpplysningerData> clazz) throws JsonProcessingException {
+        return objectMapper.readValue(json, clazz);
+    }
+
+    private static String lagJsonFraType(MottatteOpplysningerData mottatteOpplysningerData) throws JsonProcessingException {
+        return objectMapper
+            .writerWithDefaultPrettyPrinter()
+            .writeValueAsString(mottatteOpplysningerData);
+    }
+}

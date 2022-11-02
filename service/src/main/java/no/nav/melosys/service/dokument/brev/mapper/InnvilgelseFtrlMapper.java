@@ -11,9 +11,9 @@ import no.nav.melosys.domain.avgift.AvgiftsgrunnlagInfoNorge;
 import no.nav.melosys.domain.avgift.AvgiftsgrunnlagInfoUtland;
 import no.nav.melosys.domain.avgift.Trygdeavgiftsgrunnlag;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
-import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.Soeknadsland;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
+import no.nav.melosys.domain.mottatteopplysninger.data.MedfolgendeFamilie;
+import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland;
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
@@ -67,8 +67,8 @@ public class InnvilgelseFtrlMapper {
 
         //NOTE Henter i første versjon av FTRL kun en norsk arbeidsgiver og forventer ett registert arbeidsland
         AvklartVirksomhet norskeArbeidsgivere = avklarteVirksomheterService.hentNorskeArbeidsgivere(brevbestilling.getBehandling()).get(0);
-        BehandlingsgrunnlagData behandlingsgrunnlagdata = behandlingsresultat.getBehandling().getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
-        Soeknadsland soeknadsland = behandlingsgrunnlagdata.soeknadsland;
+        MottatteOpplysningerData mottatteOpplysningerData = behandlingsresultat.getBehandling().getMottatteOpplysninger().getMottatteOpplysningerData();
+        Soeknadsland soeknadsland = mottatteOpplysningerData.soeknadsland;
         String arbeidsland = soeknadsland.landkoder.get(0);
 
         Collection<Medlemskapsperiode> medlemskapsperioder = medlemAvFolketrygden.getMedlemskapsperioder();
@@ -139,7 +139,7 @@ public class InnvilgelseFtrlMapper {
 
     private FamiliemedlemInfo tilFamiliemedlemInfo(Map<String, MedfolgendeFamilie> avklartMedfolgende, String uuid) {
         MedfolgendeFamilie medfolgendeFamilie = Optional.of(avklartMedfolgende.get(uuid))
-            .orElseThrow(() -> new FunksjonellException("Avklart medfølgende familie " + uuid + " finnes ikke i behandlingsgrunnlaget"));
+            .orElseThrow(() -> new FunksjonellException("Avklart medfølgende familie " + uuid + " finnes ikke i mottatteOpplysningeret"));
         String sammensattNavn = medfolgendeFamilie.getFnr() != null ? dokgenMapperDatahenter.hentSammensattNavn(medfolgendeFamilie.getFnr()) : medfolgendeFamilie.getNavn();
         return new FamiliemedlemInfo(sammensattNavn, medfolgendeFamilie.getFnr(), medfolgendeFamilie.utledIdentType());
     }

@@ -8,14 +8,14 @@ import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
+import no.nav.melosys.domain.mottatteopplysninger.data.Periode;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
+import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService;
 import no.nav.melosys.service.sak.*;
@@ -33,8 +33,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.WebApplicationContext;
 
-import static no.nav.melosys.domain.util.BehandlingsgrunnlagUtils.hentPeriode;
-import static no.nav.melosys.domain.util.BehandlingsgrunnlagUtils.hentSøknadsland;
+import static no.nav.melosys.domain.util.MottatteOpplysningerUtils.hentPeriode;
+import static no.nav.melosys.domain.util.MottatteOpplysningerUtils.hentSøknadsland;
 
 @Protected
 @RestController
@@ -48,7 +48,7 @@ public class FagsakTjeneste {
     private final FagsakService fagsakService;
     private final OpprettSak opprettSak;
     private final Aksesskontroll aksesskontroll;
-    private final BehandlingsgrunnlagService behandlingsgrunnlagService;
+    private final MottatteOpplysningerService mottatteOpplysningerService;
     private final BehandlingsresultatService behandlingsresultatService;
     private final PersondataFasade persondataFasade;
     private final SaksopplysningerService saksopplysningerService;
@@ -56,7 +56,7 @@ public class FagsakTjeneste {
     private final OpprettBehandlingForSak opprettBehandlingForSak;
     private final Unleash unleash;
 
-    public FagsakTjeneste(FagsakService fagsakService, Aksesskontroll aksesskontroll, BehandlingsgrunnlagService behandlingsgrunnlagService,
+    public FagsakTjeneste(FagsakService fagsakService, Aksesskontroll aksesskontroll, MottatteOpplysningerService mottatteOpplysningerService,
                           OpprettSak opprettSak,
                           BehandlingsresultatService behandlingsresultatService, PersondataFasade persondataFasade,
                           Unleash unleash,
@@ -64,7 +64,7 @@ public class FagsakTjeneste {
                           OpprettBehandlingForSak opprettBehandlingForSak) {
         this.fagsakService = fagsakService;
         this.aksesskontroll = aksesskontroll;
-        this.behandlingsgrunnlagService = behandlingsgrunnlagService;
+        this.mottatteOpplysningerService = mottatteOpplysningerService;
         this.opprettSak = opprettSak;
         this.behandlingsresultatService = behandlingsresultatService;
         this.persondataFasade = persondataFasade;
@@ -267,22 +267,22 @@ public class FagsakTjeneste {
                 var søknadsperiodeDto = new PeriodeDto(lovvalgsperiode.getFom(), lovvalgsperiode.getTom());
                 behandlingOversiktDto.setPeriode(søknadsperiodeDto);
             }, () -> {
-                var behandlingsgrunnlag = behandlingsgrunnlagService.finnBehandlingsgrunnlag(behandling.getId());
-                if (behandlingsgrunnlag.isPresent()) {
-                    var behandlingsgrunnlagData = behandlingsgrunnlag.get().getBehandlingsgrunnlagdata();
+                var mottatteOpplysninger = mottatteOpplysningerService.finnMottatteOpplysninger(behandling.getId());
+                if (mottatteOpplysninger.isPresent()) {
+                    var mottatteOpplysningerData = mottatteOpplysninger.get().getMottatteOpplysningerData();
 
-                    var land = SoeknadslandDto.av(hentSøknadsland((behandlingsgrunnlagData)));
+                    var land = SoeknadslandDto.av(hentSøknadsland((mottatteOpplysningerData)));
                     behandlingOversiktDto.setLand(land);
 
-                    var periode = hentPeriode(behandlingsgrunnlagData);
+                    var periode = hentPeriode(mottatteOpplysningerData);
                     var søknadsperiodeDto = new PeriodeDto(periode.getFom(), periode.getTom());
                     behandlingOversiktDto.setPeriode(søknadsperiodeDto);
                 }
             });
         } else {
             if (behandling.erBehandlingAvSøknadGammel()) {
-                behandlingsgrunnlagService.finnBehandlingsgrunnlag(behandling.getId())
-                    .map(Behandlingsgrunnlag::getBehandlingsgrunnlagdata).ifPresent(grunnlagData -> {
+                mottatteOpplysningerService.finnMottatteOpplysninger(behandling.getId())
+                    .map(MottatteOpplysninger::getMottatteOpplysningerData).ifPresent(grunnlagData -> {
                         SoeknadslandDto land = SoeknadslandDto.av(hentSøknadsland((grunnlagData)));
                         behandlingOversiktDto.setLand(land);
                         Periode periode = hentPeriode(grunnlagData);

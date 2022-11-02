@@ -7,11 +7,11 @@ import java.util.List;
 
 import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
-import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.Soeknadsland;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.FysiskArbeidssted;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
+import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
+import no.nav.melosys.domain.mottatteopplysninger.data.Periode;
+import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland;
+import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.FysiskArbeidssted;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
@@ -251,9 +251,9 @@ class OppfriskSaksopplysningerServiceTest {
         soeknad.periode = new Periode(LocalDate.now(), LocalDate.now().plusYears(2));
         soeknad.soeknadsland = new Soeknadsland(List.of("SE"), false);
 
-        Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
-        behandlingsgrunnlag.setBehandlingsgrunnlagdata(soeknad);
-        behandling.setBehandlingsgrunnlag(behandlingsgrunnlag);
+        MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
+        mottatteOpplysninger.setMottatteOpplysningerdata(soeknad);
+        behandling.setMottatteOpplysninger(mottatteOpplysninger);
 
         behandling.setSaksopplysninger(saksopplysninger);
         return behandling;

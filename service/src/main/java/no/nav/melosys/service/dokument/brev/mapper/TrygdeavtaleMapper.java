@@ -10,10 +10,10 @@ import javax.transaction.Transactional;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
-import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
-import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadTrygdeavtale;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.IdentType;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
+import no.nav.melosys.domain.mottatteopplysninger.SoeknadTrygdeavtale;
+import no.nav.melosys.domain.mottatteopplysninger.data.IdentType;
+import no.nav.melosys.domain.mottatteopplysninger.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.brev.FastMottakerMedOrgnr;
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
@@ -34,8 +34,8 @@ import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.behandlingsgrunnlag.data.IdentType.DNR;
-import static no.nav.melosys.domain.behandlingsgrunnlag.data.IdentType.FNR;
+import static no.nav.melosys.domain.mottatteopplysninger.data.IdentType.DNR;
+import static no.nav.melosys.domain.mottatteopplysninger.data.IdentType.FNR;
 import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk.UK_ART8_2;
 import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_usa.USA_ART5_1;
 import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_usa.USA_ART5_9;
@@ -70,13 +70,13 @@ public class TrygdeavtaleMapper {
         if (skalIkkeHaInnvilgelse(brevbestilling)) return null;
 
         var behandling = brevbestilling.getBehandling();
-        var behandlingsgrunnlag = behandling.getBehandlingsgrunnlag();
+        var mottatteOpplysninger = behandling.getMottatteOpplysninger();
         var lovvalgsperiode = lovvalgsperiodeService.hentLovvalgsperiode(behandling.getId());
 
         return new InnvilgelseTrygdeavtale.Builder()
             .innvilgelse(Innvilgelse.av(brevbestilling))
             .artikkel(lovvalgsperiode.getBestemmelse())
-            .soknad(lagSøknad(behandlingsgrunnlag, lovvalgsperiode, soknadsland))
+            .soknad(lagSøknad(mottatteOpplysninger, lovvalgsperiode, soknadsland))
             .familie(lagFamile(behandling.getId()))
             .virksomhetArbeidsgiverSkalHaKopi(brevbestilling.isVirksomhetArbeidsgiverSkalHaKopi())
             .build();
@@ -100,7 +100,7 @@ public class TrygdeavtaleMapper {
                 persondokument.getFødselsdato(),
                 persondokument.hentFolkeregisterident(),
                 adresseSjekker.finnGyldigNorskAdresse(soknadsland)))
-            .representant(lagRepresentant(behandling.getBehandlingsgrunnlag()))
+            .representant(lagRepresentant(behandling.getMottatteOpplysninger()))
             .utsendelse(lagUtsendelse(lovvalgsperioder, persondokument, soknadsland))
             .build();
     }
@@ -178,11 +178,11 @@ public class TrygdeavtaleMapper {
             .build();
     }
 
-    private Soknad lagSøknad(Behandlingsgrunnlag behandlingsgrunnlag, Lovvalgsperiode lovvalgsperiode, Land_iso2 soknadsland) {
-        var avklartVirksomhet = hentAvklartVirksomhet(behandlingsgrunnlag.getBehandling());
+    private Soknad lagSøknad(MottatteOpplysninger mottatteOpplysninger, Lovvalgsperiode lovvalgsperiode, Land_iso2 soknadsland) {
+        var avklartVirksomhet = hentAvklartVirksomhet(mottatteOpplysninger.getBehandling());
 
         return new Soknad(
-            behandlingsgrunnlag.getMottaksdato(),
+            mottatteOpplysninger.getMottaksdato(),
             lovvalgsperiode.getFom(),
             lovvalgsperiode.getTom(),
             avklartVirksomhet.navn,
@@ -224,8 +224,8 @@ public class TrygdeavtaleMapper {
         return new ArbeidsgiverNorge(norskArbeidsgiver.navn, norskArbeidsgiver.adresse.toList());
     }
 
-    private RepresentantTrygdeavtale lagRepresentant(Behandlingsgrunnlag behandlingsgrunnlag) {
-        var soeknadTrygdeavtale = (SoeknadTrygdeavtale) behandlingsgrunnlag.getBehandlingsgrunnlagdata();
+    private RepresentantTrygdeavtale lagRepresentant(MottatteOpplysninger mottatteOpplysninger) {
+        var soeknadTrygdeavtale = (SoeknadTrygdeavtale) mottatteOpplysninger.getMottatteOpplysningerData();
         var representantIUtlandet = soeknadTrygdeavtale.getRepresentantIUtlandet();
         if (representantIUtlandet == null) {
             throw new FunksjonellException(Kontroll_begrunnelser.ATTEST_MANGLER_ARBEIDSSTED.getBeskrivelse());
@@ -278,7 +278,7 @@ public class TrygdeavtaleMapper {
     }
 
     private FunksjonellException finnesIkkeIBehandlingsGrunnlagetException(String uuid) {
-        return new FunksjonellException("Avklart medfølgende familie " + uuid + " finnes ikke i behandlingsgrunnlaget");
+        return new FunksjonellException("Avklart medfølgende familie " + uuid + " finnes ikke i mottatteOpplysningeret");
     }
 
     private boolean erSkatteetaten(OrganisasjonDokument org) {

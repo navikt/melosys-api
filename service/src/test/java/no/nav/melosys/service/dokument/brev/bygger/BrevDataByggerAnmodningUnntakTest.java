@@ -35,7 +35,7 @@ import org.mockito.quality.Strictness;
 
 import static no.nav.melosys.domain.kodeverk.begrunnelser.Art12_2_begrunnelser.UTSENDELSE_OVER_24_MN;
 import static no.nav.melosys.domain.kodeverk.begrunnelser.Art16_1_anmodning.KORT_OPPDRAG_RETUR_NORSK_AG;
-import static no.nav.melosys.service.BehandlingsgrunnlagStub.lagBehandlingsgrunnlag;
+import static no.nav.melosys.service.MottatteOpplysningerStub.lagMottatteOpplysninger;
 import static no.nav.melosys.service.SaksopplysningStubs.lagArbeidsforholdOpplysninger;
 import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.*;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
@@ -91,7 +91,7 @@ class BrevDataByggerAnmodningUnntakTest {
         List<String> selvstendigeForetak = Collections.singletonList("987654321");
         List<String> arbeidsgivereRegister = Collections.singletonList("123456789");
 
-        behandling.setBehandlingsgrunnlag(lagBehandlingsgrunnlag(selvstendigeForetak, Collections.emptyList(), Collections.emptyList()));
+        behandling.setMottatteOpplysninger(lagMottatteOpplysninger(selvstendigeForetak, Collections.emptyList(), Collections.emptyList()));
 
         Set<Saksopplysning> saksopplysninger = lagArbeidsforholdOpplysninger(arbeidsgivereRegister);
         behandling.setSaksopplysninger(saksopplysninger);

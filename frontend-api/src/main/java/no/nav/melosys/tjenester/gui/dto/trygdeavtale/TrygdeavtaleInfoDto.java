@@ -6,8 +6,8 @@ import java.util.Map;
 import java.util.function.Predicate;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
+import no.nav.melosys.domain.mottatteopplysninger.data.MedfolgendeFamilie;
+import no.nav.melosys.domain.mottatteopplysninger.data.Periode;
 import no.nav.melosys.domain.kodeverk.Trygdeavtale_myndighetsland;
 
 public record TrygdeavtaleInfoDto(

@@ -13,7 +13,7 @@ import io.mockk.verify
 import no.finn.unleash.FakeUnleash
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.adresse.StrukturertAdresse
-import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData
 import no.nav.melosys.domain.dokument.SaksopplysningDokument
 import no.nav.melosys.domain.dokument.inntekt.InntektDokument
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument
@@ -30,7 +30,7 @@ import no.nav.melosys.repository.KontrollresultatRepository
 import no.nav.melosys.service.SaksbehandlingDataFactory
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
-import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService
+import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
 import no.nav.melosys.service.persondata.PersondataFasade
 import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory.*
 import org.junit.jupiter.api.BeforeEach
@@ -49,7 +49,7 @@ class UfmKontrollServiceTest {
     lateinit var behandlingsresultatService: BehandlingsresultatService
 
     @MockK
-    lateinit var behandlingsgrunnlagService: BehandlingsgrunnlagService
+    lateinit var mottatteOpplysningerService: MottatteOpplysningerService
 
     @MockK
     lateinit var behandlingService: BehandlingService
@@ -68,7 +68,7 @@ class UfmKontrollServiceTest {
     private var sedDokument: SedDokument = SedDokument()
     private var medlemskapDokument = MedlemskapDokument()
     private var personopplysninger: Personopplysninger = lagPersonopplysninger()
-    private var behandlingsgrunnlagData: BehandlingsgrunnlagData = BehandlingsgrunnlagData()
+    private var mottatteOpplysningerData: MottatteOpplysningerData = MottatteOpplysningerData()
 
     @BeforeEach
     fun setup() {
@@ -76,7 +76,7 @@ class UfmKontrollServiceTest {
         ufmKontrollService = UfmKontrollService(
             kontrollresultatRepository,
             behandlingsresultatService,
-            behandlingsgrunnlagService,
+            mottatteOpplysningerService,
             behandlingService,
             persondataFasade,
             unleash
@@ -246,7 +246,7 @@ class UfmKontrollServiceTest {
             )
             personopplysninger
         }
-        behandlingsgrunnlagData.apply {
+        mottatteOpplysningerData.apply {
             ytterligereInformasjon = "Vi har ekstra informasjon som en saksbehandler må manuelt behandle!"
         }
         personopplysninger.apply {
@@ -291,7 +291,7 @@ class UfmKontrollServiceTest {
             )
             personopplysninger
         }
-        behandlingsgrunnlagData.apply {
+        mottatteOpplysningerData.apply {
             ytterligereInformasjon = null
         }
         personopplysninger.apply {
@@ -335,7 +335,7 @@ class UfmKontrollServiceTest {
             )
             personopplysninger
         }
-        behandlingsgrunnlagData.apply {
+        mottatteOpplysningerData.apply {
             ytterligereInformasjon = "Vi har ekstra informasjon som en saksbehandler må manuelt behandle!"
         }
         personopplysninger.apply {
@@ -536,8 +536,8 @@ class UfmKontrollServiceTest {
             .apply {
                 id = BEHANDLINGSRESULTAT_ID
             }
-        every { behandlingsgrunnlagService.finnBehandlingsgrunnlagdata(BEHANDLING_ID) } returns
-            Optional.of(behandlingsgrunnlagData)
+        every { mottatteOpplysningerService.finnMottatteOpplysningerdata(BEHANDLING_ID) } returns
+            Optional.of(mottatteOpplysningerData)
     }
 
     private fun lagSaksopplysning(

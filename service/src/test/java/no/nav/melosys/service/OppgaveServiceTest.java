@@ -7,12 +7,12 @@ import java.util.*;
 
 import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
-import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
-import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.FysiskArbeidssted;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
+import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
+import no.nav.melosys.domain.mottatteopplysninger.data.MedfolgendeFamilie;
+import no.nav.melosys.domain.mottatteopplysninger.data.Periode;
+import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.FysiskArbeidssted;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.Diskresjonskode;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
@@ -25,7 +25,7 @@ import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.oppgave.OppgaveFasade;
 import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
 import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
+import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.oppgave.dto.BehandlingsoppgaveDto;
 import no.nav.melosys.service.oppgave.dto.JournalfoeringsoppgaveDto;
@@ -61,7 +61,7 @@ class OppgaveServiceTest {
     @Mock
     private SaksopplysningerService saksopplysningerService;
     @Mock
-    private BehandlingsgrunnlagService behandlingsgrunnlagService;
+    private MottatteOpplysningerService mottatteOpplysningerService;
 
     private final FakeUnleash unleash = new FakeUnleash();
 
@@ -83,7 +83,7 @@ class OppgaveServiceTest {
             fagsakService,
             oppgaveFasade,
             saksopplysningerService,
-            behandlingsgrunnlagService,
+            mottatteOpplysningerService,
             persondataFasade,
             eregFasade,
             unleash);
@@ -124,7 +124,7 @@ class OppgaveServiceTest {
         fagsak.setBehandlinger(List.of(behandling));
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
         when(fagsakService.hentFagsak(any(String.class))).thenReturn(fagsak);
-        when(behandlingsgrunnlagService.finnBehandlingsgrunnlag(behandling.getId())).thenReturn(Optional.of(lagBehandlingsgrunnlag()));
+        when(mottatteOpplysningerService.finnMottatteOpplysninger(behandling.getId())).thenReturn(Optional.of(lagMottatteOpplysninger()));
 
 
         List<OppgaveDto> mineSaker = oppgaveService.hentOppgaverMedAnsvarlig(tilordnetRessurs);
@@ -148,7 +148,7 @@ class OppgaveServiceTest {
     }
 
     @Test
-    void hentOppgaverMedAnsvarlig_behandlingsgrunnlagFinnesIkke_mappesKorrekt() {
+    void hentOppgaverMedAnsvarlig_mottatteopplysningerFinnesIkke_mappesKorrekt() {
         final String behOppgID = "1";
         final String tilordnetRessurs = "Z2222";
         Oppgave.Builder oppgave = new Oppgave.Builder();
@@ -168,7 +168,7 @@ class OppgaveServiceTest {
         fagsak.setBehandlinger(List.of(behandling));
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
         when(fagsakService.hentFagsak(any(String.class))).thenReturn(fagsak);
-        when(behandlingsgrunnlagService.finnBehandlingsgrunnlag(behandling.getId())).thenReturn(Optional.empty());
+        when(mottatteOpplysningerService.finnMottatteOpplysninger(behandling.getId())).thenReturn(Optional.empty());
 
 
         List<OppgaveDto> mineSaker = oppgaveService.hentOppgaverMedAnsvarlig(tilordnetRessurs);
@@ -368,8 +368,8 @@ class OppgaveServiceTest {
     @Test
     void opprettEllerGjenbrukBehandlingsoppgave_ingenEksisterendeOppgave_oppgaveBlirOpprettet() {
         Behandling behandling = lagBehandling();
-        behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
-        behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(new BehandlingsgrunnlagData());
+        behandling.setMottatteOpplysninger(new MottatteOpplysninger());
+        behandling.getMottatteOpplysninger().setMottatteOpplysningerdata(new MottatteOpplysningerData());
         when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
 
         oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", "Z99999");
@@ -381,9 +381,9 @@ class OppgaveServiceTest {
     @Test
     void opprettEllerGjenbrukBehandlingsoppgave_oppgaveOpprettElektroniskSøknad_oppgaveBlirOpprettetMedBeskrivelse() {
         Behandling behandling = lagBehandling();
-        behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
-        behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(new BehandlingsgrunnlagData());
-        behandling.getBehandlingsgrunnlag().setType(Behandlingsgrunnlagtyper.SØKNAD_A1_UTSENDTE_ARBEIDSTAKERE_EØS);
+        behandling.setMottatteOpplysninger(new MottatteOpplysninger());
+        behandling.getMottatteOpplysninger().setMottatteOpplysningerdata(new MottatteOpplysningerData());
+        behandling.getMottatteOpplysninger().setType(Behandlingsgrunnlagtyper.SØKNAD_A1_UTSENDTE_ARBEIDSTAKERE_EØS);
         when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
 
         oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", "Z99999");
@@ -398,9 +398,9 @@ class OppgaveServiceTest {
 
         final String mottattString = "Mottatt elektronisk søknad";
         Behandling behandling = lagBehandling();
-        behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
-        behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(new BehandlingsgrunnlagData());
-        behandling.getBehandlingsgrunnlag().setType(Behandlingsgrunnlagtyper.SØKNAD_A1_UTSENDTE_ARBEIDSTAKERE_EØS);
+        behandling.setMottatteOpplysninger(new MottatteOpplysninger());
+        behandling.getMottatteOpplysninger().setMottatteOpplysningerdata(new MottatteOpplysningerData());
+        behandling.getMottatteOpplysninger().setType(Behandlingsgrunnlagtyper.SØKNAD_A1_UTSENDTE_ARBEIDSTAKERE_EØS);
         when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
 
         oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", "Z99999");
@@ -469,8 +469,8 @@ class OppgaveServiceTest {
     @Test
     void opprettEllerGjenbrukBehandlingsoppgave_personHarBeskyttelsesbehov_sensitivOppgaveBlirOpprettet() {
         Behandling behandling = lagBehandling();
-        behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
-        behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(new BehandlingsgrunnlagData());
+        behandling.setMottatteOpplysninger(new MottatteOpplysninger());
+        behandling.getMottatteOpplysninger().setMottatteOpplysningerdata(new MottatteOpplysningerData());
         when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
         when(persondataFasade.harStrengtFortroligAdresse("aktørID")).thenReturn(true);
 
@@ -483,9 +483,9 @@ class OppgaveServiceTest {
     @Test
     void opprettEllerGjenbrukBehandlingsoppgave_barnHarBeskyttelsesbehov_sensitivOppgaveBlirOpprettet() {
         Behandling behandling = lagBehandling();
-        behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
-        behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(new BehandlingsgrunnlagData());
-        behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().personOpplysninger.medfolgendeFamilie
+        behandling.setMottatteOpplysninger(new MottatteOpplysninger());
+        behandling.getMottatteOpplysninger().setMottatteOpplysningerdata(new MottatteOpplysningerData());
+        behandling.getMottatteOpplysninger().getMottatteOpplysningerData().personOpplysninger.medfolgendeFamilie
             = List.of(MedfolgendeFamilie.tilBarnFraFnrOgNavn("fnrBarn", null));
         when(persondataFasade.harStrengtFortroligAdresse("aktørID")).thenReturn(false);
         when(persondataFasade.harStrengtFortroligAdresse("fnrBarn")).thenReturn(true);
@@ -585,10 +585,10 @@ class OppgaveServiceTest {
         return personDokument;
     }
 
-    private static Behandlingsgrunnlag lagBehandlingsgrunnlag() {
-        Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
-        behandlingsgrunnlag.setBehandlingsgrunnlagdata(lagSoeknadDokument());
-        return behandlingsgrunnlag;
+    private static MottatteOpplysninger lagMottatteOpplysninger() {
+        MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
+        mottatteOpplysninger.setMottatteOpplysningerdata(lagSoeknadDokument());
+        return mottatteOpplysninger;
     }
 
     private static Soeknad lagSoeknadDokument() {

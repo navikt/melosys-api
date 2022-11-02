@@ -8,8 +8,8 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import no.finn.unleash.FakeUnleash
 import no.nav.melosys.domain.Fagsystem
-import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad
-import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode
+import no.nav.melosys.domain.mottatteopplysninger.Soeknad
+import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.domain.kodeverk.Landkoder
 import no.nav.melosys.domain.kodeverk.Saksstatuser
 import no.nav.melosys.domain.kodeverk.Sakstemaer
@@ -75,7 +75,7 @@ class JournalfoeringIT(
             registrertAv.shouldBe(Fagsystem.MELOSYS.toString())
             tema.shouldBe(Sakstemaer.MEDLEMSKAP_LOVVALG)
         }
-        behandling.behandlingsgrunnlag.behandlingsgrunnlagdata.shouldBeInstanceOf<Soeknad>()
+        behandling.mottatteOpplysninger.mottatteOpplysningerData.shouldBeInstanceOf<Soeknad>()
             .shouldBeEqualToComparingFields(Soeknad().apply {
                 soeknadsland.apply {
                     landkoder = listOf(Landkoder.IE.kode)
@@ -118,7 +118,7 @@ class JournalfoeringIT(
             registrertAv.shouldBe(Fagsystem.MELOSYS.toString())
             tema.shouldBe(Sakstemaer.MEDLEMSKAP_LOVVALG)
         }
-        behandling.behandlingsgrunnlag.behandlingsgrunnlagdata.shouldBeInstanceOf<Soeknad>()
+        behandling.mottatteOpplysninger.mottatteOpplysningerData.shouldBeInstanceOf<Soeknad>()
             .shouldBeEqualToComparingFields(Soeknad().apply {
                 soeknadsland.apply {
                     landkoder = listOf(Landkoder.IE.kode)
@@ -175,7 +175,7 @@ class JournalfoeringIT(
                 opprinneligBehandling.id.shouldBe(behandling.id)
                 initierendeJournalpostId.shouldBe(journalfoeringOpprettDto.journalpostID)
             }
-            .behandlingsgrunnlag.behandlingsgrunnlagdata.shouldBeInstanceOf<Soeknad>()
+            .mottatteOpplysninger.mottatteOpplysningerData.shouldBeInstanceOf<Soeknad>()
             .shouldBeEqualToComparingFields(Soeknad().apply {
                 soeknadsland.apply {
                     landkoder = listOf(Landkoder.IE.kode)
@@ -236,7 +236,7 @@ class JournalfoeringIT(
                 opprinneligBehandling.shouldBeNull()
                 initierendeJournalpostId.shouldBe(journalfoeringTilordneDto.journalpostID)
             }
-            .behandlingsgrunnlag.behandlingsgrunnlagdata.shouldBeInstanceOf<Soeknad>()
+            .mottatteOpplysninger.mottatteOpplysningerData.shouldBeInstanceOf<Soeknad>()
             .shouldBeEqualToComparingFields(Soeknad().apply {
                 soeknadsland.apply {
                     landkoder = listOf()
@@ -263,7 +263,7 @@ class JournalfoeringIT(
             waitFor = ProsessType.JFR_NY_SAK_BRUKER,
         )
         val behandling = prosessinstans.behandling
-        behandling.behandlingsgrunnlag.shouldBeNull()
+        behandling.mottatteOpplysninger.shouldBeNull()
 
         behandling.status = Behandlingsstatus.AVSLUTTET
         behandlingRepository.save(behandling)
@@ -295,7 +295,7 @@ class JournalfoeringIT(
                 opprinneligBehandling.shouldBeNull()
                 initierendeJournalpostId.shouldBe(journalfoeringTilordneDto.journalpostID)
             }
-            .behandlingsgrunnlag.behandlingsgrunnlagdata.shouldBeInstanceOf<Soeknad>()
+            .mottatteOpplysninger.mottatteOpplysningerData.shouldBeInstanceOf<Soeknad>()
             .shouldBeEqualToComparingFields(Soeknad().apply {
                 soeknadsland.apply {
                     landkoder = listOf()

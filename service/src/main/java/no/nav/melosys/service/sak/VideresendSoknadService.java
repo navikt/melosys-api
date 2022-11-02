@@ -113,7 +113,7 @@ public class VideresendSoknadService {
     }
 
     private void validerAdresse(Behandling behandling) {
-        if (!PersonRegler.harRegistrertAdresse(hentPersondata(behandling), behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata())) {
+        if (!PersonRegler.harRegistrertAdresse(hentPersondata(behandling), behandling.getMottatteOpplysninger().getMottatteOpplysningerData())) {
             throw new FunksjonellException("Behandlingen mangler adresse!");
         }
     }

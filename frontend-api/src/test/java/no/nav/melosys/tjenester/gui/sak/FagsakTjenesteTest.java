@@ -12,8 +12,8 @@ import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
-import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
+import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
 import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.Tilleggsinformasjon;
 import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.TilleggsinformasjonDetaljer;
 import no.nav.melosys.domain.dokument.medlemskap.Periode;
@@ -28,7 +28,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
+import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService;
 import no.nav.melosys.service.sak.FagsakService;
@@ -78,7 +78,7 @@ class FagsakTjenesteTest {
     @MockBean
     private static SaksopplysningerService saksopplysningerService;
     @MockBean
-    private static BehandlingsgrunnlagService behandlingsgrunnlagService;
+    private static MottatteOpplysningerService mottatteOpplysningerService;
     @MockBean
     private static BehandlingsresultatService behandlingsresultatService;
     @MockBean
@@ -213,13 +213,13 @@ class FagsakTjenesteTest {
     }
 
     @Test
-    void hentFagsaker_medBehandlingsgrunnlag_verifiserBehandlingsgrunnlagPeriodeErMappetKorrekt() throws Exception {
+    void hentFagsaker_medMottatteOpplysninger_verifiserMottatteOpplysningerPeriodeErMappetKorrekt() throws Exception {
         var behandlingID = 123L;
         when(saksopplysningerService.finnSedOpplysninger(behandlingID)).thenReturn(Optional.empty());
 
         var søknadFom = LocalDate.of(2023, 1, 1);
         var søknadTom = LocalDate.of(2023, 2, 1);
-        mockBehandlingsgrunnlagMedPeriode(behandlingID, søknadFom, søknadTom);
+        mockMottatteOpplysningerMedPeriode(behandlingID, søknadFom, søknadTom);
 
         mockFagsakMedBehandling(behandlingID, "MEL-1");
 
@@ -235,7 +235,7 @@ class FagsakTjenesteTest {
     }
 
     @Test
-    void hentFagsaker_medSedDokumentOgBehandlingsgrunnlag_verifiserSedDokumentPeriodeBrukes() throws Exception {
+    void hentFagsaker_medSedDokumentOgMottatteOpplysninger_verifiserSedDokumentPeriodeBrukes() throws Exception {
         var behandlingID = 123L;
 
         var sedDokumentFom = LocalDate.of(2022, 1, 1);
@@ -244,7 +244,7 @@ class FagsakTjenesteTest {
 
         var søknadFom = LocalDate.of(2066, 1, 1);
         var søknadTom = LocalDate.of(2067, 2, 1);
-        mockBehandlingsgrunnlagMedPeriode(behandlingID, søknadFom, søknadTom);
+        mockMottatteOpplysningerMedPeriode(behandlingID, søknadFom, søknadTom);
 
         mockFagsakMedBehandling(behandlingID, "MEL-1");
 
@@ -398,12 +398,12 @@ class FagsakTjenesteTest {
 
     private void mockFagsakTjeneste(Fagsak fagsak) {
         Soeknad søknadDokument = SaksbehandlingDataFactory.lagSøknadDokument();
-        Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
-        behandlingsgrunnlag.setBehandlingsgrunnlagdata(søknadDokument);
+        MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
+        mottatteOpplysninger.setMottatteOpplysningerdata(søknadDokument);
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setType(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
-        when(behandlingsgrunnlagService.finnBehandlingsgrunnlag(1L)).thenReturn(Optional.of(behandlingsgrunnlag));
+        when(mottatteOpplysningerService.finnMottatteOpplysninger(1L)).thenReturn(Optional.of(mottatteOpplysninger));
         when(fagsakService.hentFagsak("123")).thenReturn(fagsak);
         when(persondataFasade.hentSammensattNavn(any())).thenReturn("Joe Moe");
         if (fagsak != null) {
@@ -422,17 +422,17 @@ class FagsakTjenesteTest {
         when(saksopplysningerService.finnSedOpplysninger(behandlingID)).thenReturn(Optional.of(sedDokument));
     }
 
-    private void mockBehandlingsgrunnlagMedPeriode(long behandlingID, LocalDate søknadFom, LocalDate søknadTom) {
+    private void mockMottatteOpplysningerMedPeriode(long behandlingID, LocalDate søknadFom, LocalDate søknadTom) {
         var søknadDokument = SaksbehandlingDataFactory.lagSøknadDokument();
-        søknadDokument.periode = new no.nav.melosys.domain.behandlingsgrunnlag.data.Periode(søknadFom, søknadTom);
+        søknadDokument.periode = new no.nav.melosys.domain.mottatteopplysninger.data.Periode(søknadFom, søknadTom);
 
-        var behandlingsgrunnlag = new Behandlingsgrunnlag();
-        behandlingsgrunnlag.setBehandlingsgrunnlagdata(søknadDokument);
+        var mottatteOpplysninger = new MottatteOpplysninger();
+        mottatteOpplysninger.setMottatteOpplysningerdata(søknadDokument);
 
         var behandlingsresultat = new Behandlingsresultat();
 
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
-        when(behandlingsgrunnlagService.finnBehandlingsgrunnlag(behandlingID)).thenReturn(Optional.of(behandlingsgrunnlag));
+        when(mottatteOpplysningerService.finnMottatteOpplysninger(behandlingID)).thenReturn(Optional.of(mottatteOpplysninger));
     }
 
     private void mockFagsakMedBehandling(long behandlingID, String saksnummer) {

@@ -4,8 +4,8 @@ import java.util.Collections;
 import java.util.Set;
 
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
-import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
+import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
@@ -71,8 +71,8 @@ class BrevDataByggerInnvilgelseFlereLandTest {
         behandling.setId(1L);
         behandling.setFagsak(fagsak);
         behandling.getSaksopplysninger().add(lagPersonsopplysning());
-        behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
-        behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(new Soeknad());
+        behandling.setMottatteOpplysninger(new MottatteOpplysninger());
+        behandling.getMottatteOpplysninger().setMottatteOpplysningerdata(new Soeknad());
 
         brevbestillingRequest = new BrevbestillingRequest.Builder()
             .medMottaker(Aktoersroller.BRUKER)

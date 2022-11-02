@@ -5,7 +5,7 @@ import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 
-import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.msm.AltinnDokument;
 
@@ -29,7 +29,7 @@ public class FysiskDokument extends ArkivDokument {
     }
 
     static FysiskDokument lagFysiskHovedDokumentAltinn(AltinnDokument altinnDokument,
-                                                       Behandlingsgrunnlag behandlingsgrunnlag) {
+                                                       MottatteOpplysninger mottatteOpplysninger) {
         FysiskDokument fysiskDokument = new FysiskDokument();
         fysiskDokument.setDokumentKategori(DOKUMENT_KATEGORI_SOKNAD);
         fysiskDokument.setTittel(hentTittelForAltinnDokument(altinnDokument.getDokumentType()));
@@ -37,7 +37,7 @@ public class FysiskDokument extends ArkivDokument {
         var dokumentVarianter = List.of(
             lagDokumentVariant(innhold),
             lagDokumentVariant(
-                behandlingsgrunnlag.getOriginalData().getBytes(StandardCharsets.UTF_8),
+                mottatteOpplysninger.getOriginalData().getBytes(StandardCharsets.UTF_8),
                 DokumentVariant.Filtype.XML,
                 DokumentVariant.VariantFormat.ORIGINAL
             )

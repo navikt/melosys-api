@@ -6,9 +6,9 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Vilkaarsresultat;
-import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
-import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadFtrl;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
+import no.nav.melosys.domain.mottatteopplysninger.SoeknadFtrl;
+import no.nav.melosys.domain.mottatteopplysninger.data.Periode;
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
@@ -85,15 +85,15 @@ class OpprettMedlemskapsperiodeServiceTest {
         Fagsak fagsak = new Fagsak();
         fagsak.setType(Sakstyper.FTRL);
         behandling.setFagsak(fagsak);
-        Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
+        MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
         SoeknadFtrl søknad = new SoeknadFtrl();
 
         søknad.periode = new Periode(LocalDate.now(), null);
         søknad.soeknadsland.landkoder.add("BR");
         søknad.setTrygdedekning(Trygdedekninger.HELSEDEL_MED_SYKE_OG_FORELDREPENGER);
-        behandlingsgrunnlag.setBehandlingsgrunnlagdata(søknad);
-        behandlingsgrunnlag.setMottaksdato(LocalDate.now());
-        behandling.setBehandlingsgrunnlag(behandlingsgrunnlag);
+        mottatteOpplysninger.setMottatteOpplysningerdata(søknad);
+        mottatteOpplysninger.setMottaksdato(LocalDate.now());
+        behandling.setMottatteOpplysninger(mottatteOpplysninger);
         behandlingsresultat.setBehandling(behandling);
 
         return behandlingsresultat;
