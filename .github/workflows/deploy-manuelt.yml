@@ -29,7 +29,7 @@ jobs:
       exists: ${{ steps.set_output.outputs.exists }}
 
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest-8-cores
     needs: check_docker_image_exists
     if: needs.check_docker_image_exists.outputs.exists != 'true'
     env:
@@ -59,7 +59,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.READER_TOKEN }}
       - name: Build and test
-        run: mvn clean verify ${{github.event.inputs.environment != 'prod' && '-DskipTests'}} -B -e -U --settings .github/settings.xml
+        run: mvn clean verify --threads=8 ${{github.event.inputs.environment != 'prod' && '-DskipTests'}} -B -e -U --settings .github/settings.xml
       - uses: actions/upload-artifact@v3
         with:
           name: melosys-app
@@ -71,7 +71,7 @@ jobs:
           retention-days: 1
 
   docker:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest-8-cores
     needs: build
     steps:
       - uses: actions/download-artifact@v3
@@ -88,7 +88,7 @@ jobs:
           docker push ${IMAGE}
 
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest-8-cores
     needs: [build, docker]
     if: always() && (needs.docker.result == 'success' || needs.docker.result == 'skipped')
     steps:
